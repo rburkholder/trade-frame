@@ -1,0 +1,179 @@
+IQFeedRetrieval needs a singleton IQFeed
+
+plugins, like Smartquant: http://www.ddj.com/cpp/204202899
+
+
+
+
+Compression:
+http://www.zlib.net/
+http://datacompression.info/sourcecode.shtml
+
+build snmp trend system to prototype traffic analysis
+pc based with multicast then web based with multicast
+which would be example of multiclient capabilities
+
+
+Create quote/trade playback capability
+Will require storage for this first.
+
+2007/12/25
+Need to optimize ChartDatedDatum so that SlidingMinMax supplies scaling values.
+
+2007/12/26
+ARMS index
+incremental bar update with each trade, but maximum once per second
+
+CBar, CTrade, CQuote usage:
+always delete at source, if something keeps it, they need to make a new copy
+fix with suitable use of pointers and constant references
+
+Need to add profit/loss indicators on trade frame
+Need to add various indicators to trade frame
+
+Need to back feed TradeFrame with quote/trades
+
+Need to bring in DateTime from IQFeed/Genesis to indicate start of trading day
+
+Market Depth Indicator (side by side bid/ask)
+Ticker Tape
+
+add opening price, pivots, zig zag, bollinger to trade frame
+
+need to abstract the obtaining of data, much like SQ QD
+
+Save window locations
+---
+Bid/Ask Color & breakdown on trade frame
+market profile
+market delta price indicators
+volume@price vertical chart
+queue up 9100 stats objects to be reused
+anything else to back fill?
+arms
+store values to disk
+---
+
+Model, View, Controller
+
+===
+running
+stretches
+calisthnenics
+music 
+drawing
+===
+
++++
+chair selection from guy with out of the box message
+check bom bank accounts and message
+pay bills
++++
+
+
+
+==================  Tape reading
+
+        if (0 != bidsize) {
+          if ((LastBid != bid) || (LastBidSize != bidsize)) {
+            DisplayLine(time, exch, Color.LightYellow,
+              bid > LastBid ? "Best Bid" : "Bid", bid, bidsize, precision);
+            LastBid = bid;
+            LastBidSize = bidsize;
+          }
+        }
+
+        if (0 != asksize) {
+          if ((LastAsk != ask) || (LastAskSize != asksize)) {
+            DisplayLine(time, exch, Color.White,
+              ask < LastAsk ? "Best Ask" : "Ask", ask, asksize, precision);
+            LastAsk = ask;
+            LastAskSize = asksize;
+          }
+        }
+
+        if ("t" == Type || "T" == Type) {
+          double avg = (bid + ask) / 2;
+          color = price >= avg ? Color.LightGreen : Color.LightPink;
+          if (0 == SessionHi) SessionHi = price;
+          else {
+            if (price > SessionHi) {
+              SessionHi = price;
+              color = Color.LightBlue;
+            }
+          }
+          if (0 == SessionLo) SessionLo = price;
+          else {
+            if (price < SessionLo) {
+              SessionLo = price;
+              color = Color.LightSalmon;
+            }
+          }
+          DisplayLine(time, exch, color, "Trade", price, args.Message.LastSize, precision);
+        }
+====================
+
+  /*
+   * The Ensign Windows Level II screen can be sorted by Total Bid/Ask Volume.  
+   * This shows who is active and leading the market.  
+   * It also counts how many times each Market Maker presented the LEAD bid or ask.  
+   * It also displays ratios on bid and ask LEAD counts when a Market Maker is selected.  
+   * By the way, there are some very interesting patterns formed while CHARTING the two top Market Makers 
+   * (on the same Chart) which may tip-off the direction of the market for the next several minutes.  
+   * Great for Scalpers or the Market Makers themselves.  
+   * http://www.ensignsoftware.com/help/nasdaq.htm
+   * 
+   * http://www.cmastation.com/images/station_tela11.gif
+   */
+   
+   
+   
+   			"select symbol from iqSymbols where "  
+			+ "(exchange='NASDAQ' or exchange='NYSE' or exchange='AMEX' or exchange='NMS' "
+			//+ " or exchange='HOTSPOT' or exchange='DTN' )"  // having a few problems with DTN (try again sometime)
+			+ " or exchange='HOTSPOT' )"
+			+ "and ismutualfund = 0 and ismoneymarketfund = 0 and symbol not like 'RFC.%'";  // RFC causes abort in iqconnect
+		//string sSelect = "select symbol from iqSymbols where symbol = 'CRR*'";
+		SqlCommand cmdSelect;
+		SqlDataReader drSelect;
+
+
+
+
+
+======
+* split trading day range into slots, each as wide so as to fit one position
+  into each based upon bp / position
+* boxes:  trade buttons, indices (with IQFeed?), portfolios and position
+  trade:
+  portfolio: spread, size
+* be able to create new symbols and new portfolios
+* put in the table:
+
+Market Direction INDU COMPX TRIN TICK  
+High Reversal Probability     0.55 or lower 1000 or higher  
+Extremely Bullish above 75 above 20 0.70 to 0.55 600 to 1000  
+Bullish 35 to 75 15 to 20 0.85 to 0.70 300 to 600  
+Neutral 35 to -35 15 to -15 1.00 to 0.85 300 to -300  
+Bearish -35 to -75 -15 to -20 1.15 to 1.00 -300 to -600  
+Extremely Bearish -75 or lower -20 or lower 1.30 to 1.15 -600 to -1000  
+High Reversal Probability     1.30 or higher -1000 or lower  
+http://www.oneunified.net/blog/Trading/SiteOfTheDay/D200704/20070402_Evidence.article
+* need to do orders, transactions, portfolios
+* possibly bollinger volume*weight level
+
+* volume weighted price for bollinger band base?
+http://www.gummy-stuff.org/VMA.htm
+
+
+* statistic on bollinger band width:  monitor narrow, wide
+ * narrow:  then straddle technique
+ * wide:  then strangle technique
+ 
+ * orders:  catch up with ttl of 90 seconds
+            catch down with ttl of 90 seconds
+            bracket
+            cover with market
+            
+         
+===================================
