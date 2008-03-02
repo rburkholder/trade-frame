@@ -58,12 +58,9 @@ void CHistoryCollectorDaily::WriteData( void ) {
     DSetCreatPropList pl;
     hsize_t sizeChunk = 64;
     pl.setChunk( 1, &sizeChunk );
-    string sFileName;
-    sFileName = "/daily/bar/";
-    sFileName += m_sSymbol.c_str();
-    //dm.GetH5File()->createGroup( "/daily" );
-    //dm.GetH5File()->createGroup( "/daily/bar" );
-    dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName, *pdt, *pds, pl ) );
+    string sFileName1;
+    sFileName1 = "/bar/86400" + m_sSymbol + ".86400.bar";
+    dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
     //Dataset ds2 = dm.GetH5File()->openDataSet( m_sSymbol.c_str() );
     dataset->write( m_bars.First(), *pdt );
     dataset->close();
@@ -181,10 +178,9 @@ void CScripts::TestDataSet( void ) {
     DataSpace pdspace( pdset.getSpace() );
     pdspace.selectAll();
     //hssize_t cnt1 = pdspace.getSelectElemNpoints();  // doesn't work, no points
-    hssize_t cnt2 = pdspace.getSimpleExtentNpoints();
+    // hssize_t cnt2 = pdspace.getSimpleExtentNpoints(); // works but may not be correct one to use
     hsize_t t1, t2;
-    pdspace.getSimpleExtentDims( &t1, &t2  );
-    //cout << t1 << ", " << t2 << endl;
+    pdspace.getSimpleExtentDims( &t1, &t2  );  //current, max
     pdspace.close();
     pdset.close();
   }

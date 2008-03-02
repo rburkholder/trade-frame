@@ -35,10 +35,16 @@ CDataManager::CDataManager(void) {
       catch (...) {
         // try to create and open
         m_H5File.openFile( m_H5FileName, H5F_ACC_CREAT | H5F_ACC_RDWR, pl2 );
-        Group g1( dm.GetH5File()->createGroup( "/daily" ) );
-        g1.close();
-        Group g2( dm.GetH5File()->createGroup( "/daily/bar" ) );
-        g2.close();
+        //Group g1( dm.GetH5File()->createGroup( "/daily" ) );
+        //g1.close();
+        //Group g2( dm.GetH5File()->createGroup( "/daily/bar" ) );
+        //g2.close();
+        Group g3( dm.GetH5File()->createGroup( "/bar" ) );
+        g3.close();
+        Group g4( dm.GetH5File()->createGroup( "/bar/86400" ) );
+        g4.close();
+        Group g5( dm.GetH5File()->createGroup( "/symbol" ) );
+        g5.close();
       }
 
     }
@@ -50,6 +56,9 @@ CDataManager::CDataManager(void) {
     //throw std::exception( "Only one DataManager may be instantiated." );
     // multiple instantiations are allowed
   }
+}
+
+void CDataManager::AddSymbolDirectory( const std::string &sSymbol ) {
 }
 
 CDataManager::~CDataManager(void) {
