@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "DataManager.h"
 #include <stdexcept>
+#include <iostream>
 
 using namespace H5;
 
@@ -58,7 +59,31 @@ CDataManager::CDataManager(void) {
   }
 }
 
-void CDataManager::AddSymbolDirectory( const std::string &sSymbol ) {
+void CDataManager::AddGroupForSymbol( const std::string &sSymbol ) {
+  try {
+    Group g = dm.GetH5File()->openGroup( "/symbol/" + sSymbol );
+    g.close();
+  }  // one of these when doesn't exist
+  catch ( H5::FileIException e ) {
+    std::cout << "H5::FileIException " << e.getDetailMsg() << std::endl;
+    Group g = dm.GetH5File()->createGroup( "/symbol/" + sSymbol );
+    g.close();
+  }
+  catch ( H5::GroupIException e ) {
+    std::cout << "H5::GroupIException " << e.getDetailMsg() << std::endl;
+    Group g = dm.GetH5File()->createGroup( "/symbol/" + sSymbol );
+    g.close();
+    // assume all is well, or should we do in another try?
+  }
+}
+
+herr_t CDataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data ) {
+  // this is a call back from within an exception handler
+  std::cout << "H5 Error Level " << n << ": " 
+    << err_desc->file_name << "::" 
+    << err_desc->func_name << "::"
+    << err_desc->desc << std::endl;
+  return 1;
 }
 
 CDataManager::~CDataManager(void) {

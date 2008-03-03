@@ -59,13 +59,29 @@ void CHistoryCollectorDaily::WriteData( void ) {
     hsize_t sizeChunk = 64;
     pl.setChunk( 1, &sizeChunk );
     string sFileName1;
-    sFileName1 = "/bar/86400" + m_sSymbol + ".86400.bar";
-    dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
+    sFileName1 = "/bar/86400/" + m_sSymbol;
+    bool bNeedToCreateDataSet = false;
+    try { // check if dataset exists (for overwrite)
+      dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
+    }
+    catch ( H5::FileIException e ) {
+      cout << "H5::FileIException " << e.getDetailMsg() << endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+      bNeedToCreateDataSet = true;
+    }
+    catch (...) {
+      cout << "unknown error" << endl;
+    }
+    if ( bNeedToCreateDataSet ) {
+      dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
+    }
     //Dataset ds2 = dm.GetH5File()->openDataSet( m_sSymbol.c_str() );
     dataset->write( m_bars.First(), *pdt );
     dataset->close();
     pds->close();
     pdt->close();
+    dm.AddGroupForSymbol( m_sSymbol );
+    dm.GetH5File()->link( H5L_type_t::H5L_TYPE_HARD, sFileName1, "/symbol/" + m_sSymbol + "/bar.86400" );
     delete dataset;
     delete pds;
     delete pdt;
@@ -81,9 +97,11 @@ void CHistoryCollectorDaily::WriteData( void ) {
   }
   catch ( H5::FileIException e ) {
     cout << "H5::FileIException " << e.getDetailMsg() << endl;
+    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
   }
   catch ( H5::GroupIException e ) {
     cout << "H5::GroupIException " << e.getDetailMsg() << endl;
+    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
   }
   catch (...) {
     cout << "unknown error" << endl;

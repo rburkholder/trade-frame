@@ -234,8 +234,8 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         }
         if ( "CUST" == msg.Field( 2 ) ) {
           if ( "4.3.0.3" > msg.Field( 7 ) ) {
-            string s = "Need IQFeed version of 4.3.0.3 or greater (" + msg.Field( 7 ) + ")";
-            throw s;
+            cout << "Need IQFeed version of 4.3.0.3 or greater (" << msg.Field( 7 ) << ")" << endl;
+            //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
         }
       }
