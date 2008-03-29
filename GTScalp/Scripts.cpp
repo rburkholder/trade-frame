@@ -190,15 +190,40 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
 void CScripts::TestDataSet( void ) {
   //DataSpace *pds = new DataSpace( dm.GetH5File()->
   CDataManager dm;
-  string sFilename( "/daily/bar/SOX.X" );
+  string sFilename( "/bar/86400/SOX.X" );
   try {
     DataSet pdset( dm.GetH5File()->openDataSet( sFilename.c_str() ) );
     DataSpace pdspace( pdset.getSpace() );
-    pdspace.selectAll();
-    //hssize_t cnt1 = pdspace.getSelectElemNpoints();  // doesn't work, no points
-    // hssize_t cnt2 = pdspace.getSimpleExtentNpoints(); // works but may not be correct one to use
     hsize_t t1, t2;
     pdspace.getSimpleExtentDims( &t1, &t2  );  //current, max
+
+    DataSpace dspaceSelection( pdset.getSpace() );
+
+    CBar bar; 
+    hsize_t dim = 1;
+
+    hsize_t coord1[] = { t1 - 1 };
+    hsize_t coord2[] = { 0 };
+
+    DataType *pdtype = CBar::DefineDataType();
+    //DataType pdtype( pdset.getDataType() );  // this needs to be DataType of the inmemory destination
+    DataSpace destDataspace(1, &dim ); // create one element dataspace to get at last element of dataset
+    try {
+      dspaceSelection.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord1) );
+      //destDataspace.selectElements( H5S_SELECT_SET, 1, (const hsize_t **)coord2 );
+      destDataspace.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord2) );
+      pdset.read( &bar, *pdtype, destDataspace, dspaceSelection );
+    }
+    catch ( H5::Exception e ) {
+      cout << "TestDataSet H5::Exception " << e.getDetailMsg() << endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+    }
+
+    destDataspace.close();
+    dspaceSelection.close();
+    pdtype->close();
+    delete pdtype;
+
     pdspace.close();
     pdset.close();
   }

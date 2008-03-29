@@ -5,16 +5,16 @@ using namespace H5;
 
 // CDatedDatum
 
-CDatedDatum::CDatedDatum(void) { 
-  m_dt = not_a_date_time;
+CDatedDatum::CDatedDatum(void) :
+  m_dt( not_a_date_time ) { 
 }
 
-CDatedDatum::CDatedDatum(const boost::posix_time::ptime &dt) {
-  m_dt = dt;
+  CDatedDatum::CDatedDatum(const boost::posix_time::ptime &dt):
+  m_dt( dt ) {
 }
 
-CDatedDatum::CDatedDatum(const CDatedDatum &datum) {
-  m_dt = datum.m_dt;
+CDatedDatum::CDatedDatum(const CDatedDatum &datum) :
+  m_dt( datum.m_dt ) {
 }
 
 CDatedDatum::CDatedDatum(const std::string &dt) {

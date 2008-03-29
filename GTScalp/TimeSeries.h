@@ -58,7 +58,7 @@ template<class T> void CTimeSeries<T>::AppendDatum(const T &datum) { // changed 
 
 template<class T> void CTimeSeries<T>::InsertDatum( const ptime &dt, const T &datum ) {
   T key( dt );
-  T *datum = NULL;
+  // T *datum = NULL;  // is this needed?
   pair<vector<T>::iterator, vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   if ( m_vSeries.end() == p.second ) {
