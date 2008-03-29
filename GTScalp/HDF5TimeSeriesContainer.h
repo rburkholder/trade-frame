@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HDF5TimeSeriesIterator.h"
+#include "HDF5TimeSeriesAccessor.h"
 
 #include "DataManager.h"
 using namespace H5;
@@ -8,14 +9,17 @@ using namespace H5;
 #include <string>
 using namespace std;
 
-class CHDF5TimeSeriesContainer {
+template<class T> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<T> {
 public:
-  CHDF5TimeSeriesContainer( string &sFilename );
-  ~CHDF5TimeSeriesContainer(void);
+  CHDF5TimeSeriesContainer<T>( const string &sFilename );
+  virtual ~CHDF5TimeSeriesContainer<T>( void );
 protected:
-  string m_sFilename;
-    CDataManager dm;
-DataSet *pdset;
-DataSpace *pdspace;
 private:
 };
+
+template<class T> CHDF5TimeSeriesContainer<T>::CHDF5TimeSeriesContainer( const string &sFilename ):
+  CHDF5TimeSeriesAccessor<T>( sFilename ) {
+}
+
+template<class T> CHDF5TimeSeriesContainer<T>::~CHDF5TimeSeriesContainer(void) {
+}

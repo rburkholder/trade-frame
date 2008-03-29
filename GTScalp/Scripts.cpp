@@ -5,6 +5,8 @@
 using namespace H5;
 #include "IQFeedSymbolFile.h"
 
+#include "HDF5TimeSeriesContainer.h"
+
 #include <stdexcept>
 using namespace std;
 
@@ -189,6 +191,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
 
 void CScripts::TestDataSet( void ) {
   //DataSpace *pds = new DataSpace( dm.GetH5File()->
+
   CDataManager dm;
   string sFilename( "/bar/86400/SOX.X" );
   try {
