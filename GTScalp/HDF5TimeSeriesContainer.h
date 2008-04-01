@@ -16,16 +16,19 @@ public:
   //typedef CHDF5TimeSeriesIterator<T> const_iterator;
   typedef CHDF5TimeSeriesIterator<T> iterator;
   iterator begin();
-  iterator end();
+  const iterator &end();
 protected:
+  iterator *m_end;
 private:
 };
 
 template<class T> CHDF5TimeSeriesContainer<T>::CHDF5TimeSeriesContainer( const string &sFilename ):
   CHDF5TimeSeriesAccessor<T>( sFilename ) {
+    m_end = new iterator( this, size() );
 }
 
 template<class T> CHDF5TimeSeriesContainer<T>::~CHDF5TimeSeriesContainer(void) {
+  delete m_end;
 }
 
 template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeriesContainer<T>::begin() {
@@ -39,8 +42,7 @@ template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeries
 //  return result;
 //}
 
-template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeriesContainer<T>::end() {
-  iterator result( this, size() );
-  return result;
+template<class T> const typename CHDF5TimeSeriesContainer<T>::iterator &CHDF5TimeSeriesContainer<T>::end() {
+  return *m_end;
 }
 

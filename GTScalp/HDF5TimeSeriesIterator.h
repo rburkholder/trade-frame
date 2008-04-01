@@ -81,38 +81,22 @@ template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operat
 }
 
 template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator++() { // pre-increment
-  if ( m_bValidIndex ) {
-    if ( m_ItemIndex == m_pAccessor->size() ) { // should I be doing this validation, or only in debug mode?
-      // don't move beyond end() marker
-    }
-    else {
-      ++m_ItemIndex;
-      if ( m_ItemIndex < m_pAccessor->size() ) {
-        m_pAccessor->Retrieve( m_ItemIndex, &m_T );
-      }
-    }
-  }
-  else {
-    // can't do anything
+  assert( m_bValidIndex );
+  assert( m_ItemIndex < m_pAccessor->size() );
+  ++m_ItemIndex;
+  if ( m_ItemIndex < m_pAccessor->size() ) {
+    m_pAccessor->Retrieve( m_ItemIndex, &m_T );  // retrieve at our new location if we can
   }
   return( *this );
 }
 
 template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator++( int ) { // post-increment
   CHDF5TimeSeriesIterator<T> result( *this );  // make a copy of what is before increment
-  if ( m_bValidIndex ) {
-    if ( m_ItemIndex == m_pAccessor->size() ) { // should I be doing this validation, or only in debug mode?
-      // don't move beyond end() marker
-    }
-    else {
-      ++m_ItemIndex;
-      if ( m_ItemIndex < m_pAccessor->size() ) {
-        m_pAccessor->Retrieve( m_ItemIndex, &m_T );
-      }
-    }
-  }
-  else {
-    // can't do anything
+  assert( m_bValidIndex );
+  assert( m_ItemIndex < m_pAccessor->size() );
+  ++m_ItemIndex;
+  if ( m_ItemIndex < m_pAccessor->size() ) {
+    m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   }
   return( result ); 
 }
@@ -123,11 +107,13 @@ template<class T> bool CHDF5TimeSeriesIterator<T>::operator<( const CHDF5TimeSer
 }
 
 template<class T> bool CHDF5TimeSeriesIterator<T>::operator==( const CHDF5TimeSeriesIterator<T> &other ) {
-  return ( ( m_pAccessor == other.m_pAccessor ) && ( m_ItemIndex == other.m_ItemIndex ) );
+  assert( m_pAccessor == other.m_pAccessor );
+  return ( m_ItemIndex == other.m_ItemIndex );
 }
 
 template<class T> bool CHDF5TimeSeriesIterator<T>::operator!=( const CHDF5TimeSeriesIterator<T> &other ) {
-  return !( ( m_pAccessor == other.m_pAccessor ) && ( m_ItemIndex == other.m_ItemIndex ) );
+  assert( m_pAccessor == other.m_pAccessor );
+  return !( m_ItemIndex == other.m_ItemIndex );
 }
 
 template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator*() {
