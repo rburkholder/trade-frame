@@ -8,6 +8,9 @@ using namespace H5;
 #include "HDF5TimeSeriesContainer.h"
 
 #include <stdexcept>
+#include<algorithm>
+#include<functional>
+#include<string>
 using namespace std;
 
 //
@@ -53,6 +56,8 @@ void CHistoryCollectorDaily::Start( void ) {
 
 void CHistoryCollectorDaily::WriteData( void ) {
   try {
+    string sFileName1 = "/bar/86400/" + m_sSymbol;
+
     CDataManager dm;
     CompType *pdt = CBar::DefineDataType();
     DataSpace *pds = m_bars.DefineDataSpace(); 
@@ -60,8 +65,6 @@ void CHistoryCollectorDaily::WriteData( void ) {
     DSetCreatPropList pl;
     hsize_t sizeChunk = 64;
     pl.setChunk( 1, &sizeChunk );
-    string sFileName1;
-    sFileName1 = "/bar/86400/" + m_sSymbol;
     bool bNeedToCreateDataSet = false;
     try { // check if dataset exists (for overwrite)
       dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
@@ -189,56 +192,34 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   symbolfile.Close();
 }
 
+class ShowItem: public std::unary_function<CBar &, void> {
+public:
+  //ShowItem( void );
+  //~ShowItem( void );
+  void operator()( CBar &bar ) {
+    cout << "bar is " << bar.m_dblOpen << endl;
+  }
+protected:
+private:
+};
+
 void CScripts::TestDataSet( void ) {
   //DataSpace *pds = new DataSpace( dm.GetH5File()->
 
-  CDataManager dm;
   string sFilename( "/bar/86400/SOX.X" );
   try {
-    DataSet pdset( dm.GetH5File()->openDataSet( sFilename.c_str() ) );
-    DataSpace pdspace( pdset.getSpace() );
-    hsize_t t1, t2;
-    pdspace.getSimpleExtentDims( &t1, &t2  );  //current, max
 
-    DataSpace dspaceSelection( pdset.getSpace() );
+    CHDF5TimeSeriesContainer<CBar> barRepository( sFilename );
+    //CHDF5TimeSeriesContainer<CBar>::iterator iter;
+    //iter = barRepository.begin();
 
-    CBar bar; 
-    hsize_t dim = 1;
+    for_each( barRepository.begin(), barRepository.end(), ShowItem() );
 
-    hsize_t coord1[] = { t1 - 1 };
-    hsize_t coord2[] = { 0 };
-
-    DataType *pdtype = CBar::DefineDataType();
-    //DataType pdtype( pdset.getDataType() );  // this needs to be DataType of the inmemory destination
-    DataSpace destDataspace(1, &dim ); // create one element dataspace to get at last element of dataset
-    try {
-      dspaceSelection.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord1) );
-      //destDataspace.selectElements( H5S_SELECT_SET, 1, (const hsize_t **)coord2 );
-      destDataspace.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord2) );
-      pdset.read( &bar, *pdtype, destDataspace, dspaceSelection );
-    }
-    catch ( H5::Exception e ) {
-      cout << "TestDataSet H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
-    }
-
-    destDataspace.close();
-    dspaceSelection.close();
-    pdtype->close();
-    delete pdtype;
-
-    pdspace.close();
-    pdset.close();
   }
-  catch ( H5::FileIException e ) {
-    cout << "H5::FileIException " << e.getDetailMsg() << endl;
+  catch ( ... ) {
+    cout << "problems" << endl;
   }
-  catch ( H5::DataSpaceIException e ) {
-    cout << "H5::DataSpaceIException " << e.getDetailMsg() << endl;
-  }
-  catch (...) {
-    cout << "unknown error" << endl;
-  }
+
 }
 
 void CScripts::StartHistoryCollection( void ) {
