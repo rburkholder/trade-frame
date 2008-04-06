@@ -14,7 +14,6 @@ using namespace std;
 	//		+ " exchange in ('HOTSPOT', 'ONECH', 'NYSE', 'AMEX', 'NMS', 'CBOT', 'CME', 'DTN' )"
 			// NASDAQ
 			//+ " ( exchange='HOTSPOT'"
-			//+ " or exchan
 			//+ " or exchange='NASDAQ' or exchange='NYSE' or exchange='AMEX' or exchange='NMS' "
 			//+ " or exchange='DTN' )"  // having a few problems with DTN (try again sometime)
 //			+ " and ismutualfund = 0 and ismoneymarketfund = 0 and symbol not like 'RFC.%'"  // RFC causes abort in iqconnect
@@ -86,12 +85,10 @@ void CIQFeedSymbolFile::EndSearch( void ) {
 
 // http://www.relisoft.com/book/tech/6lib.html
 class LessThan
-    : public std::binary_function<char const *, char const *, bool>
-{
+    : public std::binary_function<char const *, char const *, bool> {
 public:
     bool operator () (char const * str1, 
-                      char const * str2) const
-    {
+                      char const * str2) const {
         return strcmp (str1, str2) < 0;
     }
 };

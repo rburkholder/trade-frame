@@ -27,6 +27,7 @@ public:
   bool operator<( const CHDF5TimeSeriesIterator<T> &other );
   bool operator==( const CHDF5TimeSeriesIterator<T> &other );
   bool operator!=( const CHDF5TimeSeriesIterator<T> &other );
+  CHDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
   reference operator*();
   reference operator->();
 protected:
@@ -99,6 +100,14 @@ template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operato
     m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   }
   return( result ); 
+}
+
+template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator[]( const hsize_t Index ) {
+  assert( Index < m_pAccessor->size() );
+  m_ItemIndex = Index;
+  m_bValidIndex = true;
+  m_pAccessor->Retrieve( Index, &m_T );
+  return (*this);
 }
 
 template<class T> bool CHDF5TimeSeriesIterator<T>::operator<( const CHDF5TimeSeriesIterator<T> &other ) {
