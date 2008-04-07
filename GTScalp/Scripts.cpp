@@ -23,27 +23,30 @@ CScripts::~CScripts(void) {
 
 void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays ) {
   // process IQFSymbol Table for exchanges and retrieve associated symbols
-
   //_CrtMemCheckpoint( &memstate1 );
-
+  //ofs.open( "archive.arc", std::ios::out | std::ios::binary );
 
   CIQFeedSymbolFile symbolfile;
   symbolfile.Open();
-
-  //ofs.open( "archive.arc", std::ios::out | std::ios::binary );
-  
-  
+  cout << endl;
 
   // with list of symbols, initiate history retrieval of daily bars
-  int i = 0;
-  const char szExchange[] = "PBOT";
-  cout << endl;
-  symbolfile.SetSearchExchange( szExchange );
-    const char *szSymbol = symbolfile.GetSymbol( DB_SET );
-    while ( NULL != szSymbol ) {
-      //cout << szSymbol << endl;
-      CHistoryCollector *phc;
-      switch ( typeHistory ) {
+  int cntSymbols = 0;
+  //const char *szExchanges[] = { "ONECH", "NYSE", "AMEX", "NMS", "DTN", "" };
+  const char *szExchanges[] = { "ONECH", "NYSE", "AMEX", "NMS", "" };
+  //const char *szExchanges[] = { "PBOT", "" };
+  int ixExchanges = 0;
+  const char *szExchange = szExchanges[ixExchanges];
+  while ( 0 != *szExchange ) {
+    symbolfile.SetSearchExchange( szExchange );
+    bool bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_SET );
+    while ( bSymbolFound ) {
+      const char *szSymbol = symbolfile.GetSymbol();
+      cout << szSymbol << " ";
+      if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
+        cout << "useful";
+        CHistoryCollector *phc;
+        switch ( typeHistory ) {
         case Daily:
           phc = new CHistoryCollectorDaily( szSymbol, nDays );
           break;
@@ -52,15 +55,21 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
           break;
         case Minute:
           break;
+        }
+        m_qHistoryCollectors.push( phc );
+        StartHistoryCollection();  // start what collectors we can while still building up the queue
+        ++cntSymbols;
       }
-      m_qHistoryCollectors.push( phc );
-      StartHistoryCollection();  // start what collectors we can while still building up the queue
-      ++i;
-      szSymbol = symbolfile.GetSymbol( DB_NEXT_DUP );
+      else {
+        cout << "n/a";
+      }
+      cout << endl;
+      bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_NEXT_DUP );
     }
-  
-  symbolfile.EndSearch();
-  cout << "#Symbols: " << i << endl;
+    symbolfile.EndSearch();
+    szExchange = szExchanges[ ++ixExchanges ];
+  }
+  cout << "#Symbols: " << cntSymbols << endl;
   //if ( 0 < i ) StartHistoryCollection();
 
   // close out files
@@ -146,3 +155,70 @@ void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
   }
 }
 
+// need to check queue as didn't get the queue has finished message
+
+/*
+active = 1
+H5::FileIException H5Gopen2 failed
+HD XTC.X done 3342
+active = 2
+H5::FileIException H5Gopen2 failed
+HD YIH.X done 2037
+active = 3
+H5 Error Level 12: k:\data\projects\hdf5-1.8.0-beta5\src\h5gnode.c::H5G_node_found::not found
+H5 Error Level 11: k:\data\projects\hdf5-1.8.0-beta5\src\h5gstab.c::H5G_stab_lookup::not found
+H5 Error Level 10: k:\data\projects\hdf5-1.8.0-beta5\src\h5gobj.c::H5G_obj_lookup::can't locate object
+H5 Error Level 9: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create::dataspace extent has not been set.
+H5 Error Level 8: k:\data\projects\hdf5-1.8.0-beta5\src\h5doh.c::H5O_dset_create::unable to create dataset
+H5 Error Level 7: k:\data\projects\hdf5-1.8.0-beta5\src\h5o.c::H5O_obj_create::unable to open object
+H5 Error Level 6: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_cb::unable to create object
+H5 Error Level 5: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse_real::traversal operator failed
+H5 Error Level 4: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse::internal path traversal failed
+H5 Error Level 3: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_create_real::can't insert link
+H5 Error Level 2: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_object::unable to create new link to object
+H5 Error Level 1: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create_named::unable to create and link to dataset
+H5 Error Level 0: k:\data\projects\hdf5-1.8.0-beta5\src\h5d.c::H5Dcreate2::unable to create dataset
+H5::FileIException H5Dcreate2 failed
+series is empty
+HD ZWI.X done 0
+HD ZWI.X !ERROR! Invalid symbol.
+active = 4
+H5 Error Level 12: k:\data\projects\hdf5-1.8.0-beta5\src\h5gnode.c::H5G_node_found::not found
+H5 Error Level 11: k:\data\projects\hdf5-1.8.0-beta5\src\h5gstab.c::H5G_stab_lookup::not found
+H5 Error Level 10: k:\data\projects\hdf5-1.8.0-beta5\src\h5gobj.c::H5G_obj_lookup::can't locate object
+H5 Error Level 9: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create::dataspace extent has not been set.
+H5 Error Level 8: k:\data\projects\hdf5-1.8.0-beta5\src\h5doh.c::H5O_dset_create::unable to create dataset
+H5 Error Level 7: k:\data\projects\hdf5-1.8.0-beta5\src\h5o.c::H5O_obj_create::unable to open object
+H5 Error Level 6: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_cb::unable to create object
+H5 Error Level 5: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse_real::traversal operator failed
+H5 Error Level 4: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse::internal path traversal failed
+H5 Error Level 3: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_create_real::can't insert link
+H5 Error Level 2: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_object::unable to create new link to object
+H5 Error Level 1: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create_named::unable to create and link to dataset
+H5 Error Level 0: k:\data\projects\hdf5-1.8.0-beta5\src\h5d.c::H5Dcreate2::unable to create dataset
+H5::FileIException H5Dcreate2 failed
+series is empty
+HD ZRS.X done 0
+HD ZRS.X !ERROR! Invalid symbol.
+H5 Error Level 12: k:\data\projects\hdf5-1.8.0-beta5\src\h5gnode.c::H5G_node_found::not found
+H5 Error Level 11: k:\data\projects\hdf5-1.8.0-beta5\src\h5gstab.c::H5G_stab_lookup::not found
+H5 Error Level 10: k:\data\projects\hdf5-1.8.0-beta5\src\h5gobj.c::H5G_obj_lookup::can't locate object
+H5 Error Level 9: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create::dataspace extent has not been set.
+H5 Error Level 8: k:\data\projects\hdf5-1.8.0-beta5\src\h5doh.c::H5O_dset_create::unable to create dataset
+H5 Error Level 7: k:\data\projects\hdf5-1.8.0-beta5\src\h5o.c::H5O_obj_create::unable to open object
+H5 Error Level 6: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_cb::unable to create object
+H5 Error Level 5: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse_real::traversal operator failed
+H5 Error Level 4: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse::internal path traversal failed
+H5 Error Level 3: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_create_real::can't insert link
+H5 Error Level 2: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_object::unable to create new link to object
+H5 Error Level 1: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create_named::unable to create and link to dataset
+H5 Error Level 0: k:\data\projects\hdf5-1.8.0-beta5\src\h5d.c::H5Dcreate2::unable to create dataset
+H5::FileIException H5Dcreate2 failed
+series is empty
+HD ZOC.XO done 0
+HD ZOC.XO !ERROR! Invalid symbol.
+H5 Error Level 12: k:\data\projects\hdf5-1.8.0-beta5\src\h5gnode.c::H5G_node_found::not found
+H5 Error Level 11: k:\data\projects\hdf5-1.8.0-beta5\src\h5gstab.c::H5G_stab_lookup::not found
+H5 Error Level 10: k:\data\projects\hdf5-1.8.0-beta5\src\h5gobj.c::H5G_obj_lookup::can't locate object
+
+*/

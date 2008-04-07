@@ -13,9 +13,17 @@ public:
   bool Load( const string &filename );
   void Close( void );
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
-  const char *GetSymbol( u_int32_t flags );
+  bool RetrieveSymbolRecord( u_int32_t flags );
+  const char *GetSymbol() { return pRecord->line; };
+  const char *GetDescription() { return pRecord->line + pRecord->ix[1]; };
+  const char *GetExchange() { return pRecord->line + pRecord->ix[2]; };
+  bool GetBitMutual() { return m_bMutual; };
+  bool GetBitMoneyMkt()  { return m_bMoneyMkt; };
+  bool GetBitIndex()  { return m_bIndex; };
+  bool GetBitCboe() { return m_bCboe; };
+  bool GetBitIndicator() { return m_bIndicator; };
+  bool GetBitHasOptions() { return m_bHasOptions; };
   void EndSearch( void );
-  //const char *Get
 protected:
   static int GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey );
     // memset this structure sometime.
@@ -28,6 +36,7 @@ protected:
     unsigned char ucBits;  // mutual, moneymkt, index, cboe, indicator
     char line[nMaxBufferSize];
   } dbRecord;
+  structIQFSymbolRecord *pRecord; // used for retrievals
 
   bool m_bMutual, m_bMoneyMkt, m_bIndex, m_bCboe, m_bIndicator, m_bHasOptions;
   Db *m_pdbIQFSymbols;
@@ -45,6 +54,6 @@ protected:
   static const unsigned char ucIndicator = 16;
   static const unsigned char ucHasOptions = 32;
   void PackBoolean(void);
-  void UnPackBoolean(void);
+  void UnPackBoolean( const unsigned char );
 private:
 };

@@ -31,10 +31,9 @@ using namespace std;
 
 // http://www.dtniq.com/product/mktsymbols.zip
 
-CIQFeedSymbolFile::CIQFeedSymbolFile(void) {
-  m_pdbIQFSymbols = NULL;
-  m_pdbIxIQFSymbols_Market = NULL;
-  m_pdbcIxIQFSymbols_Market = NULL;
+CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
+    pRecord( NULL ), 
+    m_pdbIQFSymbols( NULL ), m_pdbIxIQFSymbols_Market( NULL ), m_pdbcIxIQFSymbols_Market( NULL ) {
 }
 
 CIQFeedSymbolFile::~CIQFeedSymbolFile(void) {
@@ -70,14 +69,14 @@ void CIQFeedSymbolFile::SetSearchExchange( const char *szExchange ) {
   m_pdbIxIQFSymbols_Market->cursor( NULL, &m_pdbcIxIQFSymbols_Market, 0 );
 }
 
-const char *CIQFeedSymbolFile::GetSymbol( u_int32_t flags ) {
-  const char *szSymbol = NULL;
+bool CIQFeedSymbolFile::RetrieveSymbolRecord( u_int32_t flags ) {
+  pRecord = NULL;
   int result = m_pdbcIxIQFSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
   if ( 0 == result ) {
-    structIQFSymbolRecord *pRecord = (structIQFSymbolRecord *) m_dbtData.get_data();
-    szSymbol = pRecord->line;
+    pRecord = (structIQFSymbolRecord *) m_dbtData.get_data();
+    UnPackBoolean( pRecord->ucBits );
   }
-  return szSymbol;
+  return ( 0 == result );
 }
 
 void CIQFeedSymbolFile::EndSearch( void ) {
@@ -115,12 +114,15 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   td_structIndexes j, k, c; 
   bool bEndFound;
 
+  cout << "Opening Symbol Database" << endl;
   file.open( filename.c_str() );
 
   Open();
   u_int32_t countp = 0;
+  cout << "Truncating Symbol Database" << endl;
   m_pdbIQFSymbols->truncate( NULL, &countp, 0 );
 
+  cout << "Loading Symbols" << endl;
   try {
     file.getline( dbRecord.line, nMaxBufferSize );
     while ( !file.fail() ) {
@@ -233,13 +235,13 @@ void CIQFeedSymbolFile::PackBoolean( void ) {
   dbRecord.ucBits |= ( m_bHasOptions ? ucHasOptions : 0 );
 }
 
-void CIQFeedSymbolFile::UnPackBoolean( void ) {
-  m_bMutual = 0 != ( dbRecord.ucBits & ucMutual );
-  m_bMoneyMkt = 0 != ( dbRecord.ucBits & ucMoneyMkt );
-  m_bIndex = 0 != ( dbRecord.ucBits & ucIndex );
-  m_bCboe = 0 != ( dbRecord.ucBits & ucCboe );
-  m_bIndicator = 0 != ( dbRecord.ucBits & ucIndicator );
-  m_bHasOptions = 0 != ( dbRecord.ucBits & ucHasOptions );
+void CIQFeedSymbolFile::UnPackBoolean( const unsigned char ucBits ) {
+  m_bMutual = 0 != ( ucBits & ucMutual );
+  m_bMoneyMkt = 0 != ( ucBits & ucMoneyMkt );
+  m_bIndex = 0 != ( ucBits & ucIndex );
+  m_bCboe = 0 != ( ucBits & ucCboe );
+  m_bIndicator = 0 != ( ucBits & ucIndicator );
+  m_bHasOptions = 0 != ( ucBits & ucHasOptions );
 }
 
 int CIQFeedSymbolFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {

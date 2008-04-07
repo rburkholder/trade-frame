@@ -479,7 +479,7 @@ void CGTScalpDlg::OnBnClickedIqfeedloadsymbols()
 void CGTScalpDlg::OnBnClickedLoaddailydata() {
   // TODO: Add your control notification handler code here
   CScripts *scripts = new CScripts();
-  scripts->GetIQFeedHistoryForSymbolRange( CScripts::Daily, 10 );
+  scripts->GetIQFeedHistoryForSymbolRange( CScripts::Daily, 0 );
 }
 
 void CGTScalpDlg::OnBnClickedTesthdf5() {
