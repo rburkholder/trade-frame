@@ -56,7 +56,7 @@ void CHistoryCollectorDaily::WriteData( void ) {
       DataSpace *pds = m_bars.DefineDataSpace(); 
       DataSet *dataset;
       DSetCreatPropList pl;
-      hsize_t sizeChunk = 64;
+      hsize_t sizeChunk = CDataManager::H5ChunkSize();
       pl.setChunk( 1, &sizeChunk );
       bool bNeedToCreateDataSet = false;
       try { // check if dataset exists (for overwrite)

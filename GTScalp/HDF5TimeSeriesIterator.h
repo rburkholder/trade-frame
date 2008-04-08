@@ -50,10 +50,10 @@ template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5Time
   m_ItemIndex( Index ),
   m_bValidIndex( false ) { 
 
-  if ( Index > m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
+  if ( Index >= m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
   // Index == m_pAccessor->size() is same as end();
   if ( Index < m_pAccessor->size() ) {
-    m_pAccessor->Retrieve( m_ItemIndex, &m_T );
+    m_pAccessor->ReadItem( m_ItemIndex, &m_T );
   }
   m_bValidIndex = true;
 }
@@ -86,7 +86,7 @@ template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operat
   assert( m_ItemIndex < m_pAccessor->size() );
   ++m_ItemIndex;
   if ( m_ItemIndex < m_pAccessor->size() ) {
-    m_pAccessor->Retrieve( m_ItemIndex, &m_T );  // retrieve at our new location if we can
+    m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
   }
   return( *this );
 }

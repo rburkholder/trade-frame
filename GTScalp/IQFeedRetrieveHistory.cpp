@@ -190,6 +190,7 @@ void IQFeedHistoryHD::OnPortMessage( const char *str ) {
       cout << "HD " << m_sSymbol << " " << str << endl;
       break;
     case EResponseDone:
+      m_pBars->Flip();
       m_bBusy = false;
       // check size of Time Series to match count
       cout << "HD " << m_sSymbol << " done " << m_cntRecords << endl;

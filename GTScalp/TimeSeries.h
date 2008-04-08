@@ -32,7 +32,7 @@ public:
   virtual CTimeSeries<T> *Subset( const ptime &time ); // from At or After to end
   virtual CTimeSeries<T> *Subset( const ptime &time, unsigned int n ); // from At or After for n T
   void Sort( void ); // use when loaded from external data
-  void Flip( void );
+  void Flip( void ) {reverse( m_vSeries.begin(), m_vSeries.end() ); };
   void Clear( void );
   H5::DataSpace *DefineDataSpace( H5::DataSpace *pSpace = NULL );
 protected:
@@ -185,20 +185,22 @@ template<class T> void CTimeSeries<T>::Sort( void ) {
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order
 }
 
-template<class T> void CTimeSeries<T>::Flip() {
-  std::vector<T>::iterator iterBegin = m_vSeries.begin();
-  std::vector<T>::iterator iterEnd = m_vSeries.end();
-  iterEnd--;
+//template<class T> void CTimeSeries<T>::Flip() {
+  //std::vector<T>::iterator iterBegin = m_vSeries.begin();
+  //std::vector<T>::iterator iterEnd = m_vSeries.end();
+  //iterEnd--;
 
-  T datum;
-  while ( iterBegin < iterEnd ) {
-    datum = *iterBegin;
-    *iterBegin = *iterEnd;
-    *iterEnd = datum;
-    --iterEnd;
-    ++iterBegin;
-  }
-}
+  //T datum;
+  //while ( iterBegin < iterEnd ) {
+  //  datum = *iterBegin;
+  //  *iterBegin = *iterEnd;
+  //  *iterEnd = datum;
+  //  --iterEnd;
+  //  ++iterBegin;
+  //}
+
+  //reverse( m_vSeries.begin(), m_vSeries.end() );
+//}
 
 template<class T> CTimeSeries<T> * CTimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
@@ -246,7 +248,8 @@ template<class T> H5::DataSpace *CTimeSeries<T>::DefineDataSpace( H5::DataSpace 
     pSpace->setExtentSimple( 1, &curSize, &maxSize ); 
   }
   else {
-    cout << "series is empty" << endl;
+    //throw runtime_error( "CTimeSeries<T>::DefineDataSpace series is empty" );
+    cout << "CTimeSeries<T>::DefineDataSpace series is empty" << endl;
   }
   return pSpace;
 }
