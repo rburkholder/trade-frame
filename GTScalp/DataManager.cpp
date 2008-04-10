@@ -2,6 +2,8 @@
 #include "DataManager.h"
 #include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+
 
 using namespace H5;
 
@@ -59,22 +61,27 @@ CDataManager::CDataManager(void) {
   }
 }
 
-void CDataManager::AddGroupForSymbol( const std::string &sSymbol ) {
+void CDataManager::AddGroup( const std::string &sGroup ) {
+  // caller can supply stepped groups to create group structure:
+  //  /symbol, /symbol/G, /symbol/G/O, /symbol/G/O/GOOG
   try {
-    Group g = dm.GetH5File()->openGroup( "/symbol/" + sSymbol );
-    g.close();
-  }  // one of these when doesn't exist
-  catch ( H5::FileIException e ) {
-    std::cout << "H5::FileIException " << e.getDetailMsg() << std::endl;
-    Group g = dm.GetH5File()->createGroup( "/symbol/" + sSymbol );
-    g.close();
+    try {
+      Group g = dm.GetH5File()->openGroup( sGroup );
+      g.close();
+    }  // one of these when doesn't exist
+    catch ( H5::Exception e ) {
+      //std::cout << "CDataManager::AddGroup H5::Exception for '" << sGroup << "', " << e.getDetailMsg() << std::endl;
+      Group g = dm.GetH5File()->createGroup( sGroup );
+      g.close();
+    }
   }
-  catch ( H5::GroupIException e ) {
-    std::cout << "H5::GroupIException " << e.getDetailMsg() << std::endl;
-    Group g = dm.GetH5File()->createGroup( "/symbol/" + sSymbol );
-    g.close();
-    // assume all is well, or should we do in another try?
+  catch (...) {
+    throw std::runtime_error( "CDataManager::AddGroup has creation problems" );
   }
+}
+
+void CDataManager::AddGroupForSymbol( const std::string &sSymbol ) {
+  AddGroup( "/symbol/" + sSymbol );
 }
 
 herr_t CDataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data ) {

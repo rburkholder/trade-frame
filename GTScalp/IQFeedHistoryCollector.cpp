@@ -49,15 +49,28 @@ void CHistoryCollectorDaily::Start( void ) {
 void CHistoryCollectorDaily::WriteData( void ) {
   if ( 0 != m_bars.Count() ) {
     try {
-      string sFileName1 = "/bar/86400/" + m_sSymbol;
-
+      assert( m_sSymbol.length() > 0 );
       CDataManager dm;
+      string sFileName1;
+      sFileName1.append( "/bar/86400/" );
+      sFileName1.append( m_sSymbol.substr( 0, 1 ) );
+      dm.AddGroup( sFileName1 );
+      if ( m_sSymbol.length() >= 2 ) {
+        sFileName1.append( "/" );
+        sFileName1.append( m_sSymbol.substr( 1, 1 ) );
+        dm.AddGroup( sFileName1 );
+      }
+      sFileName1.append( "/" );
+      sFileName1.append( m_sSymbol );
+
       CompType *pdt = CBar::DefineDataType();
       DataSpace *pds = m_bars.DefineDataSpace(); 
       DataSet *dataset;
       DSetCreatPropList pl;
       hsize_t sizeChunk = CDataManager::H5ChunkSize();
       pl.setChunk( 1, &sizeChunk );
+      pl.setShuffle();
+      pl.setDeflate(5);
       bool bNeedToCreateDataSet = false;
       try { // check if dataset exists (for overwrite)
         dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
