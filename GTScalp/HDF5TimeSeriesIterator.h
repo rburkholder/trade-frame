@@ -11,12 +11,17 @@ using namespace H5;
 #include <stdexcept>
 //using namespace std;
 
+// need distance operator: This function returns the distance between two iterators 
+//  by determining how many times the first iterator would need to be incremented 
+//  until it was equal to the last iterator. 
+
 template<class T> class CHDF5TimeSeriesIterator: 
 //  public std::iterator<std::random_access_iterator_tag, const T, hsize_t> {
   public std::iterator<std::random_access_iterator_tag, T, hsize_t> {
 public:
   explicit CHDF5TimeSeriesIterator<T>( void ); // end() init
   explicit CHDF5TimeSeriesIterator<T>( CHDF5TimeSeriesAccessor<T> *pAccessor, hsize_t Index );  // begin() or later init
+  typedef random_access_iterator_tag iterator_category;
   CHDF5TimeSeriesIterator<T>( const CHDF5TimeSeriesIterator<T>& other );  // copy constructor
   ~CHDF5TimeSeriesIterator<T>( void ) { };
   //typedef CHDF5TimeSeriesIterator self_type;
@@ -24,6 +29,8 @@ public:
   CHDF5TimeSeriesIterator<T> &operator=( const CHDF5TimeSeriesIterator<T> &other );
   CHDF5TimeSeriesIterator<T> &operator++(); // pre-increment
   CHDF5TimeSeriesIterator<T>  operator++( int ); // post-increment
+  CHDF5TimeSeriesIterator<T> &operator+=( const hsize_t inc );
+  hsize_t operator-( const CHDF5TimeSeriesIterator<T> &other );
   bool operator<( const CHDF5TimeSeriesIterator<T> &other );
   bool operator==( const CHDF5TimeSeriesIterator<T> &other );
   bool operator!=( const CHDF5TimeSeriesIterator<T> &other );
@@ -38,6 +45,14 @@ protected:
 private:
 };
 
+template<class T>
+typename iterator_traits<T>::difference_type 
+dist_helper( T &first, T &last, random_access_iterator_tag ) {
+  return last - first;
+}
+
+
+
 template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( void ):
   m_pAccessor( NULL ), 
   m_ItemIndex( 0 ),
@@ -50,7 +65,7 @@ template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5Time
   m_ItemIndex( Index ),
   m_bValidIndex( false ) { 
 
-  if ( Index >= m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
+  if ( Index > m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
   // Index == m_pAccessor->size() is same as end();
   if ( Index < m_pAccessor->size() ) {
     m_pAccessor->ReadItem( m_ItemIndex, &m_T );
@@ -100,6 +115,20 @@ template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operato
     m_pAccessor->Retrieve( m_ItemIndex, &m_T );
   }
   return( result ); 
+}
+
+template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator+=( const hsize_t inc ) { // plus assignment
+  assert( m_bValidIndex );
+  m_ItemIndex += inc;
+  assert( m_ItemIndex <= m_pAccessor->size() );
+  if ( m_ItemIndex < m_pAccessor->size() ) {
+    m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
+  }
+  return( *this );
+}
+
+template<class T> hsize_t CHDF5TimeSeriesIterator<T>::operator-( const CHDF5TimeSeriesIterator<T> &other ) { // subtraction
+  return m_ItemIndex - other.m_ItemIndex;
 }
 
 template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator[]( const hsize_t Index ) {

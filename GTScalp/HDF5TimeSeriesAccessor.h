@@ -92,6 +92,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::ReadItem( hsize_t ixSource, T
       m_pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord1) );
       MemoryDataspace.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord2) );
       m_pDiskDataSet->read( pDatedDatum, *m_pDiskCompType, MemoryDataspace, *m_pDiskDataSpaceSelection );
+      cout << "read from index " << ixSource << endl;
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;

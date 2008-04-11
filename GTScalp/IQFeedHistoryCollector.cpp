@@ -55,11 +55,9 @@ void CHistoryCollectorDaily::WriteData( void ) {
       sFileName1.append( "/bar/86400/" );
       sFileName1.append( m_sSymbol.substr( 0, 1 ) );
       dm.AddGroup( sFileName1 );
-      if ( m_sSymbol.length() >= 2 ) {
-        sFileName1.append( "/" );
-        sFileName1.append( m_sSymbol.substr( 1, 1 ) );
-        dm.AddGroup( sFileName1 );
-      }
+      sFileName1.append( "/" );
+      sFileName1.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
+      dm.AddGroup( sFileName1 );
       sFileName1.append( "/" );
       sFileName1.append( m_sSymbol );
 
