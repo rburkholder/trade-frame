@@ -1,9 +1,10 @@
 #include "StdAfx.h"
 #include "IQFeedHistoryCollector.h"
 
-#include "DataManager.h"
-using namespace H5;
+//#include "DataManager.h"
+//using namespace H5;
 
+#include "HDF5TimeSeriesContainer.h"
 
 //
 // CHistoryCollector
@@ -49,9 +50,14 @@ void CHistoryCollectorDaily::Start( void ) {
 void CHistoryCollectorDaily::WriteData( void ) {
   if ( 0 != m_bars.Count() ) {
     try {
+
       assert( m_sSymbol.length() > 0 );
-      CDataManager dm;
+
+      DataSet *dataset;
+      bool bNeedToCreateDataSet = false;
       string sFileName1;
+      CDataManager dm;
+
       sFileName1.append( "/bar/86400/" );
       sFileName1.append( m_sSymbol.substr( 0, 1 ) );
       dm.AddGroup( sFileName1 );
@@ -61,52 +67,55 @@ void CHistoryCollectorDaily::WriteData( void ) {
       sFileName1.append( "/" );
       sFileName1.append( m_sSymbol );
 
-      CompType *pdt = CBar::DefineDataType();
-      DataSpace *pds = m_bars.DefineDataSpace(); 
-      DataSet *dataset;
-      DSetCreatPropList pl;
-      hsize_t sizeChunk = CDataManager::H5ChunkSize();
-      pl.setChunk( 1, &sizeChunk );
-      pl.setShuffle();
-      pl.setDeflate(5);
-      bool bNeedToCreateDataSet = false;
       try { // check if dataset exists (for overwrite)
         dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
+        dataset->close();
+        delete dataset;
       }
       catch ( H5::FileIException e ) {
         bNeedToCreateDataSet = true;
-      }
-      catch (...) {
-        cout << "CHistoryCollectorDaily::WriteData  unknown error 1" << endl;
+        dataset->close();
+        delete dataset;
       }
       if ( bNeedToCreateDataSet ) {
-        try {
-          dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
-          dataset->write( m_bars.First(), *pdt );
-          dataset->close();
-          delete dataset;
-          dm.AddGroupForSymbol( m_sSymbol );
-          //dm.GetH5File()->link( H5L_type_t::H5L_TYPE_HARD, sFileName1, "/symbol/" + m_sSymbol + "/bar.86400" );
-        }
-        catch (  H5::FileIException e ) {
-          cout << "H5::FileIException " << e.getDetailMsg() << endl;
-          e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
-        }
-        catch ( ... ) {
-          cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << endl;
-        }
+
+        CompType *pdt = CBar::DefineDataType();
+        DataSpace *pds = m_bars.DefineDataSpace(); 
+        DSetCreatPropList pl;
+        hsize_t sizeChunk = CDataManager::H5ChunkSize();
+        pl.setChunk( 1, &sizeChunk );
+        pl.setShuffle();
+        pl.setDeflate(5);
+
+        dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
+        dataset->close();
+        pds->close();
+        pdt->close();
+        delete pds;
+        delete pdt;
+        delete dataset;
       }
       else {
-        cout << "Code is needed to write over existing dataset for " << m_sSymbol << endl;
+        //dataset->close();  // from successful open
+        //cout << "Code is needed to write over existing dataset for " << m_sSymbol << endl;
       }
-      pds->close();
-      pdt->close();
-      delete pds;
-      delete pdt;
-    }
-    catch ( H5::Exception e ) {
-      cout << "H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+
+      try {
+        CHDF5TimeSeriesContainer<CBar> barRepository( sFileName1 );
+        barRepository.Write( m_bars.First(), m_bars.Last() + 1 );
+        //dataset->write( m_bars.First(), *pdt );
+        //dataset->close();
+        //
+        //dm.AddGroupForSymbol( m_sSymbol );
+        //dm.GetH5File()->link( H5L_type_t::H5L_TYPE_HARD, sFileName1, "/symbol/" + m_sSymbol + "/bar.86400" );
+      }
+      catch (  H5::FileIException e ) {
+        cout << "H5::FileIException " << e.getDetailMsg() << endl;
+        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+      }
+      catch ( ... ) {
+        cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << endl;
+      }
     }
     catch (...) {
       cout << "CHistoryCollectorDaily::WriteData:  unknown error 3" << endl;

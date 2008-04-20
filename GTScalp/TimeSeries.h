@@ -23,9 +23,9 @@ public:
   T *First();
   T *Next();
   T *Last();
-  T *Ago( unsigned int ix );
-  T *operator[]( unsigned int ix );
-  T *At( unsigned int ix );
+  T *Ago( size_t ix );
+  T *operator[]( size_t ix );
+  T *At( size_t ix );
   T *At( const ptime &time );
   T *AtOrAfter( const ptime &time );
   T *After( const ptime &time );
@@ -108,7 +108,7 @@ template<class T> T *CTimeSeries<T>::Last() {
   return m_vSeries.empty() ? NULL : &m_vSeries[ m_vSeries.size() - 1 ];
 }
 
-template<class T> T *CTimeSeries<T>::Ago( unsigned int ix ) {
+template<class T> T *CTimeSeries<T>::Ago( size_t ix ) {
   T *datum = NULL;
   if ( 0 != m_vSeries.size() ) {
     if ( ix < m_vSeries.size() ) {
@@ -120,7 +120,7 @@ template<class T> T *CTimeSeries<T>::Ago( unsigned int ix ) {
   return datum;
 }
 
-template<class T> T *CTimeSeries<T>::operator []( unsigned int ix ) {
+template<class T> T *CTimeSeries<T>::operator []( size_t ix ) {
   T *datum = NULL;
   if ( ix < m_vSeries.size() ) {
     m_vIterator = m_vSeries.begin() + ix;
@@ -129,7 +129,7 @@ template<class T> T *CTimeSeries<T>::operator []( unsigned int ix ) {
   return datum;
 }
 
-template<class T> T *CTimeSeries<T>::At( unsigned int ix ) {
+template<class T> T *CTimeSeries<T>::At( size_t ix ) {
   T *datum = NULL;
   if ( ix < m_vSeries.size() ) {
     m_vIterator = m_vSeries.begin() + ix;

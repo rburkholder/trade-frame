@@ -292,15 +292,15 @@ void CTradingLogic::OnTickHistoryDone( IQFeedHistory *pHistory ) {
 
   // this is being processed on a non-gui thread, 
   // need to turn this into tha thread cross over event
-  int nQuotes = pQuotes->Count();
-  int nTrades = pTrades->Count();
+  size_t nQuotes = pQuotes->Count();
+  size_t nTrades = pTrades->Count();
   ASSERT( nQuotes == nTrades );
   if ( ( nQuotes > 0 ) && ( nTrades > 0 ) ) {
     pQuotes->Flip();
     pTrades->Flip();
 
     //int n = pTrades->Count();
-    int i;
+    size_t i;
 
     pChartIntraDay->m_chart.SetUpdateChart( false );
 

@@ -20,8 +20,9 @@ public:
   virtual ~CHDF5TimeSeriesAccessor<T>(void);
   typedef hsize_t size_type;
   size_type size() const { return m_curElementCount; };
-  void ReadItem( hsize_t index, T* );
-  void WriteItem( hsize_t index, const T & );
+  void Read( hsize_t index, T* );
+  void Write( hsize_t index, const T & );
+  void Write( hsize_t index, size_t count, T *  );
 protected:
   string m_sFilename;
   CDataManager dm;
@@ -30,9 +31,10 @@ protected:
   DataSpace *m_pDiskDataSpaceSelection;
   size_type m_curElementCount, m_maxElementCount;
   CompType *m_pDiskCompType;
+  virtual void SetNewSize( size_type size ) = 0;
 private:
-  CHDF5TimeSeriesAccessor( const CHDF5TimeSeriesAccessor& ); // not implemented
-  CHDF5TimeSeriesAccessor& operator=( const CHDF5TimeSeriesAccessor& ); // not implemented
+  CHDF5TimeSeriesAccessor( const CHDF5TimeSeriesAccessor& ); // copy constructor not implemented
+  CHDF5TimeSeriesAccessor& operator=( const CHDF5TimeSeriesAccessor& ); // assignment constructor not implemented
 };
 
 template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std::string &sFileName):
@@ -80,7 +82,7 @@ template<class T> CHDF5TimeSeriesAccessor<T>::~CHDF5TimeSeriesAccessor() {
   delete m_pDiskDataSet;
 }
 
-template<class T> void CHDF5TimeSeriesAccessor<T>::ReadItem( hsize_t ixSource, T *pDatedDatum ) {
+template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pDatedDatum ) {
   // store the retrieved value in pDatedDatum
   try {
     hsize_t dim = 1;
@@ -104,25 +106,20 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::ReadItem( hsize_t ixSource, T
   }
 }
 
-template<class T> void CHDF5TimeSeriesAccessor<T>::WriteItem( hsize_t ixDest, const T &DatedDatum ) {
-  // store the retrieved value in pDatedDatum
+template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixDest, const T &DatedDatum ) {
   try {
     hsize_t dim = 1;
-    assert( ixDest <= m_curElementCount );  // at an existing position, or one past the end
+    assert( ixDest <= m_curElementCount );  // at an existing position, or one past the end (sparseness not allowed)
     hsize_t coord1[] = { ixDest };  // index on disk
     hsize_t coord2[] = { 0 };      // only one item in memory
     DataSpace MemoryDataspace(1, &dim ); // represents one element memory based dataspace
-    //DSetCreatPropList pl;
-    //hsize_t sizeChunk = CDataManager::H5ChunkSize();
-    //pl.setChunk( 1, &sizeChunk );
-    //pl.setFletcher32(
     try {
       m_pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord1) );
       MemoryDataspace.selectElements( H5S_SELECT_SET, 1, reinterpret_cast<const hsize_t **>(coord2) );
-      m_pDiskDataSet->write( &DatedDatum, m_pDiskCompType, MemoryDataspace, m_pDiskDataSpaceSelection );
-      //m_pDiskDataSet->read( pDatedDatum, *m_pDiskCompType, MemoryDataspace, *m_pDiskDataSpaceSelection );
+      m_pDiskDataSet->write( &DatedDatum, *m_pDiskCompType, MemoryDataspace, *m_pDiskDataSpaceSelection );
       if ( ixDest == m_curElementCount ) {
         m_pDiskDataSpace->getSimpleExtentDims( &m_curElementCount, &m_maxElementCount  );  // update current, max
+        SetNewSize( m_curElementCount );
       }
     }
     catch ( H5::Exception e ) {
@@ -135,3 +132,33 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::WriteItem( hsize_t ixDest, co
   }
 }
 
+template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_t count, T *pDatedDatum ) {
+  try {
+    assert( ixStart <= m_curElementCount );  // at an existing position, or one past the end (sparseness not allowed)
+    hsize_t oldElementCount = m_curElementCount;
+    hsize_t dim[] = { count };
+    DataSpace MemoryDataspace(1, dim ); // rank, dimensions
+    hsize_t coord1[][2] = { 0 };      // starting memory element index
+    hsize_t coord2[][2] = { ixStart };  // starting index on disk
+    try {
+      MemoryDataspace.selectElements( H5S_SELECT_SET, count, reinterpret_cast<const hsize_t **>(coord1) );
+      m_pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, count, reinterpret_cast<const hsize_t **>(coord2) );
+      //m_pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, count, coord1 );
+      m_pDiskDataSet->write( pDatedDatum, *m_pDiskCompType, MemoryDataspace, *m_pDiskDataSpaceSelection );
+      //if ( ixDest == m_curElementCount ) {
+        m_pDiskDataSpace->getSimpleExtentDims( &m_curElementCount, &m_maxElementCount  );  // update current, max
+        SetNewSize( m_curElementCount );
+      //}
+        if ( m_curElementCount == oldElementCount ) {
+          cout << "Dataset did not expand" << endl;
+        }
+    }
+    catch ( H5::Exception e ) {
+      cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+    }
+  }
+  catch (...) {
+    cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Retrieve" << endl;
+  }
+}

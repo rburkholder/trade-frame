@@ -99,15 +99,21 @@ void CScripts::TestDataSet( void ) {
 
     //for_each( barRepository.begin(), barRepository.end(), ShowItem() );
     //ptime dt(boost::date_time::special_values::not_a_date_time );
-    ptime dt( boost::gregorian::date( 2008, 04, 07 ) );
-    CHDF5TimeSeriesContainer<CBar>::iterator iter;
+    ptime dt( boost::gregorian::date( 2008, 04, 04 ), boost::posix_time::time_duration( 1, 1, 1 ) );
+    //ptime dt( boost::gregorian::date( 2008, 04, 04 ) );
+    //CHDF5TimeSeriesContainer<CBar>::iterator iter;
+    pair<CHDF5TimeSeriesContainer<CBar>::iterator, CHDF5TimeSeriesContainer<CBar>::iterator> p;
     //iter = find( barRepository.begin(), barRepository.end(), dt );
-    iter = lower_bound( barRepository.begin(), barRepository.end(), dt );
-    if ( (const CHDF5TimeSeriesIterator<CBar> ) barRepository.end() == iter ) {
-      cout << "nothing found" << endl;
+    //iter = lower_bound( barRepository.begin(), barRepository.end(), dt );
+
+    p = equal_range( barRepository.begin(), barRepository.end(), dt );
+    //iter = upper_bound( barRepository.begin(), barRepository.end(), dt );
+    //if ( (const CHDF5TimeSeriesIterator<CBar> ) barRepository.end() == iter ) {
+    if ( p.first == p.second ) {
+      cout << "nothing found: insertion point is " << (*p.first).m_dt << endl;
     }
     else {
-      cout << "found " << (*iter).m_dt << endl;
+      cout << "found " << (*p.first).m_dt << endl;
     }
 
   }

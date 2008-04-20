@@ -70,7 +70,7 @@ void IQFeedHistory::LiveRequest( const char *szPrefix, const char *szSymbol, uns
     s.append( "," );
     s.append( szSymbol );
     s.append( "," );
-    s.append( itoa( nCount, buf, 10 ) );
+    s.append( _itoa( nCount, buf, 10 ) );
     s.append( ";" );
     m_stateHistory = ECommandSent;
     m_pPort->SendToSocket( s.c_str() );

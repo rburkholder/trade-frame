@@ -5,6 +5,7 @@
 using namespace fastdelegate;
 
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 template<class RO> class Delegate {
@@ -36,16 +37,14 @@ template<class RO> void Delegate<RO>::Add( OnMessageHandler function ) {
 
 template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
 
-  std::vector<OnMessageHandler>::iterator rOnFD_Iter;
+  std::vector<OnMessageHandler>::iterator rOnFD_Iter = rOnFD.begin();;
 
-  rOnFD_Iter = rOnFD.begin();
   while ( rOnFD.end() != rOnFD_Iter ) {
     if ( function == *rOnFD_Iter ) {
-      // can one erase while in an iterator?
       rOnFD.erase( rOnFD_Iter );
       break;
     }
-    rOnFD_Iter++;
+    ++rOnFD_Iter;
   }
 }
 
@@ -60,7 +59,7 @@ template<class RO> void Delegate<RO>::operator()( RO ro ) {
   rOnFD_Iter = rOnFD.begin();
   while ( rOnFD.end() != rOnFD_Iter ) {
     (*rOnFD_Iter)( ro );
-    rOnFD_Iter++;
+    ++rOnFD_Iter;
   }
 }
 

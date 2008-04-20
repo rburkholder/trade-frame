@@ -102,7 +102,7 @@ void CChartArmsIntraDay::DrawChart( void ) {
   pChart ->addText( 250,  15, "DnSn!!" );
 
   vector<double>::iterator iterIndu, iterTrin;
-  unsigned int i, j;
+  size_t i, j;
   j = m_vdblIndu.size();
   double *pdblIndu = new double[ j ];
   double *pdblTrin = new double[ j ];

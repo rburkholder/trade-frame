@@ -6,20 +6,19 @@
 using namespace H5;
 
 #include "HDF5TimeSeriesAccessor.h"
+#include "HDF5TimeSeriesContainer.h"
 
 #include <iterator>
 #include <stdexcept>
 //using namespace std;
 
-// need distance operator: This function returns the distance between two iterators 
-//  by determining how many times the first iterator would need to be incremented 
-//  until it was equal to the last iterator. 
+template<class T> class CHDF5TimeSeriesContainer;
 
 template<class T> class CHDF5TimeSeriesIterator: 
-//  public std::iterator<std::random_access_iterator_tag, const T, hsize_t> {
   public std::iterator<std::random_access_iterator_tag, T, hsize_t> {
+    friend class CHDF5TimeSeriesContainer<T>;
 public:
-  explicit CHDF5TimeSeriesIterator<T>( void ); // end() init
+  explicit CHDF5TimeSeriesIterator<T>( void );
   explicit CHDF5TimeSeriesIterator<T>( CHDF5TimeSeriesAccessor<T> *pAccessor, hsize_t Index );  // begin() or later init
   typedef random_access_iterator_tag iterator_category;
   CHDF5TimeSeriesIterator<T>( const CHDF5TimeSeriesIterator<T>& other );  // copy constructor
@@ -34,24 +33,16 @@ public:
   bool operator<( const CHDF5TimeSeriesIterator<T> &other );
   bool operator==( const CHDF5TimeSeriesIterator<T> &other );
   bool operator!=( const CHDF5TimeSeriesIterator<T> &other );
-  CHDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
+  //CHDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
   reference operator*();
-  reference operator->();
+  //reference operator->();
 protected:
-  CHDF5TimeSeriesAccessor<T> *m_pAccessor;
   bool m_bValidIndex;  // m_ItemIndex is valid ie, is something from .begin() to .end()
+  CHDF5TimeSeriesAccessor<T> *m_pAccessor;
   hsize_t m_ItemIndex; // index into specific item
-  T m_T; // the currently retrieved datum
+  T m_T; // the currently retrieved datum, could keep and track two values in order to optimize lower_bound speed somewhat
 private:
 };
-
-template<class T>
-typename iterator_traits<T>::difference_type 
-dist_helper( T &first, T &last, random_access_iterator_tag ) {
-  return last - first;
-}
-
-
 
 template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( void ):
   m_pAccessor( NULL ), 
@@ -67,9 +58,9 @@ template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5Time
 
   if ( Index > m_pAccessor->size() ) throw std::runtime_error( "Index out of range on construction" ); 
   // Index == m_pAccessor->size() is same as end();
-  if ( Index < m_pAccessor->size() ) {
-    m_pAccessor->ReadItem( m_ItemIndex, &m_T );
-  }
+  //if ( Index < m_pAccessor->size() ) {
+  //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // don't preload
+  //}
   m_bValidIndex = true;
 }
 
@@ -100,9 +91,9 @@ template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operat
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   ++m_ItemIndex;
-  if ( m_ItemIndex < m_pAccessor->size() ) {
-    m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
-  }
+  //if ( m_ItemIndex < m_pAccessor->size() ) {
+  //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
+  //}
   return( *this );
 }
 
@@ -111,9 +102,9 @@ template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operato
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   ++m_ItemIndex;
-  if ( m_ItemIndex < m_pAccessor->size() ) {
-    m_pAccessor->Retrieve( m_ItemIndex, &m_T );
-  }
+  //if ( m_ItemIndex < m_pAccessor->size() ) {
+  //  m_pAccessor->Retrieve( m_ItemIndex, &m_T );
+  //}
   return( result ); 
 }
 
@@ -121,22 +112,14 @@ template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operat
   assert( m_bValidIndex );
   m_ItemIndex += inc;
   assert( m_ItemIndex <= m_pAccessor->size() );
-  if ( m_ItemIndex < m_pAccessor->size() ) {
-    m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
-  }
+  //if ( m_ItemIndex < m_pAccessor->size() ) {
+  //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
+  //}
   return( *this );
 }
 
 template<class T> hsize_t CHDF5TimeSeriesIterator<T>::operator-( const CHDF5TimeSeriesIterator<T> &other ) { // subtraction
   return m_ItemIndex - other.m_ItemIndex;
-}
-
-template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator[]( const hsize_t Index ) {
-  assert( Index < m_pAccessor->size() );
-  m_ItemIndex = Index;
-  m_bValidIndex = true;
-  m_pAccessor->Retrieve( Index, &m_T );
-  return (*this);
 }
 
 template<class T> bool CHDF5TimeSeriesIterator<T>::operator<( const CHDF5TimeSeriesIterator<T> &other ) {
@@ -155,9 +138,23 @@ template<class T> bool CHDF5TimeSeriesIterator<T>::operator!=( const CHDF5TimeSe
 }
 
 template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator*() {
+  assert( m_bValidIndex );
+  assert( m_ItemIndex < m_pAccessor->size() );
+  m_pAccessor->Read( m_ItemIndex, &m_T );
   return m_T;
 }
 
-template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator->() {
-  return m_T;  // not sure yet how this works
-}
+//template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator->() {
+//  m_pAccessor->ReadItem( m_ItemIndex, &m_T );
+//  return m_T;  // not sure yet how this works
+//}
+
+// does operator[] make sense for iterator?  ... look in requirements for a random interator
+//template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operator[]( const hsize_t Index ) {
+//  assert( Index < m_pAccessor->size() );
+//  m_ItemIndex = Index;
+//  m_bValidIndex = true;
+//  m_pAccessor->Retrieve( Index, &m_T );
+//  return (*this);
+//}
+
