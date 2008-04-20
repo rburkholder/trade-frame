@@ -110,6 +110,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_IQFEEDLOADSYMBOLS, &CGTScalpDlg::OnBnClickedIqfeedloadsymbols)
   ON_BN_CLICKED(IDC_LOADDAILYDATA, &CGTScalpDlg::OnBnClickedLoaddailydata)
   ON_BN_CLICKED(IDC_TESTHDF5, &CGTScalpDlg::OnBnClickedTesthdf5)
+  ON_BN_CLICKED(IDC_DNLDDAYSYMBOL, &CGTScalpDlg::OnBnClickedDnlddaysymbol)
 END_MESSAGE_MAP()
 
 
@@ -486,4 +487,13 @@ void CGTScalpDlg::OnBnClickedTesthdf5() {
   // TODO: Add your control notification handler code here
   CScripts *scripts = new CScripts();
   scripts->TestDataSet();
+}
+
+void CGTScalpDlg::OnBnClickedDnlddaysymbol()
+{
+  // TODO: Add your control notification handler code here
+  CScripts *scripts = new CScripts();
+  char symbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( symbol, 30 );
+  scripts->GetIQFeedHistoryForSymbol( symbol, CScripts::Daily, 10 );
 }

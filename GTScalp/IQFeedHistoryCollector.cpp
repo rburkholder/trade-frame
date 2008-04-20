@@ -74,13 +74,19 @@ void CHistoryCollectorDaily::WriteData( void ) {
       }
       catch ( H5::FileIException e ) {
         bNeedToCreateDataSet = true;
-        dataset->close();
-        delete dataset;
+        //dataset->close();
+        //delete dataset;
       }
       if ( bNeedToCreateDataSet ) {
 
         CompType *pdt = CBar::DefineDataType();
-        DataSpace *pds = m_bars.DefineDataSpace(); 
+
+        //DataSpace *pds = m_bars.DefineDataSpace(); 
+        DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
+        hsize_t curSize = 0;
+        hsize_t maxSize = H5S_UNLIMITED; 
+        pds->setExtentSimple( 1, &curSize, &maxSize ); 
+
         DSetCreatPropList pl;
         hsize_t sizeChunk = CDataManager::H5ChunkSize();
         pl.setChunk( 1, &sizeChunk );

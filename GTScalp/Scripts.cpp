@@ -21,6 +21,22 @@ CScripts::CScripts(void) {
 CScripts::~CScripts(void) {
 }
 
+void CScripts::GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays ) {
+  CHistoryCollector *phc;
+  switch ( typeHistory ) {
+        case Daily:
+          phc = new CHistoryCollectorDaily( szSymbol, nDays );
+          break;
+        case Tick:
+          phc = new CHistoryCollectorTicks( szSymbol, nDays );
+          break;
+        case Minute:
+          break;
+  }
+  m_qHistoryCollectors.push( phc );
+  StartHistoryCollection();  // start what collectors we can while still building up the queue
+}
+
 void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays ) {
   // process IQFSymbol Table for exchanges and retrieve associated symbols
   //_CrtMemCheckpoint( &memstate1 );
@@ -99,8 +115,8 @@ void CScripts::TestDataSet( void ) {
 
     //for_each( barRepository.begin(), barRepository.end(), ShowItem() );
     //ptime dt(boost::date_time::special_values::not_a_date_time );
-    ptime dt( boost::gregorian::date( 2008, 04, 04 ), boost::posix_time::time_duration( 1, 1, 1 ) );
-    //ptime dt( boost::gregorian::date( 2008, 04, 04 ) );
+    //ptime dt( boost::gregorian::date( 2008, 04, 04 ), boost::posix_time::time_duration( 1, 1, 1 ) );
+    ptime dt( boost::gregorian::date( 2008, 04, 18 ) );
     //CHDF5TimeSeriesContainer<CBar>::iterator iter;
     pair<CHDF5TimeSeriesContainer<CBar>::iterator, CHDF5TimeSeriesContainer<CBar>::iterator> p;
     //iter = find( barRepository.begin(), barRepository.end(), dt );

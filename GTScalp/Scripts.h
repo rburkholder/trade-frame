@@ -16,6 +16,7 @@ public:
   CScripts(void);
   virtual ~CScripts(void);
   enum EHistoryType { Daily, Tick, Minute };
+  void GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays );
   void GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays );
   void TestDataSet( void );
 protected:

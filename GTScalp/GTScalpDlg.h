@@ -94,4 +94,5 @@ public:
   afx_msg void OnBnClickedIqfeedloadsymbols();
   afx_msg void OnBnClickedLoaddailydata();
   afx_msg void OnBnClickedTesthdf5();
+  afx_msg void OnBnClickedDnlddaysymbol();
 };
