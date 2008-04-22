@@ -246,3 +246,8 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
   }
 }
 
+void CIQFeed::Send( char *szCommand ) {
+  IQConnect.SendToSocket( szCommand ); 
+  IQConnect.SendToSocket( "\n" );
+}
+ 

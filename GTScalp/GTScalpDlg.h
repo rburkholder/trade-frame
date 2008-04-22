@@ -95,4 +95,8 @@ public:
   afx_msg void OnBnClickedLoaddailydata();
   afx_msg void OnBnClickedTesthdf5();
   afx_msg void OnBnClickedDnlddaysymbol();
+  afx_msg void OnBnClickedIqfeedcmd();
+  CComboBox m_lbIQCommands;
+  CEdit m_edtEntry1;
+  afx_msg void OnBnClickedIterate();
 };

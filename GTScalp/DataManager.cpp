@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <stdexcept>
-
+#include <iostream>
 
 using namespace H5;
 
@@ -26,6 +26,7 @@ CDataManager dm;
 CDataManager::CDataManager(void) {
   ++m_RefCount;
   if ( 1 == m_RefCount ) {
+    std::cout << "Opening HDF5 DataManager" << std::endl;
     m_DbEnv.open( ".", DB_INIT_MPOOL | DB_CREATE | DB_THREAD | DB_INIT_CDB, 0 );
     H5::FileAccPropList pl1;
     H5::FileAccPropList pl2;
@@ -54,6 +55,7 @@ CDataManager::CDataManager(void) {
     catch (...) {
       printf( "problems with HDF5 system\n" );
     }
+    std::cout << "DataManager opened" << std::endl;
   }
   else {
     //throw std::exception( "Only one DataManager may be instantiated." );

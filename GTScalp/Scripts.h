@@ -19,6 +19,7 @@ public:
   void GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays );
   void GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays );
   void TestDataSet( void );
+  void IterateGroups( void );
 protected:
   static const unsigned short nMaxActiveCollectors = 4;
   queue<CHistoryCollector *> m_qHistoryCollectors; // collectors waiting activiation

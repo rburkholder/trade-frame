@@ -58,8 +58,12 @@
 #define IDC_IQFEEDLOADSYMBOLS           1056
 #define IDC_LOADDAILYDATA               1057
 #define IDC_TESTHDF5                    1058
-#define IDC_BUTTON2                     1059
 #define IDC_DNLDDAYSYMBOL               1059
+#define IDC_IQCOMMANDLIST               1060
+#define IDC_ENTRY1                      1061
+#define IDC_IQFEEDCMD                   1062
+#define IDC_BUTTON4                     1063
+#define IDC_ITERATE                     1063
 
 // Next default values for new objects
 // 
@@ -67,7 +71,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1060
+#define _APS_NEXT_CONTROL_VALUE         1064
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

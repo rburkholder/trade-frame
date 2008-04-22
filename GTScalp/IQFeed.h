@@ -28,6 +28,8 @@ public:
   CIQFeedThreadCrossing *CheckOutLookupPort( void );
   void CheckInLookupPort( CIQFeedThreadCrossing * );
 
+  void Send( char *szCommand );
+
 protected:
   typedef CIQFSymbol* LP_CIQFSymbol;
   map<string,LP_CIQFSymbol> m_mapSymbols;

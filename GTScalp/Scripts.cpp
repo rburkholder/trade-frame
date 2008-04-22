@@ -5,6 +5,9 @@
 
 #include "HDF5TimeSeriesContainer.h"
 
+#include "DataManager.h"
+using namespace H5;
+
 #include <stdexcept>
 #include <algorithm>
 #include <functional>
@@ -58,9 +61,9 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
     bool bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_SET );
     while ( bSymbolFound ) {
       const char *szSymbol = symbolfile.GetSymbol();
-      cout << szSymbol << " ";
+      //cout << szSymbol << " ";
       if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
-        cout << "useful";
+        //cout << "useful";
         CHistoryCollector *phc;
         switch ( typeHistory ) {
         case Daily:
@@ -77,9 +80,9 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
         ++cntSymbols;
       }
       else {
-        cout << "n/a";
+        //cout << "n/a";
       }
-      cout << endl;
+      //cout << endl;
       bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_NEXT_DUP );
     }
     symbolfile.EndSearch();
@@ -136,7 +139,38 @@ void CScripts::TestDataSet( void ) {
   catch ( ... ) {
     cout << "problems" << endl;
   }
+}
 
+herr_t IterateCallback( hid_t group, const char *name, void *op_data ) {
+  CDataManager dm;
+  H5G_stat_t stats;
+  string sBaseGroup = * (string *) op_data;
+  string sObject;
+  try {
+    //H5I_type_t type = dm.GetH5File()->getHDFObjType( group );
+    sObject = sBaseGroup + name;
+    dm.GetH5File()->getObjinfo( sObject, stats );
+    
+    if ( H5G_GROUP == stats.type ) {
+      int idx = 0;  // starting location for interrupted queries
+      sObject.append( "/" );
+      int result = dm.GetH5File()->iterateElems( sObject, &idx, &IterateCallback, &sObject );  
+    }
+  }
+  catch ( H5::Exception e ) {
+    cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
+    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, op_data );
+  }
+  return 0;
+}
+
+void CScripts::IterateGroups( void ) {
+  CDataManager dm;
+  int idx = 0;  // starting location for interrupted queries
+  string sBaseGroup = "/bar/86400/";
+  int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &IterateCallback, &sBaseGroup );
+
+  cout << "iteration returned " << result << endl;
 }
 
 void CScripts::StartHistoryCollection( void ) {
@@ -190,31 +224,3 @@ void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
 
 // need to check queue as didn't get the queue has finished message
 
-/*
-active = 1
-H5::FileIException H5Gopen2 failed
-HD XTC.X done 3342
-active = 2
-H5::FileIException H5Gopen2 failed
-HD YIH.X done 2037
-active = 3
-H5 Error Level 12: k:\data\projects\hdf5-1.8.0-beta5\src\h5gnode.c::H5G_node_found::not found
-H5 Error Level 11: k:\data\projects\hdf5-1.8.0-beta5\src\h5gstab.c::H5G_stab_lookup::not found
-H5 Error Level 10: k:\data\projects\hdf5-1.8.0-beta5\src\h5gobj.c::H5G_obj_lookup::can't locate object
-H5 Error Level 9: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create::dataspace extent has not been set.
-H5 Error Level 8: k:\data\projects\hdf5-1.8.0-beta5\src\h5doh.c::H5O_dset_create::unable to create dataset
-H5 Error Level 7: k:\data\projects\hdf5-1.8.0-beta5\src\h5o.c::H5O_obj_create::unable to open object
-H5 Error Level 6: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_cb::unable to create object
-H5 Error Level 5: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse_real::traversal operator failed
-H5 Error Level 4: k:\data\projects\hdf5-1.8.0-beta5\src\h5gtraverse.c::H5G_traverse::internal path traversal failed
-H5 Error Level 3: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_create_real::can't insert link
-H5 Error Level 2: k:\data\projects\hdf5-1.8.0-beta5\src\h5l.c::H5L_link_object::unable to create new link to object
-H5 Error Level 1: k:\data\projects\hdf5-1.8.0-beta5\src\h5dint.c::H5D_create_named::unable to create and link to dataset
-H5 Error Level 0: k:\data\projects\hdf5-1.8.0-beta5\src\h5d.c::H5Dcreate2::unable to create dataset
-H5::FileIException H5Dcreate2 failed
-series is empty
-HD ZWI.X done 0
-HD ZWI.X !ERROR! Invalid symbol.
-active = 4
-
-*/

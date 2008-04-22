@@ -28,7 +28,7 @@ protected:
   DataSet *m_pDiskDataSet;
   CompType *m_pDiskCompType;
   size_type m_curElementCount, m_maxElementCount;
-  virtual void SetNewSize( size_type size ) = 0;
+  virtual void SetNewSize( size_type size ) {};
   void UpdateElementCount( void );
 private:
   CHDF5TimeSeriesAccessor( const CHDF5TimeSeriesAccessor& ); // copy constructor not implemented
@@ -136,6 +136,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
       if ( m_curElementCount == oldElementCount ) {
         cout << "Dataset did not expand" << endl;
       }
+      cout << "Wrote " << count << ", total " << m_curElementCount << endl;
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;

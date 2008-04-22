@@ -84,6 +84,8 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_DAYSAGO, m_edtDaysAgo);
   DDX_Control(pDX, IDC_ALLOWTRADES, m_cbAllowTrades);
   DDX_Control(pDX, IDC_SYMBOLLIST, m_lbSymbolList);
+  DDX_Control(pDX, IDC_IQCOMMANDLIST, m_lbIQCommands);
+  DDX_Control(pDX, IDC_ENTRY1, m_edtEntry1);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -111,6 +113,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_LOADDAILYDATA, &CGTScalpDlg::OnBnClickedLoaddailydata)
   ON_BN_CLICKED(IDC_TESTHDF5, &CGTScalpDlg::OnBnClickedTesthdf5)
   ON_BN_CLICKED(IDC_DNLDDAYSYMBOL, &CGTScalpDlg::OnBnClickedDnlddaysymbol)
+  ON_BN_CLICKED(IDC_IQFEEDCMD, &CGTScalpDlg::OnBnClickedIqfeedcmd)
+  ON_BN_CLICKED(IDC_ITERATE, &CGTScalpDlg::OnBnClickedIterate)
 END_MESSAGE_MAP()
 
 
@@ -479,8 +483,13 @@ void CGTScalpDlg::OnBnClickedIqfeedloadsymbols()
 
 void CGTScalpDlg::OnBnClickedLoaddailydata() {
   // TODO: Add your control notification handler code here
-  CScripts *scripts = new CScripts();
-  scripts->GetIQFeedHistoryForSymbolRange( CScripts::Daily, 0 );
+  char szDays[ 30 ];
+  m_edtDaysAgo.GetWindowTextA( szDays, 30 );
+  int nDays = atoi( szDays );
+  if ( 0 < nDays ) {
+    CScripts *scripts = new CScripts();
+    scripts->GetIQFeedHistoryForSymbolRange( CScripts::Daily, nDays );
+  }
 }
 
 void CGTScalpDlg::OnBnClickedTesthdf5() {
@@ -489,11 +498,35 @@ void CGTScalpDlg::OnBnClickedTesthdf5() {
   scripts->TestDataSet();
 }
 
-void CGTScalpDlg::OnBnClickedDnlddaysymbol()
-{
+void CGTScalpDlg::OnBnClickedDnlddaysymbol() {
+  // TODO: Add your control notification handler code here
+  char szSymbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+  char szDays[ 30 ];
+  m_edtDaysAgo.GetWindowTextA( szDays, 30 );
+  int nDays = atoi( szDays );
+  if ( 0 != nDays && 0 != *szSymbol ) {
+    CScripts *scripts = new CScripts();
+    scripts->GetIQFeedHistoryForSymbol( szSymbol, CScripts::Daily, nDays );
+  }
+  else {
+    cout << "Days was " << nDays << " for Symbol " << szSymbol << endl;
+  }
+}
+
+void CGTScalpDlg::OnBnClickedIqfeedcmd() {
+  // TODO: Add your control notification handler code here
+  char szCommand[ 40 ];
+  m_lbIQCommands.GetWindowTextA( szCommand, 40 );
+  if ( 0 != *szCommand ) {
+    if ( NULL != theApp.m_pIQFeed ) {
+      theApp.m_pIQFeed->Send( szCommand );
+    }
+  }
+}
+
+void CGTScalpDlg::OnBnClickedIterate() {
   // TODO: Add your control notification handler code here
   CScripts *scripts = new CScripts();
-  char symbol[ 30 ];
-  m_lbSymbolList.GetWindowTextA( symbol, 30 );
-  scripts->GetIQFeedHistoryForSymbol( symbol, CScripts::Daily, 10 );
+  scripts->IterateGroups();
 }
