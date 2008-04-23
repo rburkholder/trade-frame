@@ -12,6 +12,7 @@
 #include "VuChartArmsIntraDay.h"
 #include <vector>
 #include "HDF5.h"
+#include "afxdtctl.h"
 
 using namespace std;
 
@@ -99,4 +100,13 @@ public:
   CComboBox m_lbIQCommands;
   CEdit m_edtEntry1;
   afx_msg void OnBnClickedIterate();
+  CDateTimeCtrl m_dtLastDate;
+  CDateTimeCtrl m_dtLastTime;
+  CDateTimeCtrl m_dtStartDate;
+  CDateTimeCtrl m_dtStartTime;
+  CButton m_rbEndSelector1;
+  afx_msg void OnBnClickedEnddayselect();
+  afx_msg void OnBnClickedEndbarcount();
+  afx_msg void OnBnClickedEnddaycount();
+  CStatic m_grpEndDay;
 };

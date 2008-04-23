@@ -147,7 +147,7 @@ void CTradingLogic::OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg ) {
 void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
   if ( pBars->Count() > 0 ) {
 
-    pBars->Flip();  // probably not needed as already performed in IQFeedRetrieveHistory::OnPortMessage
+    //pBars->Flip();  // probably not needed as already performed in IQFeedRetrieveHistory::OnPortMessage
     CBar *pBar = pBars->Last();
 
     //stringstream ss;

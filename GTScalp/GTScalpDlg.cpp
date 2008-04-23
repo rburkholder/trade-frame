@@ -86,6 +86,12 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_SYMBOLLIST, m_lbSymbolList);
   DDX_Control(pDX, IDC_IQCOMMANDLIST, m_lbIQCommands);
   DDX_Control(pDX, IDC_ENTRY1, m_edtEntry1);
+  DDX_Control(pDX, IDC_DATETIMEPICKER3, m_dtLastDate);
+  DDX_Control(pDX, IDC_DATETIMEPICKER2, m_dtLastTime);
+  DDX_Control(pDX, IDC_DATETIMEPICKER4, m_dtStartDate);
+  DDX_Control(pDX, IDC_DATETIMEPICKER5, m_dtStartTime);
+
+  DDX_Control(pDX, IDC_STATICRB, m_grpEndDay);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -115,6 +121,9 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_DNLDDAYSYMBOL, &CGTScalpDlg::OnBnClickedDnlddaysymbol)
   ON_BN_CLICKED(IDC_IQFEEDCMD, &CGTScalpDlg::OnBnClickedIqfeedcmd)
   ON_BN_CLICKED(IDC_ITERATE, &CGTScalpDlg::OnBnClickedIterate)
+  ON_BN_CLICKED(IDC_ENDDAYSELECT, &CGTScalpDlg::OnBnClickedEnddayselect)
+  ON_BN_CLICKED(IDC_ENDBARCOUNT, &CGTScalpDlg::OnBnClickedEndbarcount)
+  ON_BN_CLICKED(IDC_ENDDAYCOUNT, &CGTScalpDlg::OnBnClickedEnddaycount)
 END_MESSAGE_MAP()
 
 
@@ -529,4 +538,27 @@ void CGTScalpDlg::OnBnClickedIterate() {
   // TODO: Add your control notification handler code here
   CScripts *scripts = new CScripts();
   scripts->IterateGroups();
+}
+
+void CGTScalpDlg::OnBnClickedEnddayselect() {
+  // TODO: Add your control notification handler code here
+  //int i = m_dt;
+  //bool b = m_rbDaySelect.
+  m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYSELECT );
+  m_dtStartDate.EnableWindow( 1 );
+  m_dtStartTime.EnableWindow( 1 );
+}
+
+void CGTScalpDlg::OnBnClickedEndbarcount() {
+  // TODO: Add your control notification handler code here
+  m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDBARCOUNT );
+  m_dtStartDate.EnableWindow( 0 );
+  m_dtStartTime.EnableWindow( 0 );
+}
+
+void CGTScalpDlg::OnBnClickedEnddaycount() {
+  // TODO: Add your control notification handler code here
+  m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYCOUNT );
+  m_dtStartDate.EnableWindow( 0 );
+  m_dtStartTime.EnableWindow( 0 );
 }

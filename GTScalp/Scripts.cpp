@@ -209,6 +209,11 @@ void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
   // final reporting
   if ( m_qHistoryCollectors.empty() && !m_mapActiveHistoryCollectors.empty() ) {
     cout << "active = " << m_mapActiveHistoryCollectors.size() << endl;
+    map<string, CHistoryCollector *>::iterator iter = m_mapActiveHistoryCollectors.begin();
+    while ( m_mapActiveHistoryCollectors.end() != iter ) {
+      cout << "  symbol remaining: " << iter->first << endl;
+      ++iter;
+    }
     //_CrtDumpMemoryLeaks();
   }
   if ( m_qHistoryCollectors.empty() && m_mapActiveHistoryCollectors.empty() ) {
