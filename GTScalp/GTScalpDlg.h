@@ -13,6 +13,7 @@
 #include <vector>
 #include "HDF5.h"
 #include "afxdtctl.h"
+#include "Scripts.h"
 
 using namespace std;
 
@@ -37,6 +38,10 @@ private:
   CConsoleMessages *pNews;
   CVuChartArmsIntraDay *pvuArms;
   CHDF5 *pHdf5;
+
+  CScripts script;
+  CScripts::enumDayStart eDayStart;
+  CScripts::enumScanType eScanType;
 
 
 protected:
@@ -99,7 +104,6 @@ public:
   afx_msg void OnBnClickedIqfeedcmd();
   CComboBox m_lbIQCommands;
   CEdit m_edtEntry1;
-  afx_msg void OnBnClickedIterate();
   CDateTimeCtrl m_dtLastDate;
   CDateTimeCtrl m_dtLastTime;
   CDateTimeCtrl m_dtStartDate;
@@ -109,4 +113,9 @@ public:
   afx_msg void OnBnClickedEndbarcount();
   afx_msg void OnBnClickedEnddaycount();
   CStatic m_grpEndDay;
+  afx_msg void OnBnClickedBtnscan();
+  afx_msg void OnBnClickedRbdarvas();
+  afx_msg void OnBnClickedRbbollinger();
+  afx_msg void OnBnClickedRbbreakout();
+  CStatic m_grpScanType;
 };

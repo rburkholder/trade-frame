@@ -19,6 +19,8 @@ public:
   typedef CHDF5TimeSeriesIterator<T> iterator;
   iterator begin();
   const iterator &end();
+  //void Read( const iterator &_begin, const iterator &_end, T *_dest ); 
+  void Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ); 
   void Write( T *_begin, T *_end );
 protected:
   iterator *m_end;
@@ -53,6 +55,17 @@ template<class T> const typename CHDF5TimeSeriesContainer<T>::iterator &CHDF5Tim
 template<class T> void CHDF5TimeSeriesContainer<T>::SetNewSize( size_type newsize ) {
   delete m_end;
   m_end = new iterator( this, newsize );
+}
+
+//template<class T> void CHDF5TimeSeriesContainer<T>::Read( const iterator &_begin, const iterator &_end, T *_dest ) {
+template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ) {
+  hsize_t cnt = _end - _begin;
+  DataSpace *pDs = _dest->DefineDataSpace();
+  if ( cnt > 0 ) {
+    CHDF5TimeSeriesAccessor<T>::Read( _begin.m_ItemIndex, cnt, pDs, _dest->First() );
+  }
+  pDs->close();
+  delete pDs;
 }
 
 template<class T> void CHDF5TimeSeriesContainer<T>::Write( T *_begin, T *_end ) {

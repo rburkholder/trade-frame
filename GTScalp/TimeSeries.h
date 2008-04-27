@@ -20,6 +20,11 @@ public:
   size_t Count();
   void AppendDatum( const T &datum );
   void InsertDatum( const ptime &time, const T &datum );
+  //void Resize( unsigned int Size ) { if ( Size > m_vSeries.size() ) m_vSeries.resize( Size ); }; // there is a Destroy issue here in STL
+  void Resize( unsigned int Size ) { 
+    m_vSeries.resize( Size );  
+    void *p = &m_vSeries; 
+  }; 
   T *First();
   T *Next();
   T *Last();
@@ -45,10 +50,11 @@ template<class T> CTimeSeries<T>::CTimeSeries(void) {
 }
 
 template<class T> CTimeSeries<T>::CTimeSeries( unsigned int size ) {
-  m_vSeries.reserve( size );
+  m_vSeries.resize( size );
 }
 
 template<class T> CTimeSeries<T>::~CTimeSeries(void) {
+  Clear();
 }
 
 template<class T> void CTimeSeries<T>::AppendDatum(const T &datum) { // changed name 'cause VC++ doesn't do symbol results properly

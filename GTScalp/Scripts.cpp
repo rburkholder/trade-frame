@@ -4,6 +4,7 @@
 #include "IQFeedSymbolFile.h"
 
 #include "HDF5TimeSeriesContainer.h"
+#include "SymbolSelectionFilter.h"
 
 #include "DataManager.h"
 using namespace H5;
@@ -141,36 +142,104 @@ void CScripts::TestDataSet( void ) {
   }
 }
 
-herr_t IterateCallback( hid_t group, const char *name, void *op_data ) {
-  CDataManager dm;
-  H5G_stat_t stats;
-  string sBaseGroup = * (string *) op_data;
-  string sObject;
-  try {
-    //H5I_type_t type = dm.GetH5File()->getHDFObjType( group );
-    sObject = sBaseGroup + name;
-    dm.GetH5File()->getObjinfo( sObject, stats );
-    
-    if ( H5G_GROUP == stats.type ) {
-      int idx = 0;  // starting location for interrupted queries
-      sObject.append( "/" );
-      int result = dm.GetH5File()->iterateElems( sObject, &idx, &IterateCallback, &sObject );  
+herr_t IterateCallback( hid_t group, const char *name, void *op_data );
+
+class CFilterSelectionIteratorControl {
+public:
+  CFilterSelectionIteratorControl( 
+    CScripts::enumDayStart dstype, int count, ptime dtStart, ptime dtEnd,
+    const string &sBaseGroup,
+    CSymbolSelectionFilter *pFilter ) :
+      m_dstype( dstype ), m_count( count ), m_dtStart( dtStart ), m_dtEnd( dtEnd ), 
+        m_sBaseGroup( sBaseGroup ), m_pFilter( pFilter ) { };
+  void Process( const string &sObjectName ) {
+    CDataManager dm;
+    H5G_stat_t stats;
+    string sObjectPath;
+    try {
+      sObjectPath = m_sBaseGroup + sObjectName;
+      dm.GetH5File()->getObjinfo( sObjectPath, stats );
+      switch ( stats.type ) {
+        case H5G_DATASET: {
+          CHDF5TimeSeriesContainer<CBar> barRepository( sObjectPath );
+          CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
+          end = lower_bound( barRepository.begin(), barRepository.end(), m_dtEnd );
+          switch ( m_dstype ) {
+            case CScripts::DaySelect:
+              begin = lower_bound( barRepository.begin(), end, m_dtStart );
+              break;
+            case CScripts::BarCount:
+              break;
+              begin = end;
+              begin -= m_count;
+            case CScripts::DayCount:
+              date_duration tmp( m_count );
+              ptime dt = (*end).m_dt - tmp;
+              begin = lower_bound( barRepository.begin(), end, dt );
+          }
+          hsize_t cnt = end - begin;
+          //CBars bars( cnt );
+          void *p = m_pFilter->Bars()->First();
+          int p2 = sizeof( CBar );
+          m_pFilter->Bars()->Resize( cnt );
+          barRepository.Read( begin, end, m_pFilter->Bars() );
+          m_pFilter->Process( sObjectName );
+          break;
+        }
+        break;
+        case H5G_GROUP:
+          int idx = 0;  // starting location for interrupted queries
+          sObjectPath.append( "/" );
+          CFilterSelectionIteratorControl control( m_dstype, m_count, m_dtStart, m_dtEnd, sObjectPath, m_pFilter );
+          int result = dm.GetH5File()->iterateElems( sObjectPath, &idx, &IterateCallback, &control );  
+          break;
+      }
+    }
+    catch ( H5::Exception e ) {
+      cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, 0 );
     }
   }
-  catch ( H5::Exception e ) {
-    cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
-    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, op_data );
-  }
+protected:
+  CScripts::enumDayStart m_dstype;
+  int m_count;
+  ptime m_dtStart;
+  ptime m_dtEnd;
+  string m_sBaseGroup;
+  CSymbolSelectionFilter *m_pFilter;
+private:
+};
+
+herr_t IterateCallback( hid_t group, const char *name, void *op_data ) {
+  CFilterSelectionIteratorControl *pControl = 
+    ( CFilterSelectionIteratorControl * ) op_data;
+  pControl->Process( name );
   return 0;
 }
 
-void CScripts::IterateGroups( void ) {
+void CScripts::Scan( enumScanType scantype, enumDayStart dstype, int count, ptime dtStart, ptime dtEnd ) {
+
+  CSymbolSelectionFilter *pFilter;
+  switch ( scantype ) {
+    case Darvas:
+      pFilter = new CSelectSymbolWithDarvas();
+      break;
+    case Bollinger:
+      pFilter = new CSelectSymbolWithBollinger();
+      break;
+    case Breakout:
+      pFilter = new CSelectSymbolWithBreakout();
+      break;
+  }
+
   CDataManager dm;
   int idx = 0;  // starting location for interrupted queries
   string sBaseGroup = "/bar/86400/";
-  int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &IterateCallback, &sBaseGroup );
-
+  CFilterSelectionIteratorControl control( dstype, count, dtStart, dtEnd, sBaseGroup, pFilter );
+  int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &IterateCallback, &control );
   cout << "iteration returned " << result << endl;
+
+  delete pFilter;
 }
 
 void CScripts::StartHistoryCollection( void ) {

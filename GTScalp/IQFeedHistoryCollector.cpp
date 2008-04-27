@@ -58,14 +58,21 @@ void CHistoryCollectorDaily::WriteData( void ) {
       string sFileName1;
       CDataManager dm;
 
-      sFileName1.append( "/bar/86400/" );
-      sFileName1.append( m_sSymbol.substr( 0, 1 ) );
-      dm.AddGroup( sFileName1 );
-      sFileName1.append( "/" );
-      sFileName1.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
-      dm.AddGroup( sFileName1 );
-      sFileName1.append( "/" );
-      sFileName1.append( m_sSymbol );
+      try {   // need to fix this so everything is skipped
+        sFileName1.append( "/bar/86400/" );
+        sFileName1.append( m_sSymbol.substr( 0, 1 ) );
+        dm.AddGroup( sFileName1 );
+        sFileName1.append( "/" );
+        sFileName1.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
+        dm.AddGroup( sFileName1 );
+        sFileName1.append( "/" );
+        sFileName1.append( m_sSymbol );
+      }
+      catch (  H5::Exception e ) {
+        cout << "CHistoryCollectorDaily::WriteData Exception " << e.getDetailMsg() << endl;
+        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+        throw e;
+      }
 
       try { // check if dataset exists (for overwrite)
         dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
@@ -80,6 +87,9 @@ void CHistoryCollectorDaily::WriteData( void ) {
       if ( bNeedToCreateDataSet ) {
 
         CompType *pdt = CBar::DefineDataType();
+        int t1 = pdt->getSize();
+        pdt->pack();
+        int t2 = pdt->getSize();
 
         //DataSpace *pds = m_bars.DefineDataSpace(); 
         DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
