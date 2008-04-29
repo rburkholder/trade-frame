@@ -62,7 +62,6 @@
 #define IDC_IQCOMMANDLIST               1060
 #define IDC_ENTRY1                      1061
 #define IDC_IQFEEDCMD                   1062
-#define IDC_ITERATE                     1063
 #define IDC_DATETIMEPICKER2             1066
 #define IDC_DATETIMEPICKER3             1067
 #define IDC_ENDDAYCOUNT                 1069
@@ -74,8 +73,13 @@
 #define IDC_RBDARVAS                    1078
 #define IDC_RBBOLLINGER                 1079
 #define IDC_RBBREAKOUT                  1080
-#define IDC_BTNSCAN                     1081
-#define IDC_SCANTYPE                    1082
+#define IDC_RADIO1                      1081
+#define IDC_RADIO2                      1082
+#define IDC_RADIO3                      1083
+#define IDC_BTNSCAN                     1084
+#define IDC_SCANTYPE                    1085
+#define IDC_USEDAYSTART                 1086
+#define IDC_USEDAYEND                   1087
 
 // Next default values for new objects
 // 
@@ -83,7 +87,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1083
+#define _APS_NEXT_CONTROL_VALUE         1088
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

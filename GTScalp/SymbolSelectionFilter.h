@@ -7,13 +7,21 @@ using namespace std;
 
 class CSymbolSelectionFilter {
 public:
-  CSymbolSelectionFilter(void);
+  enum enumDayCalc { NoDayCalc, DaySelect, BarCount, DayCount };
+  CSymbolSelectionFilter( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd );
   virtual ~CSymbolSelectionFilter(void);
   CTimeSeries<CBar> *Bars( void ) { return &m_bars; };
-  virtual void Process( const string &sSymbol ) = 0;
+  virtual bool Validate( void ) { return true; };
+  void Start( void );
+  virtual void Process( const string &sSymbol, const string &sPath ) = 0;
 protected:
-  //CBars m_bars;
   CTimeSeries<CBar> m_bars;
+  enumDayCalc m_DayStartType;
+  int m_nCount;
+  bool m_bUseStart;
+  ptime m_dtStart;
+  bool m_bUseLast;
+  ptime m_dtLast;
 private:
 };
 
@@ -26,27 +34,28 @@ private:
 
 class CSelectSymbolWithDarvas: public CSymbolSelectionFilter {
 public:
-  CSelectSymbolWithDarvas(void);
+  CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
   virtual ~CSelectSymbolWithDarvas(void );
-  void Process( const string &sSymbol );
+  bool Validate( void );
+  void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };
 
 class CSelectSymbolWithBollinger: public CSymbolSelectionFilter {
 public:
-  CSelectSymbolWithBollinger(void);
+  CSelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
   virtual ~CSelectSymbolWithBollinger(void );
-  void Process( const string &sSymbol );
+  void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };
 
 class CSelectSymbolWithBreakout: public CSymbolSelectionFilter {
 public:
-  CSelectSymbolWithBreakout(void);
+  CSelectSymbolWithBreakout( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
   virtual ~CSelectSymbolWithBreakout(void );
-  void Process( const string &sSymbol );
+  void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };

@@ -24,10 +24,7 @@ public:
   void GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays );
   void GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays );
   void TestDataSet( void );
-  void IterateGroups( void );
-  enum enumDayStart { NoDayStart, DaySelect, BarCount, DayCount };
-  enum enumScanType { NoScanType, Darvas, Bollinger, Breakout };
-  void Scan( enumScanType scantype, enumDayStart dstype, int count, ptime dtStart, ptime dtEnd );
+  //void IterateGroups( void );
 protected:
   static const unsigned short nMaxActiveCollectors = 4;
   queue<CHistoryCollector *> m_qHistoryCollectors; // collectors waiting activiation

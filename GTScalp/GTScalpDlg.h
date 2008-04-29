@@ -14,6 +14,7 @@
 #include "HDF5.h"
 #include "afxdtctl.h"
 #include "Scripts.h"
+#include "SymbolSelectionFilter.h"
 
 using namespace std;
 
@@ -40,8 +41,11 @@ private:
   CHDF5 *pHdf5;
 
   CScripts script;
-  CScripts::enumDayStart eDayStart;
-  CScripts::enumScanType eScanType;
+  enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility };
+  enumScanType m_eScanType;
+  CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
+  bool m_bUseDayStart;
+  bool m_bUseDayEnd;
 
 
 protected:
@@ -118,4 +122,11 @@ public:
   afx_msg void OnBnClickedRbbollinger();
   afx_msg void OnBnClickedRbbreakout();
   CStatic m_grpScanType;
+  afx_msg void OnBnClickedUsedaystart();
+  afx_msg void OnBnClickedUsedayend();
+  CButton m_cbUseDayStart;
+  CButton m_cbUseDayEnd;
+  CButton m_rbSelectByDay;
+  CButton m_rbSelectByBarCount;
+  CButton m_rbSelectByDayCount;
 };

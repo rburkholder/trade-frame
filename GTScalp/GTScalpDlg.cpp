@@ -14,7 +14,6 @@
 #include "IQFeedRetrieveHistory.h"
 #include "IQFeedSymbolFile.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -93,6 +92,11 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
 
   DDX_Control(pDX, IDC_STATICRB, m_grpEndDay);
   DDX_Control(pDX, IDC_SCANTYPE, m_grpScanType);
+  DDX_Control(pDX, IDC_USEDAYSTART, m_cbUseDayStart);
+  DDX_Control(pDX, IDC_USEDAYEND, m_cbUseDayEnd);
+  DDX_Control(pDX, IDC_ENDDAYSELECT, m_rbSelectByDay);
+  DDX_Control(pDX, IDC_ENDBARCOUNT, m_rbSelectByBarCount);
+  DDX_Control(pDX, IDC_ENDDAYCOUNT, m_rbSelectByDayCount);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -128,6 +132,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_RBDARVAS, &CGTScalpDlg::OnBnClickedRbdarvas)
   ON_BN_CLICKED(IDC_RBBOLLINGER, &CGTScalpDlg::OnBnClickedRbbollinger)
   ON_BN_CLICKED(IDC_RBBREAKOUT, &CGTScalpDlg::OnBnClickedRbbreakout)
+  ON_BN_CLICKED(IDC_USEDAYSTART, &CGTScalpDlg::OnBnClickedUsedaystart)
+  ON_BN_CLICKED(IDC_USEDAYEND, &CGTScalpDlg::OnBnClickedUsedayend)
 END_MESSAGE_MAP()
 
 
@@ -222,8 +228,10 @@ BOOL CGTScalpDlg::OnInitDialog() {
     pport++;
   }
 
-  eDayStart = CScripts::NoDayStart;
-  eScanType = CScripts::NoScanType;
+  m_eDayCalc = CSymbolSelectionFilter::NoDayCalc;
+  m_eScanType = NoScanType;
+  m_bUseDayStart = false;
+  m_bUseDayEnd = false;
 
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -348,7 +356,7 @@ void CGTScalpDlg::OnBnClickedLogin()
     theApp.m_session1.m_setting.SetQuoteAddress("69.64.202.157",16811);
     theApp.m_session1.m_setting.SetLevel2Address("69.64.202.157",16810);
     result = theApp.m_session1.Login( "OURB001", "pembmnc" );
-    s.Format("Login result (ses1) is %d", result );
+    s.Format("Login result (sess1) is %d", result );
     theApp.pConsoleMessages->WriteLine(s);
     if ( 1 == result ) bLoggedIn = true;
 
@@ -356,7 +364,7 @@ void CGTScalpDlg::OnBnClickedLogin()
     theApp.m_session2.m_setting.SetQuoteAddress("69.64.202.157",16811);
     theApp.m_session2.m_setting.SetLevel2Address("69.64.202.157",16810);
     result = theApp.m_session2.Login( "OURB002", "pembmnc" );
-    s.Format("Login result (ses2) is %d", result );
+    s.Format("Login result (sess2) is %d", result );
     theApp.pConsoleMessages->WriteLine(s);
     if ( 1 == result ) bLoggedIn = true;
 
@@ -548,7 +556,7 @@ void CGTScalpDlg::OnBnClickedEnddayselect() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYSELECT );
   m_dtStartDate.EnableWindow( 1 );
   m_dtStartTime.EnableWindow( 1 );
-  eDayStart = CScripts::DaySelect;
+  m_eDayCalc = CSymbolSelectionFilter::DaySelect;
 }
 
 void CGTScalpDlg::OnBnClickedEndbarcount() {
@@ -556,7 +564,7 @@ void CGTScalpDlg::OnBnClickedEndbarcount() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDBARCOUNT );
   m_dtStartDate.EnableWindow( 0 );
   m_dtStartTime.EnableWindow( 0 );
-  eDayStart = CScripts::BarCount;
+  m_eDayCalc = CSymbolSelectionFilter::BarCount;
 }
 
 void CGTScalpDlg::OnBnClickedEnddaycount() {
@@ -564,7 +572,7 @@ void CGTScalpDlg::OnBnClickedEnddaycount() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYCOUNT );
   m_dtStartDate.EnableWindow( 0 );
   m_dtStartTime.EnableWindow( 0 );
-  eDayStart = CScripts::DayCount;
+  m_eDayCalc = CSymbolSelectionFilter::DayCount;
 }
 
 void CGTScalpDlg::OnBnClickedBtnscan() {
@@ -572,7 +580,7 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
   int count = 0;
   ptime dtStart;
   ptime dtEnd;
-  bool bValidValues = ( ( CScripts::NoDayStart != eDayStart ) && ( CScripts::NoScanType != eScanType ) );
+  bool bValidValues = ( ( CSymbolSelectionFilter::NoDayCalc != m_eDayCalc ) && ( NoScanType != m_eScanType ) );
   if ( bValidValues ) {
     SYSTEMTIME dtLastDate, dtLastTime, dtStartDate, dtStartTime;
     m_dtLastDate.GetTime( &dtLastDate );
@@ -585,7 +593,7 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
     dtEnd = ptime( 
       boost::gregorian::date( dtLastDate.wYear, dtLastDate.wMonth, dtLastDate.wDay ),
       boost::posix_time::time_duration( dtLastTime.wHour, dtLastTime.wMinute, dtLastTime.wSecond, dtLastTime.wMilliseconds ) );
-    if ( ( CScripts::BarCount == eDayStart  ) || ( CScripts::DayCount == eDayStart ) ) {
+    if ( ( CSymbolSelectionFilter::BarCount == m_eDayCalc  ) || ( CSymbolSelectionFilter::DayCount == m_eDayCalc ) ) {
       char szDays[ 30 ];
       m_edtDaysAgo.GetWindowTextA( szDays, 30 );
       count = atoi( szDays );
@@ -593,8 +601,28 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
     }
   }
   if ( bValidValues ) {
-    CScripts *scripts = new CScripts();
-    scripts->Scan( eScanType, eDayStart, count, dtStart, dtEnd );
+    //CScripts *scripts = new CScripts();
+    CSymbolSelectionFilter *pFilter;
+    switch ( m_eScanType ) {
+      case Darvas:
+        pFilter = new CSelectSymbolWithDarvas( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        break;
+      case Bollinger:
+        pFilter = new CSelectSymbolWithBollinger( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        break;
+      case Breakout:
+        pFilter = new CSelectSymbolWithBreakout( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        break;
+      case Volatility:
+        break;
+    }
+    if ( pFilter->Validate() ) {
+      pFilter->Start();
+    }
+    else {
+      MessageBox( "Invalid presets", "Error" );
+    }
+    
   }
   else {
     MessageBox( "Invalid values found", "Error" );
@@ -605,18 +633,42 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
 void CGTScalpDlg::OnBnClickedRbdarvas() {
   // TODO: Add your control notification handler code here
   m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBDARVAS );
-  eScanType = CScripts::Darvas;
+  m_eScanType = Darvas;
 }
 
 void CGTScalpDlg::OnBnClickedRbbollinger() {
   // TODO: Add your control notification handler code here
   m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBBOLLINGER );
-  eScanType = CScripts::Bollinger;
+  m_eScanType = Bollinger;
 }
 
 void CGTScalpDlg::OnBnClickedRbbreakout() {
   // TODO: Add your control notification handler code here
   m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBBREAKOUT );
-  eScanType = CScripts::Breakout;
+  m_eScanType = Breakout;
 }
 
+
+void CGTScalpDlg::OnBnClickedUsedaystart() {
+  // TODO: Add your control notification handler code here
+  m_bUseDayStart = ( BST_CHECKED == m_cbUseDayStart.GetCheck() );
+  m_dtStartDate.EnableWindow( m_bUseDayStart ? 1 : 0 );
+  m_dtStartTime.EnableWindow( m_bUseDayStart ? 1 : 0 );
+
+  bool bBothDays = m_bUseDayStart && m_bUseDayEnd;
+  m_rbSelectByDay.EnableWindow( bBothDays ? 0 : 1 );
+  m_rbSelectByBarCount.EnableWindow( bBothDays ? 0 : 1 );
+  m_rbSelectByDayCount.EnableWindow( bBothDays ? 0 : 1 );
+}
+
+void CGTScalpDlg::OnBnClickedUsedayend() {
+  // TODO: Add your control notification handler code here
+  m_bUseDayEnd = ( BST_CHECKED == m_cbUseDayEnd.GetCheck() );
+  m_dtLastDate.EnableWindow( m_bUseDayStart ? 1 : 0 );
+  m_dtLastTime.EnableWindow( m_bUseDayStart ? 1 : 0 );
+
+  bool bBothDays = m_bUseDayStart && m_bUseDayEnd;
+  m_rbSelectByDay.EnableWindow( bBothDays ? 0 : 1 );
+  m_rbSelectByBarCount.EnableWindow( bBothDays ? 0 : 1 );
+  m_rbSelectByDayCount.EnableWindow( bBothDays ? 0 : 1 );
+}

@@ -2,7 +2,7 @@
 #include "Darvas.h"
 
 CDarvas::CDarvas(void):
-  bTop( false ), bBottom( false ), bSignalBuy( false ), bSignalSetStop( false ),
+  bTop( false ), bBottom( false ), bSignalBuy( false ), bSignalBuy2( false ), bSignalSetStop( false ),
     bSignalExit( false ), bSignalDone( false ), cntTop( 0 ), cntBottom( 0 ),
     dblTop( 0 ), dblBottom( 0 ), dblStop( 0 ), dblStopStep( 0 ), dblGhostTop( 0 ),
     bDebug( false )  {
@@ -12,6 +12,9 @@ CDarvas::~CDarvas(void) {
 }
 
 void CDarvas::Calc(const CBar &bar) {
+
+  bSignalBuy2 = false;
+
   // Calculate Darvis Box
   if ( bar.m_dblHigh <= dblTop ) {
     ++cntTop;
@@ -23,7 +26,7 @@ void CDarvas::Calc(const CBar &bar) {
     // perform trade if box completed
     if ( bTop && bBottom ) {  // we have a completed box
       if ( ( bar.m_dblClose > dblTop ) && ( bar.m_dblClose > dblStop ) ) {
-        bSignalBuy = true;
+        bSignalBuy = bSignalBuy2 = true;
         // calculate a new ghost box
         dblStop = dblTop;
         dblGhostTop = dblStop + dblStopStep;
@@ -48,7 +51,7 @@ void CDarvas::Calc(const CBar &bar) {
     else {
       ++cntBottom;
       if ( ( 4 < cntBottom ) && ( bar.m_dblClose > dblStop ) && ( bar.m_dblOpen < bar.m_dblClose ) ) {
-        bSignalBuy = true;  // **
+        bSignalBuy = bSignalBuy2 = true;  // **
       }
     }
 

@@ -32,6 +32,8 @@ public:
   T *operator[]( size_t ix );
   T *At( size_t ix );
   T *At( const ptime &time );
+  typename vector<T>::iterator iterAt( const ptime &time );
+  typename vector<T>::iterator iterAtOrAfter( const ptime &time );
   T *AtOrAfter( const ptime &time );
   T *After( const ptime &time );
   virtual CTimeSeries<T> *Subset( const ptime &time ); // from At or After to end
@@ -39,6 +41,8 @@ public:
   void Sort( void ); // use when loaded from external data
   void Flip( void ) {reverse( m_vSeries.begin(), m_vSeries.end() ); };
   void Clear( void );
+  typename vector<T>::iterator begin() { return m_vSeries.begin(); };
+  typename vector<T>::iterator end() { return m_vSeries.end(); };
   H5::DataSpace *DefineDataSpace( H5::DataSpace *pSpace = NULL );
 protected:
   vector<T> m_vSeries;
@@ -158,6 +162,15 @@ template<class T> T *CTimeSeries<T>::At( const ptime &dt ) {
   return datum;
 }
 
+template<class T> typename vector<T>::iterator CTimeSeries<T>::iterAt( const ptime &time ) {
+  T key( time );
+  //vector<T>::iterator iter;
+  pair<vector<T>::iterator, vector<T>::iterator> p;
+  p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
+  //iter = ( p.first != p.second ) ? *(p.first) : m_vSeries.end();
+  return ( p.first != p.second ) ? *(p.first) : m_vSeries.end();
+}
+
 template<class T> T *CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
   // TODO:  Check that this is correct
   T key( dt );
@@ -171,6 +184,15 @@ template<class T> T *CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
     }
   }
   return datum;
+}
+
+template<class T> typename vector<T>::iterator CTimeSeries<T>::iterAtOrAfter( const ptime &time ) {
+  T key( time );
+  //vector<T>::iterator iter;
+  pair<vector<T>::iterator, vector<T>::iterator> p;
+  p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
+  //iter = p.first;
+  return p.first;
 }
 
 template<class T> T *CTimeSeries<T>::After( const ptime &dt ) {
