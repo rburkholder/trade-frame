@@ -2,6 +2,18 @@
 
 #include "DatedDatum.h"
 
+class CDarvasResults {
+public:
+  CDarvasResults( bool bTrigger, double dblStopLevel ): m_bTrigger( bTrigger ), m_dblStopLevel( dblStopLevel ) {};
+  ~CDarvasResults( void ) {};
+  bool GetTrigger( void ) { return m_bTrigger; };
+  double GetStopLevel( void ) { return m_dblStopLevel; };
+protected:
+  bool m_bTrigger;
+  double m_dblStopLevel;
+private:
+};
+
 // is a functor
 class CDarvas: public std::unary_function<CBar &, void> {
 public:
@@ -10,6 +22,7 @@ public:
   void operator()( const CBar &bar ) { Calc( bar ); };
   void Calc( const CBar &bar );
   operator bool() { return bSignalBuy2; };
+  operator CDarvasResults() { CDarvasResults results( bSignalBuy2, dblStop ); return results; };
   bool SignalBuy( void ) { bool b = bSignalBuy; bSignalBuy = false; return b; };
   bool SignalSetStop( void ) { bool b = bSignalSetStop; bSignalSetStop = false; return b; };
   bool SignalExit( void ) { bool b = bSignalExit; bSignalExit = false; return b; };

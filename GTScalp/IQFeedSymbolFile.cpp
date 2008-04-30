@@ -46,19 +46,31 @@ void CIQFeedSymbolFile::Open() {
   CDataManager dm;
   DbEnv *pDbEnv = dm.GetDbEnv();
 
+  // open/create main symbol table
   m_pdbIQFSymbols = new Db( pDbEnv, 0 );
-  m_pdbIQFSymbols->open( NULL, "TradeFrame.bdb", "IQFSymbols", DB_BTREE, DB_CREATE, 0 );
+  m_pdbIQFSymbols->open( NULL, dm.GetBDBFileName(), "IQFSymbols", DB_BTREE, DB_CREATE, 0 );
 
+  // open/create the market index
   m_pdbIxIQFSymbols_Market = new Db( pDbEnv, 0 );
   m_pdbIxIQFSymbols_Market->set_flags( DB_DUPSORT );
-  m_pdbIxIQFSymbols_Market->open( NULL, "TradeFrame.bdb", "IxIQFSymbols_Market", DB_BTREE, DB_CREATE, 0 );
+  m_pdbIxIQFSymbols_Market->open( NULL, dm.GetBDBFileName(), "IxIQFSymbols_Market", DB_BTREE, DB_CREATE, 0 );
 
+  // associate the index with the main table
   m_pdbIQFSymbols->associate( NULL, m_pdbIxIQFSymbols_Market, &CIQFeedSymbolFile::GetMarketName, 0 );
 }
 
 void CIQFeedSymbolFile::Close() {
   m_pdbIxIQFSymbols_Market->close(0);
   m_pdbIQFSymbols->close(0);
+}
+
+int CIQFeedSymbolFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
+  structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
+  char *p = dbIxRecord->line + dbIxRecord->ix[2];
+  unsigned long l = dbIxRecord->cnt[2];
+  secKey->set_data( p );
+  secKey->set_size( l );
+  return 0;
 }
 
 void CIQFeedSymbolFile::SetSearchExchange( const char *szExchange ) {
@@ -244,11 +256,3 @@ void CIQFeedSymbolFile::UnPackBoolean( const unsigned char ucBits ) {
   m_bHasOptions = 0 != ( ucBits & ucHasOptions );
 }
 
-int CIQFeedSymbolFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
-  structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
-  char *p = dbIxRecord->line + dbIxRecord->ix[2];
-  unsigned long l = dbIxRecord->cnt[2];
-  secKey->set_data( p );
-  secKey->set_size( l );
-  return 0;
-}

@@ -30,6 +30,7 @@ public:
   CHDF5TimeSeriesIterator<T>  operator++( int ); // post-increment
   CHDF5TimeSeriesIterator<T> &operator+=( const hsize_t inc );
   CHDF5TimeSeriesIterator<T> &operator-=( const hsize_t inc );
+  CHDF5TimeSeriesIterator<T>  operator-( const hsize_t val );
   hsize_t operator-( const CHDF5TimeSeriesIterator<T> &other );
   bool operator<( const CHDF5TimeSeriesIterator<T> &other );
   bool operator==( const CHDF5TimeSeriesIterator<T> &other );
@@ -127,6 +128,13 @@ template<class T> CHDF5TimeSeriesIterator<T> &CHDF5TimeSeriesIterator<T>::operat
   //  m_pAccessor->ReadItem( m_ItemIndex, &m_T );  // retrieve at our new location if we can
   //}
   return( *this );
+}
+
+template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator-( const hsize_t val ) { // subtraction
+  assert( val <= m_ItemIndex );
+  CHDF5TimeSeriesIterator<T> result( *this );  // make a copy of this
+  result.m_ItemIndex -= val;
+  return result;
 }
 
 template<class T> hsize_t CHDF5TimeSeriesIterator<T>::operator-( const CHDF5TimeSeriesIterator<T> &other ) { // subtraction

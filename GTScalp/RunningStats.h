@@ -3,7 +3,10 @@
 class CRunningStats {
 public:
   CRunningStats(void);
+  CRunningStats(double BBMultiplier);
   virtual ~CRunningStats(void);
+  void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
+  double GetBBMultiplier( void ) { return m_BBMultiplier; };
 
   double b2; // acceleration
   double b1; // slope
@@ -17,19 +20,19 @@ public:
   double SD;
 
   double BBUpper, BBLower;
-  double BBMultiplier;
 
   void Add( double, double );
   void Remove( double, double );
   virtual void CalcStats( void );
 
 protected:
-  unsigned int nX;
+  unsigned int nX, nY;
 
   double SumXX, SumX, SumXY, SumY, SumYY;
   double Sxx, Sxy, Syy;
   double SST, SSR, SSE;
 
-  bool CanCalcSlope;
+  double m_BBMultiplier;
+  //bool CanCalcSlope;
 private:
 };

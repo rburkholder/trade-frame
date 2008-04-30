@@ -87,11 +87,8 @@ void CHistoryCollectorDaily::WriteData( void ) {
       if ( bNeedToCreateDataSet ) {
 
         CompType *pdt = CBar::DefineDataType();
-        int t1 = pdt->getSize();
         pdt->pack();
-        int t2 = pdt->getSize();
 
-        //DataSpace *pds = m_bars.DefineDataSpace(); 
         DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
         hsize_t curSize = 0;
         hsize_t maxSize = H5S_UNLIMITED; 

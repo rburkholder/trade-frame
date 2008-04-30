@@ -96,11 +96,14 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
 
       DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, 1, coord1 );
+
       m_pDiskDataSet->read( pDatedDatum, *pComp, MemoryDataspace, *pDiskDataSpaceSelection );
+
       pDiskDataSpaceSelection->close();
       delete pDiskDataSpaceSelection;
 
       MemoryDataspace.close();
+
       pComp->close();
       delete pComp;
 
@@ -123,20 +126,21 @@ template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize
       DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectHyperslab( H5S_SELECT_SET, &dim[0], &ixStart, 0, 0 );
 
-      //DataSpace MemoryDataspace(1, dim ); // rank, dimensions
-      //MemoryDataspace.selectAll();
-
       DSetMemXferPropList pl;
       bool b = pl.getPreserve();
       pl.setPreserve( true );
 
       CompType *pComp = pDatedDatum->DefineDataType();
-      //pComp->pack();
-      //m_pDiskDataSet->read( pDatedDatum, *m_pDiskCompType, *pMemoryDataSpace, *pDiskDataSpaceSelection );
+
       m_pDiskDataSet->read( pDatedDatum, *pComp, *pMemoryDataSpace, *pDiskDataSpaceSelection, pl );
+
       pComp->close();
       delete pComp;
+
       pl.close();
+
+      pDiskDataSpaceSelection->close();
+      delete pDiskDataSpaceSelection;
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Read H5::Exception " << e.getDetailMsg() << endl;
@@ -158,6 +162,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
 
       DataSpace MemoryDataspace(1, dim ); // rank, dimensions
       MemoryDataspace.selectAll();
+
       hsize_t newsize[] = { ixStart + count };
       if ( newsize[0] > m_curElementCount ) {
         m_pDiskDataSet->extend( newsize );
@@ -173,6 +178,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
       delete pDiskDataSpaceSelection;
 
       MemoryDataspace.close();
+
       pComp->close();
       delete pComp;
 

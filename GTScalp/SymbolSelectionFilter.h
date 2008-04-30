@@ -59,3 +59,12 @@ public:
 protected:
 private:
 };
+
+class CSelectSymbolWithXWeekHigh: public CSymbolSelectionFilter {
+public:
+  CSelectSymbolWithXWeekHigh( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~CSelectSymbolWithXWeekHigh(void );
+  void Process( const string &sSymbol, const string &sPath );
+protected:
+private:
+};
