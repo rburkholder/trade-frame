@@ -7,6 +7,8 @@ using namespace H5;
 #include "TimeSeries.h"
 #include "HDF5TimeSeriesContainer.h"
 
+#include "RunningStats.h"
+
 #include "Darvas.h"
 
 // destroy self when done
@@ -107,6 +109,29 @@ protected:
 private:
 };
 
+// implement boost 1_35_0 soon for the boost::bind
+
+class CalcSixMonMeans {
+private:
+  CRunningStats rsUpper, rsLower;
+  int cnt;
+protected:
+public:
+  CalcSixMonMeans( void ): cnt( 0 ) {};
+  ~CalcSixMonMeans( void ) {
+    rsUpper.CalcStats();
+    rsLower.CalcStats();
+    cout << endl << "  upper mean=" << rsUpper.meanY << ", SD=" << rsUpper.SD;
+    cout << endl << "  lower mean=" << rsLower.meanY << ", SD=" << rsLower.SD;
+  }
+  void operator() ( const CBar &bar ) {
+    ++cnt;
+    double t = cnt;
+    rsUpper.Add( t, bar.m_dblHigh - bar.m_dblOpen );
+    rsLower.Add( t, bar.m_dblOpen - bar.m_dblLow );
+  }
+};
+
 void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPath ) {
   //cout << "Darvas for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
@@ -124,11 +149,17 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
     barRepository.Read( begin, end, &m_bars );
     ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
     if ( dtDayOfMax >= dtPt1 ) {
-      cout << "Darvas max for " << sSymbol << " on " << dtDayOfMax << ", close=" << m_bars.Last()->m_dblClose;
+      cout << 
+        "Darvas max for " << sSymbol << 
+        " on " << dtDayOfMax << 
+        ", close=" << m_bars.Last()->m_dblClose <<
+        ", volume=" << m_bars.Last()->m_nVolume;
       vector<CBar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
       CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
       if ( results.GetTrigger() ) {
         cout << " triggered, stop=" << results.GetStopLevel();
+        iter = m_bars.iterAtOrAfter( dt26WksAgo );
+        for_each( iter, m_bars.end(), CalcSixMonMeans() );
       }
       cout << endl;
     }
