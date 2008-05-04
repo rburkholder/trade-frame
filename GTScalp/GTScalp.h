@@ -16,6 +16,7 @@
 #include "ConsoleCoutMessages.h"
 #include "TradingLogic.h"
 #include "IQFeed.h" 
+#include "..\InteractiveBrokers\IBTWS.h"
 
 #include "GeneratePeriodicRefresh.h"  // need the above constants
 
@@ -40,6 +41,7 @@ public:
   //CTradingLogic* pTradingLogic;
 
   CIQFeed *m_pIQFeed;
+  CIBTWS *m_pIB;
 
   CGeneratePeriodicRefresh *m_pRefresh;
 

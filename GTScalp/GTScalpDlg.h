@@ -129,4 +129,6 @@ public:
   CButton m_rbSelectByDay;
   CButton m_rbSelectByBarCount;
   CButton m_rbSelectByDayCount;
+  afx_msg void OnBnClickedOpenib();
+  CEdit m_edtIBAcctCode;
 };

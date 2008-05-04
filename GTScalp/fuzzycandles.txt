@@ -1,0 +1,839 @@
+
+Hi Ray,
+    Just had a quick look at your candlesticks blog post and though you might be interested in some old Futures magazine articles on the theme that I archived (pasted below) - The articles are fairly basic , but make the point that fuzzy logic goes very well with candles.
+
+--
+Keith
+
+
+The original articles might be still available on the net but I am not 
+sure. 
+
+-------------
+All futures articles: 
+http://www.allbusiness.com/periodicals/publication/41398-1-2.html
+
+See index: http://www.futuresmag.com/library/archives/technology.html
+
+Next three from: http://www.allbusiness.com/periodicals/article/730026-1.html
+
+Artificial trader jumps candlesticks.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sure, software is available to read candlestick charts. But here's how 
+you can program your own system selecting the candlesticks and 
+definitions that fit your method.
+
+Candlestick chart analysis is subjective. You first identify the 
+patterns and then judge their significance. For example, a white hammer 
+pattern is bullish, but more so after a major downtrend.
+
+Today, several vendors offer software that automatically identifies 
+candlestick patterns. Some of these products also generate mechanical 
+trading signals. They generally do well identifying the patterns but 
+have mixed results in generating mechanical trading signals.
+
+Let's now program our own system to identify and implement these 
+signals. Using fuzzy logic we'll show you how to identify several 
+candlestick patterns using TradeStation and how to integrate other forms 
+of technical analysis with candlesticks to develop mechanical trading 
+signals.
+
+Clearly fuzzy Fuzzy logic is a powerful technology that allows you to 
+solve problems that deal with vague concepts, such as tall or short. For 
+example, if a person is six feet tall he might be considered tall 
+compared to the general population, but short if he were on a 
+professional basketball team. And how do you define a person who is 
+5'11" if 6 feet is considered tall? Fuzzy logic allows us to solve both 
+these problems.
+
+Fuzzy logic operators are made of three parts:
+1) Membership Function(s) shows how relevant data is to the premise of 
+each rule;
+2) Fuzzy Rule Logic performs the reasoning within fuzzy rules; and
+3) Defuzzifier(s) maps the fuzzy information back into real world answers.
+
+Here's how fuzzy logic works: Let's develop fuzzy rules that predict a 
+one- year-old male child's height based on the height of his parents. 
+The first step is to develop fuzzy membership functions for each 
+variable's attributes. As such, we need to develop fuzzy membership 
+functions for the height attributes of the mother, father and child. For 
+our example, these attributes are tall, normal and short. We have 
+defined generic membership functions for these height attributes as follows:
+
+Tall=maximum(0,min(1,(X-Average Height)/(Stdev of height)))
+
+Short=maximum(0,min(1,(Average Height-X)/(Stdev of height)))
+
+Normal=Maximum(0,(1-(abs(X-Average Height)/(Stdev of height))))
+
+When using these membership functions, substitute the following values 
+for average height and standard deviation for the mother, father and child.
+
+Mother average height 65 inches, stdev 3 inches
+
+Father average height 69 inches, stdev 4 inches
+
+Child average height (12 months) 30 inches, stdev 2 inches
+
+Now we can now develop our fuzzy rules. Suppose we have these two fuzzy 
+rules in our expert system:
+
+* If Mother Short and Father Short then Child Short.
+
+* If Mother Short and Father Normal then Child Normal.
+
+We also have the following facts:
+
+* Mother is 63 inches tall
+
+* Father is 67 inches tall.
+
+Using the above facts and our fuzzy membership functions for both the 
+mother and father, we calculated the following output values for each 
+membership function:
+
+* Mother's height short .66, normal .33 tall 0
+
+* Father's height short .5, normal .5 tall 0
+
+Let's see what happens when we run these facts and fuzzy rules.
+
+* If Mother Short (.66) and Father Short (.5) then Child Short (.5).
+
+* If Mother Short (.66) and Father Normal (.5) then Child Normal (.5)
+
+Using the rules of fuzzy logic, you take the minimum of the values 
+associated with the conditions when they are joined by an "and." If they 
+are joined by an "or," you take the maximum.
+
+As you can see, the child is both short and normal. We will now use 
+something called defuzzification to convert the results of these rules 
+back to a real height. First, find the center point of each of the 
+membership functions that apply to the height of the child. In our case 
+that is 28 for short, 30 for normal and 32 for tall. Next, multiply the 
+output from the rules associated with each membership function by these 
+center point values. Divide this by the sum of the outputs from the 
+membership functions. This will convert the fuzzy output back into a 
+real height for our one-year-old male child.
+
+(.5*28+.5*30+0*32)/(.5+.5) = 29 inches tall.
+
+To see how these membership functions interact for the height of our 
+one- year-old child, see the diagram, "Watching my boy grow," above.
+
+Lighting candles To analyze candlestick charts using fuzzy logic, the 
+first step is to list the variables involved and then develop a list of 
+attributes for each variable. For a single candlestick, they are:
+
+Color
+
+* White or Black
+
+Shape
+
+* Long, Small or About Equal
+
+* Upper ShadowSize
+
+* Long, Small, About None
+
+* LowerShadowSize
+
+* Long, Small, About None.
+
+Not all variables require fuzzy logic. In our list, "color" does not 
+because it is simply the sign of the close minus the open.
+
+Now we'll develop a membership function for each of these variables. For 
+a graphical look at the "shape" candlestick variable, see "Measuring 
+stick," above.
+
+After developing a graphical representation for each variable and 
+membership function, we program them (see "Fuzzy logic makes it clear").
+
+Identifying candlestick patterns is only half the problem. The 
+predictive value of a given candlestick pattern is based on the context 
+in which it occurred. For example, a hammer is much more valuable after 
+a long downtrend. Doji are reversal patterns that are more valuable 
+after long uptrends and are not as good at picking bottoms.
+
+Next let's develop a candlestick trader using the doji pattern. The key 
+to using candlesticks is to filter your signals. A good way to think 
+about using candlestick reversal patterns is they supply more exact 
+timing for an event that other indicators have already warned you about.
+
+Using our overbought indicator and our fuzzy function to detect simple 
+dojis produced 70% winners and a win/loss ratio of over 2:1.
+
+Using fuzzy logic to develop mechanical ways for analyzing subjective 
+forms of analysis like candlesticks should be one of the most important 
+areas of research in technical analysis for years to come.
+
+Murray A. Ruggiero Jr. is a consultant in East Haven, Conn. His firm, 
+Ruggiero Associates, specializes in market timing systems using advanced 
+technologies as well as Excel and Microsoft Windows development. 
+CompuServe I.D.: 71054,3545.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fuzzy logic makes it clear.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Let's see how to design your own candlestick recognition software.
+
+We'll begin by designing a fuzzy logic candlestick recognition utility. 
+First, we need to define the needed membership functions, which is done 
+in the main story. Next, graph these on paper. Then develop formulas 
+and/or rules that represent these functions. For the shape set (defined 
+in the main text) of membership functions we have three functions: long, 
+small and doji.
+
+Now take a look at the fuzzy membership function for a long shaped 
+candlestick. (Comments are in boldfaced type and in brackets.) The 
+TradeStation code for this function is:
+
+{Fuzzy Logic to define a long candlestick}
+
+Inputs:
+
+OPrice(NUMERICSERIES),CPrice(NUMERICSERIES),LBack(NUMERIC), 
+OneCof(NUMERIC),ZeroCof(NUMERIC);
+
+Variables:
+
+PrevLong(0),CRange(0),AveRange(0),Z
+
+Trig(0),OneTrig(0),Tall(0),Scale(0);
+
+{Calculate the size of the body}
+
+CRange=absvalue(OPrice-CPrice);
+
+{Calculate the Zero and One Trigger}
+
+ZTrig=Average(CRange,LBack)*ZeroCof; OneTrig=Average(CRange,LBack)*One Cof;
+
+{Calculate the Scale}
+
+Scale=OneTrig-ZTrig;
+
+{If Scale is zero then set to 99.99 since FuzzyLong should output a 0}
+
+if Scale=0 then Scale=99.99;
+
+{Calculate value of tall so it can be used in fuzzy long}
+
+Tall=maxlist(0,minlist(1,(CRange-OneTrig)/(Scale)));
+
+{If the previous candle is tall then relax requirement for tall so that 
+we don't get ridiculous requirements for consecutive tall candles. Only 
+that they must be bigger than previous candle to output a 1}
+
+if Tall[1]=1 then 
+Tall=maxlist(0,minlist(1,(CRange-CRange[1])/(CRange[1]- ZTrig))); 
+FuzzyLong=Tall;
+
+The fuzzy long membership function is similar to our tall height 
+function from our child height example except for the rule involving 
+consecutive tall candles. Without this rule it is possible a second tall 
+candle would not be identified even if it was taller than the first.
+
+Here are the definitions for a simple set of membership functions 
+developed for TradeStation that can be used to identify most of the 
+common candlestick patterns.
+
+Candlestick color
+
+* CandleColor(Open,Close)
+
+Candlestick shape
+
+* FuzzyLong(Open,Close,Lookback, OneTrigger,ZeroTrigger)
+
+* FuzzySmall(Open,Close,Lookback, OneTrigger,ZeroTrigger)
+
+* FuzzyDoji(Open,Close,Lookback, OneTrigger, ZeroTrigger)
+
+Candlestick shadows: Upper and lower
+
+* FuzzyLongShad(Open,high,low,close, OneTrigger,ZeroTrigger,UpperShadow)
+
+* FuzzyShortShad(Open,high,low,close, OneTrigger,ZeroTrigger,UpperShadow)
+
+* FuzzyNoShad(Open,High,Low,Close, OneTrigger,ZeroTrigger,UpperShadow) 
+Miscellaneous functions
+
+* FuzzyMiddle(Open,Close,RefPrice, Lookback,OneTrigger,ZeroTrigger)
+
+* EnGulfing(Open,Close,RefBar)
+
+To use these functions, start with the CandleColor function, which 
+simply returns a 1 if the candlestick is white and a -1 if it is black.
+
+The candlestick shape set of membership functions uses the following 
+inputs: open and close, which are the open and close of that 
+candlestick. Next we have lookback, which is the period used for a 
+moving average of the candlestick body size used as a measure of 
+relative candlestick size, The OneTrigger and ZeroTrigger are 
+coefficients used to calculate the one and zero points for the 
+membership function. These coefficients are applied to the average 
+candlestick body size.
+
+The candlestick upper and lower shadow functions use these arguments: 
+First the open, high, low and close of the session; Next, the OneTrigger 
+and ZeroTrigger values similar to that used in the body membership 
+functions; and last, which shadow to apply the function to 1 for upper 
+and 0 for lower.
+
+The fuzzy middle function is used to output the membership of some point 
+on the current bar being in the middle of the previous candlestick's body.
+
+The engulfing function outputs a 1 if the current bar engulfs a bar 
+pointed to by RefBar back and a 0 otherwise.
+
+The values for the lookback and triggers are developed using trial and 
+error. The goal is to best agree with a human expert's classification of 
+these candlestick attributes.
+
+Now we'll use the FuzzyLong function along with other candlestick 
+recognition functions discussed earlier to identify a simple hammer 
+candlestick pattern. Let's take a look at this code in TradeStation.
+
+{Checks to see if the bar is a hammer. Body must not be long, upper 
+shadow must be short, lower shadow must be long}
+
+Inputs:
+
+OPrice(NumericSeries),HPrice(Numeric 
+Series),LPrice(NumericSeries),CPrice (NumericSeries);Vars:Body(0),Up- 
+Shad(O),LShad(0);
+
+{Calculate membership to class not long}
+
+Body=1-FuzzyLong (OPrice,CPrice, 5,2,1);
+
+{Calculate membership to class small upper shadow}
+
+UpShad=FuzzySmallShad(OPrice, HPrice,LPrice,CPrice,.10,.25,1);
+
+{Calculate membership to class long lower shadow}
+
+LShad=FuzzyLongShad(OPrice,HPrice, LPrice,CPrice,2,1,0);
+
+{Using the rules of fuzzy logic "AND" these together by taking the min}
+
+IsHammer=minlist(Body,UpShad,LShad);
+
+For a candlestick to be a hammer, the body cannot be long and must have 
+a long lower shadow and small upper shadow. We defined long as two times 
+the average bar height over the past 15 periods. A good way to test the 
+user functions you develop is to use them inside a TradeStation 
+indicator and compare the classification to that of a human expert.
+
+The TradeStation functions we developed also can classify candlesticks 
+such as tall white or black candles or more complex candles such as 
+bearish and bullish engulfing patterns.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Lighting candlesticks with fuzzy logic.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Programming software to recognize candlestick patterns can save time and 
+money. Here's how to do it with more complex patterns using fuzzy logic 
+to ease the recognition process.
+
+A single candlestick has these characteristics: color, shape, upper and 
+lower shadow size. But not all characteristics require fuzzy logic. For 
+example, "color" doesn't because it is simply the sign of the close 
+minus the open.
+
+The other attributes aren't so specific. For example, size requires 
+fuzzy logic because a candle's size is relative to nearly all other 
+candles. Also, if a candle with the size of 2 is large, a candle with a 
+size of 1.9 is nearly large, not small. Here's an example of a fuzzy 
+logic function (improved from the version in the February 1995 issue) that
+identifies a candle with a long shape:
+
+Inputs: OPrice(NUMERICSERIES), 
+CPrice(NUMERICSERIES),LBack(NUMERIC),OneCof(NUMERIC),ZeroCof (NUMERIC);
+Vars: PrevLong(0),CRange(0),Ave Range(0), ZTrig(0), OneTrig(0), Tall(0), 
+Scale(0);
+{Calculate the range for the candle}
+CRange = absvalue(OPrice-CPrice);
+{Calculate what level represents a 0}
+ZTrig = Average[(CRange, LBack).sup.*] ZeroCof;
+{Calculate what level represents a 1}
+OneTrig = Average[(CRange, LBack).sup.*] OneCof;
+{Calculate the difference between the zero and one level}
+Scale = OneTrig-ZTrig;
+{If one level and zero level are the same set to 99.99 so it can't be a 
+large bar}
+if Scale = 0 then Scale = 99.99;
+{Calculate the fuzzy membership to tall}
+Tall = maxlist(0, minlist(1, (CRange-OneTrig)/(Scale)));
+{If previous bar is big relax requirements}
+if Tall[1] = 1 and CRange[1]-ZTrig < > 0 then Tall = 
+maxlist(0,min-list(1, (CRange-CRange[1])/(CRange[1]-ZTrig)));
+FuzzyLong = Tall;
+
+This function will return a 1 when the current candle size is greater 
+than or equal to OneCof times the average candle size over the last 
+lookback days. It will return a 0 when it is less than ZeroCof times the 
+average size. When the candle size is between these ranges it returns a 
+scaled value between 0 and 1.
+
+This function also can handle the case when the previous candle was very 
+long and the next candle also should be long, but using the general rule 
+based on the average size, the candle would not have been identified 
+correctly. It also handles divide-by-zero conditions that occur when the 
+open and close are the same.
+
+To identify most of the common candlestick patterns we need functions 
+that can classify all of the attributes associated with a candlestick. 
+The shape of a candlestick can be long, small, doji. The upper and lower 
+wick can be large, small, none. You also must be able to identify if 
+there are gaps or if one candle engulfs another. After developing 
+functions to identify these attributes you can identify more complex 
+patterns.
+
+Step by step
+
+The first step in developing a candlestick recognition tool is to decide 
+what patterns you want to identify. Here we'll target some of the more 
+popular patterns: dark cloud cover, bullish engulfing pattern and 
+evening star. Next, we need to develop a profile of each of these 
+patterns (see "In the library").
+
+The dark cloud cover consists of two candlesticks. The first is a white 
+candle with a significant body, and the second is a black candle that 
+opens above the high of the white candle but closes below the midpoint 
+of it. This is a bearish pattern in an uptrend.
+
+The bullish engulfing pattern also consists of two candlesticks. The 
+first is a black candle, and the second is a white candle that engulfs 
+the first candle. This is a bullish sign in a downtrend.
+
+Our final pattern, evening star, consists of three candles. The first is 
+a significant white candle. Next, is a small candle of either color, and 
+the third is a black candle. The middle candle gaps above both the white 
+and black candles. The black candle opens higher than the close of the 
+white but then closes below the midpoint of the white candle. This is a 
+bearish pattern in a uptrend.
+
+To translate these explanations into TradeStation Easy Language code see 
+"Inside every dark cloud is fuzzy logic" (left). You can repeat this 
+process to identify any candlestick patterns. Once you've written your 
+code, test it. We tested our code (and our routines) using the plates 
+from Japanese Candlestick Charting Techniques by Steve Nison. If you are 
+not identifying the patterns you want, adjust the lookback period as 
+well as the scaling coefficients. In general, mechanical identification 
+will miss some patterns that can be detected by eye. Once you've 
+developed routines to identify your candlestick patterns, use them to 
+develop or improve various trading systems.
+
+To develop mechanical trading strategies we'll begin with the dark cloud 
+cover pattern on COMEX gold during the period Aug. 1, 1986 to Dec. 26, 
+1995. We'll go short on the next open when we identify a dark cloud 
+cover pattern and have a 10-day RSI greater than 50. Then we'll exit at 
+a five-day high. The code for this system in EasyLanguage is:
+
+Vars: DC(0); DC = DarkCloud(15,1,1); If DC [greater than] .5 and 
+RSI(close, 10) [greater than] 50 then sell at open; exitshort at 
+highest(high,5) stop;
+
+The results, without slippage and commissions, are:
+
+Net profit         $150.00
+Trades               13
+Wins                  4
+Losses                9
+Win %                31%
+Average trade       $11.54
+
+These are pretty bad, especially because they don't even cover 
+commissions and slippage. But by combining correlation analysis between 
+the CRB and gold we can improve this performance.
+
+Last month's article covered how gold normally only trends when it is 
+highly correlated to the CRB. Using this, we'll develop two different 
+exit rules for our dark cloud combined with a 10-day RSI pattern. We'll 
+exit using a five- day high when the 50-day correlation between gold and 
+the CRB is above .50. We'll use a limit order at the entry price -2 x 
+average(range, 10) when the correlation is below .50. The theory is we 
+use a trend-type exit when the market has a good probability of trending 
+and a limit order when the market has a low probability of trending. The 
+code we'll use is (Note: We are once again using RACorrel that we 
+discussed last month.):
+
+Vars: DC(0),Correl(0),CRB(0),GC(0); CRB = Close of Data2; GC = Close; 
+Correl = RACorreI(CRB,GC,50); DC = DarkCloud(15,1,1); If DC [greater 
+than] .5 and RSI(close, 10) [greater than] 50 then sell at open; If 
+Correl [greater than] .5 then exitshort at highest(high,5) stop; If 
+Correl [less than] .5 then exitshort at entryprice-[2.sup.*] 
+average(range, 10) limit;
+
+The results of these new rules once again without slippage and 
+commissions during the same period used earlier are:
+
+Net profit          $5,350.00
+Trades                  12
+Wins                     9
+Losses                   3
+Win %                   75%
+Average trade         $445.83
+
+This is a great improvement in the performance of the dark cloud simply 
+by using intermarket analysis to select an exit method. But there aren't 
+enough trades to prove this is a reliable trading method for gold. It 
+only is used as an example of how to use candlestick patterns to develop 
+mechanical trading systems.
+
+Combining candlesticks with other Western methods and intermarket 
+analysis is a hot area of research for developing mechanical trading 
+systems. The ability to backtest candlestick patterns will help answer 
+how well any given candlestick pattern works in a given market. If you 
+evaluate these patterns objectively, at least you'll know how well they 
+worked in the past and how much heat you will take trading them in the 
+future.
+
+RELATED ARTICLE: Inside every dark cloud is fuzzy logic
+
+Here's how to use fuzzy logic and EasyLanguage to identify our 
+candlestick patterns. The primitive functions, discussed in my previous 
+article, used to identify the dark cloud, bullish engulf and evening 
+star are:
+
+CandleStick Color: CandleColor(Open,Close) CandleStick Shape: 
+FuzzyLong(Open,Close,Lookback,OneTrigger, ZeroTrigger) 
+FuzzySmall(Open,Close,Lookback,OneTrigger, ZeroTrigger)
+
+Miscellaneous Functions: EnGulfing(Open,Close, RefBar) 
+WindowDown(Open,High,Low,Close,Lookback) 
+WindowUp(Open,High,Low,Close,Lookback)
+
+These functions' parameters are:
+
+1) The LookBack is the period used to calculate a moving average of the 
+body size of each candlestick. This average is used as a reference point 
+to compare the current candle's size relative to recent candles.
+
+2) The OneTrigger is the percentage of the average candle size that will 
+cause the function to output a 1.
+
+3) The ZeroTrigger is the percentage of the average candle size for 
+outputting a 0.
+
+4) The RefBar parameter is used by the engulfing function to reference 
+which candlestick the current candlestick needs to engulf.
+
+Also important when using these functions is that the OneTrigger is 
+smaller than the ZeroTrigger for functions that identify small or doji 
+candies. When using the long candle size function the OneTrigger is 
+larger than the ZeroTrigger.
+
+The engulfing function returns a 1 if the current candle engulfs the 
+"RefBar" candle. The window up and window down functions return a number 
+greater than 0 when there is a gap in the proper direction. The exact 
+return value from these functions is based on the size of the gap 
+relative to the average candle size over the past lookback days.
+
+Combining these functions, we can identify the candlestick formations:
+
+The dark cloud is a bearish formation and usually signals a top in the 
+market or at least an end of a trend and a period of consolidation. The 
+EasyLanguage code is:
+
+Inputs: LookBack(Numeric),OneCoe(Numeric),ZeroCoe(Numeric); Vars: 
+Color(0),SBody(0); Vars: FuzzyRange(0),Return(0); Color = 
+CandleColor(O,C); {FuzzySmall has the following arguments: 
+FuzzySmall(LookBack,OneCoe,ZeroCoe)} {We reversed OneCoe and ZeroCoe so 
+we can test for not as small as input to the fuzzy small function.}
+
+SBody = FuzzySmall(O,C,LookBack,[ZeroCoe.sup.*]. 3,[OneCoe.sup.*]1); 
+Return = 0; FuzzyRange = Close-(Open[1] + Close[1])/2; if Color = -1 and 
+Color[1] = 1 and open [greater than] High[1] and FuzzyRange [less than] 
+0 then begin Return = 1 - SBody[1]; end; DarkCloud = Return;
+
+First, we save the color of each candlestick. Next, we save the 
+membership of each candlestick to the fuzzy set small. We inverted the 
+OneCoe and ZeroCoe arguments because the dark cloud requires the first 
+white candle have a significant body. We did this by inverting the small 
+membership function. If we used the long membership function we would 
+have missed many dark clouds because the first candle was significant 
+but not quite long.
+
+Next, we calculate if the second candlestick is black and falls below 
+the mid- point of the first candle that is white. The second candle must 
+also open above the high of the first. If the candle qualifies as a dark 
+cloud we return the fuzzy inverse membership of the first candle to the 
+class small as the value of the fuzzy dark cloud.
+
+The EasyLanguage code for bullish engulfing pattern is:
+
+Inputs: LookBack(Numeric),OneCoeNumeric),ZeroCoe(Numeric); Vars: 
+Color(0),SBody(0),LBody(0); Color = CandleColor(O,C); SBody = 
+FuzzySmall(O,C,LookBack,[OneCoe.sup.*].3,[ZeroCoe.sup.*]1); LBody = 
+FuzzyLong(O,C,LookBack,[OneCoe.sup.*]2,[ZeroCoe.sup.*]1); if 
+EnGulfing(O,C,1) = 1 and Color = 1 and Color[1] = -1 then BullEngulf = 
+minlist(SBody[1],LBody) else BullEngulf = 0;
+
+In identifying a bullish engulf, we first evaluate the color and size of 
+each candle. If the current candle is white and engulfs the first candle 
+that is black we have a possible bullish engulf. Its significance is 
+measured by using our fuzzy logic functions for candle size. We take a 
+fuzzy "AND" between the membership of the previous candle to the small 
+class and the current to the large class. This value measures the 
+importance of the engulfing pattern. If the pattern does not qualify as 
+a bullish engulfing pattern we return a 0.
+
+Our Easy Language code for evening star is:
+
+Inputs: LookBack(Numeric),OneCoe(Numeric),ZeroCoe(Numeric); Vars: 
+Color(0),SBody(0); Vars: FuzzyRange(0),Return(0); Color = 
+CandleColor(O,C); SBody = 
+FuzzySmall(O,C,LookBack,[OneCoe.sup.*].3,[ZeroCoe.sub.*]1); Return = 0; 
+FuzzyRange = Close-(Close[2] + Open[2])/2; if Color = -1 and Color[2] = 
+1 and WindowUp(O,H,L,C,1)[1] [greater than] 0 and open [greater than] 
+open[1] and FuzzyRange [less than] 0 then begin Return = 
+minList(SBody[1], 1-SBody[2]); end; EveningStar = Return;
+
+First we test the color of each candle as well as its membership to 
+small size class. Next we test to see where the close of the current 
+candle falls in the range of the first candle in the formation.
+
+For an evening star we need a black current candle and a white candle 
+two candlesticks ago. Next, we need the second candle in the formation 
+to have gapped higher. Finally, the current candle must open higher than 
+the middle candle but close at or below the middle of the first candle. 
+All of these requirements must be met for the formation to qualify as an 
+evening star. We then return the fuzzy "AND" of one candle ago to the 
+small class and two candles ago to the inverse of the small class. If 
+the formation does not qualify as an evening star, the function returns a 0.
+
+RELATED ARTICLE: Fuzzy logic explained
+
+Fuzzy logic is a powerful technology used to solve problems that deal 
+with vague concepts such as tall or short. For example, if a person is 6 
+feet tall, he might be considered tall compared to the general 
+population, but short if he was on a basketball team. Another issue is 
+what do you consider a person who is 5 feet 11 inches if 6 feet is 
+considered tall. Fuzzy logic allows us to solve both of these problems.
+
+Fuzzy logic operators are made of three pans: membership function(s), 
+fuzzy rule logic and defuzzifier(s). The membership function shows how 
+relevant data is to the premise of each role. Fuzzy rule logic performs 
+the reasoning within fuzzy rules. The defuzzifier maps the fuzzy 
+information back into real world answers.
+
+Fuzzy logic also has fuzzy conjunctive operators. These are fuzzy "AND" 
+and fuzzy "OR". A fuzzy "AND" is the minimum of the two fuzzy 
+conditions. The fuzzy "OR" is the maximum of the two conditions.
+
+RELATED ARTICLE: In the library
+
+"Learning Japanese-Style 'Candlesticks' Charting," Steve Nison, December 
+1989
+
+"A Japanese Candelabra Of Price Chart Patterns," Steve Nison, April 1990
+
+"Candlestick Patterns: How Reliable Are They?." Larry Williams, June 1991
+
+"Presenting Another Chapter In Candlestick Analysis," Steve Nison, May 1992
+
+"Candlesticks Work Best With Overhead Light," Steve Nison, September 1994
+
+"The Yin And Yang Of Trading," Steve Nison, November 1994
+
+"Making A Break For Profits," Steve Nison, December 1994
+
+"Past Meets Present," Gary Wagner and Brad Matheny, July 1995
+
+Murray A. Ruggiero Jr. is a consultant in East Haven, Conn. His firm, 
+Ruggiero Associates, specializes in market timing systems using advanced 
+technologies as well as TradeStation application programming. CompuServe 
+I.D.: 71054,3545.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Finding candlesticks inside the E-mini S&P:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+candlestick charting can be complex, turning traders away from using it 
+at all, but there are advantages to being familiar with at least a few 
+continuation and reversal patterns--and it doesn't have to get too 
+complicated.
+
+The candlestick techniques traders are familiar with today originated as 
+a technical charting method used by the Japanese more than 100 years 
+before the development of the price bar or point-and-figure techniques.
+
+According to Shaun Taylor, president of Phase II Consultants Inc., a 
+1700s era Japanese trader in the futures markets of the day, Munehisa 
+Homma, discovered that aside from the strong link between price and the 
+supply and demand of rice, the markets also were strongly influenced by 
+the emotions of the traders.
+
+Homma saw that when emotions played into the equation a vast difference 
+between the value and the price of rice occurred. This difference 
+applies to today's markets as it did to rice in Japan long ago. The 
+principles Homma established ate the basis for the candlestick charting 
+method.
+
+Despite its many patterns and rules, which at times can be involved and 
+difficult, candlestick charting is popular among traders.
+
+CANDLE VS. BAR
+
+Candlesticks portray price information like the high, low, close and 
+open of that day, as do bars on a typical bar chart, but many traders 
+find candlesticks easier and faster to read.
+
+"Many traders look to bar charts for reversal formations such as double 
+tops and head-and-shoulders, yet candlesticks can be used for the same 
+purpose," says Erik Gebhard, president of Altavest Worldwide Trading 
+Inc. "In either case, a reversal does not always signify the current 
+uptrend/downtrend will reverse direction. It may merely suggest that the 
+current trend may end and the market may then decide in drift sideways."
+
+There is too much in candlesticks to fit into one article, or perhaps 
+even one book, so we are going to focus on a few main patterns.
+
+"It is important to remember that candle patterns are merely reactions 
+of traders at a particular time in the market place," says Taylor. "That 
+human beings often react en masse to situations allows candlestick chart 
+analysis to work."
+
+WHAT MAKES A CANDLE?
+
+A candlestick is made up of a thin vertical line with a body that may be 
+empty (white) or green on days when the close was higher than the open, 
+of filled-in black of red on days the close is lower than the open (see 
+"Candlestick construction," page 60).
+
+The body, called the real body, represents the range between opening and 
+closing prices. Vertical lines above and below the real body are called 
+shadows. Shadows indicate high and low prices for that candle. Shadows 
+(or "wicks") can be long or short. If the upper shadow on the filled-in 
+body is short, it indicates the open that day was closer to the high of 
+the day. A short upper shadow on a white or unfilled body indicates the 
+close was near the high.
+
+INTERPRETING CANDLESTICKS
+
+Being able to interpret candlesticks makes it easier for a trader to get 
+a feel for day-to-day sentiment. A candlestick with a long black (of red 
+in some applications) body represents a bearish period. A long white 
+body (or green in some applications) represent a bullish period.
+
+Spinning tops, small bodies of either color, show a tight trading range 
+between the open and the close and are considered to be neutral in terms 
+of market direction; they represent equilibrium between bulls and bears 
+when they appear in a sideways choppy market. The shadows can be any 
+size in spinning tops. Doji lines almost have no real body with a 
+horizontal line representing both the open and close.
+
+REVERSAL PATTERNS
+
+A candlestick pattern may consist o one candlestick or a series of 
+candlesticks forming over several trading sessions. A reversal candle 
+pattern is a series of candlesticks that show a trend reversal--this is 
+not easy to spot.
+
+"Candlestick reversal patterns have more relevance if viewed within the 
+context of prior activity to be effective," Gebhard says. "In fact, 
+identical candlesticks may have different meanings depending on where 
+they occur within the context of prior trends and formation."
+
+There are at Least 40 patterns in candlesticks that can indicate 
+reversals. We will focus on two one-day reversals, the hammer and the 
+hanging man.
+
+A hammer is an umbrella that appears after a price decline, and comes 
+from the action of "hammering" out a bottom. The shadow should be at 
+least twice as long as the body, which can be either black or white. A 
+hammer occurs in the context of a downtrend--when the price opens down 
+and then drops throughout the session only to come back near the opening 
+price at close.
+
+"Hammers are excellent signals of a market that is bottoming," says 
+Steve Nison, founder and president of Candlecharts.com.
+
+A hanging man resembles a hammer because it is also an umbrella of 
+either color with a shadow that is twice as long; however, it develops 
+after a rally in the context of an uptrend (see "Hammer vs. Hanging 
+man," below).
+
+"Engulfing patterns are the most recognizable in candlestick charting 
+for most traders," Nison says. A bearish engulfing pattern is recognized 
+as a long black real body engulfing a small white real body and develops 
+in an uptrend when the sellers out number the buyers.
+
+It indicates the open was higher than the previous day and that the 
+session sold off with volume much greater than the previous session. A 
+bullish engulfing pattern takes place when buyers outpace the sellers. 
+This condition is reflected by a long white real body engulfing a small 
+black real body.
+
+CONTINUATION PATTERNS
+
+Side-by-side lines can indicate when the current trend will continue 
+going in the direction it's in. Side-by-side white lines ate an 
+indication that the bullish trend will continue. In this pattern, the 
+first day is a white day, the second day is a white day that gaps up and 
+the third day is a white day of about the same body length and close as 
+the second day. In an uptrend three white days occur with an upward gap 
+between the first two and a similar body length and close for the last 
+two. This suggests a definite building of the uptrend and has a high 
+reliability.
+
+Side-by-side bearish white lines are identified when the first day is a 
+black day, the second day is a white day that gaps down and the third 
+day is a white day of about the same body length and close as the second 
+day. In a downtrend a black day is followed by two white days gapped 
+below the first day. This typically means the shorts are covering their 
+positions and that no reversal is about to occur, although the bearish 
+version is not as reliable as the bullish side-by-side. The downtrend 
+should remain intact.
+
+When three long white days occur with consecutively higher closes and 
+the fourth day opens higher and closes below the open of the first day, 
+it is called a bullish three-line strike. The black day drives prices 
+back to where they were at the start of the pattern. If the bullish 
+trend was strong before the pattern, then it should continue.
+
+In a bearish three-line strike three long black days occur with 
+consecutively lower closes and the fourth day opens lower, but closes 
+above the open of the first day. The white day drives prices back to 
+where they were at the pattern's start. If the bearish trend was strong 
+before the pattern, then it should continue.
+
+The more comfortable you get with these patterns, the easier it will be 
+for you to recognize them instantly and to use them on a regular basis.
+
+Hammer vs. Hanging man
+
+Hammer and hanging men may look the same, but a hammer must occur within 
+the context of a downtrend to be considered a hammer and a hanging man 
+must occur in the context of a downtrend The following charts are from 
+the E-mini S&P 500.
+
+The first chart shows that on Oct. 27 right after noon a hammer (notice 
+there is no top shadow and the bottom shadow is twice as long as the 
+body) appeared when the trend was what could be seen as a downtrend. 
+Afterwards the trend moved above our 21-day moving average (blue line). 
+This chart, for illustrative purposes, also shows an engulfing pattern 
+right before 9:00 am. The body of the red candle engulfs the entire body 
+of the previous green candle and confirms the trend is changing 
+downward. An example of a spinning top is also shown
+
+The second chart shows that on Nov. 13 early in the morning a hanging 
+man appears. It's a hanging man because the previous three days are all 
+up days, thereby confirming the uptrend to qualify this as a hanging man 
+and not a hammer. The trend did afterwards briefly turn downward. This 
+chart, for illustrative purposes, also shows a few Doji's, which were 
+not covered in this article because Doji patterns alone are very 
+complicated to even begin to introduce them, but you should know what 
+they are (see "Learning Japanese style 'candlesticks' charting," Futures 
+1989).
+
+
+-- 
+Scanned for viruses and dangerous content at 
+http://www.oneunified.net and is believed to be clean.
+

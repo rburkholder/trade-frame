@@ -80,6 +80,9 @@
 #define IDC_SCANTYPE                    1085
 #define IDC_USEDAYSTART                 1086
 #define IDC_USEDAYEND                   1087
+#define IDC_OPENIB                      1088
+#define IDC_EDIT1                       1089
+#define IDC_IBACCT                      1089
 
 // Next default values for new objects
 // 
@@ -87,7 +90,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1088
+#define _APS_NEXT_CONTROL_VALUE         1090
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

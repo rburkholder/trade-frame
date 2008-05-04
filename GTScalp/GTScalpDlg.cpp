@@ -97,6 +97,7 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_ENDDAYSELECT, m_rbSelectByDay);
   DDX_Control(pDX, IDC_ENDBARCOUNT, m_rbSelectByBarCount);
   DDX_Control(pDX, IDC_ENDDAYCOUNT, m_rbSelectByDayCount);
+  DDX_Control(pDX, IDC_IBACCT, m_edtIBAcctCode);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -134,6 +135,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_RBBREAKOUT, &CGTScalpDlg::OnBnClickedRbbreakout)
   ON_BN_CLICKED(IDC_USEDAYSTART, &CGTScalpDlg::OnBnClickedUsedaystart)
   ON_BN_CLICKED(IDC_USEDAYEND, &CGTScalpDlg::OnBnClickedUsedayend)
+  ON_BN_CLICKED(IDC_OPENIB, &CGTScalpDlg::OnBnClickedOpenib)
 END_MESSAGE_MAP()
 
 
@@ -232,6 +234,9 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eScanType = NoScanType;
   m_bUseDayStart = false;
   m_bUseDayEnd = false;
+
+  theApp.m_pIB = NULL;
+
 
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -341,6 +346,10 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
   if ( NULL != theApp.m_pIQFeed ) {
     delete theApp.m_pIQFeed;
     theApp.m_pIQFeed = NULL;
+  }
+  if ( NULL != theApp.m_pIB ) {
+    delete theApp.m_pIB;
+    theApp.m_pIB = NULL;
   }
 }
 
@@ -671,4 +680,20 @@ void CGTScalpDlg::OnBnClickedUsedayend() {
   m_rbSelectByDay.EnableWindow( bBothDays ? 0 : 1 );
   m_rbSelectByBarCount.EnableWindow( bBothDays ? 0 : 1 );
   m_rbSelectByDayCount.EnableWindow( bBothDays ? 0 : 1 );
+}
+
+void CGTScalpDlg::OnBnClickedOpenib() {
+  // TODO: Add your control notification handler code here
+  if ( NULL == theApp.m_pIB ) {
+    char szAcct[ 50 ];
+    m_edtIBAcctCode.GetWindowTextA( szAcct, 50 );
+    if ( 0 == *szAcct ) {
+      cout << "No IB Account Code" << endl;
+    }
+    else {
+      CString sAcct( szAcct );
+      theApp.m_pIB = new CIBTWS( sAcct );
+      theApp.m_pIB->Start();
+    }
+  }
 }
