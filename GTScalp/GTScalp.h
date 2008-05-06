@@ -20,6 +20,18 @@
 
 #include "GeneratePeriodicRefresh.h"  // need the above constants
 
+
+// file and line numbers on exit for memory loss
+//#define new DEBUG_NEW  
+// has been put in stdafx.h
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 // CGTScalpApp:
 // See GTScalp.cpp for the implementation of this class
 //
@@ -32,6 +44,7 @@ public:
 	public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+  virtual BOOL OnIdle(LONG lCount);
 
 // Implementation
 

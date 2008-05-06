@@ -31,6 +31,8 @@ using namespace std;
 
 // http://www.dtniq.com/product/mktsymbols.zip
 
+// need a mechanism to detect lock files and then to eliminate them
+
 CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
     pRecord( NULL ), 
     m_pdbIQFSymbols( NULL ), m_pdbIxIQFSymbols_Market( NULL ), m_pdbcIxIQFSymbols_Market( NULL ) {
@@ -136,6 +138,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
   cout << "Loading Symbols" << endl;
   try {
+    file.getline( dbRecord.line, nMaxBufferSize );  // remove header line
     file.getline( dbRecord.line, nMaxBufferSize );
     while ( !file.fail() ) {
       ++cntLines;

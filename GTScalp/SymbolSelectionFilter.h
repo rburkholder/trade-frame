@@ -14,6 +14,7 @@ public:
   virtual bool Validate( void ) { return true; };
   void Start( void );
   virtual void Process( const string &sSymbol, const string &sPath ) = 0;
+  virtual void WrapUp( void ) {};
 protected:
   CTimeSeries<CBar> m_bars;
   enumDayCalc m_DayStartType;
@@ -68,3 +69,34 @@ public:
 protected:
 private:
 };
+
+struct MaxNegativesCompare {
+  bool operator() ( double dbl1, double dbl2 ) {
+    return dbl2 < dbl1; // reverse form of operator so most negative at end of list
+  }
+};
+
+class CSelectSymbolWith10Percent: public CSymbolSelectionFilter {
+public:
+  CSelectSymbolWith10Percent( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~CSelectSymbolWith10Percent(void );
+  bool Validate( void );
+  void Process( const string &sSymbol, const string &sPath );
+  void WrapUp( void );
+protected:
+  static const unsigned short nMaxInList = 10;  // maximum of 10 items in each list
+  std::multimap<double, string> mapMaxPositives;
+  std::multimap<double, string, MaxNegativesCompare> mapMaxNegatives;
+private:
+};
+
+class CSelectSymbolWithVolatility: public CSymbolSelectionFilter {
+public:
+  CSelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~CSelectSymbolWithVolatility(void );
+  void Process( const string &sSymbol, const string &sPath );
+protected:
+private:
+};
+
+

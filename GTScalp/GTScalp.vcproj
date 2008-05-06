@@ -50,6 +50,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
@@ -485,6 +486,10 @@
 				</File>
 				<File
 					RelativePath=".\iqfeedsymbolimport.txt"
+					>
+				</File>
+				<File
+					RelativePath=".\mfc.txt"
 					>
 				</File>
 				<File

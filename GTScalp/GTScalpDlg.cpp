@@ -136,6 +136,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_USEDAYSTART, &CGTScalpDlg::OnBnClickedUsedaystart)
   ON_BN_CLICKED(IDC_USEDAYEND, &CGTScalpDlg::OnBnClickedUsedayend)
   ON_BN_CLICKED(IDC_OPENIB, &CGTScalpDlg::OnBnClickedOpenib)
+  ON_BN_CLICKED(IDC_RADIO1, &CGTScalpDlg::OnBnClickedRadio1)
 END_MESSAGE_MAP()
 
 
@@ -624,9 +625,13 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
         break;
       case Volatility:
         break;
+      case TenPercent:
+        pFilter = new CSelectSymbolWith10Percent( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        break;
     }
     if ( pFilter->Validate() ) {
       pFilter->Start();
+      pFilter->WrapUp();
     }
     else {
       MessageBox( "Invalid presets", "Error" );
@@ -641,22 +646,27 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
 
 void CGTScalpDlg::OnBnClickedRbdarvas() {
   // TODO: Add your control notification handler code here
-  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBDARVAS );
+  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RBDARVAS );
   m_eScanType = Darvas;
 }
 
 void CGTScalpDlg::OnBnClickedRbbollinger() {
   // TODO: Add your control notification handler code here
-  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBBOLLINGER );
+  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RBBOLLINGER );
   m_eScanType = Bollinger;
 }
 
 void CGTScalpDlg::OnBnClickedRbbreakout() {
   // TODO: Add your control notification handler code here
-  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RBBREAKOUT, IDC_RBBREAKOUT );
+  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RBBREAKOUT );
   m_eScanType = Breakout;
 }
 
+void CGTScalpDlg::OnBnClickedRadio1() { // 10% range, positive or negative
+  // TODO: Add your control notification handler code here
+  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RADIO1 );
+  m_eScanType = TenPercent;
+}
 
 void CGTScalpDlg::OnBnClickedUsedaystart() {
   // TODO: Add your control notification handler code here
@@ -673,8 +683,8 @@ void CGTScalpDlg::OnBnClickedUsedaystart() {
 void CGTScalpDlg::OnBnClickedUsedayend() {
   // TODO: Add your control notification handler code here
   m_bUseDayEnd = ( BST_CHECKED == m_cbUseDayEnd.GetCheck() );
-  m_dtLastDate.EnableWindow( m_bUseDayStart ? 1 : 0 );
-  m_dtLastTime.EnableWindow( m_bUseDayStart ? 1 : 0 );
+  m_dtLastDate.EnableWindow( m_bUseDayEnd ? 1 : 0 );
+  m_dtLastTime.EnableWindow( m_bUseDayEnd ? 1 : 0 );
 
   bool bBothDays = m_bUseDayStart && m_bUseDayEnd;
   m_rbSelectByDay.EnableWindow( bBothDays ? 0 : 1 );
@@ -697,3 +707,4 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     }
   }
 }
+

@@ -149,19 +149,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\TWS\EClientSocket.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\HScrollListBox.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\IBTWS.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\MySocket.cpp"
 				>
 			</File>
 			<File
@@ -184,6 +172,22 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="TWS"
+				>
+				<File
+					RelativePath=".\TWS\EClientSocket.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\HScrollListBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\MySocket.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -191,65 +195,69 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\TWS\CommonDefs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\Contract.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\EClient.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\EClientSocket.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\EWrapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\Execution.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\HScrollListBox.h"
-				>
-			</File>
-			<File
 				RelativePath=".\IBTWS.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\MySocket.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\Order.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\OrderState.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\ScannerSubscription.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TWS\shared_ptr.h"
 				>
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TWS\TwsSocketClientErrors.h"
+			<Filter
+				Name="TWS"
 				>
-			</File>
+				<File
+					RelativePath=".\TWS\CommonDefs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Contract.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EClient.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EClientSocket.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EWrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Execution.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\HScrollListBox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\MySocket.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Order.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\OrderState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\ScannerSubscription.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\shared_ptr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\TwsSocketClientErrors.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

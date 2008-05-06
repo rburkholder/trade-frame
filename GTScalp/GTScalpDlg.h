@@ -41,7 +41,7 @@ private:
   CHDF5 *pHdf5;
 
   CScripts script;
-  enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility };
+  enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
   enumScanType m_eScanType;
   CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
   bool m_bUseDayStart;
@@ -131,4 +131,5 @@ public:
   CButton m_rbSelectByDayCount;
   afx_msg void OnBnClickedOpenib();
   CEdit m_edtIBAcctCode;
+  afx_msg void OnBnClickedRadio1();
 };

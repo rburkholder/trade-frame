@@ -113,4 +113,13 @@ int CGTScalpApp::ExitInstance() {
 	return CWinApp::ExitInstance();
 }
 
+BOOL CGTScalpApp::OnIdle(LONG lCount) {
+  if ( 1 == CWinApp::OnIdle( lCount ) ) { // reserve first loop through for system
+    return TRUE;
+  }
+  // anything else is fair game
+  return FALSE;  // and then indicate don't do anything until another message has been processed
+  // return TRUE; // keep accepting OnIdle messages
+}
+
 

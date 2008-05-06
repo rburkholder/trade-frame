@@ -1,3 +1,13 @@
+2008/05/05
+Calculate average positive, average positive maximum
+Calculate average negative, average negative maximum
+Use as trading range for getting in and getting out locations
+Pivots will also be useful on this
+Calculate how often open/close are at high/low levels
+Calculate typical close-open and high-low ranges
+
+
+
 IQFeedRetrieval needs a singleton IQFeed
 
 plugins, like Smartquant: http://www.ddj.com/cpp/204202899

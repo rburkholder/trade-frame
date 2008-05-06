@@ -11,6 +11,8 @@ using namespace H5;
 
 #include "Darvas.h"
 
+#include <map>
+
 // destroy self when done
 // http://www.codeproject.com/KB/stl/xingstlarticle.aspx  functors
 
@@ -82,17 +84,6 @@ herr_t IterateCallback( hid_t group, const char *name, void *op_data ) {
 //
 // CSelectSymbolWithDarvas
 //
-CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
-}
-
-CSelectSymbolWithDarvas::~CSelectSymbolWithDarvas(void) {
-}
-
-bool CSelectSymbolWithDarvas::Validate( void ) {
-  return ( m_bUseStart && m_bUseLast );
-}
-
 class CalcMaxDate: public std::unary_function<CBar &, void> {
 public:
   CalcMaxDate( void ) : dtMax( boost::date_time::special_values::min_date_time ), dblMax( 0 ) { };
@@ -132,6 +123,31 @@ public:
   }
 };
 
+class CalcAverageVolume {
+private:
+  unsigned long m_nTotalVolume;
+  unsigned long m_nNumberOfValues;
+protected:
+public:
+  CalcAverageVolume() : m_nTotalVolume( 0 ), m_nNumberOfValues( 0 ) {};
+  void operator() ( const CBar &bar ) {
+    m_nTotalVolume += bar.m_nVolume;
+    ++m_nNumberOfValues;
+  }
+  operator unsigned long() { return m_nTotalVolume / m_nNumberOfValues; };
+};
+
+CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+}
+
+CSelectSymbolWithDarvas::~CSelectSymbolWithDarvas(void) {
+}
+
+bool CSelectSymbolWithDarvas::Validate( void ) {
+  return ( CSymbolSelectionFilter::Validate() && m_bUseStart && m_bUseLast );
+}
+
 void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPath ) {
   //cout << "Darvas for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
@@ -147,23 +163,102 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
   if ( ( 240 < cnt ) && ( (*(end-1)).m_dt == dtTrigger ) ){   // at least 240 bars, with required last bar
     m_bars.Resize( cnt );
     barRepository.Read( begin, end, &m_bars );
-    ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
-    if ( dtDayOfMax >= dtPt1 ) {
-      cout << 
-        "Darvas max for " << sSymbol << 
-        " on " << dtDayOfMax << 
-        ", close=" << m_bars.Last()->m_dblClose <<
-        ", volume=" << m_bars.Last()->m_nVolume;
-      vector<CBar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
-      CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
-      if ( results.GetTrigger() ) {
-        cout << " triggered, stop=" << results.GetStopLevel();
-        iter = m_bars.iterAtOrAfter( dt26WksAgo );
-        for_each( iter, m_bars.end(), CalcSixMonMeans() );
+
+    vector<CBar>::iterator volIter = m_bars.end() - 20;
+    unsigned long nAverageVolume = std::for_each( volIter, m_bars.end(), CalcAverageVolume() );
+
+    if ( 500000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+
+      ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
+      if ( dtDayOfMax >= dtPt1 ) {
+        cout << 
+          "Darvas max for " << sSymbol << 
+          " on " << dtDayOfMax << 
+          ", close=" << m_bars.Last()->m_dblClose <<
+          ", volume=" << m_bars.Last()->m_nVolume;
+        vector<CBar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
+        CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
+        if ( results.GetTrigger() ) {
+          cout << " triggered, stop=" << results.GetStopLevel();
+          iter = m_bars.iterAtOrAfter( dt26WksAgo );
+          for_each( iter, m_bars.end(), CalcSixMonMeans() );
+        }
+        cout << endl;
       }
-      cout << endl;
     }
   }
+}
+
+//
+// CSelectSymbolWith10Percent
+//
+CSelectSymbolWith10Percent::CSelectSymbolWith10Percent( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+}
+
+CSelectSymbolWith10Percent::~CSelectSymbolWith10Percent(void) {
+}
+
+bool CSelectSymbolWith10Percent::Validate( void ) {
+  return ( CSymbolSelectionFilter::Validate() && m_bUseLast );
+}
+
+void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &sPath ) {
+  //cout << "10 Percent for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+  CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
+  CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
+  ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
+  end = lower_bound( barRepository.begin(), barRepository.end(), dtPt2 );
+  //if (  ( end != barRepository.end() ) ) {
+    if ( 20 < ( end - barRepository.begin() ) ) {  // make sure there are at least 20 bars available
+      begin = end - 20;
+      m_bars.Resize( 20 );
+      barRepository.Read( begin, end, &m_bars );
+      if ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) {
+        unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
+        if ( 500000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+          multimap<double, string>::iterator iterPos;
+          std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
+          double dblReturn = ( m_bars.Last()->m_dblClose - m_bars.Last()->m_dblOpen ) / m_bars.Last()->m_dblClose;
+          if ( nMaxInList > mapMaxPositives.size() ) {
+            mapMaxPositives.insert( pair<double, string>( dblReturn, sSymbol ) );
+          }
+          else {
+            iterPos = mapMaxPositives.begin();
+            if ( dblReturn > iterPos->first ) {
+              mapMaxPositives.erase( iterPos );
+              mapMaxPositives.insert( pair<double, string>( dblReturn, sSymbol ) );
+            }
+          }
+          if ( nMaxInList > mapMaxNegatives.size() ) {
+            mapMaxNegatives.insert( pair<double, string>( dblReturn, sSymbol ) );
+          }
+          else {
+            iterNeg = mapMaxNegatives.begin();
+            if ( dblReturn < iterNeg->first ) {
+              mapMaxNegatives.erase( iterNeg );
+              mapMaxNegatives.insert( pair<double, string>( dblReturn, sSymbol ) );
+            }
+          }
+        }
+      }
+    }
+  //}
+}
+
+void CSelectSymbolWith10Percent::WrapUp( void ) {
+  cout << "Positives: " << endl;
+  multimap<double, string>::iterator iterPos;
+  for ( iterPos = mapMaxPositives.begin(); iterPos != mapMaxPositives.end(); ++iterPos ) {
+    cout << " " << iterPos->second << "=" << iterPos->first << endl;
+  }
+  mapMaxPositives.clear();
+  cout << "Negatives: " << endl;
+  std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
+  for ( iterNeg = mapMaxNegatives.begin(); iterNeg != mapMaxNegatives.end(); ++iterNeg ) {
+    cout << " " << iterNeg->second << "=" << iterNeg->first << endl;
+  }
+  mapMaxNegatives.clear();
 }
 
 //
@@ -201,6 +296,21 @@ void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &s
   m_bars.Resize( cnt );
   barRepository.Read( begin, end, &m_bars );
 }
+
+//
+// CSelectSymbolWithVolatility
+//
+CSelectSymbolWithVolatility::CSelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+}
+
+CSelectSymbolWithVolatility::~CSelectSymbolWithVolatility(void) {
+}
+
+void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
+  cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+}
+
 
 //
 // CSelectSymbolWithBreakout
