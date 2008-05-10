@@ -137,6 +137,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_USEDAYEND, &CGTScalpDlg::OnBnClickedUsedayend)
   ON_BN_CLICKED(IDC_OPENIB, &CGTScalpDlg::OnBnClickedOpenib)
   ON_BN_CLICKED(IDC_RADIO1, &CGTScalpDlg::OnBnClickedRadio1)
+  ON_BN_CLICKED(IDC_RADIO2, &CGTScalpDlg::OnBnClickedRadio2)
 END_MESSAGE_MAP()
 
 
@@ -624,6 +625,7 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
         pFilter = new CSelectSymbolWithBreakout( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case Volatility:
+        pFilter = new CSelectSymbolWithVolatility( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case TenPercent:
         pFilter = new CSelectSymbolWith10Percent( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
@@ -657,19 +659,21 @@ void CGTScalpDlg::OnBnClickedRbbollinger() {
 }
 
 void CGTScalpDlg::OnBnClickedRbbreakout() {
-  // TODO: Add your control notification handler code here
   m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RBBREAKOUT );
   m_eScanType = Breakout;
 }
 
 void CGTScalpDlg::OnBnClickedRadio1() { // 10% range, positive or negative
-  // TODO: Add your control notification handler code here
   m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RADIO1 );
   m_eScanType = TenPercent;
 }
 
+void CGTScalpDlg::OnBnClickedRadio2() { // volatility
+  m_grpScanType.CheckRadioButton( IDC_RBDARVAS, IDC_RADIO3, IDC_RADIO2 );
+  m_eScanType = Volatility;
+}
+
 void CGTScalpDlg::OnBnClickedUsedaystart() {
-  // TODO: Add your control notification handler code here
   m_bUseDayStart = ( BST_CHECKED == m_cbUseDayStart.GetCheck() );
   m_dtStartDate.EnableWindow( m_bUseDayStart ? 1 : 0 );
   m_dtStartTime.EnableWindow( m_bUseDayStart ? 1 : 0 );
@@ -707,4 +711,5 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     }
   }
 }
+
 

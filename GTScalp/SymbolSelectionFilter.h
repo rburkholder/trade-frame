@@ -94,8 +94,12 @@ class CSelectSymbolWithVolatility: public CSymbolSelectionFilter {
 public:
   CSelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
   virtual ~CSelectSymbolWithVolatility(void );
+  bool Validate( void );
   void Process( const string &sSymbol, const string &sPath );
+  void WrapUp( void );
 protected:
+  static const unsigned short nMaxInList = 10;  // maximum of 10 items in list
+  std::multimap<double, string> mapMaxVolatility;
 private:
 };
 

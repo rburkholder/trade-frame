@@ -167,7 +167,7 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
     vector<CBar>::iterator volIter = m_bars.end() - 20;
     unsigned long nAverageVolume = std::for_each( volIter, m_bars.end(), CalcAverageVolume() );
 
-    if ( 500000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+    if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
 
       ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
       if ( dtDayOfMax >= dtPt1 ) {
@@ -216,7 +216,7 @@ void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &s
       barRepository.Read( begin, end, &m_bars );
       if ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) {
         unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
-        if ( 500000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+        if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
           multimap<double, string>::iterator iterPos;
           std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
           double dblReturn = ( m_bars.Last()->m_dblClose - m_bars.Last()->m_dblOpen ) / m_bars.Last()->m_dblClose;
@@ -307,10 +307,64 @@ CSelectSymbolWithVolatility::CSelectSymbolWithVolatility( enumDayCalc dstype, in
 CSelectSymbolWithVolatility::~CSelectSymbolWithVolatility(void) {
 }
 
-void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
-  cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+bool CSelectSymbolWithVolatility::Validate( void ) {
+  return ( CSymbolSelectionFilter::Validate() && m_bUseLast );
 }
 
+class CalcAverageVolatility {
+private:
+  double m_dblVolatility;
+  unsigned long m_nNumberOfValues;
+protected:
+public:
+  CalcAverageVolatility() : m_dblVolatility( 0 ), m_nNumberOfValues( 0 ) {};
+  void operator() ( const CBar &bar ) {
+    //m_dblVolatility += ( bar.m_dblHigh - bar.m_dblLow ) / bar.m_dblClose;
+    m_dblVolatility += ( bar.m_dblHigh - bar.m_dblLow ) ;
+    ++m_nNumberOfValues;
+  }
+  operator double() { return m_dblVolatility / m_nNumberOfValues; };
+};
+
+void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
+  //cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+  CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
+  CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
+  ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
+  end = lower_bound( barRepository.begin(), barRepository.end(), dtPt2 );
+  if ( 20 < ( end - barRepository.begin() ) ) {  // make sure there are at least 20 bars available
+    begin = end - 20;
+    m_bars.Resize( 20 );
+    barRepository.Read( begin, end, &m_bars );
+    if ( ( m_bars.Last()->m_dblClose < 60.0 ) && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
+      unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
+      if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+        double dblAverageVolatility = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolatility() );
+        //double dblVolatility = ( m_bars.Last()->m_dblHigh - m_bars.Last()->m_dblLow ) / m_bars.Last()->m_dblClose;
+        multimap<double, string>::iterator iterPos;
+        if ( nMaxInList > mapMaxVolatility.size() ) {
+          mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sSymbol ) );
+        }
+        else {
+          iterPos = mapMaxVolatility.begin();
+          if ( dblAverageVolatility > iterPos->first ) {
+            mapMaxVolatility.erase( iterPos );
+            mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sSymbol ) );
+          }
+        }
+      }
+    }
+  }
+}
+
+void CSelectSymbolWithVolatility::WrapUp( void ) {
+  cout << "Volatiles: " << endl;
+  multimap<double, string>::iterator iterPos;
+  for ( iterPos = mapMaxVolatility.begin(); iterPos != mapMaxVolatility.end(); ++iterPos ) {
+    cout << " " << iterPos->second << "=" << iterPos->first << endl;
+  }
+  mapMaxVolatility.clear();
+}
 
 //
 // CSelectSymbolWithBreakout

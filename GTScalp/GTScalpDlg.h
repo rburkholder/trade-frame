@@ -132,4 +132,5 @@ public:
   afx_msg void OnBnClickedOpenib();
   CEdit m_edtIBAcctCode;
   afx_msg void OnBnClickedRadio1();
+  afx_msg void OnBnClickedRadio2();
 };
