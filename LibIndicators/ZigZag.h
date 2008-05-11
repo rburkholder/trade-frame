@@ -13,7 +13,7 @@ public:
   virtual ~CZigZag(void);
   void Check( ptime dt, double val );
 
-  enum EDirection { Init, Start, Down, Up } m_PatternState;
+  enum EDirection { Init, Start, Down, Up };
 
   typedef FastDelegate4<CZigZag *, ptime, double, EDirection> OnPeakFoundHandler;
   void SetOnPeakFound( OnPeakFoundHandler function ) {
@@ -31,6 +31,7 @@ public:
 protected:
   double m_dblFilterWidth; // pt1 becomes new anchor when abs(pt0-pt1)>delta
   int cntNewUp, cntNewDown, cntTurns;
+  EDirection m_PatternState;
 
 private:
   double m_dblPatternPt0,  // pattern end point, drags pt1 away from anchor, but can retrace at will

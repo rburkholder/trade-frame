@@ -6,17 +6,43 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GTScalp", "GTScalp\GTScalp.
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InteractiveBrokers", "InteractiveBrokers\InteractiveBrokers.vcproj", "{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
+	ProjectSection(ProjectDependencies) = postProject
+		{A009C9AC-12BD-4BBB-9FB5-68A113561949} = {A009C9AC-12BD-4BBB-9FB5-68A113561949}
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0} = {0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A} = {BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeFrame", "TradeFrame\TradeFrame.vcproj", "{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFCharting", "TFCharting\TFCharting.vcproj", "{309BC492-1C49-4C7E-B08E-CA7D7A873577}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTimeSeries", "LibTimeSeries\LibTimeSeries.vcproj", "{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibInteractiveBrokers", "LibInteractiveBrokers\LibInteractiveBrokers.vcproj", "{A009C9AC-12BD-4BBB-9FB5-68A113561949}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIndicators", "LibIndicators\LibIndicators.vcproj", "{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A} = {BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}
 	EndProjectSection
 EndProject
 Global
@@ -33,14 +59,26 @@ Global
 		{B513732A-53F3-4688-85A2-4AFF8CFCD443}.Debug|Win32.Build.0 = Debug|Win32
 		{B513732A-53F3-4688-85A2-4AFF8CFCD443}.Release|Win32.ActiveCfg = Release|Win32
 		{B513732A-53F3-4688-85A2-4AFF8CFCD443}.Release|Win32.Build.0 = Release|Win32
-		{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}.Debug|Win32.Build.0 = Debug|Win32
-		{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}.Release|Win32.ActiveCfg = Release|Win32
-		{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}.Release|Win32.Build.0 = Release|Win32
 		{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}.Debug|Win32.Build.0 = Debug|Win32
 		{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}.Release|Win32.ActiveCfg = Release|Win32
 		{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}.Release|Win32.Build.0 = Release|Win32
+		{309BC492-1C49-4C7E-B08E-CA7D7A873577}.Debug|Win32.ActiveCfg = Debug|Win32
+		{309BC492-1C49-4C7E-B08E-CA7D7A873577}.Debug|Win32.Build.0 = Debug|Win32
+		{309BC492-1C49-4C7E-B08E-CA7D7A873577}.Release|Win32.ActiveCfg = Release|Win32
+		{309BC492-1C49-4C7E-B08E-CA7D7A873577}.Release|Win32.Build.0 = Release|Win32
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}.Debug|Win32.Build.0 = Debug|Win32
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}.Release|Win32.ActiveCfg = Release|Win32
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}.Release|Win32.Build.0 = Release|Win32
+		{A009C9AC-12BD-4BBB-9FB5-68A113561949}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A009C9AC-12BD-4BBB-9FB5-68A113561949}.Debug|Win32.Build.0 = Debug|Win32
+		{A009C9AC-12BD-4BBB-9FB5-68A113561949}.Release|Win32.ActiveCfg = Release|Win32
+		{A009C9AC-12BD-4BBB-9FB5-68A113561949}.Release|Win32.Build.0 = Release|Win32
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Debug|Win32.Build.0 = Debug|Win32
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Release|Win32.ActiveCfg = Release|Win32
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

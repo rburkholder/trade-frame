@@ -1,20 +1,16 @@
 #include "StdAfx.h"
 #include "Pivots.h"
 
-CPivotSet::CPivotSet(void) {
-  m_R3 = m_R2 = m_R1 = m_PV = m_S1 = m_S2 = m_S3 = 0;
-  m_R23 = m_R12 = m_PVR1 = m_PVS1 = m_S12 = m_S23 = 0;
+CPivotSet::CPivotSet(void) :
+  m_R3( 0 ), m_R2( 0 ), m_R1( 0 ),  m_PV( 0 ), m_S1( 0 ), m_S2( 0 ), m_S3( 0 ), 
+  m_R23( 0 ), m_R12( 0 ), m_PVR1( 0 ), m_PVS1( 0 ), m_S12( 0 ), m_S23( 0 )
+ {
 }
 
-CPivotSet::CPivotSet( const string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 ) {
-  m_sName = sName;
-  m_R3 = R3;
-  m_R2 = R2;
-  m_R1 = R1;
-  m_PV = PV;
-  m_S1 = S1;
-  m_S2 = S2;
-  m_S3 = S3;
+CPivotSet::CPivotSet( const string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 ) :
+  m_sName( sName ),
+  m_R3( R3 ), m_R2( R2 ), m_R1( R1 ), m_PV( PV ), m_S1( S1 ), m_S2( S2 ), m_S3( S3 )
+{
   CalcHalfPivots();
 }
 
@@ -70,7 +66,12 @@ CPivotSet::~CPivotSet() {
 
 /*
 http://www.earnforex.com/pivot_points_calculator.php
-The floor pivot points, presented in the first column of the calculation results table, are the most basic and popular type of pivots used in Forex trading technical analysis. The pivot point is interpreted as the primary support/resistance level - the point at which the main trend will be born. First-third level resistance and support points serve as additional indicators of possible trend reversal or continuation. The rules to calculate floor pivot points are quite simple: 
+The floor pivot points, presented in the first column of the calculation results table, 
+are the most basic and popular type of pivots used in Forex trading technical analysis. 
+The pivot point is interpreted as the primary support/resistance level - the point at 
+which the main trend will be born. First-third level resistance and support points 
+serve as additional indicators of possible trend reversal or continuation. The rules 
+to calculate floor pivot points are quite simple: 
 
 Pivot (P) = (H + L + C) / 3 
 
@@ -86,7 +87,9 @@ S2 = P - H + L
 
 S3 = L - 2 X (H - P) 
 
-Other popular method of calculating a simple TA indicator which helps trader to forecast future trend is Tom DeMark's pivot points. Which are not pivot points exactly, but predicted low and high of the period. To calculate DeMark's pivot points follow these rules: 
+Other popular method of calculating a simple TA indicator which helps trader to forecast 
+future trend is Tom DeMark's pivot points. Which are not pivot points exactly, but predicted 
+low and high of the period. To calculate DeMark's pivot points follow these rules: 
 
 If Close < Opencurrent Then X = H + 2 X L + C; 
 
@@ -96,7 +99,9 @@ If Close = Opencurrent Then X = H + L + 2 X C;
 
 New High = X / 2 - L; New Low = X / 2 - H 
 
-Woodie's pivot points are similar to floor pivot points, but are calculated in a somewhat different way, giving more weight to the Close price of the previous period. Use the following rules to calculate Woodie's pivot points: 
+Woodie's pivot points are similar to floor pivot points, but are calculated in a 
+somewhat different way, giving more weight to the Close price of the 
+previous period. Use the following rules to calculate Woodie's pivot points: 
 
 Pivot (P) = (H + L + 2 X C) / 4 
 
@@ -108,7 +113,12 @@ Support (S1) = (2 X P) - H
 
 S2 = P - H + L 
 
-Camarilla pivot points is a set of eight very probable levels which resemble support and resistance values for a current trend. The origin and the precise way to calculate these pivot points are unclear. The most important is that these pivot points work for all traders and help in setting the right stop-loss and take-profit orders. We use the following rules to calculate Camarilla pivot points: 
+Camarilla pivot points is a set of eight very probable levels 
+which resemble support and resistance values for a current trend. 
+The origin and the precise way to calculate these pivot points are unclear. 
+The most important is that these pivot points work for all traders and help in 
+setting the right stop-loss and take-profit orders. We use the following 
+rules to calculate Camarilla pivot points: 
 
 R4 = (H - L) X 1.1 / 2 + C 
 

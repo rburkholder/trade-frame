@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_34_1;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
+				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -69,9 +69,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\hdf5_hl_cppddll.lib $(OutDir)\hdf5ddll.lib $(OutDir)\libdb46d.lib $(OutDir)\InteractiveBrokers.lib"
+				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\hdf5_hl_cppddll.lib $(OutDir)\hdf5ddll.lib $(OutDir)\libdb46d.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="K:\Data\Projects\boost\boost_1_34_1\lib"
+				AdditionalLibraryDirectories="K:\Data\Projects\boost\boost_1_35_0\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -362,38 +362,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Indicators"
-				>
-				<File
-					RelativePath=".\Darvas.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Pivots.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\RunningMinMax.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\RunningStats.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\SlidingWindow.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\StatsInSlidingWindow.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ZigZag.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Vu"
 				>
 				<File
@@ -514,26 +482,6 @@
 				</File>
 				<File
 					RelativePath=".\ChartViewerShim.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="TimeSeries"
-				>
-				<File
-					RelativePath=".\BarFactory.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\DatedDatum.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\MergeDatedDatums.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TimeSeries.cpp"
 					>
 				</File>
 			</Filter>
@@ -784,38 +732,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Indicators"
-				>
-				<File
-					RelativePath=".\Darvas.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Pivots.h"
-					>
-				</File>
-				<File
-					RelativePath=".\RunningMinMax.h"
-					>
-				</File>
-				<File
-					RelativePath=".\RunningStats.h"
-					>
-				</File>
-				<File
-					RelativePath=".\SlidingWindow.h"
-					>
-				</File>
-				<File
-					RelativePath=".\StatsInSlidingWindow.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ZigZag.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="ChartDir"
 				>
 				<File
@@ -852,26 +768,6 @@
 				</File>
 				<File
 					RelativePath=".\ChartViewerShim.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="TimeSeries"
-				>
-				<File
-					RelativePath=".\BarFactory.h"
-					>
-				</File>
-				<File
-					RelativePath=".\DatedDatum.h"
-					>
-				</File>
-				<File
-					RelativePath=".\MergeDatedDatums.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TimeSeries.h"
 					>
 				</File>
 			</Filter>

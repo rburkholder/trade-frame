@@ -20,7 +20,7 @@ public:
   void SetOnRowInsert( OnRowInsertHandler function ) {
     OnRowInsert = function;
   }
-
+protected:
 private:
   int m_Multiplier;
   std::map<unsigned int, CDataRow*> m_mpDataRow; // sparse array

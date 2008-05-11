@@ -13,6 +13,23 @@ public:
 
   virtual ~CPivotSet(void);
 
+  const string &Name( void ) { return m_sName; };
+  double R3( void ) { return m_R3; };
+  double R23( void ) { return m_R3; };
+  double R2( void ) { return m_R3; };
+  double R12( void ) { return m_R3; };
+  double R1( void ) { return m_R3; };
+  double PVR1( void ) { return m_R3; };
+  double PV( void ) { return m_R3; };
+  double PVS1( void ) { return m_R3; };
+  double S1( void ) { return m_R3; };
+  double S12( void ) { return m_R3; };
+  double S2( void ) { return m_R3; };
+  double S23( void ) { return m_R3; };
+  double S3( void ) { return m_R3; };
+
+protected:
+  
   string m_sName;
   double m_R3;
   double m_R23;
@@ -28,7 +45,6 @@ public:
   double m_S23;
   double m_S3;
 
-protected:
   void CalcHalfPivots();
   void CalcPivots( const string &sName, double Hi, double Lo, double Close );
 private:

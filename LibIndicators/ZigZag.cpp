@@ -1,11 +1,12 @@
 #include "StdAfx.h"
 #include "ZigZag.h"
 
-CZigZag::CZigZag( double FilterWidth ) {
-  m_dblFilterWidth = FilterWidth;
-  m_PatternState = EDirection::Init;
-  m_dblPatternPt0 = m_dblPatternPt1 = 0;
-  cntNewUp = cntNewDown = cntTurns = 0;
+CZigZag::CZigZag( double FilterWidth ) : 
+  m_dblFilterWidth( FilterWidth ), 
+  m_PatternState( EDirection::Init ),
+  m_dblPatternPt0( 0 ), m_dblPatternPt1( 0 ),
+  cntNewUp( 0 ), cntNewDown( 0 ), cntTurns( 0 )
+  {
 }
 
 CZigZag::~CZigZag(void) {

@@ -12,7 +12,7 @@ CChartDatedDatum::CChartDatedDatum(void) : CChartViewerShim() {
   chart = NULL;
   m_majorTickInc = 0;
   m_minorTickInc = 0;
-  m_factory.SetOnNewBar( MakeDelegate( this, &CChartDatedDatum::HandleOnNewBar ) );
+  m_factory.SetOnBarComplete( MakeDelegate( this, &CChartDatedDatum::HandleOnNewBar ) );
   m_factory.SetOnBarUpdated( MakeDelegate( this, &CChartDatedDatum::HandleOnBarUpdated ) );
 }
 

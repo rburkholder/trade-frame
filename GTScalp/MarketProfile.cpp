@@ -10,7 +10,7 @@ CMarketProfile::CMarketProfile(void) {
   m_pBars = new CBars( 20 );
   m_bf.SetBarWidth( 30 * 60 );  // 30 minutes
   m_nBucketSize = 5;
-  m_bf.SetOnNewBar( MakeDelegate( this, &CMarketProfile::OnNewBar ) );
+  m_bf.SetOnBarComplete( MakeDelegate( this, &CMarketProfile::OnNewBar ) );
   m_bf.SetOnBarUpdated( MakeDelegate( this, &CMarketProfile::OnBarUpdate ) );
 }
 
