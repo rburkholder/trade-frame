@@ -19,6 +19,7 @@ IMPLEMENT_DYNAMIC( CIQFeed, CWnd )
 
 CIQFeed::CIQFeed( CWnd *pParent ) {
 
+  // turn this into a singleton
   BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), pParent, 1 );
 
   SetCallbackFunction( &IQFeedCallBack );

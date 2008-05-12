@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="InteractiveBrokers"
-	ProjectGUID="{F9BE4F41-8334-4461-BEC8-1F83BEEF9EC6}"
-	RootNamespace="InteractiveBrokers"
+	Name="LibCommon"
+	ProjectGUID="{21EFE05C-79BF-4581-BA84-AE3621564654}"
+	RootNamespace="LibCommon"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -149,6 +149,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\ConsoleStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ReusableCharBuffers.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -174,6 +182,30 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\BufferedSocket.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Color.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConsoleStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Delegate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FastDelegate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ReusableCharBuffers.h"
+				>
+			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>

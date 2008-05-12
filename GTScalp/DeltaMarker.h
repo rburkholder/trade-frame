@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Color.h"
+#include "..\LibCommon\Color.h"
 
 #include <string>
 using namespace std;

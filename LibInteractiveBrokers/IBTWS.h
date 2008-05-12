@@ -2,12 +2,22 @@
 //#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
 //#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
 #include "TWS\EClientSocket.h"
+#include "ProviderInterface.h"
 
-class CIBTWS :   public EWrapper {
+#include <string>
+
+class CIBTWS : public EWrapper, public CProviderInterface {
 public:
-  CIBTWS( const CString &acctCode );
+  CIBTWS( const string &acctCode, const string &address = "127.0.0.1", UINT port = 7496 );
   ~CIBTWS(void);
-  void Start( void );
+  
+  //void Start( void );
+
+  // From ProviderInterface:
+  virtual void Connect( void );
+  virtual void Disconnect( void );
+
+  // From TWS Wrapper:
   virtual void connectionClosed();
   virtual void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
   virtual void tickSize( TickerId tickerId, TickType field, int size);
@@ -52,7 +62,10 @@ public:
 	   long volume, double wap, int count);
 
 protected:
-  CString m_acctCode;
+  std::string m_sAccountCode;
+  std::string m_sIPAddress;
+  UINT m_nPort;
+  TickerId m_curTickerId;
 private:
   EClientSocket *pTWS;
 };

@@ -1,10 +1,10 @@
 #pragma once
 #include "IQFeedMessages.h"
 
-#include "FastDelegate.h"
-using namespace fastdelegate;
+//#include "FastDelegate.h"
+//using namespace fastdelegate;
 
-#include "Delegate.h"
+#include "..\LibCommon\Delegate.h"
 
 #include <vector>
 #include <string>
@@ -26,17 +26,7 @@ public:
   void HandleSummaryMessage( CIQFSummaryMessage *pMsg );
   void HandleNewsMessage( CIQFNewsMessage *pMsg );
 
-  //typedef FastDelegate1<CIQFSymbol*> OnFundamentalMessageHandler;
-  //Delegate<OnFundamentalMessageHandler,CIQFSymbol*> OnFundamentalMessage;
   Delegate<CIQFSymbol*> OnFundamentalMessage, OnUpdateMessage, OnSummaryMessage, OnNewsMessage;
-
-  //typedef FastDelegate1<CIQFSymbol*> OnUpdateMessageHandler;
-  //Delegate<OnUpdateMessageHandler,CIQFSymbol*> OnUpdateMessage;
-  //Delegate<CIQFSymbol*> OnUpdateMessage;
-
-  //typedef FastDelegate1<CIQFSymbol*> OnSummaryMessageHandler;
-  //Delegate<OnSummaryMessageHandler,CIQFSymbol*> OnSummaryMessage;
-  //Delegate<CIQFSymbol*> OnSummaryMessage;
 
   // Fundamentals
   string sOptionRoots;

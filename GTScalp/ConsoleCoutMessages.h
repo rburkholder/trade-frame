@@ -1,6 +1,6 @@
 #pragma once
 #include "consolemessages.h"
-#include "ConsoleStream.h"
+#include "..\LibCommon\ConsoleStream.h"
 
 #include <iostream>
 using namespace std;

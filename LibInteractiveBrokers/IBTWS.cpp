@@ -8,27 +8,43 @@
 
 #include <iostream>
 
-CIBTWS::CIBTWS( const CString &acctCode ): m_acctCode( acctCode )  {
-  pTWS = new EClientSocket( this );
-  pTWS->eConnect( "127.0.0.1", 7496 );
+CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ): 
+  CProviderInterface(), m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
+{
 }
 
 CIBTWS::~CIBTWS(void) {
-  pTWS->eDisconnect();
-  delete pTWS;
 }
 
-void CIBTWS::Start() {
-  Contract contract;
-  contract.symbol = "GOOG";
-  contract.currency = "USD";
-  contract.exchange = "SMART";
-  contract.secType = "STK";
-  pTWS->reqAccountUpdates( true, m_acctCode );
-  pTWS->reqAllOpenOrders();
-  pTWS->reqNewsBulletins( true );
-  pTWS->reqCurrentTime();
-  pTWS->reqMktData( 1, contract, "100,101,104,165,221,225,236", false );
+//void CIBTWS::Start() {
+  //Contract contract;
+  //contract.symbol = "GOOG";
+  //contract.currency = "USD";
+  //contract.exchange = "SMART";
+  //contract.secType = "STK";
+  //pTWS->reqAccountUpdates( true, m_sAccountCode );
+  //pTWS->reqAllOpenOrders();
+  //pTWS->reqNewsBulletins( true );
+  //pTWS->reqCurrentTime();
+  //pTWS->reqMktData( 1, contract, "100,101,104,165,221,225,236", false );
+//}
+
+void CIBTWS::Connect() {
+  if ( NULL == pTWS ) {
+    pTWS = new EClientSocket( this );
+    pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
+    OnConnected( 0 );
+  }
+}
+
+void CIBTWS::Disconnect() {
+  // check to see if there are any watches happening, and get them disconnected
+  if ( NULL != pTWS ) {
+    pTWS->eDisconnect();
+    delete pTWS;
+    pTWS = NULL;
+    OnDisconnected( 0 );
+  }
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute) {

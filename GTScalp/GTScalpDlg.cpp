@@ -705,9 +705,9 @@ void CGTScalpDlg::OnBnClickedOpenib() {
       cout << "No IB Account Code" << endl;
     }
     else {
-      CString sAcct( szAcct );
+      string sAcct( szAcct );
       theApp.m_pIB = new CIBTWS( sAcct );
-      theApp.m_pIB->Start();
+      //theApp.m_pIB->Start();
     }
   }
 }

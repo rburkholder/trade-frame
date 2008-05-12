@@ -25,18 +25,6 @@ void CChartDatedDatum::SetWindowWidthSeconds( long seconds ) {
   m_pWindowBars -> SetSlidingWindowSeconds( seconds );
 }
 
-long CChartDatedDatum::GetWindowWidthSeconds( void ) {
-  return m_pWindowBars -> GetSlidingWindowSeconds();
-}
-
-void CChartDatedDatum::SetBarFactoryWidthSeconds( long seconds ) {
-  m_factory.SetBarWidth( seconds );
-}
-
-long CChartDatedDatum::GetBarFactoryWidthSeconds( void ) {
-  return m_factory.GetBarWidth();
-}
-
 void CChartDatedDatum::HandleOnNewBar( const CBar &bar) {
   m_pWindowBars->Add( bar.m_dt, new CBar( bar ) );   // TODO: need to do garbage collection after
   m_pWindowBars->UpdateWindow();

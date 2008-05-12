@@ -8,8 +8,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GTScalp", "GTScalp\GTScalp.
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{A009C9AC-12BD-4BBB-9FB5-68A113561949} = {A009C9AC-12BD-4BBB-9FB5-68A113561949}
-		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0} = {0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}
+		{7F4262BB-E374-4367-A3A0-1C303219338E} = {7F4262BB-E374-4367-A3A0-1C303219338E}
+		{21EFE05C-79BF-4581-BA84-AE3621564654} = {21EFE05C-79BF-4581-BA84-AE3621564654}
 		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A} = {BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}
+		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0} = {0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeFrame", "TradeFrame\TradeFrame.vcproj", "{E60FC46C-ADEC-416A-9ADB-C87DFB5DAB25}"
@@ -35,6 +37,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibInteractiveBrokers", "Li
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{21EFE05C-79BF-4581-BA84-AE3621564654} = {21EFE05C-79BF-4581-BA84-AE3621564654}
+		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A} = {BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}
+		{7F4262BB-E374-4367-A3A0-1C303219338E} = {7F4262BB-E374-4367-A3A0-1C303219338E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIndicators", "LibIndicators\LibIndicators.vcproj", "{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -43,6 +50,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIndicators", "LibIndicat
 	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A} = {BB79D16D-1569-4BFC-A14E-BEC0FB4FB26A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTrading", "LibTrading\LibTrading.vcproj", "{7F4262BB-E374-4367-A3A0-1C303219338E}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{21EFE05C-79BF-4581-BA84-AE3621564654} = {21EFE05C-79BF-4581-BA84-AE3621564654}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibCommon", "LibCommon\LibCommon.vcproj", "{21EFE05C-79BF-4581-BA84-AE3621564654}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
 Global
@@ -79,6 +101,14 @@ Global
 		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Debug|Win32.Build.0 = Debug|Win32
 		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Release|Win32.ActiveCfg = Release|Win32
 		{0A50D1F1-4D51-496B-BB3E-9852F3F55EA0}.Release|Win32.Build.0 = Release|Win32
+		{7F4262BB-E374-4367-A3A0-1C303219338E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7F4262BB-E374-4367-A3A0-1C303219338E}.Debug|Win32.Build.0 = Debug|Win32
+		{7F4262BB-E374-4367-A3A0-1C303219338E}.Release|Win32.ActiveCfg = Release|Win32
+		{7F4262BB-E374-4367-A3A0-1C303219338E}.Release|Win32.Build.0 = Release|Win32
+		{21EFE05C-79BF-4581-BA84-AE3621564654}.Debug|Win32.ActiveCfg = Debug|Win32
+		{21EFE05C-79BF-4581-BA84-AE3621564654}.Debug|Win32.Build.0 = Debug|Win32
+		{21EFE05C-79BF-4581-BA84-AE3621564654}.Release|Win32.ActiveCfg = Release|Win32
+		{21EFE05C-79BF-4581-BA84-AE3621564654}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

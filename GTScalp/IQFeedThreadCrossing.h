@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BufferedSocket.h"
-#include "ReusableCharBuffers.h"
+#include "..\LibCommon\BufferedSocket.h"
+#include "..\LibCommon\ReusableCharBuffers.h"
 
 #include <queue>
 using namespace std;

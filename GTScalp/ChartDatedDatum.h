@@ -12,9 +12,9 @@ public:
   void Add( const CBar &bar );
   void Add( const CTrade &trade );
   void SetWindowWidthSeconds( long seconds );
-  long GetWindowWidthSeconds( void );
-  void SetBarFactoryWidthSeconds( long seconds );
-  long GetBarFactoryWidthSeconds( void );
+  long GetWindowWidthSeconds( void ) { return m_pWindowBars -> GetSlidingWindowSeconds(); };
+  void SetBarFactoryWidthSeconds( long seconds ) { m_factory.SetBarWidth( seconds ); };
+  long GetBarFactoryWidthSeconds( void ) { return m_factory.GetBarWidth(); };
   void UpdateChart( void );
   void ClearChart( void );
   void setMajorTickInc( double inc ) { m_majorTickInc = inc; };
