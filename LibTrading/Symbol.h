@@ -23,6 +23,10 @@ public:
   virtual bool RemoveTradeHandler( tradehandler_t );
   virtual bool AddDepthHandler( depthhandler_t );
   virtual bool RemoveDepthHandler( depthhandler_t );
+
+  bool QuoteWatchNeeded( void ) { return !m_OnQuote.IsEmpty(); };
+  bool TradeWatchNeeded( void ) { return !m_OnTrade.IsEmpty(); };
+  bool DepthWatchNeeded( void ) { return !m_OnDepth.IsEmpty(); };
 protected:
   std::string m_sSymbolName;
   Delegate<quote_t> m_OnQuote; 

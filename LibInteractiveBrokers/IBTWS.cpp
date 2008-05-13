@@ -7,26 +7,27 @@
 #include "TWS\Execution.h"
 
 #include <iostream>
+#include <stdexcept>
 
 CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ): 
-  CProviderInterface(), m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
+  CProviderInterface(), 
+    pTWS( NULL ),
+    m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
 {
+  CIBSymbol *p = NULL;
+  m_vTickerToSymbol.push_back( p );
 }
 
 CIBTWS::~CIBTWS(void) {
+  Disconnect();
+  m_vTickerToSymbol.clear();
 }
 
 //void CIBTWS::Start() {
-  //Contract contract;
-  //contract.symbol = "GOOG";
-  //contract.currency = "USD";
-  //contract.exchange = "SMART";
-  //contract.secType = "STK";
+
   //pTWS->reqAccountUpdates( true, m_sAccountCode );
   //pTWS->reqAllOpenOrders();
-  //pTWS->reqNewsBulletins( true );
-  //pTWS->reqCurrentTime();
-  //pTWS->reqMktData( 1, contract, "100,101,104,165,221,225,236", false );
+
 //}
 
 void CIBTWS::Connect() {
@@ -34,6 +35,8 @@ void CIBTWS::Connect() {
     pTWS = new EClientSocket( this );
     pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
     OnConnected( 0 );
+    pTWS->reqCurrentTime();
+    pTWS->reqNewsBulletins( true );
   }
 }
 
@@ -44,28 +47,109 @@ void CIBTWS::Disconnect() {
     delete pTWS;
     pTWS = NULL;
     OnDisconnected( 0 );
+    std::cout << "IB Disconnected " << std::endl;
   }
 }
 
-void CIBTWS::tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute) {
-  //std::cout << "tickPrice " << tickerId << ", " << field << ", " << price << std::endl;
+CSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
+  TickerId ticker = ++m_curTickerId;
+  CIBSymbol *pSymbol = new CIBSymbol( sSymbolName, ticker );
+  m_vTickerToSymbol.push_back( pSymbol );
+  return pSymbol;
 }
 
-void CIBTWS::tickSize( TickerId tickerId, TickType field, int size) {
-  //std::cout << "tickSize " << tickerId << ", " << field << ", " << size << std::endl;
+void CIBTWS::StartQuoteWatch(CSymbol *pSymbol) {
+  StartQuoteTradeWatch( pSymbol );
+}
+
+void CIBTWS::StopQuoteWatch(CSymbol *pSymbol) {
+  StopQuoteTradeWatch( pSymbol );
+}
+
+void CIBTWS::StartTradeWatch(CSymbol *pSymbol) {
+  StartQuoteTradeWatch( pSymbol );
+}
+
+void CIBTWS::StopTradeWatch(CSymbol *pSymbol) {
+  StopQuoteTradeWatch( pSymbol );
+}
+
+void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
+  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+  if ( !pIBSymbol->m_bQuoteTradeWatchInProgress ) {
+    // start watch
+    pIBSymbol->m_bQuoteTradeWatchInProgress = true;
+    Contract contract;
+    contract.symbol = pSymbol->Name().c_str();
+    contract.currency = "USD";
+    contract.exchange = "SMART";
+    contract.secType = "STK";
+    pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
+  }
+}
+
+void CIBTWS::StopQuoteTradeWatch( CSymbol *pSymbol ) {
+  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+  if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() ) {
+    // don't do anything if either a quote or trade watch still in progress
+  }
+  else {
+    // stop watch
+    pTWS->cancelMktData( pIBSymbol->GetTickerId() );
+    pIBSymbol->m_bQuoteTradeWatchInProgress = false;
+  }
+}
+
+void CIBTWS::StartDepthWatch(CSymbol *pSymbol) {
+  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+  if ( !pIBSymbol->m_bDepthWatchInProgress ) {
+    // start watch
+    pIBSymbol->m_bDepthWatchInProgress = true;
+  }
+}
+
+void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {
+  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+  if ( pIBSymbol->DepthWatchNeeded() ) {
+  }
+  else {
+    // stop watch
+    pIBSymbol->m_bDepthWatchInProgress = false;
+  }
+}
+
+void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
+  //static char *meaning[] = { "0", "bid", "ask", "3", "last", "5", "high", "low", "8", "close" };
+  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+  std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
+  pSym->AcceptTickPrice( tickType, price );
+}
+
+void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
+  //static char *meaning[] = { "bidsize", "1", "2", "asksize", "4", "lastsize", "6", "7", "volume" };
+  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+  std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
+  pSym->AcceptTickSize( tickType, size );
 }
 
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
                                    double modelPrice, double pvDividend) {
-  std::cout << "tickOptionComputation" << std::endl;
+  std::cout << "tickOptionComputation" << ", " << TickTypeStrings[tickType] << std::endl; 
 }
 
 void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
-  std::cout << "tickGeneric " << tickerId << ", " << tickType << ", " << value << std::endl;
+  std::cout << "tickGeneric " << m_vTickerToSymbol[ tickerId ]->Name() << ", " << TickTypeStrings[tickType] << ", " << value << std::endl;
 }
 
 void CIBTWS::tickString(TickerId tickerId, TickType tickType, const CString& value) {
-  //std::cout << "tickString " << tickerId << ", " << tickType << ", " << value << std::endl;
+  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+  std::cout << "tickString " << pSym->Name() << ", " 
+    << TickTypeStrings[tickType] << ", " << value;
+  //if ( TickType::LAST_TIMESTAMP == tickType ) {
+  //  cout << ":" << value - m_time;
+  //}
+  std::cout << std::endl;
+  pSym->AcceptTickString( tickType, value );
 }
 
 void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const CString& formattedBasisPoints,
@@ -101,6 +185,8 @@ void CIBTWS::updateNewsBulletin(int msgId, int msgType, const CString& newsMessa
 }
 
 void CIBTWS::currentTime(long time) {
+  std::cout << "current time " << time << endl;
+  m_time = time;
 }
 
 void CIBTWS::updateAccountTime(const CString& timeStamp) {
@@ -174,4 +260,46 @@ void CIBTWS::realtimeBar(TickerId reqId, long time, double open, double high, do
                          long volume, double wap, int count) {
 }
 
-
+// From EWrapper.h
+char *CIBTWS::TickTypeStrings[] = {
+  "BID_SIZE", "BID", "ASK", "ASK_SIZE", "LAST", "LAST_SIZE",
+				"HIGH", "LOW", "VOLUME", "CLOSE",
+				"BID_OPTION_COMPUTATION", 
+				"ASK_OPTION_COMPUTATION", 
+				"LAST_OPTION_COMPUTATION",
+				"MODEL_OPTION",
+				"OPEN",
+				"LOW_13_WEEK",
+				"HIGH_13_WEEK",
+				"LOW_26_WEEK",
+				"HIGH_26_WEEK",
+				"LOW_52_WEEK",
+				"HIGH_52_WEEK",
+				"AVG_VOLUME",
+				"OPEN_INTEREST",
+				"OPTION_HISTORICAL_VOL",
+				"OPTION_IMPLIED_VOL",
+				"OPTION_BID_EXCH",
+				"OPTION_ASK_EXCH",
+				"OPTION_CALL_OPEN_INTEREST",
+				"OPTION_PUT_OPEN_INTEREST",
+				"OPTION_CALL_VOLUME",
+				"OPTION_PUT_VOLUME",
+				"INDEX_FUTURE_PREMIUM",
+				"BID_EXCH",
+				"ASK_EXCH",
+				"AUCTION_VOLUME",
+				"AUCTION_PRICE",
+				"AUCTION_IMBALANCE",
+				"MARK_PRICE",
+				"BID_EFP_COMPUTATION",
+				"ASK_EFP_COMPUTATION",
+				"LAST_EFP_COMPUTATION",
+				"OPEN_EFP_COMPUTATION",
+				"HIGH_EFP_COMPUTATION",
+				"LOW_EFP_COMPUTATION",
+				"CLOSE_EFP_COMPUTATION",
+				"LAST_TIMESTAMP",
+				"SHORTABLE",
+				"NOT_SET"
+};

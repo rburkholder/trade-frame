@@ -34,5 +34,6 @@ protected:
   virtual void StopTradeWatch( CSymbol *pSymbol ) {};
   virtual void StartDepthWatch( CSymbol *pSymbol ) {};
   virtual void StopDepthWatch( CSymbol *pSymbol ) {};
+  virtual CSymbol *NewCSymbol( const std::string &sSymbolName ) { return new CSymbol( sSymbolName ); }; // override for deriving different inherited version
 private:
 };

@@ -133,4 +133,7 @@ public:
   CEdit m_edtIBAcctCode;
   afx_msg void OnBnClickedRadio1();
   afx_msg void OnBnClickedRadio2();
+  afx_msg void OnBnClickedIbwatch();
+  afx_msg void OnBnClickedIbunwatch();
+  afx_msg void OnBnClickedIbclose();
 };

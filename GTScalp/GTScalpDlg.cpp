@@ -138,6 +138,9 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_OPENIB, &CGTScalpDlg::OnBnClickedOpenib)
   ON_BN_CLICKED(IDC_RADIO1, &CGTScalpDlg::OnBnClickedRadio1)
   ON_BN_CLICKED(IDC_RADIO2, &CGTScalpDlg::OnBnClickedRadio2)
+  ON_BN_CLICKED(IDC_IBWATCH, &CGTScalpDlg::OnBnClickedIbwatch)
+  ON_BN_CLICKED(IDC_IBUNWATCH, &CGTScalpDlg::OnBnClickedIbunwatch)
+  ON_BN_CLICKED(IDC_IBCLOSE, &CGTScalpDlg::OnBnClickedIbclose)
 END_MESSAGE_MAP()
 
 
@@ -696,6 +699,19 @@ void CGTScalpDlg::OnBnClickedUsedayend() {
   m_rbSelectByDayCount.EnableWindow( bBothDays ? 0 : 1 );
 }
 
+class CTestTrade {
+public:
+  CTestTrade( void ) {};
+  ~CTestTrade( void ) {};
+  void HandleTrade( const CTrade &trade ) { 
+    std::cout << trade.m_dblTrade << " " << trade.m_nTradeSize << endl; 
+  };
+protected:
+private:
+};
+
+CTestTrade testTrade;
+
 void CGTScalpDlg::OnBnClickedOpenib() {
   // TODO: Add your control notification handler code here
   if ( NULL == theApp.m_pIB ) {
@@ -707,9 +723,31 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     else {
       string sAcct( szAcct );
       theApp.m_pIB = new CIBTWS( sAcct );
-      //theApp.m_pIB->Start();
+      theApp.m_pIB->Connect();
     }
   }
 }
 
+void CGTScalpDlg::OnBnClickedIbwatch() {
+  if ( NULL != theApp.m_pIB ) {
+    char symbol[ 30 ];
+    m_lbSymbolList.GetWindowTextA( symbol, 30 );
+    theApp.m_pIB->AddTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
+  }
+}
 
+void CGTScalpDlg::OnBnClickedIbunwatch() {
+  if ( NULL != theApp.m_pIB ) {
+    char symbol[ 30 ];
+    m_lbSymbolList.GetWindowTextA( symbol, 30 );
+    theApp.m_pIB->RemoveTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
+  }
+}
+
+void CGTScalpDlg::OnBnClickedIbclose() {
+  if ( NULL != theApp.m_pIB ) {
+    theApp.m_pIB->Disconnect();
+    delete theApp.m_pIB;
+    theApp.m_pIB = NULL;
+  }
+}

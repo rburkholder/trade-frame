@@ -3,6 +3,7 @@
 //#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
 #include "TWS\EClientSocket.h"
 #include "ProviderInterface.h"
+#include "IBSymbol.h"
 
 #include <string>
 
@@ -16,6 +17,10 @@ public:
   // From ProviderInterface:
   virtual void Connect( void );
   virtual void Disconnect( void );
+
+  // From ProviderInterface
+
+
 
   // From TWS Wrapper:
   virtual void connectionClosed();
@@ -66,6 +71,22 @@ protected:
   std::string m_sIPAddress;
   UINT m_nPort;
   TickerId m_curTickerId;
+  CSymbol *NewCSymbol( const std::string &sSymbolName );
+  std::vector<CIBSymbol *> m_vTickerToSymbol;
+
+  // overridden from ProviderInterface
+  virtual void StartQuoteWatch( CSymbol *pSymbol );
+  virtual void StopQuoteWatch( CSymbol *pSymbol );
+  virtual void StartTradeWatch( CSymbol *pSymbol );
+  virtual void StopTradeWatch( CSymbol *pSymbol );
+  virtual void StartQuoteTradeWatch( CSymbol *pSymbol );
+  virtual void StopQuoteTradeWatch( CSymbol *pSymbol );
+  virtual void StartDepthWatch( CSymbol *pSymbol );
+  virtual void StopDepthWatch( CSymbol *pSymbol );
+
+  static char *TickTypeStrings[];
 private:
   EClientSocket *pTWS;
+  long m_time;
+  
 };
