@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "BarFactory.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CBarFactory::CBarFactory(long nSeconds) : 
     m_nBarWidthSeconds( max( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
 {

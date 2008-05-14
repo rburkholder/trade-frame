@@ -13,11 +13,13 @@
 //#include "IQFeedOptions.h"
 #include "IQFeedRetrieveHistory.h"
 #include "IQFeedSymbolFile.h"
+#include "ChartDatedDatum.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
-
 
 // CAboutDlg dialog used for App About
 
@@ -98,6 +100,7 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_ENDBARCOUNT, m_rbSelectByBarCount);
   DDX_Control(pDX, IDC_ENDDAYCOUNT, m_rbSelectByDayCount);
   DDX_Control(pDX, IDC_IBACCT, m_edtIBAcctCode);
+  DDX_Control(pDX, IDC_GRPDATASOURCE, m_grpDataSource);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -141,6 +144,11 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_IBWATCH, &CGTScalpDlg::OnBnClickedIbwatch)
   ON_BN_CLICKED(IDC_IBUNWATCH, &CGTScalpDlg::OnBnClickedIbunwatch)
   ON_BN_CLICKED(IDC_IBCLOSE, &CGTScalpDlg::OnBnClickedIbclose)
+  ON_BN_CLICKED(IDC_DSIQFEED, &CGTScalpDlg::OnBnClickedDsiqfeed)
+  ON_BN_CLICKED(IDC_DSIB, &CGTScalpDlg::OnBnClickedDsib)
+  ON_BN_CLICKED(IDC_DSGT1, &CGTScalpDlg::OnBnClickedDsgt1)
+  ON_BN_CLICKED(IDC_DSGT2, &CGTScalpDlg::OnBnClickedDsgt2)
+  ON_BN_CLICKED(IDC_CHARTSYMBOL, &CGTScalpDlg::OnBnClickedChartsymbol)
 END_MESSAGE_MAP()
 
 
@@ -239,6 +247,9 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eScanType = NoScanType;
   m_bUseDayStart = false;
   m_bUseDayEnd = false;
+
+  m_eDataSourceType = NoDS;
+  //pChartIntraDay = NULL;
 
   theApp.m_pIB = NULL;
 
@@ -704,7 +715,7 @@ public:
   CTestTrade( void ) {};
   ~CTestTrade( void ) {};
   void HandleTrade( const CTrade &trade ) { 
-    std::cout << trade.m_dblTrade << " " << trade.m_nTradeSize << endl; 
+    //std::cout << trade.m_dblTrade << " " << trade.m_nTradeSize << endl; 
   };
 protected:
 private:
@@ -749,5 +760,54 @@ void CGTScalpDlg::OnBnClickedIbclose() {
     theApp.m_pIB->Disconnect();
     delete theApp.m_pIB;
     theApp.m_pIB = NULL;
+  }
+}
+
+void CGTScalpDlg::OnBnClickedDsiqfeed() {
+  m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSIQFEED );
+  m_eDataSourceType = DSIQFeed;
+}
+
+void CGTScalpDlg::OnBnClickedDsib() {
+  m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSIB );
+  m_eDataSourceType = DSIB;
+}
+
+void CGTScalpDlg::OnBnClickedDsgt1() {
+  m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSGT1 );
+  m_eDataSourceType = DSGenesis1;
+}
+
+void CGTScalpDlg::OnBnClickedDsgt2() {
+  m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSGT2 );
+  m_eDataSourceType = DSGenesis2;
+}
+
+void CGTScalpDlg::OnBnClickedChartsymbol() {
+  char szSymbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+  string sSymbol( szSymbol );
+  if ( ( 0 != *szSymbol ) && ( NoDS != m_eDataSourceType ) ) {
+    if ( DSIB == m_eDataSourceType ) {  // only accept IB for now
+      if ( NULL != theApp.m_pIB ) { // make sure IB is turned on
+        CVuChart *pChartIntraDay;  // need to add to vector so can delete at end of program run
+        pChartIntraDay = new CVuChart( );
+        pChartIntraDay->m_chart.SetBarFactoryWidthSeconds( 6 );
+        pChartIntraDay->m_chart.SetWindowWidthSeconds( 90 * 6 ); 
+        pChartIntraDay->m_chart.setMajorTickInc( 12 * 6 );
+        pChartIntraDay->m_chart.setMinorTickInc( 18 );
+        pChartIntraDay->m_chart.SetUpdateChart( true );
+        std::string s = "Intraday ";
+        s.append( sSymbol );
+        pChartIntraDay->m_chart.SetTitle( s );
+        pChartIntraDay->ShowWindow( 1 );
+        //pChartIntraDay->m_chart.se
+        theApp.m_pIB->AddTradeHandler( 
+          sSymbol, 
+          MakeDelegate( &pChartIntraDay->m_chart, &CChartDatedDatum::AddTrade ) 
+          //MakeDelegate( &testTrade, &CTestTrade::HandleTrade )
+          );
+      }
+    }
   }
 }

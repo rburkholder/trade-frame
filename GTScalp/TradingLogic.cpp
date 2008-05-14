@@ -4,6 +4,12 @@
 #include "GTOrderX.h"
 #include "Color.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 EColor MDColors[] = { 
   LightYellow, LightYellow, PaleGoldenrod, Wheat, Goldenrod, DarkGoldenrod,
   DarkKhaki, DarkOrange, Orange, OrangeRed, Red, Crimson, Black };  // Black is not used, simply an end of list indicator
@@ -64,7 +70,7 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pTrades = new CTrades( 100000 );
 
   pChartIntraDay->m_chart.SetBarFactoryWidthSeconds( 60 );
-  pChartIntraDay->m_chart.SetWindowWidthSeconds( 90 * 60 );
+  pChartIntraDay->m_chart.SetWindowWidthSeconds( 90 * 60 ); // 90 minute window
   pChartIntraDay->m_chart.setMajorTickInc( 12 * 60 );
   pChartIntraDay->m_chart.setMinorTickInc( 60 );
 
@@ -212,6 +218,7 @@ void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
     pPivot = pivots[ i ];
     char sz[ 10 ];
     while ( NULL != pPivot ) {
+      
       *sz = 0;
       strcat_s( sz, 10, pPivot->Name().c_str() );
       strcat_s( sz, 10, "R3" );

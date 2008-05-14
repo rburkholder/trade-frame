@@ -2,6 +2,12 @@
 #include "ChartDatedDatum.h"
 //#include "chartdir.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 // recieve quotes and trades, maintain window of values, and re-chart the window
 // as new values are received.
 // generate bars 

@@ -9,6 +9,12 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ): 
   CProviderInterface(), 
     pTWS( NULL ),
@@ -84,7 +90,8 @@ void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
     contract.currency = "USD";
     contract.exchange = "SMART";
     contract.secType = "STK";
-    pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
+    //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
+    pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
   }
 }
 
@@ -119,16 +126,14 @@ void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
-  //static char *meaning[] = { "0", "bid", "ask", "3", "last", "5", "high", "low", "8", "close" };
   CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
+  //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
   pSym->AcceptTickPrice( tickType, price );
 }
 
 void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
-  //static char *meaning[] = { "bidsize", "1", "2", "asksize", "4", "lastsize", "6", "7", "volume" };
   CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
+  //std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
   pSym->AcceptTickSize( tickType, size );
 }
 
@@ -143,12 +148,9 @@ void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
 
 void CIBTWS::tickString(TickerId tickerId, TickType tickType, const CString& value) {
   CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  std::cout << "tickString " << pSym->Name() << ", " 
-    << TickTypeStrings[tickType] << ", " << value;
-  //if ( TickType::LAST_TIMESTAMP == tickType ) {
-  //  cout << ":" << value - m_time;
-  //}
-  std::cout << std::endl;
+  //std::cout << "tickString " << pSym->Name() << ", " 
+  //  << TickTypeStrings[tickType] << ", " << value;
+  //std::cout << std::endl;
   pSym->AcceptTickString( tickType, value );
 }
 

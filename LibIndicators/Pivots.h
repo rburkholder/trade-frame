@@ -15,18 +15,18 @@ public:
 
   const string &Name( void ) { return m_sName; };
   double R3( void ) { return m_R3; };
-  double R23( void ) { return m_R3; };
-  double R2( void ) { return m_R3; };
-  double R12( void ) { return m_R3; };
-  double R1( void ) { return m_R3; };
-  double PVR1( void ) { return m_R3; };
-  double PV( void ) { return m_R3; };
-  double PVS1( void ) { return m_R3; };
-  double S1( void ) { return m_R3; };
-  double S12( void ) { return m_R3; };
-  double S2( void ) { return m_R3; };
-  double S23( void ) { return m_R3; };
-  double S3( void ) { return m_R3; };
+  double R23( void ) { return m_R23; };
+  double R2( void ) { return m_R2; };
+  double R12( void ) { return m_R12; };
+  double R1( void ) { return m_R1; };
+  double PVR1( void ) { return m_PVR1; };
+  double PV( void ) { return m_PV; };
+  double PVS1( void ) { return m_PVS1; };
+  double S1( void ) { return m_S1; };
+  double S12( void ) { return m_S12; };
+  double S2( void ) { return m_S2; };
+  double S23( void ) { return m_S23; };
+  double S3( void ) { return m_S3; };
 
 protected:
   

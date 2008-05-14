@@ -2,6 +2,7 @@
 
 //#include <queue>
 #include <deque>
+#include <stdexcept>
 using namespace std;
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -12,6 +13,7 @@ using namespace boost::gregorian;
 
 //
 // CObjectAtTime
+// Has a time reference, and holds an object related to the time reference
 //
 
 template<class T> class CObjectAtTime {
@@ -33,15 +35,19 @@ template<class T> CObjectAtTime<T>::CObjectAtTime(boost::posix_time::ptime dt, T
 
 template<class T> CObjectAtTime<T>::~CObjectAtTime(void) {
   m_object = NULL;
+  // held object is released elsewhere
 }
 
 //
 // CSlidingWindow
+// Holds a series of objects based upon minimizing a time window or a count window
+//  ie, any excess objects or objects outside of the time window are removed
+// Assumes objects are added in forward chronological order
 //
 
 template<class T> class CSlidingWindow {
 public:
-  // when both are zerio, then do no windowing
+  // when both are zero, then do no windowing, should actually raise an exception
   CSlidingWindow<T>(long WindowSizeSeconds = 0, long WindowSizeCount = 0);
   virtual ~CSlidingWindow<T>(void);
 
@@ -76,6 +82,9 @@ private:
 };
 
 template<class T> CSlidingWindow<T>::CSlidingWindow(long nWindowSizeSeconds, long nWindowSizeCount) {
+  //if ( ( 0 == nWindowSizeSeconds ) && ( 0 == nWindowSizeCount ) ) {
+  //  throw std::runtime_error( "WindowSize (seconds) and WindowSize (count) cannot both be zero" );
+  //}  // can't do this as many things construct with 0 window then set parameters later
   m_nWindowSizeCount = nWindowSizeCount;
   m_nWindowSizeSeconds = nWindowSizeSeconds;
   m_tdWindowWidth = seconds(nWindowSizeSeconds);

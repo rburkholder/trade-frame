@@ -16,6 +16,12 @@
 #include "Scripts.h"
 #include "SymbolSelectionFilter.h"
 
+#include "Pivots.h"
+#include "VuChart.h"
+#include "FinanceChart.h"
+#include "VuMarketDepth.h"
+
+
 using namespace std;
 
 // CGTScalpDlg dialog
@@ -46,6 +52,10 @@ private:
   CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
   bool m_bUseDayStart;
   bool m_bUseDayEnd;
+  enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2 };
+  enumDataSourceType m_eDataSourceType;
+
+  //CVuChart *pChartIntraDay;
 
 
 protected:
@@ -136,4 +146,10 @@ public:
   afx_msg void OnBnClickedIbwatch();
   afx_msg void OnBnClickedIbunwatch();
   afx_msg void OnBnClickedIbclose();
+  afx_msg void OnBnClickedDsiqfeed();
+  afx_msg void OnBnClickedDsib();
+  afx_msg void OnBnClickedDsgt1();
+  afx_msg void OnBnClickedDsgt2();
+  CStatic m_grpDataSource;
+  afx_msg void OnBnClickedChartsymbol();
 };

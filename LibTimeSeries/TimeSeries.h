@@ -54,7 +54,7 @@ template<class T> CTimeSeries<T>::CTimeSeries(void) {
 }
 
 template<class T> CTimeSeries<T>::CTimeSeries( unsigned int size ) {
-  m_vSeries.resize( size );
+  m_vSeries.reserve( size );
 }
 
 template<class T> CTimeSeries<T>::~CTimeSeries(void) {

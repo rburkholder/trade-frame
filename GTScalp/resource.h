@@ -84,8 +84,16 @@
 #define IDC_IBACCT                      1089
 #define IDC_IBWATCH                     1090
 #define IDC_IBUNWATCH                   1091
-#define IDC_BUTTON4                     1092
 #define IDC_IBCLOSE                     1092
+#define IDC_GRPDATASOURCE               1093
+#define IDC_DSIQFEED                    1094
+#define IDC_DSIB                        1095
+#define IDC_DSGT1                       1096
+#define IDC_DSGT2                       1097
+#define IDC_DS1                         1098
+#define IDC_DS2                         1099
+#define IDC_BUTTON5                     1100
+#define IDC_CHARTSYMBOL                 1100
 
 // Next default values for new objects
 // 
@@ -93,7 +101,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1093
+#define _APS_NEXT_CONTROL_VALUE         1101
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
