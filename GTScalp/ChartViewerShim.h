@@ -22,5 +22,9 @@ protected:
   unsigned int m_nChartWidth;
   unsigned int m_nChartHeight;
   string m_sChartTitle;
+
+	afx_msg void OnDestroy();
+	DECLARE_MESSAGE_MAP()
+
 private:
 };

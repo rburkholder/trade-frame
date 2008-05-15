@@ -15,6 +15,8 @@
 #include "IQFeedSymbolFile.h"
 #include "ChartDatedDatum.h"
 
+#include <iostream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -193,7 +195,7 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_edtDaysAgo.SetWindowTextA( "1" );
 
   // looks like addresses for exec, level1, and level2
-  CString GTAddress[] = { "76.8.64.2","76.8.64.3","76.8.64.4","69.64.202.157","" };
+  char *GTAddress[] = { "76.8.64.2","76.8.64.3","76.8.64.4","69.64.202.157","" };
   // preferred ports for level2
   int ExecPort[] = { 15805,16805,16705,16605,16505,16405,16305,16205,16105,16005,15905,15305,15405,15505,15605,15705,17205,0 };
 
@@ -202,20 +204,28 @@ BOOL CGTScalpDlg::OnInitDialog() {
   int Level2Port0[] = {16810,26810,36810,46810,56810,17810,27810,37810,47810,57810,0};
 
   // any combination of the following
-  CString Level2Address1[] = { "69.64.202.155","69.64.202.156","69.64.202.157",""};
+  char *Level2Address1[] = { "69.64.202.155","69.64.202.156","69.64.202.157",""};
   // alternate ports
   int Level2Port1[] = { 16324,26324,0};
 
-  CString *pstr = GTAddress;
-  while ( (*pstr).Compare( "" ) ) {
-    //while ( "" != LPCTSTR( pstr ) ) {
-    m_lbExecAddr.AddString( LPCTSTR( *pstr ) );
+  unsigned short ix = 0;
+  char *pstr = GTAddress[ix];
+  while ( 0 != *pstr ) {
+    m_lbExecAddr.AddString( pstr );
     m_lbExecAddr.SetCurSel( 0 );
-    m_lbLvl1Addr.AddString( LPCTSTR( *pstr ) );
+    m_lbLvl1Addr.AddString( pstr );
     m_lbLvl1Addr.SetCurSel( 0 );
-    m_lbLvl2Addr.AddString( LPCTSTR( *pstr ) );
+    m_lbLvl2Addr.AddString( pstr );
     m_lbLvl2Addr.SetCurSel( 0 );
-    pstr++;
+    pstr = GTAddress[++ix];
+  }
+
+  ix = 0;
+  pstr = Level2Address1[ix];
+  while ( 0 != *pstr ) {
+    m_lbLvl2Addr.AddString( pstr );
+    m_lbLvl2Addr.SetCurSel( 0 );
+    pstr = Level2Address1[ ++ix ];
   }
 
   CString s;
@@ -236,6 +246,14 @@ BOOL CGTScalpDlg::OnInitDialog() {
   }
 
   pport = Level2Port0;
+  while ( 0 != *pport ) {
+    s.Format( "%d", *pport );
+    m_lbLvl2Port.AddString( LPCTSTR( s ) );
+    m_lbLvl2Port.SetCurSel( 0 );
+    pport++;
+  }
+
+  pport = Level2Port1;
   while ( 0 != *pport ) {
     s.Format( "%d", *pport );
     m_lbLvl2Port.AddString( LPCTSTR( s ) );
@@ -373,30 +391,57 @@ void CGTScalpDlg::OnBnClickedLogin()
 {
   int result = 0;
 
-  bLoggedIn = false;
+  bLoggedIn = true;
   CString s;
 
   try {
-    theApp.m_session1.m_setting.SetExecAddress("76.8.64.4",15805);
-    theApp.m_session1.m_setting.SetQuoteAddress("69.64.202.157",16811);
-    theApp.m_session1.m_setting.SetLevel2Address("69.64.202.157",16810);
-    result = theApp.m_session1.Login( "OURB001", "pembmnc" );
-    s.Format("Login result (sess1) is %d", result );
-    theApp.pConsoleMessages->WriteLine(s);
-    if ( 1 == result ) bLoggedIn = true;
+    char buffer1[20];
+    char buffer2[20];
+    unsigned short nPort;
 
-    theApp.m_session2.m_setting.SetExecAddress("76.8.64.4",15805);
-    theApp.m_session2.m_setting.SetQuoteAddress("69.64.202.157",16811);
-    theApp.m_session2.m_setting.SetLevel2Address("69.64.202.157",16810);
+    m_lbExecAddr.GetText( m_lbExecAddr.GetCurSel(), buffer1 );
+    m_lbExecPort.GetText( m_lbExecPort.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session1.m_setting.SetExecAddress(buffer1,nPort);
+
+    m_lbLvl1Addr.GetText( m_lbLvl1Addr.GetCurSel(), buffer1 );
+    m_lbLvl1Port.GetText( m_lbLvl1Port.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session1.m_setting.SetQuoteAddress(buffer1,nPort);
+
+    m_lbLvl2Addr.GetText( m_lbLvl2Addr.GetCurSel(), buffer1 );
+    m_lbLvl2Port.GetText( m_lbLvl2Port.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session1.m_setting.SetLevel2Address(buffer1,nPort);
+
+    result = theApp.m_session1.Login( "OURB001", "pembmnc" );
+    std::cout << "Login result (sess1) is " << result << std::endl;
+    if ( 1 != result ) bLoggedIn = false;
+
+    m_lbExecAddr.GetText( m_lbExecAddr.GetCurSel(), buffer1 );
+    m_lbExecPort.GetText( m_lbExecPort.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session2.m_setting.SetExecAddress(buffer1,nPort);
+
+    m_lbLvl1Addr.GetText( m_lbLvl1Addr.GetCurSel(), buffer1 );
+    m_lbLvl1Port.GetText( m_lbLvl1Port.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session2.m_setting.SetQuoteAddress(buffer1,nPort);
+
+    m_lbLvl2Addr.GetText( m_lbLvl2Addr.GetCurSel(), buffer1 );
+    m_lbLvl2Port.GetText( m_lbLvl2Port.GetCurSel(), buffer2 );
+    nPort = atoi( buffer2 );
+    theApp.m_session2.m_setting.SetLevel2Address(buffer1,nPort);
+
     result = theApp.m_session2.Login( "OURB002", "pembmnc" );
-    s.Format("Login result (sess2) is %d", result );
-    theApp.pConsoleMessages->WriteLine(s);
-    if ( 1 == result ) bLoggedIn = true;
+    std::cout << "Login result (sess2) is " << result << std::endl;
+    if ( 1 != result ) bLoggedIn = false;
 
 
   }
   catch (...) {
-    theApp.pConsoleMessages->WriteLine("Login Exception");
+    std::cout << "Login Exception" << std::endl;
+    bLoggedIn = false;
   }
 
   if ( bLoggedIn ) {

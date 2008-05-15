@@ -89,7 +89,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
     symbolfile.EndSearch();
     szExchange = szExchanges[ ++ixExchanges ];
   }
-  cout << "#Symbols: " << cntSymbols << endl;
+  cout << "#Symbols: " << cntSymbols << ", bar count: " << nDays << endl;
   //if ( 0 < i ) StartHistoryCollection();
 
   // close out files

@@ -15,7 +15,17 @@ CChartViewerShim::CChartViewerShim(void) :CChartViewer() {
 CChartViewerShim::~CChartViewerShim(void) {
 }
 
+BEGIN_MESSAGE_MAP(CChartViewerShim, CChartViewer)
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
 void CChartViewerShim::SetChartDimensions(unsigned int x, unsigned int y) {
   m_nChartWidth = x;
   m_nChartHeight = y;
 }
+
+void CChartViewerShim::OnDestroy()  {
+	CChartViewer::OnDestroy();
+	
+}
+

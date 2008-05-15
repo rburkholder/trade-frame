@@ -193,7 +193,7 @@ void IQFeedHistoryHD::OnPortMessage( const char *str ) {
       m_pBars->Flip();
       m_bBusy = false;
       // check size of Time Series to match count
-      cout << "HD " << m_sSymbol << " done " << m_cntRecords << endl;
+      //cout << "HD " << m_sSymbol << " done " << m_cntRecords << endl;
       if ( NULL != OnRequestComplete ) OnRequestComplete( this ); // don't do anything after this as we are deleted
       break;
   }

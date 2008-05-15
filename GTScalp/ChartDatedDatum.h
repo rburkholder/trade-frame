@@ -29,5 +29,9 @@ protected:
   void HandleOnNewBar( const CBar &bar );
   void HandleOnBarUpdated( const CBar &bar );
   double m_majorTickInc, m_minorTickInc; 
+
+	afx_msg void OnDestroy();
+	DECLARE_MESSAGE_MAP()
+
 private:
 };

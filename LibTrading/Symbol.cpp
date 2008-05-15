@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "Symbol.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CSymbol::CSymbol( const std::string sName ): 
   m_sSymbolName( sName ), m_nQuoteHandlers( 0 ), m_nTradeHandlers( 0 ), m_nDepthHandlers( 0 )
 {

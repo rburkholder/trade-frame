@@ -3,6 +3,12 @@
 
 //using namespace H5;
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 /*
 A simple dataspace, H5S_SIMPLE, is a multidimensional array of elements. 
 The dimensionality of the dataspace (or the rank of the array) is fixed and 

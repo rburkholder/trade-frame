@@ -23,8 +23,18 @@ CChartDatedDatum::CChartDatedDatum(void) : CChartViewerShim() {
 }
 
 CChartDatedDatum::~CChartDatedDatum(void) {
+}
+
+BEGIN_MESSAGE_MAP(CChartDatedDatum, CChartViewerShim)
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+void CChartDatedDatum::OnDestroy()  {
+
   if ( NULL != chart ) delete chart;
   delete m_pWindowBars;
+
+	CChartViewerShim::OnDestroy();
 }
 
 void CChartDatedDatum::SetWindowWidthSeconds( long seconds ) {
@@ -164,7 +174,7 @@ void CChartDatedDatum::UpdateChart() {
     //chart->setXAxisStyle( "Arial", 8, TextColor, 45 );
     chart -> addTitle( m_sChartTitle.c_str() );
     chart -> setData( daTimeStamps, daHi, daLo, daOpen, daClose, daVolume, 0 );
-    chart ->addMainChart( m_nChartHeight );
+    chart -> addMainChart( m_nChartHeight );
     //chart->addHLOC(0x008000, 0xcc0000);
     chart->addCandleStick(0x00ff00, 0xff0000);
     chart->addVolBars(70, 0x99ff99, 0xff9999, 0x808080);

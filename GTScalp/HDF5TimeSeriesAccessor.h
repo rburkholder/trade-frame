@@ -183,9 +183,9 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
       delete pComp;
 
       if ( m_curElementCount == oldElementCount ) {
-        cout << "Dataset did not expand" << endl;
+        //cout << "Dataset did not expand" << endl;
       }
-      cout << "Wrote " << count << ", total " << m_curElementCount << endl;
+      //cout << "Wrote " << count << ", total " << m_curElementCount << endl;
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Write H5::Exception " << e.getDetailMsg() << endl;
