@@ -1,5 +1,4 @@
 #pragma once
-//#include "afxcmn.h"
 #include "Resource.h"
 #include "CtlMarketDepth.h"
 
@@ -11,6 +10,9 @@ class CVuMarketDepth : public CDialog {
 public:
 	CVuMarketDepth(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CVuMarketDepth();
+
+  void SetTitleBarText( const char *pText ) { CDialog::SetWindowTextA( pText ); };
+
 
 // Dialog Data
 	enum { IDD = IDD_VUMARKETDEPTH };

@@ -151,6 +151,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_DSGT1, &CGTScalpDlg::OnBnClickedDsgt1)
   ON_BN_CLICKED(IDC_DSGT2, &CGTScalpDlg::OnBnClickedDsgt2)
   ON_BN_CLICKED(IDC_CHARTSYMBOL, &CGTScalpDlg::OnBnClickedChartsymbol)
+  ON_EN_CHANGE(IDC_IBACCT, &CGTScalpDlg::OnEnChangeIbacct)
 END_MESSAGE_MAP()
 
 
@@ -212,11 +213,8 @@ BOOL CGTScalpDlg::OnInitDialog() {
   char *pstr = GTAddress[ix];
   while ( 0 != *pstr ) {
     m_lbExecAddr.AddString( pstr );
-    m_lbExecAddr.SetCurSel( 0 );
     m_lbLvl1Addr.AddString( pstr );
-    m_lbLvl1Addr.SetCurSel( 0 );
     m_lbLvl2Addr.AddString( pstr );
-    m_lbLvl2Addr.SetCurSel( 0 );
     pstr = GTAddress[++ix];
   }
 
@@ -224,16 +222,18 @@ BOOL CGTScalpDlg::OnInitDialog() {
   pstr = Level2Address1[ix];
   while ( 0 != *pstr ) {
     m_lbLvl2Addr.AddString( pstr );
-    m_lbLvl2Addr.SetCurSel( 0 );
     pstr = Level2Address1[ ++ix ];
   }
+
+  m_lbExecAddr.SetCurSel( 3 );
+  m_lbLvl1Addr.SetCurSel( 0 );
+  m_lbLvl2Addr.SetCurSel( 0 );
 
   CString s;
   int *pport = ExecPort;
   while ( 0 != *pport ) {
     s.Format( "%d", *pport );
     m_lbExecPort.AddString( LPCTSTR( s ) );
-    m_lbExecPort.SetCurSel( 0 );
     pport++;
   }
 
@@ -241,7 +241,6 @@ BOOL CGTScalpDlg::OnInitDialog() {
   while ( 0 != *pport ) {
     s.Format( "%d", *pport );
     m_lbLvl1Port.AddString( LPCTSTR( s ) );
-    m_lbLvl1Port.SetCurSel( 0 );
     pport++;
   }
 
@@ -249,7 +248,6 @@ BOOL CGTScalpDlg::OnInitDialog() {
   while ( 0 != *pport ) {
     s.Format( "%d", *pport );
     m_lbLvl2Port.AddString( LPCTSTR( s ) );
-    m_lbLvl2Port.SetCurSel( 0 );
     pport++;
   }
 
@@ -257,9 +255,12 @@ BOOL CGTScalpDlg::OnInitDialog() {
   while ( 0 != *pport ) {
     s.Format( "%d", *pport );
     m_lbLvl2Port.AddString( LPCTSTR( s ) );
-    m_lbLvl2Port.SetCurSel( 0 );
     pport++;
   }
+
+  m_lbExecPort.SetCurSel( 5 );
+  m_lbLvl1Port.SetCurSel( 0 );
+  m_lbLvl2Port.SetCurSel( 1 );
 
   m_eDayCalc = CSymbolSelectionFilter::NoDayCalc;
   m_eScanType = NoScanType;
@@ -776,11 +777,11 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     if ( 0 == *szAcct ) {
       cout << "No IB Account Code" << endl;
     }
-    else {
+//    else {
       string sAcct( szAcct );
       theApp.m_pIB = new CIBTWS( sAcct );
       theApp.m_pIB->Connect();
-    }
+//    }
   }
 }
 
@@ -855,4 +856,14 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
       }
     }
   }
+}
+
+void CGTScalpDlg::OnEnChangeIbacct()
+{
+  // TODO:  If this is a RICHEDIT control, the control will not
+  // send this notification unless you override the CDialog::OnInitDialog()
+  // function and call CRichEditCtrl().SetEventMask()
+  // with the ENM_CHANGE flag ORed into the mask.
+
+  // TODO:  Add your control notification handler code here
 }

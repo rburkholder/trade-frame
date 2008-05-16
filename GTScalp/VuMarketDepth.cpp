@@ -47,7 +47,6 @@ BOOL CVuMarketDepth::OnInitDialog() {
   return b;
 }
 
-
 BEGIN_MESSAGE_MAP(CVuMarketDepth, CDialog)
 END_MESSAGE_MAP()
 

@@ -39,6 +39,8 @@ public:
   void AddDynamicIndicator( double price, const char *ind );
   void RemoveDynamicIndicator( double price, const char *ind );
 
+  void SetTitleBarText( const char* pText ) { CFrameWnd::SetWindowTextA( pText ); };
+
 private:
   //bool bMouseIsDown;
   bool bSizing;

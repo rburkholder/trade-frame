@@ -28,6 +28,8 @@ public:
   void Acct1CancelAsk();
   void Acct2CancelAsk();
 
+  const char *GetSymbol( void ) { return (LPCTSTR) m_sSymbol; };
+
 protected:
   CString m_sSymbol;
   

@@ -87,6 +87,11 @@ void CChartDatedDatum::UpdateChart() {
     double *prClose = new double[ n ];
     double *prVolume = new double[ n ];
 
+    double *prPivot1 = new double[ n ];
+    double *prPivot2 = new double[ n ];
+    double *prPivot3 = new double[ n ];
+    double *prPivot4 = new double[ n ];
+
     int i = 0;
     while ( NULL != pBar ) {
       prTimeStamps[ i ] = Chart::chartTime( 
@@ -102,6 +107,10 @@ void CChartDatedDatum::UpdateChart() {
       prOpen[ i ] = pBar -> m_dblOpen;
       prClose[ i ] = pBar -> m_dblClose;
       prVolume[ i ] = pBar -> m_nVolume;
+      //prPivot1[ i ] = 425.0;
+      //prPivot2[ i ] = 525.0;
+      //prPivot3[ i ] = 625.0;
+      //prPivot4[ i ] = 675.0;
       pBar = m_pWindowBars->Next();
       i++;
     }
@@ -112,6 +121,10 @@ void CChartDatedDatum::UpdateChart() {
     DoubleArray daOpen( prOpen, n );
     DoubleArray daClose( prClose, n );
     DoubleArray daVolume( prVolume, n );
+    //DoubleArray daPivot1( prPivot1, n );
+    //DoubleArray daPivot2( prPivot2, n );
+    //DoubleArray daPivot3( prPivot3, n );
+    //DoubleArray daPivot4( prPivot4, n );
 
     if ( NULL != chart ) {
       delete chart;
@@ -166,7 +179,7 @@ void CChartDatedDatum::UpdateChart() {
 ///*
 
     chart = new FinanceChart( m_nChartWidth );
-    chart->setDateLabelSpacing( 35 );
+    chart->setDateLabelSpacing( 5 );
     chart->setDateLabelFormat( 
       "{value|yyyy}", "{value|yyyy/mmm}", 
       "{value|mmm}", "{value|yyyy/mm/dd hh}", 
@@ -174,12 +187,16 @@ void CChartDatedDatum::UpdateChart() {
     //chart->setXAxisStyle( "Arial", 8, TextColor, 45 );
     chart -> addTitle( m_sChartTitle.c_str() );
     chart -> setData( daTimeStamps, daHi, daLo, daOpen, daClose, daVolume, 0 );
-    chart -> addMainChart( m_nChartHeight );
+    XYChart *main = chart -> addMainChart( m_nChartHeight );
     //chart->addHLOC(0x008000, 0xcc0000);
     chart->addCandleStick(0x00ff00, 0xff0000);
-    chart->addVolBars(70, 0x99ff99, 0xff9999, 0x808080);
+    //chart->addVolBars(70, 0x99ff99, 0xff9999, 0x808080);
+    XYChart *bars = chart->addVolIndicator(70, 0x99ff99, 0xff9999, 0x808080);
+    //chart->addLineIndicator2( main, daPivot1, 0x99ff99, "Pivot1" );
+    //chart->addLineIndicator2( main, daPivot2, 0xff9999, "Pivot2" );
+    //chart->addLineIndicator2( main, daPivot3, 0x808080, "Pivot3" );
+    //chart->addLineIndicator2( main, daPivot4, 0x00ff00, "Pivot4" );
     chart->layout();
-    //chart->get
     setChart( chart );
 //*/
     //pChart->m_chart.setChart( chart );

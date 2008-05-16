@@ -152,4 +152,5 @@ public:
   afx_msg void OnBnClickedDsgt2();
   CStatic m_grpDataSource;
   afx_msg void OnBnClickedChartsymbol();
+  afx_msg void OnEnChangeIbacct();
 };

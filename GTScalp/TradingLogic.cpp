@@ -32,6 +32,9 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pTradeFrame = new CTradeFrame( this );
   pTradeFrame->Create(theApp.m_pMainWnd);
   pTradeFrame->SetAllowRedraw( false );
+  s = "TradeFrame: ";
+  s.append( sSymbol );
+  pTradeFrame->SetTitleBarText( s.c_str() ); 
 
   //pChartDaily = new CVuChart(theApp.m_pMainWnd);
   //pChartDaily->ShowWindow(1);
@@ -40,13 +43,16 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pChartIntraDay->ShowWindow(1);
   s = "Intraday ";
   s.append( m_sSymbol );
-  pChartIntraDay->m_chart.SetTitle( s );
+  pChartIntraDay->m_chart.SetTitle( s.c_str() );
 
   pVuPendingOrders = new CVuPendingOrders( theApp.m_pMainWnd );
   pVuPendingOrders->po1.SetOnCancelHandler( MakeDelegate( this, &CTradingLogic::OnCancelAcct1Order ) );
   pVuPendingOrders->po2.SetOnCancelHandler( MakeDelegate( this, &CTradingLogic::OnCancelAcct2Order ) );
 
   pVuMarketDepth = new CVuMarketDepth( theApp.m_pMainWnd );
+  s = "Market Depth: ";
+  s.append( m_sSymbol );
+  pVuMarketDepth -> SetTitleBarText( s.c_str() );
   pVuMarketDepth ->ShowWindow( SW_SHOWNORMAL );
 
   stkSession1->SetOnQuoteLevel1Handler( MakeDelegate( this, &CTradingLogic::OnQuoteLevel1 ) );
@@ -212,6 +218,7 @@ void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
       delete pBarsForPeriod;
     }
 
+    // need to test that each pointer isn't NULL, if they weren't assigned above
     CPivotSet *pivots[] = { pPivot1Day, pPivot3Day, pPivotWeek, pPivotMonth, pPivot20Days, NULL };
     int i = 0;
     CPivotSet *pPivot;
