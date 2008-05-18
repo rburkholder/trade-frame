@@ -83,12 +83,6 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   ASSERT( NULL != theApp.m_pIQFeed );
   theApp.m_pIQFeed->TimeMessage.Add( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
 
-  pPivot1Day = NULL;
-  pPivot3Day = NULL;
-  pPivotWeek = NULL;
-  pPivotMonth = NULL;
-  pPivot20Days = NULL;
-
   m_state = EState::History;
 
   pBars = new CBars( 250 );
@@ -114,12 +108,6 @@ CTradingLogic::~CTradingLogic(void){
   //theApp.m_pIQFeed->TimeMessage.Remove( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
 
   theApp.m_pRefresh->OnRefresh.Remove( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
-
-  if ( NULL != pPivot1Day ) delete pPivot1Day;
-  if ( NULL != pPivot3Day ) delete pPivot3Day;
-  if ( NULL != pPivotWeek ) delete pPivotWeek;
-  if ( NULL != pPivotMonth ) delete pPivotMonth;
-  if ( NULL != pPivot20Days ) delete pPivot20Days;
 
   delete pVuPendingOrders;
   pVuPendingOrders = NULL;
@@ -159,146 +147,10 @@ void CTradingLogic::OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg ) {
 void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
   if ( pBars->Count() > 0 ) {
 
-    //pBars->Flip();  // probably not needed as already performed in IQFeedRetrieveHistory::OnPortMessage
-    CBar *pBar = pBars->Last();
-
-    //stringstream ss;
-    date dtThisDay = pBar->m_dt.date();
-    //ss << "This Day: " << dtThisDay;
-    date dtPrevDay = ( boost::date_time::Monday == dtThisDay.day_of_week() ) 
-      ? dtThisDay - days( 3 )
-      : dtThisDay - days( 1 );
-    //ss << ", Prev Day: " << dtPrevDay;
-    date dtPrevMonday = dtThisDay + days( boost::date_time::Monday - dtThisDay.day_of_week() ) - days( 7 );
-    //ss << ", Prev Monday: " << dtPrevMonday;
-    date dtPrevWeekFriday = dtPrevMonday + days( 4 );
-    //ss << ", Prev Friday: " << dtPrevWeekFriday;
-    date dtPrevMonthEnd = dtThisDay - days( dtThisDay.day().as_number() );
-    //ss << ", Prev Month End: " << dtPrevMonthEnd;
-    date dtPrevMonth = dtPrevMonthEnd - days( dtPrevMonthEnd.day().as_number() - 1 );
-    //ss << ", Prev Month: " << dtPrevMonth;
-    date dtMonthAgo = dtThisDay - days( 30 );
-    //ss << ", Month ago: " << dtMonthAgo;
-    date dtSixMonthsAgo = dtThisDay - months( 6 );
-    //ss << ", Six Months ago: " << dtSixMonthsAgo;
-    date dt200DaysAgo = dtThisDay - days( 42 * 7 - 2 );
-    //ss << ", 200 Days ago: " << dt200DaysAgo;
-
-    pPivot1Day = new CPivotSet( "pv1Dy", pBar->m_dblHigh, pBar->m_dblLow, pBar->m_dblClose );
-
-    double day3hi = pBar->m_dblHigh;
-    double day3lo = pBar->m_dblLow;
-    double day3cl = pBar->m_dblClose;
-
-    if ( pBars->Count() >= 3 ) {
-      pBar = pBars->Ago( 1 );
-      day3hi = max( day3hi, pBar->m_dblHigh );
-      day3lo = min( day3lo, pBar->m_dblLow );
-      pBar = pBars->Ago( 2 );
-      day3hi = max( day3hi, pBar->m_dblHigh );
-      day3lo = min( day3lo, pBar->m_dblLow );
+    CPivotGroup group( pBars );
+    for ( CPivotGroup::const_iterator iter = group.begin(); iter != group.end(); ++iter ) {
+      pTradeFrame->AppendStaticIndicator( iter->first, iter->second.c_str() );
     }
-    pPivot3Day = new CPivotSet( "pv3Dy", day3hi, day3lo, day3cl );
-
-    CBars *pBarsForPeriod;
-
-    if ( pBars->Count() >= 10 ) {
-      pBarsForPeriod = pBars->Subset( ptime( dtPrevMonday ), 5 );
-      pPivotWeek = new CPivotSet( "pvWk", pBarsForPeriod );
-      delete pBarsForPeriod;
-    }
-    if ( pBars->Count() >= 42 ) {
-      pBarsForPeriod = pBars->Subset( ptime( dtPrevMonth ), 20 );
-      pPivotMonth = new CPivotSet( "pvMn", pBarsForPeriod );
-      delete pBarsForPeriod;
-    }
-    if ( pBars->Count() >= 20 ) {
-      pBarsForPeriod = pBars->Subset( ptime( dtMonthAgo ) );
-      pPivot20Days = new CPivotSet( "pv20D", pBarsForPeriod );
-      delete pBarsForPeriod;
-    }
-
-    // need to test that each pointer isn't NULL, if they weren't assigned above
-    CPivotSet *pivots[] = { pPivot1Day, pPivot3Day, pPivotWeek, pPivotMonth, pPivot20Days, NULL };
-    int i = 0;
-    CPivotSet *pPivot;
-    pPivot = pivots[ i ];
-    char sz[ 10 ];
-    while ( NULL != pPivot ) {
-      
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "R3" );
-      pTradeFrame->AppendStaticIndicator( pPivot->R3(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "R23" );
-      pTradeFrame->AppendStaticIndicator( pPivot->R23(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "R2" );
-      pTradeFrame->AppendStaticIndicator( pPivot->R2(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "R12" );
-      pTradeFrame->AppendStaticIndicator( pPivot->R12(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "R1" );
-      pTradeFrame->AppendStaticIndicator( pPivot->R1(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "PVR1" );
-      pTradeFrame->AppendStaticIndicator( pPivot->PVR1(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "PV" );
-      pTradeFrame->AppendStaticIndicator( pPivot->PV(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "PVS1" );
-      pTradeFrame->AppendStaticIndicator( pPivot->PVS1(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "S1" );
-      pTradeFrame->AppendStaticIndicator( pPivot->S1(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "S12" );
-      pTradeFrame->AppendStaticIndicator( pPivot->S12(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "S2" );
-      pTradeFrame->AppendStaticIndicator( pPivot->S2(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "S23" );
-      pTradeFrame->AppendStaticIndicator( pPivot->S23(), sz );
-      *sz = 0;
-      strcat_s( sz, 10, pPivot->Name().c_str() );
-      strcat_s( sz, 10, "S3" );
-      pTradeFrame->AppendStaticIndicator( pPivot->S3(), sz );
-
-      ++i;
-      pPivot = pivots[ i ];
-    }
-
-    //int n = pBars->Count();
-    //int i;
-
-    /*
-    pChartDaily->m_chart.ClearChart();
-    pChartDaily->m_chart.SetUpdateChart( false );
-    pChartDaily->m_chart.setMajorTickInc( 30 * 86400  );
-    pChartDaily->m_chart.setMinorTickInc(  86400  );
-
-    for ( i = 0; i < n; i++ ) {
-      pBar = pBars -> At( i );
-      pChartDaily->m_chart.Add( pBar );
-    }
-    pChartDaily->m_chart.SetUpdateChart( true );
-    pChartDaily->m_chart.UpdateChart();
-    */
   }
 }
 
@@ -329,7 +181,6 @@ void CTradingLogic::OnTickHistoryDone( IQFeedHistory *pHistory ) {
   }
 
   pChartIntraDay->m_chart.SetUpdateChart( true );
-  //pChartIntraDay->m_chart.UpdateChart();
   m_state = EState::RealTime;
   pTradeFrame->SetAllowRedraw( true );
 }

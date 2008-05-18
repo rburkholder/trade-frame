@@ -30,15 +30,21 @@ protected:
   static const size_t nMaxBufferSize = 255;
   typedef unsigned char td_structIndexes;
   struct structIQFSymbolRecord {
-    td_structIndexes bufferedlength; // means structure can only be 255 long
+    float fltStrike;  // option strike price
+    unsigned short nYear;  // futures or options
     td_structIndexes ix[3]; // looking for three strings: symbol, desc, exchange
     td_structIndexes cnt[3];  // length of each of three strings, excludes terminator
-    unsigned char ucBits;  // mutual, moneymkt, index, cboe, indicator
+    td_structIndexes bufferedlength; // means structure can only be 255 long
+    unsigned char ucBits1;  // mutual, moneymkt, index, cboe, indicator, hasoptions
+    unsigned char ucBits2;  // stock, future, option, futuresoption, currency, bond, etf
+    unsigned char nMonth;  // 1 - 12, 0 for nothing
+    char chDirection;  // P put C call for option
     char line[nMaxBufferSize];
   } dbRecord;
   structIQFSymbolRecord *pRecord; // used for retrievals
 
   bool m_bMutual, m_bMoneyMkt, m_bIndex, m_bCboe, m_bIndicator, m_bHasOptions;
+  bool m_bStock, m_bFuture, m_bOption, m_bFuturesOption, m_bCurrency, m_bBond, m_bETF, m_bMetals;
   Db *m_pdbIQFSymbols;
   Db *m_pdbIxIQFSymbols_Market;
   Dbc *m_pdbcIxIQFSymbols_Market;
@@ -53,7 +59,15 @@ protected:
   static const unsigned char ucCboe = 8;
   static const unsigned char ucIndicator = 16;
   static const unsigned char ucHasOptions = 32;
+  static const unsigned char ucStock = 1;
+  static const unsigned char ucFuture = 2;
+  static const unsigned char ucOption = 4;
+  static const unsigned char ucFuturesOption = 8;
+  static const unsigned char ucCurrency = 16;
+  static const unsigned char ucBond = 32;
+  static const unsigned char ucETF = 64;
+  static const unsigned char ucMetals = 128;
   void PackBoolean(void);
-  void UnPackBoolean( const unsigned char );
+  void UnPackBoolean( const unsigned char ucBits1, const unsigned char ucBits2 );
 private:
 };

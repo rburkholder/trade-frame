@@ -87,10 +87,10 @@ void CChartDatedDatum::UpdateChart() {
     double *prClose = new double[ n ];
     double *prVolume = new double[ n ];
 
-    double *prPivot1 = new double[ n ];
-    double *prPivot2 = new double[ n ];
-    double *prPivot3 = new double[ n ];
-    double *prPivot4 = new double[ n ];
+    //double *prPivot1 = new double[ n ];
+    //double *prPivot2 = new double[ n ];
+    //double *prPivot3 = new double[ n ];
+    //double *prPivot4 = new double[ n ];
 
     int i = 0;
     while ( NULL != pBar ) {
@@ -177,6 +177,22 @@ void CChartDatedDatum::UpdateChart() {
 */    
 
 ///*
+    //int n = pBars->Count();
+    //int i;
+
+    /*
+    pChartDaily->m_chart.ClearChart();
+    pChartDaily->m_chart.SetUpdateChart( false );
+    pChartDaily->m_chart.setMajorTickInc( 30 * 86400  );
+    pChartDaily->m_chart.setMinorTickInc(  86400  );
+
+    for ( i = 0; i < n; i++ ) {
+      pBar = pBars -> At( i );
+      pChartDaily->m_chart.Add( pBar );
+    }
+    pChartDaily->m_chart.SetUpdateChart( true );
+    pChartDaily->m_chart.UpdateChart();
+    */
 
     chart = new FinanceChart( m_nChartWidth );
     chart->setDateLabelSpacing( 5 );

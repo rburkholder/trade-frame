@@ -93,7 +93,6 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_DATETIMEPICKER2, m_dtLastTime);
   DDX_Control(pDX, IDC_DATETIMEPICKER4, m_dtStartDate);
   DDX_Control(pDX, IDC_DATETIMEPICKER5, m_dtStartTime);
-
   DDX_Control(pDX, IDC_STATICRB, m_grpEndDay);
   DDX_Control(pDX, IDC_SCANTYPE, m_grpScanType);
   DDX_Control(pDX, IDC_USEDAYSTART, m_cbUseDayStart);
@@ -847,11 +846,9 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
         s.append( sSymbol );
         pChartIntraDay->m_chart.SetTitle( s );
         pChartIntraDay->ShowWindow( 1 );
-        //pChartIntraDay->m_chart.se
         theApp.m_pIB->AddTradeHandler( 
           sSymbol, 
           MakeDelegate( &pChartIntraDay->m_chart, &CChartDatedDatum::AddTrade ) 
-          //MakeDelegate( &testTrade, &CTestTrade::HandleTrade )
           );
       }
     }

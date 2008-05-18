@@ -6,7 +6,7 @@
 #include "TimeSeries.h"
 #include "IQFeed.h"
 #include "IQFeedRetrieveHistory.h"
-#include "Pivots.h"
+#include "PivotGroup.h"
 #include "VuChart.h"
 #include "FinanceChart.h"
 #include "VuMarketDepth.h"
@@ -32,12 +32,8 @@ public:
 
 protected:
   CString m_sSymbol;
-  
-  CPivotSet *pPivot1Day;
-  CPivotSet *pPivot3Day;
-  CPivotSet *pPivotWeek;
-  CPivotSet *pPivotMonth;
-  CPivotSet *pPivot20Days;
+
+  //CPivotGroup *m_pPivotGroup;
 
   IQFeedHistoryHD *phd;
   CBars *pBars;
@@ -57,7 +53,7 @@ protected:
   CTradeFrame *pTradeFrame;
   //CVuKeyValues *pVuKeyValues;
   CVuPendingOrders *pVuPendingOrders;
-  CVuChart *pChartDaily;
+  //CVuChart *pChartDaily;
   CVuChart *pChartIntraDay;
   CVuMarketDepth *pVuMarketDepth;
 

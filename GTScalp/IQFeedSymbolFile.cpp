@@ -88,7 +88,7 @@ bool CIQFeedSymbolFile::RetrieveSymbolRecord( u_int32_t flags ) {
   int result = m_pdbcIxIQFSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
   if ( 0 == result ) {
     pRecord = (structIQFSymbolRecord *) m_dbtData.get_data();
-    UnPackBoolean( pRecord->ucBits );
+    UnPackBoolean( pRecord->ucBits1, pRecord->ucBits2 );
   }
   return ( 0 == result );
 }
@@ -106,6 +106,24 @@ public:
     }
 };
 
+unsigned short DecodeMonth( const std::string &s ) {
+  unsigned short month = 0;
+  if ( s == "JAN" ) month = 1;
+  if ( s == "FEB" ) month = 2;
+  if ( s == "MAR" ) month = 3;
+  if ( s == "APR" ) month = 4;
+  if ( s == "MAY" ) month = 5;
+  if ( s == "JUN" ) month = 6;
+  if ( s == "JUL" ) month = 7;
+  if ( s == "AUG" ) month = 8;
+  if ( s == "SEP" ) month = 9;
+  if ( s == "OCT" ) month = 10;
+  if ( s == "NOV" ) month = 11;
+  if ( s == "DEC" ) month = 12;
+  assert( month > 0 );
+  return month;
+}
+
 bool CIQFeedSymbolFile::Load( const string &filename ) {
   // mktsymbols.txt
 
@@ -118,10 +136,16 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   static const boost::regex rxCboe(".+\\.XO$");
   static const boost::regex rxIndicator(".+\\.Z$");
 
+  static const boost::regex rxOption( "^([A-Z]+){0,1}[ ]([A-Z]{3}) ([0-9]{4}) ([CP]) ([0-9]+[.][0-9]+)" ); //GM SEP 2008 P 10.000
+  static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
+
   unsigned int cntMutual = 0, cntMoneyMkt = 0, cntIndex = 0, cntCboe = 0, cntIndicator = 0;
   map<const char *, unsigned int, LessThan> map_SymbolsPerExchange;
   typedef pair<const char *, unsigned int> pair_SymbolsPerExchange;
   map<const char *, unsigned int, LessThan>::iterator map_iter_SymbolsPerExchange;
+
+  unsigned int cntStock = 0, cntFuture = 0, cntOption = 0, cntFuturesOption = 0, cntCurrency = 0, cntBond = 0, cntETF = 0, cntMetals = 0;
+  unsigned short nUnderlyingSize = 0;
 
   ifstream file;
   unsigned long cntLines = 0;
@@ -144,6 +168,12 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       ++cntLines;
       bEndFound = false;
       c = j = k = 0; // c is count of char in string, j index into ix, k index into line
+      dbRecord.ucBits1 = dbRecord.ucBits2 = 0;  // initialize bits to zero
+      UnPackBoolean( dbRecord.ucBits1, dbRecord.ucBits2 );
+      dbRecord.fltStrike = 0;
+      dbRecord.nYear = 0;
+      dbRecord.nMonth = 0;
+      dbRecord.chDirection = ' ';
       dbRecord.ix[j] = k; // index of first string is 0
       while ( !bEndFound ) {
         if ( 0 == dbRecord.line[k] ) {
@@ -183,6 +213,73 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
         map_SymbolsPerExchange.insert( pair_SymbolsPerExchange( sExchange, 1 ) );
       }
 
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "WCE" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "TULLETT" ) ) { m_bCurrency = true; ++cntCurrency; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "TSE" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "SMCAP" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "SGX" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "PSE" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "PBOT" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "OTCBB" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "OTC" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "OPRA" ) ) { m_bOption = true; ++cntOption; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "ONECH" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NYSE" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NYMEXMINI" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NYMEX" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NYBOT" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NMS" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "NASDAQ" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "MGE" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "LME" ) ) { m_bMetals = true; ++cntMetals; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "KCBOT" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "IPE" ) ) { m_bFuture = true; ++cntFuture; };
+      //if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "EUREXNDX" ) ) {  = true; ++; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "EUREX" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "ENIR" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "ENID" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "ENCOM" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "DTN" ) ) { m_bIndex = true; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "DJ" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "CVE" ) ) { m_bStock = true; ++cntStock; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "COMMEX" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "CME" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "CHX" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "CBOT" ) ) { m_bFuture = true; ++cntFuture; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "BARCLAYS" ) ) { m_bCurrency = true; ++cntCurrency; };
+      if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "AMEX" ) ) { m_bStock = true; ++cntStock; };
+
+      if ( m_bFuture ) {
+        boost::cmatch what;
+        if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture ) ) {
+          std::string sMonth( what[1].first, what[1].second );
+          std::string sYear( what[2].first, what[2].second );
+          dbRecord.nMonth = DecodeMonth( sMonth );
+          dbRecord.nYear = atoi( sYear.c_str() );
+        }
+        else {
+          std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+        }
+      }
+
+      if ( m_bOption ) {
+        boost::cmatch what;
+        if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
+          //std::string sUnderlying( what[1].first, what[1].second );
+          //nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
+          std::string sMonth( what[2].first, what[2].second );
+          std::string sYear( what[3].first, what[3].second );
+          dbRecord.chDirection = *what[4].first;
+          std::string sStrike( what[5].first, what[5].second );
+          dbRecord.nMonth = DecodeMonth( sMonth );
+          dbRecord.nYear = atoi( sYear.c_str() );
+          dbRecord.fltStrike = atof( sStrike.c_str() );
+        }
+        else {
+          std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+        }
+      }
+
       // identify the symbol types
       m_bMutual = m_bMoneyMkt = m_bIndex = m_bCboe = m_bIndicator = false;
       if ( boost::regex_match( dbRecord.line, rxMutual ) ) {
@@ -210,6 +307,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       // update database
       //Dbt key( dbRecord.line, dbRecord.cnt[0]+1 );
       Dbt key( dbRecord.line, dbRecord.cnt[0] );
+      assert( dbRecord.bufferedlength <= 255 );
       Dbt value( &dbRecord, dbRecord.bufferedlength );
       int ret = m_pdbIQFSymbols->put( 0, &key, &value, DB_NOOVERWRITE );
       // get next line
@@ -223,11 +321,17 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   Close();
   file.close();
 
-  cout << "Count Mutual:  " << cntMutual << endl;
-  cout << "Count MoneyMkt:  " << cntMoneyMkt << endl;
-  cout << "Count Index:  " << cntIndex << endl;
-  cout << "Count CBOE:  " << cntCboe << endl;
+  cout << "Count Mutual:     " << cntMutual << endl;
+  cout << "Count MoneyMkt:   " << cntMoneyMkt << endl;
+  cout << "Count Index:      " << cntIndex << endl;
+  cout << "Count CBOE:       " << cntCboe << endl;
   cout << "Count Indicator:  " << cntIndicator << endl;
+  cout << "Count Currency:   " << cntCurrency << endl;
+  cout << "Count Stock:      " << cntStock << endl;
+  cout << "Count Future:     " << cntFuture << endl;
+  cout << "Count Option:     " << cntOption << endl;
+  cout << "Count Metals:     " << cntMetals << endl;
+  cout << "Max Underlying    " << nUnderlyingSize << endl;
 
   map_iter_SymbolsPerExchange = map_SymbolsPerExchange.begin();
   while ( map_SymbolsPerExchange.end() != map_iter_SymbolsPerExchange ) {
@@ -241,21 +345,38 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 }
 
 void CIQFeedSymbolFile::PackBoolean( void ) {
-  dbRecord.ucBits = 0;
-  dbRecord.ucBits |= ( m_bMutual ? ucMutual : 0 );
-  dbRecord.ucBits |= ( m_bMoneyMkt ? ucMoneyMkt : 0 );
-  dbRecord.ucBits |= ( m_bIndex ? ucIndex : 0 );
-  dbRecord.ucBits |= ( m_bCboe ? ucCboe : 0 );
-  dbRecord.ucBits |= ( m_bIndicator ? ucIndicator : 0 );
-  dbRecord.ucBits |= ( m_bHasOptions ? ucHasOptions : 0 );
+  dbRecord.ucBits1 = dbRecord.ucBits2 = 0;
+  dbRecord.ucBits1 |= ( m_bMutual ? ucMutual : 0 );
+  dbRecord.ucBits1 |= ( m_bMoneyMkt ? ucMoneyMkt : 0 );
+  dbRecord.ucBits1 |= ( m_bIndex ? ucIndex : 0 );
+  dbRecord.ucBits1 |= ( m_bCboe ? ucCboe : 0 );
+  dbRecord.ucBits1 |= ( m_bIndicator ? ucIndicator : 0 );
+  dbRecord.ucBits1 |= ( m_bHasOptions ? ucHasOptions : 0 );
+  dbRecord.ucBits2 |= ( m_bStock ? ucStock : 0 );
+  dbRecord.ucBits2 |= ( m_bFuture ? ucFuture : 0 );
+  dbRecord.ucBits2 |= ( m_bOption ? ucOption : 0 );
+  dbRecord.ucBits2 |= ( m_bFuturesOption ? ucFuturesOption : 0 );
+  dbRecord.ucBits2 |= ( m_bCurrency ? ucCurrency : 0 );
+  dbRecord.ucBits2 |= ( m_bBond ? ucBond : 0 );
+  dbRecord.ucBits2 |= ( m_bETF ? ucETF : 0 );
+  dbRecord.ucBits2 |= ( m_bMetals ? ucMetals : 0 );
+
 }
 
-void CIQFeedSymbolFile::UnPackBoolean( const unsigned char ucBits ) {
-  m_bMutual = 0 != ( ucBits & ucMutual );
-  m_bMoneyMkt = 0 != ( ucBits & ucMoneyMkt );
-  m_bIndex = 0 != ( ucBits & ucIndex );
-  m_bCboe = 0 != ( ucBits & ucCboe );
-  m_bIndicator = 0 != ( ucBits & ucIndicator );
-  m_bHasOptions = 0 != ( ucBits & ucHasOptions );
+void CIQFeedSymbolFile::UnPackBoolean( const unsigned char ucBits1, const unsigned char ucBits2 ) {
+  m_bMutual = 0 != ( ucBits1 & ucMutual );
+  m_bMoneyMkt = 0 != ( ucBits1 & ucMoneyMkt );
+  m_bIndex = 0 != ( ucBits1 & ucIndex );
+  m_bCboe = 0 != ( ucBits1 & ucCboe );
+  m_bIndicator = 0 != ( ucBits1 & ucIndicator );
+  m_bHasOptions = 0 != ( ucBits1 & ucHasOptions );
+  m_bStock = 0 != ( ucBits2 & ucStock );
+  m_bFuture = 0 != ( ucBits2 & ucFuture );
+  m_bOption = 0 != ( ucBits2 & ucOption );
+  m_bFuturesOption = 0 != ( ucBits2 & ucFuturesOption );
+  m_bCurrency = 0 != ( ucBits2 & ucCurrency );
+  m_bBond = 0 != ( ucBits2 & ucBond );
+  m_bETF = 0 != ( ucBits2 & ucETF );
+  m_bMetals = 0 != ( ucBits2 & ucMetals );
 }
 

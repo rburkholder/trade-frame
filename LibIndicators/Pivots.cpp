@@ -1,20 +1,28 @@
 #include "StdAfx.h"
 #include "Pivots.h"
 
-CPivotSet::CPivotSet(void) :
-  m_R3( 0 ), m_R2( 0 ), m_R1( 0 ),  m_PV( 0 ), m_S1( 0 ), m_S2( 0 ), m_S3( 0 ), 
-  m_R23( 0 ), m_R12( 0 ), m_PVR1( 0 ), m_PVS1( 0 ), m_S12( 0 ), m_S23( 0 )
+string CPivotSet::m_sPivotNames[ CPivotSet::PivotCount ] 
+  = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
+
+CPivotSet::CPivotSet(void) 
  {
+  for ( unsigned short ix = 0; ix < PivotCount; ++ix );
 }
 
-CPivotSet::CPivotSet( const string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 ) :
-  m_sName( sName ),
-  m_R3( R3 ), m_R2( R2 ), m_R1( R1 ), m_PV( PV ), m_S1( S1 ), m_S2( S2 ), m_S3( S3 )
+CPivotSet::CPivotSet( const std::string &sName, double _S3, double _S2, double _S1, double _PV, double _R1, double _R2, double _R3 ) :
+  m_sName( sName )
 {
+  m_rPivots[ R3 ] = _R3;
+  m_rPivots[ R2 ] = _R2;
+  m_rPivots[ R1 ] = _R1;
+  m_rPivots[ PV ] = _PV;
+  m_rPivots[ S1 ] = _S1;
+  m_rPivots[ S2 ] = _S2;
+  m_rPivots[ S3 ] = _S3;
   CalcHalfPivots();
 }
 
-CPivotSet::CPivotSet( const string &sName, CBars *bars ) {
+CPivotSet::CPivotSet( const std::string &sName, CBars *bars ) {
   double hi = 0;
   double lo = 0;
   double cl = 0;
@@ -35,33 +43,33 @@ CPivotSet::CPivotSet( const string &sName, CBars *bars ) {
   CalcPivots( sName, hi, lo, cl );
 }
 
-CPivotSet::CPivotSet( const string &sName, double Hi, double Lo, double Close ) {
+CPivotSet::CPivotSet( const std::string &sName, double Hi, double Lo, double Close ) {
   CalcPivots( sName, Hi, Lo, Close );
 }
 
-void CPivotSet::CalcPivots( const string &sName, double Hi, double Lo, double Close ) {
+CPivotSet::~CPivotSet() {
+}
+
+void CPivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, double Close ) {
   m_sName = sName;
   double dif = Hi - Lo;
-  m_PV = ( Hi + Lo + Close ) / 3;
-  m_R1 = 2 * m_PV - Lo;
-  m_R2 = m_PV + dif;
-  m_R3 = m_R1 + dif;
-  m_S1 = 2 * m_PV - Hi;
-  m_S2 = m_PV - dif;
-  m_S3 = m_S1 - dif;
+  m_rPivots[ PV ] = ( Hi + Lo + Close ) / 3;
+  m_rPivots[ R1 ] = 2 * m_rPivots[ PV ] - Lo;
+  m_rPivots[ R2 ] = m_rPivots[ PV ] + dif;
+  m_rPivots[ R3 ] = m_rPivots[ R1 ] + dif;
+  m_rPivots[ S1 ] = 2 * m_rPivots[ PV ] - Hi;
+  m_rPivots[ S2 ] = m_rPivots[ PV ] - dif;
+  m_rPivots[ S3 ] = m_rPivots[ S1 ] - dif;
   CalcHalfPivots();
 }
 
 void CPivotSet::CalcHalfPivots() {
-  m_R23 = ( m_R3 + m_R2 ) / 2;
-  m_R12 = ( m_R1 + m_R2 ) / 2;
-  m_PVR1 = ( m_PV + m_R1 ) / 2;
-  m_PVS1 = ( m_PV + m_S1 ) / 2;
-  m_S12 = ( m_S1 + m_S2 ) / 2;
-  m_S23 = ( m_S2 + m_S3 ) / 2;
-}
-
-CPivotSet::~CPivotSet() {
+  m_rPivots[ R23  ] = ( m_rPivots[ R3 ] + m_rPivots[ R2 ] ) / 2;
+  m_rPivots[ R12  ] = ( m_rPivots[ R1 ] + m_rPivots[ R2 ] ) / 2;
+  m_rPivots[ PVR1 ] = ( m_rPivots[ PV ] + m_rPivots[ R1 ] ) / 2;
+  m_rPivots[ PVS1 ] = ( m_rPivots[ PV ] + m_rPivots[ S1 ] ) / 2;
+  m_rPivots[ S12  ] = ( m_rPivots[ S1 ] + m_rPivots[ S2 ] ) / 2;
+  m_rPivots[ S23  ] = ( m_rPivots[ S2 ] + m_rPivots[ S3 ] ) / 2;
 }
 
 /*
