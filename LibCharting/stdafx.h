@@ -23,7 +23,7 @@
 #define _WIN32_IE 0x0600	// Change this to the appropriate value to target other versions of IE.
 #endif
 
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+//#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
 #ifndef VC_EXTRALEAN
@@ -38,6 +38,5 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls  // wasn't included in wizard
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
-#include <afxsock.h>		// MFC socket extensions
 
 // TODO: reference additional headers your program requires here

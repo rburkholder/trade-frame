@@ -1,7 +1,7 @@
 #pragma once
 //#include "chartviewer.h"
 #include "ChartViewerShim.h"
-#include "FinanceChart.h"
+#include "ChartDirector\FinanceChart.h"
 #include "ZigZag.h"
 
 class CChartArmsIntraDay : public CChartViewerShim {

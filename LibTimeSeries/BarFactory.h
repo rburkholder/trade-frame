@@ -13,6 +13,7 @@ public:
   CBarFactory(long nSeconds = 60);
   virtual ~CBarFactory(void);
   void Add( const ptime &, double, unsigned int);
+  void Add( const CTrade &trade ) { Add( trade.m_dt, trade.m_dblTrade, trade.m_nTradeSize ); };
   const CBar &getCurrentBar() { return m_bar; };
   void SetBarWidth( long seconds ) { m_nBarWidthSeconds = seconds; };
   long GetBarWidth( void ) { return m_nBarWidthSeconds; };

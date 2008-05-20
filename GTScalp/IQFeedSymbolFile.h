@@ -13,6 +13,7 @@ public:
   bool Load( const string &filename );
   void Close( void );
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
+  void SetSearchUnderlying( const char *szUnderlying );
   bool RetrieveSymbolRecord( u_int32_t flags );
   const char *GetSymbol() { return pRecord->line; };
   const char *GetDescription() { return pRecord->line + pRecord->ix[1]; };
@@ -26,10 +27,11 @@ public:
   void EndSearch( void );
 protected:
   static int GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey );
+  static int GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey );
     // memset this structure sometime.
   static const size_t nMaxBufferSize = 255;
   typedef unsigned char td_structIndexes;
-  struct structIQFSymbolRecord {
+  struct structIQFSymbolRecord {  //members ordered by decreasing size for alignment purposes
     float fltStrike;  // option strike price
     unsigned short nYear;  // futures or options
     td_structIndexes ix[3]; // looking for three strings: symbol, desc, exchange
@@ -48,6 +50,8 @@ protected:
   Db *m_pdbIQFSymbols;
   Db *m_pdbIxIQFSymbols_Market;
   Dbc *m_pdbcIxIQFSymbols_Market;
+  Db *m_pdbIxIQFSymbols_Underlying;
+  Dbc *m_pdbcIxIQFSymbols_Underlying;
   Dbt m_dbtKey;
   Dbt m_dbtData;
   const char *m_szSearchKey;

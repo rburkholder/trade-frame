@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\GTScalp\MarketProfile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PivotGroup.cpp"
 				>
 			</File>
@@ -207,6 +211,10 @@
 			>
 			<File
 				RelativePath=".\Darvas.h"
+				>
+			</File>
+			<File
+				RelativePath="..\GTScalp\MarketProfile.h"
 				>
 			</File>
 			<File

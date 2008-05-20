@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibInteractiveBrokers;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
+				AdditionalIncludeDirectories="..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibInteractiveBrokers;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -199,10 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BufferedSocket.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ConsoleCoutMessages.cpp"
 				>
 			</File>
@@ -236,10 +232,6 @@
 			</File>
 			<File
 				RelativePath=".\HDF5.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MarketProfile.cpp"
 				>
 			</File>
 			<File
@@ -411,14 +403,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="ChartDir"
-				>
-				<File
-					RelativePath=".\ChartViewer.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Notes"
 				>
 				<File
@@ -534,10 +518,6 @@
 			</File>
 			<File
 				RelativePath=".\HDF5TimeSeriesIterator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MarketProfile.h"
 				>
 			</File>
 			<File
@@ -701,30 +681,6 @@
 				</File>
 				<File
 					RelativePath=".\VuSymbolsOfInterest.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ChartDir"
-				>
-				<File
-					RelativePath=".\bchartdir.h"
-					>
-				</File>
-				<File
-					RelativePath=".\chartdir.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ChartViewer.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FinanceChart.h"
-					>
-				</File>
-				<File
-					RelativePath=".\memblock.h"
 					>
 				</File>
 			</Filter>

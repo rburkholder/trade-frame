@@ -8,7 +8,7 @@
 #include "IQFeedRetrieveHistory.h"
 #include "PivotGroup.h"
 #include "VuChart.h"
-#include "FinanceChart.h"
+#include "ChartDirector\FinanceChart.h"
 #include "VuMarketDepth.h"
 
 #include <string>

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="LibTrading"
-	ProjectGUID="{7F4262BB-E374-4367-A3A0-1C303219338E}"
-	RootNamespace="LibTrading"
+	Name="LibCharting"
+	ProjectGUID="{686CEE2C-87E9-4D45-96FB-4C6671AE91D6}"
+	RootNamespace="LibCharting"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,6 +20,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
+			UseOfMFC="2"
 			CharacterSet="0"
 			>
 			<Tool
@@ -40,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_35_0;;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibCommon"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="..\LibTimeSeries;..\LibCommon;..\LibIndicators;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -83,6 +84,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
+			UseOfMFC="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -148,15 +150,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Order.cpp"
+				RelativePath=".\ChartEntryBase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\OrderExecution.cpp"
+				RelativePath=".\ChartEntryIndicator.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ProviderInterface.cpp"
+				RelativePath=".\ChartEntryMark.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartEntrySegments.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartEntryShape.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeController.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeView.cpp"
 				>
 			</File>
 			<File
@@ -179,10 +201,14 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\Symbol.cpp"
+			<Filter
+				Name="ChartDirector"
 				>
-			</File>
+				<File
+					RelativePath=".\ChartDirector\ChartViewer.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -190,29 +216,65 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Order.h"
+				RelativePath=".\ChartEntryBase.h"
 				>
 			</File>
 			<File
-				RelativePath=".\OrderExecution.h"
+				RelativePath=".\ChartEntryIndicator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ProviderInterface.h"
+				RelativePath=".\ChartEntryMark.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartEntrySegments.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartEntryShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeController.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeView.h"
 				>
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Symbol.h"
+			<Filter
+				Name="ChartDirector"
 				>
-			</File>
-			<File
-				RelativePath=".\TradingEnumerations.h"
-				>
-			</File>
+				<File
+					RelativePath=".\ChartDirector\bchartdir.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChartDirector\chartdir.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChartDirector\ChartViewer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChartDirector\FinanceChart.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ChartDirector\memblock.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

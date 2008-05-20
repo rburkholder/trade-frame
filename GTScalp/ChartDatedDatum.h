@@ -3,7 +3,7 @@
 #include "SlidingWindow.h"
 #include "DatedDatum.h"
 #include "BarFactory.h"
-#include "FinanceChart.h"
+#include "ChartDirector\FinanceChart.h"
 
 class CChartDatedDatum : public CChartViewerShim {
 public:

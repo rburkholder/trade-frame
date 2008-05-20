@@ -1,5 +1,7 @@
 #pragma once
 
+// Todo:  Need to check that all buffers are empty.
+
 #include "FastDelegate.h"
 using namespace fastdelegate;
 

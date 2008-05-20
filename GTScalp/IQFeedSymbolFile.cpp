@@ -35,7 +35,10 @@ using namespace std;
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
     pRecord( NULL ), 
-    m_pdbIQFSymbols( NULL ), m_pdbIxIQFSymbols_Market( NULL ), m_pdbcIxIQFSymbols_Market( NULL ) {
+    m_pdbIQFSymbols( NULL ), 
+    m_pdbIxIQFSymbols_Market( NULL ), m_pdbcIxIQFSymbols_Market( NULL ),
+    m_pdbIxIQFSymbols_Underlying( NULL ), m_pdbcIxIQFSymbols_Underlying( NULL ) 
+    {
 }
 
 CIQFeedSymbolFile::~CIQFeedSymbolFile(void) {
@@ -59,19 +62,48 @@ void CIQFeedSymbolFile::Open() {
 
   // associate the index with the main table
   m_pdbIQFSymbols->associate( NULL, m_pdbIxIQFSymbols_Market, &CIQFeedSymbolFile::GetMarketName, 0 );
+
+  // open/create the underlying index
+  m_pdbIxIQFSymbols_Underlying = new Db( pDbEnv, 0 );
+  m_pdbIxIQFSymbols_Underlying->set_flags( DB_DUPSORT );
+  m_pdbIxIQFSymbols_Underlying->open( NULL, dm.GetBDBFileName(), "IxIQFSymbols_Underlying", DB_BTREE, DB_CREATE, 0 );
+
+  // associate the index with the main table
+  m_pdbIQFSymbols->associate( NULL, m_pdbIxIQFSymbols_Underlying, &CIQFeedSymbolFile::GetUnderlyingName, 0 );
 }
 
 void CIQFeedSymbolFile::Close() {
+  m_pdbIxIQFSymbols_Underlying->close(0);
   m_pdbIxIQFSymbols_Market->close(0);
   m_pdbIQFSymbols->close(0);
 }
 
 int CIQFeedSymbolFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
-  char *p = dbIxRecord->line + dbIxRecord->ix[2];
-  unsigned long l = dbIxRecord->cnt[2];
+  char *p = dbIxRecord->line + dbIxRecord->ix[2];  // get at the 'exchange' string
+  unsigned long l = dbIxRecord->cnt[2];  // set the key and its length
   secKey->set_data( p );
   secKey->set_size( l );
+  return 0;
+}
+
+int CIQFeedSymbolFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
+  structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
+  char *p; 
+  u_int32_t len;
+  bool bUseIndex = true;
+  if ( 0 != ( dbIxRecord->ucBits2 & ucOption ) ) { // OPRA option
+    p = dbIxRecord->line + dbIxRecord->ix[1];  // start of description
+    char *e = strchr( p, ' ' );  // find the trailing blank
+    len = e - p;
+    if ( 0 != len ) bUseIndex = false;
+  }
+  if ( bUseIndex ) {  // by default, use records symbol
+    p = dbIxRecord->line;
+    len = dbIxRecord->cnt[0];
+  }
+  secKey->set_data( p );
+  secKey->set_size( len );
   return 0;
 }
 
@@ -81,6 +113,14 @@ void CIQFeedSymbolFile::SetSearchExchange( const char *szExchange ) {
   m_dbtKey.set_data( (void*) szExchange );
   m_dbtKey.set_size( m_lenSearchKey );
   m_pdbIxIQFSymbols_Market->cursor( NULL, &m_pdbcIxIQFSymbols_Market, 0 );
+}
+
+void CIQFeedSymbolFile::SetSearchUnderlying( const char *szUnderlying ) {
+  m_szSearchKey = szUnderlying;
+  m_lenSearchKey = strlen( szUnderlying );
+  m_dbtKey.set_data( (void*) szUnderlying );
+  m_dbtKey.set_size( m_lenSearchKey );
+  m_pdbIxIQFSymbols_Underlying->cursor( NULL, &m_pdbcIxIQFSymbols_Underlying, 0 );
 }
 
 bool CIQFeedSymbolFile::RetrieveSymbolRecord( u_int32_t flags ) {
@@ -138,6 +178,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
   static const boost::regex rxOption( "^([A-Z]+){0,1}[ ]([A-Z]{3}) ([0-9]{4}) ([CP]) ([0-9]+[.][0-9]+)" ); //GM SEP 2008 P 10.000
   static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
+  static const boost::regex rxFuture2( "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
 
   unsigned int cntMutual = 0, cntMoneyMkt = 0, cntIndex = 0, cntCboe = 0, cntIndicator = 0;
   map<const char *, unsigned int, LessThan> map_SymbolsPerExchange;
@@ -213,6 +254,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
         map_SymbolsPerExchange.insert( pair_SymbolsPerExchange( sExchange, 1 ) );
       }
 
+      // assign instrument types
       if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "WCE" ) ) { m_bFuture = true; ++cntFuture; };
       if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "TULLETT" ) ) { m_bCurrency = true; ++cntCurrency; };
       if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "TSE" ) ) { m_bStock = true; ++cntStock; };
@@ -249,6 +291,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "BARCLAYS" ) ) { m_bCurrency = true; ++cntCurrency; };
       if ( 0 == strcmp( dbRecord.line + dbRecord.ix[2], "AMEX" ) ) { m_bStock = true; ++cntStock; };
 
+      // parse out contract expiry information
       if ( m_bFuture ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture ) ) {
@@ -257,16 +300,22 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
           dbRecord.nMonth = DecodeMonth( sMonth );
           dbRecord.nYear = atoi( sYear.c_str() );
         }
-        else {
-          std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+        else {  // No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
+          if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture2 ) ) {
+            // just ignore the double future set
+          }
+          else {
+            std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+          }
         }
       }
 
+      // parse out contract information
       if ( m_bOption ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
-          //std::string sUnderlying( what[1].first, what[1].second );
-          //nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
+          std::string sUnderlying( what[1].first, what[1].second );
+          nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
           std::string sMonth( what[2].first, what[2].second );
           std::string sYear( what[3].first, what[3].second );
           dbRecord.chDirection = *what[4].first;
@@ -310,7 +359,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       assert( dbRecord.bufferedlength <= 255 );
       Dbt value( &dbRecord, dbRecord.bufferedlength );
       int ret = m_pdbIQFSymbols->put( 0, &key, &value, DB_NOOVERWRITE );
-      // get next line
+      // get next line from text file
       file.getline( dbRecord.line, nMaxBufferSize );
     }
   }

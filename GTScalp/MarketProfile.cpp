@@ -64,12 +64,15 @@ void CMarketProfile::Draw() {
     m_pBars->Next();
   }
 
-  CString s;
+  //CString s;
+  //string s;
+  char buf[30];
   
   for each ( pair<int, string *> p in m_mapProfile ) {
-    s.Format( "%f0.2: %s", ( (double) p.first ) / 100.0, *p.second );
+    sprintf( buf, "%f0.2: %s", ( (double) p.first ) / 100.0, *p.second );
+    //s.Format( "%f0.2: %s", ( (double) p.first ) / 100.0, *p.second );
     //theApp.pConsoleMessages->WriteLine( s );
-    cout << s << endl;
+    cout << buf << endl;
     //theApp.pConsoleMessages->Write( itoa( p.first ) );
     //theApp.pConsoleMessages->Write( ":  " );
     //theApp.pConsoleMessages->WriteLine( *p.second );

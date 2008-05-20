@@ -18,7 +18,7 @@
 
 #include "Pivots.h"
 #include "VuChart.h"
-#include "FinanceChart.h"
+#include "ChartDirector\FinanceChart.h"
 #include "VuMarketDepth.h"
 
 
