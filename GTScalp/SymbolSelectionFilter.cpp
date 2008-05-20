@@ -336,7 +336,7 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
     begin = end - 20;
     m_bars.Resize( 20 );
     barRepository.Read( begin, end, &m_bars );
-    if ( ( m_bars.Last()->m_dblClose < 60.0 ) && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
+    if ( ( m_bars.Last()->m_dblClose < 50.0 ) && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
       unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
       if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
         double dblAverageVolatility = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolatility() );

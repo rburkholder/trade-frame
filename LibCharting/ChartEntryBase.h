@@ -38,6 +38,7 @@ public:
   virtual ~CChartEntryBaseWithTime( void );
 protected:
   std::vector<ptime> m_vDateTime;
+  std::vector<double> m_vChartTime;  // used by ChartDir
   void Add( ptime dt, double price );
 private:
 };
