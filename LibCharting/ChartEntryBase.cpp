@@ -22,6 +22,10 @@ void CChartEntryBase::Add(double price) {
   m_vPrice.push_back( price );
 }
 
+void CChartEntryBase::Reserve(unsigned int nSize ) {
+  m_vPrice.reserve( nSize );
+}
+
 //
 // CChartEntryBaseWithTime
 //
@@ -37,6 +41,12 @@ CChartEntryBaseWithTime::CChartEntryBaseWithTime( unsigned int nSize )
 
 CChartEntryBaseWithTime::~CChartEntryBaseWithTime() {
   m_vDateTime.clear();
+}
+
+void CChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
+  CChartEntryBase::Reserve( nSize );
+  m_vDateTime.reserve( nSize );
+  m_vChartTime.reserve( nSize );
 }
 
 void CChartEntryBaseWithTime::Add(boost::posix_time::ptime dt, double price) {

@@ -14,8 +14,6 @@ CVuChartArmsIntraDay::CVuChartArmsIntraDay(CWnd* pParent /*=NULL*/)
 
   BOOL b = Create(IDD, pParent );
 
-  pTradesIndu = pTradesTrin = pTradesTick = NULL;
-  m_bInduHistoryDone = m_bTrinHistoryDone = m_bTickHistoryDone = false;
 }
 
 CVuChartArmsIntraDay::~CVuChartArmsIntraDay() {
@@ -33,6 +31,15 @@ CVuChartArmsIntraDay::~CVuChartArmsIntraDay() {
   delete pHistoryTick;
 
   DestroyWindow();
+}
+
+BOOL CVuChartArmsIntraDay::OnInitDialog() {
+  BOOL b = CDialog::OnInitDialog();
+
+  pTradesIndu = pTradesTrin = pTradesTick = NULL;
+  m_bInduHistoryDone = m_bTrinHistoryDone = m_bTickHistoryDone = false;
+
+  return b;
 }
 
 void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
@@ -67,6 +74,7 @@ void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
   pHistoryTrin = new IQFeedHistoryHT( pQuotesTrin, pTradesTrin );
   pHistoryTick = new IQFeedHistoryHT( pQuotesTick, pTradesTick );
 
+  /*
   pHistoryIndu->SetOnRequestComplete( MakeDelegate( this, &CVuChartArmsIntraDay::OnInduHistoryDone ) );
   pHistoryTrin->SetOnRequestComplete( MakeDelegate( this, &CVuChartArmsIntraDay::OnTrinHistoryDone ) );
   pHistoryTick->SetOnRequestComplete( MakeDelegate( this, &CVuChartArmsIntraDay::OnTickHistoryDone ) );
@@ -81,6 +89,8 @@ void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
     pHistoryTrin->FileRequest( "TRIN.Z", nDaysAgo );
     pHistoryTick->FileRequest( "TICK.Z", nDaysAgo );
   }
+  */
+  HandleRealTime();
 }
 
 void CVuChartArmsIntraDay::OnInduHistoryDone( IQFeedHistory *pHistory ) {
@@ -119,41 +129,47 @@ void CVuChartArmsIntraDay::ProcessHistory() {
 
     merge.Run();
 
-    // start real time data here
-    if ( theApp.m_bLive ) {
-      CIQFSymbol *pSym;
+  // start real time data here
+    HandleRealTime();
+  }
 
-      char symIndu[] = "INDU.X";
-      pSym = theApp.m_pIQFeed->Attach( symIndu );
-      pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleInduUpdate ) );
-      theApp.m_pIQFeed->Watch( symIndu );
+}
 
-      char symTrin[] = "TRIN.Z";
-      pSym = theApp.m_pIQFeed->Attach( symTrin );
-      pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTrinUpdate ) );
-      theApp.m_pIQFeed->Watch( symTrin );
+void CVuChartArmsIntraDay::HandleRealTime() {
+  if ( theApp.m_bLive ) {
+    CIQFSymbol *pSym;
 
-      char symTick[] = "TICK.Z";
-      pSym = theApp.m_pIQFeed->Attach( symTick );
-      pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTickUpdate ) );
-      theApp.m_pIQFeed->Watch( symTick );
-    }
+    char symIndu[] = "INDU.X";
+    pSym = theApp.m_pIQFeed->Attach( symIndu );
+    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleInduUpdate ) );
+    theApp.m_pIQFeed->Watch( symIndu );
+
+    char symTrin[] = "TRIN.Z";
+    pSym = theApp.m_pIQFeed->Attach( symTrin );
+    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTrinUpdate ) );
+    theApp.m_pIQFeed->Watch( symTrin );
+
+    char symTick[] = "TICK.Z";
+    pSym = theApp.m_pIQFeed->Attach( symTick );
+    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTickUpdate ) );
+    theApp.m_pIQFeed->Watch( symTick );
   }
 }
 
+
 void CVuChartArmsIntraDay::HandleInduUpdate( CIQFSymbol *pSym ) {
   CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeIndu( (CDatedDatum) trade );
+  ProcessMergeIndu( trade );
 }
 
 void CVuChartArmsIntraDay::HandleTrinUpdate( CIQFSymbol *pSym ) {
   CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeTrin( (CDatedDatum) trade );
+  ProcessMergeTrin( trade );
 }
 
 void CVuChartArmsIntraDay::HandleTickUpdate( CIQFSymbol *pSym ) {
   CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeTick( (CDatedDatum) trade );
+  ProcessMergeTick( trade );
 }
 
 void CVuChartArmsIntraDay::ProcessMergeIndu( const CDatedDatum &datum ) {

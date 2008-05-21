@@ -7,6 +7,9 @@
 //
 
 CChartRealTimeModel::CChartRealTimeModel(void) {
+  m_ceAsks.Reserve( 50000 );
+  m_ceBids.Reserve( 50000 );
+  m_ceTrades.Reserve( 50000 );
   m_barFactory.SetBarWidth( 60 );
   m_barFactory.SetOnNewBarStarted( MakeDelegate( this, &CChartRealTimeModel::HandleNewBarStarted ) );
   m_barFactory.SetOnBarUpdated( MakeDelegate( this, &CChartRealTimeModel::HandleBarUpdated ) );
@@ -18,9 +21,13 @@ CChartRealTimeModel::~CChartRealTimeModel(void) {
 
 void CChartRealTimeModel::AddQuote(const CQuote &quote) {
   m_vQuotes.push_back( quote );
+  m_ceAsks.Add( quote.m_dt, quote.m_dblAsk );
+  m_ceBids.Add( quote.m_dt, quote.m_dblBid );
+  m_ceSpreadMidPoint.Add( quote.m_dt, ( quote.m_dblAsk + quote.m_dblBid ) / 2 );
 }
 
 void CChartRealTimeModel::AddTrade(const CTrade &trade) {
+  m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
   m_vTrades.push_back( trade );
   m_barFactory.Add( trade );
 }

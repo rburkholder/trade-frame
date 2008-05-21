@@ -5,7 +5,8 @@
 #include "DatedDatum.h"
 #include "BarFactory.h"
 
-#include "ChartEntryBase.h"
+//#include "ChartEntryBase.h"
+#include "ChartEntryIndicator.h"
 
 // possibly inherit from this to use with trading rules
 
@@ -26,6 +27,11 @@ protected:
   void HandleNewBarStarted( const CBar &bar );
   void HandleBarUpdated( const CBar &bar );
   void HandleBarCompleted( const CBar &bar );
+
+  CChartEntryIndicator m_ceAsks;
+  CChartEntryIndicator m_ceBids;
+  CChartEntryIndicator m_ceSpreadMidPoint;
+  CChartEntryIndicator m_ceTrades;
 
 private:
 };

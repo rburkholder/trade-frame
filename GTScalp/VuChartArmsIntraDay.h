@@ -55,6 +55,10 @@ protected:
   void HandleTrinUpdate( CIQFSymbol *pSym );
   void HandleTickUpdate( CIQFSymbol *pSym );
 
+  void HandleRealTime( void );
+
+  afx_msg BOOL OnInitDialog();
+
 private:
 
 public:

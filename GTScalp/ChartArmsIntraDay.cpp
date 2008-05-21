@@ -4,6 +4,7 @@
 
 // CChartArmsIntraDay
 CChartArmsIntraDay::CChartArmsIntraDay(void) : CChartViewerShim() {
+
   m_dblIndu = m_dblTrin = -1;
   m_bInduChanged = m_bTrinChanged = false;
   pChart = NULL;

@@ -53,8 +53,10 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 
-// CGTScalpDlg dialog
 
+//
+// CGTScalpDlg dialog
+//
 
 
 
@@ -64,12 +66,6 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
-  options = NULL;
-  pvpo = NULL;
-  pvi = NULL;
-  psoi = NULL;
-  pvuArms = NULL;
-  pNews = NULL;
 }
 
 void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
@@ -185,6 +181,13 @@ BOOL CGTScalpDlg::OnInitDialog() {
 	// TODO: Add extra initialization here
 
 //  pTradingLogic = NULL;
+
+  options = NULL;
+  pvpo = NULL;
+  pvi = NULL;
+  psoi = NULL;
+  pvuArms = NULL;
+  pNews = NULL;
 
   theApp.m_bLive = true;
   m_btnLive.SetCheck( BST_CHECKED );

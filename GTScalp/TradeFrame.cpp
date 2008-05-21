@@ -100,6 +100,8 @@ BOOL CTradeFrame::Create(CWnd* pParentWnd) {
   //theApp.pConsoleMessages->WriteLine(s);
   cout << s << endl;
 
+  SetWindowTextA( m_sChartTitle.c_str() );
+  
   CFrameWnd::EnableWindow();
 
   DrawRows();

@@ -39,7 +39,8 @@ public:
   void AddDynamicIndicator( double price, const char *ind );
   void RemoveDynamicIndicator( double price, const char *ind );
 
-  void SetTitleBarText( const char* pText ) { CFrameWnd::SetWindowTextA( pText ); };
+  //void SetTitleBarText( const char* pText ) { CFrameWnd::SetWindowTextA( pText ); };
+  void SetTitleBarText( const std::string &sTitle ) { m_sChartTitle = sTitle; };
 
 private:
   //bool bMouseIsDown;
@@ -50,6 +51,8 @@ private:
   //CRect rectLabel;
   long cntSharesPerOrder;
   bool m_bAllowRedraw;
+
+  std::string m_sChartTitle;
 
   CTradingLogic *m_pTradingLogic;
 
@@ -128,6 +131,7 @@ private:
   void UpdateProfitLossIndications();
 
 protected:
+
   afx_msg void OnMouseMove(UINT nFlags, CPoint point);
   afx_msg void OnMoving(UINT nSide, LPRECT lpRect);
   afx_msg void OnMove(int x, int y);

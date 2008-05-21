@@ -10,6 +10,7 @@ public:
   CChartEntryBars(void);
   CChartEntryBars(unsigned int nSize);
   virtual ~CChartEntryBars(void);
+  virtual void Reserve( unsigned int );
   void AddBar( const CBar &bar );
 protected:
   std::vector<double> m_vOpen;

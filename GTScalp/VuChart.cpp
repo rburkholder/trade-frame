@@ -26,6 +26,12 @@ CVuChart::~CVuChart() {
   DestroyWindow();
 }
 
+BOOL CVuChart::OnInitDialog() {
+  BOOL b = CDialog::OnInitDialog();
+  SetWindowTextA( m_sChartTitle.c_str() );
+  return b;
+}
+
 void CVuChart::DoDataExchange(CDataExchange* pDX) {
   CDialog::DoDataExchange(pDX);
   DDX_Control(pDX, IDC_CHART, m_chart);

@@ -34,7 +34,7 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pTradeFrame->SetAllowRedraw( false );
   s = "TradeFrame: ";
   s.append( sSymbol );
-  pTradeFrame->SetTitleBarText( s.c_str() ); 
+  pTradeFrame->SetTitleBarText( s ); 
 
   //pChartDaily = new CVuChart(theApp.m_pMainWnd);
   //pChartDaily->ShowWindow(1);
@@ -43,6 +43,7 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pChartIntraDay->ShowWindow(1);
   s = "Intraday ";
   s.append( m_sSymbol );
+  pChartIntraDay->SetTitleBarText( s );
   pChartIntraDay->m_chart.SetTitle( s.c_str() );
 
   pVuPendingOrders = new CVuPendingOrders( theApp.m_pMainWnd );
@@ -52,7 +53,7 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pVuMarketDepth = new CVuMarketDepth( theApp.m_pMainWnd );
   s = "Market Depth: ";
   s.append( m_sSymbol );
-  pVuMarketDepth -> SetTitleBarText( s.c_str() );
+  pVuMarketDepth -> SetTitleBarText( s );
   pVuMarketDepth ->ShowWindow( SW_SHOWNORMAL );
 
   stkSession1->SetOnQuoteLevel1Handler( MakeDelegate( this, &CTradingLogic::OnQuoteLevel1 ) );

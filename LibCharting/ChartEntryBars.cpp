@@ -14,6 +14,15 @@ CChartEntryBars::CChartEntryBars(unsigned int nSize)
 CChartEntryBars::~CChartEntryBars(void) {
 }
 
+void CChartEntryBars::Reserve( unsigned int nSize ) {
+  CChartEntryBaseWithTime::Reserve( nSize );
+  m_vOpen.reserve( nSize );
+  m_vHigh.reserve( nSize );
+  m_vLow.reserve( nSize );
+  m_vClose.reserve( nSize );
+  m_vVolume.reserve( nSize );
+}
+
 void CChartEntryBars::AddBar(const CBar &bar) {
   m_vDateTime.push_back( bar.m_dt );
   m_vOpen.push_back( bar.m_dblOpen );

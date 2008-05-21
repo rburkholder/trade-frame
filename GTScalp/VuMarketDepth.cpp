@@ -29,6 +29,8 @@ void CVuMarketDepth::DoDataExchange(CDataExchange* pDX) {
 BOOL CVuMarketDepth::OnInitDialog() {
   BOOL b = CDialog::OnInitDialog();
 
+  SetWindowTextA( m_sChartTitle.c_str() );
+
   m_lcMarketDepthAsk.InitControl();
   m_lcMarketDepthAsk.DrawColumns();
   m_lcMarketDepthBid.InitControl();

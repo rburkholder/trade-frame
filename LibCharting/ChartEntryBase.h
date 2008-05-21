@@ -23,9 +23,10 @@ public:
   EColor Color( void ) { return m_eColor; };
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
-protected:
-  std::vector<double> m_vPrice;
   void Add( double price );
+protected:
+  virtual void Reserve( unsigned int );
+  std::vector<double> m_vPrice;
   EColor m_eColor;
   std::string m_sName;
 private:
@@ -36,9 +37,10 @@ public:
   CChartEntryBaseWithTime( void );
   CChartEntryBaseWithTime( unsigned int nSize );
   virtual ~CChartEntryBaseWithTime( void );
+  void Add( ptime dt, double price );
 protected:
   std::vector<ptime> m_vDateTime;
   std::vector<double> m_vChartTime;  // used by ChartDir
-  void Add( ptime dt, double price );
+  virtual void Reserve( unsigned int );
 private:
 };

@@ -92,6 +92,7 @@ void CChartDatedDatum::UpdateChart() {
     //double *prPivot3 = new double[ n ];
     //double *prPivot4 = new double[ n ];
 
+    bool bHasVolume = false;
     int i = 0;
     while ( NULL != pBar ) {
       prTimeStamps[ i ] = Chart::chartTime( 
@@ -106,7 +107,9 @@ void CChartDatedDatum::UpdateChart() {
       prLo[ i ] = pBar -> m_dblLow;
       prOpen[ i ] = pBar -> m_dblOpen;
       prClose[ i ] = pBar -> m_dblClose;
-      prVolume[ i ] = pBar -> m_nVolume;
+      double d = pBar -> m_nVolume;
+      if ( 0 < d ) bHasVolume = true;
+      prVolume[ i ] = d;
       //prPivot1[ i ] = 425.0;
       //prPivot2[ i ] = 525.0;
       //prPivot3[ i ] = 625.0;
@@ -206,8 +209,8 @@ void CChartDatedDatum::UpdateChart() {
     XYChart *main = chart -> addMainChart( m_nChartHeight );
     //chart->addHLOC(0x008000, 0xcc0000);
     chart->addCandleStick(0x00ff00, 0xff0000);
-    //chart->addVolBars(70, 0x99ff99, 0xff9999, 0x808080);
-    XYChart *bars = chart->addVolIndicator(70, 0x99ff99, 0xff9999, 0x808080);
+    if ( bHasVolume ) chart->addVolBars(70, 0x99ff99, 0xff9999, 0x808080);
+    //XYChart *bars = chart->addVolIndicator(70, 0x99ff99, 0xff9999, 0x808080);
     //chart->addLineIndicator2( main, daPivot1, 0x99ff99, "Pivot1" );
     //chart->addLineIndicator2( main, daPivot2, 0xff9999, "Pivot2" );
     //chart->addLineIndicator2( main, daPivot3, 0x808080, "Pivot3" );

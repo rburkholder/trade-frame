@@ -13,3 +13,8 @@ CChartEntryIndicator::CChartEntryIndicator( unsigned int nSize )
 
 CChartEntryIndicator::~CChartEntryIndicator(void) {
 }
+
+void CChartEntryIndicator::Reserve( unsigned int nSize ) {
+  CChartEntryBaseWithTime::Reserve( nSize );
+
+}
