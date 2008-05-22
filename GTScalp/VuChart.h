@@ -1,6 +1,5 @@
 #pragma once
-//#include "afxwin.h"
-//#include "ChartViewer.h" 
+
 #include "Resource.h"
 #include "ChartDatedDatum.h"
 
@@ -10,9 +9,8 @@ class CVuChart : public CDialog {
 	DECLARE_DYNAMIC(CVuChart)
 
 public:
-	CVuChart(CWnd* pParent = NULL);   // standard constructor
+	CVuChart(const std::string &sTitle, CWnd* pParent = NULL);   // standard constructor
 	virtual ~CVuChart();
-  void SetTitleBarText( const std::string &sTitle ) { m_sChartTitle = sTitle; };
 
 // Dialog Data
 	enum { IDD = IDD_VUCHART };

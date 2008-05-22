@@ -26,6 +26,5 @@ void CChartViewerShim::SetChartDimensions(unsigned int x, unsigned int y) {
 
 void CChartViewerShim::OnDestroy()  {
 	CChartViewer::OnDestroy();
-	
 }
 

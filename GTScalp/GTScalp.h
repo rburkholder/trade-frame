@@ -18,7 +18,7 @@
 #include "IQFeed.h" 
 #include "IBTWS.h"
 
-#include "GeneratePeriodicRefresh.h"  // need the above constants
+//#include "GeneratePeriodicRefresh.h"  // need the above constants
 
 
 // file and line numbers on exit for memory loss
@@ -56,7 +56,7 @@ public:
   CIQFeed *m_pIQFeed;
   CIBTWS *m_pIB;
 
-  CGeneratePeriodicRefresh *m_pRefresh;
+  //CGeneratePeriodicRefresh *m_pRefresh;  // 2008/05/21  done as a singleton now
 
   bool m_bLive;
   unsigned int m_nDaysAgo;

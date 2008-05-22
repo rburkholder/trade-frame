@@ -8,13 +8,10 @@ class CVuMarketDepth : public CDialog {
 	DECLARE_DYNAMIC(CVuMarketDepth)
 
 public:
-	CVuMarketDepth(CWnd* pParent = NULL);   // standard constructor
+	CVuMarketDepth(const std::string &sTitle, CWnd* pParent = NULL );   // standard constructor
 	virtual ~CVuMarketDepth();
 
-  //void SetTitleBarText( const char *pText ) { CDialog::SetWindowTextA( pText ); };
-  void SetTitleBarText( const std::string &sTitle ) { m_sChartTitle = sTitle; };
-
-// Dialog Data
+  // Dialog Data
 	enum { IDD = IDD_VUMARKETDEPTH };
 
 protected:

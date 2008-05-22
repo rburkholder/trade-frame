@@ -10,8 +10,10 @@
 
 IMPLEMENT_DYNAMIC(CVuMarketDepth, CDialog)
 
-CVuMarketDepth::CVuMarketDepth(CWnd* pParent /*=NULL*/)
+CVuMarketDepth::CVuMarketDepth( const std::string &sTitle, CWnd* pParent /*=NULL*/ )
 	: CDialog(CVuMarketDepth::IDD, pParent) {
+
+    m_sChartTitle = sTitle;
 
     BOOL b = Create(IDD_VUMARKETDEPTH, pParent );
 }

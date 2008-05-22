@@ -15,9 +15,10 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CVuChart, CDialog)
 
-CVuChart::CVuChart(CWnd* pParent /*=NULL*/)
+CVuChart::CVuChart(const std::string &sTitle, CWnd* pParent /*=NULL*/)
 	: CDialog(CVuChart::IDD, pParent) {
 
+    m_sChartTitle = sTitle;
   BOOL b = Create(IDD, pParent );
 }
 

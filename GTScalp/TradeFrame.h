@@ -158,6 +158,8 @@ protected:
 
   void OnPeriodicRefresh( CGeneratePeriodicRefresh* );
 
+  CGeneratePeriodicRefresh m_refresh;
+
   //virtual BOOL Create(UINT nIDTemplate, CWnd* pParentWnd = NULL);
   virtual BOOL PreTranslateMessage(MSG* pMsg);
 

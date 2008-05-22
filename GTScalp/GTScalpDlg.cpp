@@ -274,6 +274,8 @@ BOOL CGTScalpDlg::OnInitDialog() {
 
   theApp.m_pIB = NULL;
 
+  m_refresh.SetThreadWindow( theApp.m_pMainWnd );
+
 
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -347,11 +349,14 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
 }
 
 afx_msg LRESULT CGTScalpDlg::OnPeriodicRefresh( WPARAM w, LPARAM l ) {
-  theApp.m_pRefresh ->HandleRefresh();
+  m_refresh.HandleRefresh();
   return 1;
 }
 
 afx_msg void CGTScalpDlg::OnDestroy( ) {
+
+  m_refresh.ResetThreadWindow();
+
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
   }
@@ -839,7 +844,7 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
     if ( DSIB == m_eDataSourceType ) {  // only accept IB for now
       if ( NULL != theApp.m_pIB ) { // make sure IB is turned on
         CVuChart *pChartIntraDay;  // need to add to vector so can delete at end of program run
-        pChartIntraDay = new CVuChart( );
+        pChartIntraDay = new CVuChart( sSymbol );
         pChartIntraDay->m_chart.SetBarFactoryWidthSeconds( 6 );
         pChartIntraDay->m_chart.SetWindowWidthSeconds( 90 * 6 ); 
         pChartIntraDay->m_chart.setMajorTickInc( 12 * 6 );

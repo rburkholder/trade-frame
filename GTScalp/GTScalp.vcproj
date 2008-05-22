@@ -227,10 +227,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GeneratePeriodicRefresh.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\HDF5.cpp"
 				>
 			</File>
@@ -501,10 +497,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GeneratePeriodicRefresh.h"
-				>
-			</File>
-			<File
 				RelativePath=".\HDF5.h"
 				>
 			</File>
@@ -621,10 +613,6 @@
 				</File>
 				<File
 					RelativePath=".\GTStockX.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GTWindowsConstants.h"
 					>
 				</File>
 			</Filter>

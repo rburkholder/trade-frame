@@ -20,6 +20,7 @@
 #include "VuChart.h"
 #include "ChartDirector\FinanceChart.h"
 #include "VuMarketDepth.h"
+#include "GeneratePeriodicRefresh.h" 
 
 
 using namespace std;
@@ -66,6 +67,9 @@ protected:
 
 // Implementation
 protected:
+
+  CGeneratePeriodicRefresh m_refresh;
+
 	HICON m_hIcon;
 
 	// Generated message map functions

@@ -5,8 +5,9 @@
 #include "DatedDatum.h"
 #include "BarFactory.h"
 
-//#include "ChartEntryBase.h"
 #include "ChartEntryIndicator.h"
+
+#include "Delegate.h"
 
 // possibly inherit from this to use with trading rules
 
@@ -17,6 +18,7 @@ public:
   virtual ~CChartRealTimeModel(void);
   void AddQuote( const CQuote &quote );
   void AddTrade( const CTrade &trade );
+  Delegate<const CChartRealTimeModel &> OnDataChanged;
 
 protected:
   std::vector<CQuote> m_vQuotes;

@@ -10,6 +10,7 @@
 #include "VuChart.h"
 #include "ChartDirector\FinanceChart.h"
 #include "VuMarketDepth.h"
+#include "GeneratePeriodicRefresh.h"
 
 #include <string>
 using namespace std;
@@ -76,6 +77,8 @@ protected:
 
   enum EMarketDepthToUpdate { MDUpdateNone=0, MDUpdateBid=1, MDUpdateAsk=2, MDUpdateBoth=3 } stateMDUpdate;
   void UpdateMarketDepth( void );
+
+  CGeneratePeriodicRefresh m_refresh;
 private:
   void OnIQFeedTimeMessage( CIQFTimeMessage *pMsg );
   void OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg );

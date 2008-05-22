@@ -80,7 +80,7 @@ BOOL CGTScalpApp::InitInstance()
     pConsoleMessages->ShowWindow( SW_SHOWNORMAL );
   }
 
-  m_pRefresh = new CGeneratePeriodicRefresh( m_pMainWnd );
+  //m_pRefresh = new CGeneratePeriodicRefresh( m_pMainWnd );
 
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -96,7 +96,7 @@ BOOL CGTScalpApp::InitInstance()
 
   //CGTSessionX::Uninitialize();
 
-  delete m_pRefresh;
+  //delete m_pRefresh;
 
   delete pConsoleMessages;
   pConsoleMessages = NULL;

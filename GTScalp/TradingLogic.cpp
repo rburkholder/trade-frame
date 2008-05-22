@@ -30,30 +30,30 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   stkSession2 ->CancelChart();
 
   pTradeFrame = new CTradeFrame( this );
-  pTradeFrame->Create(theApp.m_pMainWnd);
-  pTradeFrame->SetAllowRedraw( false );
   s = "TradeFrame: ";
   s.append( sSymbol );
   pTradeFrame->SetTitleBarText( s ); 
+  pTradeFrame->Create(theApp.m_pMainWnd);
+  pTradeFrame->SetAllowRedraw( false );
 
   //pChartDaily = new CVuChart(theApp.m_pMainWnd);
   //pChartDaily->ShowWindow(1);
 
-  pChartIntraDay = new CVuChart(theApp.m_pMainWnd);
-  pChartIntraDay->ShowWindow(1);
   s = "Intraday ";
   s.append( m_sSymbol );
-  pChartIntraDay->SetTitleBarText( s );
+  pChartIntraDay = new CVuChart(s,theApp.m_pMainWnd);
+  //pChartIntraDay->SetTitleBarText( s );
+  pChartIntraDay->ShowWindow(1);
   pChartIntraDay->m_chart.SetTitle( s.c_str() );
 
   pVuPendingOrders = new CVuPendingOrders( theApp.m_pMainWnd );
   pVuPendingOrders->po1.SetOnCancelHandler( MakeDelegate( this, &CTradingLogic::OnCancelAcct1Order ) );
   pVuPendingOrders->po2.SetOnCancelHandler( MakeDelegate( this, &CTradingLogic::OnCancelAcct2Order ) );
 
-  pVuMarketDepth = new CVuMarketDepth( theApp.m_pMainWnd );
   s = "Market Depth: ";
   s.append( m_sSymbol );
-  pVuMarketDepth -> SetTitleBarText( s );
+  pVuMarketDepth = new CVuMarketDepth( s, theApp.m_pMainWnd);
+  //pVuMarketDepth -> SetTitleBarText( s );
   pVuMarketDepth ->ShowWindow( SW_SHOWNORMAL );
 
   stkSession1->SetOnQuoteLevel1Handler( MakeDelegate( this, &CTradingLogic::OnQuoteLevel1 ) );
@@ -101,14 +101,14 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   }
 
   stateMDUpdate = MDUpdateBoth;  // these two lines depend upon Session being logged in AND connected
-  theApp.m_pRefresh->OnRefresh.Add( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
+  m_refresh.OnRefresh.Add( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
 }
 
 CTradingLogic::~CTradingLogic(void){
 
   //theApp.m_pIQFeed->TimeMessage.Remove( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
 
-  theApp.m_pRefresh->OnRefresh.Remove( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
+  m_refresh.OnRefresh.Remove( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
 
   delete pVuPendingOrders;
   pVuPendingOrders = NULL;

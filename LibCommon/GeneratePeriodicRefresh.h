@@ -6,17 +6,20 @@
 
 class CGeneratePeriodicRefresh {
 public:
-  CGeneratePeriodicRefresh(CWnd *pWindowForThread);
+  CGeneratePeriodicRefresh( void );
   virtual ~CGeneratePeriodicRefresh(void);
   void HandleRefresh( void ) { // window calls this on each send message to get the calls invoked
     if ( !OnRefresh.IsEmpty() ) OnRefresh( this );
   }
-  Delegate<CGeneratePeriodicRefresh *> OnRefresh;
+  void SetThreadWindow( CWnd *pWindowForThread );
+  void ResetThreadWindow( void );
+  static Delegate<CGeneratePeriodicRefresh *> OnRefresh;
 protected:
-  HANDLE hScreenRefreshThread;
-  DWORD RefreshThreadId;
-  CWnd *m_pWindowForThread;
+  static HANDLE hScreenRefreshThread;
+  static DWORD RefreshThreadId;
+  static CWnd *m_pWindowForThread;
 private:
   static DWORD WINAPI TriggerRefresh( LPVOID );
+  static unsigned int m_nInstances;
 
 };
