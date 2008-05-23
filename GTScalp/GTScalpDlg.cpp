@@ -14,6 +14,7 @@
 #include "IQFeedRetrieveHistory.h"
 #include "IQFeedSymbolFile.h"
 #include "ChartDatedDatum.h"
+#include "ChartRealTimeContainer.h"
 
 #include <iostream>
 
@@ -147,6 +148,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_DSGT2, &CGTScalpDlg::OnBnClickedDsgt2)
   ON_BN_CLICKED(IDC_CHARTSYMBOL, &CGTScalpDlg::OnBnClickedChartsymbol)
   ON_EN_CHANGE(IDC_IBACCT, &CGTScalpDlg::OnEnChangeIbacct)
+  ON_BN_CLICKED(IDC_RTCHART, &CGTScalpDlg::OnBnClickedRtchart)
 END_MESSAGE_MAP()
 
 
@@ -863,12 +865,26 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
   }
 }
 
-void CGTScalpDlg::OnEnChangeIbacct()
-{
+void CGTScalpDlg::OnEnChangeIbacct() {
   // TODO:  If this is a RICHEDIT control, the control will not
   // send this notification unless you override the CDialog::OnInitDialog()
   // function and call CRichEditCtrl().SetEventMask()
   // with the ENM_CHANGE flag ORed into the mask.
 
   // TODO:  Add your control notification handler code here
+}
+
+void CGTScalpDlg::OnBnClickedRtchart() {
+  char szSymbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+  string sSymbol( szSymbol );
+  if ( ( 0 != *szSymbol ) && ( NoDS != m_eDataSourceType ) ) {
+    if ( DSIB == m_eDataSourceType ) {  // only accept IB for now
+      if ( NULL != theApp.m_pIB ) { // make sure IB is turned on
+        CChartRealTimeContainer *pChart;  // need to add to vector so can delete at end of program run
+        pChart = new CChartRealTimeContainer( sSymbol, theApp.m_pIB );
+        pChart->ShowWindow( SW_SHOWNORMAL );
+      }
+    }
+  }
 }

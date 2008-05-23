@@ -49,12 +49,17 @@ void CChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
   m_vChartTime.reserve( nSize );
 }
 
-void CChartEntryBaseWithTime::Add(boost::posix_time::ptime dt, double price) {
-  CChartEntryBase::Add( price );
+void CChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
+  // some Chart Entries don't use the built in vector
   m_vDateTime.push_back( dt );
   m_vChartTime.push_back( 
     Chart::chartTime( 
       dt.date().year(), dt.date().month(), dt.date().day(),
       dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
+}
+
+void CChartEntryBaseWithTime::Add( const boost::posix_time::ptime &dt, double price) {
+  CChartEntryBase::Add( price );
+  Add( dt );
 }
 

@@ -157,4 +157,5 @@ public:
   CStatic m_grpDataSource;
   afx_msg void OnBnClickedChartsymbol();
   afx_msg void OnEnChangeIbacct();
+  afx_msg void OnBnClickedRtchart();
 };

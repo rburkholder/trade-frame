@@ -26,7 +26,9 @@ public:
   virtual void AddDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
   virtual void RemoveDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
 
+  const std::string &Name( void ) { return m_sName; };
 protected:
+  std::string m_sName;  // name of provider
   std::map<std::string, CSymbol*> m_mapSymbols;
   virtual void StartQuoteWatch( CSymbol *pSymbol ) {};
   virtual void StopQuoteWatch( CSymbol *pSymbol ) {};

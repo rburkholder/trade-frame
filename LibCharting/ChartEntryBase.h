@@ -14,6 +14,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include "ChartDirector\FinanceChart.h"
+
 class CChartEntryBase {
 public:
   CChartEntryBase( void );
@@ -24,6 +26,11 @@ public:
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
   void Add( double price );
+  typedef std::vector<double> vdouble_t;
+  DoubleArray GetPrice( void ) {
+    vdouble_t::iterator iter = m_vPrice.begin();
+    return DoubleArray( &(*iter), m_vPrice.size() );
+  }
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;
@@ -37,7 +44,12 @@ public:
   CChartEntryBaseWithTime( void );
   CChartEntryBaseWithTime( unsigned int nSize );
   virtual ~CChartEntryBaseWithTime( void );
-  void Add( ptime dt, double price );
+  void Add( const ptime &dt, double price );
+  void Add( const ptime &dt );
+  DoubleArray GetDateTime( void ) {
+    vdouble_t::iterator iter = m_vChartTime.begin();
+    return DoubleArray( &(*iter), m_vChartTime.size() );
+  }
 protected:
   std::vector<ptime> m_vDateTime;
   std::vector<double> m_vChartTime;  // used by ChartDir

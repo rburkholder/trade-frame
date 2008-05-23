@@ -92,8 +92,9 @@
 #define IDC_DSGT2                       1097
 #define IDC_DS1                         1098
 #define IDC_DS2                         1099
-#define IDC_BUTTON5                     1100
 #define IDC_CHARTSYMBOL                 1100
+#define IDC_BUTTON2                     1101
+#define IDC_RTCHART                     1101
 
 // Next default values for new objects
 // 
@@ -101,7 +102,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1101
+#define _APS_NEXT_CONTROL_VALUE         1102
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
