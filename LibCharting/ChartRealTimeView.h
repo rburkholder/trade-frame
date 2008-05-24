@@ -15,7 +15,7 @@ public:
   //void SetModel( CChartRealTimeModel *pModel ) { m_pModel = pModel; };
   void SetUpdateChart( bool b ) { m_bUpdateChart = b; };
   bool GetUpdateChart( void ) { return m_bUpdateChart; };
-  void SetChartDimensions( unsigned int x, unsigned int y);
+  void SetChartDimensions( unsigned int width, unsigned int height);
   void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
   void HandleBarCompleted(CChartRealTimeModel *model);
 protected:
@@ -27,6 +27,7 @@ protected:
   std::string m_sChartTitle;
   CGeneratePeriodicRefresh m_refresh;
   void HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
+
 	DECLARE_MESSAGE_MAP()
 private:
 };

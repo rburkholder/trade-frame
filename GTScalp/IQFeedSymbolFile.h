@@ -1,7 +1,9 @@
 #pragma once
 
-#include "BerkeleyDb.h"
 #include <string>
+
+#include "TradingEnumerations.h"
+#include "BerkeleyDb.h"
 
 //using namespace std;
 
@@ -38,7 +40,7 @@ protected:
     td_structIndexes cnt[3];  // length of each of three strings, excludes terminator
     td_structIndexes bufferedlength; // means structure can only be 255 long
     unsigned char ucBits1;  // mutual, moneymkt, index, cboe, indicator, hasoptions
-    unsigned char ucBits2;  // stock, future, option, futuresoption, currency, bond, etf
+    unsigned char nContractType;  // Trading::enumContractTypes
     unsigned char nMonth;  // 1 - 12, 0 for nothing
     char chDirection;  // P put C call for option
     char line[nMaxBufferSize];
@@ -46,7 +48,7 @@ protected:
   structIQFSymbolRecord *pRecord; // used for retrievals
 
   bool m_bMutual, m_bMoneyMkt, m_bIndex, m_bCboe, m_bIndicator, m_bHasOptions;
-  bool m_bStock, m_bFuture, m_bOption, m_bFuturesOption, m_bCurrency, m_bBond, m_bETF, m_bMetals;
+  //bool m_bStock, m_bFuture, m_bOption, m_bFuturesOption, m_bCurrency, m_bBond, m_bETF, m_bMetals;
   Db *m_pdbIQFSymbols;
   Db *m_pdbIxIQFSymbols_Market;
   Dbc *m_pdbcIxIQFSymbols_Market;
@@ -57,21 +59,21 @@ protected:
   const char *m_szSearchKey;
   u_int32_t m_lenSearchKey;
 
+  static struct structExchangeInfo {
+    char *szName;
+    Trading::enumContractTypes nContractType;
+    unsigned long cntContracts;
+    //structExchangeInfo( void ) : szName( NULL ), nContractType( Trading::UnknownContract ), cntContracts( 0 ) {};
+  } m_rExchanges[];
+
   static const unsigned char ucMutual = 1;
   static const unsigned char ucMoneyMkt = 2;
   static const unsigned char ucIndex = 4;
   static const unsigned char ucCboe = 8;
   static const unsigned char ucIndicator = 16;
   static const unsigned char ucHasOptions = 32;
-  static const unsigned char ucStock = 1;
-  static const unsigned char ucFuture = 2;
-  static const unsigned char ucOption = 4;
-  static const unsigned char ucFuturesOption = 8;
-  static const unsigned char ucCurrency = 16;
-  static const unsigned char ucBond = 32;
-  static const unsigned char ucETF = 64;
-  static const unsigned char ucMetals = 128;
+
   void PackBoolean(void);
-  void UnPackBoolean( const unsigned char ucBits1, const unsigned char ucBits2 );
+  void UnPackBoolean( const unsigned char ucBits1 );
 private:
 };

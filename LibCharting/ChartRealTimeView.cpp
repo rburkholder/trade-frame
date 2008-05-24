@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "ChartRealTimeView.h"
 
+#include "Color.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -24,10 +26,10 @@ CChartRealTimeView::~CChartRealTimeView(void) {
 BEGIN_MESSAGE_MAP(CChartRealTimeView, CChartViewer)
 END_MESSAGE_MAP()
 
-void CChartRealTimeView::SetChartDimensions(unsigned int x, unsigned int y) {
+void CChartRealTimeView::SetChartDimensions(unsigned int width, unsigned int height) {
   // need to force a window resize here
-  m_nChartWidth = x;
-  m_nChartHeight = y;
+  m_nChartWidth = width;
+  m_nChartHeight = height;
 }
 
 void CChartRealTimeView::HandleBarCompleted(CChartRealTimeModel *model) {
@@ -37,12 +39,17 @@ void CChartRealTimeView::HandleBarCompleted(CChartRealTimeModel *model) {
 void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
   if ( m_bModelChanged ) {
     // redraw the chart here
-  CRect rect;
-  CChartViewer::GetClientRect( &rect );
-  m_nChartWidth = rect.Width();
-  m_nChartHeight = rect.Height();
+    /*
     FinanceChart chart( m_nChartWidth );
     //assert( NULL != m_pModel );
+    XYChart *xy = chart.addMainChart( 300 ); 
+    //LineLayer *lltrade = chart.addLineIndicator2( xy, m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
+    //XYChart *xyask = chart.addLineIndicator( 100, m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
+    LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
+    //LineLayer *llask = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
+    lltrade->setXData( m_pModel->Trades()->GetDateTime() );
+    //LineLayer *llbid = chart.addLineIndicator2( xy, m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
+//    llbid->setXData( m_pModel->Bids()->GetDateTime() );
     CChartEntryBars *bars = m_pModel->Bars();
     chart.setData( 
       bars->GetDateTime(), 
@@ -52,10 +59,31 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
       bars->GetClose(), 
       bars->GetVolume(), 
       0 );
-    XYChart *xy = chart.addMainChart( m_nChartHeight );
+    //chart.layout();
     chart.addCandleStick(0x00ff00, 0xff0000);
-    chart.layout();
-    setChart( &chart );
+    chart.addVolBars( 70, 0x99ff99, 0xff9999, 0x808080);*/
+    XYChart xy( m_nChartWidth, 300 );
+    xy.setPlotArea( 50, 20, m_nChartWidth - 100, 200 );
+    
+    LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
+    lltrade->setXData( m_pModel->Trades()->GetDateTime() );
+    LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
+    llasks->setXData( m_pModel->Asks()->GetDateTime() );
+    LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
+    llbids->setXData( m_pModel->Bids()->GetDateTime() );
+
+    CChartEntryBars *bars = m_pModel->Bars();
+    CandleStickLayer *candle = xy.addCandleStickLayer( 
+      bars->GetHigh(), 
+      bars->GetLow(), 
+      bars->GetOpen(), 
+      bars->GetClose(), 0x00ff00, 0xff0000);
+    candle->setXData( bars->GetDateTime() );
+    BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
+    bl->setXData( bars->GetDateTime() );
+    bl->setUseYAxis2( true );
+    xy.layout();
+    setChart( &xy );
     m_bModelChanged = false;
   }
 }
