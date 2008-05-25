@@ -12,7 +12,7 @@
 
 class IQFeedHistory: public CIQFeedRetrieval {
 public:
-  IQFeedHistory( void );
+  IQFeedHistory( CIQFeedProvider *pProvider );
   virtual ~IQFeedHistory( void );
   typedef FastDelegate1<IQFeedHistory *> OnRequestCompleteHandler;
   void SetOnRequestComplete( OnRequestCompleteHandler function ) {
@@ -43,7 +43,7 @@ private:
 
 class IQFeedHistoryHD: public IQFeedHistory {
 public:
-  IQFeedHistoryHD( CBars *pBars );
+  IQFeedHistoryHD( CIQFeedProvider *pProvider, CBars *pBars );
   virtual ~IQFeedHistoryHD( void );
   virtual void FileRequest( const char *szSymbol, unsigned long nCount );
   virtual void LiveRequest( const char *szSymbol, unsigned long nCount );
@@ -61,7 +61,7 @@ private:
 
 class IQFeedHistoryHT: public IQFeedHistory {
 public:
-  IQFeedHistoryHT( CQuotes *pQuotes, CTrades *pTrades );
+  IQFeedHistoryHT( CIQFeedProvider *pProvider, CQuotes *pQuotes, CTrades *pTrades );
   virtual ~IQFeedHistoryHT( void );
   virtual void FileRequest( const char *szSymbol, unsigned long nCount );
   virtual void LiveRequest( const char *szSymbol, unsigned long nCount );

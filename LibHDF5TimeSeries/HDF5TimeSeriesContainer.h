@@ -3,7 +3,7 @@
 #include "HDF5TimeSeriesIterator.h"
 #include "HDF5TimeSeriesAccessor.h"
 
-#include "DataManager.h"
+#include "HDF5DataManager.h"
 using namespace H5;
 
 #include <string>

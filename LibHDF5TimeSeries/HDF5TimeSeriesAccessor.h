@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataManager.h"
+#include "HDF5DataManager.h"
 using namespace H5;
 
 #include "DatedDatum.h"
@@ -25,7 +25,7 @@ public:
   void Write( hsize_t ixStart, size_t count, T * );
 protected:
   string m_sFilename;
-  CDataManager dm;
+  CHDF5DataManager dm;
   DataSet *m_pDiskDataSet;
   CompType *m_pDiskCompType;
   size_type m_curElementCount, m_maxElementCount;
@@ -65,7 +65,7 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
   }
   catch ( H5::Exception e ) {
     cout << "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor " << e.getDetailMsg() << endl;
-    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     throw runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor error 1" );
   }
   catch (...) {
@@ -111,7 +111,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch (...) {
@@ -189,7 +189,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Write H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch (...) {

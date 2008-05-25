@@ -7,7 +7,7 @@ COrder::COrder(void) {
 COrder::COrder( 
     CProviderInterface *provider, 
     const std::string &sSymbol, 
-    enumOrderSide eOrderSide, 
+    OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
     ptime dtOrderSubmitted
     ) :

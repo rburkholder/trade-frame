@@ -7,6 +7,11 @@ CKeyWordMatch::CKeyWordMatch(void) {
   ClearPatterns();
 }
 
+CKeyWordMatch::CKeyWordMatch(size_t size) {
+  m_vNodes.reserve( size );
+  ClearPatterns();
+}
+
 CKeyWordMatch::~CKeyWordMatch(void) {
   m_vNodes.clear();
 }
@@ -25,7 +30,8 @@ void CKeyWordMatch::ClearPatterns() {
 
 // do matches through indirect case table like the wumanber design
 
-void CKeyWordMatch::AddPattern( const std::string &sPattern, unsigned short op ) {
+void CKeyWordMatch::AddPattern( 
+              const std::string &sPattern, void *object ) {
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {
     throw std::runtime_error( "zero length pattern" );
@@ -56,7 +62,8 @@ void CKeyWordMatch::AddPattern( const std::string &sPattern, unsigned short op )
         }
         else {
           // move onto next node at this level to find character
-          size_t ixLinkAtNextSameLevel = m_vNodes[ ixLevel ].ixLinkAtSameLevel;
+          size_t ixLinkAtNextSameLevel 
+            = m_vNodes[ ixLevel ].ixLinkAtSameLevel;
           if ( 0 == ixLinkAtNextSameLevel ) {
             // add a new node at this level
             structNode node;
@@ -77,22 +84,23 @@ void CKeyWordMatch::AddPattern( const std::string &sPattern, unsigned short op )
     }
     ++iter;
     if ( sPattern.end() == iter ) {
-      if ( 0 != m_vNodes[ ixNode ].ixOperation ) {
+      if ( NULL != m_vNodes[ ixNode ].object ) {
         std::runtime_error( "Pattern already present" );
       }
-      m_vNodes[ ixNode ].ixOperation = op;  // assign the value for return, and finish
+      m_vNodes[ ixNode ].object = object;  // assign and finish
       bDone = true;
     }
   }
 }
 
-unsigned short CKeyWordMatch::FindMatch( const std::string &sPattern ) {
+void *CKeyWordMatch::FindMatch( const std::string &sPattern ) {
   // traverse structure looking for matches
+  // need to fix so can return longest match
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {
     throw std::runtime_error( "zero length pattern" );
   }
-  unsigned short op = 0;
+  void *object = NULL;
   size_t ixNode = 0;
   size_t ix;
   bool bOpFound = true;
@@ -114,7 +122,7 @@ unsigned short CKeyWordMatch::FindMatch( const std::string &sPattern ) {
         }
         else {
           ixLevel = m_vNodes[ ixLevel ].ixLinkAtSameLevel;
-          if ( 0 == ixLevel ) {
+          if ( 0 == ixLevel ) {  // no match so end 
             bLevelDone = true;
             bDone = true;
           }
@@ -123,11 +131,11 @@ unsigned short CKeyWordMatch::FindMatch( const std::string &sPattern ) {
     }
     ++iter;
     if ( sPattern.end() == iter ) {
-      op = m_vNodes[ ixNode ].ixOperation;
+      object = m_vNodes[ ixNode ].object;
       bDone = true;
     }
   }
-  return op;
+  return object;
 }
 
 

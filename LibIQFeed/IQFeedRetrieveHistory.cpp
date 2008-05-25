@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "IQFeedRetrieveHistory.h"
-//#include "GTScalp.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -8,7 +7,9 @@ using namespace std;
 
 // IQFeedHistory
 
-IQFeedHistory::IQFeedHistory() {
+IQFeedHistory::IQFeedHistory( CIQFeedProvider *pProvider )
+: CIQFeedRetrieval( pProvider )
+{
   m_bBusy = false;
   m_cntRecords = 0;
   m_stateHistory = EDoingNothing;
@@ -159,7 +160,7 @@ void IQFeedHistory::Parse(const char *str, string *results, unsigned short nStri
 
 // IQFeedHistoryHD
 
-IQFeedHistoryHD::IQFeedHistoryHD( CBars *pBars ): IQFeedHistory() {
+IQFeedHistoryHD::IQFeedHistoryHD( CIQFeedProvider *pProvider, CBars *pBars ): IQFeedHistory(pProvider) {
   m_pBars = pBars;
 }
 
@@ -201,7 +202,7 @@ void IQFeedHistoryHD::OnPortMessage( const char *str ) {
 
 // IQFeedHistoryHT
 
-IQFeedHistoryHT::IQFeedHistoryHT( CQuotes *pQuotes, CTrades *pTrades ): IQFeedHistory() {
+IQFeedHistoryHT::IQFeedHistoryHT( CIQFeedProvider *pProvider, CQuotes *pQuotes, CTrades *pTrades ): IQFeedHistory(pProvider) {
   m_pQuotes = pQuotes;
   m_pTrades = pTrades;
 }

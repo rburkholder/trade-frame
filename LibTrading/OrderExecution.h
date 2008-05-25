@@ -5,20 +5,19 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 
 #include "TradingEnumerations.h"
-using namespace Trading;
 
 #include "Order.h"
 
 class COrderExecution {
 public:
   COrderExecution(void);
-  COrderExecution( COrder *order, ptime dtExecutionTime, unsigned long nExecutedQuantity, enumOrderSide eOrderSide );
+  COrderExecution( COrder *order, ptime dtExecutionTime, unsigned long nExecutedQuantity, OrderSide::enumOrderSide eOrderSide );
   virtual ~COrderExecution(void);
 protected:
   COrder *m_pOrder;
   ptime m_dtExecutionTime;
   unsigned long m_nExecutedQuantity;
-  enumOrderSide m_eOrderSide;
-  enumExecutionStatus m_eExecutionStatus;
+  OrderSide::enumOrderSide m_eOrderSide;
+  ExecutionStatus::enumExecutionStatus m_eExecutionStatus;
 private:
 };

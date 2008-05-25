@@ -27,8 +27,10 @@ public:
   virtual void RemoveDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
 
   const std::string &Name( void ) { return m_sName; };
+  bool Connected( void ) { return m_bConnected; };
 protected:
   std::string m_sName;  // name of provider
+  bool m_bConnected;
   std::map<std::string, CSymbol*> m_mapSymbols;
   virtual void StartQuoteWatch( CSymbol *pSymbol ) {};
   virtual void StopQuoteWatch( CSymbol *pSymbol ) {};
@@ -36,6 +38,6 @@ protected:
   virtual void StopTradeWatch( CSymbol *pSymbol ) {};
   virtual void StartDepthWatch( CSymbol *pSymbol ) {};
   virtual void StopDepthWatch( CSymbol *pSymbol ) {};
-  virtual CSymbol *NewCSymbol( const std::string &sSymbolName ) { return new CSymbol( sSymbolName ); }; // override for deriving different inherited version
+  virtual CSymbol *NewCSymbol( const std::string &sSymbolName ) = 0; // override for deriving different inherited version
 private:
 };

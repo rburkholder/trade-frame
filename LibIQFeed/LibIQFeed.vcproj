@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="LibInteractiveBrokers"
-	ProjectGUID="{A009C9AC-12BD-4BBB-9FB5-68A113561949}"
-	RootNamespace="LibInteractiveBrokers"
+	Name="LibIQFeed"
+	ProjectGUID="{E0F5C363-DFFD-4095-84C4-30197EEE8A1F}"
+	RootNamespace="LibIQFeed"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_35_0;..\LibTrading;..\LibCommon;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;"
+				AdditionalIncludeDirectories="&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;;K:\Data\Projects\boost\boost_1_35_0;..\LibBerkeleyDb;..\LibTrading;..\LibCommon;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibTimeSeries;..\LibHDF5TimeSeries"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_LIB_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -150,11 +150,43 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\IBSymbol.cpp"
+				RelativePath=".\IQFeed.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\IBTWS.cpp"
+				RelativePath=".\IQFeedHistoryCollector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedMessages.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedOptions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedProvider.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieval.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieveHistory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedSymbol.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedSymbolFile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedThreadCrossing.cpp"
 				>
 			</File>
 			<File
@@ -177,22 +209,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<Filter
-				Name="TWS"
-				>
-				<File
-					RelativePath=".\TWS\EClientSocket.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\HScrollListBox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\MySocket.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -200,73 +216,53 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\IBSymbol.h"
+				RelativePath=".\IQ32.H"
 				>
 			</File>
 			<File
-				RelativePath=".\IBTWS.h"
+				RelativePath=".\IQFeed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedHistoryCollector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedMessages.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedOptions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedProvider.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieval.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieveHistory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedSymbol.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedSymbolFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedThreadCrossing.h"
 				>
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<Filter
-				Name="TWS"
-				>
-				<File
-					RelativePath=".\TWS\CommonDefs.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Contract.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EClient.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EClientSocket.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EWrapper.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Execution.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\HScrollListBox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\MySocket.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Order.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\OrderState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\ScannerSubscription.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\shared_ptr.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\TwsSocketClientErrors.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibInteractiveBrokers;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
+				AdditionalIncludeDirectories="..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibInteractiveBrokers;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -195,19 +195,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BerkeleyDb.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ConsoleCoutMessages.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ConsoleMessages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DataManager.cpp"
 				>
 			</File>
 			<File
@@ -224,10 +216,6 @@
 			</File>
 			<File
 				RelativePath=".\DeltaMarker.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HDF5.cpp"
 				>
 			</File>
 			<File
@@ -278,46 +266,6 @@
 				RelativePath=".\VisibleRow.cpp"
 				>
 			</File>
-			<Filter
-				Name="IQFeed"
-				>
-				<File
-					RelativePath=".\IQFeed.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedHistoryCollector.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedMessages.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedOptions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedRetrieval.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedRetrieveHistory.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedSymbol.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedSymbolFile.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedThreadCrossing.cpp"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="GT"
 				>
@@ -465,19 +413,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\BerkeleyDb.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ConsoleCoutMessages.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ConsoleMessages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DataManager.h"
 				>
 			</File>
 			<File
@@ -494,22 +434,6 @@
 			</File>
 			<File
 				RelativePath=".\DeltaMarker.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HDF5.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HDF5TimeSeriesAccessor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HDF5TimeSeriesContainer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HDF5TimeSeriesIterator.h"
 				>
 			</File>
 			<File
@@ -552,46 +476,6 @@
 				RelativePath=".\VisibleRow.h"
 				>
 			</File>
-			<Filter
-				Name="IQFeed"
-				>
-				<File
-					RelativePath=".\IQFeed.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedHistoryCollector.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedMessages.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedOptions.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedRetrieval.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedRetrieveHistory.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedSymbol.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedSymbolFile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IQFeedThreadCrossing.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="GT"
 				>

@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GTWindowsConstants.h"
+				>
+			</File>
+			<File
 				RelativePath=".\KeyWordMatch.h"
 				>
 			</File>

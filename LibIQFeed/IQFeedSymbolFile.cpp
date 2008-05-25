@@ -1,8 +1,7 @@
 #include "StdAfx.h"
 
 #include "IQFeedSymbolFile.h"
-//#include "BerkeleyDb.h"
-#include "DataManager.h"
+#include "BerkeleyDBDataManager.h"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -36,41 +35,42 @@ using namespace std;
 // need a mechanism to detect lock files and then to eliminate them
 
 CIQFeedSymbolFile::structExchangeInfo CIQFeedSymbolFile::m_rExchanges[] = {
-  { "AMEX", Trading::Stock, 0 },
-  { "BARCLAYS", Trading::Currency, 0 },
-  { "CBOT", Trading::Future, 0 },
-  { "CHX", Trading::Future, 0 },
-  { "CME", Trading::Future, 0 },
-  { "COMEX", Trading::Future, 0 },
-  { "CVE", Trading::Stock, 0 },
-  { "DJ", Trading::Future, 0 },
-  { "DTN", Trading::Index, 0 },
-  { "ENCOM", Trading::Future, 0 },
-  { "ENID", Trading::Future, 0 },
-  { "ENIR", Trading::Future, 0 },
-  { "EUREX", Trading::Future, 0 },
-  { "EUREXNDX", Trading::Currency, 0 },
-  { "IPE", Trading::Future, 0 },
-  { "KCBOT", Trading::Future, 0 },
-  { "LME", Trading::Metals, 0 },
-  { "MGE", Trading::Future, 0 },
-  { "NASDAQ", Trading::Stock, 0 },
-  { "NMS", Trading::Stock, 0 },
-  { "NYBOT", Trading::Future, 0 },
-  { "NYMEX", Trading::Future, 0 },
-  { "NYMEXMINI", Trading::Future, 0 },
-  { "NYSE", Trading::Stock, 0 },
-  { "ONECH", Trading::Future, 0 },
-  { "OPRA", Trading::Option, 0 },
-  { "OTC", Trading::Stock, 0 },
-  { "OTCBB", Trading::Stock, 0 },
-  { "PBOT", Trading::Future, 0 },
-  { "PSE", Trading::Stock, 0 },
-  { "SGX", Trading::Future, 0 },
-  { "SMCAP", Trading::Stock, 0 },
-  { "TSE", Trading::Stock, 0 },
-  { "TULLETT", Trading::Currency, 0 },
-  { "WCE", Trading::Future, 0 }
+  { "Unknown", ContractType::Unknown, 0 },
+  { "AMEX", ContractType::Stock, 0 },
+  { "BARCLAYS", ContractType::Currency, 0 },
+  { "CBOT", ContractType::Future, 0 },
+  { "CHX", ContractType::Future, 0 },
+  { "CME", ContractType::Future, 0 },
+  { "COMEX", ContractType::Future, 0 },
+  { "CVE", ContractType::Stock, 0 },
+  { "DJ", ContractType::Future, 0 },
+  { "DTN", ContractType::Index, 0 },
+  { "ENCOM", ContractType::Future, 0 },
+  { "ENID", ContractType::Future, 0 },
+  { "ENIR", ContractType::Future, 0 },
+  { "EUREX", ContractType::Future, 0 },
+  { "EUREXNDX", ContractType::Currency, 0 },
+  { "IPE", ContractType::Future, 0 },
+  { "KCBOT", ContractType::Future, 0 },
+  { "LME", ContractType::Metal, 0 },
+  { "MGE", ContractType::Future, 0 },
+  { "NASDAQ", ContractType::Stock, 0 },
+  { "NMS", ContractType::Stock, 0 },
+  { "NYBOT", ContractType::Future, 0 },
+  { "NYMEX", ContractType::Future, 0 },
+  { "NYMEXMINI", ContractType::Future, 0 },
+  { "NYSE", ContractType::Stock, 0 },
+  { "ONECH", ContractType::Future, 0 },
+  { "OPRA", ContractType::Option, 0 },
+  { "OTC", ContractType::Stock, 0 },
+  { "OTCBB", ContractType::Stock, 0 },
+  { "PBOT", ContractType::Future, 0 },
+  { "PSE", ContractType::Stock, 0 },
+  { "SGX", ContractType::Future, 0 },
+  { "SMCAP", ContractType::Stock, 0 },
+  { "TSE", ContractType::Stock, 0 },
+  { "TULLETT", ContractType::Currency, 0 },
+  { "WCE", ContractType::Future, 0 }
 };
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
@@ -88,7 +88,7 @@ CIQFeedSymbolFile::~CIQFeedSymbolFile(void) {
 }
 
 void CIQFeedSymbolFile::Open() {
-  CDataManager dm;
+  CBerkeleyDBDataManager dm;
   DbEnv *pDbEnv = dm.GetDbEnv();
 
   // open/create main symbol table
@@ -132,7 +132,7 @@ int CIQFeedSymbolFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const 
   char *p; 
   u_int32_t len;
   bool bUseIndex = true;
-  if ( Trading::Option == dbIxRecord->nContractType ) { // OPRA option
+  if ( ContractType::Option == dbIxRecord->nContractType ) { // OPRA option
     p = dbIxRecord->line + dbIxRecord->ix[1];  // start of description
     char *e = strchr( p, ' ' );  // find the trailing blank
     len = e - p;
@@ -253,10 +253,10 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
     m_rExchanges[ ix ].cntContracts = 0;
-    kwm.AddPattern( m_rExchanges[ ix ].szName, ix );
+    kwm.AddPattern( m_rExchanges[ ix ].szName, (void *) ix );
   }
-  unsigned long rcntContractTypes[ Trading::ContractTypeCount ];
-  for ( unsigned long ix = 0; ix < Trading::ContractTypeCount; ++ix ) {
+  unsigned long rcntContractTypes[ ContractType::_Count ];
+  for ( unsigned long ix = 0; ix < ContractType::_Count; ++ix ) {
     rcntContractTypes[ ix ] = 0;
   }
 
@@ -312,21 +312,22 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
       size_t ix;
       try {
-        ix = kwm.FindMatch( dbRecord.line + dbRecord.ix[2] );
+        ix = (size_t) kwm.FindMatch( dbRecord.line + dbRecord.ix[2] );
         dbRecord.nContractType = m_rExchanges[ ix ].nContractType;
         ++m_rExchanges[ ix ].cntContracts;
       }
       catch ( std::exception e ) {
         std::cout << dbRecord.line << ": zero length pattern" << std::endl;
-        dbRecord.nContractType = Trading::UnknownContract;
+        dbRecord.nContractType = ContractType::Unknown;
+        ++m_rExchanges[ 0 ].cntContracts;
       }
       
       ++rcntContractTypes[ dbRecord.nContractType ];
-      if ( Trading::UnknownContract == dbRecord.nContractType ) {
+      if ( ContractType::Unknown == dbRecord.nContractType ) {
         cout << "unknown contract: " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[2] << endl;
       }
       // parse out contract expiry information
-      if ( Trading::Future == dbRecord.nContractType ) {
+      if ( ContractType::Future == dbRecord.nContractType ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture ) ) {
           std::string sMonth( what[1].first, what[1].second );
@@ -345,7 +346,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       }
 
       // parse out contract information
-      if ( Trading::Option == dbRecord.nContractType ) {
+      if ( ContractType::Option == dbRecord.nContractType ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
           std::string sUnderlying( what[1].first, what[1].second );
@@ -415,7 +416,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
     std::cout << m_rExchanges[ ix ].szName << "=" << m_rExchanges[ ix ].cntContracts << std::endl;
   }
   std::cout << "Contract Types" << std::endl;
-  for ( unsigned long ix = 0; ix < Trading::ContractTypeCount; ++ix ) {
+  for ( unsigned long ix = 0; ix < ContractType::_Count; ++ix ) {
     std::cout << ix << "=" << rcntContractTypes[ ix ] << std::endl;
   }
 

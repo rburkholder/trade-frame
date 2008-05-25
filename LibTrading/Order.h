@@ -2,7 +2,6 @@
 
 #include "ProviderInterface.h"
 #include "TradingEnumerations.h"
-using namespace Trading;
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -16,7 +15,7 @@ public:
   COrder( 
     CProviderInterface *provider, 
     const std::string &sSymbol, 
-    enumOrderSide eOrderSide, 
+    OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderAmount,
     ptime dtOrderSubmitted
     );
@@ -24,7 +23,7 @@ public:
 protected:
   std::string m_sSymbol;
   unsigned long m_nOrderId;
-  enumOrderSide m_eOrderSide;
+  OrderSide::enumOrderSide m_eOrderSide;
   unsigned long m_nOrderQuantity;
   unsigned long m_nOrderQuantityRemaining;
 

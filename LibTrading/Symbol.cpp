@@ -8,7 +8,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CSymbol::CSymbol( const std::string sName ): 
-  m_sSymbolName( sName ), m_nQuoteHandlers( 0 ), m_nTradeHandlers( 0 ), m_nDepthHandlers( 0 )
+  m_sSymbolName( sName )
 {
 }
 
@@ -16,47 +16,49 @@ CSymbol::~CSymbol(void) {
 }
 
 bool CSymbol::AddQuoteHandler(quotehandler_t handler) {
+  Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
   m_OnQuote.Add( handler );
-  ++m_nQuoteHandlers;
-  return ( 1 == m_nQuoteHandlers );  // start watch for the symbol
+  assert( size == ( m_OnQuote.Size() - 1 ) );
+  return ( 1 == m_OnQuote.Size() );  // start watch for the symbol
 }
 
 bool CSymbol::RemoveQuoteHandler(quotehandler_t handler) {
-  assert( 0 < m_nQuoteHandlers );
+  assert( 0 < m_OnQuote.Size() );
   m_OnQuote.Remove( handler );
-  --m_nQuoteHandlers;
-  return ( 0 == m_nQuoteHandlers );  // no more so stop watch
+  return ( 0 == m_OnQuote.Size() );  // no more so stop watch
 }
 
 bool CSymbol::AddTradeHandler(tradehandler_t handler) {
+  Delegate<trade_t>::vsize_t size = m_OnTrade.Size();
   m_OnTrade.Add( handler );
-  ++m_nTradeHandlers;
-  return ( 1 == m_nTradeHandlers ); // start watch on first handler
+  assert( size == ( m_OnTrade.Size() - 1 ) );
+  return ( 1 == m_OnTrade.Size() ); // start watch on first handler
 }
 
 bool CSymbol::RemoveTradeHandler(tradehandler_t handler) {
-  assert( 0 < m_nTradeHandlers );
+  assert( 0 < m_OnTrade.Size() );
   m_OnTrade.Remove( handler );
-  --m_nTradeHandlers;
-  return ( 0 == m_nTradeHandlers ); // no more so stop watch
+  return ( 0 == m_OnTrade.Size() ); // no more so stop watch
 }
 
 bool CSymbol::AddDepthHandler(depthhandler_t handler) {
+  Delegate<depth_t>::vsize_t size = m_OnDepth.Size();
   m_OnDepth.Add( handler );
-  ++m_nDepthHandlers;
-  return ( 1 == m_nDepthHandlers );  // when true, start watch
+  assert( size == ( m_OnDepth.Size() - 1 ) );
+  return ( 1 == m_OnDepth.Size() );  // when true, start watch
 }
 
 bool CSymbol::RemoveDepthHandler(depthhandler_t handler) {
-  assert( 0 < m_nDepthHandlers );
+  assert( 0 < m_OnDepth.Size() );
   m_OnDepth.Remove( handler );
-  --m_nDepthHandlers;
-  return ( 0 == m_nDepthHandlers );  // when true, stop watch
+  return ( 0 == m_OnDepth.Size() );  // when true, stop watch
 }
 
 
 /*
-What is effectively happening, is that myFoo is being "bound" into the newFunc object. Think of it as creating a private variable inside newFunc and sticking myFoo in it. When newFunc is invoked, it will use myFoo as a parameter. 
+What is effectively happening, is that myFoo is being "bound" into the newFunc object. 
+Think of it as creating a private variable inside newFunc and sticking myFoo in it. 
+When newFunc is invoked, it will use myFoo as a parameter. 
 http://orionedwards.blogspot.com/2006/09/function-pointers-in-cc-and-boostbind.html
 */
 

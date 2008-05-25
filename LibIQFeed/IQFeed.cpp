@@ -1,8 +1,7 @@
 #include "StdAfx.h"
-//#include "GTScalp.h"
-#include "IQFeed.h"
 #include "IQ32.H"
-#include "GTWindowsConstants.h"  // based upon WM_USER
+#include "IQFeed.h"
+#include "..\LibCommon\GTWindowsConstants.h"  // based upon WM_USER for cross-thread messaging
 
 #include <sstream>
 #include <stdexcept>
@@ -12,26 +11,44 @@
 void __stdcall IQFeedCallBack( int x, int y ) {
   stringstream ss;
   ss << "IQFeed Callback" << x << ", " << y;
-  //theApp.pConsoleMessages->WriteLine( ss.str() );
 }
 
 IMPLEMENT_DYNAMIC( CIQFeed, CWnd )
 
 CIQFeed::CIQFeed( CWnd *pParent ) {
 
-  // turn this into a singleton
   BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), pParent, 1 );
 
   SetCallbackFunction( &IQFeedCallBack );
   int i = RegisterClientApp( this->m_hWnd, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
-  
+}
+
+CIQFeed::~CIQFeed(void) {
+  RemoveClientApp( NULL );
+}
+
+void CIQFeed::Connect() {
   IQConnect.SetOnPreThreadCrossingResponse( MakeDelegate( this, &CIQFeed::OnPreCrossThreadResponse ) );
   IQConnect.SetOnPostThreadCrossingResponse( MakeDelegate( this, &CIQFeed::OnNewResponsePort5009 ) );
   IQConnect.Activate();
   IQConnect.OpenSocket( "127.0.0.1", 5009 );
 }
 
-CIQFeed::~CIQFeed(void) {
+void CIQFeed::Disconnect() {
+
+  // part of this should be to unwatch symbols
+  LP_CIQFSymbol sym;
+  map<string,LP_CIQFSymbol>::iterator iter;
+  iter = m_mapSymbols.begin();
+  while ( m_mapSymbols.end() != iter ) {
+    sym = iter->second;
+    delete sym;
+    sym = NULL;
+    iter++;
+  }
+
+  // turn this into an async termination so can wait for socket to sent it's termination events 
+  //   create the termination events if they don't exist
 
   // have to turn off stuff as well.
   while ( !m_qLookupPortAvailable.empty() ) {
@@ -46,22 +63,13 @@ CIQFeed::~CIQFeed(void) {
   // some messages may be in limbo if they havn't been returned to here before 
   // program terminates
 
-  LP_CIQFSymbol sym;
-  map<string,LP_CIQFSymbol>::iterator iter;
-  iter = m_mapSymbols.begin();
-  while ( m_mapSymbols.end() != iter ) {
-    sym = iter->second;
-    delete sym;
-    sym = NULL;
-    iter++;
-  }
-  RemoveClientApp( NULL );
 }
 
 BEGIN_MESSAGE_MAP(CIQFeed, CWnd)
   ON_MESSAGE( WM_IQFEEDCROSSTHREAD, OnCrossThreadArrival )
 END_MESSAGE_MAP()
 
+/*
 CIQFSymbol *CIQFeed::Attach( const string &symbol ) {
   m_mapSymbols_Iter = m_mapSymbols.find( symbol );
   CIQFSymbol *pSym;
@@ -74,7 +82,9 @@ CIQFSymbol *CIQFeed::Attach( const string &symbol ) {
   }
   return pSym;
 }
+*/
 
+/*
 CIQFSymbol *CIQFeed::Watch( const string &symbol ) {
   CIQFSymbol *pSym = Attach( symbol );
   if ( pSym->Watch() ) {
@@ -95,6 +105,27 @@ void CIQFeed::UnWatch( const string &symbol ) {
       s.Format( "r%s\n", symbol );
       IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
     }
+  }
+}
+*/
+
+void CIQFeed::StartQuoteTradeWatch( CIQFSymbol *pSymbol ) {
+  if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
+    std::string s = "w" + pSymbol->Name() + "\n";
+    //s.Format( "w%s\n", pSymbol->Name().c_str() );
+    //IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
+    IQConnect.SendToSocket( s.c_str() );
+    pSymbol->SetQuoteTradeWatchInProgress();
+  }
+}
+
+void CIQFeed::StopQuoteTradeWatch( CIQFSymbol *pSymbol ) {
+  if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
+    // don't do anything, as stuff still active
+  }
+  else {
+    std::string s = "r" + pSymbol->Name() + "\n";
+    IQConnect.SendToSocket( s.c_str() );
   }
 }
 

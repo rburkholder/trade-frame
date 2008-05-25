@@ -10,7 +10,14 @@ public:
   TickerId GetTickerId( void ) { return m_TickerId; };
 protected:
   TickerId m_TickerId;
+
+  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
+  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
+  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
   bool m_bQuoteTradeWatchInProgress;
+  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
+  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
+  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
   bool m_bAskFound;

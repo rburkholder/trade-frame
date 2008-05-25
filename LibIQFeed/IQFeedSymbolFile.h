@@ -61,7 +61,7 @@ protected:
 
   static struct structExchangeInfo {
     char *szName;
-    Trading::enumContractTypes nContractType;
+    ContractType::enumContractTypes nContractType;
     unsigned long cntContracts;
     //structExchangeInfo( void ) : szName( NULL ), nContractType( Trading::UnknownContract ), cntContracts( 0 ) {};
   } m_rExchanges[];

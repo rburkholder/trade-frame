@@ -56,7 +56,7 @@ void CHistoryCollectorDaily::WriteData( void ) {
       DataSet *dataset;
       bool bNeedToCreateDataSet = false;
       string sFileName1;
-      CDataManager dm;
+      CHDF5DataManager dm;
 
       try {   // need to fix this so everything is skipped
         sFileName1.append( "/bar/86400/" );
@@ -70,7 +70,7 @@ void CHistoryCollectorDaily::WriteData( void ) {
       }
       catch (  H5::Exception e ) {
         cout << "CHistoryCollectorDaily::WriteData Exception " << e.getDetailMsg() << endl;
-        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
         throw e;
       }
 
@@ -95,7 +95,7 @@ void CHistoryCollectorDaily::WriteData( void ) {
         pds->setExtentSimple( 1, &curSize, &maxSize ); 
 
         DSetCreatPropList pl;
-        hsize_t sizeChunk = CDataManager::H5ChunkSize();
+        hsize_t sizeChunk = CHDF5DataManager::H5ChunkSize();
         pl.setChunk( 1, &sizeChunk );
         pl.setShuffle();
         pl.setDeflate(5);
@@ -124,7 +124,7 @@ void CHistoryCollectorDaily::WriteData( void ) {
       }
       catch (  H5::FileIException e ) {
         cout << "H5::FileIException " << e.getDetailMsg() << endl;
-        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
       }
       catch ( ... ) {
         cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << endl;

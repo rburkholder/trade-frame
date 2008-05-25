@@ -10,7 +10,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CProviderInterface::CProviderInterface(void) {
+CProviderInterface::CProviderInterface(void) 
+: m_bConnected( false )
+{
 }
 
 CProviderInterface::~CProviderInterface(void) {

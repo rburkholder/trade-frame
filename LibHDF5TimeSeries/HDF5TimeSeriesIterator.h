@@ -2,7 +2,7 @@
 
 #include "DatedDatum.h"
 
-#include "DataManager.h"
+#include "HDF5DataManager.h"
 using namespace H5;
 
 #include "HDF5TimeSeriesAccessor.h"

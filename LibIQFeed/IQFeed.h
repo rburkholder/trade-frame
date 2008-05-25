@@ -10,17 +10,20 @@
 #include <string>
 using namespace std;
 
-void __stdcall IQFeedCallBack( int x, int y );
+//void __stdcall IQFeedCallBack( int x, int y );
 
 class CIQFeed :public CWnd {
   DECLARE_DYNAMIC(CIQFeed)
 public:
-  CIQFeed( CWnd *pParent );
+  CIQFeed( CWnd *pParent = NULL );
   ~CIQFeed(void);
 
-  CIQFSymbol *Attach( const string &symbol );
-  CIQFSymbol *Watch( const string &symbol );
-  void UnWatch( const string &symbol );
+  void Connect( void );
+  void Disconnect( void );
+
+  //CIQFSymbol *Attach( const string &symbol );
+  //CIQFSymbol *Watch( const string &symbol );
+  //void UnWatch( const string &symbol );
 
   Delegate<CIQFNewsMessage *> NewsMessage;
   Delegate<CIQFTimeMessage *> TimeMessage;
@@ -35,6 +38,9 @@ protected:
   map<string,LP_CIQFSymbol> m_mapSymbols;
   map<string,LP_CIQFSymbol> ::const_iterator m_mapSymbols_Iter;
   typedef std::pair <string,LP_CIQFSymbol> m_mapSymbols_Pair;
+
+  void StartQuoteTradeWatch( CIQFSymbol *pSymbol );
+  void StopQuoteTradeWatch( CIQFSymbol *pSymbol );
 
 private:
   CIQFeedThreadCrossing IQConnect;  // port and buffers for main streaming connection

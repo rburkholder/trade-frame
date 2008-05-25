@@ -109,7 +109,6 @@ void CIBSymbol::BuildQuote() {
     //  << quote.m_nAskSize << "@" << quote.m_dblAsk 
     //  << std::endl;
     m_OnQuote( quote );  
-    
   }
 }
 

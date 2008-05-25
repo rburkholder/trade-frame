@@ -3,14 +3,15 @@
 
 // TODO:  convert OnNewResponse over to IQFeedRetrial
 
-CIQFeedOptions::CIQFeedOptions(const char *szSymbol) {
+CIQFeedOptions::CIQFeedOptions(CIQFeedProvider *pProvider, const char *szSymbol) 
+: CIQFeedRetrieval( pProvider ) 
+{
   OpenPort();
   string s;
   s = "OEA,";
   s += szSymbol;
   s += ";";
-  bLookingForDetail = true;
-  //bs.Send( s.c_str() );
+  m_bLookingForDetail = true;
   m_pPort->SendToSocket( s.c_str() );
 }
 
@@ -31,7 +32,7 @@ void CIQFeedOptions::AddOptionSymbol( const char *s, unsigned short cnt ) {
 }
 
 void CIQFeedOptions::OnNewResponse( const char *szLine ) {
-  if ( !bLookingForDetail ) {
+  if ( !m_bLookingForDetail ) {
     //CIQFeedRetrieval::OnNewResponse( szLine );
   }
   else {
@@ -72,6 +73,6 @@ void CIQFeedOptions::OnNewResponse( const char *szLine ) {
     }
     if ( NULL != OnSymbolListReceived ) OnSymbolListReceived();
     ClosePort();
-    bLookingForDetail = false;
+    m_bLookingForDetail = false;
   }
 }

@@ -22,25 +22,19 @@ CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ):
 {
   m_sName = "Interactive Brokers";
   CIBSymbol *p = NULL;
-  m_vTickerToSymbol.push_back( p );
+  m_vTickerToSymbol.push_back( p );  // first ticker is 1, so preload at position 0
 }
 
 CIBTWS::~CIBTWS(void) {
   Disconnect();
-  m_vTickerToSymbol.clear();
+  m_vTickerToSymbol.clear();  // the provider class takes care of deleting CIBSymbol.
 }
-
-//void CIBTWS::Start() {
-
-  //pTWS->reqAccountUpdates( true, m_sAccountCode );
-  //pTWS->reqAllOpenOrders();
-
-//}
 
 void CIBTWS::Connect() {
   if ( NULL == pTWS ) {
     pTWS = new EClientSocket( this );
     pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
+    m_bConnected = true;
     OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
@@ -50,6 +44,7 @@ void CIBTWS::Connect() {
 void CIBTWS::Disconnect() {
   // check to see if there are any watches happening, and get them disconnected
   if ( NULL != pTWS ) {
+    m_bConnected = false;
     pTWS->eDisconnect();
     delete pTWS;
     pTWS = NULL;
@@ -65,27 +60,27 @@ CSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
   return pSymbol;
 }
 
-void CIBTWS::StartQuoteWatch(CSymbol *pSymbol) {
+void CIBTWS::StartQuoteWatch(CSymbol *pSymbol) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopQuoteWatch(CSymbol *pSymbol) {
+void CIBTWS::StopQuoteWatch(CSymbol *pSymbol) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartTradeWatch(CSymbol *pSymbol) {
+void CIBTWS::StartTradeWatch(CSymbol *pSymbol) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopTradeWatch(CSymbol *pSymbol) {
+void CIBTWS::StopTradeWatch(CSymbol *pSymbol) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
 void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
   CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
-  if ( !pIBSymbol->m_bQuoteTradeWatchInProgress ) {
+  if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
-    pIBSymbol->m_bQuoteTradeWatchInProgress = true;
+    pIBSymbol->SetQuoteTradeWatchInProgress();
     Contract contract;
     contract.symbol = pSymbol->Name().c_str();
     contract.currency = "USD";
@@ -104,25 +99,25 @@ void CIBTWS::StopQuoteTradeWatch( CSymbol *pSymbol ) {
   else {
     // stop watch
     pTWS->cancelMktData( pIBSymbol->GetTickerId() );
-    pIBSymbol->m_bQuoteTradeWatchInProgress = false;
+    pIBSymbol->ResetQuoteTradeWatchInProgress();
   }
 }
 
-void CIBTWS::StartDepthWatch(CSymbol *pSymbol) {
+void CIBTWS::StartDepthWatch(CSymbol *pSymbol) {  // overridden from base class
   CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
-  if ( !pIBSymbol->m_bDepthWatchInProgress ) {
+  if ( !pIBSymbol->GetDepthWatchInProgress() ) {
     // start watch
-    pIBSymbol->m_bDepthWatchInProgress = true;
+    pIBSymbol->SetDepthWatchInProgress();
   }
 }
 
-void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {
+void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
   CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( pIBSymbol->DepthWatchNeeded() ) {
   }
   else {
     // stop watch
-    pIBSymbol->m_bDepthWatchInProgress = false;
+    pIBSymbol->ResetDepthWatchInProgress();
   }
 }
 

@@ -20,8 +20,6 @@ public:
 
   // From ProviderInterface
 
-
-
   // From TWS Wrapper:
   virtual void connectionClosed();
   virtual void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
@@ -71,8 +69,8 @@ protected:
   std::string m_sIPAddress;
   UINT m_nPort;
   TickerId m_curTickerId;
-  CSymbol *NewCSymbol( const std::string &sSymbolName );
-  std::vector<CIBSymbol *> m_vTickerToSymbol;
+  virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
+  std::vector<CIBSymbol *> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
 
   // overridden from ProviderInterface
   virtual void StartQuoteWatch( CSymbol *pSymbol );

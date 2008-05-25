@@ -1,10 +1,10 @@
 #include "StdAfx.h"
-#include "GTScalp.h"
+//#include "GTScalp.h"
 #include "IQFeedRetrieval.h"
 
-CIQFeedRetrieval::CIQFeedRetrieval(void) {
-  bLookingForDetail = false;
-  m_pPort = NULL;
+CIQFeedRetrieval::CIQFeedRetrieval( CIQFeedProvider *pProvider ) 
+: m_pIQFeedProvider( pProvider ), m_pPort( NULL ), m_bLookingForDetail( false )
+{
 }
 
 CIQFeedRetrieval::~CIQFeedRetrieval(void) {
@@ -14,13 +14,13 @@ CIQFeedRetrieval::~CIQFeedRetrieval(void) {
 }
 
 void CIQFeedRetrieval::OpenPort( void ) {
-  bLookingForDetail = false;
-  m_pPort = theApp.m_pIQFeed->CheckOutLookupPort();
+  m_bLookingForDetail = false;
+  m_pPort = m_pIQFeedProvider->CheckOutLookupPort();
   m_pPort->SetOnPostThreadCrossingResponse( MakeDelegate( this, &CIQFeedRetrieval::OnNewResponse ) );
 }
 
 void CIQFeedRetrieval::ClosePort( void ) {
-  theApp.m_pIQFeed->CheckInLookupPort( m_pPort );
+  m_pIQFeedProvider->CheckInLookupPort( m_pPort );
   m_pPort = NULL;
 }
 

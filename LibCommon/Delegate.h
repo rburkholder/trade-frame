@@ -15,10 +15,12 @@ public:
   Delegate<RO>(void);
   ~Delegate<RO>(void);
   typedef FastDelegate1<RO> OnMessageHandler;
+  typedef typename std::vector<OnMessageHandler>::size_type vsize_t;
   void Add( OnMessageHandler function );
   void Remove( OnMessageHandler function );
   bool IsEmpty();
   void operator()( RO );
+  vsize_t Size( void ) const { return rOnFD.size(); };
 protected:
 private:
   std::vector<OnMessageHandler> rOnFD;
