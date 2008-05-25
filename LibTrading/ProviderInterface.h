@@ -26,6 +26,8 @@ public:
   virtual void AddDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
   virtual void RemoveDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
 
+  virtual CSymbol* GetSymbol( const string &sSymbol );
+
   const std::string &Name( void ) { return m_sName; };
   bool Connected( void ) { return m_bConnected; };
 protected:

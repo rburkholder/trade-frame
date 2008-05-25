@@ -10,8 +10,7 @@
 #include "VuSymbolsOfInterest.h"
 #include "ConsoleMessages.h"
 #include "VuChartArmsIntraDay.h"
-#include <vector>
-#include "HDF5.h"
+//#include "HDF5.h"
 #include "afxdtctl.h"
 #include "Scripts.h"
 #include "SymbolSelectionFilter.h"
@@ -22,7 +21,7 @@
 #include "VuMarketDepth.h"
 #include "GeneratePeriodicRefresh.h" 
 
-
+#include <vector>
 using namespace std;
 
 // CGTScalpDlg dialog
@@ -45,7 +44,7 @@ private:
   CVuSymbolsOfInterest *psoi;
   CConsoleMessages *pNews;
   CVuChartArmsIntraDay *pvuArms;
-  CHDF5 *pHdf5;
+  //CHDF5 *pHdf5;
 
   CScripts script;
   enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
@@ -114,10 +113,8 @@ public:
   vector<CTradingLogic *> m_vTradingLogic;
   afx_msg void OnCbnSelchangeSymbollist();
   afx_msg LRESULT OnPeriodicRefresh( WPARAM w, LPARAM l );
-  afx_msg void OnBnClickedBtnhfs();
   afx_msg void OnBnClickedIqfeedloadsymbols();
   afx_msg void OnBnClickedLoaddailydata();
-  afx_msg void OnBnClickedTesthdf5();
   afx_msg void OnBnClickedDnlddaysymbol();
   afx_msg void OnBnClickedIqfeedcmd();
   CComboBox m_lbIQCommands;

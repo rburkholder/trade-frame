@@ -6,6 +6,7 @@
 #include "ChartArmsIntraDay.h"
 #include "MergeDatedDatums.h"
 #include "ChartDatedDatum.h"
+#include "IQFeedProviderSingleton.h"
 
 // CVuChartArmsIntraDay dialog
 
@@ -47,15 +48,17 @@ protected:
   IQFeedHistoryHT *pHistoryIndu, *pHistoryTrin, *pHistoryTick;
   bool m_bInduHistoryDone, m_bTrinHistoryDone, m_bTickHistoryDone;
 
-  void ProcessMergeIndu( const CDatedDatum &datum );
-  void ProcessMergeTrin( const CDatedDatum &datum );
-  void ProcessMergeTick( const CDatedDatum &datum );
+  void ProcessMergeIndu( const CTrade &trade );
+  void ProcessMergeTrin( const CTrade &trade );
+  void ProcessMergeTick( const CTrade &trade );
 
-  void HandleInduUpdate( CIQFSymbol *pSym );
-  void HandleTrinUpdate( CIQFSymbol *pSym );
-  void HandleTickUpdate( CIQFSymbol *pSym );
+  void HandleInduUpdate( CIQFeedSymbol *pSym );
+  void HandleTrinUpdate( CIQFeedSymbol *pSym );
+  void HandleTickUpdate( CIQFeedSymbol *pSym );
 
   void HandleRealTime( void );
+
+  CIQFeedProviderSingleton m_IQFeedProvider;
 
   afx_msg BOOL OnInitDialog();
 

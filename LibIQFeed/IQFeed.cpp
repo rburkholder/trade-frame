@@ -17,7 +17,9 @@ IMPLEMENT_DYNAMIC( CIQFeed, CWnd )
 
 CIQFeed::CIQFeed( CWnd *pParent ) {
 
-  BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), pParent, 1 );
+  BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), ::AfxGetMainWnd(), 1 );
+  //BOOL b = CWnd::Create( NULL, "IQFeed", 0, CRect( 0, 0, 20, 20 ), NULL, 1 );
+  //BOOL b = CWnd::CreateEx( 0, NULL, "IQFeed", 0, 10, 10, 10, 10, NULL, NULL, 0 );
 
   SetCallbackFunction( &IQFeedCallBack );
   int i = RegisterClientApp( this->m_hWnd, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
@@ -109,7 +111,7 @@ void CIQFeed::UnWatch( const string &symbol ) {
 }
 */
 
-void CIQFeed::StartQuoteTradeWatch( CIQFSymbol *pSymbol ) {
+void CIQFeed::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
     std::string s = "w" + pSymbol->Name() + "\n";
     //s.Format( "w%s\n", pSymbol->Name().c_str() );
@@ -119,7 +121,7 @@ void CIQFeed::StartQuoteTradeWatch( CIQFSymbol *pSymbol ) {
   }
 }
 
-void CIQFeed::StopQuoteTradeWatch( CIQFSymbol *pSymbol ) {
+void CIQFeed::StopQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
     // don't do anything, as stuff still active
   }
@@ -174,7 +176,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         CIQFUpdateMessage msg;
         msg.Assign( str );
         m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFUpdateMessage::QPSymbol ) );
-        CIQFSymbol *pSym;
+        CIQFeedSymbol *pSym;
         if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
           pSym = m_mapSymbols_Iter -> second;
           pSym ->HandleUpdateMessage( &msg );
@@ -186,7 +188,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         CIQFSummaryMessage msg;
         msg.Assign( str );
         m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFSummaryMessage::QPSymbol ) );
-        CIQFSymbol *pSym;
+        CIQFeedSymbol *pSym;
         if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
           pSym = m_mapSymbols_Iter -> second;
           pSym ->HandleSummaryMessage( &msg );
@@ -198,7 +200,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         CIQFFundamentalMessage msg;
         msg.Assign( str );
         m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFFundamentalMessage::FSymbol ) );
-        CIQFSymbol *pSym;
+        CIQFeedSymbol *pSym;
         if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
           pSym = m_mapSymbols_Iter -> second;
           pSym ->HandleFundamentalMessage( &msg );
@@ -227,7 +229,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
                 s.assign( ++ixFstColon, cnt );
 
                 m_mapSymbols_Iter = m_mapSymbols.find( s.c_str() );
-                CIQFSymbol *pSym;
+                CIQFeedSymbol *pSym;
                 if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
                   pSym = m_mapSymbols_Iter -> second;
                   pSym ->HandleNewsMessage( &msg );

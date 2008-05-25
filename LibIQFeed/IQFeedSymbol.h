@@ -8,35 +8,24 @@
 #include <string>
 using namespace std;
 
-class CIQFSymbol : public CSymbol {
+class CIQFeedSymbol : public CSymbol {
   // needs to be created by IQFeed object as IQFeed injects the actual commands
     friend class CIQFeedProvider;
     friend class CIQFeed;
 public:
-  CIQFSymbol(const string &symbol);
-  virtual ~CIQFSymbol(void);
+  CIQFeedSymbol(const string &symbol);
+  virtual ~CIQFeedSymbol(void);
 
   //bool Watch();
   //bool UnWatch();
 
-  Delegate<CIQFSymbol*> OnFundamentalMessage;
-  Delegate<CIQFSymbol*> OnUpdateMessage;
-  Delegate<CIQFSymbol*> OnSummaryMessage;
-  Delegate<CIQFSymbol*> OnNewsMessage;
+  Delegate<CIQFeedSymbol*> OnFundamentalMessage;
+  Delegate<CIQFeedSymbol*> OnUpdateMessage;
+  Delegate<CIQFeedSymbol*> OnSummaryMessage;
+  Delegate<CIQFeedSymbol*> OnNewsMessage;
 
-protected:
-  unsigned short m_cnt;  // used for watch/unwatch
-  enum enumQStatus { qUnknown, qFound, qNotFound } m_QStatus;
-
-  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
-  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
-  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
-  bool m_bQuoteTradeWatchInProgress;
-  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
-  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
-  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
-  bool m_bDepthWatchInProgress;
-
+  // Public for RowKeyValues.  Pass in a structure sometime.
+  // Public for CVuChartArmsIntraDay.  Pass in structure sometime.
   // Fundamentals
   string m_sOptionRoots;
   int m_AverageVolume;
@@ -61,6 +50,20 @@ protected:
   double m_dblOpen;
   double m_dblClose;
   int m_cntTrades;
+
+
+protected:
+  unsigned short m_cnt;  // used for watch/unwatch
+  enum enumQStatus { qUnknown, qFound, qNotFound } m_QStatus;
+
+  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
+  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
+  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
+  bool m_bQuoteTradeWatchInProgress;
+  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
+  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
+  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
+  bool m_bDepthWatchInProgress;
 
   void HandleFundamentalMessage( CIQFFundamentalMessage *pMsg );
   void HandleUpdateMessage( CIQFUpdateMessage *pMsg );

@@ -45,11 +45,11 @@ CRowKeyValues::~CRowKeyValues(void) {
   //delete m_piVolume;
 }
 
-void CRowKeyValues::HandleSymbolFundamental( CIQFSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolFundamental( CIQFeedSymbol *pSym ) {
 
  // TODO look at setting precision at some point in time
 
-  m_sFullName = pSym->sCompanyName;
+  m_sFullName = pSym->m_sCompanyName;
   /*
   m_InfoTip.cbSize = sizeof( m_InfoTip );
   m_InfoTip.dwFlags = 0;
@@ -66,34 +66,34 @@ void CRowKeyValues::HandleSymbolFundamental( CIQFSymbol *pSym ) {
   */
 }
 
-void CRowKeyValues::HandleSymbolSummary( CIQFSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolSummary( CIQFeedSymbol *pSym ) {
   //CString s;
   //s.Format( "%s summary", pSym->m_sSymbol );
   //theApp.pConsoleMessages->WriteLine( s );
 
-  m_piTradeSize->SetValue( pSym->TradeSize );
-  m_pdTrade->SetValue( pSym->dblTrade );
-  m_pdHigh->SetValue( pSym->dblHigh );
-  m_pdLow->SetValue( pSym->dblLow );
-  m_pdPrevClose->SetValue( pSym->dblClose );
-  m_pdNetChange->SetValue( pSym->dblChange );
-  m_piVolume->SetValue( pSym->TotalVolume );
+  m_piTradeSize->SetValue( pSym->m_nTradeSize );
+  m_pdTrade->SetValue( pSym->m_dblTrade );
+  m_pdHigh->SetValue( pSym->m_dblHigh );
+  m_pdLow->SetValue( pSym->m_dblLow );
+  m_pdPrevClose->SetValue( pSym->m_dblClose );
+  m_pdNetChange->SetValue( pSym->m_dblChange );
+  m_piVolume->SetValue( pSym->m_nTotalVolume );
 }
 
-void CRowKeyValues::HandleSymbolUpdate( CIQFSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolUpdate( CIQFeedSymbol *pSym ) {
   //CString s;
   //s.Format( "%s update", pSym->m_sSymbol );
   //theApp.pConsoleMessages->WriteLine( s );
 
-  m_pdTrade->SetValue( pSym->dblTrade );
+  m_pdTrade->SetValue( pSym->m_dblTrade );
   //m_piTradeSize->SetValue( pSym->dblTrade );
-  m_piBidSize->SetValue( pSym->BidSize );
-  m_pdBid->SetValue( pSym->dblBid );
-  m_pdAsk->SetValue( pSym->dblAsk );
-  m_piAskSize->SetValue( pSym->AskSize );
-  m_pdHigh->SetValue( pSym->dblHigh );
-  m_pdLow->SetValue( pSym->dblLow );
-  m_pdNetChange->SetValue( pSym->dblChange );
-  m_piVolume->SetValue( pSym->TotalVolume );
+  m_piBidSize->SetValue( pSym->m_nBidSize );
+  m_pdBid->SetValue( pSym->m_dblBid );
+  m_pdAsk->SetValue( pSym->m_dblAsk );
+  m_piAskSize->SetValue( pSym->m_nAskSize );
+  m_pdHigh->SetValue( pSym->m_dblHigh );
+  m_pdLow->SetValue( pSym->m_dblLow );
+  m_pdNetChange->SetValue( pSym->m_dblChange );
+  m_piVolume->SetValue( pSym->m_nTotalVolume );
 
 }

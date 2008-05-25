@@ -70,9 +70,9 @@ void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
   pTradesTrin = new CTrades( 100000 );
   pTradesTick = new CTrades( 100000 );
 
-  pHistoryIndu = new IQFeedHistoryHT( pQuotesIndu, pTradesIndu );
-  pHistoryTrin = new IQFeedHistoryHT( pQuotesTrin, pTradesTrin );
-  pHistoryTick = new IQFeedHistoryHT( pQuotesTick, pTradesTick );
+  pHistoryIndu = new IQFeedHistoryHT( m_IQFeedProvider.GetIQFeedProvider(), pQuotesIndu, pTradesIndu );
+  pHistoryTrin = new IQFeedHistoryHT(m_IQFeedProvider.GetIQFeedProvider(), pQuotesTrin, pTradesTrin );
+  pHistoryTick = new IQFeedHistoryHT(m_IQFeedProvider.GetIQFeedProvider(), pQuotesTick, pTradesTick );
 
   /*
   pHistoryIndu->SetOnRequestComplete( MakeDelegate( this, &CVuChartArmsIntraDay::OnInduHistoryDone ) );
@@ -123,9 +123,12 @@ void CVuChartArmsIntraDay::OnTickHistoryDone( IQFeedHistory *pHistory ) {
 void CVuChartArmsIntraDay::ProcessHistory() {
   if ( m_bInduHistoryDone && m_bTrinHistoryDone && m_bTickHistoryDone ) {
 
-    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesIndu, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeIndu ) );
-    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesTrin, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTrin ) );
-    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesTick, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTick ) );
+//    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesIndu, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeIndu ) );
+//    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesTrin, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTrin ) );
+//    merge.Add( (CTimeSeries<CDatedDatum> *) pTradesTick, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTick ) );
+//    merge.Add( pTradesIndu, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeIndu ) );
+//    merge.Add( pTradesTrin, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTrin ) );
+//    merge.Add( pTradesTick, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTick ) );
 
     merge.Run();
 
@@ -137,57 +140,59 @@ void CVuChartArmsIntraDay::ProcessHistory() {
 
 void CVuChartArmsIntraDay::HandleRealTime() {
   if ( theApp.m_bLive ) {
-    CIQFSymbol *pSym;
+    CIQFeedSymbol *pSym;
 
     char symIndu[] = "INDU.X";
-    pSym = theApp.m_pIQFeed->Attach( symIndu );
-    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleInduUpdate ) );
-    theApp.m_pIQFeed->Watch( symIndu );
+    m_IQFeedProvider.GetIQFeedProvider()->AddTradeHandler( symIndu, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeIndu ) );
+    //pSym = theApp.m_pIQFeed->Attach( symIndu );
+    //pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleInduUpdate ) );
+    //theApp.m_pIQFeed->Watch( symIndu );
 
     char symTrin[] = "TRIN.Z";
-    pSym = theApp.m_pIQFeed->Attach( symTrin );
-    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTrinUpdate ) );
-    theApp.m_pIQFeed->Watch( symTrin );
+    m_IQFeedProvider.GetIQFeedProvider()->AddTradeHandler( symTrin, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTrin ) );
+    //pSym = theApp.m_pIQFeed->Attach( symTrin );
+    //pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTrinUpdate ) );
+    //theApp.m_pIQFeed->Watch( symTrin );
 
     char symTick[] = "TICK.Z";
-    pSym = theApp.m_pIQFeed->Attach( symTick );
-    pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTickUpdate ) );
-    theApp.m_pIQFeed->Watch( symTick );
+    m_IQFeedProvider.GetIQFeedProvider()->AddTradeHandler( symTick, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeTick ) );
+    //pSym = theApp.m_pIQFeed->Attach( symTick );
+    //pSym->OnUpdateMessage.Add( MakeDelegate( this, &CVuChartArmsIntraDay::HandleTickUpdate ) );
+    //theApp.m_pIQFeed->Watch( symTick );
   }
 }
 
+//void CVuChartArmsIntraDay::HandleInduUpdate( CIQFSymbol *pSym ) {
+//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  ProcessMergeIndu( trade );
+//}
 
-void CVuChartArmsIntraDay::HandleInduUpdate( CIQFSymbol *pSym ) {
-  CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeIndu( trade );
-}
+//void CVuChartArmsIntraDay::HandleTrinUpdate( CIQFSymbol *pSym ) {
+//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  ProcessMergeTrin( trade );
+//}
 
-void CVuChartArmsIntraDay::HandleTrinUpdate( CIQFSymbol *pSym ) {
-  CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeTrin( trade );
-}
+//void CVuChartArmsIntraDay::HandleTickUpdate( CIQFSymbol *pSym ) {
+//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  ProcessMergeTick( trade );
+//}
 
-void CVuChartArmsIntraDay::HandleTickUpdate( CIQFSymbol *pSym ) {
-  CTrade trade( pSym->dtLastTrade, pSym->dblTrade, pSym->TradeSize );
-  ProcessMergeTick( trade );
-}
-
-void CVuChartArmsIntraDay::ProcessMergeIndu( const CDatedDatum &datum ) {
+void CVuChartArmsIntraDay::ProcessMergeIndu( const CTrade &trade ) {
   //CTrade *pTrade = (CTrade *) pDatum;
-  m_ChartArmsIntraDay.ProcessIndu( (CTrade &) datum );
-  m_ChartIndu.Add( (CTrade &) datum );
+  m_ChartArmsIntraDay.ProcessIndu( trade );
+  m_ChartIndu.Add( trade );
 }
 
-void CVuChartArmsIntraDay::ProcessMergeTrin( const CDatedDatum &datum ) {
+void CVuChartArmsIntraDay::ProcessMergeTrin( const CTrade &trade ) {
   //CTrade *pTrade = (CTrade *) pDatum;
-  m_ChartArmsIntraDay.ProcessTrin( (CTrade &) datum );
-  m_ChartTrin.Add( (CTrade &) datum );
+  m_ChartArmsIntraDay.ProcessTrin( trade );
+  m_ChartTrin.Add( trade );
 }
 
-void CVuChartArmsIntraDay::ProcessMergeTick( const CDatedDatum &datum ) {
+void CVuChartArmsIntraDay::ProcessMergeTick( const CTrade &trade ) {
   //CTrade *pTrade = (CTrade *) pDatum;
-  m_ChartArmsIntraDay.ProcessTick( (CTrade &) datum );
-  m_ChartTick.Add( (CTrade &) datum );
+  m_ChartArmsIntraDay.ProcessTick( trade );
+  m_ChartTick.Add( trade );
 }
 
 void CVuChartArmsIntraDay::DoDataExchange(CDataExchange* pDX) {

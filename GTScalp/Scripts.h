@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IQFeedHistoryCollector.h"
+#include "IQFeedProvider.h"
 
 #include <queue>
 #include <map>
@@ -35,6 +36,8 @@ protected:
   void HistoryCollectorIsComplete( CHistoryCollector *phc );
 
   std::ofstream ofs;
+
+  CIQFeedProvider *m_pProvider;
 
 private:
   //_CrtMemState memstate1, memstate2, memstate3;

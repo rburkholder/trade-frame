@@ -170,6 +170,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedProviderSingleton.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\IQFeedRetrieval.cpp"
 				>
 			</File>
@@ -237,6 +241,10 @@
 			</File>
 			<File
 				RelativePath=".\IQFeedProvider.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedProviderSingleton.h"
 				>
 			</File>
 			<File

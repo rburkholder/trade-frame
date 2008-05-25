@@ -53,13 +53,28 @@ afx_msg void CVuKeyValues::OnSize( UINT i, int x, int y ) {
 
 void CVuKeyValues::WatchSymbol( const string &sSymbol, CRowKeyValues *row ) {
 
-  CIQFSymbol *pSym;
+  CIQFeedSymbol *pSym;
 
-  pSym = theApp.m_pIQFeed->Attach( sSymbol );
+  pSym = m_IQFeedProvider.GetIQFeedProvider()->GetSymbol( sSymbol );
+  //pSym = theApp.m_pIQFeed->Attach( sSymbol );
   pSym->OnFundamentalMessage.Add( MakeDelegate( row, &CRowKeyValues::HandleSymbolFundamental ) );
   pSym->OnSummaryMessage.Add( MakeDelegate( row, &CRowKeyValues::HandleSymbolSummary ) );
   pSym->OnUpdateMessage.Add( MakeDelegate( row, &CRowKeyValues::HandleSymbolUpdate ) );
-  theApp.m_pIQFeed->Watch( sSymbol );
+  //theApp.m_pIQFeed->Watch( sSymbol );
+  m_IQFeedProvider.GetIQFeedProvider()->StartQuoteTradeWatch( pSym );
+}
+
+void CVuKeyValues::UnWatchSymbol( const string &sSymbol, CRowKeyValues *row ) {
+
+  CIQFeedSymbol *pSym;
+
+  pSym = m_IQFeedProvider.GetIQFeedProvider()->GetSymbol( sSymbol );
+  //pSym = theApp.m_pIQFeed->Attach( sSymbol );
+  pSym->OnFundamentalMessage.Remove( MakeDelegate( row, &CRowKeyValues::HandleSymbolFundamental ) );
+  pSym->OnSummaryMessage.Remove( MakeDelegate( row, &CRowKeyValues::HandleSymbolSummary ) );
+  pSym->OnUpdateMessage.Remove( MakeDelegate( row, &CRowKeyValues::HandleSymbolUpdate ) );
+  //theApp.m_pIQFeed->Watch( sSymbol );
+  m_IQFeedProvider.GetIQFeedProvider()->StopQuoteTradeWatch( pSym );
 }
 
 CRowKeyValues *CVuKeyValues::AppendSymbol( const string &sName ) {

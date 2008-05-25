@@ -5,6 +5,7 @@
 #include "CtlKeyValues.h"
 #include "IQFeedSymbol.h"
 #include "RowKeyValues.h"
+#include "IQFeedProviderSingleton.h"
 
 #include <map>
 #include <string>
@@ -30,6 +31,7 @@ public:
 
   CRowKeyValues *AppendSymbol( const string &name );
   void WatchSymbol( const string &Symbol, CRowKeyValues *row );
+  void UnWatchSymbol( const string &Symbol, CRowKeyValues *row );
 
 protected:
 
@@ -51,6 +53,8 @@ protected:
 
   afx_msg void OnSize( UINT, int, int );
   bool bDialogReady;
+
+  CIQFeedProviderSingleton m_IQFeedProvider;
 
 public:
   afx_msg void OnHdnDividerdblclickKeyvalues(NMHDR *pNMHDR, LRESULT *pResult);

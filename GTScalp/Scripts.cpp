@@ -6,7 +6,7 @@
 #include "HDF5TimeSeriesContainer.h"
 #include "SymbolSelectionFilter.h"
 
-#include "DataManager.h"
+#include "HDF5DataManager.h"
 using namespace H5;
 
 #include <stdexcept>
@@ -19,20 +19,26 @@ using namespace std;
 // CScripts
 //
 
-CScripts::CScripts(void) {
+CScripts::CScripts(void) 
+: m_pProvider( NULL ) 
+{
 }
 
 CScripts::~CScripts(void) {
+  if ( NULL != m_pProvider ) {
+    delete m_pProvider;  // needs to be disconnected before this though.
+    m_pProvider = NULL;
+  }
 }
 
 void CScripts::GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays ) {
   CHistoryCollector *phc;
   switch ( typeHistory ) {
         case Daily:
-          phc = new CHistoryCollectorDaily( szSymbol, nDays );
+          phc = new CHistoryCollectorDaily( m_pProvider, szSymbol, nDays );
           break;
         case Tick:
-          phc = new CHistoryCollectorTicks( szSymbol, nDays );
+          phc = new CHistoryCollectorTicks( m_pProvider, szSymbol, nDays );
           break;
         case Minute:
           break;
@@ -68,10 +74,10 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
         CHistoryCollector *phc;
         switch ( typeHistory ) {
         case Daily:
-          phc = new CHistoryCollectorDaily( szSymbol, nDays );
+          phc = new CHistoryCollectorDaily( m_pProvider, szSymbol, nDays );
           break;
         case Tick:
-          phc = new CHistoryCollectorTicks( szSymbol, nDays );
+          phc = new CHistoryCollectorTicks( m_pProvider, szSymbol, nDays );
           break;
         case Minute:
           break;
@@ -106,41 +112,6 @@ public:
 protected:
 private:
 };
-
-void CScripts::TestDataSet( void ) {
-  //DataSpace *pds = new DataSpace( dm.GetH5File()->
-
-  string sFilename( "/bar/86400/I/C/ICE" );
-  try {
-
-    CHDF5TimeSeriesContainer<CBar> barRepository( sFilename );
-    //CHDF5TimeSeriesContainer<CBar>::iterator iter;
-    //iter = barRepository.begin();
-
-    //for_each( barRepository.begin(), barRepository.end(), ShowItem() );
-    //ptime dt(boost::date_time::special_values::not_a_date_time );
-    //ptime dt( boost::gregorian::date( 2008, 04, 04 ), boost::posix_time::time_duration( 1, 1, 1 ) );
-    ptime dt( boost::gregorian::date( 2008, 04, 18 ) );
-    //CHDF5TimeSeriesContainer<CBar>::iterator iter;
-    pair<CHDF5TimeSeriesContainer<CBar>::iterator, CHDF5TimeSeriesContainer<CBar>::iterator> p;
-    //iter = find( barRepository.begin(), barRepository.end(), dt );
-    //iter = lower_bound( barRepository.begin(), barRepository.end(), dt );
-
-    p = equal_range( barRepository.begin(), barRepository.end(), dt );
-    //iter = upper_bound( barRepository.begin(), barRepository.end(), dt );
-    //if ( (const CHDF5TimeSeriesIterator<CBar> ) barRepository.end() == iter ) {
-    if ( p.first == p.second ) {
-      cout << "nothing found: insertion point is " << (*p.first).m_dt << endl;
-    }
-    else {
-      cout << "found " << (*p.first).m_dt << endl;
-    }
-
-  }
-  catch ( ... ) {
-    cout << "problems" << endl;
-  }
-}
 
 void CScripts::StartHistoryCollection( void ) {
   CHistoryCollector *phc;

@@ -28,8 +28,10 @@ public:
   virtual ~CMergeDatedDatums(void);
 
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
+  //typedef FastDelegate1<const CTrade &> OnTradeHandler;
 
   void Add( CTimeSeries<CDatedDatum> *pSeries, OnDatumHandler );
+  //void Add( CTrades *pSeries, OnTradeHandler );
   void Run( void );
 protected:
   list<CMergeCarrier *> m_lCarriers;

@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "SymbolSelectionFilter.h"
 
-#include "DataManager.h"
+#include "HDF5DataManager.h"
 using namespace H5;
 
 #include "TimeSeries.h"
@@ -36,7 +36,7 @@ public:
   CFilterSelectionIteratorControl( const string &sBaseGroup, CSymbolSelectionFilter *pFilter ) :
       m_sBaseGroup( sBaseGroup ), m_pFilter( pFilter ) { };
   void Process( const string &sObjectName ) {
-    CDataManager dm;
+    CHDF5DataManager dm;
     H5G_stat_t stats;
     string sObjectPath;
     sObjectPath = m_sBaseGroup + sObjectName;
@@ -56,7 +56,7 @@ public:
     }
     catch ( H5::Exception e ) {
       cout << "CFilterSelectionIteratorControl::Process H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, 0 );
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
     }
   }
 protected:
@@ -66,7 +66,7 @@ private:
 };
 
 void CSymbolSelectionFilter::Start( void ) {
-  CDataManager dm;
+  CHDF5DataManager dm;
   int idx = 0;  // starting location for interrupted queries
   string sBaseGroup = "/bar/86400/";
   CFilterSelectionIteratorControl control( sBaseGroup, this );

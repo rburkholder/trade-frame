@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-CIQFSymbol::CIQFSymbol(const string &sSymbol) 
+CIQFeedSymbol::CIQFeedSymbol(const string &sSymbol) 
 : CSymbol( sSymbol ),
 m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
 m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
@@ -13,7 +13,7 @@ m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false )
 {
 }
 
-CIQFSymbol::~CIQFSymbol(void) {
+CIQFeedSymbol::~CIQFeedSymbol(void) {
 }
 
 /*
@@ -38,7 +38,7 @@ bool CIQFSymbol::UnWatch() {
 }                                               
 */
 
-void CIQFSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
+void CIQFeedSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
   //pMsg->EmitFields();
   m_sOptionRoots = pMsg->Field( CIQFFundamentalMessage::FRootOptionSymbols );
   m_AverageVolume = pMsg->Integer( CIQFFundamentalMessage::FAveVolume );
@@ -55,7 +55,7 @@ void CIQFSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
   OnFundamentalMessage( this );
 }
 
-void CIQFSymbol::HandlePricingMessage( CIQFPricingMessage *pMsg ) {
+void CIQFeedSymbol::HandlePricingMessage( CIQFPricingMessage *pMsg ) {
   string sLastTradeTime = pMsg->Field( CIQFPricingMessage::QPLastTradeTime );
   if ( sLastTradeTime.length() > 0 ) {  // can we do 'assume' anything if it is 0?
     char chType = sLastTradeTime[ sLastTradeTime.length() - 1 ];
@@ -97,12 +97,12 @@ void CIQFSymbol::HandlePricingMessage( CIQFPricingMessage *pMsg ) {
   //theApp.pConsoleMessages->WriteLine( s ); 
 }
 
-void CIQFSymbol::HandleSummaryMessage( CIQFSummaryMessage *pMsg ) {
+void CIQFeedSymbol::HandleSummaryMessage( CIQFSummaryMessage *pMsg ) {
   HandlePricingMessage( pMsg );
   OnSummaryMessage( this );
 }
 
-void CIQFSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
+void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
 
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( _T( "Not Found" ) == pMsg->Field( CIQFPricingMessage::QPLast ) ) ? qNotFound : qFound;
@@ -119,5 +119,5 @@ void CIQFSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
   }
 }
 
-void CIQFSymbol::HandleNewsMessage( CIQFNewsMessage *pMsg ) {
+void CIQFeedSymbol::HandleNewsMessage( CIQFNewsMessage *pMsg ) {
 }

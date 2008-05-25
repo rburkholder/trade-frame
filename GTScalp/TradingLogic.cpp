@@ -87,9 +87,9 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   m_state = EState::History;
 
   pBars = new CBars( 250 );
-  phd = new IQFeedHistoryHD( pBars );
+  phd = new IQFeedHistoryHD( m_IQFeedProvider.GetIQFeedProvider(), pBars );
   phd->SetOnRequestComplete( MakeDelegate( this, &CTradingLogic::OnDailyBarHistoryDone ) );
-  pht = new IQFeedHistoryHT( pQuotes, pTrades );
+  pht = new IQFeedHistoryHT( m_IQFeedProvider.GetIQFeedProvider(), pQuotes, pTrades );
   pht->SetOnRequestComplete( MakeDelegate( this, &CTradingLogic::OnTickHistoryDone ) );
   if ( theApp.m_bLive ) {
     phd->LiveRequest( (LPCTSTR) sSymbol, 250 );

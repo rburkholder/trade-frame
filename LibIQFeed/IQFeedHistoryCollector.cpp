@@ -1,16 +1,15 @@
 #include "StdAfx.h"
 #include "IQFeedHistoryCollector.h"
 
-//#include "DataManager.h"
-//using namespace H5;
-
 #include "HDF5TimeSeriesContainer.h"
 
 //
 // CHistoryCollector
 // 
 
-CHistoryCollector::CHistoryCollector( const char *szSymbol, unsigned long nCount ) {
+CHistoryCollector::CHistoryCollector( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount ) 
+: m_pProvider( pProvider ) 
+{
   m_sSymbol.assign( szSymbol );
   m_nCount = nCount;
 }
@@ -32,9 +31,9 @@ void CHistoryCollector::OnCompletion( IQFeedHistory *pHistory ) {
 // CHistoryCollectorDaily
 //
 
-CHistoryCollectorDaily::CHistoryCollectorDaily( const char *szSymbol, unsigned long nCount ) :
-  CHistoryCollector( szSymbol, nCount ) {
-  m_phistory = new IQFeedHistoryHD( &m_bars );
+CHistoryCollectorDaily::CHistoryCollectorDaily( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount ) :
+  CHistoryCollector( pProvider, szSymbol, nCount ) {
+  m_phistory = new IQFeedHistoryHD( m_pProvider, &m_bars );
   FinalizeCreation();
 }
 
@@ -140,9 +139,9 @@ void CHistoryCollectorDaily::WriteData( void ) {
 // CHistoryCollectorTicks
 //
 
-CHistoryCollectorTicks::CHistoryCollectorTicks( const char *szSymbol, unsigned long nCount ) :
-  CHistoryCollector( szSymbol, nCount ) {
-  m_phistory = new IQFeedHistoryHT( &m_quotes, &m_trades );
+CHistoryCollectorTicks::CHistoryCollectorTicks( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount ) :
+  CHistoryCollector( pProvider, szSymbol, nCount ) {
+  m_phistory = new IQFeedHistoryHT( m_pProvider, &m_quotes, &m_trades );
   FinalizeCreation();
 }
 

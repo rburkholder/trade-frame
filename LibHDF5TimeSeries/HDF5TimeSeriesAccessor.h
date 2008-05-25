@@ -144,7 +144,7 @@ template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize
     }
     catch ( H5::Exception e ) {
       cout << "CHDF5TimeSeriesAccessor<T>::Read H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CDataManager::PrintH5ErrorStackItem, this );
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch ( ... ) {

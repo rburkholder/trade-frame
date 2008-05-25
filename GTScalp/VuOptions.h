@@ -2,6 +2,7 @@
 
 #include "VuKeyValues.h"
 #include "IQFeedOptions.h"
+#include "IQFeedProviderSingleton.h"
 
 // CVuIndicies dialog
 
@@ -16,6 +17,8 @@ public:
 	enum { IDD = IDD_VUOPTIONS };
 
 protected:
+
+  CIQFeedProviderSingleton m_IQFeedProvider;
 
   CIQFeedOptions *options;
 

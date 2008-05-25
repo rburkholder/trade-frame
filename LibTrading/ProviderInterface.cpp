@@ -100,3 +100,12 @@ void CProviderInterface::RemoveDepthHandler(const std::string &sSymbol, CSymbol:
   }
 }
 
+CSymbol *CProviderInterface::GetSymbol( const string &sSymbol ) {
+  std::map<string, CSymbol*>::iterator iter;
+  iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+    m_mapSymbols.insert( std::pair<string, CSymbol*>( sSymbol, NewCSymbol( sSymbol ) ) );
+    iter = m_mapSymbols.find( sSymbol );
+  }
+  return iter->second;
+}

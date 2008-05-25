@@ -28,22 +28,22 @@ void CIQFeedProvider::Disconnect() {
 }
 
 CSymbol *CIQFeedProvider::NewCSymbol(const std::string &sSymbolName) {
-  return new CIQFSymbol( sSymbolName );
+  return new CIQFeedSymbol( sSymbolName );
 }
 
 void CIQFeedProvider::StartQuoteWatch(CSymbol *pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFSymbol *>( pSymbol ) );
+  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
 }
 
 void CIQFeedProvider::StopQuoteWatch(CSymbol *pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFSymbol *>( pSymbol ) );
+  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
 }
 
 void CIQFeedProvider::StartTradeWatch(CSymbol *pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFSymbol *>( pSymbol ) );
+  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
 }
 
 void CIQFeedProvider::StopTradeWatch(CSymbol *pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFSymbol *>( pSymbol ) );
+  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
 }
 

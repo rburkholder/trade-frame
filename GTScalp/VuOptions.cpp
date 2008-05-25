@@ -12,7 +12,7 @@ CVuOptions::CVuOptions(CWnd* pParent /*=NULL*/)
 	: CVuKeyValues(pParent) {
 
     // will need to fix this.  need to set the event before initiating request
-  options = new CIQFeedOptions( "ICE" );
+  options = new CIQFeedOptions( m_IQFeedProvider.GetIQFeedProvider(), "ICE" );
   options->SetOnSymbolListRecieved( MakeDelegate( this, &CVuOptions::MonitorSymbolList ) );
 
 }

@@ -33,14 +33,14 @@ public:
 
   void Send( char *szCommand );
 
+  void StartQuoteTradeWatch( CIQFeedSymbol *pSymbol );
+  void StopQuoteTradeWatch( CIQFeedSymbol *pSymbol );
+
 protected:
-  typedef CIQFSymbol* LP_CIQFSymbol;
+  typedef CIQFeedSymbol* LP_CIQFSymbol;
   map<string,LP_CIQFSymbol> m_mapSymbols;
   map<string,LP_CIQFSymbol> ::const_iterator m_mapSymbols_Iter;
   typedef std::pair <string,LP_CIQFSymbol> m_mapSymbols_Pair;
-
-  void StartQuoteTradeWatch( CIQFSymbol *pSymbol );
-  void StopQuoteTradeWatch( CIQFSymbol *pSymbol );
 
 private:
   CIQFeedThreadCrossing IQConnect;  // port and buffers for main streaming connection

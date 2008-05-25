@@ -121,10 +121,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_ALLOWTRADES, &CGTScalpDlg::OnBnClickedAllowtrades)
   ON_CBN_SELCHANGE(IDC_SYMBOLLIST, &CGTScalpDlg::OnCbnSelchangeSymbollist)
   ON_MESSAGE( WM_PERIODICREFRESH, &CGTScalpDlg::OnPeriodicRefresh )
-  ON_BN_CLICKED(IDC_BTNHFS, &CGTScalpDlg::OnBnClickedBtnhfs)
   ON_BN_CLICKED(IDC_IQFEEDLOADSYMBOLS, &CGTScalpDlg::OnBnClickedIqfeedloadsymbols)
   ON_BN_CLICKED(IDC_LOADDAILYDATA, &CGTScalpDlg::OnBnClickedLoaddailydata)
-  ON_BN_CLICKED(IDC_TESTHDF5, &CGTScalpDlg::OnBnClickedTesthdf5)
   ON_BN_CLICKED(IDC_DNLDDAYSYMBOL, &CGTScalpDlg::OnBnClickedDnlddaysymbol)
   ON_BN_CLICKED(IDC_IQFEEDCMD, &CGTScalpDlg::OnBnClickedIqfeedcmd)
   ON_BN_CLICKED(IDC_ENDDAYSELECT, &CGTScalpDlg::OnBnClickedEnddayselect)
@@ -570,13 +568,6 @@ void CGTScalpDlg::OnCbnSelchangeSymbollist() {
 //ICE;@YM#;GOOG;ZXZZT
 //IDC_SYMBOLLIST
 
-void CGTScalpDlg::OnBnClickedBtnhfs() {
-  // TODO: Add your control notification handler code here
-  pHdf5 = new CHDF5;
-  pHdf5->Test();
-  delete pHdf5;
-}
-
 void CGTScalpDlg::OnBnClickedIqfeedloadsymbols()
 {
   // TODO: Add your control notification handler code here
@@ -594,12 +585,6 @@ void CGTScalpDlg::OnBnClickedLoaddailydata() {
     CScripts *scripts = new CScripts();
     scripts->GetIQFeedHistoryForSymbolRange( CScripts::Daily, nDays );
   }
-}
-
-void CGTScalpDlg::OnBnClickedTesthdf5() {
-  // TODO: Add your control notification handler code here
-  CScripts *scripts = new CScripts();
-  scripts->TestDataSet();
 }
 
 void CGTScalpDlg::OnBnClickedDnlddaysymbol() {

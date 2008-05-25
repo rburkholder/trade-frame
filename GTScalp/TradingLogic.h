@@ -4,7 +4,7 @@
 #include "TradeFrame.h"
 #include "VuPendingOrders.h"
 #include "TimeSeries.h"
-#include "IQFeed.h"
+#include "IQFeedProviderSingleton.h"
 #include "IQFeedRetrieveHistory.h"
 #include "PivotGroup.h"
 #include "VuChart.h"
@@ -35,6 +35,7 @@ protected:
   CString m_sSymbol;
 
   //CPivotGroup *m_pPivotGroup;
+  CIQFeedProviderSingleton m_IQFeedProvider;
 
   IQFeedHistoryHD *phd;
   CBars *pBars;
