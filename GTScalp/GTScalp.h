@@ -15,7 +15,8 @@
 
 #include "ConsoleCoutMessages.h"
 #include "TradingLogic.h"
-#include "IQFeed.h" 
+//#include "IQFeed.h" 
+//#include "IQFeedProvider.h"
 #include "IBTWS.h"
 
 //#include "GeneratePeriodicRefresh.h"  // need the above constants
@@ -53,7 +54,7 @@ public:
   CConsoleCoutMessages* pConsoleMessages;
   //CTradingLogic* pTradingLogic;
 
-  CIQFeed *m_pIQFeed;
+  //CIQFeedProvider *m_pIQFeedProvider;
   CIBTWS *m_pIB;
 
   //CGeneratePeriodicRefresh *m_pRefresh;  // 2008/05/21  done as a singleton now

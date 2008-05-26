@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IQFeedHistoryCollector.h"
-#include "IQFeedProvider.h"
+#include "IQFeedProviderSingleton.h"
 
 #include <queue>
 #include <map>
@@ -37,7 +37,7 @@ protected:
 
   std::ofstream ofs;
 
-  CIQFeedProvider *m_pProvider;
+  CIQFeedProviderSingleton m_Provider;
 
 private:
   //_CrtMemState memstate1, memstate2, memstate3;

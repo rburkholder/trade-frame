@@ -18,8 +18,6 @@ IMPLEMENT_DYNAMIC( CIQFeed, CWnd )
 CIQFeed::CIQFeed( CWnd *pParent ) {
 
   BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), ::AfxGetMainWnd(), 1 );
-  //BOOL b = CWnd::Create( NULL, "IQFeed", 0, CRect( 0, 0, 20, 20 ), NULL, 1 );
-  //BOOL b = CWnd::CreateEx( 0, NULL, "IQFeed", 0, 10, 10, 10, 10, NULL, NULL, 0 );
 
   SetCallbackFunction( &IQFeedCallBack );
   int i = RegisterClientApp( this->m_hWnd, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
@@ -38,17 +36,6 @@ void CIQFeed::Connect() {
 
 void CIQFeed::Disconnect() {
 
-  // part of this should be to unwatch symbols
-  LP_CIQFSymbol sym;
-  map<string,LP_CIQFSymbol>::iterator iter;
-  iter = m_mapSymbols.begin();
-  while ( m_mapSymbols.end() != iter ) {
-    sym = iter->second;
-    delete sym;
-    sym = NULL;
-    iter++;
-  }
-
   // turn this into an async termination so can wait for socket to sent it's termination events 
   //   create the termination events if they don't exist
 
@@ -66,50 +53,6 @@ void CIQFeed::Disconnect() {
   // program terminates
 
 }
-
-BEGIN_MESSAGE_MAP(CIQFeed, CWnd)
-  ON_MESSAGE( WM_IQFEEDCROSSTHREAD, OnCrossThreadArrival )
-END_MESSAGE_MAP()
-
-/*
-CIQFSymbol *CIQFeed::Attach( const string &symbol ) {
-  m_mapSymbols_Iter = m_mapSymbols.find( symbol );
-  CIQFSymbol *pSym;
-  if ( m_mapSymbols.end() == m_mapSymbols_Iter ) {
-    pSym = new CIQFSymbol( symbol.c_str() );
-    m_mapSymbols.insert( m_mapSymbols_Pair( symbol.c_str(), pSym ) );
-  }
-  else {
-    pSym = m_mapSymbols_Iter -> second;
-  }
-  return pSym;
-}
-*/
-
-/*
-CIQFSymbol *CIQFeed::Watch( const string &symbol ) {
-  CIQFSymbol *pSym = Attach( symbol );
-  if ( pSym->Watch() ) {
-    CString s;
-    s.Format( "w%s\n", symbol.c_str() );
-    IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
-  }
-  return pSym;
-}
-
-void CIQFeed::UnWatch( const string &symbol ) {
-  m_mapSymbols_Iter = m_mapSymbols.find( symbol );
-  CIQFSymbol *pSym;
-  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = m_mapSymbols_Iter -> second;
-    if ( pSym->UnWatch() ) {
-      CString s;
-      s.Format( "r%s\n", symbol );
-      IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
-    }
-  }
-}
-*/
 
 void CIQFeed::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
@@ -153,6 +96,10 @@ void CIQFeed::CheckInLookupPort( CIQFeedThreadCrossing *state ) {
   m_qLookupPortAvailable.push( state );
 }
 
+BEGIN_MESSAGE_MAP(CIQFeed, CWnd)
+  ON_MESSAGE( WM_IQFEEDCROSSTHREAD, OnCrossThreadArrival )
+END_MESSAGE_MAP()
+
 void CIQFeed::OnPreCrossThreadResponse(unsigned short nStr, const char *str, LPVOID object ) {
   CIQFeedThreadCrossing *state = (CIQFeedThreadCrossing *) object;
   state->QueueResponse( nStr, str );
@@ -175,37 +122,21 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
       {
         CIQFUpdateMessage msg;
         msg.Assign( str );
-        m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFUpdateMessage::QPSymbol ) );
-        CIQFeedSymbol *pSym;
-        if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-          pSym = m_mapSymbols_Iter -> second;
-          pSym ->HandleUpdateMessage( &msg );
-        }
+        HandleQMessage( &msg );
       }
       break;
     case 'P': 
       {
         CIQFSummaryMessage msg;
         msg.Assign( str );
-        m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFSummaryMessage::QPSymbol ) );
-        CIQFeedSymbol *pSym;
-        if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-          pSym = m_mapSymbols_Iter -> second;
-          pSym ->HandleSummaryMessage( &msg );
-        }
+        HandlePMessage( &msg );
       }
       break;
     case 'F': 
       {
         CIQFFundamentalMessage msg;
         msg.Assign( str );
-        m_mapSymbols_Iter = m_mapSymbols.find( msg.Field( CIQFFundamentalMessage::FSymbol ) );
-        CIQFeedSymbol *pSym;
-        if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-          pSym = m_mapSymbols_Iter -> second;
-          pSym ->HandleFundamentalMessage( &msg );
-        }
-
+        HandleFMessage( &msg );
       }
       break;
     case 'N': 
@@ -213,39 +144,8 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         CIQFNewsMessage msg;
         msg.Assign( str );
         NewsMessage( &msg );
+        HandleNMessage( &msg );
 
-        const char *ixFstColon = msg.m_sSymbolList.c_str();
-        const char *ixLstColon = msg.m_sSymbolList.c_str();
-        string s;
-        __w64 int cnt;
-
-        if ( 0 != *ixLstColon ) {
-          do {
-            // each symbol has a surrounding set of colons
-            if ( ':' == *ixLstColon ) {
-              if ( ( ixLstColon - ixFstColon ) > 1 ) {
-                // extract symbol
-                cnt = ixLstColon - ixFstColon - 1;
-                s.assign( ++ixFstColon, cnt );
-
-                m_mapSymbols_Iter = m_mapSymbols.find( s.c_str() );
-                CIQFeedSymbol *pSym;
-                if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-                  pSym = m_mapSymbols_Iter -> second;
-                  pSym ->HandleNewsMessage( &msg );
-                }
-                ixFstColon = ixLstColon;
-              }
-              else {
-                if ( 1 == ( ixLstColon - ixFstColon ) ) {
-                  // no symbol, move FstColon
-                  ixFstColon = ixLstColon;
-                }
-              }
-            }
-            ixLstColon++;
-          } while ( 0 != *ixLstColon );
-        }
       }
       break;
     case 'T': 
@@ -253,6 +153,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
         CIQFTimeMessage msg;
         msg.Assign( str );
         TimeMessage( &msg );
+        HandleTMessage( &msg );
       }
       break;
     case 'S': 
@@ -272,6 +173,7 @@ void CIQFeed::OnNewResponsePort5009( const char *str ) {
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
         }
+        HandleSMessage( &msg );
       }
       break;
     default:

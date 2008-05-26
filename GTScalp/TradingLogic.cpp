@@ -81,8 +81,8 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   pChartIntraDay->m_chart.setMajorTickInc( 12 * 60 );
   pChartIntraDay->m_chart.setMinorTickInc( 60 );
 
-  ASSERT( NULL != theApp.m_pIQFeed );
-  theApp.m_pIQFeed->TimeMessage.Add( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
+  //ASSERT( NULL != theApp.m_pIQFeed );
+  m_IQFeedProvider.GetIQFeedProvider()->TimeMessage.Add( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
 
   m_state = EState::History;
 

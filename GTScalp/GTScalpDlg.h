@@ -21,6 +21,8 @@
 #include "VuMarketDepth.h"
 #include "GeneratePeriodicRefresh.h" 
 
+#include "IQFeedProviderSingleton.h"
+
 #include <vector>
 using namespace std;
 
@@ -46,7 +48,7 @@ private:
   CVuChartArmsIntraDay *pvuArms;
   //CHDF5 *pHdf5;
 
-  CScripts script;
+  //CScripts script;
   enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
   enumScanType m_eScanType;
   CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
@@ -62,6 +64,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 
+  CIQFeedProviderSingleton *m_pIQFeedProvider;
 
 
 // Implementation

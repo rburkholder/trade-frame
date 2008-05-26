@@ -14,9 +14,9 @@ public:
   CProviderInterface(void);
   virtual ~CProviderInterface(void);
 
-  virtual void Connect( void ) {};
+  virtual void Connect( void );
   Delegate<int> OnConnected;
-  virtual void Disconnect( void ) {};
+  virtual void Disconnect( void );
   Delegate<int> OnDisconnected;
 
   virtual void AddQuoteHandler( const string &sSymbol, CSymbol::quotehandler_t handler );

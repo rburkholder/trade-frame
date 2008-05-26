@@ -47,3 +47,76 @@ void CIQFeedProvider::StopTradeWatch(CSymbol *pSymbol) {
   StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
 }
 
+void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
+  map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFUpdateMessage::QPSymbol ) );
+  CIQFeedSymbol *pSym;
+  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
+    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym ->HandleUpdateMessage( pMsg );
+  }
+}
+
+void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
+  map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFSummaryMessage::QPSymbol ) );
+  CIQFeedSymbol *pSym;
+  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
+    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym ->HandleSummaryMessage( pMsg );
+  }
+}
+
+void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
+  map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFFundamentalMessage::FSymbol ) );
+  CIQFeedSymbol *pSym;
+  if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
+    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym ->HandleFundamentalMessage( pMsg );
+  }
+}
+
+void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
+  map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  const char *ixFstColon = pMsg->m_sSymbolList.c_str();
+  const char *ixLstColon = pMsg->m_sSymbolList.c_str();
+  string s;
+  __w64 int cnt;
+
+  if ( 0 != *ixLstColon ) {
+    do {
+      // each symbol has a surrounding set of colons
+      if ( ':' == *ixLstColon ) {
+        if ( ( ixLstColon - ixFstColon ) > 1 ) {
+          // extract symbol
+          cnt = ixLstColon - ixFstColon - 1;
+          s.assign( ++ixFstColon, cnt );
+
+          m_mapSymbols_Iter = m_mapSymbols.find( s.c_str() );
+          CIQFeedSymbol *pSym;
+          if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
+            pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+            pSym ->HandleNewsMessage( pMsg );
+          }
+          ixFstColon = ixLstColon;
+        }
+        else {
+          if ( 1 == ( ixLstColon - ixFstColon ) ) {
+            // no symbol, move FstColon
+            ixFstColon = ixLstColon;
+          }
+        }
+      }
+      ixLstColon++;
+    } while ( 0 != *ixLstColon );
+  }
+}
+
+void CIQFeedProvider::HandleTMessage( CIQFTimeMessage *pMsg ) {
+  //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+}
+
+void CIQFeedProvider::HandleSMessage( CIQFSystemMessage *pMsg ) {
+  //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+}

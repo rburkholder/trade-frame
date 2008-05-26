@@ -25,6 +25,12 @@ CProviderInterface::~CProviderInterface(void) {
   m_mapSymbols.clear();
 }
 
+void CProviderInterface::Connect() {
+}
+
+void CProviderInterface::Disconnect() {
+}
+
 void CProviderInterface::AddQuoteHandler(const std::string &sSymbol, CSymbol::quotehandler_t handler) {
   std::map<string, CSymbol*>::iterator iter;
   iter = m_mapSymbols.find( sSymbol );

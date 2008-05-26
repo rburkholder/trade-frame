@@ -19,26 +19,20 @@ using namespace std;
 // CScripts
 //
 
-CScripts::CScripts(void) 
-: m_pProvider( NULL ) 
-{
+CScripts::CScripts(void) {
 }
 
 CScripts::~CScripts(void) {
-  if ( NULL != m_pProvider ) {
-    delete m_pProvider;  // needs to be disconnected before this though.
-    m_pProvider = NULL;
-  }
 }
 
 void CScripts::GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHistory, unsigned long nDays ) {
   CHistoryCollector *phc;
   switch ( typeHistory ) {
         case Daily:
-          phc = new CHistoryCollectorDaily( m_pProvider, szSymbol, nDays );
+          phc = new CHistoryCollectorDaily( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
           break;
         case Tick:
-          phc = new CHistoryCollectorTicks( m_pProvider, szSymbol, nDays );
+          phc = new CHistoryCollectorTicks( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
           break;
         case Minute:
           break;
@@ -74,10 +68,10 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
         CHistoryCollector *phc;
         switch ( typeHistory ) {
         case Daily:
-          phc = new CHistoryCollectorDaily( m_pProvider, szSymbol, nDays );
+          phc = new CHistoryCollectorDaily( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
           break;
         case Tick:
-          phc = new CHistoryCollectorTicks( m_pProvider, szSymbol, nDays );
+          phc = new CHistoryCollectorTicks( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
           break;
         case Minute:
           break;

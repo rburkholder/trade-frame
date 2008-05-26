@@ -64,6 +64,7 @@ END_MESSAGE_MAP()
 CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGTScalpDlg::IDD, pParent)
   , SomeTextVal(_T(";;"))
+  , m_pIQFeedProvider( NULL )
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
@@ -385,9 +386,9 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
     delete pNews;
     pNews = NULL;
   }
-  if ( NULL != theApp.m_pIQFeed ) {
-    delete theApp.m_pIQFeed;
-    theApp.m_pIQFeed = NULL;
+  if ( NULL != m_pIQFeedProvider ) {
+    delete m_pIQFeedProvider;
+    m_pIQFeedProvider = NULL;
   }
   if ( NULL != theApp.m_pIB ) {
     delete theApp.m_pIB;
@@ -493,18 +494,19 @@ void CGTScalpDlg::OnBnClickedAccounts() {
 
 void CGTScalpDlg::OnBnClickedIqfeed() {
 
-  if ( NULL == theApp.m_pIQFeed ) {
-    theApp.m_pIQFeed = new CIQFeed( this );
+  if ( NULL == m_pIQFeedProvider ) {
+    m_pIQFeedProvider = new CIQFeedProviderSingleton();
 
-    pvi = new CVuIndicies( theApp.m_pMainWnd );
+    pvi = new CVuIndicies( ::AfxGetMainWnd() );
     pvi->ShowWindow(1);
 
-    psoi = new CVuSymbolsOfInterest( theApp.m_pMainWnd );
+    psoi = new CVuSymbolsOfInterest( ::AfxGetMainWnd() );
     psoi->ShowWindow(1);
 
-    pNews = new CConsoleMessages( theApp.m_pMainWnd );
+    pNews = new CConsoleMessages( ::AfxGetMainWnd() );
     pNews ->ShowWindow( SW_SHOWNORMAL );
-    theApp.m_pIQFeed->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
+    m_pIQFeedProvider->GetIQFeedProvider()
+      ->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
   }
 }
 
@@ -605,11 +607,12 @@ void CGTScalpDlg::OnBnClickedDnlddaysymbol() {
 
 void CGTScalpDlg::OnBnClickedIqfeedcmd() {
   // TODO: Add your control notification handler code here
+
   char szCommand[ 40 ];
   m_lbIQCommands.GetWindowTextA( szCommand, 40 );
   if ( 0 != *szCommand ) {
-    if ( NULL != theApp.m_pIQFeed ) {
-      theApp.m_pIQFeed->Send( szCommand );
+    if ( NULL != m_pIQFeedProvider ) {
+      m_pIQFeedProvider->GetIQFeedProvider()->Send( szCommand );
     }
   }
 }

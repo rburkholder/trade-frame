@@ -65,7 +65,7 @@ BOOL CGTScalpApp::InitInstance()
   //_CrtSetBreakAlloc(2968);
   //_CrtSetBreakAlloc(988);
 
-  m_pIQFeed = NULL;
+  //m_pIQFeed = NULL;
 
   m_bLive = true;
 

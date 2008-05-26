@@ -10,8 +10,6 @@
 #include <string>
 using namespace std;
 
-//void __stdcall IQFeedCallBack( int x, int y );
-
 class CIQFeed :public CWnd {
   DECLARE_DYNAMIC(CIQFeed)
 public:
@@ -20,10 +18,6 @@ public:
 
   void Connect( void );
   void Disconnect( void );
-
-  //CIQFSymbol *Attach( const string &symbol );
-  //CIQFSymbol *Watch( const string &symbol );
-  //void UnWatch( const string &symbol );
 
   Delegate<CIQFNewsMessage *> NewsMessage;
   Delegate<CIQFTimeMessage *> TimeMessage;
@@ -37,10 +31,13 @@ public:
   void StopQuoteTradeWatch( CIQFeedSymbol *pSymbol );
 
 protected:
-  typedef CIQFeedSymbol* LP_CIQFSymbol;
-  map<string,LP_CIQFSymbol> m_mapSymbols;
-  map<string,LP_CIQFSymbol> ::const_iterator m_mapSymbols_Iter;
-  typedef std::pair <string,LP_CIQFSymbol> m_mapSymbols_Pair;
+
+  virtual void HandleQMessage( CIQFUpdateMessage *pMsg ) {};
+  virtual void HandlePMessage( CIQFSummaryMessage *pMsg ) {};
+  virtual void HandleFMessage( CIQFFundamentalMessage *pMsg ) {};
+  virtual void HandleNMessage( CIQFNewsMessage *pMsg ) {};
+  virtual void HandleTMessage( CIQFTimeMessage *pMsg ) {};
+  virtual void HandleSMessage( CIQFSystemMessage *pMsg ) {};
 
 private:
   CIQFeedThreadCrossing IQConnect;  // port and buffers for main streaming connection

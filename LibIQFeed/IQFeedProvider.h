@@ -31,5 +31,12 @@ protected:
 
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );  // used by Add/Remove x handlers in base class
 
+  virtual void HandleQMessage( CIQFUpdateMessage *pMsg );
+  virtual void HandlePMessage( CIQFSummaryMessage *pMsg );
+  virtual void HandleFMessage( CIQFFundamentalMessage *pMsg );
+  virtual void HandleNMessage( CIQFNewsMessage *pMsg );
+  virtual void HandleTMessage( CIQFTimeMessage *pMsg );
+  virtual void HandleSMessage( CIQFSystemMessage *pMsg );
+
 private:
 };
