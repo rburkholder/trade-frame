@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TimeSeries.h"
+
 #include "HDF5TimeSeriesIterator.h"
 #include "HDF5TimeSeriesAccessor.h"
 

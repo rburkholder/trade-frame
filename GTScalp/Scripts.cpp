@@ -41,6 +41,9 @@ void CScripts::GetIQFeedHistoryForSymbol( char *szSymbol, EHistoryType typeHisto
   StartHistoryCollection();  // start what collectors we can while still building up the queue
 }
 
+// need a method for delving into the left over data structures when a symbol doesn't complete
+//  any records recieved?  what were they?  where are we in the command hand shaking?
+
 void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigned long nDays ) {
   // process IQFSymbol Table for exchanges and retrieve associated symbols
   //_CrtMemCheckpoint( &memstate1 );
@@ -62,9 +65,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
     bool bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_SET );
     while ( bSymbolFound ) {
       const char *szSymbol = symbolfile.GetSymbol();
-      //cout << szSymbol << " ";
       if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
-        //cout << "useful";
         CHistoryCollector *phc;
         switch ( typeHistory ) {
         case Daily:
@@ -81,16 +82,13 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
         ++cntSymbols;
       }
       else {
-        //cout << "n/a";
       }
-      //cout << endl;
       bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_NEXT_DUP );
     }
     symbolfile.EndSearch();
     szExchange = szExchanges[ ++ixExchanges ];
   }
   cout << "#Symbols: " << cntSymbols << ", bar count: " << nDays << endl;
-  //if ( 0 < i ) StartHistoryCollection();
 
   // close out files
   symbolfile.Close();
@@ -147,6 +145,10 @@ void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
     while ( m_mapActiveHistoryCollectors.end() != iter ) {
       cout << "  symbol remaining: " << iter->first << endl;
       ++iter;
+    }
+    if ( 1 == m_mapActiveHistoryCollectors.size() ) {
+      std::cout << "one element left" << std::endl;
+      // examine m_mapActiveHistoryCollectors to see can see what we have recieved.
     }
     //_CrtDumpMemoryLeaks();
   }

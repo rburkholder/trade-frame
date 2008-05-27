@@ -2,6 +2,8 @@
 
 #include "TimeSeries.h"
 
+#include "FastDelegate.h"
+
 #include <string>
 using namespace std;
 
@@ -12,10 +14,15 @@ public:
   virtual ~CSymbolSelectionFilter(void);
   CTimeSeries<CBar> *Bars( void ) { return &m_bars; };
   virtual bool Validate( void ) { return true; };
+  typedef fastdelegate::FastDelegate3<const string &, const string &,const string &> OnAddSymbolHandler;
+  void SetOnAddSymbolHandler( OnAddSymbolHandler function ) {
+    OnAddSymbol = function;
+  }
   void Start( void );
   virtual void Process( const string &sSymbol, const string &sPath ) = 0;
   virtual void WrapUp( void ) {};
 protected:
+  OnAddSymbolHandler OnAddSymbol;
   CTimeSeries<CBar> m_bars;
   enumDayCalc m_DayStartType;
   int m_nCount;
@@ -23,6 +30,7 @@ protected:
   ptime m_dtStart;
   bool m_bUseLast;
   ptime m_dtLast;
+  std::string m_sPath;
 private:
 };
 

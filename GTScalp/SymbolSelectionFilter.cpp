@@ -11,6 +11,7 @@ using namespace H5;
 
 #include "Darvas.h"
 
+#include <stdexcept>
 #include <map>
 
 // destroy self when done
@@ -44,7 +45,15 @@ public:
       dm.GetH5File()->getObjinfo( sObjectPath, stats );
       switch ( stats.type ) {
         case H5G_DATASET: 
-          m_pFilter->Process( sObjectName, sObjectPath );
+          try {
+            m_pFilter->Process( sObjectName, sObjectPath );
+          }
+          catch ( std::exception e ) {
+            std::cout << "Object " << sObjectName << " problem: " << e.what() << std::endl;
+          }
+          catch (...) {
+            std::cout << "Object " << sObjectName << " unknown problems" << std::endl;
+          }
           break;
         case H5G_GROUP:
           int idx = 0;  // starting location for interrupted queries
@@ -137,6 +146,20 @@ public:
   operator unsigned long() { return m_nTotalVolume / m_nNumberOfValues; };
 };
 
+class CalcAveragePrice {
+private:
+  double m_dblSumOfPrices;
+  unsigned long m_nNumberOfValues;
+protected:
+public:
+  CalcAveragePrice() : m_dblSumOfPrices( 0 ), m_nNumberOfValues( 0 ) {};
+  void operator() ( const CBar &bar ) {
+    m_dblSumOfPrices += bar.m_dblClose;
+    ++m_nNumberOfValues;
+  }
+  operator double() { return m_dblSumOfPrices / m_nNumberOfValues; };
+};
+
 CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
@@ -182,6 +205,7 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
           cout << " triggered, stop=" << results.GetStopLevel();
           iter = m_bars.iterAtOrAfter( dt26WksAgo );
           for_each( iter, m_bars.end(), CalcSixMonMeans() );
+          if ( NULL != OnAddSymbol ) OnAddSymbol( sPath, sPath, "Darvas" );
         }
         cout << endl;
       }
@@ -205,6 +229,7 @@ bool CSelectSymbolWith10Percent::Validate( void ) {
 
 void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &sPath ) {
   //cout << "10 Percent for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+  m_sPath = sPath;
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
   CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
   ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
@@ -216,28 +241,29 @@ void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &s
       barRepository.Read( begin, end, &m_bars );
       if ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) {
         unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
-        if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+        double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
+        if ( ( 1000000 < nAverageVolume ) && ( 25 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)
           multimap<double, string>::iterator iterPos;
           std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
           double dblReturn = ( m_bars.Last()->m_dblClose - m_bars.Last()->m_dblOpen ) / m_bars.Last()->m_dblClose;
           if ( nMaxInList > mapMaxPositives.size() ) {
-            mapMaxPositives.insert( pair<double, string>( dblReturn, sSymbol ) );
+            mapMaxPositives.insert( pair<double, string>( dblReturn, sPath ) );
           }
           else {
             iterPos = mapMaxPositives.begin();
             if ( dblReturn > iterPos->first ) {
               mapMaxPositives.erase( iterPos );
-              mapMaxPositives.insert( pair<double, string>( dblReturn, sSymbol ) );
+              mapMaxPositives.insert( pair<double, string>( dblReturn, sPath ) );
             }
           }
           if ( nMaxInList > mapMaxNegatives.size() ) {
-            mapMaxNegatives.insert( pair<double, string>( dblReturn, sSymbol ) );
+            mapMaxNegatives.insert( pair<double, string>( dblReturn, sPath ) );
           }
           else {
             iterNeg = mapMaxNegatives.begin();
             if ( dblReturn < iterNeg->first ) {
               mapMaxNegatives.erase( iterNeg );
-              mapMaxNegatives.insert( pair<double, string>( dblReturn, sSymbol ) );
+              mapMaxNegatives.insert( pair<double, string>( dblReturn, sPath ) );
             }
           }
         }
@@ -251,12 +277,14 @@ void CSelectSymbolWith10Percent::WrapUp( void ) {
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxPositives.begin(); iterPos != mapMaxPositives.end(); ++iterPos ) {
     cout << " " << iterPos->second << "=" << iterPos->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( iterPos->second, iterPos->second, "10%+" );
   }
   mapMaxPositives.clear();
   cout << "Negatives: " << endl;
   std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
   for ( iterNeg = mapMaxNegatives.begin(); iterNeg != mapMaxNegatives.end(); ++iterNeg ) {
     cout << " " << iterNeg->second << "=" << iterNeg->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( iterNeg->second, iterNeg->second, "10%-" );
   }
   mapMaxNegatives.clear();
 }
@@ -327,6 +355,7 @@ public:
 };
 
 void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
+  m_sPath = sPath;
   //cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
   CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
@@ -338,18 +367,19 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
     barRepository.Read( begin, end, &m_bars );
     if ( ( m_bars.Last()->m_dblClose < 50.0 ) && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
       unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
-      if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+      double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
+      if ( ( 1000000 < nAverageVolume ) && ( 25.0 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)
         double dblAverageVolatility = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolatility() );
         //double dblVolatility = ( m_bars.Last()->m_dblHigh - m_bars.Last()->m_dblLow ) / m_bars.Last()->m_dblClose;
         multimap<double, string>::iterator iterPos;
         if ( nMaxInList > mapMaxVolatility.size() ) {
-          mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sSymbol ) );
+          mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sPath ) );
         }
         else {
           iterPos = mapMaxVolatility.begin();
           if ( dblAverageVolatility > iterPos->first ) {
             mapMaxVolatility.erase( iterPos );
-            mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sSymbol ) );
+            mapMaxVolatility.insert( pair<double, string>( dblAverageVolatility, sPath ) );
           }
         }
       }
@@ -362,6 +392,7 @@ void CSelectSymbolWithVolatility::WrapUp( void ) {
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxVolatility.begin(); iterPos != mapMaxVolatility.end(); ++iterPos ) {
     cout << " " << iterPos->second << "=" << iterPos->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( iterPos->second, iterPos->second, "Volatile" );
   }
   mapMaxVolatility.clear();
 }

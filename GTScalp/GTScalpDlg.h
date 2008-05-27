@@ -22,6 +22,9 @@
 #include "GeneratePeriodicRefresh.h" 
 
 #include "IQFeedProviderSingleton.h"
+#include "IBTWS.h"
+
+#include "..\LibBasketTrading\BasketTradeContainer.h"
 
 #include <vector>
 using namespace std;
@@ -48,7 +51,6 @@ private:
   CVuChartArmsIntraDay *pvuArms;
   //CHDF5 *pHdf5;
 
-  //CScripts script;
   enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
   enumScanType m_eScanType;
   CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
@@ -57,15 +59,14 @@ private:
   enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2 };
   enumDataSourceType m_eDataSourceType;
 
-  //CVuChart *pChartIntraDay;
+  CIBTWS *m_pIB;
+  CIQFeedProviderSingleton *m_pIQFeed;
+  void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
+  CBasketTradeContainer *m_pBasketTrade;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-
-
-  CIQFeedProviderSingleton *m_pIQFeedProvider;
-
 
 // Implementation
 protected:
@@ -158,4 +159,7 @@ public:
   afx_msg void OnBnClickedChartsymbol();
   afx_msg void OnEnChangeIbacct();
   afx_msg void OnBnClickedRtchart();
+  afx_msg void OnBnClickedBasket();
+  CEdit m_edtFunds;
+  afx_msg void OnBnClickedBasketprepare();
 };

@@ -64,7 +64,9 @@ END_MESSAGE_MAP()
 CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGTScalpDlg::IDD, pParent)
   , SomeTextVal(_T(";;"))
-  , m_pIQFeedProvider( NULL )
+  , m_pIQFeed( NULL )
+  , m_pIB( NULL )
+  , m_pBasketTrade( NULL )
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
@@ -100,6 +102,7 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_ENDDAYCOUNT, m_rbSelectByDayCount);
   DDX_Control(pDX, IDC_IBACCT, m_edtIBAcctCode);
   DDX_Control(pDX, IDC_GRPDATASOURCE, m_grpDataSource);
+  DDX_Control(pDX, IDC_EDTFUNDS, m_edtFunds);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -148,6 +151,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_CHARTSYMBOL, &CGTScalpDlg::OnBnClickedChartsymbol)
   ON_EN_CHANGE(IDC_IBACCT, &CGTScalpDlg::OnEnChangeIbacct)
   ON_BN_CLICKED(IDC_RTCHART, &CGTScalpDlg::OnBnClickedRtchart)
+  ON_BN_CLICKED(IDC_BASKET, &CGTScalpDlg::OnBnClickedBasket)
+  ON_BN_CLICKED(IDC_BASKETPREPARE, &CGTScalpDlg::OnBnClickedBasketprepare)
 END_MESSAGE_MAP()
 
 
@@ -273,8 +278,6 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eDataSourceType = NoDS;
   //pChartIntraDay = NULL;
 
-  theApp.m_pIB = NULL;
-
   m_refresh.SetThreadWindow( theApp.m_pMainWnd );
 
 
@@ -386,13 +389,17 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
     delete pNews;
     pNews = NULL;
   }
-  if ( NULL != m_pIQFeedProvider ) {
-    delete m_pIQFeedProvider;
-    m_pIQFeedProvider = NULL;
+  if ( NULL != m_pBasketTrade ) {
+    delete m_pBasketTrade;
+    m_pBasketTrade = NULL;
   }
-  if ( NULL != theApp.m_pIB ) {
-    delete theApp.m_pIB;
-    theApp.m_pIB = NULL;
+  if ( NULL != m_pIQFeed ) {
+    delete m_pIQFeed;
+    m_pIQFeed = NULL;
+  }
+  if ( NULL != m_pIB ) {
+    delete m_pIB;
+    m_pIB = NULL;
   }
 }
 
@@ -494,8 +501,8 @@ void CGTScalpDlg::OnBnClickedAccounts() {
 
 void CGTScalpDlg::OnBnClickedIqfeed() {
 
-  if ( NULL == m_pIQFeedProvider ) {
-    m_pIQFeedProvider = new CIQFeedProviderSingleton();
+  if ( NULL == m_pIQFeed ) {
+    m_pIQFeed = new CIQFeedProviderSingleton();
 
     pvi = new CVuIndicies( ::AfxGetMainWnd() );
     pvi->ShowWindow(1);
@@ -505,7 +512,7 @@ void CGTScalpDlg::OnBnClickedIqfeed() {
 
     pNews = new CConsoleMessages( ::AfxGetMainWnd() );
     pNews ->ShowWindow( SW_SHOWNORMAL );
-    m_pIQFeedProvider->GetIQFeedProvider()
+    m_pIQFeed->GetIQFeedProvider()
       ->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
   }
 }
@@ -611,8 +618,8 @@ void CGTScalpDlg::OnBnClickedIqfeedcmd() {
   char szCommand[ 40 ];
   m_lbIQCommands.GetWindowTextA( szCommand, 40 );
   if ( 0 != *szCommand ) {
-    if ( NULL != m_pIQFeedProvider ) {
-      m_pIQFeedProvider->GetIQFeedProvider()->Send( szCommand );
+    if ( NULL != m_pIQFeed ) {
+      m_pIQFeed->GetIQFeedProvider()->Send( szCommand );
     }
   }
 }
@@ -689,6 +696,12 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
         break;
     }
     if ( pFilter->Validate() ) {
+      if ( NULL == m_pBasketTrade ) {
+        std::cout << "Basket is not started." << std::endl;
+      }
+      else {
+        pFilter->SetOnAddSymbolHandler( fastdelegate::MakeDelegate( this, &CGTScalpDlg::HandleSymbolForBasketContainer ) );
+      }
       pFilter->Start();
       pFilter->WrapUp();
     }
@@ -768,7 +781,7 @@ CTestTrade testTrade;
 
 void CGTScalpDlg::OnBnClickedOpenib() {
   // TODO: Add your control notification handler code here
-  if ( NULL == theApp.m_pIB ) {
+  if ( NULL == m_pIB ) {
     char szAcct[ 50 ];
     m_edtIBAcctCode.GetWindowTextA( szAcct, 50 );
     if ( 0 == *szAcct ) {
@@ -776,33 +789,33 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     }
 //    else {
       string sAcct( szAcct );
-      theApp.m_pIB = new CIBTWS( sAcct );
-      theApp.m_pIB->Connect();
+      m_pIB = new CIBTWS( sAcct );
+      m_pIB->Connect();
 //    }
   }
 }
 
 void CGTScalpDlg::OnBnClickedIbwatch() {
-  if ( NULL != theApp.m_pIB ) {
+  if ( NULL != m_pIB ) {
     char symbol[ 30 ];
     m_lbSymbolList.GetWindowTextA( symbol, 30 );
-    theApp.m_pIB->AddTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
+    m_pIB->AddTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
   }
 }
 
 void CGTScalpDlg::OnBnClickedIbunwatch() {
-  if ( NULL != theApp.m_pIB ) {
+  if ( NULL != m_pIB ) {
     char symbol[ 30 ];
     m_lbSymbolList.GetWindowTextA( symbol, 30 );
-    theApp.m_pIB->RemoveTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
+    m_pIB->RemoveTradeHandler( symbol, MakeDelegate( &testTrade, &CTestTrade::HandleTrade ) );
   }
 }
 
 void CGTScalpDlg::OnBnClickedIbclose() {
-  if ( NULL != theApp.m_pIB ) {
-    theApp.m_pIB->Disconnect();
-    delete theApp.m_pIB;
-    theApp.m_pIB = NULL;
+  if ( NULL != m_pIB ) {
+    m_pIB->Disconnect();
+    delete m_pIB;
+    m_pIB = NULL;
   }
 }
 
@@ -832,7 +845,7 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
   string sSymbol( szSymbol );
   if ( ( 0 != *szSymbol ) && ( NoDS != m_eDataSourceType ) ) {
     if ( DSIB == m_eDataSourceType ) {  // only accept IB for now
-      if ( NULL != theApp.m_pIB ) { // make sure IB is turned on
+      if ( NULL != m_pIB ) { // make sure IB is turned on
         CVuChart *pChartIntraDay;  // need to add to vector so can delete at end of program run
         pChartIntraDay = new CVuChart( sSymbol );
         pChartIntraDay->m_chart.SetBarFactoryWidthSeconds( 6 );
@@ -844,7 +857,7 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
         s.append( sSymbol );
         pChartIntraDay->m_chart.SetTitle( s );
         pChartIntraDay->ShowWindow( 1 );
-        theApp.m_pIB->AddTradeHandler( 
+        m_pIB->AddTradeHandler( 
           sSymbol, 
           MakeDelegate( &pChartIntraDay->m_chart, &CChartDatedDatum::AddTrade ) 
           );
@@ -868,11 +881,54 @@ void CGTScalpDlg::OnBnClickedRtchart() {
   string sSymbol( szSymbol );
   if ( ( 0 != *szSymbol ) && ( NoDS != m_eDataSourceType ) ) {
     if ( DSIB == m_eDataSourceType ) {  // only accept IB for now
-      if ( NULL != theApp.m_pIB ) { // make sure IB is turned on
+      if ( NULL != m_pIB ) { // make sure IB is turned on
         CChartRealTimeContainer *pChart;  // need to add to vector so can delete at end of program run
-        pChart = new CChartRealTimeContainer( sSymbol, theApp.m_pIB );
+        pChart = new CChartRealTimeContainer( sSymbol, m_pIB );
         pChart->ShowWindow( SW_SHOWNORMAL );
       }
     }
+  }
+}
+
+void CGTScalpDlg::OnBnClickedBasket() {
+  if ( ( NULL != m_pIB ) && ( NULL != m_pIQFeed ) ) {
+    if ( NULL != m_pBasketTrade ) {
+      std::cout << "Basket already started" << std::endl;
+    }
+    else {
+      m_pBasketTrade = new CBasketTradeContainer( m_pIQFeed->GetIQFeedProvider(), m_pIB);
+    }
+  }
+  else {
+    std::cout << "one of IB or IQ is not connected" << endl;
+  }
+}
+
+void CGTScalpDlg::HandleSymbolForBasketContainer(const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy ) {
+  m_pBasketTrade->AddSymbol( sSymbolName, sPath, sStrategy );
+}
+
+void CGTScalpDlg::OnBnClickedBasketprepare() {
+  CString sFunds;
+  m_edtFunds.GetWindowTextA( sFunds );
+  if ( 0 < sFunds.GetLength() ) {
+    int nFunds = atoi( (LPCTSTR) sFunds );
+    double dblFunds = (double) nFunds;
+
+    if ( m_bUseDayEnd ) {
+      ptime dtEnd;
+      SYSTEMTIME dtLastDate, dtLastTime;
+      m_dtLastDate.GetTime( &dtLastDate );
+      m_dtLastTime.GetTime( &dtLastTime );
+      dtEnd = ptime( 
+        boost::gregorian::date( dtLastDate.wYear, dtLastDate.wMonth, dtLastDate.wDay )
+        //, boost::posix_time::time_duration( dtLastTime.wHour, dtLastTime.wMinute, dtLastTime.wSecond, dtLastTime.wMilliseconds ) 
+        );
+      m_pBasketTrade->Prepare( dtEnd, dblFunds );
+    }
+    else {
+      std::cout << "no date specified" << std::endl;
+    }
+
   }
 }

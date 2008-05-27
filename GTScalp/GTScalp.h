@@ -17,7 +17,7 @@
 #include "TradingLogic.h"
 //#include "IQFeed.h" 
 //#include "IQFeedProvider.h"
-#include "IBTWS.h"
+//#include "IBTWS.h"
 
 //#include "GeneratePeriodicRefresh.h"  // need the above constants
 
@@ -53,9 +53,6 @@ public:
   CGTSessionX m_session2;
   CConsoleCoutMessages* pConsoleMessages;
   //CTradingLogic* pTradingLogic;
-
-  //CIQFeedProvider *m_pIQFeedProvider;
-  CIBTWS *m_pIB;
 
   //CGeneratePeriodicRefresh *m_pRefresh;  // 2008/05/21  done as a singleton now
 
