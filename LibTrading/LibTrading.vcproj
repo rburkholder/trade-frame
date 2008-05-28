@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_35_0;;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibCommon"
+				AdditionalIncludeDirectories="..\LibBerkeleyDb;H:\Program Files\Oracle\Berkeley DB 4.6.21\include;K:\Data\Projects\boost\boost_1_35_0;;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibCommon"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -148,7 +148,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Contract.cpp"
+				RelativePath=".\Instrument.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InstrumentFile.cpp"
 				>
 			</File>
 			<File
@@ -194,7 +198,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Contract.h"
+				RelativePath=".\Instrument.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InstrumentFile.h"
 				>
 			</File>
 			<File

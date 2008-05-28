@@ -12,8 +12,11 @@
 //
 
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy ) 
-: m_sSymbolName( sSymbolName ), m_sPath( sSymbolName ),  m_sStrategy( sStrategy )
+: m_sSymbolName( sSymbolName ), m_sPath( sSymbolName ),  m_sStrategy( sStrategy ),
+  m_dtToday( not_a_date_time ), m_dblOpen( 0 ), m_bOpenFound( false ), m_PositionState( Init )
 {
+  m_1MinBarFactory.SetBarWidth( 60 );
+  m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
 }
 
 CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
@@ -39,4 +42,69 @@ void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds) 
   std::cout << "Entry for " << m_sSymbolName 
     << ": " << m_nQuantityForEntry << "@" << m_dblProposedEntryCost 
     << ", " << dblClose
-    << std::endl;}
+    << std::endl;
+}
+
+void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
+  if ( m_dtToday.is_not_a_date_time() ) {
+    m_dtToday = ptime( trade.m_dt.date(), time_duration( 10, 30, 0 ) );
+  }
+  if ( trade.m_dt >= m_dtToday ) {
+    if ( !m_bOpenFound ) {
+      m_bOpenFound = true;
+      m_dblOpen = trade.m_dblTrade;
+    }
+    m_1MinBarFactory.Add( trade );
+  }
+}
+
+void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
+  m_bars.AppendDatum( bar );
+  size_t cnt = m_bars.Count();
+  switch ( m_PositionState ) {
+    case Init:
+      if ( 0 == m_nQuantityForEntry ) {
+        m_PositionState = Exited;
+      }
+      else {
+        m_PositionState = WaitingForThe3Bars;
+      }
+      break;
+      //case WaitingForOpen:
+      //  break;
+    case WaitingForThe3Bars:
+      if ( cnt >= 3 ) {
+        CBar bar1, bar2, bar3;
+        bar1 = *m_bars[ cnt - 3 ];
+        bar2 = *m_bars[ cnt - 2 ];
+        bar3 = *m_bars[ cnt - 1 ];
+        if ( ( bar1.m_dblLow > m_dblOpen ) && ( bar2.m_dblLow > m_dblOpen ) && ( bar3.m_dblLow > m_dblOpen ) ) {
+          if ( ( bar1.m_dblClose < bar2.m_dblClose ) && ( bar2.m_dblClose < bar3.m_dblClose ) ) {
+            // do a market long on three rising bars
+            m_dblStop = bar1.m_dblLow;
+            m_dblStop = min( m_dblStop, bar2.m_dblLow );
+            m_dblStop = min( m_dblStop, bar3.m_dblLow );
+            std::cout << "Enter LONG now:  " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
+            m_PositionState = WaitingForOrderFulfillment;
+          }
+        }
+        if ( ( bar1.m_dblHigh < m_dblOpen ) && ( bar2.m_dblHigh < m_dblOpen ) && ( bar3.m_dblHigh < m_dblOpen ) ) {
+          if ( ( bar1.m_dblClose> bar2.m_dblClose ) && ( bar2.m_dblClose> bar3.m_dblClose ) ) {
+            // do a market shrot on three falling bars
+            m_dblStop = bar1.m_dblHigh;
+            m_dblStop = max( m_dblStop, bar2.m_dblHigh );
+            m_dblStop = max( m_dblStop, bar3.m_dblHigh );
+            std::cout << "Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
+            m_PositionState = WaitingForOrderFulfillment;
+          }
+        }
+      }
+      break;
+    case WaitingForOrderFulfillment:
+      break;
+    case WaitingForExit:
+      break;
+    case Exited:
+      break;
+  }
+}

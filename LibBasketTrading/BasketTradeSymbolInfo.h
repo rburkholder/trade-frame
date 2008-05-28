@@ -6,6 +6,9 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include "BarFactory.h"
+#include "TimeSeries.h"
+
 class CBasketTradeSymbolInfo {
 public:
   CBasketTradeSymbolInfo( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
@@ -13,6 +16,8 @@ public:
   void CalculateTrade( ptime dtTradeDate, double dblFunds );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
+  void HandleTrade( const CTrade &trade );
+  const std::string &GetSymbolName( void ) { return m_sSymbolName; };
 protected:
   std::string m_sSymbolName;
   std::string m_sPath;
@@ -30,5 +35,16 @@ protected:
   double m_dblAllocatedWorkingFunds;
   double m_dblExitPrice;
   double m_dblProposedEntryCost;
+  //bool m_bEntryInitiated;
+  enum enumPositionState { Init, WaitingForOpen, WaitingForThe3Bars, WaitingForOrderFulfillment, WaitingForExit, Exited } m_PositionState;
+  ptime m_dtToday;
+  bool m_bOpenFound;
+  double m_dblOpen;
+  double m_dblStop;
+
+
+  CBarFactory m_1MinBarFactory;
+  CBars m_bars;
+  void HandleBarFactoryBar( const CBar &bar );
 private:
 };

@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 
 #include "IQFeedSymbolFile.h"
-#include "BerkeleyDBDataManager.h"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -35,145 +34,50 @@ using namespace std;
 // need a mechanism to detect lock files and then to eliminate them
 
 CIQFeedSymbolFile::structExchangeInfo CIQFeedSymbolFile::m_rExchanges[] = {
-  { "Unknown", ContractType::Unknown, 0 },
-  { "AMEX", ContractType::Stock, 0 },
-  { "BARCLAYS", ContractType::Currency, 0 },
-  { "CBOT", ContractType::Future, 0 },
-  { "CHX", ContractType::Future, 0 },
-  { "CME", ContractType::Future, 0 },
-  { "COMEX", ContractType::Future, 0 },
-  { "CVE", ContractType::Stock, 0 },
-  { "DJ", ContractType::Future, 0 },
-  { "DTN", ContractType::Index, 0 },
-  { "ENCOM", ContractType::Future, 0 },
-  { "ENID", ContractType::Future, 0 },
-  { "ENIR", ContractType::Future, 0 },
-  { "EUREX", ContractType::Future, 0 },
-  { "EUREXNDX", ContractType::Currency, 0 },
-  { "IPE", ContractType::Future, 0 },
-  { "KCBOT", ContractType::Future, 0 },
-  { "LME", ContractType::Metal, 0 },
-  { "MGE", ContractType::Future, 0 },
-  { "NASDAQ", ContractType::Stock, 0 },
-  { "NMS", ContractType::Stock, 0 },
-  { "NYBOT", ContractType::Future, 0 },
-  { "NYMEX", ContractType::Future, 0 },
-  { "NYMEXMINI", ContractType::Future, 0 },
-  { "NYSE", ContractType::Stock, 0 },
-  { "ONECH", ContractType::Future, 0 },
-  { "OPRA", ContractType::Option, 0 },
-  { "OTC", ContractType::Stock, 0 },
-  { "OTCBB", ContractType::Stock, 0 },
-  { "PBOT", ContractType::Future, 0 },
-  { "PSE", ContractType::Stock, 0 },
-  { "SGX", ContractType::Future, 0 },
-  { "SMCAP", ContractType::Stock, 0 },
-  { "TSE", ContractType::Stock, 0 },
-  { "TULLETT", ContractType::Currency, 0 },
-  { "WCE", ContractType::Future, 0 }
+  { "Unknown", InstrumentType::Unknown, 0 },
+  { "AMEX", InstrumentType::Stock, 0 },
+  { "BARCLAYS", InstrumentType::Currency, 0 },
+  { "CBOT", InstrumentType::Future, 0 },
+  { "CHX", InstrumentType::Future, 0 },
+  { "CME", InstrumentType::Future, 0 },
+  { "COMEX", InstrumentType::Future, 0 },
+  { "CVE", InstrumentType::Stock, 0 },
+  { "DJ", InstrumentType::Future, 0 },
+  { "DTN", InstrumentType::Index, 0 },
+  { "ENCOM", InstrumentType::Future, 0 },
+  { "ENID", InstrumentType::Future, 0 },
+  { "ENIR", InstrumentType::Future, 0 },
+  { "EUREX", InstrumentType::Future, 0 },
+  { "EUREXNDX", InstrumentType::Currency, 0 },
+  { "IPE", InstrumentType::Future, 0 },
+  { "KCBOT", InstrumentType::Future, 0 },
+  { "LME", InstrumentType::Metal, 0 },
+  { "MGE", InstrumentType::Future, 0 },
+  { "NASDAQ", InstrumentType::Stock, 0 },
+  { "NMS", InstrumentType::Stock, 0 },
+  { "NYBOT", InstrumentType::Future, 0 },
+  { "NYMEX", InstrumentType::Future, 0 },
+  { "NYMEXMINI", InstrumentType::Future, 0 },
+  { "NYSE", InstrumentType::Stock, 0 },
+  { "ONECH", InstrumentType::Future, 0 },
+  { "OPRA", InstrumentType::Option, 0 },
+  { "OTC", InstrumentType::Stock, 0 },
+  { "OTCBB", InstrumentType::Stock, 0 },
+  { "PBOT", InstrumentType::Future, 0 },
+  { "PSE", InstrumentType::Stock, 0 },
+  { "SGX", InstrumentType::Future, 0 },
+  { "SMCAP", InstrumentType::Stock, 0 },
+  { "TSE", InstrumentType::Stock, 0 },
+  { "TULLETT", InstrumentType::Currency, 0 },
+  { "WCE", InstrumentType::Future, 0 }
 };
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
-    pRecord( NULL ), 
-    m_pdbIQFSymbols( NULL ), 
-    m_pdbIxIQFSymbols_Market( NULL ), m_pdbcIxIQFSymbols_Market( NULL ),
-    m_pdbIxIQFSymbols_Underlying( NULL ), m_pdbcIxIQFSymbols_Underlying( NULL ) 
+  CInstrumentFile( )
     {
 }
 
 CIQFeedSymbolFile::~CIQFeedSymbolFile(void) {
-  //if ( NULL != m_pdbcIxIQFSymbols_Market ) delete m_pdbcIxIQFSymbols_Market;
-  //if ( NULL != m_pdbIxIQFSymbols_Market ) delete m_pdbIxIQFSymbols_Market;
-  //if ( NULL != m_pdbIQFSymbols ) delete m_pdbIQFSymbols;
-}
-
-void CIQFeedSymbolFile::Open() {
-  CBerkeleyDBDataManager dm;
-  DbEnv *pDbEnv = dm.GetDbEnv();
-
-  // open/create main symbol table
-  m_pdbIQFSymbols = new Db( pDbEnv, 0 );
-  m_pdbIQFSymbols->open( NULL, dm.GetBDBFileName(), "IQFSymbols", DB_BTREE, DB_CREATE, 0 );
-
-  // open/create the market index
-  m_pdbIxIQFSymbols_Market = new Db( pDbEnv, 0 );
-  m_pdbIxIQFSymbols_Market->set_flags( DB_DUPSORT );
-  m_pdbIxIQFSymbols_Market->open( NULL, dm.GetBDBFileName(), "IxIQFSymbols_Market", DB_BTREE, DB_CREATE, 0 );
-
-  // associate the index with the main table
-  m_pdbIQFSymbols->associate( NULL, m_pdbIxIQFSymbols_Market, &CIQFeedSymbolFile::GetMarketName, 0 );
-
-  // open/create the underlying index
-  m_pdbIxIQFSymbols_Underlying = new Db( pDbEnv, 0 );
-  m_pdbIxIQFSymbols_Underlying->set_flags( DB_DUPSORT );
-  m_pdbIxIQFSymbols_Underlying->open( NULL, dm.GetBDBFileName(), "IxIQFSymbols_Underlying", DB_BTREE, DB_CREATE, 0 );
-
-  // associate the index with the main table
-  m_pdbIQFSymbols->associate( NULL, m_pdbIxIQFSymbols_Underlying, &CIQFeedSymbolFile::GetUnderlyingName, 0 );
-}
-
-void CIQFeedSymbolFile::Close() {
-  m_pdbIxIQFSymbols_Underlying->close(0);
-  m_pdbIxIQFSymbols_Market->close(0);
-  m_pdbIQFSymbols->close(0);
-}
-
-int CIQFeedSymbolFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
-  structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
-  char *p = dbIxRecord->line + dbIxRecord->ix[2];  // get at the 'exchange' string
-  unsigned long l = dbIxRecord->cnt[2];  // set the key and its length
-  secKey->set_data( p );
-  secKey->set_size( l );
-  return 0;
-}
-
-int CIQFeedSymbolFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
-  structIQFSymbolRecord *dbIxRecord = (structIQFSymbolRecord *) data->get_data();
-  char *p; 
-  u_int32_t len;
-  bool bUseIndex = true;
-  if ( ContractType::Option == dbIxRecord->nContractType ) { // OPRA option
-    p = dbIxRecord->line + dbIxRecord->ix[1];  // start of description
-    char *e = strchr( p, ' ' );  // find the trailing blank
-    len = e - p;
-    if ( 0 != len ) bUseIndex = false;
-  }
-  if ( bUseIndex ) {  // by default, use records symbol
-    p = dbIxRecord->line;
-    len = dbIxRecord->cnt[0];
-  }
-  secKey->set_data( p );
-  secKey->set_size( len );
-  return 0;
-}
-
-void CIQFeedSymbolFile::SetSearchExchange( const char *szExchange ) {
-  m_szSearchKey = szExchange;
-  m_lenSearchKey = strlen( szExchange );
-  m_dbtKey.set_data( (void*) szExchange );
-  m_dbtKey.set_size( m_lenSearchKey );
-  m_pdbIxIQFSymbols_Market->cursor( NULL, &m_pdbcIxIQFSymbols_Market, 0 );
-}
-
-void CIQFeedSymbolFile::SetSearchUnderlying( const char *szUnderlying ) {
-  m_szSearchKey = szUnderlying;
-  m_lenSearchKey = strlen( szUnderlying );
-  m_dbtKey.set_data( (void*) szUnderlying );
-  m_dbtKey.set_size( m_lenSearchKey );
-  m_pdbIxIQFSymbols_Underlying->cursor( NULL, &m_pdbcIxIQFSymbols_Underlying, 0 );
-}
-
-bool CIQFeedSymbolFile::RetrieveSymbolRecord( u_int32_t flags ) {
-  pRecord = NULL;
-  int result = m_pdbcIxIQFSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
-  if ( 0 == result ) {
-    pRecord = (structIQFSymbolRecord *) m_dbtData.get_data();
-    UnPackBoolean( pRecord->ucBits1 );
-  }
-  return ( 0 == result );
-}
-
-void CIQFeedSymbolFile::EndSearch( void ) {
 }
 
 // http://www.relisoft.com/book/tech/6lib.html
@@ -252,11 +156,11 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   CKeyWordMatch kwm;
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
-    m_rExchanges[ ix ].cntContracts = 0;
+    m_rExchanges[ ix ].cntInstruments = 0;
     kwm.AddPattern( m_rExchanges[ ix ].szName, (void *) ix );
   }
-  unsigned long rcntContractTypes[ ContractType::_Count ];
-  for ( unsigned long ix = 0; ix < ContractType::_Count; ++ix ) {
+  unsigned long rcntContractTypes[ InstrumentType::_Count ];
+  for ( unsigned long ix = 0; ix < InstrumentType::_Count; ++ix ) {
     rcntContractTypes[ ix ] = 0;
   }
 
@@ -266,7 +170,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   Open();
   u_int32_t countp = 0;
   cout << "Truncating Symbol Database" << endl;
-  m_pdbIQFSymbols->truncate( NULL, &countp, 0 );
+  m_pdbSymbols->truncate( NULL, &countp, 0 );
 
   cout << "Loading Symbols" << endl;
   try {
@@ -307,27 +211,27 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
           ++k;
         }
       }
-      dbRecord.bufferedlength = sizeof( structIQFSymbolRecord ) - nMaxBufferSize + k + 1;  // +1 is for zero offset of k
+      dbRecord.bufferedlength = sizeof( structSymbolRecord ) - nMaxBufferSize + k + 1;  // +1 is for zero offset of k
       // process line here
 
       size_t ix;
       try {
         ix = (size_t) kwm.FindMatch( dbRecord.line + dbRecord.ix[2] );
-        dbRecord.nContractType = m_rExchanges[ ix ].nContractType;
-        ++m_rExchanges[ ix ].cntContracts;
+        dbRecord.eInstrumentType = m_rExchanges[ ix ].eInstrumentType;
+        ++m_rExchanges[ ix ].cntInstruments;
       }
       catch ( std::exception e ) {
         std::cout << dbRecord.line << ": zero length pattern" << std::endl;
-        dbRecord.nContractType = ContractType::Unknown;
-        ++m_rExchanges[ 0 ].cntContracts;
+        dbRecord.eInstrumentType = InstrumentType::Unknown;
+        ++m_rExchanges[ 0 ].cntInstruments;
       }
       
-      ++rcntContractTypes[ dbRecord.nContractType ];
-      if ( ContractType::Unknown == dbRecord.nContractType ) {
+      ++rcntContractTypes[ dbRecord.eInstrumentType ];
+      if ( InstrumentType::Unknown == dbRecord.eInstrumentType ) {
         cout << "unknown contract: " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[2] << endl;
       }
       // parse out contract expiry information
-      if ( ContractType::Future == dbRecord.nContractType ) {
+      if ( InstrumentType::Future == dbRecord.eInstrumentType ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture ) ) {
           std::string sMonth( what[1].first, what[1].second );
@@ -346,7 +250,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       }
 
       // parse out contract information
-      if ( ContractType::Option == dbRecord.nContractType ) {
+      if ( InstrumentType::Option == dbRecord.eInstrumentType ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
           std::string sUnderlying( what[1].first, what[1].second );
@@ -393,7 +297,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       Dbt key( dbRecord.line, dbRecord.cnt[0] );
       assert( dbRecord.bufferedlength <= 255 );
       Dbt value( &dbRecord, dbRecord.bufferedlength );
-      int ret = m_pdbIQFSymbols->put( 0, &key, &value, DB_NOOVERWRITE );
+      int ret = m_pdbSymbols->put( 0, &key, &value, DB_NOOVERWRITE );
       // get next line from text file
       file.getline( dbRecord.line, nMaxBufferSize );
     }
@@ -413,33 +317,13 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   cout << "Max Underlying    " << nUnderlyingSize << endl;
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
-    std::cout << m_rExchanges[ ix ].szName << "=" << m_rExchanges[ ix ].cntContracts << std::endl;
+    std::cout << m_rExchanges[ ix ].szName << "=" << m_rExchanges[ ix ].cntInstruments << std::endl;
   }
   std::cout << "Contract Types" << std::endl;
-  for ( unsigned long ix = 0; ix < ContractType::_Count; ++ix ) {
+  for ( unsigned long ix = 0; ix < InstrumentType::_Count; ++ix ) {
     std::cout << ix << "=" << rcntContractTypes[ ix ] << std::endl;
   }
 
   return true;
-}
-
-void CIQFeedSymbolFile::PackBoolean( void ) {
-  dbRecord.ucBits1 = 0;
-  dbRecord.ucBits1 |= ( m_bMutual ? ucMutual : 0 );
-  dbRecord.ucBits1 |= ( m_bMoneyMkt ? ucMoneyMkt : 0 );
-  dbRecord.ucBits1 |= ( m_bIndex ? ucIndex : 0 );
-  dbRecord.ucBits1 |= ( m_bCboe ? ucCboe : 0 );
-  dbRecord.ucBits1 |= ( m_bIndicator ? ucIndicator : 0 );
-  dbRecord.ucBits1 |= ( m_bHasOptions ? ucHasOptions : 0 );
-
-}
-
-void CIQFeedSymbolFile::UnPackBoolean( const unsigned char ucBits1 ) {
-  m_bMutual = 0 != ( ucBits1 & ucMutual );
-  m_bMoneyMkt = 0 != ( ucBits1 & ucMoneyMkt );
-  m_bIndex = 0 != ( ucBits1 & ucIndex );
-  m_bCboe = 0 != ( ucBits1 & ucCboe );
-  m_bIndicator = 0 != ( ucBits1 & ucIndicator );
-  m_bHasOptions = 0 != ( ucBits1 & ucHasOptions );
 }
 

@@ -205,7 +205,7 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
           cout << " triggered, stop=" << results.GetStopLevel();
           iter = m_bars.iterAtOrAfter( dt26WksAgo );
           for_each( iter, m_bars.end(), CalcSixMonMeans() );
-          if ( NULL != OnAddSymbol ) OnAddSymbol( sPath, sPath, "Darvas" );
+          if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbol, sPath, "Darvas" );
         }
         cout << endl;
       }
@@ -276,15 +276,19 @@ void CSelectSymbolWith10Percent::WrapUp( void ) {
   cout << "Positives: " << endl;
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxPositives.begin(); iterPos != mapMaxPositives.end(); ++iterPos ) {
-    cout << " " << iterPos->second << "=" << iterPos->first << endl;
-    if ( NULL != OnAddSymbol ) OnAddSymbol( iterPos->second, iterPos->second, "10%+" );
+    size_t pos = (iterPos->second).find_last_of( "/" );
+    std::string sSymbolName = (iterPos->second).substr( pos + 1 );;
+    cout << " " << sSymbolName << "=" << iterPos->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "10%+" );
   }
   mapMaxPositives.clear();
   cout << "Negatives: " << endl;
   std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
   for ( iterNeg = mapMaxNegatives.begin(); iterNeg != mapMaxNegatives.end(); ++iterNeg ) {
-    cout << " " << iterNeg->second << "=" << iterNeg->first << endl;
-    if ( NULL != OnAddSymbol ) OnAddSymbol( iterNeg->second, iterNeg->second, "10%-" );
+    size_t pos = (iterNeg->second).find_last_of( "/" );
+    std::string sSymbolName = (iterNeg->second).substr( pos + 1 );;
+    cout << " " << sSymbolName << "=" << iterNeg->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterNeg->second, "10%-" );
   }
   mapMaxNegatives.clear();
 }
@@ -391,8 +395,10 @@ void CSelectSymbolWithVolatility::WrapUp( void ) {
   cout << "Volatiles: " << endl;
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxVolatility.begin(); iterPos != mapMaxVolatility.end(); ++iterPos ) {
-    cout << " " << iterPos->second << "=" << iterPos->first << endl;
-    if ( NULL != OnAddSymbol ) OnAddSymbol( iterPos->second, iterPos->second, "Volatile" );
+    size_t pos = (iterPos->second).find_last_of( "/" );
+    std::string sSymbolName = (iterPos->second).substr( pos + 1 );;
+    cout << " " << sSymbolName << "=" << iterPos->first << endl;
+    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "Volatile" );
   }
   mapMaxVolatility.clear();
 }
