@@ -191,6 +191,10 @@
 				RelativePath=".\Symbol.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\TradingEnumerations.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

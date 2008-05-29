@@ -9,6 +9,7 @@
 #include "HDF5DataManager.h"
 using namespace H5;
 
+#include <vector>
 #include <stdexcept>
 #include <algorithm>
 #include <functional>
@@ -60,6 +61,8 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   //const char *szExchanges[] = { "PBOT", "" };
   int ixExchanges = 0;
   const char *szExchange = szExchanges[ixExchanges];
+  //std::vector<string> v;
+  //std::vector<string>::iterator i;
   while ( 0 != *szExchange ) {
     symbolfile.SetSearchExchange( szExchange );
     bool bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_SET );
@@ -79,6 +82,12 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
         }
         m_qHistoryCollectors.push( phc );
         StartHistoryCollection();  // start what collectors we can while still building up the queue
+
+        //std::cout << "  \"" << szSymbol << "\"," << std::endl;
+        //i = v.begin();
+        //string s( szSymbol );
+        //v.insert(i, s );
+
         ++cntSymbols;
       }
       else {
@@ -88,6 +97,9 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
     symbolfile.EndSearch();
     szExchange = szExchanges[ ++ixExchanges ];
   }
+  //for ( std::vector<string>::iterator j=v.begin(); j < v.end(); j++ ) {
+  //  std::cout << "  \"" << *j << "\"," << std::endl;
+  //}
   cout << "#Symbols: " << cntSymbols << ", bar count: " << nDays << endl;
 
   // close out files

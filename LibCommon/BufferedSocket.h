@@ -5,7 +5,7 @@
 #include "FastDelegate.h"
 using namespace fastdelegate;
 
-#define DATA_BUFSIZE 2048
+#define DATA_BUFSIZE 5120
 
 class CBufferedSocket {
 public:

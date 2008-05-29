@@ -359,6 +359,7 @@ public:
 };
 
 void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
+  try {
   m_sPath = sPath;
   //cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
@@ -388,6 +389,10 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
         }
       }
     }
+  }
+  }
+  catch (...) {
+    std::cout << "problems somewhere" << std::endl;
   }
 }
 

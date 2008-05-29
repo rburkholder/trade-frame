@@ -19,8 +19,8 @@ CIQFeed::CIQFeed( CWnd *pParent ) {
 
   BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), ::AfxGetMainWnd(), 1 );
 
-  SetCallbackFunction( &IQFeedCallBack );
-  int i = RegisterClientApp( this->m_hWnd, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
+  SetCallbackFunction( IQFeedCallBack );
+  int i = RegisterClientApp( NULL, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
 }
 
 CIQFeed::~CIQFeed(void) {

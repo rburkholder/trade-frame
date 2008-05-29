@@ -48,7 +48,7 @@ void CInstrumentFile::Close() {
   m_pdbSymbols->close(0);
 }
 
-// Sets SubIndex
+// Sets SubIndex (static function)
 int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p = dbIxRecord->line + dbIxRecord->ix[2];  // get at the 'exchange' string
@@ -58,7 +58,7 @@ int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *d
   return 0;
 }
 
-// Sets SubIndex
+// Sets SubIndex (static function)
 int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p; 
