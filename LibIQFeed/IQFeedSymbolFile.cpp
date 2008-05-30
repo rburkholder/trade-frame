@@ -185,7 +185,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       dbRecord.fltStrike = 0;
       dbRecord.nYear = 0;
       dbRecord.nMonth = 0;
-      dbRecord.chDirection = ' ';
+      dbRecord.nOptionSide = OptionSide::Unknown;
       dbRecord.ix[j] = k; // index of first string is 0
       while ( !bEndFound ) {
         if ( 0 == dbRecord.line[k] ) {
@@ -254,10 +254,16 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
         boost::cmatch what;
         if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
           std::string sUnderlying( what[1].first, what[1].second );
+          if ( 0 == sUnderlying.size() ) {
+            std::cout << "Zero length underlying on " << dbRecord.line << std::endl;
+          }
           nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
           std::string sMonth( what[2].first, what[2].second );
           std::string sYear( what[3].first, what[3].second );
-          dbRecord.chDirection = *what[4].first;
+          dbRecord.nOptionSide = OptionSide::Unknown;
+          if ( 'P' == *what[4].first ) dbRecord.nOptionSide = OptionSide::Put;
+          if ( 'C' == *what[4].first ) dbRecord.nOptionSide = OptionSide::Call;
+          //dbRecord.chDirection = *what[4].first;
           std::string sStrike( what[5].first, what[5].second );
           dbRecord.nMonth = DecodeMonth( sMonth );
           dbRecord.nYear = atoi( sYear.c_str() );

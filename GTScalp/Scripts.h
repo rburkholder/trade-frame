@@ -27,7 +27,7 @@ public:
   void TestDataSet( void );
   //void IterateGroups( void );
 protected:
-  static const unsigned short nMaxActiveCollectors = 1;
+  static const unsigned short nMaxActiveCollectors = 20;
   queue<CHistoryCollector *> m_qHistoryCollectors; // collectors waiting activiation
   map<string, CHistoryCollector *> m_mapActiveHistoryCollectors; // collectors which are active
   typedef pair<string, CHistoryCollector *> m_pair_mapActiveHistoryCollectors;

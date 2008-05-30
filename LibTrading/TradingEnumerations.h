@@ -10,7 +10,8 @@ namespace OrderSide {
 }
 
 namespace OptionSide {
-  enum enumOptionSide { Put, Call, _Count };
+  enum enumOptionSide { Unknown, Put, Call, _Count };
+  const char *Name[];
 }
 
 namespace ExecutionStatus {
@@ -31,7 +32,7 @@ namespace Currency {
 }
 
 namespace Exchange {
-  enum enumExchange { SMART, NYSE, NMS, NASDAQ, AMEX, _Count };
+  enum enumExchange { SMART, NYSE, NMS, NASDAQ, AMEX, OPRA, _Count };
   const char *Name[];
 }
 

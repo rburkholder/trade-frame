@@ -77,6 +77,7 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
 template<class T> CHDF5TimeSeriesAccessor<T>::~CHDF5TimeSeriesAccessor() {
   m_pDiskCompType->close();
   delete m_pDiskCompType;
+  m_pDiskDataSet->flush( H5F_SCOPE_LOCAL );
   m_pDiskDataSet->close();
   delete m_pDiskDataSet;
 }

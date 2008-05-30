@@ -374,10 +374,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\iqfeedsymbolimport.txt"
-					>
-				</File>
-				<File
 					RelativePath=".\mfc.txt"
 					>
 				</File>

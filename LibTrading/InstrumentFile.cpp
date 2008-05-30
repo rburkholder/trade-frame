@@ -3,6 +3,8 @@
 #include "BerkeleyDBDataManager.h"
 #include "TradingEnumerations.h"
 
+#include <stdexcept>
+
 CInstrumentFile::CInstrumentFile(void) : 
     pRecord( NULL ), 
     m_pdbSymbols( NULL ), 
@@ -40,6 +42,35 @@ void CInstrumentFile::Open() {
 
   // associate the index with the main table
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Underlying, &CInstrumentFile::GetUnderlyingName, 0 );
+}
+
+CInstrument CInstrumentFile::CreateInstrument(const std::string &sSymbolName) {
+  SetSearchUnderlying( sSymbolName.c_str() );
+  bool bSymbolFound = RetrieveSymbolRecord( DB_SET );
+  if ( !bSymbolFound ) {
+    throw std::runtime_error( "no symbol found" );
+  }
+  switch ( GetInstrumentType() ) {
+    case InstrumentType::Stock: 
+      return CInstrument( sSymbolName, InstrumentType::Stock );
+      break;
+    case InstrumentType::Option: {
+      const char *p = GetDescription(); 
+      const char *e = strchr( p, ' ' );  
+      u_int32_t len = e - p;
+      string sUnderlying( GetDescription(), len );
+      return CInstrument( sSymbolName, sUnderlying, 
+        (InstrumentType::enumInstrumentTypes) GetInstrumentType(), 
+        (OptionSide::enumOptionSide) GetOptionSide(), 
+        (double) GetStrike(), GetYear(), GetMonth() );
+      }
+      break;
+    case InstrumentType::Future: 
+      return CInstrument( sSymbolName, (InstrumentType::enumInstrumentTypes) GetInstrumentType(), GetYear(), GetMonth() );
+      break;
+    default:
+      throw std::runtime_error( "Unknown instrument type" );
+  }
 }
 
 void CInstrumentFile::Close() {

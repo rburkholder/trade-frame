@@ -2,6 +2,8 @@
 
 #include "BerkeleyDb.h"
 
+#include "Instrument.h"
+
 class CInstrumentFile {
 public:
   CInstrumentFile(void);
@@ -20,7 +22,14 @@ public:
   const char *GetSymbol() { return pRecord->line; };
   const char *GetDescription() { return pRecord->line + pRecord->ix[1]; };
   const char *GetExchange() { return pRecord->line + pRecord->ix[2]; };
+  unsigned char GetInstrumentType() { return pRecord->eInstrumentType; };
+  unsigned char GetOptionSide() { return pRecord->nOptionSide; };
+  unsigned short GetYear() { return pRecord->nYear; };
+  unsigned short GetMonth() { return pRecord->nMonth; };
+  float GetStrike() { return pRecord->fltStrike; };
   void EndSearch( void );
+  CInstrument CreateInstrument( const string &sUnderlying );
+
 protected:
   Db *m_pdbSymbols;
   Db *m_pdbIxSymbols_Market;
@@ -47,7 +56,7 @@ protected:
     unsigned char ucBits1;  // mutual, moneymkt, index, cboe, indicator, hasoptions
     unsigned char eInstrumentType;  // Trading::enumContractTypes
     unsigned char nMonth;  // 1 - 12, 0 for nothing
-    char chDirection;  // P put C call for option
+    unsigned char nOptionSide;  // OptionSide
     char line[nMaxBufferSize];
   } dbRecord;
   structSymbolRecord *pRecord; // used for retrievals
