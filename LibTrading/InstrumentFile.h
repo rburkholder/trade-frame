@@ -4,6 +4,8 @@
 
 #include "Instrument.h"
 
+// http://www.tempest-sw.com/cpp/draft/ch13-44-stdexcept.html
+
 class CInstrumentFile {
 public:
   CInstrumentFile(void);
@@ -14,8 +16,8 @@ public:
   bool GetBitCboe() { return m_bCboe; };
   bool GetBitIndicator() { return m_bIndicator; };
   bool GetBitHasOptions() { return m_bHasOptions; };
-  void Open( void );
-  void Close( void );
+  void OpenIQFSymbols( void );
+  void CloseIQFSymbols( void );
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
   void SetSearchUnderlying( const char *szUnderlying );
   bool RetrieveSymbolRecord( u_int32_t flags );
@@ -28,7 +30,7 @@ public:
   unsigned short GetMonth() { return pRecord->nMonth; };
   float GetStrike() { return pRecord->fltStrike; };
   void EndSearch( void );
-  CInstrument CreateInstrument( const string &sUnderlying );
+  CInstrument CreateInstrumentFromIQFeed( const string &sUnderlying ) throw( std::out_of_range );
 
 protected:
   Db *m_pdbSymbols;

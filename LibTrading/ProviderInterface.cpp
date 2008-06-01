@@ -11,7 +11,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CProviderInterface::CProviderInterface(void) 
-: m_bConnected( false )
+: m_bConnected( false ), m_nID( 0 )
 {
 }
 

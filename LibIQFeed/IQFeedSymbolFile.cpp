@@ -167,7 +167,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   cout << "Opening Symbol Database" << endl;
   file.open( filename.c_str() );
 
-  Open();
+  OpenIQFSymbols();
   u_int32_t countp = 0;
   cout << "Truncating Symbol Database" << endl;
   m_pdbSymbols->truncate( NULL, &countp, 0 );
@@ -312,7 +312,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
     cout << "IQFSymbols exception: " << dbex.what() << endl;
   }
 
-  Close();
+  CloseIQFSymbols();
   file.close();
 
   cout << "Count Mutual:     " << cntMutual << endl;

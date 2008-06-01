@@ -5,7 +5,8 @@
 CIQFeedProvider::CIQFeedProvider(void)
 : CProviderInterface(), CIQFeed()
 {
-  m_sName = "IQFeed";
+  m_sName = "IQF";
+  m_nID = 102;
 }
 
 CIQFeedProvider::~CIQFeedProvider(void) {

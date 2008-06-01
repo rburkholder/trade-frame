@@ -156,6 +156,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CommonDatabaseFunctions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\KeyValuePair.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -187,6 +195,14 @@
 			</File>
 			<File
 				RelativePath=".\BerkeleyDBDataManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CommonDatabaseFunctions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\KeyValuePair.h"
 				>
 			</File>
 			<File

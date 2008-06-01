@@ -2,6 +2,8 @@
 
 #include <db_cxx.h>
 
+// Need to add transaction handling to the database
+
 class CBerkeleyDBDataManager {
 public:
   CBerkeleyDBDataManager(void);

@@ -19,7 +19,7 @@ CInstrumentFile::~CInstrumentFile(void) {
   //if ( NULL != m_pdbIQFSymbols ) delete m_pdbIQFSymbols;
 }
 
-void CInstrumentFile::Open() {
+void CInstrumentFile::OpenIQFSymbols() {
   CBerkeleyDBDataManager dm;
   DbEnv *pDbEnv = dm.GetDbEnv();
 
@@ -44,11 +44,11 @@ void CInstrumentFile::Open() {
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Underlying, &CInstrumentFile::GetUnderlyingName, 0 );
 }
 
-CInstrument CInstrumentFile::CreateInstrument(const std::string &sSymbolName) {
+CInstrument CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSymbolName) {
   SetSearchUnderlying( sSymbolName.c_str() );
   bool bSymbolFound = RetrieveSymbolRecord( DB_SET );
   if ( !bSymbolFound ) {
-    throw std::runtime_error( "no symbol found" );
+    throw std::out_of_range( "No symbol found" );
   }
   switch ( GetInstrumentType() ) {
     case InstrumentType::Stock: 
@@ -59,21 +59,22 @@ CInstrument CInstrumentFile::CreateInstrument(const std::string &sSymbolName) {
       const char *e = strchr( p, ' ' );  
       u_int32_t len = e - p;
       string sUnderlying( GetDescription(), len );
-      return CInstrument( sSymbolName, sUnderlying, 
+      return CInstrument( sSymbolName, 
         (InstrumentType::enumInstrumentTypes) GetInstrumentType(), 
-        (OptionSide::enumOptionSide) GetOptionSide(), 
-        (double) GetStrike(), GetYear(), GetMonth() );
+        GetYear(), GetMonth(),
+        sUnderlying, (OptionSide::enumOptionSide) GetOptionSide(), 
+        (double) GetStrike() );
       }
       break;
     case InstrumentType::Future: 
       return CInstrument( sSymbolName, (InstrumentType::enumInstrumentTypes) GetInstrumentType(), GetYear(), GetMonth() );
       break;
     default:
-      throw std::runtime_error( "Unknown instrument type" );
+      throw std::out_of_range( "Unknown instrument type" ); 
   }
 }
 
-void CInstrumentFile::Close() {
+void CInstrumentFile::CloseIQFSymbols() {
   m_pdbIxSymbols_Underlying->close(0);
   m_pdbIxSymbols_Market->close(0);
   m_pdbSymbols->close(0);

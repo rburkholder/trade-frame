@@ -148,11 +148,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\AlternateInstrumentNames.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\InstrumentFile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InstrumentManager.cpp"
 				>
 			</File>
 			<File
@@ -202,11 +210,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\AlternateInstrumentNames.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.h"
 				>
 			</File>
 			<File
 				RelativePath=".\InstrumentFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InstrumentManager.h"
 				>
 			</File>
 			<File

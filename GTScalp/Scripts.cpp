@@ -51,7 +51,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   //ofs.open( "archive.arc", std::ios::out | std::ios::binary );
 
   CIQFeedSymbolFile symbolfile;
-  symbolfile.Open();
+  symbolfile.OpenIQFSymbols();
   cout << endl;
 
   // with list of symbols, initiate history retrieval of daily bars
@@ -103,7 +103,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   cout << "#Symbols: " << cntSymbols << ", bar count: " << nDays << endl;
 
   // close out files
-  symbolfile.Close();
+  symbolfile.CloseIQFSymbols();
 }
 
 class ShowItem: public std::unary_function<CBar &, void> {

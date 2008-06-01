@@ -29,9 +29,11 @@ public:
   virtual CSymbol* GetSymbol( const string &sSymbol );
 
   const std::string &Name( void ) { return m_sName; };
+  unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
   bool Connected( void ) { return m_bConnected; };
 protected:
   std::string m_sName;  // name of provider
+  unsigned short m_nID;
   bool m_bConnected;
   std::map<std::string, CSymbol*> m_mapSymbols;
   virtual void StartQuoteWatch( CSymbol *pSymbol ) {};

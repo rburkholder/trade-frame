@@ -25,9 +25,12 @@ CInstrument::CInstrument(
 
  // option
 CInstrument::CInstrument( 
-    const std::string &sSymbolName, const std::string &sUnderlying,
-    InstrumentType::enumInstrumentTypes type, OptionSide::enumOptionSide side, 
-    double strike, unsigned short year, unsigned short month ) 
+    const std::string &sSymbolName, 
+    InstrumentType::enumInstrumentTypes type, 
+    unsigned short year, unsigned short month,
+    const std::string &sUnderlying,
+    OptionSide::enumOptionSide side, 
+    double strike ) 
     : m_sSymbolName( sSymbolName ), m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
     m_OptionSide( side ), m_Currency( Currency::USD ), 
     m_Exchange( Exchange::SMART ), 

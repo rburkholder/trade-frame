@@ -11,9 +11,11 @@ public:
   CInstrument( const std::string &sSymbol, 
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month );
-  CInstrument( const std::string &sSymbol, const std::string &sUnderlying,
-    InstrumentType::enumInstrumentTypes type, OptionSide::enumOptionSide side, 
-    double strike, unsigned short year, unsigned short month );
+  CInstrument( const std::string &sSymbol, InstrumentType::enumInstrumentTypes type, 
+    unsigned short year, unsigned short month,
+    const std::string &sUnderlying,
+    OptionSide::enumOptionSide side, 
+    double strike );
   CInstrument( const CInstrument& );  // copy ctor
   virtual ~CInstrument(void);
 protected:
