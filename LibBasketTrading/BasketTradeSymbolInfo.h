@@ -8,11 +8,17 @@ using namespace boost::gregorian;
 
 #include "BarFactory.h"
 #include "TimeSeries.h"
+#include "ProviderInterface.h"
+#include "Instrument.h"
+#include "Order.h"
 
 class CBasketTradeSymbolInfo {
 public:
-  CBasketTradeSymbolInfo( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
+  explicit CBasketTradeSymbolInfo( 
+    const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
+    CProviderInterface *pExecutionProvider );
   ~CBasketTradeSymbolInfo( void );
+
   void CalculateTrade( ptime dtTradeDate, double dblFunds );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
@@ -22,6 +28,7 @@ protected:
   std::string m_sSymbolName;
   std::string m_sPath;
   std::string m_sStrategy;
+  CInstrument *m_pInstrument;
   ptime m_dtTradeDate;
   double m_dblMaxAllowedFunds;
   double m_dblDayOpenPrice;
@@ -42,9 +49,11 @@ protected:
   double m_dblOpen;
   double m_dblStop;
 
+  CProviderInterface *m_pExecutionProvider;
 
   CBarFactory m_1MinBarFactory;
   CBars m_bars;
   void HandleBarFactoryBar( const CBar &bar );
 private:
+  CBasketTradeSymbolInfo( const CBasketTradeSymbolInfo & );  // disallow copy construction
 };

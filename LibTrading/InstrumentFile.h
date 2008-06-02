@@ -20,7 +20,8 @@ public:
   void CloseIQFSymbols( void );
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
   void SetSearchUnderlying( const char *szUnderlying );
-  bool RetrieveSymbolRecord( u_int32_t flags );
+  bool RetrieveSymbolRecordByExchange( u_int32_t flags );
+  bool RetrieveSymbolRecordByUnderlying( u_int32_t flags );
   const char *GetSymbol() { return pRecord->line; };
   const char *GetDescription() { return pRecord->line + pRecord->ix[1]; };
   const char *GetExchange() { return pRecord->line + pRecord->ix[2]; };
@@ -30,7 +31,7 @@ public:
   unsigned short GetMonth() { return pRecord->nMonth; };
   float GetStrike() { return pRecord->fltStrike; };
   void EndSearch( void );
-  CInstrument CreateInstrumentFromIQFeed( const string &sUnderlying ) throw( std::out_of_range );
+  CInstrument *CreateInstrumentFromIQFeed( const string &sUnderlying ) throw( std::out_of_range );
 
 protected:
   Db *m_pdbSymbols;

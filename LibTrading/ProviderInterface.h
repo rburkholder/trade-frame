@@ -2,9 +2,11 @@
 
 #include "Symbol.h"
 #include "Delegate.h"
+#include "Order.h"
 
 #include <map>
 #include <string>
+#include <stdexcept>
 
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
@@ -31,6 +33,8 @@ public:
   const std::string &Name( void ) { return m_sName; };
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
   bool Connected( void ) { return m_bConnected; };
+
+  virtual void PlaceOrder( COrder *order ) throw( std::runtime_error );
 protected:
   std::string m_sName;  // name of provider
   unsigned short m_nID;

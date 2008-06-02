@@ -4,7 +4,7 @@
 
 namespace InstrumentType {
   const char *Name[] = { "Unknown", "Stock", "Option", "Future", 
-    "FuturesOption", "Currency", "Commodity", "Metal", "Index", "ETF", "Bond" };
+    "FuturesOption", "Currency", "Index", "ETF", "Bond", "Commodity", "Metal",  };
 }
 
 namespace OptionSide {
@@ -12,9 +12,13 @@ namespace OptionSide {
 }
 
 namespace Currency {
-  const char *Name[] = { "USD", "GBP" };
+  const char *Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CYP", "CZK", "DKK", "EEK", "NZD", "HUF", "ILS" };
 }
 
 namespace Exchange {
   const char *Name[] = { "SMART", "NYSE", "NMS", "NASDAQ", "AMEX", "OPRA" };
+}
+
+namespace OrderSide {
+  const char *Name[] = { "BUY", "SELL", "SSHORT" }; // for IB
 }

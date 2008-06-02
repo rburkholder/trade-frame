@@ -14,9 +14,9 @@ public:
   void AddSymbol( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy  );
   void Prepare( ptime dtTradeDate, double dblFunds );
 protected:
-  typedef std::map<std::string, CBasketTradeSymbolInfo> mapBasketSymbols_t;
+  typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;
-  typedef pair<std::string, CBasketTradeSymbolInfo> pairBasketSymbolsEntry_t;
+  typedef pair<std::string, CBasketTradeSymbolInfo*> pairBasketSymbolsEntry_t;
   CProviderInterface *m_pDataProvider;
   CProviderInterface *m_pExecutionProvider;
 private:

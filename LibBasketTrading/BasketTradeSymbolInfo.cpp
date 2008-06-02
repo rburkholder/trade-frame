@@ -3,23 +3,44 @@
 #include "BasketTradeSymbolInfo.h"
 
 #include "TimeSeries.h"
-
 #include "HDF5TimeSeriesContainer.h"
+#include "InstrumentFile.h"
+
 
 
 // 
 // CSymbolInfo
 //
 
-CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy ) 
-: m_sSymbolName( sSymbolName ), m_sPath( sSymbolName ),  m_sStrategy( sStrategy ),
-  m_dtToday( not_a_date_time ), m_dblOpen( 0 ), m_bOpenFound( false ), m_PositionState( Init )
+CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
+  const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
+  CProviderInterface *pExecutionProvider
+  ) 
+: m_sSymbolName( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
+  m_dtToday( not_a_date_time ), m_dblOpen( 0 ), m_bOpenFound( false ), m_PositionState( Init ),
+  m_pExecutionProvider( pExecutionProvider )
 {
   m_1MinBarFactory.SetBarWidth( 60 );
   m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
+
+  CInstrumentFile file;
+  file.OpenIQFSymbols();
+  try {
+    m_pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName );
+  }
+  catch (...) {
+    std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;
+  }
+  file.CloseIQFSymbols();
+
+  //m_pInstrument = new CInstrument( sSymbolName, InstrumentType::Stock );
 }
 
 CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
+  if ( NULL != m_pInstrument ) {
+    delete m_pInstrument;
+    m_pInstrument = NULL;
+  }
 }
 
 void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds) {
@@ -85,16 +106,20 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
             m_dblStop = min( m_dblStop, bar2.m_dblLow );
             m_dblStop = min( m_dblStop, bar3.m_dblLow );
             std::cout << "Enter LONG now:  " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
+            COrder order( m_pInstrument, OrderType::Market, OrderSide::Buy );
+            m_pExecutionProvider->PlaceOrder( &order );  // need to keep the order around somewhere
             m_PositionState = WaitingForOrderFulfillment;
           }
         }
         if ( ( bar1.m_dblHigh < m_dblOpen ) && ( bar2.m_dblHigh < m_dblOpen ) && ( bar3.m_dblHigh < m_dblOpen ) ) {
-          if ( ( bar1.m_dblClose> bar2.m_dblClose ) && ( bar2.m_dblClose> bar3.m_dblClose ) ) {
+          if ( ( bar1.m_dblClose > bar2.m_dblClose ) && ( bar2.m_dblClose > bar3.m_dblClose ) ) {
             // do a market shrot on three falling bars
             m_dblStop = bar1.m_dblHigh;
             m_dblStop = max( m_dblStop, bar2.m_dblHigh );
             m_dblStop = max( m_dblStop, bar3.m_dblHigh );
             std::cout << "Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
+            COrder order( m_pInstrument, OrderType::Market, OrderSide::Sell );
+            m_pExecutionProvider->PlaceOrder( &order ); // need to keep the order around somewhere
             m_PositionState = WaitingForOrderFulfillment;
           }
         }

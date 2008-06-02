@@ -18,7 +18,8 @@ public:
   virtual void Connect( void );
   virtual void Disconnect( void );
 
-  // From ProviderInterface
+  // From ProviderInterface Execution Section
+  virtual void PlaceOrder( COrder *order );
 
   // From TWS Wrapper:
   virtual void connectionClosed();
@@ -71,6 +72,10 @@ protected:
   TickerId m_curTickerId;
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
   std::vector<CIBSymbol *> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
+
+  static const char *szSecurityType[];
+  static const char *szOrderType[];
+  static long nOrderId;
 
   // overridden from ProviderInterface
   virtual void StartQuoteWatch( CSymbol *pSymbol );

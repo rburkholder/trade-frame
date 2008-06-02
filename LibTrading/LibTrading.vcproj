@@ -160,6 +160,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\InstrumentInformation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\InstrumentManager.cpp"
 				>
 			</File>
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath=".\InstrumentFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InstrumentInformation.h"
 				>
 			</File>
 			<File

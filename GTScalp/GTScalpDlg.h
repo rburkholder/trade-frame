@@ -58,9 +58,12 @@ private:
   bool m_bUseDayEnd;
   enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2 };
   enumDataSourceType m_eDataSourceType;
+  enum enumExectionType { NoExec, ExecIB, ExecGenesis1, ExecGenesis2 };
+  enumExectionType m_eExecutionType;
 
   CIBTWS *m_pIB;
-  CIQFeedProviderSingleton *m_pIQFeed;
+  CIQFeedProviderSingleton *m_pIQFeedSingleton;
+  CIQFeedProvider *m_pIQFeed;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
   CBasketTradeContainer *m_pBasketTrade;
@@ -162,4 +165,11 @@ public:
   afx_msg void OnBnClickedBasket();
   CEdit m_edtFunds;
   afx_msg void OnBnClickedBasketprepare();
+  afx_msg void OnBnClickedAddtestsymbols();
+  afx_msg void OnBnClickedExecib();
+  afx_msg void OnBnClickedExecgenesis1();
+  afx_msg void OnBnClickedExecgenesis2();
+  afx_msg void OnBnClickedExec4();
+  afx_msg void OnBnClickedExec5();
+  CStatic m_grpExecution;
 };

@@ -64,6 +64,7 @@ END_MESSAGE_MAP()
 CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGTScalpDlg::IDD, pParent)
   , SomeTextVal(_T(";;"))
+  , m_pIQFeedSingleton( NULL )
   , m_pIQFeed( NULL )
   , m_pIB( NULL )
   , m_pBasketTrade( NULL )
@@ -103,6 +104,7 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_IBACCT, m_edtIBAcctCode);
   DDX_Control(pDX, IDC_GRPDATASOURCE, m_grpDataSource);
   DDX_Control(pDX, IDC_EDTFUNDS, m_edtFunds);
+  DDX_Control(pDX, IDC_GRPEXECUTION, m_grpExecution);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -153,6 +155,12 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_RTCHART, &CGTScalpDlg::OnBnClickedRtchart)
   ON_BN_CLICKED(IDC_BASKET, &CGTScalpDlg::OnBnClickedBasket)
   ON_BN_CLICKED(IDC_BASKETPREPARE, &CGTScalpDlg::OnBnClickedBasketprepare)
+  ON_BN_CLICKED(IDC_ADDTESTSYMBOLS, &CGTScalpDlg::OnBnClickedAddtestsymbols)
+  ON_BN_CLICKED(IDC_EXECIB, &CGTScalpDlg::OnBnClickedExecib)
+  ON_BN_CLICKED(IDC_EXECGENESIS1, &CGTScalpDlg::OnBnClickedExecgenesis1)
+  ON_BN_CLICKED(IDC_EXECGENESIS2, &CGTScalpDlg::OnBnClickedExecgenesis2)
+  ON_BN_CLICKED(IDC_EXEC4, &CGTScalpDlg::OnBnClickedExec4)
+  ON_BN_CLICKED(IDC_EXEC5, &CGTScalpDlg::OnBnClickedExec5)
 END_MESSAGE_MAP()
 
 
@@ -276,6 +284,7 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_bUseDayEnd = false;
 
   m_eDataSourceType = NoDS;
+  m_eExecutionType = NoExec;
   //pChartIntraDay = NULL;
 
   m_refresh.SetThreadWindow( theApp.m_pMainWnd );
@@ -393,9 +402,11 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
     delete m_pBasketTrade;
     m_pBasketTrade = NULL;
   }
-  if ( NULL != m_pIQFeed ) {
-    delete m_pIQFeed;
-    m_pIQFeed = NULL;
+  if ( NULL != m_pIQFeedSingleton ) {
+    //delete m_pIQFeed;  // don't do here else we'll be doing it twice
+    //m_pIQFeed = NULL;
+    delete m_pIQFeedSingleton;
+    m_pIQFeedSingleton = NULL;
   }
   if ( NULL != m_pIB ) {
     delete m_pIB;
@@ -501,8 +512,9 @@ void CGTScalpDlg::OnBnClickedAccounts() {
 
 void CGTScalpDlg::OnBnClickedIqfeed() {
 
-  if ( NULL == m_pIQFeed ) {
-    m_pIQFeed = new CIQFeedProviderSingleton();
+  if ( NULL == m_pIQFeedSingleton ) {
+    m_pIQFeedSingleton = new CIQFeedProviderSingleton();
+    m_pIQFeed = m_pIQFeedSingleton->GetIQFeedProvider();
 
     pvi = new CVuIndicies( ::AfxGetMainWnd() );
     pvi->ShowWindow(1);
@@ -512,8 +524,7 @@ void CGTScalpDlg::OnBnClickedIqfeed() {
 
     pNews = new CConsoleMessages( ::AfxGetMainWnd() );
     pNews ->ShowWindow( SW_SHOWNORMAL );
-    m_pIQFeed->GetIQFeedProvider()
-      ->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
+    m_pIQFeed->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
   }
 }
 
@@ -619,7 +630,7 @@ void CGTScalpDlg::OnBnClickedIqfeedcmd() {
   m_lbIQCommands.GetWindowTextA( szCommand, 40 );
   if ( 0 != *szCommand ) {
     if ( NULL != m_pIQFeed ) {
-      m_pIQFeed->GetIQFeedProvider()->Send( szCommand );
+      m_pIQFeed->Send( szCommand );
     }
   }
 }
@@ -890,17 +901,74 @@ void CGTScalpDlg::OnBnClickedRtchart() {
   }
 }
 
+// Todo:  move the switch statements in to the applicable groups and have the information stored and checked 
+//    there in order to facilitate multiple reuse.
+
 void CGTScalpDlg::OnBnClickedBasket() {
-  if ( ( NULL != m_pIB ) && ( NULL != m_pIQFeed ) ) {
+  bool bOK = true;
+  CProviderInterface *pData = NULL;
+  CProviderInterface *pExec = NULL;
+  if ( NoDS == m_eDataSourceType ) {
+    std::cout << "No Data Source selected" << std::endl;
+    bOK = false;
+  }
+  else {
+    switch ( m_eDataSourceType ) {
+      case DSIQFeed:
+        if ( NULL == m_pIQFeed ) { 
+          bOK = false;
+          std::cout << "IQFeed not started" << std::endl;
+        }
+        else {
+          pData = m_pIQFeed;
+          std::cout << "Data Source = IQFeed" << std::endl;
+        }
+        break;
+      case DSIB:
+        if ( NULL == m_pIB ) {
+          bOK = false;
+          std::cout << "IB not started" << std::endl;
+        }
+        else { 
+          pData = m_pIB;
+          std::cout << "Data Source = IB" << std::endl;
+        }
+        break;
+      case DSGenesis1:
+        break;
+      case DSGenesis2:
+        break;
+    }
+  }
+  if ( NoExec == m_eExecutionType ) {
+    std::cout << "No Execution Destination selected" << std::endl;
+    bOK = false;
+  }
+  else {
+    switch ( m_eExecutionType ) {
+      case ExecIB:
+        if ( NULL == m_pIB ) {
+          bOK = false;
+          std::cout << "IB not started" << std::endl;
+        }
+        else {
+          pExec = m_pIB;
+          std::cout << "Execution Destination = IB" << std::endl;
+        }
+        break;
+      case ExecGenesis1:
+        break;
+      case ExecGenesis2:
+        break;
+    }
+  }
+  if ( bOK ) {
     if ( NULL != m_pBasketTrade ) {
       std::cout << "Basket already started" << std::endl;
     }
     else {
-      m_pBasketTrade = new CBasketTradeContainer( m_pIQFeed->GetIQFeedProvider(), m_pIB);
+      m_pBasketTrade = new CBasketTradeContainer( pData, pExec);
     }
-  }
-  else {
-    std::cout << "one of IB or IQ is not connected" << endl;
   }
 }
 
@@ -931,4 +999,36 @@ void CGTScalpDlg::OnBnClickedBasketprepare() {
     }
 
   }
+}
+
+void CGTScalpDlg::OnBnClickedAddtestsymbols() {
+  HandleSymbolForBasketContainer( "DELL", "/bar/86400/D/E/DELL", "Test" );
+  HandleSymbolForBasketContainer( "AAPL", "/bar/86400/A/A/AAPL", "Test" );
+  HandleSymbolForBasketContainer( "INTC", "/bar/86400/I/N/INTC", "Test" );
+  HandleSymbolForBasketContainer( "MSFT", "/bar/86400/M/S/MSFT", "Test" );
+  HandleSymbolForBasketContainer( "YHOO", "/bar/86400/Y/H/YHOO", "Test" );
+  HandleSymbolForBasketContainer( "GOOG", "/bar/86400/G/O/GOOG", "Test" );
+  HandleSymbolForBasketContainer( "ICE", "/bar/86400/I/C/ICE", "Test" );
+  HandleSymbolForBasketContainer( "IBM", "/bar/86400/I/B/IBM", "Test" );
+}
+
+void CGTScalpDlg::OnBnClickedExecib() {
+  m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECIB );
+  m_eExecutionType = ExecIB;
+}
+
+void CGTScalpDlg::OnBnClickedExecgenesis1() {
+  m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECGENESIS1 );
+  m_eExecutionType = ExecGenesis1;
+}
+
+void CGTScalpDlg::OnBnClickedExecgenesis2() {
+  m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECGENESIS2 );
+  m_eExecutionType = ExecGenesis2;
+}
+
+void CGTScalpDlg::OnBnClickedExec4() {
+}
+
+void CGTScalpDlg::OnBnClickedExec5() {
 }

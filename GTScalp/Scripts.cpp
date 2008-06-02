@@ -65,7 +65,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   //std::vector<string>::iterator i;
   while ( 0 != *szExchange ) {
     symbolfile.SetSearchExchange( szExchange );
-    bool bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_SET );
+    bool bSymbolFound = symbolfile.RetrieveSymbolRecordByExchange( DB_SET );
     while ( bSymbolFound ) {
       const char *szSymbol = symbolfile.GetSymbol();
       if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
@@ -92,7 +92,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
       }
       else {
       }
-      bSymbolFound = symbolfile.RetrieveSymbolRecord( DB_NEXT_DUP );
+      bSymbolFound = symbolfile.RetrieveSymbolRecordByExchange( DB_NEXT_DUP );
     }
     symbolfile.EndSearch();
     szExchange = szExchanges[ ++ixExchanges ];

@@ -49,10 +49,10 @@ public:
             m_pFilter->Process( sObjectName, sObjectPath );
           }
           catch ( std::exception e ) {
-            std::cout << "Object " << sObjectName << " problem: " << e.what() << std::endl;
+            std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " problem: " << e.what() << std::endl;
           }
           catch (...) {
-            std::cout << "Object " << sObjectName << " unknown problems" << std::endl;
+            std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " unknown problems" << std::endl;
           }
           break;
         case H5G_GROUP:
@@ -183,7 +183,8 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
   begin = lower_bound( barRepository.begin(), barRepository.end(), dtOneYrAgo );
   end = lower_bound( begin, barRepository.end(), dtPt2 );  // retrieve to one day past trigger
   hsize_t cnt = end - begin;
-  if ( ( 240 < cnt ) && ( (*(end-1)).m_dt == dtTrigger ) ){   // at least 240 bars, with required last bar
+  ptime dttmp = (*(end-1)).m_dt;
+  if ( ( 240 < cnt ) && ( dttmp == dtTrigger ) ){   // at least 240 bars, with required last bar
     m_bars.Resize( cnt );
     barRepository.Read( begin, end, &m_bars );
 

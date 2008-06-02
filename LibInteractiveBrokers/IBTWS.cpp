@@ -122,6 +122,45 @@ void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
   }
 }
 
+// indexed with InstrumentType::enumInstrumentTypes
+const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };
+const char *CIBTWS::szOrderType[] = { "MKT", "LMT", "STP", "STPLMT", "NULL", 
+                   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
+long CIBTWS::nOrderId = 1;
+
+void CIBTWS::PlaceOrder( COrder *order ) {
+  Contract contract;
+  contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
+  contract.currency = order->GetInstrument()->GetCurrencyName();
+  contract.exchange = order->GetInstrument()->GetExchangeName();
+  contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
+  // if future or option, will need to add further information
+  Order twsorder;
+  twsorder.orderId = nOrderId++;
+  twsorder.action = order->GetOrderSideName();
+  twsorder.totalQuantity = order->GetQuantity();
+  twsorder.orderType = szOrderType[ order->GetOrderType() ];
+  switch ( order->GetOrderType() ) {
+    case OrderType::Limit:
+      twsorder.lmtPrice = order->GetPrice1();
+      twsorder.auxPrice = 0;
+      break;
+    case OrderType::Stop:
+      twsorder.auxPrice = order->GetPrice1();
+      twsorder.auxPrice = 0;
+      break;
+    case OrderType::StopLimit:
+      twsorder.lmtPrice = order->GetPrice1();
+      twsorder.auxPrice = order->GetPrice2();
+      break;
+    default:
+      twsorder.lmtPrice = 0;
+      twsorder.auxPrice = 0;
+  }
+  twsorder.transmit = true;
+  pTWS->placeOrder( twsorder.orderId, contract, twsorder );
+}
+
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
   CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
   //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;

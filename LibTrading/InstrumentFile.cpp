@@ -4,6 +4,7 @@
 #include "TradingEnumerations.h"
 
 #include <stdexcept>
+#include <assert.h>
 
 CInstrumentFile::CInstrumentFile(void) : 
     pRecord( NULL ), 
@@ -42,32 +43,52 @@ void CInstrumentFile::OpenIQFSymbols() {
 
   // associate the index with the main table
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Underlying, &CInstrumentFile::GetUnderlyingName, 0 );
+  
 }
 
-CInstrument CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSymbolName) {
-  SetSearchUnderlying( sSymbolName.c_str() );
-  bool bSymbolFound = RetrieveSymbolRecord( DB_SET );
-  if ( !bSymbolFound ) {
-    throw std::out_of_range( "No symbol found" );
+CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSymbolName) {
+  Dbt k;
+  k.set_data( (void*) sSymbolName.c_str() );
+  k.set_size( sSymbolName.size() );
+  structSymbolRecord rec;
+  Dbt v;
+  v.set_flags( DB_DBT_USERMEM );
+  v.set_ulen( sizeof( structSymbolRecord ) );
+  v.set_size( sizeof( structSymbolRecord ) );
+  v.set_data( &rec );
+  int ret;
+  try {
+    //ret = m_pdbSymbols->exists( 0, &k, 0 );
+    ret = m_pdbSymbols->get( 0, &k ,&v, 0 );
   }
-  switch ( GetInstrumentType() ) {
+  catch ( DbException  e ) {
+    std::cout << "CInstrumentFile::CreateInstrumentFromIQFeed " << e.what() << std::endl;
+  }
+  catch ( ... ) {
+    std::cout << "CInstrumentFile::CreateInstrumentFromIQFeed bummer error" << std::endl;
+  }
+  if ( DB_NOTFOUND == ret ) throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed symbol not found" );
+  if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::CreateInstrumentFromIQFeed had bad error" );
+  //pRecord = (structSymbolRecord*) v.get_data();
+  UnPackBoolean( rec.ucBits1 );
+  switch ( rec.eInstrumentType ) {
     case InstrumentType::Stock: 
-      return CInstrument( sSymbolName, InstrumentType::Stock );
+      return new CInstrument( sSymbolName, InstrumentType::Stock );
       break;
     case InstrumentType::Option: {
-      const char *p = GetDescription(); 
+      const char *p = rec.line + rec.ix[1]; 
       const char *e = strchr( p, ' ' );  
       u_int32_t len = e - p;
-      string sUnderlying( GetDescription(), len );
-      return CInstrument( sSymbolName, 
-        (InstrumentType::enumInstrumentTypes) GetInstrumentType(), 
-        GetYear(), GetMonth(),
-        sUnderlying, (OptionSide::enumOptionSide) GetOptionSide(), 
-        (double) GetStrike() );
+      string sUnderlying( rec.line + rec.ix[1], len );
+      return new CInstrument( sSymbolName, 
+        (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+        rec.nYear, rec.nMonth,
+        sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
+        rec.fltStrike );
       }
       break;
     case InstrumentType::Future: 
-      return CInstrument( sSymbolName, (InstrumentType::enumInstrumentTypes) GetInstrumentType(), GetYear(), GetMonth() );
+      return new CInstrument( sSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
       break;
     default:
       throw std::out_of_range( "Unknown instrument type" ); 
@@ -116,7 +137,8 @@ void CInstrumentFile::SetSearchExchange( const char *szExchange ) {
   m_lenSearchKey = strlen( szExchange );
   m_dbtKey.set_data( (void*) szExchange );
   m_dbtKey.set_size( m_lenSearchKey );
-  m_pdbIxSymbols_Market->cursor( NULL, &m_pdbcIxSymbols_Market, 0 );
+  int ret = m_pdbIxSymbols_Market->cursor( NULL, &m_pdbcIxSymbols_Market, 0 );
+  if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::SetSearchExchange has problems" );
 }
 
 void CInstrumentFile::SetSearchUnderlying( const char *szUnderlying ) {
@@ -124,12 +146,25 @@ void CInstrumentFile::SetSearchUnderlying( const char *szUnderlying ) {
   m_lenSearchKey = strlen( szUnderlying );
   m_dbtKey.set_data( (void*) szUnderlying );
   m_dbtKey.set_size( m_lenSearchKey );
-  m_pdbIxSymbols_Underlying->cursor( NULL, &m_pdbcIxSymbols_Underlying, 0 );
+  int ret = m_pdbIxSymbols_Underlying->cursor( NULL, &m_pdbcIxSymbols_Underlying, 0 );
+  if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::SetSearchUnderlying has problems" );
 }
 
-bool CInstrumentFile::RetrieveSymbolRecord( u_int32_t flags ) {
+bool CInstrumentFile::RetrieveSymbolRecordByExchange( u_int32_t flags ) {
   pRecord = NULL;
+  assert( NULL != m_pdbcIxSymbols_Market );
   int result = m_pdbcIxSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
+  if ( 0 == result ) {
+    pRecord = (structSymbolRecord *) m_dbtData.get_data();
+    UnPackBoolean( pRecord->ucBits1 );
+  }
+  return ( 0 == result );
+}
+
+bool CInstrumentFile::RetrieveSymbolRecordByUnderlying( u_int32_t flags ) {
+  pRecord = NULL;
+  assert( NULL != m_pdbcIxSymbols_Underlying );
+  int result = m_pdbcIxSymbols_Underlying->get( &m_dbtKey, &m_dbtData, flags );
   if ( 0 == result ) {
     pRecord = (structSymbolRecord *) m_dbtData.get_data();
     UnPackBoolean( pRecord->ucBits1 );

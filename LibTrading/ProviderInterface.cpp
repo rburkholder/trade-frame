@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "ProviderInterface.h"
 //#include "boost\lambda.hpp"
-
 //#include <algorithms>
 
 #ifdef _DEBUG
@@ -114,4 +113,8 @@ CSymbol *CProviderInterface::GetSymbol( const string &sSymbol ) {
     iter = m_mapSymbols.find( sSymbol );
   }
   return iter->second;
+}
+
+void CProviderInterface::PlaceOrder( COrder *order ) {
+  throw std::runtime_error( "CProviderInterface::PlaceOrder not implemented." );
 }

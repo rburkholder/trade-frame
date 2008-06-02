@@ -14,7 +14,6 @@ void CKeyValuePair::Save( const structKey &key,  const structValue &value ) {
   if ( 0 != ret ) throw std::runtime_error( "CKeyValuePair::Save put had error" );
 }
 
-// redo this, don't need the return of the key, it will only get what we want
 void CKeyValuePair::Get( const structKey &key, void **pVoid, size_t *pSize ) {
   Dbt k( (void*) &key, sizeof( structKey ) - nMaxKeySize + key.nKeySize );
   Dbt v;

@@ -18,6 +18,11 @@ public:
     double strike );
   CInstrument( const CInstrument& );  // copy ctor
   virtual ~CInstrument(void);
+  void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
+  const std::string &GetSymbolName( void ) { return m_sSymbolName; };
+  const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
+  const char *GetExchangeName( void ) { return Exchange::Name[ m_Exchange ]; };
+  InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
 protected:
   std::string m_sSymbolName; // main name
   std::string m_sUnderlying;  // underlying when main name is an option
