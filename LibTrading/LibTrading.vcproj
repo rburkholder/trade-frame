@@ -176,6 +176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PersistedOrderId.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ProviderInterface.cpp"
 				>
 			</File>
@@ -239,6 +243,10 @@
 			</File>
 			<File
 				RelativePath=".\OrderExecution.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PersistedOrderId.h"
 				>
 			</File>
 			<File

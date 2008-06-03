@@ -7,6 +7,9 @@
 
 #include <stdexcept>
 
+// Todo:  could restructure this with some templating to factor out some commonalities
+//   on some of the built-in types: built-in types, blob, string
+
 class CKeyValuePair : public CCommonDatabaseFunctions<CKeyValuePair> {
 public:
   CKeyValuePair(void);
@@ -46,7 +49,9 @@ protected:
       memcpy( chKey, pkey, size );
     }
   };
-  void Save( const structKey &key, const structValue &value ) throw( std::runtime_error );
-  void Get( const structKey &key, void **pVoid, size_t *pSize ) throw( std::runtime_error );  // validate KeyType
+  void Save( const structKey &key, const structValue &value ) throw( std::runtime_error, domain_error );
+  void Save( const structKey &key, Dbt *pValue ) throw( std::runtime_error, domain_error );
+  void Get( const structKey &key, void **pVoid, size_t *pSize ) throw( std::runtime_error, domain_error, out_of_range );  // validate KeyType
+  void Get( const structKey &key, Dbt *pValue ) throw( std::runtime_error, domain_error, out_of_range );  
 private:
 };

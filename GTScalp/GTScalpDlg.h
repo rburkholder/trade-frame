@@ -68,6 +68,8 @@ private:
 
   CBasketTradeContainer *m_pBasketTrade;
 
+  bool m_bOutsideRTH;  // m_cbOutsideRTH
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
@@ -172,4 +174,6 @@ public:
   afx_msg void OnBnClickedExec4();
   afx_msg void OnBnClickedExec5();
   CStatic m_grpExecution;
+  afx_msg void OnBnClickedCboutsiderth();
+  CButton m_cbOutsideRTH;
 };

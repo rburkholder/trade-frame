@@ -103,8 +103,9 @@
 #define IDC_EXECGENESIS1                1109
 #define IDC_EXECGENESIS2                1110
 #define IDC_EXEC4                       1111
-#define IDC_EXEC2                       1112
 #define IDC_EXEC5                       1112
+#define IDC_CBRTH                       1113
+#define IDC_CBOUTSIDERTH                1113
 
 // Next default values for new objects
 // 
@@ -112,7 +113,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1113
+#define _APS_NEXT_CONTROL_VALUE         1114
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

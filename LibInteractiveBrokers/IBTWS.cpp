@@ -39,6 +39,10 @@ void CIBTWS::Connect() {
     OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
+    pTWS->reqOpenOrders();
+    ExecutionFilter filter;
+    pTWS->reqExecutions( filter );
+    pTWS->reqAccountUpdates( true, "" );
   }
 }
 
@@ -126,21 +130,28 @@ void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
 const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };
 const char *CIBTWS::szOrderType[] = { "MKT", "LMT", "STP", "STPLMT", "NULL", 
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
-long CIBTWS::nOrderId = 1;
+//long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *order ) {
-  Contract contract;
-  contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
-  contract.currency = order->GetInstrument()->GetCurrencyName();
-  contract.exchange = order->GetInstrument()->GetExchangeName();
-  contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
-  // if future or option, will need to add further information
+  bool bOrderIdOk = true;
   Order twsorder;
-  twsorder.orderId = nOrderId++;
-  twsorder.action = order->GetOrderSideName();
-  twsorder.totalQuantity = order->GetQuantity();
-  twsorder.orderType = szOrderType[ order->GetOrderType() ];
-  switch ( order->GetOrderType() ) {
+  try {
+    twsorder.orderId = m_orderid.GetNextOrderId();
+  }
+  catch (...) {
+    bOrderIdOk = false;
+  }
+  if ( bOrderIdOk ) {
+    Contract contract;
+    contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
+    contract.currency = order->GetInstrument()->GetCurrencyName();
+    contract.exchange = order->GetInstrument()->GetExchangeName();
+    contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
+    // if future or option, will need to add further information
+    twsorder.action = order->GetOrderSideName();
+    twsorder.totalQuantity = order->GetQuantity();
+    twsorder.orderType = szOrderType[ order->GetOrderType() ];
+    switch ( order->GetOrderType() ) {
     case OrderType::Limit:
       twsorder.lmtPrice = order->GetPrice1();
       twsorder.auxPrice = 0;
@@ -156,9 +167,10 @@ void CIBTWS::PlaceOrder( COrder *order ) {
     default:
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
+    }
+    twsorder.transmit = true;
+    pTWS->placeOrder( twsorder.orderId, contract, twsorder );
   }
-  twsorder.transmit = true;
-  pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
@@ -231,9 +243,11 @@ void CIBTWS::updateAccountTime(const CString& timeStamp) {
 }
 
 void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
+  if ( false ) {
   std::cout << "exec " << orderId << ", " << contract.symbol << ", " << execution.orderId 
     << ", " << execution.price << ", " << execution.shares << ", " << execution.side 
     << ", " << execution.time << std::endl;
+  }
 }
 
 void CIBTWS::contractDetails( const ContractDetails& contractDetails) {
@@ -251,14 +265,35 @@ void CIBTWS::nextValidId( OrderId orderId) {
 void CIBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const CString& accountName) {
+  if ( false ) {
         std::cout << "portfolio " << contract.symbol << ", " << position << ", " 
     << marketPrice << ", " << marketValue << ", " << averageCost << ", "
     << unrealizedPNL << ", " << realizedPNL << ", " << accountName << std::endl;
+  }
 }
 
+// todo: use the keyword lookup to make this faster
+//   key, bool, double, string
 void CIBTWS::updateAccountValue(const CString& key, const CString& val,
                                 const CString& currency, const CString& accountName) {
-  std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
+  bool bEmit = false;
+  if ( "AccountCode" == key ) bEmit = true;
+  if ( "AccountReady" == key ) bEmit = true;
+  if ( "AccountType" == key ) bEmit = true;
+  if ( "AvailableFunds" == key ) bEmit = true;
+  if ( "BuyingPower" == key ) bEmit = true;
+  if ( "CashBalance" == key ) bEmit = true;
+  if ( "Cushion" == key ) bEmit = true;
+  if ( "GrossPositionValue" == key ) bEmit = true;
+  if ( "PNL" == key ) bEmit = true;
+  if ( "UnrealizedPnL" == key ) bEmit = true;
+  if ( "SMA" == key ) bEmit = true;
+  if ( "AvailableFunds" == key ) bEmit = true;
+  if ( "MaintMarginReq" == key ) bEmit = true;
+  if ( "InitMarginReq" == key ) bEmit = true;
+  if ( bEmit ) {
+    std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
+  }
 }
 
 void CIBTWS::connectionClosed() {

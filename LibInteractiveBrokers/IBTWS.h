@@ -4,6 +4,7 @@
 #include "TWS\EClientSocket.h"
 #include "ProviderInterface.h"
 #include "IBSymbol.h"
+#include "PersistedOrderId.h"
 
 #include <string>
 
@@ -75,7 +76,9 @@ protected:
 
   static const char *szSecurityType[];
   static const char *szOrderType[];
-  static long nOrderId;
+  CPersistedOrderId m_orderid;
+  //static long nOrderId;
+
 
   // overridden from ProviderInterface
   virtual void StartQuoteWatch( CSymbol *pSymbol );

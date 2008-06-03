@@ -25,6 +25,7 @@ void CInstrumentInformation::Save(const std::string &sSymbol, const std::string 
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentInformation::Save put had error" );
 }
 
+// use Dbt v concept from CInstrumentFile::CreateInstrumentFromIQFeed
 void CInstrumentInformation::Retrieve(const std::string &sSymbol) {
   structKey key( sSymbol.size(), sSymbol.c_str() );
   Dbt k(  (void*) &key, sizeof( structKey ) - nMaxSymbolNameSize + key.nKeySize );

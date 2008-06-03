@@ -105,6 +105,7 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_GRPDATASOURCE, m_grpDataSource);
   DDX_Control(pDX, IDC_EDTFUNDS, m_edtFunds);
   DDX_Control(pDX, IDC_GRPEXECUTION, m_grpExecution);
+  DDX_Control(pDX, IDC_CBOUTSIDERTH, m_cbOutsideRTH);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -161,6 +162,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_EXECGENESIS2, &CGTScalpDlg::OnBnClickedExecgenesis2)
   ON_BN_CLICKED(IDC_EXEC4, &CGTScalpDlg::OnBnClickedExec4)
   ON_BN_CLICKED(IDC_EXEC5, &CGTScalpDlg::OnBnClickedExec5)
+  ON_BN_CLICKED(IDC_CBOUTSIDERTH, &CGTScalpDlg::OnBnClickedCboutsiderth)
 END_MESSAGE_MAP()
 
 
@@ -289,6 +291,7 @@ BOOL CGTScalpDlg::OnInitDialog() {
 
   m_refresh.SetThreadWindow( theApp.m_pMainWnd );
 
+  m_bOutsideRTH = false;
 
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -1031,4 +1034,8 @@ void CGTScalpDlg::OnBnClickedExec4() {
 }
 
 void CGTScalpDlg::OnBnClickedExec5() {
+}
+
+void CGTScalpDlg::OnBnClickedCboutsiderth() {
+  m_bOutsideRTH = BST_CHECKED == m_cbOutsideRTH.GetCheck();
 }

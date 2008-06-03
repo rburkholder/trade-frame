@@ -167,6 +167,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   cout << "Opening Symbol Database" << endl;
   file.open( filename.c_str() );
 
+  // use 'db_recover -v' tool if the database hangs here
   OpenIQFSymbols();
   u_int32_t countp = 0;
   cout << "Truncating Symbol Database" << endl;
