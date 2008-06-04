@@ -23,6 +23,7 @@
 
 #include "IQFeedProviderSingleton.h"
 #include "IBTWS.h"
+#include "TradingEnumerations.h"
 
 #include "..\LibBasketTrading\BasketTradeContainer.h"
 
@@ -60,6 +61,9 @@ private:
   enumDataSourceType m_eDataSourceType;
   enum enumExectionType { NoExec, ExecIB, ExecGenesis1, ExecGenesis2 };
   enumExectionType m_eExecutionType;
+
+  OrderSide::enumOrderSide m_eOrderSide;
+  OrderType::enumOrderType m_eOrderType;
 
   CIBTWS *m_pIB;
   CIQFeedProviderSingleton *m_pIQFeedSingleton;
@@ -176,4 +180,18 @@ public:
   CStatic m_grpExecution;
   afx_msg void OnBnClickedCboutsiderth();
   CButton m_cbOutsideRTH;
+  CStatic m_grpOrderSide;
+  CStatic m_grpTradeType;
+  CEdit m_ebLimitPrice;
+  CEdit m_ebStopPrice;
+  afx_msg void OnBnClickedRadio11();
+  afx_msg void OnBnClickedRbosbuy();
+  afx_msg void OnBnClickedRbossell();
+  afx_msg void OnBnClickedRbttmkt();
+  afx_msg void OnBnClickedRbttlmt();
+  afx_msg void OnBnClickedRbttstp();
+  afx_msg void OnBnClickedRbttstplmit();
+  afx_msg void OnBnClickedRbtt01();
+  afx_msg void OnBnClickedRbtt02();
+  afx_msg void OnBnClickedBtnorder();
 };

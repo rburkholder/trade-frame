@@ -6,7 +6,7 @@ namespace InstrumentType { // IBTWS.cpp depends on this order
 }
 
 namespace OrderSide {
-  enum enumOrderSide {Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
+  enum enumOrderSide { Unknown, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
   const char *Name[];
 }
 
@@ -16,11 +16,11 @@ namespace OptionSide {
 }
 
 namespace ExecutionStatus {
-  enum enumExecutionStatus { Filled, PartialFill, Cancelled, PartialCancellation, _Count };
+  enum enumExecutionStatus { Unknown, Filled, PartialFill, Cancelled, PartialCancellation, _Count };
 }
 
 namespace OrderType { // ib szOrderType depends upon order
-  enum enumOrderType { Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
+  enum enumOrderType { Unknown, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }
 
 namespace TimeInForce {

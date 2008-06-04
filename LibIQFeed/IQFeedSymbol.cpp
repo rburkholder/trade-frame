@@ -55,35 +55,46 @@ void CIQFeedSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
   OnFundamentalMessage( this );
 }
 
-void CIQFeedSymbol::HandlePricingMessage( CIQFPricingMessage *pMsg ) {
+void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage *pMsg ) {
+  m_bNewTrade = m_bNewQuote = m_bNewOpen = false;
   string sLastTradeTime = pMsg->Field( CIQFPricingMessage::QPLastTradeTime );
   if ( sLastTradeTime.length() > 0 ) {  // can we do 'assume' anything if it is 0?
+    ptime dtLastTrade;
+    double dblOpen, dblBid, dblAsk;
+    int nBidSize, nAskSize;
     char chType = sLastTradeTime[ sLastTradeTime.length() - 1 ];
+    m_dtLastTrade = pMsg->LastTradeTime();
     switch ( chType ) {
     case 't':
     case 'T':
-      m_dtLastTrade = pMsg->LastTradeTime();
       m_dblTrade = pMsg->Double( CIQFPricingMessage::QPLast );
       m_dblChange = pMsg->Double( CIQFPricingMessage::QPChange );
       m_nTotalVolume = pMsg->Integer( CIQFPricingMessage::QPTtlVol );
       m_nTradeSize = pMsg->Integer( CIQFPricingMessage::QPLastVol );
       m_dblHigh = pMsg->Double( CIQFPricingMessage::QPHigh );
       m_dblLow = pMsg->Double( CIQFPricingMessage::QPLow );
-      m_dblOpen = pMsg->Double( CIQFPricingMessage::QPOpen );
       m_dblClose = pMsg->Double( CIQFPricingMessage::QPClose );
       m_cntTrades = pMsg->Integer( CIQFPricingMessage::QPNumTrades );
-      break;
+      m_bNewTrade = true;
+
+      dblOpen = pMsg->Double( CIQFPricingMessage::QPOpen );
+      if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) { 
+        m_dblOpen = dblOpen; 
+        m_bNewOpen = true; 
+        std::cout << "IQF new open: " << m_sSymbolName<< "=" << m_dblOpen << std::endl;
+      };
+
+      // fall through to processing bid / ask
     case 'b':
-      m_dtLastTrade = pMsg->LastTradeTime();
-      m_dblBid = pMsg->Double( CIQFPricingMessage::QPBid );
-      m_nBidSize = pMsg->Integer( CIQFPricingMessage::QPBidSize );
-      m_dblAsk = pMsg->Double( CIQFPricingMessage::QPAsk );
-      m_nAskSize = pMsg->Integer( CIQFPricingMessage::QPAskSize );
-      break;
     case 'a':
-      m_dtLastTrade = pMsg->LastTradeTime();
-      m_dblAsk = pMsg->Double( CIQFPricingMessage::QPAsk );
-      m_nAskSize = pMsg->Integer( CIQFPricingMessage::QPAskSize );
+      dblBid = pMsg->Double( CIQFPricingMessage::QPBid );
+      if ( m_dblBid != dblBid ) { m_dblBid = dblBid; m_bNewQuote = true; }
+      nBidSize = pMsg->Integer( CIQFPricingMessage::QPBidSize );
+      if ( m_nBidSize != nBidSize ) { m_nBidSize = nBidSize; m_bNewQuote = true; }
+      dblAsk = pMsg->Double( CIQFPricingMessage::QPAsk );
+      if ( m_dblAsk != dblAsk ) { m_dblAsk = dblAsk; m_bNewQuote = true; }
+      nAskSize = pMsg->Integer( CIQFPricingMessage::QPAskSize );
+      if ( m_nAskSize != nAskSize ) { m_nAskSize = nAskSize; m_bNewQuote = true; }
       break;
     case 'o':
       break;
@@ -98,7 +109,7 @@ void CIQFeedSymbol::HandlePricingMessage( CIQFPricingMessage *pMsg ) {
 }
 
 void CIQFeedSymbol::HandleSummaryMessage( CIQFSummaryMessage *pMsg ) {
-  HandlePricingMessage( pMsg );
+  DecodePricingMessage( pMsg );
   OnSummaryMessage( this );
 }
 
@@ -114,8 +125,20 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
     }
   }
   if ( qFound == m_QStatus ) {
-    HandlePricingMessage( pMsg );
+    DecodePricingMessage( pMsg );
     OnUpdateMessage( this );
+    ptime dt( microsec_clock::local_time() );
+    if ( m_bNewQuote ) {
+      CQuote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+      CSymbol::m_OnQuote( quote );
+    }
+    if ( m_bNewTrade ) {
+      CTrade trade( dt, m_dblTrade, m_nTradeSize );
+      CSymbol::m_OnTrade( trade );
+      if ( m_bNewOpen ) {
+        CSymbol::m_OnOpen( trade );
+      }
+    }
   }
 }
 

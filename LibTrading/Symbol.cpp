@@ -15,6 +15,14 @@ CSymbol::CSymbol( const std::string sName ):
 CSymbol::~CSymbol(void) {
 }
 
+void CSymbol::AddOnOpenHandler(CSymbol::tradehandler_t handler ) {
+  m_OnOpen.Add( handler );
+}
+
+void CSymbol::RemoveOnOpenHandler( CSymbol::tradehandler_t handler ) {
+  m_OnOpen.Remove( handler );
+}
+
 bool CSymbol::AddQuoteHandler(quotehandler_t handler) {
   Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
   m_OnQuote.Add( handler );

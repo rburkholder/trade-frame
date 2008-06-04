@@ -106,6 +106,10 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_EDTFUNDS, m_edtFunds);
   DDX_Control(pDX, IDC_GRPEXECUTION, m_grpExecution);
   DDX_Control(pDX, IDC_CBOUTSIDERTH, m_cbOutsideRTH);
+  DDX_Control(pDX, IDC_GRPORDERSIDE, m_grpOrderSide);
+  DDX_Control(pDX, IDC_GRPTRADETYPE, m_grpTradeType);
+  DDX_Control(pDX, IDC_EBLIMITPRICE, m_ebLimitPrice);
+  DDX_Control(pDX, IDC_EBSTOPPRICE, m_ebStopPrice);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -163,6 +167,15 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_EXEC4, &CGTScalpDlg::OnBnClickedExec4)
   ON_BN_CLICKED(IDC_EXEC5, &CGTScalpDlg::OnBnClickedExec5)
   ON_BN_CLICKED(IDC_CBOUTSIDERTH, &CGTScalpDlg::OnBnClickedCboutsiderth)
+  ON_BN_CLICKED(IDC_RBOSBUY, &CGTScalpDlg::OnBnClickedRbosbuy)
+  ON_BN_CLICKED(IDC_RBOSSELL, &CGTScalpDlg::OnBnClickedRbossell)
+  ON_BN_CLICKED(IDC_RBTTMKT, &CGTScalpDlg::OnBnClickedRbttmkt)
+  ON_BN_CLICKED(IDC_RBTTLMT, &CGTScalpDlg::OnBnClickedRbttlmt)
+  ON_BN_CLICKED(IDC_RBTTSTP, &CGTScalpDlg::OnBnClickedRbttstp)
+  ON_BN_CLICKED(IDC_RBTTSTPLMIT, &CGTScalpDlg::OnBnClickedRbttstplmit)
+  ON_BN_CLICKED(IDC_RBTT01, &CGTScalpDlg::OnBnClickedRbtt01)
+  ON_BN_CLICKED(IDC_RBTT02, &CGTScalpDlg::OnBnClickedRbtt02)
+  ON_BN_CLICKED(IDC_BTNORDER, &CGTScalpDlg::OnBnClickedBtnorder)
 END_MESSAGE_MAP()
 
 
@@ -292,6 +305,9 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_refresh.SetThreadWindow( theApp.m_pMainWnd );
 
   m_bOutsideRTH = false;
+
+  m_eOrderSide = OrderSide::Unknown;
+  m_eOrderType = OrderType::Unknown;
 
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -627,8 +643,6 @@ void CGTScalpDlg::OnBnClickedDnlddaysymbol() {
 }
 
 void CGTScalpDlg::OnBnClickedIqfeedcmd() {
-  // TODO: Add your control notification handler code here
-
   char szCommand[ 40 ];
   m_lbIQCommands.GetWindowTextA( szCommand, 40 );
   if ( 0 != *szCommand ) {
@@ -1005,14 +1019,20 @@ void CGTScalpDlg::OnBnClickedBasketprepare() {
 }
 
 void CGTScalpDlg::OnBnClickedAddtestsymbols() {
-  HandleSymbolForBasketContainer( "DELL", "/bar/86400/D/E/DELL", "Test" );
-  HandleSymbolForBasketContainer( "AAPL", "/bar/86400/A/A/AAPL", "Test" );
-  HandleSymbolForBasketContainer( "INTC", "/bar/86400/I/N/INTC", "Test" );
-  HandleSymbolForBasketContainer( "MSFT", "/bar/86400/M/S/MSFT", "Test" );
-  HandleSymbolForBasketContainer( "YHOO", "/bar/86400/Y/H/YHOO", "Test" );
-  HandleSymbolForBasketContainer( "GOOG", "/bar/86400/G/O/GOOG", "Test" );
-  HandleSymbolForBasketContainer( "ICE", "/bar/86400/I/C/ICE", "Test" );
-  HandleSymbolForBasketContainer( "IBM", "/bar/86400/I/B/IBM", "Test" );
+  if ( false ) {
+    HandleSymbolForBasketContainer( "DELL", "/bar/86400/D/E/DELL", "Test" );
+    HandleSymbolForBasketContainer( "AAPL", "/bar/86400/A/A/AAPL", "Test" );
+    HandleSymbolForBasketContainer( "INTC", "/bar/86400/I/N/INTC", "Test" );
+    HandleSymbolForBasketContainer( "MSFT", "/bar/86400/M/S/MSFT", "Test" );
+    HandleSymbolForBasketContainer( "YHOO", "/bar/86400/Y/H/YHOO", "Test" );
+    HandleSymbolForBasketContainer( "GOOG", "/bar/86400/G/O/GOOG", "Test" );
+    HandleSymbolForBasketContainer( "ICE", "/bar/86400/I/C/ICE", "Test" );
+    HandleSymbolForBasketContainer( "IBM", "/bar/86400/I/B/IBM", "Test" );
+  }
+  else {
+    HandleSymbolForBasketContainer( "@YM#", "/bar/86400/@/Y/@YM#", "Test" );
+    HandleSymbolForBasketContainer( "EBN8", "/bar/86400/E/B/EBN8", "Test" );
+  }
 }
 
 void CGTScalpDlg::OnBnClickedExecib() {
@@ -1038,4 +1058,93 @@ void CGTScalpDlg::OnBnClickedExec5() {
 
 void CGTScalpDlg::OnBnClickedCboutsiderth() {
   m_bOutsideRTH = BST_CHECKED == m_cbOutsideRTH.GetCheck();
+}
+
+// group Order Side
+void CGTScalpDlg::OnBnClickedRbosbuy() { // radio button order side buy
+  m_grpOrderSide.CheckRadioButton( IDC_RBOSBUY, IDC_RBOSSELL, IDC_RBOSBUY );
+  m_eOrderSide = OrderSide::Buy;
+}
+
+void CGTScalpDlg::OnBnClickedRbossell() { // radio button order side sell 
+  m_grpOrderSide.CheckRadioButton( IDC_RBOSBUY, IDC_RBOSSELL, IDC_RBOSSELL );
+  m_eOrderSide = OrderSide::Sell;
+}
+
+// group Trade Type
+void CGTScalpDlg::OnBnClickedRbttmkt() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTTMKT );
+  m_eOrderType = OrderType::Market;
+}
+
+void CGTScalpDlg::OnBnClickedRbttlmt() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTTLMT );
+  m_eOrderType = OrderType::Limit;
+}
+
+void CGTScalpDlg::OnBnClickedRbttstp() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTTSTP );
+  m_eOrderType = OrderType::Stop;
+}
+
+void CGTScalpDlg::OnBnClickedRbttstplmit() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTTSTPLMIT );
+  m_eOrderType = OrderType::StopLimit;
+}
+
+void CGTScalpDlg::OnBnClickedRbtt01() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTT01 );
+  m_eOrderType = OrderType::Unknown;
+}
+
+void CGTScalpDlg::OnBnClickedRbtt02() {
+  m_grpTradeType.CheckRadioButton( IDC_RBTTMKT, IDC_RBTT02, IDC_RBTT02 );
+  m_eOrderType = OrderType::Unknown;
+}
+
+void CGTScalpDlg::OnBnClickedBtnorder() {
+  bool bOkToOrder = true;
+  char szSymbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+  string sSymbol( szSymbol );
+  if ( 0 == sSymbol.size() ) bOkToOrder = false;
+  if ( OrderSide::Unknown == m_eOrderSide ) bOkToOrder = false;
+  char szDays[ 30 ];
+  m_edtDaysAgo.GetWindowTextA( szDays, 30 );
+  int nDays = atoi( szDays );
+  if ( 0 == nDays ) bOkToOrder = false;
+  if ( OrderType::Unknown == m_eOrderType ) bOkToOrder = false;
+  char szLimitPrice[ 30 ];
+  char szStopPrice[ 30 ];
+  m_ebLimitPrice.GetWindowTextA( szLimitPrice, 30 );
+  m_ebStopPrice.GetWindowTextA( szStopPrice, 30 );
+  double dblLimit, dblStop;
+  switch ( m_eOrderType ) {
+    case OrderType::Limit:
+      if ( 0 == *szLimitPrice ) bOkToOrder = false;
+      else {
+        dblLimit = atof( szLimitPrice );
+        if ( 0 == dblLimit ) bOkToOrder = false;
+      }
+      break;
+    case OrderType::StopLimit:
+      if ( 0 == *szLimitPrice ) bOkToOrder = false;
+      else {
+        dblLimit = atof( szLimitPrice );
+        if ( 0 == dblLimit ) bOkToOrder = false;
+      }
+      if ( 0 == *szStopPrice ) bOkToOrder = false;
+      else {
+        dblStop = atof( szStopPrice );
+        if ( 0 == dblStop ) bOkToOrder = false;
+      }
+      break;
+    case OrderType::Stop:
+      if ( 0 == *szStopPrice ) bOkToOrder = false;
+      else {
+        dblStop = atof( szStopPrice );
+        if ( 0 == dblStop ) bOkToOrder = false;
+      }
+      break;
+  }
 }

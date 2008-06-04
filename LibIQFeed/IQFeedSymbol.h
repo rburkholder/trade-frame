@@ -50,6 +50,9 @@ public:
   double m_dblOpen;
   double m_dblClose;
   int m_cntTrades;
+  bool m_bNewTrade;
+  bool m_bNewQuote;
+  bool m_bNewOpen;
 
 
 protected:
@@ -70,7 +73,7 @@ protected:
   void HandleSummaryMessage( CIQFSummaryMessage *pMsg );
   void HandleNewsMessage( CIQFNewsMessage *pMsg );
 
-  void HandlePricingMessage( CIQFPricingMessage *pMsg );
+  void DecodePricingMessage( CIQFPricingMessage *pMsg );
 
 private:
 };

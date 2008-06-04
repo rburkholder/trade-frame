@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "IQFeedProvider.h"
-#include "IQFeedSymbol.h"
 
 CIQFeedProvider::CIQFeedProvider(void)
 : CProviderInterface(), CIQFeed()

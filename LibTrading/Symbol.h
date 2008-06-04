@@ -17,14 +17,15 @@ public:
 
   typedef const CTrade &trade_t;
   typedef Delegate<trade_t>::OnMessageHandler tradehandler_t;
-  //typedef Delegate<const CTrade &>::OnMessageHandler tradehandler_t;
 
   typedef const CMarketDepth &depth_t;
   typedef Delegate<depth_t>::OnMessageHandler depthhandler_t;
 
+  virtual void AddOnOpenHandler( tradehandler_t );
+  virtual void RemoveOnOpenHandler( tradehandler_t );
+  
   virtual bool AddQuoteHandler( quotehandler_t );
   virtual bool RemoveQuoteHandler( quotehandler_t );
-  //virtual bool AddTradeHandler( Delegate<const CTrade &>::OnMessageHandler ); 
   virtual bool AddTradeHandler( tradehandler_t ); 
   virtual bool RemoveTradeHandler( tradehandler_t );
   virtual bool AddDepthHandler( depthhandler_t );
@@ -36,6 +37,7 @@ public:
 protected:
   std::string m_sSymbolName;
 
+  Delegate<trade_t> m_OnOpen;  // when open value changes
   Delegate<quote_t> m_OnQuote; 
   Delegate<trade_t> m_OnTrade;
   Delegate<depth_t> m_OnDepth;

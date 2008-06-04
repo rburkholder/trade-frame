@@ -128,7 +128,7 @@ void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
 
 // indexed with InstrumentType::enumInstrumentTypes
 const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };
-const char *CIBTWS::szOrderType[] = { "MKT", "LMT", "STP", "STPLMT", "NULL", 
+const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL", 
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 //long CIBTWS::nOrderId = 1;
 
@@ -140,6 +140,7 @@ void CIBTWS::PlaceOrder( COrder *order ) {
   }
   catch (...) {
     bOrderIdOk = false;
+    std::cout << "CIBTWS::PlaceOrder: Couldn't get the next order key." << std::endl;
   }
   if ( bOrderIdOk ) {
     Contract contract;

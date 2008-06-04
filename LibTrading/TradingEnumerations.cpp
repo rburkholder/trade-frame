@@ -20,5 +20,5 @@ namespace Exchange {
 }
 
 namespace OrderSide {
-  const char *Name[] = { "BUY", "SELL", "SSHORT" }; // for IB
+  const char *Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
 }
