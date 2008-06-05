@@ -4,7 +4,7 @@
 #include "TWS\EClientSocket.h"
 #include "ProviderInterface.h"
 #include "IBSymbol.h"
-#include "PersistedOrderId.h"
+//#include "PersistedOrderId.h"
 
 #include <string>
 
@@ -76,7 +76,7 @@ protected:
 
   static const char *szSecurityType[];
   static const char *szOrderType[];
-  CPersistedOrderId m_orderid;
+  //CPersistedOrderId m_orderid;
   //static long nOrderId;
 
 

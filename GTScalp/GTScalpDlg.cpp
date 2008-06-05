@@ -15,6 +15,7 @@
 #include "IQFeedSymbolFile.h"
 #include "ChartDatedDatum.h"
 #include "ChartRealTimeContainer.h"
+#include "InstrumentFile.h"
 
 #include <iostream>
 
@@ -68,6 +69,8 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
   , m_pIQFeed( NULL )
   , m_pIB( NULL )
   , m_pBasketTrade( NULL )
+  , m_pExecutionProvider( NULL )
+  , m_pDataProvider( NULL )
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
@@ -110,6 +113,11 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_GRPTRADETYPE, m_grpTradeType);
   DDX_Control(pDX, IDC_EBLIMITPRICE, m_ebLimitPrice);
   DDX_Control(pDX, IDC_EBSTOPPRICE, m_ebStopPrice);
+  DDX_Control(pDX, IDC_EDTPASSWORD, m_edtPassword);
+  DDX_Control(pDX, IDC_EXECIB, m_btnIBExecution);
+  DDX_Control(pDX, IDC_DSIB, m_btnIBData);
+  DDX_Control(pDX, IDC_DSIQFEED, m_btnIQFeedData);
+  DDX_Control(pDX, IDC_IQFWINDOWS, m_btnIQFWindows);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -176,6 +184,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_RBTT01, &CGTScalpDlg::OnBnClickedRbtt01)
   ON_BN_CLICKED(IDC_RBTT02, &CGTScalpDlg::OnBnClickedRbtt02)
   ON_BN_CLICKED(IDC_BTNORDER, &CGTScalpDlg::OnBnClickedBtnorder)
+  ON_BN_CLICKED(IDC_IQFWINDOWS, &CGTScalpDlg::OnBnClickedIqfwindows)
 END_MESSAGE_MAP()
 
 
@@ -460,7 +469,8 @@ void CGTScalpDlg::OnBnClickedLogin()
     nPort = atoi( buffer2 );
     theApp.m_session1.m_setting.SetLevel2Address(buffer1,nPort);
 
-    result = theApp.m_session1.Login( "OURB001", "pembmnc" );
+    m_edtPassword.GetWindowTextA( buffer1, 20 );
+    result = theApp.m_session1.Login( "OURB001", buffer1 );
     std::cout << "Login result (sess1) is " << result << std::endl;
     if ( 1 != result ) bLoggedIn = false;
 
@@ -479,7 +489,8 @@ void CGTScalpDlg::OnBnClickedLogin()
     nPort = atoi( buffer2 );
     theApp.m_session2.m_setting.SetLevel2Address(buffer1,nPort);
 
-    result = theApp.m_session2.Login( "OURB002", "pembmnc" );
+    m_edtPassword.GetWindowTextA( buffer1, 20 );
+    result = theApp.m_session2.Login( "OURB002", buffer1 );
     std::cout << "Login result (sess2) is " << result << std::endl;
     if ( 1 != result ) bLoggedIn = false;
 
@@ -535,15 +546,8 @@ void CGTScalpDlg::OnBnClickedIqfeed() {
     m_pIQFeedSingleton = new CIQFeedProviderSingleton();
     m_pIQFeed = m_pIQFeedSingleton->GetIQFeedProvider();
 
-    pvi = new CVuIndicies( ::AfxGetMainWnd() );
-    pvi->ShowWindow(1);
-
-    psoi = new CVuSymbolsOfInterest( ::AfxGetMainWnd() );
-    psoi->ShowWindow(1);
-
-    pNews = new CConsoleMessages( ::AfxGetMainWnd() );
-    pNews ->ShowWindow( SW_SHOWNORMAL );
-    m_pIQFeed->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
+    m_btnIQFeedData.EnableWindow( TRUE );
+    m_btnIQFWindows.EnableWindow( TRUE );
   }
 }
 
@@ -819,6 +823,8 @@ void CGTScalpDlg::OnBnClickedOpenib() {
       string sAcct( szAcct );
       m_pIB = new CIBTWS( sAcct );
       m_pIB->Connect();
+      m_btnIBExecution.EnableWindow( TRUE );
+      m_btnIBData.EnableWindow( TRUE );
 //    }
   }
 }
@@ -844,17 +850,29 @@ void CGTScalpDlg::OnBnClickedIbclose() {
     m_pIB->Disconnect();
     delete m_pIB;
     m_pIB = NULL;
+    if ( BST_CHECKED == m_btnIBExecution.GetCheck() ) {
+      m_pExecutionProvider = NULL;
+      m_btnIBExecution.SetCheck( BST_UNCHECKED );
+    }
+    m_btnIBExecution.EnableWindow( FALSE );
+    if ( BST_CHECKED == m_btnIBData.GetCheck() ) {
+      m_pDataProvider = NULL;
+      m_btnIBData.SetCheck( BST_UNCHECKED );
+    }
+    m_btnIBData.EnableWindow( FALSE );
   }
 }
 
 void CGTScalpDlg::OnBnClickedDsiqfeed() {
   m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSIQFEED );
   m_eDataSourceType = DSIQFeed;
+  m_pDataProvider = m_pIQFeed;
 }
 
 void CGTScalpDlg::OnBnClickedDsib() {
   m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSIB );
   m_eDataSourceType = DSIB;
+  m_pDataProvider = m_pIB;
 }
 
 void CGTScalpDlg::OnBnClickedDsgt1() {
@@ -1038,6 +1056,7 @@ void CGTScalpDlg::OnBnClickedAddtestsymbols() {
 void CGTScalpDlg::OnBnClickedExecib() {
   m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECIB );
   m_eExecutionType = ExecIB;
+  m_pExecutionProvider = m_pIB;
 }
 
 void CGTScalpDlg::OnBnClickedExecgenesis1() {
@@ -1106,25 +1125,49 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
   bool bOkToOrder = true;
   char szSymbol[ 30 ];
   m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
-  string sSymbol( szSymbol );
-  if ( 0 == sSymbol.size() ) bOkToOrder = false;
+  string sSymbolName( szSymbol );
+  CInstrument *pInstrument = NULL;
+  if ( 0 == sSymbolName.size() ) bOkToOrder = false;
+  else {
+    CInstrumentFile file;
+    file.OpenIQFSymbols();
+    try {
+      pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName );
+    }
+    catch (...) {
+      std::cout << "CGTScalpDlg::OnBnClickedBtnorder problems" << std::endl;
+      bOkToOrder = false;
+    }
+    file.CloseIQFSymbols();
+  }
+
   if ( OrderSide::Unknown == m_eOrderSide ) bOkToOrder = false;
+
   char szDays[ 30 ];
   m_edtDaysAgo.GetWindowTextA( szDays, 30 );
-  int nDays = atoi( szDays );
-  if ( 0 == nDays ) bOkToOrder = false;
+  unsigned long nSize = atoi( szDays );
+  if ( 0 == nSize ) bOkToOrder = false;
+
   if ( OrderType::Unknown == m_eOrderType ) bOkToOrder = false;
+
   char szLimitPrice[ 30 ];
   char szStopPrice[ 30 ];
   m_ebLimitPrice.GetWindowTextA( szLimitPrice, 30 );
   m_ebStopPrice.GetWindowTextA( szStopPrice, 30 );
+
   double dblLimit, dblStop;
-  switch ( m_eOrderType ) {
+  COrder *pOrder = NULL;
+  try {
+    switch ( m_eOrderType ) {
+    case OrderType::Market:
+      if ( bOkToOrder ) pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize );
+      break;
     case OrderType::Limit:
       if ( 0 == *szLimitPrice ) bOkToOrder = false;
       else {
         dblLimit = atof( szLimitPrice );
         if ( 0 == dblLimit ) bOkToOrder = false;
+        if ( bOkToOrder ) pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit );
       }
       break;
     case OrderType::StopLimit:
@@ -1138,6 +1181,8 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
         dblStop = atof( szStopPrice );
         if ( 0 == dblStop ) bOkToOrder = false;
       }
+      if ( bOkToOrder ) 
+        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit, dblStop );
       break;
     case OrderType::Stop:
       if ( 0 == *szStopPrice ) bOkToOrder = false;
@@ -1145,6 +1190,35 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
         dblStop = atof( szStopPrice );
         if ( 0 == dblStop ) bOkToOrder = false;
       }
+      if ( bOkToOrder ) 
+        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, dblStop, nSize );
       break;
+    }
+  }
+  catch (... ) {
+    std::cout << "Had exception while creating order" << std::endl;
+    bOkToOrder = false;
+  }
+  if ( bOkToOrder ) {
+    assert( NULL != pOrder );
+    m_pExecutionProvider->PlaceOrder( pOrder );
+  }
+  else {
+    std::cout << "Order was not submitted" << std::endl;
+  }
+}
+
+void CGTScalpDlg::OnBnClickedIqfwindows() {
+
+  if ( NULL != m_pIQFeed ) {
+    pvi = new CVuIndicies( ::AfxGetMainWnd() );
+    pvi->ShowWindow(1);
+
+    psoi = new CVuSymbolsOfInterest( ::AfxGetMainWnd() );
+    psoi->ShowWindow(1);
+
+    pNews = new CConsoleMessages( ::AfxGetMainWnd() );
+    pNews ->ShowWindow( SW_SHOWNORMAL );
+    m_pIQFeed->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
   }
 }

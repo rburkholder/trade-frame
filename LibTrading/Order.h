@@ -3,6 +3,7 @@
 //#include "ProviderInterface.h"
 #include "TradingEnumerations.h"
 #include "Instrument.h"
+#include "PersistedOrderId.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -16,24 +17,24 @@ public:
     CInstrument *instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderAmount = 100,
+    unsigned long nOrderQuantity,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder(  // limit, stop 
+  COrder(  // limit or stop
     CInstrument *instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
+    unsigned long nOrderQuantity,
     double dblPrice1,  
-    unsigned long nOrderAmount = 100,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder(  // limit stop
+  COrder(  // limit and stop
     CInstrument *instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
+    unsigned long nOrderQuantity,
     double dblPrice1,  
     double dblPrice2,
-    unsigned long nOrderAmount = 100,
     ptime dtOrderSubmitted = not_a_date_time
     );
   virtual ~COrder(void);
@@ -43,7 +44,7 @@ public:
   OrderType::enumOrderType GetOrderType( void ) { return m_eOrderType; };
   double GetPrice1( void ) { return m_dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) { return m_dblPrice2; };
-
+  unsigned long GetOrderId( void ) { return m_nOrderId; };
 protected:
   //std::string m_sSymbol;
   CInstrument *m_pInstrument;
@@ -59,6 +60,9 @@ protected:
   ptime m_dtOrderSubmitted;
   ptime m_dtOrderCancelled;
   ptime m_dtOrderExecuted;
+
+  CPersistedOrderId m_persistedorderid;  // make this static?
+  void AssignOrderId( void );
 private:
   COrder(void);
 };

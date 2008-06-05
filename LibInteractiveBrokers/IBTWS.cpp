@@ -133,26 +133,18 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 //long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *order ) {
-  bool bOrderIdOk = true;
   Order twsorder;
-  try {
-    twsorder.orderId = m_orderid.GetNextOrderId();
-  }
-  catch (...) {
-    bOrderIdOk = false;
-    std::cout << "CIBTWS::PlaceOrder: Couldn't get the next order key." << std::endl;
-  }
-  if ( bOrderIdOk ) {
-    Contract contract;
-    contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
-    contract.currency = order->GetInstrument()->GetCurrencyName();
-    contract.exchange = order->GetInstrument()->GetExchangeName();
-    contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
-    // if future or option, will need to add further information
-    twsorder.action = order->GetOrderSideName();
-    twsorder.totalQuantity = order->GetQuantity();
-    twsorder.orderType = szOrderType[ order->GetOrderType() ];
-    switch ( order->GetOrderType() ) {
+  twsorder.orderId = order->GetOrderId();
+  Contract contract;
+  contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
+  contract.currency = order->GetInstrument()->GetCurrencyName();
+  contract.exchange = order->GetInstrument()->GetExchangeName();
+  contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
+  // if future or option, will need to add further information
+  twsorder.action = order->GetOrderSideName();
+  twsorder.totalQuantity = order->GetQuantity();
+  twsorder.orderType = szOrderType[ order->GetOrderType() ];
+  switch ( order->GetOrderType() ) {
     case OrderType::Limit:
       twsorder.lmtPrice = order->GetPrice1();
       twsorder.auxPrice = 0;
@@ -168,10 +160,9 @@ void CIBTWS::PlaceOrder( COrder *order ) {
     default:
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
-    }
-    twsorder.transmit = true;
-    pTWS->placeOrder( twsorder.orderId, contract, twsorder );
   }
+  twsorder.transmit = true;
+  pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {

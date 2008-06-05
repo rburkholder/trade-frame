@@ -26,14 +26,12 @@ int CGTSessionX::OnExecConnected()
 
 	//m_pDlg->m_list.InsertString(0, "Exec Connected");
 
-  //theApp.pConsoleMessages->WriteLine("Exec Connected");
   cout << "Exec Connected" << endl;
 
 	return GTSession::OnExecConnected();
 }
 
 int CGTSessionX::OnExecDisconnected(){
-  //theApp.pConsoleMessages->WriteLine("Exec Disconnected");
   cout << "Exec Disconnected" << endl;
   return GTSession::OnExecDisconnected();
 }
@@ -43,7 +41,6 @@ int CGTSessionX::OnExecMsgErrMsg(const GTErrMsg &errmsg) {
   s.Format("ErrMsg:  %d, %d, %s, %s, %s", 
     errmsg.dwOrderSeqNo, errmsg.nErrCode, errmsg.szStock, errmsg.szText,
     CGTSessionX::GetErrorMessage(errmsg.nErrCode));
-  //theApp.pConsoleMessages->WriteLine(s);
   cout << s << endl;
   return GTSession::OnExecMsgErrMsg(errmsg);
 
@@ -79,22 +76,16 @@ void CGTSessionX::EmitSessionInfo() {
   CString s;
 
   s.Format( "AccountID: %s", m_account.szAccountID); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   s.Format( "Equity:    %0.2f", m_account.dblCurrentEquity); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   s.Format( "Current:   %0.2f", m_account.dblCurrentAmount ); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   s.Format( "Long:      %0.2f", m_account.dblCurrentLong); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   s.Format( "Short:     %0.2f", m_account.dblCurrentShort ); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   s.Format( "PL:        %0.2f", m_account.dblPLRealized ); 
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
 
   GTOpenPosition open;
@@ -104,7 +95,6 @@ void CGTSessionX::EmitSessionInfo() {
 	while(pos != NULL){
     s.Format( "Logged In Open Position: Acct:%s Stk:%s Side:%c Position:%d@%0.2f", 
       open.szAccountID, open.szStock, open.chOpenSide, open.nOpenShares, open.dblOpenPrice  );
-    //theApp.pConsoleMessages->WriteLine( s );
     cout << s << endl;
 		pos = GetNextOpenPosition(m_account.szAccountID, pos, open);
 	}
@@ -114,7 +104,6 @@ int CGTSessionX::OnExecMsgOpenPosition( const GTOpenPosition &open ) {
   CString s;
   s.Format( "Exec Open Position: Acct:%s Stk:%s Side:%c Position:%d@%0.2f", 
     open.szAccountID, open.szStock, open.chOpenSide, open.nOpenShares, open.dblOpenPrice  );
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   return GTSession::OnExecMsgOpenPosition( open );
 }
@@ -122,7 +111,6 @@ int CGTSessionX::OnExecMsgOpenPosition( const GTOpenPosition &open ) {
 int CGTSessionX::OnExecMsgState( const GTServerState &state ) {
   CString s;
   s.Format( "MsgState:  %d %d %d %s", state.nConnect, state.nReportSvrID, state.nSvrID, state.szServer );
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   return GTSession::OnExecMsgState( state );
 }
@@ -130,7 +118,6 @@ int CGTSessionX::OnExecMsgState( const GTServerState &state ) {
 int CGTSessionX::OnExecMsgAccount( const GTAccount &account ) {
   CString s;
   s.Format( "MsgAccount: %s %s %s %s %s", account.szAccountCode, account.szAccountID, account.szAccountName, account.szGroupID, account.szReconcileID );
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   return GTSession::OnExecMsgAccount( account );
 }
@@ -138,7 +125,6 @@ int CGTSessionX::OnExecMsgAccount( const GTAccount &account ) {
 int CGTSessionX::OnExecMsgUser( const GTUser &user ) {
   CString s;
   s.Format( "MsgUser: %s, %s, %d, %d, %d", user.szUserID, user.szUserName, user.nLogExecID, user.bAdmin, user.bNoSOES );
-  //theApp.pConsoleMessages->WriteLine( s );
   cout << s << endl;
   return GTSession::OnExecMsgUser( user );
   
@@ -147,31 +133,26 @@ int CGTSessionX::OnExecMsgUser( const GTUser &user ) {
 int CGTSessionX::OnExecMsgPopup( const GTPopup &popup ) {
   CString s;
   s.Format( "MsgPopup: %d %s", popup.nLength, popup.pMsg );
-  //theApp.pConsoleMessages->WriteLine( s );
   return GTSession::OnExecMsgPopup( popup );
 }
 
 
 int CGTSessionX::OnGotLevel2Connected() {
-  //theApp.pConsoleMessages->WriteLine("Level 2 Connected");
   cout << "Level 2 Connected" << endl;
   return GTSession::OnGotLevel2Connected();
 }
 
 int CGTSessionX::OnGotLevel2Disconnected() {
-  //theApp.pConsoleMessages->WriteLine("Level 2 Disconnected");
   cout << "Level 2 Disconnected" << endl;
   return GTSession::OnGotLevel2Disconnected();
 }
 
 int CGTSessionX::OnGotQuoteConnected() {
-  //theApp.pConsoleMessages->WriteLine("Quote Connected");
   cout << "Quote Connected" << endl;
   return GTSession::OnGotQuoteConnected();
 }
 
 int CGTSessionX::OnGotQuoteDisconnected() {
-  //theApp.pConsoleMessages->WriteLine("Quote Disconnected");
   cout << "Quote Disconnected" << endl;
   return GTSession::OnGotQuoteDisconnected();
 }

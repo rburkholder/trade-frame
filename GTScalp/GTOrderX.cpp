@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-//#include "GTScalp.h"
 #include "GTOrderX.h"
 
 CGTOrderX::CGTOrderX(const CGTStockX *stock, EOrderType ot, EOrderSide os, long cntShares) {
@@ -11,6 +10,8 @@ CGTOrderX::CGTOrderX(const CGTStockX *stock, EOrderType ot, EOrderSide os, long 
   memcpy( (GTOrder*) this, &stock->m_defOrder, sizeof( GTOrder ) );
   //GTOrder::szAccountID = stock->m_session.m_account.szAccountID;
   //GTOrder::szAccountID = theApp.m_session1.m_account.szAccountID;
+  //GTOrder::szAccountID =    // check to see what this is set to *******************
+  // if necessary, pass in account code from TradingLogic
   GetSystemTime( &stCreated );
   dwTimeInForce = TIF_DAY;
   method = METHOD_ISLD;

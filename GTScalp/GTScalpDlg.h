@@ -70,6 +70,11 @@ private:
   CIQFeedProvider *m_pIQFeed;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
+  CProviderInterface *m_pExecutionProvider;
+  CProviderInterface *m_pDataProvider;
+  //bool SelectExecutionProvider(  
+
+
   CBasketTradeContainer *m_pBasketTrade;
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
@@ -194,4 +199,10 @@ public:
   afx_msg void OnBnClickedRbtt01();
   afx_msg void OnBnClickedRbtt02();
   afx_msg void OnBnClickedBtnorder();
+  CEdit m_edtPassword;
+  CButton m_btnIBExecution;
+  CButton m_btnIBData;
+  CButton m_btnIQFeedData;
+  afx_msg void OnBnClickedIqfwindows();
+  CButton m_btnIQFWindows;
 };

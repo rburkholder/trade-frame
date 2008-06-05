@@ -6,6 +6,8 @@
 using namespace std;
 
 CGTStockX::CGTStockX(CGTSessionX &session, LPCSTR pszStock): GTStock(session, pszStock) {
+  strcpy( GTStock::m_defOrder.szAccountID, session.m_pAccount32->szAccountID );
+  strcpy( GTStock::m_defOrder.szStock, GTStock::m_szStock );
 }
 
 CGTStockX::~CGTStockX(void){

@@ -117,8 +117,10 @@
 #define IDC_EBSTOPPRICE                 1123
 #define IDC_GRPORDERSIDE                1124
 #define IDC_GRPTRADETYPE                1125
-#define IDC_BUTTON3                     1126
 #define IDC_BTNORDER                    1126
+#define IDC_EDTPASSWORD                 1127
+#define IDC_BUTTON2                     1128
+#define IDC_IQFWINDOWS                  1128
 
 // Next default values for new objects
 // 
@@ -126,7 +128,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1127
+#define _APS_NEXT_CONTROL_VALUE         1129
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

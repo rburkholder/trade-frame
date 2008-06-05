@@ -106,7 +106,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
             m_dblStop = min( m_dblStop, bar2.m_dblLow );
             m_dblStop = min( m_dblStop, bar3.m_dblLow );
             std::cout << "Enter LONG now:  " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
-            COrder order( m_pInstrument, OrderType::Market, OrderSide::Buy );
+            COrder order( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
             m_pExecutionProvider->PlaceOrder( &order );  // need to keep the order around somewhere
             m_PositionState = WaitingForOrderFulfillment;
           }
@@ -118,7 +118,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
             m_dblStop = max( m_dblStop, bar2.m_dblHigh );
             m_dblStop = max( m_dblStop, bar3.m_dblHigh );
             std::cout << "Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
-            COrder order( m_pInstrument, OrderType::Market, OrderSide::Sell );
+            COrder order( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
             m_pExecutionProvider->PlaceOrder( &order ); // need to keep the order around somewhere
             m_PositionState = WaitingForOrderFulfillment;
           }
