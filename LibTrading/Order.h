@@ -38,6 +38,8 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   virtual ~COrder(void);
+  void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
+  bool GetOutsideRTH( void ) { return m_bOutsideRTH; };
   CInstrument *GetInstrument( void ) { return m_pInstrument; };
   const char *GetOrderSideName( void ) { return OrderSide::Name[ m_eOrderSide ]; };
   unsigned long GetQuantity( void ) { return m_nOrderQuantity; };
@@ -45,8 +47,11 @@ public:
   double GetPrice1( void ) { return m_dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) { return m_dblPrice2; };
   unsigned long GetOrderId( void ) { return m_nOrderId; };
+  void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
+  const std::string &GetProviderName( void ) { return m_sProviderName; };
 protected:
   //std::string m_sSymbol;
+  std::string m_sProviderName;
   CInstrument *m_pInstrument;
   unsigned long m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
@@ -60,6 +65,8 @@ protected:
   ptime m_dtOrderSubmitted;
   ptime m_dtOrderCancelled;
   ptime m_dtOrderExecuted;
+
+  bool m_bOutsideRTH;
 
   CPersistedOrderId m_persistedorderid;  // make this static?
   void AssignOrderId( void );

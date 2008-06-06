@@ -205,4 +205,7 @@ public:
   CButton m_btnIQFeedData;
   afx_msg void OnBnClickedIqfwindows();
   CButton m_btnIQFWindows;
+  afx_msg void OnBnClickedBtnsavesymbol();
+  CEdit m_edtOriginalSymbolName;
+  CEdit m_edtAlternateSymbolName;
 };

@@ -39,10 +39,10 @@ void CIBTWS::Connect() {
     OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
-    pTWS->reqOpenOrders();
-    ExecutionFilter filter;
-    pTWS->reqExecutions( filter );
-    pTWS->reqAccountUpdates( true, "" );
+    //pTWS->reqOpenOrders();
+    //ExecutionFilter filter;
+    //pTWS->reqExecutions( filter );
+    //pTWS->reqAccountUpdates( true, "" );
   }
 }
 
@@ -133,13 +133,25 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 //long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *order ) {
+  CProviderInterface::PlaceOrder( order ); // any underlying initialization
   Order twsorder;
   twsorder.orderId = order->GetOrderId();
+
+  Contract contract2;
+  contract2.conId = 44678227;
+  pTWS->reqContractDetails( contract2 );
+
   Contract contract;
   contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
   contract.currency = order->GetInstrument()->GetCurrencyName();
   contract.exchange = order->GetInstrument()->GetExchangeName();
   contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
+  if ( InstrumentType::Future == order->GetInstrument()->GetInstrumentType() ) {
+    CString s;
+    s.Format( "%04d%02d", order->GetInstrument()->GetExpiryYear(),order->GetInstrument()->GetExpiryMonth() );
+    contract.expiry = s;
+    contract.exchange = "ECBOT";
+  }
   // if future or option, will need to add further information
   twsorder.action = order->GetOrderSideName();
   twsorder.totalQuantity = order->GetQuantity();
@@ -162,6 +174,7 @@ void CIBTWS::PlaceOrder( COrder *order ) {
       twsorder.auxPrice = 0;
   }
   twsorder.transmit = true;
+  twsorder.outsideRth = order->GetOutsideRTH();
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 

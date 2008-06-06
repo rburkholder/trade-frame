@@ -23,6 +23,8 @@ public:
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
   const char *GetExchangeName( void ) { return Exchange::Name[ m_Exchange ]; };
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
+  unsigned short GetExpiryYear( void ) { return m_nYear; };
+  unsigned short GetExpiryMonth( void ) { return m_nMonth; };
 protected:
   std::string m_sSymbolName; // main name
   std::string m_sUnderlying;  // underlying when main name is an option

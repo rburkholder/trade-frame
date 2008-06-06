@@ -46,10 +46,10 @@ void CInstrumentFile::OpenIQFSymbols() {
   
 }
 
-CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSymbolName) {
+CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) {
   Dbt k;
-  k.set_data( (void*) sSymbolName.c_str() );
-  k.set_size( sSymbolName.size() );
+  k.set_data( (void*) sIQFeedSymbolName.c_str() );
+  k.set_size( sIQFeedSymbolName.size() );
   structSymbolRecord rec;
   Dbt v;
   v.set_flags( DB_DBT_USERMEM );
@@ -73,14 +73,14 @@ CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSym
   UnPackBoolean( rec.ucBits1 );
   switch ( rec.eInstrumentType ) {
     case InstrumentType::Stock: 
-      return new CInstrument( sSymbolName, InstrumentType::Stock );
+      return new CInstrument( sAlternateSymbolName, InstrumentType::Stock );
       break;
     case InstrumentType::Option: {
       const char *p = rec.line + rec.ix[1]; 
       const char *e = strchr( p, ' ' );  
       u_int32_t len = e - p;
       string sUnderlying( rec.line + rec.ix[1], len );
-      return new CInstrument( sSymbolName, 
+      return new CInstrument( sAlternateSymbolName, 
         (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
         rec.nYear, rec.nMonth,
         sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
@@ -88,7 +88,7 @@ CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sSym
       }
       break;
     case InstrumentType::Future: 
-      return new CInstrument( sSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
+      return new CInstrument( sAlternateSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
       break;
     default:
       throw std::out_of_range( "Unknown instrument type" ); 

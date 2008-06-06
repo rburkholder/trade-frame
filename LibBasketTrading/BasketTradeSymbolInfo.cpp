@@ -26,7 +26,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   CInstrumentFile file;
   file.OpenIQFSymbols();
   try {
-    m_pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName );
+    m_pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName, sSymbolName );  // todo:  need to verify proper symbol usage
   }
   catch (...) {
     std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;

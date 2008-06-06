@@ -3,6 +3,7 @@
 #include "Symbol.h"
 #include "Delegate.h"
 #include "Order.h"
+#include "AlternateInstrumentNames.h"
 
 #include <map>
 #include <string>
@@ -34,7 +35,10 @@ public:
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
   bool Connected( void ) { return m_bConnected; };
 
-  virtual void PlaceOrder( COrder *order ) throw( std::runtime_error );
+  virtual void PlaceOrder( COrder *order );
+
+  void SetAlternateInstrumentName( const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName );
+  void GetAlternateInstrumentName( const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName );
 protected:
   std::string m_sName;  // name of provider
   unsigned short m_nID;
@@ -47,5 +51,9 @@ protected:
   virtual void StartDepthWatch( CSymbol *pSymbol ) {};
   virtual void StopDepthWatch( CSymbol *pSymbol ) {};
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName ) = 0; // override for deriving different inherited version
+
+  std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
+  CAlternateInstrumentNames m_lutAlternateInstrumentNames;
+
 private:
 };

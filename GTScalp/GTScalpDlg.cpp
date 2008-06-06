@@ -118,6 +118,8 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_DSIB, m_btnIBData);
   DDX_Control(pDX, IDC_DSIQFEED, m_btnIQFeedData);
   DDX_Control(pDX, IDC_IQFWINDOWS, m_btnIQFWindows);
+  DDX_Control(pDX, IDC_EDTORGSYMBOLNAME, m_edtOriginalSymbolName);
+  DDX_Control(pDX, IDC_EDTALTSYMBOLNAME, m_edtAlternateSymbolName);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -185,6 +187,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_RBTT02, &CGTScalpDlg::OnBnClickedRbtt02)
   ON_BN_CLICKED(IDC_BTNORDER, &CGTScalpDlg::OnBnClickedBtnorder)
   ON_BN_CLICKED(IDC_IQFWINDOWS, &CGTScalpDlg::OnBnClickedIqfwindows)
+  ON_BN_CLICKED(IDC_BTNSAVESYMBOL, &CGTScalpDlg::OnBnClickedBtnsavesymbol)
 END_MESSAGE_MAP()
 
 
@@ -236,7 +239,8 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_edtDaysAgo.SetWindowTextA( "1" );
 
   // looks like addresses for exec, level1, and level2
-  char *GTAddress[] = { "76.8.64.2","76.8.64.3","76.8.64.4","69.64.202.157","" };
+  char *GTAddress[] = { 
+    "76.8.64.2","76.8.64.3","76.8.64.4","69.64.202.155","69.64.202.156","69.64.202.157","" };
   // preferred ports for level2
   int ExecPort[] = { 15805,16805,16705,16605,16505,16405,16305,16205,16105,16005,15905,15305,15405,15505,15605,15705,17205,0 };
 
@@ -1125,14 +1129,22 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
   bool bOkToOrder = true;
   char szSymbol[ 30 ];
   m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
-  string sSymbolName( szSymbol );
-  CInstrument *pInstrument = NULL;
+  string sOriginalSymbolName( szSymbol );
+  string sSymbolName;
+  if ( NULL == m_pExecutionProvider ) bOkToOrder = false;
+  else {
+    if ( 0 != sOriginalSymbolName.size() ) {
+      m_pExecutionProvider->GetAlternateInstrumentName( sOriginalSymbolName, &sSymbolName );
+    }
+  }
   if ( 0 == sSymbolName.size() ) bOkToOrder = false;
+  CInstrument *pInstrument = NULL;
+  if ( 0 == sOriginalSymbolName.size() ) bOkToOrder = false;
   else {
     CInstrumentFile file;
     file.OpenIQFSymbols();
     try {
-      pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName );
+      pInstrument = file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sSymbolName );
     }
     catch (...) {
       std::cout << "CGTScalpDlg::OnBnClickedBtnorder problems" << std::endl;
@@ -1201,6 +1213,7 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
   }
   if ( bOkToOrder ) {
     assert( NULL != pOrder );
+    pOrder->SetOutsideRTH( m_bOutsideRTH );
     m_pExecutionProvider->PlaceOrder( pOrder );
   }
   else {
@@ -1220,5 +1233,25 @@ void CGTScalpDlg::OnBnClickedIqfwindows() {
     pNews = new CConsoleMessages( ::AfxGetMainWnd() );
     pNews ->ShowWindow( SW_SHOWNORMAL );
     m_pIQFeed->NewsMessage.Add( MakeDelegate( this, &CGTScalpDlg::OnNewsMessage ) );
+  }
+}
+
+void CGTScalpDlg::OnBnClickedBtnsavesymbol() {
+  if ( NULL == m_pExecutionProvider ) {
+    std::cout << "No execution provider set" << std::endl;
+  }
+  else {
+    char szSymbol[ 30 ];
+    m_edtOriginalSymbolName.GetWindowTextA( szSymbol, 30 );
+    string sOriginalInstrumentName( szSymbol );
+    m_edtAlternateSymbolName.GetWindowTextA( szSymbol, 30 );
+    string sAlternateSymbolName( szSymbol );
+    if ( ( 0 == sOriginalInstrumentName.size() ) || ( 0 == sAlternateSymbolName.size() ) ) {
+      std::cout << "One of two symbols is zero length" << std::endl;
+    }
+    else {
+      m_pExecutionProvider->SetAlternateInstrumentName( sOriginalInstrumentName, sAlternateSymbolName );
+      std::cout << sOriginalInstrumentName << " set to " << sAlternateSymbolName << std::endl;
+    }
   }
 }

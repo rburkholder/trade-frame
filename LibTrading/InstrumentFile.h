@@ -31,7 +31,7 @@ public:
   unsigned short GetMonth() { return pRecord->nMonth; };
   float GetStrike() { return pRecord->fltStrike; };
   void EndSearch( void );
-  CInstrument *CreateInstrumentFromIQFeed( const string &sUnderlying ) throw( std::out_of_range );
+  CInstrument *CreateInstrumentFromIQFeed( const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) throw( std::out_of_range );
 
 protected:
   Db *m_pdbSymbols;

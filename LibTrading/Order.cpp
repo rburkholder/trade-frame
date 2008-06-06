@@ -14,7 +14,7 @@ COrder::COrder(
     m_pInstrument( instrument ), m_eOrderType( eOrderType ),
     m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
     m_dtOrderSubmitted( dtOrderSubmitted ),
-    m_dblPrice1( 0 ), m_dblPrice2( 0 )
+    m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
 }
@@ -30,7 +30,7 @@ COrder::COrder(
     m_pInstrument( instrument ), m_eOrderType( eOrderType ),
     m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
     m_dtOrderSubmitted( dtOrderSubmitted ), 
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 )
+    m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
 }
@@ -46,7 +46,7 @@ COrder::COrder(
     m_pInstrument( instrument ), m_eOrderType( eOrderType ),
     m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
     m_dtOrderSubmitted( dtOrderSubmitted ), 
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 )
+    m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
 }

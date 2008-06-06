@@ -3,26 +3,26 @@
 #include "CommonDatabaseFunctions.h"
 
 #include <string>
-
 #include <assert.h>
 
 class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
 public:
   CAlternateInstrumentNames(void);
   virtual ~CAlternateInstrumentNames(void);
-  static const char nMaxSymbolNameSize = 20;
-  void Save( const std::string &Key, unsigned short id, const std::string &Alternate );
-  void Get( const std::string &Key, unsigned short id, std::string *pAlternate );
+  void Save( const std::string &ProviderName, const std::string &InstrumentName, const std::string &AlternateInstrumentName );
+  void Get( const std::string &ProviderName, const std::string &InstrumentName, std::string *pAlternate );
 protected:
+  static const char nMaxKeySize = 30;
+  static const char nMaxSymbolNameSize = 15;
   struct structKey {
-    unsigned short nId;
-    char nNameLength;
-    char Name[ nMaxSymbolNameSize ];
-    structKey( void ) : nId( 0 ), nNameLength( 0 ) {};
-    structKey( unsigned short id, const std::string &sName ) : nId( id ), nNameLength( 0 ) {
-      assert( sName.size() <= nMaxSymbolNameSize );
-      nNameLength = (char) sName.size();
-      strncpy( Name, sName.c_str(), nNameLength );
+    char nKeyLength;  // key is provider name + instrument name
+    char Key[ nMaxKeySize ];
+    structKey( void ) : nKeyLength( 0 ) {};
+    structKey( const std::string &sProviderName, const std::string &sInstrumentName ) : nKeyLength( 0 ) {
+      assert( ( sProviderName.size() + sInstrumentName.size() ) <= nMaxKeySize );
+      nKeyLength = (char) sProviderName.size() + (char) sInstrumentName.size();
+      string t = sProviderName + sInstrumentName;
+      strncpy( Key, t.c_str(), nKeyLength );
     };
   };
   struct structValue {
