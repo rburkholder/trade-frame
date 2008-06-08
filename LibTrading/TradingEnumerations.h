@@ -11,7 +11,7 @@ namespace OrderSide {
 }
 
 namespace OrderStatus {
-  enum enumOrderStatus { Created, SendingToProvider, PreSubmission, Submitted, 
+  enum enumOrderStatus { Created, SendingToProvider, PreSubmission, Rejected, Submitted, 
     Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
 }
 
@@ -22,6 +22,10 @@ namespace OptionSide {
 
 namespace OrderType { // ib szOrderType depends upon order
   enum enumOrderType { Unknown, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
+}
+
+namespace OrderErrors {
+  enum enumOrderErrors { Rejected, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
 namespace TimeInForce {

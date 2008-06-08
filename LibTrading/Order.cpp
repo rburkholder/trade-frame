@@ -16,6 +16,7 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ),
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
+    m_dblCommission( 0 ),
     m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
@@ -34,6 +35,7 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
+    m_dblCommission( 0 ),
     m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
@@ -52,6 +54,7 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
+    m_dblCommission( 0 ),
     m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
@@ -94,6 +97,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
   }
   else {
     switch ( m_eOrderStatus ) {
+      case OrderStatus::SendingToProvider:
       case OrderStatus::Submitted:
       case OrderStatus::Filling:
       case OrderStatus::PreSubmission:
@@ -113,4 +117,18 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     }
   }
   return m_eOrderStatus;
+}
+
+void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
+  switch( eError ) {
+    case OrderErrors::Cancelled:
+      m_eOrderStatus = OrderStatus::Cancelled;
+      break;
+    case OrderErrors::Rejected:
+    case OrderErrors::InstrumentNotFound:
+      m_eOrderStatus = OrderStatus::Rejected;
+      break;
+    case OrderErrors::NotCancellable:
+      break;
+  }
 }

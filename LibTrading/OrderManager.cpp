@@ -56,39 +56,68 @@ void COrderManager::PlaceOrder(CProviderInterface *pProvider, COrder *pOrder) {
   pProvider->PlaceOrder( pOrder );
 }
 
-void COrderManager::CancelOrder(unsigned long nOrderId) {
-  orders_t::iterator iter;
-  bool bOrderFound = true;
-  iter = m_mapActiveOrders.find( nOrderId );
+COrderManager::orders_t::iterator COrderManager::LocateOrder( unsigned long nOrderId ) {
+  orders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
   if ( m_mapActiveOrders.end() == iter ) {
     iter = m_mapCompletedOrders.find( nOrderId );
     if ( m_mapCompletedOrders.end() == iter ) {
-      std::cout << "COrderManager::ReportExecution order not found:  " << nOrderId << std::endl;
+      std::cout << "COrderManager::LocateOrder order not found:  " << nOrderId << std::endl;
       throw std::out_of_range( "OrderId not found" );
     }
   }
-  iter->second->GetProvider()->CancelOrder( nOrderId );
+  return iter;
+}
+
+void COrderManager::CancelOrder(unsigned long nOrderId) {
+  try {
+    LocateOrder( nOrderId )->second->GetProvider()->CancelOrder( nOrderId );
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
+  }
+}
+
+void COrderManager::ReportCommission( unsigned long nOrderId, double dblCommission ) {
+  try {
+    LocateOrder( nOrderId )->second->GetOrder()->SetCommission( dblCommission );
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::ReportCommission" << std::endl;
+  }
+}
+
+void COrderManager::MoveActiveOrderToCompleted( unsigned long nOrderId ) {
+  orders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
+  if ( m_mapActiveOrders.end() != iter ) {
+    m_mapCompletedOrders.insert( mappair_t( nOrderId, iter->second ) );
+    m_mapActiveOrders.erase( iter );
+    OnOrderCompleted( *(iter->second->GetOrder()) );
+  }
 }
 
 void COrderManager::ReportExecution(const CExecution &exec) {
-  orders_t::iterator iter;
-  iter = m_mapActiveOrders.find( exec.GetOrderId() );
-  bool bOrderFound = true;
-  if ( m_mapActiveOrders.end() == iter ) {
-    iter = m_mapCompletedOrders.find( exec.GetOrderId() );
-    if ( m_mapCompletedOrders.end() == iter ) {
-      std::cout << "COrderManager::ReportExecution order not found:  " << exec.GetOrderId() << std::endl;
-      bOrderFound = false;
-    }
-  }
-  if ( bOrderFound ) {
-    OrderStatus::enumOrderStatus status = iter->second->GetOrder()->ReportExecution( exec );
+  try {
+    orders_t::iterator iter = LocateOrder( exec.GetOrderId() );
+    OrderStatus::enumOrderStatus status = 
+      iter->second->GetOrder()->ReportExecution( exec );
     switch ( status ) {
       case OrderStatus::Filled:
-        // event callback here?
-        m_mapCompletedOrders.insert( mappair_t( iter->second->GetOrderId(), iter->second ) );
-        m_mapActiveOrders.erase( iter );
+        MoveActiveOrderToCompleted( exec.GetOrderId() );
         break;
     }
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::ReportExecution" << std::endl;
+  }
+}
+
+void COrderManager::ReportErrors(unsigned long nOrderId, OrderErrors::enumOrderErrors eError) {
+  try {
+    orders_t::iterator iter = LocateOrder( nOrderId );
+    iter->second->GetOrder()->ActOnError( eError );
+    MoveActiveOrderToCompleted( nOrderId );
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::ReportErrors" << std::endl;
   }
 }

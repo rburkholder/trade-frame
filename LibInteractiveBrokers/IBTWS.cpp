@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -222,19 +223,23 @@ void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, c
 }
 
 void CIBTWS::orderStatus( OrderId orderId, const CString &status, int filled,
-	   int remaining, double avgFillPrice, int permId, int parentId,
-     double lastFillPrice, int clientId, const CString& whyHeld) {
-       std::cout << "OrderStatus: ordid=" << orderId 
-         << ", stat=" << status 
-         << ", fild=" << filled 
-         << ", rem=" << remaining 
-         << ", avgfillprc=" << avgFillPrice 
-         << ", permid=" << permId 
-         //<< ", parentid=" << parentId 
-         << ", lfp=" << lastFillPrice 
-         //<< ", clid=" << clientId 
-         //<< ", yh=" << whyHeld 
-         << std::endl;
+                         int remaining, double avgFillPrice, int permId, int parentId,
+                         double lastFillPrice, int clientId, const CString& whyHeld) 
+{
+  if ( false ) {
+    std::cout 
+      << "OrderStatus: ordid=" << orderId 
+      << ", stat=" << status 
+      << ", fild=" << filled 
+      << ", rem=" << remaining 
+      << ", avgfillprc=" << avgFillPrice 
+      << ", permid=" << permId 
+      //<< ", parentid=" << parentId 
+      << ", lfp=" << lastFillPrice 
+      //<< ", clid=" << clientId 
+      //<< ", yh=" << whyHeld 
+      << std::endl;
+  }
 }
 
 void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& order, const OrderState& state) {
@@ -250,16 +255,19 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << std::endl;
   }
   else {
-    std::cout << "OpenOrder: ordid=" << orderId 
-      << ", cont.sym=" << contract.symbol 
-      //<< ", ord.id=" << order.orderId 
-      //<< ", ord.ref=" << order.orderRef 
+    std::cout 
+      << "OpenOrder: ordid=" << orderId 
       << ", state.stat=" << state.status 
-      << ", state.warning=" << state.warningText 
+      << ", cont.sym=" << contract.symbol 
       << ", order.action=" << order.action 
       << ", state.commission=" << state.commission
       << " " << state.commissionCurrency
-      << std::endl;  
+      //<< ", ord.id=" << order.orderId 
+      //<< ", ord.ref=" << order.orderRef 
+      << ", state.warning=" << state.warningText 
+      << std::endl; 
+    if ( std::numeric_limits<double>::infinity() != state.commission ) 
+      m_OrderManager.ReportCommission( orderId, state.commission );
   }
 }
 
@@ -309,6 +317,7 @@ current time 1212851947
 
 void CIBTWS::error(const int id, const int errorCode, const CString errorString) {
   std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
+
 }
 
 void CIBTWS::winError( const CString &str, int lastError) {
