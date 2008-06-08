@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <assert.h>
 
+// todo 2008/06/06 change record retrieval to use stack structures rather than dynamic allocation
+
 CInstrumentFile::CInstrumentFile(void) : 
     pRecord( NULL ), 
     m_pdbSymbols( NULL ), 
@@ -47,6 +49,7 @@ void CInstrumentFile::OpenIQFSymbols() {
 }
 
 CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) {
+  // look up IQFeed based table with IQFeedSymbolName, but return instrument with Alternate Symbol name
   Dbt k;
   k.set_data( (void*) sIQFeedSymbolName.c_str() );
   k.set_size( sIQFeedSymbolName.size() );
@@ -71,16 +74,17 @@ CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQF
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::CreateInstrumentFromIQFeed had bad error" );
   //pRecord = (structSymbolRecord*) v.get_data();
   UnPackBoolean( rec.ucBits1 );
+  std::string sExchange( rec.line + rec.ix[2], rec.cnt[2] );
   switch ( rec.eInstrumentType ) {
     case InstrumentType::Stock: 
-      return new CInstrument( sAlternateSymbolName, InstrumentType::Stock );
+      return new CInstrument( sAlternateSymbolName, sExchange, InstrumentType::Stock );
       break;
     case InstrumentType::Option: {
       const char *p = rec.line + rec.ix[1]; 
       const char *e = strchr( p, ' ' );  
       u_int32_t len = e - p;
       string sUnderlying( rec.line + rec.ix[1], len );
-      return new CInstrument( sAlternateSymbolName, 
+      return new CInstrument( sAlternateSymbolName, sExchange, 
         (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
         rec.nYear, rec.nMonth,
         sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
@@ -88,7 +92,7 @@ CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQF
       }
       break;
     case InstrumentType::Future: 
-      return new CInstrument( sAlternateSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
+      return new CInstrument( sAlternateSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
       break;
     default:
       throw std::out_of_range( "Unknown instrument type" ); 

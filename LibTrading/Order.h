@@ -4,6 +4,9 @@
 #include "TradingEnumerations.h"
 #include "Instrument.h"
 #include "PersistedOrderId.h"
+#include "Execution.h"
+
+#include "Delegate.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -39,16 +42,20 @@ public:
     );
   virtual ~COrder(void);
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
-  bool GetOutsideRTH( void ) { return m_bOutsideRTH; };
-  CInstrument *GetInstrument( void ) { return m_pInstrument; };
-  const char *GetOrderSideName( void ) { return OrderSide::Name[ m_eOrderSide ]; };
-  unsigned long GetQuantity( void ) { return m_nOrderQuantity; };
-  OrderType::enumOrderType GetOrderType( void ) { return m_eOrderType; };
-  double GetPrice1( void ) { return m_dblPrice1; };  // need to validate this on creation
-  double GetPrice2( void ) { return m_dblPrice2; };
-  unsigned long GetOrderId( void ) { return m_nOrderId; };
+  bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
+  CInstrument *GetInstrument( void ) const { return m_pInstrument; };
+  const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_eOrderSide ]; };
+  unsigned long GetQuantity( void ) const { return m_nOrderQuantity; };
+  OrderType::enumOrderType GetOrderType( void ) const { return m_eOrderType; };
+  double GetPrice1( void ) const { return m_dblPrice1; };  // need to validate this on creation
+  double GetPrice2( void ) const { return m_dblPrice2; };
+  unsigned long GetOrderId( void ) const { return m_nOrderId; };
   void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
-  const std::string &GetProviderName( void ) { return m_sProviderName; };
+  const std::string &GetProviderName( void ) const { return m_sProviderName; };
+  unsigned long GetNextExecutionId( void ) { return m_nNextExecutionId++; };
+  void SetSendingToProvider( void );
+  OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // report true when complete
+  Delegate<COrder *> OnExecution;
 protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;
@@ -68,8 +75,20 @@ protected:
 
   bool m_bOutsideRTH;
 
+  OrderStatus::enumOrderStatus m_eOrderStatus;
+  unsigned long m_nNextExecutionId;
+
   CPersistedOrderId m_persistedorderid;  // make this static?
   void AssignOrderId( void );
+
+  // statistics and status
+  unsigned long m_nTotalOrdered;
+  unsigned long m_nFilled;
+  unsigned long m_nRemaining;
+  double m_dblCommission;
+  double m_dblPriceQuantity; // used for calculating average price
+  double m_dblAverageFillPrice;
+  //double m_dblAverageFillPriceWithCommission;
 private:
   COrder(void);
 };

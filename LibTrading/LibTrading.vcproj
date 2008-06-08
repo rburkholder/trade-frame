@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Execution.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.cpp"
 				>
 			</File>
@@ -172,7 +176,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OrderExecution.cpp"
+				RelativePath=".\OrderManager.cpp"
 				>
 			</File>
 			<File
@@ -222,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Execution.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.h"
 				>
 			</File>
@@ -242,7 +250,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OrderExecution.h"
+				RelativePath=".\OrderManager.h"
 				>
 			</File>
 			<File

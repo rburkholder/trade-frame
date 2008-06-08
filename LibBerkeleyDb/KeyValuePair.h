@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable: 4290)
 
 #include <string>
 #include <assert.h>

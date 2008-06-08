@@ -15,10 +15,6 @@ namespace Currency {
   const char *Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CYP", "CZK", "DKK", "EEK", "NZD", "HUF", "ILS" };
 }
 
-namespace Exchange {
-  const char *Name[] = { "SMART", "NYSE", "NMS", "NASDAQ", "AMEX", "OPRA" };
-}
-
 namespace OrderSide {
   const char *Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
 }

@@ -6,6 +6,8 @@
 #include "IBSymbol.h"
 //#include "PersistedOrderId.h"
 
+#include "Delegate.h"
+
 #include <string>
 
 class CIBTWS : public EWrapper, public CProviderInterface {
@@ -21,6 +23,7 @@ public:
 
   // From ProviderInterface Execution Section
   virtual void PlaceOrder( COrder *order );
+  virtual void CancelOrder( unsigned long nOrderId );
 
   // From TWS Wrapper:
   virtual void connectionClosed();

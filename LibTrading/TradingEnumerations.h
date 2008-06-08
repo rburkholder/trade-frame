@@ -10,13 +10,14 @@ namespace OrderSide {
   const char *Name[];
 }
 
+namespace OrderStatus {
+  enum enumOrderStatus { Created, SendingToProvider, PreSubmission, Submitted, 
+    Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
+}
+
 namespace OptionSide {
   enum enumOptionSide { Unknown, Put, Call, _Count };
   const char *Name[];
-}
-
-namespace ExecutionStatus {
-  enum enumExecutionStatus { Unknown, Filled, PartialFill, Cancelled, PartialCancellation, _Count };
 }
 
 namespace OrderType { // ib szOrderType depends upon order
@@ -31,11 +32,6 @@ namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_4217
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
   enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CYP, CZK, DKK, EEK, NZD, HUF, ILS, _Count };
-  const char *Name[];
-}
-
-namespace Exchange {
-  enum enumExchange { SMART, NYSE, NMS, NASDAQ, AMEX, OPRA, _Count };
   const char *Name[];
 }
 

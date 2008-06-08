@@ -49,7 +49,6 @@ public:
   virtual void WriteData( void );
 protected:
   CBars m_bars;
-  //IQFeedHistoryHD *m_pBarHistory;
 private:
 };
 
@@ -66,7 +65,6 @@ public:
 protected:
   CTrades m_trades;
   CQuotes m_quotes;
-  //IQFeedHistoryHT *m_pTickHistory;
 private:
 };
 

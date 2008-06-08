@@ -137,22 +137,26 @@ void CIBTWS::PlaceOrder( COrder *order ) {
   Order twsorder;
   twsorder.orderId = order->GetOrderId();
 
-  Contract contract2;
-  contract2.conId = 44678227;
-  pTWS->reqContractDetails( contract2 );
+  //Contract contract2;
+  //contract2.conId = 44678227;
+  //pTWS->reqContractDetails( contract2 );
 
   Contract contract;
   contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
   contract.currency = order->GetInstrument()->GetCurrencyName();
-  contract.exchange = order->GetInstrument()->GetExchangeName();
+  contract.exchange = (*(order->GetInstrument()->GetExchangeName())).c_str();
   contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
-  if ( InstrumentType::Future == order->GetInstrument()->GetInstrumentType() ) {
-    CString s;
-    s.Format( "%04d%02d", order->GetInstrument()->GetExpiryYear(),order->GetInstrument()->GetExpiryMonth() );
-    contract.expiry = s;
-    contract.exchange = "ECBOT";
+  CString s;
+  switch ( order->GetInstrument()->GetInstrumentType() ) {
+    case InstrumentType::Stock:
+      contract.exchange = "SMART";
+      break;
+    case InstrumentType::Future:
+      s.Format( "%04d%02d", order->GetInstrument()->GetExpiryYear(),order->GetInstrument()->GetExpiryMonth() );
+      contract.expiry = s;
+      if ( "CBOT" == contract.exchange ) contract.exchange = "ECBOT";
+      break;
   }
-  // if future or option, will need to add further information
   twsorder.action = order->GetOrderSideName();
   twsorder.totalQuantity = order->GetQuantity();
   twsorder.orderType = szOrderType[ order->GetOrderType() ];
@@ -175,7 +179,12 @@ void CIBTWS::PlaceOrder( COrder *order ) {
   }
   twsorder.transmit = true;
   twsorder.outsideRth = order->GetOutsideRTH();
+  //twsorder.whatIf = true;
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
+}
+
+void CIBTWS::CancelOrder( unsigned long nOrderId ) {
+  pTWS->cancelOrder( nOrderId );
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
@@ -215,17 +224,88 @@ void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, c
 void CIBTWS::orderStatus( OrderId orderId, const CString &status, int filled,
 	   int remaining, double avgFillPrice, int permId, int parentId,
      double lastFillPrice, int clientId, const CString& whyHeld) {
-  std::cout << "order status " << orderId << ", " << status << ", " 
-    << filled << ", " << ", " << remaining << ", " << avgFillPrice << ", "
-    << permId << ", " << parentId << ", " << lastFillPrice << ", " 
-    << clientId << ", " << whyHeld << std::endl;
+       std::cout << "OrderStatus: ordid=" << orderId 
+         << ", stat=" << status 
+         << ", fild=" << filled 
+         << ", rem=" << remaining 
+         << ", avgfillprc=" << avgFillPrice 
+         << ", permid=" << permId 
+         //<< ", parentid=" << parentId 
+         << ", lfp=" << lastFillPrice 
+         //<< ", clid=" << clientId 
+         //<< ", yh=" << whyHeld 
+         << std::endl;
 }
 
 void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& order, const OrderState& state) {
-  std::cout << "open order " << orderId << ", " << contract.symbol << ", "
-    << order.orderId << ", " << order.orderRef << ", "
-    << state.status << std::endl;
+  if ( order.whatIf ) {
+    std::cout << "WhatIf:  ordid=" << orderId << ", cont.sym=" << contract.symbol
+      << ", state.commission=" << state.commission
+      << " " << state.commissionCurrency
+      << ", state.equitywithloan=" << state.equityWithLoan 
+      << ", state.initmarg=" << state.initMargin
+      << ", state.maintmarg=" << state.maintMargin
+      << ", state.maxcom=" << state.maxCommission
+      << ", state.mincom=" << state.minCommission 
+      << std::endl;
+  }
+  else {
+    std::cout << "OpenOrder: ordid=" << orderId 
+      << ", cont.sym=" << contract.symbol 
+      //<< ", ord.id=" << order.orderId 
+      //<< ", ord.ref=" << order.orderRef 
+      << ", state.stat=" << state.status 
+      << ", state.warning=" << state.warningText 
+      << ", order.action=" << order.action 
+      << ", state.commission=" << state.commission
+      << " " << state.commissionCurrency
+      << std::endl;  
+  }
 }
+
+void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
+  std::cout 
+    << "execDetails: " 
+    << "  sym=" << contract.symbol 
+    << ", oid=" << orderId 
+    //<< ", ex.oid=" << execution.orderId 
+    << ", ex.pr=" << execution.price 
+    << ", ex.sh=" << execution.shares 
+    << ", ex.sd=" << execution.side 
+    << ", ex.ti=" << execution.time 
+    << ", ex.ex=" << execution.exchange
+    //<< ", ex.liq=" << execution.liquidation
+    << ", ex.pid=" << execution.permId
+    << ", ex.acct=" << execution.acctNumber
+    //<< ", ex.clid=" << execution.clientId
+    << ", ex.xid=" << execution.execId
+    << std::endl;
+
+  OrderSide::enumOrderSide side = OrderSide::Unknown;
+  if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
+  if ( "SLD" == execution.side ) side = OrderSide::Sell;
+  if ( OrderSide::Unknown == side ) std::cout << "Unknown execution side: " << execution.side << std::endl;
+  else {
+    CExecution exec( orderId, execution.price, execution.shares, side, 
+      LPCTSTR( execution.exchange ), LPCTSTR( execution.execId ) );
+    m_OrderManager.ReportExecution( exec );
+  }
+}
+
+/*
+
+OrderStatus: ordid=1057, stat=Filled, fild=200, rem=0, avgfillprc=117, permid=2147126208, parentid=0, lfp=117, clid=0, yh=
+OpenOrder: ordid=1057, cont.sym=ICE, ord.id=1057, ord.ref=, state.stat=Filled, state.warning=, order.action=BUY, state.commission=1 USD
+OrderStatus: ordid=1057, stat=Filled, fild=200, rem=0, avgfillprc=117, permid=2147126208, parentid=0, lfp=117, clid=0, yh=
+OpenOrder: ordid=1057, cont.sym=ICE, ord.id=1057, ord.ref=, state.stat=Filled, state.warning=, order.action=BUY, state.commission=1 USD
+execDetails:   sym=ICE, oid=1057, ex.oid=1057, ex.pr=117, ex.sh=100, ex.sd=BOT, ex.ti=20080607  12:39:55, ex.ex=NYSE, ex.liq=0, ex.pid=2147126208, ex.acct=DU15067, ex.clid=0, ex.xid=0000ea6a.44f438e4.01.01
+OrderStatus: ordid=1057, stat=Submitted, fild=100, rem=100, avgfillprc=117, permid=2147126208, parentid=0, lfp=117, clid=0, yh=
+OpenOrder: ordid=1057, cont.sym=ICE, ord.id=1057, ord.ref=, state.stat=Submitted, state.warning=, order.action=BUY, state.commission=1 USD
+OrderStatus: ordid=1057, stat=Submitted, fild=100, rem=100, avgfillprc=117, permid=2147126208, parentid=0, lfp=117, clid=0, yh=
+OpenOrder: ordid=1057, cont.sym=ICE, ord.id=1057, ord.ref=, state.stat=Submitted, state.warning=, order.action=BUY, state.commission=1.79769e+308 USD
+execDetails:   sym=ICE, oid=1057, ex.oid=1057, ex.pr=117, ex.sh=100, ex.sd=BOT, ex.ti=20080607  12:39:14, ex.ex=NYSE, ex.liq=0, ex.pid=2147126208, ex.acct=DU15067, ex.clid=0, ex.xid=0000ea6a.44f438d5.01.01
+current time 1212851947
+*/
 
 void CIBTWS::error(const int id, const int errorCode, const CString errorString) {
   std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
@@ -245,14 +325,6 @@ void CIBTWS::currentTime(long time) {
 }
 
 void CIBTWS::updateAccountTime(const CString& timeStamp) {
-}
-
-void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
-  if ( false ) {
-  std::cout << "exec " << orderId << ", " << contract.symbol << ", " << execution.orderId 
-    << ", " << execution.price << ", " << execution.shares << ", " << execution.side 
-    << ", " << execution.time << std::endl;
-  }
 }
 
 void CIBTWS::contractDetails( const ContractDetails& contractDetails) {

@@ -18,6 +18,7 @@
 #include "InstrumentFile.h"
 
 #include <iostream>
+#include <stdexcept>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1126,100 +1127,88 @@ void CGTScalpDlg::OnBnClickedRbtt02() {
 }
 
 void CGTScalpDlg::OnBnClickedBtnorder() {
-  bool bOkToOrder = true;
-  char szSymbol[ 30 ];
-  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
-  string sOriginalSymbolName( szSymbol );
-  string sSymbolName;
-  if ( NULL == m_pExecutionProvider ) bOkToOrder = false;
-  else {
-    if ( 0 != sOriginalSymbolName.size() ) {
-      m_pExecutionProvider->GetAlternateInstrumentName( sOriginalSymbolName, &sSymbolName );
-    }
-  }
-  if ( 0 == sSymbolName.size() ) bOkToOrder = false;
-  CInstrument *pInstrument = NULL;
-  if ( 0 == sOriginalSymbolName.size() ) bOkToOrder = false;
-  else {
+
+  try {
+    if ( !theApp.m_bAllowTrades ) throw std::invalid_argument( "Trade submission Not Allowed" );
+    if ( NULL == m_pExecutionProvider ) throw std::invalid_argument( "No Execution Provider" );
+
+    char szSymbol[ 30 ];
+    m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+    if ( 0 == szSymbol[ 0 ] ) throw std::invalid_argument( "No Symbol Name Selected" );
+
+    string sOriginalSymbolName( szSymbol );
+    string sAlternateSymbolName;
+    m_pExecutionProvider->GetAlternateInstrumentName( sOriginalSymbolName, &sAlternateSymbolName );
+    if ( 0 == sAlternateSymbolName.size() ) throw std::invalid_argument( "Couldn't find alternate name" );
+
+    CInstrument *pInstrument = NULL;
     CInstrumentFile file;
     file.OpenIQFSymbols();
-    try {
-      pInstrument = file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sSymbolName );
-    }
-    catch (...) {
-      std::cout << "CGTScalpDlg::OnBnClickedBtnorder problems" << std::endl;
-      bOkToOrder = false;
-    }
+    pInstrument = file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sAlternateSymbolName );
     file.CloseIQFSymbols();
-  }
 
-  if ( OrderSide::Unknown == m_eOrderSide ) bOkToOrder = false;
+    if ( OrderSide::Unknown == m_eOrderSide ) throw std::invalid_argument( "No Order Side" );
 
-  char szDays[ 30 ];
-  m_edtDaysAgo.GetWindowTextA( szDays, 30 );
-  unsigned long nSize = atoi( szDays );
-  if ( 0 == nSize ) bOkToOrder = false;
+    char szSize[ 30 ];  
+    m_edtDaysAgo.GetWindowTextA( szSize, 30 ); // using this as trade size
+    unsigned long nSize = atoi( szSize );
+    if ( 0 == nSize ) throw std::invalid_argument( "Order size was zero" );
 
-  if ( OrderType::Unknown == m_eOrderType ) bOkToOrder = false;
+    if ( OrderType::Unknown == m_eOrderType ) throw std::invalid_argument( "No Order Type" );
 
-  char szLimitPrice[ 30 ];
-  char szStopPrice[ 30 ];
-  m_ebLimitPrice.GetWindowTextA( szLimitPrice, 30 );
-  m_ebStopPrice.GetWindowTextA( szStopPrice, 30 );
+    char szLimitPrice[ 30 ];
+    char szStopPrice[ 30 ];
+    m_ebLimitPrice.GetWindowTextA( szLimitPrice, 30 );
+    m_ebStopPrice.GetWindowTextA( szStopPrice, 30 );
 
-  double dblLimit, dblStop;
-  COrder *pOrder = NULL;
-  try {
+    double dblLimit, dblStop;
+    COrder *pOrder = NULL;
     switch ( m_eOrderType ) {
     case OrderType::Market:
-      if ( bOkToOrder ) pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize );
+      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize );
       break;
     case OrderType::Limit:
-      if ( 0 == *szLimitPrice ) bOkToOrder = false;
+      if ( 0 == *szLimitPrice ) throw std::invalid_argument( "No Limit Price Provided" );
       else {
         dblLimit = atof( szLimitPrice );
-        if ( 0 == dblLimit ) bOkToOrder = false;
-        if ( bOkToOrder ) pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit );
+        if ( 0 == dblLimit ) throw std::invalid_argument( "Limit Price was 0" );
+        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit );
       }
       break;
     case OrderType::StopLimit:
-      if ( 0 == *szLimitPrice ) bOkToOrder = false;
-      else {
-        dblLimit = atof( szLimitPrice );
-        if ( 0 == dblLimit ) bOkToOrder = false;
-      }
-      if ( 0 == *szStopPrice ) bOkToOrder = false;
-      else {
-        dblStop = atof( szStopPrice );
-        if ( 0 == dblStop ) bOkToOrder = false;
-      }
-      if ( bOkToOrder ) 
-        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit, dblStop );
+      if ( 0 == *szLimitPrice ) throw std::invalid_argument( "No Limit Price Provided" );
+      dblLimit = atof( szLimitPrice );
+      if ( 0 == dblLimit ) throw std::invalid_argument( "Limit Price was 0" );
+
+      if ( 0 == *szStopPrice ) throw std::invalid_argument( "No Stop Price Provided" );
+      dblStop = atof( szStopPrice );
+      if ( 0 == dblStop ) throw std::invalid_argument( "Stop Price was 0" );
+
+      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit, dblStop );
       break;
     case OrderType::Stop:
-      if ( 0 == *szStopPrice ) bOkToOrder = false;
-      else {
-        dblStop = atof( szStopPrice );
-        if ( 0 == dblStop ) bOkToOrder = false;
-      }
-      if ( bOkToOrder ) 
-        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, dblStop, nSize );
+      if ( 0 == *szStopPrice ) throw std::invalid_argument( "No Stop Price Provided" );
+      dblStop = atof( szStopPrice );
+      if ( 0 == dblStop ) throw std::invalid_argument( "Stop Price was 0" );
+      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, dblStop, nSize );
       break;
     }
-  }
-  catch (... ) {
-    std::cout << "Had exception while creating order" << std::endl;
-    bOkToOrder = false;
-  }
-  if ( bOkToOrder ) {
+
     assert( NULL != pOrder );
     pOrder->SetOutsideRTH( m_bOutsideRTH );
-    m_pExecutionProvider->PlaceOrder( pOrder );
+    //m_pExecutionProvider->PlaceOrder( pOrder );
+    m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+    std::cout << "Order was submitted" << std::endl;
+
   }
-  else {
-    std::cout << "Order was not submitted" << std::endl;
+  catch ( std::invalid_argument e ) {
+    std::cout << "Order Problem (1):  " << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cout << "Order Problem (2) Had exception while creating order" << std::endl;
   }
 }
+
 
 void CGTScalpDlg::OnBnClickedIqfwindows() {
 

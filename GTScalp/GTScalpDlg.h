@@ -27,6 +27,8 @@
 
 #include "..\LibBasketTrading\BasketTradeContainer.h"
 
+#include "OrderManager.h"
+
 #include <vector>
 using namespace std;
 
@@ -74,6 +76,7 @@ private:
   CProviderInterface *m_pDataProvider;
   //bool SelectExecutionProvider(  
 
+  COrderManager m_OrderManager;  // keeps at least one instance alive
 
   CBasketTradeContainer *m_pBasketTrade;
 

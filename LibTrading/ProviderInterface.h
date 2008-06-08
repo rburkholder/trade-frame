@@ -4,6 +4,7 @@
 #include "Delegate.h"
 #include "Order.h"
 #include "AlternateInstrumentNames.h"
+#include "OrderManager.h"
 
 #include <map>
 #include <string>
@@ -36,6 +37,8 @@ public:
   bool Connected( void ) { return m_bConnected; };
 
   virtual void PlaceOrder( COrder *order );
+  virtual void CancelOrder( unsigned long nOrderId );
+  COrderManager m_OrderManager;
 
   void SetAlternateInstrumentName( const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName );
   void GetAlternateInstrumentName( const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName );

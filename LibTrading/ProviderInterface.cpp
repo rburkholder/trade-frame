@@ -120,6 +120,10 @@ void CProviderInterface::PlaceOrder( COrder *order ) {
   order->SetProviderName( m_sName );
 }
 
+void CProviderInterface::CancelOrder( unsigned long nOrderId ) {
+  throw std::runtime_error( "CProviderInterface::CancelOrder not implemented." );
+}
+
 void CProviderInterface::SetAlternateInstrumentName(const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName) {
   m_lutAlternateInstrumentNames.Save( m_sName, OriginalInstrumentName, AlternateIntrumentName );
   std::map<std::string, std::string>::iterator iter 

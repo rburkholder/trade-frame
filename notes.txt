@@ -1,0 +1,3 @@
+Collection Of stuff:
+
+#pragma warning(disable: 4290)  // to disable throw warnings in header files
