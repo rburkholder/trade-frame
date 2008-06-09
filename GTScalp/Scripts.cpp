@@ -68,30 +68,39 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
     bool bSymbolFound = symbolfile.RetrieveSymbolRecordByExchange( DB_SET );
     while ( bSymbolFound ) {
       const char *szSymbol = symbolfile.GetSymbol();
-      if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
-        CHistoryCollector *phc;
-        switch ( typeHistory ) {
-        case Daily:
-          phc = new CHistoryCollectorDaily( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
-          break;
-        case Tick:
-          phc = new CHistoryCollectorTicks( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
-          break;
-        case Minute:
-          break;
+//      if ( ( 'C' == *szSymbol ) 
+//        || ( 0 == strcmp( szSymbol, "PDT" ) )
+//        || ( 0 == strcmp( szSymbol, "NBXH" ) )
+//        || ( 0 == strcmp( szSymbol, "LBC" ) )
+//        || ( 0 == strcmp( szSymbol, "HGR" ) )
+//        || ( 0 == strcmp( szSymbol, "CIT" ) )
+//        || ( 0 == strcmp( szSymbol, "BOH" ) )
+//        || ( 0 == strcmp( szSymbol, "ARTC" ) ) ) {
+        if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
+          CHistoryCollector *phc;
+          switch ( typeHistory ) {
+             case Daily:
+               phc = new CHistoryCollectorDaily( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
+               break;
+             case Tick:
+               phc = new CHistoryCollectorTicks( m_Provider.GetIQFeedProvider(), szSymbol, nDays );
+               break;
+             case Minute:
+               break;
+          }
+          m_qHistoryCollectors.push( phc );
+          StartHistoryCollection();  // start what collectors we can while still building up the queue
+
+          //std::cout << "  \"" << szSymbol << "\"," << std::endl;
+          //i = v.begin();
+          //string s( szSymbol );
+          //v.insert(i, s );
+
+          ++cntSymbols;
         }
-        m_qHistoryCollectors.push( phc );
-        StartHistoryCollection();  // start what collectors we can while still building up the queue
-
-        //std::cout << "  \"" << szSymbol << "\"," << std::endl;
-        //i = v.begin();
-        //string s( szSymbol );
-        //v.insert(i, s );
-
-        ++cntSymbols;
-      }
-      else {
-      }
+        else {
+        }
+//      }
       bSymbolFound = symbolfile.RetrieveSymbolRecordByExchange( DB_NEXT_DUP );
     }
     symbolfile.EndSearch();

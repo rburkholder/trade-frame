@@ -43,6 +43,7 @@ void CBasketTradeModel::Prepare(ptime dtTradeDate, double dblFunds) {
       iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol );
       dblCostForEntry += iter->second->GetProposedEntryCost();
       m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
+      m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );
     }
     std::cout << "Total Cost of Entry: " << dblCostForEntry << std::endl;
   }

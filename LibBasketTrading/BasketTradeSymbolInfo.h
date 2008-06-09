@@ -23,6 +23,7 @@ public:
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   void HandleTrade( const CTrade &trade );
+  void HandleOpen( const CTrade &trade );
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
 protected:
   std::string m_sSymbolName;
@@ -43,7 +44,11 @@ protected:
   double m_dblExitPrice;
   double m_dblProposedEntryCost;
   //bool m_bEntryInitiated;
-  enum enumPositionState { Init, WaitingForOpen, WaitingForThe3Bars, WaitingForOrderFulfillment, WaitingForExit, Exited } m_PositionState;
+  enum enumPositionState { Init, WaitingForOpen, 
+    WaitingForThe3Bars, 
+    WaitingForOrderFulfillmentLong, WaitingForOrderFulfillmentShort,
+    WaitingForLongExit, WaitingForShortExit,
+    WaitingForExit, Exited } m_PositionState;
   ptime m_dtToday;
   bool m_bOpenFound;
   double m_dblOpen;
@@ -54,6 +59,10 @@ protected:
   CBarFactory m_1MinBarFactory;
   CBars m_bars;
   void HandleBarFactoryBar( const CBar &bar );
+
+  void HandleOrderFilled( COrder *pOrder );
+  bool m_bDoneTheLong, m_bDoneTheShort;
+
 private:
   CBasketTradeSymbolInfo( const CBasketTradeSymbolInfo & );  // disallow copy construction
 };

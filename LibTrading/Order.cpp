@@ -94,6 +94,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
   m_dblAverageFillPrice = m_dblPriceQuantity / m_nFilled;
   if ( 0 == m_nRemaining ) {
     m_eOrderStatus = OrderStatus::Filled;
+    OnOrderFilled( this );
   }
   else {
     switch ( m_eOrderStatus ) {

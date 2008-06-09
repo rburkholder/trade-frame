@@ -23,6 +23,8 @@ public:
   virtual void Disconnect( void );
   Delegate<int> OnDisconnected;
 
+  virtual void AddOnOpenHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
+  virtual void RemoveOnOpenHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
   virtual void AddQuoteHandler( const string &sSymbol, CSymbol::quotehandler_t handler );
   virtual void RemoveQuoteHandler( const string &sSymbol, CSymbol::quotehandler_t handler );
   virtual void AddTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );

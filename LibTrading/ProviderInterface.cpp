@@ -80,6 +80,27 @@ void CProviderInterface::RemoveTradeHandler(const std::string &sSymbol, CSymbol:
   }
 }
 
+void CProviderInterface::AddOnOpenHandler(const std::string &sSymbol, CSymbol::tradehandler_t handler) {
+  std::map<string, CSymbol*>::iterator iter;
+  iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+    m_mapSymbols.insert( std::pair<string, CSymbol*>( sSymbol, NewCSymbol( sSymbol ) ) );
+    iter = m_mapSymbols.find( sSymbol );
+  }
+  iter->second->AddOnOpenHandler( handler );
+}
+
+void CProviderInterface::RemoveOnOpenHandler(const std::string &sSymbol, CSymbol::tradehandler_t handler) {
+  std::map<string, CSymbol*>::iterator iter;
+  iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+  //  m_mapSymbols.insert( std::pair<string, CSymbol*>( sSymbol, new CSymbol( sSymbol ) ) );
+  }
+  else {
+    iter->second->RemoveOnOpenHandler( handler );
+  }
+}
+
 void CProviderInterface::AddDepthHandler(const std::string &sSymbol, CSymbol::depthhandler_t handler) {
   std::map<string, CSymbol*>::iterator iter;
   iter = m_mapSymbols.find( sSymbol );

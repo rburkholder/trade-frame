@@ -74,14 +74,11 @@ void CIQFBaseMessage::EmitFields( void ) {
       s.Format( "%s%d %s", Field( 1 ), i, Field( i ) );
       //s.Format( "%s%d %s",   m_sMsg.substr( rOffset[ 1 ], rSize[ 1 ] ), i, m_sMsg.substr( rOffset[ i ], rSize[ i ] ) );
       cout << s << endl;
-      //theApp.pConsoleMessages->WriteLine( s );
     }
   }
 }
 
 void CIQFBaseMessage::EmitLine( void ) {
-  //theApp.pConsoleMessages->WriteLine( m_sMsg.c_str() );
-  //theApp.pConsoleMessages->WriteLine( m_pStr );
   cout << m_pStr << endl;
 }
 

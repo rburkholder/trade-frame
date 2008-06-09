@@ -56,6 +56,7 @@ public:
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // report true when complete
   Delegate<COrder *> OnExecution;
+  Delegate<COrder *> OnOrderFilled;
   void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
 protected:
