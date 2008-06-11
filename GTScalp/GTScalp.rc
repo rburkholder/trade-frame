@@ -190,6 +190,7 @@ BEGIN
     LTEXT           "Alt Name:",IDC_STATIC,162,165,32,8
     GROUPBOX        "Alternate Symbol Name:",IDC_STATIC,144,136,116,59
     LTEXT           "(Set Execution)",IDC_STATIC,149,181,50,8
+    PUSHBUTTON      "Close Bskt",IDC_CLOSEBASKET,303,182,50,14
 END
 
 IDD_CONSOLEMESSAGES DIALOGEX 0, 0, 252, 235

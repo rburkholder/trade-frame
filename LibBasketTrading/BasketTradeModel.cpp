@@ -7,8 +7,7 @@
 //
 
 CBasketTradeModel::CBasketTradeModel( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider )
-: m_pDataProvider( pDataProvider ),
-    m_pExecutionProvider( pExecutionProvider )
+: m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider )
 {
 }
 
@@ -34,13 +33,13 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   }
 }
 
-void CBasketTradeModel::Prepare(ptime dtTradeDate, double dblFunds) {
+void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly ) {
   try {
     mapBasketSymbols_t::iterator iter; 
     double dblFundsPerSymbol = dblFunds / m_mapBasketSymbols.size();
     double dblCostForEntry = 0;
     for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
-      iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol );
+      iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
       dblCostForEntry += iter->second->GetProposedEntryCost();
       m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
       m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );

@@ -121,9 +121,10 @@
 #define IDC_EDTPASSWORD                 1127
 #define IDC_IQFWINDOWS                  1128
 #define IDC_EDTORGSYMBOLNAME            1129
-#define IDC_EDIT2                       1130
 #define IDC_EDTALTSYMBOLNAME            1130
 #define IDC_BTNSAVESYMBOL               1131
+#define IDC_BUTTON3                     1132
+#define IDC_CLOSEBASKET                 1132
 
 // Next default values for new objects
 // 
@@ -131,7 +132,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1132
+#define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

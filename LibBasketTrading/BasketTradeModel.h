@@ -12,7 +12,7 @@ public:
   CBasketTradeModel( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
   ~CBasketTradeModel(void);
   void AddSymbol( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy  );
-  void Prepare( ptime dtTradeDate, double dblFunds );
+  void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
 protected:
   typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;

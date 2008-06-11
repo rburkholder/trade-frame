@@ -5,6 +5,7 @@
 #include "BasketTradeViewPosition.h"
 #include "BasketTradeViewSymbolList.h"
 #include "BasketTradeController.h"
+#include "BasketTradeViewDialog.h"
 
 #include <string>
 
@@ -13,7 +14,7 @@ public:
   CBasketTradeContainer( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
   ~CBasketTradeContainer(void);
   void AddSymbol( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
-  void Prepare( ptime dtTradeDate, double dblFunds ) { m_pModel->Prepare( dtTradeDate, dblFunds ); };
+  void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly ) { m_pModel->Prepare( dtTradeDate, dblFunds, bRTHOnly ); };
 
 protected:
   CProviderInterface *m_pDataProvider;
@@ -22,6 +23,7 @@ protected:
   CBasketTradeModel *m_pModel;
   CBasketTradeViewPosition *m_pVuPosition;
   CBasketTradeViewSymbolList *m_pVuSymbols;
+  CBasketTradeViewDialog *m_pVuDialog;
   CBasketTradeController *m_pController;
 private:
 };

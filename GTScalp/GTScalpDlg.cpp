@@ -1032,7 +1032,7 @@ void CGTScalpDlg::OnBnClickedBasketprepare() {
         boost::gregorian::date( dtLastDate.wYear, dtLastDate.wMonth, dtLastDate.wDay )
         //, boost::posix_time::time_duration( dtLastTime.wHour, dtLastTime.wMinute, dtLastTime.wSecond, dtLastTime.wMilliseconds ) 
         );
-      m_pBasketTrade->Prepare( dtEnd, dblFunds );
+      m_pBasketTrade->Prepare( dtEnd, dblFunds, !m_bOutsideRTH );
     }
     else {
       std::cout << "no date specified" << std::endl;
@@ -1042,7 +1042,7 @@ void CGTScalpDlg::OnBnClickedBasketprepare() {
 }
 
 void CGTScalpDlg::OnBnClickedAddtestsymbols() {
-  if ( false ) {
+  if ( true ) {
     HandleSymbolForBasketContainer( "DELL", "/bar/86400/D/E/DELL", "Test" );
     HandleSymbolForBasketContainer( "AAPL", "/bar/86400/A/A/AAPL", "Test" );
     HandleSymbolForBasketContainer( "INTC", "/bar/86400/I/N/INTC", "Test" );

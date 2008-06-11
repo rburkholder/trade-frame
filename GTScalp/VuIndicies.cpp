@@ -13,6 +13,7 @@ CVuIndicies::CVuIndicies(CWnd* pParent /*=NULL*/)
 
   static string sSymbols[] = {
     _T( "INDU.X" ),
+//    _T( "EB#" ),
     _T( "VIX.XO" ),
     _T( "PCRATIO.Z" ),
     _T( "II1A.Z" ),

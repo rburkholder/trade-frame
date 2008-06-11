@@ -45,19 +45,19 @@ BOOL CVuChartArmsIntraDay::OnInitDialog() {
 void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
 
   m_ChartIndu.SetBarFactoryWidthSeconds( 180 );
-  m_ChartIndu.SetWindowWidthSeconds( 13 * 30 * 60 ); // 6.5 hours
+  m_ChartIndu.SetWindowWidthSeconds( 14 * 30 * 60 ); // 7.0 hours
   m_ChartIndu.setMajorTickInc( 12 * 60 );
   m_ChartIndu.setMinorTickInc( 60 );
   m_ChartIndu.SetTitle( "Indu" );
 
   m_ChartTrin.SetBarFactoryWidthSeconds( 180 );
-  m_ChartTrin.SetWindowWidthSeconds( 13 * 30 * 60 ); // 6.5 hours
+  m_ChartTrin.SetWindowWidthSeconds( 14 * 30 * 60 ); // 7.0 hours
   m_ChartTrin.setMajorTickInc( 12 * 60 );
   m_ChartTrin.setMinorTickInc( 60 );
   m_ChartTrin.SetTitle( "Trin" );
 
   m_ChartTick.SetBarFactoryWidthSeconds( 180 );
-  m_ChartTick.SetWindowWidthSeconds( 13 * 30 * 60 ); // 6.5 hours
+  m_ChartTick.SetWindowWidthSeconds( 14 * 30 * 60 ); // 7.0 hours
   m_ChartTick.setMajorTickInc( 12 * 60 );
   m_ChartTick.setMinorTickInc( 60 );
   m_ChartTick.SetTitle( "Tick" );

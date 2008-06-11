@@ -11,6 +11,7 @@ using namespace boost::gregorian;
 #include "ProviderInterface.h"
 #include "Instrument.h"
 #include "Order.h"
+#include "OrderManager.h"
 
 class CBasketTradeSymbolInfo {
 public:
@@ -19,7 +20,7 @@ public:
     CProviderInterface *pExecutionProvider );
   ~CBasketTradeSymbolInfo( void );
 
-  void CalculateTrade( ptime dtTradeDate, double dblFunds );
+  void CalculateTrade( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   void HandleTrade( const CTrade &trade );
@@ -49,10 +50,27 @@ protected:
     WaitingForOrderFulfillmentLong, WaitingForOrderFulfillmentShort,
     WaitingForLongExit, WaitingForShortExit,
     WaitingForExit, Exited } m_PositionState;
+  enum enumTradingState {
+    WaitForOpeningTrade, 
+    WaitForOpeningBell, // 9:30 exchange time
+    SetOpeningRange,  // spend 5 minutes here
+    ActiveTrading,  // through the day
+    NoMoreTrades, // 15:40 exchange time
+    CancelTrades, // 15:45 exchange time
+    CloseTrades,  // 15:50 exchange time
+    DoneTrading   // 15:50 exchange time
+  } m_TradingState;
   ptime m_dtToday;
   bool m_bOpenFound;
   double m_dblOpen;
+  double m_dblOpenLow;  // ACD Opening Range
+  double m_dblOpenHigh; // ACD Opening Range
   double m_dblStop;
+  double m_dblStartLevel;
+  double m_dblAveBarHeight;
+  double m_dblTrailingStopDistance;
+
+  bool m_bRTHOnly;
 
   CProviderInterface *m_pExecutionProvider;
 
@@ -62,6 +80,8 @@ protected:
 
   void HandleOrderFilled( COrder *pOrder );
   bool m_bDoneTheLong, m_bDoneTheShort;
+
+  COrderManager m_OrderManager;
 
 private:
   CBasketTradeSymbolInfo( const CBasketTradeSymbolInfo & );  // disallow copy construction

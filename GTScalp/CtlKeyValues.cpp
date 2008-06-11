@@ -22,7 +22,6 @@ CCtlKeyValues::~CCtlKeyValues() {
     delete kv;
     m_vRowKeyValues.pop_back();
   }
-  
 }
 
 void CCtlKeyValues::InitControl() {

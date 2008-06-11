@@ -2,10 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="LibBasketTrading"
-	ProjectGUID="{CD396733-F34F-4BD5-B532-011AC3CBE737}"
-	RootNamespace="LibBasketTrading"
-	Keyword="Win32Proj"
+	Name="INDU"
+	ProjectGUID="{F7F04E62-E4EF-421F-A3AC-47ECA907301B}"
+	RootNamespace="INDU"
+	Keyword="MFCProj"
 	>
 	<Platforms>
 		<Platform
@@ -19,9 +19,9 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			UseOfMFC="2"
-			CharacterSet="0"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -37,12 +37,14 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="false"
+				ValidateParameters="false"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibHDF5TimeSeries;..\LibCommon;..\LibTimeSeries;..\LibTrading;..\LibBerkeleyDb;H:\Program Files\Oracle\Berkeley DB 4.6.21\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -56,15 +58,25 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -76,6 +88,12 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -83,9 +101,9 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			UseOfMFC="2"
-			CharacterSet="1"
+			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -102,10 +120,14 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="false"
+				ValidateParameters="false"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -117,15 +139,27 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -135,6 +169,12 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -150,31 +190,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BasketTradeContainer.cpp"
+				RelativePath=".\INDU.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BasketTradeController.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeSymbolInfo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewPosition.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewSymbolList.cpp"
+				RelativePath=".\INDUDlg.cpp"
 				>
 			</File>
 			<File
@@ -204,35 +224,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\BasketTradeContainer.h"
+				RelativePath=".\INDU.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BasketTradeController.h"
+				RelativePath=".\INDUDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BasketTradeModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeSymbolInfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewPosition.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BasketTradeViewSymbolList.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
+				RelativePath=".\Resource.h"
 				>
 			</File>
 			<File
@@ -246,7 +246,15 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\LibBasketTrading.rc"
+				RelativePath=".\res\INDU.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\INDU.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\res\INDU.rc2"
 				>
 			</File>
 		</Filter>
@@ -256,9 +264,5 @@
 		</File>
 	</Files>
 	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="LibBasketTrading.rc"
-		/>
 	</Globals>
 </VisualStudioProject>

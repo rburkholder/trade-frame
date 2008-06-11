@@ -16,7 +16,8 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ),
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ),
+    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
     m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
@@ -35,7 +36,8 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ),
+    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
     m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
 {
   AssignOrderId();
@@ -54,7 +56,8 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ),
+    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
     m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false )
 {
   AssignOrderId();

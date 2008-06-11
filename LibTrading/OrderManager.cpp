@@ -91,7 +91,7 @@ void COrderManager::MoveActiveOrderToCompleted( unsigned long nOrderId ) {
   if ( m_mapActiveOrders.end() != iter ) {
     m_mapCompletedOrders.insert( mappair_t( nOrderId, iter->second ) );
     m_mapActiveOrders.erase( iter );
-    OnOrderCompleted( *(iter->second->GetOrder()) );
+    //OnOrderCompleted( *(iter->second->GetOrder()) );
   }
 }
 

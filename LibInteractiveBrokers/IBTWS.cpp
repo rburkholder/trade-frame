@@ -254,7 +254,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << ", state.mincom=" << state.minCommission 
       << std::endl;
   }
-  else {
+  else { /*
     std::cout 
       << "OpenOrder: ordid=" << orderId 
       << ", state.stat=" << state.status 
@@ -266,12 +266,15 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       //<< ", ord.ref=" << order.orderRef 
       << ", state.warning=" << state.warningText 
       << std::endl; 
-    if ( std::numeric_limits<double>::infinity() != state.commission ) 
-      m_OrderManager.ReportCommission( orderId, state.commission );
+    //if ( std::numeric_limits<double>::max(0) != state.commission ) 
+    if ( 1e308 > state.commission ) 
+      m_OrderManager.ReportCommission( orderId, state.commission ); */
   }
+  if ( state.warningText != "" ) std::cout << "Open Order Warning: " << state.warningText << std::endl;
 }
 
 void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
+  /*
   std::cout 
     << "execDetails: " 
     << "  sym=" << contract.symbol 
@@ -288,7 +291,7 @@ void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execu
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
-
+*/
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
   if ( "SLD" == execution.side ) side = OrderSide::Sell;
