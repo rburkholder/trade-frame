@@ -15,27 +15,26 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   CProviderInterface *pExecutionProvider
   ) 
 : m_sSymbolName( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
+  m_pExecutionProvider( pExecutionProvider ),
   m_dtToday( not_a_date_time ), 
   m_bOpenFound( false ), m_dblOpen( 0 ), m_dblOpenLow( 0 ), m_dblOpenHigh( 0 ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
-  m_pExecutionProvider( pExecutionProvider ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true )
 {
-  m_1MinBarFactory.SetBarWidth( 30 );  // 30 seconds, 10 bars in 5 minutes, 5 bars for A confirmation
-  m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
+  Initialize();
+}
 
-  CInstrumentFile file;
-  file.OpenIQFSymbols();
-  try {
-    m_pInstrument = file.CreateInstrumentFromIQFeed( sSymbolName, sSymbolName );  // todo:  need to verify proper symbol usage
-  }
-  catch (...) {
-    std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;
-  }
-  file.CloseIQFSymbols();
-
-  //m_pInstrument = new CInstrument( sSymbolName, InstrumentType::Stock );
+CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider )
+: m_pExecutionProvider( pExecutionProvider ),
+  m_dtToday( not_a_date_time ), 
+  m_bOpenFound( false ), m_dblOpen( 0 ), m_dblOpenLow( 0 ), m_dblOpenHigh( 0 ),
+  m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
+  m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
+  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true )
+{
+  *pStream >> m_sSymbolName >> m_sPath >> m_sStrategy;
+  Initialize();
 }
 
 CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
@@ -43,6 +42,27 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
     delete m_pInstrument;
     m_pInstrument = NULL;
   }
+}
+
+void CBasketTradeSymbolInfo::Initialize( void ) {
+  m_1MinBarFactory.SetBarWidth( 30 );  // 30 seconds, 10 bars in 5 minutes, 5 bars for A confirmation
+  m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
+
+  CInstrumentFile file;
+  file.OpenIQFSymbols();
+  try {
+    m_pInstrument = file.CreateInstrumentFromIQFeed( m_sSymbolName, m_sSymbolName );  // todo:  need to verify proper symbol usage
+  }
+  catch (...) {
+    std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;
+  }
+  file.CloseIQFSymbols();
+}
+
+void CBasketTradeSymbolInfo::StreamSymbolInfo(std::stringstream *pStream) {
+  *pStream << m_sSymbolName << "," << m_sPath << "," << m_sStrategy;
+  //int i = pStream->gcount();
+  //pStream->rdbuf()->pubsync
 }
 
 void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, bool bRTHOnly) {
@@ -221,8 +241,6 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
         bar4 = *m_bars[ cnt - 2 ];
         bar5 = *m_bars[ cnt - 1 ];
         if ( !m_bDoneTheLong ) {
-          //if ( ( bar1.m_dblLow > m_dblOpen ) && ( bar2.m_dblLow > m_dblOpen ) && ( bar3.m_dblLow > m_dblOpen ) ) {
-            //if ( ( bar1.m_dblClose < bar2.m_dblClose ) && ( bar2.m_dblClose < bar3.m_dblClose ) ) {
           double dblAboveThisLevel = m_dblOpenHigh + m_dblAveBarHeight;
           if ( ( bar1.m_dblLow > dblAboveThisLevel ) 
             && ( bar2.m_dblLow > dblAboveThisLevel ) 
@@ -231,20 +249,15 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
             && ( bar5.m_dblLow > dblAboveThisLevel ) ) {
               m_dblStop = m_dblOpenLow;
               m_dblTrailingStopDistance = bar.m_dblClose - m_dblOpenLow;
-              //m_dblStop = min( m_dblStop, bar2.m_dblLow );
-              //m_dblStop = min( m_dblStop, bar3.m_dblLow );
-              std::cout << m_sSymbolName << "Enter LONG now: " << bar.m_dblClose << ", Stop at " << m_dblStop << std::endl;
+              std::cout << m_sSymbolName << " Enter LONG now: " << bar.m_dblClose << ", Stop at " << m_dblStop << std::endl;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentLong;
               m_bDoneTheLong = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
-            //}
           }
         }
         if ( !m_bDoneTheShort ) {
-          //if ( ( bar1.m_dblHigh < m_dblOpen ) && ( bar2.m_dblHigh < m_dblOpen ) && ( bar3.m_dblHigh < m_dblOpen ) ) {
-            //if ( ( bar1.m_dblClose > bar2.m_dblClose ) && ( bar2.m_dblClose > bar3.m_dblClose ) ) {
           double dblBelowThisLevel = m_dblOpenLow - m_dblAveBarHeight;
           if ( ( bar1.m_dblHigh < dblBelowThisLevel ) 
             && ( bar2.m_dblHigh < dblBelowThisLevel ) 
@@ -253,17 +266,13 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
             && ( bar5.m_dblHigh < dblBelowThisLevel ) ) {
               m_dblStop = m_dblOpenHigh;
               m_dblTrailingStopDistance = m_dblOpenHigh - bar.m_dblClose;
-              //m_dblStop = bar1.m_dblHigh;
-              //m_dblStop = max( m_dblStop, bar2.m_dblHigh );
-              //m_dblStop = max( m_dblStop, bar3.m_dblHigh );
-              std::cout << "Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
+              std::cout << " Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentShort;
               m_bDoneTheShort = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
-          //}
         }
       }
       break;
@@ -293,6 +302,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
 
 void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
   // make the assumption that the order arriving is the order we are expecting, ie no multiple or cancelled orders
+  pOrder->OnOrderFilled.Remove( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
   switch ( m_PositionState ) {
     case WaitingForOrderFulfillmentLong:
       m_PositionState = WaitingForLongExit;

@@ -211,4 +211,6 @@ public:
   afx_msg void OnBnClickedBtnsavesymbol();
   CEdit m_edtOriginalSymbolName;
   CEdit m_edtAlternateSymbolName;
+  afx_msg void OnBnClickedBtnloadbasket();
+  afx_msg void OnBnClickedBtnsavebasket();
 };

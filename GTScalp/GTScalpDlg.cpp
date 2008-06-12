@@ -189,6 +189,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_BTNORDER, &CGTScalpDlg::OnBnClickedBtnorder)
   ON_BN_CLICKED(IDC_IQFWINDOWS, &CGTScalpDlg::OnBnClickedIqfwindows)
   ON_BN_CLICKED(IDC_BTNSAVESYMBOL, &CGTScalpDlg::OnBnClickedBtnsavesymbol)
+  ON_BN_CLICKED(IDC_BTNLOADBASKET, &CGTScalpDlg::OnBnClickedBtnloadbasket)
+  ON_BN_CLICKED(IDC_BTNSAVEBASKET, &CGTScalpDlg::OnBnClickedBtnsavebasket)
 END_MESSAGE_MAP()
 
 
@@ -1244,3 +1246,13 @@ void CGTScalpDlg::OnBnClickedBtnsavesymbol() {
     }
   }
 }
+
+void CGTScalpDlg::OnBnClickedBtnsavebasket() {
+  if ( NULL != m_pBasketTrade ) {
+    m_pBasketTrade->SaveBasket();
+  }
+}
+
+void CGTScalpDlg::OnBnClickedBtnloadbasket() {
+}
+

@@ -85,22 +85,29 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
   // need to worry about fill after cancel
   assert( exec.GetOrderSide() == m_eOrderSide );
   assert( exec.GetOrderId() == m_nOrderId );
+  bool bOverDone = false;
   if ( 0 == m_nRemaining ) {
     std::cout << "Order " << m_nOrderId << " overfilled with +" << exec.GetSize() << std::endl;
     m_eOrderStatus = OrderStatus::OverFilled;
+    bOverDone = true;
   }
   else {
     m_nRemaining -= exec.GetSize();
   }
   m_nFilled += exec.GetSize();
-  m_dblPriceQuantity += exec.GetPrice() * exec.GetSize();
-  m_dblAverageFillPrice = m_dblPriceQuantity / m_nFilled;
-  if ( 0 == m_nRemaining ) {
-    m_eOrderStatus = OrderStatus::Filled;
-    OnOrderFilled( this );
+  if ( m_nFilled > m_nOrderQuantity ) {
+    std:: cout << "Order " << m_nOrderId << " overfilled with +" << exec.GetSize() << std::endl;
+    bOverDone = true;
   }
-  else {
-    switch ( m_eOrderStatus ) {
+  if ( !bOverDone ) {
+    m_dblPriceQuantity += exec.GetPrice() * exec.GetSize();
+    m_dblAverageFillPrice = m_dblPriceQuantity / m_nFilled;
+    if ( 0 == m_nRemaining ) {
+      m_eOrderStatus = OrderStatus::Filled;
+      OnOrderFilled( this );
+    }
+    else {
+      switch ( m_eOrderStatus ) {
       case OrderStatus::SendingToProvider:
       case OrderStatus::Submitted:
       case OrderStatus::Filling:
@@ -118,6 +125,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
       default:
         std::cout << "COrder::ReportExecution " << m_eOrderStatus << std::endl;
         break;
+      }
     }
   }
   return m_eOrderStatus;

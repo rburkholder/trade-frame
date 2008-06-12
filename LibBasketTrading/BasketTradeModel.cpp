@@ -1,6 +1,10 @@
 #include "StdAfx.h"
 #include "BasketTradeModel.h"
 
+#include "DbValueStream.h"
+#include "CommonDatabaseFunctions.h"
+
+#include <sstream>
 
 //
 // CBasketTradeModel
@@ -49,4 +53,23 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   catch (...) {
     std::cout << "error somewhere" << std::endl;
   }
+}
+
+void CBasketTradeModel::WriteBasketToDatabase() {
+
+  std::stringstream out;
+  streambuf *pOldBuf = out.rdbuf();
+  CDbValueStream strm;
+  cout.rdbuf( &strm );
+  CCommonDatabaseFunctions<CBasketTradeSymbolInfo> db( "BasicBasket" );
+
+  for( mapBasketSymbols_t::iterator iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
+    out.clear();
+    iter->second->StreamSymbolInfo( &out );
+  }
+}
+
+void CBasketTradeModel::ReadBasketFromDatabase() {
+  std::stringstream in;
+  CBasketTradeSymbolInfo *pBasket = new CBasketTradeSymbolInfo( &in, m_pExecutionProvider );
 }

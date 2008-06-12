@@ -13,11 +13,14 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 
+#include <sstream>
+
 class CBasketTradeSymbolInfo {
 public:
   explicit CBasketTradeSymbolInfo( 
     const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
     CProviderInterface *pExecutionProvider );
+  explicit CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider );
   ~CBasketTradeSymbolInfo( void );
 
   void CalculateTrade( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
@@ -26,7 +29,24 @@ public:
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
+  void StreamSymbolInfo( std::stringstream *pStream );
+
+  struct structFieldsForDialog { // used for updating dialog
+    std::string sSymbol;
+    double dblHigh;
+    double dblOpenRangeHigh;
+    double dblOpen;
+    double dblOpenRangeLow;
+    double dblLow;
+    double dblFilledPrice;
+    double dblCurrentPrice;
+    double dblStop;
+    double dblUnRealizedPL;
+    double dblRealizedPL;
+    std::string sHit;  // 0/1 for long, 0/1 for short (two characters here)
+  } ;
 protected:
+  void Initialize( void );
   std::string m_sSymbolName;
   std::string m_sPath;
   std::string m_sStrategy;
@@ -69,6 +89,8 @@ protected:
   double m_dblStartLevel;
   double m_dblAveBarHeight;
   double m_dblTrailingStopDistance;
+
+  structFieldsForDialog m_FieldsForDialog;
 
   bool m_bRTHOnly;
 

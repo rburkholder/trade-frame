@@ -15,6 +15,8 @@ public:
   ~CBasketTradeContainer(void);
   void AddSymbol( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
   void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly ) { m_pModel->Prepare( dtTradeDate, dblFunds, bRTHOnly ); };
+  void SaveBasket( void ) { m_pModel->WriteBasketToDatabase(); };
+  void LoadBasket( void ) { m_pModel->ReadBasketFromDatabase(); };
 
 protected:
   CProviderInterface *m_pDataProvider;

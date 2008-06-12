@@ -274,7 +274,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
 }
 
 void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
-  /*
+
   std::cout 
     << "execDetails: " 
     << "  sym=" << contract.symbol 
@@ -291,7 +291,7 @@ void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execu
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
-*/
+
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
   if ( "SLD" == execution.side ) side = OrderSide::Sell;

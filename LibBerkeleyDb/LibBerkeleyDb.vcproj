@@ -156,7 +156,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CommonDatabaseFunctions.cpp"
+				RelativePath=".\DbValueStream.cpp"
 				>
 			</File>
 			<File
@@ -199,6 +199,10 @@
 			</File>
 			<File
 				RelativePath=".\CommonDatabaseFunctions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DbValueStream.h"
 				>
 			</File>
 			<File

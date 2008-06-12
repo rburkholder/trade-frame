@@ -24,9 +24,12 @@ public:
 protected:
 private:
   std::vector<OnMessageHandler> rOnFD;
+  std::vector<OnMessageHandler> rToBeRemoved;
+  std::vector<OnMessageHandler> rToBeAdded;
+  bool m_bIterating;
 };
 
-template<class RO> Delegate<RO>::Delegate(void) {
+template<class RO> Delegate<RO>::Delegate(void) : m_bIterating( false ) {
 }
 
 template<class RO> Delegate<RO>::~Delegate(void) {
@@ -35,29 +38,61 @@ template<class RO> Delegate<RO>::~Delegate(void) {
 
 template<class RO> void Delegate<RO>::operator()( RO ro ) {
 
-  std::vector<OnMessageHandler>::iterator rOnFD_Iter;
+  std::vector<OnMessageHandler>::iterator iter;
 
-  rOnFD_Iter = rOnFD.begin();
-  while ( rOnFD.end() != rOnFD_Iter ) {
-    (*rOnFD_Iter)( ro );
-    ++rOnFD_Iter;
+  m_bIterating = true;
+  //if ( 0 < rOnFD.size() ) {
+  iter = rOnFD.begin();
+  while ( rOnFD.end() != iter ) {
+    (*iter)( ro );
+    ++iter;
+  }
+  //}
+  m_bIterating = false;
+
+  if ( !rToBeAdded.empty() ) {
+    iter = rToBeAdded.begin();
+    while ( rToBeAdded.end() != iter ) {
+      rOnFD.push_back( *iter );
+      ++iter;
+    }
+    rToBeAdded.clear();
+  }
+
+  if ( !rToBeRemoved.empty() ) {
+    iter = rToBeRemoved.begin();
+    while ( rToBeRemoved.end() != iter ) {
+      Remove( *iter );
+      ++iter;
+    }
+    rToBeRemoved.clear();
   }
 }
 
 template<class RO> void Delegate<RO>::Add( OnMessageHandler function ) {
-  rOnFD.push_back( function );
+  if ( m_bIterating ) {
+    rToBeAdded.push_back( function );
+  }
+  else {
+    rOnFD.push_back( function );
+  }
 }
 
 template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
 
-  std::vector<OnMessageHandler>::iterator rOnFD_Iter = rOnFD.begin();;
+  if ( m_bIterating ) {
+    rToBeRemoved.push_back( function );
+  }
+  else {
+    std::vector<OnMessageHandler>::iterator rOnFD_Iter = rOnFD.begin();
 
-  while ( rOnFD.end() != rOnFD_Iter ) {
-    if ( function == *rOnFD_Iter ) {
-      rOnFD.erase( rOnFD_Iter );
-      break;
+    while ( rOnFD.end() != rOnFD_Iter ) {
+      if ( function == *rOnFD_Iter ) {
+        rOnFD.erase( rOnFD_Iter );
+        break;
+      }
+      ++rOnFD_Iter;
     }
-    ++rOnFD_Iter;
   }
 }
 

@@ -21,16 +21,17 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   BOOL b = CDialog::OnInitDialog();
 
   m_lcBasketSymbols.InsertColumn(  0, "Sym", LVCFMT_LEFT, 50 );
-  m_lcBasketSymbols.InsertColumn(  1, "Open", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  2, "High", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  3, "Low", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  4, "Crnt", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  5, "BuyLvl", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  6, "SelLvl", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  7, "Stop", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn(  8, "Hit", LVCFMT_CENTER, 50 );
+  m_lcBasketSymbols.InsertColumn(  1, "High", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  2, "OpnHi", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  3, "Open", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  4, "OpnLo", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  5, "Low", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  6, "Filled", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  7, "Current", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn(  8, "Stop", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn(  9, "UnrelPL", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( 10, "RelPL", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn( 11, "Hit", LVCFMT_CENTER, 50 );
 
   return TRUE;
 }
