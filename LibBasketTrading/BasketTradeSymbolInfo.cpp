@@ -59,7 +59,7 @@ void CBasketTradeSymbolInfo::Initialize( void ) {
   file.CloseIQFSymbols();
 }
 
-void CBasketTradeSymbolInfo::StreamSymbolInfo(std::stringstream *pStream) {
+void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {
   *pStream << m_sSymbolName << "," << m_sPath << "," << m_sStrategy;
   //int i = pStream->gcount();
   //pStream->rdbuf()->pubsync

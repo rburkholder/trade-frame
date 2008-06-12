@@ -140,7 +140,7 @@ void CVuChartArmsIntraDay::ProcessHistory() {
 
 void CVuChartArmsIntraDay::HandleRealTime() {
   if ( theApp.m_bLive ) {
-    CIQFeedSymbol *pSym;
+//    CIQFeedSymbol *pSym;
 
     char symIndu[] = "INDU.X";
     m_IQFeedProvider.GetIQFeedProvider()->AddTradeHandler( symIndu, MakeDelegate( this, &CVuChartArmsIntraDay::ProcessMergeIndu ) );

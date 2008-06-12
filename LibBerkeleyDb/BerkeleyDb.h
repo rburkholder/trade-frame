@@ -1,5 +1,8 @@
 #pragma once
 
+// http://www.oracle.com/technology/documentation/berkeley-db/db/ref/toc.html
+// http://www.oracle.com/technology/documentation/berkeley-db/db/api_cxx/frame.html
+
 #include <db_cxx.h>
 
 #include <map>

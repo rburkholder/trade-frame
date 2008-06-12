@@ -29,7 +29,7 @@ public:
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
-  void StreamSymbolInfo( std::stringstream *pStream );
+  void StreamSymbolInfo( std::ostream *pStream );
 
   struct structFieldsForDialog { // used for updating dialog
     std::string sSymbol;
