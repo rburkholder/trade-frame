@@ -56,9 +56,15 @@ public:
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // report true when complete
   Delegate<COrder *> OnExecution;
-  Delegate<COrder *> OnOrderFilled;
+  Delegate<COrder *> OnOrderFilled; // on final fill
+  Delegate<COrder *> OnPartialFill; // on intermediate fills only
   void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
+  unsigned long GetQuanRemaining( void ) { return m_nRemaining; };
+  unsigned long GetQuanOrdered( void ) { return m_nOrderQuantity; };
+  unsigned long GetQuanFilled( void ) { return m_nFilled; };
+  void SetSignalPrice( double dblSignalPrice ) { m_dblSignalPrice = dblSignalPrice; };
+  double GetSignalPrice( void ) { return m_dblSignalPrice; };
 protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;
@@ -67,14 +73,15 @@ protected:
   OrderType::enumOrderType m_eOrderType;
   OrderSide::enumOrderSide m_eOrderSide;
   unsigned long m_nOrderQuantity;
-  unsigned long m_nOrderQuantityRemaining;
+  //unsigned long m_nOrderQuantityRemaining;
   double m_dblPrice1;  // for limit
   double m_dblPrice2;  // for stop
+  double m_dblSignalPrice;  // mark at which algorithm requested order
 
   //CProviderInterface *m_pProvider;  // associated provider
   ptime m_dtOrderSubmitted;
   ptime m_dtOrderCancelled;
-  ptime m_dtOrderExecuted;
+  ptime m_dtOrderFilled;
 
   bool m_bOutsideRTH;
 
@@ -85,11 +92,11 @@ protected:
   void AssignOrderId( void );
 
   // statistics and status
-  unsigned long m_nTotalOrdered;
+  //unsigned long m_nTotalOrdered;
   unsigned long m_nFilled;
   unsigned long m_nRemaining;
   double m_dblCommission;
-  double m_dblPriceQuantity; // used for calculating average price
+  double m_dblPriceXQuantity; // used for calculating average price
   double m_dblAverageFillPrice;
   //double m_dblAverageFillPriceWithCommission;
 private:

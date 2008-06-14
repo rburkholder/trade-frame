@@ -26,10 +26,12 @@ public:
   void CalculateTrade( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
+  void HandleQuote( const CQuote &quote );
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
   void StreamSymbolInfo( std::ostream *pStream );
+  void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
   struct structFieldsForDialog { // used for updating dialog
     std::string sSymbol;
@@ -90,6 +92,11 @@ protected:
   double m_dblAveBarHeight;
   double m_dblTrailingStopDistance;
 
+  size_t m_nBarsInSequence;
+  size_t m_nOpenCrossings;
+  static const size_t m_nMaxCrossings = 5;  
+  static const size_t m_nBarWidth = 6;  //seconds
+
   structFieldsForDialog m_FieldsForDialog;
 
   bool m_bRTHOnly;
@@ -97,6 +104,8 @@ protected:
   CProviderInterface *m_pExecutionProvider;
 
   CBarFactory m_1MinBarFactory;
+  CQuotes m_quotes;
+  CTrades m_trades;
   CBars m_bars;
   void HandleBarFactoryBar( const CBar &bar );
 

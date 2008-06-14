@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "IQFeedHistoryCollector.h"
 
-#include "HDF5TimeSeriesContainer.h"
+#include "HDF5WriteTimeSeries.h"
 
 //
 // CHistoryCollector
@@ -48,90 +48,20 @@ void CHistoryCollectorDaily::Start( void ) {
 
 void CHistoryCollectorDaily::WriteData( void ) {
   if ( 0 != m_bars.Count() ) {
-    try {
 
-      assert( m_sSymbol.length() > 0 );
+    assert( m_sSymbol.length() > 0 );
 
-      DataSet *dataset;
-      bool bNeedToCreateDataSet = false;
-      string sFileName1;
-      CHDF5DataManager dm;
+    string sPathName;
 
-      try {   // need to fix this so everything is skipped
-        sFileName1.append( "/bar/86400/" );
-        sFileName1.append( m_sSymbol.substr( 0, 1 ) );
-        dm.AddGroup( sFileName1 );
-        sFileName1.append( "/" );
-        sFileName1.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
-        dm.AddGroup( sFileName1 );
-        sFileName1.append( "/" );
-        sFileName1.append( m_sSymbol );
-      }
-      catch (  H5::Exception e ) {
-        cout << "CHistoryCollectorDaily::WriteData Exception " << e.getDetailMsg() << endl;
-        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
-        throw e;
-      }
+    sPathName.append( "/bar/86400/" );
+    sPathName.append( m_sSymbol.substr( 0, 1 ) );
+    sPathName.append( "/" );
+    sPathName.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
+    sPathName.append( "/" );
+    sPathName.append( m_sSymbol );
 
-      try { // check if dataset exists (for overwrite)
-        dataset = new DataSet( dm.GetH5File()->openDataSet( sFileName1 ) );
-        dataset->close();
-        delete dataset;
-      }
-      catch ( H5::FileIException e ) {
-        bNeedToCreateDataSet = true;
-        //dataset->close();
-        //delete dataset;
-      }
-      if ( bNeedToCreateDataSet ) {
-
-        CompType *pdt = CBar::DefineDataType();
-        pdt->pack();
-
-        DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
-        hsize_t curSize = 0;
-        hsize_t maxSize = H5S_UNLIMITED; 
-        pds->setExtentSimple( 1, &curSize, &maxSize ); 
-
-        DSetCreatPropList pl;
-        hsize_t sizeChunk = CHDF5DataManager::H5ChunkSize();
-        pl.setChunk( 1, &sizeChunk );
-        pl.setShuffle();
-        pl.setDeflate(5);
-
-        dataset = new DataSet( dm.GetH5File()->createDataSet( sFileName1, *pdt, *pds, pl ) );
-        dataset->close();
-        pds->close();
-        pdt->close();
-        delete pds;
-        delete pdt;
-        delete dataset;
-      }
-      else {
-        //dataset->close();  // from successful open
-        //cout << "Code is needed to write over existing dataset for " << m_sSymbol << endl;
-      }
-
-      try {
-        CHDF5TimeSeriesContainer<CBar> barRepository( sFileName1 );
-        barRepository.Write( m_bars.First(), m_bars.Last() + 1 );
-        //dataset->write( m_bars.First(), *pdt );
-        //dataset->close();
-        //
-        //dm.AddGroupForSymbol( m_sSymbol );
-        //dm.GetH5File()->link( H5L_type_t::H5L_TYPE_HARD, sFileName1, "/symbol/" + m_sSymbol + "/bar.86400" );
-      }
-      catch (  H5::FileIException e ) {
-        cout << "H5::FileIException " << e.getDetailMsg() << endl;
-        e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
-      }
-      catch ( ... ) {
-        cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << endl;
-      }
-    }
-    catch (...) {
-      cout << "CHistoryCollectorDaily::WriteData:  unknown error 3" << endl;
-    }
+    CHDF5WriteTimeSeries<CBars, CBar> wts;
+    wts.Write( sPathName, &m_bars );
   }
 }
 
@@ -156,5 +86,21 @@ void CHistoryCollectorTicks::Start( void ) {
 }
 
 void CHistoryCollectorTicks::WriteData( void ) {
+
+  assert( m_sSymbol.length() > 0 );
+
+  string sPathName;
+
+  if ( 0 != m_trades.Count() ) {
+    sPathName = "/trade/" + m_sSymbol;
+    CHDF5WriteTimeSeries<CTrades, CTrade> wtst;
+    wtst.Write( sPathName, &m_trades );
+  }
+
+  if ( 0 != m_quotes.Count() ) {
+    sPathName = "/quote/" + m_sSymbol;
+    CHDF5WriteTimeSeries<CQuotes, CQuote> wtsq;
+    wtsq.Write( sPathName, &m_quotes );
+  }
 }
 

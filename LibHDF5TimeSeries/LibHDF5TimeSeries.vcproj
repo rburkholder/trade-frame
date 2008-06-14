@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HDF5WriteTimeSeries.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>

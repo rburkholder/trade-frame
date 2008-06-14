@@ -5,6 +5,8 @@
 #include "FastDelegate.h"
 using namespace fastdelegate;
 
+#include <string>
+
 #define DATA_BUFSIZE 5120
 
 class CBufferedSocket {
@@ -25,6 +27,8 @@ public:
 
 protected:
   LPVOID m_object;  // an object used by the caller
+
+  std::string m_sLastCommand;
 
 private:
   HANDLE m_hReceiveThread;

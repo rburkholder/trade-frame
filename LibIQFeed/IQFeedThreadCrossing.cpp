@@ -53,6 +53,7 @@ void CIQFeedThreadCrossing::CloseSocket() {
 }
 
 void CIQFeedThreadCrossing::QueueResponse(unsigned short nChars, const char *buf) {
+  // todo:  I've been caught here once with data still arriving,  need to track from whence it comes
   ASSERT( bActive );
   EnterCriticalSection( &csProtectQueues );
   CCharBuffer *cb = m_EmptyBuffers.CheckOut( nChars, buf );

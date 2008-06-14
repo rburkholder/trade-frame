@@ -56,22 +56,28 @@ CHDF5DataManager::~CHDF5DataManager(void) {
   }
 }
 
-void CHDF5DataManager::AddGroup( const std::string &sGroup ) {
-  // caller can supply stepped groups to create group structure:
+void CHDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to have terminating '/'
   //  /symbol, /symbol/G, /symbol/G/O, /symbol/G/O/GOOG
-  try {
+  std::string sSubPath;
+  // ensure that appropriate group has been created in the file
+  std::string::size_type ixSlash = sGroupPath.find( '/', 1 ); // ignore initial / character
+  while ( std::string::npos != ixSlash ) {
+    sSubPath = sGroupPath.substr( 0, ++ixSlash );  // use ixSlash as count here
     try {
-      Group g = GetH5File()->openGroup( sGroup );
-      g.close();
-    }  // one of these when doesn't exist
-    catch ( H5::Exception e ) {
-      //std::cout << "CDataManager::AddGroup H5::Exception for '" << sGroup << "', " << e.getDetailMsg() << std::endl;
-      Group g = GetH5File()->createGroup( sGroup );
-      g.close();
+      try {
+        Group g = GetH5File()->openGroup( sSubPath );
+        g.close();
+      }  // one of these when doesn't exist
+      catch ( H5::Exception e ) {  // what is the specific exception here?
+        //std::cout << "CDataManager::AddGroup H5::Exception for '" << sGroup << "', " << e.getDetailMsg() << std::endl;
+        Group g = GetH5File()->createGroup( sSubPath );
+        g.close();
+      }
     }
-  }
-  catch (...) {
-    throw std::runtime_error( "CDataManager::AddGroup has creation problems" );
+    catch (...) {
+      throw std::runtime_error( "CDataManager::AddGroup has creation problems" );
+    }
+    ixSlash = sGroupPath.find( '/', ixSlash ); // use incremented ixSlash here as new start index
   }
 }
 

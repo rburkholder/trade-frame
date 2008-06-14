@@ -17,7 +17,7 @@ public:
   void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly ) { m_pModel->Prepare( dtTradeDate, dblFunds, bRTHOnly ); };
   void SaveBasket( void ) { m_pModel->WriteBasketToDatabase(); };
   void LoadBasket( void ) { m_pModel->ReadBasketFromDatabase(); };
-
+  void SaveBasketData( const std::string &sPathPrefix ) { m_pModel->WriteBasketData( sPathPrefix ); };
 protected:
   CProviderInterface *m_pDataProvider;
   CProviderInterface *m_pExecutionProvider;

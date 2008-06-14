@@ -191,6 +191,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_BTNSAVESYMBOL, &CGTScalpDlg::OnBnClickedBtnsavesymbol)
   ON_BN_CLICKED(IDC_BTNLOADBASKET, &CGTScalpDlg::OnBnClickedBtnloadbasket)
   ON_BN_CLICKED(IDC_BTNSAVEBASKET, &CGTScalpDlg::OnBnClickedBtnsavebasket)
+  ON_BN_CLICKED(IDC_BTNSAFEBSKTDATA, &CGTScalpDlg::OnBnClickedBtnsafebsktdata)
+  ON_EN_CHANGE(IDC_ENTRY1, &CGTScalpDlg::OnEnChangeEntry1)
 END_MESSAGE_MAP()
 
 
@@ -1254,5 +1256,31 @@ void CGTScalpDlg::OnBnClickedBtnsavebasket() {
 }
 
 void CGTScalpDlg::OnBnClickedBtnloadbasket() {
+  if ( NULL != m_pBasketTrade ) {
+    m_pBasketTrade->LoadBasket();
+  }
 }
 
+
+void CGTScalpDlg::OnBnClickedBtnsafebsktdata() {
+  if ( NULL != m_pBasketTrade ) {
+    char entry[ 100 ];
+    m_edtEntry1.GetWindowTextA( entry, 100 );
+    if ( 0 != *entry ) {
+      if ( '/' == *entry ) {
+        string path( entry );
+        m_pBasketTrade->SaveBasketData( path );
+      }
+    }
+  }
+}
+
+void CGTScalpDlg::OnEnChangeEntry1()
+{
+  // TODO:  If this is a RICHEDIT control, the control will not
+  // send this notification unless you override the CDialog::OnInitDialog()
+  // function and call CRichEditCtrl().SetEventMask()
+  // with the ENM_CHANGE flag ORed into the mask.
+
+  // TODO:  Add your control notification handler code here
+}

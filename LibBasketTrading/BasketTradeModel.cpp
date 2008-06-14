@@ -79,3 +79,9 @@ void CBasketTradeModel::ReadBasketFromDatabase() {
   std::stringstream in;
   CBasketTradeSymbolInfo *pBasket = new CBasketTradeSymbolInfo( &in, m_pExecutionProvider );
 }
+
+void CBasketTradeModel::WriteBasketData( const std::string &sPathPrefix ) {
+  for( mapBasketSymbols_t::iterator iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
+    iter->second->WriteTradesAndQuotes( sPathPrefix );
+  }
+}

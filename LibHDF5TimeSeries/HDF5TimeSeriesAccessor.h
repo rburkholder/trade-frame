@@ -16,7 +16,7 @@ using namespace std;
 // class T needs to be composed from the CDatedDatum class for access to ptime element
 template<class T> class CHDF5TimeSeriesAccessor {
 public:
-  explicit CHDF5TimeSeriesAccessor<T>( const string &sFileName );
+  explicit CHDF5TimeSeriesAccessor<T>( const string &sPathName );
   virtual ~CHDF5TimeSeriesAccessor<T>(void);
   typedef hsize_t size_type;
   size_type size() const { return m_curElementCount; };
@@ -24,7 +24,7 @@ public:
   void Read( hsize_t ixStart, hsize_t count, DataSpace *pMemoryDataSpace, T *pDatedDatum );
   void Write( hsize_t ixStart, size_t count, T * );
 protected:
-  string m_sFilename;
+  string m_sPathName;
   CHDF5DataManager dm;
   DataSet *m_pDiskDataSet;
   CompType *m_pDiskCompType;
@@ -45,12 +45,12 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::UpdateElementCount( void ) {
   SetNewSize( m_curElementCount );
 }
 
-template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std::string &sFileName):
+template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std::string &sPathName):
 
-  m_sFilename( sFileName ) {
+  m_sPathName( sPathName ) {
 
   try {
-    m_pDiskDataSet = new DataSet( dm.GetH5File()->openDataSet( m_sFilename.c_str() ) );
+    m_pDiskDataSet = new DataSet( dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
     m_pDiskCompType = new CompType( *m_pDiskDataSet );
 
     CompType *pMemCompType = T::DefineDataType( NULL );

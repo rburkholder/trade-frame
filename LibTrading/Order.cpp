@@ -16,9 +16,10 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ),
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
+    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+    m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
+    m_dblSignalPrice( 0 )
 {
   AssignOrderId();
 }
@@ -36,9 +37,10 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false )
+    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+    m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
+    m_dblSignalPrice( 0 )
 {
   AssignOrderId();
 }
@@ -56,9 +58,10 @@ COrder::COrder(
     m_dtOrderSubmitted( dtOrderSubmitted ), 
     m_eOrderStatus( OrderStatus::Created ),
     m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nTotalOrdered( nOrderQuantity ), m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false )
+    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+    m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false ),
+    m_dblSignalPrice( 0 )
 {
   AssignOrderId();
 }
@@ -100,8 +103,8 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     bOverDone = true;
   }
   if ( !bOverDone ) {
-    m_dblPriceQuantity += exec.GetPrice() * exec.GetSize();
-    m_dblAverageFillPrice = m_dblPriceQuantity / m_nFilled;
+    m_dblPriceXQuantity += exec.GetPrice() * exec.GetSize();
+    m_dblAverageFillPrice = m_dblPriceXQuantity / m_nFilled;
     if ( 0 == m_nRemaining ) {
       m_eOrderStatus = OrderStatus::Filled;
       OnOrderFilled( this );
@@ -126,6 +129,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
         std::cout << "COrder::ReportExecution " << m_eOrderStatus << std::endl;
         break;
       }
+      OnPartialFill( this );
     }
   }
   return m_eOrderStatus;

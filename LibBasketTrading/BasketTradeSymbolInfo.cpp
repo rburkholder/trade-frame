@@ -4,6 +4,7 @@
 
 #include "TimeSeries.h"
 #include "HDF5TimeSeriesContainer.h"
+#include "HDF5WriteTimeSeries.h"
 #include "InstrumentFile.h"
 
 // 
@@ -20,7 +21,8 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bOpenFound( false ), m_dblOpen( 0 ), m_dblOpenLow( 0 ), m_dblOpenHigh( 0 ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
-  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true )
+  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
 {
   Initialize();
 }
@@ -31,7 +33,8 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CPro
   m_bOpenFound( false ), m_dblOpen( 0 ), m_dblOpenLow( 0 ), m_dblOpenHigh( 0 ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
-  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true )
+  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
 {
   *pStream >> m_sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -45,7 +48,7 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
 }
 
 void CBasketTradeSymbolInfo::Initialize( void ) {
-  m_1MinBarFactory.SetBarWidth( 30 );  // 30 seconds, 10 bars in 5 minutes, 5 bars for A confirmation
+  m_1MinBarFactory.SetBarWidth( m_nBarWidth );  
   m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
 
   CInstrumentFile file;
@@ -105,7 +108,12 @@ void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, 
   }
 }
 
+void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
+  m_quotes.AppendDatum( quote );
+}
+
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
+  m_trades.AppendDatum( trade );
   //std::cout << "Trade " << m_sSymbolName << ", " << trade.m_nTradeSize << "@" << trade.m_dblTrade << std::endl;
   switch ( m_TradingState ) {
     case WaitForOpeningTrade:
@@ -130,23 +138,13 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
           m_bOpenFound = true;
           m_dblOpen = m_dblOpenLow = m_dblOpenHigh = trade.m_dblTrade;
         }
-        m_dtToday = ptime( trade.m_dt.date(), time_duration( 10, 35, 0 ) );
-        m_TradingState = SetOpeningRange;
-        std::cout << m_sSymbolName << " Entering SetOpeningRange" << std::endl;
-      }
-      break;
-    case SetOpeningRange:
-      if ( trade.m_dt >= m_dtToday ) {
         m_dtToday = ptime( trade.m_dt.date(), time_duration( 16, 40, 0 ) );
         m_TradingState = ActiveTrading;
         std::cout << m_sSymbolName << " Entering ActiveTrading" << std::endl;
       }
-      else {
-        if ( trade.m_dblTrade > m_dblOpenHigh ) m_dblOpenHigh = trade.m_dblTrade;
-        if ( trade.m_dblTrade < m_dblOpenLow ) m_dblOpenLow = trade.m_dblTrade;
-      }
       break;
     case ActiveTrading:
+
       if ( trade.m_dt >= m_dtToday ) {
         m_dtToday = ptime( trade.m_dt.date(), time_duration( 16, 45, 0 ) );
         m_TradingState = NoMoreTrades;
@@ -156,14 +154,17 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
         // these states are here in order to handle stops at the trade level rather than bar level
         switch ( m_PositionState ) {
           case WaitingForLongExit:
-            if ( trade.m_dblTrade < m_dblStop ) {
+            if ( trade.m_dblTrade < m_dblOpen ) {
+              ++m_nOpenCrossings;
+              //if ( m_nMaxCrossings < m_nOpenCrossings ) m_bDoneTheLong = true;
               m_PositionState = WaitingForThe3Bars;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
             break;
           case WaitingForShortExit:
-            if ( trade.m_dblTrade > m_dblStop ) {
+            if ( trade.m_dblTrade > m_dblOpen ) {
+              ++m_nOpenCrossings;
               m_PositionState = WaitingForThe3Bars;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
@@ -173,6 +174,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
             // all other states handled in bar mode
             break;
         }
+        m_1MinBarFactory.Add( trade );
       }
       break;
     case NoMoreTrades:
@@ -205,9 +207,6 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       // do nothing
       break;
   }
-
-  m_1MinBarFactory.Add( trade );
-
 }
 
 void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
@@ -225,52 +224,55 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
       else {
         m_PositionState = WaitingForThe3Bars;
       }
-      break;  // some strategies may require a fall through here
+      //break;  // some strategies may require a fall through here
       //case WaitingForOpen:
       //  break;
     case WaitingForThe3Bars:
-      if ( m_bDoneTheLong && m_bDoneTheShort ) {
+      //if ( m_bDoneTheLong && m_bDoneTheShort ) {
+      if ( m_nMaxCrossings < m_nOpenCrossings ) {
         m_PositionState = Exited;  // don't do any more trading
         break;
       }
-      if ( ( cnt >= 5 ) && ( 0 < m_dblOpen ) && ( ActiveTrading == m_TradingState ) ) {
-        CBar bar1, bar2, bar3, bar4, bar5;
-        bar1 = *m_bars[ cnt - 5 ];
-        bar2 = *m_bars[ cnt - 4 ];
-        bar3 = *m_bars[ cnt - 3 ];
-        bar4 = *m_bars[ cnt - 2 ];
-        bar5 = *m_bars[ cnt - 1 ];
+      if ( ( cnt >= 3 ) && ( 0 < m_dblOpen ) ) {
+        CBar bar1, bar2, bar3;
+        //bar1 = *m_bars[ cnt - 5 ];
+        //bar2 = *m_bars[ cnt - 4 ];
+        bar1 = *m_bars[ cnt - 3 ];
+        bar2 = *m_bars[ cnt - 2 ];
+        bar3 = *m_bars[ cnt - 1 ];
         if ( !m_bDoneTheLong ) {
-          double dblAboveThisLevel = m_dblOpenHigh + m_dblAveBarHeight;
+          //double dblAboveThisLevel = m_dblOpenHigh + m_dblAveBarHeight;
+          double dblAboveThisLevel = m_dblOpen;
           if ( ( bar1.m_dblLow > dblAboveThisLevel ) 
             && ( bar2.m_dblLow > dblAboveThisLevel ) 
             && ( bar3.m_dblLow > dblAboveThisLevel ) 
-            && ( bar4.m_dblLow > dblAboveThisLevel ) 
-            && ( bar5.m_dblLow > dblAboveThisLevel ) ) {
-              m_dblStop = m_dblOpenLow;
+            ) {
+              m_dblStop = m_dblOpen;
               m_dblTrailingStopDistance = bar.m_dblClose - m_dblOpenLow;
               std::cout << m_sSymbolName << " Enter LONG now: " << bar.m_dblClose << ", Stop at " << m_dblStop << std::endl;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
+              pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentLong;
-              m_bDoneTheLong = true;
+              //m_bDoneTheLong = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
           }
         }
         if ( !m_bDoneTheShort ) {
-          double dblBelowThisLevel = m_dblOpenLow - m_dblAveBarHeight;
+          //double dblBelowThisLevel = m_dblOpenLow - m_dblAveBarHeight;
+          double dblBelowThisLevel = m_dblOpen;
           if ( ( bar1.m_dblHigh < dblBelowThisLevel ) 
             && ( bar2.m_dblHigh < dblBelowThisLevel ) 
             && ( bar3.m_dblHigh < dblBelowThisLevel ) 
-            && ( bar4.m_dblHigh < dblBelowThisLevel ) 
-            && ( bar5.m_dblHigh < dblBelowThisLevel ) ) {
-              m_dblStop = m_dblOpenHigh;
+            ) {
+              m_dblStop = m_dblOpen;
               m_dblTrailingStopDistance = m_dblOpenHigh - bar.m_dblClose;
               std::cout << " Enter SHORT Now: " << m_sSymbolName << ", Stop at " << m_dblStop << std::endl;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
+              pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentShort;
-              m_bDoneTheShort = true;
+              //m_bDoneTheShort = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
         }
@@ -283,13 +285,13 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
     case WaitingForLongExit:   // adjust stop after each bar
       dblTemp = bar.m_dblClose - m_dblTrailingStopDistance;
       if ( dblTemp > m_dblStop ) {
-        m_dblStop = dblTemp;
+        //m_dblStop = dblTemp;
       }
       break;
     case WaitingForShortExit:   // adjust stop after each bar
       dblTemp = bar.m_dblClose + m_dblTrailingStopDistance;
       if ( dblTemp < m_dblStop ) {
-        m_dblStop = dblTemp;
+        //m_dblStop = dblTemp;
       }
       break;
     case Exited:
@@ -316,4 +318,16 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
 }
 
 void CBasketTradeSymbolInfo::HandleOpen( const CTrade &trade ) {
+  m_dblOpen = trade.m_dblTrade;
+}
+
+void CBasketTradeSymbolInfo::WriteTradesAndQuotes(const std::string &sPathPrefix) {
+  if ( 0 != m_trades.Count() ) {
+    CHDF5WriteTimeSeries<CTrades, CTrade> wts;
+    wts.Write( sPathPrefix + "trades/" + m_sSymbolName, &m_trades );
+  }
+  if ( 0 != m_quotes.Count() ) {
+    CHDF5WriteTimeSeries<CQuotes, CQuote> wts;
+    wts.Write( sPathPrefix + "quotes/" + m_sSymbolName, &m_quotes );
+  }
 }

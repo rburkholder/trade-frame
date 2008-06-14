@@ -126,6 +126,7 @@ void CBufferedSocket::Send( const char *pCommand ) {
   //CString s;
   buf.buf = (char*) pCommand;
   buf.len = (u_long) strlen( pCommand );
+  m_sLastCommand.assign( buf.buf, buf.len );
   m_cntBytesSent = m_Flags = 0;
   if ( SOCKET_ERROR == WSASend( m_socket, &buf, 1, &m_cntBytesSent, m_Flags, NULL, NULL ) ) {
     int e = WSAGetLastError();

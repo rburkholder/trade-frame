@@ -15,6 +15,7 @@ public:
   void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
   void WriteBasketToDatabase( void );
   void ReadBasketFromDatabase( void );
+  void WriteBasketData( const std::string &sPathPrefix );
 protected:
   typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;

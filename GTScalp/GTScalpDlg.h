@@ -213,4 +213,6 @@ public:
   CEdit m_edtAlternateSymbolName;
   afx_msg void OnBnClickedBtnloadbasket();
   afx_msg void OnBnClickedBtnsavebasket();
+  afx_msg void OnBnClickedBtnsafebsktdata();
+  afx_msg void OnEnChangeEntry1();
 };
