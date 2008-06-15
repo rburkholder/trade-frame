@@ -286,14 +286,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\CtlListCtrlBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CtlLvColumns.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\CtlMarketDepth.cpp"
 					>
 				</File>
@@ -425,10 +417,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReusableCharBuffers.h"
-				>
-			</File>
-			<File
 				RelativePath=".\RowKeyValues.h"
 				>
 			</File>
@@ -477,14 +465,6 @@
 				>
 				<File
 					RelativePath=".\CtlKeyValues.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CtlListCtrlBase.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CtlLvColumns.h"
 					>
 				</File>
 				<File
