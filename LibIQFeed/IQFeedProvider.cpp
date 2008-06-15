@@ -5,7 +5,7 @@ CIQFeedProvider::CIQFeedProvider(void)
 : CProviderInterface(), CIQFeed()
 {
   m_sName = "IQF";
-  m_nID = 102;
+  m_nID = EProviderIQF;
 }
 
 CIQFeedProvider::~CIQFeedProvider(void) {
@@ -13,6 +13,7 @@ CIQFeedProvider::~CIQFeedProvider(void) {
 
 void CIQFeedProvider::Connect() {
   if ( !m_bConnected ) {
+    CProviderInterface::Connect();
     CIQFeed::Connect();
     m_bConnected = true;
     OnConnected( 0 );
@@ -22,6 +23,7 @@ void CIQFeedProvider::Connect() {
 void CIQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
     CIQFeed::Disconnect();
+    CProviderInterface::Disconnect();
     m_bConnected = false;
     OnDisconnected( 0 );
   }

@@ -44,6 +44,8 @@ public:
 
   void SetAlternateInstrumentName( const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName );
   void GetAlternateInstrumentName( const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName );
+
+  enum enumProviderId { EProviderIB = 100, EProviderIQF, EProviderGNDT, _EProviderCount };
 protected:
   std::string m_sName;  // name of provider
   unsigned short m_nID;
@@ -62,3 +64,12 @@ protected:
 
 private:
 };
+
+/*
+
+Discussion of calling sequence for open, quote, trade, depth handlers:
+* client application calls Provider to add a handler
+* CProviderInterface maintains list of symbols, 
+   and will use the pure virtual override to create a new one when necessary 
+
+*/

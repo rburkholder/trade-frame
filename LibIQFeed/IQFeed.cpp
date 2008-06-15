@@ -57,8 +57,6 @@ void CIQFeed::Disconnect() {
 void CIQFeed::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
     std::string s = "w" + pSymbol->Name() + "\n";
-    //s.Format( "w%s\n", pSymbol->Name().c_str() );
-    //IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
     IQConnect.SendToSocket( s.c_str() );
     pSymbol->SetQuoteTradeWatchInProgress();
   }

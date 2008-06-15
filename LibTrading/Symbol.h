@@ -26,8 +26,10 @@ public:
   
   virtual bool AddQuoteHandler( quotehandler_t );
   virtual bool RemoveQuoteHandler( quotehandler_t );
+
   virtual bool AddTradeHandler( tradehandler_t ); 
   virtual bool RemoveTradeHandler( tradehandler_t );
+
   virtual bool AddDepthHandler( depthhandler_t );
   virtual bool RemoveDepthHandler( depthhandler_t );
 

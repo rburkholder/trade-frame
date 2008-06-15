@@ -22,7 +22,7 @@ CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ):
     m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
 {
   m_sName = "IB";
-  m_nID = 101;
+  m_nID = EProviderIB;
   CIBSymbol *p = NULL;
   m_vTickerToSymbol.push_back( p );  // first ticker is 1, so preload at position 0
 }

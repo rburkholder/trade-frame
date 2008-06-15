@@ -16,41 +16,13 @@ m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false )
 CIQFeedSymbol::~CIQFeedSymbol(void) {
 }
 
-/*
-bool CIQFSymbol::Watch() {
-  bool b = false;
-  m_cnt++;
-  if ( 1 == m_cnt ) {
-    b = true;
-  }
-  return b;
-}
-
-bool CIQFSymbol::UnWatch() {
-  bool b = false;
-  if ( 0 < m_cnt ) {
-    m_cnt--;
-    if ( 0 == m_cnt ) {
-      b = true;
-    }
-  }
-  return b;
-}                                               
-*/
-
 void CIQFeedSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
-  //pMsg->EmitFields();
   m_sOptionRoots = pMsg->Field( CIQFFundamentalMessage::FRootOptionSymbols );
   m_AverageVolume = pMsg->Integer( CIQFFundamentalMessage::FAveVolume );
   m_sCompanyName = pMsg->Field( CIQFFundamentalMessage::FName );
   m_Precision = pMsg->Integer( CIQFFundamentalMessage::FPrecision );
   m_dblHistoricalVolatility = pMsg->Double( CIQFFundamentalMessage::FVolatility );
   m_dblStrikePrice = pMsg->Double( CIQFFundamentalMessage::FStrikePrice );
-
-  //CString s;
-  //s.Format( "%s: %s, %s, %d, %d, %0.2f", 
-  //  m_sSymbol, sCompanyName, sOptionRoots, AverageVolume, Precision, dblHistoricalVolatility );
-  //theApp.pConsoleMessages->WriteLine( s ); 
 
   OnFundamentalMessage( this );
 }

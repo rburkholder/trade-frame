@@ -1,5 +1,5 @@
 #pragma once
-#include "k:\data\projects\tradingsoftware\libtrading\providerinterface.h"
+#include <providerinterface.h>
 #include "IQFeed.h"
 #include "IQFeedSymbol.h"
 

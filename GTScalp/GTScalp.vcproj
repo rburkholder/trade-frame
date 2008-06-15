@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibInteractiveBrokers;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;;..\LibIQFeed;..\LibBasketTrading"
+				AdditionalIncludeDirectories="..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibIQFeed;..\LibInteractiveBrokers;..\LibGndt;..\LibBasketTrading;K:\Data\Projects\boost\boost_1_35_0;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\TradingSoftware\GTScalp\szlib;K:\Data\Projects\TradingSoftware\GTScalp\zlib;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -270,23 +270,11 @@
 				Name="GT"
 				>
 				<File
-					RelativePath=".\GTOrderX.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\GTScalp.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\GTScalpDlg.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GTSessionX.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\GTStockX.cpp"
 					>
 				</File>
 			</Filter>
@@ -476,23 +464,11 @@
 				Name="GT"
 				>
 				<File
-					RelativePath=".\GTOrderX.h"
-					>
-				</File>
-				<File
 					RelativePath=".\GTScalp.h"
 					>
 				</File>
 				<File
 					RelativePath=".\GTScalpDlg.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GTSessionX.h"
-					>
-				</File>
-				<File
-					RelativePath=".\GTStockX.h"
 					>
 				</File>
 			</Filter>
@@ -584,118 +560,6 @@
 			</File>
 			<File
 				RelativePath=".\res\GTScalp.rc2"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="GTAPI"
-			>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GMMID.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTAccount.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTAPI.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTAPI_API.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTAskList.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTBidList.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTCancel.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTChart.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTErrMsg.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTExecMsg.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTLevel1.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTLevel2.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTLevel2Box.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTLevel2List.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTOpenPosition.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTOrder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTPending.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTPendingBook.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTPrint.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTReject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTServerState.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTSession.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTSetting.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTStatus.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTStock.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTTrade.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Genesis\v8\GenSrc\API\INC\GTUser.h"
 				>
 			</File>
 		</Filter>

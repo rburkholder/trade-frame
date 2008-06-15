@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-//#include "GTScalp.h"
 #include "GTSessionX.h"
 #include "GTStockX.h"
 
@@ -18,6 +17,13 @@ BEGIN_MESSAGE_MAP(CGTSessionX, GTSession)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+GTStock* CGTSessionX::OnCreateStock(LPCSTR pszStock) {
+  CGTStockX *pStock = new CGTStockX( *this, pszStock );
+  if (NULL == pStock) {
+    return NULL;
+  }
+  return pStock;
+}
 
 int CGTSessionX::OnExecConnected()
 {
@@ -156,13 +162,4 @@ int CGTSessionX::OnGotQuoteDisconnected() {
   cout << "Quote Disconnected" << endl;
   return GTSession::OnGotQuoteDisconnected();
 }
-
-GTStock* CGTSessionX::OnCreateStock(LPCSTR pszStock) {
-  CGTStockX *pStock = new CGTStockX( *this, pszStock );
-  if (NULL == pStock) {
-    return NULL;
-  }
-  return pStock;
-}
-
 
