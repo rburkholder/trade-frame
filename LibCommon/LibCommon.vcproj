@@ -157,10 +157,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GeneratePeriodicRefresh.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\KeyWordMatch.cpp"
 				>
 			</File>
@@ -212,10 +208,6 @@
 			</File>
 			<File
 				RelativePath=".\FastDelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GeneratePeriodicRefresh.h"
 				>
 			</File>
 			<File

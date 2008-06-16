@@ -2,6 +2,7 @@
 
 #include "..\LibTrading\ProviderInterface.h"
 #include "BasketTradeSymbolInfo.h"
+#include "Delegate.h"
 
 #include <map>
 #include <string>
@@ -16,6 +17,7 @@ public:
   void WriteBasketToDatabase( void );
   void ReadBasketFromDatabase( void );
   void WriteBasketData( const std::string &sPathPrefix );
+  Delegate<CBasketTradeSymbolInfo*> OnBasketTradeSymbolInfoAddedToBasket;
 protected:
   typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;

@@ -11,6 +11,7 @@ CCtlListCtrlBase::~CCtlListCtrlBase(void) {
 
 void CCtlListCtrlBase::InitControl( void ) {
   SetExtendedStyle( LVS_EX_INFOTIP | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP | LVS_EX_FULLROWSELECT );
+//  SetExtendedStyle( LVS_EX_INFOTIP | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP  | LVS_EX_FULLROWSELECT | LVS_EX_ONECLICKACTIVATE );
   EnableToolTips();
   m_nRowCount = 0;
 }

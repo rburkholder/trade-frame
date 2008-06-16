@@ -12,6 +12,7 @@ using namespace boost::gregorian;
 #include "Instrument.h"
 #include "Order.h"
 #include "OrderManager.h"
+#include "Delegate.h"
 
 #include <sstream>
 
@@ -22,6 +23,8 @@ public:
     CProviderInterface *pExecutionProvider );
   explicit CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider );
   ~CBasketTradeSymbolInfo( void );
+
+  Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
 
   void CalculateTrade( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };

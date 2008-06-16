@@ -27,8 +27,6 @@ CCtlKeyValues::~CCtlKeyValues() {
 void CCtlKeyValues::InitControl() {
 
   CCtlListCtrlBase::InitControl();
-//  SetExtendedStyle( LVS_EX_INFOTIP | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP | LVS_EX_ONECLICKACTIVATE | LVS_EX_FULLROWSELECT );
-//  SetExtendedStyle( LVS_EX_INFOTIP | LVS_EX_DOUBLEBUFFER | LVS_EX_LABELTIP | LVS_EX_FULLROWSELECT );
 
   //EnableToolTips();
 

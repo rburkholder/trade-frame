@@ -9,9 +9,10 @@
 
 IMPLEMENT_DYNAMIC(CBasketTradeViewDialog, CDialog)
 
-CBasketTradeViewDialog::CBasketTradeViewDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CBasketTradeViewDialog::IDD, pParent) {
-
+CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* pParent /*=NULL*/)
+	: CDialog(CBasketTradeViewDialog::IDD, pParent),
+  m_pModel( pModel )
+{
 }
 
 CBasketTradeViewDialog::~CBasketTradeViewDialog() {
@@ -34,6 +35,12 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_lcBasketSymbols.InsertColumn( 11, "Hit", LVCFMT_CENTER, 50 );
 
   return TRUE;
+}
+
+void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ) {
+}
+
+void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolInfo *pInfo ) {
 }
 
 void CBasketTradeViewDialog::DoDataExchange(CDataExchange* pDX) {
