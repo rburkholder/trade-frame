@@ -3,7 +3,11 @@
 #include "resource.h"
 #include "afxcmn.h"
 
+#include "GeneratePeriodicRefresh.h"
 #include "BasketTradeModel.h"
+
+#include <map>
+#include <queue>
 
 // CBasketTradeViewDialog dialog
 
@@ -23,6 +27,20 @@ protected:
 
   void HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ); // when object instatiated in basket
   void HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolInfo *pInfo );  // when object has new data to display
+
+  CGeneratePeriodicRefresh m_refresh;
+  void HandlePeriodicRefresh( CGeneratePeriodicRefresh* );
+
+  struct structDialogEntry {
+    int ix; // index in dialog box
+    bool bChanged;
+    CBasketTradeSymbolInfo *pInfo;
+    structDialogEntry( int ix_, CBasketTradeSymbolInfo *pInfo_ ) 
+      : ix( ix_ ), bChanged( false ), pInfo( pInfo_ ) {};
+  };
+  typedef std::pair<string, structDialogEntry> mapDialogEntry_t;
+  std::map<std::string, structDialogEntry> m_mapDialogEntry;
+  bool m_bSourceChanged;
 
 protected:
   virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

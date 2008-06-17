@@ -153,12 +153,13 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
   cout << "Initializing Structures" << endl;
 
-  CKeyWordMatch kwm;
+  CKeyWordMatch<unsigned long> kwm( 0, 300 );  // about 300 characters?
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
     m_rExchanges[ ix ].cntInstruments = 0;
-    kwm.AddPattern( m_rExchanges[ ix ].szName, (void *) ix );
+    kwm.AddPattern( m_rExchanges[ ix ].szName, ix );
   }
+  std::cout << "kvm size is " << kwm.size() << std::endl;
   unsigned long rcntContractTypes[ InstrumentType::_Count ];
   for ( unsigned long ix = 0; ix < InstrumentType::_Count; ++ix ) {
     rcntContractTypes[ ix ] = 0;

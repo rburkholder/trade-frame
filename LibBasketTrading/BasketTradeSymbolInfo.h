@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -14,7 +15,6 @@ using namespace boost::gregorian;
 #include "OrderManager.h"
 #include "Delegate.h"
 
-#include <sstream>
 
 class CBasketTradeSymbolInfo {
 public:
@@ -32,30 +32,40 @@ public:
   void HandleQuote( const CQuote &quote );
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
-  const std::string &GetSymbolName( void ) { return m_sSymbolName; };
+  const std::string &GetSymbolName( void ) { return m_status.sSymbolName; };
   void StreamSymbolInfo( std::ostream *pStream );
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
   struct structFieldsForDialog { // used for updating dialog
-    std::string sSymbol;
+    std::string sSymbolName;
+    double dblCurrentPrice;
     double dblHigh;
-    double dblOpenRangeHigh;
+    double dblOpenRangeHigh;  // ACD Opening Range
     double dblOpen;
-    double dblOpenRangeLow;
+    double dblOpenRangeLow;   // ACD Opening Range
     double dblLow;
     double dblFilledPrice;
-    double dblCurrentPrice;
     double dblStop;
     double dblUnRealizedPL;
     double dblRealizedPL;
     std::string sHit;  // 0/1 for long, 0/1 for short (two characters here)
-  } ;
+    structFieldsForDialog( void ) : 
+      dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
+      dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
+      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ) {};
+    structFieldsForDialog( const std::string &sSymbolName_ ) : sSymbolName( sSymbolName_ ),
+      dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
+      dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
+      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ) {};
+  };
+  const structFieldsForDialog &GetDialogFields( void ) { return m_status; };  // needs come after structure definition
+
 protected:
   void Initialize( void );
-  std::string m_sSymbolName;
+  structFieldsForDialog m_status;
   std::string m_sPath;
   std::string m_sStrategy;
-  CInstrument *m_pInstrument;
+  ptime m_dtTimeMarker;
   ptime m_dtTradeDate;
   double m_dblMaxAllowedFunds;
   double m_dblDayOpenPrice;
@@ -70,7 +80,8 @@ protected:
   double m_dblExitPrice;
   double m_dblProposedEntryCost;
   //bool m_bEntryInitiated;
-  enum enumPositionState { Init, WaitingForOpen, 
+  enum enumPositionState { 
+    Init, WaitingForOpen, 
     WaitingForThe3Bars, 
     WaitingForOrderFulfillmentLong, WaitingForOrderFulfillmentShort,
     WaitingForLongExit, WaitingForShortExit,
@@ -85,20 +96,17 @@ protected:
     CloseTrades,  // 15:50 exchange time
     DoneTrading   // 15:50 exchange time
   } m_TradingState;
-  ptime m_dtToday;
   bool m_bOpenFound;
-  double m_dblOpen;
-  double m_dblOpenLow;  // ACD Opening Range
-  double m_dblOpenHigh; // ACD Opening Range
-  double m_dblStop;
   double m_dblStartLevel;
   double m_dblAveBarHeight;
   double m_dblTrailingStopDistance;
 
+  bool m_bDoneTheLong, m_bDoneTheShort;
+
   size_t m_nBarsInSequence;
   size_t m_nOpenCrossings;
-  static const size_t m_nMaxCrossings = 5;  
-  static const size_t m_nBarWidth = 6;  //seconds
+  static const size_t m_nMaxCrossings = 2;  
+  static const size_t m_nBarWidth = 30;  //seconds
 
   structFieldsForDialog m_FieldsForDialog;
 
@@ -106,16 +114,16 @@ protected:
 
   CProviderInterface *m_pExecutionProvider;
 
+  CInstrument *m_pInstrument;
+  COrderManager m_OrderManager;
+
   CBarFactory m_1MinBarFactory;
   CQuotes m_quotes;
   CTrades m_trades;
   CBars m_bars;
+
   void HandleBarFactoryBar( const CBar &bar );
-
   void HandleOrderFilled( COrder *pOrder );
-  bool m_bDoneTheLong, m_bDoneTheShort;
-
-  COrderManager m_OrderManager;
 
 private:
   CBasketTradeSymbolInfo( const CBasketTradeSymbolInfo & );  // disallow copy construction

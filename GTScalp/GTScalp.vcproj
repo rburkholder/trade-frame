@@ -63,7 +63,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="K:\Data\Projects\TradingSoftware\LibBasketTrading\Debug"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

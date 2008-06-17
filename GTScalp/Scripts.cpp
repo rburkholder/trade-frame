@@ -169,12 +169,14 @@ void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
     }
     if ( 1 == m_mapActiveHistoryCollectors.size() ) {
       std::cout << "one element left" << std::endl;
+      // is there still anything in buffers?  what is the last symbol?
       // examine m_mapActiveHistoryCollectors to see can see what we have recieved.
     }
     //_CrtDumpMemoryLeaks();
   }
   if ( m_qHistoryCollectors.empty() && m_mapActiveHistoryCollectors.empty() ) {
     cout << "History processing queue has been finished." << endl;
+    // check that all buffers are empty *****
     //_CrtMemCheckpoint( &memstate2 );
     //int val = _CrtMemDifference( &memstate3, &memstate1, &memstate2 );
     //_CrtMemDumpStatistics( &memstate3 );

@@ -28,8 +28,9 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   mapBasketSymbols_t::iterator iter;
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
-    m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( 
-      sSymbolName, new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy, m_pExecutionProvider ) ) );
+    CBasketTradeSymbolInfo *pInfo = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy, m_pExecutionProvider );
+    m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
+    OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;
   }
   else {
@@ -46,6 +47,7 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
       iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
       dblCostForEntry += iter->second->GetProposedEntryCost();
       m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
+      m_pDataProvider->AddQuoteHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleQuote ) );
       m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );
     }
     std::cout << "Total Cost of Entry: " << dblCostForEntry << std::endl;
@@ -59,20 +61,15 @@ void CBasketTradeModel::WriteBasketToDatabase() {
 
   CDbValueStream strm;
   std::ostream out(&strm);
-  //streambuf *pOldBuf = out.rdbuf();
-  //out.rdbuf( &strm );
   unsigned long key = 0;
 
   strm.Truncate();
   for( mapBasketSymbols_t::iterator iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
-    //out.clear();  // one of these calls sync to clear the buffer
     out.flush();
     iter->second->StreamSymbolInfo( &out );
     strm.Save( &key, sizeof( key ) );
     ++key;
   }
-
-  //out.rdbuf( pOldBuf );
 }
 
 void CBasketTradeModel::ReadBasketFromDatabase() {

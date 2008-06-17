@@ -137,6 +137,8 @@ void CBufferedSocket::Send( const char *pCommand ) {
 void CBufferedSocket::Close( void ) {
   closesocket( m_socket );
   Sleep(100);
+
+  // todo:  check that buffer is empty
   
   //TerminateThread( hReceiveThread ); // need to use ExitThread in object instead !!!!!!
   

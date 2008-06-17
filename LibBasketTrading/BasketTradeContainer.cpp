@@ -14,6 +14,7 @@ CBasketTradeContainer::CBasketTradeContainer( CProviderInterface *pDataProvider,
 {
   m_pModel = new CBasketTradeModel( pDataProvider, pExecutionProvider );
   m_pVuDialog = new CBasketTradeViewDialog( m_pModel );
+  m_pVuDialog->ShowWindow( SW_SHOWNORMAL );
   m_pController = new CBasketTradeController( );
   std::cout << "Basket Waiting" << std::endl;
 }
