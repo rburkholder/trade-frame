@@ -39,18 +39,49 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
 }
 
 void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly ) {
+  int nTradeableSymbols = 0;
+  int nSymbolCount = 0;
+  double dblFundsPerSymbol = 0;
+  double dblCostForEntry = 0;
+  mapBasketSymbols_t::iterator iter; 
   try {
-    mapBasketSymbols_t::iterator iter; 
-    double dblFundsPerSymbol = dblFunds / m_mapBasketSymbols.size();
-    double dblCostForEntry = 0;
-    for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
-      iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
-      dblCostForEntry += iter->second->GetProposedEntryCost();
-      m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
-      m_pDataProvider->AddQuoteHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleQuote ) );
-      m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );
+    for ( int nLoopCount = 1; nLoopCount <= 2; ++nLoopCount ) {
+      double dblTotalCostForEntry = 0;
+      switch ( nLoopCount ) {
+        case 1:
+          nSymbolCount = m_mapBasketSymbols.size();
+          dblFundsPerSymbol = dblFunds / nSymbolCount;
+          break;
+        case 2: 
+          nSymbolCount = nTradeableSymbols;
+          dblFundsPerSymbol = dblFunds / nSymbolCount;
+          break;
+      }
+      for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
+        switch ( nLoopCount ) {
+          case 1:
+            iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
+            dblCostForEntry = iter->second->GetProposedEntryCost();
+            if ( 0 != dblCostForEntry ) {
+              ++nTradeableSymbols;
+              dblTotalCostForEntry += dblCostForEntry;
+            }
+            break;
+          case 2:
+            dblCostForEntry = iter->second->GetProposedEntryCost();  // was set on last loop through
+            if ( 0 != dblCostForEntry ) {
+              iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
+              dblCostForEntry = iter->second->GetProposedEntryCost();
+              dblTotalCostForEntry += dblCostForEntry;
+              m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
+              m_pDataProvider->AddQuoteHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleQuote ) );
+              m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );
+            }
+            break;
+        }
+      }
+      std::cout << "# Symbols: " << nSymbolCount << ", Total Cost of Entry: " << dblTotalCostForEntry << std::endl;
     }
-    std::cout << "Total Cost of Entry: " << dblCostForEntry << std::endl;
   }
   catch (...) {
     std::cout << "error somewhere" << std::endl;

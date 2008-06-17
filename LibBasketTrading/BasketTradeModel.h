@@ -7,7 +7,6 @@
 #include <map>
 #include <string>
 
-
 class CBasketTradeModel {
 public:
   CBasketTradeModel( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );

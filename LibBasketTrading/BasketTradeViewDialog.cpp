@@ -72,7 +72,17 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           iter->second.bChanged = false;
           const CBasketTradeSymbolInfo::structFieldsForDialog &flds = iter->second.pInfo->GetDialogFields();
           int ix = iter->second.ix;
-          //m_lcBasketSymbols.SetItemText( ix, 1, 
+          char conv[ 30 ];
+          sprintf( conv, "%.2f", flds.dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, 1, conv );
+          sprintf( conv, "%.2f", flds.dblHigh ); m_lcBasketSymbols.SetItemText( ix, 2, conv );
+          sprintf( conv, "%.2f", flds.dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, 3, conv );
+          sprintf( conv, "%.2f", flds.dblOpen ); m_lcBasketSymbols.SetItemText( ix, 4, conv );
+          sprintf( conv, "%.2f", flds.dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, 5, conv );
+          sprintf( conv, "%.2f", flds.dblLow ); m_lcBasketSymbols.SetItemText( ix, 6, conv );
+          sprintf( conv, "%.2f", flds.dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, 7, conv );
+          sprintf( conv, "%.2f", flds.dblStop ); m_lcBasketSymbols.SetItemText( ix, 8, conv );
+          sprintf( conv, "%.2f", flds.dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, 9, conv );
+          sprintf( conv, "%.2f", flds.dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, 10, conv );
         }
     }
     m_bSourceChanged = false;

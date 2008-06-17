@@ -70,6 +70,7 @@ void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {
 
 void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, bool bRTHOnly) {
 
+  m_dblProposedEntryCost = 0;
   m_bRTHOnly = bRTHOnly;
   m_dtTradeDate = dtTradeDate;
   m_dblMaxAllowedFunds = dblFunds;
@@ -113,8 +114,26 @@ void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
 }
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
+  static const ptime dtOpenRangeBgn( trade.m_dt.date(), time_duration( 10, 30, 0 ) );
+  static const ptime dtOpenRangeEnd( trade.m_dt.date(), time_duration( 10, 35, 0 ) );
   m_trades.AppendDatum( trade );
-  //std::cout << "Trade " << m_sSymbolName << ", " << trade.m_nTradeSize << "@" << trade.m_dblTrade << std::endl;
+  m_status.dblCurrentPrice = trade.m_dblTrade;
+  if ( 1 == m_trades.Count() ) {
+    m_status.dblHigh = m_status.dblLow = trade.m_dblTrade;
+  }
+  else {
+    m_status.dblHigh = max( m_status.dblHigh, trade.m_dblTrade );
+    m_status.dblLow  = min( m_status.dblLow,  trade.m_dblTrade );
+  }
+  if ( ( trade.m_dt >= dtOpenRangeBgn ) && ( trade.m_dt < dtOpenRangeBgn ) ) {
+    if ( 0 == m_status.dblOpenRangeHigh ) {
+      m_status.dblOpenRangeHigh = m_status.dblOpenRangeLow = trade.m_dblTrade;
+    }
+    else {
+      m_status.dblOpenRangeHigh = max( m_status.dblOpenRangeHigh, trade.m_dblTrade );
+      m_status.dblOpenRangeLow  = min( m_status.dblOpenRangeLow, trade.m_dblTrade );
+    }
+  }
   switch ( m_TradingState ) {
     case WaitForOpeningTrade:
       if ( m_bRTHOnly ) {
@@ -208,6 +227,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       // do nothing
       break;
   }
+  OnBasketTradeSymbolInfoChanged( this );
 }
 
 void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
@@ -259,7 +279,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentLong;
-              //m_bDoneTheLong = true;
+              m_bDoneTheLong = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
           }
         }
@@ -281,7 +301,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_PositionState = WaitingForOrderFulfillmentShort;
-              //m_bDoneTheShort = true;
+              m_bDoneTheShort = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
         }
