@@ -22,7 +22,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ), m_nCurrentPosition( 0 )
 {
   Initialize();
 }
@@ -34,7 +34,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CPro
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ), m_nCurrentPosition( 0 )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -179,6 +179,8 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               //if ( m_nMaxCrossings < m_nOpenCrossings ) m_bDoneTheLong = true;
               m_PositionState = WaitingForThe3Bars;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
+              pOrder->SetSignalPrice( m_status.dblStop );
+              pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
             break;
@@ -187,6 +189,8 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               ++m_nOpenCrossings;
               m_PositionState = WaitingForThe3Bars;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
+              pOrder->SetSignalPrice( m_status.dblStop );
+              pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
             break;
@@ -275,11 +279,11 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               m_status.dblStop = min( bar3.m_dblLow, m_status.dblStop );
               m_dblTrailingStopDistance = bar.m_dblClose - m_status.dblStop;
               std::cout << m_status.sSymbolName << " Enter LONG now: " << bar.m_dblClose << ", Stop at " << m_status.dblStop << std::endl;
+              m_PositionState = WaitingForOrderFulfillmentLong;
+              m_bDoneTheLong = true;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_PositionState = WaitingForOrderFulfillmentLong;
-              m_bDoneTheLong = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
           }
         }
@@ -297,11 +301,11 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               m_status.dblStop = max( bar3.m_dblHigh, m_status.dblStop );
               m_dblTrailingStopDistance = m_status.dblStop - bar.m_dblClose;
               std::cout << " Enter SHORT Now: " << m_status.sSymbolName << ", Stop at " << m_status.dblStop << std::endl;
+              m_PositionState = WaitingForOrderFulfillmentShort;
+              m_bDoneTheShort = true;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_PositionState = WaitingForOrderFulfillmentShort;
-              m_bDoneTheShort = true;
               m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
             }
         }
@@ -333,7 +337,17 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
 
 void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
   // make the assumption that the order arriving is the order we are expecting, ie no multiple or cancelled orders
+  // at some point, possibly in different basket algorithm, will need to handle cancelled orders
   pOrder->OnOrderFilled.Remove( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+  switch ( pOrder->GetOrderSide() ) {
+    case OrderSide::Buy:
+      m_nCurrentPosition += pOrder->GetQuanFilled();
+      break;
+    case OrderSide::Sell:
+      m_nCurrentPosition -= pOrder->GetQuanFilled();
+      break;
+  }
+  m_status.dblFilledPrice = pOrder->GetAverageFillPrice();
   switch ( m_PositionState ) {
     case WaitingForOrderFulfillmentLong:
       m_PositionState = WaitingForLongExit;
@@ -342,7 +356,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       m_PositionState = WaitingForShortExit;
       break;
     default:
-      std::cout << "We've got problems" << std::endl;
+      std::cout << "Basket " << m_status.sSymbolName << " has problems" << std::endl;
   }
 }
 

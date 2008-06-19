@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <map>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -124,6 +125,12 @@ protected:
 
   void HandleBarFactoryBar( const CBar &bar );
   void HandleOrderFilled( COrder *pOrder );
+
+  std::map<unsigned long, COrder*> m_mapActiveOrders;
+  std::map<unsigned long, COrder*> m_mapCompletedOrders;
+
+  int m_nCurrentPosition;
+
 
 private:
   CBasketTradeSymbolInfo( const CBasketTradeSymbolInfo & );  // disallow copy construction

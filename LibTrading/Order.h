@@ -47,8 +47,10 @@ public:
   const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_eOrderSide ]; };
   unsigned long GetQuantity( void ) const { return m_nOrderQuantity; };
   OrderType::enumOrderType GetOrderType( void ) const { return m_eOrderType; };
+  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_eOrderSide; };
   double GetPrice1( void ) const { return m_dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) const { return m_dblPrice2; };
+  double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
   unsigned long GetOrderId( void ) const { return m_nOrderId; };
   void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
   const std::string &GetProviderName( void ) const { return m_sProviderName; };
