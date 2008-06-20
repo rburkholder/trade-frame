@@ -4,69 +4,88 @@
 #include <iostream>
 using namespace std;
 
-CBufferedSocket::CBufferedSocket(void) {
-  m_object = NULL;
+CBufferedSocket::CBufferedSocket(void) : m_object( NULL ), m_bSocketOpen( false ), m_bThreadActive( false ) {
   m_hReceiveThread = CreateThread( NULL, 10000, ReceiveThread, this, CREATE_SUSPENDED, &m_ReceiveThreadId );
   if ( NULL == m_hReceiveThread ) {
     DWORD err = GetLastError();
-    //CString s;
     cout << "CreateThread error " << err << endl;
   }
-  m_bSocketOpen = false;
 }
 
 CBufferedSocket::~CBufferedSocket(void) {
-  TerminateThread( m_hReceiveThread, 0 );
+  BOOL bIOIsPending, bReturnValue;
+  DWORD dwThreadExitCode;
+  bReturnValue = GetExitCodeThread( m_hReceiveThread, &dwThreadExitCode );
+  ASSERT( 0 != bReturnValue );
+  if ( STILL_ACTIVE == dwThreadExitCode ) {
+    std::cout << "CBufferedSocket recieve thread is still active" << std::endl;
+    bReturnValue = GetThreadIOPendingFlag( m_hReceiveThread, &bIOIsPending );
+    ASSERT( 0 != bReturnValue );
+    if ( bIOIsPending ) {
+      std::cout << "CBufferedSocket has IO Pending" << std::endl;
+    }
+    TerminateThread( m_hReceiveThread, 0 );
+  }
 }
 
 //http://msdn2.microsoft.com/en-us/library/ms740668.aspx
 
 DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
+
   CBufferedSocket *bs = ( CBufferedSocket * ) lpParameter;
 
-  //CString s;
+  bs->m_bThreadActive = true;
+
   char buf[DATA_BUFSIZE];
   WSAOVERLAPPED AcceptOverlapped;
   WSABUF DataBuf;
   DWORD EventTotal = 0, 
-    RecvBytes = 0, 
+    //RecvBytes = 0, 
     Flags = 0,
     BytesTransferred = 0, 
     CallBack = 0;
 
-  char str[DATA_BUFSIZE];
+  char str[DATA_BUFSIZE];  // string built from taking characters from buf
   unsigned short ixSrc = 0;  // position for next character in str
   unsigned short ixDst = 0;
   char ch;
 
   HANDLE hEvent = WSACreateEvent();
-/*  if ( NULL = hEvent ) {
-    DWORD err = GetLastError();
-    CString s;
-    s.Format( "WSACreateEvent error %d", err );
-  } */
 
   DWORD ix;
   DataBuf.len = DATA_BUFSIZE;
   DataBuf.buf = buf;
   while ( 1 ) {
     Flags = 0;
+    BytesTransferred = 0;
     ZeroMemory(&AcceptOverlapped, sizeof(WSAOVERLAPPED));
     AcceptOverlapped.hEvent = hEvent;
-    if ( SOCKET_ERROR == 
-      WSARecv( bs->m_socket, &DataBuf, 1, &RecvBytes, &Flags, &AcceptOverlapped, NULL ) ) {
+    int nError = WSARecv( bs->m_socket, &DataBuf, 1, &BytesTransferred, &Flags, &AcceptOverlapped, NULL );
+    if ( 0 != nError ) {
+      if ( SOCKET_ERROR == nError ) {
         int e = WSAGetLastError();
-        if ( WSA_IO_PENDING != e ) {
-          cout << "WSARecv error " << e << endl;
+        if ( WSA_IO_PENDING != e ) {  // an error which isn't an error
+          //std::cerr << "WSARecv error " << e << std::endl;
+          break;
         }
+      }
+      else {
+        int i = 1;
+        break;
+      }
     }
-    ix = WSAWaitForMultipleEvents( 1, &hEvent, FALSE, WSA_INFINITE, FALSE );
-    WSAResetEvent( hEvent );
-    WSAGetOverlappedResult( bs->m_socket, &AcceptOverlapped, &BytesTransferred, FALSE, &Flags );
+
+    if ( 0 != BytesTransferred ) {
+      int i = 10;
+    }
+    else {
+      ix = WSAWaitForMultipleEvents( 1, &hEvent, FALSE, WSA_INFINITE, FALSE );
+      WSAResetEvent( hEvent );
+      WSAGetOverlappedResult( bs->m_socket, &AcceptOverlapped, &BytesTransferred, FALSE, &Flags );
+    }
+
     if ( 0 == BytesTransferred ) { // connection has been closed
-      // exit thread here
-      ExitThread( 1 );
-  //  WSACleanup();
+      break;  // end while loop, exit RecieveThread, and close out thread
     }
     else {
       // Process data in buffer here.
@@ -76,7 +95,6 @@ DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
           str[ ixDst++ ] = 0x00;  
           ASSERT( DATA_BUFSIZE > ixDst );
           if ( NULL != bs->OnNewResponse ) bs->OnNewResponse( ixDst, str, bs->m_object );
-          //printf( "%s\n", str );
           ixDst = 0;
         }
         else {
@@ -91,13 +109,11 @@ DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
       }
     }
   }
-
+  bs->m_bThreadActive = false;
   return 0;
 }
 
 void CBufferedSocket::Open( const char *pAddress, unsigned short Port ) {
-
-  //CString s;
 
   sockaddr_in service;
   service.sin_family = AF_INET;
@@ -123,7 +139,6 @@ void CBufferedSocket::Open( const char *pAddress, unsigned short Port ) {
 
 void CBufferedSocket::Send( const char *pCommand ) {
   WSABUF buf;
-  //CString s;
   buf.buf = (char*) pCommand;
   buf.len = (u_long) strlen( pCommand );
   m_sLastCommand.assign( buf.buf, buf.len );
@@ -136,7 +151,17 @@ void CBufferedSocket::Send( const char *pCommand ) {
 
 void CBufferedSocket::Close( void ) {
   closesocket( m_socket );
-  Sleep(100);
+  unsigned short nLoopCount = 10;
+  while ( 0 != nLoopCount ) {
+    Sleep(100);
+    if ( !m_bThreadActive ) {
+      break;
+    }
+    --nLoopCount;
+  }
+  if ( 0 != nLoopCount ) {
+    std::cout << "CBufferedSocket thread is still active" << std::endl;
+  }
 
   // todo:  check that buffer is empty
   

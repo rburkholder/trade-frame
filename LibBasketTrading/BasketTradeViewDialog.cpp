@@ -35,6 +35,9 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_lcBasketSymbols.InsertColumn( ix++, "Low", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Filled", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Stop", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn( ix++, "Size", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn( ix++, "Size", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn( ix++, "AvgCst", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "UnrelPL", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "RelPL", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Hit", LVCFMT_CENTER, 50 );
@@ -73,16 +76,20 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           const CBasketTradeSymbolInfo::structFieldsForDialog &flds = iter->second.pInfo->GetDialogFields();
           int ix = iter->second.ix;
           char conv[ 30 ];
-          sprintf( conv, "%.2f", flds.dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, 1, conv );
-          sprintf( conv, "%.2f", flds.dblHigh ); m_lcBasketSymbols.SetItemText( ix, 2, conv );
-          sprintf( conv, "%.2f", flds.dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, 3, conv );
-          sprintf( conv, "%.2f", flds.dblOpen ); m_lcBasketSymbols.SetItemText( ix, 4, conv );
-          sprintf( conv, "%.2f", flds.dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, 5, conv );
-          sprintf( conv, "%.2f", flds.dblLow ); m_lcBasketSymbols.SetItemText( ix, 6, conv );
-          sprintf( conv, "%.2f", flds.dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, 7, conv );
-          sprintf( conv, "%.2f", flds.dblStop ); m_lcBasketSymbols.SetItemText( ix, 8, conv );
-          sprintf( conv, "%.2f", flds.dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, 9, conv );
-          sprintf( conv, "%.2f", flds.dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, 10, conv );
+          int iy = 0;
+          sprintf( conv, "%.2f", flds.dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblOpen ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblStop ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv,   "%d", flds.nPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblAverageCost ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          sprintf( conv, "%.2f", flds.dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
         }
     }
     m_bSourceChanged = false;

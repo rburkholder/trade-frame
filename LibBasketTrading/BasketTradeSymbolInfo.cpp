@@ -22,7 +22,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ), m_nCurrentPosition( 0 )
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
 {
   Initialize();
 }
@@ -34,7 +34,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CPro
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ), m_nCurrentPosition( 0 )
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -115,7 +115,7 @@ void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
   static const ptime dtOpenRangeBgn( trade.m_dt.date(), time_duration( 10, 30, 0 ) );
-  static const ptime dtOpenRangeEnd( trade.m_dt.date(), time_duration( 10, 35, 0 ) );
+  static const ptime dtOpenRangeEnd( trade.m_dt.date(), time_duration( 10, 31, 0 ) );
   m_trades.AppendDatum( trade );
   m_status.dblCurrentPrice = trade.m_dblTrade;
   if ( 1 == m_trades.Count() ) {
@@ -125,7 +125,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
     m_status.dblHigh = max( m_status.dblHigh, trade.m_dblTrade );
     m_status.dblLow  = min( m_status.dblLow,  trade.m_dblTrade );
   }
-  if ( ( trade.m_dt >= dtOpenRangeBgn ) && ( trade.m_dt < dtOpenRangeBgn ) ) {
+  if ( ( trade.m_dt >= dtOpenRangeBgn ) && ( trade.m_dt < dtOpenRangeEnd ) ) {
     if ( 0 == m_status.dblOpenRangeHigh ) {
       m_status.dblOpenRangeHigh = m_status.dblOpenRangeLow = trade.m_dblTrade;
     }
@@ -176,7 +176,6 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
           case WaitingForLongExit:
             if ( trade.m_dblTrade < m_status.dblStop ) {
               ++m_nOpenCrossings;
-              //if ( m_nMaxCrossings < m_nOpenCrossings ) m_bDoneTheLong = true;
               m_PositionState = WaitingForThe3Bars;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( m_status.dblStop );
@@ -199,6 +198,18 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
             break;
         }
         m_1MinBarFactory.Add( trade );
+        if ( 0 == m_status.nPositionSize ) {
+          m_status.dblUnRealizedPL = 0;
+        }
+        else {
+          if ( 0 < m_status.nPositionSize ) { // long
+            m_status.dblUnRealizedPL = ( trade.m_dblTrade - m_status.dblAverageCost ) * m_status.nPositionSize;
+          }
+          else { // short
+            m_status.dblUnRealizedPL = ( m_status.dblAverageCost - trade.m_dblTrade ) * m_status.nPositionSize;
+          }
+        }
+        
       }
       break;
     case NoMoreTrades:
@@ -225,6 +236,24 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
         std::cout << m_status.sSymbolName << " Entering DoneTrading" << std::endl;
       }
       else {
+        if ( 0 == m_status.nPositionSize ) {
+          // nothing to do
+        }
+        else {
+          std::cout << m_status.sSymbolName << " closing position" << std::endl;
+          if ( 0 < m_status.nPositionSize ) {  // clear out long
+            COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_status.nPositionSize );
+            pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+            m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+          }
+          else { // clear out short
+            COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, -m_status.nPositionSize );
+            pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+            m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+          }
+        }
+        m_TradingState = DoneTrading;
+        std::cout << m_status.sSymbolName << " Entering DoneTrading" << std::endl;
       }
       break;
     case DoneTrading:
@@ -339,15 +368,31 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
   // make the assumption that the order arriving is the order we are expecting, ie no multiple or cancelled orders
   // at some point, possibly in different basket algorithm, will need to handle cancelled orders
   pOrder->OnOrderFilled.Remove( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+  m_status.dblFilledPrice = pOrder->GetAverageFillPrice();
+  double dblPreviousAverageCost;
+  bool bClosing;
   switch ( pOrder->GetOrderSide() ) {
     case OrderSide::Buy:
-      m_nCurrentPosition += pOrder->GetQuanFilled();
+      bClosing = m_status.nPositionSize < 0;  // we are short, with a buy, closing all or part of position, => realized PL
+      dblPreviousAverageCost = m_status.dblAverageCost;
+      m_status.nPositionSize += pOrder->GetQuanFilled();
+      m_status.dblPositionSize += pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      m_status.dblAverageCost = m_status.dblPositionSize / m_status.nPositionSize;
+      if ( bClosing ) {
+        m_status.dblRealizedPL += ( dblPreviousAverageCost - pOrder->GetAverageFillPrice() ) * pOrder->GetQuanFilled();
+      }
       break;
     case OrderSide::Sell:
-      m_nCurrentPosition -= pOrder->GetQuanFilled();
+      bClosing = m_status.nPositionSize > 0;  // we are long, with a sell, closing all or part of postion, => realized PL
+      dblPreviousAverageCost = m_status.dblAverageCost;
+      m_status.nPositionSize -= pOrder->GetQuanFilled();
+      m_status.dblPositionSize -= pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      m_status.dblAverageCost = m_status.dblPositionSize / m_status.nPositionSize;
+      if ( bClosing ) {
+        m_status.dblRealizedPL += ( pOrder->GetAverageFillPrice() - dblPreviousAverageCost ) * pOrder->GetQuanFilled();
+      }
       break;
   }
-  m_status.dblFilledPrice = pOrder->GetAverageFillPrice();
   switch ( m_PositionState ) {
     case WaitingForOrderFulfillmentLong:
       m_PositionState = WaitingForLongExit;
@@ -361,7 +406,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
 }
 
 void CBasketTradeSymbolInfo::HandleOpen( const CTrade &trade ) {
-  m_status.dblOpen = trade.m_dblTrade;
+  m_status.dblOpen = trade.m_dblTrade; // official open
 }
 
 void CBasketTradeSymbolInfo::WriteTradesAndQuotes(const std::string &sPathPrefix) {

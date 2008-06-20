@@ -31,17 +31,20 @@ protected:
   std::string m_sLastCommand;
 
 private:
+  // from CreateThread
   HANDLE m_hReceiveThread;
   DWORD m_ReceiveThreadId;
+  static DWORD WINAPI ReceiveThread( LPVOID lpParameter );
+  volatile bool m_bThreadActive;  // set and reset only by RecieveThread
 
   OnNewResponseHandler OnNewResponse;
-  static DWORD WINAPI ReceiveThread( LPVOID lpParameter );
-
+  
   SOCKET m_socket;
+  bool m_bSocketOpen;
   
   DWORD m_Flags;
   DWORD m_cntBytesSent;
 
-  bool m_bSocketOpen;
+
 
 };

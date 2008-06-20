@@ -33,7 +33,9 @@ void CIQFeedOptions::AddOptionSymbol( const char *s, unsigned short cnt ) {
 
 void CIQFeedOptions::OnNewResponse( const char *szLine ) {
   if ( !m_bLookingForDetail ) {
-    //CIQFeedRetrieval::OnNewResponse( szLine );
+    if ( 0 == strcmp( szLine, "!ENDMSG!" ) ) {
+      ClosePort();
+    }
   }
   else {
     char *szSubStr = (char*) szLine;
@@ -72,7 +74,6 @@ void CIQFeedOptions::OnNewResponse( const char *szLine ) {
       }
     }
     if ( NULL != OnSymbolListReceived ) OnSymbolListReceived();
-    ClosePort();
     m_bLookingForDetail = false;
   }
 }

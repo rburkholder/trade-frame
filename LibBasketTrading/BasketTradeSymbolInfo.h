@@ -47,16 +47,21 @@ public:
     double dblLow;
     double dblFilledPrice;
     double dblStop;
+    int    nPositionSize; //+ or -
+    double dblPositionSize;  
+    double dblAverageCost;
     double dblUnRealizedPL;
     double dblRealizedPL;
     std::string sHit;  // 0/1 for long, 0/1 for short (two characters here)
     structFieldsForDialog( void ) : 
       dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
       dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
+      nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
       dblUnRealizedPL( 0 ), dblRealizedPL( 0 ) {};
     structFieldsForDialog( const std::string &sSymbolName_ ) : sSymbolName( sSymbolName_ ),
       dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
       dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
+      nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
       dblUnRealizedPL( 0 ), dblRealizedPL( 0 ) {};
   };
   const structFieldsForDialog &GetDialogFields( void ) { return m_status; };  // needs come after structure definition
@@ -128,8 +133,6 @@ protected:
 
   std::map<unsigned long, COrder*> m_mapActiveOrders;
   std::map<unsigned long, COrder*> m_mapCompletedOrders;
-
-  int m_nCurrentPosition;
 
 
 private:
