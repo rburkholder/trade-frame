@@ -5,9 +5,7 @@
 #include <stdexcept>
 using namespace std;
 
-CIQFeedThreadCrossing::CIQFeedThreadCrossing() {
-  bActive = false;
-  cntMessages = 0;
+CIQFeedThreadCrossing::CIQFeedThreadCrossing() : m_bActive( false ), m_nActivations( 0 ) {
   InitializeCriticalSection( &csProtectQueues );
 }
 
@@ -27,13 +25,14 @@ CIQFeedThreadCrossing::~CIQFeedThreadCrossing() {
 }
 
 void CIQFeedThreadCrossing::Activate( void ) {
-  ASSERT( !bActive );
-  bActive = true;
+  ASSERT( !m_bActive );
+  m_bActive = true;
+  ++m_nActivations;
 }
 
 void CIQFeedThreadCrossing::Deactivate( void ) {
-  ASSERT( bActive );
-  bActive = false;
+  ASSERT( m_bActive );
+  m_bActive = false;
 }
 
 void CIQFeedThreadCrossing::OpenSocket( const char *pAddress, unsigned short port ) {
@@ -43,7 +42,7 @@ void CIQFeedThreadCrossing::OpenSocket( const char *pAddress, unsigned short por
 }
 
 void CIQFeedThreadCrossing::SendToSocket( const char *pCommand ) {
-  ASSERT( bActive );
+  ASSERT( m_bActive );
   m_socket.Send( pCommand );
 }
 
@@ -54,7 +53,7 @@ void CIQFeedThreadCrossing::CloseSocket() {
 
 void CIQFeedThreadCrossing::QueueResponse(unsigned short nChars, const char *buf) {
   // todo:  I've been caught here once with data still arriving,  need to track from whence it comes
-  ASSERT( bActive );
+  ASSERT( m_bActive );
   EnterCriticalSection( &csProtectQueues );
   CCharBuffer *cb = m_EmptyBuffers.CheckOut( nChars, buf );
   m_responses.push( cb );
@@ -62,7 +61,7 @@ void CIQFeedThreadCrossing::QueueResponse(unsigned short nChars, const char *buf
 }
 
 void CIQFeedThreadCrossing::ProcessResponse() {
-  ASSERT( bActive );
+  ASSERT( m_bActive );
   ASSERT( !m_responses.empty() );
   EnterCriticalSection( &csProtectQueues );
   CCharBuffer *cb = m_responses.front();

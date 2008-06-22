@@ -44,6 +44,16 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   double dblFundsPerSymbol = 0;
   double dblCostForEntry = 0;
   mapBasketSymbols_t::iterator iter; 
+  m_ModelInfo.bRTH = bRTHOnly;
+  m_ModelInfo.dtTradeDate = dtTradeDate;
+  m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 30, 00 ) );
+  m_ModelInfo.dtOpenRangeBgn = m_ModelInfo.dtRTHBgn;
+  m_ModelInfo.dtOpenRangeEnd = ptime( dtTradeDate.date(), time_duration( 10, 34, 0 ) );
+  m_ModelInfo.dtEndActiveTrading = ptime( dtTradeDate.date(), time_duration( 16, 40, 0 ) );
+  m_ModelInfo.dtBgnNoMoreTrades = ptime( dtTradeDate.date(), time_duration( 16, 45, 0 ) );
+  m_ModelInfo.dtBgnCancelTrades = ptime( dtTradeDate.date(), time_duration( 16, 50, 0 ) );
+  m_ModelInfo.dtBgnCloseTrades = ptime( dtTradeDate.date(), time_duration( 16, 55, 0 ) );
+  m_ModelInfo.dtRTHEnd = ptime( dtTradeDate.date(), time_duration( 17, 00, 00 ) );
   try {
     for ( int nLoopCount = 1; nLoopCount <= 2; ++nLoopCount ) {
       double dblTotalCostForEntry = 0;
@@ -60,7 +70,8 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
       for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
         switch ( nLoopCount ) {
           case 1:
-            iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
+            m_ModelInfo.dblFunds = dblFundsPerSymbol;
+            iter->second->CalculateTrade( &m_ModelInfo );
             dblCostForEntry = iter->second->GetProposedEntryCost();
             if ( 0 != dblCostForEntry ) {
               ++nTradeableSymbols;
@@ -70,7 +81,8 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
           case 2:
             dblCostForEntry = iter->second->GetProposedEntryCost();  // was set on last loop through
             if ( 0 != dblCostForEntry ) {
-              iter->second->CalculateTrade( dtTradeDate, dblFundsPerSymbol, bRTHOnly );
+              m_ModelInfo.dblFunds = dblFundsPerSymbol;
+              iter->second->CalculateTrade( &m_ModelInfo );
               dblCostForEntry = iter->second->GetProposedEntryCost();
               dblTotalCostForEntry += dblCostForEntry;
               m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );

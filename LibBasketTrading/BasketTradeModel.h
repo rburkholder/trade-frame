@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\LibTrading\ProviderInterface.h"
+#include "ProviderInterface.h"
 #include "BasketTradeSymbolInfo.h"
 #include "Delegate.h"
 
@@ -23,5 +23,6 @@ protected:
   typedef pair<std::string, CBasketTradeSymbolInfo*> pairBasketSymbolsEntry_t;
   CProviderInterface *m_pDataProvider;
   CProviderInterface *m_pExecutionProvider;
+  CBasketTradeSymbolInfo::structCommonModelInformation m_ModelInfo;
 private:
 };

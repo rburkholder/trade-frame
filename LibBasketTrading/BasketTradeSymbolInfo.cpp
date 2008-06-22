@@ -17,24 +17,22 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   ) 
 : m_status( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
   m_pExecutionProvider( pExecutionProvider ),
-  m_dtTimeMarker( not_a_date_time ), 
-  m_bOpenFound( false ), 
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
-  m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
-  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
+  m_PositionState( Init ), m_TradingState( WaitForFirstTrade ),
+  m_bDoneTheLong( false ), m_bDoneTheShort( false ),
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
+  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart )
 {
   Initialize();
 }
 
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider )
-: m_pExecutionProvider( pExecutionProvider ),
-  m_dtTimeMarker( not_a_date_time ), 
-  m_bOpenFound( false ), 
+: m_pExecutionProvider( pExecutionProvider ), 
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
-  m_bDoneTheLong( false ), m_bDoneTheShort( false ), m_bRTHOnly( true ), 
-  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 )
+  m_bDoneTheLong( false ), m_bDoneTheShort( false ),
+  m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
+  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -47,7 +45,7 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
   }
 }
 
-void CBasketTradeSymbolInfo::Initialize( void ) {
+void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call this
   m_1MinBarFactory.SetBarWidth( m_nBarWidth );  
   m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
 
@@ -68,18 +66,16 @@ void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {
   //pStream->rdbuf()->pubsync
 }
 
-void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, bool bRTHOnly) {
+void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pParameters ) {
 
+  m_pModelParameters = pParameters;
   m_dblProposedEntryCost = 0;
-  m_bRTHOnly = bRTHOnly;
-  m_dtTradeDate = dtTradeDate;
-  m_dblMaxAllowedFunds = dblFunds;
   CHDF5TimeSeriesContainer<CBar> barRepository( m_sPath );
   CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
-  ptime dt3MonthsAgo = dtTradeDate - date_duration( 365 / 4 );
-  ptime dt6MonthsAgo = dtTradeDate - date_duration( 365 / 2 );
+  ptime dt3MonthsAgo = pParameters->dtTradeDate - date_duration( 365 / 4 );
+  ptime dt6MonthsAgo = pParameters->dtTradeDate - date_duration( 365 / 2 );
   begin = lower_bound( barRepository.begin(), barRepository.end(), dt6MonthsAgo );
-  end = lower_bound( begin, barRepository.end(), dtTradeDate );
+  end = lower_bound( begin, barRepository.end(), pParameters->dtTradeDate );
   hsize_t cnt = end - begin;
   CBars bars;
   bars.Resize( cnt );
@@ -93,10 +89,9 @@ void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, 
       pBar = bars[ ix ];
       range += pBar->m_dblHigh - pBar->m_dblLow;
     }
-    m_dblStartLevel = ( range / cnt ) * 0.05;
 
-    double dblClose = bars.Last()->m_dblClose;
-    m_nQuantityForEntry = ( ( (int) ( dblFunds / dblClose ) ) / 100 ) * 100;
+    double dblClose = bars.Last()->m_dblClose;  
+    m_nQuantityForEntry = ( ( (int) ( m_pModelParameters->dblFunds / dblClose ) ) / 100 ) * 100;
     m_dblProposedEntryCost = m_nQuantityForEntry * bars.Last()->m_dblClose;
     std::cout  
       << ": " << m_nQuantityForEntry << "@" << m_dblProposedEntryCost 
@@ -104,7 +99,8 @@ void CBasketTradeSymbolInfo::CalculateTrade(ptime dtTradeDate, double dblFunds, 
       << std::endl;
   }
   else {
-    m_nQuantityForEntry = m_dblProposedEntryCost = 0;
+    m_nQuantityForEntry = 0;
+    m_dblProposedEntryCost = 0;
     std::cout << m_status.sSymbolName << " didn't have enough bars" << std::endl;
   }
 }
@@ -114,50 +110,65 @@ void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
 }
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
-  static const ptime dtOpenRangeBgn( trade.m_dt.date(), time_duration( 10, 30, 0 ) );
-  static const ptime dtOpenRangeEnd( trade.m_dt.date(), time_duration( 10, 31, 0 ) );
-  m_trades.AppendDatum( trade );
+
   m_status.dblCurrentPrice = trade.m_dblTrade;
-  if ( 1 == m_trades.Count() ) {
-    m_status.dblHigh = m_status.dblLow = trade.m_dblTrade;
+  m_trades.AppendDatum( trade );
+
+  switch ( m_OpeningRangeState ) {
+    case DoneCalculatingRange:  // most often encountered case listed first
+      break;
+    case CalculatingRange:
+      if ( trade.m_dt >= m_pModelParameters->dtOpenRangeEnd ) {
+        m_OpeningRangeState = DoneCalculatingRange;
+      }
+      else {
+        m_status.dblOpenRangeHigh = max( m_status.dblOpenRangeHigh, trade.m_dblTrade );
+        m_status.dblOpenRangeLow  = min( m_status.dblOpenRangeLow, trade.m_dblTrade );
+      }
+      break;
+    case WaitForRangeStart:
+      if( trade.m_dt >= m_pModelParameters->dtOpenRangeBgn ) {
+        m_status.dblOpenRangeHigh = trade.m_dblTrade;
+        m_status.dblOpenRangeLow = trade.m_dblTrade;
+        m_OpeningRangeState = CalculatingRange;
+      }
+      break;
   }
-  else {
-    m_status.dblHigh = max( m_status.dblHigh, trade.m_dblTrade );
-    m_status.dblLow  = min( m_status.dblLow,  trade.m_dblTrade );
+
+  switch ( m_RTHRangeState ) {
+    case CalculatingRange:  // most often encountered case listed first
+      if ( trade.m_dt >= m_pModelParameters->dtRTHEnd ) {
+        m_RTHRangeState = DoneCalculatingRange;
+      }
+      else {
+        m_status.dblHigh = max( m_status.dblHigh, trade.m_dblTrade );
+        m_status.dblLow  = min( m_status.dblLow, trade.m_dblTrade );
+      }
+      break;
+    case DoneCalculatingRange:
+      break;
+    case WaitForRangeStart:
+      if( trade.m_dt >= m_pModelParameters->dtRTHBgn ) {
+        m_status.dblHigh = trade.m_dblTrade;
+        m_status.dblLow = trade.m_dblTrade;
+        m_RTHRangeState = CalculatingRange;
+      }
+      break;
   }
-  if ( ( trade.m_dt >= dtOpenRangeBgn ) && ( trade.m_dt < dtOpenRangeEnd ) ) {
-    if ( 0 == m_status.dblOpenRangeHigh ) {
-      m_status.dblOpenRangeHigh = m_status.dblOpenRangeLow = trade.m_dblTrade;
-    }
-    else {
-      m_status.dblOpenRangeHigh = max( m_status.dblOpenRangeHigh, trade.m_dblTrade );
-      m_status.dblOpenRangeLow  = min( m_status.dblOpenRangeLow, trade.m_dblTrade );
-    }
-  }
+
   switch ( m_TradingState ) {
-    case WaitForOpeningTrade:
-      if ( m_bRTHOnly ) {
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 10, 30, 0 ) );
+    case WaitForFirstTrade:  
+      if ( m_pModelParameters->bRTH ) {
         m_TradingState = WaitForOpeningBell;
         std::cout << m_status.sSymbolName << " Entering WaitForOpeningBell" << std::endl;
       }
       else {
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 16, 40, 0 ) );
         m_TradingState = ActiveTrading;
-        std::cout << m_status.sSymbolName << " Entering ActiveTrading" << std::endl;  // need to fix how this operates without RTHOnly set
-        if ( !m_bOpenFound ) {
-          m_bOpenFound = true;
-          m_status.dblOpen = m_status.dblOpenRangeLow = m_status.dblOpenRangeHigh = trade.m_dblTrade;
-        }
+        std::cout << m_status.sSymbolName << " Entering ActiveTrading" << std::endl;  
       }
       break;
     case WaitForOpeningBell:
-      if ( trade.m_dt >= m_dtTimeMarker ) {
-        if ( !m_bOpenFound ) {
-          m_bOpenFound = true;
-          m_status.dblOpen = m_status.dblOpenRangeLow = m_status.dblOpenRangeHigh = trade.m_dblTrade;
-        }
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 16, 40, 0 ) );
+      if ( trade.m_dt >= m_pModelParameters->dtRTHBgn ) {
         m_TradingState = ActiveTrading;
         std::cout << m_status.sSymbolName << " Entering ActiveTrading" << std::endl;
       }
@@ -165,8 +176,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       break;
     case ActiveTrading:
 
-      if ( trade.m_dt >= m_dtTimeMarker ) {
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 16, 45, 0 ) );
+      if ( trade.m_dt >= m_pModelParameters->dtBgnNoMoreTrades ) {
         m_TradingState = NoMoreTrades;
         std::cout << m_status.sSymbolName << " Entering NoMoreTrades" << std::endl;
       }
@@ -198,23 +208,11 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
             break;
         }
         m_1MinBarFactory.Add( trade );
-        if ( 0 == m_status.nPositionSize ) {
-          m_status.dblUnRealizedPL = 0;
-        }
-        else {
-          if ( 0 < m_status.nPositionSize ) { // long
-            m_status.dblUnRealizedPL = ( trade.m_dblTrade - m_status.dblAverageCost ) * m_status.nPositionSize;
-          }
-          else { // short
-            m_status.dblUnRealizedPL = ( m_status.dblAverageCost - trade.m_dblTrade ) * m_status.nPositionSize;
-          }
-        }
         
       }
       break;
     case NoMoreTrades:
-      if ( trade.m_dt >= m_dtTimeMarker ) {
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 16, 50, 0 ) );
+      if ( trade.m_dt >= m_pModelParameters->dtBgnCancelTrades ) {
         m_TradingState = CancelTrades;
         std::cout << m_status.sSymbolName << " Entering CancelTrades" << std::endl;
       }
@@ -222,8 +220,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       }
       break;
     case CancelTrades:
-      if ( trade.m_dt >= m_dtTimeMarker ) {
-        m_dtTimeMarker = ptime( trade.m_dt.date(), time_duration( 16, 55, 0 ) );
+      if ( trade.m_dt >= m_pModelParameters->dtBgnCloseTrades ) {
         m_TradingState = CloseTrades;
         std::cout << m_status.sSymbolName << " Entering CloseTrades" << std::endl;
       }
@@ -231,7 +228,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       }
       break;
     case CloseTrades:
-      if ( trade.m_dt >= m_dtTimeMarker ) {
+      if ( trade.m_dt >= m_pModelParameters->dtRTHEnd ) {
         m_TradingState = DoneTrading;
         std::cout << m_status.sSymbolName << " Entering DoneTrading" << std::endl;
       }
@@ -260,6 +257,19 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       // do nothing
       break;
   }
+
+  if ( 0 == m_status.nPositionSize ) {
+    m_status.dblUnRealizedPL = 0;
+  }
+  else {
+    if ( 0 < m_status.nPositionSize ) { // long
+      m_status.dblUnRealizedPL = ( trade.m_dblTrade - m_status.dblAverageCost ) * m_status.nPositionSize;
+    }
+    else { // short
+      m_status.dblUnRealizedPL = ( m_status.dblAverageCost - trade.m_dblTrade ) * m_status.nPositionSize;
+    }
+  }
+
   OnBasketTradeSymbolInfoChanged( this );
 }
 
@@ -371,6 +381,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
   m_status.dblFilledPrice = pOrder->GetAverageFillPrice();
   double dblPreviousAverageCost;
   bool bClosing;
+
   switch ( pOrder->GetOrderSide() ) {
     case OrderSide::Buy:
       bClosing = m_status.nPositionSize < 0;  // we are short, with a buy, closing all or part of position, => realized PL
@@ -393,6 +404,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       }
       break;
   }
+
   switch ( m_PositionState ) {
     case WaitingForOrderFulfillmentLong:
       m_PositionState = WaitingForLongExit;

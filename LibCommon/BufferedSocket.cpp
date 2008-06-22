@@ -4,7 +4,10 @@
 #include <iostream>
 using namespace std;
 
-CBufferedSocket::CBufferedSocket(void) : m_object( NULL ), m_bSocketOpen( false ), m_bThreadActive( false ) {
+CBufferedSocket::CBufferedSocket(void) 
+: m_object( NULL ), m_bSocketOpen( false ), m_bThreadActive( false ) 
+, m_bWaitingForCharacters( false )
+{
   m_hReceiveThread = CreateThread( NULL, 10000, ReceiveThread, this, CREATE_SUSPENDED, &m_ReceiveThreadId );
   if ( NULL == m_hReceiveThread ) {
     DWORD err = GetLastError();
@@ -76,12 +79,14 @@ DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
     }
 
     if ( 0 != BytesTransferred ) {
-      int i = 10;
+      int i = 10;  // simply a breakpoint placeholder
     }
     else {
+      bs->m_bWaitingForCharacters = true;
       ix = WSAWaitForMultipleEvents( 1, &hEvent, FALSE, WSA_INFINITE, FALSE );
       WSAResetEvent( hEvent );
       WSAGetOverlappedResult( bs->m_socket, &AcceptOverlapped, &BytesTransferred, FALSE, &Flags );
+      bs->m_bWaitingForCharacters = false;
     }
 
     if ( 0 == BytesTransferred ) { // connection has been closed
@@ -150,17 +155,24 @@ void CBufferedSocket::Send( const char *pCommand ) {
 }
 
 void CBufferedSocket::Close( void ) {
-  closesocket( m_socket );
+  int nReturnValue1 = shutdown( m_socket, SD_BOTH );
+  if ( 0 != nReturnValue1 ) {
+    std::cerr << "Socket Shutdown error " << WSAGetLastError() << std::endl;
+  }
   unsigned short nLoopCount = 10;
   while ( 0 != nLoopCount ) {
-    Sleep(100);
     if ( !m_bThreadActive ) {
       break;
     }
+    Sleep(100);
     --nLoopCount;
   }
-  if ( 0 != nLoopCount ) {
+  if ( 0 == nLoopCount ) {
     std::cout << "CBufferedSocket thread is still active" << std::endl;
+  }
+  int nReturnValue2 = closesocket( m_socket );
+  if ( 0 != nReturnValue2 ) {
+    std::cerr << "Socket close error " << WSAGetLastError() << std::endl;
   }
 
   // todo:  check that buffer is empty

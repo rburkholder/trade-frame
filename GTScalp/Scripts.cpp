@@ -76,7 +76,9 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
 //        || ( 0 == strcmp( szSymbol, "CIT" ) )
 //        || ( 0 == strcmp( szSymbol, "BOH" ) )
 //        || ( 0 == strcmp( szSymbol, "ARTC" ) ) ) {
-        if ( !symbolfile.GetBitMutual() && !symbolfile.GetBitMoneyMkt() ) {
+        if ( !symbolfile.GetBitMutual() 
+           && !symbolfile.GetBitMoneyMkt() 
+           && !symbolfile.GetBitNotAStock() ) {
           CHistoryCollector *phc;
           switch ( typeHistory ) {
              case Daily:

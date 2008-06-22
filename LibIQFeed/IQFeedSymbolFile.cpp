@@ -138,12 +138,13 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   static const boost::regex rxIndex(".+\\.X$");
   static const boost::regex rxCboe(".+\\.XO$");
   static const boost::regex rxIndicator(".+\\.Z$");
+  static const boost::regex rxNotAStock("([A-Z]+[0-9]+[A-Z]*)|([A-Z]+\\.[A-Z]+)");
 
   static const boost::regex rxOption( "^([A-Z]+){0,1}[ ]([A-Z]{3}) ([0-9]{4}) ([CP]) ([0-9]+[.][0-9]+)" ); //GM SEP 2008 P 10.000
   static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
   static const boost::regex rxFuture2( "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
 
-  unsigned int cntMutual = 0, cntMoneyMkt = 0, cntIndex = 0, cntCboe = 0, cntIndicator = 0;
+  unsigned int cntMutual = 0, cntMoneyMkt = 0, cntIndex = 0, cntCboe = 0, cntIndicator = 0, cntNotAStock = 0;
   unsigned short nUnderlyingSize = 0;
 
   ifstream file;
@@ -277,7 +278,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       }
 
       // identify the symbol types
-      m_bMutual = m_bMoneyMkt = m_bIndex = m_bCboe = m_bIndicator = false;
+      m_bMutual = m_bMoneyMkt = m_bIndex = m_bCboe = m_bIndicator , m_bNotAStock= false;
       if ( boost::regex_match( dbRecord.line, rxMutual ) ) {
         m_bMutual = true;
         ++cntMutual;
@@ -297,6 +298,10 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       if ( boost::regex_match( dbRecord.line, rxIndicator ) ) {
         m_bIndicator = true;
         ++cntIndicator;
+      }
+      if ( boost::regex_match( dbRecord.line, rxNotAStock ) ) {
+        m_bNotAStock = true;
+        ++cntNotAStock;
       }
       PackBoolean();
 
@@ -322,6 +327,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   cout << "Count Index:      " << cntIndex << endl;
   cout << "Count CBOE:       " << cntCboe << endl;
   cout << "Count Indicator:  " << cntIndicator << endl;
+  cout << "Count NotAStock   " << cntNotAStock << endl;
   cout << "Max Underlying    " << nUnderlyingSize << endl;
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {

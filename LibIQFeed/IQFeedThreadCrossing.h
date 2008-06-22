@@ -26,7 +26,6 @@ public:
     m_socket.SetOnNewResponse( function );
   }
 
-  //void CallClient( void ) { };
   void QueueResponse( unsigned short, const char * );
   void ProcessResponse( void );
 
@@ -37,8 +36,8 @@ protected:
   CBufferedSocket m_socket;
   CReusableCharBuffers m_EmptyBuffers;
   queue<CCharBuffer *> m_responses;
-  unsigned int cntMessages;
-  bool bActive;
+  bool m_bActive;
+  unsigned long m_nActivations;
 private:
   CRITICAL_SECTION csProtectQueues;
   OnNewResponseHandler OnNewResponse;

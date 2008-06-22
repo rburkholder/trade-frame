@@ -184,14 +184,20 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
   end = lower_bound( begin, barRepository.end(), dtPt2 );  // retrieve to one day past trigger
   hsize_t cnt = end - begin;
   ptime dttmp = (*(end-1)).m_dt;
-  if ( ( 240 < cnt ) && ( dttmp == dtTrigger ) ){   // at least 240 bars, with required last bar
+  if ( 
+    ( 240 < cnt ) 
+    && ( dttmp == dtTrigger ) ){   // at least 240 bars, with required last bar
     m_bars.Resize( cnt );
     barRepository.Read( begin, end, &m_bars );
 
     vector<CBar>::iterator volIter = m_bars.end() - 20;
     unsigned long nAverageVolume = std::for_each( volIter, m_bars.end(), CalcAverageVolume() );
 
-    if ( 1000000 < nAverageVolume ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+    if ( 
+      ( 1000000 < nAverageVolume )
+      && ( m_bars.Last()->m_dblClose >= 20.0 ) 
+      && ( m_bars.Last()->m_dblClose  < 80.0 ) 
+      ) {  // need certain amount of liquidity before entering trade (20 bars worth)
 
       ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
       if ( dtDayOfMax >= dtPt1 ) {
@@ -240,7 +246,9 @@ void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &s
       begin = end - 20;
       m_bars.Resize( 20 );
       barRepository.Read( begin, end, &m_bars );
-      if ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) {
+      if ( ( m_bars.Last()->m_dblClose < 80.0 ) 
+        && ( m_bars.Last()->m_dblClose > 20.0 ) 
+        && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
         unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
         double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
         if ( ( 1000000 < nAverageVolume ) && ( 25 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)
@@ -371,7 +379,9 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
     begin = end - 20;
     m_bars.Resize( 20 );
     barRepository.Read( begin, end, &m_bars );
-    if ( ( m_bars.Last()->m_dblClose < 50.0 ) && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
+    if ( ( m_bars.Last()->m_dblClose < 50.0 ) 
+      && ( m_bars.Last()->m_dblClose > 20.0 ) 
+      && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
       unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
       double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
       if ( ( 1000000 < nAverageVolume ) && ( 25.0 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)

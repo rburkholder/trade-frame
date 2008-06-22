@@ -187,6 +187,7 @@ void CInstrumentFile::PackBoolean( void ) {
   dbRecord.ucBits1 |= ( m_bCboe ? ucCboe : 0 );
   dbRecord.ucBits1 |= ( m_bIndicator ? ucIndicator : 0 );
   dbRecord.ucBits1 |= ( m_bHasOptions ? ucHasOptions : 0 );
+  dbRecord.ucBits1 |= ( m_bNotAStock ? ucNotAStock : 0 );
 
 }
 
@@ -197,5 +198,6 @@ void CInstrumentFile::UnPackBoolean( const unsigned char ucBits1 ) {
   m_bCboe = 0 != ( ucBits1 & ucCboe );
   m_bIndicator = 0 != ( ucBits1 & ucIndicator );
   m_bHasOptions = 0 != ( ucBits1 & ucHasOptions );
+  m_bNotAStock = 0 != ( ucBits1 & ucNotAStock );
 }
 

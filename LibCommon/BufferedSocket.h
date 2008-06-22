@@ -41,6 +41,7 @@ private:
   
   SOCKET m_socket;
   bool m_bSocketOpen;
+  bool m_bWaitingForCharacters;  // debugging aid to confirm nothing active when put in waiting qwu
   
   DWORD m_Flags;
   DWORD m_cntBytesSent;

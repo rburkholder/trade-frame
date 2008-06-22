@@ -27,7 +27,6 @@ public:
 
   Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
 
-  void CalculateTrade( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   void HandleQuote( const CQuote &quote );
@@ -66,14 +65,26 @@ public:
   };
   const structFieldsForDialog &GetDialogFields( void ) { return m_status; };  // needs come after structure definition
 
+  struct structCommonModelInformation {
+      bool bRTH;  // regular trading hours only
+      ptime dtRTHBgn;
+      ptime dtRTHEnd;
+      ptime dtOpenRangeBgn;
+      ptime dtOpenRangeEnd;
+      ptime dtEndActiveTrading;
+      ptime dtBgnNoMoreTrades;
+      ptime dtBgnCancelTrades;
+      ptime dtBgnCloseTrades;
+      ptime dtTradeDate; // date of trading, previous days provide the history
+      double dblFunds;  // funds available for use
+  };
+  void CalculateTrade( structCommonModelInformation *pParameters  );
+
 protected:
   void Initialize( void );
   structFieldsForDialog m_status;
   std::string m_sPath;
   std::string m_sStrategy;
-  ptime m_dtTimeMarker;
-  ptime m_dtTradeDate;
-  double m_dblMaxAllowedFunds;
   double m_dblDayOpenPrice;
   double m_dblPriceForEntry;
   double m_dblAveragePriceOfEntry;
@@ -85,7 +96,6 @@ protected:
   double m_dblAllocatedWorkingFunds;
   double m_dblExitPrice;
   double m_dblProposedEntryCost;
-  //bool m_bEntryInitiated;
   enum enumPositionState { 
     Init, WaitingForOpen, 
     WaitingForThe3Bars, 
@@ -93,6 +103,7 @@ protected:
     WaitingForLongExit, WaitingForShortExit,
     WaitingForExit, Exited } m_PositionState;
   enum enumTradingState {
+    WaitForFirstTrade,
     WaitForOpeningTrade, 
     WaitForOpeningBell, // 9:30 exchange time
     SetOpeningRange,  // spend 5 minutes here
@@ -102,8 +113,6 @@ protected:
     CloseTrades,  // 15:50 exchange time
     DoneTrading   // 15:50 exchange time
   } m_TradingState;
-  bool m_bOpenFound;
-  double m_dblStartLevel;
   double m_dblAveBarHeight;
   double m_dblTrailingStopDistance;
 
@@ -115,8 +124,12 @@ protected:
   static const size_t m_nBarWidth = 30;  //seconds
 
   structFieldsForDialog m_FieldsForDialog;
-
-  bool m_bRTHOnly;
+  structCommonModelInformation *m_pModelParameters;
+  enum enumStateForRangeCalc {
+    WaitForRangeStart,
+    CalculatingRange, 
+    DoneCalculatingRange
+  } m_OpeningRangeState, m_RTHRangeState;
 
   CProviderInterface *m_pExecutionProvider;
 

@@ -16,6 +16,7 @@ public:
   bool GetBitCboe() { return m_bCboe; };
   bool GetBitIndicator() { return m_bIndicator; };
   bool GetBitHasOptions() { return m_bHasOptions; };
+  bool GetBitNotAStock() { return m_bNotAStock; };
   void OpenIQFSymbols( void );
   void CloseIQFSymbols( void );
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
@@ -70,7 +71,8 @@ protected:
   static const unsigned char ucCboe = 8;
   static const unsigned char ucIndicator = 16;
   static const unsigned char ucHasOptions = 32;
-  bool m_bMutual, m_bMoneyMkt, m_bIndex, m_bCboe, m_bIndicator, m_bHasOptions;
+  static const unsigned char ucNotAStock = 64;
+  bool m_bMutual, m_bMoneyMkt, m_bIndex, m_bCboe, m_bIndicator, m_bHasOptions, m_bNotAStock;
 
   void PackBoolean(void);
   void UnPackBoolean( const unsigned char ucBits1 );
