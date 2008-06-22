@@ -91,6 +91,7 @@
 #define IDC_DSGT1                       1096
 #define IDC_DSGT2                       1097
 #define IDC_DS1                         1098
+#define IDC_DSSIMULATION                1098
 #define IDC_DS2                         1099
 #define IDC_CHARTSYMBOL                 1100
 #define IDC_RTCHART                     1101
@@ -103,6 +104,7 @@
 #define IDC_EXECGENESIS1                1109
 #define IDC_EXECGENESIS2                1110
 #define IDC_EXEC4                       1111
+#define IDC_EXECSIMULATION              1111
 #define IDC_EXEC5                       1112
 #define IDC_CBOUTSIDERTH                1113
 #define IDC_RBOSSELL                    1114
@@ -128,6 +130,9 @@
 #define IDC_BTNLOADBASKET               1134
 #define IDC_BUTTON6                     1135
 #define IDC_BTNSAFEBSKTDATA             1135
+#define IDC_CBSIMULATOR                 1136
+#define IDC_BUTTON2                     1137
+#define IDC_BTNSIMUASSIGNDIR            1137
 
 // Next default values for new objects
 // 
@@ -135,7 +140,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1136
+#define _APS_NEXT_CONTROL_VALUE         1138
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

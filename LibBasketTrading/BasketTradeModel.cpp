@@ -3,6 +3,7 @@
 
 #include "DbValueStream.h"
 #include "CommonDatabaseFunctions.h"
+#include "HDF5IterateGroups.h"
 
 #include <ostream>
 
@@ -100,7 +101,7 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   }
 }
 
-void CBasketTradeModel::WriteBasketToDatabase() {
+void CBasketTradeModel::WriteBasketList() {
 
   CDbValueStream strm;
   std::ostream out(&strm);
@@ -115,13 +116,27 @@ void CBasketTradeModel::WriteBasketToDatabase() {
   }
 }
 
-void CBasketTradeModel::ReadBasketFromDatabase() {
+void CBasketTradeModel::ReadBasketList() {
   std::stringstream in;
   CBasketTradeSymbolInfo *pBasket = new CBasketTradeSymbolInfo( &in, m_pExecutionProvider );
 }
 
-void CBasketTradeModel::WriteBasketData( const std::string &sPathPrefix ) {
-  for( mapBasketSymbols_t::iterator iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
-    iter->second->WriteTradesAndQuotes( sPathPrefix );
+void CBasketTradeModel::ReadBasketData( const std::string &sGroupName ) {  // directory of symbol trades to read
+  if ( 0 != m_mapBasketSymbols.size() ) {
+    std::cout << "Nothing added, symbols already in basket model" << std::endl;
   }
+  else {
+    HDF5IterateGroups<CBasketTradeModel> control;
+    int result = control.Start( sGroupName, this );
+  }
+}
+
+void CBasketTradeModel::WriteBasketData( const std::string &sGroupName ) {
+  for( mapBasketSymbols_t::iterator iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
+    iter->second->WriteTradesAndQuotes( sGroupName );
+  }
+}
+
+void CBasketTradeModel::Process(const std::string &sObjectName, const std::string &sObjectPath) {
+  AddSymbol( sObjectName, sObjectPath, "archive" );
 }

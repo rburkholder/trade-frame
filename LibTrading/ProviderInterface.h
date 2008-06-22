@@ -45,7 +45,7 @@ public:
   void SetAlternateInstrumentName( const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName );
   void GetAlternateInstrumentName( const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName );
 
-  enum enumProviderId { EProviderIB = 100, EProviderIQF, EProviderGNDT, _EProviderCount };
+  enum enumProviderId { EProviderIB = 100, EProviderIQF, EProviderGNDT, EProviderSimulator, _EProviderCount };
 protected:
   std::string m_sName;  // name of provider
   unsigned short m_nID;

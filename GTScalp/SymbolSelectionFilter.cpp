@@ -6,6 +6,7 @@ using namespace H5;
 
 #include "TimeSeries.h"
 #include "HDF5TimeSeriesContainer.h"
+#include "HDF5IterateGroups.h"
 
 #include "RunningStats.h"
 
@@ -28,66 +29,11 @@ CSymbolSelectionFilter::~CSymbolSelectionFilter(void) {
   m_bars.Clear();
 }
 
-// forward reference only
-herr_t IterateCallback( hid_t group, const char *name, void *op_data );
-
-// called from IterateCallback (which is called as HDF5 iterates the directory
-class CFilterSelectionIteratorControl {
-public:
-  CFilterSelectionIteratorControl( const string &sBaseGroup, CSymbolSelectionFilter *pFilter ) :
-      m_sBaseGroup( sBaseGroup ), m_pFilter( pFilter ) { };
-  void Process( const string &sObjectName ) {
-    CHDF5DataManager dm;
-    H5G_stat_t stats;
-    string sObjectPath;
-    sObjectPath = m_sBaseGroup + sObjectName;
-    try {
-      dm.GetH5File()->getObjinfo( sObjectPath, stats );
-      switch ( stats.type ) {
-        case H5G_DATASET: 
-          try {
-            m_pFilter->Process( sObjectName, sObjectPath );
-          }
-          catch ( std::exception e ) {
-            std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " problem: " << e.what() << std::endl;
-          }
-          catch (...) {
-            std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " unknown problems" << std::endl;
-          }
-          break;
-        case H5G_GROUP:
-          int idx = 0;  // starting location for interrupted queries
-          sObjectPath.append( "/" );
-          CFilterSelectionIteratorControl control( sObjectPath, m_pFilter );  // prepare for recursive call
-          int result = dm.GetH5File()->iterateElems( sObjectPath, &idx, &IterateCallback, &control );  
-          break;
-      }
-    }
-    catch ( H5::Exception e ) {
-      cout << "CFilterSelectionIteratorControl::Process H5::Exception " << e.getDetailMsg() << endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
-    }
-  }
-protected:
-  string m_sBaseGroup;
-  CSymbolSelectionFilter *m_pFilter;
-private:
-};
-
 void CSymbolSelectionFilter::Start( void ) {
-  CHDF5DataManager dm;
-  int idx = 0;  // starting location for interrupted queries
   string sBaseGroup = "/bar/86400/";
-  CFilterSelectionIteratorControl control( sBaseGroup, this );
-  int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &IterateCallback, &control );
+  HDF5IterateGroups<CSymbolSelectionFilter> control;
+  int result = control.Start( sBaseGroup, this );
   cout << "iteration returned " << result << endl;
-}
-
-herr_t IterateCallback( hid_t group, const char *name, void *op_data ) {
-  CFilterSelectionIteratorControl *pControl = 
-    ( CFilterSelectionIteratorControl * ) op_data;
-  pControl->Process( name );
-  return 0;
 }
 
 //
@@ -183,39 +129,41 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
   begin = lower_bound( barRepository.begin(), barRepository.end(), dtOneYrAgo );
   end = lower_bound( begin, barRepository.end(), dtPt2 );  // retrieve to one day past trigger
   hsize_t cnt = end - begin;
-  ptime dttmp = (*(end-1)).m_dt;
-  if ( 
-    ( 240 < cnt ) 
-    && ( dttmp == dtTrigger ) ){   // at least 240 bars, with required last bar
-    m_bars.Resize( cnt );
-    barRepository.Read( begin, end, &m_bars );
-
-    vector<CBar>::iterator volIter = m_bars.end() - 20;
-    unsigned long nAverageVolume = std::for_each( volIter, m_bars.end(), CalcAverageVolume() );
-
+  if ( 20 <= cnt ) {
+    ptime dttmp = (*(end-1)).m_dt;
     if ( 
-      ( 1000000 < nAverageVolume )
-      && ( m_bars.Last()->m_dblClose >= 20.0 ) 
-      && ( m_bars.Last()->m_dblClose  < 80.0 ) 
-      ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+      ( 240 < cnt ) 
+      && ( dttmp == dtTrigger ) ){   // at least 240 bars, with required last bar
+        m_bars.Resize( cnt );
+        barRepository.Read( begin, end, &m_bars );
 
-      ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
-      if ( dtDayOfMax >= dtPt1 ) {
-        cout << 
-          "Darvas max for " << sSymbol << 
-          " on " << dtDayOfMax << 
-          ", close=" << m_bars.Last()->m_dblClose <<
-          ", volume=" << m_bars.Last()->m_nVolume;
-        vector<CBar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
-        CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
-        if ( results.GetTrigger() ) {
-          cout << " triggered, stop=" << results.GetStopLevel();
-          iter = m_bars.iterAtOrAfter( dt26WksAgo );
-          for_each( iter, m_bars.end(), CalcSixMonMeans() );
-          if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbol, sPath, "Darvas" );
+        vector<CBar>::iterator volIter = m_bars.end() - 20;
+        unsigned long nAverageVolume = std::for_each( volIter, m_bars.end(), CalcAverageVolume() );
+
+        if ( 
+          ( 1000000 < nAverageVolume )
+          && ( m_bars.Last()->m_dblClose >= 20.0 ) 
+          && ( m_bars.Last()->m_dblClose  < 80.0 ) 
+          ) {  // need certain amount of liquidity before entering trade (20 bars worth)
+
+            ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
+            if ( dtDayOfMax >= dtPt1 ) {
+              cout << 
+                "Darvas max for " << sSymbol << 
+                " on " << dtDayOfMax << 
+                ", close=" << m_bars.Last()->m_dblClose <<
+                ", volume=" << m_bars.Last()->m_nVolume;
+              vector<CBar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
+              CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
+              if ( results.GetTrigger() ) {
+                cout << " triggered, stop=" << results.GetStopLevel();
+                iter = m_bars.iterAtOrAfter( dt26WksAgo );
+                for_each( iter, m_bars.end(), CalcSixMonMeans() );
+                if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbol, sPath, "Darvas" );
+              }
+              cout << endl;
+            }
         }
-        cout << endl;
-      }
     }
   }
 }
@@ -300,42 +248,6 @@ void CSelectSymbolWith10Percent::WrapUp( void ) {
     if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterNeg->second, "10%-" );
   }
   mapMaxNegatives.clear();
-}
-
-//
-// CSelectSymbolWithBollinger
-//
-CSelectSymbolWithBollinger::CSelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
-}
-
-CSelectSymbolWithBollinger::~CSelectSymbolWithBollinger(void) {
-}
-
-void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &sPath ) {
-  cout << "Bollinger for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
-  CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
-  end = lower_bound( barRepository.begin(), barRepository.end(), m_dtStart );
-  switch ( m_DayStartType ) {
-    case DaySelect:
-      begin = lower_bound( barRepository.begin(), end, m_dtStart );
-      break;
-    case BarCount:
-      break;
-      begin = end;
-      begin -= m_nCount;
-    case DayCount:
-      date_duration tmp( m_nCount );
-      ptime dt = (*end).m_dt - tmp;
-      begin = lower_bound( barRepository.begin(), end, dt );
-  }
-  hsize_t cnt = end - begin;
-  //CBars bars( cnt );
-  void *p = m_bars.First();
-  int p2 = sizeof( CBar );
-  m_bars.Resize( cnt );
-  barRepository.Read( begin, end, &m_bars );
 }
 
 //
@@ -465,4 +377,40 @@ void CSelectSymbolWithXWeekHigh::Process( const string &sSymbol, const string &s
   }
 }
 
+
+//
+// CSelectSymbolWithBollinger
+//
+CSelectSymbolWithBollinger::CSelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+}
+
+CSelectSymbolWithBollinger::~CSelectSymbolWithBollinger(void) {
+}
+
+void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &sPath ) {
+  cout << "Bollinger for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
+  CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
+  CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
+  end = lower_bound( barRepository.begin(), barRepository.end(), m_dtStart );
+  switch ( m_DayStartType ) {
+    case DaySelect:
+      begin = lower_bound( barRepository.begin(), end, m_dtStart );
+      break;
+    case BarCount:
+      break;
+      begin = end;
+      begin -= m_nCount;
+    case DayCount:
+      date_duration tmp( m_nCount );
+      ptime dt = (*end).m_dt - tmp;
+      begin = lower_bound( barRepository.begin(), end, dt );
+  }
+  hsize_t cnt = end - begin;
+  //CBars bars( cnt );
+  void *p = m_bars.First();
+  int p2 = sizeof( CBar );
+  m_bars.Resize( cnt );
+  barRepository.Read( begin, end, &m_bars );
+}
 

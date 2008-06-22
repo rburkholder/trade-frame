@@ -24,6 +24,7 @@
 #include "IQFeedProviderSingleton.h"
 #include "IBTWS.h"
 #include "TradingEnumerations.h"
+#include "SimulationProvider.h"
 
 #include "..\LibBasketTrading\BasketTradeContainer.h"
 
@@ -59,9 +60,9 @@ private:
   CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
   bool m_bUseDayStart;
   bool m_bUseDayEnd;
-  enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2 };
+  enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2, DSSimulation };
   enumDataSourceType m_eDataSourceType;
-  enum enumExectionType { NoExec, ExecIB, ExecGenesis1, ExecGenesis2 };
+  enum enumExectionType { NoExec, ExecIB, ExecGenesis1, ExecGenesis2, ExecSimulation };
   enumExectionType m_eExecutionType;
 
   OrderSide::enumOrderSide m_eOrderSide;
@@ -70,7 +71,9 @@ private:
   CIBTWS *m_pIB;
   CIQFeedProviderSingleton *m_pIQFeedSingleton;
   CIQFeedProvider *m_pIQFeed;
+  CSimulationProvider *m_pSimulation;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
+
 
   CProviderInterface *m_pExecutionProvider;
   CProviderInterface *m_pDataProvider;
@@ -215,4 +218,11 @@ public:
   afx_msg void OnBnClickedBtnsavebasket();
   afx_msg void OnBnClickedBtnsafebsktdata();
   afx_msg void OnEnChangeEntry1();
+  afx_msg void OnBnClickedDssimulation();
+  afx_msg void OnBnClickedExecsimulation();
+  afx_msg void OnBnClickedCbsimulator();
+  CButton m_cbSimulatorOn;
+  CButton m_btnSimulatorExecution;
+  CButton m_btnSimulatorDataSource;
+  afx_msg void OnBnClickedBtnsimuassigndir();
 };

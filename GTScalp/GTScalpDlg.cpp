@@ -69,6 +69,7 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
   , m_pIQFeedSingleton( NULL )
   , m_pIQFeed( NULL )
   , m_pIB( NULL )
+  , m_pSimulation( NULL )
   , m_pBasketTrade( NULL )
   , m_pExecutionProvider( NULL )
   , m_pDataProvider( NULL )
@@ -121,6 +122,9 @@ void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_IQFWINDOWS, m_btnIQFWindows);
   DDX_Control(pDX, IDC_EDTORGSYMBOLNAME, m_edtOriginalSymbolName);
   DDX_Control(pDX, IDC_EDTALTSYMBOLNAME, m_edtAlternateSymbolName);
+  DDX_Control(pDX, IDC_CBSIMULATOR, m_cbSimulatorOn);
+  DDX_Control(pDX, IDC_EXECSIMULATION, m_btnSimulatorExecution );
+  DDX_Control(pDX, IDC_DSSIMULATION, m_btnSimulatorDataSource);
 }
 
 BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
@@ -162,20 +166,21 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_IBWATCH, &CGTScalpDlg::OnBnClickedIbwatch)
   ON_BN_CLICKED(IDC_IBUNWATCH, &CGTScalpDlg::OnBnClickedIbunwatch)
   ON_BN_CLICKED(IDC_IBCLOSE, &CGTScalpDlg::OnBnClickedIbclose)
-  ON_BN_CLICKED(IDC_DSIQFEED, &CGTScalpDlg::OnBnClickedDsiqfeed)
+  ON_BN_CLICKED(IDC_DSSIMULATION, &CGTScalpDlg::OnBnClickedDssimulation)
   ON_BN_CLICKED(IDC_DSIB, &CGTScalpDlg::OnBnClickedDsib)
   ON_BN_CLICKED(IDC_DSGT1, &CGTScalpDlg::OnBnClickedDsgt1)
   ON_BN_CLICKED(IDC_DSGT2, &CGTScalpDlg::OnBnClickedDsgt2)
+  ON_BN_CLICKED(IDC_DSIQFEED, &CGTScalpDlg::OnBnClickedDsiqfeed)
   ON_BN_CLICKED(IDC_CHARTSYMBOL, &CGTScalpDlg::OnBnClickedChartsymbol)
   ON_EN_CHANGE(IDC_IBACCT, &CGTScalpDlg::OnEnChangeIbacct)
   ON_BN_CLICKED(IDC_RTCHART, &CGTScalpDlg::OnBnClickedRtchart)
   ON_BN_CLICKED(IDC_BASKET, &CGTScalpDlg::OnBnClickedBasket)
   ON_BN_CLICKED(IDC_BASKETPREPARE, &CGTScalpDlg::OnBnClickedBasketprepare)
   ON_BN_CLICKED(IDC_ADDTESTSYMBOLS, &CGTScalpDlg::OnBnClickedAddtestsymbols)
+  ON_BN_CLICKED(IDC_EXECSIMULATION, &CGTScalpDlg::OnBnClickedExecsimulation)
   ON_BN_CLICKED(IDC_EXECIB, &CGTScalpDlg::OnBnClickedExecib)
   ON_BN_CLICKED(IDC_EXECGENESIS1, &CGTScalpDlg::OnBnClickedExecgenesis1)
   ON_BN_CLICKED(IDC_EXECGENESIS2, &CGTScalpDlg::OnBnClickedExecgenesis2)
-  ON_BN_CLICKED(IDC_EXEC4, &CGTScalpDlg::OnBnClickedExec4)
   ON_BN_CLICKED(IDC_EXEC5, &CGTScalpDlg::OnBnClickedExec5)
   ON_BN_CLICKED(IDC_CBOUTSIDERTH, &CGTScalpDlg::OnBnClickedCboutsiderth)
   ON_BN_CLICKED(IDC_RBOSBUY, &CGTScalpDlg::OnBnClickedRbosbuy)
@@ -193,6 +198,8 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_BTNSAVEBASKET, &CGTScalpDlg::OnBnClickedBtnsavebasket)
   ON_BN_CLICKED(IDC_BTNSAFEBSKTDATA, &CGTScalpDlg::OnBnClickedBtnsafebsktdata)
   ON_EN_CHANGE(IDC_ENTRY1, &CGTScalpDlg::OnEnChangeEntry1)
+  ON_BN_CLICKED(IDC_CBSIMULATOR, &CGTScalpDlg::OnBnClickedCbsimulator)
+  ON_BN_CLICKED(IDC_BTNSIMUASSIGNDIR, &CGTScalpDlg::OnBnClickedBtnsimuassigndir)
 END_MESSAGE_MAP()
 
 
@@ -448,6 +455,10 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
   if ( NULL != m_pIB ) {
     delete m_pIB;
     m_pIB = NULL;
+  }
+  if ( NULL != m_pSimulation ) {
+    delete m_pSimulation;
+    m_pSimulation = NULL;
   }
 }
 
@@ -872,6 +883,12 @@ void CGTScalpDlg::OnBnClickedIbclose() {
   }
 }
 
+void CGTScalpDlg::OnBnClickedDssimulation() {
+  m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSSIMULATION );
+  m_eDataSourceType = DSSimulation;
+  m_pDataProvider = m_pSimulation;
+}
+
 void CGTScalpDlg::OnBnClickedDsiqfeed() {
   m_grpDataSource.CheckRadioButton( IDC_DSIQFEED, IDC_DS2, IDC_DSIQFEED );
   m_eDataSourceType = DSIQFeed;
@@ -978,6 +995,16 @@ void CGTScalpDlg::OnBnClickedBasket() {
           std::cout << "Data Source = IB" << std::endl;
         }
         break;
+      case DSSimulation:
+        if ( NULL == m_pSimulation ) {
+          bOK = false;
+          std::cout << "Simulation not started" << std::endl;
+        }
+        else {
+          pData = m_pSimulation;
+          std::cout << "Data Source = Simulation" << std::endl;
+        }
+        break;
       case DSGenesis1:
         break;
       case DSGenesis2:
@@ -998,6 +1025,16 @@ void CGTScalpDlg::OnBnClickedBasket() {
         else {
           pExec = m_pIB;
           std::cout << "Execution Destination = IB" << std::endl;
+        }
+        break;
+      case ExecSimulation:
+        if ( NULL == m_pSimulation ) {
+          bOK = false;
+          std::cout << "Simulation not started" << std::endl;
+        }
+        else {
+          pExec = m_pSimulation;
+          std::cout << "Execution = Simulation" << std::endl;
         }
         break;
       case ExecGenesis1:
@@ -1062,6 +1099,12 @@ void CGTScalpDlg::OnBnClickedAddtestsymbols() {
   }
 }
 
+void CGTScalpDlg::OnBnClickedExecsimulation() {
+  m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECSIMULATION );
+  m_eExecutionType = ExecSimulation;
+  m_pExecutionProvider = m_pSimulation;
+}
+
 void CGTScalpDlg::OnBnClickedExecib() {
   m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECIB );
   m_eExecutionType = ExecIB;
@@ -1076,9 +1119,6 @@ void CGTScalpDlg::OnBnClickedExecgenesis1() {
 void CGTScalpDlg::OnBnClickedExecgenesis2() {
   m_grpExecution.CheckRadioButton( IDC_EXECIB, IDC_EXEC5, IDC_EXECGENESIS2 );
   m_eExecutionType = ExecGenesis2;
-}
-
-void CGTScalpDlg::OnBnClickedExec4() {
 }
 
 void CGTScalpDlg::OnBnClickedExec5() {
@@ -1251,18 +1291,31 @@ void CGTScalpDlg::OnBnClickedBtnsavesymbol() {
 
 void CGTScalpDlg::OnBnClickedBtnsavebasket() {
   if ( NULL != m_pBasketTrade ) {
-    m_pBasketTrade->SaveBasket();
+    m_pBasketTrade->SaveBasketList();
   }
 }
 
 void CGTScalpDlg::OnBnClickedBtnloadbasket() {
+  bool b = false;
   if ( NULL != m_pBasketTrade ) {
-    m_pBasketTrade->LoadBasket();
+    char entry[ 100 ];
+    m_edtEntry1.GetWindowTextA( entry, 100 );
+    if ( 0 != *entry ) {
+      if ( '/' == *entry ) {
+        string path( entry );
+        m_pBasketTrade->LoadBasketData( path );
+        b = true;
+      }
+    }
+  }
+  if ( !b ) {
+    std::cout << "Problems with loading" << std::endl;
   }
 }
 
 
 void CGTScalpDlg::OnBnClickedBtnsafebsktdata() {
+  bool b = false;
   if ( NULL != m_pBasketTrade ) {
     char entry[ 100 ];
     m_edtEntry1.GetWindowTextA( entry, 100 );
@@ -1270,8 +1323,12 @@ void CGTScalpDlg::OnBnClickedBtnsafebsktdata() {
       if ( '/' == *entry ) {
         string path( entry );
         m_pBasketTrade->SaveBasketData( path );
+        b = true;
       }
     }
+  }
+  if ( !b ) {
+    std::cout << "Problems with saving" << std::endl;
   }
 }
 
@@ -1283,4 +1340,59 @@ void CGTScalpDlg::OnEnChangeEntry1()
   // with the ENM_CHANGE flag ORed into the mask.
 
   // TODO:  Add your control notification handler code here
+}
+
+
+void CGTScalpDlg::OnBnClickedCbsimulator() {
+  if ( BST_CHECKED == m_cbSimulatorOn.GetCheck() ) {
+    if ( NULL == m_pSimulation ) {
+      m_pSimulation = new CSimulationProvider();
+    }
+    if ( !m_pSimulation->Connected() ) {
+      m_pSimulation->Connect();
+      //m_btnSimulatorDataSource.SetCheck( BST_CHECKED );
+      m_btnSimulatorDataSource.EnableWindow( TRUE );
+      //m_btnSimulatorExecution.SetCheck( BST_CHECKED );
+      m_btnSimulatorExecution.EnableWindow( TRUE );
+    }
+  }
+  else {
+    if ( NULL != m_pSimulation ) {
+      if ( m_pSimulation->Connected() ) {
+        m_btnSimulatorDataSource.SetCheck( BST_UNCHECKED );
+        m_btnSimulatorDataSource.EnableWindow( FALSE );
+        m_btnSimulatorExecution.SetCheck( BST_UNCHECKED );
+        m_btnSimulatorExecution.EnableWindow( FALSE );
+        m_pSimulation->Disconnect();
+        if ( m_pExecutionProvider == m_pSimulation ) {
+          m_pExecutionProvider = NULL;
+        }
+        if ( m_pDataProvider == m_pSimulation ) {
+          m_pDataProvider = NULL;
+        }
+      }
+    }
+  }
+}
+
+void CGTScalpDlg::OnBnClickedBtnsimuassigndir() {
+  if ( NULL == m_pSimulation ) {
+    std::cout << "Simulation Provider not available" << std::endl;
+  }
+  else {
+    bool b = false;
+    char entry[ 100 ];
+    m_edtEntry1.GetWindowTextA( entry, 100 );
+    if ( 0 != *entry ) {
+      if ( '/' == *entry ) {
+        string path( entry );
+        m_pSimulation->SetGroupDirectory( path );
+        std::cout << "Group directory set to " << path << std::endl;
+        b = true;
+      }
+    }
+    if ( !b ) {
+      std::cout << "problems setting directory" << std::endl;
+    }
+  }
 }

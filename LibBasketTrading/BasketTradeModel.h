@@ -13,10 +13,12 @@ public:
   ~CBasketTradeModel(void);
   void AddSymbol( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy  );
   void Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOnly );
-  void WriteBasketToDatabase( void );
-  void ReadBasketFromDatabase( void );
-  void WriteBasketData( const std::string &sPathPrefix );
+  void WriteBasketList( void );
+  void ReadBasketList( void );
+  void WriteBasketData( const std::string &sGroupName );
+  void ReadBasketData( const std::string &sGroupName );
   Delegate<CBasketTradeSymbolInfo*> OnBasketTradeSymbolInfoAddedToBasket;
+  void Process( const std::string &sObjectName, const std::string &sObjectPath );
 protected:
   typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;

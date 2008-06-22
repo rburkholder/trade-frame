@@ -44,6 +44,9 @@ void CGndtProvider::Connect() {
     GTSession::m_setting.SetQuoteAddress( m_sLvl1Addr.c_str(), m_nLvl1Port );
     GTSession::m_setting.SetLevel2Address( m_sLvl2Addr.c_str(), m_nLvl2Port );
     int ret = GTSession::Login( m_sLoginName.c_str(), m_sPassword.c_str() );
+
+    // need to add '   OnConnected( 0 );' to event that has login
+ 
   }
 }
 
@@ -54,6 +57,7 @@ void CGndtProvider::Disconnect() {
     GTSession::TryClose();
     BOOL bCanClose = GTSession::CanClose();
     CProviderInterface::Disconnect();
+    // need to add 'OnDisconnected( 0 );' to event that has disconnection
   }
 }
 

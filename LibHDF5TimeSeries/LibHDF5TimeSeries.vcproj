@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HDF5IterateGroups.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -179,6 +183,10 @@
 			>
 			<File
 				RelativePath=".\HDF5DataManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HDF5IterateGroups.h"
 				>
 			</File>
 			<File
