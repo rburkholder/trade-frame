@@ -47,5 +47,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
   virtual BOOL OnInitDialog( void );
 
+  afx_msg void OnSize( UINT, int, int );
+  bool bDialogReady;
+
+
 private:
 };

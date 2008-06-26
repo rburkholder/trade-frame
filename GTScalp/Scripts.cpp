@@ -135,12 +135,14 @@ void CScripts::StartHistoryCollection( void ) {
     m_qHistoryCollectors.pop();
     m_mapActiveHistoryCollectors.insert( m_pair_mapActiveHistoryCollectors( phc->Symbol(), phc ) );
     phc->SetOnRetrievalComplete( MakeDelegate( this, &CScripts::HistoryCollectorIsComplete ) );
+    //std::cout << "Start " << phc->Symbol() << std::endl;
     phc->Start();
   }
 }
 
 void CScripts::HistoryCollectorIsComplete( CHistoryCollector *phc ) {
   
+  //std::cout << "End   " << phc->Symbol() << std::endl;
   map<string, CHistoryCollector *>::iterator m_iter_mapActiveHistoryCollectors;
   m_iter_mapActiveHistoryCollectors = m_mapActiveHistoryCollectors.find( phc->Symbol());
   if ( m_mapActiveHistoryCollectors.end() == m_iter_mapActiveHistoryCollectors ) {

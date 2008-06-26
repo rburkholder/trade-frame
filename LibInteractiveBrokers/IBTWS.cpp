@@ -161,6 +161,9 @@ void CIBTWS::PlaceOrder( COrder *order ) {
   twsorder.action = order->GetOrderSideName();
   twsorder.totalQuantity = order->GetQuantity();
   twsorder.orderType = szOrderType[ order->GetOrderType() ];
+  twsorder.tif = "DAY";
+  //twsorder.goodAfterTime = "20080625 09:30:00";
+  //twsorder.goodTillDate = "20080625 16:00:00";
   switch ( order->GetOrderType() ) {
     case OrderType::Limit:
       twsorder.lmtPrice = order->GetPrice1();

@@ -50,6 +50,7 @@ protected:
   std::string m_sName;  // name of provider
   unsigned short m_nID;
   bool m_bConnected;
+  typedef std::map<std::string, CSymbol*> m_mapSymbols_t;
   std::map<std::string, CSymbol*> m_mapSymbols;
   virtual void StartQuoteWatch( CSymbol *pSymbol ) {};
   virtual void StopQuoteWatch( CSymbol *pSymbol ) {};

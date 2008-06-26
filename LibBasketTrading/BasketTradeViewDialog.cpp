@@ -13,7 +13,7 @@ IMPLEMENT_DYNAMIC(CBasketTradeViewDialog, CDialog)
 
 CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* pParent /*=NULL*/)
 	: CDialog(CBasketTradeViewDialog::IDD, pParent),
-  m_pModel( pModel ), m_bSourceChanged( false )
+  m_pModel( pModel ), m_bSourceChanged( false ), bDialogReady( false )
 {
   UINT id = IDD_DLGBASKETSYMBOLS;
   BOOL b = Create(id, pParent );
@@ -45,6 +45,8 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_refresh.OnRefresh.Add( MakeDelegate( this, &CBasketTradeViewDialog::HandlePeriodicRefresh ) );
   m_pModel->OnBasketTradeSymbolInfoAddedToBasket.Add( 
     MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded ) );
+
+  bDialogReady = true;
 
   return TRUE;
 }
@@ -103,7 +105,27 @@ void CBasketTradeViewDialog::DoDataExchange(CDataExchange* pDX) {
 
 
 BEGIN_MESSAGE_MAP(CBasketTradeViewDialog, CDialog)
+//  ON_WM_MOVING( )
+//  ON_WM_MOVE( )
+//  ON_WM_SIZING( )
+  ON_WM_SIZE( )
 END_MESSAGE_MAP()
 
 
 // CBasketTradeViewDialog message handlers
+
+afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int x, int y ) {
+  if ( bDialogReady ) {
+    CRect rect1, rect2;
+    //GetClientRect( &rect1 );
+    //rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
+    //kv1.MoveWindow( &rect2 );
+    GetWindowRect( &rect1 );
+    
+    //CWnd::SetWindowPos( &CWnd::wndTop, rect1.left, rect1.top, x, y, 0 );
+    CWnd::GetClientRect( &rect1 );
+    rect2.SetRect( rect1.left + 10, rect1.top + 10, rect1.right - 10, rect1.bottom - 10 );
+    m_lcBasketSymbols.MoveWindow( &rect2 );
+  }
+}
+

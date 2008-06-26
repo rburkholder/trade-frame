@@ -141,6 +141,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   static const boost::regex rxNotAStock("([A-Z]+[0-9]+[A-Z]*)|([A-Z]+\\.[A-Z]+)");
 
   static const boost::regex rxOption( "^([A-Z]+){0,1}[ ]([A-Z]{3}) ([0-9]{4}) ([CP]) ([0-9]+[.][0-9]+)" ); //GM SEP 2008 P 10.000
+  static const boost::regex rxOptionName( "^[A-Z]{1,3} [A-Z][A-Z]$" );
   static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
   static const boost::regex rxFuture2( "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
 
@@ -151,6 +152,8 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   unsigned long cntLines = 0;
   td_structIndexes j, k, c; 
   bool bEndFound;
+
+  std::map<std::string, unsigned long> mapUnderlying;  // keeps track of optionable symbols, to fix bool at end
 
   cout << "Initializing Structures" << endl;
 
@@ -254,23 +257,29 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
 
       // parse out contract information
       if ( InstrumentType::Option == dbRecord.eInstrumentType ) {
-        boost::cmatch what;
-        if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxOption, boost::match_default ) ) {
-          std::string sUnderlying( what[1].first, what[1].second );
+        boost::cmatch what1, what2;
+        if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what1, rxOption, boost::match_default )
+          && boost::regex_search( dbRecord.line, what2, rxOptionName, boost::match_default )
+          ) {
+          std::string sUnderlying( what1[1].first, what1[1].second );
           if ( 0 == sUnderlying.size() ) {
             std::cout << "Zero length underlying on " << dbRecord.line << std::endl;
           }
+          else {
+            mapUnderlying[ sUnderlying ] = 1;  // simply create an entry for later use
+          }
           nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
-          std::string sMonth( what[2].first, what[2].second );
-          std::string sYear( what[3].first, what[3].second );
+          std::string sMonth( what1[2].first, what1[2].second );
+          std::string sYear( what1[3].first, what1[3].second );
           dbRecord.nOptionSide = OptionSide::Unknown;
-          if ( 'P' == *what[4].first ) dbRecord.nOptionSide = OptionSide::Put;
-          if ( 'C' == *what[4].first ) dbRecord.nOptionSide = OptionSide::Call;
+          if ( 'P' == *what1[4].first ) dbRecord.nOptionSide = OptionSide::Put;
+          if ( 'C' == *what1[4].first ) dbRecord.nOptionSide = OptionSide::Call;
           //dbRecord.chDirection = *what[4].first;
-          std::string sStrike( what[5].first, what[5].second );
+          std::string sStrike( what1[5].first, what1[5].second );
           dbRecord.nMonth = DecodeMonth( sMonth );
           dbRecord.nYear = atoi( sYear.c_str() );
           dbRecord.fltStrike = atof( sStrike.c_str() );
+          
         }
         else {
           std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
@@ -314,6 +323,35 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       // get next line from text file
       file.getline( dbRecord.line, nMaxBufferSize );
     }
+
+    structSymbolRecord rec;
+    Dbt k;
+    Dbt v;
+    v.set_flags( DB_DBT_USERMEM );
+    v.set_data( &rec );  
+    int ret;
+    for ( std::map<std::string, unsigned long>::iterator iter = mapUnderlying.begin();
+      mapUnderlying.end() != iter; ++iter ) {
+      // iterate through map and update ucHasOptions flag in each record
+      k.set_data( (void*) iter->first.c_str() );
+      k.set_size( iter->first.size() );
+      v.set_ulen( sizeof( structSymbolRecord ) );
+      v.set_size( sizeof( structSymbolRecord ) );
+      ret = m_pdbSymbols->get( 0, &k, &v, 0 );
+      if ( 0 == ret ) {
+        rec.ucBits1 |= ucHasOptions;  // set the bit
+        k.set_data( (void*) iter->first.c_str() );
+        k.set_size( iter->first.size() );
+        ret = m_pdbSymbols->put( 0, &k, &v, 0 );
+        if ( 0 != ret ) {
+          std::cout << "failed write on " << iter->first << std::endl;
+        }
+      }
+      else {
+        std::cout << "failed read on " << iter->first << std::endl; // no underlying listed
+      }
+
+    }
   }
   catch( DbException &dbex ) {
     cout << "IQFSymbols exception: " << dbex.what() << endl;
@@ -328,6 +366,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
   cout << "Count CBOE:       " << cntCboe << endl;
   cout << "Count Indicator:  " << cntIndicator << endl;
   cout << "Count NotAStock   " << cntNotAStock << endl;
+  cout << "Count Optionables " << mapUnderlying.size() << endl;
   cout << "Max Underlying    " << nUnderlyingSize << endl;
 
   for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
