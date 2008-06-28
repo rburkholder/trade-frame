@@ -2,6 +2,13 @@
 #include "IQFeedHistoryCollector.h"
 
 #include "HDF5WriteTimeSeries.h"
+#include "HDF5DataManager.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
 //
 // CHistoryCollector
@@ -51,14 +58,8 @@ void CHistoryCollectorDaily::WriteData( void ) {
 
     assert( m_sSymbol.length() > 0 );
 
-    string sPathName;
-
-    sPathName.append( "/bar/86400/" );
-    sPathName.append( m_sSymbol.substr( 0, 1 ) );
-    sPathName.append( "/" );
-    sPathName.append( m_sSymbol.substr( m_sSymbol.length() == 1 ? 0 : 1, 1 ) );
-    sPathName.append( "/" );
-    sPathName.append( m_sSymbol );
+    std::string sPathName;
+    CHDF5DataManager::DailyBarPath( m_sSymbol, sPathName );
 
     CHDF5WriteTimeSeries<CBars, CBar> wts;
     wts.Write( sPathName, &m_bars );

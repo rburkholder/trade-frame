@@ -30,7 +30,12 @@ public:
   void Process( const std::string &sObjectName ) {
     CHDF5DataManager dm;
     std::string sObjectPath;
-    sObjectPath = m_sBaseGroup + sObjectName;
+    if ( '/' == m_sBaseGroup[ m_sBaseGroup.size() - 1 ] ) {
+      sObjectPath = m_sBaseGroup + sObjectName;
+    }
+    else {
+      sObjectPath = m_sBaseGroup + '/' + sObjectName;
+    }
     H5G_stat_t stats;
     try {
       dm.GetH5File()->getObjinfo( sObjectPath, stats );

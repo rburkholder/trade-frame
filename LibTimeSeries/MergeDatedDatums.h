@@ -7,20 +7,7 @@ using namespace std;
 #include "FastDelegate.h"
 using namespace fastdelegate;
 
-class CMergeCarrier {
-public:
-  typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
-
-  CMergeCarrier( CTimeSeries<CDatedDatum> *pSeries, OnDatumHandler function );
-  virtual ~CMergeCarrier( void );
-  void ProcessDatum( void );
-  ptime m_dt;  // datetime of datum to be merged (used in comparison)
-  CTimeSeries<CDatedDatum> *m_pSeries;  // series from which a datum is to be merged to output
-  CDatedDatum *m_pDatum;
-protected:
-  OnDatumHandler OnDatum;
-private:
-};
+#include "MergeDatedDAtumCarrier.h"
 
 class CMergeDatedDatums {
 public:
@@ -30,7 +17,7 @@ public:
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
   //typedef FastDelegate1<const CTrade &> OnTradeHandler;
 
-  void Add( CTimeSeries<CDatedDatum> *pSeries, OnDatumHandler );
+  void Add( CTimeSeriesBase *pSeries, OnDatumHandler );
   //void Add( CTrades *pSeries, OnTradeHandler );
   void Run( void );
 protected:

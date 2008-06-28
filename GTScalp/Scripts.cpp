@@ -16,6 +16,12 @@ using namespace H5;
 #include <string>
 using namespace std;
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 //
 // CScripts
 //
@@ -78,6 +84,7 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
 //        || ( 0 == strcmp( szSymbol, "ARTC" ) ) ) {
         if ( !symbolfile.GetBitMutual() 
            && !symbolfile.GetBitMoneyMkt() 
+           && symbolfile.GetBitHasOptions() // could probably use this flag by itself
            && !symbolfile.GetBitNotAStock() ) {
           CHistoryCollector *phc;
           switch ( typeHistory ) {

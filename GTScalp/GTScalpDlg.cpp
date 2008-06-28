@@ -200,6 +200,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_EN_CHANGE(IDC_ENTRY1, &CGTScalpDlg::OnEnChangeEntry1)
   ON_BN_CLICKED(IDC_CBSIMULATOR, &CGTScalpDlg::OnBnClickedCbsimulator)
   ON_BN_CLICKED(IDC_BTNSIMUASSIGNDIR, &CGTScalpDlg::OnBnClickedBtnsimuassigndir)
+  ON_BN_CLICKED(IDC_BTNRUNSIM, &CGTScalpDlg::OnBnClickedBtnrunsim)
 END_MESSAGE_MAP()
 
 
@@ -1328,7 +1329,7 @@ void CGTScalpDlg::OnBnClickedBtnsafebsktdata() {
     }
   }
   if ( !b ) {
-    std::cout << "Problems with saving" << std::endl;
+    std::cout << "Problems with saving (filename?)" << std::endl;
   }
 }
 
@@ -1386,13 +1387,35 @@ void CGTScalpDlg::OnBnClickedBtnsimuassigndir() {
     if ( 0 != *entry ) {
       if ( '/' == *entry ) {
         string path( entry );
-        m_pSimulation->SetGroupDirectory( path );
-        std::cout << "Group directory set to " << path << std::endl;
-        b = true;
+        try {
+          m_pSimulation->SetGroupDirectory( path );
+          std::cout << "Group directory set to " << path << std::endl;
+          b = true;
+        }
+        catch ( std::exception &e ) {
+          std::cout << "problems setting directory:  " << e.what() << std::endl;
+        }
       }
     }
     if ( !b ) {
       std::cout << "problems setting directory" << std::endl;
+    }
+  }
+}
+
+void CGTScalpDlg::OnBnClickedBtnrunsim() {
+  if ( NULL == m_pSimulation ) {
+    std::cout << "simulation provider not available" << std::endl;
+  }
+  else {
+    try {
+      m_pSimulation->Run();
+    }
+    catch ( std::invalid_argument e ) {
+      std::cout << "Sim failed:  " << e.what() << std::endl;
+    }
+    catch ( ... ) {
+      std::cout << "Sim failed:  unknown reason" << std::endl;
     }
   }
 }

@@ -1,29 +1,6 @@
 #include "StdAfx.h"
 #include "MergeDatedDatums.h"
 
-//
-// CMergeCarrier
-//
-
-CMergeCarrier::CMergeCarrier( CTimeSeries<CDatedDatum> *pSeries, OnDatumHandler function ) {
-  m_pSeries = pSeries;
-  OnDatum = function;
-  m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison
-  m_dt = ( NULL == m_pDatum ) 
-    ? boost::date_time::special_values::not_a_date_time 
-    : m_pDatum->m_dt;
-}
-
-CMergeCarrier::~CMergeCarrier() {
-}
-
-void CMergeCarrier::ProcessDatum(void) {
-  if ( NULL != OnDatum ) OnDatum( *m_pDatum );
-  m_pDatum = m_pSeries->Next();
-  m_dt = ( NULL == m_pDatum ) 
-    ? boost::date_time::special_values::not_a_date_time 
-    : m_pDatum->m_dt;
-}
 
 //
 // CMergeDatedDatums
@@ -41,7 +18,7 @@ CMergeDatedDatums::~CMergeDatedDatums(void) {
   }
 }
 
-void CMergeDatedDatums::Add(CTimeSeries<CDatedDatum> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
+void CMergeDatedDatums::Add( CTimeSeriesBase *pSeries, CMergeDatedDatums::OnDatumHandler function) {
   m_lCarriers.push_back( new CMergeCarrier( pSeries, function ) );
 }
 

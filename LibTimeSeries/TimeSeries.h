@@ -282,6 +282,21 @@ template<class T> H5::DataSpace *CTimeSeries<T>::DefineDataSpace( H5::DataSpace 
   return pSpace;
 }
 
+// DatedDatums
+/*
+class CDatedDatums: public CTimeSeries<CDatedDatum> {
+public:
+  CDatedDatums(void);
+  CDatedDatums( unsigned int );
+  virtual ~CDatedDatums(void);
+  CDatedDatums *Subset( ptime time ) { return (CDatedDatums *) CTimeSeries<CDatedDatum>::Subset( time ); };
+  CDatedDatums *Subset( ptime time, unsigned int n ) { return (CDatedDatums *) CTimeSeries<CDatedDatum>::Subset( time, n ); };
+protected:
+private:
+};
+
+*/
+
 // Bars
 
 class CBars: public CTimeSeries<CBar> {

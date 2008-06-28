@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MergeDatedDatumCarrier.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MergeDatedDatums.h"
 				>
 			</File>

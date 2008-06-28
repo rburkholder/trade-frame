@@ -6,6 +6,12 @@
 
 using namespace H5;
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
 H5File CHDF5DataManager::m_H5File;
 unsigned int CHDF5DataManager::m_RefCount = 0;
@@ -56,6 +62,19 @@ CHDF5DataManager::~CHDF5DataManager(void) {
   }
 }
 
+bool CHDF5DataManager::GroupExists( const std::string &sGroup ) {
+  bool bGroupExists = false;
+  try {
+    Group g = GetH5File()->openGroup( sGroup );
+    g.close();
+    bGroupExists = true;
+  }
+  catch ( H5::Exception e ) {
+    // group doesn't exist so just ignore
+  }
+  return bGroupExists;
+}
+
 void CHDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to have terminating '/'
   //  /symbol, /symbol/G, /symbol/G/O, /symbol/G/O/GOOG
   std::string sSubPath;
@@ -92,5 +111,14 @@ herr_t CHDF5DataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, vo
     << err_desc->func_name << "::"
     << err_desc->desc << std::endl;
   return 1;
+}
+
+void CHDF5DataManager::DailyBarPath(const std::string &sSymbol, std::string &sPath) {
+  sPath = "/bar/86400/";
+  sPath.append( sSymbol.substr( 0, 1 ) );
+  sPath.append( "/" );
+  sPath.append( sSymbol.substr( sSymbol.length() == 1 ? 0 : 1, 1 ) );
+  sPath.append( "/" );
+  sPath.append( sSymbol );
 }
 

@@ -1,7 +1,17 @@
 #include "StdAfx.h"
 #include "SimulationProvider.h"
 
+#include <stdexcept>
+
+#include "HDF5DataManager.h"
+
 #include "MergeDatedDatums.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
 CSimulationProvider::CSimulationProvider(void)
 : CProviderInterface(), m_bMergeHasBeenRun( false )
@@ -11,6 +21,17 @@ CSimulationProvider::CSimulationProvider(void)
 }
 
 CSimulationProvider::~CSimulationProvider(void) {
+}
+
+void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
+  CHDF5DataManager dm;
+  std::string s;
+  if( !dm.GroupExists( sGroupDirectory ) ) throw std::invalid_argument( "Could not find: " + sGroupDirectory );
+  s = sGroupDirectory + "/trades";
+  if( !dm.GroupExists( s ) ) throw std::invalid_argument( "Could not find: " + s );
+  s = sGroupDirectory + "/quotes";
+  if( !dm.GroupExists( s ) ) throw std::invalid_argument( "Could not find: " + s );
+  m_sGroupDirectory = sGroupDirectory;
 }
 
 void CSimulationProvider::Connect() {
@@ -59,14 +80,21 @@ void CSimulationProvider::StopDepthWatch( CSymbol *pSymbol ) {
 }
 
 void CSimulationProvider::Run() {
+  if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
+  if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
   CMergeDatedDatums merge;
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
     iter != m_mapSymbols.end(); ++iter ) {
+      CSimulationSymbol *sym = dynamic_cast<CSimulationSymbol*>(iter->second);
+      CQuotes *quotes = &sym->m_quotes;
+      CDatedDatums *qdatums = dynamic_cast<CDatedDatums *>( quotes );
       merge.Add( 
-        dynamic_cast<CTimeSeries<CDatedDatum>*>( &(dynamic_cast<CSimulationSymbol*>(iter->second)->m_quotes) ), 
+        qdatums, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleQuoteEvent ) );
+      CTrades *trades = &sym->m_trades;
+      CDatedDatums *tdatums = dynamic_cast<CDatedDatums *>( trades );
       merge.Add( 
-        dynamic_cast<CTimeSeries<CDatedDatum>*>( &(dynamic_cast<CSimulationSymbol*>(iter->second)->m_trades) ), 
+        tdatums, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
   merge.Run();

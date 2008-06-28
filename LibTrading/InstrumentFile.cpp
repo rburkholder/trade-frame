@@ -1,5 +1,14 @@
 #include "StdAfx.h"
+
 #include "InstrumentFile.h"
+
+//#ifdef _DEBUG
+//#define new DEBUG_NEW
+//#undef THIS_FILE
+//static char THIS_FILE[] = __FILE__;
+//#endif
+
+
 #include "BerkeleyDBDataManager.h"
 #include "TradingEnumerations.h"
 
@@ -7,6 +16,7 @@
 #include <assert.h>
 
 // todo 2008/06/06 change record retrieval to use stack structures rather than dynamic allocation
+
 
 CInstrumentFile::CInstrumentFile(void) : 
     pRecord( NULL ), 

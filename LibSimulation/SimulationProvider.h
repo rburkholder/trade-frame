@@ -12,7 +12,8 @@ public:
   virtual ~CSimulationProvider(void);
   virtual void Connect( void );
   virtual void Disconnect( void );
-  void SetGroupDirectory( const std::string sGroupDirectory ) { m_sGroupDirectory = sGroupDirectory; };  // eg /basket/20080620
+  void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
+  const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
   void Run( void );
 protected:
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );

@@ -32,6 +32,20 @@ HDF5 uses C storage conventions, assuming that the last listed dimension is the
 fastest-changing dimension and the first-listed dimension is the slowest changing.
 */
 
+// CDatedDatums
+/*
+CDatedDatums::CDatedDatums(void) {
+}
+
+CDatedDatums::CDatedDatums( unsigned int size )
+:CTimeSeries<CDatedDatum>( size ) {
+}
+
+CDatedDatums::~CDatedDatums( void ) {
+
+}
+
+*/
 // CBars
 
 CBars::CBars(void) {

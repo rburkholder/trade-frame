@@ -4,8 +4,15 @@
 #include "DbValueStream.h"
 #include "CommonDatabaseFunctions.h"
 #include "HDF5IterateGroups.h"
+#include "HDF5DataManager.h"
 
 #include <ostream>
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
 //
 // CBasketTradeModel
@@ -126,8 +133,21 @@ void CBasketTradeModel::ReadBasketData( const std::string &sGroupName ) {  // di
     std::cout << "Nothing added, symbols already in basket model" << std::endl;
   }
   else {
-    HDF5IterateGroups<CBasketTradeModel> control;
-    int result = control.Start( sGroupName, this );
+    try {
+      HDF5IterateGroups<CBasketTradeModel> control;
+      int result = control.Start( sGroupName, this );
+    }
+    catch ( H5::FileIException e ) {
+      std::cout << "problem with group iteration with file" << e.getDetailMsg() << std::endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
+    }
+    catch ( H5::GroupIException e ) {
+      std::cout << "problem with group interation with group" << e.getDetailMsg() << std::endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
+    }
+    catch (...) {
+      std::cout << "problems with group iteration" << std::endl;
+    }
   }
 }
 
@@ -138,5 +158,7 @@ void CBasketTradeModel::WriteBasketData( const std::string &sGroupName ) {
 }
 
 void CBasketTradeModel::Process(const std::string &sObjectName, const std::string &sObjectPath) {
-  AddSymbol( sObjectName, sObjectPath, "archive" );
+  std::string sPath;
+  CHDF5DataManager::DailyBarPath( sObjectName, sPath );
+  AddSymbol( sObjectName, sPath, "archive" );
 }
