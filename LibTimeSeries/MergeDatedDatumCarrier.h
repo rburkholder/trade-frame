@@ -5,33 +5,39 @@
 #include "FastDelegate.h"
 using namespace fastdelegate;
 
-class CMergeCarrierBase {
-};
+#include <stdexcept>
 
-template<class T> class CMergeCarrier: public class CMergeCarrierBase {
-  // T is a DatedDatum type
+class CMergeCarrierBase {
   friend class CMergeDatedDatums;
 public:
-  typedef FastDelegate1<const T &> OnDatumHandler;
-
-  CMergeCarrier<T>( CTimeSeries<T> *pSeries, OnDatumHandler function );
-  virtual ~CMergeCarrier<T>( void );
-
-  void ProcessDatum( void );
+  typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
+  CMergeCarrierBase( void ) {};
+  virtual ~CMergeCarrierBase( void ) {};
+  virtual void ProcessDatum( void ) { throw std::runtime_error( "ProcessDatum not instantiated" ); };
 protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
-  CTimeSeries<T> *m_pSeries;  // series from which a datum is to be merged to output
-  T *m_pDatum;
+  CDatedDatum *m_pDatum;
   OnDatumHandler OnDatum;
 private:
 };
 
+template<class T> class CMergeCarrier: public CMergeCarrierBase {
+  // T is a DatedDatum type
+  friend class CMergeDatedDatums;
+public:
+  CMergeCarrier<T>( CTimeSeries<T> *pSeries, OnDatumHandler function );
+  virtual ~CMergeCarrier<T>( void );
 
-//
-// CMergeCarrier
-//
+  virtual void ProcessDatum( void );
+protected:
+  CTimeSeries<T> *m_pSeries;  // series from which a datum is to be merged to output
+private:
+};
 
-template<class T> CMergeCarrier<T>::CMergeCarrier( CTimeSeries<T> *pSeries, OnDatumHandler function ) {
+
+
+template<class T> CMergeCarrier<T>::CMergeCarrier( CTimeSeries<T> *pSeries, OnDatumHandler function ) : CMergeCarrierBase() {
+  
   m_pSeries = pSeries;
   OnDatum = function;
   m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison

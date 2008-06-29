@@ -87,14 +87,14 @@ void CSimulationProvider::Run() {
     iter != m_mapSymbols.end(); ++iter ) {
       CSimulationSymbol *sym = dynamic_cast<CSimulationSymbol*>(iter->second);
       CQuotes *quotes = &sym->m_quotes;
-      CDatedDatums *qdatums = dynamic_cast<CDatedDatums *>( quotes );
+      //CDatedDatums *qdatums = dynamic_cast<CDatedDatums *>( quotes );
       merge.Add( 
-        qdatums, 
+        quotes, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleQuoteEvent ) );
       CTrades *trades = &sym->m_trades;
-      CDatedDatums *tdatums = dynamic_cast<CDatedDatums *>( trades );
+      //CDatedDatums *tdatums = dynamic_cast<CDatedDatums *>( trades );
       merge.Add( 
-        tdatums, 
+        trades, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
   merge.Run();

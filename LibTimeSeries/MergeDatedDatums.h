@@ -17,10 +17,12 @@ public:
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
   //typedef FastDelegate1<const CTrade &> OnTradeHandler;
 
-  void Add( CTimeSeriesBase *pSeries, OnDatumHandler );
-  //void Add( CTrades *pSeries, OnTradeHandler );
+  void Add( CTimeSeries<CQuote> *pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CTrade> *pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CBar> *pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CMarketDepth> *pSeries, OnDatumHandler );
   void Run( void );
 protected:
-  list<CMergeCarrier *> m_lCarriers;
+  list<CMergeCarrierBase *> m_lCarriers;
 private:
 };
