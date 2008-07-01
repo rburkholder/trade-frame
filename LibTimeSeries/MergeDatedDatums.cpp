@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "MergeDatedDatums.h"
 
-
 //
 // CMergeDatedDatums
 //
@@ -10,88 +9,67 @@ CMergeDatedDatums::CMergeDatedDatums(void) {
 }
 
 CMergeDatedDatums::~CMergeDatedDatums(void) {
-  CMergeCarrierBase *pCarrier;
-  while ( !m_lCarriers.empty() ) {
-    pCarrier = m_lCarriers.back();
-    delete pCarrier;
-    m_lCarriers.pop_back();
+  for each ( CMergeCarrierBase *i in m_vCarriers ) {
+    delete i;
   }
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CQuote> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_lCarriers.push_back( new CMergeCarrier<CQuote>( pSeries, function ) );
+  m_vCarriers.push_back( new CMergeCarrier<CQuote>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CTrade> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_lCarriers.push_back( new CMergeCarrier<CTrade>( pSeries, function ) );
+  m_vCarriers.push_back( new CMergeCarrier<CTrade>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CBar> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_lCarriers.push_back( new CMergeCarrier<CBar>( pSeries, function ) );
+  m_vCarriers.push_back( new CMergeCarrier<CBar>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_lCarriers.push_back( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
+  m_vCarriers.push_back( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
 }
+
+struct SortByMergeCarrier {
+public:
+  SortByMergeCarrier( std::vector<CMergeCarrierBase *> *v ): m_v( v ) {};
+  bool operator() ( size_t lhs, size_t rhs ) { return (*m_v)[lhs]->GetDateTime() < (*m_v)[rhs]->GetDateTime(); };
+protected:
+  std::vector<CMergeCarrierBase *> *m_v;
+};
 
 void CMergeDatedDatums::Run() {
-  bool bFirstSet;
-  bool bDone = false;
-  CMergeCarrierBase *pmcToUse;
-  while ( !bDone ) {
-    bFirstSet = false;
-    for each ( CMergeCarrierBase *i in m_lCarriers ) {
-      // goal is to find earliest time, that will be the one queued
-      if ( NULL != i->m_pDatum ) {
-        if ( !bFirstSet ) {
-          pmcToUse = i;
-          bFirstSet = true;
-        }
-        else {
-          if ( i->m_dt < pmcToUse->m_dt ) {
-            pmcToUse = i;
-          }
-        }
+  std::vector<size_t> vIx;  // ordered by most recent values from CMergeCarrierBase
+  vIx.resize( m_vCarriers.size() );
+  for ( size_t ix = 0; ix < vIx.size(); ++ix ) vIx[ ix ] = ix;  // preset each entry for each carrier
+  std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
+  size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
+  size_t cntCarriers = vIx.size();
+  CMergeCarrierBase *pCarrier;
+  while ( 0 != cntCarriers ) {  // once all series have been depleted, end of run
+    pCarrier = m_vCarriers[vIx[0]];
+    pCarrier->ProcessDatum();
+    if ( NULL == pCarrier->GetDatedDatum() ) {
+      // retire the consumed carrier
+      ++cntNulls;
+      --cntCarriers;
+      size_t retired = vIx[ 0 ];
+      for ( size_t ix = 0; ix < cntCarriers; ++ix ) {
+        vIx[ ix ] = vIx[ ix + 1 ];  // move the carriers up to fill vacated spot at front
       }
+      vIx[ cntCarriers ] = retired;  // used up time series
     }
-    if ( bFirstSet ) { // if at least one has been set, then use it
-      pmcToUse->ProcessDatum();
-    }
-    else { // we havn't set anything so nothing to use
-      bDone = true;
+    else {
+      // reorder the carriers
+      size_t ix = 1;
+      size_t carrier = vIx[ 0 ];
+      while ( ix < cntCarriers ) {
+        if ( pCarrier->GetDateTime() < m_vCarriers[vIx[ix]]->GetDateTime() ) break;
+        vIx[ ix - 1 ] = vIx[ ix ];
+        ++ix;
+      }
+      vIx[ ix - 1 ] = carrier;
     }
   }
 }
 
-/*
-  bool bFirstSet;
-  bool bDone = false;
-  CMergeCarrier *pmcToCompare;
-  CMergeCarrier *pmcToUse;
-  while ( !bDone ) {
-    bFirstSet = false;
-    for each ( CMergeCarrier *i in m_lCarriers ) {
-      if ( !bFirstSet ) {
-        pmcToCompare = i;
-        if ( NULL == pmcToCompare->pDatum ) {
-        }
-        else {
-          pmcToUse = i;
-          bFirstSet = true;
-        }
-      }
-      else {
-        if ( i->m_dt < pmcToCompare->m_dt ) {
-          pmcToUse = i;
-        }
-        pmcToCompare = i;
-      }
-    }
-    if ( bFirstSet ) {
-      pmcToUse->ProcessDatum();
-    }
-    else {
-      bDone = true;
-    }
-  }
-*/

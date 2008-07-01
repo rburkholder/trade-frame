@@ -4,7 +4,7 @@
 // Tools are meant for drawing in world coordinates:  at a price level, or at a price/time intersection
 //
 
-#include "..\LibCommon\Color.h"
+#include "Color.h"
 
 #include <vector>
 #include <string>

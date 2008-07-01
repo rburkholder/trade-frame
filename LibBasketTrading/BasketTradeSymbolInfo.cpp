@@ -13,10 +13,11 @@
 
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
   const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
-  CProviderInterface *pExecutionProvider
+  CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider
   ) 
 : m_status( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
   m_pExecutionProvider( pExecutionProvider ),
+  m_pDataProvider( pDataProvider ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForFirstTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
@@ -26,8 +27,11 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   Initialize();
 }
 
-CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider )
+CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
+  std::stringstream *pStream, 
+  CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider )
 : m_pExecutionProvider( pExecutionProvider ), 
+  m_pDataProvider( pDataProvider ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
@@ -58,6 +62,22 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
     std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;
   }
   file.CloseIQFSymbols();
+
+  // need data provider
+  //m_pChart = new CChartRealTimeContainer( sSymbol, m_pIB );
+  //m_pChart->ShowWindow( SW_SHOWNORMAL );
+}
+
+void CBasketTradeSymbolInfo::ConnectDataProvider() {
+  m_pDataProvider->AddTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+  m_pDataProvider->AddQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+  m_pDataProvider->AddOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+}
+
+void CBasketTradeSymbolInfo::DisconnectDataProvider() {
+  m_pDataProvider->RemoveTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+  m_pDataProvider->RemoveQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+  m_pDataProvider->RemoveOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
 }
 
 void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {

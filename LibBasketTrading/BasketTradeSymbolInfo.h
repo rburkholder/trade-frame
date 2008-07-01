@@ -15,26 +15,27 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 #include "Delegate.h"
-
+//#include "ChartRealTimeContainer.h"
 
 class CBasketTradeSymbolInfo {
 public:
   explicit CBasketTradeSymbolInfo( 
     const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
-    CProviderInterface *pExecutionProvider );
-  explicit CBasketTradeSymbolInfo( std::stringstream *pStream, CProviderInterface *pExecutionProvider );
+    CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
+  explicit CBasketTradeSymbolInfo( 
+    std::stringstream *pStream, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
   ~CBasketTradeSymbolInfo( void );
 
   Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
 
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
-  void HandleQuote( const CQuote &quote );
-  void HandleTrade( const CTrade &trade );
-  void HandleOpen( const CTrade &trade );
   const std::string &GetSymbolName( void ) { return m_status.sSymbolName; };
   void StreamSymbolInfo( std::ostream *pStream );
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
+
+  void ConnectDataProvider( void );
+  void DisconnectDataProvider( void );
 
   struct structFieldsForDialog { // used for updating dialog
     std::string sSymbolName;
@@ -81,6 +82,10 @@ public:
   void CalculateTrade( structCommonModelInformation *pParameters  );
 
 protected:
+  void HandleQuote( const CQuote &quote );
+  void HandleTrade( const CTrade &trade );
+  void HandleOpen( const CTrade &trade );
+
   void Initialize( void );
   structFieldsForDialog m_status;
   std::string m_sPath;
@@ -132,6 +137,7 @@ protected:
   } m_OpeningRangeState, m_RTHRangeState;
 
   CProviderInterface *m_pExecutionProvider;
+  CProviderInterface *m_pDataProvider;
 
   CInstrument *m_pInstrument;
   COrderManager m_OrderManager;
@@ -146,6 +152,9 @@ protected:
 
   std::map<unsigned long, COrder*> m_mapActiveOrders;
   std::map<unsigned long, COrder*> m_mapCompletedOrders;
+
+  //CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
+
 
 
 private:

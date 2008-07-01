@@ -13,6 +13,7 @@ public:
   static herr_t PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data );
   static hsize_t H5ChunkSize( void ) { return 64; };
   static void DailyBarPath( const std::string &sSymbol, std::string &sPath );
+  void Flush( void );
 protected:
   static const char m_H5FileName[];
   static unsigned int m_RefCount;

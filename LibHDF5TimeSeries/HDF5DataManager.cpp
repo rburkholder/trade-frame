@@ -62,6 +62,10 @@ CHDF5DataManager::~CHDF5DataManager(void) {
   }
 }
 
+void CHDF5DataManager::Flush( void ) {
+  GetH5File()->flush( H5F_SCOPE_GLOBAL );
+}
+
 bool CHDF5DataManager::GroupExists( const std::string &sGroup ) {
   bool bGroupExists = false;
   try {

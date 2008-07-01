@@ -132,8 +132,9 @@
 #define IDC_BTNSAFEBSKTDATA             1135
 #define IDC_CBSIMULATOR                 1136
 #define IDC_BTNSIMUASSIGNDIR            1137
-#define IDC_BUTTON2                     1138
 #define IDC_BTNRUNSIM                   1138
+#define IDC_BUTTON3                     1139
+#define IDC_BTNHDF5FLUSH                1139
 
 // Next default values for new objects
 // 
@@ -141,7 +142,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1139
+#define _APS_NEXT_CONTROL_VALUE         1140
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

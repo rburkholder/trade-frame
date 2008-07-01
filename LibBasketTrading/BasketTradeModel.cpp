@@ -36,7 +36,8 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   mapBasketSymbols_t::iterator iter;
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
-    CBasketTradeSymbolInfo *pInfo = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy, m_pExecutionProvider );
+    CBasketTradeSymbolInfo *pInfo 
+      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy, m_pDataProvider, m_pExecutionProvider );
     m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
     OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;
@@ -93,9 +94,7 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
               iter->second->CalculateTrade( &m_ModelInfo );
               dblCostForEntry = iter->second->GetProposedEntryCost();
               dblTotalCostForEntry += dblCostForEntry;
-              m_pDataProvider->AddTradeHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleTrade ) );
-              m_pDataProvider->AddQuoteHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleQuote ) );
-              m_pDataProvider->AddOnOpenHandler( iter->second->GetSymbolName(), MakeDelegate( iter->second, &CBasketTradeSymbolInfo::HandleOpen ) );
+              iter->second->ConnectDataProvider();
             }
             break;
         }
@@ -124,8 +123,8 @@ void CBasketTradeModel::WriteBasketList() {
 }
 
 void CBasketTradeModel::ReadBasketList() {
-  std::stringstream in;
-  CBasketTradeSymbolInfo *pBasket = new CBasketTradeSymbolInfo( &in, m_pExecutionProvider );
+  //std::stringstream in;
+  //CBasketTradeSymbolInfo *pBasket = new CBasketTradeSymbolInfo( &in, m_pExecutionProvider );
 }
 
 void CBasketTradeModel::ReadBasketData( const std::string &sGroupName ) {  // directory of symbol trades to read

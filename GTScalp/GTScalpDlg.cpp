@@ -16,6 +16,7 @@
 #include "ChartDatedDatum.h"
 #include "ChartRealTimeContainer.h"
 #include "InstrumentFile.h"
+#include "HDF5DataManager.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -201,6 +202,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_CBSIMULATOR, &CGTScalpDlg::OnBnClickedCbsimulator)
   ON_BN_CLICKED(IDC_BTNSIMUASSIGNDIR, &CGTScalpDlg::OnBnClickedBtnsimuassigndir)
   ON_BN_CLICKED(IDC_BTNRUNSIM, &CGTScalpDlg::OnBnClickedBtnrunsim)
+  ON_BN_CLICKED(IDC_BTNHDF5FLUSH, &CGTScalpDlg::OnBnClickedBtnhdf5flush)
 END_MESSAGE_MAP()
 
 
@@ -1324,6 +1326,7 @@ void CGTScalpDlg::OnBnClickedBtnsafebsktdata() {
       if ( '/' == *entry ) {
         string path( entry );
         m_pBasketTrade->SaveBasketData( path );
+        std::cout << "Basket data supposedly saved" << std::endl;
         b = true;
       }
     }
@@ -1418,4 +1421,9 @@ void CGTScalpDlg::OnBnClickedBtnrunsim() {
       std::cout << "Sim failed:  unknown reason" << std::endl;
     }
   }
+}
+
+void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
+  CHDF5DataManager dm;
+  dm.Flush();
 }

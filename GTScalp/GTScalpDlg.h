@@ -226,4 +226,5 @@ public:
   CButton m_btnSimulatorDataSource;
   afx_msg void OnBnClickedBtnsimuassigndir();
   afx_msg void OnBnClickedBtnrunsim();
+  afx_msg void OnBnClickedBtnhdf5flush();
 };

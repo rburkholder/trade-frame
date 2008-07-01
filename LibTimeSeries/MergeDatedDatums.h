@@ -1,8 +1,7 @@
 #pragma once
 #include "TimeSeries.h"
 
-#include <list>
-using namespace std;
+#include <vector>
 
 #include "FastDelegate.h"
 using namespace fastdelegate;
@@ -23,6 +22,6 @@ public:
   void Add( CTimeSeries<CMarketDepth> *pSeries, OnDatumHandler );
   void Run( void );
 protected:
-  list<CMergeCarrierBase *> m_lCarriers;
+  std::vector<CMergeCarrierBase *> m_vCarriers;
 private:
 };
