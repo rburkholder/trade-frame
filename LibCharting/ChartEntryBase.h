@@ -1,7 +1,8 @@
 #pragma once
 
 // 
-// Tools are meant for drawing in world coordinates:  at a price level, or at a price/time intersection
+// Tools are meant for drawing in world coordinates:  
+//   at a price level, or at a price/time intersection
 //
 
 #include "Color.h"
@@ -10,7 +11,6 @@
 #include <string>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-//#include "boost/date_time/gregorian/gregorian_types.hpp" 
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
@@ -31,6 +31,7 @@ public:
     vdouble_t::iterator iter = m_vPrice.begin();
     return DoubleArray( &(*iter), m_vPrice.size() );
   }
+  size_t Size( void ) { return m_vPrice.size(); };
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;

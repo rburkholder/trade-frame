@@ -22,7 +22,8 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_PositionState( Init ), m_TradingState( WaitForFirstTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
-  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart )
+  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
+  m_pChart( NULL )
 {
   Initialize();
 }
@@ -36,7 +37,8 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
-  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart )
+  m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
+  m_pChart( NULL )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -46,6 +48,10 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
   if ( NULL != m_pInstrument ) {
     delete m_pInstrument;
     m_pInstrument = NULL;
+  }
+  if ( NULL != m_pChart ) {
+    delete m_pChart;
+    m_pChart = NULL;
   }
 }
 
@@ -63,9 +69,8 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   }
   file.CloseIQFSymbols();
 
-  // need data provider
-  //m_pChart = new CChartRealTimeContainer( sSymbol, m_pIB );
-  //m_pChart->ShowWindow( SW_SHOWNORMAL );
+  m_pChart = new CChartRealTimeContainer( m_status.sSymbolName, m_pDataProvider );
+  m_pChart->ShowWindow( SW_SHOWNORMAL );
 }
 
 void CBasketTradeSymbolInfo::ConnectDataProvider() {

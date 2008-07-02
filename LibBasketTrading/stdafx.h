@@ -32,7 +32,11 @@
 
 #include <afx.h>
 #include <afxwin.h>         // MFC core and standard components
+#include <afxext.h>         // MFC extensions  // wasn't included in wizard
 
+#ifndef _AFX_NO_AFXCMN_SUPPORT
+#include <afxcmn.h>			// MFC support for Windows Common Controls  // wasn't included in wizard
+#endif // _AFX_NO_AFXCMN_SUPPORT
 
 
 // TODO: reference additional headers your program requires here

@@ -51,6 +51,11 @@ template<class T> CMergeCarrier<T>::~CMergeCarrier() {
 }
 
 template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
+  static int i = 1000;
+  if ( i > 0 ) {
+    std::cout << "#" << m_pDatum->m_dt << std::endl;
+    --i;
+  }
   if ( NULL != OnDatum ) OnDatum( *m_pDatum );
   m_pDatum = m_pSeries->Next();
   m_dt = ( NULL == m_pDatum ) 

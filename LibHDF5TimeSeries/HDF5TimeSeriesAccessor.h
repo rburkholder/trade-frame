@@ -26,7 +26,7 @@ public:
 protected:
   string m_sPathName;
   CHDF5DataManager dm;
-  DataSet *m_pDiskDataSet;
+  H5::DataSet *m_pDiskDataSet;
   CompType *m_pDiskCompType;
   size_type m_curElementCount, m_maxElementCount;
   virtual void SetNewSize( size_type size ) {};
@@ -50,7 +50,7 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
   m_sPathName( sPathName ) {
 
   try {
-    m_pDiskDataSet = new DataSet( dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
+    m_pDiskDataSet = new H5::DataSet( dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
     m_pDiskCompType = new CompType( *m_pDiskDataSet );
 
     CompType *pMemCompType = T::DefineDataType( NULL );

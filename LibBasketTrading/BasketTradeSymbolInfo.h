@@ -15,7 +15,7 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 #include "Delegate.h"
-//#include "ChartRealTimeContainer.h"
+#include "ChartRealTimeContainer.h"
 
 class CBasketTradeSymbolInfo {
 public:
@@ -153,7 +153,7 @@ protected:
   std::map<unsigned long, COrder*> m_mapActiveOrders;
   std::map<unsigned long, COrder*> m_mapCompletedOrders;
 
-  //CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
+  CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
 
 
 

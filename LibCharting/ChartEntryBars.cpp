@@ -25,7 +25,6 @@ void CChartEntryBars::Reserve( unsigned int nSize ) {
 
 void CChartEntryBars::AddBar(const CBar &bar) {
   CChartEntryBaseWithTime::Add( bar.m_dt, 0 );
-  //m_vDateTime.push_back( bar.m_dt );
   m_vOpen.push_back( bar.m_dblOpen );
   m_vHigh.push_back( bar.m_dblHigh );
   m_vLow.push_back( bar.m_dblLow );

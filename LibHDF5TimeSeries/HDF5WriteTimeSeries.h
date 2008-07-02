@@ -28,7 +28,7 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
     throw std::invalid_argument( "zero length time series found" );
   }
 
-  DataSet *dataset;
+  H5::DataSet *dataset;
   bool bNeedToCreateDataSet = false;
   CHDF5DataManager dm;
 
@@ -36,7 +36,7 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
   dm.AddGroup( sPathName );
 
   try { // check if dataset exists (for overwrite)
-    dataset = new DataSet( dm.GetH5File()->openDataSet( sPathName ) );
+    dataset = new H5::DataSet( dm.GetH5File()->openDataSet( sPathName ) );
     dataset->close();
     delete dataset;
   }
@@ -62,7 +62,7 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
     pl.setShuffle();
     pl.setDeflate(5);
 
-    dataset = new DataSet( dm.GetH5File()->createDataSet( sPathName, *pdt, *pds, pl ) );
+    dataset = new H5::DataSet( dm.GetH5File()->createDataSet( sPathName, *pdt, *pds, pl ) );
     dataset->close();
     pds->close();
     pdt->close();

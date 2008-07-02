@@ -30,6 +30,7 @@ void CChartRealTimeView::SetChartDimensions(unsigned int width, unsigned int hei
   // need to force a window resize here
   m_nChartWidth = width;
   m_nChartHeight = height;
+  m_bModelChanged = true;
 }
 
 void CChartRealTimeView::HandleBarCompleted(CChartRealTimeModel *model) {
@@ -62,29 +63,36 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
     //chart.layout();
     chart.addCandleStick(0x00ff00, 0xff0000);
     chart.addVolBars( 70, 0x99ff99, 0xff9999, 0x808080);*/
-    XYChart xy( m_nChartWidth, 300 );
-    xy.setPlotArea( 50, 20, m_nChartWidth - 100, 200 );
+    XYChart xy( m_nChartWidth, m_nChartHeight );
+    xy.setPlotArea( 50, 20, m_nChartWidth - 100, m_nChartHeight - 100 );
     
-    LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
-    lltrade->setXData( m_pModel->Trades()->GetDateTime() );
-    LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
-    llasks->setXData( m_pModel->Asks()->GetDateTime() );
-    LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
-    llbids->setXData( m_pModel->Bids()->GetDateTime() );
-
     CChartEntryBars *bars = m_pModel->Bars();
-    CandleStickLayer *candle = xy.addCandleStickLayer( 
-      bars->GetHigh(), 
-      bars->GetLow(), 
-      bars->GetOpen(), 
-      bars->GetClose(), 0x00ff00, 0xff0000);
-    candle->setXData( bars->GetDateTime() );
-    BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
-    bl->setXData( bars->GetDateTime() );
-    bl->setUseYAxis2( true );
+    if ( 0 < bars->Size() ) {
+      BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
+      bl->setXData( bars->GetDateTime() );
+      bl->setUseYAxis2( true );
+
+      LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
+      lltrade->setXData( m_pModel->Trades()->GetDateTime() );
+      LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
+      llasks->setXData( m_pModel->Asks()->GetDateTime() );
+      LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
+      llbids->setXData( m_pModel->Bids()->GetDateTime() );
+
+      CandleStickLayer *candle = xy.addCandleStickLayer( 
+        bars->GetHigh(), 
+        bars->GetLow(), 
+        bars->GetOpen(), 
+        bars->GetClose(), 0x00ff00, 0xff0000);
+      candle->setXData( bars->GetDateTime() );
+    }
+
     xy.layout();
     setChart( &xy );
     m_bModelChanged = false;
   }
 }
 
+
+// watch the last 30 minutes of the tick data
+// need 3 minute bars for day watch

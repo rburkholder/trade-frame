@@ -42,7 +42,12 @@ CChartRealTimeContainer::CChartRealTimeContainer(
 }
 
 CChartRealTimeContainer::~CChartRealTimeContainer(void) {
-  DestroyWindow();
+  m_pDataProvider->RemoveTradeHandler( m_sSymbol, MakeDelegate( m_prtModel, &CChartRealTimeModel::AddTrade ) );
+  m_pDataProvider->RemoveQuoteHandler( m_sSymbol, MakeDelegate( m_prtModel, &CChartRealTimeModel::AddQuote ) );
+  //DestroyWindow();
+  delete m_prtView;
+  delete m_prtControl;
+  delete m_prtModel;
 }
 
 /*
@@ -59,11 +64,6 @@ BEGIN_MESSAGE_MAP(CChartRealTimeContainer, CFrameWnd)
 END_MESSAGE_MAP()
 
 void CChartRealTimeContainer::OnDestroy()  {
-  m_pDataProvider->RemoveTradeHandler( m_sSymbol, MakeDelegate( m_prtModel, &CChartRealTimeModel::AddTrade ) );
-  m_pDataProvider->RemoveQuoteHandler( m_sSymbol, MakeDelegate( m_prtModel, &CChartRealTimeModel::AddQuote ) );
-  delete m_prtControl;
-  delete m_prtView;
-  delete m_prtModel;
 	CFrameWnd::OnDestroy();
 }
 

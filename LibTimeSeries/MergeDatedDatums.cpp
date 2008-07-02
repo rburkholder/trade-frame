@@ -40,7 +40,7 @@ protected:
 
 void CMergeDatedDatums::Run() {
   std::vector<size_t> vIx;  // ordered by most recent values from CMergeCarrierBase
-  vIx.resize( m_vCarriers.size() );
+  vIx.resize( m_vCarriers.size() );  // vIx provides mechanism to extract datums in datetime order from carriers.
   for ( size_t ix = 0; ix < vIx.size(); ++ix ) vIx[ ix ] = ix;  // preset each entry for each carrier
   std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
   size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
