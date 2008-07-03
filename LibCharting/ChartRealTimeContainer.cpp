@@ -9,7 +9,7 @@ static char THIS_FILE[] = __FILE__;
 
 // Todo:  the destructor is not called
 
-IMPLEMENT_DYNAMIC(CChartRealTimeContainer, CFrameWnd)
+IMPLEMENT_DYNAMIC(CChartRealTimeContainer, CGUIFrameBase)
 
 CChartRealTimeContainer::CChartRealTimeContainer(
   const std::string &sSymbol,
@@ -17,14 +17,18 @@ CChartRealTimeContainer::CChartRealTimeContainer(
   CWnd* pParent /*=NULL*/
   ) 
 	//: CDialog(CChartRealTimeContainer::IDD, pParent),
-  : CFrameWnd(),
+  : CGUIFrameBase(),
   m_sSymbol( sSymbol ),
   m_pDataProvider( pDataProvider ),
   m_prtModel( NULL ), m_prtView( NULL ), m_prtControl( NULL )
 {
   m_sDialogTitle = sSymbol + " on " + pDataProvider->Name();
+  //CRect rectLocation( 0, 0, 900, 400 );
+  CGUIFrameBase::SetPosition( 0, 0, 900, 400 );
+  //CGUIFrameBase::SetTitleBarText( 
   //BOOL b = Create(IDD, pParent );
-  BOOL b = Create(NULL, m_sDialogTitle.c_str() );
+  //BOOL b = Create(NULL, m_sDialogTitle.c_str(), WS_OVERLAPPEDWINDOW, rectLocation. );
+  CGUIFrameBase::Create( );
 
   m_prtModel = new CChartRealTimeModel();
   m_prtView = new CChartRealTimeView( m_prtModel );
@@ -50,35 +54,22 @@ CChartRealTimeContainer::~CChartRealTimeContainer(void) {
   delete m_prtModel;
 }
 
-/*
-void CChartRealTimeContainer::DoDataExchange(CDataExchange* pDX) {
-  CFrameWnd::DoDataExchange(pDX);
-  DDX_Control(pDX, IDC_CHART, *m_prtView);
-}
-*/
-
-BEGIN_MESSAGE_MAP(CChartRealTimeContainer, CFrameWnd)
+BEGIN_MESSAGE_MAP(CChartRealTimeContainer, CGUIFrameBase)
 	ON_WM_DESTROY()
   ON_WM_SIZE( )
   //ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 void CChartRealTimeContainer::OnDestroy()  {
-	CFrameWnd::OnDestroy();
+	CGUIFrameBase::OnDestroy();
 }
 
 afx_msg void CChartRealTimeContainer::OnSize(UINT nType, int cx, int cy) {
-  CFrameWnd::OnSize(nType,cx,cy);
+  CGUIFrameBase::OnSize(nType,cx,cy);
   CRect clientRect;
   CFrameWnd::GetClientRect(&clientRect);
   CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
   m_prtView->SetChartDimensions( chartRect.Width(), chartRect.Height() );
-  std::cout << "size " << chartRect.Width() << ", " << chartRect.Height() << endl;
-}
-
-afx_msg void CChartRealTimeContainer::OnMouseMove(UINT nFlags, CPoint point) {
-
-  cout << "Mouse Move " << point.x << ", " << point.y << ", " << nFlags << endl;
-  CFrameWnd::OnMouseMove(nFlags, point);
+  //std::cout << "size " << chartRect.Width() << ", " << chartRect.Height() << endl;
 }
 

@@ -63,8 +63,13 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
     //chart.layout();
     chart.addCandleStick(0x00ff00, 0xff0000);
     chart.addVolBars( 70, 0x99ff99, 0xff9999, 0x808080);*/
+
+
+    //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
+    
     XYChart xy( m_nChartWidth, m_nChartHeight );
-    xy.setPlotArea( 50, 20, m_nChartWidth - 100, m_nChartHeight - 100 );
+    //multi.addChart( 0, 0, &xy );
+    xy.setPlotArea( 50, 20, m_nChartWidth - 75, m_nChartHeight - 75 );
     
     CChartEntryBars *bars = m_pModel->Bars();
     if ( 0 < bars->Size() ) {
@@ -88,7 +93,9 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
     }
 
     xy.layout();
+    //multi.layout();
     setChart( &xy );
+    //setChart( &multi );
     m_bModelChanged = false;
   }
 }

@@ -30,6 +30,8 @@ void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth> *pSeries, CMergeDatedDatu
   m_vCarriers.push_back( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
 }
 
+// http://www.codeguru.com/forum/archive/index.php/t-344661.html
+
 struct SortByMergeCarrier {
 public:
   SortByMergeCarrier( std::vector<CMergeCarrierBase *> *v ): m_v( v ) {};
@@ -64,7 +66,7 @@ void CMergeDatedDatums::Run() {
       size_t ix = 1;
       size_t carrier = vIx[ 0 ];
       while ( ix < cntCarriers ) {
-        if ( pCarrier->GetDateTime() < m_vCarriers[vIx[ix]]->GetDateTime() ) break;
+        if ( pCarrier->GetDateTime() <= m_vCarriers[vIx[ix]]->GetDateTime() ) break;
         vIx[ ix - 1 ] = vIx[ ix ];
         ++ix;
       }

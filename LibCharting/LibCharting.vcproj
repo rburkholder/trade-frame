@@ -186,6 +186,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChartRealTimeTreeView.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartRealTimeView.cpp"
 				>
 			</File>
@@ -257,6 +261,10 @@
 			</File>
 			<File
 				RelativePath=".\ChartRealTimeModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartRealTimeTreeView.h"
 				>
 			</File>
 			<File

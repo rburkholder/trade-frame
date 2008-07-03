@@ -60,9 +60,9 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   m_ModelInfo.dtOpenRangeBgn = m_ModelInfo.dtRTHBgn;
   m_ModelInfo.dtOpenRangeEnd = ptime( dtTradeDate.date(), time_duration( 10, 34, 0 ) );
   m_ModelInfo.dtEndActiveTrading = ptime( dtTradeDate.date(), time_duration( 16, 40, 0 ) );
-  m_ModelInfo.dtBgnNoMoreTrades = ptime( dtTradeDate.date(), time_duration( 16, 45, 0 ) );
-  m_ModelInfo.dtBgnCancelTrades = ptime( dtTradeDate.date(), time_duration( 16, 50, 0 ) );
-  m_ModelInfo.dtBgnCloseTrades = ptime( dtTradeDate.date(), time_duration( 16, 55, 0 ) );
+  m_ModelInfo.dtBgnNoMoreTrades = ptime( dtTradeDate.date(), time_duration( 16, 42, 0 ) );
+  m_ModelInfo.dtBgnCancelTrades = ptime( dtTradeDate.date(), time_duration( 16, 44, 0 ) );
+  m_ModelInfo.dtBgnCloseTrades = ptime( dtTradeDate.date(), time_duration( 16, 46, 0 ) );
   m_ModelInfo.dtRTHEnd = ptime( dtTradeDate.date(), time_duration( 17, 00, 00 ) );
   try {
     for ( int nLoopCount = 1; nLoopCount <= 2; ++nLoopCount ) {

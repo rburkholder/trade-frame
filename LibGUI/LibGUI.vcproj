@@ -162,6 +162,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GUIFrameBase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -201,6 +205,10 @@
 			</File>
 			<File
 				RelativePath=".\GTWindowsConstants.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GUIFrameBase.h"
 				>
 			</File>
 			<File
