@@ -150,6 +150,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\ChartControls.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartEntryBars.cpp"
 				>
 			</File>
@@ -171,6 +175,10 @@
 			</File>
 			<File
 				RelativePath=".\ChartEntryShape.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartInstrumentTree.cpp"
 				>
 			</File>
 			<File
@@ -228,6 +236,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\ChartControls.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartEntryBars.h"
 				>
 			</File>
@@ -249,6 +261,10 @@
 			</File>
 			<File
 				RelativePath=".\ChartEntryShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartInstrumentTree.h"
 				>
 			</File>
 			<File

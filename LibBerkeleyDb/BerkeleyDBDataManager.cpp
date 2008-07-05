@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "BerkeleyDBDataManager.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 const char CBerkeleyDBDataManager::m_BDBFileName[] = "TradeFrame.bdb";
 DbEnv CBerkeleyDBDataManager::m_DbEnv( 0 );
 unsigned int CBerkeleyDBDataManager::m_RefCount = 0;

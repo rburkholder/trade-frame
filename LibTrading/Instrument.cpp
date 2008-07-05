@@ -2,6 +2,12 @@
 #include "assert.h"
 #include "Instrument.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CInstrument::CInstrument(const std::string &sSymbolName, const std::string &sExchangeName,
                          InstrumentType::enumInstrumentTypes type)
 : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),

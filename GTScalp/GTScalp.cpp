@@ -11,7 +11,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
 // CGTScalpApp
 
 BEGIN_MESSAGE_MAP(CGTScalpApp, CWinApp)
