@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "IQFeedOptions.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 // TODO:  convert OnNewResponse over to IQFeedRetrial
 
 CIQFeedOptions::CIQFeedOptions(CIQFeedProvider *pProvider, const char *szSymbol) 

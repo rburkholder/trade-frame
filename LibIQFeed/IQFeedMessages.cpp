@@ -5,6 +5,14 @@
 #include <iostream>
 #include <sstream>
 
+/*
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+*/
+
 // News Message: This does appear to be an error in the documentation. 
 // "SNT:AAPL::1:20070901:;" 
 // Enter the date with a range, such as "20070901-20070910" to get the data you are looking for.

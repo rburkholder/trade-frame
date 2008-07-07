@@ -6,6 +6,12 @@
 #include <sstream>
 #include <stdexcept>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 // http://www.dtn.com/trading.cfm?sidenav=sn_trading&content=pr_nxcore
 
 void __stdcall IQFeedCallBack( int x, int y ) {

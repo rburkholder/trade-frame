@@ -1,3 +1,7 @@
+comparison function for map
+http://www.gamedev.net/community/forums/topic.asp?topic_id=275617
+
+
 Collection Of stuff:
 
 #pragma warning(disable: 4290)  // to disable throw warnings in header files

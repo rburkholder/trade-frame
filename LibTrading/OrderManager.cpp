@@ -4,6 +4,14 @@
 
 #include <stdexcept>
 
+/*
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+*/
+
 //
 // CMapOrderToProvider
 //
@@ -49,8 +57,7 @@ COrderManager::~COrderManager(void) {
 void COrderManager::PlaceOrder(CProviderInterface *pProvider, COrder *pOrder) {
   assert( NULL != pProvider );
   assert( NULL != pOrder );
-  CMapOrderToProvider *pMapping 
-    = new CMapOrderToProvider( pProvider, pOrder );
+  CMapOrderToProvider *pMapping = new CMapOrderToProvider( pProvider, pOrder );
   m_mapActiveOrders.insert( mappair_t( pOrder->GetOrderId(), pMapping ) );
   pOrder->SetSendingToProvider();
   pProvider->PlaceOrder( pOrder );

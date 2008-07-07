@@ -3,6 +3,12 @@
 
 #include <iostream>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CIQFeedSymbol::CIQFeedSymbol(const string &sSymbol) 
 : CSymbol( sSymbol ),
 m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),

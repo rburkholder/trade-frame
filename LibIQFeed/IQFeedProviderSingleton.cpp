@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "IQFeedProviderSingleton.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 size_t CIQFeedProviderSingleton::m_cntConstructionCount = 0;
 CIQFeedProvider *CIQFeedProviderSingleton::m_pProvider = NULL;
 

@@ -2,6 +2,12 @@
 //#include "GTScalp.h"
 #include "IQFeedRetrieval.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CIQFeedRetrieval::CIQFeedRetrieval( CIQFeedProvider *pProvider ) 
 : m_pIQFeedProvider( pProvider ), m_pPort( NULL ), m_bLookingForDetail( false )
 {
