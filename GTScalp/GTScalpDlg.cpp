@@ -1427,3 +1427,4 @@ void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
   CHDF5DataManager dm;
   dm.Flush();
 }
+

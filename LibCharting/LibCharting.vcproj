@@ -154,6 +154,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChartDataView.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartEntryBars.cpp"
 				>
 			</File>
@@ -237,6 +241,10 @@
 			>
 			<File
 				RelativePath=".\ChartControls.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartDataView.h"
 				>
 			</File>
 			<File

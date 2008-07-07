@@ -8,6 +8,8 @@ using namespace fastdelegate;
 #include <algorithm>
 using namespace std;
 
+#include <assert.h>
+
 template<class RO> class Delegate {
   // RO: Return Object in call
 
@@ -33,7 +35,10 @@ template<class RO> Delegate<RO>::Delegate(void) : m_bIterating( false ) {
 }
 
 template<class RO> Delegate<RO>::~Delegate(void) {
+  assert( !m_bIterating );
   rOnFD.clear();
+  rToBeRemoved.clear();
+  rToBeAdded.clear();
 }
 
 template<class RO> void Delegate<RO>::operator()( RO ro ) {
@@ -41,7 +46,6 @@ template<class RO> void Delegate<RO>::operator()( RO ro ) {
   std::vector<OnMessageHandler>::iterator iter;
 
   m_bIterating = true;
-  //if ( 0 < rOnFD.size() ) {
   iter = rOnFD.begin();
   while ( rOnFD.end() != iter ) {
     (*iter)( ro );
