@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChartingContainer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartInstrumentTree.cpp"
 				>
 			</File>
@@ -203,6 +207,10 @@
 			</File>
 			<File
 				RelativePath=".\ChartRealTimeView.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartViewPort.cpp"
 				>
 			</File>
 			<File
@@ -272,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChartingContainer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChartInstrumentTree.h"
 				>
 			</File>
@@ -293,6 +305,10 @@
 			</File>
 			<File
 				RelativePath=".\ChartRealTimeView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChartViewPort.h"
 				>
 			</File>
 			<File
