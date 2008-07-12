@@ -96,6 +96,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
   assert( exec.GetOrderId() == m_nOrderId );
   bool bOverDone = false;
   if ( 0 == m_nRemaining ) {
+    // yes this has happened, 2008/07/09 vmw
     std::cout << "Order " << m_nOrderId << " overfilled with +" << exec.GetSize() << std::endl;
     m_eOrderStatus = OrderStatus::OverFilled;
     bOverDone = true;

@@ -5,6 +5,10 @@
 //   at a price level, or at a price/time intersection
 //
 
+// inheriting classes need to be aware of how Size is calculated, as it 
+//   will be used by the charting application for determinig if 
+//   it will be calculating the DoubleArray parameter for the charting library
+
 #include "Color.h"
 
 #include <vector>
@@ -14,14 +18,15 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include "ChartDirector\FinanceChart.h"
+//#include "ChartDirector\FinanceChart.h"
+#include "ChartDirector\memblock.h"
 
 class CChartEntryBase {
 public:
   CChartEntryBase( void );
   CChartEntryBase( unsigned int nSize );
   virtual ~CChartEntryBase( void );
-  void Color( EColor color ) { m_eColor = color; };
+  virtual void Color( EColor color ) { m_eColor = color; };
   EColor Color( void ) { return m_eColor; };
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
@@ -31,7 +36,7 @@ public:
     vdouble_t::iterator iter = m_vPrice.begin();
     return DoubleArray( &(*iter), m_vPrice.size() );
   }
-  size_t Size( void ) { return m_vPrice.size(); };
+  virtual size_t Size( void ) { return m_vPrice.size(); };
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;

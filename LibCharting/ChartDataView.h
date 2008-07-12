@@ -7,10 +7,10 @@
 
 #include "ChartEntryBase.h"
 
-// contains the CChartEntries and related sub-chart 
+// CChartDataView contains the CChartEntries and related sub-chart 
 //   to be viewed in a master chart viewport 
 
-class CChartDataViewCarrier {
+class CChartDataViewCarrier { // used by CChartViewPort objects to chart data
 public:
   CChartDataViewCarrier( void );
   CChartDataViewCarrier( size_t nChart, CChartEntryBaseWithTime *pChartEntry );
@@ -24,6 +24,10 @@ protected:
 private:
 };
 
+// nChart:  0, 1 reserved:
+//   0: main price chart
+//   1: main volume chart
+
 class CChartDataView {
 public:
   CChartDataView( const std::string &sStrategy, const std::string &sName );
@@ -32,10 +36,10 @@ public:
   typedef std::vector<CChartDataViewCarrier>::const_iterator const_iterator;
   const_iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
   const_iterator end( void ) { return m_vChartDataViewEntry.end(); };
-  Delegate<CChartDataView *> OnClosing;
-  void Close( void ); // call before destruction so can be removed from tree view and view port properly
   const std::string &GetStrategy( void ) { return m_sStrategy; };
   const std::string &GetName( void ) { return m_sName; };
+  Delegate<CChartDataView *> OnClosing;
+  void Close( void ); // call before destruction so can be removed from tree view and view port properly
 protected:
   std::vector<CChartDataViewCarrier> m_vChartDataViewEntry;
   bool m_bClosed;

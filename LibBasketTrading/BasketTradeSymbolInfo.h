@@ -17,6 +17,13 @@ using namespace boost::gregorian;
 #include "Delegate.h"
 #include "ChartRealTimeContainer.h"
 
+#include "ChartEntryBars.h"
+#include "ChartEntryIndicator.h"
+#include "ChartEntryMark.h"
+#include "ChartEntrySegments.h"
+#include "ChartEntryShape.h"
+#include "ChartDataView.h"
+
 class CBasketTradeSymbolInfo {
 public:
   explicit CBasketTradeSymbolInfo( 
@@ -142,11 +149,6 @@ protected:
   CInstrument *m_pInstrument;
   COrderManager m_OrderManager;
 
-  CBarFactory m_1MinBarFactory;
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CBars m_bars;
-
   void HandleBarFactoryBar( const CBar &bar );
   void HandleOrderFilled( COrder *pOrder );
 
@@ -155,6 +157,25 @@ protected:
 
   CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
 
+  CBarFactory m_1MinBarFactory;
+  CQuotes m_quotes;
+  CTrades m_trades;
+  CBars m_bars;
+
+  CChartEntryIndicator m_ceTrades;
+  CChartEntryIndicator m_ceQuoteBids;
+  CChartEntryIndicator m_ceQuoteAsks;
+  CChartEntryMark m_ceLevels; // open, pivots
+  CChartEntryShape m_ceTransactions;
+  CChartEntrySegments m_ceZigZag;
+  CChartEntryIndicator m_ceBollinger20TickAverage;
+  CChartEntryIndicator m_cdBollinger20TickUpper;
+  CChartEntryIndicator m_cdBollinger20TickLower;
+  CChartEntryIndicator m_ceHi;
+  CChartEntryIndicator m_ceLo;
+  //CChartEntryIndicator  // some sort of indicator for order flow:  trade direction vs quotes, etc
+
+  CChartDataView *m_pdvChart;
 
 
 private:

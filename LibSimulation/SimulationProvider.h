@@ -6,6 +6,10 @@
 #include "SimulationSymbol.h"
 //#include "MergeDatedDatums.h"
 
+// simulation provider needs to send an open event on each symbol it does
+//  will need to be based upon time
+// looks like CMergeDatedDatums will need an OnOpen event simulated
+
 class CSimulationProvider: public CProviderInterface {
 public:
   CSimulationProvider(void);

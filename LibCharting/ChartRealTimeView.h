@@ -7,6 +7,8 @@
 
 #include <string>
 
+// code from here will morph for use by CChartViewPort
+
 class CChartRealTimeView :
   public CChartViewer {
 public:

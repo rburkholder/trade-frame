@@ -11,6 +11,9 @@
 // CSymbolInfo
 //
 
+// Is this disabled when model decides it shouldn't trade?
+// m_status.symbol is no showing for certain of these objects
+
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
   const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
   CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider
@@ -23,6 +26,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
+  m_pdvChart( NULL ),
   m_pChart( NULL )
 {
   Initialize();
@@ -38,7 +42,8 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pChart( NULL )
+  m_pChart( NULL ),
+  m_pdvChart( NULL )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -71,6 +76,9 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
 
   m_pChart = new CChartRealTimeContainer( m_status.sSymbolName, m_pDataProvider );
   m_pChart->ShowWindow( SW_SHOWNORMAL );
+
+  m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
+  //m_pdvChart->Add( 
 }
 
 void CBasketTradeSymbolInfo::ConnectDataProvider() {

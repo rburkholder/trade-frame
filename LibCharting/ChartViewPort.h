@@ -2,6 +2,8 @@
 
 #include "GUIFrameBase.h"
 
+// CChartViewPort is used to hold the master chart
+
 class CChartViewPort : public CGUIFrameBase {
   DECLARE_DYNAMIC(CChartViewPort)
 public:

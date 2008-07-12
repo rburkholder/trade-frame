@@ -11,8 +11,8 @@ public:
   CChartingContainer(void);
   ~CChartingContainer(void);
 protected:
-  CChartControls m_ChartControls;
-  CChartRealTimeTreeView *m_pTreeView;
+  CChartControls m_ChartControls;  // not sure if I'll end up using this, meant to be used for mouse gestures on the chart and such
+  CChartRealTimeTreeView *m_pTreeView; 
   std::vector<CChartViewPort *> m_vViewPorts;
   void HandleCreateNewViewPort( CChartControls *pControls );
   void CreateNewViewPort( void );

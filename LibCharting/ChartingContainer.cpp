@@ -7,6 +7,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// make the container a singleton instead of the tree view, makes for more consistent design
+
 CChartingContainer::CChartingContainer(void) {
   m_pTreeView = CChartRealTimeTreeView::Register();  // get the tree view started
   m_ChartControls.OnBtnNewMasterChart.Add( MakeDelegate( this, &CChartingContainer::HandleCreateNewViewPort ) );

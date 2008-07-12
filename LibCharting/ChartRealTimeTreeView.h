@@ -3,7 +3,7 @@
 #include "ChartInstrumentTree.h"
 #include "ChartDataView.h"
 
-// run as a singleton
+// run as a singleton, actually, shouldn't need to worry about his, as container should be a singleton, at least it controls instantiations
 
 class CChartRealTimeTreeView : public CGUIFrameBase {
   DECLARE_DYNAMIC(CChartRealTimeTreeView)

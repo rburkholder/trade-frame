@@ -5,6 +5,9 @@
 #include "ChartDataView.h"
 #include "Delegate.h"
 
+// CChartInstrumentTree is used the control for showing/selecting charts in the ChartViewPort
+// CChartRealTimeTreeView is the window containing this control
+
 class CChartInstrumentTree : public CTreeCtrl {
   DECLARE_DYNAMIC(CChartInstrumentTree)
 public:

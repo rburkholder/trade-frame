@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+// level markers (horizontal lines at a price level)
+
 class CChartEntryMark :
   public CChartEntryBase {
 public:
