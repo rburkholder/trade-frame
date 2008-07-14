@@ -4,8 +4,21 @@
 
 #include "DatedDatum.h"
 
+class CChartEntryVolume: public CChartEntryBaseWithTime {
+public:
+  CChartEntryVolume(void);
+  CChartEntryVolume(unsigned int nSize);
+  virtual ~CChartEntryVolume(void);
+  virtual void Reserve( unsigned int );
+  void Add( const ptime &dt, double volume );
+protected:
+private:
+};
+
 class CChartEntryBars :
-  public CChartEntryBaseWithTime {
+  public CChartEntryVolume {  
+    // derived from CChartEntryVolume so 
+    //   can do bar in one chart frame and volume in another
 public:
   CChartEntryBars(void);
   CChartEntryBars(unsigned int nSize);

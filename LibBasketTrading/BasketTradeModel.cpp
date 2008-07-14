@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+
 #include "BasketTradeModel.h"
 
 #include "DbValueStream.h"
@@ -19,15 +20,18 @@ static char THIS_FILE[] = __FILE__;
 //
 
 CBasketTradeModel::CBasketTradeModel( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider )
-: m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider )
+//: m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider )
 {
+  m_ModelInfo.pDataProvider = pDataProvider;
+  m_ModelInfo.pExecutionProvider = pExecutionProvider;
+  m_ModelInfo.pTreeView = m_ChartingContainer.GetTreeView();
 }
 
 CBasketTradeModel::~CBasketTradeModel(void) {
   mapBasketSymbols_t::iterator iter;
   for ( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
     // todo: need to remove any events attached to this object as well
-    iter->second->DisconnectDataProvider();
+    iter->second->StopTrading();
     delete iter->second;
   }
   m_mapBasketSymbols.clear();
@@ -38,7 +42,7 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
     CBasketTradeSymbolInfo *pInfo 
-      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy, m_pDataProvider, m_pExecutionProvider );
+      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy );
     m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
     OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;
@@ -95,7 +99,7 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
               iter->second->CalculateTrade( &m_ModelInfo );
               dblCostForEntry = iter->second->GetProposedEntryCost();
               dblTotalCostForEntry += dblCostForEntry;
-              iter->second->ConnectDataProvider();
+              iter->second->StartTrading();
             }
             break;
         }

@@ -3,14 +3,13 @@
 #include "ChartInstrumentTree.h"
 #include "ChartDataView.h"
 
-// run as a singleton, actually, shouldn't need to worry about his, as container should be a singleton, at least it controls instantiations
-
 class CChartRealTimeTreeView : public CGUIFrameBase {
   DECLARE_DYNAMIC(CChartRealTimeTreeView)
 public:
+  CChartRealTimeTreeView(void); 
   virtual ~CChartRealTimeTreeView(void);
-  static CChartRealTimeTreeView *Register( void );
-  static void Deregister( void );
+  //static CChartRealTimeTreeView *Register( void );
+  //static void Deregister( void );
   void Add( const std::string &sStrategy, const std::string &sName, CChartDataView *pDataView ) { // caller handles destruction
     m_Tree.Add( sStrategy, sName, pDataView );
   };
@@ -23,8 +22,7 @@ protected:
   CChartInstrumentTree m_Tree;
   afx_msg void OnTvnSelChangedTree(NMHDR *pNMHDR, LRESULT *pResult);
 private:
-  explicit CChartRealTimeTreeView(void);  // here for singleton's sake
   DECLARE_MESSAGE_MAP()
-  static CChartRealTimeTreeView *m_pTreeView;
-  static size_t m_cntConstruction;
+  //static CChartRealTimeTreeView *m_pTreeView;
+  //static size_t m_cntConstruction;
 };

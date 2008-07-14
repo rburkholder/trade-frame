@@ -15,34 +15,28 @@
 // m_status.symbol is no showing for certain of these objects
 
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
-  const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
-  CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider
+  const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy
   ) 
 : m_status( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
-  m_pExecutionProvider( pExecutionProvider ),
-  m_pDataProvider( pDataProvider ),
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForFirstTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pdvChart( NULL ),
-  m_pChart( NULL )
+//  m_pChart( NULL ),
+  m_pdvChart( NULL )
 {
   Initialize();
 }
 
 CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
-  std::stringstream *pStream, 
-  CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider )
-: m_pExecutionProvider( pExecutionProvider ), 
-  m_pDataProvider( pDataProvider ),
-  m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
+  std::stringstream *pStream )
+: m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pChart( NULL ),
+//  m_pChart( NULL ),
   m_pdvChart( NULL )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
@@ -54,9 +48,14 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
     delete m_pInstrument;
     m_pInstrument = NULL;
   }
-  if ( NULL != m_pChart ) {
-    delete m_pChart;
-    m_pChart = NULL;
+//  if ( NULL != m_pChart ) {
+//    delete m_pChart;
+//    m_pChart = NULL;
+//  }
+  if ( NULL != m_pdvChart ) {
+    m_pdvChart->Close();
+    delete m_pdvChart;
+    m_pdvChart = NULL;
   }
 }
 
@@ -70,27 +69,32 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
     m_pInstrument = file.CreateInstrumentFromIQFeed( m_status.sSymbolName, m_status.sSymbolName );  // todo:  need to verify proper symbol usage
   }
   catch (...) {
-    std::cout << "CBasketTradeSymbolInfo::CBasketTradeSymbolInfo problems" << std::endl;
+    std::cout << "CBasketTradeSymbolInfo::Initialize problems" << std::endl;
   }
   file.CloseIQFSymbols();
 
-  m_pChart = new CChartRealTimeContainer( m_status.sSymbolName, m_pDataProvider );
-  m_pChart->ShowWindow( SW_SHOWNORMAL );
+  //m_pChart = new CChartRealTimeContainer( m_status.sSymbolName, m_pDataProvider );
+  //m_pChart->ShowWindow( SW_SHOWNORMAL );
 
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
-  //m_pdvChart->Add( 
+  m_pdvChart->Add( 0, &m_ceBars );
+  m_pdvChart->Add( 1, reinterpret_cast<CChartEntryVolume *>( &m_ceBars ) );
 }
 
-void CBasketTradeSymbolInfo::ConnectDataProvider() {
-  m_pDataProvider->AddTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
-  m_pDataProvider->AddQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
-  m_pDataProvider->AddOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+void CBasketTradeSymbolInfo::StartTrading() {
+  m_pModelParameters->pTreeView->Add( "Basket", m_status.sSymbolName, m_pdvChart );
+
+  m_pModelParameters->pDataProvider->AddTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+  m_pModelParameters->pDataProvider->AddQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+  m_pModelParameters->pDataProvider->AddOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
 }
 
-void CBasketTradeSymbolInfo::DisconnectDataProvider() {
-  m_pDataProvider->RemoveTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
-  m_pDataProvider->RemoveQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
-  m_pDataProvider->RemoveOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+void CBasketTradeSymbolInfo::StopTrading() {
+  m_pModelParameters->pDataProvider->RemoveTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+  m_pModelParameters->pDataProvider->RemoveQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+  m_pModelParameters->pDataProvider->RemoveOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+
+  m_pModelParameters->pTreeView->Remove( "Basket", m_status.sSymbolName );
 }
 
 void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {
@@ -223,7 +227,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( m_status.dblStop );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+              m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
             break;
           case WaitingForShortExit:
@@ -233,7 +237,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->SetSignalPrice( m_status.dblStop );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+              m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
             break;
           default:
@@ -274,12 +278,12 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
           if ( 0 < m_status.nPositionSize ) {  // clear out long
             COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_status.nPositionSize );
             pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-            m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+            m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
           else { // clear out short
             COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, -m_status.nPositionSize );
             pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-            m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+            m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
         }
         m_TradingState = DoneTrading;
@@ -356,7 +360,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+              m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
         }
         if ( !m_bDoneTheShort ) {
@@ -378,7 +382,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
-              m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+              m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
         }
       }

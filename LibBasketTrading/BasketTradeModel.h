@@ -3,6 +3,7 @@
 #include "ProviderInterface.h"
 #include "BasketTradeSymbolInfo.h"
 #include "Delegate.h"
+#include "ChartingContainer.h"
 
 #include <map>
 #include <string>
@@ -23,8 +24,9 @@ protected:
   typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;
   typedef pair<std::string, CBasketTradeSymbolInfo*> pairBasketSymbolsEntry_t;
-  CProviderInterface *m_pDataProvider;
-  CProviderInterface *m_pExecutionProvider;
   CBasketTradeSymbolInfo::structCommonModelInformation m_ModelInfo;
+  CChartingContainer m_ChartingContainer;
+  //CProviderInterface *m_pDataProvider;
+  //CProviderInterface *m_pExecutionProvider;
 private:
 };

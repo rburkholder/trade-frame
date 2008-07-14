@@ -24,14 +24,18 @@ void CChartInstrumentTree::Add(const std::string &sStrategy, const std::string &
   HTREEITEM itemStrategy;
   HTREEITEM itemName;
 
+  // if this code chunk changes, copy into Remove method as well
   bool bStrategyFound = false;
   bool bNameFound = false;
+  CString s;
   for ( HTREEITEM ix = GetNextItem( TVI_ROOT, TVGN_CHILD ); NULL != ix; ix = GetNextItem( ix, TVGN_NEXT ) ) {
-    if ( strcmp( sStrategy.c_str(), (LPCTSTR) GetItemText( ix ) ) ) {
+    s = GetItemText( ix );
+    if ( 0 == s.Compare( sStrategy.c_str() ) ) {
       bStrategyFound = true;
       itemStrategy = ix;
       for ( HTREEITEM iy = GetNextItem( itemStrategy, TVGN_CHILD ); NULL != iy; iy = GetNextItem( iy, TVGN_NEXT ) ) {
-        if ( strcmp( sName.c_str(), (LPCTSTR) GetItemText( iy ) ) ) {
+        s = GetItemText( iy );
+        if ( 0 == s.Compare( sName.c_str() ) ) {
           bNameFound = true;
           itemName = iy;
           break;
@@ -47,6 +51,7 @@ void CChartInstrumentTree::Add(const std::string &sStrategy, const std::string &
   if ( !bStrategyFound ) {
     itemStrategy = InsertItem( sStrategy.c_str() );
     bStrategyFound = true;
+    SetItemText( itemStrategy, sStrategy.c_str() );
     SetItemData( itemStrategy, NULL );
   }
   itemName = InsertItem( sName.c_str(), itemStrategy );
@@ -59,12 +64,15 @@ void CChartInstrumentTree::Remove(const std::string &sStrategy, const std::strin
 
   bool bStrategyFound = false;
   bool bNameFound = false;
+  CString s;
   for ( HTREEITEM ix = GetNextItem( TVI_ROOT, TVGN_CHILD ); NULL != ix; ix = GetNextItem( ix, TVGN_NEXT ) ) {
-    if ( strcmp( sStrategy.c_str(), (LPCTSTR) GetItemText( ix ) ) ) {
+    s = GetItemText( ix );
+    if ( 0 == s.Compare( sStrategy.c_str() ) ) {
       bStrategyFound = true;
       itemStrategy = ix;
       for ( HTREEITEM iy = GetNextItem( itemStrategy, TVGN_CHILD ); NULL != iy; iy = GetNextItem( iy, TVGN_NEXT ) ) {
-        if ( strcmp( sName.c_str(), (LPCTSTR) GetItemText( iy ) ) ) {
+        s = GetItemText( iy );
+        if ( 0 == s.Compare( sName.c_str() ) ) {
           bNameFound = true;
           itemName = iy;
           break;

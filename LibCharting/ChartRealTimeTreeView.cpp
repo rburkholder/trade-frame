@@ -9,26 +9,6 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CChartRealTimeTreeView, CGUIFrameBase)
 
-CChartRealTimeTreeView *CChartRealTimeTreeView::m_pTreeView = NULL;
-size_t CChartRealTimeTreeView::m_cntConstruction = 0;
-
-CChartRealTimeTreeView *CChartRealTimeTreeView::Register() {
-  ++m_cntConstruction;
-  if ( NULL == m_pTreeView ) {
-    assert( 1 == m_cntConstruction );
-    m_pTreeView = new CChartRealTimeTreeView();
-  }
-  return m_pTreeView;
-}
-
-void CChartRealTimeTreeView::Deregister( void ) {
-  --m_cntConstruction;
-  if ( 0 == m_cntConstruction ) {
-    delete m_pTreeView;
-    m_pTreeView = NULL;
-  }
-}
-
 CChartRealTimeTreeView::CChartRealTimeTreeView(void) : CGUIFrameBase() {
   m_sDialogTitle = "Symbols";
   CGUIFrameBase::SetPosition( 0, 0, 200, 600 );
@@ -41,7 +21,6 @@ CChartRealTimeTreeView::CChartRealTimeTreeView(void) : CGUIFrameBase() {
 }
 
 CChartRealTimeTreeView::~CChartRealTimeTreeView(void) {
-  assert( 0 == m_cntConstruction );
 }
 
 BEGIN_MESSAGE_MAP(CChartRealTimeTreeView, CGUIFrameBase)

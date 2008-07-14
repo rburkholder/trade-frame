@@ -15,7 +15,9 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 #include "Delegate.h"
-#include "ChartRealTimeContainer.h"
+//#include "ChartRealTimeContainer.h"
+//#include "ChartRealTimeView.h"
+#include "ChartRealTimeTreeView.h"
 
 #include "ChartEntryBars.h"
 #include "ChartEntryIndicator.h"
@@ -27,10 +29,8 @@ using namespace boost::gregorian;
 class CBasketTradeSymbolInfo {
 public:
   explicit CBasketTradeSymbolInfo( 
-    const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy,
-    CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
-  explicit CBasketTradeSymbolInfo( 
-    std::stringstream *pStream, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
+    const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
+  explicit CBasketTradeSymbolInfo( std::stringstream *pStream );
   ~CBasketTradeSymbolInfo( void );
 
   Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
@@ -41,8 +41,8 @@ public:
   void StreamSymbolInfo( std::ostream *pStream );
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
-  void ConnectDataProvider( void );
-  void DisconnectDataProvider( void );
+  void StartTrading( void );
+  void StopTrading( void );
 
   struct structFieldsForDialog { // used for updating dialog
     std::string sSymbolName;
@@ -74,17 +74,20 @@ public:
   const structFieldsForDialog &GetDialogFields( void ) { return m_status; };  // needs come after structure definition
 
   struct structCommonModelInformation {
-      bool bRTH;  // regular trading hours only
-      ptime dtRTHBgn;
-      ptime dtRTHEnd;
-      ptime dtOpenRangeBgn;
-      ptime dtOpenRangeEnd;
-      ptime dtEndActiveTrading;
-      ptime dtBgnNoMoreTrades;
-      ptime dtBgnCancelTrades;
-      ptime dtBgnCloseTrades;
-      ptime dtTradeDate; // date of trading, previous days provide the history
-      double dblFunds;  // funds available for use
+    bool bRTH;  // regular trading hours only
+    ptime dtRTHBgn;
+    ptime dtRTHEnd;
+    ptime dtOpenRangeBgn;
+    ptime dtOpenRangeEnd;
+    ptime dtEndActiveTrading;
+    ptime dtBgnNoMoreTrades;
+    ptime dtBgnCancelTrades;
+    ptime dtBgnCloseTrades;
+    ptime dtTradeDate; // date of trading, previous days provide the history
+    double dblFunds;  // funds available for use
+    CProviderInterface *pDataProvider;
+    CProviderInterface *pExecutionProvider;
+    CChartRealTimeTreeView *pTreeView;
   };
   void CalculateTrade( structCommonModelInformation *pParameters  );
 
@@ -143,8 +146,8 @@ protected:
     DoneCalculatingRange
   } m_OpeningRangeState, m_RTHRangeState;
 
-  CProviderInterface *m_pExecutionProvider;
-  CProviderInterface *m_pDataProvider;
+  //CProviderInterface *m_pExecutionProvider;
+  //CProviderInterface *m_pDataProvider;
 
   CInstrument *m_pInstrument;
   COrderManager m_OrderManager;
@@ -155,13 +158,14 @@ protected:
   std::map<unsigned long, COrder*> m_mapActiveOrders;
   std::map<unsigned long, COrder*> m_mapCompletedOrders;
 
-  CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
+  //CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
 
   CBarFactory m_1MinBarFactory;
   CQuotes m_quotes;
   CTrades m_trades;
   CBars m_bars;
 
+  CChartEntryBars m_ceBars;
   CChartEntryIndicator m_ceTrades;
   CChartEntryIndicator m_ceQuoteBids;
   CChartEntryIndicator m_ceQuoteAsks;

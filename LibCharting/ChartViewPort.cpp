@@ -7,6 +7,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+IMPLEMENT_DYNAMIC(CChartViewPort, CGUIFrameBase)
+
 CChartViewPort::CChartViewPort( size_t ix, CWnd* pParent )
 : m_ixViewPort( ix ), CGUIFrameBase()
 {
