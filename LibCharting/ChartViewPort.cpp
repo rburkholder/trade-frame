@@ -9,8 +9,8 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CChartViewPort, CGUIFrameBase)
 
-CChartViewPort::CChartViewPort( size_t ix, CWnd* pParent )
-: m_ixViewPort( ix ), CGUIFrameBase()
+CChartViewPort::CChartViewPort( CChartDataView *cdv, CWnd* pParent )
+: CGUIFrameBase()
 {
   CGUIFrameBase::SetPosition( 0, 0, 900, 400 );
   CGUIFrameBase::Create( );

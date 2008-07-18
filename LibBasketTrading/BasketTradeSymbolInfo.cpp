@@ -316,6 +316,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
   m_dblAveBarHeight = // 10 bar ema used for calculating A
     ( dblPercentage * ( bar.m_dblHigh - bar.m_dblLow ) ) + ( ( 1 - dblPercentage ) * m_dblAveBarHeight );
   m_bars.AppendDatum( bar );
+  m_ceBars.AddBar( bar );
   size_t cnt = m_bars.Count();
   switch ( m_PositionState ) {
     case Init:

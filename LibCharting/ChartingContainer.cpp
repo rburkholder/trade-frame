@@ -28,7 +28,7 @@ void CChartingContainer::HandleCreateNewViewPort(CChartControls *pControls) {
 
 void CChartingContainer::CreateNewViewPort( void ) {
   m_ixActiveViewPort = m_vViewPorts.size();  // make new viewport active
-  CChartViewPort *pViewPort = new CChartViewPort( m_ixActiveViewPort );
+  CChartViewPort *pViewPort = new CChartViewPort( NULL );  // nothing to view yet
   pViewPort->ShowWindow( SW_SHOWNORMAL );
   //pViewPort->SetViewPortIndex( m_ixActiveViewPort );
   m_vViewPorts.push_back( pViewPort );

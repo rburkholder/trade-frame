@@ -6,6 +6,9 @@
 #include "ChartRealTimeTreeView.h"
 #include "ChartViewPort.h"
 
+// CChartingContainer contains the view, tree, and controls for the mechanics of 
+//  selecting and viewing a chart.
+
 class CChartingContainer {
 public:
   explicit CChartingContainer(void);
