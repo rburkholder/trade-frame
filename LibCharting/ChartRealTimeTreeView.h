@@ -5,6 +5,7 @@
 
 class CChartRealTimeTreeView : public CGUIFrameBase {
   DECLARE_DYNAMIC(CChartRealTimeTreeView)
+  friend class CChartingContainer;
 public:
   CChartRealTimeTreeView(void); 
   virtual ~CChartRealTimeTreeView(void);

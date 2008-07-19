@@ -11,6 +11,7 @@ static char THIS_FILE[] = __FILE__;
 
 CChartingContainer::CChartingContainer(void) {
   //m_pTreeView = CChartRealTimeTreeView::Register();  // get the tree view started
+  m_TreeView.m_Tree.OnClick.Add( MakeDelegate( this, &CChartingContainer::HandleSelectDataView ) );
   m_TreeView.ShowWindow( SW_SHOWNORMAL );
   m_ChartControls.OnBtnNewMasterChart.Add( MakeDelegate( this, &CChartingContainer::HandleCreateNewViewPort ) );
   m_ChartControls.ShowWindow( SW_SHOWNORMAL );
@@ -19,6 +20,7 @@ CChartingContainer::CChartingContainer(void) {
 
 CChartingContainer::~CChartingContainer(void) {
   m_ChartControls.OnBtnNewMasterChart.Remove( MakeDelegate( this, &CChartingContainer::HandleCreateNewViewPort ) );
+  m_TreeView.m_Tree.OnClick.Remove( MakeDelegate( this, &CChartingContainer::HandleSelectDataView ) );
   //CChartRealTimeTreeView::Deregister();
 }
 
@@ -32,4 +34,11 @@ void CChartingContainer::CreateNewViewPort( void ) {
   pViewPort->ShowWindow( SW_SHOWNORMAL );
   //pViewPort->SetViewPortIndex( m_ixActiveViewPort );
   m_vViewPorts.push_back( pViewPort );
+}
+
+void CChartingContainer::HandleSelectActiveViewPort(CChartViewPort *pViewPort) {
+}
+
+void CChartingContainer::HandleSelectDataView(CChartDataView *pDataView) {
+  m_vViewPorts[ m_ixActiveViewPort ]->SetChartDataView( pDataView );
 }
