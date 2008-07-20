@@ -9,6 +9,7 @@ public:
   CChartEntryIndicator( unsigned int nSize );
   virtual ~CChartEntryIndicator(void);
   virtual void Reserve( unsigned int );
+  virtual void AddDataToChart( XYChart *pXY );
 protected:
 private:
 };

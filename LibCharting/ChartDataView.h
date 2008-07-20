@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include <Delegate.h>
 
@@ -12,14 +13,18 @@
 
 class CChartDataViewCarrier { // used by CChartViewPort objects to chart data
 public:
+  //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
   CChartDataViewCarrier( void );
   CChartDataViewCarrier( size_t nChart, CChartEntryBaseWithTime *pChartEntry );
   CChartDataViewCarrier( const CChartDataViewCarrier &carrier );
   ~CChartDataViewCarrier( void );
-  size_t GetChartId( void ) { return m_nChart; };
+  size_t GetLogicalChartId( void ) { return m_nLogicalChart; };
+  void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
+  size_t GetActualChartId( void ) { return m_nActualChart; };
   CChartEntryBaseWithTime *GetChartEntry( void ) { return m_pChartEntry; };
 protected:
-  size_t m_nChart;
+  size_t m_nLogicalChart;  // as supplied by trading rules
+  size_t m_nActualChart;   // as supplied by CChartDataView management
   CChartEntryBaseWithTime *m_pChartEntry;
 private:
 };
@@ -34,16 +39,31 @@ public:
   ~CChartDataView(void);
   void Add( size_t nChart, CChartEntryBaseWithTime *pChartEntry );
   typedef std::vector<CChartDataViewCarrier>::const_iterator const_iterator;
-  const_iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
-  const_iterator end( void ) { return m_vChartDataViewEntry.end(); };
+  typedef std::vector<CChartDataViewCarrier>::iterator iterator;
+  iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
+  iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) { return m_sStrategy; };
   const std::string &GetName( void ) { return m_sName; };
   Delegate<CChartDataView *> OnClosing;
   void Close( void ); // call before destruction so can be removed from tree view and view port properly
+  size_t GetChartCount( void ) { return m_mapCntChartIndexes.size(); };
 protected:
   std::vector<CChartDataViewCarrier> m_vChartDataViewEntry;
+  struct structChartMapping {
+    size_t ixActualChartId;  // actual chart index
+    size_t nCharts;  // number of charts at this index
+    explicit structChartMapping( void ) : ixActualChartId( 0 ), nCharts( 0 ) {};
+    explicit structChartMapping( const structChartMapping &obj ) 
+      : ixActualChartId( obj.ixActualChartId ), nCharts( obj.nCharts ) {};
+    structChartMapping &operator=( const structChartMapping &obj ) { 
+      ixActualChartId = obj.ixActualChartId; nCharts = obj.nCharts; return *this; };
+  };
+  typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
+  mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
   bool m_bClosed;
   std::string m_sStrategy;
   std::string m_sName;
 private:
 };
+
+// http://www.parashift.com/c++-faq-lite/assignment-operators.html

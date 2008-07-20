@@ -20,6 +20,7 @@ using namespace boost::gregorian;
 
 //#include "ChartDirector\FinanceChart.h"
 #include "ChartDirector\memblock.h"
+#include "ChartDirector\chartviewer.h"
 
 class CChartEntryBase {
 public:
@@ -37,6 +38,7 @@ public:
     return DoubleArray( &(*iter), m_vPrice.size() );
   }
   virtual size_t Size( void ) { return m_vPrice.size(); };
+  virtual void AddDataToChart( XYChart *pXY ) {};
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;

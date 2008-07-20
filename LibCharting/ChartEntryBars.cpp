@@ -26,6 +26,12 @@ void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, double volume) {
   CChartEntryBaseWithTime::Add( dt, volume );
 }
 
+void CChartEntryVolume::AddDataToChart( XYChart *pXY ) {
+  BarLayer *bl = pXY->addBarLayer( this->GetPrice() );
+  bl->setXData( this->GetDateTime() );
+  //bl->setUseYAxis2( true );
+}
+
 //
 // CChartEntryBars
 //
@@ -59,4 +65,15 @@ void CChartEntryBars::AddBar(const CBar &bar) {
   m_vLow.push_back( bar.m_dblLow );
   m_vClose.push_back( bar.m_dblClose );
   //m_vVolume.push_back( bar.m_nVolume );
+}
+
+void CChartEntryBars::AddDataToChart(XYChart *pXY) {
+  CandleStickLayer *candle = pXY->addCandleStickLayer( 
+    this->GetHigh(),
+    this->GetLow(),
+    this->GetOpen(),
+    this->GetClose(),
+    0x00ff00, 0xff0000
+    );
+  candle->setXData( this->GetDateTime() );
 }

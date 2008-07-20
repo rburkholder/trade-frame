@@ -11,6 +11,7 @@ public:
   virtual ~CChartEntryVolume(void);
   virtual void Reserve( unsigned int );
   void Add( const ptime &dt, double volume );
+  virtual void AddDataToChart( XYChart *pXY );
 protected:
 private:
 };
@@ -41,15 +42,16 @@ public:
     vdouble_t::iterator iter = m_vClose.begin();
     return DoubleArray( &(*iter), m_vClose.size() );
   }
-  DoubleArray GetVolume( void ) {
-    vdouble_t::iterator iter = m_vVolume.begin();
-    return DoubleArray( &(*iter), m_vVolume.size() );
-  }
+  //DoubleArray GetVolume( void ) {
+  //  vdouble_t::iterator iter = m_vVolume.begin();
+  //  return DoubleArray( &(*iter), m_vVolume.size() );
+  //}
+  virtual void AddDataToChart( XYChart *pXY );
 protected:
   std::vector<double> m_vOpen;
   std::vector<double> m_vHigh;
   std::vector<double> m_vLow;
   std::vector<double> m_vClose;
-  std::vector<double> m_vVolume;
+  //std::vector<double> m_vVolume;
 private:
 };

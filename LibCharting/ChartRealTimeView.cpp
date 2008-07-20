@@ -73,9 +73,9 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
     
     CChartEntryBars *bars = m_pModel->Bars();
     if ( 0 < bars->Size() ) {
-      BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
-      bl->setXData( bars->GetDateTime() );
-      bl->setUseYAxis2( true );
+      //BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
+      //bl->setXData( bars->GetDateTime() );
+      //bl->setUseYAxis2( true );
 
       LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
       lltrade->setXData( m_pModel->Trades()->GetDateTime() );

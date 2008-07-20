@@ -3,6 +3,8 @@
 
 #include "Color.h"
 
+#include <vector>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -11,7 +13,7 @@ static char THIS_FILE[] = __FILE__;
 
 CChartMaster::CChartMaster(void) 
 : CChartViewer(), m_bUpdateChart( false ), m_pCdv( NULL),
-  m_nChartWidth( 600 ), m_nChartHeight( 180 )
+  m_nChartWidth( 600 ), m_nChartHeight( 900 )
 {
   m_refresh.OnRefresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
@@ -32,64 +34,59 @@ void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
 
 void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
   if ( m_bUpdateChart ) {
-    // redraw the chart here
-    /*
-    FinanceChart chart( m_nChartWidth );
-    //assert( NULL != m_pModel );
-    XYChart *xy = chart.addMainChart( 300 ); 
-    //LineLayer *lltrade = chart.addLineIndicator2( xy, m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
-    //XYChart *xyask = chart.addLineIndicator( 100, m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
-    LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
-    //LineLayer *llask = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
-    lltrade->setXData( m_pModel->Trades()->GetDateTime() );
-    //LineLayer *llbid = chart.addLineIndicator2( xy, m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
-//    llbid->setXData( m_pModel->Bids()->GetDateTime() );
-    CChartEntryBars *bars = m_pModel->Bars();
-    chart.setData( 
-      bars->GetDateTime(), 
-      bars->GetHigh(), 
-      bars->GetLow(), 
-      bars->GetOpen(), 
-      bars->GetClose(), 
-      bars->GetVolume(), 
-      0 );
-    //chart.layout();
-    chart.addCandleStick(0x00ff00, 0xff0000);
-    chart.addVolBars( 70, 0x99ff99, 0xff9999, 0x808080);*/
 
+    struct structSubChart {
+      XYChart *xy; // xy chart at this position
+      structSubChart( void ) : xy( NULL ) {};
+    };
 
-    //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
-    
-    XYChart xy( m_nChartWidth, m_nChartHeight );
-    //multi.addChart( 0, 0, &xy );
-    xy.setPlotArea( 50, 20, m_nChartWidth - 75, m_nChartHeight - 75 );
-/*    
-    CChartEntryBars *bars = m_pModel->Bars();
-    if ( 0 < bars->Size() ) {
-      BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
-      bl->setXData( bars->GetDateTime() );
-      bl->setUseYAxis2( true );
+    if ( NULL != m_pCdv ) { // DataView has something to draw
+      //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
+      MultiChart multi( m_nChartWidth, m_nChartHeight );
 
-      LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
-      lltrade->setXData( m_pModel->Trades()->GetDateTime() );
-      LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
-      llasks->setXData( m_pModel->Asks()->GetDateTime() );
-      LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
-      llbids->setXData( m_pModel->Bids()->GetDateTime() );
+      // chart 0 is x, volume chart is 1/4x, indicator charts are 1/3x
+      // calc assumes chart 0 and chart 1 are always present
+      int heightChart0 = m_nChartHeight / ( ( 15 + ( 4 * m_pCdv->GetChartCount() ) ) / 12 );
+      int heightChart1 = heightChart0 / 4;
+      int heightChartN = heightChart0 / 3;
 
-      CandleStickLayer *candle = xy.addCandleStickLayer( 
-        bars->GetHigh(), 
-        bars->GetLow(), 
-        bars->GetOpen(), 
-        bars->GetClose(), 0x00ff00, 0xff0000);
-      candle->setXData( bars->GetDateTime() );
+      std::vector<structSubChart> vCharts;
+      vCharts.resize( m_pCdv->GetChartCount() );  // this is the number of sub-charts we are working with
+      size_t ix = 0;
+      int y = 0;
+      XYChart *pXY;
+      while ( ix < m_pCdv->GetChartCount() ) {
+        switch ( ix ) {
+          case 0:
+            pXY = new XYChart( m_nChartWidth, heightChart0 );
+            multi.addChart( 0, y, pXY );
+            multi.setMainChart( pXY );
+            y += heightChart0; 
+            break;
+          case 1:
+            pXY = new XYChart( m_nChartWidth, heightChart1 );
+            multi.addChart( 0, y, pXY );
+            y += heightChart1;
+            break;
+          default:
+            pXY = new XYChart( m_nChartWidth, heightChartN );
+            multi.addChart( 0, y, pXY );
+            y += heightChartN;
+            break;
+        }
+        vCharts[ ix ].xy = pXY;
+        //pXY->setPlotArea( 50, 20, m_nChartWidth - 75, m_nChartHeight - 75 );
+        ++ix;
+      }
+
+      for ( CChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
+        size_t ixChart = (*iter).GetActualChartId();
+        (*iter).GetChartEntry()->AddDataToChart( vCharts[ ix ].xy );
+      }
+      multi.layout();
+      setChart( &multi );
     }
-*/
 
-    xy.layout();
-    //multi.layout();
-    setChart( &xy );
-    //setChart( &multi );
     m_bUpdateChart = false;
   }
 }
