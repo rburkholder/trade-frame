@@ -12,13 +12,15 @@ IMPLEMENT_DYNAMIC(CChartViewPort, CGUIFrameBase)
 CChartViewPort::CChartViewPort( CChartDataView *cdv, CWnd* pParent )
 : CGUIFrameBase()
 {
-  CGUIFrameBase::SetPosition( 0, 0, 900, 400 );
+  CGUIFrameBase::SetPosition( -1000, 0, -200, 900 );
   CGUIFrameBase::Create( );
 
-  //CRect clientRect;
-  //CFrameWnd::GetClientRect(&clientRect);
-  //CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
-}
+  CRect clientRect;
+  CFrameWnd::GetClientRect(&clientRect);
+  CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
+
+  m_cm.Create( _T( "" ), WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY, chartRect, this );
+} 
 
 CChartViewPort::~CChartViewPort(void) {
 }

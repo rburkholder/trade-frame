@@ -167,6 +167,7 @@ protected:
 
   CChartEntryBars m_ceBars;
   CChartEntryIndicator m_ceTrades;
+  CChartEntryVolume m_ceTradeVolume;
   CChartEntryIndicator m_ceQuoteBids;
   CChartEntryIndicator m_ceQuoteAsks;
   CChartEntryMark m_ceLevels; // open, pivots

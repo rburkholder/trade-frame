@@ -79,6 +79,10 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
   m_pdvChart->Add( 0, &m_ceBars );
   m_pdvChart->Add( 1, reinterpret_cast<CChartEntryVolume *>( &m_ceBars ) );
+  m_pdvChart->Add( 0, &m_ceQuoteAsks );
+  m_pdvChart->Add( 0, &m_ceQuoteBids );
+  m_pdvChart->Add( 0, &m_ceTrades );
+  m_pdvChart->Add( 1, &m_ceTradeVolume );
 }
 
 void CBasketTradeSymbolInfo::StartTrading() {
@@ -144,12 +148,16 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
 
 void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
   m_quotes.AppendDatum( quote );
+  m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
+  m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
 }
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
 
   m_status.dblCurrentPrice = trade.m_dblTrade;
   m_trades.AppendDatum( trade );
+  m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
+  m_ceTradeVolume.Add( trade.m_dt, trade.m_nTradeSize );
 
   switch ( m_OpeningRangeState ) {
     case DoneCalculatingRange:  // most often encountered case listed first

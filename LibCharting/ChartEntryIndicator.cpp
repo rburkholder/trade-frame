@@ -19,7 +19,9 @@ void CChartEntryIndicator::Reserve( unsigned int nSize ) {
 }
 
 void CChartEntryIndicator::AddDataToChart(XYChart *pXY) {
-  LineLayer *ll = pXY->addLineLayer( this->GetPrice() );
-  // LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
-  ll->setXData( this->GetDateTime() );
+  if ( 0 != this->m_vDateTime.size() ) {
+    LineLayer *ll = pXY->addLineLayer( this->GetPrice() );
+    // LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
+    ll->setXData( this->GetDateTime() );
+  }
 }
