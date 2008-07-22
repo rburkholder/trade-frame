@@ -38,7 +38,7 @@ void CCtlMarketDepth::Resize( void ) {
 }
 
 void CCtlMarketDepth::AssignRow( 
-     int n, EColor color, const char* szMMID, int nSize, double price, int nOwn, const char *pTime ) {
+     int n, Colour::enumColour colour, const char* szMMID, int nSize, double price, int nOwn, const char *pTime ) {
        char conv[ 30 ];
   if ( n >= nInsertedRows ) {
     // overflow
@@ -47,7 +47,7 @@ void CCtlMarketDepth::AssignRow(
     if ( 0 == n ) {
       nCumulativeCount = 0;
     }
-    SetTextBkColor(color);
+    SetTextBkColor(colour);
     nCumulativeCount += nSize;
     SetItemText( n, 0, szMMID );
     sprintf_s( conv, 30, "%0.2f", price );

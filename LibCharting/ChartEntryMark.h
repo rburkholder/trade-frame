@@ -12,9 +12,10 @@ class CChartEntryMark :
 public:
   CChartEntryMark(void);
   virtual ~CChartEntryMark(void);
-  void AddMark( double price, EColor color, std::string name = "" );
+  void AddMark( double price, Colour::enumColour colour, const std::string &name );
+  virtual void AddDataToChart( XYChart *pXY );
 protected:
-  std::vector<EColor> m_vColor;
+  std::vector<Colour::enumColour> m_vColour;
   std::vector<std::string> m_vName;
 private:
 };

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "GTScalp.h"
 #include "GTScalpDlg.h"
-#include "Color.h"
+//#include "Color.h"
 #include "IQFeed.h" 
 //#include "CtlPendingOrders.h"
 #include "VuPendingOrders.h"

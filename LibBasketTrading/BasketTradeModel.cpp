@@ -75,10 +75,12 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
         case 1:
           nSymbolCount = m_mapBasketSymbols.size();
           dblFundsPerSymbol = dblFunds / nSymbolCount;
+          m_ModelInfo.nCalcStep = CBasketTradeSymbolInfo::structCommonModelInformation::Prelim;
           break;
         case 2: 
           nSymbolCount = nTradeableSymbols;
           dblFundsPerSymbol = dblFunds / nSymbolCount;
+          m_ModelInfo.nCalcStep = CBasketTradeSymbolInfo::structCommonModelInformation::Final;
           break;
       }
       for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {

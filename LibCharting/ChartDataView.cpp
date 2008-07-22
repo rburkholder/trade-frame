@@ -16,7 +16,7 @@ CChartDataViewCarrier::CChartDataViewCarrier( void )
 {
 }
 
-CChartDataViewCarrier::CChartDataViewCarrier( size_t nChart, CChartEntryBaseWithTime *pChartEntry ) 
+CChartDataViewCarrier::CChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry ) 
 : m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
 {
 }
@@ -49,7 +49,7 @@ CChartDataView::~CChartDataView(void) {
   m_vChartDataViewEntry.clear();
 }
 
-void CChartDataView::Add(size_t nChart, CChartEntryBaseWithTime *pChartEntry) {
+void CChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
   CChartDataViewCarrier carrier( nChart, pChartEntry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;

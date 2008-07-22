@@ -15,17 +15,17 @@ class CChartDataViewCarrier { // used by CChartViewPort objects to chart data
 public:
   //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
   CChartDataViewCarrier( void );
-  CChartDataViewCarrier( size_t nChart, CChartEntryBaseWithTime *pChartEntry );
+  CChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry );
   CChartDataViewCarrier( const CChartDataViewCarrier &carrier );
   ~CChartDataViewCarrier( void );
   size_t GetLogicalChartId( void ) { return m_nLogicalChart; };
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
   size_t GetActualChartId( void ) { return m_nActualChart; };
-  CChartEntryBaseWithTime *GetChartEntry( void ) { return m_pChartEntry; };
+  CChartEntryBase *GetChartEntry( void ) { return m_pChartEntry; };
 protected:
   size_t m_nLogicalChart;  // as supplied by trading rules
   size_t m_nActualChart;   // as supplied by CChartDataView management
-  CChartEntryBaseWithTime *m_pChartEntry;
+  CChartEntryBase *m_pChartEntry;
 private:
 };
 
@@ -37,7 +37,7 @@ class CChartDataView {
 public:
   CChartDataView( const std::string &sStrategy, const std::string &sName );
   ~CChartDataView(void);
-  void Add( size_t nChart, CChartEntryBaseWithTime *pChartEntry );
+  void Add( size_t nChart, CChartEntryBase *pChartEntry );
   typedef std::vector<CChartDataViewCarrier>::const_iterator const_iterator;
   typedef std::vector<CChartDataViewCarrier>::iterator iterator;
   iterator begin( void ) { return m_vChartDataViewEntry.begin(); };

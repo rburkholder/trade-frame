@@ -6,6 +6,7 @@
 #include "HDF5TimeSeriesContainer.h"
 #include "HDF5WriteTimeSeries.h"
 #include "InstrumentFile.h"
+#include "PivotGroup.h"
 
 // 
 // CSymbolInfo
@@ -82,7 +83,8 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   m_pdvChart->Add( 0, &m_ceQuoteAsks );
   m_pdvChart->Add( 0, &m_ceQuoteBids );
   m_pdvChart->Add( 0, &m_ceTrades );
-  m_pdvChart->Add( 1, &m_ceTradeVolume );
+  //m_pdvChart->Add( 1, &m_ceTradeVolume );
+  m_pdvChart->Add( 0, &m_ceLevels );
 }
 
 void CBasketTradeSymbolInfo::StartTrading() {
@@ -124,12 +126,14 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
 
   std::cout << "Entry for " << m_status.sSymbolName;
   if ( 20 < cnt ) {
+    /*
     double range = 0;
     CBar *pBar;
     for ( int ix = cnt - 20; ix < cnt; ++ix ) {
       pBar = bars[ ix ];
       range += pBar->m_dblHigh - pBar->m_dblLow;
     }
+    */
 
     double dblClose = bars.Last()->m_dblClose;  
     m_nQuantityForEntry = ( ( (int) ( m_pModelParameters->dblFunds / dblClose ) ) / 100 ) * 100;
@@ -138,6 +142,13 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
       << ": " << m_nQuantityForEntry << "@" << m_dblProposedEntryCost 
       << ", " << dblClose
       << std::endl;
+
+    if ( structCommonModelInformation::Final == m_pModelParameters->nCalcStep ) {
+      CPivotGroup pivots( &bars );
+      for ( CPivotGroup::const_iterator iter = pivots.begin(); iter != pivots.end(); ++iter ) {
+        m_ceLevels.AddMark( iter->first, iter->second.colour, iter->second.sName.c_str() );
+      }
+    }
   }
   else {
     m_nQuantityForEntry = 0;
@@ -465,6 +476,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
 
 void CBasketTradeSymbolInfo::HandleOpen( const CTrade &trade ) {
   m_status.dblOpen = trade.m_dblTrade; // official open
+  m_ceLevels.AddMark( trade.m_dblTrade, Colour::Plum, "Open" );
 }
 
 void CBasketTradeSymbolInfo::WriteTradesAndQuotes(const std::string &sPathPrefix) {

@@ -13,13 +13,13 @@
 
 CVisibleRow::CVisibleRow() {
 
-  crAccount1 = LightSeaGreen;
-  crAccount2 = LightGreen;
-  crPrice = LightSteelBlue;
-  crColumnHeader = LightGoldenrodYellow;
-  crPriceHighlight = SkyBlue;
-  crBidHighlight = DodgerBlue;
-  crAskHighlight = Magenta;
+  crAccount1 = Colour::LightSeaGreen;
+  crAccount2 = Colour::LightGreen;
+  crPrice = Colour::LightSteelBlue;
+  crColumnHeader = Colour::LightGoldenrodYellow;
+  crPriceHighlight = Colour::SkyBlue;
+  crBidHighlight = Colour::DodgerBlue;
+  crAskHighlight = Colour::Magenta;
 
   m_veAcct1BidPending.SetBackColorDefault( crAccount1 );
   m_veAcct2BidPending.SetBackColorDefault( crAccount2 );

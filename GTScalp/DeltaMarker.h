@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "..\LibCommon\Color.h"
+#include "..\LibCommon\Colour.h"
 
 #include <string>
 using namespace std;
@@ -18,8 +18,8 @@ public:
   //EColor GetBackground( void ) { return colBackground; };
   //EColor GetForeground( void ) { return colForeground; };
 
-  EColor colBackground;
-  EColor colForeground;
+  Colour::enumColour colBackground;
+  Colour::enumColour colForeground;
 
   LPCTSTR GetString( void );
 
@@ -27,8 +27,8 @@ protected:
 
   CString sValue;
   CString sFormat;
-  EColor colRising;
-  EColor colFalling;
+  Colour::enumColour colRising;
+  Colour::enumColour colFalling;
   int nPrecision;
   bool bFirstFound;
 

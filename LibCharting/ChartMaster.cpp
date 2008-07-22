@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "ChartMaster.h"
 
-#include "Color.h"
+#include "Colour.h"
 
 #include <vector>
 
@@ -61,7 +61,7 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
       XYChart *pXY0;
       while ( ix < n ) {
         switch ( ix ) {
-          case 0:
+          case 0:  // main chart
             pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
             pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight );
             pXY->setXAxisOnTop( true );
@@ -69,19 +69,19 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
             multi.setMainChart( pXY );
             y += heightChart0; 
             break;
-          case 1:
+          case 1: // volume chart
             pXY = new XYChart( m_nChartWidth, heightChart1 );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 - 50 );
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);
-            pXY->xAxis()->copyAxis( pXY0->xAxis() );
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             multi.addChart( 0, y, pXY );
             y += heightChart1;
             break;
-          default:
+          default:  // secondary indicator charts
             pXY = new XYChart( m_nChartWidth, heightChartN );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN );
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);
-            pXY->xAxis()->copyAxis( pXY0->xAxis() );
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             multi.addChart( 0, y, pXY );
             y += heightChartN;
             break;

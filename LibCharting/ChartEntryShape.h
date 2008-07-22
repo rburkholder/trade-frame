@@ -10,7 +10,7 @@ public:
   CChartEntryShape(void);
   virtual ~CChartEntryShape(void);
   enum EShape { EBuy, ESell, EBuyStop, ESellStop, EFillLong, EFillShort };
-  void SetShape( EShape shape, EColor color ) { m_eShape = shape; m_eColor = color; };
+  void SetShape( EShape shape, Colour::enumColour colour ) { m_eShape = shape; m_eColour = colour; };
 protected:
   EShape m_eShape;
 private:

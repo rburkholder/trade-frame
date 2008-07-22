@@ -2,7 +2,7 @@
 #include "GTScalp.h"
 #include "TradingLogic.h"
 #include "GTOrderX.h"
-#include "Color.h"
+#include "Colour.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -10,9 +10,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-EColor MDColors[] = { 
-  LightYellow, LightYellow, PaleGoldenrod, Wheat, Goldenrod, DarkGoldenrod,
-  DarkKhaki, DarkOrange, Orange, OrangeRed, Red, Crimson, Black };  // Black is not used, simply an end of list indicator
+Colour::enumColour MDColors[] = { 
+  Colour::LightYellow, Colour::LightYellow, Colour::PaleGoldenrod, Colour::Wheat, Colour::Goldenrod, Colour::DarkGoldenrod,
+  Colour::DarkKhaki, Colour::DarkOrange, Colour::Orange, Colour::OrangeRed, Colour::Red, Colour::Crimson, Colour::Black };  // Black is not used, simply an end of list indicator
 
 CTradingLogic::CTradingLogic( CString sSymbol ) {
   
@@ -150,7 +150,7 @@ void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
 
     CPivotGroup group( pBars );
     for ( CPivotGroup::const_iterator iter = group.begin(); iter != group.end(); ++iter ) {
-      pTradeFrame->AppendStaticIndicator( iter->first, iter->second.c_str() );
+      pTradeFrame->AppendStaticIndicator( iter->first, iter->second.sName.c_str() );
     }
   }
 }
@@ -273,7 +273,7 @@ void CTradingLogic::UpdateMarketDepth() {
       mmid = pL2->mmid;
       if ( 0 != dwComparePrice && dwComparePrice != pL2->dwComparePrice ) {
         ++ixColor;
-        if ( Black == MDColors[ ixColor ] ) ixColor = 0;
+        if ( Colour::Black == MDColors[ ixColor ] ) ixColor = 0;
       }
       sprintf( szTime, "%02d:%02d:%02d", pL2->gtime.chHour, pL2->gtime.chMin, pL2->gtime.chSec );
       pVuMarketDepth->m_lcMarketDepthBid.AssignRow( 
@@ -294,7 +294,7 @@ void CTradingLogic::UpdateMarketDepth() {
       mmid = pL2->mmid;
       if ( 0 != dwComparePrice && dwComparePrice != pL2->dwComparePrice ) {
         ++ixColor;
-        if ( Black == MDColors[ ixColor ] ) ixColor = 0;
+        if ( Colour::Black == MDColors[ ixColor ] ) ixColor = 0;
       }
       sprintf( szTime, "%02d:%02d:%02d", pL2->gtime.chHour, pL2->gtime.chMin, pL2->gtime.chSec );
       pVuMarketDepth->m_lcMarketDepthAsk.AssignRow( 

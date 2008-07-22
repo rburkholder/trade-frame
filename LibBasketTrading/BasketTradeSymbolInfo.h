@@ -74,6 +74,7 @@ public:
   const structFieldsForDialog &GetDialogFields( void ) { return m_status; };  // needs come after structure definition
 
   struct structCommonModelInformation {
+    enum enumCalcStep { Prelim, Final } nCalcStep;
     bool bRTH;  // regular trading hours only
     ptime dtRTHBgn;
     ptime dtRTHEnd;
@@ -178,6 +179,7 @@ protected:
   CChartEntryIndicator m_cdBollinger20TickLower;
   CChartEntryIndicator m_ceHi;
   CChartEntryIndicator m_ceLo;
+
   //CChartEntryIndicator  // some sort of indicator for order flow:  trade direction vs quotes, etc
 
   CChartDataView *m_pdvChart;

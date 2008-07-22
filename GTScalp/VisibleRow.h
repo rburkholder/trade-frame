@@ -3,7 +3,7 @@
 
 // CVisibleRow
 
-#include "Color.h"
+#include "Colour.h"
 #include "VisibleElement.h"
 
 #include <vector>

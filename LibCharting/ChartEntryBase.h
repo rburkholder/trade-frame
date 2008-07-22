@@ -9,7 +9,7 @@
 //   will be used by the charting application for determinig if 
 //   it will be calculating the DoubleArray parameter for the charting library
 
-#include "Color.h"
+#include "Colour.h"
 
 #include <vector>
 #include <string>
@@ -27,8 +27,8 @@ public:
   CChartEntryBase( void );
   CChartEntryBase( unsigned int nSize );
   virtual ~CChartEntryBase( void );
-  virtual void Color( EColor color ) { m_eColor = color; };
-  EColor Color( void ) { return m_eColor; };
+  virtual void SetColor( Colour::enumColour colour ) { m_eColour = colour; };
+  Colour::enumColour GetColour( void ) { return m_eColour; };
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
   void Add( double price );
@@ -42,7 +42,7 @@ public:
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;
-  EColor m_eColor;
+  Colour::enumColour m_eColour;
   std::string m_sName;
 private:
 };

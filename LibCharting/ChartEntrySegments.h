@@ -11,7 +11,7 @@ class CChartEntrySegments :
 public:
   CChartEntrySegments(void);
   virtual ~CChartEntrySegments(void);
-  void SetAttributes( EColor color, std::string name = "" );
+  void SetAttributes( Colour::enumColour colour, const std::string &name );
 protected:
   
 private:

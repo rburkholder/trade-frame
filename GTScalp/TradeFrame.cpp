@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "GTScalp.h"
 #include "TradeFrame.h"
-#include "Color.h"
+//#include "Colour.h"
 #include "VisibleElement.h"
 #include "VisibleRow.h"
 #include "DataRow.h"

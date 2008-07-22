@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "ChartRealTimeView.h"
 
-#include "Color.h"
+#include "Colour.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,11 +77,11 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
       //bl->setXData( bars->GetDateTime() );
       //bl->setUseYAxis2( true );
 
-      LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Green, _T( "Trade" ) );
+      LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Colour::Green, _T( "Trade" ) );
       lltrade->setXData( m_pModel->Trades()->GetDateTime() );
-      LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Red, _T( "Ask" ) );
+      LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Colour::Red, _T( "Ask" ) );
       llasks->setXData( m_pModel->Asks()->GetDateTime() );
-      LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Blue, _T( "Bid" ) );
+      LineLayer *llbids = xy.addLineLayer( m_pModel->Bids()->GetPrice(), Colour::Blue, _T( "Bid" ) );
       llbids->setXData( m_pModel->Bids()->GetDateTime() );
 
       CandleStickLayer *candle = xy.addCandleStickLayer( 

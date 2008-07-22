@@ -8,10 +8,10 @@
 // ==== CDeltaMarkerBase
 
 CDeltaMarkerBase::CDeltaMarkerBase( CListCtrl *pListCtrl, int row, int col ) {
-  colBackground = Black;
-  colForeground = White;
-  colRising = Green;
-  colFalling = Red;
+  colBackground = Colour::Black;
+  colForeground = Colour::White;
+  colRising = Colour::Green;
+  colFalling = Colour::Red;
   nPrecision = 0;
   bFirstFound = false;
   m_pListCtrl = pListCtrl;
