@@ -11,7 +11,7 @@ class CChartEntrySegments :
 public:
   CChartEntrySegments(void);
   virtual ~CChartEntrySegments(void);
-  void SetAttributes( Colour::enumColour colour, const std::string &name );
+  virtual void AddDataToChart( XYChart *pXY );
 protected:
   
 private:

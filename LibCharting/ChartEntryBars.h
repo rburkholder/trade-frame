@@ -26,26 +26,6 @@ public:
   virtual ~CChartEntryBars(void);
   virtual void Reserve( unsigned int );
   void AddBar( const CBar &bar );
-  DoubleArray GetOpen( void ) {
-    vdouble_t::iterator iter = m_vOpen.begin();
-    return DoubleArray( &(*iter), m_vOpen.size() );
-  }
-  DoubleArray GetHigh( void ) {
-    vdouble_t::iterator iter = m_vHigh.begin();
-    return DoubleArray( &(*iter), m_vHigh.size() );
-  }
-  DoubleArray GetLow( void ) {
-    vdouble_t::iterator iter = m_vLow.begin();
-    return DoubleArray( &(*iter), m_vLow.size() );
-  }
-  DoubleArray GetClose( void ) {
-    vdouble_t::iterator iter = m_vClose.begin();
-    return DoubleArray( &(*iter), m_vClose.size() );
-  }
-  //DoubleArray GetVolume( void ) {
-  //  vdouble_t::iterator iter = m_vVolume.begin();
-  //  return DoubleArray( &(*iter), m_vVolume.size() );
-  //}
   virtual void AddDataToChart( XYChart *pXY );
 protected:
   std::vector<double> m_vOpen;
@@ -53,5 +33,25 @@ protected:
   std::vector<double> m_vLow;
   std::vector<double> m_vClose;
   //std::vector<double> m_vVolume;
+  DoubleArray GetOpen( void ) {
+    vdouble_t::iterator iter = m_vOpen.begin();
+    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
+  }
+  DoubleArray GetHigh( void ) {
+    vdouble_t::iterator iter = m_vHigh.begin();
+    return DoubleArray( &(*iter), static_cast<int>( m_vHigh.size() ) );
+  }
+  DoubleArray GetLow( void ) {
+    vdouble_t::iterator iter = m_vLow.begin();
+    return DoubleArray( &(*iter), static_cast<int>( m_vLow.size() ) );
+  }
+  DoubleArray GetClose( void ) {
+    vdouble_t::iterator iter = m_vClose.begin();
+    return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
+  }
+  //DoubleArray GetVolume( void ) {
+  //  vdouble_t::iterator iter = m_vVolume.begin();
+  //  return DoubleArray( &(*iter), m_vVolume.size() );
+  //}
 private:
 };

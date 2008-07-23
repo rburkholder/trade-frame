@@ -39,7 +39,7 @@ CChartDataViewCarrier::~CChartDataViewCarrier() {
 //
 
 CChartDataView::CChartDataView( const std::string &sStrategy, const std::string &sName )
-: m_bClosed( false ), m_sStrategy( sStrategy ), m_sName( sName )
+: m_bClosed( false ), m_sStrategy( sStrategy ), m_sName( sName ), m_bChanged( false )
 {
   m_vChartDataViewEntry.reserve( 10 );
 }

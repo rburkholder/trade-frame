@@ -47,6 +47,8 @@ public:
   Delegate<CChartDataView *> OnClosing;
   void Close( void ); // call before destruction so can be removed from tree view and view port properly
   size_t GetChartCount( void ) { return m_mapCntChartIndexes.size(); };
+  void SetChanged(void) { m_bChanged = true; };
+  bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
 protected:
   std::vector<CChartDataViewCarrier> m_vChartDataViewEntry;
   struct structChartMapping {
@@ -63,6 +65,7 @@ protected:
   bool m_bClosed;
   std::string m_sStrategy;
   std::string m_sName;
+  bool m_bChanged;
 private:
 };
 

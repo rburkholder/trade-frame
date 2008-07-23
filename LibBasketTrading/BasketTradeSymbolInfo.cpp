@@ -161,6 +161,7 @@ void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
   m_quotes.AppendDatum( quote );
   m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
   m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
+  m_pdvChart->SetChanged();
 }
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
@@ -169,6 +170,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
   m_trades.AppendDatum( trade );
   m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
   m_ceTradeVolume.Add( trade.m_dt, trade.m_nTradeSize );
+  m_pdvChart->SetChanged();
 
   switch ( m_OpeningRangeState ) {
     case DoneCalculatingRange:  // most often encountered case listed first
@@ -322,7 +324,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
       m_status.dblUnRealizedPL = ( trade.m_dblTrade - m_status.dblAverageCost ) * m_status.nPositionSize;
     }
     else { // short
-      m_status.dblUnRealizedPL = ( m_status.dblAverageCost - trade.m_dblTrade ) * m_status.nPositionSize;
+      m_status.dblUnRealizedPL = ( m_status.dblAverageCost - trade.m_dblTrade ) * -m_status.nPositionSize;
     }
   }
 
@@ -445,7 +447,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       dblPreviousAverageCost = m_status.dblAverageCost;
       m_status.nPositionSize += pOrder->GetQuanFilled();
       m_status.dblPositionSize += pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
-      m_status.dblAverageCost = m_status.dblPositionSize / m_status.nPositionSize;
+      m_status.dblAverageCost = ( 0 == m_status.nPositionSize ) ? 0 : m_status.dblPositionSize / m_status.nPositionSize;
       if ( bClosing ) {
         m_status.dblRealizedPL += ( dblPreviousAverageCost - pOrder->GetAverageFillPrice() ) * pOrder->GetQuanFilled();
       }
@@ -455,7 +457,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       dblPreviousAverageCost = m_status.dblAverageCost;
       m_status.nPositionSize -= pOrder->GetQuanFilled();
       m_status.dblPositionSize -= pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
-      m_status.dblAverageCost = m_status.dblPositionSize / m_status.nPositionSize;
+      m_status.dblAverageCost = ( 0 == m_status.nPositionSize ) ? 0 : m_status.dblPositionSize / m_status.nPositionSize;
       if ( bClosing ) {
         m_status.dblRealizedPL += ( pOrder->GetAverageFillPrice() - dblPreviousAverageCost ) * pOrder->GetQuanFilled();
       }

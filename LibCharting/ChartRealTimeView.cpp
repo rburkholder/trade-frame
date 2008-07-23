@@ -10,7 +10,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CChartRealTimeView::CChartRealTimeView( CChartRealTimeModel *pModel ) 
-: CChartViewer(), m_bUpdateChart( false ), m_bModelChanged( false ),
+: CChartViewer(), m_bModelChanged( false ),
   m_nChartWidth( 600 ), m_nChartHeight( 180 ),
   m_pModel( pModel )
 {
@@ -76,7 +76,7 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
       //BarLayer *bl = xy.addBarLayer( bars->GetVolume() );
       //bl->setXData( bars->GetDateTime() );
       //bl->setUseYAxis2( true );
-
+/*
       LineLayer *lltrade = xy.addLineLayer( m_pModel->Trades()->GetPrice(), Colour::Green, _T( "Trade" ) );
       lltrade->setXData( m_pModel->Trades()->GetDateTime() );
       LineLayer *llasks = xy.addLineLayer( m_pModel->Asks()->GetPrice(), Colour::Red, _T( "Ask" ) );
@@ -90,6 +90,7 @@ void CChartRealTimeView::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg )
         bars->GetOpen(), 
         bars->GetClose(), 0x00ff00, 0xff0000);
       candle->setXData( bars->GetDateTime() );
+*/
     }
 
     xy.layout();

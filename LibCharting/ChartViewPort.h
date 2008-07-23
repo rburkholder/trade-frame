@@ -15,6 +15,7 @@ public:
   CChartDataView *GetChartDataView( void ) { return m_cm.GetChartDataView(); };
 protected:
   CChartMaster m_cm;
+  void SetChartMasterSize( void );
 	afx_msg void OnDestroy();
   afx_msg void OnSize(UINT nType, int cx, int cy);
 private:

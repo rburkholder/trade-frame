@@ -15,14 +15,19 @@ CChartViewPort::CChartViewPort( CChartDataView *cdv, CWnd* pParent )
   CGUIFrameBase::SetPosition( -1000, 0, -200, 900 );
   CGUIFrameBase::Create( );
 
-  CRect clientRect;
-  CFrameWnd::GetClientRect(&clientRect);
-  CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
-
+  CRect chartRect( 5, 5, 10, 10 );
   m_cm.Create( _T( "" ), WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY, chartRect, this );
+  SetChartMasterSize();
 } 
 
 CChartViewPort::~CChartViewPort(void) {
+}
+
+void CChartViewPort::SetChartMasterSize( void ) {
+  CRect clientRect;
+  CFrameWnd::GetClientRect(&clientRect);
+  CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
+  m_cm.SetChartDimensions( chartRect.Width(), chartRect.Height() );
 }
 
 BEGIN_MESSAGE_MAP(CChartViewPort, CGUIFrameBase)
@@ -37,11 +42,7 @@ void CChartViewPort::OnDestroy()  {
 
 afx_msg void CChartViewPort::OnSize(UINT nType, int cx, int cy) {
   CGUIFrameBase::OnSize(nType,cx,cy);
-  CRect clientRect;
-  CFrameWnd::GetClientRect(&clientRect);
-  CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
-  //m_prtView->SetChartDimensions( chartRect.Width(), chartRect.Height() );
-  //std::cout << "size " << chartRect.Width() << ", " << chartRect.Height() << endl;
+  SetChartMasterSize();
 }
 
 

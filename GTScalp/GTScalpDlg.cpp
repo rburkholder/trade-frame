@@ -1237,7 +1237,7 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
       if ( 0 == *szStopPrice ) throw std::invalid_argument( "No Stop Price Provided" );
       dblStop = atof( szStopPrice );
       if ( 0 == dblStop ) throw std::invalid_argument( "Stop Price was 0" );
-      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, dblStop, nSize );
+      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblStop );
       break;
     }
 

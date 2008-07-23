@@ -172,7 +172,7 @@ protected:
   CChartEntryIndicator m_ceQuoteBids;
   CChartEntryIndicator m_ceQuoteAsks;
   CChartEntryMark m_ceLevels; // open, pivots
-  CChartEntryShape m_ceTransactions;
+  //CChartEntryShape m_ceTransactions;
   CChartEntrySegments m_ceZigZag;
   CChartEntryIndicator m_ceBollinger20TickAverage;
   CChartEntryIndicator m_cdBollinger20TickUpper;

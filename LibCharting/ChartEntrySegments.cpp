@@ -9,7 +9,9 @@ CChartEntrySegments::CChartEntrySegments(void)
 CChartEntrySegments::~CChartEntrySegments(void) {
 }
 
-void CChartEntrySegments::SetAttributes(Colour::enumColour colour, const std::string &name ) {
-  m_sName = name;
-  m_eColour = colour;
+void CChartEntrySegments::AddDataToChart(XYChart *pXY) {
+  if ( 0 < m_vPrice.size() ) {
+    LineLayer *layer = pXY->addLineLayer( GetPrice(), m_eColour, m_sName.c_str() );
+    layer->setXData( GetDateTime() );
+  }
 }

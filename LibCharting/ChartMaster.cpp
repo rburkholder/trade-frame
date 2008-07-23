@@ -12,9 +12,20 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CChartMaster::CChartMaster(void) 
-: CChartViewer(), m_bUpdateChart( false ), m_pCdv( NULL),
+: CChartViewer(), m_pCdv( NULL),
   m_nChartWidth( 600 ), m_nChartHeight( 900 )
 {
+  Initialize();
+}
+
+CChartMaster::CChartMaster( unsigned int width, unsigned int height ) 
+: CChartViewer(), m_pCdv( NULL),
+  m_nChartWidth( width ), m_nChartHeight( height )
+{
+  Initialize();
+}
+
+void CChartMaster::Initialize( void ) {
   m_refresh.OnRefresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
 
@@ -26,21 +37,20 @@ BEGIN_MESSAGE_MAP(CChartMaster, CChartViewer)
 END_MESSAGE_MAP()
 
 void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
-  // need to force a window resize here
   m_nChartWidth = width;
   m_nChartHeight = height;
-  m_bUpdateChart = true;
+  if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
 void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
-  //if ( m_bUpdateChart ) {  // no way to set this flag, needs to be set in container or elsewhere
 
-    struct structSubChart {
-      XYChart *xy; // xy chart at this position
-      structSubChart( void ) : xy( NULL ) {};
-    };
+  struct structSubChart {
+    XYChart *xy; // xy chart at this position
+    structSubChart( void ) : xy( NULL ) {};
+  };
 
-    if ( NULL != m_pCdv ) { // DataView has something to draw
+  if ( NULL != m_pCdv ) { // DataView has something to draw
+    if ( m_pCdv->GetChanged() ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
 
@@ -101,8 +111,6 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
         delete (*iter).xy;
       }
     }
-
-    m_bUpdateChart = false;
-  //}
+  }
 }
 
