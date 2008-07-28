@@ -11,15 +11,17 @@
 class CChartEntryShape :
   public CChartEntryBaseWithTime {
 public:
-  enum EShape { EBuy, ESell, EBuyStop, ESellStop, EFillLong, EFillShort };
-  CChartEntryShape( EShape eShape, Colour::enumColour colour );
+  enum enumShape { EDefault, EBuy, ESell, EFillLong, EFillShort, EBuyStop, ESellStop };
+  CChartEntryShape( void );
+  CChartEntryShape( enumShape eShape, Colour::enumColour colour );
+  void SetShape( enumShape shape ) { m_eShape = shape; };
+  enumShape GetShape( void ) { return m_eShape; };
   virtual ~CChartEntryShape(void);
   void AddLabel( const ptime &dt, double price, const std::string &sLabel );
   virtual void AddDataToChart( XYChart *pXY );
 protected:
   static int m_rShapes[];
-  EShape m_eShape;
-  Colour::enumColour m_colour;
+  enumShape m_eShape;
   std::vector<std::string> m_vLabel;
   std::vector<const char *> m_vpChar;
   StringArray GetLabels( void ) {

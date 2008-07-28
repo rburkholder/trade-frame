@@ -27,8 +27,8 @@ public:
   CChartEntryBase( void );
   CChartEntryBase( unsigned int nSize );
   virtual ~CChartEntryBase( void );
-  virtual void SetColor( Colour::enumColour colour ) { m_eColour = colour; };
   Colour::enumColour GetColour( void ) { return m_eColour; };
+  virtual void SetColour( Colour::enumColour colour ) { m_eColour = colour; };
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
   void Add( double price );

@@ -24,8 +24,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-//  m_pChart( NULL ),
-  m_pdvChart( NULL )
+  m_pdvChart( NULL ), m_pInstrument( NULL )
 {
   Initialize();
 }
@@ -37,8 +36,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-//  m_pChart( NULL ),
-  m_pdvChart( NULL )
+  m_pdvChart( NULL ), m_pInstrument( NULL )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -49,10 +47,6 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
     delete m_pInstrument;
     m_pInstrument = NULL;
   }
-//  if ( NULL != m_pChart ) {
-//    delete m_pChart;
-//    m_pChart = NULL;
-//  }
   if ( NULL != m_pdvChart ) {
     m_pdvChart->Close();
     delete m_pdvChart;
@@ -74,17 +68,23 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   }
   file.CloseIQFSymbols();
 
-  //m_pChart = new CChartRealTimeContainer( m_status.sSymbolName, m_pDataProvider );
-  //m_pChart->ShowWindow( SW_SHOWNORMAL );
+  m_ceBars.SetColour( Colour::Orange );
+  m_ceQuoteAsks.SetColour( Colour::Red );
+  m_ceQuoteBids.SetColour( Colour::Blue );
+  m_ceTrades.SetColour( Colour::Green );
+  m_ceOrdersBuy.SetColour( Colour::Blue );
+  m_ceOrdersSell.SetColour( Colour::Red );
 
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
   m_pdvChart->Add( 0, &m_ceBars );
-  m_pdvChart->Add( 1, reinterpret_cast<CChartEntryVolume *>( &m_ceBars ) );
+  m_pdvChart->Add( 1, dynamic_cast<CChartEntryVolume *>( &m_ceBars ) );
   m_pdvChart->Add( 0, &m_ceQuoteAsks );
   m_pdvChart->Add( 0, &m_ceQuoteBids );
   m_pdvChart->Add( 0, &m_ceTrades );
   //m_pdvChart->Add( 1, &m_ceTradeVolume );
   m_pdvChart->Add( 0, &m_ceLevels );
+  m_pdvChart->Add( 0, &m_ceOrdersBuy );
+  m_pdvChart->Add( 0, &m_ceOrdersSell );
 }
 
 void CBasketTradeSymbolInfo::StartTrading() {
@@ -159,21 +159,25 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
 
 void CBasketTradeSymbolInfo::HandleQuote( const CQuote &quote ) {
   m_quotes.AppendDatum( quote );
-  m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
-  m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
-  m_pdvChart->SetChanged();
+  if ( ( quote.m_dt >= m_pModelParameters->dtRTHBgn ) && ( quote.m_dt < m_pModelParameters->dtRTHEnd ) ) {
+    m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
+    m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
+    m_pdvChart->SetChanged();
+  }
 }
 
 void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
 
   m_status.dblCurrentPrice = trade.m_dblTrade;
   m_trades.AppendDatum( trade );
-  m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
-  m_ceTradeVolume.Add( trade.m_dt, trade.m_nTradeSize );
-  m_pdvChart->SetChanged();
+  if ( ( trade.m_dt >= m_pModelParameters->dtRTHBgn ) && ( trade.m_dt < m_pModelParameters->dtRTHEnd ) ) {
+    m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
+    m_ceTradeVolume.Add( trade.m_dt, trade.m_nTradeSize );
+    m_pdvChart->SetChanged();
+  }
 
   switch ( m_OpeningRangeState ) {
-    case DoneCalculatingRange:  // most often encountered case listed first
+    case DoneCalculatingRange: 
       break;
     case CalculatingRange:
       if ( trade.m_dt >= m_pModelParameters->dtOpenRangeEnd ) {
@@ -248,6 +252,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( m_status.dblStop );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+              m_ceOrdersSell.AddLabel( trade.m_dt, trade.m_dblTrade, "Long Stop" );
               m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
             break;
@@ -258,6 +263,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->SetSignalPrice( m_status.dblStop );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+              m_ceOrdersBuy.AddLabel( trade.m_dt, trade.m_dblTrade, "Short Stop" );
               m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
             break;
@@ -297,13 +303,15 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
         else {
           std::cout << m_status.sSymbolName << " closing position" << std::endl;
           if ( 0 < m_status.nPositionSize ) {  // clear out long
-            COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_status.nPositionSize );
+            COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_status.nPositionSize );
             pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+            m_ceOrdersSell.AddLabel( trade.m_dt, trade.m_dblTrade, "Close Sell" );
             m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
           else { // clear out short
             COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, -m_status.nPositionSize );
             pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+            m_ceOrdersBuy.AddLabel( trade.m_dt, trade.m_dblTrade, "Close Buy" );
             m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
         }
@@ -358,13 +366,10 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
       }
       if ( ( cnt >= 5 ) && ( 0 < m_status.dblOpen ) ) {  // 5 being 2x30 second bars at beginning, then the three bars we need
         CBar bar1, bar2, bar3;
-        //bar1 = *m_bars[ cnt - 5 ];
-        //bar2 = *m_bars[ cnt - 4 ];
         bar1 = *m_bars[ cnt - 3 ];
         bar2 = *m_bars[ cnt - 2 ];
         bar3 = *m_bars[ cnt - 1 ];
         if ( !m_bDoneTheLong ) {
-          //double dblAboveThisLevel = m_dblOpenHigh + m_dblAveBarHeight;
           double dblAboveThisLevel = m_status.dblOpen;
           if ( ( bar1.m_dblLow > dblAboveThisLevel ) 
             && ( bar2.m_dblLow > dblAboveThisLevel ) 
@@ -382,11 +387,11 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+              m_ceOrdersBuy.AddLabel( bar.m_dt, bar.m_dblClose, "Long Entry" );
               m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
           }
         }
         if ( !m_bDoneTheShort ) {
-          //double dblBelowThisLevel = m_dblOpenLow - m_dblAveBarHeight;
           double dblBelowThisLevel = m_status.dblOpen;
           if ( ( bar1.m_dblHigh < dblBelowThisLevel ) 
             && ( bar2.m_dblHigh < dblBelowThisLevel ) 
@@ -404,6 +409,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
               pOrder->SetSignalPrice( bar.m_dblClose );
               pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOrderFilled ) );
+              m_ceOrdersSell.AddLabel( bar.m_dt, bar.m_dblClose, "Short Entry" );
               m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
             }
         }

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 //#include "GTScalp.h"
 #include "VisibleElement.h"
-#include "Color.h"
+#include "Colour.h"
 
 #include <iostream>
 using namespace std;
@@ -47,8 +47,8 @@ BOOL CVisibleElement::Create(LPCTSTR lpszText, DWORD dwStyle,
     DEFAULT_PITCH | FF_SWISS, _T("Arial") );
 
   m_brush.CreateSolidBrush( m_BackColor );
-  m_penNull.CreatePen(PS_NULL, 0, Black);
-  m_pen.CreatePen(PS_SOLID, 1, Black );
+  m_penNull.CreatePen(PS_NULL, 0, Colour::Black);
+  m_pen.CreatePen(PS_SOLID, 1, Colour::Black );
 
   return b;
 }

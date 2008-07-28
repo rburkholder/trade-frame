@@ -12,7 +12,7 @@ public:
   virtual ~CChartMaster(void);
   void SetChartDimensions( unsigned int width, unsigned int height);
   //void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
-  void SetChartDataView( CChartDataView *pcdv ) { m_pCdv = pcdv; };
+  void SetChartDataView( CChartDataView *pcdv ) { m_pCdv = pcdv; m_pCdv->SetChanged(); };
   CChartDataView *GetChartDataView( void ) { return m_pCdv; };
 protected:
   //std::string m_sChartTitle;  // data view has this information

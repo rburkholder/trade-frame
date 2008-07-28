@@ -15,8 +15,6 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 #include "Delegate.h"
-//#include "ChartRealTimeContainer.h"
-//#include "ChartRealTimeView.h"
 #include "ChartRealTimeTreeView.h"
 
 #include "ChartEntryBars.h"
@@ -147,9 +145,6 @@ protected:
     DoneCalculatingRange
   } m_OpeningRangeState, m_RTHRangeState;
 
-  //CProviderInterface *m_pExecutionProvider;
-  //CProviderInterface *m_pDataProvider;
-
   CInstrument *m_pInstrument;
   COrderManager m_OrderManager;
 
@@ -158,8 +153,6 @@ protected:
 
   std::map<unsigned long, COrder*> m_mapActiveOrders;
   std::map<unsigned long, COrder*> m_mapCompletedOrders;
-
-  //CChartRealTimeContainer *m_pChart;  // need to add to vector so can delete at end of program run
 
   CBarFactory m_1MinBarFactory;
   CQuotes m_quotes;
@@ -172,7 +165,8 @@ protected:
   CChartEntryIndicator m_ceQuoteBids;
   CChartEntryIndicator m_ceQuoteAsks;
   CChartEntryMark m_ceLevels; // open, pivots
-  //CChartEntryShape m_ceTransactions;
+  CChartEntryShape m_ceOrdersBuy;
+  CChartEntryShape m_ceOrdersSell;
   CChartEntrySegments m_ceZigZag;
   CChartEntryIndicator m_ceBollinger20TickAverage;
   CChartEntryIndicator m_cdBollinger20TickUpper;

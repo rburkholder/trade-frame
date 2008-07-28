@@ -2,14 +2,21 @@
 #include "ChartEntryShape.h"
 
 int CChartEntryShape::m_rShapes[] = { 
+  Chart::DiamondShape,
   Chart::TriangleShape, Chart::InvertedTriangleShape, 
-  Chart::Polygon2Shape( 6 ), Chart::Polygon2Shape( 6 ),
-  Chart::Polygon2Shape( 5 ), Chart::PolygonShape( 5 ) };
+  Chart::PolygonShape( 5 ), Chart::PolygonShape( 5 ), 
+  Chart::Polygon2Shape( 6 ), Chart::Polygon2Shape( 6 ) 
+};
 
-
-CChartEntryShape::CChartEntryShape( EShape eShape, Colour::enumColour colour ) 
-: CChartEntryBaseWithTime(), m_eShape( eShape ), m_colour( colour )
+CChartEntryShape::CChartEntryShape( void )
+: CChartEntryBaseWithTime(), m_eShape( EDefault )
 {
+}
+
+CChartEntryShape::CChartEntryShape( enumShape eShape, Colour::enumColour colour ) 
+: CChartEntryBaseWithTime(), m_eShape( eShape )
+{
+  CChartEntryBase::SetColour( colour );
 }
 
 CChartEntryShape::~CChartEntryShape(void) {
@@ -26,7 +33,7 @@ void CChartEntryShape::AddDataToChart(XYChart *pXY) {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
-        GetPrice(), GetDateTime(), NULL, m_rShapes[ m_eShape ], 5, m_colour, m_colour );
+        GetPrice(), GetDateTime(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
     layer->addExtraField( GetLabels() );
     layer->setDataLabelFormat("{field0}");
     TextBox *textbox = layer->setDataLabelStyle("arialbd.ttf", 8);
