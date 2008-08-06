@@ -31,6 +31,7 @@ CIQFeed::CIQFeed( CWnd *pParent ) {
 
 CIQFeed::~CIQFeed(void) {
   RemoveClientApp( NULL );
+  CWnd::DestroyWindow(); 
 }
 
 void CIQFeed::Connect() {
@@ -107,7 +108,7 @@ END_MESSAGE_MAP()
 void CIQFeed::OnPreCrossThreadResponse(unsigned short nStr, const char *str, LPVOID object ) {
   CIQFeedThreadCrossing *state = (CIQFeedThreadCrossing *) object;
   state->QueueResponse( nStr, str );
-  SendMessage( WM_IQFEEDCROSSTHREAD, (WPARAM) state );
+  CWnd::SendMessage( WM_IQFEEDCROSSTHREAD, (WPARAM) state );
 }
 
 LRESULT CIQFeed::OnCrossThreadArrival( WPARAM w, LPARAM l ) {

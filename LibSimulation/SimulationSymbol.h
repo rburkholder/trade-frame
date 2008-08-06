@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <boost/detail/atomic_count.hpp>
 
 #include <TimeSeries.h>
 
@@ -24,6 +25,11 @@ protected:
   };
   void HandleQuoteEvent( const CDatedDatum &datum ) {
     m_OnQuote( dynamic_cast<const CQuote &>( datum ) );  // use static_cast in non-debug mode
+  }
+
+  void HandleMTQuoteEvent( const CDatedDatum &datum ) { // multi-thread handler
+  }
+  void HandleMTTradeEvent( const CDatedDatum &datum ) { // multi-thread handler
   }
 
   std::string m_sDirectory;

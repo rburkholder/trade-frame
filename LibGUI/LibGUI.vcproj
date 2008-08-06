@@ -166,6 +166,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GuiThreadCrossing.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -209,6 +213,10 @@
 			</File>
 			<File
 				RelativePath=".\GUIFrameBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GuiThreadCrossing.h"
 				>
 			</File>
 			<File
