@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibTimeSeries;..\LibTrading;..\LibCommon;..\LibHDF5TimeSeries;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\boost\boost_1_35_0;..\LibBerkeleyDb;H:\Program Files\Oracle\Berkeley DB 4.6.21\include"
+				AdditionalIncludeDirectories="..\LibGUI;..\LibTimeSeries;..\LibTrading;..\LibCommon;..\LibHDF5TimeSeries;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\boost\boost_1_35_0;..\LibBerkeleyDb;&quot;H:\Program Files\Oracle\Berkeley DB 4.6.21\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

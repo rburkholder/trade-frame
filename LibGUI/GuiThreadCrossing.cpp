@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "GuiThreadCrossing.h"
 
-#include "GTWindowsConstants.h"
+//#include "GTWindowsConstants.h"
 #include <assert.h>
 
 #ifdef _DEBUG
@@ -18,7 +18,7 @@ CGuiThreadCrossing::CGuiThreadCrossing(void) {
 }
 
 CGuiThreadCrossing::~CGuiThreadCrossing() {
-  BOOL b = CWnd::DestroyWindow();
+  BOOL b = CWnd::DestroyWindow();  // may need to send event instead
   assert( b );
 }
 

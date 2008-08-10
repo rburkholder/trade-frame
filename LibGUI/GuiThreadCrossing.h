@@ -3,6 +3,8 @@
 
 // can be used in IQFeed, PerioidicRefresh
 
+#define WM_GUITHREADCROSSING (WM_USER + 1)
+
 // creation/construction needs to occur in GUI process main/gui thread
 class CGuiThreadCrossing :  public CWnd {
   DECLARE_DYNAMIC(CGuiThreadCrossing)

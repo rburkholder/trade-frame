@@ -13,9 +13,15 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define WM_QUOTEEVENT ( WM_GUITHREADCROSSING + 1)
+#define WM_TRADEEVENT ( WM_GUITHREADCROSSING + 2)
+
+IMPLEMENT_DYNAMIC(CSimulationSymbol, CGuiThreadCrossing)
+
 CSimulationSymbol::CSimulationSymbol( const std::string &sSymbol, const std::string &sDirectory) 
-: CSymbol(sSymbol), m_sDirectory( sDirectory )
+: CSymbol(sSymbol), CGuiThreadCrossing(), m_sDirectory( sDirectory )
 {
+  m_pMainThread = ::AfxGetThread(); // comparison for crossing
 }
 
 CSimulationSymbol::~CSimulationSymbol(void) {
@@ -51,5 +57,44 @@ void CSimulationSymbol::StartDepthWatch( void ) {
 }
 
 void CSimulationSymbol::StopDepthWatch( void ) {
+}
+
+void CSimulationSymbol::HandleQuoteEvent( const CDatedDatum &datum ) {
+  if ( m_pMainThread == ::AfxGetThread() ) {
+    m_OnQuote( dynamic_cast<const CQuote &>( datum ) ); 
+  }
+  else {
+    // need a lock here if entered before previous conversion completion
+    // remember that this is a delayed thing, and datum has to be valid through out the cycle
+    BOOL b = ::PostMessage( CWnd::m_hWnd, WM_QUOTEEVENT, reinterpret_cast<WPARAM>( &datum ), 0 );
+    assert( b );
+  }
+}
+
+void CSimulationSymbol::HandleTradeEvent( const CDatedDatum &datum ) {
+  if ( m_pMainThread == ::AfxGetThread() ) {
+    m_OnTrade( dynamic_cast<const CTrade &>( datum ) );  
+  }
+  else {
+    // need a lock here if entered before previous conversion completion
+    // remember that this is a delayed thing, and datum has to be valid through out the cycle
+    BOOL b = ::PostMessage( CWnd::m_hWnd, WM_TRADEEVENT, reinterpret_cast<WPARAM>( &datum ), 0 );
+    assert( b );
+  }
+}
+
+BEGIN_MESSAGE_MAP(CSimulationSymbol, CGuiThreadCrossing)
+  ON_MESSAGE( WM_QUOTEEVENT, OnCrossThreadArrivalQuoteEvent )
+  ON_MESSAGE( WM_TRADEEVENT, OnCrossThreadArrivalTradeEvent )
+END_MESSAGE_MAP()
+
+LRESULT CSimulationSymbol::OnCrossThreadArrivalQuoteEvent( WPARAM w, LPARAM l ) {
+  HandleQuoteEvent( *(reinterpret_cast<const CDatedDatum *>( w ) ) );
+  return 1;
+}
+
+LRESULT CSimulationSymbol::OnCrossThreadArrivalTradeEvent( WPARAM w, LPARAM l ) {
+  HandleTradeEvent( *(reinterpret_cast<const CDatedDatum *>( w ) ) );
+  return 1;
 }
 
