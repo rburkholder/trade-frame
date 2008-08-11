@@ -69,6 +69,7 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   file.CloseIQFSymbols();
 
   m_ceBars.SetColour( Colour::Orange );
+  m_ceBarVolume.SetColour( Colour::Black );
   m_ceQuoteAsks.SetColour( Colour::Red );
   m_ceQuoteBids.SetColour( Colour::Blue );
   m_ceTrades.SetColour( Colour::Green );
@@ -77,7 +78,7 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
 
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
   m_pdvChart->Add( 0, &m_ceBars );
-  m_pdvChart->Add( 1, dynamic_cast<CChartEntryVolume *>( &m_ceBars ) );
+  m_pdvChart->Add( 1, &m_ceBarVolume );
   m_pdvChart->Add( 0, &m_ceQuoteAsks );
   m_pdvChart->Add( 0, &m_ceQuoteBids );
   m_pdvChart->Add( 0, &m_ceTrades );
@@ -346,6 +347,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
     ( dblPercentage * ( bar.m_dblHigh - bar.m_dblLow ) ) + ( ( 1 - dblPercentage ) * m_dblAveBarHeight );
   m_bars.AppendDatum( bar );
   m_ceBars.AddBar( bar );
+  m_ceBarVolume.Add( bar.m_dt, bar.m_nVolume );
   size_t cnt = m_bars.Count();
   switch ( m_PositionState ) {
     case Init:

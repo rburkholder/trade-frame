@@ -203,6 +203,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_BTNSIMUASSIGNDIR, &CGTScalpDlg::OnBnClickedBtnsimuassigndir)
   ON_BN_CLICKED(IDC_BTNRUNSIM, &CGTScalpDlg::OnBnClickedBtnrunsim)
   ON_BN_CLICKED(IDC_BTNHDF5FLUSH, &CGTScalpDlg::OnBnClickedBtnhdf5flush)
+  ON_BN_CLICKED(IDC_BTNSTOPSIM, &CGTScalpDlg::OnBnClickedBtnstopsim)
 END_MESSAGE_MAP()
 
 
@@ -1423,9 +1424,19 @@ void CGTScalpDlg::OnBnClickedBtnrunsim() {
   }
 }
 
+void CGTScalpDlg::OnBnClickedBtnstopsim() {
+  if ( NULL == m_pSimulation ) {
+    std::cout << "no simulation to stop" << std::endl;
+  }
+  else {
+    m_pSimulation->Stop();
+  }
+}
+
 void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
   CHDF5DataManager dm;
   dm.Flush();
   std::cout << "HDF5 Flushed" << std::endl;
 }
+
 

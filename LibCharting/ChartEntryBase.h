@@ -9,6 +9,11 @@
 //   will be used by the charting application for determinig if 
 //   it will be calculating the DoubleArray parameter for the charting library
 
+#ifdef RGB
+#undef RGB
+// windows COLORREF is backwards from what ChartDir is expecting
+#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+#endif
 #include "Colour.h"
 
 #include <vector>

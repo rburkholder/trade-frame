@@ -33,7 +33,11 @@ protected:
   CQuotes m_quotes;
   CTrades m_trades;
 
+  HANDLE m_hQuoteEventSignal;
+  HANDLE m_hTradeEventSignal;
+
   CWinThread *m_pMainThread;
+  //DWORD m_idMainThread;
 private:
   DECLARE_MESSAGE_MAP()
 };

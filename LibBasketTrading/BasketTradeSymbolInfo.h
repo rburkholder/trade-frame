@@ -160,6 +160,7 @@ protected:
   CBars m_bars;
 
   CChartEntryBars m_ceBars;
+  CChartEntryVolume m_ceBarVolume;
   CChartEntryIndicator m_ceTrades;
   CChartEntryVolume m_ceTradeVolume;
   CChartEntryIndicator m_ceQuoteBids;

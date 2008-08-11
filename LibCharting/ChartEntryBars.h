@@ -10,16 +10,14 @@ public:
   CChartEntryVolume(unsigned int nSize);
   virtual ~CChartEntryVolume(void);
   virtual void Reserve( unsigned int );
-  void Add( const ptime &dt, double volume );
+  void Add( const ptime &dt, int volume );
   virtual void AddDataToChart( XYChart *pXY );
 protected:
 private:
 };
 
 class CChartEntryBars :
-  public CChartEntryVolume {  
-    // derived from CChartEntryVolume so 
-    //   can do bar in one chart frame and volume in another
+  public CChartEntryBaseWithTime {  
 public:
   CChartEntryBars(void);
   CChartEntryBars(unsigned int nSize);
@@ -32,7 +30,6 @@ protected:
   std::vector<double> m_vHigh;
   std::vector<double> m_vLow;
   std::vector<double> m_vClose;
-  //std::vector<double> m_vVolume;
   DoubleArray GetOpen( void ) {
     vdouble_t::iterator iter = m_vOpen.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
@@ -49,9 +46,5 @@ protected:
     vdouble_t::iterator iter = m_vClose.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
   }
-  //DoubleArray GetVolume( void ) {
-  //  vdouble_t::iterator iter = m_vVolume.begin();
-  //  return DoubleArray( &(*iter), m_vVolume.size() );
-  //}
 private:
 };

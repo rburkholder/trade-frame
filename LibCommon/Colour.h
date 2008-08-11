@@ -2,6 +2,14 @@
 
 // http://en.wikipedia.org/wiki/Color#cite_note-0
 
+/* 
+#ifdef RGB
+#undef RGB
+// windows COLORREF is backwards from what ChartDir is expecting
+#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+#endif
+*/
+
 namespace Colour {
   enum enumColour {
     IndianRed = RGB(0xCD,0x5C,0x5C),

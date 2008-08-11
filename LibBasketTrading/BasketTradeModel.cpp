@@ -166,14 +166,14 @@ void CBasketTradeModel::WriteBasketData( const std::string &sGroupName ) {
 
 void CBasketTradeModel::Process(const std::string &sObjectName, const std::string &sObjectPath) {
   static std::string rSymbols[] = { "SY", "MER", "LVS", "JRCC", "" };
-  int ix = 0;
-  while ( rSymbols[ix] != "" ) {
-    if ( rSymbols[ix] == sObjectName ) {
+//  int ix = 0;
+//  while ( rSymbols[ix] != "" ) {
+//    if ( rSymbols[ix] == sObjectName ) {
       std::string sPath;
       CHDF5DataManager::DailyBarPath( sObjectName, sPath );
       AddSymbol( sObjectName, sPath, "archive" );
-      break;
-    }
-    ++ix;
-  }
+//      break;
+//    }
+//    ++ix;
+//  }
 }

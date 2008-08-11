@@ -22,15 +22,16 @@ void CChartEntryVolume::Reserve(unsigned int nSize ) {
   CChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, double volume) {
-  CChartEntryBaseWithTime::Add( dt, volume );
+void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, int volume) {
+  CChartEntryBaseWithTime::Add( dt, (double) volume );
 }
 
 void CChartEntryVolume::AddDataToChart( XYChart *pXY ) {
   if ( 0 != this->m_vDateTime.size() ) {
     BarLayer *bl = pXY->addBarLayer( this->GetPrice() );
     bl->setXData( this->GetDateTime() );
-    //bl->setUseYAxis2( true );
+    DataSet *pds = bl->getDataSet(0);
+    pds->setDataColor( m_eColour );
   }
 }
 
@@ -39,34 +40,44 @@ void CChartEntryVolume::AddDataToChart( XYChart *pXY ) {
 //
 
 CChartEntryBars::CChartEntryBars(void) 
-: CChartEntryVolume()
+: CChartEntryBaseWithTime()
 {
 }
 
 CChartEntryBars::CChartEntryBars(unsigned int nSize) 
-: CChartEntryVolume(nSize)
+: CChartEntryBaseWithTime(nSize)
 {
 }
 
 CChartEntryBars::~CChartEntryBars(void) {
+  m_vOpen.clear();
+  m_vHigh.clear();
+  m_vLow.clear();
+  m_vClose.clear();
 }
 
 void CChartEntryBars::Reserve( unsigned int nSize ) {
-  CChartEntryVolume::Reserve( nSize );
+  CChartEntryBaseWithTime::Reserve( nSize );
   m_vOpen.reserve( nSize );
   m_vHigh.reserve( nSize );
   m_vLow.reserve( nSize );
   m_vClose.reserve( nSize );
-  //m_vVolume.reserve( nSize );
 }
 
 void CChartEntryBars::AddBar(const CBar &bar) {
-  CChartEntryVolume::Add( bar.m_dt, bar.m_nVolume );
+  if ( m_vOpen.capacity() == m_vOpen.size() ) {
+    int sz = m_vOpen.size() + ( m_vOpen.size() / 5 ); // expand by 20%
+    //CChartEntryBaseWithTime::Reserve( sz );
+    m_vOpen.reserve( sz ); 
+    m_vHigh.reserve( sz ); 
+    m_vLow.reserve( sz ); 
+    m_vClose.reserve( sz ); 
+  }
+  CChartEntryBaseWithTime::Add( bar.m_dt );
   m_vOpen.push_back( bar.m_dblOpen );
   m_vHigh.push_back( bar.m_dblHigh );
   m_vLow.push_back( bar.m_dblLow );
   m_vClose.push_back( bar.m_dblClose );
-  //m_vVolume.push_back( bar.m_nVolume );
 }
 
 void CChartEntryBars::AddDataToChart(XYChart *pXY) {

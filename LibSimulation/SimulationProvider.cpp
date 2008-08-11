@@ -5,8 +5,6 @@
 
 #include "HDF5DataManager.h"
 
-#include "MergeDatedDatums.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -14,7 +12,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CSimulationProvider::CSimulationProvider(void)
-: CProviderInterface(), m_bMergeHasBeenRun( false )
+: CProviderInterface(), 
+  m_pMerge( NULL ), m_pMergeThread( NULL )
 {
   m_sName = "Simulator";
   m_nID = EProviderSimulator;
@@ -79,23 +78,53 @@ void CSimulationProvider::StopDepthWatch( CSymbol *pSymbol ) {
   dynamic_cast<CSimulationSymbol*>( pSymbol )->StopDepthWatch();
 }
 
-void CSimulationProvider::Run() {
-  if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
-  if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
-  CMergeDatedDatums merge;
-  for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
-    iter != m_mapSymbols.end(); ++iter ) {
+UINT __cdecl CSimulationProvider::Merge( LPVOID lpParam ) {
+  CSimulationProvider *pProvider = reinterpret_cast<CSimulationProvider *>( lpParam );
+
+  pProvider -> m_pMerge = new CMergeDatedDatums();
+
+  for ( m_mapSymbols_t::iterator iter = pProvider->m_mapSymbols.begin();
+    iter != pProvider->m_mapSymbols.end(); ++iter ) {
       CSimulationSymbol *sym = dynamic_cast<CSimulationSymbol*>(iter->second);
       CQuotes *quotes = &sym->m_quotes;
-      //CDatedDatums *qdatums = dynamic_cast<CDatedDatums *>( quotes );
-      merge.Add( 
+      pProvider -> m_pMerge -> Add( 
         quotes, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleQuoteEvent ) );
       CTrades *trades = &sym->m_trades;
-      //CDatedDatums *tdatums = dynamic_cast<CDatedDatums *>( trades );
-      merge.Add( 
+      pProvider -> m_pMerge -> Add( 
         trades, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
-  merge.Run();
+  pProvider -> m_pMerge -> Run();
+
+  delete pProvider -> m_pMerge;
+  pProvider -> m_pMerge = NULL;
+  pProvider -> m_pMergeThread = NULL;
+  return 1;
+}
+
+void CSimulationProvider::Run() {
+  if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
+  if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
+  // how to detect end of thread, and reset m_hMergeThread?
+  if ( NULL != m_pMerge ) {
+    std::cout << "Simulation already in progress" << std::endl;
+  }
+  else {
+    m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ), THREAD_PRIORITY_NORMAL );
+    assert( NULL != m_pMergeThread );
+    //m_hMergeThread = CreateThread( NULL, 0, Merge, this, 0, &m_idMergeThread );
+    //assert( NULL != m_hMergeThread );
+  }
+}
+
+// at some point:  run, stop, pause, resume, reset
+void CSimulationProvider::Stop() {
+  if ( NULL == m_pMerge ) {
+    std::cout << "no simulation to stop" << std::endl;
+  }
+  else {
+    m_pMerge->Stop();
+    std::cout << "stopping simulation" << std::endl;
+  }
 }

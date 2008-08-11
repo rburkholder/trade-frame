@@ -5,9 +5,9 @@ std::string CPivotSet::m_sPivotNames[ CPivotSet::PivotCount ]
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
 Colour::enumColour CPivotSet::m_rPivotColours[ CPivotSet::PivotCount ] 
-  = { Colour::Tomato, Colour::OrangeRed, Colour::Orange, Colour::RosyBrown, Colour::Red, Colour::Azure, 
-      Colour::Pink, 
-      Colour::Azure, Colour::Red, Colour::RosyBrown, Colour::Orange, Colour::OrangeRed, Colour::Tomato };
+  = { Colour::Tomato, Colour::OrangeRed, Colour::Orange, Colour::RosyBrown, Colour::Red, Colour::Pink, 
+      Colour::DarkRed, 
+      Colour::BlueViolet, Colour::Blue, Colour::RoyalBlue, Colour::Purple, Colour::SkyBlue, Colour::Violet };
 
 CPivotSet::CPivotSet(void) 
  {

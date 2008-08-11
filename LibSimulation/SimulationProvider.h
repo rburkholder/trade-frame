@@ -4,7 +4,7 @@
 
 #include "ProviderInterface.h"
 #include "SimulationSymbol.h"
-//#include "MergeDatedDatums.h"
+#include "MergeDatedDatums.h"
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -19,6 +19,7 @@ public:
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
   void Run( void );
+  void Stop( void );
 protected:
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
   virtual void StartQuoteWatch( CSymbol *pSymbol );
@@ -30,7 +31,10 @@ protected:
 
   std::string m_sGroupDirectory;
 
-  bool m_bMergeHasBeenRun;
-  //CMergeDatedDatums m_merge;
+  CWinThread *m_pMergeThread;
+  CMergeDatedDatums *m_pMerge;
+
+  static UINT __cdecl Merge( LPVOID lpParam );
+
 private:
 };

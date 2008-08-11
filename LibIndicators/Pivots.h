@@ -1,6 +1,11 @@
 #pragma once
 #include "TimeSeries.h"
 
+#ifdef RGB
+#undef RGB
+// windows COLORREF is backwards from what ChartDir is expecting
+#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+#endif
 #include "Colour.h"
 
 #include <string>

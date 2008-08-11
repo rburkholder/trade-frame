@@ -5,7 +5,9 @@
 // CMergeDatedDatums
 //
 
-CMergeDatedDatums::CMergeDatedDatums(void) {
+CMergeDatedDatums::CMergeDatedDatums(void) 
+: m_state( eInit ), m_request( eUnknown )
+{
 }
 
 CMergeDatedDatums::~CMergeDatedDatums(void) {
@@ -40,7 +42,9 @@ protected:
   std::vector<CMergeCarrierBase *> *m_v;
 };
 
+// be aware that this maybe running in alternate thread
 void CMergeDatedDatums::Run() {
+  m_request = eRun;
   std::vector<size_t> vIx;  // ordered by most recent values from CMergeCarrierBase
   vIx.resize( m_vCarriers.size() );  // vIx provides mechanism to extract datums in datetime order from carriers.
   for ( size_t ix = 0; ix < vIx.size(); ++ix ) vIx[ ix ] = ix;  // preset each entry for each carrier
@@ -48,7 +52,8 @@ void CMergeDatedDatums::Run() {
   size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
   size_t cntCarriers = vIx.size();
   CMergeCarrierBase *pCarrier;
-  while ( 0 != cntCarriers ) {  // once all series have been depleted, end of run
+  m_state = eRunning;
+  while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers[vIx[0]];
     pCarrier->ProcessDatum();
     if ( NULL == pCarrier->GetDatedDatum() ) {
@@ -73,5 +78,10 @@ void CMergeDatedDatums::Run() {
       vIx[ ix - 1 ] = carrier;
     }
   }
+  m_state = eStopped;
+}
+
+void CMergeDatedDatums::Stop( void ) {
+  m_request = eStop;
 }
 

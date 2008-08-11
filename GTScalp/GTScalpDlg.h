@@ -227,4 +227,5 @@ public:
   afx_msg void OnBnClickedBtnsimuassigndir();
   afx_msg void OnBnClickedBtnrunsim();
   afx_msg void OnBnClickedBtnhdf5flush();
+  afx_msg void OnBnClickedBtnstopsim();
 };

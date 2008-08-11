@@ -97,4 +97,5 @@ void CChartInstrumentTree::ProcessSelectionChanged(LPNMTREEVIEWA pNMTreeView) {
   CChartDataView *pDataView 
     = reinterpret_cast<CChartDataView *>( GetItemData( pNMTreeView->itemNew.hItem ) ) ;
   if ( NULL != pDataView ) OnClick( pDataView );
+  //OnClick( pDataView );  // need to repaint a blank window when a data view disappears
 }

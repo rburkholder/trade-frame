@@ -23,5 +23,7 @@ void CChartEntryIndicator::AddDataToChart(XYChart *pXY) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrice() );
     // LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
     ll->setXData( this->GetDateTime() );
+    DataSet *pds = ll->getDataSet(0);
+    pds->setDataColor( m_eColour );
   }
 }

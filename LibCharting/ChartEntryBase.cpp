@@ -20,12 +20,15 @@ CChartEntryBase::~CChartEntryBase() {
   m_vPrice.clear();
 }
 
-void CChartEntryBase::Add(double price) {
-  m_vPrice.push_back( price );
-}
-
 void CChartEntryBase::Reserve(unsigned int nSize ) {
   m_vPrice.reserve( nSize );
+}
+
+void CChartEntryBase::Add(double price) {
+  if ( m_vPrice.capacity() == m_vPrice.size() ) {
+    m_vPrice.reserve( m_vPrice.size() + ( m_vPrice.size() / 5 ) ); // expand by 20%
+  }
+  m_vPrice.push_back( price );
 }
 
 //
@@ -39,10 +42,12 @@ CChartEntryBaseWithTime::CChartEntryBaseWithTime( unsigned int nSize )
 : CChartEntryBase( nSize ) 
 {
   m_vDateTime.reserve( nSize );
+  m_vChartTime.reserve( nSize );
 }
 
 CChartEntryBaseWithTime::~CChartEntryBaseWithTime() {
   m_vDateTime.clear();
+  m_vChartTime.clear();
 }
 
 void CChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
@@ -53,6 +58,10 @@ void CChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
 
 void CChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
   // some Chart Entries don't use the built in vector
+  if ( m_vDateTime.capacity() == m_vDateTime.size() ) {
+    m_vDateTime.reserve( m_vDateTime.size() + ( m_vDateTime.size() / 5 ) ); // expand by 20%
+    m_vChartTime.reserve( m_vChartTime.size() + ( m_vChartTime.size() / 5 ) ); // expand by 20%
+  }
   m_vDateTime.push_back( dt );
   m_vChartTime.push_back( 
     Chart::chartTime( 
