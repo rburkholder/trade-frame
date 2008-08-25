@@ -73,8 +73,8 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   m_ceQuoteAsks.SetColour( Colour::Red );
   m_ceQuoteBids.SetColour( Colour::Blue );
   m_ceTrades.SetColour( Colour::Green );
-  m_ceOrdersBuy.SetColour( Colour::Blue );
-  m_ceOrdersSell.SetColour( Colour::Red );
+  m_ceOrdersBuy.SetColour( Colour::Blue ); m_ceOrdersBuy.SetShape( CChartEntryShape::EBuy );
+  m_ceOrdersSell.SetColour( Colour::Red ); m_ceOrdersSell.SetShape( CChartEntryShape::ESell );
 
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
   m_pdvChart->Add( 0, &m_ceBars );

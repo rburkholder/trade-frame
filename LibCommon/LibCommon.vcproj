@@ -184,6 +184,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\TimeSource.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -220,6 +224,10 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TimeSource.h"
 				>
 			</File>
 		</Filter>

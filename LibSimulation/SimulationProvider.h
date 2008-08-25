@@ -20,6 +20,7 @@ public:
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
   void Run( void );
   void Stop( void );
+  virtual void PlaceOrder( COrder *order );
 protected:
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
   virtual void StartQuoteWatch( CSymbol *pSymbol );

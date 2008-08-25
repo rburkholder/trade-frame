@@ -128,3 +128,8 @@ void CSimulationProvider::Stop() {
     std::cout << "stopping simulation" << std::endl;
   }
 }
+
+void CSimulationProvider::PlaceOrder( COrder *order ) {
+  CProviderInterface::PlaceOrder( order ); // any underlying initialization
+  // queue up the request for when appropriate data arrives
+}

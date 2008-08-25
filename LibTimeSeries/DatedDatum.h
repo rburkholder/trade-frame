@@ -29,6 +29,11 @@ public:
   // http://www.boost.org/doc/html/date_time/posix_time.html#date_time.posix_time.ptime_class
   //ptime m_dt(boost::date_time::special_values::not_a_date_time);
 
+  typedef long tradesize_t;
+  typedef tradesize_t volume_t;
+  typedef long quotesize_t;
+  typedef quotesize_t bidsize_t;
+  typedef quotesize_t asksize_t;
 protected:
 private:
 };
@@ -40,7 +45,7 @@ public:
   CQuote(void);
   CQuote( const ptime &dt );
   CQuote( const CQuote &quote );
-  CQuote( const ptime &dt, double dblBid, int nBidSize, double dblAsk, int nAskSize );
+  CQuote( const ptime &dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
   CQuote( const std::string &dt, const std::string &bid, 
     const std::string &bidsize, const std::string &ask, const std::string &asksize );
   virtual ~CQuote(void);
@@ -48,8 +53,8 @@ public:
 
   double m_dblBid;
   double m_dblAsk;
-  int m_nBidSize;
-  int m_nAskSize;
+  bidsize_t m_nBidSize;
+  asksize_t m_nAskSize;
 
 protected:
 private:
@@ -62,7 +67,7 @@ public:
   CTrade(void);
   CTrade( const ptime &dt );
   CTrade( const CTrade &trade );
-  CTrade( const ptime &dt, double dblTrade, int nTradeSize );
+  CTrade( const ptime &dt, double dblTrade, tradesize_t nTradeSize );
   CTrade( const std::string &dt, const std::string &trade, const std::string &size );
   virtual ~CTrade(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
@@ -81,7 +86,7 @@ public:
   CBar(void);
   CBar( const ptime &dt );
   CBar( const CBar &bar );
-  CBar( const ptime &dt, double dblOpen, double dblHigh, double dblLow, double dblClose, int nVolume );
+  CBar( const ptime &dt, double dblOpen, double dblHigh, double dblLow, double dblClose, volume_t nVolume );
   CBar( const std::string &dt, const std::string &open, const std::string &high, 
     const std::string &low, const std::string &close, const std::string &volume );
   virtual ~CBar(void);
@@ -91,7 +96,7 @@ public:
   double m_dblHigh;
   double m_dblLow;
   double m_dblClose;
-  int m_nVolume;
+  volume_t m_nVolume;
 
 protected:
 private:
@@ -106,7 +111,7 @@ public:
   CMarketDepth(void);
   CMarketDepth( const ptime &dt );
   CMarketDepth( const CMarketDepth &md );
-  CMarketDepth( const ptime &dt, char chSide, long nShares, double dblPrice, MMID mmid );
+  CMarketDepth( const ptime &dt, char chSide, quotesize_t nShares, double dblPrice, MMID mmid );
   CMarketDepth( const std::string &dt, char chSide, const std::string &shares, 
     const std::string &price, const std::string &mmid );
   virtual ~CMarketDepth(void);

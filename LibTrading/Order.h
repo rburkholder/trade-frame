@@ -56,7 +56,7 @@ public:
   const std::string &GetProviderName( void ) const { return m_sProviderName; };
   unsigned long GetNextExecutionId( void ) { return m_nNextExecutionId++; };
   void SetSendingToProvider( void );
-  OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // report true when complete
+  OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
   Delegate<COrder *> OnExecution;
   Delegate<COrder *> OnOrderFilled; // on final fill
   Delegate<COrder *> OnPartialFill; // on intermediate fills only
@@ -67,6 +67,10 @@ public:
   unsigned long GetQuanFilled( void ) { return m_nFilled; };
   void SetSignalPrice( double dblSignalPrice ) { m_dblSignalPrice = dblSignalPrice; };
   double GetSignalPrice( void ) { return m_dblSignalPrice; };
+  const ptime &GetDateTimeOrderSubmitted( void ) { 
+    assert( not_a_date_time != m_dtOrderSubmitted ); 
+    return m_dtOrderSubmitted; 
+  };
 protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;
@@ -81,6 +85,7 @@ protected:
   double m_dblSignalPrice;  // mark at which algorithm requested order
 
   //CProviderInterface *m_pProvider;  // associated provider
+  ptime m_dtOrderCreated;
   ptime m_dtOrderSubmitted;
   ptime m_dtOrderCancelled;
   ptime m_dtOrderFilled;

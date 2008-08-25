@@ -54,7 +54,7 @@ CQuote::CQuote(const CQuote &quote):
 {
 }
 
-CQuote::CQuote( const ptime &dt, double dblBid, int nBidSize, double dblAsk, int nAskSize ) :
+CQuote::CQuote( const ptime &dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize ) :
 CDatedDatum( dt ), 
     m_dblBid( dblBid ), m_dblAsk( dblAsk ), 
     m_nBidSize( nBidSize ), m_nAskSize( nAskSize ) {
@@ -98,7 +98,7 @@ CTrade::CTrade(const CTrade &trade): CDatedDatum( trade.m_dt ),
     m_dblTrade( trade.m_dblTrade ), m_nTradeSize( trade.m_nTradeSize ) {
 }
 
-CTrade::CTrade( const ptime &dt, double dblTrade, int nTradeSize ) :
+CTrade::CTrade( const ptime &dt, double dblTrade, tradesize_t nTradeSize ) :
 CDatedDatum( dt ), m_dblTrade( dblTrade ), m_nTradeSize( nTradeSize ) {
 }
 
@@ -135,7 +135,7 @@ CBar::CBar(const CBar &bar): CDatedDatum( bar.m_dt ),
   m_dblOpen( bar.m_dblOpen ), m_dblHigh( bar.m_dblHigh ), m_dblLow( bar.m_dblLow ), m_dblClose( bar.m_dblClose ), m_nVolume( bar.m_nVolume ) {
 }
 
-CBar::CBar(const boost::posix_time::ptime &dt, double dblOpen, double dblHigh, double dblLow, double dblClose, int nVolume):
+CBar::CBar(const boost::posix_time::ptime &dt, double dblOpen, double dblHigh, double dblLow, double dblClose, volume_t nVolume):
 CDatedDatum( dt ), 
   m_dblOpen( dblOpen ), m_dblHigh( dblHigh ), m_dblLow( dblLow ), m_dblClose( dblClose ), m_nVolume( nVolume ) {
 }

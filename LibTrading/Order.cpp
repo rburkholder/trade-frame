@@ -77,6 +77,8 @@ COrder::~COrder(void) {
 
 void COrder::AssignOrderId() {
 //  try {
+  m_dtOrderCreated = boost::posix_time::microsec_clock::local_time();
+  m_dtOrderSubmitted = not_a_date_time;
     m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
 //  catch (...) {
@@ -88,6 +90,7 @@ void COrder::AssignOrderId() {
 void COrder::SetSendingToProvider() {
   assert( OrderStatus::Created == m_eOrderStatus );
   m_eOrderStatus = OrderStatus::SendingToProvider;
+  m_dtOrderSubmitted = boost::posix_time::microsec_clock::local_time();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
