@@ -5,6 +5,7 @@
 #include "Instrument.h"
 #include "PersistedOrderId.h"
 #include "Execution.h"
+#include "TimeSource.h"
 
 #include "Delegate.h"
 
@@ -106,6 +107,8 @@ protected:
   double m_dblPriceXQuantity; // used for calculating average price
   double m_dblAverageFillPrice;
   //double m_dblAverageFillPriceWithCommission;
+
+  CTimeSource m_timesource;
 private:
   COrder(void);
 };

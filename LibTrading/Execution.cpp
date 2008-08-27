@@ -19,7 +19,7 @@ CExecution::CExecution(
 {
   assert( 0 < dblPrice );
   assert( 0 < nSize );
-  m_dtExecutionTimeStamp = boost::posix_time::microsec_clock::local_time();
+  m_dtExecutionTimeStamp = m_timesource.Internal();
 }
 
 CExecution::~CExecution(void) {

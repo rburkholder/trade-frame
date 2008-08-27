@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TradingEnumerations.h"
+#include "TimeSource.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -29,5 +30,8 @@ protected:
   ptime m_dtExecutionTimeStamp;
   std::string m_sExchange;
   std::string m_sExecutionId;  // unique execution id supplied by provider
+
+  CTimeSource m_timesource;
+
 private:
 };
