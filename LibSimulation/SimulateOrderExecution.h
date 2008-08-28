@@ -1,6 +1,6 @@
 #pragma once
 
-#include <queue>
+#include <list>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -32,7 +32,7 @@ public:
   void NewTrade( const CTrade &trade );
   void NewQuote( const CQuote &quote );
 
-  void SubmitOrder( const COrder &order );
+  void SubmitOrder( COrder *pOrder );
   void CancelOrder( unsigned long nOrderId );
 
 protected:
@@ -40,7 +40,7 @@ protected:
   double m_dblCommission;  // currency, per share (need also per trade)
   OnOrderCancelledHandler OnOrderCancelled;
   OnOrderFillHandler OnOrderFill;
-  std::queue<COrder *> m_qDelay;
+  std::list<COrder *> m_lDelay;  // all orders put in delay queue, taken out then processed as limit or market
   double m_dtLatestTradePrice;
   CDatedDatum::tradesize_t m_nLastTradeSize;
 

@@ -8,7 +8,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
-: m_dtOrderDelay( milliseconds( 100) ), m_dblCommission( 0 )
+: m_dtOrderDelay( milliseconds( 250 ) ), m_dblCommission( 0 )
 {
 }
 
@@ -25,23 +25,30 @@ void CSimulateOrderExecution::NewQuote( const CQuote &quote ) {
 
 }
 
-void CSimulateOrderExecution::SubmitOrder( const COrder &order ) {
+void CSimulateOrderExecution::SubmitOrder( COrder *pOrder ) {
+  m_lDelay.push_back( pOrder );
 }
 
 void CSimulateOrderExecution::CancelOrder( unsigned long nOrderId ) {
-
+  for ( std::list<COrder *>::iterator iter = m_lDelay.begin(); iter != m_lDelay.end(); ++iter ) {
+    if ( nOrderId == (*iter)->GetOrderId() ) {
+      // TODO:  perform cancellation and remove from list and exit
+      m_lDelay.erase( iter );
+      break;
+    }
+  }
 }
 
 void CSimulateOrderExecution::ProcessDelayQueue( const ptime &dtMark ) {
   bool bNoMore = false;
-  while ( !bNoMore ) {
-    COrder *pOrder = m_qDelay.back();
+  while ( !bNoMore && ( 0 < m_lDelay.size() ) ) {
+    COrder *pOrder = m_lDelay.front();
     if ( ( pOrder->GetDateTimeOrderSubmitted() + m_dtOrderDelay ) < dtMark ) {
       bNoMore = true;  // havn't waited long enough to simulate order submission
     }
     else {
       // waited long enough, now process order
-      m_qDelay.pop(); // remove the element
+      m_lDelay.pop_front(); // remove the element
       switch ( pOrder->GetOrderType() ) {
         case OrderType::Market:
           break;

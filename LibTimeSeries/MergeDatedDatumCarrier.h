@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TimeSeries.h"
+#include "TimeSource.h"
 
 #include "FastDelegate.h"
 using namespace fastdelegate;
@@ -21,6 +22,7 @@ protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
   CDatedDatum *m_pDatum;
   OnDatumHandler OnDatum;
+  CTimeSource m_timesource;
 private:
 };
 
@@ -56,6 +58,9 @@ template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
   //  std::cout << "#" << m_pDatum->m_dt << std::endl;
   //  --i;
   //}
+  if ( CTimeSource::GetSimulationMode() ) {
+    CTimeSource::SetSimulationTime( m_pDatum->m_dt );
+  }
   if ( NULL != OnDatum ) OnDatum( *m_pDatum );
   m_pDatum = m_pSeries->Next();
   m_dt = ( NULL == m_pDatum ) 

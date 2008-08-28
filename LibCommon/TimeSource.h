@@ -15,10 +15,11 @@ public:
     else 
       return External(); 
   };
-  static void SetSimulationMode( void ) { m_bInSimulation = true; m_dtSimulationTime = boost::date_time::not_a_date_time; };
+  static void SetSimulationMode( bool bMode = true ) { m_bInSimulation = bMode; m_dtSimulationTime = boost::date_time::not_a_date_time; };
   static void ResetSimulationMode( void ) { m_bInSimulation = false; };
   static bool GetSimulationMode( void ) { return m_bInSimulation; };
-  static void SetSimulationTime( const ptime &dt ) { m_bInSimulation = true; m_dtSimulationTime = dt; };
+  static void SetSimulationTime( const ptime &dt ) { m_dtSimulationTime = dt; };
+  static void ForceSimulationTime( const ptime &dt ) { m_bInSimulation = true; m_dtSimulationTime = dt; };
 protected:
   static bool m_bInSimulation;
   static ptime m_dtSimulationTime;

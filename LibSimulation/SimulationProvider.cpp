@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "HDF5DataManager.h"
+#include "TimeSource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -95,7 +96,12 @@ UINT __cdecl CSimulationProvider::Merge( LPVOID lpParam ) {
         trades, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
+
+  CTimeSource ts;
+  bool bOldMode = CTimeSource::GetSimulationMode();
+  CTimeSource::SetSimulationMode();
   pProvider -> m_pMerge -> Run();
+  CTimeSource::SetSimulationMode( bOldMode );
 
   delete pProvider -> m_pMerge;
   pProvider -> m_pMerge = NULL;
