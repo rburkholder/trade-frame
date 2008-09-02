@@ -51,7 +51,9 @@ void CSimulationProvider::Disconnect() {
 }
 
 CSymbol *CSimulationProvider::NewCSymbol( const std::string &sSymbolName ) {
-  return dynamic_cast<CSymbol *>( new CSimulationSymbol(sSymbolName, m_sGroupDirectory) );
+  CSimulationSymbol *pSymbol = new CSimulationSymbol(sSymbolName, m_sGroupDirectory);
+  pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
+  return dynamic_cast<CSymbol *>( pSymbol );
 }
 
 // these need to open the data file, load the data, and prepare to simulate
@@ -135,7 +137,28 @@ void CSimulationProvider::Stop() {
   }
 }
 
-void CSimulationProvider::PlaceOrder( COrder *order ) {
-  CProviderInterface::PlaceOrder( order ); // any underlying initialization
-  // queue up the request for when appropriate data arrives
+void CSimulationProvider::PlaceOrder( COrder *pOrder ) {
+  CProviderInterface::PlaceOrder( pOrder ); // any underlying initialization
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
+  if ( m_mapSymbols.end() == iter ) {
+    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
+  }
+  else {
+    dynamic_cast<CSimulationSymbol *>( iter->second )->m_simExec.SubmitOrder( pOrder );
+  }
+}
+
+void CSimulationProvider::CancelOrder( COrder *pOrder ) {
+  CProviderInterface::CancelOrder( pOrder );
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
+  if ( m_mapSymbols.end() == iter ) {
+    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
+  }
+  else {
+    dynamic_cast<CSimulationSymbol *>( iter->second )->m_simExec.CancelOrder( pOrder->GetOrderId() );
+  }
+}
+
+void CSimulationProvider::HandleExecution( const CExecution &exec ) {
+  m_OrderManager.ReportExecution( exec );
 }

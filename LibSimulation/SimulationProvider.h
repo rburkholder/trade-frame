@@ -20,7 +20,8 @@ public:
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
   void Run( void );
   void Stop( void );
-  virtual void PlaceOrder( COrder *order );
+  virtual void PlaceOrder( COrder *pOrder );
+  virtual void CancelOrder( COrder *pOrder );
 protected:
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
   virtual void StartQuoteWatch( CSymbol *pSymbol );
@@ -36,6 +37,8 @@ protected:
   CMergeDatedDatums *m_pMerge;
 
   static UINT __cdecl Merge( LPVOID lpParam );
+
+  void HandleExecution( const CExecution &exec );
 
 private:
 };

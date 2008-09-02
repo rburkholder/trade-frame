@@ -75,16 +75,18 @@ COrderManager::orders_t::iterator COrderManager::LocateOrder( unsigned long nOrd
   return iter;
 }
 
-void COrderManager::CancelOrder(unsigned long nOrderId) {
+void COrderManager::CancelOrder( COrder::orderid_t nOrderId) {
   try {
-    LocateOrder( nOrderId )->second->GetProvider()->CancelOrder( nOrderId );
+    //LocateOrder( nOrderId )->second->GetProvider()->CancelOrder( nOrderId );
+    CMapOrderToProvider *pMap = LocateOrder( nOrderId )->second;
+    pMap->GetProvider()->CancelOrder( pMap->GetOrder() );
   }
   catch (...) {
     std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
   }
 }
 
-void COrderManager::ReportCommission( unsigned long nOrderId, double dblCommission ) {
+void COrderManager::ReportCommission( COrder::orderid_t nOrderId, double dblCommission ) {
   try {
     LocateOrder( nOrderId )->second->GetOrder()->SetCommission( dblCommission );
   }
@@ -93,7 +95,7 @@ void COrderManager::ReportCommission( unsigned long nOrderId, double dblCommissi
   }
 }
 
-void COrderManager::MoveActiveOrderToCompleted( unsigned long nOrderId ) {
+void COrderManager::MoveActiveOrderToCompleted( COrder::orderid_t nOrderId ) {
   orders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
   if ( m_mapActiveOrders.end() != iter ) {
     m_mapCompletedOrders.insert( mappair_t( nOrderId, iter->second ) );
@@ -118,7 +120,7 @@ void COrderManager::ReportExecution(const CExecution &exec) {
   }
 }
 
-void COrderManager::ReportErrors(unsigned long nOrderId, OrderErrors::enumOrderErrors eError) {
+void COrderManager::ReportErrors( COrder::orderid_t nOrderId, OrderErrors::enumOrderErrors eError) {
   try {
     orders_t::iterator iter = LocateOrder( nOrderId );
     iter->second->GetOrder()->ActOnError( eError );

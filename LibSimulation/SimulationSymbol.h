@@ -5,6 +5,7 @@
 
 #include <GuiThreadCrossing.h>
 #include <TimeSeries.h>
+#include "SimulateOrderExecution.h"
 
 #include "symbol.h"
 
@@ -37,7 +38,8 @@ protected:
   HANDLE m_hTradeEventSignal;
 
   CWinThread *m_pMainThread;
-  //DWORD m_idMainThread;
+
+  CSimulateOrderExecution m_simExec;
 private:
   DECLARE_MESSAGE_MAP()
 };

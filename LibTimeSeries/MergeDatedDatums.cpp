@@ -51,11 +51,15 @@ void CMergeDatedDatums::Run() {
   std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
   size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
   size_t cntCarriers = vIx.size();
+  std::cout << "#carriers: " << cntCarriers << std::endl;
   CMergeCarrierBase *pCarrier;
+  unsigned long cntProcessedDatums = 0;
+  unsigned long cntReorders = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers[vIx[0]];
     pCarrier->ProcessDatum();
+    ++cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
       ++cntNulls;
@@ -74,11 +78,13 @@ void CMergeDatedDatums::Run() {
         if ( pCarrier->GetDateTime() <= m_vCarriers[vIx[ix]]->GetDateTime() ) break;
         vIx[ ix - 1 ] = vIx[ ix ];
         ++ix;
+        ++cntReorders;
       }
       vIx[ ix - 1 ] = carrier;
     }
   }
   m_state = eStopped;
+  std::cout << "Merge stats: " << cntProcessedDatums << ", " << cntReorders << std::endl;
 }
 
 void CMergeDatedDatums::Stop( void ) {

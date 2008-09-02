@@ -23,7 +23,8 @@ public:
 
   // From ProviderInterface Execution Section
   virtual void PlaceOrder( COrder *order );
-  virtual void CancelOrder( unsigned long nOrderId );
+  //virtual void CancelOrder( unsigned long nOrderId );
+  virtual void CancelOrder( COrder *order );
 
   // From TWS Wrapper:
   virtual void connectionClosed();

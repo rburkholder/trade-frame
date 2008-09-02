@@ -8,53 +8,112 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
-: m_dtOrderDelay( milliseconds( 250 ) ), m_dblCommission( 0 )
+: m_dtQueueDelay( milliseconds( 250 ) ), m_dblCommission( 0.01 ), 
+  m_pCurrentOrder( NULL ), m_bOrdersQueued( false ),
+  m_bCancelsQueued( false ), m_nOrderQuanRemaining( 0 )
 {
 }
 
 CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 }
 
-void CSimulateOrderExecution::NewTrade( const CTrade &trade ) {
-  m_dtLatestTradePrice = trade.m_dblTrade;
-  m_nLastTradeSize = trade.m_nTradeSize;
-  ProcessDelayQueue( trade.m_dt );
+void CSimulateOrderExecution::NewTrade( CSymbol::trade_t trade ) {
+  if ( m_bOrdersQueued || m_bCancelsQueued ) ProcessDelayQueues( trade );
 }
 
-void CSimulateOrderExecution::NewQuote( const CQuote &quote ) {
-
+void CSimulateOrderExecution::NewQuote( CSymbol::quote_t quote ) {
+  // not handled yet.  implement when implementing limit order simulation
 }
 
 void CSimulateOrderExecution::SubmitOrder( COrder *pOrder ) {
-  m_lDelay.push_back( pOrder );
+  m_lDelayOrder.push_back( pOrder );
+  m_bOrdersQueued = true;
 }
 
-void CSimulateOrderExecution::CancelOrder( unsigned long nOrderId ) {
-  for ( std::list<COrder *>::iterator iter = m_lDelay.begin(); iter != m_lDelay.end(); ++iter ) {
-    if ( nOrderId == (*iter)->GetOrderId() ) {
-      // TODO:  perform cancellation and remove from list and exit
-      m_lDelay.erase( iter );
-      break;
-    }
+void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
+  structCancelOrder co( ts.Internal(), nOrderId );
+  m_lDelayCancel.push_back( co );
+  m_bCancelsQueued = true;
+}
+
+void CSimulateOrderExecution::CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan ) {
+  if ( 0 == quan ) {
+    if ( NULL != OnCommission ) OnCommission( nOrderId, m_dblCommission * (double) quan );
   }
 }
 
-void CSimulateOrderExecution::ProcessDelayQueue( const ptime &dtMark ) {
+void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
+
+  // process cancels list
   bool bNoMore = false;
-  while ( !bNoMore && ( 0 < m_lDelay.size() ) ) {
-    COrder *pOrder = m_lDelay.front();
-    if ( ( pOrder->GetDateTimeOrderSubmitted() + m_dtOrderDelay ) < dtMark ) {
-      bNoMore = true;  // havn't waited long enough to simulate order submission
+  while ( !bNoMore && !m_lDelayCancel.empty() ) {
+    structCancelOrder &co = m_lDelayCancel.front();
+    if ( ( co.dtCancellation + m_dtQueueDelay ) < trade.m_dt ) {
+      bNoMore = true;  // havn't waited long enough to simulate cancel submission
     }
     else {
-      // waited long enough, now process order
-      m_lDelay.pop_front(); // remove the element
-      switch ( pOrder->GetOrderType() ) {
-        case OrderType::Market:
+      m_lDelayCancel.pop_front();
+      m_bCancelsQueued = !m_lDelayCancel.empty();
+      bool bOrderFound = false;
+      for ( std::list<COrder *>::iterator iter = m_lDelayOrder.begin(); iter != m_lDelayOrder.end(); ++iter ) {
+        if ( co.nOrderId == (*iter)->GetOrderId() ) {
+          // perform cancellation on in-process order
+          if ( NULL != m_pCurrentOrder ) {
+            if ( co.nOrderId == m_pCurrentOrder->GetOrderId() ) {
+              m_pCurrentOrder = NULL;
+            }
+          }
+          if ( NULL != OnOrderCancelled ) {
+            CalculateCommission( co.nOrderId, m_nOrderQuanProcessed );
+            OnOrderCancelled( co.nOrderId );
+          }
+          m_lDelayOrder.erase( iter );
+          bOrderFound = true;
           break;
-        case OrderType::Limit:
-          break;
+        }
       }
+      if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
+        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
+        if ( NULL != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+      }
+    }
+  }
+
+  // process orders list
+  if ( NULL == m_pCurrentOrder ) {
+    m_pCurrentOrder = m_lDelayOrder.front();
+    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) >= trade.m_dt ) {
+      m_lDelayOrder.pop_front();
+      m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
+      m_nOrderQuanProcessed = 0;
+      assert( 0 != m_nOrderQuanRemaining );
+    }
+    else {
+      m_pCurrentOrder = NULL;
+      m_nOrderQuanRemaining = 0;
+    }
+  }
+  if ( NULL != m_pCurrentOrder ) {
+    assert( 0 != m_nOrderQuanRemaining );
+    assert( 0 != trade.m_nTradeSize );
+    CTrade::tradesize_t quan = min( m_nOrderQuanRemaining, trade.m_nTradeSize );
+    switch ( m_pCurrentOrder->GetOrderType() ) {
+      case OrderType::Market: 
+        {
+        CExecution exec( m_pCurrentOrder->GetOrderId(), trade.m_dblTrade, quan, m_pCurrentOrder->GetOrderSide(), "SIM", "ExecIDHere" );
+        if ( NULL != OnOrderFill ) OnOrderFill( exec );
+        m_nOrderQuanRemaining -= quan;
+        m_nOrderQuanProcessed += quan;
+        }
+        break;
+      case OrderType::Limit:
+        // complicated order processing here
+        break;
+    }
+    if ( 0 == m_nOrderQuanRemaining ) {
+      CalculateCommission( m_pCurrentOrder->GetOrderId(), m_nOrderQuanProcessed );
+      m_pCurrentOrder = NULL;
+      m_bOrdersQueued = !m_lDelayOrder.empty();
     }
   }
 }

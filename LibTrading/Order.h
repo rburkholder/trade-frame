@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "ProviderInterface.h"
 #include "TradingEnumerations.h"
 #include "Instrument.h"
 #include "PersistedOrderId.h"
@@ -42,6 +41,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   virtual ~COrder(void);
+  typedef unsigned long orderid_t;
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
   CInstrument *GetInstrument( void ) const { return m_pInstrument; };
@@ -52,7 +52,7 @@ public:
   double GetPrice1( void ) const { return m_dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) const { return m_dblPrice2; };
   double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
-  unsigned long GetOrderId( void ) const { return m_nOrderId; };
+  orderid_t GetOrderId( void ) const { return m_nOrderId; };
   void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
   const std::string &GetProviderName( void ) const { return m_sProviderName; };
   unsigned long GetNextExecutionId( void ) { return m_nNextExecutionId++; };
@@ -76,7 +76,7 @@ protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;
   CInstrument *m_pInstrument;
-  unsigned long m_nOrderId;
+  orderid_t m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
   OrderSide::enumOrderSide m_eOrderSide;
   unsigned long m_nOrderQuantity;

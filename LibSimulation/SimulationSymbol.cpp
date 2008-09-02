@@ -26,9 +26,13 @@ CSimulationSymbol::CSimulationSymbol( const std::string &sSymbol, const std::str
   assert( NULL != m_hQuoteEventSignal );
   m_hTradeEventSignal = CreateEvent( NULL, FALSE, TRUE, "" );
   assert( NULL != m_hTradeEventSignal );
+
+  m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
 CSimulationSymbol::~CSimulationSymbol(void) {
+  m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
+
   CloseHandle( m_hQuoteEventSignal );
   CloseHandle( m_hTradeEventSignal );
 }
@@ -86,7 +90,7 @@ void CSimulationSymbol::HandleTradeEvent( const CDatedDatum &datum ) {
   CWinThread *pThread = AfxGetThread();
   if ( m_pMainThread == pThread ) {
     m_OnTrade( dynamic_cast<const CTrade &>( datum ) );  
-    BOOL b = SetEvent( m_hTradeEventSignal ); // not sure to do before or after
+    BOOL b = SetEvent( m_hTradeEventSignal ); // set after so trade is available through full sequence
     assert( b );
   }
   else {

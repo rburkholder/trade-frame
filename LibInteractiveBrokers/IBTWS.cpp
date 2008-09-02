@@ -133,62 +133,64 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 //long CIBTWS::nOrderId = 1;
 
-void CIBTWS::PlaceOrder( COrder *order ) {
-  CProviderInterface::PlaceOrder( order ); // any underlying initialization
+void CIBTWS::PlaceOrder( COrder *pOrder ) {
+  CProviderInterface::PlaceOrder( pOrder ); // any underlying initialization
   Order twsorder;
-  twsorder.orderId = order->GetOrderId();
+  twsorder.orderId = pOrder->GetOrderId();
 
   //Contract contract2;
   //contract2.conId = 44678227;
   //pTWS->reqContractDetails( contract2 );
 
   Contract contract;
-  contract.symbol = order->GetInstrument()->GetSymbolName().c_str();
-  contract.currency = order->GetInstrument()->GetCurrencyName();
-  contract.exchange = (*(order->GetInstrument()->GetExchangeName())).c_str();
-  contract.secType = szSecurityType[ order->GetInstrument()->GetInstrumentType() ];
+  contract.symbol = pOrder->GetInstrument()->GetSymbolName().c_str();
+  contract.currency = pOrder->GetInstrument()->GetCurrencyName();
+  contract.exchange = (*(pOrder->GetInstrument()->GetExchangeName())).c_str();
+  contract.secType = szSecurityType[ pOrder->GetInstrument()->GetInstrumentType() ];
   CString s;
-  switch ( order->GetInstrument()->GetInstrumentType() ) {
+  switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
     case InstrumentType::Stock:
       contract.exchange = "SMART";
       break;
     case InstrumentType::Future:
-      s.Format( "%04d%02d", order->GetInstrument()->GetExpiryYear(),order->GetInstrument()->GetExpiryMonth() );
+      s.Format( "%04d%02d", pOrder->GetInstrument()->GetExpiryYear(), pOrder->GetInstrument()->GetExpiryMonth() );
       contract.expiry = s;
       if ( "CBOT" == contract.exchange ) contract.exchange = "ECBOT";
       break;
   }
-  twsorder.action = order->GetOrderSideName();
-  twsorder.totalQuantity = order->GetQuantity();
-  twsorder.orderType = szOrderType[ order->GetOrderType() ];
+  twsorder.action = pOrder->GetOrderSideName();
+  twsorder.totalQuantity = pOrder->GetQuantity();
+  twsorder.orderType = szOrderType[ pOrder->GetOrderType() ];
   twsorder.tif = "DAY";
   //twsorder.goodAfterTime = "20080625 09:30:00";
   //twsorder.goodTillDate = "20080625 16:00:00";
-  switch ( order->GetOrderType() ) {
+  switch ( pOrder->GetOrderType() ) {
     case OrderType::Limit:
-      twsorder.lmtPrice = order->GetPrice1();
+      twsorder.lmtPrice = pOrder->GetPrice1();
       twsorder.auxPrice = 0;
       break;
     case OrderType::Stop:
-      twsorder.auxPrice = order->GetPrice1();
+      twsorder.auxPrice = pOrder->GetPrice1();
       twsorder.auxPrice = 0;
       break;
     case OrderType::StopLimit:
-      twsorder.lmtPrice = order->GetPrice1();
-      twsorder.auxPrice = order->GetPrice2();
+      twsorder.lmtPrice = pOrder->GetPrice1();
+      twsorder.auxPrice = pOrder->GetPrice2();
       break;
     default:
       twsorder.lmtPrice = 0;
       twsorder.auxPrice = 0;
   }
   twsorder.transmit = true;
-  twsorder.outsideRth = order->GetOutsideRTH();
+  twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
-void CIBTWS::CancelOrder( unsigned long nOrderId ) {
-  pTWS->cancelOrder( nOrderId );
+//void CIBTWS::CancelOrder( unsigned long nOrderId ) {
+void CIBTWS::CancelOrder( COrder *pOrder ) {
+  CProviderInterface::CancelOrder( pOrder );
+  pTWS->cancelOrder( pOrder->GetOrderId() );
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {

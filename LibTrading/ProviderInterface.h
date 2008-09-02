@@ -38,9 +38,8 @@ public:
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
   bool Connected( void ) { return m_bConnected; };
 
-  virtual void PlaceOrder( COrder *order );
-  virtual void CancelOrder( unsigned long nOrderId );
-  COrderManager m_OrderManager;
+  virtual void PlaceOrder( COrder *pOrder );
+  virtual void CancelOrder( COrder *pOrder );
 
   void SetAlternateInstrumentName( const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName );
   void GetAlternateInstrumentName( const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName );
@@ -51,7 +50,7 @@ protected:
   unsigned short m_nID;
   bool m_bConnected;
   typedef std::map<std::string, CSymbol*> m_mapSymbols_t;
-  std::map<std::string, CSymbol*> m_mapSymbols;
+  m_mapSymbols_t m_mapSymbols;
   virtual void StartQuoteWatch( CSymbol *pSymbol ) {};
   virtual void StopQuoteWatch( CSymbol *pSymbol ) {};
   virtual void StartTradeWatch( CSymbol *pSymbol ) {};
@@ -62,6 +61,8 @@ protected:
 
   std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
   CAlternateInstrumentNames m_lutAlternateInstrumentNames;
+
+  COrderManager m_OrderManager;
 
 private:
 };

@@ -1,7 +1,5 @@
 #include "StdAfx.h"
 #include "ProviderInterface.h"
-//#include "boost\lambda.hpp"
-//#include <algorithms>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -136,13 +134,13 @@ CSymbol *CProviderInterface::GetSymbol( const string &sSymbol ) {
   return iter->second;
 }
 
-void CProviderInterface::PlaceOrder( COrder *order ) {
+void CProviderInterface::PlaceOrder( COrder *pOrder ) {
   //throw std::runtime_error( "CProviderInterface::PlaceOrder not implemented." );
-  order->SetProviderName( m_sName );
+  pOrder->SetProviderName( m_sName );
 }
 
-void CProviderInterface::CancelOrder( unsigned long nOrderId ) {
-  throw std::runtime_error( "CProviderInterface::CancelOrder not implemented." );
+void CProviderInterface::CancelOrder( COrder *pOrder ) {
+  //throw std::runtime_error( "CProviderInterface::CancelOrder not implemented." );
 }
 
 void CProviderInterface::SetAlternateInstrumentName(const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName) {

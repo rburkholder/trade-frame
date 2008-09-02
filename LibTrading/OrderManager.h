@@ -35,18 +35,18 @@ public:
   COrderManager(void);
   ~COrderManager(void);
   void PlaceOrder( CProviderInterface *pProvider, COrder *pOrder );
-  void CancelOrder( unsigned long nOrderId );
+  void CancelOrder( COrder::orderid_t nOrderId );
   void ReportExecution( const CExecution &exec );  // feedback from provider
-  void ReportCommission( unsigned long nOrderId, double dblCommission );
-  void ReportErrors( unsigned long nOrderId, OrderErrors::enumOrderErrors eError );
+  void ReportCommission( COrder::orderid_t nOrderId, double dblCommission );
+  void ReportErrors( COrder::orderid_t nOrderId, OrderErrors::enumOrderErrors eError );
   Delegate<const COrder &> OnOrderCompleted;
 protected:
-  typedef std::map<unsigned long, CMapOrderToProvider*> orders_t;
-  typedef std::pair<unsigned long, CMapOrderToProvider*> mappair_t;
+  typedef std::map<COrder::orderid_t, CMapOrderToProvider*> orders_t;
+  typedef std::pair<COrder::orderid_t, CMapOrderToProvider*> mappair_t;
   static orders_t m_mapActiveOrders;  // two lists in order to minimize lookup times on active orders
   static orders_t m_mapCompletedOrders;
-  orders_t::iterator LocateOrder( unsigned long nOrderId );
-  void MoveActiveOrderToCompleted( unsigned long nOrderId );
+  orders_t::iterator LocateOrder( COrder::orderid_t nOrderId );
+  void MoveActiveOrderToCompleted( COrder::orderid_t nOrderId );
 private:
   static unsigned short m_nRefCount;
 };
