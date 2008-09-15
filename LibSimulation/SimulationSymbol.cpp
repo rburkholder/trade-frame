@@ -18,6 +18,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CSimulationSymbol, CGuiThreadCrossing)
 
+// sDirectory needs to be available on instantiation to enable signal availability
 CSimulationSymbol::CSimulationSymbol( const std::string &sSymbol, const std::string &sDirectory) 
 : CSymbol(sSymbol), CGuiThreadCrossing(), m_sDirectory( sDirectory )
 {
@@ -27,11 +28,13 @@ CSimulationSymbol::CSimulationSymbol( const std::string &sSymbol, const std::str
   m_hTradeEventSignal = CreateEvent( NULL, FALSE, TRUE, "" );
   assert( NULL != m_hTradeEventSignal );
 
-  m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  // this is dealt with in the SimulationProvider, but we don't have a .Remove
+  //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
 CSimulationSymbol::~CSimulationSymbol(void) {
-  m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  // we don't yet have a .Remove for this in SimulationProvider yet.
+  //m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 
   CloseHandle( m_hQuoteEventSignal );
   CloseHandle( m_hTradeEventSignal );
@@ -68,6 +71,14 @@ void CSimulationSymbol::StartDepthWatch( void ) {
 
 void CSimulationSymbol::StopDepthWatch( void ) {
 }
+
+//bool CSimluationSymbol::AddTradeHandler( CSymbol::tradehandler_t handler ) {
+//  return CSymbol::AddTradeHandler( handler );
+//}
+
+//bool CSimulationSymbol::RemoveTradeHandler( CSymbol::tradehandler_t handler ) {
+//  return CSymbol::RemoveTradeHandler( handler );
+//}
 
 void CSimulationSymbol::HandleQuoteEvent( const CDatedDatum &datum ) {
   CWinThread *pThread = AfxGetThread();

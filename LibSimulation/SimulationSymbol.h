@@ -23,6 +23,9 @@ protected:
   void StartDepthWatch( void );
   void StopDepthWatch( void );
 
+  //virtual bool AddTradeHandler( CSymbol::tradehandler_t ); 
+  //virtual bool RemoveTradeHandler( CSymbol::tradehandler_t );
+
   void HandleTradeEvent( const CDatedDatum &datum );
   void HandleQuoteEvent( const CDatedDatum &datum );
 

@@ -64,6 +64,8 @@ protected:
 
   COrderManager m_OrderManager;
 
+  //virtual void PreSymbolDestroy( CSymbol *pSymbol );
+
 private:
 };
 

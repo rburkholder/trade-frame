@@ -53,7 +53,40 @@ void CSimulationProvider::Disconnect() {
 CSymbol *CSimulationProvider::NewCSymbol( const std::string &sSymbolName ) {
   CSimulationSymbol *pSymbol = new CSimulationSymbol(sSymbolName, m_sGroupDirectory);
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
+  //CProviderInterface::AddTradeHandler( sSymbolName, MakeDelegate( &pSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
   return dynamic_cast<CSymbol *>( pSymbol );
+}
+
+//void CSimulationProvider::PreSymbolDestroy( CSymbol *pSymbol ) {
+  //CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( pSymbol );
+  //CProviderInterface::RemoveTradeHandler( pSymbol->Name(), MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  //CProviderInterface::PreSymbolDestroy( pSymbol );
+//}
+
+void CSimulationProvider::AddTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler ) {
+  CProviderInterface::AddTradeHandler( sSymbol, handler );
+  std::map<string, CSymbol*>::iterator iter;
+  iter = m_mapSymbols.find( sSymbol );
+  assert( m_mapSymbols.end() != iter );
+  CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
+  if ( 1 == iter->second->GetTradeHandlerCount() ) {
+    CProviderInterface::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+  }
+}
+
+void CSimulationProvider::RemoveTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler ) {
+  CProviderInterface::RemoveTradeHandler( sSymbol, handler );
+  std::map<string, CSymbol*>::iterator iter;
+  iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );  // this shouldn't occur
+  }
+  else {
+    if ( 1 == iter->second->GetTradeHandlerCount() ) {
+      CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
+      CProviderInterface::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+    }
+  }
 }
 
 // these need to open the data file, load the data, and prepare to simulate

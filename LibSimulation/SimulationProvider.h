@@ -22,6 +22,8 @@ public:
   void Stop( void );
   virtual void PlaceOrder( COrder *pOrder );
   virtual void CancelOrder( COrder *pOrder );
+  virtual void AddTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
+  virtual void RemoveTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
 protected:
   virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
   virtual void StartQuoteWatch( CSymbol *pSymbol );
@@ -39,6 +41,7 @@ protected:
   static UINT __cdecl Merge( LPVOID lpParam );
 
   void HandleExecution( const CExecution &exec );
+  //void PreSymbolDestroy( CSymbol *pSymbol );
 
 private:
 };

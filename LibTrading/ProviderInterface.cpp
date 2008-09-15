@@ -16,6 +16,7 @@ CProviderInterface::~CProviderInterface(void) {
   // need to step through and unwatch anything still watching
   std::map<string, CSymbol*>::iterator iter = m_mapSymbols.begin();
   while ( m_mapSymbols.end() != iter ) {
+//    PreSymbolDestroy( iter->second );
     delete iter->second;
     ++iter;
   }
@@ -70,6 +71,7 @@ void CProviderInterface::RemoveTradeHandler(const std::string &sSymbol, CSymbol:
   iter = m_mapSymbols.find( sSymbol );
   if ( m_mapSymbols.end() == iter ) {
   //  m_mapSymbols.insert( std::pair<string, CSymbol*>( sSymbol, new CSymbol( sSymbol ) ) );
+    // should probably raise exception here as trying to remove handler from non-existtant symbol
   }
   else {
     if ( iter->second->RemoveTradeHandler( handler ) ) {
@@ -133,6 +135,9 @@ CSymbol *CProviderInterface::GetSymbol( const string &sSymbol ) {
   }
   return iter->second;
 }
+
+//void CProviderInterface::PreSymbolDestroy( CSymbol *pSymbol ) {
+//}
 
 void CProviderInterface::PlaceOrder( COrder *pOrder ) {
   //throw std::runtime_error( "CProviderInterface::PlaceOrder not implemented." );

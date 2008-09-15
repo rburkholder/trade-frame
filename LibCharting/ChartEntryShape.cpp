@@ -33,12 +33,14 @@ void CChartEntryShape::AddDataToChart(XYChart *pXY) {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
-        GetPrice(), GetDateTime(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
+        //GetPrice(), GetDateTime(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
+        GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
+    layer->setXData( GetDateTime() );
     layer->addExtraField( GetLabels() );
     layer->setDataLabelFormat("{field0}");
     TextBox *textbox = layer->setDataLabelStyle("arialbd.ttf", 8);
     //textbox->setBackground(0xcc99ff, Chart::Transparent, 1);
     textbox->setAlignment(Chart::Left);
-    textbox->setPos(4, 0);
+    //textbox->setPos(4, 0);
   }
 }

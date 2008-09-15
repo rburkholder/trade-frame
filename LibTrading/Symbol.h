@@ -29,6 +29,7 @@ public:
 
   virtual bool AddTradeHandler( tradehandler_t ); 
   virtual bool RemoveTradeHandler( tradehandler_t );
+  size_t GetTradeHandlerCount( void ) { return m_OnTrade.Size(); };
 
   virtual bool AddDepthHandler( depthhandler_t );
   virtual bool RemoveDepthHandler( depthhandler_t );

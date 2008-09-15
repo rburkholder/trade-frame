@@ -366,7 +366,8 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
         m_PositionState = Exited;  // don't do any more trading
         break;
       }
-      if ( ( cnt >= 5 ) && ( 0 < m_status.dblOpen ) ) {  // 5 being 2x30 second bars at beginning, then the three bars we need
+      //if ( ( cnt >= 5 ) && ( 0 < m_status.dblOpen ) ) {  // 5 being 2x30 second bars at beginning, then the three bars we need
+      if ( cnt >= 5 ) {  // 5 being 2x30 second bars at beginning, then the three bars we need
         CBar bar1, bar2, bar3;
         bar1 = *m_bars[ cnt - 3 ];
         bar2 = *m_bars[ cnt - 2 ];
@@ -478,6 +479,9 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       break;
     case WaitingForOrderFulfillmentShort:
       m_PositionState = WaitingForShortExit;
+      break;
+    case WaitingForThe3Bars:
+      // ok, but do nothing
       break;
     default:
       std::cout << "Basket " << m_status.sSymbolName << " has problems" << std::endl;

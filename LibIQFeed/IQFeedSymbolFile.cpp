@@ -42,40 +42,51 @@ static char THIS_FILE[] = __FILE__;
 CIQFeedSymbolFile::structExchangeInfo CIQFeedSymbolFile::m_rExchanges[] = {
   { "Unknown", InstrumentType::Unknown, 0 },
   { "AMEX", InstrumentType::Stock, 0 },
+  { "ARCA", InstrumentType::Stock, 0 },  //
   { "BARCLAYS", InstrumentType::Currency, 0 },
+  { "BMF", InstrumentType::Future, 0 },  //
   { "CBOT", InstrumentType::Future, 0 },
+  { "CFE", InstrumentType::Future, 0 },  //
   { "CHX", InstrumentType::Future, 0 },
   { "CME", InstrumentType::Future, 0 },
   { "COMEX", InstrumentType::Future, 0 },
   { "CVE", InstrumentType::Stock, 0 },
   { "DJ", InstrumentType::Future, 0 },
+  { "DME", InstrumentType::Future, 0 },  //
   { "DTN", InstrumentType::Index, 0 },
   { "ENCOM", InstrumentType::Future, 0 },
   { "ENID", InstrumentType::Future, 0 },
   { "ENIR", InstrumentType::Future, 0 },
   { "EUREX", InstrumentType::Future, 0 },
   { "EUREXNDX", InstrumentType::Currency, 0 },
-  { "IPE", InstrumentType::Future, 0 },
+  { "GREENX", InstrumentType::Future, 0 },  //
+  { "ICEFC", InstrumentType::Future, 0 },  //
+  { "ICEFE", InstrumentType::Future, 0 },  //
+  { "ICEFI", InstrumentType::Future, 0 },  //
+  { "ICEFU", InstrumentType::Future, 0 },  //
+//  { "IPE", InstrumentType::Future, 0 },
   { "KCBOT", InstrumentType::Future, 0 },
   { "LME", InstrumentType::Metal, 0 },
+  { "MDEX", InstrumentType::Future, 0 },  //
   { "MGE", InstrumentType::Future, 0 },
   { "NASDAQ", InstrumentType::Stock, 0 },
   { "NMS", InstrumentType::Stock, 0 },
-  { "NYBOT", InstrumentType::Future, 0 },
+//  { "NYBOT", InstrumentType::Future, 0 },
   { "NYMEX", InstrumentType::Future, 0 },
   { "NYMEXMINI", InstrumentType::Future, 0 },
   { "NYSE", InstrumentType::Stock, 0 },
-  { "ONECH", InstrumentType::Future, 0 },
+//  { "ONECH", InstrumentType::Future, 0 },
   { "OPRA", InstrumentType::Option, 0 },
   { "OTC", InstrumentType::Stock, 0 },
   { "OTCBB", InstrumentType::Stock, 0 },
   { "PBOT", InstrumentType::Future, 0 },
-  { "PSE", InstrumentType::Stock, 0 },
+//  { "PSE", InstrumentType::Stock, 0 },
   { "SGX", InstrumentType::Future, 0 },
   { "SMCAP", InstrumentType::Stock, 0 },
   { "TSE", InstrumentType::Stock, 0 },
   { "TULLETT", InstrumentType::Currency, 0 },
-  { "WCE", InstrumentType::Future, 0 }
+//  { "WCE", InstrumentType::Future, 0 },
+  { "WTB", InstrumentType::Future, 0 }  //
 };
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void) : 
@@ -354,7 +365,7 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
         }
       }
       else {
-        std::cout << "failed read on " << iter->first << std::endl; // no underlying listed
+        std::cout << "option with " << iter->first << " has no underlying" << std::endl; // no underlying listed
       }
 
     }
