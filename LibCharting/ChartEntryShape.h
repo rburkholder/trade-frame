@@ -22,7 +22,7 @@ public:
 protected:
   static int m_rShapes[];
   enumShape m_eShape;
-  std::vector<std::string> m_vLabel;
+  //std::vector<std::string> m_vLabel;
   std::vector<const char *> m_vpChar;
   StringArray GetLabels( void ) {
     std::vector<const char *>::iterator iter = m_vpChar.begin();

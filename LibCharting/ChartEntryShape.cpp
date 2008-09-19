@@ -20,20 +20,26 @@ CChartEntryShape::CChartEntryShape( enumShape eShape, Colour::enumColour colour 
 }
 
 CChartEntryShape::~CChartEntryShape(void) {
+  if ( !m_vpChar.empty() ) {
+    for ( std::vector<const char *>::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
+      delete [] *iter;
+    }
+  }
 }
 
 void CChartEntryShape::AddLabel(const ptime &dt, double price, const std::string &sText ) {
   CChartEntryBaseWithTime::Add( dt, price );
-  m_vLabel.push_back( sText );
-  const std::string &s = m_vLabel.back();
-  m_vpChar.push_back( s.c_str() );
+  char *pszLabel = new char[ sText.size() + 1 ];
+  strcpy( pszLabel, sText.c_str() );
+  //m_vLabel.push_back( sText );
+  //const std::string &s = m_vLabel.back();
+  m_vpChar.push_back( pszLabel );
 }
 
 void CChartEntryShape::AddDataToChart(XYChart *pXY) {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
-        //GetPrice(), GetDateTime(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
         GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
     layer->setXData( GetDateTime() );
     layer->addExtraField( GetLabels() );

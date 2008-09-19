@@ -24,7 +24,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pdvChart( NULL ), m_pInstrument( NULL )
+  m_pdvChart( NULL ), m_pInstrument( NULL ), m_bFoundOpeningTrade( false )
 {
   Initialize();
 }
@@ -36,7 +36,7 @@ CBasketTradeSymbolInfo::CBasketTradeSymbolInfo(
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pdvChart( NULL ), m_pInstrument( NULL )
+  m_pdvChart( NULL ), m_pInstrument( NULL ), m_bFoundOpeningTrade( false )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -172,6 +172,10 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
   m_status.dblCurrentPrice = trade.m_dblTrade;
   m_trades.AppendDatum( trade );
   if ( ( trade.m_dt >= m_pModelParameters->dtRTHBgn ) && ( trade.m_dt < m_pModelParameters->dtRTHEnd ) ) {
+    if ( !m_bFoundOpeningTrade ) {
+      HandleOpen( trade );
+      m_bFoundOpeningTrade = true;
+    }
     m_ceTrades.Add( trade.m_dt, trade.m_dblTrade );
     m_ceTradeVolume.Add( trade.m_dt, trade.m_nTradeSize );
     m_pdvChart->SetChanged();
@@ -406,7 +410,7 @@ void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
               m_status.dblStop = max( bar2.m_dblHigh, m_status.dblStop );
               m_status.dblStop = max( bar3.m_dblHigh, m_status.dblStop );
               m_dblTrailingStopDistance = m_status.dblStop - bar.m_dblClose;
-              std::cout << " Enter SHORT Now: " << m_status.sSymbolName << ", Stop at " << m_status.dblStop << std::endl;
+              std::cout << m_status.sSymbolName << " Enter SHORT Now: " << bar.m_dblClose << ", Stop at " << m_status.dblStop << std::endl;
               m_PositionState = WaitingForOrderFulfillmentShort;
               m_bDoneTheShort = true;
               COrder *pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_nQuantityForEntry );
@@ -491,6 +495,7 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
 void CBasketTradeSymbolInfo::HandleOpen( const CTrade &trade ) {
   m_status.dblOpen = trade.m_dblTrade; // official open
   m_ceLevels.AddMark( trade.m_dblTrade, Colour::Plum, "Open" );
+  m_bFoundOpeningTrade = true;
 }
 
 void CBasketTradeSymbolInfo::WriteTradesAndQuotes(const std::string &sPathPrefix) {

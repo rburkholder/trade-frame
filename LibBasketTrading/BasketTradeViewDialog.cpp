@@ -101,6 +101,7 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
 void CBasketTradeViewDialog::DoDataExchange(CDataExchange* pDX) {
   CDialog::DoDataExchange(pDX);
   DDX_Control(pDX, IDC_LISTBASKETSYMBOLS, m_lcBasketSymbols);
+  DDX_Control(pDX, LBL_DTEXEC, m_lblDateTime);
 }
 
 
@@ -124,7 +125,7 @@ afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int x, int y ) {
     
     //CWnd::SetWindowPos( &CWnd::wndTop, rect1.left, rect1.top, x, y, 0 );
     CWnd::GetClientRect( &rect1 );
-    rect2.SetRect( rect1.left + 10, rect1.top + 10, rect1.right - 10, rect1.bottom - 10 );
+    rect2.SetRect( rect1.left + 10, rect1.top + 10, rect1.right - 10, rect1.bottom - 20 );
     m_lcBasketSymbols.MoveWindow( &rect2 );
   }
 }

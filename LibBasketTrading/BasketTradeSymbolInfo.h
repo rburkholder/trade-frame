@@ -131,6 +131,7 @@ protected:
   double m_dblTrailingStopDistance;
 
   bool m_bDoneTheLong, m_bDoneTheShort;
+  bool m_bFoundOpeningTrade;
 
   size_t m_nBarsInSequence;
   size_t m_nOpenCrossings;

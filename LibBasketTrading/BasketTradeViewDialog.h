@@ -8,6 +8,7 @@
 
 #include <map>
 #include <queue>
+#include "afxwin.h"
 
 // CBasketTradeViewDialog dialog
 
@@ -24,6 +25,7 @@ public:
 protected:
 	CBasketTradeModel *m_pModel;
   CListCtrl m_lcBasketSymbols;
+  CStatic m_lblDateTime;
 
   void HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ); // when object instatiated in basket
   void HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolInfo *pInfo );  // when object has new data to display
