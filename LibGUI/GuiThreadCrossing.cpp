@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "GuiThreadCrossing.h"
 
-//#include "GTWindowsConstants.h"
 #include <assert.h>
 
 #ifdef _DEBUG
@@ -22,10 +21,6 @@ CGuiThreadCrossing::~CGuiThreadCrossing() {
   assert( b );
 }
 
-LRESULT CGuiThreadCrossing::OnCrossThreadArrival( WPARAM w, LPARAM l ) {
-  return 1;
-}
-
 BEGIN_MESSAGE_MAP(CGuiThreadCrossing, CWnd)
 	ON_WM_DESTROY()
   ON_MESSAGE( WM_GUITHREADCROSSING, OnCrossThreadArrival )
@@ -33,6 +28,10 @@ END_MESSAGE_MAP()
 
 void CGuiThreadCrossing::OnDestroy()  {
   CWnd::OnDestroy();
+}
+
+LRESULT CGuiThreadCrossing::OnCrossThreadArrival( WPARAM w, LPARAM l ) {
+  return 1;
 }
 
 // SendMessage( WM_GUITHREADCROSSING, (WPARAM) state );  // calls function
