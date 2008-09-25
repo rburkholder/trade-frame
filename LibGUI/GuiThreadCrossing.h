@@ -3,7 +3,7 @@
 
 // can be used in IQFeed, PerioidicRefresh
 
-#define WM_GUITHREADCROSSING (WM_USER + 1)
+#define WM_GUITHREADCROSSING (WM_APP + 1)
 
 // creation/construction needs to occur in GUI process main/gui thread
 class CGuiThreadCrossing :  public CWnd {
@@ -12,8 +12,10 @@ public:
   CGuiThreadCrossing(void);
   ~CGuiThreadCrossing(void);
 protected:
-  LRESULT OnCrossThreadArrival( WPARAM w, LPARAM l );
-  afx_msg void OnDestroy();
+  CWinThread *m_pCreationThread;
 private:
 	DECLARE_MESSAGE_MAP()
+
+  LRESULT OnCrossThreadArrival( WPARAM w, LPARAM l );
+  afx_msg void OnDestroy();
 };

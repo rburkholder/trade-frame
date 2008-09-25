@@ -14,10 +14,8 @@
 #define IDD_VUCHARTARMSINTRADAY         109
 #define IDD_VUMARKETDEPTH               110
 #define IDR_MAINFRAME                   128
-#define IDD_CONSOLEMESSAGES             129
 #define IDD_VUKEYVALUES                 135
 #define IDD_VUCHART                     136
-#define IDC_MESSAGES                    1000
 #define IDC_TESTMESSAGE                 1003
 #define IDC_GTSESSION1                  1004
 #define IDC_BTNLOGIN                    1005
@@ -134,7 +132,6 @@
 #define IDC_BTNSIMUASSIGNDIR            1137
 #define IDC_BTNRUNSIM                   1138
 #define IDC_BTNHDF5FLUSH                1139
-#define IDC_TREE1                       1140
 #define IDC_BTNSTOPSIM                  1141
 
 // Next default values for new objects

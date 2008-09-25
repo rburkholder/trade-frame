@@ -150,11 +150,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\GTScalp\ConsoleCoutMessages.cpp"
+				RelativePath=".\ConsoleCoutMessages.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\GTScalp\ConsoleMessages.cpp"
+				RelativePath=".\ConsoleMessages.cpp"
 				>
 			</File>
 			<File
@@ -204,11 +204,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\GTScalp\ConsoleCoutMessages.h"
+				RelativePath=".\ConsoleCoutMessages.h"
 				>
 			</File>
 			<File
-				RelativePath="..\GTScalp\ConsoleMessages.h"
+				RelativePath=".\ConsoleMessages.h"
 				>
 			</File>
 			<File

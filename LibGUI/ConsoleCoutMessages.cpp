@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "ConsoleCoutMessages.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CConsoleCoutMessages::CConsoleCoutMessages(CWnd* pParent /*=NULL*/)
 : CConsoleMessages( pParent ) {
 

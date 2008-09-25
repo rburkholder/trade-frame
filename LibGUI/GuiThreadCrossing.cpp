@@ -11,7 +11,8 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CGuiThreadCrossing, CWnd)
 
-CGuiThreadCrossing::CGuiThreadCrossing(void) {
+CGuiThreadCrossing::CGuiThreadCrossing(void): m_pCreationThread( ::AfxGetThread() ) {
+  assert( NULL != m_pCreationThread );  // obviously, this needs creating in the GUI thread
   BOOL b = CWnd::Create( NULL, "GuiThreadCrossing", WS_CHILD, CRect( 0, 0, 10 , 10), ::AfxGetMainWnd(), 1 );
   assert( b );
 }
@@ -35,4 +36,4 @@ LRESULT CGuiThreadCrossing::OnCrossThreadArrival( WPARAM w, LPARAM l ) {
 }
 
 // SendMessage( WM_GUITHREADCROSSING, (WPARAM) state );  // calls function
-// PostMessage( WM_GUITHREADCROSSING, (WPARAM) state );  // puts into window queue
+// PostMessage( WM_GUITHREADCROSSING, (WPARAM) state );  // puts into window queue  (don't use when pointers involved)

@@ -1,15 +1,16 @@
 #pragma once
 #include "afxwin.h"
-#include "Resource.h"
+//#include "Resource.h"
+
+#include "GUIFrameBase.h"
 
 #include <string>
 using namespace std;
 
 // CConsoleMessages dialog
 
-class CConsoleMessages : public CDialog {
+class CConsoleMessages : public CGUIFrameBase {
 	DECLARE_DYNAMIC(CConsoleMessages)
-
 public:
 	CConsoleMessages(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CConsoleMessages();
@@ -22,15 +23,15 @@ public:
   void WriteLine( void );
 
 // Dialog Data
-	enum { IDD = IDD_CONSOLEMESSAGES };
+	//enum { IDD = IDD_CONSOLEMESSAGES };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-public:
-	CEdit ceMessages;
-  CString sMessageList;
+
+  CEdit m_ceMessages;
+  CFont m_font;
 
 private:
 
