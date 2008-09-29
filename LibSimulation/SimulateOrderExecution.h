@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <sstream>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -75,5 +76,9 @@ protected:
 
   void ProcessDelayQueues( const CTrade &trade );
   void CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan );
+
+  static int m_nExecId;
+  std::stringstream m_ssExecId;
+  const std::string &GetExecId( void ) { m_ssExecId << ++m_nExecId; return m_ssExecId.str(); };
 private:
 };

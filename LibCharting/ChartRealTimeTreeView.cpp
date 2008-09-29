@@ -39,7 +39,6 @@ afx_msg void CChartRealTimeTreeView::OnSize(UINT nType, int cx, int cy) {
 
 void CChartRealTimeTreeView::OnTvnSelChangedTree(NMHDR *pNMHDR, LRESULT *pResult) {
   LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-  // TODO: Add your control notification handler code here
   m_Tree.ProcessSelectionChanged( pNMTreeView );
   *pResult = 0;
 }

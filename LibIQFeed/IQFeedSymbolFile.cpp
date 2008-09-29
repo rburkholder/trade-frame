@@ -71,6 +71,7 @@ CIQFeedSymbolFile::structExchangeInfo CIQFeedSymbolFile::m_rExchanges[] = {
   { "MGE", InstrumentType::Future, 0 },
   { "NASDAQ", InstrumentType::Stock, 0 },
   { "NMS", InstrumentType::Stock, 0 },
+  { "NSX", InstrumentType::Future, 0 },
 //  { "NYBOT", InstrumentType::Future, 0 },
   { "NYMEX", InstrumentType::Future, 0 },
   { "NYMEXMINI", InstrumentType::Future, 0 },
@@ -240,6 +241,9 @@ bool CIQFeedSymbolFile::Load( const string &filename ) {
       size_t ix;
       try {
         ix = (size_t) kwm.FindMatch( dbRecord.line + dbRecord.ix[2] );
+        if ( 0 == ix ) {
+          std::cout << "Unknown Exchange:  " << dbRecord.line << std::endl;
+        }
         dbRecord.eInstrumentType = m_rExchanges[ ix ].eInstrumentType;
         ++m_rExchanges[ ix ].cntInstruments;
       }

@@ -32,12 +32,15 @@ CConsoleMessages::CConsoleMessages(CWnd* pParent /*=NULL*/)
 
   GetClientRect( &rect1 );
   rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
-  m_ceMessages.Create( WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_READONLY, rect2, this, 2 );
+  m_ceMessages.Create( WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_READONLY | WS_VSCROLL, rect2, this, 2 );
+  m_ceMessages.SetLimitText( 10000000 );
+
   //ceMessages.MoveWindow( &rect2 );
 
-  m_ceMessages.EnableScrollBar( SB_VERT, ESB_ENABLE_BOTH );
-  m_ceMessages.EnableWindow( );
+  //m_ceMessages.EnableScrollBar( SB_VERT, ESB_ENABLE_BOTH );
+  //m_ceMessages.EnableWindow( );
 
+  /*
   VERIFY( m_font.CreateFont( 
    14,                        // nHeight
    0,                         // nWidth
@@ -53,9 +56,17 @@ CConsoleMessages::CConsoleMessages(CWnd* pParent /*=NULL*/)
    DEFAULT_QUALITY,           // nQuality
    DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
    "Arial"));                 // lpszFacename
+   */
+  VERIFY( m_font.CreatePointFont( 80, "Arial" ) );
   m_ceMessages.SetFont( &m_font );
 
   bDialogReady = true;
+}
+
+CConsoleMessages::~CConsoleMessages() {
+  m_font.DeleteObject();
+  //DestroyWindow();
+  // need to destroy CDialog and CMessageList?
 }
 
 afx_msg void CConsoleMessages::OnSize( UINT i, int x, int y ) {
@@ -66,11 +77,6 @@ afx_msg void CConsoleMessages::OnSize( UINT i, int x, int y ) {
     rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
     m_ceMessages.MoveWindow( &rect2 );
   }
-}
-
-CConsoleMessages::~CConsoleMessages() {
-  //DestroyWindow();
-  // need to destroy CDialog and CMessageList?
 }
 
 /*
@@ -84,24 +90,32 @@ void CConsoleMessages::DoDataExchange(CDataExchange* pDX) {
 // need to make this more elegant... need some sort of append capability
 
 void CConsoleMessages::Write(const CString &sMessage) {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( (LPCTSTR) sMessage );
   //sMessageList.Insert(0, sMessage);
   //UpdateData(FALSE);
 }
 
 void CConsoleMessages::Write(const char *sMessage) {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( sMessage );
   //sMessageList.Insert(0, sMessage);
   //UpdateData(FALSE);
 }
 
 void CConsoleMessages::Write(const std::string &sMessage) {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( sMessage.c_str() );
   //sMessageList.Insert(0, sMessage.c_str() );
   //UpdateData(FALSE);
 }
 
 void CConsoleMessages::WriteLine(const CString &sMessage) {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( (LPCTSTR) sMessage );
   WriteLine();
   //sMessageList.Insert(0, _T( "\r\n" ) );
@@ -110,6 +124,8 @@ void CConsoleMessages::WriteLine(const CString &sMessage) {
 }
 
 void CConsoleMessages::WriteLine( const char *sMessage ) {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( sMessage );
   WriteLine();
   //sMessageList.Insert(0, _T( "\r\n" ) );
@@ -118,6 +134,8 @@ void CConsoleMessages::WriteLine( const char *sMessage ) {
 }
 
 void CConsoleMessages::WriteLine() {
+  int l = m_ceMessages.GetWindowTextLengthA();
+  m_ceMessages.SetSel( l, l );
   m_ceMessages.ReplaceSel( _T( "\r\n" ) );
   //sMessageList.Insert(0, _T( "\r\n" ) );
   //UpdateData(FALSE);

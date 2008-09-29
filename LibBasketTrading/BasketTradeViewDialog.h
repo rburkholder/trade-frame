@@ -5,6 +5,7 @@
 
 #include "GeneratePeriodicRefresh.h"
 #include "BasketTradeModel.h"
+#include "TimeSource.h"
 
 #include <map>
 #include <queue>
@@ -36,15 +37,17 @@ protected:
   struct structDialogEntry {
     int ix; // index in dialog box
     bool bChanged;
-    CBasketTradeSymbolInfo *pInfo;
-    structDialogEntry( int ix_, CBasketTradeSymbolInfo *pInfo_ ) 
-      : ix( ix_ ), bChanged( false ), pInfo( pInfo_ ) {};
+    CBasketTradeSymbolInfo *pInfo;  // try not to use this
+    CBasketTradeSymbolInfo::structFieldsForDialog *pFields;
+    structDialogEntry( int ix_, CBasketTradeSymbolInfo *pInfo_,  CBasketTradeSymbolInfo::structFieldsForDialog *pFields_ ) 
+      : ix( ix_ ), bChanged( false ), pInfo( pInfo_ ), pFields( pFields_ ) {};
+    structDialogEntry( int ix_, CBasketTradeSymbolInfo::structFieldsForDialog *pFields_ ) 
+      : ix( ix_ ), bChanged( false ), pInfo( NULL ), pFields( pFields_ ) {};
   };
   typedef std::pair<string, structDialogEntry> mapDialogEntry_t;
   std::map<std::string, structDialogEntry> m_mapDialogEntry;
   bool m_bSourceChanged;
 
-protected:
   virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()
   virtual BOOL OnInitDialog( void );
@@ -52,6 +55,9 @@ protected:
   afx_msg void OnSize( UINT, int, int );
   bool bDialogReady;
 
+  CBasketTradeSymbolInfo::structFieldsForDialog m_Totals;
+
+  CTimeSource m_ts;
 
 private:
 };
