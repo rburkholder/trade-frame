@@ -459,7 +459,8 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       bClosing = m_status.nPositionSize < 0;  // we are short, with a buy, closing all or part of position, => realized PL
       dblPreviousAverageCost = m_status.dblAverageCost;
       m_status.nPositionSize += pOrder->GetQuanFilled();
-      m_status.dblPositionSize += pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      //m_status.dblPositionSize += pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      m_status.dblPositionSize = m_status.nPositionSize * pOrder->GetAverageFillPrice();
       m_status.dblAverageCost = ( 0 == m_status.nPositionSize ) ? 0 : m_status.dblPositionSize / m_status.nPositionSize;
       if ( bClosing ) {
         m_status.dblRealizedPL += ( dblPreviousAverageCost - pOrder->GetAverageFillPrice() ) * pOrder->GetQuanFilled();
@@ -469,7 +470,8 @@ void CBasketTradeSymbolInfo::HandleOrderFilled(COrder *pOrder) {
       bClosing = m_status.nPositionSize > 0;  // we are long, with a sell, closing all or part of postion, => realized PL
       dblPreviousAverageCost = m_status.dblAverageCost;
       m_status.nPositionSize -= pOrder->GetQuanFilled();
-      m_status.dblPositionSize -= pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      //m_status.dblPositionSize -= pOrder->GetQuanFilled() * pOrder->GetAverageFillPrice();
+      m_status.dblPositionSize = m_status.nPositionSize * pOrder->GetAverageFillPrice();
       m_status.dblAverageCost = ( 0 == m_status.nPositionSize ) ? 0 : m_status.dblPositionSize / m_status.nPositionSize;
       if ( bClosing ) {
         m_status.dblRealizedPL += ( pOrder->GetAverageFillPrice() - dblPreviousAverageCost ) * pOrder->GetQuanFilled();

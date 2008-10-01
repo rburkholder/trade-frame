@@ -79,6 +79,11 @@ protected:
 
   static int m_nExecId;
   std::stringstream m_ssExecId;
-  const std::string &GetExecId( void ) { m_ssExecId << ++m_nExecId; return m_ssExecId.str(); };
+  const char *GetExecId( void ) { 
+    m_ssExecId.flush();
+    //m_ssExecId.clear();
+    m_ssExecId << ++m_nExecId; 
+    return m_ssExecId.str().c_str();
+  }
 private:
 };

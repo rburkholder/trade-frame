@@ -92,30 +92,32 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
     char conv[ 30 ];
     for ( std::map<std::string, structDialogEntry>::iterator iter = m_mapDialogEntry.begin();
       iter != m_mapDialogEntry.end(); ++iter ) {
-        m_Totals.nPositionSize += iter->second.pFields->nPositionSize;
-        m_Totals.dblPositionSize += iter->second.pFields->dblPositionSize;
-        m_Totals.dblAverageCost += iter->second.pFields->dblAverageCost;
-        m_Totals.dblUnRealizedPL += iter->second.pFields->dblUnRealizedPL;
-        m_Totals.dblRealizedPL += iter->second.pFields->dblRealizedPL;
-        m_Totals.dblRunningPL = m_Totals.dblUnRealizedPL + m_Totals.dblRealizedPL;
-        if ( iter->second.bChanged ) {
-          iter->second.bChanged = false;
-          const CBasketTradeSymbolInfo::structFieldsForDialog *pFields = iter->second.pFields;
-          int ix = iter->second.ix;
-          int iy = 0;
-          sprintf( conv, "%.2f", pFields->dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblOpen ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblStop ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv,   "%d", pFields->nPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblAverageCost ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-          sprintf( conv, "%.2f", pFields->dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+        if ( 0 != iter->second.ix ) {  // 0th entry is our summary record, so don't add it to itself
+          m_Totals.nPositionSize += iter->second.pFields->nPositionSize;
+          m_Totals.dblPositionSize += iter->second.pFields->dblPositionSize;
+          m_Totals.dblAverageCost += iter->second.pFields->dblAverageCost;
+          m_Totals.dblUnRealizedPL += iter->second.pFields->dblUnRealizedPL;
+          m_Totals.dblRealizedPL += iter->second.pFields->dblRealizedPL;
+          m_Totals.dblRunningPL = m_Totals.dblUnRealizedPL + m_Totals.dblRealizedPL;
+          if ( iter->second.bChanged ) {
+            iter->second.bChanged = false;
+            const CBasketTradeSymbolInfo::structFieldsForDialog *pFields = iter->second.pFields;
+            int ix = iter->second.ix;
+            int iy = 0;
+            sprintf( conv, "%.2f", pFields->dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblOpen ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblStop ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv,   "%d", pFields->nPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblAverageCost ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+          }
         }
     }
     int iy = 8;

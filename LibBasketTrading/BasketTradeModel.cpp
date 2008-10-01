@@ -169,6 +169,7 @@ void CBasketTradeModel::Process(const std::string &sObjectName, const std::strin
 //  int ix = 0;
 //  while ( rSymbols[ix] != "" ) {
 //    if ( rSymbols[ix] == sObjectName ) {
+//      if ( "GOLD" == sObjectName ) {
       std::string sPath;
       CHDF5DataManager::DailyBarPath( sObjectName, sPath );
       AddSymbol( sObjectName, sPath, "archive" );
