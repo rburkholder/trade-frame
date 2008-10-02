@@ -72,7 +72,7 @@ protected:
   bool m_bOrdersQueued;
   bool m_bCancelsQueued;
 
-  CTimeSource ts;
+  CTimeSource m_ts;
 
   void ProcessDelayQueues( const CTrade &trade );
   void CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan );
@@ -80,8 +80,9 @@ protected:
   static int m_nExecId;
   std::stringstream m_ssExecId;
   const char *GetExecId( void ) { 
-    m_ssExecId.flush();
-    //m_ssExecId.clear();
+    //m_ssExecId.str( "" ); // works according to time tutorial in boost
+    m_ssExecId.flush(); // this does work
+    //m_ssExecId.clear(); // this doesn't work
     m_ssExecId << ++m_nExecId; 
     return m_ssExecId.str().c_str();
   }

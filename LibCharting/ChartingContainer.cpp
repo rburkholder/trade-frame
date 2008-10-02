@@ -19,6 +19,9 @@ CChartingContainer::CChartingContainer(void) {
 }
 
 CChartingContainer::~CChartingContainer(void) {
+  for ( std::vector<CChartViewPort *>::iterator iter = m_vViewPorts.begin(); m_vViewPorts.end() != iter; ++iter ) {
+    delete *iter;
+  }
   m_ChartControls.OnBtnNewMasterChart.Remove( MakeDelegate( this, &CChartingContainer::HandleCreateNewViewPort ) );
   m_TreeView.m_Tree.OnClick.Remove( MakeDelegate( this, &CChartingContainer::HandleSelectDataView ) );
   //CChartRealTimeTreeView::Deregister();

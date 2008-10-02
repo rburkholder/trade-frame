@@ -33,7 +33,7 @@ void CSimulateOrderExecution::SubmitOrder( COrder *pOrder ) {
 }
 
 void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
-  structCancelOrder co( ts.Internal(), nOrderId );
+  structCancelOrder co( m_ts.Internal(), nOrderId );
   m_lDelayCancel.push_back( co );
   m_bCancelsQueued = true;
 }
@@ -114,12 +114,14 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
         }
         break;
       case OrderType::Limit: {
+        // to handle order book
         double price = m_pCurrentOrder->GetPrice1();
         assert( 0 < price );
         switch ( m_pCurrentOrder->GetOrderSide() ) {
           case OrderSide::Buy:
             if ( trade.m_dblTrade < price ) {
-              CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Buy, "SIMLmtBuy", GetExecId() );
+              std::string id( GetExecId() );
+              CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Buy, "SIMLmtBuy", id );
               if ( NULL != OnOrderFill ) OnOrderFill( exec );
               m_nOrderQuanRemaining -= quan;
               m_nOrderQuanProcessed += quan;
@@ -127,7 +129,8 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
             break;
           case OrderSide::Sell:
             if ( trade.m_dblTrade > price ) {
-              CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Sell, "SIMLmtSell", GetExecId() );
+              std::string id( GetExecId() );
+              CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Sell, "SIMLmtSell", id );
               if ( NULL != OnOrderFill ) OnOrderFill( exec );
               m_nOrderQuanRemaining -= quan;
               m_nOrderQuanProcessed += quan;

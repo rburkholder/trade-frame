@@ -7,7 +7,10 @@
 #include "BasketTradeViewDialog.h"
 //#include "BasketTradeSymbolInfo.h"
 
-#include <sstream>
+#include <locale>
+//#include <iomanip>
+#include "boost/date_time/local_time/local_time_io.hpp"
+#include "boost/date_time/time_facet.hpp"
 
 // CBasketTradeViewDialog dialog
 
@@ -17,6 +20,13 @@ CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* 
 	: CDialog(CBasketTradeViewDialog::IDD, pParent),
   m_pModel( pModel ), m_bSourceChanged( false ), bDialogReady( false )
 {
+  //http://www.boost.org/doc/libs/1_36_0/doc/html/date_time/date_time_io.html#date_time.io_tutorial
+
+  boost::local_time::local_time_facet *facet = new boost::local_time::local_time_facet();
+  facet->format( "%Y %m %d %H:%M:%S" );
+  //m_ssDateTime.imbue( locale( std::locale::classic(), facet ) );
+  m_ssDateTime.imbue( locale( m_ssDateTime.getloc(), facet ) );
+
   UINT id = IDD_DLGBASKETSYMBOLS;
   BOOL b = Create(id, pParent );
 } 
@@ -37,8 +47,8 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_lcBasketSymbols.InsertColumn( ix++, "Low", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Filled", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Stop", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "Size", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "Size", LVCFMT_RIGHT, 70 );
+  m_lcBasketSymbols.InsertColumn( ix++, "Quan", LVCFMT_RIGHT, 50 );
+  m_lcBasketSymbols.InsertColumn( ix++, "Amt", LVCFMT_RIGHT, 70 );
   m_lcBasketSymbols.InsertColumn( ix++, "AvgCst", LVCFMT_RIGHT, 80 );
   m_lcBasketSymbols.InsertColumn( ix++, "UnrelPL", LVCFMT_RIGHT, 60 );
   m_lcBasketSymbols.InsertColumn( ix++, "RelPL", LVCFMT_RIGHT, 80 );
@@ -79,9 +89,13 @@ void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSym
 }
 
 void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pRefresh ) {
-  stringstream ss;
-  ss << m_ts.Internal();
-  m_lblDateTime.SetWindowTextA( ss.str().c_str() );
+  //ptime now;
+  //now = m_ts.Internal();
+  //m_ssDateTime << now << "." << now.time_of_day().fractional_seconds();
+  //m_ssDateTime.flush();
+  m_ssDateTime.str( "" );
+  m_ssDateTime << m_ts.Internal();
+  m_lblDateTime.SetWindowTextA( m_ssDateTime.str().c_str() );
   if ( m_bSourceChanged ) {
     m_Totals.nPositionSize = 0;
     m_Totals.dblPositionSize = 0;

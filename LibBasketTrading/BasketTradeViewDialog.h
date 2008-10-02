@@ -7,6 +7,7 @@
 #include "BasketTradeModel.h"
 #include "TimeSource.h"
 
+#include <sstream>
 #include <map>
 #include <queue>
 #include "afxwin.h"
@@ -58,6 +59,9 @@ protected:
   CBasketTradeSymbolInfo::structFieldsForDialog m_Totals;
 
   CTimeSource m_ts;
+
+  std::stringstream m_ssDateTime;
+
 
 private:
 };
