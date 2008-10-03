@@ -88,6 +88,7 @@ public:
     CProviderInterface *pDataProvider;
     CProviderInterface *pExecutionProvider;
     CChartRealTimeTreeView *pTreeView;
+    double dblAvgDailyRange;
   };
   void CalculateTrade( structCommonModelInformation *pParameters  );
 

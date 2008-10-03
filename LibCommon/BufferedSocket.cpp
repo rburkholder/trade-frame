@@ -41,7 +41,7 @@ CBufferedSocket::~CBufferedSocket(void) {
 
 DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
 
-  CBufferedSocket *bs = ( CBufferedSocket * ) lpParameter;
+  CBufferedSocket *bs = reinterpret_cast<CBufferedSocket *>( lpParameter );
 
   bs->m_bThreadActive = true;
 

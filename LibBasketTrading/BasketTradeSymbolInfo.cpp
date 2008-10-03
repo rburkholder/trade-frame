@@ -8,6 +8,12 @@
 #include "InstrumentFile.h"
 #include "PivotGroup.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 // 
 // CSymbolInfo
 //
@@ -126,15 +132,7 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
   barRepository.Read( begin, end, &bars );
 
   std::cout << "Entry for " << m_status.sSymbolName;
-  if ( 20 < cnt ) {
-    /*
-    double range = 0;
-    CBar *pBar;
-    for ( int ix = cnt - 20; ix < cnt; ++ix ) {
-      pBar = bars[ ix ];
-      range += pBar->m_dblHigh - pBar->m_dblLow;
-    }
-    */
+  if ( 20 < cnt ) { // needs to be 21 or more for ATR
 
     double dblClose = bars.Last()->m_dblClose;  
     m_nQuantityForEntry = ( ( (int) ( m_pModelParameters->dblFunds / dblClose ) ) / 100 ) * 100;
@@ -149,6 +147,14 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
       for ( CPivotGroup::const_iterator iter = pivots.begin(); iter != pivots.end(); ++iter ) {
         m_ceLevels.AddMark( iter->first, iter->second.colour, iter->second.sName.c_str() );
       }
+      // calc Average Daily Range, calc Averge True Range at some point in time
+      double range = 0;
+      CBar *pBar;
+      for ( int ix = cnt - 20; ix < cnt; ++ix ) {
+        pBar = bars[ ix ];
+        range += pBar->m_dblHigh - pBar->m_dblLow;
+      }
+      pParameters->dblAvgDailyRange = range / 20.0;
     }
   }
   else {

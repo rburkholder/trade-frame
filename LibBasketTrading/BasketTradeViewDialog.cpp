@@ -7,6 +7,12 @@
 #include "BasketTradeViewDialog.h"
 //#include "BasketTradeSymbolInfo.h"
 
+//#ifdef _DEBUG
+//#define new DEBUG_NEW
+//#undef THIS_FILE
+//static char THIS_FILE[] = __FILE__;
+//#endif
+
 #include <locale>
 //#include <iomanip>
 #include "boost/date_time/local_time/local_time_io.hpp"

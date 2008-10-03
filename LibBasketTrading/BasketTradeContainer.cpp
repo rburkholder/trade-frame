@@ -8,6 +8,12 @@
 // Need DataProvider: trades data
 // Need ExecutionProvider: market order, execution report, execution summary
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CBasketTradeContainer::CBasketTradeContainer( CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider ) 
 : m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider ),
   m_pVuPosition( NULL ), m_pVuSymbols( NULL ), m_pVuDialog( NULL ), m_pController( NULL )
