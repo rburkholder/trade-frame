@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibCommon;..\LibTimeSeries;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;K:\Data\Projects\boost\boost_1_35_0"
+				AdditionalIncludeDirectories="..\LibCommon;..\LibTimeSeries;K:\Data\Projects\hdf5\current\hdf5lib\debug\include;K:\Data\Projects\boost\current"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

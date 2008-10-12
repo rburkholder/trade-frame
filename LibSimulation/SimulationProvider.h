@@ -5,6 +5,7 @@
 #include "ProviderInterface.h"
 #include "SimulationSymbol.h"
 #include "MergeDatedDatums.h"
+#include "TimeSource.h"
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -42,6 +43,9 @@ protected:
 
   void HandleExecution( const CExecution &exec );
   //void PreSymbolDestroy( CSymbol *pSymbol );
+
+  ptime m_dtSimStart;
+  ptime m_dtSimStop;
 
 private:
 };

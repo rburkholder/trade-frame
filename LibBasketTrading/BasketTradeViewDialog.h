@@ -58,7 +58,7 @@ protected:
 
   CBasketTradeSymbolInfo::structFieldsForDialog m_Totals;
 
-  CTimeSource m_ts;
+  //CTimeSource m_ts;
 
   std::stringstream m_ssDateTime;
 

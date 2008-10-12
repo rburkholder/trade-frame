@@ -8,6 +8,7 @@ class CBerkeleyDBDataManager {
 public:
   CBerkeleyDBDataManager(void);
   ~CBerkeleyDBDataManager(void);
+public:
   DbEnv *GetDbEnv( void ) { return &m_DbEnv; }; 
   const char *GetBDBFileName( void ) { return m_BDBFileName; };
 protected:

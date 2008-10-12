@@ -77,7 +77,7 @@ COrder::~COrder(void) {
 
 void COrder::AssignOrderId() {
 //  try {
-  m_dtOrderCreated = m_timesource.Internal();
+  m_dtOrderCreated = CTimeSource::Internal();
   m_dtOrderSubmitted = not_a_date_time;
     m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
@@ -90,7 +90,7 @@ void COrder::AssignOrderId() {
 void COrder::SetSendingToProvider() {
   assert( OrderStatus::Created == m_eOrderStatus );
   m_eOrderStatus = OrderStatus::SendingToProvider;
-  m_dtOrderSubmitted = m_timesource.Internal();
+  m_dtOrderSubmitted = CTimeSource::Internal();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 

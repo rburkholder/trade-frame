@@ -33,7 +33,7 @@ void CSimulateOrderExecution::SubmitOrder( COrder *pOrder ) {
 }
 
 void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
-  structCancelOrder co( m_ts.Internal(), nOrderId );
+  structCancelOrder co( CTimeSource::Internal(), nOrderId );
   m_lDelayCancel.push_back( co );
   m_bCancelsQueued = true;
 }

@@ -67,8 +67,8 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
       int y = 25;
       int x = 50;
       int xAxisHeight = 50;
-      XYChart *pXY;
-      XYChart *pXY0;
+      XYChart *pXY;  // used for each sub-chart
+      XYChart *pXY0;  // main chart
       while ( ix < n ) {
         switch ( ix ) {
           case 0:  // main chart

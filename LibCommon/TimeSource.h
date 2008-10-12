@@ -6,8 +6,6 @@ using namespace boost::gregorian;
 
 class CTimeSource : boost::noncopyable {
 public:
-  CTimeSource(void);
-  ~CTimeSource(void);
   static ptime External( void ) { return boost::posix_time::microsec_clock::local_time(); };
   static ptime Internal( void ) { 
     if ( m_bInSimulation ) 
@@ -24,4 +22,6 @@ protected:
   static bool m_bInSimulation;
   static ptime m_dtSimulationTime;
 private:
+  CTimeSource(void);
+  ~CTimeSource(void);
 };

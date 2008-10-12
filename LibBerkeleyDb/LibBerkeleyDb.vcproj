@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="H:\Program Files\Oracle\Berkeley DB 4.6.21\include"
+				AdditionalIncludeDirectories="&quot;H:\Program Files\Oracle\current\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

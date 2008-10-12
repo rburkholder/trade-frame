@@ -22,7 +22,7 @@ protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
   CDatedDatum *m_pDatum;
   OnDatumHandler OnDatum;
-  CTimeSource m_timesource;
+  //CTimeSource m_timesource;
 private:
 };
 

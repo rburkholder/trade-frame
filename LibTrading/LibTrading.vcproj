@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibBerkeleyDb;H:\Program Files\Oracle\Berkeley DB 4.6.21\include;K:\Data\Projects\boost\boost_1_35_0;;&quot;K:\Data\Downloads\hdf5\hdf5-1.9.3\hdf5lib\debug\include&quot;;..\LibCommon"
+				AdditionalIncludeDirectories="..\LibBerkeleyDb;..\LibCommon;K:\Data\Projects\hdf5\current\hdf5lib\debug\include;&quot;H:\Program Files\Oracle\current\include&quot;;K:\Data\Projects\boost\current"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

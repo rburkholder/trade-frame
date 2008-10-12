@@ -22,6 +22,8 @@ public:
   void Add( CTimeSeries<CMarketDepth> *pSeries, OnDatumHandler );
   void Run( void );
   void Stop( void );
+  unsigned long GetCountProcessedDatums( void ) { return m_cntProcessedDatums; };
+  unsigned long GetCountCarrierReorders( void ) { return m_cntReorders; };
 protected:
   // this could be reimplemented with a linked list, if a linked list is sortable,
   //   ie, do the ordered insertions one at a time
@@ -34,6 +36,10 @@ protected:
 
   enumMergingState m_state;
   enumMergingCommands m_request;
+
+  unsigned long m_cntProcessedDatums;
+  unsigned long m_cntReorders;
+
 
 private:
 };

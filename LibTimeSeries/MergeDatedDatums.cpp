@@ -53,13 +53,13 @@ void CMergeDatedDatums::Run() {
   size_t cntCarriers = vIx.size();
 //  std::cout << "#carriers: " << cntCarriers << std::endl;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
-  unsigned long cntProcessedDatums = 0;
-  unsigned long cntReorders = 0;
+  m_cntProcessedDatums = 0;
+  m_cntReorders = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers[vIx[0]];
     pCarrier->ProcessDatum();
-    ++cntProcessedDatums;
+    ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
       ++cntNulls;
@@ -78,7 +78,7 @@ void CMergeDatedDatums::Run() {
         if ( pCarrier->GetDateTime() <= m_vCarriers[vIx[ix]]->GetDateTime() ) break;
         vIx[ ix - 1 ] = vIx[ ix ];
         ++ix;
-        ++cntReorders;
+        ++m_cntReorders;
       }
       vIx[ ix - 1 ] = carrier;
     }

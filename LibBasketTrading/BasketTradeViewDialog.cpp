@@ -100,7 +100,7 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
   //m_ssDateTime << now << "." << now.time_of_day().fractional_seconds();
   //m_ssDateTime.flush();
   m_ssDateTime.str( "" );
-  m_ssDateTime << m_ts.Internal();
+  m_ssDateTime << CTimeSource::Internal();
   m_lblDateTime.SetWindowTextA( m_ssDateTime.str().c_str() );
   if ( m_bSourceChanged ) {
     m_Totals.nPositionSize = 0;

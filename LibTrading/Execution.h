@@ -31,7 +31,7 @@ protected:
   std::string m_sExchange;
   std::string m_sExecutionId;  // unique execution id supplied by provider
 
-  CTimeSource m_timesource;
+  //CTimeSource m_timesource;
 
 private:
 };
