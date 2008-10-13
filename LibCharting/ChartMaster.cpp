@@ -26,11 +26,11 @@ CChartMaster::CChartMaster( unsigned int width, unsigned int height )
 }
 
 void CChartMaster::Initialize( void ) {
-  m_refresh.OnRefresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
+  m_refresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
 
 CChartMaster::~CChartMaster(void) {
-  m_refresh.OnRefresh.Remove( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
+  m_refresh.Remove( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
 
 BEGIN_MESSAGE_MAP(CChartMaster, CChartViewer)

@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 // TS: TimeSeries, DD: DatedDatum, the type that TS uses
-// todo:  need to implement compile time type-matching for allowable TS, DD
+// todo:  need to implement compile time type-matching for allowable TS/DD conbinations
 template<class TS, class DD> class CHDF5WriteTimeSeries {
 public:
   CHDF5WriteTimeSeries<TS,DD>( void );

@@ -101,14 +101,14 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   }
 
   stateMDUpdate = MDUpdateBoth;  // these two lines depend upon Session being logged in AND connected
-  m_refresh.OnRefresh.Add( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
+  m_refresh.Add( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
 }
 
 CTradingLogic::~CTradingLogic(void){
 
   //theApp.m_pIQFeed->TimeMessage.Remove( MakeDelegate( this, &CTradingLogic::OnIQFeedTimeMessage ) );
 
-  m_refresh.OnRefresh.Remove( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
+  m_refresh.Remove( MakeDelegate( this, &CTradingLogic::OnPeriodicRefresh ) );
 
   delete pVuPendingOrders;
   pVuPendingOrders = NULL;

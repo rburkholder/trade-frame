@@ -38,6 +38,10 @@ CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* 
 } 
 
 CBasketTradeViewDialog::~CBasketTradeViewDialog() {
+  // there is no OnDestroy(), should implement it.
+  m_refresh.Remove( MakeDelegate( this, &CBasketTradeViewDialog::HandlePeriodicRefresh ) );
+  m_pModel->OnBasketTradeSymbolInfoAddedToBasket.Remove( 
+    MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded ) );
 }
 
 BOOL CBasketTradeViewDialog::OnInitDialog() {
@@ -67,7 +71,7 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_lcBasketSymbols.InsertItem( 0, m_Totals.sSymbolName.c_str() );
 
   // add appropriate event handlers
-  m_refresh.OnRefresh.Add( MakeDelegate( this, &CBasketTradeViewDialog::HandlePeriodicRefresh ) );
+  m_refresh.Add( MakeDelegate( this, &CBasketTradeViewDialog::HandlePeriodicRefresh ) );
   m_pModel->OnBasketTradeSymbolInfoAddedToBasket.Add( 
     MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded ) );
 

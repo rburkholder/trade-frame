@@ -67,7 +67,7 @@ CTradeFrame::CTradeFrame( CTradingLogic *pTradingLogic ) {
   bControl = false;
   bAlt = false;
 
-  m_refresh.OnRefresh.Add( MakeDelegate( this, &CTradeFrame::OnPeriodicRefresh ) );
+  m_refresh.Add( MakeDelegate( this, &CTradeFrame::OnPeriodicRefresh ) );
 
   //_CrtSetBreakAlloc(999);
 }
@@ -75,7 +75,7 @@ CTradeFrame::CTradeFrame( CTradingLogic *pTradingLogic ) {
 CTradeFrame::~CTradeFrame() {
   //CFrameWnd::~CFrameWnd();
   //TerminateThread( hScreenRefreshThread, 0 );
-  m_refresh.OnRefresh.Remove( MakeDelegate( this, &CTradeFrame::OnPeriodicRefresh ) );
+  m_refresh.Remove( MakeDelegate( this, &CTradeFrame::OnPeriodicRefresh ) );
 }
 
 BOOL CTradeFrame::Create(CWnd* pParentWnd) {

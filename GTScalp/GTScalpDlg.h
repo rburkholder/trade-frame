@@ -19,7 +19,7 @@
 #include "VuChart.h"
 #include "ChartDirector\FinanceChart.h"
 #include "VuMarketDepth.h"
-#include "GeneratePeriodicRefresh.h" 
+//#include "GeneratePeriodicRefresh.h" 
 
 #include "IQFeedProviderSingleton.h"
 #include "IBTWS.h"
@@ -91,7 +91,7 @@ protected:
 // Implementation
 protected:
 
-  CGeneratePeriodicRefresh m_refresh;
+//  CGeneratePeriodicRefresh m_refresh;
 
 	HICON m_hIcon;
 
@@ -136,7 +136,6 @@ public:
   CComboBox m_lbSymbolList;
   vector<CTradingLogic *> m_vTradingLogic;
   afx_msg void OnCbnSelchangeSymbollist();
-  afx_msg LRESULT OnPeriodicRefresh( WPARAM w, LPARAM l );
   afx_msg void OnBnClickedIqfeedloadsymbols();
   afx_msg void OnBnClickedLoaddailydata();
   afx_msg void OnBnClickedDnlddaysymbol();

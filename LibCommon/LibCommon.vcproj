@@ -162,6 +162,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Log.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ReusableCharBuffers.cpp"
 				>
 			</File>
@@ -217,6 +221,10 @@
 			</File>
 			<File
 				RelativePath=".\KeyWordMatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Log.h"
 				>
 			</File>
 			<File

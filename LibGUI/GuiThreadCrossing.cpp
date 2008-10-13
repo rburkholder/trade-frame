@@ -11,9 +11,9 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CGuiThreadCrossing, CWnd)
 
-CGuiThreadCrossing::CGuiThreadCrossing(void): m_pCreationThread( ::AfxGetThread() ) {
+CGuiThreadCrossing::CGuiThreadCrossing(void): CWnd(), m_pCreationThread( AfxGetApp()  ) {
   assert( NULL != m_pCreationThread );  // obviously, this needs creating in the GUI thread
-  BOOL b = CWnd::Create( NULL, "GuiThreadCrossing", WS_CHILD, CRect( 0, 0, 10 , 10), ::AfxGetMainWnd(), 1 );
+  BOOL b = CWnd::Create( NULL, "ThreadCrossing", WS_CHILD, CRect( 0, 0, 10 , 10), ::AfxGetMainWnd(), 1 );
   assert( b );
 }
 

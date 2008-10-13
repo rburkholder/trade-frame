@@ -147,7 +147,6 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_EN_CHANGE(IDC_DAYSAGO, &CGTScalpDlg::OnEnChangeDaysago)
   ON_BN_CLICKED(IDC_ALLOWTRADES, &CGTScalpDlg::OnBnClickedAllowtrades)
   ON_CBN_SELCHANGE(IDC_SYMBOLLIST, &CGTScalpDlg::OnCbnSelchangeSymbollist)
-  ON_MESSAGE( WM_PERIODICREFRESH, &CGTScalpDlg::OnPeriodicRefresh )
   ON_BN_CLICKED(IDC_IQFEEDLOADSYMBOLS, &CGTScalpDlg::OnBnClickedIqfeedloadsymbols)
   ON_BN_CLICKED(IDC_LOADDAILYDATA, &CGTScalpDlg::OnBnClickedLoaddailydata)
   ON_BN_CLICKED(IDC_DNLDDAYSYMBOL, &CGTScalpDlg::OnBnClickedDnlddaysymbol)
@@ -331,7 +330,7 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eExecutionType = NoExec;
   //pChartIntraDay = NULL;
 
-  m_refresh.SetThreadWindow( theApp.m_pMainWnd );
+  //m_refresh.SetThreadWindow( theApp.m_pMainWnd );
 
   m_bOutsideRTH = false;
 
@@ -409,14 +408,9 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
   CDialog::DestroyWindow();
 }
 
-afx_msg LRESULT CGTScalpDlg::OnPeriodicRefresh( WPARAM w, LPARAM l ) {
-  m_refresh.HandleRefresh();
-  return 1;
-}
-
 afx_msg void CGTScalpDlg::OnDestroy( ) {
 
-  m_refresh.ResetThreadWindow();
+  //m_refresh.ResetThreadWindow();
 
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;

@@ -15,11 +15,11 @@ CChartRealTimeView::CChartRealTimeView( CChartRealTimeModel *pModel )
   m_pModel( pModel )
 {
   m_pModel->OnBarComplete.Add( MakeDelegate( this, &CChartRealTimeView::HandleBarCompleted ) );
-  m_refresh.OnRefresh.Add( MakeDelegate( this, &CChartRealTimeView::HandlePeriodicRefresh ) );
+  m_refresh.Add( MakeDelegate( this, &CChartRealTimeView::HandlePeriodicRefresh ) );
 }
 
 CChartRealTimeView::~CChartRealTimeView(void) {
-  m_refresh.OnRefresh.Remove( MakeDelegate( this, &CChartRealTimeView::HandlePeriodicRefresh ) );
+  m_refresh.Remove( MakeDelegate( this, &CChartRealTimeView::HandlePeriodicRefresh ) );
   m_pModel->OnBarComplete.Remove( MakeDelegate( this, &CChartRealTimeView::HandleBarCompleted ) );
 }
 

@@ -10,12 +10,11 @@ class CGuiThreadCrossing :  public CWnd {
   DECLARE_DYNAMIC(CGuiThreadCrossing)
 public:
   CGuiThreadCrossing(void);
-  ~CGuiThreadCrossing(void);
+  virtual ~CGuiThreadCrossing(void);
 protected:
-  CWinThread *m_pCreationThread;
-private:
 	DECLARE_MESSAGE_MAP()
-
-  LRESULT OnCrossThreadArrival( WPARAM w, LPARAM l );
-  afx_msg void OnDestroy();
+  virtual LRESULT OnCrossThreadArrival( WPARAM w, LPARAM l );
+  virtual afx_msg void OnDestroy();
+private:
+  CWinThread *m_pCreationThread;
 };
