@@ -62,7 +62,7 @@ END_MESSAGE_MAP()
 // CGTScalpDlg dialog
 //
 
-
+IMPLEMENT_DYNAMIC(CGTScalpDlg, CDialog)
 
 CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGTScalpDlg::IDD, pParent)
@@ -75,8 +75,13 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
   , m_pExecutionProvider( NULL )
   , m_pDataProvider( NULL )
 {
+
+  //BOOL b = Create(IDD, pParent );
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
+}
+
+CGTScalpDlg::~CGTScalpDlg() {
 }
 
 void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
@@ -337,6 +342,11 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eOrderSide = OrderSide::Unknown;
   m_eOrderType = OrderType::Unknown;
 
+  pConsoleMessages = new CConsoleCoutMessages(this);
+  if ( NULL != pConsoleMessages ) {
+    pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
+  }
+
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -459,6 +469,10 @@ void CGTScalpDlg::CloseEverything( void ) {
     delete m_pSimulation;
     m_pSimulation = NULL;
   }
+
+  delete pConsoleMessages;
+  pConsoleMessages = NULL;
+
 }
 
 afx_msg void CGTScalpDlg::OnDestroy( ) {

@@ -13,7 +13,6 @@
 
 #include "..\..\Genesis\v8\GenSrc\API\INC\GTAPI.h"
 
-#include "ConsoleCoutMessages.h"
 #include "TradingLogic.h"
 //#include "IQFeed.h" 
 //#include "IQFeedProvider.h"
@@ -51,7 +50,6 @@ public:
 
   CGTSessionX m_session1;
   CGTSessionX m_session2;
-  CConsoleCoutMessages* pConsoleMessages;
   //CTradingLogic* pTradingLogic;
 
   //CGeneratePeriodicRefresh *m_pRefresh;  // 2008/05/21  done as a singleton now

@@ -32,9 +32,10 @@ protected:
 
 private:
   // from CreateThread
-  HANDLE m_hReceiveThread;
-  DWORD m_ReceiveThreadId;
-  static DWORD WINAPI ReceiveThread( LPVOID lpParameter );
+  //HANDLE m_hReceiveThread;
+  //DWORD m_ReceiveThreadId;
+  CWinThread *m_pThread;
+  static UINT ReceiveThread( LPVOID lpParameter );
   volatile bool m_bThreadActive;  // set and reset only by RecieveThread
 
   OnNewResponseHandler OnNewResponse;

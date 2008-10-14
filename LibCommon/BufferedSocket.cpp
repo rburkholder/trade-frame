@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "BufferedSocket.h"
 
+#include "Log.h"
+
 #include <iostream>
 using namespace std;
 
@@ -14,18 +16,20 @@ CBufferedSocket::CBufferedSocket(void)
 : m_object( NULL ), m_bSocketOpen( false ), m_bThreadActive( false ) 
 , m_bWaitingForCharacters( false )
 {
-  m_hReceiveThread = CreateThread( NULL, 10000, ReceiveThread, this, CREATE_SUSPENDED, &m_ReceiveThreadId );
-  if ( NULL == m_hReceiveThread ) {
-    DWORD err = GetLastError();
-    cout << "CreateThread error " << err << endl;
+  m_pThread = AfxBeginThread( &CBufferedSocket::ReceiveThread, this, 0, 0, CREATE_SUSPENDED );
+  //m_hReceiveThread = CreateThread( NULL, 10000, ReceiveThread, this, CREATE_SUSPENDED, &m_ReceiveThreadId );
+  if ( NULL == m_pThread ) {
+    //DWORD err = GetLastError();
+    LOG << "CBufferedSocket::CreateThread error";
   }
 }
 
 CBufferedSocket::~CBufferedSocket(void) {
   BOOL bIOIsPending, bReturnValue;
   DWORD dwThreadExitCode;
-  bReturnValue = GetExitCodeThread( m_hReceiveThread, &dwThreadExitCode );
-  ASSERT( 0 != bReturnValue );
+  //bReturnValue = GetExitCodeThread( m_hReceiveThread, &dwThreadExitCode );
+  //ASSERT( 0 != bReturnValue );
+  /*
   if ( STILL_ACTIVE == dwThreadExitCode ) {
     std::cout << "CBufferedSocket recieve thread is still active" << std::endl;
     bReturnValue = GetThreadIOPendingFlag( m_hReceiveThread, &bIOIsPending );
@@ -35,11 +39,12 @@ CBufferedSocket::~CBufferedSocket(void) {
     }
     TerminateThread( m_hReceiveThread, 0 );
   }
+  */
 }
 
 //http://msdn2.microsoft.com/en-us/library/ms740668.aspx
 
-DWORD WINAPI CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
+UINT CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
 
   CBufferedSocket *bs = reinterpret_cast<CBufferedSocket *>( lpParameter );
 
@@ -145,7 +150,8 @@ void CBufferedSocket::Open( const char *pAddress, unsigned short Port ) {
   }
 
   m_bSocketOpen = true;
-  ResumeThread( m_hReceiveThread );
+  //ResumeThread( m_hReceiveThread );
+  m_pThread->ResumeThread();
 }
 
 void CBufferedSocket::Send( const char *pCommand ) {

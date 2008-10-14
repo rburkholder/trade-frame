@@ -44,7 +44,7 @@ CGeneratePeriodicRefresh::~CGeneratePeriodicRefresh(void) {
     TerminateThread( m_pThreadPeriodic->m_hThread, 0 ); // not supposed to be called this way
   }
   CloseHandle( m_hWaitEvent );
-  delete m_pThreadPeriodic;
+  //delete m_pThreadPeriodic;
   assert( 0 == m_OnRefresh.Size() );  // test for code cleanup elsewhere
   //assert( 0 != m_cntInstances );
   //--m_cntInstances;

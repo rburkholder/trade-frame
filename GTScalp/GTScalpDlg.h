@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "afxwin.h"
+//#include "afxwin.h"
 #include "TradingLogic.h"
 #include "VuIndicies.h"
 #include "VuOptions.h"
 #include "VuSymbolsOfInterest.h"
-#include "ConsoleMessages.h"
+//#include "ConsoleMessages.h"
 #include "VuChartArmsIntraDay.h"
 //#include "HDF5.h"
-#include "afxdtctl.h"
+//#include "afxdtctl.h"
 #include "Scripts.h"
 #include "SymbolSelectionFilter.h"
 
@@ -28,6 +28,8 @@
 
 #include "..\LibBasketTrading\BasketTradeContainer.h"
 
+#include "ConsoleCoutMessages.h"
+
 #include "OrderManager.h"
 
 #include <vector>
@@ -35,9 +37,11 @@ using namespace std;
 
 // CGTScalpDlg dialog
 class CGTScalpDlg : public CDialog {
+	DECLARE_DYNAMIC(CGTScalpDlg)
 // Construction
 public:
 	CGTScalpDlg(CWnd* pParent = NULL);	// standard constructor
+  virtual ~CGTScalpDlg( void );
 
 // Dialog Data
 	enum { IDD = IDD_GTSCALP_DIALOG };
@@ -74,6 +78,7 @@ private:
   CSimulationProvider *m_pSimulation;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
+  CConsoleCoutMessages* pConsoleMessages;
 
   CProviderInterface *m_pExecutionProvider;
   CProviderInterface *m_pDataProvider;

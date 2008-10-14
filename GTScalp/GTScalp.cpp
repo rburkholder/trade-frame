@@ -73,17 +73,12 @@ BOOL CGTScalpApp::InitInstance()
 
   CGTSessionX::Initialize(GTAPI_VERSION);
 
-  CGTScalpDlg *p4 = new CGTScalpDlg();
+  //CGTScalpDlg *p4 = new CGTScalpDlg();
 
-  CGTScalpDlg &dlg = *p4;
-  //m_pMainWnd = &dlg;
-  m_pMainWnd = p4;
+  CGTScalpDlg dlg;
+  m_pMainWnd = &dlg;
+  //m_pMainWnd = p4;
   //dlg.MoveWindow(
-
-  pConsoleMessages = new CConsoleCoutMessages(m_pMainWnd);
-  if ( NULL != pConsoleMessages ) {
-    pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
-  }
 
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -100,9 +95,6 @@ BOOL CGTScalpApp::InitInstance()
   //CGTSessionX::Uninitialize();
 
   //delete m_pRefresh;
-
-  delete pConsoleMessages;
-  pConsoleMessages = NULL;
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
