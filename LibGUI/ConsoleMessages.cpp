@@ -23,7 +23,7 @@ CConsoleMessages::CConsoleMessages(CWnd* pParent /*=NULL*/)
 
   CGUIFrameBase::SetTitleBarText( _T( "Console Messages" ) );
   assert( CGUIFrameBase::Create() );
-  CGUIFrameBase::SetPosition( 100, 800, 500, 1200 );
+  CGUIFrameBase::SetPosition( 200, 600, 700, 1000 );
 
   CRect rect1, rect2;
   //GetWindowRect(&rect1);

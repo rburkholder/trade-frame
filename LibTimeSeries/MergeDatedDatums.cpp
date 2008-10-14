@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "MergeDatedDatums.h"
 
+#include "Log.h"
+
 //
 // CMergeDatedDatums
 //
@@ -51,7 +53,7 @@ void CMergeDatedDatums::Run() {
   std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
   size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
   size_t cntCarriers = vIx.size();
-//  std::cout << "#carriers: " << cntCarriers << std::endl;  // need cross thread writing 
+  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_cntReorders = 0;
@@ -84,7 +86,7 @@ void CMergeDatedDatums::Run() {
     }
   }
   m_state = eStopped;
-//  std::cout << "Merge stats: " << cntProcessedDatums << ", " << cntReorders << std::endl;
+  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
 }
 
 void CMergeDatedDatums::Stop( void ) {

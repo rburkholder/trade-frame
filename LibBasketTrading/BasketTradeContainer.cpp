@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "BasketTradeContainer.h"
+#include "Log.h"
 
 // need DataProvider, ExecutionProvider
 // Trades data
@@ -22,7 +23,7 @@ CBasketTradeContainer::CBasketTradeContainer( CProviderInterface *pDataProvider,
   m_pVuDialog = new CBasketTradeViewDialog( m_pModel );
   m_pVuDialog->ShowWindow( SW_SHOWNORMAL );
   m_pController = new CBasketTradeController( );
-  std::cout << "Basket Waiting" << std::endl;
+  LOG << "Basket Waiting";
 }
 
 CBasketTradeContainer::~CBasketTradeContainer(void) {

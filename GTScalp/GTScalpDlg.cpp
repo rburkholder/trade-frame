@@ -394,6 +394,7 @@ HCURSOR CGTScalpDlg::OnQueryDragIcon()
 afx_msg void CGTScalpDlg::OnCancel() {  // With System 'X' or with Cancel button
   //CDialog::OnCancel();
   //CleanUpStuff();
+  CloseEverything();
   CDialog::DestroyWindow();
 }
 
@@ -405,11 +406,11 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
   // CWnd::UpdateData  when doing Exchange type activities
   //CDialog::OnOK();  // Don't call the base class CDialog::OnCancel, because it calls EndDialog, which will make the dialog box invisible but will not destroy it.
   //CleanUpStuff();
+  CloseEverything();
   CDialog::DestroyWindow();
 }
 
-afx_msg void CGTScalpDlg::OnDestroy( ) {
-
+void CGTScalpDlg::CloseEverything( void ) {
   //m_refresh.ResetThreadWindow();
 
   for each ( CTradingLogic *p in m_vTradingLogic ) {
@@ -458,6 +459,12 @@ afx_msg void CGTScalpDlg::OnDestroy( ) {
     delete m_pSimulation;
     m_pSimulation = NULL;
   }
+}
+
+afx_msg void CGTScalpDlg::OnDestroy( ) {
+  // don't close down most stuff here, as some stuff is already turned off by windows
+  //   and should be done so before windows gets to it
+
 }
 
 void CGTScalpDlg::OnBnClickedLogin()

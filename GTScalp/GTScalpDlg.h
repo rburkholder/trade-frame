@@ -85,6 +85,8 @@ private:
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
 
+  void CloseEverything( void );
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 

@@ -7,6 +7,7 @@
 #include "HDF5WriteTimeSeries.h"
 #include "InstrumentFile.h"
 #include "PivotGroup.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -61,6 +62,7 @@ CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
 }
 
 void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call this
+
   m_1MinBarFactory.SetBarWidth( m_nBarWidth );  
   m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
 

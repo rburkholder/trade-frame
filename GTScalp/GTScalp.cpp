@@ -46,7 +46,8 @@ BOOL CGTScalpApp::InitInstance()
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
 
-	CWinApp::InitInstance();
+	BOOL b = CWinApp::InitInstance();
+  ASSERT( b );
 
 	if (!AfxSocketInit())
 	{
@@ -72,16 +73,17 @@ BOOL CGTScalpApp::InitInstance()
 
   CGTSessionX::Initialize(GTAPI_VERSION);
 
-  CGTScalpDlg dlg;
-  m_pMainWnd = &dlg;
+  CGTScalpDlg *p4 = new CGTScalpDlg();
+
+  CGTScalpDlg &dlg = *p4;
+  //m_pMainWnd = &dlg;
+  m_pMainWnd = p4;
   //dlg.MoveWindow(
 
   pConsoleMessages = new CConsoleCoutMessages(m_pMainWnd);
   if ( NULL != pConsoleMessages ) {
-    pConsoleMessages->ShowWindow( SW_SHOWNORMAL );
+    pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
   }
-
-  //m_pRefresh = new CGeneratePeriodicRefresh( m_pMainWnd );
 
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

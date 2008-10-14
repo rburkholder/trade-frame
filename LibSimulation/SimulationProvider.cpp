@@ -153,7 +153,7 @@ void CSimulationProvider::Run() {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
-    m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ), THREAD_PRIORITY_NORMAL );
+    m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ) );
     assert( NULL != m_pMergeThread );
     //m_hMergeThread = CreateThread( NULL, 0, Merge, this, 0, &m_idMergeThread );
     //assert( NULL != m_hMergeThread );

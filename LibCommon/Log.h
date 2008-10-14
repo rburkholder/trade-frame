@@ -10,6 +10,8 @@
 #include <boost/log/sinks/sink.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
 
+#include <boost/log/utility/empty_deleter.hpp>
+
 #include <boost/log/formatters/ostream.hpp>
 
 //#include <boost/log/sources/threading_models.hpp>
@@ -31,11 +33,17 @@ namespace attrs = boost::log::attributes;
 // boost-log/boost goes into boost
 // boost-log/lib goes in lib
 
+#define LOG BOOST_LOG(CLog::Log())
+
 class CLog {
 public:
   CLog(void);
   ~CLog(void);
+  static src::logger &Log( void ) { return lg; };
 protected:
+  typedef sinks::synchronous_sink<sinks::text_ostream_backend> text_sink;
+  static boost::shared_ptr<text_sink> m_pSink;
+  static src::logger lg;
 private:
   static int m_cntInstances;
 };

@@ -20,14 +20,13 @@ public:
   void Remove( delegateRefresh_t::OnMessageHandler handler );
 protected:
   delegateRefresh_t m_OnRefresh;
-  //HANDLE hScreenRefreshThread;
-  //DWORD RefreshThreadId;
-  HANDLE m_hTimerQueue;
-  HANDLE m_hTimer;
+  HANDLE m_hWaitEvent;
+  CWinThread *m_pThreadPeriodic;
 	DECLARE_MESSAGE_MAP()
   virtual LRESULT OnPeriodicRefresh( WPARAM w, LPARAM l );
-  virtual afx_msg void OnDestroy();
+  //virtual afx_msg void OnDestroy();  // doesn't get called
 private:
-  static VOID CALLBACK TriggerRefresh( LPVOID, BOOLEAN );
+  static UINT TriggerRefresh( LPVOID );
   bool m_bKeepTimerActive;
+  //static int m_cntInstances;
 };

@@ -33,6 +33,7 @@ protected:
   CEdit m_ceMessages;
   CFont m_font;
 
+
 private:
 
   bool bDialogReady;

@@ -9,10 +9,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// threading info start: CWinThread, AfxBeginThread
+
 IMPLEMENT_DYNAMIC(CGuiThreadCrossing, CWnd)
 
-CGuiThreadCrossing::CGuiThreadCrossing(void): CWnd(), m_pCreationThread( AfxGetApp()  ) {
-  assert( NULL != m_pCreationThread );  // obviously, this needs creating in the GUI thread
+CGuiThreadCrossing::CGuiThreadCrossing(void): CWnd(), m_pThreadMain( AfxGetApp()  ) {
+  assert( NULL != m_pThreadMain ); 
+  assert( AfxGetThread() == m_pThreadMain );  // obviously, this needs creating in the GUI thread
   BOOL b = CWnd::Create( NULL, "ThreadCrossing", WS_CHILD, CRect( 0, 0, 10 , 10), ::AfxGetMainWnd(), 1 );
   assert( b );
 }

@@ -158,6 +158,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CrossThreadCout.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CtlListCtrlBase.cpp"
 				>
 			</File>
@@ -209,6 +213,10 @@
 			</File>
 			<File
 				RelativePath=".\ConsoleMessages.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CrossThreadCout.h"
 				>
 			</File>
 			<File
