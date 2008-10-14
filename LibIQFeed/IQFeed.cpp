@@ -19,11 +19,13 @@ void __stdcall IQFeedCallBack( int x, int y ) {
   ss << "IQFeed Callback" << x << ", " << y;
 }
 
-IMPLEMENT_DYNAMIC( CIQFeed, CWnd )
+IMPLEMENT_DYNAMIC( CIQFeed, CGuiThreadCrossing )
 
-CIQFeed::CIQFeed( CWnd *pParent ) {
+#define WM_IQFEEDCROSSTHREAD (WM_GUITHREADCROSSING + 1)
 
-  BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), ::AfxGetMainWnd(), 1 );
+CIQFeed::CIQFeed( void ): CGuiThreadCrossing() {
+
+  //BOOL b = CWnd::Create( NULL, "IQFeed", WS_CHILD, CRect( 0, 0, 20, 20 ), ::AfxGetMainWnd(), 1 );
 
   SetCallbackFunction( &IQFeedCallBack );
   int i = RegisterClientApp( NULL, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
@@ -31,7 +33,7 @@ CIQFeed::CIQFeed( CWnd *pParent ) {
 
 CIQFeed::~CIQFeed(void) {
   RemoveClientApp( NULL );
-  CWnd::DestroyWindow(); 
+  //CWnd::DestroyWindow(); 
 }
 
 void CIQFeed::Connect() {
@@ -101,18 +103,18 @@ void CIQFeed::CheckInLookupPort( CIQFeedThreadCrossing *state ) {
   m_qLookupPortAvailable.push( state );
 }
 
-BEGIN_MESSAGE_MAP(CIQFeed, CWnd)
+BEGIN_MESSAGE_MAP(CIQFeed, CGuiThreadCrossing)
   ON_MESSAGE( WM_IQFEEDCROSSTHREAD, OnCrossThreadArrival )
 END_MESSAGE_MAP()
 
 void CIQFeed::OnPreCrossThreadResponse(unsigned short nStr, const char *str, LPVOID object ) {
   CIQFeedThreadCrossing *state = (CIQFeedThreadCrossing *) object;
   state->QueueResponse( nStr, str );
-  CWnd::SendMessage( WM_IQFEEDCROSSTHREAD, (WPARAM) state );
+  SendMessage( WM_IQFEEDCROSSTHREAD, reinterpret_cast<WPARAM>( state ) );
 }
 
 LRESULT CIQFeed::OnCrossThreadArrival( WPARAM w, LPARAM l ) {
-  CIQFeedThreadCrossing *state = (CIQFeedThreadCrossing *) w;
+  CIQFeedThreadCrossing *state = reinterpret_cast<CIQFeedThreadCrossing *>( w );
   state->ProcessResponse();
   return 1;
 }

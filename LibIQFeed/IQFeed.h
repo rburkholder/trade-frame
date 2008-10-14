@@ -3,6 +3,7 @@
 #include "IQFeedThreadCrossing.h"
 #include "IQFeedMessages.h"
 #include "IQFeedSymbol.h"
+#include "GuiThreadCrossing.h"
 #include "Delegate.h"
 
 #include <queue>
@@ -10,11 +11,12 @@
 #include <string>
 using namespace std;
 
-class CIQFeed :public CWnd {
+class CIQFeed :public CGuiThreadCrossing {
   DECLARE_DYNAMIC(CIQFeed)
 public:
-  CIQFeed( CWnd *pParent = NULL );
-  ~CIQFeed(void);
+  //CIQFeed( CWnd *pParent = NULL );
+  CIQFeed( void );
+  virtual ~CIQFeed( void );
 
   void Connect( void );
   void Disconnect( void );
@@ -39,6 +41,7 @@ protected:
   virtual void HandleTMessage( CIQFTimeMessage *pMsg ) {};
   virtual void HandleSMessage( CIQFSystemMessage *pMsg ) {};
 
+  DECLARE_MESSAGE_MAP()
 private:
   CIQFeedThreadCrossing IQConnect;  // port and buffers for main streaming connection
   void OnPreCrossThreadResponse( unsigned  short nStr, const char *str, LPVOID object );
@@ -48,6 +51,5 @@ private:
 
   queue<CIQFeedThreadCrossing *> m_qLookupPortAvailable;
 
-  DECLARE_MESSAGE_MAP()
 };
 

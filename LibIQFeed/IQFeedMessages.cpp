@@ -5,13 +5,11 @@
 #include <iostream>
 #include <sstream>
 
-/*
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-*/
 
 // News Message: This does appear to be an error in the documentation. 
 // "SNT:AAPL::1:20070901:;" 
@@ -130,28 +128,6 @@ CIQFSystemMessage::CIQFSystemMessage() {
 CIQFSystemMessage::~CIQFSystemMessage() {
 }
 
-//**** CIQFTimeMessage
-
-CIQFTimeMessage::CIQFTimeMessage() {
-  m_bMarketIsOpen = false;
-  m_timeMarketOpen = time_duration( 9, 30, 0 );
-  m_timeMarketClose = time_duration( 16, 0, 0 );
-}
-
-CIQFTimeMessage::~CIQFTimeMessage() {
-}
-
-void CIQFTimeMessage::Assign( const char *str ) {
-  CIQFBaseMessage::Assign( str );
-  stringstream ss( Field( 2 ) );
-  time_input_facet *input_facet;
-  input_facet = new time_input_facet();  // input facet stuff needs to be with ss.imbue, can't be reused
-  input_facet->format( "%Y%m%d %H:%M:%S" );
-  ss.imbue( locale( ss.getloc(), input_facet ) );
-  ss >> m_dt;
-  m_bMarketIsOpen = ( ( m_dt.time_of_day() >= m_timeMarketOpen ) && ( m_dt.time_of_day() < m_timeMarketClose ) );
-}
-
 //**** CIQFNewsMessage
 
 CIQFNewsMessage::CIQFNewsMessage() {
@@ -254,5 +230,32 @@ CIQFSummaryMessage::CIQFSummaryMessage() {
 }
 
 CIQFSummaryMessage::~CIQFSummaryMessage() {
+}
+
+//**** CIQFTimeMessage
+
+CIQFTimeMessage::CIQFTimeMessage() {
+  m_bMarketIsOpen = false;
+  m_timeMarketOpen = time_duration( 9, 30, 0 );
+  m_timeMarketClose = time_duration( 16, 0, 0 );
+}
+
+CIQFTimeMessage::~CIQFTimeMessage() {
+}
+
+//#ifdef DEBUG_NEW
+//#undef DEBUG_NEW
+//#endif
+
+void CIQFTimeMessage::Assign( const char *str ) {
+  CIQFBaseMessage::Assign( str );
+  stringstream ss( Field( 2 ) );
+  time_input_facet *input_facet;
+#undef new
+  input_facet = new boost::posix_time::time_input_facet();  // input facet stuff needs to be with ss.imbue, can't be reused
+  input_facet->format( "%Y%m%d %H:%M:%S" );
+  ss.imbue( locale( ss.getloc(), input_facet ) );
+  ss >> m_dt;
+  m_bMarketIsOpen = ( ( m_dt.time_of_day() >= m_timeMarketOpen ) && ( m_dt.time_of_day() < m_timeMarketClose ) );
 }
 
