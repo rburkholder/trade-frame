@@ -87,8 +87,8 @@ CGTScalpDlg::~CGTScalpDlg() {
 void CGTScalpDlg::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
-  DDX_Control(pDX, IDC_GTSESSION1, theApp.m_session1);
-  DDX_Control(pDX, IDC_GTSESSION2, theApp.m_session2);
+  //DDX_Control(pDX, IDC_GTSESSION1, m_session1);
+  //DDX_Control(pDX, IDC_GTSESSION2, m_session2);
   DDX_Control(pDX, IDC_LBEXECADDR, m_lbExecAddr);
   DDX_Control(pDX, IDC_LBEXECPORT, m_lbExecPort);
   DDX_Control(pDX, IDC_LBLVL1ADDR, m_lbLvl1Addr);
@@ -250,6 +250,19 @@ BOOL CGTScalpDlg::OnInitDialog() {
   pvuArms = NULL;
   pNews = NULL;
 
+  pConsoleMessages = new CConsoleCoutMessages(this);
+  if ( NULL != pConsoleMessages ) {
+    pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
+  }
+
+  CGTSessionX::Initialize(GTAPI_VERSION);
+
+  // manual because custom class didn't work in release mode, and caused dialog to not be drawn.
+  m_session1.Create( this, 0 );
+  m_session1.MoveWindow( 7, 7, 50, 14 );
+  m_session2.Create( this, 0 );
+  m_session2.MoveWindow( 60, 7, 50, 14 );
+
   theApp.m_bLive = true;
   m_btnLive.SetCheck( BST_CHECKED );
   m_cbAllowTrades.SetCheck( BST_UNCHECKED );
@@ -342,11 +355,6 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_eOrderSide = OrderSide::Unknown;
   m_eOrderType = OrderType::Unknown;
 
-  pConsoleMessages = new CConsoleCoutMessages(this);
-  if ( NULL != pConsoleMessages ) {
-    pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
-  }
-
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -421,7 +429,6 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
 }
 
 void CGTScalpDlg::CloseEverything( void ) {
-  //m_refresh.ResetThreadWindow();
 
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
@@ -473,6 +480,8 @@ void CGTScalpDlg::CloseEverything( void ) {
   delete pConsoleMessages;
   pConsoleMessages = NULL;
 
+  CGTSessionX::Uninitialize();
+
 }
 
 afx_msg void CGTScalpDlg::OnDestroy( ) {
@@ -496,40 +505,40 @@ void CGTScalpDlg::OnBnClickedLogin()
     m_lbExecAddr.GetText( m_lbExecAddr.GetCurSel(), buffer1 );
     m_lbExecPort.GetText( m_lbExecPort.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session1.m_setting.SetExecAddress(buffer1,nPort);
+    m_session1.m_setting.SetExecAddress(buffer1,nPort);
 
     m_lbLvl1Addr.GetText( m_lbLvl1Addr.GetCurSel(), buffer1 );
     m_lbLvl1Port.GetText( m_lbLvl1Port.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session1.m_setting.SetQuoteAddress(buffer1,nPort);
+    m_session1.m_setting.SetQuoteAddress(buffer1,nPort);
 
     m_lbLvl2Addr.GetText( m_lbLvl2Addr.GetCurSel(), buffer1 );
     m_lbLvl2Port.GetText( m_lbLvl2Port.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session1.m_setting.SetLevel2Address(buffer1,nPort);
+    m_session1.m_setting.SetLevel2Address(buffer1,nPort);
 
     m_edtPassword.GetWindowTextA( buffer1, 20 );
-    result = theApp.m_session1.Login( "OURB001", buffer1 );
+    result = m_session1.Login( "OURB001", buffer1 );
     std::cout << "Login result (sess1) is " << result << std::endl;
     if ( 1 != result ) bLoggedIn = false;
 
     m_lbExecAddr.GetText( m_lbExecAddr.GetCurSel(), buffer1 );
     m_lbExecPort.GetText( m_lbExecPort.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session2.m_setting.SetExecAddress(buffer1,nPort);
+    m_session2.m_setting.SetExecAddress(buffer1,nPort);
 
     m_lbLvl1Addr.GetText( m_lbLvl1Addr.GetCurSel(), buffer1 );
     m_lbLvl1Port.GetText( m_lbLvl1Port.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session2.m_setting.SetQuoteAddress(buffer1,nPort);
+    m_session2.m_setting.SetQuoteAddress(buffer1,nPort);
 
     m_lbLvl2Addr.GetText( m_lbLvl2Addr.GetCurSel(), buffer1 );
     m_lbLvl2Port.GetText( m_lbLvl2Port.GetCurSel(), buffer2 );
     nPort = atoi( buffer2 );
-    theApp.m_session2.m_setting.SetLevel2Address(buffer1,nPort);
+    m_session2.m_setting.SetLevel2Address(buffer1,nPort);
 
     m_edtPassword.GetWindowTextA( buffer1, 20 );
-    result = theApp.m_session2.Login( "OURB002", buffer1 );
+    result = m_session2.Login( "OURB002", buffer1 );
     std::cout << "Login result (sess2) is " << result << std::endl;
     if ( 1 != result ) bLoggedIn = false;
 
@@ -558,25 +567,28 @@ void CGTScalpDlg::OnBnClickedLogout()
   //if ( 
   //if ( bLoggedIn ) {
 
-    theApp.m_session1.Logout();
-    theApp.m_session1.TryClose();
+  
+    m_session1.Logout();
+    m_session1.TryClose();
 
-    theApp.m_session2.Logout();
-    theApp.m_session2.TryClose();
+    m_session2.Logout();
+    m_session2.TryClose();
+    
   //}
 }
 
 void CGTScalpDlg::OnBnClickedStart() {
   char symbol[ 30 ];
   m_lbSymbolList.GetWindowTextA( symbol, 30 );
-  m_vTradingLogic.push_back( new CTradingLogic( symbol ) );
+  m_vTradingLogic.push_back( new CTradingLogic( symbol, &m_session1, &m_session2 ) );
   //pTradingLogic = new CTradingLogic( "ICE" );
   //pTradingLogic = new CTradingLogic( "ZXZZT" );
 }
 
 void CGTScalpDlg::OnBnClickedAccounts() {
-  theApp.m_session1.EmitSessionInfo();
-  theApp.m_session2.EmitSessionInfo();
+
+  m_session1.EmitSessionInfo();
+  m_session2.EmitSessionInfo();
 }
 
 void CGTScalpDlg::OnBnClickedIqfeed() {

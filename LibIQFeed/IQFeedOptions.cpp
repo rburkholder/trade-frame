@@ -7,7 +7,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-// TODO:  convert OnNewResponse over to IQFeedRetrial
+// TODO:  convert OnNewResponse over to IQFeedRetrieval
 
 CIQFeedOptions::CIQFeedOptions(CIQFeedProvider *pProvider, const char *szSymbol) 
 : CIQFeedRetrieval( pProvider ) 

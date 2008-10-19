@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "IQ32.H"
 #include "IQFeed.h"
-#include "GTWindowsConstants.h"  // based upon WM_USER for cross-thread messaging
+//#include "GTWindowsConstants.h"  // based upon WM_USER for cross-thread messaging
 
 #include <sstream>
 #include <stdexcept>

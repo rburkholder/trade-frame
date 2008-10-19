@@ -9,17 +9,7 @@
 
 #include "resource.h"		// main symbols
 
-#include "GTWindowsConstants.h"  // based upon WM_USER
-
-#include "..\..\Genesis\v8\GenSrc\API\INC\GTAPI.h"
-
 #include "TradingLogic.h"
-//#include "IQFeed.h" 
-//#include "IQFeedProvider.h"
-//#include "IBTWS.h"
-
-//#include "GeneratePeriodicRefresh.h"  // need the above constants
-
 
 // file and line numbers on exit for memory loss
 //#define new DEBUG_NEW  
@@ -47,12 +37,6 @@ public:
   virtual BOOL OnIdle(LONG lCount);
 
 // Implementation
-
-  CGTSessionX m_session1;
-  CGTSessionX m_session2;
-  //CTradingLogic* pTradingLogic;
-
-  //CGeneratePeriodicRefresh *m_pRefresh;  // 2008/05/21  done as a singleton now
 
   bool m_bLive;
   unsigned int m_nDaysAgo;

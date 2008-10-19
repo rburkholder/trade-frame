@@ -53,11 +53,11 @@ UINT CBufferedSocket::ReceiveThread( LPVOID lpParameter ) {
   char buf[DATA_BUFSIZE];
   WSAOVERLAPPED AcceptOverlapped;
   WSABUF DataBuf;
-  DWORD EventTotal = 0, 
+  DWORD EventTotal = 0; 
     //RecvBytes = 0, 
-    Flags = 0,
-    BytesTransferred = 0, 
-    CallBack = 0;
+  DWORD Flags = 0;
+  DWORD BytesTransferred = 0;
+  DWORD CallBack = 0;
 
   char str[DATA_BUFSIZE];  // string built from taking characters from buf
   unsigned short ixSrc = 0;  // position for next character in str

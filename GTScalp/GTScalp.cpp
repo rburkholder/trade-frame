@@ -71,14 +71,14 @@ BOOL CGTScalpApp::InitInstance()
 
   m_bLive = true;
 
-  CGTSessionX::Initialize(GTAPI_VERSION);
-
   //CGTScalpDlg *p4 = new CGTScalpDlg();
 
   CGTScalpDlg dlg;
   m_pMainWnd = &dlg;
   //m_pMainWnd = p4;
   //dlg.MoveWindow(
+
+  //CGTSessionX::Initialize(GTAPI_VERSION);
 
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -103,7 +103,7 @@ BOOL CGTScalpApp::InitInstance()
 
 int CGTScalpApp::ExitInstance() {
 
-  CGTSessionX::Uninitialize();
+  //CGTSessionX::Uninitialize();
 	
 	return CWinApp::ExitInstance();
 }

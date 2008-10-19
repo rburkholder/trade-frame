@@ -17,7 +17,7 @@ using namespace std;
 
 class CTradingLogic {
 public:
-  CTradingLogic(CString sSymbol);
+  CTradingLogic(CString sSymbol, CGTSessionX *pGTSession1, CGTSessionX *pGTSession2 );
   ~CTradingLogic(void);
 
   void Acct1LmtBuy( long Shares, double dblPrice );

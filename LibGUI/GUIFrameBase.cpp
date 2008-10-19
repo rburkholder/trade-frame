@@ -10,8 +10,9 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CGUIFrameBase, CFrameWnd)
 
 CGUIFrameBase::CGUIFrameBase(CWnd* pParent /*=NULL*/) 
-: CFrameWnd(), m_pParent( pParent ), m_position( 10, 10, 100, 100 )
+: CFrameWnd(), m_pParent( pParent )
 {
+  SetPosition( 10, 10, 100, 100 );
 }
 
 CGUIFrameBase::~CGUIFrameBase(void) {
@@ -32,7 +33,7 @@ void CGUIFrameBase::SetTitleBarText( const std::string &sTitle ) {
 }
 
 BOOL CGUIFrameBase::Create( void ) {
-  BOOL b = CFrameWnd::Create(NULL, m_sDialogTitle.c_str(), WS_OVERLAPPEDWINDOW, m_position );
+  BOOL b = CFrameWnd::Create(NULL, m_sDialogTitle.c_str(), WS_OVERLAPPEDWINDOW, m_position, m_pParent );
   return b;
 }
 

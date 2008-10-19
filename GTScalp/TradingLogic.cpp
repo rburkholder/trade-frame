@@ -14,7 +14,7 @@ Colour::enumColour MDColors[] = {
   Colour::LightYellow, Colour::LightYellow, Colour::PaleGoldenrod, Colour::Wheat, Colour::Goldenrod, Colour::DarkGoldenrod,
   Colour::DarkKhaki, Colour::DarkOrange, Colour::Orange, Colour::OrangeRed, Colour::Red, Colour::Crimson, Colour::Black };  // Black is not used, simply an end of list indicator
 
-CTradingLogic::CTradingLogic( CString sSymbol ) {
+CTradingLogic::CTradingLogic( CString sSymbol, CGTSessionX *pGTSession1, CGTSessionX *pGTSession2 ) {
   
   string s;
   m_bFirstTradeFound = false;
@@ -23,8 +23,8 @@ CTradingLogic::CTradingLogic( CString sSymbol ) {
   m_state = EState::Init;
 
   m_sSymbol = sSymbol;
-  stkSession1 = (CGTStockX*) theApp.m_session1.CreateStock( m_sSymbol );
-  stkSession2 = (CGTStockX*) theApp.m_session2.CreateStock( m_sSymbol );
+  stkSession1 = (CGTStockX*) pGTSession1->CreateStock( m_sSymbol );
+  stkSession2 = (CGTStockX*) pGTSession2->CreateStock( m_sSymbol );
   stkSession2 ->CancelLevel2();
   stkSession2 ->CancelQuote();
   stkSession2 ->CancelChart();

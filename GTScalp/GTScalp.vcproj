@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibSimulation;..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibIQFeed;..\LibInteractiveBrokers;..\LibGndt;..\LibGUI;..\LibBasketTrading;K:\Data\Projects\hdf5\current\hdf5lib\debug\include;K:\Data\Projects\boost\current;&quot;H:\Program Files\Oracle\current\include&quot;"
+				AdditionalIncludeDirectories="..\LibSimulation;..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibIQFeed;..\LibInteractiveBrokers;..\LibGndt;..\LibGUI;..\LibBasketTrading;K:\Data\Projects\boost\current;&quot;H:\Program Files\Oracle\current\include&quot;;K:\Data\Projects\hdf5\current\hdf5lib\debug\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -70,9 +70,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\hdf5_hl_cppddll.lib $(OutDir)\hdf5ddll.lib $(OutDir)\libdb47d.lib"
+				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\zlib1.lib $(OutDir)\hdf5ddll.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\szlibdll.lib"
+				ShowProgress="2"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="K:\Data\Projects\boost\current\lib"
+				AdditionalLibraryDirectories=""
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -108,7 +111,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
-			CharacterSet="2"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -131,7 +134,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				AdditionalIncludeDirectories="..\LibSimulation;..\LibHDF5TimeSeries;..\LibBerkeleyDb;..\LibCharting;..\LibCommon;..\LibIndicators;..\LibTimeSeries;..\LibTrading;..\LibIQFeed;..\LibInteractiveBrokers;..\LibGndt;..\LibGUI;..\LibBasketTrading;K:\Data\Projects\boost\current;&quot;H:\Program Files\Oracle\current\include&quot;;K:\Data\Projects\hdf5\current\hdf5lib\release\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_HDF5USEDLL_;HDF5CPP_USEDLL"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -153,7 +157,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\libboost_date_time-vc80-mt-1_36.lib $(OutDir)\libboost_log-vc80-mt-1_36.lib $(OutDir)\libboost_regex-vc80-mt-1_36.lib $(OutDir)\libboost_thread-vc80-mt-1_36.lib $(OutDir)\zlib1.lib $(OutDir)\szlibdll.lib $(OutDir)\hdf5dll.lib $(OutDir)\hdf5_cppdll.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"

@@ -23,6 +23,8 @@
 
 #include "IQFeedProviderSingleton.h"
 #include "IBTWS.h"
+#include "GTSessionX.h"
+
 #include "TradingEnumerations.h"
 #include "SimulationProvider.h"
 
@@ -72,6 +74,9 @@ private:
   OrderSide::enumOrderSide m_eOrderSide;
   OrderType::enumOrderType m_eOrderType;
 
+  CGTSessionX m_session1;
+  CGTSessionX m_session2;
+
   CIBTWS *m_pIB;
   CIQFeedProviderSingleton *m_pIQFeedSingleton;
   CIQFeedProvider *m_pIQFeed;
@@ -82,7 +87,6 @@ private:
 
   CProviderInterface *m_pExecutionProvider;
   CProviderInterface *m_pDataProvider;
-  //bool SelectExecutionProvider(  
 
   COrderManager m_OrderManager;  // keeps at least one instance alive
 

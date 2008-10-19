@@ -18,11 +18,12 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CConsoleMessages, CGUIFrameBase)
 
 CConsoleMessages::CConsoleMessages(CWnd* pParent /*=NULL*/)
-	: bDialogReady( false ), CGUIFrameBase( pParent )
+	: CGUIFrameBase( pParent ), bDialogReady( false )
 {
 
   CGUIFrameBase::SetTitleBarText( _T( "Console Messages" ) );
-  assert( CGUIFrameBase::Create() );
+  BOOL b = CGUIFrameBase::Create();
+  assert( b );
   CGUIFrameBase::SetPosition( 200, 600, 700, 1000 );
 
   CRect rect1, rect2;
@@ -30,7 +31,7 @@ CConsoleMessages::CConsoleMessages(CWnd* pParent /*=NULL*/)
   //rect1.MoveToXY(10,10);
   //MoveWindow(&rect1);
 
-  GetClientRect( &rect1 );
+  CGUIFrameBase::GetClientRect( &rect1 );
   rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
   m_ceMessages.Create( WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_READONLY | WS_VSCROLL, rect2, this, 2 );
   m_ceMessages.SetLimitText( 10000000 );

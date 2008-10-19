@@ -73,8 +73,11 @@ bool CHDF5DataManager::GroupExists( const std::string &sGroup ) {
     g.close();
     bGroupExists = true;
   }
-  catch ( H5::Exception e ) {
+  catch ( const H5::Exception &e ) {
     // group doesn't exist so just ignore
+  }
+  catch ( ... ) {
+    std::cout << "CHDF5DataManager::GroupExists unknown error" << std::endl;
   }
   return bGroupExists;
 }

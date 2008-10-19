@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "GTWindowsConstants.h"
+//#include "GTWindowsConstants.h"
 #include "GeneratePeriodicRefresh.h"
 
 #include <stdexcept>
