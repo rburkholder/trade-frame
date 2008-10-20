@@ -156,7 +156,7 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
         pBar = bars[ ix ];
         range += pBar->m_dblHigh - pBar->m_dblLow;
       }
-      pParameters->dblAvgDailyRange = range / 20.0;
+      m_status.dblAvgDailyRange = range / 20.0;
     }
   }
   else {

@@ -63,6 +63,8 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   m_lcBasketSymbols.InsertColumn( ix++, "UnrelPL", LVCFMT_RIGHT, 60 );
   m_lcBasketSymbols.InsertColumn( ix++, "RelPL", LVCFMT_RIGHT, 80 );
   m_lcBasketSymbols.InsertColumn( ix++, "RunPL", LVCFMT_CENTER, 80 );
+  m_lcBasketSymbols.InsertColumn( ix++, "MaxPL", LVCFMT_CENTER, 80 );
+  m_lcBasketSymbols.InsertColumn( ix++, "MinPL", LVCFMT_CENTER, 80 );
 
   // initialize display with a top level totals record
   m_Totals.sSymbolName = _T( "Totals" );
@@ -113,6 +115,8 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
     m_Totals.dblUnRealizedPL = 0;
     m_Totals.dblRealizedPL = 0;
     m_Totals.dblRunningPL = 0;
+    //m_Totals.dblMaxRunningPL = 0;
+    //m_Totals.dblMinRunningPL = 0;
     char conv[ 30 ];
     for ( std::map<std::string, structDialogEntry>::iterator iter = m_mapDialogEntry.begin();
       iter != m_mapDialogEntry.end(); ++iter ) {
@@ -123,6 +127,8 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           m_Totals.dblUnRealizedPL += iter->second.pFields->dblUnRealizedPL;
           m_Totals.dblRealizedPL += iter->second.pFields->dblRealizedPL;
           m_Totals.dblRunningPL = m_Totals.dblUnRealizedPL + m_Totals.dblRealizedPL;
+          m_Totals.dblMaxRunningPL = max( m_Totals.dblMaxRunningPL, m_Totals.dblRunningPL );
+          m_Totals.dblMinRunningPL = min( m_Totals.dblMinRunningPL, m_Totals.dblRunningPL );
           if ( iter->second.bChanged ) {
             iter->second.bChanged = false;
             const CBasketTradeSymbolInfo::structFieldsForDialog *pFields = iter->second.pFields;
@@ -141,6 +147,7 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
             sprintf( conv, "%.2f", pFields->dblAverageCost ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblAvgDailyRange ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
           }
         }
     }
@@ -151,6 +158,8 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
     sprintf( conv, "%.2f", m_Totals.dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblRealizedPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblRunningPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
+    sprintf( conv, "%.2f", m_Totals.dblMaxRunningPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
+    sprintf( conv, "%.2f", m_Totals.dblMinRunningPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     m_bSourceChanged = false;
   }
 }

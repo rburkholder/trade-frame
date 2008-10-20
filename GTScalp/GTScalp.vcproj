@@ -70,8 +70,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\zlib1.lib $(OutDir)\hdf5ddll.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\szlibdll.lib"
-				ShowProgress="2"
+				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\zlib.lib $(OutDir)\hdf5ddll.lib $(OutDir)\hdf5_cppddll.lib $(OutDir)\szlib.lib"
+				ShowProgress="0"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				IgnoreAllDefaultLibraries="false"
@@ -157,7 +157,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\libboost_date_time-vc80-mt-1_36.lib $(OutDir)\libboost_log-vc80-mt-1_36.lib $(OutDir)\libboost_regex-vc80-mt-1_36.lib $(OutDir)\libboost_thread-vc80-mt-1_36.lib $(OutDir)\zlib1.lib $(OutDir)\szlibdll.lib $(OutDir)\hdf5dll.lib $(OutDir)\hdf5_cppdll.lib"
+				AdditionalDependencies="$(OutDir)\GTAPI.LIB $(OutDir)\IQ32.LIB $(OutDir)\chartdir41.lib $(OutDir)\libdb47d.lib $(OutDir)\libboost_date_time-vc80-mt-1_36.lib $(OutDir)\libboost_log-vc80-mt-1_36.lib $(OutDir)\libboost_regex-vc80-mt-1_36.lib $(OutDir)\libboost_thread-vc80-mt-1_36.lib $(OutDir)\zlib.lib $(OutDir)\szlib.lib $(OutDir)\hdf5dll.lib $(OutDir)\hdf5_cppdll.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"

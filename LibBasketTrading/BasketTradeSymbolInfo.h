@@ -58,17 +58,22 @@ public:
     double dblUnRealizedPL;
     double dblRealizedPL;
     double dblRunningPL;
+    double dblMaxRunningPL;
+    double dblMinRunningPL;
+    double dblAvgDailyRange;
     std::string sHit;  // 0/1 for long, 0/1 for short (two characters here)
     structFieldsForDialog( void ) : 
       dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
       dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
       nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
-      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblRunningPL( 0 ) {};
+      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblAvgDailyRange( 0 ),
+      dblRunningPL( 0 ), dblMaxRunningPL( 0 ), dblMinRunningPL( 0) {};
     structFieldsForDialog( const std::string &sSymbolName_ ) : sSymbolName( sSymbolName_ ),
       dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
       dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
       nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
-      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblRunningPL( 0 ) {};
+      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblAvgDailyRange( 0 ),
+      dblRunningPL( 0 ), dblMaxRunningPL( 0 ), dblMinRunningPL( 0 ) {};
   };
   structFieldsForDialog *GetDialogFields( void ) { return &m_status; };  // needs to come after structure definition
 
@@ -88,7 +93,6 @@ public:
     CProviderInterface *pDataProvider;
     CProviderInterface *pExecutionProvider;
     CChartRealTimeTreeView *pTreeView;
-    double dblAvgDailyRange;
   };
   void CalculateTrade( structCommonModelInformation *pParameters  );
 
