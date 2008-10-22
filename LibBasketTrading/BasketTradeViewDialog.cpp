@@ -114,9 +114,6 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
     m_Totals.dblAverageCost = 0;
     m_Totals.dblUnRealizedPL = 0;
     m_Totals.dblRealizedPL = 0;
-    m_Totals.dblRunningPL = 0;
-    //m_Totals.dblMaxRunningPL = 0;
-    //m_Totals.dblMinRunningPL = 0;
     char conv[ 30 ];
     for ( std::map<std::string, structDialogEntry>::iterator iter = m_mapDialogEntry.begin();
       iter != m_mapDialogEntry.end(); ++iter ) {
@@ -126,9 +123,6 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           m_Totals.dblAverageCost += iter->second.pFields->dblAverageCost;
           m_Totals.dblUnRealizedPL += iter->second.pFields->dblUnRealizedPL;
           m_Totals.dblRealizedPL += iter->second.pFields->dblRealizedPL;
-          m_Totals.dblRunningPL = m_Totals.dblUnRealizedPL + m_Totals.dblRealizedPL;
-          m_Totals.dblMaxRunningPL = max( m_Totals.dblMaxRunningPL, m_Totals.dblRunningPL );
-          m_Totals.dblMinRunningPL = min( m_Totals.dblMinRunningPL, m_Totals.dblRunningPL );
           if ( iter->second.bChanged ) {
             iter->second.bChanged = false;
             const CBasketTradeSymbolInfo::structFieldsForDialog *pFields = iter->second.pFields;
@@ -151,6 +145,11 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           }
         }
     }
+
+    m_Totals.dblRunningPL = m_Totals.dblUnRealizedPL + m_Totals.dblRealizedPL;
+    m_Totals.dblMaxRunningPL = max( m_Totals.dblMaxRunningPL, m_Totals.dblRunningPL );
+    m_Totals.dblMinRunningPL = min( m_Totals.dblMinRunningPL, m_Totals.dblRunningPL );
+
     int iy = 8;
     sprintf( conv,   "%d", m_Totals.nPositionSize ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblPositionSize ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );

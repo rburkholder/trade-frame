@@ -44,6 +44,11 @@ protected:
   std::vector<CMergeCarrierBase *> *m_v;
 };
 
+// heap (min-heap) algorithm
+//  http://cis.stvincent.edu/html/tutorials/swd/heaps/heaps.html
+//  http://en.wikipedia.org/wiki/Heapsort, has the siftdown algorithm
+//  http://www.cppreference.com/wiki/stl/algorithm/is_heap  is_heap()
+
 // be aware that this maybe running in alternate thread
 void CMergeDatedDatums::Run() {
   m_request = eRun;
@@ -60,7 +65,7 @@ void CMergeDatedDatums::Run() {
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers[vIx[0]];
-    pCarrier->ProcessDatum();
+    pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
