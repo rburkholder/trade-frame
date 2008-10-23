@@ -13,25 +13,33 @@ CMergeDatedDatums::CMergeDatedDatums(void)
 }
 
 CMergeDatedDatums::~CMergeDatedDatums(void) {
-  for each ( CMergeCarrierBase *i in m_vCarriers ) {
-    delete i;
+//  for each ( CMergeCarrierBase *i in m_vCarriers ) {
+//    delete i;
+//  }
+  while ( !m_vCarriers.Empty() ) {
+    CMergeCarrierBase *p = m_vCarriers.RemoveEnd();
+    delete p;
   }
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CQuote> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.push_back( new CMergeCarrier<CQuote>( pSeries, function ) );
+  //m_vCarriers.push_back( new CMergeCarrier<CQuote>( pSeries, function ) );
+  m_vCarriers.Append( new CMergeCarrier<CQuote>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CTrade> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.push_back( new CMergeCarrier<CTrade>( pSeries, function ) );
+  //m_vCarriers.push_back( new CMergeCarrier<CTrade>( pSeries, function ) );
+  m_vCarriers.Append( new CMergeCarrier<CTrade>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CBar> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.push_back( new CMergeCarrier<CBar>( pSeries, function ) );
+  //m_vCarriers.push_back( new CMergeCarrier<CBar>( pSeries, function ) );
+  m_vCarriers.Append( new CMergeCarrier<CBar>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.push_back( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
+  //m_vCarriers.push_back( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
+  m_vCarriers.Append( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
 }
 
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html
@@ -44,50 +52,56 @@ protected:
   std::vector<CMergeCarrierBase *> *m_v;
 };
 
-// heap (min-heap) algorithm
-//  http://cis.stvincent.edu/html/tutorials/swd/heaps/heaps.html
-//  http://en.wikipedia.org/wiki/Heapsort, has the siftdown algorithm
-//  http://www.cppreference.com/wiki/stl/algorithm/is_heap  is_heap()
+
+struct structLT {
+  bool lt( CMergeCarrierBase *plhs, CMergeCarrierBase *prhs )  { return plhs->GetDateTime() < prhs->GetDateTime(); };
+};
 
 // be aware that this maybe running in alternate thread
 void CMergeDatedDatums::Run() {
   m_request = eRun;
   std::vector<size_t> vIx;  // ordered by most recent values from CMergeCarrierBase
-  vIx.resize( m_vCarriers.size() );  // vIx provides mechanism to extract datums in datetime order from carriers.
-  for ( size_t ix = 0; ix < vIx.size(); ++ix ) vIx[ ix ] = ix;  // preset each entry for each carrier
-  std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
-  size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
-  size_t cntCarriers = vIx.size();
+  //vIx.resize( m_vCarriers.size() );  // vIx provides mechanism to extract datums in datetime order from carriers.
+  //for ( size_t ix = 0; ix < vIx.size(); ++ix ) vIx[ ix ] = ix;  // preset each entry for each carrier
+  //std::sort( vIx.begin(), vIx.end(), SortByMergeCarrier( &m_vCarriers ) );
+  //size_t cntNulls = 0; // as timeseries depleted, move to end, and keep count
+
+
+
+  size_t cntCarriers = m_vCarriers.Size();
   LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_cntReorders = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
-    pCarrier = m_vCarriers[vIx[0]];
+    //pCarrier = m_vCarriers[vIx[0]];
+    pCarrier = m_vCarriers.GetRoot();
     pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
-      ++cntNulls;
+      m_vCarriers.ArchiveRoot();
+      //++cntNulls;
       --cntCarriers;
-      size_t retired = vIx[ 0 ];
-      for ( size_t ix = 0; ix < cntCarriers; ++ix ) {
-        vIx[ ix ] = vIx[ ix + 1 ];  // move the carriers up to fill vacated spot at front
-      }
-      vIx[ cntCarriers ] = retired;  // used up time series
+      //size_t retired = vIx[ 0 ];
+      //for ( size_t ix = 0; ix < cntCarriers; ++ix ) {
+      //  vIx[ ix ] = vIx[ ix + 1 ];  // move the carriers up to fill vacated spot at front
+      //}
+      //vIx[ cntCarriers ] = retired;  // used up time series
     }
     else {
       // reorder the carriers
-      size_t ix = 1;
-      size_t carrier = vIx[ 0 ];
-      while ( ix < cntCarriers ) {
-        if ( pCarrier->GetDateTime() <= m_vCarriers[vIx[ix]]->GetDateTime() ) break;
-        vIx[ ix - 1 ] = vIx[ ix ];
-        ++ix;
-        ++m_cntReorders;
-      }
-      vIx[ ix - 1 ] = carrier;
+      m_vCarriers.SiftDown();
+      //size_t ix = 1;
+      //size_t carrier = vIx[ 0 ];
+      //while ( ix < cntCarriers ) {
+      //  if ( pCarrier->GetDateTime() <= m_vCarriers[vIx[ix]]->GetDateTime() ) break;
+      //  vIx[ ix - 1 ] = vIx[ ix ];
+      //  ++ix;
+      //  ++m_cntReorders;
+      //}
+      //vIx[ ix - 1 ] = carrier;
     }
   }
   m_state = eStopped;

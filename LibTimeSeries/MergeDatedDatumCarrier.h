@@ -16,10 +16,11 @@ public:
   virtual ~CMergeCarrierBase( void ) {};
   virtual void ProcessDatum( void ) { throw std::runtime_error( "ProcessDatum not instantiated" ); };
   virtual void Reset( void ) { throw std::runtime_error( "Reset not instantiated" ); };
-  const ptime &GetDateTime( void ) { return m_dt; };
+  inline const ptime &GetDateTime( void ) { return m_dt; };
   CDatedDatum *GetDatedDatum( void ) { return m_pDatum; };
   bool operator<( const CMergeCarrierBase &other ) const { return m_dt < other.m_dt; };
   bool operator<( const CMergeCarrierBase *pOther ) const { return m_dt < pOther->m_dt; };
+  static bool lt( CMergeCarrierBase *plhs, CMergeCarrierBase *prhs ) { return plhs->m_dt < prhs->m_dt; };
 protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
   CDatedDatum *m_pDatum;

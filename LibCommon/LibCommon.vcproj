@@ -159,10 +159,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyWordMatch.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Log.cpp"
 				>
 			</File>
@@ -226,6 +222,10 @@
 			</File>
 			<File
 				RelativePath=".\Log.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MinHeap.h"
 				>
 			</File>
 			<File
