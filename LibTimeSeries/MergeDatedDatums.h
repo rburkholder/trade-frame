@@ -15,7 +15,6 @@ public:
   virtual ~CMergeDatedDatums(void);
 
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
-  //typedef FastDelegate1<const CTrade &> OnTradeHandler;
 
   void Add( CTimeSeries<CQuote> *pSeries, OnDatumHandler );
   void Add( CTimeSeries<CTrade> *pSeries, OnDatumHandler );
@@ -26,10 +25,6 @@ public:
   unsigned long GetCountProcessedDatums( void ) { return m_cntProcessedDatums; };
   unsigned long GetCountCarrierReorders( void ) { return m_cntReorders; };
 protected:
-  // this could be reimplemented with a linked list, if a linked list is sortable,
-  //   ie, do the ordered insertions one at a time
-  // or stay with a vector and do binary search each time
-  //std::vector<CMergeCarrierBase *> m_vCarriers;
   CMinHeap<CMergeCarrierBase *, CMergeCarrierBase> m_vCarriers;
 
   // not all states or commands are implemented yet

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-//#include <stdexcept>
 #include <assert.h>
 
 // http://cis.stvincent.edu/html/tutorials/swd/heaps/heaps.html
@@ -20,7 +19,7 @@ public:
   T RemoveEnd( void );
   T GetRoot( void ) { assert( 0 != m_cntActiveItems ); return m_vT.front(); };
   void ArchiveRoot( void ); // root item of no further use, swap to end and sift down
-  void SiftDown( void ) { SiftDown( 0 ); }; // resequence new root after use and change
+  void SiftDown( void ) { SiftDown( 0 ); }; // reorder new root after use and change
   bool Empty( void ) { return m_vT.empty(); };
   size_t Size( void ) { return m_vT.size(); };
 protected:
@@ -72,14 +71,6 @@ template<class T, class C> T CMinHeap<T,C>::RemoveEnd( void ) {
   return item;
 }
 
-template<class T, class C> void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
-  assert( ix < m_cntActiveItems );
-  assert( iy < m_cntActiveItems );
-  T tmp = m_vT.at( ix );
-  m_vT.at( ix ) = m_vT.at( iy );
-  m_vT.at( iy ) = tmp;
-}
-
 template<class T, class C> void CMinHeap<T,C>::ArchiveRoot() {
   // swap with last item and SiftDown
   assert( 0 < m_cntActiveItems );
@@ -91,12 +82,34 @@ template<class T, class C> void CMinHeap<T,C>::ArchiveRoot() {
   }
 }
 
+template<class T, class C> void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
+  assert( ix < m_cntActiveItems );
+  assert( iy < m_cntActiveItems );
+  T tmp = m_vT.at( ix );
+  m_vT.at( ix ) = m_vT.at( iy );
+  m_vT.at( iy ) = tmp;
+}
+
+template<class T, class C> void CMinHeap<T,C>::SiftUp( size_t ix ) {
+  size_t cur = ix;
+  size_t parent;
+  while ( 0 != cur ) {
+    parent = Parent( cur );
+    if ( C::lt( m_vT.at( parent ), m_vT.at( cur ) ) ) {
+      break; // done sifting
+    }
+    else { // swap and try again
+      Swap( cur, parent );
+      cur = parent;
+    }
+  }
+}
+
 template<class T, class C> void CMinHeap<T,C>::SiftDown( size_t ix ) {
   size_t cur = ix;
   while ( !isLeaf( cur ) ) {
     if ( hasOneLeaf( cur ) ) {
       size_t left = LeftChild( cur );
-      //if ( m_vT.at( left ) < m_vT.at( cur ) ) {
       if ( C::lt( m_vT.at( left ), m_vT.at( cur ) ) ) {
         Swap( left, cur );
         cur = left;
@@ -108,10 +121,9 @@ template<class T, class C> void CMinHeap<T,C>::SiftDown( size_t ix ) {
     else { // has two leaves
       size_t right = RightChild( cur );
       size_t left = LeftChild( cur );
-      //bool bGoRight = !( m_vT.at( left ) < m_vT.at( right ) );  // right side has shorter distance by default for same or greater
+      // right side has shorter distance by default for same or greater
       bool bGoRight = !( C::lt( m_vT.at( left ), m_vT.at( right ) ) );
       if ( bGoRight ) {
-        //if ( m_vT.at( right ) < m_vT.at( cur ) ) {
         if ( C::lt( m_vT.at( right ), m_vT.at( cur ) ) ) {
           Swap( right, cur );
           cur = right;
@@ -121,7 +133,6 @@ template<class T, class C> void CMinHeap<T,C>::SiftDown( size_t ix ) {
         }
       }
       else { // test with left
-        //if ( m_vT.at( left ) < m_vT.at( cur ) ) {
         if ( C::lt( m_vT.at( left ), m_vT.at( cur ) ) ) {
           Swap( left, cur );
           cur = left;
@@ -130,22 +141,6 @@ template<class T, class C> void CMinHeap<T,C>::SiftDown( size_t ix ) {
           break;
         }
       }
-    }
-  }
-}
-
-template<class T, class C> void CMinHeap<T,C>::SiftUp( size_t ix ) {
-  size_t cur = ix;
-  size_t parent;
-  while ( 0 != cur ) {
-    parent = Parent( cur );
-    //if ( m_vT.at( parent ) < m_vT.at( cur ) ) {
-    if ( C::lt( m_vT.at( parent ), m_vT.at( cur ) ) ) {
-      break; // done sifting
-    }
-    else { // swap and try again
-      Swap( cur, parent );
-      cur = parent;
     }
   }
 }
