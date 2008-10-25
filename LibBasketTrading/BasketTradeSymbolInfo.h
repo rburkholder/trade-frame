@@ -1,30 +1,21 @@
 #pragma once
 
-#include <string>
-#include <sstream>
+#include "BasketTradeSymbolBase.h"
+
 #include <map>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
 #include "BarFactory.h"
-#include "TimeSeries.h"
-#include "ProviderInterface.h"
-#include "Instrument.h"
 #include "Order.h"
 #include "OrderManager.h"
 #include "Delegate.h"
-#include "ChartRealTimeTreeView.h"
 
 #include "ChartEntryBars.h"
 #include "ChartEntryIndicator.h"
 #include "ChartEntryMark.h"
 #include "ChartEntrySegments.h"
 #include "ChartEntryShape.h"
-#include "ChartDataView.h"
 
-class CBasketTradeSymbolInfo {
+class CBasketTradeSymbolInfo: public CBasketTradeSymbolBase {
 public:
   explicit CBasketTradeSymbolInfo( 
     const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
@@ -36,64 +27,13 @@ public:
   double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   const std::string &GetSymbolName( void ) { return m_status.sSymbolName; };
-  void StreamSymbolInfo( std::ostream *pStream );
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
   void StartTrading( void );
   void StopTrading( void );
 
-  struct structFieldsForDialog { // used for updating dialog
-    std::string sSymbolName;
-    double dblCurrentPrice;
-    double dblHigh;
-    double dblOpenRangeHigh;  // ACD Opening Range
-    double dblOpen;
-    double dblOpenRangeLow;   // ACD Opening Range
-    double dblLow;
-    double dblFilledPrice;
-    double dblStop;
-    int    nPositionSize; //+ or -
-    double dblPositionSize;  
-    double dblAverageCost;
-    double dblUnRealizedPL;
-    double dblRealizedPL;
-    double dblRunningPL;
-    double dblMaxRunningPL;
-    double dblMinRunningPL;
-    double dblAvgDailyRange;
-    std::string sHit;  // 0/1 for long, 0/1 for short (two characters here)
-    structFieldsForDialog( void ) : 
-      dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
-      dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
-      nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
-      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblAvgDailyRange( 0 ),
-      dblRunningPL( 0 ), dblMaxRunningPL( 0 ), dblMinRunningPL( 0) {};
-    structFieldsForDialog( const std::string &sSymbolName_ ) : sSymbolName( sSymbolName_ ),
-      dblHigh( 0 ), dblOpenRangeHigh( 0 ), dblOpen( 0 ),
-      dblOpenRangeLow( 0 ), dblLow( 0 ), dblFilledPrice( 0 ), dblCurrentPrice( 0 ), dblStop( 0 ),
-      nPositionSize( 0 ), dblPositionSize( 0 ), dblAverageCost( 0 ),
-      dblUnRealizedPL( 0 ), dblRealizedPL( 0 ), dblAvgDailyRange( 0 ),
-      dblRunningPL( 0 ), dblMaxRunningPL( 0 ), dblMinRunningPL( 0 ) {};
-  };
   structFieldsForDialog *GetDialogFields( void ) { return &m_status; };  // needs to come after structure definition
 
-  struct structCommonModelInformation {
-    enum enumCalcStep { Prelim, Final } nCalcStep;
-    bool bRTH;  // regular trading hours only
-    ptime dtRTHBgn;
-    ptime dtRTHEnd;
-    ptime dtOpenRangeBgn;
-    ptime dtOpenRangeEnd;
-    ptime dtEndActiveTrading;
-    ptime dtBgnNoMoreTrades;
-    ptime dtBgnCancelTrades;
-    ptime dtBgnCloseTrades;
-    ptime dtTradeDate; // date of trading, previous days provide the history
-    double dblFunds;  // funds available for use
-    CProviderInterface *pDataProvider;
-    CProviderInterface *pExecutionProvider;
-    CChartRealTimeTreeView *pTreeView;
-  };
   void CalculateTrade( structCommonModelInformation *pParameters  );
 
 protected:
@@ -102,9 +42,7 @@ protected:
   void HandleOpen( const CTrade &trade );
 
   void Initialize( void );
-  structFieldsForDialog m_status;
-  std::string m_sPath;
-  std::string m_sStrategy;
+
   double m_dblDayOpenPrice;
   double m_dblPriceForEntry;
   double m_dblAveragePriceOfEntry;
@@ -144,15 +82,12 @@ protected:
   static const size_t m_nMaxCrossings = 2;  
   static const size_t m_nBarWidth = 30;  //seconds
 
-  structFieldsForDialog m_FieldsForDialog;
-  structCommonModelInformation *m_pModelParameters;
   enum enumStateForRangeCalc {
     WaitForRangeStart,
     CalculatingRange, 
     DoneCalculatingRange
   } m_OpeningRangeState, m_RTHRangeState;
 
-  CInstrument *m_pInstrument;
   COrderManager m_OrderManager;
 
   void HandleBarFactoryBar( const CBar &bar );
@@ -183,8 +118,6 @@ protected:
   CChartEntryIndicator m_ceLo;
 
   //CChartEntryIndicator  // some sort of indicator for order flow:  trade direction vs quotes, etc
-
-  CChartDataView *m_pdvChart;
 
 
 private:

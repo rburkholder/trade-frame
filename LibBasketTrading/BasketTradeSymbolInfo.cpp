@@ -2,10 +2,8 @@
 
 #include "BasketTradeSymbolInfo.h"
 
-#include "TimeSeries.h"
 #include "HDF5TimeSeriesContainer.h"
 #include "HDF5WriteTimeSeries.h"
-#include "InstrumentFile.h"
 #include "PivotGroup.h"
 #include "Log.h"
 
@@ -19,62 +17,37 @@ static char THIS_FILE[] = __FILE__;
 // CSymbolInfo
 //
 
-// Is this disabled when model decides it shouldn't trade?
-// m_status.symbol is no showing for certain of these objects
-
-CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
+CBasketTradeSymbolInfo::CBasketTradeSymbolInfo ( 
   const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy
   ) 
-: m_status( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ),
+: CBasketTradeSymbolBase( sSymbolName, sPath, sStrategy ), 
   m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForFirstTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pdvChart( NULL ), m_pInstrument( NULL ), m_bFoundOpeningTrade( false )
+  m_bFoundOpeningTrade( false )
 {
   Initialize();
 }
 
-CBasketTradeSymbolInfo::CBasketTradeSymbolInfo( 
-  std::stringstream *pStream )
-: m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
+CBasketTradeSymbolInfo::CBasketTradeSymbolInfo ( std::stringstream *pStream )
+: CBasketTradeSymbolBase(), 
+  m_dblAveBarHeight( 0 ), m_dblTrailingStopDistance( 0 ),
   m_PositionState( Init ), m_TradingState( WaitForOpeningTrade ),
   m_bDoneTheLong( false ), m_bDoneTheShort( false ),
   m_nBarsInSequence( 0 ), m_nOpenCrossings( 0 ),
   m_OpeningRangeState( WaitForRangeStart ), m_RTHRangeState( WaitForRangeStart ),
-  m_pdvChart( NULL ), m_pInstrument( NULL ), m_bFoundOpeningTrade( false )
+  m_bFoundOpeningTrade( false )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
 }
 
 CBasketTradeSymbolInfo::~CBasketTradeSymbolInfo( void ) {
-  if ( NULL != m_pInstrument ) {
-    delete m_pInstrument;
-    m_pInstrument = NULL;
-  }
-  if ( NULL != m_pdvChart ) {
-    m_pdvChart->Close();
-    delete m_pdvChart;
-    m_pdvChart = NULL;
-  }
 }
 
 void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call this
-
-  m_1MinBarFactory.SetBarWidth( m_nBarWidth );  
-  m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
-
-  CInstrumentFile file;
-  file.OpenIQFSymbols();
-  try {
-    m_pInstrument = file.CreateInstrumentFromIQFeed( m_status.sSymbolName, m_status.sSymbolName );  // todo:  need to verify proper symbol usage
-  }
-  catch (...) {
-    std::cout << "CBasketTradeSymbolInfo::Initialize problems" << std::endl;
-  }
-  file.CloseIQFSymbols();
 
   m_ceBars.SetColour( Colour::Orange );
   m_ceBarVolume.SetColour( Colour::Black );
@@ -84,7 +57,6 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   m_ceOrdersBuy.SetColour( Colour::Blue ); m_ceOrdersBuy.SetShape( CChartEntryShape::EBuy );
   m_ceOrdersSell.SetColour( Colour::Red ); m_ceOrdersSell.SetShape( CChartEntryShape::ESell );
 
-  m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
   m_pdvChart->Add( 0, &m_ceBars );
   m_pdvChart->Add( 1, &m_ceBarVolume );
   m_pdvChart->Add( 0, &m_ceQuoteAsks );
@@ -94,28 +66,6 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
   m_pdvChart->Add( 0, &m_ceLevels );
   m_pdvChart->Add( 0, &m_ceOrdersBuy );
   m_pdvChart->Add( 0, &m_ceOrdersSell );
-}
-
-void CBasketTradeSymbolInfo::StartTrading() {
-  m_pModelParameters->pTreeView->Add( "Basket", m_status.sSymbolName, m_pdvChart );
-
-  m_pModelParameters->pDataProvider->AddTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
-  m_pModelParameters->pDataProvider->AddQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
-  m_pModelParameters->pDataProvider->AddOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
-}
-
-void CBasketTradeSymbolInfo::StopTrading() {
-  m_pModelParameters->pDataProvider->RemoveTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
-  m_pModelParameters->pDataProvider->RemoveQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
-  m_pModelParameters->pDataProvider->RemoveOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
-
-  m_pModelParameters->pTreeView->Remove( "Basket", m_status.sSymbolName );
-}
-
-void CBasketTradeSymbolInfo::StreamSymbolInfo(std::ostream *pStream) {
-  *pStream << m_status.sSymbolName << "," << m_sPath << "," << m_sStrategy;
-  //int i = pStream->gcount();
-  //pStream->rdbuf()->pubsync
 }
 
 void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pParameters ) {
@@ -163,6 +113,29 @@ void CBasketTradeSymbolInfo::CalculateTrade( structCommonModelInformation *pPara
     m_nQuantityForEntry = 0;
     m_dblProposedEntryCost = 0;
     std::cout << m_status.sSymbolName << " didn't have enough bars" << std::endl;
+  }
+}
+
+void CBasketTradeSymbolInfo::StartTrading() {
+  if ( NULL != m_pModelParameters ) {
+    m_pModelParameters->pTreeView->Add( "Basket", m_status.sSymbolName, m_pdvChart );
+
+    m_1MinBarFactory.SetBarWidth( m_nBarWidth );  
+    m_1MinBarFactory.SetOnBarComplete( MakeDelegate( this, &CBasketTradeSymbolInfo::HandleBarFactoryBar ) );
+
+    m_pModelParameters->pDataProvider->AddTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+    m_pModelParameters->pDataProvider->AddQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+    m_pModelParameters->pDataProvider->AddOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+  }
+}
+
+void CBasketTradeSymbolInfo::StopTrading() {
+  if ( NULL != m_pModelParameters ) {
+    m_pModelParameters->pDataProvider->RemoveTradeHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleTrade ) );
+    m_pModelParameters->pDataProvider->RemoveQuoteHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleQuote ) );
+    m_pModelParameters->pDataProvider->RemoveOnOpenHandler( m_status.sSymbolName, MakeDelegate( this, &CBasketTradeSymbolInfo::HandleOpen ) );
+
+    m_pModelParameters->pTreeView->Remove( "Basket", m_status.sSymbolName );
   }
 }
 
