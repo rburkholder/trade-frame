@@ -5,9 +5,7 @@
 #include <map>
 
 #include "BarFactory.h"
-#include "Order.h"
-#include "OrderManager.h"
-#include "Delegate.h"
+//#include "Delegate.h"
 
 #include "ChartEntryBars.h"
 #include "ChartEntryIndicator.h"
@@ -24,24 +22,19 @@ public:
 
   Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
 
-  double GetProposedEntryCost() { return m_dblProposedEntryCost; };
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
-  const std::string &GetSymbolName( void ) { return m_status.sSymbolName; };
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
-  void StartTrading( void );
-  void StopTrading( void );
-
-  structFieldsForDialog *GetDialogFields( void ) { return &m_status; };  // needs to come after structure definition
-
-  void CalculateTrade( structCommonModelInformation *pParameters  );
+  virtual void StartTrading( void );
+  virtual void StopTrading( void );
 
 protected:
+  void Initialize( void );
+  virtual void ModelReady( CBars *pBars );
+
   void HandleQuote( const CQuote &quote );
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
-
-  void Initialize( void );
 
   double m_dblDayOpenPrice;
   double m_dblPriceForEntry;
@@ -49,17 +42,19 @@ protected:
   double m_dblMarketValueAtEntry;
   double m_dblCurrentMarketPrice;
   double m_dblCurrentMarketValue;
-  int m_nQuantityForEntry;
   int m_nWorkingQuantity;
   double m_dblAllocatedWorkingFunds;
   double m_dblExitPrice;
-  double m_dblProposedEntryCost;
+  double m_dblAveBarHeight;
+  double m_dblTrailingStopDistance;
+
   enum enumPositionState { 
     Init, WaitingForOpen, 
     WaitingForThe3Bars, 
     WaitingForOrderFulfillmentLong, WaitingForOrderFulfillmentShort,
     WaitingForLongExit, WaitingForShortExit,
     WaitingForExit, Exited } m_PositionState;
+
   enum enumTradingState {
     WaitForFirstTrade,
     WaitForOpeningTrade, 
@@ -71,8 +66,12 @@ protected:
     CloseTrades,  // 15:50 exchange time
     DoneTrading   // 15:50 exchange time
   } m_TradingState;
-  double m_dblAveBarHeight;
-  double m_dblTrailingStopDistance;
+
+  enum enumStateForRangeCalc {
+    WaitForRangeStart,
+    CalculatingRange, 
+    DoneCalculatingRange
+  } m_OpeningRangeState, m_RTHRangeState;
 
   bool m_bDoneTheLong, m_bDoneTheShort;
   bool m_bFoundOpeningTrade;
@@ -82,19 +81,11 @@ protected:
   static const size_t m_nMaxCrossings = 2;  
   static const size_t m_nBarWidth = 30;  //seconds
 
-  enum enumStateForRangeCalc {
-    WaitForRangeStart,
-    CalculatingRange, 
-    DoneCalculatingRange
-  } m_OpeningRangeState, m_RTHRangeState;
-
-  COrderManager m_OrderManager;
-
   void HandleBarFactoryBar( const CBar &bar );
-  void HandleOrderFilled( COrder *pOrder );
+  virtual void HandleOrderFilled( COrder *pOrder );
 
-  std::map<unsigned long, COrder*> m_mapActiveOrders;
-  std::map<unsigned long, COrder*> m_mapCompletedOrders;
+  //std::map<unsigned long, COrder*> m_mapActiveOrders;
+  //std::map<unsigned long, COrder*> m_mapCompletedOrders;
 
   CBarFactory m_1MinBarFactory;
   CQuotes m_quotes;

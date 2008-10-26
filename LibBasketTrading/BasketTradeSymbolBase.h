@@ -12,11 +12,13 @@ using namespace boost::gregorian;
 #include "Instrument.h"
 #include "TimeSeries.h"
 #include "ChartDataView.h"
+#include "Order.h"
+#include "OrderManager.h"
 
 class CBasketTradeSymbolBase {
 public:
-  CBasketTradeSymbolBase( void ); // probably isn't working properly, updated when streaming stuff implemented
   CBasketTradeSymbolBase( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
+  CBasketTradeSymbolBase( std::stringstream *pStream ); // probably isn't working properly, updated when streaming stuff implemented
   virtual ~CBasketTradeSymbolBase(void);
   void StreamSymbolInfo( std::ostream *pStream );
 
@@ -72,7 +74,29 @@ public:
     CChartRealTimeTreeView *pTreeView;
   };
 
+  const std::string &GetSymbolName( void ) { return m_status.sSymbolName; };
+  structFieldsForDialog *GetDialogFields( void ) { return &m_status; };  // needs to come after structure definition
+  double GetProposedEntryCost() { return m_dblProposedEntryCost; };
+
+  void CalculateTrade( structCommonModelInformation *pParameters  );
+
+  virtual void StartTrading( void ) {};
+  virtual void StopTrading( void ) {};
+
+  void AddTradeHandler( CSymbol::tradehandler_t handler );
+  void AddQuoteHandler( CSymbol::quotehandler_t handler );
+  void AddOpenHandler( CSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( CSymbol::tradehandler_t handler );
+  void RemoveQuoteHandler( CSymbol::quotehandler_t handler );
+  void RemoveOpenHandler( CSymbol::tradehandler_t handler );
+
+  void PlaceOrder( COrder *pOrder );
+
 protected:
+  double m_dblProposedEntryCost;
+  int m_nQuantityForEntry;
+
+
   structFieldsForDialog m_status;
   std::string m_sPath;
   std::string m_sStrategy;
@@ -81,10 +105,13 @@ protected:
   structCommonModelInformation *m_pModelParameters;
 
   CInstrument *m_pInstrument;
-
+  COrderManager m_OrderManager;
   CChartDataView *m_pdvChart;
 
   void Initialize( void );
+  virtual void ModelReady( CBars *pBars ) {};
+  virtual void HandleOrderFilled( COrder *pOrder );
 
 private:
+  CBasketTradeSymbolBase( void );  // don't use a default constructor
 };
