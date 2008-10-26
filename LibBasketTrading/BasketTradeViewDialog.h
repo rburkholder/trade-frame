@@ -30,7 +30,7 @@ protected:
   CStatic m_lblDateTime;
 
   void HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ); // when object instatiated in basket
-  void HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolInfo *pInfo );  // when object has new data to display
+  void HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolBase *p );  // when object has new data to display
 
   CGeneratePeriodicRefresh m_refresh;
   void HandlePeriodicRefresh( CGeneratePeriodicRefresh* );

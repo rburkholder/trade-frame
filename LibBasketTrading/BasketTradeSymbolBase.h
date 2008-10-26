@@ -92,6 +92,8 @@ public:
 
   void PlaceOrder( COrder *pOrder );
 
+  Delegate<CBasketTradeSymbolBase *> OnBasketTradeSymbolChanged;
+
 protected:
   double m_dblProposedEntryCost;
   int m_nQuantityForEntry;

@@ -20,8 +20,6 @@ public:
   explicit CBasketTradeSymbolInfo( std::stringstream *pStream );
   ~CBasketTradeSymbolInfo( void );
 
-  Delegate<CBasketTradeSymbolInfo *> OnBasketTradeSymbolInfoChanged;
-
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
@@ -83,9 +81,6 @@ protected:
 
   void HandleBarFactoryBar( const CBar &bar );
   virtual void HandleOrderFilled( COrder *pOrder );
-
-  //std::map<unsigned long, COrder*> m_mapActiveOrders;
-  //std::map<unsigned long, COrder*> m_mapCompletedOrders;
 
   CBarFactory m_1MinBarFactory;
   CQuotes m_quotes;

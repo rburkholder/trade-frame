@@ -87,11 +87,12 @@ void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbo
   structDialogEntry entry( ix, pInfo, pInfo->GetDialogFields() );
   m_mapDialogEntry.insert( mapDialogEntry_t( pInfo->GetDialogFields()->sSymbolName, entry ) );
   m_lcBasketSymbols.InsertItem( ix, pInfo->GetDialogFields()->sSymbolName.c_str() );
-  pInfo->OnBasketTradeSymbolInfoChanged.Add( 
+  pInfo->OnBasketTradeSymbolChanged.Add( 
     MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged ) );
 }
 
-void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolInfo *pInfo ) {
+void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolBase *p ) {
+  CBasketTradeSymbolInfo *pInfo = reinterpret_cast<CBasketTradeSymbolInfo *>( p );
   std::map<std::string, structDialogEntry>::iterator iter
     = m_mapDialogEntry.find( pInfo->GetDialogFields()->sSymbolName );
   if ( m_mapDialogEntry.end() != iter ) {

@@ -71,10 +71,10 @@ void CBasketTradeSymbolInfo::Initialize( void ) {  // constructors only call thi
 }
 
 void CBasketTradeSymbolInfo::ModelReady( CBars *pBars ) {
-    CPivotGroup pivots( pBars );
-    for ( CPivotGroup::const_iterator iter = pivots.begin(); iter != pivots.end(); ++iter ) {
-      m_ceLevels.AddMark( iter->first, iter->second.colour, iter->second.sName.c_str() );
-    }
+  CPivotGroup pivots( pBars );
+  for ( CPivotGroup::const_iterator iter = pivots.begin(); iter != pivots.end(); ++iter ) {
+    m_ceLevels.AddMark( iter->first, iter->second.colour, iter->second.sName.c_str() );
+  }
 }
 
 void CBasketTradeSymbolInfo::StartTrading() {
@@ -289,7 +289,7 @@ void CBasketTradeSymbolInfo::HandleTrade(const CTrade &trade) {
     }
   }
 
-  OnBasketTradeSymbolInfoChanged( this );
+  OnBasketTradeSymbolChanged( this );
 }
 
 void CBasketTradeSymbolInfo::HandleBarFactoryBar(const CBar &bar) {
