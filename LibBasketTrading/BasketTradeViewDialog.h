@@ -29,7 +29,7 @@ protected:
   CListCtrl m_lcBasketSymbols;
   CStatic m_lblDateTime;
 
-  void HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ); // when object instatiated in basket
+  void HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolBase *pInfo ); // when object instatiated in basket
   void HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolBase *p );  // when object has new data to display
 
   CGeneratePeriodicRefresh m_refresh;
@@ -38,11 +38,11 @@ protected:
   struct structDialogEntry {
     int ix; // index in dialog box
     bool bChanged;
-    CBasketTradeSymbolInfo *pInfo;  // try not to use this
-    CBasketTradeSymbolInfo::structFieldsForDialog *pFields;
-    structDialogEntry( int ix_, CBasketTradeSymbolInfo *pInfo_,  CBasketTradeSymbolInfo::structFieldsForDialog *pFields_ ) 
+    CBasketTradeSymbolBase *pInfo;  // try not to use this
+    CBasketTradeSymbolBase::structFieldsForDialog *pFields;
+    structDialogEntry( int ix_, CBasketTradeSymbolBase *pInfo_,  CBasketTradeSymbolBase::structFieldsForDialog *pFields_ ) 
       : ix( ix_ ), bChanged( false ), pInfo( pInfo_ ), pFields( pFields_ ) {};
-    structDialogEntry( int ix_, CBasketTradeSymbolInfo::structFieldsForDialog *pFields_ ) 
+    structDialogEntry( int ix_, CBasketTradeSymbolBase::structFieldsForDialog *pFields_ ) 
       : ix( ix_ ), bChanged( false ), pInfo( NULL ), pFields( pFields_ ) {};
   };
   typedef std::pair<string, structDialogEntry> mapDialogEntry_t;
@@ -56,7 +56,7 @@ protected:
   afx_msg void OnSize( UINT, int, int );
   bool bDialogReady;
 
-  CBasketTradeSymbolInfo::structFieldsForDialog m_Totals;
+  CBasketTradeSymbolBase::structFieldsForDialog m_Totals;
 
   //CTimeSource m_ts;
 

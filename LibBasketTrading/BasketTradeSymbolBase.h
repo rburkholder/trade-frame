@@ -15,12 +15,15 @@ using namespace boost::gregorian;
 #include "Order.h"
 #include "OrderManager.h"
 
+// CBasketTradeModel::AddSymbol is where a subclass of this class is instantiated
+
 class CBasketTradeSymbolBase {
 public:
   CBasketTradeSymbolBase( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
   CBasketTradeSymbolBase( std::stringstream *pStream ); // probably isn't working properly, updated when streaming stuff implemented
   virtual ~CBasketTradeSymbolBase(void);
   void StreamSymbolInfo( std::ostream *pStream );
+  void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
   struct structFieldsForDialog { // used for updating dialog
     std::string sSymbolName;
@@ -98,6 +101,8 @@ protected:
   double m_dblProposedEntryCost;
   int m_nQuantityForEntry;
 
+  CQuotes m_quotes;
+  CTrades m_trades;
 
   structFieldsForDialog m_status;
   std::string m_sPath;

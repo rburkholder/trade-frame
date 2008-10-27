@@ -82,7 +82,7 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
   return TRUE;
 }
 
-void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolInfo *pInfo ) {
+void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbolBase *pInfo ) {
   int ix = m_mapDialogEntry.size();
   structDialogEntry entry( ix, pInfo, pInfo->GetDialogFields() );
   m_mapDialogEntry.insert( mapDialogEntry_t( pInfo->GetDialogFields()->sSymbolName, entry ) );
@@ -91,8 +91,8 @@ void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded( CBasketTradeSymbo
     MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged ) );
 }
 
-void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolBase *p ) {
-  CBasketTradeSymbolInfo *pInfo = reinterpret_cast<CBasketTradeSymbolInfo *>( p );
+void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSymbolBase *pInfo ) {
+  //CBasketTradeSymbolInfo *pInfo = reinterpret_cast<CBasketTradeSymbolInfo *>( p );
   std::map<std::string, structDialogEntry>::iterator iter
     = m_mapDialogEntry.find( pInfo->GetDialogFields()->sSymbolName );
   if ( m_mapDialogEntry.end() != iter ) {
@@ -126,7 +126,7 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
           m_Totals.dblRealizedPL += iter->second.pFields->dblRealizedPL;
           if ( iter->second.bChanged ) {
             iter->second.bChanged = false;
-            const CBasketTradeSymbolInfo::structFieldsForDialog *pFields = iter->second.pFields;
+            const CBasketTradeSymbolBase::structFieldsForDialog *pFields = iter->second.pFields;
             int ix = iter->second.ix;
             int iy = 0;
             sprintf( conv, "%.2f", pFields->dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );

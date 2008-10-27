@@ -171,3 +171,13 @@ void CBasketTradeSymbolBase::HandleOrderFilled(COrder *pOrder) {
   }
 }
 
+void CBasketTradeSymbolBase::WriteTradesAndQuotes(const std::string &sPathPrefix) {
+  if ( 0 != m_trades.Count() ) {
+    CHDF5WriteTimeSeries<CTrades, CTrade> wts;
+    wts.Write( sPathPrefix + "/trades/" + m_status.sSymbolName, &m_trades );
+  }
+  if ( 0 != m_quotes.Count() ) {
+    CHDF5WriteTimeSeries<CQuotes, CQuote> wts;
+    wts.Write( sPathPrefix + "/quotes/" + m_status.sSymbolName, &m_quotes );
+  }
+}

@@ -6,6 +6,7 @@
 #include "CommonDatabaseFunctions.h"
 #include "HDF5IterateGroups.h"
 #include "HDF5DataManager.h"
+#include "BasketTradeSymbolV2.h"
 
 #include <ostream>
 
@@ -41,8 +42,8 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   mapBasketSymbols_t::iterator iter;
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
-    CBasketTradeSymbolInfo *pInfo 
-      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy );
+    CBasketTradeSymbolV2 *pInfo 
+      = new CBasketTradeSymbolV2( sSymbolName, sPath, sStrategy );
     m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
     OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;
@@ -60,13 +61,13 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   mapBasketSymbols_t::iterator iter; 
   m_ModelInfo.bRTH = bRTHOnly;
   m_ModelInfo.dtTradeDate = dtTradeDate;
-  m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 30, 00 ) );
-  m_ModelInfo.dtOpenRangeBgn = m_ModelInfo.dtRTHBgn;
+  m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 31, 00 ) );
+  m_ModelInfo.dtOpenRangeBgn = ptime( dtTradeDate.date(), time_duration( 10, 30, 00 ) );
   m_ModelInfo.dtOpenRangeEnd = ptime( dtTradeDate.date(), time_duration( 10, 34, 0 ) );
-  m_ModelInfo.dtEndActiveTrading = ptime( dtTradeDate.date(), time_duration( 16, 40, 0 ) );
-  m_ModelInfo.dtBgnNoMoreTrades = ptime( dtTradeDate.date(), time_duration( 16, 42, 0 ) );
-  m_ModelInfo.dtBgnCancelTrades = ptime( dtTradeDate.date(), time_duration( 16, 44, 0 ) );
-  m_ModelInfo.dtBgnCloseTrades = ptime( dtTradeDate.date(), time_duration( 16, 46, 0 ) );
+  m_ModelInfo.dtEndActiveTrading = ptime( dtTradeDate.date(), time_duration( 16, 53, 0 ) );
+  m_ModelInfo.dtBgnNoMoreTrades = ptime( dtTradeDate.date(), time_duration( 16, 54, 0 ) );
+  m_ModelInfo.dtBgnCancelTrades = ptime( dtTradeDate.date(), time_duration( 16, 55, 0 ) );
+  m_ModelInfo.dtBgnCloseTrades = ptime( dtTradeDate.date(), time_duration( 16, 56, 0 ) );
   m_ModelInfo.dtRTHEnd = ptime( dtTradeDate.date(), time_duration( 17, 00, 00 ) );
   try {
     for ( int nLoopCount = 1; nLoopCount <= 2; ++nLoopCount ) {
@@ -75,12 +76,12 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
         case 1:
           nSymbolCount = m_mapBasketSymbols.size();
           dblFundsPerSymbol = dblFunds / nSymbolCount;
-          m_ModelInfo.nCalcStep = CBasketTradeSymbolInfo::structCommonModelInformation::Prelim;
+          m_ModelInfo.nCalcStep = CBasketTradeSymbolBase::structCommonModelInformation::Prelim;
           break;
         case 2: 
           nSymbolCount = nTradeableSymbols;
           dblFundsPerSymbol = dblFunds / nSymbolCount;
-          m_ModelInfo.nCalcStep = CBasketTradeSymbolInfo::structCommonModelInformation::Final;
+          m_ModelInfo.nCalcStep = CBasketTradeSymbolBase::structCommonModelInformation::Final;
           break;
       }
       for( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {

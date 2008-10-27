@@ -9,11 +9,11 @@
 #include "ChartEntrySegments.h"
 #include "ChartEntryShape.h"
 
-class CBasketTradeSymbolV2 :  public CBasketTradeSymbolBase
+class CBasketTradeSymbolSkeleton :  public CBasketTradeSymbolBase
 {
 public:
-  CBasketTradeSymbolV2( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
-  virtual ~CBasketTradeSymbolV2(void);
+  CBasketTradeSymbolSkeleton( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
+  virtual ~CBasketTradeSymbolSkeleton(void);
 
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
   void WriteTradesAndQuotes( const std::string &sPathPrefix );
@@ -25,6 +25,8 @@ protected:
 
   CBarFactory m_1MinBarFactory;
   CBars m_bars;
+  CQuotes m_quotes;
+  CTrades m_trades;
 
   CChartEntryBars m_ceBars;
   CChartEntryVolume m_ceBarVolume;
@@ -39,7 +41,6 @@ protected:
   static const size_t m_nBarWidth = 180;  //seconds
 
   bool m_bFoundOpeningTrade;
-  bool m_bFirstOrder;
 
   virtual void HandleOrderFilled( COrder *pOrder );
 
@@ -50,24 +51,5 @@ protected:
   void HandleQuote( const CQuote &quote );
   void HandleTrade( const CTrade &trade );
   void HandleOpen( const CTrade &trade );
-
-  double m_dblBaseLinePrice;
-  double m_dblTradeMovingSum;
-  double m_dblTradeMovingAvg;
-  int m_cntMovingAverageTrades;  // used only for ramp up of averaging process
-  static const int m_nMovingAverageValues = 5;
-  int m_ixRemovalTrade;
-
-  enum enumTradeSide {
-    UnknownTradeSide, 
-    GoingLong, GoingShort, TransitionLong, TransitionShort, 
-    SearchForLong, SearchForShort,
-    ConfirmLong, ConfirmShort, ConfirmLongCancel, ConfirmShortCancel,
-    NoMoreTrades,
-    CancelTrades,
-    ClosePositions,
-    NoMoreTrading
-  } m_TradeSideState;
-
 private:
 };

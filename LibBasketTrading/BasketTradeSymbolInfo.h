@@ -21,7 +21,6 @@ public:
   ~CBasketTradeSymbolInfo( void );
 
   int GetQuantityForEntry() { return m_nQuantityForEntry; };
-  void WriteTradesAndQuotes( const std::string &sPathPrefix );
 
   virtual void StartTrading( void );
   virtual void StopTrading( void );
@@ -83,8 +82,6 @@ protected:
   virtual void HandleOrderFilled( COrder *pOrder );
 
   CBarFactory m_1MinBarFactory;
-  CQuotes m_quotes;
-  CTrades m_trades;
   CBars m_bars;
 
   CChartEntryBars m_ceBars;

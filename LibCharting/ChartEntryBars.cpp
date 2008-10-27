@@ -89,6 +89,7 @@ void CChartEntryBars::AddDataToChart(XYChart *pXY) {
       this->GetClose(),
       0x00ff00, 0xff0000
       );
+    //candle->setDataGap( 0 );
     candle->setXData( CChartEntryBaseWithTime::GetDateTime() );
   }
 }

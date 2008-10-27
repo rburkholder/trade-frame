@@ -72,6 +72,10 @@ public:
     assert( not_a_date_time != m_dtOrderSubmitted ); 
     return m_dtOrderSubmitted; 
   };
+  const ptime &GetDateTimeOrderFilled( void ) { 
+    assert( not_a_date_time != m_dtOrderFilled ); 
+    return m_dtOrderFilled; 
+  };
 protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;

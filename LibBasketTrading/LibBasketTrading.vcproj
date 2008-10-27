@@ -171,6 +171,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BasketTradeSymbolSkeleton.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\BasketTradeSymbolV2.cpp"
 				>
 			</File>
@@ -230,6 +234,10 @@
 			</File>
 			<File
 				RelativePath=".\BasketTradeSymbolInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BasketTradeSymbolSkeleton.h"
 				>
 			</File>
 			<File

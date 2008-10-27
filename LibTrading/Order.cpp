@@ -78,8 +78,8 @@ COrder::~COrder(void) {
 void COrder::AssignOrderId() {
 //  try {
   m_dtOrderCreated = CTimeSource::Internal();
-  m_dtOrderSubmitted = not_a_date_time;
-    m_nOrderId = m_persistedorderid.GetNextOrderId();
+  //m_dtOrderSubmitted = not_a_date_time;  // already set as such
+  m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
 //  catch (...) {
 //    bOrderIdOk = false;
@@ -117,6 +117,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     m_dblAverageFillPrice = m_dblPriceXQuantity / m_nFilled;
     if ( 0 == m_nRemaining ) {
       m_eOrderStatus = OrderStatus::Filled;
+      m_dtOrderFilled = CTimeSource::Internal();
       OnOrderFilled( this );
     }
     else {

@@ -86,7 +86,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   // need to build and maintain order book, particularily for handling limit orders
   if ( NULL == m_pCurrentOrder ) {
     m_pCurrentOrder = m_lDelayOrder.front();
-    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) >= trade.m_dt ) {
+    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < trade.m_dt ) {
       m_lDelayOrder.pop_front();
       m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
       m_nOrderQuanProcessed = 0;
@@ -106,8 +106,8 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
         {
         std::string id( GetExecId() );
         CExecution exec( m_pCurrentOrder->GetOrderId(), trade.m_dblTrade, quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
-        std::cout << "Exec:  " << m_pCurrentOrder->GetInstrument()->GetSymbolName() << ", " << quan << "@" << trade.m_dblTrade
-          << ", " << m_pCurrentOrder->GetOrderSide() << ", Total=" << quan * trade.m_dblTrade << std::endl;
+//        std::cout << "Exec:  " << m_pCurrentOrder->GetInstrument()->GetSymbolName() << ", " << quan << "@" << trade.m_dblTrade
+//          << ", " << m_pCurrentOrder->GetOrderSide() << ", Total=" << quan * trade.m_dblTrade << std::endl;
         if ( NULL != OnOrderFill ) OnOrderFill( exec );
         m_nOrderQuanRemaining -= quan;
         m_nOrderQuanProcessed += quan;

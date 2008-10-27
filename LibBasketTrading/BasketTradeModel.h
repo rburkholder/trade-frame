@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ProviderInterface.h"
-#include "BasketTradeSymbolInfo.h"
+#include "BasketTradeSymbolBase.h"
 #include "Delegate.h"
 #include "ChartingContainer.h"
 
@@ -18,13 +18,13 @@ public:
   void ReadBasketList( void );
   void WriteBasketData( const std::string &sGroupName );
   void ReadBasketData( const std::string &sGroupName );
-  Delegate<CBasketTradeSymbolInfo*> OnBasketTradeSymbolInfoAddedToBasket;
+  Delegate<CBasketTradeSymbolBase*> OnBasketTradeSymbolInfoAddedToBasket;
   void Process( const std::string &sObjectName, const std::string &sObjectPath );
 protected:
-  typedef std::map<std::string, CBasketTradeSymbolInfo*> mapBasketSymbols_t;
+  typedef std::map<std::string, CBasketTradeSymbolBase*> mapBasketSymbols_t;
   mapBasketSymbols_t m_mapBasketSymbols;
-  typedef pair<std::string, CBasketTradeSymbolInfo*> pairBasketSymbolsEntry_t;
-  CBasketTradeSymbolInfo::structCommonModelInformation m_ModelInfo;
+  typedef pair<std::string, CBasketTradeSymbolBase*> pairBasketSymbolsEntry_t;
+  CBasketTradeSymbolBase::structCommonModelInformation m_ModelInfo;
   CChartingContainer m_ChartingContainer;
   //CProviderInterface *m_pDataProvider;
   //CProviderInterface *m_pExecutionProvider;
