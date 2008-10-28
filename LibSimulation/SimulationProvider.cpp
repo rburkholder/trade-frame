@@ -20,6 +20,10 @@ CSimulationProvider::CSimulationProvider(void)
 }
 
 CSimulationProvider::~CSimulationProvider(void) {
+  if ( NULL != m_pMerge ) {
+    delete m_pMerge;
+    m_pMerge = NULL;
+  }
 }
 
 void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
@@ -116,7 +120,7 @@ void CSimulationProvider::StopDepthWatch( CSymbol *pSymbol ) {
 UINT __cdecl CSimulationProvider::Merge( LPVOID lpParam ) {
   CSimulationProvider *pProvider = reinterpret_cast<CSimulationProvider *>( lpParam );
 
-  pProvider -> m_pMerge = new CMergeDatedDatums();
+  //pProvider -> m_pMerge = new CCrossThreadMerge();  // needs to be created in main thread
 
   for ( m_mapSymbols_t::iterator iter = pProvider->m_mapSymbols.begin();
     iter != pProvider->m_mapSymbols.end(); ++iter ) {
@@ -139,8 +143,10 @@ UINT __cdecl CSimulationProvider::Merge( LPVOID lpParam ) {
   CTimeSource::SetSimulationMode( bOldMode );
   pProvider -> m_dtSimStop = CTimeSource::External();
 
-  delete pProvider -> m_pMerge;
-  pProvider -> m_pMerge = NULL;
+  //delete pProvider -> m_pMerge;
+  //pProvider -> m_pMerge = NULL;
+
+  // use event here instead
   pProvider -> m_pMergeThread = NULL;
   return 1;
 }
@@ -153,6 +159,7 @@ void CSimulationProvider::Run() {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
+    m_pMerge = new CCrossThreadMerge();
     m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ) );
     assert( NULL != m_pMergeThread );
     //m_hMergeThread = CreateThread( NULL, 0, Merge, this, 0, &m_idMergeThread );

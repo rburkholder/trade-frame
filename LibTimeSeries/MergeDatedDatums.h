@@ -37,6 +37,8 @@ protected:
   unsigned long m_cntProcessedDatums;
   unsigned long m_cntReorders;
 
+  inline virtual void ProcessCarrier( CMergeCarrierBase *pCarrier );
+
 
 private:
 };

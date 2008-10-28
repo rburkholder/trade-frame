@@ -67,7 +67,8 @@ void CGeneratePeriodicRefresh::Remove( delegateRefresh_t::OnMessageHandler handl
 UINT CGeneratePeriodicRefresh::TriggerRefresh( LPVOID lpParameter ) {
   CGeneratePeriodicRefresh *p = reinterpret_cast<CGeneratePeriodicRefresh *>( lpParameter );
   while ( p->m_bKeepTimerActive ) {
-    p->SendMessage( WM_PERIODICREFRESH );
+    //p->SendMessageA( WM_PERIODICREFRESH );
+    p->PostMessage( WM_PERIODICREFRESH );
     WaitForSingleObject( p->m_hWaitEvent, 250 );
   }
   return 0;

@@ -4,7 +4,7 @@
 
 #include "ProviderInterface.h"
 #include "SimulationSymbol.h"
-#include "MergeDatedDatums.h"
+#include "CrossThreadMerge.h"
 #include "TimeSource.h"
 
 // simulation provider needs to send an open event on each symbol it does
@@ -37,7 +37,7 @@ protected:
   std::string m_sGroupDirectory;
 
   CWinThread *m_pMergeThread;
-  CMergeDatedDatums *m_pMerge;
+  CCrossThreadMerge *m_pMerge;
 
   static UINT __cdecl Merge( LPVOID lpParam );
 

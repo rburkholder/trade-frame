@@ -48,6 +48,8 @@ protected:
 */
 
 // be aware that this maybe running in alternate thread
+// the thread is not created in this class 
+// for example, see CSimulationProvider
 void CMergeDatedDatums::Run() {
   m_request = eRun;
   size_t cntCarriers = m_vCarriers.Size();
@@ -58,7 +60,8 @@ void CMergeDatedDatums::Run() {
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers.GetRoot();
-    pCarrier->ProcessDatum();  // automatically loads next datum when done
+    ProcessCarrier( pCarrier );
+    //pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
@@ -72,6 +75,10 @@ void CMergeDatedDatums::Run() {
   }
   m_state = eStopped;
   LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
+}
+
+void CMergeDatedDatums::ProcessCarrier( CMergeCarrierBase *pCarrier ) {
+  pCarrier->ProcessDatum();  // automatically loads next datum when done
 }
 
 void CMergeDatedDatums::Stop( void ) {
