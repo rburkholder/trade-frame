@@ -1,8 +1,10 @@
 #pragma once
+
+#include <map>
+#include <string>
+
 #include "BarFactory.h"
 #include "TimeSeries.h"
-#include <map>
-using namespace std;
 
 class CMarketProfile {
 public:
@@ -16,8 +18,8 @@ protected:
   void OnNewBar( const CBar &bar );
   void OnBarUpdate( const CBar &bar );
   CBars *m_pBars;
-  map<int, string *> m_mapProfile;
-  typedef pair<int, string *> m_mapProfile_Pair;
+  std::map<int, std::string *> m_mapProfile;
+  typedef std::pair<int, std::string *> m_mapProfile_Pair;
   int m_nMin, m_nMax;
 private:
 };

@@ -1,8 +1,6 @@
 #include "StdAfx.h"
 #include "TimeSeries.h"
 
-//using namespace H5;
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -56,7 +54,6 @@ CBars::CBars( unsigned int size )
 }
 
 CBars::~CBars( void ) {
-  //CTimeSeries<CBar>::~CTimeSeries();
 }
 
 // CTrades
@@ -69,7 +66,6 @@ CTrades::CTrades( unsigned int size )
 }
 
 CTrades::~CTrades( void ) {
-  //CTimeSeries<CTrade>::~CTimeSeries();
 }
 
 // CQuotes
@@ -82,7 +78,6 @@ CQuotes::CQuotes( unsigned int size )
 }
 
 CQuotes::~CQuotes( void ) {
-  //CTimeSeries<CQuote>::~CTimeSeries();
 }
 
 // CMarketDepths

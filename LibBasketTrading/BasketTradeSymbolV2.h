@@ -69,5 +69,7 @@ protected:
     NoMoreTrading
   } m_TradeSideState;
 
+  static const double m_dblHysterisis;
+
 private:
 };

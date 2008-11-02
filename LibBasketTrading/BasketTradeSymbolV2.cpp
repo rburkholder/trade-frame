@@ -13,6 +13,8 @@ static char THIS_FILE[] = __FILE__;
 #include "HDF5TimeSeriesContainer.h"
 #include "HDF5WriteTimeSeries.h"
 
+const double CBasketTradeSymbolV2::m_dblHysterisis = 0.02;
+
 CBasketTradeSymbolV2::CBasketTradeSymbolV2( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy ) 
 : CBasketTradeSymbolBase( sSymbolName, sPath, sStrategy ),
   m_TradeSideState( UnknownTradeSide ), m_dblTradeMovingSum( 0 ), m_cntMovingAverageTrades( 0 ),
@@ -81,10 +83,11 @@ void CBasketTradeSymbolV2::HandleOpen( const CTrade &trade ) {
 }
 
 void CBasketTradeSymbolV2::HandleQuote( const CQuote &quote ) {
-  assert( 0 < quote.m_dblAsk );
-  assert( 0 < quote.m_dblBid );
+  bool b = ( ( 0 < quote.m_dblAsk ) && (  0 < quote.m_dblBid ) );
+  //assert( 0 < quote.m_dblAsk );
+  //assert( 0 < quote.m_dblBid );
   m_quotes.AppendDatum( quote );
-  if ( ( quote.m_dt >= m_pModelParameters->dtRTHBgn ) && ( quote.m_dt < m_pModelParameters->dtRTHEnd ) ) {
+  if ( b && ( quote.m_dt >= m_pModelParameters->dtRTHBgn ) && ( quote.m_dt < m_pModelParameters->dtRTHEnd ) ) {
     m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
     m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
     m_pdvChart->SetChanged();
@@ -93,8 +96,8 @@ void CBasketTradeSymbolV2::HandleQuote( const CQuote &quote ) {
 
 void CBasketTradeSymbolV2::HandleTrade(const CTrade &trade) {
 
-  assert( 0 < trade.m_dblTrade );
-  assert( 0 < trade.m_nTradeSize );
+  //assert( 0 < trade.m_dblTrade );
+  //assert( 0 < trade.m_nTradeSize );
 
   m_status.dblCurrentPrice = trade.m_dblTrade;
   m_trades.AppendDatum( trade );
@@ -138,8 +141,8 @@ void CBasketTradeSymbolV2::HandleTrade(const CTrade &trade) {
           if ( m_cntMovingAverageTrades == m_nMovingAverageValues ) {
             m_ixRemovalTrade = m_trades.Count() - m_nMovingAverageValues;
             avg = m_dblTradeMovingSum / m_cntMovingAverageTrades;
-            if ( avg > ( m_dblBaseLinePrice + 0.05 ) ) m_TradeSideState = TransitionLong;
-            if ( avg < ( m_dblBaseLinePrice - 0.05 ) ) m_TradeSideState = TransitionShort;
+            if ( avg > ( m_dblBaseLinePrice + m_dblHysterisis ) ) m_TradeSideState = TransitionLong;
+            if ( avg < ( m_dblBaseLinePrice - m_dblHysterisis ) ) m_TradeSideState = TransitionShort;
           }
         }
         else { // cycle the moving average
@@ -148,14 +151,14 @@ void CBasketTradeSymbolV2::HandleTrade(const CTrade &trade) {
           avg = m_dblTradeMovingSum / m_cntMovingAverageTrades;
           switch ( m_TradeSideState ) {
             case UnknownTradeSide:
-              if ( avg > ( m_dblBaseLinePrice + 0.05 ) ) m_TradeSideState = TransitionLong;
-              if ( avg < ( m_dblBaseLinePrice - 0.05 ) ) m_TradeSideState = TransitionShort;
+              if ( avg > ( m_dblBaseLinePrice + m_dblHysterisis ) ) m_TradeSideState = TransitionLong;
+              if ( avg < ( m_dblBaseLinePrice - m_dblHysterisis ) ) m_TradeSideState = TransitionShort;
               break;
             case GoingLong:
-              if ( avg < ( m_dblBaseLinePrice - 0.05 ) ) m_TradeSideState = TransitionShort;
+              if ( avg < ( m_dblBaseLinePrice - m_dblHysterisis ) ) m_TradeSideState = TransitionShort;
               break;
             case GoingShort:
-              if ( avg > ( m_dblBaseLinePrice + 0.05 ) ) m_TradeSideState = TransitionLong;
+              if ( avg > ( m_dblBaseLinePrice + m_dblHysterisis ) ) m_TradeSideState = TransitionLong;
               break;
           }
         }
@@ -165,28 +168,42 @@ void CBasketTradeSymbolV2::HandleTrade(const CTrade &trade) {
     COrder *pOrder;
     switch ( m_TradeSideState ) { // use Boost state library?
       case GoingLong: // check for profit
-        if ( m_status.dblRunningPL > 2500 ) {
+        if ( m_status.dblRunningPL < -300.0 ) {
+          pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_status.nPositionSize );
+          LOG << "Order " << pOrder->GetOrderId() << " " << m_status.sSymbolName << " Placing Long Failure Exit, " << m_status.nPositionSize;
+          m_ceOrdersSell.AddLabel( trade.m_dt, trade.m_dblTrade, "Long Failure Exit" );
+          PlaceOrder( pOrder );
+          m_TradeSideState = NoMoreTrading;
+        }
+        if ( m_status.dblUnRealizedPL > 150.0 ) {
           pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Sell, m_status.nPositionSize );
           LOG << "Order " << pOrder->GetOrderId() << " " << m_status.sSymbolName << " Placing Long Profit Exit, " << m_status.nPositionSize;
           m_ceOrdersSell.AddLabel( trade.m_dt, trade.m_dblTrade, "Long Profit Exit" );
           PlaceOrder( pOrder );
-          m_TradeSideState = NoMoreTrading;
+          m_TradeSideState = SearchForShort;
         }
         break;
       case GoingShort:  // check for profit
-        if ( m_status.dblRunningPL > 2500 ) {
+        if ( m_status.dblRunningPL < -300.0 ) {
+          pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, -m_status.nPositionSize );
+          LOG << "Order " << pOrder->GetOrderId() << " " << m_status.sSymbolName << " Placing Short Failure Exit, " << -m_status.nPositionSize;
+          m_ceOrdersBuy.AddLabel( trade.m_dt, trade.m_dblTrade, "Short Failure Exit" );
+          PlaceOrder( pOrder );
+          m_TradeSideState = NoMoreTrading;
+        }
+        if ( m_status.dblUnRealizedPL > 150.0 ) {
           pOrder = new COrder( m_pInstrument, OrderType::Market, OrderSide::Buy, -m_status.nPositionSize );
           LOG << "Order " << pOrder->GetOrderId() << " " << m_status.sSymbolName << " Placing Short Profit Exit, " << -m_status.nPositionSize;
           m_ceOrdersBuy.AddLabel( trade.m_dt, trade.m_dblTrade, "Short Profit Exit" );
           PlaceOrder( pOrder );
-          m_TradeSideState = NoMoreTrading;
+          m_TradeSideState = SearchForLong;
         }
         break;
       case SearchForLong:
-        if ( avg > ( m_dblBaseLinePrice + 0.05 ) ) m_TradeSideState = TransitionLong;
+        if ( avg > ( m_dblBaseLinePrice + m_dblHysterisis ) ) m_TradeSideState = TransitionLong;
         break;
       case SearchForShort:
-        if ( avg < ( m_dblBaseLinePrice - 0.05 ) ) m_TradeSideState = TransitionShort;
+        if ( avg < ( m_dblBaseLinePrice - m_dblHysterisis ) ) m_TradeSideState = TransitionShort;
         break;
       case TransitionLong:  // reverse trade direction
         assert( m_status.nPositionSize <= 0 );
@@ -290,8 +307,8 @@ void CBasketTradeSymbolV2::HandleOrderFilled(COrder *pOrder) {
 
   if ( m_bFirstOrder ) {
     m_bFirstOrder = false;
-    m_status.dblOpen = pOrder->GetAverageFillPrice();
-    m_dblBaseLinePrice = m_status.dblOpen;
+    //m_status.dblOpen = pOrder->GetAverageFillPrice();
+    //m_dblBaseLinePrice = m_status.dblOpen;
   }
 
   switch ( m_TradeSideState ) {

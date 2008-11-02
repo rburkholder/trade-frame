@@ -213,23 +213,6 @@ template<class T> void CTimeSeries<T>::Sort( void ) {
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order
 }
 
-//template<class T> void CTimeSeries<T>::Flip() {
-  //std::vector<T>::iterator iterBegin = m_vSeries.begin();
-  //std::vector<T>::iterator iterEnd = m_vSeries.end();
-  //iterEnd--;
-
-  //T datum;
-  //while ( iterBegin < iterEnd ) {
-  //  datum = *iterBegin;
-  //  *iterBegin = *iterEnd;
-  //  *iterEnd = datum;
-  //  --iterEnd;
-  //  ++iterBegin;
-  //}
-
-  //reverse( m_vSeries.begin(), m_vSeries.end() );
-//}
-
 template<class T> CTimeSeries<T> * CTimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
   CTimeSeries<T> *series = NULL;
@@ -281,21 +264,6 @@ template<class T> H5::DataSpace *CTimeSeries<T>::DefineDataSpace( H5::DataSpace 
   }
   return pSpace;
 }
-
-// DatedDatums
-/*
-class CDatedDatums: public CTimeSeries<CDatedDatum> {
-public:
-  CDatedDatums(void);
-  CDatedDatums( unsigned int );
-  virtual ~CDatedDatums(void);
-  CDatedDatums *Subset( ptime time ) { return (CDatedDatums *) CTimeSeries<CDatedDatum>::Subset( time ); };
-  CDatedDatums *Subset( ptime time, unsigned int n ) { return (CDatedDatums *) CTimeSeries<CDatedDatum>::Subset( time, n ); };
-protected:
-private:
-};
-
-*/
 
 // Bars
 

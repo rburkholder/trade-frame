@@ -135,7 +135,6 @@ UINT __cdecl CSimulationProvider::Merge( LPVOID lpParam ) {
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
 
-  //CTimeSource ts;
   bool bOldMode = CTimeSource::GetSimulationMode();
   pProvider -> m_dtSimStart = CTimeSource::External();
   CTimeSource::SetSimulationMode();

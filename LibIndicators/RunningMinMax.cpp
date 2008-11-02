@@ -3,8 +3,9 @@
 
 // look up Tirone Levels, page 335, in Tech Anal, A-Z
 
-CRunningMinMax::CRunningMinMax(void) {
-  m_dblMax = m_dblMin = 0;
+CRunningMinMax::CRunningMinMax(void) 
+: m_dblMax( 0 ), m_dblMin( 0 )
+{
 }
 
 CRunningMinMax::~CRunningMinMax(void) {

@@ -14,7 +14,6 @@
 //#endif
 
 #include <locale>
-//#include <iomanip>
 #include "boost/date_time/local_time/local_time_io.hpp"
 #include "boost/date_time/time_facet.hpp"
 
@@ -49,17 +48,18 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
 
   int ix = 0;
   m_lcBasketSymbols.InsertColumn( ix++, "Sym", LVCFMT_LEFT, 50 );
+  m_lcBasketSymbols.InsertColumn( ix++, "DlyRng", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Current", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "High", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "OpnHi", LVCFMT_RIGHT, 50 );
+  //m_lcBasketSymbols.InsertColumn( ix++, "OpnHi", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Open", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "OpnLo", LVCFMT_RIGHT, 50 );
+  //m_lcBasketSymbols.InsertColumn( ix++, "OpnLo", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Low", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "Filled", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "Stop", LVCFMT_RIGHT, 50 );
+  //m_lcBasketSymbols.InsertColumn( ix++, "Filled", LVCFMT_RIGHT, 50 );
+  //m_lcBasketSymbols.InsertColumn( ix++, "Stop", LVCFMT_RIGHT, 50 );
   m_lcBasketSymbols.InsertColumn( ix++, "Quan", LVCFMT_RIGHT, 50 );
-  m_lcBasketSymbols.InsertColumn( ix++, "Amt", LVCFMT_RIGHT, 70 );
   m_lcBasketSymbols.InsertColumn( ix++, "AvgCst", LVCFMT_RIGHT, 80 );
+  m_lcBasketSymbols.InsertColumn( ix++, "Amt", LVCFMT_RIGHT, 70 );
   m_lcBasketSymbols.InsertColumn( ix++, "UnrelPL", LVCFMT_RIGHT, 60 );
   m_lcBasketSymbols.InsertColumn( ix++, "RelPL", LVCFMT_RIGHT, 80 );
   m_lcBasketSymbols.InsertColumn( ix++, "RunPL", LVCFMT_CENTER, 80 );
@@ -102,10 +102,6 @@ void CBasketTradeViewDialog::HandleBasketTradeSymbolInfoChanged( CBasketTradeSym
 }
 
 void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pRefresh ) {
-  //ptime now;
-  //now = m_ts.Internal();
-  //m_ssDateTime << now << "." << now.time_of_day().fractional_seconds();
-  //m_ssDateTime.flush();
   m_ssDateTime.str( "" );
   m_ssDateTime << CTimeSource::Internal();
   m_lblDateTime.SetWindowTextA( m_ssDateTime.str().c_str() );
@@ -129,20 +125,23 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
             const CBasketTradeSymbolBase::structFieldsForDialog *pFields = iter->second.pFields;
             int ix = iter->second.ix;
             int iy = 0;
+            sprintf( conv, "%.2f", pFields->dblAvgDailyRange ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblCurrentPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            //sprintf( conv, "%.2f", pFields->dblOpenRangeHigh ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblOpen ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            //sprintf( conv, "%.2f", pFields->dblOpenRangeLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblLow ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblStop ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            //sprintf( conv, "%.2f", pFields->dblFilledPrice ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            //sprintf( conv, "%.2f", pFields->dblStop ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv,   "%d", pFields->nPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblAverageCost ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            sprintf( conv, "%.2f", pFields->dblPositionSize ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
             sprintf( conv, "%.2f", pFields->dblRealizedPL ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
-            sprintf( conv, "%.2f", pFields->dblAvgDailyRange ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
+            double dbl;
+            dbl = pFields->dblUnRealizedPL + pFields->dblRealizedPL;
+            sprintf( conv, "%.2f", dbl ); m_lcBasketSymbols.SetItemText( ix, ++iy, conv );
           }
         }
     }
@@ -151,10 +150,10 @@ void CBasketTradeViewDialog::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pR
     m_Totals.dblMaxRunningPL = max( m_Totals.dblMaxRunningPL, m_Totals.dblRunningPL );
     m_Totals.dblMinRunningPL = min( m_Totals.dblMinRunningPL, m_Totals.dblRunningPL );
 
-    int iy = 8;
+    int iy = 5;
     sprintf( conv,   "%d", m_Totals.nPositionSize ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
-    sprintf( conv, "%.2f", m_Totals.dblPositionSize ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblAverageCost ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
+    sprintf( conv, "%.2f", m_Totals.dblPositionSize ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblUnRealizedPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblRealizedPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
     sprintf( conv, "%.2f", m_Totals.dblRunningPL ); m_lcBasketSymbols.SetItemText( 0, ++iy, conv );
