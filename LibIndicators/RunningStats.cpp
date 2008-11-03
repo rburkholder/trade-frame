@@ -41,6 +41,9 @@ void CRunningStats::CalcStats() {
 
   if ( nX > 1 ) {
 
+    double Sxx, Sxy, Syy;
+    double SST, SSR, SSE;
+
     double oldb1 = b1;
 
     Sxx = SumXX - ( SumX * SumX ) / nX;
@@ -54,7 +57,6 @@ void CRunningStats::CalcStats() {
     RR = SSR / SST;
     R = Sxy / sqrt(Sxx * Syy);
 
-    //SD = Math.Sqrt(Syy / (Xcnt - 1));
     SD = sqrt(Syy / nX);
 
     meanY = SumY / nX;

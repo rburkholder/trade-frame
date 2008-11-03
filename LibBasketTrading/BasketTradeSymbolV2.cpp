@@ -18,7 +18,8 @@ const double CBasketTradeSymbolV2::m_dblHysterisis = 0.02;
 CBasketTradeSymbolV2::CBasketTradeSymbolV2( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy ) 
 : CBasketTradeSymbolBase( sSymbolName, sPath, sStrategy ),
   m_TradeSideState( UnknownTradeSide ), m_dblTradeMovingSum( 0 ), m_cntMovingAverageTrades( 0 ),
-  m_ixRemovalTrade( 0 ), m_bFoundOpeningTrade( false ), m_bFirstOrder( true )
+  m_ixRemovalTrade( 0 ), m_bFoundOpeningTrade( false ), m_bFirstOrder( true ),
+  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 90 /* seconds */ ) )
 {
   Initialize();
 }

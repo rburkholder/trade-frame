@@ -2,6 +2,7 @@
 #include "baskettradesymbolbase.h"
 
 #include "BarFactory.h"
+#include "TimeSeriesSlidingWindowStats.h"
 
 #include "ChartEntryBars.h"
 #include "ChartEntryIndicator.h"
@@ -70,6 +71,8 @@ protected:
   } m_TradeSideState;
 
   static const double m_dblHysterisis;
+
+  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW;
 
 private:
 };

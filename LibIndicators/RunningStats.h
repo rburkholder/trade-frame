@@ -8,6 +8,10 @@ public:
   void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
   double GetBBMultiplier( void ) { return m_BBMultiplier; };
 
+  void Add( double, double );
+  void Remove( double, double );
+  virtual void CalcStats( void );
+
   double b2; // acceleration
   double b1; // slope
   double b0; // offset
@@ -21,18 +25,9 @@ public:
 
   double BBUpper, BBLower;
 
-  void Add( double, double );
-  void Remove( double, double );
-  virtual void CalcStats( void );
-
 protected:
   unsigned int nX, nY;
-
   double SumXX, SumX, SumXY, SumY, SumYY;
-  double Sxx, Sxy, Syy;
-  double SST, SSR, SSE;
-
   double m_BBMultiplier;
-  //bool CanCalcSlope;
 private:
 };

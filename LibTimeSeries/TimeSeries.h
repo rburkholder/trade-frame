@@ -17,10 +17,10 @@ public:
   CTimeSeries<T>( unsigned int Size );
   virtual ~CTimeSeries<T>(void);
 
-  size_t Count();
+  size_t Count() { return m_vSeries.size(); };  // this one should be deprecated, for consistencies sake
+  size_t Size() { return m_vSeries.size(); };
   void AppendDatum( const T &datum );
   void InsertDatum( const ptime &time, const T &datum );
-  //void Resize( unsigned int Size ) { if ( Size > m_vSeries.size() ) m_vSeries.resize( Size ); }; // there is a Destroy issue here in STL
   void Resize( unsigned int Size ) { 
     m_vSeries.resize( Size );  
     void *p = &m_vSeries; 
@@ -32,21 +32,22 @@ public:
   T *operator[]( size_t ix );
   T *At( size_t ix );
   T *At( const ptime &time );
-  typename vector<T>::iterator iterAt( const ptime &time );
-  typename vector<T>::iterator iterAtOrAfter( const ptime &time );
+  typedef typename std::vector<T>::iterator iterator;
+  iterator iterAt( const ptime &time );
+  iterator iterAtOrAfter( const ptime &time );
   T *AtOrAfter( const ptime &time );
   T *After( const ptime &time );
   virtual CTimeSeries<T> *Subset( const ptime &time ); // from At or After to end
   virtual CTimeSeries<T> *Subset( const ptime &time, unsigned int n ); // from At or After for n T
   void Sort( void ); // use when loaded from external data
-  void Flip( void ) {reverse( m_vSeries.begin(), m_vSeries.end() ); };
+  void Flip( void ) { reverse( m_vSeries.begin(), m_vSeries.end() ); };
   void Clear( void );
-  typename vector<T>::iterator begin() { return m_vSeries.begin(); };
-  typename vector<T>::iterator end() { return m_vSeries.end(); };
+  iterator begin() { return m_vSeries.begin(); };
+  iterator end() { return m_vSeries.end(); };
   H5::DataSpace *DefineDataSpace( H5::DataSpace *pSpace = NULL );
 protected:
   vector<T> m_vSeries;
-  typename vector<T>::iterator m_vIterator;
+  iterator m_vIterator;
 private:
 };
 
@@ -82,10 +83,6 @@ template<class T> void CTimeSeries<T>::InsertDatum( const ptime &dt, const T &da
 template<class T> void CTimeSeries<T>::Clear( void ) {
   m_vSeries.clear();
   m_vIterator = m_vSeries.end();
-}
-
-template<class T> size_t CTimeSeries<T>::Count() {
-  return m_vSeries.size();
 }
 
 template<class T> T *CTimeSeries<T>::First() {
@@ -164,10 +161,8 @@ template<class T> T *CTimeSeries<T>::At( const ptime &dt ) {
 
 template<class T> typename vector<T>::iterator CTimeSeries<T>::iterAt( const ptime &time ) {
   T key( time );
-  //vector<T>::iterator iter;
   pair<vector<T>::iterator, vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
-  //iter = ( p.first != p.second ) ? *(p.first) : m_vSeries.end();
   return ( p.first != p.second ) ? *(p.first) : m_vSeries.end();
 }
 
@@ -188,10 +183,8 @@ template<class T> T *CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
 
 template<class T> typename vector<T>::iterator CTimeSeries<T>::iterAtOrAfter( const ptime &time ) {
   T key( time );
-  //vector<T>::iterator iter;
   pair<vector<T>::iterator, vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
-  //iter = p.first;
   return p.first;
 }
 
