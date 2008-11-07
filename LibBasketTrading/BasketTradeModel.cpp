@@ -6,7 +6,8 @@
 #include "CommonDatabaseFunctions.h"
 #include "HDF5IterateGroups.h"
 #include "HDF5DataManager.h"
-#include "BasketTradeSymbolV2.h"
+//#include "BasketTradeSymbolV2.h"
+#include "BasketTradeSymbolInfo.h"
 
 #include <ostream>
 
@@ -42,8 +43,10 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   mapBasketSymbols_t::iterator iter;
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
-    CBasketTradeSymbolV2 *pInfo 
-      = new CBasketTradeSymbolV2( sSymbolName, sPath, sStrategy );
+//    CBasketTradeSymbolV2 *pInfo 
+//      = new CBasketTradeSymbolV2( sSymbolName, sPath, sStrategy );
+    CBasketTradeSymbolInfo *pInfo 
+      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy );
     m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
     OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;
@@ -61,7 +64,8 @@ void CBasketTradeModel::Prepare( ptime dtTradeDate, double dblFunds, bool bRTHOn
   mapBasketSymbols_t::iterator iter; 
   m_ModelInfo.bRTH = bRTHOnly;
   m_ModelInfo.dtTradeDate = dtTradeDate;
-  m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 31, 00 ) );
+  //m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 31, 00 ) );
+  m_ModelInfo.dtRTHBgn = ptime( dtTradeDate.date(), time_duration( 10, 30, 00 ) );
   m_ModelInfo.dtOpenRangeBgn = ptime( dtTradeDate.date(), time_duration( 10, 30, 00 ) );
   m_ModelInfo.dtOpenRangeEnd = ptime( dtTradeDate.date(), time_duration( 10, 34, 0 ) );
   m_ModelInfo.dtEndActiveTrading = ptime( dtTradeDate.date(), time_duration( 16, 46, 0 ) );

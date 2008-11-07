@@ -40,10 +40,10 @@ void CIBTWS::Connect() {
     OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
-    //pTWS->reqOpenOrders();
+    pTWS->reqOpenOrders();
     //ExecutionFilter filter;
     //pTWS->reqExecutions( filter );
-    //pTWS->reqAccountUpdates( true, "" );
+    pTWS->reqAccountUpdates( true, "" );
   }
 }
 
@@ -187,7 +187,6 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
-//void CIBTWS::CancelOrder( unsigned long nOrderId ) {
 void CIBTWS::CancelOrder( COrder *pOrder ) {
   CProviderInterface::CancelOrder( pOrder );
   pTWS->cancelOrder( pOrder->GetOrderId() );
@@ -231,7 +230,7 @@ void CIBTWS::orderStatus( OrderId orderId, const CString &status, int filled,
                          int remaining, double avgFillPrice, int permId, int parentId,
                          double lastFillPrice, int clientId, const CString& whyHeld) 
 {
-  if ( false ) {
+  if ( true ) {
     std::cout 
       << "OrderStatus: ordid=" << orderId 
       << ", stat=" << status 
@@ -259,7 +258,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << ", state.mincom=" << state.minCommission 
       << std::endl;
   }
-  else { /*
+  else { 
     std::cout 
       << "OpenOrder: ordid=" << orderId 
       << ", state.stat=" << state.status 
@@ -273,7 +272,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << std::endl; 
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
-      m_OrderManager.ReportCommission( orderId, state.commission ); */
+      m_OrderManager.ReportCommission( orderId, state.commission ); 
   }
   if ( state.warningText != "" ) std::cout << "Open Order Warning: " << state.warningText << std::endl;
 }
@@ -325,7 +324,11 @@ current time 1212851947
 
 void CIBTWS::error(const int id, const int errorCode, const CString errorString) {
   std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
-
+  switch ( errorCode ) {
+    case 1102: // Connectivity has been restored
+      pTWS->reqAccountUpdates( true, "" );
+      break;
+  }
 }
 
 void CIBTWS::winError( const CString &str, int lastError) {
@@ -359,7 +362,7 @@ void CIBTWS::nextValidId( OrderId orderId) {
 void CIBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const CString& accountName) {
-  if ( false ) {
+  if ( true ) {
         std::cout << "portfolio " << contract.symbol << ", " << position << ", " 
     << marketPrice << ", " << marketValue << ", " << averageCost << ", "
     << unrealizedPNL << ", " << realizedPNL << ", " << accountName << std::endl;
@@ -375,7 +378,11 @@ void CIBTWS::updateAccountValue(const CString& key, const CString& val,
   if ( "AccountReady" == key ) bEmit = true;
   if ( "AccountType" == key ) bEmit = true;
   if ( "AvailableFunds" == key ) bEmit = true;
-  if ( "BuyingPower" == key ) bEmit = true;
+  if ( "BuyingPower" == key ) {
+    bEmit = true;
+    m_dblBuyingPower = atof( (LPCTSTR) val );
+    //std::cout << "**Buying Power " << m_dblBuyingPower << std::endl;
+  }
   if ( "CashBalance" == key ) bEmit = true;
   if ( "Cushion" == key ) bEmit = true;
   if ( "GrossPositionValue" == key ) bEmit = true;

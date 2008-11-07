@@ -40,33 +40,33 @@ template<class T> CTimeSeriesSlidingWindow<T>::~CTimeSeriesSlidingWindow(void) {
 
 template<class T> void CTimeSeriesSlidingWindow<T>::Update( void ) {
   if ( !m_bFirstDatumFound ) {
-    if ( 0 < pSeries->Size() ) {
-      T *datum = (*pSeries)[ 0 ];
+    if ( 0 < m_pSeries->Size() ) {
+      T *datum = (*m_pSeries)[ 0 ];
       m_dtZero = datum->m_dt;
       m_bFirstDatumFound = true;
     }
   }
   while ( m_ixLeading < m_pSeries->Size() ) {
-    T *datum = (*pSeries)[ m_ixLeading ];
+    T *datum = (*m_pSeries)[ m_ixLeading ];
     m_dtLeading = datum->m_dt;
     Add( *datum );
     ++m_ixLeading;
   }
-  if ( 0 < pSeries->Size() ) {
+  if ( 0 < m_pSeries->Size() ) {
     if ( 0 < m_nWindowSizeCount ) {
       while ( ( m_ixLeading - m_ixTrailing ) > m_nWindowSizeCount ) {
-        T *datum = (*pSeries)[ m_ixTrailing ];
+        T *datum = (*m_pSeries)[ m_ixTrailing ];
         Expire( *datum );
         ++m_ixTrailing;
       }
     }
     if ( 0 < m_nWindowSizeSeconds ) {
-      T *datum = (*pSeries)[ m_ixTrailing ];
+      T *datum = (*m_pSeries)[ m_ixTrailing ];
       time_duration dif = m_dtLeading - datum->m_dt;
       while ( dif > m_tdWindowWidth ) {
         Expire( *datum );
         ++m_ixTrailing;
-        datum = (*pSeries)[ m_ixTrailing ];
+        datum = (*m_pSeries)[ m_ixTrailing ];
         dif = m_dtLeading - datum->m_dt;
       }
     }

@@ -37,6 +37,10 @@ protected:
   CChartEntryShape m_ceOrdersBuy;
   CChartEntryShape m_ceOrdersSell;
 
+  CChartEntryIndicator m_ceAvg;
+  CChartEntryIndicator m_ceBBUpper;
+  CChartEntryIndicator m_ceBBLower;
+
   static const size_t m_nBarWidth = 180;  //seconds
 
   bool m_bFoundOpeningTrade;

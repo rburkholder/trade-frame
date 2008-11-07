@@ -19,7 +19,8 @@ CBasketTradeSymbolV2::CBasketTradeSymbolV2( const std::string &sSymbolName, cons
 : CBasketTradeSymbolBase( sSymbolName, sPath, sStrategy ),
   m_TradeSideState( UnknownTradeSide ), m_dblTradeMovingSum( 0 ), m_cntMovingAverageTrades( 0 ),
   m_ixRemovalTrade( 0 ), m_bFoundOpeningTrade( false ), m_bFirstOrder( true ),
-  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 90 /* seconds */ ) )
+//  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 768 /* 12.8 minutes */ ) )
+  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 256 /* 4.2 minutes */ ) )
 {
   Initialize();
 }
@@ -35,6 +36,10 @@ void CBasketTradeSymbolV2::Initialize() {
   m_ceOrdersBuy.SetColour( Colour::Blue ); m_ceOrdersBuy.SetShape( CChartEntryShape::EBuy );
   m_ceOrdersSell.SetColour( Colour::Red ); m_ceOrdersSell.SetShape( CChartEntryShape::ESell );
 
+  m_ceAvg.SetColour( Colour::Gold );
+  m_ceBBUpper.SetColour( Colour::Brown );
+  m_ceBBLower.SetColour( Colour::Brown );
+
   //m_pdvChart->Add( 0, &m_ceBars );
   m_pdvChart->Add( 1, &m_ceBarVolume );
   m_pdvChart->Add( 0, &m_ceQuoteAsks );
@@ -44,6 +49,10 @@ void CBasketTradeSymbolV2::Initialize() {
   m_pdvChart->Add( 0, &m_ceLevels );
   m_pdvChart->Add( 0, &m_ceOrdersBuy );
   m_pdvChart->Add( 0, &m_ceOrdersSell );
+
+  m_pdvChart->Add( 0, &m_ceAvg );
+  m_pdvChart->Add( 0, &m_ceBBUpper );
+  m_pdvChart->Add( 0, &m_ceBBLower );
 }
 
 void CBasketTradeSymbolV2::ModelReady( CBars *pBars ) {
@@ -88,9 +97,13 @@ void CBasketTradeSymbolV2::HandleQuote( const CQuote &quote ) {
   //assert( 0 < quote.m_dblAsk );
   //assert( 0 < quote.m_dblBid );
   m_quotes.AppendDatum( quote );
+  m_pQuoteSW->Update();
   if ( b && ( quote.m_dt >= m_pModelParameters->dtRTHBgn ) && ( quote.m_dt < m_pModelParameters->dtRTHEnd ) ) {
     m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
     m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
+    m_ceAvg.Add( quote.m_dt, m_pQuoteSW->MeanY() );
+    m_ceBBUpper.Add( quote.m_dt, m_pQuoteSW->BBUpper() );
+    m_ceBBLower.Add( quote.m_dt, m_pQuoteSW->BBLower() );
     m_pdvChart->SetChanged();
   }
 }
