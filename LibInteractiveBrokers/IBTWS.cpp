@@ -379,8 +379,8 @@ void CIBTWS::updateAccountValue(const CString& key, const CString& val,
   if ( "AccountType" == key ) bEmit = true;
   if ( "AvailableFunds" == key ) bEmit = true;
   if ( "BuyingPower" == key ) {
-    bEmit = true;
     m_dblBuyingPower = atof( (LPCTSTR) val );
+    bEmit = true;
     //std::cout << "**Buying Power " << m_dblBuyingPower << std::endl;
   }
   if ( "CashBalance" == key ) bEmit = true;
@@ -389,7 +389,10 @@ void CIBTWS::updateAccountValue(const CString& key, const CString& val,
   if ( "PNL" == key ) bEmit = true;
   if ( "UnrealizedPnL" == key ) bEmit = true;
   if ( "SMA" == key ) bEmit = true;
-  if ( "AvailableFunds" == key ) bEmit = true;
+  if ( "AvailableFunds" == key ) {
+    m_dblAvailableFunds = atof( (LPCTSTR) val );
+    bEmit = true;
+  }
   if ( "MaintMarginReq" == key ) bEmit = true;
   if ( "InitMarginReq" == key ) bEmit = true;
   if ( bEmit ) {

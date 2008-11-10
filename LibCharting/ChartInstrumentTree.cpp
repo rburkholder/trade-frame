@@ -59,6 +59,7 @@ void CChartInstrumentTree::Add(const std::string &sStrategy, const std::string &
 }
 
 void CChartInstrumentTree::Remove(const std::string &sStrategy, const std::string &sName) {
+
   HTREEITEM itemStrategy;
   HTREEITEM itemName;
 

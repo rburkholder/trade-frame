@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "GUIFrameBase.h"
 
+#include "Log.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -48,6 +50,9 @@ void CGUIFrameBase::OnDestroy()  {
 }
 
 afx_msg void CGUIFrameBase::OnSize(UINT nType, int cx, int cy) {
-  CFrameWnd::OnSize(nType,cx,cy);
+  CFrameWnd::OnSize(nType, cx, cy);
 }
 
+afx_msg void CGUIFrameBase::OnMove( int x, int y ) {
+  LOG << "GUIFrameBase move to " << x << "," << y;
+}

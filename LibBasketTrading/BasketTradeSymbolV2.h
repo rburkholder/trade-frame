@@ -76,7 +76,11 @@ protected:
 
   static const double m_dblHysterisis;
 
-  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW;
+  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW0256;  //  4.2 minutes
+  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW0768;  // 12.8 minutes
+  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW2048;  // 34.1 minutes
+  CTimeSeriesSlidingWindowStatsQuote *m_pQuoteSW20;  // 20 quotes
+  CTimeSeriesSlidingWindowStatsTrade *m_pTradesSW20;  // 20 trades
 
 private:
 };

@@ -18,6 +18,13 @@ protected:
   void SetChartMasterSize( void );
 	afx_msg void OnDestroy();
   afx_msg void OnSize(UINT nType, int cx, int cy);
+  afx_msg BOOL OnMouseWheel( UINT nFlags, short zDelta, CPoint pt );
+  afx_msg void OnHScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar );
+
+
+
+  afx_msg void OnViewPortChanged();
+
 private:
 	DECLARE_MESSAGE_MAP()
 };

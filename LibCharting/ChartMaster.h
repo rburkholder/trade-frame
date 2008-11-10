@@ -23,5 +23,11 @@ protected:
 private:
   CGeneratePeriodicRefresh m_refresh;
   void HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
+  //void HandlePeriodicRefresh( void );
+  //UINT_PTR m_nIDEvent;
+	//virtual afx_msg void OnTimer(UINT nIDEvent);
+  virtual afx_msg int OnCreate( LPCREATESTRUCT lpCreateStruct );
+  virtual afx_msg void OnDestroy( );
+
 	DECLARE_MESSAGE_MAP()
 };

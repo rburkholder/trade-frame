@@ -5,17 +5,13 @@
 
 #include "stdafx.h"
 #include "BasketTradeViewDialog.h"
-//#include "BasketTradeSymbolInfo.h"
 
-//#ifdef _DEBUG
-//#define new DEBUG_NEW
-//#undef THIS_FILE
-//static char THIS_FILE[] = __FILE__;
-//#endif
+#include "Log.h"
 
 #include <locale>
 #include "boost/date_time/local_time/local_time_io.hpp"
 #include "boost/date_time/time_facet.hpp"
+
 
 // CBasketTradeViewDialog dialog
 
@@ -34,7 +30,14 @@ CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* 
 
   UINT id = IDD_DLGBASKETSYMBOLS;
   BOOL b = Create(id, pParent );
+
 } 
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
 CBasketTradeViewDialog::~CBasketTradeViewDialog() {
   // there is no OnDestroy(), should implement it.
@@ -45,6 +48,9 @@ CBasketTradeViewDialog::~CBasketTradeViewDialog() {
 
 BOOL CBasketTradeViewDialog::OnInitDialog() {
   BOOL b = CDialog::OnInitDialog();
+
+  MoveWindow( 230, 1100, 950, 520 );
+  //OnSize( 0, 950, 520 );
 
   int ix = 0;
   m_lcBasketSymbols.InsertColumn( ix++, "Sym", LVCFMT_LEFT, 50 );
@@ -172,7 +178,7 @@ void CBasketTradeViewDialog::DoDataExchange(CDataExchange* pDX) {
 
 BEGIN_MESSAGE_MAP(CBasketTradeViewDialog, CDialog)
 //  ON_WM_MOVING( )
-//  ON_WM_MOVE( )
+  ON_WM_MOVE( )
 //  ON_WM_SIZING( )
   ON_WM_SIZE( )
 END_MESSAGE_MAP()
@@ -187,6 +193,9 @@ afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int x, int y ) {
     //rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
     //kv1.MoveWindow( &rect2 );
     //GetWindowRect( &rect1 );
+
+    //CWnd::GetWindowRect( &rect1 );
+    //LOG << "TVD Size " << rect1.Width() << "," << rect1.Height();
     
     //CWnd::SetWindowPos( &CWnd::wndTop, rect1.left, rect1.top, x, y, 0 );
     CWnd::GetClientRect( &rect1 );
@@ -197,5 +206,9 @@ afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int x, int y ) {
     rect2.SetRect( rect1.left + 10, rect1.bottom - 20, rect1.left + 10 + rect3.right - rect3.left, rect1.bottom - 5 );
     m_lblDateTime.MoveWindow( &rect2 );
   }
+}
+
+afx_msg void CBasketTradeViewDialog::OnMove( int x, int y ) {
+  //LOG << "TVD move to " << x << "," << y;
 }
 

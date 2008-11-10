@@ -54,6 +54,8 @@ protected:
   virtual BOOL OnInitDialog( void );
 
   afx_msg void OnSize( UINT, int, int );
+  afx_msg void OnMove( int x, int y );
+
   bool bDialogReady;
 
   CBasketTradeSymbolBase::structFieldsForDialog m_Totals;

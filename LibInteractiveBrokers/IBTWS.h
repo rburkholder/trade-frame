@@ -79,6 +79,7 @@ protected:
   std::vector<CIBSymbol *> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
 
   double m_dblBuyingPower;
+  double m_dblAvailableFunds;
 
   static const char *szSecurityType[];
   static const char *szOrderType[];

@@ -19,8 +19,11 @@ CBasketTradeSymbolV2::CBasketTradeSymbolV2( const std::string &sSymbolName, cons
 : CBasketTradeSymbolBase( sSymbolName, sPath, sStrategy ),
   m_TradeSideState( UnknownTradeSide ), m_dblTradeMovingSum( 0 ), m_cntMovingAverageTrades( 0 ),
   m_ixRemovalTrade( 0 ), m_bFoundOpeningTrade( false ), m_bFirstOrder( true ),
-//  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 768 /* 12.8 minutes */ ) )
-  m_pQuoteSW( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 256 /* 4.2 minutes */ ) )
+  m_pQuoteSW0256( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes,  256 ) ),
+  m_pQuoteSW0768( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes,  768 ) ),
+  m_pQuoteSW2048( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 2048 ) ),
+  m_pQuoteSW20( new CTimeSeriesSlidingWindowStatsQuote( &m_quotes, 0, 20 ) ),
+  m_pTradesSW20( new CTimeSeriesSlidingWindowStatsTrade( &m_trades, 0, 20 ) )
 {
   Initialize();
 }
@@ -97,13 +100,16 @@ void CBasketTradeSymbolV2::HandleQuote( const CQuote &quote ) {
   //assert( 0 < quote.m_dblAsk );
   //assert( 0 < quote.m_dblBid );
   m_quotes.AppendDatum( quote );
-  m_pQuoteSW->Update();
+  m_pQuoteSW0256->Update();
+  m_pQuoteSW0768->Update();
+  m_pQuoteSW2048->Update();
+  m_pQuoteSW20->Update();
   if ( b && ( quote.m_dt >= m_pModelParameters->dtRTHBgn ) && ( quote.m_dt < m_pModelParameters->dtRTHEnd ) ) {
     m_ceQuoteAsks.Add( quote.m_dt, quote.m_dblAsk );
     m_ceQuoteBids.Add( quote.m_dt, quote.m_dblBid );
-    m_ceAvg.Add( quote.m_dt, m_pQuoteSW->MeanY() );
-    m_ceBBUpper.Add( quote.m_dt, m_pQuoteSW->BBUpper() );
-    m_ceBBLower.Add( quote.m_dt, m_pQuoteSW->BBLower() );
+    m_ceAvg.Add( quote.m_dt, m_pQuoteSW0768->MeanY() );
+    m_ceBBUpper.Add( quote.m_dt, m_pQuoteSW0768->BBUpper() );
+    m_ceBBLower.Add( quote.m_dt, m_pQuoteSW0768->BBLower() );
     m_pdvChart->SetChanged();
   }
 }
@@ -115,6 +121,8 @@ void CBasketTradeSymbolV2::HandleTrade(const CTrade &trade) {
 
   m_status.dblCurrentPrice = trade.m_dblTrade;
   m_trades.AppendDatum( trade );
+
+  m_pTradesSW20->Update();
 
   if ( ( trade.m_dt >= m_pModelParameters->dtRTHBgn ) && ( trade.m_dt < m_pModelParameters->dtRTHEnd ) ) {
     if ( !m_bFoundOpeningTrade ) {

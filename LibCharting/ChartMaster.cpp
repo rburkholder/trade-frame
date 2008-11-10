@@ -25,6 +25,17 @@ CChartMaster::CChartMaster( unsigned int width, unsigned int height )
   Initialize();
 }
 
+afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
+  CChartViewer::OnCreate( lpCreateStruct );
+  //m_nIDEvent = SetTimer( 10, 250, NULL );
+  return 0;  // 0 to continue creation, -1 to destroy
+}
+
+afx_msg void CChartMaster::OnDestroy( ) {
+  //KillTimer( m_nIDEvent );
+  CChartViewer::OnDestroy();
+}
+
 void CChartMaster::Initialize( void ) {
   m_refresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
@@ -34,6 +45,9 @@ CChartMaster::~CChartMaster(void) {
 }
 
 BEGIN_MESSAGE_MAP(CChartMaster, CChartViewer)
+  //ON_WM_TIMER()
+  ON_WM_CREATE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
@@ -42,7 +56,20 @@ void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
+/*
+afx_msg void CChartMaster::OnTimer(UINT nIDEvent) {  // isn't as responsive as CGeneratePeriodicRefresh
+  // due to ontimer going through application and gpr goes to cwnd directly?
+  if ( nIDEvent != m_nIDEvent ) {
+    CChartViewer::OnTimer( nIDEvent );
+  }
+  else {
+    HandlePeriodicRefresh();
+  }
+}
+*/
+
 void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
+//void CChartMaster::HandlePeriodicRefresh( void ){
 
   struct structSubChart {
     XYChart *xy; // xy chart at this position
@@ -54,10 +81,10 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
 
-      // chart 0 is x, volume chart is 1/4x, indicator charts are 1/3x
+      // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
       // calc assumes chart 0 and chart 1 are always present
       size_t n = m_pCdv->GetChartCount();
-      int heightChart0 = ( 12 * ( m_nChartHeight - 100 ) ) / ( 15 + ( 4 * ( n - 2 ) ) );
+      int heightChart0 = ( 12 * ( m_nChartHeight - 25 ) ) / ( 15 + ( 4 * ( n - 2 ) ) );
       int heightChart1 = heightChart0 / 4;
       int heightChartN = heightChart0 / 3;
 
@@ -74,7 +101,10 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
           case 0:  // main chart
             pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
             pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight );
+            pXY->setClipping();
             pXY->setXAxisOnTop( true );
+            pXY->xAxis()->setWidth( 2 );
+            pXY->yAxis()->setWidth( 2 );
             multi.addChart( 0, y, pXY );
             multi.setMainChart( pXY );
             y += heightChart0; 
@@ -82,16 +112,20 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
           case 1: // volume chart
             pXY = new XYChart( m_nChartWidth, heightChart1 );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 - 50 );
+            pXY->setClipping();
             pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
+            pXY->yAxis()->setWidth( 2 );
             multi.addChart( 0, y, pXY );
             y += heightChart1;
             break;
           default:  // secondary indicator charts
             pXY = new XYChart( m_nChartWidth, heightChartN );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN );
+            pXY->setClipping();
             pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
+            pXY->yAxis()->setWidth( 2 );
             multi.addChart( 0, y, pXY );
             y += heightChartN;
             break;

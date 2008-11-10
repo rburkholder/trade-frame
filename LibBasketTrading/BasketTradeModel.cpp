@@ -6,8 +6,8 @@
 #include "CommonDatabaseFunctions.h"
 #include "HDF5IterateGroups.h"
 #include "HDF5DataManager.h"
-//#include "BasketTradeSymbolV2.h"
-#include "BasketTradeSymbolInfo.h"
+#include "BasketTradeSymbolV2.h"
+//#include "BasketTradeSymbolInfo.h"
 
 #include <ostream>
 
@@ -43,10 +43,10 @@ void CBasketTradeModel::AddSymbol(const std::string &sSymbolName, const std::str
   mapBasketSymbols_t::iterator iter;
   iter = m_mapBasketSymbols.find( sSymbolName );
   if ( m_mapBasketSymbols.end() == iter ) {
-//    CBasketTradeSymbolV2 *pInfo 
-//      = new CBasketTradeSymbolV2( sSymbolName, sPath, sStrategy );
-    CBasketTradeSymbolInfo *pInfo 
-      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy );
+    CBasketTradeSymbolV2 *pInfo 
+      = new CBasketTradeSymbolV2( sSymbolName, sPath, sStrategy );
+//    CBasketTradeSymbolInfo *pInfo 
+//      = new CBasketTradeSymbolInfo( sSymbolName, sPath, sStrategy );
     m_mapBasketSymbols.insert( pairBasketSymbolsEntry_t( sSymbolName, pInfo ) );
     OnBasketTradeSymbolInfoAddedToBasket( pInfo );
     std::cout << "Basket add for " << sSymbolName << " successful." << std::endl;

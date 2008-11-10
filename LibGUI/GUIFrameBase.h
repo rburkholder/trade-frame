@@ -17,6 +17,8 @@ protected:
   CWnd *m_pParent;
 	afx_msg void OnDestroy();
   afx_msg void OnSize(UINT nType, int cx, int cy);
+  afx_msg void OnMove( int x, int y );
+
 private:
 	DECLARE_MESSAGE_MAP()
 };
