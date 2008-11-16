@@ -20,14 +20,17 @@ CChartMaster::CChartMaster(void)
 
 CChartMaster::CChartMaster( unsigned int width, unsigned int height ) 
 : CChartViewer(), m_pCdv( NULL),
-  m_nChartWidth( width ), m_nChartHeight( height )
+  m_nChartWidth( width ), m_nChartHeight( height ),
+  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 5 ),
+  m_dblXMin( 0 ), m_dblXMax( 0 )
 {
   Initialize();
 }
 
-afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
+afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) { // virtual from within CChartViewer
   CChartViewer::OnCreate( lpCreateStruct );
   //m_nIDEvent = SetTimer( 10, 250, NULL );
+
   return 0;  // 0 to continue creation, -1 to destroy
 }
 
@@ -37,6 +40,11 @@ afx_msg void CChartMaster::OnDestroy( ) {
 }
 
 void CChartMaster::Initialize( void ) {
+
+  CChartViewer::setZoomInWidthLimit( m_dblMinDuration );
+  CChartViewer::setViewPortWidth( m_dblCurDuration );
+  CChartViewer::updateViewPort( true, false );
+
   m_refresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
 
@@ -115,6 +123,7 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
             pXY->setClipping();
             pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
+            pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
             multi.addChart( 0, y, pXY );
             y += heightChart1;
@@ -125,6 +134,7 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
             pXY->setClipping();
             pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
+            pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
             multi.addChart( 0, y, pXY );
             y += heightChartN;
@@ -134,11 +144,20 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
         ++ix;
       }
 
+      m_dblXMin = 0;
+      m_dblXMax = 0;
       for ( CChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = (*iter).GetActualChartId();
-        (*iter).GetChartEntry()->AddDataToChart( vCharts[ ixChart ].xy );
+        CChartEntryBase::structChartAttributes Attributes;
+        (*iter).GetChartEntry()->AddDataToChart( vCharts[ ixChart ].xy, &Attributes );
+        m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : min( m_dblXMin, Attributes.dblXMin );
+        m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : max( m_dblXMax, Attributes.dblXMax );
       }
-      multi.layout();
+
+      CChartViewer::updateViewPort( true );
+
+      //multi.layout();
+
       setChart( &multi );
 
       for ( std::vector<structSubChart>::iterator iter = vCharts.begin(); iter < vCharts.end(); ++iter ) {

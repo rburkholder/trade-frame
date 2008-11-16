@@ -26,10 +26,15 @@ void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, int volume) {
   CChartEntryBaseWithTime::Add( dt, (double) volume );
 }
 
-void CChartEntryVolume::AddDataToChart( XYChart *pXY ) {
+void CChartEntryVolume::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   if ( 0 != this->m_vDateTime.size() ) {
     BarLayer *bl = pXY->addBarLayer( this->GetPrice() );
-    bl->setXData( this->GetDateTime() );
+
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    bl->setXData( daXData );
+    pAttributes->dblXMin = daXData[0];
+    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+
     DataSet *pds = bl->getDataSet(0);
     pds->setDataColor( m_eColour );
   }
@@ -80,7 +85,7 @@ void CChartEntryBars::AddBar(const CBar &bar) {
   m_vClose.push_back( bar.m_dblClose );
 }
 
-void CChartEntryBars::AddDataToChart(XYChart *pXY) {
+void CChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   if ( 0 != this->m_vDateTime.size() ) {
     CandleStickLayer *candle = pXY->addCandleStickLayer( 
       this->GetHigh(),
@@ -90,6 +95,9 @@ void CChartEntryBars::AddDataToChart(XYChart *pXY) {
       0x00ff00, 0xff0000
       );
     //candle->setDataGap( 0 );
-    candle->setXData( CChartEntryBaseWithTime::GetDateTime() );
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    candle->setXData( daXData );
+    pAttributes->dblXMin = daXData[0];
+    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
   }
 }

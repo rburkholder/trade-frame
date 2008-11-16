@@ -13,7 +13,7 @@ public:
   CChartEntryMark(void);
   virtual ~CChartEntryMark(void);
   void AddMark( double price, Colour::enumColour colour, const std::string &name );
-  virtual void AddDataToChart( XYChart *pXY );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   std::vector<Colour::enumColour> m_vColour;
   std::vector<std::string> m_vName;

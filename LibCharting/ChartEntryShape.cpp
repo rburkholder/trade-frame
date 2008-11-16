@@ -36,12 +36,17 @@ void CChartEntryShape::AddLabel(const ptime &dt, double price, const std::string
   m_vpChar.push_back( pszLabel );
 }
 
-void CChartEntryShape::AddDataToChart(XYChart *pXY) {
+void CChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
         GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
-    layer->setXData( GetDateTime() );
+
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    layer->setXData( daXData );
+    pAttributes->dblXMin = daXData[0];
+    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+
     layer->addExtraField( GetLabels() );
     layer->setDataLabelFormat("{field0}");
     TextBox *textbox = layer->setDataLabelStyle("arialbd.ttf", 8);

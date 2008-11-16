@@ -18,7 +18,7 @@ public:
   enumShape GetShape( void ) { return m_eShape; };
   virtual ~CChartEntryShape(void);
   void AddLabel( const ptime &dt, double price, const std::string &sLabel );
-  virtual void AddDataToChart( XYChart *pXY );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   static int m_rShapes[];
   enumShape m_eShape;

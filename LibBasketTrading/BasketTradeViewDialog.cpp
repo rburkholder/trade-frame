@@ -24,7 +24,7 @@ CBasketTradeViewDialog::CBasketTradeViewDialog(CBasketTradeModel *pModel, CWnd* 
   //http://www.boost.org/doc/libs/1_36_0/doc/html/date_time/date_time_io.html#date_time.io_tutorial
 
   boost::local_time::local_time_facet *facet = new boost::local_time::local_time_facet();
-  facet->format( "%Y %m %d %H:%M:%S" );
+  facet->format( "%Y %m %d %H:%M:%S" );  // this doesn't appear to work properly
   //m_ssDateTime.imbue( locale( std::locale::classic(), facet ) );
   m_ssDateTime.imbue( locale( m_ssDateTime.getloc(), facet ) );
 
@@ -49,7 +49,7 @@ CBasketTradeViewDialog::~CBasketTradeViewDialog() {
 BOOL CBasketTradeViewDialog::OnInitDialog() {
   BOOL b = CDialog::OnInitDialog();
 
-  MoveWindow( 230, 1100, 950, 520 );
+  MoveWindow( 240, 1050, 950, 520 );
   //OnSize( 0, 950, 520 );
 
   int ix = 0;
@@ -84,6 +84,8 @@ BOOL CBasketTradeViewDialog::OnInitDialog() {
     MakeDelegate( this, &CBasketTradeViewDialog::HandleBasketTradeSymbolInfoAdded ) );
 
   bDialogReady = true;
+
+  SetClientPositions();
 
   return TRUE;
 }
@@ -186,29 +188,33 @@ END_MESSAGE_MAP()
 
 // CBasketTradeViewDialog message handlers
 
-afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int x, int y ) {
+void CBasketTradeViewDialog::SetClientPositions( void ) {
+  CRect rect1, rect2, rect3;
+  //GetClientRect( &rect1 );
+  //rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
+  //kv1.MoveWindow( &rect2 );
+  //GetWindowRect( &rect1 );
+
+  //CWnd::GetWindowRect( &rect1 );
+  //LOG << "TVD Size " << rect1.Width() << "," << rect1.Height();
+  
+  //CWnd::SetWindowPos( &CWnd::wndTop, rect1.left, rect1.top, x, y, 0 );
+  CWnd::GetClientRect( &rect1 );
+  rect2.SetRect( rect1.left + 10, rect1.top + 10, rect1.right - 10, rect1.bottom - 20 );
+  m_lcBasketSymbols.MoveWindow( &rect2 );
+
+  m_lblDateTime.GetWindowRect( &rect3 );
+  rect2.SetRect( rect1.left + 10, rect1.bottom - 20, rect1.left + 10 + rect3.right - rect3.left, rect1.bottom - 5 );
+  m_lblDateTime.MoveWindow( &rect2 );
+}
+
+afx_msg void CBasketTradeViewDialog::OnSize( UINT i, int nx, int ny ) {  // new width, new heigh
   if ( bDialogReady ) {
-    CRect rect1, rect2, rect3;
-    //GetClientRect( &rect1 );
-    //rect2.SetRect( 5, 5, rect1.right - 5, rect1.bottom - 5 );
-    //kv1.MoveWindow( &rect2 );
-    //GetWindowRect( &rect1 );
-
-    //CWnd::GetWindowRect( &rect1 );
-    //LOG << "TVD Size " << rect1.Width() << "," << rect1.Height();
-    
-    //CWnd::SetWindowPos( &CWnd::wndTop, rect1.left, rect1.top, x, y, 0 );
-    CWnd::GetClientRect( &rect1 );
-    rect2.SetRect( rect1.left + 10, rect1.top + 10, rect1.right - 10, rect1.bottom - 20 );
-    m_lcBasketSymbols.MoveWindow( &rect2 );
-
-    m_lblDateTime.GetWindowRect( &rect3 );
-    rect2.SetRect( rect1.left + 10, rect1.bottom - 20, rect1.left + 10 + rect3.right - rect3.left, rect1.bottom - 5 );
-    m_lblDateTime.MoveWindow( &rect2 );
+    SetClientPositions();
   }
 }
 
 afx_msg void CBasketTradeViewDialog::OnMove( int x, int y ) {
-  //LOG << "TVD move to " << x << "," << y;
+  LOG << "TVD move to " << x << "," << y;
 }
 

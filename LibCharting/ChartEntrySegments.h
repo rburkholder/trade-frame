@@ -11,7 +11,7 @@ class CChartEntrySegments :
 public:
   CChartEntrySegments(void);
   virtual ~CChartEntrySegments(void);
-  virtual void AddDataToChart( XYChart *pXY );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   
 private:

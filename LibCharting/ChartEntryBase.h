@@ -39,7 +39,16 @@ public:
   void Add( double price );
   typedef std::vector<double> vdouble_t;
   virtual size_t Size( void ) { return m_vPrice.size(); };
-  virtual void AddDataToChart( XYChart *pXY ) {};
+
+  struct structChartAttributes {
+    double dblXMin;
+    double dblXMax;
+    double dblYMin;
+    double dblYMax;
+    structChartAttributes( void ) : dblXMin( 0 ), dblXMax( 0 ), dblYMin( 0 ), dblYMax( 0 ) {};
+  };
+
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {};
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;

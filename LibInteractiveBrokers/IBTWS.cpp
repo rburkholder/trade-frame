@@ -396,7 +396,7 @@ void CIBTWS::updateAccountValue(const CString& key, const CString& val,
   if ( "MaintMarginReq" == key ) bEmit = true;
   if ( "InitMarginReq" == key ) bEmit = true;
   if ( bEmit ) {
-    std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
+    //std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
   }
 }
 

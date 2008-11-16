@@ -33,7 +33,7 @@ CBasketTradeModel::~CBasketTradeModel(void) {
   mapBasketSymbols_t::iterator iter;
   for ( iter = m_mapBasketSymbols.begin(); iter != m_mapBasketSymbols.end(); ++iter ) {
     // todo: need to remove any events attached to this object as well
-    iter->second->StopTrading();
+    iter->second->StopTrading(); // if 0 < dblCostForEntry
     delete iter->second;
   }
   m_mapBasketSymbols.clear();

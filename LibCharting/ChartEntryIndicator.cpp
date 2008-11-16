@@ -18,11 +18,13 @@ void CChartEntryIndicator::Reserve( unsigned int nSize ) {
   CChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void CChartEntryIndicator::AddDataToChart(XYChart *pXY) {
+void CChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   if ( 0 != this->m_vDateTime.size() ) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrice() );
-    // LineLayer *lltrade = xy->addLineLayer( m_pModel->Asks()->GetPrice(), Green, _T( "Trade" ) );
-    ll->setXData( this->GetDateTime() );
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    ll->setXData( daXData );
+    pAttributes->dblXMin = daXData[0];
+    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
     DataSet *pds = ll->getDataSet(0);
     pds->setDataColor( m_eColour );
   }

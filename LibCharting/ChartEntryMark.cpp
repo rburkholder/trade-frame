@@ -15,7 +15,7 @@ void CChartEntryMark::AddMark(double price, Colour::enumColour colour, const std
   m_vName.push_back( name );
 }
 
-void CChartEntryMark::AddDataToChart( XYChart *pXY ) {
+void CChartEntryMark::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {

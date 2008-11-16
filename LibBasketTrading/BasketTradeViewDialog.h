@@ -64,6 +64,7 @@ protected:
 
   std::stringstream m_ssDateTime;
 
+  void SetClientPositions( void );
 
 private:
 };

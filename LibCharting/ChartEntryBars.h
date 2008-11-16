@@ -11,7 +11,7 @@ public:
   virtual ~CChartEntryVolume(void);
   virtual void Reserve( unsigned int );
   void Add( const ptime &dt, int volume );
-  virtual void AddDataToChart( XYChart *pXY );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };
@@ -24,7 +24,7 @@ public:
   virtual ~CChartEntryBars(void);
   virtual void Reserve( unsigned int );
   void AddBar( const CBar &bar );
-  virtual void AddDataToChart( XYChart *pXY );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   std::vector<double> m_vOpen;
   std::vector<double> m_vHigh;
