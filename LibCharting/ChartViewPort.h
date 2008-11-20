@@ -3,6 +3,7 @@
 #include "ChartDataView.h"
 #include "ChartMaster.h"
 #include "GUIFrameBase.h"
+#include "GeneratePeriodicRefresh.h"
 
 // CChartViewPort is the window used to hold the master chart
 
@@ -30,9 +31,15 @@ protected:
   afx_msg void OnMouseMove( UINT, CPoint );
   afx_msg BOOL OnSetCursor( CWnd*, UINT, UINT );
 
+  CGeneratePeriodicRefresh m_refresh;
+  void HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
+  //void HandlePeriodicRefresh( void );
 
 private:
 	DECLARE_MESSAGE_MAP()
+  bool m_bKeyOnShift;
+  bool m_bKeyOnControl;
+  void SetMouseUsage( void );
 };
 
 // have the refresh on only when there is a DataView available

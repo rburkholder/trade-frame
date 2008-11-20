@@ -13,47 +13,38 @@ static char THIS_FILE[] = __FILE__;
 
 CChartMaster::CChartMaster(void) 
 : CChartViewer(), m_pCdv( NULL),
-  m_nChartWidth( 600 ), m_nChartHeight( 900 )
+  m_nChartWidth( 600 ), m_nChartHeight( 900 ),
+  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
+  m_dblXMin( 0 ), m_dblXMax( 0 )
 {
-  Initialize();
 }
 
 CChartMaster::CChartMaster( unsigned int width, unsigned int height ) 
 : CChartViewer(), m_pCdv( NULL),
   m_nChartWidth( width ), m_nChartHeight( height ),
-  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 5 ),
+  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 )
 {
-  Initialize();
 }
 
 afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) { // virtual from within CChartViewer
   CChartViewer::OnCreate( lpCreateStruct );
-  //m_nIDEvent = SetTimer( 10, 250, NULL );
+
+  //CChartViewer::setZoomInWidthLimit( m_dblMinDuration );
+  //CChartViewer::setViewPortWidth( m_dblCurDuration );
+  //CChartViewer::updateViewPort( true, false );
 
   return 0;  // 0 to continue creation, -1 to destroy
 }
 
 afx_msg void CChartMaster::OnDestroy( ) {
-  //KillTimer( m_nIDEvent );
   CChartViewer::OnDestroy();
 }
 
-void CChartMaster::Initialize( void ) {
-
-  CChartViewer::setZoomInWidthLimit( m_dblMinDuration );
-  CChartViewer::setViewPortWidth( m_dblCurDuration );
-  CChartViewer::updateViewPort( true, false );
-
-  m_refresh.Add( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
-}
-
 CChartMaster::~CChartMaster(void) {
-  m_refresh.Remove( MakeDelegate( this, &CChartMaster::HandlePeriodicRefresh ) );
 }
 
 BEGIN_MESSAGE_MAP(CChartMaster, CChartViewer)
-  //ON_WM_TIMER()
   ON_WM_CREATE()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
@@ -64,20 +55,8 @@ void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
-/*
-afx_msg void CChartMaster::OnTimer(UINT nIDEvent) {  // isn't as responsive as CGeneratePeriodicRefresh
-  // due to ontimer going through application and gpr goes to cwnd directly?
-  if ( nIDEvent != m_nIDEvent ) {
-    CChartViewer::OnTimer( nIDEvent );
-  }
-  else {
-    HandlePeriodicRefresh();
-  }
-}
-*/
 
-void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
-//void CChartMaster::HandlePeriodicRefresh( void ){
+void CChartMaster::DrawChart( void ) {
 
   struct structSubChart {
     XYChart *xy; // xy chart at this position
@@ -85,7 +64,8 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
   };
 
   if ( NULL != m_pCdv ) { // DataView has something to draw
-    if ( m_pCdv->GetChanged() ) {
+    //if ( m_pCdv->GetChanged() ) {
+    if ( true ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
 
@@ -154,7 +134,22 @@ void CChartMaster::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
         m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : max( m_dblXMax, Attributes.dblXMax );
       }
 
-      CChartViewer::updateViewPort( true );
+      double dblLower;
+      double dblUpper;
+      if ( m_dblXMin != m_dblXMax ) {
+        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {
+          dblUpper = m_dblXMax;
+          dblLower = dblUpper - m_dblMinDuration;
+        }
+        else {
+          dblUpper = m_dblXMax;
+          //dblLower = dblUpper - m_dblCurDuration;
+          dblLower = m_dblXMin;
+        }
+        pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
+      }
+
+      //CChartViewer::updateViewPort( true, false );
 
       //multi.layout();
 

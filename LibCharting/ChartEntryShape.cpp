@@ -40,7 +40,7 @@ void CChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttr
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
-        GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 5, m_eColour, m_eColour );
+        GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 25, m_eColour, m_eColour );
 
     DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
     layer->setXData( daXData );

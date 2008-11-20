@@ -2,7 +2,6 @@
 
 #include <string>
 #include "ChartDirector\chartviewer.h"
-#include "GeneratePeriodicRefresh.h"
 #include "ChartDataView.h"
 
 class CChartMaster :  public CChartViewer {
@@ -16,6 +15,8 @@ public:
   CChartDataView *GetChartDataView( void ) { return m_pCdv; };
   double GetXMin( void ) { return m_dblXMin; };
   double GetXMax( void ) { return m_dblXMax; };
+  bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
+  void DrawChart( void );
 protected:
   //std::string m_sChartTitle;  // data view has this information
   unsigned int m_nChartWidth;
@@ -25,16 +26,11 @@ protected:
   double m_dblMinDuration;  // minimum viewport width in seconds
   double m_dblCurDuration;  // current viewport width in seconds
 
-  double m_dblXMin;
-  double m_dblXMax;
+  double m_dblXMin;  // initial data time stamp
+  double m_dblXMax;  // last data time stamp
 
   void Initialize( void );
 private:
-  CGeneratePeriodicRefresh m_refresh;
-  void HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
-  //void HandlePeriodicRefresh( void );
-  //UINT_PTR m_nIDEvent;
-	//virtual afx_msg void OnTimer(UINT nIDEvent);
   virtual afx_msg int OnCreate( LPCREATESTRUCT lpCreateStruct );
   virtual afx_msg void OnDestroy( );
 
