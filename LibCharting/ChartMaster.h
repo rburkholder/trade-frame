@@ -16,7 +16,8 @@ public:
   double GetXMin( void ) { return m_dblXMin; };
   double GetXMax( void ) { return m_dblXMax; };
   bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
-  void DrawChart( void );
+  void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
+  bool isCreated( void ) { return m_bCreated; };
 protected:
   //std::string m_sChartTitle;  // data view has this information
   unsigned int m_nChartWidth;
@@ -28,6 +29,8 @@ protected:
 
   double m_dblXMin;  // initial data time stamp
   double m_dblXMax;  // last data time stamp
+
+  bool m_bCreated;
 
   void Initialize( void );
 private:

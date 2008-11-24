@@ -11,15 +11,25 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CChartViewPort, CGUIFrameBase)
 
+#define ID_CM 65500
+
 CChartViewPort::CChartViewPort( CChartDataView *cdv, CWnd* pParent )
 : CGUIFrameBase(), m_bKeyOnShift( false ), m_bKeyOnControl( false )
 {
   CGUIFrameBase::SetPosition( -1000, 0, -200, 900 );
   CGUIFrameBase::Create( );
 
-  CRect chartRect( 5, 5, 10, 10 );
-  m_cm.Create( _T( "" ), WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY, chartRect, this, 65500 );
-  SetChartMasterSize();
+  CRect rectChart;
+  CGUIFrameBase::GetClientRect( &rectChart );
+
+  //CRect rectSB;
+  //m_hscroll.Create( SBS_HORZ | SBS_BOTTOMALIGN, rectChart, this, 65500 );
+  //m_hscroll.EnableWindow( false );
+
+  //rectChart.bottom -= rectSB.Height() + 1;
+  m_cm.Create( _T( "" ), WS_CHILD | WS_VISIBLE | SS_BITMAP | SS_NOTIFY, rectChart, this, ID_CM );
+
+  //SetChartMasterSize();
 
   m_refresh.Add( MakeDelegate( this, &CChartViewPort::HandlePeriodicRefresh ) );
 } 
@@ -29,19 +39,30 @@ CChartViewPort::~CChartViewPort(void) {
 }
 
 void CChartViewPort::SetChartMasterSize( void ) {
-  CRect clientRect;
-  CFrameWnd::GetClientRect(&clientRect);
-  CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
-  m_cm.SetChartDimensions( chartRect.Width(), chartRect.Height() );
-  m_cm.setMouseUsage( Chart::MouseUsageDefault );
-  m_cm.setZoomDirection( Chart::DirectionHorizontal );
-  m_cm.setScrollDirection( Chart::DirectionHorizontal );
-  //m_cm.setZoomInWidthLimit( 60 * 1 );
-  //m_cm.setViewPortWidth( 60 * 5 );
-  m_cm.updateViewPort( true, false );
+  //SCROLLINFO si;
+  //si.cbSize = sizeof( SCROLLINFO );
+  CGUIFrameBase::ShowScrollBar( SB_HORZ, true );
+  //CGUIFrameBase::EnableScrollBar( SB_HORZ, ESB_DISABLE_BOTH );
+  //CGUIFrameBase::EnableScrollBarCtrl( SB_HORZ, false );
+  if ( m_cm.isCreated() ) {
+    CRect rectClient;
+    //CRect rectSB;
+    CRect rectTemp;
+    CGUIFrameBase::GetClientRect(&rectClient);  // 0,0, width, height
+    m_cm.SetWindowPos( &CWnd::wndTop, 0, 0, rectClient.Width(), rectClient.Height(), SWP_NOCOPYBITS );
+    //CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
+    m_cm.SetChartDimensions( rectClient.Width(), rectClient.Height() );
+    m_cm.setMouseUsage( Chart::MouseUsageDefault );
+    m_cm.setZoomDirection( Chart::DirectionHorizontal );
+    m_cm.setScrollDirection( Chart::DirectionHorizontal );
+    //m_cm.setZoomInWidthLimit( 60 * 1 );
+    //m_cm.setViewPortWidth( 60 * 5 );
+    m_cm.updateViewPort( true, false );
+  }
 }
 
 BEGIN_MESSAGE_MAP(CChartViewPort, CGUIFrameBase)
+  ON_WM_CREATE()
 	ON_WM_DESTROY()
   ON_WM_SIZE()
 //  ON_WM_SIZING( )
@@ -53,9 +74,16 @@ BEGIN_MESSAGE_MAP(CChartViewPort, CGUIFrameBase)
   ON_WM_KEYUP( )
 //  ON_WM_SETCURSOR( )
 
-  ON_CONTROL(CVN_ViewPortChanged, 65500, OnViewPortChanged)
+  ON_BN_CLICKED(ID_CM, OnChartViewer)
+  ON_CONTROL(CVN_ViewPortChanged, ID_CM, OnViewPortChanged)
   //ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
+
+afx_msg int CChartViewPort::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
+  CGUIFrameBase::OnCreate( lpCreateStruct );
+  SetChartMasterSize();
+  return 0;  // -1 to destroy
+}
 
 void CChartViewPort::OnDestroy()  {
 	CGUIFrameBase::OnDestroy();
@@ -72,6 +100,25 @@ void CChartViewPort::OnViewPortChanged() {
 //    << ", t=" << m_cm.getViewPortTop()
 //    << ", w=" << m_cm.getViewPortWidth();
   if ( m_cm.needUpdateChart() ) m_cm.DrawChart();
+}
+
+void CChartViewPort::OnChartViewer() {  // when chart is clicked in normal mode
+
+  ImageMapHandler *handler = m_cm.getImageMapHandler();
+  if (0 != handler) {
+    //
+    // Query the ImageMapHandler to see if the mouse is on a clickable hot spot. We 
+    // consider the hot spot as clickable if its href ("path") parameter is not empty.
+    //
+    const char *path = handler->getValue("path");
+    if ((0 != path) && (0 != *path))
+    {
+        // In this sample code, we just show all hot spot parameters.
+        //CHotSpotDlg hs;
+        //hs.SetData(handler);
+        //hs.DoModal();
+    }
+  }
 }
 
 afx_msg BOOL CChartViewPort::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt ) {
@@ -92,6 +139,26 @@ afx_msg void CChartViewPort::OnHScroll( UINT nSBCode, UINT nPos, CScrollBar* pSc
   LOG << "sb "
     << "nSBCode=" << nSBCode
     << ", nPos=" << nPos;
+  switch ( nSBCode ) {
+    case SB_LINELEFT:
+      break;
+    case SB_LINERIGHT:
+      break;
+    case SB_PAGELEFT:
+      break;
+    case SB_PAGERIGHT:
+      break;
+    case SB_THUMBPOSITION:  // issued when thumb released
+      break;
+    case SB_THUMBTRACK:  // issued during thumb move
+      break;
+    case SB_ENDSCROLL:
+      break;
+    case SB_RIGHT:
+      break;
+    case SB_LEFT:
+      break;
+  }
 }
 
 afx_msg void CChartViewPort::OnInitMenuPopup( CMenu *, UINT, BOOL ) {
@@ -153,7 +220,7 @@ afx_msg BOOL CChartViewPort::OnSetCursor( CWnd*, UINT, UINT ) {
 
 void CChartViewPort::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
   if ( m_cm.GetChartDataViewChanged() ) {
-    m_cm.updateViewPort( true, true );
+    //m_cm.updateViewPort( true, true );
   }
 }
 

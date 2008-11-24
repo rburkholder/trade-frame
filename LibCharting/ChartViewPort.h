@@ -16,10 +16,13 @@ public:
   CChartDataView *GetChartDataView( void ) { return m_cm.GetChartDataView(); };
 protected:
   CChartMaster m_cm;
+  //CScrollBar m_hscroll;
   void SetChartMasterSize( void );
 
   afx_msg void OnViewPortChanged();
+  afx_msg void OnChartViewer();
 
+  afx_msg int OnCreate( LPCREATESTRUCT );
   afx_msg void OnDestroy();
   afx_msg void OnSize(UINT nType, int cx, int cy);
   afx_msg BOOL OnMouseWheel( UINT nFlags, short zDelta, CPoint pt );
@@ -33,7 +36,6 @@ protected:
 
   CGeneratePeriodicRefresh m_refresh;
   void HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
-  //void HandlePeriodicRefresh( void );
 
 private:
 	DECLARE_MESSAGE_MAP()

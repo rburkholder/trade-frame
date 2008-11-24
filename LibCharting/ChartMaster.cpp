@@ -15,15 +15,19 @@ CChartMaster::CChartMaster(void)
 : CChartViewer(), m_pCdv( NULL),
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
-  m_dblXMin( 0 ), m_dblXMax( 0 )
+  m_dblXMin( 0 ), m_dblXMax( 0 ),
+  m_bCreated( false )
 {
+  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  assert( b );
 }
 
 CChartMaster::CChartMaster( unsigned int width, unsigned int height ) 
 : CChartViewer(), m_pCdv( NULL),
   m_nChartWidth( width ), m_nChartHeight( height ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
-  m_dblXMin( 0 ), m_dblXMax( 0 )
+  m_dblXMin( 0 ), m_dblXMax( 0 ),
+  m_bCreated( false )
 {
 }
 
@@ -33,6 +37,8 @@ afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) { // virtual
   //CChartViewer::setZoomInWidthLimit( m_dblMinDuration );
   //CChartViewer::setViewPortWidth( m_dblCurDuration );
   //CChartViewer::updateViewPort( true, false );
+
+  m_bCreated = true;
 
   return 0;  // 0 to continue creation, -1 to destroy
 }
@@ -56,7 +62,7 @@ void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
 }
 
 
-void CChartMaster::DrawChart( void ) {
+void CChartMaster::DrawChart( bool bViewPortChanged ) {
 
   struct structSubChart {
     XYChart *xy; // xy chart at this position
@@ -124,6 +130,7 @@ void CChartMaster::DrawChart( void ) {
         ++ix;
       }
 
+      // determine XAxis min/max while adding chart data
       m_dblXMin = 0;
       m_dblXMax = 0;
       for ( CChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
@@ -134,24 +141,22 @@ void CChartMaster::DrawChart( void ) {
         m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : max( m_dblXMax, Attributes.dblXMax );
       }
 
+      // time axis scales
       double dblLower;
       double dblUpper;
       if ( m_dblXMin != m_dblXMax ) {
-        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {
+        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {  // minimum time window
           dblUpper = m_dblXMax;
           dblLower = dblUpper - m_dblMinDuration;
         }
         else {
-          dblUpper = m_dblXMax;
-          //dblLower = dblUpper - m_dblCurDuration;
-          dblLower = m_dblXMin;
+          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
+          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
+          //dblUpper = m_dblXMax;
+          //dblLower = m_dblXMin;
         }
         pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
       }
-
-      //CChartViewer::updateViewPort( true, false );
-
-      //multi.layout();
 
       setChart( &multi );
 
