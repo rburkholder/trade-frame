@@ -99,7 +99,7 @@ void CChartViewPort::OnViewPortChanged() {
 //    << ", l=" << m_cm.getViewPortLeft() 
 //    << ", t=" << m_cm.getViewPortTop()
 //    << ", w=" << m_cm.getViewPortWidth();
-  if ( m_cm.needUpdateChart() ) m_cm.DrawChart();
+  if ( m_cm.needUpdateChart() ) m_cm.DrawChart( true );
 }
 
 void CChartViewPort::OnChartViewer() {  // when chart is clicked in normal mode
@@ -221,6 +221,7 @@ afx_msg BOOL CChartViewPort::OnSetCursor( CWnd*, UINT, UINT ) {
 void CChartViewPort::HandlePeriodicRefresh( CGeneratePeriodicRefresh *pMsg ){
   if ( m_cm.GetChartDataViewChanged() ) {
     //m_cm.updateViewPort( true, true );
+    m_cm.DrawChart( false );
   }
 }
 

@@ -16,7 +16,7 @@ const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
 H5File CHDF5DataManager::m_H5File;
 unsigned int CHDF5DataManager::m_RefCount = 0;
 
-CHDF5DataManager HDF5DM;
+CHDF5DataManager HDF5DM;  // statically defined, so at least one instance is always present
 
 CHDF5DataManager::CHDF5DataManager(void) {
   ++m_RefCount;

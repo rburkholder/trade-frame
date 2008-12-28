@@ -24,10 +24,15 @@ CChartRealTimeTreeView::~CChartRealTimeTreeView(void) {
 }
 
 BEGIN_MESSAGE_MAP(CChartRealTimeTreeView, CGUIFrameBase)
+  ON_WM_CREATE()
 	ON_WM_DESTROY()
   ON_WM_SIZE( )
   ON_NOTIFY(TVN_SELCHANGED, 2001, &CChartRealTimeTreeView::OnTvnSelChangedTree)
 END_MESSAGE_MAP()
+
+int CChartRealTimeTreeView::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
+  return CGUIFrameBase::OnCreate( lpCreateStruct );
+}
 
 void CChartRealTimeTreeView::OnDestroy()  {
 	CGUIFrameBase::OnDestroy();

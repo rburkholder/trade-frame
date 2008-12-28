@@ -40,11 +40,15 @@ BOOL CGUIFrameBase::Create( void ) {
 }
 
 BEGIN_MESSAGE_MAP(CGUIFrameBase, CFrameWnd)
+  ON_WM_CREATE()
 	ON_WM_DESTROY()
   ON_WM_SIZE( )
   //ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
+int CGUIFrameBase::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
+  return CFrameWnd::OnCreate( lpCreateStruct );
+}
 void CGUIFrameBase::OnDestroy()  {
 	CFrameWnd::OnDestroy();
 }

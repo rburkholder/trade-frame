@@ -363,9 +363,20 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const CString& accountName) {
   if ( true ) {
-        std::cout << "portfolio " << contract.symbol << ", " << position << ", " 
-    << marketPrice << ", " << marketValue << ", " << averageCost << ", "
-    << unrealizedPNL << ", " << realizedPNL << ", " << accountName << std::endl;
+    std::cout << "portfolio " 
+      << contract.symbol 
+      << ", type=" << contract.secType 
+      << ", strike=" << contract.strike
+      << ", expire=" << contract.expiry
+      << ", right=" << contract.right
+      << ", pos=" << position
+      << ", price=" << marketPrice
+      << ", val=" << marketValue
+      << ", cost=" << averageCost
+      << ", uPL=" << unrealizedPNL
+      << ", rPL=" << realizedPNL
+      //<< ", " << accountName 
+      << std::endl;
   }
 }
 

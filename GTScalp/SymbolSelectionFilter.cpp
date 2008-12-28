@@ -18,11 +18,15 @@ using namespace H5;
 // destroy self when done
 // http://www.codeproject.com/KB/stl/xingstlarticle.aspx  functors
 
+// implement boost 1_35_0 soon for the boost::bind
+
 //
-// CSymbolSelectionFilter
+// CSymbolSelectionFilter ( base class for filters )
 //
-CSymbolSelectionFilter::CSymbolSelectionFilter( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
-  m_DayStartType( dstype) , m_nCount( count ), m_bUseStart( bUseStart ), m_dtStart( dtStart ), m_bUseLast( bUseEnd ), m_dtLast( dtEnd ) {
+CSymbolSelectionFilter::CSymbolSelectionFilter( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
+  m_DayStartType( dstype) , m_nCount( count ), 
+    m_bUseStart( bUseStart ), m_dtStart( dtStart ), m_bUseLast( bUseEnd ), m_dtLast( dtEnd ) {
 }
 
 CSymbolSelectionFilter::~CSymbolSelectionFilter(void) {
@@ -54,8 +58,6 @@ protected:
   double dblMax;
 private:
 };
-
-// implement boost 1_35_0 soon for the boost::bind
 
 class CalcSixMonMeans {
 private:
@@ -106,7 +108,8 @@ public:
   operator double() { return m_dblSumOfPrices / m_nNumberOfValues; };
 };
 
-CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
@@ -171,7 +174,8 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
 //
 // CSelectSymbolWith10Percent
 //
-CSelectSymbolWith10Percent::CSelectSymbolWith10Percent( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+CSelectSymbolWith10Percent::CSelectSymbolWith10Percent( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
@@ -253,7 +257,9 @@ void CSelectSymbolWith10Percent::WrapUp( void ) {
 //
 // CSelectSymbolWithVolatility
 //
-CSelectSymbolWithVolatility::CSelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+
+CSelectSymbolWithVolatility::CSelectSymbolWithVolatility( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
@@ -334,7 +340,9 @@ void CSelectSymbolWithVolatility::WrapUp( void ) {
 //
 // CSelectSymbolWithBreakout
 //
-CSelectSymbolWithBreakout::CSelectSymbolWithBreakout( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+
+CSelectSymbolWithBreakout::CSelectSymbolWithBreakout( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
@@ -349,7 +357,8 @@ void CSelectSymbolWithBreakout::Process( const string &sSymbol, const string &sP
 //
 // CSelectSymbolWithXWeekHigh
 //
-CSelectSymbolWithXWeekHigh::CSelectSymbolWithXWeekHigh( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+CSelectSymbolWithXWeekHigh::CSelectSymbolWithXWeekHigh( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
@@ -381,7 +390,9 @@ void CSelectSymbolWithXWeekHigh::Process( const string &sSymbol, const string &s
 //
 // CSelectSymbolWithBollinger
 //
-CSelectSymbolWithBollinger::CSelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
+
+CSelectSymbolWithBollinger::CSelectSymbolWithBollinger( 
+  enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
   CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 

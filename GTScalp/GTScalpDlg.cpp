@@ -74,6 +74,7 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
   , m_pBasketTrade( NULL )
   , m_pExecutionProvider( NULL )
   , m_pDataProvider( NULL )
+  , m_pCalcAboveBelow( NULL )
 {
 
   //BOOL b = Create(IDD, pParent );
@@ -208,6 +209,7 @@ BEGIN_MESSAGE_MAP(CGTScalpDlg, CDialog)
   ON_BN_CLICKED(IDC_BTNRUNSIM, &CGTScalpDlg::OnBnClickedBtnrunsim)
   ON_BN_CLICKED(IDC_BTNHDF5FLUSH, &CGTScalpDlg::OnBnClickedBtnhdf5flush)
   ON_BN_CLICKED(IDC_BTNSTOPSIM, &CGTScalpDlg::OnBnClickedBtnstopsim)
+  ON_BN_CLICKED(IDC_BTNSKUNK, &CGTScalpDlg::OnBnClickedBtnskunk)
 END_MESSAGE_MAP()
 
 
@@ -430,6 +432,10 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
 
 void CGTScalpDlg::CloseEverything( void ) {
 
+  if ( NULL != m_pCalcAboveBelow ) {
+    delete m_pCalcAboveBelow;
+    m_pCalcAboveBelow = NULL;
+  }
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
   }
@@ -1467,3 +1473,11 @@ void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
 }
 
 
+
+void CGTScalpDlg::OnBnClickedBtnskunk() {
+  if ( NULL != m_pCalcAboveBelow ) {
+    delete m_pCalcAboveBelow;
+  }
+  m_pCalcAboveBelow = new CCalcAboveBelow();
+  m_pCalcAboveBelow->Start();
+}

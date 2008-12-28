@@ -34,6 +34,8 @@
 
 #include "OrderManager.h"
 
+#include "CalcAboveBelow.h"
+
 #include <vector>
 using namespace std;
 
@@ -93,6 +95,8 @@ private:
   CBasketTradeContainer *m_pBasketTrade;
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
+
+  CCalcAboveBelow *m_pCalcAboveBelow;
 
   void CloseEverything( void );
 
@@ -238,4 +242,5 @@ public:
   afx_msg void OnBnClickedBtnrunsim();
   afx_msg void OnBnClickedBtnhdf5flush();
   afx_msg void OnBnClickedBtnstopsim();
+  afx_msg void OnBnClickedBtnskunk();
 };

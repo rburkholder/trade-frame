@@ -8,7 +8,6 @@
 //static char THIS_FILE[] = __FILE__;
 //#endif
 
-
 #include "BerkeleyDBDataManager.h"
 #include "TradingEnumerations.h"
 
@@ -16,7 +15,6 @@
 #include <assert.h>
 
 // todo 2008/06/06 change record retrieval to use stack structures rather than dynamic allocation
-
 
 CInstrumentFile::CInstrumentFile(void) : 
     pRecord( NULL ), 
@@ -165,6 +163,8 @@ void CInstrumentFile::SetSearchUnderlying( const char *szUnderlying ) {
 }
 
 bool CInstrumentFile::RetrieveSymbolRecordByExchange( u_int32_t flags ) {
+  // flags =  DB_SET: find first record
+  //          DB_NEXT_DUP:  retrieve next record for same exchange
   pRecord = NULL;
   assert( NULL != m_pdbcIxSymbols_Market );
   int result = m_pdbcIxSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
