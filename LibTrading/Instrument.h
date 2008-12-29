@@ -26,6 +26,8 @@ public:
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   unsigned short GetExpiryYear( void ) { return m_nYear; };
   unsigned short GetExpiryMonth( void ) { return m_nMonth; };
+  void SetContract( long id ) { m_nContract = id; };
+  long GetContract( void ) { return m_nContract; };
 protected:
   std::string m_sSymbolName; // main name
   std::string m_sUnderlying;  // underlying when main name is an option
@@ -37,5 +39,6 @@ protected:
   unsigned short m_nYear; // future, option
   unsigned short m_nMonth; // future, option
   double m_dblStrike;
+  long m_nContract;
 private:
 };

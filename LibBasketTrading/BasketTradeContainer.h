@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\LibTrading\ProviderInterface.h"
+#include "ProviderInterface.h"
 #include "BasketTradeModel.h"
 #include "BasketTradeViewPosition.h"
 #include "BasketTradeViewSymbolList.h"

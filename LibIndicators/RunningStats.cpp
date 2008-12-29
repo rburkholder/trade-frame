@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+
 #include "math.h"
 #include "RunningStats.h"
 

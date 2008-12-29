@@ -5,6 +5,7 @@
 #include "Order.h"
 #include "AlternateInstrumentNames.h"
 #include "OrderManager.h"
+#include "Portfolio.h"
 
 #include <map>
 #include <string>
@@ -31,6 +32,8 @@ public:
   virtual void RemoveTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
   virtual void AddDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
   virtual void RemoveDepthHandler( const string &sSymbol, CSymbol::depthhandler_t handler );
+
+  Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
   virtual CSymbol* GetSymbol( const string &sSymbol );
 

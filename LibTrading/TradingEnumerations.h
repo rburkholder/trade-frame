@@ -1,35 +1,35 @@
 #pragma once
 
 namespace InstrumentType { // IBTWS.cpp depends on this order
-  enum enumInstrumentTypes : char { Unknown, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
+  enum enumInstrumentTypes : char { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
   const char *Name[];
 }
 
 namespace OrderSide {
-  enum enumOrderSide { Unknown, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
+  enum enumOrderSide { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
   const char *Name[];
 }
 
 namespace OrderStatus {
-  enum enumOrderStatus { Created, SendingToProvider, PreSubmission, Rejected, Submitted, 
+  enum enumOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted, 
     Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
 }
 
 namespace OptionSide {
-  enum enumOptionSide { Unknown, Put, Call, _Count };
+  enum enumOptionSide { Unknown=0, Put, Call, _Count };
   const char *Name[];
 }
 
 namespace OrderType { // ib szOrderType depends upon order
-  enum enumOrderType { Unknown, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
+  enum enumOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }
 
 namespace OrderErrors {
-  enum enumOrderErrors { Rejected, Cancelled, NotCancellable, InstrumentNotFound };
+  enum enumOrderErrors { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
 namespace TimeInForce {
-  enum enumTimeInForce { Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, AtTheClose, _Count };
+  enum enumTimeInForce { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, AtTheClose, _Count };
 }
 
 namespace Currency {

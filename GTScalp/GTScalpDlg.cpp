@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -74,7 +75,7 @@ CGTScalpDlg::CGTScalpDlg(CWnd* pParent /*=NULL*/)
   , m_pBasketTrade( NULL )
   , m_pExecutionProvider( NULL )
   , m_pDataProvider( NULL )
-  , m_pCalcAboveBelow( NULL )
+  //, m_pCalcAboveBelow( NULL )
 {
 
   //BOOL b = Create(IDD, pParent );
@@ -432,10 +433,11 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
 
 void CGTScalpDlg::CloseEverything( void ) {
 
-  if ( NULL != m_pCalcAboveBelow ) {
-    delete m_pCalcAboveBelow;
-    m_pCalcAboveBelow = NULL;
+  std::vector<CCalcAboveBelow *>::iterator iterAB;
+  for ( iterAB = m_vCalcAB.begin(); m_vCalcAB.end() != iterAB; ++iterAB ) {
+    delete *iterAB;
   }
+
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
   }
@@ -999,64 +1001,15 @@ void CGTScalpDlg::OnBnClickedRtchart() {
   }
 }
 
-// Todo:  move the switch statements in to the applicable groups and have the information stored and checked 
-//    there in order to facilitate multiple reuse.
-
-void CGTScalpDlg::OnBnClickedBasket() {
-  bool bOK = true;
-  CProviderInterface *pData = NULL;
+CProviderInterface *CGTScalpDlg::GetExecutionProvider() {
   CProviderInterface *pExec = NULL;
-  if ( NoDS == m_eDataSourceType ) {
-    std::cout << "No Data Source selected" << std::endl;
-    bOK = false;
-  }
-  else {
-    switch ( m_eDataSourceType ) {
-      case DSIQFeed:
-        if ( NULL == m_pIQFeed ) { 
-          bOK = false;
-          std::cout << "IQFeed not started" << std::endl;
-        }
-        else {
-          pData = m_pIQFeed;
-          std::cout << "Data Source = IQFeed" << std::endl;
-        }
-        break;
-      case DSIB:
-        if ( NULL == m_pIB ) {
-          bOK = false;
-          std::cout << "IB not started" << std::endl;
-        }
-        else { 
-          pData = m_pIB;
-          std::cout << "Data Source = IB" << std::endl;
-        }
-        break;
-      case DSSimulation:
-        if ( NULL == m_pSimulation ) {
-          bOK = false;
-          std::cout << "Simulation not started" << std::endl;
-        }
-        else {
-          pData = m_pSimulation;
-          std::cout << "Data Source = Simulation" << std::endl;
-        }
-        break;
-      case DSGenesis1:
-        break;
-      case DSGenesis2:
-        break;
-    }
-  }
   if ( NoExec == m_eExecutionType ) {
     std::cout << "No Execution Destination selected" << std::endl;
-    bOK = false;
   }
   else {
     switch ( m_eExecutionType ) {
       case ExecIB:
         if ( NULL == m_pIB ) {
-          bOK = false;
           std::cout << "IB not started" << std::endl;
         }
         else {
@@ -1066,7 +1019,6 @@ void CGTScalpDlg::OnBnClickedBasket() {
         break;
       case ExecSimulation:
         if ( NULL == m_pSimulation ) {
-          bOK = false;
           std::cout << "Simulation not started" << std::endl;
         }
         else {
@@ -1080,9 +1032,61 @@ void CGTScalpDlg::OnBnClickedBasket() {
         break;
     }
   }
-  if ( bOK ) {
-    if ( NULL != m_pBasketTrade ) {
-      std::cout << "Basket already started" << std::endl;
+  return pExec;
+}
+
+CProviderInterface *CGTScalpDlg::GetDataProvider() {
+  CProviderInterface *pData = NULL;
+  if ( NoDS == m_eDataSourceType ) {
+    std::cout << "No Data Source selected" << std::endl;
+  }
+  else {
+    switch ( m_eDataSourceType ) {
+      case DSIQFeed:
+        if ( NULL == m_pIQFeed ) { 
+          std::cout << "IQFeed not started" << std::endl;
+        }
+        else {
+          pData = m_pIQFeed;
+          std::cout << "Data Source = IQFeed" << std::endl;
+        }
+        break;
+      case DSIB:
+        if ( NULL == m_pIB ) {
+          std::cout << "IB not started" << std::endl;
+        }
+        else { 
+          pData = m_pIB;
+          std::cout << "Data Source = IB" << std::endl;
+        }
+        break;
+      case DSSimulation:
+        if ( NULL == m_pSimulation ) {
+          std::cout << "Simulation not started" << std::endl;
+        }
+        else {
+          pData = m_pSimulation;
+          std::cout << "Data Source = Simulation" << std::endl;
+        }
+        break;
+      case DSGenesis1:
+        break;
+      case DSGenesis2:
+        break;
+    }
+  }
+  return pData;
+}
+
+void CGTScalpDlg::OnBnClickedBasket() {
+  if ( NULL != m_pBasketTrade ) {
+    std::cout << "Basket already started" << std::endl;
+  }
+  else {
+    CProviderInterface *pExec = GetExecutionProvider();
+    CProviderInterface *pData = GetDataProvider();
+    if ( ( NULL == pExec ) || ( NULL == pData ) ) {
+      std::cout  << "A provider was not found" << std::endl;
     }
     else {
       m_pBasketTrade = new CBasketTradeContainer( pData, pExec);
@@ -1475,9 +1479,23 @@ void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
 
 
 void CGTScalpDlg::OnBnClickedBtnskunk() {
-  if ( NULL != m_pCalcAboveBelow ) {
-    delete m_pCalcAboveBelow;
+
+  char szSymbol[ 30 ];
+  m_lbSymbolList.GetWindowTextA( szSymbol, 30 );
+  if ( 0 == szSymbol[ 0 ] ) {
+    std::cout << "No symbol provided" << std::endl;
   }
-  m_pCalcAboveBelow = new CCalcAboveBelow();
-  m_pCalcAboveBelow->Start();
+  else {
+    std::string sSymbol( szSymbol );
+    CProviderInterface *pExec = GetExecutionProvider();
+    CProviderInterface *pData = GetDataProvider();
+    if ( ( NULL == pExec ) || ( NULL == pData ) ) {
+      std::cout  << "A provider was not found" << std::endl;
+    }
+    else {
+      CCalcAboveBelow *pCalc = new CCalcAboveBelow( sSymbol, pData, pExec );
+      m_vCalcAB.push_back( pCalc );
+      pCalc->Start();
+    }
+  }
 }

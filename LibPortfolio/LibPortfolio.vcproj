@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="LibSimulation"
-	ProjectGUID="{ADC0D3BE-54E4-4543-857B-F70E44449B29}"
-	RootNamespace="LibSimulation"
+	Name="LibPortfolio"
+	ProjectGUID="{56835D91-41B5-4B1F-83BF-20B43A646430}"
+	RootNamespace="LibPortfolio"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\LibPortfolio;..\LibGUI;..\LibTimeSeries;..\LibTrading;..\LibCommon;..\LibHDF5TimeSeries;..\LibBerkeleyDb;K:\Data\Projects\boost\current;&quot;H:\Program Files\Oracle\current\include&quot;;K:\Data\Projects\hdf5\current\hdf5lib\debug\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_HDF5USEDLL_;HDF5CPP_USEDLL;_HDF5USEHLDLL_;HDF5USE_HLCPPDLL"
+				AdditionalIncludeDirectories="..\LibTrading;..\LibTimeSeries;..\LibCommon"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -85,7 +85,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="2"
-			CharacterSet="0"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -105,8 +105,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\LibGUI;..\LibTimeSeries;..\LibTrading;..\LibCommon;..\LibHDF5TimeSeries;..\LibBerkeleyDb;K:\Data\Projects\boost\current;&quot;H:\Program Files\Oracle\current\include&quot;;K:\Data\Projects\hdf5\current\hdf5lib\release\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_HDF5USEDLL_;HDF5CPP_USEDLL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -151,19 +150,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\CrossThreadMerge.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulateOrderExecution.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulationProvider.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulationSymbol.cpp"
+				RelativePath=".\Portfolio.cpp"
 				>
 			</File>
 			<File
@@ -193,19 +180,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\CrossThreadMerge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulateOrderExecution.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulationProvider.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SimulationSymbol.h"
+				RelativePath=".\Portfolio.h"
 				>
 			</File>
 			<File

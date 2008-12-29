@@ -6,9 +6,16 @@
 #include "TWS\OrderState.h"
 #include "TWS\Execution.h"
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
 #include <iostream>
 #include <stdexcept>
 #include <limits>
+#include <string>
+
+#include <stdlib.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -91,7 +98,7 @@ void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
     contract.symbol = pSymbol->Name().c_str();
     contract.currency = "USD";
     contract.exchange = "SMART";
-    contract.secType = "STK";
+    contract.secType = "STK";  // todo:  get this information from the symbol
     //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
     pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
   }
@@ -128,8 +135,8 @@ void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
 }
 
 // indexed with InstrumentType::enumInstrumentTypes
-const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };
-const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL", 
+const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
+const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 //long CIBTWS::nOrderId = 1;
 
@@ -362,22 +369,71 @@ void CIBTWS::nextValidId( OrderId orderId) {
 void CIBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const CString& accountName) {
+
+  std::string sUnderlying( LPCSTR( contract.symbol ) );
+  std::string sLocalSymbol( LPCSTR( contract.localSymbol ) );
+
+  InstrumentType::enumInstrumentTypes it;
+  bool bFound = false;
+  for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
+    if ( 0 == strcmp( szSecurityType[ ix ], LPCTSTR( contract.secType ) ) ) {
+      it = static_cast<InstrumentType::enumInstrumentTypes>( ix );
+      bFound = true;
+      break;
+    }
+  }
+  if ( !bFound ) throw std::out_of_range( "can't find instrument type" );
+
+  bFound = false;
+  ptime dtExpiry = not_a_date_time;
+  OptionSide::enumOptionSide os = OptionSide::Unknown;
+  if ( 0 != contract.expiry.GetLength() ) {
+    std::string s( LPCTSTR( contract.expiry ) );
+    boost::gregorian::date d( boost::gregorian::from_undelimited_string( s ) );
+    dtExpiry = ptime( d );
+  }
+  CInstrument *pInstrument = NULL;
+  std::string sExchange( LPCSTR( contract.exchange ) );
+  switch ( it ) {
+    case InstrumentType::Stock: 
+      pInstrument = new CInstrument( sUnderlying, sExchange, it );
+      break;
+    case InstrumentType::FuturesOption:
+    case InstrumentType::Option:
+      if ( "P" == contract.right ) os = OptionSide::Put;
+      if ( "C" == contract.right ) os = OptionSide::Call;
+      pInstrument = new CInstrument( 
+        sLocalSymbol, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month(), sUnderlying, os, contract.strike );
+      break;
+    case InstrumentType::Future:
+      pInstrument = new CInstrument( sUnderlying, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month() );
+      break;
+  }
+  if ( NULL == pInstrument ) throw std::out_of_range( "instrument type not accounted for" );
+  pInstrument->SetContract( contract.conId );
+
   if ( true ) {
-    std::cout << "portfolio " 
-      << contract.symbol 
-      << ", type=" << contract.secType 
-      << ", strike=" << contract.strike
-      << ", expire=" << contract.expiry
-      << ", right=" << contract.right
-      << ", pos=" << position
-      << ", price=" << marketPrice
-      << ", val=" << marketValue
-      << ", cost=" << averageCost
-      << ", uPL=" << unrealizedPNL
-      << ", rPL=" << realizedPNL
+    std::cout << "portfolio item " 
+      << sUnderlying << " " << contract.localSymbol
+      << "  id=" << contract.conId  // long
+      << ", type=" << InstrumentType::Name[ it ]
+      << ", strike=" << contract.strike // double
+      << ", expire=" << dtExpiry
+      << ", right=" << OptionSide::Name[ os ]
+      << ", pos=" << position // int
+      << ", price=" << marketPrice // double
+      << ", val=" << marketValue // double
+      << ", cost=" << averageCost // double
+      << ", uPL=" << unrealizedPNL // double
+      << ", rPL=" << realizedPNL // double
       //<< ", " << accountName 
       << std::endl;
   }
+
+  CPortfolio::structUpdatePortfolioRecord record( pInstrument, position, marketPrice, averageCost );
+  OnUpdatePortfolioRecord( record );
+
+  if ( NULL != pInstrument ) delete pInstrument;
 }
 
 // todo: use the keyword lookup to make this faster

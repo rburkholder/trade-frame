@@ -15,7 +15,7 @@ using namespace H5;
 #include <stdexcept>
 #include <map>
 
-// destroy self when done
+// need to destroy self when done
 // http://www.codeproject.com/KB/stl/xingstlarticle.aspx  functors
 
 // implement boost 1_35_0 soon for the boost::bind

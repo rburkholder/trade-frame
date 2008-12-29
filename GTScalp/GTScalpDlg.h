@@ -96,12 +96,16 @@ private:
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
 
-  CCalcAboveBelow *m_pCalcAboveBelow;
+  std::vector<CCalcAboveBelow *> m_vCalcAB;
+  //CCalcAboveBelow *m_pCalcAboveBelow;
 
   void CloseEverything( void );
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+
+  CProviderInterface *GetExecutionProvider( void );
+  CProviderInterface *GetDataProvider( void );
 
 // Implementation
 protected:

@@ -3,7 +3,7 @@
 #include <string>
 #include "Delegate.h"
 
-#include "..\LibTimeSeries\DatedDatum.h"
+#include "DatedDatum.h"
 
 class CSymbol {
 public:

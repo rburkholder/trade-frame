@@ -11,14 +11,15 @@ static char THIS_FILE[] = __FILE__;
 CInstrument::CInstrument(const std::string &sSymbolName, const std::string &sExchangeName,
                          InstrumentType::enumInstrumentTypes type)
 : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
-m_InstrumentType( type ), 
+  m_InstrumentType( type ), 
   m_Currency( Currency::USD ),
-  m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 )
+  m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 ),
+  m_nContract( 0 )
 {
   assert( type < InstrumentType::_Count );
   assert( type > InstrumentType::Unknown );
   assert( 0 < m_sSymbolName.size() );
-  assert( 0 < m_sExchange.size() );
+  //assert( 0 < m_sExchange.size() );
 }
 
  // future
@@ -29,10 +30,11 @@ CInstrument::CInstrument(
     : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
     m_InstrumentType( type ),
     m_OptionSide( OptionSide::Unknown ), m_Currency( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 )
+    m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 ),
+    m_nContract( 0 )
 {
-  assert( 0 < m_sSymbolName.size() );
-  assert( 0 < m_sExchange.size() );
+  //assert( 0 < m_sSymbolName.size() );
+  //assert( 0 < m_sExchange.size() );
 }
 
  // option
@@ -46,10 +48,13 @@ CInstrument::CInstrument(
     : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
     m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
     m_OptionSide( side ), m_Currency( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), m_dblStrike( strike )
+    m_nYear( year ), m_nMonth( month ), m_dblStrike( strike ),
+    m_nContract( 0 )
 {
-  assert( 0 < m_sSymbolName.size() );
-  assert( 0 < m_sExchange.size() );
+  assert( side < OptionSide::_Count );
+  assert( side > OptionSide::Unknown );
+  //assert( 0 < m_sSymbolName.size() );
+  //assert( 0 < m_sExchange.size() );
 }
 
 CInstrument::CInstrument(const CInstrument &instrument) 
@@ -61,7 +66,8 @@ CInstrument::CInstrument(const CInstrument &instrument)
   m_Currency(  instrument.m_Currency ), 
   m_nYear( instrument.m_nYear ), 
   m_nMonth( instrument.m_nMonth ), 
-  m_dblStrike( instrument.m_dblStrike )
+  m_dblStrike( instrument.m_dblStrike ),
+  m_nContract( 0 )
 {
 }
 

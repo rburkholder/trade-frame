@@ -1,14 +1,15 @@
 #pragma once
 //#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
-//#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
 #include "TWS\EClientSocket.h"
 #include "ProviderInterface.h"
+#include "TradingEnumerations.h"
 #include "IBSymbol.h"
-//#include "PersistedOrderId.h"
+#include "Instrument.h"
 
 #include "Delegate.h"
 
 #include <string>
+#include <vector>
 
 class CIBTWS : public EWrapper, public CProviderInterface {
 public:
@@ -25,6 +26,8 @@ public:
   virtual void PlaceOrder( COrder *order );
   //virtual void CancelOrder( unsigned long nOrderId );
   virtual void CancelOrder( COrder *order );
+
+  // TWS Specific events
 
   // From TWS Wrapper:
   virtual void connectionClosed();
@@ -83,9 +86,6 @@ protected:
 
   static const char *szSecurityType[];
   static const char *szOrderType[];
-  //CPersistedOrderId m_orderid;
-  //static long nOrderId;
-
 
   // overridden from ProviderInterface
   virtual void StartQuoteWatch( CSymbol *pSymbol );
