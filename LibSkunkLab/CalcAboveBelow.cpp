@@ -68,19 +68,9 @@ public:
       << ", down=" << m_nCountDown
       << ", ave open=" << m_dblTotalOfOpen / m_nCount
       << ", ave close=" << m_dblTotalOfClose / m_nCount
+      << ", sd=" << m_statsRange.SD
       << std::endl;
-    std::cout << "Trade points:  "
-      << std::setprecision( 5 )
-      << std::setw( 6 )
-      <<         m_statsRange.meanY - 3 * m_statsRange.SD
-      << ", " << m_statsRange.meanY - 2 * m_statsRange.SD
-      << ", " << m_statsRange.meanY - 1 * m_statsRange.SD
-      << ", " << m_statsRange.meanY 
-      << ", " << m_statsRange.meanY + 1 * m_statsRange.SD
-      << ", " << m_statsRange.meanY + 2 * m_statsRange.SD
-      << ", " << m_statsRange.meanY + 3 * m_statsRange.SD
-      << std::endl;
-    return m_dblTotalOfOpen / m_nCount; 
+    return m_statsRange.SD; 
   };
 protected:
 private:
@@ -99,39 +89,58 @@ private:
   CRunningStats m_statsRange;
 };
 
-CCalcAboveBelow::CCalcAboveBelow( const std::string &sSymbol, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider ) 
-: m_sSymbol( sSymbol ), m_pDataProvider( pDataProvider), m_pExecutionProvider( pExecutionProvider ),
+//
+// CCalcAboveBelow
+//
+
+CCalcAboveBelow::CCalcAboveBelow( const std::string &sSymbolName, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider ) 
+: m_sSymbolName( sSymbolName ), m_pDataProvider( pDataProvider), m_pExecutionProvider( pExecutionProvider ),
   m_dblLast( 0 )
 {
-  m_pDataProvider->AddTradeHandler( sSymbol, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
+  m_pDataProvider->AddTradeHandler( sSymbolName, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
   m_pExecutionProvider->OnUpdatePortfolioRecord.Add( MakeDelegate( this, &CCalcAboveBelow::HandleUpdatePortfolioRecord ) );
 }
 
 CCalcAboveBelow::~CCalcAboveBelow(void) {
   m_pExecutionProvider->OnUpdatePortfolioRecord.Remove( MakeDelegate( this, &CCalcAboveBelow::HandleUpdatePortfolioRecord ) );
-  m_pDataProvider->RemoveTradeHandler( m_sSymbol, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
+  m_pDataProvider->RemoveTradeHandler( m_sSymbolName, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
 }
 
 void CCalcAboveBelow::Start( void ) {
   string sPath;
-  CHDF5DataManager::DailyBarPath( m_sSymbol, sPath );
-  std::cout << "Processing " << m_sSymbol << " in " << sPath << std::endl;
+  CHDF5DataManager::DailyBarPath( m_sSymbolName, sPath );
+  std::cout << "Processing " << m_sSymbolName << " in " << sPath << std::endl;
   //string sPath( "/bar/86400/I/C/" + m_sSymbol );
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
   CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
   end = barRepository.end();
   if ( 20 > ( end - barRepository.begin() ) ) {
-    std::cout << m_sSymbol << " does not have 20 or more daily bars" << std::endl;
+    std::cout << m_sSymbolName << " does not have 20 or more daily bars" << std::endl;
   }
   else {
     CTimeSeries<CBar> m_bars;
     begin = end - 20;
     m_bars.Resize( 20 );
     barRepository.Read( begin, end, &m_bars );
-    double avg = std::for_each( m_bars.begin(), m_bars.end(), CalcRangeStats() );
-    std::cout << m_sSymbol << " average open: " << avg << std::endl;
-    
+    double sd = std::for_each( m_bars.begin(), m_bars.end(), CalcRangeStats() );
+
+    CBar bar( *m_bars.Last() );
+    std::cout << "Trade points:  "
+      << std::setprecision( 5 )
+      << std::setw( 6 )
+      <<         bar.m_dblClose - 3 * sd
+      << ", " << bar.m_dblClose - 2 * sd
+      << ", " << bar.m_dblClose - 1 * sd
+      << ", " << bar.m_dblClose 
+      << ", " << bar.m_dblClose + 1 * sd
+      << ", " << bar.m_dblClose + 2 * sd
+      << ", " << bar.m_dblClose + 3 * sd
+      << std::endl;
+
   }
+}
+
+void CCalcAboveBelow::Stop( void ) {
 }
 
 void CCalcAboveBelow::HandleUpdatePortfolioRecord(CPortfolio::UpdatePortfolioRecord_t rec) {

@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "Portfolio.h"
+#include "PortfolioManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -7,8 +7,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CPortfolio::CPortfolio(void) {
+CPortfolioManager::CPortfolioManager(void) {
 }
 
-CPortfolio::~CPortfolio(void) {
+CPortfolioManager::~CPortfolioManager(void) {
 }

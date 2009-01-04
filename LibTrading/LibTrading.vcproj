@@ -186,6 +186,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Portfolio.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PortfolioManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PortfolioRecord.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ProviderInterface.cpp"
 				>
 			</File>
@@ -257,6 +269,18 @@
 			</File>
 			<File
 				RelativePath=".\PersistedOrderId.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Portfolio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PortfolioManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PortfolioRecord.h"
 				>
 			</File>
 			<File

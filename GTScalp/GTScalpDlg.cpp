@@ -435,6 +435,7 @@ void CGTScalpDlg::CloseEverything( void ) {
 
   std::vector<CCalcAboveBelow *>::iterator iterAB;
   for ( iterAB = m_vCalcAB.begin(); m_vCalcAB.end() != iterAB; ++iterAB ) {
+    (*iterAB)->Stop();
     delete *iterAB;
   }
 
