@@ -279,7 +279,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << std::endl; 
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
-      m_OrderManager.ReportCommission( orderId, state.commission ); 
+      COrderManager::Instance().ReportCommission( orderId, state.commission ); 
   }
   if ( state.warningText != "" ) std::cout << "Open Order Warning: " << state.warningText << std::endl;
 }
@@ -310,7 +310,7 @@ void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execu
   else {
     CExecution exec( orderId, execution.price, execution.shares, side, 
       LPCTSTR( execution.exchange ), LPCTSTR( execution.execId ) );
-    m_OrderManager.ReportExecution( exec );
+    COrderManager::Instance().ReportExecution( exec );
   }
 }
 

@@ -11,6 +11,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "boost/shared_ptr.hpp"
+
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
 
@@ -18,6 +20,8 @@ class CProviderInterface {
 public:
   CProviderInterface(void);
   virtual ~CProviderInterface(void);
+
+  typedef boost::shared_ptr<CProviderInterface> pProvider_t;
 
   virtual void Connect( void );
   Delegate<int> OnConnected;
@@ -65,7 +69,7 @@ protected:
   std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
   CAlternateInstrumentNames m_lutAlternateInstrumentNames;
 
-  COrderManager m_OrderManager;
+  //COrderManager m_OrderManager;
 
   //virtual void PreSymbolDestroy( CSymbol *pSymbol );
 

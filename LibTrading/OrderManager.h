@@ -2,8 +2,9 @@
 
 #include <map>
 
+//#include "Singleton.h"
+#include "ManagerBase.h"
 #include "Order.h"
-//#include "ProviderInterface.h"
 #include "Execution.h"
 #include "Delegate.h"
 
@@ -30,7 +31,7 @@ private:
 // COrderManager
 //
 
-class COrderManager {
+class COrderManager: public ManagerBase<COrderManager, COrder::orderid_t, COrder> {
 public:
   COrderManager(void);
   ~COrderManager(void);

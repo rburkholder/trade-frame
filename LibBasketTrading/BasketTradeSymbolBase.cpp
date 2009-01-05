@@ -1,7 +1,8 @@
 #include "StdAfx.h"
 #include "BasketTradeSymbolBase.h"
 
-#include "InstrumentFile.h"
+//#include "InstrumentFile.h"
+#include "InstrumentManager.h"
 #include "HDF5TimeSeriesContainer.h"
 #include "HDF5WriteTimeSeries.h"
 
@@ -49,6 +50,8 @@ void CBasketTradeSymbolBase::Initialize( void ) {
 
   assert( 0 < m_status.sSymbolName.length() );
 
+  m_pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( m_status.sSymbolName );
+  /*
   CInstrumentFile file;
   file.OpenIQFSymbols();
   try {
@@ -58,6 +61,7 @@ void CBasketTradeSymbolBase::Initialize( void ) {
     std::cout << "CBasketTradeSymbolInfo::Initialize problems" << std::endl;
   }
   file.CloseIQFSymbols();
+  */
 
   m_pdvChart = new CChartDataView( "Basket", m_status.sSymbolName );
 
@@ -134,7 +138,7 @@ void CBasketTradeSymbolBase::RemoveOpenHandler(CSymbol::tradehandler_t handler) 
 
 void CBasketTradeSymbolBase::PlaceOrder( COrder *pOrder ) {
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &CBasketTradeSymbolBase::HandleOrderFilled ) );
-  m_OrderManager.PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
+  COrderManager::Instance().PlaceOrder( m_pModelParameters->pExecutionProvider, pOrder );
 }
 
 void CBasketTradeSymbolBase::HandleOrderFilled(COrder *pOrder) {

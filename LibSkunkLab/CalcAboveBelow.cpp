@@ -93,29 +93,29 @@ private:
 // CCalcAboveBelow
 //
 
-CCalcAboveBelow::CCalcAboveBelow( const std::string &sSymbolName, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider ) 
-: m_sSymbolName( sSymbolName ), m_pDataProvider( pDataProvider), m_pExecutionProvider( pExecutionProvider ),
+CCalcAboveBelow::CCalcAboveBelow( CInstrument* pInstrument, CProviderInterface* pDataProvider, CProviderInterface* pExecutionProvider ) 
+: m_pInstrument( pInstrument ), m_pDataProvider( pDataProvider), m_pExecutionProvider( pExecutionProvider ),
   m_dblLast( 0 )
 {
-  m_pDataProvider->AddTradeHandler( sSymbolName, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
+  m_pDataProvider->AddTradeHandler( m_pInstrument->GetSymbolName(), MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
   m_pExecutionProvider->OnUpdatePortfolioRecord.Add( MakeDelegate( this, &CCalcAboveBelow::HandleUpdatePortfolioRecord ) );
 }
 
 CCalcAboveBelow::~CCalcAboveBelow(void) {
   m_pExecutionProvider->OnUpdatePortfolioRecord.Remove( MakeDelegate( this, &CCalcAboveBelow::HandleUpdatePortfolioRecord ) );
-  m_pDataProvider->RemoveTradeHandler( m_sSymbolName, MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
+  m_pDataProvider->RemoveTradeHandler( m_pInstrument->GetSymbolName(), MakeDelegate( this, &CCalcAboveBelow::HandleTrade ) );
 }
 
 void CCalcAboveBelow::Start( void ) {
   string sPath;
-  CHDF5DataManager::DailyBarPath( m_sSymbolName, sPath );
-  std::cout << "Processing " << m_sSymbolName << " in " << sPath << std::endl;
+  CHDF5DataManager::DailyBarPath( m_pInstrument->GetSymbolName(), sPath );
+  std::cout << "Processing " << m_pInstrument->GetSymbolName() << " in " << sPath << std::endl;
   //string sPath( "/bar/86400/I/C/" + m_sSymbol );
   CHDF5TimeSeriesContainer<CBar> barRepository( sPath );
   CHDF5TimeSeriesContainer<CBar>::iterator begin, end;
   end = barRepository.end();
   if ( 20 > ( end - barRepository.begin() ) ) {
-    std::cout << m_sSymbolName << " does not have 20 or more daily bars" << std::endl;
+    std::cout << m_pInstrument->GetSymbolName() << " does not have 20 or more daily bars" << std::endl;
   }
   else {
     CTimeSeries<CBar> m_bars;

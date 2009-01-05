@@ -158,6 +158,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExecutionManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.cpp"
 				>
 			</File>
@@ -199,6 +203,10 @@
 			</File>
 			<File
 				RelativePath=".\ProviderInterface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ProviderManager.cpp"
 				>
 			</File>
 			<File
@@ -244,6 +252,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExecutionManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Instrument.h"
 				>
 			</File>
@@ -257,6 +269,10 @@
 			</File>
 			<File
 				RelativePath=".\InstrumentManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ManagerBase.h"
 				>
 			</File>
 			<File
@@ -285,6 +301,10 @@
 			</File>
 			<File
 				RelativePath=".\ProviderInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProviderManager.h"
 				>
 			</File>
 			<File

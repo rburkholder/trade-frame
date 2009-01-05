@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <vector>
+using namespace std;
+
 //#include "afxwin.h"
 #include "TradingLogic.h"
 #include "VuIndicies.h"
@@ -32,12 +35,7 @@
 
 #include "ConsoleCoutMessages.h"
 
-#include "OrderManager.h"
-
 #include "CalcAboveBelow.h"
-
-#include <vector>
-using namespace std;
 
 // CGTScalpDlg dialog
 class CGTScalpDlg : public CDialog {
@@ -79,24 +77,24 @@ private:
   CGTSessionX m_session1;
   CGTSessionX m_session2;
 
-  CIBTWS *m_pIB;
-  CIQFeedProviderSingleton *m_pIQFeedSingleton;
-  CIQFeedProvider *m_pIQFeed;
-  CSimulationProvider *m_pSimulation;
+  CIBTWS* m_pIB;
+  CIQFeedProviderSingleton* m_pIQFeedSingleton;
+  CIQFeedProvider* m_pIQFeed;
+  CSimulationProvider* m_pSimulation;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
   CConsoleCoutMessages* pConsoleMessages;
 
-  CProviderInterface *m_pExecutionProvider;
-  CProviderInterface *m_pDataProvider;
+  CProviderInterface* m_pExecutionProvider;
+  CProviderInterface* m_pDataProvider;
 
-  COrderManager m_OrderManager;  // keeps at least one instance alive
+//  COrderManager m_OrderManager;  // keeps at least one instance alive
 
   CBasketTradeContainer *m_pBasketTrade;
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
 
-  std::vector<CCalcAboveBelow *> m_vCalcAB;
+  std::vector<CCalcAboveBelow*> m_vCalcAB;
   //CCalcAboveBelow *m_pCalcAboveBelow;
 
   void CloseEverything( void );
@@ -104,8 +102,8 @@ private:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
-  CProviderInterface *GetExecutionProvider( void );
-  CProviderInterface *GetDataProvider( void );
+  CProviderInterface* GetExecutionProvider( void );
+  CProviderInterface* GetDataProvider( void );
 
 // Implementation
 protected:

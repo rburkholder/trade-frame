@@ -3,6 +3,7 @@
 #include "TradingEnumerations.h"
 
 #include <string>
+#include "boost/shared_ptr.hpp"
 
 class CInstrument {
 public:
@@ -19,6 +20,9 @@ public:
     double strike );
   CInstrument( const CInstrument& );  // copy ctor
   virtual ~CInstrument(void);
+
+  typedef boost::shared_ptr<CInstrument> pInstrument_t;
+
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };

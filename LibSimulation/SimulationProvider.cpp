@@ -200,5 +200,5 @@ void CSimulationProvider::CancelOrder( COrder *pOrder ) {
 }
 
 void CSimulationProvider::HandleExecution( const CExecution &exec ) {
-  m_OrderManager.ReportExecution( exec );
+  COrderManager::Instance().ReportExecution( exec );
 }

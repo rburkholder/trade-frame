@@ -8,6 +8,7 @@
 
 #include "Delegate.h"
 
+#include "boost/shared_ptr.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -41,7 +42,10 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   virtual ~COrder(void);
+
   typedef unsigned long orderid_t;
+  typedef boost::shared_ptr<COrder> pOrder_t;
+
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
   CInstrument *GetInstrument( void ) const { return m_pInstrument; };

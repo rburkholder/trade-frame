@@ -112,7 +112,7 @@ protected:
   structCommonModelInformation *m_pModelParameters;
 
   CInstrument *m_pInstrument;
-  COrderManager m_OrderManager;
+  //COrderManager m_OrderManager;
   CChartDataView *m_pdvChart;
 
   void Initialize( void );

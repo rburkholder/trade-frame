@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
 class CPortfolio {
 public:
   CPortfolio( const std::string &sPortfolioName );
@@ -20,6 +22,7 @@ public:
       : pInstrument( pInstrument_ ), nPosition( nPosition_ ), dblPrice( dblPrice_ ), dblAverageCost( dblAverageCost_ ) {};
   };
 
+  typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
   typedef const structUpdatePortfolioRecord &UpdatePortfolioRecord_t;
   typedef Delegate<UpdatePortfolioRecord_t>::OnMessageHandler UpdatePortfolioRecordHandler_t;
 

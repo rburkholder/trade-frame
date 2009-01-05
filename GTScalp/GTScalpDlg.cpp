@@ -1,6 +1,10 @@
 // GTScalpDlg.cpp : implementation file
 //
 
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
 #include "stdafx.h"
 #include "GTScalp.h"
 #include "GTScalpDlg.h"
@@ -17,10 +21,8 @@
 #include "ChartRealTimeContainer.h"
 #include "InstrumentFile.h"
 #include "HDF5DataManager.h"
-
-#include <iostream>
-#include <stdexcept>
-#include <string>
+#include "InstrumentManager.h"
+#include "OrderManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1283,7 +1285,7 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
     assert( NULL != pOrder );
     pOrder->SetOutsideRTH( m_bOutsideRTH );
     //m_pExecutionProvider->PlaceOrder( pOrder );
-    m_OrderManager.PlaceOrder( m_pExecutionProvider, pOrder );
+    COrderManager::Instance().PlaceOrder( m_pExecutionProvider, pOrder );
     std::cout << "Order was submitted" << std::endl;
 
   }
@@ -1488,13 +1490,14 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
   }
   else {
     std::string sSymbol( szSymbol );
-    CProviderInterface *pExec = GetExecutionProvider();
-    CProviderInterface *pData = GetDataProvider();
+    CProviderInterface* pExec = GetExecutionProvider();
+    CProviderInterface* pData = GetDataProvider();
     if ( ( NULL == pExec ) || ( NULL == pData ) ) {
       std::cout  << "A provider was not found" << std::endl;
     }
     else {
-      CCalcAboveBelow *pCalc = new CCalcAboveBelow( sSymbol, pData, pExec );
+      CInstrument *pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
+      CCalcAboveBelow *pCalc = new CCalcAboveBelow( pInstrument, pData, pExec );
       m_vCalcAB.push_back( pCalc );
       pCalc->Start();
     }

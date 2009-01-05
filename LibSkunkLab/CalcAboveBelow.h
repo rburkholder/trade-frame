@@ -44,10 +44,11 @@ protected:
   void HandleUpdatePortfolioRecord( CPortfolio::UpdatePortfolioRecord_t );
   void HandleTrade( const CTrade &trade );
 private:
-  CProviderInterface *m_pDataProvider;
-  CProviderInterface *m_pExecutionProvider;
+  CInstrument* m_pInstrument;
+  CProviderInterface* m_pDataProvider;
+  CProviderInterface* m_pExecutionProvider;
 
-  std::string m_sSymbolName;
+  //std::string m_sSymbolName;
 
   double m_dblLast;
 

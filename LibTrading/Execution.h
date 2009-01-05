@@ -3,6 +3,7 @@
 #include "TradingEnumerations.h"
 #include "TimeSource.h"
 
+#include "boost/shared_ptr.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -15,6 +16,10 @@ public:
     double dblPrice, unsigned long nSize, OrderSide::enumOrderSide eOrderSide,
     const std::string &sExchange, const std::string &sExecutionId );
   ~CExecution(void);
+
+  boost::shared_ptr<CExecution> pExecution_t;
+  typedef unsigned long ExecutionId_t;
+
   unsigned long GetOrderId() const { return m_nOrderId; };
   double GetPrice( void ) const { return m_dblPrice; };
   unsigned long GetSize( void ) const { return m_nSize; };
