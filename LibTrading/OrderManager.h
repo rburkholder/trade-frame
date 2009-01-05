@@ -2,6 +2,8 @@
 
 #include <map>
 
+// need to change the PlaceOrder method to pass a CInstrument rather than symbol name
+
 //#include "Singleton.h"
 #include "ManagerBase.h"
 #include "Order.h"

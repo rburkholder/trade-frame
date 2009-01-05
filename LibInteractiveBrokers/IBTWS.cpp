@@ -6,10 +6,6 @@
 #include "TWS\OrderState.h"
 #include "TWS\Execution.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
 #include <iostream>
 #include <stdexcept>
 #include <limits>
@@ -26,7 +22,8 @@ static char THIS_FILE[] = __FILE__;
 CIBTWS::CIBTWS( const string &acctCode, const string &address, UINT port ): 
   CProviderInterface(), 
     pTWS( NULL ),
-    m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
+    m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
+    m_dblPortfolioDelta( 0 )
 {
   m_sName = "IB";
   m_nID = EProviderIB;
@@ -213,7 +210,43 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
 
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
                                    double modelPrice, double pvDividend) {
-  std::cout << "tickOptionComputation" << ", " << TickTypeStrings[tickType] << std::endl; 
+
+  mapDelta_t::iterator iter = m_mapDelta.find( tickerId );
+  if ( m_mapDelta.end() == iter ) {
+    std::cout << "can't find option map fo ticker=" << tickerId << std::endl;
+  }
+  else {
+//    if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
+    if ( ( MODEL_OPTION == tickType ) || ( FALSE ) ) {
+      iter->second.delta = delta;
+      iter->second.impliedVolatility = impliedVol;
+      if ( MODEL_OPTION == tickType ) {
+        iter->second.modelPrice = modelPrice;
+        m_dblPortfolioDelta -= 100 * iter->second.positionCalc * delta;
+        iter->second.positionCalc = iter->second.position;
+        iter->second.positionDelta = 100 * iter->second.position * delta;
+        m_dblPortfolioDelta += iter->second.positionDelta;
+      }
+    }
+  }
+//  if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
+    if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
+    std::cout 
+      << "tickOptionComputation " 
+      << iter->second.sUnderlying
+      << " " << iter->second.sSymbol
+  //    << "tickerid=" << tickerId
+      << " " << TickTypeStrings[tickType] 
+      << ", Implied Vol=" << impliedVol
+      << ", Delta=" << delta
+      << ", ModelPrice=" << modelPrice
+      << ", MarketPrice=" << iter->second.marketPrice
+      << ", PositionDelta=" << iter->second.positionDelta
+      << ", PortfolioDelta=" << m_dblPortfolioDelta
+//      << ", Dividend=" << pvDividend
+      << std::endl; 
+  }
+
 }
 
 void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
@@ -428,6 +461,39 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       << ", rPL=" << realizedPNL // double
       //<< ", " << accountName 
       << std::endl;
+  }
+
+  mapDelta_t::iterator iter = m_mapDelta.find( contract.conId );
+  if ( m_mapDelta.end() == iter ) {
+    CIBSymbol* pSymbol = dynamic_cast<CIBSymbol*>( NewCSymbol( sLocalSymbol ) );  // *** this isn't done correctly, but good enough for now
+
+    structDeltaStuff stuff;
+    stuff.tickerId = pSymbol->GetTickerId();
+    stuff.sSymbol = sLocalSymbol;
+    stuff.sUnderlying = sUnderlying;
+    stuff.delta = 0;
+    stuff.impliedVolatility = 0;
+    stuff.modelPrice = 0;
+    stuff.strike = contract.strike;
+    stuff.dtExpiry = dtExpiry;
+    stuff.position = position;
+    stuff.positionCalc = 0;
+    stuff.positionDelta = 0;
+    stuff.marketPrice = marketPrice;
+    stuff.averageCost = averageCost;
+    stuff.os = os;
+
+    m_mapDelta.insert( pair_mapDelta_t( stuff.tickerId, stuff ) );
+
+    Contract contractMktData;
+    contractMktData = contract;
+    contractMktData.exchange = "SMART";
+    pTWS->reqMktData( stuff.tickerId, contractMktData, "100,101,104,106,221,225", false );
+  }
+  else {
+    iter->second.position = position;
+    iter->second.marketPrice = marketPrice;
+    iter->second.averageCost = averageCost;
   }
 
   CPortfolio::structUpdatePortfolioRecord record( pInstrument, position, marketPrice, averageCost );

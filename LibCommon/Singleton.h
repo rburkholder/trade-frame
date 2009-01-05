@@ -6,7 +6,6 @@
 //   IQFeedProviderSingleton
 //   TimeSource
 //   GeneratePeriodicRefresh
-//   COrderManager
 
 // http://www.oneunified.net/blog/Personal/SoftwareDevelopment/CPP/Singleton.article
 

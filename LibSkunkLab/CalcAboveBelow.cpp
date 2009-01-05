@@ -6,6 +6,7 @@
 #include "HDF5DataManager.h"
 #include "HDF5TimeSeriesContainer.h"
 #include "RunningStats.h"
+#include "Pivots.h"
 
 #include <iostream>
 
@@ -136,7 +137,14 @@ void CCalcAboveBelow::Start( void ) {
       << ", " << bar.m_dblClose + 2 * sd
       << ", " << bar.m_dblClose + 3 * sd
       << std::endl;
-
+    CPivotSet pivot( m_pInstrument->GetSymbolName(), bar.m_dblHigh, bar.m_dblLow, bar.m_dblClose );
+    std::cout << "Pivots: "
+      << "S2=" << pivot.GetPivotValue( CPivotSet::S2 )
+      << " S1=" << pivot.GetPivotValue( CPivotSet::S1 )
+      << " PV=" << pivot.GetPivotValue( CPivotSet::PV )
+      << " R1=" << pivot.GetPivotValue( CPivotSet::R1 )
+      << " R2=" << pivot.GetPivotValue( CPivotSet::R2 )
+      << std::endl;
   }
 }
 

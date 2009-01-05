@@ -1,15 +1,21 @@
 #pragma once
 //#include "k:\data\projects\tradingsoftware\interactivebrokers\tws\ewrapper.h"
-#include "TWS\EClientSocket.h"
-#include "ProviderInterface.h"
-#include "TradingEnumerations.h"
-#include "IBSymbol.h"
-#include "Instrument.h"
-
-#include "Delegate.h"
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
+#include "TWS\EClientSocket.h"
+#include "ProviderInterface.h"
+#include "TradingEnumerations.h"
+#include "Instrument.h"
+#include "IBSymbol.h"
+
+#include "Delegate.h"
 
 class CIBTWS : public EWrapper, public CProviderInterface {
 public:
@@ -101,5 +107,28 @@ protected:
 private:
   EClientSocket *pTWS;
   long m_time;
+
+  struct structDeltaStuff {
+    TickerId tickerId;
+    long contractId;
+    std::string sUnderlying;
+    std::string sSymbol;
+    double delta;
+    double impliedVolatility;
+    double modelPrice;
+    double strike;
+    ptime dtExpiry;
+    int position;
+    int positionCalc;  // used by incremental option calculations.
+    double positionDelta;
+    double marketPrice;
+    double averageCost;
+    OptionSide::enumOptionSide os;
+  };
+
+  typedef std::map<TickerId, structDeltaStuff> mapDelta_t;
+  typedef std::pair<TickerId, structDeltaStuff> pair_mapDelta_t;
+  mapDelta_t m_mapDelta;
+  double m_dblPortfolioDelta;
   
 };
