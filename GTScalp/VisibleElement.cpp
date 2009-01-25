@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-//#include "GTScalp.h"
 #include "VisibleElement.h"
 #include "Colour.h"
 

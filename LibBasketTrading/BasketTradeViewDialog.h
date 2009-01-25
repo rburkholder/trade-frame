@@ -2,15 +2,15 @@
 
 #include "resource.h"
 #include "afxcmn.h"
-
-#include "GeneratePeriodicRefresh.h"
-#include "BasketTradeModel.h"
-#include "TimeSource.h"
+#include "afxwin.h"
 
 #include <sstream>
 #include <map>
 #include <queue>
-#include "afxwin.h"
+
+#include "GeneratePeriodicRefresh.h"
+#include "BasketTradeModel.h"
+#include "TimeSource.h"
 
 // CBasketTradeViewDialog dialog
 
@@ -59,8 +59,6 @@ protected:
   bool bDialogReady;
 
   CBasketTradeSymbolBase::structFieldsForDialog m_Totals;
-
-  //CTimeSource m_ts;
 
   std::stringstream m_ssDateTime;
 
