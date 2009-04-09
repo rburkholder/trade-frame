@@ -1,20 +1,23 @@
 #pragma once
 
-class CDrawingPrimitives {
+class CVisibleItemAttributes {
 public:
-  CDrawingPrimitives( 
+  CVisibleItemAttributes( 
     int nFontHeight, 
     COLORREF colourBackground = ::GetSysColor( COLOR_WINDOW ), 
     COLORREF colourForeground = ::GetSysColor( COLOR_WINDOWTEXT ) );
-  ~CDrawingPrimitives(void);
+  ~CVisibleItemAttributes(void);
 
   const CPen& Pen( void ) { return m_pen; };
   const CBrush& Brush( void ) { return m_brush; };
   const CFont& Font( void ) { return m_font; };
   COLORREF DefaultBackgroundColour( void ) { return m_colourDefaultBackground; };
   COLORREF DefaultForegroundColour( void ) { return m_colourDefaultForeground; };
+  
 protected:
 private:
+
+  CVisibleItemAttributes( void );  // no default constructor
 
   // graphic objects
   CPen m_penNull;

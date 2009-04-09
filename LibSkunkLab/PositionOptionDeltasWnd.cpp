@@ -40,21 +40,9 @@ int CPositionOptionDeltasWnd::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   // this stuff should be pulled from the record structure
 
   int ix = 0;
-  m_vuDeltas.InsertColumn( ix++, "UndSym", LVCFMT_LEFT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Sym", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Strk", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Expiry", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Bid", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "BidSz", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Sprd", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Ask", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "AskSz", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Pos", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "AvgCst", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Delta", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "Gamma", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "UnRlPL", LVCFMT_RIGHT, 50 );
-  m_vuDeltas.InsertColumn( ix++, "RlPL", LVCFMT_RIGHT, 50 );
+
+  // m_vuDeltas.InsertColumn( ix++, "UndSym", LVCFMT_LEFT, 50 );
+  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_InsertColumn, ~ )
 
   return i;
 }

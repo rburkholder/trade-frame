@@ -19,13 +19,14 @@ using namespace fastdelegate;
 
 #include <boost/utility.hpp>
 
-#include "DrawingPrimitives.h"
+#include "VisibleItemAttributes.h"
 
 template<class DT, class GUI> class CVisibleItem: boost::noncopyable {
 public:
-  CVisibleItem<DT,GUI>( GUI* pWin, 
-    DT dtBlank, // initialized with this, GUI shows blank with this value
-    CDrawingPrimitives* pPrimitives
+  CVisibleItem<DT,GUI>( 
+    GUI* pWin, 
+    CVisibleItemAttributes* pItemAttributes,
+    DT dtBlank // initialized with this, GUI shows blank with this value
     );
   ~CVisibleItem<DT,GUI>(void);
 
@@ -43,21 +44,22 @@ protected:
   OnUpdateHandler OnUpdate;
 private:
   GUI* m_pWin;  // destroyed elsewhere
-  DT m_dtItem;
   DT m_dtBlank;
-  CDrawingPrimitives* m_pPrimitives;
+  DT m_dtItem;
+  CVisibleItemAttributes* m_pItemAttributes;
   COLORREF colourBackground;
   COLORREF colourForeground;
   //std::string m_sText;
   std::stringstream m_ss;
+  CVisibleItem<DT,GUI>( void );  // default constructor unavailable
 };
 
 template<class DT, class GUI> CVisibleItem<DT,GUI>::CVisibleItem( 
   GUI *pWin, 
-  DT dtBlank,
-  CDrawingPrimitives* pPrimitives
+  CVisibleItemAttributes* pItemAttributes,
+  DT dtBlank
   ) 
-: m_pWin( pWin ), m_dtBlank( dtBlank ), m_dtItem( dtBlank ), m_pPrimitives( pPrimitives )
+: m_pWin( pWin ), m_dtBlank( dtBlank ), m_dtItem( dtBlank ), m_pItemAttributes( pItemAttributes )
 {
   // pre-constructed window on to which we'll draw our stuff
   assert( NULL != pWin );
@@ -82,12 +84,12 @@ template<class DT, class GUI> void Paint( CPaintDC* pdc ) {
   // OnEraseBkgnd should be no-op'd
   CRect rc;
   pWin->GetClientRect( &rc );
-  pdc->SelectObject( m_pPrimitives->Brush() );
-  pdc->SelectObject( m_pPrimitives->Pen() );
+  pdc->SelectObject( m_pItemAttributes->Brush() );
+  pdc->SelectObject( m_pItemAttributes->Pen() );
   pdc->FillSolidRect( &rc, colourBackground );
   // possibly draw a focus rectangle:
   // pdc->Rectangle( &rc );
-  pdc->SelectObject( m_pPrimitives->Font() );
+  pdc->SelectObject( m_pItemAttributes->Font() );
   pdc->SetBkMode( TRANSPARENT );
   pdc->DrawText( m_ss.str().c_str(), m_ss.str().size(), &rc, DT_CENTER|DT_SINGLELINE|DT_VCENTER|DT_NOCLIP );
 }

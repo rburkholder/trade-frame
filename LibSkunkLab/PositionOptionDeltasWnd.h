@@ -4,6 +4,53 @@
 
 #include "PositionOptionDeltasVu.h"
 
+#include "boost/preprocessor/tuple/elem.hpp"
+#include "boost/preprocessor/array/elem.hpp"
+#include "boost/preprocessor/array/size.hpp"
+#include "boost/preprocessor/punctuation/comma_if.hpp"
+#include "boost/preprocessor/repetition/repeat.hpp"
+
+
+#define COLHDR_DELTAS_ARRAY_ELEMENT_SIZE 4
+#define COLHDR_DELTAS_ARRAY \
+  (15, \
+    ( \
+      (COLHDR_DELTAS_COL_UndSym, "UndSym", LVCFMT_LEFT,  50), \
+      (COLHDR_DELTAS_COL_Sym   , "Sym",    LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Strk  , "Strk",   LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Expiry, "Expiry", LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Bid   , "Bid",    LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_BidSz , "BidSz",  LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Sprd  , "Sprd",   LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Ask   , "Ask",    LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_AskSz , "AskSz",  LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Pos   , "Pos",    LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_AvgCst, "AvgCst", LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Delta , "Delta",  LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_Gamma , "Gamma",  LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_UnRlPL, "UnRlPL", LVCFMT_RIGHT, 50), \
+      (COLHDR_DELTAS_COL_RlPL  , "RlPL",   LVCFMT_RIGHT, 50) \
+      ) \
+    ) \
+  /**/
+
+#define COLHDR_DELTAS_EXTRACT_ENUM_LIST(z, n, text) \
+  BOOST_PP_COMMA_IF(n) \
+  COLHDR_DELTAS_EXTRACT_COL_DETAILS( z, n, 0, text )
+
+#define COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, m, text) \
+  BOOST_PP_TUPLE_ELEM( \
+    COLHDR_DELTAS_ARRAY_ELEMENT_SIZE, m, \
+      BOOST_PP_ARRAY_ELEM( n, COLHDR_DELTAS_ARRAY ) \
+    )
+
+#define COLHDR_DELTAS_EMIT_InsertColumn( z, n, text ) \
+  m_vuDeltas.InsertColumn( ix++, \
+    COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 1, text), \
+    COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 2, text), \
+    COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 3, text) \
+    );
+
 class CPositionOptionDeltasWnd: public CGUIFrameBase {
   DECLARE_DYNAMIC(CPositionOptionDeltasWnd)
 public:
@@ -14,6 +61,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
   CPositionOptionDeltasVu m_vuDeltas;
+
+  enum enumColHdrDeltasCol {
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EXTRACT_ENUM_LIST, ~ )
+  };
 
 private:
   bool m_bDialogReady;

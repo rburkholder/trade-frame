@@ -1,9 +1,9 @@
 #include "StdAfx.h"
-#include "DrawingPrimitives.h"
+#include "VisibleItemAttributes.h"
 
 #include "Colour.h"
 
-CDrawingPrimitives::CDrawingPrimitives( int nFontHeight, COLORREF colourBackground, COLORREF colourForeground ) 
+CVisibleItemAttributes::CVisibleItemAttributes( int nFontHeight, COLORREF colourBackground, COLORREF colourForeground ) 
 : m_colourDefaultBackground( colourBackground ), m_colourDefaultForeground( colourForeground )
 {
 
@@ -16,6 +16,6 @@ CDrawingPrimitives::CDrawingPrimitives( int nFontHeight, COLORREF colourBackgrou
   m_pen.CreatePen(PS_SOLID, 1, colourForeground );
 }
 
-CDrawingPrimitives::~CDrawingPrimitives(void) {
+CVisibleItemAttributes::~CVisibleItemAttributes(void) {
   
 }

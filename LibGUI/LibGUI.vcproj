@@ -171,10 +171,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DrawingPrimitives.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GeneratePeriodicRefresh.cpp"
 				>
 			</File>
@@ -207,7 +203,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\VisibleItem.cpp"
+				RelativePath=".\VisibleItemAttributes.cpp"
 				>
 			</File>
 		</Filter>
@@ -237,10 +233,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DrawingPrimitives.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GeneratePeriodicRefresh.h"
 				>
 			</File>
@@ -253,11 +245,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RowFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
 			<File
 				RelativePath=".\VisibleItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VisibleItemAttributes.h"
 				>
 			</File>
 		</Filter>
