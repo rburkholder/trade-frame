@@ -58,7 +58,7 @@ CRowKeyValues *CCtlKeyValues::InsertSymbol( const char *szSymbol ) {
   CRowKeyValues *row = new CRowKeyValues( m_nRowCount++, this, szSymbol );
   m_vRowKeyValues.push_back( row );
 
-  std::vector <CRowKeyValues *>::size_type i;
+  std::vector<CRowKeyValues *>::size_type i;
   i = m_vRowKeyValues.size();
 
   return row;
