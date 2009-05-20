@@ -156,6 +156,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PositionOptionDeltasControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PositionOptionDeltasModel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PositionOptionDeltasRow.cpp"
 				>
 			</File>
@@ -195,6 +203,18 @@
 			>
 			<File
 				RelativePath=".\CalcAboveBelow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PositionOptionDeltasControl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PositionOptionDeltasMacros.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PositionOptionDeltasModel.h"
 				>
 			</File>
 			<File

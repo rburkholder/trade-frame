@@ -37,17 +37,13 @@ BOOL CPositionOptionDeltasWnd::Create() {
 int CPositionOptionDeltasWnd::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   int i = CGUIFrameBase::OnCreate( lpCreateStruct );
 
-  int ix = 0;
-  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_InsertColumn, ix )
-  // m_vuDeltas.InsertColumn( ix++, "UndSym", LVCFMT_LEFT, 50 );
-
   return i;
 }
 void CPositionOptionDeltasWnd::OnDestroy()  {
 	CGUIFrameBase::OnDestroy();
 }
 
-afx_msg void CPositionOptionDeltasWnd::OnSize( UINT i, int nx, int ny ) {  // new width, new heigh
+afx_msg void CPositionOptionDeltasWnd::OnSize( UINT i, int nx, int ny ) {  // new width, new height
   if ( m_bDialogReady ) {
     //SetClientPositions();
   }

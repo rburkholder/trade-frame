@@ -70,7 +70,7 @@ template<class T> DeltaMarker<T>::~DeltaMarker(void) {
 template<class T> void DeltaMarker<T>::SetPrecision( int precision ) {
   if ( typeid( double ) == typeid( T ) ) {
     nPrecision = precision;
-    sFormat.Format( "%s%df", "%0.", precision );
+    sFormat.Format( _T( "%s%df" ), _T( "%0." ), precision );
   }
   else {
     if ( typeid( int ) == typeid( T ) ) {
