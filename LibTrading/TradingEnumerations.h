@@ -18,6 +18,8 @@ namespace OrderStatus {
 namespace OptionSide {
   enum enumOptionSide { Unknown=0, Put, Call, _Count };
   const char *Name[];
+  const char *LongName[];
+  const char *ShortName[];
 }
 
 namespace OrderType { // ib szOrderType depends upon order

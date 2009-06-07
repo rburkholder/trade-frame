@@ -9,6 +9,8 @@ namespace InstrumentType {
 
 namespace OptionSide {
   const char *Name[] = { "Unknown", "Put", "Call" };
+  const char *LongName[] = { "Unknown", "Put", "Call" };
+  const char *ShortName[] = { "U", "P", "C" };
 }
 
 namespace Currency {

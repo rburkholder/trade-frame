@@ -6,33 +6,29 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include "PositionOptionDeltasWnd.h"
+#include "PositionOptionDeltasMacros.h"
+#include "Instrument.h"
+
+// events to update the visible row values
+// event to cause model to update view
+// use mixin?
+
+// custom list view:
+//  each field drawn uses own graphics buffer then copies buffer over to visible column
+
+// need a row factory?  has the variable
 
 class CPositionOptionDeltasRow {
+  friend class CPositionOptionDeltasModel;
 public:
-  CPositionOptionDeltasRow( 
-    const std::string &sSymbolUnderlying, const std::string &sSymbol,
-    double dblStrike, const ptime &dtExpiry
-    );
+  CPositionOptionDeltasRow( CInstrument::pInstrument_t pInstrument );
   ~CPositionOptionDeltasRow(void);
 protected:
+
+  // define variables to be viewed in the row
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_DefineVars, ~ )
-  /*
-  std::string m_sSymbolUnderlying;
-  std::string m_sSymbol;
-  double m_dblStrike;
-  ptime m_dtExpiry;
-  double m_dblBid;
-  int m_nBidSize;
-  double m_dblSpread;
-  double m_dblAsk;
-  int m_nAskSize;
-  int m_nPosition;
-  double m_dblAverageCost;
-  double m_dblDelta;
-  double m_dblGamma;
-  double m_dblUnrealizedPL;
-  double m_dblRealizedPL;
-  */
+
+  CInstrument::pInstrument_t m_pInstrument;  // smart pointer provides basic info for the model
+
 private:
 };

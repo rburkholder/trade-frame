@@ -8,12 +8,10 @@
 
 #define COLHDR_DELTAS_ARRAY_ELEMENT_SIZE 6
 #define COLHDR_DELTAS_ARRAY \
-  (15, \
-    ( \
-      (COLHDR_DELTAS_COL_UndSym, "UndSym", LVCFMT_LEFT,  50, std::string, m_sSymbolUnderlying), \
+  (13, /* number of rows */ \
+    ( /* Col 0, 1, 2, 3, 4, 5 */ \
       (COLHDR_DELTAS_COL_Sym   , "Sym",    LVCFMT_RIGHT, 50, std::string, m_sSymbol), \
-      (COLHDR_DELTAS_COL_Strk  , "Strk",   LVCFMT_RIGHT, 50, double,      m_dblStrike), \
-      (COLHDR_DELTAS_COL_Expiry, "Expiry", LVCFMT_RIGHT, 50, ptime,       m_dtExpiry), \
+      (COLHDR_DELTAS_COL_Desc  , "Desc",   LVCFMT_LEFT,  50, std::string, m_sSymbolDesc), \
       (COLHDR_DELTAS_COL_Bid   , "Bid",    LVCFMT_RIGHT, 50, double,      m_dblBid), \
       (COLHDR_DELTAS_COL_BidSz , "BidSz",  LVCFMT_RIGHT, 50, int,         m_nBidSize), \
       (COLHDR_DELTAS_COL_Sprd  , "Sprd",   LVCFMT_RIGHT, 50, double,      m_dblSpread), \
@@ -40,7 +38,7 @@
   COLHDR_DELTAS_EXTRACT_COL_DETAILS( z, n, 0, text )
 
 #define COLHDR_DELTAS_EMIT_InsertColumn( z, n, VAR ) \
-  InsertColumn( VAR++, \
+  CListCtrl::InsertColumn( VAR++, \
     _T(COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 1, ~)), \
     COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 2, ~), \
     COLHDR_DELTAS_EXTRACT_COL_DETAILS(z, n, 3, ~) \

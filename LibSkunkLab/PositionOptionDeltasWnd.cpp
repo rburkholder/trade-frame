@@ -11,7 +11,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPositionOptionDeltasWnd, CGUIFrameBase)
 
-CPositionOptionDeltasWnd::CPositionOptionDeltasWnd( CWnd* pParent )
+CPositionOptionDeltasWnd::CPositionOptionDeltasWnd( CWnd* pParent, CProviderInterface *pDataProvider )
 : CGUIFrameBase( pParent ), m_bDialogReady( false )  
 {
   m_bDialogReady = true;

@@ -1,13 +1,20 @@
 #include "StdAfx.h"
+
+#include <stdexcept>
+
 #include "PositionOptionDeltasRow.h"
 
 CPositionOptionDeltasRow::CPositionOptionDeltasRow(
-  const std::string &sSymbolUnderlying, const std::string &sSymbol,
-  double dblStrike, const ptime &dtExpiry
+  CInstrument::pInstrument_t pInstrument
   ) 
-: m_sSymbolUnderlying( sSymbolUnderlying ), m_sSymbol( sSymbol ),
-  m_dblStrike( dblStrike ), m_dtExpiry( dtExpiry )
+  : m_pInstrument( pInstrument ), m_sSymbol( pInstrument->GetSymbolName() )
 {
+  std::stringstream ss;
+  ss << pInstrument->GetUnderlyingName() 
+    << " " << OptionSide::ShortName[ pInstrument->GetOptionSide() ]
+    << " " << pInstrument->GetExpiryYear()
+    << "/" << pInstrument->GetExpiryMonth()
+    << " " << pInstrument->GetStrike();
 }
 
 CPositionOptionDeltasRow::~CPositionOptionDeltasRow(void) {

@@ -25,11 +25,14 @@ public:
 
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
+  const std::string &GetUnderlyingName( void ) { return m_sUnderlying; }
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
   const std::string *GetExchangeName( void ) { return &m_sExchange; };
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
+  double GetStrike( void ) { return m_dblStrike; };
   unsigned short GetExpiryYear( void ) { return m_nYear; };
   unsigned short GetExpiryMonth( void ) { return m_nMonth; };
+  OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
 protected:

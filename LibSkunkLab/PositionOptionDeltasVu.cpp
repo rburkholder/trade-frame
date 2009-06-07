@@ -3,6 +3,8 @@
 
 #include "PositionOptionDeltasMacros.h"
 
+#include "Log.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -31,6 +33,8 @@ afx_msg int CPositionOptionDeltasVu::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
 
   int i  = CListCtrl::OnCreate( lpCreateStruct );
 
+  CListCtrl::SetView( LV_VIEW_DETAILS );
+
   int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_InsertColumn, ix )
   // InsertColumn( ix++, "UndSym", LVCFMT_LEFT, 50 );
@@ -48,6 +52,5 @@ afx_msg void CPositionOptionDeltasVu::OnClose( ) {
 
 afx_msg void CPositionOptionDeltasVu::OnCustomDraw( NMHDR* pNMHDR, LRESULT* pResult ) {
   NMLVCUSTOMDRAW* pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>( pNMHDR );
-
+  LOG << "in CPositionOptionDeltasVu::OnCustomDraw";
 }
-
