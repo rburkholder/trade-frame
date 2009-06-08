@@ -70,9 +70,11 @@ template<class DT, class GUI> CVisibleItem<DT,GUI>::~CVisibleItem() {
 
 template<class DT, class GUI> DT& CVisibleItem<DT,GUI>::operator=( const DT& rhs ) {
   if ( m_dtItem != rhs ) {
-    m_dItem = rhs;
+    m_dtItem = rhs;
     m_ss.str( "" );
-    m_ss << m_dtItem;
+    if ( m_dtBlank != m_dtItem ) {
+      m_ss << m_dtItem;
+    }
     if ( NULL != OnUpdate ) OnUpdate();
   }
   return m_dtItem;

@@ -1,6 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <set>
+
+#include "FastDelegate.h"
+using namespace fastdelegate;
+
+#include "ProviderInterface.h"
 
 #include "PositionOptionDeltasRow.h"
 
@@ -18,8 +24,27 @@ class CPositionOptionDeltasModel {
 public:
   CPositionOptionDeltasModel(void);
   ~CPositionOptionDeltasModel(void);
-  void Add( CInstrument::pInstrument_t pInstrument );  
+  void Add( CProviderInterface *pDataProvider, CInstrument::pInstrument_t pInstrument );  
+  
+  typedef FastDelegate0<> OnInstrumentAddedHandler;
+  void SetOnInstrumentAdded( OnInstrumentAddedHandler function ) {
+    OnInstrumentAdded = function;
+  }
+
+  typedef CPositionOptionDeltasRow::vDeltaRows_t vDeltaRows_t;
+
+  // queue rows to be updated 
+  typedef FastDelegate<void(vDeltaRows_t::size_type)> OnQueueUpdatedRowIndexHandler;
+  void SetOnQueueUpdatedRowIndex( OnQueueUpdatedRowIndexHandler function ) {
+    OnQueueUpdatedRowIndex = function;
+  }
+
 protected:
+  void QueueUpdatedRowIndex( vDeltaRows_t::size_type ix );
+
 private:
-  std::vector<CPositionOptionDeltasRow*> m_vDeltaRows; // data to be viewed
+  vDeltaRows_t m_vDeltaRows; // data to be viewed
+  OnInstrumentAddedHandler OnInstrumentAdded;  // create blank visual row to be updated
+  std::set<vDeltaRows_t::size_type> m_setUpdatedRows;  // a set of updated rows
+  OnQueueUpdatedRowIndexHandler OnQueueUpdatedRowIndex;
 };

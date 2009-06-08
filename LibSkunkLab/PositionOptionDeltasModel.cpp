@@ -17,11 +17,20 @@ CPositionOptionDeltasModel::~CPositionOptionDeltasModel(void) {
   }
 }
 
-void CPositionOptionDeltasModel::Add( CInstrument::pInstrument_t pInstrument) {
+void CPositionOptionDeltasModel::Add( CProviderInterface *pDataProvider, CInstrument::pInstrument_t pInstrument) {
   if ( InstrumentType::Option != pInstrument->GetInstrumentType() ) {
     std::string s = "Instrument " + pInstrument->GetSymbolName() + " is not an Option.";
     throw std::invalid_argument( s );
   }
-  CPositionOptionDeltasRow *pRow = new CPositionOptionDeltasRow( pInstrument ); 
+  CPositionOptionDeltasRow *pRow = new CPositionOptionDeltasRow( m_vDeltaRows.size(), pDataProvider, pInstrument ); 
   m_vDeltaRows.push_back( pRow );
+  pRow->SetOnRowUpdated( MakeDelegate( this, &CPositionOptionDeltasModel::QueueUpdatedRowIndex ) );
+
+  //pRow->SetOnRowUpdated( MakeDelegate( pRow, &CPositionOptionDeltasVu::HandleRowUpdate ) );
+  if ( NULL != OnInstrumentAdded ) OnInstrumentAdded();  // append blank visual row.
+
+}
+
+void CPositionOptionDeltasModel::QueueUpdatedRowIndex( vDeltaRows_t::size_type ix ) {
+  m_setUpdatedRows.insert( ix );
 }

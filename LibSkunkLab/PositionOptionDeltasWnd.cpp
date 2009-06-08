@@ -11,10 +11,9 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPositionOptionDeltasWnd, CGUIFrameBase)
 
-CPositionOptionDeltasWnd::CPositionOptionDeltasWnd( CWnd* pParent, CProviderInterface *pDataProvider )
+CPositionOptionDeltasWnd::CPositionOptionDeltasWnd( CWnd* pParent )
 : CGUIFrameBase( pParent ), m_bDialogReady( false )  
 {
-  m_bDialogReady = true;
 }
 
 CPositionOptionDeltasWnd::~CPositionOptionDeltasWnd(void) {
@@ -36,10 +35,14 @@ BOOL CPositionOptionDeltasWnd::Create() {
 
 int CPositionOptionDeltasWnd::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   int i = CGUIFrameBase::OnCreate( lpCreateStruct );
+  m_refresh.Add( MakeDelegate( &m_vuDeltas, &CPositionOptionDeltasVu::HandlePeriodicRefresh ) ) ;
+  m_bDialogReady = true;
 
   return i;
 }
 void CPositionOptionDeltasWnd::OnDestroy()  {
+  m_bDialogReady = false;
+  m_refresh.Remove( MakeDelegate( &m_vuDeltas, &CPositionOptionDeltasVu::HandlePeriodicRefresh ) ) ;
 	CGUIFrameBase::OnDestroy();
 }
 

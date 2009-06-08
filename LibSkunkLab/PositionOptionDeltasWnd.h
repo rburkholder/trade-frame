@@ -2,6 +2,8 @@
 
 #include "GUIFrameBase.h"
 
+#include "GeneratePeriodicRefresh.h"
+
 #include "ProviderInterface.h"
 #include "Instrument.h"
 
@@ -14,10 +16,12 @@
 class CPositionOptionDeltasWnd: public CGUIFrameBase {
   DECLARE_DYNAMIC(CPositionOptionDeltasWnd)
 public:
-  CPositionOptionDeltasWnd( CWnd* pParent, CProviderInterface *pDataProvider );
+  CPositionOptionDeltasWnd( CWnd* pParent );
   virtual ~CPositionOptionDeltasWnd(void);
   virtual BOOL Create( void );
-  void Add( CInstrument::pInstrument_t pInstrument ) { m_mdlDeltas.Add( pInstrument ); };
+  void Add( CProviderInterface *pDataProvider, CInstrument::pInstrument_t pInstrument ) { 
+    m_mdlDeltas.Add( pDataProvider, pInstrument ); 
+  };
 protected:
 	DECLARE_MESSAGE_MAP()
 
@@ -38,4 +42,9 @@ private:
   afx_msg void OnSize( UINT, int, int );
   afx_msg void OnMove( int x, int y );
 
+  CGeneratePeriodicRefresh m_refresh;
+  //void HandlePeriodicRefresh( CGeneratePeriodicRefresh* );
+
+
 };
+

@@ -1,10 +1,16 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+
+#include "FastDelegate.h"
+using namespace fastdelegate;
+
+#include "ProviderInterface.h"
 
 #include "PositionOptionDeltasMacros.h"
 #include "Instrument.h"
@@ -21,14 +27,30 @@ using namespace boost::gregorian;
 class CPositionOptionDeltasRow {
   friend class CPositionOptionDeltasModel;
 public:
-  CPositionOptionDeltasRow( CInstrument::pInstrument_t pInstrument );
+  typedef std::vector<CPositionOptionDeltasRow*> vDeltaRows_t;
+
+  CPositionOptionDeltasRow( 
+    vDeltaRows_t::size_type ixRow,
+    CProviderInterface *pDataProvider, CInstrument::pInstrument_t pInstrument 
+    );
   ~CPositionOptionDeltasRow(void);
 protected:
+
+  typedef FastDelegate1<vDeltaRows_t::size_type> OnRowUpdatedHandler;
+  void SetOnRowUpdated( OnRowUpdatedHandler function ) {
+    OnRowUpdated = function;
+  }
 
   // define variables to be viewed in the row
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_DefineVars, ~ )
 
   CInstrument::pInstrument_t m_pInstrument;  // smart pointer provides basic info for the model
+  CProviderInterface *m_pDataProvider; 
+  vDeltaRows_t m_ixRow;  // supplied by the model, index into it's vector
+
+  void HandleQuote( CSymbol::quote_t quote );
+  void HandleTrade( CSymbol::trade_t trade );
 
 private:
+  OnRowUpdatedHandler OnRowUpdated;
 };
