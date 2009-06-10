@@ -36,6 +36,7 @@ using namespace std;
 #include "ConsoleCoutMessages.h"
 
 #include "CalcAboveBelow.h"
+#include "PositionOptionDeltasWnd.h"
 
 // CGTScalpDlg dialog
 class CGTScalpDlg : public CDialog {
@@ -53,12 +54,12 @@ public:
 
 private:
   //CTradingLogic *pTradingLogic;
-  CVuOptions *options;
-  CVuPendingOrders *pvpo;
-  CVuIndicies *pvi;
-  CVuSymbolsOfInterest *psoi;
-  CConsoleMessages *pNews;
-  CVuChartArmsIntraDay *pvuArms;
+  CVuOptions* options;
+  CVuPendingOrders* pvpo;
+  CVuIndicies* pvi;
+  CVuSymbolsOfInterest* psoi;
+  CConsoleMessages* pNews;
+  CVuChartArmsIntraDay* pvuArms;
   //CHDF5 *pHdf5;
 
   enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
@@ -90,12 +91,13 @@ private:
 
 //  COrderManager m_OrderManager;  // keeps at least one instance alive
 
-  CBasketTradeContainer *m_pBasketTrade;
+  CBasketTradeContainer* m_pBasketTrade;
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
 
   std::vector<CCalcAboveBelow*> m_vCalcAB;
   //CCalcAboveBelow *m_pCalcAboveBelow;
+  CPositionOptionDeltasWnd* m_pwndOptiondDeltas;
 
   void CloseEverything( void );
 

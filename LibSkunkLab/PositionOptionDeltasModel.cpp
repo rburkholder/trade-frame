@@ -27,7 +27,7 @@ void CPositionOptionDeltasModel::Add( CProviderInterface *pDataProvider, CInstru
   pRow->SetOnRowUpdated( MakeDelegate( this, &CPositionOptionDeltasModel::QueueUpdatedRowIndex ) );
 
   //pRow->SetOnRowUpdated( MakeDelegate( pRow, &CPositionOptionDeltasVu::HandleRowUpdate ) );
-  if ( NULL != OnInstrumentAdded ) OnInstrumentAdded();  // append blank visual row.
+  if ( NULL != OnInstrumentAdded ) OnInstrumentAdded( m_vDeltaRows.size() );  // append blank visual row.
 
 }
 

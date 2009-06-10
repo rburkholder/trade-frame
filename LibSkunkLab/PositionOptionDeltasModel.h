@@ -22,16 +22,16 @@ using namespace fastdelegate;
 
 class CPositionOptionDeltasModel {
 public:
+  typedef CPositionOptionDeltasRow::vDeltaRows_t vDeltaRows_t;
+
   CPositionOptionDeltasModel(void);
   ~CPositionOptionDeltasModel(void);
   void Add( CProviderInterface *pDataProvider, CInstrument::pInstrument_t pInstrument );  
   
-  typedef FastDelegate0<> OnInstrumentAddedHandler;
+  typedef FastDelegate1<vDeltaRows_t::size_type> OnInstrumentAddedHandler;
   void SetOnInstrumentAdded( OnInstrumentAddedHandler function ) {
     OnInstrumentAdded = function;
   }
-
-  typedef CPositionOptionDeltasRow::vDeltaRows_t vDeltaRows_t;
 
   // queue rows to be updated 
   typedef FastDelegate<void(vDeltaRows_t::size_type)> OnQueueUpdatedRowIndexHandler;

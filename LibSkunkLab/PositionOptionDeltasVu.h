@@ -23,7 +23,7 @@ protected:
   afx_msg void OnCustomDraw( NMHDR* pNMHDR, LRESULT* pResult );
   afx_msg void OnGetDispInfo( NMHDR* pNMHDR, LRESULT* pResult );
 
-  void HandleInstrumentAdded( void );
+  void HandleInstrumentAdded(  CPositionOptionDeltasModel::vDeltaRows_t::size_type cnt  );
   //void HandleRowUpdate( CPositionOptionDeltasModel::vDeltaRows_t::size_type ixRow );  // ix starts at 0
 
 private:

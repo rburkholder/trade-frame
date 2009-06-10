@@ -33,14 +33,8 @@ END_MESSAGE_MAP()
 
 afx_msg int CPositionOptionDeltasVu::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
 
-  //lpCreateStruct->dwExStyle |= LVS_OWNERDATA;
-  //lpCreateStruct->dwExStyle |= LVS_REPORT;
-  lpCreateStruct->style |= LVS_OWNERDATA;
-  lpCreateStruct->style |= LVS_REPORT;
-
   int i  = CListCtrl::OnCreate( lpCreateStruct );
 
-  //CListCtrl::SetView( LV_VIEW_DETAILS );
   BOOL b = CListCtrl::SetItemCountEx( 0, LVSICF_NOINVALIDATEALL | LVSICF_NOSCROLL );
 
   int ix = 0;
@@ -54,15 +48,47 @@ afx_msg void CPositionOptionDeltasVu::OnDestroy( ) {
   CListCtrl::OnDestroy();
 }
 
-afx_msg void CPositionOptionDeltasVu::OnClose( ) {
-  CListCtrl::OnClose();
+afx_msg void CPositionOptionDeltasVu::OnClose( ) { // isn't called
+  CListCtrl::OnClose();  
 }
 
 afx_msg void CPositionOptionDeltasVu::OnCustomDraw( NMHDR* pNMHDR, LRESULT* pResult ) {
+  int i[] = {CDDS_POSTERASE, CDDS_POSTPAINT,  CDIS_CHECKED,  LVCDI_ITEM, LVCDI_GROUP};
   NMLVCUSTOMDRAW* pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>( pNMHDR );
-  LOG << "in CPositionOptionDeltasVu::OnCustomDraw";
-  *pResult = 0;
+  LOG << "in CPositionOptionDeltasVu::OnCustomDraw " 
+    << pLVCD->nmcd.dwDrawStage
+    << ", " << pLVCD->dwItemType
+    << ", " << pLVCD->iSubItem
+    << ", " << pLVCD->nmcd.uItemState
+    ;
+  *pResult = CDRF_DODEFAULT;
 }
+
+/*
+dwDrawStage
+Current drawing stage. This value is one of the following. 
+Global Values:
+  CDDS_POSTERASE
+After the erasing cycle is complete.
+  CDDS_POSTPAINT
+After the painting cycle is complete.
+  CDDS_PREERASE
+Before the erasing cycle begins.
+  CDDS_PREPAINT
+Before the painting cycle begins.
+Item-specific Values:
+  CDDS_ITEM
+Indicates that the dwItemSpec, uItemState, and lItemlParam members are valid.
+  CDDS_ITEMPOSTERASE
+After an item has been erased.
+  CDDS_ITEMPOSTPAINT
+After an item has been drawn.
+  CDDS_ITEMPREERASE
+Before an item is erased.
+  CDDS_ITEMPREPAINT
+Before an item is drawn.
+  CDDS_SUBITEM
+*/
 
 afx_msg void CPositionOptionDeltasVu::OnGetDispInfo( NMHDR* pNMHDR, LRESULT* pResult ) {
   //NMLVDISPINFO *pdi = (NMLVDISPINFO*)lParam
@@ -77,8 +103,8 @@ void CPositionOptionDeltasVu::SetModel( CPositionOptionDeltasModel *pModel ) {
   pModel->SetOnInstrumentAdded( MakeDelegate( this, &CPositionOptionDeltasVu::HandleInstrumentAdded ) );
 }
 
-void CPositionOptionDeltasVu::HandleInstrumentAdded() {
-  // append blank row to CListCtrl
+void CPositionOptionDeltasVu::HandleInstrumentAdded( CPositionOptionDeltasModel::vDeltaRows_t::size_type cnt ) {
+  BOOL b = CListCtrl::SetItemCountEx( cnt, LVSICF_NOINVALIDATEALL | LVSICF_NOSCROLL );
 }
 
 //void CPositionOptionDeltasVu::HandleRowUpdate( CPositionOptionDeltasModel::vDeltaRows_t::size_type ixRow ) {  // ix starts at 0

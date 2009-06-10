@@ -14,7 +14,7 @@ IMPLEMENT_DYNAMIC(CGUIFrameBase, CFrameWnd)
 CGUIFrameBase::CGUIFrameBase(CWnd* pParent /*=NULL*/) 
 : CFrameWnd(), m_pParent( pParent )
 {
-  SetPosition( 10, 10, 100, 100 );
+  SetPosition( 10, 10, 100, 100 );  // may not work on pass through here, only when created
 }
 
 CGUIFrameBase::~CGUIFrameBase(void) {

@@ -35,7 +35,17 @@ BOOL CPositionOptionDeltasWnd::Create() {
 
 int CPositionOptionDeltasWnd::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   int i = CGUIFrameBase::OnCreate( lpCreateStruct );
+
+  CRect clientRect;
+  CGUIFrameBase::GetClientRect(&clientRect);
+  CRect reportRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
+
+  m_vuDeltas.Create( LVS_OWNERDATA | LVS_REPORT | LVS_SINGLESEL, reportRect, this, 1 );
+  m_vuDeltas.ShowWindow( 1 );
+  // LVS_OWNERDRAWFIXED 
+
   m_refresh.Add( MakeDelegate( &m_vuDeltas, &CPositionOptionDeltasVu::HandlePeriodicRefresh ) ) ;
+
   m_bDialogReady = true;
 
   return i;
@@ -46,9 +56,15 @@ void CPositionOptionDeltasWnd::OnDestroy()  {
 	CGUIFrameBase::OnDestroy();
 }
 
-afx_msg void CPositionOptionDeltasWnd::OnSize( UINT i, int nx, int ny ) {  // new width, new height
+afx_msg void CPositionOptionDeltasWnd::OnSize( UINT nType, int cx, int cy ) {  // new width, new height
   if ( m_bDialogReady ) {
-    //SetClientPositions();
+    CGUIFrameBase::OnSize(nType,cx,cy);
+    CRect clientRect;
+    CFrameWnd::GetClientRect(&clientRect);
+    CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
+    m_vuDeltas.MoveWindow( &chartRect );
+    //m_prtView->SetChartDimensions( chartRect.Width(), chartRect.Height() );
+    //std::cout << "size " << chartRect.Width() << ", " << chartRect.Height() << endl;
   }
 }
 

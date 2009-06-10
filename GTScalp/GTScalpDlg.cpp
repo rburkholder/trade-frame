@@ -24,6 +24,7 @@
 #include "InstrumentManager.h"
 #include "OrderManager.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -255,6 +256,8 @@ BOOL CGTScalpDlg::OnInitDialog() {
   pvuArms = NULL;
   pNews = NULL;
 
+  m_pwndOptiondDeltas = NULL;
+
   pConsoleMessages = new CConsoleCoutMessages(this);
   if ( NULL != pConsoleMessages ) {
     pConsoleMessages->CConsoleMessages::ShowWindow( SW_SHOWNORMAL );
@@ -440,6 +443,12 @@ void CGTScalpDlg::CloseEverything( void ) {
     (*iterAB)->Stop();
     delete *iterAB;
   }
+
+//  should be destoryed with main window 
+//  if ( NULL != m_pwndOptiondDeltas ) {
+//    delete m_pwndOptiondDeltas;
+//    m_pwndOptiondDeltas = NULL;
+//  }
 
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
@@ -1500,6 +1509,10 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
       CCalcAboveBelow *pCalc = new CCalcAboveBelow( pInstrument, pData, pExec );
       m_vCalcAB.push_back( pCalc );
       pCalc->Start();
+
+      m_pwndOptiondDeltas = new CPositionOptionDeltasWnd( ::AfxGetMainWnd() );
+      m_pwndOptiondDeltas->Create();
+      m_pwndOptiondDeltas->ShowWindow( 1 );
     }
   }
 }
