@@ -16,13 +16,13 @@ CBasketTradeSymbolBase::CBasketTradeSymbolBase(
   const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy
   ) 
 : m_status( sSymbolName ), m_sPath( sPath ),  m_sStrategy( sStrategy ), 
-  m_pInstrument( NULL ), m_pdvChart( NULL ), m_pModelParameters( NULL )
+  m_pdvChart( NULL ), m_pModelParameters( NULL )
 {
   Initialize();
 }
 
 CBasketTradeSymbolBase::CBasketTradeSymbolBase( std::stringstream *pStream ) 
-: m_pInstrument( NULL ), m_pdvChart( NULL ), m_pModelParameters( NULL )
+: m_pdvChart( NULL ), m_pModelParameters( NULL )
 {
   *pStream >> m_status.sSymbolName >> m_sPath >> m_sStrategy;
   Initialize();
@@ -34,10 +34,10 @@ CBasketTradeSymbolBase::~CBasketTradeSymbolBase(void) {
     delete m_pdvChart;
     m_pdvChart = NULL;
   }
-  if ( NULL != m_pInstrument ) {
-    delete m_pInstrument;
-    m_pInstrument = NULL;
-  }
+//  if ( NULL != m_pInstrument ) {
+//    delete m_pInstrument;
+//    m_pInstrument = NULL;
+//  }
 }
 
 void CBasketTradeSymbolBase::StreamSymbolInfo(std::ostream *pStream) {

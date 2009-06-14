@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(CPositionOptionDeltasVu, CListCtrl)
 
 CPositionOptionDeltasVu::CPositionOptionDeltasVu() 
-: CListCtrl()
+: CListCtrl(), m_pModel( NULL ), m_bActive( false )
 {
   
 }
@@ -23,9 +23,9 @@ CPositionOptionDeltasVu::~CPositionOptionDeltasVu(void) {
 }
 
 BEGIN_MESSAGE_MAP(CPositionOptionDeltasVu, CListCtrl)
-  ON_WM_DESTROY( )  // may need reflection
-  ON_WM_CLOSE( )    // may need reflection
-  ON_WM_CREATE( )   // may need reflection
+  ON_WM_DESTROY( )  // does not need reflection
+  ON_WM_CLOSE( )    // does not need reflection
+  ON_WM_CREATE( )   // does not need reflection
   ON_NOTIFY_REFLECT ( NM_CUSTOMDRAW, OnCustomDraw )
   ON_NOTIFY_REFLECT ( LVN_GETDISPINFO, OnGetDispInfo )
 END_MESSAGE_MAP()
@@ -41,10 +41,26 @@ afx_msg int CPositionOptionDeltasVu::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_DELTAS_ARRAY ), COLHDR_DELTAS_EMIT_InsertColumn, ix )
   // InsertColumn( ix++, "UndSym", LVCFMT_LEFT, 50 );
 
+  m_bActive = true;
+
   return i;
 }
 
+void CPositionOptionDeltasVu::SetModel( CPositionOptionDeltasModel *pModel ) {
+  assert( NULL != pModel );
+  m_pModel = pModel;
+  pModel->SetOnInstrumentAdded( MakeDelegate( this, &CPositionOptionDeltasVu::HandleInstrumentAdded ) );
+}
+
 afx_msg void CPositionOptionDeltasVu::OnDestroy( ) {
+
+  m_bActive = false;
+
+  if ( m_pModel != NULL ) {
+    m_pModel->SetOnInstrumentAdded( NULL );
+    m_pModel = NULL;
+  }
+
   CListCtrl::OnDestroy();
 }
 
@@ -93,14 +109,22 @@ Before an item is drawn.
 afx_msg void CPositionOptionDeltasVu::OnGetDispInfo( NMHDR* pNMHDR, LRESULT* pResult ) {
   //NMLVDISPINFO *pdi = (NMLVDISPINFO*)lParam
   NMLVDISPINFO* pDI = reinterpret_cast<NMLVDISPINFO*>( pNMHDR );
+  // per field information is retrieved through this call?
   //pDI->item.
-  *pResult = 0;
-}
 
-void CPositionOptionDeltasVu::SetModel( CPositionOptionDeltasModel *pModel ) {
-  assert( NULL != pModel );
-  m_pModel = pModel;
-  pModel->SetOnInstrumentAdded( MakeDelegate( this, &CPositionOptionDeltasVu::HandleInstrumentAdded ) );
+  LOG << "in CPositionOptionDeltasVu::OnGetDispInfo "
+    << pDI->hdr.code
+    << ", " << pDI->item.mask
+    << ", " << pDI->item.iItem
+    << ", " << pDI->item.iSubItem
+    << ", " << pDI->item.state
+    ;
+
+  if ( LVIF_TEXT == ( LVIF_TEXT & pDI->item.mask ) ) {
+    pDI->item.pszText = const_cast<LPSTR>( m_pModel->GetItem( pDI->item.iItem, pDI->item.iSubItem ).c_str() );
+  }
+
+  *pResult = 0;
 }
 
 void CPositionOptionDeltasVu::HandleInstrumentAdded( CPositionOptionDeltasModel::vDeltaRows_t::size_type cnt ) {
@@ -110,7 +134,9 @@ void CPositionOptionDeltasVu::HandleInstrumentAdded( CPositionOptionDeltasModel:
 //void CPositionOptionDeltasVu::HandleRowUpdate( CPositionOptionDeltasModel::vDeltaRows_t::size_type ixRow ) {  // ix starts at 0
 //}
 
-void CPositionOptionDeltasVu::HandlePeriodicRefresh(CGeneratePeriodicRefresh *refresh ) {
+void CPositionOptionDeltasVu::HandlePeriodicRefresh( CGeneratePeriodicRefresh *refresh ) {
+  if ( m_bActive ) {  // not very good use of flag as refresh might call after window is destroyed?
+  }
 }
 
 

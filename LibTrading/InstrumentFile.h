@@ -32,7 +32,7 @@ public:
   unsigned short GetMonth() { return pRecord->nMonth; };
   float GetStrike() { return pRecord->fltStrike; };
   void EndSearch( void );
-  CInstrument *CreateInstrumentFromIQFeed( const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName );
+  CInstrument::pInstrument_t CreateInstrumentFromIQFeed( const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName );
 
 protected:
   Db *m_pdbSymbols;

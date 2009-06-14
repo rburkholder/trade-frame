@@ -56,7 +56,7 @@ void CInstrumentFile::OpenIQFSymbols() {
   
 }
 
-CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) {
+CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) {
   // look up IQFeed based table with IQFeedSymbolName, but return instrument with Alternate Symbol name
   Dbt k;
   k.set_data( (void*) sIQFeedSymbolName.c_str() );
@@ -83,24 +83,30 @@ CInstrument *CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQF
   //pRecord = (structSymbolRecord*) v.get_data();
   UnPackBoolean( rec.ucBits1 );
   std::string sExchange( rec.line + rec.ix[2], rec.cnt[2] );
+
   switch ( rec.eInstrumentType ) {
-    case InstrumentType::Stock: 
-      return new CInstrument( sAlternateSymbolName, sExchange, InstrumentType::Stock );
-      break;
-    case InstrumentType::Option: {
-      const char *p = rec.line + rec.ix[1]; 
-      const char *e = strchr( p, ' ' );  
-      u_int32_t len = e - p;
-      string sUnderlying( rec.line + rec.ix[1], len );
-      return new CInstrument( sAlternateSymbolName, sExchange, 
-        (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
-        rec.nYear, rec.nMonth,
-        sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
-        rec.fltStrike );
+    case InstrumentType::Stock: {
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, InstrumentType::Stock ) );
+        return pInstrument;
       }
       break;
-    case InstrumentType::Future: 
-      return new CInstrument( sAlternateSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth );
+    case InstrumentType::Option: {
+        const char *p = rec.line + rec.ix[1]; 
+        const char *e = strchr( p, ' ' );  
+        u_int32_t len = e - p;
+        string sUnderlying( rec.line + rec.ix[1], len );
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, 
+          (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          rec.nYear, rec.nMonth,
+          sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
+          rec.fltStrike ) );
+        return pInstrument;
+      }
+      break;
+    case InstrumentType::Future: {
+         CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth ) );
+         return pInstrument;
+       }
       break;
     default:
       throw std::out_of_range( "Unknown instrument type" ); 

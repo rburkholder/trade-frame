@@ -11,8 +11,8 @@ class CInstrumentManager: public ManagerBase<CInstrumentManager, std::string, CI
 public:
   CInstrumentManager(void);
   virtual ~CInstrumentManager(void);
-  CInstrument* GetIQFeedInstrument( const std::string& sName );
-  CInstrument* GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
+  CInstrument::pInstrument_t GetIQFeedInstrument( const std::string& sName );
+  CInstrument::pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
 protected:
   CInstrumentFile file;
 private:

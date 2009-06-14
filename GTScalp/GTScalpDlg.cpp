@@ -445,10 +445,11 @@ void CGTScalpDlg::CloseEverything( void ) {
   }
 
 //  should be destoryed with main window 
-//  if ( NULL != m_pwndOptiondDeltas ) {
+  if ( NULL != m_pwndOptiondDeltas ) {
+    m_pwndOptiondDeltas->DestroyWindow();
 //    delete m_pwndOptiondDeltas;
-//    m_pwndOptiondDeltas = NULL;
-//  }
+    m_pwndOptiondDeltas = NULL;
+  }
 
   for each ( CTradingLogic *p in m_vTradingLogic ) {
     delete p;
@@ -1238,10 +1239,10 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
     m_pExecutionProvider->GetAlternateInstrumentName( sOriginalSymbolName, &sAlternateSymbolName );
     if ( 0 == sAlternateSymbolName.size() ) throw std::invalid_argument( "Couldn't find alternate name" );
 
-    CInstrument *pInstrument = NULL;
+//    CInstrument *pInstrument = NULL;
     CInstrumentFile file;
     file.OpenIQFSymbols();
-    pInstrument = file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sAlternateSymbolName );
+    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sAlternateSymbolName ) );
     file.CloseIQFSymbols();
 
     if ( OrderSide::Unknown == m_eOrderSide ) throw std::invalid_argument( "No Order Side" );
@@ -1505,7 +1506,7 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
       std::cout  << "A provider was not found" << std::endl;
     }
     else {
-      CInstrument *pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
+      CInstrument::pInstrument_t pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
       CCalcAboveBelow *pCalc = new CCalcAboveBelow( pInstrument, pData, pExec );
       m_vCalcAB.push_back( pCalc );
       pCalc->Start();
@@ -1513,6 +1514,7 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
       m_pwndOptiondDeltas = new CPositionOptionDeltasWnd( ::AfxGetMainWnd() );
       m_pwndOptiondDeltas->Create();
       m_pwndOptiondDeltas->ShowWindow( 1 );
+      m_pwndOptiondDeltas->Add( pData, pInstrument );
     }
   }
 }

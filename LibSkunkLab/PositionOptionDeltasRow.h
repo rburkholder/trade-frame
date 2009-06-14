@@ -53,4 +53,6 @@ protected:
 
 private:
   OnRowUpdatedHandler OnRowUpdated;
+
+  CPositionOptionDeltasRow( void );  // can't use the default constructor
 };

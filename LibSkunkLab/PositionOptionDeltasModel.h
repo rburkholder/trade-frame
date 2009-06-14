@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <set>
+#include <string>
 
 #include "FastDelegate.h"
 using namespace fastdelegate;
@@ -38,6 +39,8 @@ public:
   void SetOnQueueUpdatedRowIndex( OnQueueUpdatedRowIndexHandler function ) {
     OnQueueUpdatedRowIndex = function;
   }
+
+  const std::string& GetItem( vDeltaRows_t::size_type ixRow, int ixItem );
 
 protected:
   void QueueUpdatedRowIndex( vDeltaRows_t::size_type ix );

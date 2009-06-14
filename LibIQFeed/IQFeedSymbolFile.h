@@ -2,6 +2,8 @@
 
 #include <string>
 
+// http://www.dtniq.com/product/mktsymbols.zip
+
 #include "TradingEnumerations.h"
 #include "InstrumentFile.h"
 

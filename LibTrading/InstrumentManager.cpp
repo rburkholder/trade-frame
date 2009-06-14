@@ -17,19 +17,19 @@ CInstrumentManager::~CInstrumentManager(void) {
   file.CloseIQFSymbols();
 }
 
-CInstrument* CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
+CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
   return GetIQFeedInstrument( sName, sName );
 }
 
-CInstrument* CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
-  CInstrument* pInstrument = NULL;
+CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
   try {
-    pInstrument = file.CreateInstrumentFromIQFeed( sName, sAlternateName );  // todo:  need to verify proper symbol usage
+    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
+    return pInstrument;
   }
   catch (...) {
-    std::cout << "CBasketTradeSymbolInfo::Initialize problems" << std::endl;
+    throw std::runtime_error( "CBasketTradeSymbolInfo::Initialize problems" );
   }
-  return pInstrument;
+  //return pInstrument;
 }
 
 

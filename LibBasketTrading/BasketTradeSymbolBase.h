@@ -111,7 +111,7 @@ protected:
   structFieldsForDialog m_FieldsForDialog;
   structCommonModelInformation *m_pModelParameters;
 
-  CInstrument *m_pInstrument;
+  CInstrument::pInstrument_t m_pInstrument;
   //COrderManager m_OrderManager;
   CChartDataView *m_pdvChart;
 

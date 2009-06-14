@@ -94,7 +94,7 @@ private:
 // CCalcAboveBelow
 //
 
-CCalcAboveBelow::CCalcAboveBelow( CInstrument* pInstrument, CProviderInterface* pDataProvider, CProviderInterface* pExecutionProvider ) 
+CCalcAboveBelow::CCalcAboveBelow( CInstrument::pInstrument_t pInstrument, CProviderInterface* pDataProvider, CProviderInterface* pExecutionProvider ) 
 : m_pInstrument( pInstrument ), m_pDataProvider( pDataProvider), m_pExecutionProvider( pExecutionProvider ),
   m_dblLast( 0 )
 {

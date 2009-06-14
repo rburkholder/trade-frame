@@ -28,4 +28,5 @@ protected:
 
 private:
   CPositionOptionDeltasModel *m_pModel;
+  bool m_bActive;
 };

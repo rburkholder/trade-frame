@@ -34,3 +34,8 @@ void CPositionOptionDeltasModel::Add( CProviderInterface *pDataProvider, CInstru
 void CPositionOptionDeltasModel::QueueUpdatedRowIndex( vDeltaRows_t::size_type ix ) {
   m_setUpdatedRows.insert( ix );
 }
+
+const std::string& CPositionOptionDeltasModel::GetItem( vDeltaRows_t::size_type ixRow, int ixItem ) {
+  const static string s( "a" );
+  return s;
+}

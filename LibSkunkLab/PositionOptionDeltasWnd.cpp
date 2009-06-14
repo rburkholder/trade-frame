@@ -36,11 +36,14 @@ BOOL CPositionOptionDeltasWnd::Create() {
 int CPositionOptionDeltasWnd::OnCreate( LPCREATESTRUCT lpCreateStruct ) {
   int i = CGUIFrameBase::OnCreate( lpCreateStruct );
 
+  MoveWindow( 450, 150, 700, 300 );
+
   CRect clientRect;
   CGUIFrameBase::GetClientRect(&clientRect);
   CRect reportRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
 
   m_vuDeltas.Create( LVS_OWNERDATA | LVS_REPORT | LVS_SINGLESEL, reportRect, this, 1 );
+  m_vuDeltas.SetModel( &m_mdlDeltas );
   m_vuDeltas.ShowWindow( 1 );
   // LVS_OWNERDRAWFIXED 
 
@@ -64,7 +67,7 @@ afx_msg void CPositionOptionDeltasWnd::OnSize( UINT nType, int cx, int cy ) {  /
     CRect chartRect( clientRect.left + 5, clientRect.top + 5, clientRect.right - 5, clientRect.bottom - 5 );
     m_vuDeltas.MoveWindow( &chartRect );
     //m_prtView->SetChartDimensions( chartRect.Width(), chartRect.Height() );
-    //std::cout << "size " << chartRect.Width() << ", " << chartRect.Height() << endl;
+    LOG << "size " << clientRect.Width() << ", " << clientRect.Height();
   }
 }
 

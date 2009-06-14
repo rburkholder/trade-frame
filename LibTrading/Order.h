@@ -18,14 +18,14 @@ using namespace boost::gregorian;
 class COrder {
 public:
   COrder(  // market 
-    CInstrument *instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit or stop
-    CInstrument *instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -33,7 +33,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit and stop
-    CInstrument *instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -48,7 +48,7 @@ public:
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
-  CInstrument *GetInstrument( void ) const { return m_pInstrument; };
+  CInstrument::pInstrument_t GetInstrument( void ) const { return m_pInstrument; };
   const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_eOrderSide ]; };
   unsigned long GetQuantity( void ) const { return m_nOrderQuantity; };
   OrderType::enumOrderType GetOrderType( void ) const { return m_eOrderType; };
@@ -83,7 +83,7 @@ public:
 protected:
   //std::string m_sSymbol;
   std::string m_sProviderName;
-  CInstrument *m_pInstrument;
+  CInstrument::pInstrument_t m_pInstrument;
   orderid_t m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
   OrderSide::enumOrderSide m_eOrderSide;

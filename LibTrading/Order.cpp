@@ -11,7 +11,7 @@ COrder::COrder(void) {
 }
 
 COrder::COrder( 
-    CInstrument *instrument,
+    CInstrument::pInstrument_t instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -31,7 +31,7 @@ COrder::COrder(
 }
 
 COrder::COrder( 
-    CInstrument *instrument,
+    CInstrument::pInstrument_t instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -52,7 +52,7 @@ COrder::COrder(
 }
 
 COrder::COrder( 
-    CInstrument *instrument,
+    CInstrument::pInstrument_t instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,

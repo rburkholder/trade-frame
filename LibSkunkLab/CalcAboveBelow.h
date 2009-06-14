@@ -36,7 +36,7 @@ private:
 
 class CCalcAboveBelow {
 public:
-  CCalcAboveBelow( CInstrument *pInstrument, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
+  CCalcAboveBelow( CInstrument::pInstrument_t pInstrument, CProviderInterface *pDataProvider, CProviderInterface *pExecutionProvider );
   ~CCalcAboveBelow(void);
   void Start( void );
   void Stop( void );
@@ -44,7 +44,7 @@ protected:
   void HandleUpdatePortfolioRecord( CPortfolio::UpdatePortfolioRecord_t );
   void HandleTrade( const CTrade &trade );
 private:
-  CInstrument* m_pInstrument;
+  CInstrument::pInstrument_t m_pInstrument;
   CProviderInterface* m_pDataProvider;
   CProviderInterface* m_pExecutionProvider;
 
