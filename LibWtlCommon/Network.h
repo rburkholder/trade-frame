@@ -55,6 +55,8 @@ public:
     unsigned short nPort;
   };
 
+  struct
+
   CNetwork(CAppModule* pModule, const structMessages&);
   ~CNetwork(void);
 

@@ -162,7 +162,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReusableCharBuffers.cpp"
+				RelativePath=".\ReusableBuffers.cpp"
 				>
 			</File>
 			<File
@@ -228,7 +228,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReusableCharBuffers.h"
+				RelativePath=".\ReusableBuffers.h"
 				>
 			</File>
 			<File
