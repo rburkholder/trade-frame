@@ -24,7 +24,6 @@
 
 #include "LibCommon/ReusableBuffers.h"
 
-
 // use asio post messages to send commands 
 // use CThread PostMessages to return responses
 // use circular buffer of 20 messages
@@ -105,7 +104,7 @@ protected:
   BOOL PostMessage( UINT, WPARAM = NULL, LPARAM = NULL );
 
 private:
-#define NETWORK_INBOUND_BUF_SIZE 5120
+#define NETWORK_INBOUND_BUF_SIZE 2048
 
   structMessages m_Messages;
 
@@ -126,6 +125,7 @@ private:
   void ConnectHandler( const boost::system::error_code& error );
   void TimerHandler( const boost::system::error_code& error );
   void WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* );
+  void ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* );
 
   void AsioThread( void );
 

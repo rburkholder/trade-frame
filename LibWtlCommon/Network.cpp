@@ -81,8 +81,19 @@ void CNetwork::ConnectHandler( const boost::system::error_code& error ) {
   }
   else {
     m_bSocketOpen = true;
+    buffer_t* pbuffer = m_repository.CheckOut();
+    if ( NETWORK_INBOUND_BUF_SIZE != pbuffer->size() ) {
+      pbuffer->resize( NETWORK_INBOUND_BUF_SIZE, 0 );
+    }
+    m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
+      boost::bind( &CNetwork::ReadHandler, this,
+      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
     BOOL b = PostMessage( m_Messages.msgConnected );
   }
+}
+
+void CNetwork::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* pbuffer ) {
+  assert( bytes_transferred == pbuffer->size() );
 }
 
 void CNetwork::TimerHandler( const boost::system::error_code& error ) {
@@ -114,12 +125,12 @@ void CNetwork::WriteHandler( const boost::system::error_code& error, std::size_t
   if ( error ) {
     BOOL b = PostMessage( m_Messages.msgError, ERROR_WRITE ); 
   }
+  assert( bytes_transferred == pbuffer->size() );
   if ( 0 != m_Messages.msgSendDone ) {
     if ( 0 != m_Messages.hWnd ) {
       BOOL b = ::PostMessage( m_Messages.hWnd, m_Messages.msgSendDone, reinterpret_cast<WPARAM>( pbuffer ), NULL );
     }
   }
-
 }
 
 LRESULT CNetwork::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {

@@ -80,7 +80,7 @@ private:
 };
 
 
-// CReusableCharBuffers
+// CBufferRepository
 
 template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void) 
 #ifdef _DEBUG
