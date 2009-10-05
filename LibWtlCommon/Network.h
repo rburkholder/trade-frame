@@ -38,6 +38,10 @@
 //   * asio thread for processing outbound and inbound
 //   * windows thread for processing windows messages
 // when running with socket async io, is a timer needed to keep asio running?
+// collect statistics to see if network side input buffers are being broken up
+//   if they are, then remain with character by character delivery
+//   if they are not, then can use begin/end iterators to pass information
+//   or come up with a different scheme of managing iterators over multiple buffers for use by Spirit
 
 class CNetwork: public CGuiThreadImpl<CNetwork> {
 public:
@@ -104,7 +108,7 @@ protected:
   BOOL PostMessage( UINT, WPARAM = NULL, LPARAM = NULL );
 
 private:
-#define NETWORK_INBOUND_BUF_SIZE 2048
+#define NETWORK_INPUT_BUF_SIZE 2048
 
   structMessages m_Messages;
 
@@ -120,12 +124,19 @@ private:
   boost::asio::deadline_timer m_timer;  // used to keep asio.run something to keep busy with
 
   //boost::array<char, NETWORK_INBOUND_BUF_SIZE> m_buf;
-  repository_t m_repository;
+  repository_t m_reposInputBuffers;
+  repository_t m_reposLineBuffers;
+
+  unsigned int m_cntBytesTransferred_input;
+  unsigned int m_cntAsyncReads;
+  unsigned int m_cntSends;
+  unsigned int m_cntBytesTransferred_send;
 
   void ConnectHandler( const boost::system::error_code& error );
   void TimerHandler( const boost::system::error_code& error );
   void WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* );
   void ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* );
+  void AsyncRead( void );
 
   void AsioThread( void );
 

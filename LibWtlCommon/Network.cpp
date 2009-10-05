@@ -22,7 +22,9 @@ CNetwork::CNetwork(CAppModule* pModule, const structMessages& messages)
 : CGuiThreadImpl<CNetwork>( pModule ), m_Messages( messages ),
   m_timer( m_io, boost::posix_time::seconds( 1 ) ), m_bKeepTimerActive( true ),
   m_psocket( new tcp::socket( m_io ) ), 
-  m_bSocketOpen( false ) //, m_bSocketOpened( false )
+  m_bSocketOpen( false ), //, m_bSocketOpened( false ),
+  m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
+  m_cntSends( 0 ), m_cntBytesTransferred_send( 0 )
 {
 }
 
@@ -69,7 +71,10 @@ LRESULT CNetwork::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
   tcp::endpoint endpoint( boost::asio::ip::address::from_string( connection.sAddress ), connection.nPort );
-  m_psocket->async_connect( endpoint, boost::bind<void>( &CNetwork::ConnectHandler, this, boost::asio::placeholders::error ) );
+  m_psocket->async_connect( 
+    endpoint, 
+    boost::bind<void>( &CNetwork::ConnectHandler, this, boost::asio::placeholders::error ) 
+    );
 
   bHandled = true;
   return 1;
@@ -81,19 +86,34 @@ void CNetwork::ConnectHandler( const boost::system::error_code& error ) {
   }
   else {
     m_bSocketOpen = true;
-    buffer_t* pbuffer = m_repository.CheckOut();
-    if ( NETWORK_INBOUND_BUF_SIZE != pbuffer->size() ) {
-      pbuffer->resize( NETWORK_INBOUND_BUF_SIZE, 0 );
-    }
-    m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
-      boost::bind( &CNetwork::ReadHandler, this,
-      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
+
+    AsyncRead();
+
     BOOL b = PostMessage( m_Messages.msgConnected );
   }
 }
 
+void CNetwork::AsyncRead( void ) {
+
+  buffer_t* pbuffer = m_reposInputBuffers.CheckOut();
+  if ( NETWORK_INPUT_BUF_SIZE != pbuffer->size() ) {
+    pbuffer->resize( NETWORK_INPUT_BUF_SIZE, 0 );
+  }
+  m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
+    boost::bind( 
+      &CNetwork::ReadHandler, this,
+      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
+
+}
+
 void CNetwork::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* pbuffer ) {
   assert( bytes_transferred == pbuffer->size() );
+  assert( bytes_transferred > 0 );
+
+  ++m_cntAsyncReads;
+  m_cntBytesTransferred_input += bytes_transferred;
+
+  AsyncRead();  // set up for another read while processing existing buffer
 }
 
 void CNetwork::TimerHandler( const boost::system::error_code& error ) {
@@ -112,6 +132,7 @@ LRESULT CNetwork::OnSend( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
       boost::bind( &CNetwork::WriteHandler, this, 
       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer )
       );
+    ++m_cntSends;
   }
   else {
     BOOL b = PostMessage( m_Messages.msgError, ERROR_SOCKET );
@@ -126,6 +147,7 @@ void CNetwork::WriteHandler( const boost::system::error_code& error, std::size_t
     BOOL b = PostMessage( m_Messages.msgError, ERROR_WRITE ); 
   }
   assert( bytes_transferred == pbuffer->size() );
+  m_cntBytesTransferred_send += bytes_transferred;
   if ( 0 != m_Messages.msgSendDone ) {
     if ( 0 != m_Messages.hWnd ) {
       BOOL b = ::PostMessage( m_Messages.hWnd, m_Messages.msgSendDone, reinterpret_cast<WPARAM>( pbuffer ), NULL );
