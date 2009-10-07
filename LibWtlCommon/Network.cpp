@@ -26,9 +26,18 @@ CNetwork::CNetwork(CAppModule* pModule, const structMessages& messages)
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 )
 {
+  m_line = m_reposLineBuffers.CheckOut();
+  m_line->clear();
 }
 
 CNetwork::~CNetwork(void) {
+  if ( 0 != m_line->size() ) {
+    OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
+  }
+  delete m_line;
+
+  // check that we've closed and deleted the thread
+  // check that we've closed and deleted the socket
 }
 
 BOOL CNetwork::InitializeThread( void ) {
@@ -95,10 +104,10 @@ void CNetwork::ConnectHandler( const boost::system::error_code& error ) {
 
 void CNetwork::AsyncRead( void ) {
 
-  buffer_t* pbuffer = m_reposInputBuffers.CheckOut();
-  if ( NETWORK_INPUT_BUF_SIZE != pbuffer->size() ) {
-    pbuffer->resize( NETWORK_INPUT_BUF_SIZE, 0 );
-  }
+  inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOut();
+//  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
+//    pbuffer->reserve( NETWORK_INPUT_BUF_SIZE );
+//  }
   m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
     boost::bind( 
       &CNetwork::ReadHandler, this,
@@ -106,14 +115,50 @@ void CNetwork::AsyncRead( void ) {
 
 }
 
-void CNetwork::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* pbuffer ) {
-  assert( bytes_transferred == pbuffer->size() );
-  assert( bytes_transferred > 0 );
+void CNetwork::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
 
   ++m_cntAsyncReads;
-  m_cntBytesTransferred_input += bytes_transferred;
+  if ( 0 == bytes_transferred ) {
+    // probably infers that connection has been closed
+    OutputDebugString( "CNetwork::ReadHandler:  connection probably closed.\n" );
+  }
+  else {
+    m_cntBytesTransferred_input += bytes_transferred;
 
-  AsyncRead();  // set up for another read while processing existing buffer
+    AsyncRead();  // set up for another read while processing existing buffer
+
+    // process the buffer here
+
+    // need current linebuffer, need stats on how often it waits for subsequent bulk data
+    bufferelement_t ch;
+    inputbuffer_t::const_iterator input = pbuffer->begin();
+    while ( 0 != bytes_transferred ) {
+      ch = *input;
+      ++input;
+      if ( 0 == ch ) {
+        OutputDebugString( "CNetwork::ReadHandler: have a 0x00 character.\n" );
+      }
+      if ( 0x0a == ch ) {
+        // send the buffer off 
+        PostMessage( m_Messages.msgProcess, reinterpret_cast<WPARAM>( m_line ) );
+        ++m_cntSends;
+        // and allocate another buffer
+        m_line = m_reposLineBuffers.CheckOut();
+        m_line->clear();
+      }
+      else {
+        if ( 0x0d == ch ) {
+          // ignore the character
+        }
+        else {
+          m_line->push_back( ch );
+        }
+      }
+
+      --bytes_transferred;
+    } // end while
+
+  }
 }
 
 void CNetwork::TimerHandler( const boost::system::error_code& error ) {
@@ -125,7 +170,7 @@ void CNetwork::TimerHandler( const boost::system::error_code& error ) {
 
 LRESULT CNetwork::OnSend( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
-  buffer_t* pbuffer = reinterpret_cast<buffer_t*>( wParam );
+  linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( wParam );
 
   if ( m_bSocketOpen ) {
     boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
@@ -142,17 +187,13 @@ LRESULT CNetwork::OnSend( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
   return 1;
 }
 
-void CNetwork::WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, buffer_t* pbuffer ) {
+void CNetwork::WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* pbuffer ) {
   if ( error ) {
     BOOL b = PostMessage( m_Messages.msgError, ERROR_WRITE ); 
   }
   assert( bytes_transferred == pbuffer->size() );
   m_cntBytesTransferred_send += bytes_transferred;
-  if ( 0 != m_Messages.msgSendDone ) {
-    if ( 0 != m_Messages.hWnd ) {
-      BOOL b = ::PostMessage( m_Messages.hWnd, m_Messages.msgSendDone, reinterpret_cast<WPARAM>( pbuffer ), NULL );
-    }
-  }
+  PostMessage( m_Messages.msgSendDone, reinterpret_cast<WPARAM>( pbuffer ) );
 }
 
 LRESULT CNetwork::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
@@ -167,7 +208,11 @@ LRESULT CNetwork::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
   return 1;
 }
 
-LRESULT CNetwork::OnProcessed( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CNetwork::OnProcessed( UINT, WPARAM wparam, LPARAM, BOOL &bHandled ) {
+
+  linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( wparam );
+  m_reposLineBuffers.CheckIn( pbuffer );
+
   bHandled = true;
   return 1;
 }
