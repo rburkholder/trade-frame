@@ -14,6 +14,8 @@
 #include "StdAfx.h"
 #include "Network.h"
 
+#include <string>
+#include <sstream>
 #include <boost/bind.hpp>
 
 using boost::asio::ip::tcp;
@@ -21,8 +23,7 @@ using boost::asio::ip::tcp;
 CNetwork::CNetwork(CAppModule* pModule, const structMessages& messages)
 : CGuiThreadImpl<CNetwork>( pModule ), m_Messages( messages ),
   m_timer( m_io, boost::posix_time::seconds( 1 ) ), m_bKeepTimerActive( true ),
-  m_psocket( new tcp::socket( m_io ) ), 
-  m_bSocketOpen( false ), //, m_bSocketOpened( false ),
+  m_psocket( NULL ), m_bSocketOpen( false ), //, m_bSocketOpened( false ),
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 )
 {
@@ -36,8 +37,20 @@ CNetwork::~CNetwork(void) {
   }
   delete m_line;
 
+//  if ( m_asioThread. ) {  // need to find check for done and cleared
+//    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
+//  }
+
   // check that we've closed and deleted the thread
   // check that we've closed and deleted the socket
+
+  std::stringstream ss;
+  ss << "CNetwork::~CNetwork" 
+    << " bytes in " << m_cntBytesTransferred_input 
+    << " on " << m_cntAsyncReads << " reads, "
+    << " bytes out " << m_cntBytesTransferred_send
+    << " on " << m_cntSends << " sends." 
+    << std::endl;
 }
 
 BOOL CNetwork::InitializeThread( void ) {
@@ -70,6 +83,8 @@ void CNetwork::CleanupThread( DWORD dw ) {
   }
 
   m_asioThread.join();  // wait for i/o thread to terminate
+//  delete m_asioThread;
+//  m_asioThread = NULL;
 
   BOOL b = PostMessage( m_Messages.msgClosed );
 }
@@ -77,6 +92,11 @@ void CNetwork::CleanupThread( DWORD dw ) {
 LRESULT CNetwork::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   const structConnection& connection  = reinterpret_cast<const structConnection&>( wParam ); 
+
+  if ( NULL != m_psocket ) {
+    OutputDebugString( "CNetwork::OnConnect:  m_psocket not null.\n" );
+  }
+  m_psocket = new tcp::socket( m_io );
 
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
   tcp::endpoint endpoint( boost::asio::ip::address::from_string( connection.sAddress ), connection.nPort );
@@ -201,6 +221,8 @@ LRESULT CNetwork::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
   //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
   m_psocket->close();
   m_bSocketOpen = false;
+  delete m_psocket;
+  m_psocket = NULL;
 
   BOOL b = PostMessage( m_Messages.msgDisconnected );
 
