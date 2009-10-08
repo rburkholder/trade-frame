@@ -24,6 +24,8 @@
 #include "aboutdlg.h"
 #include "MainFrm.h"
 
+#include "LibIQFeed/IQFeed.h"
+
 //#ifdef _DEBUG
 //#define new DEBUG_NEW
 //#undef THIS_FILE
@@ -31,7 +33,6 @@
 //#endif
 
 CAppModule _Module;
-
 
 class CTapeReaderThreadManager
 {
@@ -64,6 +65,8 @@ public:
     CRect rect;
     wndFrame.GetWindowRect( &rect );
     wndFrame.MoveWindow( rect.left, rect.top, 400, 600 );
+
+    CIQFeed iqfeed( &_Module );
 
     // Custom End
 

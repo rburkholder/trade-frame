@@ -41,9 +41,6 @@ CNetwork::~CNetwork(void) {
 //    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
 //  }
 
-  // check that we've closed and deleted the thread
-  // check that we've closed and deleted the socket
-
   std::stringstream ss;
   ss << "CNetwork::~CNetwork" 
     << " bytes in " << m_cntBytesTransferred_input 

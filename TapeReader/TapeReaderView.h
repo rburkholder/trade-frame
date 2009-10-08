@@ -64,7 +64,7 @@ protected:
   CButton m_btnStart;
   CButton m_btnStop;
   CListViewCtrl m_lvTape; // sub class this later and turn into own class for reuse
-  
+
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
 public:

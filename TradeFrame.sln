@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlCommon", "LibWtlCommon\LibWtlCommon.vcproj", "{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIQFeed", "LibIQFeed\LibIQFeed.vcproj", "{23192E89-C17F-4C84-B35C-3677927D64A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -35,6 +37,10 @@ Global
 		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}.Debug|Win32.Build.0 = Debug|Win32
 		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}.Release|Win32.ActiveCfg = Release|Win32
 		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}.Release|Win32.Build.0 = Release|Win32
+		{23192E89-C17F-4C84-B35C-3677927D64A6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{23192E89-C17F-4C84-B35C-3677927D64A6}.Debug|Win32.Build.0 = Debug|Win32
+		{23192E89-C17F-4C84-B35C-3677927D64A6}.Release|Win32.ActiveCfg = Release|Win32
+		{23192E89-C17F-4C84-B35C-3677927D64A6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
