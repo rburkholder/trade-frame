@@ -25,6 +25,8 @@
 
 #include "LibCommon/ReusableBuffers.h"
 
+// http://www.codeproject.com/KB/wtl/WTLIntellisense.aspx
+
 // use asio post messages to send commands 
 // use CThread PostMessages to return responses
 // use circular buffer of 20 messages
@@ -67,13 +69,13 @@ public:
   // pre-initialized message ids for messages delivered to and accepted by external caller
   struct structMessages {  // information needed by port processing thread
     HWND hWnd;        // handle of window to which message is sent
-    UINT msgInitialized;   // message id when class thread has been  initialized
-    UINT msgClosed;   // message id when class thread has ended
-    UINT msgConnected;    // message id when socket has been connected
-    UINT msgDisconnected;  // message id when socket has been disconnected/closed
-    UINT msgProcess;  // message id when sending line of text to process
-    UINT msgSendDone; // returns buffer used by the send message
-    UINT msgError;    // message id when error is encountered
+    UINT msgInitialized;   // message id when class thread has been  initialized  (wparam=null, lparam=null)
+    UINT msgClosed;   // message id when class thread has ended   (wparam=null, lparam=null)
+    UINT msgConnected;    // message id when socket has been connected  (wparam=null, lparam=null)
+    UINT msgDisconnected;  // message id when socket has been disconnected/closed  (wparam=null, lparam=null)
+    UINT msgProcess;  // message id when sending line of text to process  (wparam=linebuffer_t*, lparam=null)
+    UINT msgSendDone; // returns buffer used by the send message  (wparam=linebuffer_t*, lparam=null)
+    UINT msgError;    // message id when error is encountered  (wparam=enumMessageErrorTypes, lparam=null)
     structMessages(void): hWnd( 0 ), msgProcess( 0 ), msgInitialized( 0 ), msgClosed( 0 ), msgError( 0 ) {};
     structMessages(HWND hWnd_, UINT msgProcess_, UINT msgInitialized_, UINT msgClosed_, UINT msgError_ )
       : hWnd( hWnd_ ), msgProcess( msgProcess_ ), msgInitialized( msgInitialized_ ), msgClosed( msgClosed_ ), msgError( msgError_ ) {};
@@ -96,10 +98,10 @@ public:
 protected:
   BEGIN_MSG_MAP_EX(CNetwork)
 //    MSG_WM_TIMER(OnTimer)
-    MESSAGE_HANDLER(WM_NETWORK_CONNECT, OnConnect)
-    MESSAGE_HANDLER(WM_NETWORK_SEND, OnSend)  // command to be transmitted to network
-    MESSAGE_HANDLER(WM_NETWORK_PROCESSED, OnProcessed)  // line buffer is returned to repository
-    MESSAGE_HANDLER(WM_NETWORK_DISCONNECT, OnDisconnect)
+    MESSAGE_HANDLER(WM_NETWORK_CONNECT, OnConnect)  //(wparam=const structConnection&, lparam=null)
+    MESSAGE_HANDLER(WM_NETWORK_SEND, OnSend)  // command to be transmitted to network  (wparam=linebuffer_t*, lparam=null)
+    MESSAGE_HANDLER(WM_NETWORK_PROCESSED, OnProcessed)  // line buffer is returned to repository  (wparam=linebuffer_t*, lparam=null)
+    MESSAGE_HANDLER(WM_NETWORK_DISCONNECT, OnDisconnect)  //(wparam=null, lparam=null)
   END_MSG_MAP()
 
   LRESULT OnConnect( UINT, WPARAM, LPARAM, BOOL &bHandled);

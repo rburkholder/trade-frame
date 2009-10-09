@@ -3,7 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TapeReader", "TapeReader\TapeReader.vcproj", "{F0BF4F84-45E6-439B-937D-7DCA29BB8A78}"
 	ProjectSection(ProjectDependencies) = postProject
+		{1952070E-4378-49ED-88E1-C3556A616681} = {1952070E-4378-49ED-88E1-C3556A616681}
+		{23192E89-C17F-4C84-B35C-3677927D64A6} = {23192E89-C17F-4C84-B35C-3677927D64A6}
 		{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4} = {F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}
+		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163} = {DF7C1FF7-075F-4DCC-8E43-0C704AD54163}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibCommon", "LibCommon\LibCommon.vcproj", "{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}"
@@ -18,6 +21,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlCommon", "LibWtlCommon\LibWtlCommon.vcproj", "{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIQFeed", "LibIQFeed\LibIQFeed.vcproj", "{23192E89-C17F-4C84-B35C-3677927D64A6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163} = {DF7C1FF7-075F-4DCC-8E43-0C704AD54163}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wtlintellisense", "wtlintellisense\wtlintellisense.vcproj", "{1952070E-4378-49ED-88E1-C3556A616681}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +49,10 @@ Global
 		{23192E89-C17F-4C84-B35C-3677927D64A6}.Debug|Win32.Build.0 = Debug|Win32
 		{23192E89-C17F-4C84-B35C-3677927D64A6}.Release|Win32.ActiveCfg = Release|Win32
 		{23192E89-C17F-4C84-B35C-3677927D64A6}.Release|Win32.Build.0 = Release|Win32
+		{1952070E-4378-49ED-88E1-C3556A616681}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1952070E-4378-49ED-88E1-C3556A616681}.Debug|Win32.Build.0 = Debug|Win32
+		{1952070E-4378-49ED-88E1-C3556A616681}.Release|Win32.ActiveCfg = Release|Win32
+		{1952070E-4378-49ED-88E1-C3556A616681}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
