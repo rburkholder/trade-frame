@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "LibIQFeed/IQFeed.h"
+
 class CTapeReaderView : public CDialogImpl<CTapeReaderView>,
                         public CDialogResize<CTapeReaderView>
 {
@@ -25,11 +27,12 @@ public:
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
-	BEGIN_MSG_MAP(CTapeReaderView)
+	BEGIN_MSG_MAP_EX(CTapeReaderView)
     COMMAND_HANDLER(IDC_EDTSYMBOL, EN_CHANGE, OnEnChangeEdtsymbol)
     COMMAND_HANDLER(IDC_BTNSTART, BN_CLICKED, OnBnClickedBtnstart)
     COMMAND_HANDLER(IDC_BTNSTOP, BN_CLICKED, OnBnClickedBtnstop)
     NOTIFY_HANDLER(IDC_LISTTAPE, LVN_ITEMCHANGED, OnLvnItemchangedListtape)
+    MSG_WM_DESTROY(OnDestroy)
     CHAIN_MSG_MAP(CDialogResize<CTapeReaderView>)
 	END_MSG_MAP()
 
@@ -65,7 +68,12 @@ protected:
   CButton m_btnStop;
   CListViewCtrl m_lvTape; // sub class this later and turn into own class for reuse
 
+  void OnDestroy();
+
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
-public:
+
+  CIQFeed* m_pIQFeed;
+
+
 };

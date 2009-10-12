@@ -20,12 +20,6 @@
 
 #include "TapeReaderView.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 BOOL CTapeReaderView::PreTranslateMessage(MSG* pMsg)
 {
 	return CWindow::IsDialogMessage(pMsg);
@@ -48,7 +42,15 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   int i3 = m_lvTape.AddColumn( "Size", 2 );
   int i4 = m_lvTape.AddColumn( "Price", 3 );
 
+  m_pIQFeed = new CIQFeed( &_Module );
+  m_pIQFeed->Connect();
+
   return h;
+}
+
+void CTapeReaderView::OnDestroy( void ) {
+  m_pIQFeed->Disconnect();
+  delete m_pIQFeed;
 }
 
 LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

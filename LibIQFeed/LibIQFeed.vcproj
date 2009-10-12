@@ -156,6 +156,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedMessages.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -187,6 +191,10 @@
 			</File>
 			<File
 				RelativePath=".\IQFeed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedMessages.h"
 				>
 			</File>
 			<File

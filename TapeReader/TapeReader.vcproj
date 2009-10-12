@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\;..\lib;..\lib\wtl"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_STRICT;STRICT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -74,10 +74,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-gd-1_40.lib $(OutDir)\libboost_thread-vc90-mt-gd-1_40.lib $(OutDir)\libboost_regex-vc90-mt-gd-1_40.lib $(OutDir)\libboost_date_time-vc90-mt-gd-1_40.lib"
+				AdditionalDependencies="$(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_40.lib"
 				ShowProgress="0"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="libboost_system-vc90-mt-sgd-1_40.lib;libboost_regex-vc90-mt-sgd-1_40.lib;libboost_date_time-vc90-mt-sgd-1_40.lib;libboost_thread-vc90-mt-sgd-1_40.lib;&quot;D:\Program Files\Microsoft\Visual Studio 9.0\VC\lib\msvcprtd.lib&quot;;libcmtd.lib;msvcprtd.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"

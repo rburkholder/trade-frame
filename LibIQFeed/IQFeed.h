@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <codeproject/thread.h>  // class inbound messages
 
 #include <LibWtlCommon/Network.h>
@@ -25,18 +27,23 @@ public:
 
   void Connect( void );
   void Disconnect( void );
-
+  void Send( const std::string& send );
 
 protected:
 
   enum enumPrivateMessageTypes {  // messages from CNetwork
+    // called by CNetwork
     WM_IQFEED_CONN_INITIALIZED = WM_USER + 1,
     WM_IQFEED_CONN_CLOSED,
     WM_IQFEED_CONN_CONNECTED,
     WM_IQFEED_CONN_DISCONNECTED,
     WM_IQFEED_CONN_PROCESS,
     WM_IQFEED_CONN_SENDDONE,
-    WM_IQFEED_CONN_ERROR
+    WM_IQFEED_CONN_ERROR, 
+    // called by derived method calls and cross thread boundary
+    WM_IQFEED_METHOD_CONNECT,
+    WM_IQFEED_METHOD_DISCONNECT,
+    WM_IQFEED_METHOD_SEND
   };
 
   BEGIN_MSG_MAP_EX(CIQFeed)
@@ -57,10 +64,21 @@ protected:
   LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnError( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
+  LRESULT OnMethodConnect( );
+  LRESULT OnMethodDisconnect( );
+  LRESULT OnMethodSend( );
+
   BOOL InitializeThread( void );
   void CleanupThread( DWORD );
 
+  CNetwork<CIQFeed>::structMessages m_NetworkMessages;
+
+  void PostMessage( UINT id, WPARAM wparam = NULL, LPARAM lparam = NULL ) {
+    PostThreadMessage( id, wparam, lparam );
+  }
 private:
   CAppModule* m_pModule;
-  CNetwork* m_pconnIQfeed;
+  CNetwork<CIQFeed>::structConnection m_connParameters;
+  CNetwork<CIQFeed>* m_pconnIQFeed;
+
 };
