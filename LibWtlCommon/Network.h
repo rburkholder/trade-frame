@@ -19,14 +19,15 @@
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/array.hpp>
+#include <boost/bind.hpp>
 
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
-#include "LibCommon/ReusableBuffers.h"
+#include <LibCommon/ReusableBuffers.h>
 
 using boost::asio::ip::tcp;
 
@@ -50,6 +51,8 @@ using boost::asio::ip::tcp;
 //   if they are, then remain with character by character delivery
 //   if they are not, then can use begin/end iterators to pass information
 //   or come up with a different scheme of managing iterators over multiple buffers for use by Spirit
+// need code to catch when the socket is closed for whatever reason
+
 template <class ownerT, class charT = unsigned char>
 class CNetwork: public CGuiThreadImpl<CNetwork<ownerT> > {
 public:
@@ -127,10 +130,18 @@ protected:
 
 private:
 
+  enum enumNetworkState {
+    NS_INITIALIZING,
+    NS_DISCONNECTED,
+    NS_CONNECTING,
+    NS_CONNECTED,
+    NS_DISCONNECTING
+  } m_stateNetwork;
+
   structMessages m_Messages;
 
   bool m_bKeepTimerActive;
-  bool m_bSocketOpen;
+  //bool m_bSocketOpen;
 
   boost::thread m_asioThread;
 
@@ -162,8 +173,9 @@ private:
 template <class ownerT, class charT>
 CNetwork<ownerT,charT>::CNetwork(CAppModule* pModule, const structMessages& messages)
 : CGuiThreadImpl<CNetwork>( pModule ), m_Messages( messages ),
+  m_stateNetwork( NS_INITIALIZING ),
   m_timer( m_io, boost::posix_time::seconds( 1 ) ), m_bKeepTimerActive( true ),
-  m_psocket( NULL ), m_bSocketOpen( false ), //, m_bSocketOpened( false ),
+  m_psocket( NULL ), //m_bSocketOpen( false ), //, m_bSocketOpened( false ),
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 )
 {
@@ -194,11 +206,6 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 template <class ownerT, class charT>
 BOOL CNetwork<ownerT,charT>::InitializeThread( void ) {
 
-  // keep the asio busy with something
-  m_timer.async_wait( boost::bind( &CNetwork::TimerHandler, this, boost::asio::placeholders::error ) );
-
-  m_asioThread = boost::thread( &CNetwork::AsioThread, this );
-
   BOOL b = PostMessageToOwner( m_Messages.msgInitialized );
 
   return TRUE;
@@ -216,17 +223,13 @@ void CNetwork<ownerT,charT>::AsioThread( void ) {
 template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::CleanupThread( DWORD dw ) {
 
-  // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/deadline_timer.html
-
-  m_bKeepTimerActive = false;
-  m_timer.cancel();
-
-  if ( m_bSocketOpen ) {
-    m_psocket->close();
-    m_bSocketOpen = false;
+  if ( NS_CONNECTED == m_stateNetwork ) {
+    BOOL bHandled;
+    OnDisconnect( NULL, NULL, NULL, bHandled );
   }
 
   m_asioThread.join();  // wait for i/o thread to terminate
+
 //  delete m_asioThread;
 //  m_asioThread = NULL;
 
@@ -238,11 +241,18 @@ LRESULT CNetwork<ownerT,charT>::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bH
 
   const structConnection* connection  = reinterpret_cast<structConnection*>( wParam ); 
 
+  // keep the asio busy with something
+  // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/deadline_timer.html
+  m_timer.async_wait( boost::bind( &CNetwork::TimerHandler, this, boost::asio::placeholders::error ) );
+
+  m_asioThread = boost::thread( boost::bind( &CNetwork::AsioThread, this ) );
 
   if ( NULL != m_psocket ) {
     OutputDebugString( "CNetwork::OnConnect:  m_psocket not null.\n" );
   }
   m_psocket = new tcp::socket( m_io );
+
+  m_stateNetwork = NS_CONNECTING;
 
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
   tcp::endpoint endpoint( boost::asio::ip::address::from_string( connection->sAddress ), connection->nPort );
@@ -256,12 +266,36 @@ LRESULT CNetwork<ownerT,charT>::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bH
 }
 
 template <class ownerT, class charT>
+LRESULT CNetwork<ownerT,charT>::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+
+  //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
+  if ( NS_CONNECTED == m_stateNetwork ) {
+    m_psocket->close();
+  }
+
+  delete m_psocket;
+  m_psocket = NULL;
+
+  m_bKeepTimerActive = false;
+  m_timer.cancel();
+
+  m_stateNetwork = NS_DISCONNECTED;
+
+  BOOL b = PostMessageToOwner( m_Messages.msgDisconnected );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::ConnectHandler( const boost::system::error_code& error ) {
   if ( error ) {
     BOOL b = PostMessageToOwner( m_Messages.msgError, ERROR_CONNECT );
   }
   else {
-    m_bSocketOpen = true;
+//    m_bSocketOpen = true;
+
+    m_stateNetwork = NS_CONNECTED;
 
     AsyncRead();
 
@@ -271,6 +305,8 @@ void CNetwork<ownerT,charT>::ConnectHandler( const boost::system::error_code& er
 
 template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::AsyncRead( void ) {
+
+  assert( NS_CONNECTED == m_stateNetwork );
 
   inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOut();
 //  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
@@ -285,6 +321,8 @@ void CNetwork<ownerT,charT>::AsyncRead( void ) {
 
 template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
+
+  assert( NS_CONNECTED == m_stateNetwork );
 
   ++m_cntAsyncReads;
   if ( 0 == bytes_transferred ) {
@@ -332,6 +370,9 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
 
 template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::TimerHandler( const boost::system::error_code& error ) {
+
+  //assert( NS_CONNECTED == m_stateNetwork );
+
   if ( m_bKeepTimerActive ) {
     m_timer.expires_at( m_timer.expires_at() + boost::posix_time::seconds( 1 ) );
     m_timer.async_wait( boost::bind( &CNetwork::TimerHandler, this, boost::asio::placeholders::error ) );
@@ -343,7 +384,7 @@ LRESULT CNetwork<ownerT,charT>::OnSend( UINT, WPARAM wParam, LPARAM, BOOL &bHand
 
   linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( wParam );
 
-  if ( m_bSocketOpen ) {
+  if ( NS_CONNECTED == m_stateNetwork ) {
     boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
       boost::bind( &CNetwork::WriteHandler, this, 
       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer )
@@ -360,27 +401,15 @@ LRESULT CNetwork<ownerT,charT>::OnSend( UINT, WPARAM wParam, LPARAM, BOOL &bHand
 
 template <class ownerT, class charT>
 void CNetwork<ownerT,charT>::WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* pbuffer ) {
+
+  assert( NS_CONNECTED == m_stateNetwork );
+
   if ( error ) {
     BOOL b = PostMessageToOwner( m_Messages.msgError, ERROR_WRITE ); 
   }
   assert( bytes_transferred == pbuffer->size() );
   m_cntBytesTransferred_send += bytes_transferred;
   PostMessageToOwner( m_Messages.msgSendDone, reinterpret_cast<WPARAM>( pbuffer ) );
-}
-
-template <class ownerT, class charT>
-LRESULT CNetwork<ownerT,charT>::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
-
-  //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
-  m_psocket->close();
-  m_bSocketOpen = false;
-  delete m_psocket;
-  m_psocket = NULL;
-
-  BOOL b = PostMessageToOwner( m_Messages.msgDisconnected );
-
-  bHandled = true;
-  return 1;
 }
 
 template <class ownerT, class charT>

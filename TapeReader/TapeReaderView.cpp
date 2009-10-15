@@ -20,6 +20,15 @@
 
 #include "TapeReaderView.h"
 
+CTapeReaderView::CTapeReaderView( void ) 
+: CDialogImpl<CTapeReaderView>(), CDialogResize<CTapeReaderView>(),
+  m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR )
+{
+}
+
+CTapeReaderView::~CTapeReaderView( void ) {
+}
+
 BOOL CTapeReaderView::PreTranslateMessage(MSG* pMsg)
 {
 	return CWindow::IsDialogMessage(pMsg);
@@ -42,8 +51,7 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   int i3 = m_lvTape.AddColumn( "Size", 2 );
   int i4 = m_lvTape.AddColumn( "Price", 3 );
 
-  m_pIQFeed = new CIQFeed( &_Module );
-  m_pIQFeed->Connect();
+  m_pIQFeed = new CIQFeed<CTapeReaderView>( &_Module, m_Destinations );
 
   return h;
 }
@@ -86,4 +94,30 @@ LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR
   // TODO: Add your control notification handler code here
 
   return 0;
+}
+
+LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  m_pIQFeed->Connect();
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
 }
