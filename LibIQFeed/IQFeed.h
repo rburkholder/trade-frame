@@ -29,6 +29,13 @@
 #include "IQ32.H"
 #include "IQFeedMessages.h"
 
+// custom on
+// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+// custom off
+
 void __stdcall IQFeedCallBack( int x, int y );
 
 template <class ownerT>
@@ -51,12 +58,17 @@ public:
       {};
   };
 
+  enum enumSend {
+    SEND_AND_FORWARD,
+    SEND_AND_NO_FORWARD
+  };
+
   CIQFeed(CAppModule* pModule, const structMessageDestinations&);
   ~CIQFeed(void);
 
   void Connect( void );
   void Disconnect( void );
-  void Send( const std::string& send );
+  void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to false
 
 protected:
 
@@ -72,7 +84,9 @@ protected:
     // called by derived method calls and cross thread boundary
     WM_IQFEED_METHOD_CONNECT,
     WM_IQFEED_METHOD_DISCONNECT,
-    WM_IQFEED_METHOD_SEND
+    WM_IQFEED_METHOD_SEND,
+    // get everything closed down prior to PostQuitMessage
+    WM_IQFEED_PRE_QUIT
   };
 
   BEGIN_MSG_MAP_EX(CIQFeed<ownerT>)
@@ -87,6 +101,8 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_METHOD_CONNECT, OnMethodConnect );
     MESSAGE_HANDLER( WM_IQFEED_METHOD_DISCONNECT, OnMethodDisconnect );
     MESSAGE_HANDLER( WM_IQFEED_METHOD_SEND, OnMethodSend );
+
+    MESSAGE_HANDLER( WM_IQFEED_PRE_QUIT, OnPreQuit );
   END_MSG_MAP()
 
   LRESULT OnConnInitialized( UINT, WPARAM, LPARAM, BOOL &bHandled );
@@ -100,6 +116,8 @@ protected:
   LRESULT OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnMethodSend( UINT, WPARAM, LPARAM, BOOL &bHandled );
+
+  LRESULT OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
   BOOL InitializeThread( void );
   void CleanupThread( DWORD );
@@ -123,8 +141,8 @@ private:
   structMessageDestinations m_structMessageDestinations;
 
   CAppModule* m_pModule;
-  typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
   typename CNetwork<CIQFeed<ownerT> >* m_pconnIQFeed;
+  typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
   typename CNetwork<CIQFeed<ownerT> >::linerepository_t m_sendbuffers;
 
 };
@@ -143,6 +161,13 @@ CIQFeed<ownerT>::CIQFeed(CAppModule* pModule, const structMessageDestinations& M
 
 template <class ownerT>
 CIQFeed<ownerT>::~CIQFeed(void) {
+  assert( CS_CONNECTED != m_stateConnection );
+  PostThreadMessage( WM_IQFEED_PRE_QUIT );
+//  PostQuitMessage();
+//  if ( m_stateConnection != CS_DISCONNECTED ) {
+//      if ( NULL != m_pconnIQFeed ) m_pconnIQFeed->Join();
+//  }
+  Join();
 }
 
 template <class ownerT>
@@ -153,6 +178,19 @@ BOOL CIQFeed<ownerT>::InitializeThread( void ) {
   m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgInitialized );
 
   return TRUE;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+  if ( CS_DISCONNECTED == m_stateConnection ) {
+    PostQuitMessage();
+  }
+  else {
+    Sleep(10);
+    PostThreadMessage( WM_IQFEED_PRE_QUIT ); // dally for a bit
+  }
+  bHandled = true;
+  return 1;
 }
 
 template <class ownerT>
@@ -172,14 +210,16 @@ void CIQFeed<ownerT>::Connect( void ) { // post a local message, register needs 
 }
 
 template <class ownerT>
-void CIQFeed<ownerT>::Send( const std::string& send ) {
+void CIQFeed<ownerT>::Send( const std::string& send, enumSend eSend ) {
   if ( CS_CONNECTED == m_stateConnection ) {
     CNetwork<CIQFeed<ownerT> >::linebuffer_t* psendbuffer = m_sendbuffers.CheckOut();
     psendbuffer->clear();
     BOOST_FOREACH( char ch, send ) {
       (*psendbuffer).push_back( ch );
     }
-    PostThreadMessage( WM_IQFEED_METHOD_SEND, reinterpret_cast<WPARAM>( psendbuffer ) );
+    PostThreadMessage( WM_IQFEED_METHOD_SEND, 
+                       static_cast<WPARAM>( eSend ), 
+                       reinterpret_cast<LPARAM>( psendbuffer ) );
   }
   else {
     throw std::logic_error( "CIQFeed::Send not in connected state" );
@@ -220,9 +260,9 @@ LRESULT CIQFeed<ownerT>::OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandle
 }
 
 template <class ownerT>
-LRESULT CIQFeed<ownerT>::OnMethodSend( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeed<ownerT>::OnMethodSend( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_SEND, wParam );
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_SEND, wParam, lParam );
 
   bHandled = true;
   return 1;
@@ -259,6 +299,7 @@ template <class ownerT>
 LRESULT CIQFeed<ownerT>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   delete m_pconnIQFeed;
+  m_pconnIQFeed = NULL;
 
   RemoveClientApp( NULL );
 
@@ -276,6 +317,10 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
   CNetwork<CIQFeed<ownerT> >::linebuffer_t* buf = reinterpret_cast<CNetwork<CIQFeed>::linebuffer_t*>( wParam );
   CNetwork<CIQFeed<ownerT> >::linebuffer_t::iterator iter = (*buf).begin();
   CNetwork<CIQFeed<ownerT> >::linebuffer_t::iterator end = (*buf).end();
+
+  std::string str( iter, end );
+  str += '\n';
+  OutputDebugString( str.c_str() );
 
   BOOST_ASSERT( iter != end );
 
@@ -318,10 +363,12 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         CIQFSystemMessage msg( iter, end );
 //        msg.EmitLine();
         if ( _T( "KEY" ) == msg.Field( 2 ) ) {
-//          CString s;
-//          s.Format( "S,KEY,%s\n", msg.Field( 3 ) );
-//          IQConnect.SendToSocket( (char*) LPCTSTR( s ) );
-//          IQConnect.SendToSocket( "S,NEWSON\n" );
+          std::stringstream ss;
+          ss << "S,KEY," << msg.Field( 3 ) << std::endl;
+          Send( ss.str(), SEND_AND_NO_FORWARD );
+          ss.str( "" );
+          ss << "S,NEWSON" << std::endl;
+          Send( ss.str(), SEND_AND_NO_FORWARD );
         }
         if ( _T( "CUST" ) == msg.Field( 2 ) ) {
           if ( _T( "4.3.0.3" ) > msg.Field( 7 ) ) {
@@ -344,12 +391,15 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
 }
 
 template <class ownerT>
-LRESULT CIQFeed<ownerT>::OnConnSendDone( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeed<ownerT>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  CNetwork<CIQFeed<ownerT> >::linebuffer_t* linebuffer = reinterpret_cast<CNetwork<CIQFeed<ownerT> >::linebuffer_t*>( wParam );
+  CNetwork<CIQFeed<ownerT> >::linebuffer_t* linebuffer = reinterpret_cast<CNetwork<CIQFeed<ownerT> >::linebuffer_t*>( lParam );
   m_sendbuffers.CheckIn( linebuffer );
 
-  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+  enumSend eForwardSendDone = static_cast<enumSend>( wParam );
+  if ( SEND_AND_FORWARD == eForwardSendDone ) {
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+  }
 
   bHandled = true;
   return 1;

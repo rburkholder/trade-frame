@@ -22,7 +22,7 @@
 				SQLDebugging=""
 				Environment=""
 				EnvironmentMerge="true"
-				DebuggerFlavor=""
+				DebuggerFlavor="0"
 				MPIRunCommand=""
 				MPIRunArguments=""
 				MPIRunWorkingDirectory=""

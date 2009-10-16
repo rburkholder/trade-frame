@@ -12,13 +12,15 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "ReusableBuffers.h"
 
-//#ifdef _DEBUG
-//#define new DEBUG_NEW
-//#undef THIS_FILE
-//static char THIS_FILE[] = __FILE__;
-//#endif
+// custom on
+// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+// custom off
+
+#include "ReusableBuffers.h"
 
 // CCharBuffer
 

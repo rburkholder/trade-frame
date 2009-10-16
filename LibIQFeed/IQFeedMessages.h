@@ -283,7 +283,12 @@ void CIQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end )
       ++current;
       begin = current;
     }
+    else {
+      ++current;
+    }
   }
+  // always push what ever is remaining, empty string or not
+  m_vFieldDelimiters.push_back( fielddelimiter_t( begin, current ) );
 }
 
 //template <class T, class charT>

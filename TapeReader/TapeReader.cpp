@@ -18,6 +18,13 @@
 #include "stdafx.h"
 #include "atlmisc.h"
 
+// custom on
+// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+// custom off
+
 #include "resource.h"
 
 #include "TapeReaderView.h"
@@ -181,6 +188,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	_Module.Term();
 	::CoUninitialize();
+
+  // custom on
+  _CrtDumpMemoryLeaks();
+
+  // custom off
 
 	return nRet;
 }
