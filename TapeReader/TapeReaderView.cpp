@@ -89,6 +89,9 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
 
   m_pIQFeed->Send( sSend );
 
+  m_stateUI = UI_STARTED;
+  UpdateUIState();
+
   return 0;
 }
 
@@ -204,6 +207,7 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
   if ( 'N' == *msg->FieldBegin( CIQFUpdateMessage::QPLast ) ) {
     CWindow::MessageBoxA( "Symbol Not Found", "Error", MB_OK );
     m_stateUI = UI_SYMBOLENTRY;
+    UpdateUIState();
   }
   else {
     std::string sSymbol( 
@@ -214,18 +218,37 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
         msg->FieldBegin( CIQFUpdateMessage::QPLastTradeTime ),
         msg->FieldEnd( CIQFUpdateMessage::QPLastTradeTime ) );
       if ( 9 == sLastTradeTime.length() ) {
+        std::string sBate;
+        std::string sSize;
+        std::string sPrice;
         switch ( sLastTradeTime[ 8 ] ) {
           case 't':
+            sBate = "T";
+            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPLast ), msg->FieldEnd( CIQFUpdateMessage::QPLast ) );
+            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
             break;
           case 'T':
+            sBate = "E";
+            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( CIQFUpdateMessage::QPExtTradeLast ) );
+            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
             break;
           case 'b':
+            sBate = "B";
+            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPBid ), msg->FieldEnd( CIQFUpdateMessage::QPBid ) );
+            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( CIQFUpdateMessage::QPBidSize ) );
             break;
           case 'a':
+            sBate = "A";
+            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPAsk ), msg->FieldEnd( CIQFUpdateMessage::QPAsk ) );
+            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( CIQFUpdateMessage::QPAskSize ) );
             break;
           case 'o':
             break;
         }
+        m_lvTape.InsertItem( 0, sLastTradeTime.c_str() );
+        m_lvTape.SetItemText( 0, 1, sBate.c_str() );
+        m_lvTape.SetItemText( 0, 2, sSize.c_str() );
+        m_lvTape.SetItemText( 0, 3, sPrice.c_str() );
       }
     }
   }

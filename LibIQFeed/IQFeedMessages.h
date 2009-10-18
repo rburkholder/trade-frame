@@ -18,6 +18,11 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
+
 #include <string>
 #include <vector>
 #include <utility>
@@ -336,18 +341,36 @@ template <class T, class charT>
 double CIQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
-  std::string& str = Field( fld );
-  if ( 0 == str.size() ) return 0.0;
-  return atof( str.c_str() );
+
+  namespace qi = boost::spirit::qi;
+	using namespace boost::phoenix::arg_names;
+
+	using boost::phoenix::ref;
+	//using boost::spirit::qi::_1;
+	using namespace boost::spirit::qi;
+
+  double dest = 0;
+	bool b = qi::parse( m_vFieldDelimiters[ fld ].first, m_vFieldDelimiters[ fld ].second, double_[ref(dest)] );
+
+  return dest;
 }
 
 template <class T, class charT>
 int CIQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
-  std::string& str = Field( fld );
-  if ( 0 == str.size() ) return 0;
-  return atoi( str.c_str() );
+
+  namespace qi = boost::spirit::qi;
+	using namespace boost::phoenix::arg_names;
+
+	using boost::phoenix::ref;
+	//using boost::spirit::qi::_1;
+	using namespace boost::spirit::qi;
+
+  int dest = 0;
+	bool b = qi::parse( m_vFieldDelimiters[ fld ].first, m_vFieldDelimiters[ fld ].second, int_[ref(dest)] );
+
+  return dest;
 }
 
 template <class T, class charT>
