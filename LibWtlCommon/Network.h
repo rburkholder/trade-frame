@@ -212,6 +212,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 //    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
 //  }
 
+#if defined _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name()
     << " bytes in " << m_cntBytesTransferred_input 
@@ -220,6 +221,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
     << " on " << m_cntSends << " sends." 
     << std::endl;
   OutputDebugString( ss.str().c_str() );
+#endif
 }
 
 template <class ownerT, class charT>

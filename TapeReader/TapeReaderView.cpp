@@ -29,7 +29,9 @@
 
 CTapeReaderView::CTapeReaderView( void ) 
 : CDialogImpl<CTapeReaderView>(), CDialogResize<CTapeReaderView>(),
-  m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR )
+  m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
+  WM_IQFEED_UPDATE, WM_IQFEED_SUMMARY, 0, WM_IQFEED_FUNDAMENTAL, 0, 0 ),
+  m_stateUI( UI_STARTING )
 {
 }
 
@@ -70,14 +72,37 @@ void CTapeReaderView::OnDestroy( void ) {
 
 LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  // TODO: Add your control notification handler code here
+
+  m_stateUI = UI_STARTING;
+  UpdateUIState();
+
+  typedef std::string::value_type char_t ;
+  int l = m_edtSymbol.GetWindowTextLengthA();
+  char_t* pText = new char_t[ l + 1 ];
+  m_edtSymbol.GetWindowText( (LPTSTR) pText, l + 1 ); 
+  m_sSymbol = pText;
+  delete[] pText;
+
+  std::string sSend = _T( "w" );
+  sSend += m_sSymbol;
+  sSend += _T( "\n" );
+
+  m_pIQFeed->Send( sSend );
 
   return 0;
 }
 
 LRESULT CTapeReaderView::OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  // TODO: Add your control notification handler code here
+
+  std::string sSend = _T( "r" );
+  sSend += m_sSymbol;
+  sSend += _T( "\n" );
+
+  m_pIQFeed->Send( sSend );
+
+  m_stateUI = UI_SYMBOLENTRY;
+  UpdateUIState();
 
   return 0;
 }
@@ -90,15 +115,46 @@ LRESULT CTapeReaderView::OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/,
   // with the ENM_CHANGE flag ORed into the mask.
 
   // TODO:  Add your control notification handler code here
+  if ( 0 == m_edtSymbol.GetWindowTextLengthA() ) {
+    m_stateUI = UI_NOSYMBOL;
+  }
+  else {
+    m_stateUI = UI_SYMBOLENTRY;
+  }
+  UpdateUIState();
 
   return 0;
+}
+
+void CTapeReaderView::UpdateUIState( void ) {
+  switch ( m_stateUI ) {
+    case UI_STARTING:
+      m_btnStart.EnableWindow( false );
+      m_btnStop.EnableWindow( false );
+      m_edtSymbol.EnableWindow( false );
+    case UI_NOSYMBOL: 
+      m_btnStart.EnableWindow( false );
+      m_btnStop.EnableWindow( false );
+      m_edtSymbol.EnableWindow( true );
+      break;
+    case UI_SYMBOLENTRY:
+      m_btnStart.EnableWindow( true );
+      m_btnStop.EnableWindow( false );
+      m_edtSymbol.EnableWindow( true );
+      break;
+    case UI_STARTED:
+      m_btnStart.EnableWindow( false );
+      m_btnStop.EnableWindow( true );
+      m_edtSymbol.EnableWindow( false );
+      break;
+  }
 }
 
 
 LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
 {
   LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-  // TODO: Add your control notification handler code here
+  
 
   return 0;
 }
@@ -110,11 +166,19 @@ LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandl
 }
 
 LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+
+  m_stateUI = UI_NOSYMBOL;
+  UpdateUIState();
+
   bHandled = true;
   return 1;
 }
 
 LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+
+  m_stateUI = UI_STARTING;
+  UpdateUIState();
+
   bHandled = true;
   return 1;
 }
@@ -125,6 +189,69 @@ LRESULT CTapeReaderView::OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& bHandled 
 }
 
 LRESULT CTapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
+// Data Handling
+
+// S,WATCHES,@ES,+CL#,@IA#,@QM#,@IE#,@QO#,BZ#,CRD#,@ES#,@ES@,#ES#,@LA#,+CLF#,@NQ#,@NS#,@NX#,#NX#,@QC#,@YM#
+
+LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+
+  CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
+
+  if ( 'N' == *msg->FieldBegin( CIQFUpdateMessage::QPLast ) ) {
+    CWindow::MessageBoxA( "Symbol Not Found", "Error", MB_OK );
+    m_stateUI = UI_SYMBOLENTRY;
+  }
+  else {
+    std::string sSymbol( 
+      msg->FieldBegin( CIQFUpdateMessage::QPSymbol ),
+      msg->FieldEnd( CIQFUpdateMessage::QPSymbol ) );
+    if ( sSymbol == m_sSymbol ) {
+      std::string sLastTradeTime( 
+        msg->FieldBegin( CIQFUpdateMessage::QPLastTradeTime ),
+        msg->FieldEnd( CIQFUpdateMessage::QPLastTradeTime ) );
+      if ( 9 == sLastTradeTime.length() ) {
+        switch ( sLastTradeTime[ 8 ] ) {
+          case 't':
+            break;
+          case 'T':
+            break;
+          case 'b':
+            break;
+          case 'a':
+            break;
+          case 'o':
+            break;
+        }
+      }
+    }
+  }
+
+  m_pIQFeed->UpdateDone( wParam, lParam );
+
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+
+  CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
+
+  m_pIQFeed->SummaryDone( wParam, lParam );
+
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CTapeReaderView::OnIQFeedFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+
+  CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
+
+  m_pIQFeed->FundamentalDone( wParam, lParam );
+
   bHandled = true;
   return 1;
 }

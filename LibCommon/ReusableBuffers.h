@@ -82,6 +82,10 @@ private:
 
 // CBufferRepository
 
+// can the mutex be made compile-time conditional?
+// most usage may be single thread mode now, as buffers are being returned to the original
+//   thread for storage
+
 template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void) 
 #ifdef _DEBUG
 : cntCheckins( 0 ), cntCheckouts( 0 ), cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 )
@@ -91,7 +95,7 @@ template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void)
 
 template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
   TBuffer* pBuffer;
-  boost::mutex::scoped_lock lock(m_mutex);
+//  boost::mutex::scoped_lock lock(m_mutex);
   while ( !m_qBuffer.empty() ) {
     pBuffer = m_qBuffer.front();
     m_qBuffer.pop();
@@ -110,11 +114,17 @@ template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
     << " Max Q Size: " << maxQsize
     << std::endl;
   OutputDebugString( ss.str().c_str() );
+  if ( cntCreated != cntDestroyed ) {
+    OutputDebugString( "  ** Created != Destroyed\n" );
+  }
+  if ( cntCheckins != cntCheckouts ) {
+    OutputDebugString( "  ** Checkins != Checkouts\n" );
+  }
 #endif
 }
 
 template<class TBuffer> void CBufferRepository<TBuffer>::CheckIn(TBuffer* pBuffer) {
-  boost::mutex::scoped_lock lock(m_mutex);
+//  boost::mutex::scoped_lock lock(m_mutex);
   m_qBuffer.push( pBuffer );
 #ifdef _DEBUG
   ++cntCheckins;
@@ -124,7 +134,7 @@ template<class TBuffer> void CBufferRepository<TBuffer>::CheckIn(TBuffer* pBuffe
 
 template<class TBuffer> TBuffer* CBufferRepository<TBuffer>::CheckOut() {
   TBuffer* pBuffer;
-  boost::mutex::scoped_lock lock(m_mutex);
+//  boost::mutex::scoped_lock lock(m_mutex);
   if ( m_qBuffer.empty() ) {
     pBuffer = new TBuffer();
 #ifdef _DEBUG

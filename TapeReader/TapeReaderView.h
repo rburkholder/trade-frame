@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "LibIQFeed/IQFeed.h"
 
 class CTapeReaderView : public CDialogImpl<CTapeReaderView>,
@@ -63,17 +65,37 @@ protected:
     WM_IQFEED_CONNECTED,
     WM_IQFEED_SENDDONE,
     WM_IQFEED_DISCONNECTED,
-    WM_IQFEED_ERROR
+    WM_IQFEED_ERROR, 
+
+    WM_IQFEED_UPDATE,
+    WM_IQFEED_SUMMARY,
+    WM_IQFEED_NEWS,
+    WM_IQFEED_FUNDAMENTAL,
+    WM_IQFEED_TIME,
+    WM_IQFEED_SYSTEM
   };
+
+  enum enumUIEnableState {
+    UI_STARTING,
+    UI_NOSYMBOL,
+    UI_SYMBOLENTRY,
+    UI_STARTED
+  } m_stateUI;
+
+  void UpdateUIState( void );
 
   CIQFeed<CTapeReaderView>::structMessageDestinations m_Destinations;
 
 	BEGIN_MSG_MAP_EX(CTapeReaderView)
+    MESSAGE_HANDLER( WM_IQFEED_UPDATE, OnIQFeedUpdate )
+    MESSAGE_HANDLER( WM_IQFEED_SUMMARY, OnIQFeedSummary )
+    MESSAGE_HANDLER( WM_IQFEED_FUNDAMENTAL, OnIQFeedFundamental )
+
     MESSAGE_HANDLER( WM_IQFEED_INITIALIZED, OnIQFeedInitialized )
     MESSAGE_HANDLER( WM_IQFEED_CONNECTED, OnIQFeedConnected )
     MESSAGE_HANDLER( WM_IQFEED_DISCONNECTED, OnIQFeedDisconnected )
-    MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedSendDone )
-    MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedError )
+    MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
+    MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedError )
 
     COMMAND_HANDLER(IDC_EDTSYMBOL, EN_CHANGE, OnEnChangeEdtsymbol)
     COMMAND_HANDLER(IDC_BTNSTART, BN_CLICKED, OnBnClickedBtnstart)
@@ -94,6 +116,9 @@ protected:
   LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
 
+  LRESULT OnIQFeedUpdate( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedSummary( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedFundamental( UINT, WPARAM, LPARAM, BOOL& );
 
   void OnDestroy();
 
@@ -101,6 +126,8 @@ private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
 
   CIQFeed<CTapeReaderView>* m_pIQFeed;
+
+  std::string m_sSymbol;
 
 
 };

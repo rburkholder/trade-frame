@@ -25,7 +25,14 @@
 
 //**** CIQFBaseMessage
 
+// templated
+
 //**** CIQFSystemMessage
+
+CIQFSystemMessage::CIQFSystemMessage( void ) 
+: CIQFBaseMessage<CIQFSystemMessage>()
+{
+}
 
 CIQFSystemMessage::CIQFSystemMessage( iterator_t& current, iterator_t& end ) 
 : CIQFBaseMessage<CIQFSystemMessage>( current, end )
@@ -37,22 +44,37 @@ CIQFSystemMessage::~CIQFSystemMessage() {
 
 //**** CIQFNewsMessage
 
-CIQFNewsMessage::CIQFNewsMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFNewsMessage>( current, end )
+CIQFNewsMessage::CIQFNewsMessage( void ) 
+: CIQFBaseMessage<CIQFNewsMessage>()
 {
-  m_sDistributor = Field( NDistributor );
-  m_sStoryId = Field( NStoryId );
-  m_sSymbolList = Field( NSymbolList );
-  m_sDateTime = Field( NDateTime );
-  fielddelimiter_t headline = m_vFieldDelimiters[ NHeadline ];
-  m_sHeadline.assign( headline.first, end );
+}
+
+CIQFNewsMessage::CIQFNewsMessage( iterator_t& current, iterator_t& end ) 
+: CIQFBaseMessage<CIQFNewsMessage>()
+{
+  Assign( current, end );
 }
 
 CIQFNewsMessage::~CIQFNewsMessage() {
 }
 
+void CIQFNewsMessage::Assign(iterator_t &current, iterator_t &end) {
+  CIQFBaseMessage<CIQFNewsMessage>::Assign( current, end );
+  m_sDistributor = Field( NDistributor );
+  m_sStoryId = Field( NStoryId );
+  m_sSymbolList = Field( NSymbolList );
+  m_sDateTime = Field( NDateTime );
+  fielddelimiter_t headline = m_vFieldDelimiters[ NHeadLine ];
+  m_sHeadLine.assign( headline.first, end );
+}
+
 //**** CIQFFundamentalMessage
 // resize the vector to accept with out resizing so often?
+
+CIQFFundamentalMessage::CIQFFundamentalMessage( void ) 
+: CIQFBaseMessage<CIQFFundamentalMessage>()
+{
+}
 
 CIQFFundamentalMessage::CIQFFundamentalMessage( iterator_t& current, iterator_t& end ) 
 : CIQFBaseMessage<CIQFFundamentalMessage>( current, end )
@@ -64,6 +86,11 @@ CIQFFundamentalMessage::~CIQFFundamentalMessage() {
 
 //**** CIQFUpdateMessage
 
+CIQFUpdateMessage::CIQFUpdateMessage( void )
+: CIQFPricingMessage<CIQFUpdateMessage>()
+{
+}
+
 CIQFUpdateMessage::CIQFUpdateMessage( iterator_t& current, iterator_t& end ) 
 : CIQFPricingMessage<CIQFUpdateMessage>( current, end )
 {
@@ -73,6 +100,11 @@ CIQFUpdateMessage::~CIQFUpdateMessage() {
 }
 
 //**** CIQFSummaryMessage
+
+CIQFSummaryMessage::CIQFSummaryMessage( void ) 
+: CIQFPricingMessage<CIQFSummaryMessage>()
+{
+}
 
 CIQFSummaryMessage::CIQFSummaryMessage( iterator_t& current, iterator_t& end ) 
 : CIQFPricingMessage<CIQFSummaryMessage>( current, end )
@@ -84,13 +116,26 @@ CIQFSummaryMessage::~CIQFSummaryMessage() {
 
 //**** CIQFTimeMessage
 
-CIQFTimeMessage::CIQFTimeMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFTimeMessage>( current, end )
+CIQFTimeMessage::CIQFTimeMessage( void )
+: CIQFBaseMessage<CIQFTimeMessage>(),
+  m_bMarketIsOpen( false ), 
+  m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
 {
-  m_bMarketIsOpen = false;
-  m_timeMarketOpen = time_duration( 9, 30, 0 );
-  m_timeMarketClose = time_duration( 16, 0, 0 );
+}
 
+CIQFTimeMessage::CIQFTimeMessage( iterator_t& current, iterator_t& end ) 
+: CIQFBaseMessage<CIQFTimeMessage>(),
+  m_bMarketIsOpen( false ), 
+  m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
+{
+  Assign( current, end );
+}
+
+CIQFTimeMessage::~CIQFTimeMessage() {
+}
+
+void CIQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
+  CIQFBaseMessage<CIQFTimeMessage>::Assign( current, end );
   std::stringstream ss( Field( 2 ) );
   time_input_facet *input_facet;
   input_facet = new boost::posix_time::time_input_facet();  // input facet stuff needs to be with ss.imbue, can't be reused
@@ -98,8 +143,5 @@ CIQFTimeMessage::CIQFTimeMessage( iterator_t& current, iterator_t& end )
   ss.imbue( std::locale( ss.getloc(), input_facet ) );
   ss >> m_dt;
   m_bMarketIsOpen = ( ( m_dt.time_of_day() >= m_timeMarketOpen ) && ( m_dt.time_of_day() < m_timeMarketClose ) );
-}
-
-CIQFTimeMessage::~CIQFTimeMessage() {
 }
 

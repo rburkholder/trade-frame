@@ -44,18 +44,32 @@ public:
 
   // pre-initialized message ids for messages delivered to and accepted by external caller
   struct structMessageDestinations { // 
+    // possibly make use of Boost named parameters here.
     ownerT* owner;        // owner object to which message is sent (PostMessage needs to be implemented)
     UINT msgInitialized;
     UINT msgConnected;
     UINT msgSendComplete;
     UINT msgDisconnected;
     UINT msgError;
+    UINT msgMessageUpdate;
+    UINT msgMessageSummary;
+    UINT msgMessageNews;
+    UINT msgMessageFundamental;
+    UINT msgMessageTime;
+    UINT msgMessageSystem;
+
     structMessageDestinations( void )
-      : owner( NULL ), msgInitialized( 0 ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 )
+      : owner( NULL ), msgInitialized( 0 ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
+        msgMessageUpdate( 0 ), msgMessageSummary( 0 ), msgMessageNews( 0 ), msgMessageFundamental( 0 ), msgMessageTime( 0 ), msgMessageSystem( 0 )
       {};
-    structMessageDestinations( ownerT* owner_, UINT msgInitialized_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_ ) 
-      : owner( owner_ ), msgInitialized( msgInitialized_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ )
-      {};
+    structMessageDestinations( ownerT* owner_, UINT msgInitialized_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
+        UINT msgMessageUpdate_, UINT msgMessageSummary_, UINT msgMessageNews_, UINT msgMessageFundamental_, UINT msgMessageTime_, UINT msgMessageSystem_ ) 
+      : owner( owner_ ), msgInitialized( msgInitialized_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
+        msgMessageUpdate( msgMessageUpdate_ ), msgMessageSummary( msgMessageSummary_ ), msgMessageNews( msgMessageNews_ ),
+        msgMessageFundamental( msgMessageFundamental_ ), msgMessageTime( msgMessageTime_ ), msgMessageSystem( msgMessageSystem_ )
+      {
+        BOOST_ASSERT( NULL != owner_ );
+    };
   };
 
   enum enumSend {
@@ -69,6 +83,24 @@ public:
   void Connect( void );
   void Disconnect( void );
   void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to false
+  void inline UpdateDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_UPDATE, wParam, lParam );
+  }
+  void inline SummaryDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_SUMMARY, wParam, lParam );
+  }
+  void inline NewsDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_NEWS, wParam, lParam );
+  }
+  void inline FundamentalDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_FUNDAMENTAL, wParam, lParam );
+  }
+  void inline TimeDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_TIME, wParam, lParam );
+  }
+  void inline SystemDone( WPARAM wParam, LPARAM lParam ) {
+    PostThreadMessage( WM_IQFEED_DONE_SYSTEM, wParam, lParam );
+  }
 
 protected:
 
@@ -81,6 +113,13 @@ protected:
     WM_IQFEED_CONN_PROCESS,
     WM_IQFEED_CONN_SENDDONE,
     WM_IQFEED_CONN_ERROR, 
+    // called when derived methods have finished with message and buffer
+    WM_IQFEED_DONE_UPDATE,
+    WM_IQFEED_DONE_SUMMARY,
+    WM_IQFEED_DONE_NEWS,
+    WM_IQFEED_DONE_FUNDAMENTAL,
+    WM_IQFEED_DONE_TIME,
+    WM_IQFEED_DONE_SYSTEM,
     // called by derived method calls and cross thread boundary
     WM_IQFEED_METHOD_CONNECT,
     WM_IQFEED_METHOD_DISCONNECT,
@@ -98,6 +137,13 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_CONN_SENDDONE, OnConnSendDone );
     MESSAGE_HANDLER( WM_IQFEED_CONN_ERROR, OnConnError );
 
+    MESSAGE_HANDLER( WM_IQFEED_DONE_UPDATE, OnDoneUpdate );
+    MESSAGE_HANDLER( WM_IQFEED_DONE_SUMMARY, OnDoneSummary );
+    MESSAGE_HANDLER( WM_IQFEED_DONE_NEWS, OnDoneNews );
+    MESSAGE_HANDLER( WM_IQFEED_DONE_FUNDAMENTAL, OnDoneFundamental );
+    MESSAGE_HANDLER( WM_IQFEED_DONE_TIME, OnDoneTime );
+    MESSAGE_HANDLER( WM_IQFEED_DONE_SYSTEM, OnDoneSystem );
+
     MESSAGE_HANDLER( WM_IQFEED_METHOD_CONNECT, OnMethodConnect );
     MESSAGE_HANDLER( WM_IQFEED_METHOD_DISCONNECT, OnMethodDisconnect );
     MESSAGE_HANDLER( WM_IQFEED_METHOD_SEND, OnMethodSend );
@@ -112,6 +158,13 @@ protected:
   LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnError( UINT, WPARAM, LPARAM, BOOL &bHandled );
+
+  LRESULT OnDoneUpdate( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnDoneSummary( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnDoneNews( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnDoneFundamental( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnDoneTime( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnDoneSystem( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
   LRESULT OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
@@ -144,6 +197,13 @@ private:
   typename CNetwork<CIQFeed<ownerT> >* m_pconnIQFeed;
   typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
   typename CNetwork<CIQFeed<ownerT> >::linerepository_t m_sendbuffers;
+
+  typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
+  typename CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
+  typename CBufferRepository<CIQFNewsMessage> m_reposNewsMessages;
+  typename CBufferRepository<CIQFFundamentalMessage> m_reposFundamentalMessages;
+  typename CBufferRepository<CIQFTimeMessage> m_reposTimeMessages;
+  typename CBufferRepository<CIQFSystemMessage> m_reposSystemMessages;
 
 };
 
@@ -318,73 +378,129 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
   CNetwork<CIQFeed<ownerT> >::linebuffer_t::iterator iter = (*buf).begin();
   CNetwork<CIQFeed<ownerT> >::linebuffer_t::iterator end = (*buf).end();
 
+#if defined _DEBUG
   std::string str( iter, end );
   str += '\n';
   OutputDebugString( str.c_str() );
+#endif
 
   BOOST_ASSERT( iter != end );
 
   switch ( *iter ) {
     case 'Q': 
       {
-        CIQFUpdateMessage msg( iter, end );
-//        HandleQMessage( &msg );
+        CIQFUpdateMessage* msg = m_reposUpdateMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( 0 != m_structMessageDestinations.msgMessageUpdate ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageUpdate, 
+              wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneUpdate( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
       }
       break;
     case 'P': 
       {
-        CIQFSummaryMessage msg( iter, end );
-//        HandlePMessage( &msg );
-      }
-      break;
-    case 'F': 
-      {
-        CIQFFundamentalMessage msg( iter, end );
-//        HandleFMessage( &msg );
+        CIQFSummaryMessage* msg = m_reposSummaryMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( 0 != m_structMessageDestinations.msgMessageSummary ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageSummary, 
+              wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneSummary( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
       }
       break;
     case 'N': 
       {
-        CIQFNewsMessage msg( iter, end );
-//        NewsMessage( &msg );
-//        HandleNMessage( &msg );
-
+        CIQFNewsMessage* msg = m_reposNewsMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( 0 != m_structMessageDestinations.msgMessageNews ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageNews, 
+              wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneNews( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
+      }
+      break;
+    case 'F': 
+      {
+        CIQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( 0 != m_structMessageDestinations.msgMessageFundamental ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageFundamental, 
+              wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneFundamental( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
       }
       break;
     case 'T': 
       {
-        CIQFTimeMessage msg( iter, end );
-//        TimeMessage( &msg );
-//        HandleTMessage( &msg );
+        CIQFTimeMessage* msg = m_reposTimeMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( 0 != m_structMessageDestinations.msgMessageTime ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageTime, 
+              wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneTime( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
       }
       break;
     case 'S': 
       {
-        CIQFSystemMessage msg( iter, end );
-//        msg.EmitLine();
-        if ( _T( "KEY" ) == msg.Field( 2 ) ) {
+        CIQFSystemMessage* msg = m_reposSystemMessages.CheckOut();
+        msg->Assign( iter, end );
+        if ( _T( "KEY" ) == msg->Field( 2 ) ) {
           std::stringstream ss;
-          ss << "S,KEY," << msg.Field( 3 ) << std::endl;
+          ss << "S,KEY," << msg->Field( 3 ) << std::endl;
           Send( ss.str(), SEND_AND_NO_FORWARD );
           ss.str( "" );
           ss << "S,NEWSON" << std::endl;
           Send( ss.str(), SEND_AND_NO_FORWARD );
         }
-        if ( _T( "CUST" ) == msg.Field( 2 ) ) {
-          if ( _T( "4.3.0.3" ) > msg.Field( 7 ) ) {
+        if ( _T( "CUST" ) == msg->Field( 2 ) ) {
+          if ( _T( "4.3.0.3" ) > msg->Field( 7 ) ) {
 //            cout << "Need IQFeed version of 4.3.0.3 or greater (" << msg.Field( 7 ) << ")" << endl;
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
         }
-//        HandleSMessage( &msg );
+        if ( 0 != m_structMessageDestinations.msgMessageSystem ) {
+          m_structMessageDestinations.owner
+            ->PostMessage( m_structMessageDestinations.msgMessageSystem, 
+            wParam, reinterpret_cast<LPARAM>( msg ) );
+        }
+        else {
+          BOOL bHandled;
+          OnDoneSystem( m_structMessageDestinations.msgMessageUpdate, 
+            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+        }
       }
       break;
     default:
       throw "Unknown message type in IQFeed"; // unknown message type
       break;
   }
-
-  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, reinterpret_cast<WPARAM>( buf ) );
 
   bHandled = true;
   return 1;
@@ -409,6 +525,84 @@ template <class ownerT>
 LRESULT CIQFeed<ownerT>::OnConnError( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   OutputDebugString( "CIQFeed::OnConnError error" );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
+
+  m_reposUpdateMessages.CheckIn( msg );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
+
+  m_reposSummaryMessages.CheckIn( msg );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneNews( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+
+  m_reposNewsMessages.CheckIn( msg );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
+
+  m_reposFundamentalMessages.CheckIn( msg );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneTime( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFTimeMessage* msg = reinterpret_cast<CIQFTimeMessage*>( lParam );
+
+  m_reposTimeMessages.CheckIn( msg );
+
+  bHandled = true;
+  return 1;
+}
+
+template <class ownerT>
+LRESULT CIQFeed<ownerT>::OnDoneSystem( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_PROCESSED, wParam );
+
+  CIQFSystemMessage* msg = reinterpret_cast<CIQFSystemMessage*>( lParam );
+
+  m_reposSystemMessages.CheckIn( msg );
 
   bHandled = true;
   return 1;
