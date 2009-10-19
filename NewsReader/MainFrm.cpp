@@ -19,7 +19,7 @@
 #include "resource.h"
 
 #include "aboutdlg.h"
-#include "TapeReaderView.h"
+#include "NewsReaderView.h"
 #include "MainFrm.h"
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)

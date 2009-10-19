@@ -149,14 +149,13 @@ private:
   structMessages m_Messages;
 
   bool m_bKeepTimerActive;
-  //bool m_bSocketOpen;
 
   boost::thread m_asioThread;
 
   boost::asio::io_service m_io;
   boost::asio::ip::tcp::socket* m_psocket;
 
-  boost::asio::deadline_timer m_timer;  // used to keep asio.run something to keep busy with
+  boost::asio::deadline_timer m_timer;  // replace this busy work thing with: http://think-async.com/Asio/Recipes
 
   inputrepository_t m_reposInputBuffers;
   linerepository_t m_reposLineBuffers;
@@ -169,7 +168,6 @@ private:
 
   unsigned int m_cntSends;
   unsigned int m_cntBytesTransferred_send;
-  //unsigned int m_cntBytesProcessed;
 
   void ConnectHandler( const boost::system::error_code& error );
   void TimerHandler( const boost::system::error_code& error );
@@ -203,10 +201,8 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   if ( 0 != m_pline->size() ) {
     OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
   }
-  //delete m_pline;
   m_reposLineBuffers.CheckIn( m_pline );
   m_pline = NULL;
-
 
 //  if ( m_asioThread. ) {  // need to find check for done and cleared
 //    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
@@ -221,6 +217,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
     << " on " << m_cntSends << " sends." 
     << std::endl;
   OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
 #endif
 }
 
@@ -237,7 +234,10 @@ void CNetwork<ownerT,charT>::AsioThread( void ) {
 
   m_io.run();  // handles async timer and async socket 
 #ifdef _DEBUG
-  OutputDebugString( "ASIO thread exited.\n" );
+  std::stringstream ss;
+  ss << "ASIO Thread Exit:  " << typeid( this ).name() << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
 #endif
 }
 

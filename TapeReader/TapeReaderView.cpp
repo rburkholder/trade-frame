@@ -77,9 +77,9 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
   UpdateUIState();
 
   typedef std::string::value_type char_t ;
-  int l = m_edtSymbol.GetWindowTextLengthA();
-  char_t* pText = new char_t[ l + 1 ];
-  m_edtSymbol.GetWindowText( (LPTSTR) pText, l + 1 ); 
+  int len = m_edtSymbol.GetWindowTextLengthA();
+  char_t* pText = new char_t[ len + 1 ];
+  m_edtSymbol.GetWindowText( (LPTSTR) pText, len + 1 ); 
   m_sSymbol = pText;
   delete[] pText;
 
@@ -204,7 +204,7 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 
   CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
 
-  if ( 'N' == *msg->FieldBegin( CIQFUpdateMessage::QPLast ) ) {
+  if ( 'N' == *msg->FieldBegin( CIQFUpdateMessage::QPLast ) ) {  // field has "Not Found" in numeric field
     CWindow::MessageBoxA( "Symbol Not Found", "Error", MB_OK );
     m_stateUI = UI_SYMBOLENTRY;
     UpdateUIState();

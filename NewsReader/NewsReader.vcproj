@@ -2,10 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibIQFeed"
-	ProjectGUID="{23192E89-C17F-4C84-B35C-3677927D64A6}"
-	RootNamespace="LibIQFeed"
-	Keyword="Win32Proj"
+	Name="NewsReader"
+	ProjectGUID="{081EBC65-07A2-4298-9D6F-E32FEF3A8EBD}"
+	RootNamespace="NewsReader"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -20,7 +19,8 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="0"
 			>
 			<Tool
@@ -37,17 +37,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="false"
+				TargetEnvironment="1"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/NewsReader.tlb"
+				HeaderFileName="NewsReader.h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="NewsReader_i.c"
+				ProxyFileName="NewsReader_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\;..\lib;..\lib\wtl"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				BrowseInformation="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -56,16 +64,26 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				IgnoreAllDefaultLibraries="true"
+				Name="VCLinkerTool"
+				AdditionalDependencies="$(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_40.lib"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -77,16 +95,19 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="1"
-			WholeProgramOptimization="1"
+			OutputDirectory="Release"
+			IntermediateDirectory="Release"
+			ConfigurationType="1"
+			ATLMinimizesCRunTimeLibraryUsage="true"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -102,32 +123,48 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="false"
+				TargetEnvironment="1"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/NewsReader.tlb"
+				HeaderFileName="NewsReader.h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="NewsReader_i.c"
+				ProxyFileName="NewsReader_p.c"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
+				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -139,6 +176,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -148,15 +188,22 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
-				RelativePath=".\IQFeed.cpp"
+				RelativePath=".\AboutDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedMessages.cpp"
+				RelativePath=".\MainFrm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NewsReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NewsReaderView.cpp"
 				>
 			</File>
 			<File
@@ -182,44 +229,46 @@
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File
-				RelativePath=".\IQ32.H"
+				RelativePath=".\AboutDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeed.h"
+				RelativePath=".\MainFrm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedMessages.h"
+				RelativePath=".\NewsReaderView.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedNews.h"
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\targetver.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest"
 			>
+			<File
+				RelativePath=".\res\NewsReader.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\NewsReader.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\res\toolbar.bmp"
+				>
+			</File>
 		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

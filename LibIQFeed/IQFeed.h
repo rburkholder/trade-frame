@@ -102,17 +102,25 @@ public:
     PostThreadMessage( WM_IQFEED_DONE_SYSTEM, wParam, lParam );
   }
 
+  void SetNewsOn( void );
+  void SetNewsOff( void );
+
 protected:
+
+  enum enumNewsState {
+    NEWSISON,
+    NEWSISOFF
+  } m_stateNews;
 
   enum enumPrivateMessageTypes {  // messages from CNetwork
     // called by CNetwork
-    WM_IQFEED_CONN_INITIALIZED = WM_USER + 1,
-    WM_IQFEED_CONN_CLOSED,
-    WM_IQFEED_CONN_CONNECTED,
-    WM_IQFEED_CONN_DISCONNECTED,
-    WM_IQFEED_CONN_PROCESS,
-    WM_IQFEED_CONN_SENDDONE,
-    WM_IQFEED_CONN_ERROR, 
+    WM_CONN_INITIALIZED = WM_USER + 1,
+    WM_CONN_CLOSED,
+    WM_CONN_CONNECTED,
+    WM_CONN_DISCONNECTED,
+    WM_CONN_PROCESS,
+    WM_CONN_SENDDONE,
+    WM_CONN_ERROR, 
     // called when derived methods have finished with message and buffer
     WM_IQFEED_DONE_UPDATE,
     WM_IQFEED_DONE_SUMMARY,
@@ -129,13 +137,13 @@ protected:
   };
 
   BEGIN_MSG_MAP_EX(CIQFeed<ownerT>)
-    MESSAGE_HANDLER( WM_IQFEED_CONN_INITIALIZED, OnConnInitialized );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_CLOSED, OnConnClosed );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_CONNECTED, OnConnConnected );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_DISCONNECTED, OnConnDisconnected );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_PROCESS, OnConnProcess );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_SENDDONE, OnConnSendDone );
-    MESSAGE_HANDLER( WM_IQFEED_CONN_ERROR, OnConnError );
+    MESSAGE_HANDLER( WM_CONN_INITIALIZED, OnConnInitialized );
+    MESSAGE_HANDLER( WM_CONN_CLOSED, OnConnClosed );
+    MESSAGE_HANDLER( WM_CONN_CONNECTED, OnConnConnected );
+    MESSAGE_HANDLER( WM_CONN_DISCONNECTED, OnConnDisconnected );
+    MESSAGE_HANDLER( WM_CONN_PROCESS, OnConnProcess );
+    MESSAGE_HANDLER( WM_CONN_SENDDONE, OnConnSendDone );
+    MESSAGE_HANDLER( WM_CONN_ERROR, OnConnError );
 
     MESSAGE_HANDLER( WM_IQFEED_DONE_UPDATE, OnDoneUpdate );
     MESSAGE_HANDLER( WM_IQFEED_DONE_SUMMARY, OnDoneSummary );
@@ -175,21 +183,18 @@ protected:
   BOOL InitializeThread( void );
   void CleanupThread( DWORD );
 
-  typename CNetwork<typename CIQFeed<ownerT> >::structMessages m_NetworkMessages;
-
   void PostMessage( UINT id, WPARAM wparam = NULL, LPARAM lparam = NULL ) {
     PostThreadMessage( id, wparam, lparam );
   }
 private:
 
   enum enumConnectionState {
-    CS_INITIALIZING,
-    CS_DISCONNECTED,
-    CS_CONNECTING,
-    CS_CONNECTED,
-    CS_DISCONNECTING
-  };
-  enumConnectionState m_stateConnection;
+    CS_QUIESCENT,  // no worker thread
+    CS_DISCONNECTED,  // no connection created
+    CS_CONNECTING,  // new connection, waiting for networkinitialization
+    CS_CONNECTED,  // connected and ready for operation
+    CS_DISCONNECTING  // initiated disconnect
+  } m_stateConnection;
 
   structMessageDestinations m_structMessageDestinations;
 
@@ -197,6 +202,7 @@ private:
   typename CNetwork<CIQFeed<ownerT> >* m_pconnIQFeed;
   typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
   typename CNetwork<CIQFeed<ownerT> >::linerepository_t m_sendbuffers;
+  typename CNetwork<CIQFeed<ownerT> >::structMessages m_NetworkMessages;
 
   typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
   typename CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
@@ -209,13 +215,14 @@ private:
 
 template <class ownerT>
 CIQFeed<ownerT>::CIQFeed(CAppModule* pModule, const structMessageDestinations& MessageDestinations ) 
-: CGuiThreadImpl<CIQFeed<ownerT> >( pModule ), m_pModule( pModule ),
+: m_pModule( pModule ),
   m_structMessageDestinations( MessageDestinations ),
   m_connParameters( "127.0.0.1", 5009 ),
-  m_stateConnection( CS_INITIALIZING ),
+  m_stateConnection( CS_QUIESCENT ), m_stateNews( NEWSISOFF ),
   m_NetworkMessages( this,
-    WM_IQFEED_CONN_INITIALIZED, WM_IQFEED_CONN_CLOSED, WM_IQFEED_CONN_CONNECTED,
-    WM_IQFEED_CONN_DISCONNECTED, WM_IQFEED_CONN_PROCESS, WM_IQFEED_CONN_SENDDONE, WM_IQFEED_CONN_ERROR )
+    WM_CONN_INITIALIZED, WM_CONN_CLOSED, WM_CONN_CONNECTED,
+    WM_CONN_DISCONNECTED, WM_CONN_PROCESS, WM_CONN_SENDDONE, WM_CONN_ERROR ),
+  CGuiThreadImpl<CIQFeed<ownerT> >( pModule )
 {
 }
 
@@ -223,10 +230,6 @@ template <class ownerT>
 CIQFeed<ownerT>::~CIQFeed(void) {
   assert( CS_CONNECTED != m_stateConnection );
   PostThreadMessage( WM_IQFEED_PRE_QUIT );
-//  PostQuitMessage();
-//  if ( m_stateConnection != CS_DISCONNECTED ) {
-//      if ( NULL != m_pconnIQFeed ) m_pconnIQFeed->Join();
-//  }
   Join();
 }
 
@@ -255,7 +258,7 @@ LRESULT CIQFeed<ownerT>::OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
 
 template <class ownerT>
 void CIQFeed<ownerT>::CleanupThread( DWORD dw ) {
-
+  m_stateConnection = CS_QUIESCENT;
 }
 
 template <class ownerT>
@@ -266,6 +269,18 @@ void CIQFeed<ownerT>::Connect( void ) { // post a local message, register needs 
   }
   else {
     throw std::logic_error( "CIQFeed::Connect not in disconnected state" );
+  }
+}
+
+template <class ownerT>
+void CIQFeed<ownerT>::Disconnect( void ) {  
+  if ( CS_CONNECTED == m_stateConnection ) {
+    m_stateConnection = CS_DISCONNECTING;
+    PostThreadMessage( WM_IQFEED_METHOD_DISCONNECT );
+
+  }
+  else {
+    throw std::logic_error( "CIQFeed::Disconnect not in connected state" );
   }
 }
 
@@ -287,14 +302,22 @@ void CIQFeed<ownerT>::Send( const std::string& send, enumSend eSend ) {
 }
 
 template <class ownerT>
-void CIQFeed<ownerT>::Disconnect( void ) {  
-  if ( CS_CONNECTED == m_stateConnection ) {
-    m_stateConnection = CS_DISCONNECTING;
-    PostThreadMessage( WM_IQFEED_METHOD_DISCONNECT );
-
+void CIQFeed<ownerT>::SetNewsOn( void ) {
+  if ( NEWSISOFF == m_stateNews ) {
+    m_stateNews = NEWSISON;
+    std::stringstream ss;
+    ss << "S,NEWSON" << std::endl;
+    Send( ss.str(), SEND_AND_NO_FORWARD );
   }
-  else {
-    throw std::logic_error( "CIQFeed::Disconnect not in connected state" );
+}
+
+template <class ownerT>
+void CIQFeed<ownerT>::SetNewsOff( void ) {
+  if ( NEWSISON == m_stateNews ) {
+    m_stateNews = NEWSISOFF;
+    std::stringstream ss;
+    ss << "S,NEWSOFF" << std::endl;
+    Send( ss.str(), SEND_AND_NO_FORWARD );
   }
 }
 
@@ -414,7 +437,7 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         }
         else {
           BOOL bHandled;
-          OnDoneSummary( m_structMessageDestinations.msgMessageUpdate, 
+          OnDoneSummary( m_structMessageDestinations.msgMessageSummary, 
             wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
         }
       }
@@ -430,7 +453,7 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         }
         else {
           BOOL bHandled;
-          OnDoneNews( m_structMessageDestinations.msgMessageUpdate, 
+          OnDoneNews( m_structMessageDestinations.msgMessageNews, 
             wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
         }
       }
@@ -446,7 +469,7 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         }
         else {
           BOOL bHandled;
-          OnDoneFundamental( m_structMessageDestinations.msgMessageUpdate, 
+          OnDoneFundamental( m_structMessageDestinations.msgMessageFundamental, 
             wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
         }
       }
@@ -462,7 +485,7 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         }
         else {
           BOOL bHandled;
-          OnDoneTime( m_structMessageDestinations.msgMessageUpdate, 
+          OnDoneTime( m_structMessageDestinations.msgMessageTime, 
             wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
         }
       }
@@ -474,9 +497,6 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         if ( _T( "KEY" ) == msg->Field( 2 ) ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
-          Send( ss.str(), SEND_AND_NO_FORWARD );
-          ss.str( "" );
-          ss << "S,NEWSON" << std::endl;
           Send( ss.str(), SEND_AND_NO_FORWARD );
         }
         if ( _T( "CUST" ) == msg->Field( 2 ) ) {
@@ -492,7 +512,7 @@ LRESULT CIQFeed<ownerT>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHand
         }
         else {
           BOOL bHandled;
-          OnDoneSystem( m_structMessageDestinations.msgMessageUpdate, 
+          OnDoneSystem( m_structMessageDestinations.msgMessageSystem, 
             wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
         }
       }

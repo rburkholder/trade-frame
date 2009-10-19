@@ -1,0 +1,1 @@
+// NewsReader.h

@@ -11,21 +11,19 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// TapeReaderView.h : interface of the CTapeReaderView class
+// NewsReaderView.h : interface of the CNewsReaderView class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <string>
-
 #include "LibIQFeed/IQFeed.h"
 
-class CTapeReaderView : public CDialogImpl<CTapeReaderView>,
-                        public CDialogResize<CTapeReaderView>
+class CNewsReaderView : public CDialogImpl<CNewsReaderView>,
+                        public CDialogResize<CNewsReaderView>
 {
 public:
-	enum { IDD = IDD_TAPEREADER_FORM };
+	enum { IDD = IDD_NEWSREADER_FORM };
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -36,15 +34,22 @@ public:
 //    * DLSZ_MOVE_Y: Move the control vertically as the dialog resizes vertically.
 //    * DLSZ_REPAINT: Invalidate the control after every move/resize so it repaints every time.
 
-  BEGIN_DLGRESIZE_MAP(CTapeReaderView)
-    DLGRESIZE_CONTROL( IDC_EDTSYMBOL, DLSZ_SIZE_X )
-    DLGRESIZE_CONTROL( IDC_BTNSTART, DLSZ_MOVE_X )
-    DLGRESIZE_CONTROL( IDC_BTNSTOP, DLSZ_MOVE_X )
-    DLGRESIZE_CONTROL( IDC_LISTTAPE, DLSZ_SIZE_X | DLSZ_SIZE_Y )
+  BEGIN_DLGRESIZE_MAP(CNewsReaderView)
+//    DLGRESIZE_CONTROL( IDC_TREESOURCES, DLSZ_SIZE_X )
+    DLGRESIZE_CONTROL( IDC_LVHEADLINES, DLSZ_SIZE_X )
+    DLGRESIZE_CONTROL( IDC_EDITSTORY, DLSZ_SIZE_X | DLSZ_SIZE_Y )
   END_DLGRESIZE_MAP()
 
-  CTapeReaderView( void );
-  ~CTapeReaderView( void );
+// Handler prototypes (uncomment arguments if needed):
+//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
+
+  //HWND Create(HWND hWndParent, RECT&, LPARAM dwInitParam = NULL);
+  HWND Create(HWND hWndParent, LPARAM dwInitParam = NULL);
+
+  CNewsReaderView( void );
+  ~CNewsReaderView( void );
 protected:
 
   enum enumMessages {
@@ -59,22 +64,14 @@ protected:
     WM_IQFEED_NEWS,
     WM_IQFEED_FUNDAMENTAL,
     WM_IQFEED_TIME,
-    WM_IQFEED_SYSTEM
+    WM_IQFEED_SYSTEM, 
+
+    WM_IQFEED_NEWS_DONE
   };
 
-  enum enumUIEnableState {
-    UI_STARTING,
-    UI_NOSYMBOL,
-    UI_SYMBOLENTRY,
-    UI_STARTED
-  } m_stateUI;
-
-  void UpdateUIState( void );
-
-	BEGIN_MSG_MAP_EX(CTapeReaderView)
-    MESSAGE_HANDLER( WM_IQFEED_UPDATE, OnIQFeedUpdate )
-    MESSAGE_HANDLER( WM_IQFEED_SUMMARY, OnIQFeedSummary )
-    MESSAGE_HANDLER( WM_IQFEED_FUNDAMENTAL, OnIQFeedFundamental )
+  BEGIN_MSG_MAP_EX(CNewsReaderView)
+    MESSAGE_HANDLER( WM_IQFEED_NEWS, OnIQFeedNews )  // goes to external handler
+    MESSAGE_HANDLER( WM_IQFEED_NEWS_DONE, OnIQFeedNewsDone )  // message returned from external handler
 
     MESSAGE_HANDLER( WM_IQFEED_INITIALIZED, OnIQFeedInitialized )
     MESSAGE_HANDLER( WM_IQFEED_CONNECTED, OnIQFeedConnected )
@@ -82,31 +79,11 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
     MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedError )
 
-    COMMAND_HANDLER(IDC_EDTSYMBOL, EN_CHANGE, OnEnChangeEdtsymbol)
-    COMMAND_HANDLER(IDC_BTNSTART, BN_CLICKED, OnBnClickedBtnstart)
-    COMMAND_HANDLER(IDC_BTNSTOP, BN_CLICKED, OnBnClickedBtnstop)
-    NOTIFY_HANDLER(IDC_LISTTAPE, LVN_ITEMCHANGED, OnLvnItemchangedListtape)
-
+//    MSG_WM_MOVE(OnMove)
+//    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
     MSG_WM_DESTROY(OnDestroy)
-    CHAIN_MSG_MAP(CDialogResize<CTapeReaderView>)
+    CHAIN_MSG_MAP(CDialogResize<CNewsReaderView>)
 	END_MSG_MAP()
-
-  CEdit m_edtSymbol;
-  CButton m_btnStart;
-  CButton m_btnStop;
-  CListViewCtrl m_lvTape; // sub class this later and turn into own class for reuse
-
-
-// Handler prototypes (uncomment arguments if needed):
-//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
-  LRESULT OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/);
-
-  HWND Create(HWND hWndParent, LPARAM dwInitParam = NULL);
 
   LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
@@ -114,18 +91,17 @@ protected:
   LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
 
-  LRESULT OnIQFeedUpdate( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedSummary( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedFundamental( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedNews( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedNewsDone( UINT, WPARAM, LPARAM, BOOL& );
 
   void OnDestroy();
+  void OnSize(UINT nType, CSize size);
+  void OnMove(CPoint ptPos);
 
 private:
-  typedef CDialogImpl<CTapeReaderView> CThisClass;
+  typedef CDialogImpl<CNewsReaderView> CThisClass;
 
-  CIQFeed<CTapeReaderView>::structMessageDestinations m_Destinations;
-  CIQFeed<CTapeReaderView>* m_pIQFeed;
-
-  std::string m_sSymbol;
+  CIQFeed<CNewsReaderView>::structMessageDestinations m_Destinations;
+  CIQFeed<CNewsReaderView>* m_pIQFeed;
 
 };

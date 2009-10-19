@@ -11,8 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//
-// TapeReader.cpp : main source file for TapeReader.exe
+// NewsReader.cpp : main source file for NewsReader.exe
 //
 
 #include "stdafx.h"
@@ -27,13 +26,13 @@
 
 #include "resource.h"
 
-#include "TapeReaderView.h"
+#include "NewsReaderView.h"
 #include "aboutdlg.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
 
-class CTapeReaderThreadManager
+class CNewsReaderThreadManager
 {
 public:
 	// thread init param
@@ -58,12 +57,11 @@ public:
 			return 0;
 		}
 
-
     // Custom Begin
 
     CRect rect;
     wndFrame.GetWindowRect( &rect );
-    wndFrame.MoveWindow( rect.left, rect.top, 400, 600 );
+    wndFrame.MoveWindow( rect.left, rect.top, 550, 700 );
 
     // Custom End
 
@@ -81,7 +79,7 @@ public:
 	DWORD m_dwCount;
 	HANDLE m_arrThreadHandles[MAXIMUM_WAIT_OBJECTS - 1];
 
-	CTapeReaderThreadManager() : m_dwCount(0)
+	CNewsReaderThreadManager() : m_dwCount(0)
 	{ }
 
 // Operations
@@ -89,7 +87,7 @@ public:
 	{
 		if(m_dwCount == (MAXIMUM_WAIT_OBJECTS - 1))
 		{
-			::MessageBox(NULL, _T("ERROR: Cannot create ANY MORE threads!!!"), _T("TapeReader"), MB_OK);
+			::MessageBox(NULL, _T("ERROR: Cannot create ANY MORE threads!!!"), _T("NewsReader"), MB_OK);
 			return 0;
 		}
 
@@ -100,7 +98,7 @@ public:
 		HANDLE hThread = ::CreateThread(NULL, 0, RunThread, pData, 0, &dwThreadID);
 		if(hThread == NULL)
 		{
-			::MessageBox(NULL, _T("ERROR: Cannot create thread!!!"), _T("TapeReader"), MB_OK);
+			::MessageBox(NULL, _T("ERROR: Cannot create thread!!!"), _T("NewsReader"), MB_OK);
 			return 0;
 		}
 
@@ -133,7 +131,7 @@ public:
 
 			if(dwRet == 0xFFFFFFFF)
 			{
-				::MessageBox(NULL, _T("ERROR: Wait for multiple objects failed!!!"), _T("TapeReader"), MB_OK);
+				::MessageBox(NULL, _T("ERROR: Wait for multiple objects failed!!!"), _T("NewsReader"), MB_OK);
 			}
 			else if(dwRet >= WAIT_OBJECT_0 && dwRet <= (WAIT_OBJECT_0 + m_dwCount - 1))
 			{
@@ -176,7 +174,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	int nRet = 0;
 	// BLOCK: Run application
 	{
-		CTapeReaderThreadManager mgr;
+		CNewsReaderThreadManager mgr;
 		nRet = mgr.Run(lpstrCmdLine, nCmdShow);
 	}
 

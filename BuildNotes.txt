@@ -1,3 +1,16 @@
+2009/10/18
+
+*.rc:
+
+#include "atlres.h"
+#include "..\lib\wtl\atlres.h"
+
+"#include ""atlres.h""\r\n"
+"#include ""..\\lib\\wtl\\atlres.h""\r\n"
+
+project include directories:
+..\;..\lib;..\lib\wtl
+
 2009/09/07
 
 Requires Boost::Log
