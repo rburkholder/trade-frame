@@ -25,13 +25,17 @@
 #include <crtdbg.h>
 // custom off
 
+#include <LibCommon/Colour.h>
+
 #include "TapeReaderView.h"
+
 
 CTapeReaderView::CTapeReaderView( void ) 
 : CDialogImpl<CTapeReaderView>(), CDialogResize<CTapeReaderView>(),
   m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
   WM_IQFEED_UPDATE, WM_IQFEED_SUMMARY, 0, WM_IQFEED_FUNDAMENTAL, 0, 0 ),
-  m_stateUI( UI_STARTING )
+  m_stateUI( UI_STARTING ),
+  m_bRunning( false )
 {
 }
 
@@ -55,10 +59,8 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   m_btnStop = GetDlgItem( IDC_BTNSTOP );
   m_lvTape = GetDlgItem( IDC_LISTTAPE );
 
-  int i1 = m_lvTape.AddColumn( "Time", 0 );
-  int i2 = m_lvTape.AddColumn( "BATE", 1 );
-  int i3 = m_lvTape.AddColumn( "Size", 2 );
-  int i4 = m_lvTape.AddColumn( "Price", 3 );
+  int ix = 0;
+  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
   m_pIQFeed = new CIQFeed<CTapeReaderView>( &_Module, m_Destinations );
 
@@ -170,6 +172,8 @@ LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandl
 
 LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
+  m_edtSymbol.SetFocus();
+
   m_stateUI = UI_NOSYMBOL;
   UpdateUIState();
 
@@ -218,37 +222,94 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
         msg->FieldBegin( CIQFUpdateMessage::QPLastTradeTime ),
         msg->FieldEnd( CIQFUpdateMessage::QPLastTradeTime ) );
       if ( 9 == sLastTradeTime.length() ) {
-        std::string sBate;
-        std::string sSize;
-        std::string sPrice;
-        switch ( sLastTradeTime[ 8 ] ) {
-          case 't':
-            sBate = "T";
-            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPLast ), msg->FieldEnd( CIQFUpdateMessage::QPLast ) );
-            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
-            break;
-          case 'T':
-            sBate = "E";
-            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( CIQFUpdateMessage::QPExtTradeLast ) );
-            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
-            break;
-          case 'b':
-            sBate = "B";
-            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPBid ), msg->FieldEnd( CIQFUpdateMessage::QPBid ) );
-            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( CIQFUpdateMessage::QPBidSize ) );
-            break;
-          case 'a':
-            sBate = "A";
-            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPAsk ), msg->FieldEnd( CIQFUpdateMessage::QPAsk ) );
-            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( CIQFUpdateMessage::QPAskSize ) );
-            break;
-          case 'o':
-            break;
+        std::string sBid( msg->FieldBegin( CIQFUpdateMessage::QPBid ), msg->FieldEnd( CIQFUpdateMessage::QPBid ) );
+        std::string sBidVol( msg->FieldBegin( CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( CIQFUpdateMessage::QPBidSize ) );
+        std::string sTick( msg->FieldBegin( CIQFUpdateMessage::QPLast ), msg->FieldEnd( CIQFUpdateMessage::QPLast ) );
+        std::string sTickVol( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
+        std::string sAsk( msg->FieldBegin( CIQFUpdateMessage::QPAsk ), msg->FieldEnd( CIQFUpdateMessage::QPAsk ) );
+        std::string sAskVol( msg->FieldBegin( CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( CIQFUpdateMessage::QPAskSize ) );
+//            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( CIQFUpdateMessage::QPExtTradeLast ) );
+//            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
+
+        int cntPerPage = m_lvTape.GetCountPerPage();
+        if ( 0 < cntPerPage ) {
+
+          int ix;
+          while ( cntPerPage <= (ix = m_lvTape.GetItemCount() ) ) {
+            m_lvTape.DeleteItem( ix - 1 );
+          }
+
+          m_lvTape.InsertItem( 0, sLastTradeTime.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_Bid, sBid.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_BidVol, sBidVol.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_Tck, sTick.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_TckVol, sTickVol.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_Ask, sAsk.c_str() );
+          m_lvTape.SetItemText( 0, COLHDR_COL_AskVol, sAskVol.c_str() );
+
+          structRowItems ri;
+          ri.vTime = sLastTradeTime;
+          ri.vBid = msg->Double( CIQFUpdateMessage::QPBid );
+          ri.vBidVol = msg->Integer( CIQFUpdateMessage::QPBidSize );
+          ri.vTick = msg->Double( CIQFUpdateMessage::QPLast );
+          ri.vTickVol = msg->Integer( CIQFUpdateMessage::QPLastVol );
+          ri.vAsk = msg->Double( CIQFUpdateMessage::QPAsk );
+          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
+
+          double dblMid = ( ri.vBid + ri.vAsk ) / 2.0;
+          COLORREF cBack = Colour::Beige;
+
+          if ( m_bRunning ) {
+            if ( 't' == sLastTradeTime[8] ) {  // treat as trade
+              ri.vBate = "Trade";
+              if ( ri.vTick > dblMid ) {
+                cBack = Colour::LightGreen;
+                ri.vBate = "Buy";
+              }
+              else {
+                cBack = Colour::LightPink;
+                ri.vBate = "Sell";
+              }
+              if ( ri.vTick > m_dblMaxTick ) {
+                cBack = Colour::Blue;
+              }
+              if ( ri.vTick < m_dblMinTick ) {
+                cBack = Colour::Orange;
+              }
+            }
+            else {  // process bid/ask stuff
+              if ( ( ri.vBid > m_prvValues.vBid ) && ( ri.vAsk < m_prvValues.vAsk ) ) {
+                // new inside bid and new inside ask
+                cBack = Colour::Gray;
+                ri.vBate = "Best Bid/Ask";
+              }
+              else {
+                if ( ( ri.vBid > m_prvValues.vBid ) || ( ri.vAsk < m_prvValues.vAsk ) ) {
+                  if ( ri.vBid > m_prvValues.vBid ) {
+                    cBack = Colour::Yellow;
+                    ri.vBate = "Best Bid";
+                  }
+                  else {
+                    cBack = Colour::White;
+                    ri.vBate = "Best Ask";
+                  }
+                }
+                else {  // regular bid or regular ask change
+                }
+              }
+            }
+            m_lvTape.SetItemText( 0, COLHDR_COL_BATE, ri.vBate.c_str() );
+          }
+          else {
+            m_bRunning = true;
+            m_dblMinTick = m_dblMaxTick = ri.vTick;
+          }
+          m_prvValues = ri;
+          m_dblMinTick = std::min<double>( m_dblMinTick, ri.vTick );
+          m_dblMaxTick = std::max<double>( m_dblMaxTick, ri.vTick );
+
+          m_prvValues = ri;
         }
-        m_lvTape.InsertItem( 0, sLastTradeTime.c_str() );
-        m_lvTape.SetItemText( 0, 1, sBate.c_str() );
-        m_lvTape.SetItemText( 0, 2, sSize.c_str() );
-        m_lvTape.SetItemText( 0, 3, sPrice.c_str() );
       }
     }
   }

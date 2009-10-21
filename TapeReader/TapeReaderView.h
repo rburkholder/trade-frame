@@ -21,6 +21,51 @@
 
 #include "LibIQFeed/IQFeed.h"
 
+#include "boost/preprocessor/tuple/elem.hpp"
+#include "boost/preprocessor/array/elem.hpp"
+#include "boost/preprocessor/array/size.hpp"
+#include "boost/preprocessor/punctuation/comma_if.hpp"
+#include "boost/preprocessor/repetition/repeat.hpp"
+
+#define COLHDR_ARRAY_ELEMENT_SIZE 7
+#define COLHDR_ARRAY_ROW_COUNT 8
+#define COLHDR_ARRAY \
+  (COLHDR_ARRAY_ROW_COUNT,  \
+    ( /* Col 0,                  1,        2,            3,   4,           5,                6 */ \
+      (COLHDR_COL_Time  , "Time", LVCFMT_LEFT  , 60, std::string, vTime,    0  ), \
+      (COLHDR_COL_BATE  , "BATE", LVCFMT_CENTER, 60, std::string, vBate,    "" ), \
+      (COLHDR_COL_Bid   , "Bid",  LVCFMT_RIGHT , 57, double,      vBid,     0.0), \
+      (COLHDR_COL_BidVol, "Vol",  LVCFMT_LEFT  , 38, int,         vBidVol,  0  ), \
+      (COLHDR_COL_Tck   , "Tick", LVCFMT_RIGHT , 57, double,      vTick,    0.0), \
+      (COLHDR_COL_TckVol, "Vol",  LVCFMT_LEFT  , 38, int,         vTickVol, 0  ), \
+      (COLHDR_COL_Ask   , "Ask",  LVCFMT_RIGHT , 57, double,      vAsk,     0.0), \
+      (COLHDR_COL_AskVol, "Vol",  LVCFMT_LEFT  , 38, int,         vAskVol,  0  )  \
+      ) \
+    ) \
+  /**/
+
+#define COLHDR_EXTRACT_COL_DETAILS(z, n, m, text) \
+  BOOST_PP_TUPLE_ELEM( \
+    COLHDR_ARRAY_ELEMENT_SIZE, m, \
+      BOOST_PP_ARRAY_ELEM( n, COLHDR_ARRAY ) \
+    )
+
+#define COLHDR_EXTRACT_ENUM_LIST(z, n, text) \
+  BOOST_PP_COMMA_IF(n) \
+  COLHDR_EXTRACT_COL_DETAILS( z, n, 0, text )
+
+#define COLHDR_EMIT_InsertColumn( z, n, VAR ) \
+  m_lvTape.InsertColumn( VAR++, \
+    _T(COLHDR_EXTRACT_COL_DETAILS(z, n, 1, ~)), \
+    COLHDR_EXTRACT_COL_DETAILS(z, n, 2, ~), \
+    COLHDR_EXTRACT_COL_DETAILS(z, n, 3, ~) \
+    );
+
+#define COLHDR_EMIT_DefineVars( z, n, text ) \
+  COLHDR_EXTRACT_COL_DETAILS(z, n, 4, ~) \
+  COLHDR_EXTRACT_COL_DETAILS(z, n, 5, ~)\
+  ;
+
 class CTapeReaderView : public CDialogImpl<CTapeReaderView>,
                         public CDialogResize<CTapeReaderView>
 {
@@ -68,6 +113,19 @@ protected:
     UI_SYMBOLENTRY,
     UI_STARTED
   } m_stateUI;
+
+  enum enumColHdrCol {
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EXTRACT_ENUM_LIST, ~ )
+  };
+  // define variables to be viewed in the row
+  struct structRowItems {
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_DefineVars, ~ )
+  } m_prvValues;
+
+  bool m_bRunning; // need to store one row item before start of comparisons
+  double m_dblMinTick;
+  double m_dblMaxTick;
+
 
   void UpdateUIState( void );
 

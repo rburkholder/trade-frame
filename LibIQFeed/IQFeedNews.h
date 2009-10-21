@@ -43,7 +43,6 @@ protected:
     // called by derived method calls and cross thread boundary
     WM_METHOD_CONNECT,
     WM_METHOD_DISCONNECT,
-    WM_METHOD_SEND,
     // get everything closed down prior to PostQuitMessage
     WM_PRE_QUIT
   };
