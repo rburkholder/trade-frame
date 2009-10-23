@@ -25,8 +25,6 @@
 #include <crtdbg.h>
 // custom off
 
-#include <LibCommon/Colour.h>
-
 #include "TapeReaderView.h"
 
 
@@ -59,6 +57,8 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   m_btnStop = GetDlgItem( IDC_BTNSTOP );
   m_lvTape = GetDlgItem( IDC_LISTTAPE );
 
+  m_edtSymbol.SetFocus(); 
+
   int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
@@ -78,6 +78,9 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
   m_stateUI = UI_STARTING;
   UpdateUIState();
 
+  m_lvTape.DeleteAllItems();
+
+  // determine symbol to process (should drop white space front and back)
   typedef std::string::value_type char_t ;
   int len = m_edtSymbol.GetWindowTextLengthA();
   char_t* pText = new char_t[ len + 1 ];
@@ -85,6 +88,7 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
   m_sSymbol = pText;
   delete[] pText;
 
+  // turn on watch
   std::string sSend = _T( "w" );
   sSend += m_sSymbol;
   sSend += _T( "\n" );
@@ -250,17 +254,17 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
           structRowItems ri;
           ri.vTime = sLastTradeTime;
           ri.vBid = msg->Double( CIQFUpdateMessage::QPBid );
-          ri.vBidVol = msg->Integer( CIQFUpdateMessage::QPBidSize );
+//          ri.vBidVol = msg->Integer( CIQFUpdateMessage::QPBidSize );
           ri.vTick = msg->Double( CIQFUpdateMessage::QPLast );
-          ri.vTickVol = msg->Integer( CIQFUpdateMessage::QPLastVol );
+//          ri.vTickVol = msg->Integer( CIQFUpdateMessage::QPLastVol );
           ri.vAsk = msg->Double( CIQFUpdateMessage::QPAsk );
-          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
-
-          double dblMid = ( ri.vBid + ri.vAsk ) / 2.0;
+//          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
+          
           COLORREF cBack = Colour::Beige;
 
           if ( m_bRunning ) {
             if ( 't' == sLastTradeTime[8] ) {  // treat as trade
+              double dblMid = ( ri.vBid + ri.vAsk ) / 2.0;
               ri.vBate = "Trade";
               if ( ri.vTick > dblMid ) {
                 cBack = Colour::LightGreen;
@@ -295,6 +299,14 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
                   }
                 }
                 else {  // regular bid or regular ask change
+                  if ( 'b' == sLastTradeTime[8] ) {
+                    ri.vBate = "Bid";
+                    cBack = Colour::LightYellow;
+                  }
+                  if ( 'a' == sLastTradeTime[8] ) {
+                    ri.vBate = "Ask";
+                    cBack = Colour::Snow;
+                  }
                 }
               }
             }

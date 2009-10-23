@@ -16,6 +16,7 @@
 #include <queue>
 #include <sstream>
 #include <typeinfo.h>
+#include <cassert>
 //using namespace std;
 
 #include <boost/thread/mutex.hpp>
@@ -76,6 +77,8 @@ private:
 #ifdef _DEBUG
   typedef unsigned int stats_pod_t;
   stats_pod_t cntCheckins, cntCheckouts, cntCreated, cntDestroyed, maxQsize;
+  bool m_bCheckingOut;
+  bool m_bCheckingIn;
 #endif
 };
 
@@ -88,7 +91,8 @@ private:
 
 template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void) 
 #ifdef _DEBUG
-: cntCheckins( 0 ), cntCheckouts( 0 ), cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 )
+: cntCheckins( 0 ), cntCheckouts( 0 ), cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 ),
+  m_bCheckingOut( false ), m_bCheckingIn( false )
 #endif
 {
 }
@@ -125,16 +129,25 @@ template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
 
 template<class TBuffer> void CBufferRepository<TBuffer>::CheckIn(TBuffer* pBuffer) {
 //  boost::mutex::scoped_lock lock(m_mutex);
+#ifdef _DEBUG
+  assert( !m_bCheckingIn && !m_bCheckingOut );
+  m_bCheckingIn = true;
+#endif
   m_qBuffer.push( pBuffer );
 #ifdef _DEBUG
   ++cntCheckins;
   maxQsize = std::max<stats_pod_t>( maxQsize, m_qBuffer.size() );
+  m_bCheckingIn = false;
 #endif
 }
 
 template<class TBuffer> TBuffer* CBufferRepository<TBuffer>::CheckOut() {
   TBuffer* pBuffer;
 //  boost::mutex::scoped_lock lock(m_mutex);
+#ifdef _DEBUG
+  assert( !m_bCheckingIn && !m_bCheckingOut );
+  m_bCheckingOut = true;
+#endif
   if ( m_qBuffer.empty() ) {
     pBuffer = new TBuffer();
 #ifdef _DEBUG
@@ -147,8 +160,15 @@ template<class TBuffer> TBuffer* CBufferRepository<TBuffer>::CheckOut() {
   }
 #ifdef _DEBUG
   ++cntCheckouts;
+  m_bCheckingOut = false;
 #endif
   return pBuffer;
 }
 
  
+// check threading id's between checkin, checkout  (is there overlapping thread?)
+// Unhandled exception at 0x00548d0d in TapeReader.exe: 0xC0000005: Access violation reading location 0x00000014.
+// in 235863, out 235886, created 893 destro 0 max 892 cur 870
+// _DEBUG_ERROR("deque iterator not dereferencable");
+// set flag to test in out?
+// upstream processing isn't keeping up, need to do 1/5 sec screen updates

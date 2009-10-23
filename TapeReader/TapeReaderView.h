@@ -18,14 +18,19 @@
 #pragma once
 
 #include <string>
+#include <deque>
+
+#include <boost/array.hpp>
+
+#include <LibCommon/Colour.h>
 
 #include "LibIQFeed/IQFeed.h"
 
-#include "boost/preprocessor/tuple/elem.hpp"
-#include "boost/preprocessor/array/elem.hpp"
-#include "boost/preprocessor/array/size.hpp"
-#include "boost/preprocessor/punctuation/comma_if.hpp"
-#include "boost/preprocessor/repetition/repeat.hpp"
+#include <boost/preprocessor/tuple/elem.hpp>
+#include <boost/preprocessor/array/elem.hpp>
+#include <boost/preprocessor/array/size.hpp>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
 
 #define COLHDR_ARRAY_ELEMENT_SIZE 7
 #define COLHDR_ARRAY_ROW_COUNT 8
@@ -35,11 +40,11 @@
       (COLHDR_COL_Time  , "Time", LVCFMT_LEFT  , 60, std::string, vTime,    0  ), \
       (COLHDR_COL_BATE  , "BATE", LVCFMT_CENTER, 60, std::string, vBate,    "" ), \
       (COLHDR_COL_Bid   , "Bid",  LVCFMT_RIGHT , 57, double,      vBid,     0.0), \
-      (COLHDR_COL_BidVol, "Vol",  LVCFMT_LEFT  , 38, int,         vBidVol,  0  ), \
+      (COLHDR_COL_BidVol, "Vol",  LVCFMT_RIGHT , 38, int,         vBidVol,  0  ), \
       (COLHDR_COL_Tck   , "Tick", LVCFMT_RIGHT , 57, double,      vTick,    0.0), \
-      (COLHDR_COL_TckVol, "Vol",  LVCFMT_LEFT  , 38, int,         vTickVol, 0  ), \
+      (COLHDR_COL_TckVol, "Vol",  LVCFMT_RIGHT , 38, int,         vTickVol, 0  ), \
       (COLHDR_COL_Ask   , "Ask",  LVCFMT_RIGHT , 57, double,      vAsk,     0.0), \
-      (COLHDR_COL_AskVol, "Vol",  LVCFMT_LEFT  , 38, int,         vAskVol,  0  )  \
+      (COLHDR_COL_AskVol, "Vol",  LVCFMT_RIGHT , 38, int,         vAskVol,  0  )  \
       ) \
     ) \
   /**/
@@ -63,6 +68,11 @@
 
 #define COLHDR_EMIT_DefineVars( z, n, text ) \
   COLHDR_EXTRACT_COL_DETAILS(z, n, 4, ~) \
+  COLHDR_EXTRACT_COL_DETAILS(z, n, 5, ~)\
+  ;
+
+#define COLHDR_EMIT_StringVars( z, n, text ) \
+  std::string \
   COLHDR_EXTRACT_COL_DETAILS(z, n, 5, ~)\
   ;
 
@@ -121,6 +131,13 @@ protected:
   struct structRowItems {
     BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_DefineVars, ~ )
   } m_prvValues;
+
+  struct structRowForDisplay {
+    Colour::enumColour colourRow;
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_StringVars, ~ )
+  };
+
+  typedef std::deque<structRowForDisplay> rowqueue_t;
 
   bool m_bRunning; // need to store one row item before start of comparisons
   double m_dblMinTick;

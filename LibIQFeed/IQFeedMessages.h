@@ -50,12 +50,12 @@ public:
   void Assign( iterator_t& current, iterator_t& end );
 
   // change to return a fielddelimiter_t
-  const std::string &Field( vector_size_type ); // returns reference to a field (will be sNull or sField );
+  const std::string& Field( vector_size_type ); // returns reference to a field (will be sNull or sField );
   double Double( vector_size_type );  // use boost::spirit?
   int Integer( vector_size_type );  // use boost::spirit?
 
-  iterator_t& FieldBegin( vector_size_type );
-  iterator_t& FieldEnd( vector_size_type );
+  iterator_t FieldBegin( vector_size_type );
+  iterator_t FieldEnd( vector_size_type );
 
 protected:
 
@@ -333,7 +333,7 @@ const std::string& CIQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
   if ( fielddelimiter.first == fielddelimiter.second ) return sNull;
-  sField.assign( fielddelimiter.first, fielddelimiter.second );
+  else sField.assign( fielddelimiter.first, fielddelimiter.second );
   return sField;
 }
 
@@ -342,15 +342,18 @@ double CIQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
-  namespace qi = boost::spirit::qi;
-	using namespace boost::phoenix::arg_names;
-
-	using boost::phoenix::ref;
-	//using boost::spirit::qi::_1;
-	using namespace boost::spirit::qi;
-
   double dest = 0;
-	bool b = qi::parse( m_vFieldDelimiters[ fld ].first, m_vFieldDelimiters[ fld ].second, double_[ref(dest)] );
+  fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
+  if ( fielddelimiter.first != fielddelimiter.second ) {
+    namespace qi = boost::spirit::qi;
+	  using namespace boost::phoenix::arg_names;
+
+    using boost::spirit::qi::_1;
+	  using boost::phoenix::ref;
+	  using namespace boost::spirit::qi;
+
+    bool b = qi::parse( fielddelimiter.first, fielddelimiter.second, double_[ref(dest) = _1] );
+  }
 
   return dest;
 }
@@ -360,28 +363,31 @@ int CIQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
-  namespace qi = boost::spirit::qi;
-	using namespace boost::phoenix::arg_names;
-
-	using boost::phoenix::ref;
-	//using boost::spirit::qi::_1;
-	using namespace boost::spirit::qi;
-
   int dest = 0;
-	bool b = qi::parse( m_vFieldDelimiters[ fld ].first, m_vFieldDelimiters[ fld ].second, int_[ref(dest)] );
+  fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
+  if ( fielddelimiter.first != fielddelimiter.second ) {
+    namespace qi = boost::spirit::qi;
+	  using namespace boost::phoenix::arg_names;
+
+    using boost::spirit::qi::_1;
+	  using boost::phoenix::ref;
+	  using namespace boost::spirit::qi;
+
+    bool b = qi::parse( fielddelimiter.first, fielddelimiter.second, int_[ref(dest) = _1] );
+  }
 
   return dest;
 }
 
 template <class T, class charT>
-typename CIQFBaseMessage<T, charT>::iterator_t& CIQFBaseMessage<T, charT>::FieldBegin( vector_size_type fld ) {
+typename CIQFBaseMessage<T, charT>::iterator_t CIQFBaseMessage<T, charT>::FieldBegin( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].first;
 }
 
 template <class T, class charT>
-typename CIQFBaseMessage<T, charT>::iterator_t& CIQFBaseMessage<T, charT>::FieldEnd( vector_size_type fld ) {
+typename CIQFBaseMessage<T, charT>::iterator_t CIQFBaseMessage<T, charT>::FieldEnd( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].second;
