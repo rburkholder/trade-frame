@@ -83,6 +83,8 @@ public:
   void Connect( void );
   void Disconnect( void );
   void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to false
+
+  // used for returning message buffer
   void inline UpdateDone( WPARAM wParam, LPARAM lParam ) {
     PostThreadMessage( WM_IQFEED_DONE_UPDATE, wParam, lParam );
   }
@@ -336,7 +338,13 @@ LRESULT CIQFeed<ownerT>::OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled )
 template <class ownerT>
 LRESULT CIQFeed<ownerT>::OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
 
-  m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_DISCONNECT );
+  if ( m_sendbuffers.Outstanding() ) {  // wait to finish off what ever we were sending
+    Sleep(10);
+    PostThreadMessage( WM_IQFEED_METHOD_DISCONNECT );
+  }
+  else {
+    m_pconnIQFeed->PostThreadMessage( CNetwork<CIQFeed<ownerT> >::WM_NETWORK_DISCONNECT );
+  }
 
   bHandled = true;
   return 1;

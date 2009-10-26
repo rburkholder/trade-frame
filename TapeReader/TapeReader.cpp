@@ -63,7 +63,7 @@ public:
 
     CRect rect;
     wndFrame.GetWindowRect( &rect );
-    wndFrame.MoveWindow( rect.left, rect.top, 400, 600 );
+    wndFrame.MoveWindow( rect.left, rect.top, 425, 600 );
 
     // Custom End
 

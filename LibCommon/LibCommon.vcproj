@@ -186,6 +186,10 @@
 				RelativePath=".\TimeSource.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\WuManber.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -242,6 +246,10 @@
 			</File>
 			<File
 				RelativePath=".\TimeSource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WuManber.h"
 				>
 			</File>
 		</Filter>

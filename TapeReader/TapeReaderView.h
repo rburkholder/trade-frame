@@ -40,11 +40,11 @@
       (COLHDR_COL_Time  , "Time", LVCFMT_LEFT  , 60, std::string, vTime,    0  ), \
       (COLHDR_COL_BATE  , "BATE", LVCFMT_CENTER, 60, std::string, vBate,    "" ), \
       (COLHDR_COL_Bid   , "Bid",  LVCFMT_RIGHT , 57, double,      vBid,     0.0), \
-      (COLHDR_COL_BidVol, "Vol",  LVCFMT_RIGHT , 38, int,         vBidVol,  0  ), \
+      (COLHDR_COL_BidVol, "Vol",  LVCFMT_RIGHT , 36, int,         vBidVol,  0  ), \
       (COLHDR_COL_Tck   , "Tick", LVCFMT_RIGHT , 57, double,      vTick,    0.0), \
-      (COLHDR_COL_TckVol, "Vol",  LVCFMT_RIGHT , 38, int,         vTickVol, 0  ), \
+      (COLHDR_COL_TckVol, "Vol",  LVCFMT_RIGHT , 36, int,         vTickVol, 0  ), \
       (COLHDR_COL_Ask   , "Ask",  LVCFMT_RIGHT , 57, double,      vAsk,     0.0), \
-      (COLHDR_COL_AskVol, "Vol",  LVCFMT_RIGHT , 38, int,         vAskVol,  0  )  \
+      (COLHDR_COL_AskVol, "Vol",  LVCFMT_RIGHT , 36, int,         vAskVol,  0  )  \
       ) \
     ) \
   /**/

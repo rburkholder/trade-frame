@@ -85,6 +85,10 @@ protected:
     CHAIN_MSG_MAP(CDialogResize<CNewsReaderView>)
 	END_MSG_MAP()
 
+  CTreeViewCtrl m_treeSources;
+  CListViewCtrl m_lvHeadlines;
+  CEdit m_edtStory;
+
   LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );

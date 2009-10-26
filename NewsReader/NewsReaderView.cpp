@@ -43,18 +43,17 @@ HWND CNewsReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   h = CThisClass::Create( hWndParent, dwInitParam );
 
   DlgResize_Init( false, true );
-/*
-  m_edtSymbol = GetDlgItem( IDC_EDTSYMBOL );
-  m_btnStart = GetDlgItem( IDC_BTNSTART );
-  m_btnStop = GetDlgItem( IDC_BTNSTOP );
-  m_lvTape = GetDlgItem( IDC_LISTTAPE );
 
-  int i1 = m_lvTape.AddColumn( "Time", 0 );
-  int i2 = m_lvTape.AddColumn( "BATE", 1 );
-  int i3 = m_lvTape.AddColumn( "Size", 2 );
-  int i4 = m_lvTape.AddColumn( "Price", 3 );
-*/
+  m_treeSources = GetDlgItem( IDC_TREESOURCES );
+  m_lvHeadlines = GetDlgItem( IDC_LVHEADLINES );
+  m_edtStory = GetDlgItem( IDC_EDITSTORY );
+
+  int i1 = m_lvHeadlines.AddColumn( "Dist", 0 );
+  int i2 = m_lvHeadlines.AddColumn( "Symbols", 1 );
+  int i3 = m_lvHeadlines.AddColumn( "Headline", 2 );
+
   m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_Destinations );
+
   return h;
 }
 
@@ -110,8 +109,13 @@ LRESULT CNewsReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 }
 
 LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+  // for local interpretation of the header
 
-//  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+
+  m_lvHeadlines.InsertItem( 0, msg->Distributor().c_str() );
+  m_lvHeadlines.SetItemText( 0, 1, msg->SymbolList().c_str() );
+  m_lvHeadlines.SetItemText( 0, 2, msg->Headline().c_str() );
 
   m_pIQFeed->NewsDone( wParam, lParam );
 
@@ -120,8 +124,9 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
 }
 
 LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+  // for when another module has processed the message and is passing it along back
 
-//  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
 
   m_pIQFeed->NewsDone( wParam, lParam );
 

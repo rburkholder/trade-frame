@@ -176,10 +176,10 @@ LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandl
 
 LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-  m_edtSymbol.SetFocus();
-
   m_stateUI = UI_NOSYMBOL;
   UpdateUIState();
+
+  m_edtSymbol.SetFocus();
 
   bHandled = true;
   return 1;

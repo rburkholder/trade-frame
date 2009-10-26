@@ -189,7 +189,7 @@ CNetwork<ownerT,charT>::CNetwork(CAppModule* pModule, const structMessages& mess
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 )
 {
-  m_pline = m_reposLineBuffers.CheckOut();
+  m_pline = m_reposLineBuffers.CheckOutL();
   m_pline->clear();
 }
 
@@ -201,7 +201,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   if ( 0 != m_pline->size() ) {
     OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
   }
-  m_reposLineBuffers.CheckIn( m_pline );
+  m_reposLineBuffers.CheckInL( m_pline );
   m_pline = NULL;
 
 //  if ( m_asioThread. ) {  // need to find check for done and cleared
@@ -329,7 +329,7 @@ void CNetwork<ownerT,charT>::AsyncRead( void ) {
 
   assert( NS_CONNECTED == m_stateNetwork );
 
-  inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOut();
+  inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOutL();
 //  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
 //    pbuffer->reserve( NETWORK_INPUT_BUF_SIZE );
 //  }
@@ -371,7 +371,7 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
         PostMessageToOwner( m_Messages.msgProcess, reinterpret_cast<WPARAM>( m_pline ) );
         ++m_cntLinesProcessed;
         // and allocate another buffer
-        m_pline = m_reposLineBuffers.CheckOut();
+        m_pline = m_reposLineBuffers.CheckOutL();
         m_pline->clear();
       }
       else {
@@ -387,7 +387,7 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
     } // end while
 
   }
-  m_reposInputBuffers.CheckIn( pbuffer );
+  m_reposInputBuffers.CheckInL( pbuffer );
 }
 
 template <class ownerT, class charT>
@@ -442,7 +442,7 @@ template <class ownerT, class charT>
 LRESULT CNetwork<ownerT,charT>::OnProcessed( UINT, WPARAM wparam, LPARAM, BOOL &bHandled ) {
 
   linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( wparam );
-  m_reposLineBuffers.CheckIn( pbuffer );
+  m_reposLineBuffers.CheckInL( pbuffer );
 
   bHandled = true;
   return 1;
