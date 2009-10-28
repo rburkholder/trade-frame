@@ -18,6 +18,7 @@
 #pragma once
 
 #include "LibIQFeed/IQFeed.h"
+#include "LibIQFeed/IQFeedNews.h"
 
 class CNewsReaderView : public CDialogImpl<CNewsReaderView>,
                         public CDialogResize<CNewsReaderView>

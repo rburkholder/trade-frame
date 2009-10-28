@@ -15,23 +15,27 @@
 
 // accepts headlines
 // matches up story text, calculates hashes to reduce redundant stories
-// performs some emotional scanning
+// performs some sentiment analysis
 // handles refresh of 'sources' list
 
-#include <codeproject/thread.h>  // class inbound messages
+//#include <codeproject/thread.h>  // class inbound messages
 
 #include <LibWtlCommon/Network.h>
+#include <LibWtlCommon/NetworkClientSkeleton.h>
 
 #include <LibCommon/ReusableBuffers.h>
 
 template <class ownerT>
-class CIQFeedNews: public CGuiThreadImpl<CIQFeedNews<ownerT> > {
+class CIQFeedNews: public CNetworkClientSkeleton<CIQFeedNews<ownerT> > {
 public:
   CIQFeedNews(CAppModule* pModule);
   ~CIQFeedNews(void );
+
+  void Connect( void );
+  void Disconnect( void );
 protected:
 
-  enumPrivateMessageTypes { // messages from CNetwork
+  enum enumPrivateMessageTypes { // messages from CNetwork
     // called by CNetwork
     WM_CONN_INITIALIZED = WM_USER + 1,
     WM_CONN_CLOSED,
@@ -81,15 +85,6 @@ protected:
 
 private:
 
-  enum enumConnectionState {
-    CS_QUIESCENT,
-    CS_INITIALIZING,
-    CS_DISCONNECTED,
-    CS_CONNECTING,
-    CS_CONNECTED,
-    CS_DISCONNECTING
-  } m_stateConnection;
-
   CAppModule* m_pModule;
 
   typename CNetwork<CIQFeedNews<ownerT> >* m_pconn9100;  // news lookup port
@@ -97,22 +92,22 @@ private:
   typename CNetwork<CIQFeedNews<ownerT> >::linerepository_t m_sendbuffers;
   typename CNetwork<CIQFeedNews<ownerT> >::structMessages m_NetworkMessages;
 
-}
+};
 
 template <class ownerT>
-CIQFeedNews::CIQFeedNews(WTL::CAppModule *pModule) 
+CIQFeedNews<ownerT>::CIQFeedNews(WTL::CAppModule *pModule) 
 : m_pModule( pModule ),
   m_stateConnection( CS_QUIESCENT ),
-  m_connParameters( "127.0.0.1", 9100 ),
   m_NetworkMessages( this,
     WM_CONN_INITIALIZED, WM_CONN_CLOSED, WM_CONN_CONNECTED,
     WM_CONN_DISCONNECTED, WM_CONN_PROCESS, WM_CONN_SENDDONE, WM_CONN_ERROR ),
-  CGuiThreadImpl<CIQFeedNews<ownerT> >( pModule )
+  m_connParameters( "127.0.0.1", 9100 ),
+  CNetworkClientSkeleton<CIQFeedNews<ownerT> >( pModule )
 {
 }
 
 template <class ownerT>
-CIQFeedNews::~CIQFeedNews() {
+CIQFeedNews<ownerT>::~CIQFeedNews() {
   assert( CS_CONNECTED != m_stateConnection );
   PostThreadMessage( WM_PRE_QUIT );
   Join();

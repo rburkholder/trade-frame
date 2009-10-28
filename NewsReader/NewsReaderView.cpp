@@ -110,6 +110,7 @@ LRESULT CNewsReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
 LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
   // for local interpretation of the header
+  // use the iterators for pulling out the strings in order to reduce the number of copies made
 
   CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
 

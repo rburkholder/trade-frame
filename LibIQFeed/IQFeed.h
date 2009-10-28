@@ -20,9 +20,10 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
-#include <codeproject/thread.h>  // class inbound messages
+//#include <codeproject/thread.h>  // class inbound messages
 
 #include <LibWtlCommon/Network.h>
+#include <LibWtlCommon/NetworkClientSkeleton.h>
 
 #include <LibCommon/ReusableBuffers.h>
 
@@ -39,7 +40,7 @@
 void __stdcall IQFeedCallBack( int x, int y );
 
 template <class ownerT>
-class CIQFeed: public CGuiThreadImpl<CIQFeed<ownerT> > {
+class CIQFeed: public CNetworkClientSkeleton<CIQFeed<ownerT> > {
 public:
 
   // pre-initialized message ids for messages delivered to and accepted by external caller
@@ -72,17 +73,8 @@ public:
     };
   };
 
-  enum enumSend {
-    SEND_AND_FORWARD,
-    SEND_AND_NO_FORWARD
-  };
-
   CIQFeed(CAppModule* pModule, const structMessageDestinations&);
   ~CIQFeed(void);
-
-  void Connect( void );
-  void Disconnect( void );
-  void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to false
 
   // used for returning message buffer
   void inline UpdateDone( WPARAM wParam, LPARAM lParam ) {
@@ -176,35 +168,20 @@ protected:
   LRESULT OnDoneTime( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnDoneSystem( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
-  LRESULT OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnMethodSend( UINT, WPARAM, LPARAM, BOOL &bHandled );
-
   LRESULT OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
   BOOL InitializeThread( void );
   void CleanupThread( DWORD );
 
-  void PostMessage( UINT id, WPARAM wparam = NULL, LPARAM lparam = NULL ) {
-    PostThreadMessage( id, wparam, lparam );
-  }
 private:
-
-  enum enumConnectionState {
-    CS_QUIESCENT,  // no worker thread
-    CS_DISCONNECTED,  // no connection created
-    CS_CONNECTING,  // new connection, waiting for networkinitialization
-    CS_CONNECTED,  // connected and ready for operation
-    CS_DISCONNECTING  // initiated disconnect
-  } m_stateConnection;
 
   structMessageDestinations m_structMessageDestinations;
 
   CAppModule* m_pModule;
-  typename CNetwork<CIQFeed<ownerT> >* m_pconnIQFeed;
-  typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
-  typename CNetwork<CIQFeed<ownerT> >::linerepository_t m_sendbuffers;
-  typename CNetwork<CIQFeed<ownerT> >::structMessages m_NetworkMessages;
+  //typename CNetwork<CIQFeed<ownerT> >* m_pconnIQFeed;
+  //typename CNetwork<CIQFeed<ownerT> >::structConnection m_connParameters;
+  //typename CNetwork<CIQFeed<ownerT> >::linerepository_t m_sendbuffers;
+  //typename CNetwork<CIQFeed<ownerT> >::structMessages m_NetworkMessages;
 
   typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
   typename CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
@@ -224,7 +201,7 @@ CIQFeed<ownerT>::CIQFeed(CAppModule* pModule, const structMessageDestinations& M
   m_NetworkMessages( this,
     WM_CONN_INITIALIZED, WM_CONN_CLOSED, WM_CONN_CONNECTED,
     WM_CONN_DISCONNECTED, WM_CONN_PROCESS, WM_CONN_SENDDONE, WM_CONN_ERROR ),
-  CGuiThreadImpl<CIQFeed<ownerT> >( pModule )
+  CNetworkClientSkeleton<CIQFeed<ownerT> >( pModule )
 {
 }
 
@@ -267,7 +244,7 @@ template <class ownerT>
 void CIQFeed<ownerT>::Connect( void ) { // post a local message, register needs to be in other thread
   if ( CS_DISCONNECTED == m_stateConnection ) {
     m_stateConnection = CS_CONNECTING;
-    PostThreadMessage( WM_IQFEED_METHOD_CONNECT );
+    this->PostThreadMessage( WM_IQFEED_METHOD_CONNECT );
   }
   else {
     throw std::logic_error( "CIQFeed::Connect not in disconnected state" );
@@ -276,13 +253,17 @@ void CIQFeed<ownerT>::Connect( void ) { // post a local message, register needs 
 
 template <class ownerT>
 void CIQFeed<ownerT>::Disconnect( void ) {  
-  if ( CS_CONNECTED == m_stateConnection ) {
-    m_stateConnection = CS_DISCONNECTING;
-    PostThreadMessage( WM_IQFEED_METHOD_DISCONNECT );
-
-  }
-  else {
-    throw std::logic_error( "CIQFeed::Disconnect not in connected state" );
+  switch ( m_stateConnection ) {
+    case CS_CONNECTED: 
+      m_stateConnection = CS_DISCONNECTING;
+      PostThreadMessage( WM_IQFEED_METHOD_DISCONNECT );
+      break;
+    case CS_QUIESCENT:
+      // nothing has started so don't do anything
+      // rather we need to send an 'all ok' message somewhere
+      break;
+    default:
+      throw std::logic_error( "CIQFeed::Disconnect not in connected state" );
   }
 }
 
