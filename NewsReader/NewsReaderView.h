@@ -17,8 +17,11 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include "LibIQFeed/IQFeed.h"
-#include "LibIQFeed/IQFeedNews.h"
+#include "LibIQFeed/IQFeedNewsQuery.h"
 
 class CNewsReaderView : public CDialogImpl<CNewsReaderView>,
                         public CDialogResize<CNewsReaderView>
@@ -54,27 +57,27 @@ public:
 protected:
 
   enum enumMessages {
-    WM_IQFEED_INITIALIZED = WM_USER + 1,
-    WM_IQFEED_CONNECTED,
+    WM_IQFEED_CONNECTED = WM_USER + 1,
     WM_IQFEED_SENDDONE,
     WM_IQFEED_DISCONNECTED,
     WM_IQFEED_ERROR, 
 
-    WM_IQFEED_UPDATE,
-    WM_IQFEED_SUMMARY,
     WM_IQFEED_NEWS,
-    WM_IQFEED_FUNDAMENTAL,
-    WM_IQFEED_TIME,
-    WM_IQFEED_SYSTEM, 
 
-    WM_IQFEED_NEWS_DONE
+    WM_IQFEED_NEWS_DONE  // called from derived class, if we need it
   };
 
   BEGIN_MSG_MAP_EX(CNewsReaderView)
     MESSAGE_HANDLER( WM_IQFEED_NEWS, OnIQFeedNews )  // goes to external handler
     MESSAGE_HANDLER( WM_IQFEED_NEWS_DONE, OnIQFeedNewsDone )  // message returned from external handler
 
-    MESSAGE_HANDLER( WM_IQFEED_INITIALIZED, OnIQFeedInitialized )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_GETDISPINFO, OnLVHeadlinesDispInfo )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_ITEMACTIVATE, OnLVHeadlinesItemActivate )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_HOTTRACK, OnLVHeadlinesHotTrack )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, NM_CLICK, OnLVHeadlinesClick )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, NM_HOVER, OnLVHeadlinesHover )
+    NOTIFY_HANDLER( IDC_LVHEADLINES, NM_RCLICK, OnLVHeadlinesRClick )
+
     MESSAGE_HANDLER( WM_IQFEED_CONNECTED, OnIQFeedConnected )
     MESSAGE_HANDLER( WM_IQFEED_DISCONNECTED, OnIQFeedDisconnected )
     MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
@@ -82,6 +85,7 @@ protected:
 
 //    MSG_WM_MOVE(OnMove)
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
+    MSG_WM_INITDIALOG(OnInitDialog)
     MSG_WM_DESTROY(OnDestroy)
     CHAIN_MSG_MAP(CDialogResize<CNewsReaderView>)
 	END_MSG_MAP()
@@ -90,23 +94,42 @@ protected:
   CListViewCtrl m_lvHeadlines;
   CEdit m_edtStory;
 
-  LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedNews( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedNewsDone( UINT, WPARAM, LPARAM, BOOL& );
+
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
 
-  LRESULT OnIQFeedNews( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedNewsDone( UINT, WPARAM, LPARAM, BOOL& );
-
+  BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
   void OnDestroy();
   void OnSize(UINT nType, CSize size);
   void OnMove(CPoint ptPos);
+
+  LRESULT OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHeadlinesClick( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHeadlinesHover( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHeadlinesRClick( int idCtrl, LPNMHDR, BOOL& );
 
 private:
   typedef CDialogImpl<CNewsReaderView> CThisClass;
 
   CIQFeed<CNewsReaderView>::structMessageDestinations m_Destinations;
   CIQFeed<CNewsReaderView>* m_pIQFeed;
+  CIQFeedNewsQuery<CNewsReaderView>* m_pIQFeedNewsQuery;
+
+  struct structNewsItem {
+    std::string Distributor;
+    std::string StoryId;
+    std::string SymbolList;
+    std::string DateTime;
+    std::string Headline;
+    std::string Story;
+  };
+
+  std::vector<structNewsItem> m_NewsItems;
 
 };

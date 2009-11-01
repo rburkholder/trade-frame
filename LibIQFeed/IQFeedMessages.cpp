@@ -52,20 +52,9 @@ CIQFNewsMessage::CIQFNewsMessage( void )
 CIQFNewsMessage::CIQFNewsMessage( iterator_t& current, iterator_t& end ) 
 : CIQFBaseMessage<CIQFNewsMessage>()
 {
-  Assign( current, end );
 }
 
 CIQFNewsMessage::~CIQFNewsMessage() {
-}
-
-void CIQFNewsMessage::Assign(iterator_t &current, iterator_t &end) {
-  CIQFBaseMessage<CIQFNewsMessage>::Assign( current, end );
-  m_sDistributor = Field( NDistributor );
-  m_sStoryId = Field( NStoryId );
-  m_sSymbolList = Field( NSymbolList );
-  m_sDateTime = Field( NDateTime );
-  fielddelimiter_t headline = m_vFieldDelimiters[ NHeadLine ];
-  m_sHeadLine.assign( headline.first, end );
 }
 
 //**** CIQFFundamentalMessage

@@ -46,7 +46,7 @@ public:
 
   void Connect( void );
   void Disconnect( void );
-  void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to false
+  void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to SEND_AND_NO_FORWARD
   void SetPort( port_t port ) { m_connParameters.nPort = port; };
   void SetAddress( const ipaddress_t& ipaddress ) { m_connParameters.sAddress = ipaddress; };
 
@@ -58,8 +58,8 @@ protected:
     WM_NETWORK_CLOSED,
     WM_NETWORK_CONNECTED,
     WM_NETWORK_DISCONNECTED,
-    WM_NETWORK_PROCESS,
-    WM_NETWORK_SENDDONE,
+    WM_NETWORK_PROCESS,  // network has provided a buffer to process
+    WM_NETWORK_SENDDONE,  // when network has completed sending the command
     WM_NETWORK_ERROR,
 
     // called by derived method calls to cross the thread boundary
@@ -118,12 +118,13 @@ protected:
 
 private:
   enum enumConnectionState {
-    CS_QUIESCENT,  // no worker thread
     CS_INITIALIZING,
+    CS_QUIESCENT,  // no worker thread
     CS_CONNECTING,  // new connection, waiting for network initialization
     CS_CONNECTED,  // connected and ready for operation
     CS_DISCONNECTING  // initiated disconnect
-  } m_stateConnection;
+  };
+  volatile enumConnectionState m_stateConnection;
 
   CAppModule* m_pModule;
 
@@ -132,13 +133,23 @@ private:
 template <typename T>
 CNetworkClientSkeleton<T>::CNetworkClientSkeleton(WTL::CAppModule *pModule) 
 : m_pModule( pModule ),
-  m_stateConnection( CS_QUIESCENT ),
+//  m_stateConnection( CS_INITIALIZING ),
   m_NetworkMessageIDs( this,
     WM_NETWORK_INITIALIZED, WM_NETWORK_CLOSED, WM_NETWORK_CONNECTED,
     WM_NETWORK_DISCONNECTED, WM_NETWORK_PROCESS, WM_NETWORK_SENDDONE, WM_NETWORK_ERROR ),
   m_connParameters( "127.0.0.1", 0 ),  // some random defaults
   CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule )
 {
+  unsigned int cnt = 1000;
+  while ( CS_QUIESCENT != m_stateConnection ) {
+    if ( 0 == cnt ) {
+      throw std::logic_error( "CNetworkClientSkeleton<T>::CNetworkClientSkeleton timeout" );
+    }
+    else {
+      Sleep(10);
+      --cnt;
+    }
+  }
 }
 
 template <typename T>
@@ -147,12 +158,22 @@ CNetworkClientSkeleton<T>::CNetworkClientSkeleton(
   ) 
 : CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule ),
   m_pModule( pModule ),
-  m_stateConnection( CS_QUIESCENT ),
+//  m_stateConnection( CS_INITIALIZING ),
   m_NetworkMessageIDs( this,
     WM_NETWORK_INITIALIZED, WM_NETWORK_CLOSED, WM_NETWORK_CONNECTED,
     WM_NETWORK_DISCONNECTED, WM_NETWORK_PROCESS, WM_NETWORK_SENDDONE, WM_NETWORK_ERROR ),
   m_connParameters( ipaddress, port )  
 {
+  unsigned int cnt = 100;
+  while ( CS_QUIESCENT != m_stateConnection ) {
+    if ( 0 == cnt ) {
+      throw std::logic_error( "CNetworkClientSkeleton<T>::CNetworkClientSkeleton timeout" );
+    }
+    else {
+      Sleep(10);
+      --cnt;
+    }
+  }
 }
 
 template <typename T>
@@ -166,7 +187,7 @@ template <typename T>
 BOOL CNetworkClientSkeleton<T>::InitializeThread( void ) {
 
   BOOL b = TRUE;
-  //m_stateConnection = CS_QUIESCENT;  // is set in class initializer
+  m_stateConnection = CS_QUIESCENT;  // thread has been initialized
 
   T* pT = static_cast<T*>( this );
   if ( &CNetworkClientSkeleton<T>::InitializeThread != &T::InitializeThread ) {
@@ -229,6 +250,20 @@ void CNetworkClientSkeleton<T>::Disconnect( void ) {
 
 template <typename T>
 void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) {
+
+  // need to do this pause differently, maybe add WaitToSend message, but need message queue to be initialized first
+
+  unsigned int cnt = 100;  // wait up to a second
+  while ( CS_CONNECTING == m_stateConnection ) {
+    --cnt;
+    if ( 0 == cnt ) {
+      throw std::logic_error( "CNetworkClientSkeleton::Send time out" );
+    }
+    else {
+      Sleep( 10 );  // wait for the connection to be made
+    }
+    
+  }
   if ( CS_CONNECTED == m_stateConnection ) {
     CNetwork<CNetworkClientSkeleton<T> >::linebuffer_t* psendbuffer = m_sendbuffers.CheckOut();
     psendbuffer->clear();

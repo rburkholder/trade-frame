@@ -118,20 +118,40 @@ public:
   CIQFNewsMessage( iterator_t& current, iterator_t& end );
   ~CIQFNewsMessage(void);
 
-  void Assign( iterator_t& current, iterator_t& end );
+  const std::string& Distributor( void ) { return Field( NDistributor ); };
+  const std::string& StoryId( void ) { return Field( NStoryId ); };
+  const std::string& SymbolList( void ) { return Field( NSymbolList ); };
+  const std::string& DateTime( void ) { return Field( NDateTime ); };
+  const std::string& Headline( void ) { 
+    m_sHeadLine.assign( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second );
+    return m_sHeadLine;
+  };
 
-  const std::string& Distributor( void ) { return m_sDistributor; };
-  const std::string& StoryId( void ) { return m_sStoryId; };
-  const std::string& SymbolList( void ) { return m_sSymbolList; };
-  const std::string& DateTime( void ) { return m_sDateTime; };
-  const std::string& Headline( void ) { return m_sHeadLine; };
+  fielddelimiter_t Distributor_iter( void ) { 
+    BOOST_ASSERT( NDistributor <= m_vFieldDelimiters.size() - 1 );
+    return m_vFieldDelimiters[ NDistributor ];
+  }
+  fielddelimiter_t StoryId_iter( void ) { 
+    BOOST_ASSERT( NStoryId <= m_vFieldDelimiters.size() - 1 );
+    return m_vFieldDelimiters[ NStoryId ];
+  }
+  fielddelimiter_t SymbolList_iter( void ) { 
+    BOOST_ASSERT( NSymbolList <= m_vFieldDelimiters.size() - 1 );
+    return m_vFieldDelimiters[ NSymbolList ];
+  }
+  fielddelimiter_t DateTime_iter( void ) { 
+    BOOST_ASSERT( NDateTime <= m_vFieldDelimiters.size() - 1 );
+    return m_vFieldDelimiters[ NDateTime ];
+  }
+  fielddelimiter_t HeadLine_iter( void ) { 
+    BOOST_ASSERT( NHeadLine <= m_vFieldDelimiters.size() - 1 );
+    fielddelimiter_t fd( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second ); // necessary to incorporate included commas, and field 0 has end of buffer marker
+    return fd;
+  }
+
 
 protected:
 private:
-  std::string m_sDistributor;
-  std::string m_sStoryId;
-  std::string m_sSymbolList;
-  std::string m_sDateTime;
   std::string m_sHeadLine;
 };
 

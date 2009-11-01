@@ -24,7 +24,7 @@
 
 CNewsReaderView::CNewsReaderView() 
 : CDialogImpl<CNewsReaderView>(), CDialogResize<CNewsReaderView>(),
-  m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
+  m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
   0, 0, WM_IQFEED_NEWS, 0, 0, 0 )
 {
 }
@@ -42,6 +42,11 @@ HWND CNewsReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   HWND h;
   h = CThisClass::Create( hWndParent, dwInitParam );
 
+  return h;
+}
+
+BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
+
   DlgResize_Init( false, true );
 
   m_treeSources = GetDlgItem( IDC_TREESOURCES );
@@ -52,12 +57,19 @@ HWND CNewsReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   int i2 = m_lvHeadlines.AddColumn( "Symbols", 1 );
   int i3 = m_lvHeadlines.AddColumn( "Headline", 2 );
 
-  m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_Destinations );
+  m_lvHeadlines.SetColumnWidth( 0, 50 );
+  m_lvHeadlines.SetColumnWidth( 1, 70 );
+  m_lvHeadlines.SetColumnWidth( 2, 400 );
 
-  return h;
+  m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_Destinations );
+  m_pIQFeed->Connect();
+
+  return TRUE;
 }
 
 void CNewsReaderView::OnDestroy( void ) {
+  m_pIQFeedNewsQuery->Disconnect();
+  delete m_pIQFeedNewsQuery;
   m_pIQFeed->SetNewsOff();  // check to see if message gets fully processed before disconnect occurs
   m_pIQFeed->Disconnect();
   delete m_pIQFeed;
@@ -73,17 +85,14 @@ void CNewsReaderView::OnMove( CPoint ptPos ) {
   OutputDebugString( "OnMove" );
 }
 
-LRESULT CNewsReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
-  m_pIQFeed->Connect();
-  bHandled = true;
-  return 1;
-}
-
 LRESULT CNewsReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
 //  m_stateUI = UI_NOSYMBOL;
 //  UpdateUIState();
   m_pIQFeed->SetNewsOn();
+
+  m_pIQFeedNewsQuery = new CIQFeedNewsQuery<CNewsReaderView>( &_Module );
+  m_pIQFeedNewsQuery->Connect();
 
   bHandled = true;
   return 1;
@@ -113,12 +122,37 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
   // use the iterators for pulling out the strings in order to reduce the number of copies made
 
   CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+  CIQFNewsMessage::fielddelimiter_t fd;
 
-  m_lvHeadlines.InsertItem( 0, msg->Distributor().c_str() );
-  m_lvHeadlines.SetItemText( 0, 1, msg->SymbolList().c_str() );
-  m_lvHeadlines.SetItemText( 0, 2, msg->Headline().c_str() );
+  structNewsItem item;
+  m_NewsItems.push_back( item );
+
+  structNewsItem& ref = m_NewsItems[ m_NewsItems.size() - 1 ];
+
+  fd = msg->Distributor_iter();
+  ref.Distributor.assign( fd.first, fd.second );
+
+  fd = msg->StoryId_iter();
+  ref.StoryId.assign( fd.first, fd.second );
+
+  fd = msg->SymbolList_iter();
+  ref.SymbolList.assign( fd.first, fd.second );
+
+  fd = msg->DateTime_iter();
+  ref.DateTime.assign( fd.first, fd.second );
+
+  fd = msg->HeadLine_iter();
+  ref.Headline.assign( fd.first, fd.second );
 
   m_pIQFeed->NewsDone( wParam, lParam );
+
+  std::stringstream ss;
+  ss << "NN:" << ref.StoryId << ";";
+  m_pIQFeedNewsQuery->Send( ss.str() );
+
+  m_lvHeadlines.InsertItem( 0, ref.Distributor.c_str() );
+  m_lvHeadlines.SetItemText( 0, 1, ref.SymbolList.c_str() );
+  m_lvHeadlines.SetItemText( 0, 2, ref.Headline.c_str() );
 
   bHandled = true;
   return 1;
@@ -133,5 +167,62 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
 
   bHandled = true;
   return 1;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
+
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
+/*
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << " HotTrack "
+    << " item: " << pNM->iItem
+    << " sub: " << pNM->iSubItem
+    << std::endl;
+  OutputDebugString( ss.str().c_str() );
+#endif
+*/
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
+
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesHover( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  //LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
+
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesRClick( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
+
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  NMLVDISPINFO* pNM = reinterpret_cast<NMLVDISPINFO*>( pNMHDR );
+
+  bHandled = true;
+  return 0;
 }
 

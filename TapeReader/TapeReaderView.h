@@ -146,6 +146,7 @@ protected:
   void UpdateUIState( void );
 
 	BEGIN_MSG_MAP_EX(CTapeReaderView)
+//	BEGIN_MSG_MAP(CTapeReaderView)
     MESSAGE_HANDLER( WM_IQFEED_UPDATE, OnIQFeedUpdate )
     MESSAGE_HANDLER( WM_IQFEED_SUMMARY, OnIQFeedSummary )
     MESSAGE_HANDLER( WM_IQFEED_FUNDAMENTAL, OnIQFeedFundamental )
@@ -170,7 +171,6 @@ protected:
   CButton m_btnStop;
   CListViewCtrl m_lvTape; // sub class this later and turn into own class for reuse
 
-
 // Handler prototypes (uncomment arguments if needed):
 //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 //	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -182,7 +182,6 @@ protected:
 
   HWND Create(HWND hWndParent, LPARAM dwInitParam = NULL);
 
-//  LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );

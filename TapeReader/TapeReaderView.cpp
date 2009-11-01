@@ -181,12 +181,6 @@ LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR
   return 0;
 }
 
-//LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
-//  m_pIQFeed->Connect();
-//  bHandled = true;
-//  return 1;
-//}
-
 LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
   m_stateUI = UI_NOSYMBOL;

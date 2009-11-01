@@ -20,9 +20,6 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
-//#include <codeproject/thread.h>  // class inbound messages
-
-//#include <LibWtlCommon/Network.h>
 #include <LibWtlCommon/NetworkClientSkeleton.h>
 
 #include <LibCommon/ReusableBuffers.h>

@@ -271,5 +271,9 @@
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="NewsReader.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

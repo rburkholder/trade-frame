@@ -120,7 +120,7 @@ template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
 #ifdef _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name()
-    << "Created: " << cntCreated
+    << " Created: " << cntCreated
     << " Destroyed: " << cntDestroyed
     << " Checkins: " << cntCheckins
     << " Checkouts: " << cntCheckouts
