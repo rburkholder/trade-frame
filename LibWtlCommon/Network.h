@@ -82,6 +82,9 @@ public:
 
 #define NETWORK_INPUT_BUF_SIZE 2048
 
+  typedef unsigned short port_t;
+  typedef std::string ipaddress_t;
+
   // pre-initialized message ids for messages delivered to and accepted by external caller
   struct structMessages {  // information needed by port processing thread
     ownerT* owner;        // owner object to which message is sent (PostMessage needs to be implemented)
@@ -101,9 +104,9 @@ public:
   };
 
   struct structConnection {
-    std::string sAddress;
-    unsigned short nPort;
-    structConnection( const std::string& sAddress_, unsigned short nPort_ )
+    ipaddress_t sAddress;
+    port_t nPort;
+    structConnection( const ipaddress_t& sAddress_, port_t nPort_ )
       : sAddress( sAddress_ ), nPort( nPort_ ) {};
   };
 

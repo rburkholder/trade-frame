@@ -30,7 +30,7 @@
 
 CTapeReaderView::CTapeReaderView( void ) 
 : CDialogImpl<CTapeReaderView>(), CDialogResize<CTapeReaderView>(),
-  m_Destinations( this, WM_IQFEED_INITIALIZED, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
+  m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
   WM_IQFEED_UPDATE, WM_IQFEED_SUMMARY, 0, WM_IQFEED_FUNDAMENTAL, 0, 0 ),
   m_stateUI( UI_STARTING ),
   m_bRunning( false )
@@ -50,6 +50,11 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   HWND h;
   h = CThisClass::Create( hWndParent, dwInitParam );
 
+  return h;
+}
+
+BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
+
   DlgResize_Init( false, true );
 
   m_edtSymbol = GetDlgItem( IDC_EDTSYMBOL );
@@ -63,11 +68,13 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
   m_pIQFeed = new CIQFeed<CTapeReaderView>( &_Module, m_Destinations );
+  m_pIQFeed->Connect();
 
-  return h;
+  return TRUE;
 }
 
 void CTapeReaderView::OnDestroy( void ) {
+  StopData();
   m_pIQFeed->Disconnect();
   delete m_pIQFeed;
 }
@@ -101,17 +108,23 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
   return 0;
 }
 
+void CTapeReaderView::StopData( void ) {
+  if ( UI_STARTED == m_stateUI ) {
+    std::string sSend = _T( "r" );
+    sSend += m_sSymbol;
+    sSend += _T( "\n" );
+
+    m_pIQFeed->Send( sSend );
+
+    m_stateUI = UI_SYMBOLENTRY;
+    UpdateUIState();
+  }
+}
+
 LRESULT CTapeReaderView::OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 
-  std::string sSend = _T( "r" );
-  sSend += m_sSymbol;
-  sSend += _T( "\n" );
-
-  m_pIQFeed->Send( sSend );
-
-  m_stateUI = UI_SYMBOLENTRY;
-  UpdateUIState();
+  StopData();
 
   return 0;
 }
@@ -168,11 +181,11 @@ LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR
   return 0;
 }
 
-LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
-  m_pIQFeed->Connect();
-  bHandled = true;
-  return 1;
-}
+//LRESULT CTapeReaderView::OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+//  m_pIQFeed->Connect();
+//  bHandled = true;
+//  return 1;
+//}
 
 LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 

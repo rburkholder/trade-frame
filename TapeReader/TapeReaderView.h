@@ -103,8 +103,7 @@ public:
 protected:
 
   enum enumMessages {
-    WM_IQFEED_INITIALIZED = WM_USER + 1,
-    WM_IQFEED_CONNECTED,
+    WM_IQFEED_CONNECTED = WM_USER + 1,
     WM_IQFEED_SENDDONE,
     WM_IQFEED_DISCONNECTED,
     WM_IQFEED_ERROR, 
@@ -143,7 +142,7 @@ protected:
   double m_dblMinTick;
   double m_dblMaxTick;
 
-
+  void StopData( void );
   void UpdateUIState( void );
 
 	BEGIN_MSG_MAP_EX(CTapeReaderView)
@@ -151,7 +150,6 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_SUMMARY, OnIQFeedSummary )
     MESSAGE_HANDLER( WM_IQFEED_FUNDAMENTAL, OnIQFeedFundamental )
 
-    MESSAGE_HANDLER( WM_IQFEED_INITIALIZED, OnIQFeedInitialized )
     MESSAGE_HANDLER( WM_IQFEED_CONNECTED, OnIQFeedConnected )
     MESSAGE_HANDLER( WM_IQFEED_DISCONNECTED, OnIQFeedDisconnected )
     MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
@@ -162,6 +160,7 @@ protected:
     COMMAND_HANDLER(IDC_BTNSTOP, BN_CLICKED, OnBnClickedBtnstop)
     NOTIFY_HANDLER(IDC_LISTTAPE, LVN_ITEMCHANGED, OnLvnItemchangedListtape)
 
+    MSG_WM_INITDIALOG(OnInitDialog)
     MSG_WM_DESTROY(OnDestroy)
     CHAIN_MSG_MAP(CDialogResize<CTapeReaderView>)
 	END_MSG_MAP()
@@ -183,7 +182,7 @@ protected:
 
   HWND Create(HWND hWndParent, LPARAM dwInitParam = NULL);
 
-  LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
+//  LRESULT OnIQFeedInitialized( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
@@ -193,6 +192,7 @@ protected:
   LRESULT OnIQFeedSummary( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedFundamental( UINT, WPARAM, LPARAM, BOOL& );
 
+  BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
   void OnDestroy();
 
 private:
