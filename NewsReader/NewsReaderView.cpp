@@ -25,7 +25,8 @@
 CNewsReaderView::CNewsReaderView() 
 : CDialogImpl<CNewsReaderView>(), CDialogResize<CNewsReaderView>(),
   m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
-  0, 0, WM_IQFEED_NEWS, 0, 0, 0 )
+  0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
+  m_stateStoryRetrieval( INACTIVE )
 {
 }
 
@@ -197,6 +198,10 @@ LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL
 LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
   LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
+
+  LVHITTESTINFO info;
+  info.pt = pNM->ptAction;
+  int ix = m_lvHeadlines.HitTest( &info );
 
   bHandled = true;
   return 0;

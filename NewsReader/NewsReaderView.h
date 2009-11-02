@@ -56,6 +56,11 @@ public:
   ~CNewsReaderView( void );
 protected:
 
+  enum stateStoryRetrieval {
+    INACTIVE,
+    RETRIEVING
+  } m_stateStoryRetrieval;
+
   enum enumMessages {
     WM_IQFEED_CONNECTED = WM_USER + 1,
     WM_IQFEED_SENDDONE,
@@ -127,7 +132,9 @@ private:
     std::string SymbolList;
     std::string DateTime;
     std::string Headline;
+    bool StoryLoaded;
     std::string Story;
+    structNewsItem(void): StoryLoaded( false ) {};
   };
 
   std::vector<structNewsItem> m_NewsItems;

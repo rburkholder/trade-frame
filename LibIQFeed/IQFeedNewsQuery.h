@@ -84,6 +84,8 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
 
   // code here
 
+  PostProcessedMessage( wParam );
+
   bHandled = true;
   return 1;
 }

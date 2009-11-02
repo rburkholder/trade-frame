@@ -19,6 +19,8 @@
 // document what goes into each message.  Some are empty all the time.
 // Once documented, then the CRTP calls could be turned into calls with fewer parameters for some speed gain
 
+#include <boost/thread/barrier.hpp>
+
 #include <codeproject/thread.h>  // class inbound messages
 
 #include "Network.h"
@@ -118,7 +120,7 @@ protected:
 
 private:
   enum enumConnectionState {
-    CS_INITIALIZING,
+    CS_INITIALIZING = 0,  // never used, just supplies a 0
     CS_QUIESCENT,  // no worker thread
     CS_CONNECTING,  // new connection, waiting for network initialization
     CS_CONNECTED,  // connected and ready for operation
@@ -128,52 +130,38 @@ private:
 
   CAppModule* m_pModule;
 
+  boost::barrier m_barrier;  
+
 };
 
 template <typename T>
 CNetworkClientSkeleton<T>::CNetworkClientSkeleton(WTL::CAppModule *pModule) 
-: m_pModule( pModule ),
-//  m_stateConnection( CS_INITIALIZING ),
+: CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule, CREATE_SUSPENDED ),
+  m_barrier( 2 ),
+  m_pModule( pModule ),
   m_NetworkMessageIDs( this,
     WM_NETWORK_INITIALIZED, WM_NETWORK_CLOSED, WM_NETWORK_CONNECTED,
     WM_NETWORK_DISCONNECTED, WM_NETWORK_PROCESS, WM_NETWORK_SENDDONE, WM_NETWORK_ERROR ),
-  m_connParameters( "127.0.0.1", 0 ),  // some random defaults
-  CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule )
+  m_connParameters( "127.0.0.1", 0 )  
 {
-  unsigned int cnt = 1000;
-  while ( CS_QUIESCENT != m_stateConnection ) {
-    if ( 0 == cnt ) {
-      throw std::logic_error( "CNetworkClientSkeleton<T>::CNetworkClientSkeleton timeout" );
-    }
-    else {
-      Sleep(10);
-      --cnt;
-    }
-  }
+  this->Resume();
+  m_barrier.wait();  // sync up with InitializeThread
 }
 
 template <typename T>
 CNetworkClientSkeleton<T>::CNetworkClientSkeleton(
   WTL::CAppModule *pModule, const ipaddress_t& ipaddress, port_t port
   ) 
-: CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule ),
+: CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule, CREATE_SUSPENDED ),
+  m_barrier( 2 ),
   m_pModule( pModule ),
-//  m_stateConnection( CS_INITIALIZING ),
   m_NetworkMessageIDs( this,
     WM_NETWORK_INITIALIZED, WM_NETWORK_CLOSED, WM_NETWORK_CONNECTED,
     WM_NETWORK_DISCONNECTED, WM_NETWORK_PROCESS, WM_NETWORK_SENDDONE, WM_NETWORK_ERROR ),
   m_connParameters( ipaddress, port )  
 {
-  unsigned int cnt = 100;
-  while ( CS_QUIESCENT != m_stateConnection ) {
-    if ( 0 == cnt ) {
-      throw std::logic_error( "CNetworkClientSkeleton<T>::CNetworkClientSkeleton timeout" );
-    }
-    else {
-      Sleep(10);
-      --cnt;
-    }
-  }
+  this->Resume();
+  m_barrier.wait();  // sync up with InitializeThread
 }
 
 template <typename T>
@@ -188,6 +176,8 @@ BOOL CNetworkClientSkeleton<T>::InitializeThread( void ) {
 
   BOOL b = TRUE;
   m_stateConnection = CS_QUIESCENT;  // thread has been initialized
+
+  m_barrier.wait();  // sync up with constructor
 
   T* pT = static_cast<T*>( this );
   if ( &CNetworkClientSkeleton<T>::InitializeThread != &T::InitializeThread ) {
@@ -223,6 +213,14 @@ void CNetworkClientSkeleton<T>::CleanupThread( DWORD dw ) {
 
 template <typename T>
 void CNetworkClientSkeleton<T>::Connect( void ) { // post a local message, register needs to be in other thread
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << "::Connect:  " << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
+
   if ( CS_QUIESCENT == m_stateConnection ) {
     m_stateConnection = CS_CONNECTING;
     this->PostThreadMessage( WM_NCS_METHOD_CONNECT );
@@ -253,7 +251,16 @@ void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) 
 
   // need to do this pause differently, maybe add WaitToSend message, but need message queue to be initialized first
 
-  unsigned int cnt = 100;  // wait up to a second
+#define COUNT 1000
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << "::Send:  " << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
+
+  unsigned int cnt = COUNT;  // wait up to a second
   while ( CS_CONNECTING == m_stateConnection ) {
     --cnt;
     if ( 0 == cnt ) {
@@ -262,8 +269,16 @@ void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) 
     else {
       Sleep( 10 );  // wait for the connection to be made
     }
-    
   }
+
+#ifdef _DEBUG
+  if ( COUNT != cnt ) {
+    ss << typeid( this ).name() << "::Send Waited " << COUNT - cnt << " times." << std::endl;
+    OutputDebugString( ss.str().c_str() );
+    ss.str() = "";
+  }
+#endif
+
   if ( CS_CONNECTED == m_stateConnection ) {
     CNetwork<CNetworkClientSkeleton<T> >::linebuffer_t* psendbuffer = m_sendbuffers.CheckOut();
     psendbuffer->clear();
@@ -282,6 +297,14 @@ void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) 
 template <typename T>
 LRESULT CNetworkClientSkeleton<T>::OnConnInitialized( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << "::OnConnInitialized:  " << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
+
   m_pNetworkConnection->PostThreadMessage( 
     network_t::WM_NETWORK_CONNECT, reinterpret_cast<WPARAM>( &m_connParameters ) );
 
@@ -297,6 +320,14 @@ LRESULT CNetworkClientSkeleton<T>::OnConnClosed( UINT, WPARAM wParam, LPARAM, BO
 
 template <typename T>
 LRESULT CNetworkClientSkeleton<T>::OnConnConnected( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << "::OnConnConnected:  " << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
 
   BOOL b = TRUE;
   m_stateConnection = CS_CONNECTED;
@@ -381,6 +412,14 @@ LRESULT CNetworkClientSkeleton<T>::OnConnError( UINT id, WPARAM wParam, LPARAM l
 
 template <typename T>
 LRESULT CNetworkClientSkeleton<T>::OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << typeid( this ).name() << "::OnMethodConnect:  " << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
 
   m_pNetworkConnection = new CNetwork<CNetworkClientSkeleton<T> >( m_pModule, m_NetworkMessageIDs );
 
