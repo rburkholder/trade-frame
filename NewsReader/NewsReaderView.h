@@ -137,6 +137,7 @@ private:
     structNewsItem(void): StoryLoaded( false ) {};
   };
 
-  std::vector<structNewsItem> m_NewsItems;
+  typedef std::vector<structNewsItem> vNewsItems_t;
+  vNewsItems_t m_NewsItems;
 
 };

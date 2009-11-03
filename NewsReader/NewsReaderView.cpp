@@ -128,7 +128,9 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
   structNewsItem item;
   m_NewsItems.push_back( item );
 
-  structNewsItem& ref = m_NewsItems[ m_NewsItems.size() - 1 ];
+  vNewsItems_t::size_type ix = m_NewsItems.size() - 1;
+
+  structNewsItem& ref = m_NewsItems[ ix ];
 
   fd = msg->Distributor_iter();
   ref.Distributor.assign( fd.first, fd.second );
@@ -147,13 +149,11 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
 
   m_pIQFeed->NewsDone( wParam, lParam );
 
-  std::stringstream ss;
-  ss << "NN:" << ref.StoryId << ";";
-  m_pIQFeedNewsQuery->Send( ss.str() );
-
-  m_lvHeadlines.InsertItem( 0, ref.Distributor.c_str() );
+  m_lvHeadlines.InsertItem(  0,    ref.Distributor.c_str() );
   m_lvHeadlines.SetItemText( 0, 1, ref.SymbolList.c_str() );
   m_lvHeadlines.SetItemText( 0, 2, ref.Headline.c_str() );
+
+  m_lvHeadlines.SetItemData( 0, ix );
 
   bHandled = true;
   return 1;
@@ -199,9 +199,23 @@ LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& b
 
   LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
 
-  LVHITTESTINFO info;
-  info.pt = pNM->ptAction;
-  int ix = m_lvHeadlines.HitTest( &info );
+  if ( INACTIVE == m_stateStoryRetrieval ) {
+    // check what got hit
+    LVHITTESTINFO info;
+    info.pt = pNM->ptAction;
+    int ix = m_lvHeadlines.HitTest( &info );
+
+    if ( -1 != ix ) {  // a valid entry was hit
+
+      m_stateStoryRetrieval = RETRIEVING;
+
+      DWORD_PTR ixStory = m_lvHeadlines.GetItemData(ix);
+
+      m_edtStory.Clear();
+
+      m_pIQFeedNewsQuery->RetrieveStory( m_NewsItems[ixStory].StoryId, 0, 0 );
+    }
+  }
 
   bHandled = true;
   return 0;

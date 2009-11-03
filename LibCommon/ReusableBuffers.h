@@ -64,18 +64,18 @@ private:
 
 // might use auto_ptr for this
 
-template<class TBuffer> class CBufferRepository {
+template<typename bufferT> class CBufferRepository {
 public:
   CBufferRepository(void);
   ~CBufferRepository(void);
-  inline void CheckIn( TBuffer* Buffer );
-  inline TBuffer* CheckOut();  
-  void CheckInL( TBuffer* Buffer );  // locked version
-  TBuffer* CheckOutL();  // locked version
+  inline void CheckIn( bufferT* Buffer );
+  inline bufferT* CheckOut();  
+  void CheckInL( bufferT* Buffer );  // locked version
+  bufferT* CheckOutL();  // locked version
   bool Outstanding( void ) { return ( cntCheckins != cntCheckouts ); };
 protected:
   boost::mutex m_mutex;
-  std::queue<TBuffer*> m_qBuffer;
+  std::queue<bufferT*> m_qBuffer;
 private:
   typedef unsigned int stats_pod_t;
   stats_pod_t cntCheckins, cntCheckouts;
@@ -94,7 +94,7 @@ private:
 // most usage may be single thread mode now, as buffers are being returned to the original
 //   thread for storage
 
-template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void) 
+template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void) 
 : cntCheckins( 0 ), cntCheckouts( 0 )
 #ifdef _DEBUG
   , cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 ),
@@ -106,8 +106,8 @@ template<class TBuffer> CBufferRepository<TBuffer>::CBufferRepository(void)
 #endif
 }
 
-template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
-  TBuffer* pBuffer;
+template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) {
+  bufferT* pBuffer;
   boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a locki
   while ( !m_qBuffer.empty() ) {
     pBuffer = m_qBuffer.front();
@@ -120,11 +120,11 @@ template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
 #ifdef _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name()
-    << " Created: " << cntCreated
-    << " Destroyed: " << cntDestroyed
-    << " Checkins: " << cntCheckins
-    << " Checkouts: " << cntCheckouts
-    << " Max Q Size: " << maxQsize
+    << cntCreated << " Created, " 
+    << cntDestroyed << " Destroyed, "
+    << cntCheckins << " Checkins, " 
+    << cntCheckouts << " Checkouts, " 
+    << maxQsize << " Max Q Size" 
     << std::endl;
   OutputDebugString( ss.str().c_str() );
   if ( cntCreated != cntDestroyed ) {
@@ -136,12 +136,12 @@ template<class TBuffer> CBufferRepository<TBuffer>::~CBufferRepository(void) {
 #endif
 }
 
-template<class TBuffer> void CBufferRepository<TBuffer>::CheckInL(TBuffer* pBuffer) {
+template<typename bufferT> inline void CBufferRepository<bufferT>::CheckInL(bufferT* pBuffer) {
   boost::mutex::scoped_lock lock(m_mutex);
   CheckIn( pBuffer );
 }
 
-template<class TBuffer> inline void CBufferRepository<TBuffer>::CheckIn(TBuffer* pBuffer) {
+template<typename bufferT> inline void CBufferRepository<bufferT>::CheckIn(bufferT* pBuffer) {
 #ifdef _DEBUG
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingIn = true;
@@ -154,19 +154,19 @@ template<class TBuffer> inline void CBufferRepository<TBuffer>::CheckIn(TBuffer*
 #endif
 }
 
-template<class TBuffer> inline TBuffer* CBufferRepository<TBuffer>::CheckOutL() {
+template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOutL() {
   boost::mutex::scoped_lock lock(m_mutex);
   return CheckOut();
 }
 
-template<class TBuffer> inline TBuffer* CBufferRepository<TBuffer>::CheckOut() {
-  TBuffer* pBuffer;
+template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut() {
+  bufferT* pBuffer;
 #ifdef _DEBUG
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingOut = true;
 #endif
   if ( m_qBuffer.empty() ) {
-    pBuffer = new TBuffer();
+    pBuffer = new bufferT();
 #ifdef _DEBUG
     ++cntCreated;
 #endif
