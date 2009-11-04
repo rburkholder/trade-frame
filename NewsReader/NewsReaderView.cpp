@@ -170,6 +170,16 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
   return 1;
 }
 
+LRESULT CNewsReaderView::OnIQFeedStoryLine( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
+LRESULT CNewsReaderView::OnIQFeedStoryDone( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+  bHandled = true;
+  return 1;
+}
+
 LRESULT CNewsReaderView::OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
   LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );

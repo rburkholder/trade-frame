@@ -67,14 +67,19 @@ protected:
     WM_IQFEED_DISCONNECTED,
     WM_IQFEED_ERROR, 
 
-    WM_IQFEED_NEWS,
+    WM_IQFEED_STORY_LINE,  // one story line
+    WM_IQFEED_STORY_DONE,  // no more story lines to process from story request
 
+    WM_IQFEED_NEWS,
     WM_IQFEED_NEWS_DONE  // called from derived class, if we need it
   };
 
   BEGIN_MSG_MAP_EX(CNewsReaderView)
     MESSAGE_HANDLER( WM_IQFEED_NEWS, OnIQFeedNews )  // goes to external handler
     MESSAGE_HANDLER( WM_IQFEED_NEWS_DONE, OnIQFeedNewsDone )  // message returned from external handler
+
+    MESSAGE_HANDLER( WM_IQFEED_STORY_LINE, OnIQFeedStoryLine )
+    MESSAGE_HANDLER( WM_IQFEED_STORY_LINE, OnIQFeedStoryDone )
 
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_GETDISPINFO, OnLVHeadlinesDispInfo )
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_ITEMACTIVATE, OnLVHeadlinesItemActivate )
@@ -101,6 +106,9 @@ protected:
 
   LRESULT OnIQFeedNews( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedNewsDone( UINT, WPARAM, LPARAM, BOOL& );
+
+  LRESULT OnIQFeedStoryLine( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnIQFeedStoryDone( UINT, WPARAM, LPARAM, BOOL& );
 
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );

@@ -24,6 +24,13 @@
 
 #include <LibCommon/ReusableBuffers.h>
 
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+
+namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
+
+
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
 #define _CRTDBG_MAP_ALLOC
@@ -65,7 +72,8 @@ protected:
     WAIT4ENDSTORY,
     WAIT4ENDSTORIES,
     WAIT4BLANK,
-    WAIT4ENDMSG
+    WAIT4ENDMSG,
+    STORYLINE
   } m_stateCommand;
 
   UINT m_MsgIdStoryLine;
@@ -74,7 +82,33 @@ protected:
 private:
 
   CAppModule* m_pModule;
-  CBufferRepository<std::string> m_reposStoryTextLines;
+  //CBufferRepository<std::string> m_reposStoryTextLines;
+
+  typedef stateCommand ruleid_t;
+
+  template <typename Iterator>
+  struct structStoryXmlKeywords: qi::grammar<Iterator, ruleid_t()> {
+    structStoryXmlKeywords(): structStoryXmlKeywords::base_type(start) {
+      start = qi::eps[qi::_val=STORYLINE] 
+        >> *qi::space
+        >> (
+            qi::lit("<?xml version='1.0'?>")[qi::_val=WAIT4XML]
+          | qi::lit("<news_stories>")       [qi::_val=WAIT4STORIES]
+          | qi::lit("<news_story>")         [qi::_val=WAIT4STORY]
+          | qi::lit("<is_link>")            [qi::_val=WAIT4LINK]
+          | qi::lit("<story_text>")         [qi::_val=WAIT4TEXT]
+          | qi::lit("</story_text>")        [qi::_val=WAIT4ENDTEXT]
+          | qi::lit("</news_story>")        [qi::_val=WAIT4ENDSTORY]
+          | qi::lit("</news_stories>")      [qi::_val=WAIT4ENDSTORIES]
+          | qi::lit("!ENDMSG!")             [qi::_val=WAIT4ENDMSG]
+          )
+        ;
+    }
+    qi::rule<Iterator, ruleid_t()> start;
+  };
+
+  typedef typename inherited_t::linebuffer_t::const_iterator iterator_t;
+  structStoryXmlKeywords<iterator_t> m_grammarStoryKeywords;
 
 };
 
@@ -94,111 +128,121 @@ template <typename T>
 LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   inherited_t::linebuffer_t* buf = reinterpret_cast<inherited_t::linebuffer_t*>( wParam );
-  inherited_t::linebuffer_t::iterator iter = (*buf).begin();
-  inherited_t::linebuffer_t::iterator end = (*buf).end();
-
-  std::string* pLine = m_reposStoryTextLines.CheckOutL();
-  pLine->assign( iter, end );
+  inherited_t::linebuffer_t::const_iterator bgn = (*buf).begin();
+  inherited_t::linebuffer_t::const_iterator end = (*buf).end();
 
 #if defined _DEBUG
-  std::string str( *pLine );
-  str += '\n';
-  OutputDebugString( str.c_str() );
+  {
+    std::string str( bgn, end );
+    str += '\n';
+    OutputDebugString( str.c_str() );
+    bgn = (*buf).begin();  // restore the interator for next use
+  }
 #endif
 
 // do a boost parser for all this with custom iterators which pause when no more input available due to new line
 
-  std::string::size_type ix;
+  ruleid_t id;
+  bool b = parse( bgn, end, m_grammarStoryKeywords, id );
+
   switch (m_stateCommand ) {
     case IDLE:
       break;
     case WAIT4XML:
-      if ( std::string::npos == ( pLine->find( "<?xml version='1.0'?>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4XML");
       }
       else {
         m_stateCommand = WAIT4STORIES;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4STORIES:
-      if ( std::string::npos == ( pLine->find( "<news_stories>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4STORIES");
       }
       else {
         m_stateCommand = WAIT4STORY;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4STORY:
-      if ( std::string::npos == ( pLine->find( "<news_story>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4STORY");
       }
       else {
         m_stateCommand = WAIT4LINK;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4LINK:
-      if ( std::string::npos == ( ix = pLine->find( "<is_link>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4LINK");
       }
       else {
         m_stateCommand = WAIT4TEXT;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4TEXT:
-      if ( std::string::npos == ( ix = pLine->find( "<story_text>") ) ) {
-        throw std::logic_error( "WAIT4TEXT");
-      }
-      else {
-        if ( pLine->size() > ( ix + 11 ) ) {
-          // emit line
-        }
-        m_stateCommand = WAIT4ENDTEXT;
-      }
-      break;
-    case WAIT4ENDTEXT:
-      if ( std::string::npos == ( pLine->find( "</story_text>") ) ) {
-        // emit line
-      }
-      else {
+      if ( WAIT4ENDTEXT == id ) {
         m_stateCommand = WAIT4ENDSTORY;
+        PostProcessedMessage( wParam );
+      }
+      else {
+        if ( id != m_stateCommand ) {
+          throw std::logic_error( "WAIT4TEXT");
+        }
+        else {  // anything else on the line?
+          if ( bgn == end ) {
+            // nothing else to process
+            PostProcessedMessage( wParam );
+          }
+          else {
+            buf->erase( buf->begin(), bgn );  // erase the keyword and send buffer onwards
+            // emit line
+          }
+        }
       }
       break;
     case WAIT4ENDSTORY:
-      if ( std::string::npos == ( pLine->find( "</news_story>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4ENDSTORY");
       }
       else {
         m_stateCommand = WAIT4ENDSTORIES;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4ENDSTORIES:
-      if ( std::string::npos == ( pLine->find( "</news_stories>") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4ENDSTORIES");
       }
       else {
         m_stateCommand = WAIT4BLANK;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4BLANK:
-      if ( 0 != pLine->size() ) {
+      if ( bgn != end ) {
         throw std::logic_error( "WAIT4BLANK");
       }
       else {
         m_stateCommand = WAIT4ENDMSG;
+        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4ENDMSG:
-      if ( std::string::npos == ( ix = pLine->find( "!ENDMSG!") ) ) {
+      if ( id != m_stateCommand ) {
         throw std::logic_error( "WAIT4ENDMSG");
       }
       else {
         // send end marker
         m_stateCommand = IDLE;
+        PostProcessedMessage( wParam );
       }
       break;
   }
-
-  PostProcessedMessage( wParam );
 
   bHandled = true;
   return 1;
