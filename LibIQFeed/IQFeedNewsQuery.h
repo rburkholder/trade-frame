@@ -30,7 +30,6 @@
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
-
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
 #define _CRTDBG_MAP_ALLOC
@@ -47,7 +46,7 @@ public:
   CIQFeedNewsQuery(CAppModule* pModule);
   ~CIQFeedNewsQuery(void );
 
-  void RetrieveStory( const std::string& StoryId, UINT MsgIdStoryLine, UINT MsgIdStoryDone  );
+  void RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone );
 
 protected:
 
@@ -70,28 +69,29 @@ protected:
     WAIT4TEXT,
     WAIT4ENDTEXT,
     WAIT4ENDSTORY,
+    WAIT4SYMBOLS,
     WAIT4ENDSTORIES,
     WAIT4BLANK,
-    WAIT4ENDMSG,
-    STORYLINE
+    WAIT4ENDMSG
   } m_stateCommand;
 
   UINT m_MsgIdStoryLine;
   UINT m_MsgIdStoryDone;
+  T* m_owner;
+  LPARAM m_lParam; // passed back to caller as reference to story
 
 private:
 
   CAppModule* m_pModule;
-  //CBufferRepository<std::string> m_reposStoryTextLines;
 
   typedef stateCommand ruleid_t;
 
   template <typename Iterator>
   struct structStoryXmlKeywords: qi::grammar<Iterator, ruleid_t()> {
     structStoryXmlKeywords(): structStoryXmlKeywords::base_type(start) {
-      start = qi::eps[qi::_val=STORYLINE] 
-        >> *qi::space
-        >> (
+      start = qi::eps[qi::_val=WAIT4TEXT]  // default value if nothing else found
+        >> *qi::space  // eat up any leading spaces
+        >> (  // any one of a set of line markers:
             qi::lit("<?xml version='1.0'?>")[qi::_val=WAIT4XML]
           | qi::lit("<news_stories>")       [qi::_val=WAIT4STORIES]
           | qi::lit("<news_story>")         [qi::_val=WAIT4STORY]
@@ -101,6 +101,7 @@ private:
           | qi::lit("</news_story>")        [qi::_val=WAIT4ENDSTORY]
           | qi::lit("</news_stories>")      [qi::_val=WAIT4ENDSTORIES]
           | qi::lit("!ENDMSG!")             [qi::_val=WAIT4ENDMSG]
+          | qi::lit("<symbols>")            [qi::_val=WAIT4SYMBOLS]
           )
         ;
     }
@@ -140,13 +141,33 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
   }
 #endif
 
-// do a boost parser for all this with custom iterators which pause when no more input available due to new line
+// do his with custom iterators which pause when no more input available due to new line
 
-  ruleid_t id;
+  ruleid_t id;  // id of line marker found during parse
   bool b = parse( bgn, end, m_grammarStoryKeywords, id );
 
-  switch (m_stateCommand ) {
-    case IDLE:
+  switch (m_stateCommand ) {  //match where we are with what we are expecting
+    case WAIT4TEXT:  // this one is encountered most often so first in switch statement
+      if ( WAIT4ENDTEXT == id ) {
+        m_stateCommand = WAIT4ENDSTORY;
+        PostProcessedMessage( wParam );
+      }
+      else {
+        if ( id != m_stateCommand ) {
+          throw std::logic_error( "WAIT4TEXT");
+        }
+        else {  // anything else on the line?
+          if ( bgn == end ) {
+            // nothing else to process
+            PostProcessedMessage( wParam );
+          }
+          else { // erase the keyword, if any, and send buffer onwards
+            buf->erase( buf->begin(), bgn );  
+            // emit line
+            if ( 0 != m_MsgIdStoryLine ) m_owner->PostMessage( m_MsgIdStoryLine, wParam, m_lParam );
+          }
+        }
+      }
       break;
     case WAIT4XML:
       if ( id != m_stateCommand ) {
@@ -184,34 +205,23 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
         PostProcessedMessage( wParam );
       }
       break;
-    case WAIT4TEXT:
-      if ( WAIT4ENDTEXT == id ) {
-        m_stateCommand = WAIT4ENDSTORY;
-        PostProcessedMessage( wParam );
-      }
-      else {
-        if ( id != m_stateCommand ) {
-          throw std::logic_error( "WAIT4TEXT");
-        }
-        else {  // anything else on the line?
-          if ( bgn == end ) {
-            // nothing else to process
-            PostProcessedMessage( wParam );
-          }
-          else {
-            buf->erase( buf->begin(), bgn );  // erase the keyword and send buffer onwards
-            // emit line
-          }
-        }
-      }
-      break;
     case WAIT4ENDSTORY:
+      switch ( id ) {
+        case WAIT4ENDSTORY:
+          m_stateCommand = WAIT4ENDSTORIES;
+          PostProcessedMessage( wParam );
+          break;
+        case WAIT4SYMBOLS:
+          m_stateCommand = WAIT4ENDSTORY;
+          PostProcessedMessage( wParam );
+          break;
+        default:
+          throw std::logic_error( "WAIT4ENDSTORY");
+          break;
+      }
       if ( id != m_stateCommand ) {
-        throw std::logic_error( "WAIT4ENDSTORY");
       }
       else {
-        m_stateCommand = WAIT4ENDSTORIES;
-        PostProcessedMessage( wParam );
       }
       break;
     case WAIT4ENDSTORIES:
@@ -240,7 +250,10 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
         // send end marker
         m_stateCommand = IDLE;
         PostProcessedMessage( wParam );
+        if ( 0 != m_MsgIdStoryDone ) m_owner->PostMessage( m_MsgIdStoryDone, NULL, m_lParam );
       }
+      break;
+    case IDLE:
       break;
   }
 
@@ -249,14 +262,16 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
 }
 
 template <typename T>
-void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, UINT MsgIdStoryLine, UINT MsgIdStoryDone ) {
+void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone ) {
   if ( IDLE != m_stateCommand ) {
-    throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveStory: bad state");
+    throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveStory: not in IDLE");
   }
   else {
     m_stateCommand = WAIT4XML;
+    m_owner = owner;
     m_MsgIdStoryLine = MsgIdStoryLine;
     m_MsgIdStoryDone = MsgIdStoryDone;
+    m_lParam = lParam;
     std::string ss;
     ss = "NN:" + StoryId + ";";
     Send( ss );

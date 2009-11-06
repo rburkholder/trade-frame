@@ -20,6 +20,8 @@
 
 #include <sstream>
 
+#include <boost/foreach.hpp>
+
 #include "NewsReaderView.h"
 
 CNewsReaderView::CNewsReaderView() 
@@ -55,12 +57,14 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   m_edtStory = GetDlgItem( IDC_EDITSTORY );
 
   int i1 = m_lvHeadlines.AddColumn( "Dist", 0 );
-  int i2 = m_lvHeadlines.AddColumn( "Symbols", 1 );
-  int i3 = m_lvHeadlines.AddColumn( "Headline", 2 );
+  int i2 = m_lvHeadlines.AddColumn( "DateTime", 1 );
+  int i3 = m_lvHeadlines.AddColumn( "Symbols", 2 );
+  int i4 = m_lvHeadlines.AddColumn( "Headline", 3 );
 
   m_lvHeadlines.SetColumnWidth( 0, 50 );
-  m_lvHeadlines.SetColumnWidth( 1, 70 );
-  m_lvHeadlines.SetColumnWidth( 2, 400 );
+  m_lvHeadlines.SetColumnWidth( 1, 80 );
+  m_lvHeadlines.SetColumnWidth( 2, 70 );
+  m_lvHeadlines.SetColumnWidth( 3, 400 );
 
   m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_Destinations );
   m_pIQFeed->Connect();
@@ -150,8 +154,9 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
   m_pIQFeed->NewsDone( wParam, lParam );
 
   m_lvHeadlines.InsertItem(  0,    ref.Distributor.c_str() );
-  m_lvHeadlines.SetItemText( 0, 1, ref.SymbolList.c_str() );
-  m_lvHeadlines.SetItemText( 0, 2, ref.Headline.c_str() );
+  m_lvHeadlines.SetItemText( 0, 1, ref.DateTime.c_str() );
+  m_lvHeadlines.SetItemText( 0, 2, ref.SymbolList.c_str() );
+  m_lvHeadlines.SetItemText( 0, 3, ref.Headline.c_str() );
 
   m_lvHeadlines.SetItemData( 0, ix );
 
@@ -171,11 +176,38 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
 }
 
 LRESULT CNewsReaderView::OnIQFeedStoryLine( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+
+  typedef CIQFeedNewsQuery<CNewsReaderView> query_t;
+
+  vNewsItems_t::size_type ix = static_cast<vNewsItems_t::size_type>( lParam );
+
+  typedef query_t::inherited_t::linebuffer_t linebuffer_t;
+
+  linebuffer_t* buf = reinterpret_cast<linebuffer_t*>( wParam );
+  linebuffer_t::const_iterator bgn = (*buf).begin();
+  linebuffer_t::const_iterator end = (*buf).end();
+
+  structNewsItem& ref = m_NewsItems[ ix ];
+  if ( 0 != ref.Story.size() ) {
+    ref.Story.append( "\r\n" );
+  }
+  ref.Story.append( bgn, end );
+
+  m_pIQFeedNewsQuery->PostProcessedMessage( wParam );
+
   bHandled = true;
   return 1;
 }
 
 LRESULT CNewsReaderView::OnIQFeedStoryDone( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+
+  vNewsItems_t::size_type ix = static_cast<vNewsItems_t::size_type>( lParam );
+
+  m_NewsItems[ ix ].StoryLoaded = true;
+  DisplayStory( ix );
+
+  m_stateStoryRetrieval = INACTIVE;
+
   bHandled = true;
   return 1;
 }
@@ -191,18 +223,28 @@ LRESULT CNewsReaderView::OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR pNMHDR, 
 LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
   LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
-/*
+
+  LVHITTESTINFO info; 
+  info.pt = pNM->ptAction;
+  int ix = m_lvHeadlines.HitTest( &info );
+
 #ifdef _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name() << " HotTrack "
     << " item: " << pNM->iItem
     << " sub: " << pNM->iSubItem
+    << " ix: " << ix
     << std::endl;
   OutputDebugString( ss.str().c_str() );
 #endif
-*/
+
   bHandled = true;
   return 0;
+}
+
+void CNewsReaderView::DisplayStory( vNewsItems_t::size_type ix ) {
+  m_edtStory.Clear();
+  m_edtStory.SetWindowText( m_NewsItems[ ix ].Story.c_str() );
 }
 
 LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
@@ -217,13 +259,22 @@ LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& b
 
     if ( -1 != ix ) {  // a valid entry was hit
 
-      m_stateStoryRetrieval = RETRIEVING;
+      // need to check if StoryLoaded, then use in memory story rather than retrieving it again
 
       DWORD_PTR ixStory = m_lvHeadlines.GetItemData(ix);
 
-      m_edtStory.Clear();
+      if ( m_NewsItems[ ixStory ].StoryLoaded ) {
+        DisplayStory( ixStory );
+      }
+      else {
 
-      m_pIQFeedNewsQuery->RetrieveStory( m_NewsItems[ixStory].StoryId, 0, 0 );
+        m_stateStoryRetrieval = RETRIEVING;
+
+        m_edtStory.Clear();
+
+        m_pIQFeedNewsQuery->RetrieveStory( 
+          m_NewsItems[ixStory].StoryId, this, ixStory, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE );
+      }
     }
   }
 

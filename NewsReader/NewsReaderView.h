@@ -79,7 +79,7 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_NEWS_DONE, OnIQFeedNewsDone )  // message returned from external handler
 
     MESSAGE_HANDLER( WM_IQFEED_STORY_LINE, OnIQFeedStoryLine )
-    MESSAGE_HANDLER( WM_IQFEED_STORY_LINE, OnIQFeedStoryDone )
+    MESSAGE_HANDLER( WM_IQFEED_STORY_DONE, OnIQFeedStoryDone )
 
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_GETDISPINFO, OnLVHeadlinesDispInfo )
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_ITEMACTIVATE, OnLVHeadlinesItemActivate )
@@ -127,13 +127,6 @@ protected:
   LRESULT OnLVHeadlinesHover( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesRClick( int idCtrl, LPNMHDR, BOOL& );
 
-private:
-  typedef CDialogImpl<CNewsReaderView> CThisClass;
-
-  CIQFeed<CNewsReaderView>::structMessageDestinations m_Destinations;
-  CIQFeed<CNewsReaderView>* m_pIQFeed;
-  CIQFeedNewsQuery<CNewsReaderView>* m_pIQFeedNewsQuery;
-
   struct structNewsItem {
     std::string Distributor;
     std::string StoryId;
@@ -146,6 +139,16 @@ private:
   };
 
   typedef std::vector<structNewsItem> vNewsItems_t;
+
+  void DisplayStory( vNewsItems_t::size_type ix );
+
+private:
+  typedef CDialogImpl<CNewsReaderView> CThisClass;
+
+  CIQFeed<CNewsReaderView>::structMessageDestinations m_Destinations;
+  CIQFeed<CNewsReaderView>* m_pIQFeed;
+  CIQFeedNewsQuery<CNewsReaderView>* m_pIQFeedNewsQuery;
+
   vNewsItems_t m_NewsItems;
 
 };
