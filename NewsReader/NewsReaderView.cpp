@@ -26,8 +26,10 @@
 
 CNewsReaderView::CNewsReaderView() 
 : CDialogImpl<CNewsReaderView>(), CDialogResize<CNewsReaderView>(),
-  m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
-  0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
+//  m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
+//  0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
+  m_MsgIdsForIQFeed( this, WM_IQFEED_CONNECTED, 0, 0, 0, 0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
+  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0, 0 ),
   m_stateStoryRetrieval( INACTIVE )
 {
 }
@@ -62,11 +64,11 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   int i4 = m_lvHeadlines.AddColumn( "Headline", 3 );
 
   m_lvHeadlines.SetColumnWidth( 0, 50 );
-  m_lvHeadlines.SetColumnWidth( 1, 80 );
+  m_lvHeadlines.SetColumnWidth( 1, 100 );
   m_lvHeadlines.SetColumnWidth( 2, 70 );
   m_lvHeadlines.SetColumnWidth( 3, 400 );
 
-  m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_Destinations );
+  m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_MsgIdsForIQFeed );
   m_pIQFeed->Connect();
 
   return TRUE;
@@ -92,21 +94,25 @@ void CNewsReaderView::OnMove( CPoint ptPos ) {
 
 LRESULT CNewsReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-//  m_stateUI = UI_NOSYMBOL;
-//  UpdateUIState();
   m_pIQFeed->SetNewsOn();
 
-  m_pIQFeedNewsQuery = new CIQFeedNewsQuery<CNewsReaderView>( &_Module );
+  m_pIQFeedNewsQuery = new CIQFeedNewsQuery<CNewsReaderView>( &_Module, m_MsgIdsForNewsQuery );
   m_pIQFeedNewsQuery->Connect();
 
   bHandled = true;
   return 1;
 }
 
-LRESULT CNewsReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT CNewsReaderView::OnQueryConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-//  m_stateUI = UI_STARTING;
-//  UpdateUIState();
+  m_pIQFeedNewsQuery->RetrieveConfiguration();
+
+  bHandled = true;
+  return 1;
+}
+
+/*
+LRESULT CNewsReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
   bHandled = true;
   return 1;
@@ -121,10 +127,8 @@ LRESULT CNewsReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   bHandled = true;
   return 1;
 }
-
+*/
 LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
-  // for local interpretation of the header
-  // use the iterators for pulling out the strings in order to reduce the number of copies made
 
   CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
   CIQFNewsMessage::fielddelimiter_t fd;
@@ -204,9 +208,8 @@ LRESULT CNewsReaderView::OnIQFeedStoryDone( UINT, WPARAM wParam, LPARAM lParam, 
   vNewsItems_t::size_type ix = static_cast<vNewsItems_t::size_type>( lParam );
 
   m_NewsItems[ ix ].StoryLoaded = true;
-  DisplayStory( ix );
-
   m_stateStoryRetrieval = INACTIVE;
+  DisplayStory( ix );
 
   bHandled = true;
   return 1;
@@ -227,7 +230,7 @@ LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL
   LVHITTESTINFO info; 
   info.pt = pNM->ptAction;
   int ix = m_lvHeadlines.HitTest( &info );
-
+/*
 #ifdef _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name() << " HotTrack "
@@ -237,7 +240,7 @@ LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL
     << std::endl;
   OutputDebugString( ss.str().c_str() );
 #endif
-
+*/
   bHandled = true;
   return 0;
 }
@@ -258,8 +261,6 @@ LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& b
     int ix = m_lvHeadlines.HitTest( &info );
 
     if ( -1 != ix ) {  // a valid entry was hit
-
-      // need to check if StoryLoaded, then use in memory story rather than retrieving it again
 
       DWORD_PTR ixStory = m_lvHeadlines.GetItemData(ix);
 
@@ -292,7 +293,7 @@ LRESULT CNewsReaderView::OnLVHeadlinesHover( int idCtrl, LPNMHDR pNMHDR, BOOL& b
 
 LRESULT CNewsReaderView::OnLVHeadlinesRClick( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
-  LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
+  //LPNMITEMACTIVATE pNM = reinterpret_cast<LPNMITEMACTIVATE>( pNMHDR );
 
   bHandled = true;
   return 0;
@@ -300,7 +301,7 @@ LRESULT CNewsReaderView::OnLVHeadlinesRClick( int idCtrl, LPNMHDR pNMHDR, BOOL& 
 
 LRESULT CNewsReaderView::OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
-  NMLVDISPINFO* pNM = reinterpret_cast<NMLVDISPINFO*>( pNMHDR );
+  //NMLVDISPINFO* pNM = reinterpret_cast<NMLVDISPINFO*>( pNMHDR );
 
   bHandled = true;
   return 0;

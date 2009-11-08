@@ -49,7 +49,7 @@ public:
     UINT msgConnected;
     UINT msgSendComplete;
     UINT msgDisconnected;
-    UINT msgError;
+    UINT msgError;  // not currently forwarded
     UINT msgMessageUpdate;
     UINT msgMessageSummary;
     UINT msgMessageNews;
@@ -130,6 +130,7 @@ protected:
   LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
+  // locally generated messages
   LRESULT OnDoneUpdate( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnDoneSummary( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnDoneNews( UINT, WPARAM, LPARAM, BOOL &bHandled );
@@ -139,9 +140,8 @@ protected:
 
 private:
 
-  structMessageDestinations m_structMessageDestinations;
-
   CAppModule* m_pModule;
+  structMessageDestinations m_structMessageDestinations;
 
   typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
   typename CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
@@ -202,6 +202,15 @@ template <typename T>
 LRESULT CIQFeed<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
   m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+
+  bHandled = true;
+  return 1;
+}
+
+template <typename T>
+LRESULT CIQFeed<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
 
   bHandled = true;
   return 1;
@@ -334,15 +343,6 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
       throw "Unknown message type in IQFeed"; // unknown message type
       break;
   }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
 
   bHandled = true;
   return 1;

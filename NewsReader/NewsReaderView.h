@@ -23,6 +23,14 @@
 #include "LibIQFeed/IQFeed.h"
 #include "LibIQFeed/IQFeedNewsQuery.h"
 
+// some things yet todo:
+//  use custom draw to do the headlines
+//  hash the articles to determine unique ones
+//  speak the headlines?
+//  implement cursor and return key so don't need mouse always for getting story content
+//  extract and sort symbols
+//  implement various sorts and filters
+
 class CNewsReaderView : public CDialogImpl<CNewsReaderView>,
                         public CDialogResize<CNewsReaderView>
 {
@@ -63,9 +71,11 @@ protected:
 
   enum enumMessages {
     WM_IQFEED_CONNECTED = WM_USER + 1,
-    WM_IQFEED_SENDDONE,
-    WM_IQFEED_DISCONNECTED,
-    WM_IQFEED_ERROR, 
+//    WM_IQFEED_SENDDONE,
+//    WM_IQFEED_DISCONNECTED,
+//    WM_IQFEED_ERROR, 
+
+    WM_QUERY_CONNECTED,
 
     WM_IQFEED_STORY_LINE,  // one story line
     WM_IQFEED_STORY_DONE,  // no more story lines to process from story request
@@ -89,9 +99,10 @@ protected:
     NOTIFY_HANDLER( IDC_LVHEADLINES, NM_RCLICK, OnLVHeadlinesRClick )
 
     MESSAGE_HANDLER( WM_IQFEED_CONNECTED, OnIQFeedConnected )
-    MESSAGE_HANDLER( WM_IQFEED_DISCONNECTED, OnIQFeedDisconnected )
-    MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
-    MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedError )
+    MESSAGE_HANDLER( WM_QUERY_CONNECTED, OnQueryConnected )
+//    MESSAGE_HANDLER( WM_IQFEED_DISCONNECTED, OnIQFeedDisconnected )
+//    MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
+//    MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedError )
 
 //    MSG_WM_MOVE(OnMove)
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
@@ -111,9 +122,10 @@ protected:
   LRESULT OnIQFeedStoryDone( UINT, WPARAM, LPARAM, BOOL& );
 
   LRESULT OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
-  LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
+  LRESULT OnQueryConnected( UINT, WPARAM, LPARAM, BOOL& );
+//  LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
+//  LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
+//  LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
 
   BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
   void OnDestroy();
@@ -145,8 +157,10 @@ protected:
 private:
   typedef CDialogImpl<CNewsReaderView> CThisClass;
 
-  CIQFeed<CNewsReaderView>::structMessageDestinations m_Destinations;
+  CIQFeed<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
   CIQFeed<CNewsReaderView>* m_pIQFeed;
+
+  CIQFeedNewsQuery<CNewsReaderView>::structMessageDestinations m_MsgIdsForNewsQuery;
   CIQFeedNewsQuery<CNewsReaderView>* m_pIQFeedNewsQuery;
 
   vNewsItems_t m_NewsItems;

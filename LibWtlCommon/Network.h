@@ -60,6 +60,7 @@ using boost::asio::ip::tcp;
 //   if they are not, then can use begin/end iterators to pass information
 //   or come up with a different scheme of managing iterators over multiple buffers for use by Spirit
 // need code to catch when the socket is closed for whatever reason
+// remove the timer stuff as there are other ways to keep the service running
 
 template <class ownerT, class charT = unsigned char>
 class CNetwork: public CGuiThreadImpl<CNetwork<ownerT> > {

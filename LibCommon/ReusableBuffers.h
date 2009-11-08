@@ -108,7 +108,7 @@ template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void)
 
 template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) {
   bufferT* pBuffer;
-  boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a locki
+  boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a lock
   while ( !m_qBuffer.empty() ) {
     pBuffer = m_qBuffer.front();
     m_qBuffer.pop();
@@ -122,11 +122,12 @@ template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) 
   ss << typeid( this ).name()
     << cntCreated << " Created, " 
     << cntDestroyed << " Destroyed, "
-    << cntCheckins << " Checkins, " 
     << cntCheckouts << " Checkouts, " 
+    << cntCheckins << " Checkins, " 
     << maxQsize << " Max Q Size" 
     << std::endl;
   OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
   if ( cntCreated != cntDestroyed ) {
     OutputDebugString( "  ** Created != Destroyed\n" );
   }
@@ -183,9 +184,4 @@ template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut(
 }
 
  
-// check threading id's between checkin, checkout  (is there overlapping thread?)
-// Unhandled exception at 0x00548d0d in TapeReader.exe: 0xC0000005: Access violation reading location 0x00000014.
-// in 235863, out 235886, created 893 destro 0 max 892 cur 870
-// _DEBUG_ERROR("deque iterator not dereferencable");
-// set flag to test in out?
 // upstream processing isn't keeping up, need to do 1/5 sec screen updates

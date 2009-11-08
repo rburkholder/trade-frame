@@ -25,7 +25,10 @@
 #include <LibCommon/ReusableBuffers.h>
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+//#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -43,7 +46,23 @@ public:
 
   typedef typename CNetworkClientSkeleton<CIQFeedNewsQuery<T> > inherited_t;
 
-  CIQFeedNewsQuery(CAppModule* pModule);
+  struct structMessageDestinations {
+    T* owner;
+    UINT msgConnected;
+    UINT msgSendComplete;
+    UINT msgDisconnected;
+    UINT msgError;  // not currently forwarded
+    structMessageDestinations( void )
+      : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 )
+    {};
+    structMessageDestinations( T* owner_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_ ) 
+      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ )
+    {
+      BOOST_ASSERT( NULL != owner_ );
+    };
+  };
+
+  CIQFeedNewsQuery(CAppModule* pModule, const structMessageDestinations& MessageDestinations);
   ~CIQFeedNewsQuery(void );
 
   void RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone );
@@ -58,10 +77,14 @@ protected:
     CHAIN_MSG_MAP(inherited_t)
   END_MSG_MAP()
 
-  LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  enum enumRetrieveType {
+    RETRIEVE_IDLE = 0,  // no retrievals in progress
+    RETRIEVE_STORY,  // retrieve a story
+    RETRIEVE_CONFIG  // retrieve news configuration
+  } m_stateRetrieval;
 
-  enum stateCommand {
-    IDLE,
+  enum stateStoryRetrieval {
+//    IDLE,
     WAIT4XML,
     WAIT4STORIES,
     WAIT4STORY,
@@ -73,18 +96,31 @@ protected:
     WAIT4ENDSTORIES,
     WAIT4BLANK,
     WAIT4ENDMSG
-  } m_stateCommand;
+  } m_stateStoryRetrieval;
 
   UINT m_MsgIdStoryLine;
   UINT m_MsgIdStoryDone;
   T* m_owner;
   LPARAM m_lParam; // passed back to caller as reference to story
 
+  // overloads from CNetworkClientSkeleton
+  LRESULT OnConnConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnConnDisconnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
+
+  void RetrieveConfiguration( void );
+
+  void ProcessStoryRetrieval(  linebuffer_t* buf, WPARAM wParam );
+  void ProcessConfigurationRetrieval(  linebuffer_t* buf );
 private:
 
   CAppModule* m_pModule;
+  structMessageDestinations m_structMessageDestinations;
 
-  typedef stateCommand ruleid_t;
+  typedef stateStoryRetrieval ruleid_t;
+  typedef typename inherited_t::linebuffer_t linebuffer_t;
+  typedef typename inherited_t::linebuffer_t::const_iterator iterator_t;
 
   template <typename Iterator>
   struct structStoryXmlKeywords: qi::grammar<Iterator, ruleid_t()> {
@@ -100,24 +136,118 @@ private:
           | qi::lit("</story_text>")        [qi::_val=WAIT4ENDTEXT]
           | qi::lit("</news_story>")        [qi::_val=WAIT4ENDSTORY]
           | qi::lit("</news_stories>")      [qi::_val=WAIT4ENDSTORIES]
-          | qi::lit("!ENDMSG!")             [qi::_val=WAIT4ENDMSG]
           | qi::lit("<symbols>")            [qi::_val=WAIT4SYMBOLS]
+          | qi::lit("!ENDMSG!")             [qi::_val=WAIT4ENDMSG]
           )
         ;
     }
     qi::rule<Iterator, ruleid_t()> start;
   };
 
-  typedef typename inherited_t::linebuffer_t::const_iterator iterator_t;
   structStoryXmlKeywords<iterator_t> m_grammarStoryKeywords;
+
+
+  // following uses as a base:
+  // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/employee.cpp
+  // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/calc2.cpp
+
+  enum enumNewsConfigLineTypes {
+    NC_NOCATEGORY = 0,  // illegal value
+    NC_FILLER,
+    NC_CATEGORY,
+    NC_CATEGORY_DONE,
+    NC_MAJORTYPE,
+    NC_MAJORTYPE_DONE,
+    NC_MINORTYPE,
+    NC_DONE
+  };
+/*
+  struct structNewsConfigInfo {
+    enumNewsConfigLineTypes nctype;
+    std::string ItemType;
+    std::string ItemName;
+    std::string ItemAuthCode;
+    std::string ItemIcon;
+  };
+*/
+  static void DoItemType( void ) {};
+  static void DoItemName( void ) {};
+  static void DoItemIcon( void ) {};
+  static void DoItemAuthCode( void ) {};
+  static void DoItem( void ) {};
+//  void DoItemType( const std::string& s ) {};
+//  void DoItemName( const std::string& s ) {};
+//  void DoItemIcon( const std::string& s ) {};
+//  void DoItemAuthCode( const std::string& s ) {};
+//  void DoItem( const std::string& s ) {};
+  static void StartCategory( void ) {};
+  static void EndCategory( void ) {};
+  static void StartMajorType( void ) {};
+  static void EndMajorType( void ) {};
+  static void StartMinorType( void ) {};
+  static void ConfigRetrievalDone( void ) {  };
+//  void ConfigRetrievalDone( void ) { m_stateRetrieval = RETRIEVE_IDLE; };
+
+  typedef enumNewsConfigLineTypes nc_rule_t;
+
+  template <typename Iterator>
+  struct structNewsConfiguration: qi::grammar<Iterator, nc_rule_t()> {
+
+    structNewsConfiguration(): structNewsConfiguration::base_type(start) {
+
+      item_quoted =
+        qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')[&CIQFeedNewsQuery<T>::DoItem]];
+
+//      item_equal =
+//        *qi::space >> qi::char_('=') >> *qi::space;
+
+      item_type =
+        qi::lit("type") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemType];
+
+      item_name =
+        qi::lit("name") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemName];
+
+      item_icon =
+        qi::lit("icon_id" ) >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemIcon];
+
+      item_authcode = 
+        qi::lit("auth_code") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemAuthCode];
+
+      item_elements =
+        item_type >> +qi::space >> item_name >> +qi::space >> item_authcode >> +qi::space >> item_icon;
+
+      start = qi::eps[qi::_val=NC_NOCATEGORY] // default value if nothing found, which is an error
+        >> *qi::space
+        >> ( // any one of a set of line styles:
+            qi::lit("<?xml version='1.0'?>")[qi::_val=NC_FILLER]
+        |   qi::lit("<DynamicNewsConf>")    [qi::_val=NC_FILLER]
+        | ( qi::lit("<category")            [qi::_val=NC_CATEGORY, &CIQFeedNewsQuery<T>::StartCategory] >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
+        |   qi::lit("</category>")          [qi::_val=NC_CATEGORY_DONE, &CIQFeedNewsQuery<T>::EndCategory]
+        | ( qi::lit("<major_type")          [qi::_val=NC_MAJORTYPE, &CIQFeedNewsQuery<T>::StartMajorType] >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
+        |   qi::lit("</major_type>")        [qi::_val=NC_MAJORTYPE_DONE, &CIQFeedNewsQuery<T>::EndMajorType]
+        | ( qi::lit("<minor_type")          [qi::_val=NC_MINORTYPE, &CIQFeedNewsQuery<T>::StartMinorType] >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
+        |   qi::lit("</DynamicNewsConf>")   [qi::_val=NC_FILLER]
+        |   qi::lit("!ENDMSG!")             [qi::_val=NC_DONE, &CIQFeedNewsQuery<T>::ConfigRetrievalDone]
+        )
+        ;
+    }
+
+    qi::rule<Iterator> item_elements;
+    qi::rule<Iterator, std::string()> item_quoted;
+    qi::rule<Iterator, nc_rule_t()> 
+      /*item_equal,*/ item_type, item_name, item_icon, item_authcode, start;
+  };
+
+  structNewsConfiguration<iterator_t> m_grammarDecodeNewsConfiguration;
 
 };
 
 template <typename T>
-CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule) 
+CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMessageDestinations& MessageDestinations) 
 : CNetworkClientSkeleton<CIQFeedNewsQuery<T> >( pModule, "127.0.0.1", 9100 ),
+  m_structMessageDestinations( MessageDestinations ),
   m_pModule( pModule ),
-  m_stateCommand( IDLE )
+  m_stateRetrieval( RETRIEVE_IDLE )
 {
 }
 
@@ -126,40 +256,108 @@ CIQFeedNewsQuery<T>::~CIQFeedNewsQuery() {
 }
 
 template <typename T>
+LRESULT CIQFeedNewsQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+
+  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+
+  bHandled = true;
+  return 1;
+}
+
+template <typename T>
+LRESULT CIQFeedNewsQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+
+  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+
+  bHandled = true;
+  return 1;
+}
+
+template <typename T>
+LRESULT CIQFeedNewsQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
+
+  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+
+  bHandled = true;
+  return 1;
+}
+
+template <typename T>
 LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
-  inherited_t::linebuffer_t* buf = reinterpret_cast<inherited_t::linebuffer_t*>( wParam );
-  inherited_t::linebuffer_t::const_iterator bgn = (*buf).begin();
-  inherited_t::linebuffer_t::const_iterator end = (*buf).end();
+  linebuffer_t* buf = reinterpret_cast<linebuffer_t*>( wParam );
 
 #if defined _DEBUG
   {
+    linebuffer_t::const_iterator bgn = (*buf).begin();
+    linebuffer_t::const_iterator end = (*buf).end();
+
     std::string str( bgn, end );
     str += '\n';
     OutputDebugString( str.c_str() );
-    bgn = (*buf).begin();  // restore the interator for next use
+//    bgn = (*buf).begin();  // restore the interator for next use
   }
 #endif
 
-// do his with custom iterators which pause when no more input available due to new line
+  switch ( m_stateRetrieval ) {
+    case RETRIEVE_STORY:
+      ProcessStoryRetrieval( buf, wParam );
+      break;
+    case RETRIEVE_CONFIG:
+      ProcessConfigurationRetrieval( buf );
+      break;
+    case RETRIEVE_IDLE:
+      OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess\n" );
+      break;
+  }
+
+  PostProcessedMessage( wParam );
+
+  bHandled = true;
+  return 1;
+}
+
+template <typename T>
+void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone ) {
+  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+    throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveStory: not in IDLE");
+  }
+  else {
+    m_stateRetrieval = RETRIEVE_STORY;
+    m_stateStoryRetrieval = WAIT4XML;
+    m_owner = owner;
+    m_MsgIdStoryLine = MsgIdStoryLine;
+    m_MsgIdStoryDone = MsgIdStoryDone;
+    m_lParam = lParam;
+    std::string ss;
+    ss = "NN:" + StoryId + ";";
+    Send( ss );
+  }
+}
+
+template <typename T>
+void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wParam ) {
+
+  linebuffer_t::const_iterator bgn = (*buf).begin();
+  linebuffer_t::const_iterator end = (*buf).end();
 
   ruleid_t id;  // id of line marker found during parse
   bool b = parse( bgn, end, m_grammarStoryKeywords, id );
 
-  switch (m_stateCommand ) {  //match where we are with what we are expecting
+  // do his with custom iterators which pause when no more input available due to new line
+
+  switch ( m_stateStoryRetrieval ) {  //match where we are with what we are expecting
     case WAIT4TEXT:  // this one is encountered most often so first in switch statement
       if ( WAIT4ENDTEXT == id ) {
-        m_stateCommand = WAIT4ENDSTORY;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4ENDSTORY;
       }
       else {
-        if ( id != m_stateCommand ) {
+        if ( id != m_stateStoryRetrieval ) {
           throw std::logic_error( "WAIT4TEXT");
         }
         else {  // anything else on the line?
           if ( bgn == end ) {
             // nothing else to process
-            PostProcessedMessage( wParam );
           }
           else { // erase the keyword, if any, and send buffer onwards
             buf->erase( buf->begin(), bgn );  
@@ -170,67 +368,56 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
       }
       break;
     case WAIT4XML:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4XML");
       }
       else {
-        m_stateCommand = WAIT4STORIES;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4STORIES;
       }
       break;
     case WAIT4STORIES:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4STORIES");
       }
       else {
-        m_stateCommand = WAIT4STORY;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4STORY;
       }
       break;
     case WAIT4STORY:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4STORY");
       }
       else {
-        m_stateCommand = WAIT4LINK;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4LINK;
       }
       break;
     case WAIT4LINK:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4LINK");
       }
       else {
-        m_stateCommand = WAIT4TEXT;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4TEXT;
       }
       break;
     case WAIT4ENDSTORY:
       switch ( id ) {
         case WAIT4ENDSTORY:
-          m_stateCommand = WAIT4ENDSTORIES;
-          PostProcessedMessage( wParam );
+          m_stateStoryRetrieval = WAIT4ENDSTORIES;
           break;
         case WAIT4SYMBOLS:
-          m_stateCommand = WAIT4ENDSTORY;
-          PostProcessedMessage( wParam );
+          m_stateStoryRetrieval = WAIT4ENDSTORY;
           break;
         default:
           throw std::logic_error( "WAIT4ENDSTORY");
           break;
-      }
-      if ( id != m_stateCommand ) {
-      }
-      else {
-      }
+          }
       break;
     case WAIT4ENDSTORIES:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4ENDSTORIES");
       }
       else {
-        m_stateCommand = WAIT4BLANK;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4BLANK;
       }
       break;
     case WAIT4BLANK:
@@ -238,42 +425,52 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
         throw std::logic_error( "WAIT4BLANK");
       }
       else {
-        m_stateCommand = WAIT4ENDMSG;
-        PostProcessedMessage( wParam );
+        m_stateStoryRetrieval = WAIT4ENDMSG;
       }
       break;
     case WAIT4ENDMSG:
-      if ( id != m_stateCommand ) {
+      if ( id != m_stateStoryRetrieval ) {
         throw std::logic_error( "WAIT4ENDMSG");
       }
       else {
         // send end marker
-        m_stateCommand = IDLE;
-        PostProcessedMessage( wParam );
+        //stateStoryRetrieval = IDLE;
+        m_stateRetrieval = RETRIEVE_IDLE;
         if ( 0 != m_MsgIdStoryDone ) m_owner->PostMessage( m_MsgIdStoryDone, NULL, m_lParam );
       }
       break;
-    case IDLE:
-      break;
+//    case IDLE:
+//      break;
   }
 
-  bHandled = true;
-  return 1;
 }
 
 template <typename T>
-void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone ) {
-  if ( IDLE != m_stateCommand ) {
-    throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveStory: not in IDLE");
+void CIQFeedNewsQuery<T>::RetrieveConfiguration( void ) {
+  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+    throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveConfiguration: not in IDLE");
   }
   else {
-    m_stateCommand = WAIT4XML;
-    m_owner = owner;
-    m_MsgIdStoryLine = MsgIdStoryLine;
-    m_MsgIdStoryDone = MsgIdStoryDone;
-    m_lParam = lParam;
+    m_stateRetrieval = RETRIEVE_CONFIG;
+    //m_stateCommand = WAIT4XML;
+    //m_owner = owner;
+    //m_MsgIdStoryLine = MsgIdStoryLine;
+    //m_MsgIdStoryDone = MsgIdStoryDone;
+    //m_lParam = lParam;
     std::string ss;
-    ss = "NN:" + StoryId + ";";
+    ss = "NC;";
     Send( ss );
   }
+}
+
+template <typename T>
+void CIQFeedNewsQuery<T>::ProcessConfigurationRetrieval( linebuffer_t* buf ) {
+
+  linebuffer_t::const_iterator bgn = (*buf).begin();
+  linebuffer_t::const_iterator end = (*buf).end();
+
+  nc_rule_t id;  // id of line marker found during parse
+  bool b = parse( bgn, end, m_grammarDecodeNewsConfiguration, id );
+
+
 }
