@@ -28,7 +28,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -39,6 +39,110 @@ namespace ascii = boost::spirit::ascii;
 #include <stdlib.h>
 #include <crtdbg.h>
 // custom off
+
+
+// following uses as a base:
+// http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/employee.cpp
+// http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/calc2.cpp
+
+
+enum enumNewsConfigLineTypes {
+  NC_NOCATEGORY = 0,  // illegal value
+  NC_FILLER,
+  NC_CATEGORY,
+  NC_CATEGORY_DONE,
+  NC_MAJORTYPE,
+  NC_MAJORTYPE_DONE,
+  NC_MINORTYPE,
+  NC_DONE
+};
+
+struct structNewsConfigInfo {
+//  enumNewsConfigLineTypes ncinfo;
+  std::string ItemType;
+  std::string ItemName;
+  std::string ItemAuthCode;
+  std::string ItemIcon;
+};
+
+BOOST_FUSION_ADAPT_STRUCT(
+  structNewsConfigInfo,
+//  (enumNewsConfigLineTypes, ncinfo)
+  (std::string, ItemType)
+  (std::string, ItemName)
+  (std::string, ItemAuthCode)
+  (std::string, ItemIcon)
+)
+
+typedef structNewsConfigInfo nc_rule_t;
+
+template <typename Iterator>
+struct structNewsConfiguration: qi::grammar<Iterator, structNewsConfigInfo()> {
+
+  structNewsConfiguration(): structNewsConfiguration::base_type(start) {
+
+    item_quoted =
+      qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')/*[qi::_val = qi::_1]*/];
+
+    item_equal =
+      *qi::space >> qi::char_('=') >> *qi::space;
+
+    item_type =
+      //        qi::lit("type") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemType];
+      qi::lit("type") >> item_equal >> item_quoted;
+
+    item_name =
+      //        qi::lit("name") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemName];
+      qi::lit("name") >> item_equal >> item_quoted;
+
+    item_icon =
+      //        qi::lit("icon_id" ) >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemIcon];
+      qi::lit("icon_id" ) >> item_equal >> item_quoted;
+
+    item_authcode = 
+      //        qi::lit("auth_code") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemAuthCode];
+      qi::lit("auth_code") >> item_equal >> item_quoted;
+
+    item_elements =
+      item_type >> +qi::space >> item_name >> +qi::space >> item_authcode >> +qi::space >> item_icon;
+
+//    start = qi::eps[qi::_val=NC_NOCATEGORY] // default value if nothing found, which is an error
+        start = 
+     *qi::space
+      >> ( // any one of a set of line styles:
+      
+      qi::lit("<?xml version='1.0'?>")
+    |   qi::lit("<DynamicNewsConf>")    
+    | ( qi::lit("<category")             >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
+      |   qi::lit("</category>")          
+    | ( qi::lit("<major_type")           >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
+      |   qi::lit("</major_type>")        
+    | ( qi::lit("<minor_type")           >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
+      |   qi::lit("</DynamicNewsConf>")   
+    |   qi::lit("!ENDMSG!")            
+/*
+    qi::lit("<?xml version='1.0'?>")[qi::_val=NC_FILLER]
+    |   qi::lit("<DynamicNewsConf>")    [qi::_val=NC_FILLER]
+    | ( qi::lit("<category")            [qi::_val=NC_CATEGORY] >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
+      |   qi::lit("</category>")          [qi::_val=NC_CATEGORY_DONE]
+    | ( qi::lit("<major_type")          [qi::_val=NC_MAJORTYPE] >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
+      |   qi::lit("</major_type>")        [qi::_val=NC_MAJORTYPE_DONE]
+    | ( qi::lit("<minor_type")          [qi::_val=NC_MINORTYPE] >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
+      |   qi::lit("</DynamicNewsConf>")   [qi::_val=NC_FILLER]
+    |   qi::lit("!ENDMSG!")             [qi::_val=NC_DONE]
+*/
+    )
+      ;
+  }
+
+  qi::rule<Iterator> item_elements, item_equal;
+  qi::rule<Iterator, std::string()> item_quoted;
+  qi::rule<Iterator, std::string()> item_type, item_name, item_icon, item_authcode;
+  qi::rule<Iterator, structNewsConfigInfo()> start;
+};
+
+
+
 
 template <typename T>
 class CIQFeedNewsQuery: public CNetworkClientSkeleton<CIQFeedNewsQuery<T> > {
@@ -113,6 +217,9 @@ protected:
 
   void ProcessStoryRetrieval(  linebuffer_t* buf, WPARAM wParam );
   void ProcessConfigurationRetrieval(  linebuffer_t* buf );
+
+
+
 private:
 
   CAppModule* m_pModule;
@@ -147,98 +254,26 @@ private:
   structStoryXmlKeywords<iterator_t> m_grammarStoryKeywords;
 
 
-  // following uses as a base:
-  // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/employee.cpp
-  // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/calc2.cpp
-
-  enum enumNewsConfigLineTypes {
-    NC_NOCATEGORY = 0,  // illegal value
-    NC_FILLER,
-    NC_CATEGORY,
-    NC_CATEGORY_DONE,
-    NC_MAJORTYPE,
-    NC_MAJORTYPE_DONE,
-    NC_MINORTYPE,
-    NC_DONE
-  };
-/*
-  struct structNewsConfigInfo {
-    enumNewsConfigLineTypes nctype;
-    std::string ItemType;
-    std::string ItemName;
-    std::string ItemAuthCode;
-    std::string ItemIcon;
-  };
-*/
-  static void DoItemType( void ) {};
-  static void DoItemName( void ) {};
-  static void DoItemIcon( void ) {};
-  static void DoItemAuthCode( void ) {};
-  static void DoItem( void ) {};
-//  void DoItemType( const std::string& s ) {};
-//  void DoItemName( const std::string& s ) {};
-//  void DoItemIcon( const std::string& s ) {};
-//  void DoItemAuthCode( const std::string& s ) {};
-//  void DoItem( const std::string& s ) {};
-  static void StartCategory( void ) {};
-  static void EndCategory( void ) {};
-  static void StartMajorType( void ) {};
-  static void EndMajorType( void ) {};
-  static void StartMinorType( void ) {};
-  static void ConfigRetrievalDone( void ) {  };
-//  void ConfigRetrievalDone( void ) { m_stateRetrieval = RETRIEVE_IDLE; };
-
-  typedef enumNewsConfigLineTypes nc_rule_t;
-
-  template <typename Iterator>
-  struct structNewsConfiguration: qi::grammar<Iterator, nc_rule_t()> {
-
-    structNewsConfiguration(): structNewsConfiguration::base_type(start) {
-
-      item_quoted =
-        qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')[&CIQFeedNewsQuery<T>::DoItem]];
-
-//      item_equal =
-//        *qi::space >> qi::char_('=') >> *qi::space;
-
-      item_type =
-        qi::lit("type") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemType];
-
-      item_name =
-        qi::lit("name") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemName];
-
-      item_icon =
-        qi::lit("icon_id" ) >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemIcon];
-
-      item_authcode = 
-        qi::lit("auth_code") >> *qi::space >> qi::char_('=') >> *qi::space >> item_quoted[&CIQFeedNewsQuery<T>::DoItemAuthCode];
-
-      item_elements =
-        item_type >> +qi::space >> item_name >> +qi::space >> item_authcode >> +qi::space >> item_icon;
-
-      start = qi::eps[qi::_val=NC_NOCATEGORY] // default value if nothing found, which is an error
-        >> *qi::space
-        >> ( // any one of a set of line styles:
-            qi::lit("<?xml version='1.0'?>")[qi::_val=NC_FILLER]
-        |   qi::lit("<DynamicNewsConf>")    [qi::_val=NC_FILLER]
-        | ( qi::lit("<category")            [qi::_val=NC_CATEGORY, &CIQFeedNewsQuery<T>::StartCategory] >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
-        |   qi::lit("</category>")          [qi::_val=NC_CATEGORY_DONE, &CIQFeedNewsQuery<T>::EndCategory]
-        | ( qi::lit("<major_type")          [qi::_val=NC_MAJORTYPE, &CIQFeedNewsQuery<T>::StartMajorType] >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
-        |   qi::lit("</major_type>")        [qi::_val=NC_MAJORTYPE_DONE, &CIQFeedNewsQuery<T>::EndMajorType]
-        | ( qi::lit("<minor_type")          [qi::_val=NC_MINORTYPE, &CIQFeedNewsQuery<T>::StartMinorType] >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
-        |   qi::lit("</DynamicNewsConf>")   [qi::_val=NC_FILLER]
-        |   qi::lit("!ENDMSG!")             [qi::_val=NC_DONE, &CIQFeedNewsQuery<T>::ConfigRetrievalDone]
-        )
-        ;
-    }
-
-    qi::rule<Iterator> item_elements;
-    qi::rule<Iterator, std::string()> item_quoted;
-    qi::rule<Iterator, nc_rule_t()> 
-      /*item_equal,*/ item_type, item_name, item_icon, item_authcode, start;
-  };
-
   structNewsConfiguration<iterator_t> m_grammarDecodeNewsConfiguration;
+
+  qi::rule<iterator_t> ruleItemEqual;
+  qi::rule<iterator_t, std::string()> ruleItemQuoted;
+  qi::rule<iterator_t> ruleElements;
+  qi::rule<iterator_t, std::string()> ruleItemType, ruleItemName, ruleItemIcon, ruleItemAuthCode;
+  //qi::rule<iterator_t, structNewsConfigInfo()> start;
+  qi::rule<iterator_t> ruleQueryKeyword;  
+
+  inline void DoCategoryStart( void ) {};
+  inline void DoCategoryStop( void ) {};
+  inline void DoMajorTypeStart( void ) {};
+  inline void DoMajorTypeStop( void ) {};
+  inline void DoMinorType( void ) {};
+  inline void DoEndMsg( void ) {};
+
+  inline void DoItemType( const std::string& s ) {};
+  inline void DoItemName( const std::string& s ) {};
+  inline void DoItemIcon( const std::string& s ) {};
+  inline void DoItemAuthCode( const std::string& s ) {};
 
 };
 
@@ -249,6 +284,43 @@ CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMess
   m_pModule( pModule ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
+  ruleQueryKeyword = 
+    *qi::space
+    >> ( // any one of a set of line styles:
+        qi::lit("<?xml version='1.0'?>")
+    |   qi::lit("<DynamicNewsConf>")    
+    | ( qi::lit("<category")            [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoCategoryStart, this)] 
+                                               >> +qi::space >> ruleItemName >> *qi::space >> qi::char_('>') )
+    |   qi::lit("</category>")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoCategoryStop, this)]
+    | ( qi::lit("<major_type")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMajorTypeStart, this)] 
+                                               >> +qi::space >> ruleElements >> *qi::space >> qi::char_('>') )
+    |   qi::lit("</major_type>")        [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMajorTypeStop, this)]
+    | ( qi::lit("<minor_type")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMinorType, this)] 
+                                               >> +qi::space >> ruleElements >> *qi::space >> qi::lit("/>") )
+    |   qi::lit("</DynamicNewsConf>") 
+    |   qi::lit("!ENDMSG!")             [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoEndMsg, this)]
+    );
+
+    ruleItemQuoted =
+      qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')/*[qi::_val = qi::_1]*/];
+
+    ruleItemEqual =
+      *qi::space >> qi::char_('=') >> *qi::space;
+
+    ruleItemType =
+      qi::lit("type") >> ruleItemEqual >> ruleItemQuoted[boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoItemType, this, qi::_1)];
+
+    ruleItemName =
+      qi::lit("name") >> ruleItemEqual >> ruleItemQuoted[boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoItemName, this, qi::_1)];
+
+    ruleItemIcon =
+      qi::lit("icon_id" ) >> ruleItemEqual >> ruleItemQuoted[boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoItemIcon, this, qi::_1)];
+
+    ruleItemAuthCode = 
+      qi::lit("auth_code") >> ruleItemEqual >> ruleItemQuoted[boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoItemAuthCode, this, qi::_1)];
+
+    ruleElements =
+      ruleItemType >> +qi::space >> ruleItemName >> +qi::space >> ruleItemAuthCode >> +qi::space >> ruleItemIcon;
 }
 
 template <typename T>
@@ -469,8 +541,12 @@ void CIQFeedNewsQuery<T>::ProcessConfigurationRetrieval( linebuffer_t* buf ) {
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
 
-  nc_rule_t id;  // id of line marker found during parse
-  bool b = parse( bgn, end, m_grammarDecodeNewsConfiguration, id );
+  structNewsConfigInfo info;
+  //std::string s;
+  //int i;
+  //nc_rule_t id;  // id of line marker found during parse
+//  bool b = parse( bgn, end, m_grammarDecodeNewsConfiguration, info );
 
+  //OutputDebugString( s.c_str() );
 
 }
