@@ -29,7 +29,7 @@ CNewsReaderView::CNewsReaderView()
 //  m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
 //  0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
   m_MsgIdsForIQFeed( this, WM_IQFEED_CONNECTED, 0, 0, 0, 0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
-  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0, 0 ),
+  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0, 0, 0, 0, 0, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE, 0 ),
   m_stateStoryRetrieval( INACTIVE )
 {
 }
@@ -274,7 +274,7 @@ LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& b
         m_edtStory.Clear();
 
         m_pIQFeedNewsQuery->RetrieveStory( 
-          m_NewsItems[ixStory].StoryId, this, ixStory, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE );
+          m_NewsItems[ixStory].StoryId, ixStory );
       }
     }
   }

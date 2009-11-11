@@ -17,8 +17,10 @@
 // matches up story text, calculates hashes to reduce redundant stories
 // performs some sentiment analysis
 // handles refresh of 'sources' list
+// put parsers in separate compilation units to cut down on compile time
 
 #include <string>
+#include <vector>
 
 #include <LibWtlCommon/NetworkClientSkeleton.h>
 
@@ -46,102 +48,6 @@ namespace ascii = boost::spirit::ascii;
 // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/calc2.cpp
 
 
-enum enumNewsConfigLineTypes {
-  NC_NOCATEGORY = 0,  // illegal value
-  NC_FILLER,
-  NC_CATEGORY,
-  NC_CATEGORY_DONE,
-  NC_MAJORTYPE,
-  NC_MAJORTYPE_DONE,
-  NC_MINORTYPE,
-  NC_DONE
-};
-
-struct structNewsConfigInfo {
-//  enumNewsConfigLineTypes ncinfo;
-  std::string ItemType;
-  std::string ItemName;
-  std::string ItemAuthCode;
-  std::string ItemIcon;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(
-  structNewsConfigInfo,
-//  (enumNewsConfigLineTypes, ncinfo)
-  (std::string, ItemType)
-  (std::string, ItemName)
-  (std::string, ItemAuthCode)
-  (std::string, ItemIcon)
-)
-
-typedef structNewsConfigInfo nc_rule_t;
-
-template <typename Iterator>
-struct structNewsConfiguration: qi::grammar<Iterator, structNewsConfigInfo()> {
-
-  structNewsConfiguration(): structNewsConfiguration::base_type(start) {
-
-    item_quoted =
-      qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')/*[qi::_val = qi::_1]*/];
-
-    item_equal =
-      *qi::space >> qi::char_('=') >> *qi::space;
-
-    item_type =
-      //        qi::lit("type") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemType];
-      qi::lit("type") >> item_equal >> item_quoted;
-
-    item_name =
-      //        qi::lit("name") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemName];
-      qi::lit("name") >> item_equal >> item_quoted;
-
-    item_icon =
-      //        qi::lit("icon_id" ) >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemIcon];
-      qi::lit("icon_id" ) >> item_equal >> item_quoted;
-
-    item_authcode = 
-      //        qi::lit("auth_code") >> item_equal >> item_quoted[&CIQFeedNewsQuery<T>::DoItemAuthCode];
-      qi::lit("auth_code") >> item_equal >> item_quoted;
-
-    item_elements =
-      item_type >> +qi::space >> item_name >> +qi::space >> item_authcode >> +qi::space >> item_icon;
-
-//    start = qi::eps[qi::_val=NC_NOCATEGORY] // default value if nothing found, which is an error
-        start = 
-     *qi::space
-      >> ( // any one of a set of line styles:
-      
-      qi::lit("<?xml version='1.0'?>")
-    |   qi::lit("<DynamicNewsConf>")    
-    | ( qi::lit("<category")             >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
-      |   qi::lit("</category>")          
-    | ( qi::lit("<major_type")           >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
-      |   qi::lit("</major_type>")        
-    | ( qi::lit("<minor_type")           >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
-      |   qi::lit("</DynamicNewsConf>")   
-    |   qi::lit("!ENDMSG!")            
-/*
-    qi::lit("<?xml version='1.0'?>")[qi::_val=NC_FILLER]
-    |   qi::lit("<DynamicNewsConf>")    [qi::_val=NC_FILLER]
-    | ( qi::lit("<category")            [qi::_val=NC_CATEGORY] >> +qi::space >> item_name >> *qi::space >> qi::char_('>') )
-      |   qi::lit("</category>")          [qi::_val=NC_CATEGORY_DONE]
-    | ( qi::lit("<major_type")          [qi::_val=NC_MAJORTYPE] >> +qi::space >> item_elements >> *qi::space >> qi::char_('>') )
-      |   qi::lit("</major_type>")        [qi::_val=NC_MAJORTYPE_DONE]
-    | ( qi::lit("<minor_type")          [qi::_val=NC_MINORTYPE] >> +qi::space >> item_elements >> *qi::space >> qi::lit("/>") )
-      |   qi::lit("</DynamicNewsConf>")   [qi::_val=NC_FILLER]
-    |   qi::lit("!ENDMSG!")             [qi::_val=NC_DONE]
-*/
-    )
-      ;
-  }
-
-  qi::rule<Iterator> item_elements, item_equal;
-  qi::rule<Iterator, std::string()> item_quoted;
-  qi::rule<Iterator, std::string()> item_type, item_name, item_icon, item_authcode;
-  qi::rule<Iterator, structNewsConfigInfo()> start;
-};
-
-
 
 
 template <typename T>
@@ -155,12 +61,25 @@ public:
     UINT msgConnected;
     UINT msgSendComplete;
     UINT msgDisconnected;
+    UINT msgNewsConfigCategory;
+    UINT msgNewsConfigMajorType;
+    UINT msgNewsConfigMinorType;
+    UINT msgNewsConfigDone;
+    UINT msgNewsStoryLine;
+    UINT msgNewsStoryDone;
     UINT msgError;  // not currently forwarded
     structMessageDestinations( void )
-      : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 )
+      : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
+        msgNewsConfigCategory( 0 ), msgNewsConfigMajorType( 0 ), msgNewsConfigMinorType( 0 ), msgNewsConfigDone( 0 ),
+        msgNewsStoryLine( 0 ), msgNewsStoryDone( 0 )
     {};
-    structMessageDestinations( T* owner_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_ ) 
-      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ )
+    structMessageDestinations( T* owner_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
+      UINT msgNewsConfigCategory_, UINT msgNewsConfigMajorType_, UINT msgNewsConfigMinorType_, UINT msgNewsConfigDone_,
+      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_
+      ) 
+      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
+      msgNewsConfigCategory( msgNewsConfigCategory_ ), msgNewsConfigMajorType( msgNewsConfigMajorType_ ), msgNewsConfigMinorType( msgNewsConfigMinorType_ ), msgNewsConfigDone( msgNewsConfigDone_ ),
+      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ )
     {
       BOOST_ASSERT( NULL != owner_ );
     };
@@ -169,7 +88,7 @@ public:
   CIQFeedNewsQuery(CAppModule* pModule, const structMessageDestinations& MessageDestinations);
   ~CIQFeedNewsQuery(void );
 
-  void RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone );
+  void RetrieveStory( const std::string& StoryId, LPARAM lParam );
 
 protected:
 
@@ -202,10 +121,10 @@ protected:
     WAIT4ENDMSG
   } m_stateStoryRetrieval;
 
-  UINT m_MsgIdStoryLine;
-  UINT m_MsgIdStoryDone;
-  T* m_owner;
-  LPARAM m_lParam; // passed back to caller as reference to story
+//  UINT m_MsgIdStoryLine;
+//  UINT m_MsgIdStoryDone;
+//  T* m_owner;
+  LPARAM m_lParam; // passed back to caller as reference to story, therefore only one story at a time, which is inherent in protocol anyway
 
   // overloads from CNetworkClientSkeleton
   LRESULT OnConnConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
@@ -217,8 +136,6 @@ protected:
 
   void ProcessStoryRetrieval(  linebuffer_t* buf, WPARAM wParam );
   void ProcessConfigurationRetrieval(  linebuffer_t* buf );
-
-
 
 private:
 
@@ -253,27 +170,79 @@ private:
 
   structStoryXmlKeywords<iterator_t> m_grammarStoryKeywords;
 
+  struct structNCElements {
+    std::string ItemName;
+    std::string ItemType;
+    std::string ItemAuthCode;
+    std::string ItemIcon;
+  } *m_pElements;
 
-  structNewsConfiguration<iterator_t> m_grammarDecodeNewsConfiguration;
+  struct structNCCategory {
+    structNCElements Elements;
+    //std::vector<vNCMajorType_t::size_type> vMajorTypes;
+  };
+  typedef std::vector<structNCCategory> vNCCategory_t;
 
-  qi::rule<iterator_t> ruleItemEqual;
+  struct structNCMajorType {
+    typename vNCCategory_t::size_type ixCategory;
+    structNCElements Elements;
+    //std::vector<vNCMinorType_t::size_type> vMinorTypes;
+    structNCMajorType( typename vNCCategory_t::size_type ixCategory_ ): ixCategory( ixCategory_ ) {};;
+  };
+  typedef std::vector<structNCMajorType> vNCMajorType_t;
+
+  struct structNCMinorType {
+    typename vNCMajorType_t::size_type ixMajorItem;
+    structNCElements Elements;
+    structNCMinorType( typename vNCMajorType_t::size_type ixMajorItem_ ): ixMajorItem( ixMajorItem_ ) {};;
+  }; 
+  typedef std::vector<structNCMinorType> vNCMinorType_t;
+  
+
+  vNCCategory_t m_vNCCategory;
+  vNCMajorType_t m_vNCMajorType;
+  vNCMinorType_t m_vNCMinorType;
+
+  qi::rule<iterator_t> ruleItemEqual, ruleItemQuote;
   qi::rule<iterator_t, std::string()> ruleItemQuoted;
   qi::rule<iterator_t> ruleElements;
   qi::rule<iterator_t, std::string()> ruleItemType, ruleItemName, ruleItemIcon, ruleItemAuthCode;
-  //qi::rule<iterator_t, structNewsConfigInfo()> start;
-  qi::rule<iterator_t> ruleQueryKeyword;  
+  qi::rule<iterator_t> ruleNewsConfigKeyword;  
 
-  inline void DoCategoryStart( void ) {};
+  inline void DoCategoryStart( void ) {
+    structNCCategory Category;
+    m_vNCCategory.push_back( Category );
+    m_pElements = &m_vNCCategory.back().Elements;
+  };
   inline void DoCategoryStop( void ) {};
-  inline void DoMajorTypeStart( void ) {};
+  inline void DoMajorTypeStart( void ) {
+    structNCMajorType MajorType( m_vNCCategory.size()-1 );
+    m_vNCMajorType.push_back( MajorType );
+    m_pElements = &m_vNCMajorType.back().Elements;
+  };
   inline void DoMajorTypeStop( void ) {};
-  inline void DoMinorType( void ) {};
-  inline void DoEndMsg( void ) {};
+  inline void DoMinorTypeStart( void ) {
+    structNCMinorType MinorType( m_vNCMajorType.size()-1 );
+    m_vNCMinorType.push_back( MinorType );
+    m_pElements = &m_vNCMinorType.back().Elements;
+  };
+  inline void DoMinorStop( void ) {};
+  inline void DoEndMsg( void ) {
+    m_stateRetrieval = RETRIEVE_IDLE;
+  };
 
-  inline void DoItemType( const std::string& s ) {};
-  inline void DoItemName( const std::string& s ) {};
-  inline void DoItemIcon( const std::string& s ) {};
-  inline void DoItemAuthCode( const std::string& s ) {};
+  inline void DoItemType( const std::string& str ) {
+    m_pElements->ItemType = str;
+  };
+  inline void DoItemName( const std::string& str ) {
+    m_pElements->ItemName = str;
+  };
+  inline void DoItemIcon( const std::string& str ) {
+    m_pElements->ItemIcon = str;
+  };
+  inline void DoItemAuthCode( const std::string& str ) {
+    m_pElements->ItemAuthCode = str;
+  };
 
 };
 
@@ -284,7 +253,7 @@ CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMess
   m_pModule( pModule ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
-  ruleQueryKeyword = 
+  ruleNewsConfigKeyword = 
     *qi::space
     >> ( // any one of a set of line styles:
         qi::lit("<?xml version='1.0'?>")
@@ -295,14 +264,16 @@ CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMess
     | ( qi::lit("<major_type")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMajorTypeStart, this)] 
                                                >> +qi::space >> ruleElements >> *qi::space >> qi::char_('>') )
     |   qi::lit("</major_type>")        [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMajorTypeStop, this)]
-    | ( qi::lit("<minor_type")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMinorType, this)] 
+    | ( qi::lit("<minor_type")          [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoMinorTypeStart, this)] 
                                                >> +qi::space >> ruleElements >> *qi::space >> qi::lit("/>") )
     |   qi::lit("</DynamicNewsConf>") 
     |   qi::lit("!ENDMSG!")             [boost::phoenix::bind(&CIQFeedNewsQuery<T>::DoEndMsg, this)]
     );
 
+    ruleItemQuote = qi::char_('"');
+
     ruleItemQuoted =
-      qi::lexeme[qi::char_('"') >> *(qi::char_ - qi::char_('"')) >> qi::char_('"')/*[qi::_val = qi::_1]*/];
+      ruleItemQuote >> qi::lexeme[*(qi::char_ - qi::char_('"'))] >> ruleItemQuote;
 
     ruleItemEqual =
       *qi::space >> qi::char_('=') >> *qi::space;
@@ -330,7 +301,9 @@ CIQFeedNewsQuery<T>::~CIQFeedNewsQuery() {
 template <typename T>
 LRESULT CIQFeedNewsQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
-  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+  if ( 0 != m_structMessageDestinations.msgConnected ) {
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+  }
 
   bHandled = true;
   return 1;
@@ -339,7 +312,10 @@ LRESULT CIQFeedNewsQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL 
 template <typename T>
 LRESULT CIQFeedNewsQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
-  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+  if ( 0 != m_structMessageDestinations.msgDisconnected ) {
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+  }
+  
 
   bHandled = true;
   return 1;
@@ -348,7 +324,9 @@ LRESULT CIQFeedNewsQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BO
 template <typename T>
 LRESULT CIQFeedNewsQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+  if( 0 != m_structMessageDestinations.msgSendComplete ) {
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+  }
 
   bHandled = true;
   return 1;
@@ -390,16 +368,16 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
 }
 
 template <typename T>
-void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, T* owner, LPARAM lParam, UINT MsgIdStoryLine, UINT MsgIdStoryDone ) {
+void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, LPARAM lParam ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedNewsQuery<T>::RetrieveStory: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_STORY;
     m_stateStoryRetrieval = WAIT4XML;
-    m_owner = owner;
-    m_MsgIdStoryLine = MsgIdStoryLine;
-    m_MsgIdStoryDone = MsgIdStoryDone;
+    //m_owner = owner;
+    //m_MsgIdStoryLine = MsgIdStoryLine;
+    //m_MsgIdStoryDone = MsgIdStoryDone;
     m_lParam = lParam;
     std::string ss;
     ss = "NN:" + StoryId + ";";
@@ -434,7 +412,9 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
           else { // erase the keyword, if any, and send buffer onwards
             buf->erase( buf->begin(), bgn );  
             // emit line
-            if ( 0 != m_MsgIdStoryLine ) m_owner->PostMessage( m_MsgIdStoryLine, wParam, m_lParam );
+            if ( 0 != m_structMessageDestinations.msgNewsStoryLine ) {
+              m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsStoryLine, wParam, m_lParam );
+            }
           }
         }
       }
@@ -506,13 +486,12 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
       }
       else {
         // send end marker
-        //stateStoryRetrieval = IDLE;
         m_stateRetrieval = RETRIEVE_IDLE;
-        if ( 0 != m_MsgIdStoryDone ) m_owner->PostMessage( m_MsgIdStoryDone, NULL, m_lParam );
+        if ( 0 != m_structMessageDestinations.msgNewsStoryDone ) {
+          m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsStoryDone, 0, m_lParam );
+        }
       }
       break;
-//    case IDLE:
-//      break;
   }
 
 }
@@ -524,11 +503,6 @@ void CIQFeedNewsQuery<T>::RetrieveConfiguration( void ) {
   }
   else {
     m_stateRetrieval = RETRIEVE_CONFIG;
-    //m_stateCommand = WAIT4XML;
-    //m_owner = owner;
-    //m_MsgIdStoryLine = MsgIdStoryLine;
-    //m_MsgIdStoryDone = MsgIdStoryDone;
-    //m_lParam = lParam;
     std::string ss;
     ss = "NC;";
     Send( ss );
@@ -541,12 +515,6 @@ void CIQFeedNewsQuery<T>::ProcessConfigurationRetrieval( linebuffer_t* buf ) {
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
 
-  structNewsConfigInfo info;
-  //std::string s;
-  //int i;
-  //nc_rule_t id;  // id of line marker found during parse
-//  bool b = parse( bgn, end, m_grammarDecodeNewsConfiguration, info );
-
-  //OutputDebugString( s.c_str() );
+  bool b = parse( bgn, end, ruleNewsConfigKeyword);
 
 }
