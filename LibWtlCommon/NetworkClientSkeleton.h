@@ -109,7 +109,7 @@ protected:
   void PostMessage( UINT id, WPARAM wparam = NULL, LPARAM lparam = NULL ) {
     PostThreadMessage( id, wparam, lparam );
   }
-  void PostProcessedMessage( WPARAM wParam ) {
+  void ReturnLineBuffer( WPARAM wParam ) {
     m_pNetworkConnection->PostThreadMessage( network_t::WM_NETWORK_PROCESSED, wParam );
   }
 

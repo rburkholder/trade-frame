@@ -351,7 +351,7 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
 
@@ -364,7 +364,7 @@ LRESULT CIQFeed<T>::OnDoneUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHan
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
 
@@ -377,7 +377,7 @@ LRESULT CIQFeed<T>::OnDoneSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHa
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneNews( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
 
@@ -390,7 +390,7 @@ LRESULT CIQFeed<T>::OnDoneNews( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandl
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
 
@@ -403,7 +403,7 @@ LRESULT CIQFeed<T>::OnDoneFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL 
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneTime( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFTimeMessage* msg = reinterpret_cast<CIQFTimeMessage*>( lParam );
 
@@ -416,7 +416,7 @@ LRESULT CIQFeed<T>::OnDoneTime( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandl
 template <typename T>
 LRESULT CIQFeed<T>::OnDoneSystem( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
-  PostProcessedMessage( wParam );
+  ReturnLineBuffer( wParam );
 
   CIQFSystemMessage* msg = reinterpret_cast<CIQFSystemMessage*>( lParam );
 

@@ -119,7 +119,7 @@ template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) 
   }
 #ifdef _DEBUG
   std::stringstream ss;
-  ss << typeid( this ).name()
+  ss << typeid( this ).name() << ": "
     << cntCreated << " Created, " 
     << cntDestroyed << " Destroyed, "
     << cntCheckouts << " Checkouts, " 

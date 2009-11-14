@@ -73,13 +73,16 @@ public:
         msgNewsConfigCategory( 0 ), msgNewsConfigMajorType( 0 ), msgNewsConfigMinorType( 0 ), msgNewsConfigDone( 0 ),
         msgNewsStoryLine( 0 ), msgNewsStoryDone( 0 )
     {};
-    structMessageDestinations( T* owner_, UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
+    structMessageDestinations( T* owner_, 
+      UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_,
       UINT msgNewsConfigCategory_, UINT msgNewsConfigMajorType_, UINT msgNewsConfigMinorType_, UINT msgNewsConfigDone_,
-      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_
+      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_, 
+      UINT msgError_
       ) 
-      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
+      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ),
       msgNewsConfigCategory( msgNewsConfigCategory_ ), msgNewsConfigMajorType( msgNewsConfigMajorType_ ), msgNewsConfigMinorType( msgNewsConfigMinorType_ ), msgNewsConfigDone( msgNewsConfigDone_ ),
-      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ )
+      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ ), 
+      msgError( msgError_ )
     {
       BOOST_ASSERT( NULL != owner_ );
     };
@@ -107,7 +110,6 @@ protected:
   } m_stateRetrieval;
 
   enum stateStoryRetrieval {
-//    IDLE,
     WAIT4XML,
     WAIT4STORIES,
     WAIT4STORY,
@@ -121,9 +123,6 @@ protected:
     WAIT4ENDMSG
   } m_stateStoryRetrieval;
 
-//  UINT m_MsgIdStoryLine;
-//  UINT m_MsgIdStoryDone;
-//  T* m_owner;
   LPARAM m_lParam; // passed back to caller as reference to story, therefore only one story at a time, which is inherent in protocol anyway
 
   // overloads from CNetworkClientSkeleton
@@ -162,6 +161,8 @@ private:
           | qi::lit("</news_stories>")      [qi::_val=WAIT4ENDSTORIES]
           | qi::lit("<symbols>")            [qi::_val=WAIT4SYMBOLS]
           | qi::lit("!ENDMSG!")             [qi::_val=WAIT4ENDMSG]
+          | ( ( +( qi::char_ >> !qi::lit("</story_text>") ) ) >> qi::char_ >> qi::lit("</story_text>") )
+                                            [qi::_val=WAIT4ENDTEXT]
           )
         ;
     }
@@ -343,25 +344,25 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
     linebuffer_t::const_iterator end = (*buf).end();
 
     std::string str( bgn, end );
-    str += '\n';
+    str += "\n";
     OutputDebugString( str.c_str() );
-//    bgn = (*buf).begin();  // restore the interator for next use
   }
 #endif
 
   switch ( m_stateRetrieval ) {
     case RETRIEVE_STORY:
       ProcessStoryRetrieval( buf, wParam );
+      //      ReturnLineBuffer( wParam ); // is handled specially inside method
       break;
     case RETRIEVE_CONFIG:
       ProcessConfigurationRetrieval( buf );
+      ReturnLineBuffer( wParam );
       break;
     case RETRIEVE_IDLE:
       OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess\n" );
+      ReturnLineBuffer( wParam );
       break;
   }
-
-  PostProcessedMessage( wParam );
 
   bHandled = true;
   return 1;
@@ -375,9 +376,6 @@ void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, LPARAM lPar
   else {
     m_stateRetrieval = RETRIEVE_STORY;
     m_stateStoryRetrieval = WAIT4XML;
-    //m_owner = owner;
-    //m_MsgIdStoryLine = MsgIdStoryLine;
-    //m_MsgIdStoryDone = MsgIdStoryDone;
     m_lParam = lParam;
     std::string ss;
     ss = "NN:" + StoryId + ";";
@@ -390,6 +388,8 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
 
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
+
+  bool bReturnTheBuffer = true;
 
   ruleid_t id;  // id of line marker found during parse
   bool b = parse( bgn, end, m_grammarStoryKeywords, id );
@@ -414,6 +414,7 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
             // emit line
             if ( 0 != m_structMessageDestinations.msgNewsStoryLine ) {
               m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsStoryLine, wParam, m_lParam );
+              bReturnTheBuffer = false;  // message handler needs to return the buffer once it's processing is complete
             }
           }
         }
@@ -493,6 +494,7 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
       }
       break;
   }
+  if ( bReturnTheBuffer ) ReturnLineBuffer( wParam );
 
 }
 
