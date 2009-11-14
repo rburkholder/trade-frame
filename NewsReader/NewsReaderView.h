@@ -80,6 +80,8 @@ protected:
     WM_IQFEED_STORY_LINE,  // one story line
     WM_IQFEED_STORY_DONE,  // no more story lines to process from story request
 
+    WM_IQFEED_NEWS_CONFIG_DONE,
+
     WM_IQFEED_NEWS,
     WM_IQFEED_NEWS_DONE  // called from derived class, if we need it
   };
@@ -104,6 +106,8 @@ protected:
 //    MESSAGE_HANDLER( WM_IQFEED_SENDDONE, OnIQFeedSendDone )
 //    MESSAGE_HANDLER( WM_IQFEED_ERROR, OnIQFeedError )
 
+    MESSAGE_HANDLER( WM_IQFEED_NEWS_CONFIG_DONE, OnIQFeedNewsConfigDone )
+
 //    MSG_WM_MOVE(OnMove)
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
     MSG_WM_INITDIALOG(OnInitDialog)
@@ -126,6 +130,8 @@ protected:
 //  LRESULT OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& );
 //  LRESULT OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& );
 //  LRESULT OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& );
+
+  LRESULT OnIQFeedNewsConfigDone( UINT, WPARAM, LPARAM, BOOL& );
 
   BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
   void OnDestroy();

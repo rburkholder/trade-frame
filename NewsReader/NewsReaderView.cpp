@@ -19,6 +19,7 @@
 #include "resource.h"
 
 #include <sstream>
+#include <vector>
 
 #include <boost/foreach.hpp>
 
@@ -27,7 +28,8 @@
 CNewsReaderView::CNewsReaderView() 
 : CDialogImpl<CNewsReaderView>(), CDialogResize<CNewsReaderView>(),
   m_MsgIdsForIQFeed( this, WM_IQFEED_CONNECTED, 0, 0, 0, 0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
-  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0, 0, 0, 0, 0, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE, 0 ),
+  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0,/* 0, 0, 0,*/ WM_IQFEED_NEWS_CONFIG_DONE, 
+    WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE, 0 ),
   m_stateStoryRetrieval( INACTIVE )
 {
 }
@@ -56,10 +58,15 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   m_lvHeadlines = GetDlgItem( IDC_LVHEADLINES );
   m_edtStory = GetDlgItem( IDC_EDITSTORY );
 
-  int i1 = m_lvHeadlines.AddColumn( "Dist", 0 );
-  int i2 = m_lvHeadlines.AddColumn( "DateTime", 1 );
-  int i3 = m_lvHeadlines.AddColumn( "Symbols", 2 );
-  int i4 = m_lvHeadlines.AddColumn( "Headline", 3 );
+  // http://www.ucancode.net/CPP_Library_Control_Tool/VC_MFC_Totorial_CListCtrl_InsertItem_SetImageList_Article.htm
+  DWORD dw = m_lvHeadlines.GetExtendedListViewStyle();
+  dw |= LVS_EX_FULLROWSELECT;
+  m_lvHeadlines.SetExtendedListViewStyle( dw );
+
+  int i1 = m_lvHeadlines.AddColumn( _T( "Dist"), 0 );
+  int i2 = m_lvHeadlines.AddColumn( _T( "DateTime"), 1 );
+  int i3 = m_lvHeadlines.AddColumn( _T( "Symbols" ), 2 );
+  int i4 = m_lvHeadlines.AddColumn( _T( "Headline" ), 3 );
 
   m_lvHeadlines.SetColumnWidth( 0, 50 );
   m_lvHeadlines.SetColumnWidth( 1, 100 );
@@ -70,6 +77,51 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   m_pIQFeed->Connect();
 
   return TRUE;
+}
+
+LRESULT CNewsReaderView::OnIQFeedNewsConfigDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+
+  typedef CIQFeedNewsQuery<CNewsReaderView> connection_t;
+
+  connection_t::vNCCategory_t& categories = m_pIQFeedNewsQuery->GetConfigCategories();
+  connection_t::vNCMajorType_t& majortypes = m_pIQFeedNewsQuery->GetConfigMajorTypes();
+  connection_t::vNCMinorType_t& minortypes = m_pIQFeedNewsQuery->GetConfigMinorTypes();
+
+  HTREEITEM hRoot = m_treeSources.InsertItem( _T( "All Items" ), TVI_ROOT, TVI_LAST );
+  HTREEITEM hTemp;
+
+  std::vector<HTREEITEM> vCategory( categories.size() );
+  std::vector<HTREEITEM> vMajorType( majortypes.size() );
+  std::vector<HTREEITEM> vMinorType( minortypes.size() );
+
+  std::string sItemText;
+
+  size_t ix = 0;
+  BOOST_FOREACH( connection_t::structNCCategory& cat, categories ){
+    sItemText = cat.Elements.ItemType + " " + cat.Elements.ItemName;
+    vCategory[ ix ] = hTemp = m_treeSources.InsertItem( sItemText.c_str(), hRoot, TVI_LAST );
+    m_treeSources.SetItemData( hTemp, ix );
+    ix++;
+  }
+
+  ix = 0;
+  BOOST_FOREACH( connection_t::structNCMajorType& mt, majortypes ) {
+    sItemText = mt.Elements.ItemType + " " + mt.Elements.ItemName;
+    vMajorType[ ix ] = hTemp = m_treeSources.InsertItem( sItemText.c_str(), vCategory[ mt.ixCategory ], TVI_LAST );
+    m_treeSources.SetItemData( hTemp, ix );
+    ix++;
+  }
+
+  ix = 0;
+  BOOST_FOREACH( connection_t::structNCMinorType& mt, minortypes ) {
+    sItemText = mt.Elements.ItemType + " " + mt.Elements.ItemName;
+    vMinorType[ ix ] = hTemp = m_treeSources.InsertItem( sItemText.c_str(), vMajorType[ mt.ixMajorItem ], TVI_LAST );
+    m_treeSources.SetItemData( hTemp, ix );
+    ix++;
+  }
+
+  bHandled = true;
+  return 1;
 }
 
 void CNewsReaderView::OnDestroy( void ) {
