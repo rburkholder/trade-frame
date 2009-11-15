@@ -1,0 +1,12 @@
+CPP Reference Locations
+
+http://www.cppreference.com/wiki/start operator precedence, stl ref
+
+
+CRTP:
+http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Curiously_Recurring_Template_Pattern
+http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
+
+Dr. Dobbs
+http://www.ddj.com/cpp/184401659
+http://www.ddj.com/hpc-high-performance-computing/208801974

@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NewsReader", "NewsReader\Ne
 		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163} = {DF7C1FF7-075F-4DCC-8E43-0C704AD54163}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTrading", "LibTrading\LibTrading.vcproj", "{11243A27-764A-4119-BEFF-A8A80FD615EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -57,6 +59,10 @@ Global
 		{081EBC65-07A2-4298-9D6F-E32FEF3A8EBD}.Debug|Win32.Build.0 = Debug|Win32
 		{081EBC65-07A2-4298-9D6F-E32FEF3A8EBD}.Release|Win32.ActiveCfg = Release|Win32
 		{081EBC65-07A2-4298-9D6F-E32FEF3A8EBD}.Release|Win32.Build.0 = Release|Win32
+		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Debug|Win32.Build.0 = Debug|Win32
+		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Release|Win32.ActiveCfg = Release|Win32
+		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

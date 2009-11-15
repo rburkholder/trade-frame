@@ -31,7 +31,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
+//#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;

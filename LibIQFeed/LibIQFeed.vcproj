@@ -160,6 +160,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedSymbolFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -199,6 +203,10 @@
 			</File>
 			<File
 				RelativePath=".\IQFeedNewsQuery.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedSymbolFile.h"
 				>
 			</File>
 			<File

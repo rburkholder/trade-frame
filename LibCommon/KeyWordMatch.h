@@ -15,7 +15,7 @@
 
 // this is kind of a subset of Aho Corasick algorithm
 // only full keyword matching, no text searches
-// no on failure coding
+// no on-failure coding
 
 #include <string>
 #include <vector>

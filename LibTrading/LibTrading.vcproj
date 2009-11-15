@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibCommon"
-	ProjectGUID="{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}"
-	RootNamespace="LibCommon"
+	Name="LibTrading"
+	ProjectGUID="{11243A27-764A-4119-BEFF-A8A80FD615EC}"
+	RootNamespace="LibTrading"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,11 +41,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -61,7 +60,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalLibraryDirectories=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -151,18 +149,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\ConsoleStream.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Log.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ReusableBuffers.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -183,11 +169,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TimeSource.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WuManber.cpp"
+				RelativePath=".\TradingEnumerations.cpp"
 				>
 			</File>
 		</Filter>
@@ -197,46 +179,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Colour.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ConsoleStream.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Delegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FastDelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\KeyWordMatch.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Log.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MinHeap.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ReusableBuffers.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Singleton.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SmartVar.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
@@ -245,11 +187,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TimeSource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WuManber.h"
+				RelativePath=".\TradingEnumerations.h"
 				>
 			</File>
 		</Filter>
@@ -259,10 +197,6 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
-		<File
-			RelativePath=".\notes.txt"
-			>
-		</File>
 		<File
 			RelativePath=".\ReadMe.txt"
 			>
