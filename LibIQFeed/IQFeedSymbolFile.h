@@ -6,6 +6,8 @@
 
 // http://www.dtniq.com/product/mktsymbols.zip
 
+// Is designed for running in debug mode at the moment.
+
 class CIQFeedSymbolFile {
 public:
   CIQFeedSymbolFile(void);

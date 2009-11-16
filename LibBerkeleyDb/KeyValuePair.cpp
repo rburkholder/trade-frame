@@ -1,13 +1,10 @@
 #include "StdAfx.h"
+
 #include "KeyValuePair.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-CKeyValuePair::CKeyValuePair(void) : CCommonDatabaseFunctions<CKeyValuePair>( "KeyValuePairs" ) {
+CKeyValuePair::CKeyValuePair(void) 
+: CCommonDatabaseFunctions<CKeyValuePair>( "KeyValuePairs" ) 
+{
 }
 
 CKeyValuePair::~CKeyValuePair(void) {
@@ -22,7 +19,7 @@ void CKeyValuePair::Save( const structKey &key, const structValue &value ) {
     ret = m_pdb->put( 0, &k, &v, 0 ); // overwrite existing value
   }
   catch ( DbException e ) {
-    string err( "CKeyValuePair::Save: DbException error " );
+    std::string err( "CKeyValuePair::Save: DbException error " );
     err.append( e.what() );
     throw std::domain_error( err );
   }
@@ -37,7 +34,7 @@ void CKeyValuePair::Save( const structKey &key, Dbt *pValue ) {
     ret = m_pdb->put( 0, &k, pValue, 0 ); // overwrite existing value
   }
   catch ( DbException e ) {
-    string err( "CKeyValuePair::Save: DbException error " );
+    std::string err( "CKeyValuePair::Save: DbException error " );
     err.append( e.what() );
     throw std::domain_error( err );
   }
@@ -53,7 +50,7 @@ void CKeyValuePair::Get( const structKey &key, void **pVoid, size_t *pSize ) {
     ret = m_pdb->get( 0, &k, &v, 0 );
   }
   catch ( DbException e ) {
-    string err( "CKeyValuePair::Get: DbException error " );
+    std::string err( "CKeyValuePair::Get: DbException error " );
     err.append( e.what() );
     throw std::domain_error( err );
   }
@@ -74,7 +71,7 @@ void CKeyValuePair::Get( const structKey &key, Dbt *pValue ) {
     ret = m_pdb->get( 0, &k, pValue, 0 );
   }
   catch ( DbException e ) {
-    string err( "CKeyValuePair::Get: DbException error " );
+    std::string err( "CKeyValuePair::Get: DbException error " );
     err.append( e.what() );
     throw std::domain_error( err );
   }

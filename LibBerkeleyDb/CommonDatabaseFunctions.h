@@ -1,21 +1,23 @@
 #pragma once
 
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "BerkeleyDb.h"
 #include "BerkeleyDBDataManager.h"
 
 template<class T> class CCommonDatabaseFunctions {
 public:
-  explicit CCommonDatabaseFunctions<T>( const std::string &Name );
-  virtual ~CCommonDatabaseFunctions<T>(void);
   struct structValue {
     void *pAddr;  // address of beginning of array of bytes
     u_int32_t nSize;  // number of bytes
     structValue( void ) : pAddr( NULL ), nSize( 0 ) {};
     structValue( void* addr, u_int32_t size ) : pAddr( addr ), nSize( size ) {};
   };
+
+  explicit CCommonDatabaseFunctions<T>( const std::string &Name );
+  ~CCommonDatabaseFunctions<T>(void);
+
   void Save( Dbt *pKey, Dbt *pValue );
   void Get( Dbt *pKey, Dbt *pValue );
   void Truncate( void );
@@ -56,7 +58,7 @@ template<class T> void CCommonDatabaseFunctions<T>::Save( Dbt *pKey, Dbt *pValue
     ret = m_pdb->put( 0, pKey, pValue, 0 ); // overwrite existing value, or create new one
   }
   catch ( DbException e ) {
-    string err( "CCommonDatabaseFunctions::Save: DbException error, " );
+    std::string err( "CCommonDatabaseFunctions::Save: DbException error, " );
     err.append( e.what() );
     throw std::domain_error( err );
   }
@@ -69,7 +71,7 @@ template<class T> void CCommonDatabaseFunctions<T>::Get( Dbt *pKey, Dbt *pValue 
     ret = m_pdb->get( 0, pKey, pValue, 0 );
   }
   catch ( DbException e ) {
-    string err( "CCommonDatabaseFunctions::Get: DbException error, " );
+    std::string err( "CCommonDatabaseFunctions::Get: DbException error, " );
     err.append( e.what() );
     throw std::domain_error( err );
   }

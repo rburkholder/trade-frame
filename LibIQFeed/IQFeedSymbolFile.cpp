@@ -5,6 +5,7 @@
 #include <LibCommon/KeywordMatch.h>
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -94,7 +95,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
   std::ifstream file;
   size_t cntLines = 0;
 //  td_structIndexes j, k, c; 
-  bool bEndFound;
+  //bool bEndFound;
 
   std::map<std::string, unsigned long> mapUnderlying;  // keeps track of optionable symbols, to fix bool at end
   CKeyWordMatch<unsigned long> kwm( 0, 300 );  // about 300 characters?
@@ -102,10 +103,47 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
   OutputDebugString( "Initializing Structures\n" );
 
   size_t cntExchanges = sizeof( m_rExchanges ) / sizeof( structExchangeInfo );
-  std::vector<size_t> vcntExchangeSymbols( cntExchanges );
+  std::vector<size_t> vcntInstrumentsPerExchange( cntExchanges );
 
   for ( size_t ix = 0; ix < cntExchanges; ++ix ) {
-    //m_rExchanges
+    vcntInstrumentsPerExchange[ ix ] = 0;
+    kwm.AddPattern( m_rExchanges[ ix ].szName, ix );
+  }
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << "kwm size is " << kwm.size() << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
+
+  size_t rcntContractTypes[ InstrumentType::_Count ];
+  for ( size_t ix = 0; ix < InstrumentType::_Count; ++ix ) {
+    rcntContractTypes[ ix ] = 0;
+  }
+
+  OutputDebugString( "Opening Input Instrument File " );
+  OutputDebugString( filename );
+  OutputDebugString( "\n" );
+
+  file.open( filename.c_str() );
+
+  OutputDebugString( "Loading Symbols\n" );
+
+  // convert to db stuff later
+  const size_t nMaxBufferSize = 1000;
+  char rBuffer[ nMaxBufferSize ];
+
+  try {
+    file.getline( rBuffer, nMaxBufferSize );  // remove header line
+    file.getline( rBuffer, nMaxBufferSize ); // first data line to preload
+    while ( !file.fail() ) {
+      ++cntLines;
+    }
+
+  }
+  catch( ... ) {
+
   }
 
 

@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+
 #include "DbValueStream.h"
 
 CDbValueStream::CDbValueStream(void) 

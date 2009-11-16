@@ -2,7 +2,7 @@
 #pragma warning(disable: 4290)
 
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "CommonDatabaseFunctions.h"
 
@@ -50,9 +50,9 @@ protected:
       memcpy( chKey, pkey, size );
     }
   };
-  void Save( const structKey &key, const structValue &value ) throw( std::runtime_error, domain_error );
-  void Save( const structKey &key, Dbt *pValue ) throw( std::runtime_error, domain_error );
-  void Get( const structKey &key, void **pVoid, size_t *pSize ) throw( std::runtime_error, domain_error, out_of_range );  // validate KeyType
-  void Get( const structKey &key, Dbt *pValue ) throw( std::runtime_error, domain_error, out_of_range );  
+  void Save( const structKey &key, const structValue &value );
+  void Save( const structKey &key, Dbt *pValue );
+  void Get( const structKey &key, void **pVoid, size_t *pSize );  // validate KeyType
+  void Get( const structKey &key, Dbt *pValue );  
 private:
 };

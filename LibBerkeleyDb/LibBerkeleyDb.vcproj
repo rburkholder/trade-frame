@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="1"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -149,6 +150,22 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\BerkeleyDb.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BerkeleyDBDataManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DbValueStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\KeyValuePair.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -174,6 +191,26 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\BerkeleyDb.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BerkeleyDBDataManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CommonDatabaseFunctions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DbValueStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\KeyValuePair.h"
+				>
+			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>
