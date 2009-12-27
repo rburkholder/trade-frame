@@ -22,12 +22,13 @@
 #include <stdexcept>
 #include <iostream>
 
-template<class T> class CKeyWordMatch {
+template<typename T> 
+class CKeyWordMatch {
   // T is something to be returned once a match if found
   // example usage is to return per minute rate for longest match on telephone number prefix
 public:
   explicit CKeyWordMatch<T>( T initializer, size_t size );  // initializer is some default value of T
-  virtual ~CKeyWordMatch(void);
+  virtual ~CKeyWordMatch<T>(void);
   void ClearPatterns( void );
   void AddPattern( const std::string &sPattern, T object );
   T FindMatch( const std::string &sMatch );
@@ -46,24 +47,24 @@ protected:
 private:
 };
 
-template<class T> CKeyWordMatch<T>::CKeyWordMatch( T initializer, size_t size )
+template<typename T> CKeyWordMatch<T>::CKeyWordMatch( T initializer, size_t size )
 : m_Initializer( initializer )
 {
   m_vNodes.reserve( size );
   ClearPatterns();
 }
 
-template<class T> CKeyWordMatch<T>::~CKeyWordMatch(void) {
+template<typename T> CKeyWordMatch<T>::~CKeyWordMatch(void) {
   m_vNodes.clear();
 }
 
-template<class T> void CKeyWordMatch<T>::ClearPatterns() {
+template<typename T> void CKeyWordMatch<T>::ClearPatterns() {
   m_vNodes.clear();
   structNode node( m_Initializer );
   m_vNodes.push_back( node ); // root node with nothing
 }
 
-template<class T> void CKeyWordMatch<T>::AddPattern( 
+template<typename T> void CKeyWordMatch<T>::AddPattern( 
               const std::string &sPattern, T object ) {
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {
@@ -125,7 +126,7 @@ template<class T> void CKeyWordMatch<T>::AddPattern(
   }
 }
 
-template<class T> T CKeyWordMatch<T>::FindMatch( const std::string &sPattern ) {
+template<typename T> T CKeyWordMatch<T>::FindMatch( const std::string &sPattern ) {
   // traverse structure looking for matches, object at longest match is returned
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {

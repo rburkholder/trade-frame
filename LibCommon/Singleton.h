@@ -18,11 +18,11 @@
 // other classes to fix:
 //   IQFeedProviderSingleton
 //   TimeSource
-//   GeneratePeriodicRefresh
 
 // http://www.oneunified.net/blog/Personal/SoftwareDevelopment/CPP/Singleton.article
 
-template<class T> class CSingleton {
+template<typename T> 
+class CSingleton {
 public:
   static T& Instance() {
     static T _instance;
@@ -30,15 +30,34 @@ public:
   }
 protected:
   CSingleton() {
-    ++m_ref;
-    if ( 1 != m_ref ) throw std::runtime_error( "too many instances of CSingleton class T" );
   };          // ctor hidden
-  virtual ~CSingleton() {};          // dtor hidden
+  ~CSingleton() {};          // dtor hidden
 private:
   CSingleton(CSingleton const&);    // copy ctor hidden
   CSingleton& operator=(CSingleton const&);  // assign op hidden
 
-  static int m_ref;  // validation that only one instance has been created
 };
 
-template<class T> int CSingleton<T>::m_ref = 0;
+// a CRTP class to ensure Singleton'd class isn't multiply defined
+// see CBerkeleyDBEnvManager as an example
+template<typename T>
+class CMultipleInstanceTest {
+public:
+  CMultipleInstanceTest( void ) {
+#ifdef _DEBUG
+    ++m_ref;
+    // this may be changed to handle multi thread stuff, Dr. Dobbs has a solution
+    if ( 1 != m_ref ) throw std::runtime_error( "too many instances of CSingleton typename T" );
+#endif
+  }
+protected:
+private:
+#ifdef _DEBUG
+  static int m_ref;  // validation that only one instance has been created
+#endif
+};
+
+#ifdef _DEBUG
+template<typename T> int CMultipleInstanceTest<T>::m_ref = 0;
+#endif
+

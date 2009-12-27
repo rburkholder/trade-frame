@@ -13,19 +13,48 @@
 
 #pragma once
 
-// handles the table oriented stuff
-
 #include <db4/db_cxx.h>
+//#include <db4/dbstl_common.h>
 
-// CBerkeleyDb =====
+#include <LibCommon/Singleton.h>
 
-template <typename T>
-class CBerkeleyDb {
+// handles the environment oriented stuff
+
+// http://www.oracle.com/technology/documentation/berkeley-db/db/ref/toc.html
+// http://www.oracle.com/technology/documentation/berkeley-db/db/api_cxx/frame.html
+
+// review the database instructions if we happen to do database stuff cross thread
+// see cpp file
+
+// CBerkeleyDBEnvManager =====
+
+class CBerkeleyDBEnvManager: public CMultipleInstanceTest<CBerkeleyDBEnvManager> {
 public:
-  CBerkeleyDb<T>(void) {};
-  ~CBerkeleyDb<T>(void) {};
+
+  CBerkeleyDBEnvManager(void);
+  ~CBerkeleyDBEnvManager(void);
+
+  inline DbEnv *GetDbEnv( void ) { 
+    return m_pDbEnv; 
+  }; 
+
+  const char *GetBDBFileName( void ) { return m_BDBFileName; };
+
 protected:
-  Db *m_pDb;
+
+  static const char m_BDBFileName[];
+  DbEnv* m_pDbEnv;
+
 private:
+
 };
 
+//
+// ==== singleton
+//
+
+class CBerkeleyDBEnvManagerSingleton: public CSingleton<CBerkeleyDBEnvManager> {
+public:
+protected:
+private:
+};

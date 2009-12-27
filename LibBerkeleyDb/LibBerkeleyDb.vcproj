@@ -41,11 +41,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\lib"
+				AdditionalIncludeDirectories="..\lib;..\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -150,15 +150,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BerkeleyDb.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BerkeleyDBDataManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\DbValueStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\EnvManager.cpp"
 				>
 			</File>
 			<File
@@ -196,15 +192,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BerkeleyDBDataManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\CommonDatabaseFunctions.h"
 				>
 			</File>
 			<File
 				RelativePath=".\DbValueStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EnvManager.h"
 				>
 			</File>
 			<File

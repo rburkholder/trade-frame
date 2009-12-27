@@ -21,6 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlCommon", "LibWtlCommo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIQFeed", "LibIQFeed\LibIQFeed.vcproj", "{23192E89-C17F-4C84-B35C-3677927D64A6}"
 	ProjectSection(ProjectDependencies) = postProject
+		{11243A27-764A-4119-BEFF-A8A80FD615EC} = {11243A27-764A-4119-BEFF-A8A80FD615EC}
 		{DF7C1FF7-075F-4DCC-8E43-0C704AD54163} = {DF7C1FF7-075F-4DCC-8E43-0C704AD54163}
 	EndProjectSection
 EndProject
@@ -34,6 +35,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTrading", "LibTrading\LibTrading.vcproj", "{11243A27-764A-4119-BEFF-A8A80FD615EC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibBerkeleyDb", "LibBerkeleyDb\LibBerkeleyDb.vcproj", "{3FCEB045-314A-49F5-A0D1-B6985F2C9399}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImportIQFeedSymbolFile", "ImportIQFeedSymbolFile\ImportIQFeedSymbolFile.vcproj", "{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3FCEB045-314A-49F5-A0D1-B6985F2C9399} = {3FCEB045-314A-49F5-A0D1-B6985F2C9399}
+		{23192E89-C17F-4C84-B35C-3677927D64A6} = {23192E89-C17F-4C84-B35C-3677927D64A6}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +76,10 @@ Global
 		{3FCEB045-314A-49F5-A0D1-B6985F2C9399}.Debug|Win32.Build.0 = Debug|Win32
 		{3FCEB045-314A-49F5-A0D1-B6985F2C9399}.Release|Win32.ActiveCfg = Release|Win32
 		{3FCEB045-314A-49F5-A0D1-B6985F2C9399}.Release|Win32.Build.0 = Release|Win32
+		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Debug|Win32.Build.0 = Debug|Win32
+		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Release|Win32.ActiveCfg = Release|Win32
+		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

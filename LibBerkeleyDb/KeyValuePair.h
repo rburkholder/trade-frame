@@ -1,3 +1,16 @@
+/************************************************************************
+ * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
+
 #pragma once
 #pragma warning(disable: 4290)
 
@@ -14,7 +27,7 @@
 class CKeyValuePair : public CCommonDatabaseFunctions<CKeyValuePair> {
 public:
   CKeyValuePair(void);
-  virtual ~CKeyValuePair(void);
+  ~CKeyValuePair(void);
 
   const static char nMaxKeySize = 30;
 
@@ -37,7 +50,7 @@ public:
   double GetDouble( const std::string &key );
   structValue GetBlob( const std::string &key );
 protected:
-  enum enumValueType : char { Char, String, UInt16, Int16, UInt32, Int32, Float, Double, Blob, Unknown, _Count }; 
+  enum enumValueType : char { Unknown = 0, Char, String, UInt16, Int16, UInt32, Int32, Float, Double, Blob, _Count }; 
   struct structKey {
     char nValueType;
     char nKeySize; // excludes terminating 0
