@@ -24,15 +24,16 @@
 
 template<typename T> 
 class CKeyWordMatch {
-  // T is something to be returned once a match if found
+  // T is something to be returned once a match is found, requires copy constructor and operator!=()
   // example usage is to return per minute rate for longest match on telephone number prefix
 public:
   explicit CKeyWordMatch<T>( T initializer, size_t size );  // initializer is some default value of T
-  virtual ~CKeyWordMatch<T>(void);
+  ~CKeyWordMatch<T>(void);
   void ClearPatterns( void );
   void AddPattern( const std::string &sPattern, T object );
+  size_t GetNodeCount( void ) { return m_vNodes.size(); };
+  size_t GetPatternCount( void ) { return m_cntPatterns; };
   T FindMatch( const std::string &sMatch );
-  size_t size( void ) { return m_vNodes.size(); };
 protected:
 	T m_Initializer;
   struct structNode {
@@ -43,12 +44,13 @@ protected:
     explicit structNode( T initializer ) : ixLinkToNextLevel( 0 ), ixLinkAtSameLevel( 0 ), 
       object( initializer ), chLetter( 0 ) {};
   };
-  std::vector<structNode> m_vNodes;
 private:
+  std::vector<structNode> m_vNodes;
+  size_t m_cntPatterns;
 };
 
 template<typename T> CKeyWordMatch<T>::CKeyWordMatch( T initializer, size_t size )
-: m_Initializer( initializer )
+: m_Initializer( initializer ), m_cntPatterns( 0 )
 {
   m_vNodes.reserve( size );
   ClearPatterns();
@@ -62,6 +64,7 @@ template<typename T> void CKeyWordMatch<T>::ClearPatterns() {
   m_vNodes.clear();
   structNode node( m_Initializer );
   m_vNodes.push_back( node ); // root node with nothing
+  m_cntPatterns = 0;
 }
 
 template<typename T> void CKeyWordMatch<T>::AddPattern( 
@@ -124,6 +127,7 @@ template<typename T> void CKeyWordMatch<T>::AddPattern(
       bDone = true;
     }
   }
+  ++m_cntPatterns;
 }
 
 template<typename T> T CKeyWordMatch<T>::FindMatch( const std::string &sPattern ) {

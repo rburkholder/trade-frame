@@ -25,77 +25,15 @@
 
 #include <boost/regex.hpp> 
 
-//#include <boost/spirit/include/qi.hpp>
-//#include <boost/spirit/include/phoenix_core.hpp>
-//#include <boost/spirit/include/phoenix_bind.hpp>
-//#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/qi.hpp>
 
-//namespace qi = boost::spirit::qi;
-//namespace ascii = boost::spirit::ascii;
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
-CIQFeedSymbolFile::structExchangeInfo CIQFeedSymbolFile::m_rExchanges[] = {
-  { "Unknown", InstrumentType::Unknown },  // needs to be first in table
-  //  { "AMEX", InstrumentType::Stock },
-  //{ "ARCA", InstrumentType::Stock },  //
-  { "BARCLAYS", InstrumentType::Currency },
-  { "BMF", InstrumentType::Future },  //
-  { "CANADIAN", InstrumentType::Stock },
-  { "CBOE", InstrumentType::Future },
-  { "CBOT", InstrumentType::Future },
-  //{ "CFE", InstrumentType::Future },  //
-  { "CHX", InstrumentType::Future },
-  { "CLEARPORT", InstrumentType::Future },
-  { "CME", InstrumentType::Future },
-  { "CME_GBX", InstrumentType::FuturesOption },
-  { "COMEX", InstrumentType::Future },
-  //{ "CVE", InstrumentType::Stock },
-  //{ "DJ", InstrumentType::Index },
-  { "DME", InstrumentType::Future },  //
-  { "DTN", InstrumentType::Index },
-  //{ "ENCOM", InstrumentType::Future },
-  //{ "ENID", InstrumentType::Future },
-  //{ "ENIR", InstrumentType::Future },
-  { "EUREX", InstrumentType::Future },
-  //{ "EUREXNDX", InstrumentType::Currency },
-  { "FOREX", InstrumentType::Currency },
-  { "FXCM", InstrumentType::Currency },
-  { "GREENX", InstrumentType::Future },  //
-  { "ICE", InstrumentType::Future },  //
-  //{ "ICEFC", InstrumentType::Future },  //
-  //{ "ICEFE", InstrumentType::Future },  //
-  //{ "ICEFI", InstrumentType::Future },  //
-  //{ "ICEFU", InstrumentType::Future },  //
-  //  { "IPE", InstrumentType::Future },
-  { "KCBOT", InstrumentType::Future },
-  { "LME", InstrumentType::Metal },
-  { "MDEX", InstrumentType::Future },  //
-  { "MGE", InstrumentType::Future },
-  { "MX", InstrumentType::Future },  //
-  { "NASDAQ", InstrumentType::Stock },
-  //{ "NMS", InstrumentType::Stock },
-  //  { "NSX", InstrumentType::Future },
-  //  { "NYBOT", InstrumentType::Future },
-  //{ "NYLCD", InstrumentType::Future },
-  //{ "NYLED", InstrumentType::Future },
-  //{ "NYLID", InstrumentType::Future },
-  //{ "NYLMD", InstrumentType::Future },
-  { "NYMEX", InstrumentType::Future },
-  //{ "NYMEXMINI", InstrumentType::Future },
-  { "NYSE", InstrumentType::Stock },
-  //  { "ONECH", InstrumentType::Future },
-  { "OPRA", InstrumentType::Option },
-  //{ "OTC", InstrumentType::Stock },
-  //{ "OTCBB", InstrumentType::Stock },
-  //{ "PBOT", InstrumentType::Future },
-  //  { "PSE", InstrumentType::Stock },
-  { "SGX", InstrumentType::Future },
-  //{ "SMCAP", InstrumentType::Stock },
-  //{ "TENFORE", InstrumentType::Currency }, 
-  //{ "TSE", InstrumentType::Stock },
-  //{ "TULLETT", InstrumentType::Currency },
-  //  { "WCE", InstrumentType::Future },
-  //{ "WTB", InstrumentType::Future }  //
-};
+namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
+using namespace boost::phoenix;
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void)
 : CInstrumentFile()
@@ -115,8 +53,8 @@ public:
     }
 };
 
-unsigned short DecodeMonth( const std::string &s ) {
-  unsigned short month2 = 0;
+unsigned char DecodeMonth( const std::string &s ) {
+  unsigned char month2 = 0;
   if ( 'J' < s[0] ) {
     if ( 'N' < s[0] ) {
       month2 = ( 'O' == s[0] ) ? 10 : 9;
@@ -156,77 +94,125 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
   // mktsymbols_v2.txt
 
   // TODO:  need to prevent re-entrant execution:  ie, turn invoking button off
-  // TODO:  need to put in back ground thread, and lock out other access processes while running
+  // TODO:  need to put this inside a background thread, and lock out other database access processes while running
 
-  static const boost::regex rxMutual(".{3}[^\\.]X$");
-  static const boost::regex rxMoneyMkt(".{3}XX$");
-  static const boost::regex rxIndex(".+\\.X$");
-  static const boost::regex rxCboe(".+\\.XO$");
-  static const boost::regex rxIndicator(".+\\.Z$");
-  static const boost::regex rxNotAStock("([A-Z]+[0-9]+[A-Z]*)|([A-Z]+\\.[A-Z]+)");
-
-  static const boost::regex rxOption( "^([A-Z]+){0,1}[ ]([A-Z]{3}) ([0-9]{4}) ([CP]) ([0-9]+[.][0-9]+)" ); //GM SEP 2008 P 10.000
-  static const boost::regex rxOptionName( "^[A-Z]{1,3} [A-Z][A-Z]$" );
   static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
   static const boost::regex rxFuture2( "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
-
-  unsigned int cntMutual = 0, cntMoneyMkt = 0, cntIndex = 0, cntCboe = 0, cntIndicator = 0, cntNotAStock = 0;
-  unsigned short nUnderlyingSize = 0;
 
   std::ifstream file;
 
   size_t cntLines = 0;
+  size_t cntSIC = 0;
+  size_t cntNAICS = 0;
   CInstrumentFile::structIndexes_t j, k, c; 
   bool bEndFound;
 
+  unsigned short nUnderlyingSize = 0;
   std::map<std::string, unsigned long> mapUnderlying;  // keeps track of optionable symbols, to fix bool at end
-  CKeyWordMatch<size_t> kwm( 0, 300 );  // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
 
-  OutputDebugString( "Initializing Structures\n" );
+  struct structCountPerString { // count cnt of string s
+    size_t cnt;
+    std::string s;
+    structCountPerString( void ) : cnt( 0 ) {};
+  };
 
-  size_t cntExchanges = sizeof( m_rExchanges ) / sizeof( structExchangeInfo );
-  std::vector<size_t> vcntInstrumentsPerExchange( cntExchanges );
+  std::cout << "Initializing Structures" << std::endl;
 
-  for ( size_t ix = 0; ix < cntExchanges; ++ix ) {
-    vcntInstrumentsPerExchange[ ix ] = 0;
-    kwm.AddPattern( m_rExchanges[ ix ].szName, ix );
+  CKeyWordMatch<size_t> kwmExchanges( 0, 200 );  // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
+  kwmExchanges.AddPattern( "Unknown", 0 );
+  std::vector<structCountPerString> vSymbolsPerExchange( 1 );
+  vSymbolsPerExchange[ 0 ].s = "UNKNOWN";
+
+  struct structSymbolTypes {
+    unsigned char sc;
+    std::string sSC;
+  } rSymbolTypes[] = {
+    { Unknown, "UNKNOWN" },
+    { Bonds, "BONDS" },
+    { Calc , "CALC" },
+    { Equity , "EQUITY" },
+    { FOption , "FOPTION" },
+    { Forex , "FOREX" },
+    { Forward , "FORWARD" },
+    { Future , "FUTURE" },
+    { ICSpread , "ICSPREAD" },
+    { IEOption , "IEOPTION" },
+    { Index , "INDEX" },
+    { MktStats , "MKTSTATS" },
+    { Money , "MONEY" },
+    { Mutual , "MUTUAL" },
+    { PrecMtl , "PRECMTL" },
+    { Spot , "SPOT" },
+    { Spread , "SPREAD" },
+    { StratSpread, "STRATSPREAD" }
+  };
+
+  size_t cntSymbolClassifiers = sizeof( rSymbolTypes ) / sizeof( structSymbolTypes );
+
+  CKeyWordMatch<size_t> kwmSymbolType( Unknown, 100 );
+  std::vector<size_t> vSymbolTypeStats( cntSymbolClassifiers );  // number of symbols of this SymbolType
+  for ( size_t ix = 0; ix < cntSymbolClassifiers; ++ix ) {
+    kwmSymbolType.AddPattern( rSymbolTypes[ ix ].sSC, rSymbolTypes[ ix ].sc );
+    vSymbolTypeStats[ ix ] = 0;
   }
 
-#ifdef _DEBUG
-  std::stringstream ss;
-  ss << "kwm size is " << kwm.size() << std::endl;
-  OutputDebugString( ss.str().c_str() );
-  ss.str() = "";
-#endif
+  std::string sUnderlying;
 
-  size_t rcntContractTypes[ InstrumentType::_Count ];  // keep a record of the count of Instrument Types
-  for ( size_t ix = 0; ix < InstrumentType::_Count; ++ix ) {
-    rcntContractTypes[ ix ] = 0;
-  }
+  // define option processing rules
+  qi::rule<char *, std::string()> ruleString = +(qi::char_ - qi::char_(' '));
+  qi::rule<char *> ruleUnderlyingSymbol = ruleString[ref(sUnderlying)=qi::_1];
+  qi::rule<char *> ruleMonth = (
+    qi::string("JAN")
+    |qi::string("FEB")
+    |qi::string("MAR")
+    |qi::string("APR")
+    |qi::string("MAY")
+    |qi::string("JUN")
+    |qi::string("JUL")
+    |qi::string("AUG")
+    |qi::string("SEP")
+    |qi::string("OCT")
+    |qi::string("NOV")
+    |qi::string("DEC"))
+    [ref(dbRecord.nMonth)=bind(&DecodeMonth, qi::_1)];  // 0 is nothing, legal is 1 - 12
+  qi::rule<char *> ruleYear = qi::uint_[ref(dbRecord.nYear)=qi::_1];
+  qi::rule<char *> ruleStrike = qi::double_[ref(dbRecord.fltStrike)=qi::_1];
+  qi::rule<char *> ruleOptionSide = 
+    qi::char_( 'C' )[ref(dbRecord.nOptionSide)=OptionSide::Call] 
+  | qi::char_( 'P' )[ref(dbRecord.nOptionSide)=OptionSide::Put]; // 'C' or 'P' or ' ' or 0x00
+  qi::rule<char *> ruleOption = qi::eps 
+       >> ruleUnderlyingSymbol
+       >> qi::space >> ruleMonth
+       >> qi::space >> ruleYear
+       >> qi::space >> ruleOptionSide
+       >> qi::space >> ruleStrike
+    ;
 
-  // convert to db stuff later
-//  const size_t nMaxBufferSize = 1000;
-//  char rBuffer[ nMaxBufferSize ];
+  qi::rule<char *, unsigned int> ruleSIC = qi::uint_[ref(dbRecord.SIC)=qi::_1];
+  qi::rule<char *, unsigned int> ruleNAICS = qi::uint_[ref(dbRecord.NAICS)=qi::_1];
+
+  // offset and size of each string in the inbound file record
+  static const unsigned char cntFields = 8;
+  CInstrumentFile::structIndexes_t offset[cntFields];
+  CInstrumentFile::structIndexes_t count[cntFields];
 
   try {
 
-    OutputDebugString( "Opening Instrument Database ... " );
+    std::cout << "Opening Instrument Database ... ";
     OpenIQFSymbols();
     u_int32_t countp = 0;
-    OutputDebugString( "truncating ... " );
+    std::cout << "truncating ... ";
     m_pdbSymbols->truncate( NULL, &countp, 0 );
-    OutputDebugString( "done.\n" );
+    std::cout << "done." << std::endl;
 
-    OutputDebugString( "Opening Input Instrument File " );
-    OutputDebugString( filename.c_str() );
-    OutputDebugString( " ... " );
+    std::cout << "Opening Input Instrument File ";
+    std::cout << filename.c_str();
+    std::cout << " ... ";
     file.open( filename.c_str() );
-    OutputDebugString( "\n" );
+    std::cout << std::endl;
 
-    OutputDebugString( "Loading Symbols\n" );
+    std::cout << "Loading Symbols ..." << std::endl;
 
-    //file.getline( rBuffer, nMaxBufferSize );  // remove header line
-    //file.getline( rBuffer, nMaxBufferSize ); // first data line to preload
     file.getline( dbRecord.line, nMaxBufferSize );  // remove header line
     file.getline( dbRecord.line, nMaxBufferSize );
     while ( !file.fail() ) {
@@ -235,95 +221,156 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       bEndFound = false;
       c = j = k = 0; // c is count of char in string, j index into ix, k index into line
 
-      // load line for next trip through loop
       dbRecord.sc.reset();  // initialize bits to zero
-//      UnPackBoolean( dbRecord.ucBits1 );
       dbRecord.fltStrike = 0;
       dbRecord.nYear = 0;
       dbRecord.nMonth = 0;
+      dbRecord.SIC = 0;
+      dbRecord.NAICS = 0;
       dbRecord.nOptionSide = OptionSide::Unknown;
-      dbRecord.ix[j] = k; // index of first string is 0
-      bool bSizeError = false;
+      offset[j] = k;
       while ( !bEndFound ) {
-        if ( 0 == dbRecord.line[k] ) {
-          dbRecord.cnt[j] = c; // size of last string
-          if ( 0 == c ) bSizeError = true;
+        if ( 0 == dbRecord.line[k] ) {  // end of line has been found
+          count[j] = c; // size of last string
           bEndFound = true;
+          if ( j != ( cntFields - 1 ) ) {
+            std::cout << "Not enough fields for: " << dbRecord.line << std::endl;
+          }
         }
         else {
-          if ( '\t' != dbRecord.line[k] ) { 
-            ++c;
+          if ( '\t' != dbRecord.line[k] ) { // look for tab field separator
+            ++c;  // increment character count if no tab found
           }
-          else {
-            dbRecord.cnt[j] = c;
-            if ( 0 == c ) bSizeError = true;
+          else {  // otherwise perform field end processing
+            count[j] = c;
             c = 0;
             ++j;
-            if ( j >= 3 ) {
+            if ( j >= cntFields ) {
               bEndFound = true;
             }
             else {
-              dbRecord.ix[j] = k+1; // beginning of new string
+              offset[j] = k+1; // beginning of new string
             }
-            dbRecord.line[k] = 0;  //force a string end
+            dbRecord.line[k] = 0;  // replace tab character with string terminator
           }
           ++k;
         }
       }
 
-      if ( bSizeError ) {
-        std::cout << "Field length error for:  " << dbRecord.line << std::endl;
+      if ( 0 == count[1] ) {
+        std::cout << dbRecord.line << ": no description supplied" << std::endl;
+      }
+
+      if ( ( 0 == count[0] ) || ( 0 == count[2] ) || ( 0 == count[3] ) || ( 0 == count[4] ) ) {
+        std::cout << dbRecord.line << ": Field length error" << std::endl;
       }
       else {
 
-        dbRecord.bufferedlength = sizeof( structSymbolRecord ) - nMaxBufferSize + k + 1;  // +1 is for zero offset of k
-        // process line here
+        for ( size_t ix = 0; ix < nMaxStrings; ++ix ) { // store symbol, desc, exch, listed into db
+          dbRecord.ix[ix] = offset[ix];
+          dbRecord.cnt[ix] = count[ix];
+        }
 
         size_t ix;
+
+        dbRecord.bufferedlength = sizeof( structSymbolRecord ) - nMaxBufferSize + offset[3] + count[3] + 1;
+
+        std::string sSecurityType( dbRecord.line + offset[4] );  // create string from sub-string
+
+        ix = kwmSymbolType.FindMatch( sSecurityType );
+        if ( Unknown == ix ) {
+          std::cout << sSecurityType << ": Unknown Security Type" << std::endl;
+        }
+        else {
+          dbRecord.sc.set( ix );
+        }
+
+        dbRecord.eInstrumentType = ix;
+        ++vSymbolTypeStats[ ix ];
+
         try {
-          ix = (size_t) kwm.FindMatch( dbRecord.line + dbRecord.ix[2] );
-          if ( 0 == ix ) {
-            std::cout << "Unknown Exchange for:  " << dbRecord.line << std::endl;
+          std::string sPattern1( dbRecord.line + offset[2] );
+          std::string sPattern2( dbRecord.line + offset[3] );
+          std::string sPattern3;
+          if ( sPattern1 == sPattern2 ) {
+            sPattern3 = sPattern1;
           }
-          dbRecord.eInstrumentType = m_rExchanges[ ix ].eInstrumentType;
-          ++m_rExchanges[ ix ].cntInstruments;
+          else {
+            sPattern3 = sPattern1 + "," + sPattern2;
+          }
+          ix = kwmExchanges.FindMatch( sPattern3 );
+          if ( 0 == ix ) {
+            std::cout << "Adding Exchange " << sPattern3 << std::endl;
+            size_t cnt = kwmExchanges.GetPatternCount();
+            kwmExchanges.AddPattern( sPattern3, cnt );
+            structCountPerString cps;
+            vSymbolsPerExchange.push_back( cps );
+            vSymbolsPerExchange[ cnt ].cnt = 1;
+            vSymbolsPerExchange[ cnt ].s = sPattern3;
+          }
+          else {
+            ++( vSymbolsPerExchange[ ix ].cnt );
+          }
         }
         catch ( std::exception e ) {
           std::cout << dbRecord.line << ": zero length pattern" << std::endl;
-          dbRecord.eInstrumentType = InstrumentType::Unknown;
-          ++m_rExchanges[ 0 ].cntInstruments;
+        }
+
+        if ( CInstrumentFile::Equity == dbRecord.eInstrumentType ) {
+          char* pBegin;
+          char* pEnd;
+          bool b;
+
+          pBegin = dbRecord.line + offset[5];  // SIC
+          pEnd = pBegin + count[5];
+          b = parse( pBegin, pEnd, ruleSIC );
+          if ( b && ( pBegin == pEnd ) ) {
+            if ( 0 != dbRecord.SIC ) {
+              ++cntSIC;
+            }
+          }
+
+          pBegin = dbRecord.line + offset[7];  // NAICS
+          pEnd = pBegin + count[7];
+          b = parse( pBegin, pEnd, ruleNAICS );
+          if ( b && ( pBegin == pEnd ) ) {  
+            if ( 0 != dbRecord.NAICS ) {
+              ++cntNAICS;
+            }
+          }
         }
         
-        ++rcntContractTypes[ dbRecord.eInstrumentType ];
-        if ( InstrumentType::Unknown == dbRecord.eInstrumentType ) {
-          std::cout << "Unknown contract for: " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[2] << std::endl;
-        }
         // parse out contract expiry information
-        if ( InstrumentType::Future == dbRecord.eInstrumentType ) {
+        if ( CInstrumentFile::Future == dbRecord.eInstrumentType ) {
+          if ( 'Y' == *(dbRecord.line + offset[6]) ) {
+            dbRecord.sc.set( CInstrumentFile::FrontMonth );
+          }
           boost::cmatch what;
-          if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture ) ) {
+          if ( boost::regex_search( dbRecord.line + offset[1], what, rxFuture ) ) {
             std::string sMonth( what[1].first, what[1].second );
             std::string sYear( what[2].first, what[2].second );
             dbRecord.nMonth = DecodeMonth( sMonth );
             dbRecord.nYear = atoi( sYear.c_str() );
           }
           else {  // No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
-            if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what, rxFuture2 ) ) {
+            if ( boost::regex_search( dbRecord.line + offset[1], what, rxFuture2 ) ) {
               // just ignore the double future set
             }
             else {
-              std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+              std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + offset[1] << std::endl;
             }
           }
         }
 
         // parse out contract information
-        if ( InstrumentType::Option == dbRecord.eInstrumentType ) {
-          boost::cmatch what1, what2;
-          if ( boost::regex_search( dbRecord.line + dbRecord.ix[1], what1, rxOption, boost::match_default )
-            && boost::regex_search( dbRecord.line, what2, rxOptionName, boost::match_default )
-            ) {
-            std::string sUnderlying( what1[1].first, what1[1].second );
+        if ( CInstrumentFile::IEOption == dbRecord.eInstrumentType ) {
+          if ( 'Y' == *(dbRecord.line + offset[6]) ) {
+            dbRecord.sc.set( CInstrumentFile::FrontMonth );
+          }
+          char* pBegin = dbRecord.line + offset[1];
+          char* pEnd = pBegin + count[1];
+          bool b = parse( pBegin, pEnd, ruleOption );
+          if ( b && ( pBegin == pEnd ) ) {
             if ( 0 == sUnderlying.size() ) {
               std::cout << "Zero length underlying for " << dbRecord.line << std::endl;
             }
@@ -331,61 +378,13 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
               mapUnderlying[ sUnderlying ] = 1;  // simply create an entry for later use
             }
             nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
-            std::string sMonth( what1[2].first, what1[2].second );
-            std::string sYear( what1[3].first, what1[3].second );
-            dbRecord.nOptionSide = OptionSide::Unknown;
-            if ( 'P' == *what1[4].first ) dbRecord.nOptionSide = OptionSide::Put;
-            if ( 'C' == *what1[4].first ) dbRecord.nOptionSide = OptionSide::Call;
-            //dbRecord.chDirection = *what[4].first;
-            std::string sStrike( what1[5].first, what1[5].second );
-            dbRecord.nMonth = DecodeMonth( sMonth );
-            dbRecord.nYear = atoi( sYear.c_str() );
-            dbRecord.fltStrike = atof( sStrike.c_str() );
-            
           }
           else {
-            std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + dbRecord.ix[1] << std::endl;
+            std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + offset[1] << std::endl;
           }
         }
 
-        // identify the symbol types
-        CInstrumentFile::bitsSymbolClassifier_t sc;
-        dbRecord.sc.reset();
-        //m_bMutual = m_bMoneyMkt = m_bIndex = m_bCboe = m_bIndicator = m_bNotAStock= false;
-        if ( boost::regex_match( dbRecord.line, rxMutual ) ) {
-          dbRecord.sc.set( CInstrumentFile::Mutual );
-          //m_bMutual = true;
-          ++cntMutual;
-        }
-        if ( boost::regex_match( dbRecord.line, rxMoneyMkt ) ) {
-          dbRecord.sc.set( CInstrumentFile::MoneyMarket );
-          //m_bMoneyMkt = true;
-          ++cntMoneyMkt;
-        }
-        if ( boost::regex_match( dbRecord.line, rxIndex ) ) {
-          dbRecord.sc.set( CInstrumentFile::Index );
-          //m_bIndex = true;
-          ++cntIndex;
-        }
-        if ( boost::regex_match( dbRecord.line, rxCboe ) ) {
-          dbRecord.sc.set( CInstrumentFile::CBOE );
-          //m_bCboe = true;
-          ++cntCboe;
-        }
-        if ( boost::regex_match( dbRecord.line, rxIndicator ) ) {
-          dbRecord.sc.set( CInstrumentFile::Indicator );
-          //m_bIndicator = true;
-          ++cntIndicator;
-        }
-        if ( boost::regex_match( dbRecord.line, rxNotAStock ) ) {
-          dbRecord.sc.set( CInstrumentFile::NotAStock );
-          //m_bNotAStock = true;
-          ++cntNotAStock;
-        }
-        //PackBoolean();
-        
         // update database
-        //Dbt key( dbRecord.line, dbRecord.cnt[0]+1 );
         Dbt key( dbRecord.line, dbRecord.cnt[0] );
         assert( dbRecord.bufferedlength <= 255 );
         Dbt value( &dbRecord, dbRecord.bufferedlength );
@@ -397,58 +396,66 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
           std::cout << "db write problem with: " << dbRecord.line << std::endl;
         }
       }
+
       // get next line from text file
       file.getline( dbRecord.line, nMaxBufferSize );
-      //file.getline( rBuffer, nMaxBufferSize ); // first data line to preload
     }
 
-    structSymbolRecord rec;
-    Dbt k;
-    Dbt v;
-    v.set_flags( DB_DBT_USERMEM );
-    v.set_data( &rec );  
-    int ret;
-    for ( std::map<std::string, unsigned long>::iterator iter = mapUnderlying.begin();
-      mapUnderlying.end() != iter; ++iter ) {
-      // iterate through map and update ucHasOptions flag in each record
-      k.set_data( (void*) iter->first.c_str() );
-      k.set_size( iter->first.size() );
-      v.set_ulen( sizeof( structSymbolRecord ) );
-      v.set_size( sizeof( structSymbolRecord ) );
-      ret = m_pdbSymbols->get( 0, &k, &v, 0 );
-      if ( 0 == ret ) {
-        rec.sc.set( CInstrumentFile::HasOptions );
-        //rec.ucBits1 |= ucHasOptions;  // set the bit
+    {
+      structSymbolRecord rec;
+      Dbt k;
+      Dbt v;
+      v.set_flags( DB_DBT_USERMEM );
+      v.set_data( &rec );  
+      int ret;
+      for ( std::map<std::string, unsigned long>::iterator iter = mapUnderlying.begin();
+        mapUnderlying.end() != iter; ++iter ) {
+        // iterate through map and update ucHasOptions flag in each record
         k.set_data( (void*) iter->first.c_str() );
         k.set_size( iter->first.size() );
-        ret = m_pdbSymbols->put( 0, &k, &v, 0 );
-        if ( 0 != ret ) {
-          std::cout << "failed write on " << iter->first << std::endl;
+        v.set_ulen( sizeof( structSymbolRecord ) );
+        v.set_size( sizeof( structSymbolRecord ) );
+        ret = m_pdbSymbols->get( 0, &k, &v, 0 );
+        if ( 0 == ret ) {
+          rec.sc.set( CInstrumentFile::HasOptions );  // check if underlying is a stock/equity/future  (sc should be set as such as well)
+          k.set_data( (void*) iter->first.c_str() );
+          k.set_size( iter->first.size() );
+          ret = m_pdbSymbols->put( 0, &k, &v, 0 );
+          if ( 0 != ret ) {
+            std::cout << "failed write on " << iter->first << std::endl;
+          }
         }
+        else {
+          std::cout << "option with " << iter->first << " in DESCRIPTION has no underlying entry" << std::endl; // no underlying listed
+        }
+
       }
-      else {
-        std::cout << "option with " << iter->first << " in DESCRIPTION has no underlying entry" << std::endl; // no underlying listed
-      }
-
     }
 
-    std::cout << "Count Mutual:     " << cntMutual << std::endl;
-    std::cout << "Count MoneyMkt:   " << cntMoneyMkt << std::endl;
-    std::cout << "Count Index:      " << cntIndex << std::endl;
-    std::cout << "Count CBOE:       " << cntCboe << std::endl;
-    std::cout << "Count Indicator:  " << cntIndicator << std::endl;
-    std::cout << "Count NotAStock   " << cntNotAStock << std::endl;
-    std::cout << "Count Optionables " << mapUnderlying.size() << std::endl;
-    std::cout << "Max Underlying    " << nUnderlyingSize << std::endl;
-
-    for ( unsigned long ix = 0; ix < sizeof( m_rExchanges ) / sizeof( structExchangeInfo ); ++ix ) {
-      std::cout << m_rExchanges[ ix ].szName << "=" << m_rExchanges[ ix ].cntInstruments << std::endl;
+    std::cout << std::endl;
+    for ( size_t ix = 0; ix < cntSymbolClassifiers; ++ix ) {
+      std::cout << rSymbolTypes[ ix ].sSC << "=" << vSymbolTypeStats[ ix ] << std::endl;
     }
-    std::cout << "Contract Types" << std::endl;
-    for ( unsigned long ix = 0; ix < InstrumentType::_Count; ++ix ) {
-      std::cout << ix << "=" << rcntContractTypes[ ix ] << std::endl;
-    }
+    std::cout << std::endl;
 
+    std::cout << "Count Optionables  =" << mapUnderlying.size() << std::endl;
+    std::cout << "Max Underlying Size=" << nUnderlyingSize << std::endl;
+    std::cout << "cntSIC             =" << cntSIC << std::endl;
+    std::cout << "cntNAICS           =" << cntNAICS << std::endl;
+    std::cout << std::endl;
+
+    for ( size_t ix = 0; ix < vSymbolsPerExchange.size(); ++ix ) {
+      std::cout << vSymbolsPerExchange[ ix ].s << "=" << vSymbolsPerExchange[ ix ].cnt << std::endl;
+    }
+    std::cout << std::endl;
+
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl;
+  ss << "#kwmSymbolType nodes " << kwmSymbolType.GetNodeCount() << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  ss.str() = "";
+#endif
 
   }
   catch( DbRunRecoveryException &e ) {

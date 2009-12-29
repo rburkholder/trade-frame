@@ -33,12 +33,5 @@ public:
 
 protected:
 
-  static struct structExchangeInfo {
-    char *szName;
-    InstrumentType::enumInstrumentTypes eInstrumentType;
-    unsigned long cntInstruments;  // remove this sometime?
-  } m_rExchanges[];
-
-
 private:
 };

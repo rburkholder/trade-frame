@@ -24,10 +24,12 @@ public:
   CInstrumentFile(void);
   ~CInstrumentFile(void);
 
-  enum enumSymbolClassifier: unsigned char {
-    Mutual = 0, MoneyMarket, Index, CBOE, Indicator, HasOptions, NotAStock
+  enum enumSymbolClassifier: unsigned char { // bits in bitmap of stored data record
+    Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
+      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, 
+      FrontMonth, HasOptions  // these last two are calculated differently than previous enumerations
   };
-  typedef std::bitset<8> bitsSymbolClassifier_t;
+  typedef std::bitset<32> bitsSymbolClassifier_t;
 
   void OpenIQFSymbols( void );
   void CloseIQFSymbols( void );
@@ -52,21 +54,22 @@ public:
 protected:
 
   static const size_t nMaxBufferSize = 255;
+  static const unsigned char nMaxStrings = 4;  // symbol, desc, exchange, listed market
   typedef unsigned char structIndexes_t;
   struct structSymbolRecord {  //members ordered by decreasing size for alignment purposes
     float fltStrike;  // option strike price
-    unsigned short nYear;  // futures or options
-    structIndexes_t ix[3]; // looking for three strings: symbol, desc, exchange
-    structIndexes_t cnt[3];  // length of each of three strings, excludes terminator
-    structIndexes_t bufferedlength; // length of whole structure, can only be <255
-    //unsigned char ucBits1;  // mutual, moneymkt, index, cboe, indicator, hasoptions
+    unsigned long SIC;
+    unsigned long NAICS;
     bitsSymbolClassifier_t sc; // symbol classifications
+    unsigned short nYear;  // futures or options
+    structIndexes_t ix[nMaxStrings]; // starting position of each expected string
+    structIndexes_t cnt[nMaxStrings];  // length of each strings, excludes terminator
+    structIndexes_t bufferedlength; // length of whole structure, can only be <255
     unsigned char eInstrumentType;  // Trading::enumContractTypes
     unsigned char nMonth;  // 1 - 12, 0 for nothing
     unsigned char nOptionSide;  // OptionSide
     char line[nMaxBufferSize];
-  } dbRecord;
-  structSymbolRecord *pRecord; // used for retrievals
+  } dbRecord, *pRecord;
 
   Db *m_pdbSymbols;
   Db *m_pdbIxSymbols_Market;
