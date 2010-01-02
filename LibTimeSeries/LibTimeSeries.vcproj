@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibTrading"
-	ProjectGUID="{11243A27-764A-4119-BEFF-A8A80FD615EC}"
-	RootNamespace="LibTrading"
+	Name="LibTimeSeries"
+	ProjectGUID="{6AE9A695-3B0C-46C2-B363-7125C955BCF0}"
+	RootNamespace="LibTimeSeries"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\lib"
+				AdditionalIncludeDirectories="..\;..\Lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -150,63 +150,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\AlternateInstrumentNames.cpp"
+				RelativePath=".\BarFactory.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Execution.cpp"
+				RelativePath=".\DatedDatum.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ExecutionManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Instrument.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentFile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentInformation.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Order.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OrderManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PersistedOrderId.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Portfolio.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioRecord.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderInterface.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderManager.cpp"
+				RelativePath=".\MergeDatedDatums.cpp"
 				>
 			</File>
 			<File
@@ -230,11 +182,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Symbol.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TradingEnumerations.cpp"
+				RelativePath=".\TimeSeries.cpp"
 				>
 			</File>
 		</Filter>
@@ -244,67 +192,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\AlternateInstrumentNames.h"
+				RelativePath=".\BarFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Execution.h"
+				RelativePath=".\DatedDatum.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ExecutionManager.h"
+				RelativePath=".\MergeDatedDatumCarrier.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Instrument.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentInformation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ManagerBase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Order.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OrderManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PersistedOrderId.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Portfolio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioRecord.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderInterface.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderManager.h"
+				RelativePath=".\MergeDatedDatums.h"
 				>
 			</File>
 			<File
@@ -312,15 +212,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Symbol.h"
-				>
-			</File>
-			<File
 				RelativePath=".\targetver.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TradingEnumerations.h"
+				RelativePath=".\TimeSeries.h"
 				>
 			</File>
 		</Filter>

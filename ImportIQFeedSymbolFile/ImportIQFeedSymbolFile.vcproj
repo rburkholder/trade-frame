@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibTrading"
-	ProjectGUID="{11243A27-764A-4119-BEFF-A8A80FD615EC}"
-	RootNamespace="LibTrading"
+	Name="ImportIQFeedSymbolFile"
+	ProjectGUID="{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}"
+	RootNamespace="ImportIQFeedSymbolFile"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="0"
 			>
 			<Tool
@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\;..\lib"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -60,10 +60,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="$(OutDir)\IQ32.lib $(OutDir)\LibIQFeed.lib $(OutDir)\LibBerkeleyDb.lib  $(OutDir)\libdb48d.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_40.lib $(OutDir)\LibTrading.lib $(OutDir)\LibCommon.lib"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -75,6 +83,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -82,7 +93,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -105,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -122,10 +133,19 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -135,6 +155,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -150,63 +173,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\AlternateInstrumentNames.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Execution.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ExecutionManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Instrument.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentFile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentInformation.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Order.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OrderManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PersistedOrderId.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Portfolio.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioRecord.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderInterface.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderManager.cpp"
+				RelativePath=".\ImportIQFeedSymbolFile.cpp"
 				>
 			</File>
 			<File
@@ -229,14 +196,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\Symbol.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TradingEnumerations.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -244,83 +203,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\AlternateInstrumentNames.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Execution.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ExecutionManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Instrument.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentInformation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InstrumentManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ManagerBase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Order.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OrderManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PersistedOrderId.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Portfolio.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PortfolioRecord.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderInterface.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProviderManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Symbol.h"
-				>
-			</File>
-			<File
 				RelativePath=".\targetver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TradingEnumerations.h"
 				>
 			</File>
 		</Filter>

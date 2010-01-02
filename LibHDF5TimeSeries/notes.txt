@@ -1,0 +1,11 @@
+2010/01/01
+
+h5include.h has:
+
+#include <hdf5.h>
+
+Change it to:
+
+#include "hdf5.h"
+
+In order to prevent having to put the destination library path in all calling library includes.

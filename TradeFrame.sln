@@ -33,6 +33,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NewsReader", "NewsReader\Ne
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTrading", "LibTrading\LibTrading.vcproj", "{11243A27-764A-4119-BEFF-A8A80FD615EC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3FCEB045-314A-49F5-A0D1-B6985F2C9399} = {3FCEB045-314A-49F5-A0D1-B6985F2C9399}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibBerkeleyDb", "LibBerkeleyDb\LibBerkeleyDb.vcproj", "{3FCEB045-314A-49F5-A0D1-B6985F2C9399}"
 EndProject
@@ -41,6 +44,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImportIQFeedSymbolFile", "I
 		{3FCEB045-314A-49F5-A0D1-B6985F2C9399} = {3FCEB045-314A-49F5-A0D1-B6985F2C9399}
 		{23192E89-C17F-4C84-B35C-3677927D64A6} = {23192E89-C17F-4C84-B35C-3677927D64A6}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTimeSeries", "LibTimeSeries\LibTimeSeries.vcproj", "{6AE9A695-3B0C-46C2-B363-7125C955BCF0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibHDF5TimeSeries", "LibHDF5TimeSeries\LibHDF5TimeSeries.vcproj", "{12CC3456-56CB-4AC1-979F-B6B73BB47929}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +87,14 @@ Global
 		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Debug|Win32.Build.0 = Debug|Win32
 		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Release|Win32.ActiveCfg = Release|Win32
 		{BE7441D9-D52F-4777-A6F4-0F5CC29578E8}.Release|Win32.Build.0 = Release|Win32
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0}.Debug|Win32.Build.0 = Debug|Win32
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0}.Release|Win32.ActiveCfg = Release|Win32
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0}.Release|Win32.Build.0 = Release|Win32
+		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Debug|Win32.ActiveCfg = Debug|Win32
+		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Debug|Win32.Build.0 = Debug|Win32
+		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Release|Win32.ActiveCfg = Release|Win32
+		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
