@@ -49,6 +49,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTimeSeries", "LibTimeSer
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibHDF5TimeSeries", "LibHDF5TimeSeries\LibHDF5TimeSeries.vcproj", "{12CC3456-56CB-4AC1-979F-B6B73BB47929}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibSimulation", "LibSimulation\LibSimulation.vcproj", "{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -95,6 +97,10 @@ Global
 		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Debug|Win32.Build.0 = Debug|Win32
 		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Release|Win32.ActiveCfg = Release|Win32
 		{12CC3456-56CB-4AC1-979F-B6B73BB47929}.Release|Win32.Build.0 = Release|Win32
+		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Debug|Win32.Build.0 = Debug|Win32
+		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Release|Win32.ActiveCfg = Release|Win32
+		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibIQFeed"
-	ProjectGUID="{23192E89-C17F-4C84-B35C-3677927D64A6}"
-	RootNamespace="LibIQFeed"
+	Name="LibSimulation"
+	ProjectGUID="{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}"
+	RootNamespace="LibSimulation"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,13 +41,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\lib;..\lib\wtl"
+				AdditionalIncludeDirectories="..\;..\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				BrowseInformation="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -62,7 +61,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -152,23 +150,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\IQFeed.cpp"
+				RelativePath=".\SimulateOrderExecution.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedHistoryCollector.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedMessages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbol.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbolFile.cpp"
+				RelativePath=".\SimulationSymbol.cpp"
 				>
 			</File>
 			<File
@@ -198,31 +184,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\IQ32.H"
+				RelativePath=".\SimulateOrderExecution.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryCollector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedMessages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedNewsQuery.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbol.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbolFile.h"
+				RelativePath=".\SimulationSymbol.h"
 				>
 			</File>
 			<File

@@ -15,15 +15,14 @@
 
 #include <string>
 
-#include "TimeSeries.h"
+#include "LibCommon/Delegate.h"
+
+#include "LibTimeSeries/TimeSeries.h"
+
+#include "HDF5DataManager.h"
 
 #include "HDF5TimeSeriesIterator.h"
 #include "HDF5TimeSeriesAccessor.h"
-
-#include "HDF5DataManager.h"
-//using namespace H5;
-
-#include "LibCommon/Delegate.h"
 
 template<class T> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<T> {
 public:
@@ -74,7 +73,7 @@ template<class T> void CHDF5TimeSeriesContainer<T>::SetNewSize( size_type newsiz
 //template<class T> void CHDF5TimeSeriesContainer<T>::Read( const iterator &_begin, const iterator &_end, T *_dest ) {
 template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ) {
   hsize_t cnt = _end - _begin;
-  DataSpace *pDs = _dest->DefineDataSpace();
+  H5::DataSpace *pDs = _dest->DefineDataSpace();
   if ( cnt > 0 ) {
     CHDF5TimeSeriesAccessor<T>::Read( _begin.m_ItemIndex, cnt, pDs, _dest->First() );
   }

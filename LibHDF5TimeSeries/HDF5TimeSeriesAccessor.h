@@ -13,10 +13,9 @@
 
 #pragma once
 
-#include "HDF5DataManager.h"
-//using namespace H5;
+#include "LibTimeSeries/DatedDatum.h"
 
-#include "DatedDatum.h"
+#include "HDF5DataManager.h"
 
 #include <string>
 
@@ -33,13 +32,13 @@ public:
   typedef hsize_t size_type;
   size_type size() const { return m_curElementCount; };
   void Read( hsize_t index, T* );
-  void Read( hsize_t ixStart, hsize_t count, DataSpace *pMemoryDataSpace, T *pDatedDatum );
+  void Read( hsize_t ixStart, hsize_t count, H5::DataSpace *pMemoryDataSpace, T *pDatedDatum );
   void Write( hsize_t ixStart, size_t count, T * );
 protected:
   string m_sPathName;
   CHDF5DataManager dm;
   H5::DataSet *m_pDiskDataSet;
-  CompType *m_pDiskCompType;
+  H5::CompType *m_pDiskCompType;
   size_type m_curElementCount, m_maxElementCount;
   virtual void SetNewSize( size_type size ) {};
   void UpdateElementCount( void );
@@ -49,8 +48,8 @@ private:
 };
 
 template<class T> void CHDF5TimeSeriesAccessor<T>::UpdateElementCount( void ) {
-  DataSpace *pDiskDataSpace;
-  pDiskDataSpace = new DataSpace( m_pDiskDataSet->getSpace() );
+  H5::DataSpace *pDiskDataSpace;
+  pDiskDataSpace = new H5::DataSpace( m_pDiskDataSet->getSpace() );
   pDiskDataSpace->getSimpleExtentDims( &m_curElementCount, &m_maxElementCount  );  //current, max
   pDiskDataSpace->close();
   delete pDiskDataSpace;
@@ -63,9 +62,9 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
 
   try {
     m_pDiskDataSet = new H5::DataSet( dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
-    m_pDiskCompType = new CompType( *m_pDiskDataSet );
+    m_pDiskCompType = new H5::CompType( *m_pDiskDataSet );
 
-    CompType *pMemCompType = T::DefineDataType( NULL );
+    H5::CompType *pMemCompType = T::DefineDataType( NULL );
     if ( ( pMemCompType->getNmembers() != m_pDiskCompType->getNmembers() ) ) { // can't do size as drive datatypes are packed, need instead to check member names
       //|| ( pMemCompType->getSize()     != m_pDiskCompType->getSize() ) ) { // works as Quote, Trade, Bar  have different member count (but MarketDepth has same count as Quote
       throw runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor CompType doesn't match" );
@@ -102,9 +101,9 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
     hsize_t coord1[] = { ixSource };  // index on disk
     hsize_t coord2[] = { 0 };      // only one item in memory
     try {
-      CompType *pComp = pDatedDatum->DefineDataType();
+      H5::CompType *pComp = pDatedDatum->DefineDataType();
 
-      DataSpace MemoryDataspace(1, &dim ); // create one element dataspace to get requested element of dataset
+      H5::DataSpace MemoryDataspace(1, &dim ); // create one element dataspace to get requested element of dataset
       MemoryDataspace.selectElements( H5S_SELECT_SET, 1, coord2 );
 
       DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
@@ -132,18 +131,18 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
   }
 }
 
-template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize_t count, DataSpace *pMemoryDataSpace, T *pDatedDatum ) {
+template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize_t count, H5::DataSpace *pMemoryDataSpace, T *pDatedDatum ) {
   try {
     hsize_t dim[] = { count };
     try {
-      DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
+      H5::DataSpace *pDiskDataSpaceSelection = new H5::DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectHyperslab( H5S_SELECT_SET, &dim[0], &ixStart, 0, 0 );
 
-      DSetMemXferPropList pl;
+      H5::DSetMemXferPropList pl;
       bool b = pl.getPreserve();
       pl.setPreserve( true );
 
-      CompType *pComp = pDatedDatum->DefineDataType();
+      H5::CompType *pComp = pDatedDatum->DefineDataType();
 
       m_pDiskDataSet->read( pDatedDatum, *pComp, *pMemoryDataSpace, *pDiskDataSpaceSelection, pl );
 
@@ -171,9 +170,9 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
     hsize_t oldElementCount = m_curElementCount;  // keep for later comparison
     hsize_t dim[] = { count };
     try {
-      CompType *pComp = pDatedDatum->DefineDataType();
+      H5::CompType *pComp = pDatedDatum->DefineDataType();
 
-      DataSpace MemoryDataspace(1, dim ); // rank, dimensions
+      H5::DataSpace MemoryDataspace(1, dim ); // rank, dimensions
       MemoryDataspace.selectAll();
 
       hsize_t newsize[] = { ixStart + count };
@@ -182,7 +181,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
         UpdateElementCount();
       }
 
-      DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
+      H5::DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectHyperslab( H5S_SELECT_SET, &dim[0], &ixStart, 0, 0 );
 
       m_pDiskDataSet->write( pDatedDatum, *pComp, MemoryDataspace, *pDiskDataSpaceSelection );

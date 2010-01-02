@@ -440,25 +440,25 @@ ptime CIQFPricingMessage<T, charT>::LastTradeTime( void ) {
 
   if ( ( ( date.second - date.first ) == 10 ) && ( ( time.second - time.first ) >= 8 ) ) {
     char szDateTime[ 20 ];
-    szDateTime[  0 ] = *(date + 6); // yyyy
-    szDateTime[  1 ] = *(date + 7);
-    szDateTime[  2 ] = *(date + 8);
-    szDateTime[  3 ] = *(date + 9);
+    szDateTime[  0 ] = *(date.first + 6); // yyyy
+    szDateTime[  1 ] = *(date.first + 7);
+    szDateTime[  2 ] = *(date.first + 8);
+    szDateTime[  3 ] = *(date.first + 9);
 
-    szDateTime[  5 ] = *(date + 0); // mm
-    szDateTime[  6 ] = *(date + 1);
+    szDateTime[  5 ] = *(date.first + 0); // mm
+    szDateTime[  6 ] = *(date.first + 1);
 
-    szDateTime[  8 ] = *(date + 3); // dd
-    szDateTime[  9 ] = *(date + 4);
+    szDateTime[  8 ] = *(date.first + 3); // dd
+    szDateTime[  9 ] = *(date.first + 4);
 
-    szDateTime[ 11 ] = *(time + 0); // hh:mm:ss
-    szDateTime[ 12 ] = *(time + 1);
-    szDateTime[ 13 ] = *(time + 2);
-    szDateTime[ 14 ] = *(time + 3);
-    szDateTime[ 15 ] = *(time + 4);
-    szDateTime[ 16 ] = *(time + 5);
-    szDateTime[ 17 ] = *(time + 6);
-    szDateTime[ 18 ] = *(time + 7);
+    szDateTime[ 11 ] = *(time.first + 0); // hh:mm:ss
+    szDateTime[ 12 ] = *(time.first + 1);
+    szDateTime[ 13 ] = *(time.first + 2);
+    szDateTime[ 14 ] = *(time.first + 3);
+    szDateTime[ 15 ] = *(time.first + 4);
+    szDateTime[ 16 ] = *(time.first + 5);
+    szDateTime[ 17 ] = *(time.first + 6);
+    szDateTime[ 18 ] = *(time.first + 7);
 
     szDateTime[ 4 ] = szDateTime[ 7 ] = '-';
     szDateTime[ 10 ] = ' ';
