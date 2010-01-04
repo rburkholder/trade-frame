@@ -5,10 +5,34 @@
 
 #pragma once
 
-#include "targetver.h"
+// Change these values to use different versions
+#define WINVER		0x0500
+#define _WIN32_WINNT	0x0502
+#define _WIN32_IE	0x0502
+#define _RICHEDIT_VER	0x0200
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
+#include <atlbase.h>
+#include <atlapp.h>
 
+extern CAppModule _Module;
 
-// TODO: reference additional headers your program requires here
+#include <atlwin.h>
+
+#include <atlframe.h>
+#include <atlctrls.h>
+#include <atldlgs.h>
+
+// Non default includes
+#include <atlcrack.h>
+
+#if defined _M_IX86
+  #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_IA64
+  #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+  #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+  #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif

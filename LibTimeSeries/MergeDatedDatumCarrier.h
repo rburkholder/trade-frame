@@ -22,6 +22,10 @@ using namespace fastdelegate;
 
 #include "TimeSeries.h"
 
+// Each carrier holds a CTimeSeries.  The carrier holds an index to the current DatedDatum in each CTimeSeries.
+// The current DatedDatum timestamp is maintained for the merge process to figure out which DatedDatum to 
+// send into the merge process
+
 class CMergeCarrierBase {
   friend class CMergeDatedDatums;
 public:
@@ -69,11 +73,6 @@ template<class T> CMergeCarrier<T>::~CMergeCarrier() {
 }
 
 template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
-  //static int i = 1000;
-  //if ( i > 0 ) {
-  //  std::cout << "#" << m_pDatum->m_dt << std::endl;
-  //  --i;
-  //}
   if ( CTimeSource::GetSimulationMode() ) {
     CTimeSource::SetSimulationTime( m_pDatum->m_dt );
   }

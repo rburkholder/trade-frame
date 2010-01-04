@@ -25,6 +25,7 @@ using namespace fastdelegate;
 
 class CMergeDatedDatums {
 public:
+
   CMergeDatedDatums(void);
   virtual ~CMergeDatedDatums(void);
 
@@ -36,9 +37,12 @@ public:
   void Add( CTimeSeries<CMarketDepth> *pSeries, OnDatumHandler );
   void Run( void );
   void Stop( void );
+
   unsigned long GetCountProcessedDatums( void ) { return m_cntProcessedDatums; };
   unsigned long GetCountCarrierReorders( void ) { return m_cntReorders; };
+
 protected:
+
   CMinHeap<CMergeCarrierBase *, CMergeCarrierBase> m_vCarriers;
 
   // not all states or commands are implemented yet
@@ -53,7 +57,7 @@ protected:
 
   inline virtual void ProcessCarrier( CMergeCarrierBase *pCarrier );
 
-
 private:
+
 };
 

@@ -244,7 +244,7 @@ template<class T> CTimeSeries<T> * CTimeSeries<T>::Subset( const ptime &dt, unsi
   std::vector<T>::iterator iter;
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
-    unsigned int todo = std::min( n, (unsigned int) ( m_vSeries.end() - iter ) );
+    unsigned int todo = std::min<unsigned int>( n, (unsigned int) ( m_vSeries.end() - iter ) );
     series = new CTimeSeries<T>( todo );
     while ( 0 < todo ) {
       series->AppendDatum( *iter );

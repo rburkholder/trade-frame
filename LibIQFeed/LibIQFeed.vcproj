@@ -164,6 +164,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedOptions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedProvider.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieval.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieveHistory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\IQFeedSymbol.cpp"
 				>
 			</File>
@@ -215,6 +231,22 @@
 			</File>
 			<File
 				RelativePath=".\IQFeedNewsQuery.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedOptions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedProvider.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieval.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IQFeedRetrieveHistory.h"
 				>
 			</File>
 			<File
