@@ -202,9 +202,11 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 
   PostQuitMessage();
 
+#if defined _DEBUG
   if ( 0 != m_pline->size() ) {
     OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
   }
+#endif
   m_reposLineBuffers.CheckInL( m_pline );
   m_pline = NULL;
 
@@ -272,9 +274,11 @@ LRESULT CNetwork<ownerT,charT>::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bH
 
   m_asioThread = boost::thread( boost::bind( &CNetwork::AsioThread, this ) );
 
+#ifdef _DEBUG
   if ( NULL != m_psocket ) {
     OutputDebugString( "CNetwork::OnConnect:  m_psocket not null.\n" );
   }
+#endif
   m_psocket = new tcp::socket( m_io );
 
   m_stateNetwork = NS_CONNECTING;

@@ -15,8 +15,8 @@
 
 #include "IQFeedProvider.h"
 
-CIQFeedProvider::CIQFeedProvider(void)
-: CProviderInterface(), CIQFeed()
+CIQFeedProvider::CIQFeedProvider(void) 
+: CProviderInterface(), CIQFeed<CIQFeedProvider>( pModule, m_structMessageDestinations )
 {
   m_sName = "IQF";
   m_nID = EProviderIQF;

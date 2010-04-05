@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <iostream>
+//#include <iostream>
 
 template<typename T> 
 class CKeyWordMatch {

@@ -135,8 +135,6 @@ H5::CompType *CTrade::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-bool operator<( const CTrade &trade1, const CTrade &trade2 ) { return trade1.m_dt < trade2.m_dt; };
-
 // CBar
 
 CBar::CBar(void): CDatedDatum(), m_dblOpen( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ), m_nVolume( 0 ) {

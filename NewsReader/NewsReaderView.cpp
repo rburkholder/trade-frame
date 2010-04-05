@@ -28,8 +28,8 @@
 CNewsReaderView::CNewsReaderView() 
 : CDialogImpl<CNewsReaderView>(), CDialogResize<CNewsReaderView>(),
   m_MsgIdsForIQFeed( this, WM_IQFEED_CONNECTED, 0, 0, 0, 0, 0, WM_IQFEED_NEWS, 0, 0, 0 ),
-  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0,/* 0, 0, 0,*/ WM_IQFEED_NEWS_CONFIG_DONE, 
-    WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE, 0 ),
+  m_MsgIdsForNewsQuery( this, WM_QUERY_CONNECTED, 0, 0, 0, 
+    WM_IQFEED_NEWS_CONFIG_DONE, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE ),
   m_stateStoryRetrieval( INACTIVE )
 {
 }

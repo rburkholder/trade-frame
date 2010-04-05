@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedHistoryQuery.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IQFeedMessages.h"
 				>
 			</File>

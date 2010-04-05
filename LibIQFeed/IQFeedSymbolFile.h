@@ -27,7 +27,7 @@
 class CIQFeedSymbolFile: public CInstrumentFile {
 public:
   CIQFeedSymbolFile(void);
-  virtual ~CIQFeedSymbolFile(void);
+  ~CIQFeedSymbolFile(void);
 
   bool Load( const std::string &filename );
 

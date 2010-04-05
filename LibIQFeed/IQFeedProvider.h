@@ -19,14 +19,16 @@
 #include "IQFeedSymbol.h"
 
 class CIQFeedProvider :
-  public CProviderInterface, public CIQFeed {
+  public CProviderInterface, public CIQFeed<CIQFeedProvider> {
 public:
-  CIQFeedProvider(void);
-  virtual ~CIQFeedProvider(void);
+  CIQFeedProvider( CAppModule* pModule, m_structMessageDestinations );
+  ~CIQFeedProvider(void);
 
+  // do these need to be virtual?  use crtp?
   virtual void Connect( void );
   virtual void Disconnect( void );
 
+  // use crtp?
   virtual CIQFeedSymbol *GetSymbol( const string &sSymbol ) { 
     CSymbol *pSym = CProviderInterface::GetSymbol( sSymbol );
     return dynamic_cast<CIQFeedSymbol *>( pSym ); 
@@ -52,4 +54,6 @@ protected:
   virtual void HandleSMessage( CIQFSystemMessage *pMsg );
 
 private:
+
+  CIQFeed<CIQFeedProvider>::structMessageDestinations m_structMessageDestinations;
 };

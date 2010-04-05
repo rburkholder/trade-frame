@@ -13,9 +13,6 @@
 
 #pragma once
 
-//#include "K:\Data\Projects\Genesis\v8\GenSrc\API\INC\gmmid.h"
-
-//#include "DataManager.h"
 #include "HDF5/H5Cpp.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -51,7 +48,7 @@ protected:
 private:
 };
 
-bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 );
+bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
 
 class CQuote: public CDatedDatum {
 public:

@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include <queue>
+//#include <queue>
+#include <vector>
 #include <sstream>
 #include <typeinfo.h>
 #include <cassert>
@@ -64,6 +65,8 @@ private:
 
 // might use auto_ptr for this
 
+// use a stack, may help to optimize speed
+
 template<typename bufferT> class CBufferRepository {
 public:
   CBufferRepository(void);
@@ -75,7 +78,8 @@ public:
   bool Outstanding( void ) { return ( cntCheckins != cntCheckouts ); };
 protected:
   boost::mutex m_mutex;
-  std::queue<bufferT*> m_qBuffer;
+  //std::queue<bufferT*> m_qBuffer;
+  std::vector<bufferT*> m_vStack;
 private:
   typedef unsigned int stats_pod_t;
   stats_pod_t cntCheckins, cntCheckouts;
@@ -109,9 +113,9 @@ template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void)
 template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) {
   bufferT* pBuffer;
   boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a lock
-  while ( !m_qBuffer.empty() ) {
-    pBuffer = m_qBuffer.front();
-    m_qBuffer.pop();
+  while ( !m_vStack.empty() ) {
+    pBuffer = m_vStack.back();
+    m_vStack.pop_back();
     delete pBuffer;
 #ifdef _DEBUG
     ++cntDestroyed;
@@ -147,10 +151,10 @@ template<typename bufferT> inline void CBufferRepository<bufferT>::CheckIn(buffe
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingIn = true;
 #endif
-  m_qBuffer.push( pBuffer );
+  m_vStack.push_back( pBuffer );
   ++cntCheckins;
 #ifdef _DEBUG
-  maxQsize = std::max<stats_pod_t>( maxQsize, m_qBuffer.size() );
+  maxQsize = std::max<stats_pod_t>( maxQsize, m_vStack.size() );
   m_bCheckingIn = false;
 #endif
 }
@@ -166,15 +170,15 @@ template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut(
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingOut = true;
 #endif
-  if ( m_qBuffer.empty() ) {
+  if ( m_vStack.empty() ) {
     pBuffer = new bufferT();
 #ifdef _DEBUG
     ++cntCreated;
 #endif
   }
   else {
-    pBuffer = m_qBuffer.front();
-    m_qBuffer.pop();
+    pBuffer = m_vStack.back();
+    m_vStack.pop_back();
   }
   ++cntCheckouts;
 #ifdef _DEBUG

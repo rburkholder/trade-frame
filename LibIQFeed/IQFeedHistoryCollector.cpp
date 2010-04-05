@@ -15,6 +15,8 @@
 
 #include "IQFeedHistoryCollector.h"
 
+#include <cassert>
+
 #include "LibHDF5TimeSeries/HDF5WriteTimeSeries.h"
 #include "LibHDF5TimeSeries/HDF5DataManager.h"
 
@@ -34,7 +36,7 @@ CHistoryCollector::~CHistoryCollector() {
 
 void CHistoryCollector::Start( void ) {
   // m_phistory will be assigned by sub classes
-  ASSERT( NULL != m_phistory );
+  assert( NULL != m_phistory );
   m_phistory->LiveRequest( m_sSymbol.c_str(), m_nCount );
 }
 

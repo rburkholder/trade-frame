@@ -25,7 +25,7 @@
 
 #include <LibWtlCommon/NetworkClientSkeleton.h>
 
-#include <LibCommon/ReusableBuffers.h>
+//#include <LibCommon/ReusableBuffers.h>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -62,28 +62,25 @@ public:
     UINT msgConnected;
     UINT msgSendComplete;
     UINT msgDisconnected;
-//    UINT msgNewsConfigCategory;
-//    UINT msgNewsConfigMajorType;
-//    UINT msgNewsConfigMinorType;
+    UINT msgError;  // not currently forwarded
     UINT msgNewsConfigDone;
     UINT msgNewsStoryLine;
     UINT msgNewsStoryDone;
-    UINT msgError;  // not currently forwarded
     structMessageDestinations( void )
       : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
-        /*msgNewsConfigCategory( 0 ), msgNewsConfigMajorType( 0 ), msgNewsConfigMinorType( 0 ),*/ msgNewsConfigDone( 0 ),
+        msgNewsConfigDone( 0 ),
         msgNewsStoryLine( 0 ), msgNewsStoryDone( 0 )
     {};
-    structMessageDestinations( T* owner_, 
-      UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_,
-      /*UINT msgNewsConfigCategory_, UINT msgNewsConfigMajorType_, UINT msgNewsConfigMinorType_,*/ UINT msgNewsConfigDone_,
-      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_, 
-      UINT msgError_
+    structMessageDestinations( 
+      T* owner_, 
+      UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
+      UINT msgNewsConfigDone_, 
+      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_
       ) 
-      : owner( owner_ ), msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ),
-      /*msgNewsConfigCategory( msgNewsConfigCategory_ ), msgNewsConfigMajorType( msgNewsConfigMajorType_ ), msgNewsConfigMinorType( msgNewsConfigMinorType_ ),*/ msgNewsConfigDone( msgNewsConfigDone_ ),
+    : owner( owner_ ), 
+      msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
+      msgNewsConfigDone( msgNewsConfigDone_ ),
       msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ ), 
-      msgError( msgError_ )
     {
       assert( NULL != owner_ );
     };
@@ -164,19 +161,21 @@ protected:
   LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
 
+  // internal use only to obtain news type configurations
   void RetrieveConfiguration( void );
 
+  // internal procedures for each retrieveal state
   void ProcessStoryRetrieval(  linebuffer_t* buf, WPARAM wParam );
   void ProcessConfigurationRetrieval(  linebuffer_t* buf );
 
 private:
 
-  CAppModule* m_pModule;
-  structMessageDestinations m_structMessageDestinations;
-
   typedef stateStoryRetrieval ruleid_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
   typedef typename inherited_t::linebuffer_t::const_iterator iterator_t;
+
+  CAppModule* m_pModule;
+  structMessageDestinations m_structMessageDestinations;
 
   template <typename Iterator>
   struct structStoryXmlKeywords: qi::grammar<Iterator, ruleid_t()> {
@@ -262,7 +261,7 @@ CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMess
 : CNetworkClientSkeleton<CIQFeedNewsQuery<T> >( pModule, "127.0.0.1", 9100 ),
   m_structMessageDestinations( MessageDestinations ),
   m_pModule( pModule ),
-  m_stateRetrieval( RETRIEVE_IDLE )
+  m_stateRetrieval( RETRIEVE_IDLE ), m_lParam( 0 )
 {
 
   assert( NULL != MessageDestinations.owner );

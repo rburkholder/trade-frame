@@ -41,6 +41,5 @@ protected:
     // this is a combination of HASH and PREFIX table
     // the paper suggests shifting hash right by n bits to hash into this table in order to reduce sparseness
 
-
 private:
 };
