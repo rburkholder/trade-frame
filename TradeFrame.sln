@@ -51,6 +51,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibHDF5TimeSeries", "LibHDF
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibSimulation", "LibSimulation\LibSimulation.vcproj", "{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IQFeedGetHistory", "IQFeedGetHistory\IQFeedGetHistory.vcproj", "{11240329-A854-4462-92A1-53249FECAC8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -101,6 +103,10 @@ Global
 		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Debug|Win32.Build.0 = Debug|Win32
 		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Release|Win32.ActiveCfg = Release|Win32
 		{DF661922-9273-42E4-B0E6-3DBDA89A4D3A}.Release|Win32.Build.0 = Release|Win32
+		{11240329-A854-4462-92A1-53249FECAC8D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{11240329-A854-4462-92A1-53249FECAC8D}.Debug|Win32.Build.0 = Debug|Win32
+		{11240329-A854-4462-92A1-53249FECAC8D}.Release|Win32.ActiveCfg = Release|Win32
+		{11240329-A854-4462-92A1-53249FECAC8D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -28,32 +28,14 @@
 // has some thread safety
 
 // Use template style so that various types can be used
-// replace CCharBuffer with std::vector, as it auto-grows, and takes care of 
-//    various sizing management issues, and has iterators built in
 
 // issue statistics at destruction stage as to how many buffers were allocated (max size queue reached)
 
 // this whole thing may be obsolete as CCharBuffer can be a vector<>, 
 //   and CReusableCharBuffers is only need when running with multiple threads
 
-class CCharBuffer {
-public:
-  CCharBuffer(void);  // allocate default sized buffer
-  CCharBuffer( int nChars, const char *szBuf ); // allocate with nchars, nchars includes terminator, if used
-  ~CCharBuffer(void);
-  //CCharBuffer *Duplicate( int nChars, const char *szBuf );
-  CCharBuffer *Assign( int nChars, const char *szBuf );  // assigns zero terminated string, nchars includes space for terminator
 
-  int Size( void ) { return m_nChar; };
-  const char *Buffer( void ) { return m_szBuffer; };
-  
-protected:
-  static const int m_nBasicBufferSize = 100;  // default size of buffer
-  int m_nBufferSize;  // number of characters including terminator
-  int m_nChar; // number of char actually in buffer, including terminator
-  char *m_szBuffer;
-private:
-};
+// ======
 
 // T is the type of buffer to be used
 // Thread safe
@@ -67,7 +49,8 @@ private:
 
 // use a stack, may help to optimize speed
 
-template<typename bufferT> class CBufferRepository {
+template<typename bufferT> 
+class CBufferRepository {
 public:
   CBufferRepository(void);
   ~CBufferRepository(void);

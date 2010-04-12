@@ -18,9 +18,12 @@
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
+#include <string.h> 
+#include <algorithm>
+
 // custom off
 
-#include "ReusableBuffers.h"
+#include "CharBuffer.h"
 
 // CCharBuffer
 

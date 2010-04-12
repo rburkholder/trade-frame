@@ -1,15 +1,41 @@
+2010/04/11
+* multi-thread sdi, no rebar
+* no unicode, set .cpp, set common controls
+* Form, dialog based
+
+MainFrm.cpp
+	//UIUpdateToolBar();
+	
+	//CreateSimpleToolBar();
+	//UIAddToolBar(m_hWndToolBar);
+	
+	//UISetCheck(ID_VIEW_TOOLBAR, 1);
+	
+append to stdafx.h:
+
+// Non default includes
+#include <atlcrack.h>
+#include <atlmisc.h>
+
+
+
 2009/10/18
 
 *.rc:
 
+replace:
 #include "atlres.h"
+with:
 #include "..\lib\wtl\atlres.h"
 
+replace:
 "#include ""atlres.h""\r\n"
+with:
 "#include ""..\\lib\\wtl\\atlres.h""\r\n"
 
 project include directories:
 ..\;..\lib;..\lib\wtl
+
 
 2009/09/07
 

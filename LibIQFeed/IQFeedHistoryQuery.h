@@ -38,7 +38,6 @@ namespace ascii = boost::spirit::ascii;
 #include <LibCommon/ReusableBuffers.h>
 #include <LibWtlCommon/NetworkClientSkeleton.h>
 
-
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
 //#define _CRTDBG_MAP_ALLOC
@@ -51,6 +50,57 @@ class CIQFeedHistoryQuery: public CNetworkClientSkeleton<CIQFeedHistoryQuery<T> 
 public:
 
   typedef typename CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > inherited_t;
+
+  struct structTickDataPoint {
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+//    ptime DateTime;
+    double Last;
+    long  LastSize;
+    long TotalVolume;
+    double Bid;
+    double Ask;
+    long TickID;
+    long BidSize;
+    long AskSize;
+    char BasisForLast;  // 'C' normal, 'E' extended
+  };
+
+  struct structInterval {
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+//    ptime DateTime;
+    double High;
+    double Low;
+    double Open;
+    double Close;
+    long TotalVolume;
+    long PeriodVolume;
+  };
+
+  struct structSummary {
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+//    ptime DateTime;
+    double High;
+    double Low;
+    double Open;
+    double Close;
+    long PeriodVolume;
+    long OpenInterest;
+  };
 
   struct structMessageDestinations {
     T* owner;
@@ -71,11 +121,11 @@ public:
         msgHistoryTickDataPoint( 0 ), msgHistoryIntervalData( 0 ), msgHistorySummaryData( 0 ), 
         msgHistoryRequestDone( 0 )
     {};
-    structMessageDestinations( 
+    structMessageDestinations(
       T* owner_, 
       UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
       UINT msgHistoryTickDataPoint_, UINT msgHistoryIntervalData_, UINT msgHistorySummaryData_, 
-      UINT msgHistoryRequestDone_, 
+      UINT msgHistoryRequestDone_
       ) 
     : owner( owner_ ), 
       msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
@@ -87,62 +137,11 @@ public:
     };
   };
 
-  struct structTickDataPoint {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
-    ptime DateTime;
-    double Last;
-    long  LastSize;
-    long TotalVolume;
-    double Bid;
-    double Ask;
-    long TickID;
-    long BidSize;
-    long AskSize;
-    char BasisForLast;  // 'C' normal, 'E' extended
-  };
-
-  struct structInterval {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
-    ptime DateTime;
-    double High;
-    double Low;
-    double Open;
-    double Close;
-    long TotalVolume;
-    long PeriodVolume;
-  };
-
-  struct structSummary {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
-    ptime DateTime;
-    double High;
-    double Low;
-    double Open;
-    double Close;
-    long PeriodVolume;
-    long OpenInterest;
-  };
-
   CIQFeedHistoryQuery(CAppModule* pModule, const structMessageDestinations& MessageDestinations);
   ~CIQFeedHistoryQuery(void );
 
-  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HTX
-  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ); // HTD
+  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HTX ticks
+  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ); // HTD ticks
 
   void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam );  // HIX i=interval in seconds
   void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ); // HID i=interval in seconds
@@ -198,61 +197,61 @@ private:
   structMessageDestinations m_structMessageDestinations;
 
   // Process the line, called from OnConnProcess:
-  void ProcessHistoryRetrieval( linebuffer_t* buf ); {
+  void ProcessHistoryRetrieval( linebuffer_t* buf );
 
 };
 
+
 BOOST_FUSION_ADAPT_STRUCT(
-  template <typename T> CIQFeedHistoryQuery<T>::structTickDataPoint,
-  (Year, unsigned short)
-  (Month, unsigned short)
-  (Day, unsigned short)
-  (Hour, unsigned short)
-  (Minute, unsigned short)
-  (Second, unsigned short)
-  (Last, double)
-  (LastSize, long)
-  (TotalVolume, long)
-  (Bid, double)
-  (Ask, double)
-  (TickID, long)
-  (BidSize, long)
-  (AskSize, long)
-  (BasisForLast, char)
+  template<typename T> CIQFeedHistoryQuery<T>::structTickDataPoint,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (double, Last)
+  (long, LastSize)
+  (long, TotalVolume)
+  (double, Bid)
+  (double, Ask)
+  (long, TickID)
+  (long, BidSize)
+  (long, AskSize)
+  (char, BasisForLast)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  template <typename T> CIQFeedHistoryQuery<T>::structInterval,
-  (Year, unsigned short)
-  (Month, unsigned short)
-  (Day, unsigned short)
-  (Hour, unsigned short)
-  (Minute, unsigned short)
-  (Second, unsigned short)
-  (High, double)
-  (Low, double)
-  (Open, double)
-  (Close, double)
-  (TotalVolume, long)
-  (PeriodVolume, long)
+  template<typename T> CIQFeedHistoryQuery<T>::structInterval,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second 
+  (double, High)
+  (double, Low)
+  (double, Open)
+  (double, Close)
+  (long, TotalVolume)
+  (long, PeriodVolume)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  template <typename T> CIQFeedHistoryQuery<T>::structSummary,
-  (Year, unsigned short)
-  (Month, unsigned short)
-  (Day, unsigned short)
-  (Hour, unsigned short)
-  (Minute, unsigned short)
-  (Second, unsigned short)
-  (High, double)
-  (Low, double)
-  (Open, double)
-  (Close, double)
-  (PeriodVolume, long)
-  (OpenInterest, long)
+  template<typename T> CIQFeedHistoryQuery<T>::structSummary,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (long, High)
+  (double, Low)
+  (double, Open)
+  (double, Close)
+  (long, PeriodVolume)
+  (long, OpenInterest)
   )
-
 
 template <typename T>
 CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery(
@@ -463,7 +462,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second );
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           m_structMessageDestinations.owner->PostMessage( 
             m_structMessageDestinations.msgHistoryTickDataPoint, reinterpret_cast<WPARAM>( pDP ), m_lParam );
         }
@@ -479,7 +478,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second );
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           m_structMessageDestinations.owner->PostMessage( 
             m_structMessageDestinations.msgHistoryIntervalData, reinterpret_cast<WPARAM>( pDP ), m_lParam );
         }
@@ -495,7 +494,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second );
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           m_structMessageDestinations.owner->PostMessage( 
             m_structMessageDestinations.msgHistorySummaryData, reinterpret_cast<WPARAM>( pDP ), m_lParam );
         }
@@ -525,3 +524,4 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   bool bReturnTheBuffer = true;
 }
 
+*/
