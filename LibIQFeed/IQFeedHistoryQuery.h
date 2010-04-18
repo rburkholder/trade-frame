@@ -16,10 +16,14 @@
 // processes historical data requests against the IQFeed API
 // put parsers in separate compilation units to cut down on compile time
 
+#define FUSION_MAX_VECTOR_SIZE 18
+
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cassert>
+
+#include <boost/config/warning_disable.hpp>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -28,6 +32,7 @@ using namespace boost::gregorian;
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
 namespace qi = boost::spirit::qi;
@@ -45,11 +50,7 @@ namespace ascii = boost::spirit::ascii;
 //#include <crtdbg.h>
 // custom off
 
-template <typename T>
-class CIQFeedHistoryQuery: public CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > {
-public:
-
-  typedef typename CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > inherited_t;
+namespace IQFeedHistoryStructs {
 
   struct structTickDataPoint {
     unsigned short Year;
@@ -58,7 +59,7 @@ public:
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-//    ptime DateTime;
+    ptime DateTime;
     double Last;
     long  LastSize;
     long TotalVolume;
@@ -68,6 +69,7 @@ public:
     long BidSize;
     long AskSize;
     char BasisForLast;  // 'C' normal, 'E' extended
+    
   };
 
   struct structInterval {
@@ -77,7 +79,7 @@ public:
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-//    ptime DateTime;
+    ptime DateTime;
     double High;
     double Low;
     double Open;
@@ -93,7 +95,7 @@ public:
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-//    ptime DateTime;
+    ptime DateTime;
     double High;
     double Low;
     double Open;
@@ -101,6 +103,119 @@ public:
     long PeriodVolume;
     long OpenInterest;
   };
+
+}
+
+
+BOOST_FUSION_ADAPT_STRUCT(
+  IQFeedHistoryStructs::structTickDataPoint,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (double, Last)
+  (long, LastSize)
+  (long, TotalVolume)
+  (double, Bid)
+  (double, Ask)
+  (long, TickID)
+  (long, BidSize)
+  (long, AskSize)
+  (char, BasisForLast)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  IQFeedHistoryStructs::structInterval,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second) 
+  (double, High)
+  (double, Low)
+  (double, Open)
+  (double, Close)
+  (long, TotalVolume)
+  (long, PeriodVolume)
+  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  IQFeedHistoryStructs::structSummary,
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (double, High)
+  (double, Low)
+  (double, Open)
+  (double, Close)
+  (long, PeriodVolume)
+  (long, OpenInterest)
+  )
+
+namespace IQFeedHistoryStructs {
+
+  template <typename Iterator>
+  struct DataPointParser: qi::grammar<Iterator, structTickDataPoint()> {
+    DataPointParser(): DataPointParser::base_type(start) {
+      start %= 
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
+        >> ',' >> qi::double_ >> ',' >> qi::long_   >> ',' >> qi::long_
+        >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::long_
+        >> ',' >> qi::long_   >> ',' >> qi::long_   >> ',' >> ascii::char_ 
+        >> ','
+        ;
+    }
+    qi::rule<Iterator, structTickDataPoint()> start;
+  };
+
+  template <typename Iterator>
+  struct IntervalParser: qi::grammar<Iterator, structInterval()> {
+    IntervalParser(): IntervalParser::base_type(start) {
+      start %= 
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
+        >> ',' >> qi::double_ >> ',' >> qi::double_ 
+        >> ',' >> qi::double_ >> ',' >> qi::double_ 
+        >> ',' >> qi::long_   >> ',' >> qi::long_ 
+        >> ','
+        ;
+    }
+    qi::rule<Iterator, structInterval()> start;
+  };
+
+  template <typename Iterator>
+  struct SummaryParser: qi::grammar<Iterator, structSummary()> {
+    SummaryParser(): SummaryParser::base_type(start) {
+      start %= 
+                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
+        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
+        >> ',' >> qi::double_ >> ',' >> qi::double_ 
+        >> ',' >> qi::double_ >> ',' >> qi::double_ 
+        >> ',' >> qi::long_   >> ',' >> qi::long_ 
+        >> ','
+        ;
+    }
+    qi::rule<Iterator, structSummary()> start;
+  };
+
+}
+
+template <typename T>
+class CIQFeedHistoryQuery: public CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > {
+public:
+
+  typedef typename CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > inherited_t;
+
+  typedef typename IQFeedHistoryStructs::structTickDataPoint structTickDataPoint;
+  typedef typename IQFeedHistoryStructs::structInterval structInterval;
+  typedef typename IQFeedHistoryStructs::structSummary structSummary;
 
   struct structMessageDestinations {
     T* owner;
@@ -149,8 +264,8 @@ public:
   void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );
 
   void ReturnTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
-  void ReturnInterval( structTickDataPoint* pDP ) { m_reposInterval.CheckInL( pDP ); }
-  void ReturnSummary( structTickDataPoint* pDP ) { m_reposSummary.CheckInL( pDP ); }
+  void ReturnInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
+  void ReturnSummary( structSummary* pDP ) { m_reposSummary.CheckInL( pDP ); }
 
 protected:
 
@@ -186,11 +301,12 @@ private:
   // used for containing parsed data and passing it on
   CBufferRepository<structTickDataPoint> m_reposTickDataPoint;  // used for containing parsed data and passing it on
   CBufferRepository<structInterval> m_reposInterval;
-  CBufferRepository<structEOD> m_reposSummary;
+  CBufferRepository<structSummary> m_reposSummary;
 
-  qi::rule<const_iterator_t, structTickDataPoint()> m_ruleDataPoint;
-  qi::rule<const_iterator_t, structInterval()> m_ruleInterval;
-  qi::rule<const_iterator_t, structSummary()> m_ruleSummary;
+  IQFeedHistoryStructs::DataPointParser<const_iterator_t> m_grammarDataPoint;
+  IQFeedHistoryStructs::IntervalParser<const_iterator_t> m_grammarInterval;
+  IQFeedHistoryStructs::SummaryParser<const_iterator_t> m_grammarSummary;
+
   qi::rule<const_iterator_t> m_ruleEndMsg;
 
   CAppModule* m_pModule;
@@ -200,58 +316,6 @@ private:
   void ProcessHistoryRetrieval( linebuffer_t* buf );
 
 };
-
-
-BOOST_FUSION_ADAPT_STRUCT(
-  template<typename T> CIQFeedHistoryQuery<T>::structTickDataPoint,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
-  (double, Last)
-  (long, LastSize)
-  (long, TotalVolume)
-  (double, Bid)
-  (double, Ask)
-  (long, TickID)
-  (long, BidSize)
-  (long, AskSize)
-  (char, BasisForLast)
-  )
-
-BOOST_FUSION_ADAPT_STRUCT(
-  template<typename T> CIQFeedHistoryQuery<T>::structInterval,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second 
-  (double, High)
-  (double, Low)
-  (double, Open)
-  (double, Close)
-  (long, TotalVolume)
-  (long, PeriodVolume)
-  )
-
-BOOST_FUSION_ADAPT_STRUCT(
-  template<typename T> CIQFeedHistoryQuery<T>::structSummary,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
-  (long, High)
-  (double, Low)
-  (double, Open)
-  (double, Close)
-  (long, PeriodVolume)
-  (long, OpenInterest)
-  )
 
 template <typename T>
 CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery(
@@ -263,30 +327,6 @@ CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery(
 {
   assert( NULL != MessageDestinations.owner );
 
-  m_ruleDataPoint = 
-    //qi::lit('D') >> qi::lit(',') >>
-    qi::ushort_ >> qi::lit('-') >> qi::ushort_ >> qi::lit('-') >> qi::ushort_ 
-    >> qi::lit(' ') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::long_ >> qi::lit(',') >> qi::long_
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::long_
-    >> qi::lit(',') >> qi::long_ >> qi::lit(',') >> qi::long_ >> qi::lit(',') >> qi::char_
-    >> qi::lit(',');
-  m_ruleInterval = 
-    //qi::lit('I') >> qi::lit(',') >>
-    qi::ushort_ >> qi::lit('-') >> qi::ushort_ >> qi::lit('-') >> qi::ushort_ 
-    >> qi::lit(' ') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::double_ 
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::double_ 
-    >> qi::lit(',') >> qi::long_ >> qi::lit(',') >> qi::long_ 
-    >> qi::lit(',');
-  m_ruleSummary = 
-    //qi::lit('E') >> qi::lit(',') >>
-    qi::ushort_ >> qi::lit('-') >> qi::ushort_ >> qi::lit('-') >> qi::ushort_ 
-    >> qi::lit(' ') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_ >> qi::lit(':') >> qi::ushort_
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::double_ 
-    >> qi::lit(',') >> qi::double_ >> qi::lit(',') >> qi::double_ 
-    >> qi::lit(',') >> qi::long_ >> qi::lit(',') >> qi::long_ 
-    >> qi::lit(',');
   m_ruleEndMsg = qi::lit("!ENDMSG!," );
 
 }
@@ -442,7 +482,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, uns
 }
 
 template <typename T>
-void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
+void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
@@ -458,7 +498,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       assert ( RETRIEVE_HISTORY_DATAPOINTS == m_stateRetrieval );
       if ( 0 != m_structMessageDestinations.msgHistoryTickDataPoint ) {
         structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
-        b = parse( bgn, end, m_ruleDataPoint, qi::unused, *pDP );
+        b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
@@ -474,7 +514,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       assert ( RETRIEVE_HISTORY_INTERVALS == m_stateRetrieval );
       if ( 0 != m_structMessageDestinations.msgHistoryIntervalData ) {
         structInterval* pDP = m_reposInterval.CheckOutL();
-        b = parse( bgn, end, m_ruleInterval, qi::unused, *pDP );
+        b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
@@ -490,7 +530,7 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       assert ( RETRIEVE_HISTORY_SUMMARY == m_stateRetrieval );
       if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
         structSummary* pDP = m_reposSummary.CheckOutL();
-        b = parse( bgn, end, m_ruleSummary, qi::unused, *pDP );
+        b = parse( bgn, end, m_grammarSummary, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
@@ -524,4 +564,3 @@ void CIQFeedNewsQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   bool bReturnTheBuffer = true;
 }
 
-*/
