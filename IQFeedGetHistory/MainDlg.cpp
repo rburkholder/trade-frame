@@ -64,6 +64,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
   m_pIQFeedHistoryQuery = new CIQFeedHistoryQuery<CMainDlg>( &_Module, m_MsgIdsForIQFeedHistoryQuery );
 
+  m_pIQFeedHistoryQuery->Connect();
+
 	return TRUE;
 }
 
@@ -103,11 +105,16 @@ LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOO
 
 void CMainDlg::CloseDialog(int nVal)
 {
-	DestroyWindow();
-	::PostQuitMessage(nVal);
+  m_DialogCloseCode = nVal;
+
+  m_pIQFeedHistoryQuery->Disconnect();
+
+//	DestroyWindow();
+//	::PostQuitMessage(nVal);
 }
 
 LRESULT CMainDlg::OnIQFeedHistoryConnected( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+  m_pIQFeedHistoryQuery->RetrieveNEndOfDays( "GLD", 10, 1 );
 	return 0;
 }
 
@@ -116,6 +123,8 @@ LRESULT CMainDlg::OnIQFeedHistorySendComplete( UINT, WPARAM, LPARAM, BOOL &bHand
 }
 
 LRESULT CMainDlg::OnIQFeedHistoryDisconnected( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+	DestroyWindow();
+	::PostQuitMessage(m_DialogCloseCode);
 	return 0;
 }
 
@@ -123,15 +132,18 @@ LRESULT CMainDlg::OnIQFeedHistoryError( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
 	return 0;
 }
 
-LRESULT CMainDlg::OnIQFeedHistoryTickDataPoint( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CMainDlg::OnIQFeedHistoryTickDataPoint( UINT, WPARAM w, LPARAM l, BOOL &bHandled ) {
+  m_pIQFeedHistoryQuery->ReQueueTickDataPoint( reinterpret_cast<history_query_t::structTickDataPoint*>( w ) );
 	return 0;
 }
 
-LRESULT CMainDlg::OnIQFeedHistoryIntervalData( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CMainDlg::OnIQFeedHistoryIntervalData( UINT, WPARAM w, LPARAM l, BOOL &bHandled ) {
+  m_pIQFeedHistoryQuery->ReQueueInterval( reinterpret_cast<history_query_t::structInterval*>( w ) );
 	return 0;
 }
 
-LRESULT CMainDlg::OnIQFeedHistorySummaryData( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CMainDlg::OnIQFeedHistorySummaryData( UINT, WPARAM w, LPARAM l, BOOL &bHandled ) {
+  m_pIQFeedHistoryQuery->ReQueueSummary( reinterpret_cast<history_query_t::structSummary*>( w ) );
 	return 0;
 }
 

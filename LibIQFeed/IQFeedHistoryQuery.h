@@ -261,11 +261,11 @@ public:
   void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam );  // HIX i=interval in seconds
   void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ); // HID i=interval in seconds
 
-  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );
+  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HDX
 
-  void ReturnTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
-  void ReturnInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
-  void ReturnSummary( structSummary* pDP ) { m_reposSummary.CheckInL( pDP ); }
+  void ReQueueTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
+  void ReQueueInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
+  void ReQueueSummary( structSummary* pDP ) { m_reposSummary.CheckInL( pDP ); }
 
 protected:
 
@@ -420,7 +420,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, un
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     m_lParam = lParam;
     std::stringstream ss;
-    ss << "HTX," << sSymbol << "," << n << ",1,D";
+    ss << "HTX," << sSymbol << "," << n << ",1,D\n";
     Send( ss.str().c_str() );
   }
 }
@@ -434,7 +434,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymb
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     m_lParam = lParam;
     std::stringstream ss;
-    ss << "HTD," << sSymbol << "," << n << ",,,,1,D";
+    ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
     Send( ss.str().c_str() );
   }
 }
@@ -448,7 +448,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, uns
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     m_lParam = lParam;
     std::stringstream ss;
-    ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I";
+    ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
     Send( ss.str().c_str() );
   }
 }
@@ -462,7 +462,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbo
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     m_lParam = lParam;
     std::stringstream ss;
-    ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I";
+    ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
     Send( ss.str().c_str() );
   }
 }
@@ -473,10 +473,10 @@ void CIQFeedHistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, uns
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNEndOfDays: not in IDLE");
   }
   else {
-    m_stateRetrieval = RETRIEVE_HISTORY_EOD;
+    m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
     m_lParam = lParam;
     std::stringstream ss;
-    ss << "HDX," << sSymbol << "," << n << ",1,E";
+    ss << "HDX," << sSymbol << "," << n << ",1,E\n";
     Send( ss.str().c_str() );
   }
 }
@@ -510,6 +510,7 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           m_reposTickDataPoint.CheckInL( pDP );
         }
       }
+      break;
     case 'I':
       assert ( RETRIEVE_HISTORY_INTERVALS == m_stateRetrieval );
       if ( 0 != m_structMessageDestinations.msgHistoryIntervalData ) {
@@ -526,6 +527,7 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           m_reposInterval.CheckInL( pDP );
         }
       }
+      break;
     case 'E':
       assert ( RETRIEVE_HISTORY_SUMMARY == m_stateRetrieval );
       if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
@@ -542,6 +544,7 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           m_reposSummary.CheckInL( pDP );
         }
       }
+      break;
     default:
       throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval unknown record");
   }
@@ -561,6 +564,6 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   }
 
 
-  bool bReturnTheBuffer = true;
+  //bool bReturnTheBuffer = true;
 }
 

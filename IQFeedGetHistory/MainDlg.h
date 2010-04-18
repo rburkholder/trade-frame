@@ -28,6 +28,8 @@ class CMainDlg :
 public:
 	enum { IDD = IDD_MAINDLG };
 
+  typedef CIQFeedHistoryQuery<CMainDlg> history_query_t;
+
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
 
@@ -42,7 +44,9 @@ public:
     WM_IQFEEDHISTORY_TICKDATAPOINT,
     WM_IQFEEDHISTORY_INTERVALDATA,
     WM_IQFEEDHISTORY_SUMMARYDATA,
-    WM_IQFEEDHISTORY_REQUESTDONE
+    WM_IQFEEDHISTORY_REQUESTDONE,
+
+    WM_MAINDLG_CLOSEDIALOG  // checks for disconnection then closes
   };
 
 	BEGIN_MSG_MAP_EX(CMainDlg)
@@ -89,4 +93,5 @@ protected:
   CIQFeedHistoryQuery<CMainDlg>::structMessageDestinations m_MsgIdsForIQFeedHistoryQuery;
   CIQFeedHistoryQuery<CMainDlg>* m_pIQFeedHistoryQuery;
 private:
+  WORD m_DialogCloseCode;
 };
