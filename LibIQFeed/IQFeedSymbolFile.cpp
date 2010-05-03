@@ -127,29 +127,29 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     unsigned char sc;
     std::string sSC;
   } rSymbolTypes[] = {
-    { Unknown, "UNKNOWN" },
-    { Bonds, "BONDS" },
-    { Calc , "CALC" },
-    { Equity , "EQUITY" },
-    { FOption , "FOPTION" },
-    { Forex , "FOREX" },
-    { Forward , "FORWARD" },
-    { Future , "FUTURE" },
-    { ICSpread , "ICSPREAD" },
-    { IEOption , "IEOPTION" },
-    { Index , "INDEX" },
-    { MktStats , "MKTSTATS" },
-    { Money , "MONEY" },
-    { Mutual , "MUTUAL" },
-    { PrecMtl , "PRECMTL" },
-    { Spot , "SPOT" },
-    { Spread , "SPREAD" },
-    { StratSpread, "STRATSPREAD" }
+    { structSymbolRecord::Unknown, "UNKNOWN" },
+    { structSymbolRecord::Bonds, "BONDS" },
+    { structSymbolRecord::Calc , "CALC" },
+    { structSymbolRecord::Equity , "EQUITY" },
+    { structSymbolRecord::FOption , "FOPTION" },
+    { structSymbolRecord::Forex , "FOREX" },
+    { structSymbolRecord::Forward , "FORWARD" },
+    { structSymbolRecord::Future , "FUTURE" },
+    { structSymbolRecord::ICSpread , "ICSPREAD" },
+    { structSymbolRecord::IEOption , "IEOPTION" },
+    { structSymbolRecord::Index , "INDEX" },
+    { structSymbolRecord::MktStats , "MKTSTATS" },
+    { structSymbolRecord::Money , "MONEY" },
+    { structSymbolRecord::Mutual , "MUTUAL" },
+    { structSymbolRecord::PrecMtl , "PRECMTL" },
+    { structSymbolRecord::Spot , "SPOT" },
+    { structSymbolRecord::Spread , "SPREAD" },
+    { structSymbolRecord::StratSpread, "STRATSPREAD" }
   };
 
   size_t cntSymbolClassifiers = sizeof( rSymbolTypes ) / sizeof( structSymbolTypes );
 
-  CKeyWordMatch<size_t> kwmSymbolType( Unknown, 100 );
+  CKeyWordMatch<size_t> kwmSymbolType( structSymbolRecord::Unknown, 120 );
   std::vector<size_t> vSymbolTypeStats( cntSymbolClassifiers );  // number of symbols of this SymbolType
   for ( size_t ix = 0; ix < cntSymbolClassifiers; ++ix ) {
     kwmSymbolType.AddPattern( rSymbolTypes[ ix ].sSC, rSymbolTypes[ ix ].sc );
@@ -213,8 +213,8 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
 
     std::cout << "Loading Symbols ..." << std::endl;
 
-    file.getline( dbRecord.line, nMaxBufferSize );  // remove header line
-    file.getline( dbRecord.line, nMaxBufferSize );
+    file.getline( dbRecord.line, structSymbolRecord::nMaxBufferSize );  // remove header line
+    file.getline( dbRecord.line, structSymbolRecord::nMaxBufferSize );
     while ( !file.fail() ) {
       ++cntLines;  // number data lines processed
 
@@ -266,19 +266,19 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       }
       else {
 
-        for ( size_t ix = 0; ix < nMaxStrings; ++ix ) { // store symbol, desc, exch, listed into db
+        for ( size_t ix = 0; ix < structSymbolRecord::nMaxStrings; ++ix ) { // store symbol, desc, exch, listed into db
           dbRecord.ix[ix] = offset[ix];
           dbRecord.cnt[ix] = count[ix];
         }
 
         size_t ix;
 
-        dbRecord.bufferedlength = sizeof( structSymbolRecord ) - nMaxBufferSize + offset[3] + count[3] + 1;
+        dbRecord.bufferedlength = sizeof( structSymbolRecord ) - structSymbolRecord::nMaxBufferSize + offset[3] + count[3] + 1;
 
         std::string sSecurityType( dbRecord.line + offset[4] );  // create string from sub-string
 
         ix = kwmSymbolType.FindMatch( sSecurityType );
-        if ( Unknown == ix ) {
+        if ( structSymbolRecord::Unknown == ix ) {
           std::cout << sSecurityType << ": Unknown Security Type" << std::endl;
         }
         else {
@@ -299,7 +299,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
             sPattern3 = sPattern1 + "," + sPattern2;
           }
           ix = kwmExchanges.FindMatch( sPattern3 );
-          if ( 0 == ix ) {
+          if ( ( 0 == ix ) || ( sPattern3.length() != vSymbolsPerExchange[ ix ].s.length() ) ) {
             std::cout << "Adding Exchange " << sPattern3 << std::endl;
             size_t cnt = kwmExchanges.GetPatternCount();
             kwmExchanges.AddPattern( sPattern3, cnt );
@@ -316,7 +316,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
           std::cout << dbRecord.line << ": zero length pattern" << std::endl;
         }
 
-        if ( CInstrumentFile::Equity == dbRecord.eInstrumentType ) {
+        if ( structSymbolRecord::Equity == dbRecord.eInstrumentType ) {
           char* pBegin;
           char* pEnd;
           bool b;
@@ -341,9 +341,9 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         }
         
         // parse out contract expiry information
-        if ( CInstrumentFile::Future == dbRecord.eInstrumentType ) {
+        if ( structSymbolRecord::Future == dbRecord.eInstrumentType ) {
           if ( 'Y' == *(dbRecord.line + offset[6]) ) {
-            dbRecord.sc.set( CInstrumentFile::FrontMonth );
+            dbRecord.sc.set( structSymbolRecord::FrontMonth );
           }
           boost::cmatch what;
           if ( boost::regex_search( dbRecord.line + offset[1], what, rxFuture ) ) {
@@ -363,9 +363,9 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         }
 
         // parse out contract information
-        if ( CInstrumentFile::IEOption == dbRecord.eInstrumentType ) {
+        if ( structSymbolRecord::IEOption == dbRecord.eInstrumentType ) {
           if ( 'Y' == *(dbRecord.line + offset[6]) ) {
-            dbRecord.sc.set( CInstrumentFile::FrontMonth );
+            dbRecord.sc.set( structSymbolRecord::FrontMonth );
           }
           char* pBegin = dbRecord.line + offset[1];
           char* pEnd = pBegin + count[1];
@@ -398,7 +398,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       }
 
       // get next line from text file
-      file.getline( dbRecord.line, nMaxBufferSize );
+      file.getline( dbRecord.line, structSymbolRecord::nMaxBufferSize );
     }
 
     {
@@ -417,7 +417,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         v.set_size( sizeof( structSymbolRecord ) );
         ret = m_pdbSymbols->get( 0, &k, &v, 0 );
         if ( 0 == ret ) {
-          rec.sc.set( CInstrumentFile::HasOptions );  // check if underlying is a stock/equity/future  (sc should be set as such as well)
+          rec.sc.set( structSymbolRecord::HasOptions );  // check if underlying is a stock/equity/future  (sc should be set as such as well)
           k.set_data( (void*) iter->first.c_str() );
           k.set_size( iter->first.size() );
           ret = m_pdbSymbols->put( 0, &k, &v, 0 );
@@ -448,6 +448,8 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       std::cout << vSymbolsPerExchange[ ix ].s << "=" << vSymbolsPerExchange[ ix ].cnt << std::endl;
     }
     std::cout << std::endl;
+
+    std::cout << "Symbol List Complete" << std::endl;
 
 #ifdef _DEBUG
   std::stringstream ss;

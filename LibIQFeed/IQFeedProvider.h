@@ -19,7 +19,9 @@
 #include "IQFeedSymbol.h"
 
 class CIQFeedProvider :
-  public CProviderInterface, public CIQFeed<CIQFeedProvider> {
+  public CProviderInterface, 
+  public CIQFeed<CIQFeedProvider> 
+{
 public:
   CIQFeedProvider( CAppModule* pModule, m_structMessageDestinations );
   ~CIQFeedProvider(void);

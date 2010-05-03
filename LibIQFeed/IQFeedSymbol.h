@@ -23,7 +23,7 @@
 
 class CIQFeedSymbol : public CSymbol {
   // needs to be created by IQFeed object as IQFeed injects the actual commands
-    friend class CIQFeedProvider;
+//    friend class CIQFeedProvider;
     friend class CIQFeed;
 public:
   CIQFeedSymbol(const std::string &symbol);

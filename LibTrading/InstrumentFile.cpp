@@ -24,6 +24,7 @@
 
 CInstrumentFile::CInstrumentFile(void) 
 : pRecord( NULL ), 
+  m_bOpen( false ),
   m_pdbSymbols( NULL ), 
   m_pdbIxSymbols_Market( NULL ), m_pdbcIxSymbols_Market( NULL ),
   m_pdbIxSymbols_Underlying( NULL ), m_pdbcIxSymbols_Underlying( NULL ) 
@@ -57,10 +58,15 @@ void CInstrumentFile::OpenIQFSymbols() {
 
   // associate the index with the main table
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Underlying, &CInstrumentFile::GetUnderlyingName, 0 );
+
+  m_bOpen = true;
   
 }
 
 void CInstrumentFile::CloseIQFSymbols() {
+
+  m_bOpen = false;
+
   m_pdbIxSymbols_Underlying->close(0);
   m_pdbIxSymbols_Market->close(0);
   m_pdbSymbols->close(0);
@@ -91,7 +97,6 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
   if ( DB_NOTFOUND == ret ) throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed symbol not found" );
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::CreateInstrumentFromIQFeed had bad error" );
   //pRecord = (structSymbolRecord*) v.get_data();
-  //UnPackBoolean( rec.ucBits1 );
   std::string sExchange( rec.line + rec.ix[2], rec.cnt[2] );
 
   switch ( rec.eInstrumentType ) {
@@ -172,29 +177,29 @@ void CInstrumentFile::SetSearchUnderlying( const char *szUnderlying ) {
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::SetSearchUnderlying has problems" );
 }
 
-bool CInstrumentFile::RetrieveSymbolRecordByExchange( u_int32_t flags ) {
+structSymbolRecord* CInstrumentFile::RetrieveSymbolRecordByExchange( u_int32_t flags ) {
+  // return value NULL when data not found
   // flags =  DB_SET: find first record
   //          DB_NEXT_DUP:  retrieve next record for same exchange
-  pRecord = NULL;
+  structSymbolRecord* p = NULL;
   assert( NULL != m_pdbcIxSymbols_Market );
   int result = m_pdbcIxSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
   if ( 0 == result ) {
-    pRecord = (structSymbolRecord *) m_dbtData.get_data();
-//    UnPackBoolean( pRecord->ucBits1 );
+    p = (structSymbolRecord *) m_dbtData.get_data();
   }
-  return ( 0 == result );
+  return p;
 }
 
-bool CInstrumentFile::RetrieveSymbolRecordByUnderlying( u_int32_t flags ) {
-  pRecord = NULL;
+structSymbolRecord* CInstrumentFile::RetrieveSymbolRecordByUnderlying( u_int32_t flags ) {
+  // return value NULL when data not found
+  // flags =  DB_SET: find first record
+  //          DB_NEXT_DUP:  retrieve next record for same exchange
+  structSymbolRecord* p = NULL;
   assert( NULL != m_pdbcIxSymbols_Underlying );
   int result = m_pdbcIxSymbols_Underlying->get( &m_dbtKey, &m_dbtData, flags );
   if ( 0 == result ) {
-    pRecord = (structSymbolRecord *) m_dbtData.get_data();
-//    UnPackBoolean( pRecord->ucBits1 );
+    p = (structSymbolRecord *) m_dbtData.get_data();
   }
-  return ( 0 == result );
+  return p;
 }
 
-void CInstrumentFile::EndSearch( void ) {
-}

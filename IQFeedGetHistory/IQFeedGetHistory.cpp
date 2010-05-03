@@ -46,6 +46,9 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
 {
+
+  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
 	HRESULT hRes = ::CoInitialize(NULL);
 // If you are running on NT 4.0 or higher you can use the following call instead to 
 // make the EXE free threaded. This means that calls come in on a random RPC thread.

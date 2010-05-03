@@ -21,6 +21,7 @@
 #include "aboutdlg.h"
 #include "MainDlg.h"
 
+
 BOOL CMainDlg::PreTranslateMessage(MSG* pMsg)
 {
 	return CWindow::IsDialogMessage(pMsg);

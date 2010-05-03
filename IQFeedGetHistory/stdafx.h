@@ -11,6 +11,18 @@
 #define _WIN32_IE	0x0501
 #define _RICHEDIT_VER	0x0200
 
+// custom on
+// To enable the debug heap functions, include the following statements in your program:
+// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+// use just before program exit:
+// _CrtDumpMemoryLeaks(); 
+// or use the following at program start:
+// _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+// custom off
+
 #include <atlbase.h>
 #include <atlapp.h>
 
