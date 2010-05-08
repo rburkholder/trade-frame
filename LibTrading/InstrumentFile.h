@@ -22,7 +22,9 @@
 // 2010/05/02
 // try designing an iterator for the Retrieve* acces stuff
 
-struct structSymbolRecord {  //members ordered by decreasing size for alignment purposes
+// 2010/05/07 close cursors when finished
+
+struct structSymbolRecord {  // member variables ordered by decreasing size for alignment purposes
 
   typedef unsigned char structIndexes_t;
   typedef std::bitset<32> bitsSymbolClassifier_t;
@@ -114,16 +116,26 @@ class CInstrumentFile_Exchange_iterator: public std::iterator<std::forward_itera
   structSymbolRecord *m_pSR;
   CInstrumentFile* m_pIF;
 public:
-  CInstrumentFile_Exchange_iterator( CInstrumentFile* pIF ): m_pSR( NULL ), m_pIF( pIF ) {
-    assert( NULL != pIF );
-    assert( pIF->IsOpen() );
+  CInstrumentFile_Exchange_iterator( void ): m_pSR( NULL ), m_pIF( NULL ) {
+  };
+  CInstrumentFile_Exchange_iterator( CInstrumentFile* pIF ): m_pSR( NULL ), m_pIF( NULL ) {
+    SetInstrumentFile( pIF );
   };
   ~CInstrumentFile_Exchange_iterator( void ) {};
 
+  void SetInstrumentFile( CInstrumentFile* pIF ) {
+    assert( NULL != pIF );
+    assert( pIF->IsOpen() );
+    m_pIF = pIF;
+  };
+
   structSymbolRecord* begin( const std::string& sExchange ) {
+    assert( NULL != m_pIF );
     m_pSR = NULL;
     m_pIF->SetSearchExchange( sExchange.c_str() );
+//    m_pIF->SetSearchUnderlying( sExchange.c_str() );
     m_pSR = m_pIF->RetrieveSymbolRecordByExchange( DB_SET );
+//    m_pSR = m_pIF->RetrieveSymbolRecordByUnderlying( DB_SET );
     return m_pSR;
   };
 
@@ -134,6 +146,7 @@ public:
   structSymbolRecord* operator++() {
     if ( NULL != m_pSR ) {
       m_pSR = m_pIF->RetrieveSymbolRecordByExchange( DB_NEXT_DUP );
+//      m_pSR = m_pIF->RetrieveSymbolRecordByUnderlying( DB_NEXT_DUP );
     }
     return m_pSR;
   };

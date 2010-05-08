@@ -115,7 +115,8 @@ void CMainDlg::CloseDialog(int nVal)
 }
 
 LRESULT CMainDlg::OnIQFeedHistoryConnected( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
-  m_pIQFeedHistoryQuery->RetrieveNEndOfDays( "GLD", 10, 1 );
+//  m_pIQFeedHistoryQuery->RetrieveNEndOfDays( "GLD", 10, 1 );
+  m_process.Start();
 	return 0;
 }
 

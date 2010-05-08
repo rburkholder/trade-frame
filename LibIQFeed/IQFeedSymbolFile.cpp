@@ -391,6 +391,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         int ret;
         try {
           ret = m_pdbSymbols->put( 0, &key, &value, DB_NOOVERWRITE );
+          if ( 0 != ret ) std::cout << "non return put value " << ret << std::endl;
         }
         catch (...) {
           std::cout << "db write problem with: " << dbRecord.line << std::endl;

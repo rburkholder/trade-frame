@@ -128,7 +128,7 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
   }
 }
 
-// Sets SubIndex (static function)
+// Sets SubIndex (static function) for Exchange
 int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p = dbIxRecord->line + dbIxRecord->ix[2];  // get at the 'exchange' string
@@ -138,7 +138,7 @@ int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *d
   return 0;
 }
 
-// Sets SubIndex (static function)
+// Sets SubIndex (static function) for Underlying
 int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p; 
@@ -184,6 +184,7 @@ structSymbolRecord* CInstrumentFile::RetrieveSymbolRecordByExchange( u_int32_t f
   structSymbolRecord* p = NULL;
   assert( NULL != m_pdbcIxSymbols_Market );
   int result = m_pdbcIxSymbols_Market->get( &m_dbtKey, &m_dbtData, flags );
+  // DB_NOTFOUND = -30988
   if ( 0 == result ) {
     p = (structSymbolRecord *) m_dbtData.get_data();
   }

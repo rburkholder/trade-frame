@@ -19,6 +19,8 @@
 
 #include <LibIQFeed/IQFeedHistoryQuery.h>
 
+#include "Process.h"
+
 class CMainDlg : 
   public CDialogImpl<CMainDlg>, 
   public CUpdateUI<CMainDlg>,
@@ -94,4 +96,5 @@ protected:
   CIQFeedHistoryQuery<CMainDlg>* m_pIQFeedHistoryQuery;
 private:
   WORD m_DialogCloseCode;
+  CProcess m_process;
 };
