@@ -68,7 +68,7 @@ public:
     UINT msgNewsStoryDone;
     structMessageDestinations( void )
       : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
-        msgNewsConfigDone( 0 ),
+        msgNewsConfigDone( 0 ), 
         msgNewsStoryLine( 0 ), msgNewsStoryDone( 0 )
     {};
     structMessageDestinations( 
@@ -80,7 +80,7 @@ public:
     : owner( owner_ ), 
       msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
       msgNewsConfigDone( msgNewsConfigDone_ ),
-      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ ), 
+      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ )
     {
       assert( NULL != owner_ );
     };
@@ -362,7 +362,7 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
 
     std::string str( bgn, end );
     str += "\n";
-//    OutputDebugString( str.c_str() );
+    OutputDebugString( str.c_str() );
   }
 #endif
 
@@ -454,11 +454,15 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
       }
       break;
     case WAIT4STORY:
-      if ( id != m_stateStoryRetrieval ) {
-        throw std::logic_error( "WAIT4STORY");
-      }
-      else {
-        m_stateStoryRetrieval = WAIT4LINK;
+      switch ( id ) {
+        case WAIT4STORY:
+          m_stateStoryRetrieval = WAIT4LINK;
+          break;
+        case WAIT4ENDSTORIES:  // copied from below
+          m_stateStoryRetrieval = WAIT4BLANK;
+          break;
+        default:
+          throw std::logic_error( "WAIT4STORY");
       }
       break;
     case WAIT4LINK:

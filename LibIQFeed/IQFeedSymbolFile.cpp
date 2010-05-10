@@ -22,6 +22,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <algorithm>
+
 
 #include <boost/regex.hpp> 
 
@@ -30,10 +32,14 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+//#include <boost/spirit/home/phoenix/algorithm.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
+
 using namespace boost::phoenix;
+using namespace boost::phoenix::arg_names;
+
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void)
 : CInstrumentFile()
@@ -114,6 +120,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     size_t cnt;
     std::string s;
     structCountPerString( void ) : cnt( 0 ) {};
+    bool operator<(const structCountPerString& rhs) { return (s < rhs.s); };
   };
 
   std::cout << "Initializing Structures" << std::endl;
@@ -192,9 +199,9 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
   qi::rule<char *, unsigned int> ruleNAICS = qi::uint_[ref(dbRecord.NAICS)=qi::_1];
 
   // offset and size of each string in the inbound file record
-  static const unsigned char cntFields = 8;
-  CInstrumentFile::structIndexes_t offset[cntFields];
-  CInstrumentFile::structIndexes_t count[cntFields];
+  // use these as not all fields are kept within dbRecord
+  CInstrumentFile::structIndexes_t offset[structSymbolRecord::_IXCount];
+  CInstrumentFile::structIndexes_t count[structSymbolRecord::_IXCount];
 
   try {
 
@@ -216,6 +223,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     file.getline( dbRecord.line, structSymbolRecord::nMaxBufferSize );  // remove header line
     file.getline( dbRecord.line, structSymbolRecord::nMaxBufferSize );
     while ( !file.fail() ) {
+
       ++cntLines;  // number data lines processed
 
       bEndFound = false;
@@ -228,12 +236,12 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       dbRecord.SIC = 0;
       dbRecord.NAICS = 0;
       dbRecord.nOptionSide = OptionSide::Unknown;
-      offset[j] = k;
+      offset[j] = k; // this initialization doesn't make much sense, could be offset[0]=0;?
       while ( !bEndFound ) {
         if ( 0 == dbRecord.line[k] ) {  // end of line has been found
           count[j] = c; // size of last string
           bEndFound = true;
-          if ( j != ( cntFields - 1 ) ) {
+          if ( j != ( structSymbolRecord::_IXCount - 1 ) ) {
             std::cout << "Not enough fields for: " << dbRecord.line << std::endl;
           }
         }
@@ -245,7 +253,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
             count[j] = c;
             c = 0;
             ++j;
-            if ( j >= cntFields ) {
+            if ( j >= structSymbolRecord::_IXCount ) {
               bEndFound = true;
             }
             else {
@@ -257,11 +265,14 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         }
       }
 
-      if ( 0 == count[1] ) {
+      if ( 0 == count[structSymbolRecord::IXDesc] ) {
         std::cout << dbRecord.line << ": no description supplied" << std::endl;
       }
 
-      if ( ( 0 == count[0] ) || ( 0 == count[2] ) || ( 0 == count[3] ) || ( 0 == count[4] ) ) {
+      if ( ( 0 == count[structSymbolRecord::IXSymbol] ) 
+        || ( 0 == count[structSymbolRecord::IXExchange] ) 
+        || ( 0 == count[structSymbolRecord::IXListedMarket] ) 
+        || ( 0 == count[structSymbolRecord::IXSecurityType] ) ) {
         std::cout << dbRecord.line << ": Field length error" << std::endl;
       }
       else {
@@ -273,9 +284,11 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
 
         size_t ix;
 
-        dbRecord.bufferedlength = sizeof( structSymbolRecord ) - structSymbolRecord::nMaxBufferSize + offset[3] + count[3] + 1;
+        dbRecord.bufferedlength = sizeof( structSymbolRecord ) 
+          - structSymbolRecord::nMaxBufferSize 
+          + offset[structSymbolRecord::IXListedMarket] + count[structSymbolRecord::IXListedMarket] + 1;  // 1 for last terminator
 
-        std::string sSecurityType( dbRecord.line + offset[4] );  // create string from sub-string
+        std::string sSecurityType( dbRecord.line + offset[structSymbolRecord::IXSecurityType] );  // create string from sub-string
 
         ix = kwmSymbolType.FindMatch( sSecurityType );
         if ( structSymbolRecord::Unknown == ix ) {
@@ -289,24 +302,29 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         ++vSymbolTypeStats[ ix ];
 
         try {
-          std::string sPattern1( dbRecord.line + offset[2] );
-          std::string sPattern2( dbRecord.line + offset[3] );
-          std::string sPattern3;
-          if ( sPattern1 == sPattern2 ) {
-            sPattern3 = sPattern1;
+          if ( 0 == strcmp( 
+            dbRecord.line + offset[structSymbolRecord::IXExchange], 
+            dbRecord.line + offset[structSymbolRecord::IXListedMarket] ) ) {
+            // two fields re same, so just first field goes into key
+            dbRecord.lenExchangeKey = count[structSymbolRecord::IXExchange];
           }
           else {
-            sPattern3 = sPattern1 + "," + sPattern2;
+            // different, both fields make up key, so put comma between Exchange and Listed Market
+            *(dbRecord.line + offset[structSymbolRecord::IXExchange] + count[structSymbolRecord::IXExchange]) = ',';
+            dbRecord.lenExchangeKey = count[structSymbolRecord::IXExchange] + 1 + count[structSymbolRecord::IXListedMarket];
           }
-          ix = kwmExchanges.FindMatch( sPattern3 );
-          if ( ( 0 == ix ) || ( sPattern3.length() != vSymbolsPerExchange[ ix ].s.length() ) ) {
-            std::cout << "Adding Exchange " << sPattern3 << std::endl;
+
+          std::string sPattern( dbRecord.line + offset[structSymbolRecord::IXExchange] );
+
+          ix = kwmExchanges.FindMatch( sPattern );
+          if ( ( 0 == ix ) || ( sPattern.length() != vSymbolsPerExchange[ ix ].s.length() ) ) {
+            std::cout << "Adding Exchange " << sPattern << std::endl;
             size_t cnt = kwmExchanges.GetPatternCount();
-            kwmExchanges.AddPattern( sPattern3, cnt );
+            kwmExchanges.AddPattern( sPattern, cnt );
             structCountPerString cps;
             vSymbolsPerExchange.push_back( cps );
             vSymbolsPerExchange[ cnt ].cnt = 1;
-            vSymbolsPerExchange[ cnt ].s = sPattern3;
+            vSymbolsPerExchange[ cnt ].s = sPattern;
           }
           else {
             ++( vSymbolsPerExchange[ ix ].cnt );
@@ -321,8 +339,8 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
           char* pEnd;
           bool b;
 
-          pBegin = dbRecord.line + offset[5];  // SIC
-          pEnd = pBegin + count[5];
+          pBegin = dbRecord.line + offset[structSymbolRecord::IXSIC];  // SIC
+          pEnd = pBegin + count[structSymbolRecord::IXSIC];
           b = parse( pBegin, pEnd, ruleSIC );
           if ( b && ( pBegin == pEnd ) ) {
             if ( 0 != dbRecord.SIC ) {
@@ -330,8 +348,8 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
             }
           }
 
-          pBegin = dbRecord.line + offset[7];  // NAICS
-          pEnd = pBegin + count[7];
+          pBegin = dbRecord.line + offset[structSymbolRecord::IXNAICS];  // NAICS
+          pEnd = pBegin + count[structSymbolRecord::IXNAICS];
           b = parse( pBegin, pEnd, ruleNAICS );
           if ( b && ( pBegin == pEnd ) ) {  
             if ( 0 != dbRecord.NAICS ) {
@@ -342,33 +360,33 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
         
         // parse out contract expiry information
         if ( structSymbolRecord::Future == dbRecord.eInstrumentType ) {
-          if ( 'Y' == *(dbRecord.line + offset[6]) ) {
+          if ( 'Y' == *(dbRecord.line + offset[structSymbolRecord::IXFrontMonth]) ) {
             dbRecord.sc.set( structSymbolRecord::FrontMonth );
           }
           boost::cmatch what;
-          if ( boost::regex_search( dbRecord.line + offset[1], what, rxFuture ) ) {
+          if ( boost::regex_search( dbRecord.line + offset[structSymbolRecord::IXDesc], what, rxFuture ) ) {
             std::string sMonth( what[1].first, what[1].second );
             std::string sYear( what[2].first, what[2].second );
             dbRecord.nMonth = DecodeMonth( sMonth );
             dbRecord.nYear = atoi( sYear.c_str() );
           }
           else {  // No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
-            if ( boost::regex_search( dbRecord.line + offset[1], what, rxFuture2 ) ) {
+            if ( boost::regex_search( dbRecord.line + offset[structSymbolRecord::IXDesc], what, rxFuture2 ) ) {
               // just ignore the double future set
             }
             else {
-              std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + offset[1] << std::endl;
+              std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + offset[structSymbolRecord::IXDesc] << std::endl;
             }
           }
         }
 
         // parse out contract information
         if ( structSymbolRecord::IEOption == dbRecord.eInstrumentType ) {
-          if ( 'Y' == *(dbRecord.line + offset[6]) ) {
+          if ( 'Y' == *(dbRecord.line + offset[structSymbolRecord::IXFrontMonth]) ) {
             dbRecord.sc.set( structSymbolRecord::FrontMonth );
           }
-          char* pBegin = dbRecord.line + offset[1];
-          char* pEnd = pBegin + count[1];
+          char* pBegin = dbRecord.line + offset[structSymbolRecord::IXDesc];
+          char* pEnd = pBegin + count[structSymbolRecord::IXDesc];
           bool b = parse( pBegin, pEnd, ruleOption );
           if ( b && ( pBegin == pEnd ) ) {
             if ( 0 == sUnderlying.size() ) {
@@ -380,12 +398,12 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
             nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
           }
           else {
-            std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + offset[1] << std::endl;
+            std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + offset[structSymbolRecord::IXDesc] << std::endl;
           }
         }
 
         // update database
-        Dbt key( dbRecord.line, dbRecord.cnt[0] );
+        Dbt key( dbRecord.line, dbRecord.cnt[structSymbolRecord::IXSymbol] );
         assert( dbRecord.bufferedlength <= 255 );
         Dbt value( &dbRecord, dbRecord.bufferedlength );
         int ret;
@@ -445,6 +463,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     std::cout << "cntNAICS           =" << cntNAICS << std::endl;
     std::cout << std::endl;
 
+    std::sort( vSymbolsPerExchange.begin(), vSymbolsPerExchange.end() );
     for ( size_t ix = 0; ix < vSymbolsPerExchange.size(); ++ix ) {
       std::cout << vSymbolsPerExchange[ ix ].s << "=" << vSymbolsPerExchange[ ix ].cnt << std::endl;
     }

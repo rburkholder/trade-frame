@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ListViewCtrl_Headlines.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MainFrm.cpp"
 				>
 			</File>
@@ -233,6 +237,10 @@
 			>
 			<File
 				RelativePath=".\AboutDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ListViewCtrl_Headlines.h"
 				>
 			</File>
 			<File

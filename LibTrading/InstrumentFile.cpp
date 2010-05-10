@@ -131,8 +131,8 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
 // Sets SubIndex (static function) for Exchange
 int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
-  char *p = dbIxRecord->line + dbIxRecord->ix[2];  // get at the 'exchange' string
-  unsigned long l = dbIxRecord->cnt[2];  // set the key and its length
+  char *p = dbIxRecord->line + dbIxRecord->ix[structSymbolRecord::IXExchange];  // get at the 'exchange' string
+  unsigned long l = dbIxRecord->lenExchangeKey;  // set the key and its length
   secKey->set_data( p );
   secKey->set_size( l );
   return 0;
@@ -145,12 +145,12 @@ int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Db
   u_int32_t len;
   bool bUseIndex = true;
   if ( InstrumentType::Option == dbIxRecord->eInstrumentType ) { // OPRA option
-    p = dbIxRecord->line + dbIxRecord->ix[1];  // start of description
+    p = dbIxRecord->line + dbIxRecord->ix[structSymbolRecord::IXDesc];  // start of description
     char *e = strchr( p, ' ' );  // find the trailing blank
     len = e - p;
     if ( 0 != len ) bUseIndex = false;
   }
-  if ( bUseIndex ) {  // by default, use records symbol
+  if ( bUseIndex ) {  // by default, use record's symbol
     p = dbIxRecord->line;
     len = dbIxRecord->cnt[0];
   }

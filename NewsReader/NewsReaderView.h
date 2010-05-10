@@ -23,6 +23,8 @@
 #include "LibIQFeed/IQFeed.h"
 #include "LibIQFeed/IQFeedNewsQuery.h"
 
+#include "ListViewCtrl_Headlines.h"
+
 // some things yet todo:
 //  use custom draw to do the headlines
 //  hash the articles to determine unique ones
@@ -108,6 +110,11 @@ protected:
 
     MESSAGE_HANDLER( WM_IQFEED_NEWS_CONFIG_DONE, OnIQFeedNewsConfigDone )
 
+    //CHAIN_MSG_MAP(CListViewCtrl_Headlines)
+    CHAIN_MSG_MAP_MEMBER(m_lvHeadlines)
+
+    MSG_WM_MOUSEMOVE(OnMouseMove)
+    MSG_WM_MOUSEWHEEL(OnMouseWheel)
 //    MSG_WM_MOVE(OnMove)
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
     MSG_WM_INITDIALOG(OnInitDialog)
@@ -116,7 +123,7 @@ protected:
 	END_MSG_MAP()
 
   CTreeViewCtrl m_treeSources;
-  CListViewCtrl m_lvHeadlines;
+  CListViewCtrl_Headlines m_lvHeadlines;
   CEdit m_edtStory;
 
   LRESULT OnIQFeedNews( UINT, WPARAM, LPARAM, BOOL& );
@@ -137,6 +144,8 @@ protected:
   void OnDestroy();
   void OnSize(UINT nType, CSize size);
   void OnMove(CPoint ptPos);
+  void OnMouseMove(UINT nFlags, CPoint point);
+  BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 
   LRESULT OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR, BOOL& );

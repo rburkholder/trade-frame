@@ -38,6 +38,10 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
       FrontMonth, HasOptions  // these last two are calculated differently than previous enumerations
   };
 
+  enum enumIxFieldOffsets: unsigned char {
+    IXSymbol = 0, IXDesc, IXExchange, IXListedMarket, IXSecurityType, IXSIC, IXFrontMonth, IXNAICS, _IXCount
+  };
+
   float fltStrike;  // option strike price
   unsigned long SIC;
   unsigned long NAICS;
@@ -46,14 +50,15 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
   structIndexes_t ix[nMaxStrings]; // starting position of each expected string
   structIndexes_t cnt[nMaxStrings];  // length of each strings, excludes terminator
   structIndexes_t bufferedlength; // length of whole structure, can only be <255
+  structIndexes_t lenExchangeKey;  // length of the Exchange key, might be 1 or 2 parts.
   unsigned char eInstrumentType;  // Trading::enumContractTypes
   unsigned char nMonth;  // 1 - 12, 0 for nothing
   unsigned char nOptionSide;  // OptionSide
   char line[nMaxBufferSize];
 
   const char *GetSymbol() { return line; };
-  const char *GetDescription() { return line + ix[1]; };
-  const char *GetExchange() { return line + ix[2]; };
+  const char *GetDescription() { return line + ix[IXDesc]; };
+  const char *GetExchange() { return line + ix[IXExchange]; };
   unsigned char GetInstrumentType() { return eInstrumentType; };
   unsigned char GetOptionSide() { return nOptionSide; };
   unsigned short GetYear() { return nYear; };

@@ -316,6 +316,8 @@ LRESULT CNewsReaderView::OnLVHeadlinesClick( int idCtrl, LPNMHDR pNMHDR, BOOL& b
 
       if ( m_NewsItems[ ixStory ].StoryLoaded ) {
         DisplayStory( ixStory );
+        //m_NewsItems[ ixStory ].StoryLoaded = false;
+        //m_NewsItems[ ixStory ].Story.clear();
       }
       else {
 
@@ -357,3 +359,15 @@ LRESULT CNewsReaderView::OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR pNMHDR, BOOL
   return 0;
 }
 
+void CNewsReaderView::OnMouseMove(UINT nFlags, CPoint point) {
+  //std::stringstream ss;
+  //ss << "Mouse Move " << point.x << "," << point.y << std::endl;
+  //OutputDebugString( ss.str().c_str() );
+}
+
+BOOL CNewsReaderView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+  std::stringstream ss;
+  ss << "Mouse Scroll " << pt.x << "," << pt.y << "," << zDelta << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  return TRUE;
+}
