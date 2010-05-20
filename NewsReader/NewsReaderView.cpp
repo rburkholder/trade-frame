@@ -273,13 +273,13 @@ LRESULT CNewsReaderView::OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR pNMHDR, 
   return 0;
 }
 
-LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+LRESULT CNewsReaderView::OnLVHotTrackHeadlines( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
 
   LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
 
   LVHITTESTINFO info; 
   info.pt = pNM->ptAction;
-  int ix = m_lvHeadlines.HitTest( &info );
+//  int ix = m_lvHeadlines.HitTest( &info );
 /*
 #ifdef _DEBUG
   std::stringstream ss;
@@ -291,6 +291,28 @@ LRESULT CNewsReaderView::OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR pNMHDR, BOOL
   OutputDebugString( ss.str().c_str() );
 #endif
 */
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHotTrackTree( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
+
+  LVHITTESTINFO info; 
+  info.pt = pNM->ptAction;
+  //int ix = m_lvHeadlines.HitTest( &info );
+  bHandled = true;
+  return 0;
+}
+
+LRESULT CNewsReaderView::OnLVHotTrackStory( int idCtrl, LPNMHDR pNMHDR, BOOL& bHandled) {
+
+  LPNMLISTVIEW pNM = reinterpret_cast<LPNMLISTVIEW>( pNMHDR );
+
+  LVHITTESTINFO info; 
+  info.pt = pNM->ptAction;
+  //int ix = m_lvHeadlines.HitTest( &info );
   bHandled = true;
   return 0;
 }

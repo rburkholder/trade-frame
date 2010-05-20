@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <algorithms>
+
 #include <boost/foreach.hpp>
 
 #include "Process.h"
@@ -21,7 +23,7 @@ CProcess::CProcess(void) {
   m_vExchanges.push_back( "NYSE" );
   m_vExchanges.push_back( "NYSE_AMEX" );
   //m_vExchanges.push_back( "NYSE,ARCA" );
-  //m_vExchanges.push_back( "NASDAQ,NMS" );
+  m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
   //m_vExchanges.push_back( "NASDAQ,OTC" );
@@ -45,4 +47,9 @@ void CProcess::Start( void ) {
   }
 
   m_IF.CloseIQFSymbols();
+
+  std::sort( m_vSymbols.begin(), m_vSymbols.end() );
+
+  BOOST_FOREACH( std::string s, m_vSymbols ) {
+  }
 }

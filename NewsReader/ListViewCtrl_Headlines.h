@@ -16,8 +16,8 @@
 class CListViewCtrl_Headlines : public CWindowImpl<CListViewCtrl_Headlines, CListViewCtrl> {
 public:
   //CListViewCtrl_Headlines(HWND hWnd = NULL);
-  CListViewCtrl_Headlines(void) {};
-  ~CListViewCtrl_Headlines(void) {};
+//  CListViewCtrl_Headlines(void) {};
+//  ~CListViewCtrl_Headlines(void) {};
   CListViewCtrl_Headlines& operator=( HWND hWnd ) {
     CListViewCtrl::operator =( hWnd );
     return *this;
@@ -25,9 +25,9 @@ public:
 protected:
   BEGIN_MSG_MAP_EX(CListViewCtrl_Headlines)
     // put your message handler entries here
-    MSG_WM_MOUSEMOVE(OnMouseMove)
-    MSG_WM_MOUSEWHEEL(OnMouseWheel)
-    MSG_WM_MOUSEHOVER()
+//    MSG_WM_MOUSEMOVE(OnMouseMove)
+//    MSG_WM_MOUSEWHEEL(OnMouseWheel)
+//    MSG_WM_MOUSEHOVER(OnMouseHover)
   END_MSG_MAP()
 
   void OnMouseMove(UINT nFlags, CPoint point);

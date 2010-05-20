@@ -14,7 +14,8 @@
 #pragma once
 
 // processes historical data requests against the IQFeed API
-// put parsers in separate compilation units to cut down on compile time
+
+// todo:  put parsers in separate compilation units to cut down on compile time
 
 #define FUSION_MAX_VECTOR_SIZE 18
 

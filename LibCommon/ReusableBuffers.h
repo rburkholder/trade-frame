@@ -13,12 +13,10 @@
 
 #pragma once
 
-//#include <queue>
 #include <vector>
 #include <sstream>
 #include <typeinfo.h>
 #include <cassert>
-//using namespace std;
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
@@ -47,7 +45,13 @@
 
 // might use auto_ptr for this
 
-// use a stack, may help to optimize speed
+// uses a stack to optimize some re-use speed
+
+// CBufferRepository
+
+// can the mutex be made compile-time conditional?
+// most usage may be single thread mode now, as buffers are being returned to the original
+//   thread for storage (actually possibly no, cross thread returns are used)
 
 template<typename bufferT> 
 class CBufferRepository {
@@ -61,25 +65,17 @@ public:
   bool Outstanding( void ) { return ( cntCheckins != cntCheckouts ); };
 protected:
   boost::mutex m_mutex;
-  //std::queue<bufferT*> m_qBuffer;
   std::vector<bufferT*> m_vStack;
 private:
-  typedef unsigned int stats_pod_t;
-  stats_pod_t cntCheckins, cntCheckouts;
+  size_t cntCheckins, cntCheckouts;
 #ifdef _DEBUG
-  stats_pod_t cntCreated, cntDestroyed, maxQsize;
+  size_t cntCreated, cntDestroyed, maxQsize;
   bool m_bCheckingOut;
   bool m_bCheckingIn;
   std::string m_sType;
 #endif
 };
 
-
-// CBufferRepository
-
-// can the mutex be made compile-time conditional?
-// most usage may be single thread mode now, as buffers are being returned to the original
-//   thread for storage
 
 template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void) 
 : cntCheckins( 0 ), cntCheckouts( 0 )
@@ -137,7 +133,7 @@ template<typename bufferT> inline void CBufferRepository<bufferT>::CheckIn(buffe
   m_vStack.push_back( pBuffer );
   ++cntCheckins;
 #ifdef _DEBUG
-  maxQsize = std::max<stats_pod_t>( maxQsize, m_vStack.size() );
+  maxQsize = std::max<size_t>( maxQsize, m_vStack.size() );
   m_bCheckingIn = false;
 #endif
 }
@@ -170,5 +166,3 @@ template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut(
   return pBuffer;
 }
 
- 
-// upstream processing isn't keeping up, need to do 1/5 sec screen updates

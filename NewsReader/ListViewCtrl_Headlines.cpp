@@ -35,5 +35,4 @@ void CListViewCtrl_Headlines::OnMouseHover(WPARAM wParam, CPoint ptPos) {
   std::stringstream ss;
   ss << "HeadLine Mouse Hover " << ptPos.x << "," << ptPos.y << std::endl;
   OutputDebugString( ss.str().c_str() );
-  return TRUE;
 }

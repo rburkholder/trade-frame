@@ -88,6 +88,10 @@ protected:
     WM_IQFEED_NEWS_DONE  // called from derived class, if we need it
   };
 
+  enum enumActiveControl {
+    EACNone, EACTree, EACHeadlines, EACStoryu
+  };
+
   BEGIN_MSG_MAP_EX(CNewsReaderView)
     MESSAGE_HANDLER( WM_IQFEED_NEWS, OnIQFeedNews )  // goes to external handler
     MESSAGE_HANDLER( WM_IQFEED_NEWS_DONE, OnIQFeedNewsDone )  // message returned from external handler
@@ -95,9 +99,12 @@ protected:
     MESSAGE_HANDLER( WM_IQFEED_STORY_LINE, OnIQFeedStoryLine )
     MESSAGE_HANDLER( WM_IQFEED_STORY_DONE, OnIQFeedStoryDone )
 
+    NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_HOTTRACK, OnLVHotTrackHeadlines )
+    NOTIFY_HANDLER( IDC_TREESOURCES, LVN_HOTTRACK, OnLVHotTrackTree )
+    NOTIFY_HANDLER( IDC_EDITSTORY, LVN_HOTTRACK, OnLVHotTrackStory )
+
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_GETDISPINFO, OnLVHeadlinesDispInfo )
     NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_ITEMACTIVATE, OnLVHeadlinesItemActivate )
-    NOTIFY_HANDLER( IDC_LVHEADLINES, LVN_HOTTRACK, OnLVHeadlinesHotTrack )
     NOTIFY_HANDLER( IDC_LVHEADLINES, NM_CLICK, OnLVHeadlinesClick )
     NOTIFY_HANDLER( IDC_LVHEADLINES, NM_HOVER, OnLVHeadlinesHover )
     NOTIFY_HANDLER( IDC_LVHEADLINES, NM_RCLICK, OnLVHeadlinesRClick )
@@ -113,8 +120,8 @@ protected:
     //CHAIN_MSG_MAP(CListViewCtrl_Headlines)
     CHAIN_MSG_MAP_MEMBER(m_lvHeadlines)
 
-    MSG_WM_MOUSEMOVE(OnMouseMove)
-    MSG_WM_MOUSEWHEEL(OnMouseWheel)
+//    MSG_WM_MOUSEMOVE(OnMouseMove)
+//    MSG_WM_MOUSEWHEEL(OnMouseWheel)
 //    MSG_WM_MOVE(OnMove)
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
     MSG_WM_INITDIALOG(OnInitDialog)
@@ -147,9 +154,12 @@ protected:
   void OnMouseMove(UINT nFlags, CPoint point);
   BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 
+  LRESULT OnLVHotTrackHeadlines( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHotTrackTree( int idCtrl, LPNMHDR, BOOL& );
+  LRESULT OnLVHotTrackStory( int idCtrl, LPNMHDR, BOOL& );
+
   LRESULT OnLVHeadlinesDispInfo( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesItemActivate( int idCtrl, LPNMHDR, BOOL& );
-  LRESULT OnLVHeadlinesHotTrack( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesClick( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesHover( int idCtrl, LPNMHDR, BOOL& );
   LRESULT OnLVHeadlinesRClick( int idCtrl, LPNMHDR, BOOL& );
