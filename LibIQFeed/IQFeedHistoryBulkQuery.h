@@ -65,9 +65,6 @@ public:
   CIQFeedHistoryBulkQuery( CAppModule* pModule );
   ~CIQFeedHistoryBulkQuery( void );
 
-  BOOL InitializeThread( void );
-  void CleanupThread( DWORD );
-
   // use one or the other of SetExchanges or SetSymbols
   typedef std::vector<std::string> exchange_list_t;
   void SetExchanges( const &exchange_list_t exchanges );
@@ -119,6 +116,9 @@ protected:
 
   void GenerateQueries( void );
   void ProcessSymbolList( void );
+
+  BOOL InitializeThread( void );
+  void CleanupThread( DWORD );
 
 private:
   CAppModule* m_pModule;
