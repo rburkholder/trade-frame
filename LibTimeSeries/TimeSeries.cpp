@@ -69,7 +69,7 @@ CBars::~CBars( void ) {
 CTrades::CTrades(void) {
 }
 
-CTrades::CTrades( unsigned int size )
+CTrades::CTrades( size_t size )
 :CTimeSeries<CTrade>( size ) {
 }
 
@@ -81,7 +81,7 @@ CTrades::~CTrades( void ) {
 CQuotes::CQuotes(void) {
 }
 
-CQuotes::CQuotes( unsigned int size )
+CQuotes::CQuotes( size_t size )
 :CTimeSeries<CQuote>( size ) {
 }
 
@@ -96,7 +96,7 @@ CMarketDepths::CMarketDepths() {
 CMarketDepths::~CMarketDepths() {
 }
 
-CMarketDepths::CMarketDepths(unsigned int size) 
+CMarketDepths::CMarketDepths(size_t size) 
 : CTimeSeries<CMarketDepth>( size ) {
 }
 

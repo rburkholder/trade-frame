@@ -268,6 +268,8 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 //          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
           
           COLORREF cBack = Colour::Beige;
+          // set colours so green range for higher buy/sell, new high buy/sell
+          // set colours so red range for lower buy/sell, new log buy/sell
 
           if ( m_bRunning ) {
             if ( 't' == sLastTradeTime[8] ) {  // treat as trade

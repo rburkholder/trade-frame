@@ -28,10 +28,10 @@
 template<class T> class CTimeSeries {
 public:
   CTimeSeries<T>(void);
-  CTimeSeries<T>( unsigned int Size );
+  CTimeSeries<T>( size_t Size );
   virtual ~CTimeSeries<T>(void);
 
-  size_t Count() { return m_vSeries.size(); };  // this one should be deprecated, for consistencies sake
+  //size_t Count() { return m_vSeries.size(); };  // this one should be deprecated, for consistencies sake
   size_t Size() { return m_vSeries.size(); };
   void AppendDatum( const T &datum );
   void InsertDatum( const ptime &time, const T &datum );
@@ -68,7 +68,7 @@ private:
 template<class T> CTimeSeries<T>::CTimeSeries(void) {
 }
 
-template<class T> CTimeSeries<T>::CTimeSeries( unsigned int size ) {
+template<class T> CTimeSeries<T>::CTimeSeries( size_t size ) {
   m_vSeries.reserve( size );
 }
 
@@ -277,7 +277,7 @@ template<class T> H5::DataSpace *CTimeSeries<T>::DefineDataSpace( H5::DataSpace 
 class CBars: public CTimeSeries<CBar> {
 public:
   CBars(void);
-  CBars( unsigned int );
+  CBars( size_t );
   virtual ~CBars(void);
   CBars *Subset( ptime time ) { return (CBars *) CTimeSeries<CBar>::Subset( time ); };
   CBars *Subset( ptime time, unsigned int n ) { return (CBars *) CTimeSeries<CBar>::Subset( time, n ); };
@@ -290,7 +290,7 @@ private:
 class CTrades: public CTimeSeries<CTrade> {
 public:
   CTrades(void);
-  CTrades( unsigned int );
+  CTrades( size_t );
   virtual ~CTrades(void);
   CTrades *Subset( ptime time ) { return (CTrades *) CTimeSeries<CTrade>::Subset( time ); };
   CTrades *Subset( ptime time, unsigned int n ) { return (CTrades *) CTimeSeries<CTrade>::Subset( time, n ); };
@@ -303,7 +303,7 @@ private:
 class CQuotes: public CTimeSeries<CQuote> {
 public:
   CQuotes(void);
-  CQuotes( unsigned int );
+  CQuotes( size_t );
   virtual ~CQuotes(void);
   CQuotes *Subset( ptime time ) { return (CQuotes *) CTimeSeries<CQuote>::Subset( time ); };
   CQuotes *Subset( ptime time, unsigned int n ) { return (CQuotes *) CTimeSeries<CQuote>::Subset( time, n ); };
@@ -316,7 +316,7 @@ private:
 class CMarketDepths: public CTimeSeries<CMarketDepth> {
 public:
   CMarketDepths(void);
-  CMarketDepths( unsigned int );
+  CMarketDepths( size_t );
   virtual ~CMarketDepths(void);
   CMarketDepths *Subset( ptime time ) { return (CMarketDepths *) CTimeSeries<CMarketDepth>::Subset( time ); };
   CMarketDepths *Subset( ptime time, unsigned int n ) { return (CMarketDepths *) CTimeSeries<CMarketDepth>::Subset( time, n ); };

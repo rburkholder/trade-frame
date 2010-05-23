@@ -25,7 +25,10 @@
 
 #include "Network.h"
 
-template <typename T>
+// typename T: CRTP based type
+// typename O: Object type passed in for session reference via LPARAM
+
+template <typename T, typename O = size_t>
 class CNetworkClientSkeleton: public CGuiThreadImpl<CNetworkClientSkeleton<T> > {
 public:
 
@@ -51,6 +54,8 @@ public:
   void Send( const std::string& send, enumSend eSend = SEND_AND_FORWARD );  // for internal origination, set to SEND_AND_NO_FORWARD
   void SetPort( port_t port ) { m_connParameters.nPort = port; };
   void SetAddress( const ipaddress_t& ipaddress ) { m_connParameters.sAddress = ipaddress; };
+  void SetObject( const O& o ) { m_o = o; };
+  const O& GetObject( void ) { return m_o; };
 
 protected:
 
@@ -91,6 +96,8 @@ protected:
 
     MESSAGE_HANDLER( WM_NCS_PRE_QUIT, OnPreQuit )
   END_MSG_MAP()
+
+  O m_o; // user supplied value of user supplied type, to be returned in various LPARAM results
 
   LRESULT OnConnInitialized( UINT, WPARAM, LPARAM, BOOL &bHandled );
   LRESULT OnConnClosed( UINT, WPARAM, LPARAM, BOOL &bHandled );
@@ -134,7 +141,7 @@ private:
 
 };
 
-template <typename T>
+template <typename T, typename O>
 CNetworkClientSkeleton<T>::CNetworkClientSkeleton(WTL::CAppModule *pModule) 
 : CGuiThreadImpl<CNetworkClientSkeleton<T> >( pModule, CREATE_SUSPENDED ),
   m_barrier( 2 ),
@@ -146,9 +153,10 @@ CNetworkClientSkeleton<T>::CNetworkClientSkeleton(WTL::CAppModule *pModule)
 {
   this->Resume();
   m_barrier.wait();  // sync up with InitializeThread
+  m_stateConnection = CS_QUIESCENT;  // thread has been initialized
 }
 
-template <typename T>
+template <typename T, typename O>
 CNetworkClientSkeleton<T>::CNetworkClientSkeleton(
   WTL::CAppModule *pModule, const ipaddress_t& ipaddress, port_t port
   ) 
@@ -162,32 +170,32 @@ CNetworkClientSkeleton<T>::CNetworkClientSkeleton(
 {
   this->Resume();
   m_barrier.wait();  // sync up with InitializeThread
+  m_stateConnection = CS_QUIESCENT;  // thread has been initialized
 }
 
-template <typename T>
+template <typename T, typename O>
 CNetworkClientSkeleton<T>::~CNetworkClientSkeleton() {
   assert( CS_CONNECTED != m_stateConnection );
   PostThreadMessage( WM_NCS_PRE_QUIT );
   Join();
 }
 
-template <typename T>
+template <typename T, typename O>
 BOOL CNetworkClientSkeleton<T>::InitializeThread( void ) {
 
   BOOL b = TRUE;
-  m_stateConnection = CS_QUIESCENT;  // thread has been initialized
-
-  m_barrier.wait();  // sync up with constructor
 
   T* pT = static_cast<T*>( this );
   if ( &CNetworkClientSkeleton<T>::InitializeThread != &T::InitializeThread ) {
     b = pT->InitializeThread();
   }
 
+  m_barrier.wait();  // sync up with constructor
+
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
   if ( CS_QUIESCENT == m_stateConnection ) {
     PostQuitMessage();
@@ -200,7 +208,7 @@ LRESULT CNetworkClientSkeleton<T>::OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandl
   return 1;
 }
 
-template <typename T>
+template <typename T, typename O>
 void CNetworkClientSkeleton<T>::CleanupThread( DWORD dw ) {
 
   T* pT = static_cast<T*>( this );
@@ -211,7 +219,7 @@ void CNetworkClientSkeleton<T>::CleanupThread( DWORD dw ) {
   m_stateConnection = CS_QUIESCENT;
 }
 
-template <typename T>
+template <typename T, typename O>
 void CNetworkClientSkeleton<T>::Connect( void ) { // post a local message, register needs to be in other thread
 
 #ifdef _DEBUG
@@ -230,7 +238,7 @@ void CNetworkClientSkeleton<T>::Connect( void ) { // post a local message, regis
   }
 }
 
-template <typename T>
+template <typename T, typename O>
 void CNetworkClientSkeleton<T>::Disconnect( void ) {  
   switch ( m_stateConnection ) {
     case CS_CONNECTED: 
@@ -246,7 +254,7 @@ void CNetworkClientSkeleton<T>::Disconnect( void ) {
   }
 }
 
-template <typename T>
+template <typename T, typename O>
 void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) {
 
   // need to do this pause differently, maybe add WaitToSend message, but need message queue to be initialized first
@@ -294,7 +302,7 @@ void CNetworkClientSkeleton<T>::Send( const std::string& send, enumSend eSend ) 
   }
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnInitialized( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
 
 
@@ -312,15 +320,14 @@ LRESULT CNetworkClientSkeleton<T>::OnConnInitialized( UINT, WPARAM wParam, LPARA
   return 1;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnClosed( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
   bHandled = true;
   return 1;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnConnected( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
 
 #ifdef _DEBUG
   std::stringstream ss;
@@ -334,14 +341,15 @@ LRESULT CNetworkClientSkeleton<T>::OnConnConnected( UINT id, WPARAM wParam, LPAR
 
   T* pT = static_cast<T*>( this );
   if ( &CNetworkClientSkeleton<T>::OnConnConnected != &T::OnConnConnected ) {
-    b = pT->OnConnConnected( id, wParam, lParam, bHandled );
+    //b = pT->OnConnConnected( id, wParam, lParam, bHandled );
+    b = pT->OnConnConnected( id, wParam, reinterpret_cast<LPARAM>( m_o), bHandled );
   }
 
   bHandled = true;
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnDisconnected( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   BOOL b = TRUE;
@@ -349,7 +357,8 @@ LRESULT CNetworkClientSkeleton<T>::OnConnDisconnected( UINT id, WPARAM wParam, L
 
   T* pT = static_cast<T*>( this );
   if ( &CNetworkClientSkeleton<T>::OnConnDisconnected != &T::OnConnDisconnected ) {
-    b = pT->OnConnDisconnected( id, wParam, lParam, bHandled );
+    //b = pT->OnConnDisconnected( id, wParam, lParam, bHandled );
+    b = pT->OnConnDisconnected( id, wParam, reinterpret_cast<LPARAM>( m_o), bHandled );
   }
 
   delete m_pNetworkConnection;
@@ -359,7 +368,7 @@ LRESULT CNetworkClientSkeleton<T>::OnConnDisconnected( UINT id, WPARAM wParam, L
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnProcess( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   BOOL b = TRUE;
@@ -373,7 +382,7 @@ LRESULT CNetworkClientSkeleton<T>::OnConnProcess( UINT id, WPARAM wParam, LPARAM
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnSendDone( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   BOOL b = TRUE;
@@ -394,7 +403,7 @@ LRESULT CNetworkClientSkeleton<T>::OnConnSendDone( UINT id, WPARAM wParam, LPARA
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnConnError( UINT id, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   BOOL b = TRUE;
@@ -410,7 +419,7 @@ LRESULT CNetworkClientSkeleton<T>::OnConnError( UINT id, WPARAM wParam, LPARAM l
   return b;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
 
 
@@ -427,7 +436,7 @@ LRESULT CNetworkClientSkeleton<T>::OnMethodConnect( UINT, WPARAM, LPARAM, BOOL &
   return 1;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnMethodDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
 
   if ( m_sendbuffers.Outstanding() ) {  // wait to finish off what ever we were sending
@@ -442,7 +451,7 @@ LRESULT CNetworkClientSkeleton<T>::OnMethodDisconnect( UINT, WPARAM, LPARAM, BOO
   return 1;
 }
 
-template <typename T>
+template <typename T, typename O>
 LRESULT CNetworkClientSkeleton<T>::OnMethodSend( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   m_pNetworkConnection->PostThreadMessage( network_t::WM_NETWORK_SEND, wParam, lParam );

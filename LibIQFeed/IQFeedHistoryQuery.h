@@ -259,10 +259,10 @@ public:
   void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HTX ticks
   void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ); // HTD ticks
 
-  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam );  // HIX i=interval in seconds
-  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ); // HID i=interval in seconds
+  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam );  // HIX i=interval in seconds  (bars)
+  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ); // HID i=interval in seconds (bars)
 
-  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HDX
+  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HDX  (bars)
 
   void ReQueueTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
   void ReQueueInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
