@@ -337,10 +337,10 @@ CIQFeedHistoryQuery<T>::~CIQFeedHistoryQuery() {
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   if ( 0 != m_structMessageDestinations.msgConnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected, wParam, lParam );
   }
 
   bHandled = true;
@@ -348,10 +348,10 @@ LRESULT CIQFeedHistoryQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BO
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   if ( 0 != m_structMessageDestinations.msgDisconnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected, wParam, lParam );
   }
   
   bHandled = true;
@@ -362,7 +362,7 @@ template <typename T>
 LRESULT CIQFeedHistoryQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   if( 0 != m_structMessageDestinations.msgSendComplete ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete, wParam, lParam );
   }
 
   bHandled = true;
@@ -370,7 +370,7 @@ LRESULT CIQFeedHistoryQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lPar
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
 
   linebuffer_t* buf = reinterpret_cast<linebuffer_t*>( wParam );
 

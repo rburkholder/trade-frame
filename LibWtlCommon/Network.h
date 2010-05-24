@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <codeproject/thread.h>  // class inbound messages
+//#include <codeproject/thread.h>  // class inbound messages
 
 #include <boost/asio.hpp>  // class outbound processing
 #include <boost/thread.hpp>  // separate thread for asio run processing
@@ -40,39 +40,40 @@
 using boost::asio::ip::tcp;
 
 // http://www.codeproject.com/KB/wtl/WTLIntellisense.aspx
+// http://think-async.com/Asio/Recipes
 
 // use asio post messages to send commands 
-// use CThread PostMessages to return responses
-// use circular buffer of 20 messages
-// post message when circular buffer is empty
-// based upon Lock-Free Queues? http://www.ddj.com/hpc-high-performance-computing/208801974
+// can we base stuff on Lock-Free Queues? http://www.ddj.com/hpc-high-performance-computing/208801974
 // input streams are cr/lf delimited
 // LOG received buffer length to see if we are actually using big buffers on reception
-// constructor uses static init structure, rather than dynamic update one message types
 // maybe do dynamic message pointer updates later
-// three threads:
+// two threads:
 //   * external thread for routines that send message to this class
 //   * asio thread for processing outbound and inbound
-//   * windows thread for processing windows messages
 // collect statistics to see if network side input buffers are being broken up
 //   if they are, then remain with character by character delivery
 //   if they are not, then can use begin/end iterators to pass information
 //   or come up with a different scheme of managing iterators over multiple buffers for use by Spirit
 // need code to catch when the socket is closed for whatever reason
-// should we do the boost::barrier thread stuff here to sync start and shutdown?
 
-template <typename ownerT, typename charT = unsigned char>
-class CNetwork: public CGuiThreadImpl<CNetwork<ownerT> > {
+// ownerT:  CRTP class
+// objectT:  object type passed through the Send/Write loop
+// charT:  type of character processed 
+
+// CRTP based callbacks:
+/*
+OnNetworkError( enumMessageErrorTypes )
+OnNetworkDisconnected()
+OnNetworkConnected()
+OnNetworkLineBuffer( linebuffer_t* )
+OnNetworkSendDone( linebuffer_t* )
+OnNetworkSendDone( linebuffer_t*, objectT )
+*/
+
+
+template <typename ownerT, typename objectT, typename charT = unsigned char>
+class CNetwork {
 public:
-
-  // message ids for messages delivered to this class from external caller
-  // used for crossing thread boundaries
-  enum enumMessageTypes { 
-    WM_NETWORK_CONNECT = WM_USER + 1,  // open the port
-    WM_NETWORK_DISCONNECT,  // close the port
-    WM_NETWORK_SEND,  // send string over network port
-    WM_NETWORK_PROCESSED // message has been processed, return buffer to queue for re-use
-  };
 
   enum enumMessageErrorTypes {
     OK = 0,
@@ -86,29 +87,12 @@ public:
   typedef unsigned short port_t;
   typedef std::string ipaddress_t;
 
-  // pre-initialized message ids for messages delivered to and accepted by external caller
-  struct structMessages {  // information needed by port processing thread
-    ownerT* owner;        // owner object to which message is sent (PostMessage needs to be implemented)
-    UINT msgInitialized;   // message id when class thread has been  initialized  (wparam=null, lparam=null)
-    UINT msgClosed;   // message id when class thread has ended   (wparam=null, lparam=null)
-    UINT msgConnected;    // message id when socket has been connected  (wparam=null, lparam=null)
-    UINT msgDisconnected;  // message id when socket has been disconnected/closed  (wparam=null, lparam=null)
-    UINT msgProcess;  // message id when sending line of text to process  (wparam=linebuffer_t*, lparam=null)
-    UINT msgSendDone; // returns buffer used by the send message  (wparam=object, lparam=linebuffer_t*)
-    UINT msgError;    // message id when error is encountered  (wparam=enumMessageErrorTypes, lparam=null)
-    structMessages(void): owner( 0 ), msgInitialized( 0 ), msgClosed( 0 ), msgConnected( 0 ), msgDisconnected( 0 ),
-      msgProcess( 0 ), msgSendDone( 0 ), msgError( 0 ) {};
-    structMessages(ownerT* owner_, UINT msgInitialized_, UINT msgClosed_, UINT msgConnected_, UINT msgDisconnected_,
-      UINT msgProcess_, UINT msgSendDone_, UINT msgError_ )
-      : owner( owner_ ), msgInitialized( msgInitialized_ ), msgClosed( msgClosed_ ), msgConnected( msgConnected_ ),
-        msgDisconnected( msgDisconnected_ ), msgProcess( msgProcess_ ), msgSendDone( msgSendDone_ ), msgError( msgError_ ) {};
-  };
-
   struct structConnection {
     ipaddress_t sAddress;
     port_t nPort;
     structConnection( const ipaddress_t& sAddress_, port_t nPort_ )
       : sAddress( sAddress_ ), nPort( nPort_ ) {};
+    structConnection( void ) sAddress( "127.0.0.1" ), nPort( 0 ) {};
   };
 
   // factor a couple of these out as traits for here and for IQFeedMessages.
@@ -118,26 +102,19 @@ public:
   typedef std::vector<bufferelement_t> linebuffer_t;  // used for composing lines of data for processing
   typedef CBufferRepository<linebuffer_t> linerepository_t;
 
-  CNetwork(CAppModule* pModule, const structMessages&);
-  ~CNetwork(void);
+//  CNetwork(CAppModule* pModule, const structMessages&);
+  CNetwork( void );
+  CNetwork( const structConnection& connection );
+  ~CNetwork( void );
+
+  void Connect( void );
+  void Connect( const structConnection& connection );
+  void Disconnect( void );
+  void Send( linebuffer_t* pbuffer );  // string being sent out to network
+  void Send( linebuffer_t* pbuffer, const objectT& object );  // string being sent out to network
+  void GiveBackBuffer( linebuffer_t* p ) { m_reposLineBuffers.CheckInL( p ); };  // parsed buffer being given back to accept more parsed network traffic
 
 protected:
-  BEGIN_MSG_MAP_EX(CNetwork)
-    MESSAGE_HANDLER(WM_NETWORK_SEND, OnSend)  // command to be transmitted to network  (wparam=object, lparam=linebuffer_t*)
-    MESSAGE_HANDLER(WM_NETWORK_PROCESSED, OnProcessed)  // line buffer is returned to repository  (wparam=linebuffer_t*, lparam=null)
-    MESSAGE_HANDLER(WM_NETWORK_CONNECT, OnConnect)  //(wparam=const structConnection&, lparam=null)
-    MESSAGE_HANDLER(WM_NETWORK_DISCONNECT, OnDisconnect)  //(wparam=null, lparam=null)
-  END_MSG_MAP()
-
-  LRESULT OnConnect( UINT, WPARAM, LPARAM, BOOL &bHandled);
-  LRESULT OnSend( UINT, WPARAM, LPARAM, BOOL &bHandled);
-  LRESULT OnProcessed( UINT, WPARAM, LPARAM, BOOL &bHandled);
-  LRESULT OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled);
-
-  BOOL InitializeThread( void );
-  void CleanupThread( DWORD );
-
-  BOOL PostMessageToOwner( UINT, WPARAM = NULL, LPARAM = NULL );
 
 private:
 
@@ -146,10 +123,12 @@ private:
     NS_DISCONNECTED,
     NS_CONNECTING,
     NS_CONNECTED,
-    NS_DISCONNECTING
+    NS_DISCONNECTING, 
+    NS_CLOSING,
+    NS_CLOSED
   } m_stateNetwork;
 
-  structMessages m_Messages;
+  structConnection m_Connection;
 
   boost::thread m_asioThread;
 
@@ -157,10 +136,10 @@ private:
   boost::asio::io_service::work* m_pwork;
   boost::asio::ip::tcp::socket* m_psocket;
 
-  inputrepository_t m_reposInputBuffers;
-  linerepository_t m_reposLineBuffers;
+  inputrepository_t m_reposInputBuffers;  // content received from the network
+  linerepository_t m_reposLineBuffers;  // parsed lines sent to the callers
 
-  linebuffer_t* m_pline;
+  linebuffer_t* m_pline;  // current parsing results
 
   unsigned int m_cntAsyncReads;
   unsigned int m_cntBytesTransferred_input;
@@ -170,34 +149,61 @@ private:
   unsigned int m_cntBytesTransferred_send;
 
   void ConnectHandler( const boost::system::error_code& error );
-  void TimerHandler( const boost::system::error_code& error );
-  void WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t*, WPARAM wParam );
+  void WriteHandlerCommon( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
+  void WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
+  void WriteHandler( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t*, const objectT& object );
   void ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* );
   void AsyncRead( void );
 
   void AsioThread( void );
+  void CommonConstruction( void );
 
 };
 
-template <typename ownerT, typename charT>
-CNetwork<ownerT,charT>::CNetwork(CAppModule* pModule, const structMessages& messages)
-: CGuiThreadImpl<CNetwork>( pModule ), m_Messages( messages ),
+template <typename ownerT, typename objectT, typename charT>
+CNetwork<ownerT,objectT,charT>::CNetwork( void )
+: 
   m_stateNetwork( NS_INITIALIZING ),
-  m_psocket( NULL ), //m_bSocketOpen( false ), //, m_bSocketOpened( false ),
+  m_psocket( NULL ), 
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 )
 {
-  m_pline = m_reposLineBuffers.CheckOutL();
-  m_pline->clear();
+  CommonConstruction();
 }
 
-template <typename ownerT, typename charT>
-CNetwork<ownerT,charT>::~CNetwork(void) {
+template <typename ownerT, typename objectT, typename charT>
+CNetwork<ownerT,objectT,charT>::CNetwork( const structConnection& connection )
+: 
+  m_Connection( connection ),
+  m_stateNetwork( NS_INITIALIZING ),
+  m_psocket( NULL ), 
+  m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
+  m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
+  m_cntLinesProcessed( 0 )
+{
+  CommonConstruction();
+}
 
-  assert( NS_DISCONNECTED == m_stateNetwork );
+template <typename ownerT, typename objectT, typename charT>
+void CommonConstruction( void ) {
+  m_pline = m_reposLineBuffers.CheckOutL();  // have a receiving line ready
+  m_pline->clear();
+  m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running 
+  m_asioThread = boost::thread( boost::bind( &CNetwork::AsioThread, this ) );
+}
 
-  PostQuitMessage();
+template <typename ownerT, typename objectT, typename charT>
+CNetwork<ownerT,objectT,charT>::~CNetwork(void) {
+
+  if ( NS_CONNECTED == m_stateNetwork ) {
+    Disconnect();
+  }
+  else {
+    assert( NS_DISCONNECTED == m_stateNetwork );
+  }
+
+  m_stateNetwork = NS_CLOSING;
 
 #if defined _DEBUG
   if ( 0 != m_pline->size() ) {
@@ -205,13 +211,21 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   }
 #endif
 
-  // check in our held line so it gets cleaned up
-  m_reposLineBuffers.CheckInL( m_pline );
-  m_pline = NULL;
+  delete m_pwork;  // stop the asio service (let it run out of work, which at this point should be none)
+//  m_io.stop();  // kinda redundant
+
+  m_asioThread.join();  // wait for i/o thread to terminate
+
+//  delete m_asioThread;
+//  m_asioThread = NULL;
 
 //  if ( m_asioThread. ) {  // need to find check for done and cleared
 //    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
 //  }
+
+  // check in our held line so it gets cleaned up
+  m_reposLineBuffers.CheckInL( m_pline );
+  m_pline = NULL;
 
 #if defined _DEBUG
   std::stringstream ss;
@@ -224,21 +238,16 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   OutputDebugString( ss.str().c_str() );
   ss.str() = "";
 #endif
+
+  m_stateNetwork = NS_CLOSED;
+
 }
 
-template <typename ownerT, typename charT>
-BOOL CNetwork<ownerT,charT>::InitializeThread( void ) {
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::AsioThread( void ) {
 
-  BOOL b = PostMessageToOwner( m_Messages.msgInitialized );
+  m_io.run();  // handles async socket 
 
-  return TRUE;
-}
-
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::AsioThread( void ) {
-
-  m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running 
-  m_io.run();  // handles async timer and async socket 
 #ifdef _DEBUG
   std::stringstream ss;
   ss << "ASIO Thread Exit:  " << typeid( this ).name() << std::endl;
@@ -247,90 +256,96 @@ void CNetwork<ownerT,charT>::AsioThread( void ) {
 #endif
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::CleanupThread( DWORD dw ) {
-
-  if ( NS_CONNECTED == m_stateNetwork ) {
-    BOOL bHandled;
-    OnDisconnect( NULL, NULL, NULL, bHandled );
-  }
-
-  m_asioThread.join();  // wait for i/o thread to terminate
-
-//  delete m_asioThread;
-//  m_asioThread = NULL;
-
-  BOOL b = PostMessageToOwner( m_Messages.msgClosed );
-}
-
-template <typename ownerT, typename charT>
-LRESULT CNetwork<ownerT,charT>::OnConnect( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
-  const structConnection* connection  = reinterpret_cast<structConnection*>( wParam ); 
-
-  m_asioThread = boost::thread( boost::bind( &CNetwork::AsioThread, this ) );
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::Connect( void ) {
 
 #ifdef _DEBUG
   if ( NULL != m_psocket ) {
     OutputDebugString( "CNetwork::OnConnect:  m_psocket not null.\n" );
   }
 #endif
-  m_psocket = new tcp::socket( m_io );
+
+  assert( NS_DISCONNECTED == m_stateNetwork );
 
   m_stateNetwork = NS_CONNECTING;
 
+  assert( 0 != m_Connection->nPort );
+
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
-  tcp::endpoint endpoint( boost::asio::ip::address::from_string( connection->sAddress ), connection->nPort );
+  m_psocket = new tcp::socket( m_io );
+  tcp::endpoint endpoint( boost::asio::ip::address::from_string( m_Connection->sAddress ), m_Connection->nPort );
   m_psocket->async_connect( 
     endpoint, 
     boost::bind<void>( &CNetwork::ConnectHandler, this, boost::asio::placeholders::error ) 
     );
-
-  bHandled = true;
-  return 1;
 }
 
-template <typename ownerT, typename charT>
-LRESULT CNetwork<ownerT,charT>::OnDisconnect( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::Connect( const structConnection& connection ) {
+  m_Connection = connection;
+  Connect();
+}
 
-  //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
-  if ( NS_CONNECTED == m_stateNetwork ) {
-    m_psocket->close();
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::Disconnect( void ) {
+
+  if ( NS_DISCONNECTED != m_stateNetwork ) {
+    //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
+    if ( NS_CONNECTED == m_stateNetwork ) {
+      m_stateNetwork = NS_DISCONNECTING;
+      m_psocket->close();
+      delete m_psocket;
+      m_psocket = NULL;
+    }
+    else {
+      assert( NS_DISCONNECTED == m_stateNetwork );
+    }
   }
-
-  delete m_psocket;
-  m_psocket = NULL;
-
-  delete m_pwork;  // stop the asio service (let it run out of work)
-
-  m_io.stop();  // kinda redundant
 
   m_stateNetwork = NS_DISCONNECTED;
 
-  BOOL b = PostMessageToOwner( m_Messages.msgDisconnected );
+  if ( &CNetwork<ownerT, objectT, charT>::OnNetworkDisconnected != &ownerT::OnNetworkDisconnected ) {
+    static_cast<ownerT*>( this )->OnNetworkDisconnected();
+  }
 
-  bHandled = true;
-  return 1;
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::ConnectHandler( const boost::system::error_code& error ) {
-  if ( error ) {
-    BOOL b = PostMessageToOwner( m_Messages.msgError, ERROR_CONNECT );
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::Send( linebuffer_t* pbuffer ) {
+
+  if ( NS_CONNECTED == m_stateNetwork ) {
+    boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
+      boost::bind( &CNetwork::WriteHandler, this,
+      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer )
+      );
+    ++m_cntSends;
   }
   else {
-//    m_bSocketOpen = true;
-
-    m_stateNetwork = NS_CONNECTED;
-
-    AsyncRead();
-
-    BOOL b = PostMessageToOwner( m_Messages.msgConnected );
+    if ( &CNetwork<ownerT, objectT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
+      static_cast<ownerT*>( this )->OnNetworkError( ERROR_SOCKET );
+    }
   }
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::AsyncRead( void ) {
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::Send( linebuffer_t* pbuffer, const objectT& object ) {
+
+  if ( NS_CONNECTED == m_stateNetwork ) {
+    boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
+      boost::bind( &CNetwork::WriteHandler, this,
+      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer, object )
+      );
+    ++m_cntSends;
+  }
+  else {
+    if ( &CNetwork<ownerT, objectT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
+      static_cast<ownerT*>( this )->OnNetworkError( ERROR_SOCKET );
+    }
+  }
+}
+
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::AsyncRead( void ) {
 
   assert( NS_CONNECTED == m_stateNetwork );
 
@@ -342,11 +357,30 @@ void CNetwork<ownerT,charT>::AsyncRead( void ) {
     boost::bind( 
       &CNetwork::ReadHandler, this,
       boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
-
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::ConnectHandler( const boost::system::error_code& error ) {
+
+  if ( error ) {
+    if ( &CNetwork<ownerT, objectT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
+      static_cast<ownerT*>( this )->OnNetworkError( ERROR_CONNECT );
+    }
+  }
+  else {
+
+    m_stateNetwork = NS_CONNECTED;
+
+    if ( &CNetwork<ownerT, objectT, charT>::OnNetworkConnected != &ownerT::OnNetworkConnected ) {
+      static_cast<ownerT*>( this )->OnNetworkConnected();
+    }
+
+    AsyncRead();
+  }
+}
+
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::ReadHandler( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
 
   if ( 0 == bytes_transferred ) {
     // probably infers that connection has been closed
@@ -360,8 +394,7 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
 
     AsyncRead();  // set up for another read while processing existing buffer
 
-    // process the buffer here
-
+    // process the buffer:
     // need current linebuffer, need stats on how often it waits for subsequent bulk data
     bufferelement_t ch;
     inputbuffer_t::const_iterator input = pbuffer->begin();
@@ -373,7 +406,9 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
       }
       if ( 0x0a == ch ) {
         // send the buffer off 
-        PostMessageToOwner( m_Messages.msgProcess, reinterpret_cast<WPARAM>( m_pline ) );
+        if ( &CNetwork<ownerT, objectT, charT>::OnNetworkLineBuffer != &ownerT::OnNetworkLineBuffer ) {
+          static_cast<ownerT*>( this )->OnNetworkLineBuffer( m_pline );
+        }
         ++m_cntLinesProcessed;
         // and allocate another buffer
         m_pline = m_reposLineBuffers.CheckOutL();
@@ -387,7 +422,6 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
           m_pline->push_back( ch );
         }
       }
-
       --bytes_transferred;
     } // end while
 
@@ -395,70 +429,45 @@ void CNetwork<ownerT,charT>::ReadHandler( const boost::system::error_code& error
   m_reposInputBuffers.CheckInL( pbuffer );
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::TimerHandler( const boost::system::error_code& error ) {
-
-  //assert( NS_CONNECTED == m_stateNetwork );
-
-//  if ( m_bKeepTimerActive ) {
-//    m_timer.expires_at( m_timer.expires_at() + boost::posix_time::seconds( 1 ) );
-//    m_timer.async_wait( boost::bind( &CNetwork::TimerHandler, this, boost::asio::placeholders::error ) );
-//  }
-}
-
-template <typename ownerT, typename charT>
-LRESULT CNetwork<ownerT,charT>::OnSend( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( lParam );
-
-  if ( NS_CONNECTED == m_stateNetwork ) {
-    boost::asio::async_write( *m_psocket, boost::asio::buffer( *pbuffer ), 
-      boost::bind( &CNetwork::WriteHandler, this,
-      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer, wParam )
-      );
-    ++m_cntSends;
-  }
-  else {
-    BOOL b = PostMessageToOwner( m_Messages.msgError, ERROR_SOCKET );
-  }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::WriteHandler( 
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::WriteHandlerCommon( 
         const boost::system::error_code& error, 
         std::size_t bytes_transferred, 
-        linebuffer_t* pbuffer,
-        WPARAM wParam) {
+        linebuffer_t* pbuffer
+        ) {
 
   assert( NS_CONNECTED == m_stateNetwork );
 
   if ( error ) {
-    BOOL b = PostMessageToOwner( m_Messages.msgError, ERROR_WRITE ); 
+    if ( &CNetwork<ownerT, objectT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
+      static_cast<ownerT*>( this )->OnNetworkError( ERROR_WRITE );
+    }
   }
   assert( bytes_transferred == pbuffer->size() );
   m_cntBytesTransferred_send += bytes_transferred;
-  PostMessageToOwner( m_Messages.msgSendDone, wParam, reinterpret_cast<LPARAM>( pbuffer ) );
 }
 
-template <typename ownerT, typename charT>
-LRESULT CNetwork<ownerT,charT>::OnProcessed( UINT, WPARAM wparam, LPARAM, BOOL &bHandled ) {
-
-  linebuffer_t* pbuffer = reinterpret_cast<linebuffer_t*>( wparam );
-  m_reposLineBuffers.CheckInL( pbuffer );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename ownerT, typename charT>
-BOOL CNetwork<ownerT,charT>::PostMessageToOwner( UINT msg, WPARAM wParam, LPARAM lParam ) {
-  if ( 0 != msg ) {
-    if ( NULL != m_Messages.owner ) {
-      m_Messages.owner->PostMessage( msg, wParam, lParam );
-    }
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::WriteHandler( 
+        const boost::system::error_code& error, 
+        std::size_t bytes_transferred, 
+        linebuffer_t* pbuffer
+        ) {
+  WriteHandlerCommon( error, bytes_tranferred, pbuffer );
+  if ( &CNetwork<ownerT, objectT, charT>::OnNetworkSendDone != &ownerT::OnNetworkSendDone ) {
+    static_cast<ownerT*>( this )->OnNetworkSendDone( pbuffer );
   }
-  return TRUE;
 }
+
+template <typename ownerT, typename objectT, typename charT>
+void CNetwork<ownerT,objectT,charT>::WriteHandler( 
+        const boost::system::error_code& error, 
+        std::size_t bytes_transferred, 
+        linebuffer_t* pbuffer,
+        const objectT& object) {
+  WriteHandlerCommon( error, bytes_tranferred, pbuffer );
+  if ( &CNetwork<ownerT, objectT, charT>::OnNetworkSendDone != &ownerT::OnNetworkSendDone ) {
+    static_cast<ownerT*>( this )->OnNetworkSendDone( pbuffer, object );
+  }
+}
+
