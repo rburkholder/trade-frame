@@ -56,16 +56,17 @@
 template<typename bufferT> 
 class CBufferRepository {
 public:
+  typedef typename bufferT* buffer_t;
   CBufferRepository(void);
   ~CBufferRepository(void);
-  inline void CheckIn( bufferT* Buffer );
-  inline bufferT* CheckOut();  
-  void CheckInL( bufferT* Buffer );  // locked version
-  bufferT* CheckOutL();  // locked version
+  inline void CheckIn( buffer_t Buffer );
+  inline buffer_t CheckOut();  
+  void CheckInL( buffer_t Buffer );  // locked version
+  buffer_t CheckOutL();  // locked version
   bool Outstanding( void ) { return ( cntCheckins != cntCheckouts ); };
 protected:
   boost::mutex m_mutex;
-  std::vector<bufferT*> m_vStack;
+  std::vector<buffer_t> m_vStack;
 private:
   size_t cntCheckins, cntCheckouts;
 #ifdef _DEBUG

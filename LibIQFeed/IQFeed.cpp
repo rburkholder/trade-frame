@@ -18,7 +18,7 @@
 // http://www.dtn.com/trading.cfm?sidenav=sn_trading&content=pr_nxcore
 
 void __stdcall IQFeedCallBack( int x, int y ) {
-  std::stringstream ss;
-  ss << _T( "IQFeed Callback" ) << x << ", " << y;
+//  std::stringstream ss;
+//  ss << _T( "IQFeed Callback" ) << x << ", " << y;
 }
 

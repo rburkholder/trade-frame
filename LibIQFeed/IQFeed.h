@@ -20,8 +20,7 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
-#include <LibWtlCommon/NetworkClientSkeleton.h>
-
+#include <LibWtlCommon/Network.h>
 #include <LibCommon/ReusableBuffers.h>
 
 #include "IQ32.H"
@@ -37,14 +36,15 @@
 void __stdcall IQFeedCallBack( int x, int y );
 
 template <typename T>
-class CIQFeed: public CNetworkClientSkeleton<CIQFeed<T> > {
+class CIQFeed: public CNetwork<CIQFeed<T> > {
+  friend CNetwork<CIQFeed<T> >;
 public:
 
-  typedef typename CNetworkClientSkeleton<CIQFeed<T> > inherited_t;
+  typedef typename CNetwork<CIQFeed<T> > inherited_t;
+  typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   // pre-initialized message ids for messages delivered to and accepted by external caller
   struct structMessageDestinations { // 
-    // possibly make use of Boost named parameters here.
     T* owner;        // owner object to which message is sent (PostMessage needs to be implemented)
     UINT msgConnected;
     UINT msgSendComplete;
@@ -71,27 +71,33 @@ public:
     };
   };
 
-  CIQFeed(CAppModule* pModule, const structMessageDestinations&);
+  CIQFeed(const structMessageDestinations&);
   ~CIQFeed(void);
 
   // used for returning message buffer
-  void inline UpdateDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_UPDATE, wParam, lParam );
+  void inline UpdateDone( linebuffer_t* p, CIQFUpdateMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposUpdateMessages.CheckInL( msg );
   }
-  void inline SummaryDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_SUMMARY, wParam, lParam );
+  void inline SummaryDone( linebuffer_t* p, CIQFSummaryMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposSummaryMessages.CheckInL( msg );
   }
-  void inline NewsDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_NEWS, wParam, lParam );
+  void inline NewsDone( linebuffer_t* p, CIQFNewsMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposNewsMessages.CheckInL( msg );
   }
-  void inline FundamentalDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_FUNDAMENTAL, wParam, lParam );
+  void inline FundamentalDone( linebuffer_t* p, CIQFFundamentalMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposFundamentalMessages.CheckInL( msg );
   }
-  void inline TimeDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_TIME, wParam, lParam );
+  void inline TimeDone( linebuffer_t* p, CIQFTimeMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposTimeMessages.CheckInL( msg );
   }
-  void inline SystemDone( WPARAM wParam, LPARAM lParam ) {
-    PostThreadMessage( WM_IQFEED_DONE_SYSTEM, wParam, lParam );
+  void inline SystemDone( linebuffer_t* p, CIQFSystemMessage* msg ) {
+    GiveBackBuffer( p );
+    m_reposSystemMessages.CheckInL( msg );
   }
 
   void SetNewsOn( void );
@@ -104,43 +110,15 @@ protected:
     NEWSISOFF
   } m_stateNews;
 
-  enum enumPrivateMessageTypes {  // messages from CNetwork
-    // called when derived methods have finished with message and buffer
-    WM_IQFEED_DONE_UPDATE = inherited_t::WM_NCS_ENDMARKER,
-    WM_IQFEED_DONE_SUMMARY,
-    WM_IQFEED_DONE_NEWS,
-    WM_IQFEED_DONE_FUNDAMENTAL,
-    WM_IQFEED_DONE_TIME,
-    WM_IQFEED_DONE_SYSTEM,
-  };
-
-  BEGIN_MSG_MAP_EX(CIQFeed<T>)
-    MESSAGE_HANDLER( WM_IQFEED_DONE_UPDATE, OnDoneUpdate )
-    MESSAGE_HANDLER( WM_IQFEED_DONE_SUMMARY, OnDoneSummary )
-    MESSAGE_HANDLER( WM_IQFEED_DONE_NEWS, OnDoneNews )
-    MESSAGE_HANDLER( WM_IQFEED_DONE_FUNDAMENTAL, OnDoneFundamental )
-    MESSAGE_HANDLER( WM_IQFEED_DONE_TIME, OnDoneTime )
-    MESSAGE_HANDLER( WM_IQFEED_DONE_SYSTEM, OnDoneSystem )
-    CHAIN_MSG_MAP(inherited_t)
-  END_MSG_MAP()
-
-  // overloads from CNetworkClientSkeleton
-  LRESULT OnConnConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnDisconnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
-
-  // locally generated messages
-  LRESULT OnDoneUpdate( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnDoneSummary( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnDoneNews( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnDoneFundamental( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnDoneTime( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnDoneSystem( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  // called by CNetwork via CRTP
+  void OnNetworkConnected(void);
+  void OnNetworkDisconnected(void);
+  //void OnNetworkError( size_t );
+  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+  void OnNetworkSendDone(void);
 
 private:
 
-  CAppModule* m_pModule;
   structMessageDestinations m_structMessageDestinations;
 
   typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
@@ -153,12 +131,10 @@ private:
 };
 
 template <typename T>
-CIQFeed<T>::CIQFeed(CAppModule* pModule, const structMessageDestinations& MessageDestinations ) 
-: CNetworkClientSkeleton<CIQFeed<T> >( pModule, "127.0.0.1", 5009 ),
+CIQFeed<T>::CIQFeed(const structMessageDestinations& MessageDestinations ) 
+: CNetwork<CIQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF ),
-  m_structMessageDestinations( MessageDestinations ),
-  m_pModule( pModule )
-  
+  m_structMessageDestinations( MessageDestinations )
 {
   SetCallbackFunction( &IQFeedCallBack );
   int i = RegisterClientApp( NULL, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
@@ -175,7 +151,7 @@ void CIQFeed<T>::SetNewsOn( void ) {
     m_stateNews = NEWSISON;
     std::stringstream ss;
     ss << "S,NEWSON" << std::endl;
-    Send( ss.str(), SEND_AND_NO_FORWARD );
+    Send( ss.str() );
   }
 }
 
@@ -185,43 +161,32 @@ void CIQFeed<T>::SetNewsOff( void ) {
     m_stateNews = NEWSISOFF;
     std::stringstream ss;
     ss << "S,NEWSOFF" << std::endl;
-    Send( ss.str(), SEND_AND_NO_FORWARD );
+    Send( ss.str() );
   }
 }
 
 template <typename T>
-LRESULT CIQFeed<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
+void CIQFeed<T>::OnNetworkConnected( void ) {
   m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
-
-  bHandled = true;
-  return 1;
 }
 
 template <typename T>
-LRESULT CIQFeed<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
+void CIQFeed<T>::OnNetworkDisconnected( void ) {
   m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
-
-  bHandled = true;
-  return 1;
 }
 
 template <typename T>
-LRESULT CIQFeed<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
+void CIQFeed<T>::OnNetworkSendDone( void ) {
   m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
-
-  bHandled = true;
-  return 1;
 }
 
 template <typename T>
-LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pbuffer) {
 
-  inherited_t::linebuffer_t* buf = reinterpret_cast<inherited_t::linebuffer_t*>( wParam );
-  inherited_t::linebuffer_t::iterator iter = (*buf).begin();
-  inherited_t::linebuffer_t::iterator end = (*buf).end();
+  linebuffer_t::iterator iter = (*pbuffer).begin();
+  linebuffer_t::iterator end = (*pbuffer).end();
+
+  WPARAM wParam = reinterpret_cast<WPARAM>( pbuffer );
 
 #if defined _DEBUG
   std::string str( iter, end );
@@ -234,7 +199,7 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
   switch ( *iter ) {
     case 'Q': 
       {
-        CIQFUpdateMessage* msg = m_reposUpdateMessages.CheckOut();
+        CIQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( 0 != m_structMessageDestinations.msgMessageUpdate ) {
           m_structMessageDestinations.owner
@@ -242,15 +207,13 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
               wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneUpdate( m_structMessageDestinations.msgMessageUpdate, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          UpdateDone( pbuffer, msg );
         }
       }
       break;
     case 'P': 
       {
-        CIQFSummaryMessage* msg = m_reposSummaryMessages.CheckOut();
+        CIQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( 0 != m_structMessageDestinations.msgMessageSummary ) {
           m_structMessageDestinations.owner
@@ -258,15 +221,13 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
               wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneSummary( m_structMessageDestinations.msgMessageSummary, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          SummaryDone( pbuffer, msg );
         }
       }
       break;
     case 'N': 
       {
-        CIQFNewsMessage* msg = m_reposNewsMessages.CheckOut();
+        CIQFNewsMessage* msg = m_reposNewsMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( 0 != m_structMessageDestinations.msgMessageNews ) {
           m_structMessageDestinations.owner
@@ -274,15 +235,13 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
               wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneNews( m_structMessageDestinations.msgMessageNews, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          NewsDone( pbuffer, msg );
         }
       }
       break;
     case 'F': 
       {
-        CIQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOut();
+        CIQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( 0 != m_structMessageDestinations.msgMessageFundamental ) {
           m_structMessageDestinations.owner
@@ -290,15 +249,13 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
               wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneFundamental( m_structMessageDestinations.msgMessageFundamental, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          FundamentalDone( pbuffer, msg );
         }
       }
       break;
     case 'T': 
       {
-        CIQFTimeMessage* msg = m_reposTimeMessages.CheckOut();
+        CIQFTimeMessage* msg = m_reposTimeMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( 0 != m_structMessageDestinations.msgMessageTime ) {
           m_structMessageDestinations.owner
@@ -306,20 +263,18 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
               wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneTime( m_structMessageDestinations.msgMessageTime, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          TimeDone( pbuffer, msg );
         }
       }
       break;
     case 'S': 
       {
-        CIQFSystemMessage* msg = m_reposSystemMessages.CheckOut();
+        CIQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( _T( "KEY" ) == msg->Field( 2 ) ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
-          Send( ss.str(), SEND_AND_NO_FORWARD );
+          Send( ss.str() );
         }
         if ( _T( "CUST" ) == msg->Field( 2 ) ) {
           if ( _T( "4.3.0.3" ) > msg->Field( 7 ) ) {
@@ -333,9 +288,7 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
             wParam, reinterpret_cast<LPARAM>( msg ) );
         }
         else {
-          BOOL bHandled;
-          OnDoneSystem( m_structMessageDestinations.msgMessageSystem, 
-            wParam, reinterpret_cast<LPARAM>( msg ), bHandled );
+          SystemDone( pbuffer, msg );
         }
       }
       break;
@@ -344,85 +297,5 @@ LRESULT CIQFeed<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled )
       break;
   }
 
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
-
-  m_reposUpdateMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
-
-  m_reposSummaryMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneNews( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
-
-  m_reposNewsMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
-
-  m_reposFundamentalMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneTime( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFTimeMessage* msg = reinterpret_cast<CIQFTimeMessage*>( lParam );
-
-  m_reposTimeMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeed<T>::OnDoneSystem( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  ReturnLineBuffer( wParam );
-
-  CIQFSystemMessage* msg = reinterpret_cast<CIQFSystemMessage*>( lParam );
-
-  m_reposSystemMessages.CheckIn( msg );
-
-  bHandled = true;
-  return 1;
 }
 

@@ -27,8 +27,8 @@
 
 #include "resource.h"
 
-#include "TapeReaderView.h"
 #include "aboutdlg.h"
+#include "TapeReaderView.h"
 #include "MainFrm.h"
 
 CAppModule _Module;

@@ -67,7 +67,7 @@ BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
-  m_pIQFeed = new CIQFeed<CTapeReaderView>( &_Module, m_Destinations );
+  m_pIQFeed = new CIQFeed<CTapeReaderView>( m_Destinations );
   m_pIQFeed->Connect();
 
   return TRUE;
@@ -335,17 +335,20 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
     }
   }
 
-  m_pIQFeed->UpdateDone( wParam, lParam );
+  linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
+  m_pIQFeed->UpdateDone( p, msg );
 
   bHandled = true;
   return 1;
 }
 
+
 LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
   CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
+  linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
-  m_pIQFeed->SummaryDone( wParam, lParam );
+  m_pIQFeed->SummaryDone( p, msg );
 
   bHandled = true;
   return 1;
@@ -354,8 +357,9 @@ LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BO
 LRESULT CTapeReaderView::OnIQFeedFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
   CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
+  linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
-  m_pIQFeed->FundamentalDone( wParam, lParam );
+  m_pIQFeed->FundamentalDone( p, msg );
 
   bHandled = true;
   return 1;

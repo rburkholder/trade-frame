@@ -22,21 +22,20 @@
 
 #include <boost/array.hpp>
 
-#include <LibCommon/Colour.h>
-
-#include "LibIQFeed/IQFeed.h"
-
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/array/elem.hpp>
 #include <boost/preprocessor/array/size.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 
+#include <LibCommon/Colour.h>
+#include "LibIQFeed/IQFeed.h"
+
 #define COLHDR_ARRAY_ELEMENT_SIZE 7
 #define COLHDR_ARRAY_ROW_COUNT 8
 #define COLHDR_ARRAY \
   (COLHDR_ARRAY_ROW_COUNT,  \
-    ( /* Col 0,                  1,        2,            3,   4,           5,                6 */ \
+    ( /* Col 0,           1,      2,             3,   4,           5,       6 */ \
       (COLHDR_COL_Time  , "Time", LVCFMT_LEFT  , 60, std::string, vTime,    0  ), \
       (COLHDR_COL_BATE  , "BATE", LVCFMT_CENTER, 60, std::string, vBate,    "" ), \
       (COLHDR_COL_Bid   , "Bid",  LVCFMT_RIGHT , 57, double,      vBid,     0.0), \
@@ -199,6 +198,7 @@ private:
 
   CIQFeed<CTapeReaderView>::structMessageDestinations m_Destinations;
   CIQFeed<CTapeReaderView>* m_pIQFeed;
+  typedef CIQFeed<CTapeReaderView>::linebuffer_t linebuffer_t;
 
   std::string m_sSymbol;
 
