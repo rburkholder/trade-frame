@@ -92,11 +92,10 @@ public:
   typedef std::vector<bufferelement_t> linebuffer_t;  // used for composing lines of data for processing
   typedef CBufferRepository<linebuffer_t> linerepository_t;
 
-//  CNetwork(CAppModule* pModule, const structMessages&);
   CNetwork( void );
   CNetwork( const structConnection& connection );
   CNetwork( const ipaddress_t& sAddress, port_t nPort );
-  ~CNetwork( void );
+  virtual ~CNetwork( void );
 
   void SetPort( port_t port ) { m_Connection.nPort = port; };
   void SetAddress( const ipaddress_t& ipaddress ) { m_Connection.sAddress = ipaddress; };

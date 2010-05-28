@@ -53,7 +53,9 @@ public:
   };
  
   CIQFeedMsgShim( const structMessageDestinations& MessageDestinations) 
-    : m_structMessageDestinations( MessageDestinations ) {};
+    : m_structMessageDestinations( MessageDestinations ) {
+      assert( NULL != MessageDestinations.owner );
+  };
   ~CIQFeedMsgShim( void ) {};
 
 
@@ -75,52 +77,82 @@ protected:
     m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
   }
 
-  void OnIQFeedUpdateMessage( linebuffer_t* pbuffer, CIQFUpdateMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageUpdate, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageUpdate ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageUpdate, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      UpdateDone( pBuffer, pMsg );
+    }
   }
 
-  void OnIQFeedSummaryMessage( linebuffer_t* pbuffer, CIQFSummaryMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageSummary, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageSummary ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageSummary, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      SummaryDone( pBuffer, pMsg );
+    }
   }
 
-  void OnIQFeedNewsMessage( linebuffer_t* pbuffer, CIQFNewsMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageNews, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageNews ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageNews, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      NewsDone( pBuffer, pMsg );
+    }
   }
 
-  void OnIQFeedFundamentalMessage( linebuffer_t* pbuffer, CIQFFundamentalMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageFundamental, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageFundamental ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageFundamental, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      FundamentalDone( pBuffer, pMsg );
+    }
   }
 
-  void OnIQFeedTimeMessage( linebuffer_t* pbuffer, CIQFTimeMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageTime, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageTime ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageTime, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      TimeDone( pBuffer, pMsg );
+    }
   }
 
-  void OnIQFeedSystemMessage( linebuffer_t* pbuffer, CIQFSystemMessage* msg ) {
-    m_structMessageDestinations.owner->PostMessage( 
-      m_structMessageDestinations.msgMessageSystem, 
-      reinterpret_cast<WPARAM>( pbuffer ),
-      reinterpret_cast<LPARAM>( msg )
-      );
+  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage* pMsg ) {
+    if ( 0 != m_structMessageDestinations.msgMessageSystem ) {
+      m_structMessageDestinations.owner->PostMessage( 
+        m_structMessageDestinations.msgMessageSystem, 
+        reinterpret_cast<WPARAM>( pBuffer ),
+        reinterpret_cast<LPARAM>( pMsg )
+        );
+    }
+    else {
+      SystemDone( pBuffer, pMsg );
+    }
   }
 
 private:

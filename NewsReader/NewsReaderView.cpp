@@ -73,7 +73,7 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   m_lvHeadlines.SetColumnWidth( 2, 70 );
   m_lvHeadlines.SetColumnWidth( 3, 400 );
 
-  m_pIQFeed = new CIQFeed<CNewsReaderView>( &_Module, m_MsgIdsForIQFeed );
+  m_pIQFeed = new CIQFeedMsgShim<CNewsReaderView>( &_Module, m_MsgIdsForIQFeed );
   m_pIQFeed->Connect();
 
   return TRUE;

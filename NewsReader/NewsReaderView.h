@@ -20,7 +20,7 @@
 #include <vector>
 #include <string>
 
-#include "LibIQFeed/IQFeed.h"
+#include "LibIQFeed/IQFeedMsgShim.h"
 #include "LibIQFeed/IQFeedNewsQuery.h"
 
 #include "ListViewCtrl_Headlines.h"
@@ -182,8 +182,8 @@ protected:
 private:
   typedef CDialogImpl<CNewsReaderView> CThisClass;
 
-  CIQFeed<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
-  CIQFeed<CNewsReaderView>* m_pIQFeed;
+  CIQFeedMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
+  CIQFeedMsgShim<CNewsReaderView>* m_pIQFeed;
 
   CIQFeedNewsQuery<CNewsReaderView>::structMessageDestinations m_MsgIdsForNewsQuery;
   CIQFeedNewsQuery<CNewsReaderView>* m_pIQFeedNewsQuery;
