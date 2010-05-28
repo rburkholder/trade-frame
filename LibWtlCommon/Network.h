@@ -108,7 +108,7 @@ public:
 
 protected:
 
-  // CRTP based callbacks:
+  // CRTP based dummy callbacks 
   void OnNetworkConnected(void) {};
   void OnNetworkDisconnected(void) {};
   void OnNetworkError( size_t ) {;};

@@ -67,7 +67,7 @@ BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
-  m_pIQFeed = new CIQFeed<CTapeReaderView>( m_Destinations );
+  m_pIQFeed = new CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
   m_pIQFeed->Connect();
 
   return TRUE;

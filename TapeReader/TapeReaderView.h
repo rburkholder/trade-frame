@@ -29,7 +29,7 @@
 #include <boost/preprocessor/repetition/repeat.hpp>
 
 #include <LibCommon/Colour.h>
-#include "LibIQFeed/IQFeed.h"
+#include "LibIQFeed/IQFeedMsgShim.h"
 
 #define COLHDR_ARRAY_ELEMENT_SIZE 7
 #define COLHDR_ARRAY_ROW_COUNT 8
@@ -196,9 +196,9 @@ protected:
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
 
-  CIQFeed<CTapeReaderView>::structMessageDestinations m_Destinations;
-  CIQFeed<CTapeReaderView>* m_pIQFeed;
-  typedef CIQFeed<CTapeReaderView>::linebuffer_t linebuffer_t;
+  CIQFeedMsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
+  CIQFeedMsgShim<CTapeReaderView>* m_pIQFeed;
+  typedef CIQFeedMsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
 
   std::string m_sSymbol;
 
