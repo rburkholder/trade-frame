@@ -35,9 +35,11 @@ CTapeReaderView::CTapeReaderView( void )
   m_stateUI( UI_STARTING ),
   m_bRunning( false )
 {
+  m_pIQFeed = new CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
 }
 
 CTapeReaderView::~CTapeReaderView( void ) {
+  delete m_pIQFeed;
 }
 
 BOOL CTapeReaderView::PreTranslateMessage(MSG* pMsg)
@@ -67,16 +69,23 @@ BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   int ix = 0;
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_InsertColumn, ix )
 
-  m_pIQFeed = new CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
   m_pIQFeed->Connect();
 
+  return TRUE;
+}
+
+void CTapeReaderView::OnClose( void ) {  // doesn't appear to be called, needs to be used in main window
+  // main thread would need to wait for disconnect and then do destroy
+}
+
+// wait for disconnect completion
+LRESULT CTapeReaderView::OnWaitForDisconnect( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   return TRUE;
 }
 
 void CTapeReaderView::OnDestroy( void ) {
   StopData();
   m_pIQFeed->Disconnect();
-  delete m_pIQFeed;
 }
 
 LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -150,6 +159,7 @@ LRESULT CTapeReaderView::OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/,
 
 void CTapeReaderView::UpdateUIState( void ) {
   switch ( m_stateUI ) {
+    case UI_DISCONNECTED:
     case UI_STARTING:
       m_btnStart.EnableWindow( false );
       m_btnStop.EnableWindow( false );
@@ -194,8 +204,10 @@ LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
 
 LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-  m_stateUI = UI_STARTING;
+  m_stateUI = UI_DISCONNECTED;
   UpdateUIState();
+
+  DestroyWindow();
 
   bHandled = true;
   return 1;

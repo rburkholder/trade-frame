@@ -134,6 +134,10 @@ private:
   boost::asio::io_service::work* m_pwork;
   boost::asio::ip::tcp::socket* m_psocket;
 
+  // variables used to sync for thread ending
+  volatile LONG m_cntActiveSends;  // number of active sends
+  volatile LONG m_lReadProgress; // >0 when read buffer processing is active
+
   inputrepository_t m_reposInputBuffers;  // content received from the network
   linerepository_t m_reposLineBuffers;  // parsed lines sent to the callers
   linerepository_t m_reposSendBuffers; // buffers used to send data to network
@@ -148,6 +152,7 @@ private:
   unsigned int m_cntBytesTransferred_send;
 
   void OnConnectDone( const boost::system::error_code& error );
+  void OnDisconnecting( void);
   void OnSendDoneCommon( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDone( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDoneNoNotify( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
@@ -160,6 +165,10 @@ private:
 
 };
 
+// 
+// CNetwork Construction
+//
+
 template <typename ownerT, typename charT>
 CNetwork<ownerT,charT>::CNetwork( void )
 : 
@@ -167,10 +176,15 @@ CNetwork<ownerT,charT>::CNetwork( void )
   m_psocket( NULL ), 
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
-  m_cntLinesProcessed( 0 )
+  m_cntLinesProcessed( 0 ),
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
 {
   CommonConstruction();
 }
+
+// 
+// CNetwork Construction
+//
 
 template <typename ownerT, typename charT>
 CNetwork<ownerT,charT>::CNetwork( const structConnection& connection )
@@ -180,10 +194,16 @@ CNetwork<ownerT,charT>::CNetwork( const structConnection& connection )
   m_psocket( NULL ), 
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
-  m_cntLinesProcessed( 0 )
+  m_cntLinesProcessed( 0 ),
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
+
 {
   CommonConstruction();
 }
+
+// 
+// CNetwork Construction
+//
 
 template <typename ownerT, typename charT>
 CNetwork<ownerT,charT>::CNetwork( const ipaddress_t& sAddress, port_t nPort ) 
@@ -193,10 +213,16 @@ CNetwork<ownerT,charT>::CNetwork( const ipaddress_t& sAddress, port_t nPort )
   m_psocket( NULL ), 
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
-  m_cntLinesProcessed( 0 )
+  m_cntLinesProcessed( 0 ),
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
+
 {
   CommonConstruction();
 }
+
+//
+// CommonConstruction
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::CommonConstruction( void ) {
@@ -207,6 +233,10 @@ void CNetwork<ownerT,charT>::CommonConstruction( void ) {
   m_stateNetwork = NS_DISCONNECTED;
 }
 
+//
+// Destructor
+//
+
 template <typename ownerT, typename charT>
 CNetwork<ownerT,charT>::~CNetwork(void) {
 
@@ -214,21 +244,15 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
     Disconnect();
   }
   else {
-    assert( NS_DISCONNECTED == m_stateNetwork );
+    assert( ( NS_DISCONNECTED == m_stateNetwork ) || ( NS_DISCONNECTING == m_stateNetwork ) );
   }
-
-  m_stateNetwork = NS_CLOSING;
-
-#if defined _DEBUG
-  if ( 0 != m_pline->size() ) {
-    OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
-  }
-#endif
 
   delete m_pwork;  // stop the asio service (let it run out of work, which at this point should be none)
 //  m_io.stop();  // kinda redundant
 
-  m_asioThread.join();  // wait for i/o thread to terminate
+  m_asioThread.join();  // wait for i/o thread to cleanup and terminate
+
+  m_stateNetwork = NS_CLOSING;
 
 //  delete m_asioThread;
 //  m_asioThread = NULL;
@@ -237,6 +261,12 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 //    OutputDebugString( "CNetwork::~CNetwork: m_asioThread is not NULL.\n" );
 //  }
 
+#if defined _DEBUG
+  if ( 0 != m_pline->size() ) {
+    OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
+  }
+#endif
+
   // check in our held line so it gets cleaned up
   m_reposLineBuffers.CheckInL( m_pline );
   m_pline = NULL;
@@ -244,10 +274,10 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 #if defined _DEBUG
   std::stringstream ss;
   ss << typeid( this ).name()
-    << " bytes in " << m_cntBytesTransferred_input 
-    << " on " << m_cntAsyncReads << " reads with " << m_cntLinesProcessed << " lines out, "
-    << " bytes out " << m_cntBytesTransferred_send
-    << " on " << m_cntSends << " sends." 
+    << " " << m_cntBytesTransferred_input << " bytes in on "
+    << m_cntAsyncReads << " reads with " << m_cntLinesProcessed << " lines out, "
+    << m_cntBytesTransferred_send << " bytes out on " 
+    << m_cntSends << " sends." 
     << std::endl;
   OutputDebugString( ss.str().c_str() );
   ss.str() = "";
@@ -256,6 +286,10 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   m_stateNetwork = NS_CLOSED;
 
 }
+
+//
+// AsioThread
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::AsioThread( void ) {
@@ -269,6 +303,10 @@ void CNetwork<ownerT,charT>::AsioThread( void ) {
   ss.str() = "";
 #endif
 }
+
+//
+// Connect
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::Connect( void ) {
@@ -294,50 +332,19 @@ void CNetwork<ownerT,charT>::Connect( void ) {
     );
 }
 
+//
+// Connect
+//
+
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::Connect( const structConnection& connection ) {
   m_Connection = connection;
   Connect();
 }
 
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::Disconnect( void ) {
-
-  if ( NS_DISCONNECTED != m_stateNetwork ) {
-    //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
-    if ( NS_CONNECTED == m_stateNetwork ) {
-      m_stateNetwork = NS_DISCONNECTING;
-      m_psocket->close();
-      delete m_psocket;
-      m_psocket = NULL;
-    }
-    else {
-      assert( NS_DISCONNECTED == m_stateNetwork );
-    }
-  }
-
-  m_stateNetwork = NS_DISCONNECTED;
-
-  if ( &CNetwork<ownerT, charT>::OnNetworkDisconnected != &ownerT::OnNetworkDisconnected ) {
-    static_cast<ownerT*>( this )->OnNetworkDisconnected();
-  }
-
-}
-
-template <typename ownerT, typename charT>
-void CNetwork<ownerT,charT>::AsyncRead( void ) {
-
-  assert( NS_CONNECTED == m_stateNetwork );
-
-  inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOutL();
-//  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
-//    pbuffer->reserve( NETWORK_INPUT_BUF_SIZE );
-//  }
-  m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
-    boost::bind( 
-      &CNetwork::OnReadDone, this,
-      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
-}
+//
+// OnConnectDone
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::OnConnectDone( const boost::system::error_code& error ) {
@@ -359,15 +366,89 @@ void CNetwork<ownerT,charT>::OnConnectDone( const boost::system::error_code& err
   }
 }
 
+//
+// Disconnect
+//
+
+template <typename ownerT, typename charT>
+void CNetwork<ownerT,charT>::Disconnect( void ) {
+
+  if ( NS_DISCONNECTED != m_stateNetwork ) {
+    //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
+    if ( NS_CONNECTED == m_stateNetwork ) {
+      m_stateNetwork = NS_DISCONNECTING;
+      m_psocket->shutdown( boost::asio::ip::tcp::socket::shutdown_both );
+      m_psocket->close();
+      delete m_psocket;
+      m_psocket = NULL;
+      OnDisconnecting();
+    }
+    else {
+      assert( NS_DISCONNECTING == m_stateNetwork );
+    }
+  }
+}
+
+// 
+// OnDisconnnecting
+// an async call
+//
+
+template <typename ownerT, typename charT>
+void CNetwork<ownerT,charT>::OnDisconnecting( void ) {
+  if ( ( 0 == m_cntActiveSends ) // there are no active sends
+    && ( 0 == m_lReadProgress )  // no reads in progress
+//    && ( !m_reposLineBuffers.Outstanding() )  // all clients buffers have been returned. [ can't as destroy doesn't clean up]
+  ) {
+    // signal disconnect complete
+    m_stateNetwork = NS_DISCONNECTED;
+    if ( &CNetwork<ownerT, charT>::OnNetworkDisconnected != &ownerT::OnNetworkDisconnected ) {
+      static_cast<ownerT*>( this )->OnNetworkDisconnected();
+    }
+  }
+  else {
+    // wait for operations to complete, by posting a message to the io processing queue
+    m_io.post( boost::bind( &CNetwork::OnDisconnecting, this ) );
+  }
+}
+
+//
+// AsyncRead
+//
+
+template <typename ownerT, typename charT>
+void CNetwork<ownerT,charT>::AsyncRead( void ) {
+
+  assert( NS_CONNECTED == m_stateNetwork );
+
+  InterlockedIncrement( &m_lReadProgress );
+
+  inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOutL();
+//  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
+//    pbuffer->reserve( NETWORK_INPUT_BUF_SIZE );
+//  }
+  m_psocket->async_read_some( boost::asio::buffer( *pbuffer ), 
+    boost::bind( 
+      &CNetwork::OnReadDone, this,
+      boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, pbuffer ) );
+}
+
+//
+// OnReadDone
+//
+
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error, std::size_t bytes_transferred, inputbuffer_t* pbuffer ) {
 
   if ( 0 == bytes_transferred ) {
     // probably infers that connection has been closed
     OutputDebugString( "CNetwork::ReadHandler: connection probably closed.\n" );
+    if ( 0 != m_pline->size() ) {
+      m_pline->clear();
+    }
   }
   else {
-    assert( NS_CONNECTED == m_stateNetwork );
+    assert( ( NS_CONNECTED == m_stateNetwork ) || ( NS_DISCONNECTING == m_stateNetwork) );
 
     ++m_cntAsyncReads;
     m_cntBytesTransferred_input += bytes_transferred;
@@ -407,12 +488,20 @@ void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error,
 
   }
   m_reposInputBuffers.CheckInL( pbuffer );
+
+  InterlockedDecrement( &m_lReadProgress );
 }
+
+//
+// Send
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) {
 
   if ( NS_CONNECTED == m_stateNetwork ) {
+    InterlockedIncrement( &m_cntActiveSends );
+
     linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
     BOOST_FOREACH( char ch, send ) {
@@ -439,6 +528,10 @@ void CNetwork<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone )
   }
 }
 
+//
+// OnSendDoneCommon
+//
+
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::OnSendDoneCommon( 
         const boost::system::error_code& error, 
@@ -446,11 +539,13 @@ void CNetwork<ownerT,charT>::OnSendDoneCommon(
         linebuffer_t* pbuffer
         ) {
 
-  assert( NS_CONNECTED == m_stateNetwork );
+  assert( ( NS_CONNECTED == m_stateNetwork ) || ( NS_DISCONNECTING == m_stateNetwork) );
 
   m_reposSendBuffers.CheckInL( pbuffer );
   assert( bytes_transferred == pbuffer->size() );
   m_cntBytesTransferred_send += bytes_transferred;
+
+  InterlockedDecrement( &m_cntActiveSends );
 
   if ( 0 != error ) {
     if ( &CNetwork<ownerT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
@@ -458,6 +553,10 @@ void CNetwork<ownerT,charT>::OnSendDoneCommon(
     }
   }
 }
+
+//
+// OnSendDone
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::OnSendDone( 
@@ -472,6 +571,10 @@ void CNetwork<ownerT,charT>::OnSendDone(
     }
   }
 }
+
+//
+// OnSendDoneNoNotify
+//
 
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::OnSendDoneNoNotify( 

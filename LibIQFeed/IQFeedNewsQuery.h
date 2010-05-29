@@ -23,15 +23,12 @@
 #include <vector>
 #include <cassert>
 
-#include <LibWtlCommon/NetworkClientSkeleton.h>
-
-//#include <LibCommon/ReusableBuffers.h>
+#include <LibWtlCommon/Network.h>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -50,12 +47,11 @@ namespace ascii = boost::spirit::ascii;
 
 
 
-
 template <typename T>
-class CIQFeedNewsQuery: public CNetworkClientSkeleton<CIQFeedNewsQuery<T> > {
+class CIQFeedNewsQuery: public CNetwork<CIQFeedNewsQuery<T> > {
 public:
 
-  typedef typename CNetworkClientSkeleton<CIQFeedNewsQuery<T> > inherited_t;
+  typedef typename CNetwork<CIQFeedNewsQuery<T> > inherited_t;
 
   struct structMessageDestinations {
     T* owner;

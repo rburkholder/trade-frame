@@ -112,14 +112,16 @@ protected:
     WM_IQFEED_NEWS,
     WM_IQFEED_FUNDAMENTAL,
     WM_IQFEED_TIME,
-    WM_IQFEED_SYSTEM
+    WM_IQFEED_SYSTEM,
+    WM_WAIT_FOR_DISCONNECT
   };
 
   enum enumUIEnableState {
     UI_STARTING,
     UI_NOSYMBOL,
     UI_SYMBOLENTRY,
-    UI_STARTED
+    UI_STARTED,
+    UI_DISCONNECTED
   } m_stateUI;
 
   enum enumColHdrCol {
@@ -160,8 +162,11 @@ protected:
     COMMAND_HANDLER(IDC_BTNSTOP, BN_CLICKED, OnBnClickedBtnstop)
     NOTIFY_HANDLER(IDC_LISTTAPE, LVN_ITEMCHANGED, OnLvnItemchangedListtape)
 
+    MESSAGE_HANDLER( WM_WAIT_FOR_DISCONNECT, OnWaitForDisconnect )
+
     MSG_WM_INITDIALOG(OnInitDialog)
     MSG_WM_DESTROY(OnDestroy)
+    MSG_WM_CLOSE(OnClose)
     CHAIN_MSG_MAP(CDialogResize<CTapeReaderView>)
 	END_MSG_MAP()
 
@@ -190,8 +195,11 @@ protected:
   LRESULT OnIQFeedSummary( UINT, WPARAM, LPARAM, BOOL& );
   LRESULT OnIQFeedFundamental( UINT, WPARAM, LPARAM, BOOL& );
 
+  LRESULT OnWaitForDisconnect( UINT, WPARAM, LPARAM, BOOL& );
+
   BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
   void OnDestroy();
+  void OnClose();
 
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
