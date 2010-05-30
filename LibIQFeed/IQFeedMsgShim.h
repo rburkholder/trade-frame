@@ -61,20 +61,30 @@ public:
 
 protected:
 
+  // CRTP callbacks
+
   void OnIQFeedConnected( void ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+    if ( 0 != m_structMessageDestinations.msgConnected ) {
+      m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
+    }
   }
 
-  void OnNetworkDisconnected( void ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+  void OnIQFeedDisconnected( void ) {
+    if ( 0 != m_structMessageDestinations.msgDisconnected ) {
+      m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
+    }
   }
 
   void OnIQFeedError( size_t e ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgError, e );
+    if ( 0 != m_structMessageDestinations.msgError ) {
+      m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgError, e );
+    }
   }
 
   void OnIQFeedSendDone( void ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+    if ( 0 != m_structMessageDestinations.msgSendComplete ) {
+      m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
+    }
   }
 
   void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* pMsg ) {

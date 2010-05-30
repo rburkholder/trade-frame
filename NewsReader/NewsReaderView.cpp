@@ -32,9 +32,11 @@ CNewsReaderView::CNewsReaderView()
     WM_IQFEED_NEWS_CONFIG_DONE, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE ),
   m_stateStoryRetrieval( INACTIVE )
 {
+  m_pIQFeed = new CIQFeedMsgShim<CNewsReaderView>( m_MsgIdsForIQFeed );
 }
 
 CNewsReaderView::~CNewsReaderView() {
+  delete m_pIQFeed;
 }
 
 BOOL CNewsReaderView::PreTranslateMessage(MSG* pMsg)
@@ -73,7 +75,6 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   m_lvHeadlines.SetColumnWidth( 2, 70 );
   m_lvHeadlines.SetColumnWidth( 3, 400 );
 
-  m_pIQFeed = new CIQFeedMsgShim<CNewsReaderView>( &_Module, m_MsgIdsForIQFeed );
   m_pIQFeed->Connect();
 
   return TRUE;
@@ -81,7 +82,7 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
 
 LRESULT CNewsReaderView::OnIQFeedNewsConfigDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-  typedef CIQFeedNewsQuery<CNewsReaderView> connection_t;
+  typedef CIQFeedNewsQueryMsgShim<CNewsReaderView> connection_t;
 
   connection_t::vNCCategory_t& categories = m_pIQFeedNewsQuery->GetConfigCategories();
   connection_t::vNCMajorType_t& majortypes = m_pIQFeedNewsQuery->GetConfigMajorTypes();
@@ -125,11 +126,12 @@ LRESULT CNewsReaderView::OnIQFeedNewsConfigDone( UINT, WPARAM, LPARAM, BOOL& bHa
 }
 
 void CNewsReaderView::OnDestroy( void ) {
+  m_pIQFeed->SetNewsOff();  // check to see if message gets fully processed before disconnect occurs
+
   m_pIQFeedNewsQuery->Disconnect();
   delete m_pIQFeedNewsQuery;
-  m_pIQFeed->SetNewsOff();  // check to see if message gets fully processed before disconnect occurs
+
   m_pIQFeed->Disconnect();
-  delete m_pIQFeed;
 }
 
 void CNewsReaderView::OnSize(UINT nType, CSize size) {
@@ -146,7 +148,7 @@ LRESULT CNewsReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
 
   m_pIQFeed->SetNewsOn();
 
-  m_pIQFeedNewsQuery = new CIQFeedNewsQuery<CNewsReaderView>( &_Module, m_MsgIdsForNewsQuery );
+  m_pIQFeedNewsQuery = new CIQFeedNewsQueryMsgShim<CNewsReaderView>( m_MsgIdsForNewsQuery );
   m_pIQFeedNewsQuery->Connect();
 
   bHandled = true;
@@ -155,7 +157,7 @@ LRESULT CNewsReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
 
 LRESULT CNewsReaderView::OnQueryConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-  m_pIQFeedNewsQuery->RetrieveConfiguration();
+//  m_pIQFeedNewsQuery->RetrieveConfiguration();
 
   bHandled = true;
   return 1;
@@ -205,7 +207,7 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
   fd = msg->HeadLine_iter();
   ref.Headline.assign( fd.first, fd.second );
 
-  m_pIQFeed->NewsDone( wParam, lParam );
+  m_pIQFeed->NewsDone( reinterpret_cast<linebuffer_t*>( wParam ), msg );
 
   m_lvHeadlines.InsertItem(  0,    ref.Distributor.c_str() );
   m_lvHeadlines.SetItemText( 0, 1, ref.DateTime.c_str() );
@@ -223,7 +225,7 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
 
   CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
 
-  m_pIQFeed->NewsDone( wParam, lParam );
+  m_pIQFeed->NewsDone( reinterpret_cast<linebuffer_t*>( wParam ), msg );
 
   bHandled = true;
   return 1;
@@ -231,7 +233,7 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
 
 LRESULT CNewsReaderView::OnIQFeedStoryLine( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  typedef CIQFeedNewsQuery<CNewsReaderView> query_t;
+  typedef CIQFeedNewsQueryMsgShim<CNewsReaderView> query_t;
 
   vNewsItems_t::size_type ix = static_cast<vNewsItems_t::size_type>( lParam );
 
@@ -247,7 +249,7 @@ LRESULT CNewsReaderView::OnIQFeedStoryLine( UINT, WPARAM wParam, LPARAM lParam, 
   }
   ref.Story.append( bgn, end );
 
-  m_pIQFeedNewsQuery->ReturnLineBuffer( wParam );
+  m_pIQFeedNewsQuery->GiveBackBuffer( buf );
 
   bHandled = true;
   return 1;

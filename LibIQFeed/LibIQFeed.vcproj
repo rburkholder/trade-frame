@@ -294,6 +294,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedNewsQueryMsgShim.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IQFeedOptions.h"
 				>
 				<FileConfiguration

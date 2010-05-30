@@ -203,6 +203,7 @@ LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
 }
 
 LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+  // this message never arrives
 
   m_stateUI = UI_DISCONNECTED;
   UpdateUIState();

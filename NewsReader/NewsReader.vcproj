@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_40.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_40.lib"
+				AdditionalDependencies="$(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_43.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"

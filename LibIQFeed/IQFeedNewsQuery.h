@@ -23,7 +23,7 @@
 #include <vector>
 #include <cassert>
 
-#include <LibWtlCommon/Network.h>
+#include <LibCommon/Network.h>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -49,38 +49,11 @@ namespace ascii = boost::spirit::ascii;
 
 template <typename T>
 class CIQFeedNewsQuery: public CNetwork<CIQFeedNewsQuery<T> > {
+  friend CNetwork<CIQFeedNewsQuery<T> >;
 public:
 
   typedef typename CNetwork<CIQFeedNewsQuery<T> > inherited_t;
-
-  struct structMessageDestinations {
-    T* owner;
-    UINT msgConnected;
-    UINT msgSendComplete;
-    UINT msgDisconnected;
-    UINT msgError;  // not currently forwarded
-    UINT msgNewsConfigDone;
-    UINT msgNewsStoryLine;
-    UINT msgNewsStoryDone;
-    structMessageDestinations( void )
-      : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
-        msgNewsConfigDone( 0 ), 
-        msgNewsStoryLine( 0 ), msgNewsStoryDone( 0 )
-    {};
-    structMessageDestinations( 
-      T* owner_, 
-      UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
-      UINT msgNewsConfigDone_, 
-      UINT msgNewsStoryLine_, UINT msgNewsStoryDone_
-      ) 
-    : owner( owner_ ), 
-      msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
-      msgNewsConfigDone( msgNewsConfigDone_ ),
-      msgNewsStoryLine( msgNewsStoryLine_ ), msgNewsStoryDone( msgNewsStoryDone_ )
-    {
-      assert( NULL != owner_ );
-    };
-  };
+  typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   struct structNCElements {
     std::string ItemName;
@@ -110,8 +83,8 @@ public:
   }; 
   typedef std::vector<structNCMinorType> vNCMinorType_t;
 
-  CIQFeedNewsQuery(CAppModule* pModule, const structMessageDestinations& MessageDestinations);
-  ~CIQFeedNewsQuery(void );
+  CIQFeedNewsQuery( void );
+  ~CIQFeedNewsQuery( void );
 
   void RetrieveStory( const std::string& StoryId, LPARAM lParam );
 
@@ -120,14 +93,6 @@ public:
   vNCMinorType_t& GetConfigMinorTypes( void ) { return m_vNCMinorType; };
 
 protected:
-
-  enum enumPrivateMessageTypes { // messages from CNetwork
-    WM_NQ_DONE = inherited_t::WM_NCS_ENDMARKER
-  };
-
-  BEGIN_MSG_MAP_EX(CIQFeedNewsQuery<T>)
-    CHAIN_MSG_MAP(inherited_t)
-  END_MSG_MAP()
 
   enum enumRetrieveType {  // activity in progress on this port
     RETRIEVE_IDLE = 0,  // no retrievals in progress
@@ -151,17 +116,44 @@ protected:
 
   LPARAM m_lParam; // passed back to caller as reference to story, therefore only one story at a time, which is inherent in protocol anyway
 
-  // overloads from CNetworkClientSkeleton
-  LRESULT OnConnConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnDisconnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  // CRTP based dummy callbacks
+  void OnNewsQueryError( size_t ) {};
+  void OnNewsQueryConnected( void ) {};
+  void OnNewsQueryDisconnected( void ) {};
+  void OnNewsQuerySendDone( void ) {};
+  void OnNewsQueryStoryLine( linebuffer_t* buf, LPARAM lParam ) {};
+  void OnNewsQueryStoryDone( LPARAM lParam ) {};
+  void OnNewsQueryNewsConfigDone( void ) {};
+
+  // called by CNetwork via CRTP
+  void OnNetworkConnected(void) {
+    RetrieveConfiguration();
+    if ( &CIQFeedNewsQuery<T>::OnNewsQueryConnected != &T::OnNewsQueryConnected ) {
+      static_cast<T*>( this )->OnNewsQueryConnected();
+    }
+  };
+  void OnNetworkDisconnected(void) {
+    if ( &CIQFeedNewsQuery<T>::OnNewsQueryDisconnected != &T::OnNewsQueryDisconnected ) {
+      static_cast<T*>( this )->OnNewsQueryDisconnected();
+    }
+  };
+  void OnNetworkError( size_t e ) {
+    if ( &CIQFeedNewsQuery<T>::OnNewsQueryError != &T::OnNewsQueryError ) {
+      static_cast<T*>( this )->OnNewsQueryError(e);
+    }
+  };
+  void OnNetworkSendDone(void) {
+    if ( &CIQFeedNewsQuery<T>::OnNewsQuerySendDone != &T::OnNewsQuerySendDone ) {
+      static_cast<T*>( this )->OnNewsQuerySendDone();
+    }
+  };
+  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
   // internal use only to obtain news type configurations
   void RetrieveConfiguration( void );
 
   // internal procedures for each retrieveal state
-  void ProcessStoryRetrieval(  linebuffer_t* buf, WPARAM wParam );
+  void ProcessStoryRetrieval(  linebuffer_t* buf );
   void ProcessConfigurationRetrieval(  linebuffer_t* buf );
 
 private:
@@ -169,9 +161,6 @@ private:
   typedef stateStoryRetrieval ruleid_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
   typedef typename inherited_t::linebuffer_t::const_iterator iterator_t;
-
-  CAppModule* m_pModule;
-  structMessageDestinations m_structMessageDestinations;
 
   template <typename Iterator>
   struct structStoryXmlKeywords: qi::grammar<Iterator, ruleid_t()> {
@@ -204,7 +193,6 @@ private:
   vNCMajorType_t m_vNCMajorType;
   vNCMinorType_t m_vNCMinorType;
 
-
   qi::rule<iterator_t> ruleItemEqual, ruleItemQuote;
   qi::rule<iterator_t, std::string()> ruleItemQuoted;
   qi::rule<iterator_t> ruleElements;
@@ -231,10 +219,9 @@ private:
   inline void DoMinorStop( void ) {};
   inline void DoEndMsg( void ) {
     m_stateRetrieval = RETRIEVE_IDLE;
-    if ( 0 != m_structMessageDestinations.msgNewsConfigDone ) {
-      m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsConfigDone );
+    if ( &CIQFeedNewsQuery<T>::OnNewsQueryNewsConfigDone != &T::OnNewsQueryNewsConfigDone ) {
+      static_cast<T*>( this )->OnNewsQueryNewsConfigDone();
     }
-
   };
 
   inline void DoItemType( const std::string& str ) {
@@ -253,14 +240,11 @@ private:
 };
 
 template <typename T>
-CIQFeedNewsQuery<T>::CIQFeedNewsQuery(WTL::CAppModule *pModule, const structMessageDestinations& MessageDestinations) 
-: CNetworkClientSkeleton<CIQFeedNewsQuery<T> >( pModule, "127.0.0.1", 9100 ),
-  m_structMessageDestinations( MessageDestinations ),
-  m_pModule( pModule ),
-  m_stateRetrieval( RETRIEVE_IDLE ), m_lParam( 0 )
+CIQFeedNewsQuery<T>::CIQFeedNewsQuery( void ) 
+: CNetwork<CIQFeedNewsQuery<T> >( "127.0.0.1", 9100 ),
+  m_stateRetrieval( RETRIEVE_IDLE ), 
+  m_lParam( 0 )
 {
-
-  assert( NULL != MessageDestinations.owner );
 
   // other examples:
   //  http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/
@@ -313,43 +297,8 @@ CIQFeedNewsQuery<T>::~CIQFeedNewsQuery() {
 }
 
 template <typename T>
-LRESULT CIQFeedNewsQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
-  if ( 0 != m_structMessageDestinations.msgConnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected );
-  }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedNewsQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
-  if ( 0 != m_structMessageDestinations.msgDisconnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected );
-  }
-  
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedNewsQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  if( 0 != m_structMessageDestinations.msgSendComplete ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete );
-  }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
-
-  linebuffer_t* buf = reinterpret_cast<linebuffer_t*>( wParam );
+//LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &bHandled ) {
+void CIQFeedNewsQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
 #if defined _DEBUG
   {
@@ -364,21 +313,18 @@ LRESULT CIQFeedNewsQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM, BOOL &b
 
   switch ( m_stateRetrieval ) {
     case RETRIEVE_STORY:
-      ProcessStoryRetrieval( buf, wParam );
-      //      ReturnLineBuffer( wParam ); // is handled specially inside method
+      ProcessStoryRetrieval( buf );
+      //      ReturnLineBuffer( buf ); // is handled specially inside method
       break;
     case RETRIEVE_CONFIG:
       ProcessConfigurationRetrieval( buf );
-      ReturnLineBuffer( wParam );
+      GiveBackBuffer( buf );
       break;
     case RETRIEVE_IDLE:
       OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess\n" );
-      ReturnLineBuffer( wParam );
+      GiveBackBuffer( buf );
       break;
   }
-
-  bHandled = true;
-  return 1;
 }
 
 template <typename T>
@@ -397,7 +343,7 @@ void CIQFeedNewsQuery<T>::RetrieveStory( const std::string& StoryId, LPARAM lPar
 }
 
 template <typename T>
-void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wParam ) {
+void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf ) {
 
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
@@ -425,8 +371,8 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
           else { // erase the keyword, if any, and send buffer onwards
             buf->erase( buf->begin(), bgn );  
             // emit line
-            if ( 0 != m_structMessageDestinations.msgNewsStoryLine ) {
-              m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsStoryLine, wParam, m_lParam );
+            if ( &CIQFeedNewsQuery<T>::OnNewsQueryStoryLine != &T::OnNewsQueryStoryLine ) {
+              static_cast<T*>( this )->OnNewsQueryStoryLine( buf, m_lParam );
               bReturnTheBuffer = false;  // message handler needs to return the buffer once it's processing is complete
             }
           }
@@ -505,13 +451,13 @@ void CIQFeedNewsQuery<T>::ProcessStoryRetrieval( linebuffer_t* buf, WPARAM wPara
       else {
         // send end marker
         m_stateRetrieval = RETRIEVE_IDLE;
-        if ( 0 != m_structMessageDestinations.msgNewsStoryDone ) {
-          m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgNewsStoryDone, 0, m_lParam );
+        if ( &CIQFeedNewsQuery<T>::OnNewsQueryStoryDone != &T::OnNewsQueryStoryDone ) {
+          static_cast<T*>( this )->OnNewsQueryStoryDone( m_lParam );
         }
       }
       break;
   }
-  if ( bReturnTheBuffer ) ReturnLineBuffer( wParam );
+  if ( bReturnTheBuffer ) GiveBackBuffer( buf );
 
 }
 

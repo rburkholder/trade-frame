@@ -20,7 +20,7 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
-#include <LibWtlCommon/Network.h>
+#include <LibCommon/Network.h>
 #include <LibCommon/ReusableBuffers.h>
 
 #include "IQ32.H"
@@ -84,11 +84,27 @@ protected:
   } m_stateNews;
 
   // called by CNetwork via CRTP
-  void OnNetworkConnected(void);
-  void OnNetworkDisconnected(void);
-  void OnNetworkError( size_t );
+  void OnNetworkConnected(void) {
+    if ( &CIQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
+      static_cast<T*>( this )->OnIQFeedConnected();
+    }
+  };
+  void OnNetworkDisconnected(void) {
+    if ( &CIQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
+      static_cast<T*>( this )->OnIQFeedDisConnected();
+    }
+  };
+  void OnNetworkError( size_t e ) {
+    if ( &CIQFeed<T>::OnIQFeedError != &T::OnIQFeedError ) {
+      static_cast<T*>( this )->OnIQFeedError(e);
+    }
+  };
+  void OnNetworkSendDone(void) {
+    if ( &CIQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
+      static_cast<T*>( this )->OnIQFeedSendDone();
+    }
+  };
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
-  void OnNetworkSendDone(void);
 
   // CRTP based dummy callbacks
   void OnIQFeedError( size_t ) {};
@@ -144,34 +160,6 @@ void CIQFeed<T>::SetNewsOff( void ) {
     std::stringstream ss;
     ss << "S,NEWSOFF" << std::endl;
     Send( ss.str() );
-  }
-}
-
-template <typename T>
-void CIQFeed<T>::OnNetworkError( size_t e) {
-  if ( &CIQFeed<T>::OnIQFeedError != &T::OnIQFeedError ) {
-    static_cast<T*>( this )->OnIQFeedError(e);
-  }
-}
-
-template <typename T>
-void CIQFeed<T>::OnNetworkConnected( void ) {
-  if ( &CIQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
-    static_cast<T*>( this )->OnIQFeedConnected();
-  }
-}
-
-template <typename T>
-void CIQFeed<T>::OnNetworkDisconnected( void ) {
-  if ( &CIQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
-    static_cast<T*>( this )->OnIQFeedDisConnected();
-  }
-}
-
-template <typename T>
-void CIQFeed<T>::OnNetworkSendDone( void ) {
-  if ( &CIQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
-    static_cast<T*>( this )->OnIQFeedSendDone();
   }
 }
 

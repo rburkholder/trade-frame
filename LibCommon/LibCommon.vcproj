@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Network.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ReusableBuffers.h"
 				>
 			</File>
