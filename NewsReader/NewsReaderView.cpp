@@ -57,7 +57,8 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   DlgResize_Init( false, true );
 
   m_treeSources = GetDlgItem( IDC_TREESOURCES );
-  m_lvHeadlines = GetDlgItem( IDC_LVHEADLINES );
+  //m_lvHeadlines = GetDlgItem( IDC_LVHEADLINES );
+  m_lvHeadlines.SubclassWindow( GetDlgItem( IDC_LVHEADLINES) );
   m_edtStory = GetDlgItem( IDC_EDITSTORY );
 
   // http://www.ucancode.net/CPP_Library_Control_Tool/VC_MFC_Totorial_CListCtrl_InsertItem_SetImageList_Article.htm

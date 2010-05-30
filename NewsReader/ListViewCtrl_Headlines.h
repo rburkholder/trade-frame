@@ -28,11 +28,13 @@ protected:
 //    MSG_WM_MOUSEMOVE(OnMouseMove)
 //    MSG_WM_MOUSEWHEEL(OnMouseWheel)
 //    MSG_WM_MOUSEHOVER(OnMouseHover)
+    MSG_WM_DESTROY(OnDestroy)
   END_MSG_MAP()
 
   void OnMouseMove(UINT nFlags, CPoint point);
   BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
   void OnMouseHover(WPARAM wParam, CPoint ptPos);
+  void OnDestroy();
 
 private:
 };

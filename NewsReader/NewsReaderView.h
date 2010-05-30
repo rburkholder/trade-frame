@@ -119,8 +119,6 @@ protected:
 
     MESSAGE_HANDLER( WM_IQFEED_NEWS_CONFIG_DONE, OnIQFeedNewsConfigDone )
 
-    //CHAIN_MSG_MAP(CListViewCtrl_Headlines)
-    CHAIN_MSG_MAP_MEMBER(m_lvHeadlines)
 
 //    MSG_WM_MOUSEMOVE(OnMouseMove)
 //    MSG_WM_MOUSEWHEEL(OnMouseWheel)
@@ -128,10 +126,12 @@ protected:
 //    MSG_WM_SIZE(OnSize)  // when enabled, does not allow CDialogResize to do its job
     MSG_WM_INITDIALOG(OnInitDialog)
     MSG_WM_DESTROY(OnDestroy)
+    CHAIN_MSG_MAP_MEMBER(m_lvHeadlines)
     CHAIN_MSG_MAP(CDialogResize<CNewsReaderView>)
 	END_MSG_MAP()
 
   CTreeViewCtrl m_treeSources;
+//  CListViewCtrl m_lvHeadlines;
   CListViewCtrl_Headlines m_lvHeadlines;
   CEdit m_edtStory;
 

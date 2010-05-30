@@ -36,3 +36,7 @@ void CListViewCtrl_Headlines::OnMouseHover(WPARAM wParam, CPoint ptPos) {
   ss << "HeadLine Mouse Hover " << ptPos.x << "," << ptPos.y << std::endl;
   OutputDebugString( ss.str().c_str() );
 }
+
+void CListViewCtrl_Headlines::OnDestroy() {
+//  DestroyWindow();
+}
