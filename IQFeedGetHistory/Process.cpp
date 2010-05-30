@@ -13,7 +13,7 @@
 
 #include "StdAfx.h"
 
-#include <algorithms>
+#include <algorithm>
 
 #include <boost/foreach.hpp>
 
@@ -50,6 +50,6 @@ void CProcess::Start( void ) {
 
   std::sort( m_vSymbols.begin(), m_vSymbols.end() );
 
-  BOOST_FOREACH( std::string s, m_vSymbols ) {
-  }
+//  BOOST_FOREACH( std::string s, m_vSymbols ) {
+//  }
 }

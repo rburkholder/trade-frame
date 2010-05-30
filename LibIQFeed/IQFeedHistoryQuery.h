@@ -42,7 +42,7 @@ namespace ascii = boost::spirit::ascii;
 #include <boost/fusion/include/adapt_struct.hpp>
 
 #include <LibCommon/ReusableBuffers.h>
-#include <LibWtlCommon/NetworkClientSkeleton.h>
+#include <LibCommon/Network.h>
 
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
@@ -208,75 +208,36 @@ namespace IQFeedHistoryStructs {
 
 }
 
-template <typename T>
-class CIQFeedHistoryQuery: public CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > {
+// T: CRTP inheriting class, U: type passed in for reference by inheriting class
+template <typename T, typename U>
+class CIQFeedHistoryQuery: public CNetwork<CIQFeedHistoryQuery<T,U> > {
+  friend CNetwork<CIQFeedHistoryQuery<T,U> >;
 public:
 
-  typedef typename CNetworkClientSkeleton<CIQFeedHistoryQuery<T> > inherited_t;
+  typedef typename CNetwork<CIQFeedHistoryQuery<T,U> > inherited_t;
 
   typedef typename IQFeedHistoryStructs::structTickDataPoint structTickDataPoint;
   typedef typename IQFeedHistoryStructs::structInterval structInterval;
   typedef typename IQFeedHistoryStructs::structSummary structSummary;
 
-  struct structMessageDestinations {
-    T* owner;
-    UINT msgConnected;
-    UINT msgSendComplete;
-    UINT msgDisconnected;
+  CIQFeedHistoryQuery( void );
+  ~CIQFeedHistoryQuery( void );
 
-    UINT msgError;  // not currently forwarded
+  // start a query with one of these commands
+  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, U user );  // HTX ticks
+  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, U user ); // HTD ticks
 
-    UINT msgHistoryTickDataPoint;
-    UINT msgHistoryIntervalData;
-    UINT msgHistorySummaryData;
+  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user );  // HIX i=interval in seconds  (bars)
+  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ); // HID i=interval in seconds (bars)
 
-    UINT msgHistoryRequestDone;
+  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, U user );  // HDX  (bars)
 
-    structMessageDestinations( void )
-      : owner( NULL ), msgConnected( 0 ), msgSendComplete( 0 ), msgDisconnected( 0 ), msgError( 0 ),
-        msgHistoryTickDataPoint( 0 ), msgHistoryIntervalData( 0 ), msgHistorySummaryData( 0 ), 
-        msgHistoryRequestDone( 0 )
-    {};
-    structMessageDestinations(
-      T* owner_, 
-      UINT msgConnected_, UINT msgSendComplete_, UINT msgDisconnected_, UINT msgError_,
-      UINT msgHistoryTickDataPoint_, UINT msgHistoryIntervalData_, UINT msgHistorySummaryData_, 
-      UINT msgHistoryRequestDone_
-      ) 
-    : owner( owner_ ), 
-      msgConnected( msgConnected_ ), msgSendComplete( msgSendComplete_ ), msgDisconnected( msgDisconnected_ ), msgError( msgError_ ),
-      msgHistoryTickDataPoint( msgHistoryTickDataPoint_ ),
-      msgHistoryIntervalData( msgHistoryIntervalData_ ), msgHistorySummaryData( msgHistorySummaryData_ ), 
-      msgHistoryRequestDone( msgHistoryRequestDone_ )
-    {
-      assert( NULL != owner_ );
-    };
-  };
-
-  CIQFeedHistoryQuery(CAppModule* pModule, const structMessageDestinations& MessageDestinations);
-  ~CIQFeedHistoryQuery(void );
-
-  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HTX ticks
-  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ); // HTD ticks
-
-  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam );  // HIX i=interval in seconds  (bars)
-  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ); // HID i=interval in seconds (bars)
-
-  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam );  // HDX  (bars)
-
+  // once data is extracted, return the buffer for reuse
   void ReQueueTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
   void ReQueueInterval( structInterval* pDP ) { m_reposInterval.CheckInL( pDP ); }
   void ReQueueSummary( structSummary* pDP ) { m_reposSummary.CheckInL( pDP ); }
 
 protected:
-
-  enum enumPrivateMessageTypes { // messages from CNetwork
-    WM_NQ_DONE = inherited_t::WM_NCS_ENDMARKER
-  };
-
-  BEGIN_MSG_MAP_EX(CIQFeedHistoryQuery<T>)
-    CHAIN_MSG_MAP(inherited_t)
-  END_MSG_MAP()
 
   enum enumRetrievalState {  // activity in progress on this port
     RETRIEVE_IDLE = 0,  // no retrievals in progress
@@ -286,13 +247,40 @@ protected:
     RETRIEVE_DONE  // end marker arrived and is awaiting processing
   } m_stateRetrieval;
 
-  LPARAM m_lParam; // passed back to caller as reference to data, therefore only one request at a time, based upon m_stateRetrieval
+  U m_user; // passed back to caller as reference to data, therefore only one request at a time, based upon m_stateRetrieval
 
-  // overloads from CNetworkClientSkeleton
-  LRESULT OnConnConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnDisconnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnProcess( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnConnSendDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
+  // called by CNetwork via CRTP
+  void OnNetworkConnected(void) {
+    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryConnected != &T::OnHistoryConnected ) {
+      static_cast<T*>( this )->OnHistoryConnected();
+    }
+  };
+  void OnNetworkDisconnected(void) {
+    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
+      static_cast<T*>( this )->OnHistoryDisconnected();
+    }
+  };
+  void OnNetworkError( size_t e ) {
+    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryError != &T::OnHistoryError ) {
+      static_cast<T*>( this )->OnHistoryError(e);
+    }
+  };
+  void OnNetworkSendDone(void) {
+    if ( &CIQFeedHistoryQuery<T,U>::OnHistorySendDone != &T::OnHistorySendDone ) {
+      static_cast<T*>( this )->OnHistorySendDone();
+    }
+  };
+  void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
+
+  // CRTP based dummy callbacks;
+  void OnHistoryConnected( void ) {};
+  void OnHistoryDisconnected( void ) {};
+  void OnHistoryError( size_t e ) {};
+  void OnHistorySendDone( void ) {};
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP, U user ) {};
+  void OnHistoryIntervalData( structInterval* pDP, U user ) {};
+  void OnHistorySummaryData( structSummary* pDP, U user ) {};
+  void OnHistoryRequestDone( U user ) {};
 
 private:
 
@@ -300,7 +288,7 @@ private:
   typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
 
   // used for containing parsed data and passing it on
-  CBufferRepository<structTickDataPoint> m_reposTickDataPoint;  // used for containing parsed data and passing it on
+  CBufferRepository<structTickDataPoint> m_reposTickDataPoint;
   CBufferRepository<structInterval> m_reposInterval;
   CBufferRepository<structSummary> m_reposSummary;
 
@@ -310,69 +298,25 @@ private:
 
   qi::rule<const_iterator_t> m_ruleEndMsg;
 
-  CAppModule* m_pModule;
-  structMessageDestinations m_structMessageDestinations;
-
-  // Process the line, called from OnConnProcess:
+  // Process the line
   void ProcessHistoryRetrieval( linebuffer_t* buf );
 
 };
 
-template <typename T>
-CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery(
-  WTL::CAppModule *pModule, const structMessageDestinations& MessageDestinations) 
-: CNetworkClientSkeleton<CIQFeedHistoryQuery<T> >( pModule, "127.0.0.1", 9100 ),
-  m_structMessageDestinations( MessageDestinations ),
-  m_pModule( pModule ),
-  m_stateRetrieval( RETRIEVE_IDLE ), m_lParam( 0 )
+template <typename T, typename U>
+CIQFeedHistoryQuery<T,U>::CIQFeedHistoryQuery( void ) 
+: CNetwork<CIQFeedHistoryQuery<T,U> >( "127.0.0.1", 9100 ),
+  m_stateRetrieval( RETRIEVE_IDLE )
 {
-  assert( NULL != MessageDestinations.owner );
-
   m_ruleEndMsg = qi::lit("!ENDMSG!," );
-
 }
 
-template <typename T>
-CIQFeedHistoryQuery<T>::~CIQFeedHistoryQuery() {
+template <typename T, typename U>
+CIQFeedHistoryQuery<T,U>::~CIQFeedHistoryQuery() {
 }
 
-template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnConnected( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  if ( 0 != m_structMessageDestinations.msgConnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgConnected, wParam, lParam );
-  }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnDisconnected( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  if ( 0 != m_structMessageDestinations.msgDisconnected ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgDisconnected, wParam, lParam );
-  }
-  
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnSendDone( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  if( 0 != m_structMessageDestinations.msgSendComplete ) {
-    m_structMessageDestinations.owner->PostMessage( m_structMessageDestinations.msgSendComplete, wParam, lParam );
-  }
-
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-LRESULT CIQFeedHistoryQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM lParam, BOOL &bHandled ) {
-
-  linebuffer_t* buf = reinterpret_cast<linebuffer_t*>( wParam );
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
 #if defined _DEBUG
   {
@@ -406,84 +350,81 @@ LRESULT CIQFeedHistoryQuery<T>::OnConnProcess( UINT, WPARAM wParam, LPARAM lPara
       break;
   }
 
-  ReturnLineBuffer( wParam );
-
-  bHandled = true;
-  return 1;
+  GiveBackBuffer( buf );
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, U user ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDataPoints: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
-    m_lParam = lParam;
+    m_user = user;
     std::stringstream ss;
     ss << "HTX," << sSymbol << "," << n << ",1,D\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, LPARAM lParam ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, U user) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
-    m_lParam = lParam;
+    m_user = user;
     std::stringstream ss;
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNIntervals: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
-    m_lParam = lParam;
+    m_user = user;
     std::stringstream ss;
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, LPARAM lParam ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
-    m_lParam = lParam;
+    m_user = user;
     std::stringstream ss;
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, LPARAM lParam ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, U user ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNEndOfDays: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
-    m_lParam = lParam;
+    m_user = user;
     std::stringstream ss;
     ss << "HDX," << sSymbol << "," << n << ",1,E\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T>
-void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
+template <typename T, typename U>
+void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
@@ -495,51 +436,51 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   bool b = false;
   switch ( chRequestID ) {
-    case 'D':
-      assert ( RETRIEVE_HISTORY_DATAPOINTS == m_stateRetrieval );
-      if ( 0 != m_structMessageDestinations.msgHistoryTickDataPoint ) {
+    case 'D': {
+        assert ( RETRIEVE_HISTORY_DATAPOINTS == m_stateRetrieval );
         structTickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          m_structMessageDestinations.owner->PostMessage( 
-            m_structMessageDestinations.msgHistoryTickDataPoint, reinterpret_cast<WPARAM>( pDP ), m_lParam );
+          if ( &CIQFeedHistoryQuery<T,U>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
+            static_cast<T*>( this )->OnHistoryTickDataPoint( pDP, m_user );
+          }
         }
         else {
           m_reposTickDataPoint.CheckInL( pDP );
         }
       }
       break;
-    case 'I':
-      assert ( RETRIEVE_HISTORY_INTERVALS == m_stateRetrieval );
-      if ( 0 != m_structMessageDestinations.msgHistoryIntervalData ) {
+    case 'I': {
+        assert ( RETRIEVE_HISTORY_INTERVALS == m_stateRetrieval );
         structInterval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          m_structMessageDestinations.owner->PostMessage( 
-            m_structMessageDestinations.msgHistoryIntervalData, reinterpret_cast<WPARAM>( pDP ), m_lParam );
+          if ( &CIQFeedHistoryQuery<T,U>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
+            static_cast<T*>( this )->OnHistoryIntervalData( pDP, m_user );
+          }
         }
         else {
           m_reposInterval.CheckInL( pDP );
         }
       }
       break;
-    case 'E':
-      assert ( RETRIEVE_HISTORY_SUMMARY == m_stateRetrieval );
-      if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
+    case 'E': {
+        assert ( RETRIEVE_HISTORY_SUMMARY == m_stateRetrieval );
         structSummary* pDP = m_reposSummary.CheckOutL();
         b = parse( bgn, end, m_grammarSummary, *pDP );
         if ( b && ( bgn == end ) ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          m_structMessageDestinations.owner->PostMessage( 
-            m_structMessageDestinations.msgHistorySummaryData, reinterpret_cast<WPARAM>( pDP ), m_lParam );
+          if ( &CIQFeedHistoryQuery<T,U>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
+            static_cast<T*>( this )->OnHistorySummaryData( pDP, m_user );
+          }
         }
         else {
           m_reposSummary.CheckInL( pDP );
@@ -554,17 +495,13 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     b = parse( bgn, end, m_ruleEndMsg );
     if ( b && ( bgn ==  end ) ) {
       m_stateRetrieval = RETRIEVE_IDLE;
-      if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
-        m_structMessageDestinations.owner->PostMessage( 
-          m_structMessageDestinations.msgHistoryRequestDone, 0, m_lParam );
-      }
+        if ( &CIQFeedHistoryQuery<T,U>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+          static_cast<T*>( this )->OnHistoryRequestDone( m_user );
+        }
     }
     else {
       throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval no endmessage");
     }
   }
-
-
-  //bool bReturnTheBuffer = true;
 }
 
