@@ -266,6 +266,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IQFeedHistoryBulkQueryMsgShim.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IQFeedHistoryCollector.h"
 				>
 				<FileConfiguration

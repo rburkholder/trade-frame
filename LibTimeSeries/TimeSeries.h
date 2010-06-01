@@ -19,10 +19,7 @@
 
 #include "DatedDatum.h"
 
-//using namespace std;
-
 //#include <boost/serialization/vector.hpp>
-
 // http://www.boost.org/libs/serialization/doc/traits.html
 
 template<class T> class CTimeSeries {

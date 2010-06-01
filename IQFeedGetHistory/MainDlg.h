@@ -30,7 +30,7 @@ class CMainDlg :
 public:
 	enum { IDD = IDD_MAINDLG };
 
-  typedef CIQFeedHistoryQueryMsgShim<CMainDlg,LPARAM> history_query_t;
+  typedef CIQFeedHistoryQueryMsgShim<CMainDlg> history_query_t;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
@@ -92,8 +92,8 @@ public:
 	void CloseDialog(int nVal);
 
 protected:
-  CIQFeedHistoryQueryMsgShim<CMainDlg,LPARAM>::structMessageDestinations m_MsgIdsForIQFeedHistoryQuery;
-  CIQFeedHistoryQueryMsgShim<CMainDlg,LPARAM>* m_pIQFeedHistoryQuery;
+  CIQFeedHistoryQueryMsgShim<CMainDlg>::structMessageDestinations m_MsgIdsForIQFeedHistoryQuery;
+  CIQFeedHistoryQueryMsgShim<CMainDlg>* m_pIQFeedHistoryQuery;
 private:
   WORD m_DialogCloseCode;
   CProcess m_process;

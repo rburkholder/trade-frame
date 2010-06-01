@@ -63,7 +63,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
   m_MsgIdsForIQFeedHistoryQuery.msgHistorySummaryData = WM_IQFEEDHISTORY_SUMMARYDATA;
   m_MsgIdsForIQFeedHistoryQuery.msgHistoryRequestDone = WM_IQFEEDHISTORY_REQUESTDONE;
 
-  m_pIQFeedHistoryQuery = new CIQFeedHistoryQueryMsgShim<CMainDlg,LPARAM>( m_MsgIdsForIQFeedHistoryQuery );
+  m_pIQFeedHistoryQuery = new CIQFeedHistoryQueryMsgShim<CMainDlg>( m_MsgIdsForIQFeedHistoryQuery );
 
   m_pIQFeedHistoryQuery->Connect();
 

@@ -209,12 +209,12 @@ namespace IQFeedHistoryStructs {
 }
 
 // T: CRTP inheriting class, U: type passed in for reference by inheriting class
-template <typename T, typename U>
-class CIQFeedHistoryQuery: public CNetwork<CIQFeedHistoryQuery<T,U> > {
-  friend CNetwork<CIQFeedHistoryQuery<T,U> >;
+template <typename T>
+class CIQFeedHistoryQuery: public CNetwork<CIQFeedHistoryQuery<T> > {
+  friend CNetwork<CIQFeedHistoryQuery<T> >;
 public:
 
-  typedef typename CNetwork<CIQFeedHistoryQuery<T,U> > inherited_t;
+  typedef typename CNetwork<CIQFeedHistoryQuery<T> > inherited_t;
 
   typedef typename IQFeedHistoryStructs::structTickDataPoint structTickDataPoint;
   typedef typename IQFeedHistoryStructs::structInterval structInterval;
@@ -224,13 +224,13 @@ public:
   ~CIQFeedHistoryQuery( void );
 
   // start a query with one of these commands
-  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, U user );  // HTX ticks
-  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, U user ); // HTD ticks
+  void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n );  // HTX ticks
+  void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ); // HTD ticks
 
-  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user );  // HIX i=interval in seconds  (bars)
-  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ); // HID i=interval in seconds (bars)
+  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n );  // HIX i=interval in seconds  (bars)
+  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ); // HID i=interval in seconds (bars)
 
-  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, U user );  // HDX  (bars)
+  void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n );  // HDX  (bars)
 
   // once data is extracted, return the buffer for reuse
   void ReQueueTickDataPoint( structTickDataPoint* pDP ) { m_reposTickDataPoint.CheckInL( pDP ); }
@@ -247,26 +247,24 @@ protected:
     RETRIEVE_DONE  // end marker arrived and is awaiting processing
   } m_stateRetrieval;
 
-  U m_user; // passed back to caller as reference to data, therefore only one request at a time, based upon m_stateRetrieval
-
   // called by CNetwork via CRTP
   void OnNetworkConnected(void) {
-    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryConnected != &T::OnHistoryConnected ) {
+    if ( &CIQFeedHistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
     }
   };
   void OnNetworkDisconnected(void) {
-    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
+    if ( &CIQFeedHistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
       static_cast<T*>( this )->OnHistoryDisconnected();
     }
   };
   void OnNetworkError( size_t e ) {
-    if ( &CIQFeedHistoryQuery<T,U>::OnHistoryError != &T::OnHistoryError ) {
+    if ( &CIQFeedHistoryQuery<T>::OnHistoryError != &T::OnHistoryError ) {
       static_cast<T*>( this )->OnHistoryError(e);
     }
   };
   void OnNetworkSendDone(void) {
-    if ( &CIQFeedHistoryQuery<T,U>::OnHistorySendDone != &T::OnHistorySendDone ) {
+    if ( &CIQFeedHistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
       static_cast<T*>( this )->OnHistorySendDone();
     }
   };
@@ -277,10 +275,10 @@ protected:
   void OnHistoryDisconnected( void ) {};
   void OnHistoryError( size_t e ) {};
   void OnHistorySendDone( void ) {};
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP, U user ) {};
-  void OnHistoryIntervalData( structInterval* pDP, U user ) {};
-  void OnHistorySummaryData( structSummary* pDP, U user ) {};
-  void OnHistoryRequestDone( U user ) {};
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {};
+  void OnHistoryIntervalData( structInterval* pDP ) {};
+  void OnHistorySummaryData( structSummary* pDP ) {};
+  void OnHistoryRequestDone( void ) {};
 
 private:
 
@@ -303,20 +301,20 @@ private:
 
 };
 
-template <typename T, typename U>
-CIQFeedHistoryQuery<T,U>::CIQFeedHistoryQuery( void ) 
-: CNetwork<CIQFeedHistoryQuery<T,U> >( "127.0.0.1", 9100 ),
+template <typename T>
+CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery( void ) 
+: CNetwork<CIQFeedHistoryQuery<T> >( "127.0.0.1", 9100 ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
   m_ruleEndMsg = qi::lit("!ENDMSG!," );
 }
 
-template <typename T, typename U>
-CIQFeedHistoryQuery<T,U>::~CIQFeedHistoryQuery() {
+template <typename T>
+CIQFeedHistoryQuery<T>::~CIQFeedHistoryQuery() {
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::OnNetworkLineBuffer( linebuffer_t* buf ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
 #if defined _DEBUG
   {
@@ -353,78 +351,73 @@ void CIQFeedHistoryQuery<T,U>::OnNetworkLineBuffer( linebuffer_t* buf ) {
   GiveBackBuffer( buf );
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::RetrieveNDataPoints( const std::string& sSymbol, unsigned int n, U user ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned int n ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDataPoints: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
-    m_user = user;
     std::stringstream ss;
     ss << "HTX," << sSymbol << "," << n << ",1,D\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n, U user) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
-    m_user = user;
     std::stringstream ss;
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNIntervals: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
-    m_user = user;
     std::stringstream ss;
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n, U user ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
-    m_user = user;
     std::stringstream ss;
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n, U user ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n ) {
   if ( RETRIEVE_IDLE != m_stateRetrieval ) {
     throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveNEndOfDays: not in IDLE");
   }
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
-    m_user = user;
     std::stringstream ss;
     ss << "HDX," << sSymbol << "," << n << ",1,E\n";
     Send( ss.str().c_str() );
   }
 }
 
-template <typename T, typename U>
-void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
+template <typename T>
+void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   linebuffer_t::const_iterator bgn = (*buf).begin();
   linebuffer_t::const_iterator end = (*buf).end();
@@ -444,8 +437,8 @@ void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &CIQFeedHistoryQuery<T,U>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
-            static_cast<T*>( this )->OnHistoryTickDataPoint( pDP, m_user );
+          if ( &CIQFeedHistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
+            static_cast<T*>( this )->OnHistoryTickDataPoint( pDP );
           }
         }
         else {
@@ -461,8 +454,8 @@ void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &CIQFeedHistoryQuery<T,U>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
-            static_cast<T*>( this )->OnHistoryIntervalData( pDP, m_user );
+          if ( &CIQFeedHistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
+            static_cast<T*>( this )->OnHistoryIntervalData( pDP );
           }
         }
         else {
@@ -478,8 +471,8 @@ void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           pDP->DateTime = ptime( 
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ), 
             boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
-          if ( &CIQFeedHistoryQuery<T,U>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
-            static_cast<T*>( this )->OnHistorySummaryData( pDP, m_user );
+          if ( &CIQFeedHistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
+            static_cast<T*>( this )->OnHistorySummaryData( pDP );
           }
         }
         else {
@@ -495,8 +488,8 @@ void CIQFeedHistoryQuery<T,U>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     b = parse( bgn, end, m_ruleEndMsg );
     if ( b && ( bgn ==  end ) ) {
       m_stateRetrieval = RETRIEVE_IDLE;
-        if ( &CIQFeedHistoryQuery<T,U>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
-          static_cast<T*>( this )->OnHistoryRequestDone( m_user );
+        if ( &CIQFeedHistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+          static_cast<T*>( this )->OnHistoryRequestDone();
         }
     }
     else {

@@ -17,11 +17,11 @@
 
 #include "IQFeedHistoryQuery.h"
 
-template <typename T, typename U>
-class CIQFeedHistoryQueryMsgShim: public CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T,U>, U> {
-  friend CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T,U>, U>;
+template <typename T>
+class CIQFeedHistoryQueryMsgShim: public CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T> > {
+  friend CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T> >;
 public:
-  typedef typename CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T,U>, U> inherited_t;
+  typedef typename CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T> > inherited_t;
 
   struct structMessageDestinations {
     T* owner;
@@ -92,31 +92,31 @@ protected:
     }
   }
 
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP, U user ) {
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistoryTickDataPoint ) {
       m_structMessageDestinations.owner->PostMessage( 
-        m_structMessageDestinations.msgHistoryTickDataPoint, reinterpret_cast<WPARAM>( pDP ), user );
+        m_structMessageDestinations.msgHistoryTickDataPoint, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
-  void OnHistoryIntervalData( structInterval* pDP, U user ) {
+  void OnHistoryIntervalData( structInterval* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistoryIntervalData ) {
       m_structMessageDestinations.owner->PostMessage( 
-        m_structMessageDestinations.msgHistoryIntervalData, reinterpret_cast<WPARAM>( pDP ), user );
+        m_structMessageDestinations.msgHistoryIntervalData, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
-  void OnHistorySummaryData( structSummary* pDP, U user ) {
+  void OnHistorySummaryData( structSummary* pDP ) {
     if ( 0 != m_structMessageDestinations.msgHistorySummaryData ) {
       m_structMessageDestinations.owner->PostMessage( 
-        m_structMessageDestinations.msgHistorySummaryData, reinterpret_cast<WPARAM>( pDP ), user );
+        m_structMessageDestinations.msgHistorySummaryData, reinterpret_cast<WPARAM>( pDP ) );
     }
   }
 
-  void OnHistoryRequestDone( U user ) {
+  void OnHistoryRequestDone( void ) {
     if ( 0 != m_structMessageDestinations.msgHistoryRequestDone ) {
       m_structMessageDestinations.owner->PostMessage( 
-        m_structMessageDestinations.msgHistoryRequestDone, 0, user );
+        m_structMessageDestinations.msgHistoryRequestDone, 0 );
       }
   }
 

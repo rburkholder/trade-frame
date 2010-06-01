@@ -20,50 +20,129 @@
 #include <vector>
 #include <cassert>
 
-#include <algorithms>
+#include <algorithm>
 
 #include <boost/foreach.hpp>
-#include <boost/thread/barrier.hpp>
 
-#include <codeproject/thread.h>  // class inbound messages
-
+#include <LibCommon/ReusableBuffers.h>
+#include <LibTimeSeries/TimeSeries.h>
 #include <LibTrading/InstrumentFile.h>
 #include <LibIQFeed/IQFeedHistoryQuery.h>
 
-template <typename T>
-class CIQFeedHistoryBulkQuery: public CGuiThreadImpl<CIQFeedHistoryBulkQuery<T> > {
+template <typename T, typename U>
+class CIQFeedHistoryQueryTag: CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > {
+  friend CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> >;
 public:
-
-  enum enumMessages {
-    WM_HBQ_Done,
-    WM_HBQ_Bars,
-    WM_HBQ_Ticks
+  typedef typename CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > inherited_t;
+  CIQFeedHistoryQueryTag( T* t = NULL ) : m_t( t ) {
   };
 
-  struct structMessageDestinations {
-    T* owner;
-    UINT msgDone;
-    UINT msgBars;
-    UINT msgTicks;
-    structMessageDestinations( void ) 
-      : owner( NULL ), msgDone( 0 ), msgBars( 0 ), msgTicks( 0 ) {};
-    structMessageDestinations( T* owner_, UINT msgDone_, UINT msgBars_, UINT msgTicks_ )
-      : owner( owner_ ), msgDone( msgDone_ ), msgBars( msgBars_ ), msgTicks( msgTicks_ ) ) { assert( NULL != owner_ ); };
+  CIQFeedHistoryQueryTag( T* t, U tagUser ) : m_t( t ), m_tagUser( tagUser ) {
   };
+
+  ~CIQFeedHistoryQueryTag( void ) {
+  };
+
+  void SetUserTag( U tagUser ) { m_tagUser = tagUser; };
+  U GetUserTag( void ) { return m_tagUser; };
+
+  void SetT( T* t ) { m_t = t; };
+  T* GetT( void ) { return m_t; };
+
+  void Activate( void ) { m_bActivated = true; };
+  bool Activated( void ) { return m_bActivated; };
+
+protected:
+
+  // CRTP based callbacks;
+  void OnHistoryConnected( void ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryConnected != &T::OnHistoryConnected ) {
+      static_cast<T*>( m_t )->OnHistoryConnected( m_tagUser );
+    }
+  };
+
+  void OnHistoryDisconnected( void ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
+      static_cast<T*>( m_t )->OnHistoryDisconnected( m_tagUser );
+    }
+  };
+
+  void OnHistoryError( size_t e ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryError != &T::OnHistoryError ) {
+      static_cast<T*>( m_t )->OnHistoryError( m_tagUser, e );
+    }
+  };
+
+  void OnHistorySendDone( void ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistorySendDone != &T::OnHistorySendDone ) {
+      static_cast<T*>( m_t )->OnHistorySendDone( m_tagUser );
+    }
+  };
+
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
+      static_cast<T*>( m_t )->OnHistoryTickDataPoint( m_tagUser, pDP );
+    }
+  };
+
+  void OnHistoryIntervalData( structInterval* pDP ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
+      static_cast<T*>( m_t )->OnHistoryIntervalData( m_tagUser, pDP );
+    }
+  };
+
+  void OnHistorySummaryData( structSummary* pDP ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
+      static_cast<T*>( m_t )->OnHistorySummaryData( m_tagUser, pDP );
+    }
+  };
+
+  void OnHistoryRequestDone( void ) {
+    assert( NULL != m_t );
+    if ( &CIQFeedHistoryQueryTag<T,U>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+      static_cast<T*>( m_t )->OnHistoryRequestDone( m_tagUser );
+    }
+  };
+
+private:
+  U m_tagUser;
+  T* m_t;
+  bool m_bActivated;
+};
+
+template <typename T>
+class CIQFeedHistoryBulkQuery {
+public:
 
   struct structResultBar {
     std::string sSymbol;
-    // CBars bars;
+    CBars bars;
+    void Clear( void ) {
+      sSymbol.Clear();
+      bars.Clear();
+    };
   };
 
   struct structResultTicks {
     std::string sSymbol;
-    // CQuotes Quotes;  // quote added in sequence before trade
-    // CTrades Trades;
+    CQuotes quotes;  // quote added in sequence before trade
+    CTrades trades;
+    void Clear( void ) {
+      sSymbol.Clear();
+      quotes.Clear();
+      trades.Clear();
+    };
   };
 
-  CIQFeedHistoryBulkQuery( CAppModule* pModule );
-  ~CIQFeedHistoryBulkQuery( void );
+  CIQFeedHistoryBulkQuery( void );
+  virtual ~CIQFeedHistoryBulkQuery( void );
 
   // use one or the other of SetExchanges or SetSymbols
   typedef std::vector<std::string> exchange_list_t;
@@ -78,37 +157,10 @@ public:
   };
   size_t GetMaxSimultaneousQueries( void ) { return m_nMaxSimultaneousQueries; };
 
-  void DailyBars( size_t n, const structMessageDestinations& messages );
+  // first of a series of requests to be built
+  void DailyBars( size_t n );
 
 protected:
-  enum enumLocalMessages {  // messages sent from CIQFeedHistoryQuery
-    WM_BQ_CONNECTED = WM_USER + 1,
-    WM_BQ_ERROR, 
-    WM_BQ_TICK,
-    WM_BQ_INTERVAL,
-    WM_BQ_SUMMARY,
-    WM_BQ_DONE,
-    WM_BQ_SENDCOMPLETE,
-    WM_BQ_DISCONNECTED,
-
-    // get everything closed down prior to PostQuitMessage
-    WM_BQ_PRE_QUIT,
-
-    // unused here, derived can use it for start of its messages
-    WM_BQ_ENDMARKER
-  };
-
-  BEGIN_MSG_MAP_EX(CIQFeedHistoryBulkQuery<T>)
-    MESSAGE_HANDLER(WM_BQ_CONNECTED, OnQueryConnected);
-    MESSAGE_HANDLER(WM_BQ_ERROR, OnQueryError);
-    MESSAGE_HANDLER(WM_BQ_TICK, OnQueryDataPoint);
-    MESSAGE_HANDLER(WM_BQ_INTERVAL, OnQueryInterval);
-    MESSAGE_HANDLER(WM_BQ_SUMMARY, OnQuerySummary);
-    MESSAGE_HANDLER(WM_BQ_DONE, OnQueryDoned);
-    MESSAGE_HANDLER(WM_BQ_SENDCOMPLETE, OnQuerySendComplete);
-    MESSAGE_HANDLER(WM_BQ_DISCONNECTED, OnQueryDisConnected);
-    MESSAGE_HANDLER(WM_BQ_PRE_QUIT, OnPreQuit )
-  END_MSG_MAP()
 
   enum enumProcessingState {
     EConstructing, EQuiescent, ESymbolListBuilt, ERetrievingWithMoreInQ, ERetrievingWithQEmpty, EInDestruction
@@ -117,104 +169,58 @@ protected:
   void GenerateQueries( void );
   void ProcessSymbolList( void );
 
-  BOOL InitializeThread( void );
-  void CleanupThread( DWORD );
-
 private:
-  CAppModule* m_pModule;
-  boost::barrier m_barrier;  
 
   symbol_list_t m_listSymbols;
-  structMessageDestinations m_messageDestinations;
   size_t m_n;  // number of data points to retrieve
 
   size_t m_nMaxSimultaneousQueries;
   size_t m_nCurSimultaneousQueries;
   symbol_list_t::iterator m_iterSymbols;
 
-  typedef typename CIQFeedHistoryQuery<CIQFeedHistoryBulkQuery<T> > query_t;
+  struct structQueryState;  // empty declaration for circular reference
+  typedef typename CIQFeedHistoryQueryTag<CIQFeedHistoryBulkQuery<T>, structQueryState*> query_t;
 
   struct structQueryState {
     size_t ix;  // index into vector containing this structure
-    structResultBar* bars;
+    structResultBar* bars;  // one of bars or ticks will be used in any one session
     structResultTicks* ticks;
-    query_t* pq;
-    structQueryState(CAppModule* pModule, const query_t::structMessageDestinations& MessageDestinations) 
-      : ix(0) 
-    {
-      pq = new query_t( pModule, MessageDestinations );
-    };
-    ~structQueryState(void) {
-      delete pq;
+    query_t query;
+    void Clear( void ) {
+      bars->Clear();
+      ticks->Clear();
+    }
+    structQueryState( void ) {
+      query.SetUserTag( this );
     };
   };
 
-  std::vector<structQueryState*> m_vQueryStates;  // all our usable queries
-  std::vector<size_t> m_stkSpareQueries;  // stack of spare re-usable query indexes into m_vQueryStates;
+  CBufferRepository<structQueryState> m_reposQueryStates;
 
-  query_t::structMessageDestinations m_idsQueryMessage;
-
-  LRESULT OnQueryConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQueryError( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQueryDataPoint( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQueryInterval( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQuerySummary( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQueryDone( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQuerySendComplete( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnQueryDisConnected( UINT, WPARAM, LPARAM, BOOL &bHandled );
-  LRESULT OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled );
-
-  void PostMessage( UINT id, WPARAM wparam = NULL, LPARAM lparam = NULL ) {
-    PostThreadMessage( id, wparam, lparam );
-  }
+  // CRTP based callbacks from IQFeedHistoryQuery
+  void OnHistoryConnected( structQueryState* pqs ) {};
+  void OnHistoryDisconnected( structQueryState* pqs ) {};
+  void OnHistoryError( structQueryState* pqs, size_t e ) {};
+  void OnHistorySendDone( structQueryState* pqs ) {};
+  void OnHistoryTickDataPoint( structQueryState* pqs, structTickDataPoint* pDP ) {};
+  void OnHistoryIntervalData( structQueryState* pqs, structInterval* pDP ) {};
+  void OnHistorySummaryData( structQueryState* pqs, structSummary* pDP ) {};
+  void OnHistoryRequestDone( structQueryState* pqs ) {};
 };
 
 template <typename T>
-CIQFeedHistoryBulkQuery<T>::CIQFeedHistoryBulkQuery(WTL::CAppModule *pModule) 
-: CGuiThreadImpl<CIQFeedHistoryBulkQuery<T> >( pModule, CREATE_SUSPENDED ),
-  m_barrier( 2 ),  // 2 threads need to meet
-  m_pModule( pModule ),
+CIQFeedHistoryBulkQuery<T>::CIQFeedHistoryBulkQuery( void ) 
+: 
+  m_stateBulkQuery( EConstructing ),
   m_nMaxSimultaneousQueries( 10 ),
-  m_nCurSimultaneousQueries( 0 ),
-  m_QueryMessageIds( this, WM_BQ_CONNECTED, WM_BQ_SENDCOMPLETE, WM_BQ_DISCONNECTED, WM_BQ_ERROR, 
-    WM_BQ_TICK, WM_BQ_INTERVAL, WM_BQ_SUMMARY, WM_BQ_DONE ),
-  m_stateBulkQuery( EConstructing );
+  m_nCurSimultaneousQueries( 0 )
 {
-  this->Resume();
-  m_barrier.wait();  // sync up with InitializeThread
-  m_stateProcessing( EQuiescent );
+  m_stateBulkQuery( EQuiescent );
 }
 
 template <typename T>
 CIQFeedHistoryBulkQuery<T>::~CIQFeedHistoryBulkQuery() {
-
-  PostThreadMessage( WM_BQ_PRE_QUIT );
-  Join();  
-}
-
-template <typename T>
-BOOL CIQFeedHistoryBulkQuery<T>::InitializeThread() {
-
-  m_barrier.wait();  // sync up with constructor
-
-  return TRUE;
-}
-
-template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnPreQuit( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
-  if ( EQuiescent == m_stateBulkQuery ) {
-    PostQuitMessage();
-  }
-  else {
-    Sleep(10); // dally for a bit
-    PostThreadMessage( WM_BQ_PRE_QUIT );
-  }
-  bHandled = true;
-  return 1;
-}
-
-template <typename T>
-void CIQFeedHistoryBulkQuery<T>::CleanupThread(DWORD) {
+  assert( EQuiescent == m_stateBulkQuery );
 }
 
 template <typename T>
@@ -260,9 +266,8 @@ void CIQFeedHistoryBulkQuery<T>::BulkQuerySymbols(const int &symbol_list_t list)
 }
 
 templet <typename T>
-void CIQFeedHistoryBulkQuery<T>::DailyBars( size_t n, const structMessageDestinations& messages ) {
+void CIQFeedHistoryBulkQuery<T>::DailyBars( size_t n ) {
   m_n = n;
-  structMessageDestinations = messages;
   GenerateQueries();
 }
 
@@ -271,7 +276,7 @@ void CIQFeedHistoryBulkQuery<T>::GenerateQueries( void ) {
   assert( ESymbolListBuilt == m_stateBulkQuery );
   m_nCurSimultaneousQueries = 0;
   m_iterSymbols = m_listSymbols.begin();
-  ProcessSymbolList();
+  ProcessSymbolList();  // startup first set of queries
 }
 
 template <typename T>
@@ -281,19 +286,17 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
   m_stateBulkQuery = ERetrievingWithMoreInQ;  // set default state
   while ( ( m_nCurSimultaneousQueries < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
     // generate another query
+    ++m_nCurSimultaneousQueries;
     // obtain a query state structure
-    if ( m_stkSpareQueries.empty() ) {
-      pqs = new structQueryState( m_pModule, m_idsQueryMessage );
-      //pqs->ix = ix = m_vQueryStates.size();
-      //m_vQueryStates.push_back( pq );
-      // wait for query to reach connected state
+    pqs = m_reposQueryStates.CheckOutL;
+    if ( !pqs->query.Activated() ) {
+      pqs->query.SetT( this );
+      pqs->query.Connect();
     }
-    else {
-      ++m_nCurSimultaneousQueries;
-      ix = m_stkSpareQueries.back();
-      m_stkSpareQueries.pop_back();
-      pqs = m_vQueryStates[ ix ];
-      pqs->RetrieveNEndOfDays(*m_iterSymbols, m_n, reinterpret_cast<LPARAM>( pqs ) );
+    
+    // wait for query to reach connected state (do we need to do this anymore?)
+
+    pqs->query.RetrieveNEndOfDays(*m_iterSymbols, m_n );
     }
   }
 
@@ -309,36 +312,41 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryConnected( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryConnected( structQueryState* pqs ) {
   ProcessSymbolList();
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryError( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryDisconnected( structQueryState* pqs ) {
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryDataPoint( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryError( structQueryState* pqs, size_t e ) {
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryInterval( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQuerySummary( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, structTickDataPoint* pDP ) {
+  pDp->ReQueueTickDataPoint( pDP );
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryDone( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, structInterval* pDP ) {
+  pDp->ReQueueSummary( pDP );
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQuerySendComplete( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, structSummary* pDP ) {
+  pDp->ReQueueInterval( pDP );
 }
 
 template <typename T>
-LRESULT CIQFeedHistoryBulkQuery<T>::OnQueryDisConnected( UINT, WPARAM, LPARAM, BOOL &bHandled ) {
+LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
+  m_reposQueryStates.CheckInL( pqs );
+  ProcessSymbolList();
 }
 
 
