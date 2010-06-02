@@ -30,7 +30,7 @@
 #include <LibIQFeed/IQFeedHistoryQuery.h>
 
 template <typename T, typename U>
-class CIQFeedHistoryQueryTag: CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > {
+class CIQFeedHistoryQueryTag: public CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > {
   friend CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> >;
 public:
   typedef typename CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > inherited_t;
@@ -117,6 +117,10 @@ private:
   bool m_bActivated;
 };
 
+//
+// =====================
+//
+
 template <typename T>
 class CIQFeedHistoryBulkQuery {
 public:
@@ -160,11 +164,22 @@ public:
   // first of a series of requests to be built
   void DailyBars( size_t n );
 
+  // CRTP callbacks for inheriting class
+  void OnBars( structResultBar* bars );
+  void OnTicks( structResultTicks* ticks );
+  void OnCompletion( void );
+
+  void ReQueueBars( structResultBar* bars ) { m_reposBars.CheckInL( bars ) };
+  void ReQueueTicks( structResultTicks* ticks ) { m_reposTicks.CheckInL( ticks ); };
+
 protected:
 
   enum enumProcessingState {
     EConstructing, EQuiescent, ESymbolListBuilt, ERetrievingWithMoreInQ, ERetrievingWithQEmpty, EInDestruction
     } m_stateBulkQuery;
+  enum enumResultType {
+    EUnknown, EBars, ETicks
+  } m_ResultType;
 
   void GenerateQueries( void );
   void ProcessSymbolList( void );
@@ -173,6 +188,9 @@ private:
 
   symbol_list_t m_listSymbols;
   size_t m_n;  // number of data points to retrieve
+
+  CBufferRepository<structResultBar> m_reposBars;
+  CBufferRepository<structResultTicks> m_reposTicks;
 
   size_t m_nMaxSimultaneousQueries;
   size_t m_nCurSimultaneousQueries;
@@ -186,11 +204,13 @@ private:
     structResultBar* bars;  // one of bars or ticks will be used in any one session
     structResultTicks* ticks;
     query_t query;
-    void Clear( void ) {
-      bars->Clear();
-      ticks->Clear();
-    }
-    structQueryState( void ) {
+//    void Clear( void ) {
+//      bars->Clear();
+//      ticks->Clear();
+//    }
+    structQueryState( void ) 
+      : bars( NULL ), ticks( NULL ), ix( 0 )
+    {
       query.SetUserTag( this );
     };
   };
@@ -213,7 +233,8 @@ CIQFeedHistoryBulkQuery<T>::CIQFeedHistoryBulkQuery( void )
 : 
   m_stateBulkQuery( EConstructing ),
   m_nMaxSimultaneousQueries( 10 ),
-  m_nCurSimultaneousQueries( 0 )
+  m_nCurSimultaneousQueries( 0 ),
+  m_ResultType( EUnknown )
 {
   m_stateBulkQuery( EQuiescent );
 }
@@ -268,6 +289,7 @@ void CIQFeedHistoryBulkQuery<T>::BulkQuerySymbols(const int &symbol_list_t list)
 templet <typename T>
 void CIQFeedHistoryBulkQuery<T>::DailyBars( size_t n ) {
   m_n = n;
+  m_ResultType = EBars;
   GenerateQueries();
 }
 
@@ -290,8 +312,22 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
     // obtain a query state structure
     pqs = m_reposQueryStates.CheckOutL;
     if ( !pqs->query.Activated() ) {
+      pqs->query.Activate();
       pqs->query.SetT( this );
       pqs->query.Connect();
+    }
+
+    switch ( m_ResultType ) {
+      case ETicks:
+        pqs->ticks = m_reposTicks.CheckOutL();
+        pqs->ticks.Clear();   // do this on check in instead
+        pqs->ticks.sSymbol = *m_iterSymbols;
+        break;
+      case EBars:
+        pqs->bars = m_reposBars.CheckOutL();
+        pqs->bars.Clear();  // do this on check in instead
+        pqs->bars.sSymbol = *m_iterSymbols;
+        break;
     }
     
     // wait for query to reach connected state (do we need to do this anymore?)
@@ -313,7 +349,6 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryConnected( structQueryState* pqs ) {
-  ProcessSymbolList();
 }
 
 template <typename T>
@@ -326,25 +361,61 @@ LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryError( structQueryState* pqs, size_
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
+
+  if ( &CIQFeedHistoryBulkQuery<T>::OnCompletion != &T::OnCompletion ) {
+    switch( m_ResultType ) {
+      case ETicks:
+        OnTicks( pqs->ticks );
+        pqs->ticks = NULL;
+        break;
+      case EBars:
+        OnBars( pqs->bars );
+        pqs->bars = NULL;
+        break;
+    }
+  }
+  m_reposQueryStates.CheckInL( pqs );
 }
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, structTickDataPoint* pDP ) {
+  CQuote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
+  pqs->ticks.quotes.AppendDatum( quote );
+  CTrade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
+  pqs->ticks.trades.AppendDatum( trade );
   pDp->ReQueueTickDataPoint( pDP );
 }
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, structInterval* pDP ) {
+  CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
+  pqs->bars.AppendDatum( bar );
   pDp->ReQueueSummary( pDP );
 }
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, structSummary* pDP ) {
+  CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
+  pqs->bars.AppendDatum( bar );
   pDp->ReQueueInterval( pDP );
 }
 
 template <typename T>
 LRESULT CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
+  m_reposQueryStates.CheckInL( pqs );
+  if ( &CIQFeedHistoryBulkQuery<T>::OnCompletion != &T::OnCompletion ) {
+    switch ( m_ResultType ) {
+      case ETicks:
+        OnTicks( pqs->ticks );
+        pqs->ticks = NULL;
+        break;
+      case EBars:
+        OnBars( pqs->bars );
+        pqs->bars = NULL;
+        break;
+    }
+  }
+
   m_reposQueryStates.CheckInL( pqs );
   ProcessSymbolList();
 }
