@@ -1,3 +1,10 @@
+2010/06/03
+
+ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots/v19/
+
+E:\Data\Projects\hdf5\hdf5-1.9.55\hdf5lib\debug\include\H5Include.h:
+change to #include "hdf5.h"
+
 2010/04/11
 * multi-thread sdi, no rebar
 * no unicode, set .cpp, set common controls

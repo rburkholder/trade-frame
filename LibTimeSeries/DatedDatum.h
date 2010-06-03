@@ -84,7 +84,7 @@ public:
   virtual ~CTrade(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
 
-  bool operator<( const CTrade &trade ) const { return m_dt < trade.m_dt; };
+//  bool operator<( const CTrade &trade ) const { return m_dt < trade.m_dt; };
 
   double m_dblTrade;
   int m_nTradeSize;

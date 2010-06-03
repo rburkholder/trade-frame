@@ -73,8 +73,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\libboost_system-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_43.lib $(OutDir)\LibHDF5TimeSeries.lib $(OutDir)\szlibdll.lib $(OutDir)\szlib.lib $(OutDir)\zlib.lib $(OutDir)\zlib1.lib $(OutDir)\libtrading.lib $(OutDir)\LibTimeSeries.lib $(OutDir)\LibBerkeleyDb.lib $(OutDir)\libdb48d.lib $(OutDir)\hdf5d.lib $(OutDir)\hdf5_cppd.lib"
+				AdditionalDependencies="$(OutDir)\libboost_system-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_43.lib $(OutDir)\LibHDF5TimeSeries.lib $(OutDir)\szip.lib $(OutDir)\zlib.lib $(OutDir)\zlib1.lib $(OutDir)\libtrading.lib $(OutDir)\LibTimeSeries.lib $(OutDir)\LibBerkeleyDb.lib $(OutDir)\libdb48d.lib $(OutDir)\hdf5d.lib $(OutDir)\hdf5_cppd.lib"
 				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
