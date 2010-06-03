@@ -13,9 +13,9 @@
 
 #include "StdAfx.h"
 
-#include "DatedDatum.h"
-
 #include <assert.h>
+
+#include "DatedDatum.h"
 
 //using namespace H5;
 
@@ -51,7 +51,7 @@ H5::CompType *CDatedDatum::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
+//bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
 
 // CQuote
 
@@ -98,7 +98,7 @@ H5::CompType *CQuote::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-bool operator<( const CQuote &quote1, const CQuote &quote2 ) { return quote1.m_dt < quote2.m_dt; };
+//bool operator<( const CQuote &quote1, const CQuote &quote2 ) { return quote1.m_dt < quote2.m_dt; };
 
 // CTrade
 
@@ -179,7 +179,7 @@ H5::CompType *CBar::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-bool operator<( const CBar &bar1, const CBar &bar2 ) { return bar1.m_dt < bar2.m_dt; };
+//bool operator<( const CBar &bar1, const CBar &bar2 ) { return bar1.m_dt < bar2.m_dt; };
 
 // CMarketDepth
 
@@ -235,5 +235,5 @@ H5::CompType *CMarketDepth::DefineDataType( H5::CompType *pComp ) {
   return pComp; 
 }
 
-bool operator<( const CMarketDepth &md1, const CMarketDepth &md2 ) { return md1.m_dt < md2.m_dt; };
+//bool operator<( const CMarketDepth &md1, const CMarketDepth &md2 ) { return md1.m_dt < md2.m_dt; };
 

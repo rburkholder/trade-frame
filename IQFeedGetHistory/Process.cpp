@@ -33,23 +33,20 @@ CProcess::~CProcess(void) {
 }
 
 void CProcess::Start( void ) {
-  m_IF.OpenIQFSymbols();
 
-  structSymbolRecord *pRec;
+  SetExchanges( m_vExchanges );
+  DailyBars( 20 );
 
-  BOOST_FOREACH( std::string s, m_vExchanges ) {
-    m_iterSymbols.SetInstrumentFile( &m_IF );
-    pRec = m_iterSymbols.begin( s );
-    while ( m_iterSymbols.end() != pRec ) {
-      m_vSymbols.push_back( pRec->GetSymbol() );
-      pRec = ++m_iterSymbols;
-    }
-  }
+}
 
-  m_IF.CloseIQFSymbols();
+void CProcess::OnBars( inherited_t::structResultBar* bars ) {
+//  OutputDebugString( "bars for " + bars->sSymbol + " done\n" );
+}
 
-  std::sort( m_vSymbols.begin(), m_vSymbols.end() );
+void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
+//  OutputDebugString( "ticks for " + ticks->sSymbol + " done\n" );
+}
 
-//  BOOST_FOREACH( std::string s, m_vSymbols ) {
-//  }
+void CProcess::OnCompletion( void ) {
+  OutputDebugString( "all processing complete\n" );
 }

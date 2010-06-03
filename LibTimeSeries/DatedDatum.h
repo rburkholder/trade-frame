@@ -31,10 +31,10 @@ public:
   ptime m_dt;
   bool IsNull( void ) { return m_dt.is_not_a_date_time(); };
 
-  bool operator<( const CDatedDatum &datum ) { return m_dt < datum.m_dt; };
-  bool operator<( CDatedDatum *datum ) { return m_dt < datum->m_dt; };
-  bool operator==( const CDatedDatum &datum ) { return m_dt == datum.m_dt; };
-  bool operator!=( const CDatedDatum &datum ) { return m_dt != datum.m_dt; };
+  bool operator<( const CDatedDatum &datum ) const { return m_dt < datum.m_dt; };
+//  bool operator<( CDatedDatum *datum ) { return m_dt < datum->m_dt; };
+  bool operator==( const CDatedDatum &datum ) const { return m_dt == datum.m_dt; };
+  bool operator!=( const CDatedDatum &datum ) const { return m_dt != datum.m_dt; };
 
   // http://www.boost.org/doc/html/date_time/posix_time.html#date_time.posix_time.ptime_class
   //ptime m_dt(boost::date_time::special_values::not_a_date_time);
@@ -48,7 +48,7 @@ protected:
 private:
 };
 
-bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
+//bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
 
 class CQuote: public CDatedDatum {
 public:
@@ -61,6 +61,8 @@ public:
   virtual ~CQuote(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
 
+//  bool operator<( const CQuote &quote ) const { return m_dt < quote.m_dt; };
+
   double m_dblBid;
   double m_dblAsk;
   bidsize_t m_nBidSize;
@@ -70,7 +72,7 @@ protected:
 private:
 };
 
-bool operator<( const CQuote &quote1, const CQuote &quote2 );
+//bool operator<( const CQuote &quote1, const CQuote &quote2 );
 
 class CTrade: public CDatedDatum {
 public:
@@ -82,6 +84,8 @@ public:
   virtual ~CTrade(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
 
+  bool operator<( const CTrade &trade ) const { return m_dt < trade.m_dt; };
+
   double m_dblTrade;
   int m_nTradeSize;
 
@@ -89,7 +93,7 @@ protected:
 private:
 };
 
-bool operator<( const CTrade &trade1, const CTrade &trade2 );
+//bool operator<( const CTrade &trade1, const CTrade &trade2 );
 
 class CBar: public CDatedDatum {
 public:
@@ -102,6 +106,8 @@ public:
   virtual ~CBar(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
 
+//  bool operator<( const CBar &bar ) const { return m_dt < bar.m_dt; };
+
   double m_dblOpen;
   double m_dblHigh;
   double m_dblLow;
@@ -112,7 +118,7 @@ protected:
 private:
 };
 
-bool operator<( const CBar &bar1, const CBar &bar2 );
+//bool operator<( const CBar &bar1, const CBar &bar2 );
 
 class CMarketDepth: public CDatedDatum {
 public:
@@ -126,6 +132,8 @@ public:
     const std::string &price, const std::string &mmid );
   virtual ~CMarketDepth(void);
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+
+//  bool operator<( const CMarketDepth &md ) const { return m_dt < md.m_dt; };
 
   enum ESide : char { Bid, Ask, None };
 
@@ -148,6 +156,6 @@ protected:
 private:
 };
 
-bool operator<( const CMarketDepth &md1, const CMarketDepth &md2 );
+//bool operator<( const CMarketDepth &md1, const CMarketDepth &md2 );
 
 

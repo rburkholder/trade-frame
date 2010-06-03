@@ -25,15 +25,26 @@
 #include <string>
 
 #include <LibTrading/InstrumentFile.h>
+#include <LibIQFeed/IQFeedHistoryBulkQuery.h>
 
-class CProcess
-{
+class CProcess: public CIQFeedHistoryBulkQuery<CProcess> {
+  friend CIQFeedHistoryBulkQuery<CProcess>;
 public:
+
+  typedef CIQFeedHistoryBulkQuery<CProcess> inherited_t;
+
   CProcess(void);
   ~CProcess(void);
   void Start( void );
+
 protected:
+
+  void OnBars( inherited_t::structResultBar* bars );
+  void OnTicks( inherited_t::structResultTicks* ticks );
+  void OnCompletion( void );
+
 private:
+
   CInstrumentFile m_IF;
   CInstrumentFile::iterator m_iterSymbols;
 
