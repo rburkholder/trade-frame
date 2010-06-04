@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <boost/foreach.hpp>
+#include <boost/thread.hpp>
 
 #include <LibCommon/ReusableBuffers.h>
 #include <LibTimeSeries/TimeSeries.h>
@@ -34,10 +35,10 @@ class CIQFeedHistoryQueryTag: public CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<
   friend CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> >;
 public:
   typedef typename CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > inherited_t;
-  CIQFeedHistoryQueryTag( T* t = NULL ) : m_t( t ) {
+  CIQFeedHistoryQueryTag( T* t = NULL ) : m_t( t ), m_bActivated( false ) {
   };
 
-  CIQFeedHistoryQueryTag( T* t, U tagUser ) : m_t( t ), m_tagUser( tagUser ) {
+  CIQFeedHistoryQueryTag( T* t, U tagUser ) : m_t( t ), m_tagUser( tagUser ), m_bActivated( false ) {
   };
 
   ~CIQFeedHistoryQueryTag( void ) {
@@ -217,11 +218,13 @@ private:
   CBufferRepository<structResultBar> m_reposBars;
   CBufferRepository<structResultTicks> m_reposTicks;
 
-  size_t m_nMaxSimultaneousQueries;
-  size_t m_nCurSimultaneousQueries;
+  LONG m_nMaxSimultaneousQueries;
+  volatile LONG m_nCurSimultaneousQueries;
   symbol_list_t::iterator m_iterSymbols;
 
   CBufferRepository<structQueryState> m_reposQueryStates;
+
+  boost::mutex m_mutexProcessSymbolList;
 
 };
 
@@ -258,7 +261,10 @@ void CIQFeedHistoryBulkQuery<T>::SetExchanges(const exchange_list_t& list) {
   BOOST_FOREACH( std::string s, list ) {
     pRec = iterSymbols.begin( s );
     while ( iterSymbols.end() != pRec ) {
-      m_listSymbols.push_back( pRec->GetSymbol() );
+//      if ( pRec->GetSymbolClassifier().test( structSymbolRecord::Equity ) ) {
+      if ( pRec->GetSymbolClassifier().test( structSymbolRecord::HasOptions ) ) {
+        m_listSymbols.push_back( pRec->GetSymbol() );
+      }
       pRec = ++iterSymbols;
     }
   }
@@ -301,11 +307,13 @@ void CIQFeedHistoryBulkQuery<T>::GenerateQueries( void ) {
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
 //  size_t ix;
+  boost::mutex::scoped_lock lock( m_mutexProcessSymbolList );  // lock for the scope
   structQueryState* pqs;
-  m_stateBulkQuery = ERetrievingWithMoreInQ;  // set default state
+  m_stateBulkQuery = ERetrievingWithMoreInQ;  
   while ( ( m_nCurSimultaneousQueries < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
     // generate another query
-    ++m_nCurSimultaneousQueries;
+    //++m_nCurSimultaneousQueries; 
+    InterlockedIncrement( &m_nCurSimultaneousQueries );
     // obtain a query state structure
     pqs = m_reposQueryStates.CheckOutL();
     if ( !pqs->query.Activated() ) {
@@ -328,6 +336,7 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
     // wait for query to reach connected state (do we need to do this anymore?)
 
     pqs->query.RetrieveNEndOfDays(*m_iterSymbols, m_n );
+    ++m_iterSymbols;
   }
 
   if ( m_listSymbols.end() == m_iterSymbols ) {
@@ -335,7 +344,8 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
   }
 
   if ( 0 == m_nCurSimultaneousQueries ) { // no more queries outstanding so finish up
-    m_stateBulkQuery = ESymbolListBuilt; // can now initiate another round of queries
+    m_stateBulkQuery = EQuiescent; // can now initiate another round of queries
+    m_listSymbols.clear();
     static_cast<T*>( this )->OnCompletion();  // indicate total completion
   }
 }
@@ -394,6 +404,8 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
   }
 
   m_reposQueryStates.CheckInL( pqs );
+  //--m_nCurSimultaneousQueries;
+  InterlockedDecrement( &m_nCurSimultaneousQueries );
   ProcessSymbolList();
 }
 

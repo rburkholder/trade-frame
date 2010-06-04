@@ -12,13 +12,14 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "InstrumentFile.h"
-
-#include "TradingEnumerations.h"
 
 #include <string>
 #include <stdexcept>
 #include <cassert>
+
+#include "TradingEnumerations.h"
+
+#include "InstrumentFile.h"
 
 // todo 2008/06/06 change record retrieval to use stack structures rather than dynamic allocation
 

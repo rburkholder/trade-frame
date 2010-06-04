@@ -285,6 +285,8 @@ private:
   typedef typename inherited_t::linebuffer_t linebuffer_t;
   typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
 
+  static const size_t m_nMillisecondsToSleep = 40;
+
   // used for containing parsed data and passing it on
   CBufferRepository<structTickDataPoint> m_reposTickDataPoint;
   CBufferRepository<structInterval> m_reposInterval;
@@ -295,6 +297,7 @@ private:
   IQFeedHistoryStructs::SummaryParser<const_iterator_t> m_grammarSummary;
 
   qi::rule<const_iterator_t> m_ruleEndMsg;
+  qi::rule<const_iterator_t> m_ruleErrorInvalidSymbol;
 
   // Process the line
   void ProcessHistoryRetrieval( linebuffer_t* buf );
@@ -306,7 +309,8 @@ CIQFeedHistoryQuery<T>::CIQFeedHistoryQuery( void )
 : CNetwork<CIQFeedHistoryQuery<T> >( "127.0.0.1", 9100 ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
-  m_ruleEndMsg = qi::lit("!ENDMSG!," );
+  m_ruleEndMsg = qi::lit( "!ENDMSG!" );
+  m_ruleErrorInvalidSymbol = qi::lit( "E,Invalid symbol" );
 }
 
 template <typename T>
@@ -321,9 +325,9 @@ void CIQFeedHistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
     linebuffer_t::const_iterator bgn = (*buf).begin();
     linebuffer_t::const_iterator end = (*buf).end();
 
-    std::string str( bgn, end );
-    str += "\n";
-    OutputDebugString( str.c_str() );
+//    std::string str( bgn, end );
+//    str += "\n";
+//    OutputDebugString( str.c_str() );
   }
 #endif
 
@@ -359,6 +363,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, un
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     std::stringstream ss;
+    Sleep( m_nMillisecondsToSleep );
     ss << "HTX," << sSymbol << "," << n << ",1,D\n";
     Send( ss.str().c_str() );
   }
@@ -372,6 +377,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymb
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     std::stringstream ss;
+    Sleep( m_nMillisecondsToSleep );
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
     Send( ss.str().c_str() );
   }
@@ -385,6 +391,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, uns
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     std::stringstream ss;
+    Sleep( m_nMillisecondsToSleep );
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
     Send( ss.str().c_str() );
   }
@@ -398,6 +405,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbo
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     std::stringstream ss;
+    Sleep( m_nMillisecondsToSleep );
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
     Send( ss.str().c_str() );
   }
@@ -411,6 +419,7 @@ void CIQFeedHistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, uns
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
     std::stringstream ss;
+    Sleep( m_nMillisecondsToSleep );
     ss << "HDX," << sSymbol << "," << n << ",1,E\n";
     Send( ss.str().c_str() );
   }
@@ -426,6 +435,7 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   char chRequestID = *bgn;
   bgn++;
   bgn++;
+  linebuffer_t::const_iterator bgn2 = bgn;  // used for error handling
 
   bool b = false;
   switch ( chRequestID ) {
@@ -485,15 +495,27 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   }
 
   if ( !b ) {
-    b = parse( bgn, end, m_ruleEndMsg );
-    if ( b && ( bgn ==  end ) ) {
-      m_stateRetrieval = RETRIEVE_IDLE;
-        if ( &CIQFeedHistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
-          static_cast<T*>( this )->OnHistoryRequestDone();
-        }
+    if ( 'E' == *bgn2 ) { // indication of an error
+      b = parse( bgn2, end, m_ruleErrorInvalidSymbol );
+      if ( b ) {
+        OutputDebugString( "Invalid Symbol\n" );
+        m_stateRetrieval = RETRIEVE_IDLE;
+          if ( &CIQFeedHistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+            static_cast<T*>( this )->OnHistoryRequestDone();
+          }
+      }
     }
     else {
-      throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval no endmessage");
+      b = parse( bgn2, end, m_ruleEndMsg );
+      if ( b ) {
+        m_stateRetrieval = RETRIEVE_IDLE;
+          if ( &CIQFeedHistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+            static_cast<T*>( this )->OnHistoryRequestDone();
+          }
+      }
+      else {
+        throw std::logic_error( "CIQFeedNewsQuery<T>::ProcessHistoryRetrieval no endmessage");
+      }
     }
   }
 }

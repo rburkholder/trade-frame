@@ -19,10 +19,13 @@
 
 #include "Process.h"
 
-CProcess::CProcess(void) {
+CProcess::CProcess(void)
+: CIQFeedHistoryBulkQuery<CProcess>()
+{
   m_vExchanges.push_back( "NYSE" );
   m_vExchanges.push_back( "NYSE_AMEX" );
-  //m_vExchanges.push_back( "NYSE,ARCA" );
+  m_vExchanges.push_back( "NYSE,ARCA" );
+  m_vExchanges.push_back( "NASDAQ" );
   m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
@@ -35,12 +38,14 @@ CProcess::~CProcess(void) {
 void CProcess::Start( void ) {
 
   SetExchanges( m_vExchanges );
-  DailyBars( 20 );
+  SetMaxSimultaneousQueries( 100 );
+  DailyBars( 200 );
 
 }
 
 void CProcess::OnBars( inherited_t::structResultBar* bars ) {
-//  OutputDebugString( "bars for " + bars->sSymbol + " done\n" );
+  std::string s = "bars for " + bars->sSymbol + " done\n";
+  OutputDebugString( s.c_str() );
 }
 
 void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
@@ -50,3 +55,4 @@ void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
 void CProcess::OnCompletion( void ) {
   OutputDebugString( "all processing complete\n" );
 }
+

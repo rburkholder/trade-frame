@@ -48,6 +48,6 @@ private:
   CInstrumentFile m_IF;
   CInstrumentFile::iterator m_iterSymbols;
 
-  std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned
+  std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::vector<std::string> m_vSymbols;  // list of symbols to be scanned
 };
