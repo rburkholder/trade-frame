@@ -13,6 +13,9 @@
 
 #pragma once
 
+// pg 36 May 2005 Technical Analysis of Stocks and Commodities - Darvas Style Trading - Daryl Guppy
+// pg 16 June 2005 Technical Analysis of Stocks and Commodities - Something Darvas, Something New - Daryl Guppy
+
 #include <LibTimeSeries/DatedDatum.h>
 
 class CDarvasResults {
@@ -28,7 +31,8 @@ private:
 };
 
 // is a functor
-class CDarvas: public std::unary_function<CBar &, void> {
+//class CDarvas: public std::unary_function<CBar &, void> {
+class CDarvas {
 public:
   CDarvas(void);
   ~CDarvas(void);

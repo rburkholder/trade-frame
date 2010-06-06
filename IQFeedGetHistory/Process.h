@@ -45,6 +45,8 @@ protected:
 
 private:
 
+  size_t m_cntBars;
+
   CInstrumentFile m_IF;
   CInstrumentFile::iterator m_iterSymbols;
 

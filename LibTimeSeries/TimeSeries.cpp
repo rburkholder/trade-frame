@@ -57,7 +57,7 @@ CDatedDatums::~CDatedDatums( void ) {
 CBars::CBars(void) {
 }
 
-CBars::CBars( unsigned int size )
+CBars::CBars( size_t size )
 :CTimeSeries<CBar>( size ) {
 }
 

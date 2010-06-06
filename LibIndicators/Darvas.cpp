@@ -32,7 +32,7 @@ void CDarvas::Calc(const CBar &bar) {
   bSignalBuy2 = false;
 
   // Calculate Darvis Box
-  if ( bar.m_dblHigh <= dblTop ) {
+  if ( bar.High() <= dblTop ) {
     ++cntTop;
     if ( 4 == cntTop ) { // we've reached the four day price pattern
       bTop = true;
@@ -41,7 +41,7 @@ void CDarvas::Calc(const CBar &bar) {
   else { // top of box has been exceeded
     // perform trade if box completed
     if ( bTop && bBottom ) {  // we have a completed box
-      if ( ( bar.m_dblClose > dblTop ) && ( bar.m_dblClose > dblStop ) ) {
+      if ( ( bar.Close() > dblTop ) && ( bar.Close() > dblStop ) ) {
         bSignalBuy = bSignalBuy2 = true;
         // calculate a new ghost box
         dblStop = dblTop;
@@ -50,8 +50,8 @@ void CDarvas::Calc(const CBar &bar) {
       }
     }
     // restart box calculation on new high
-    dblTop = bar.m_dblHigh;
-    dblBottom = bar.m_dblLow;
+    dblTop = bar.High();
+    dblBottom = bar.Low();
     cntTop = 1;
     cntBottom = 0;
     bTop = false;
@@ -60,20 +60,20 @@ void CDarvas::Calc(const CBar &bar) {
 
   // calculate bottom of box
   if ( bBottom ) {
-    if ( bar.m_dblClose < dblBottom ) {
+    if ( bar.Close() < dblBottom ) {
       bSignalExit = true;
       bSignalDone = true;
     }
     else {
       ++cntBottom;
-      if ( ( 4 < cntBottom ) && ( bar.m_dblClose > dblStop ) && ( bar.m_dblOpen < bar.m_dblClose ) ) {
+      if ( ( 4 < cntBottom ) && ( bar.Close() > dblStop ) && ( bar.Open() < bar.Close() ) ) {
         bSignalBuy = bSignalBuy2 = true;  // **
       }
     }
 
   }
   else { // see if can set the bottom yet
-    if ( bar.m_dblLow >= dblBottom ) { // higher low
+    if ( bar.Low() >= dblBottom ) { // higher low
       cntBottom++;
       if ( 4 == cntBottom ) {
         bBottom = true;
@@ -85,14 +85,14 @@ void CDarvas::Calc(const CBar &bar) {
       }
     }
     else { // lower low so reset
-      dblBottom = bar.m_dblLow;
+      dblBottom = bar.Low();
       cntBottom = 1;
     }
   }
 
   // calculate Ghost box if no active box
   if ( !bTop && !bBottom && ( 0.0 < dblStop ) ) {
-    if ( bar.m_dblClose > dblGhostTop ) {
+    if ( bar.Close() > dblGhostTop ) {
       dblStop = dblGhostTop;
       dblGhostTop += dblStopStep;
       bSignalSetStop = true;

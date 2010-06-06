@@ -28,15 +28,15 @@ CTimeSeriesSlidingWindowStatsTrade::~CTimeSeriesSlidingWindowStatsTrade( void ) 
 }
 
 void CTimeSeriesSlidingWindowStatsTrade::Add( const CTrade &trade ) {
-  time_duration dur = trade.m_dt - m_dtZero;
+  time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Add( dif, trade.m_dblTrade );
+  m_stats.Add( dif, trade.Trade() );
 }
 
 void CTimeSeriesSlidingWindowStatsTrade::Expire( const CTrade &trade ) {
-  time_duration dur = trade.m_dt - m_dtZero;
+  time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Remove( dif, trade.m_dblTrade );
+  m_stats.Remove( dif, trade.Trade() );
 }
 
 //
@@ -52,16 +52,16 @@ CTimeSeriesSlidingWindowStatsQuote::~CTimeSeriesSlidingWindowStatsQuote( void ) 
 }
 
 void CTimeSeriesSlidingWindowStatsQuote::Add( const CQuote &quote ) {
-  time_duration dur = quote.m_dt - m_dtZero;
+  time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Add( dif, quote.m_dblBid );
-  m_stats.Add( dif, quote.m_dblAsk );
+  m_stats.Add( dif, quote.Bid() );
+  m_stats.Add( dif, quote.Ask() );
 }
 
 void CTimeSeriesSlidingWindowStatsQuote::Expire( const CQuote &quote ) {
-  time_duration dur = quote.m_dt - m_dtZero;
+  time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Remove( dif, quote.m_dblBid );
-  m_stats.Remove( dif, quote.m_dblAsk );
+  m_stats.Remove( dif, quote.Bid() );
+  m_stats.Remove( dif, quote.Ask() );
 }
 

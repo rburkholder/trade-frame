@@ -20,12 +20,17 @@ using namespace fastdelegate;
 
 class CBarFactory {
 public:
-  CBarFactory(long nSeconds = 60);
+
+  typedef long duration_t;
+  typedef CBar::volume_t volume_t;
+  typedef CBar::price_t price_t;
+
+  CBarFactory( duration_t nSeconds = 60);
   virtual ~CBarFactory(void);
-  void Add( const ptime &, double, unsigned int);
-  void Add( const CTrade &trade ) { Add( trade.m_dt, trade.m_dblTrade, trade.m_nTradeSize ); };
-  const CBar &getCurrentBar() { return m_bar; };
-  void SetBarWidth( long seconds ) { m_nBarWidthSeconds = seconds; };
+  void Add( const ptime &, price_t, volume_t);
+  void Add( const CTrade &trade ) { Add( trade.DateTime(), trade.Trade(), trade.Volume() ); };
+  const CBar& getCurrentBar() { return m_bar; };
+  void SetBarWidth( duration_t seconds ) { m_nBarWidthSeconds = seconds; };
   long GetBarWidth( void ) { return m_nBarWidthSeconds; };
 
   typedef FastDelegate1<const CBar &> OnNewBarStartedHandler;
@@ -46,8 +51,8 @@ protected:
   OnNewBarStartedHandler OnNewBarStarted;
   OnBarUpdatedHandler OnBarUpdated;
   OnBarCompleteHandler OnBarComplete;
-  long m_nBarWidthSeconds;
-  long m_curInterval; // current bar interval
+  duration_t m_nBarWidthSeconds;
+  duration_t m_curInterval; // current bar interval
   ptime m_dtBarStart;
   ptime m_dtLastIntermediateEmission; // changes emitted no less than 1 second apart
   boost::posix_time::time_duration m_1Sec;

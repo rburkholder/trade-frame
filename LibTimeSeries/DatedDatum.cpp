@@ -19,7 +19,9 @@
 
 //using namespace H5;
 
+//
 // CDatedDatum
+//
 
 CDatedDatum::CDatedDatum(void) :
   m_dt( not_a_date_time ) { 
@@ -51,9 +53,9 @@ H5::CompType *CDatedDatum::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-//bool operator<( const CDatedDatum &datum1, const CDatedDatum &datum2 ) { return datum1.m_dt < datum2.m_dt; };
-
+//
 // CQuote
+//
 
 CQuote::CQuote(void): CDatedDatum(), m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ) {
 }
@@ -68,7 +70,7 @@ CQuote::CQuote(const CQuote &quote):
 {
 }
 
-CQuote::CQuote( const ptime &dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize ) :
+CQuote::CQuote( const ptime &dt, price_t dblBid, bidsize_t nBidSize, price_t dblAsk, asksize_t nAskSize ) :
 CDatedDatum( dt ), 
     m_dblBid( dblBid ), m_dblAsk( dblAsk ), 
     m_nBidSize( nBidSize ), m_nAskSize( nAskSize ) {
@@ -98,9 +100,9 @@ H5::CompType *CQuote::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-//bool operator<( const CQuote &quote1, const CQuote &quote2 ) { return quote1.m_dt < quote2.m_dt; };
-
+//
 // CTrade
+//
 
 CTrade::CTrade(void): CDatedDatum(), m_dblTrade( 0 ), m_nTradeSize( 0 ) {
 }
@@ -112,7 +114,7 @@ CTrade::CTrade(const CTrade &trade): CDatedDatum( trade.m_dt ),
     m_dblTrade( trade.m_dblTrade ), m_nTradeSize( trade.m_nTradeSize ) {
 }
 
-CTrade::CTrade( const ptime &dt, double dblTrade, tradesize_t nTradeSize ) :
+CTrade::CTrade( const ptime &dt, price_t dblTrade, volume_t nTradeSize ) :
 CDatedDatum( dt ), m_dblTrade( dblTrade ), m_nTradeSize( nTradeSize ) {
 }
 
@@ -147,7 +149,7 @@ CBar::CBar(const CBar &bar): CDatedDatum( bar.m_dt ),
   m_dblOpen( bar.m_dblOpen ), m_dblHigh( bar.m_dblHigh ), m_dblLow( bar.m_dblLow ), m_dblClose( bar.m_dblClose ), m_nVolume( bar.m_nVolume ) {
 }
 
-CBar::CBar(const boost::posix_time::ptime &dt, double dblOpen, double dblHigh, double dblLow, double dblClose, volume_t nVolume):
+CBar::CBar(const boost::posix_time::ptime &dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume):
 CDatedDatum( dt ), 
   m_dblOpen( dblOpen ), m_dblHigh( dblHigh ), m_dblLow( dblLow ), m_dblClose( dblClose ), m_nVolume( nVolume ) {
 }
@@ -179,9 +181,9 @@ H5::CompType *CBar::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
-//bool operator<( const CBar &bar1, const CBar &bar2 ) { return bar1.m_dt < bar2.m_dt; };
-
+//
 // CMarketDepth
+//
 
 CMarketDepth::CMarketDepth(): CDatedDatum(), m_eSide( None ), m_nShares( 0 ), m_dblPrice( 0 ) {
   //m_szMMID[ 0 ] = 0;
@@ -196,7 +198,7 @@ CMarketDepth::CMarketDepth(const CMarketDepth &md): CDatedDatum( md.m_dt ),
   //strcpy_s( m_szMMID, 10, md.m_szMMID );
 }
 
-CMarketDepth::CMarketDepth(const boost::posix_time::ptime &dt, char chSide, long nShares, double dblPrice, MMID mmid):
+CMarketDepth::CMarketDepth(const boost::posix_time::ptime &dt, char chSide, volume_t nShares, price_t dblPrice, MMID_t mmid):
     CDatedDatum( dt ), m_eSide( None ), m_nShares( nShares ), m_dblPrice( dblPrice ), m_uMMID( mmid ) {
   if ( 'S' == chSide ) m_eSide = Ask;
   if ( 'B' == chSide ) m_eSide = Bid;
@@ -234,6 +236,4 @@ H5::CompType *CMarketDepth::DefineDataType( H5::CompType *pComp ) {
   pComp->insertMember( "MMID3", HOFFSET( CMarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );  
   return pComp; 
 }
-
-//bool operator<( const CMarketDepth &md1, const CMarketDepth &md2 ) { return md1.m_dt < md2.m_dt; };
 

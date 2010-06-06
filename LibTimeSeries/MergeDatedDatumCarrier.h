@@ -66,7 +66,7 @@ template<class T> CMergeCarrier<T>::CMergeCarrier( CTimeSeries<T> *pSeries, OnDa
   m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison
   m_dt = ( NULL == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
-    : m_pDatum->m_dt;
+    : m_pDatum->DateTime();
 }
 
 template<class T> CMergeCarrier<T>::~CMergeCarrier() {
@@ -74,18 +74,18 @@ template<class T> CMergeCarrier<T>::~CMergeCarrier() {
 
 template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
   if ( CTimeSource::GetSimulationMode() ) {
-    CTimeSource::SetSimulationTime( m_pDatum->m_dt );
+    CTimeSource::SetSimulationTime( m_pDatum->DateTime() );
   }
   if ( NULL != OnDatum ) OnDatum( *m_pDatum );
   m_pDatum = m_pSeries->Next();
   m_dt = ( NULL == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
-    : m_pDatum->m_dt;
+    : m_pDatum->DateTime();
 }
 
 template<class T> void CMergeCarrier<T>::Reset() {
   m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison
   m_dt = ( NULL == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
-    : m_pDatum->m_dt;
+    : m_pDatum->DateTime();
 }

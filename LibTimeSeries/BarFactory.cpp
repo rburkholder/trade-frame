@@ -28,31 +28,37 @@ CBarFactory::~CBarFactory(void) {
   OnBarComplete = NULL;
 }
 
-void CBarFactory::Add(const ptime &dt, double val, unsigned int volume) {
+void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
   long seconds = dt.time_of_day().total_seconds();
   long interval = seconds / m_nBarWidthSeconds;
   if ( m_bar.IsNull() ) {
-    m_bar.m_dblClose = m_bar.m_dblHigh = m_bar.m_dblLow = m_bar.m_dblOpen = val;
-    m_bar.m_nVolume = volume;
+    m_bar.Close( val );
+    m_bar.High( val );
+    m_bar.Low(  val );
+    m_bar.Open( val );
+    m_bar.Volume( volume );
     m_curInterval = interval;
-    m_bar.m_dt = ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) );
+    m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
     m_dtLastIntermediateEmission = dt - m_1Sec; // prime the value
     if ( NULL != OnNewBarStarted ) OnNewBarStarted( m_bar );
   }
   else {
     if ( interval > m_curInterval ) { // emit bar and start again
       if ( NULL != OnBarComplete ) OnBarComplete( m_bar );
-      m_bar.m_dblClose = m_bar.m_dblHigh = m_bar.m_dblLow = m_bar.m_dblOpen = val;
-      m_bar.m_nVolume = volume;
+      m_bar.Close( val );
+      m_bar.High( val );
+      m_bar.Low( val );
+      m_bar.Open( val );
+      m_bar.Volume( volume );
       m_curInterval = interval;
-      m_bar.m_dt = ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) );
+      m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
       if ( NULL != OnNewBarStarted ) OnNewBarStarted( m_bar );
     }
     else { // update current interval
-      m_bar.m_dblClose = val;
-      m_bar.m_dblHigh = std::max( m_bar.m_dblHigh, val );
-      m_bar.m_dblLow = std::min( m_bar.m_dblLow, val );
-      m_bar.m_nVolume += volume;
+      m_bar.Close( val );
+      m_bar.High( std::max( m_bar.High(), val ) );
+      m_bar.Low( std::min( m_bar.Low(), val ) );
+      m_bar.Volume( m_bar.Volume() + volume ); 
 
     }
   }

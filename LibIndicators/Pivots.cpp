@@ -49,14 +49,14 @@ CPivotSet::CPivotSet( const std::string &sName, CBars *bars ) {
   CBar *bar;
   if ( cnt > 0 ) {
     bar = bars->At( 0 );
-    hi = bar->m_dblHigh;
-    lo = bar->m_dblLow;
-    cl = bar->m_dblClose;
+    hi = bar->High();
+    lo = bar->Low();
+    cl = bar->Close();
     for ( unsigned int i = 1; i < cnt; i++ ) {
       bar = bars->At( i );
-      hi = max( hi, bar->m_dblHigh );
-      lo = min( lo, bar->m_dblLow );
-      cl = bar->m_dblClose;
+      hi = max( hi, bar->High() );
+      lo = min( lo, bar->Low() );
+      cl = bar->Close();
     }
   }
   CalcPivots( sName, hi, lo, cl );

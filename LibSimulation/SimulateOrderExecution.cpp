@@ -58,7 +58,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   bool bNoMore = false;
   while ( !bNoMore && !m_lDelayCancel.empty() ) {
     structCancelOrder &co = m_lDelayCancel.front();
-    if ( ( co.dtCancellation + m_dtQueueDelay ) < trade.m_dt ) {
+    if ( ( co.dtCancellation + m_dtQueueDelay ) < trade.DateTime() ) {
       bNoMore = true;  // havn't waited long enough to simulate cancel submission
     }
     else {
@@ -94,7 +94,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   // need to build and maintain order book, particularily for handling limit orders
   if ( NULL == m_pCurrentOrder ) {
     m_pCurrentOrder = m_lDelayOrder.front();
-    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < trade.m_dt ) {
+    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < trade.DateTime() ) {
       m_lDelayOrder.pop_front();
       m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
       m_nOrderQuanProcessed = 0;
@@ -107,13 +107,13 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   }
   if ( NULL != m_pCurrentOrder ) {
     assert( 0 != m_nOrderQuanRemaining );
-    assert( 0 != trade.m_nTradeSize );
-    CTrade::tradesize_t quan = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, trade.m_nTradeSize );
+    assert( 0 != trade.Volume() );
+    CTrade::tradesize_t quan = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, trade.Volume() );
     switch ( m_pCurrentOrder->GetOrderType() ) {
       case OrderType::Market: 
         {
         std::string id( GetExecId() );
-        CExecution exec( m_pCurrentOrder->GetOrderId(), trade.m_dblTrade, quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
+        CExecution exec( m_pCurrentOrder->GetOrderId(), trade.Trade(), quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
 //        std::cout << "Exec:  " << m_pCurrentOrder->GetInstrument()->GetSymbolName() << ", " << quan << "@" << trade.m_dblTrade
 //          << ", " << m_pCurrentOrder->GetOrderSide() << ", Total=" << quan * trade.m_dblTrade << std::endl;
         if ( NULL != OnOrderFill ) OnOrderFill( exec );
@@ -127,7 +127,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
         assert( 0 < price );
         switch ( m_pCurrentOrder->GetOrderSide() ) {
           case OrderSide::Buy:
-            if ( trade.m_dblTrade < price ) {
+            if ( trade.Trade() < price ) {
               std::string id( GetExecId() );
               CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Buy, "SIMLmtBuy", id );
               if ( NULL != OnOrderFill ) OnOrderFill( exec );
@@ -136,7 +136,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
             }
             break;
           case OrderSide::Sell:
-            if ( trade.m_dblTrade > price ) {
+            if ( trade.Trade() > price ) {
               std::string id( GetExecId() );
               CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Sell, "SIMLmtSell", id );
               if ( NULL != OnOrderFill ) OnOrderFill( exec );

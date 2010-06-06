@@ -38,7 +38,7 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
   CBar *pBar = pBars->Last();
 
   //stringstream ss;
-  date dtThisDay = pBar->m_dt.date();
+  date dtThisDay = pBar->DateTime().date();
   //ss << "This Day: " << dtThisDay;
   date dtPrevDay = ( boost::date_time::Monday == dtThisDay.day_of_week() ) 
     ? dtThisDay - days( 3 )
@@ -60,20 +60,20 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
   date dt200BarsAgo = dtThisDay - days( ( ( 200 /*bars wanted*/ / 5 /*days/wk*=#wks*/ ) * 7 /*days/wk*/ ) + 10 /*trade holidays*/ ); // ensures 200 bars is within reasonable time frame
   //ss << ", 200 Days ago: " << dt200DaysAgo;
 
-  CPivotSet Pivot1Day( "pv1Dy", pBar->m_dblHigh, pBar->m_dblLow, pBar->m_dblClose );
+  CPivotSet Pivot1Day( "pv1Dy", pBar->High(), pBar->Low(), pBar->Close() );
   AddToMap( Pivot1Day );
 
-  double day3hi = pBar->m_dblHigh;
-  double day3lo = pBar->m_dblLow;
-  double day3cl = pBar->m_dblClose;
+  double day3hi = pBar->High();
+  double day3lo = pBar->Low();
+  double day3cl = pBar->Close();
 
   if ( pBars->Size() >= 3 ) {
     pBar = pBars->Ago( 1 );
-    day3hi = max( day3hi, pBar->m_dblHigh );
-    day3lo = min( day3lo, pBar->m_dblLow );
+    day3hi = max( day3hi, pBar->High() );
+    day3lo = min( day3lo, pBar->Low() );
     pBar = pBars->Ago( 2 );
-    day3hi = max( day3hi, pBar->m_dblHigh );
-    day3lo = min( day3lo, pBar->m_dblLow );
+    day3hi = max( day3hi, pBar->High() );
+    day3lo = min( day3lo, pBar->Low() );
     CPivotSet Pivot3Day( "pv3Dy", day3hi, day3lo, day3cl );
     AddToMap( Pivot3Day );
   }

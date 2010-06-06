@@ -124,7 +124,7 @@ public:
     std::string sSymbol;
     CBars bars;
     void Clear( void ) {
-      sSymbol.Clear();
+      sSymbol.clear();
       bars.Clear();
     };
   };
@@ -134,7 +134,7 @@ public:
     CQuotes quotes;  // quote added in sequence before trade
     CTrades trades;
     void Clear( void ) {
-      sSymbol.Clear();
+      sSymbol.clear();
       quotes.Clear();
       trades.Clear();
     };
@@ -159,8 +159,8 @@ public:
   // first of a series of requests to be built
   void DailyBars( size_t n );
 
-  void ReQueueBars( structResultBar* bars ) { m_reposBars.CheckInL( bars ) };
-  void ReQueueTicks( structResultTicks* ticks ) { m_reposTicks.CheckInL( ticks ); };
+  void ReQueueBars( structResultBar* bars ) { bars->Clear(); m_reposBars.CheckInL( bars ); };
+  void ReQueueTicks( structResultTicks* ticks ) { ticks->Clear(); m_reposTicks.CheckInL( ticks ); };
 
   struct structQueryState;  // empty declaration for circular reference
   typedef typename CIQFeedHistoryQueryTag<CIQFeedHistoryBulkQuery<T>, structQueryState*> query_t;
@@ -198,11 +198,11 @@ protected:
 
   // CRTP callbacks for inheriting class
   void OnBars( structResultBar* bars ) { 
-    bars->Clear();
+    //bars->Clear();
     ReQueueBars( bars ); 
   };
   void OnTicks( structResultTicks* ticks ) { 
-    ticks->Clear();
+    //ticks->Clear();
     ReQueueTicks( ticks ); 
   };
   void OnCompletion( void );
@@ -369,23 +369,23 @@ void CIQFeedHistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, IQFeedHistoryStructs::structTickDataPoint* pDP ) {
   CQuote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
-  pqs->ticks->quotes.AppendDatum( quote );
+  pqs->ticks->quotes.Append( quote );
   CTrade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
-  pqs->ticks->trades.AppendDatum( trade );
+  pqs->ticks->trades.Append( trade );
   pqs->query.ReQueueTickDataPoint( pDP );
 }
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, IQFeedHistoryStructs::structInterval* pDP ) {
   CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
-  pqs->bars->bars.AppendDatum( bar );
+  pqs->bars->bars.Append( bar );
   pqs->query.ReQueueInterval( pDP );
 }
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP ) {
   CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
-  pqs->bars->bars.AppendDatum( bar );
+  pqs->bars->bars.Append( bar );
   pqs->query.ReQueueSummary( pDP );
 }
 
