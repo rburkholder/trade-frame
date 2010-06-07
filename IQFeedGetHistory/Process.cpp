@@ -17,12 +17,93 @@
 
 #include <boost/foreach.hpp>
 
+#include <LibIndicators/Darvas.h>
+
 #include "Process.h"
+
+// 
+// CProcessDarvas
+//
+
+class CProcessDarvas: public CDarvas<CProcessDarvas> {
+  friend CDarvas<CProcess>;
+public:
+  CProcessDarvas( void );
+  ~CProcessDarvas( void ) {};
+  void Calc( void );
+  const std::string& Result( void ) { 
+    // emit darvas signal
+    if ( m_bTriggered ) {
+      m_ss << " stop(" << m_dblStop << ")";
+      m_ss << std::endl;
+      //OutputDebugString( m_ss.str().c_str() );
+      append( m_ss.str() );
+    }
+    return m_ss.str(); 
+  };
+protected:
+  // CRTP from CDarvas<CProcess>
+//  void ConservativeTrigger( void ) {};
+  void AggressiveTrigger( void );
+  void SetStop( double stop ) { m_dblStop = stop; };
+//  void StopTrigger( void ) {};
+  void BreakOutAlert( size_t );
+
+private:
+  size_t m_cntBars;
+
+  double m_dblStop;
+
+  std::stringstream m_ss;
+
+  static const size_t m_BarWindow = 20;  // number of bars to examine
+  size_t m_ixRelative;
+  bool m_bTriggered;
+
+};
+
+void CProcessDarvas::CProcessDarvas( void ) 
+: CDarvas<CProcessDarvas>()
+{
+    m_bTriggered = false;
+    double dblBuy = 0;
+    double dblStop = 0;
+    size_t ixBuy = 0;
+    size_t ix = m_cntBars - m_BarWindow;
+    m_ixRelative = m_BarWindow;
+    //for ( size_t i = ( m_cntBars - 20 ); i < m_cntBars; ++i ) {
+}
+
+void CProcessDarvas::Calc( const CBar& bar ) {
+  CDarvas<CProcessDarvas>::Calc( bar );
+  --m_ixRelative;
+
+}
+
+void CProcessDarvas::AggressiveTrigger( void ) {
+  std::stringstream m_ss;
+  m_ss << " AT(" << m_ixRelative << ")";
+  if ( 1 == m_ixRelative ) {
+    m_bTriggered = true;
+  }
+}
+
+void CProcessDarvas::BreakOutAlert( size_t cnt ) {
+  std::stringstream m_ss;
+  m_ss << " BO(" << m_ixRelative << ")";
+  if ( 1 == m_ixRelative ) {
+    m_bTriggered = true;
+  }
+}
+
+
+//
+// CProcess
+//
 
 CProcess::CProcess(void)
 : CIQFeedHistoryBulkQuery<CProcess>(), 
-  CDarvas<CProcess>(),
-  m_cntBars( 125 )
+  m_cntBars( 125 ), m_b( false )
 {
   m_vExchanges.push_back( "NYSE" );
   m_vExchanges.push_back( "NYSE_AMEX" );
@@ -45,19 +126,12 @@ void CProcess::Start( void ) {
 
 }
 
-void CProcess::AggressiveTrigger( void ) {
-  m_bTriggered = true;
-  m_ss << " AT(" << m_ixRelative << ")";
-}
-
-void CProcess::BreakOutAlert( size_t cnt ) {
-  m_bTriggered = true;
-  m_ss << " BO(" << m_ixRelative << ")";
-}
-
 void CProcess::OnBars( inherited_t::structResultBar* bars ) {
 
-  m_ss.str() = "";
+  // warning:  this section is re-entrant from multiple threads
+
+  std::stringstream m_ss;
+  //m_ss.str(std::string());
   
   m_ss << "Bars for " << bars->sSymbol << ": ";
 
@@ -76,34 +150,21 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
     }
   }
 
-  if ( ixHigh > ( m_cntBars - 20 ) ) {  // if high is in last 20 days, then can push through Darvas
-    CDarvas<CProcess>::Clear();
-    m_bTriggered = false;
-    double dblBuy = 0;
-    double dblStop = 0;
-    size_t ixBuy = 0;
-    size_t ix = m_cntBars - m_BarWindow;
-    m_ixRelative = m_BarWindow;
-    //for ( size_t i = ( m_cntBars - 20 ); i < m_cntBars; ++i ) {
+  if ( ixHigh > ( m_cntBars - 20 ) ) {  // if high is in last 20 days, then can push bars through Darvas
+    CProcessDarvas darvas;
+    bool bTrigger;  // wait for trigger on final day
     for ( CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
-      CDarvas<CProcess>::Calc( *iter );
-//      if ( darvas.SignalBuy() ) {
-//        ixBuy = ix;
-//        dblBuy = (*iter).Close();
-//        dblStop = darvas.StopLevel();
-//      }
-//      ++ix;
-      --m_ixRelative;
+      bTrigger = CProcess::Calc( *iter );
     }
 
-    // emit darvas signal
-    if ( m_bTriggered ) {
-      m_ss << " stop(" << m_dblStop << ")";
+    if ( bTrigger ) {
+      // output results
     }
+
   }
 
-  m_ss << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  m_ss << std::endl;
+//  OutputDebugString( m_ss.str().c_str() );
 
   ReQueueBars( bars ); 
 
@@ -115,6 +176,7 @@ void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
 }
 
 void CProcess::OnCompletion( void ) {
+  OutputDebugString( m_s.c_str() );
   OutputDebugString( "all processing complete\n" );
 }
 

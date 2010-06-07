@@ -166,12 +166,13 @@ public:
   typedef typename CIQFeedHistoryQueryTag<CIQFeedHistoryBulkQuery<T>, structQueryState*> query_t;
 
   struct structQueryState {
-    size_t ix;  // index into vector containing this structure
+    bool b;
+//    size_t ix;  // index into vector containing this structure
     structResultBar* bars;  // one of bars or ticks will be used in any one session
     structResultTicks* ticks;
     query_t query;
     structQueryState( void ) 
-      : bars( NULL ), ticks( NULL ), ix( 0 )
+      : bars( NULL ), ticks( NULL ), b( false )//, ix( 0 )
     {
       query.SetUserTag( this );
     };
@@ -316,6 +317,8 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
     InterlockedIncrement( &m_nCurSimultaneousQueries );
     // obtain a query state structure
     pqs = m_reposQueryStates.CheckOutL();
+    assert( !(pqs->b) );
+    pqs-b = true;
     if ( !pqs->query.Activated() ) {
       pqs->query.Activate();
       pqs->query.SetT( this );
@@ -403,6 +406,7 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
       break;
   }
 
+  pqs->b = false;
   m_reposQueryStates.CheckInL( pqs );
   //--m_nCurSimultaneousQueries;
   InterlockedDecrement( &m_nCurSimultaneousQueries );
