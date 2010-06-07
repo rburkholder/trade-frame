@@ -26,9 +26,14 @@
 
 #include <LibTrading/InstrumentFile.h>
 #include <LibIQFeed/IQFeedHistoryBulkQuery.h>
+#include <LibIndicators/Darvas.h>
 
-class CProcess: public CIQFeedHistoryBulkQuery<CProcess> {
+class CProcess: 
+  public CIQFeedHistoryBulkQuery<CProcess>,
+  public CDarvas<CProcess>
+{
   friend CIQFeedHistoryBulkQuery<CProcess>;
+  friend CDarvas<CProcess>;
 public:
 
   typedef CIQFeedHistoryBulkQuery<CProcess> inherited_t;
@@ -39,17 +44,34 @@ public:
 
 protected:
 
+  // CRTP from CIQFeedHistoryBulkQuery<CProcess>
   void OnBars( inherited_t::structResultBar* bars );
   void OnTicks( inherited_t::structResultTicks* ticks );
   void OnCompletion( void );
 
+  // CRTP from CDarvas<CProcess>
+//  void ConservativeTrigger( void ) {};
+  void AggressiveTrigger( void );
+  void SetStop( double stop ) { m_dblStop = stop; };
+//  void StopTrigger( void ) {};
+  void BreakOutAlert( size_t );
+
 private:
 
   size_t m_cntBars;
+
+  double m_dblStop;
 
   CInstrumentFile m_IF;
   CInstrumentFile::iterator m_iterSymbols;
 
   std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::vector<std::string> m_vSymbols;  // list of symbols to be scanned
+
+  std::stringstream m_ss;
+
+  static const size_t m_BarWindow = 20;  // number of bars to examine
+  size_t m_ixRelative;
+  bool m_bTriggered;
 };
+

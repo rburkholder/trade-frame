@@ -18,10 +18,10 @@
 #include <boost/foreach.hpp>
 
 #include "Process.h"
-#include <LibIndicators/Darvas.h>
 
 CProcess::CProcess(void)
-: CIQFeedHistoryBulkQuery<CProcess>(),
+: CIQFeedHistoryBulkQuery<CProcess>(), 
+  CDarvas<CProcess>(),
   m_cntBars( 125 )
 {
   m_vExchanges.push_back( "NYSE" );
@@ -40,50 +40,70 @@ CProcess::~CProcess(void) {
 void CProcess::Start( void ) {
 
   SetExchanges( m_vExchanges );
-  SetMaxSimultaneousQueries( 100 );
+  SetMaxSimultaneousQueries( 15 );
   DailyBars( m_cntBars );
 
 }
 
+void CProcess::AggressiveTrigger( void ) {
+  m_bTriggered = true;
+  m_ss << " AT(" << m_ixRelative << ")";
+}
+
+void CProcess::BreakOutAlert( size_t cnt ) {
+  m_bTriggered = true;
+  m_ss << " BO(" << m_ixRelative << ")";
+}
+
 void CProcess::OnBars( inherited_t::structResultBar* bars ) {
 
-  std::stringstream ss;
-  ss << "Bars for " + bars->sSymbol + ": ";
+  m_ss.str() = "";
+  
+  m_ss << "Bars for " << bars->sSymbol << ": ";
 
   double dblHigh = 0;
-  size_t ix = 0;
+  size_t ixHigh = 0;
 
   // look for index of high
   if ( m_cntBars == bars->bars.Size() ) {  // we have our bar count, so perform calc
-    for ( size_t i = 0; i < bars->bars.Size(); ++i ) {
-      if ( dblHigh < bars->bars[ i ]->High() ) {
-        ix = i;
-        dblHigh = bars->bars[ i ]->High();
+    size_t ix = 0;
+    for ( CBars::const_iterator iter = bars->bars.begin(); iter != bars->bars.end(); ++iter ) {
+      if ( dblHigh < (*iter).High() ) {
+        ixHigh = ix;
+        dblHigh = (*iter).High();
       }
+      ++ix;
     }
   }
 
-  if ( ix > ( m_cntBars - 20 ) ) {  // if high is in last 20 days, then can push through Darvas
-    CDarvas darvas;
+  if ( ixHigh > ( m_cntBars - 20 ) ) {  // if high is in last 20 days, then can push through Darvas
+    CDarvas<CProcess>::Clear();
+    m_bTriggered = false;
     double dblBuy = 0;
     double dblStop = 0;
     size_t ixBuy = 0;
-    for ( size_t i = ( m_cntBars - 20 ); i < m_cntBars; ++i ) {
-      darvas.Calc( *(bars->bars[ i ]));
-      if ( darvas.SignalBuy() ) {
-        ixBuy = i;
-        dblBuy = bars->bars[ i ]->Close();
-        dblStop = darvas.StopLevel();
-      }
+    size_t ix = m_cntBars - m_BarWindow;
+    m_ixRelative = m_BarWindow;
+    //for ( size_t i = ( m_cntBars - 20 ); i < m_cntBars; ++i ) {
+    for ( CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
+      CDarvas<CProcess>::Calc( *iter );
+//      if ( darvas.SignalBuy() ) {
+//        ixBuy = ix;
+//        dblBuy = (*iter).Close();
+//        dblStop = darvas.StopLevel();
+//      }
+//      ++ix;
+      --m_ixRelative;
     }
 
     // emit darvas signal
-    if ( ixBuy == ( m_cntBars - 1 ) ) {
-      ss << " Darvas stop " << dblBuy;
-      ss << std::endl;
-      OutputDebugString( ss.str().c_str() );
+    if ( m_bTriggered ) {
+      m_ss << " stop(" << m_dblStop << ")";
     }
   }
+
+  m_ss << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 
   ReQueueBars( bars ); 
 
