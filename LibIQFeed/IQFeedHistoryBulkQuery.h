@@ -317,8 +317,6 @@ void CIQFeedHistoryBulkQuery<T>::ProcessSymbolList( void ) {
     InterlockedIncrement( &m_nCurSimultaneousQueries );
     // obtain a query state structure
     pqs = m_reposQueryStates.CheckOutL();
-    assert( !(pqs->b) );
-    pqs-b = true;
     if ( !pqs->query.Activated() ) {
       pqs->query.Activate();
       pqs->query.SetT( this );
@@ -408,7 +406,6 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
 
   pqs->b = false;
   m_reposQueryStates.CheckInL( pqs );
-  //--m_nCurSimultaneousQueries;
   InterlockedDecrement( &m_nCurSimultaneousQueries );
   ProcessSymbolList();
 }

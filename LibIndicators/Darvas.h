@@ -185,8 +185,10 @@ void CDarvas<T>::Calc(const CBar& bar) {
   };
 
   if ( m_dblStop > bar.Close() ) {
-    ResetState();
-    m_stateTop = EStopLooking;
+    ResetState();  // start looking again
+    m_dblTop = 0;
+    m_cntBreakOuts = 0;
+    //m_stateTop = EStopLooking;
     // issue stop trigger
     static_cast<T*>( this )->StopTrigger();
   }

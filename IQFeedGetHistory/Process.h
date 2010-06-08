@@ -56,11 +56,9 @@ private:
   std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::vector<std::string> m_vSymbols;  // list of symbols to be scanned
 
-  boost::mutex m_mutexProcess;
-  std::string m_s;
-  void append( const std::string& s ) {
-    boost::mutex::scoped_lock lock( m_mutexProcess );  // lock for the scope
-    m_s += s;
-  };
+  static const size_t m_BarWindow = 20;  // number of bars to examine
+
+  const size_t m_cntBars;
+
 };
 

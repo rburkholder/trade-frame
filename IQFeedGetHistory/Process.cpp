@@ -26,74 +26,62 @@
 //
 
 class CProcessDarvas: public CDarvas<CProcessDarvas> {
-  friend CDarvas<CProcess>;
+  friend CDarvas<CProcessDarvas>;
 public:
-  CProcessDarvas( void );
+  CProcessDarvas( size_t ix );
   ~CProcessDarvas( void ) {};
-  void Calc( void );
-  const std::string& Result( void ) { 
-    // emit darvas signal
-    if ( m_bTriggered ) {
-      m_ss << " stop(" << m_dblStop << ")";
-      m_ss << std::endl;
-      //OutputDebugString( m_ss.str().c_str() );
-      append( m_ss.str() );
-    }
-    return m_ss.str(); 
-  };
+  bool Calc( const CBar& );
+  void Result( std::string& s );  // should only be called once
 protected:
   // CRTP from CDarvas<CProcess>
-//  void ConservativeTrigger( void ) {};
+  void ConservativeTrigger( void );
   void AggressiveTrigger( void );
   void SetStop( double stop ) { m_dblStop = stop; };
 //  void StopTrigger( void ) {};
   void BreakOutAlert( size_t );
 
 private:
-  size_t m_cntBars;
-
-  double m_dblStop;
 
   std::stringstream m_ss;
 
-  static const size_t m_BarWindow = 20;  // number of bars to examine
-  size_t m_ixRelative;
-  bool m_bTriggered;
+  size_t m_ix; // keeps track of index of trigger bar
+  bool m_bTriggered;  // set when last bar has trigger
+  double m_dblStop;
 
 };
 
-void CProcessDarvas::CProcessDarvas( void ) 
-: CDarvas<CProcessDarvas>()
+CProcessDarvas::CProcessDarvas( size_t ix ) 
+: CDarvas<CProcessDarvas>(), 
+  m_bTriggered( false ), m_dblStop( 0 ), m_ix( ix )
 {
-    m_bTriggered = false;
-    double dblBuy = 0;
-    double dblStop = 0;
-    size_t ixBuy = 0;
-    size_t ix = m_cntBars - m_BarWindow;
-    m_ixRelative = m_BarWindow;
-    //for ( size_t i = ( m_cntBars - 20 ); i < m_cntBars; ++i ) {
 }
 
-void CProcessDarvas::Calc( const CBar& bar ) {
+bool CProcessDarvas::Calc( const CBar& bar ) {
   CDarvas<CProcessDarvas>::Calc( bar );
-  --m_ixRelative;
+  --m_ix;
+  bool b = m_bTriggered; 
+  m_bTriggered = false; 
+  return b;
+}
 
+void CProcessDarvas::ConservativeTrigger( void ) {
+  m_ss << " CT(" << m_ix << ")";
+  m_bTriggered = true;
 }
 
 void CProcessDarvas::AggressiveTrigger( void ) {
-  std::stringstream m_ss;
-  m_ss << " AT(" << m_ixRelative << ")";
-  if ( 1 == m_ixRelative ) {
-    m_bTriggered = true;
-  }
+  m_ss << " AT(" << m_ix << ")";
+  m_bTriggered = true;
 }
 
 void CProcessDarvas::BreakOutAlert( size_t cnt ) {
-  std::stringstream m_ss;
-  m_ss << " BO(" << m_ixRelative << ")";
-  if ( 1 == m_ixRelative ) {
-    m_bTriggered = true;
-  }
+  m_ss << " BO(" << m_ix << ")";
+  m_bTriggered = true;
+}
+
+void CProcessDarvas::Result( std::string& s ) {
+  m_ss << " stop(" << m_dblStop << ")";
+  s = m_ss.str();
 }
 
 
@@ -103,7 +91,7 @@ void CProcessDarvas::BreakOutAlert( size_t cnt ) {
 
 CProcess::CProcess(void)
 : CIQFeedHistoryBulkQuery<CProcess>(), 
-  m_cntBars( 125 ), m_b( false )
+  m_cntBars( 125 )
 {
   m_vExchanges.push_back( "NYSE" );
   m_vExchanges.push_back( "NYSE_AMEX" );
@@ -130,10 +118,10 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
 
   // warning:  this section is re-entrant from multiple threads
 
-  std::stringstream m_ss;
-  //m_ss.str(std::string());
+  std::string s;
+  bool bEmit = false;
   
-  m_ss << "Bars for " << bars->sSymbol << ": ";
+  s = "Bars for " +  bars->sSymbol + ": ";
 
   double dblHigh = 0;
   size_t ixHigh = 0;
@@ -150,21 +138,27 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
     }
   }
 
-  if ( ixHigh > ( m_cntBars - 20 ) ) {  // if high is in last 20 days, then can push bars through Darvas
-    CProcessDarvas darvas;
+  if ( ixHigh > ( m_cntBars - m_BarWindow ) ) {  // if high is in last n days, then can push bars through Darvas
+    CProcessDarvas darvas( m_BarWindow );
+    size_t ix = m_cntBars - m_BarWindow;
     bool bTrigger;  // wait for trigger on final day
     for ( CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
-      bTrigger = CProcess::Calc( *iter );
+      bTrigger = darvas.Calc( *iter );
     }
 
     if ( bTrigger ) {
-      // output results
+      std::string ss;
+      darvas.Result( ss );
+      s += ss;
+      bEmit = true;
     }
 
   }
 
-//  m_ss << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+  if ( bEmit ) {
+    s += "\n";
+    OutputDebugString( s.c_str() );
+  }
 
   ReQueueBars( bars ); 
 
@@ -172,11 +166,9 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
 
 void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
   ReQueueTicks( ticks ); 
-//  OutputDebugString( "ticks for " + ticks->sSymbol + " done\n" );
 }
 
 void CProcess::OnCompletion( void ) {
-  OutputDebugString( m_s.c_str() );
   OutputDebugString( "all processing complete\n" );
 }
 
