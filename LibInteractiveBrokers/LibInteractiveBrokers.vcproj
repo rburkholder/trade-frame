@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibIQFeed"
-	ProjectGUID="{23192E89-C17F-4C84-B35C-3677927D64A6}"
-	RootNamespace="LibIQFeed"
+	Name="LibInteractiveBrokers"
+	ProjectGUID="{22BF5BE7-74F6-462A-A01F-E543825C0290}"
+	RootNamespace="LibInteractiveBrokers"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -41,13 +41,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\lib;..\lib\wtl"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="..\;..\lib"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;IB_USE_STD_STRING"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				BrowseInformation="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -62,7 +61,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -152,55 +150,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\IQFeed.cpp"
+				RelativePath=".\EPosixClientSocket.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedHistoryCollector.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedMessages.cpp"
+				RelativePath=".\IBSymbol.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeedOptions.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedProvider.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbol.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbolFile.cpp"
+				RelativePath=".\IBTWS.cpp"
 				>
 			</File>
 			<File
@@ -223,6 +181,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="TWS"
+				>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -230,94 +192,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\IQ32.H"
+				RelativePath=".\IBSymbol.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IQFeed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryBulkQuery.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryBulkQueryMsgShim.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryCollector.h"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryQuery.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedHistoryQueryMsgShim.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedMessages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedMsgShim.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedNewsQuery.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedNewsQueryMsgShim.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IQFeedOptions.h"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedProvider.h"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbol.h"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\IQFeedSymbolFile.h"
+				RelativePath=".\IBTWS.h"
 				>
 			</File>
 			<File
@@ -328,6 +207,74 @@
 				RelativePath=".\targetver.h"
 				>
 			</File>
+			<Filter
+				Name="TWS"
+				>
+				<File
+					RelativePath=".\TWS\CommonDefs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Contract.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EClient.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EClientSocketBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EClientSocketBaseImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EPosixClientSocket.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EPosixClientSocketPlatform.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\EWrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Execution.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\IBString.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\Order.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\OrderState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\ScannerSubscription.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\shared_ptr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\StdAfx.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TWS\TwsSocketClientErrors.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

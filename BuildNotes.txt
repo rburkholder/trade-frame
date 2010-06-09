@@ -1,3 +1,6 @@
+2010/06/09
+IB_USE_STD_STRING when using IB TWS libraries
+
 2010/06/03
 
 ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots/v19/

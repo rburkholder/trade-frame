@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include "TradingEnumerations.h"
-
 #include <string>
 
 #include "boost/shared_ptr.hpp"
+
+#include "TradingEnumerations.h"
 
 class CInstrument {
 public:

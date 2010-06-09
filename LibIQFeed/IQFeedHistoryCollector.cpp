@@ -17,8 +17,8 @@
 
 #include <cassert>
 
-#include "LibHDF5TimeSeries/HDF5WriteTimeSeries.h"
-#include "LibHDF5TimeSeries/HDF5DataManager.h"
+#include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <LibHDF5TimeSeries/HDF5DataManager.h>
 
 //
 // CHistoryCollector

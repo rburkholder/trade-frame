@@ -51,6 +51,32 @@ namespace ascii = boost::spirit::ascii;
 //#include <crtdbg.h>
 // custom off
 
+/* If necessary to read values from a file, here is some old code to load stream formatted data from a file:
+#include <fstream>
+#include <stdexcept>
+
+    string s;
+    s.assign( szPrefix );
+    s.append( "-" );
+    s.append( szSymbol );
+    s.append( ".txt" );
+
+    char buf[ 512 ];
+    ifstream file;
+    file.open( s.c_str() );
+
+    m_stateHistory = EHandleResponse;
+    file.getline( buf, 511 );
+    while ( 0 != *buf ) {
+      OnPortMessage( buf );
+      file.getline( buf, 511 );
+    }
+    m_stateHistory = EResponseDone;
+    OnPortMessage( buf );
+    file.close();
+
+    */
+
 namespace IQFeedHistoryStructs {
 
   struct structTickDataPoint {
@@ -285,7 +311,7 @@ private:
   typedef typename inherited_t::linebuffer_t linebuffer_t;
   typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
 
-  static const size_t m_nMillisecondsToSleep = 40;
+  static const size_t m_nMillisecondsToSleep = 75;
 
   // used for containing parsed data and passing it on
   CBufferRepository<structTickDataPoint> m_reposTickDataPoint;

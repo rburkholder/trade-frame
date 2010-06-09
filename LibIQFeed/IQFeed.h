@@ -35,6 +35,12 @@
 
 void __stdcall IQFeedCallBack( int x, int y );
 
+// In the future, for auxilliary routines making use of IQFeed, 
+//   think about incorporating the following concept:
+//     m_pPort = m_pIQFeedProvider->CheckOutLookupPort();
+//     m_pIQFeedProvider->CheckInLookupPort( m_pPort );
+
+
 template <typename T>
 class CIQFeed: public CNetwork<CIQFeed<T> > {
   friend CNetwork<CIQFeed<T> >;

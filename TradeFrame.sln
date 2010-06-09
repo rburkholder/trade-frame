@@ -62,6 +62,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IQFeedGetHistory", "IQFeedG
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIndicators", "LibIndicators\LibIndicators.vcproj", "{662ACE5B-9B25-4BD7-9656-EC8815723EBB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibInteractiveBrokers", "LibInteractiveBrokers\LibInteractiveBrokers.vcproj", "{22BF5BE7-74F6-462A-A01F-E543825C0290}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -120,6 +122,10 @@ Global
 		{662ACE5B-9B25-4BD7-9656-EC8815723EBB}.Debug|Win32.Build.0 = Debug|Win32
 		{662ACE5B-9B25-4BD7-9656-EC8815723EBB}.Release|Win32.ActiveCfg = Release|Win32
 		{662ACE5B-9B25-4BD7-9656-EC8815723EBB}.Release|Win32.Build.0 = Release|Win32
+		{22BF5BE7-74F6-462A-A01F-E543825C0290}.Debug|Win32.ActiveCfg = Debug|Win32
+		{22BF5BE7-74F6-462A-A01F-E543825C0290}.Debug|Win32.Build.0 = Debug|Win32
+		{22BF5BE7-74F6-462A-A01F-E543825C0290}.Release|Win32.ActiveCfg = Release|Win32
+		{22BF5BE7-74F6-462A-A01F-E543825C0290}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
