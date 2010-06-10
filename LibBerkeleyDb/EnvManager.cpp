@@ -56,7 +56,7 @@ CBerkeleyDBEnvManager::CBerkeleyDBEnvManager( void )
 
 CBerkeleyDBEnvManager::~CBerkeleyDBEnvManager( void ) {
   //dbstl::dbstl_exit();
-  m_pDbEnv->close( 0 ); // self deleting
+//  m_pDbEnv->close( 0 ); // self deleting
 //  delete m_pDbEnv;
   m_pDbEnv = NULL;
 }

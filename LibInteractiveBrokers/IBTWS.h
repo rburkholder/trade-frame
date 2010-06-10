@@ -42,59 +42,66 @@ public:
   ~CIBTWS(void);
   
   // From ProviderInterface:
-  virtual void Connect( void );
-  virtual void Disconnect( void );
+  void Connect( void );
+  void Disconnect( void );
 
   // From ProviderInterface Execution Section
-  virtual void PlaceOrder( COrder *order );
+  void PlaceOrder( COrder *order );
   //virtual void CancelOrder( unsigned long nOrderId );
-  virtual void CancelOrder( COrder *order );
+  void CancelOrder( COrder *order );
 
   // TWS Specific events
 
   // From TWS Wrapper:
-  virtual void connectionClosed();
-  virtual void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
-  virtual void tickSize( TickerId tickerId, TickType field, int size);
-  virtual void tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
-	   double modelPrice, double pvDividend);
-  virtual void tickGeneric(TickerId tickerId, TickType tickType, double value);
-  virtual void tickString(TickerId tickerId, TickType tickType, const IBString& value);
-  virtual void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
+  void connectionClosed();
+  void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
+  void tickSize( TickerId tickerId, TickType field, int size);
+  void tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
+	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice);
+  void tickGeneric(TickerId tickerId, TickType tickType, double value);
+  void tickString(TickerId tickerId, TickType tickType, const IBString& value);
+  void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
 	   double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry);
-   virtual void orderStatus( OrderId orderId, const IBString &status, int filled,
+   void orderStatus( OrderId orderId, const IBString &status, int filled,
 	   int remaining, double avgFillPrice, int permId, int parentId,
 	   double lastFillPrice, int clientId, const IBString& whyHeld);
-  virtual void openOrder( OrderId orderId, const Contract&, const Order&, const OrderState&);
-  virtual void execDetails( OrderId orderId, const Contract& contract, const Execution& execution);
-  virtual void error(const int id, const int errorCode, const IBString errorString);
-  virtual void winError( const IBString &str, int lastError);
-  virtual void updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch);
-  virtual void currentTime(long time);
-  virtual void contractDetails( const ContractDetails& contractDetails);
-  virtual void bondContractDetails( const ContractDetails& contractDetails);
-  virtual void nextValidId( OrderId orderId);
-  virtual void updatePortfolio( const Contract& contract, int position,
+  void openOrder( OrderId orderId, const Contract&, const Order&, const OrderState&);
+  void openOrderEnd() {};  // **
+  void execDetails( int reqId, const Contract& contract, const Execution& execution );
+  void execDetailsEnd( int reqId) {};  // **
+  void error(const int id, const int errorCode, const IBString errorString);
+  void winError( const IBString &str, int lastError);
+  void updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch);
+  void currentTime(long time);
+  void contractDetails( int reqId, const ContractDetails& contractDetails );
+  void contractDetailsEnd( int reqId) {};  // **
+  void bondContractDetails( int reqId, const ContractDetails& contractDetails );
+  void nextValidId( OrderId orderId);
+  void updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const IBString& accountName);
-  virtual void updateAccountValue(const IBString& key, const IBString& val,
+  void updateAccountValue(const IBString& key, const IBString& val,
    const IBString& currency, const IBString& accountName);
-  virtual void updateAccountTime(const IBString& timeStamp);
-  virtual void updateMktDepth(TickerId id, int position, int operation, int side,
+  void updateAccountTime(const IBString& timeStamp);
+  void accountDownloadEnd(const IBString& accountName) {};  // **
+  void updateMktDepth(TickerId id, int position, int operation, int side,
       double price, int size);
-  virtual void updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
+  void updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
       int side, double price, int size);
-  virtual void managedAccounts( const IBString& accountsList);
+  void managedAccounts( const IBString& accountsList);
      virtual void receiveFA(faDataType pFaDataType, const IBString& cxml);
-   virtual void historicalData(TickerId reqId, const IBString& date, double open, double high, 
+  void historicalData(TickerId reqId, const IBString& date, double open, double high, 
 	   double low, double close, int volume, int barCount, double WAP, int hasGaps);
-   virtual void scannerParameters(const IBString &xml);
-   virtual void scannerData(int reqId, int rank, const ContractDetails &contractDetails,
+  void scannerParameters(const IBString &xml);
+  void scannerData(int reqId, int rank, const ContractDetails &contractDetails,
 	   const IBString &distance, const IBString &benchmark, const IBString &projection,
 	   const IBString &legsStr);
-   virtual void scannerDataEnd(int reqId);
-   virtual void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
+  void scannerDataEnd(int reqId);
+  void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
 	   long volume, double wap, int count);
+  void fundamentalData(TickerId reqId, const IBString& data) {};  // **
+  void deltaNeutralValidation(int reqId, const UnderComp& underComp) {};  // **
+  void tickSnapshotEnd( int reqId) {};  // **
 
 protected:
   std::string m_sAccountCode;
@@ -111,17 +118,17 @@ protected:
   static const char *szOrderType[];
 
   // overridden from ProviderInterface
-  virtual void StartQuoteWatch( CSymbol *pSymbol );
-  virtual void StopQuoteWatch( CSymbol *pSymbol );
+  void StartQuoteWatch( CSymbol *pSymbol );
+  void StopQuoteWatch( CSymbol *pSymbol );
 
-  virtual void StartTradeWatch( CSymbol *pSymbol );
-  virtual void StopTradeWatch( CSymbol *pSymbol );
+  void StartTradeWatch( CSymbol *pSymbol );
+  void StopTradeWatch( CSymbol *pSymbol );
 
-  virtual void StartQuoteTradeWatch( CSymbol *pSymbol );
-  virtual void StopQuoteTradeWatch( CSymbol *pSymbol );
+  void StartQuoteTradeWatch( CSymbol *pSymbol );
+  void StopQuoteTradeWatch( CSymbol *pSymbol );
 
-  virtual void StartDepthWatch( CSymbol *pSymbol );
-  virtual void StopDepthWatch( CSymbol *pSymbol );
+  void StartDepthWatch( CSymbol *pSymbol );
+  void StopDepthWatch( CSymbol *pSymbol );
 
   static char *TickTypeStrings[];
 

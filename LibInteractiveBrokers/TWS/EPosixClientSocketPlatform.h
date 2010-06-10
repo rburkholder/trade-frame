@@ -7,6 +7,8 @@
 	#include <WinSock2.h>
 	#include <time.h>
 
+#pragma comment(lib, "ws2_32.lib") 
+
 	// defines
 	#define EISCONN WSAEISCONN
 	#define EWOULDBLOCK WSAEWOULDBLOCK

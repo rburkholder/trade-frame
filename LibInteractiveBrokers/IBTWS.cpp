@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include "IBTWS.h"
+
 #include <iostream>
 #include <stdexcept>
 #include <limits>
@@ -23,9 +25,8 @@
 #include "TWS\OrderState.h"
 #include "TWS\Execution.h"
 
-#include "IBTWS.h"
-
 CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port ): 
+  EWrapper(),
   CProviderInterface(), 
     pTWS( NULL ),
     m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
@@ -217,7 +218,7 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
 }
 
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
-                                   double modelPrice, double pvDividend) {
+	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
   mapTickerIdToContract_t::iterator iterTicker = m_mapTickerIdToContract.find( tickerId );
   if ( m_mapTickerIdToContract.end() != iterTicker ) {
@@ -230,7 +231,7 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
       if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
         iter->second.impliedVolatility = impliedVol;
         if ( MODEL_OPTION == tickType ) {
-          iter->second.modelPrice = modelPrice;
+//          iter->second.modelPrice = modelPrice;
           m_dblPortfolioDelta -= iter->second.positionDelta;
           iter->second.delta = delta;
           iter->second.positionCalc = iter->second.position;
@@ -249,7 +250,7 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
         << " " << TickTypeStrings[tickType] 
         << ", Implied Vol=" << impliedVol
         << ", Delta=" << delta
-        << ", ModelPrice=" << modelPrice
+//        << ", ModelPrice=" << modelPrice
         << ", MarketPrice=" << iter->second.marketPrice
         << ", PositionDelta=" << iter->second.positionDelta
         << ", PortfolioDelta=" << m_dblPortfolioDelta
@@ -328,12 +329,12 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
   if ( state.warningText != "" ) std::cout << "Open Order Warning: " << state.warningText << std::endl;
 }
 
-void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execution& execution) {
-
+void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
+//  ****************** need to redo this, orderid disappeared, to be replacedby reqId.
   std::cout 
     << "execDetails: " 
     << "  sym=" << contract.symbol 
-    << ", oid=" << orderId 
+//    << ", oid=" << orderId 
     //<< ", ex.oid=" << execution.orderId 
     << ", ex.pr=" << execution.price 
     << ", ex.sh=" << execution.shares 
@@ -352,9 +353,9 @@ void CIBTWS::execDetails( OrderId orderId, const Contract& contract, const Execu
   if ( "SLD" == execution.side ) side = OrderSide::Sell;
   if ( OrderSide::Unknown == side ) std::cout << "Unknown execution side: " << execution.side << std::endl;
   else {
-    CExecution exec( orderId, execution.price, execution.shares, side, 
-      execution.exchange, execution.execId );
-    COrderManager::Instance().ReportExecution( exec );
+//    CExecution exec( orderId, execution.price, execution.shares, side, 
+//      execution.exchange, execution.execId );
+//    COrderManager::Instance().ReportExecution( exec );
   }
 }
 
@@ -398,12 +399,12 @@ void CIBTWS::currentTime(long time) {
 void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 }
 
-void CIBTWS::contractDetails( const ContractDetails& contractDetails) {
+void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   std::cout << "contract Details " << 
     contractDetails.orderTypes << ", " << contractDetails.minTick << std::endl;
 }
 
-void CIBTWS::bondContractDetails( const ContractDetails& contractDetails) {
+void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {
 }
 
 void CIBTWS::nextValidId( OrderId orderId) {

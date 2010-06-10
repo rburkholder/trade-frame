@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibInteractiveBrokers"
-	ProjectGUID="{22BF5BE7-74F6-462A-A01F-E543825C0290}"
-	RootNamespace="LibInteractiveBrokers"
+	Name="LibWtlHeaders"
+	ProjectGUID="{59B836F9-5799-4F25-82EB-F4C9F180CD94}"
+	RootNamespace="LibWtlHeaders"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -40,13 +40,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/D IB_USE_STD_STRING /D _CRT_SECURE_NO_DEPRECATE /EHsc /wd4355 /wd4800&#x0D;&#x0A;"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\lib"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -107,7 +105,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -151,22 +149,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\EClientSocketBase.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EPosixClientSocket.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IBSymbol.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IBTWS.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -186,10 +168,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<Filter
-				Name="TWS"
-				>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -197,11 +175,87 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\IBSymbol.h"
+				RelativePath="..\lib\wtl\atlapp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IBTWS.h"
+				RelativePath="..\lib\wtl\atlcrack.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlctrls.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlctrlw.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlctrlx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlddx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atldlgs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atldwm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlfind.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlframe.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlgdi.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlmisc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlprint.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlres.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlresce.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlscrl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlsplit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atltheme.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atluser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlwince.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lib\wtl\atlwinx.h"
 				>
 			</File>
 			<File
@@ -212,70 +266,6 @@
 				RelativePath=".\targetver.h"
 				>
 			</File>
-			<Filter
-				Name="TWS"
-				>
-				<File
-					RelativePath=".\TWS\CommonDefs.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Contract.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EClient.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EClientSocketBase.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EClientSocketBaseImpl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EPosixClientSocket.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EPosixClientSocketPlatform.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\EWrapper.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Execution.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\IBString.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\Order.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\OrderState.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\ScannerSubscription.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\shared_ptr.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TWS\TwsSocketClientErrors.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

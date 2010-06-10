@@ -1,5 +1,9 @@
 2010/06/09
 IB_USE_STD_STRING when using IB TWS libraries
+which is included in IBTWS.h
+
+For building Interactive Brokers without MFC:
+https://www.interactivebrokers.com/smf/index.php?topic=83754.0
 
 2010/06/03
 
@@ -9,9 +13,9 @@ E:\Data\Projects\hdf5\hdf5-1.9.55\hdf5lib\debug\include\H5Include.h:
 change to #include "hdf5.h"
 
 2010/04/11
-* multi-thread sdi, no rebar
-* no unicode, set .cpp, set common controls
-* Form, dialog based
+* multi-thread sdi
+* set .cpp, set common controls, no unicode
+* Form, dialog based, no rebar
 
 MainFrm.cpp
 	//UIUpdateToolBar();

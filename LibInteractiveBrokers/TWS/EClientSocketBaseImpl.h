@@ -1,6 +1,7 @@
 #ifndef eclientsocketbaseimpl_h__INCLUDED
 #define eclientsocketbaseimpl_h__INCLUDED
 
+//#include "StdAfx.h"
 #include "EClientSocketBase.h"
 
 #include "EWrapper.h"
@@ -16,7 +17,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -232,7 +233,7 @@ void EClientSocketBase::EncodeField<double>(std::ostream& os, double doubleValue
 {
 	char str[128];
 
-	snprintf(str, sizeof(str), "%.10g", doubleValue);
+//	snprintf(str, sizeof(str), "%.10g", doubleValue);
 
 	EncodeField<const char*>(os, str);
 }
@@ -391,14 +392,14 @@ static IBString errMsg(std::exception e) {
 }
 
 
-#ifdef _MSC_VER
-static IBString errMsg(CException *e) {
+//#ifdef _MSC_VER
+//static IBString errMsg(CException *e) {
 	// return the error associated with this exception
-	char buf[1024];
-	e->GetErrorMessage( buf, sizeof buf);
-	return IBString( buf);
-}
-#endif
+//	char buf[1024];
+//	e->GetErrorMessage( buf, sizeof buf);
+//	return IBString( buf);
+//}
+//#endif
 
 ///////////////////////////////////////////////////////////
 // member funcs
@@ -1847,12 +1848,12 @@ int EClientSocketBase::processConnectAck(const char*& beginPtr, const char* endP
 		beginPtr = ptr;
 		return processed;
 	}
-#ifdef _MSC_VER
-	catch( CException* e) {
-		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
-			SOCKET_EXCEPTION.msg() + errMsg(e));
-	}
-#endif
+//#ifdef _MSC_VER
+//	catch( CException* e) {
+//		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
+//			SOCKET_EXCEPTION.msg() + errMsg(e));
+//	}
+//#endif
 
 	catch(  std::exception e) {
 		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
@@ -2881,12 +2882,12 @@ int EClientSocketBase::processMsg(const char*& beginPtr, const char* endPtr)
 		return processed;
 	}
 
-#ifdef _MSC_VER
-	catch( CException* e) {
-		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
-			SOCKET_EXCEPTION.msg() + errMsg(e));
-	}
-#endif
+//#ifdef _MSC_VER
+//	catch( CException* e) {
+//		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
+//			SOCKET_EXCEPTION.msg() + errMsg(e));
+//	}
+//#endif
 
 	catch( std::exception e) {
 		m_pEWrapper->error( NO_VALID_ID, SOCKET_EXCEPTION.code(),
