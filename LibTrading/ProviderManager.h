@@ -18,7 +18,7 @@
 #include "ManagerBase.h"
 #include "ProviderInterface.h"
 
-class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterface> {
+class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
 public:
   CProviderManager(void);
   virtual ~CProviderManager(void);

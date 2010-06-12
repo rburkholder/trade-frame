@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "LibBerkeleyDb\CommonDatabaseFunctions.h"
-
 #include <string>
 #include <cassert>
+
+#include "LibBerkeleyDb\CommonDatabaseFunctions.h"
 
 #define _CRT_SECURE_NO_DEPRECATE
 #pragma warning( disable : 4996 )

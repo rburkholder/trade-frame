@@ -56,6 +56,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				BrowseInformation="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -73,7 +74,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)\LibWtlHeaders.lib $(OutDir)\IQ32.LIB $(OutDir)\libboost_system-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_43.lib $(OutDir)\LibIQFeed.lib $(OutDir)\LibBerkeleyDb.lib $(OutDir)\libdb48d.lib $(OutDir)\LibTrading.lib $(OutDir)\LibCommon.lib $(OutDir)\LibTimeSeries.lib $(OutDir)\LibHDF5TimeSeries.lib $(OutDir)\szip.lib $(OutDir)\zlib.lib $(OutDir)\zlib1.lib $(OutDir)\LibIndicators.lib $(OutDir)\hdf5d.lib $(OutDir)\hdf5_cppd.lib"
+				AdditionalDependencies="$(OutDir)\LibCommon.lib $(OutDir)\LibWtlHeaders.lib $(OutDir)\LibIndicators.lib $(OutDir)\LibTrading.lib $(OutDir)\LibIQFeed.lib $(OutDir)\LibBerkeleyDb.lib $(OutDir)\LibTimeSeries.lib $(OutDir)\LibHDF5TimeSeries.lib $(OutDir)\libboost_system-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_thread-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_regex-vc90-mt-sgd-1_43.lib $(OutDir)\libboost_date_time-vc90-mt-sgd-1_43.lib $(OutDir)\libdb48d.lib $(OutDir)\szip.lib $(OutDir)\zlib.lib $(OutDir)\zlib1.lib $(OutDir)\hdf5d.lib $(OutDir)\hdf5_cppd.lib $(OutDir)\IQ32.LIB"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"

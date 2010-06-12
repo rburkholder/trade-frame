@@ -12,12 +12,13 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "IQFeedSymbol.h"
 
 #include <iostream>
 
+#include "IQFeedSymbol.h"
+
 CIQFeedSymbol::CIQFeedSymbol(const string &sSymbol) 
-: CSymbol( sSymbol ),
+: CSymbol<CIQFeedSymbol>( sSymbol ),
 m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
 m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
 m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), 
@@ -104,7 +105,7 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( _T( "Not Found" ) == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
-      cout << m_sSymbolName << " not found" << endl;
+      std::cout << m_sSymbolName << " not found" << endl;
     }
   }
   if ( qFound == m_QStatus ) {

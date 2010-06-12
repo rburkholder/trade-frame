@@ -27,17 +27,17 @@
 // CMapOrderToProvider
 //
 
-class CProviderInterface;
+class CProviderInterfaceBase;
 
 class CMapOrderToProvider {
 public:
-  CMapOrderToProvider( CProviderInterface *pProvider, COrder *pOrder );
+  CMapOrderToProvider( CProviderInterfaceBase *pProvider, COrder *pOrder );
   ~CMapOrderToProvider( void );
   unsigned long GetOrderId( void ) { return m_pOrder->GetOrderId(); };
-  CProviderInterface *GetProvider( void ) { return m_pProvider; };
+  CProviderInterfaceBase *GetProvider( void ) { return m_pProvider; };
   COrder *GetOrder( void ) { return m_pOrder; };
 protected:
-  CProviderInterface *m_pProvider;
+  CProviderInterfaceBase *m_pProvider;
   COrder *m_pOrder;
 private:
 };
@@ -50,7 +50,7 @@ class COrderManager: public ManagerBase<COrderManager, COrder::orderid_t, COrder
 public:
   COrderManager(void);
   ~COrderManager(void);
-  void PlaceOrder( CProviderInterface *pProvider, COrder *pOrder );
+  void PlaceOrder( CProviderInterfaceBase *pProvider, COrder *pOrder );
   void CancelOrder( COrder::orderid_t nOrderId );
   void ReportExecution( const CExecution &exec );  // feedback from provider
   void ReportCommission( COrder::orderid_t nOrderId, double dblCommission );

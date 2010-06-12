@@ -202,10 +202,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ProviderInterface.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ProviderManager.cpp"
 				>
 			</File>
@@ -228,10 +224,6 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\Symbol.cpp"
-				>
 			</File>
 			<File
 				RelativePath=".\TradingEnumerations.cpp"

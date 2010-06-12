@@ -22,6 +22,12 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <LibCommon/Delegate.h>
+
+#include <LibTrading/TradingEnumerations.h>
+#include <LibTrading/Instrument.h>
+#include <LibTrading/ProviderInterface.h>
+
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING
 #endif
@@ -29,15 +35,13 @@ using namespace boost::gregorian;
 #include "TWS/EPosixClientSocket.h"
 #include "TWS/EWrapper.h"
 
-#include <LibTrading/ProviderInterface.h>
-#include <LibTrading/TradingEnumerations.h>
-#include <LibTrading/Instrument.h>
 #include "IBSymbol.h"
 
-#include <LibCommon/Delegate.h>
-
-class CIBTWS : public EWrapper, public CProviderInterface {
+class CIBTWS : public CProviderInterface<CIBTWS, CIBSymbol>, public EWrapper {
 public:
+
+  typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
+
   CIBTWS( const string &acctCode, const string &address = "127.0.0.1", unsigned int port = 7496 );
   ~CIBTWS(void);
   
@@ -108,8 +112,8 @@ protected:
   std::string m_sIPAddress;
   unsigned int m_nPort;
   TickerId m_curTickerId;
-  virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
-  std::vector<CIBSymbol *> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
+  virtual CIBSymbol *NewCSymbol( const std::string &sSymbolName );
+  std::vector<CIBSymbol*> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
 
   double m_dblBuyingPower;
   double m_dblAvailableFunds;
@@ -118,19 +122,19 @@ protected:
   static const char *szOrderType[];
 
   // overridden from ProviderInterface
-  void StartQuoteWatch( CSymbol *pSymbol );
-  void StopQuoteWatch( CSymbol *pSymbol );
+  void StartQuoteWatch( CIBSymbol* pSymbol );
+  void  StopQuoteWatch( CIBSymbol* pSymbol );
 
-  void StartTradeWatch( CSymbol *pSymbol );
-  void StopTradeWatch( CSymbol *pSymbol );
+  void StartTradeWatch( CIBSymbol* pSymbol );
+  void  StopTradeWatch( CIBSymbol* pSymbol );
 
-  void StartQuoteTradeWatch( CSymbol *pSymbol );
-  void StopQuoteTradeWatch( CSymbol *pSymbol );
+  void StartQuoteTradeWatch( CIBSymbol* pSymbol );
+  void  StopQuoteTradeWatch( CIBSymbol* pSymbol );
 
-  void StartDepthWatch( CSymbol *pSymbol );
-  void StopDepthWatch( CSymbol *pSymbol );
+  void StartDepthWatch( CIBSymbol* pSymbol );
+  void  StopDepthWatch( CIBSymbol* pSymbol );
 
-  static char *TickTypeStrings[];
+  static char* TickTypeStrings[];
 
 private:
   EPosixClientSocket *pTWS;

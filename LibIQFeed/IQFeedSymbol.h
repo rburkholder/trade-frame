@@ -21,10 +21,12 @@
 
 #include "IQFeedMessages.h"
 
-class CIQFeedSymbol : public CSymbol {
+class CIQFeedProvider;
+
+class CIQFeedSymbol : public CSymbol<CIQFeedSymbol> {
   // needs to be created by IQFeed object as IQFeed injects the actual commands
-//    friend class CIQFeedProvider;
-    friend class CIQFeed;
+    friend class CIQFeedProvider;
+//    friend class CIQFeed;
 public:
   CIQFeedSymbol(const std::string &symbol);
   virtual ~CIQFeedSymbol(void);
@@ -76,6 +78,7 @@ protected:
   void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
   bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
   bool m_bQuoteTradeWatchInProgress;
+
   void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
   void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
   bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };

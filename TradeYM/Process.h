@@ -14,13 +14,20 @@
 #pragma once
 
 #include <LibInteractiveBrokers/IBTWS.h>
+//#include <LibIQFeed/IQFeed.h>
 
 class CProcess
+//  : 
+//  public CIQFeed<CProcess>
 {
+//  friend CIQFeed<CProcess>;
 public:
   CProcess(void);
   ~CProcess(void);
 protected:
+  void OnIQFeedConnected( void );
+  void OnIQFeedDisConnected( void );
+//  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg);
 private:
   CIBTWS m_tws;
 };

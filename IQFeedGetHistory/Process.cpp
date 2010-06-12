@@ -91,7 +91,7 @@ void CProcessDarvas::Result( std::string& s ) {
 
 CProcess::CProcess(void)
 : CIQFeedHistoryBulkQuery<CProcess>(), 
-  m_cntBars( 125 )
+  m_cntBars( 200 )
 {
   m_vExchanges.push_back( "NYSE" );
   m_vExchanges.push_back( "NYSE_AMEX" );

@@ -17,13 +17,21 @@
 
 #include <LibTrading/Symbol.h>
 
-class CIBSymbol : public CSymbol {
+#ifndef IB_USE_STD_STRING
+#define IB_USE_STD_STRING
+#endif
+
+// todo:  need to assigne TickerId after creation or in overload
+
+class CIBSymbol : public CSymbol<CIBSymbol> {
   friend class CIBTWS;
 public:
+  CIBSymbol( const std::string sName );
   CIBSymbol( const std::string sName, TickerId id  );
   virtual ~CIBSymbol(void);
   TickerId GetTickerId( void ) { return m_TickerId; };
 protected:
+
   TickerId m_TickerId;
 
   void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };

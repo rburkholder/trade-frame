@@ -15,8 +15,9 @@
 
 #include "IQFeedProvider.h"
 
-CIQFeedProvider::CIQFeedProvider( CAppModule* pModule, m_structMessageDestinations ) 
-: CProviderInterface(), CIQFeed<CIQFeedProvider>( pModule, m_structMessageDestinations )
+CIQFeedProvider::CIQFeedProvider( void ) 
+: CProviderInterface<CIQFeedProvider,CIQFeedSymbol>(), 
+  CIQFeed<CIQFeedProvider>()
 {
   m_sName = "IQF";
   m_nID = EProviderIQF;
@@ -27,7 +28,7 @@ CIQFeedProvider::~CIQFeedProvider(void) {
 
 void CIQFeedProvider::Connect() {
   if ( !m_bConnected ) {
-    CProviderInterface::Connect();
+    CProviderInterface<CIQFeedProvider,CIQFeedSymbol>::Connect();
     CIQFeed::Connect();
     m_bConnected = true;
     OnConnected( 0 );
@@ -37,34 +38,54 @@ void CIQFeedProvider::Connect() {
 void CIQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
     CIQFeed::Disconnect();
-    CProviderInterface::Disconnect();
+    CProviderInterface<CIQFeedProvider,CIQFeedSymbol>::Disconnect();
     m_bConnected = false;
     OnDisconnected( 0 );
   }
 }
 
-CSymbol *CIQFeedProvider::NewCSymbol(const std::string &sSymbolName) {
+CIQFeedSymbol* CIQFeedProvider::NewCSymbol(const std::string &sSymbolName) {
   return new CIQFeedSymbol( sSymbolName );
 }
 
-void CIQFeedProvider::StartQuoteWatch(CSymbol *pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
+void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
+  if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
+    std::string s = "w" + pSymbol->Name() + "\n";
+    CIQFeed<CIQFeedProvider>::Send( s );
+    //IQConnect.SendToSocket( s.c_str() );
+    pSymbol->SetQuoteTradeWatchInProgress();
+  }
 }
 
-void CIQFeedProvider::StopQuoteWatch(CSymbol *pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
+void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
+  if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
+    // don't do anything, as stuff still active
+  }
+  else {
+    std::string s = "r" + pSymbol->Name() + "\n";
+    //IQConnect.SendToSocket( s.c_str() );
+    CIQFeed<CIQFeedProvider>::Send( s );
+  }
 }
 
-void CIQFeedProvider::StartTradeWatch(CSymbol *pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
+void CIQFeedProvider::StartQuoteWatch(CIQFeedSymbol* pSymbol) {
+  StartQuoteTradeWatch( pSymbol );
 }
 
-void CIQFeedProvider::StopTradeWatch(CSymbol *pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol *>( pSymbol ) );
+void CIQFeedProvider::StopQuoteWatch(CIQFeedSymbol* pSymbol) {
+  StopQuoteTradeWatch( pSymbol );
+}
+
+void CIQFeedProvider::StartTradeWatch(CIQFeedSymbol* pSymbol) {
+  StartQuoteTradeWatch( pSymbol );
+}
+
+void CIQFeedProvider::StopTradeWatch(CIQFeedSymbol* pSymbol) {
+  StopQuoteTradeWatch( pSymbol );
 }
 
 void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
-  CProviderInterface::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFUpdateMessage::QPSymbol ) );
   CIQFeedSymbol *pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
@@ -74,7 +95,7 @@ void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
 }
 
 void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
-  CProviderInterface::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFSummaryMessage::QPSymbol ) );
   CIQFeedSymbol *pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
@@ -84,7 +105,7 @@ void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
 }
 
 void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
-  CProviderInterface::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFFundamentalMessage::FSymbol ) );
   CIQFeedSymbol *pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
@@ -94,7 +115,9 @@ void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
 }
 
 void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
-  CProviderInterface::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+
+  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+/*
   const char *ixFstColon = pMsg->m_sSymbolList.c_str();
   const char *ixLstColon = pMsg->m_sSymbolList.c_str();
   string s;
@@ -127,6 +150,7 @@ void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
       ixLstColon++;
     } while ( 0 != *ixLstColon );
   }
+  */
 }
 
 void CIQFeedProvider::HandleTMessage( CIQFTimeMessage *pMsg ) {

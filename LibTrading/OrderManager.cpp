@@ -18,12 +18,11 @@
 #include "OrderManager.h"
 #include "ProviderInterface.h"
 
-
 //
 // CMapOrderToProvider
 //
 
-CMapOrderToProvider::CMapOrderToProvider(CProviderInterface *pProvider, COrder *pOrder ) 
+CMapOrderToProvider::CMapOrderToProvider(CProviderInterfaceBase *pProvider, COrder *pOrder ) 
 : m_pProvider( pProvider ), m_pOrder( pOrder )
 {
 }
@@ -61,7 +60,7 @@ COrderManager::~COrderManager(void) {
   }
 }
 
-void COrderManager::PlaceOrder(CProviderInterface *pProvider, COrder *pOrder) {
+void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder *pOrder) {
   assert( NULL != pProvider );
   assert( NULL != pOrder );
   CMapOrderToProvider *pMapping = new CMapOrderToProvider( pProvider, pOrder );

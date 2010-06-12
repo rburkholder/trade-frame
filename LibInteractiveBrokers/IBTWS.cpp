@@ -13,8 +13,6 @@
 
 #include "StdAfx.h"
 
-#include "IBTWS.h"
-
 #include <iostream>
 #include <stdexcept>
 #include <limits>
@@ -25,9 +23,11 @@
 #include "TWS\OrderState.h"
 #include "TWS\Execution.h"
 
+#include "IBTWS.h"
+
 CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port ): 
+  CProviderInterface<CIBTWS,CIBSymbol>(), 
   EWrapper(),
-  CProviderInterface(), 
     pTWS( NULL ),
     m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
     m_dblPortfolioDelta( 0 )
@@ -70,37 +70,37 @@ void CIBTWS::Disconnect() {
   }
 }
 
-CSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
+CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
   TickerId ticker = ++m_curTickerId;
   CIBSymbol *pSymbol = new CIBSymbol( sSymbolName, ticker );
-  CProviderInterface::AddCSymbol( pSymbol );
+  CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
   return pSymbol;
 }
 
-void CIBTWS::StartQuoteWatch(CSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StartQuoteWatch(CIBSymbol *pSymbol) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopQuoteWatch(CSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StopQuoteWatch(CIBSymbol *pSymbol) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartTradeWatch(CSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StartTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopTradeWatch(CSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StopTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
-  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
+  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
     pIBSymbol->SetQuoteTradeWatchInProgress();
     Contract contract;
-    contract.symbol = pSymbol->Name().c_str();
+    contract.symbol = pIBSymbol->Name().c_str();
     contract.currency = "USD";
     contract.exchange = "SMART";
     contract.secType = "STK";  // todo:  get this information from the symbol
@@ -109,8 +109,8 @@ void CIBTWS::StartQuoteTradeWatch( CSymbol *pSymbol ) {
   }
 }
 
-void CIBTWS::StopQuoteTradeWatch( CSymbol *pSymbol ) {
-  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+void CIBTWS::StopQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
+  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() ) {
     // don't do anything if either a quote or trade watch still in progress
   }
@@ -121,16 +121,16 @@ void CIBTWS::StopQuoteTradeWatch( CSymbol *pSymbol ) {
   }
 }
 
-void CIBTWS::StartDepthWatch(CSymbol *pSymbol) {  // overridden from base class
-  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+void CIBTWS::StartDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
+  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( !pIBSymbol->GetDepthWatchInProgress() ) {
     // start watch
     pIBSymbol->SetDepthWatchInProgress();
   }
 }
 
-void CIBTWS::StopDepthWatch(CSymbol *pSymbol) {  // overridden from base class
-  CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
+void CIBTWS::StopDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
+  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( pIBSymbol->DepthWatchNeeded() ) {
   }
   else {
@@ -146,7 +146,7 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 //long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *pOrder ) {
-  CProviderInterface::PlaceOrder( pOrder ); // any underlying initialization
+  CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   Order twsorder;
   twsorder.orderId = pOrder->GetOrderId();
 
@@ -201,7 +201,7 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
 }
 
 void CIBTWS::CancelOrder( COrder *pOrder ) {
-  CProviderInterface::CancelOrder( pOrder );
+  CProviderInterface<CIBTWS,CIBSymbol>::CancelOrder( pOrder );
   pTWS->cancelOrder( pOrder->GetOrderId() );
 }
 
@@ -495,7 +495,8 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     if ( NULL == pInstrument ) throw std::out_of_range( "instrument type not accounted for" );
     pInstrument->SetContract( contract.conId );
 
-    CIBSymbol* pSymbol = dynamic_cast<CIBSymbol*>( NewCSymbol( sLocalSymbol ) );  // *** this isn't done correctly, but good enough for now
+    //CIBSymbol* pSymbol = dynamic_cast<CIBSymbol*>( NewCSymbol( sLocalSymbol ) );  // *** this isn't done correctly, but good enough for now
+    CIBSymbol* pSymbol = NewCSymbol( sLocalSymbol );
 
     structDeltaStuff stuff;
 //    stuff.tickerId = pSymbol->GetTickerId();

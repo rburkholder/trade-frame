@@ -17,8 +17,20 @@
 
 //#include "boost/date_time/local_time/local_time.hpp"
 
+CIBSymbol::CIBSymbol( const std::string sName ): 
+  CSymbol<CIBSymbol>( sName ), m_TickerId( 0 ), 
+    m_bAskFound( false ), m_bAskSizeFound( false ), 
+    m_bBidFound( false ), m_bBidSizeFound( false ),
+    m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
+    m_nAskSize( 0 ), m_nBidSize( 0 ), m_nLastSize( 0 ),
+    m_dblAsk( 0 ), m_dblBid( 0 ), m_dblLast( 0 ),
+    m_nVolume( 0 ),
+    m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
+    m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ) {
+}
+
 CIBSymbol::CIBSymbol( const std::string sName, TickerId id ): 
-  CSymbol( sName ), m_TickerId( id ), 
+  CSymbol<CIBSymbol>( sName ), m_TickerId( id ), 
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
     m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
