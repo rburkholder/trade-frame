@@ -54,7 +54,7 @@ void CProcess::PlaceBuyOrder( void ) {
 
 void CProcess::PlaceSellOrder( void ) {
   COrder::pInstrument_t instrument( new CInstrument( "ICE", "SMART", InstrumentType::Stock ) );
-  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Buy, -100 ) );
+  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
 }
 
 void CProcess::OnIQFeedConnected( void ) {

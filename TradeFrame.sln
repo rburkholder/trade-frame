@@ -70,6 +70,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeYM", "TradeYM\TradeYM.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibInteractiveBrokers", "LibInteractiveBrokers\LibInteractiveBrokers.vcproj", "{22BF5BE7-74F6-462A-A01F-E543825C0290}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11243A27-764A-4119-BEFF-A8A80FD615EC} = {11243A27-764A-4119-BEFF-A8A80FD615EC}
+		{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4} = {F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlHeaders", "LibWtlHeaders\LibWtlHeaders.vcproj", "{59B836F9-5799-4F25-82EB-F4C9F180CD94}"
 EndProject

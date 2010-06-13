@@ -66,7 +66,6 @@ void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder *pOrder
   CMapOrderToProvider *pMapping = new CMapOrderToProvider( pProvider, pOrder );
   m_mapActiveOrders.insert( mappair_t( pOrder->GetOrderId(), pMapping ) );
   pOrder->SetSendingToProvider();
-  pProvider->PlaceOrder( pOrder );
 }
 
 COrderManager::orders_t::iterator COrderManager::LocateOrder( unsigned long nOrderId ) {

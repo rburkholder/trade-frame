@@ -95,6 +95,7 @@ public:
   void GetAlternateInstrumentName( const std::string& OriginalInstrumentName, std::string* pAlternateInstrumentName );
 
 protected:
+
   std::string m_sName;  // name of provider
   unsigned short m_nID;
   bool m_bConnected;
@@ -119,7 +120,7 @@ protected:
   std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
   CAlternateInstrumentNames m_lutAlternateInstrumentNames;
 
-  //COrderManager m_OrderManager;
+  COrderManager m_OrderManager;
 
 private:
 };
@@ -286,14 +287,15 @@ void CProviderInterface<P,S>::PreSymbolDestroy( S* pSymbol ) {
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::PlaceOrder( COrder *pOrder ) {
-  //throw std::runtime_error( "CProviderInterface::PlaceOrder not implemented." );
   pOrder->SetProviderName( m_sName );
+  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
+  COrderManager::Instance().PlaceOrder( this, pOrder );
 }
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::CancelOrder( COrder *pOrder ) {
-  //throw std::runtime_error( "CProviderInterface::CancelOrder not implemented." );
   pOrder->SetProviderName( m_sName );
+  COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 }
 
 template <typename P, typename S>

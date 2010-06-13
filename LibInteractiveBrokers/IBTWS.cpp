@@ -28,9 +28,9 @@
 CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port ): 
   CProviderInterface<CIBTWS,CIBSymbol>(), 
   EWrapper(),
-    pTWS( NULL ),
-    m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
-    m_dblPortfolioDelta( 0 )
+  pTWS( NULL ),
+  m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
+  m_dblPortfolioDelta( 0 )
 {
   m_sName = "IB";
   m_nID = EProviderIB;
@@ -48,6 +48,7 @@ void CIBTWS::Connect() {
     pTWS = new EPosixClientSocket( this );
     pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
     m_bConnected = true;
+    m_thrdIBMessages = boost::thread( boost::bind( &CIBTWS::ProcessMessages, this ) );
     OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
@@ -63,11 +64,26 @@ void CIBTWS::Disconnect() {
   if ( NULL != pTWS ) {
     m_bConnected = false;
     pTWS->eDisconnect();
+    m_thrdIBMessages.join();  // wait for message processing to exit
     delete pTWS;
     pTWS = NULL;
     OnDisconnected( 0 );
-    std::cout << "IB Disconnected " << std::endl;
+    m_ss.str("");
+    m_ss << "IB Disconnected " << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
   }
+}
+
+// this is executed in non-main thread, and the events below will be called from the processing here
+void CIBTWS::ProcessMessages( void ) {
+  bool bOK = true;
+  while ( bOK && m_bConnected ) {
+    bOK = pTWS->checkMessages();
+  }
+  m_bConnected = false;  // placeholder for debug
+
+  // need to deal with pre=mature exit so that flags get reset
+  // maybe a state machine would keep track
 }
 
 CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
@@ -146,9 +162,11 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 //long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *pOrder ) {
+
   CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
+  assert( twsorder.orderId >= m_idNextValid );
 
   //Contract contract2;
   //contract2.conId = 44678227;
@@ -206,15 +224,23 @@ void CIBTWS::CancelOrder( COrder *pOrder ) {
 }
 
 void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
-  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
-  pSym->AcceptTickPrice( tickType, price );
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  //   when a valid symbol has been defined
+  if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
+    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
+    pSym->AcceptTickPrice( tickType, price );
+  }
 }
 
 void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
-  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  //std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
-  pSym->AcceptTickSize( tickType, size );
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  //   when a valid symbol has been defined
+  if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
+    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    //std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
+    pSym->AcceptTickSize( tickType, size );
+  }
 }
 
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
@@ -224,7 +250,9 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
   if ( m_mapTickerIdToContract.end() != iterTicker ) {
     mapDelta_t::iterator iter = m_mapDelta.find( iterTicker->second );
     if ( m_mapDelta.end() == iter ) {
-      std::cout << "can't find option map fo ticker=" << tickerId << std::endl;
+      m_ss.str("");
+      m_ss << "can't find option map fo ticker=" << tickerId << std::endl;
+      OutputDebugString( m_ss.str().c_str() );
     }
     else {
   //    if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
@@ -242,7 +270,8 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
     }
   //  if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
       if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
-      std::cout 
+      m_ss.str(""); 
+      m_ss
         << "tickOptionComputation " 
         << iter->second.sUnderlying
         << " " << iter->second.sSymbol
@@ -256,6 +285,7 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
         << ", PortfolioDelta=" << m_dblPortfolioDelta
   //      << ", Dividend=" << pvDividend
         << std::endl; 
+      OutputDebugString( m_ss.str().c_str() );
     }
   }
 
@@ -266,16 +296,22 @@ void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
 }
 
 void CIBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& value) {
-  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  //std::cout << "tickString " << pSym->Name() << ", " 
-  //  << TickTypeStrings[tickType] << ", " << value;
-  //std::cout << std::endl;
-  pSym->AcceptTickString( tickType, value );
+  // we seem to get ticks even though we havn't requested them, so ensure we only accept 
+  //   when a valid symbol has been defined
+  if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
+    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    //std::cout << "tickString " << pSym->Name() << ", " 
+    //  << TickTypeStrings[tickType] << ", " << value;
+    //std::cout << std::endl;
+    pSym->AcceptTickString( tickType, value );
+  }
 }
 
 void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
   double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry ) {
-  std::cout << "tickEFP" << std::endl;
+  m_ss.str("");
+  m_ss << "tickEFP" << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
@@ -283,7 +319,8 @@ void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
                          double lastFillPrice, int clientId, const IBString& whyHeld) 
 {
   if ( true ) {
-    std::cout 
+    m_ss.str("");
+    m_ss
       << "OrderStatus: ordid=" << orderId 
       << ", stat=" << status 
       << ", fild=" << filled 
@@ -295,12 +332,15 @@ void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
       //<< ", clid=" << clientId 
       //<< ", yh=" << whyHeld 
       << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
 void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& order, const OrderState& state) {
   if ( order.whatIf ) {
-    std::cout << "WhatIf:  ordid=" << orderId << ", cont.sym=" << contract.symbol
+    m_ss.str("");
+    m_ss
+      << "WhatIf:  ordid=" << orderId << ", cont.sym=" << contract.symbol
       << ", state.commission=" << state.commission
       << " " << state.commissionCurrency
       << ", state.equitywithloan=" << state.equityWithLoan 
@@ -309,9 +349,11 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       << ", state.maxcom=" << state.maxCommission
       << ", state.mincom=" << state.minCommission 
       << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
   }
   else { 
-    std::cout 
+    m_ss.str("");
+    m_ss 
       << "OpenOrder: ordid=" << orderId 
       << ", state.stat=" << state.status 
       << ", cont.sym=" << contract.symbol 
@@ -322,16 +364,22 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       //<< ", ord.ref=" << order.orderRef 
       << ", state.warning=" << state.warningText 
       << std::endl; 
+    OutputDebugString( m_ss.str().c_str() );
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
       COrderManager::Instance().ReportCommission( orderId, state.commission ); 
   }
-  if ( state.warningText != "" ) std::cout << "Open Order Warning: " << state.warningText << std::endl;
+  if ( state.warningText != "" ) {
+    m_ss.str("");
+    m_ss << "Open Order Warning: " << state.warningText << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
+  }
 }
 
 void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
 //  ****************** need to redo this, orderid disappeared, to be replacedby reqId.
-  std::cout 
+  m_ss.str("");
+  m_ss  
     << "execDetails: " 
     << "  sym=" << contract.symbol 
 //    << ", oid=" << orderId 
@@ -347,6 +395,7 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
@@ -375,24 +424,36 @@ current time 1212851947
 */
 
 void CIBTWS::error(const int id, const int errorCode, const IBString errorString) {
-  std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
   switch ( errorCode ) {
     case 1102: // Connectivity has been restored
       pTWS->reqAccountUpdates( true, "" );
+      break;
+    case 2104:  // datafarm connected ok
+      break;
+    default:
+      m_ss.str("");
+      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
+      OutputDebugString( m_ss.str().c_str() );
       break;
   }
 }
 
 void CIBTWS::winError( const IBString &str, int lastError) {
-  std::cout << "winerror " << str << ", " << lastError << std::endl;
+  m_ss.str("");
+  m_ss << "winerror " << str << ", " << lastError << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CIBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
-  std::cout << "news bulletin " << msgId << ", " << msgType << ", " << newsMessage << ", " << originExch << std::endl;
+  m_ss.str("");
+  m_ss << "news bulletin " << msgId << ", " << msgType << ", " << newsMessage << ", " << originExch << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CIBTWS::currentTime(long time) {
-  std::cout << "current time " << time << endl;
+  m_ss.str("");
+  m_ss << "current time " << time << endl;
+  OutputDebugString( m_ss.str().c_str() );
   m_time = time;
 }
 
@@ -400,15 +461,20 @@ void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 }
 
 void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
-  std::cout << "contract Details " << 
+  m_ss.str("");
+  m_ss << "contract Details " << 
     contractDetails.orderTypes << ", " << contractDetails.minTick << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {
 }
 
 void CIBTWS::nextValidId( OrderId orderId) {
-  std::cout << "next valid id " << orderId << std::endl;
+  m_ss.str("");
+  m_ss << "next valid id " << orderId << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+  m_idNextValid = orderId;
 }
 
 void CIBTWS::updatePortfolio( const Contract& contract, int position,
@@ -551,7 +617,8 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
   }
 
   if ( true ) {
-    std::cout << "portfolio item " 
+    m_ss.str("");
+    m_ss << "portfolio item " 
       << contract.symbol
       << " " << contract.localSymbol
       << "  id=" << contract.conId  // long
@@ -567,6 +634,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       << ", rPL=" << realizedPNL // double
       //<< ", " << accountName 
       << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
   }
 
   CPortfolio::structUpdatePortfolioRecord record( iter->second.pInstrument.get(), position, marketPrice, averageCost );
@@ -606,7 +674,9 @@ void CIBTWS::updateAccountValue(const IBString& key, const IBString& val,
 }
 
 void CIBTWS::connectionClosed() {
-  std::cout << "connection closed" << std::endl;
+  m_ss.str("");
+  m_ss << "connection closed" << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CIBTWS::updateMktDepth(TickerId id, int position, int operation, int side,
