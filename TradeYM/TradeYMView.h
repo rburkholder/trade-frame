@@ -27,7 +27,10 @@ public:
 	BOOL PreTranslateMessage(MSG* pMsg);
 
 	BEGIN_MSG_MAP(CTradeYMView)
-    COMMAND_HANDLER(IDC_BTN_TEST_TRADE, BN_CLICKED, OnBnClickedBtnTestTrade)
+    COMMAND_HANDLER(IDC_BTN_IBCONNECT, BN_CLICKED, OnBnClickedBtnIbconnect)
+    COMMAND_HANDLER(IDC_BTN_IBDISCONNECT, BN_CLICKED, OnBnClickedBtnIbdisconnect)
+    COMMAND_HANDLER(IDC_BTN_BUY, BN_CLICKED, OnBnClickedBtnBuy)
+    COMMAND_HANDLER(IDC_BTN_SELL, BN_CLICKED, OnBnClickedBtnSell)
   END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -44,5 +47,8 @@ private:
   CProcess m_process;
 
 public:
-  LRESULT OnBnClickedBtnTestTrade(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIbconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIbdisconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnBuy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnSell(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

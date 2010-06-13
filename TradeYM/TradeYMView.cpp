@@ -32,9 +32,32 @@ BOOL CTradeYMView::PreTranslateMessage(MSG* pMsg) {
 	return CWindow::IsDialogMessage(pMsg);
 }
 
-LRESULT CTradeYMView::OnBnClickedBtnTestTrade(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+LRESULT CTradeYMView::OnBnClickedBtnIbconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.IBConnect();
 
-  OutputDebugString( "test\n" );
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnIbdisconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.IBDisconnect();
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnBuy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  OutputDebugString( "Buy\n" );
+  m_process.PlaceBuyOrder();
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnSell(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  OutputDebugString( "Sell\n" );
+  m_process.PlaceSellOrder();
 
   return 0;
 }

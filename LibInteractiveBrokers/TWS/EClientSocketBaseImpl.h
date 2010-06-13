@@ -12,12 +12,12 @@
 #include "Execution.h"
 #include "ScannerSubscription.h"
 
-
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
 
 //#include <stdio.h>
+//#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -233,7 +233,7 @@ void EClientSocketBase::EncodeField<double>(std::ostream& os, double doubleValue
 {
 	char str[128];
 
-//	snprintf(str, sizeof(str), "%.10g", doubleValue);
+	_snprintf(str, sizeof(str), "%.10g", doubleValue);
 
 	EncodeField<const char*>(os, str);
 }

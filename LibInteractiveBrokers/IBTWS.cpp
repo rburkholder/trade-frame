@@ -147,7 +147,7 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 
 void CIBTWS::PlaceOrder( COrder *pOrder ) {
   CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
-  Order twsorder;
+  Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
 
   //Contract contract2;
@@ -155,9 +155,9 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   //pTWS->reqContractDetails( contract2 );
 
   Contract contract;
-  contract.symbol = pOrder->GetInstrument()->GetSymbolName().c_str();
+  contract.symbol = pOrder->GetInstrument()->GetSymbolName();
   contract.currency = pOrder->GetInstrument()->GetCurrencyName();
-  contract.exchange = (*(pOrder->GetInstrument()->GetExchangeName())).c_str();
+  contract.exchange = (*(pOrder->GetInstrument()->GetExchangeName()));
   contract.secType = szSecurityType[ pOrder->GetInstrument()->GetInstrumentType() ];
   IBString s;
   switch ( pOrder->GetInstrument()->GetInstrumentType() ) {

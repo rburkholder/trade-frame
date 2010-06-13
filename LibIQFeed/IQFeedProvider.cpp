@@ -28,8 +28,8 @@ CIQFeedProvider::~CIQFeedProvider(void) {
 
 void CIQFeedProvider::Connect() {
   if ( !m_bConnected ) {
-    CProviderInterface<CIQFeedProvider,CIQFeedSymbol>::Connect();
-    CIQFeed::Connect();
+    ProviderInterface_t::Connect();
+    IQFeed_t::Connect();
     m_bConnected = true;
     OnConnected( 0 );
   }
@@ -37,8 +37,8 @@ void CIQFeedProvider::Connect() {
 
 void CIQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
-    CIQFeed::Disconnect();
-    CProviderInterface<CIQFeedProvider,CIQFeedSymbol>::Disconnect();
+    IQFeed_t::Disconnect();
+    ProviderInterface_t::Disconnect();
     m_bConnected = false;
     OnDisconnected( 0 );
   }
@@ -52,7 +52,6 @@ void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
     std::string s = "w" + pSymbol->Name() + "\n";
     CIQFeed<CIQFeedProvider>::Send( s );
-    //IQConnect.SendToSocket( s.c_str() );
     pSymbol->SetQuoteTradeWatchInProgress();
   }
 }
@@ -63,7 +62,6 @@ void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   }
   else {
     std::string s = "r" + pSymbol->Name() + "\n";
-    //IQConnect.SendToSocket( s.c_str() );
     CIQFeed<CIQFeedProvider>::Send( s );
   }
 }

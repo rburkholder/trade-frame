@@ -21,6 +21,7 @@
 
 class CInstrument {
 public:
+
   CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown ); // generic
   CInstrument( const std::string& sSymbolName, const std::string& sExchangeName, 
@@ -53,7 +54,9 @@ public:
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
+
 protected:
+
   std::string m_sSymbolName; // main name
   std::string m_sUnderlying;  // underlying when main name is an option
   InstrumentType::enumInstrumentTypes m_InstrumentType;
@@ -66,5 +69,6 @@ protected:
   unsigned short m_nMonth; // future, option
   double m_dblStrike;
   long m_nContract;
+
 private:
 };

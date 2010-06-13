@@ -16,19 +16,45 @@
 #include <vector>
 #include <string>
 
+#include <LibTrading/Order.h>
+
 #include "Process.h"
 
 CProcess::CProcess(void)
 : 
 //  CIQFeed<CProcess>(),
-  m_tws( "U215226" )
+  //m_tws( "U215226" ),
+  m_tws( "DU15100" ),
+  m_bIBConnected( false )
 {
-  m_tws.Connect();
 }
 
 CProcess::~CProcess(void)
 {
-  m_tws.Disconnect();
+}
+
+void CProcess::IBConnect( void ) {
+  if ( !m_bIBConnected ) {
+    m_tws.Connect();
+    m_bIBConnected = true;
+  }
+}
+
+void CProcess::IBDisconnect( void ) {
+  if ( m_bIBConnected ) {
+    m_tws.Disconnect();
+    m_bIBConnected = false;
+  }
+}
+
+void CProcess::PlaceBuyOrder( void ) {
+  COrder::pInstrument_t instrument( new CInstrument( "ICE", "SMART", InstrumentType::Stock ) );
+  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
+}
+
+void CProcess::PlaceSellOrder( void ) {
+  COrder::pInstrument_t instrument( new CInstrument( "ICE", "SMART", InstrumentType::Stock ) );
+  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Buy, -100 ) );
 }
 
 void CProcess::OnIQFeedConnected( void ) {

@@ -22,12 +22,18 @@ class CProcess
 {
 //  friend CIQFeed<CProcess>;
 public:
-  CProcess(void);
-  ~CProcess(void);
+  CProcess( void );
+  ~CProcess( void );
+  void IBConnect( void );
+  void PlaceBuyOrder( void );
+  void PlaceSellOrder( void );
+  void IBDisconnect( void );
 protected:
+
   void OnIQFeedConnected( void );
   void OnIQFeedDisConnected( void );
 //  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg);
 private:
   CIBTWS m_tws;
+  bool m_bIBConnected;
 };

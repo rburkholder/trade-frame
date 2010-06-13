@@ -13,6 +13,13 @@
 
 #pragma once
 
+#include <string>
+
+#include "boost/shared_ptr.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
 #include "TradingEnumerations.h"
 #include "Instrument.h"
 #include "PersistedOrderId.h"
@@ -21,15 +28,11 @@
 #include "LibCommon/TimeSource.h"
 #include "LibCommon/Delegate.h"
 
-#include "boost/shared_ptr.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
-#include <string>
-
 class COrder {
 public:
+
+  typedef CInstrument::pInstrument_t pInstrument_t;
+
   COrder(  // market 
     CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,

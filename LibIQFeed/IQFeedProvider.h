@@ -25,6 +25,7 @@ class CIQFeedProvider :
 public:
 
   typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> ProviderInterface_t;
+  typedef CIQFeed<CIQFeedProvider>  IQFeed_t;
 
   CIQFeedProvider( void );
   ~CIQFeedProvider( void );

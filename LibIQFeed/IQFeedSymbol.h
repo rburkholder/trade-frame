@@ -24,15 +24,11 @@
 class CIQFeedProvider;
 
 class CIQFeedSymbol : public CSymbol<CIQFeedSymbol> {
-  // needs to be created by IQFeed object as IQFeed injects the actual commands
-    friend class CIQFeedProvider;
-//    friend class CIQFeed;
+  friend class CIQFeedProvider;
 public:
-  CIQFeedSymbol(const std::string &symbol);
-  virtual ~CIQFeedSymbol(void);
 
-  //bool Watch();
-  //bool UnWatch();
+  CIQFeedSymbol(const std::string &symbol);
+  ~CIQFeedSymbol(void);
 
   Delegate<CIQFeedSymbol*> OnFundamentalMessage;
   Delegate<CIQFeedSymbol*> OnUpdateMessage;
