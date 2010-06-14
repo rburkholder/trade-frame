@@ -183,10 +183,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TimeSource.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\WuManber.cpp"
 				>
 			</File>

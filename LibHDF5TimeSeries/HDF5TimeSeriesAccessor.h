@@ -106,7 +106,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
       H5::DataSpace MemoryDataspace(1, &dim ); // create one element dataspace to get requested element of dataset
       MemoryDataspace.selectElements( H5S_SELECT_SET, 1, coord2 );
 
-      DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
+      H5::DataSpace *pDiskDataSpaceSelection = new H5::DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectElements( H5S_SELECT_SET, 1, coord1 );
 
       m_pDiskDataSet->read( pDatedDatum, *pComp, MemoryDataspace, *pDiskDataSpaceSelection );
@@ -181,7 +181,7 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
         UpdateElementCount();
       }
 
-      H5::DataSpace *pDiskDataSpaceSelection = new DataSpace( m_pDiskDataSet->getSpace() );
+      H5::DataSpace *pDiskDataSpaceSelection = new H5::DataSpace( m_pDiskDataSet->getSpace() );
       pDiskDataSpaceSelection->selectHyperslab( H5S_SELECT_SET, &dim[0], &ixStart, 0, 0 );
 
       m_pDiskDataSet->write( pDatedDatum, *pComp, MemoryDataspace, *pDiskDataSpaceSelection );

@@ -14,6 +14,8 @@
 #include "StdAfx.h"
 #include "PersistedOrderId.h"
 
+const std::string CPersistedOrderId::m_key = "OrderId";
+
 CPersistedOrderId::CPersistedOrderId(void) 
 : CKeyValuePair()
 {
@@ -22,17 +24,32 @@ CPersistedOrderId::CPersistedOrderId(void)
 CPersistedOrderId::~CPersistedOrderId(void) {
 }
 
-unsigned long CPersistedOrderId::GetNextOrderId() {
-  static const std::string key = "OrderId";
-  unsigned long nOrderId;
+CPersistedOrderId::OrderId_t CPersistedOrderId::GetNextOrderId() {
+  OrderId_t nOrderId;
   try {
-    nOrderId = GetUnsignedLong( key );
+    nOrderId = GetUnsignedLong( m_key );
     ++nOrderId;
-    Save( key, nOrderId );
+    Save( m_key, nOrderId );
   }
   catch ( std::out_of_range e ) {
-    Save( key, m_nStartingOrderId );
+    Save( m_key, m_nStartingOrderId );
     nOrderId = m_nStartingOrderId;
   }
   return nOrderId;
+}
+
+CPersistedOrderId::OrderId_t CPersistedOrderId::GetCurrentOrderId() {
+  OrderId_t nOrderId;
+  try {
+    nOrderId = GetUnsignedLong( m_key );
+  }
+  catch ( std::out_of_range e ) {
+    Save( m_key, m_nStartingOrderId );
+    nOrderId = m_nStartingOrderId;
+  }
+  return nOrderId;
+}
+
+void CPersistedOrderId::SetNextOrderId( OrderId_t nOrderId ) {
+  Save( m_key, nOrderId );
 }

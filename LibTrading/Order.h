@@ -132,7 +132,7 @@ protected:
   double m_dblAverageFillPrice;
   //double m_dblAverageFillPriceWithCommission;
 
-  //CTimeSource m_timesource;
+  CTimeSource m_timesource;
 private:
   COrder(void);
 };

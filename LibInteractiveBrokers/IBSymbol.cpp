@@ -123,7 +123,7 @@ void CIBSymbol::BuildQuote() {
   if ( m_bAskFound && m_bBidFound && m_bAskSizeFound && m_bBidSizeFound ) {
     //boost::local_time::local_date_time ldt = 
     //  boost::local_time::local_microsec_clock::local_time();
-    CQuote quote( boost::posix_time::microsec_clock::local_time() , m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+    CQuote quote( m_TimeSource.External(), m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
     //std::cout << "Q:" << quote.m_dt << " " 
     //  << quote.m_nBidSize << "@" << quote.m_dblBid << " "
     //  << quote.m_nAskSize << "@" << quote.m_dblAsk 
@@ -138,7 +138,7 @@ void CIBSymbol::BuildTrade() {
   //}
   //if ( m_bLastTimeStampFound && m_bLastFound && m_bLastSizeFound ) {
   if ( m_bLastFound && m_bLastSizeFound ) {
-    CTrade trade( boost::posix_time::microsec_clock::local_time(), m_dblLast, m_nLastSize );
+    CTrade trade( m_TimeSource.External(), m_dblLast, m_nLastSize );
     //std::cout << "T:" << trade.m_dt << " " << trade.m_nTradeSize << "@" << trade.m_dblTrade << std::endl;
     m_OnTrade( trade );
     //m_bLastTimeStampFound = m_bLastFound = m_bLastSizeFound = false;

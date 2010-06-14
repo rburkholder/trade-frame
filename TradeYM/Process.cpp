@@ -15,18 +15,23 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <LibTrading/Order.h>
+
+#include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <LibHDF5TimeSeries/HDF5DataManager.h>
 
 #include "Process.h"
 
 CProcess::CProcess(void)
 : 
 //  CIQFeed<CProcess>(),
-  //m_tws( "U215226" ),
-  m_tws( "DU15100" ),
-  m_bIBConnected( false )
+  m_tws( "U215226" ),
+  m_bIBConnected( false ),
+  m_pSymbol( NULL )
 {
+  m_sSymbolName = "ICE";
 }
 
 CProcess::~CProcess(void)
@@ -48,18 +53,18 @@ void CProcess::IBDisconnect( void ) {
 }
 
 void CProcess::PlaceBuyOrder( void ) {
-  COrder::pInstrument_t instrument( new CInstrument( "ICE", "SMART", InstrumentType::Stock ) );
+  COrder::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
 }
 
 void CProcess::PlaceSellOrder( void ) {
-  COrder::pInstrument_t instrument( new CInstrument( "ICE", "SMART", InstrumentType::Stock ) );
+  COrder::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
 }
 
 void CProcess::OnIQFeedConnected( void ) {
   std::vector<std::string> vs;
-  vs.push_back( "@YM#" );
+//  vs.push_back( "@YM#" );
 //  vs.push_back( "INDU" );
 //  vs.push_back( "TICk" );
 //  vs.push_back( "TRIN" );
@@ -71,3 +76,50 @@ void CProcess::OnIQFeedDisConnected( void ) {
 //void CProcess::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {
 //}
 
+void CProcess::StartWatch( void ) {
+  if ( ( NULL == m_pSymbol ) && ( m_bIBConnected ) ) {
+    m_pSymbol = m_tws.GetSymbol( m_sSymbolName );
+    m_tws.AddQuoteHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnQuote ) );
+    m_tws.AddTradeHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnTrade ) );
+  }
+}
+
+void CProcess::StopWatch( void ) {
+  if ( NULL != m_pSymbol ) {
+    m_tws.RemoveQuoteHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnQuote ) );
+    m_tws.RemoveTradeHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnTrade ) );
+    m_pSymbol = NULL;
+
+    std::stringstream ss;
+    ss << m_vQuotes.Size() << " Quotes, " << m_vTrades.Size() << " Trades" << std::endl;
+    OutputDebugString( ss.str().c_str() );
+
+    string sPathName;
+
+    if ( 0 != m_vQuotes.Size() ) {
+      sPathName = "/quote/" + m_sSymbolName;
+      CHDF5WriteTimeSeries<CQuotes, CQuote> wtsq;
+      wtsq.Write( sPathName, &m_vQuotes );
+    }
+
+    if ( 0 != m_vTrades.Size() ) {
+      sPathName = "/trade/" + m_sSymbolName;
+      CHDF5WriteTimeSeries<CTrades, CTrade> wtst;
+      wtst.Write( sPathName, &m_vTrades );
+    }
+  }
+}
+
+void CProcess::HandleOnQuote(CIBSymbol::quote_t quote) {
+  std::stringstream ss;
+  ss << "Q: " << quote.DateTime() << "," << quote.Bid() << "," << quote.Ask() << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  m_vQuotes.Append( quote );
+}
+
+void CProcess::HandleOnTrade(CIBSymbol::trade_t trade ) {
+  std::stringstream ss;
+  ss << "T: " << trade.DateTime() << "," << trade.Volume() << "@" << trade.Trade() << std::endl;
+  OutputDebugString( ss.str().c_str() );
+  m_vTrades.Append( trade );
+}

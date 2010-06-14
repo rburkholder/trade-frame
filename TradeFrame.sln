@@ -47,6 +47,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImportIQFeedSymbolFile", "I
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTimeSeries", "LibTimeSeries\LibTimeSeries.vcproj", "{6AE9A695-3B0C-46C2-B363-7125C955BCF0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{12CC3456-56CB-4AC1-979F-B6B73BB47929} = {12CC3456-56CB-4AC1-979F-B6B73BB47929}
+		{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4} = {F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibHDF5TimeSeries", "LibHDF5TimeSeries\LibHDF5TimeSeries.vcproj", "{12CC3456-56CB-4AC1-979F-B6B73BB47929}"
 EndProject

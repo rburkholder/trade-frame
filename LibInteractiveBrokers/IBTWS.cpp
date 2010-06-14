@@ -166,7 +166,6 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
-  assert( twsorder.orderId >= m_idNextValid );
 
   //Contract contract2;
   //contract2.conId = 44678227;
@@ -288,7 +287,6 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
       OutputDebugString( m_ss.str().c_str() );
     }
   }
-
 }
 
 void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
@@ -471,10 +469,20 @@ void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDeta
 }
 
 void CIBTWS::nextValidId( OrderId orderId) {
+  // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  m_ss << "next valid id " << orderId << std::endl;
+  CPersistedOrderId poi;
+  CPersistedOrderId::OrderId_t id;
+  id = poi.GetCurrentOrderId();
+  if ( orderId > id ) {
+    poi.SetNextOrderId( orderId );
+    m_ss << "old order id (" << id << ") new order id (" << orderId << ")" << std::endl;
+  }
+  else {
+    m_ss << "next order id (" << orderId << ")" << std::endl;
+  }
+  
   OutputDebugString( m_ss.str().c_str() );
-  m_idNextValid = orderId;
 }
 
 void CIBTWS::updatePortfolio( const Contract& contract, int position,
@@ -562,10 +570,10 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     pInstrument->SetContract( contract.conId );
 
     //CIBSymbol* pSymbol = dynamic_cast<CIBSymbol*>( NewCSymbol( sLocalSymbol ) );  // *** this isn't done correctly, but good enough for now
-    CIBSymbol* pSymbol = NewCSymbol( sLocalSymbol );
+    CIBSymbol* pSymbol = GetSymbol( sLocalSymbol );
 
     structDeltaStuff stuff;
-//    stuff.tickerId = pSymbol->GetTickerId();
+    stuff.tickerId = pSymbol->GetTickerId();
     stuff.pInstrument = pInstrument;
     stuff.sSymbol = sLocalSymbol;
     stuff.sUnderlying = sUnderlying;

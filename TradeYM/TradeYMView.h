@@ -31,6 +31,8 @@ public:
     COMMAND_HANDLER(IDC_BTN_IBDISCONNECT, BN_CLICKED, OnBnClickedBtnIbdisconnect)
     COMMAND_HANDLER(IDC_BTN_BUY, BN_CLICKED, OnBnClickedBtnBuy)
     COMMAND_HANDLER(IDC_BTN_SELL, BN_CLICKED, OnBnClickedBtnSell)
+    COMMAND_HANDLER(IDC_BTN_WATCH_START, BN_CLICKED, OnBnClickedBtnWatchStart)
+    COMMAND_HANDLER(IDC_BTN_WATCH_STOP, BN_CLICKED, OnBnClickedBtnWatchStop)
   END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -51,4 +53,6 @@ public:
   LRESULT OnBnClickedBtnIbdisconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnBuy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnSell(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnWatchStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnWatchStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

@@ -16,6 +16,7 @@
 #include "TWS/EWrapper.h"
 
 #include <LibTrading/Symbol.h>
+#include <LibCommon/TimeSource.h>
 
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING
@@ -73,4 +74,5 @@ protected:
   void BuildTrade( void );
 
 private:
+  CTimeSource m_TimeSource;
 };

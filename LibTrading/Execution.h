@@ -13,12 +13,14 @@
 
 #pragma once
 
-#include "TradingEnumerations.h"
-
 #include "boost/shared_ptr.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+
+#include <LibCommon/TimeSource.h>
+
+#include "TradingEnumerations.h"
 
 class CExecution {
 public:
@@ -48,7 +50,7 @@ protected:
   std::string m_sExchange;
   std::string m_sExecutionId;  // unique execution id supplied by provider
 
-  //CTimeSource m_timesource;
+  CTimeSource m_timesource;
 
 private:
 };

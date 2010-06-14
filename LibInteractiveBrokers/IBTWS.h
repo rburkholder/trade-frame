@@ -147,8 +147,6 @@ private:
   EPosixClientSocket *pTWS;
   long m_time;
 
-  OrderId m_idNextValid;
-
   std::stringstream m_ss;  // for OutputDebugStrings in background thread
 
   struct structDeltaStuff {

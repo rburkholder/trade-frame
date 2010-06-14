@@ -12,15 +12,23 @@
  ************************************************************************/
 
 #pragma once
-#include "LibBerkeleyDB/KeyValuePair.h"
+#include <LibBerkeleyDB/KeyValuePair.h>
+
+// may need to worry about multi-threading at some point in time
 
 class CPersistedOrderId :
   public CKeyValuePair {
 public:
+
+  typedef unsigned long OrderId_t;
+
   CPersistedOrderId(void);
   virtual ~CPersistedOrderId(void);
-  unsigned long GetNextOrderId( void ); // may need to worry about multi-threading at some point in time
+  void SetNextOrderId( OrderId_t );
+  OrderId_t GetNextOrderId( void ); 
+  OrderId_t GetCurrentOrderId( void );
 protected:
-  const static unsigned long m_nStartingOrderId = 1000;
+  const static OrderId_t m_nStartingOrderId = 1000;
+  static const std::string m_key;
 private:
 };

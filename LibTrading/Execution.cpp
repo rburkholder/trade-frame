@@ -12,8 +12,10 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "Execution.h"
+
 #include "LibCommon\TimeSource.h"
+
+#include "Execution.h"
 
 CExecution::CExecution( 
     unsigned long nOrderId, 
@@ -27,7 +29,7 @@ CExecution::CExecution(
 {
   assert( 0 < dblPrice );
   assert( 0 < nSize );
-  m_dtExecutionTimeStamp = CTimeSource::Internal();
+  m_dtExecutionTimeStamp = m_timesource.Internal();
 }
 
 CExecution::~CExecution(void) {

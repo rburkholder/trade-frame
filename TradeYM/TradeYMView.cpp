@@ -48,7 +48,6 @@ LRESULT CTradeYMView::OnBnClickedBtnIbdisconnect(WORD /*wNotifyCode*/, WORD /*wI
 
 LRESULT CTradeYMView::OnBnClickedBtnBuy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  OutputDebugString( "Buy\n" );
   m_process.PlaceBuyOrder();
 
   return 0;
@@ -56,8 +55,21 @@ LRESULT CTradeYMView::OnBnClickedBtnBuy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND
 
 LRESULT CTradeYMView::OnBnClickedBtnSell(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  OutputDebugString( "Sell\n" );
   m_process.PlaceSellOrder();
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnWatchStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StartWatch();
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnWatchStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StopWatch();
 
   return 0;
 }

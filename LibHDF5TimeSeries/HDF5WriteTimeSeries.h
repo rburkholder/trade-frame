@@ -37,7 +37,7 @@ template<class TS, class DD> CHDF5WriteTimeSeries<TS,DD>::~CHDF5WriteTimeSeries(
 
 template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::string &sPathName, TS *timeseries) {
 
-  if ( 0 == timeseries->Count() ) {
+  if ( 0 == timeseries->Size() ) {
     throw std::invalid_argument( "zero length time series found" );
   }
 
@@ -61,15 +61,15 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
 
   if ( bNeedToCreateDataSet ) {
 
-    CompType *pdt = DD::DefineDataType();
+    H5::CompType *pdt = DD::DefineDataType();
     pdt->pack();
 
-    DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
+    H5::DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
     hsize_t curSize = 0;
     hsize_t maxSize = H5S_UNLIMITED; 
     pds->setExtentSimple( 1, &curSize, &maxSize ); 
 
-    DSetCreatPropList pl;
+    H5::DSetCreatPropList pl;
     hsize_t sizeChunk = CHDF5DataManager::H5ChunkSize();
     pl.setChunk( 1, &sizeChunk );
     pl.setShuffle();
