@@ -38,6 +38,11 @@ using namespace boost::gregorian;
 #include "TWS/EPosixClientSocket.h"
 #include "TWS/EWrapper.h"
 
+#include "TWS/Contract.h"
+#include "TWS/Order.h"
+#include "TWS/OrderState.h"
+#include "TWS/Execution.h"
+
 #include "IBSymbol.h"
 
 class CIBTWS : 
@@ -59,6 +64,9 @@ public:
   void PlaceOrder( COrder *order );
   //virtual void CancelOrder( unsigned long nOrderId );
   void CancelOrder( COrder *order );
+
+  // TWS Function Calls
+  void RequestContractDetails( int reqId, const Contract& contract ) { pTWS->reqContractDetails( reqId, contract ); };
 
   // TWS Specific events
 

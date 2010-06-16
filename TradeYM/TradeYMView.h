@@ -33,6 +33,10 @@ public:
     COMMAND_HANDLER(IDC_BTN_SELL, BN_CLICKED, OnBnClickedBtnSell)
     COMMAND_HANDLER(IDC_BTN_WATCH_START, BN_CLICKED, OnBnClickedBtnWatchStart)
     COMMAND_HANDLER(IDC_BTN_WATCH_STOP, BN_CLICKED, OnBnClickedBtnWatchStop)
+    COMMAND_HANDLER(IDC_BTN_IQFEED_CONNNECT, BN_CLICKED, OnBnClickedBtnIqfeedConnnect)
+    COMMAND_HANDLER(IDC_BTN_IQFEED_DISCONNECT, BN_CLICKED, OnBnClickedBtnIqfeedDisconnect)
+    COMMAND_HANDLER(IDC_BTN_IQFEED_STARTWATCH, BN_CLICKED, OnBnClickedBtnIqfeedStartwatch)
+    COMMAND_HANDLER(IDC_BTN_IQFEED_STOPWATCH, BN_CLICKED, OnBnClickedBtnIqfeedStopwatch)
   END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -55,4 +59,8 @@ public:
   LRESULT OnBnClickedBtnSell(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnWatchStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnWatchStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIqfeedConnnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIqfeedDisconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIqfeedStartwatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnIqfeedStopwatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

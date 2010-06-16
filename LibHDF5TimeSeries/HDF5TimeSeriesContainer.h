@@ -51,7 +51,6 @@ template<class T> CHDF5TimeSeriesContainer<T>::~CHDF5TimeSeriesContainer(void) {
 }
 
 template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeriesContainer<T>::begin() {
-//template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesContainer<T>::begin() {
   iterator result( this, 0 );
   return result;
 }
@@ -70,7 +69,6 @@ template<class T> void CHDF5TimeSeriesContainer<T>::SetNewSize( size_type newsiz
   m_end = new iterator( this, newsize );
 }
 
-//template<class T> void CHDF5TimeSeriesContainer<T>::Read( const iterator &_begin, const iterator &_end, T *_dest ) {
 template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ) {
   hsize_t cnt = _end - _begin;
   H5::DataSpace *pDs = _dest->DefineDataSpace();
@@ -85,9 +83,7 @@ template<class T> void CHDF5TimeSeriesContainer<T>::Write( T *_begin, T *_end ) 
   size_t cnt = _end - _begin;
   if ( cnt > 0 ) {
     pair<CHDF5TimeSeriesContainer<T>::iterator, CHDF5TimeSeriesContainer<T>::iterator> p;
-    //p = equal_range( begin(), end(), (*_begin).m_dt );
     p = equal_range( begin(), end(), *_begin );
-    //p = lower_bound( begin(), end(), (*_begin).m_dt );
     // whether we found something or not, p.first is insertion point
     CHDF5TimeSeriesAccessor<T>::Write( p.first.m_ItemIndex, cnt, _begin );
   }

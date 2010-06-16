@@ -18,11 +18,6 @@
 #include <limits>
 #include <string>
 
-#include "TWS\Contract.h"
-#include "TWS\Order.h"
-#include "TWS\OrderState.h"
-#include "TWS\Execution.h"
-
 #include "IBTWS.h"
 
 CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port ): 
@@ -111,7 +106,6 @@ void CIBTWS::StopTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
 }
 
 void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
-  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
     pIBSymbol->SetQuoteTradeWatchInProgress();
@@ -159,7 +153,6 @@ void CIBTWS::StopDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base cla
 const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
 const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
-//long CIBTWS::nOrderId = 1;
 
 void CIBTWS::PlaceOrder( COrder *pOrder ) {
 
@@ -274,7 +267,7 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
         << "tickOptionComputation " 
         << iter->second.sUnderlying
         << " " << iter->second.sSymbol
-    //    << "tickerid=" << tickerId
+        << "tickerid=" << tickerId
         << " " << TickTypeStrings[tickType] 
         << ", Implied Vol=" << impliedVol
         << ", Delta=" << delta
@@ -375,7 +368,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
 }
 
 void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
-//  ****************** need to redo this, orderid disappeared, to be replacedby reqId.
+//  ****************** need to redo this, orderid disappeared, to be replaced by reqId.
   m_ss.str("");
   m_ss  
     << "execDetails: " 
@@ -460,8 +453,12 @@ void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 
 void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   m_ss.str("");
-  m_ss << "contract Details " << 
-    contractDetails.orderTypes << ", " << contractDetails.minTick << std::endl;
+  m_ss << "contract Details "
+    << contractDetails.summary.conId << ", "
+    << contractDetails.summary.expiry << ", "
+    << contractDetails.summary.strike << ", "
+    << contractDetails.summary.right 
+    << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
@@ -569,7 +566,6 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     if ( NULL == pInstrument ) throw std::out_of_range( "instrument type not accounted for" );
     pInstrument->SetContract( contract.conId );
 
-    //CIBSymbol* pSymbol = dynamic_cast<CIBSymbol*>( NewCSymbol( sLocalSymbol ) );  // *** this isn't done correctly, but good enough for now
     CIBSymbol* pSymbol = GetSymbol( sLocalSymbol );
 
     structDeltaStuff stuff;

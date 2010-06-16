@@ -30,14 +30,9 @@
 
 class CPivotSet {
 public:
-  CPivotSet(void);
-  CPivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
-  CPivotSet( const std::string &sName, double Hi, double Lo, double Close );
-  CPivotSet( const std::string &sName, CBars *bars );
-
-  virtual ~CPivotSet(void);
 
   enum enumPivots { R3, R23, R2, R12, R1, PVR1, PV, PVS1, S1, S12, S2, S23, S3, PivotCount };
+
   struct structPivotInfo {
     std::string sName;
     Colour::enumColour colour;
@@ -46,9 +41,20 @@ public:
       : sName( sName_ ), colour( colour_ ) {};
   };
 
-  const std::string &Name( void ) { return m_sName; };
+  CPivotSet(void);
+  CPivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
+  CPivotSet( const std::string &sName, double Hi, double Lo, double Close );
+  CPivotSet( const std::string &sName, CBars *bars );
+
+  virtual ~CPivotSet(void);
+
+  void CalcHalfPivots();
+  void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
 
   typedef std::pair<double, structPivotInfo> pivot_t;
+
+  const std::string &Name( void ) { return m_sName; };
+
   pivot_t operator[]( unsigned short ix ) { // this probably copies twice or thrice in succession
     assert( ix >= R3 );
     assert( ix <= S3 );
@@ -73,13 +79,12 @@ public:
 
 protected:
   
+private:
+
   std::string m_sName;
 
   double m_rPivots[ PivotCount ];
-  static std::string m_sPivotNames[ PivotCount ];
-  static Colour::enumColour m_rPivotColours[ PivotCount ];
+  static const std::string m_sPivotNames[ PivotCount ];
+  static const Colour::enumColour m_rPivotColours[ PivotCount ];
 
-  void CalcHalfPivots();
-  void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
-private:
 };

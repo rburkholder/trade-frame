@@ -64,10 +64,10 @@ void CProcess::PlaceSellOrder( void ) {
 
 void CProcess::OnIQFeedConnected( void ) {
   std::vector<std::string> vs;
-//  vs.push_back( "@YM#" );
-//  vs.push_back( "INDU" );
-//  vs.push_back( "TICk" );
-//  vs.push_back( "TRIN" );
+  vs.push_back( "@YM#" );
+  vs.push_back( "INDU" );
+  vs.push_back( "TICk" );
+  vs.push_back( "TRIN" );
 }
 
 void CProcess::OnIQFeedDisConnected( void ) {
@@ -111,15 +111,15 @@ void CProcess::StopWatch( void ) {
 }
 
 void CProcess::HandleOnQuote(CIBSymbol::quote_t quote) {
-  std::stringstream ss;
-  ss << "Q: " << quote.DateTime() << "," << quote.Bid() << "," << quote.Ask() << std::endl;
-  OutputDebugString( ss.str().c_str() );
+//  std::stringstream ss;
+//  ss << "Q: " << quote.DateTime() << "," << quote.Bid() << "," << quote.Ask() << std::endl;
+//  OutputDebugString( ss.str().c_str() );
   m_vQuotes.Append( quote );
 }
 
 void CProcess::HandleOnTrade(CIBSymbol::trade_t trade ) {
-  std::stringstream ss;
-  ss << "T: " << trade.DateTime() << "," << trade.Volume() << "@" << trade.Trade() << std::endl;
-  OutputDebugString( ss.str().c_str() );
+//  std::stringstream ss;
+//  ss << "T: " << trade.DateTime() << "," << trade.Volume() << "@" << trade.Trade() << std::endl;
+//  OutputDebugString( ss.str().c_str() );
   m_vTrades.Append( trade );
 }

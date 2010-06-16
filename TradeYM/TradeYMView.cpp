@@ -73,3 +73,31 @@ LRESULT CTradeYMView::OnBnClickedBtnWatchStop(WORD /*wNotifyCode*/, WORD /*wID*/
 
   return 0;
 }
+
+LRESULT CTradeYMView::OnBnClickedBtnIqfeedConnnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  // TODO: Add your control notification handler code here
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnIqfeedDisconnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  // TODO: Add your control notification handler code here
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnIqfeedStartwatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  // TODO: Add your control notification handler code here
+
+  return 0;
+}
+
+LRESULT CTradeYMView::OnBnClickedBtnIqfeedStopwatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  // TODO: Add your control notification handler code here
+
+  return 0;
+}

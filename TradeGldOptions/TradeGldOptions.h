@@ -1,0 +1,1 @@
+// TradeGldOptions.h

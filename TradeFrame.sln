@@ -65,6 +65,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IQFeedGetHistory", "IQFeedG
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibIndicators", "LibIndicators\LibIndicators.vcproj", "{662ACE5B-9B25-4BD7-9656-EC8815723EBB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0} = {6AE9A695-3B0C-46C2-B363-7125C955BCF0}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeYM", "TradeYM\TradeYM.vcproj", "{CF143A08-F85A-44E3-9E91-529F7CFA4379}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -80,6 +83,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibInteractiveBrokers", "Li
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlHeaders", "LibWtlHeaders\LibWtlHeaders.vcproj", "{59B836F9-5799-4F25-82EB-F4C9F180CD94}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeGldOptions", "TradeGldOptions\TradeGldOptions.vcproj", "{540D511F-4959-46B1-B973-28B8C6664B03}"
+	ProjectSection(ProjectDependencies) = postProject
+		{662ACE5B-9B25-4BD7-9656-EC8815723EBB} = {662ACE5B-9B25-4BD7-9656-EC8815723EBB}
+		{23192E89-C17F-4C84-B35C-3677927D64A6} = {23192E89-C17F-4C84-B35C-3677927D64A6}
+		{22BF5BE7-74F6-462A-A01F-E543825C0290} = {22BF5BE7-74F6-462A-A01F-E543825C0290}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,6 +161,10 @@ Global
 		{59B836F9-5799-4F25-82EB-F4C9F180CD94}.Debug|Win32.Build.0 = Debug|Win32
 		{59B836F9-5799-4F25-82EB-F4C9F180CD94}.Release|Win32.ActiveCfg = Release|Win32
 		{59B836F9-5799-4F25-82EB-F4C9F180CD94}.Release|Win32.Build.0 = Release|Win32
+		{540D511F-4959-46B1-B973-28B8C6664B03}.Debug|Win32.ActiveCfg = Debug|Win32
+		{540D511F-4959-46B1-B973-28B8C6664B03}.Debug|Win32.Build.0 = Debug|Win32
+		{540D511F-4959-46B1-B973-28B8C6664B03}.Release|Win32.ActiveCfg = Release|Win32
+		{540D511F-4959-46B1-B973-28B8C6664B03}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

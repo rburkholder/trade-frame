@@ -110,7 +110,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About TradeYM...",           ID_APP_ABOUT
+        MENUITEM "&About TradeGldOptions...",   ID_APP_ABOUT
     END
 END
 
@@ -122,7 +122,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\TradeYM.ico"
+IDR_MAINFRAME           ICON                    "res\\TradeGldOptions.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -135,26 +135,20 @@ CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,130,81,50,14
-    CTEXT           "TradeYM Application v1.0\n\n(c) Copyright 2010",IDC_STATIC,25,57,78,32
+    CTEXT           "TradeGldOptions Application v1.0\n\n(c) Copyright 2010",IDC_STATIC,25,57,78,32
     ICON            IDR_MAINFRAME,IDC_STATIC,55,26,18,20
     GROUPBOX        "",IDC_STATIC,7,7,115,88
 END
 
-IDD_TRADEYM_FORM DIALOGEX 0, 0, 349, 154
+IDD_TRADEGLDOPTIONS_FORM DIALOGEX 0, 0, 225, 175
 STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
 EXSTYLE WS_EX_CLIENTEDGE
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Buy",IDC_BTN_BUY,25,50,50,14
-    PUSHBUTTON      "IB Connect",IDC_BTN_IBCONNECT,23,19,50,14
-    PUSHBUTTON      "IB Disconnect",IDC_BTN_IBDISCONNECT,91,18,50,14
-    PUSHBUTTON      "Sell",IDC_BTN_SELL,90,49,50,14
-    PUSHBUTTON      "Start Watch",IDC_BTN_WATCH_START,25,77,50,14
-    PUSHBUTTON      "Stop Watch",IDC_BTN_WATCH_STOP,91,79,50,14
-    PUSHBUTTON      "IQFeed Con",IDC_BTN_IQFEED_CONNNECT,190,17,50,14
-    PUSHBUTTON      "IQFeed Disc.",IDC_BTN_IQFEED_DISCONNECT,262,18,50,14
-    PUSHBUTTON      "Start Watch",IDC_BTN_IQFEED_STARTWATCH,187,74,50,14
-    PUSHBUTTON      "Stop Watch",IDC_BTN_IQFEED_STOPWATCH,262,73,50,14
+    PUSHBUTTON      "IB Connect",IDC_BTN_IB_CONNECT,7,7,50,14
+    PUSHBUTTON      "IB Disconnect",IDC_BTN_IB_DISCONNECT,71,7,50,14
+    PUSHBUTTON      "IQFeed Connect",IDC_BTN_IQFEED_CONNECT,7,25,58,14
+    PUSHBUTTON      "IQFeed Discon",IDC_BTN_IQFEED_DISCONNECT,71,25,61,14
 END
 
 
@@ -174,12 +168,12 @@ BEGIN
         BOTTOMMARGIN, 95
     END
 
-    IDD_TRADEYM_FORM, DIALOG
+    IDD_TRADEGLDOPTIONS_FORM, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 342
+        RIGHTMARGIN, 218
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 168
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -223,12 +217,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "TradeYM Module"
+            VALUE "FileDescription", "TradeGldOptions Module"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "TradeYM"
+            VALUE "InternalName", "TradeGldOptions"
             VALUE "LegalCopyright", "Copyright 2010"
-            VALUE "OriginalFilename", "TradeYM.exe"
-            VALUE "ProductName", "TradeYM Module"
+            VALUE "OriginalFilename", "TradeGldOptions.exe"
+            VALUE "ProductName", "TradeGldOptions Module"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
@@ -246,7 +240,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "TradeYM"
+    IDR_MAINFRAME           "TradeGldOptions"
 END
 
 STRINGTABLE 
