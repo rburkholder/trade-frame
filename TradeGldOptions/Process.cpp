@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <algorithm>
+
 #include "Process.h"
 
 #include <LibIndicators/Pivots.h>
@@ -21,7 +23,7 @@ CProcess::CProcess(void)
 :
   m_tws( "U215226" ),
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
-  m_reqId( 0 ),
+//  m_reqId( 0 ),
   m_sSymbolName( "GLD" )
 {
   m_tws.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
@@ -66,17 +68,30 @@ void CProcess::IQFeedDisconnect( void ) {
 }
 
 void CProcess::HandleOnIBConnected(int e) {
+  // obtain strike list of underlying instrument
   Contract contract;
   contract.currency = "USD";
   contract.exchange = "SMART";
   contract.secType = "OPT";
-  contract.symbol = "GLD";
-  contract.expiry = "20100618";
+  contract.symbol = m_sSymbolName;
+  contract.expiry = "201006";
 //  contract.strike = 120.0;
   contract.right = "CALL";
-  m_tws.RequestContractDetails( ++m_reqId, contract );
-  contract.right = "PUT";
-  m_tws.RequestContractDetails( ++m_reqId, contract );
+  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing ) );
+  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+  m_tws.RequestContractDetails( contract );
+//  contract.right = "PUT";
+//  m_tws.RequestContractDetails( ++m_reqId, contract );
+}
+
+void CProcess::HandleStrikeListing( const ContractDetails& details ) {
+  m_vCrossOverPoints.push_back( details.summary.strike );
+}
+
+void CProcess::HandleStrikeListingDone(  ) {
+  m_ss.str( "" );
+  m_ss << "#strikes: " << m_vCrossOverPoints.size() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleOnIBDisconnected(int e) {
@@ -114,4 +129,11 @@ void CProcess::OnHistoryRequestDone( void ) {
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S1 ) );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S2 ) );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S3 ) );
+}
+
+void CProcess::StartTrading( void ) {
+  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
+}
+
+void CProcess::StopTrading( void ) {
 }

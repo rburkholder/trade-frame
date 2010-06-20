@@ -18,6 +18,10 @@
 #include <map>
 #include <sstream>
 
+#ifndef IB_USE_STD_STRING
+#define IB_USE_STD_STRING
+#endif
+
 #include <boost/shared_ptr.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -25,15 +29,12 @@ using namespace boost::gregorian;
 #include <boost/thread.hpp> 
 #include <boost/bind.hpp>
 
+#include <LibCommon/FastDelegate.h>
 #include <LibCommon/Delegate.h>
 
 #include <LibTrading/TradingEnumerations.h>
 #include <LibTrading/Instrument.h>
 #include <LibTrading/ProviderInterface.h>
-
-#ifndef IB_USE_STD_STRING
-#define IB_USE_STD_STRING
-#endif
 
 #include "TWS/EPosixClientSocket.h"
 #include "TWS/EWrapper.h"
@@ -52,6 +53,8 @@ class CIBTWS :
 public:
 
   typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
+  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef int reqId_t;  // request id type
 
   CIBTWS( const string &acctCode, const string &address = "127.0.0.1", unsigned int port = 7496 );
   ~CIBTWS(void);
@@ -66,7 +69,18 @@ public:
   void CancelOrder( COrder *order );
 
   // TWS Function Calls
-  void RequestContractDetails( int reqId, const Contract& contract ) { pTWS->reqContractDetails( reqId, contract ); };
+  //  need ot make a container of re-usable request ids to be looked up in order to return data to appropriate caller
+  //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
+  //   ie, may need an array of OnContractDetailsHandler_t
+  void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };
+  typedef FastDelegate1<const ContractDetails&> OnContractDetailsHandler_t;
+  void SetOnContractDetailsHandler( OnContractDetailsHandler_t function ) {
+    OnContractDetails = function;
+  }
+  typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
+  void SetOnContractDetailsDoneHandler( OnContractDetailsDoneHandler_t function ) {
+    OnContractDetailsDone = function;
+  }
 
   // TWS Specific events
 
@@ -92,7 +106,7 @@ public:
   void updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch);
   void currentTime(long time);
   void contractDetails( int reqId, const ContractDetails& contractDetails );
-  void contractDetailsEnd( int reqId) {};  // **
+  void contractDetailsEnd( int reqId );
   void bondContractDetails( int reqId, const ContractDetails& contractDetails );
   void nextValidId( OrderId orderId);
   void updatePortfolio( const Contract& contract, int position,
@@ -123,11 +137,13 @@ public:
 
 protected:
 
+  static char* TickTypeStrings[];
+
   std::string m_sAccountCode;
   std::string m_sIPAddress;
   unsigned int m_nPort;
   TickerId m_curTickerId;
-  virtual CIBSymbol *NewCSymbol( const std::string &sSymbolName );
+  
   std::vector<CIBSymbol*> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
 
   double m_dblBuyingPower;
@@ -135,6 +151,10 @@ protected:
 
   static const char *szSecurityType[];
   static const char *szOrderType[];
+
+  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
+
+  CIBSymbol *NewCSymbol( pInstrument_t pInstrument );
 
   // overridden from ProviderInterface
   void StartQuoteWatch( CIBSymbol* pSymbol );
@@ -149,46 +169,62 @@ protected:
   void StartDepthWatch( CIBSymbol* pSymbol );
   void  StopDepthWatch( CIBSymbol* pSymbol );
 
-  static char* TickTypeStrings[];
-
 private:
   EPosixClientSocket *pTWS;
   long m_time;
 
   std::stringstream m_ss;  // for OutputDebugStrings in background thread
 
+  OnContractDetailsHandler_t OnContractDetails;
+  OnContractDetailsDoneHandler_t OnContractDetailsDone;
+
   struct structDeltaStuff {
-    TickerId tickerId;
-    CInstrument::pInstrument_t pInstrument;
-    long contractId;
-    std::string sUnderlying;
-    std::string sSymbol;
     double delta;
     double impliedVolatility;
     double modelPrice;
-    double strike;
-    ptime dtExpiry;
     int position;
     int positionCalc;  // used by incremental option calculations.
     double positionDelta;
     double marketPrice;
     double averageCost;
-    OptionSide::enumOptionSide os;
     bool bDataRequested;
     structDeltaStuff(): delta( 0 ), positionDelta( 0 ), bDataRequested( false ) {};
   };
 
-  typedef std::map<long, structDeltaStuff> mapDelta_t;
-  typedef std::pair<long, structDeltaStuff> pair_mapDelta_t;
-  mapDelta_t m_mapDelta;
+  // keep track of option greeks, maybe put in symbol at some point in time
+  typedef std::map<TickerId, structDeltaStuff> mapGreeks_t;
+  typedef std::pair<TickerId, structDeltaStuff> pair_mapGreeks_t;
+  mapGreeks_t m_mapGreeks;
 
-  typedef std::map<TickerId, long> mapTickerIdToContract_t;
-  typedef std::pair<TickerId, long> pair_mapTickerIdToContract_t;
-  mapTickerIdToContract_t m_mapTickerIdToContract;
+  // given a contract id, see if we have a symbol assigned for the symbol id
+  typedef std::map<long, TickerId> mapContractToSymbolId_t;
+  typedef std::pair<long, TickerId> pair_mapContractToSymbolId_t;
+  mapContractToSymbolId_t m_mapContractToSymbolId;
 
   double m_dblPortfolioDelta;
 
   boost::thread m_thrdIBMessages;
 
   void ProcessMessages( void );
+
+  std::vector<reqId_t> m_vReqId;
+  reqId_t m_nxtReqId; 
+
+  reqId_t NextReqId( void ) {
+    reqId_t tmp;
+    if ( 0 == m_vReqId.size() ) {
+      tmp = ++m_nxtReqId;
+    }
+    else {
+      tmp = m_vReqId.back();
+      m_vReqId.pop_back();
+    }
+    return tmp;
+  }
+
+  void GiveBackReqId( reqId_t  id ) {
+    assert( 0 < id );
+    assert( id < m_nxtReqId );
+    m_vReqId.push_back( id );
+  }
 };

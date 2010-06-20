@@ -39,3 +39,17 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnIqfeedDisconnect(WORD /*wNotifyCode*
 
   return 0;
 }
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnStartTrading(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StartTrading();
+
+  return 0;
+}
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnStopTrading(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StopTrading();
+
+  return 0;
+}

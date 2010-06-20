@@ -25,6 +25,7 @@ CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port
   EWrapper(),
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
+  m_nxtReqId( 0 ),
   m_dblPortfolioDelta( 0 )
 {
   m_sName = "IB";
@@ -81,11 +82,13 @@ void CIBTWS::ProcessMessages( void ) {
   // maybe a state machine would keep track
 }
 
-CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
+//CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
+CIBSymbol* CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
   TickerId ticker = ++m_curTickerId;
-  CIBSymbol *pSymbol = new CIBSymbol( sSymbolName, ticker );
+  CIBSymbol *pSymbol = new CIBSymbol( ticker, pInstrument );
   CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
+  m_mapContractToSymbolId.insert( pair_mapContractToSymbolId_t( pInstrument->GetContract(), pSymbol->GetId() ) );
   return pSymbol;
 }
 
@@ -108,19 +111,21 @@ void CIBTWS::StopTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
 void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
-    pIBSymbol->SetQuoteTradeWatchInProgress();
     Contract contract;
-    contract.symbol = pIBSymbol->Name().c_str();
-    contract.currency = "USD";
-    contract.exchange = "SMART";
-    contract.secType = "STK";  // todo:  get this information from the symbol
+    contract.symbol = pIBSymbol->GetInstrument()->GetSymbolName();
+    //contract.currency = "USD";
+    contract.currency = pIBSymbol->GetInstrument()->GetCurrencyName();
+    //contract.exchange = "SMART";
+    contract.exchange = pIBSymbol->GetInstrument()->GetExchangeName();
+    //contract.secType = "STK";  // todo:  get this information from the symbol
+    contract.secType = szSecurityType[ pIBSymbol->GetInstrument()->GetInstrumentType() ];
     //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
+    pIBSymbol->SetQuoteTradeWatchInProgress();
     pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
   }
 }
 
 void CIBTWS::StopQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
-  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() ) {
     // don't do anything if either a quote or trade watch still in progress
   }
@@ -132,7 +137,6 @@ void CIBTWS::StopQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
 }
 
 void CIBTWS::StartDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
-  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( !pIBSymbol->GetDepthWatchInProgress() ) {
     // start watch
     pIBSymbol->SetDepthWatchInProgress();
@@ -140,7 +144,6 @@ void CIBTWS::StartDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base cl
 }
 
 void CIBTWS::StopDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
-  //CIBSymbol *pIBSymbol = (CIBSymbol *) pSymbol;
   if ( pIBSymbol->DepthWatchNeeded() ) {
   }
   else {
@@ -156,7 +159,6 @@ const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NU
 
 void CIBTWS::PlaceOrder( COrder *pOrder ) {
 
-  CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
 
@@ -167,7 +169,7 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   Contract contract;
   contract.symbol = pOrder->GetInstrument()->GetSymbolName();
   contract.currency = pOrder->GetInstrument()->GetCurrencyName();
-  contract.exchange = (*(pOrder->GetInstrument()->GetExchangeName()));
+  contract.exchange = pOrder->GetInstrument()->GetExchangeName();
   contract.secType = szSecurityType[ pOrder->GetInstrument()->GetInstrumentType() ];
   IBString s;
   switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
@@ -207,6 +209,8 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   twsorder.transmit = true;
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
+
+  CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
@@ -238,25 +242,25 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
-  mapTickerIdToContract_t::iterator iterTicker = m_mapTickerIdToContract.find( tickerId );
-  if ( m_mapTickerIdToContract.end() != iterTicker ) {
-    mapDelta_t::iterator iter = m_mapDelta.find( iterTicker->second );
-    if ( m_mapDelta.end() == iter ) {
+  m_mapSymbols_t::iterator iterTicker = m_mapSymbols.find( tickerId );
+  if ( m_mapSymbols.end() != iterTicker ) {
+    mapGreeks_t::iterator iterGreeks = m_mapGreeks.find( tickerId );
+    if ( m_mapGreeks.end() == iterGreeks ) {
       m_ss.str("");
-      m_ss << "can't find option map fo ticker=" << tickerId << std::endl;
+      m_ss << "can't find greeks map for ticker=" << tickerId << std::endl;
       OutputDebugString( m_ss.str().c_str() );
     }
     else {
   //    if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
       if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
-        iter->second.impliedVolatility = impliedVol;
+        iterGreeks->second.impliedVolatility = impliedVol;
         if ( MODEL_OPTION == tickType ) {
 //          iter->second.modelPrice = modelPrice;
-          m_dblPortfolioDelta -= iter->second.positionDelta;
-          iter->second.delta = delta;
-          iter->second.positionCalc = iter->second.position;
-          iter->second.positionDelta = 100 * iter->second.position * delta;
-          m_dblPortfolioDelta += iter->second.positionDelta;
+          m_dblPortfolioDelta -= iterGreeks->second.positionDelta;
+          iterGreeks->second.delta = delta;
+          iterGreeks->second.positionCalc = iterGreeks->second.position;
+          iterGreeks->second.positionDelta = 100 * iterGreeks->second.position * delta;
+          m_dblPortfolioDelta += iterGreeks->second.positionDelta;
         }
       }
     }
@@ -265,15 +269,15 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
       m_ss.str(""); 
       m_ss
         << "tickOptionComputation " 
-        << iter->second.sUnderlying
-        << " " << iter->second.sSymbol
-        << "tickerid=" << tickerId
+//        << iter->second.sUnderlying
+//        << " " << iter->second.sSymbol
+//        << "tickerid=" << tickerId
         << " " << TickTypeStrings[tickType] 
         << ", Implied Vol=" << impliedVol
         << ", Delta=" << delta
 //        << ", ModelPrice=" << modelPrice
-        << ", MarketPrice=" << iter->second.marketPrice
-        << ", PositionDelta=" << iter->second.positionDelta
+        << ", MarketPrice=" << iterGreeks->second.marketPrice
+        << ", PositionDelta=" << iterGreeks->second.positionDelta
         << ", PortfolioDelta=" << m_dblPortfolioDelta
   //      << ", Dividend=" << pvDividend
         << std::endl; 
@@ -460,6 +464,12 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
     << contractDetails.summary.right 
     << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+  if ( NULL != OnContractDetails ) OnContractDetails( contractDetails );
+}
+
+void CIBTWS::contractDetailsEnd( int reqId ) {
+  GiveBackReqId( reqId );
+  if ( NULL != OnContractDetailsDone ) OnContractDetailsDone();
 }
 
 void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {
@@ -482,141 +492,170 @@ void CIBTWS::nextValidId( OrderId orderId) {
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::updatePortfolio( const Contract& contract, int position,
-      double marketPrice, double marketValue, double averageCost,
-      double unrealizedPNL, double realizedPNL, const IBString& accountName) {
+CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contract ) {
 
-  mapDelta_t::iterator iter = m_mapDelta.find( contract.conId );
-  if ( m_mapDelta.end() == iter ) {
+  pInstrument_t pInstrument;
 
-    std::string sUnderlying( contract.symbol );
-    std::string sLocalSymbol( contract.localSymbol );
+  std::string sUnderlying( contract.symbol );
+  std::string sLocalSymbol( contract.localSymbol );
+  std::string sExchange( contract.exchange );
 
-    InstrumentType::enumInstrumentTypes it;
-    bool bFound = false;
-    for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
-      if ( 0 == strcmp( szSecurityType[ ix ], contract.secType.c_str() ) ) {
-        it = static_cast<InstrumentType::enumInstrumentTypes>( ix );
-        bFound = true;
-        break;
-      }
-    }
-    if ( !bFound ) throw std::out_of_range( "can't find instrument type" );
+  OptionSide::enumOptionSide os = OptionSide::Unknown;
 
-    ptime dtExpiry = not_a_date_time;
-    OptionSide::enumOptionSide os = OptionSide::Unknown;
+  // calculate expiry, maybe move inside with futures/options calcs
+  ptime dtExpiry = not_a_date_time;
+  try {  // is this only calculated on futures and options?
     if ( 0 != contract.expiry.length() ) {
       std::string s( contract.expiry );
       boost::gregorian::date d( boost::gregorian::from_undelimited_string( s ) );
       dtExpiry = ptime( d );
     }
-    std::string sExchange( contract.exchange );
+  }
+  catch ( std::exception e ) {
+      m_ss.str("");
+      m_ss << "contract expiry is funny: " << e.what() << std::endl;
+      OutputDebugString( m_ss.str().c_str() );
+  }
 
-    CInstrument::pInstrument_t pInstrument;
-    switch ( it ) {
-      case InstrumentType::Stock: 
-        if ( "" == sExchange ) sExchange = "SMART";
-        pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it ) );
-        break;
-      case InstrumentType::FuturesOption:
-      case InstrumentType::Option:
-        if ( "P" == contract.right ) os = OptionSide::Put;
-        if ( "C" == contract.right ) os = OptionSide::Call;
-        if ( "" == sExchange ) sExchange = "SMART";
-        pInstrument = CInstrument::pInstrument_t( new CInstrument( 
-          sLocalSymbol, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month(), sUnderlying, os, contract.strike ) );
-        break;
-      case InstrumentType::Future:
-        if ( "" == sExchange ) sExchange = "SMART";
-        pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month() ) );
-        break;
-      case InstrumentType::Currency:
-        bFound = false;
-        Currency::enumCurrency base = Currency::_Count;
-        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-          if ( 0 == strcmp( Currency::Name[ ix ], sUnderlying.c_str() ) ) {
-            bFound = true;
-            base = static_cast<Currency::enumCurrency>( ix );
-            break;
-          }
-        }
-        if ( !bFound ) throw std::out_of_range( "base currency lookup not found" );
-
-        const char* szCounter = NULL;
-        szCounter = strchr( sLocalSymbol.c_str(), '.' );
-        if ( NULL == szCounter ) throw std::out_of_range( "counter currency not in LocalSymbol" );
-        ++szCounter;  // advance to character after '.'
-
-        bFound = false;
-        Currency::enumCurrency counter = Currency::_Count;
-        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-          if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
-            bFound = true;
-            counter = static_cast<Currency::enumCurrency>( ix );
-            break;
-          }
-        }
-        if ( !bFound ) throw std::out_of_range( "counter currency lookup not found" );
-
-        if ( "" == sExchange ) sExchange = "IDEALPRO";
-
-        pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, base, counter ) );
-        break;
+  InstrumentType::enumInstrumentTypes it;
+  bool bFound = false;
+  for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
+    if ( 0 == strcmp( szSecurityType[ ix ], contract.secType.c_str() ) ) {
+      it = static_cast<InstrumentType::enumInstrumentTypes>( ix );
+      bFound = true;
+      break;
     }
-    if ( NULL == pInstrument ) throw std::out_of_range( "instrument type not accounted for" );
-    pInstrument->SetContract( contract.conId );
+  }
+  if ( !bFound ) 
+    throw std::out_of_range( "can't find instrument type" );
 
-    CIBSymbol* pSymbol = GetSymbol( sLocalSymbol );
+  switch ( it ) {
+    case InstrumentType::Stock: 
+      if ( "" == sExchange ) sExchange = "SMART";
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it ) );
+      break;
+    case InstrumentType::FuturesOption:
+    case InstrumentType::Option:
+      if ( "P" == contract.right ) os = OptionSide::Put;
+      if ( "C" == contract.right ) os = OptionSide::Call;
+      if ( "" == sExchange ) sExchange = "SMART";
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( 
+        sLocalSymbol, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day(), 
+        sUnderlying, os, contract.strike ) );
+      break;
+    case InstrumentType::Future:
+      if ( "" == sExchange ) sExchange = "SMART";
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month() ) );
+      break;
+    case InstrumentType::Currency:
+      bFound = false;
+      Currency::enumCurrency base = Currency::_Count;
+      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], sUnderlying.c_str() ) ) {
+          bFound = true;
+          base = static_cast<Currency::enumCurrency>( ix );
+          break;
+        }
+      }
+      if ( !bFound ) 
+        throw std::out_of_range( "base currency lookup not found" );
 
+      const char* szCounter = NULL;
+      szCounter = strchr( sLocalSymbol.c_str(), '.' );
+      if ( NULL == szCounter ) 
+        throw std::out_of_range( "counter currency not in LocalSymbol" );
+      ++szCounter;  // advance to character after '.'
+
+      bFound = false;
+      Currency::enumCurrency counter = Currency::_Count;
+      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
+          bFound = true;
+          counter = static_cast<Currency::enumCurrency>( ix );
+          break;
+        }
+      }
+      if ( !bFound ) 
+        throw std::out_of_range( "counter currency lookup not found" );
+
+      if ( "" == sExchange ) sExchange = "IDEALPRO";
+
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, base, counter ) );
+      break;
+  }
+  if ( NULL == pInstrument ) 
+    throw std::out_of_range( "instrument type not accounted for" );
+  pInstrument->SetContract( contract.conId );
+
+  return pInstrument;
+
+}
+
+void CIBTWS::updatePortfolio( const Contract& contract, int position,
+      double marketPrice, double marketValue, double averageCost,
+      double unrealizedPNL, double realizedPNL, const IBString& accountName) {
+
+  pInstrument_t pInstrument;
+  CIBSymbol* pSymbol;
+  mapGreeks_t::iterator iterGreeks;
+
+  mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( contract.conId );
+  if ( m_mapContractToSymbolId.end() == iterId ) {
+    // if we can't find an instrument, then create a new one.
+    pInstrument = BuildInstrumentFromContract( contract );
+    pSymbol = NewCSymbol( pInstrument );
+
+    // preset option stuff.
     structDeltaStuff stuff;
-    stuff.tickerId = pSymbol->GetTickerId();
-    stuff.pInstrument = pInstrument;
-    stuff.sSymbol = sLocalSymbol;
-    stuff.sUnderlying = sUnderlying;
     stuff.delta = 0;
     stuff.impliedVolatility = 0;
     stuff.modelPrice = 0;
-    stuff.strike = contract.strike;
-    stuff.dtExpiry = dtExpiry;
     stuff.position = position;
     stuff.positionCalc = 0;
     stuff.positionDelta = 0;
     stuff.marketPrice = marketPrice;
     stuff.averageCost = averageCost;
-    stuff.os = os;
 
-    m_mapDelta.insert( pair_mapDelta_t( contract.conId, stuff ) );
-    m_mapTickerIdToContract.insert( pair_mapTickerIdToContract_t( stuff.tickerId, contract.conId ) );
+    //  change: look through mapDelta and insert if not found
+    m_mapGreeks.insert( pair_mapGreeks_t( pSymbol->GetTickerId(), stuff ) );
 
-    iter = m_mapDelta.find( contract.conId );  // load iter for status print at end of this method
+    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
 
-    Contract contractMktData;
-    contractMktData = contract;
-    contractMktData.exchange = sExchange.c_str();
-    pTWS->reqMktData( stuff.tickerId, contractMktData, "100,101,104,106,221,225", false );
-    iter->second.bDataRequested = true;
+    // start market data
+    if ( 0 != position ) {
+      Contract contractMktData;
+      contractMktData = contract;
+      contractMktData.exchange = pInstrument->GetExchangeName();
+      pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
+      iterGreeks->second.bDataRequested = true;
+    }
 
   }
   else {
-    iter->second.position = position;
-    iter->second.marketPrice = marketPrice;
-    iter->second.averageCost = averageCost;
-  }
+    pSymbol = GetSymbol( iterId->second );
+    pInstrument = pSymbol->GetInstrument();
 
-  // start/stop data depending upon position size
-  if ( 0 == position ) {
-    if ( iter->second.bDataRequested ) {
-      pTWS->cancelMktData( iter->second.tickerId );
-      iter->second.bDataRequested = false;
+    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
+
+    iterGreeks->second.position = position;
+    iterGreeks->second.marketPrice = marketPrice;
+    iterGreeks->second.averageCost = averageCost;
+
+    // start/stop data depending upon position size
+    if ( 0 == position ) {
+      if ( iterGreeks->second.bDataRequested ) {
+        pTWS->cancelMktData( pSymbol->GetTickerId() );
+        iterGreeks->second.bDataRequested = false;
+      }
     }
-  }
-  else { // we have a position, so need data
-    if ( !iter->second.bDataRequested ) {
-      Contract contractMktData;
-      contractMktData = contract;
-      contractMktData.exchange = iter->second.pInstrument.get()->GetExchangeName()->c_str();
-      pTWS->reqMktData( iter->second.tickerId, contractMktData, "100,101,104,106,221,225", false );
-      iter->second.bDataRequested = true;
+    else { // we have a position, so need data
+      if ( !iterGreeks->second.bDataRequested ) {
+        Contract contractMktData;
+        contractMktData = contract;
+        contractMktData.exchange = pInstrument->GetExchangeName();
+        pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
+        iterGreeks->second.bDataRequested = true;
+      }
     }
   }
 
@@ -626,10 +665,10 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       << contract.symbol
       << " " << contract.localSymbol
       << "  id=" << contract.conId  // long
-      << ", type=" << InstrumentType::Name[ iter->second.pInstrument->GetInstrumentType() ]
+      << ", type=" << InstrumentType::Name[ pInstrument->GetInstrumentType() ]
       << ", strike=" << contract.strike // double
-      << ", expire=" << iter->second.dtExpiry
-      << ", right=" << OptionSide::Name[ iter->second.os ]
+//      << ", expire=" << iter->second.dtExpiry
+//      << ", right=" << OptionSide::Name[ iter->second.os ]
       << ", pos=" << position // int
       << ", price=" << marketPrice // double
       << ", val=" << marketValue // double
@@ -641,7 +680,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     OutputDebugString( m_ss.str().c_str() );
   }
 
-  CPortfolio::structUpdatePortfolioRecord record( iter->second.pInstrument.get(), position, marketPrice, averageCost );
+  CPortfolio::structUpdatePortfolioRecord record( pInstrument.get(), position, marketPrice, averageCost );
   OnUpdatePortfolioRecord( record );
 
 }

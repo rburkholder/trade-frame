@@ -25,6 +25,8 @@ class CIQFeedProvider :
 public:
 
   typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> ProviderInterface_t;
+  typedef ProviderInterface_t::symbol_id_t symbol_id_t;
+  typedef CIQFeedSymbol::pInstrument_t pInstrument_t;
   typedef CIQFeed<CIQFeedProvider>  IQFeed_t;
 
   CIQFeedProvider( void );
@@ -35,8 +37,8 @@ public:
   virtual void Disconnect( void );
 
   // use crtp?
-  virtual CIQFeedSymbol* GetSymbol( const string &sSymbol ) { 
-    CIQFeedSymbol* pSym = ProviderInterface_t::GetSymbol( sSymbol );
+  virtual CIQFeedSymbol* GetSymbol( symbol_id_t id ) { 
+    CIQFeedSymbol* pSym = ProviderInterface_t::GetSymbol( id );
     return pSym; 
   };
 
@@ -55,7 +57,7 @@ protected:
   virtual void StartDepthWatch( CIQFeedSymbol* pSymbol ) {};
   virtual void  StopDepthWatch( CIQFeedSymbol* pSymbol ) {};
 
-  virtual CIQFeedSymbol* NewCSymbol( const std::string &sSymbolName );  // used by Add/Remove x handlers in base class
+  virtual CIQFeedSymbol* NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
   virtual void HandleQMessage( CIQFUpdateMessage *pMsg );
   virtual void HandlePMessage( CIQFSummaryMessage *pMsg );

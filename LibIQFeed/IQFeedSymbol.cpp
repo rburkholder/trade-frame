@@ -17,13 +17,14 @@
 
 #include "IQFeedSymbol.h"
 
-CIQFeedSymbol::CIQFeedSymbol(const string &sSymbol) 
-: CSymbol<CIQFeedSymbol>( sSymbol ),
-m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
-m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
-m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), 
-m_nOpenInterest( 0 ), m_QStatus( qUnknown ),
-m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false )
+CIQFeedSymbol::CIQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument) 
+: 
+  CSymbol<CIQFeedSymbol,symbol_id_t>( sSymbol, pInstrument ),
+  m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
+  m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
+  m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), 
+  m_nOpenInterest( 0 ), m_QStatus( qUnknown ),
+  m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false )
 {
 }
 
@@ -68,7 +69,7 @@ void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage<T> *pMsg ) {
       if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) { 
         m_dblOpen = dblOpen; 
         m_bNewOpen = true; 
-        std::cout << "IQF new open: " << m_sSymbolName<< "=" << m_dblOpen << std::endl;
+        std::cout << "IQF new open: " << GetId() << "=" << m_dblOpen << std::endl;
       };
 
       // fall through to processing bid / ask
@@ -105,7 +106,7 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( _T( "Not Found" ) == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
-      std::cout << m_sSymbolName << " not found" << endl;
+      std::cout << GetId() << " not found" << endl;
     }
   }
   if ( qFound == m_QStatus ) {

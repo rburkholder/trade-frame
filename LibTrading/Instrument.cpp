@@ -48,7 +48,7 @@ CInstrument::CInstrument(
   //assert( 0 < m_sExchange.size() );
 }
 
- // option
+ // option yymm
 CInstrument::CInstrument( 
     const std::string &sSymbolName, const std::string &sExchangeName,
     InstrumentType::enumInstrumentTypes type, 
@@ -60,7 +60,33 @@ CInstrument::CInstrument(
     m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
     m_OptionSide( side ), 
     m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), m_dblStrike( strike ),
+    m_nYear( year ), m_nMonth( month ), 
+    m_dblStrike( strike ),
+    m_nContract( 0 )
+{
+  assert( side < OptionSide::_Count );
+  assert( side > OptionSide::Unknown );
+  assert( ( m_InstrumentType == InstrumentType::Option )
+       || ( m_InstrumentType == InstrumentType::FuturesOption )
+    );
+  //assert( 0 < m_sSymbolName.size() );
+  //assert( 0 < m_sExchange.size() );
+}
+
+ // option yymmdd
+CInstrument::CInstrument( 
+    const std::string &sSymbolName, const std::string &sExchangeName,
+    InstrumentType::enumInstrumentTypes type, 
+    unsigned short year, unsigned short month, unsigned short day,
+    const std::string &sUnderlying,
+    OptionSide::enumOptionSide side, 
+    double strike ) 
+    : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
+    m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
+    m_OptionSide( side ), 
+    m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
+    m_nYear( year ), m_nMonth( month ), m_nDay( day ),
+    m_dblStrike( strike ),
     m_nContract( 0 )
 {
   assert( side < OptionSide::_Count );

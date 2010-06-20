@@ -22,35 +22,42 @@
 class CInstrument {
 public:
 
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,
-    InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown ); // generic
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName, 
+  typedef boost::shared_ptr<CInstrument> pInstrument_t;
+
+  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName, // generic
+    InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
+  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // future
     InstrumentType::enumInstrumentTypes type, 
-    unsigned short year, unsigned short month ); // future
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,
+    unsigned short year, unsigned short month );
+  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // option with yymm
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month,
     const std::string &sUnderlying,
     OptionSide::enumOptionSide side, 
-    double strike );  // option
-  CInstrument( const std::string& sSymbolName, const std::string& sUnderlyingName,
-    InstrumentType::enumInstrumentTypes type,  // currency
+    double strike ); 
+  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // option with yymmdd
+    InstrumentType::enumInstrumentTypes type, 
+    unsigned short year, unsigned short month, unsigned short day,
+    const std::string &sUnderlying,
+    OptionSide::enumOptionSide side, 
+    double strike ); 
+  CInstrument( const std::string& sSymbolName, const std::string& sUnderlyingName, // currency
+    InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   CInstrument( const CInstrument& );  // copy ctor
   virtual ~CInstrument(void);
 
-  typedef boost::shared_ptr<CInstrument> pInstrument_t;
-
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
   const std::string &GetSymbolName( void ) { return m_sSymbolName; };
   const std::string &GetUnderlyingName( void ) { return m_sUnderlying; }
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
-  const std::string *GetExchangeName( void ) { return &m_sExchange; };
+  const std::string& GetExchangeName( void ) { return m_sExchange; };
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   double GetStrike( void ) { return m_dblStrike; };
   unsigned short GetExpiryYear( void ) { return m_nYear; };
   unsigned short GetExpiryMonth( void ) { return m_nMonth; };
+  unsigned short GetExpiryDay( void ) { return m_nDay; };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
@@ -67,6 +74,7 @@ protected:
   OptionSide::enumOptionSide m_OptionSide;
   unsigned short m_nYear; // future, option
   unsigned short m_nMonth; // future, option
+  unsigned short m_nDay; // future, option
   double m_dblStrike;
   long m_nContract;
 

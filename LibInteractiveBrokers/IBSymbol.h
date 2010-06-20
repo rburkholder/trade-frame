@@ -22,27 +22,19 @@
 #define IB_USE_STD_STRING
 #endif
 
-// todo:  need to assigne TickerId after creation or in overload
-
-class CIBSymbol : public CSymbol<CIBSymbol> {
+class CIBSymbol : public CSymbol<CIBSymbol,TickerId> {
   friend class CIBTWS;
 public:
-  CIBSymbol( const std::string sName );
-  CIBSymbol( const std::string sName, TickerId id  );
+
+  typedef CSymbol<CIBSymbol,TickerId> inherited_t;
+  typedef inherited_t::pInstrument_t pInstrument_t;
+
+  CIBSymbol( TickerId id, pInstrument_t pInstrument );
   virtual ~CIBSymbol(void);
   TickerId GetTickerId( void ) { return m_TickerId; };
 protected:
 
   TickerId m_TickerId;
-
-  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
-  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
-  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
-  bool m_bQuoteTradeWatchInProgress;
-  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
-  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
-  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
-  bool m_bDepthWatchInProgress;
 
   bool m_bAskFound;
   bool m_bAskSizeFound;
@@ -66,6 +58,16 @@ protected:
   double m_dblLow;
   double m_dblClose;
 
+  void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
+  void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
+  bool GetQuoteTradeWatchInProgress( void ) { return m_bQuoteTradeWatchInProgress; };
+  bool m_bQuoteTradeWatchInProgress;
+
+  void SetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = true; };
+  void ResetDepthWatchInProgress( void ) { m_bDepthWatchInProgress = false; };
+  bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
+  bool m_bDepthWatchInProgress;
+
   void AcceptTickPrice( TickType tickType, double price );
   void AcceptTickSize( TickType tickType, int size );
   void AcceptTickString( TickType tickType, const IBString &value );
@@ -74,5 +76,8 @@ protected:
   void BuildTrade( void );
 
 private:
+
   CTimeSource m_TimeSource;
+  long m_conId;  // matches IB contract id
+
 };

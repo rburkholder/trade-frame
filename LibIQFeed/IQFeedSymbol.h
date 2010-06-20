@@ -23,17 +23,13 @@
 
 class CIQFeedProvider;
 
-class CIQFeedSymbol : public CSymbol<CIQFeedSymbol> {
+class CIQFeedSymbol : public CSymbol<CIQFeedSymbol,std::string> {
   friend class CIQFeedProvider;
 public:
 
-  CIQFeedSymbol(const std::string &symbol);
-  ~CIQFeedSymbol(void);
-
-  Delegate<CIQFeedSymbol*> OnFundamentalMessage;
-  Delegate<CIQFeedSymbol*> OnUpdateMessage;
-  Delegate<CIQFeedSymbol*> OnSummaryMessage;
-  Delegate<CIQFeedSymbol*> OnNewsMessage;
+  typedef CSymbol<CIQFeedSymbol,std::string> inherited_t;
+  typedef inherited_t::pInstrument_t pInstrument_t;
+  typedef std::string symbol_id_t;
 
   // Public for RowKeyValues.  Pass in a structure sometime.
   // Public for CVuChartArmsIntraDay.  Pass in structure sometime.
@@ -65,8 +61,16 @@ public:
   bool m_bNewQuote;
   bool m_bNewOpen;
 
+  CIQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
+  ~CIQFeedSymbol(void);
+
+  Delegate<CIQFeedSymbol*> OnFundamentalMessage;
+  Delegate<CIQFeedSymbol*> OnUpdateMessage;
+  Delegate<CIQFeedSymbol*> OnSummaryMessage;
+  Delegate<CIQFeedSymbol*> OnNewsMessage;
 
 protected:
+
   unsigned short m_cnt;  // used for watch/unwatch
   enum enumQStatus { qUnknown, qFound, qNotFound } m_QStatus;
 

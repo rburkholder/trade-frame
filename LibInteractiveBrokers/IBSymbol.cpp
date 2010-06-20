@@ -17,20 +17,10 @@
 
 //#include "boost/date_time/local_time/local_time.hpp"
 
-CIBSymbol::CIBSymbol( const std::string sName ): 
-  CSymbol<CIBSymbol>( sName ), m_TickerId( 0 ), 
-    m_bAskFound( false ), m_bAskSizeFound( false ), 
-    m_bBidFound( false ), m_bBidSizeFound( false ),
-    m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
-    m_nAskSize( 0 ), m_nBidSize( 0 ), m_nLastSize( 0 ),
-    m_dblAsk( 0 ), m_dblBid( 0 ), m_dblLast( 0 ),
-    m_nVolume( 0 ),
-    m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
-    m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ) {
-}
-
-CIBSymbol::CIBSymbol( const std::string sName, TickerId id ): 
-  CSymbol<CIBSymbol>( sName ), m_TickerId( id ), 
+CIBSymbol::CIBSymbol( TickerId id, pInstrument_t pInstrument )
+: 
+  CSymbol<CIBSymbol,TickerId>( id, pInstrument ), 
+    m_TickerId( id ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
     m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
@@ -67,15 +57,15 @@ void CIBSymbol::AcceptTickPrice(TickType tickType, double price) {
       break;
     case TickType::HIGH:
       m_dblHigh = price;
-      std::cout << m_sSymbolName << " High " << price << std::endl;
+//      std::cout << m_sSymbolName << " High " << price << std::endl;
       break;
     case TickType::LOW:
       m_dblLow = price;
-      std::cout << m_sSymbolName << " Low " << price << std::endl;
+//      std::cout << m_sSymbolName << " Low " << price << std::endl;
       break;
     case TickType::CLOSE:
       m_dblClose = price;
-      std::cout << m_sSymbolName << " Close " << price << std::endl;
+//      std::cout << m_sSymbolName << " Close " << price << std::endl;
       break;
   }
 }

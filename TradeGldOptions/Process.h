@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include <sstream>
 
 #include <LibTimeSeries/DatedDatum.h>
 
@@ -22,7 +23,8 @@
 
 #include <LibInteractiveBrokers/IBTWS.h>
 
-class CProcess: public CIQFeedHistoryQuery<CProcess>
+class CProcess: 
+  public CIQFeedHistoryQuery<CProcess>
 {
   friend CIQFeedHistoryQuery<CProcess>;
 public:
@@ -35,6 +37,9 @@ public:
   void IQFeedConnect( void );
   void IQFeedDisconnect( void );
 
+  void StartTrading( void ) ;
+  void StopTrading( void );
+
 protected:
 
   void OnHistoryConnected( void );
@@ -46,12 +51,14 @@ private:
 
   std::string m_sSymbolName;
 
+  std::stringstream m_ss;
+
   CIQFeedProvider m_iqfeed;
   bool m_bIQFeedConnected;
 
   CIBTWS m_tws;
   bool m_bIBConnected;
-  int m_reqId;
+  //int m_reqId;
 
   CBar m_Bar;  // keep pointer for when data arrives
 
@@ -77,5 +84,8 @@ private:
 
   void HandleOnIQFeedConnected( int );
   void HandleOnIQFeedDisconnected( int );
+
+  void HandleStrikeListing( const ContractDetails& );
+  void HandleStrikeListingDone( void );
 
 };

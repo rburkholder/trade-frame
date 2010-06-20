@@ -30,8 +30,6 @@
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
 
-// Merge CInstrument and CSymbol<S>?
-// Create CSymbol<S> from CInstrument?
 // Store CInstrument in CSymbol<S>?  <= use this with smart_ptr on CInstrument.
 
 /*
@@ -43,6 +41,7 @@ Discussion of calling sequence for open, quote, trade, depth handlers:
 
 class CProviderInterfaceBase {
 public:
+
   CProviderInterfaceBase( void ) {};
   virtual ~CProviderInterfaceBase( void ) {};
 
@@ -55,12 +54,15 @@ private:
 template <typename P, typename S>  // p = provider, S = symbol
 class CProviderInterface: public CProviderInterfaceBase {
 public:
-  CProviderInterface(void);
-  ~CProviderInterface(void);
 
   typedef boost::shared_ptr<CProviderInterface<P,S> > pProvider_t;
+  typedef typename S::pInstrument_t pInstrument_t;
+  typedef typename S::symbol_id_t symbol_id_t;
 
   enum enumProviderId { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, _EProviderCount };
+
+  CProviderInterface(void);
+  ~CProviderInterface(void);
 
   virtual  void Connect( void );
   Delegate<int> OnConnected;
@@ -68,21 +70,21 @@ public:
   virtual  void Disconnect( void );
   Delegate<int> OnDisconnected;
 
-  virtual void     AddQuoteHandler( const std::string& sSymbol, typename S::quotehandler_t handler );
-  virtual void  RemoveQuoteHandler( const std::string& sSymbol, typename S::quotehandler_t handler );
+  virtual void     AddQuoteHandler( const symbol_id_t id, typename S::quotehandler_t handler );
+  virtual void  RemoveQuoteHandler( const symbol_id_t id, typename S::quotehandler_t handler );
 
-  virtual void    AddOnOpenHandler( const std::string& sSymbol, typename S::tradehandler_t handler );
-  virtual void RemoveOnOpenHandler( const std::string& sSymbol, typename S::tradehandler_t handler );
+  virtual void    AddOnOpenHandler( const symbol_id_t id, typename S::tradehandler_t handler );
+  virtual void RemoveOnOpenHandler( const symbol_id_t id, typename S::tradehandler_t handler );
 
-  virtual void     AddTradeHandler( const std::string& sSymbol, typename S::tradehandler_t handler );
-  virtual void  RemoveTradeHandler( const std::string& sSymbol, typename S::tradehandler_t handler );
+  virtual void     AddTradeHandler( const symbol_id_t id, typename S::tradehandler_t handler );
+  virtual void  RemoveTradeHandler( const symbol_id_t id, typename S::tradehandler_t handler );
 
-  virtual void     AddDepthHandler( const std::string& sSymbol, typename S::depthhandler_t handler );
-  virtual void  RemoveDepthHandler( const std::string& sSymbol, typename S::depthhandler_t handler );
+  virtual void     AddDepthHandler( const symbol_id_t id, typename S::depthhandler_t handler );
+  virtual void  RemoveDepthHandler( const symbol_id_t id, typename S::depthhandler_t handler );
 
   Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
-  S* GetSymbol( const string &sSymbol );
+  S* GetSymbol( const symbol_id_t );
 
   const std::string& Name( void ) { return m_sName; };
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
@@ -100,8 +102,8 @@ protected:
   unsigned short m_nID;
   bool m_bConnected;
 
-  typedef std::map<const std::string, S*> m_mapSymbols_t;
-  typedef std::pair<const std::string, S*> pair_mapSymbols_t;
+   typedef std::map<symbol_id_t, S*> m_mapSymbols_t;
+  typedef std::pair<symbol_id_t, S*> pair_mapSymbols_t;
   m_mapSymbols_t m_mapSymbols;
 
   virtual void StartQuoteWatch( S* pSymbol ) {};
@@ -113,10 +115,12 @@ protected:
   virtual void StartDepthWatch( S* pSymbol ) {};
   virtual void  StopDepthWatch( S* pSymbol ) {};
 
-  virtual S *NewCSymbol( const std::string& sSymbolName ) = 0; // override needs to call AddCSymbol to add symbol to map
+//  virtual S *NewCSymbol( const std::string& sSymbolName ) = 0; // override needs to call AddCSymbol to add symbol to map
+  virtual S *NewCSymbol( pInstrument_t pInstrument ) = 0; 
   S* AddCSymbol( S* pSymbol );
   virtual void PreSymbolDestroy( S* pSymbol );
 
+  // need to redo this and place into CInstrument?  or CSymbol?
   std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
   CAlternateInstrumentNames m_lutAlternateInstrumentNames;
 
@@ -156,22 +160,23 @@ void CProviderInterface<P,S>::Disconnect() {
 template <typename P, typename S>
 S* CProviderInterface<P,S>::AddCSymbol( S* pSymbol) {
   // todo:  add an assert to validate acceptable CSymbol type
-  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->Name() );
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->Name(), pSymbol ) );
-    iter = m_mapSymbols.find( pSymbol->Name() );
+    m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->GetId(), pSymbol ) );
+    iter = m_mapSymbols.find( pSymbol->GetId() );
     assert( m_mapSymbols.end() != iter );
   }
   return iter->second;
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddQuoteHandler(const std::string &sSymbol, typename S::quotehandler_t handler) {
+void CProviderInterface<P,S>::AddQuoteHandler(const symbol_id_t id, typename S::quotehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-    iter = m_mapSymbols.find( sSymbol );
+//    m_mapSymbols.insert( pair_mapSymbols_t( id, NewCSymbol( sSymbol ) ) );
+//    iter = m_mapSymbols.find( sSymbol );
+    assert( 1 == 0 );
   }
   if ( iter->second->AddQuoteHandler( handler ) ) {
     StartQuoteWatch( iter->second );
@@ -179,11 +184,12 @@ void CProviderInterface<P,S>::AddQuoteHandler(const std::string &sSymbol, typena
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveQuoteHandler(const std::string &sSymbol, typename S::quotehandler_t handler) {
+void CProviderInterface<P,S>::RemoveQuoteHandler(const symbol_id_t id, typename S::quotehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
+    assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveQuoteHandler( handler ) ) {
@@ -193,12 +199,13 @@ void CProviderInterface<P,S>::RemoveQuoteHandler(const std::string &sSymbol, typ
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddTradeHandler(const std::string &sSymbol, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::AddTradeHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-    iter = m_mapSymbols.find( sSymbol );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
+//    iter = m_mapSymbols.find( sSymbol );
+    assert( 1 == 0 );
   }
   if ( iter->second->AddTradeHandler( handler ) ) {
     StartTradeWatch( iter->second );
@@ -206,12 +213,13 @@ void CProviderInterface<P,S>::AddTradeHandler(const std::string &sSymbol, typena
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveTradeHandler(const std::string &sSymbol, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::RemoveTradeHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
     // should probably raise exception here as trying to remove handler from non-existtant symbol
+    assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveTradeHandler( handler ) ) {
@@ -221,22 +229,24 @@ void CProviderInterface<P,S>::RemoveTradeHandler(const std::string &sSymbol, typ
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddOnOpenHandler(const std::string &sSymbol, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::AddOnOpenHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-    iter = m_mapSymbols.find( sSymbol );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
+//    iter = m_mapSymbols.find( sSymbol );
+    assert( 1 == 0 );
   }
   iter->second->AddOnOpenHandler( handler );
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveOnOpenHandler(const std::string &sSymbol, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::RemoveOnOpenHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
+//    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
+    assert( 1 == 0 );
   }
   else {
     iter->second->RemoveOnOpenHandler( handler );
@@ -244,12 +254,13 @@ void CProviderInterface<P,S>::RemoveOnOpenHandler(const std::string &sSymbol, ty
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddDepthHandler(const std::string &sSymbol, typename S::depthhandler_t handler) {
+void CProviderInterface<P,S>::AddDepthHandler(const symbol_id_t id, typename S::depthhandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-    iter = m_mapSymbols.find( sSymbol );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
+//    iter = m_mapSymbols.find( sSymbol );
+    assert( 1 == 0 );
   }
   if ( iter->second->AddDepthHandler( handler ) ) {
     StartDepthWatch( iter->second );
@@ -257,11 +268,12 @@ void CProviderInterface<P,S>::AddDepthHandler(const std::string &sSymbol, typena
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveDepthHandler(const std::string &sSymbol, typename S::depthhandler_t handler) {
+void CProviderInterface<P,S>::RemoveDepthHandler(const symbol_id_t id, typename S::depthhandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
+//    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
+    assert( 1 == 0 );
   }
   else {
     if ( iter->second->RemoveDepthHandler( handler ) ) {
@@ -271,12 +283,13 @@ void CProviderInterface<P,S>::RemoveDepthHandler(const std::string &sSymbol, typ
 }
 
 template <typename P, typename S>
-S* CProviderInterface<P,S>::GetSymbol( const string &sSymbol ) {
+S* CProviderInterface<P,S>::GetSymbol( const symbol_id_t id ) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-    iter = m_mapSymbols.find( sSymbol );
+//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
+//    iter = m_mapSymbols.find( sSymbol );
+    assert( 1 == 0 );
   }
   return iter->second;
 }
@@ -288,7 +301,7 @@ void CProviderInterface<P,S>::PreSymbolDestroy( S* pSymbol ) {
 template <typename P, typename S>
 void CProviderInterface<P,S>::PlaceOrder( COrder *pOrder ) {
   pOrder->SetProviderName( m_sName );
-  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
+//  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
   COrderManager::Instance().PlaceOrder( this, pOrder );
 }
 
