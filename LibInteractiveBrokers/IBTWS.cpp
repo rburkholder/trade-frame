@@ -42,7 +42,8 @@ CIBTWS::~CIBTWS(void) {
 void CIBTWS::Connect() {
   if ( NULL == pTWS ) {
     pTWS = new EPosixClientSocket( this );
-    pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
+    bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
+    assert( bReturn );
     m_bConnected = true;
     m_thrdIBMessages = boost::thread( boost::bind( &CIBTWS::ProcessMessages, this ) );
     OnConnected( 0 );
@@ -395,7 +396,11 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
   if ( "SLD" == execution.side ) side = OrderSide::Sell;
-  if ( OrderSide::Unknown == side ) std::cout << "Unknown execution side: " << execution.side << std::endl;
+  if ( OrderSide::Unknown == side ) {
+    m_ss.str("");
+    m_ss << "Unknown execution side: " << execution.side << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
+  }
   else {
 //    CExecution exec( orderId, execution.price, execution.shares, side, 
 //      execution.exchange, execution.execId );
@@ -417,6 +422,30 @@ OpenOrder: ordid=1057, cont.sym=ICE, ord.id=1057, ord.ref=, state.stat=Submitted
 execDetails:   sym=ICE, oid=1057, ex.oid=1057, ex.pr=117, ex.sh=100, ex.sd=BOT, ex.ti=20080607  12:39:14, ex.ex=NYSE, ex.liq=0, ex.pid=2147126208, ex.acct=DU15067, ex.clid=0, ex.xid=0000ea6a.44f438d5.01.01
 current time 1212851947
 */
+
+// check for symbol existance and return, else exeption
+CIBSymbol* CIBTWS::GetSymbol( long ContractId ) {
+  mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( ContractId );
+  if ( m_mapContractToSymbolId.end() == iterId ) {
+    throw std::out_of_range( "can't find contract" );
+  }
+  return GetSymbol( iterId->second );
+}
+
+// check for symbol existance, and return, else add and return
+CIBSymbol* CIBTWS::GetSymbol( pInstrument_t instrument ) {
+  long contractId;
+  contractId = instrument->GetContract();
+  assert( 0 != contractId );
+  CIBSymbol* pSymbol;
+  try {
+    pSymbol = GetSymbol( contractId );
+  }
+  catch ( std::out_of_range& e ) {
+    pSymbol = NewCSymbol( instrument );
+  }
+  return pSymbol;
+}
 
 void CIBTWS::error(const int id, const int errorCode, const IBString errorString) {
   switch ( errorCode ) {
@@ -458,10 +487,15 @@ void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   m_ss.str("");
   m_ss << "contract Details "
+    << contractDetails.marketName << ", "
+    << contractDetails.longName << ", "
+    << contractDetails.summary.symbol << ", "
+    << contractDetails.summary.localSymbol << ", "
+    << contractDetails.summary.secType << ", "
     << contractDetails.summary.conId << ", "
-    << contractDetails.summary.expiry << ", "
     << contractDetails.summary.strike << ", "
-    << contractDetails.summary.right 
+    << contractDetails.summary.right  << ", "
+    << contractDetails.summary.expiry 
     << std::endl;
   OutputDebugString( m_ss.str().c_str() );
   if ( NULL != OnContractDetails ) OnContractDetails( contractDetails );
@@ -483,10 +517,10 @@ void CIBTWS::nextValidId( OrderId orderId) {
   id = poi.GetCurrentOrderId();
   if ( orderId > id ) {
     poi.SetNextOrderId( orderId );
-    m_ss << "old order id (" << id << ") new order id (" << orderId << ")" << std::endl;
+    m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
   }
   else {
-    m_ss << "next order id (" << orderId << ")" << std::endl;
+    m_ss << "next order id (" << id << "), IB had (" << orderId << ")" << std::endl;
   }
   
   OutputDebugString( m_ss.str().c_str() );
@@ -502,7 +536,7 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
 
   OptionSide::enumOptionSide os = OptionSide::Unknown;
 
-  // calculate expiry, maybe move inside with futures/options calcs
+  // calculate expiry, used with FuturesOption, Option, Future
   ptime dtExpiry = not_a_date_time;
   try {  // is this only calculated on futures and options?
     if ( 0 != contract.expiry.length() ) {

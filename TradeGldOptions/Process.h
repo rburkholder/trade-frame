@@ -40,6 +40,9 @@ public:
   void StartTrading( void ) ;
   void StopTrading( void );
 
+  void StartWatch( void );
+  void StopWatch( void );
+
 protected:
 
   void OnHistoryConnected( void );
@@ -50,6 +53,8 @@ protected:
 private:
 
   std::string m_sSymbolName;
+  long m_contractidUnderlying;
+  CIBSymbol *pUnderlying;  // need to make share_ptr
 
   std::stringstream m_ss;
 
@@ -85,7 +90,12 @@ private:
   void HandleOnIQFeedConnected( int );
   void HandleOnIQFeedDisconnected( int );
 
-  void HandleStrikeListing( const ContractDetails& );
-  void HandleStrikeListingDone( void );
+  void HandleStrikeListing1( const ContractDetails& );
+  void HandleStrikeListingDone1( void );
+  void HandleStrikeListing2( const ContractDetails& );
+  void HandleStrikeListingDone2( void );
+
+  void HandleMainQuote( const CQuote& quote );
+  void HandleMainTrade( const CTrade& trade );
 
 };

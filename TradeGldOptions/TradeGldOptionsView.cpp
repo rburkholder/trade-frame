@@ -53,3 +53,25 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnStopTrading(WORD /*wNotifyCode*/, WO
 
   return 0;
 }
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnStartWatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StartWatch();
+
+  return 0;
+}
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnStopWatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.StopWatch();
+
+  return 0;
+}
+
+void CTradeGldOptionsView::OnMove(CPoint ptPos) {
+
+}
+
+void CTradeGldOptionsView::OnSize(UINT nType, CSize size) {
+
+}

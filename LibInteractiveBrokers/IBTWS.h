@@ -65,7 +65,6 @@ public:
 
   // From ProviderInterface Execution Section
   void PlaceOrder( COrder *order );
-  //virtual void CancelOrder( unsigned long nOrderId );
   void CancelOrder( COrder *order );
 
   // TWS Function Calls
@@ -82,6 +81,9 @@ public:
     OnContractDetailsDone = function;
   }
 
+  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
+  CIBSymbol* GetSymbol( long ContractId );  // query existance
+  CIBSymbol* GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
   // TWS Specific events
 
   // From TWS Wrapper:
@@ -152,9 +154,7 @@ protected:
   static const char *szSecurityType[];
   static const char *szOrderType[];
 
-  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
-
-  CIBSymbol *NewCSymbol( pInstrument_t pInstrument );
+  CIBSymbol* NewCSymbol( pInstrument_t pInstrument );
 
   // overridden from ProviderInterface
   void StartQuoteWatch( CIBSymbol* pSymbol );
@@ -213,7 +213,8 @@ private:
   reqId_t NextReqId( void ) {
     reqId_t tmp;
     if ( 0 == m_vReqId.size() ) {
-      tmp = ++m_nxtReqId;
+      // starts with 0
+      tmp = m_nxtReqId++;
     }
     else {
       tmp = m_vReqId.back();
@@ -223,7 +224,7 @@ private:
   }
 
   void GiveBackReqId( reqId_t  id ) {
-    assert( 0 < id );
+//    assert( 0 < id );
     assert( id < m_nxtReqId );
     m_vReqId.push_back( id );
   }

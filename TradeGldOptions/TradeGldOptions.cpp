@@ -36,6 +36,15 @@ public:
 			return 0;
 		}
 
+    // Custom Begin
+
+    CRect rect;
+    wndFrame.GetWindowRect( &rect );
+//    wndFrame.MoveWindow( rect.left, rect.top, 500, 300 );
+    wndFrame.MoveWindow( rect.left, -800, 500, 300 );
+
+    // Custom End
+
 		wndFrame.ShowWindow(pData->nCmdShow);
 		::SetForegroundWindow(wndFrame);	// Win95 needs this
 		delete pData;

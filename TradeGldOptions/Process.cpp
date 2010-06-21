@@ -23,8 +23,7 @@ CProcess::CProcess(void)
 :
   m_tws( "U215226" ),
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
-//  m_reqId( 0 ),
-  m_sSymbolName( "GLD" )
+  m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 )
 {
   m_tws.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
   m_tws.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
@@ -74,24 +73,51 @@ void CProcess::HandleOnIBConnected(int e) {
   contract.exchange = "SMART";
   contract.secType = "OPT";
   contract.symbol = m_sSymbolName;
-  contract.expiry = "201006";
+  contract.expiry = "20100630";
 //  contract.strike = 120.0;
   contract.right = "CALL";
-  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing ) );
-  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
+  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone1 ) );
   m_tws.RequestContractDetails( contract );
 //  contract.right = "PUT";
 //  m_tws.RequestContractDetails( ++m_reqId, contract );
 }
 
-void CProcess::HandleStrikeListing( const ContractDetails& details ) {
+void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
   m_vCrossOverPoints.push_back( details.summary.strike );
 }
 
-void CProcess::HandleStrikeListingDone(  ) {
+void CProcess::HandleStrikeListingDone1(  ) {
   m_ss.str( "" );
   m_ss << "#strikes: " << m_vCrossOverPoints.size() << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+
+  Contract contract;
+  contract.currency = "USD";
+//  contract.exchange = "SMART";
+  contract.secType = "STK";
+  contract.symbol = m_sSymbolName;
+
+  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
+  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone2 ) );
+  m_tws.RequestContractDetails( contract );
+}
+
+void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
+  m_contractidUnderlying = details.summary.conId;
+  try {
+    pUnderlying = m_tws.GetSymbol( m_contractidUnderlying );
+  }
+  catch ( std::out_of_range& e ) {
+    CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
+    pUnderlying = m_tws.GetSymbol( instrument );
+  }
+
+  m_tws.AddQuoteHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainQuote ) );
+  m_tws.AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTrade ) );
+}
+
+void CProcess::HandleStrikeListingDone2(  ) {
 }
 
 void CProcess::HandleOnIBDisconnected(int e) {
@@ -132,8 +158,26 @@ void CProcess::OnHistoryRequestDone( void ) {
 }
 
 void CProcess::StartTrading( void ) {
-  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 }
 
 void CProcess::StopTrading( void ) {
+}
+
+void CProcess::StartWatch( void ) {
+  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
+}
+
+void CProcess::StopWatch( void ) {
+}
+
+void CProcess::HandleMainQuote( const CQuote& quote ) {
+  m_ss.str( "" );
+  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+}
+
+void CProcess::HandleMainTrade( const CTrade& trade ) {
+  m_ss.str( "" );
+  m_ss << "Trade: " << trade.Volume() << "@" << trade.Trade() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }

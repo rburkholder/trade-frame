@@ -70,21 +70,21 @@ public:
   virtual  void Disconnect( void );
   Delegate<int> OnDisconnected;
 
-  virtual void     AddQuoteHandler( const symbol_id_t id, typename S::quotehandler_t handler );
-  virtual void  RemoveQuoteHandler( const symbol_id_t id, typename S::quotehandler_t handler );
+  virtual void     AddQuoteHandler( const symbol_id_t& id, typename S::quotehandler_t handler );
+  virtual void  RemoveQuoteHandler( const symbol_id_t& id, typename S::quotehandler_t handler );
 
-  virtual void    AddOnOpenHandler( const symbol_id_t id, typename S::tradehandler_t handler );
-  virtual void RemoveOnOpenHandler( const symbol_id_t id, typename S::tradehandler_t handler );
+  virtual void    AddOnOpenHandler( const symbol_id_t& id, typename S::tradehandler_t handler );
+  virtual void RemoveOnOpenHandler( const symbol_id_t& id, typename S::tradehandler_t handler );
 
-  virtual void     AddTradeHandler( const symbol_id_t id, typename S::tradehandler_t handler );
-  virtual void  RemoveTradeHandler( const symbol_id_t id, typename S::tradehandler_t handler );
+  virtual void     AddTradeHandler( const symbol_id_t& id, typename S::tradehandler_t handler );
+  virtual void  RemoveTradeHandler( const symbol_id_t& id, typename S::tradehandler_t handler );
 
-  virtual void     AddDepthHandler( const symbol_id_t id, typename S::depthhandler_t handler );
-  virtual void  RemoveDepthHandler( const symbol_id_t id, typename S::depthhandler_t handler );
+  virtual void     AddDepthHandler( const symbol_id_t& id, typename S::depthhandler_t handler );
+  virtual void  RemoveDepthHandler( const symbol_id_t& id, typename S::depthhandler_t handler );
 
   Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
-  S* GetSymbol( const symbol_id_t );
+  S* GetSymbol( const symbol_id_t& );
 
   const std::string& Name( void ) { return m_sName; };
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
@@ -170,7 +170,7 @@ S* CProviderInterface<P,S>::AddCSymbol( S* pSymbol) {
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddQuoteHandler(const symbol_id_t id, typename S::quotehandler_t handler) {
+void CProviderInterface<P,S>::AddQuoteHandler(const symbol_id_t& id, typename S::quotehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -184,7 +184,7 @@ void CProviderInterface<P,S>::AddQuoteHandler(const symbol_id_t id, typename S::
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveQuoteHandler(const symbol_id_t id, typename S::quotehandler_t handler) {
+void CProviderInterface<P,S>::RemoveQuoteHandler(const symbol_id_t& id, typename S::quotehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -199,7 +199,7 @@ void CProviderInterface<P,S>::RemoveQuoteHandler(const symbol_id_t id, typename 
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddTradeHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::AddTradeHandler(const symbol_id_t& id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -213,7 +213,7 @@ void CProviderInterface<P,S>::AddTradeHandler(const symbol_id_t id, typename S::
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveTradeHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::RemoveTradeHandler(const symbol_id_t& id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -229,7 +229,7 @@ void CProviderInterface<P,S>::RemoveTradeHandler(const symbol_id_t id, typename 
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddOnOpenHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::AddOnOpenHandler(const symbol_id_t& id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -241,7 +241,7 @@ void CProviderInterface<P,S>::AddOnOpenHandler(const symbol_id_t id, typename S:
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveOnOpenHandler(const symbol_id_t id, typename S::tradehandler_t handler) {
+void CProviderInterface<P,S>::RemoveOnOpenHandler(const symbol_id_t& id, typename S::tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -254,7 +254,7 @@ void CProviderInterface<P,S>::RemoveOnOpenHandler(const symbol_id_t id, typename
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::AddDepthHandler(const symbol_id_t id, typename S::depthhandler_t handler) {
+void CProviderInterface<P,S>::AddDepthHandler(const symbol_id_t& id, typename S::depthhandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -268,7 +268,7 @@ void CProviderInterface<P,S>::AddDepthHandler(const symbol_id_t id, typename S::
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::RemoveDepthHandler(const symbol_id_t id, typename S::depthhandler_t handler) {
+void CProviderInterface<P,S>::RemoveDepthHandler(const symbol_id_t& id, typename S::depthhandler_t handler) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -283,7 +283,7 @@ void CProviderInterface<P,S>::RemoveDepthHandler(const symbol_id_t id, typename 
 }
 
 template <typename P, typename S>
-S* CProviderInterface<P,S>::GetSymbol( const symbol_id_t id ) {
+S* CProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {

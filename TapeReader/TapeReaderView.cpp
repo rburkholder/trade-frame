@@ -27,9 +27,9 @@
 
 #include "TapeReaderView.h"
 
-
 CTapeReaderView::CTapeReaderView( void ) 
-: CDialogImpl<CTapeReaderView>(), CDialogResize<CTapeReaderView>(),
+: CDialogImpl<CTapeReaderView>(), 
+  CDialogResize<CTapeReaderView>(),
   m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
   WM_IQFEED_UPDATE, WM_IQFEED_SUMMARY, 0, WM_IQFEED_FUNDAMENTAL, 0, 0 ),
   m_stateUI( UI_STARTING ),
