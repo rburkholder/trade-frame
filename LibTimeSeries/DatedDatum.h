@@ -40,11 +40,11 @@ public:
   bool IsNull( void ) { return m_dt.is_not_a_date_time(); };
 
   bool operator<( const CDatedDatum &datum ) const { return m_dt < datum.m_dt; };
-  bool operator<=( const CDatedDatum &datum ) const { return m_dt <= datum.m_dt; };
-  bool operator>( const CDatedDatum &datum ) const { return m_dt > datum.m_dt; };
-  bool operator>=( const CDatedDatum &datum ) const { return m_dt >= datum.m_dt; };
-  bool operator==( const CDatedDatum &datum ) const { return m_dt == datum.m_dt; };
-  bool operator!=( const CDatedDatum &datum ) const { return m_dt != datum.m_dt; };
+  bool operator<=( const CDatedDatum& datum ) const { return m_dt <= datum.m_dt; };
+  bool operator>( const CDatedDatum& datum ) const { return m_dt > datum.m_dt; };
+  bool operator>=( const CDatedDatum& datum ) const { return m_dt >= datum.m_dt; };
+  bool operator==( const CDatedDatum& datum ) const { return m_dt == datum.m_dt; };
+  bool operator!=( const CDatedDatum& datum ) const { return m_dt != datum.m_dt; };
 
   const ptime& DateTime( void ) const { return m_dt; };
   void DateTime( const ptime& dt ) { m_dt = dt; };

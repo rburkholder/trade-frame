@@ -41,7 +41,7 @@ public:
     CRect rect;
     wndFrame.GetWindowRect( &rect );
 //    wndFrame.MoveWindow( rect.left, rect.top, 500, 300 );
-    wndFrame.MoveWindow( rect.left, -800, 500, 300 );
+    wndFrame.MoveWindow( rect.left, -400, 500, 300 );
 
     // Custom End
 

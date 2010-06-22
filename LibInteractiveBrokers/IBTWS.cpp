@@ -20,13 +20,13 @@
 
 #include "IBTWS.h"
 
-CIBTWS::CIBTWS( const string &acctCode, const string &address, unsigned int port ): 
+CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
   CProviderInterface<CIBTWS,CIBSymbol>(), 
   EWrapper(),
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
-  m_nxtReqId( 0 ),
-  m_dblPortfolioDelta( 0 )
+//  m_dblPortfolioDelta( 0 ),
+  m_nxtReqId( 0 )
 {
   m_sName = "IB";
   m_nID = EProviderIB;
@@ -113,13 +113,9 @@ void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
     Contract contract;
-    contract.symbol = pIBSymbol->GetInstrument()->GetSymbolName();
-    //contract.currency = "USD";
-    contract.currency = pIBSymbol->GetInstrument()->GetCurrencyName();
-    //contract.exchange = "SMART";
+    contract.conId = pIBSymbol->GetInstrument()->GetContract();  // mostly enough to have contract id
     contract.exchange = pIBSymbol->GetInstrument()->GetExchangeName();
-    //contract.secType = "STK";  // todo:  get this information from the symbol
-    contract.secType = szSecurityType[ pIBSymbol->GetInstrument()->GetInstrumentType() ];
+    contract.currency = pIBSymbol->GetInstrument()->GetCurrencyName();
     //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
     pIBSymbol->SetQuoteTradeWatchInProgress();
     pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
@@ -243,47 +239,22 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
-  m_mapSymbols_t::iterator iterTicker = m_mapSymbols.find( tickerId );
-  if ( m_mapSymbols.end() != iterTicker ) {
-    mapGreeks_t::iterator iterGreeks = m_mapGreeks.find( tickerId );
-    if ( m_mapGreeks.end() == iterGreeks ) {
-      m_ss.str("");
-      m_ss << "can't find greeks map for ticker=" << tickerId << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
-    }
-    else {
+  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
   //    if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
-      if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
-        iterGreeks->second.impliedVolatility = impliedVol;
-        if ( MODEL_OPTION == tickType ) {
-//          iter->second.modelPrice = modelPrice;
-          m_dblPortfolioDelta -= iterGreeks->second.positionDelta;
-          iterGreeks->second.delta = delta;
-          iterGreeks->second.positionCalc = iterGreeks->second.position;
-          iterGreeks->second.positionDelta = 100 * iterGreeks->second.position * delta;
-          m_dblPortfolioDelta += iterGreeks->second.positionDelta;
-        }
-      }
+  if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
+    switch ( tickType ) {
+      case BID_OPTION_COMPUTATION:
+        break;
+      case ASK_OPTION_COMPUTATION:
+        break;
+      case LAST_OPTION_COMPUTATION:
+        break;
+      case MODEL_OPTION: 
+        break;
+      default:
+        break;
     }
-  //  if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
-      if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
-      m_ss.str(""); 
-      m_ss
-        << "tickOptionComputation " 
-//        << iter->second.sUnderlying
-//        << " " << iter->second.sSymbol
-//        << "tickerid=" << tickerId
-        << " " << TickTypeStrings[tickType] 
-        << ", Implied Vol=" << impliedVol
-        << ", Delta=" << delta
-//        << ", ModelPrice=" << modelPrice
-        << ", MarketPrice=" << iterGreeks->second.marketPrice
-        << ", PositionDelta=" << iterGreeks->second.positionDelta
-        << ", PortfolioDelta=" << m_dblPortfolioDelta
-  //      << ", Dividend=" << pvDividend
-        << std::endl; 
-      OutputDebugString( m_ss.str().c_str() );
-    }
+    pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
   }
 }
 
@@ -476,7 +447,7 @@ void CIBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMess
 
 void CIBTWS::currentTime(long time) {
   m_ss.str("");
-  m_ss << "current time " << time << endl;
+  m_ss << "current time " << time << std::endl;
   OutputDebugString( m_ss.str().c_str() );
   m_time = time;
 }
@@ -631,7 +602,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
 
   pInstrument_t pInstrument;
   CIBSymbol* pSymbol;
-  mapGreeks_t::iterator iterGreeks;
+//  mapGreeks_t::iterator iterGreeks;
 
   mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( contract.conId );
   if ( m_mapContractToSymbolId.end() == iterId ) {
@@ -640,20 +611,20 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     pSymbol = NewCSymbol( pInstrument );
 
     // preset option stuff.
-    structDeltaStuff stuff;
-    stuff.delta = 0;
-    stuff.impliedVolatility = 0;
-    stuff.modelPrice = 0;
-    stuff.position = position;
-    stuff.positionCalc = 0;
-    stuff.positionDelta = 0;
-    stuff.marketPrice = marketPrice;
-    stuff.averageCost = averageCost;
+//    structDeltaStuff stuff;
+//    stuff.delta = 0;
+//    stuff.impliedVolatility = 0;
+//    stuff.modelPrice = 0;
+//    stuff.position = position;
+//    stuff.positionCalc = 0;
+//    stuff.positionDelta = 0;
+//    stuff.marketPrice = marketPrice;
+//    stuff.averageCost = averageCost;
 
     //  change: look through mapDelta and insert if not found
-    m_mapGreeks.insert( pair_mapGreeks_t( pSymbol->GetTickerId(), stuff ) );
+//    m_mapGreeks.insert( pair_mapGreeks_t( pSymbol->GetTickerId(), stuff ) );
 
-    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
+//    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
 
     // start market data
     if ( 0 != position ) {
@@ -661,7 +632,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       contractMktData = contract;
       contractMktData.exchange = pInstrument->GetExchangeName();
       pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
-      iterGreeks->second.bDataRequested = true;
+//      iterGreeks->second.bDataRequested = true;
     }
 
   }
@@ -669,27 +640,27 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
     pSymbol = GetSymbol( iterId->second );
     pInstrument = pSymbol->GetInstrument();
 
-    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
+//    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
 
-    iterGreeks->second.position = position;
-    iterGreeks->second.marketPrice = marketPrice;
-    iterGreeks->second.averageCost = averageCost;
+//    iterGreeks->second.position = position;
+//    iterGreeks->second.marketPrice = marketPrice;
+//    iterGreeks->second.averageCost = averageCost;
 
     // start/stop data depending upon position size
     if ( 0 == position ) {
-      if ( iterGreeks->second.bDataRequested ) {
-        pTWS->cancelMktData( pSymbol->GetTickerId() );
-        iterGreeks->second.bDataRequested = false;
-      }
+//      if ( iterGreeks->second.bDataRequested ) {
+//        pTWS->cancelMktData( pSymbol->GetTickerId() );
+//        iterGreeks->second.bDataRequested = false;
+//      }
     }
     else { // we have a position, so need data
-      if ( !iterGreeks->second.bDataRequested ) {
+/*      if ( !iterGreeks->second.bDataRequested ) {
         Contract contractMktData;
         contractMktData = contract;
         contractMktData.exchange = pInstrument->GetExchangeName();
         pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
         iterGreeks->second.bDataRequested = true;
-      }
+      } */
     }
   }
 

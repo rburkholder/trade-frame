@@ -28,7 +28,11 @@ CIBSymbol::CIBSymbol( TickerId id, pInstrument_t pInstrument )
     m_dblAsk( 0 ), m_dblBid( 0 ), m_dblLast( 0 ),
     m_nVolume( 0 ),
     m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
-    m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ) {
+    m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
+    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 ),
+    m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblVega( 0 ), m_dblTheta( 0 ),
+    m_bOptionsSet( false )
+{
 }
 
 CIBSymbol::~CIBSymbol(void) {
@@ -110,7 +114,8 @@ void CIBSymbol::AcceptTickString(TickType tickType, const IBString &value) {
 }
 
 void CIBSymbol::BuildQuote() {
-  if ( m_bAskFound && m_bBidFound && m_bAskSizeFound && m_bBidSizeFound ) {
+//  if ( m_bAskFound && m_bBidFound && m_bAskSizeFound && m_bBidSizeFound ) {
+    if ( m_bAskFound || m_bBidFound ) {
     //boost::local_time::local_date_time ldt = 
     //  boost::local_time::local_microsec_clock::local_time();
     CQuote quote( m_TimeSource.External(), m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
@@ -119,6 +124,10 @@ void CIBSymbol::BuildQuote() {
     //  << quote.m_nAskSize << "@" << quote.m_dblAsk 
     //  << std::endl;
     m_OnQuote( quote );  
+    // 2010-06-21 not sure if these flags should be reset 
+    //   basics are if Ask or Bid value changes, then emit regardless of Size
+    //   size doesn't matter for now
+    m_bAskFound = m_bBidFound = m_bAskSizeFound = m_bBidSizeFound = false;
   }
 }
 
@@ -134,4 +143,18 @@ void CIBSymbol::BuildTrade() {
     //m_bLastTimeStampFound = m_bLastFound = m_bLastSizeFound = false;
     m_bLastFound = m_bLastSizeFound = false;
   }
+}
+
+void CIBSymbol::Greeks( double optPrice, double undPrice, double pvDividend, 
+                       double impliedVol, double delta, double gamma, double vega, double theta ) {
+
+  m_dblOptionPrice = optPrice;
+  m_dblUnderlyingPrice = undPrice;
+  m_dblPvDividend = pvDividend;
+  m_dblImpliedVolatility = impliedVol;
+  m_dblDelta = delta;
+  m_dblGamma = gamma;
+  m_dblVega = vega;
+  m_dblTheta = theta;
+  m_bOptionsSet = true;
 }

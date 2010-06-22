@@ -56,7 +56,7 @@ public:
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef int reqId_t;  // request id type
 
-  CIBTWS( const string &acctCode, const string &address = "127.0.0.1", unsigned int port = 7496 );
+  CIBTWS( const std::string &acctCode, const std::string &address = "127.0.0.1", unsigned int port = 7496 );
   ~CIBTWS(void);
   
   // From ProviderInterface:
@@ -146,8 +146,6 @@ protected:
   unsigned int m_nPort;
   TickerId m_curTickerId;
   
-  std::vector<CIBSymbol*> m_vTickerToSymbol;  // stuff comes back from IB with ticker id so use this to look up symbol, which is stored in the map of the class from which we inherited
-
   double m_dblBuyingPower;
   double m_dblAvailableFunds;
 
@@ -178,30 +176,16 @@ private:
   OnContractDetailsHandler_t OnContractDetails;
   OnContractDetailsDoneHandler_t OnContractDetailsDone;
 
-  struct structDeltaStuff {
-    double delta;
-    double impliedVolatility;
-    double modelPrice;
-    int position;
-    int positionCalc;  // used by incremental option calculations.
-    double positionDelta;
-    double marketPrice;
-    double averageCost;
-    bool bDataRequested;
-    structDeltaStuff(): delta( 0 ), positionDelta( 0 ), bDataRequested( false ) {};
-  };
-
-  // keep track of option greeks, maybe put in symbol at some point in time
-  typedef std::map<TickerId, structDeltaStuff> mapGreeks_t;
-  typedef std::pair<TickerId, structDeltaStuff> pair_mapGreeks_t;
-  mapGreeks_t m_mapGreeks;
+  // stuff comes back from IB with ticker id so use this to look up symbol, 
+  //    which is stored in the map of the class from which we inherited
+  std::vector<CIBSymbol*> m_vTickerToSymbol;  
 
   // given a contract id, see if we have a symbol assigned for the symbol id
   typedef std::map<long, TickerId> mapContractToSymbolId_t;
   typedef std::pair<long, TickerId> pair_mapContractToSymbolId_t;
   mapContractToSymbolId_t m_mapContractToSymbolId;
 
-  double m_dblPortfolioDelta;
+//  double m_dblPortfolioDelta;
 
   boost::thread m_thrdIBMessages;
 
@@ -210,6 +194,7 @@ private:
   std::vector<reqId_t> m_vReqId;
   reqId_t m_nxtReqId; 
 
+  // todo:  turn this stuff into a class so that each request has its own fastdelegate
   reqId_t NextReqId( void ) {
     reqId_t tmp;
     if ( 0 == m_vReqId.size() ) {

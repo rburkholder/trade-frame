@@ -19,7 +19,6 @@ using namespace fastdelegate;
 
 #include <vector>
 #include <algorithm>
-using namespace std;
 
 #include <assert.h>
 
@@ -33,18 +32,21 @@ public:
   typedef typename std::vector<OnMessageHandler>::size_type vsize_t;
   void Add( OnMessageHandler function );
   void Remove( OnMessageHandler function );
-  bool IsEmpty();
   void operator()( RO );
-  vsize_t Size( void ) const { return rOnFD.size(); };
+  bool IsEmpty() { return ( 0 == m_size ); };
+  vsize_t Size( void ) const { return m_size; };
 protected:
 private:
   std::vector<OnMessageHandler> rOnFD;
   std::vector<OnMessageHandler> rToBeRemoved;
   std::vector<OnMessageHandler> rToBeAdded;
   bool m_bIterating;
+  typename std::vector<OnMessageHandler>::size_type m_size;
 };
 
-template<class RO> Delegate<RO>::Delegate(void) : m_bIterating( false ) {
+template<class RO> Delegate<RO>::Delegate(void) 
+: m_bIterating( false ), m_size( 0 )
+{
 }
 
 template<class RO> Delegate<RO>::~Delegate(void) {
@@ -52,6 +54,7 @@ template<class RO> Delegate<RO>::~Delegate(void) {
   rOnFD.clear();
   rToBeRemoved.clear();
   rToBeAdded.clear();
+  m_size = 0;
 }
 
 template<class RO> void Delegate<RO>::operator()( RO ro ) {
@@ -92,6 +95,7 @@ template<class RO> void Delegate<RO>::Add( OnMessageHandler function ) {
   else {
     rOnFD.push_back( function );
   }
+  ++m_size;
 }
 
 template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
@@ -105,14 +109,11 @@ template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
     while ( rOnFD.end() != rOnFD_Iter ) {
       if ( function == *rOnFD_Iter ) {
         rOnFD.erase( rOnFD_Iter );
-        break;
+        break;  // allow only one deletion
       }
       ++rOnFD_Iter;
     }
   }
-}
-
-template<class RO> bool Delegate<RO>::IsEmpty() {
-  return rOnFD.empty();
+  --m_size;
 }
 

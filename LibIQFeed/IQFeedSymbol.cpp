@@ -106,7 +106,7 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
   if ( qUnknown == m_QStatus ) {
     m_QStatus = ( _T( "Not Found" ) == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
-      std::cout << GetId() << " not found" << endl;
+      std::cout << GetId() << " not found" << std::endl;
     }
   }
   if ( qFound == m_QStatus ) {

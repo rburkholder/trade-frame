@@ -31,7 +31,16 @@ public:
 
   CIBSymbol( TickerId id, pInstrument_t pInstrument );
   virtual ~CIBSymbol(void);
+
   TickerId GetTickerId( void ) { return m_TickerId; };
+
+  void Greeks( double optPrice, double undPrice, double pvDividend, 
+    double impliedVol, double delta, double gamma, double vega, double theta );
+
+  double OptionPrice( void ) { return m_dblOptionPrice; };
+  double Delta( void ) { return m_dblDelta; };
+  double Gamma( void ) { return m_dblGamma; };
+
 protected:
 
   TickerId m_TickerId;
@@ -57,6 +66,16 @@ protected:
   double m_dblHigh;
   double m_dblLow;
   double m_dblClose;
+
+  bool m_bOptionsSet;  // option info is available
+  double m_dblOptionPrice;
+  double m_dblUnderlyingPrice;
+  double m_dblPvDividend;
+  double m_dblImpliedVolatility;
+  double m_dblDelta;
+  double m_dblGamma;
+  double m_dblVega;
+  double m_dblTheta;
 
   void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
   void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };

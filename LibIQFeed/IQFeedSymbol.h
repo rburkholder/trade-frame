@@ -36,7 +36,7 @@ public:
   // Fundamentals
   std::string m_sOptionRoots;
   int m_AverageVolume;
-  string m_sCompanyName;
+  std::string m_sCompanyName;
   int m_Precision;
   double m_dblHistoricalVolatility;
   double m_dblStrikePrice;
