@@ -195,7 +195,8 @@ private:
 
   std::vector<COptionInfo>::iterator m_iterOILowestWatch;
   std::vector<COptionInfo>::iterator m_iterOIHighestWatch;
-  std::vector<COptionInfo>::iterator m_iterOILatestGammaSelect;
+  std::vector<COptionInfo>::iterator m_iterOILatestGammaSelectCall;
+  std::vector<COptionInfo>::iterator m_iterOILatestGammaSelectPut;
 
   Contract m_contract; // re-usable, persistant contract scratchpad
 
@@ -223,5 +224,8 @@ private:
   void HandleMainQuote( const CQuote& quote );
   void HandleMainTrade1( const CTrade& trade ); // first trade gives our center oint
   void HandleMainTradeN( const CTrade& trade ); // following trades follow
+
+  void OpenPosition( void );
+  void ClosePosition( void );
 
 };
