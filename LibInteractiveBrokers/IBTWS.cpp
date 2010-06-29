@@ -159,15 +159,11 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
 
-  //Contract contract2;
-  //contract2.conId = 44678227;
-  //pTWS->reqContractDetails( contract2 );
-
   Contract contract;
-  contract.symbol = pOrder->GetInstrument()->GetSymbolName();
-  contract.currency = pOrder->GetInstrument()->GetCurrencyName();
+  contract.conId = pOrder->GetInstrument()->GetContract();  // mostly enough to have contract id
   contract.exchange = pOrder->GetInstrument()->GetExchangeName();
-  contract.secType = szSecurityType[ pOrder->GetInstrument()->GetInstrumentType() ];
+  contract.currency = pOrder->GetInstrument()->GetCurrencyName();
+
   IBString s;
   switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
     case InstrumentType::Stock:
@@ -240,21 +236,18 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
   CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
-  //    if ( ( MODEL_OPTION == tickType ) || ( LAST_OPTION_COMPUTATION == tickType ) ) {
-  if ( ( MODEL_OPTION == tickType ) || ( false ) ) {
-    switch ( tickType ) {
-      case BID_OPTION_COMPUTATION:
-        break;
-      case ASK_OPTION_COMPUTATION:
-        break;
-      case LAST_OPTION_COMPUTATION:
-        break;
-      case MODEL_OPTION: 
-        break;
-      default:
-        break;
-    }
-    pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
+  switch ( tickType ) {
+    case MODEL_OPTION: 
+      pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
+      break;
+    case BID_OPTION_COMPUTATION:
+      break;
+    case ASK_OPTION_COMPUTATION:
+      break;
+    case LAST_OPTION_COMPUTATION:
+      break;
+    default:
+      break;
   }
 }
 
@@ -299,7 +292,7 @@ void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
       //<< ", clid=" << clientId 
       //<< ", yh=" << whyHeld 
       << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
@@ -331,7 +324,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       //<< ", ord.ref=" << order.orderRef 
       << ", state.warning=" << state.warningText 
       << std::endl; 
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
       COrderManager::Instance().ReportCommission( orderId, state.commission ); 
@@ -362,7 +355,7 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
@@ -600,15 +593,15 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const IBString& accountName) {
 
-  pInstrument_t pInstrument;
-  CIBSymbol* pSymbol;
+//  pInstrument_t pInstrument;
+//  CIBSymbol* pSymbol;
 //  mapGreeks_t::iterator iterGreeks;
 
   mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( contract.conId );
   if ( m_mapContractToSymbolId.end() == iterId ) {
     // if we can't find an instrument, then create a new one.
-    pInstrument = BuildInstrumentFromContract( contract );
-    pSymbol = NewCSymbol( pInstrument );
+//    pInstrument = BuildInstrumentFromContract( contract );
+//    pSymbol = NewCSymbol( pInstrument );
 
     // preset option stuff.
 //    structDeltaStuff stuff;
@@ -627,18 +620,18 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
 //    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
 
     // start market data
-    if ( 0 != position ) {
-      Contract contractMktData;
-      contractMktData = contract;
-      contractMktData.exchange = pInstrument->GetExchangeName();
-      pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
+//    if ( 0 != position ) {
+//      Contract contractMktData;
+//      contractMktData = contract;
+//      contractMktData.exchange = pInstrument->GetExchangeName();
+//      pTWS->reqMktData( pSymbol->GetTickerId(), contractMktData, "100,101,104,106,221,225", false );
 //      iterGreeks->second.bDataRequested = true;
-    }
+//    }
 
   }
   else {
-    pSymbol = GetSymbol( iterId->second );
-    pInstrument = pSymbol->GetInstrument();
+//    pSymbol = GetSymbol( iterId->first );
+//    pInstrument = pSymbol->GetInstrument();
 
 //    iterGreeks = m_mapGreeks.find( pSymbol->GetTickerId() );  // load iter for status print at end of this method
 
@@ -670,7 +663,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       << contract.symbol
       << " " << contract.localSymbol
       << "  id=" << contract.conId  // long
-      << ", type=" << InstrumentType::Name[ pInstrument->GetInstrumentType() ]
+//      << ", type=" << InstrumentType::Name[ pInstrument->GetInstrumentType() ]
       << ", strike=" << contract.strike // double
 //      << ", expire=" << iter->second.dtExpiry
 //      << ", right=" << OptionSide::Name[ iter->second.os ]
@@ -682,11 +675,11 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
       << ", rPL=" << realizedPNL // double
       //<< ", " << accountName 
       << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
 
-  CPortfolio::structUpdatePortfolioRecord record( pInstrument.get(), position, marketPrice, averageCost );
-  OnUpdatePortfolioRecord( record );
+//  CPortfolio::structUpdatePortfolioRecord record( pInstrument.get(), position, marketPrice, averageCost );
+//  OnUpdatePortfolioRecord( record );
 
 }
 

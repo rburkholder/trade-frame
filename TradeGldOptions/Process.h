@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <sstream>
 #include <map>
 
@@ -23,6 +24,84 @@
 #include <LibIQFeed/IQFeedProvider.h>
 
 #include <LibInteractiveBrokers/IBTWS.h>
+
+
+
+//
+// ==================
+//
+
+class CNakedOption
+{
+public:
+  CNakedOption( double dblStrike );
+  CNakedOption( const CNakedOption& rhs );
+  virtual ~CNakedOption( void ) {};
+
+  CNakedOption& operator=( const CNakedOption& rhs );
+
+  bool operator< ( const CNakedOption& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
+  bool operator<=( const CNakedOption& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
+
+  double Strike( void ) { return m_dblStrike; };
+  void Symbol( CIBSymbol* pSymbol ) { m_pSymbol = pSymbol; };
+  CIBSymbol* Symbol( void ) { return m_pSymbol; };
+
+  void HandleQuote( const CQuote& quote );
+  void HandleTrade( const CTrade& trade );
+  void HandleGreeks( double ImplVol, double Delta, double Gamma, double Vega, double Theta );
+
+  double Bid( void ) { return m_dblBid; };
+  double Ask( void ) { return m_dblAsk; };
+
+protected:
+
+  std::string m_sSide;
+
+  double m_dblBid;
+  double m_dblAsk;
+
+  double m_dblStrike;
+  double m_dblImpliedVolatility;
+  double m_dblDelta;
+  double m_dblGamma;
+  double m_dblVega;
+  double m_dblTheta;
+
+  bool m_bWatching;
+
+  CIBSymbol* m_pSymbol;
+
+  std::stringstream m_ss;
+
+private:
+};
+
+//
+// ==================
+//
+
+class CNakedCall: public CNakedOption
+{
+public:
+  CNakedCall( double dblStrike );
+  virtual ~CNakedCall( void ) {};
+protected:
+private:
+};
+
+//
+// ==================
+//
+
+class CNakedPut: public CNakedOption
+{
+public:
+  CNakedPut( double dblStrike );
+  virtual ~CNakedPut( void ) {};
+protected:
+private:
+};
 
 //
 // ==================
@@ -40,40 +119,20 @@ public:
   bool operator< ( const COptionInfo& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
   bool operator<=( const COptionInfo& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
-  void HandleCallQuote( const CQuote& quote );
-   void HandlePutQuote( const CQuote& quote );
-
-  void HandleCallTrade( const CTrade& trade );
-   void HandlePutTrade( const CTrade& trade );
-
   double Strike( void ) { return m_dblStrike; };
 
-  void CallSymbol( CIBSymbol* pSymbol ) { m_pCallSymbol = pSymbol; };
-  void PutSymbol( CIBSymbol* pSymbol ) { m_pPutSymbol = pSymbol; };
-
-  CIBSymbol* CallSymbol( void ) { return m_pCallSymbol; };
-  CIBSymbol* PutSymbol( void ) { return m_pPutSymbol; };
-
-  double PutBid( void ) { return m_PutBid; };
-  double PutAsk( void ) { return m_PutAsk; };
-  double CallBid( void ) { return m_CallBid; };
-  double CallAsk( void ) { return m_CallAsk; };
+  CNakedCall* Call( void ) { return &m_call; };
+  CNakedPut* Put( void ) { return &m_put; };
 
 protected:
+
+  CNakedCall m_call;
+  CNakedPut m_put;
+
 private:
   std::stringstream m_ss;
   bool m_bWatching;
   double m_dblStrike;
-  double m_dblCallDelta;
-  double m_dblPutDelta;
-  double m_dblGamma;
-  CIBSymbol* m_pCallSymbol;
-  CIBSymbol* m_pPutSymbol;
-
-  double m_PutBid;
-  double m_CallBid;
-  double m_PutAsk;
-  double m_CallAsk;
 };
 
 //
@@ -123,6 +182,7 @@ private:
   CIBTWS m_tws;
   bool m_bIBConnected;
   bool m_bWatchingOptions;
+  bool m_bTrading;
 
   CBar m_Bar;  // keep pointer for when data arrives
 

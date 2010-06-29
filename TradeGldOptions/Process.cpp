@@ -23,25 +23,95 @@
 // ==================
 //
 
+CNakedOption::CNakedOption( double dblStrike ) 
+: m_dblBid( 0 ), m_dblAsk( 0 ),
+  m_dblStrike( dblStrike ),
+  m_dblImpliedVolatility( 0 ),
+  m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblVega( 0 ), m_dblTheta( 0 ),
+  m_bWatching( false ),
+  m_pSymbol( NULL )
+{
+}
+
+CNakedOption::CNakedOption( const CNakedOption& rhs ) 
+: m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ),
+  m_dblStrike( rhs.m_dblStrike ),
+  m_dblImpliedVolatility( 0 ),
+  m_dblDelta( rhs.m_dblDelta ), m_dblGamma( rhs.m_dblGamma ), m_dblVega( rhs.m_dblVega ), m_dblTheta( rhs.m_dblVega ),
+  m_bWatching( false ),
+  m_pSymbol( rhs.m_pSymbol )
+{
+  assert( !rhs.m_bWatching );
+}
+
+CNakedOption& CNakedOption::operator=( const CNakedOption& rhs ) {
+  assert( !rhs.m_bWatching );
+  assert( !m_bWatching );
+  m_dblStrike = rhs.m_dblStrike;
+  m_dblImpliedVolatility = rhs.m_dblImpliedVolatility;
+  m_dblDelta = rhs.m_dblDelta;
+  m_dblGamma = rhs.m_dblGamma;
+  m_dblVega = rhs.m_dblVega;
+  m_dblTheta = rhs.m_dblTheta;
+  m_pSymbol = rhs.m_pSymbol;
+  return *this;
+}
+
+void CNakedOption::HandleQuote( const CQuote& quote ) {
+  m_dblBid = quote.Bid();
+  m_dblAsk = quote.Ask();
+}
+
+void CNakedOption::HandleTrade( const CTrade& trade ) {
+  m_ss.str( "" );
+  m_ss << "Trade(" << m_sSide << m_dblStrike << "): " << trade.Volume() << "@" << trade.Trade() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+}
+
+void CNakedOption::HandleGreeks( double ImplVol, double Delta, double Gamma, double Vega, double Theta ) {
+  m_dblImpliedVolatility = ImplVol;
+  m_dblDelta = Delta;
+  m_dblGamma = Gamma;
+  m_dblVega = Vega;
+  m_dblTheta = Theta;
+}
+
+//
+// ==================
+//
+
+CNakedCall::CNakedCall( double dblStrike )
+: CNakedOption( dblStrike )
+{
+  m_sSide = "C";
+}
+
+//
+// ==================
+//
+
+CNakedPut::CNakedPut( double dblStrike )
+: CNakedOption( dblStrike )
+{
+  m_sSide = "P";
+}
+
+
+//
+// ==================
+//
+
 COptionInfo::COptionInfo( double dblStrike ) 
 : m_dblStrike( dblStrike ),
-  m_dblCallDelta( 0 ),
-  m_dblPutDelta( 0 ),
-  m_dblGamma( 0 ),
-  m_bWatching( false ),
-  m_pCallSymbol( NULL ),
-  m_pPutSymbol( NULL )
+  m_call( dblStrike ), m_put( dblStrike ),
+  m_bWatching( false )
 {
 }
 
 COptionInfo::COptionInfo( const COptionInfo& rhs ) 
 : m_dblStrike( rhs.m_dblStrike ),
-  m_dblCallDelta( rhs.m_dblCallDelta ),
-  m_dblPutDelta( rhs.m_dblPutDelta ),
-  m_dblGamma( rhs.m_dblGamma ),
-  m_pCallSymbol( rhs.m_pCallSymbol ), m_pPutSymbol( rhs.m_pPutSymbol ),
-  m_bWatching( false ), 
-  m_CallBid( 0 ), m_CallAsk( 0 ), m_PutBid( 0 ), m_PutAsk( 0 )
+  m_call( rhs.m_call ), m_put( rhs.m_put ),
+  m_bWatching( false )
 { 
   assert( !rhs.m_bWatching );
 }
@@ -53,36 +123,10 @@ COptionInfo& COptionInfo::operator=( const COptionInfo& rhs ) {
   assert( !rhs.m_bWatching );
   assert( !m_bWatching );
   m_dblStrike = rhs.m_dblStrike;
-  m_dblCallDelta = rhs.m_dblCallDelta;
-  m_dblPutDelta = rhs.m_dblPutDelta;
-  m_dblGamma = rhs.m_dblGamma;
-  m_pCallSymbol = rhs.m_pCallSymbol;
-  m_pPutSymbol = rhs.m_pPutSymbol;
+  m_call = rhs.m_call;
+  m_put = rhs.m_put;
   return *this;
 }
-
-void COptionInfo::HandleCallQuote( const CQuote& quote ) {
-  m_CallBid = quote.Bid();
-  m_CallAsk = quote.Ask();
-}
-
-void COptionInfo::HandlePutQuote( const CQuote& quote ) {
-  m_PutBid = quote.Bid();
-  m_PutAsk = quote.Ask();
-}
-
-void COptionInfo::HandleCallTrade( const CTrade& trade ) {
-  m_ss.str( "" );
-  m_ss << "Trade(C" << m_dblStrike << "): " << trade.Volume() << "@" << trade.Trade() << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
-}
-
-void COptionInfo::HandlePutTrade( const CTrade& trade ) {
-  m_ss.str( "" );
-  m_ss << "Trade(P" << m_dblStrike << "): " << trade.Volume() << "@" << trade.Trade() << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
-}
-
 
 //
 // ==================
@@ -94,14 +138,14 @@ CProcess::CProcess(void)
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ),
-  m_bWatchingOptions( false )
+  m_bWatchingOptions( false ), m_bTrading( false )
 {
 
   m_contract.currency = "USD";
   m_contract.exchange = "SMART";
   m_contract.secType = "OPT";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20100630";
+  m_contract.expiry = "20100716";
 
   m_tws.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
   m_tws.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
@@ -181,10 +225,10 @@ void CProcess::StopWatch( void ) {
   if ( m_bWatchingOptions ) {
     m_bWatchingOptions = false;
     for ( std::vector<COptionInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-      m_tws.RemoveQuoteHandler( iter->CallSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandleCallQuote ) );
-      m_tws.RemoveTradeHandler( iter->CallSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandleCallTrade ) );
-      m_tws.RemoveQuoteHandler( iter->PutSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandlePutQuote ) );
-      m_tws.RemoveTradeHandler( iter->PutSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandlePutTrade ) );
+      m_tws.RemoveQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedOption::HandleQuote ) );
+      m_tws.RemoveTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedOption::HandleTrade ) );
+      m_tws.RemoveQuoteHandler( iter->Put()->Symbol()->GetId(), MakeDelegate( iter->Put(), &CNakedOption::HandleQuote ) );
+      m_tws.RemoveTradeHandler( iter->Put()->Symbol()->GetId(), MakeDelegate( iter->Put(), &CNakedOption::HandleTrade ) );
     }
   }
 }
@@ -227,7 +271,7 @@ void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
 void CProcess::HandleStrikeListing2Done(  ) {
 }
 
-// --- listing 3
+// --- listing 3 -- Call Contracts
 
 void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   CIBSymbol* pSymbol;
@@ -238,7 +282,7 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
     CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
     pSymbol = m_tws.GetSymbol( instrument );
   }
-  m_iterStrikes->CallSymbol( pSymbol );
+  m_iterStrikes->Call()->Symbol( pSymbol );
 
 //  m_tws.AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &COptionInfo::HandleCallQuote ) );
 //  m_tws.AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &COptionInfo::HandleCallTrade ) );
@@ -263,7 +307,7 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
 void CProcess::HandleStrikeListing3Done(  ) {
 }
 
-// --- listing 4
+// --- listing 4 -- Put Contracts
 
 void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
   CIBSymbol* pSymbol;
@@ -274,7 +318,7 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
     pSymbol = m_tws.GetSymbol( instrument );
   }
-  m_iterStrikes->PutSymbol( pSymbol );
+  m_iterStrikes->Put()->Symbol( pSymbol );
 
 //  m_tws.AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &COptionInfo::HandlePutQuote ) );
 //  m_tws.AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &COptionInfo::HandlePutTrade ) );
@@ -337,9 +381,49 @@ void CProcess::OnHistoryRequestDone( void ) {
 }
 
 void CProcess::StartTrading( void ) {
+
+  m_bTrading = true;
+
+  if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
+    double gamma = 0;
+    m_iterOILatestGammaSelect = m_iterOIHighestWatch;
+    for ( std::vector<COptionInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+      double tmp1 = iter->Call()->Symbol()->Gamma();
+      double tmp2 = iter->Put()->Symbol()->Gamma();
+      if ( gamma < tmp1 ) {
+        gamma = tmp1;
+        m_iterOILatestGammaSelect = iter;
+      }
+    }
+
+    m_dblCallPrice = m_iterOILatestGammaSelect->Call()->Ask();
+    m_dblPutPrice = m_iterOILatestGammaSelect->Put()->Ask();
+    m_nCalls = ( 1000.0 / m_iterOILatestGammaSelect->Call()->Symbol()->Delta() ) / 100;
+    m_nPuts = -1 * ( 1000.0 / m_iterOILatestGammaSelect->Put()->Symbol()->Delta() ) / 100;
+
+    if ( ( 0 == m_nCalls ) || ( 0 == m_nPuts ) ) {
+      m_nCalls = m_nPuts = 0;
+    }
+    else {
+      COrder* pOrder;
+      pOrder = new COrder( m_iterOILatestGammaSelect->Call()->Symbol()->GetInstrument(), 
+        OrderType::Market, OrderSide::Buy, m_nCalls );
+      m_tws.PlaceOrder( pOrder );
+      pOrder = new COrder( m_iterOILatestGammaSelect->Put()->Symbol()->GetInstrument(), 
+        OrderType::Market, OrderSide::Buy, m_nPuts );
+      m_tws.PlaceOrder( pOrder );
+
+      m_ss.str( "" );
+      m_ss << "Bought: C" << m_nCalls << "@" << m_dblCallPrice << " for " << 100 * m_nCalls * m_dblCallPrice
+                 << ", P" << m_nPuts  << "@" << m_dblPutPrice  << " for " << 100 * m_nPuts  * m_dblPutPrice 
+                 << std::endl;
+      OutputDebugString( m_ss.str().c_str() );
+    }
+  }
 }
 
 void CProcess::StopTrading( void ) {
+  m_bTrading = false;
 }
 
 void CProcess::HandleMainQuote( const CQuote& quote ) {
@@ -379,7 +463,7 @@ void CProcess::HandleMainTrade1( const CTrade& trade ) {
   }
   m_iterOILowestWatch = m_iterOIHighestWatch;
   --m_iterOILowestWatch;
-  for ( int i = 0; i < 10; ++i ) { // set watch 10 strikes above and below current trade
+  for ( int i = 0; i < 20; ++i ) { // set watch 10 strikes above and below current trade
     if ( m_vStrikes.begin() != m_iterOILowestWatch ) {
       --m_iterOILowestWatch;
     }
@@ -390,10 +474,10 @@ void CProcess::HandleMainTrade1( const CTrade& trade ) {
 
   m_bWatchingOptions = true;
   for ( std::vector<COptionInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-    m_tws.AddQuoteHandler( iter->CallSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandleCallQuote ) );
-    m_tws.AddTradeHandler( iter->CallSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandleCallTrade ) );
-    m_tws.AddQuoteHandler( iter->PutSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandlePutQuote ) );
-    m_tws.AddTradeHandler( iter->PutSymbol()->GetId(), MakeDelegate( &(*iter), &COptionInfo::HandlePutTrade ) );
+    m_tws.AddQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedOption::HandleQuote ) );
+    m_tws.AddTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedOption::HandleTrade ) );
+    m_tws.AddQuoteHandler( iter->Put()->Symbol()->GetId(), MakeDelegate( iter->Put(), &CNakedOption::HandleQuote ) );
+    m_tws.AddTradeHandler( iter->Put()->Symbol()->GetId(), MakeDelegate( iter->Put(), &CNakedOption::HandleTrade ) );
   }
 
 }
@@ -405,16 +489,27 @@ void CProcess::HandleMainTradeN( const CTrade& trade ) {
   if ( dblTrade > *m_iterAboveCrossOver ) {
     // execute adjustment
     if ( ( 0 != m_nCalls ) && ( 0 != m_nPuts ) ) {
-      double dblCallPrice = m_iterOILatestGammaSelect->CallAsk();
-      double dblPutPrice = m_iterOILatestGammaSelect->PutAsk();
+      double dblCallPrice = m_iterOILatestGammaSelect->Call()->Ask();
+      double dblPutPrice = m_iterOILatestGammaSelect->Put()->Ask();
       double dblCallDiff = ( dblCallPrice - m_dblCallPrice ) * m_nCalls;
       double dblPutDiff = ( dblPutPrice - m_dblPutPrice ) * m_nPuts;
       double dblDiff = dblCallDiff + dblPutDiff;
       m_ss.str( "" );
-      m_ss << "Sell Up: " << dblCallDiff << "+" << dblPutDiff << "=" << dblDiff;
+      m_ss << "Sell Up Calc: " << dblCallDiff << "+" << dblPutDiff << "=" << dblDiff;
       if ( 0 < dblDiff ) {
-        m_nCalls = m_nPuts = 0;
         m_ss << " (sold)";
+
+          if ( ( 0 < m_nCalls ) && ( 0 < m_nPuts ) ) {
+            COrder* pOrder;
+            pOrder = new COrder( m_iterOILatestGammaSelect->Call()->Symbol()->GetInstrument(), 
+              OrderType::Market, OrderSide::Sell, m_nCalls );
+            m_tws.PlaceOrder( pOrder );
+            pOrder = new COrder( m_iterOILatestGammaSelect->Put()->Symbol()->GetInstrument(), 
+              OrderType::Market, OrderSide::Sell, m_nPuts );
+            m_tws.PlaceOrder( pOrder );
+          }
+
+        m_nCalls = m_nPuts = 0;
       }
       m_ss << std::endl;
       OutputDebugString( m_ss.str().c_str() );
@@ -434,16 +529,27 @@ void CProcess::HandleMainTradeN( const CTrade& trade ) {
     if ( dblTrade < *m_iterBelowCrossOver ) {
       // execute adjustment
       if ( ( 0 != m_nCalls ) && ( 0 != m_nPuts ) ) {
-        double dblCallPrice = m_iterOILatestGammaSelect->CallBid();
-        double dblPutPrice = m_iterOILatestGammaSelect->PutBid();
-        double dblCallDiff = ( dblCallPrice - m_dblCallPrice ) * m_nCalls;
-        double dblPutDiff = ( dblPutPrice - m_dblPutPrice ) * m_nPuts;
+        double dblNewCallPrice = m_iterOILatestGammaSelect->Call()->Bid();
+        double dblNewPutPrice = m_iterOILatestGammaSelect->Put()->Bid();
+        double dblCallDiff = ( dblNewCallPrice - m_dblCallPrice ) * m_nCalls;
+        double dblPutDiff = ( dblNewPutPrice - m_dblPutPrice ) * m_nPuts;
         double dblDiff = dblCallDiff + dblPutDiff;
         m_ss.str( "" );
-        m_ss << "Sell Dn: " << dblCallDiff << "+" << dblPutDiff << "=" << dblDiff;
+        m_ss << "Sell Dn Calc: " << dblCallDiff << "+" << dblPutDiff << "=" << dblDiff;
         if ( 0 < dblDiff ) {
-          m_nCalls = m_nPuts = 0;
           m_ss << " (sold)";
+
+          if ( ( 0 < m_nCalls ) && ( 0 < m_nPuts ) ) {
+            COrder* pOrder;
+            pOrder = new COrder( m_iterOILatestGammaSelect->Call()->Symbol()->GetInstrument(), 
+              OrderType::Market, OrderSide::Sell, m_nCalls );
+            m_tws.PlaceOrder( pOrder );
+            pOrder = new COrder( m_iterOILatestGammaSelect->Put()->Symbol()->GetInstrument(), 
+              OrderType::Market, OrderSide::Sell, m_nPuts );
+            m_tws.PlaceOrder( pOrder );
+          }
+
+          m_nCalls = m_nPuts = 0;
         }
         m_ss << std::endl;
         OutputDebugString( m_ss.str().c_str() );
@@ -466,21 +572,24 @@ void CProcess::HandleMainTradeN( const CTrade& trade ) {
       // output greeks for previous acquisition
       m_ss.str( "" );
       m_ss << "Prev Xvr: " 
-        << m_iterOILatestGammaSelect->Strike() << " -- "
-        << m_iterOILatestGammaSelect->CallSymbol()->OptionPrice() << ", "
-        << m_iterOILatestGammaSelect->CallSymbol()->Delta() << ", "
-        << m_iterOILatestGammaSelect->CallSymbol()->Gamma() << " - "
-        << m_iterOILatestGammaSelect->PutSymbol()->OptionPrice() << ", "
-        << m_iterOILatestGammaSelect->PutSymbol()->Delta() << ", "
-        << m_iterOILatestGammaSelect->PutSymbol()->Gamma() 
+        << " Strk "  << m_iterOILatestGammaSelect->Strike()
+        << " Call "  << m_iterOILatestGammaSelect->Call()->Symbol()->OptionPrice()
+        << " Delta " << m_iterOILatestGammaSelect->Call()->Symbol()->Delta()
+        << " Gamma " << m_iterOILatestGammaSelect->Call()->Symbol()->Gamma() << " - "
+        << " Put "   << m_iterOILatestGammaSelect->Put()->Symbol()->OptionPrice()
+        << " Delta " << m_iterOILatestGammaSelect->Put()->Symbol()->Delta()
+        << " Gamma " << m_iterOILatestGammaSelect->Put()->Symbol()->Gamma() 
         << std::endl;
       OutputDebugString( m_ss.str().c_str() );
     }
+  }
+
+  if ( bCrossedOver && ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {  // don't do anything unless we've cleared the slate
     double gamma = 0;
     m_iterOILatestGammaSelect = m_iterOIHighestWatch;
     for ( std::vector<COptionInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-      double tmp1 = iter->CallSymbol()->Gamma();
-      double tmp2 = iter->PutSymbol()->Gamma();
+      double tmp1 = iter->Call()->Symbol()->Gamma();
+      double tmp2 = iter->Put()->Symbol()->Gamma();
       if ( gamma < tmp1 ) {
         gamma = tmp1;
         m_iterOILatestGammaSelect = iter;
@@ -491,24 +600,44 @@ void CProcess::HandleMainTradeN( const CTrade& trade ) {
     }
     else {
       // buy in
-      m_dblCallPrice = m_iterOILatestGammaSelect->CallAsk();
-      m_dblPutPrice = m_iterOILatestGammaSelect->PutAsk();
-      m_nCalls = ( 5000.0 / m_iterOILatestGammaSelect->CallSymbol()->Delta() ) / 100;
-      m_nPuts = ( 5000.0 / m_iterOILatestGammaSelect->PutSymbol()->Delta() ) / 100;
-      m_ss.str( "" );
-      m_ss << "Bought: C" << m_nCalls << "@" << m_dblCallPrice << " for " << m_nCalls * m_dblCallPrice
-                 << ", P" << m_nPuts << "@" << m_dblPutPrice << " for " << m_nPuts * m_dblPutPrice << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
+      if ( 0 == m_nCalls ) {
+        COrder* pOrder;
+        m_dblCallPrice = m_iterOILatestGammaSelect->Call()->Ask();
+        m_dblPutPrice = m_iterOILatestGammaSelect->Put()->Ask();
+        m_nCalls = ( 1000.0 / m_iterOILatestGammaSelect->Call()->Symbol()->Delta() ) / 100;
+        m_nPuts = -1 * ( 1000.0 / m_iterOILatestGammaSelect->Put()->Symbol()->Delta() ) / 100;
+
+        if ( ( 0 < m_nCalls ) && ( 0 < m_nPuts ) ) {
+          pOrder = new COrder( m_iterOILatestGammaSelect->Call()->Symbol()->GetInstrument(), 
+            OrderType::Market, OrderSide::Buy, m_nCalls );
+          m_tws.PlaceOrder( pOrder );
+          pOrder = new COrder( m_iterOILatestGammaSelect->Put()->Symbol()->GetInstrument(), 
+            OrderType::Market, OrderSide::Buy, m_nPuts );
+          m_tws.PlaceOrder( pOrder );
+        }
+        else {
+          m_ss.str( "" );
+          m_ss << "puts or calls are zero" << std::endl;
+          OutputDebugString( m_ss.str().c_str() );
+        }
+
+        m_ss.str( "" );
+        m_ss << "Bought: C" << m_nCalls << "@" << m_dblCallPrice << " for " << m_nCalls * m_dblCallPrice
+                   << ", P" << m_nPuts  << "@" << m_dblPutPrice  << " for " << m_nPuts  * m_dblPutPrice 
+                   << std::endl;
+        OutputDebugString( m_ss.str().c_str() );
+      }
       // status out
       m_ss.str( "" );
       m_ss << "Cur Xvr: " 
-        << m_iterOILatestGammaSelect->Strike() << " -- "
-        << m_iterOILatestGammaSelect->CallSymbol()->OptionPrice() << ", "
-        << m_iterOILatestGammaSelect->CallSymbol()->Delta() << ", "
-        << m_iterOILatestGammaSelect->CallSymbol()->Gamma() << " - "
-        << m_iterOILatestGammaSelect->PutSymbol()->OptionPrice() << ", "
-        << m_iterOILatestGammaSelect->PutSymbol()->Delta() << ", "
-        << m_iterOILatestGammaSelect->PutSymbol()->Gamma() 
+        << " Strk "  << m_iterOILatestGammaSelect->Strike()
+        << " Call "  << m_iterOILatestGammaSelect->Call()->Symbol()->OptionPrice()
+        << " Delta " << m_iterOILatestGammaSelect->Call()->Symbol()->Delta()
+        << " Gamma " << m_iterOILatestGammaSelect->Call()->Symbol()->Gamma() << " - "
+        << " Put "   << m_iterOILatestGammaSelect->Put()->Symbol()->OptionPrice()
+        << " Delta " << m_iterOILatestGammaSelect->Put()->Symbol()->Delta()
+        << " Gamma " << m_iterOILatestGammaSelect->Put()->Symbol()->Gamma() 
+        << std::endl 
         << std::endl;
       OutputDebugString( m_ss.str().c_str() );
     }
