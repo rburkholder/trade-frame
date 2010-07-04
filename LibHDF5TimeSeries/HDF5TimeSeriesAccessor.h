@@ -27,7 +27,7 @@
 // class T needs to be composed from the CDatedDatum class for access to ptime element
 template<class T> class CHDF5TimeSeriesAccessor {
 public:
-  explicit CHDF5TimeSeriesAccessor<T>( const string &sPathName );
+  explicit CHDF5TimeSeriesAccessor<T>( const std::string &sPathName );
   virtual ~CHDF5TimeSeriesAccessor<T>(void);
   typedef hsize_t size_type;
   size_type size() const { return m_curElementCount; };
@@ -35,7 +35,7 @@ public:
   void Read( hsize_t ixStart, hsize_t count, H5::DataSpace *pMemoryDataSpace, T *pDatedDatum );
   void Write( hsize_t ixStart, size_t count, T * );
 protected:
-  string m_sPathName;
+  std::string m_sPathName;
   CHDF5DataManager dm;
   H5::DataSet *m_pDiskDataSet;
   H5::CompType *m_pDiskCompType;

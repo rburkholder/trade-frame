@@ -330,3 +330,16 @@ protected:
 private:
 };
 
+// Greeks
+
+class CGreeks: public CTimeSeries<CGreek> {
+public:
+  CGreeks( void );
+  CGreeks( size_t );
+  ~CGreeks( void );
+  CGreeks *Subset( ptime time ) { return (CGreeks *) CTimeSeries<CGreek>::Subset( time ); };
+  CGreeks *Subset( ptime time, unsigned int n ) { return (CGreeks *) CTimeSeries<CGreek>::Subset( time, n ); };
+protected:
+private:
+};
+

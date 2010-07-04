@@ -15,8 +15,6 @@
 
 #include "IBSymbol.h"
 
-//#include "boost/date_time/local_time/local_time.hpp"
-
 CIBSymbol::CIBSymbol( TickerId id, pInstrument_t pInstrument )
 : 
   CSymbol<CIBSymbol,TickerId>( id, pInstrument ), 
@@ -30,7 +28,6 @@ CIBSymbol::CIBSymbol( TickerId id, pInstrument_t pInstrument )
     m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
     m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
     m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 ),
-    m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblVega( 0 ), m_dblTheta( 0 ),
     m_bOptionsSet( false )
 {
 }
@@ -146,15 +143,18 @@ void CIBSymbol::BuildTrade() {
 }
 
 void CIBSymbol::Greeks( double optPrice, double undPrice, double pvDividend, 
-                       double impliedVol, double delta, double gamma, double vega, double theta ) {
+                        double impliedVol, double delta, double gamma, double vega, double theta ) {
 
   m_dblOptionPrice = optPrice;
   m_dblUnderlyingPrice = undPrice;
   m_dblPvDividend = pvDividend;
-  m_dblImpliedVolatility = impliedVol;
-  m_dblDelta = delta;
-  m_dblGamma = gamma;
-  m_dblVega = vega;
-  m_dblTheta = theta;
+
+  ptime dt;
+  m_TimeSource.External( &dt );
+
+  m_greek = CGreek( dt, impliedVol, delta, gamma, theta, vega, 0 );
   m_bOptionsSet = true;
+
+  m_OnGreek( m_greek );
+
 }

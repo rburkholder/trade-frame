@@ -153,45 +153,6 @@ private:
   volume_t m_nVolume;
 };
 
-//
-// CGreeks
-//
-
-class CGreeks: public CDatedDatum {
-public:
-
-  CGreeks( void );
-  CGreeks( const ptime &dt );
-  CGreeks( const CGreeks& greeks );
-  CGreeks( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
-  ~CGreeks( void );
-
-  double ImpliedVolatility( void ) const { return m_dblImpliedVolatility; };
-  double Delta( void ) const { return m_dblDelta; };
-  double Gamma( void ) const { return m_dblGamma; };
-  double Theta( void ) const { return m_dblTheta; };
-  double Vega( void ) const { return m_dblVega; };
-  double Rho( void ) const { return m_dblRho; };
-
-  void ImpliedVolatility( double dblImpliedVolatility ) { m_dblImpliedVolatility = dblImpliedVolatility; };
-  void Delta( double dblDelta ) { m_dblDelta = dblDelta; };
-  void Gamma( double dblGamma ) { m_dblGamma = dblGamma; };
-  void Theta( double dblTheta ) { m_dblTheta = dblTheta; };
-  void Vega( double dblVega ) { m_dblVega = dblVega; };
-  void Rho( double dblRho ) { m_dblRho = dblRho; };
-
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
-
-protected:
-private:
-  double m_dblImpliedVolatility;
-  double m_dblDelta;  // sensitivity to underlying's price changes
-  double m_dblGamma;  // measure of delta's sensitivity to underlying's price changes
-  double m_dblTheta;  // measure of option value's sensitivity to volatility
-  double m_dblVega;   // measure of options value's sensivity to passage of time
-  double m_dblRho;    // measure of option value's sensivity to interest rates
-};
-
 // 
 // CMarketDepth
 //
@@ -230,6 +191,47 @@ protected:
 private:
   volume_t m_nShares;
   price_t m_dblPrice;
+};
+
+//
+// CGreek
+//
+
+class CGreek: public CDatedDatum {
+public:
+
+  CGreek( void );
+  CGreek( const ptime &dt );
+  CGreek( const CGreek& greeks );
+  CGreek( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
+  ~CGreek( void );
+
+  double ImpliedVolatility( void ) const { return m_dblImpliedVolatility; };
+  double Delta( void ) const { return m_dblDelta; };
+  double Gamma( void ) const { return m_dblGamma; };
+  double Theta( void ) const { return m_dblTheta; };
+  double Vega( void ) const { return m_dblVega; };
+  double Rho( void ) const { return m_dblRho; };
+
+  void ImpliedVolatility( double dblImpliedVolatility ) { m_dblImpliedVolatility = dblImpliedVolatility; };
+  void Delta( double dblDelta ) { m_dblDelta = dblDelta; };
+  void Gamma( double dblGamma ) { m_dblGamma = dblGamma; };
+  void Theta( double dblTheta ) { m_dblTheta = dblTheta; };
+  void Vega( double dblVega ) { m_dblVega = dblVega; };
+  void Rho( double dblRho ) { m_dblRho = dblRho; };
+
+  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+
+protected:
+
+private:
+  double m_dblImpliedVolatility;
+  double m_dblDelta;  // sensitivity to underlying's price changes
+  double m_dblGamma;  // measure of delta's sensitivity to underlying's price changes
+  double m_dblTheta;  // measure of option value's sensitivity to volatility
+  double m_dblVega;   // measure of options value's sensivity to passage of time
+  double m_dblRho;    // measure of option value's sensivity to interest rates
+
 };
 
 

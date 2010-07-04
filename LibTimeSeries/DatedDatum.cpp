@@ -93,8 +93,8 @@ CQuote::~CQuote(void) {
 H5::CompType *CQuote::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CQuote ) );
   CDatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "Bid", HOFFSET( CQuote, m_dblBid ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Ask", HOFFSET( CQuote, m_dblAsk ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Bid",     HOFFSET( CQuote, m_dblBid ),   H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Ask",     HOFFSET( CQuote, m_dblAsk ),   H5::PredType::NATIVE_DOUBLE );
   pComp->insertMember( "BidSize", HOFFSET( CQuote, m_nBidSize ), H5::PredType::NATIVE_INT );
   pComp->insertMember( "AskSize", HOFFSET( CQuote, m_nAskSize ), H5::PredType::NATIVE_INT );
   return pComp;
@@ -132,8 +132,8 @@ CTrade::~CTrade(void) {
 H5::CompType *CTrade::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CTrade ) );
   CDatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "Trade", HOFFSET( CTrade, m_dblTrade ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "TradeSize", HOFFSET( CTrade, m_nTradeSize ), H5::PredType::NATIVE_INT );
+  pComp->insertMember( "Trade", HOFFSET( CTrade, m_dblTrade ),   H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Size",  HOFFSET( CTrade, m_nTradeSize ), H5::PredType::NATIVE_INT );
   return pComp;
 }
 
@@ -173,48 +173,11 @@ CBar::~CBar(void) {
 H5::CompType *CBar::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CBar ) );
   CDatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "Open", HOFFSET( CBar, m_dblOpen ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "High", HOFFSET( CBar, m_dblHigh ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Low", HOFFSET( CBar, m_dblLow ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Close", HOFFSET( CBar, m_dblClose ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Volume", HOFFSET( CBar, m_nVolume ), H5::PredType::NATIVE_INT );
-  return pComp;
-}
-
-// 
-// CGreeks
-//
-
-CGreeks::CGreeks( void ): CDatedDatum(), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
-}
-
-CGreeks::CGreeks( const ptime& dt ): CDatedDatum(dt), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
-}
-
-CGreeks::CGreeks( const CGreeks& greeks ): CDatedDatum( greeks.m_dt ), 
-  m_dblImpliedVolatility( greeks.m_dblImpliedVolatility ), 
-  m_dblDelta( greeks.m_dblDelta ), m_dblGamma( greeks.m_dblGamma ), m_dblTheta( greeks.m_dblTheta ), m_dblVega( greeks.m_dblVega ), m_dblRho( greeks.m_dblRho ) {
-}
-
-CGreeks::CGreeks( const boost::posix_time::ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ):
-  CDatedDatum( dt ), 
-  m_dblImpliedVolatility( dblImpliedVolatility ), 
-  m_dblDelta( dblDelta ), m_dblGamma( dblGamma ), m_dblTheta( dblTheta ), m_dblVega( dblVega ), m_dblRho( dblRho ) {
-}
-
-CGreeks::~CGreeks( void ) {
-  CDatedDatum::~CDatedDatum();
-}
-
-H5::CompType *CGreeks::DefineDataType( H5::CompType *pComp ) {
-  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CGreeks ) );
-  CDatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "ImplVol", HOFFSET( CGreeks, m_dblImpliedVolatility ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Delta", HOFFSET( CGreeks, m_dblDelta ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Gamma", HOFFSET( CGreeks, m_dblGamma ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Theta", HOFFSET( CGreeks, m_dblTheta ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Vega", HOFFSET( CGreeks, m_dblVega ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Rho", HOFFSET( CGreeks, m_dblRho ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Open",   HOFFSET( CBar, m_dblOpen ),  H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "High",   HOFFSET( CBar, m_dblHigh ),  H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Low",    HOFFSET( CBar, m_dblLow ),   H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Close",  HOFFSET( CBar, m_dblClose ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Volume", HOFFSET( CBar, m_nVolume ),  H5::PredType::NATIVE_INT );
   return pComp;
 }
 
@@ -264,13 +227,50 @@ CMarketDepth::~CMarketDepth() {
 H5::CompType *CMarketDepth::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CMarketDepth ) );
   CDatedDatum::DefineDataType( pComp );
-  pComp->insertMember( "Shares", HOFFSET( CMarketDepth, m_nShares ), H5::PredType::NATIVE_LONG );
-  pComp->insertMember( "Price", HOFFSET( CMarketDepth, m_dblPrice ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Side", HOFFSET( CMarketDepth, m_eSide ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID0", HOFFSET( CMarketDepth, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID1", HOFFSET( CMarketDepth, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID2", HOFFSET( CMarketDepth, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );
-  pComp->insertMember( "MMID3", HOFFSET( CMarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );  
+  pComp->insertMember( "Shares", HOFFSET( CMarketDepth, m_nShares ),      H5::PredType::NATIVE_LONG );
+  pComp->insertMember( "Price",  HOFFSET( CMarketDepth, m_dblPrice ),     H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Side",   HOFFSET( CMarketDepth, m_eSide ),        H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID0",  HOFFSET( CMarketDepth, m_uMMID.rch[0] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID1",  HOFFSET( CMarketDepth, m_uMMID.rch[1] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID2",  HOFFSET( CMarketDepth, m_uMMID.rch[2] ), H5::PredType::NATIVE_CHAR );
+  pComp->insertMember( "MMID3",  HOFFSET( CMarketDepth, m_uMMID.rch[3] ), H5::PredType::NATIVE_CHAR );  
   return pComp; 
+}
+
+// 
+// CGreek
+//
+
+CGreek::CGreek( void ): CDatedDatum(), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
+}
+
+CGreek::CGreek( const ptime& dt ): CDatedDatum(dt), m_dblImpliedVolatility( 0 ), m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblTheta( 0 ), m_dblVega( 0 ), m_dblRho( 0 ) {
+}
+
+CGreek::CGreek( const CGreek& greeks ): CDatedDatum( greeks.m_dt ), 
+  m_dblImpliedVolatility( greeks.m_dblImpliedVolatility ), 
+  m_dblDelta( greeks.m_dblDelta ), m_dblGamma( greeks.m_dblGamma ), m_dblTheta( greeks.m_dblTheta ), m_dblVega( greeks.m_dblVega ), m_dblRho( greeks.m_dblRho ) {
+}
+
+CGreek::CGreek( const boost::posix_time::ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ):
+  CDatedDatum( dt ), 
+  m_dblImpliedVolatility( dblImpliedVolatility ), 
+  m_dblDelta( dblDelta ), m_dblGamma( dblGamma ), m_dblTheta( dblTheta ), m_dblVega( dblVega ), m_dblRho( dblRho ) {
+}
+
+CGreek::~CGreek( void ) {
+  CDatedDatum::~CDatedDatum();
+}
+
+H5::CompType *CGreek::DefineDataType( H5::CompType *pComp ) {
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CGreek ) );
+  CDatedDatum::DefineDataType( pComp );
+  pComp->insertMember( "ImplVol", HOFFSET( CGreek, m_dblImpliedVolatility ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Delta",   HOFFSET( CGreek, m_dblDelta ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Gamma",   HOFFSET( CGreek, m_dblGamma ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Theta",   HOFFSET( CGreek, m_dblTheta ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Vega",    HOFFSET( CGreek, m_dblVega ),  H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "Rho",     HOFFSET( CGreek, m_dblRho ),   H5::PredType::NATIVE_DOUBLE );
+  return pComp;
 }
 

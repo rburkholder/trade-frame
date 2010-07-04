@@ -100,3 +100,15 @@ CMarketDepths::CMarketDepths(size_t size)
 : CTimeSeries<CMarketDepth>( size ) {
 }
 
+// CGreeks
+
+CGreeks::CGreeks(void) {
+}
+
+CGreeks::CGreeks( size_t size )
+:CTimeSeries<CGreek>( size ) {
+}
+
+CGreeks::~CGreeks( void ) {
+}
+

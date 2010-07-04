@@ -20,6 +20,8 @@
 #include "Process.h"
 
 #include <LibIndicators/Pivots.h>
+#include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <LibHDF5TimeSeries/HDF5DataManager.h>
 
 //
 // ==================
@@ -28,8 +30,6 @@
 CNakedOption::CNakedOption( double dblStrike ) 
 : m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
   m_dblStrike( dblStrike ),
-  m_dblImpliedVolatility( 0 ),
-  m_dblDelta( 0 ), m_dblGamma( 0 ), m_dblVega( 0 ), m_dblTheta( 0 ),
   m_bWatching( false ),
   m_sSide( "-" ),
   m_pSymbol( NULL )
@@ -39,8 +39,7 @@ CNakedOption::CNakedOption( double dblStrike )
 CNakedOption::CNakedOption( const CNakedOption& rhs ) 
 : m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblTrade( rhs.m_dblTrade ),
   m_dblStrike( rhs.m_dblStrike ),
-  m_dblImpliedVolatility( 0 ),
-  m_dblDelta( rhs.m_dblDelta ), m_dblGamma( rhs.m_dblGamma ), m_dblVega( rhs.m_dblVega ), m_dblTheta( rhs.m_dblVega ),
+  m_greek( rhs.m_greek ),
   m_bWatching( false ),
   m_sSide( rhs.m_sSide ),
   m_pSymbol( rhs.m_pSymbol )
@@ -52,11 +51,7 @@ CNakedOption& CNakedOption::operator=( const CNakedOption& rhs ) {
   assert( !rhs.m_bWatching );
   assert( !m_bWatching );
   m_dblStrike = rhs.m_dblStrike;
-  m_dblImpliedVolatility = rhs.m_dblImpliedVolatility;
-  m_dblDelta = rhs.m_dblDelta;
-  m_dblGamma = rhs.m_dblGamma;
-  m_dblVega = rhs.m_dblVega;
-  m_dblTheta = rhs.m_dblTheta;
+  m_greek = rhs.m_greek;
   m_sSide = rhs.m_sSide;
   m_pSymbol = rhs.m_pSymbol;
   return *this;
@@ -65,21 +60,17 @@ CNakedOption& CNakedOption::operator=( const CNakedOption& rhs ) {
 void CNakedOption::HandleQuote( const CQuote& quote ) {
   m_dblBid = quote.Bid();
   m_dblAsk = quote.Ask();
+  m_quotes.Append( quote );
 }
 
 void CNakedOption::HandleTrade( const CTrade& trade ) {
   m_dblTrade = trade.Trade();
-//  m_ss.str( "" );
-//  m_ss << "Trade(" << m_sSide << m_dblStrike << "): " << trade.Volume() << "@" << trade.Trade() << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+  m_trades.Append( trade );
 }
 
-void CNakedOption::HandleGreeks( double ImplVol, double Delta, double Gamma, double Vega, double Theta ) {
-  m_dblImpliedVolatility = ImplVol;
-  m_dblDelta = Delta;
-  m_dblGamma = Gamma;
-  m_dblVega = Vega;
-  m_dblTheta = Theta;
+void CNakedOption::HandleGreek( const CGreek& greek ) {
+  m_greek = greek;
+  m_greeks.Append( greek );
 }
 
 //
@@ -146,7 +137,11 @@ CProcess::CProcess(void)
   m_nCalls( 0 ), m_nPuts( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
   m_dblBaseDelta( 6000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
-  m_TradingState( ETSFirstPass )
+  m_TradingState( ETSFirstPass ), 
+  m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
+  m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
+  m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
+  m_dtMarketClose( time_duration( 17, 0, 0 ) )
 {
 
   m_contract.currency = "USD";
@@ -234,10 +229,14 @@ void CProcess::StopWatch( void ) {
   if ( m_bWatchingOptions ) {
     m_bWatchingOptions = false;
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+
       m_tws.RemoveQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
       m_tws.RemoveTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_tws.RemoveGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+
       m_tws.RemoveQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
       m_tws.RemoveTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_tws.RemoveGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -507,7 +506,7 @@ void CProcess::HandleTSFirstPass( const CTrade& trade ) {
 void CProcess::HandleTSPreMarket( const CTrade& trade ) {
   ptime dt;
   m_ts.External( &dt );
-  if ( dt.time_of_day() >= time_duration( 10, 30, 0 ) ) {
+  if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
     m_ss << m_ts.External();
     m_ss << " State:  Market Opened." << std::endl;
@@ -566,10 +565,14 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   // set the actual watches
   m_bWatchingOptions = true;
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+
     m_tws.AddQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
     m_tws.AddTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+    m_tws.AddGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+
     m_tws.AddQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
     m_tws.AddTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+    m_tws.AddGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
   }
 
   m_TradingState = ETSFirstTrade;
@@ -579,7 +582,7 @@ void CProcess::HandleTSOpeningOrder( const CTrade& trade ) {
 
   ptime dt;
   m_ts.External( &dt );
-  if ( dt.time_of_day() >= time_duration( 10, 31, 0 ) ) {
+  if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
     m_ss.str( "" );
     m_ss << m_ts.External();
     m_ss << " State:  Opening Order." << std::endl;
@@ -598,7 +601,7 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 
   ptime dt;
   m_ts.External( &dt );
-  if ( dt.time_of_day() >= time_duration( 16, 56, 0 ) ) {
+  if ( dt.time_of_day() >= m_dtMarketClosingOrder ) {
     m_ss.str( "" );
     m_ss << m_ts.External();
     m_ss << " State:  Close Orders." << std::endl;
@@ -620,6 +623,10 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 
     try {
 
+      // todo:  while implied volatility is rising, hold back on exiting?
+      // todo:  while implied volatility is falling, hold back on entering?
+
+      // handle the Put position
       if ( dblDeltaHi < -dblDeltaPut ) {
         // sell to bring back to -m_dblBaseDelta
         nOptions = (int) floor( ( ( -dblDeltaPut - m_dblBaseDelta ) / -( m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta() ) ) / 100.0 );
@@ -647,6 +654,7 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
         }
       }
 
+      // handle the call position
       if ( dblDeltaHi < dblDeltaCall ) {
         // sell to bring back to m_dblBaseDelta
         nOptions = (int) floor( ( ( dblDeltaCall - m_dblBaseDelta ) / m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() ) / 100.0 );
@@ -714,7 +722,7 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
 
   ptime dt;
   m_ts.External( &dt );
-  if ( dt.time_of_day() >= time_duration( 17, 0, 0 ) ) {
+  if ( dt.time_of_day() >= m_dtMarketClose ) {
     m_ss.str( "" );
     m_ss << m_ts.External();
     m_ss << " State:  After Market." << std::endl;
@@ -748,3 +756,4 @@ void CProcess::PrintGreeks( void ) {
 // capture quotes, trades, greeks and write to database afterwards
 // handle executions
 // manage multiple position, add a new position on each cross over.
+

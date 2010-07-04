@@ -45,6 +45,9 @@ public:
   typedef const CMarketDepth& depth_t;
   typedef Delegate<depth_t>::OnMessageHandler depthhandler_t;
 
+  typedef const CGreek& greek_t;
+  typedef Delegate<greek_t>::OnMessageHandler greekhandler_t;
+
   virtual bool AddQuoteHandler( quotehandler_t );
   virtual bool RemoveQuoteHandler( quotehandler_t );
   size_t GetQuoteHandlerCount( void ) { return m_OnQuote.Size(); };
@@ -61,10 +64,15 @@ public:
   virtual bool RemoveDepthHandler( depthhandler_t );
   size_t GetDepthHandlerCount( void ) { return m_OnDepth.Size(); };
 
+  virtual void AddGreekHandler( greekhandler_t );
+  virtual void RemoveGreekHandler( greekhandler_t );
+  size_t GetGreekHandlerCount( void ) { return m_OnGreek.Size(); };
+
   bool  OpenWatchNeeded( void ) { return !m_OnOpen.IsEmpty(); };
   bool QuoteWatchNeeded( void ) { return !m_OnQuote.IsEmpty(); };
   bool TradeWatchNeeded( void ) { return !m_OnTrade.IsEmpty(); };
   bool DepthWatchNeeded( void ) { return !m_OnDepth.IsEmpty(); };
+  bool GreekWatchNeeded( void ) { return !m_OnGreek.Isempty(); };
 
 protected:
 
@@ -72,6 +80,7 @@ protected:
   Delegate<quote_t> m_OnQuote; 
   Delegate<trade_t> m_OnTrade;
   Delegate<depth_t> m_OnDepth;
+  Delegate<greek_t> m_OnGreek;
 
 private:
 
@@ -145,6 +154,16 @@ bool CSymbol<S,ID>::RemoveDepthHandler(depthhandler_t handler) {
   assert( 0 < m_OnDepth.Size() );
   m_OnDepth.Remove( handler );
   return ( 0 == m_OnDepth.Size() );  // when true, stop watch
+}
+
+template <typename S, typename ID>
+void CSymbol<S,ID>::AddGreekHandler ( greekhandler_t handler ) {
+  m_OnGreek.Add( handler );
+}
+
+template <typename S, typename ID>
+void CSymbol<S,ID>::RemoveGreekHandler( greekhandler_t handler ) {
+  m_OnGreek.Remove( handler );
 }
 
 

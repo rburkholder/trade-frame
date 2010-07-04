@@ -47,6 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				BrowseInformation="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>

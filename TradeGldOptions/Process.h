@@ -21,6 +21,7 @@
 #include <LibCommon/TimeSource.h>
 
 #include <LibTimeSeries/DatedDatum.h>
+#include <LibTimeSeries/TimeSeries.h>
 
 #include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <LibIQFeed/IQFeedProvider.h>
@@ -49,7 +50,7 @@ public:
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );
-  void HandleGreeks( double ImplVol, double Delta, double Gamma, double Vega, double Theta );
+  void HandleGreek( const CGreek& greek );
 
   double Bid( void ) { return m_dblBid; };
   double Ask( void ) { return m_dblAsk; };
@@ -63,11 +64,11 @@ protected:
   double m_dblTrade;
 
   double m_dblStrike;
-  double m_dblImpliedVolatility;
-  double m_dblDelta;
-  double m_dblGamma;
-  double m_dblVega;
-  double m_dblTheta;
+  CGreek m_greek;
+
+  CQuotes m_quotes;
+  CTrades m_trades;
+  CGreeks m_greeks;
 
   bool m_bWatching;
 
@@ -214,9 +215,10 @@ private:
   Contract m_contract; // re-usable, persistant contract scratchpad
 
   CTimeSource m_ts;
-  ptime m_dtMarketOpen;
-  ptime m_dtMarketPreClose;
-  ptime m_dtMarketClose;
+  time_duration m_dtMarketOpen;
+  time_duration m_dtMarketOpeningOrder;
+  time_duration m_dtMarketClosingOrder;
+  time_duration m_dtMarketClose;
 
   int m_nCalls;
   int m_nPuts;

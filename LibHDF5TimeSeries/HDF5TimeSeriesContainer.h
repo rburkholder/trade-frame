@@ -26,7 +26,7 @@
 
 template<class T> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<T> {
 public:
-  CHDF5TimeSeriesContainer<T>( const string &sPathName );
+  CHDF5TimeSeriesContainer<T>( const std::string &sPathName );
   virtual ~CHDF5TimeSeriesContainer<T>( void );
   //typedef CHDF5TimeSeriesIterator<T> const_iterator;
   typedef CHDF5TimeSeriesIterator<T> iterator;
@@ -41,7 +41,7 @@ protected:
 private:
 };
 
-template<class T> CHDF5TimeSeriesContainer<T>::CHDF5TimeSeriesContainer( const string &sPathName ):
+template<class T> CHDF5TimeSeriesContainer<T>::CHDF5TimeSeriesContainer( const std::string &sPathName ):
   CHDF5TimeSeriesAccessor<T>( sPathName ) {
     m_end = new iterator( this, size() );
 }

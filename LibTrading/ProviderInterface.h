@@ -82,6 +82,9 @@ public:
   virtual void     AddDepthHandler( const symbol_id_t& id, typename S::depthhandler_t handler );
   virtual void  RemoveDepthHandler( const symbol_id_t& id, typename S::depthhandler_t handler );
 
+  virtual void     AddGreekHandler( const symbol_id_t& id, typename S::greekhandler_t handler );
+  virtual void  RemoveGreekHandler( const symbol_id_t& id, typename S::greekhandler_t handler );
+
   Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
   S* GetSymbol( const symbol_id_t& );
@@ -280,6 +283,26 @@ void CProviderInterface<P,S>::RemoveDepthHandler(const symbol_id_t& id, typename
       StopDepthWatch( iter->second );
     }
   }
+}
+
+template <typename P, typename S>
+void CProviderInterface<P,S>::AddGreekHandler(const symbol_id_t& id, typename S::greekhandler_t handler) {
+  m_mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( id );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( 1 == 0 );
+  }
+  iter->second->AddGreekHandler( handler );
+}
+
+template <typename P, typename S>
+void CProviderInterface<P,S>::RemoveGreekHandler(const symbol_id_t& id, typename S::greekhandler_t handler) {
+  m_mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( id );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( 1 == 0 );
+  }
+  iter->second->RemoveGreekHandler( handler );
 }
 
 template <typename P, typename S>

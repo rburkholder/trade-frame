@@ -17,6 +17,7 @@
 
 #include "TWS/EWrapper.h"
 
+#include <LibTimeSeries/DatedDatum.h>
 #include <LibTrading/Symbol.h>
 #include <LibCommon/TimeSource.h>
 
@@ -42,15 +43,15 @@ public:
   double OptionPrice( void ) { return m_dblOptionPrice; };
   double ImpliedVolatility( void ) { 
     if ( !m_bOptionsSet ) throw std::logic_error( "ImplVol not set" );
-    return m_dblImpliedVolatility; 
+    return m_greek.ImpliedVolatility(); 
   };
   double Delta( void ) { 
     if ( !m_bOptionsSet ) throw std::logic_error( "Delta not set" );
-    return m_dblDelta; 
+    return m_greek.Delta(); 
   };
   double Gamma( void ) { 
     if ( !m_bOptionsSet ) throw std::logic_error( "Gamma not set" );
-    return m_dblGamma; 
+    return m_greek.Gamma(); 
   };
 
 protected:
@@ -83,11 +84,7 @@ protected:
   double m_dblOptionPrice;
   double m_dblUnderlyingPrice;
   double m_dblPvDividend;
-  double m_dblImpliedVolatility;
-  double m_dblDelta;
-  double m_dblGamma;
-  double m_dblVega;
-  double m_dblTheta;
+  CGreek m_greek;
 
   void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
   void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };
