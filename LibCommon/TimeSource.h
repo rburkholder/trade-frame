@@ -19,26 +19,34 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+
 class CTimeSource : boost::noncopyable {
 public:
+
   CTimeSource(void)
   : m_bInSimulation( false ),
     m_dtSimulationTime( boost::date_time::not_a_date_time ),
     m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) {};
   ~CTimeSource(void) {};
 
-  ptime External( void ) { 
+  void External( ptime* dt ) { 
     // this ensures we always have a monotonically increasing time (for use in simulations)
     // is not thread safe
-    ptime t = boost::posix_time::microsec_clock::local_time();
-    if ( m_dtLastRetrievedExternalTime >= t ) {  
+    ptime& dt_ = *dt;
+    dt_ = boost::posix_time::microsec_clock::local_time();
+    if ( m_dtLastRetrievedExternalTime >= dt_ ) {  
       m_dtLastRetrievedExternalTime += boost::posix_time::microsec( 1 );
-      t = m_dtLastRetrievedExternalTime;
+      dt_ = m_dtLastRetrievedExternalTime;
     }
     else {
-      m_dtLastRetrievedExternalTime = t;
+      m_dtLastRetrievedExternalTime = dt_;
     }
-    return t; 
+  };
+
+  ptime External( void ) {
+    ptime dt;
+    External( &dt );
+    return dt;
   };
 
   ptime Internal( void ) { 
@@ -60,9 +68,12 @@ public:
     m_dtSimulationTime = dt; 
   }
   void ForceSimulationTime( const ptime &dt ) { m_bInSimulation = true; m_dtSimulationTime = dt; };
+
 protected:
+
   bool m_bInSimulation;
   ptime m_dtSimulationTime;
   ptime m_dtLastRetrievedExternalTime;
+
 private:
 };

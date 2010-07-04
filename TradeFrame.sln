@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		story.txt = story.txt
 		symbol stats.txt = symbol stats.txt
+		wtl sites.txt = wtl sites.txt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibWtlCommon", "LibWtlCommon\LibWtlCommon.vcproj", "{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}"

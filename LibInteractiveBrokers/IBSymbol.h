@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include "TWS/EWrapper.h"
 
 #include <LibTrading/Symbol.h>
@@ -38,8 +40,18 @@ public:
     double impliedVol, double delta, double gamma, double vega, double theta );
 
   double OptionPrice( void ) { return m_dblOptionPrice; };
-  double Delta( void ) { return m_dblDelta; };
-  double Gamma( void ) { return m_dblGamma; };
+  double ImpliedVolatility( void ) { 
+    if ( !m_bOptionsSet ) throw std::logic_error( "ImplVol not set" );
+    return m_dblImpliedVolatility; 
+  };
+  double Delta( void ) { 
+    if ( !m_bOptionsSet ) throw std::logic_error( "Delta not set" );
+    return m_dblDelta; 
+  };
+  double Gamma( void ) { 
+    if ( !m_bOptionsSet ) throw std::logic_error( "Gamma not set" );
+    return m_dblGamma; 
+  };
 
 protected:
 

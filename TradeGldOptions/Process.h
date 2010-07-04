@@ -18,14 +18,14 @@
 #include <sstream>
 #include <map>
 
+#include <LibCommon/TimeSource.h>
+
 #include <LibTimeSeries/DatedDatum.h>
 
 #include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <LibIQFeed/IQFeedProvider.h>
 
 #include <LibInteractiveBrokers/IBTWS.h>
-
-
 
 //
 // ==================
@@ -60,6 +60,7 @@ protected:
 
   double m_dblBid;
   double m_dblAsk;
+  double m_dblTrade;
 
   double m_dblStrike;
   double m_dblImpliedVolatility;
@@ -107,17 +108,17 @@ private:
 // ==================
 //
 
-class COptionInfo 
+class CStrikeInfo 
 {
 public:
-  COptionInfo( double dblStrike );
-  COptionInfo( const COptionInfo& rhs );
-  ~COptionInfo( void );
+  CStrikeInfo( double dblStrike );
+  CStrikeInfo( const CStrikeInfo& rhs );
+  ~CStrikeInfo( void );
 
-  COptionInfo& operator=( const COptionInfo& rhs );
+  CStrikeInfo& operator=( const CStrikeInfo& rhs );
 
-  bool operator< ( const COptionInfo& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
-  bool operator<=( const COptionInfo& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
+  bool operator< ( const CStrikeInfo& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
+  bool operator<=( const CStrikeInfo& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double Strike( void ) { return m_dblStrike; };
 
@@ -169,6 +170,15 @@ protected:
 private:
 
   typedef double strike_t;
+  enum enumTradingState {  // arranged in chronological order
+    ETSFirstPass,     // any state initialization
+    ETSPreMarket,     // time frame before Markets open
+    ETSMarketOpened,  // initialize anything on market open
+    ETSFirstTrade,    // create opening trade at correct time
+    ETSTrading,       // allow active trading
+    ETSCloseOrders,   // close trades
+    ETSAfterMarket    // after market closes
+  } m_TradingState;
 
   std::string m_sSymbolName;
   long m_contractidUnderlying;
@@ -186,19 +196,27 @@ private:
 
   CBar m_Bar;  // keep pointer for when data arrives
 
+  double m_dblBaseDelta; // keep trades balanced at this level
+  double m_dblBaseDeltaIncrement;
+
   std::vector<double> m_vCrossOverPoints;  // has pivots and strikes in order
-  std::vector<COptionInfo> m_vStrikes;  // put/call info for each strike
-  std::vector<COptionInfo>::iterator m_iterStrikes;
+  std::vector<CStrikeInfo> m_vStrikes;  // put/call info for each strike
+  std::vector<CStrikeInfo>::iterator m_iterStrikes;
 
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
 
-  std::vector<COptionInfo>::iterator m_iterOILowestWatch;
-  std::vector<COptionInfo>::iterator m_iterOIHighestWatch;
-  std::vector<COptionInfo>::iterator m_iterOILatestGammaSelectCall;
-  std::vector<COptionInfo>::iterator m_iterOILatestGammaSelectPut;
+  std::vector<CStrikeInfo>::iterator m_iterOILowestWatch;
+  std::vector<CStrikeInfo>::iterator m_iterOIHighestWatch;
+  std::vector<CStrikeInfo>::iterator m_iterOILatestGammaSelectCall;
+  std::vector<CStrikeInfo>::iterator m_iterOILatestGammaSelectPut;
 
   Contract m_contract; // re-usable, persistant contract scratchpad
+
+  CTimeSource m_ts;
+  ptime m_dtMarketOpen;
+  ptime m_dtMarketPreClose;
+  ptime m_dtMarketClose;
 
   int m_nCalls;
   int m_nPuts;
@@ -221,11 +239,19 @@ private:
   void HandleStrikeListing4( const ContractDetails& );  // symbols for puts
   void HandleStrikeListing4Done( void );
 
-  void HandleMainQuote( const CQuote& quote );
-  void HandleMainTrade1( const CTrade& trade ); // first trade gives our center oint
-  void HandleMainTradeN( const CTrade& trade ); // following trades follow
+  void HandleUnderlyingQuote( const CQuote& quote );
+  void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine
+
+  void HandleTSFirstPass( const CTrade& trade );
+  void HandleTSPreMarket( const CTrade& trade );
+  void HandleTSMarketOpened( const CTrade& trade );
+  void HandleTSOpeningOrder( const CTrade& trade );
+  void HandleTSTrading( const CTrade& trade );
+  void HandleTSCloseOrders( const CTrade& trade );
+  void HandleAfterMarket( const CTrade& trade );
 
   void OpenPosition( void );
   void ClosePosition( void );
+  void PrintGreeks( void );
 
 };
