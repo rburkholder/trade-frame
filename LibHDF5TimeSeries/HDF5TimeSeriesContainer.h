@@ -82,7 +82,7 @@ template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator &_begin, iter
 template<class T> void CHDF5TimeSeriesContainer<T>::Write( T *_begin, T *_end ) {
   size_t cnt = _end - _begin;
   if ( cnt > 0 ) {
-    pair<CHDF5TimeSeriesContainer<T>::iterator, CHDF5TimeSeriesContainer<T>::iterator> p;
+    std::pair<CHDF5TimeSeriesContainer<T>::iterator, CHDF5TimeSeriesContainer<T>::iterator> p;
     p = equal_range( begin(), end(), *_begin );
     // whether we found something or not, p.first is insertion point
     CHDF5TimeSeriesAccessor<T>::Write( p.first.m_ItemIndex, cnt, _begin );

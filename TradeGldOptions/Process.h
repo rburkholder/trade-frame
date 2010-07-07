@@ -55,6 +55,10 @@ public:
   double Bid( void ) { return m_dblBid; };
   double Ask( void ) { return m_dblAsk; };
 
+  CQuotes* Quotes( void ) { return &m_quotes; };
+  CTrades* Trades( void ) { return &m_trades; };
+  CGreeks* Greeks( void ) { return &m_greeks; };
+
 protected:
 
   std::string m_sSide;
@@ -161,6 +165,8 @@ public:
   void StartTrading( void ) ;
   void StopTrading( void );
 
+  void SaveSeries( void );
+
 protected:
 
   void OnHistoryConnected( void );
@@ -185,6 +191,8 @@ private:
   long m_contractidUnderlying;
   CIBSymbol *pUnderlying;  // need to make share_ptr
 
+  std::string m_sPathForSeries;
+
   std::stringstream m_ss;
 
   CIQFeedProvider m_iqfeed;
@@ -194,6 +202,9 @@ private:
   bool m_bIBConnected;
   bool m_bWatchingOptions;
   bool m_bTrading;
+
+  CQuotes m_quotes;
+  CTrades m_trades;
 
   CBar m_Bar;  // keep pointer for when data arrives
 

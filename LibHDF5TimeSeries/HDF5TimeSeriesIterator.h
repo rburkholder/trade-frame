@@ -15,12 +15,10 @@
 
 #include <iterator>
 #include <stdexcept>
-//using namespace std;
 
 #include "LibTimeSeries/DatedDatum.h"
 
 #include "HDF5DataManager.h"
-//using namespace H5;
 
 #include "HDF5TimeSeriesAccessor.h"
 #include "HDF5TimeSeriesContainer.h"

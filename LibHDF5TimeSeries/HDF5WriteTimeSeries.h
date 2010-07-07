@@ -89,17 +89,17 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
   }
 
   try {
-    CHDF5TimeSeriesContainer<DD> barRepository( sPathName );
-    barRepository.Write( timeseries->First(), timeseries->Last() + 1 );
+    CHDF5TimeSeriesContainer<DD> repository( sPathName );
+    repository.Write( timeseries->First(), timeseries->Last() + 1 );
     //dm.AddGroupForSymbol( m_sSymbol );
     //dm.GetH5File()->link( H5L_type_t::H5L_TYPE_HARD, sFileName1, "/symbol/" + m_sSymbol + "/bar.86400" );
   }
   catch (  H5::FileIException e ) {
-    cout << "H5::FileIException " << e.getDetailMsg() << endl;
+    std::cout << "H5::FileIException " << e.getDetailMsg() << std::endl;
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
   }
   catch ( ... ) {
-    cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << endl;
+    std::cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << std::endl;
   }
 }
 

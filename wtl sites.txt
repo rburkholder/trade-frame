@@ -1,0 +1,25 @@
+WTL Splitters and Pane Containers
+http://www.codeproject.com/KB/wtl/splitpane.aspx
+
+Custom Drawn Controls using WTL
+http://www.codeproject.com/KB/wtl/customdrawlist_wtl.aspx
+
+The Joys of WTL
+http://www.pnotepad.org/articles/wtljoys.html
+
+
+Radix tree
+http://en.wikipedia.org/wiki/Radix_tree
+
+WTL for MFC Programmers, Part IV - Dialogs and Controls
+http://www.codeproject.com/KB/wtl/wtl4mfc4.aspx
+
+Static Control
+http://msdn.microsoft.com/en-us/library/bb760769%28v=VS.85%29.aspx
+
+WTL for MFC Programmers, Part IV - Dialogs and Controls
+http://www.codeproject.com/kb/wtl/wtl4mfc4.aspx
+
+Custom Controls from Scratch
+http://www.catch22.net/tuts/custctrl
+

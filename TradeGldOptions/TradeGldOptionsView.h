@@ -23,6 +23,7 @@ public:
     COMMAND_HANDLER(IDC_BTN_STOP_TRADING, BN_CLICKED, OnBnClickedBtnStopTrading)
     COMMAND_HANDLER(IDC_BTN_START_WATCH, BN_CLICKED, OnBnClickedBtnStartWatch)
     COMMAND_HANDLER(IDC_BTN_STOP_WATCH, BN_CLICKED, OnBnClickedBtnStopWatch)
+    COMMAND_HANDLER(IDC_BTN_SAVE_SERIES, BN_CLICKED, OnBnClickedBtnSaveSeries)
     MSG_WM_MOVE(OnMove)
     MSG_WM_SIZE(OnSize)
   END_MSG_MAP()
@@ -49,4 +50,5 @@ public:
  
   void OnMove(CPoint ptPos);
   void OnSize(UINT nType, CSize size);
+  LRESULT OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

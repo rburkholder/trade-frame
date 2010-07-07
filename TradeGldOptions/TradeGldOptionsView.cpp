@@ -75,3 +75,9 @@ void CTradeGldOptionsView::OnMove(CPoint ptPos) {
 void CTradeGldOptionsView::OnSize(UINT nType, CSize size) {
 
 }
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+  m_process.SaveSeries();
+
+  return 0;
+}

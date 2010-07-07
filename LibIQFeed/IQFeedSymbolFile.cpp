@@ -167,7 +167,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
 
   // define option processing rules
   qi::rule<char *, std::string()> ruleString = +(qi::char_ - qi::char_(' '));
-  qi::rule<char *> ruleUnderlyingSymbol = ruleString[ref(sUnderlying)=qi::_1];
+  qi::rule<char *> ruleUnderlyingSymbol = ruleString[boost::phoenix::ref(sUnderlying)=qi::_1];
   qi::rule<char *> ruleMonth = (
     qi::string("JAN")
     |qi::string("FEB")
@@ -181,12 +181,12 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     |qi::string("OCT")
     |qi::string("NOV")
     |qi::string("DEC"))
-    [ref(dbRecord.nMonth)=bind(&DecodeMonth, qi::_1)];  // 0 is nothing, legal is 1 - 12
+    [boost::phoenix::ref(dbRecord.nMonth)=boost::phoenix::bind(&DecodeMonth, qi::_1)];  // 0 is nothing, legal is 1 - 12
   qi::rule<char *> ruleYear = qi::uint_[ref(dbRecord.nYear)=qi::_1];
   qi::rule<char *> ruleStrike = qi::double_[ref(dbRecord.fltStrike)=qi::_1];
   qi::rule<char *> ruleOptionSide = 
-    qi::char_( 'C' )[ref(dbRecord.nOptionSide)=OptionSide::Call] 
-  | qi::char_( 'P' )[ref(dbRecord.nOptionSide)=OptionSide::Put]; // 'C' or 'P' or ' ' or 0x00
+    qi::char_( 'C' )[boost::phoenix::ref(dbRecord.nOptionSide)=OptionSide::Call] 
+  | qi::char_( 'P' )[boost::phoenix::ref(dbRecord.nOptionSide)=OptionSide::Put]; // 'C' or 'P' or ' ' or 0x00
   qi::rule<char *> ruleOption = qi::eps 
        >> ruleUnderlyingSymbol
        >> qi::space >> ruleMonth

@@ -141,7 +141,8 @@ CProcess::CProcess(void)
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
-  m_dtMarketClose( time_duration( 17, 0, 0 ) )
+  m_dtMarketClose( time_duration( 17, 0, 0 ) ),
+  m_sPathForSeries( "/strategy/deltaneutral1" )
 {
 
   m_contract.currency = "USD";
@@ -461,9 +462,12 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
 //  m_ss.str( "" );
 //  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  m_quotes.Append( quote );
 }
 
 void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
+
+  m_trades.Append( trade );
 
   switch ( m_TradingState ) {
     case ETSTrading:
@@ -752,8 +756,60 @@ void CProcess::PrintGreeks( void ) {
   OutputDebugString( m_ss.str().c_str() );
 }
 
+void CProcess::SaveSeries( void ) {
+
+  m_ss.str( "" );
+  m_ss << m_ts.External();
+
+  std::string sPathName;
+  if ( 0 != m_quotes.Size() ) {
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
+    CHDF5WriteTimeSeries<CQuotes, CQuote> wts;
+    wts.Write( sPathName, &m_quotes );
+  }
+
+  if ( 0 != m_trades.Size() ) {
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
+    CHDF5WriteTimeSeries<CTrades, CTrade> wts;
+    wts.Write( sPathName, &m_trades );
+  }
+
+  CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
+  CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
+  CHDF5WriteTimeSeries<CGreeks, CGreek> wtsGreeks;
+
+  for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsTrades.Write( sPathName, iter->Call()->Trades() );
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsTrades.Write( sPathName, iter->Put()->Trades() );
+
+    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+    wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
+
+  }
+}
+
 // need to worry about rogue trades... trades out side of the normal trading range
 // capture quotes, trades, greeks and write to database afterwards
 // handle executions
-// manage multiple position, add a new position on each cross over.
+// manage multiple position, add a new position on each cross over, or when ever 
+//  hightest gamma moves to another strike
+// implied volatility appears to keep around for what a medium day should be, but on large 
+//  moves on the underlying, will increase, and then come back to the daily mean
+// on increasing implied volatility, or when it exceeds current maximums, hold on trades until new
+//   maximum implied volatility is established, then sell at that point, to take 
+//   advantage of increased premiums: 
+//      sell high implied volatility, buy low implied volatility
 

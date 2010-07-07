@@ -67,7 +67,7 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
     H5::CompType *pMemCompType = T::DefineDataType( NULL );
     if ( ( pMemCompType->getNmembers() != m_pDiskCompType->getNmembers() ) ) { // can't do size as drive datatypes are packed, need instead to check member names
       //|| ( pMemCompType->getSize()     != m_pDiskCompType->getSize() ) ) { // works as Quote, Trade, Bar  have different member count (but MarketDepth has same count as Quote
-      throw runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor CompType doesn't match" );
+      throw std::runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor CompType doesn't match" );
     }
     pMemCompType->close();
     delete pMemCompType;
@@ -75,13 +75,13 @@ template<class T> CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor(const std:
     UpdateElementCount();
   }
   catch ( H5::Exception e ) {
-    cout << "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor " << e.getDetailMsg() << endl;
+    std::cout << "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor " << e.getDetailMsg() << std::endl;
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
-    throw runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor error 1" );
+    throw std::runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor error 1" );
   }
   catch (...) {
-    cout << "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor unknown error" << endl;
-    throw runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor error 2" );
+    std::cout << "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor unknown error" << std::endl;
+    throw std::runtime_error( "CHDF5TimeSeriesAccessor<T>::CHDF5TimeSeriesAccessor error 2" );
   }
 }
 
@@ -122,12 +122,12 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixSource, T *pD
       //cout << "read from index " << ixSource << endl;
     }
     catch ( H5::Exception e ) {
-      cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << endl;
+      std::cout << "CHDF5TimeSeriesAccessor<T>::Retrieve H5::Exception " << e.getDetailMsg() << std::endl;
       e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch (...) {
-    cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Retrieve" << endl;
+    std::cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Retrieve" << std::endl;
   }
 }
 
@@ -155,12 +155,12 @@ template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize
       delete pDiskDataSpaceSelection;
     }
     catch ( H5::Exception e ) {
-      cout << "CHDF5TimeSeriesAccessor<T>::Read H5::Exception " << e.getDetailMsg() << endl;
+      std::cout << "CHDF5TimeSeriesAccessor<T>::Read H5::Exception " << e.getDetailMsg() << std::endl;
       e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch ( ... ) {
-    cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Read" << endl;
+    std::cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Read" << endl;
   }
 }
 
@@ -200,12 +200,12 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
       //cout << "Wrote " << count << ", total " << m_curElementCount << endl;
     }
     catch ( H5::Exception e ) {
-      cout << "CHDF5TimeSeriesAccessor<T>::Write H5::Exception " << e.getDetailMsg() << endl;
+      std::cout << "CHDF5TimeSeriesAccessor<T>::Write H5::Exception " << e.getDetailMsg() << std::endl;
       e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, this );
     }
   }
   catch (...) {
-    cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Write" << endl;
+    std::cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Write" << std::endl;
   }
 }
 
