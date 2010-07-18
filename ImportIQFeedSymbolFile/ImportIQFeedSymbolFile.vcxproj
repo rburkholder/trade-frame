@@ -57,7 +57,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)IQ32.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)libdb48d.lib;$(OutDir)libboost_regex-vc90-mt-sgd-1_43.lib;$(OutDir)LibTrading.lib;$(OutDir)LibCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)IQ32.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)libdb48d.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)LibTrading.lib;$(OutDir)LibCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

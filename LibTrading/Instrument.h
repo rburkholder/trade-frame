@@ -11,6 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// should a provider be included?  No, because this allows the same instrument
+//  to be used to provide details to any provider.
+
 #pragma once
 
 #include <string>
@@ -23,6 +26,7 @@ class CInstrument {
 public:
 
   typedef boost::shared_ptr<CInstrument> pInstrument_t;
+  typedef const pInstrument_t& pInstrument_ref;
 
   CInstrument( const std::string& sSymbolName, const std::string& sExchangeName, // generic
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );

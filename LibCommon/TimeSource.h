@@ -19,7 +19,6 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-
 class CTimeSource : boost::noncopyable {
 public:
 
@@ -32,7 +31,7 @@ public:
   void External( ptime* dt ) { 
     // this ensures we always have a monotonically increasing time (for use in simulations)
     // is not thread safe
-    ptime& dt_ = *dt;
+    ptime& dt_ = *dt;  // create reference to existing location
     dt_ = boost::posix_time::microsec_clock::local_time();
     if ( m_dtLastRetrievedExternalTime >= dt_ ) {  
       m_dtLastRetrievedExternalTime += boost::posix_time::microsec( 1 );

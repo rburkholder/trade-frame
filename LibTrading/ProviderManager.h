@@ -21,7 +21,7 @@
 class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
 public:
   CProviderManager(void);
-  virtual ~CProviderManager(void);
+  ~CProviderManager(void);
 protected:
 private:
 };

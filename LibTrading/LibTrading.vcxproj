@@ -81,7 +81,7 @@
     <ClCompile Include="PersistedOrderId.cpp" />
     <ClCompile Include="Portfolio.cpp" />
     <ClCompile Include="PortfolioManager.cpp" />
-    <ClCompile Include="PortfolioRecord.cpp" />
+    <ClCompile Include="Position.cpp" />
     <ClCompile Include="ProviderManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -103,7 +103,7 @@
     <ClInclude Include="PersistedOrderId.h" />
     <ClInclude Include="Portfolio.h" />
     <ClInclude Include="PortfolioManager.h" />
-    <ClInclude Include="PortfolioRecord.h" />
+    <ClInclude Include="Position.h" />
     <ClInclude Include="ProviderInterface.h" />
     <ClInclude Include="ProviderManager.h" />
     <ClInclude Include="stdafx.h" />

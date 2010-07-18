@@ -19,7 +19,7 @@ COrder::COrder(void) {
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_t instrument,
+    CInstrument::pInstrument_ref instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -39,7 +39,7 @@ COrder::COrder(
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_t instrument,
+    CInstrument::pInstrument_ref instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -60,7 +60,7 @@ COrder::COrder(
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_t instrument,
+    CInstrument::pInstrument_ref instrument,
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -104,7 +104,7 @@ void COrder::SetSendingToProvider() {
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
   // need to worry about fill after cancel
   assert( exec.GetOrderSide() == m_eOrderSide );
-  assert( exec.GetOrderId() == m_nOrderId );
+//  assert( exec.GetOrderId() == m_nOrderId );
   bool bOverDone = false;
   if ( 0 == m_nRemaining ) {
     // yes this has happened, 2008/07/09 vmw

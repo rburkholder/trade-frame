@@ -13,13 +13,15 @@
 
 #pragma once
 
-#include "LibBerkeleyDB/CommonDatabaseFunctions.h"
+// based upon getting information through IQFeed services.
+
+#include <string>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <string>
+#include "LibBerkeleyDB/CommonDatabaseFunctions.h"
 
 class CInstrumentInformation : public CCommonDatabaseFunctions<CInstrumentInformation> {
 public:

@@ -29,8 +29,7 @@ public:
     return _instance;
   }
 protected:
-  CSingleton() {
-  };          // ctor hidden
+  CSingleton() {};          // ctor hidden
   ~CSingleton() {};          // dtor hidden
 private:
   CSingleton(CSingleton const&);    // copy ctor hidden

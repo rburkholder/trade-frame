@@ -11,6 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 #include "StdAfx.h"
+
 #include "Portfolio.h"
 
 CPortfolio::CPortfolio( const std::string &sPortfolioName ) 

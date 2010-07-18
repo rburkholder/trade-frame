@@ -31,14 +31,18 @@ class CProviderInterfaceBase;
 
 class CMapOrderToProvider {
 public:
+
   CMapOrderToProvider( CProviderInterfaceBase *pProvider, COrder *pOrder );
   ~CMapOrderToProvider( void );
   unsigned long GetOrderId( void ) { return m_pOrder->GetOrderId(); };
   CProviderInterfaceBase *GetProvider( void ) { return m_pProvider; };
   COrder *GetOrder( void ) { return m_pOrder; };
+
 protected:
+
   CProviderInterfaceBase *m_pProvider;
   COrder *m_pOrder;
+
 private:
 };
 
@@ -48,6 +52,7 @@ private:
 
 class COrderManager: public ManagerBase<COrderManager, COrder::orderid_t, COrder> {
 public:
+
   COrderManager(void);
   ~COrderManager(void);
   void PlaceOrder( CProviderInterfaceBase *pProvider, COrder *pOrder );
@@ -56,13 +61,17 @@ public:
   void ReportCommission( COrder::orderid_t nOrderId, double dblCommission );
   void ReportErrors( COrder::orderid_t nOrderId, OrderErrors::enumOrderErrors eError );
   Delegate<const COrder &> OnOrderCompleted;
+
 protected:
+
   typedef std::map<COrder::orderid_t, CMapOrderToProvider*> orders_t;
   typedef std::pair<COrder::orderid_t, CMapOrderToProvider*> mappair_t;
   static orders_t m_mapActiveOrders;  // two lists in order to minimize lookup times on active orders
   static orders_t m_mapCompletedOrders;
   orders_t::iterator LocateOrder( COrder::orderid_t nOrderId );
   void MoveActiveOrderToCompleted( COrder::orderid_t nOrderId );
+
 private:
+
   static unsigned short m_nRefCount;
 };

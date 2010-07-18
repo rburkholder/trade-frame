@@ -134,9 +134,9 @@ CProcess::CProcess(void)
   m_tws( "U215226" ),
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
-  m_nCalls( 0 ), m_nPuts( 0 ),
+  m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
-  m_dblBaseDelta( 6000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
+  m_dblBaseDelta( 1000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
@@ -395,12 +395,13 @@ void CProcess::OpenPosition( void ) {
 
   // if no position, create a zero delta position.
   if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
+
     double gammaCall = 0;
     double gammaPut = 0;
     double gamma;
     m_iterOILatestGammaSelectCall = m_iterOILowestWatch;
     m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
-    // find highest gamma option for call, put
+    // find highest gamma option for call and for put
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
       gamma = iter->Call()->Symbol()->Gamma();
       if ( gammaCall < gamma ) { 
@@ -414,14 +415,20 @@ void CProcess::OpenPosition( void ) {
       }
     }
 
-    // check that SelectCall != LowestWatch and SelectPut != HighestWatch?
+    // todo?  check that SelectCall != LowestWatch and SelectPut != HighestWatch
 
     m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
     m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
 
+    // depending upon gammas, could be straddle or strangle?
     m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() ) / 100 );
-    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta() ) / 100 );
+    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->Put() ->Symbol()->Delta() ) / 100 );
 
+    // a normal delta neutral with long underlying and long put
+    m_nLongPut = m_nPuts;
+    m_nLongUnderlying = m_dblBaseDelta;
+
+    // generate orders
     if ( ( 0 == m_nCalls ) || ( 0 == m_nPuts ) ) {
       // don't buy anything if either side is zero
       m_ss.str( "" );
@@ -431,17 +438,17 @@ void CProcess::OpenPosition( void ) {
     }
     else {
       COrder* pOrder;
-      pOrder = new COrder( m_iterOILatestGammaSelectCall->Call()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Buy, m_nCalls );
+      // orders for normal delta neutral
+      pOrder = new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_tws.PlaceOrder( pOrder );
       pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Buy, m_nPuts );
+        OrderType::Market, OrderSide::Buy, m_nLongPut );
       m_tws.PlaceOrder( pOrder );
 
       m_ss.str( "" );
-      m_ss << "Opening Trade: C" << m_nCalls << "@" << m_dblCallPrice << " for " << 100 * m_nCalls * m_dblCallPrice
-                        << ", P" << m_nPuts  << "@" << m_dblPutPrice  << " for " << 100 * m_nPuts  * m_dblPutPrice 
-                        << std::endl;
+      m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
+                           << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
+                           << std::endl;
       OutputDebugString( m_ss.str().c_str() );
     }
   }
@@ -467,6 +474,7 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
 
 void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
 
+  m_dblUnderlyingPrice = trade.Trade();
   m_trades.Append( trade );
 
   switch ( m_TradingState ) {
@@ -630,61 +638,6 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
       // todo:  while implied volatility is rising, hold back on exiting?
       // todo:  while implied volatility is falling, hold back on entering?
 
-      // handle the Put position
-      if ( dblDeltaHi < -dblDeltaPut ) {
-        // sell to bring back to -m_dblBaseDelta
-        nOptions = (int) floor( ( ( -dblDeltaPut - m_dblBaseDelta ) / -( m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta() ) ) / 100.0 );
-        if ( 0 != nOptions ) {
-          assert( 0 < nOptions );
-          pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-            OrderType::Market, OrderSide::Sell, nOptions );
-          m_tws.PlaceOrder( pOrder );
-          m_nPuts -= nOptions;
-          bTraded = true;
-        }
-      }
-      else {
-        if ( dblDeltaLo > -dblDeltaPut ) {
-          // buy to bring back to m_dblBaseDelta
-          nOptions = (int) floor( ( ( m_dblBaseDelta - -dblDeltaPut ) / -( m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta() ) ) / 100.0 );
-          if ( 0 != nOptions ) {
-            assert( 0 < nOptions );
-            pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-              OrderType::Market, OrderSide::Buy, nOptions );
-            m_tws.PlaceOrder( pOrder );
-            m_nPuts += nOptions;
-            bTraded = true;
-          }
-        }
-      }
-
-      // handle the call position
-      if ( dblDeltaHi < dblDeltaCall ) {
-        // sell to bring back to m_dblBaseDelta
-        nOptions = (int) floor( ( ( dblDeltaCall - m_dblBaseDelta ) / m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() ) / 100.0 );
-        if ( 0 != nOptions ) {
-          assert( 0 < nOptions );
-          pOrder = new COrder( m_iterOILatestGammaSelectCall->Call()->Symbol()->GetInstrument(), 
-            OrderType::Market, OrderSide::Sell, nOptions );
-          m_tws.PlaceOrder( pOrder );
-          m_nCalls -= nOptions;
-          bTraded = true;
-        }
-      }
-      else {
-        if ( dblDeltaLo > dblDeltaCall ) {
-          // buy to bring back to m_dblBaseDelta
-          nOptions = (int) floor( ( ( m_dblBaseDelta - dblDeltaCall ) / m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() ) / 100.0 );
-          if ( 0 != nOptions ) {
-            assert( 0 < nOptions );
-            pOrder = new COrder( m_iterOILatestGammaSelectCall->Call()->Symbol()->GetInstrument(), 
-              OrderType::Market, OrderSide::Buy, nOptions );
-            m_tws.PlaceOrder( pOrder );
-            m_nCalls += nOptions;
-            bTraded = true;
-          }
-        }
-      }
 
     }
     catch ( std::logic_error &e ) {
@@ -700,26 +653,20 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
 
   if ( m_bTrading ) {
-    COrder* pOrder;
-    if ( 0 != m_nCalls ) {
-      pOrder = new COrder( m_iterOILatestGammaSelectCall->Call()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Sell, m_nCalls );
-      m_tws.PlaceOrder( pOrder );
-      m_nCalls = 0;
-    }
-    if ( 0 != m_nPuts ) {
-      pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Sell, m_nPuts );
-      m_tws.PlaceOrder( pOrder );
-      m_nPuts = 0;
-    }
 
     m_ss.str( "" );
-    m_ss << m_ts.External();
-    m_ss << " Closing Trade: C" << m_nCalls << "@" << m_dblCallPrice << " for " << 100 * m_nCalls * m_dblCallPrice
-                       << ", P" << m_nPuts  << "@" << m_dblPutPrice  << " for " << 100 * m_nPuts  * m_dblPutPrice 
-                       << std::endl;
+    m_ss << "Closing Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
+                         << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
+                          << std::endl;
     OutputDebugString( m_ss.str().c_str() );
+
+    COrder* pOrder;
+
+    // orders for normal delta neutral
+    pOrder = new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongUnderlying );
+    m_tws.PlaceOrder( pOrder );
+    pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongPut );
+    m_tws.PlaceOrder( pOrder );
 
     m_bTrading = false;
   }
@@ -762,43 +709,65 @@ void CProcess::SaveSeries( void ) {
   m_ss << m_ts.External();
 
   std::string sPathName;
-  if ( 0 != m_quotes.Size() ) {
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
-    CHDF5WriteTimeSeries<CQuotes, CQuote> wts;
-    wts.Write( sPathName, &m_quotes );
-  }
 
-  if ( 0 != m_trades.Size() ) {
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
-    CHDF5WriteTimeSeries<CTrades, CTrade> wts;
-    wts.Write( sPathName, &m_trades );
-  }
-
-  CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
   CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
+  CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
   CHDF5WriteTimeSeries<CGreeks, CGreek> wtsGreeks;
+
+  try {
+    if ( 0 != m_quotes.Size() ) {
+      sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
+      wtsQuotes.Write( sPathName, &m_quotes );
+    }
+
+    if ( 0 != m_trades.Size() ) {
+      sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
+      wtsTrades.Write( sPathName, &m_trades );
+    }
+  }
+  catch (...) {
+  }
 
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
+    try {
+      if ( 0 != iter->Call()->Quotes()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
+      }
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsTrades.Write( sPathName, iter->Call()->Trades() );
+      if ( 0 != iter->Call()->Trades()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsTrades.Write( sPathName, iter->Call()->Trades() );
+      }
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
+      if ( 0 != iter->Call()->Greeks()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
+      }
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
+      if ( 0 != iter->Put()->Quotes()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
+      }
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsTrades.Write( sPathName, iter->Put()->Trades() );
+      if ( 0 != iter->Put()->Trades()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsTrades.Write( sPathName, iter->Put()->Trades() );
+      }
 
-    sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
-    wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
+      if ( 0 != iter->Put()->Greeks()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
+      }
+    }
+    catch (...) {
+    }
 
   }
+
+  m_ss << " done writing." << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 // need to worry about rogue trades... trades out side of the normal trading range
@@ -812,4 +781,5 @@ void CProcess::SaveSeries( void ) {
 //   maximum implied volatility is established, then sell at that point, to take 
 //   advantage of increased premiums: 
 //      sell high implied volatility, buy low implied volatility
+// add hdf5 link cross links for different groupings
 

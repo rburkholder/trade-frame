@@ -21,7 +21,7 @@ using namespace fastdelegate;
 class CBarFactory {
 public:
 
-  typedef long duration_t;
+  typedef unsigned long duration_t;
   typedef CBar::volume_t volume_t;
   typedef CBar::price_t price_t;
 
@@ -29,9 +29,9 @@ public:
   virtual ~CBarFactory(void);
   void Add( const ptime &, price_t, volume_t);
   void Add( const CTrade &trade ) { Add( trade.DateTime(), trade.Trade(), trade.Volume() ); };
-  const CBar& getCurrentBar() { return m_bar; };
+  const CBar& getCurrentBar() const { return m_bar; };
   void SetBarWidth( duration_t seconds ) { m_nBarWidthSeconds = seconds; };
-  long GetBarWidth( void ) { return m_nBarWidthSeconds; };
+  duration_t GetBarWidth( void ) const { return m_nBarWidthSeconds; };
 
   typedef FastDelegate1<const CBar &> OnNewBarStartedHandler;
   void SetOnNewBarStarted( OnNewBarStartedHandler function ) {

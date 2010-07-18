@@ -11,6 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// should provider be included?  No, this allows an order routing process to select an 
+//   an appropriate provider based upon other criteria
+// the provider will be associated later for Execution evaluation
+
 #pragma once
 
 #include <string>
@@ -20,28 +24,31 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include "LibCommon/TimeSource.h"
+#include "LibCommon/Delegate.h"
+
 #include "TradingEnumerations.h"
 #include "Instrument.h"
 #include "PersistedOrderId.h"
 #include "Execution.h"
 
-#include "LibCommon/TimeSource.h"
-#include "LibCommon/Delegate.h"
-
 class COrder {
 public:
 
+  typedef unsigned long orderid_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef boost::shared_ptr<COrder> pOrder_t;
+  typedef const pOrder_t& pOrder_ref;
 
   COrder(  // market 
-    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit or stop
-    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -49,7 +56,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit and stop
-    CInstrument::pInstrument_t instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -58,9 +65,6 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   virtual ~COrder(void);
-
-  typedef unsigned long orderid_t;
-  typedef boost::shared_ptr<COrder> pOrder_t;
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };

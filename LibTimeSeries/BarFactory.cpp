@@ -17,8 +17,8 @@
 
 #include "BarFactory.h"
 
-CBarFactory::CBarFactory(long nSeconds) : 
-  m_nBarWidthSeconds( std::max( 1l, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
+CBarFactory::CBarFactory(duration_t nSeconds) : 
+  m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
 {
 }
 
@@ -29,8 +29,8 @@ CBarFactory::~CBarFactory(void) {
 }
 
 void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
-  long seconds = dt.time_of_day().total_seconds();
-  long interval = seconds / m_nBarWidthSeconds;
+  duration_t seconds = dt.time_of_day().total_seconds();
+  duration_t interval = seconds / m_nBarWidthSeconds;
   if ( m_bar.IsNull() ) {
     m_bar.Close( val );
     m_bar.High( val );

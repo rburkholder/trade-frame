@@ -37,7 +37,7 @@ public:
   CDatedDatum( const std::string &dt ); // YYYY-MM-DD HH:MM:SS
   virtual ~CDatedDatum( void );
 
-  bool IsNull( void ) { return m_dt.is_not_a_date_time(); };
+  bool IsNull( void ) const { return m_dt.is_not_a_date_time(); };
 
   bool operator<( const CDatedDatum &datum ) const { return m_dt < datum.m_dt; };
   bool operator<=( const CDatedDatum& datum ) const { return m_dt <= datum.m_dt; };

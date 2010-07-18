@@ -52,8 +52,8 @@ public:
   void HandleTrade( const CTrade& trade );
   void HandleGreek( const CGreek& greek );
 
-  double Bid( void ) { return m_dblBid; };
-  double Ask( void ) { return m_dblAsk; };
+  double Bid( void ) const { return m_dblBid; };
+  double Ask( void ) const { return m_dblAsk; };
 
   CQuotes* Quotes( void ) { return &m_quotes; };
   CTrades* Trades( void ) { return &m_trades; };
@@ -125,7 +125,7 @@ public:
   bool operator< ( const CStrikeInfo& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
   bool operator<=( const CStrikeInfo& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
-  double Strike( void ) { return m_dblStrike; };
+  double Strike( void ) const { return m_dblStrike; };
 
   CNakedCall* Call( void ) { return &m_call; };
   CNakedPut* Put( void ) { return &m_put; };
@@ -231,11 +231,17 @@ private:
   time_duration m_dtMarketClosingOrder;
   time_duration m_dtMarketClose;
 
+  // straddle
   int m_nCalls;
   int m_nPuts;
 
+  // delta neutal long call, long put
+  int m_nLongPut;
+  int m_nLongUnderlying;
+
   double m_dblCallPrice;
   double m_dblPutPrice;
+  double m_dblUnderlyingPrice;
 
   void HandleOnIBConnected( int );
   void HandleOnIBDisconnected( int );

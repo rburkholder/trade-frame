@@ -12,6 +12,7 @@
  ************************************************************************/
 
 #include "StdAfx.h"
+
 #include "InstrumentInformation.h"
 
 CInstrumentInformation::CInstrumentInformation(void) : CCommonDatabaseFunctions<CInstrumentInformation>( "InstrumentInformation" ) {
