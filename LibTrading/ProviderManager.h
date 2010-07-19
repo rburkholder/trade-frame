@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// when a provider is created, it should be registered with the provider manager
+
 #pragma once
 
 #include <string>
@@ -22,6 +24,8 @@ class CProviderManager: public ManagerBase<CProviderManager, std::string, CProvi
 public:
   CProviderManager(void);
   ~CProviderManager(void);
+
+  void Register( CProviderInterfaceBase::pProvider_ref pProvider ) {};
 protected:
 private:
 };

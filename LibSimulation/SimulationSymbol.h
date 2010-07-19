@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+
 #include <boost/detail/atomic_count.hpp>
 
 #include "LibTimeSeries/TimeSeries.h"
@@ -21,12 +22,23 @@
 
 #include "SimulateOrderExecution.h"
 
-class CSimulationSymbol: public CSymbol {
+class CSimulationSymbol: public CSymbol<CSimulationSymbol,std::string> {
   friend class CSimulationProvider;
 public:
-  CSimulationSymbol(const std::string &sSymbol, const std::string &sDirectory );
-  virtual ~CSimulationSymbol(void);
+
+  typedef CSymbol<CSimulationSymbol,std::string> inherited_t;
+  typedef inherited_t::pInstrument_t pInstrument_t;
+  typedef inherited_t::pInstrument_ref pInstrument_ref;
+  typedef inherited_t::trade_t trade_t;
+  typedef inherited_t::quote_t quote_t;
+  
+  CSimulationSymbol( const std::string& sSymbol, 
+                     pInstrument_ref pInstrument, 
+                     const std::string& sDirectory );
+  ~CSimulationSymbol(void);
+
 protected:
+
   void StartTradeWatch( void );
   void StopTradeWatch( void );
   void StartQuoteWatch( void );
@@ -46,5 +58,7 @@ protected:
   CTrades m_trades;
 
   CSimulateOrderExecution m_simExec;
+
 private:
+
 };

@@ -17,11 +17,12 @@
 
 #include <math.h>
 
-#include "Process.h"
-
+#include <LibCommon/TimeSource.h>
 #include <LibIndicators/Pivots.h>
 #include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <LibHDF5TimeSeries/HDF5DataManager.h>
+
+#include "Process.h"
 
 //
 // ==================
@@ -437,12 +438,12 @@ void CProcess::OpenPosition( void ) {
       m_nCalls = m_nPuts = 0;
     }
     else {
-      COrder* pOrder;
+      COrder::pOrder_t pOrder;
       // orders for normal delta neutral
-      pOrder = new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
+      pOrder = COrder::pOrder_t( new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Buy, m_nLongUnderlying ) );
       m_tws.PlaceOrder( pOrder );
-      pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Buy, m_nLongPut );
+      pOrder = COrder::pOrder_t( new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
+        OrderType::Market, OrderSide::Buy, m_nLongPut ) );
       m_tws.PlaceOrder( pOrder );
 
       m_ss.str( "" );
@@ -510,17 +511,17 @@ void CProcess::HandleTSFirstPass( const CTrade& trade ) {
   // may need to open portfoloio and evaluate existing positions here
   m_TradingState = ETSPreMarket;
   m_ss.str( "" );
-  m_ss << m_ts.External();
+  m_ss << CTimeSource::Instance().External();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleTSPreMarket( const CTrade& trade ) {
   ptime dt;
-  m_ts.External( &dt );
+  CTimeSource::Instance().External( &dt );
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
-    m_ss << m_ts.External();
+    m_ss << dt;
     m_ss << " State:  Market Opened." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     m_TradingState = ETSMarketOpened;
@@ -534,7 +535,7 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
 
   // comment our starting trade of the day
   m_ss.str( "" );
-  m_ss << m_ts.External();
+  m_ss << CTimeSource::Instance().External();
   m_ss << " Trade 1: " << trade.Volume() << "@" << trade.Trade() << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
@@ -593,10 +594,10 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
 void CProcess::HandleTSOpeningOrder( const CTrade& trade ) {
 
   ptime dt;
-  m_ts.External( &dt );
+  CTimeSource::Instance().External( &dt );
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
     m_ss.str( "" );
-    m_ss << m_ts.External();
+    m_ss << CTimeSource::Instance().External();
     m_ss << " State:  Opening Order." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
@@ -612,10 +613,10 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 //  m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
 
   ptime dt;
-  m_ts.External( &dt );
+  CTimeSource::Instance().External( &dt );
   if ( dt.time_of_day() >= m_dtMarketClosingOrder ) {
     m_ss.str( "" );
-    m_ss << m_ts.External();
+    m_ss << dt;
     m_ss << " State:  Close Orders." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
@@ -628,7 +629,7 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 
     bool bTraded = false;
     int nOptions = 0;
-    COrder* pOrder;
+    //COrder::pOrder_t pOrder;
 
     double dblDeltaHi = m_dblBaseDelta + m_dblBaseDeltaIncrement;
     double dblDeltaLo = m_dblBaseDelta - m_dblBaseDeltaIncrement;
@@ -660,22 +661,22 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
                           << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    COrder* pOrder;
+    COrder::pOrder_t pOrder;
 
     // orders for normal delta neutral
-    pOrder = new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongUnderlying );
+    pOrder = COrder::pOrder_t( new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongUnderlying ) );
     m_tws.PlaceOrder( pOrder );
-    pOrder = new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongPut );
+    pOrder = COrder::pOrder_t( new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongPut ) );
     m_tws.PlaceOrder( pOrder );
 
     m_bTrading = false;
   }
 
   ptime dt;
-  m_ts.External( &dt );
+  CTimeSource::Instance().External( &dt );
   if ( dt.time_of_day() >= m_dtMarketClose ) {
     m_ss.str( "" );
-    m_ss << m_ts.External();
+    m_ss << dt;
     m_ss << " State:  After Market." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     m_TradingState = ETSAfterMarket;
@@ -688,7 +689,7 @@ void CProcess::HandleAfterMarket( const CTrade& trade ) {
 void CProcess::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
-    << m_ts.External()
+    << CTimeSource::Instance().External()
     << " Strk "  << m_iterOILatestGammaSelectCall->Strike()
     << " Call "  << m_iterOILatestGammaSelectCall->Call()->Symbol()->OptionPrice()
     << " ImpVo " << m_iterOILatestGammaSelectCall->Call()->Symbol()->ImpliedVolatility()
@@ -706,7 +707,7 @@ void CProcess::PrintGreeks( void ) {
 void CProcess::SaveSeries( void ) {
 
   m_ss.str( "" );
-  m_ss << m_ts.External();
+  m_ss << CTimeSource::Instance().External();
 
   std::string sPathName;
 

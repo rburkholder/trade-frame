@@ -273,7 +273,7 @@ template<typename T> H5::DataSpace* CTimeSeries<T>::DefineDataSpace( H5::DataSpa
   }
   else {
     //throw runtime_error( "CTimeSeries<T>::DefineDataSpace series is empty" );
-    cout << "CTimeSeries<T>::DefineDataSpace series is empty" << endl;
+    std::cout << "CTimeSeries<T>::DefineDataSpace series is empty" << std::endl;
   }
   return pSpace; 
 }

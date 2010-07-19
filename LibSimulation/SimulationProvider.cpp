@@ -13,15 +13,15 @@
 
 #include "StdAfx.h"
 
-#include "SimulationProvider.h"
-
 #include <stdexcept>
 #include <cassert>
 
 #include "LibHDF5TimeSeries/HDF5DataManager.h"
 
+#include "SimulationProvider.h"
+
 CSimulationProvider::CSimulationProvider(void)
-: CProviderInterface(), 
+: CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
   m_pMerge( NULL )
 {
   m_sName = "Simulator";
@@ -64,28 +64,28 @@ void CSimulationProvider::Disconnect() {
   }
 }
 
-CSymbol *CSimulationProvider::NewCSymbol( const std::string &sSymbolName ) {
-  CSimulationSymbol *pSymbol = new CSimulationSymbol(sSymbolName, m_sGroupDirectory);
+CSimulationSymbol* CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
+  CSimulationSymbol *pSymbol = new CSimulationSymbol(pInstrument->GetSymbolName(), pInstrument, m_sGroupDirectory);
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
   //CProviderInterface::AddTradeHandler( sSymbolName, MakeDelegate( &pSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
-  CProviderInterface::AddCSymbol( pSymbol );
-  return dynamic_cast<CSymbol *>( pSymbol );
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddCSymbol( pSymbol );
+  return pSymbol;
 }
 
-void CSimulationProvider::AddTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler ) {
-  CProviderInterface::AddTradeHandler( sSymbol, handler );
-  CProviderInterface::m_mapSymbols_t::iterator iter;
+void CSimulationProvider::AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddTradeHandler( sSymbol, handler );
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( sSymbol );
   assert( m_mapSymbols.end() != iter );
   CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) {
-    CProviderInterface::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+    CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
   }
 }
 
-void CSimulationProvider::RemoveTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler ) {
-  CProviderInterface::RemoveTradeHandler( sSymbol, handler );
-  CProviderInterface::m_mapSymbols_t::iterator iter;
+void CSimulationProvider::RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::RemoveTradeHandler( sSymbol, handler );
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( sSymbol );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
@@ -93,34 +93,34 @@ void CSimulationProvider::RemoveTradeHandler( const string &sSymbol, CSymbol::tr
   else {
     if ( 1 == iter->second->GetTradeHandlerCount() ) {
       CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
-      CProviderInterface::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+      CProviderInterface<CSimulationProvider,CSimulationSymbol>::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
     }
   }
 }
 
 // these need to open the data file, load the data, and prepare to simulate
-void CSimulationProvider::StartQuoteWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StartQuoteWatch();
+void CSimulationProvider::StartQuoteWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StartQuoteWatch();
 }
 
-void CSimulationProvider::StopQuoteWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StopQuoteWatch();
+void CSimulationProvider::StopQuoteWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StopQuoteWatch();
 }
 
-void CSimulationProvider::StartTradeWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StartTradeWatch();
+void CSimulationProvider::StartTradeWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StartTradeWatch();
 }
 
-void CSimulationProvider::StopTradeWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StopTradeWatch();
+void CSimulationProvider::StopTradeWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StopTradeWatch();
 }
 
-void CSimulationProvider::StartDepthWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StartDepthWatch();
+void CSimulationProvider::StartDepthWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StartDepthWatch();
 }
 
-void CSimulationProvider::StopDepthWatch( CSymbol *pSymbol ) {
-  dynamic_cast<CSimulationSymbol*>( pSymbol )->StopDepthWatch();
+void CSimulationProvider::StopDepthWatch( CSimulationSymbol *pSymbol ) {
+  pSymbol->StopDepthWatch();
 }
 
 //void CSimulationProvider::Merge( LPVOID lpParam ) {
@@ -132,7 +132,7 @@ void CSimulationProvider::Merge( void ) {
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
     iter != m_mapSymbols.end(); ++iter ) {
       CSimulationSymbol *sym = dynamic_cast<CSimulationSymbol*>(iter->second);
-      CQuotes *quotes = &sym->m_quotes;
+      CQuotes* quotes = &sym->m_quotes;
       m_pMerge -> Add( 
         quotes, 
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleQuoteEvent ) );
@@ -142,12 +142,12 @@ void CSimulationProvider::Merge( void ) {
         MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
   }
 
-  bool bOldMode = CTimeSource::GetSimulationMode();
-  m_dtSimStart = CTimeSource::External();
-  CTimeSource::SetSimulationMode();
+  bool bOldMode = CTimeSource::Instance().GetSimulationMode();
+  m_dtSimStart = CTimeSource::Instance().External();
+  CTimeSource::Instance().SetSimulationMode();
   m_pMerge -> Run();
-  CTimeSource::SetSimulationMode( bOldMode );
-  m_dtSimStop = CTimeSource::External();
+  CTimeSource::Instance().SetSimulationMode( bOldMode );
+  m_dtSimStop = CTimeSource::Instance().External();
 
   // use event here instead
 //  m_pMergeThread = NULL;
@@ -181,8 +181,8 @@ void CSimulationProvider::Stop() {
   }
 }
 
-void CSimulationProvider::PlaceOrder( COrder *pOrder ) {
-  CProviderInterface::PlaceOrder( pOrder ); // any underlying initialization
+void CSimulationProvider::PlaceOrder( pOrder_t pOrder ) {
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
   if ( m_mapSymbols.end() == iter ) {
     std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
@@ -192,8 +192,8 @@ void CSimulationProvider::PlaceOrder( COrder *pOrder ) {
   }
 }
 
-void CSimulationProvider::CancelOrder( COrder *pOrder ) {
-  CProviderInterface::CancelOrder( pOrder );
+void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
+  CProviderInterface<CSimulationProvider,CSimulationSymbol>::CancelOrder( pOrder );
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
   if ( m_mapSymbols.end() == iter ) {
     std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
@@ -203,7 +203,7 @@ void CSimulationProvider::CancelOrder( COrder *pOrder ) {
   }
 }
 
-void CSimulationProvider::HandleExecution( const CExecution &exec ) {
-  COrderManager::Instance().ReportExecution( exec );
+void CSimulationProvider::HandleExecution( COrder::orderid_t orderId, const CExecution &exec ) {
+  COrderManager::Instance().ReportExecution( orderId, exec );
 }
 

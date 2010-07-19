@@ -18,8 +18,6 @@
 #include <sstream>
 #include <map>
 
-#include <LibCommon/TimeSource.h>
-
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTimeSeries/TimeSeries.h>
 
@@ -225,7 +223,6 @@ private:
 
   Contract m_contract; // re-usable, persistant contract scratchpad
 
-  CTimeSource m_ts;
   time_duration m_dtMarketOpen;
   time_duration m_dtMarketOpeningOrder;
   time_duration m_dtMarketClosingOrder;

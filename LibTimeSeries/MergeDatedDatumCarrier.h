@@ -43,7 +43,6 @@ protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
   CDatedDatum *m_pDatum;
   OnDatumHandler OnDatum;
-  static CTimeSource m_TimeSource;
 private:
 };
 
@@ -74,8 +73,8 @@ template<class T> CMergeCarrier<T>::~CMergeCarrier() {
 }
 
 template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
-  if ( m_TimeSource.GetSimulationMode() ) {
-    m_TimeSource.SetSimulationTime( m_pDatum->DateTime() );
+  if ( CTimeSource::Instance().GetSimulationMode() ) {
+    CTimeSource::Instance().SetSimulationTime( m_pDatum->DateTime() );
   }
   if ( NULL != OnDatum ) OnDatum( *m_pDatum );
   m_pDatum = m_pSeries->Next();

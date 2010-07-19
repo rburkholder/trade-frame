@@ -18,8 +18,9 @@
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
 
-#include "LibCommon/TimeSource.h"
-#include "LibTrading/ProviderInterface.h"
+#include <LibCommon/TimeSource.h>
+#include <LibTrading/ProviderInterface.h>
+#include <LibTrading/Order.h>
 
 #include "SimulationSymbol.h"
 #include "CrossThreadMerge.h"
@@ -29,9 +30,16 @@
 // looks like CMergeDatedDatums will need an OnOpen event simulated
 
 class CSimulationProvider
-: public CProviderInterface
+: public CProviderInterface<CSimulationProvider,CSimulationSymbol>
 {
 public:
+
+  typedef CProviderInterface<CSimulationProvider,CSimulationSymbol> ProviderInterface_t;
+  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef CInstrument::pInstrument_ref pInstrument_ref;
+  typedef COrder::pOrder_t pOrder_t;
+  //typedef COrder::pOrder_ref pOrder_ref;
+
   CSimulationProvider(void);
   virtual ~CSimulationProvider(void);
   virtual void Connect( void );
@@ -40,18 +48,18 @@ public:
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
   void Run( void );
   void Stop( void );
-  virtual void PlaceOrder( COrder *pOrder );
-  virtual void CancelOrder( COrder *pOrder );
-  virtual void AddTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
-  virtual void RemoveTradeHandler( const string &sSymbol, CSymbol::tradehandler_t handler );
+  void PlaceOrder( pOrder_t pOrder );
+  void CancelOrder( pOrder_t pOrder );
+  void AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
 protected:
-  virtual CSymbol *NewCSymbol( const std::string &sSymbolName );
-  virtual void StartQuoteWatch( CSymbol *pSymbol );
-  virtual void StopQuoteWatch( CSymbol *pSymbol );
-  virtual void StartTradeWatch( CSymbol *pSymbol );
-  virtual void StopTradeWatch( CSymbol *pSymbol );
-  virtual void StartDepthWatch( CSymbol *pSymbol );
-  virtual void StopDepthWatch( CSymbol *pSymbol );
+  CSimulationSymbol *NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
+  void StartQuoteWatch( CSimulationSymbol *pSymbol );
+  void StopQuoteWatch( CSimulationSymbol *pSymbol );
+  void StartTradeWatch( CSimulationSymbol *pSymbol );
+  void StopTradeWatch( CSimulationSymbol *pSymbol );
+  void StartDepthWatch( CSimulationSymbol *pSymbol );
+  void StopDepthWatch( CSimulationSymbol *pSymbol );
 
   std::string m_sGroupDirectory;
 
@@ -61,7 +69,7 @@ protected:
   //static UINT __cdecl Merge( LPVOID lpParam );
   void Merge( void );  // the background process
 
-  void HandleExecution( const CExecution &exec );
+  void HandleExecution( COrder::orderid_t orderId, const CExecution &exec );
 
   ptime m_dtSimStart;
   ptime m_dtSimStop;

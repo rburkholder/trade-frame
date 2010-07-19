@@ -43,7 +43,7 @@ public:
   void AddPosition( const std::string &sName, CInstrument *pInstrument );
   void Delete( const std::string &sName );
   void Rename( const std::string &sName );
-  CPosition *Get( const std::string &sName );
+  CPosition::pPosition_t Get( const std::string &sName );
 
   // need an on change event so delta can be recalculated on value or record addition (quote, trade, portfolio record, order, execution )
 

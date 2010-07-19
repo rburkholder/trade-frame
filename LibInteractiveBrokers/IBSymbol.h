@@ -19,7 +19,6 @@
 
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTrading/Symbol.h>
-#include <LibCommon/TimeSource.h>
 
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING
@@ -33,7 +32,7 @@ public:
   typedef inherited_t::pInstrument_t pInstrument_t;
 
   CIBSymbol( TickerId id, pInstrument_t pInstrument );
-  virtual ~CIBSymbol(void);
+  ~CIBSymbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };
 
@@ -105,7 +104,6 @@ protected:
 
 private:
 
-  CTimeSource m_TimeSource;
   long m_conId;  // matches IB contract id
 
 };

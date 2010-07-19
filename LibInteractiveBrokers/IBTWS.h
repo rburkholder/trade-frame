@@ -35,9 +35,11 @@ using namespace boost::gregorian;
 #include <LibTrading/TradingEnumerations.h>
 #include <LibTrading/Instrument.h>
 #include <LibTrading/ProviderInterface.h>
+#include <LibTrading/Order.h>
 
 #include "TWS/EPosixClientSocket.h"
 #include "TWS/EWrapper.h"
+
 
 #include "TWS/Contract.h"
 #include "TWS/Order.h"
@@ -54,6 +56,8 @@ public:
 
   typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef COrder::pOrder_t pOrder_t;
+  //typedef COrder::pOrder_ref pOrder_ref;
   typedef int reqId_t;  // request id type
 
   CIBTWS( const std::string &acctCode, const std::string &address = "127.0.0.1", unsigned int port = 7496 );
@@ -64,8 +68,8 @@ public:
   void Disconnect( void );
 
   // From ProviderInterface Execution Section
-  void PlaceOrder( COrder *order );
-  void CancelOrder( COrder *order );
+  void PlaceOrder( pOrder_t order );
+  void CancelOrder( pOrder_t order );
 
   // TWS Function Calls
   //  need ot make a container of re-usable request ids to be looked up in order to return data to appropriate caller

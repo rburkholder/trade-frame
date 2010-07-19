@@ -19,8 +19,12 @@
 #include "LibHDF5TimeSeries/HDF5IterateGroups.h"
 
 // sDirectory needs to be available on instantiation to enable signal availability
-CSimulationSymbol::CSimulationSymbol( const std::string &sSymbol, const std::string &sDirectory) 
-: CSymbol(sSymbol), m_sDirectory( sDirectory )
+CSimulationSymbol::CSimulationSymbol( 
+  const std::string &sSymbol, 
+  pInstrument_ref pInstrument, 
+  const std::string &sDirectory
+  ) 
+: CSymbol<CSimulationSymbol,std::string>(sSymbol, pInstrument), m_sDirectory( sDirectory )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
@@ -33,7 +37,7 @@ CSimulationSymbol::~CSimulationSymbol(void) {
 }
 
 void CSimulationSymbol::StartTradeWatch( void ) {
-  std::string sPath( m_sDirectory + "/trades/" + m_sSymbolName );
+  std::string sPath( m_sDirectory + "/trades/" + GetId() );
   CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
   CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
   begin = tradeRepository.begin();
@@ -46,7 +50,7 @@ void CSimulationSymbol::StopTradeWatch( void ) {
 }
 
 void CSimulationSymbol::StartQuoteWatch( void ) {
-  std::string sPath( m_sDirectory + "/quotes/" + m_sSymbolName );
+  std::string sPath( m_sDirectory + "/quotes/" + GetId() );
   CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
   CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
   begin = quoteRepository.begin();

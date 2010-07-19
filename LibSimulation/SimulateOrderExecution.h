@@ -23,14 +23,15 @@ using namespace boost::gregorian;
 #include "LibCommon/FastDelegate.h"
 using namespace fastdelegate;
 
-#include "LibCommon/TimeSource.h"
-#include "LibTimeSeries/DatedDatum.h"
-#include "LibTrading/Symbol.h"
-#include "LibTrading/Order.h"
-#include "LibTrading/Execution.h"
+#include <LibTimeSeries/DatedDatum.h>
+#include <LibTrading/Order.h>
+#include <LibTrading/Execution.h>
 
 class CSimulateOrderExecution {  // one object per symbol
 public:
+
+  typedef COrder::pOrder_t pOrder_t;
+
   CSimulateOrderExecution(void);
   ~CSimulateOrderExecution(void);
 
@@ -38,7 +39,7 @@ public:
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
     OnOrderCancelled = function;
   }
-  typedef FastDelegate1<const CExecution &> OnOrderFillHandler;
+  typedef FastDelegate2<COrder::orderid_t, const CExecution&> OnOrderFillHandler;
   void SetOnOrderFill( OnOrderFillHandler function ) {
     OnOrderFill = function;
   }
@@ -54,10 +55,10 @@ public:
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
 
-  void NewTrade( CSymbol::trade_t trade );
-  void NewQuote( CSymbol::quote_t quote );
+  void NewTrade( const CTrade& trade );
+  void NewQuote( const CQuote& quote );
 
-  void SubmitOrder( COrder *pOrder );
+  void SubmitOrder( pOrder_t pOrder );
   void CancelOrder( COrder::orderid_t nOrderId );
 
 protected:
@@ -75,17 +76,17 @@ protected:
   OnNoOrderFoundHandler OnNoOrderFound;
   OnCommissionHandler OnCommission;
 
-  std::list<COrder *> m_lDelayOrder;  // all orders put in delay queue, taken out then processed as limit or market
+  typedef std::list<pOrder_t> lDelayOrder_t;
+  typedef lDelayOrder_t::iterator lDelayOrder_iter_t;
+  lDelayOrder_t m_lDelayOrder;  // all orders put in delay queue, taken out then processed as limit or market
   std::list<structCancelOrder> m_lDelayCancel;
 
   CTrade::tradesize_t m_nOrderQuanRemaining;
   CTrade::tradesize_t m_nOrderQuanProcessed;
 
-  COrder *m_pCurrentOrder;
+  pOrder_t m_pCurrentOrder;
   bool m_bOrdersQueued;
   bool m_bCancelsQueued;
-
-  //CTimeSource m_ts;
 
   void ProcessDelayQueues( const CTrade &trade );
   void CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan );

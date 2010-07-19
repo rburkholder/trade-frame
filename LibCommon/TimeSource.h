@@ -18,8 +18,12 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include <boost/thread/mutex.hpp>
 
-class CTimeSource : boost::noncopyable {
+
+#include "Singleton.h"
+
+class CTimeSource : public CSingleton<CTimeSource> {
 public:
 
   CTimeSource(void)
@@ -28,10 +32,10 @@ public:
     m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) {};
   ~CTimeSource(void) {};
 
-  void External( ptime* dt ) { 
+  ptime External( ptime* dt ) { 
     // this ensures we always have a monotonically increasing time (for use in simulations)
-    // is not thread safe
-    ptime& dt_ = *dt;  // create reference to existing location
+    boost::mutex::scoped_lock lock( m_mutex );
+    ptime& dt_ = *dt;  // create reference to existing location for ease of use
     dt_ = boost::posix_time::microsec_clock::local_time();
     if ( m_dtLastRetrievedExternalTime >= dt_ ) {  
       m_dtLastRetrievedExternalTime += boost::posix_time::microsec( 1 );
@@ -40,12 +44,12 @@ public:
     else {
       m_dtLastRetrievedExternalTime = dt_;
     }
+    return dt_;
   };
 
-  ptime External( void ) {
+  inline ptime External( void ) {
     ptime dt;
-    External( &dt );
-    return dt;
+    return External( &dt );
   };
 
   ptime Internal( void ) { 
@@ -75,4 +79,6 @@ protected:
   ptime m_dtLastRetrievedExternalTime;
 
 private:
+
+  boost::mutex m_mutex;
 };

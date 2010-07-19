@@ -25,7 +25,6 @@
 #include "Order.h"
 #include "AlternateInstrumentNames.h"
 #include "OrderManager.h"
-#include "Portfolio.h"
 
 // need to include a check that callbacks and virtuals are in the correct thread
 // in IB, processMsg may be best place to have in cross thread management, if it isn't already
@@ -39,17 +38,31 @@ Discussion of calling sequence for open, quote, trade, depth handlers:
    and will use the pure virtual override to create a new one when necessary 
 */
 
+//
+// =======================
+//
+
 class CProviderInterfaceBase {
 public:
+
+  typedef CProviderInterfaceBase* pProvider_t;
+  typedef const pProvider_t& pProvider_ref;
 
   CProviderInterfaceBase( void ) {};
   virtual ~CProviderInterfaceBase( void ) {};
 
-  virtual void PlaceOrder( COrder *pOrder ) = 0;
-  virtual void CancelOrder( COrder *pOrder ) = 0;
+  virtual void PlaceOrder( COrder::pOrder_t pOrder ) = 0;
+  virtual void CancelOrder( COrder::pOrder_t pOrder ) = 0;
+
 protected:
+
 private:
+
 };
+
+//
+// =======================
+//
 
 template <typename P, typename S>  // p = provider, S = symbol
 class CProviderInterface: public CProviderInterfaceBase {
@@ -85,7 +98,7 @@ public:
   virtual void     AddGreekHandler( const symbol_id_t& id, typename S::greekhandler_t handler );
   virtual void  RemoveGreekHandler( const symbol_id_t& id, typename S::greekhandler_t handler );
 
-  Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
+//  Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
   S* GetSymbol( const symbol_id_t& );
 
@@ -93,8 +106,8 @@ public:
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
   bool Connected( void ) { return m_bConnected; };
 
-  void PlaceOrder( COrder *pOrder );
-  void CancelOrder( COrder *pOrder );
+  void PlaceOrder( COrder::pOrder_t pOrder );
+  void CancelOrder( COrder::pOrder_t pOrder );
 
   void SetAlternateInstrumentName( const std::string& OriginalInstrumentName, const std::string& AlternateIntrumentName );
   void GetAlternateInstrumentName( const std::string& OriginalInstrumentName, std::string* pAlternateInstrumentName );
@@ -322,14 +335,14 @@ void CProviderInterface<P,S>::PreSymbolDestroy( S* pSymbol ) {
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::PlaceOrder( COrder *pOrder ) {
+void CProviderInterface<P,S>::PlaceOrder( COrder::pOrder_t pOrder ) {
   pOrder->SetProviderName( m_sName );
 //  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
   COrderManager::Instance().PlaceOrder( this, pOrder );
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::CancelOrder( COrder *pOrder ) {
+void CProviderInterface<P,S>::CancelOrder( COrder::pOrder_t pOrder ) {
   pOrder->SetProviderName( m_sName );
   COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 }

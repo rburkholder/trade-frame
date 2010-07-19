@@ -19,35 +19,48 @@
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
+#include "Order.h"
+#include "ProviderInterface.h"
 
-// Multiple position records grouped together would be a multi-legged instrument -- not sure how to construct this yet
+// Multiple position records grouped together would be a multi-legged instrument
+//   -- not sure how to construct this yet
 // A Portfolio should be a collection of position records, whether individual positions, or multi-positions
 // check that orders for both sell side and buy side are not opened simultaneously
+// a position is provider dependent, ie, only one provider per position
 
 class CPosition {
 public:
 
   typedef boost::shared_ptr<CPosition> pPosition_t;
 
-  CPosition( CInstrument::pInstrument_ref );
-  CPosition( CInstrument::pInstrument_ref, const std::string& sNotes );
+  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef CProviderInterfaceBase::pProvider_ref pProvider_ref;
+
+  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef CInstrument::pInstrument_ref pInstrument_ref;
+
+  typedef COrder::pOrder_t pOrder_t;
+  typedef COrder::pOrder_ref pOrder_ref;
+
+  CPosition( pProvider_ref, pInstrument_ref );
+  CPosition( pProvider_ref, pInstrument_ref, const std::string& sNotes );
   ~CPosition(void);
 
   const std::string& Notes( void ) { return m_sNotes; };
   void Append( std::string& sNotes ) { m_sNotes += sNotes; };
 
-  COrder::pOrder_ref PlaceOrder( // market
+  COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     unsigned long nOrderQuantity
     );
-  COrder::pOrder_ref PlaceOrder( // limit or stop
+  COrder::pOrder_t PlaceOrder( // limit or stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     unsigned long nOrderQuantity,
     double dblPrice1
     );
-  COrder::pOrder_ref PlaceOrder( // limit and stop
+  COrder::pOrder_t PlaceOrder( // limit and stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     unsigned long nOrderQuantity,
@@ -59,15 +72,24 @@ public:
 
 protected:
 
-  CInstrument::pInstrument_t m_pInstrument;
+  pProvider_t m_pProvider;
+  pInstrument_t m_pInstrument;
   std::string m_sNotes;
-  int m_nPosition;
+
+  OrderSide::enumOrderSide m_eOrderSidePending;
+  unsigned long m_nPositionPending;
+
+  OrderSide::enumOrderSide m_eOrderSideActive;
+  unsigned long m_nPositionActive;
+
   double m_dblPrice;
   double m_dblAverageCost;
   double m_dblCommission;
 
-  std::vector<COrder::pOrder_t> m_OpenOrders;
-  std::vector<COrder::pOrder_t> m_ClosedOrders;
+  std::vector<pOrder_t> m_OpenOrders;
+  std::vector<pOrder_t> m_ClosedOrders;
+
+  void ProcessOrder( pOrder_t pOrder );
 
 private:
 };

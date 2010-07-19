@@ -26,7 +26,7 @@ CExecution::CExecution(
 {
   assert( 0 < dblPrice );
   assert( 0 < nSize );
-  m_dtExecutionTimeStamp = m_timesource.Internal();
+  m_dtExecutionTimeStamp = CTimeSource::Instance().Internal();
 }
 
 CExecution::~CExecution(void) {

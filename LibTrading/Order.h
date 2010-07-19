@@ -24,7 +24,6 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include "LibCommon/TimeSource.h"
 #include "LibCommon/Delegate.h"
 
 #include "TradingEnumerations.h"
@@ -77,14 +76,14 @@ public:
   double GetPrice2( void ) const { return m_dblPrice2; };
   double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
   orderid_t GetOrderId( void ) const { return m_nOrderId; };
-  void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
-  const std::string &GetProviderName( void ) const { return m_sProviderName; };
-  unsigned long GetNextExecutionId( void ) { return m_nNextExecutionId++; };
+//  void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
+//  const std::string &GetProviderName( void ) const { return m_sProviderName; };
+  unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
-  Delegate<COrder *> OnExecution;
-  Delegate<COrder *> OnOrderFilled; // on final fill
-  Delegate<COrder *> OnPartialFill; // on intermediate fills only
+  Delegate<std::pair<const COrder&, const CExecution&> > OnExecution;
+  Delegate<const COrder&> OnOrderFilled; // on final fill
+  Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
   unsigned long GetQuanRemaining( void ) { return m_nRemaining; };
@@ -101,8 +100,7 @@ public:
     return m_dtOrderFilled; 
   };
 protected:
-  //std::string m_sSymbol;
-  std::string m_sProviderName;
+//  std::string m_sProviderName;
   CInstrument::pInstrument_t m_pInstrument;
   orderid_t m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
@@ -136,7 +134,6 @@ protected:
   double m_dblAverageFillPrice;
   //double m_dblAverageFillPriceWithCommission;
 
-  CTimeSource m_timesource;
 private:
   COrder(void);
 };

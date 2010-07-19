@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include "LibCommon/TimeSource.h"
+
 #include "Order.h"
 
 COrder::COrder(void) {
@@ -85,7 +87,7 @@ COrder::~COrder(void) {
 
 void COrder::AssignOrderId() {
 //  try {
-  m_dtOrderCreated = m_timesource.Internal();
+  m_dtOrderCreated = CTimeSource::Instance().Internal();
   //m_dtOrderSubmitted = not_a_date_time;  // already set as such
   m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
@@ -98,7 +100,7 @@ void COrder::AssignOrderId() {
 void COrder::SetSendingToProvider() {
   assert( OrderStatus::Created == m_eOrderStatus );
   m_eOrderStatus = OrderStatus::SendingToProvider;
-  m_dtOrderSubmitted = m_timesource.Internal();
+  m_dtOrderSubmitted = CTimeSource::Instance().Internal();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
@@ -125,8 +127,8 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     m_dblAverageFillPrice = m_dblPriceXQuantity / m_nFilled;
     if ( 0 == m_nRemaining ) {
       m_eOrderStatus = OrderStatus::Filled;
-      m_dtOrderFilled = m_timesource.Internal();
-      OnOrderFilled( this );
+      m_dtOrderFilled = CTimeSource::Instance().Internal();
+      OnOrderFilled( *this );
     }
     else {
       switch ( m_eOrderStatus ) {
@@ -148,9 +150,10 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
         std::cout << "COrder::ReportExecution " << m_eOrderStatus << std::endl;
         break;
       }
-      OnPartialFill( this );
+      OnPartialFill( *this );
     }
   }
+  OnExecution( std::pair<const COrder&, const CExecution&>( *this, exec ) );
   return m_eOrderStatus;
 }
 

@@ -22,13 +22,12 @@
 // CMapOrderToProvider
 //
 
-CMapOrderToProvider::CMapOrderToProvider(CProviderInterfaceBase *pProvider, COrder *pOrder ) 
+CMapOrderToProvider::CMapOrderToProvider(CProviderInterfaceBase* pProvider, COrder::pOrder_ref pOrder ) 
 : m_pProvider( pProvider ), m_pOrder( pOrder )
 {
 }
 
 CMapOrderToProvider::~CMapOrderToProvider(void) {
-  delete m_pOrder;  // perhaps should make pOrder as smartpointer;
 }
 
 //
@@ -60,9 +59,9 @@ COrderManager::~COrderManager(void) {
   }
 }
 
-void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder *pOrder) {
+void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder::pOrder_t pOrder) {
   assert( NULL != pProvider );
-  assert( NULL != pOrder );
+  //assert( NULL != pOrder );
   CMapOrderToProvider *pMapping = new CMapOrderToProvider( pProvider, pOrder );
   m_mapActiveOrders.insert( mappair_t( pOrder->GetOrderId(), pMapping ) );
   pOrder->SetSendingToProvider();
@@ -109,14 +108,14 @@ void COrderManager::MoveActiveOrderToCompleted( COrder::orderid_t nOrderId ) {
   }
 }
 
-void COrderManager::ReportExecution(const CExecution &exec) {
+void COrderManager::ReportExecution( COrder::orderid_t nOrderId, const CExecution& exec) {
   try {
-    orders_t::iterator iter = LocateOrder( exec.GetOrderId() );
+    orders_t::iterator iter = LocateOrder( nOrderId );
     OrderStatus::enumOrderStatus status = 
       iter->second->GetOrder()->ReportExecution( exec );
     switch ( status ) {
       case OrderStatus::Filled:
-        MoveActiveOrderToCompleted( exec.GetOrderId() );
+        MoveActiveOrderToCompleted( nOrderId );
         break;
     }
   }

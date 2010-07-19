@@ -18,8 +18,6 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <LibCommon/TimeSource.h>
-
 #include "TradingEnumerations.h"
 
 class CExecution {
@@ -48,8 +46,6 @@ protected:
   ptime m_dtExecutionTimeStamp;
   std::string m_sExchange;
   std::string m_sExecutionId;  // unique execution id supplied by provider
-
-  CTimeSource m_timesource;
 
 private:
 };

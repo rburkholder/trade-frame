@@ -160,7 +160,7 @@ template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize
     }
   }
   catch ( ... ) {
-    std::cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Read" << endl;
+    std::cout << "unknown error in CHDF5TimeSeriesAccessor<T>::Read" << std::endl;
   }
 }
 

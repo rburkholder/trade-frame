@@ -154,7 +154,7 @@ const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CA
 const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
-void CIBTWS::PlaceOrder( COrder *pOrder ) {
+void CIBTWS::PlaceOrder( pOrder_t pOrder ) {
 
   Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
@@ -207,7 +207,7 @@ void CIBTWS::PlaceOrder( COrder *pOrder ) {
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
-void CIBTWS::CancelOrder( COrder *pOrder ) {
+void CIBTWS::CancelOrder( pOrder_t pOrder ) {
   CProviderInterface<CIBTWS,CIBSymbol>::CancelOrder( pOrder );
   pTWS->cancelOrder( pOrder->GetOrderId() );
 }
@@ -337,13 +337,12 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
 }
 
 void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
-//  ****************** need to redo this, orderid disappeared, to be replaced by reqId.
   m_ss.str("");
   m_ss  
     << "execDetails: " 
     << "  sym=" << contract.symbol 
 //    << ", oid=" << orderId 
-    //<< ", ex.oid=" << execution.orderId 
+    << ", ex.oid=" << execution.orderId 
     << ", ex.pr=" << execution.price 
     << ", ex.sh=" << execution.shares 
     << ", ex.sd=" << execution.side 
@@ -366,9 +365,8 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
     OutputDebugString( m_ss.str().c_str() );
   }
   else {
-//    CExecution exec( orderId, execution.price, execution.shares, side, 
-//      execution.exchange, execution.execId );
-//    COrderManager::Instance().ReportExecution( exec );
+    CExecution exec( execution.price, execution.shares, side, execution.exchange, execution.execId );
+    COrderManager::Instance().ReportExecution( execution.orderId, exec );
   }
 }
 
