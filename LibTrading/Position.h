@@ -42,8 +42,8 @@ public:
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
-  CPosition( pProvider_ref, pInstrument_ref );
-  CPosition( pProvider_ref, pInstrument_ref, const std::string& sNotes );
+  CPosition( pInstrument_ref, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider );
+  CPosition( pInstrument_ref, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider, const std::string& sNotes );
   ~CPosition(void);
 
   const std::string& Notes( void ) { return m_sNotes; };
@@ -72,24 +72,39 @@ public:
 
 protected:
 
-  pProvider_t m_pProvider;
+  pProvider_t m_pExecutionProvider;
+  pProvider_t m_pDataProvider;
+
   pInstrument_t m_pInstrument;
   std::string m_sNotes;
 
-  OrderSide::enumOrderSide m_eOrderSidePending;
+  // all pending orders must be on the same side
+  // pending orders need to cancelled in order to change sides
+  // use an opposing position if playing both sides of the market
+  OrderSide::enumOrderSide m_eOrderSidePending;  
   unsigned long m_nPositionPending;
 
-  OrderSide::enumOrderSide m_eOrderSideActive;
+  // indicates whether we are in a long or short position
+  OrderSide::enumOrderSide m_eOrderSideActive;  
   unsigned long m_nPositionActive;
 
-  double m_dblPrice;
-  double m_dblAverageCost;
-  double m_dblCommission;
+  double m_dblAveragePricePerShare;  // based upon position trades
+  double m_dblConstructedValue;  // based upon position trades
+  double m_dblMarketValue;  // based upon market quotes
 
-  std::vector<pOrder_t> m_OpenOrders;
-  std::vector<pOrder_t> m_ClosedOrders;
+  double m_dblUnRealizedPL;  // based upon market quotes
+  double m_dblRealizedPL;  // based upon position trades
+
+  double m_dblCommissionPaid;
+
+  std::vector<pOrder_t> m_OpenOrders;  // active orders waiting to be executed or cancelled
+  std::vector<pOrder_t> m_ClosedOrders;  // orders that have executed or have cancelled
+//  std::vector<pOrder_t> m_AllOrders;  // keeps track of all orders in case we have to search both lists
+
+private:
+
+  void HandleExecution( std::pair<const COrder&, const CExecution&>& );
 
   void ProcessOrder( pOrder_t pOrder );
 
-private:
 };

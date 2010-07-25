@@ -76,31 +76,30 @@ public:
   double GetPrice2( void ) const { return m_dblPrice2; };
   double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
   orderid_t GetOrderId( void ) const { return m_nOrderId; };
-//  void SetProviderName( const std::string &sName ) { m_sProviderName = sName; };
-//  const std::string &GetProviderName( void ) const { return m_sProviderName; };
   unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
-  Delegate<std::pair<const COrder&, const CExecution&> > OnExecution;
-  Delegate<const COrder&> OnOrderFilled; // on final fill
-  Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
-  unsigned long GetQuanRemaining( void ) { return m_nRemaining; };
-  unsigned long GetQuanOrdered( void ) { return m_nOrderQuantity; };
-  unsigned long GetQuanFilled( void ) { return m_nFilled; };
+  unsigned long GetQuanRemaining( void ) const { return m_nRemaining; };
+  unsigned long GetQuanOrdered( void ) const { return m_nOrderQuantity; };
+  unsigned long GetQuanFilled( void ) const { return m_nFilled; };
   void SetSignalPrice( double dblSignalPrice ) { m_dblSignalPrice = dblSignalPrice; };
-  double GetSignalPrice( void ) { return m_dblSignalPrice; };
-  const ptime &GetDateTimeOrderSubmitted( void ) { 
+  double GetSignalPrice( void ) const { return m_dblSignalPrice; };
+  const ptime &GetDateTimeOrderSubmitted( void ) const { 
     assert( not_a_date_time != m_dtOrderSubmitted ); 
     return m_dtOrderSubmitted; 
   };
-  const ptime &GetDateTimeOrderFilled( void ) { 
+  const ptime &GetDateTimeOrderFilled( void ) const { 
     assert( not_a_date_time != m_dtOrderFilled ); 
     return m_dtOrderFilled; 
   };
+
+  Delegate<std::pair<const COrder&, const CExecution&> > OnExecution;
+  Delegate<const COrder&> OnOrderFilled; // on final fill
+  Delegate<const COrder&> OnPartialFill; // on intermediate fills only
+
 protected:
-//  std::string m_sProviderName;
   CInstrument::pInstrument_t m_pInstrument;
   orderid_t m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
