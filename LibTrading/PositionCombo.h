@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,13 +11,29 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#pragma once
 
-#include "ProviderManager.h"
+#include <vector>
 
-CProviderManager::CProviderManager(void) {
-}
+#include "Position.h"
 
-CProviderManager::~CProviderManager(void) {
-}
+// used for tracking profit/loss across a combo of positions
+
+class CPositionCombo {
+public:
+
+  typedef CPosition::pPosition_t pPosition_t;
+
+  CPositionCombo(void);
+  ~CPositionCombo(void);
+
+  void Add( pPosition_t );
+
+protected:
+
+private:
+
+  std::vector<pPosition_t> m_vPositions;
+
+};
 

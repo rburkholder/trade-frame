@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -21,7 +21,7 @@ CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvi
   m_pInstrument( pInstrument ), 
   m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
   m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
-  m_dblAveragePricePerShare( 0 ), m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
+  m_dblAverageCostPerShare( 0 ), m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblCommissionPaid( 0 )
 {
@@ -33,7 +33,7 @@ CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvi
   m_sNotes( sNotes ),
   m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
   m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
-  m_dblAveragePricePerShare( 0 ), m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
+  m_dblAverageCostPerShare( 0 ), m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblCommissionPaid( 0 )
 {
@@ -106,6 +106,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 void CPosition::ProcessOrder( pOrder_t pOrder ) {
   m_eOrderSidePending = pOrder->GetOrderSide();
   m_nPositionPending += pOrder->GetQuantity();
+  m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
   m_pExecutionProvider->PlaceOrder( pOrder );
 }
@@ -146,37 +147,64 @@ void CPosition::HandleExecution( std::pair<const COrder&, const CExecution&>& st
   COrder::orderid_t orderId = order.GetOrderId();
 
   // update position, regardless of whether we see order open or closed
-  switch ( m_eOrderSidePending ) {
-    case OrderSide::Buy:
+  double dblNewAverageCostPerShare = 0;
+  switch ( m_eOrderSideActive ) {
+    case OrderSide::Buy:  // existing is long
       switch ( exec.GetOrderSide() ) {
         case OrderSide::Buy:  // increase long
+          dblNewAverageCostPerShare = 
+            ( ( m_dblAverageCostPerShare * m_nPositionActive ) + ( exec.GetSize() * exec.GetPrice() ) ) 
+            / ( m_nPositionActive + exec.GetSize() );
+          m_dblAverageCostPerShare = dblNewAverageCostPerShare;
           m_nPositionActive += exec.GetSize();
           m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
           break;
         case OrderSide::Sell:  // decrease long
           assert( m_nPositionActive >= exec.GetSize() );
+          dblNewAverageCostPerShare = 
+            ( ( m_dblAverageCostPerShare * m_nPositionActive ) - ( exec.GetSize() * exec.GetPrice() ) ) 
+            / ( m_nPositionActive - exec.GetSize() );
+          m_dblRealizedPL += exec.GetSize() * ( dblNewAverageCostPerShare - m_dblAverageCostPerShare );
+          m_dblAverageCostPerShare = dblNewAverageCostPerShare;
           m_nPositionActive -= exec.GetSize();
           m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
-          if ( 0 == m_nPositionActive ) m_dblConstructedValue = 0;
+          if ( 0 == m_nPositionActive ) {
+            m_eOrderSideActive = OrderSide::Unknown;
+          }
           break;
       }
       break;
-    case OrderSide::Sell:
+    case OrderSide::Sell:  // existing is short
       switch ( exec.GetOrderSide() ) {
-        case OrderSide::Buy:  // decrease short
-          assert( m_nPositionActive >= exec.GetSize() );
-          m_nPositionActive -= exec.GetSize();
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
-          if ( 0 == m_nPositionActive ) m_dblConstructedValue = 0;
-          break;
         case OrderSide::Sell:  // increase short
+          dblNewAverageCostPerShare = 
+            ( ( m_dblAverageCostPerShare * m_nPositionActive ) + ( exec.GetSize() * exec.GetPrice() ) ) 
+            / ( m_nPositionActive + exec.GetSize() );
+          m_dblAverageCostPerShare = dblNewAverageCostPerShare;
           m_nPositionActive += exec.GetSize();
           m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
+          break;
+        case OrderSide::Buy:  // decrease short
+          assert( m_nPositionActive >= exec.GetSize() );
+          dblNewAverageCostPerShare = 
+            ( ( m_dblAverageCostPerShare * m_nPositionActive ) - ( exec.GetSize() * exec.GetPrice() ) ) 
+            / ( m_nPositionActive - exec.GetSize() );
+          m_dblRealizedPL += exec.GetSize() * ( m_dblAverageCostPerShare - dblNewAverageCostPerShare );
+          m_dblAverageCostPerShare = dblNewAverageCostPerShare;
+          m_nPositionActive -= exec.GetSize();
+          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
+          if ( 0 == m_nPositionActive ) {
+            m_eOrderSideActive = OrderSide::Unknown;
+          }
           break;
       }
       break;
     case OrderSide::Unknown:
-      throw std::runtime_error( "CPosition::HandleExecution isn't prepped for execution" );
+      assert( 0 == m_nPositionActive );
+      m_eOrderSideActive = exec.GetOrderSide();
+      dblNewAverageCostPerShare = exec.GetPrice();
+      m_nPositionActive = exec.GetSize();
+      m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
       break;
   }
 

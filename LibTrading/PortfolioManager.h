@@ -22,13 +22,21 @@
 class CPortfolioManager: public ManagerBase<CPortfolioManager, std::string, CPortfolio> {
 public:
 
+  typedef CPortfolio::pPortfolio_t pPortfolio_t;
+
   CPortfolioManager(void);
   ~CPortfolioManager(void);
 
-  void Add( const std::string &sName );
-  void Delete( const std::string &sName );
-  CPortfolio *GetPortfolio( const std::string &sName );
+  pPortfolio_t Create( const std::string& sName );
+  pPortfolio_t GetPortfolio( const std::string &sName, bool bCreate = false );
+  void Delete( const std::string& sName );
 
 protected:
 private:
+
+  typedef std::pair<std::string, pPortfolio_t> m_mapPortfolios_pair;
+  typedef std::map<std::string, pPortfolio_t> map_t;
+  typedef map_t::iterator iterator;
+  map_t m_mapPortfolios;
+
 };

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,11 +13,14 @@
 
 #include "StdAfx.h"
 
-#include "ProviderManager.h"
+#include "PositionCombo.h"
 
-CProviderManager::CProviderManager(void) {
+CPositionCombo::CPositionCombo(void) {
 }
 
-CProviderManager::~CProviderManager(void) {
+CPositionCombo::~CPositionCombo(void) {
 }
 
+void CPositionCombo::Add( pPosition_t pPosition ) {
+  m_vPositions.push_back( pPosition );
+}
