@@ -336,14 +336,14 @@ void CProviderInterface<P,S>::PreSymbolDestroy( S* pSymbol ) {
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::PlaceOrder( COrder::pOrder_t pOrder ) {
-  pOrder->SetProviderName( m_sName );
+//  pOrder->SetProviderName( m_sName );
 //  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
   COrderManager::Instance().PlaceOrder( this, pOrder );
 }
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::CancelOrder( COrder::pOrder_t pOrder ) {
-  pOrder->SetProviderName( m_sName );
+//  pOrder->SetProviderName( m_sName );
   COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 }
 

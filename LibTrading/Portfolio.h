@@ -50,9 +50,9 @@ public:
   CPortfolio( const std::string &sPortfolioName );
   ~CPortfolio(void);
 
-  void Add( const std::string& sName, pPosition_t pPosition );
-  void Delete( const std::string& sName );
-  void Rename( const std::string& sName );
+  void AddPosition( const std::string& sName, pPosition_t pPosition );
+  void DeletePosition( const std::string& sName );
+  void RenamePosition( const std::string& sOld, const std::string& sNew );
   pPosition_t GetPosition( const std::string& sName );
 
   // need an on change event so delta can be recalculated on value or record addition (quote, trade, portfolio record, order, execution )

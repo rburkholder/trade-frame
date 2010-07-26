@@ -21,8 +21,10 @@
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTimeSeries/TimeSeries.h>
 
+#include <LibTrading/PortfolioManager.h>
+
 #include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
-#include <LibIQFeed/IQFeedProvider.h>
+#include <LibIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
 
 #include <LibInteractiveBrokers/IBTWS.h>
 
@@ -174,6 +176,9 @@ protected:
 
 private:
 
+  typedef CPortfolio::pPortfolio_t pPortfolio_t;
+  typedef CPosition::pPosition_t pPosition_t;
+
   typedef double strike_t;
   enum enumTradingState {  // arranged in chronological order
     ETSFirstPass,     // any state initialization
@@ -239,6 +244,11 @@ private:
   double m_dblCallPrice;
   double m_dblPutPrice;
   double m_dblUnderlyingPrice;
+
+  pPortfolio_t m_pPortfolio;
+
+  pPosition_t m_posPut;
+  pPosition_t m_posUnderlying;
 
   void HandleOnIBConnected( int );
   void HandleOnIBDisconnected( int );

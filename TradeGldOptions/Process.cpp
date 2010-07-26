@@ -152,6 +152,8 @@ CProcess::CProcess(void)
   m_contract.symbol = m_sSymbolName;
   m_contract.expiry = "20100716";
 
+  m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
+
   m_tws.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
   m_tws.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
 

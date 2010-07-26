@@ -22,7 +22,7 @@ CPortfolio::CPortfolio( const std::string &sPortfolioName )
 CPortfolio::~CPortfolio(void) {
 }
 
-void CPortfolio::Add( const std::string &sName, pPosition_t pPosition ) {
+void CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) {
   iterator iter = m_mapPositions.find( sName );
   if ( m_mapPositions.end() != iter ) {
     throw std::runtime_error( "CPortfolio::Add position already exists" );
@@ -32,11 +32,41 @@ void CPortfolio::Add( const std::string &sName, pPosition_t pPosition ) {
   }
 }
 
-void CPortfolio::Delete( const std::string& sName ) {
+void CPortfolio::DeletePosition( const std::string& sName ) {
+  iterator iter = m_mapPositions.find( sName );
+  if ( m_mapPositions.end() == iter ) {
+    throw std::runtime_error( "CPortfolio::Delete Portfolio does not exist" );
+  }
+  else {
+    m_mapPositions.erase( iter );
+  }
 }
 
-void CPortfolio::Rename( const std::string& sName ) {
+void CPortfolio::RenamePosition( const std::string& sOld, const std::string& sNew ) {
+
+  iterator iter;
+
+  iter = m_mapPositions.find( sNew );
+  if ( m_mapPositions.end() == iter ) {
+    throw std::runtime_error( "CPortfolio::Rename New Portfolio already exists" );
+  }
+  iter = m_mapPositions.find( sOld );
+  if ( m_mapPositions.end() == iter ) {
+    throw std::runtime_error( "CPortfolio::Rename Old Portfolio does not exist" );
+  }
+
+  pPosition_t pPosition( iter->second );
+  m_mapPositions.erase( iter );
+  m_mapPositions.insert( map_t_pair( sNew, pPosition ) );
 }
 
 CPortfolio::pPosition_t CPortfolio::GetPosition( const std::string& sName ) {
+
+  iterator iter = m_mapPositions.find( sName );
+
+  if ( m_mapPositions.end() == iter ) {
+    throw std::runtime_error( "CPortfolio::GetPosition Portfolio does not exist" );
+  }
+
+  return iter->second;
 }

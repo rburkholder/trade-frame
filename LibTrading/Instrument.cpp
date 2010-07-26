@@ -113,16 +113,18 @@ CInstrument::CInstrument(
 }
 
 
-CInstrument::CInstrument(const CInstrument &instrument) 
+CInstrument::CInstrument(const CInstrument& instrument) 
 :
   m_sSymbolName( instrument.m_sSymbolName ), 
+  m_sUnderlying( instrument.m_sUnderlying ),
   m_sExchange( instrument.m_sExchange ), 
-  m_sUnderlying( instrument.m_sUnderlying ), 
   m_InstrumentType( instrument.m_InstrumentType ), 
-  m_Currency(  instrument.m_Currency ), 
+  m_Currency( instrument.m_Currency ), 
   m_CurrencyCounter( instrument.m_CurrencyCounter ),
+  m_OptionSide( instrument.m_OptionSide ),
   m_nYear( instrument.m_nYear ), 
   m_nMonth( instrument.m_nMonth ), 
+  m_nDay( instrument.m_nDay ),
   m_dblStrike( instrument.m_dblStrike ),
   m_nContract( 0 )
 {

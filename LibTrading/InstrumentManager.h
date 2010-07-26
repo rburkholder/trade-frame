@@ -21,12 +21,19 @@
 
 class CInstrumentManager: public ManagerBase<CInstrumentManager, std::string, CInstrument> {
 public:
+
+  typedef CInstrument::pInstrument_t pInstrument_t;
+
   CInstrumentManager(void);
   ~CInstrumentManager(void);
-  CInstrument::pInstrument_t GetIQFeedInstrument( const std::string& sName );
-  CInstrument::pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
+  pInstrument_t GetIQFeedInstrument( const std::string& sName );
+  pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
+
 protected:
+
   CInstrumentFile file;
+
 private:
+
 };
 
