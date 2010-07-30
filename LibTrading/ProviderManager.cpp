@@ -21,3 +21,11 @@ CProviderManager::CProviderManager(void) {
 CProviderManager::~CProviderManager(void) {
 }
 
+void CProviderManager::Register( const std::string& sKey, pProvider_t pProvider ) {
+
+  if ( m_mapProviders.end() == m_mapProviders.find( sKey ) ) {
+    throw std::runtime_error( "CProviderManager::Register already exists" );
+  }
+  m_mapProviders.insert( providers_pair_t( sKey, pProvider ) );
+
+}

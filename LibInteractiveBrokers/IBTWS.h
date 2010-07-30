@@ -55,6 +55,7 @@ class CIBTWS :
 public:
 
   typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
+  typedef 
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef COrder::pOrder_t pOrder_t;
   //typedef COrder::pOrder_ref pOrder_ref;

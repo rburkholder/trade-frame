@@ -132,7 +132,7 @@ CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
 
 CProcess::CProcess(void)
 :
-  m_tws( "U215226" ),
+  //m_tws( "U215226" ),
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
@@ -143,7 +143,8 @@ CProcess::CProcess(void)
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
-  m_sPathForSeries( "/strategy/deltaneutral1" )
+  m_sPathForSeries( "/strategy/deltaneutral1" ),
+  m_providerTws( new CIBTWS( "U215226" ) ), m_providerIqfeed( new CIQFeedProvider() )
 {
 
   m_contract.currency = "USD";
@@ -154,8 +155,10 @@ CProcess::CProcess(void)
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
 
-  m_tws.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
+  CProviderManager::Instance().Register( "U215226", m_providerTws );
+  m_providerTws->.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
   m_tws.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
+
 
   m_iqfeed.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedConnected ) );
   m_iqfeed.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedDisconnected ) );
@@ -440,6 +443,7 @@ void CProcess::OpenPosition( void ) {
       m_nCalls = m_nPuts = 0;
     }
     else {
+      //m_posUnderlying.reset( new CPosition( pUnderlying->GetInstrument(),
       COrder::pOrder_t pOrder;
       // orders for normal delta neutral
       pOrder = COrder::pOrder_t( new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Buy, m_nLongUnderlying ) );

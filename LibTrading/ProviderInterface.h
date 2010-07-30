@@ -45,14 +45,16 @@ Discussion of calling sequence for open, quote, trade, depth handlers:
 class CProviderInterfaceBase {
 public:
 
-  typedef CProviderInterfaceBase* pProvider_t;
-  typedef const pProvider_t& pProvider_ref;
+  //typedef CProviderInterfaceBase* pProvider_t;
+  //typedef const pProvider_t& pProvider_ref;
+
+  typedef COrder::pOrder_t pOrder_t;
 
   CProviderInterfaceBase( void ) {};
   virtual ~CProviderInterfaceBase( void ) {};
 
-  virtual void PlaceOrder( COrder::pOrder_t pOrder ) = 0;
-  virtual void CancelOrder( COrder::pOrder_t pOrder ) = 0;
+  virtual void PlaceOrder( pOrder_t pOrder ) = 0;
+  virtual void CancelOrder( pOrder_t pOrder ) = 0;
 
 protected:
 

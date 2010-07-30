@@ -16,16 +16,30 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include "ManagerBase.h"
 #include "ProviderInterface.h"
 
+// key might be account or other similar globally known identifier
+
 class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
 public:
+
+  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef CProviderInterfaceBase::pProvider_ref pProvider_ref;
+
   CProviderManager(void);
   ~CProviderManager(void);
 
-  void Register( CProviderInterfaceBase::pProvider_ref pProvider ) {};
+  void Register( const std::string& sKey,  pProvider_t pProvider );
+
 protected:
+
+  typedef std::map<std::string, pProvider_t> providers_t;
+  typedef std::pair<std::string, pProvider_t> providers_pair_t;
+
+  providers_t m_mapProviders;
+
 private:
 };
