@@ -21,6 +21,8 @@ CIQFeedProvider::CIQFeedProvider( void )
 {
   m_sName = "IQF";
   m_nID = EProviderIQF;
+  m_bProvidesQuotes = true;
+  m_bProvidesTrades = true;
 }
 
 CIQFeedProvider::~CIQFeedProvider(void) {

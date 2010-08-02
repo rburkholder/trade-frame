@@ -24,6 +24,8 @@
 
 // Multiple position records grouped together would be a multi-legged instrument, aka Combo
 //   -- not sure how to construct this yet
+//    -- a position consists of one or more legs, so a leg would be the atomic unit of composition
+// once a position with multiple legs is in a portfolio, should be able to sum up the legs to see if rebalancing or adjustments are required
 // A Portfolio should be a collection of position records, whether individual positions, or Combos
 // check that orders for both sell side and buy side are not opened simultaneously
 // a position is provider dependent, ie, only one provider per position
@@ -35,7 +37,6 @@ public:
   typedef boost::shared_ptr<CPosition> pPosition_t;
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef CProviderInterfaceBase::pProvider_ref pProvider_ref;
 
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::pInstrument_ref pInstrument_ref;
@@ -43,8 +44,8 @@ public:
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
-  CPosition( pInstrument_ref, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider );
-  CPosition( pInstrument_ref, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider, const std::string& sNotes );
+  CPosition( pInstrument_ref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
+  CPosition( pInstrument_ref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   ~CPosition(void);
 
   const std::string& Notes( void ) { return m_sNotes; };
@@ -103,6 +104,8 @@ protected:
   std::vector<pOrder_t> m_AllOrders;  // keeps track of all orders in case we have to search both lists
 
 private:
+
+  void Construction( void );
 
   void HandleExecution( std::pair<const COrder&, const CExecution&>& );
 

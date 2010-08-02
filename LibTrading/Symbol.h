@@ -28,7 +28,7 @@ class CSymbol {
 public:
 
   typedef typename CInstrument::pInstrument_t pInstrument_t;
-  typedef typename CInstrument::pInstrument_ref pInstrument_ref;
+  typedef typename CInstrument::pInstrument_cref pInstrument_cref;
   typedef typename ID symbol_id_t;
 
   CSymbol( symbol_id_t id, pInstrument_t pInstrument ); // class should only be constructed with valid instrument

@@ -40,14 +40,14 @@ public:
   typedef const pOrder_t& pOrder_ref;
 
   COrder(  // market 
-    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_cref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit or stop
-    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_cref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,
@@ -55,7 +55,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   COrder(  // limit and stop
-    CInstrument::pInstrument_ref instrument, // not deleted here, need a smart pointer
+    CInstrument::pInstrument_cref instrument, // not deleted here, need a smart pointer
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     unsigned long nOrderQuantity,

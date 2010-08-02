@@ -23,8 +23,6 @@
 
 #include <LibTrading/PortfolioManager.h>
 
-#include <LibTrading/ProviderManager.h>
-
 #include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <LibIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
 
@@ -180,8 +178,9 @@ private:
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
-  //typedef CProviderManager::pProvider_t pProvider_t;
-  typedef CIBTWS::ProviderInterface_t pProviderIBTWS_t;
+
+  typedef CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
 
   typedef double strike_t;
   enum enumTradingState {  // arranged in chronological order
@@ -202,12 +201,10 @@ private:
 
   std::stringstream m_ss;
 
-  //CIQFeedProvider m_iqfeed;
-  pProvider_t m_providerIqfeed;
+  pProviderIQFeed_t m_iqfeed;
   bool m_bIQFeedConnected;
 
-  //CIBTWS m_tws;
-  pProviderIBTWS_t m_providerTws;
+  pProviderIBTWS_t m_tws;
   bool m_bIBConnected;
   bool m_bWatchingOptions;
   bool m_bTrading;

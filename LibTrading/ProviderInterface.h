@@ -23,7 +23,6 @@
 
 #include "Symbol.h"
 #include "Order.h"
-#include "AlternateInstrumentNames.h"
 #include "OrderManager.h"
 
 // need to include a check that callbacks and virtuals are in the correct thread
@@ -45,18 +44,41 @@ Discussion of calling sequence for open, quote, trade, depth handlers:
 class CProviderInterfaceBase {
 public:
 
-  //typedef CProviderInterfaceBase* pProvider_t;
-  //typedef const pProvider_t& pProvider_ref;
+  typedef boost::shared_ptr<CProviderInterfaceBase> pProvider_t;
 
   typedef COrder::pOrder_t pOrder_t;
+  typedef unsigned short enumProviderId_t;
 
-  CProviderInterfaceBase( void ) {};
+  enum enumProviderId: enumProviderId_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, _EProviderCount };
+
+  const std::string& Name( void ) { return m_sName; };
+  unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
+
+  CProviderInterfaceBase( void )
+    : m_nID( 0 ), m_bConnected( false ),
+      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false )
+    {};
   virtual ~CProviderInterfaceBase( void ) {};
+
+  bool Connected( void ) { return m_bConnected; };
+
+  bool ProvidesQuotes( void ) { return m_bProvidesQuotes; };
+  bool ProvidesTrades( void ) { return m_bProvidesQuotes; };
+  bool ProvidesGreeks( void ) { return m_bProvidesGreeks; };
 
   virtual void PlaceOrder( pOrder_t pOrder ) = 0;
   virtual void CancelOrder( pOrder_t pOrder ) = 0;
 
 protected:
+
+  std::string m_sName;  // name of provider
+  unsigned short m_nID;
+
+  bool m_bConnected;
+
+  bool m_bProvidesQuotes;
+  bool m_bProvidesTrades;
+  bool m_bProvidesGreeks;
 
 private:
 
@@ -70,11 +92,8 @@ template <typename P, typename S>  // p = provider, S = symbol
 class CProviderInterface: public CProviderInterfaceBase {
 public:
 
-  typedef boost::shared_ptr<CProviderInterface<P,S> > pProvider_t;
   typedef typename S::pInstrument_t pInstrument_t;
   typedef typename S::symbol_id_t symbol_id_t;
-
-  enum enumProviderId { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, _EProviderCount };
 
   CProviderInterface(void);
   ~CProviderInterface(void);
@@ -104,21 +123,10 @@ public:
 
   S* GetSymbol( const symbol_id_t& );
 
-  const std::string& Name( void ) { return m_sName; };
-  unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
-  bool Connected( void ) { return m_bConnected; };
-
   void PlaceOrder( COrder::pOrder_t pOrder );
   void CancelOrder( COrder::pOrder_t pOrder );
 
-  void SetAlternateInstrumentName( const std::string& OriginalInstrumentName, const std::string& AlternateIntrumentName );
-  void GetAlternateInstrumentName( const std::string& OriginalInstrumentName, std::string* pAlternateInstrumentName );
-
 protected:
-
-  std::string m_sName;  // name of provider
-  unsigned short m_nID;
-  bool m_bConnected;
 
    typedef std::map<symbol_id_t, S*> m_mapSymbols_t;
   typedef std::pair<symbol_id_t, S*> pair_mapSymbols_t;
@@ -138,18 +146,11 @@ protected:
   S* AddCSymbol( S* pSymbol );
   virtual void PreSymbolDestroy( S* pSymbol );
 
-  // need to redo this and place into CInstrument?  or CSymbol?
-  std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
-  CAlternateInstrumentNames m_lutAlternateInstrumentNames;
-
-  COrderManager m_OrderManager;
-
 private:
 };
 
 template <typename P, typename S>
 CProviderInterface<P,S>::CProviderInterface(void) 
-: m_bConnected( false ), m_nID( 0 )
 {
 }
 
@@ -349,35 +350,3 @@ void CProviderInterface<P,S>::CancelOrder( COrder::pOrder_t pOrder ) {
   COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 }
 
-template <typename P, typename S>
-void CProviderInterface<P,S>::SetAlternateInstrumentName(const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName) {
-  m_lutAlternateInstrumentNames.Save( m_sName, OriginalInstrumentName, AlternateIntrumentName );
-  std::map<std::string, std::string>::iterator iter 
-    = m_mapAlternateNames.find( OriginalInstrumentName );
-  if ( m_mapAlternateNames.end() == iter ) {
-    m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, AlternateIntrumentName ) );
-  }
-  else m_mapAlternateNames[ OriginalInstrumentName ] = AlternateIntrumentName;
-}
-
-template <typename P, typename S>
-void CProviderInterface<P,S>::GetAlternateInstrumentName(const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName) {
-  std::map<std::string, std::string>::iterator iter 
-    = m_mapAlternateNames.find( OriginalInstrumentName );
-  if ( m_mapAlternateNames.end() != iter ) {
-    pAlternateInstrumentName->assign( iter->second );
-  }
-  else {
-    try {
-      m_lutAlternateInstrumentNames.Get( m_sName, OriginalInstrumentName, pAlternateInstrumentName );
-      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, *pAlternateInstrumentName ) );
-    }
-    catch ( std::out_of_range e ) {
-      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, OriginalInstrumentName ) );
-      pAlternateInstrumentName->assign( OriginalInstrumentName );
-    }
-    catch ( std::exception e ) {
-      std::cout << "CProviderInterface::GetAlternateInstrumentName has error: " << e.what() << std::endl;
-    }
-  }
-}

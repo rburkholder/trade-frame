@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include "boost/shared_ptr.hpp"
 
@@ -26,38 +27,40 @@ class CInstrument {
 public:
 
   typedef boost::shared_ptr<CInstrument> pInstrument_t;
-  typedef const pInstrument_t& pInstrument_ref;
+  typedef const pInstrument_t& pInstrument_cref;
+  typedef unsigned short enumProviderId_t;  // from CProviderInterfaceBase in ProviderInterface.h
 
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName, // generic
+  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName, // generic
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // future
+  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // future
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month );
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // option with yymm
+  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // option with yymm
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month,
-    const std::string &sUnderlying,
+    const std::string &sUnderlyingName,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( const std::string& sSymbolName, const std::string& sExchangeName,  // option with yymmdd
+  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month, unsigned short day,
-    const std::string &sUnderlying,
+    const std::string &sUnderlyingName,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( const std::string& sSymbolName, const std::string& sUnderlyingName, // currency
+  CInstrument( const std::string& sInstrumentName, const std::string& sUnderlyingName, // currency
     InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
-  CInstrument( const CInstrument& );  // copy ctor
   virtual ~CInstrument(void);
 
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
-  const std::string &GetSymbolName( void ) { return m_sSymbolName; };
-  const std::string &GetUnderlyingName( void ) { return m_sUnderlying; }
+  const std::string &GetInstrumentName( void ) { return m_sInstrumentName; };
+  const std::string &GetUnderlyingName( void ) { return m_sUnderlyingName; }
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
   const std::string& GetExchangeName( void ) { return m_sExchange; };
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
+  bool IsOption( void ) { return ( InstrumentType::Option == m_InstrumentType ); };
+  bool IsFuture( void ) { return ( InstrumentType::Future == m_InstrumentType ); };
   double GetStrike( void ) { return m_dblStrike; };
   unsigned short GetExpiryYear( void ) { return m_nYear; };
   unsigned short GetExpiryMonth( void ) { return m_nMonth; };
@@ -66,21 +69,30 @@ public:
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
 
+  void SetAlternateName( enumProviderId_t, const std::string& );
+  const std::string& GetAlternateName( enumProviderId_t );
+
 protected:
 
-  std::string m_sSymbolName; // main name
-  std::string m_sUnderlying;  // underlying when main name is an option
+  std::string m_sInstrumentName; // main name
+  std::string m_sUnderlyingName; // underlying when main name is an option
   InstrumentType::enumInstrumentTypes m_InstrumentType;
   Currency::enumCurrency m_Currency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
   Currency::enumCurrency m_CurrencyCounter; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
-  //Exchange::enumExchange m_Exchange;
   std::string m_sExchange;
   OptionSide::enumOptionSide m_OptionSide;
   unsigned short m_nYear; // future, option
   unsigned short m_nMonth; // future, option
   unsigned short m_nDay; // future, option
   double m_dblStrike;
-  long m_nContract;
+  long m_nContract;  // used with CIBTWS
 
 private:
+
+  typedef std::map<enumProviderId_t, std::string> mapAlternateNames_t;
+  typedef std::pair<enumProviderId_t, std::string&> mapAlternateNames_pair_t;
+  mapAlternateNames_t m_mapAlternateNames;
+
+  CInstrument( const CInstrument& );  // copy ctor
+  CInstrument& operator=( const CInstrument& ); // assignement
 };

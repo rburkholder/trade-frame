@@ -54,11 +54,10 @@ class CIBTWS :
 {
 public:
 
+  typedef boost::shared_ptr<CIBTWS> pProvider_t;
   typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
-  typedef 
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef COrder::pOrder_t pOrder_t;
-  //typedef COrder::pOrder_ref pOrder_ref;
   typedef int reqId_t;  // request id type
 
   CIBTWS( const std::string &acctCode, const std::string &address = "127.0.0.1", unsigned int port = 7496 );
@@ -89,8 +88,8 @@ public:
   pInstrument_t BuildInstrumentFromContract( const Contract& contract );
   CIBSymbol* GetSymbol( long ContractId );  // query existance
   CIBSymbol* GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
-  // TWS Specific events
 
+  // TWS Specific events
   // From TWS Wrapper:
   void connectionClosed();
   void tickPrice( TickerId tickerId, TickType field, double price, int canAutoExecute);
@@ -189,8 +188,6 @@ private:
   typedef std::map<long, TickerId> mapContractToSymbolId_t;
   typedef std::pair<long, TickerId> pair_mapContractToSymbolId_t;
   mapContractToSymbolId_t m_mapContractToSymbolId;
-
-//  double m_dblPortfolioDelta;
 
   boost::thread m_thrdIBMessages;
 

@@ -16,7 +16,7 @@
 #include "Position.h"
 #include <LibTrading/OrderManager.h>
 
-CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider ) 
+CPosition::CPosition( pInstrument_ref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
@@ -25,9 +25,10 @@ CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvi
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblCommissionPaid( 0 )
 {
+  Construction();
 }
 
-CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvider, pProvider_ref pDataProvider, const std::string& sNotes ) 
+CPosition::CPosition( pInstrument_ref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_sNotes( sNotes ),
@@ -37,6 +38,17 @@ CPosition::CPosition( pInstrument_ref pInstrument, pProvider_ref pExecutionProvi
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblCommissionPaid( 0 )
 {
+  Construction();
+}
+
+void CPosition::Construction( void ) {
+  if ( m_pDataProvider->ProvidesQuotes() ) {
+    //m_pDataProvider->AddQuoteHandler( 
+  }
+  if ( m_pDataProvider->ProvidesTrades() ) {
+  }
+  if ( m_pDataProvider->ProvidesGreeks() ) {
+  }
 }
 
 CPosition::~CPosition(void) {

@@ -23,11 +23,14 @@
 
 // key might be account or other similar globally known identifier
 
+// ProviderManager probably won't be used much at the moment
+// it hould be converted over to boost::fusion for storing full types and values ofr the 
+// various providers, and then have specialized algorithms for processing the tuples of providers.
+
 class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
 public:
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef CProviderInterfaceBase::pProvider_ref pProvider_ref;
 
   CProviderManager(void);
   ~CProviderManager(void);

@@ -17,9 +17,9 @@
 #include <cassert>
 
 // equity / generic creation
-CInstrument::CInstrument(const std::string &sSymbolName, const std::string &sExchangeName,
+CInstrument::CInstrument(const std::string &sInstrumentName, const std::string &sExchangeName,
                          InstrumentType::enumInstrumentTypes type)
-: m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
+: m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
   m_InstrumentType( type ), 
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 ),
@@ -27,21 +27,21 @@ CInstrument::CInstrument(const std::string &sSymbolName, const std::string &sExc
 {
   assert( type < InstrumentType::_Count );
   assert( type > InstrumentType::Unknown );
-  assert( 0 < m_sSymbolName.size() );
+  assert( 0 < m_sInstrumentName.size() );
   //assert( 0 < m_sExchange.size() );
 }
 
  // future
 CInstrument::CInstrument( 
-    const std::string &sSymbolName, const std::string &sExchangeName,
-    InstrumentType::enumInstrumentTypes type, 
-    unsigned short year, unsigned short month ) 
-    : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
-    m_InstrumentType( type ),
-    m_OptionSide( OptionSide::Unknown ), 
-    m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 ),
-    m_nContract( 0 )
+  const std::string &sInstrumentName, const std::string &sExchangeName,
+  InstrumentType::enumInstrumentTypes type, 
+  unsigned short year, unsigned short month ) 
+: m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
+  m_InstrumentType( type ),
+  m_OptionSide( OptionSide::Unknown ), 
+  m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
+  m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 ),
+  m_nContract( 0 )
 {
   assert( m_InstrumentType == InstrumentType::Future );
   //assert( 0 < m_sSymbolName.size() );
@@ -50,19 +50,19 @@ CInstrument::CInstrument(
 
  // option yymm
 CInstrument::CInstrument( 
-    const std::string &sSymbolName, const std::string &sExchangeName,
-    InstrumentType::enumInstrumentTypes type, 
-    unsigned short year, unsigned short month,
-    const std::string &sUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ) 
-    : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
-    m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
-    m_OptionSide( side ), 
-    m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), 
-    m_dblStrike( strike ),
-    m_nContract( 0 )
+  const std::string &sInstrumentName, const std::string &sExchangeName,
+  InstrumentType::enumInstrumentTypes type, 
+  unsigned short year, unsigned short month,
+  const std::string &sUnderlyingName,
+  OptionSide::enumOptionSide side, 
+  double strike ) 
+: m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
+  m_sUnderlyingName( sUnderlyingName ), m_InstrumentType( type ),
+  m_OptionSide( side ), 
+  m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
+  m_nYear( year ), m_nMonth( month ), 
+  m_dblStrike( strike ),
+  m_nContract( 0 )
 {
   assert( side < OptionSide::_Count );
   assert( side > OptionSide::Unknown );
@@ -75,19 +75,19 @@ CInstrument::CInstrument(
 
  // option yymmdd
 CInstrument::CInstrument( 
-    const std::string &sSymbolName, const std::string &sExchangeName,
-    InstrumentType::enumInstrumentTypes type, 
-    unsigned short year, unsigned short month, unsigned short day,
-    const std::string &sUnderlying,
-    OptionSide::enumOptionSide side, 
-    double strike ) 
-    : m_sSymbolName( sSymbolName ), m_sExchange( sExchangeName ),
-    m_sUnderlying( sUnderlying ), m_InstrumentType( type ),
-    m_OptionSide( side ), 
-    m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
-    m_nYear( year ), m_nMonth( month ), m_nDay( day ),
-    m_dblStrike( strike ),
-    m_nContract( 0 )
+  const std::string &sInstrumentName, const std::string &sExchangeName,
+  InstrumentType::enumInstrumentTypes type, 
+  unsigned short year, unsigned short month, unsigned short day,
+  const std::string &sUnderlyingName,
+  OptionSide::enumOptionSide side, 
+  double strike ) 
+: m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
+  m_sUnderlyingName( sUnderlyingName ), m_InstrumentType( type ),
+  m_OptionSide( side ), 
+  m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
+  m_nYear( year ), m_nMonth( month ), m_nDay( day ),
+  m_dblStrike( strike ),
+  m_nContract( 0 )
 {
   assert( side < OptionSide::_Count );
   assert( side > OptionSide::Unknown );
@@ -100,11 +100,11 @@ CInstrument::CInstrument(
 
 // currency
 CInstrument::CInstrument(
-  const std::string &sSymbolName, const std::string& sUnderlyingName,
+  const std::string &sInstrumentName, const std::string& sUnderlyingName,
   InstrumentType::enumInstrumentTypes type,
   Currency::enumCurrency base, Currency::enumCurrency counter
   ) 
-  : m_sSymbolName( sSymbolName ), m_sUnderlying( sUnderlyingName ),
+: m_sInstrumentName( sInstrumentName ), m_sUnderlyingName( sUnderlyingName ),
   m_InstrumentType( type ),
   m_Currency( base ), m_CurrencyCounter( counter ),
   m_sExchange( "" ), m_nContract( 0 )
@@ -115,8 +115,8 @@ CInstrument::CInstrument(
 
 CInstrument::CInstrument(const CInstrument& instrument) 
 :
-  m_sSymbolName( instrument.m_sSymbolName ), 
-  m_sUnderlying( instrument.m_sUnderlying ),
+  m_sInstrumentName( instrument.m_sInstrumentName ), 
+  m_sUnderlyingName( instrument.m_sUnderlyingName ),
   m_sExchange( instrument.m_sExchange ), 
   m_InstrumentType( instrument.m_InstrumentType ), 
   m_Currency( instrument.m_Currency ), 
@@ -128,7 +128,29 @@ CInstrument::CInstrument(const CInstrument& instrument)
   m_dblStrike( instrument.m_dblStrike ),
   m_nContract( 0 )
 {
+  mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
+  while ( instrument.m_mapAlternateNames.end() != iter ) {
+    m_mapAlternateNames.insert( mapAlternateNames_pair_t( iter->first, iter->second ) );
+  }
 }
 
 CInstrument::~CInstrument(void) {
+}
+
+void CInstrument::SetAlternateName( enumProviderId_t id, const std::string& name ) {
+  mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
+  if ( m_mapAlternateNames.end() == iter ) {
+    m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
+  }
+  else {
+    iter->second.assign( name );
+  }
+}
+
+const std::string& CInstrument::GetAlternateName( enumProviderId_t id ) {
+  mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
+  if ( m_mapAlternateNames.end() == iter ) {
+    throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );
+  }
+  return iter->second;
 }

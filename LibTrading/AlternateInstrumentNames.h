@@ -53,3 +53,48 @@ protected:
   };
 private:
 };
+
+// sample code which was in ProviderInterface.h:
+
+//  std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
+//  CAlternateInstrumentNames m_lutAlternateInstrumentNames;
+
+  // need to redo this and place into CInstrument? => CInstrument has basic AlternateName stuff
+//  void SetAlternateInstrumentName( const std::string& OriginalInstrumentName, const std::string& AlternateIntrumentName );
+//  void GetAlternateInstrumentName( const std::string& OriginalInstrumentName, std::string* pAlternateInstrumentName );
+
+/*
+template <typename P, typename S>
+void CProviderInterface<P,S>::SetAlternateInstrumentName(const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName) {
+  m_lutAlternateInstrumentNames.Save( m_sName, OriginalInstrumentName, AlternateIntrumentName );
+  std::map<std::string, std::string>::iterator iter 
+    = m_mapAlternateNames.find( OriginalInstrumentName );
+  if ( m_mapAlternateNames.end() == iter ) {
+    m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, AlternateIntrumentName ) );
+  }
+  else m_mapAlternateNames[ OriginalInstrumentName ] = AlternateIntrumentName;
+}
+
+template <typename P, typename S>
+void CProviderInterface<P,S>::GetAlternateInstrumentName(const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName) {
+  std::map<std::string, std::string>::iterator iter 
+    = m_mapAlternateNames.find( OriginalInstrumentName );
+  if ( m_mapAlternateNames.end() != iter ) {
+    pAlternateInstrumentName->assign( iter->second );
+  }
+  else {
+    try {
+      m_lutAlternateInstrumentNames.Get( m_sName, OriginalInstrumentName, pAlternateInstrumentName );
+      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, *pAlternateInstrumentName ) );
+    }
+    catch ( std::out_of_range e ) {
+      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, OriginalInstrumentName ) );
+      pAlternateInstrumentName->assign( OriginalInstrumentName );
+    }
+    catch ( std::exception e ) {
+      std::cout << "CProviderInterface::GetAlternateInstrumentName has error: " << e.what() << std::endl;
+    }
+  }
+}
+*/
+

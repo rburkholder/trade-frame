@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+
 #include "LibTrading/ProviderInterface.h"
 
 #include "IQFeed.h"
@@ -24,6 +26,7 @@ class CIQFeedProvider :
 {
 public:
 
+  typedef boost::shared_ptr<CIQFeedProvider> pProvider_t;
   typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> ProviderInterface_t;
   typedef ProviderInterface_t::symbol_id_t symbol_id_t;
   typedef CIQFeedSymbol::pInstrument_t pInstrument_t;

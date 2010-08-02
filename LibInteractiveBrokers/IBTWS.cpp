@@ -32,6 +32,9 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
   m_nID = EProviderIB;
   CIBSymbol *p = NULL;
   m_vTickerToSymbol.push_back( p );  // first ticker is 1, so preload with nothing at position 0
+  m_bProvidesQuotes = true;
+  m_bProvidesTrades = true;
+  m_bProvidesGreeks = true;
 }
 
 CIBTWS::~CIBTWS(void) {

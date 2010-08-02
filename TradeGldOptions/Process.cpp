@@ -132,7 +132,6 @@ CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
 
 CProcess::CProcess(void)
 :
-  //m_tws( "U215226" ),
   m_bIBConnected( false ), m_bIQFeedConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
@@ -144,7 +143,8 @@ CProcess::CProcess(void)
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
   m_sPathForSeries( "/strategy/deltaneutral1" ),
-  m_providerTws( new CIBTWS( "U215226" ) ), m_providerIqfeed( new CIQFeedProvider() )
+  //m_tws( "U215226" ), m_iqfeed()
+  m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() )
 {
 
   m_contract.currency = "USD";
@@ -155,13 +155,12 @@ CProcess::CProcess(void)
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
 
-  CProviderManager::Instance().Register( "U215226", m_providerTws );
-  m_providerTws->.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
-  m_tws.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
+  m_tws->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
+  m_tws->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
 
 
-  m_iqfeed.OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedConnected ) );
-  m_iqfeed.OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedDisconnected ) );
+  m_iqfeed->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedConnected ) );
+  m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedDisconnected ) );
 }
 
 CProcess::~CProcess(void)
@@ -171,14 +170,14 @@ CProcess::~CProcess(void)
 void CProcess::IBConnect( void ) {
   if ( !m_bIBConnected ) {
     
-    m_tws.Connect();
+    m_tws->Connect();
     m_bIBConnected = true;
   }
 }
 
 void CProcess::IBDisconnect( void ) {
   if ( m_bIBConnected ) {
-    m_tws.Disconnect();
+    m_tws->Disconnect();
     m_bIBConnected = false;
   }
 }
@@ -186,14 +185,14 @@ void CProcess::IBDisconnect( void ) {
 void CProcess::IQFeedConnect( void ) {
   if ( !m_bIQFeedConnected ) {
     
-    m_iqfeed.Connect();
+    m_iqfeed->Connect();
     m_bIQFeedConnected = true;
   }
 }
 
 void CProcess::IQFeedDisconnect( void ) {
   if ( m_bIQFeedConnected ) {
-    m_iqfeed.Disconnect();
+    m_iqfeed->Disconnect();
     m_bIQFeedConnected = false;
   }
 }
@@ -205,9 +204,9 @@ void CProcess::HandleOnIBConnected(int e) {
 
   m_vStrikes.clear(); /// horribly buggy this way.
 
-  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
-  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
-  m_tws.RequestContractDetails( m_contract );
+  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
+  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
+  m_tws->RequestContractDetails( m_contract );
 
 }
 
@@ -227,9 +226,9 @@ void CProcess::StartWatch( void ) {
 
   m_contract.strike = m_iterStrikes->Strike();
 
-  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
-  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
-  m_tws.RequestContractDetails( m_contract );
+  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
+  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
+  m_tws->RequestContractDetails( m_contract );
 }
 
 void CProcess::StopWatch( void ) {
@@ -237,13 +236,13 @@ void CProcess::StopWatch( void ) {
     m_bWatchingOptions = false;
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_tws.RemoveQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_tws.RemoveTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_tws.RemoveGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      m_tws->RemoveQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_tws->RemoveTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_tws->RemoveGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-      m_tws.RemoveQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_tws.RemoveTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_tws.RemoveGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_tws->RemoveQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_tws->RemoveTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_tws->RemoveGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -264,9 +263,9 @@ void CProcess::HandleStrikeListing1Done(  ) {
 
   m_contract.secType = "STK";
 
-  m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
-  m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2Done ) );
-  m_tws.RequestContractDetails( m_contract );
+  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
+  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2Done ) );
+  m_tws->RequestContractDetails( m_contract );
 }
 
 // --- listing 2
@@ -274,11 +273,11 @@ void CProcess::HandleStrikeListing1Done(  ) {
 void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
   m_contractidUnderlying = details.summary.conId;
   try {
-    pUnderlying = m_tws.GetSymbol( m_contractidUnderlying );
+    pUnderlying = m_tws->GetSymbol( m_contractidUnderlying );
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
-    pUnderlying = m_tws.GetSymbol( instrument );
+    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
+    pUnderlying = m_tws->GetSymbol( instrument );
   }
 
 }
@@ -291,21 +290,21 @@ void CProcess::HandleStrikeListing2Done(  ) {
 void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   CIBSymbol* pSymbol;
   try {
-    pSymbol = m_tws.GetSymbol( details.summary.conId );
+    pSymbol = m_tws->GetSymbol( details.summary.conId );
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws.GetSymbol( instrument );
+    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
+    pSymbol = m_tws->GetSymbol( instrument );
   }
   m_iterStrikes->Call()->Symbol( pSymbol );
 
-//  m_tws.AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallQuote ) );
-//  m_tws.AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallTrade ) );
+//  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallQuote ) );
+//  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallTrade ) );
 
   ++m_iterStrikes;
   if ( m_vStrikes.end() != m_iterStrikes ) {
     m_contract.strike = m_iterStrikes->Strike();
-    m_tws.RequestContractDetails( m_contract );
+    m_tws->RequestContractDetails( m_contract );
   }
   else {
     m_iterStrikes = m_vStrikes.begin();
@@ -313,9 +312,9 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
 
     m_contract.strike = m_iterStrikes->Strike();
 
-    m_tws.SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4 ) );
-    m_tws.SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4Done ) );
-    m_tws.RequestContractDetails( m_contract );
+    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4 ) );
+    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4Done ) );
+    m_tws->RequestContractDetails( m_contract );
   }
 }
 
@@ -327,21 +326,21 @@ void CProcess::HandleStrikeListing3Done(  ) {
 void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
   CIBSymbol* pSymbol;
   try {
-    pSymbol = m_tws.GetSymbol( details.summary.conId );
+    pSymbol = m_tws->GetSymbol( details.summary.conId );
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws.BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws.GetSymbol( instrument );
+    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
+    pSymbol = m_tws->GetSymbol( instrument );
   }
   m_iterStrikes->Put()->Symbol( pSymbol );
 
-//  m_tws.AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutQuote ) );
-//  m_tws.AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutTrade ) );
+//  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutQuote ) );
+//  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutTrade ) );
 
   ++m_iterStrikes;
   if ( m_vStrikes.end() != m_iterStrikes ) {
     m_contract.strike = m_iterStrikes->Strike();
-    m_tws.RequestContractDetails( m_contract );
+    m_tws->RequestContractDetails( m_contract );
   }
   else {
     // all done
@@ -349,8 +348,8 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     m_ss << "Option Acquisition Complete" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    m_tws.AddQuoteHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-    m_tws.AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+    m_tws->AddQuoteHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+    m_tws->AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
 
   }
 }
@@ -443,14 +442,15 @@ void CProcess::OpenPosition( void ) {
       m_nCalls = m_nPuts = 0;
     }
     else {
-      //m_posUnderlying.reset( new CPosition( pUnderlying->GetInstrument(),
-      COrder::pOrder_t pOrder;
       // orders for normal delta neutral
-      pOrder = COrder::pOrder_t( new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Buy, m_nLongUnderlying ) );
-      m_tws.PlaceOrder( pOrder );
-      pOrder = COrder::pOrder_t( new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), 
-        OrderType::Market, OrderSide::Buy, m_nLongPut ) );
-      m_tws.PlaceOrder( pOrder );
+
+      m_posUnderlying.reset( new CPosition( pUnderlying->GetInstrument(), m_tws, m_tws, "Underlying" ) );
+      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
+      m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
+
+      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), m_tws, m_tws, "Put" ) );
+      m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
+      m_pPortfolio->AddPosition( "Put", m_posPut );
 
       m_ss.str( "" );
       m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
@@ -546,8 +546,8 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   OutputDebugString( m_ss.str().c_str() );
 
   // after initialization in this method, hand off subsequent procesing to main handler
-//  m_tws.RemoveTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTrade1 ) );
-//     m_tws.AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTradeN ) );
+//  m_tws->RemoveTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTrade1 ) );
+//     m_tws->AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTradeN ) );
 
   // set iterators for center of the pack (crossovers are above and below trade):
   m_iterAboveCrossOver = m_vCrossOverPoints.begin();
@@ -585,13 +585,13 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_bWatchingOptions = true;
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    m_tws.AddQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-    m_tws.AddTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-    m_tws.AddGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+    m_tws->AddQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+    m_tws->AddTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+    m_tws->AddGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-    m_tws.AddQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-    m_tws.AddTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-    m_tws.AddGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    m_tws->AddQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+    m_tws->AddTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+    m_tws->AddGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
   }
 
   m_TradingState = ETSFirstTrade;
@@ -667,13 +667,11 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
                           << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    COrder::pOrder_t pOrder;
-
     // orders for normal delta neutral
-    pOrder = COrder::pOrder_t( new COrder( pUnderlying->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongUnderlying ) );
-    m_tws.PlaceOrder( pOrder );
-    pOrder = COrder::pOrder_t( new COrder( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), OrderType::Market, OrderSide::Sell, m_nLongPut ) );
-    m_tws.PlaceOrder( pOrder );
+    m_posUnderlying->CancelOrders();
+    m_posUnderlying->ClosePosition();
+    m_posPut->CancelOrders();
+    m_posPut->ClosePosition();
 
     m_bTrading = false;
   }

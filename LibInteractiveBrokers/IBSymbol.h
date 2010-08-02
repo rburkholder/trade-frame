@@ -15,14 +15,14 @@
 
 #include <stdexcept>
 
-#include "TWS/EWrapper.h"
-
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTrading/Symbol.h>
 
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING
 #endif
+
+#include "TWS/EWrapper.h"
 
 class CIBSymbol : public CSymbol<CIBSymbol,TickerId> {
   friend class CIBTWS;
