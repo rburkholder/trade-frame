@@ -17,10 +17,10 @@
 
 #include "IBSymbol.h"
 
-CIBSymbol::CIBSymbol( TickerId id, pInstrument_t pInstrument )
+CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<CIBSymbol,TickerId>( id, pInstrument ), 
-    m_TickerId( id ), m_conId( 0 ),
+  CSymbol<CIBSymbol>( idSym, pInstrument ), 
+    m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
     m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),

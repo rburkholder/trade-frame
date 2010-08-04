@@ -24,14 +24,16 @@
 
 #include "TWS/EWrapper.h"
 
-class CIBSymbol : public CSymbol<CIBSymbol,TickerId> {
+class CIBSymbol : public CSymbol<CIBSymbol> {
   friend class CIBTWS;
 public:
 
-  typedef CSymbol<CIBSymbol,TickerId> inherited_t;
+  typedef CSymbol<CIBSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
+  typedef inherited_t::pSymbol_t pSymbol_t;
 
-  CIBSymbol( TickerId id, pInstrument_t pInstrument );
+  //CIBSymbol( TickerId id, pInstrument_t pInstrument );
+  CIBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
   ~CIBSymbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };

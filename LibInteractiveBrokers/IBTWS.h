@@ -37,16 +37,15 @@ using namespace boost::gregorian;
 #include <LibTrading/ProviderInterface.h>
 #include <LibTrading/Order.h>
 
+#include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
+
 #include "TWS/EPosixClientSocket.h"
 #include "TWS/EWrapper.h"
-
 
 #include "TWS/Contract.h"
 #include "TWS/Order.h"
 #include "TWS/OrderState.h"
 #include "TWS/Execution.h"
-
-#include "IBSymbol.h"
 
 class CIBTWS : 
   public CProviderInterface<CIBTWS, CIBSymbol>, 
@@ -56,6 +55,7 @@ public:
 
   typedef boost::shared_ptr<CIBTWS> pProvider_t;
   typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
+  typedef CIBSymbol::pSymbol_t pSymbol_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef COrder::pOrder_t pOrder_t;
   typedef int reqId_t;  // request id type
@@ -86,8 +86,8 @@ public:
   }
 
   pInstrument_t BuildInstrumentFromContract( const Contract& contract );
-  CIBSymbol* GetSymbol( long ContractId );  // query existance
-  CIBSymbol* GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
+  pSymbol_t GetSymbol( long ContractId );  // query existance
+  pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
   // TWS Specific events
   // From TWS Wrapper:
@@ -156,20 +156,20 @@ protected:
   static const char *szSecurityType[];
   static const char *szOrderType[];
 
-  CIBSymbol* NewCSymbol( pInstrument_t pInstrument );
+  pSymbol_t NewCSymbol( pInstrument_t pInstrument );
 
   // overridden from ProviderInterface
-  void StartQuoteWatch( CIBSymbol* pSymbol );
-  void  StopQuoteWatch( CIBSymbol* pSymbol );
+  void StartQuoteWatch( pSymbol_t pSymbol );
+  void  StopQuoteWatch( pSymbol_t pSymbol );
 
-  void StartTradeWatch( CIBSymbol* pSymbol );
-  void  StopTradeWatch( CIBSymbol* pSymbol );
+  void StartTradeWatch( pSymbol_t pSymbol );
+  void  StopTradeWatch( pSymbol_t pSymbol );
 
-  void StartQuoteTradeWatch( CIBSymbol* pSymbol );
-  void  StopQuoteTradeWatch( CIBSymbol* pSymbol );
+  void StartQuoteTradeWatch( pSymbol_t pSymbol );
+  void  StopQuoteTradeWatch( pSymbol_t pSymbol );
 
-  void StartDepthWatch( CIBSymbol* pSymbol );
-  void  StopDepthWatch( CIBSymbol* pSymbol );
+  void StartDepthWatch( pSymbol_t pSymbol );
+  void  StopDepthWatch( pSymbol_t pSymbol );
 
 private:
   EPosixClientSocket *pTWS;
@@ -182,12 +182,18 @@ private:
 
   // stuff comes back from IB with ticker id so use this to look up symbol, 
   //    which is stored in the map of the class from which we inherited
-  std::vector<CIBSymbol*> m_vTickerToSymbol;  
+  std::vector<pSymbol_t> m_vTickerToSymbol;  
 
-  // given a contract id, see if we have a symbol assigned for the symbol id
-  typedef std::map<long, TickerId> mapContractToSymbolId_t;
-  typedef std::pair<long, TickerId> pair_mapContractToSymbolId_t;
-  mapContractToSymbolId_t m_mapContractToSymbolId;
+  // given a contract id, see if we have a symbol assigned
+  typedef std::map<long, pSymbol_t> mapContractToSymbol_t;
+  typedef std::pair<long, pSymbol_t> pair_mapContractToSymbol_t;
+  mapContractToSymbol_t m_mapContractToSymbol;
+
+  // do we actually need this anymore given that we have the above vector?
+  // given a ticker id, see if we have a symbol assigned
+//  typedef std::map<TickerId, pSymbol_t> mapTickerIdToSymbol_t;
+//  typedef std::pair<TickerId, pSymbol_t> pair_mapContractToSymbol_t;
+//  pair_mapContractToSymbol_t m_mapContractToSymbol;
 
   boost::thread m_thrdIBMessages;
 

@@ -30,7 +30,7 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
 {
   m_sName = "IB";
   m_nID = EProviderIB;
-  CIBSymbol *p = NULL;
+  pSymbol_t p;
   m_vTickerToSymbol.push_back( p );  // first ticker is 1, so preload with nothing at position 0
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
@@ -39,7 +39,8 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
 
 CIBTWS::~CIBTWS(void) {
   Disconnect();
-  m_vTickerToSymbol.clear();  // the provider class takes care of deleting CIBSymbol.
+  m_vTickerToSymbol.clear();
+  m_mapContractToSymbol.clear();
 }
 
 void CIBTWS::Connect() {
@@ -87,32 +88,32 @@ void CIBTWS::ProcessMessages( void ) {
 }
 
 //CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
-CIBSymbol* CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
+CIBTWS::pSymbol_t CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
   TickerId ticker = ++m_curTickerId;
-  CIBSymbol *pSymbol = new CIBSymbol( ticker, pInstrument );
+  pSymbol_t pSymbol( new CIBSymbol( ticker, pInstrument ) );
   CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
-  m_mapContractToSymbolId.insert( pair_mapContractToSymbolId_t( pInstrument->GetContract(), pSymbol->GetId() ) );
+  m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol->GetId() ) );
   return pSymbol;
 }
 
-void CIBTWS::StartQuoteWatch(CIBSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StartQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopQuoteWatch(CIBSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StopQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StartTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopTradeWatch(CIBSymbol *pSymbol) {  // overridden from base class
+void CIBTWS::StopTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
+void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
     Contract contract;
@@ -125,7 +126,7 @@ void CIBTWS::StartQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
   }
 }
 
-void CIBTWS::StopQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
+void CIBTWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() ) {
     // don't do anything if either a quote or trade watch still in progress
   }
@@ -136,14 +137,14 @@ void CIBTWS::StopQuoteTradeWatch( CIBSymbol *pIBSymbol ) {
   }
 }
 
-void CIBTWS::StartDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
+void CIBTWS::StartDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
   if ( !pIBSymbol->GetDepthWatchInProgress() ) {
     // start watch
     pIBSymbol->SetDepthWatchInProgress();
   }
 }
 
-void CIBTWS::StopDepthWatch(CIBSymbol *pIBSymbol) {  // overridden from base class
+void CIBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
   if ( pIBSymbol->DepthWatchNeeded() ) {
   }
   else {
@@ -389,20 +390,20 @@ current time 1212851947
 */
 
 // check for symbol existance and return, else exeption
-CIBSymbol* CIBTWS::GetSymbol( long ContractId ) {
-  mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( ContractId );
-  if ( m_mapContractToSymbolId.end() == iterId ) {
+CIBTWS::pSymbol_t CIBTWS::GetSymbol( long ContractId ) {
+  mapContractToSymbol_t::iterator iterId = m_mapContractToSymbol.find( ContractId );
+  if ( m_mapContractToSymbol.end() == iterId ) {
     throw std::out_of_range( "can't find contract" );
   }
-  return GetSymbol( iterId->second );
+  return iterId->second;
 }
 
 // check for symbol existance, and return, else add and return
-CIBSymbol* CIBTWS::GetSymbol( pInstrument_t instrument ) {
+CIBTWS::pSymbol_t CIBTWS::GetSymbol( pInstrument_t instrument ) {
   long contractId;
   contractId = instrument->GetContract();
   assert( 0 != contractId );
-  CIBSymbol* pSymbol;
+  pSymbol_t pSymbol;
   try {
     pSymbol = GetSymbol( contractId );
   }
@@ -598,8 +599,8 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
 //  CIBSymbol* pSymbol;
 //  mapGreeks_t::iterator iterGreeks;
 
-  mapContractToSymbolId_t::iterator iterId = m_mapContractToSymbolId.find( contract.conId );
-  if ( m_mapContractToSymbolId.end() == iterId ) {
+  mapContractToSymbol_t::iterator iterId = m_mapContractToSymbol.find( contract.conId );
+  if ( m_mapContractToSymbol.end() == iterId ) {
     // if we can't find an instrument, then create a new one.
 //    pInstrument = BuildInstrumentFromContract( contract );
 //    pSymbol = NewCSymbol( pInstrument );

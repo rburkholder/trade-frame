@@ -17,7 +17,7 @@
 #include <cassert>
 
 // equity / generic creation
-CInstrument::CInstrument(const std::string &sInstrumentName, const std::string &sExchangeName,
+CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &sExchangeName,
                          InstrumentType::enumInstrumentTypes type)
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
   m_InstrumentType( type ), 
@@ -33,7 +33,7 @@ CInstrument::CInstrument(const std::string &sInstrumentName, const std::string &
 
  // future
 CInstrument::CInstrument( 
-  const std::string &sInstrumentName, const std::string &sExchangeName,
+  idInstrument_cref sInstrumentName, const std::string &sExchangeName,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
@@ -50,10 +50,10 @@ CInstrument::CInstrument(
 
  // option yymm
 CInstrument::CInstrument( 
-  const std::string &sInstrumentName, const std::string &sExchangeName,
+  idInstrument_cref sInstrumentName, const std::string &sExchangeName,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month,
-  const std::string &sUnderlyingName,
+  idInstrument_cref sUnderlyingName,
   OptionSide::enumOptionSide side, 
   double strike ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
@@ -75,10 +75,10 @@ CInstrument::CInstrument(
 
  // option yymmdd
 CInstrument::CInstrument( 
-  const std::string &sInstrumentName, const std::string &sExchangeName,
+  idInstrument_cref sInstrumentName, const std::string &sExchangeName,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month, unsigned short day,
-  const std::string &sUnderlyingName,
+  idInstrument_cref sUnderlyingName,
   OptionSide::enumOptionSide side, 
   double strike ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
@@ -137,7 +137,7 @@ CInstrument::CInstrument(const CInstrument& instrument)
 CInstrument::~CInstrument(void) {
 }
 
-void CInstrument::SetAlternateName( enumProviderId_t id, const std::string& name ) {
+void CInstrument::SetAlternateName( enumProviderId_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
@@ -147,7 +147,7 @@ void CInstrument::SetAlternateName( enumProviderId_t id, const std::string& name
   }
 }
 
-const std::string& CInstrument::GetAlternateName( enumProviderId_t id ) {
+CInstrument::idInstrument_cref CInstrument::GetAlternateName( enumProviderId_t id ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );

@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <LibCommon/Delegate.h>
 #include <LibTimeSeries/DatedDatum.h>
 
@@ -23,15 +25,19 @@
 // change the Add/Remove...Handlers from virtual to CRTP?
 //  probably not, 
 
-template <typename S, typename ID>  // S for Provider specific Symbol type, ID for map look up type
+//template <typename S, typename ID>  // S for Provider specific Symbol type, ID for map look up type
+template <typename S>  // S for Provider specific CRTP Symbol type
 class CSymbol {
 public:
 
+  typedef boost::shared_ptr<S> pSymbol_t;
   typedef typename CInstrument::pInstrument_t pInstrument_t;
   typedef typename CInstrument::pInstrument_cref pInstrument_cref;
-  typedef typename ID symbol_id_t;
+  //typedef typename ID symbol_id_t;
+//  typedef std::string symbol_id_t;  // all symbols referenced by provider specific symbol/instrument name
+  //   may need to use provider specific name in alternate instrument name in CInstrument
 
-  CSymbol( symbol_id_t id, pInstrument_t pInstrument ); // class should only be constructed with valid instrument
+  CSymbol( pInstrument_t pInstrument ); // class should only be constructed with valid instrument, which already has general name as well as provider specific name
   virtual ~CSymbol(void);
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
@@ -49,24 +55,24 @@ public:
   typedef const CGreek& greek_t;
   typedef Delegate<greek_t>::OnMessageHandler greekhandler_t;
 
-  virtual bool AddQuoteHandler( quotehandler_t );
-  virtual bool RemoveQuoteHandler( quotehandler_t );
+  bool AddQuoteHandler( quotehandler_t );
+  bool RemoveQuoteHandler( quotehandler_t );
   size_t GetQuoteHandlerCount( void ) { return m_OnQuote.Size(); };
 
-  virtual void AddOnOpenHandler( tradehandler_t );
-  virtual void RemoveOnOpenHandler( tradehandler_t );
+  void AddOnOpenHandler( tradehandler_t );
+  void RemoveOnOpenHandler( tradehandler_t );
   size_t GetOpenHandlerCount( void ) { return m_OnOpen.Size(); };
   
-  virtual bool AddTradeHandler( tradehandler_t ); 
-  virtual bool RemoveTradeHandler( tradehandler_t );
+  bool AddTradeHandler( tradehandler_t ); 
+  bool RemoveTradeHandler( tradehandler_t );
   size_t GetTradeHandlerCount( void ) { return m_OnTrade.Size(); };
 
-  virtual bool AddDepthHandler( depthhandler_t );
-  virtual bool RemoveDepthHandler( depthhandler_t );
+  bool AddDepthHandler( depthhandler_t );
+  bool RemoveDepthHandler( depthhandler_t );
   size_t GetDepthHandlerCount( void ) { return m_OnDepth.Size(); };
 
-  virtual void AddGreekHandler( greekhandler_t );
-  virtual void RemoveGreekHandler( greekhandler_t );
+  void AddGreekHandler( greekhandler_t );
+  void RemoveGreekHandler( greekhandler_t );
   size_t GetGreekHandlerCount( void ) { return m_OnGreek.Size(); };
 
   bool  OpenWatchNeeded( void ) { return !m_OnOpen.IsEmpty(); };
@@ -90,80 +96,80 @@ private:
 
 };
 
-template <typename S, typename ID>
-CSymbol<S,ID>::CSymbol( symbol_id_t id, pInstrument_t pInstrument )
+template <typename S>
+CSymbol<S>::CSymbol( symbol_id_t id, pInstrument_t pInstrument )
 : 
   m_id( id ),
   m_pInstrument( pInstrument )
 {
 }
 
-template <typename S, typename ID>
-CSymbol<S,ID>::~CSymbol(void) {
+template <typename S>
+CSymbol<S>::~CSymbol(void) {
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::AddQuoteHandler(quotehandler_t handler) {
+template <typename S>
+bool CSymbol<S>::AddQuoteHandler(quotehandler_t handler) {
   Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
   m_OnQuote.Add( handler );
   assert( size == ( m_OnQuote.Size() - 1 ) );
   return ( 1 == m_OnQuote.Size() );  // start watch for the symbol
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::RemoveQuoteHandler(quotehandler_t handler) {
+template <typename S>
+bool CSymbol<S>::RemoveQuoteHandler(quotehandler_t handler) {
   assert( 0 < m_OnQuote.Size() );
   m_OnQuote.Remove( handler );
   return ( 0 == m_OnQuote.Size() );  // no more so stop watch
 }
 
-template <typename S, typename ID>
-void CSymbol<S,ID>::AddOnOpenHandler(tradehandler_t handler ) {
+template <typename S>
+void CSymbol<S>::AddOnOpenHandler(tradehandler_t handler ) {
   m_OnOpen.Add( handler );
 }
 
-template <typename S, typename ID>
-void CSymbol<S,ID>::RemoveOnOpenHandler( tradehandler_t handler ) {
+template <typename S>
+void CSymbol<S>::RemoveOnOpenHandler( tradehandler_t handler ) {
   m_OnOpen.Remove( handler );
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::AddTradeHandler(tradehandler_t handler) {
+template <typename S>
+bool CSymbol<S>::AddTradeHandler(tradehandler_t handler) {
   Delegate<trade_t>::vsize_t size = m_OnTrade.Size();
   m_OnTrade.Add( handler );
   assert( size == ( m_OnTrade.Size() - 1 ) );
   return ( 1 == m_OnTrade.Size() ); // start watch on first handler
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::RemoveTradeHandler(tradehandler_t handler) {
+template <typename S>
+bool CSymbol<S>::RemoveTradeHandler(tradehandler_t handler) {
   assert( 0 < m_OnTrade.Size() );
   m_OnTrade.Remove( handler );
   return ( 0 == m_OnTrade.Size() ); // no more so stop watch
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::AddDepthHandler(depthhandler_t handler) {
+template <typename S>
+bool CSymbol<S>::AddDepthHandler(depthhandler_t handler) {
   Delegate<depth_t>::vsize_t size = m_OnDepth.Size();
   m_OnDepth.Add( handler );
   assert( size == ( m_OnDepth.Size() - 1 ) );
   return ( 1 == m_OnDepth.Size() );  // when true, start watch
 }
 
-template <typename S, typename ID>
-bool CSymbol<S,ID>::RemoveDepthHandler(depthhandler_t handler) {
+template <typename S>
+bool CSymbol<S>::RemoveDepthHandler(depthhandler_t handler) {
   assert( 0 < m_OnDepth.Size() );
   m_OnDepth.Remove( handler );
   return ( 0 == m_OnDepth.Size() );  // when true, stop watch
 }
 
-template <typename S, typename ID>
-void CSymbol<S,ID>::AddGreekHandler ( greekhandler_t handler ) {
+template <typename S>
+void CSymbol<S>::AddGreekHandler ( greekhandler_t handler ) {
   m_OnGreek.Add( handler );
 }
 
-template <typename S, typename ID>
-void CSymbol<S,ID>::RemoveGreekHandler( greekhandler_t handler ) {
+template <typename S>
+void CSymbol<S>::RemoveGreekHandler( greekhandler_t handler ) {
   m_OnGreek.Remove( handler );
 }
 

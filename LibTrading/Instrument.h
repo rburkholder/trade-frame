@@ -26,36 +26,38 @@
 class CInstrument {
 public:
 
+  typedef unsigned short enumProviderId_t;  // from CProviderInterfaceBase in ProviderInterface.h
+  typedef std::string idInstrument_t;
+  typedef const idInstrument_t& idInstrument_cref;
   typedef boost::shared_ptr<CInstrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
-  typedef unsigned short enumProviderId_t;  // from CProviderInterfaceBase in ProviderInterface.h
 
-  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName, // generic
+  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
-  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // future
+  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month );
-  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // option with yymm
+  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month,
-    const std::string &sUnderlyingName,
+    const idInstrument_t &sUnderlyingName,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( const std::string& sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
+  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month, unsigned short day,
     const std::string &sUnderlyingName,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( const std::string& sInstrumentName, const std::string& sUnderlyingName, // currency
+  CInstrument( idInstrument_cref sInstrumentName, const std::string& sUnderlyingName, // currency
     InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   virtual ~CInstrument(void);
 
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
-  const std::string &GetInstrumentName( void ) { return m_sInstrumentName; };
-  const std::string &GetUnderlyingName( void ) { return m_sUnderlyingName; }
+  idInstrument_cref GetInstrumentName( void ) { return m_sInstrumentName; };
+  idInstrument_cref GetUnderlyingName( void ) { return m_sUnderlyingName; }
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
   const std::string& GetExchangeName( void ) { return m_sExchange; };
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
@@ -74,8 +76,8 @@ public:
 
 protected:
 
-  std::string m_sInstrumentName; // main name
-  std::string m_sUnderlyingName; // underlying when main name is an option
+  idInstrument_t m_sInstrumentName; // main name
+  idInstrument_t m_sUnderlyingName; // underlying when main name is an option
   InstrumentType::enumInstrumentTypes m_InstrumentType;
   Currency::enumCurrency m_Currency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
   Currency::enumCurrency m_CurrencyCounter; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
@@ -89,8 +91,8 @@ protected:
 
 private:
 
-  typedef std::map<enumProviderId_t, std::string> mapAlternateNames_t;
-  typedef std::pair<enumProviderId_t, std::string&> mapAlternateNames_pair_t;
+  typedef std::map<enumProviderId_t, idInstrument_t> mapAlternateNames_t;
+  typedef std::pair<enumProviderId_t, idInstrument_t> mapAlternateNames_pair_t;
   mapAlternateNames_t m_mapAlternateNames;
 
   CInstrument( const CInstrument& );  // copy ctor

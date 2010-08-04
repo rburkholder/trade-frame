@@ -92,8 +92,9 @@ template <typename P, typename S>  // p = provider, S = symbol
 class CProviderInterface: public CProviderInterfaceBase {
 public:
 
-  typedef typename S::pInstrument_t pInstrument_t;
   typedef typename S::symbol_id_t symbol_id_t;
+  typedef typename S::pSymbol_t pSymbol_t;
+  typedef typename S::pInstrument_t pInstrument_t;
 
   CProviderInterface(void);
   ~CProviderInterface(void);
@@ -121,30 +122,30 @@ public:
 
 //  Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
 
-  S* GetSymbol( const symbol_id_t& );
+  pSymbol_t GetSymbol( const symbol_id_t& );
 
-  void PlaceOrder( COrder::pOrder_t pOrder );
+  void  PlaceOrder( COrder::pOrder_t pOrder );
   void CancelOrder( COrder::pOrder_t pOrder );
 
 protected:
 
-   typedef std::map<symbol_id_t, S*> m_mapSymbols_t;
-  typedef std::pair<symbol_id_t, S*> pair_mapSymbols_t;
+   typedef std::map<symbol_id_t, pSymbol_t> m_mapSymbols_t;
+  typedef std::pair<symbol_id_t, pSymbol_t> pair_mapSymbols_t;
   m_mapSymbols_t m_mapSymbols;
 
-  virtual void StartQuoteWatch( S* pSymbol ) {};
-  virtual void  StopQuoteWatch( S* pSymbol ) {};
+  virtual void StartQuoteWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopQuoteWatch( pSymbol_t pSymbol ) {};
 
-  virtual void StartTradeWatch( S* pSymbol ) {};
-  virtual void  StopTradeWatch( S* pSymbol ) {};
+  virtual void StartTradeWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopTradeWatch( pSymbol_t pSymbol ) {};
 
-  virtual void StartDepthWatch( S* pSymbol ) {};
-  virtual void  StopDepthWatch( S* pSymbol ) {};
+  virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
 
 //  virtual S *NewCSymbol( const std::string& sSymbolName ) = 0; // override needs to call AddCSymbol to add symbol to map
-  virtual S *NewCSymbol( pInstrument_t pInstrument ) = 0; 
-  S* AddCSymbol( S* pSymbol );
-  virtual void PreSymbolDestroy( S* pSymbol );
+  virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
+  pSymbol_t AddCSymbol( pSymbol_t pSymbol );
+//  virtual void PreSymbolDestroy( pSymbol_t pSymbol );
 
 private:
 };
@@ -156,6 +157,7 @@ CProviderInterface<P,S>::CProviderInterface(void)
 
 template <typename P, typename S>
 CProviderInterface<P,S>::~CProviderInterface(void) {
+  /*
   m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
   while ( m_mapSymbols.end() != iter ) {
   // tod:  need to step through and unwatch anything still watching
@@ -163,6 +165,7 @@ CProviderInterface<P,S>::~CProviderInterface(void) {
     delete iter->second;
     ++iter;
   }
+  */
   m_mapSymbols.clear();
 }
 
@@ -177,7 +180,7 @@ void CProviderInterface<P,S>::Disconnect() {
 }
 
 template <typename P, typename S>
-S* CProviderInterface<P,S>::AddCSymbol( S* pSymbol) {
+typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::AddCSymbol( pSymbol_t pSymbol) {
   // todo:  add an assert to validate acceptable CSymbol type
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
   if ( m_mapSymbols.end() == iter ) {
@@ -322,7 +325,7 @@ void CProviderInterface<P,S>::RemoveGreekHandler(const symbol_id_t& id, typename
 }
 
 template <typename P, typename S>
-S* CProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
+typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
@@ -333,19 +336,19 @@ S* CProviderInterface<P,S>::GetSymbol( const symbol_id_t& id ) {
   return iter->second;
 }
 
-template <typename P, typename S>
-void CProviderInterface<P,S>::PreSymbolDestroy( S* pSymbol ) {
-}
+//template <typename P, typename S>
+//void CProviderInterface<P,S>::PreSymbolDestroy( pSymbol_t pSymbol ) {
+//}
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::PlaceOrder( COrder::pOrder_t pOrder ) {
+void CProviderInterface<P,S>::PlaceOrder( pOrder_t pOrder ) {
 //  pOrder->SetProviderName( m_sName );
 //  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
   COrderManager::Instance().PlaceOrder( this, pOrder );
 }
 
 template <typename P, typename S>
-void CProviderInterface<P,S>::CancelOrder( COrder::pOrder_t pOrder ) {
+void CProviderInterface<P,S>::CancelOrder( pOrder_t pOrder ) { 
 //  pOrder->SetProviderName( m_sName );
   COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
 }
