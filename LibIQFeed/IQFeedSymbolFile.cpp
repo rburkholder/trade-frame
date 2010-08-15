@@ -34,6 +34,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 //#include <boost/spirit/home/phoenix/algorithm.hpp>
 
+// for options, need to decode symbol name in order to get expiry day.
+
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
@@ -233,6 +235,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
       dbRecord.fltStrike = 0;
       dbRecord.nYear = 0;
       dbRecord.nMonth = 0;
+      dbRecord.nDay = 0;
       dbRecord.SIC = 0;
       dbRecord.NAICS = 0;
       dbRecord.nOptionSide = OptionSide::Unknown;

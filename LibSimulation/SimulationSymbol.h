@@ -22,18 +22,18 @@
 
 #include "SimulateOrderExecution.h"
 
-class CSimulationSymbol: public CSymbol<CSimulationSymbol,std::string> {
+class CSimulationSymbol: public CSymbol<CSimulationSymbol> {
   friend class CSimulationProvider;
 public:
 
-  typedef CSymbol<CSimulationSymbol,std::string> inherited_t;
+  typedef CSymbol<CSimulationSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef inherited_t::pInstrument_ref pInstrument_ref;
+  typedef inherited_t::pInstrument_cref pInstrument_cref;
   typedef inherited_t::trade_t trade_t;
   typedef inherited_t::quote_t quote_t;
   
   CSimulationSymbol( const std::string& sSymbol, 
-                     pInstrument_ref pInstrument, 
+                     pInstrument_cref pInstrument, 
                      const std::string& sDirectory );
   ~CSimulationSymbol(void);
 

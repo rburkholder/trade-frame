@@ -33,11 +33,12 @@ public:
   typedef boost::shared_ptr<S> pSymbol_t;
   typedef typename CInstrument::pInstrument_t pInstrument_t;
   typedef typename CInstrument::pInstrument_cref pInstrument_cref;
+  typedef typename CInstrument::idInstrument_t symbol_id_t;
   //typedef typename ID symbol_id_t;
 //  typedef std::string symbol_id_t;  // all symbols referenced by provider specific symbol/instrument name
   //   may need to use provider specific name in alternate instrument name in CInstrument
 
-  CSymbol( pInstrument_t pInstrument ); // class should only be constructed with valid instrument, which already has general name as well as provider specific name
+  CSymbol( pInstrument_t pInstrument ); // class should only be constructed with valid instrument, which already has general name as well as provider specific names
   virtual ~CSymbol(void);
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
@@ -83,6 +84,9 @@ public:
 
 protected:
 
+  symbol_id_t m_id;  // may be overwritten with provider specific override
+  pInstrument_t m_pInstrument;  // composition rather than inheritance as same instrument refers to different market data and order providers
+
   Delegate<trade_t> m_OnOpen;  // first value upon market opening
   Delegate<quote_t> m_OnQuote; 
   Delegate<trade_t> m_OnTrade;
@@ -91,17 +95,15 @@ protected:
 
 private:
 
-  symbol_id_t m_id;
-  CInstrument::pInstrument_t m_pInstrument;  // composition rather than inheritance as same instrument refers to different market data and order providers
-
 };
 
 template <typename S>
-CSymbol<S>::CSymbol( symbol_id_t id, pInstrument_t pInstrument )
+CSymbol<S>::CSymbol( pInstrument_t pInstrument )
 : 
-  m_id( id ),
+  m_id( pInstrument->GetInstrumentName() ),  // use the generic name, but in provider, use provider specific name
   m_pInstrument( pInstrument )
 {
+  // need to set using the provider specific from CInstrument, but need provider id to do so.
 }
 
 template <typename S>

@@ -19,7 +19,25 @@
 
 CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<CIBSymbol>( idSym, pInstrument ), 
+  CSymbol<CIBSymbol>( pInstrument ), 
+    m_TickerId( idTicker ), m_conId( 0 ),
+    m_bAskFound( false ), m_bAskSizeFound( false ), 
+    m_bBidFound( false ), m_bBidSizeFound( false ),
+    m_bLastTimeStampFound( false ), m_bLastFound( false ), m_bLastSizeFound( false ),
+    m_nAskSize( 0 ), m_nBidSize( 0 ), m_nLastSize( 0 ),
+    m_dblAsk( 0 ), m_dblBid( 0 ), m_dblLast( 0 ),
+    m_nVolume( 0 ),
+    m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
+    m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
+    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 ),
+    m_bOptionsSet( false )
+{
+  inherited_t::m_id = idSym;
+}
+
+CIBSymbol::CIBSymbol( pInstrument_t pInstrument, TickerId idTicker )
+: 
+  CSymbol<CIBSymbol>( pInstrument ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),

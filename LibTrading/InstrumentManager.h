@@ -27,7 +27,7 @@ public:
   CInstrumentManager(void);
   ~CInstrumentManager(void);
   pInstrument_t GetIQFeedInstrument( const std::string& sName );
-  pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
+//  pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
 
 protected:
 

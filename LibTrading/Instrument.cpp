@@ -53,11 +53,13 @@ CInstrument::CInstrument(
   idInstrument_cref sInstrumentName, const std::string &sExchangeName,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month,
-  idInstrument_cref sUnderlyingName,
+  //idInstrument_cref sUnderlyingName,
+  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
-  m_sUnderlyingName( sUnderlyingName ), m_InstrumentType( type ),
+  m_pUnderlying( pUnderlying ), 
+  m_InstrumentType( type ),
   m_OptionSide( side ), 
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), 
@@ -78,11 +80,14 @@ CInstrument::CInstrument(
   idInstrument_cref sInstrumentName, const std::string &sExchangeName,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month, unsigned short day,
-  idInstrument_cref sUnderlyingName,
+  //idInstrument_cref sUnderlyingName,
+  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
-  m_sUnderlyingName( sUnderlyingName ), m_InstrumentType( type ),
+  //m_sUnderlyingName( sUnderlyingName ), 
+  m_pUnderlying( pUnderlying ), 
+  m_InstrumentType( type ),
   m_OptionSide( side ), 
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), m_nDay( day ),
@@ -100,11 +105,15 @@ CInstrument::CInstrument(
 
 // currency
 CInstrument::CInstrument(
-  const std::string &sInstrumentName, const std::string& sUnderlyingName,
+  const std::string &sInstrumentName, 
+  pInstrument_t pUnderlying,
+  //const std::string& sUnderlyingName,
   InstrumentType::enumInstrumentTypes type,
   Currency::enumCurrency base, Currency::enumCurrency counter
   ) 
-: m_sInstrumentName( sInstrumentName ), m_sUnderlyingName( sUnderlyingName ),
+: m_sInstrumentName( sInstrumentName ), 
+  //m_sUnderlyingName( sUnderlyingName ),
+  m_pUnderlying( pUnderlying ), 
   m_InstrumentType( type ),
   m_Currency( base ), m_CurrencyCounter( counter ),
   m_sExchange( "" ), m_nContract( 0 )
@@ -116,7 +125,7 @@ CInstrument::CInstrument(
 CInstrument::CInstrument(const CInstrument& instrument) 
 :
   m_sInstrumentName( instrument.m_sInstrumentName ), 
-  m_sUnderlyingName( instrument.m_sUnderlyingName ),
+  m_pUnderlying( instrument.m_pUnderlying ),
   m_sExchange( instrument.m_sExchange ), 
   m_InstrumentType( instrument.m_InstrumentType ), 
   m_Currency( instrument.m_Currency ), 

@@ -32,8 +32,7 @@ CNakedOption::CNakedOption( double dblStrike )
 : m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
   m_dblStrike( dblStrike ),
   m_bWatching( false ),
-  m_sSide( "-" ),
-  m_pSymbol( NULL )
+  m_sSide( "-" )
 {
 }
 
@@ -273,11 +272,11 @@ void CProcess::HandleStrikeListing1Done(  ) {
 void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
   m_contractidUnderlying = details.summary.conId;
   try {
-    pUnderlying = m_tws->GetSymbol( m_contractidUnderlying );
+    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying );
   }
   catch ( std::out_of_range& e ) {
     CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
-    pUnderlying = m_tws->GetSymbol( instrument );
+    m_pUnderlying = m_tws->GetSymbol( instrument );
   }
 
 }
@@ -288,7 +287,7 @@ void CProcess::HandleStrikeListing2Done(  ) {
 // --- listing 3 -- Call Contracts
 
 void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
-  CIBSymbol* pSymbol;
+  CIBSymbol::pSymbol_t pSymbol;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
   }
@@ -324,7 +323,7 @@ void CProcess::HandleStrikeListing3Done(  ) {
 // --- listing 4 -- Put Contracts
 
 void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
-  CIBSymbol* pSymbol;
+  CIBSymbol::pSymbol_t pSymbol;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
   }
@@ -348,8 +347,8 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     m_ss << "Option Acquisition Complete" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    m_tws->AddQuoteHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-    m_tws->AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+    m_tws->AddQuoteHandler( m_pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+    m_tws->AddTradeHandler( m_pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
 
   }
 }
@@ -444,7 +443,7 @@ void CProcess::OpenPosition( void ) {
     else {
       // orders for normal delta neutral
 
-      m_posUnderlying.reset( new CPosition( pUnderlying->GetInstrument(), m_tws, m_tws, "Underlying" ) );
+      m_posUnderlying.reset( new CPosition( m_pUnderlying->GetInstrument(), m_tws, m_tws, "Underlying" ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
 
@@ -737,32 +736,32 @@ void CProcess::SaveSeries( void ) {
 
     try {
       if ( 0 != iter->Call()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
       }
 
       if ( 0 != iter->Call()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Call()->Trades() );
       }
 
       if ( 0 != iter->Call()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
       }
 
       if ( 0 != iter->Put()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
       }
 
       if ( 0 != iter->Put()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Put()->Trades() );
       }
 
       if ( 0 != iter->Put()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetSymbolName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
       }
     }

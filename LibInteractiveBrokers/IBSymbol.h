@@ -34,6 +34,7 @@ public:
 
   //CIBSymbol( TickerId id, pInstrument_t pInstrument );
   CIBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
+  CIBSymbol( pInstrument_t pInstrument, TickerId id );
   ~CIBSymbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };

@@ -27,9 +27,10 @@ class CIQFeedProvider :
 public:
 
   typedef boost::shared_ptr<CIQFeedProvider> pProvider_t;
-  typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> ProviderInterface_t;
-  typedef ProviderInterface_t::symbol_id_t symbol_id_t;
-  typedef CIQFeedSymbol::pInstrument_t pInstrument_t;
+  typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> inherited_t;
+  typedef inherited_t::symbol_id_t symbol_id_t;
+  typedef inherited_t::pSymbol_t pSymbol_t;
+  typedef inherited_t::pInstrument_t pInstrument_t;
   typedef CIQFeed<CIQFeedProvider>  IQFeed_t;
 
   CIQFeedProvider( void );
@@ -38,12 +39,6 @@ public:
   // do these need to be virtual?  use crtp?
   virtual void Connect( void );
   virtual void Disconnect( void );
-
-  // use crtp?
-  virtual CIQFeedSymbol* GetSymbol( symbol_id_t id ) { 
-    CIQFeedSymbol* pSym = ProviderInterface_t::GetSymbol( id );
-    return pSym; 
-  };
 
 protected:
 
@@ -60,7 +55,7 @@ protected:
   virtual void StartDepthWatch( CIQFeedSymbol* pSymbol ) {};
   virtual void  StopDepthWatch( CIQFeedSymbol* pSymbol ) {};
 
-  virtual CIQFeedSymbol* NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
+  pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
   virtual void HandleQMessage( CIQFUpdateMessage *pMsg );
   virtual void HandlePMessage( CIQFSummaryMessage *pMsg );

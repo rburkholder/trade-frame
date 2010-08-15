@@ -12,7 +12,7 @@
  ************************************************************************/
 
 // should a provider be included?  No, because this allows the same instrument
-//  to be used to provide details to any provider.
+//  to be used to supply details to any provider.
 
 #pragma once
 
@@ -32,42 +32,55 @@ public:
   typedef boost::shared_ptr<CInstrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
 
-  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
+  CInstrument( 
+    idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
-  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
+  CInstrument( 
+    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month );
-  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
+  CInstrument( 
+    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month,
-    const idInstrument_t &sUnderlyingName,
+    //const idInstrument_t &sUnderlyingName,
+    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
+  CInstrument( 
+    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month, unsigned short day,
-    const std::string &sUnderlyingName,
+    //const std::string &sUnderlyingName,
+    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( idInstrument_cref sInstrumentName, const std::string& sUnderlyingName, // currency
+  CInstrument( 
+    idInstrument_cref sInstrumentName, 
+    //const std::string& sUnderlyingName, // currency
+    pInstrument_t pUnderlying,
     InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   virtual ~CInstrument(void);
 
-  void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
   idInstrument_cref GetInstrumentName( void ) { return m_sInstrumentName; };
-  idInstrument_cref GetUnderlyingName( void ) { return m_sUnderlyingName; }
-  const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
-  const std::string& GetExchangeName( void ) { return m_sExchange; };
+  idInstrument_cref GetUnderlyingName( void ) { return m_pUnderlying->GetInstrumentName(); }
+
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   bool IsOption( void ) { return ( InstrumentType::Option == m_InstrumentType ); };
   bool IsFuture( void ) { return ( InstrumentType::Future == m_InstrumentType ); };
+
+  const std::string& GetExchangeName( void ) { return m_sExchange; };
+  void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
+  const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
+
   double GetStrike( void ) { return m_dblStrike; };
   unsigned short GetExpiryYear( void ) { return m_nYear; };
   unsigned short GetExpiryMonth( void ) { return m_nMonth; };
   unsigned short GetExpiryDay( void ) { return m_nDay; };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
+
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
 
@@ -77,7 +90,8 @@ public:
 protected:
 
   idInstrument_t m_sInstrumentName; // main name
-  idInstrument_t m_sUnderlyingName; // underlying when main name is an option
+  pInstrument_t m_pUnderlying;
+  //idInstrument_t m_sUnderlyingName; // underlying when main name is an option
   InstrumentType::enumInstrumentTypes m_InstrumentType;
   Currency::enumCurrency m_Currency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
   Currency::enumCurrency m_CurrencyCounter; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency

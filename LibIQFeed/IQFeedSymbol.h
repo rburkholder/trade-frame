@@ -23,11 +23,11 @@
 
 class CIQFeedProvider;
 
-class CIQFeedSymbol : public CSymbol<CIQFeedSymbol,std::string> {
+class CIQFeedSymbol : public CSymbol<CIQFeedSymbol> {
   friend class CIQFeedProvider;
 public:
 
-  typedef CSymbol<CIQFeedSymbol,std::string> inherited_t;
+  typedef CSymbol<CIQFeedSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef std::string symbol_id_t;
 

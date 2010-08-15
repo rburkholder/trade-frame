@@ -39,13 +39,13 @@ public:
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
   typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_ref pInstrument_ref;
+  typedef CInstrument::pInstrument_cref pInstrument_cref;
 
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
-  CPosition( pInstrument_ref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
-  CPosition( pInstrument_ref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   ~CPosition(void);
 
   const std::string& Notes( void ) { return m_sNotes; };

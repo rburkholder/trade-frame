@@ -73,17 +73,17 @@ void CInstrumentFile::CloseIQFSymbols() {
   m_pdbSymbols->close(0);
 }
 
-CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName ) {
-  // look up IQFeed based table with IQFeedSymbolName, but return instrument with Alternate Symbol name
+void CInstrumentFile::GetRecord( const std::string& sName, structSymbolRecord* pRec ) {
+
   Dbt k;
-  k.set_data( (void*) sIQFeedSymbolName.c_str() );
-  k.set_size( sIQFeedSymbolName.size() );
-  structSymbolRecord rec;
+  k.set_data( (void*) sName.c_str() );
+  k.set_size( sName.size() );
+  //structSymbolRecord rec;
   Dbt v;
   v.set_flags( DB_DBT_USERMEM );
   v.set_ulen( sizeof( structSymbolRecord ) );
   v.set_size( sizeof( structSymbolRecord ) );
-  v.set_data( &rec );
+  v.set_data( pRec );
   int ret;
   try {
     //ret = m_pdbSymbols->exists( 0, &k, 0 );
@@ -95,37 +95,84 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
   catch ( ... ) {
     std::cout << "CInstrumentFile::CreateInstrumentFromIQFeed bummer error" << std::endl;
   }
-  if ( DB_NOTFOUND == ret ) throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed symbol not found" );
-  if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::CreateInstrumentFromIQFeed had bad error" );
-  //pRecord = (structSymbolRecord*) v.get_data();
+
+  if ( DB_NOTFOUND == ret ) {
+    throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed symbol not found" );
+  }
+  if ( 0 != ret ) {
+    throw std::runtime_error( "CInstrumentFile::CreateInstrumentFromIQFeed had bad error" );
+  }
+
+}
+
+CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std::string& sIQFeedSymbolName ) {
+
+  structSymbolRecord rec;
+  GetRecord( sIQFeedSymbolName, &rec );
+
   std::string sExchange( rec.line + rec.ix[2], rec.cnt[2] );
 
   switch ( rec.eInstrumentType ) {
     case InstrumentType::Stock: {
-        CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, InstrumentType::Stock ) );
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, InstrumentType::Stock ) );
         return pInstrument;
       }
       break;
     case InstrumentType::Option: {
+
         const char *p = rec.line + rec.ix[1]; 
         const char *e = strchr( p, ' ' );  
         u_int32_t len = e - p;
         std::string sUnderlying( rec.line + rec.ix[1], len );
-        CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, 
+
+        if ( 0 == len ) {
+          throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed underlying symbol length is 0" );
+        }
+
+        CInstrument::pInstrument_t pUnderlying( CreateInstrumentFromIQFeed( sUnderlying ) );
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, 
           (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
           rec.nYear, rec.nMonth,
-          sUnderlying, (OptionSide::enumOptionSide) rec.nOptionSide, 
+          pUnderlying, 
+          (OptionSide::enumOptionSide) rec.nOptionSide, 
           rec.fltStrike ) );
         return pInstrument;
       }
       break;
     case InstrumentType::Future: {
-         CInstrument::pInstrument_t pInstrument( new CInstrument( sAlternateSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth ) );
+         CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth ) );
          return pInstrument;
        }
       break;
     default:
-      throw std::out_of_range( "Unknown instrument type" ); 
+      throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed: Unknown instrument type" ); 
+  }
+}
+
+CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std::string& sIQFeedSymbolName, CInstrument::pInstrument_t pUnderlying ) {
+
+  structSymbolRecord rec;
+  GetRecord( sIQFeedSymbolName, &rec );
+
+  std::string sExchange( rec.line + rec.ix[2], rec.cnt[2] );
+
+  switch ( rec.eInstrumentType ) {
+    case InstrumentType::Option: {
+        const char *p = rec.line + rec.ix[1]; 
+        const char *e = strchr( p, ' ' );  
+        u_int32_t len = e - p;
+        std::string sUnderlying( rec.line + rec.ix[1], len );
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, 
+          (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          rec.nYear, rec.nMonth, rec.nDay,
+          pUnderlying, 
+          (OptionSide::enumOptionSide) rec.nOptionSide, 
+          rec.fltStrike ) );
+        return pInstrument;
+      }
+      break;
+    default:
+      throw std::out_of_range( "CInstrumentFile::CreateInstrumentFromIQFeed: used for symbols with underlying only" ); 
   }
 }
 

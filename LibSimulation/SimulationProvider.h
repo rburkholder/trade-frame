@@ -34,10 +34,11 @@ class CSimulationProvider
 {
 public:
 
-  typedef CProviderInterface<CSimulationProvider,CSimulationSymbol> ProviderInterface_t;
+  typedef CProviderInterface<CSimulationProvider,CSimulationSymbol> inherited_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_ref pInstrument_ref;
+  typedef CInstrument::pInstrument_cref pInstrument_cref;
   typedef COrder::pOrder_t pOrder_t;
+  typedef inherited_t::pSymbol_t pSymbol_t;
   //typedef COrder::pOrder_ref pOrder_ref;
 
   CSimulationProvider(void);
@@ -53,13 +54,13 @@ public:
   void AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
   void RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
 protected:
-  CSimulationSymbol *NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
-  void StartQuoteWatch( CSimulationSymbol *pSymbol );
-  void StopQuoteWatch( CSimulationSymbol *pSymbol );
-  void StartTradeWatch( CSimulationSymbol *pSymbol );
-  void StopTradeWatch( CSimulationSymbol *pSymbol );
-  void StartDepthWatch( CSimulationSymbol *pSymbol );
-  void StopDepthWatch( CSimulationSymbol *pSymbol );
+  pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
+  void StartQuoteWatch( pSymbol_t pSymbol );
+  void StopQuoteWatch( pSymbol_t Symbol );
+  void StartTradeWatch( pSymbol_t pSymbol );
+  void StopTradeWatch( pSymbol_t pSymbol );
+  void StartDepthWatch( pSymbol_t pSymbol );
+  void StopDepthWatch( pSymbol_t pSymbol );
 
   std::string m_sGroupDirectory;
 

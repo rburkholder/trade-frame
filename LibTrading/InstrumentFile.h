@@ -53,6 +53,7 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
   structIndexes_t lenExchangeKey;  // length of the Exchange key, might be 1 or 2 parts.
   unsigned char eInstrumentType;  // Trading::enumContractTypes
   unsigned char nMonth;  // 1 - 12, 0 for nothing
+  unsigned char nDay;  // 1 - 31, 0 for nothing
   unsigned char nOptionSide;  // OptionSide
   char line[nMaxBufferSize];
 
@@ -63,6 +64,7 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
   unsigned char GetOptionSide() { return nOptionSide; };
   unsigned short GetYear() { return nYear; };
   unsigned short GetMonth() { return nMonth; };
+  unsigned short GetDay() { return nDay; };
   const bitsSymbolClassifier_t& GetSymbolClassifier() { return sc; };
   void SetSymbolClassifier( const bitsSymbolClassifier_t& sc_ ) { sc.reset(); sc |= sc_; };
   float GetStrike() { return fltStrike; };
@@ -91,8 +93,10 @@ public:
   structSymbolRecord* RetrieveSymbolRecordByExchange( u_int32_t flags );
   structSymbolRecord* RetrieveSymbolRecordByUnderlying( u_int32_t flags );
   void EndSearch( void ) {};
-  CInstrument::pInstrument_t 
-    CreateInstrumentFromIQFeed( const std::string &sIQFeedSymbolName, const std::string &sAlternateSymbolName );
+  CInstrument::pInstrument_t // basic call
+    CreateInstrumentFromIQFeed( const std::string& sIQFeedSymbolName );
+  CInstrument::pInstrument_t // builds an underlying when basic call is with an option
+    CreateInstrumentFromIQFeed( const std::string& sIQFeedSymbolName, CInstrument::pInstrument_t pUnderlying );
 
 protected:
 
@@ -107,6 +111,8 @@ protected:
   Dbt m_dbtData;
   const char *m_szSearchKey;
   u_int32_t m_lenSearchKey;
+
+  void GetRecord( const std::string& sName, structSymbolRecord* pRec );
 
 private:
 

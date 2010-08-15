@@ -25,9 +25,17 @@ CInstrumentManager::~CInstrumentManager(void) {
 }
 
 CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
-  return GetIQFeedInstrument( sName, sName );
+//  return GetIQFeedInstrument( sName, sName );
+  try {
+    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName ) );  // todo:  need to verify proper symbol usage
+    return pInstrument;
+  }
+  catch (...) {
+    throw std::runtime_error( "CInstrumentManager::GetIQFeedInstrument problems" );
+  }
 }
 
+/*
 CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
   try {
     CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
@@ -38,7 +46,7 @@ CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::st
   }
   //return pInstrument;
 }
-
+*/
 
 
 

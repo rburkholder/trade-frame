@@ -21,10 +21,10 @@
 // sDirectory needs to be available on instantiation to enable signal availability
 CSimulationSymbol::CSimulationSymbol( 
   const std::string &sSymbol, 
-  pInstrument_ref pInstrument, 
+  pInstrument_cref pInstrument, 
   const std::string &sDirectory
   ) 
-: CSymbol<CSimulationSymbol,std::string>(sSymbol, pInstrument), m_sDirectory( sDirectory )
+: CSymbol<CSimulationSymbol>(pInstrument), m_sDirectory( sDirectory )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );

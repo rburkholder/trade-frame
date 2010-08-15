@@ -30,7 +30,7 @@ CIQFeedProvider::~CIQFeedProvider(void) {
 
 void CIQFeedProvider::Connect() {
   if ( !m_bConnected ) {
-    ProviderInterface_t::Connect();
+    inherited_t::Connect();
     IQFeed_t::Connect();
     m_bConnected = true;
     OnConnected( 0 );
@@ -40,15 +40,15 @@ void CIQFeedProvider::Connect() {
 void CIQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
     IQFeed_t::Disconnect();
-    ProviderInterface_t::Disconnect();
+    inherited_t::Disconnect();
     m_bConnected = false;
     OnDisconnected( 0 );
   }
 }
 
-CIQFeedSymbol* CIQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
-  CIQFeedSymbol *pSymbol = new CIQFeedSymbol( pInstrument->GetSymbolName(), pInstrument );
-  CProviderInterface<CIQFeedProvider,CIQFeedSymbol>::AddCSymbol( pSymbol );
+CIQFeedProvider::pSymbol_t CIQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
+  pSymbol_t pSymbol( new CIQFeedSymbol( pInstrument->GetInstrumentName(), pInstrument ) );
+  inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
 
@@ -87,38 +87,38 @@ void CIQFeedProvider::StopTradeWatch(CIQFeedSymbol* pSymbol) {
 }
 
 void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
-  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFUpdateMessage::QPSymbol ) );
-  CIQFeedSymbol *pSym;
+  pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleUpdateMessage( pMsg );
   }
 }
 
 void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
-  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFSummaryMessage::QPSymbol ) );
-  CIQFeedSymbol *pSym;
+  pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleSummaryMessage( pMsg );
   }
 }
 
 void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
-  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFFundamentalMessage::FSymbol ) );
-  CIQFeedSymbol *pSym;
+  pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-    pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+    pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleFundamentalMessage( pMsg );
   }
 }
 
 void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
 
-  ProviderInterface_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
+  inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
 /*
   const char *ixFstColon = pMsg->m_sSymbolList.c_str();
   const char *ixLstColon = pMsg->m_sSymbolList.c_str();

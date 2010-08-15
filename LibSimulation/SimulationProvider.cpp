@@ -64,11 +64,11 @@ void CSimulationProvider::Disconnect() {
   }
 }
 
-CSimulationSymbol* CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
-  CSimulationSymbol *pSymbol = new CSimulationSymbol(pInstrument->GetSymbolName(), pInstrument, m_sGroupDirectory);
+CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
+  pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
   //CProviderInterface::AddTradeHandler( sSymbolName, MakeDelegate( &pSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddCSymbol( pSymbol );
+  inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
 
@@ -77,49 +77,49 @@ void CSimulationProvider::AddTradeHandler( const std::string &sSymbol, CSimulati
   CProviderInterface<CSimulationProvider,CSimulationSymbol>::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( sSymbol );
   assert( m_mapSymbols.end() != iter );
-  CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
+  pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) {
-    CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+    inherited_t::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
   }
 }
 
 void CSimulationProvider::RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::RemoveTradeHandler( sSymbol, handler );
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::m_mapSymbols_t::iterator iter;
+  inherited_t::RemoveTradeHandler( sSymbol, handler );
+  inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( sSymbol );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
   else {
     if ( 1 == iter->second->GetTradeHandlerCount() ) {
-      CSimulationSymbol *pSymSymbol = dynamic_cast<CSimulationSymbol *>( iter->second );
-      CProviderInterface<CSimulationProvider,CSimulationSymbol>::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+      pSymbol_t pSymSymbol( iter->second );
+      inherited_t::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
     }
   }
 }
 
 // these need to open the data file, load the data, and prepare to simulate
-void CSimulationProvider::StartQuoteWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
   pSymbol->StartQuoteWatch();
 }
 
-void CSimulationProvider::StopQuoteWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StopQuoteWatch( pSymbol_t pSymbol ) {
   pSymbol->StopQuoteWatch();
 }
 
-void CSimulationProvider::StartTradeWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StartTradeWatch( pSymbol_t pSymbol ) {
   pSymbol->StartTradeWatch();
 }
 
-void CSimulationProvider::StopTradeWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StopTradeWatch( pSymbol_t pSymbol ) {
   pSymbol->StopTradeWatch();
 }
 
-void CSimulationProvider::StartDepthWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StartDepthWatch( pSymbol_t pSymbol ) {
   pSymbol->StartDepthWatch();
 }
 
-void CSimulationProvider::StopDepthWatch( CSimulationSymbol *pSymbol ) {
+void CSimulationProvider::StopDepthWatch( pSymbol_t pSymbol ) {
   pSymbol->StopDepthWatch();
 }
 
@@ -131,15 +131,15 @@ void CSimulationProvider::Merge( void ) {
   // datums from each series will be merged and emittedin in chronological order
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
     iter != m_mapSymbols.end(); ++iter ) {
-      CSimulationSymbol *sym = dynamic_cast<CSimulationSymbol*>(iter->second);
+      pSymbol_t sym( iter->second );
       CQuotes* quotes = &sym->m_quotes;
       m_pMerge -> Add( 
         quotes, 
-        MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleQuoteEvent ) );
+        MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
       CTrades *trades = &sym->m_trades;
       m_pMerge -> Add( 
         trades, 
-        MakeDelegate( dynamic_cast<CSimulationSymbol*>( iter->second ), &CSimulationSymbol::HandleTradeEvent ) );
+        MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
   }
 
   bool bOldMode = CTimeSource::Instance().GetSimulationMode();
@@ -182,24 +182,24 @@ void CSimulationProvider::Stop() {
 }
 
 void CSimulationProvider::PlaceOrder( pOrder_t pOrder ) {
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::PlaceOrder( pOrder ); // any underlying initialization
-  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
+  inherited_t::PlaceOrder( pOrder ); // any underlying initialization
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
+    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
-    dynamic_cast<CSimulationSymbol *>( iter->second )->m_simExec.SubmitOrder( pOrder );
+    iter->second->m_simExec.SubmitOrder( pOrder );
   }
 }
 
 void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::CancelOrder( pOrder );
-  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetSymbolName() );
+  inherited_t::CancelOrder( pOrder );
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetSymbolName() << std::endl;
+    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
-    dynamic_cast<CSimulationSymbol *>( iter->second )->m_simExec.CancelOrder( pOrder->GetOrderId() );
+    iter->second->m_simExec.CancelOrder( pOrder->GetOrderId() );
   }
 }
 

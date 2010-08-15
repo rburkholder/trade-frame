@@ -16,7 +16,7 @@
 #include "Position.h"
 #include <LibTrading/OrderManager.h>
 
-CPosition::CPosition( pInstrument_ref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
+CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
@@ -28,7 +28,7 @@ CPosition::CPosition( pInstrument_ref pInstrument, pProvider_t pExecutionProvide
   Construction();
 }
 
-CPosition::CPosition( pInstrument_ref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
+CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_sNotes( sNotes ),

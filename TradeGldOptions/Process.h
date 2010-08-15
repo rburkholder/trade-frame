@@ -45,8 +45,8 @@ public:
   bool operator<=( const CNakedOption& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double Strike( void ) { return m_dblStrike; };
-  void Symbol( CIBSymbol* pSymbol ) { m_pSymbol = pSymbol; };
-  CIBSymbol* Symbol( void ) { return m_pSymbol; };
+  void Symbol( CIBSymbol::pSymbol_t pSymbol ) { m_pSymbol = pSymbol; };
+  CIBSymbol::pSymbol_t Symbol( void ) { return m_pSymbol; };
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );
@@ -76,7 +76,7 @@ protected:
 
   bool m_bWatching;
 
-  CIBSymbol* m_pSymbol;
+  CIBSymbol::pSymbol_t m_pSymbol;
 
   std::stringstream m_ss;
 
@@ -195,7 +195,7 @@ private:
 
   std::string m_sSymbolName;
   long m_contractidUnderlying;
-  CIBSymbol *pUnderlying;  // need to make share_ptr
+  CIBSymbol::pSymbol_t m_pUnderlying;  // need to make share_ptr
 
   std::string m_sPathForSeries;
 

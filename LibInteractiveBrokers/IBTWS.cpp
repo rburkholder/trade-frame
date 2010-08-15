@@ -90,10 +90,10 @@ void CIBTWS::ProcessMessages( void ) {
 //CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
 CIBTWS::pSymbol_t CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
   TickerId ticker = ++m_curTickerId;
-  pSymbol_t pSymbol( new CIBSymbol( ticker, pInstrument ) );
+  pSymbol_t pSymbol( new CIBSymbol( pInstrument, ticker ) );  // is there someplace with the IB specific symbol name, or is it set already?
   CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
-  m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol->GetId() ) );
+  m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol ) );
   return pSymbol;
 }
 
@@ -220,7 +220,7 @@ void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int 
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
     pSym->AcceptTickPrice( tickType, price );
   }
@@ -230,7 +230,7 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
     pSym->AcceptTickSize( tickType, size );
   }
@@ -239,7 +239,7 @@ void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
 void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
-  CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+  CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
   switch ( tickType ) {
     case MODEL_OPTION: 
       pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
@@ -263,7 +263,7 @@ void CIBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& va
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol *pSym = m_vTickerToSymbol[ tickerId ];
+    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickString " << pSym->Name() << ", " 
     //  << TickTypeStrings[tickType] << ", " << value;
     //std::cout << std::endl;
@@ -529,6 +529,8 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
   if ( !bFound ) 
     throw std::out_of_range( "can't find instrument type" );
 
+  m_mapSymbols_t::iterator iterSymbol;
+
   switch ( it ) {
     case InstrumentType::Stock: 
       if ( "" == sExchange ) sExchange = "SMART";
@@ -539,9 +541,14 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
       if ( "" == sExchange ) sExchange = "SMART";
+      iterSymbol = m_mapSymbols.find( sUnderlying );
+      if ( m_mapSymbols.end() == iterSymbol ) {
+        throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
+      }
       pInstrument = CInstrument::pInstrument_t( new CInstrument( 
         sLocalSymbol, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day(), 
-        sUnderlying, os, contract.strike ) );
+        iterSymbol->second->GetInstrument(), 
+        os, contract.strike ) );
       break;
     case InstrumentType::Future:
       if ( "" == sExchange ) sExchange = "SMART";
