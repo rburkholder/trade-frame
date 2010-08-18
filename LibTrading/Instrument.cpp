@@ -121,7 +121,6 @@ CInstrument::CInstrument(
   assert( m_InstrumentType == InstrumentType::Currency );
 }
 
-
 CInstrument::CInstrument(const CInstrument& instrument) 
 :
   m_sInstrumentName( instrument.m_sInstrumentName ), 
@@ -156,10 +155,26 @@ void CInstrument::SetAlternateName( enumProviderId_t id, idInstrument_cref name 
   }
 }
 
-CInstrument::idInstrument_cref CInstrument::GetAlternateName( enumProviderId_t id ) {
+CInstrument::idInstrument_cref CInstrument::GetInstrumentName( enumProviderId_t id ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
-  if ( m_mapAlternateNames.end() == iter ) {
-    throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );
+  if ( m_mapAlternateNames.end() != iter ) {
+    //throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );
+    return iter->second;
   }
-  return iter->second;
+  return m_sInstrumentName;
 }
+
+CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( void ) {
+  if ( NULL == m_pUnderlying.get() ) {
+    throw std::runtime_error( "CInstrument::GetUnderlyingName: no underlying" );
+  }
+  return m_pUnderlying->GetInstrumentName();
+}
+
+CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( enumProviderId_t id ) {
+  if ( NULL == m_pUnderlying.get() ) {
+    throw std::runtime_error( "CInstrument::GetUnderlyingName: no underlying" );
+  }
+  return m_pUnderlying->GetInstrumentName(id);
+}
+

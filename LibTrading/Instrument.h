@@ -65,7 +65,12 @@ public:
   virtual ~CInstrument(void);
 
   idInstrument_cref GetInstrumentName( void ) { return m_sInstrumentName; };
-  idInstrument_cref GetUnderlyingName( void ) { return m_pUnderlying->GetInstrumentName(); }
+  idInstrument_cref GetUnderlyingName( void );
+
+  idInstrument_cref GetInstrumentName( enumProviderId_t id );
+  idInstrument_cref GetUnderlyingName( enumProviderId_t id );
+
+  void SetAlternateName( enumProviderId_t, idInstrument_cref );
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   bool IsOption( void ) { return ( InstrumentType::Option == m_InstrumentType ); };
@@ -83,9 +88,6 @@ public:
 
   void SetContract( long id ) { m_nContract = id; };
   long GetContract( void ) { return m_nContract; };
-
-  void SetAlternateName( enumProviderId_t, const std::string& );
-  const std::string& GetAlternateName( enumProviderId_t );
 
 protected:
 

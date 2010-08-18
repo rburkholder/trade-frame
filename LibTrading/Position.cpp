@@ -43,15 +43,35 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 
 void CPosition::Construction( void ) {
   if ( m_pDataProvider->ProvidesQuotes() ) {
-    //m_pDataProvider->AddQuoteHandler( 
+    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
   }
   if ( m_pDataProvider->ProvidesTrades() ) {
+    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleTrade ) );
   }
   if ( m_pDataProvider->ProvidesGreeks() ) {
+    m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
   }
 }
 
 CPosition::~CPosition(void) {
+  if ( m_pDataProvider->ProvidesQuotes() ) {
+    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
+  }
+  if ( m_pDataProvider->ProvidesTrades() ) {
+    m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleTrade ) );
+  }
+  if ( m_pDataProvider->ProvidesGreeks() ) {
+    m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
+  }
+}
+
+void CPosition::HandleQuote( quote_t quote ) {
+}
+
+void CPosition::HandleTrade( trade_t trade ) {
+}
+
+void CPosition::HandleGreek( greek_t greek ) {
 }
 
 COrder::pOrder_t CPosition::PlaceOrder( // market

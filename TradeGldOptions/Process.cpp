@@ -235,13 +235,13 @@ void CProcess::StopWatch( void ) {
     m_bWatchingOptions = false;
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_tws->RemoveQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_tws->RemoveTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_tws->RemoveGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      m_tws->RemoveQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_tws->RemoveTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_tws->RemoveGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-      m_tws->RemoveQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_tws->RemoveTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_tws->RemoveGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_tws->RemoveQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_tws->RemoveTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_tws->RemoveGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -347,8 +347,8 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     m_ss << "Option Acquisition Complete" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    m_tws->AddQuoteHandler( m_pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-    m_tws->AddTradeHandler( m_pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+    m_tws->AddQuoteHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+    m_tws->AddTradeHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
 
   }
 }
@@ -584,13 +584,13 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_bWatchingOptions = true;
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    m_tws->AddQuoteHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-    m_tws->AddTradeHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-    m_tws->AddGreekHandler( iter->Call()->Symbol()->GetId(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+    m_tws->AddQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+    m_tws->AddTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+    m_tws->AddGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-    m_tws->AddQuoteHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-    m_tws->AddTradeHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-    m_tws->AddGreekHandler( iter->Put()->Symbol()->GetId(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    m_tws->AddQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+    m_tws->AddTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+    m_tws->AddGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
   }
 
   m_TradingState = ETSFirstTrade;

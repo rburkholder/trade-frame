@@ -27,6 +27,9 @@ CSimulationProvider::CSimulationProvider(void)
   m_sName = "Simulator";
   m_nID = EProviderSimulator;
 
+  m_bProvidesQuotes = true;
+  m_bProvidesTrades = true;
+  m_bProvidesGreeks = true;
 }
 
 CSimulationProvider::~CSimulationProvider(void) {
@@ -73,8 +76,8 @@ CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbo
 }
 
 void CSimulationProvider::AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::AddTradeHandler( sSymbol, handler );
-  CProviderInterface<CSimulationProvider,CSimulationSymbol>::m_mapSymbols_t::iterator iter;
+  inherited_t::AddTradeHandler( sSymbol, handler );
+  inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( sSymbol );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );

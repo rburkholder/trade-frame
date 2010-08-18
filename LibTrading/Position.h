@@ -74,6 +74,10 @@ public:
 
 protected:
 
+  typedef CSymbolBase::quote_t quote_t;
+  typedef CSymbolBase::trade_t trade_t;
+  typedef CSymbolBase::greek_t greek_t;
+
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
 
@@ -110,5 +114,9 @@ private:
   void HandleExecution( std::pair<const COrder&, const CExecution&>& );
 
   void ProcessOrder( pOrder_t pOrder );
+
+  void HandleQuote( quote_t );
+  void HandleTrade( trade_t );
+  void HandleGreek( greek_t );
 
 };
