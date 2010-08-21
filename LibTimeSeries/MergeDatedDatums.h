@@ -31,10 +31,11 @@ public:
 
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
 
-  void Add( CTimeSeries<CQuote> *pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CTrade> *pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CBar> *pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CMarketDepth> *pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CQuote>* pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CTrade>* pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CBar>* pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CGreek>* pSeries, OnDatumHandler );
+  void Add( CTimeSeries<CMarketDepth>* pSeries, OnDatumHandler );
   void Run( void );
   void Stop( void );
 
@@ -43,7 +44,7 @@ public:
 
 protected:
 
-  CMinHeap<CMergeCarrierBase *, CMergeCarrierBase> m_vCarriers;
+  CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_vCarriers;
 
   // not all states or commands are implemented yet
   enum enumMergingState { eInit, eRunning, ePaused, eStopped };

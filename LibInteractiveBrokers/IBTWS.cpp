@@ -35,6 +35,7 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesGreeks = true;
+  m_pProvidesBrokerInterface = true;
 }
 
 CIBTWS::~CIBTWS(void) {

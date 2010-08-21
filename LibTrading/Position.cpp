@@ -66,6 +66,14 @@ CPosition::~CPosition(void) {
 }
 
 void CPosition::HandleQuote( quote_t quote ) {
+  switch ( m_eOrderSideActive ) {
+    case OrderSide::Buy:
+      m_dblUnRealizedPL = m_nPositionActive * ( quote.Bid() - m_dblAverageCostPerShare );
+      break;
+    case OrderSide::Sell:
+      m_dblUnRealizedPL = m_nPositionActive * ( m_dblAverageCostPerShare - quote.Ask() );
+      break;
+  }
 }
 
 void CPosition::HandleTrade( trade_t trade ) {

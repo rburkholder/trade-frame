@@ -30,6 +30,7 @@ CSimulationProvider::CSimulationProvider(void)
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesGreeks = true;
+  m_pProvidesBrokerInterface = true;
 }
 
 CSimulationProvider::~CSimulationProvider(void) {
@@ -75,28 +76,28 @@ CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbo
   return pSymbol;
 }
 
-void CSimulationProvider::AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
-  inherited_t::AddTradeHandler( sSymbol, handler );
+void CSimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler ) {
+  inherited_t::AddTradeHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) {
-    inherited_t::AddTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
   }
 }
 
-void CSimulationProvider::RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler ) {
-  inherited_t::RemoveTradeHandler( sSymbol, handler );
+void CSimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler ) {
+  inherited_t::RemoveTradeHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( sSymbol );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
   else {
     if ( 1 == iter->second->GetTradeHandlerCount() ) {
       pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveTradeHandler( sSymbol, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
     }
   }
 }
@@ -126,23 +127,41 @@ void CSimulationProvider::StopDepthWatch( pSymbol_t pSymbol ) {
   pSymbol->StopDepthWatch();
 }
 
+void CSimulationProvider::StartGreekWatch( pSymbol_t pSymbol ) {
+  pSymbol->StartGreekWatch();
+}
+
+void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
+  pSymbol->StopGreekWatch();
+}
+
 //void CSimulationProvider::Merge( LPVOID lpParam ) {
 //  CSimulationProvider *pProvider = reinterpret_cast<CSimulationProvider *>( lpParam );
 void CSimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote and trade series
-  // datums from each series will be merged and emittedin in chronological order
+  // datums from each series will be merged and emitted in chronological order
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
     iter != m_mapSymbols.end(); ++iter ) {
       pSymbol_t sym( iter->second );
       CQuotes* quotes = &sym->m_quotes;
-      m_pMerge -> Add( 
-        quotes, 
-        MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
-      CTrades *trades = &sym->m_trades;
-      m_pMerge -> Add( 
-        trades, 
-        MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
+      if ( 0 != quotes->Size() ) {
+        m_pMerge -> Add( 
+          quotes, 
+          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
+      }
+      CTrades* trades = &sym->m_trades;
+      if ( 0 != trades->Size() ) {
+        m_pMerge -> Add( 
+          trades, 
+          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
+      }
+      CGreeks* greeks = &sym->m_greeks;
+      if ( 0 != greeks->Size() ) {
+        m_pMerge -> Add(
+          greeks,
+          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleGreekEvent ) );
+      }
   }
 
   bool bOldMode = CTimeSource::Instance().GetSimulationMode();
@@ -188,7 +207,7 @@ void CSimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName() << std::endl;
+    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
   }
   else {
     iter->second->m_simExec.SubmitOrder( pOrder );
@@ -199,7 +218,7 @@ void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
   inherited_t::CancelOrder( pOrder );
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName() << std::endl;
+    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
   }
   else {
     iter->second->m_simExec.CancelOrder( pOrder->GetOrderId() );

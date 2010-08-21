@@ -57,21 +57,24 @@ public:
   typedef CSymbolBase::pInstrument_t pInstrument_t;
   typedef CSymbolBase::pInstrument_cref pInstrument_cref;
 
-  enum enumProviderId: enumProviderId_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, _EProviderCount };
+  enum enumProviderId: enumProviderId_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
 
   const std::string& Name( void ) { return m_sName; };
   unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
 
   CProviderInterfaceBase( void )
     : m_nID( 0 ), m_bConnected( false ),
+      m_pProvidesBrokerInterface( false ),
       m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false )
     {};
   virtual ~CProviderInterfaceBase( void ) {};
 
   bool Connected( void ) { return m_bConnected; };
 
+  bool ProvidesBrokerInterface( void ) { return m_pProvidesBrokerInterface; };
+
   bool ProvidesQuotes( void ) { return m_bProvidesQuotes; };
-  bool ProvidesTrades( void ) { return m_bProvidesQuotes; };
+  bool ProvidesTrades( void ) { return m_bProvidesTrades; };
   bool ProvidesGreeks( void ) { return m_bProvidesGreeks; };
 
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
@@ -98,6 +101,8 @@ protected:
   unsigned short m_nID;
 
   bool m_bConnected;
+
+  bool m_pProvidesBrokerInterface;
 
   bool m_bProvidesQuotes;
   bool m_bProvidesTrades;

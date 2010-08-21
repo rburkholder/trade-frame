@@ -31,6 +31,7 @@ public:
   typedef inherited_t::pInstrument_cref pInstrument_cref;
   typedef inherited_t::trade_t trade_t;
   typedef inherited_t::quote_t quote_t;
+  typedef inherited_t::greek_t greek_t;
   
   CSimulationSymbol( const std::string& sSymbol, 
                      pInstrument_cref pInstrument, 
@@ -45,17 +46,21 @@ protected:
   void StopQuoteWatch( void );
   void StartDepthWatch( void );
   void StopDepthWatch( void );
+  void StartGreekWatch( void );
+  void StopGreekWatch( void );
 
   //virtual bool AddTradeHandler( CSymbol::tradehandler_t ); 
   //virtual bool RemoveTradeHandler( CSymbol::tradehandler_t );
 
   void HandleTradeEvent( const CDatedDatum &datum );
   void HandleQuoteEvent( const CDatedDatum &datum );
+  void HandleGreekEvent( const CDatedDatum &datum );
 
   std::string m_sDirectory;
 
   CQuotes m_quotes;
   CTrades m_trades;
+  CGreeks m_greeks;
 
   CSimulateOrderExecution m_simExec;
 

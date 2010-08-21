@@ -24,12 +24,17 @@
 //  PortfolioManager
 //  ProviderManager, 
 
+// implement a factory templated method for pR_t?
+
 #include <map>
 
 #include "boost/shared_ptr.hpp"
 
 #include "LibCommon/Singleton.h"
 
+// T: CRTP base
+// K: key
+// R: object or base type being managed
 template<class T, class K, class R> class ManagerBase: public CSingleton<T> {
 public:
 
@@ -41,7 +46,7 @@ protected:
 
   typedef std::map<K, pR_t> map_t;
   typedef std::pair<K, pR_t> mappair_t;
-  map_t m_records; // where records of type R with key of type K are stored
+  map_t m_records; // where records of type pR_t with key of type K are stored
 
 private:
 };

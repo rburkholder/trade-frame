@@ -22,11 +22,14 @@
 #include <LibTimeSeries/TimeSeries.h>
 
 #include <LibTrading/PortfolioManager.h>
+#include <LibTrading/ProviderManager.h>
 
 #include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <LibIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
 
 #include <LibInteractiveBrokers/IBTWS.h>
+
+#include <LibSimulation/SimulationProvider.h>
 
 //
 // ==================
@@ -179,8 +182,11 @@ private:
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
 
+  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+
   typedef CIBTWS::pProvider_t pProviderIBTWS_t;
   typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef CSimulationProvider::pProvider_t pProviderSim_t;
 
   typedef double strike_t;
   enum enumTradingState {  // arranged in chronological order
@@ -209,6 +215,12 @@ private:
   bool m_bWatchingOptions;
   bool m_bTrading;
 
+  pProviderSim_t m_sim;
+  bool m_bSimConnected;
+
+  pProvider_t m_pDataProvider;
+  pProvider_t m_pExecutionProvider;
+  
   CQuotes m_quotes;
   CTrades m_trades;
 

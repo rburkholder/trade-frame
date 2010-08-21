@@ -15,6 +15,7 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
 
@@ -29,11 +30,16 @@
 //  will need to be based upon time
 // looks like CMergeDatedDatums will need an OnOpen event simulated
 
+// 20100821:  todo: provide cache mechanism for multiple runs
+//    first time through, use the minheap, 
+//    subsequent times through, scan a vector
+
 class CSimulationProvider
 : public CProviderInterface<CSimulationProvider,CSimulationSymbol>
 {
 public:
 
+  typedef boost::shared_ptr<CSimulationProvider> pProvider_t;
   typedef CProviderInterface<CSimulationProvider,CSimulationSymbol> inherited_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::pInstrument_cref pInstrument_cref;
@@ -51,8 +57,8 @@ public:
   void Stop( void );
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
-  void AddTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
-  void RemoveTradeHandler( const std::string &sSymbol, CSimulationSymbol::tradehandler_t handler );
+  void AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
 protected:
   pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
   void StartQuoteWatch( pSymbol_t pSymbol );
@@ -61,6 +67,8 @@ protected:
   void StopTradeWatch( pSymbol_t pSymbol );
   void StartDepthWatch( pSymbol_t pSymbol );
   void StopDepthWatch( pSymbol_t pSymbol );
+  void StartGreekWatch( pSymbol_t pSymbol );
+  void StopGreekWatch( pSymbol_t pSymbol );
 
   std::string m_sGroupDirectory;
 

@@ -33,19 +33,23 @@ CMergeDatedDatums::~CMergeDatedDatums(void) {
   }
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CQuote> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
+void CMergeDatedDatums::Add( CTimeSeries<CQuote>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
   m_vCarriers.Append( new CMergeCarrier<CQuote>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CTrade> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
+void CMergeDatedDatums::Add( CTimeSeries<CTrade>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
   m_vCarriers.Append( new CMergeCarrier<CTrade>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CBar> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
+void CMergeDatedDatums::Add( CTimeSeries<CBar>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
   m_vCarriers.Append( new CMergeCarrier<CBar>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth> *pSeries, CMergeDatedDatums::OnDatumHandler function) {
+void CMergeDatedDatums::Add( CTimeSeries<CGreek>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
+  m_vCarriers.Append( new CMergeCarrier<CGreek>( pSeries, function ) );
+}
+
+void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
   m_vCarriers.Append( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
 }
 

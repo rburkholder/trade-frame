@@ -28,9 +28,12 @@
   int result = control.Start( sBaseGroup, this );
   */
 
+// m_pFilter->T::Process( sObjectName, sObjectPath );
 template<class T> class HDF5IterateGroups {
 public:
+
   HDF5IterateGroups<T>( void ) {};
+
   int Start( const std::string &sBaseGroup, T *pFilter ) {
     CHDF5DataManager dm;
     m_sBaseGroup = sBaseGroup;
@@ -39,6 +42,7 @@ public:
     int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &HDF5IterateCallback, this );  
     return result;
   }
+
   void Process( const std::string &sObjectName ) {
     CHDF5DataManager dm;
     std::string sObjectPath;
@@ -68,6 +72,8 @@ public:
           sObjectPath.append( "/" );
           HDF5IterateGroups control;  // recursive call
           int result = control.Start( sObjectPath, m_pFilter );
+          break;
+        default:
           break;
       }
     }

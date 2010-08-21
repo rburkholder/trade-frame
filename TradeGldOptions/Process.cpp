@@ -131,7 +131,7 @@ CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
 
 CProcess::CProcess(void)
 :
-  m_bIBConnected( false ), m_bIQFeedConnected( false ),
+  m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),

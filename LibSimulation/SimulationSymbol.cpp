@@ -37,29 +37,48 @@ CSimulationSymbol::~CSimulationSymbol(void) {
 }
 
 void CSimulationSymbol::StartTradeWatch( void ) {
-  std::string sPath( m_sDirectory + "/trades/" + GetId() );
-  CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
-  CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
-  begin = tradeRepository.begin();
-  end = tradeRepository.end();
-  m_trades.Resize( end - begin );
-  tradeRepository.Read( begin, end, &m_trades );
+  if ( 0 == m_trades.Size() ) {
+    std::string sPath( m_sDirectory + "/trades/" + GetId() );
+    CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
+    CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
+    begin = tradeRepository.begin();
+    end = tradeRepository.end();
+    m_trades.Resize( end - begin );
+    tradeRepository.Read( begin, end, &m_trades );
+  }
 }
 
 void CSimulationSymbol::StopTradeWatch( void ) {
 }
 
 void CSimulationSymbol::StartQuoteWatch( void ) {
-  std::string sPath( m_sDirectory + "/quotes/" + GetId() );
-  CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
-  CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
-  begin = quoteRepository.begin();
-  end = quoteRepository.end();
-  m_quotes.Resize( end - begin );
-  quoteRepository.Read( begin, end, &m_quotes );
+  if ( 0 == m_quotes.Size() ) {
+    std::string sPath( m_sDirectory + "/quotes/" + GetId() );
+    CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
+    CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
+    begin = quoteRepository.begin();
+    end = quoteRepository.end();
+    m_quotes.Resize( end - begin );
+    quoteRepository.Read( begin, end, &m_quotes );
+  }
 }
 
 void CSimulationSymbol::StopQuoteWatch( void ) {
+}
+
+void CSimulationSymbol::StartGreekWatch( void ) {
+  if ( 0 == m_greeks.Size() ) {
+    std::string sPath( m_sDirectory + "/greeks/" + GetId() );
+    CHDF5TimeSeriesContainer<CGreek> greekRepository( sPath );
+    CHDF5TimeSeriesContainer<CGreek>::iterator begin, end;
+    begin = greekRepository.begin();
+    end = greekRepository.end();
+    m_greeks.Resize( end - begin );
+    greekRepository.Read( begin, end, &m_greeks );
+  }
+}
+
+void CSimulationSymbol::StopGreekWatch( void ) {
 }
 
 void CSimulationSymbol::StartDepthWatch( void ) {
@@ -82,5 +101,9 @@ void CSimulationSymbol::HandleQuoteEvent( const CDatedDatum &datum ) {
 
 void CSimulationSymbol::HandleTradeEvent( const CDatedDatum &datum ) {
   m_OnTrade( dynamic_cast<const CTrade &>( datum ) );  
+}
+
+void CSimulationSymbol::HandleGreekEvent( const CDatedDatum &datum ) {
+  m_OnGreek( dynamic_cast<const CGreek &>( datum ) );  
 }
 
