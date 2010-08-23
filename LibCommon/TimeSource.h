@@ -20,7 +20,6 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 #include <boost/thread/mutex.hpp>
 
-
 #include "Singleton.h"
 
 class CTimeSource : public CSingleton<CTimeSource> {

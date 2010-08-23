@@ -156,6 +156,9 @@ public:
   CProcess(void);
   ~CProcess(void);
 
+  void SimConnect( void );
+  void SimDisconnect( void );
+
   void IBConnect( void );
   void IBDisconnect( void );
 
@@ -168,6 +171,7 @@ public:
   void StartTrading( void ) ;
   void StopTrading( void );
 
+  void EmitStats( void );
   void SaveSeries( void );
 
 protected:
@@ -218,9 +222,14 @@ private:
   pProviderSim_t m_sim;
   bool m_bSimConnected;
 
-  pProvider_t m_pDataProvider;
   pProvider_t m_pExecutionProvider;
+  pProvider_t m_pDataProvider;
   
+  enum enumProcessingState {
+    EPSSimulation,
+    EPSLive
+  } m_ProcessingState;
+
   CQuotes m_quotes;
   CTrades m_trades;
 
@@ -265,11 +274,14 @@ private:
   pPosition_t m_posPut;
   pPosition_t m_posUnderlying;
 
-  void HandleOnIBConnected( int );
-  void HandleOnIBDisconnected( int );
+  void HandleOnExecConnected( int );
+  void HandleOnExecDisconnected( int );
 
-  void HandleOnIQFeedConnected( int );
-  void HandleOnIQFeedDisconnected( int );
+  void HandleOnDataConnected( int );
+  void HandleOnDataDisconnected( int );
+
+  void HandleOnData2Connected( int );
+  void HandleOnData2Disconnected( int );
 
   void HandleStrikeListing1( const ContractDetails& );  // listing of strikes
   void HandleStrikeListing1Done( void );

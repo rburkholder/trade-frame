@@ -143,7 +143,8 @@ CProcess::CProcess(void)
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
   m_sPathForSeries( "/strategy/deltaneutral1" ),
   //m_tws( "U215226" ), m_iqfeed()
-  m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() )
+  m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
+  m_ProcessingState( EPSLive )
 {
 
   m_contract.currency = "USD";
@@ -154,18 +155,50 @@ CProcess::CProcess(void)
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
 
-  m_tws->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIBConnected ) );
-  m_tws->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIBDisconnected ) );
+  // this is where we select which provider we will be working with on this run
 
+  switch ( m_ProcessingState ) {
+    case EPSSimulation:
+      m_pExecutionProvider = m_sim;
+      m_pDataProvider = m_sim;
+      break;
+    case EPSLive:
+      m_pExecutionProvider = m_tws;
+      m_pDataProvider = m_tws;
+      break;
+  }
 
-  m_iqfeed->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedConnected ) );
-  m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnIQFeedDisconnected ) );
+  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
+
+  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnDataConnected ) );
+  m_pDataProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnDataDisconnected ) );
+
+  m_iqfeed->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnData2Connected ) );
+  m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
 }
 
 CProcess::~CProcess(void)
 {
 }
 
+// Simulation Engine Connect/Disconnect
+void CProcess::SimConnect( void ) {
+  if ( !m_bSimConnected ) {
+    
+    m_sim->Connect();
+    m_bSimConnected = true;
+  }
+}
+
+void CProcess::SimDisconnect( void ) {
+  if ( m_bSimConnected ) {
+    m_sim->Disconnect();
+    m_bSimConnected = false;
+  }
+}
+
+// Interactive Brokers Connect/Disconnect
 void CProcess::IBConnect( void ) {
   if ( !m_bIBConnected ) {
     
@@ -181,6 +214,7 @@ void CProcess::IBDisconnect( void ) {
   }
 }
 
+// IQFeed Connect/Disconnect
 void CProcess::IQFeedConnect( void ) {
   if ( !m_bIQFeedConnected ) {
     
@@ -196,17 +230,42 @@ void CProcess::IQFeedDisconnect( void ) {
   }
 }
 
-void CProcess::HandleOnIBConnected(int e) {
+void CProcess::HandleOnExecConnected(int e) {
   // obtain strike list of underlying instrument
 
   m_contract.right = "CALL";
-
   m_vStrikes.clear(); /// horribly buggy this way.
 
-  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
-  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
-  m_tws->RequestContractDetails( m_contract );
+  switch ( m_ProcessingState ) {
+    case EPSSimulation:
+      break;
+    case EPSLive:
+      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
+      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
+      m_tws->RequestContractDetails( m_contract );
+      break;
+  }
+}
 
+void CProcess::HandleOnExecDisconnected(int e) {
+}
+
+void CProcess::HandleOnDataConnected(int e) {
+  CIQFeedHistoryQuery<CProcess>::Connect();  
+}
+
+void CProcess::HandleOnDataDisconnected(int e) {
+}
+
+void CProcess::HandleOnData2Connected(int e) {
+  CIQFeedHistoryQuery<CProcess>::Connect();  
+}
+
+void CProcess::HandleOnData2Disconnected(int e) {
+}
+
+void CProcess::OnHistoryConnected( void ) {
+  CIQFeedHistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
 }
 
 void CProcess::StartWatch( void ) {
@@ -225,9 +284,16 @@ void CProcess::StartWatch( void ) {
 
   m_contract.strike = m_iterStrikes->Strike();
 
-  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
-  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
-  m_tws->RequestContractDetails( m_contract );
+  switch ( m_ProcessingState ) {
+    case EPSSimulation:
+      break;
+    case EPSLive:
+      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
+      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
+      m_tws->RequestContractDetails( m_contract );
+      break;
+  }
+
 }
 
 void CProcess::StopWatch( void ) {
@@ -235,13 +301,13 @@ void CProcess::StopWatch( void ) {
     m_bWatchingOptions = false;
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_tws->RemoveQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_tws->RemoveTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_tws->RemoveGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-      m_tws->RemoveQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_tws->RemoveTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_tws->RemoveGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -356,20 +422,6 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
 void CProcess::HandleStrikeListing4Done(  ) {
 }
 
-void CProcess::HandleOnIBDisconnected(int e) {
-}
-
-void CProcess::HandleOnIQFeedConnected(int e) {
-  CIQFeedHistoryQuery<CProcess>::Connect();  
-}
-
-void CProcess::HandleOnIQFeedDisconnected(int e) {
-}
-
-void CProcess::OnHistoryConnected( void ) {
-  CIQFeedHistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
-}
-
 void CProcess::OnHistorySummaryData( structSummary* pDP ) {
   m_Bar.Open( pDP->Open );
   m_Bar.Close( pDP->Close );
@@ -443,11 +495,11 @@ void CProcess::OpenPosition( void ) {
     else {
       // orders for normal delta neutral
 
-      m_posUnderlying.reset( new CPosition( m_pUnderlying->GetInstrument(), m_tws, m_tws, "Underlying" ) );
+      m_posUnderlying.reset( new CPosition( m_pUnderlying->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
 
-      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), m_tws, m_tws, "Put" ) );
+      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
       m_pPortfolio->AddPosition( "Put", m_posPut );
 
@@ -584,13 +636,13 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_bWatchingOptions = true;
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    m_tws->AddQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-    m_tws->AddTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-    m_tws->AddGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+    m_pDataProvider->AddQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+    m_pDataProvider->AddGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-    m_tws->AddQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-    m_tws->AddTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-    m_tws->AddGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    m_pDataProvider->AddQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+    m_pDataProvider->AddGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
   }
 
   m_TradingState = ETSFirstTrade;
@@ -712,6 +764,12 @@ void CProcess::SaveSeries( void ) {
   m_ss.str( "" );
   m_ss << CTimeSource::Instance().External();
 
+  if ( CProviderInterfaceBase::EProviderSimulator == m_pDataProvider->ID() ) {
+    m_ss << " simulator stores nothing." << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
+    return;
+  }
+
   std::string sPathName;
 
   CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
@@ -771,6 +829,14 @@ void CProcess::SaveSeries( void ) {
   }
 
   m_ss << " done writing." << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+}
+
+void CProcess::EmitStats( void ) {
+  m_ss.str( "" );
+  m_ss << CTimeSource::Instance().External();
+  m_ss << ": ";
+  m_pPortfolio->EmitStats( m_ss );
   OutputDebugString( m_ss.str().c_str() );
 }
 

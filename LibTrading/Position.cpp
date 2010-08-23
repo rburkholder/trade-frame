@@ -74,9 +74,12 @@ void CPosition::HandleQuote( quote_t quote ) {
       m_dblUnRealizedPL = m_nPositionActive * ( m_dblAverageCostPerShare - quote.Ask() );
       break;
   }
+
+  OnQuote( this );
 }
 
 void CPosition::HandleTrade( trade_t trade ) {
+  OnTrade( this );
 }
 
 void CPosition::HandleGreek( greek_t greek ) {
@@ -271,6 +274,8 @@ void CPosition::HandleExecution( std::pair<const COrder&, const CExecution&>& st
     // need to handle the case where order was cancelled, but not in time to prevent execution
     throw std::runtime_error( "CPosition::HandleExecution doesn't have an Open Order" );
   }
+
+  OnExecution( this );
   
 }
 

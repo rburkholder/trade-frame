@@ -76,11 +76,12 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)LibCommon.lib;$(OutDir)LibWtlHeaders.lib;$(OutDir)LibIndicators.lib;$(OutDir)LibTrading.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;$(OutDir)libdb48d.lib;$(OutDir)szip.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)LibCommon.lib;$(OutDir)LibWtlHeaders.lib;$(OutDir)LibIndicators.lib;$(OutDir)LibSimulation.lib;$(OutDir)LibTrading.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;$(OutDir)libdb48d.lib;$(OutDir)szip.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,24 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TradeGldOptions.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibHDF5TimeSeries\LibHDF5TimeSeries.vcxproj">
-      <Project>{12cc3456-56cb-4ac1-979f-b6b73bb47929}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibIndicators\LibIndicators.vcxproj">
-      <Project>{662ace5b-9b25-4bd7-9656-ec8815723ebb}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibInteractiveBrokers\LibInteractiveBrokers.vcxproj">
-      <Project>{22bf5be7-74f6-462a-a01f-e543825c0290}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibIQFeed\LibIQFeed.vcxproj">
-      <Project>{23192e89-c17f-4c84-b35c-3677927d64a6}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

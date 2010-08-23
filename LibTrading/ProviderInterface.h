@@ -65,16 +65,23 @@ public:
   CProviderInterfaceBase( void )
     : m_nID( 0 ), m_bConnected( false ),
       m_pProvidesBrokerInterface( false ),
-      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false )
+      m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepth( false )
     {};
   virtual ~CProviderInterfaceBase( void ) {};
 
-  bool Connected( void ) { return m_bConnected; };
+  virtual  void Connect( void ) {};
+  Delegate<int> OnConnected;
+
+  virtual  void Disconnect( void ) {};
+  Delegate<int> OnDisconnected;
 
   bool ProvidesBrokerInterface( void ) { return m_pProvidesBrokerInterface; };
 
+  bool Connected( void ) { return m_bConnected; };
+
   bool ProvidesQuotes( void ) { return m_bProvidesQuotes; };
   bool ProvidesTrades( void ) { return m_bProvidesTrades; };
+  bool ProvidesDepth( void )  { return m_bProvidesDepth; };
   bool ProvidesGreeks( void ) { return m_bProvidesGreeks; };
 
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
@@ -106,6 +113,7 @@ protected:
 
   bool m_bProvidesQuotes;
   bool m_bProvidesTrades;
+  bool m_bProvidesDepth;
   bool m_bProvidesGreeks;
 
 private:
@@ -125,12 +133,6 @@ public:
 
   CProviderInterface(void);
   ~CProviderInterface(void);
-
-  virtual  void Connect( void );
-  Delegate<int> OnConnected;
-
-  virtual  void Disconnect( void );
-  Delegate<int> OnDisconnected;
 
   void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
   void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
@@ -194,16 +196,6 @@ CProviderInterface<P,S>::~CProviderInterface(void) {
   }
   */
   m_mapSymbols.clear();
-}
-
-template <typename P, typename S>
-void CProviderInterface<P,S>::Connect() {
-  // override for provider specific code
-}
-
-template <typename P, typename S>
-void CProviderInterface<P,S>::Disconnect() {
-  // override for provider specific code
 }
 
 template <typename P, typename S>

@@ -81,3 +81,27 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WOR
 
   return 0;
 }
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSimConnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.SimConnect();
+
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSimDisconnet(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.SimDisconnect();
+
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnEmitStats(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.EmitStats();
+
+  return 0;
+}

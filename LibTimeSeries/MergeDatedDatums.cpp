@@ -13,7 +13,7 @@
 
 #include "StdAfx.h"
 
-#include "LibCommon/Log.h"
+//#include "LibCommon/Log.h"
 
 #include "MergeDatedDatums.h"
 
@@ -71,7 +71,7 @@ protected:
 void CMergeDatedDatums::Run() {
   m_request = eRun;
   size_t cntCarriers = m_vCarriers.Size();
-  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
+//  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_cntReorders = 0;
@@ -92,7 +92,7 @@ void CMergeDatedDatums::Run() {
     }
   }
   m_state = eStopped;
-  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
+//  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
 }
 
 void CMergeDatedDatums::ProcessCarrier( CMergeCarrierBase *pCarrier ) {

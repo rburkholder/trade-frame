@@ -13,8 +13,10 @@
 #define IDC_BTN_STOP_TRADING            1005
 #define IDC_BTN_START_WATCH             1006
 #define IDC_BTN_STOP_WATCH              1007
-#define IDC_BUTTON1                     1008
 #define IDC_BTN_SAVE_SERIES             1008
+#define IDC_BTN_SIM_CONNECT             1009
+#define IDC_BTN_SIM_DISCONNECT          1010
+#define IDC_BTN_EMIT_STATS              1011
 #define ID_FILE_NEW_WINDOW              32771
 
 // Next default values for new objects
@@ -23,7 +25,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        201
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1009
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

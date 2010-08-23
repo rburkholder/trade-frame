@@ -15,6 +15,8 @@ public:
 	BOOL PreTranslateMessage(MSG* pMsg);
 
 	BEGIN_MSG_MAP_EX(CTradeGldOptionsView)
+    COMMAND_HANDLER(IDC_BTN_SIM_CONNECT, BN_CLICKED, OnBnClickedBtnSimConnect)
+    COMMAND_HANDLER(IDC_BTN_SIM_DISCONNECT, BN_CLICKED, OnBnClickedBtnSimDisconnet)
     COMMAND_HANDLER(IDC_BTN_IB_CONNECT, BN_CLICKED, OnBnClickedBtnIbConnect)
     COMMAND_HANDLER(IDC_BTN_IB_DISCONNECT, BN_CLICKED, OnBnClickedBtnIbDisconnect)
     COMMAND_HANDLER(IDC_BTN_IQFEED_CONNECT, BN_CLICKED, OnBnClickedBtnIqfeedConnect)
@@ -24,6 +26,7 @@ public:
     COMMAND_HANDLER(IDC_BTN_START_WATCH, BN_CLICKED, OnBnClickedBtnStartWatch)
     COMMAND_HANDLER(IDC_BTN_STOP_WATCH, BN_CLICKED, OnBnClickedBtnStopWatch)
     COMMAND_HANDLER(IDC_BTN_SAVE_SERIES, BN_CLICKED, OnBnClickedBtnSaveSeries)
+    COMMAND_HANDLER(IDC_BTN_EMIT_STATS, BN_CLICKED, OnBnClickedBtnEmitStats)
     MSG_WM_MOVE(OnMove)
     MSG_WM_SIZE(OnSize)
   END_MSG_MAP()
@@ -48,7 +51,11 @@ public:
   LRESULT OnBnClickedBtnStartWatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnStopWatch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
  
+  LRESULT OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnSimConnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnSimDisconnet(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnEmitStats(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
   void OnMove(CPoint ptPos);
   void OnSize(UINT nType, CSize size);
-  LRESULT OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

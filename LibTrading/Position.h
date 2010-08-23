@@ -15,7 +15,9 @@
 #include <string>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+
+#include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
@@ -51,6 +53,11 @@ public:
   const std::string& Notes( void ) { return m_sNotes; };
   void Append( std::string& sNotes ) { m_sNotes += sNotes; };
 
+  pInstrument_cref GetInstrument( void ) { return m_pInstrument; };
+  double GetUnRealizedPL( void ) { return m_dblUnRealizedPL; };
+  double GetRealizedPL( void ) { return m_dblRealizedPL; };
+  double GetCommissionPaid( void ) { return m_dblCommissionPaid; };
+
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
@@ -71,6 +78,10 @@ public:
     );
   void CancelOrders( void );
   void ClosePosition( void );
+
+  Delegate<const CPosition*> OnQuote;
+  Delegate<const CPosition*> OnTrade;  // nothing useful currently
+  Delegate<const CPosition*> OnExecution;
 
 protected:
 
@@ -94,13 +105,16 @@ protected:
   OrderSide::enumOrderSide m_eOrderSideActive;  
   unsigned long m_nPositionActive;
 
+  // following value markers exclude commission
   double m_dblAverageCostPerShare;  // based upon position trades
   double m_dblConstructedValue;  // based upon position trades
   double m_dblMarketValue;  // based upon market quotes
 
+  // following value markers exclude commission
   double m_dblUnRealizedPL;  // based upon market quotes
   double m_dblRealizedPL;  // based upon position trades
 
+  // contains total commissions
   double m_dblCommissionPaid;
 
   std::vector<pOrder_t> m_OpenOrders;  // active orders waiting to be executed or cancelled
