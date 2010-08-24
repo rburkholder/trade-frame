@@ -54,10 +54,21 @@ private:
 
   std::string m_sPortfolioName;
 
-  double m_dblUnRealizedPL;
-  double m_dblRealizedPL;
-  double m_dblCommissionsPaid;
-  double m_dblNetPL;
+  struct structPL {
+    double dblUnRealized;
+    double dblRealized;
+    double dblCommissionsPaid;
+    double dblNet;
+    structPL( void ): dblUnRealized( 0 ), dblRealized( 0 ), dblNet( 0 ), dblCommissionsPaid( 0 ) {};
+    void Zero( void ) { dblUnRealized = dblRealized = dblNet = dblCommissionsPaid = 0; };
+    void Sum( void ) { dblNet = dblUnRealized + dblRealized - dblCommissionsPaid; };
+    bool operator>( const structPL& pl ) const { return  dblNet > pl.dblNet; };
+    bool operator<( const structPL& pl ) const { return  dblNet < pl.dblNet; };
+  };
+
+  structPL m_plCurrent;
+  structPL m_plMax;
+  structPL m_plMin;
 
   void HandleQuote( const CPosition* );
   void HandleTrade( const CPosition* );

@@ -151,7 +151,7 @@ CProcess::CProcess(void)
   m_contract.exchange = "SMART";
   m_contract.secType = "OPT";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20100716";
+  m_contract.expiry = "20100930";
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
 

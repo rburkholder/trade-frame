@@ -19,7 +19,6 @@
 CPortfolio::CPortfolio( const std::string &sPortfolioName ) 
 : m_sPortfolioName( sPortfolioName )
 {
-  m_dblUnRealizedPL = m_dblRealizedPL = m_dblCommissionsPaid = m_dblCommissionsPaid = 0;
 }
 
 CPortfolio::~CPortfolio(void) {
@@ -100,14 +99,16 @@ CPortfolio::pPosition_t CPortfolio::GetPosition( const std::string& sName ) {
 
 void CPortfolio::HandleQuote( const CPosition* pPosition ) {
 
-  m_dblUnRealizedPL = m_dblRealizedPL = m_dblCommissionsPaid = m_dblCommissionsPaid = 0;
+  m_plCurrent.Zero();
 
   for ( iterator iter = m_mapPositionsViaUserName.begin(); iter != m_mapPositionsViaUserName.end(); ++iter ) {
-    m_dblUnRealizedPL += iter->second->GetUnRealizedPL();
-    m_dblRealizedPL += iter->second->GetRealizedPL();
-    m_dblCommissionsPaid += iter->second->GetCommissionPaid();
-    m_dblNetPL = m_dblUnRealizedPL + m_dblRealizedPL - m_dblCommissionsPaid;
+    m_plCurrent.dblUnRealized += iter->second->GetUnRealizedPL();
+    m_plCurrent.dblRealized += iter->second->GetRealizedPL();
+    m_plCurrent.dblCommissionsPaid += iter->second->GetCommissionPaid();
   }
+  m_plCurrent.Sum();
+  if ( m_plCurrent > m_plMax ) m_plMax = m_plCurrent;
+  if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
 }
 
 void CPortfolio::HandleTrade( const CPosition* pPosition ) {
@@ -118,10 +119,12 @@ void CPortfolio::HandleExecution( const CPosition* pPosition ) {
 
 void CPortfolio::EmitStats( std::stringstream& ss ) {
   ss.str( "" );
-  ss << "Portfolio UPL=" << m_dblUnRealizedPL
-    << ", RPL=" << m_dblRealizedPL 
-    << ", Comm=" << m_dblCommissionsPaid
-    << ", Net=" << m_dblNetPL;
+  ss << "Portfolio URPL=" << m_plCurrent.dblUnRealized
+    << ", RPL=" << m_plCurrent.dblRealized 
+    << ", Comm=" << m_plCurrent.dblCommissionsPaid
+    << ": Min=" << m_plMin.dblNet
+    << ", Net=" << m_plCurrent.dblNet
+    << ", Max=" << m_plMax.dblNet;
 }
 
 
