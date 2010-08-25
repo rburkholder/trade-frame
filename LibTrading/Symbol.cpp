@@ -19,7 +19,7 @@ CSymbolBase::CSymbolBase( pInstrument_t pInstrument )
 : 
   m_id( pInstrument->GetInstrumentName() ),  // use the generic name, but in provider, use provider specific name
   m_pInstrument( pInstrument )
-{
+  {
   // need to set using the provider specific from CInstrument, but need provider id to do so.
 }
 

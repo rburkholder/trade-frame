@@ -27,10 +27,19 @@
 //
 // ==================
 //
-
+/*
 CNakedOption::CNakedOption( double dblStrike ) 
 : m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
   m_dblStrike( dblStrike ),
+  m_bWatching( false ),
+  m_sSide( "-" )
+{
+}
+*/
+CNakedOption::CNakedOption( pInstrument_t pInstrument ) 
+: m_pInstrument( pInstrument ),
+  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
+  m_dblStrike( pInstrument->GetStrike() ),
   m_bWatching( false ),
   m_sSide( "-" )
 {
@@ -42,7 +51,7 @@ CNakedOption::CNakedOption( const CNakedOption& rhs )
   m_greek( rhs.m_greek ),
   m_bWatching( false ),
   m_sSide( rhs.m_sSide ),
-  m_pSymbol( rhs.m_pSymbol )
+  m_pInstrument( rhs.m_pInstrument )
 {
   assert( !rhs.m_bWatching );
 }
@@ -53,7 +62,7 @@ CNakedOption& CNakedOption::operator=( const CNakedOption& rhs ) {
   m_dblStrike = rhs.m_dblStrike;
   m_greek = rhs.m_greek;
   m_sSide = rhs.m_sSide;
-  m_pSymbol = rhs.m_pSymbol;
+  m_pInstrument = rhs.m_pInstrument;
   return *this;
 }
 
@@ -77,8 +86,8 @@ void CNakedOption::HandleGreek( const CGreek& greek ) {
 // ==================
 //
 
-CNakedCall::CNakedCall( double dblStrike )
-: CNakedOption( dblStrike )
+CNakedCall::CNakedCall( pInstrument_t pInstrument )
+: CNakedOption( pInstrument )
 {
   m_sSide = "C";
 }
@@ -87,8 +96,8 @@ CNakedCall::CNakedCall( double dblStrike )
 // ==================
 //
 
-CNakedPut::CNakedPut( double dblStrike )
-: CNakedOption( dblStrike )
+CNakedPut::CNakedPut( pInstrument_t pInstrument )
+: CNakedOption( pInstrument )
 {
   m_sSide = "P";
 }
@@ -100,7 +109,7 @@ CNakedPut::CNakedPut( double dblStrike )
 
 CStrikeInfo::CStrikeInfo( double dblStrike ) 
 : m_dblStrike( dblStrike ),
-  m_call( dblStrike ), m_put( dblStrike ),
+  m_call( NULL ), m_put( NULL ),
   m_bWatching( false )
 {
 }
@@ -151,7 +160,7 @@ CProcess::CProcess(void)
   m_contract.exchange = "SMART";
   m_contract.secType = "OPT";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20100930";
+  m_contract.expiry = "20100917";
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
 
@@ -301,13 +310,13 @@ void CProcess::StopWatch( void ) {
     m_bWatchingOptions = false;
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_pDataProvider->RemoveQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-      m_pDataProvider->RemoveQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -354,14 +363,16 @@ void CProcess::HandleStrikeListing2Done(  ) {
 
 void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   CIBSymbol::pSymbol_t pSymbol;
+  CIBTWS::pInstrument_t pInstrument;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
+    pInstrument = pSymbol->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws->GetSymbol( instrument );
+    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+    //pSymbol = m_tws->GetSymbol( instrument );
   }
-  m_iterStrikes->Call()->Symbol( pSymbol );
+  m_iterStrikes->Call( pInstrument );
 
 //  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallQuote ) );
 //  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallTrade ) );
@@ -390,14 +401,16 @@ void CProcess::HandleStrikeListing3Done(  ) {
 
 void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
   CIBSymbol::pSymbol_t pSymbol;
+  CIBTWS::pInstrument_t pInstrument;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
+    pInstrument = pSymbol->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws->GetSymbol( instrument );
+    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+    //pSymbol = m_tws->GetSymbol( instrument );
   }
-  m_iterStrikes->Put()->Symbol( pSymbol );
+  m_iterStrikes->Put( pInstrument );
 
 //  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutQuote ) );
 //  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutTrade ) );
@@ -413,8 +426,8 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     m_ss << "Option Acquisition Complete" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
-    m_tws->AddQuoteHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-    m_tws->AddTradeHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+    m_pDataProvider->AddQuoteHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+    m_pDataProvider->AddTradeHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
 
   }
 }
@@ -459,12 +472,12 @@ void CProcess::OpenPosition( void ) {
     m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
     // find highest gamma option for call and for put
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-      gamma = iter->Call()->Symbol()->Gamma();
+      gamma = iter->Call()->Gamma();
       if ( gammaCall < gamma ) { 
         gammaCall = gamma;
         m_iterOILatestGammaSelectCall = iter;
       }
-      gamma = iter->Put()->Symbol()->Gamma();
+      gamma = iter->Put()->Gamma();
       if ( gammaPut < gamma ) { 
         gammaPut = gamma;
         m_iterOILatestGammaSelectPut = iter;
@@ -477,8 +490,8 @@ void CProcess::OpenPosition( void ) {
     m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
 
     // depending upon gammas, could be straddle or strangle?
-    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() ) / 100 );
-    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->Put() ->Symbol()->Delta() ) / 100 );
+    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->Call()->Delta() ) / 100 );
+    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->Put() ->Delta() ) / 100 );
 
     // a normal delta neutral with long underlying and long put
     m_nLongPut = m_nPuts;
@@ -499,7 +512,7 @@ void CProcess::OpenPosition( void ) {
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
 
-      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->Symbol()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
+      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
       m_pPortfolio->AddPosition( "Put", m_posPut );
 
@@ -636,13 +649,13 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_bWatchingOptions = true;
   for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    m_pDataProvider->AddQuoteHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-    m_pDataProvider->AddGreekHandler( iter->Call()->Symbol()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+    m_pDataProvider->AddQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+    m_pDataProvider->AddGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-    m_pDataProvider->AddQuoteHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-    m_pDataProvider->AddGreekHandler( iter->Put()->Symbol()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    m_pDataProvider->AddQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+    m_pDataProvider->AddGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
   }
 
   m_TradingState = ETSFirstTrade;
@@ -681,8 +694,8 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
   }
   else {
 
-    double dblDeltaPut  = m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta() * m_nPuts * 100;
-    double dblDeltaCall = m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta() * m_nCalls * 100;
+    double dblDeltaPut  = m_iterOILatestGammaSelectPut->Put()->Delta() * m_nPuts * 100;
+    double dblDeltaCall = m_iterOILatestGammaSelectCall->Call()->Delta() * m_nCalls * 100;
 
     bool bTraded = false;
     int nOptions = 0;
@@ -746,15 +759,15 @@ void CProcess::PrintGreeks( void ) {
   m_ss << "Greeks: " 
     << CTimeSource::Instance().External()
     << " Strk "  << m_iterOILatestGammaSelectCall->Strike()
-    << " Call "  << m_iterOILatestGammaSelectCall->Call()->Symbol()->OptionPrice()
-    << " ImpVo " << m_iterOILatestGammaSelectCall->Call()->Symbol()->ImpliedVolatility()
-    << " Delta " << m_iterOILatestGammaSelectCall->Call()->Symbol()->Delta()
-    << " Gamma " << m_iterOILatestGammaSelectCall->Call()->Symbol()->Gamma() << " - "
+//    << " Call "  << m_iterOILatestGammaSelectCall->Call()->OptionPrice()
+    << " ImpVo " << m_iterOILatestGammaSelectCall->Call()->ImpliedVolatility()
+    << " Delta " << m_iterOILatestGammaSelectCall->Call()->Delta()
+    << " Gamma " << m_iterOILatestGammaSelectCall->Call()->Gamma() << " - "
     << " Strk "  << m_iterOILatestGammaSelectPut->Strike()
-    << " Put "   << m_iterOILatestGammaSelectPut->Put()->Symbol()->OptionPrice()
-    << " ImpVo " << m_iterOILatestGammaSelectPut->Put()->Symbol()->ImpliedVolatility()
-    << " Delta " << m_iterOILatestGammaSelectPut->Put()->Symbol()->Delta()
-    << " Gamma " << m_iterOILatestGammaSelectPut->Put()->Symbol()->Gamma() 
+//    << " Put "   << m_iterOILatestGammaSelectPut->Put()->OptionPrice()
+    << " ImpVo " << m_iterOILatestGammaSelectPut->Put()->ImpliedVolatility()
+    << " Delta " << m_iterOILatestGammaSelectPut->Put()->Delta()
+    << " Gamma " << m_iterOILatestGammaSelectPut->Put()->Gamma() 
     << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
@@ -794,32 +807,32 @@ void CProcess::SaveSeries( void ) {
 
     try {
       if ( 0 != iter->Call()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
       }
 
       if ( 0 != iter->Call()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Call()->Trades() );
       }
 
       if ( 0 != iter->Call()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
       }
 
       if ( 0 != iter->Put()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
       }
 
       if ( 0 != iter->Put()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Put()->Trades() );
       }
 
       if ( 0 != iter->Put()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->Symbol()->GetInstrument()->GetInstrumentName();
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
       }
     }

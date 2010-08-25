@@ -29,8 +29,7 @@ CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument,
     m_nVolume( 0 ),
     m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
     m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
-    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 ),
-    m_bOptionsSet( false )
+    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 )
 {
   inherited_t::m_id = idSym;
 }
@@ -47,8 +46,7 @@ CIBSymbol::CIBSymbol( pInstrument_t pInstrument, TickerId idTicker )
     m_nVolume( 0 ),
     m_dblHigh( 0 ), m_dblLow( 0 ), m_dblClose( 0 ),
     m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false ),
-    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 ),
-    m_bOptionsSet( false )
+    m_dblOptionPrice( 0 ), m_dblUnderlyingPrice( 0 ), m_dblPvDividend( 0 )
 {
 }
 
@@ -172,9 +170,8 @@ void CIBSymbol::Greeks( double optPrice, double undPrice, double pvDividend,
   ptime dt;
   CTimeSource::Instance().External( &dt );
 
-  m_greek = CGreek( dt, impliedVol, delta, gamma, theta, vega, 0 );
-  m_bOptionsSet = true;
+  CGreek greek( dt, impliedVol, delta, gamma, theta, vega, 0 );
 
-  m_OnGreek( m_greek );
+  m_OnGreek( greek );
 
 }

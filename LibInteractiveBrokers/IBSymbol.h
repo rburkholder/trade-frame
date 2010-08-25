@@ -43,18 +43,6 @@ public:
     double impliedVol, double delta, double gamma, double vega, double theta );
 
   double OptionPrice( void ) { return m_dblOptionPrice; };
-  double ImpliedVolatility( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "ImplVol not set" );
-    return m_greek.ImpliedVolatility(); 
-  };
-  double Delta( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Delta not set" );
-    return m_greek.Delta(); 
-  };
-  double Gamma( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Gamma not set" );
-    return m_greek.Gamma(); 
-  };
 
 protected:
 
@@ -82,11 +70,9 @@ protected:
   double m_dblLow;
   double m_dblClose;
 
-  bool m_bOptionsSet;  // option info is available
   double m_dblOptionPrice;
   double m_dblUnderlyingPrice;
   double m_dblPvDividend;
-  CGreek m_greek;
 
   void SetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = true; };
   void ResetQuoteTradeWatchInProgress( void ) { m_bQuoteTradeWatchInProgress = false; };

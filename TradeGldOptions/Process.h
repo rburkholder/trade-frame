@@ -21,6 +21,8 @@
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTimeSeries/TimeSeries.h>
 
+#include <LibTrading/Instrument.h>
+
 #include <LibTrading/PortfolioManager.h>
 #include <LibTrading/ProviderManager.h>
 
@@ -38,7 +40,11 @@
 class CNakedOption
 {
 public:
-  CNakedOption( double dblStrike );
+
+  typedef CInstrument::pInstrument_t pInstrument_t;
+
+  //CNakedOption( double dblStrike );
+  CNakedOption( pInstrument_t pInstrument );
   CNakedOption( const CNakedOption& rhs );
   virtual ~CNakedOption( void ) {};
 
@@ -48,8 +54,9 @@ public:
   bool operator<=( const CNakedOption& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double Strike( void ) { return m_dblStrike; };
-  void Symbol( CIBSymbol::pSymbol_t pSymbol ) { m_pSymbol = pSymbol; };
-  CIBSymbol::pSymbol_t Symbol( void ) { return m_pSymbol; };
+  pInstrument_t GetInstrument( void ) { return m_pInstrument; };
+  //void Symbol( CIBSymbol::pSymbol_t pSymbol ) { m_pSymbol = pSymbol; };
+  //CIBSymbol::pSymbol_t Symbol( void ) { return m_pSymbol; };
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );
@@ -57,6 +64,12 @@ public:
 
   double Bid( void ) const { return m_dblBid; };
   double Ask( void ) const { return m_dblAsk; };
+
+  double ImpliedVolatility( void ) const { return m_greek.ImpliedVolatility(); };
+  double Delta( void ) const { return m_greek.Delta(); };
+  double Gamma( void ) const { return m_greek.Gamma(); };
+  double Theta( void ) const { return m_greek.Theta(); };
+  double Vega( void ) const { return m_greek.Vega(); };
 
   CQuotes* Quotes( void ) { return &m_quotes; };
   CTrades* Trades( void ) { return &m_trades; };
@@ -79,7 +92,8 @@ protected:
 
   bool m_bWatching;
 
-  CIBSymbol::pSymbol_t m_pSymbol;
+  pInstrument_t m_pInstrument;
+  //CIBSymbol::pSymbol_t m_pSymbol;
 
   std::stringstream m_ss;
 
@@ -93,7 +107,7 @@ private:
 class CNakedCall: public CNakedOption
 {
 public:
-  CNakedCall( double dblStrike );
+  CNakedCall( pInstrument_t pInstrument );
   virtual ~CNakedCall( void ) {};
 protected:
 private:
@@ -106,7 +120,7 @@ private:
 class CNakedPut: public CNakedOption
 {
 public:
-  CNakedPut( double dblStrike );
+  CNakedPut( pInstrument_t pInstrument );
   virtual ~CNakedPut( void ) {};
 protected:
 private:
@@ -130,13 +144,16 @@ public:
 
   double Strike( void ) const { return m_dblStrike; };
 
-  CNakedCall* Call( void ) { return &m_call; };
-  CNakedPut* Put( void ) { return &m_put; };
+  void Call( CInstrument::pInstrument_t pInstrument ) { assert( NULL == m_call ); m_call = new CNakedCall( pInstrument ); };
+  void Put( CInstrument::pInstrument_t pInstrument )  { assert( NULL == m_put );  m_put  = new CNakedPut( pInstrument ); };
+
+  CNakedCall* Call( void ) { return m_call; };
+  CNakedPut*  Put( void )  { return m_put; };
 
 protected:
 
-  CNakedCall m_call;
-  CNakedPut m_put;
+  CNakedCall *m_call;
+  CNakedPut *m_put;
 
 private:
   std::stringstream m_ss;

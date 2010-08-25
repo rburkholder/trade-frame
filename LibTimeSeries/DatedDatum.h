@@ -220,6 +220,16 @@ public:
   void Vega( double dblVega ) { m_dblVega = dblVega; };
   void Rho( double dblRho ) { m_dblRho = dblRho; };
 
+  void Assign( const ptime& dt, double dblImplVol, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ) {
+    m_dt = dt;
+    m_dblImpliedVolatility = dblImplVol;
+    m_dblDelta = dblDelta;
+    m_dblGamma =  dblGamma;
+    m_dblTheta = dblTheta;
+    m_dblVega = dblVega;
+    m_dblRho = dblRho;
+  };
+
   static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
 
 protected:
