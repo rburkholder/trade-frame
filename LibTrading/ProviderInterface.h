@@ -17,9 +17,9 @@
 #include <string>
 #include <stdexcept>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
-#include "LibCommon/Delegate.h"
+#include <LibCommon/Delegate.h>
 
 #include "Symbol.h"
 #include "Order.h"

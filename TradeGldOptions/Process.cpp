@@ -27,15 +27,7 @@
 //
 // ==================
 //
-/*
-CNakedOption::CNakedOption( double dblStrike ) 
-: m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
-  m_dblStrike( dblStrike ),
-  m_bWatching( false ),
-  m_sSide( "-" )
-{
-}
-*/
+
 CNakedOption::CNakedOption( pInstrument_t pInstrument ) 
 : m_pInstrument( pInstrument ),
   m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
@@ -109,7 +101,7 @@ CNakedPut::CNakedPut( pInstrument_t pInstrument )
 
 CStrikeInfo::CStrikeInfo( double dblStrike ) 
 : m_dblStrike( dblStrike ),
-  m_call( NULL ), m_put( NULL ),
+//  m_call( NULL ), m_put( NULL ),
   m_bWatching( false )
 {
 }
@@ -158,7 +150,6 @@ CProcess::CProcess(void)
 
   m_contract.currency = "USD";
   m_contract.exchange = "SMART";
-  m_contract.secType = "OPT";
   m_contract.symbol = m_sSymbolName;
   m_contract.expiry = "20100917";
 
@@ -239,26 +230,6 @@ void CProcess::IQFeedDisconnect( void ) {
   }
 }
 
-void CProcess::HandleOnExecConnected(int e) {
-  // obtain strike list of underlying instrument
-
-  m_contract.right = "CALL";
-  m_vStrikes.clear(); /// horribly buggy this way.
-
-  switch ( m_ProcessingState ) {
-    case EPSSimulation:
-      break;
-    case EPSLive:
-      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
-      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
-      m_tws->RequestContractDetails( m_contract );
-      break;
-  }
-}
-
-void CProcess::HandleOnExecDisconnected(int e) {
-}
-
 void CProcess::HandleOnDataConnected(int e) {
   CIQFeedHistoryQuery<CProcess>::Connect();  
 }
@@ -277,89 +248,105 @@ void CProcess::OnHistoryConnected( void ) {
   CIQFeedHistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
 }
 
-void CProcess::StartWatch( void ) {
+void CProcess::HandleOnExecConnected(int e) {
 
-  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
-  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
-
-  m_iterOILatestGammaSelectCall = m_vStrikes.end();  // initialized for beginning of trading
-  m_iterOILatestGammaSelectPut = m_vStrikes.end();  // initialized for beginning of trading
-
-  // start contract acquisition for calls
-  m_iterStrikes = m_vStrikes.begin();
-
-  m_contract.secType = "OPT";
-  m_contract.right = "CALL";
-
-  m_contract.strike = m_iterStrikes->Strike();
+  // (1) create underlying symbol, then (2) get strike list
+  m_vStrikes.clear(); /// horribly buggy this way.
+  m_vCrossOverPoints.clear();
 
   switch ( m_ProcessingState ) {
     case EPSSimulation:
       break;
     case EPSLive:
-      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
-      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
+      m_contract.secType = "STK";
+      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
+      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
       m_tws->RequestContractDetails( m_contract );
       break;
   }
-
 }
 
-void CProcess::StopWatch( void ) {
-  if ( m_bWatchingOptions ) {
-    m_bWatchingOptions = false;
-    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-
-      m_pDataProvider->RemoveQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
-
-      m_pDataProvider->RemoveQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
-    }
-  }
+void CProcess::HandleOnExecDisconnected(int e) {
+  m_ss.str( "" );
+  m_ss << "Exec disconnected." << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
-// --- listing 1 listing of strikes
-
+// --- listing 1 -- Uhderlying Contract
 
 void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
-  m_vCrossOverPoints.push_back( details.summary.strike );
-  CStrikeInfo oi( details.summary.strike );
-  m_vStrikes.push_back( oi );
+  m_contractidUnderlying = details.summary.conId;
+  try {
+    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
+  }
+  catch ( std::out_of_range& e ) {
+    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
+  }
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
+
   m_ss.str( "" );
-  m_ss << "#strikes: " << m_vStrikes.size() << std::endl;
+  m_ss << "Uhderlying Contract Done" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
-  m_contract.secType = "STK";
-
+  // now request contract info for strike listing 
+  m_contract.secType = "OPT";
+  m_contract.right = "CALL";
   m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
   m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2Done ) );
   m_tws->RequestContractDetails( m_contract );
+
 }
 
-// --- listing 2
+// --- listing 2 -- listing of strikes, listing of calls
 
 void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
-  m_contractidUnderlying = details.summary.conId;
+
+  // create strike entries
+  m_vCrossOverPoints.push_back( details.summary.strike );
+
+  // process contract as a call
+  CIBSymbol::pSymbol_t pSymbol;
+  CIBTWS::pInstrument_t pInstrument;
   try {
-    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying );
+    pSymbol = m_tws->GetSymbol( details.summary.conId );
+    pInstrument = pSymbol->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t instrument = m_tws->BuildInstrumentFromContract( details.summary );
-    m_pUnderlying = m_tws->GetSymbol( instrument );
+    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
+
+  // create strike entry
+  CStrikeInfo oi( details.summary.strike );
+  m_vStrikes.push_back( oi );
+  m_vStrikes.back().AssignCall( pInstrument );  // needs to come after push
 
 }
 
 void CProcess::HandleStrikeListing2Done(  ) {
+
+  // strike listing is complete
+  m_ss.str( "" );
+  m_ss << "#strikes: " << m_vStrikes.size() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+
+  // request puts
+  m_iterStrikes = m_vStrikes.begin();
+
+  if ( m_vStrikes.end() != m_iterStrikes ) {
+    m_contract.strike = m_iterStrikes->Strike();
+    m_contract.right = "PUT";
+
+    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
+    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
+    m_tws->RequestContractDetails( m_contract );
+  }
 }
 
-// --- listing 3 -- Call Contracts
+// --- listing 3 -- Put Contracts
 
 void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   CIBSymbol::pSymbol_t pSymbol;
@@ -370,50 +357,9 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   }
   catch ( std::out_of_range& e ) {
     pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-    //pSymbol = m_tws->GetSymbol( instrument );
+    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
-  m_iterStrikes->Call( pInstrument );
-
-//  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallQuote ) );
-//  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandleCallTrade ) );
-
-  ++m_iterStrikes;
-  if ( m_vStrikes.end() != m_iterStrikes ) {
-    m_contract.strike = m_iterStrikes->Strike();
-    m_tws->RequestContractDetails( m_contract );
-  }
-  else {
-    m_iterStrikes = m_vStrikes.begin();
-    m_contract.right = "PUT";
-
-    m_contract.strike = m_iterStrikes->Strike();
-
-    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4 ) );
-    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing4Done ) );
-    m_tws->RequestContractDetails( m_contract );
-  }
-}
-
-void CProcess::HandleStrikeListing3Done(  ) {
-}
-
-// --- listing 4 -- Put Contracts
-
-void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
-  CIBSymbol::pSymbol_t pSymbol;
-  CIBTWS::pInstrument_t pInstrument;
-  try {
-    pSymbol = m_tws->GetSymbol( details.summary.conId );
-    pInstrument = pSymbol->GetInstrument();
-  }
-  catch ( std::out_of_range& e ) {
-    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-    //pSymbol = m_tws->GetSymbol( instrument );
-  }
-  m_iterStrikes->Put( pInstrument );
-
-//  m_tws->AddQuoteHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutQuote ) );
-//  m_tws->AddTradeHandler( pSymbol->GetId(), MakeDelegate( &(*m_iterStrikes), &CStrikeInfo::HandlePutTrade ) );
+  m_iterStrikes->AssignPut( pInstrument );
 
   ++m_iterStrikes;
   if ( m_vStrikes.end() != m_iterStrikes ) {
@@ -425,14 +371,10 @@ void CProcess::HandleStrikeListing4( const ContractDetails& details ) {
     m_ss.str( "" );
     m_ss << "Option Acquisition Complete" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
-
-    m_pDataProvider->AddQuoteHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-    m_pDataProvider->AddTradeHandler( m_pUnderlying->GetInstrument(), MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
-
   }
 }
 
-void CProcess::HandleStrikeListing4Done(  ) {
+void CProcess::HandleStrikeListing3Done(  ) {
 }
 
 void CProcess::OnHistorySummaryData( structSummary* pDP ) {
@@ -456,6 +398,39 @@ void CProcess::OnHistoryRequestDone( void ) {
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S1 ) );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S2 ) );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S3 ) );
+}
+
+void CProcess::StartWatch( void ) {
+
+  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
+  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
+
+  m_iterOILatestGammaSelectCall = m_vStrikes.end();  // initialized for beginning of trading
+  m_iterOILatestGammaSelectPut = m_vStrikes.end();  // initialized for beginning of trading
+
+  m_pDataProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+  m_pDataProvider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+
+}
+
+void CProcess::StopWatch( void ) {
+
+  m_pDataProvider->RemoveQuoteHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
+  m_pDataProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+
+  if ( m_bWatchingOptions ) {
+    m_bWatchingOptions = false;
+    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+
+      m_pDataProvider->RemoveQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+
+      m_pDataProvider->RemoveQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    }
+  }
 }
 
 void CProcess::OpenPosition( void ) {
@@ -508,7 +483,7 @@ void CProcess::OpenPosition( void ) {
     else {
       // orders for normal delta neutral
 
-      m_posUnderlying.reset( new CPosition( m_pUnderlying->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
+      m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
 
@@ -608,10 +583,6 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_ss << CTimeSource::Instance().External();
   m_ss << " Trade 1: " << trade.Volume() << "@" << trade.Trade() << std::endl;
   OutputDebugString( m_ss.str().c_str() );
-
-  // after initialization in this method, hand off subsequent procesing to main handler
-//  m_tws->RemoveTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTrade1 ) );
-//     m_tws->AddTradeHandler( pUnderlying->GetId(), MakeDelegate( this, &CProcess::HandleMainTradeN ) );
 
   // set iterators for center of the pack (crossovers are above and below trade):
   m_iterAboveCrossOver = m_vCrossOverPoints.begin();

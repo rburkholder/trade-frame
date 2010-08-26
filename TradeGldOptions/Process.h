@@ -18,6 +18,8 @@
 #include <sstream>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include <LibTimeSeries/DatedDatum.h>
 #include <LibTimeSeries/TimeSeries.h>
 
@@ -43,7 +45,6 @@ public:
 
   typedef CInstrument::pInstrument_t pInstrument_t;
 
-  //CNakedOption( double dblStrike );
   CNakedOption( pInstrument_t pInstrument );
   CNakedOption( const CNakedOption& rhs );
   virtual ~CNakedOption( void ) {};
@@ -55,8 +56,6 @@ public:
 
   double Strike( void ) { return m_dblStrike; };
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
-  //void Symbol( CIBSymbol::pSymbol_t pSymbol ) { m_pSymbol = pSymbol; };
-  //CIBSymbol::pSymbol_t Symbol( void ) { return m_pSymbol; };
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );
@@ -93,7 +92,6 @@ protected:
   bool m_bWatching;
 
   pInstrument_t m_pInstrument;
-  //CIBSymbol::pSymbol_t m_pSymbol;
 
   std::stringstream m_ss;
 
@@ -144,20 +142,20 @@ public:
 
   double Strike( void ) const { return m_dblStrike; };
 
-  void Call( CInstrument::pInstrument_t pInstrument ) { assert( NULL == m_call ); m_call = new CNakedCall( pInstrument ); };
-  void Put( CInstrument::pInstrument_t pInstrument )  { assert( NULL == m_put );  m_put  = new CNakedPut( pInstrument ); };
+  void AssignCall( CInstrument::pInstrument_t pInstrument ) { assert( 0 == m_call.use_count() ); m_call.reset( new CNakedCall( pInstrument ) ); };
+  void AssignPut( CInstrument::pInstrument_t pInstrument )  { assert( 0 == m_put.use_count() );  m_put.reset( new CNakedPut( pInstrument ) ); };
 
-  CNakedCall* Call( void ) { return m_call; };
-  CNakedPut*  Put( void )  { return m_put; };
+  CNakedCall* Call( void ) { return m_call.get(); };
+  CNakedPut*  Put( void )  { return m_put.get(); };
 
 protected:
 
-  CNakedCall *m_call;
-  CNakedPut *m_put;
+  boost::shared_ptr<CNakedCall> m_call;
+  boost::shared_ptr<CNakedPut>  m_put;
 
 private:
   std::stringstream m_ss;
-  bool m_bWatching;
+  bool m_bWatching;  // this needs to be implemented.
   double m_dblStrike;
 };
 
@@ -203,6 +201,8 @@ private:
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
 
+  typedef CInstrument::pInstrument_t pInstrument_t;
+
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
   typedef CIBTWS::pProvider_t pProviderIBTWS_t;
@@ -222,7 +222,7 @@ private:
 
   std::string m_sSymbolName;
   long m_contractidUnderlying;
-  CIBSymbol::pSymbol_t m_pUnderlying;  // need to make share_ptr
+  pInstrument_t m_pUnderlying;
 
   std::string m_sPathForSeries;
 
@@ -300,14 +300,12 @@ private:
   void HandleOnData2Connected( int );
   void HandleOnData2Disconnected( int );
 
-  void HandleStrikeListing1( const ContractDetails& );  // listing of strikes
+  void HandleStrikeListing1( const ContractDetails& );  // underlying
   void HandleStrikeListing1Done( void );
-  void HandleStrikeListing2( const ContractDetails& );  // underlying contract
+  void HandleStrikeListing2( const ContractDetails& );  // symbols for Calls
   void HandleStrikeListing2Done( void );
-  void HandleStrikeListing3( const ContractDetails& );  // symbols for Calls
+  void HandleStrikeListing3( const ContractDetails& );  // symbols for Puts
   void HandleStrikeListing3Done( void );
-  void HandleStrikeListing4( const ContractDetails& );  // symbols for puts
-  void HandleStrikeListing4Done( void );
 
   void HandleUnderlyingQuote( const CQuote& quote );
   void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine
