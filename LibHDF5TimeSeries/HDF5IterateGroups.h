@@ -12,10 +12,13 @@
  ************************************************************************/
 #pragma once
 
-#include "HDF5DataManager.h"
-//using namespace H5;
-
 #include <string>
+#include <iostream>
+
+#include <LIbCommon/FastDelegate.h>
+using namespace fastdelegate;
+
+#include "HDF5DataManager.h"
 
 // called from IterateCallback (which is called as HDF5 iterates the directory
 // this class is called recursively as the group hierarchy is traversed
@@ -28,16 +31,23 @@
   int result = control.Start( sBaseGroup, this );
   */
 
-// m_pFilter->T::Process( sObjectName, sObjectPath );
-template<class T> class HDF5IterateGroups {
+class HDF5IterateGroups {
 public:
 
-  HDF5IterateGroups<T>( void ) {};
+  typedef FastDelegate2<const std::string&,const std::string&> OnObjectHandler_t;  // objectpath, objectname
 
-  int Start( const std::string &sBaseGroup, T *pFilter ) {
+  HDF5IterateGroups( void ) {};
+
+  void SetOnHandleObject( OnObjectHandler_t handler ) {
+    HandleObject = handler;;
+  }
+  void SetOnHandleGroup( OnObjectHandler_t handler ) {
+    HandleGroup = handler;
+  }
+
+  int Start( const std::string &sBaseGroup ) {
     CHDF5DataManager dm;
     m_sBaseGroup = sBaseGroup;
-    m_pFilter = pFilter;
     int idx = 0;  // starting location for interrupted queries
     int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &HDF5IterateCallback, this );  
     return result;
@@ -58,7 +68,7 @@ public:
       switch ( stats.type ) {
         case H5G_DATASET: 
           try {
-            m_pFilter->Process( sObjectName, sObjectPath );
+            if ( NULL != HandleObject ) HandleObject( sObjectPath, sObjectName );
           }
           catch ( std::exception e ) {
             std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " problem: " << e.what() << std::endl;
@@ -67,31 +77,35 @@ public:
             std::cout << "CFilterSelectionIteratorControl::Process Object " << sObjectName << " unknown problems" << std::endl;
           }
           break;
-        case H5G_GROUP:
-          int idx = 0;  // starting location for interrupted queries
-          sObjectPath.append( "/" );
-          HDF5IterateGroups control;  // recursive call
-          int result = control.Start( sObjectPath, m_pFilter );
+        case H5G_GROUP: {
+            int idx = 0;  // starting location for interrupted queries
+            sObjectPath.append( "/" );
+            if ( NULL != HandleGroup ) HandleGroup( sObjectPath, sObjectName );
+            HDF5IterateGroups control;  // recursive call
+            control.SetOnHandleObject( HandleObject );
+            control.SetOnHandleGroup( HandleGroup );
+            int result = control.Start( sObjectPath );
+          }
           break;
         default:
           break;
       }
     }
     catch ( H5::Exception e ) {
-      cout << "CFilterSelectionIteratorControl::Process H5::Exception " << e.getDetailMsg() << endl;
+      std::cout << "CFilterSelectionIteratorControl::Process H5::Exception " << e.getDetailMsg() << std::endl;
       e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
     }
   }
 protected:
   std::string m_sBaseGroup;
-  T *m_pFilter;
 private:
-  static herr_t HDF5IterateCallback( hid_t group, const char *name, void *op_data );
-};
+  OnObjectHandler_t HandleObject;
+  OnObjectHandler_t HandleGroup;
 
-template<class T> herr_t HDF5IterateGroups<T>::HDF5IterateCallback( hid_t group, const char *name, void *op_data ) {
-  HDF5IterateGroups<T> *pControl = ( HDF5IterateGroups<T> *) op_data;
-  pControl->Process( name );
-  return 0;
-}
+  static herr_t HDF5IterateCallback( hid_t group, const char *name, void *op_data ) {
+    HDF5IterateGroups *pControl = ( HDF5IterateGroups *) op_data;
+    pControl->Process( name );
+  return 0;  
+  }
+};
 

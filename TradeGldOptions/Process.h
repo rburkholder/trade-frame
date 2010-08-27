@@ -225,6 +225,8 @@ private:
   pInstrument_t m_pUnderlying;
 
   std::string m_sPathForSeries;
+  std::string m_sDesiredSimTradingDay;
+  bool m_bProcessSimTradingDayGroup;
 
   std::stringstream m_ss;
 
@@ -299,6 +301,10 @@ private:
 
   void HandleOnData2Connected( int );
   void HandleOnData2Disconnected( int );
+
+  void AcquireSimulationSymbols( void );
+  void HandleHDF5Object( const std::string& sPath, const std::string& sName);
+  void HandleHDF5Group( const std::string& sPath, const std::string& sName );
 
   void HandleStrikeListing1( const ContractDetails& );  // underlying
   void HandleStrikeListing1Done( void );

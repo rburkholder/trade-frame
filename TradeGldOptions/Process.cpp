@@ -21,6 +21,7 @@
 #include <LibIndicators/Pivots.h>
 #include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <LibHDF5TimeSeries/HDF5DataManager.h>
+#include <LibHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "Process.h"
 
@@ -143,6 +144,8 @@ CProcess::CProcess(void)
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
   m_sPathForSeries( "/strategy/deltaneutral1" ),
+  m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
+  m_bProcessSimTradingDayGroup( false ),
   //m_tws( "U215226" ), m_iqfeed()
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
   m_ProcessingState( EPSLive )
@@ -188,6 +191,8 @@ void CProcess::SimConnect( void ) {
     
     m_sim->Connect();
     m_bSimConnected = true;
+
+    AcquireSimulationSymbols();
   }
 }
 
@@ -283,6 +288,36 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
     CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
     m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
+}
+
+void CProcess::AcquireSimulationSymbols( void ) {
+  HDF5IterateGroups scan;
+  scan.SetOnHandleObject( MakeDelegate( this, &CProcess::HandleHDF5Object ) );
+  scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
+  scan.Start( m_sPathForSeries );
+}
+
+void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
+
+  if ( m_bProcessSimTradingDayGroup ) {
+    m_ss.str( "" );
+    m_ss << "Object: \"" << sPath << "\"" << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
+  }
+}
+
+void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
+
+  if ( 18 < sName.length() ) {
+    m_bProcessSimTradingDayGroup = ( sName == m_sDesiredSimTradingDay );
+  }
+  
+  m_ss.str( "" );
+  m_ss << "Group: \"" << sPath << "\"";
+  if ( m_bProcessSimTradingDayGroup ) 
+    m_ss << "*";
+  m_ss << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
@@ -703,10 +738,10 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
     OutputDebugString( m_ss.str().c_str() );
 
     // orders for normal delta neutral
-    m_posUnderlying->CancelOrders();
-    m_posUnderlying->ClosePosition();
-    m_posPut->CancelOrders();
-    m_posPut->ClosePosition();
+//    m_posUnderlying->CancelOrders();
+//    m_posUnderlying->ClosePosition();
+//    m_posPut->CancelOrders();
+//    m_posPut->ClosePosition();
 
     m_bTrading = false;
   }
@@ -821,6 +856,7 @@ void CProcess::EmitStats( void ) {
   m_ss << CTimeSource::Instance().External();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
+  m_ss << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
