@@ -13,12 +13,10 @@
 
 #include "StdAfx.h"
 
-#include "HDF5DataManager.h"
-
 #include <iostream>
 #include <stdexcept>
 
-//using namespace H5;
+#include "HDF5DataManager.h"
 
 //const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
 const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.hdf5";
@@ -60,7 +58,7 @@ CHDF5DataManager::CHDF5DataManager(void) {
   }
   else {
     //throw std::exception( "Only one DataManager may be instantiated." );
-    // multiple instantiations are allowed
+    // multiple instantiations are allowed as we may be using a number of different files
   }
 }
 

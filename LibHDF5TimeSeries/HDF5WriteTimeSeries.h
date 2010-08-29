@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "HDF5TimeSeriesContainer.h"
-
 #include <string>
 #include <stdexcept>
+
+#include "HDF5TimeSeriesContainer.h"
 
 // TS: TimeSeries, DD: DatedDatum, the type that TS uses
 // todo:  need to implement compile time type-matching for allowable TS/DD conbinations

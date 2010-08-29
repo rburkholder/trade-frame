@@ -147,7 +147,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
       case OrderStatus::OverFilled:
         break;
       default:
-        std::cout << "COrder::ReportExecution " << m_eOrderStatus << std::endl;
+        std::cout << "COrder::ReportExecution " << static_cast<char>( m_eOrderStatus ) << std::endl;
         break;
       }
       OnPartialFill( *this );

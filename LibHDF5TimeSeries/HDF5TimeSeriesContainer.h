@@ -15,9 +15,9 @@
 
 #include <string>
 
-#include "LibCommon/Delegate.h"
+#include <LibCommon/Delegate.h>
 
-#include "LibTimeSeries/TimeSeries.h"
+#include <LibTimeSeries/TimeSeries.h>
 
 #include "HDF5DataManager.h"
 

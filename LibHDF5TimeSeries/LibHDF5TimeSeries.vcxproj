@@ -68,6 +68,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HDF5Attribute.cpp" />
     <ClCompile Include="HDF5DataManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -75,6 +76,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HDF5Attribute.h" />
     <ClInclude Include="HDF5DataManager.h" />
     <ClInclude Include="HDF5IterateGroups.h" />
     <ClInclude Include="HDF5TimeSeriesAccessor.h" />

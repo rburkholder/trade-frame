@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include "LibTimeSeries/DatedDatum.h"
+#include <string>
+
+#include <LibTimeSeries/DatedDatum.h>
 
 #include "HDF5DataManager.h"
-
-#include <string>
 
 // inherited by CHDF5TimeSeriesContainer
 // called by CHDF5TimeSeriesIterator to access elements
