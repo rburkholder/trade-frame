@@ -149,7 +149,7 @@ CProcess::CProcess(void)
   m_bProcessSimTradingDayGroup( false ),
   //m_tws( "U215226" ), m_iqfeed()
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-  m_ProcessingState( EPSLive )
+  m_ProcessingState( EPSLive ), m_stateTimeSeries( EUnknown )
 {
 
   m_contract.currency = "USD";
@@ -292,6 +292,7 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
 }
 
 void CProcess::AcquireSimulationSymbols( void ) {
+  m_stateTimeSeries = EUnknown;
   HDF5IterateGroups scan;
   scan.SetOnHandleObject( MakeDelegate( this, &CProcess::HandleHDF5Object ) );
   scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
@@ -304,13 +305,29 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
     m_ss.str( "" );
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
+    if ( 5 >= sName.size() ) {  // process as stock
+    }
+    else { // process as option
+    }
+    switch ( m_stateTimeSeries ) {
+    case EQuotes:
+      break;
+    case ETrades:
+      break;
+    case EGreeks:
+      break;
+    }
   }
 }
 
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
 
+  m_stateTimeSeries = EUnknown;
   if ( 18 < sName.length() ) {
     m_bProcessSimTradingDayGroup = ( sName == m_sDesiredSimTradingDay );
+    if ( "quotes" == sName ) m_stateTimeSeries = EQuotes;
+    if ( "trades" == sName ) m_stateTimeSeries = ETrades;
+    if ( "greeks" == sName ) m_stateTimeSeries = EGreeks;
   }
   
   m_ss.str( "" );

@@ -78,35 +78,11 @@ public:
   bool TradeWatchNeeded( void ) { return !m_OnTrade.IsEmpty(); };
   bool DepthWatchNeeded( void ) { return !m_OnDepth.IsEmpty(); };
   bool GreekWatchNeeded( void ) { return !m_OnGreek.IsEmpty(); };
-  /*
-  double ImpliedVolatility( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "ImplVol not set" );
-    return m_greek.ImpliedVolatility(); 
-  };
-  double Delta( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Delta not set" );
-    return m_greek.Delta(); 
-  };
-  double Gamma( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Gamma not set" );
-    return m_greek.Gamma(); 
-  };
-  double Theta( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Theta not set" );
-    return m_greek.Theta(); 
-  };
-  double Vega( void ) { 
-    if ( !m_bOptionsSet ) throw std::logic_error( "Vega not set" );
-    return m_greek.Vega(); 
-  };
-  */
+
 protected:
 
   symbol_id_t m_id;  // may be overwritten with provider specific override
   pInstrument_t m_pInstrument;  // composition rather than inheritance as same instrument refers to different market data and order providers
-
-  //bool m_bOptionsSet;  // option info is available
-  //CGreek m_greek;
 
   Delegate<trade_t> m_OnOpen;  // first value upon market opening
   Delegate<quote_t> m_OnQuote; 

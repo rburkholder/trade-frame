@@ -227,6 +227,9 @@ private:
   std::string m_sPathForSeries;
   std::string m_sDesiredSimTradingDay;
   bool m_bProcessSimTradingDayGroup;
+  enum enumTimeSeriesType {
+    EUnknown, EQuotes, ETrades, EGreeks
+  } m_stateTimeSeries;
 
   std::stringstream m_ss;
 

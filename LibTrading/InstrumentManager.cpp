@@ -49,4 +49,75 @@ CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::st
 */
 
 
+CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument( 
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
+  InstrumentType::enumInstrumentTypes type ) {
+  pInstrument_t pInstrument( 
+    new CInstrument( sInstrumentName, sExchangeName, type ) );
+  Assign( pInstrument );
+  return pInstrument;
+}
 
+CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(     
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
+  unsigned short year, unsigned short month ) {
+  pInstrument_t pInstrument(
+    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Future, year, month ) );
+  Assign( pInstrument );
+  return pInstrument;
+}
+
+CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
+  unsigned short year, unsigned short month,
+  pInstrument_t pUnderlying,
+  OptionSide::enumOptionSide side, 
+  double strike ) {
+  pInstrument_t pInstrument( 
+    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Option, 
+    year, month, pUnderlying, side, strike ) );
+  Assign( pInstrument );
+  return pInstrument;
+}
+
+CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
+  unsigned short year, unsigned short month, unsigned short day,
+  pInstrument_t pUnderlying,
+  OptionSide::enumOptionSide side, 
+  double strike ) {
+  pInstrument_t pInstrument( 
+    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Option, 
+    year, month, day, pUnderlying, side, strike ) );
+  Assign( pInstrument );
+  return pInstrument;
+}
+
+CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency( 
+  idInstrument_cref sInstrumentName, 
+  pInstrument_t pUnderlying,
+  Currency::enumCurrency base, Currency::enumCurrency counter ) {
+  pInstrument_t pInstrument(
+    new CInstrument( sInstrumentName, pUnderlying, InstrumentType::Currency, base, counter ) );
+  Assign( pInstrument );
+  return pInstrument;
+}
+
+void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
+  if ( m_map.end() != m_map.find( pInstrument->GetInstrumentName() ) ) {
+    throw std::runtime_error( "CInstrumentManager::Assign instrument already exists" );
+  }
+  else {
+    m_map.insert( pair_t( pInstrument->GetInstrumentName(), pInstrument ) );
+  }
+}
+
+CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idName ) {
+  iterator iter = m_map.find( idName );
+  if ( m_map.end() == iter ) {
+    std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
+  }
+  else {
+    return iter->second;
+  }
+}

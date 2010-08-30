@@ -35,7 +35,7 @@ public:
   
   CSimulationSymbol( const std::string& sSymbol, 
                      pInstrument_cref pInstrument, 
-                     const std::string& sDirectory );
+                     const std::string& sGroup ); // base with trades/ quotes/, greeks/
   ~CSimulationSymbol(void);
 
 protected:
@@ -48,9 +48,6 @@ protected:
   void StopDepthWatch( void );
   void StartGreekWatch( void );
   void StopGreekWatch( void );
-
-  //virtual bool AddTradeHandler( CSymbol::tradehandler_t ); 
-  //virtual bool RemoveTradeHandler( CSymbol::tradehandler_t );
 
   void HandleTradeEvent( const CDatedDatum &datum );
   void HandleQuoteEvent( const CDatedDatum &datum );

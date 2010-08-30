@@ -139,29 +139,34 @@ void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
 //  CSimulationProvider *pProvider = reinterpret_cast<CSimulationProvider *>( lpParam );
 void CSimulationProvider::Merge( void ) {
 
-  // for each of the symbols, add the quote and trade series
+  // for each of the symbols, add the quote, trade and greek series
   // datums from each series will be merged and emitted in chronological order
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
     iter != m_mapSymbols.end(); ++iter ) {
+
       pSymbol_t sym( iter->second );
+
       CQuotes* quotes = &sym->m_quotes;
       if ( 0 != quotes->Size() ) {
         m_pMerge -> Add( 
           quotes, 
           MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
       }
+
       CTrades* trades = &sym->m_trades;
       if ( 0 != trades->Size() ) {
         m_pMerge -> Add( 
           trades, 
           MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
       }
+
       CGreeks* greeks = &sym->m_greeks;
       if ( 0 != greeks->Size() ) {
         m_pMerge -> Add(
           greeks,
           MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleGreekEvent ) );
       }
+
   }
 
   bool bOldMode = CTimeSource::Instance().GetSimulationMode();

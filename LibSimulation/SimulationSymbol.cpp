@@ -22,9 +22,9 @@
 CSimulationSymbol::CSimulationSymbol( 
   const std::string &sSymbol, 
   pInstrument_cref pInstrument, 
-  const std::string &sDirectory
+  const std::string &sGroup
   ) 
-: CSymbol<CSimulationSymbol>(pInstrument), m_sDirectory( sDirectory )
+: CSymbol<CSimulationSymbol>(pInstrument), m_sDirectory( sGroup )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
@@ -86,14 +86,6 @@ void CSimulationSymbol::StartDepthWatch( void ) {
 
 void CSimulationSymbol::StopDepthWatch( void ) {
 }
-
-//bool CSimluationSymbol::AddTradeHandler( CSymbol::tradehandler_t handler ) {
-//  return CSymbol::AddTradeHandler( handler );
-//}
-
-//bool CSimulationSymbol::RemoveTradeHandler( CSymbol::tradehandler_t handler ) {
-//  return CSymbol::RemoveTradeHandler( handler );
-//}
 
 void CSimulationSymbol::HandleQuoteEvent( const CDatedDatum &datum ) {
   m_OnQuote( dynamic_cast<const CQuote &>( datum ) ); 

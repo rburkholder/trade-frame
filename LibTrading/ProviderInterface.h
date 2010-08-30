@@ -59,8 +59,8 @@ public:
 
   enum enumProviderId: enumProviderId_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
 
-  const std::string& Name( void ) { return m_sName; };
-  unsigned short ID( void ) { assert( 0 != m_nID ); return m_nID; };
+  const std::string& Name( void ) const { return m_sName; };
+  unsigned short ID( void ) const { assert( 0 != m_nID ); return m_nID; };
 
   CProviderInterfaceBase( void )
     : m_nID( 0 ), m_bConnected( false ),
@@ -75,14 +75,14 @@ public:
   virtual  void Disconnect( void ) {};
   Delegate<int> OnDisconnected;
 
-  bool ProvidesBrokerInterface( void ) { return m_pProvidesBrokerInterface; };
+  bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };
 
-  bool Connected( void ) { return m_bConnected; };
+  bool Connected( void ) const { return m_bConnected; };
 
-  bool ProvidesQuotes( void ) { return m_bProvidesQuotes; };
-  bool ProvidesTrades( void ) { return m_bProvidesTrades; };
-  bool ProvidesDepth( void )  { return m_bProvidesDepth; };
-  bool ProvidesGreeks( void ) { return m_bProvidesGreeks; };
+  bool ProvidesQuotes( void ) const { return m_bProvidesQuotes; };
+  bool ProvidesTrades( void ) const { return m_bProvidesTrades; };
+  bool ProvidesDepth( void )  const { return m_bProvidesDepth; };
+  bool ProvidesGreeks( void ) const { return m_bProvidesGreeks; };
 
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
   virtual void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
@@ -149,7 +149,8 @@ public:
   void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
   void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
 
-//  Delegate<CPortfolio::UpdatePortfolioRecord_t> OnUpdatePortfolioRecord;  // need to do the Add/Remove thing
+  bool Exists( pInstrument_cref pInstrument );
+  pSymbol_t Add( pInstrument_cref pInstrument );
 
   pSymbol_t GetSymbol( const symbol_id_t& );
 
@@ -171,10 +172,8 @@ protected:
   virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
   virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
 
-//  virtual S *NewCSymbol( const std::string& sSymbolName ) = 0; // override needs to call AddCSymbol to add symbol to map
   virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
   pSymbol_t AddCSymbol( pSymbol_t pSymbol );
-//  virtual void PreSymbolDestroy( pSymbol_t pSymbol );
 
 private:
 };
@@ -199,6 +198,18 @@ CProviderInterface<P,S>::~CProviderInterface(void) {
 }
 
 template <typename P, typename S>
+bool CProviderInterface<P,S>::Exists( pInstrument_cref pInstrument ) {
+  m_mapSymbols_t::iterator iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+  return ( m_mapSymbols.end() != iter );
+}
+
+template <typename P, typename S>
+typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::Add( pInstrument_cref pInstrument ) {
+   if ( Exists( pInstrument ) ) throw std::runtime_error( "Add:: Instrument already exists" );
+   return NewCSymbol( pInstrument );
+}
+
+template <typename P, typename S>
 typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::AddCSymbol( pSymbol_t pSymbol) {
   // todo:  add an assert to validate acceptable CSymbol type
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pSymbol->GetId() );
@@ -206,6 +217,9 @@ typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::AddCSymbol(
     m_mapSymbols.insert( pair_mapSymbols_t( pSymbol->GetId(), pSymbol ) );
     iter = m_mapSymbols.find( pSymbol->GetId() );
     assert( m_mapSymbols.end() != iter );
+  }
+  else {
+    throw std::runtime_error( "AddCSymbol symbol already exists in provider" );
   }
   return iter->second;
 }
@@ -217,14 +231,10 @@ typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::GetSymbol( 
   if ( m_mapSymbols.end() == iter ) {
 //    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
 //    iter = m_mapSymbols.find( sSymbol );
-    assert( 1 == 0 );
+    throw std::runtime_error( "GetSymbol did not find symbol" );
   }
   return iter->second;
 }
-
-//template <typename P, typename S>
-//void CProviderInterface<P,S>::PreSymbolDestroy( pSymbol_t pSymbol ) {
-//}
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddQuoteHandler(pInstrument_cref pInstrument, quotehandler_t handler) {
