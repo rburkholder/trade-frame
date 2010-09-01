@@ -17,12 +17,18 @@
 
 #include <math.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include <LibCommon/TimeSource.h>
+
 #include <LibIndicators/Pivots.h>
+
 #include <LibHDF5TimeSeries/HDF5DataManager.h>
 #include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <LibHDF5TimeSeries/HDF5IterateGroups.h>
 #include <LibHDF5TimeSeries/HDF5Attribute.h>
+
+#include <LibTrading/InstrumentManager.h>
 
 #include "Process.h"
 
@@ -302,12 +308,38 @@ void CProcess::AcquireSimulationSymbols( void ) {
 void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
 
   if ( m_bProcessSimTradingDayGroup ) {
+    std::string underlying;
+    unsigned short yy;
+    unsigned short mm;
+    unsigned short dd;
+    char side;
+    double strike;
+    
     m_ss.str( "" );
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     if ( 5 >= sName.size() ) {  // process as stock
+      if ( !CInstrumentManager::Instance().Exists( sName ) ) {
+        m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
+      }
     }
     else { // process as option
+      underlying = sName.substr(0,sName.find(' '));
+      yy = boost::lexical_cast<unsigned short>( sName.substr(6,2) );
+      yy += 2000;
+      mm = boost::lexical_cast<unsigned short>( sName.substr(8,2) );
+      dd = boost::lexical_cast<unsigned short>( sName.substr(10,2) );
+      side = sName[12];
+      strike = boost::lexical_cast<double>( sName.substr(13,8) ) / 1000.0;
+
+      if ( !CInstrumentManager::Instance().Exists( sName ) ) {
+        if ( !CInstrumentManager::Instance().Exists( underlying ) ) {
+          m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
+        }
+        pInstrument_t option = CInstrumentManager::Instance().ConstructOption( 
+          sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+      }
+
     }
     switch ( m_stateTimeSeries ) {
     case EQuotes:
@@ -321,7 +353,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
 }
 
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
-
+  
   m_stateTimeSeries = EUnknown;
   if ( 18 < sName.length() ) {
     m_bProcessSimTradingDayGroup = ( sName == m_sDesiredSimTradingDay );
@@ -331,7 +363,7 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
   }
   
   m_ss.str( "" );
-  m_ss << "Group: \"" << sPath << "\"";
+  m_ss << "Group:  \"" << sPath << "\"";
   if ( m_bProcessSimTradingDayGroup ) 
     m_ss << "*";
   m_ss << std::endl;
@@ -339,7 +371,6 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
-
   m_ss.str( "" );
   m_ss << "Uhderlying Contract Done" << std::endl;
   OutputDebugString( m_ss.str().c_str() );

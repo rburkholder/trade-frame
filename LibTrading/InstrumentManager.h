@@ -17,7 +17,7 @@
 #include <map>
 
 #include "Instrument.h"
-#include "InstrumentFile.h"
+//#include "InstrumentFile.h"
 #include "ManagerBase.h"
 
 class CInstrumentManager
@@ -58,14 +58,17 @@ public:
     pInstrument_t pUnderlying,
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
+  bool Exists( idInstrument_cref );
+  bool Exists( pInstrument_cref );
   pInstrument_t Get( idInstrument_cref );
 
-  pInstrument_t GetIQFeedInstrument( const std::string& sName );
+  // move these to IQFeed somewhere
+//  pInstrument_t GetIQFeedInstrument( const std::string& sName );
 //  pInstrument_t GetIQFeedInstrument( const std::string& sName, const std::string& sAlternateName );
 
 protected:
 
-  CInstrumentFile file;
+  //CInstrumentFile file;
 
   void Assign( pInstrument_cref pInstrument );
 
@@ -76,5 +79,8 @@ private:
   typedef std::pair<idInstrument_t,pInstrument_t> pair_t;
 
   map_t m_map;
+
+  void HandleAlternateNameAdded( CInstrument::pairNames_t );
+  void HandleAlternateNameChanged( CInstrument::pairNames_t );
 };
 

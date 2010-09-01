@@ -29,7 +29,7 @@ namespace OrderStatus {
 }
 
 namespace OptionSide {
-  enum enumOptionSide : char { Unknown=0, Put, Call, _Count };
+  enum enumOptionSide : char { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
   const char *Name[];
   const char *LongName[];
   const char *ShortName[];

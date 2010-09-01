@@ -19,7 +19,9 @@
 #include <string>
 #include <map>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+
+#include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
 
@@ -71,6 +73,10 @@ public:
   idInstrument_cref GetUnderlyingName( enumProviderId_t id );
 
   void SetAlternateName( enumProviderId_t, idInstrument_cref );
+
+  typedef std::pair<idInstrument_cref,idInstrument_cref> pairNames_t;
+  Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
+  Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   bool IsOption( void ) { return ( InstrumentType::Option == m_InstrumentType ); };

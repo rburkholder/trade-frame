@@ -24,7 +24,6 @@
 #include <LibTimeSeries/TimeSeries.h>
 
 #include <LibTrading/Instrument.h>
-
 #include <LibTrading/PortfolioManager.h>
 #include <LibTrading/ProviderManager.h>
 

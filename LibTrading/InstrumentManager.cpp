@@ -17,13 +17,19 @@
 #include <stdexcept>
 
 CInstrumentManager::CInstrumentManager(void) {
-  file.OpenIQFSymbols();
+//  file.OpenIQFSymbols();
 }
 
 CInstrumentManager::~CInstrumentManager(void) {
-  file.CloseIQFSymbols();
+//  file.CloseIQFSymbols();
+  for ( iterator iter = m_map.begin(); iter != m_map.end(); ++iter ) {
+    iter->second->OnAlternateNameAdded.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameAdded ) );
+    iter->second->OnAlternateNameChanged.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameChanged ) );
+  }
+  m_map.clear();
 }
 
+/*
 CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
 //  return GetIQFeedInstrument( sName, sName );
   try {
@@ -34,7 +40,7 @@ CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::st
     throw std::runtime_error( "CInstrumentManager::GetIQFeedInstrument problems" );
   }
 }
-
+*/
 /*
 CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
   try {
@@ -110,14 +116,48 @@ void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
   else {
     m_map.insert( pair_t( pInstrument->GetInstrumentName(), pInstrument ) );
   }
+  pInstrument->OnAlternateNameAdded.Add( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameAdded ) );
+  pInstrument->OnAlternateNameChanged.Add( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameChanged ) );
 }
 
 CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idName ) {
   iterator iter = m_map.find( idName );
   if ( m_map.end() == iter ) {
-    std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
+    throw std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
   }
   else {
     return iter->second;
   }
 }
+
+bool CInstrumentManager::Exists( idInstrument_cref id ) {
+  iterator iter = m_map.find( id );
+  return m_map.end() != iter;
+}
+
+bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
+  return Exists( pInstrument->GetInstrumentName() );
+}
+
+void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair ) {
+  iterator iterKey = m_map.find( pair.first );
+  iterator iterAlt = m_map.find( pair.second );
+  if ( m_map.end() == iterKey ) 
+    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded key does not exist" );
+  if ( m_map.end() != iterKey ) 
+    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded alt exists" );
+  m_map.insert( pair_t( pair.second, iterKey->second ) );
+}
+
+void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pair ) {
+  iterator iterOld = m_map.find( pair.first );
+  if ( m_map.end() == iterOld ) 
+    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged old name not found" );
+  iterator iterNew = m_map.find( pair.second );
+  if ( m_map.end() != iterNew ) 
+    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged new name already exists" );
+  m_map.insert( pair_t( pair.second, iterOld->second ) );
+  iterOld = m_map.find( pair.first );  // load again to ensure proper copy
+  m_map.erase( iterOld );
+}
+

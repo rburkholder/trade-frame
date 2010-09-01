@@ -45,7 +45,6 @@ public:
   typedef CInstrument::pInstrument_cref pInstrument_cref;
   typedef COrder::pOrder_t pOrder_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
-  //typedef COrder::pOrder_ref pOrder_ref;
 
   CSimulationProvider(void);
   virtual ~CSimulationProvider(void);
@@ -72,10 +71,8 @@ protected:
 
   std::string m_sGroupDirectory;
 
-//  CWinThread *m_pMergeThread;
   CCrossThreadMerge *m_pMerge;
 
-  //static UINT __cdecl Merge( LPVOID lpParam );
   void Merge( void );  // the background process
 
   void HandleExecution( COrder::orderid_t orderId, const CExecution &exec );

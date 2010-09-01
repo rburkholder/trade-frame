@@ -90,8 +90,10 @@ void CIBTWS::ProcessMessages( void ) {
 
 //CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
 CIBTWS::pSymbol_t CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
+  // todo:  check that contract doesn't already exist
   TickerId ticker = ++m_curTickerId;
   pSymbol_t pSymbol( new CIBSymbol( pInstrument, ticker ) );  // is there someplace with the IB specific symbol name, or is it set already?
+  // todo:  do an existance check on the instrument/symbol
   CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
   m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol ) );
@@ -121,8 +123,8 @@ void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
     contract.conId = pIBSymbol->GetInstrument()->GetContract();  // mostly enough to have contract id
     contract.exchange = pIBSymbol->GetInstrument()->GetExchangeName();
     contract.currency = pIBSymbol->GetInstrument()->GetCurrencyName();
-    //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
     pIBSymbol->SetQuoteTradeWatchInProgress();
+    //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
     pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
   }
 }

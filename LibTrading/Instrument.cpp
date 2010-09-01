@@ -149,9 +149,14 @@ void CInstrument::SetAlternateName( enumProviderId_t id, idInstrument_cref name 
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
+    OnAlternateNameAdded( pairNames_t( m_sInstrumentName, name ) );
   }
   else {
-    iter->second.assign( name );
+    if ( iter->second != name ) {
+      idInstrument_t old = iter->second;
+      iter->second.assign( name );
+      OnAlternateNameChanged( pairNames_t( old, name ) );
+    }
   }
 }
 
