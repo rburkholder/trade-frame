@@ -155,7 +155,8 @@ CProcess::CProcess(void)
   m_bProcessSimTradingDayGroup( false ),
   //m_tws( "U215226" ), m_iqfeed()
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-  m_ProcessingState( EPSLive ), m_stateTimeSeries( EUnknown )
+  m_ProcessingState( EPSLive )
+  //m_stateTimeSeries( EUnknown )
 {
 
   m_contract.currency = "USD";
@@ -298,11 +299,21 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
 }
 
 void CProcess::AcquireSimulationSymbols( void ) {
-  m_stateTimeSeries = EUnknown;
+  //m_stateTimeSeries = EUnknown;
   HDF5IterateGroups scan;
   scan.SetOnHandleObject( MakeDelegate( this, &CProcess::HandleHDF5Object ) );
   scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
   scan.Start( m_sPathForSeries );
+
+  if ( 0 != m_vStrikes.size() ) 
+    throw std::runtime_error( "CProcess::AcquireSimulationSymbols strikes already set" );
+  for ( strikes_iterator_t iter = m_mapStrikes.begin(); iter != m_mapStrikes.end(); ++ iter ) {
+    CStrikeInfo oi( iter->first );
+    m_vStrikes.push_back( oi );
+    m_vStrikes.back().AssignCall( iter->second.first );
+    m_vStrikes.back().AssignPut( iter->second.second );
+  }
+
 }
 
 void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
@@ -318,7 +329,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
     m_ss.str( "" );
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
-    if ( 5 >= sName.size() ) {  // process as stock
+    if ( 6 >= sName.size() ) {  // process as stock
       if ( !CInstrumentManager::Instance().Exists( sName ) ) {
         m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
       }
@@ -336,35 +347,48 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
         if ( !CInstrumentManager::Instance().Exists( underlying ) ) {
           m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
         }
-        pInstrument_t option = CInstrumentManager::Instance().ConstructOption( 
-          sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+        pInstrument_t call;
+        pInstrument_t put;
+        strikes_iterator_t iter = m_mapStrikes.find( strike );
+        if ( m_mapStrikes.end() == iter ) {
+          m_mapStrikes.insert( std::pair<double,option_pair_t>( strike, option_pair_t( call, put ) ) );
+          iter = m_mapStrikes.find( strike );
+        }
+        else {
+          switch ( side ) {
+          case 'C':
+            call = CInstrumentManager::Instance().ConstructOption( 
+              sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+            iter->second.first = call;
+            m_sim->Add( call );
+            break;
+          case 'P':
+            put = CInstrumentManager::Instance().ConstructOption( 
+              sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+            iter->second.second = put;
+            m_sim->Add( put );
+            break;
+          }
+        }
       }
-
-    }
-    switch ( m_stateTimeSeries ) {
-    case EQuotes:
-      break;
-    case ETrades:
-      break;
-    case EGreeks:
-      break;
     }
   }
 }
 
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
   
-  m_stateTimeSeries = EUnknown;
+  //m_stateTimeSeries = EUnknown;
   if ( 18 < sName.length() ) {
+    m_sim->SetGroupDirectory( sPath );   // may need to do this conditionally on the following flag
     m_bProcessSimTradingDayGroup = ( sName == m_sDesiredSimTradingDay );
-    if ( "quotes" == sName ) m_stateTimeSeries = EQuotes;
-    if ( "trades" == sName ) m_stateTimeSeries = ETrades;
-    if ( "greeks" == sName ) m_stateTimeSeries = EGreeks;
   }
   
   m_ss.str( "" );
   m_ss << "Group:  \"" << sPath << "\"";
   if ( m_bProcessSimTradingDayGroup ) 
+    //if ( "quotes" == sName ) m_stateTimeSeries = EQuotes;
+    //if ( "trades" == sName ) m_stateTimeSeries = ETrades;
+    //if ( "greeks" == sName ) m_stateTimeSeries = EGreeks;
     m_ss << "*";
   m_ss << std::endl;
   OutputDebugString( m_ss.str().c_str() );

@@ -226,9 +226,9 @@ private:
   std::string m_sPathForSeries;
   std::string m_sDesiredSimTradingDay;
   bool m_bProcessSimTradingDayGroup;
-  enum enumTimeSeriesType {
-    EUnknown, EQuotes, ETrades, EGreeks
-  } m_stateTimeSeries;
+  //enum enumTimeSeriesType {
+  //  EUnknown, EQuotes, ETrades, EGreeks
+  //} m_stateTimeSeries;
 
   std::stringstream m_ss;
 
@@ -258,6 +258,12 @@ private:
 
   double m_dblBaseDelta; // keep trades balanced at this level
   double m_dblBaseDeltaIncrement;
+
+  // map used in simulation symbol creation
+  typedef std::pair<pInstrument_t,pInstrument_t> option_pair_t;  // call, put
+  typedef std::map<double,option_pair_t> strikes_map_t;
+  typedef strikes_map_t::iterator strikes_iterator_t;
+  strikes_map_t m_mapStrikes;
 
   std::vector<double> m_vCrossOverPoints;  // has pivots and strikes in order
   std::vector<CStrikeInfo> m_vStrikes;  // put/call info for each strike
