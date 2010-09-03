@@ -171,6 +171,8 @@ public:
   ~CProcess(void);
 
   void SimConnect( void );
+  void SimStart( void );
+  void SimStop( void );
   void SimDisconnect( void );
 
   void IBConnect( void );

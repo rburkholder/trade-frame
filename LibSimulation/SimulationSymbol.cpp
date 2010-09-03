@@ -67,7 +67,7 @@ void CSimulationSymbol::StopQuoteWatch( void ) {
 }
 
 void CSimulationSymbol::StartGreekWatch( void ) {
-  if ( 0 == m_greeks.Size() ) {
+  if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     std::string sPath( m_sDirectory + "/greeks/" + GetId() );
     CHDF5TimeSeriesContainer<CGreek> greekRepository( sPath );
     CHDF5TimeSeriesContainer<CGreek>::iterator begin, end;

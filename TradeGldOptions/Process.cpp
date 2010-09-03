@@ -155,7 +155,8 @@ CProcess::CProcess(void)
   m_bProcessSimTradingDayGroup( false ),
   //m_tws( "U215226" ), m_iqfeed()
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-  m_ProcessingState( EPSLive )
+  //m_ProcessingState( EPSLive )
+  m_ProcessingState( EPSSimulation )
   //m_stateTimeSeries( EUnknown )
 {
 
@@ -204,6 +205,14 @@ void CProcess::SimConnect( void ) {
   }
 }
 
+void CProcess::SimStart( void ) {
+  m_sim->Run();
+}
+
+void CProcess::SimStop( void ) {
+  m_sim->Stop();
+}
+
 void CProcess::SimDisconnect( void ) {
   if ( m_bSimConnected ) {
     m_sim->Disconnect();
@@ -244,7 +253,7 @@ void CProcess::IQFeedDisconnect( void ) {
 }
 
 void CProcess::HandleOnDataConnected(int e) {
-  CIQFeedHistoryQuery<CProcess>::Connect();  
+//  CIQFeedHistoryQuery<CProcess>::Connect();  
 }
 
 void CProcess::HandleOnDataDisconnected(int e) {
@@ -312,8 +321,12 @@ void CProcess::AcquireSimulationSymbols( void ) {
     m_vStrikes.push_back( oi );
     m_vStrikes.back().AssignCall( iter->second.first );
     m_vStrikes.back().AssignPut( iter->second.second );
+    m_vCrossOverPoints.push_back( iter->first );
   }
 
+  m_ss.str( "" );
+  m_ss << "Simulation Symbols Acquired." << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
@@ -332,6 +345,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
     if ( 6 >= sName.size() ) {  // process as stock
       if ( !CInstrumentManager::Instance().Exists( sName ) ) {
         m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
+        m_sim->Add( m_pUnderlying );
       }
     }
     else { // process as option
@@ -346,6 +360,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
       if ( !CInstrumentManager::Instance().Exists( sName ) ) {
         if ( !CInstrumentManager::Instance().Exists( underlying ) ) {
           m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
+          m_sim->Add( m_pUnderlying );
         }
         pInstrument_t call;
         pInstrument_t put;
@@ -354,21 +369,19 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
           m_mapStrikes.insert( std::pair<double,option_pair_t>( strike, option_pair_t( call, put ) ) );
           iter = m_mapStrikes.find( strike );
         }
-        else {
-          switch ( side ) {
-          case 'C':
-            call = CInstrumentManager::Instance().ConstructOption( 
-              sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
-            iter->second.first = call;
-            m_sim->Add( call );
-            break;
-          case 'P':
-            put = CInstrumentManager::Instance().ConstructOption( 
-              sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
-            iter->second.second = put;
-            m_sim->Add( put );
-            break;
-          }
+        switch ( side ) {
+        case 'C':
+          call = CInstrumentManager::Instance().ConstructOption( 
+            sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+          iter->second.first = call;
+          m_sim->Add( call );
+          break;
+        case 'P':
+          put = CInstrumentManager::Instance().ConstructOption( 
+            sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
+          iter->second.second = put;
+          m_sim->Add( put );
+          break;
         }
       }
     }

@@ -105,3 +105,19 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnEmitStats(WORD /*wNotifyCode*/, WORD
 
   return 0;
 }
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSimStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.SimStart();
+
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSimStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_process.SimStop();
+
+  return 0;
+}

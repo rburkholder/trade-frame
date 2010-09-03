@@ -66,8 +66,8 @@ CInstrument::CInstrument(
   m_dblStrike( strike ),
   m_nContract( 0 )
 {
-  assert( side < OptionSide::_Count );
-  assert( side > OptionSide::Unknown );
+  assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
+  //assert( side > OptionSide::Unknown );
   assert( ( m_InstrumentType == InstrumentType::Option )
        || ( m_InstrumentType == InstrumentType::FuturesOption )
     );
@@ -94,8 +94,8 @@ CInstrument::CInstrument(
   m_dblStrike( strike ),
   m_nContract( 0 )
 {
-  assert( side < OptionSide::_Count );
-  assert( side > OptionSide::Unknown );
+  assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
+  //assert( side > OptionSide::Unknown );
   assert( ( m_InstrumentType == InstrumentType::Option )
        || ( m_InstrumentType == InstrumentType::FuturesOption )
     );
