@@ -15,60 +15,30 @@
 
 #include <stdexcept>
 
-#include "OrderManager.h"
 #include "ProviderInterface.h"
 
-//
-// CMapOrderToProvider
-//
-
-CMapOrderToProvider::CMapOrderToProvider(CProviderInterfaceBase* pProvider, COrder::pOrder_ref pOrder ) 
-: m_pProvider( pProvider ), m_pOrder( pOrder )
-{
-}
-
-CMapOrderToProvider::~CMapOrderToProvider(void) {
-}
+#include "OrderManager.h"
 
 //
 // COrderManager
 //
 
-unsigned short COrderManager::m_nRefCount = 0;
-COrderManager::orders_t COrderManager::m_mapActiveOrders;
-COrderManager::orders_t COrderManager::m_mapCompletedOrders;
-
 COrderManager::COrderManager(void) {
-  ++m_nRefCount;
-  if ( 1 == m_nRefCount ) {
-  }
 }
 
 COrderManager::~COrderManager(void) {
-  --m_nRefCount;
-  if ( 0 == m_nRefCount ) {
-    orders_t::iterator iter;
-    for ( iter = m_mapActiveOrders.begin(); iter != m_mapActiveOrders.end(); ++iter ) {
-      delete iter->second;
-    }
-    m_mapActiveOrders.clear();
-    for ( iter = m_mapCompletedOrders.begin(); iter != m_mapCompletedOrders.end(); ++iter ) {
-      delete iter->second;
-    }
-    m_mapCompletedOrders.clear();
-  }
+  m_mapActiveOrders.clear();
+  m_mapCompletedOrders.clear();
 }
 
 void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder::pOrder_t pOrder) {
   assert( NULL != pProvider );
-  //assert( NULL != pOrder );
-  CMapOrderToProvider *pMapping = new CMapOrderToProvider( pProvider, pOrder );
-  m_mapActiveOrders.insert( mappair_t( pOrder->GetOrderId(), pMapping ) );
+  m_mapActiveOrders.insert( pairIdOrder_t( pOrder->GetOrderId(), pairProviderOrder_t( pProvider, pOrder ) ) );
   pOrder->SetSendingToProvider();
 }
 
-COrderManager::orders_t::iterator COrderManager::LocateOrder( unsigned long nOrderId ) {
-  orders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
+COrderManager::mapOrders_t::iterator COrderManager::LocateOrder( unsigned long nOrderId ) {
+  mapOrders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
   if ( m_mapActiveOrders.end() == iter ) {
     iter = m_mapCompletedOrders.find( nOrderId );
     if ( m_mapCompletedOrders.end() == iter ) {
@@ -81,9 +51,8 @@ COrderManager::orders_t::iterator COrderManager::LocateOrder( unsigned long nOrd
 
 void COrderManager::CancelOrder( COrder::orderid_t nOrderId) {
   try {
-    //LocateOrder( nOrderId )->second->GetProvider()->CancelOrder( nOrderId );
-    CMapOrderToProvider *pMap = LocateOrder( nOrderId )->second;
-    pMap->GetProvider()->CancelOrder( pMap->GetOrder() );
+    mapOrders_t::iterator iter = LocateOrder( nOrderId );
+    iter->second.first->CancelOrder( iter->second.second );
   }
   catch (...) {
     std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
@@ -92,7 +61,7 @@ void COrderManager::CancelOrder( COrder::orderid_t nOrderId) {
 
 void COrderManager::ReportCommission( COrder::orderid_t nOrderId, double dblCommission ) {
   try {
-    LocateOrder( nOrderId )->second->GetOrder()->SetCommission( dblCommission );
+    LocateOrder( nOrderId )->second.second->SetCommission( dblCommission );
   }
   catch (...) {
     std::cout << "Problems in COrderManager::ReportCommission" << std::endl;
@@ -100,9 +69,9 @@ void COrderManager::ReportCommission( COrder::orderid_t nOrderId, double dblComm
 }
 
 void COrderManager::MoveActiveOrderToCompleted( COrder::orderid_t nOrderId ) {
-  orders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
+  mapOrders_t::iterator iter = m_mapActiveOrders.find( nOrderId );
   if ( m_mapActiveOrders.end() != iter ) {
-    m_mapCompletedOrders.insert( mappair_t( nOrderId, iter->second ) );
+    m_mapCompletedOrders.insert( *iter );
     m_mapActiveOrders.erase( iter );
     //OnOrderCompleted( *(iter->second->GetOrder()) );
   }
@@ -110,9 +79,9 @@ void COrderManager::MoveActiveOrderToCompleted( COrder::orderid_t nOrderId ) {
 
 void COrderManager::ReportExecution( COrder::orderid_t nOrderId, const CExecution& exec) {
   try {
-    orders_t::iterator iter = LocateOrder( nOrderId );
+    mapOrders_t::iterator iter = LocateOrder( nOrderId );
     OrderStatus::enumOrderStatus status = 
-      iter->second->GetOrder()->ReportExecution( exec );
+      iter->second.second->ReportExecution( exec );
     switch ( status ) {
       case OrderStatus::Filled:
         MoveActiveOrderToCompleted( nOrderId );
@@ -126,8 +95,8 @@ void COrderManager::ReportExecution( COrder::orderid_t nOrderId, const CExecutio
 
 void COrderManager::ReportErrors( COrder::orderid_t nOrderId, OrderErrors::enumOrderErrors eError) {
   try {
-    orders_t::iterator iter = LocateOrder( nOrderId );
-    iter->second->GetOrder()->ActOnError( eError );
+    mapOrders_t::iterator iter = LocateOrder( nOrderId );
+    iter->second.second->ActOnError( eError );
     MoveActiveOrderToCompleted( nOrderId );
   }
   catch (...) {

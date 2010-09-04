@@ -97,7 +97,7 @@ protected:
     m_ssExecId.str( "" ); // works according to time tutorial in boost
     //m_ssExecId.flush(); // this does work
     //m_ssExecId.clear(); // this doesn't work
-    m_ssExecId << ++m_nExecId; 
+    m_ssExecId << ++m_nExecId << std::endl; 
     assert( 0 != m_ssExecId.str().size() );
     return m_ssExecId.str().c_str();
   }
