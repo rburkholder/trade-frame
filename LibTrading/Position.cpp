@@ -95,16 +95,11 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
   OrderSide::enumOrderSide eOrderSide,
   unsigned long nOrderQuantity
 ) {
+
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
-  if ( OrderSide::Unknown != m_eOrderSidePending ) { // ensure new order matches existing orders
-    if ( m_eOrderSidePending != eOrderSide ) {
-      throw std::runtime_error( "CPosition::PlaceOrder1, new order does not match pending order type" );
-    }
-  }
-  pOrder_t pOrder;
-  pOrder = pOrder_t( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity ) );
-  ProcessOrder( pOrder );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity ) );
+  PlaceOrder( pOrder );
   return pOrder;
 }
 
@@ -117,15 +112,8 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  if ( OrderSide::Unknown != m_eOrderSidePending ) { // ensure new order matches existing orders
-    if ( m_eOrderSidePending != eOrderSide ) {
-      throw std::runtime_error( "CPosition::PlaceOrder2, new order does not match pending order type" );
-    }
-  }
-
-  pOrder_t pOrder;
-  pOrder = pOrder_t( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1 ) );
-  ProcessOrder( pOrder );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1 ) );
+  PlaceOrder( pOrder );
   return pOrder;
 }
 
@@ -139,24 +127,25 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
-  if ( OrderSide::Unknown != m_eOrderSidePending ) { // ensure new order matches existing orders
-    if ( m_eOrderSidePending != eOrderSide ) {
-      throw std::runtime_error( "CPosition::PlaceOrder3, new order does not match pending order type" );
-    }
-  }
-
-  pOrder_t pOrder;
-  pOrder = pOrder_t( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2 ) );
-  ProcessOrder( pOrder );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2 ) );
+  PlaceOrder( pOrder );
   return pOrder;
 }
 
-void CPosition::ProcessOrder( pOrder_t pOrder ) {
+void CPosition::PlaceOrder( pOrder_t pOrder ) {
+
+  if ( OrderSide::Unknown != m_eOrderSidePending ) { // ensure new order matches existing orders
+    if ( m_eOrderSidePending != pOrder->GetOrderSide() ) {
+      throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
+    }
+  }
   m_eOrderSidePending = pOrder->GetOrderSide();
+
   m_nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
-  m_pExecutionProvider->PlaceOrder( pOrder );
+  //m_pExecutionProvider->PlaceOrder( pOrder );
+  COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
 void CPosition::CancelOrders( void ) {

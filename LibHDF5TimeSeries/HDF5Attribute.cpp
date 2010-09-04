@@ -16,6 +16,7 @@
 #include "HDF5Attribute.h"
 
 const char szInstrumentType[] = "InstrumentType";
+const char szProviderId[] = "ProviderId";
 const char szUnderlying[] = "Underlying";
 const char szStrike[] = "Strike";
 const char szSide[] = "Side";
@@ -23,53 +24,53 @@ const char szYear[] = "Year";
 const char szMonth[] = "Month";
 const char szDay[] = "Day";
 
- CHDF5Attribute::CHDF5Attribute(void) 
+ CHDF5Attributes::CHDF5Attributes(void) 
  : m_pDataSet( NULL )
 {
 }
 
-CHDF5Attribute::CHDF5Attribute( const std::string& sPath ) {
+CHDF5Attributes::CHDF5Attributes( const std::string& sPath ) {
   OpenDataSet( sPath );
 }
 
-CHDF5Attribute::CHDF5Attribute( const std::string& sPath, InstrumentType::enumInstrumentTypes typeInst ) {
+CHDF5Attributes::CHDF5Attributes( const std::string& sPath, InstrumentType::enumInstrumentTypes typeInst ) {
   OpenDataSet( sPath );
   SetInstrumentType( typeInst );
 }
 
-CHDF5Attribute::CHDF5Attribute( const std::string& sPath, const structOption& option ) {
+CHDF5Attributes::CHDF5Attributes( const std::string& sPath, const structOption& option ) {
   OpenDataSet( sPath );
   SetOptionAttributes( option );
 }
 
-CHDF5Attribute::CHDF5Attribute( const std::string& sPath, const structFuture& future ) {
+CHDF5Attributes::CHDF5Attributes( const std::string& sPath, const structFuture& future ) {
   OpenDataSet( sPath );
   SetFutureAttributes( future );
 }
 
-CHDF5Attribute::~CHDF5Attribute(void) {
+CHDF5Attributes::~CHDF5Attributes(void) {
   CloseDataSet();
 }
 
-void CHDF5Attribute::OpenDataSet( const std::string& sPath ) {
+void CHDF5Attributes::OpenDataSet( const std::string& sPath ) {
   m_pDataSet = new H5::DataSet( dm.GetH5File()->openDataSet( sPath.c_str() ) );
 }
 
-void CHDF5Attribute::CloseDataSet ( void ) {
+void CHDF5Attributes::CloseDataSet ( void ) {
   if ( NULL != m_pDataSet ) {
     m_pDataSet->close();
     m_pDataSet = NULL;
   }
 }
 
-void CHDF5Attribute::SetInstrumentType( InstrumentType::enumInstrumentTypes typeInstrument ) {
+void CHDF5Attributes::SetInstrumentType( InstrumentType::enumInstrumentTypes typeInstrument ) {
   H5::DataSpace dspace;
   H5::Attribute attribute( m_pDataSet->createAttribute( szInstrumentType, H5::PredType::NATIVE_INT8, dspace ) );
   attribute.write( H5::PredType::NATIVE_INT8, &typeInstrument );
   attribute.close();
 }
 
-InstrumentType::enumInstrumentTypes CHDF5Attribute::GetInstrumentType( void ) {
+InstrumentType::enumInstrumentTypes CHDF5Attributes::GetInstrumentType( void ) {
   InstrumentType::enumInstrumentTypes typeInstrument;
   H5::Attribute attribute( m_pDataSet->openAttribute( szInstrumentType ) );
   attribute.read(H5::PredType::NATIVE_INT8, &typeInstrument );
@@ -77,7 +78,22 @@ InstrumentType::enumInstrumentTypes CHDF5Attribute::GetInstrumentType( void ) {
   return typeInstrument;
 }
 
-void CHDF5Attribute::SetOptionAttributes( const structOption& option ) {
+void CHDF5Attributes::SetProviderId( unsigned short id ) {
+  H5::DataSpace dspace;
+  H5::Attribute attribute( m_pDataSet->createAttribute( szProviderId, H5::PredType::NATIVE_UINT16, dspace ) );
+  attribute.write( H5::PredType::NATIVE_UINT16, &id );
+  attribute.close();
+}
+
+unsigned short CHDF5Attributes::GetProviderId( void ) {
+  unsigned short id;
+  H5::Attribute attribute( m_pDataSet->openAttribute( szProviderId ) );
+  attribute.read(H5::PredType::NATIVE_UINT16, &id );
+  attribute.close();
+  return id;
+}
+
+void CHDF5Attributes::SetOptionAttributes( const structOption& option ) {
 
   SetInstrumentType( InstrumentType::Option );
 
@@ -104,7 +120,7 @@ void CHDF5Attribute::SetOptionAttributes( const structOption& option ) {
   attribDay.close();
 }
 
-void CHDF5Attribute::GetOptionAttributes( structOption* option ) {
+void CHDF5Attributes::GetOptionAttributes( structOption* option ) {
 
   H5::Attribute attribStrike( m_pDataSet->openAttribute( szStrike ) );
   attribStrike.read(H5::PredType::NATIVE_DOUBLE, &option->dblStrike );
@@ -128,7 +144,7 @@ void CHDF5Attribute::GetOptionAttributes( structOption* option ) {
 
 }
 
-void CHDF5Attribute::SetFutureAttributes( const structFuture& future ) {
+void CHDF5Attributes::SetFutureAttributes( const structFuture& future ) {
 
   SetInstrumentType( InstrumentType::Option );
 
@@ -147,7 +163,7 @@ void CHDF5Attribute::SetFutureAttributes( const structFuture& future ) {
   attribDay.close();
 }
 
-void CHDF5Attribute::GetFutureAttributes( structFuture* future ) {
+void CHDF5Attributes::GetFutureAttributes( structFuture* future ) {
 
   H5::Attribute attribYear( m_pDataSet->openAttribute( szStrike ) );
   attribYear.read(H5::PredType::NATIVE_UINT16, &future->nYear );

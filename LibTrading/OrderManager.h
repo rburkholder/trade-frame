@@ -51,6 +51,7 @@ protected:
 
   mapOrders_t m_mapActiveOrders;  // two lists in order to minimize lookup times on active orders
   mapOrders_t m_mapCompletedOrders;
+  mapOrders_t m_mapAllOrders; // all orders for when checking for consistency
   mapOrders_t::iterator LocateOrder( orderid_t nOrderId );
   void MoveActiveOrderToCompleted( orderid_t nOrderId );
 

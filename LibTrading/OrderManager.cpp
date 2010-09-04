@@ -31,10 +31,16 @@ COrderManager::~COrderManager(void) {
   m_mapCompletedOrders.clear();
 }
 
-void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, COrder::pOrder_t pOrder) {
+void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrder) {
   assert( NULL != pProvider );
+  mapOrders_t::iterator iter = m_mapAllOrders.find( pOrder->GetOrderId() );
+  if ( m_mapAllOrders.end() != iter ) {
+    std::runtime_error( "COrderManager::PlaceOrder duplicated order placed" );
+  }
+  m_mapAllOrders.insert( pairIdOrder_t( pOrder->GetOrderId(), pairProviderOrder_t( pProvider, pOrder ) ) );
   m_mapActiveOrders.insert( pairIdOrder_t( pOrder->GetOrderId(), pairProviderOrder_t( pProvider, pOrder ) ) );
   pOrder->SetSendingToProvider();
+  pProvider->PlaceOrder( pOrder );
 }
 
 COrderManager::mapOrders_t::iterator COrderManager::LocateOrder( unsigned long nOrderId ) {

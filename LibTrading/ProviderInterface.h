@@ -47,7 +47,7 @@ public:
   typedef boost::shared_ptr<CProviderInterfaceBase> pProvider_t;
 
   typedef COrder::pOrder_t pOrder_t;
-  typedef unsigned short enumProviderId_t;
+  typedef unsigned short enumProviderId_t;  // used in HDF5Attribute.h
 
   typedef CSymbolBase::quotehandler_t quotehandler_t;
   typedef CSymbolBase::tradehandler_t tradehandler_t;
@@ -367,12 +367,18 @@ template <typename P, typename S>
 void CProviderInterface<P,S>::PlaceOrder( pOrder_t pOrder ) {
 //  pOrder->SetProviderName( m_sName );
 //  this->GetSymbol( pOrder->GetInstrument()->GetSymbolName() );  // ensure we have the symbol locally registered
-  COrderManager::Instance().PlaceOrder( this, pOrder );
+//  COrderManager::Instance().PlaceOrder( this, pOrder );
+//  if ( &CProviderInterface<P,S>::PlaceOrder != &P::PlaceOrder ) {
+//    static_cast<P*>( this )->PlaceOrder( pOrder );
+//  }
 }
 
 template <typename P, typename S>
 void CProviderInterface<P,S>::CancelOrder( pOrder_t pOrder ) { 
 //  pOrder->SetProviderName( m_sName );
-  COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
+//  COrderManager::Instance().CancelOrder( pOrder->GetOrderId() );
+//  if ( &CProviderInterface<P,S>::CancelOrder != &P::CancelOrder ) {
+//    static_cast<P*>( this )->CancelOrder( pOrder );
+//  }
 }
 

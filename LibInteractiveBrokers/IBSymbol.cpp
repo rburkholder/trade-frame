@@ -90,6 +90,16 @@ void CIBSymbol::AcceptTickPrice(TickType tickType, double price) {
 }
 
 void CIBSymbol::AcceptTickSize(TickType tickType, int size) {
+
+  switch ( m_pInstrument->GetInstrumentType() ) {
+  case InstrumentType::Stock:
+  case InstrumentType::ETF:
+    size *= 100;
+    break;
+  default:
+    break;
+  }
+
   switch ( tickType ) {
     case TickType::BID_SIZE:
       if ( size != m_nBidSize ) {

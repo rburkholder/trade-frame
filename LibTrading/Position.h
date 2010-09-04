@@ -127,7 +127,7 @@ private:
 
   void HandleExecution( std::pair<const COrder&, const CExecution&>& );
 
-  void ProcessOrder( pOrder_t pOrder );
+  void PlaceOrder( pOrder_t pOrder );
 
   void HandleQuote( quote_t );
   void HandleTrade( trade_t );

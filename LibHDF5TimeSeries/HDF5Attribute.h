@@ -18,7 +18,7 @@
 #include "HDF5DataManager.h"
 #include <LibTrading/TradingEnumerations.h>
 
-class CHDF5Attribute {
+class CHDF5Attributes {
 public:
 
   struct structOption {
@@ -42,18 +42,21 @@ public:
       : nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_) {};
   };
 
-  CHDF5Attribute(void);
-  CHDF5Attribute( const std::string& sPath );
-  CHDF5Attribute( const std::string& sPath, InstrumentType::enumInstrumentTypes );
-  CHDF5Attribute( const std::string& sPath, const structOption& );
-  CHDF5Attribute( const std::string& sPath, const structFuture& );
-  ~CHDF5Attribute(void);
+  CHDF5Attributes(void);
+  CHDF5Attributes( const std::string& sPath );
+  CHDF5Attributes( const std::string& sPath, InstrumentType::enumInstrumentTypes );
+  CHDF5Attributes( const std::string& sPath, const structOption& );
+  CHDF5Attributes( const std::string& sPath, const structFuture& );
+  ~CHDF5Attributes(void);
 
   void OpenDataSet( const std::string& sPath );
   void CloseDataSet( void );
 
   void SetInstrumentType( InstrumentType::enumInstrumentTypes );
   InstrumentType::enumInstrumentTypes GetInstrumentType( void );
+
+  void SetProviderId( unsigned short );
+  unsigned short GetProviderId( void );
 
   void SetOptionAttributes( const structOption& );
   void GetOptionAttributes( structOption* );

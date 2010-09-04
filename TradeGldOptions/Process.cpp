@@ -895,13 +895,15 @@ void CProcess::SaveSeries( void ) {
     if ( 0 != m_quotes.Size() ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
       wtsQuotes.Write( sPathName, &m_quotes );
-      CHDF5Attribute attribute( m_sPathForSeries, InstrumentType::Stock );
+      CHDF5Attributes attributes( m_sPathForSeries, InstrumentType::Stock );
+      attributes.SetProviderId( m_pDataProvider->ID() );
     }
 
     if ( 0 != m_trades.Size() ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
       wtsTrades.Write( sPathName, &m_trades );
-      CHDF5Attribute attribute( m_sPathForSeries, InstrumentType::Stock );
+      CHDF5Attributes attributes( m_sPathForSeries, InstrumentType::Stock );
+      attributes.SetProviderId( m_pDataProvider->ID() );
     }
   }
   catch (...) {
@@ -913,55 +915,61 @@ void CProcess::SaveSeries( void ) {
       if ( 0 != iter->Call()->Quotes()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
-        CHDF5Attribute::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
           iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
           iter->Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
       if ( 0 != iter->Call()->Trades()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Call()->Trades() );
-        CHDF5Attribute::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
           iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
           iter->Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
       if ( 0 != iter->Call()->Greeks()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
-        CHDF5Attribute::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
           iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
           iter->Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
       if ( 0 != iter->Put()->Quotes()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
-        CHDF5Attribute::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
           iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
           iter->Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
       if ( 0 != iter->Put()->Trades()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, iter->Put()->Trades() );
-        CHDF5Attribute::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
           iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
           iter->Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
       if ( 0 != iter->Put()->Greeks()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
-        CHDF5Attribute::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
+        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
           iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
           iter->Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attribute attribute( sPathName, option );
+        CHDF5Attributes attributes( sPathName, option );
+        attributes.SetProviderId( m_pDataProvider->ID() );
       }
     }
     catch (...) {
