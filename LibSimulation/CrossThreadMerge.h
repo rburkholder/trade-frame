@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include "LibWtlCommon/ThreadCrossingMessage.h"
+#include <LibWtlCommon/ThreadCrossingMessage.h>
 
-#include "LibTimeSeries/MergeDatedDatums.h"
+#include <LibTimeSeries/MergeDatedDatums.h>
 
 class CCrossThreadMerge:
   public CMergeDatedDatums, 

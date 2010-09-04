@@ -66,16 +66,21 @@ CPosition::~CPosition(void) {
 }
 
 void CPosition::HandleQuote( quote_t quote ) {
+  bool bProcessed(false);
   switch ( m_eOrderSideActive ) {
     case OrderSide::Buy:
       m_dblUnRealizedPL = m_nPositionActive * ( quote.Bid() - m_dblAverageCostPerShare );
+      bProcessed = true;
       break;
     case OrderSide::Sell:
       m_dblUnRealizedPL = m_nPositionActive * ( m_dblAverageCostPerShare - quote.Ask() );
+      bProcessed = true;
       break;
   }
 
-  OnQuote( this );
+  if ( bProcessed ) {
+    OnQuote( this );
+  }
 }
 
 void CPosition::HandleTrade( trade_t trade ) {

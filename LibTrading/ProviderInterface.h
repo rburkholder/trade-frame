@@ -172,6 +172,9 @@ protected:
   virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
   virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
 
+  virtual void StartGreekWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopGreekWatch( pSymbol_t pSymbol ) {};
+
   virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
   pSymbol_t AddCSymbol( pSymbol_t pSymbol );
 
@@ -229,8 +232,6 @@ typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::GetSymbol( 
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-//    iter = m_mapSymbols.find( sSymbol );
     throw std::runtime_error( "GetSymbol did not find symbol" );
   }
   return iter->second;
@@ -241,8 +242,6 @@ void CProviderInterface<P,S>::AddQuoteHandler(pInstrument_cref pInstrument, quot
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( id, NewCSymbol( sSymbol ) ) );
-//    iter = m_mapSymbols.find( sSymbol );
     assert( 1 == 0 );
   }
   if ( iter->second->AddQuoteHandler( handler ) ) {
@@ -255,7 +254,6 @@ void CProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, q
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
     assert( 1 == 0 );
   }
   else {
@@ -270,8 +268,6 @@ void CProviderInterface<P,S>::AddTradeHandler(pInstrument_cref pInstrument, trad
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-//    iter = m_mapSymbols.find( sSymbol );
     assert( 1 == 0 );
   }
   if ( iter->second->AddTradeHandler( handler ) ) {
@@ -284,8 +280,6 @@ void CProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, t
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, new S( sSymbol ) ) );
-    // should probably raise exception here as trying to remove handler from non-existtant symbol
     assert( 1 == 0 );
   }
   else {
@@ -300,8 +294,6 @@ void CProviderInterface<P,S>::AddOnOpenHandler(pInstrument_cref pInstrument, tra
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-//    iter = m_mapSymbols.find( sSymbol );
     assert( 1 == 0 );
   }
   iter->second->AddOnOpenHandler( handler );
@@ -312,7 +304,6 @@ void CProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, 
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
     assert( 1 == 0 );
   }
   else {
@@ -325,8 +316,6 @@ void CProviderInterface<P,S>::AddDepthHandler(pInstrument_cref pInstrument, dept
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( pair_mapSymbols_t( sSymbol, NewCSymbol( sSymbol ) ) );
-//    iter = m_mapSymbols.find( sSymbol );
     assert( 1 == 0 );
   }
   if ( iter->second->AddDepthHandler( handler ) ) {
@@ -339,7 +328,6 @@ void CProviderInterface<P,S>::RemoveDepthHandler(pInstrument_cref pInstrument, d
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   if ( m_mapSymbols.end() == iter ) {
-//    m_mapSymbols.insert( std::pair<string, S*>( sSymbol, new S( sSymbol ) ) );
     assert( 1 == 0 );
   }
   else {
@@ -356,7 +344,9 @@ void CProviderInterface<P,S>::AddGreekHandler(pInstrument_cref pInstrument, gree
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
-  iter->second->AddGreekHandler( handler );
+  if ( iter->second->AddGreekHandler( handler ) ) {
+    StartGreekWatch( iter->second );
+  }
 }
 
 template <typename P, typename S>
@@ -366,7 +356,11 @@ void CProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, g
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
-  iter->second->RemoveGreekHandler( handler );
+  else {
+    if ( iter->second->RemoveGreekHandler( handler ) ) {
+      StopGreekWatch( iter->second );
+    }
+  }
 }
 
 template <typename P, typename S>

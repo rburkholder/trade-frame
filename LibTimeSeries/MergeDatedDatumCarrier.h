@@ -15,10 +15,10 @@
 
 #include <stdexcept>
 
-#include "LibCommon/FastDelegate.h"
+#include <LibCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include "LibCommon/TimeSource.h"
+#include <LibCommon/TimeSource.h>
 
 #include "TimeSeries.h"
 
@@ -32,8 +32,10 @@ public:
   typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
   CMergeCarrierBase( void ) {};
   virtual ~CMergeCarrierBase( void ) {};
-  virtual void ProcessDatum( void ) { throw std::runtime_error( "ProcessDatum not instantiated" ); };
-  virtual void Reset( void ) { throw std::runtime_error( "Reset not instantiated" ); };
+  virtual void ProcessDatum( void ) 
+    { throw std::runtime_error( "ProcessDatum not define" ); };
+  virtual void Reset( void ) 
+    { throw std::runtime_error( "Reset not defined" ); };
   inline const ptime &GetDateTime( void ) { return m_dt; };
   CDatedDatum *GetDatedDatum( void ) { return m_pDatum; };
   bool operator<( const CMergeCarrierBase &other ) const { return m_dt < other.m_dt; };
@@ -76,7 +78,8 @@ template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
   if ( CTimeSource::Instance().GetSimulationMode() ) {
     CTimeSource::Instance().SetSimulationTime( m_pDatum->DateTime() );
   }
-  if ( NULL != OnDatum ) OnDatum( *m_pDatum );
+  if ( NULL != OnDatum ) 
+    OnDatum( *m_pDatum );
   m_pDatum = m_pSeries->Next();
   m_dt = ( NULL == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 

@@ -16,11 +16,11 @@
 #include <list>
 #include <sstream>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include "LibCommon/FastDelegate.h"
+#include <LibCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include <LibTimeSeries/DatedDatum.h>

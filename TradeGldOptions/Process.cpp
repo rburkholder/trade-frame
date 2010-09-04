@@ -319,8 +319,19 @@ void CProcess::AcquireSimulationSymbols( void ) {
   for ( strikes_iterator_t iter = m_mapStrikes.begin(); iter != m_mapStrikes.end(); ++ iter ) {
     CStrikeInfo oi( iter->first );
     m_vStrikes.push_back( oi );
+
     m_vStrikes.back().AssignCall( iter->second.first );
+    // change simulator sometime to accept these mid run
+    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleGreek ) );
+
     m_vStrikes.back().AssignPut( iter->second.second );
+    // change simulator sometime to accept these mid run
+    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleGreek ) );
+
     m_vCrossOverPoints.push_back( iter->first );
   }
 
@@ -362,31 +373,32 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
           m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
           m_sim->Add( m_pUnderlying );
         }
-        pInstrument_t call;
-        pInstrument_t put;
+        pInstrument_t instCall;
+        pInstrument_t instPut;
         strikes_iterator_t iter = m_mapStrikes.find( strike );
         if ( m_mapStrikes.end() == iter ) {
-          m_mapStrikes.insert( std::pair<double,option_pair_t>( strike, option_pair_t( call, put ) ) );
+          m_mapStrikes.insert( std::pair<double,option_pair_t>( strike, option_pair_t( instCall, instPut ) ) );
           iter = m_mapStrikes.find( strike );
         }
         switch ( side ) {
         case 'C':
-          call = CInstrumentManager::Instance().ConstructOption( 
+          instCall = CInstrumentManager::Instance().ConstructOption( 
             sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
-          iter->second.first = call;
-          m_sim->Add( call );
+          iter->second.first = instCall;
+          m_sim->Add( instCall );
           break;
         case 'P':
-          put = CInstrumentManager::Instance().ConstructOption( 
+          instPut = CInstrumentManager::Instance().ConstructOption( 
             sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
-          iter->second.second = put;
-          m_sim->Add( put );
+          iter->second.second = instPut;
+          m_sim->Add( instPut );
           break;
         }
       }
     }
   }
 }
+
 
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
   
@@ -677,14 +689,13 @@ void CProcess::HandleTSFirstPass( const CTrade& trade ) {
   // may need to open portfoloio and evaluate existing positions here
   m_TradingState = ETSPreMarket;
   m_ss.str( "" );
-  m_ss << CTimeSource::Instance().External();
+  m_ss << CTimeSource::Instance().Internal();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleTSPreMarket( const CTrade& trade ) {
-  ptime dt;
-  CTimeSource::Instance().External( &dt );
+  ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -701,7 +712,7 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
 
   // comment our starting trade of the day
   m_ss.str( "" );
-  m_ss << CTimeSource::Instance().External();
+  m_ss << CTimeSource::Instance().Internal();
   m_ss << " Trade 1: " << trade.Volume() << "@" << trade.Trade() << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
@@ -739,15 +750,17 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
 
   // set the actual watches
   m_bWatchingOptions = true;
-  for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+  if ( CProviderInterfaceBase::EProviderSimulator != m_pDataProvider->ID() ) {
+    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    m_pDataProvider->AddQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-    m_pDataProvider->AddGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->AddQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
 
-    m_pDataProvider->AddQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-    m_pDataProvider->AddGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->AddQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+    }
   }
 
   m_TradingState = ETSFirstTrade;
@@ -755,11 +768,10 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
 
 void CProcess::HandleTSOpeningOrder( const CTrade& trade ) {
 
-  ptime dt;
-  CTimeSource::Instance().External( &dt );
+  ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
     m_ss.str( "" );
-    m_ss << CTimeSource::Instance().External();
+    m_ss << CTimeSource::Instance().Internal();
     m_ss << " State:  Opening Order." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
@@ -774,8 +786,7 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
 //  m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
 
-  ptime dt;
-  CTimeSource::Instance().External( &dt );
+  ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketClosingOrder ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -832,8 +843,7 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
     m_bTrading = false;
   }
 
-  ptime dt;
-  CTimeSource::Instance().External( &dt );
+  ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketClose ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -849,7 +859,7 @@ void CProcess::HandleAfterMarket( const CTrade& trade ) {
 void CProcess::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
-    << CTimeSource::Instance().External()
+    << CTimeSource::Instance().Internal()
     << " Strk "  << m_iterOILatestGammaSelectCall->Strike()
 //    << " Call "  << m_iterOILatestGammaSelectCall->Call()->OptionPrice()
     << " ImpVo " << m_iterOILatestGammaSelectCall->Call()->ImpliedVolatility()
@@ -867,7 +877,7 @@ void CProcess::PrintGreeks( void ) {
 void CProcess::SaveSeries( void ) {
 
   m_ss.str( "" );
-  m_ss << CTimeSource::Instance().External();
+  m_ss << CTimeSource::Instance().Internal();
 
   if ( CProviderInterfaceBase::EProviderSimulator == m_pDataProvider->ID() ) {
     m_ss << " simulator stores nothing." << std::endl;
@@ -965,7 +975,7 @@ void CProcess::SaveSeries( void ) {
 
 void CProcess::EmitStats( void ) {
   m_ss.str( "" );
-  m_ss << CTimeSource::Instance().External();
+  m_ss << CTimeSource::Instance().Internal();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
   m_ss << std::endl;

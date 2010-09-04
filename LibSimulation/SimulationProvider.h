@@ -22,9 +22,10 @@
 #include <LibCommon/TimeSource.h>
 #include <LibTrading/ProviderInterface.h>
 #include <LibTrading/Order.h>
+#include <LibTimeSeries/MergeDatedDatums.h>
 
 #include "SimulationSymbol.h"
-#include "CrossThreadMerge.h"
+//#include "CrossThreadMerge.h"
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -71,7 +72,8 @@ protected:
 
   std::string m_sGroupDirectory;
 
-  CCrossThreadMerge *m_pMerge;
+  //CCrossThreadMerge *m_pMerge;
+  CMergeDatedDatums *m_pMerge;
 
   void Merge( void );  // the background process
 

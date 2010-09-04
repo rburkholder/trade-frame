@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <cassert>
 
-#include "LibHDF5TimeSeries/HDF5DataManager.h"
+#include <LibHDF5TimeSeries/HDF5DataManager.h>
 
 #include "SimulationProvider.h"
 
@@ -44,11 +44,14 @@ CSimulationProvider::~CSimulationProvider(void) {
 void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
   CHDF5DataManager dm;
   std::string s;
-  if( !dm.GroupExists( sGroupDirectory ) ) throw std::invalid_argument( "Could not find: " + sGroupDirectory );
+  if( !dm.GroupExists( sGroupDirectory ) ) 
+    throw std::invalid_argument( "Could not find: " + sGroupDirectory );
   s = sGroupDirectory + "/trades";
-  if( !dm.GroupExists( s ) ) throw std::invalid_argument( "Could not find: " + s );
+  if( !dm.GroupExists( s ) ) 
+    throw std::invalid_argument( "Could not find: " + s );
   s = sGroupDirectory + "/quotes";
-  if( !dm.GroupExists( s ) ) throw std::invalid_argument( "Could not find: " + s );
+  if( !dm.GroupExists( s ) ) 
+    throw std::invalid_argument( "Could not find: " + s );
   m_sGroupDirectory = sGroupDirectory;
 }
 
@@ -71,7 +74,6 @@ void CSimulationProvider::Disconnect() {
 CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
-  //CProviderInterface::AddTradeHandler( sSymbolName, MakeDelegate( &pSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
@@ -135,8 +137,6 @@ void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
   pSymbol->StopGreekWatch();
 }
 
-//void CSimulationProvider::Merge( LPVOID lpParam ) {
-//  CSimulationProvider *pProvider = reinterpret_cast<CSimulationProvider *>( lpParam );
 void CSimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote, trade and greek series
@@ -190,7 +190,8 @@ void CSimulationProvider::Run() {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
-    m_pMerge = new CCrossThreadMerge();
+    //m_pMerge = new CCrossThreadMerge();
+    m_pMerge = new CMergeDatedDatums();
     m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
     //m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ) );
 //    assert( NULL != m_pMergeThread );

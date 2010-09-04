@@ -68,8 +68,8 @@ public:
   bool RemoveDepthHandler( depthhandler_t );
   size_t GetDepthHandlerCount( void ) { return m_OnDepth.Size(); };
 
-  void AddGreekHandler( greekhandler_t );
-  void RemoveGreekHandler( greekhandler_t );
+  bool AddGreekHandler( greekhandler_t );
+  bool RemoveGreekHandler( greekhandler_t );
   size_t GetGreekHandlerCount( void ) { return m_OnGreek.Size(); };
 
   // these are typically used by the provider only

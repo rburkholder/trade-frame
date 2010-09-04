@@ -58,6 +58,10 @@ public:
       return External(); 
   };
 
+  inline void Internal( ptime* dt ) {
+    *dt = Internal();
+  }
+
   void SetSimulationMode( bool bMode = true ) { m_bInSimulation = bMode; m_dtSimulationTime = boost::date_time::not_a_date_time; };
   void ResetSimulationMode( void ) { m_bInSimulation = false; };
   bool GetSimulationMode( void ) { return m_bInSimulation; };

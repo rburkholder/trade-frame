@@ -26,6 +26,14 @@ CSymbolBase::CSymbolBase( pInstrument_t pInstrument )
 CSymbolBase::~CSymbolBase(void) {
 }
 
+void CSymbolBase::AddOnOpenHandler(tradehandler_t handler ) {
+  m_OnOpen.Add( handler );
+}
+
+void CSymbolBase::RemoveOnOpenHandler( tradehandler_t handler ) {
+  m_OnOpen.Remove( handler );
+}
+
 bool CSymbolBase::AddQuoteHandler(quotehandler_t handler) {
   Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
   m_OnQuote.Add( handler );
@@ -37,14 +45,6 @@ bool CSymbolBase::RemoveQuoteHandler(quotehandler_t handler) {
   assert( 0 < m_OnQuote.Size() );
   m_OnQuote.Remove( handler );
   return ( 0 == m_OnQuote.Size() );  // no more so stop watch
-}
-
-void CSymbolBase::AddOnOpenHandler(tradehandler_t handler ) {
-  m_OnOpen.Add( handler );
-}
-
-void CSymbolBase::RemoveOnOpenHandler( tradehandler_t handler ) {
-  m_OnOpen.Remove( handler );
 }
 
 bool CSymbolBase::AddTradeHandler(tradehandler_t handler) {
@@ -73,12 +73,17 @@ bool CSymbolBase::RemoveDepthHandler(depthhandler_t handler) {
   return ( 0 == m_OnDepth.Size() );  // when true, stop watch
 }
 
-void CSymbolBase::AddGreekHandler ( greekhandler_t handler ) {
+bool CSymbolBase::AddGreekHandler ( greekhandler_t handler ) {
+  Delegate<greek_t>::vsize_t size = m_OnGreek.Size();
   m_OnGreek.Add( handler );
+  assert( size == ( m_OnGreek.Size() - 1 ) );
+  return ( 1 == m_OnGreek.Size() );  // when true, start watch
 }
 
-void CSymbolBase::RemoveGreekHandler( greekhandler_t handler ) {
+bool CSymbolBase::RemoveGreekHandler( greekhandler_t handler ) {
+  assert( 0 < m_OnGreek.Size() );
   m_OnGreek.Remove( handler );
+  return ( 0 == m_OnGreek.Size() );  // when true, stop watch
 }
 
 

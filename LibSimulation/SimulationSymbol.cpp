@@ -38,13 +38,18 @@ CSimulationSymbol::~CSimulationSymbol(void) {
 
 void CSimulationSymbol::StartTradeWatch( void ) {
   if ( 0 == m_trades.Size() ) {
-    std::string sPath( m_sDirectory + "/trades/" + GetId() );
-    CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
-    CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
-    begin = tradeRepository.begin();
-    end = tradeRepository.end();
-    m_trades.Resize( end - begin );
-    tradeRepository.Read( begin, end, &m_trades );
+    try {
+      std::string sPath( m_sDirectory + "/trades/" + GetId() );
+      CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
+      CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
+      begin = tradeRepository.begin();
+      end = tradeRepository.end();
+      m_trades.Resize( end - begin );
+      tradeRepository.Read( begin, end, &m_trades );
+    }
+    catch ( std::runtime_error &e ) {
+      // couldn't do read, so leave as empty
+    }
   }
 }
 
@@ -53,13 +58,18 @@ void CSimulationSymbol::StopTradeWatch( void ) {
 
 void CSimulationSymbol::StartQuoteWatch( void ) {
   if ( 0 == m_quotes.Size() ) {
-    std::string sPath( m_sDirectory + "/quotes/" + GetId() );
-    CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
-    CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
-    begin = quoteRepository.begin();
-    end = quoteRepository.end();
-    m_quotes.Resize( end - begin );
-    quoteRepository.Read( begin, end, &m_quotes );
+    try {
+      std::string sPath( m_sDirectory + "/quotes/" + GetId() );
+      CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
+      CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
+      begin = quoteRepository.begin();
+      end = quoteRepository.end();
+      m_quotes.Resize( end - begin );
+      quoteRepository.Read( begin, end, &m_quotes );
+    }
+    catch ( std::runtime_error &e ) {
+      // couldn't do read, so leave as empty
+    }
   }
 }
 
@@ -68,13 +78,18 @@ void CSimulationSymbol::StopQuoteWatch( void ) {
 
 void CSimulationSymbol::StartGreekWatch( void ) {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
-    std::string sPath( m_sDirectory + "/greeks/" + GetId() );
-    CHDF5TimeSeriesContainer<CGreek> greekRepository( sPath );
-    CHDF5TimeSeriesContainer<CGreek>::iterator begin, end;
-    begin = greekRepository.begin();
-    end = greekRepository.end();
-    m_greeks.Resize( end - begin );
-    greekRepository.Read( begin, end, &m_greeks );
+    try {
+      std::string sPath( m_sDirectory + "/greeks/" + GetId() );
+      CHDF5TimeSeriesContainer<CGreek> greekRepository( sPath );
+      CHDF5TimeSeriesContainer<CGreek>::iterator begin, end;
+      begin = greekRepository.begin();
+      end = greekRepository.end();
+      m_greeks.Resize( end - begin );
+      greekRepository.Read( begin, end, &m_greeks );
+    }
+    catch ( std::runtime_error &e ) {
+      // couldn't do read, so leave as empty
+    }
   }
 }
 
