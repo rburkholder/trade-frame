@@ -33,7 +33,7 @@ public:
   CMergeCarrierBase( void ) {};
   virtual ~CMergeCarrierBase( void ) {};
   virtual void ProcessDatum( void ) 
-    { throw std::runtime_error( "ProcessDatum not define" ); };
+    { throw std::runtime_error( "ProcessDatum not defined" ); };
   virtual void Reset( void ) 
     { throw std::runtime_error( "Reset not defined" ); };
   inline const ptime &GetDateTime( void ) { return m_dt; };

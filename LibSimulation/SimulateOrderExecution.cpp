@@ -17,10 +17,9 @@
 
 #include "SimulateOrderExecution.h"
 
-int CSimulateOrderExecution::m_nExecId = 1000;
-
 CSimulateOrderExecution::CSimulateOrderExecution(void)
 : m_dtQueueDelay( milliseconds( 800 ) ), m_dblCommission( 0.01 ), 
+  m_nExecId( 1000 ),
   m_bOrdersQueued( false ),
   m_bCancelsQueued( false ), m_nOrderQuanRemaining( 0 )
 {
@@ -114,12 +113,11 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
     switch ( m_pCurrentOrder->GetOrderType() ) {
       case OrderType::Market: 
         {
-        std::string id( GetExecId() );
-        //CExecution exec( m_pCurrentOrder->GetOrderId(), trade.Trade(), quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
+        std::string id;
+        GetExecId( &id );
         CExecution exec( trade.Trade(), quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
-//        std::cout << "Exec:  " << m_pCurrentOrder->GetInstrument()->GetSymbolName() << ", " << quan << "@" << trade.m_dblTrade
-//          << ", " << m_pCurrentOrder->GetOrderSide() << ", Total=" << quan * trade.m_dblTrade << std::endl;
-        if ( NULL != OnOrderFill ) OnOrderFill( m_pCurrentOrder->GetOrderSide(), exec );
+        if ( NULL != OnOrderFill ) 
+          OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
         m_nOrderQuanRemaining -= quan;
         m_nOrderQuanProcessed += quan;
         }
@@ -131,8 +129,8 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
         switch ( m_pCurrentOrder->GetOrderSide() ) {
           case OrderSide::Buy:
             if ( trade.Trade() < price ) {
-              std::string id( GetExecId() );
-              //CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Buy, "SIMLmtBuy", id );
+              std::string id;
+              GetExecId( &id );
               CExecution exec( price, quan, OrderSide::Buy, "SIMLmtBuy", id );
               if ( NULL != OnOrderFill ) OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
               m_nOrderQuanRemaining -= quan;
@@ -141,8 +139,8 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
             break;
           case OrderSide::Sell:
             if ( trade.Trade() > price ) {
-              std::string id( GetExecId() );
-              //CExecution exec( m_pCurrentOrder->GetOrderId(), price, quan, OrderSide::Sell, "SIMLmtSell", id );
+              std::string id;
+              GetExecId( &id );
               CExecution exec( price, quan, OrderSide::Sell, "SIMLmtSell", id );
               if ( NULL != OnOrderFill ) OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
               m_nOrderQuanRemaining -= quan;

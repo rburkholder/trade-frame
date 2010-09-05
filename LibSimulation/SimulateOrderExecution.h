@@ -14,11 +14,12 @@
 #pragma once
 
 #include <list>
-#include <sstream>
+#include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include <boost/lexical_cast.hpp>
 
 #include <LibCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -91,15 +92,12 @@ protected:
   void ProcessDelayQueues( const CTrade &trade );
   void CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan );
 
-  static int m_nExecId;
-  std::stringstream m_ssExecId;
-  const char *GetExecId( void ) { 
-    m_ssExecId.str( "" ); // works according to time tutorial in boost
-    //m_ssExecId.flush(); // this does work
-    //m_ssExecId.clear(); // this doesn't work
-    m_ssExecId << ++m_nExecId << std::endl; 
-    assert( 0 != m_ssExecId.str().size() );
-    return m_ssExecId.str().c_str();
+  int m_nExecId;
+  ;
+  void GetExecId( std::string* sId ) { 
+    *sId = boost::lexical_cast<std::string>( m_nExecId );
+    assert( 0 != sId->length() );
+    return;
   }
 private:
 };
