@@ -25,7 +25,6 @@
 #include <LibTimeSeries/MergeDatedDatums.h>
 
 #include "SimulationSymbol.h"
-//#include "CrossThreadMerge.h"
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -46,20 +45,32 @@ public:
   typedef CInstrument::pInstrument_cref pInstrument_cref;
   typedef COrder::pOrder_t pOrder_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
+  typedef CSimulateOrderExecution::enumExecuteAgainst enumExecuteAgainst;
 
   CSimulationProvider(void);
   virtual ~CSimulationProvider(void);
   virtual void Connect( void );
   virtual void Disconnect( void );
+
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
+  void SetExecuteAgainst( enumExecuteAgainst ea ) { m_ea = ea; };
+  enumExecuteAgainst GetExecuteAgainst( void ) { return m_ea; };
+
   void Run( void );
   void Stop( void );
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
+
   void AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
   void RemoveTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
+  void AddQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
+  void RemoveQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
+
 protected:
+
+  enumExecuteAgainst m_ea;
+
   pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
   void StartQuoteWatch( pSymbol_t pSymbol );
   void StopQuoteWatch( pSymbol_t Symbol );
@@ -72,10 +83,9 @@ protected:
 
   std::string m_sGroupDirectory;
 
-  //CCrossThreadMerge *m_pMerge;
   CMergeDatedDatums *m_pMerge;
 
-  void Merge( void );  // the background process
+  void Merge( void );  // the background thread
 
   void HandleExecution( COrder::orderid_t orderId, const CExecution &exec );
 

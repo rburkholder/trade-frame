@@ -22,6 +22,7 @@
 
 CSimulationProvider::CSimulationProvider(void)
 : CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
+  m_ea( CSimulateOrderExecution::EAQuotes ), 
   m_pMerge( NULL )
 {
   m_sName = "Simulator";
@@ -75,7 +76,34 @@ CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbo
   pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
   inherited_t::AddCSymbol( pSymbol );
+  pSymbol->m_simExec.SetExecuteAgainst( m_ea );
   return pSymbol;
+}
+
+void CSimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler ) {
+  inherited_t::AddQuoteHandler( pInstrument, handler );
+  inherited_t::m_mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  assert( m_mapSymbols.end() != iter );
+  pSymbol_t pSymSymbol( iter->second );
+  if ( 1 == iter->second->GetQuoteHandlerCount() ) {
+    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewQuote ) );
+  }
+}
+
+void CSimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler ) {
+  inherited_t::RemoveQuoteHandler( pInstrument, handler );
+  inherited_t::m_mapSymbols_t::iterator iter;
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );  // this shouldn't occur
+  }
+  else {
+    if ( 1 == iter->second->GetQuoteHandlerCount() ) {
+      pSymbol_t pSymSymbol( iter->second );
+      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewQuote ) );
+    }
+  }
 }
 
 void CSimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler ) {

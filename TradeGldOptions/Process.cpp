@@ -617,7 +617,7 @@ void CProcess::OpenPosition( void ) {
       // orders for normal delta neutral
 
       m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
-      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
+      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
 
       m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );

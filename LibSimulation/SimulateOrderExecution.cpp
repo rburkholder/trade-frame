@@ -13,13 +13,15 @@
 
 #include "StdAfx.h"
 
-#include "LibCommon/TimeSource.h"
+#include <LibCommon/TimeSource.h>
 
 #include "SimulateOrderExecution.h"
 
+int CSimulateOrderExecution::m_nExecId( 1000 );
+
 CSimulateOrderExecution::CSimulateOrderExecution(void)
 : m_dtQueueDelay( milliseconds( 800 ) ), m_dblCommission( 0.01 ), 
-  m_nExecId( 1000 ),
+  m_ea( EAQuotes ),
   m_bOrdersQueued( false ),
   m_bCancelsQueued( false ), m_nOrderQuanRemaining( 0 )
 {
@@ -29,11 +31,20 @@ CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 }
 
 void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
-  if ( m_bOrdersQueued || m_bCancelsQueued ) ProcessDelayQueues( trade );
+  if ( EATrades == m_ea ) {
+    CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
+    if ( m_bOrdersQueued || m_bCancelsQueued ) {
+      ProcessDelayQueues( quote );
+    }
+  }
 }
 
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
-  // not handled yet.  implement when implementing limit order simulation
+  if ( EAQuotes == m_ea ) {
+    if ( m_bOrdersQueued || m_bCancelsQueued ) {
+      ProcessDelayQueues( quote );
+    }
+  }
 }
 
 void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
@@ -53,13 +64,13 @@ void CSimulateOrderExecution::CalculateCommission( COrder::orderid_t nOrderId, C
   }
 }
 
-void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
+void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
 
   // process cancels list
   bool bNoMore = false;
   while ( !bNoMore && !m_lDelayCancel.empty() ) {
     structCancelOrder &co = m_lDelayCancel.front();
-    if ( ( co.dtCancellation + m_dtQueueDelay ) < trade.DateTime() ) {
+    if ( ( co.dtCancellation + m_dtQueueDelay ) < quote.DateTime() ) {
       bNoMore = true;  // havn't waited long enough to simulate cancel submission
     }
     else {
@@ -95,7 +106,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   // need to build and maintain order book, particularily for handling limit orders
   if ( NULL == m_pCurrentOrder ) {
     m_pCurrentOrder = m_lDelayOrder.front();
-    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < trade.DateTime() ) {
+    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
       m_lDelayOrder.pop_front();
       m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
       m_nOrderQuanProcessed = 0;
@@ -108,56 +119,74 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CTrade &trade ) {
   }
   if ( NULL != m_pCurrentOrder ) {
     assert( 0 != m_nOrderQuanRemaining );
-    assert( 0 != trade.Volume() );
-    CTrade::tradesize_t quan = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, trade.Volume() );
-    switch ( m_pCurrentOrder->GetOrderType() ) {
-      case OrderType::Market: 
-        {
-        std::string id;
-        GetExecId( &id );
-        CExecution exec( trade.Trade(), quan, m_pCurrentOrder->GetOrderSide(), "SIMMkt", id );
-        if ( NULL != OnOrderFill ) 
-          OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-        m_nOrderQuanRemaining -= quan;
-        m_nOrderQuanProcessed += quan;
-        }
-        break;
-      case OrderType::Limit: {
-        // to handle order book
-        double price = m_pCurrentOrder->GetPrice1();
-        assert( 0 < price );
-        switch ( m_pCurrentOrder->GetOrderSide() ) {
-          case OrderSide::Buy:
-            if ( trade.Trade() < price ) {
-              std::string id;
-              GetExecId( &id );
-              CExecution exec( price, quan, OrderSide::Buy, "SIMLmtBuy", id );
-              if ( NULL != OnOrderFill ) OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-              m_nOrderQuanRemaining -= quan;
-              m_nOrderQuanProcessed += quan;
-            }
-            break;
-          case OrderSide::Sell:
-            if ( trade.Trade() > price ) {
-              std::string id;
-              GetExecId( &id );
-              CExecution exec( price, quan, OrderSide::Sell, "SIMLmtSell", id );
-              if ( NULL != OnOrderFill ) OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-              m_nOrderQuanRemaining -= quan;
-              m_nOrderQuanProcessed += quan;
-            }
-            break;
-          default:
-            std::cout << "CSimulateOrderExecution::ProcessDelayQueues LimitOrder Unknown side." << std::endl;
-            break;
-        }
-        break;
+    if ( ( 0 != quote.AskSize() ) && ( 0 != quote.BidSize() ) ) {
+      CTrade::tradesize_t quanAvail;
+      double dblPrice;
+      OrderSide::enumOrderSide orderSide = m_pCurrentOrder->GetOrderSide();
+      switch ( orderSide ) {
+        case OrderSide::Buy:
+          quanAvail = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, quote.AskSize() );
+          dblPrice = quote.Ask();
+          break;
+        case OrderSide::Sell:
+          quanAvail = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, quote.BidSize() );
+          dblPrice = quote.Bid();
+          break;
+        default:
+          throw std::runtime_error( "CSimulateOrderExecution::ProcessDelayQueues unknown order side" );
+          break;
       }
-    }
-    if ( 0 == m_nOrderQuanRemaining ) {
-      CalculateCommission( m_pCurrentOrder->GetOrderId(), m_nOrderQuanProcessed );
-      m_pCurrentOrder.reset();
-      m_bOrdersQueued = !m_lDelayOrder.empty();
+
+      switch ( m_pCurrentOrder->GetOrderType() ) {
+        case OrderType::Market: 
+          {
+          std::string id;
+          GetExecId( &id );
+          CExecution exec( dblPrice, quanAvail, orderSide, "SIMMkt", id );
+          if ( NULL != OnOrderFill ) 
+            OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
+          m_nOrderQuanRemaining -= quanAvail;
+          m_nOrderQuanProcessed += quanAvail;
+          }
+          break;
+        case OrderType::Limit: {
+          // need to handle order book
+          double dblLimitOrderPrice = m_pCurrentOrder->GetPrice1();
+          assert( 0 < dblLimitOrderPrice );
+          switch ( orderSide ) {
+            case OrderSide::Buy:
+              if ( quote.Ask() <= dblLimitOrderPrice ) {
+                std::string id;
+                GetExecId( &id );
+                CExecution exec( quote.Ask(), quanAvail, orderSide, "SIMLmtBuy", id );
+                if ( NULL != OnOrderFill ) 
+                  OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
+                m_nOrderQuanRemaining -= quanAvail;
+                m_nOrderQuanProcessed += quanAvail;
+              }
+              break;
+            case OrderSide::Sell:
+              if ( quote.Bid() >= dblLimitOrderPrice ) {
+                std::string id;
+                GetExecId( &id );
+                CExecution exec( quote.Bid(), quanAvail, orderSide, "SIMLmtSell", id );
+                if ( NULL != OnOrderFill ) 
+                  OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
+                m_nOrderQuanRemaining -= quanAvail;
+                m_nOrderQuanProcessed += quanAvail;
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        }
+      }
+      if ( 0 == m_nOrderQuanRemaining ) {
+        CalculateCommission( m_pCurrentOrder->GetOrderId(), m_nOrderQuanProcessed );
+        m_pCurrentOrder.reset();
+        m_bOrdersQueued = !m_lDelayOrder.empty();
+      }
     }
   }
 }

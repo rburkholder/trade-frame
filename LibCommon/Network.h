@@ -13,7 +13,12 @@
 
 #pragma once
 
-//#include <codeproject/thread.h>  // class inbound messages
+#include <string>
+#include <vector>
+#include <cassert>
+
+#include <typeinfo.h>
+#include <sstream>
 
 #include <boost/asio.hpp>  // class outbound processing
 #include <boost/thread.hpp>  // separate thread for asio run processing
@@ -21,13 +26,6 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
-
-#include <string>
-#include <vector>
-#include <cassert>
-
-#include <typeinfo.h>
-#include <sstream>
 
 #include "ReusableBuffers.h"
 
