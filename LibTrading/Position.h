@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include <boost/shared_ptr.hpp>
 
@@ -83,6 +84,8 @@ public:
   Delegate<const CPosition*> OnTrade;  // nothing useful currently
   Delegate<const CPosition*> OnExecution;
 
+  void EmitStatus( std::stringstream& ssStatus );
+
 protected:
 
   typedef CSymbolBase::quote_t quote_t;
@@ -106,8 +109,7 @@ protected:
   unsigned long m_nPositionActive;
 
   // following value markers exclude commission
-  double m_dblAverageCostPerShare;  // based upon position trades
-  double m_dblConstructedValue;  // based upon position trades
+  double m_dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
   double m_dblMarketValue;  // based upon market quotes
 
   // following value markers exclude commission
@@ -125,7 +127,7 @@ private:
 
   void Construction( void );
 
-  void HandleExecution( std::pair<const COrder&, const CExecution&>& );
+  void HandleExecution( const std::pair<const COrder&, const CExecution&>& );
 
   void PlaceOrder( pOrder_t pOrder );
 

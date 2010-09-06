@@ -70,6 +70,8 @@ private:
   structPL m_plMax;
   structPL m_plMin;
 
+  void ReCalc( void );
+
   void HandleQuote( const CPosition* );
   void HandleTrade( const CPosition* );
   void HandleExecution( const CPosition* );

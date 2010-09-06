@@ -204,8 +204,6 @@ void CSimulationProvider::Merge( void ) {
   CTimeSource::Instance().SetSimulationMode( bOldMode );
   m_dtSimStop = CTimeSource::Instance().External();
 
-  // use event here instead
-//  m_pMergeThread = NULL;
   // use join to determine completion?  or state machine?
   // be careful, as it may deadlock
 }
@@ -218,11 +216,8 @@ void CSimulationProvider::Run() {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
-    //m_pMerge = new CCrossThreadMerge();
     m_pMerge = new CMergeDatedDatums();
     m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
-    //m_pMergeThread = AfxBeginThread( &CSimulationProvider::Merge, reinterpret_cast<LPVOID>( this ) );
-//    assert( NULL != m_pMergeThread );
   }
 }
 

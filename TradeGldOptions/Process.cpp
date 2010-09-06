@@ -835,10 +835,10 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
     OutputDebugString( m_ss.str().c_str() );
 
     // orders for normal delta neutral
-//    m_posUnderlying->CancelOrders();
-//    m_posUnderlying->ClosePosition();
-//    m_posPut->CancelOrders();
-//    m_posPut->ClosePosition();
+    m_posUnderlying->CancelOrders();
+    m_posUnderlying->ClosePosition();
+    m_posPut->CancelOrders();
+    m_posPut->ClosePosition();
 
     m_bTrading = false;
   }
@@ -987,6 +987,9 @@ void CProcess::EmitStats( void ) {
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
   m_ss << std::endl;
+
+
+
   OutputDebugString( m_ss.str().c_str() );
 }
 

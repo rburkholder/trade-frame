@@ -19,12 +19,12 @@
 
 #include <string>
 
-#include "boost/shared_ptr.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include "LibCommon/Delegate.h"
+#include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
@@ -95,7 +95,7 @@ public:
     return m_dtOrderFilled; 
   };
 
-  Delegate<std::pair<const COrder&, const CExecution&> > OnExecution;
+  Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
   Delegate<const COrder&> OnOrderFilled; // on final fill
   Delegate<const COrder&> OnPartialFill; // on intermediate fills only
 

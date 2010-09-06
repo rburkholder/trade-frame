@@ -74,12 +74,10 @@ void CMergeDatedDatums::Run() {
 //  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
-  m_cntReorders = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_vCarriers.GetRoot();
-    ProcessCarrier( pCarrier );
-    //pCarrier->ProcessDatum();  // automatically loads next datum when done
+    pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
@@ -93,10 +91,6 @@ void CMergeDatedDatums::Run() {
   }
   m_state = eStopped;
 //  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
-}
-
-void CMergeDatedDatums::ProcessCarrier( CMergeCarrierBase *pCarrier ) {
-  pCarrier->ProcessDatum();  // automatically loads next datum when done
 }
 
 void CMergeDatedDatums::Stop( void ) {

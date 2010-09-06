@@ -20,7 +20,7 @@
 int CSimulateOrderExecution::m_nExecId( 1000 );
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
-: m_dtQueueDelay( milliseconds( 800 ) ), m_dblCommission( 0.01 ), 
+: m_dtQueueDelay( milliseconds( 800 ) ), m_dblCommission( 1.00 ), 
   m_ea( EAQuotes ),
   m_bOrdersQueued( false ),
   m_bCancelsQueued( false ), m_nOrderQuanRemaining( 0 )

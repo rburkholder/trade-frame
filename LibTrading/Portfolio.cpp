@@ -97,8 +97,7 @@ CPortfolio::pPosition_t CPortfolio::GetPosition( const std::string& sName ) {
   return iter->second;
 }
 
-void CPortfolio::HandleQuote( const CPosition* pPosition ) {
-
+void CPortfolio::ReCalc( void ) {
   m_plCurrent.Zero();
 
   for ( iterator iter = m_mapPositionsViaUserName.begin(); iter != m_mapPositionsViaUserName.end(); ++iter ) {
@@ -111,10 +110,15 @@ void CPortfolio::HandleQuote( const CPosition* pPosition ) {
   if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
 }
 
+void CPortfolio::HandleQuote( const CPosition* pPosition ) {
+  ReCalc();
+}
+
 void CPortfolio::HandleTrade( const CPosition* pPosition ) {
 }
 
 void CPortfolio::HandleExecution( const CPosition* pPosition ) {
+  ReCalc();
 }
 
 void CPortfolio::EmitStats( std::stringstream& ss ) {
@@ -124,7 +128,11 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
     << ", Comm=" << m_plCurrent.dblCommissionsPaid
     << ": Min=" << m_plMin.dblNet
     << ", Net=" << m_plCurrent.dblNet
-    << ", Max=" << m_plMax.dblNet;
+    << ", Max=" << m_plMax.dblNet
+    << std::endl;
+  for ( iterator iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
+    iter->second->EmitStatus( ss );
+  }
 }
 
 
