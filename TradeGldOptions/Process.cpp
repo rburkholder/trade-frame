@@ -153,8 +153,8 @@ CProcess::CProcess(void)
   m_sPathForSeries( "/strategy/deltaneutral1" ),
   m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
   m_bProcessSimTradingDayGroup( false ),
-  //m_tws( "U215226" ), m_iqfeed()
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
+  m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
   //m_ProcessingState( EPSLive )
   m_ProcessingState( EPSSimulation )
   //m_stateTimeSeries( EUnknown )
@@ -421,7 +421,7 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
 
 void CProcess::HandleStrikeListing1Done(  ) {
   m_ss.str( "" );
-  m_ss << "Uhderlying Contract Done" << std::endl;
+  m_ss << "Underlying Contract Done" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
   // now request contract info for strike listing 
@@ -576,6 +576,7 @@ void CProcess::OpenPosition( void ) {
     double gammaCall = 0;
     double gammaPut = 0;
     double gamma;
+
     m_iterOILatestGammaSelectCall = m_iterOILowestWatch;
     m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
     // find highest gamma option for call and for put
@@ -617,12 +618,18 @@ void CProcess::OpenPosition( void ) {
       // orders for normal delta neutral
 
       m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
+      m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
+      m_dblDeltaTotalUnderlying = m_nLongUnderlying;
+
+      m_bWaitingForTradeCompletion = true;
 
       m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
+      m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
       m_pPortfolio->AddPosition( "Put", m_posPut );
+      m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->Put() ->Delta();
 
       m_ss.str( "" );
       m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
@@ -649,34 +656,28 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
 //  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
   m_quotes.Append( quote );
-}
-
-void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
-
-  m_dblUnderlyingPrice = trade.Trade();
-  m_trades.Append( trade );
 
   switch ( m_TradingState ) {
     case ETSTrading:
-      HandleTSTrading( trade );
+      HandleTSTrading( quote );
       break;
     case ETSFirstPass:
-      HandleTSFirstPass( trade );
+      HandleTSFirstPass( quote );
       break;
     case ETSPreMarket:
-      HandleTSPreMarket( trade );
+      HandleTSPreMarket( quote );
       break;
 //    case ETSMarketOpened: // first call from within HandleTSPreMarket
 //      HandleTSMarketopened( trade );
 //      break;
     case ETSFirstTrade:
-      HandleTSOpeningOrder( trade );
+      HandleTSOpeningOrder( quote );
       break;
     case ETSCloseOrders:
-      HandleTSCloseOrders( trade );
+      HandleTSCloseOrders( quote );
       break;
     case ETSAfterMarket:
-      HandleAfterMarket( trade );
+      HandleAfterMarket( quote );
       break;
     default:
       throw std::out_of_range( "CProcess::HandleUnderlyingTrade" );
@@ -685,7 +686,14 @@ void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
 
 }
 
-void CProcess::HandleTSFirstPass( const CTrade& trade ) {
+void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
+
+  m_dblUnderlyingPrice = trade.Trade();
+  m_trades.Append( trade );
+
+}
+
+void CProcess::HandleTSFirstPass( const CQuote& quote ) {
   // may need to open portfoloio and evaluate existing positions here
   m_TradingState = ETSPreMarket;
   m_ss.str( "" );
@@ -694,7 +702,7 @@ void CProcess::HandleTSFirstPass( const CTrade& trade ) {
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleTSPreMarket( const CTrade& trade ) {
+void CProcess::HandleTSPreMarket( const CQuote& quote ) {
   ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
@@ -702,39 +710,39 @@ void CProcess::HandleTSPreMarket( const CTrade& trade ) {
     m_ss << " State:  Market Opened." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     m_TradingState = ETSMarketOpened;
-    HandleTSMarketOpened( trade );
+    HandleTSMarketOpened( quote );
   }
 }
 
-void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
+void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
 
-  double dblTrade = trade.Trade();
+  double dblOpenValue = ( quote.Bid() + quote.Ask() ) / 2.0;
 
   // comment our starting trade of the day
   m_ss.str( "" );
   m_ss << CTimeSource::Instance().Internal();
-  m_ss << " Trade 1: " << trade.Volume() << "@" << trade.Trade() << std::endl;
+  m_ss << " Opening mid quote: " << dblOpenValue << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
   // set iterators for center of the pack (crossovers are above and below trade):
   m_iterAboveCrossOver = m_vCrossOverPoints.begin();
-  while ( dblTrade >= *m_iterAboveCrossOver ) {
+  while ( dblOpenValue >= *m_iterAboveCrossOver ) {
     ++m_iterAboveCrossOver;
   }
   m_iterBelowCrossOver = m_iterAboveCrossOver;
-  while ( dblTrade <= *m_iterBelowCrossOver ) {
+  while ( dblOpenValue <= *m_iterBelowCrossOver ) {
     --m_iterBelowCrossOver;
   }
 
   // comment our crossover points
   m_ss.str( "" );
-  m_ss << "Trade start " << *m_iterBelowCrossOver << ", " << dblTrade << ", " << *m_iterAboveCrossOver << std::endl;
+  m_ss << "Trade start " << *m_iterBelowCrossOver << ", " << dblOpenValue << ", " << *m_iterAboveCrossOver << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
   // calculate where to have put/call option watches,
   //   have a range of strikes above and below current trade (have maximum 100 watches available)
   m_iterOIHighestWatch = m_vStrikes.begin();
-  while ( *m_iterOIHighestWatch <= dblTrade ) {
+  while ( *m_iterOIHighestWatch <= dblOpenValue ) {
     ++m_iterOIHighestWatch;
   }
   m_iterOILowestWatch = m_iterOIHighestWatch;
@@ -766,7 +774,7 @@ void CProcess::HandleTSMarketOpened( const CTrade& trade ) {
   m_TradingState = ETSFirstTrade;
 }
 
-void CProcess::HandleTSOpeningOrder( const CTrade& trade ) {
+void CProcess::HandleTSOpeningOrder( const CQuote& quote ) {
 
   ptime dt = CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
@@ -781,7 +789,18 @@ void CProcess::HandleTSOpeningOrder( const CTrade& trade ) {
   }
 }
 
-void CProcess::HandleTSTrading( const CTrade& trade ) {
+void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
+  m_ss.str( "" );
+  ptime dt = CTimeSource::Instance().Internal();
+  m_ss << dt;
+  m_ss << "Execution: " << pair.first->GetInstrument()->GetInstrumentName() << " " 
+    << OrderSide::Name[ pair.second.GetOrderSide() ] << " " 
+    << pair.second.GetSize() << "@" << pair.second.GetPrice()
+    << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
+}
+
+void CProcess::HandleTSTrading( const CQuote& quote ) {
 
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
 //  m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
@@ -797,12 +816,13 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
   }
   else {
 
+    double dblMidQuote = ( quote.Bid() + quote.Ask() ) / 2.0;
+
     double dblDeltaPut  = m_iterOILatestGammaSelectPut->Put()->Delta() * m_nPuts * 100;
     double dblDeltaCall = m_iterOILatestGammaSelectCall->Call()->Delta() * m_nCalls * 100;
 
     bool bTraded = false;
     int nOptions = 0;
-    //COrder::pOrder_t pOrder;
 
     double dblDeltaHi = m_dblBaseDelta + m_dblBaseDeltaIncrement;
     double dblDeltaLo = m_dblBaseDelta - m_dblBaseDeltaIncrement;
@@ -811,6 +831,26 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
 
       // todo:  while implied volatility is rising, hold back on exiting?
       // todo:  while implied volatility is falling, hold back on entering?
+
+      double dblDeltaDif = dblDeltaPut + m_dblDeltaTotalUnderlying;
+      if ( dblDeltaDif > m_dblBaseDeltaIncrement ) { // sell underlying to get closer to put delta
+        m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+        m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
+        m_ss.str( "" );
+        m_ss << dt;
+        m_ss << " Underlying Sell 100, trigger @" << dblMidQuote << std::endl;
+        OutputDebugString( m_ss.str().c_str() );
+      }
+      else {
+        if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
+          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+          m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
+          m_ss.str( "" );
+          m_ss << dt;
+          m_ss << " Underlying Buy 100, trigger @" << dblMidQuote << std::endl;
+          OutputDebugString( m_ss.str().c_str() );
+        }
+      }
 
 
     }
@@ -824,7 +864,7 @@ void CProcess::HandleTSTrading( const CTrade& trade ) {
   }
 }
 
-void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
+void CProcess::HandleTSCloseOrders( const CQuote& quote ) {
 
   if ( m_bTrading ) {
 
@@ -853,7 +893,7 @@ void CProcess::HandleTSCloseOrders( const CTrade& trade ) {
   }
 }
 
-void CProcess::HandleAfterMarket( const CTrade& trade ) {
+void CProcess::HandleAfterMarket( const CQuote& quote ) {
 }
 
 void CProcess::PrintGreeks( void ) {
@@ -982,19 +1022,18 @@ void CProcess::SaveSeries( void ) {
 }
 
 void CProcess::EmitStats( void ) {
+
   m_ss.str( "" );
   m_ss << CTimeSource::Instance().Internal();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
+  m_sim->EmitStats( m_ss );
   m_ss << std::endl;
-
-
 
   OutputDebugString( m_ss.str().c_str() );
 }
 
 // need to worry about rogue trades... trades out side of the normal trading range
-// capture quotes, trades, greeks and write to database afterwards
 // handle executions
 // manage multiple position, add a new position on each cross over, or when ever 
 //  hightest gamma moves to another strike

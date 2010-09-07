@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "boost/shared_ptr.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
@@ -35,8 +35,9 @@ public:
   double GetPrice( void ) const { return m_dblPrice; };
   unsigned long GetSize( void ) const { return m_nSize; };
   OrderSide::enumOrderSide GetOrderSide( void ) const { return m_eOrderSide; };
-  const std::string &GetExchange( void ) const { return m_sExchange; };
-  const std::string &GetExecutionId( void ) const { return m_sExecutionId; };
+  const std::string& GetExchange( void ) const { return m_sExchange; };
+  const std::string& GetExecutionId( void ) const { return m_sExecutionId; };
+  ptime GetTimeStamp( void ) const { return m_dtExecutionTimeStamp; };
 
 protected:
 

@@ -23,7 +23,8 @@
 // http://www.staroceans.com/minmaxHeap1.htm
 // http://www.cppreference.com/wiki/stl/algorithm/is_heap  is_heap()
 
-template<class T, class C> class CMinHeap {
+template<class T, class C> 
+class CMinHeap {
 public:
   CMinHeap<T,C>( size_t size );
   CMinHeap<T,C>( void );
@@ -51,40 +52,47 @@ private:
   bool m_bArchivalStarted; // prevents further Appends
 };
 
-template<class T, class C> CMinHeap<T,C>::CMinHeap(size_t size) 
+template<class T, class C> 
+CMinHeap<T,C>::CMinHeap(size_t size) 
 : m_cntActiveItems( 0 ), m_bArchivalStarted( false )
 {
   m_vT.reserve( size );
 }
 
-template<class T, class C> CMinHeap<T,C>::CMinHeap( void ) 
+template<class T, class C> 
+CMinHeap<T,C>::CMinHeap( void ) 
 : m_cntActiveItems( 0 ), m_bArchivalStarted( false )
 {
 }
 
-template<class T, class C> CMinHeap<T,C>::~CMinHeap() {
+template<class T, class C> 
+CMinHeap<T,C>::~CMinHeap() {
 }
 
-template<class T, class C> size_t CMinHeap<T,C>::ixLastItem() {
+template<class T, class C> 
+size_t CMinHeap<T,C>::ixLastItem() {
   assert( 0 < m_cntActiveItems );
   return m_cntActiveItems - 1;
 }
 
-template<class T, class C> void CMinHeap<T,C>::Append( T item ) {
+template<class T, class C> 
+void CMinHeap<T,C>::Append( T item ) {
   assert( !m_bArchivalStarted );
   m_vT.push_back( item );
   ++m_cntActiveItems;
   SiftUp( ixLastItem() );
 }
 
-template<class T, class C> T CMinHeap<T,C>::RemoveEnd( void ) {
+template<class T, class C> 
+T CMinHeap<T,C>::RemoveEnd( void ) {
   assert( !m_vT.empty() );
   T item = m_vT.back();
   m_vT.pop_back();
   return item;
 }
 
-template<class T, class C> void CMinHeap<T,C>::ArchiveRoot() {
+template<class T, class C> 
+void CMinHeap<T,C>::ArchiveRoot() {
   // swap with last item and SiftDown
   assert( 0 < m_cntActiveItems );
   m_bArchivalStarted = true;
@@ -95,7 +103,8 @@ template<class T, class C> void CMinHeap<T,C>::ArchiveRoot() {
   }
 }
 
-template<class T, class C> void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
+template<class T, class C> 
+void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
   assert( ix < m_cntActiveItems );
   assert( iy < m_cntActiveItems );
   T tmp = m_vT.at( ix );
@@ -103,7 +112,8 @@ template<class T, class C> void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
   m_vT.at( iy ) = tmp;
 }
 
-template<class T, class C> void CMinHeap<T,C>::SiftUp( size_t ix ) {
+template<class T, class C> 
+void CMinHeap<T,C>::SiftUp( size_t ix ) {
   size_t cur = ix;
   size_t parent;
   while ( 0 != cur ) {
@@ -118,7 +128,8 @@ template<class T, class C> void CMinHeap<T,C>::SiftUp( size_t ix ) {
   }
 }
 
-template<class T, class C> void CMinHeap<T,C>::SiftDown( size_t ix ) {
+template<class T, class C> 
+void CMinHeap<T,C>::SiftDown( size_t ix ) {
   size_t cur = ix;
   while ( !isLeaf( cur ) ) {
     if ( hasOneLeaf( cur ) ) {

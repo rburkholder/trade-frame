@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
@@ -67,6 +68,8 @@ public:
   void AddQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
   void RemoveQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
 
+  void EmitStats( std::stringstream& ss );
+
 protected:
 
   enumExecuteAgainst m_ea;
@@ -91,6 +94,7 @@ protected:
 
   ptime m_dtSimStart;
   ptime m_dtSimStop;
+  unsigned long m_nProcessedDatums;
 
 private:
 

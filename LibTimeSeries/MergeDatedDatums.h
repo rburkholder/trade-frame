@@ -41,13 +41,13 @@ public:
   void Run( void );
   void Stop( void );
 
-  enumMergingState GetState( void ) { return m_state; };
+  enumMergingState GetState( void ) const { return m_state; };
 
-  unsigned long GetCountProcessedDatums( void ) { return m_cntProcessedDatums; };
+  unsigned long GetCountProcessedDatums( void ) const { return m_cntProcessedDatums; };
 
 protected:
 
-  CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_vCarriers;
+  CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_mhCarriers;
 
   // not all states or commands are implemented yet
   enum enumMergingCommands { eUnknown, eRun, eStop, ePause, eResume, eReset };

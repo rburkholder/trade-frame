@@ -74,6 +74,7 @@ private:
 
   void HandleQuote( const CPosition* );
   void HandleTrade( const CPosition* );
-  void HandleExecution( const CPosition* );
+  void HandleExecution( CPosition::execution_delegate_t );
+  void HandleCommission( const CPosition* );
 
 };

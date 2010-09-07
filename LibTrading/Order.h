@@ -79,7 +79,8 @@ public:
   unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
-  void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
+  void SetCommission( double dblCommission );
+  double GetCommission( void ) const{ return m_dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
   unsigned long GetQuanRemaining( void ) const { return m_nRemaining; };
   unsigned long GetQuanOrdered( void ) const { return m_nOrderQuantity; };
@@ -98,6 +99,7 @@ public:
   Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
   Delegate<const COrder&> OnOrderFilled; // on final fill
   Delegate<const COrder&> OnPartialFill; // on intermediate fills only
+  Delegate<const COrder&> OnCommission;
 
 protected:
   CInstrument::pInstrument_t m_pInstrument;

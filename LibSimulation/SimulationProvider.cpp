@@ -165,6 +165,7 @@ void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
   pSymbol->StopGreekWatch();
 }
 
+// root of background simulation thread, started from Run.
 void CSimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote, trade and greek series
@@ -197,12 +198,14 @@ void CSimulationProvider::Merge( void ) {
 
   }
 
+  m_nProcessedDatums = 0;
   bool bOldMode = CTimeSource::Instance().GetSimulationMode();
   m_dtSimStart = CTimeSource::Instance().External();
   CTimeSource::Instance().SetSimulationMode();
   m_pMerge -> Run();
   CTimeSource::Instance().SetSimulationMode( bOldMode );
   m_dtSimStop = CTimeSource::Instance().External();
+  m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
 
   // use join to determine completion?  or state machine?
   // be careful, as it may deadlock
@@ -219,6 +222,13 @@ void CSimulationProvider::Run() {
     m_pMerge = new CMergeDatedDatums();
     m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
   }
+}
+
+void CSimulationProvider::EmitStats( std::stringstream& ss ) {
+  boost::posix_time::time_duration dur = m_dtSimStop - m_dtSimStart;
+  unsigned long nDuration = dur.seconds();
+  unsigned long nDatumsPerSecond = m_nProcessedDatums / nDuration;
+  ss << m_nProcessedDatums << " datums in " << nDuration << " seconds, " << nDatumsPerSecond << " datums/second." << std::endl;
 }
 
 // at some point:  run, stop, pause, resume, reset

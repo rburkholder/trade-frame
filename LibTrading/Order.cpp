@@ -13,7 +13,7 @@
 
 #include "StdAfx.h"
 
-#include "LibCommon/TimeSource.h"
+#include <LibCommon/TimeSource.h>
 
 #include "Order.h"
 
@@ -106,7 +106,6 @@ void COrder::SetSendingToProvider() {
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
   // need to worry about fill after cancel
   assert( exec.GetOrderSide() == m_eOrderSide );
-//  assert( exec.GetOrderId() == m_nOrderId );
   bool bOverDone = false;
   if ( 0 == m_nRemaining ) {
     // yes this has happened, 2008/07/09 vmw
@@ -169,4 +168,9 @@ void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
     case OrderErrors::NotCancellable:
       break;
   }
+}
+
+void COrder::SetCommission( double dblCommission ) { 
+  m_dblCommission = dblCommission; 
+  OnCommission( *this );
 }

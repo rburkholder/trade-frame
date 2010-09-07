@@ -59,8 +59,9 @@ void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
 }
 
 void CSimulateOrderExecution::CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan ) {
-  if ( 0 == quan ) {
-    if ( NULL != OnCommission ) OnCommission( nOrderId, m_dblCommission * (double) quan );
+  if ( 0 != quan ) {
+    if ( NULL != OnCommission ) 
+      OnCommission( nOrderId, m_dblCommission * (double) quan );
   }
 }
 

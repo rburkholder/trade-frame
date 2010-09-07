@@ -23,6 +23,7 @@ CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &s
   m_InstrumentType( type ), 
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 ),
+  m_nMultiplier( 1 ),
   m_nContract( 0 )
 {
   assert( type < InstrumentType::_Count );
@@ -41,6 +42,7 @@ CInstrument::CInstrument(
   m_OptionSide( OptionSide::Unknown ), 
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 ),
+  m_nMultiplier( 1 ),
   m_nContract( 0 )
 {
   assert( m_InstrumentType == InstrumentType::Future );
@@ -64,6 +66,7 @@ CInstrument::CInstrument(
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), 
   m_dblStrike( strike ),
+  m_nMultiplier( 100 ),
   m_nContract( 0 )
 {
   assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
@@ -92,6 +95,7 @@ CInstrument::CInstrument(
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), m_nDay( day ),
   m_dblStrike( strike ),
+  m_nMultiplier( 100 ),
   m_nContract( 0 )
 {
   assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
@@ -116,6 +120,7 @@ CInstrument::CInstrument(
   m_pUnderlying( pUnderlying ), 
   m_InstrumentType( type ),
   m_Currency( base ), m_CurrencyCounter( counter ),
+  m_nMultiplier( 1 ),
   m_sExchange( "" ), m_nContract( 0 )
 {
   assert( m_InstrumentType == InstrumentType::Currency );
@@ -134,6 +139,7 @@ CInstrument::CInstrument(const CInstrument& instrument)
   m_nMonth( instrument.m_nMonth ), 
   m_nDay( instrument.m_nDay ),
   m_dblStrike( instrument.m_dblStrike ),
+  m_nMultiplier( instrument.m_nMultiplier ),
   m_nContract( 0 )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();

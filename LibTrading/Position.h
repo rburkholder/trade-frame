@@ -47,17 +47,20 @@ public:
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
+  typedef std::pair<const CPosition*, const CExecution&> execution_pair_t;
+  typedef const execution_pair_t& execution_delegate_t;
+
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   ~CPosition(void);
 
-  const std::string& Notes( void ) { return m_sNotes; };
+  const std::string& Notes( void ) const { return m_sNotes; };
   void Append( std::string& sNotes ) { m_sNotes += sNotes; };
 
-  pInstrument_cref GetInstrument( void ) { return m_pInstrument; };
-  double GetUnRealizedPL( void ) { return m_dblUnRealizedPL; };
-  double GetRealizedPL( void ) { return m_dblRealizedPL; };
-  double GetCommissionPaid( void ) { return m_dblCommissionPaid; };
+  pInstrument_cref GetInstrument( void ) const { return m_pInstrument; };
+  double GetUnRealizedPL( void ) const { return m_dblUnRealizedPL; };
+  double GetRealizedPL( void ) const { return m_dblRealizedPL; };
+  double GetCommissionPaid( void ) const { return m_dblCommissionPaid; };
 
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
@@ -82,7 +85,8 @@ public:
 
   Delegate<const CPosition*> OnQuote;
   Delegate<const CPosition*> OnTrade;  // nothing useful currently
-  Delegate<const CPosition*> OnExecution;
+  Delegate<execution_delegate_t> OnExecution;
+  Delegate<const CPosition*> OnCommission;
 
   void EmitStatus( std::stringstream& ssStatus );
 
@@ -128,6 +132,7 @@ private:
   void Construction( void );
 
   void HandleExecution( const std::pair<const COrder&, const CExecution&>& );
+  void HandleCommission( const COrder& );
 
   void PlaceOrder( pOrder_t pOrder );
 

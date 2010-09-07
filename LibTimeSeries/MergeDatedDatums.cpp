@@ -27,30 +27,30 @@ CMergeDatedDatums::CMergeDatedDatums(void)
 }
 
 CMergeDatedDatums::~CMergeDatedDatums(void) {
-  while ( !m_vCarriers.Empty() ) {
-    CMergeCarrierBase *p = m_vCarriers.RemoveEnd();
+  while ( !m_mhCarriers.Empty() ) {
+    CMergeCarrierBase *p = m_mhCarriers.RemoveEnd();
     delete p;
   }
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CQuote>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.Append( new CMergeCarrier<CQuote>( pSeries, function ) );
+  m_mhCarriers.Append( new CMergeCarrier<CQuote>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CTrade>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.Append( new CMergeCarrier<CTrade>( pSeries, function ) );
+  m_mhCarriers.Append( new CMergeCarrier<CTrade>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CBar>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.Append( new CMergeCarrier<CBar>( pSeries, function ) );
+  m_mhCarriers.Append( new CMergeCarrier<CBar>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CGreek>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.Append( new CMergeCarrier<CGreek>( pSeries, function ) );
+  m_mhCarriers.Append( new CMergeCarrier<CGreek>( pSeries, function ) );
 }
 
 void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_vCarriers.Append( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
+  m_mhCarriers.Append( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
 }
 
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html
@@ -70,23 +70,23 @@ protected:
 // for example, see CSimulationProvider
 void CMergeDatedDatums::Run() {
   m_request = eRun;
-  size_t cntCarriers = m_vCarriers.Size();
+  size_t cntCarriers = m_mhCarriers.Size();
 //  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
   CMergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
-    pCarrier = m_vCarriers.GetRoot();
+    pCarrier = m_mhCarriers.GetRoot();
     pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
     if ( NULL == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
-      m_vCarriers.ArchiveRoot();
+      m_mhCarriers.ArchiveRoot();
       --cntCarriers;
     }
     else {
       // reorder the carriers
-      m_vCarriers.SiftDown();
+      m_mhCarriers.SiftDown();
     }
   }
   m_state = eStopped;

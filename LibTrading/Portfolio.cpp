@@ -42,8 +42,9 @@ void CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) 
   m_mapPositionsViaUserName.insert( map_t_pair( sName, pPosition ) );
   m_mapPositionsViaInstrumentName.insert( map_t_pair( sInstrumentName, pPosition ) );
 
-  pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolio::HandleExecution ) );
   pPosition->OnQuote.Add( MakeDelegate( this, &CPortfolio::HandleQuote ) );
+  pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolio::HandleExecution ) );
+  pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolio::HandleCommission ) );
 
 }
 
@@ -60,6 +61,7 @@ void CPortfolio::DeletePosition( const std::string& sName ) {
     throw std::runtime_error( "CPortfolio::Delete2 position does not exist" );
   }
 
+  iterUser->second->OnCommission.Remove( MakeDelegate( this, &CPortfolio::HandleCommission ) );
   iterUser->second->OnExecution.Remove( MakeDelegate( this, &CPortfolio::HandleExecution ) );
   iterUser->second->OnQuote.Remove( MakeDelegate( this, &CPortfolio::HandleQuote ) );
 
@@ -117,12 +119,19 @@ void CPortfolio::HandleQuote( const CPosition* pPosition ) {
 void CPortfolio::HandleTrade( const CPosition* pPosition ) {
 }
 
-void CPortfolio::HandleExecution( const CPosition* pPosition ) {
+void CPortfolio::HandleExecution( CPosition::execution_delegate_t ) {
+  ReCalc();
+}
+
+void CPortfolio::HandleCommission( const CPosition* pPosition ) {
   ReCalc();
 }
 
 void CPortfolio::EmitStats( std::stringstream& ss ) {
   ss.str( "" );
+  for ( iterator iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
+    iter->second->EmitStatus( ss );
+  }
   ss << "Portfolio URPL=" << m_plCurrent.dblUnRealized
     << ", RPL=" << m_plCurrent.dblRealized 
     << ", Comm=" << m_plCurrent.dblCommissionsPaid
@@ -130,9 +139,6 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
     << ", Net=" << m_plCurrent.dblNet
     << ", Max=" << m_plMax.dblNet
     << std::endl;
-  for ( iterator iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
-    iter->second->EmitStatus( ss );
-  }
 }
 
 

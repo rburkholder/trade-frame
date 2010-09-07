@@ -290,9 +290,13 @@ private:
   int m_nCalls;
   int m_nPuts;
 
-  // delta neutal long call, long put
+  // delta neutral long call, long put
   int m_nLongPut;
   int m_nLongUnderlying;
+
+  double m_dblDeltaTotalPut;
+  double m_dblDeltaTotalUnderlying;
+  bool m_bWaitingForTradeCompletion;
 
   double m_dblCallPrice;
   double m_dblPutPrice;
@@ -326,13 +330,15 @@ private:
   void HandleUnderlyingQuote( const CQuote& quote );
   void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine
 
-  void HandleTSFirstPass( const CTrade& trade );
-  void HandleTSPreMarket( const CTrade& trade );
-  void HandleTSMarketOpened( const CTrade& trade );
-  void HandleTSOpeningOrder( const CTrade& trade );
-  void HandleTSTrading( const CTrade& trade );
-  void HandleTSCloseOrders( const CTrade& trade );
-  void HandleAfterMarket( const CTrade& trade );
+  void HandleTSFirstPass( const CQuote& quote );
+  void HandleTSPreMarket( const CQuote& quote );
+  void HandleTSMarketOpened( const CQuote& quote );
+  void HandleTSOpeningOrder( const CQuote& quote );
+  void HandleTSTrading( const CQuote& quote );
+  void HandleTSCloseOrders( const CQuote& quote );
+  void HandleAfterMarket( const CQuote& quote );
+
+  void HandlePositionExecution( const std::pair<const CPosition*, const CExecution&>& );
 
   void OpenPosition( void );
   void ClosePosition( void );

@@ -63,6 +63,13 @@ CPosition::~CPosition(void) {
   if ( m_pDataProvider->ProvidesGreeks() ) {
     m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
   }
+  for ( std::vector<pOrder_t>::iterator iter = m_AllOrders.begin(); iter != m_AllOrders.end(); ++iter ) {
+    iter->get()->OnCommission.Remove( MakeDelegate( this, &CPosition::HandleCommission ) );
+    iter->get()->OnExecution.Remove( MakeDelegate( this, &CPosition::HandleExecution ) );
+  }
+  m_OpenOrders.clear();
+  m_ClosedOrders.clear();
+  m_AllOrders.clear();
 }
 
 void CPosition::HandleQuote( quote_t quote ) {
@@ -146,8 +153,8 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   m_nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
-  pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) );  // << == need appropriate place to remove as well
-  //m_pExecutionProvider->PlaceOrder( pOrder );
+  pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
+  pOrder->OnCommission.Add( MakeDelegate( this, &CPosition::HandleCommission ) );
   COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
@@ -173,6 +180,11 @@ void CPosition::ClosePosition( void ) {
     case OrderSide::Unknown:
       break;
   }
+}
+
+void CPosition::HandleCommission( const COrder& order ) {
+  m_dblCommissionPaid = order.GetCommission();
+  OnCommission( this );
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
@@ -267,7 +279,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
     throw std::runtime_error( "CPosition::HandleExecution doesn't have an Open Order" );
   }
 
-  OnExecution( this );
+  OnExecution( execution_pair_t( this, exec ) );
   
 }
 

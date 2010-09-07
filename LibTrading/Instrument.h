@@ -66,7 +66,7 @@ public:
     
   virtual ~CInstrument(void);
 
-  idInstrument_cref GetInstrumentName( void ) { return m_sInstrumentName; };
+  idInstrument_cref GetInstrumentName( void ) const { return m_sInstrumentName; };
   idInstrument_cref GetUnderlyingName( void );
 
   idInstrument_cref GetInstrumentName( enumProviderId_t id );
@@ -79,21 +79,24 @@ public:
   Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
-  bool IsOption( void ) { return ( InstrumentType::Option == m_InstrumentType ); };
-  bool IsFuture( void ) { return ( InstrumentType::Future == m_InstrumentType ); };
+  bool IsOption( void ) const { return ( InstrumentType::Option == m_InstrumentType ); };
+  bool IsFuture( void ) const { return ( InstrumentType::Future == m_InstrumentType ); };
 
-  const std::string& GetExchangeName( void ) { return m_sExchange; };
+  const std::string& GetExchangeName( void ) const { return m_sExchange; };
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
   const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
 
-  double GetStrike( void ) { return m_dblStrike; };
-  unsigned short GetExpiryYear( void ) { return m_nYear; };
-  unsigned short GetExpiryMonth( void ) { return m_nMonth; };
-  unsigned short GetExpiryDay( void ) { return m_nDay; };
+  double GetStrike( void ) const { return m_dblStrike; };
+  unsigned short GetExpiryYear( void ) const { return m_nYear; };
+  unsigned short GetExpiryMonth( void ) const { return m_nMonth; };
+  unsigned short GetExpiryDay( void ) const { return m_nDay; };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
 
   void SetContract( long id ) { m_nContract = id; };
-  long GetContract( void ) { return m_nContract; };
+  long GetContract( void ) const { return m_nContract; };
+
+  void SetMultiplier( unsigned long nMultiplier ) { m_nMultiplier = nMultiplier; };
+  unsigned long GetMultiplier( void ) const { return m_nMultiplier; };
 
 protected:
 
@@ -110,6 +113,7 @@ protected:
   unsigned short m_nDay; // future, option
   double m_dblStrike;
   long m_nContract;  // used with CIBTWS
+  unsigned long m_nMultiplier;  // number of units per contract: stk 1x, option 100x
 
 private:
 
