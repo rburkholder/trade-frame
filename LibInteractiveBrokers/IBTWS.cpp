@@ -347,8 +347,9 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
   m_ss.str("");
   m_ss  
     << "execDetails: " 
-    << "  sym=" << contract.symbol 
+    << "  sym=" << contract.localSymbol 
 //    << ", oid=" << orderId 
+    << ", reqId=" << reqId
     << ", ex.oid=" << execution.orderId 
     << ", ex.pr=" << execution.price 
     << ", ex.sh=" << execution.shares 
@@ -361,7 +362,7 @@ void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& 
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+  OutputDebugString( m_ss.str().c_str() );
 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
@@ -403,16 +404,21 @@ CIBTWS::pSymbol_t CIBTWS::GetSymbol( long ContractId ) {
 
 // check for symbol existance, and return, else add and return
 CIBTWS::pSymbol_t CIBTWS::GetSymbol( pInstrument_t instrument ) {
+
   long contractId;
   contractId = instrument->GetContract();
   assert( 0 != contractId );
+
   pSymbol_t pSymbol;
-  try {
-    pSymbol = GetSymbol( contractId );
-  }
-  catch ( std::out_of_range& e ) {
+
+  mapContractToSymbol_t::iterator iterId = m_mapContractToSymbol.find( contractId );
+  if ( m_mapContractToSymbol.end() == iterId ) {
     pSymbol = NewCSymbol( instrument );
   }
+  else {
+    pSymbol = iterId->second;
+  }
+
   return pSymbol;
 }
 

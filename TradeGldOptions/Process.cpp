@@ -150,13 +150,14 @@ CProcess::CProcess(void)
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
-  m_sPathForSeries( "/strategy/deltaneutral1" ),
-  m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
+  m_sPathForSeries( "/strategy/deltaneutral2" ),
+  //m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
+  m_sDesiredSimTradingDay( "2010-Sep-08 19:29:30.366375" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
   m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
-  //m_ProcessingState( EPSLive )
-  m_ProcessingState( EPSSimulation )
+  m_ProcessingState( EPSLive )
+  //m_ProcessingState( EPSSimulation )
   //m_stateTimeSeries( EUnknown )
 {
 
@@ -192,6 +193,12 @@ CProcess::CProcess(void)
 
 CProcess::~CProcess(void)
 {
+}
+
+void CProcess::SetMode( enumMode mode ) {
+}
+
+void CProcess::SetDataConnection( enumDataConnection dc ) {
 }
 
 // Simulation Engine Connect/Disconnect
@@ -619,7 +626,8 @@ void CProcess::OpenPosition( void ) {
 
       m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
       m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
+      //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
+      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
       m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
       m_dblDeltaTotalUnderlying = m_nLongUnderlying;
 
@@ -793,7 +801,7 @@ void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
   m_ss.str( "" );
   ptime dt = CTimeSource::Instance().Internal();
   m_ss << dt;
-  m_ss << "Execution: " << pair.first->GetInstrument()->GetInstrumentName() << " " 
+  m_ss << " Execution: " << pair.first->GetInstrument()->GetInstrumentName() << " " 
     << OrderSide::Name[ pair.second.GetOrderSide() ] << " " 
     << pair.second.GetSize() << "@" << pair.second.GetPrice()
     << std::endl;
@@ -834,7 +842,8 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
 
       double dblDeltaDif = dblDeltaPut + m_dblDeltaTotalUnderlying;
       if ( dblDeltaDif > m_dblBaseDeltaIncrement ) { // sell underlying to get closer to put delta
-        m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+        //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+        m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement );
         m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
         m_ss.str( "" );
         m_ss << dt;
@@ -843,7 +852,8 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
       }
       else {
         if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
-          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+          //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
+          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement );
           m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
           m_ss.str( "" );
           m_ss << dt;
@@ -1027,7 +1037,9 @@ void CProcess::EmitStats( void ) {
   m_ss << CTimeSource::Instance().Internal();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
-  m_sim->EmitStats( m_ss );
+  if ( EPSSimulation == m_ProcessingState ) {
+    m_sim->EmitStats( m_ss );
+  }
   m_ss << std::endl;
 
   OutputDebugString( m_ss.str().c_str() );

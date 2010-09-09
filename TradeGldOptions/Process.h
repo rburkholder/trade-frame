@@ -167,8 +167,24 @@ class CProcess:
 {
   friend CIQFeedHistoryQuery<CProcess>;
 public:
+
+  enum enumMode {
+    EModeSimulation,
+    EModeLive
+  } m_eMode;
+
+  enum enumDataConnection {
+    EDCSim,
+    EDCIQFeed,
+    EDCIB
+  } m_eDataConn;
+
+
   CProcess(void);
   ~CProcess(void);
+
+  void SetMode( enumMode );
+  void SetDataConnection( enumDataConnection );
 
   void SimConnect( void );
   void SimStart( void );
@@ -248,11 +264,6 @@ private:
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
   
-  enum enumProcessingState {
-    EPSSimulation,
-    EPSLive
-  } m_ProcessingState;
-
   CQuotes m_quotes;
   CTrades m_trades;
 

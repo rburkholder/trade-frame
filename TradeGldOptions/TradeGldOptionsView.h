@@ -14,6 +14,8 @@ public:
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
+  HWND Create( HWND hWndParent, LPARAM dwInitParam = NULL );
+
 	BEGIN_MSG_MAP_EX(CTradeGldOptionsView)
     COMMAND_HANDLER(IDC_BTN_SIM_CONNECT, BN_CLICKED, OnBnClickedBtnSimConnect)
     COMMAND_HANDLER(IDC_BTN_SIM_DISCONNECT, BN_CLICKED, OnBnClickedBtnSimDisconnet)
@@ -29,6 +31,10 @@ public:
     COMMAND_HANDLER(IDC_BTN_STOP_WATCH, BN_CLICKED, OnBnClickedBtnStopWatch)
     COMMAND_HANDLER(IDC_BTN_SAVE_SERIES, BN_CLICKED, OnBnClickedBtnSaveSeries)
     COMMAND_HANDLER(IDC_BTN_EMIT_STATS, BN_CLICKED, OnBnClickedBtnEmitStats)
+    COMMAND_HANDLER(IDC_RDIO_MODE_LIVE, BN_CLICKED, OnBnClickedRdioModeLive)
+    COMMAND_HANDLER(IDC_RDIO_MODE_SIM, BN_CLICKED, OnBnClickedRdioModeSim)
+    COMMAND_HANDLER(IDC_RDIO_DATA_IQFEED, BN_CLICKED, OnBnClickedRdioDataIqfeed)
+    COMMAND_HANDLER(IDC_RDIO_DATA_IB, BN_CLICKED, OnBnClickedRdioDataIb)
     MSG_WM_MOVE(OnMove)
     MSG_WM_SIZE(OnSize)
   END_MSG_MAP()
@@ -37,6 +43,21 @@ protected:
 private:
 
   CProcess m_process;
+
+  CButton m_rdioDataIQFeed;
+  CButton m_rdioDataIB;
+  CButton m_btnSimConnect;
+  CButton m_btnSimStart;
+  CButton m_btnSimStop;
+  CButton m_btnSimDisconnect;
+  CButton m_btnWatchStart;
+  CButton m_btnWatchStop;
+  CButton m_btnSaveSeries;
+  CButton m_btnEmitStats;
+  CButton m_btnIBConnect;
+  CButton m_btnIBDisconnect;
+  CButton m_btnIQConnect;
+  CButton m_btnIQDisconnect;
 
 public:
 
@@ -63,4 +84,10 @@ public:
 
   void OnMove(CPoint ptPos);
   void OnSize(UINT nType, CSize size);
+//  BEGIN_MSG_MAP(CTradeGldOptionsView)
+//  END_MSG_MAP()
+  LRESULT OnBnClickedRdioModeLive(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedRdioModeSim(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedRdioDataIqfeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedRdioDataIb(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

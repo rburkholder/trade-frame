@@ -129,6 +129,8 @@ protected:
 
 private:
 
+  double m_dblMultiplier;
+
   void Construction( void );
 
   void HandleExecution( const std::pair<const COrder&, const CExecution&>& );

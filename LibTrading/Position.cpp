@@ -23,6 +23,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
   m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
+  m_dblMultiplier( 1 ), 
   m_dblCommissionPaid( 0 )
 {
   Construction();
@@ -36,12 +37,14 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
   m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
+  m_dblMultiplier( 1 ), 
   m_dblCommissionPaid( 0 )
 {
   Construction();
 }
 
 void CPosition::Construction( void ) {
+  m_dblMultiplier = m_pInstrument->GetMultiplier();
   if ( m_pDataProvider->ProvidesQuotes() ) {
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
   }
@@ -76,12 +79,12 @@ void CPosition::HandleQuote( quote_t quote ) {
   bool bProcessed(false);
   switch ( m_eOrderSideActive ) {
     case OrderSide::Buy:
-      m_dblMarketValue = m_nPositionActive * quote.Bid();
+      m_dblMarketValue = m_nPositionActive * quote.Bid() * m_dblMultiplier;
       m_dblUnRealizedPL = m_dblMarketValue - m_dblConstructedValue;
       bProcessed = true;
       break;
     case OrderSide::Sell:
-      m_dblMarketValue = - ( m_nPositionActive * quote.Bid() );
+      m_dblMarketValue = - ( m_nPositionActive * quote.Bid() ) * m_dblMultiplier;
       m_dblUnRealizedPL = m_dblConstructedValue - m_dblMarketValue;
       bProcessed = true;
       break;
@@ -183,7 +186,7 @@ void CPosition::ClosePosition( void ) {
 }
 
 void CPosition::HandleCommission( const COrder& order ) {
-  m_dblCommissionPaid = order.GetCommission();
+  m_dblCommissionPaid += order.GetCommission();
   OnCommission( this );
 }
 
@@ -206,14 +209,14 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
       switch ( exec.GetOrderSide() ) {
         case OrderSide::Buy:  // increase long
           m_nPositionActive += exec.GetSize();
-          m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Sell:  // decrease long
           assert( m_nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_dblConstructedValue / m_nPositionActive;
-          m_dblRealizedPL += exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost );
+          dblAvgConstructedCost = m_dblConstructedValue / ( m_nPositionActive * m_dblMultiplier );
+          m_dblRealizedPL += exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_nPositionActive -= exec.GetSize();
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           if ( 0 == m_nPositionActive ) {
             m_eOrderSideActive = OrderSide::Unknown;
             m_dblUnRealizedPL = 0.0;
@@ -225,14 +228,14 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
       switch ( exec.GetOrderSide() ) {
         case OrderSide::Sell:  // increase short
           m_nPositionActive += exec.GetSize();
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Buy:  // decrease short
           assert( m_nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_dblConstructedValue / m_nPositionActive;
-          m_dblRealizedPL += exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost );
+          dblAvgConstructedCost = m_dblConstructedValue / ( m_nPositionActive * m_dblMultiplier );
+          m_dblRealizedPL += exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_nPositionActive -= exec.GetSize();
-          m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           if ( 0 == m_nPositionActive ) {
             m_eOrderSideActive = OrderSide::Unknown;
             m_dblUnRealizedPL = 0.0;
@@ -246,10 +249,10 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
       m_nPositionActive = exec.GetSize();
       switch (exec.GetOrderSide() ) {
         case OrderSide::Buy:
-          m_dblConstructedValue += exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Sell:
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice();
+          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
       }
       break;
