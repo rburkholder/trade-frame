@@ -99,7 +99,7 @@ protected:
   bool m_bCancelsQueued;
 
   void ProcessDelayQueues( const CQuote &quote );
-  void CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan );
+  void CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
   void GetExecId( std::string* sId ) { 

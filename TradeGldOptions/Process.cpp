@@ -144,7 +144,7 @@ CProcess::CProcess(void)
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
-  m_dblBaseDelta( 1000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
+  m_dblBaseDelta( 1500.0 ), m_dblBaseDeltaIncrement( 200.0 ),
   m_TradingState( ETSFirstPass ), 
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
@@ -152,12 +152,12 @@ CProcess::CProcess(void)
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
   m_sPathForSeries( "/strategy/deltaneutral2" ),
   //m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
-  m_sDesiredSimTradingDay( "2010-Sep-08 19:29:30.366375" ),
+  m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
   m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
-  m_ProcessingState( EPSLive )
-  //m_ProcessingState( EPSSimulation )
+  //m_eMode( EModeLive )
+  m_eMode( EModeSimulation )
   //m_stateTimeSeries( EUnknown )
 {
 
@@ -170,12 +170,12 @@ CProcess::CProcess(void)
 
   // this is where we select which provider we will be working with on this run
 
-  switch ( m_ProcessingState ) {
-    case EPSSimulation:
+  switch ( m_eMode ) {
+    case EModeSimulation:
       m_pExecutionProvider = m_sim;
       m_pDataProvider = m_sim;
       break;
-    case EPSLive:
+    case EModeLive:
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
       break;
@@ -283,10 +283,10 @@ void CProcess::HandleOnExecConnected(int e) {
   m_vStrikes.clear(); /// horribly buggy this way.
   m_vCrossOverPoints.clear();
 
-  switch ( m_ProcessingState ) {
-    case EPSSimulation:
+  switch ( m_eMode ) {
+    case EModeSimulation:
       break;
-    case EPSLive:
+    case EModeLive:
       m_contract.secType = "STK";
       m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
       m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
@@ -472,6 +472,9 @@ void CProcess::HandleStrikeListing2Done(  ) {
   m_ss.str( "" );
   m_ss << "#strikes: " << m_vStrikes.size() << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+
+  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
+  std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
   // request puts
   m_iterStrikes = m_vStrikes.begin();
@@ -945,21 +948,25 @@ void CProcess::SaveSeries( void ) {
     if ( 0 != m_quotes.Size() ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
       wtsQuotes.Write( sPathName, &m_quotes );
-      CHDF5Attributes attributes( m_sPathForSeries, InstrumentType::Stock );
-      attributes.SetProviderId( m_pDataProvider->ID() );
-    }
-
-    if ( 0 != m_trades.Size() ) {
-      sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
-      wtsTrades.Write( sPathName, &m_trades );
-      CHDF5Attributes attributes( m_sPathForSeries, InstrumentType::Stock );
+      CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
       attributes.SetProviderId( m_pDataProvider->ID() );
     }
   }
   catch (...) {
   }
 
-  for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+  try {
+    if ( 0 != m_trades.Size() ) {
+      sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
+      wtsTrades.Write( sPathName, &m_trades );
+      CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
+      attributes.SetProviderId( m_pDataProvider->ID() );
+    }
+  }
+  catch (...) {
+  }
+
+  for ( vStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
     try {
       if ( 0 != iter->Call()->Quotes()->Size() ) {
@@ -1037,7 +1044,7 @@ void CProcess::EmitStats( void ) {
   m_ss << CTimeSource::Instance().Internal();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
-  if ( EPSSimulation == m_ProcessingState ) {
+  if ( EModeSimulation == m_eMode ) {
     m_sim->EmitStats( m_ss );
   }
   m_ss << std::endl;

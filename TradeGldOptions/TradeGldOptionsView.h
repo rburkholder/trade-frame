@@ -44,20 +44,20 @@ private:
 
   CProcess m_process;
 
-  CButton m_rdioDataIQFeed;
-  CButton m_rdioDataIB;
-  CButton m_btnSimConnect;
-  CButton m_btnSimStart;
-  CButton m_btnSimStop;
-  CButton m_btnSimDisconnect;
-  CButton m_btnWatchStart;
-  CButton m_btnWatchStop;
-  CButton m_btnSaveSeries;
-  CButton m_btnEmitStats;
-  CButton m_btnIBConnect;
-  CButton m_btnIBDisconnect;
-  CButton m_btnIQConnect;
-  CButton m_btnIQDisconnect;
+  CButton* m_prdioDataIQFeed;
+  CButton* m_prdioDataIB;
+  CButton* m_pbtnSimConnect;
+  CButton* m_pbtnSimStart;
+  CButton* m_pbtnSimStop;
+  CButton* m_pbtnSimDisconnect;
+  CButton* m_pbtnWatchStart;
+  CButton* m_pbtnWatchStop;
+  CButton* m_pbtnSaveSeries;
+  CButton* m_pbtnEmitStats;
+  CButton* m_pbtnIBConnect;
+  CButton* m_pbtnIBDisconnect;
+  CButton* m_pbtnIQConnect;
+  CButton* m_pbtnIQDisconnect;
 
 public:
 

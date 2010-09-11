@@ -135,6 +135,7 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
   ss << "Portfolio URPL=" << m_plCurrent.dblUnRealized
     << ", RPL=" << m_plCurrent.dblRealized 
     << ", Comm=" << m_plCurrent.dblCommissionsPaid
+    << "=> PL-C=" << m_plCurrent.dblRealized - m_plCurrent.dblCommissionsPaid
     << ": Min=" << m_plMin.dblNet
     << ", Net=" << m_plCurrent.dblNet
     << ", Max=" << m_plMax.dblNet

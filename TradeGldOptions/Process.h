@@ -278,17 +278,20 @@ private:
   typedef strikes_map_t::iterator strikes_iterator_t;
   strikes_map_t m_mapStrikes;
 
+  typedef std::vector<CStrikeInfo> vStrikeInfo_t;
+  typedef vStrikeInfo_t::iterator vStrikeInfo_iter_t;
+
   std::vector<double> m_vCrossOverPoints;  // has pivots and strikes in order
-  std::vector<CStrikeInfo> m_vStrikes;  // put/call info for each strike
-  std::vector<CStrikeInfo>::iterator m_iterStrikes;
+  vStrikeInfo_t m_vStrikes;  // put/call info for each strike
+  vStrikeInfo_iter_t m_iterStrikes;
 
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
 
-  std::vector<CStrikeInfo>::iterator m_iterOILowestWatch;
-  std::vector<CStrikeInfo>::iterator m_iterOIHighestWatch;
-  std::vector<CStrikeInfo>::iterator m_iterOILatestGammaSelectCall;
-  std::vector<CStrikeInfo>::iterator m_iterOILatestGammaSelectPut;
+  vStrikeInfo_iter_t m_iterOILowestWatch;
+  vStrikeInfo_iter_t m_iterOIHighestWatch;
+  vStrikeInfo_iter_t m_iterOILatestGammaSelectCall;
+  vStrikeInfo_iter_t m_iterOILatestGammaSelectPut;
 
   Contract m_contract; // re-usable, persistant contract scratchpad
 

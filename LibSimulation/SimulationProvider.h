@@ -91,6 +91,7 @@ protected:
   void Merge( void );  // the background thread
 
   void HandleExecution( COrder::orderid_t orderId, const CExecution &exec );
+  void HandleCommission( COrder::orderid_t orderId, double commission );
 
   ptime m_dtSimStart;
   ptime m_dtSimStop;

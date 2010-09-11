@@ -75,6 +75,7 @@ void CSimulationProvider::Disconnect() {
 CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
+  pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &CSimulationProvider::HandleCommission ) );
   inherited_t::AddCSymbol( pSymbol );
   pSymbol->m_simExec.SetExecuteAgainst( m_ea );
   return pSymbol;
@@ -266,5 +267,9 @@ void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
 
 void CSimulationProvider::HandleExecution( COrder::orderid_t orderId, const CExecution &exec ) {
   COrderManager::Instance().ReportExecution( orderId, exec );
+}
+
+void CSimulationProvider::HandleCommission( COrder::orderid_t orderId, double commission ) {
+  COrderManager::Instance().ReportCommission( orderId, commission );
 }
 

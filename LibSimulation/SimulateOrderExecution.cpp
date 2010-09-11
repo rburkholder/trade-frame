@@ -58,10 +58,26 @@ void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
   m_bCancelsQueued = true;
 }
 
-void CSimulateOrderExecution::CalculateCommission( COrder::orderid_t nOrderId, CTrade::tradesize_t quan ) {
+void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
   if ( 0 != quan ) {
-    if ( NULL != OnCommission ) 
-      OnCommission( nOrderId, m_dblCommission * (double) quan );
+    if ( NULL != OnCommission ) {
+      double dblCommission( 0 );
+      switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
+        case InstrumentType::ETF:
+        case InstrumentType::Stock:
+          dblCommission = 0.005 * (double) quan;
+          if ( 1.00 > dblCommission ) dblCommission = 1.00;
+          break;
+        case InstrumentType::Option:
+          dblCommission = 0.95 * (double) quan;
+          break;
+        case InstrumentType::Future:
+          break;
+        case InstrumentType::Currency:
+          break;
+      }
+      OnCommission( pOrder->GetOrderId(), dblCommission );
+    }
   }
 }
 
@@ -87,7 +103,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
             }
           }
           if ( NULL != OnOrderCancelled ) {
-            CalculateCommission( co.nOrderId, m_nOrderQuanProcessed );
+            CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
             OnOrderCancelled( co.nOrderId );
           }
           m_lDelayOrder.erase( iter );
@@ -184,7 +200,7 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
         }
       }
       if ( 0 == m_nOrderQuanRemaining ) {
-        CalculateCommission( m_pCurrentOrder->GetOrderId(), m_nOrderQuanProcessed );
+        CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
         m_pCurrentOrder.reset();
         m_bOrdersQueued = !m_lDelayOrder.empty();
       }

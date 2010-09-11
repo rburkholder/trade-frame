@@ -11,9 +11,11 @@ BOOL CTradeGldOptionsView::PreTranslateMessage(MSG* pMsg) {
 	return CWindow::IsDialogMessage(pMsg);
 }
 
-HWND CTradeGldOptionsView::Create( HWND hWndParent, LPARAM dwInitParam = NULL ) {
-  m_rdioDataIQFeed.SetDlgId( IDC_RDIO_DATA_IQFEED );
-  m_rdioDataIB.SetDlgId( IDC_RDIO_DATA_IB );
+HWND CTradeGldOptionsView::Create( HWND hWndParent, LPARAM dwInitParam ) {
+  HWND h = CDialogImpl<CTradeGldOptionsView>::Create( hWndParent, dwInitParam );
+  //m_prdioDataIQFeed = (CButton*) GetDlgItem( IDC_RDIO_DATA_IQFEED );
+  //m_prdioDataIB = (CButton*) GetDlgItem( IDC_RDIO_DATA_IB );
+  return h;
 }
 
 LRESULT CTradeGldOptionsView::OnBnClickedBtnIbConnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
