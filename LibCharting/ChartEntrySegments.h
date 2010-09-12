@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,26 +13,19 @@
 
 #pragma once
 
-#include <string>
+// for example, the zig zag indicator
+// also use for high and low indicators, keep redoing last segment so stretches to 
+//   right hand edge (optionally, perhaps in a super class)
 
-#include <LibTrading/TradingEnumerations.h>
+#include "ChartEntryBase.h"
 
-#include "IQFeedInstrumentFile.h"
-
-
-// http://www.dtniq.com/product/mktsymbols.zip  <-- deprecated
-// http://www.dtniq.com/product/mktsymbols_v2.zip
-
-// Is designed for running in debug mode at the moment.
-
-class CIQFeedSymbolFile: public CInstrumentFile {
+class CChartEntrySegments :
+  public CChartEntryBaseWithTime {
 public:
-  CIQFeedSymbolFile(void);
-  ~CIQFeedSymbolFile(void);
-
-  bool Load( const std::string &filename );
-
+  CChartEntrySegments(void);
+  virtual ~CChartEntrySegments(void);
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
-
+  
 private:
 };

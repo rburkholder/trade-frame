@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,28 +11,24 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include <string>
+#include "ChartEntrySegments.h"
 
-#include <LibTrading/TradingEnumerations.h>
+CChartEntrySegments::CChartEntrySegments(void) 
+: CChartEntryBaseWithTime()
+{
+}
 
-#include "IQFeedInstrumentFile.h"
+CChartEntrySegments::~CChartEntrySegments(void) {
+}
 
-
-// http://www.dtniq.com/product/mktsymbols.zip  <-- deprecated
-// http://www.dtniq.com/product/mktsymbols_v2.zip
-
-// Is designed for running in debug mode at the moment.
-
-class CIQFeedSymbolFile: public CInstrumentFile {
-public:
-  CIQFeedSymbolFile(void);
-  ~CIQFeedSymbolFile(void);
-
-  bool Load( const std::string &filename );
-
-protected:
-
-private:
-};
+void CChartEntrySegments::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+  if ( 0 < m_vPrice.size() ) {
+    LineLayer *layer = pXY->addLineLayer( GetPrice(), m_eColour, m_sName.c_str() );
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    layer->setXData( daXData );
+    pAttributes->dblXMin = daXData[0];
+    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+  }
+}

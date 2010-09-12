@@ -18,6 +18,8 @@
 #include <limits>
 #include <string>
 
+#include <boost/lexical_cast.hpp>
+
 #include "IBTWS.h"
 
 CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
@@ -602,6 +604,7 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
   if ( NULL == pInstrument ) 
     throw std::out_of_range( "instrument type not accounted for" );
   pInstrument->SetContract( contract.conId );
+  pInstrument->SetMultiplier( boost::lexical_cast<unsigned long>( contract.multiplier ) );
 
   return pInstrument;
 

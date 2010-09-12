@@ -21,6 +21,10 @@
 
 // http://www.oneunified.net/blog/Personal/SoftwareDevelopment/CPP/Singleton.article
 
+//
+// CSingleton
+//
+
 template<typename T> 
 class CSingleton {
 public:
@@ -36,6 +40,10 @@ private:
   CSingleton& operator=(CSingleton const&);  // assign op hidden
 
 };
+
+//
+// CMultipleInstanceTest
+//
 
 // a CRTP class to ensure Singleton'd class isn't multiply defined
 // see CBerkeleyDBEnvManager as an example

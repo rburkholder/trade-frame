@@ -73,6 +73,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IQFeedInstrumentFile.cpp" />
     <ClCompile Include="IQFeed.cpp" />
     <ClCompile Include="IQFeedHistoryCollector.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -90,6 +91,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IQFeedInstrumentFile.h" />
     <ClInclude Include="IQ32.H" />
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />

@@ -27,7 +27,7 @@
 
 #include <LibCommon/ReusableBuffers.h>
 #include <LibTimeSeries/TimeSeries.h>
-#include <LibTrading/InstrumentFile.h>
+#include <LibIQFeed/IQFeedInstrumentFile.h>
 #include <LibIQFeed/IQFeedHistoryQuery.h>
 
 template <typename T, typename U>

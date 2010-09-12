@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,26 +13,16 @@
 
 #pragma once
 
-#include <string>
+#include "ChartEntryBase.h"
 
-#include <LibTrading/TradingEnumerations.h>
-
-#include "IQFeedInstrumentFile.h"
-
-
-// http://www.dtniq.com/product/mktsymbols.zip  <-- deprecated
-// http://www.dtniq.com/product/mktsymbols_v2.zip
-
-// Is designed for running in debug mode at the moment.
-
-class CIQFeedSymbolFile: public CInstrumentFile {
+class CChartEntryIndicator :
+  public CChartEntryBaseWithTime {
 public:
-  CIQFeedSymbolFile(void);
-  ~CIQFeedSymbolFile(void);
-
-  bool Load( const std::string &filename );
-
+  CChartEntryIndicator(void);
+  CChartEntryIndicator( unsigned int nSize );
+  virtual ~CChartEntryIndicator(void);
+  virtual void Reserve( unsigned int );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
-
 private:
 };

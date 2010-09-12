@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -14,25 +14,21 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
-#include <LibTrading/TradingEnumerations.h>
+#include "ChartEntryBase.h"
 
-#include "IQFeedInstrumentFile.h"
+// level markers (horizontal lines at a price level)
 
-
-// http://www.dtniq.com/product/mktsymbols.zip  <-- deprecated
-// http://www.dtniq.com/product/mktsymbols_v2.zip
-
-// Is designed for running in debug mode at the moment.
-
-class CIQFeedSymbolFile: public CInstrumentFile {
+class CChartEntryMark :
+  public CChartEntryBase {
 public:
-  CIQFeedSymbolFile(void);
-  ~CIQFeedSymbolFile(void);
-
-  bool Load( const std::string &filename );
-
+  CChartEntryMark(void);
+  virtual ~CChartEntryMark(void);
+  void AddMark( double price, Colour::enumColour colour, const std::string &name );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
-
+  std::vector<Colour::enumColour> m_vColour;
+  std::vector<std::string> m_vName;
 private:
 };

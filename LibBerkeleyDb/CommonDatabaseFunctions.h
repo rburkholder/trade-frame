@@ -49,8 +49,8 @@ template<typename T> Db *CCommonDatabaseFunctions<T>::m_pdb = NULL;
 template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( const std::string &Name ) {
   ++m_nReferences;
   if ( 1 == m_nReferences ) {
-    CBerkeleyDBEnvManagerSingleton dms;
-    CBerkeleyDBEnvManager mgrEnv = dms.Instance();
+//    CBerkeleyDBEnvManagerSingleton dms;
+    CBerkeleyDBEnvManager& mgrEnv = CBerkeleyDBEnvManager::Instance();
     DbEnv *pDbEnv = mgrEnv.GetDbEnv();
     m_pdb = new Db( pDbEnv, 0 );
     assert( NULL != m_pdb );

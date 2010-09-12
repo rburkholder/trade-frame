@@ -850,7 +850,7 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
         m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
         m_ss.str( "" );
         m_ss << dt;
-        m_ss << " Underlying Sell 100, trigger @" << dblMidQuote << std::endl;
+        m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
         OutputDebugString( m_ss.str().c_str() );
       }
       else {
@@ -860,7 +860,7 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
           m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
           m_ss.str( "" );
           m_ss << dt;
-          m_ss << " Underlying Buy 100, trigger @" << dblMidQuote << std::endl;
+          m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
           OutputDebugString( m_ss.str().c_str() );
         }
       }

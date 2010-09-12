@@ -185,7 +185,7 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
     |qi::string("DEC"))
     [boost::phoenix::ref(dbRecord.nMonth)=boost::phoenix::bind(&DecodeMonth, qi::_1)];  // 0 is nothing, legal is 1 - 12
   qi::rule<char *> ruleYear = qi::uint_[ref(dbRecord.nYear)=qi::_1];
-  qi::rule<char *> ruleStrike = qi::double_[ref(dbRecord.fltStrike)=qi::_1];
+  qi::rule<char *> ruleStrike = qi::float_[ref(dbRecord.fltStrike)=qi::_1];
   qi::rule<char *> ruleOptionSide = 
     qi::char_( 'C' )[boost::phoenix::ref(dbRecord.nOptionSide)=OptionSide::Call] 
   | qi::char_( 'P' )[boost::phoenix::ref(dbRecord.nOptionSide)=OptionSide::Put]; // 'C' or 'P' or ' ' or 0x00

@@ -17,7 +17,7 @@
 
 #include <LibBerkeleyDb/EnvManager.h>
 
-#include "Instrument.h"
+#include <LibTrading/Instrument.h>
 
 // 2010/05/02
 // try designing an iterator for the Retrieve* acces stuff
@@ -60,14 +60,14 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
   const char *GetSymbol() { return line; };
   const char *GetDescription() { return line + ix[IXDesc]; };
   const char *GetExchange() { return line + ix[IXExchange]; };
-  unsigned char GetInstrumentType() { return eInstrumentType; };
-  unsigned char GetOptionSide() { return nOptionSide; };
-  unsigned short GetYear() { return nYear; };
-  unsigned short GetMonth() { return nMonth; };
-  unsigned short GetDay() { return nDay; };
-  const bitsSymbolClassifier_t& GetSymbolClassifier() { return sc; };
+  unsigned char GetInstrumentType() const { return eInstrumentType; };
+  unsigned char GetOptionSide() const { return nOptionSide; };
+  unsigned short GetYear() const { return nYear; };
+  unsigned short GetMonth() const { return nMonth; };
+  unsigned short GetDay() const { return nDay; };
+  const bitsSymbolClassifier_t& GetSymbolClassifier() const { return sc; };
   void SetSymbolClassifier( const bitsSymbolClassifier_t& sc_ ) { sc.reset(); sc |= sc_; };
-  float GetStrike() { return fltStrike; };
+  float GetStrike() const { return fltStrike; };
 };
 
 class CInstrumentFile_Exchange_iterator;
@@ -85,7 +85,7 @@ public:
   typedef CInstrumentFile_Exchange_iterator iterator;
   
   void OpenIQFSymbols( void );
-  bool IsOpen( void ) { return m_bOpen; };
+  bool IsOpen( void ) const { return m_bOpen; };
   void CloseIQFSymbols( void );
 
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
@@ -162,8 +162,8 @@ public:
     return m_pSR;
   };
 
-  bool operator==(const CInstrumentFile_Exchange_iterator& rhs) { return m_pSR == rhs.m_pSR; };
-  bool operator!=(const CInstrumentFile_Exchange_iterator& rhs) { return m_pSR != rhs.m_pSR; };
+  bool operator==(const CInstrumentFile_Exchange_iterator& rhs) const { return m_pSR == rhs.m_pSR; };
+  bool operator!=(const CInstrumentFile_Exchange_iterator& rhs) const { return m_pSR != rhs.m_pSR; };
 
   structSymbolRecord& operator*() { return *m_pSR; };
   structSymbolRecord& operator->() { return *m_pSR; };

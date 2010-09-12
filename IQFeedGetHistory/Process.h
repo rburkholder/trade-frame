@@ -26,7 +26,7 @@
 
 #include <boost/thread/locks.hpp>
 
-#include <LibTrading/InstrumentFile.h>
+#include <LibIQFeed/IQFeedInstrumentFile.h>
 #include <LibIQFeed/IQFeedHistoryBulkQuery.h>
 
 class CProcess: 
