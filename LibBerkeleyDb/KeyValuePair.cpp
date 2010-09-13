@@ -70,7 +70,7 @@ void CKeyValuePair::Get( const structKey &key, void **pVoid, size_t *pSize ) {
   if ( DB_NOTFOUND == ret ) {
     throw std::out_of_range( "CKeyValuePair::Get key not found" );
   }
-  if ( 0 != ret ) throw std::runtime_error( "CKeyValuePair::Get get had error" );
+  if ( 0 != ret ) throw std::runtime_error( "CKeyValuePair::Get key had error" );
   structValue *p = (structValue *) v.get_data();
   *pVoid = p->pAddr;
   *pSize = p->nSize;
@@ -96,56 +96,48 @@ void CKeyValuePair::Get( const structKey &key, Dbt *pValue ) {
 
 void CKeyValuePair::Save(const std::string &key, char value) {
   structKey k( Char, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( char ) );
   Dbt v( &value, sizeof( char ) );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, const std::string &value) {
   structKey k( String, key.size(), key.c_str() );
-  //structValue v( (void*) value.c_str(), (u_int32_t) value.size() );
   Dbt v( (void*) value.c_str(), value.size() );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, short value) {
   structKey k( Int16, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( short ) );
   Dbt v( &value, sizeof( short ) );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, unsigned short value) {
   structKey k( UInt16, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( unsigned short ) );
   Dbt v( &value, sizeof( unsigned short ) );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, long value) {
   structKey k( Int32, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( long ) );
   Dbt v( &value, sizeof( long ) );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, unsigned long value) {
   structKey k( UInt32, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( unsigned long ) );
   Dbt v( &value, sizeof( unsigned long ) );
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, float value) {
   structKey k( Float, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( float ) );
   Dbt v( &value, sizeof( float ) ) ;
   Save( k, &v );
 }
 
 void CKeyValuePair::Save(const std::string &key, double value) {
   structKey k( Double, key.size(), key.c_str() );
-  //structValue v( &value, sizeof( double ) );
   Dbt v( &value, sizeof( double ) );
   Save( k, &v );
 }

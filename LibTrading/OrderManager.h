@@ -13,6 +13,9 @@
 
 #pragma once
 
+// 2010/09/12
+// At some point, make order manager responsible for constructing COrder
+
 #include <map>
 
 #include <LibCommon/Delegate.h>

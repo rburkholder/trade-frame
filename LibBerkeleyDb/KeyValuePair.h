@@ -63,9 +63,9 @@ protected:
       memcpy( chKey, pkey, size );
     }
   };
-  void Save( const structKey &key, const structValue &value );
-  void Save( const structKey &key, Dbt *pValue );
-  void Get( const structKey &key, void **pVoid, size_t *pSize );  // validate KeyType
-  void Get( const structKey &key, Dbt *pValue );  
+  void Save( const structKey& key, const structValue& value );
+  void Save( const structKey& key, Dbt* pValue );
+  void Get( const structKey& key, void** pVoid, size_t* pSize );  // validate KeyType
+  void Get( const structKey& key, Dbt* pValue );  
 private:
 };

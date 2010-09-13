@@ -20,6 +20,7 @@
 
 template<typename T> class CCommonDatabaseFunctions {
 public:
+
   struct structValue {
     u_int32_t nSize;  // number of bytes
     void *pAddr;  // address of beginning of array of bytes
@@ -27,7 +28,7 @@ public:
     structValue( void* addr, u_int32_t size ) : pAddr( addr ), nSize( size ) {};
   };
 
-  explicit CCommonDatabaseFunctions<T>( const std::string &Name );
+  explicit CCommonDatabaseFunctions<T>( const std::string& Name );
   ~CCommonDatabaseFunctions<T>(void);
 
   void Save( Dbt *pKey, Dbt *pValue );
@@ -46,7 +47,7 @@ private:
 template<typename T> size_t CCommonDatabaseFunctions<T>::m_nReferences = 0;
 template<typename T> Db *CCommonDatabaseFunctions<T>::m_pdb = NULL;
 
-template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( const std::string &Name ) {
+template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( const std::string& Name ) {
   ++m_nReferences;
   if ( 1 == m_nReferences ) {
 //    CBerkeleyDBEnvManagerSingleton dms;
@@ -75,7 +76,8 @@ template<typename T> void CCommonDatabaseFunctions<T>::Save( Dbt *pKey, Dbt *pVa
     err.append( e.what() );
     throw std::domain_error( err );
   }
-  if ( 0 != ret ) throw std::runtime_error( "CCommonDatabaseFunctions::Save put had error" );
+  if ( 0 != ret ) 
+    throw std::runtime_error( "CCommonDatabaseFunctions::Save put had error" );
 }
 
 template<typename T> void CCommonDatabaseFunctions<T>::Get( Dbt *pKey, Dbt *pValue ) {
@@ -91,7 +93,8 @@ template<typename T> void CCommonDatabaseFunctions<T>::Get( Dbt *pKey, Dbt *pVal
   if ( DB_NOTFOUND == ret ) {
     throw std::out_of_range( "CCommonDatabaseFunctions::Get key not found" );
   }
-  if ( 0 != ret ) throw std::runtime_error( "CCommonDatabaseFunctions::Get get had error" );
+  if ( 0 != ret ) 
+    throw std::runtime_error( "CCommonDatabaseFunctions::Get get had error" );
 }
 
 template<typename T> void CCommonDatabaseFunctions<T>::Truncate( void ) {
