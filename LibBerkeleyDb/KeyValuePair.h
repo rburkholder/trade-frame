@@ -14,8 +14,10 @@
 #pragma once
 #pragma warning(disable: 4290)
 
+
 #include <string>
 #include <cassert>
+#include <cstring>
 
 #include "CommonDatabaseFunctions.h"
 
@@ -60,7 +62,7 @@ protected:
       assert( size <= nMaxKeySize );
       assert( 0 < size );
       nKeySize = (char) size;
-      memcpy( chKey, pkey, size );
+      std::memcpy( chKey, pkey, size );
     }
   };
   void Save( const structKey& key, const structValue& value );

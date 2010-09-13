@@ -69,7 +69,7 @@ public:
   void Set( const K& key, const V& value ) {
     Dbt k( &key, sizeof( K ) );
     Dbt v( &value, sizeof( V ) );
-    CKeyValuePairsBase::Save( &k, &v );
+    CKeyValuePairsBase::Set( &k, &v );
   }
   
   template<typename V>

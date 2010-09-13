@@ -13,10 +13,15 @@
 
 #pragma once
 
+#ifdef WIN32
 #include <db4/db_cxx.h>
+#include <LibCommon/Singleton.h>
+#else
+#include <db_cxx.h>
+#include <Singleton.h>
+#endif
 //#include <db4/dbstl_common.h>
 
-#include <LibCommon/Singleton.h>
 
 // handles the environment oriented stuff
 

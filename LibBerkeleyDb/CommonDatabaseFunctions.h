@@ -25,7 +25,7 @@ public:
     u_int32_t nSize;  // number of bytes
     void *pAddr;  // address of beginning of array of bytes
     structValue( void ) : pAddr( NULL ), nSize( 0 ) {};
-    structValue( void* addr, u_int32_t size ) : pAddr( addr ), nSize( size ) {};
+    structValue( void* addr, u_int32_t size ) : nSize( size ), pAddr( addr ) {};
   };
 
   explicit CCommonDatabaseFunctions<T>( const std::string& Name );
