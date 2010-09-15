@@ -11,9 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#ifdef WIN32
 #include "StdAfx.h"
-#endif
 
 #include "KeyValuePair.h"
 
