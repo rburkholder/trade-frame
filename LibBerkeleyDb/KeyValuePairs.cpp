@@ -21,11 +21,11 @@
 // CKeyValuePairsBase
 //
 
-CKeyValuePairsBase::CKeyValuePairsBase( const std::string& sDbName ) {
+CKeyValuePairsBase::CKeyValuePairsBase( const std::string& sDbFileName, const std::string& sDbName ) {
   CBerkeleyDBEnvManager& mgrEnv = CBerkeleyDBEnvManager::Instance();
   m_pdb = new Db( mgrEnv.GetDbEnv(), 0 );
   assert( NULL != m_pdb );
-  m_pdb->open( NULL, mgrEnv.GetBDBFileName(), sDbName.c_str(), DB_BTREE, DB_CREATE, 0 );
+  m_pdb->open( NULL, sDbFileName.c_str(), sDbName.c_str(), DB_BTREE, DB_CREATE, 0 );
 }
 
 

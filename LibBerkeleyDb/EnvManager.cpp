@@ -17,8 +17,6 @@
 
 // CBerkeleyDBEnvManager =====
 
-const char CBerkeleyDBEnvManager::m_BDBFileName[] = "TradeFrame.bdb";
-
 /*
 Environment and database handles can optionally be shared across threads. If handles are shared, 
 they must be registered in each thread that is using the handle (either directly, or 

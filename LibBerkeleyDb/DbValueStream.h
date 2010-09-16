@@ -21,7 +21,7 @@ class CDbValueStream :
   public std::streambuf, 
   public CCommonDatabaseFunctions<CDbValueStream> {
 public:
-  CDbValueStream(void);
+  CDbValueStream( const std::string& sDbFileName );
   ~CDbValueStream(void);
   //char *GetBuf( void ) { return pbase(); };
   //unsigned long GetLength( void ) { return pptr() - pbase(); };

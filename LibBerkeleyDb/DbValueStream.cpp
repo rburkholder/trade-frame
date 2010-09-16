@@ -15,8 +15,8 @@
 
 #include "DbValueStream.h"
 
-CDbValueStream::CDbValueStream(void) 
-: std::streambuf(), CCommonDatabaseFunctions<CDbValueStream>( "BasicBasket" )
+CDbValueStream::CDbValueStream( const std::string& sDbFileName ) 
+: std::streambuf(), CCommonDatabaseFunctions<CDbValueStream>( sDbFileName, "BasicBasket" )
 {
   setp( buf, buf + BufSize );
 }

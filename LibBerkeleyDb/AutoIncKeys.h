@@ -31,7 +31,7 @@ public:
 
   typedef unsigned long keyValue_t;
 
-  CAutoIncKeys(void);
+  CAutoIncKeys( const std::string& sDbFileName );
   ~CAutoIncKeys(void);
 
   void SetNextId( const std::string& key, keyValue_t );
@@ -56,7 +56,7 @@ public:
 
   typedef unsigned long keyValue_t;
 
-  CAutoIncKey( const std::string& sKeyName );
+  CAutoIncKey( const std::string& sDbFileName, const std::string& sKeyName );
   ~CAutoIncKey(void);
 
   void SetNextId( keyValue_t );

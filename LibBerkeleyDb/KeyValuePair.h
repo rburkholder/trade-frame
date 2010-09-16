@@ -28,7 +28,7 @@
 
 class CKeyValuePair : public CCommonDatabaseFunctions<CKeyValuePair> {
 public:
-  CKeyValuePair(void);
+  CKeyValuePair( const std::string& sDbFileName );
   ~CKeyValuePair(void);
 
   const static char nMaxKeySize = 30;

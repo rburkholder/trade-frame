@@ -15,8 +15,8 @@
 
 #include "KeyValuePair.h"
 
-CKeyValuePair::CKeyValuePair(void) 
-: CCommonDatabaseFunctions<CKeyValuePair>( "KeyValuePairs" ) 
+CKeyValuePair::CKeyValuePair( const std::string& sDbFileName ) 
+: CCommonDatabaseFunctions<CKeyValuePair>( sDbFileName, "KeyValuePairs" ) 
 {
 }
 

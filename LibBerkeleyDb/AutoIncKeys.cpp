@@ -21,8 +21,8 @@ const std::string CAutoIncKeys::m_sDbName( "_AutoIncKeys" );
 // CAutoIncKeys
 //
 
-CAutoIncKeys::CAutoIncKeys(void)
-: CKeyValuePairs<unsigned long>( m_sDbName )
+CAutoIncKeys::CAutoIncKeys( const std::string& sDbFileName )
+: CKeyValuePairs<unsigned long>( sDbFileName, m_sDbName )
 {
 }
 
@@ -63,8 +63,8 @@ CAutoIncKeys::keyValue_t CAutoIncKeys::GetCurrentId( const std::string& sKeyName
 // CAutoIncKey
 //
 
-CAutoIncKey::CAutoIncKey(const std::string& sKeyName)
-: m_sKeyName( sKeyName )
+CAutoIncKey::CAutoIncKey( const std::string& sDbFileName, const std::string& sKeyName )
+: CAutoIncKeys( sDbFileName ), m_sKeyName( sKeyName )
 {
 }
 

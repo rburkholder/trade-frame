@@ -13,7 +13,7 @@
 
 #pragma once
 
-#ifdef WIN32
+#if defined( WIN32 )
 #include <db4/db_cxx.h>
 #include <LibCommon/Singleton.h>
 #else
@@ -44,11 +44,8 @@ public:
     return m_pDbEnv; 
   }; 
 
-  const char *GetBDBFileName( void ) { return m_BDBFileName; };
-
 protected:
 
-  static const char m_BDBFileName[];
   DbEnv* m_pDbEnv;
 
 private:

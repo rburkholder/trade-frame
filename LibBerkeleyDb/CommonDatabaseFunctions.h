@@ -28,7 +28,7 @@ public:
     structValue( void* addr, u_int32_t size ) : nSize( size ), pAddr( addr ) {};
   };
 
-  explicit CCommonDatabaseFunctions<T>( const std::string& Name );
+  explicit CCommonDatabaseFunctions<T>( const std::string& sDbFileName, const std::string& Name );
   ~CCommonDatabaseFunctions<T>(void);
 
   void Save( Dbt *pKey, Dbt *pValue );
@@ -47,7 +47,7 @@ private:
 template<typename T> size_t CCommonDatabaseFunctions<T>::m_nReferences = 0;
 template<typename T> Db *CCommonDatabaseFunctions<T>::m_pdb = NULL;
 
-template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( const std::string& Name ) {
+template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( const std::string& sDbFileName, const std::string& sDbName ) {
   ++m_nReferences;
   if ( 1 == m_nReferences ) {
 //    CBerkeleyDBEnvManagerSingleton dms;
@@ -55,7 +55,7 @@ template<typename T> CCommonDatabaseFunctions<T>::CCommonDatabaseFunctions( cons
     DbEnv *pDbEnv = mgrEnv.GetDbEnv();
     m_pdb = new Db( pDbEnv, 0 );
     assert( NULL != m_pdb );
-    m_pdb->open( NULL, mgrEnv.GetBDBFileName(), Name.c_str(), DB_BTREE, DB_CREATE, 0 );
+    m_pdb->open( NULL, sDbFileName.c_str(), sDbName.c_str(), DB_BTREE, DB_CREATE, 0 );
   }
 }
 

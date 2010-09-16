@@ -32,7 +32,7 @@
 class CKeyValuePairsBase {
 public:
 
-  CKeyValuePairsBase( const std::string& sDbName );
+  CKeyValuePairsBase( const std::string& sDbFileName, const std::string& sDbName );
   virtual ~CKeyValuePairsBase( void );
 
   void Set( Dbt *pKey, Dbt *pValue );
@@ -61,7 +61,8 @@ class CKeyValuePairs: public CKeyValuePairsBase
 {
 public:
 
-  CKeyValuePairs( const std::string& sDbName ): CKeyValuePairsBase( sDbName ) {};
+  CKeyValuePairs( const std::string& sDbFileName, const std::string& sDbName )
+    : CKeyValuePairsBase( sDbFileName, sDbName ) {};
   ~CKeyValuePairs(void) {};
 
   // Sets
