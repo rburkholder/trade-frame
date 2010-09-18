@@ -13,8 +13,6 @@
 
 #include "StdAfx.h"
 
-#include "IQFeedSymbolFile.h"
-
 #include <LibCommon/KeywordMatch.h>
 
 #include <fstream>
@@ -24,7 +22,6 @@
 #include <vector>
 #include <algorithm>
 
-
 #include <boost/regex.hpp> 
 
 #include <boost/spirit/include/qi.hpp>
@@ -33,6 +30,8 @@
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 //#include <boost/spirit/home/phoenix/algorithm.hpp>
+
+#include "IQFeedSymbolFile.h"
 
 // for options, need to decode symbol name in order to get expiry day.
 
@@ -98,7 +97,7 @@ unsigned char DecodeMonth( const std::string &s ) {
   return month2;
 }
 
-bool CIQFeedSymbolFile::Load( const std::string &filename ) {
+bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string& sDbFileName ) {
   // mktsymbols_v2.txt
 
   // TODO:  need to prevent re-entrant execution:  ie, turn invoking button off
@@ -208,16 +207,16 @@ bool CIQFeedSymbolFile::Load( const std::string &filename ) {
   try {
 
     std::cout << "Opening Instrument Database ... ";
-    OpenIQFSymbols();
+    OpenIQFSymbols( sDbFileName );
     u_int32_t countp = 0;
     std::cout << "truncating ... ";
     m_pdbSymbols->truncate( NULL, &countp, 0 );
     std::cout << "done." << std::endl;
 
     std::cout << "Opening Input Instrument File ";
-    std::cout << filename.c_str();
+    std::cout << sTxtFileName.c_str();
     std::cout << " ... ";
-    file.open( filename.c_str() );
+    file.open( sTxtFileName.c_str() );
     std::cout << std::endl;
 
     std::cout << "Loading Symbols ..." << std::endl;

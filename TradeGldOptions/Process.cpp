@@ -156,8 +156,8 @@ CProcess::CProcess(void)
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
   m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
-  //m_eMode( EModeLive )
-  m_eMode( EModeSimulation )
+  m_eMode( EModeLive )
+  //m_eMode( EModeSimulation )
   //m_stateTimeSeries( EUnknown )
 {
 

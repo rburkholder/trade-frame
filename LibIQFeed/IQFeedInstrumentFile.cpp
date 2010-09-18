@@ -33,7 +33,7 @@ CInstrumentFile::CInstrumentFile(void)
 CInstrumentFile::~CInstrumentFile(void) {
 }
 
-void CInstrumentFile::OpenIQFSymbols() {
+void CInstrumentFile::OpenIQFSymbols( const std::string& sDbFileName ) {
 
 //  CBerkeleyDBEnvManagerSingleton EnvMgr;
   CBerkeleyDBEnvManager& dbMgr = CBerkeleyDBEnvManager::Instance();
@@ -41,12 +41,12 @@ void CInstrumentFile::OpenIQFSymbols() {
 
   // open/create main symbol table
   m_pdbSymbols = new Db( pDbEnv, 0 );
-  m_pdbSymbols->open( NULL, dbMgr.GetBDBFileName(), "IQFSymbols", DB_BTREE, DB_CREATE, 0 );
+  m_pdbSymbols->open( NULL, sDbFileName.c_str(), "IQFSymbols", DB_BTREE, DB_CREATE, 0 );
 
   // open/create the market index
   m_pdbIxSymbols_Market = new Db( pDbEnv, 0 );
   m_pdbIxSymbols_Market->set_flags( DB_DUPSORT );
-  m_pdbIxSymbols_Market->open( NULL, dbMgr.GetBDBFileName(), "IxIQFSymbols_Market", DB_BTREE, DB_CREATE, 0 );
+  m_pdbIxSymbols_Market->open( NULL, sDbFileName.c_str(), "IxIQFSymbols_Market", DB_BTREE, DB_CREATE, 0 );
 
   // associate the index with the main table
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Market, &CInstrumentFile::GetMarketName, 0 );
@@ -54,7 +54,7 @@ void CInstrumentFile::OpenIQFSymbols() {
   // open/create the underlying index
   m_pdbIxSymbols_Underlying = new Db( pDbEnv, 0 );
   m_pdbIxSymbols_Underlying->set_flags( DB_DUPSORT );
-  m_pdbIxSymbols_Underlying->open( NULL, dbMgr.GetBDBFileName(), "IxIQFSymbols_Underlying", DB_BTREE, DB_CREATE, 0 );
+  m_pdbIxSymbols_Underlying->open( NULL, sDbFileName.c_str(), "IxIQFSymbols_Underlying", DB_BTREE, DB_CREATE, 0 );
 
   // associate the index with the main table
   m_pdbSymbols->associate( NULL, m_pdbIxSymbols_Underlying, &CInstrumentFile::GetUnderlyingName, 0 );

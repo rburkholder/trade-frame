@@ -23,7 +23,7 @@
 
 class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
 public:
-  CAlternateInstrumentNames(void);
+  CAlternateInstrumentNames();
   ~CAlternateInstrumentNames(void);
   void Save( const std::string &ProviderName, const std::string &InstrumentName, const std::string &AlternateInstrumentName );
   void Get( const std::string &ProviderName, const std::string &InstrumentName, std::string *pAlternate );

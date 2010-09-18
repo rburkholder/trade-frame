@@ -16,6 +16,7 @@
 #include <stdexcept>
 
 #include "ProviderInterface.h"
+#include "TradingEnumerations.h"
 
 #include "OrderManager.h"
 
@@ -23,7 +24,9 @@
 // COrderManager
 //
 
-COrderManager::COrderManager(void) {
+COrderManager::COrderManager(void) 
+: m_orderIds( Trading::DbFileName, "OrderId" )
+{
 }
 
 COrderManager::~COrderManager(void) {
@@ -31,14 +34,24 @@ COrderManager::~COrderManager(void) {
   m_mapCompletedOrders.clear();
 }
 
+COrder::orderid_t COrderManager::CheckOrderId( orderid_t id ) {
+  orderid_t oldId = m_orderIds.GetCurrentId();
+  if ( id > oldId ) {
+    m_orderIds.SetNextId( id );
+  }
+  return oldId;
+}
+
 void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrder) {
   assert( NULL != pProvider );
-  mapOrders_t::iterator iter = m_mapAllOrders.find( pOrder->GetOrderId() );
+  orderid_t id = m_orderIds.GetNextId();
+  pOrder->SetOrderId( id );
+  mapOrders_t::iterator iter = m_mapAllOrders.find( id );
   if ( m_mapAllOrders.end() != iter ) {
     std::runtime_error( "COrderManager::PlaceOrder duplicated order placed" );
   }
-  m_mapAllOrders.insert( pairIdOrder_t( pOrder->GetOrderId(), pairProviderOrder_t( pProvider, pOrder ) ) );
-  m_mapActiveOrders.insert( pairIdOrder_t( pOrder->GetOrderId(), pairProviderOrder_t( pProvider, pOrder ) ) );
+  m_mapAllOrders.insert( pairIdOrder_t( id, pairProviderOrder_t( pProvider, pOrder ) ) );
+  m_mapActiveOrders.insert( pairIdOrder_t( id, pairProviderOrder_t( pProvider, pOrder ) ) );
   pOrder->SetSendingToProvider();
   pProvider->PlaceOrder( pOrder );
 }

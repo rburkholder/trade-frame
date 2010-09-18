@@ -15,7 +15,8 @@
 
 #include "InstrumentInformation.h"
 
-CInstrumentInformation::CInstrumentInformation(void) : CCommonDatabaseFunctions<CInstrumentInformation>( "InstrumentInformation" ) {
+CInstrumentInformation::CInstrumentInformation( const std::string& sDbFileName ) 
+: CCommonDatabaseFunctions<CInstrumentInformation>( sDbFileName, "InstrumentInformation" ) {
 }
 
 CInstrumentInformation::~CInstrumentInformation(void) {

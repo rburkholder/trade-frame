@@ -25,7 +25,7 @@ using namespace boost::gregorian;
 
 class CInstrumentInformation : public CCommonDatabaseFunctions<CInstrumentInformation> {
 public:
-  CInstrumentInformation(void);
+  CInstrumentInformation( const std::string& sDbFileName );
   virtual ~CInstrumentInformation(void);
   static const char nMaxSymbolNameSize = 20;
   void Save( const std::string &sSymbol, const std::string &sCompanyName,

@@ -77,7 +77,6 @@
     <ClCompile Include="InstrumentManager.cpp" />
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="OrderManager.cpp" />
-    <ClCompile Include="PersistedOrderId.cpp" />
     <ClCompile Include="Portfolio.cpp" />
     <ClCompile Include="PortfolioManager.cpp" />
     <ClCompile Include="Position.cpp" />
@@ -99,7 +98,6 @@
     <ClInclude Include="ManagerBase.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderManager.h" />
-    <ClInclude Include="PersistedOrderId.h" />
     <ClInclude Include="Portfolio.h" />
     <ClInclude Include="PortfolioManager.h" />
     <ClInclude Include="Position.h" />

@@ -12,10 +12,13 @@
  ************************************************************************/
 
 #include "StdAfx.h"
+
+#include <LibTrading/TradingEnumerations.h>
+
 #include "AlternateInstrumentNames.h"
 
-CAlternateInstrumentNames::CAlternateInstrumentNames(void) 
-: CCommonDatabaseFunctions<CAlternateInstrumentNames>( "AlternateInstrumentNames" ) {
+CAlternateInstrumentNames::CAlternateInstrumentNames() 
+  : CCommonDatabaseFunctions<CAlternateInstrumentNames>( Trading::DbFileName, "AlternateInstrumentNames" ) {
 }
 
 CAlternateInstrumentNames::~CAlternateInstrumentNames(void) {

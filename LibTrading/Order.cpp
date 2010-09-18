@@ -21,75 +21,81 @@ COrder::COrder(void) {
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
-    ptime dtOrderSubmitted
-    ) :
-    m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-    m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-    m_dtOrderSubmitted( dtOrderSubmitted ),
-    m_eOrderStatus( OrderStatus::Created ),
-    m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
-    m_dblSignalPrice( 0 )
+  CInstrument::pInstrument_cref instrument,
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide, 
+  unsigned long nOrderQuantity,
+  ptime dtOrderSubmitted
+  ) 
+:
+  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
+  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
+  m_dtOrderSubmitted( dtOrderSubmitted ),
+  m_eOrderStatus( OrderStatus::Created ),
+  m_nNextExecutionId ( 0 ),
+  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+  m_dblPrice1( 0 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
+  m_dblSignalPrice( 0 ),
+  m_nOrderId( 0 )
 {
-  AssignOrderId();
+  ConstructOrder();
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
-    double dblPrice1,
-    ptime dtOrderSubmitted
-    ) :
-    m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-    m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-    m_dtOrderSubmitted( dtOrderSubmitted ), 
-    m_eOrderStatus( OrderStatus::Created ),
-    m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
-    m_dblSignalPrice( 0 )
+  CInstrument::pInstrument_cref instrument,
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide, 
+  unsigned long nOrderQuantity,
+  double dblPrice1,
+  ptime dtOrderSubmitted
+  ) 
+:
+  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
+  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
+  m_dtOrderSubmitted( dtOrderSubmitted ), 
+  m_eOrderStatus( OrderStatus::Created ),
+  m_nNextExecutionId ( 0 ),
+  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+  m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), m_bOutsideRTH( false ),
+  m_dblSignalPrice( 0 ),
+  m_nOrderId( 0 )
 {
-  AssignOrderId();
+  ConstructOrder();
 }
 
 COrder::COrder( 
-    CInstrument::pInstrument_cref instrument,
-    OrderType::enumOrderType eOrderType,
-    OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
-    double dblPrice1, double dblPrice2,
-    ptime dtOrderSubmitted
-    ) :
-    m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-    m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-    m_dtOrderSubmitted( dtOrderSubmitted ), 
-    m_eOrderStatus( OrderStatus::Created ),
-    m_nNextExecutionId ( 0 ),
-    m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-    m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-    m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false ),
-    m_dblSignalPrice( 0 )
+  CInstrument::pInstrument_cref instrument,
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide, 
+  unsigned long nOrderQuantity,
+  double dblPrice1, double dblPrice2,
+  ptime dtOrderSubmitted
+  ) 
+:
+  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
+  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
+  m_dtOrderSubmitted( dtOrderSubmitted ), 
+  m_eOrderStatus( OrderStatus::Created ),
+  m_nNextExecutionId ( 0 ),
+  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
+  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
+  m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), m_bOutsideRTH( false ),
+  m_dblSignalPrice( 0 ),
+  m_nOrderId( 0 )
 {
-  AssignOrderId();
+  ConstructOrder();
 }
 
 COrder::~COrder(void) {
 }
 
-void COrder::AssignOrderId() {
+void COrder::ConstructOrder() {
 //  try {
   m_dtOrderCreated = CTimeSource::Instance().Internal();
   //m_dtOrderSubmitted = not_a_date_time;  // already set as such
-  m_nOrderId = m_persistedorderid.GetNextOrderId();
+//  m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
 //  catch (...) {
 //    bOrderIdOk = false;
@@ -173,4 +179,10 @@ void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
 void COrder::SetCommission( double dblCommission ) { 
   m_dblCommission = dblCommission; 
   OnCommission( *this );
+}
+
+void COrder::SetOrderId( orderid_t id ) {
+  assert( 0 != id );
+  assert( m_nOrderId == 0 );
+  m_nOrderId = id;
 }

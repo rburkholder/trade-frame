@@ -11,16 +11,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <string>
+
 #pragma once
 
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
   enum enumInstrumentTypes : char { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
-  const char *Name[];
+  const char* Name[];
 }
 
 namespace OrderSide {
   enum enumOrderSide : char { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
-  const char *Name[];
+  const char* Name[];
 }
 
 namespace OrderStatus {
@@ -30,9 +32,9 @@ namespace OrderStatus {
 
 namespace OptionSide {
   enum enumOptionSide : char { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
-  const char *Name[];
-  const char *LongName[];
-  const char *ShortName[];
+  const char* Name[];
+  const char* LongName[];
+  const char* ShortName[];
 }
 
 namespace OrderType { // ib szOrderType depends upon order
@@ -51,7 +53,11 @@ namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_4217
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
   enum enumCurrency : char { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CYP, CZK, DKK, EEK, NZD, HUF, ILS, _Count };
-  const char *Name[];
+  const char* Name[];
+}
+
+namespace Trading {
+  static const std::string DbFileName = "TradeFrame.db";
 }
 
 // currency pair    base/quote(aka counter)  - depicts how many units of the counter currency are needed to buy one unit of the base currency.

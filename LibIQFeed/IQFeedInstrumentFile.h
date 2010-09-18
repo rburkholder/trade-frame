@@ -84,7 +84,7 @@ public:
 
   typedef CInstrumentFile_Exchange_iterator iterator;
   
-  void OpenIQFSymbols( void );
+  void OpenIQFSymbols( const std::string& sDbFileName );
   bool IsOpen( void ) const { return m_bOpen; };
   void CloseIQFSymbols( void );
 

@@ -20,6 +20,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <LibTrading/OrderManager.h>
+
 #include "IBTWS.h"
 
 CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
@@ -489,11 +491,8 @@ void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDeta
 void CIBTWS::nextValidId( OrderId orderId) {
   // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  CPersistedOrderId poi;
-  CPersistedOrderId::OrderId_t id;
-  id = poi.GetCurrentOrderId();
+  COrder::orderid_t id = COrderManager::Instance().CheckOrderId( orderId );
   if ( orderId > id ) {
-    poi.SetNextOrderId( orderId );
     m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
   }
   else {
@@ -604,7 +603,9 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
   if ( NULL == pInstrument ) 
     throw std::out_of_range( "instrument type not accounted for" );
   pInstrument->SetContract( contract.conId );
-  pInstrument->SetMultiplier( boost::lexical_cast<unsigned long>( contract.multiplier ) );
+  if ( 0 < contract.multiplier.length() ) {
+    pInstrument->SetMultiplier( boost::lexical_cast<unsigned long>( contract.multiplier ) );
+  }
 
   return pInstrument;
 

@@ -30,7 +30,7 @@ public:
   CIQFeedSymbolFile(void);
   ~CIQFeedSymbolFile(void);
 
-  bool Load( const std::string &filename );
+  bool Load( const std::string& sTxtFileName, const std::string& sDbFileName );
 
 protected:
 

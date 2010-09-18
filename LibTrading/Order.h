@@ -28,10 +28,13 @@ using namespace boost::gregorian;
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
-#include "PersistedOrderId.h"
+//#include "PersistedOrderId.h"
 #include "Execution.h"
 
+class COrderManager;
+
 class COrder {
+  friend class COrderManager;
 public:
 
   typedef unsigned long orderid_t;
@@ -75,7 +78,7 @@ public:
   double GetPrice1( void ) const { return m_dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) const { return m_dblPrice2; };
   double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
-  orderid_t GetOrderId( void ) const { return m_nOrderId; };
+  orderid_t GetOrderId( void ) const { assert( 0 != m_nOrderId ); return m_nOrderId; };
   unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
@@ -103,7 +106,6 @@ public:
 
 protected:
   CInstrument::pInstrument_t m_pInstrument;
-  orderid_t m_nOrderId;
   OrderType::enumOrderType m_eOrderType;
   OrderSide::enumOrderSide m_eOrderSide;
   unsigned long m_nOrderQuantity;
@@ -112,7 +114,6 @@ protected:
   double m_dblPrice2;  // for stop
   double m_dblSignalPrice;  // mark at which algorithm requested order
 
-  //CProviderInterface *m_pProvider;  // associated provider
   ptime m_dtOrderCreated;
   ptime m_dtOrderSubmitted;
   ptime m_dtOrderCancelled;
@@ -123,9 +124,6 @@ protected:
   OrderStatus::enumOrderStatus m_eOrderStatus;
   unsigned long m_nNextExecutionId;
 
-  CPersistedOrderId m_persistedorderid;  // make this static?
-  void AssignOrderId( void );
-
   // statistics and status
   //unsigned long m_nTotalOrdered;
   unsigned long m_nFilled;
@@ -135,6 +133,13 @@ protected:
   double m_dblAverageFillPrice;
   //double m_dblAverageFillPriceWithCommission;
 
+  void ConstructOrder( void );
+  void SetOrderId( orderid_t );  // used by OrderManager
+
 private:
+
+  orderid_t m_nOrderId;
+
   COrder(void);
+
 };
