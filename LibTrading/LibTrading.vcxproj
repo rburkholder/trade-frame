@@ -69,9 +69,11 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Account.cpp" />
+    <ClCompile Include="AccountAdvisor.cpp" />
     <ClCompile Include="AlternateInstrumentNames.cpp" />
     <ClCompile Include="Execution.cpp" />
-    <ClCompile Include="ExecutionManager.cpp" />
+    <ClCompile Include="AccountManager.cpp" />
     <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="InstrumentInformation.cpp" />
     <ClCompile Include="InstrumentManager.cpp" />
@@ -89,9 +91,11 @@
     <ClCompile Include="TradingEnumerations.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Account.h" />
+    <ClInclude Include="AccountAdvisor.h" />
     <ClInclude Include="AlternateInstrumentNames.h" />
     <ClInclude Include="Execution.h" />
-    <ClInclude Include="ExecutionManager.h" />
+    <ClInclude Include="AccountManager.h" />
     <ClInclude Include="Instrument.h" />
     <ClInclude Include="InstrumentInformation.h" />
     <ClInclude Include="InstrumentManager.h" />

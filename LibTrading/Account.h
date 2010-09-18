@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,12 +11,23 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#pragma once
+class CAccount
+{
+public:
+  CAccount(void);
+  ~CAccount(void);
+protected:
 
-#include "ExecutionManager.h"
+  typedef unsigned long account_key_t;
+  typedef unsigned long accountadvisor_key_t;
+  typedef unsigned long string_key_t;
 
-CExecutionManager::CExecutionManager(void) {
-}
+  struct structAccount {
+    account_key_t pk;
+    accountadvisor_key_t fkAccountAdvisor;
+    string_key_t fkAccountName;
+  };
+private:
+};
 
-CExecutionManager::~CExecutionManager(void) {
-}

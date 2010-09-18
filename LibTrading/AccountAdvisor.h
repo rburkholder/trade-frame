@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -14,40 +14,22 @@
 #pragma once
 
 #include <string>
-#include <map>
 
-#include "ManagerBase.h"
-#include "Portfolio.h"
-
-class CPortfolioManager: public ManagerBase<CPortfolioManager, std::string, CPortfolio> {
+class CAccountAdvisor
+{
 public:
-
-  typedef CPortfolio::pPortfolio_t pPortfolio_t;
-
-  CPortfolioManager(void);
-  ~CPortfolioManager(void);
-
-  pPortfolio_t Create( const std::string& sName );
-  pPortfolio_t GetPortfolio( const std::string &sName, bool bCreate = false );
-  void Delete( const std::string& sName );
-
+  CAccountAdvisor(void);
+  ~CAccountAdvisor(void);
 protected:
 
-  typedef unsigned long porfolio_key_t;
-  typedef unsigned long account_key_t;
+  typedef unsigned long accountadvisor_key_t;
   typedef unsigned long string_key_t;
-  
-  struct structPorfolio {
-    porfolio_key_t pk;
-    account_key_t fkAccount;
-    string_key_t fkPorfolioName;
+
+  struct structAccountAdvisor {
+    accountadvisor_key_t pk;
+    string_key_t fkAdvisorName;
   };
 
 private:
-
-  typedef std::pair<std::string, pPortfolio_t> m_mapPortfolios_pair;
-  typedef std::map<std::string, pPortfolio_t> map_t;
-  typedef map_t::iterator iterator;
-  map_t m_mapPortfolios;
-
 };
+

@@ -48,7 +48,7 @@ void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrde
   pOrder->SetOrderId( id );
   mapOrders_t::iterator iter = m_mapAllOrders.find( id );
   if ( m_mapAllOrders.end() != iter ) {
-    std::runtime_error( "COrderManager::PlaceOrder duplicated order placed" );
+    std::runtime_error( "COrderManager::PlaceOrder duplicate order placed" );
   }
   m_mapAllOrders.insert( pairIdOrder_t( id, pairProviderOrder_t( pProvider, pOrder ) ) );
   m_mapActiveOrders.insert( pairIdOrder_t( id, pairProviderOrder_t( pProvider, pOrder ) ) );

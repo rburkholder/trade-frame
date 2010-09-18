@@ -12,44 +12,11 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "PersistedOrderId.h"
 
-const std::string CPersistedOrderId::m_key = "OrderId";
+#include "AccountManager.h"
 
-CPersistedOrderId::CPersistedOrderId(void) 
-: CKeyValuePair()
-{
+CAccountManager::CAccountManager(void) {
 }
 
-CPersistedOrderId::~CPersistedOrderId(void) {
-}
-
-CPersistedOrderId::OrderId_t CPersistedOrderId::GetNextOrderId() {
-  OrderId_t nOrderId;
-  try {
-    nOrderId = GetUnsignedLong( m_key );
-    ++nOrderId;
-    Save( m_key, nOrderId );
-  }
-  catch ( std::out_of_range e ) {
-    Save( m_key, m_nStartingOrderId );
-    nOrderId = m_nStartingOrderId;
-  }
-  return nOrderId;
-}
-
-CPersistedOrderId::OrderId_t CPersistedOrderId::GetCurrentOrderId() {
-  OrderId_t nOrderId;
-  try {
-    nOrderId = GetUnsignedLong( m_key );
-  }
-  catch ( std::out_of_range e ) {
-    Save( m_key, m_nStartingOrderId );
-    nOrderId = m_nStartingOrderId;
-  }
-  return nOrderId;
-}
-
-void CPersistedOrderId::SetNextOrderId( OrderId_t nOrderId ) {
-  Save( m_key, nOrderId );
+CAccountManager::~CAccountManager(void) {
 }

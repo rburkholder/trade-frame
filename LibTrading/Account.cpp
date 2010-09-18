@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,24 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-#include <LibBerkeleyDB/KeyValuePair.h>
+#include "StdAfx.h"
 
-// may need to worry about multi-threading at some point in time
+#include "Account.h"
 
-class CPersistedOrderId :
-  public CKeyValuePair {
-public:
+CAccount::CAccount(void)
+{
+}
 
-  typedef unsigned long OrderId_t;
 
-  CPersistedOrderId(void);
-  virtual ~CPersistedOrderId(void);
-  void SetNextOrderId( OrderId_t );
-  OrderId_t GetNextOrderId( void ); 
-  OrderId_t GetCurrentOrderId( void );
-protected:
-  const static OrderId_t m_nStartingOrderId = 1000;
-  static const std::string m_key;
-private:
-};
+CAccount::~CAccount(void) {
+}

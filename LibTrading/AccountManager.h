@@ -16,12 +16,13 @@
 #include <string>
 
 #include "ManagerBase.h"
-#include "Execution.h"
+#include "Account.h"
+#include "AccountAdvisor.h"
 
-class CExecutionManager: public ManagerBase<CExecutionManager, CExecution::ExecutionId_t, CExecution> {
+class CAccountManager: public ManagerBase<CAccountManager, std::string, CAccountAdvisor> {
 public:
-  CExecutionManager(void);
-  ~CExecutionManager(void);
+  CAccountManager(void);
+  ~CAccountManager(void);
 protected:
 private:
 };
