@@ -44,25 +44,31 @@
 #define OU_DB_IX_ENUM 0
 #define OU_DB_IX_CLASS 1
 #define OU_DB_IX_VN 2 /* variable name */
-#define OU_DB_IX_INIT 3 /* initializers */
 
 // basic extraction routines for struct members, tuple members, and reference between struct and tuple
 #define OU_DB_EXTRACT_RECORD_FIELD( z, tuple, field, data ) \
 	BOOST_PP_TUPLE_ELEM( OU_DB_RECORD_FIELD_DESCR_COUNT, field, tuple )
 
 #define OU_DB_EMIT_VAR_DECLARATION( r, data, elem ) \
-  OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_CLASS, data )::stored_t \
+  OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_CLASS, data )::fldStored_t \
   OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_VN, data );
 
 #define OU_DB_EMIT_TYPE_LIST( r, data, fieldix, tuple  ) \
-		BOOST_PP_COMMA_IF(fieldix)\
-		OU_DB_EXTRACT_RECORD_FIELD( r, tuple, OU_DB_IX_CLASS, data )
+	BOOST_PP_COMMA_IF(fieldix)\
+	OU_DB_EXTRACT_RECORD_FIELD( r, tuple, OU_DB_IX_CLASS, data )
 
 #define OU_DB_EMIT_REF_LIST( r, data, i, elem ) \
-		BOOST_PP_COMMA_IF(i) \
-		BOOST_PP_CAT(BOOST_PP_CAT(m_rec,data).,OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_VN, ~ ))
+	BOOST_PP_COMMA_IF(i) \
+	BOOST_PP_CAT(BOOST_PP_CAT(m_rec,data).,OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_VN, ~ ))
+
+#define OU_DB_EMIT_ENUM_LIST( r, data, i, elem ) \
+  BOOST_PP_COMMA_IF(i) \
+  OU_DB_EXTRACT_RECORD_FIELD( r, elem, OU_DB_IX_ENUM, ~ )
 
 // simplifying defines
+#define OU_DB_STRUCT_ENUMS( record_fields ) \
+  BOOST_PP_SEQ_FOR_EACH_I( OU_DB_EMIT_ENUM_LIST, ~, record_fields )
+
 #define OU_DB_STRUCT_MEMBERS( record_fields ) \
   BOOST_PP_SEQ_FOR_EACH( OU_DB_EMIT_VAR_DECLARATION, ~, record_fields )
 
@@ -73,6 +79,7 @@
 	BOOST_PP_SEQ_FOR_EACH_I( OU_DB_EMIT_REF_LIST, data, record_fields )
 
 #define OU_DB_DECLARE_STRUCTURES( base_name, record_fields ) \
+  enum BOOST_PP_CAT(enum,base_name) { OU_DB_STRUCT_ENUMS(record_fields) }; \
 	struct BOOST_PP_CAT(struct,base_name) { \
 		OU_DB_STRUCT_MEMBERS( record_fields ) \
 	}; \
@@ -98,33 +105,34 @@ class ProcessFieldBase
 {
 public:
 
-  typedef S local_t;
-  typedef S stored_t;
+  typedef S fldLocal_t;
+  typedef S fldStored_t;
 
-  ProcessFieldBase( S& stored ): m_stored( stored ) {};
+  ProcessFieldBase( fldStored_t& stored ): m_stored( stored ) {};
   virtual ~ProcessFieldBase( void ) {};
 
-  S const& constant_value( void ) const { return m_stored; };
-  S& value( void ) { return m_stored; };
+  fldStored_t const& constant_value( void ) const { return m_stored; };
+  fldStored_t& value( void ) { return m_stored; };
 
-  S& operator=( S& rhs ) {
+  fldStored_t& operator=( fldStored_t& rhs ) {
     m_stored = rhs;
     return m_stored;
   }
 
-  void SetKey( void *data, u_int32_t size ) {
-    data = &m_stored;
-    size = sizeof( S );
+  void SetKey( void** data, u_int32_t& size ) {
+    *data = static_cast<void*>( &m_local );
+    size = sizeof( fldStored_t );
   }
 
-  void Update( void ) {};
-  void Append( void ) {};
-  void Delete( void ) {};
+  void PreAppend( void ) {};
+  void PreInsert( void ) {};
+  void PreUpdate( void ) {};
+  void PreDelete( void ) {};
 
 protected:
 private:
   ProcessFieldBase( void ); // no default constructor
-  S& m_stored;
+  fldStored_t& m_stored;
 };
 
 template <typename T> // T is a plain old datatype or composite structure (multi-field key)
@@ -140,12 +148,15 @@ private:
 // auto inc key
 class ProcessFieldAutoIncKey: public ProcessFieldBase<ProcessFieldAutoIncKey,CAutoIncKeys::keyValue_t> {
 public:
-  ProcessFieldAutoIncKey( CAutoIncKeys::keyValue_t& key ): ProcessFieldBase<ProcessFieldAutoIncKey,CAutoIncKeys::keyValue_t>( key ) {};
+  ProcessFieldAutoIncKey( CAutoIncKeys::keyValue_t& key )
+    : ProcessFieldBase<ProcessFieldAutoIncKey,CAutoIncKeys::keyValue_t>( key ) 
+    {};
   ~ProcessFieldAutoIncKey( void ) {};
 
-  void Update( void ) {std::cout << "ProcessFieldPk" << std::endl;};
-  void Append( void ) {};
-  void Delete( void ) {};
+  void PreAppend( void ) {};
+  void PreInsert( void ) {};
+  void PreUpdate( void ) {std::cout << "ProcessFieldPk" << std::endl;};
+  void PreDelete( void ) {};
 protected:
 private:
   ProcessFieldAutoIncKey(void);
@@ -155,33 +166,33 @@ private:
 class ProcessFieldSk: public ProcessFieldBase<ProcessFieldSk,CAutoIncKeys::keyValue_t> {
 public:
 
-  typedef std::string local_t;
-  typedef CAutoIncKeys::keyValue_t keyStored_t;
-  typedef std::string keyLocal_t;
+  typedef std::string fldLocal_t;
+  typedef CAutoIncKeys::keyValue_t fldStored_t;
 
-  ProcessFieldSk( keyStored_t& key ): ProcessFieldBase<ProcessFieldSk,keyStored_t>( key ) {};
+  ProcessFieldSk( fldStored_t& key ): ProcessFieldBase<ProcessFieldSk,fldStored_t>( key ) {};
   ~ProcessFieldSk( void ) {};
 
-  local_t const& constant_value( void ) const { return m_local; };
-  local_t& value( void ) { return m_local; };
+  fldLocal_t const& constant_value( void ) const { return m_local; };
+  fldLocal_t& value( void ) { return m_local; };
 
-  local_t const& operator=( const std::string& rhs ) {
+  fldLocal_t const& operator=( const std::string& rhs ) {
     m_local = rhs;
     return m_local;
   }
 
-  void Update( void ) {std::cout << "ProcessFieldSk" << std::endl;};
-  void Append( void ) {};
-  void Delete( void ) {};
+  void PreInsert( void ) {};
+  void PreAppend( void ) {};
+  void PreUpdate( void ) {std::cout << "ProcessFieldSk" << std::endl;};
+  void PreDelete( void ) {};
 
-  void SetKey( void *data, u_int32_t size ) {
-    data = &m_local;
+  void SetKey( void** data, u_int32_t& size ) {
+    *data = static_cast<void*>( &m_local );
     size = sizeof( m_local.length() );
   }
 
 protected:
 private:
-  local_t m_local;
+  fldLocal_t m_local;
   ProcessFieldSk(void);
 };
 
@@ -192,29 +203,37 @@ public:
   ProcessFieldFk( FK& key ): ProcessFieldBase<ProcessFieldFk<FK>,FK>( key ) {};
   ~ProcessFieldFk( void ) {};
 
-  void Update( void ) {std::cout << "ProcessFieldFk" << std::endl;};
-  void Append( void ) {};
-  void Delete( void ) {};
+  void PreInsert( void ) {};
+  void PreAppend( void ) {};
+  void PreUpdate( void ) {std::cout << "ProcessFieldFk" << std::endl;};
+  void PreDelete( void ) {};
 protected:
 private:
   ProcessFieldFk(void);
 };
 
-struct UpdateRecordField {
+struct PreInsertRecordField {
   template <typename T>
   void operator()(T & x)  const  {
-    x.Update();
+    x.Insert();
   }
 };
 
-struct AppendRecordField {
+struct PreAppendRecordField {
   template <typename T>
   void operator()(T & x)  const  {
     x.Append();
   }
 };
 
-struct DeleteRecordField {
+struct PreUpdateRecordField {
+  template <typename T>
+  void operator()(T & x)  const  {
+    x.Update();
+  }
+};
+
+struct PreDeleteRecordField {
   template <typename T>
   void operator()(T & x)  const  {
     x.Delete();

@@ -13,14 +13,33 @@
 
 #include "StdAfx.h"
 
+#include <cassert>
+
 #include "AccountManager.h"
 
-CAccountManager::CAccountManager(void) 
-: OU_DB_INITIALIZE_STRUCTURES(AccountAdvisor, OU_DB_ACCOUNTADVISOR_RECORD_FIELDS),
-  OU_DB_INITIALIZE_STRUCTURES(Account, OU_DB_ACCOUNT_RECORD_FIELDS)
-
+CAccountManager::CAccountManager( void ) 
+: ManagerBase<CAccountManager, std::string, CAccountAdvisor>(),
+  m_bCanPersist( false )
 {
+  
+}
+
+CAccountManager::CAccountManager( const std::string& sDbFileName ) 
+: ManagerBase<CAccountManager, std::string, CAccountAdvisor>(),
+  m_sDbFileName( sDbFileName ),
+  m_bCanPersist( true )
+{
+  
 }
 
 CAccountManager::~CAccountManager(void) {
+}
+
+void CAccountManager::SetDbFileName( const std::string& sDbFileName ) {
+  assert( !m_bCanPersist );
+  m_sDbFileName = sDbFileName;
+  m_bCanPersist = true;
+}
+
+void CAccountManager::AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName, bool bPersist ) {
 }

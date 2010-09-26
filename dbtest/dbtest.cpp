@@ -3,10 +3,12 @@
 // Author      : Raymond
 // Version     :
 // Copyright   : (c) 2010 One Unified
-// Description : Hello World in C++, Ansi-style
+// Description : 
 //============================================================================
 
 #include "stdafx.h"
+
+#include <string>
 
 #include <LibTrading/AccountManager.h>
 
@@ -29,6 +31,9 @@ struct print_xml
 int _tmain(int argc, _TCHAR* argv[])
 {
 
+  std::string sDbName = "dbtest.db4";
+
+  CAccountManager am( sDbName );
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
 //  boost::fusion::for_each( m_tplR1, UpdateRecordField() );

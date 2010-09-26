@@ -16,9 +16,10 @@
 #include "Account.h"
 
 CAccount::CAccount(void)
+: OU_DB_INITIALIZE_STRUCTURES(Account, OU_TABLE_ACCOUNT_RECORD_FIELDS)
 {
+  m_recAccount.nVersion = 01010101;
 }
-
 
 CAccount::~CAccount(void) {
 }

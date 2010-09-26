@@ -15,29 +15,43 @@
 
 #include <string>
 
-#include <LibBerkeleyDb/Record.h>
+#include <boost/fusion/sequence/intrinsic/front.hpp>
+#include <boost/fusion/include/front.hpp>
+
+#include <LibBerkeleyDb/BerkeleyDb.h>
 
 #include "ManagerBase.h"
 #include "Account.h"
 #include "AccountAdvisor.h"
 
-#define OU_DB_ACCOUNTADVISOR_RECORD_FIELDS \
-  ((OU_DB_ACCOUNTADVISOR_ADVISORID, ProcessFieldSk, sAdvisorId  )) \
-  ((OU_DB_ACCOUNTADVISOR_ADVISORNAME, ProcessFieldSk, sAdvisorName  )) \
-  /**/
-
-#define OU_DB_ACCOUNT_RECORD_FIELDS \
-  ((OU_DB_ACCOUNT_ACCOUNTID,      ProcessFieldSk, sAccountId        )) \
-  ((OU_DB_ACCOUNT_ACCOUNTNAME,    ProcessFieldSk, sAccountName      )) \
-  ((OU_DB_ACCOUNT_ACCOUNTADVISOR, ProcessFieldFk<CAutoIncKeys::keyValue_t>, fkAccountAdvisor  )) \
-  /**/
-
 class CAccountManager: public ManagerBase<CAccountManager, std::string, CAccountAdvisor> {
 public:
-  CAccountManager(void);
+  CAccountManager( void );  // assume non-persistance
+  CAccountManager( const std::string& sDbFileName ); // assume persistance
   ~CAccountManager(void);
+
+  void SetDbFileName( const std::string& sDbFileName );
+
+  void AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName, bool bPersist=false );
+
 protected:
 private:
-  OU_DB_DECLARE_STRUCTURES(AccountAdvisor, OU_DB_ACCOUNTADVISOR_RECORD_FIELDS)
-  OU_DB_DECLARE_STRUCTURES(Account, OU_DB_ACCOUNT_RECORD_FIELDS)
+
+  typedef CAccountAdvisor::structAccountAdvisor structAccountAdvisor;
+  typedef CAccountAdvisor::tplAccountAdvisor_t tplAccountAdvisor_t;
+  typedef boost::fusion::result_of::front<tplAccountAdvisor_t>::element::type::fldStored_t AccountAdvisor_fldStored_t;
+  typedef CBerkeleyDb<structAccountAdvisor,tplAccountAdvisor_t,AccountAdvisor_fldStored_t> tblAccountAdvisor_t;
+
+  typedef CAccount::structAccount structAccount;
+  typedef CAccount::tplAccount_t tplAccount_t;
+  typedef boost::fusion::result_of::front<tplAccount_t>::element::type::fldStored_t Account_fldStored_t;
+  typedef CBerkeleyDb<structAccount,tplAccount_t,Account_fldStored_t> tblAccount_t;
+
+  bool m_bCanPersist;  // master flag for persistance, if false, we don't have DbFileName
+  std::string m_sDbFileName;
+
+  tblAccountAdvisor_t* m_ptblAccountAdvisor;
+  tblAccount_t* m_ptblAccount;
+
+
 };

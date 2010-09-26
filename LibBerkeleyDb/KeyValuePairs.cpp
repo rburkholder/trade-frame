@@ -28,15 +28,14 @@ CKeyValuePairsBase::CKeyValuePairsBase( const std::string& sDbFileName, const st
   m_pdb->open( NULL, sDbFileName.c_str(), sDbName.c_str(), DB_BTREE, DB_CREATE, 0 );
 }
 
-
 CKeyValuePairsBase::~CKeyValuePairsBase(void) {
   m_pdb->close(0);
 }
 
-void CKeyValuePairsBase::Set( Dbt *pKey, Dbt *pValue ) {
+void CKeyValuePairsBase::Set( Dbt *pKey, Dbt *pValue, DbTxn* pTxn ) {
   int ret;
   try {
-    ret = m_pdb->put( 0, pKey, pValue, 0 ); // overwrite existing value, or create new one
+    ret = m_pdb->put( pTxn, pKey, pValue, 0 ); // overwrite existing value, or create new one
   }
   catch ( DbException e ) {
     std::string err( "CKeyValuePairsBase::Save: DbException error, " );
@@ -47,10 +46,10 @@ void CKeyValuePairsBase::Set( Dbt *pKey, Dbt *pValue ) {
     throw std::runtime_error( "CKeyValuePairsBase::Save put had error" );
 }
 
-void CKeyValuePairsBase::Get( Dbt *pKey, Dbt *pValue ) {
+void CKeyValuePairsBase::Get( Dbt *pKey, Dbt *pValue, DbTxn* pTxn ) {
   int ret;
   try {
-    ret = m_pdb->get( 0, pKey, pValue, 0 );
+    ret = m_pdb->get( pTxn, pKey, pValue, 0 );
   }
   catch ( DbException e ) {
     std::string err( "CKeyValuePairsBase::Get: DbException error, " );
@@ -64,8 +63,8 @@ void CKeyValuePairsBase::Get( Dbt *pKey, Dbt *pValue ) {
     throw std::runtime_error( "CKeyValuePairsBase::Get get had error" );
 }
 
-void CKeyValuePairsBase::Truncate( void ) {
+void CKeyValuePairsBase::Truncate( DbTxn* pTxn ) {
   u_int32_t countp = 0;
-  m_pdb->truncate( NULL, &countp, 0 );
+  m_pdb->truncate( pTxn, &countp, 0 );
 }
 

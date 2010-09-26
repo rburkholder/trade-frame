@@ -35,9 +35,9 @@ public:
   CKeyValuePairsBase( const std::string& sDbFileName, const std::string& sDbName );
   virtual ~CKeyValuePairsBase( void );
 
-  void Set( Dbt *pKey, Dbt *pValue );
-  void Get( Dbt *pKey, Dbt *pValue );
-  void Truncate( void );
+  void Set( Dbt *pKey, Dbt *pValue, DbTxn* pTxn = NULL );
+  void Get( Dbt *pKey, Dbt *pValue, DbTxn* pTxn = NULL );
+  void Truncate( DbTxn* pTxn = NULL );
 
 //  void OpenCursor( void );
 //  void CloseCursor( void );

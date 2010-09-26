@@ -46,7 +46,9 @@ CBerkeleyDBEnvManager::CBerkeleyDBEnvManager( void )
 //  m_pDbEnv->open( ".", DB_INIT_CDB | DB_INIT_MPOOL | DB_THREAD | DB_INIT_TXN | DB_INIT_LOG | DB_CREATE | DB_RECOVER | DB_REGISTER, 0 );  // DB_INIT_LOCK
 //  m_pDbEnv->open( ".", DB_INIT_CDB | DB_INIT_MPOOL | DB_THREAD | DB_INIT_TXN | DB_CREATE | DB_RECOVER | DB_REGISTER, 0 );  // DB_INIT_LOCK
   //m_pDbEnv->open( ".", DB_INIT_LOCK | DB_INIT_MPOOL | DB_THREAD | DB_INIT_TXN | DB_CREATE | DB_RECOVER | DB_REGISTER, 0 );  // works, but slow with transactioning
-  m_pDbEnv->open( ".", DB_INIT_LOCK | DB_INIT_MPOOL | DB_THREAD | DB_CREATE, 0 );
+  //m_pDbEnv->open( ".", DB_INIT_LOCK | DB_INIT_MPOOL | DB_THREAD | DB_CREATE, 0 ); // primary 2010/09/26
+  // http://download.oracle.com/docs/cd/E17076_02/html/programmer_reference/transapp_env_open.html
+  m_pDbEnv->open( ".", DB_INIT_LOCK | DB_INIT_MPOOL | DB_THREAD | DB_CREATE | DB_INIT_TXN | DB_INIT_LOG, 0 ); // for transactions 2010/09/26
   // dbstl::register_db() and dbstl::register_db_env()
   // dbstl::open_db() or dbstl::open_env()
   //dbstl::dbstl_startup();

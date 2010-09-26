@@ -15,13 +15,46 @@
 
 #include <string>
 
+#include <LibBerkeleyDb/Record.h>
+
+#define OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS \
+  ((OU_TABLE_ACCOUNTADVISOR_ADVISORID,    ProcessFieldSk, sAdvisorId  )) \
+  ((OU_TABLE_ACCOUNTADVISOR_ADVISORNAME,  ProcessFieldSk, sAdvisorName  )) \
+  ((OU_TABLE_ACCOUNTADVISOR_VERSION,      ProcessFieldPod<unsigned long>, nVersion )) \
+  /**/
+
 class CAccountAdvisor
 {
+  friend class CAccountManager;
+
+  OU_DB_DECLARE_STRUCTURES(AccountAdvisor, OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS)
+
 public:
-  CAccountAdvisor(void);
+
+  CAccountAdvisor( const std::string& sDbFileName, bool bPersist = false );
   ~CAccountAdvisor(void);
+
+  bool IsPersisted( void ) { return m_bPersist; };
+
+  void SetAdvisorId( const std::string& sAdvisorId ) { 
+    boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORID>( m_tplAccountAdvisor ) = sAdvisorId; 
+  }
+  const std::string& GetAdvisorId( void ) { 
+    return boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORID>( m_tplAccountAdvisor ).value(); 
+  }
+
+  void SetAdvisorName( const std::string& sAdvisorName ) { 
+    boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORNAME>( m_tplAccountAdvisor ) = sAdvisorName; 
+  }
+  const std::string& GetAdvisorName( void ) { 
+    return boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORNAME>( m_tplAccountAdvisor ).value(); 
+  }
+
 protected:
 
 private:
+
+  bool m_bPersist;
+
 };
 

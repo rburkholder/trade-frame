@@ -15,17 +15,56 @@
 
 // handles the table oriented stuff
 
-#include <db4/db_cxx.h>
+#include "KeyValuePairs.h"
 
 // CBerkeleyDb =====
 
-template <typename T>
-class CBerkeleyDb {
+// S=struct for storage, T=tuple for processing, K=key
+template <typename S, typename T, typename K> 
+class CBerkeleyDb: public CKeyValuePairs<K>
+{
 public:
-  CBerkeleyDb<T>(void) {};
-  ~CBerkeleyDb<T>(void) {};
+
+  CBerkeleyDb( const std::string& sDbFileName, const std::string& sDbName );
+  ~CBerkeleyDb(void) {};
+
+  void SetDbFileName( const std::string& sDbFileName ) { m_sDbFileName = sDbFileName; };
+  void SetDbDName( const std::string& sDbName ) { m_sDbName = sDbName; };
+
+  void Insert( S& record ); // use the key in the structure
+  void Append( S& record ); // use the key in the structure
+  void Update( S& record ); // use the key in the structure  
+  void Delete( K& key );  // use this key
+
 protected:
-  Db *m_pDb;
 private:
+
+  DbEnv& m_dbEnv;
+
 };
 
+template <typename S, typename T, typename K>
+CBerkeleyDb<S,T,K>::CBerkeleyDb(  const std::string& sDbFileName, const std::string& sDbName )
+: CKeyValuePairs<K>( sDbFileName, sDbName ), 
+  m_dbEnv( *(CBerkeleyDBEnvManager::Instance().GetDbEnv() ) )
+{
+}
+
+template <typename S, typename T, typename K>
+void CBerkeleyDb<S,T,K>::Insert( S& record ) {
+}
+
+template <typename S, typename T, typename K>
+void CBerkeleyDb<S,T,K>::Append( S& record ) {
+  DbTxn* pDbTxn;
+  m_dbEnv.txn_begin( NULL, &pDbTxn, 0 );
+  pDbTxn->commit();
+}
+
+template <typename S, typename T, typename K>
+void CBerkeleyDb<S,T,K>::Update( S& record ) {
+}
+
+template <typename S, typename T, typename K>
+void CBerkeleyDb<S,T,K>::Delete( K& key ) {
+}
