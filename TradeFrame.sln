@@ -63,6 +63,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeGldOptions", "TradeGld
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibCharting", "LibCharting\LibCharting.vcxproj", "{BD8A7D5E-FD36-487F-88E9-8F3851ECF214}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbtest", "dbtest\dbtest.vcxproj", "{4D888222-F62B-4E3D-8E6D-29F7397F8FDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -141,6 +143,10 @@ Global
 		{BD8A7D5E-FD36-487F-88E9-8F3851ECF214}.Debug|Win32.Build.0 = Debug|Win32
 		{BD8A7D5E-FD36-487F-88E9-8F3851ECF214}.Release|Win32.ActiveCfg = Release|Win32
 		{BD8A7D5E-FD36-487F-88E9-8F3851ECF214}.Release|Win32.Build.0 = Release|Win32
+		{4D888222-F62B-4E3D-8E6D-29F7397F8FDC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4D888222-F62B-4E3D-8E6D-29F7397F8FDC}.Debug|Win32.Build.0 = Debug|Win32
+		{4D888222-F62B-4E3D-8E6D-29F7397F8FDC}.Release|Win32.ActiveCfg = Release|Win32
+		{4D888222-F62B-4E3D-8E6D-29F7397F8FDC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,9 +15,22 @@
 
 #include <string>
 
+#include <LibBerkeleyDb/Record.h>
+
 #include "ManagerBase.h"
 #include "Account.h"
 #include "AccountAdvisor.h"
+
+#define OU_DB_ACCOUNTADVISOR_RECORD_FIELDS \
+  ((OU_DB_ACCOUNTADVISOR_ADVISORID, ProcessFieldSk, sAdvisorId  )) \
+  ((OU_DB_ACCOUNTADVISOR_ADVISORNAME, ProcessFieldSk, sAdvisorName  )) \
+  /**/
+
+#define OU_DB_ACCOUNT_RECORD_FIELDS \
+  ((OU_DB_ACCOUNT_ACCOUNTID,      ProcessFieldSk, sAccountId        )) \
+  ((OU_DB_ACCOUNT_ACCOUNTNAME,    ProcessFieldSk, sAccountName      )) \
+  ((OU_DB_ACCOUNT_ACCOUNTADVISOR, ProcessFieldFk<CAutoIncKeys::keyValue_t>, fkAccountAdvisor  )) \
+  /**/
 
 class CAccountManager: public ManagerBase<CAccountManager, std::string, CAccountAdvisor> {
 public:
@@ -25,4 +38,6 @@ public:
   ~CAccountManager(void);
 protected:
 private:
+  OU_DB_DECLARE_STRUCTURES(AccountAdvisor, OU_DB_ACCOUNTADVISOR_RECORD_FIELDS)
+  OU_DB_DECLARE_STRUCTURES(Account, OU_DB_ACCOUNT_RECORD_FIELDS)
 };

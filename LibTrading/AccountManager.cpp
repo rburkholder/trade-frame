@@ -15,7 +15,11 @@
 
 #include "AccountManager.h"
 
-CAccountManager::CAccountManager(void) {
+CAccountManager::CAccountManager(void) 
+: OU_DB_INITIALIZE_STRUCTURES(AccountAdvisor, OU_DB_ACCOUNTADVISOR_RECORD_FIELDS),
+  OU_DB_INITIALIZE_STRUCTURES(Account, OU_DB_ACCOUNT_RECORD_FIELDS)
+
+{
 }
 
 CAccountManager::~CAccountManager(void) {

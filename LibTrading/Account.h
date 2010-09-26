@@ -19,15 +19,6 @@ public:
   ~CAccount(void);
 protected:
 
-  typedef unsigned long account_key_t;
-  typedef unsigned long accountadvisor_key_t;
-  typedef unsigned long string_key_t;
-
-  struct structAccount {
-    account_key_t pk;
-    accountadvisor_key_t fkAccountAdvisor;
-    string_key_t fkAccountName;
-  };
 private:
 };
 
