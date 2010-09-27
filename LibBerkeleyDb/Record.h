@@ -124,15 +124,21 @@ public:
     size = sizeof( fldStored_t );
   }
 
+  void SetKey( Dbt& key ) {
+    key.set_data( static_cast<void*>( &m_stored ) );
+    key.set_size( sizeof( fldStored_t ) );
+    key.set_ulen( sizeof( fldStored_t ) );
+  }
+
   void PreAppend( void ) {};
   void PreInsert( void ) {};
   void PreUpdate( void ) {};
   void PreDelete( void ) {};
 
 protected:
+  fldStored_t& m_stored;
 private:
   ProcessFieldBase( void ); // no default constructor
-  fldStored_t& m_stored;
 };
 
 template <typename T> // T is a plain old datatype or composite structure (multi-field key)
@@ -177,6 +183,7 @@ public:
 
   fldLocal_t const& operator=( const std::string& rhs ) {
     m_local = rhs;
+    m_stored = 0;
     return m_local;
   }
 
@@ -187,7 +194,13 @@ public:
 
   void SetKey( void** data, u_int32_t& size ) {
     *data = static_cast<void*>( &m_local );
-    size = sizeof( m_local.length() );
+    size = m_local.length();
+  }
+
+  void SetKey( Dbt& key ) {
+    key.set_data( static_cast<void*>( &m_local ) );
+    key.set_size( m_local.length() );
+    key.set_ulen( m_local.length() );
   }
 
 protected:
@@ -215,28 +228,28 @@ private:
 struct PreInsertRecordField {
   template <typename T>
   void operator()(T & x)  const  {
-    x.Insert();
+    x.PreInsert();
   }
 };
 
 struct PreAppendRecordField {
   template <typename T>
   void operator()(T & x)  const  {
-    x.Append();
+    x.PreAppend();
   }
 };
 
 struct PreUpdateRecordField {
   template <typename T>
   void operator()(T & x)  const  {
-    x.Update();
+    x.PreUpdate();
   }
 };
 
 struct PreDeleteRecordField {
   template <typename T>
   void operator()(T & x)  const  {
-    x.Delete();
+    x.PreDelete();
   }
 };
 

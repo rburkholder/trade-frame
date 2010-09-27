@@ -26,13 +26,11 @@
 
 class CAccountManager: public ManagerBase<CAccountManager, std::string, CAccountAdvisor> {
 public:
-  CAccountManager( void );  // assume non-persistance
-  CAccountManager( const std::string& sDbFileName ); // assume persistance
+
+  CAccountManager( const std::string& sDbFileName );
   ~CAccountManager(void);
 
-  void SetDbFileName( const std::string& sDbFileName );
-
-  void AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName, bool bPersist=false );
+  void AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName );
 
 protected:
 private:
@@ -40,18 +38,18 @@ private:
   typedef CAccountAdvisor::structAccountAdvisor structAccountAdvisor;
   typedef CAccountAdvisor::tplAccountAdvisor_t tplAccountAdvisor_t;
   typedef boost::fusion::result_of::front<tplAccountAdvisor_t>::element::type::fldStored_t AccountAdvisor_fldStored_t;
-  typedef CBerkeleyDb<structAccountAdvisor,tplAccountAdvisor_t,AccountAdvisor_fldStored_t> tblAccountAdvisor_t;
+  typedef CBerkeleyDb<tplAccountAdvisor_t,structAccountAdvisor,AccountAdvisor_fldStored_t> tblAccountAdvisor_t;
 
   typedef CAccount::structAccount structAccount;
   typedef CAccount::tplAccount_t tplAccount_t;
   typedef boost::fusion::result_of::front<tplAccount_t>::element::type::fldStored_t Account_fldStored_t;
-  typedef CBerkeleyDb<structAccount,tplAccount_t,Account_fldStored_t> tblAccount_t;
+  typedef CBerkeleyDb<tplAccount_t,structAccount,Account_fldStored_t> tblAccount_t;
 
-  bool m_bCanPersist;  // master flag for persistance, if false, we don't have DbFileName
   std::string m_sDbFileName;
+  static const std::string m_sAccountAdvisorDbName;
+  static const std::string m_sAccountDbName;
 
-  tblAccountAdvisor_t* m_ptblAccountAdvisor;
-  tblAccount_t* m_ptblAccount;
-
+  tblAccountAdvisor_t m_tblAccountAdvisor;
+  tblAccount_t m_tblAccount;;
 
 };

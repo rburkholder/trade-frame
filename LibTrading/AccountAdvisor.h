@@ -31,10 +31,9 @@ class CAccountAdvisor
 
 public:
 
-  CAccountAdvisor( const std::string& sDbFileName, bool bPersist = false );
+  CAccountAdvisor( void );
+  CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName );
   ~CAccountAdvisor(void);
-
-  bool IsPersisted( void ) { return m_bPersist; };
 
   void SetAdvisorId( const std::string& sAdvisorId ) { 
     boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORID>( m_tplAccountAdvisor ) = sAdvisorId; 
@@ -53,8 +52,6 @@ public:
 protected:
 
 private:
-
-  bool m_bPersist;
 
 };
 

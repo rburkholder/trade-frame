@@ -13,21 +13,16 @@
 
 #include "StdAfx.h"
 
-#include <cassert>
-
 #include "AccountManager.h"
 
-CAccountManager::CAccountManager( void ) 
-: ManagerBase<CAccountManager, std::string, CAccountAdvisor>(),
-  m_bCanPersist( false )
-{
-  
-}
+const std::string CAccountManager::m_sAccountAdvisorDbName( "AccountAdvisor" );
+const std::string CAccountManager::m_sAccountDbName( "Account" );
 
 CAccountManager::CAccountManager( const std::string& sDbFileName ) 
 : ManagerBase<CAccountManager, std::string, CAccountAdvisor>(),
   m_sDbFileName( sDbFileName ),
-  m_bCanPersist( true )
+  m_tblAccountAdvisor( sDbFileName, m_sAccountAdvisorDbName ),
+  m_tblAccount( sDbFileName, m_sAccountDbName )
 {
   
 }
@@ -35,11 +30,11 @@ CAccountManager::CAccountManager( const std::string& sDbFileName )
 CAccountManager::~CAccountManager(void) {
 }
 
-void CAccountManager::SetDbFileName( const std::string& sDbFileName ) {
-  assert( !m_bCanPersist );
-  m_sDbFileName = sDbFileName;
-  m_bCanPersist = true;
-}
-
-void CAccountManager::AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName, bool bPersist ) {
+void CAccountManager::AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName ) {
+  CAccountAdvisor aa( sAccountAdvisorId, sAccountAdvisorName );
+  if ( !m_tblAccountAdvisor.Exists( aa.m_tplAccountAdvisor ) ) {
+    m_tblAccountAdvisor.Insert( aa.m_tplAccountAdvisor, aa.m_recAccountAdvisor );
+  }
+  else {
+  }
 }

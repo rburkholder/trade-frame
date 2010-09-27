@@ -34,6 +34,7 @@ int _tmain(int argc, _TCHAR* argv[])
   std::string sDbName = "dbtest.db4";
 
   CAccountManager am( sDbName );
+  am.AddAccountAdvisor( "ourpb01", "Raymond Burkholder" );
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
 //  boost::fusion::for_each( m_tplR1, UpdateRecordField() );
