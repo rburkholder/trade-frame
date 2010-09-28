@@ -175,7 +175,7 @@ public:
   typedef std::string fldLocal_t;
   typedef CAutoIncKeys::keyValue_t fldStored_t;
 
-  ProcessFieldSk( fldStored_t& key ): ProcessFieldBase<ProcessFieldSk,fldStored_t>( key ) {};
+  ProcessFieldSk( fldStored_t& key );
   ~ProcessFieldSk( void ) {};
 
   fldLocal_t const& constant_value( void ) const { return m_local; };
@@ -207,6 +207,9 @@ protected:
 private:
   fldLocal_t m_local;
   ProcessFieldSk(void);
+
+  static CAutoIncKeys m_keyAutoInc;  // used for getting a key for each new string
+  static CKeyValuePairs m_kvStrings;  // used for storing the string indexed by the unique integer
 };
 
 // at some later point, need to perform validations against foreigh record

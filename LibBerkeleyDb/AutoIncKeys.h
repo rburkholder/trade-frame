@@ -25,7 +25,7 @@
 // CAutoIncKeys
 //
 
-class CAutoIncKeys: public CKeyValuePairs<unsigned long>
+class CAutoIncKeys: public CKeyValuePairs
 {
 public:
 

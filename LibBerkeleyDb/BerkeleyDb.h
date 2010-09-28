@@ -22,8 +22,9 @@
 // CBerkeleyDb =====
 
 // S=struct for storage, T=tuple for processing, K=key
+// might be able to remove K since CKeyValuePairs is now without K
 template <typename T, typename S, typename K> 
-class CBerkeleyDb: public CKeyValuePairs<K>
+class CBerkeleyDb: public CKeyValuePairs
 {
 public:
 
@@ -46,7 +47,7 @@ private:
 
 template <typename T, typename S, typename K> 
 CBerkeleyDb<T,S,K>::CBerkeleyDb(  const std::string& sDbFileName, const std::string& sDbName )
-: CKeyValuePairs<K>( sDbFileName, sDbName ), 
+: CKeyValuePairs( sDbFileName, sDbName ), 
   m_dbEnv( *(CBerkeleyDBEnvManager::Instance().GetDbEnv() ) )
 {
 }

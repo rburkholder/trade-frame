@@ -22,7 +22,7 @@ const std::string CAutoIncKeys::m_sDbName( "_AutoIncKeys" );
 //
 
 CAutoIncKeys::CAutoIncKeys( const std::string& sDbFileName )
-: CKeyValuePairs<unsigned long>( sDbFileName, m_sDbName )
+: CKeyValuePairs( sDbFileName, m_sDbName )
 {
 }
 

@@ -56,7 +56,6 @@ private:
 //
 
 // K=type of key, V=type of value;  used for size calcuations, and for type checking inbound/outbound
-template<typename K>
 class CKeyValuePairs: public CKeyValuePairsBase
 {
 public:
@@ -66,7 +65,7 @@ public:
   ~CKeyValuePairs(void) {};
 
   // Sets
-  template<typename V>
+  template<typename K, typename V>
   void Set( const K& key, const V& value ) {
     Dbt k( &key, sizeof( K ) );
     Dbt v( &value, sizeof( V ) );
@@ -80,6 +79,7 @@ public:
     CKeyValuePairsBase::Set( &k, &v );
   }
 
+  template<typename K>
   void Set( const K& key, const std::string& value ) {
     Dbt k( &key, sizeof( K ) );
     Dbt v( reinterpret_cast<void*>( value.c_str() ), value.length() );
@@ -88,12 +88,12 @@ public:
 
   void Set( const std::string& key, const std::string& value ) {
     Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
-    Dbt v( value.c_str(), value.length() );
+    Dbt v( static_cast<void*>( const_cast<char*>( value.c_str() ) ), value.length() );
     CKeyValuePairsBase::Set( &k, &v );
   }
 
   // gets
-  template<typename V>
+  template<typename K, typename V>
   void Get( const K& key, V* value ) {
     Dbt k( &key, sizeof( K ) );
     Dbt v;
@@ -115,6 +115,7 @@ public:
     CKeyValuePairsBase::Get( &k, &v );
   }
 
+  template<typename K>
   void Get( const K& key, std::string* value ) {
     Dbt k( &key, sizeof( K ) );
     Dbt v; // db engine allocates the memory
@@ -122,16 +123,15 @@ public:
     value->assign( v.get_data(), v.get_size() );
   }
 
-  template<typename V>
   void Get( const std::string& key, std::string* value ) {
     Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
     Dbt v; // db engine allocates the memory
     CKeyValuePairsBase::Get( &k, &v );
-    value->assign( v.get_data(), v.get_size() );
+    value->assign( static_cast<const char*>( v.get_data() ), v.get_size() );
   }
 
 protected:
 private:
-  CKeyValuePairs( void ) {};
+  CKeyValuePairs( void );
 };
 

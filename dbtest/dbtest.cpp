@@ -26,14 +26,14 @@ struct print_xml
     }
 };
 
-
+extern std::string const sDbFileName = "dbtest.db4";
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 
-  std::string sDbName = "dbtest.db4";
+  
 
-  CAccountManager am( sDbName );
+  CAccountManager am( sDbFileName );
   am.AddAccountAdvisor( "ourpb01", "Raymond Burkholder" );
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
