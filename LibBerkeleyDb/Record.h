@@ -134,6 +134,7 @@ public:
   void PreInsert( void ) {};
   void PreUpdate( void ) {};
   void PreDelete( void ) {};
+  void PostFetch( void ) {};
 
 protected:
   fldStored_t& m_stored;
@@ -163,6 +164,7 @@ public:
   void PreInsert( void ) {};
   void PreUpdate( void ) {std::cout << "ProcessFieldPk" << std::endl;};
   void PreDelete( void ) {};
+  void PostFetch( void ) {};
 protected:
 private:
   ProcessFieldAutoIncKey(void);
@@ -187,10 +189,20 @@ public:
     return m_local;
   }
 
-  void PreInsert( void ) {};
+  void PreInsert( void ) {
+    if ( 0 == m_local.length() ) {
+      m_stored = 0;
+    }
+    else {
+      m_stored = m_keyAutoInc.GetNextId();
+      m_kvStrings.Set( m_stored, m_local );
+    }
+  };
+
   void PreAppend( void ) {};
   void PreUpdate( void ) {std::cout << "ProcessFieldSk" << std::endl;};
   void PreDelete( void ) {};
+  void PostFetch( void ) {};
 
   void SetKey( void** data, u_int32_t& size ) {
     *data = static_cast<void*>( &m_local );
@@ -198,6 +210,9 @@ public:
   }
 
   void SetKey( Dbt& key ) {
+    if ( 0 == m_local.length() ) {
+      throw std::runtime_error( "ProcessFieldSk SetKey length 0" );
+    }
     key.set_data( static_cast<void*>( &m_local ) );
     key.set_size( m_local.length() );
     key.set_ulen( m_local.length() );
@@ -208,7 +223,7 @@ private:
   fldLocal_t m_local;
   ProcessFieldSk(void);
 
-  static CAutoIncKeys m_keyAutoInc;  // used for getting a key for each new string
+  static CAutoIncKey m_keyAutoInc;  // used for getting a key for each new string
   static CKeyValuePairs m_kvStrings;  // used for storing the string indexed by the unique integer
 };
 
@@ -223,6 +238,7 @@ public:
   void PreAppend( void ) {};
   void PreUpdate( void ) {std::cout << "ProcessFieldFk" << std::endl;};
   void PreDelete( void ) {};
+  void PostFetch( void ) {};
 protected:
 private:
   ProcessFieldFk(void);
@@ -256,3 +272,9 @@ struct PreDeleteRecordField {
   }
 };
 
+struct PostFetchRecordField {
+  template <typename T>
+  void operator()(T & x)  const  {
+    x.PostFetch();
+  }
+};

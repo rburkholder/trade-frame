@@ -64,30 +64,33 @@ public:
     : CKeyValuePairsBase( sDbFileName, sDbName ) {};
   ~CKeyValuePairs(void) {};
 
+  // be very wary of these.  You don't want to pass in Dbt for key and value.  Need a compile time type checker here.
+  // for Dbts, use CKeyValuePairsBase directly
+
   // Sets
   template<typename K, typename V>
   void Set( const K& key, const V& value ) {
-    Dbt k( &key, sizeof( K ) );
+    Dbt k( static_cast<void*>( const_cast<K*>( &key ) ), sizeof( K ) );
     Dbt v( &value, sizeof( V ) );
     CKeyValuePairsBase::Set( &k, &v );
   }
   
   template<typename V>
   void Set( const std::string& key, V& value ) {
-    Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
-    Dbt v( reinterpret_cast<void*>( &value ), sizeof( V ) );
+    Dbt k( static_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
+    Dbt v( static_cast<void*>( &value ), sizeof( V ) );
     CKeyValuePairsBase::Set( &k, &v );
   }
 
   template<typename K>
   void Set( const K& key, const std::string& value ) {
-    Dbt k( &key, sizeof( K ) );
-    Dbt v( reinterpret_cast<void*>( value.c_str() ), value.length() );
+    Dbt k( static_cast<void*>( const_cast<K*>( &key ) ), sizeof( K ) );
+    Dbt v( static_cast<void*>( const_cast<char*>( value.c_str() ) ), value.length() );
     CKeyValuePairsBase::Set( &k, &v );
   }
 
   void Set( const std::string& key, const std::string& value ) {
-    Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
+    Dbt k( static_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
     Dbt v( static_cast<void*>( const_cast<char*>( value.c_str() ) ), value.length() );
     CKeyValuePairsBase::Set( &k, &v );
   }
@@ -106,7 +109,7 @@ public:
 
   template<typename V>
   void Get( const std::string& key, V* value ) {
-    Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
+    Dbt k( static_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
     Dbt v;
     v.set_flags( DB_DBT_USERMEM );
     v.set_ulen( sizeof( V ) );
@@ -124,7 +127,7 @@ public:
   }
 
   void Get( const std::string& key, std::string* value ) {
-    Dbt k( reinterpret_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
+    Dbt k( static_cast<void*>( const_cast<char*>( key.c_str() ) ), key.length() );
     Dbt v; // db engine allocates the memory
     CKeyValuePairsBase::Get( &k, &v );
     value->assign( static_cast<const char*>( v.get_data() ), v.get_size() );

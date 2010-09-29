@@ -17,7 +17,7 @@
 
 extern std::string const sDbFileName;
 
-CAutoIncKeys ProcessFieldSk::m_keyAutoInc( sDbFileName );
+CAutoIncKey ProcessFieldSk::m_keyAutoInc( sDbFileName, "_ProcessFieldSkStringsKey" );
 CKeyValuePairs ProcessFieldSk::m_kvStrings( sDbFileName, "_ProcessFieldSkStrings" );
 
 ProcessFieldSk::ProcessFieldSk( fldStored_t& key )

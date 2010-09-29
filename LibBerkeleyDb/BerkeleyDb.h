@@ -69,8 +69,14 @@ void CBerkeleyDb<T,S,K>::Fetch( T& tuple, S& record ) {
 
 template <typename T, typename S, typename K> 
 void CBerkeleyDb<T,S,K>::Insert( T& tuple, S& record ) {
+  boost::fusion::for_each( tuple, PreInsertRecordField() );
   Dbt key;
+  Dbt value;
   boost::fusion::at_c<0>( tuple ).SetKey( key );
+  value.set_data( static_cast<void*>( &record ) );
+  value.set_size( sizeof( S ) );
+  value.set_ulen( sizeof( S ) );
+  CKeyValuePairsBase::Set( &key, &value );
 }
 
 template <typename T, typename S, typename K> 
