@@ -11,14 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
-// custom on
-// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#include <string.h> 
+//#include <stdlib.h>
+#include <string.h>
 #include <algorithm>
 
 // custom off
@@ -31,13 +27,14 @@ CCharBuffer::CCharBuffer(void) {
   m_szBuffer = new char[ m_nBasicBufferSize ];
   m_nBufferSize = m_nBasicBufferSize;
   *m_szBuffer = 0;
-  m_nChar = 1; 
+  m_nChar = 1;
 }
 
-CCharBuffer::CCharBuffer( int nChars, const char *szBuf ) { 
+CCharBuffer::CCharBuffer( int nChars, const char *szBuf ) {
   m_nBufferSize = std::max<int>( nChars, m_nBasicBufferSize );
   m_szBuffer = new char[ m_nBufferSize ];
-  strcpy_s( m_szBuffer, m_nBufferSize, szBuf );
+//  strcpy_s( m_szBuffer, m_nBufferSize, szBuf );
+  strcpy( m_szBuffer, szBuf );
   m_nChar = nChars;
 }
 
@@ -52,7 +49,8 @@ CCharBuffer *CCharBuffer::Assign( int nChars, const char *szBuf ) {
     m_nBufferSize = nChars;
     m_szBuffer = new char[ m_nBufferSize ];
   }
-  strcpy_s( m_szBuffer, m_nBufferSize, szBuf );
+//  strcpy_s( m_szBuffer, m_nBufferSize, szBuf );
+  strcpy( m_szBuffer, szBuf );
   m_nChar = nChars;
   return this;
 }

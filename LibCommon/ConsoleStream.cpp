@@ -11,15 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ConsoleStream.h"
 #include <stdexcept>
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 CConsoleStream::CConsoleStream(void) {
   // http://www.cplusplus.com/reference/iostream/streambuf/setp.html
