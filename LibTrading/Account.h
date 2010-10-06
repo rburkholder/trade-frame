@@ -13,26 +13,28 @@
 
 #pragma once
 
-#include <LibBerkeleyDb/Record.h>
+#include <string>
 
-#define OU_TABLE_ACCOUNT_RECORD_FIELDS \
-  ((OU_TABLE_ACCOUNT_ACCOUNTID,      ProcessFieldSk, sAccountId        )) \
-  ((OU_TABLE_ACCOUNT_ACCOUNTNAME,    ProcessFieldSk, sAccountName      )) \
-  ((OU_TABLE_ACCOUNT_VERSION,        ProcessFieldPod<unsigned long>, nVersion         )) \
-  ((OU_TABLE_ACCOUNT_ACCOUNTADVISOR, ProcessFieldFk<CAutoIncKeys::keyValue_t>, fkAccountAdvisor  )) \
-  /**/
+#include <LibSqlite/sqlite3.h>
 
 class CAccount
 {
 public:
 
-  OU_DB_DECLARE_STRUCTURES(Account, OU_TABLE_ACCOUNT_RECORD_FIELDS)
-
   CAccount(void);
   ~CAccount(void);
+
+  void CreateDbTable( sqlite3* pDb );
 
 protected:
 
 private:
+
+  std::string m_sAccountId;
+  std::string m_sAccountName;
+  std::string m_sAccountAdvisorId;
+
+  sqlite3* m_pDb;
+
 };
 

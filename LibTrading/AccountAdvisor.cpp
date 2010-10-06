@@ -16,18 +16,36 @@
 #include "AccountAdvisor.h"
 
 CAccountAdvisor::CAccountAdvisor( void )
-: OU_DB_INITIALIZE_STRUCTURES(AccountAdvisor, OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS)
 {
-  m_recAccountAdvisor.nVersion = 1010101; // version 1.1.1.1
 }
 
 CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName )
-: OU_DB_INITIALIZE_STRUCTURES(AccountAdvisor, OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS)
 {
-  m_recAccountAdvisor.nVersion = 1010101; // version 1.1.1.1
   SetAdvisorId( sAdvisorId );
   SetAdvisorName( sAdvisorName );
 }
 
 CAccountAdvisor::~CAccountAdvisor(void) {
+}
+
+void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
+
+  m_pDb = pDb;
+
+  char* pMsg;
+
+  int rtn = sqlite3_exec( pDb,
+    "create table if not exists accountadvisor ( \
+    advisorid TEXT CONSTRAINT pk_accountadvisor PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    advisorname TEXT NOT NULL \
+    );",
+    NULL, NULL, &pMsg );
+
+  if ( SQLITE_OK == rtn ) {
+  }
+  else {
+//    std::cerr << pMsg << std::endl;
+    sqlite3_free( pMsg );
+  }
 }

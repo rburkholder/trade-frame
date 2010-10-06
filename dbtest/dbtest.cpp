@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include <LibTrading/TradingDb.h>
 #include <LibTrading/AccountManager.h>
 
 struct print_xml
@@ -26,15 +27,16 @@ struct print_xml
     }
 };
 
-extern std::string const sDbFileName = "dbtest.db4";
+std::string const sDbFileName = "dbtest.sqlite3";
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 
-  
+  CTradingDb db( sDbFileName.c_str() );
 
-  CAccountManager am( sDbFileName );
-  am.AddAccountAdvisor( "ourpb01", "Raymond Burkholder" );
+  CAccountManager am( db.GetDb() );
+  am.CreateDbTables();
+  //am.AddAccountAdvisor( "ourpb01", "Raymond Burkholder" );
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
 //  boost::fusion::for_each( m_tplR1, UpdateRecordField() );

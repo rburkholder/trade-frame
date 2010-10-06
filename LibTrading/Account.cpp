@@ -16,10 +16,36 @@
 #include "Account.h"
 
 CAccount::CAccount(void)
-: OU_DB_INITIALIZE_STRUCTURES(Account, OU_TABLE_ACCOUNT_RECORD_FIELDS)
 {
-  m_recAccount.nVersion = 01010101;
 }
 
 CAccount::~CAccount(void) {
 }
+
+void CAccount::CreateDbTable( sqlite3* pDb ) {
+
+  m_pDb = pDb;
+
+  char* pMsg;
+
+  int rtn = sqlite3_exec( pDb,
+    "create table if not exists account ( \
+    accountid TEXT CONSTRAINT pk_account PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    accountname TEXT NOT NULL, \
+    accountadvisorid TEXT, \
+    CONSTRAINT fk_accountadvisor_advisorid \
+      FOREIGN KEY(accountadvisorid) REFERENCES accountadvisor(advisorid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );",
+    NULL, NULL, &pMsg );
+
+  if ( SQLITE_OK == rtn ) {
+  }
+  else {
+//    std::cerr << pMsg << std::endl;
+    sqlite3_free( pMsg );
+  }
+}
+

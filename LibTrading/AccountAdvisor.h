@@ -15,19 +15,11 @@
 
 #include <string>
 
-#include <LibBerkeleyDb/Record.h>
-
-#define OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS \
-  ((OU_TABLE_ACCOUNTADVISOR_ADVISORID,    ProcessFieldSk, sAdvisorId  )) \
-  ((OU_TABLE_ACCOUNTADVISOR_ADVISORNAME,  ProcessFieldSk, sAdvisorName  )) \
-  ((OU_TABLE_ACCOUNTADVISOR_VERSION,      ProcessFieldPod<unsigned long>, nVersion )) \
-  /**/
+#include <LibSqlite/sqlite3.h>
 
 class CAccountAdvisor
 {
   friend class CAccountManager;
-
-  OU_DB_DECLARE_STRUCTURES(AccountAdvisor, OU_TABLE_ACCOUNTADVISOR_RECORD_FIELDS)
 
 public:
 
@@ -36,22 +28,30 @@ public:
   ~CAccountAdvisor(void);
 
   void SetAdvisorId( const std::string& sAdvisorId ) { 
-    boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORID>( m_tplAccountAdvisor ) = sAdvisorId; 
+    m_sAdvisorId = sAdvisorId; 
   }
-  const std::string& GetAdvisorId( void ) { 
-    return boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORID>( m_tplAccountAdvisor ).value(); 
+  const std::string& GetAdvisorId( void ) const { 
+    return m_sAdvisorId; 
   }
 
   void SetAdvisorName( const std::string& sAdvisorName ) { 
-    boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORNAME>( m_tplAccountAdvisor ) = sAdvisorName; 
+    m_sAdvisorName = sAdvisorName; 
   }
-  const std::string& GetAdvisorName( void ) { 
-    return boost::fusion::at_c<OU_TABLE_ACCOUNTADVISOR_ADVISORNAME>( m_tplAccountAdvisor ).value(); 
+  const std::string& GetAdvisorName( void ) const { 
+    return m_sAdvisorName; 
   }
+
+  void CreateDbTable( sqlite3* pDb );
 
 protected:
 
 private:
 
+  std::string m_sAdvisorId;
+  std::string m_sAdvisorName;
+
+  sqlite3* m_pDb;
+
 };
+
 
