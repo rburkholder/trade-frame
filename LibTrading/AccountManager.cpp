@@ -31,10 +31,23 @@ void CAccountManager::AddAccountAdvisor( const std::string& sAccountAdvisorId, c
 
 void CAccountManager::CreateDbTables( void ) {
 
-  CAccountAdvisor aa;
-  aa.CreateDbTable( m_pDb );
+  try {
+    /*
+    CAccountAdvisor aa;
+    aa.CreateDbTable( m_pDb );
 
-  CAccount a;
-  a.CreateDbTable( m_pDb );
+    CAccountOwner ao;
+    ao.CreateDbTable( m_pDb );
+
+    CAccount a;
+    a.CreateDbTable( m_pDb );
+    */
+
+    CAccountAdvisor::CreateDbTable( m_pDb );
+    CAccountOwner::CreateDbTable( m_pDb );
+    CAccount::CreateDbTable( m_pDb );
+  }
+  catch ( std::runtime_error &e ) {
+  }
 
 }

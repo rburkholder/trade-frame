@@ -15,6 +15,8 @@
 #include <string>
 #include <map>
 
+#include <LibSqlite/sqlite3.h>
+
 #include "boost/shared_ptr.hpp"
 
 #include "Position.h"
@@ -41,6 +43,8 @@ public:
   pPosition_t GetPosition( const std::string& sName );
 
   void EmitStats( std::stringstream& ss );
+
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
   

@@ -13,6 +13,9 @@
 
 #include "StdAfx.h"
 
+#include <string>
+#include <stdexcept>
+
 #include "AccountAdvisor.h"
 
 CAccountAdvisor::CAccountAdvisor( void )
@@ -30,22 +33,21 @@ CAccountAdvisor::~CAccountAdvisor(void) {
 
 void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
 
-  m_pDb = pDb;
-
   char* pMsg;
+  int rtn;
 
-  int rtn = sqlite3_exec( pDb,
+  rtn = sqlite3_exec( pDb,
     "create table if not exists accountadvisor ( \
-    advisorid TEXT CONSTRAINT pk_accountadvisor PRIMARY KEY, \
+    accountadvisorid TEXT CONSTRAINT pk_accountadvisor PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
-    advisorname TEXT NOT NULL \
+    name TEXT NOT NULL \
     );",
-    NULL, NULL, &pMsg );
+    0, 0, &pMsg );
 
-  if ( SQLITE_OK == rtn ) {
-  }
-  else {
-//    std::cerr << pMsg << std::endl;
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table accountadvisor: " );
+    sErr += pMsg;
     sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
   }
 }

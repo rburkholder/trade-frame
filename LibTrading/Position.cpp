@@ -303,3 +303,42 @@ void CPosition::EmitStatus( std::stringstream& ssStatus ) {
 }
 
 // process execution to convert Pending to Active
+
+void CPosition::CreateDbTable( sqlite3* pDb ) {
+
+  char* pMsg;
+  int rtn;
+
+  rtn = sqlite3_exec( pDb,
+    "create table if not exists position ( \
+    positionid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    portfolioid BIGINT NOT NULL, \
+    name TEXT NOT NULL, \
+    CONSTRAINT fk_position_portfolioid \
+      FOREIGN KEY(portolioid) REFERENCES portfolio(portfolioid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table position: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+
+  rtn = sqlite3_exec( pDb, 
+    "create index idx_position_portfolioid on position( portfolioid );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating index idx_position_portfolioid: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+}
+
+

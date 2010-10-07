@@ -13,6 +13,9 @@
 
 #include "StdAfx.h"
 
+#include <string>
+#include <stdexcept>
+
 #include "LibCommon\TimeSource.h"
 
 #include "Execution.h"
@@ -31,3 +34,41 @@ CExecution::CExecution(
 
 CExecution::~CExecution(void) {
 }
+
+void CExecution::CreateDbTable( sqlite3* pDb ) {
+
+  char* pMsg;
+  int rtn;
+
+  rtn = sqlite3_exec( pDb,
+    "create table if not exists execution ( \
+    executionid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    orderid BIGINT NOT NULL, \
+    CONSTRAINT fk_execution_orderid \
+      FOREIGN KEY(orderid) REFERENCES order(orderid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table execution: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+
+  rtn = sqlite3_exec( pDb, 
+    "create index idx_execution_orderid on execution( orderid );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating index idx_execution_orderid: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+}
+
+

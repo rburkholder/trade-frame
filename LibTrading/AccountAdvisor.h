@@ -41,7 +41,7 @@ public:
     return m_sAdvisorName; 
   }
 
-  void CreateDbTable( sqlite3* pDb );
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
 
@@ -49,8 +49,6 @@ private:
 
   std::string m_sAdvisorId;
   std::string m_sAdvisorName;
-
-  sqlite3* m_pDb;
 
 };
 

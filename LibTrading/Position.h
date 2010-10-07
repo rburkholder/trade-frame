@@ -16,6 +16,8 @@
 #include <vector>
 #include <sstream>
 
+#include <LibSqlite/sqlite3.h>
+
 #include <boost/shared_ptr.hpp>
 
 #include <LibCommon/Delegate.h>
@@ -89,6 +91,8 @@ public:
   Delegate<const CPosition*> OnCommission;
 
   void EmitStatus( std::stringstream& ssStatus );
+
+  void CreateDbTable( sqlite3* pDb );
 
 protected:
 

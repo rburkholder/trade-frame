@@ -24,6 +24,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <LibSqlite/sqlite3.h>
+
 #include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
@@ -103,6 +105,8 @@ public:
   Delegate<const COrder&> OnOrderFilled; // on final fill
   Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   Delegate<const COrder&> OnCommission;
+
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
   CInstrument::pInstrument_t m_pInstrument;

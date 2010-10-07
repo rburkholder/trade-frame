@@ -18,6 +18,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <LibSqlite/sqlite3.h>
+
 #include "TradingEnumerations.h"
 
 class CExecution {
@@ -38,6 +40,8 @@ public:
   const std::string& GetExchange( void ) const { return m_sExchange; };
   const std::string& GetExecutionId( void ) const { return m_sExecutionId; };
   ptime GetTimeStamp( void ) const { return m_dtExecutionTimeStamp; };
+
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
 

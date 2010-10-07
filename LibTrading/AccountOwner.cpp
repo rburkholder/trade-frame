@@ -16,37 +16,34 @@
 #include <string>
 #include <stdexcept>
 
-#include "Account.h"
+#include "AccountOwner.h"
 
-CAccount::CAccount(void)
-{
+CAccountOwner::CAccountOwner(void) {
 }
 
-CAccount::~CAccount(void) {
+
+CAccountOwner::~CAccountOwner(void) {
 }
 
-void CAccount::CreateDbTable( sqlite3* pDb ) {
+void CAccountOwner::CreateDbTable( sqlite3* pDb ) {
 
   char* pMsg;
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists account ( \
-    accountid TEXT CONSTRAINT pk_account PRIMARY KEY, \
+    "create table if not exists accountowner ( \
+    accountownderid TEXT CONSTRAINT pk_accountowner PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
+    accountadvisorid TEXT NOT NULL, \
     name TEXT NOT NULL, \
-    accountownerid TEXT NOT NULL, \
-    brokername TEXT, \
-    brokerageaccountid TEXT, \
-    CONSTRAINT fk_accountowner_accountownerid \
-      FOREIGN KEY(accountownerid) REFERENCES accountowner(accountownderid) \
+    CONSTRAINT fk_accountowner_accountadvisorid \
+      FOREIGN KEY(accountadvisorid) REFERENCES accountadvisor(accountadvisorid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table account: " );
+    std::string sErr( "Error creating table accountowner: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

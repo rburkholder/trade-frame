@@ -24,7 +24,7 @@ public:
   CAccount(void);
   ~CAccount(void);
 
-  void CreateDbTable( sqlite3* pDb );
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
 
@@ -33,8 +33,6 @@ private:
   std::string m_sAccountId;
   std::string m_sAccountName;
   std::string m_sAccountAdvisorId;
-
-  sqlite3* m_pDb;
 
 };
 

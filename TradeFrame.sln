@@ -4,6 +4,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED787B62-84C8-4B83-86CB-5D2115DD7A79}"
 	ProjectSection(SolutionItems) = preProject
 		BuildNotes.txt = BuildNotes.txt
+		c++ reference.txt = c++ reference.txt
 		gpl3.txt = gpl3.txt
 		LICENSE.txt = LICENSE.txt
 		story.txt = story.txt

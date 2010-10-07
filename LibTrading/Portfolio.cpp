@@ -13,6 +13,8 @@
 #include "StdAfx.h"
 
 #include <sstream>
+#include <string>
+#include <stdexcept>
 
 #include "Portfolio.h"
 
@@ -140,6 +142,43 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
     << ", Net=" << m_plCurrent.dblNet
     << ", Max=" << m_plMax.dblNet
     << std::endl;
+}
+
+void CPortfolio::CreateDbTable( sqlite3* pDb ) {
+
+  char* pMsg;
+  int rtn;
+
+  rtn = sqlite3_exec( pDb,
+    "create table if not exists portfolio ( \
+    portfolioid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    accountid TEXT NOT NULL, \
+    name TEXT NOT NULL, \
+    CONSTRAINT fk_portfolio_accountid \
+      FOREIGN KEY(accountid) REFERENCES account(accountid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table portfolio: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+
+  rtn = sqlite3_exec( pDb, 
+    "create index idx_portfolio_accountid on portfolio( accountid );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating index idx_portfolio_accountid: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
 }
 
 

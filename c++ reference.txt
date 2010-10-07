@@ -1,0 +1,10 @@
+Regularily Used C++ Reference Sites:
+
+Exceptions:
+The hierarchy:
+http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/classstd_1_1exception.html
+FAQ:
+http://www.parashift.com/c++-faq-lite/exceptions.html
+Wiki:
+http://en.wikibooks.org/wiki/C++_Programming/Exception_Handling
+Catch by reference.

@@ -13,6 +13,9 @@
 
 #include "StdAfx.h"
 
+#include <string>
+#include <stdexcept>
+
 #include <LibCommon/TimeSource.h>
 
 #include "Order.h"
@@ -186,3 +189,42 @@ void COrder::SetOrderId( orderid_t id ) {
   assert( m_nOrderId == 0 );
   m_nOrderId = id;
 }
+
+void COrder::CreateDbTable( sqlite3* pDb ) {
+
+  char* pMsg;
+  int rtn;
+
+  rtn = sqlite3_exec( pDb,
+    "create table if not exists order ( \
+    orderid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    positionid BIGINT NOT NULL, \
+    description TEXT NOT NULL, \
+    CONSTRAINT fk_order_positionid \
+      FOREIGN KEY(positionid) REFERENCES position(positionid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table order: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+
+  rtn = sqlite3_exec( pDb, 
+    "create index idx_order_positionid on order( positionid );",
+    0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating index idx_order_positionid: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+}
+
+
