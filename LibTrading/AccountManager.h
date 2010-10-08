@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include "ManagerBase.h"
 #include "AccountAdvisor.h"
@@ -23,15 +24,21 @@
 class CAccountManager: public ManagerBase<CAccountManager, std::string, CAccountAdvisor> {
 public:
 
+  typedef CAccountAdvisor::pAccountAdvisor_t pAccountAdvisor_t;
+
+  CAccountManager( void );
   CAccountManager( sqlite3* pDb );
   ~CAccountManager(void);
 
   void CreateDbTables( void );
-  void AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName );
+
+  pAccountAdvisor_t AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName );
+  pAccountAdvisor_t GetAccountAdvisor( const std::string& sAccountAdvisorId );
 
 protected:
 private:
 
   sqlite3* m_pDb;
+
 
 };

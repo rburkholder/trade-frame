@@ -18,14 +18,9 @@
 
 #include "AccountAdvisor.h"
 
-CAccountAdvisor::CAccountAdvisor( void )
+CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName ) 
+: m_sAdvisorId( sAdvisorId ), m_sAdvisorName( sAdvisorName )
 {
-}
-
-CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName )
-{
-  SetAdvisorId( sAdvisorId );
-  SetAdvisorName( sAdvisorName );
 }
 
 CAccountAdvisor::~CAccountAdvisor(void) {
@@ -37,15 +32,15 @@ void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists accountadvisor ( \
-    accountadvisorid TEXT CONSTRAINT pk_accountadvisor PRIMARY KEY, \
+    "create table if not exists accountadvisors ( \
+    accountadvisorid TEXT CONSTRAINT pk_accountadvisors PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     name TEXT NOT NULL \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table accountadvisor: " );
+    std::string sErr( "Error creating table accountadvisors: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

@@ -36,7 +36,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
   CAccountManager am( db.GetDb() );
   am.CreateDbTables();
-  //am.AddAccountAdvisor( "ourpb01", "Raymond Burkholder" );
+
+//  CAccountAdvisor aa( db.GetDb(), "ourpb001", "Raymond Burkholder" );
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
 //  boost::fusion::for_each( m_tplR1, UpdateRecordField() );

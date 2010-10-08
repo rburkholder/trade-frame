@@ -92,7 +92,7 @@ public:
 
   void EmitStatus( std::stringstream& ssStatus );
 
-  void CreateDbTable( sqlite3* pDb );
+  static void CreateDbTable( sqlite3* pDb );
 
 protected:
 

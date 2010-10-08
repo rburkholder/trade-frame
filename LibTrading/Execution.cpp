@@ -41,30 +41,30 @@ void CExecution::CreateDbTable( sqlite3* pDb ) {
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists execution ( \
+    "create table if not exists executions ( \
     executionid INTEGER PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     orderid BIGINT NOT NULL, \
-    CONSTRAINT fk_execution_orderid \
-      FOREIGN KEY(orderid) REFERENCES order(orderid) \
+    CONSTRAINT fk_executions_orderid \
+      FOREIGN KEY(orderid) REFERENCES orders(orderid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
        \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table execution: " );
+    std::string sErr( "Error creating table executions: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );
   }
 
   rtn = sqlite3_exec( pDb, 
-    "create index idx_execution_orderid on execution( orderid );",
+    "create index if not exists idx_executions_orderid on executions( orderid );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating index idx_execution_orderid: " );
+    std::string sErr( "Error creating index idx_executions_orderid: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

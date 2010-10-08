@@ -196,31 +196,31 @@ void COrder::CreateDbTable( sqlite3* pDb ) {
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists order ( \
+    "create table if not exists orders ( \
     orderid INTEGER PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     positionid BIGINT NOT NULL, \
     description TEXT NOT NULL, \
-    CONSTRAINT fk_order_positionid \
-      FOREIGN KEY(positionid) REFERENCES position(positionid) \
+    CONSTRAINT fk_orders_positionid \
+      FOREIGN KEY(positionid) REFERENCES positions(positionid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
        \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table order: " );
+    std::string sErr( "Error creating table orders: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );
   }
 
   rtn = sqlite3_exec( pDb, 
-    "create index idx_order_positionid on order( positionid );",
+    "create index idx_orders_positionid on orders( positionid );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating index idx_order_positionid: " );
+    std::string sErr( "Error creating index idx_orders_positionid: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

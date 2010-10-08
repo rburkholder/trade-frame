@@ -31,19 +31,19 @@ void CAccountOwner::CreateDbTable( sqlite3* pDb ) {
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists accountowner ( \
-    accountownderid TEXT CONSTRAINT pk_accountowner PRIMARY KEY, \
+    "create table if not exists accountowners ( \
+    accountownderid TEXT CONSTRAINT pk_accountowners PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     accountadvisorid TEXT NOT NULL, \
     name TEXT NOT NULL, \
-    CONSTRAINT fk_accountowner_accountadvisorid \
-      FOREIGN KEY(accountadvisorid) REFERENCES accountadvisor(accountadvisorid) \
+    CONSTRAINT fk_accountowners_accountadvisorid \
+      FOREIGN KEY(accountadvisorid) REFERENCES accountadvisors(accountadvisorid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table accountowner: " );
+    std::string sErr( "Error creating table accountowners: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

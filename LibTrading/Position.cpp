@@ -310,31 +310,31 @@ void CPosition::CreateDbTable( sqlite3* pDb ) {
   int rtn;
 
   rtn = sqlite3_exec( pDb,
-    "create table if not exists position ( \
+    "create table if not exists positions ( \
     positionid INTEGER PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     portfolioid BIGINT NOT NULL, \
     name TEXT NOT NULL, \
-    CONSTRAINT fk_position_portfolioid \
-      FOREIGN KEY(portolioid) REFERENCES portfolio(portfolioid) \
+    CONSTRAINT fk_positions_portfolioid \
+      FOREIGN KEY(portfolioid) REFERENCES portfolios(portfolioid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
        \
     );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table position: " );
+    std::string sErr( "Error creating table positions: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );
   }
 
   rtn = sqlite3_exec( pDb, 
-    "create index idx_position_portfolioid on position( portfolioid );",
+    "create index idx_positions_portfolioid on positions( portfolioid );",
     0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating index idx_position_portfolioid: " );
+    std::string sErr( "Error creating index idx_positions_portfolioid: " );
     sErr += pMsg;
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );

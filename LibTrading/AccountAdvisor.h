@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
 #include <LibSqlite/sqlite3.h>
 
 class CAccountAdvisor
@@ -23,21 +25,16 @@ class CAccountAdvisor
 
 public:
 
-  CAccountAdvisor( void );
+  typedef boost::shared_ptr<CAccountAdvisor> pAccountAdvisor_t;
+
   CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName );
   ~CAccountAdvisor(void);
 
-  void SetAdvisorId( const std::string& sAdvisorId ) { 
-    m_sAdvisorId = sAdvisorId; 
-  }
-  const std::string& GetAdvisorId( void ) const { 
+  const std::string& GetId( void ) const { 
     return m_sAdvisorId; 
   }
 
-  void SetAdvisorName( const std::string& sAdvisorName ) { 
-    m_sAdvisorName = sAdvisorName; 
-  }
-  const std::string& GetAdvisorName( void ) const { 
+  const std::string& GetName( void ) const { 
     return m_sAdvisorName; 
   }
 
@@ -50,6 +47,7 @@ private:
   std::string m_sAdvisorId;
   std::string m_sAdvisorName;
 
+  CAccountAdvisor( void );
 };
 
 
