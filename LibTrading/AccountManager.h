@@ -16,6 +16,8 @@
 #include <string>
 #include <map>
 
+#include <LibSqlite/sqlite3.h>
+
 #include "ManagerBase.h"
 #include "AccountAdvisor.h"
 #include "AccountOwner.h"
@@ -40,5 +42,12 @@ private:
 
   sqlite3* m_pDb;
 
+  sqlite3_stmt* pStmtLoadAccountAdvisor;
+  sqlite3_stmt* pStmtAddAccountAdvisor;
+
+  typedef std::pair<std::string, pAccountAdvisor_t> pairAccountAdvisor_t;
+  typedef std::map<std::string, pAccountAdvisor_t> mapAccountAdvisor_t;
+  typedef mapAccountAdvisor_t::iterator iterAccountAdvisor_t;
+  mapAccountAdvisor_t m_mapAccountAdvisor;
 
 };

@@ -27,18 +27,28 @@
 
 CAccountManager::CAccountManager( void ) 
 : ManagerBase<CAccountManager, std::string, CAccountAdvisor>(), 
-  m_pDb( NULL )
+  m_pDb( NULL ),
+  pStmtLoadAccountAdvisor( NULL ), pStmtAddAccountAdvisor( NULL )
 {
 }
 
 CAccountManager::CAccountManager( sqlite3* pDb ) 
 : ManagerBase<CAccountManager, std::string, CAccountAdvisor>(),
-  m_pDb( pDb )
+  m_pDb( pDb ),
+  pStmtLoadAccountAdvisor( NULL ), pStmtAddAccountAdvisor( NULL )
 {
   assert( NULL != pDb );
 }
 
 CAccountManager::~CAccountManager(void) {
+  if ( NULL != pStmtLoadAccountAdvisor ) {
+    int rtn = sqlite3_finalize( pStmtLoadAccountAdvisor );
+    pStmtLoadAccountAdvisor = NULL;
+  }
+  if ( NULL != pStmtAddAccountAdvisor ) {
+    int rtn = sqlite3_finalize( pStmtAddAccountAdvisor );
+    pStmtAddAccountAdvisor = NULL;
+  }
 }
 
 void CAccountManager::CreateDbTables( void ) {
@@ -69,33 +79,47 @@ void CAccountManager::CreateDbTables( void ) {
 
 }
 
-CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const std::string& sAccountAdvisorId ) {
+CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const std::string& sAdvisorId ) {
 
   pAccountAdvisor_t p;
 
-  // prepare this stuff in constructor
-
-  if ( NULL != m_pDb ) {
-    int rtn, rtnStep;
-    sqlite3_stmt* pStmt;
-    rtn = sqlite3_prepare_v2( m_pDb, 
-      "SELECT name from accountadvisors where accountadvisorid = :id;",
-      -1, &pStmt, NULL );
-    rtnStep = sqlite3_step( pStmt );
-    if ( true ) {
-      p.reset( new CAccountAdvisor( sAccountAdvisorId, reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ) );
+  iterAccountAdvisor_t iter = m_mapAccountAdvisor.find( sAdvisorId );
+  if ( m_mapAccountAdvisor.end() != iter ) {
+    p = iter->second;
+  }
+  else {
+    if ( NULL == m_pDb ) {
+      throw std::runtime_error( "CAccountManager::GetAccountAdvisor:  no record available" );
     }
     else {
-      
+      int rtn;
+      if ( NULL == pStmtLoadAccountAdvisor ) {
+        rtn = sqlite3_prepare_v2( m_pDb, 
+          "SELECT name from accountadvisors where accountadvisorid = :id;",
+          -1, &pStmtLoadAccountAdvisor, NULL );
+        if ( SQLITE_OK != rtn ) {
+          throw std::runtime_error( "CAccountManager::GetAccountAdvisor: error in prepare" );
+        }
+      }
+      else {
+        rtn = sqlite3_reset( pStmtLoadAccountAdvisor );
+        if ( SQLITE_OK != rtn ) {
+          throw std::runtime_error( "CAccountManager::GetAccountAdvisor:  error in reset" );
+        }
+      }
+    
+      rtn = sqlite3_step( pStmtLoadAccountAdvisor );
+      if ( SQLITE_DONE == rtn ) {
+        p.reset( new CAccountAdvisor( 
+          sAdvisorId, reinterpret_cast<const char*>( sqlite3_column_text( pStmtLoadAccountAdvisor, 0 ) ) ) );
+      }
+      else {
+        throw std::runtime_error( "CAccountManager::GetAccountAdvisor: error in load" );
+      }
+
+      m_mapAccountAdvisor.insert( pairAccountAdvisor_t( sAdvisorId, p ) );
     }
-    rtn = sqlite3_finalize( pStmt );
   }
-
-  if ( NULL == p.get() ) {
-    throw std::runtime_error( "GetAccountAdvisor:  no record available" );
-  }
-
-  // update the map here
 
   return p;
 }
@@ -104,28 +128,45 @@ CAccountAdvisor::pAccountAdvisor_t CAccountManager::AddAccountAdvisor( const std
 
   pAccountAdvisor_t p;
 
-  // prepare this stuff in constructor
+  try {
+    p = GetAccountAdvisor( sAdvisorId );
+    // if we have something we can't insert something
+    throw std::runtime_error( "CAccountManager::AddAccountAdvisor: record already exists" );
+  }
+  catch (...) {
+    // had an error, so assume no record exists, and proceed
+  }
 
   if ( NULL != m_pDb ) {
-    int rtn, rtnStep;
-    sqlite3_stmt* pStmt;
-    rtn = sqlite3_prepare_v2( m_pDb, 
-      "INSERT INTO accountadvisors (accountadvisorid, name ) VALUES ( :id, :name );",
-      -1, &pStmt, NULL );
-    rtn = sqlite3_bind_text( pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), sAdvisorId.c_str(), -1, SQLITE_TRANSIENT );
-    rtn = sqlite3_bind_text( pStmt, sqlite3_bind_parameter_index( pStmt, ":name" ), sAdvisorName.c_str(), -1, SQLITE_TRANSIENT );
-    rtnStep = sqlite3_step( pStmt );
-    rtn = sqlite3_finalize( pStmt );
-    if ( SQLITE_DONE != rtnStep ) {
-      std::stringstream ss;
-      ss << "AccountAdvisor insert error:  " << rtnStep;
-      throw std::runtime_error( ss.str() );
+    int rtn;
+    if ( NULL == pStmtAddAccountAdvisor ) {
+      rtn = sqlite3_prepare_v2( m_pDb, 
+        "INSERT INTO accountadvisors (accountadvisorid, name ) VALUES ( :id, :name );",
+        -1, &pStmtAddAccountAdvisor, NULL );
+      if ( SQLITE_OK != rtn ) {
+        throw std::runtime_error( "CAccountManager::AddAccountAdvisor: error in prepare" );
+      }
+    }
+    else {
+      rtn = sqlite3_reset( pStmtAddAccountAdvisor );
+      if ( SQLITE_OK != rtn ) {
+        throw std::runtime_error( "CAccountManager::AddAccountAdvisor:  error in reset" );
+      }
+    }
+    rtn = sqlite3_bind_text( 
+      pStmtAddAccountAdvisor, sqlite3_bind_parameter_index( pStmtAddAccountAdvisor, ":id" ), sAdvisorId.c_str(), -1, SQLITE_TRANSIENT );
+    rtn = sqlite3_bind_text( 
+      pStmtAddAccountAdvisor, sqlite3_bind_parameter_index( pStmtAddAccountAdvisor, ":name" ), sAdvisorName.c_str(), -1, SQLITE_TRANSIENT );
+    rtn = sqlite3_step( pStmtAddAccountAdvisor );
+    if ( SQLITE_DONE != rtn ) {
+      throw std::runtime_error( "CAccountManager::AddAccountAdvisor: error in step" );
     }
   }
 
-  // update the map here
-
+  // if all else was fine, can add record to map
   p.reset( new CAccountAdvisor( sAdvisorId, sAdvisorName ) );
+  m_mapAccountAdvisor.insert( pairAccountAdvisor_t( sAdvisorId, p ) );
+
   return p;
 }
 
