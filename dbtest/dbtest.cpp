@@ -9,41 +9,72 @@
 #include "stdafx.h"
 
 #include <string>
+#include <algorithm>
+#include <iostream>
+
+//#include <boost/spirit/include/phoenix_core.hpp>
+//#include <boost/spirit/include/phoenix_operator.hpp>
+
+//using namespace boost::phoenix;
+//using namespace boost::phoenix::arg_names;
+
+
 
 #include <LibTrading/TradingDb.h>
 #include <LibTrading/AccountManager.h>
 
-struct print_xml
-{
-    template <typename T>
-    void operator()(T const& x) const
-    {
-        std::cout
-            << '<' << typeid(x).name() << '>'
-            << x.constant_value()
-            << "</" << typeid(x).name() << '>'
-            << std::endl
-            ;
-    }
+
+template <typename K, typename F, typename T> // C class with shared ptr, F is function type, K is type of key
+void constructClass( 
+  const std::string& sErrPrefix, 
+  const std::string& sSelect, 
+  const K& key,
+  sqlite3_stmt** ppStmt,
+  boost::shared_ptr<T> ptr,
+  F f
+  ) {
+  std::cout << sErrPrefix << ", " << sSelect << std::endl;
+  //*ptr = f( key, ppStmt );
+  ptr.
 };
+
 
 std::string const sDbFileName = "dbtest.sqlite3";
 
-int _tmain(int argc, _TCHAR* argv[])
-{
+int _tmain(int argc, _TCHAR* argv[]) {
+
+  //std::string s( "test" );
+  //std::string::iterator iter;
+
+  //sqlite3_stmt* pStmt;
+  //std::string key( "rpb001" );
+  CAccountAdvisor::sharedptr_t p;
+//  create_class c;
+  //p = c( "key", &pStmt );
+  //constructClass( "this is an error", "select me from you", key, &pStmt, &p, create_class() );
+
+  //iter = std::find_if( s.begin(), s.end(), arg1 == 'e' );
 
   CTradingDb db( sDbFileName.c_str() );
 
   CAccountManager am( db.GetDb() );
-  am.CreateDbTables();
 
+  //am.CreateDbTables();
 //  CAccountAdvisor aa( db.GetDb(), "ourpb001", "Raymond Burkholder" );
+
+  //std::map<std::string,CAccountAdvisor::pAccountAdvisor_t> map;
+  //CAccountAdvisor::sharedptr_t p;
+
+  //sqlite3_stmt* pStmt( NULL );
+  std::string key( "ourpb001" );
+  //am.LoadObject( "AccountAdvisor", CAccountAdvisor::GetSelect(), key, &pStmt, map, p, bind_key(), create_class() );
+
+  p = am.GetAccountAdvisor( key );
+
 
 //	boost::fusion::for_each( m_tplR1, print_xml() );
 //  boost::fusion::for_each( m_tplR1, UpdateRecordField() );
 
-//	std::cout << "size: " << sizeof( structR1 ) << ", " << sizeof( m_recR1 ) << ", " << sizeof( m_tplR1 ) << std::endl;
 	return 0;
 }
-
 

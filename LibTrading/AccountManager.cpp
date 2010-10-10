@@ -18,12 +18,19 @@
 #include <stdexcept>
 #include <cassert>
 
+#include <boost/spirit/home/phoenix/object/new.hpp>
+#include <boost/spirit/home/phoenix/core/argument.hpp>
+#include <boost/spirit/home/phoenix/bind/bind_function.hpp>
+#include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
+
 #include "Portfolio.h"
 #include "Position.h"
 #include "Order.h"
 #include "Execution.h"
 
 #include "AccountManager.h"
+
+using namespace boost::phoenix::arg_names;
 
 CAccountManager::CAccountManager( void ) 
 : ManagerBase<CAccountManager, std::string, CAccountAdvisor>(), 
@@ -79,47 +86,26 @@ void CAccountManager::CreateDbTables( void ) {
 
 }
 
+/*
+struct bind_key {
+  int operator()( const std::string& key, sqlite3_stmt* pStmt ) {
+    return sqlite3_bind_text( pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), key.c_str(), -1, SQLITE_TRANSIENT );
+  }
+};
+*/
+
 CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const std::string& sAdvisorId ) {
 
   pAccountAdvisor_t p;
 
-  iterAccountAdvisor_t iter = m_mapAccountAdvisor.find( sAdvisorId );
-  if ( m_mapAccountAdvisor.end() != iter ) {
-    p = iter->second;
-  }
-  else {
-    if ( NULL == m_pDb ) {
-      throw std::runtime_error( "CAccountManager::GetAccountAdvisor:  no record available" );
-    }
-    else {
-      int rtn;
-      if ( NULL == pStmtLoadAccountAdvisor ) {
-        rtn = sqlite3_prepare_v2( m_pDb, 
-          "SELECT name from accountadvisors where accountadvisorid = :id;",
-          -1, &pStmtLoadAccountAdvisor, NULL );
-        if ( SQLITE_OK != rtn ) {
-          throw std::runtime_error( "CAccountManager::GetAccountAdvisor: error in prepare" );
-        }
-      }
-      else {
-        rtn = sqlite3_reset( pStmtLoadAccountAdvisor );
-        if ( SQLITE_OK != rtn ) {
-          throw std::runtime_error( "CAccountManager::GetAccountAdvisor:  error in reset" );
-        }
-      }
-    
-      rtn = sqlite3_step( pStmtLoadAccountAdvisor );
-      if ( SQLITE_DONE == rtn ) {
-        p.reset( new CAccountAdvisor( 
-          sAdvisorId, reinterpret_cast<const char*>( sqlite3_column_text( pStmtLoadAccountAdvisor, 0 ) ) ) );
-      }
-      else {
-        throw std::runtime_error( "CAccountManager::GetAccountAdvisor: error in load" );
-      }
-
-      m_mapAccountAdvisor.insert( pairAccountAdvisor_t( sAdvisorId, p ) );
-    }
-  }
+  LoadObject( "CAccountManager::GetAccountAdvisor", CAccountAdvisor::GetSelect(), sAdvisorId, 
+    &pStmtLoadAccountAdvisor, 
+    m_mapAccountAdvisor, 
+    p, 
+    boost::phoenix::bind( &sqlite3_bind_text, arg2,   // bind_key
+      boost::phoenix::bind( &sqlite3_bind_parameter_index, arg2, ":id" ), 
+      boost::phoenix::bind( &std::string::c_str, arg1 ), -1, SQLITE_TRANSIENT ),
+    boost::phoenix::new_<CAccountAdvisor>( arg1, arg2 ) );
 
   return p;
 }

@@ -26,8 +26,10 @@ class CAccountAdvisor
 public:
 
   typedef boost::shared_ptr<CAccountAdvisor> pAccountAdvisor_t;
+  typedef pAccountAdvisor_t sharedptr_t;
 
   CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName );
+  CAccountAdvisor( const std::string& sAdvisorId, sqlite3_stmt* pStmt );
   ~CAccountAdvisor(void);
 
   const std::string& GetId( void ) const { 
@@ -39,10 +41,13 @@ public:
   }
 
   static void CreateDbTable( sqlite3* pDb );
+  static const std::string& GetSelect( void ) { return m_sSelect; };
 
 protected:
 
 private:
+
+  static const std::string m_sSelect;
 
   std::string m_sAdvisorId;
   std::string m_sAdvisorName;

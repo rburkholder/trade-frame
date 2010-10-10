@@ -18,8 +18,16 @@
 
 #include "AccountAdvisor.h"
 
+const std::string CAccountAdvisor::m_sSelect( "SELECT name from accountadvisors where accountadvisorid = :id;" );
+
 CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName ) 
 : m_sAdvisorId( sAdvisorId ), m_sAdvisorName( sAdvisorName )
+{
+}
+
+CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, sqlite3_stmt* pStmt ) 
+: m_sAdvisorId( sAdvisorId ), 
+  m_sAdvisorName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) )
 {
 }
 
@@ -46,3 +54,4 @@ void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
     throw std::runtime_error( sErr );
   }
 }
+
