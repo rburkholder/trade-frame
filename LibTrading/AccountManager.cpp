@@ -28,6 +28,7 @@
 #include "Order.h"
 #include "Execution.h"
 
+#include "TradingDb.h"
 #include "AccountManager.h"
 
 using namespace boost::phoenix::arg_names;
@@ -98,14 +99,16 @@ CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const std
 
   pAccountAdvisor_t p;
 
-  LoadObject( "CAccountManager::GetAccountAdvisor", CAccountAdvisor::GetSelect(), sAdvisorId, 
+  // arg1=key, arg2=pStmt
+  LoadObject( "CAccountManager::GetAccountAdvisor", CAccountAdvisor::GetSqlSelect(), sAdvisorId, 
     &pStmtLoadAccountAdvisor, 
     m_mapAccountAdvisor, 
     p, 
-    boost::phoenix::bind( &sqlite3_bind_text, arg2,   // bind_key
+    boost::phoenix::bind( &sqlite3_bind_text, arg2,   // fBindStatment( key, *pStmt )
       boost::phoenix::bind( &sqlite3_bind_parameter_index, arg2, ":id" ), 
       boost::phoenix::bind( &std::string::c_str, arg1 ), -1, SQLITE_TRANSIENT ),
-    boost::phoenix::new_<CAccountAdvisor>( arg1, arg2 ) );
+    boost::phoenix::new_<CAccountAdvisor>( arg1, arg2 ) 
+    );
 
   return p;
 }
@@ -114,44 +117,26 @@ CAccountAdvisor::pAccountAdvisor_t CAccountManager::AddAccountAdvisor( const std
 
   pAccountAdvisor_t p;
 
+  bool bExists = false;
   try {
     p = GetAccountAdvisor( sAdvisorId );
     // if we have something we can't insert something
-    throw std::runtime_error( "CAccountManager::AddAccountAdvisor: record already exists" );
+    bool bExists = true;
   }
   catch (...) {
     // had an error, so assume no record exists, and proceed
   }
 
-  if ( NULL != m_pDb ) {
-    int rtn;
-    if ( NULL == pStmtAddAccountAdvisor ) {
-      rtn = sqlite3_prepare_v2( m_pDb, 
-        "INSERT INTO accountadvisors (accountadvisorid, name ) VALUES ( :id, :name );",
-        -1, &pStmtAddAccountAdvisor, NULL );
-      if ( SQLITE_OK != rtn ) {
-        throw std::runtime_error( "CAccountManager::AddAccountAdvisor: error in prepare" );
-      }
-    }
-    else {
-      rtn = sqlite3_reset( pStmtAddAccountAdvisor );
-      if ( SQLITE_OK != rtn ) {
-        throw std::runtime_error( "CAccountManager::AddAccountAdvisor:  error in reset" );
-      }
-    }
-    rtn = sqlite3_bind_text( 
-      pStmtAddAccountAdvisor, sqlite3_bind_parameter_index( pStmtAddAccountAdvisor, ":id" ), sAdvisorId.c_str(), -1, SQLITE_TRANSIENT );
-    rtn = sqlite3_bind_text( 
-      pStmtAddAccountAdvisor, sqlite3_bind_parameter_index( pStmtAddAccountAdvisor, ":name" ), sAdvisorName.c_str(), -1, SQLITE_TRANSIENT );
-    rtn = sqlite3_step( pStmtAddAccountAdvisor );
-    if ( SQLITE_DONE != rtn ) {
-      throw std::runtime_error( "CAccountManager::AddAccountAdvisor: error in step" );
-    }
+  if ( bExists ) {
+    throw std::runtime_error( "CAccountManager::AddAccountAdvisor: record already exists" );
   }
 
-  // if all else was fine, can add record to map
+  // create class, as it will do some of the processing
   p.reset( new CAccountAdvisor( sAdvisorId, sAdvisorName ) );
-  m_mapAccountAdvisor.insert( pairAccountAdvisor_t( sAdvisorId, p ) );
+
+  InsertObject( "CAccountManager::AddAccountAdvisor", CAccountAdvisor::GetSqlInsert(), 
+    &pStmtAddAccountAdvisor,
+    sAdvisorId, m_mapAccountAdvisor, p );
 
   return p;
 }

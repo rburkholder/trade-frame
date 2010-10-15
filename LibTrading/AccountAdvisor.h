@@ -41,13 +41,21 @@ public:
   }
 
   static void CreateDbTable( sqlite3* pDb );
-  static const std::string& GetSelect( void ) { return m_sSelect; };
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
 
 private:
 
-  static const std::string m_sSelect;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
 
   std::string m_sAdvisorId;
   std::string m_sAdvisorName;

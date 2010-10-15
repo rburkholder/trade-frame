@@ -18,7 +18,10 @@
 
 #include "AccountAdvisor.h"
 
-const std::string CAccountAdvisor::m_sSelect( "SELECT name from accountadvisors where accountadvisorid = :id;" );
+const std::string CAccountAdvisor::m_sSqlSelect( "SELECT name FROM accountadvisors WHERE accountadvisorid = :id;" );
+const std::string CAccountAdvisor::m_sSqlInsert( "INSERT INTO accountadvisors (accountadvisorid, name ) VALUES ( :id, :name );" );
+const std::string CAccountAdvisor::m_sSqlUpdate( "UPDATE accountadvisors SET name = :name where accountadvisorid = :id;" );
+const std::string CAccountAdvisor::m_sSqlDelete( "DELETE FROM accountadvisors WHERE accountadvisorid = :id;" );
 
 CAccountAdvisor::CAccountAdvisor( const std::string& sAdvisorId, const std::string& sAdvisorName ) 
 : m_sAdvisorId( sAdvisorId ), m_sAdvisorName( sAdvisorName )
@@ -53,5 +56,19 @@ void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
     sqlite3_free( pMsg );
     throw std::runtime_error( sErr );
   }
+}
+
+int CAccountAdvisor::BindDbKey( sqlite3_stmt* pStmt ) {
+  int rtn( 0 );
+  rtn = sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_sAdvisorId.c_str(), -1, SQLITE_TRANSIENT );
+  return rtn;
+}
+
+int CAccountAdvisor::BindDbVariables( sqlite3_stmt* pStmt ) {
+  int rtn( 0 );
+  rtn = sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":name" ), m_sAdvisorName.c_str(), -1, SQLITE_TRANSIENT );
+  return rtn;
 }
 
