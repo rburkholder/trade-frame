@@ -52,6 +52,7 @@ protected:
 
 private:
 
+  static const std::string m_sSqlCreate;
   static const std::string m_sSqlSelect;
   static const std::string m_sSqlInsert;
   static const std::string m_sSqlUpdate;

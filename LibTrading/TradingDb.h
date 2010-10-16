@@ -27,37 +27,24 @@ public:
 
   sqlite3* GetDb( void ) { return m_pdbTrading; };
 
-  template<typename K, typename M, typename P, typename F1, typename F2> 
-  void LoadObject( const std::string& sErrPrefix, const std::string& sSelect, 
-    K& key,
-    sqlite3_stmt** pStmt,
-    M& map, 
-    P& p, 
-    F1 fBindStatement, 
-    F2 fConstructInstance );
-
-  template<typename K, typename M, typename P>
-  void InsertObject( const std::string& sErrPrefix, const std::string& sSqlInsert, 
-    sqlite3_stmt** pStmt, 
-    K& key, 
-    M& map,
-    P& p
-    );
-
 protected:
 private:
   sqlite3* m_pdbTrading;
 };
 
-template<typename K, typename M, typename P, typename F1, typename F2> 
-void CTradingDb::LoadObject( 
+void PrepareStatement( 
+  const std::string& sErrPrefix, const std::string& sSqlOp, 
+  sqlite3* pDb, sqlite3_stmt** pStmt );
+
+template<typename K, typename M, typename P, typename F> 
+void LoadObject( 
   const std::string& sErrPrefix, const std::string& sSqlSelect, 
   K& key, 
+  sqlite3* pDb,
   sqlite3_stmt** pStmt, 
   M& map,  // map
   P& p, // shared ptr
-  F1 fBindStatement, // function to bind key to statement
-  F2 fConstructInstance  // function to construct instance of class
+  F fConstructInstance  // function to construct instance of class
   ) 
   {
 
@@ -66,31 +53,17 @@ void CTradingDb::LoadObject(
     p = iter->second;
   }
   else {
-    if ( NULL == m_pDb ) {
+    if ( NULL == pDb ) {
       std::string sErr( sErrPrefix );
       sErr += ":  no record available";
       throw std::runtime_error( sErr );
     }
     else {
       int rtn;
-      if ( NULL == *pStmt ) {
-        rtn = sqlite3_prepare_v2( m_pDb, sSqlSelect.c_str(), -1, pStmt, NULL );
-        if ( SQLITE_OK != rtn ) {
-          std::string sErr( sErrPrefix );
-          sErr += ":  error in prepare";
-          throw std::runtime_error( sErr );
-        }
-      }
-      else {
-        rtn = sqlite3_reset( *pStmt );
-        if ( SQLITE_OK != rtn ) {
-          std::string sErr( sErrPrefix );
-          sErr += ":  error in reset";
-          throw std::runtime_error( sErr );
-        }
-      }
+
+      PrepareStatement( sErrPrefix, sSqlSelect, pDb, pStmt );
     
-      rtn = fBindStatement( key, *pStmt );
+      rtn = p->BindDbKey( *pStmt );
       if ( SQLITE_OK != rtn ) {
         std::string sErr( sErrPrefix );
         sErr += ":  error in bind";
@@ -111,60 +84,72 @@ void CTradingDb::LoadObject(
   }
 }
 
-template<typename K, typename M, typename P>
-void CTradingDb::InsertObject( 
-  const std::string& sErrPrefix, const std::string& sSqlInsert, 
+template<typename K, typename P>
+void SqlOpOnObject( 
+  const std::string& sErrPrefix, const std::string& sSqlOp, 
+  sqlite3* pDb,
   sqlite3_stmt** pStmt, 
   K& key, 
-  M& map,
   P& p
   )
 {
-  if ( NULL != m_pDb ) {
+  if ( NULL != pDb ) {
     int rtn;
-    if ( NULL == pStmt ) {
-      rtn = sqlite3_prepare_v2( m_pDb, sSqlInsert.c_str(), -1, pStmt, NULL );
-      if ( SQLITE_OK != rtn ) {
-        p.reset();   // get rid of class instance
-        std::string sErr( sErrPrefix );
-        sErr += ": error in prepare";
-        throw std::runtime_error( sErr );
-      }
-    }
-    else {
-      rtn = sqlite3_reset( *pStmt );
-      if ( SQLITE_OK != rtn ) {
-        p.reset();   // get rid of class instance
-        std::string sErr( sErrPrefix );
-        sErr += ": error in reset";
-        throw std::runtime_error( sErr );
-      }
-    }
+
+    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
+
     rtn = p->BindDbKey( *pStmt );
     if ( SQLITE_OK != rtn ) {
-      p.reset();   // get rid of class instance
       std::string sErr( sErrPrefix );
       sErr += ": error in BindDbKey";
       throw std::runtime_error( sErr );
     }
     rtn = p->BindDbVariables( *pStmt );
     if ( SQLITE_OK != rtn ) {
-      p.reset();   // get rid of class instance
       std::string sErr( sErrPrefix );
       sErr += ": error in BindDbVariables";
       throw std::runtime_error( sErr );
     }
     rtn = sqlite3_step( *pStmt );
     if ( SQLITE_DONE != rtn ) {
-      p.reset();   // get rid of class instance
       std::string sErr( sErrPrefix );
       sErr += ": error in step";
       throw std::runtime_error( sErr );
     }
   }
 
-  // if everything is fine, can add record to map
-  map.insert( std::pair<K,P>( key, p ) );
+}
+
+template<typename K, typename P>
+void DeleteObject( 
+  const std::string& sErrPrefix, const std::string& sSqlOp, 
+  sqlite3* pDb,
+  sqlite3_stmt** pStmt, 
+  K& key, 
+  P& p
+  )
+{
+  if ( NULL != pDb ) {
+
+    int rtn;
+
+    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
+
+    rtn = p->BindDbKey( *pStmt );
+    if ( SQLITE_OK != rtn ) {
+      std::string sErr( sErrPrefix );
+      sErr += ": error in BindDbKey";
+      throw std::runtime_error( sErr );
+    }
+
+    rtn = sqlite3_step( *pStmt );
+    if ( SQLITE_DONE != rtn ) {
+      std::string sErr( sErrPrefix );
+      sErr += ": error in step";
+      throw std::runtime_error( sErr );
+    }
+
+  }
 
 }
 

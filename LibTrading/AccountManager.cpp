@@ -101,12 +101,10 @@ CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const std
 
   // arg1=key, arg2=pStmt
   LoadObject( "CAccountManager::GetAccountAdvisor", CAccountAdvisor::GetSqlSelect(), sAdvisorId, 
+    m_pDb, 
     &pStmtLoadAccountAdvisor, 
     m_mapAccountAdvisor, 
     p, 
-    boost::phoenix::bind( &sqlite3_bind_text, arg2,   // fBindStatment( key, *pStmt )
-      boost::phoenix::bind( &sqlite3_bind_parameter_index, arg2, ":id" ), 
-      boost::phoenix::bind( &std::string::c_str, arg1 ), -1, SQLITE_TRANSIENT ),
     boost::phoenix::new_<CAccountAdvisor>( arg1, arg2 ) 
     );
 
@@ -134,10 +132,50 @@ CAccountAdvisor::pAccountAdvisor_t CAccountManager::AddAccountAdvisor( const std
   // create class, as it will do some of the processing
   p.reset( new CAccountAdvisor( sAdvisorId, sAdvisorName ) );
 
-  InsertObject( "CAccountManager::AddAccountAdvisor", CAccountAdvisor::GetSqlInsert(), 
+  SqlOpOnObject( "CAccountManager::AddAccountAdvisor", CAccountAdvisor::GetSqlInsert(), 
+    m_pDb,
     &pStmtAddAccountAdvisor,
-    sAdvisorId, m_mapAccountAdvisor, p );
+    sAdvisorId, 
+    p );
+
+  // if everything is fine, can add record to map
+  m_mapAccountAdvisor.insert( pairAccountAdvisor_t( sAdvisorId, p ) );
 
   return p;
 }
 
+CAccountAdvisor::pAccountAdvisor_t CAccountManager::UpdateAccountAdvisor( const std::string& sAdvisorId ) {
+
+  pAccountAdvisor_t p;
+
+  iterAccountAdvisor_t iter = m_mapAccountAdvisor.find( sAdvisorId );
+  if ( m_mapAccountAdvisor.end() == iter ) {
+    throw std::runtime_error( "CAccountManager::UpdateAccountAdvisor: could not find advisor in local storage" );
+  }
+  p = iter->second;
+
+  SqlOpOnObject( "CAccountManager::UpdateAccountAdvisor", CAccountAdvisor::GetSqlUpdate(), 
+    m_pDb,
+    &pStmtUpdateAccountAdvisor,
+    sAdvisorId, 
+    p );
+
+  return p;
+}
+
+void CAccountManager::DeleteAccountAdvisor( const std::string& sAdvisorId ) {
+
+  iterAccountAdvisor_t iter = m_mapAccountAdvisor.find( sAdvisorId );
+  if ( m_mapAccountAdvisor.end() == iter ) {
+    throw std::runtime_error( "CAccountManager::DeleteAccountAdvisor: could not find advisor in local storage" );
+  }
+
+  DeleteObject( "CAccountManager::DeleteAccountAdvisor", CAccountAdvisor::GetSqlDelete(), 
+    m_pDb,
+    &pStmtDeleteAccountAdvisor,
+    sAdvisorId, 
+    iter->second );
+
+  m_mapAccountAdvisor.erase( iter );
+
+}

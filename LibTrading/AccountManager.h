@@ -34,8 +34,10 @@ public:
 
   void CreateDbTables( void );
 
-  pAccountAdvisor_t AddAccountAdvisor( const std::string& sAccountAdvisorId, const std::string& sAccountAdvisorName );
-  pAccountAdvisor_t GetAccountAdvisor( const std::string& sAccountAdvisorId );
+  pAccountAdvisor_t AddAccountAdvisor( const std::string& sAdvisorId, const std::string& sAccountAdvisorName );
+  pAccountAdvisor_t GetAccountAdvisor( const std::string& sAdvisorId );
+  pAccountAdvisor_t UpdateAccountAdvisor( const std::string& sAdvisorId );  // uses existing class variables
+  void DeleteAccountAdvisor( const std::string& sAdvisorId );
 
 protected:
 
@@ -46,6 +48,8 @@ private:
 
   sqlite3_stmt* pStmtLoadAccountAdvisor;
   sqlite3_stmt* pStmtAddAccountAdvisor;
+  sqlite3_stmt* pStmtUpdateAccountAdvisor;
+  sqlite3_stmt* pStmtDeleteAccountAdvisor;
 
   typedef std::pair<std::string, pAccountAdvisor_t> pairAccountAdvisor_t;
   typedef std::map<std::string, pAccountAdvisor_t> mapAccountAdvisor_t;
