@@ -13,14 +13,62 @@
 #include "StdAfx.h"
 
 #include <sstream>
-#include <string>
 #include <stdexcept>
 
 #include "Portfolio.h"
 
-CPortfolio::CPortfolio( const std::string &sPortfolioName ) 
-: m_sPortfolioName( sPortfolioName )
+const std::string CPortfolio::m_sSqlCreate( 
+  "create table  portfolios ( \
+    portfolioid TEXT CONSTRAINT pk_portfolios PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    accountid TEXT NOT NULL, \
+    description TEXT default '', \
+    realizedpl double default 0.0, \
+    commissionspaid double default 0.0, \
+    CONSTRAINT fk_portfolios_accountid \
+      FOREIGN KEY(accountid) REFERENCES accounts(accountid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );" );
+const std::string CPortfolio::m_sSqlSelect( 
+  "SELECT accountid, description, realizedpl, commissionspaid FROM portfolios where portfolioid = :id;" );
+const std::string CPortfolio::m_sSqlInsert( 
+  "INSERT INTO portfolios (portfolioid, accountid, description, realizedpl, commissionspaid) \
+   VALUES (:id, :accountid, :description, :realizedpl, :commissionspaid) where portfolioid = :id;" );
+const std::string CPortfolio::m_sSqlUpdate( 
+  "UPDATE portfolios SET \
+   description = :description, realizedpl = :realizedpl, commissionspaid = :commissionspaid \
+   WHERE porfolioid = :portfolioid;" );
+const std::string CPortfolio::m_sSqlDelete( "DELETE FROM portfolios WHERE portfolioid = :id;" );
+
+CPortfolio::CPortfolio( 
+    const keyPortfolioId_t& sPortfolioId, 
+    const std::string& sDescription ) 
+: m_sPortfolioId( sPortfolioId ),
+  m_sDescription( sDescription ),
+  m_bCanUseDb( false )
 {
+}
+
+CPortfolio::CPortfolio( 
+    const keyPortfolioId_t& sPortfolioId, 
+    const keyAccountId_t& sAccountId, 
+    const std::string& sDescription ) 
+: m_sPortfolioId( sPortfolioId ),
+  m_sAccountId( sAccountId ),
+  m_sDescription( sDescription ),
+  m_bCanUseDb( true )
+{
+}
+
+CPortfolio::CPortfolio( const keyPortfolioId_t& sPortfolioId, sqlite3_stmt* pStmt ) 
+: m_sPortfolioId( sPortfolioId ),
+  m_sAccountId( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sDescription( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
+  m_bCanUseDb( true )
+{
+  m_plCurrent.dblRealized = sqlite3_column_double( pStmt, 2 );
+  m_plCurrent.dblCommissionsPaid = sqlite3_column_double( pStmt, 3 );
 }
 
 CPortfolio::~CPortfolio(void) {
@@ -149,18 +197,7 @@ void CPortfolio::CreateDbTable( sqlite3* pDb ) {
   char* pMsg;
   int rtn;
 
-  rtn = sqlite3_exec( pDb,
-    "create table if not exists portfolios ( \
-    portfolioid INTEGER PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    accountid TEXT NOT NULL, \
-    name TEXT NOT NULL, \
-    CONSTRAINT fk_portfolios_accountid \
-      FOREIGN KEY(accountid) REFERENCES accounts(accountid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
-    );",
-    0, 0, &pMsg );
+  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "Error creating table portfolios: " );
@@ -181,4 +218,29 @@ void CPortfolio::CreateDbTable( sqlite3* pDb ) {
   }
 }
 
+int CPortfolio::BindDbKey( sqlite3_stmt* pStmt ) {
+  if ( !m_bCanUseDb ) {
+    throw std::runtime_error( "CPortfolio::BindDbKey, can not save to db" );
+  }
+  int rtn( 0 );
+  rtn = sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_sPortfolioId.c_str(), -1, SQLITE_TRANSIENT );
+  return rtn;
+}
+
+int CPortfolio::BindDbVariables( sqlite3_stmt* pStmt ) {
+  if ( !m_bCanUseDb ) {
+    throw std::runtime_error( "CPortfolio::BindDbVariables, can not save to db" );
+  }
+  int rtn( 0 );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":accountid" ), m_sAccountId.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":description" ), m_sDescription.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":realizedpl" ), m_plCurrent.dblRealized );
+  rtn += sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":commissionspaid" ), m_plCurrent.dblCommissionsPaid );
+  return rtn;  // should be 0 if all goes well
+}
 

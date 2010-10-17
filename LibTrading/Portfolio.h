@@ -15,10 +15,11 @@
 #include <string>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include <LibSqlite/sqlite3.h>
 
-#include "boost/shared_ptr.hpp"
-
+#include "Account.h"
 #include "Position.h"
 
 // has series of positions, CPosition
@@ -34,7 +35,17 @@ public:
 
   typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
 
-  CPortfolio( const std::string &sPortfolioName );
+  typedef CAccount::keyAccountId_t keyAccountId_t;
+  typedef std::string keyPortfolioId_t;
+
+  CPortfolio( // for use in memory only
+    const keyPortfolioId_t& sPortfolioId, 
+    const std::string& sDescription = "" );
+  CPortfolio( // can be stored to disk
+    const keyPortfolioId_t& sPortfolioId, 
+    const keyAccountId_t& sAccountId, 
+    const std::string& sDescription );
+  CPortfolio( const keyPortfolioId_t& sPortfolioId, sqlite3_stmt* pStmt );
   ~CPortfolio(void);
 
   void AddPosition( const std::string& sName, pPosition_t pPosition );
@@ -45,6 +56,12 @@ public:
   void EmitStats( std::stringstream& ss );
 
   static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
   
@@ -56,7 +73,17 @@ private:
   map_t m_mapPositionsViaUserName;
   map_t m_mapPositionsViaInstrumentName;
 
-  std::string m_sPortfolioName;
+  bool m_bCanUseDb;
+
+  keyPortfolioId_t m_sPortfolioId;
+  keyAccountId_t m_sAccountId;
+  std::string m_sDescription;
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
 
   struct structPL {
     double dblUnRealized;

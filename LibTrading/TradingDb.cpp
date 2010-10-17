@@ -15,15 +15,16 @@
 #include "TradingDb.h"
 
 #include <iostream>
+#include <stdexcept>
 #include <cassert>
 
 CTradingDb::CTradingDb( const char* szDbFileName ) {
 
-  int rtn = sqlite3_open( szDbFileName, &m_pdbTrading );
+  int rtn = sqlite3_open_v2( szDbFileName, &m_pdbTrading, SQLITE_OPEN_READWRITE, NULL );
   if ( SQLITE_OK == rtn ) {
   }
   else {
-    std::cerr << sqlite3_errmsg( m_pdbTrading ) << std::endl;
+    throw std::runtime_error( "CTradingDb open error" );
   }
 
 }

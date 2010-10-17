@@ -13,18 +13,47 @@
 
 #pragma once
 
+#include <string>
+
 #include <LibSqlite/sqlite3.h>
+
+#include "AccountAdvisor.h"
 
 class CAccountOwner
 {
 public:
 
-  CAccountOwner(void);
+  typedef CAccountAdvisor::keyAccountAdvisorId_t keyAccountAdvisorId_t;
+  typedef std::string keyAccountOwnerId_t;
+
+  CAccountOwner( 
+    const keyAccountOwnerId_t& sAccountOwnerId, 
+    const keyAccountAdvisorId_t& sAccountAdvisorId,
+    const std::string& sFirstName, const std::string& sLastName );
+  CAccountOwner( const keyAccountOwnerId_t& sAccountOwnerId, sqlite3_stmt* pStmt);
   ~CAccountOwner(void);
 
   static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
 private:
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
+
+  keyAccountOwnerId_t m_sAccountOwnerId;
+  keyAccountAdvisorId_t m_sAccountAdvisorId;
+  std::string m_sFirstName;
+  std::string m_sLastName;
+
 };
 
