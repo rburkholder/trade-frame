@@ -22,6 +22,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <LibCommon/Delegate.h>
+#include <LibSqlite/sqlite3.h>
 
 #include "TradingEnumerations.h"
 
@@ -63,6 +64,7 @@ public:
     pInstrument_t pUnderlying,
     InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
+  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt );
     
   virtual ~CInstrument(void);
 
@@ -98,9 +100,18 @@ public:
   void SetMultiplier( unsigned long nMultiplier ) { m_nMultiplier = nMultiplier; };
   unsigned long GetMultiplier( void ) const { return m_nMultiplier; };
 
+  static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
+
 protected:
 
   idInstrument_t m_sInstrumentName; // main name
+  std::string m_sDescription;
   pInstrument_t m_pUnderlying;
   //idInstrument_t m_sUnderlyingName; // underlying when main name is an option
   InstrumentType::enumInstrumentTypes m_InstrumentType;
@@ -120,6 +131,12 @@ private:
   typedef std::map<enumProviderId_t, idInstrument_t> mapAlternateNames_t;
   typedef std::pair<enumProviderId_t, idInstrument_t> mapAlternateNames_pair_t;
   mapAlternateNames_t m_mapAlternateNames;
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
 
   CInstrument( const CInstrument& );  // copy ctor
   CInstrument& operator=( const CInstrument& ); // assignement

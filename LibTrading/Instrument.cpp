@@ -12,9 +12,62 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "Instrument.h"
 
 #include <cassert>
+#include <stdexcept>
+
+#include "Instrument.h"
+
+const std::string CInstrument::m_sSqlCreate( 
+  "create table instruments ( \
+   instrumentid TEXT CONSTRAINT pk_instruments PRIMARY KEY, \
+   version SMALLINT DEFAULT 1, \
+   description TEXT default '', \
+   exchangeid TEXT NOT NULL, \
+   type SMALLINT NOT NULL, \
+   currency SMALLINT NOT NULL, \
+   countercurrency SMALLINT NOT NULL, \
+   optionside SMALLINT NOT NULL, \
+   underlying TEXT default '', \
+   year SMALLINT NOT NULL, \
+   month SMALLINT NOT NULL, \
+   day SMALLINT NOT NULL, \
+   strike DOUBLE NOT NULL, \
+   contract INTEGER NOT NULL, \
+   multiplier UNSIGNED INTEGER NOT NULL, \
+   CONSTRAINT fk_instruments_exchangeid \
+     FOREIGN KEY(exchangeid) REFERENCES exchanges(exchangeid) \
+     ON DELETE RESTRICT ON UPDATE CASCADE, \
+   CONSTRAINT fk_instruments_underlying \
+     FOREIGN KEY(underlying) REFERENCES instruments(instrumentid) \
+     ON DELETE RESTRICT ON UPDATE CASCADE \
+  " );   
+const std::string CInstrument::m_sSqlSelect( 
+  "SELECT description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier \
+   from instruments where instrumentid = :id; \
+  " );
+const std::string CInstrument::m_sSqlInsert( 
+  "INSERT INTO instruments (description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier ) \
+  VALUES (:description, :exchangeid, :type, :currency, :countercurrency, :optionside, :underlying, :year, :month, :day, :strike, :contract, :multiplier) \
+  " );
+const std::string CInstrument::m_sSqlUpdate( 
+  "UPDATE instruments SET \
+  description = :description, \
+  exchangeid = :exchangeid, \
+  type = :type, \
+  currency = :currency, \
+  countercurrency = :countercurrency, \
+  optionside = :optionside, \
+  underlying = :underlying, \
+  year = :year, \
+  month = :month, \
+  day = :day, \
+  strike = :strike, \
+  contract = :contract, \
+  multiplier = :multiplier \
+  WHERE instrumentid = :id \
+  " );
+const std::string CInstrument::m_sSqlDelete( "DELETE FROM instruments WHERE instrumentid = :id;" );
 
 // equity / generic creation
 CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &sExchangeName,
@@ -126,6 +179,24 @@ CInstrument::CInstrument(
   assert( m_InstrumentType == InstrumentType::Currency );
 }
 
+CInstrument::CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt ) 
+: m_sInstrumentName( sInstrumentId ),
+  m_sDescription( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sExchange( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
+  m_InstrumentType( static_cast<InstrumentType::enumInstrumentTypes>( sqlite3_column_int( pStmt, 2 ) ) ),
+  m_Currency( static_cast<Currency::enumCurrency>(sqlite3_column_int( pStmt, 3 ) ) ),
+  m_CurrencyCounter( static_cast<Currency::enumCurrency>( sqlite3_column_int( pStmt, 4 ) ) ),
+  m_OptionSide( static_cast<OptionSide::enumOptionSide>( sqlite3_column_int( pStmt, 5 ) ) ),
+  // underlying requires something special
+  m_nYear( sqlite3_column_int( pStmt, 7 ) ),
+  m_nMonth( sqlite3_column_int( pStmt, 8 ) ),
+  m_nDay( sqlite3_column_int( pStmt, 9 ) ),
+  m_dblStrike( sqlite3_column_double( pStmt, 10 ) ),
+  m_nContract( sqlite3_column_int( pStmt, 11 ) ),
+  m_nMultiplier( sqlite3_column_int( pStmt, 12 ) )
+{
+}
+
 CInstrument::CInstrument(const CInstrument& instrument) 
 :
   m_sInstrumentName( instrument.m_sInstrumentName ), 
@@ -188,4 +259,63 @@ CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( enumProviderId_t 
   }
   return m_pUnderlying->GetInstrumentName(id);
 }
+
+void CInstrument::CreateDbTable( sqlite3* pDb ) {
+
+  char* pMsg;
+  int rtn;
+
+  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
+
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "Error creating table instruments: " );
+    sErr += pMsg;
+    sqlite3_free( pMsg );
+    throw std::runtime_error( sErr );
+  }
+
+}
+
+int CInstrument::BindDbKey( sqlite3_stmt* pStmt ) {
+
+  int rtn( 0 );
+  rtn = sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_sInstrumentName.c_str(), -1, SQLITE_STATIC );
+  return rtn;
+}
+
+int CInstrument::BindDbVariables( sqlite3_stmt* pStmt ) {
+
+  int rtn( 0 );
+
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":description" ), m_sDescription.c_str(), -1, SQLITE_STATIC );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":exchangeid" ), m_sExchange.c_str(), -1, SQLITE_STATIC );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":type" ), m_InstrumentType );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":currency" ), m_Currency );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":countercurrency" ), m_CurrencyCounter );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":optionside" ), m_OptionSide );
+  rtn += sqlite3_bind_text(   // ** this needs to be conditional
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":year" ), m_nYear );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":month" ), m_nMonth );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":day" ), m_nDay );
+  rtn += sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":strike" ), m_dblStrike );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":contract" ), m_nContract );
+  rtn += sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":multiplier" ), m_nMultiplier );
+
+  return rtn;  // should be 0 if all goes well
+}
+
 

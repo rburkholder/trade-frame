@@ -73,6 +73,7 @@
     <ClCompile Include="AccountAdvisor.cpp" />
     <ClCompile Include="AccountOwner.cpp" />
     <ClCompile Include="AlternateInstrumentNames.cpp" />
+    <ClCompile Include="Exchange.cpp" />
     <ClCompile Include="Execution.cpp" />
     <ClCompile Include="AccountManager.cpp" />
     <ClCompile Include="Instrument.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="AccountAdvisor.h" />
     <ClInclude Include="AccountOwner.h" />
     <ClInclude Include="AlternateInstrumentNames.h" />
+    <ClInclude Include="Exchange.h" />
     <ClInclude Include="Execution.h" />
     <ClInclude Include="AccountManager.h" />
     <ClInclude Include="Instrument.h" />

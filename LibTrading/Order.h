@@ -30,7 +30,6 @@ using namespace boost::gregorian;
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
-//#include "PersistedOrderId.h"
 #include "Execution.h"
 
 class COrderManager;
@@ -107,6 +106,12 @@ public:
   Delegate<const COrder&> OnCommission;
 
   static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
   CInstrument::pInstrument_t m_pInstrument;
@@ -141,6 +146,12 @@ protected:
   void SetOrderId( orderid_t );  // used by OrderManager
 
 private:
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
 
   orderid_t m_nOrderId;
 

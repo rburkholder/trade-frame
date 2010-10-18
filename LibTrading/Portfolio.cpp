@@ -21,20 +21,20 @@ const std::string CPortfolio::m_sSqlCreate(
   "create table  portfolios ( \
     portfolioid TEXT CONSTRAINT pk_portfolios PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
-    accountid TEXT NOT NULL, \
+    accountownerid TEXT NOT NULL, \
     description TEXT default '', \
     realizedpl double default 0.0, \
     commissionspaid double default 0.0, \
-    CONSTRAINT fk_portfolios_accountid \
-      FOREIGN KEY(accountid) REFERENCES accounts(accountid) \
+    CONSTRAINT fk_portfolios_accountownerid \
+      FOREIGN KEY(accountownerid) REFERENCES accountownerss(accountownerid) \
         ON DELETE RESTRICT ON UPDATE CASCADE \
        \
     );" );
 const std::string CPortfolio::m_sSqlSelect( 
   "SELECT accountid, description, realizedpl, commissionspaid FROM portfolios where portfolioid = :id;" );
 const std::string CPortfolio::m_sSqlInsert( 
-  "INSERT INTO portfolios (portfolioid, accountid, description, realizedpl, commissionspaid) \
-   VALUES (:id, :accountid, :description, :realizedpl, :commissionspaid) where portfolioid = :id;" );
+  "INSERT INTO portfolios (portfolioid, accountownerid, description, realizedpl, commissionspaid) \
+   VALUES (:id, :accountownerid, :description, :realizedpl, :commissionspaid) where portfolioid = :id;" );
 const std::string CPortfolio::m_sSqlUpdate( 
   "UPDATE portfolios SET \
    description = :description, realizedpl = :realizedpl, commissionspaid = :commissionspaid \
@@ -52,10 +52,10 @@ CPortfolio::CPortfolio(
 
 CPortfolio::CPortfolio( 
     const keyPortfolioId_t& sPortfolioId, 
-    const keyAccountId_t& sAccountId, 
+    const keyAccountOwnerId_t& sAccountOwnerId, 
     const std::string& sDescription ) 
 : m_sPortfolioId( sPortfolioId ),
-  m_sAccountId( sAccountId ),
+  m_sAccountOwnerId( sAccountOwnerId ),
   m_sDescription( sDescription ),
   m_bCanUseDb( true )
 {
@@ -63,7 +63,7 @@ CPortfolio::CPortfolio(
 
 CPortfolio::CPortfolio( const keyPortfolioId_t& sPortfolioId, sqlite3_stmt* pStmt ) 
 : m_sPortfolioId( sPortfolioId ),
-  m_sAccountId( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sAccountOwnerId( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
   m_sDescription( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
   m_bCanUseDb( true )
 {
@@ -234,7 +234,7 @@ int CPortfolio::BindDbVariables( sqlite3_stmt* pStmt ) {
   }
   int rtn( 0 );
   rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":accountid" ), m_sAccountId.c_str(), -1, SQLITE_TRANSIENT );
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":accountownerid" ), m_sAccountOwnerId.c_str(), -1, SQLITE_TRANSIENT );
   rtn += sqlite3_bind_text( 
     pStmt, sqlite3_bind_parameter_index( pStmt, ":description" ), m_sDescription.c_str(), -1, SQLITE_TRANSIENT );
   rtn += sqlite3_bind_double( 

@@ -16,6 +16,22 @@
 #include "Position.h"
 #include <LibTrading/OrderManager.h>
 
+const std::string CPosition::m_sSqlCreate( 
+    "create table if not exists positions ( \
+    positionid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    portfolioid TEXT NOT NULL, \
+    name TEXT NOT NULL, \
+    CONSTRAINT fk_positions_portfolioid \
+      FOREIGN KEY(portfolioid) REFERENCES portfolios(portfolioid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );");
+const std::string CPosition::m_sSqlSelect( "" );
+const std::string CPosition::m_sSqlInsert( "" );
+const std::string CPosition::m_sSqlUpdate( "" );
+const std::string CPosition::m_sSqlDelete( "" );
+
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
@@ -309,18 +325,7 @@ void CPosition::CreateDbTable( sqlite3* pDb ) {
   char* pMsg;
   int rtn;
 
-  rtn = sqlite3_exec( pDb,
-    "create table if not exists positions ( \
-    positionid INTEGER PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    portfolioid BIGINT NOT NULL, \
-    name TEXT NOT NULL, \
-    CONSTRAINT fk_positions_portfolioid \
-      FOREIGN KEY(portfolioid) REFERENCES portfolios(portfolioid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
-    );",
-    0, 0, &pMsg );
+  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "Error creating table positions: " );

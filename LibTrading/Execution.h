@@ -29,7 +29,12 @@ public:
   typedef boost::shared_ptr<CExecution> pExecution_t;
   typedef const pExecution_t& pExecution_ref;
 
-  CExecution( 
+  CExecution( sqlite3_int64 nExecutionId, sqlite3_stmt* pStmt );
+  CExecution( // in memory useage
+    double dblPrice, unsigned long nSize, OrderSide::enumOrderSide eOrderSide,
+    const std::string& sExchange, const std::string& sExecutionId );
+  CExecution( // for when record will be written to db
+    sqlite3_int64 nOrderId,
     double dblPrice, unsigned long nSize, OrderSide::enumOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExecutionId );
   ~CExecution(void);
@@ -38,19 +43,36 @@ public:
   unsigned long GetSize( void ) const { return m_nSize; };
   OrderSide::enumOrderSide GetOrderSide( void ) const { return m_eOrderSide; };
   const std::string& GetExchange( void ) const { return m_sExchange; };
-  const std::string& GetExecutionId( void ) const { return m_sExecutionId; };
+  const std::string& GetExchangeExecutionId( void ) const { return m_sExchangeExecutionId; };
   ptime GetTimeStamp( void ) const { return m_dtExecutionTimeStamp; };
 
   static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
 
+  sqlite3_int64 m_nExecutionId;
+  sqlite3_int64 m_nOrderId;
   double m_dblPrice;  // execution price
   unsigned long m_nSize;  // quantity executed
   OrderSide::enumOrderSide m_eOrderSide;
   ptime m_dtExecutionTimeStamp;
   std::string m_sExchange;
-  std::string m_sExecutionId;  // unique execution id supplied by provider
+  std::string m_sExchangeExecutionId;  // unique execution id supplied by provider
 
 private:
+
+  bool m_bCanUseDb;
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
+
 };

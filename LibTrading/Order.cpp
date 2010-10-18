@@ -13,12 +13,28 @@
 
 #include "StdAfx.h"
 
-#include <string>
 #include <stdexcept>
 
 #include <LibCommon/TimeSource.h>
 
 #include "Order.h"
+
+const std::string COrder::m_sSqlCreate(     
+  "create table if not exists orders ( \
+    orderid INTEGER PRIMARY KEY, \
+    version SMALLINT DEFAULT 1, \
+    positionid BIGINT NOT NULL, \
+    description TEXT NOT NULL, \
+    CONSTRAINT fk_orders_positionid \
+      FOREIGN KEY(positionid) REFERENCES positions(positionid) \
+        ON DELETE RESTRICT ON UPDATE CASCADE \
+       \
+    );"
+ );
+const std::string COrder::m_sSqlSelect( "" );
+const std::string COrder::m_sSqlInsert( "" );
+const std::string COrder::m_sSqlUpdate( "" );
+const std::string COrder::m_sSqlDelete( "" );
 
 COrder::COrder(void) {
 }
@@ -195,18 +211,7 @@ void COrder::CreateDbTable( sqlite3* pDb ) {
   char* pMsg;
   int rtn;
 
-  rtn = sqlite3_exec( pDb,
-    "create table if not exists orders ( \
-    orderid INTEGER PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    positionid BIGINT NOT NULL, \
-    description TEXT NOT NULL, \
-    CONSTRAINT fk_orders_positionid \
-      FOREIGN KEY(positionid) REFERENCES positions(positionid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
-    );",
-    0, 0, &pMsg );
+  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
 
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "Error creating table orders: " );

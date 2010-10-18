@@ -93,6 +93,12 @@ public:
   void EmitStatus( std::stringstream& ssStatus );
 
   static void CreateDbTable( sqlite3* pDb );
+  int BindDbKey( sqlite3_stmt* pStmt );
+  int BindDbVariables( sqlite3_stmt* pStmt );
+  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
+  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
+  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
+  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
 
@@ -132,6 +138,12 @@ protected:
   std::vector<pOrder_t> m_AllOrders;  // keeps track of all orders in case we have to search both lists
 
 private:
+
+  static const std::string m_sSqlCreate;
+  static const std::string m_sSqlSelect;
+  static const std::string m_sSqlInsert;
+  static const std::string m_sSqlUpdate;
+  static const std::string m_sSqlDelete;
 
   double m_dblMultiplier;
 

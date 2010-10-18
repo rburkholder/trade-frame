@@ -19,7 +19,7 @@
 
 #include <LibSqlite/sqlite3.h>
 
-#include "Account.h"
+#include "AccountOwner.h"
 #include "Position.h"
 
 // has series of positions, CPosition
@@ -35,7 +35,7 @@ public:
 
   typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
 
-  typedef CAccount::keyAccountId_t keyAccountId_t;
+  typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
   typedef std::string keyPortfolioId_t;
 
   CPortfolio( // for use in memory only
@@ -43,7 +43,7 @@ public:
     const std::string& sDescription = "" );
   CPortfolio( // can be stored to disk
     const keyPortfolioId_t& sPortfolioId, 
-    const keyAccountId_t& sAccountId, 
+    const keyAccountOwnerId_t& sAccountOwnerId, 
     const std::string& sDescription );
   CPortfolio( const keyPortfolioId_t& sPortfolioId, sqlite3_stmt* pStmt );
   ~CPortfolio(void);
@@ -76,7 +76,7 @@ private:
   bool m_bCanUseDb;
 
   keyPortfolioId_t m_sPortfolioId;
-  keyAccountId_t m_sAccountId;
+  keyAccountOwnerId_t m_sAccountOwnerId;
   std::string m_sDescription;
 
   static const std::string m_sSqlCreate;
