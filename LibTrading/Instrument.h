@@ -64,7 +64,8 @@ public:
     pInstrument_t pUnderlying,
     InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
-  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt );
+  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt ); // with no underlying
+  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt, pInstrument_t pUnderlying ); // with an underlying
     
   virtual ~CInstrument(void);
 
@@ -73,6 +74,8 @@ public:
 
   idInstrument_cref GetInstrumentName( enumProviderId_t id );
   idInstrument_cref GetUnderlyingName( enumProviderId_t id );
+
+  void SetUnderlying( pInstrument_t pUnderlying );
 
   void SetAlternateName( enumProviderId_t, idInstrument_cref );
 
@@ -113,7 +116,7 @@ protected:
   idInstrument_t m_sInstrumentName; // main name
   std::string m_sDescription;
   pInstrument_t m_pUnderlying;
-  //idInstrument_t m_sUnderlyingName; // underlying when main name is an option
+  idInstrument_t m_sUnderlying;  // used only for when loading from db and need to compare assigned underlying
   InstrumentType::enumInstrumentTypes m_InstrumentType;
   Currency::enumCurrency m_Currency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
   Currency::enumCurrency m_CurrencyCounter; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
@@ -131,6 +134,10 @@ private:
   typedef std::map<enumProviderId_t, idInstrument_t> mapAlternateNames_t;
   typedef std::pair<enumProviderId_t, idInstrument_t> mapAlternateNames_pair_t;
   mapAlternateNames_t m_mapAlternateNames;
+
+  enum enunUnderlyingStatus {
+    EUnderlyingNotSettable, EUnderlyingNotSet, EUnderlyingSet
+  } m_eUnderlyingStatus;
 
   static const std::string m_sSqlCreate;
   static const std::string m_sSqlSelect;

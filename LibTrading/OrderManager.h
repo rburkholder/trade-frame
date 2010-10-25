@@ -34,28 +34,28 @@
 class CProviderInterfaceBase;
 
 // this is a singleton so use the Instance() call from all users
-class COrderManager: public ManagerBase<COrderManager, COrder::orderid_t, COrder> {
+class COrderManager: public ManagerBase<COrderManager, COrder::idOrder_t, COrder> {
 public:
 
   typedef COrder::pOrder_t pOrder_t;
-  typedef COrder::orderid_t orderid_t;
+  typedef COrder::idOrder_t idOrder_t;
 
   COrderManager(void);
   ~COrderManager(void);
   void PlaceOrder( CProviderInterfaceBase* pProvider, COrder::pOrder_t pOrder );
-  void CancelOrder( COrder::orderid_t nOrderId );
-  void ReportExecution( COrder::orderid_t orderId, const CExecution& exec );  // feedback from provider
-  void ReportCommission( COrder::orderid_t nOrderId, double dblCommission );
-  void ReportErrors( COrder::orderid_t nOrderId, OrderErrors::enumOrderErrors eError );
+  void CancelOrder( idOrder_t nOrderId );
+  void ReportExecution( idOrder_t orderId, const CExecution& exec );  // feedback from provider
+  void ReportCommission( idOrder_t nOrderId, double dblCommission );
+  void ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError );
   Delegate<const COrder &> OnOrderCompleted;
 
-  orderid_t CheckOrderId( orderid_t );  // used by ibtws to sync order ids
+  idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 
 protected:
 
   typedef std::pair<CProviderInterfaceBase*,pOrder_t> pairProviderOrder_t;
-  typedef std::pair<orderid_t, pairProviderOrder_t> pairIdOrder_t;
-  typedef std::map<orderid_t, pairProviderOrder_t> mapOrders_t;
+  typedef std::pair<idOrder_t, pairProviderOrder_t> pairIdOrder_t;
+  typedef std::map<idOrder_t, pairProviderOrder_t> mapOrders_t;
 
 private:
 
@@ -64,7 +64,7 @@ private:
   mapOrders_t m_mapActiveOrders;  // two lists in order to minimize lookup times on active orders
   mapOrders_t m_mapCompletedOrders;
   mapOrders_t m_mapAllOrders; // all orders for when checking for consistency
-  mapOrders_t::iterator LocateOrder( orderid_t nOrderId );
-  void MoveActiveOrderToCompleted( orderid_t nOrderId );
+  mapOrders_t::iterator LocateOrder( idOrder_t nOrderId );
+  void MoveActiveOrderToCompleted( idOrder_t nOrderId );
 
 };

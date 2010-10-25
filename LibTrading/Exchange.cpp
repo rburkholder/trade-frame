@@ -23,7 +23,7 @@ const std::string m_sSqlCreate(
    CONSTRAINT fk_exchanges_countryid \
      FOREIGN KEY(countryid) REFERENCES countrycodes(alpha2) \
      ON DELETE RESTRICT ON UPDATE CASCADE \
-  " );
+  ;" );
 const std::string m_sSqlSelect( "SELECT name, countryid from exchanges where exchangeid = :id;" );
 const std::string m_sSqlInsert( "INSERT INTO exchanges (exchangeid, name, countryid) VALUES ( :id, :name, :countryid );" );
 const std::string m_sSqlUpdate( "UPDATE exchanges SET name = :name, coutnryid = :countryid WHERE exchangeid = :id;" );

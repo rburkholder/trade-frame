@@ -18,7 +18,7 @@
 #include "Portfolio.h"
 
 const std::string CPortfolio::m_sSqlCreate( 
-  "create table  portfolios ( \
+  "create table portfolios ( \
     portfolioid TEXT CONSTRAINT pk_portfolios PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     accountownerid TEXT NOT NULL, \

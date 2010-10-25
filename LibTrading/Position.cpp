@@ -17,7 +17,7 @@
 #include <LibTrading/OrderManager.h>
 
 const std::string CPosition::m_sSqlCreate( 
-    "create table if not exists positions ( \
+    "create table positions ( \
     positionid INTEGER PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     portfolioid TEXT NOT NULL, \
@@ -126,7 +126,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -140,7 +140,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1 ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -155,7 +155,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2 ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -215,7 +215,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
 
   const COrder& order = status.first;
   const CExecution& exec = status.second;
-  COrder::orderid_t orderId = order.GetOrderId();
+  COrder::idOrder_t orderId = order.GetOrderId();
 
   // update position, regardless of whether we see order open or closed
   //double dblNewAverageCostPerShare = 0;

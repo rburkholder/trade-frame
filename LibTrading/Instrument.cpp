@@ -41,32 +41,32 @@ const std::string CInstrument::m_sSqlCreate(
    CONSTRAINT fk_instruments_underlying \
      FOREIGN KEY(underlying) REFERENCES instruments(instrumentid) \
      ON DELETE RESTRICT ON UPDATE CASCADE \
-  " );   
+  ;" );   
 const std::string CInstrument::m_sSqlSelect( 
   "SELECT description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier \
-   from instruments where instrumentid = :id; \
-  " );
+     from instruments where instrumentid = :id \
+  ;" );
 const std::string CInstrument::m_sSqlInsert( 
   "INSERT INTO instruments (description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier ) \
-  VALUES (:description, :exchangeid, :type, :currency, :countercurrency, :optionside, :underlying, :year, :month, :day, :strike, :contract, :multiplier) \
-  " );
+    VALUES (:description, :exchangeid, :type, :currency, :countercurrency, :optionside, :underlying, :year, :month, :day, :strike, :contract, :multiplier) \
+  ;" );
 const std::string CInstrument::m_sSqlUpdate( 
   "UPDATE instruments SET \
-  description = :description, \
-  exchangeid = :exchangeid, \
-  type = :type, \
-  currency = :currency, \
-  countercurrency = :countercurrency, \
-  optionside = :optionside, \
-  underlying = :underlying, \
-  year = :year, \
-  month = :month, \
-  day = :day, \
-  strike = :strike, \
-  contract = :contract, \
-  multiplier = :multiplier \
+    description = :description, \
+    exchangeid = :exchangeid, \
+    type = :type, \
+    currency = :currency, \
+    countercurrency = :countercurrency, \
+    optionside = :optionside, \
+    underlying = :underlying, \
+    year = :year, \
+    month = :month, \
+    day = :day, \
+    strike = :strike, \
+    contract = :contract, \
+    multiplier = :multiplier \
   WHERE instrumentid = :id \
-  " );
+  ;" );
 const std::string CInstrument::m_sSqlDelete( "DELETE FROM instruments WHERE instrumentid = :id;" );
 
 // equity / generic creation
@@ -77,7 +77,8 @@ CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &s
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 ),
   m_nMultiplier( 1 ),
-  m_nContract( 0 )
+  m_nContract( 0 ),
+  m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
   assert( type < InstrumentType::_Count );
   assert( type > InstrumentType::Unknown );
@@ -96,7 +97,8 @@ CInstrument::CInstrument(
   m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
   m_nYear( year ), m_nMonth( month ), m_dblStrike( 0 ),
   m_nMultiplier( 1 ),
-  m_nContract( 0 )
+  m_nContract( 0 ),
+  m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
   assert( m_InstrumentType == InstrumentType::Future );
   //assert( 0 < m_sSymbolName.size() );
@@ -120,7 +122,8 @@ CInstrument::CInstrument(
   m_nYear( year ), m_nMonth( month ), 
   m_dblStrike( strike ),
   m_nMultiplier( 100 ),
-  m_nContract( 0 )
+  m_nContract( 0 ),
+  m_eUnderlyingStatus( EUnderlyingSet )
 {
   assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
   //assert( side > OptionSide::Unknown );
@@ -149,7 +152,8 @@ CInstrument::CInstrument(
   m_nYear( year ), m_nMonth( month ), m_nDay( day ),
   m_dblStrike( strike ),
   m_nMultiplier( 100 ),
-  m_nContract( 0 )
+  m_nContract( 0 ),
+  m_eUnderlyingStatus( EUnderlyingSet )
 {
   assert( ( OptionSide::Call == side ) || ( OptionSide::Put == side ) );
   //assert( side > OptionSide::Unknown );
@@ -174,7 +178,8 @@ CInstrument::CInstrument(
   m_InstrumentType( type ),
   m_Currency( base ), m_CurrencyCounter( counter ),
   m_nMultiplier( 1 ),
-  m_sExchange( "" ), m_nContract( 0 )
+  m_sExchange( "" ), m_nContract( 0 ),
+  m_eUnderlyingStatus( EUnderlyingSet )
 {
   assert( m_InstrumentType == InstrumentType::Currency );
 }
@@ -188,6 +193,7 @@ CInstrument::CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt )
   m_CurrencyCounter( static_cast<Currency::enumCurrency>( sqlite3_column_int( pStmt, 4 ) ) ),
   m_OptionSide( static_cast<OptionSide::enumOptionSide>( sqlite3_column_int( pStmt, 5 ) ) ),
   // underlying requires something special
+  m_sUnderlying( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 6 ) ) ), 
   m_nYear( sqlite3_column_int( pStmt, 7 ) ),
   m_nMonth( sqlite3_column_int( pStmt, 8 ) ),
   m_nDay( sqlite3_column_int( pStmt, 9 ) ),
@@ -195,6 +201,42 @@ CInstrument::CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt )
   m_nContract( sqlite3_column_int( pStmt, 11 ) ),
   m_nMultiplier( sqlite3_column_int( pStmt, 12 ) )
 {
+  m_eUnderlyingStatus = EUnderlyingNotSettable;
+  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+  if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+  if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+}
+
+CInstrument::CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt, pInstrument_t pUnderlying ) 
+: m_sInstrumentName( sInstrumentId ),
+  m_sDescription( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sExchange( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
+  m_InstrumentType( static_cast<InstrumentType::enumInstrumentTypes>( sqlite3_column_int( pStmt, 2 ) ) ),
+  m_Currency( static_cast<Currency::enumCurrency>(sqlite3_column_int( pStmt, 3 ) ) ),
+  m_CurrencyCounter( static_cast<Currency::enumCurrency>( sqlite3_column_int( pStmt, 4 ) ) ),
+  m_OptionSide( static_cast<OptionSide::enumOptionSide>( sqlite3_column_int( pStmt, 5 ) ) ),
+  m_sUnderlying( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 6 ) ) ), 
+  m_nYear( sqlite3_column_int( pStmt, 7 ) ),
+  m_nMonth( sqlite3_column_int( pStmt, 8 ) ),
+  m_nDay( sqlite3_column_int( pStmt, 9 ) ),
+  m_dblStrike( sqlite3_column_double( pStmt, 10 ) ),
+  m_nContract( sqlite3_column_int( pStmt, 11 ) ),
+  m_nMultiplier( sqlite3_column_int( pStmt, 12 ) ),
+  m_pUnderlying( pUnderlying )
+{
+  m_eUnderlyingStatus = EUnderlyingNotSet;
+  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
+  if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
+  if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
+  if ( EUnderlyingNotSet == m_eUnderlyingStatus ) {
+    throw std::runtime_error( "CInstrument::CInstrument: underlying not accepted" );
+  }
+  if ( NULL == pUnderlying.get() ) {
+    throw std::runtime_error( "CInstrument::CInstrument: non null underlying required" );
+  }
+  if ( m_sUnderlying != pUnderlying->GetInstrumentName() ) {
+    throw std::runtime_error( "CInstrument::CInstrument: underlying name does not match expected name" );
+  }
 }
 
 CInstrument::CInstrument(const CInstrument& instrument) 
@@ -211,7 +253,8 @@ CInstrument::CInstrument(const CInstrument& instrument)
   m_nDay( instrument.m_nDay ),
   m_dblStrike( instrument.m_dblStrike ),
   m_nMultiplier( instrument.m_nMultiplier ),
-  m_nContract( 0 )
+  m_nContract( 0 ),
+  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
   while ( instrument.m_mapAlternateNames.end() != iter ) {
@@ -247,17 +290,31 @@ CInstrument::idInstrument_cref CInstrument::GetInstrumentName( enumProviderId_t 
 }
 
 CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( void ) {
-  if ( NULL == m_pUnderlying.get() ) {
-    throw std::runtime_error( "CInstrument::GetUnderlyingName: no underlying" );
+  if ( EUnderlyingNotSet != m_eUnderlyingStatus ) {
+    throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName();
 }
 
 CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( enumProviderId_t id ) {
-  if ( NULL == m_pUnderlying.get() ) {
-    throw std::runtime_error( "CInstrument::GetUnderlyingName: no underlying" );
+  if ( EUnderlyingNotSet != m_eUnderlyingStatus ) {
+    throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName(id);
+}
+
+void CInstrument::SetUnderlying( pInstrument_t pUnderlying ) {
+  if ( EUnderlyingNotSettable == m_eUnderlyingStatus ) {
+    throw std::runtime_error( "CInstrument::SetUnderlying: can not set underlying" );
+  }
+  if ( EUnderlyingSet == m_eUnderlyingStatus ) {
+    throw std::runtime_error( "CInstrument::SetUnderlying: underlying already set" );
+  }
+  if ( m_sUnderlying != pUnderlying->GetInstrumentName() ) {
+    throw std::runtime_error( "CInstrument::SetUnderlying: underlying name does not match expected name" );
+  }
+  m_pUnderlying = pUnderlying;
+  m_eUnderlyingStatus = EUnderlyingSet;
 }
 
 void CInstrument::CreateDbTable( sqlite3* pDb ) {
@@ -300,8 +357,14 @@ int CInstrument::BindDbVariables( sqlite3_stmt* pStmt ) {
     pStmt, sqlite3_bind_parameter_index( pStmt, ":countercurrency" ), m_CurrencyCounter );
   rtn += sqlite3_bind_int( 
     pStmt, sqlite3_bind_parameter_index( pStmt, ":optionside" ), m_OptionSide );
-  rtn += sqlite3_bind_text(   // ** this needs to be conditional
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
+  if ( NULL != m_pUnderlying.get() ) {
+    rtn += sqlite3_bind_text(  
+      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
+  }
+  else {
+    rtn += sqlite3_bind_text(   
+      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), "", -1, SQLITE_STATIC );
+  }
   rtn += sqlite3_bind_int( 
     pStmt, sqlite3_bind_parameter_index( pStmt, ":year" ), m_nYear );
   rtn += sqlite3_bind_int( 

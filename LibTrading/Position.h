@@ -52,6 +52,8 @@ public:
   typedef std::pair<const CPosition*, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
+  typedef sqlite3_int64 idPosition_t;
+
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   ~CPosition(void);
@@ -144,6 +146,8 @@ private:
   static const std::string m_sSqlInsert;
   static const std::string m_sSqlUpdate;
   static const std::string m_sSqlDelete;
+
+  idPosition_t m_idPosition;
 
   double m_dblMultiplier;
 
