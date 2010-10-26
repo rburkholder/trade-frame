@@ -56,6 +56,8 @@ public:
 
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, sqlite3_stmt* pStmt );
+  CPosition( sqlite3_stmt* pStmt );
   ~CPosition(void);
 
   const std::string& Notes( void ) const { return m_sNotes; };
@@ -108,10 +110,16 @@ protected:
   typedef CSymbolBase::trade_t trade_t;
   typedef CSymbolBase::greek_t greek_t;
 
+  std::string m_sidExecutionAccount;
+  std::string m_sidDataAccount;
+
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
 
   pInstrument_t m_pInstrument;
+  std::string m_sInstrumentName;
+
+  std::string m_sName;
   std::string m_sNotes;
 
   // all pending orders must be on the same side
@@ -148,6 +156,7 @@ private:
   static const std::string m_sSqlDelete;
 
   idPosition_t m_idPosition;
+  std::string m_idPortfolio;
 
   double m_dblMultiplier;
 

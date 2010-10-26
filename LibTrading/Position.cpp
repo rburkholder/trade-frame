@@ -17,20 +17,71 @@
 #include <LibTrading/OrderManager.h>
 
 const std::string CPosition::m_sSqlCreate( 
-    "create table positions ( \
+  "create table positions ( \
     positionid INTEGER PRIMARY KEY, \
     version SMALLINT DEFAULT 1, \
     portfolioid TEXT NOT NULL, \
     name TEXT NOT NULL, \
+    notes TEXT DEFAULT "", \
+    executionaccountid TEXT NOT NULL, \
+    dataaccountid TEXT NOT NULL, \
+    instrumentid TEXT NOT NULL, \
+    ordersidepending SMALLINT NOT NULL, \
+    ordersideactive SMALLINT NOT NULL, \
+    quantitypending INT NOT NULL, \
+    quantityactive INT NOT NULL, \
+    constructedvalue double NOT NULL, \
+    marketvalue double NOT NULL, \
+    plunrealized double NOT NULL, \
+    plrealized double NOT NULL, \
+    commissionpaid double NOT NULL, \
     CONSTRAINT fk_positions_portfolioid \
       FOREIGN KEY(portfolioid) REFERENCES portfolios(portfolioid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
-    );");
-const std::string CPosition::m_sSqlSelect( "" );
-const std::string CPosition::m_sSqlInsert( "" );
-const std::string CPosition::m_sSqlUpdate( "" );
-const std::string CPosition::m_sSqlDelete( "" );
+      ON DELETE RESTRICT ON UPDATE CASCADE, \
+    CONSTRAINT fk_positions_executionaccountid \
+      FOREIGN KEY(executionaccountid) REFERENCES accounts(accountid) \
+      ON DELETE RESTRICT ON UPDATE CASCADE, \
+    CONSTRAINT fk_positions_dataaccountid \
+      FOREIGN KEY(dataaccountid) REFERENCES accounts(accountid) \
+      ON DELETE RESTRICT ON UPDATE CASCADE, \
+    CONSTRAINT fk_postions_instrumentid \
+      FOREIGN KEY(instrumentid) REFERENCES instruments(instrumentid) \
+      ON DELETE RESTRICT ON UPDATE CASCADE \
+        \
+  );");
+const std::string CPosition::m_sSqlSelect( 
+  "SELECT portfolioid, name, notes, executionaccountid, dataaccountid, instrumentid, \
+    ordersidepending, ordersideactive, quantitypending, quantityactive, \
+    constructedvalue, marketvalue, plunrealized, plrealized, commissionpaid \
+  FROM positions WHERE positionid = :id \
+  ;" );
+const std::string CPosition::m_sSqlInsert( 
+  "INSERT into positions (positionid, portfolioid, name, notes, executionaccountid, dataaccountid, instrumentid, \
+    ordersidepending, ordersideactive, quantitypending, quantityactive, \
+    constructedvalue, marketvalue, plunrealized, plrealized, commissionpaid ) \
+  VALUES ( :positionid, :portfolioid, :name, :notes, :executionaccountid, :dataaccountid, :instrumentid, \
+    :ordersidepending, :ordersideactive, :quantitypending, :quantityactive, \
+    :constructedvalue, :marketvalue, :plunrealized, :plrealized, :commissionpaid ) \
+    ;" );
+const std::string CPosition::m_sSqlUpdate( 
+  "UPDATE positions SET \
+  portfolioid = :portfolioid, \
+  name = :name, \
+  notes = :notes, \
+  executionaccountid = :executionaccountid, \
+  dataaccountid = :dataaccountid, \
+  instrumentid = :instrumentid, \
+  ordersidepending = :ordersidepending, \
+  ordersideactive = :ordersideactive, \
+  quantitypending = :quantitypending, \
+  quantityactive = :quantityactive, \
+  constructedvalue = :constructedvalue, \
+  marketvalue = :marketvalue, \
+  plunrealized = :plunrealized, \
+  plrealized = :plrealized, \
+  WHERE positionid = ::id \
+  ;" );
+const std::string CPosition::m_sSqlDelete( "DELETE FROM positions WHERE positionid = :id;" );
 
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
@@ -346,4 +397,44 @@ void CPosition::CreateDbTable( sqlite3* pDb ) {
   }
 }
 
+int CPosition::BindDbKey( sqlite3_stmt* pStmt ) {
+  int rtn( 0 );
+  rtn = sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_idPosition );
+  return rtn;
+}
 
+int CPosition::BindDbVariables( sqlite3_stmt* pStmt ) {
+  int rtn( 0 );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":portfolioid" ), m_idPortfolio.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":name" ), m_sName.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":notes" ), m_sNotes.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":executionaccountid" ), m_sidExecutionAccount.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":dataaccountid" ), m_sidDataAccount.c_str(), -1, SQLITE_TRANSIENT );
+  rtn += sqlite3_bind_text( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":instrumentid" ), m_sInstrumentName.c_str(), -1, SQLITE_TRANSIENT );
+  rtn = sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":ordersidepending" ), m_eOrderSidePending );
+  rtn = sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":ordersideactive" ), m_eOrderSideActive );
+  rtn = sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantitypending" ), m_nPositionPending );
+  rtn = sqlite3_bind_int( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantityactive" ), m_nPositionActive );
+  rtn = sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":constructedvalue" ), m_dblConstructedValue );
+  rtn = sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":marketvalue" ), m_dblMarketValue );
+  rtn = sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":plunrealized" ), m_dblUnRealizedPL );
+  rtn = sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":plrealized" ), m_dblRealizedPL );
+  rtn = sqlite3_bind_double( 
+    pStmt, sqlite3_bind_parameter_index( pStmt, ":commissionpaid" ), m_dblCommissionPaid );
+  return rtn;
+}

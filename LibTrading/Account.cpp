@@ -35,7 +35,7 @@ const std::string CAccount::m_sSqlCreate(
     );"
   );
 const std::string CAccount::m_sSqlSelect( 
-  "SELECT accountownderid,k accountname, providername, brokername, brokeraccountid, login, password FROM accounts where accountid = :id;" );
+  "SELECT accountownderid, accountname, providername, brokername, brokeraccountid, login, password FROM accounts WHERE accountid = :id;" );
 const std::string CAccount::m_sSqlInsert( 
   "INSERT INTO accounts (accountid, accountownerid, accountname, providername, brokername, brokeraccountid, login, password ) \
   VALUES (:id, :accountownerid, :accountname, :providername, :brokername, :brokeraccountid, :login, :password );" );
