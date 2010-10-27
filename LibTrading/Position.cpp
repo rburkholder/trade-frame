@@ -91,7 +91,8 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblMultiplier( 1 ), 
-  m_dblCommissionPaid( 0 )
+  m_dblCommissionPaid( 0 ),
+  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
 }
@@ -105,9 +106,59 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
   m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblMultiplier( 1 ), 
-  m_dblCommissionPaid( 0 )
+  m_dblCommissionPaid( 0 ),
+  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
+}
+
+CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
+  idPosition_t idPosition, sqlite3_stmt* pStmt ) 
+: m_idPosition( idPosition ),
+  m_dblMultiplier( 1 ), 
+  m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
+  m_pInstrument( pInstrument ), 
+  m_idPortfolio( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
+  m_sNotes( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 2 ) ) ),
+  m_sidExecutionAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 3 ) ) ),
+  m_sidDataAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 4 ) ) ),
+  m_sInstrumentName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 5 ) ) ),
+  m_eOrderSidePending( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 6 ) ) ),
+  m_eOrderSideActive( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 7 ) ) ),
+  m_nPositionPending( sqlite3_column_int( pStmt, 8 ) ),
+  m_nPositionActive( sqlite3_column_int( pStmt, 9 ) ),
+  m_dblConstructedValue( sqlite3_column_double( pStmt, 10 ) ),
+  m_dblMarketValue( sqlite3_column_double( pStmt, 11 ) ),
+  m_dblUnRealizedPL( sqlite3_column_double( pStmt, 12 ) ),
+  m_dblRealizedPL( sqlite3_column_double( pStmt, 13 ) ),
+  m_dblCommissionPaid( sqlite3_column_double( pStmt, 14 ) ),
+  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
+{
+  Construction();
+}
+
+CPosition::CPosition( idPosition_t idPosition, sqlite3_stmt* pStmt ) 
+: m_idPosition( idPosition ),
+  m_dblMultiplier( 1 ), 
+  m_idPortfolio( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
+  m_sName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
+  m_sNotes( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 2 ) ) ),
+  m_sidExecutionAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 3 ) ) ),
+  m_sidDataAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 4 ) ) ),
+  m_sInstrumentName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 5 ) ) ),
+  m_eOrderSidePending( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 6 ) ) ),
+  m_eOrderSideActive( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 7 ) ) ),
+  m_nPositionPending( sqlite3_column_int( pStmt, 8 ) ),
+  m_nPositionActive( sqlite3_column_int( pStmt, 9 ) ),
+  m_dblConstructedValue( sqlite3_column_double( pStmt, 10 ) ),
+  m_dblMarketValue( sqlite3_column_double( pStmt, 11 ) ),
+  m_dblUnRealizedPL( sqlite3_column_double( pStmt, 12 ) ),
+  m_dblRealizedPL( sqlite3_column_double( pStmt, 13 ) ),
+  m_dblCommissionPaid( sqlite3_column_double( pStmt, 14 ) ),
+  m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
+{
+  // need flags to wait for execution, data, instrument variables to be set
 }
 
 void CPosition::Construction( void ) {
@@ -121,6 +172,19 @@ void CPosition::Construction( void ) {
   if ( m_pDataProvider->ProvidesGreeks() ) {
     m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
   }
+}
+
+void CPosition::Set( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) {
+
+  m_pInstrument = pInstrument;
+  m_bInstrumentAssigned = true;
+
+  m_pExecutionProvider = pExecutionProvider;
+  m_bExecutionAccountAssigned = true;
+
+  m_pDataProvider = pDataProvider;
+  m_bDataAccountAssigned = true;
+
 }
 
 CPosition::~CPosition(void) {

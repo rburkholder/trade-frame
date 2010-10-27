@@ -56,8 +56,9 @@ public:
 
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, sqlite3_stmt* pStmt );
-  CPosition( sqlite3_stmt* pStmt );
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
+    idPosition_t idPosition, sqlite3_stmt* pStmt );
+  CPosition( idPosition_t idPosition, sqlite3_stmt* pStmt );
   ~CPosition(void);
 
   const std::string& Notes( void ) const { return m_sNotes; };
@@ -103,6 +104,8 @@ public:
   static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
   static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
   static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
+
+  void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
 
 protected:
 
@@ -157,6 +160,10 @@ private:
 
   idPosition_t m_idPosition;
   std::string m_idPortfolio;
+
+  bool m_bInstrumentAssigned;
+  bool m_bExecutionAccountAssigned;
+  bool m_bDataAccountAssigned;
 
   double m_dblMultiplier;
 
