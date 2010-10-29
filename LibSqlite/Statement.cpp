@@ -11,22 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include <string>
-#include <stdexcept>
+#include "Statement.h"
 
-#include <LibSqlite/sqlite3.h>
-#include <LibSqlite/DbSession.h>
 
-class CTradingDb: public CDbSession
+CStatement::CStatement(void)
 {
-public:
+}
 
-  CTradingDb( const char* szDbFileName );
-  ~CTradingDb(void);
 
-protected:
-private:
-};
-
+CStatement::~CStatement(void)
+{
+}

@@ -12,20 +12,11 @@
  ************************************************************************/
 
 #pragma once
-
-#include <string>
-#include <stdexcept>
-
-#include <LibSqlite/sqlite3.h>
-#include <LibSqlite/DbSession.h>
-
-class CTradingDb: public CDbSession
+class CStatement
 {
 public:
-
-  CTradingDb( const char* szDbFileName );
-  ~CTradingDb(void);
-
+  CStatement(void);
+  ~CStatement(void);
 protected:
 private:
 };

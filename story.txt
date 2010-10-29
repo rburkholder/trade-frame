@@ -1,0 +1,2 @@
+https://connect.microsoft.com/dashboard/?wa=wsignin1.0
+http://visualstudiogallery.msdn.microsoft.com/en-us/d0d33361-18e2-46c0-8ff2-4adea1e34fef?SRC=Home

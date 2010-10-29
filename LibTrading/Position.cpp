@@ -185,6 +185,8 @@ void CPosition::Set( pInstrument_cref pInstrument, pProvider_t pExecutionProvide
   m_pDataProvider = pDataProvider;
   m_bDataAccountAssigned = true;
 
+  Construction();
+
 }
 
 CPosition::~CPosition(void) {
