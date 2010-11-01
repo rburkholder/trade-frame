@@ -18,6 +18,7 @@
 //using namespace boost::phoenix;
 //using namespace boost::phoenix::arg_names;
 
+#include <LibSqlite/DbSession.h>
 
 
 #include <LibTrading/TradingDb.h>
@@ -41,7 +42,37 @@ void constructClass(
 
 std::string const sDbFileName = "dbtest.sqlite3";
 
+class CTestCase {
+public:
+
+  enum enumfield2 { EOne, ETwo, EThree };
+
+  template<typename A> // A = Action
+  void Parts( A& a ) {
+    Table( a, "test" );
+    Key( a, "mykey", m_key );
+    Field( a, "field1", m_field1 );
+    Field( a, "field2", m_field2 );
+    Field( a, "field3", m_field3 );
+  };
+
+protected:
+private:
+  boost::int64_t m_key;
+  std::string m_field1;
+  enumfield2 m_field2;
+  int m_field3;
+};
+
 int _tmain(int argc, _TCHAR* argv[]) {
+
+  int i = sizeof( CTestCase::enumfield2 );
+
+  CTestCase tc;
+  CDbSession session( sDbFileName.c_str() );
+  CStatementCreateTable ct;
+  tc.Parts( ct );
+  session.Prepare( ct );
 
   //std::string s( "test" );
   //std::string::iterator iter;

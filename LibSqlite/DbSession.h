@@ -17,10 +17,7 @@
 
 #include "sqlite3.h"
 
-template<typename A, typename T> // A=Action, T=Type
-void Field( A& a, const std::string& sName, T& var, const std::string& sDbType ) {
-  a.registerField( sName, var, sDbType );
-}
+#include "Statement.h"
 
 template<typename K, typename M, typename P, typename F> 
 void LoadObject( 
@@ -47,7 +44,7 @@ void LoadObject(
     else {
       int rtn;
 
-      PrepareStatement( sErrPrefix, sSqlSelect, pDb, pStmt );
+//      PrepareStatement( sErrPrefix, sSqlSelect, pStmt );
     
       rtn = p->BindDbKey( *pStmt );
       if ( SQLITE_OK != rtn ) {
@@ -82,7 +79,7 @@ void SqlOpOnObject(
   if ( NULL != pDb ) {
     int rtn;
 
-    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
+//    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
 
     rtn = p->BindDbKey( *pStmt );
     if ( SQLITE_OK != rtn ) {
@@ -119,7 +116,7 @@ void DeleteObject(
 
     int rtn;
 
-    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
+//    PrepareStatement( sErrPrefix, sSqlOp, pDb, pStmt );
 
     rtn = p->BindDbKey( *pStmt );
     if ( SQLITE_OK != rtn ) {
@@ -139,9 +136,6 @@ void DeleteObject(
 
 }
 
-void PrepareStatement( 
-  const std::string& sErrPrefix, const std::string& sSqlOp, 
-  sqlite3* pDb, sqlite3_stmt** pStmt );
 
 
 
@@ -155,6 +149,14 @@ public:
   void Close( void );
 
   sqlite3* GetDb( void ) { return m_db; };
+
+  void PrepareStatement( 
+    const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
+
+  template<typename T> // T derived from CStatementBase
+  void Prepare( T& stmt ) {
+    stmt.Prepare( m_db );
+  }
 
 protected:
 private:

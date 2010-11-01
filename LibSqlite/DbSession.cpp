@@ -13,20 +13,20 @@
 
 #include "StdAfx.h"
 
+#include "DbSession.h"
+
 #include <stdexcept>
 #include <cassert>
 
-#include "DbSession.h"
+void CDbSession::PrepareStatement( 
+  const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt ) {
 
-
-void PrepareStatement( 
-  const std::string& sErrPrefix, const std::string& sSqlOp, 
-  sqlite3* pDb, sqlite3_stmt** pStmt ) {
+  assert( m_bDbOpened );
 
   int rtn;
 
   if ( NULL == *pStmt ) {
-    rtn = sqlite3_prepare_v2( pDb, sSqlOp.c_str(), -1, pStmt, NULL );
+    rtn = sqlite3_prepare_v2( m_db, sSqlOp.c_str(), -1, pStmt, NULL );
     if ( SQLITE_OK != rtn ) {
       std::string sErr( sErrPrefix );
       sErr += ":  error in prepare";
@@ -82,3 +82,4 @@ void CDbSession::Close( void ) {
     assert( SQLITE_OK == rtn );
   }
 }
+
