@@ -48,7 +48,7 @@ public:
   enum enumfield2 { EOne, ETwo, EThree };
 
   template<typename A> // A = Action
-  void Parts( A& a ) {
+  void TableDef( A& a ) {
     Table( a, "test" );
     Key( a, "mykey", m_key );
     Field( a, "field1", m_field1 );
@@ -71,7 +71,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
   CTestCase tc;
   CDbSession session( sDbFileName.c_str() );
   CStatementCreateTable ct;
-  tc.Parts( ct );
+  tc.TableDef( ct );
   session.Prepare( ct );
 
   //std::string s( "test" );

@@ -182,6 +182,10 @@ public:
 
   void registerConstraint( const std::string& sLocalKey, const std::string& sRemoteTable, const std::string& sRemoteKey );
 
+  template<typename TD> // TableDef from persisted class
+  void RegisterDefinitions( TD& td ) {
+  }
+
 protected:
 
   struct structConstraint {
