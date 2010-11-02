@@ -14,6 +14,9 @@
 #pragma once
 
 #include <string>
+#include <map>
+#include <vector>
+#include <stdexcept>
 
 #include "sqlite3.h"
 
@@ -136,8 +139,22 @@ void DeleteObject(
 
 }
 
+class CDbTableDefBase {
+public:
+  CDbTableDefBase( void ) {};
+  ~CDbTableDefBase( void ) {};
+protected:
+private:
+};
 
-
+template<typename TD>  // TD: TableDef
+class CDbTableDef: public CDbTableDefBase {
+public:
+  CDbTableDef( void ) : CDbTableDefBase() {};
+  virtual ~CDbTableDef( void ) {};
+protected:
+private:
+};
 
 class CDbSession {
 public:
@@ -158,6 +175,9 @@ public:
     stmt.Prepare( m_db );
   }
 
+  template<typename TD>
+  void RegisterTableDef( const std::string& sTableName );
+
 protected:
 private:
 
@@ -166,5 +186,21 @@ private:
   sqlite3* m_db;
 
   std::string m_sDbFileName;
+
+  typedef std::map<std::string, CDbTableDefBase> mapTableDefs_t;
+  typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
+  typedef std::pair<std::string, CDbTableDefBase> mapTableDefs_pair_t;
+  mapTableDefs_t m_mapTableDefs;
+
 };
 
+template<typename TD>
+void CDbSession::RegisterTableDef( const std::string& sTableName ) {
+  mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
+  if ( m_mapTableDefs.end() != iter ) {
+    throw std::runtime_error( "table name already has definition" );
+  }
+  CDbTableDef<TD> def;
+  iter =
+    m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, def ) );
+}

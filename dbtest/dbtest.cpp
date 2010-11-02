@@ -73,6 +73,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
   CStatementCreateTable ct;
   tc.TableDef( ct );
   session.Prepare( ct );
+  session.RegisterTableDef<CTestCase>( "test" );
 
   //std::string s( "test" );
   //std::string::iterator iter;
