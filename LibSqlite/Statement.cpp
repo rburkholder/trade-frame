@@ -108,9 +108,9 @@ void CStatementCreateTable::ComposeStatement( void ) {
       m_sStatement += ", ";
     }
     ++ix;
-    m_sStatement += "CONSTRAINT fk_" 
-      + m_sTableName + "_" + iter->sLocalKey 
-      + " FOREIGN KEY(" + iter->sLocalKey + ") REFERENCES " 
+    m_sStatement += "CONSTRAINT fk_"
+      + m_sTableName + "_" + iter->sLocalKey
+      + " FOREIGN KEY(" + iter->sLocalKey + ") REFERENCES "
       + iter->sRemoteTable + "(" + iter->sRemoteKey + ") ON DELETE RESTRICT ON UPDATE CASCADE";
   }
 
@@ -136,7 +136,7 @@ void CStatementInsert::ComposeStatement( void ) {
     sHolders += ":" + iter->sFieldName;
   }
 
-  // fields 
+  // fields
   for ( iteratorFieldDef_t iter = m_vFieldDefs.begin(); m_vFieldDefs.end() != iter; ++iter ) {
     if ( 0 != ix ) {
       m_sStatement += ", ";
@@ -203,7 +203,7 @@ void CStatementSelect::ComposeStatement( void ) {
     m_sStatement += iter->sFieldName + "= :" + iter->sFieldName;
   }
 
-  m_sStatement += ";"; 
+  m_sStatement += ";";
 
 }
 
@@ -221,6 +221,6 @@ void CStatementDelete::ComposeStatement( void ) {
     m_sStatement += iter->sFieldName + "= :" + iter->sFieldName;
   }
 
-  m_sStatement += ";"; 
+  m_sStatement += ";";
 }
 

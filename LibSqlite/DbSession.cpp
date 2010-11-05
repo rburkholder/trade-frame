@@ -18,10 +18,12 @@
 #include <stdexcept>
 #include <cassert>
 
-void CDbSession::PrepareStatement( 
-  const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt ) {
+//void CDbSession::PrepareStatement(
+//  const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt ) {
 
-  assert( m_bDbOpened );
+void PrepareStatement(
+  const std::string& sErrPrefix, const std::string& sSqlOp,
+  sqlite3* pDb, sqlite3_stmt** pStmt ) {
 
   int rtn;
 
@@ -41,8 +43,25 @@ void CDbSession::PrepareStatement(
       throw std::runtime_error( sErr );
     }
   }
-
 }
+
+//
+// CDbFieldDefBase
+//
+
+//
+// CDbFieldDef
+//
+
+//
+// CDbTableDefBase
+//
+
+//
+// CDbTableDef
+//
+
+
 
 
 CDbSession::CDbSession(void)

@@ -17,21 +17,24 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+#include <typeinfo>
+
+#include <boost/shared_ptr.hpp>
 
 #include "sqlite3.h"
 
 #include "Statement.h"
 
-template<typename K, typename M, typename P, typename F> 
-void LoadObject( 
-  const std::string& sErrPrefix, const std::string& sSqlSelect, 
-  K& key, 
+template<typename K, typename M, typename P, typename F>
+void LoadObject(
+  const std::string& sErrPrefix, const std::string& sSqlSelect,
+  K& key,
   sqlite3* pDb,
-  sqlite3_stmt** pStmt, 
+  sqlite3_stmt** pStmt,
   M& map,  // map
   P& p, // shared ptr
   F fConstructInstance  // function to construct instance of class
-  ) 
+  )
   {
 
   M::iterator iter = map.find( key );
@@ -48,7 +51,7 @@ void LoadObject(
       int rtn;
 
 //      PrepareStatement( sErrPrefix, sSqlSelect, pStmt );
-    
+
       rtn = p->BindDbKey( *pStmt );
       if ( SQLITE_OK != rtn ) {
         std::string sErr( sErrPrefix );
@@ -71,11 +74,11 @@ void LoadObject(
 }
 
 template<typename K, typename P>
-void SqlOpOnObject( 
-  const std::string& sErrPrefix, const std::string& sSqlOp, 
+void SqlOpOnObject(
+  const std::string& sErrPrefix, const std::string& sSqlOp,
   sqlite3* pDb,
-  sqlite3_stmt** pStmt, 
-  K& key, 
+  sqlite3_stmt** pStmt,
+  K& key,
   P& p
   )
 {
@@ -107,11 +110,11 @@ void SqlOpOnObject(
 }
 
 template<typename K, typename P>
-void DeleteObject( 
-  const std::string& sErrPrefix, const std::string& sSqlOp, 
+void DeleteObject(
+  const std::string& sErrPrefix, const std::string& sSqlOp,
   sqlite3* pDb,
-  sqlite3_stmt** pStmt, 
-  K& key, 
+  sqlite3_stmt** pStmt,
+  K& key,
   P& p
   )
 {
@@ -136,28 +139,102 @@ void DeleteObject(
     }
 
   }
-
 }
+
+//
+// various Objects used for processing the TableDef
+//
+
+// TableDef_CreateTables
+
+// TableDef_BuildStatement
+
+// TableDef_BindForWrite
+
+// TableDef_ColumnForRead
+
+//
+// CDbFieldDefBase
+//
+
+class CDbFieldDefBase {
+public:
+  CDbFieldDefBase( const std::string& sDbFieldName, const std::string& sDbFieldType )
+  : m_sDbFieldName( sDbFieldName ), m_sDbFieldType( sDbFieldType )
+  {};
+  virtual ~CDbFieldDefBase( void ) {};
+protected:
+  std::string m_sDbFieldName;
+  std::string m_sDbFieldType;
+private:
+};
+
+//
+// CDbFieldDef
+//
+
+template<typename V> // V: variable for data
+class CDbFieldDef: public CDbFieldDefBase {
+public:
+  CDbFieldDef( const std::string& sDbFieldName, const std::string& sDbFieldType, V& var );
+  ~CDbFieldDef( void ) {};
+protected:
+private:
+  V* m_var;
+};
+
+template<typename V>
+CDbFieldDef::CDbFieldDef( const std::string& sDbFieldName, const std::string& sDbFieldType, V& v )
+: CDbFieldDefBase( sDbFieldName, sDbFieldType ),
+  m_v( v )
+{
+}
+
+//
+// CDbTableDefBase
+//
 
 class CDbTableDefBase {
 public:
+
+  boost::shared_ptr<CDbTableDefBase> pCDbTableDefBase_t;
+
   CDbTableDefBase( void ) {};
-  ~CDbTableDefBase( void ) {};
+  virtual ~CDbTableDefBase( void ) {};
+protected:
+  // definition of fields
+
+  typedef std::vector<CDbFieldDefBase*> vFields_t;
+  typedef vFields_t::iterator vFields_iter_t;
+  vFields_t m_vFields;
+
+  // also need to keep table of active records?
+private:
+};
+
+//
+// CDbTableDef
+//
+
+template<class TD>  // TD: TableDef
+class CDbTableDef: public CDbTableDefBase {
+public:
+  CDbTableDef( void ): CDbTableDefBase() {};
+  ~CDbTableDef( void ) {};
 protected:
 private:
 };
 
-template<typename TD>  // TD: TableDef
-class CDbTableDef: public CDbTableDefBase {
-public:
-  CDbTableDef( void ) : CDbTableDefBase() {};
-  virtual ~CDbTableDef( void ) {};
-protected:
-private:
-};
+//
+// CDbSession
+//
 
 class CDbSession {
 public:
+
+  typedef CDbTableDefBase::pCDbTableDefBase_t pCDbTableDefBase_t;
+
+
   CDbSession(void);
   CDbSession( const char* szDbFileName );
   virtual ~CDbSession(void);
@@ -167,7 +244,7 @@ public:
 
   sqlite3* GetDb( void ) { return m_db; };
 
-  void PrepareStatement( 
+  void PrepareStatement(
     const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
 
   template<typename T> // T derived from CStatementBase
@@ -187,9 +264,9 @@ private:
 
   std::string m_sDbFileName;
 
-  typedef std::map<std::string, CDbTableDefBase> mapTableDefs_t;
+  typedef std::map<std::string, pCDbTableDefBase_t> mapTableDefs_t;
   typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
-  typedef std::pair<std::string, CDbTableDefBase> mapTableDefs_pair_t;
+  typedef std::pair<std::string, pCDbTableDefBase_t&> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
 };
@@ -200,7 +277,6 @@ void CDbSession::RegisterTableDef( const std::string& sTableName ) {
   if ( m_mapTableDefs.end() != iter ) {
     throw std::runtime_error( "table name already has definition" );
   }
-  CDbTableDef<TD> def;
-  iter =
-    m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, def ) );
+  CDbTableDefBase pDef.reset( new CDbTableDef<TD>() );
+  iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
 }
