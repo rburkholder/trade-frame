@@ -87,8 +87,6 @@ void CStatementCreateTable::ComposeStatement( void ) {
   if ( 0 != ix ) {
     m_sStatement += ", ";
   }
-  ++ix;
-  m_sStatement += "version SMALLINT DEFAULT 1";
 
   // fields
   for ( iteratorFieldDef_t iter = m_vFieldDefs.begin(); m_vFieldDefs.end() != iter; ++iter ) {

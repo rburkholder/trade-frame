@@ -28,7 +28,7 @@ void PrepareStatement(
   int rtn;
 
   if ( NULL == *pStmt ) {
-    rtn = sqlite3_prepare_v2( m_db, sSqlOp.c_str(), -1, pStmt, NULL );
+    rtn = sqlite3_prepare_v2( pDb, sSqlOp.c_str(), -1, pStmt, NULL );
     if ( SQLITE_OK != rtn ) {
       std::string sErr( sErrPrefix );
       sErr += ":  error in prepare";
@@ -64,25 +64,25 @@ void PrepareStatement(
 
 
 
-CDbSession::CDbSession(void)
+CSession::CSession(void)
 : m_db( 0 ), m_bDbOpened( false )
 {
 }
 
 
-CDbSession::CDbSession( const char* szDbFileName )
+CSession::CSession( const char* szDbFileName )
 : m_db( 0 ), m_bDbOpened( false )
 {
   Open( szDbFileName );
 }
 
 
-CDbSession::~CDbSession(void)
+CSession::~CSession(void)
 {
   Close();
 }
 
-void CDbSession::Open( const char* szDbFileName ) {
+void CSession::Open( const char* szDbFileName ) {
   int rtn = sqlite3_open_v2( szDbFileName, &m_db, SQLITE_OPEN_READWRITE, 0 );
   if ( SQLITE_OK != rtn ) {
     m_db = 0;
@@ -93,7 +93,7 @@ void CDbSession::Open( const char* szDbFileName ) {
   m_bDbOpened = true;
 }
 
-void CDbSession::Close( void ) {
+void CSession::Close( void ) {
   if ( m_bDbOpened ) {
     int rtn = sqlite3_close( m_db );
     m_db = 0;
