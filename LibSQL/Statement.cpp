@@ -19,6 +19,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+namespace ou {
+namespace db {
+
 const char* KeyType( boost::int64_t key ) {
   return "INTEGER PRIMARY KEY";
 }
@@ -222,3 +225,5 @@ void CStatementDelete::ComposeStatement( void ) {
   m_sStatement += ";";
 }
 
+} // db
+} // ou

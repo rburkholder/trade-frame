@@ -19,7 +19,10 @@
 #include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "sqlite3.h"
+#include <LibSqlite\sqlite3.h>
+
+namespace ou {
+namespace db {
 
 template<typename A> // A=Action
 void Table( A& a, const std::string& sName ) {
@@ -209,7 +212,6 @@ protected:
   std::vector<std::string> m_vOrderByNames;
   std::vector<structConstraint> m_vConstraints;
 
-
 private:
 
   bool m_bRegistrationStarted;  // so we can tell if a new prepare is required.
@@ -382,3 +384,6 @@ public:
 protected:
 private:
 };
+
+} // db
+} // ou

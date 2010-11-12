@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 // this is kind of a subset of Aho Corasick algorithm
 // only full keyword matching, no text searches
 // no on-failure coding
@@ -21,6 +22,8 @@
 #include <vector>
 #include <stdexcept>
 //#include <iostream>
+
+namespace ou {
 
 template<typename T> 
 class CKeyWordMatch {
@@ -173,3 +176,5 @@ template<typename T> T CKeyWordMatch<T>::FindMatch( const std::string &sPattern 
   }
   return object;
 }
+
+} // ou

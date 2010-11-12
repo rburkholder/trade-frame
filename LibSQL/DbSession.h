@@ -19,10 +19,13 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "sqlite3.h"
+#include <LibSqlite\sqlite3.h>
 
 #include "Statement.h"
 #include "TableDef.h"
+
+namespace ou {
+namespace db {
 
 template<typename K, typename M, typename P, typename F>
 void LoadObject(
@@ -147,16 +150,12 @@ void DeleteObject(
 class CSession {
 public:
 
-  typedef CTableDefBase::pCTableDefBase_t pCTableDefBase_t;
-  
   CSession(void);
-  CSession( const char* szDbFileName );
-  virtual ~CSession(void);
+  CSession( const std::string& szDbFileName );
+  ~CSession(void);
 
-  void Open( const char* szDbFileName );
+  void Open( const std::string& szDbFileName );
   void Close( void );
-
-  sqlite3* GetDb( void ) { return m_db; };
 
   void PrepareStatement(
     const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
@@ -166,19 +165,24 @@ public:
     stmt.Prepare( m_db );
   }
 
-  template<typename TD> // TD = Table Definition ( supplied class )
+  template<typename TD> // TD = Table Definition
   void RegisterTableDef( const std::string& sTableName );
+
+  template<typename TD> // TD - Table Definition
+  void CreateTables( void );
 
 protected:
 private:
 
+  typedef CTableDefBase::pCTableDefBase_t pCTableDefBase_t;
+  
   bool m_bDbOpened;
 
   sqlite3* m_db;
 
   std::string m_sDbFileName;
 
-  typedef std::map<std::string, pCTableDefBase_t> mapTableDefs_t;
+  typedef std::map<std::string, pCTableDefBase_t> mapTableDefs_t;  // map table name to table definition
   typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
   typedef std::pair<std::string, pCTableDefBase_t&> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
@@ -191,6 +195,16 @@ void CSession::RegisterTableDef( const std::string& sTableName ) {
   if ( m_mapTableDefs.end() != iter ) {
     throw std::runtime_error( "table name already has definition" );
   }
-  CTableDefBase pDef.reset( new CTableDef<TD>() );
+  pCTableDefBase_t pDef.reset( new CTableDef<TD>() );  // add empty table defintion
   iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
 }
+
+template<typename TD>
+void CSession::CreateTables( void ) {
+  for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
+    iter->second->CreateTable( m_db, iter->first );
+  }
+}
+
+} // db
+} // ou

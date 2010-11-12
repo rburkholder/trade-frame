@@ -31,9 +31,10 @@
 
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
+// http://msdn.microsoft.com/en-us/library/x98tx3cf.aspx
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
 // custom off
 
 using boost::asio::ip::tcp;
@@ -58,6 +59,8 @@ using boost::asio::ip::tcp;
 
 // ownerT:  CRTP class
 // charT:  type of character processed 
+
+namespace ou {
 
 template <typename ownerT, typename charT = unsigned char>
 class CNetwork {
@@ -582,3 +585,4 @@ void CNetwork<ownerT,charT>::OnSendDoneNoNotify(
   OnSendDoneCommon( error, bytes_transferred, pbuffer );
 }
 
+} // ou

@@ -18,6 +18,9 @@
 #include <stdexcept>
 #include <cassert>
 
+namespace ou {
+namespace db {
+
 //void CDbSession::PrepareStatement(
 //  const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt ) {
 
@@ -70,10 +73,10 @@ CSession::CSession(void)
 }
 
 
-CSession::CSession( const char* szDbFileName )
+CSession::CSession( const std::string& sDbFileName )
 : m_db( 0 ), m_bDbOpened( false )
 {
-  Open( szDbFileName );
+  Open( sDbFileName );
 }
 
 
@@ -82,14 +85,14 @@ CSession::~CSession(void)
   Close();
 }
 
-void CSession::Open( const char* szDbFileName ) {
-  int rtn = sqlite3_open_v2( szDbFileName, &m_db, SQLITE_OPEN_READWRITE, 0 );
+void CSession::Open( const std::string& sDbFileName ) {
+  int rtn = sqlite3_open_v2( sDbFileName.c_str(), &m_db, SQLITE_OPEN_READWRITE, 0 );
   if ( SQLITE_OK != rtn ) {
     m_db = 0;
     throw std::runtime_error( "Db open error" );
   }
 
-  m_sDbFileName = szDbFileName;
+  m_sDbFileName = sDbFileName;
   m_bDbOpened = true;
 }
 
@@ -102,3 +105,5 @@ void CSession::Close( void ) {
   }
 }
 
+} // db
+} // ou

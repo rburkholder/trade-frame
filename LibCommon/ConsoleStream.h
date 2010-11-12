@@ -13,17 +13,21 @@
 
 #pragma once
 
+
+
 #include <iostream>
-using namespace std;
+//using namespace std;
 
 #include "FastDelegate.h"
 using namespace fastdelegate;
 
-class CConsoleStream :  public streambuf {
+namespace ou {
+
+class CConsoleStream :  public std::streambuf {
 public:
   CConsoleStream(void);
   virtual ~CConsoleStream(void);
-  typedef FastDelegate2<const char*, streamsize> OnNewStringHandler;
+  typedef FastDelegate2<const char*, std::streamsize> OnNewStringHandler;
   void SetOnNewString( OnNewStringHandler function ) {
     OnNewString = function;
   }
@@ -43,3 +47,5 @@ protected:
   virtual int_type overflow( int_type meta );
 private:
 };
+
+} // ou

@@ -13,4 +13,9 @@
 
 #include "TableDef.h"
 
+namespace ou {
+namespace db {
+
+} // db
+} // ou
 

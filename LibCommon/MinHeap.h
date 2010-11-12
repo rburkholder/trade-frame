@@ -23,6 +23,8 @@
 // http://www.staroceans.com/minmaxHeap1.htm
 // http://www.cppreference.com/wiki/stl/algorithm/is_heap  is_heap()
 
+namespace ou {
+
 template<class T, class C> 
 class CMinHeap {
 public:
@@ -171,3 +173,5 @@ void CMinHeap<T,C>::SiftDown( size_t ix ) {
 
 // if we needed to build a heap from pre-assigned vector:
 //  for (int i=n/2-1; i>=0; i--) siftdown(i);
+
+} // ou

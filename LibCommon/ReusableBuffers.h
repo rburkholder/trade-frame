@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 #include <vector>
 #include <sstream>
 #include <typeinfo.h>
@@ -52,6 +53,8 @@
 // can the mutex be made compile-time conditional?
 // most usage may be single thread mode now, as buffers are being returned to the original
 //   thread for storage (actually possibly no, cross thread returns are used)
+
+namespace ou {
 
 template<typename bufferT> 
 class CBufferRepository {
@@ -167,3 +170,4 @@ template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut(
   return pBuffer;
 }
 
+} // ou

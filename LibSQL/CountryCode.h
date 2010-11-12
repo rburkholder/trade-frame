@@ -15,7 +15,10 @@
 
 #include <string>
 
-#include "sqlite3.h"
+#include <LibSqlite/sqlite3.h>
+
+namespace ou {
+namespace db {
 
 class CCountryCode
 {
@@ -47,3 +50,5 @@ private:
 
 };
 
+} // db
+} // ou

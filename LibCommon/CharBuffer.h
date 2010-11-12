@@ -13,6 +13,7 @@
 
 #pragma once
 
+namespace ou {
 
 // this  thing may be obsolete as CCharBuffer can be a vector<>, 
 //   and CReusableCharBuffers is only need when running with multiple threads
@@ -36,3 +37,4 @@ protected:
 private:
 };
 
+} // ou

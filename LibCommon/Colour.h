@@ -13,6 +13,9 @@
 
 #pragma once
 
+namespace ou {
+
+
 // http://en.wikipedia.org/wiki/Color#cite_note-0
 
 /* 
@@ -169,3 +172,5 @@ namespace Colour {
     Black = RGB(0x00,0x00,0x00)
   };
 }
+
+} // ou

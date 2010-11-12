@@ -18,12 +18,27 @@
 
 #include <boost/shared_ptr.hpp>
 
+namespace ou {
+namespace db {
 
 //
 // various Objects used for processing the TableDef
 //
 
-// TableDef_CreateTables
+// TableDef_CreateTable
+
+class Action_CreateTable {
+public:
+  template<typename Var>
+  void Key( const std::string& sKey,  );
+
+  void Field( const std::string& sField, const std::string& sDbKeyType );
+  void Where( const std::string& sWhere );
+  void OrderBy( const std::string& sOrderBy );
+  void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
+protected:
+private:
+};
 
 
 
@@ -32,43 +47,6 @@
 // TableDef_BindForWrite
 
 // TableDef_ColumnForRead
-
-//
-// CFieldDefBase
-//
-
-class CFieldDefBase {
-public:
-  CFieldDefBase( const std::string& sFieldName, const std::string& sFieldType )
-  : m_sFieldName( sFieldName ), m_sFieldType( sFieldType )
-  {};
-  virtual ~CFieldDefBase( void ) {};
-protected:
-  std::string m_sFieldName;
-  std::string m_sFieldType;
-private:
-};
-
-//
-// CFieldDef
-//
-
-template<typename V> // V: variable for data
-class CFieldDef: public CDbFieldDefBase {
-public:
-  CFieldDef( const std::string& sDbFieldName, const std::string& sDbFieldType, V& var );
-  ~CFieldDef( void ) {};
-protected:
-private:
-  V* m_var;
-};
-
-template<typename V>
-CFieldDef::CDbFieldDef( const std::string& sFieldName, const std::string& sFieldType, V& v )
-: CFieldDefBase( sFieldName, sFieldType ),
-  m_v( v )
-{
-}
 
 //
 // CTableDefBase
@@ -81,14 +59,27 @@ public:
 
   CTableDefBase( void ) {};
   virtual ~CTableDefBase( void ) {};
+
+  virtual void CreateTable( sqlite3* pDb, const std::string& sTableName ) = 0;
+
 protected:
+
   // definition of fields
 
-  typedef std::vector<CFieldDefBase*> vFields_t;
+  struct structFieldDef {
+    std::string m_sFieldName;
+    std::string m_sFieldType;
+    structFieldDef( void ) {};
+    structFieldDef(const std::string& sFieldName, const std::string& sFieldType ) 
+      : m_sFieldName( sFieldName ), m_sFieldType( sFieldType ) {};
+  };
+
+  typedef std::vector<structFieldDef> vFields_t;
   typedef vFields_t::iterator vFields_iter_t;
   vFields_t m_vFields;
 
   // also need to keep table of active records?
+
 private:
 };
 
@@ -99,9 +90,20 @@ private:
 template<class TD>  // TD: TableDef
 class CTableDef: public CTableDefBase {
 public:
+
   CTableDef( void ): CTableDefBase() {};
   ~CTableDef( void ) {};
+
+  void CreateTable( sqlite3* pDb, const std::string& sTableName );
+
 protected:
 private:
 };
 
+template<class TD>
+void CTableDef<TD>::CreateTable( sqlite3* pDb, const std::string& sTableName ) {
+  TD::TableDef( TableDef_CreateTable );
+}
+
+} // db
+} // ou

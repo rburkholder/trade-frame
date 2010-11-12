@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 // obtain logging library from 
 // http://www.boostpro.com/vault/  //vrc3 is the one to use, svn changes lots and lots of stuff
 // http://www.crystalclearsoftware.com/cgi-bin/boost_wiki/wiki.pl?Boost.Logging
@@ -40,6 +41,8 @@
 #include <boost/log/attributes/basic_attribute_value.hpp>
 //#include <boost/log/filters/attr.hpp>
 //#include <boost/log/formatters/attr.hpp>
+
+namespace ou {
 
 namespace logging = boost::log;
 namespace sinks = boost::log::sinks;
@@ -79,3 +82,4 @@ private:
 };
 
 
+} // ou

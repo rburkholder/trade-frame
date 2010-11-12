@@ -8,3 +8,6 @@ http://www.parashift.com/c++-faq-lite/exceptions.html
 Wiki:
 http://en.wikibooks.org/wiki/C++_Programming/Exception_Handling
 Catch by reference.
+
+Memory allocation error troubleshooting
+http://msdn.microsoft.com/en-us/library/x98tx3cf.aspx

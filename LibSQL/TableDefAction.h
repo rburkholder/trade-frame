@@ -13,6 +13,9 @@
 
 #pragma once
 
+namespace ou {
+namespace db {
+
 //
 // CTableDefActionBase
 // has common versions of Key, Field, Where, OrderBy, Constraint as called by TableDef inside of user class
@@ -31,3 +34,5 @@ protected:
 private:
 };
 
+} // db
+} // ou

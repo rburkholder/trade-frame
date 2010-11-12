@@ -1,3 +1,16 @@
+/************************************************************************
+ * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
+
 // Implementation of Wu Manber's Multi-Pattern Search Algorithm
 // Implemented by Ray Burkholder, ray@oneunified.net
 // Copyright (2008) One Unified
@@ -14,6 +27,8 @@
 #include <stdexcept>
 #include <iostream>
 
+namespace ou {
+
 // use http://www.asciitable.com/ for determining additional character types
 char WuManber::rchSpecialCharacters[] = { 0x21, 0x22, 0x23, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
     0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x5b, 0x5c, 0x5d,
@@ -27,22 +42,22 @@ unsigned char WuManber::rchExtendedAscii[] = {
     0x00 };
 
 WuManber::WuManber( void ):
-  k( 0 ), m( 0 ), m_bInitialized( false ) {
+  m_k( 0 ), m_lcpl( 0 ), m_bInitialized( false ) {
 }
 
 WuManber::~WuManber( void ) {
 }
 
-void WuManber::Initialize( const vector<const char *> &patterns,
+void WuManber::Initialize( const std::vector<const char *>& patterns,
                           bool bCaseSensitive, bool bIncludeSpecialCharacters, bool bIncludeExtendedAscii ) {
 // bIncludeExtendedAscii, bIncludeSpecialCharacters matched as whitespace when false
 
-  k = patterns.size();
-  m = 0; // start with 0 and grow from there
-  for ( unsigned int i = 0; i < k; ++i ) {
+  m_k = patterns.size();
+  m_lcpl = 0; // start with 0 and grow from there
+  for ( unsigned int i = 0; i < m_k; ++i ) {
     size_t lenPattern = strlen( patterns[ i ] );
     if ( B > lenPattern ) throw std::runtime_error( "found pattern less than B in length" );
-    m = ( 0 == m ) ? lenPattern : min( m, lenPattern );
+    m_lcpl = ( 0 == m_lcpl ) ? lenPattern : std::min<size_t>( m_lcpl, lenPattern );
   }
 
   m_nSizeOfAlphabet = 1; // at minimum we have a white space character
@@ -93,21 +108,21 @@ void WuManber::Initialize( const vector<const char *> &patterns,
   m_ShiftTable = new unsigned int[ m_nTableSize ];
 
   for ( size_t i = 0; i < m_nTableSize; ++i ) {
-    m_ShiftTable[ i ] = m - B + 1; // default to m-B+1 for shift
+    m_ShiftTable[ i ] = m_lcpl - B + 1; // default to m-B+1 for shift
   }
 
-  m_vPatternMap = new vector<structPatternMap>[ m_nTableSize ];
+  m_vPatternMap = new std::vector<structPatternMap>[ m_nTableSize ];
 
-  for ( size_t j = 0; j < k; ++j ) {  // loop through patterns
-    for ( size_t q = m; q >= B; --q ) {
+  for ( size_t j = 0; j < m_k; ++j ) {  // loop through patterns
+    for ( size_t q = m_lcpl; q >= B; --q ) {
       unsigned int hash;
       hash  = m_lu[patterns[j][q - 2 - 1]].offset; // bring in offsets of X in pattern j
       hash <<= m_nBitsInShift;
       hash += m_lu[patterns[j][q - 1 - 1]].offset;
       hash <<= m_nBitsInShift;
       hash += m_lu[patterns[j][q     - 1]].offset;
-      size_t shiftlen = m - q;
-      m_ShiftTable[ hash ] = min( m_ShiftTable[ hash ], shiftlen );
+      size_t shiftlen = m_lcpl - q;
+      m_ShiftTable[ hash ] = std::min<size_t>( m_ShiftTable[ hash ], shiftlen );
       if ( 0 == shiftlen ) {
         m_PatternMapElement.ix = j;
         m_PatternMapElement.PrefixHash = m_lu[patterns[j][0]].offset;
@@ -122,10 +137,10 @@ void WuManber::Initialize( const vector<const char *> &patterns,
 
 void WuManber::Search( size_t TextLength, const char *Text, const std::vector<const char *> &patterns ) {
 
-  assert( k == patterns.size() );
-  assert( m < TextLength );
+  assert( m_k == patterns.size() );
+  assert( m_lcpl < TextLength );
   assert( m_bInitialized );
-  size_t ix = m - 1; // start off by matching end of largest common pattern
+  size_t ix = m_lcpl - 1; // start off by matching end of largest common pattern
   while ( ix < TextLength ) {
     unsigned int hash1;
     hash1 = m_lu[Text[ix-2]].offset;
@@ -139,15 +154,15 @@ void WuManber::Search( size_t TextLength, const char *Text, const std::vector<co
     }
     else {  // we have a potential match when shift is 0
       unsigned int hash2;  // check for matching prefixes
-      hash2 = m_lu[Text[ix-m+1]].offset;
+      hash2 = m_lu[Text[ix-m_lcpl+1]].offset;
       hash2 <<= m_nBitsInShift;
-      hash2 += m_lu[Text[ix-m+2]].offset;
-      vector<structPatternMap> &element = m_vPatternMap[ hash1 ];
-      vector<structPatternMap>::iterator iter = element.begin();
+      hash2 += m_lu[Text[ix-m_lcpl+2]].offset;
+      std::vector<structPatternMap> &element = m_vPatternMap[ hash1 ];
+      std::vector<structPatternMap>::iterator iter = element.begin();
       while ( element.end() != iter ) {
         if ( hash2 == (*iter).PrefixHash ) {
           // since prefix matches, compare target substring with pattern
-          const char *ixTarget = Text + ix - m + 3; // we know first two characters already match
+          const char *ixTarget = Text + ix - m_lcpl + 3; // we know first two characters already match
           const char *ixPattern = patterns[ (*iter).ix ] + 2;  // ditto
           while ( ( 0 != *ixTarget ) && ( 0 != *ixPattern ) ) { // match until we reach end of either string
             if ( m_lu[ *ixTarget ].letter == m_lu[ *ixPattern ].letter ) {  // match against chosen case sensitivity
@@ -169,4 +184,4 @@ void WuManber::Search( size_t TextLength, const char *Text, const std::vector<co
   }
 }
 
-
+} // ou

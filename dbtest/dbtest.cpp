@@ -18,12 +18,10 @@
 //using namespace boost::phoenix;
 //using namespace boost::phoenix::arg_names;
 
-#include <LibSqlite/DbSession.h>
-
+#include <LibSQL/DbSession.h>
 
 #include <LibTrading/TradingDb.h>
 #include <LibTrading/AccountManager.h>
-
 
 template <typename K, typename F, typename T> // C class with shared ptr, F is function type, K is type of key
 void constructClass( 
@@ -49,11 +47,10 @@ public:
 
   template<typename A> // A = Action
   void TableDef( A& a ) {
-    Table( a, "test" );
-    Key( a, "mykey", m_key );
-    Field( a, "field1", m_field1 );
-    Field( a, "field2", m_field2 );
-    Field( a, "field3", m_field3 );
+    ou::db::Key(    a, "mykey", m_key );
+    ou::db::Field(  a, "field1", m_field1 );
+    ou::db::Field(  a, "field2", m_field2 );
+    ou::db::Field(  a, "field3", m_field3 );
   };
 
 protected:
@@ -69,7 +66,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
   int i = sizeof( CTestCase::enumfield2 );
 
   CTestCase tc;
-  CSession session( sDbFileName.c_str() );
+  ou::db::CSession session( sDbFileName );
   CStatementCreateTable ct;
   tc.TableDef( ct );
   session.Prepare( ct );

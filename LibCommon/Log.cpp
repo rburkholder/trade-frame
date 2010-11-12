@@ -15,6 +15,8 @@
 #include "Log.h"
 #include <ostream>
 
+namespace ou {
+
 int CLog::m_cntInstances = 0;
 boost::shared_ptr<CLog::text_sink> CLog::m_pSink;
 src::logger CLog::lg;
@@ -53,3 +55,5 @@ CLog::~CLog(void) {
     m_pSink = pSink;  // assign null, implies delete previous content
   }
 }
+
+} // ou

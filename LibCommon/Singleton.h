@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 #include <stdexcept>
 
 // other classes to fix:
@@ -20,6 +21,8 @@
 //   TimeSource
 
 // http://www.oneunified.net/blog/Personal/SoftwareDevelopment/CPP/Singleton.article
+
+namespace ou {
 
 //
 // CSingleton
@@ -68,3 +71,4 @@ private:
 template<typename T> int CMultipleInstanceTest<T>::m_ref = 0;
 #endif
 
+} // ou

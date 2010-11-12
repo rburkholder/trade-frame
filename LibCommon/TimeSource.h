@@ -22,6 +22,8 @@ using namespace boost::gregorian;
 
 #include "Singleton.h"
 
+namespace ou {
+
 class CTimeSource : public CSingleton<CTimeSource> {
 public:
 
@@ -85,3 +87,5 @@ private:
 
   boost::mutex m_mutex;
 };
+
+} // ou

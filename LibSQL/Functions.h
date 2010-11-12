@@ -11,12 +11,21 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "TableDefAction.h"
+#pragma once
 
+#include <string>
 
-CTableDefActionBase::CTableDefActionBase(void) {
+namespace ou {
+namespace db {
+
+template<class Action, typename Var>
+void Key( Action& action, const std::string& sName, Var& var ) {
+  action.Key( sName, var );
 }
 
-
-CTableDefActionBase::~CTableDefActionBase(void) {
+class Action_CreateTable;
+void Key( Action_CreateTable& action, const std::string& sName ) {
 }
+
+} // db
+} // ou

@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 // class DT:  primitive data type (self assignment not checked)
 //  DT should be plain old datatype
 
@@ -32,6 +33,8 @@ using namespace fastdelegate;
 #include <boost/utility.hpp>
 
 //#include "VisibleItemAttributes.h"
+
+namespace ou {
 
 /////////////////////////
 
@@ -118,3 +121,5 @@ template<class DT> const std::string& CSmartVar<DT>::String() {
   m_sItem = m_ss.str(); 
   return m_sItem;
 }
+
+} // ou

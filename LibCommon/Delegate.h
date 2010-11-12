@@ -13,6 +13,8 @@
 
 #pragma once
 
+
+
 #include "FastDelegate.h"
 // http://www.codeproject.com/cpp/FastDelegate.asp
 using namespace fastdelegate;
@@ -22,7 +24,9 @@ using namespace fastdelegate;
 
 #include <assert.h>
 
-template<class RO> class Delegate {
+namespace ou {
+
+  template<class RO> class Delegate {
   // RO: Return Object in call
 
 public:
@@ -117,3 +121,4 @@ template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
   --m_size;
 }
 
+} // ou

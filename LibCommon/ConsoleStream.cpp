@@ -15,6 +15,8 @@
 #include "ConsoleStream.h"
 #include <stdexcept>
 
+namespace ou {
+
 CConsoleStream::CConsoleStream(void) {
   // http://www.cplusplus.com/reference/iostream/streambuf/setp.html
   // http://blogs.awesomeplay.com/elanthis/archives/2007/12/10/444/
@@ -40,3 +42,5 @@ int CConsoleStream::sync() {
 int CConsoleStream::overflow(int_type meta) {
   throw std::runtime_error( "ConsoleStream overflow" );
 }
+
+} // ou

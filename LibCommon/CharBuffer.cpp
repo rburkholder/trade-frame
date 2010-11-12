@@ -21,6 +21,8 @@
 
 #include "CharBuffer.h"
 
+namespace ou {
+
 // CCharBuffer
 
 CCharBuffer::CCharBuffer(void) {
@@ -60,3 +62,4 @@ CCharBuffer *CCharBuffer::Assign( int nChars, const char *szBuf ) {
 //  return this;
 //}
 
+} // ou
