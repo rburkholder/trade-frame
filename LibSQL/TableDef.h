@@ -18,6 +18,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <LibSqlite/sqlite3.h>
+
+#include "Functions.h"
+
 namespace ou {
 namespace db {
 
@@ -25,21 +29,71 @@ namespace db {
 // various Objects used for processing the TableDef
 //
 
-// TableDef_CreateTable
+//
+// ActionBase
+//
+
+// Action_CreateTable
 
 class Action_CreateTable {
 public:
-  template<typename Var>
-  void Key( const std::string& sKey,  );
 
-  void Field( const std::string& sField, const std::string& sDbKeyType );
-  void Where( const std::string& sWhere );
-  void OrderBy( const std::string& sOrderBy );
+  void Key( const std::string& sKey, const char* szDbKeyType  );
+  void Field( const std::string& sField, const char* szDbFieldType );
   void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
+
+  void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement );
+
 protected:
+
 private:
+
+  // definition of fields
+
+  struct structFieldDef {
+    std::string sFieldName;
+    std::string sFieldType;
+    structFieldDef( void ) {};
+    structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
+      : sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
+  };
+
+  typedef std::vector<structFieldDef> vFields_t;
+  typedef vFields_t::iterator vFields_iter_t;
+  vFields_t m_vKeys;
+  vFields_t m_vFields;
+
+  struct structConstraint {
+    std::string sLocalField;
+    std::string sRemoteTable;
+    std::string sRemoteField;
+    structConstraint( const std::string& sLocalField_, const std::string& sRemoteTable_, const std::string& sRemoteField_ ):
+      sLocalField( sLocalField_ ), sRemoteTable( sRemoteTable_ ), sRemoteField( sRemoteField_ ) {};
+  };
+
+  typedef std::vector<structConstraint> vConstraints_t;
+  typedef vConstraints_t::iterator vConstraints_iter_t;
+  vConstraints_t m_vConstraints;
+
 };
 
+//
+// pass through function specializations for Action_CreateTable
+//
+
+template<typename Var>
+void Key( Action_CreateTable& action, const std::string& sKeyName, Var& var ) {
+  action.Key( sName, KeyType( var ) );
+}
+
+template<typename Var>
+void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var ) {
+  action.Field( sName, FieldType( var ) );
+}
+
+void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteVar ) {
+  action.Constraint( sLocalVar, sRemoteTable, sRemoteVar );
+}
 
 
 // TableDef_BuildStatement
@@ -60,23 +114,10 @@ public:
   CTableDefBase( void ) {};
   virtual ~CTableDefBase( void ) {};
 
-  virtual void CreateTable( sqlite3* pDb, const std::string& sTableName ) = 0;
+  //virtual void CreateTable( sqlite3* pDb, const std::string& sTableName ) = 0;
+  virtual void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement ) = 0;
 
 protected:
-
-  // definition of fields
-
-  struct structFieldDef {
-    std::string m_sFieldName;
-    std::string m_sFieldType;
-    structFieldDef( void ) {};
-    structFieldDef(const std::string& sFieldName, const std::string& sFieldType ) 
-      : m_sFieldName( sFieldName ), m_sFieldType( sFieldType ) {};
-  };
-
-  typedef std::vector<structFieldDef> vFields_t;
-  typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vFields;
 
   // also need to keep table of active records?
 
@@ -94,7 +135,8 @@ public:
   CTableDef( void ): CTableDefBase() {};
   ~CTableDef( void ) {};
 
-  void CreateTable( sqlite3* pDb, const std::string& sTableName );
+  //void CreateTable( sqlite3* pDb, const std::string& sTableName );
+  void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement );
 
 protected:
 private:
@@ -102,7 +144,13 @@ private:
 
 template<class TD>
 void CTableDef<TD>::CreateTable( sqlite3* pDb, const std::string& sTableName ) {
-  TD::TableDef( TableDef_CreateTable );
+
+  Action_CreateTable ct;  // action structure maintenance
+
+  TD::TableDef( ct );  // build structure from source definitions
+
+  //ct.CreateTable( pDb, sTableName );
+
 }
 
 } // db

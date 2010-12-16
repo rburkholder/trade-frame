@@ -13,16 +13,27 @@
 
 #include "StdAfx.h"
 
-#include "TableDefAction.h"
+#include "PreparedStatement.h"
 
 namespace ou {
 namespace db {
 
-CTableDefActionBase::CTableDefActionBase(void) {
+CPreparedStatement::CPreparedStatement(void) 
+  : m_bPrepared( false )
+{
 }
 
+CPreparedStatement::CPreparedStatement( const std::string& sSqlStatement ) 
+  : m_sSqlStatement( sSqlStatement ), m_bPrepared( false )
+{
+}
 
-CTableDefActionBase::~CTableDefActionBase(void) {
+CPreparedStatement::~CPreparedStatement(void) {
+}
+
+void CPreparedStatement::SetQueryString( const std::string& sSqlStatement ) {
+  m_sSqlStatement = sSqlStatement;
+  m_bPrepared = true;
 }
 
 } // db

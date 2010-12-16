@@ -13,71 +13,17 @@
 
 #pragma once
 
+// 2010/11/13 will be obsoleted by CPreparedStatement
+
 #include <string>
 #include <vector>
 
-#include <boost/cstdint.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <LibSqlite\sqlite3.h>
+
+#include "Functions.h"
 
 namespace ou {
 namespace db {
-
-template<typename A> // A=Action
-void Table( A& a, const std::string& sName ) {
-  a.registerTable( sName );
-};
-
-template<typename A, typename T> // A=Action, T=Type
-void Key( A& a, const std::string& sName, T& var, const std::string& sDbType ) {
-  a.registerKey( sName, var, sDbType );
-};
-
-template<typename A, typename T> // A=Action, T=Type
-void Key( A& a, const std::string& sName, T& var ) {
-  a.registerKey( sName, var );
-};
-
-template<typename A, typename T> // A=Action, T=Type
-void Field( A& a, const std::string& sName, T& var, const std::string& sDbType ) {
-  a.registerField( sName, var, sDbType );
-};
-
-template<typename A, typename T> // A=Action, T=Type
-void Field( A& a, const std::string& sName, T& var ) {
-  a.registerField( sName, var );
-};
-
-template<typename A, typename T> // A=Action, T=Type
-void Where( A& a, const std::string& sName, T& var ) {  // expand functionality at a later date, defaults to '=' currently
-  a.registerWhere( sName, var );
-};
-
-template<typename A> // A=Action
-void OrderBy( A& a, const std::string& sName ) {
-  a.registerOrderBy( sName );
-};
-
-template<typename A> // A=Action
-void Constraint( A& a, const std::string& sLocalKey, const std::string& sRemoteTable, const std::string& sRemoteKey ) {
-  a.registerConstraint( sLocalKey, sRemoteTable, sRemoteKey );
-};
-
-// use some template magic to merge KeyType and FieldType so don't have redundancy in the lists
-const char* KeyType( boost::int64_t key );
-const char* KeyType( std::string& key );
-
-const char* FieldType( int key );
-const char* FieldType( char key );
-const char* FieldType( bool key );
-const char* FieldType( boost::posix_time::ptime& key );
-const char* FieldType( boost::int64_t key );
-const char* FieldType( boost::int32_t key );
-const char* FieldType( boost::int16_t key );
-const char* FieldType( boost::int8_t key );
-const char* FieldType( std::string& key );
-const char* FieldType( double key );
 
 class CDbSession;
 
@@ -324,14 +270,7 @@ void CStatement<T>::Prepare( sqlite3* db ) {
 // CStatementCreateTable
 //
 
-class CStatementCreateTable: public CStatement<CStatementCreateTable> {
-public:
-  CStatementCreateTable( void ) : CStatement<CStatementCreateTable>() {};
-  ~CStatementCreateTable( void ) {};
-  void ComposeStatement( void );
-protected:
-private:
-};
+// ** migrated to TableDef
 
 // 
 // CStatementInsert

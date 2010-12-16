@@ -11,19 +11,32 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#pragma once
 
-#include "TableDefAction.h"
+#include <string>
+
+#include <boost\shared_ptr.hpp>
 
 namespace ou {
 namespace db {
 
-CTableDefActionBase::CTableDefActionBase(void) {
-}
+class CPreparedStatement {
+public:
 
+  typedef boost::shared_ptr<CPreparedStatement> pCPreparedStatement_t;
 
-CTableDefActionBase::~CTableDefActionBase(void) {
-}
+  CPreparedStatement(void);
+  CPreparedStatement( const std::string& sSqlStatement );
+  ~CPreparedStatement(void);
+
+  void SetQueryString( const std::string& sSqlStatement );
+
+protected:
+private:
+  bool m_bPrepared;
+  std::string m_sSqlStatement;
+};
+
 
 } // db
 } // ou

@@ -27,9 +27,6 @@
     <ClInclude Include="CountryCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DbSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Statement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,15 +39,18 @@
     <ClInclude Include="Functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PreparedStatement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CountryCode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DbSession.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Statement.cpp">
@@ -60,6 +60,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TableDefAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreparedStatement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

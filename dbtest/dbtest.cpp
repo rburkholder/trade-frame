@@ -18,7 +18,7 @@
 //using namespace boost::phoenix;
 //using namespace boost::phoenix::arg_names;
 
-#include <LibSQL/DbSession.h>
+#include <LibSQL/Session.h>
 
 #include <LibTrading/TradingDb.h>
 #include <LibTrading/AccountManager.h>
@@ -38,7 +38,7 @@ void constructClass(
 };
 
 
-std::string const sDbFileName = "dbtest.sqlite3";
+std::string const sDbFileName = "dbtest1.sqlite3";
 
 class CTestCase {
 public:

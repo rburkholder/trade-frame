@@ -19,14 +19,19 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include <LibSqlite\sqlite3.h>
-
-#include "Statement.h"
+#include "PreparedStatement.h"
 #include "TableDef.h"
 
 namespace ou {
 namespace db {
 
+//
+// CSession code is at bottom of file.
+//
+
+// ==========
+
+// this function should probably disappear at some point
 template<typename K, typename M, typename P, typename F>
 void LoadObject(
   const std::string& sErrPrefix, const std::string& sSqlSelect,
@@ -75,6 +80,7 @@ void LoadObject(
   }
 }
 
+// this function should probably disappear at some point
 template<typename K, typename P>
 void SqlOpOnObject(
   const std::string& sErrPrefix, const std::string& sSqlOp,
@@ -111,6 +117,7 @@ void SqlOpOnObject(
 
 }
 
+// this function should probably disappear at some point
 template<typename K, typename P>
 void DeleteObject(
   const std::string& sErrPrefix, const std::string& sSqlOp,
@@ -144,19 +151,22 @@ void DeleteObject(
 }
 
 //
-// CDbSession
+// CSession
 //
 
 class CSession {
 public:
 
+  typedef CPreparedStatement::pCPreparedStatement_t pCPreparedStatement_t;
+
   CSession(void);
-  CSession( const std::string& szDbFileName );
+  CSession( const std::string& sDbFileName );
   ~CSession(void);
 
-  void Open( const std::string& szDbFileName );
+  void Open( const std::string& sDbFileName );
   void Close( void );
 
+  // need to convert for generic library call
   void PrepareStatement(
     const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
 
@@ -173,8 +183,6 @@ public:
 
 protected:
 private:
-
-  typedef CTableDefBase::pCTableDefBase_t pCTableDefBase_t;
   
   bool m_bDbOpened;
 
@@ -182,10 +190,18 @@ private:
 
   std::string m_sDbFileName;
 
+  typedef CTableDefBase::pCTableDefBase_t pCTableDefBase_t;
+
   typedef std::map<std::string, pCTableDefBase_t> mapTableDefs_t;  // map table name to table definition
   typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
   typedef std::pair<std::string, pCTableDefBase_t&> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
+
+  typedef CPreparedStatement::pCPreparedStatement_t pCPreparedStatement_t;
+
+  typedef std::vector<pCPreparedStatement_t> vPreparedStatements_t;
+  typedef vPreparedStatements_t::iterator vPreparedStatements_iter_t;
+  vPreparedStatements_t m_vPreparedStatements;
 
 };
 
@@ -195,14 +211,15 @@ void CSession::RegisterTableDef( const std::string& sTableName ) {
   if ( m_mapTableDefs.end() != iter ) {
     throw std::runtime_error( "table name already has definition" );
   }
-  pCTableDefBase_t pDef.reset( new CTableDef<TD>() );  // add empty table defintion
+  pCTableDefBase_t pDef.reset( new CTableDef<TD>() );  // add empty table definition
   iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
 }
 
 template<typename TD>
 void CSession::CreateTables( void ) {
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    iter->second->CreateTable( m_db, iter->first );
+    std::string sStatement;
+    iter->second->ComposeCreationStatement( iter->first, sStatement );  
   }
 }
 

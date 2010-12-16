@@ -13,7 +13,7 @@
 
 #include "stdafx.h"
 
-#include "DbSession.h"
+#include "Session.h"
 
 #include <stdexcept>
 #include <cassert>

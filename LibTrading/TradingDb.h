@@ -16,9 +16,9 @@
 #include <string>
 #include <stdexcept>
 
-#include <LibSqlite/DbSession.h>
+#include <LibSql/Session.h>
 
-class CTradingDb: public CDbSession
+class CTradingDb: public ou::db::CSession
 {
 public:
 

@@ -73,8 +73,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CountryCode.h" />
-    <ClInclude Include="DbSession.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="Functions.h" />
+    <ClInclude Include="PreparedStatement.h" />
     <ClInclude Include="Statement.h" />
     <ClInclude Include="TableDef.h" />
     <ClInclude Include="TableDefAction.h" />
@@ -83,7 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CountryCode.cpp" />
-    <ClCompile Include="DbSession.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="Functions.cpp" />
+    <ClCompile Include="PreparedStatement.cpp" />
     <ClCompile Include="Statement.cpp" />
     <ClCompile Include="TableDef.cpp" />
     <ClCompile Include="TableDefAction.cpp" />
