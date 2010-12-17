@@ -11,10 +11,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
+
 #include "TableDef.h"
 
 namespace ou {
 namespace db {
+
+void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteField ) {
+  action.Constraint( sLocalVar, sRemoteTable, sRemoteField );
+}
+
+// ----
 
 void Action_CreateTable::Key( const std::string& sKey, const char* szDbKeyType  ) {
   structFieldDef fd( sKey, szDbKeyType );

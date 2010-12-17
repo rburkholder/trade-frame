@@ -91,11 +91,6 @@ void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var 
   action.Field( sName, FieldType( var ) );
 }
 
-void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteVar ) {
-  action.Constraint( sLocalVar, sRemoteTable, sRemoteVar );
-}
-
-
 // TableDef_BuildStatement
 
 // TableDef_BindForWrite
@@ -143,13 +138,13 @@ private:
 };
 
 template<class TD>
-void CTableDef<TD>::CreateTable( sqlite3* pDb, const std::string& sTableName ) {
+void CTableDef<TD>::ComposeCreationStatement( const std::string& sTableName, std::string& sStatement ) {
 
   Action_CreateTable ct;  // action structure maintenance
 
   TD::TableDef( ct );  // build structure from source definitions
 
-  //ct.CreateTable( pDb, sTableName );
+  ct.ComposeCreationStatement( sTableName, sStatement );
 
 }
 

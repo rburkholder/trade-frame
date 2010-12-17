@@ -175,10 +175,9 @@ public:
     stmt.Prepare( m_db );
   }
 
-  template<typename TD> // TD = Table Definition
+  template<typename TC> // TC = Table Class
   void RegisterTableDef( const std::string& sTableName );
 
-  template<typename TD> // TD - Table Definition
   void CreateTables( void );
 
 protected:
@@ -215,13 +214,6 @@ void CSession::RegisterTableDef( const std::string& sTableName ) {
   iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
 }
 
-template<typename TD>
-void CSession::CreateTables( void ) {
-  for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    std::string sStatement;
-    iter->second->ComposeCreationStatement( iter->first, sStatement );  
-  }
-}
 
 } // db
 } // ou

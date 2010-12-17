@@ -105,5 +105,12 @@ void CSession::Close( void ) {
   }
 }
 
+void CSession::CreateTables( void ) {
+  for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
+    std::string sStatement;
+    iter->second->ComposeCreationStatement( iter->first, sStatement );  
+  }
+}
+
 } // db
 } // ou

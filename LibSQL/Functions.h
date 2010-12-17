@@ -70,11 +70,7 @@ void Constraint( Action& action, const std::string& sLocalKey, const std::string
 // dealing with key resolution: find db field type from c++ plain old data type
 //
 
-const char* KeyType( boost::int64_t key );
-const char* KeyType( std::string& key );
-
 const char* FieldType( boost::posix_time::ptime& key ); // don't use julian as ptime has no representation earlier than 1400 AD
-//const char* FieldType( int key );
 const char* FieldType( char key );
 const char* FieldType( bool key );
 const char* FieldType( boost::int64_t key );
@@ -83,6 +79,9 @@ const char* FieldType( boost::int16_t key );
 const char* FieldType( boost::int8_t key );
 const char* FieldType( std::string& key );
 const char* FieldType( double key );
+
+const char* KeyType( boost::int64_t key );
+const char* KeyType( std::string& key );
 
 } // db
 } // ou

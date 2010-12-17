@@ -54,7 +54,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)LibSQL.lib;$(OutDir)LibSqlite.lib;$(OutDir)LibCommon.lib;$(OutDir)LibTrading.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)LibSQL.lib;$(OutDir)LibSqlite.lib;$(OutDir)libboost_date_time-vc100-mt-gd-1_44.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
