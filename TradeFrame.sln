@@ -72,8 +72,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibSqlite", "LibSqlite\LibSqlite.vcxproj", "{842E7A61-5316-4028-9569-1468AEC45D1F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibSQL", "LibSQL\LibSQL.vcxproj", "{00437625-753F-4206-A3C0-3D5C959F7D91}"
+	ProjectSection(ProjectDependencies) = postProject
+		{842E7A61-5316-4028-9569-1468AEC45D1F} = {842E7A61-5316-4028-9569-1468AEC45D1F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbtest2", "dbtest2\dbtest2.vcxproj", "{5EC90A04-644E-448A-8380-A566CAE65ABC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{00437625-753F-4206-A3C0-3D5C959F7D91} = {00437625-753F-4206-A3C0-3D5C959F7D91}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

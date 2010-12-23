@@ -83,12 +83,12 @@ private:
 
 template<typename Var>
 void Key( Action_CreateTable& action, const std::string& sKeyName, Var& var ) {
-  action.Key( sName, KeyType( var ) );
+  action.Key( sKeyName, KeyType( var ) );
 }
 
 template<typename Var>
 void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var ) {
-  action.Field( sName, FieldType( var ) );
+  action.Field( sFieldName, FieldType( var ) );
 }
 
 // TableDef_BuildStatement
@@ -106,45 +106,53 @@ public:
 
   typedef boost::shared_ptr<CTableDefBase> pCTableDefBase_t;
 
-  CTableDefBase( void ) {};
+  CTableDefBase( const std::string& sTableName ) : m_sTableName( sTableName ) { };
   virtual ~CTableDefBase( void ) {};
 
   //virtual void CreateTable( sqlite3* pDb, const std::string& sTableName ) = 0;
-  virtual void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement ) = 0;
+  virtual void ComposeCreationStatement( std::string& sStatement ) = 0;
+
+  const std::string& TableName( void ) { return m_sTableName; };
 
 protected:
 
   // also need to keep table of active records?
 
 private:
+
+  std::string m_sTableName;
+
+  CTableDefBase( void ); // no default constructor
 };
 
 //
 // CTableDef
 //
 
-template<class TD>  // TD: TableDef
+template<class T>  // T: Table Class with TableDef member function
 class CTableDef: public CTableDefBase {
 public:
 
-  CTableDef( void ): CTableDefBase() {};
+  CTableDef( const std::string& sTableName ): CTableDefBase( sTableName ) {};
   ~CTableDef( void ) {};
 
   //void CreateTable( sqlite3* pDb, const std::string& sTableName );
-  void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeCreationStatement( std::string& sStatement );
 
 protected:
 private:
 };
 
-template<class TD>
-void CTableDef<TD>::ComposeCreationStatement( const std::string& sTableName, std::string& sStatement ) {
+template<class T>
+void CTableDef<T>::ComposeCreationStatement( std::string& sStatement ) {
 
   Action_CreateTable ct;  // action structure maintenance
 
-  TD::TableDef( ct );  // build structure from source definitions
+  T t;
 
-  ct.ComposeCreationStatement( sTableName, sStatement );
+  t.Fields( ct );  // build structure from source definitions
+
+  ct.ComposeCreationStatement( TableName(), sStatement );
 
 }
 

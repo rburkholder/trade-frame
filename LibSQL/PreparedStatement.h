@@ -25,9 +25,9 @@ public:
 
   typedef boost::shared_ptr<CPreparedStatement> pCPreparedStatement_t;
 
-  CPreparedStatement(void);
+  CPreparedStatement( void );
   CPreparedStatement( const std::string& sSqlStatement );
-  ~CPreparedStatement(void);
+  ~CPreparedStatement( void );
 
   void SetQueryString( const std::string& sSqlStatement );
 

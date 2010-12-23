@@ -33,7 +33,7 @@ CPreparedStatement::~CPreparedStatement(void) {
 
 void CPreparedStatement::SetQueryString( const std::string& sSqlStatement ) {
   m_sSqlStatement = sSqlStatement;
-  m_bPrepared = true;
+  m_bPrepared = false;
 }
 
 } // db

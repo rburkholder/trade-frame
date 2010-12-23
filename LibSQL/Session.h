@@ -157,13 +157,19 @@ void DeleteObject(
 class CSession {
 public:
 
+  enum enumFlags { 
+    EFlagsZero = 0, 
+    EFlagsAutoCreate = 0x1 
+  };
+
   typedef CPreparedStatement::pCPreparedStatement_t pCPreparedStatement_t;
 
-  CSession(void);
-  CSession( const std::string& sDbFileName );
-  ~CSession(void);
+   CSession( void );
+   CSession( const std::string& sDbFileName );
+   CSession( const std::string& sDbFileName, enumFlags flags );
+  ~CSession( void );
 
-  void Open( const std::string& sDbFileName );
+  void Open( const std::string& sDbFileName, enumFlags = EFlagsZero );
   void Close( void );
 
   // need to convert for generic library call
@@ -175,7 +181,7 @@ public:
     stmt.Prepare( m_db );
   }
 
-  template<typename TC> // TC = Table Class
+  template<typename T> // T: Table Class with TableDef member function
   void RegisterTableDef( const std::string& sTableName );
 
   void CreateTables( void );
@@ -184,6 +190,8 @@ protected:
 private:
   
   bool m_bDbOpened;
+
+  enumFlags m_flags;
 
   sqlite3* m_db;
 
@@ -204,13 +212,14 @@ private:
 
 };
 
-template<typename TD>
+template<typename T>
 void CSession::RegisterTableDef( const std::string& sTableName ) {
   mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
   if ( m_mapTableDefs.end() != iter ) {
     throw std::runtime_error( "table name already has definition" );
   }
-  pCTableDefBase_t pDef.reset( new CTableDef<TD>() );  // add empty table definition
+  pCTableDefBase_t pDef;
+  pDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
   iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
 }
 

@@ -245,7 +245,7 @@ void CStatement<T>::Prepare( sqlite3* db ) {
       throw std::runtime_error( sErr );
     }
   }
-  else { // m_bRegistrationStarted is false, so reset and unbind
+  else { // m_bRegistrationStarted is false, no prepare required, just reset and unbind
     rtn = sqlite3_reset( m_pStmt );
     if ( SQLITE_OK != rtn ) {
       std::string sErr( "CStatement::Prepare: " );
