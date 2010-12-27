@@ -74,23 +74,27 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CountryCode.h" />
+    <ClInclude Include="IDatabase.h" />
+    <ClInclude Include="IPostgresql.h" />
+    <ClInclude Include="ISqlite3.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="Functions.h" />
-    <ClInclude Include="PreparedStatement.h" />
+    <ClInclude Include="Sql.h" />
     <ClInclude Include="Statement.h" />
     <ClInclude Include="TableDef.h" />
-    <ClInclude Include="TableDefAction.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CountryCode.cpp" />
+    <ClCompile Include="IDatabase.cpp" />
+    <ClCompile Include="IPostgresql.cpp" />
+    <ClCompile Include="ISqlite3.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="Functions.cpp" />
-    <ClCompile Include="PreparedStatement.cpp" />
+    <ClCompile Include="Sql.cpp" />
     <ClCompile Include="Statement.cpp" />
     <ClCompile Include="TableDef.cpp" />
-    <ClCompile Include="TableDefAction.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

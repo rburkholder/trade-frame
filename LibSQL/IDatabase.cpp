@@ -13,16 +13,16 @@
 
 #include "StdAfx.h"
 
-#include "TableDefAction.h"
+#include "IDatabase.h"
 
 namespace ou {
 namespace db {
 
-CTableDefActionBase::CTableDefActionBase(void) {
+IDatabase::IDatabase(void) {
 }
 
 
-CTableDefActionBase::~CTableDefActionBase(void) {
+IDatabase::~IDatabase(void) {
 }
 
 } // db

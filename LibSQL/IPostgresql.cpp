@@ -13,27 +13,16 @@
 
 #include "StdAfx.h"
 
-#include "PreparedStatement.h"
+#include "IPostgresql.h"
 
 namespace ou {
 namespace db {
 
-CPreparedStatement::CPreparedStatement(void) 
-  : m_bPrepared( false )
-{
+IPostgresql::IPostgresql(void) {
 }
 
-CPreparedStatement::CPreparedStatement( const std::string& sSqlStatement ) 
-  : m_sSqlStatement( sSqlStatement ), m_bPrepared( false )
-{
-}
 
-CPreparedStatement::~CPreparedStatement(void) {
-}
-
-void CPreparedStatement::SetQueryString( const std::string& sSqlStatement ) {
-  m_sSqlStatement = sSqlStatement;
-  m_bPrepared = false;
+IPostgresql::~IPostgresql(void) {
 }
 
 } // db

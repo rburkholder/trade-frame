@@ -39,7 +39,7 @@ void Action_CreateTable::Constraint( const std::string& sLocalField, const std::
   m_vConstraints.push_back( constraint );
 }
 
-void Action_CreateTable::ComposeCreationStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_CreateTable::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
   sStatement = "CREATE TABLE " + sTableName + " (";
   int ix = 0;

@@ -21,17 +21,10 @@
 #include <LibSqlite/sqlite3.h>
 
 #include "Functions.h"
+#include "Sql.h"
 
 namespace ou {
 namespace db {
-
-//
-// various Objects used for processing the TableDef
-//
-
-//
-// ActionBase
-//
 
 // Action_CreateTable
 
@@ -42,7 +35,7 @@ public:
   void Field( const std::string& sField, const char* szDbFieldType );
   void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
 
-  void ComposeCreationStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
 protected:
 
@@ -98,53 +91,37 @@ void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var 
 // TableDef_ColumnForRead
 
 //
-// CTableDefBase
-//
-
-class CTableDefBase {
-public:
-
-  typedef boost::shared_ptr<CTableDefBase> pCTableDefBase_t;
-
-  CTableDefBase( const std::string& sTableName ) : m_sTableName( sTableName ) { };
-  virtual ~CTableDefBase( void ) {};
-
-  //virtual void CreateTable( sqlite3* pDb, const std::string& sTableName ) = 0;
-  virtual void ComposeCreationStatement( std::string& sStatement ) = 0;
-
-  const std::string& TableName( void ) { return m_sTableName; };
-
-protected:
-
-  // also need to keep table of active records?
-
-private:
-
-  std::string m_sTableName;
-
-  CTableDefBase( void ); // no default constructor
-};
-
-//
 // CTableDef
 //
 
 template<class T>  // T: Table Class with TableDef member function
-class CTableDef: public CTableDefBase {
+class CTableDef: public CSql<T> {
 public:
 
-  CTableDef( const std::string& sTableName ): CTableDefBase( sTableName ) {};
+  typedef boost::shared_ptr<CTableDef<T> > pCTableDef_t;
+
+  CTableDef( const std::string& sTableName );
   ~CTableDef( void ) {};
 
+  const std::string& TableName( void ) { return m_sTableName; };
+
   //void CreateTable( sqlite3* pDb, const std::string& sTableName );
-  void ComposeCreationStatement( std::string& sStatement );
+  void ComposeStatement( std::string& sStatement );
 
 protected:
 private:
+  std::string m_sTableName;
 };
 
 template<class T>
-void CTableDef<T>::ComposeCreationStatement( std::string& sStatement ) {
+CTableDef<T>::CTableDef( const std::string& sTableName )
+: CSql<T>(), 
+  m_sTableName( sTableName )
+{
+}
+
+template<class T>
+void CTableDef<T>::ComposeStatement( std::string& sStatement ) {
 
   Action_CreateTable ct;  // action structure maintenance
 
@@ -152,7 +129,7 @@ void CTableDef<T>::ComposeCreationStatement( std::string& sStatement ) {
 
   t.Fields( ct );  // build structure from source definitions
 
-  ct.ComposeCreationStatement( TableName(), sStatement );
+  ct.ComposeStatement( TableName(), sStatement );
 
 }
 

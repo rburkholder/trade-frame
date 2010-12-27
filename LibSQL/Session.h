@@ -19,7 +19,8 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "PreparedStatement.h"
+#include "IDatabase.h"
+#include "Sql.h"
 #include "TableDef.h"
 
 namespace ou {
@@ -157,19 +158,11 @@ void DeleteObject(
 class CSession {
 public:
 
-  enum enumFlags { 
-    EFlagsZero = 0, 
-    EFlagsAutoCreate = 0x1 
-  };
-
-  typedef CPreparedStatement::pCPreparedStatement_t pCPreparedStatement_t;
-
    CSession( void );
-   CSession( const std::string& sDbFileName );
-   CSession( const std::string& sDbFileName, enumFlags flags );
+   CSession( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   ~CSession( void );
 
-  void Open( const std::string& sDbFileName, enumFlags = EFlagsZero );
+  void Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   void Close( void );
 
   // need to convert for generic library call
@@ -182,7 +175,10 @@ public:
   }
 
   template<typename T> // T: Table Class with TableDef member function
-  void RegisterTableDef( const std::string& sTableName );
+  void RegisterTable( const std::string& sTableName );
+
+  template<typename F>
+  typename ou::db::CSql<F>::pCSql_t RegisterFields( void );
 
   void CreateTables( void );
 
@@ -191,36 +187,40 @@ private:
   
   bool m_bDbOpened;
 
-  enumFlags m_flags;
-
   sqlite3* m_db;
 
   std::string m_sDbFileName;
 
-  typedef CTableDefBase::pCTableDefBase_t pCTableDefBase_t;
+  typedef ou::db::CSqlBase::pCSqlBase_t pCSqlBase_t;  // track use_count on exit to ensure all removed properly
 
-  typedef std::map<std::string, pCTableDefBase_t> mapTableDefs_t;  // map table name to table definition
+  typedef std::map<std::string, pCSqlBase_t> mapTableDefs_t;  // map table name to table definition
   typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
-  typedef std::pair<std::string, pCTableDefBase_t&> mapTableDefs_pair_t;
+  typedef std::pair<std::string, pCSqlBase_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
-  typedef CPreparedStatement::pCPreparedStatement_t pCPreparedStatement_t;
-
-  typedef std::vector<pCPreparedStatement_t> vPreparedStatements_t;
-  typedef vPreparedStatements_t::iterator vPreparedStatements_iter_t;
-  vPreparedStatements_t m_vPreparedStatements;
+  typedef std::vector<pCSqlBase_t> vSql_t;
+  typedef vSql_t::iterator vSql_iter_t;
+  vSql_t m_vSql;
 
 };
 
 template<typename T>
-void CSession::RegisterTableDef( const std::string& sTableName ) {
+void CSession::RegisterTable( const std::string& sTableName ) {
   mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
   if ( m_mapTableDefs.end() != iter ) {
     throw std::runtime_error( "table name already has definition" );
   }
-  pCTableDefBase_t pDef;
-  pDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
-  iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pDef ) );
+  typename ou::db::CTableDef<T>::pCTableDef_t pTableDef;
+  pTableDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
+  iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pTableDef ) );
+}
+
+template<typename F>
+typename ou::db::CSql<F>::pCSql_t CSession::RegisterFields( void ) {
+  typename ou::db::CSql<F>::pCSql_t pCSql;
+  m_vSql.push_back( pCSql );
+  pCSql.reset( new CSql<F>() );
+  return pCSql;
 }
 
 

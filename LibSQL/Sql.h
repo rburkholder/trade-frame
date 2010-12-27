@@ -17,26 +17,58 @@
 
 #include <boost\shared_ptr.hpp>
 
+#include "IDatabase.h"
+
 namespace ou {
 namespace db {
 
-class CPreparedStatement {
+//
+// =====
+//
+
+class CSqlBase {
 public:
 
-  typedef boost::shared_ptr<CPreparedStatement> pCPreparedStatement_t;
+  typedef boost::shared_ptr<CSqlBase> pCSqlBase_t;
 
-  CPreparedStatement( void );
-  CPreparedStatement( const std::string& sSqlStatement );
-  ~CPreparedStatement( void );
+  CSqlBase(void);
+  virtual ~CSqlBase(void);
 
-  void SetQueryString( const std::string& sSqlStatement );
+  void PrepareStatement( void );
 
 protected:
+
+  virtual void ComposeStatement( std::string& sStatement );
+
 private:
   bool m_bPrepared;
   std::string m_sSqlStatement;
 };
 
+//
+// =====
+//
+
+template<typename F>  // f: Field definitions
+class CSql: public CSqlBase {
+public:
+
+  typedef typename boost::shared_ptr<CSql> pCSql_t;
+
+  CSql(void);
+  ~CSql(void);
+
+protected:
+private:
+};
+
+template<typename F>
+CSql<F>::CSql( void ): CSqlBase() {
+}
+
+template<typename F>
+CSql<F>::~CSql( void ) {
+}
 
 } // db
 } // ou

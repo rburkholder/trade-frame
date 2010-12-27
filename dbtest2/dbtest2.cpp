@@ -3,15 +3,18 @@
 
 #include "stdafx.h"
 
+#include <iostream>
+
 #include <LibSQL/Session.h>
 
-// test template getting at type without instatiating variable
+
+
+// test template getting at type without instantiating variable: complains about static call to non static function
 // use full specialization or partial specialization
 
 
 
-class CTestTable {
-public:
+struct CTestTable {
 
   template<typename A> // A = Action
   void Fields( A& a ) {
@@ -28,23 +31,18 @@ public:
   enumfield2 m_field2;
   int m_field3;
 
-protected:
-private:
 };
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-  ou::db::CSession session( "dbtest2.db", ou::db::CSession::EFlagsAutoCreate );
+  ou::db::CSession session( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
-  //CTestTable table;
-
-  //ou::db::CTableDef<CTestTable> td;
-
-  session.RegisterTableDef<CTestTable>( "test" );
+  session.RegisterTable<CTestTable>( "test" );
+  session.RegisterFields<CTestTable>();
 
   session.CreateTables();
 
-	return 0;
+  return 0;
 
 }
 

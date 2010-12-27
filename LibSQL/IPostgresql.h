@@ -13,23 +13,15 @@
 
 #pragma once
 
+#include "IDatabase.h"
+
 namespace ou {
 namespace db {
 
-//
-// CTableDefActionBase
-// has common versions of Key, Field, Where, OrderBy, Constraint as called by TableDef inside of user class
-//
-
-class CTableDefActionBase
-{
+class IPostgresql {
 public:
-
-  CTableDefActionBase(void);
-  virtual ~CTableDefActionBase(void);
-
-  //void Key( 
-
+  IPostgresql(void);
+  ~IPostgresql(void);
 protected:
 private:
 };
