@@ -155,11 +155,11 @@ void DeleteObject(
 // CSession
 //
 
+template<class IDatabase>
 class CSession {
 public:
 
    CSession( void );
-   CSession( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   ~CSession( void );
 
   void Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
@@ -175,21 +175,30 @@ public:
   }
 
   template<typename T> // T: Table Class with TableDef member function
-  void RegisterTable( const std::string& sTableName );
+  void RegisterTable( const std::string& sTableName ) {
+    mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
+    if ( m_mapTableDefs.end() != iter ) {
+      throw std::runtime_error( "table name already has definition" );
+    }
+    typename ou::db::CTableDef<T>::pCTableDef_t pTableDef;
+    pTableDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
+    iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pTableDef ) );
+  }
 
   template<typename F>
-  typename ou::db::CSql<F>::pCSql_t RegisterFields( void );
+  typename ou::db::CSql<F>::pCSql_t RegisterFields( void ) {
+    typename ou::db::CSql<F>::pCSql_t pCSql;
+    m_vSql.push_back( pCSql );
+    pCSql.reset( new CSql<F>() );
+    return pCSql;
+  }
 
   void CreateTables( void );
 
 protected:
 private:
   
-  bool m_bDbOpened;
-
-  sqlite3* m_db;
-
-  std::string m_sDbFileName;
+  IDatabase m_db;
 
   typedef ou::db::CSqlBase::pCSqlBase_t pCSqlBase_t;  // track use_count on exit to ensure all removed properly
 
@@ -204,24 +213,42 @@ private:
 
 };
 
-template<typename T>
-void CSession::RegisterTable( const std::string& sTableName ) {
-  mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
-  if ( m_mapTableDefs.end() != iter ) {
-    throw std::runtime_error( "table name already has definition" );
-  }
-  typename ou::db::CTableDef<T>::pCTableDef_t pTableDef;
-  pTableDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
-  iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pTableDef ) );
+// Constructor
+template<class IDatabase>
+CSession<IDatabase>::CSession( void )
+{
 }
 
-template<typename F>
-typename ou::db::CSql<F>::pCSql_t CSession::RegisterFields( void ) {
-  typename ou::db::CSql<F>::pCSql_t pCSql;
-  m_vSql.push_back( pCSql );
-  pCSql.reset( new CSql<F>() );
-  return pCSql;
+// Destructor
+template<class IDatabase>
+CSession<IDatabase>::~CSession(void)
+{
+  m_db.Close();
 }
+
+// Open
+template<class IDatabase>
+void CSession<IDatabase>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
+
+  m_db.Open( sDbFileName, flags );
+
+}
+
+// Close
+template<class IDatabase>
+void CSession<IDatabase>::Close( void ) {
+  m_db.Close();
+}
+
+// CreateTables
+template<class IDatabase>
+void CSession<IDatabase>::CreateTables( void ) {
+  for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
+    std::string sStatement;
+    iter->second->PrepareStatement();  
+  }
+}
+
 
 
 } // db

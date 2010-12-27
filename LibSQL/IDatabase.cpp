@@ -18,7 +18,9 @@
 namespace ou {
 namespace db {
 
-IDatabase::IDatabase(void) {
+IDatabase::IDatabase(void) 
+  : m_bDbOpened( false )
+{
 }
 
 

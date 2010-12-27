@@ -49,71 +49,10 @@ void PrepareStatement(
 }
 
 //
-// CDbFieldDefBase
 //
 
 //
-// CDbFieldDef
 //
-
-//
-// CDbTableDefBase
-//
-
-//
-// CDbTableDef
-//
-
-
-
-
-CSession::CSession(void)
-: m_db( 0 ), m_bDbOpened( false )
-{
-}
-
-
-CSession::CSession( const std::string& sDbFileName, enumOpenFlags flags ) 
-: m_db( 0 ), m_bDbOpened( false )
-{
-  Open( sDbFileName, flags );
-}
-
-CSession::~CSession(void)
-{
-  Close();
-}
-
-void CSession::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
-
-  int sqlite3_flags = SQLITE_OPEN_READWRITE;
-  sqlite3_flags |= ( 0 < ( flags & EOpenFlagsAutoCreate ) ) ? SQLITE_OPEN_CREATE : 0;
-
-  int rtn = sqlite3_open_v2( sDbFileName.c_str(), &m_db, sqlite3_flags, 0 );
-  if ( SQLITE_OK != rtn ) {
-    m_db = 0;
-    throw std::runtime_error( "Db open error" );
-  }
-
-  m_sDbFileName = sDbFileName;
-  m_bDbOpened = true;
-}
-
-void CSession::Close( void ) {
-  if ( m_bDbOpened ) {
-    int rtn = sqlite3_close( m_db );
-    m_db = 0;
-    m_bDbOpened = false;
-    assert( SQLITE_OK == rtn );
-  }
-}
-
-void CSession::CreateTables( void ) {
-  for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    std::string sStatement;
-    iter->second->PrepareStatement();  
-  }
-}
 
 } // db
 } // ou

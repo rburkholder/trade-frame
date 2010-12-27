@@ -22,11 +22,10 @@
 namespace ou {
 namespace db {
 
-class ISqlite3 {
+class ISqlite3: public IDatabase {
 public:
 
   ISqlite3(void);
-  ISqlite3( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   ~ISqlite3(void);
 
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );

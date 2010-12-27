@@ -30,10 +30,15 @@ public:
   IDatabase(void);
   virtual ~IDatabase(void);
 
-  virtual void Open( const std::string& sDbFileName ) {};
+  virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
   virtual void Close( void ) {};
 
 protected:
+
+  bool m_bDbOpened;
+
+  std::string m_sDbFileName;
+
 private:
 };
 

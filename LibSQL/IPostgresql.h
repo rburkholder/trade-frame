@@ -18,10 +18,10 @@
 namespace ou {
 namespace db {
 
-class IPostgresql {
+class IPostgresql: public IDatabase {
 public:
   IPostgresql(void);
-  ~IPostgresql(void);
+  virtual ~IPostgresql(void);
 protected:
 private:
 };

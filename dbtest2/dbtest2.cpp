@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <LibSQL/Session.h>
+#include <LibSQL/ISqlite3.h>
 
 
 
@@ -35,12 +36,15 @@ struct CTestTable {
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-  ou::db::CSession session( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
+  ou::db::CSession<ou::db::ISqlite3> session;
+  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
   session.RegisterTable<CTestTable>( "test" );
   session.RegisterFields<CTestTable>();
 
   session.CreateTables();
+
+  session.Close();
 
   return 0;
 
