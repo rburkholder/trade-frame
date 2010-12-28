@@ -32,6 +32,7 @@ namespace db {
 
 // ==========
 
+/*
 // this function should probably disappear at some point
 template<typename K, typename M, typename P, typename F>
 void LoadObject(
@@ -150,6 +151,7 @@ void DeleteObject(
 
   }
 }
+*/
 
 //
 // CSession
@@ -166,8 +168,8 @@ public:
   void Close( void );
 
   // need to convert for generic library call
-  void PrepareStatement(
-    const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
+//  void PrepareStatement(
+//    const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt );
 
   template<typename T> // T derived from CStatementBase
   void Prepare( T& stmt ) {
@@ -181,7 +183,7 @@ public:
       throw std::runtime_error( "table name already has definition" );
     }
     typename ou::db::CTableDef<T>::pCTableDef_t pTableDef;
-    pTableDef.reset( new CTableDef<T>( sTableName ) );  // add empty table definition
+    pTableDef.reset( new CTableDef<T>( m_db, sTableName ) );  // add empty table definition
     iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pTableDef ) );
   }
 
@@ -189,7 +191,7 @@ public:
   typename ou::db::CSql<F>::pCSql_t RegisterFields( void ) {
     typename ou::db::CSql<F>::pCSql_t pCSql;
     m_vSql.push_back( pCSql );
-    pCSql.reset( new CSql<F>() );
+    pCSql.reset( new CSql<F>( m_db ) );
     return pCSql;
   }
 
@@ -245,7 +247,7 @@ template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
     std::string sStatement;
-    iter->second->PrepareStatement();  
+//    iter->second->PrepareStatement();  
   }
 }
 

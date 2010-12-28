@@ -24,6 +24,7 @@ namespace db {
 //void CDbSession::PrepareStatement(
 //  const std::string& sErrPrefix, const std::string& sSqlOp, sqlite3_stmt** pStmt ) {
 
+/*
 void PrepareStatement(
   const std::string& sErrPrefix, const std::string& sSqlOp,
   sqlite3* pDb, sqlite3_stmt** pStmt ) {
@@ -47,6 +48,7 @@ void PrepareStatement(
     }
   }
 }
+*/
 
 //
 //

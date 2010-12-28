@@ -18,7 +18,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibSqlite/sqlite3.h>
+//#include <LibSqlite/sqlite3.h>
 
 #include "Functions.h"
 #include "Sql.h"
@@ -100,22 +100,25 @@ public:
 
   typedef boost::shared_ptr<CTableDef<T> > pCTableDef_t;
 
-  CTableDef( const std::string& sTableName );
+  CTableDef( IDatabase& db, const std::string& sTableName );
   ~CTableDef( void ) {};
 
   const std::string& TableName( void ) { return m_sTableName; };
 
+
+protected:
+
   //void CreateTable( sqlite3* pDb, const std::string& sTableName );
   void ComposeStatement( std::string& sStatement );
 
-protected:
 private:
   std::string m_sTableName;
+  CTableDef( void );  // no default constructor
 };
 
 template<class T>
-CTableDef<T>::CTableDef( const std::string& sTableName )
-: CSql<T>(), 
+CTableDef<T>::CTableDef( IDatabase& db, const std::string& sTableName )
+: CSql<T>( db ), 
   m_sTableName( sTableName )
 {
 }
@@ -129,7 +132,7 @@ void CTableDef<T>::ComposeStatement( std::string& sStatement ) {
 
   t.Fields( ct );  // build structure from source definitions
 
-  ct.ComposeStatement( TableName(), sStatement );
+  ct.ComposeStatement( TableName(), sStatement );  // build statement from structures
 
 }
 

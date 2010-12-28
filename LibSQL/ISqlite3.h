@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 #include <LibSqlite/sqlite3.h>
 
@@ -24,6 +25,17 @@ namespace db {
 
 class ISqlite3: public IDatabase {
 public:
+
+  struct structStmt {
+    sqlite3_stmt* pStmt;
+    structStmt( void ) : pStmt( 0 ) {};
+  };
+
+  // maintain list of statements submitted to database
+  // caller holds an iterator as a handle
+  typedef std::list<structStmt> lStmt_t;
+  typedef lStmt_t::iterator lStmt_iter_t;
+  lStmt_t m_lStmt;
 
   ISqlite3(void);
   ~ISqlite3(void);

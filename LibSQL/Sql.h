@@ -31,18 +31,22 @@ public:
 
   typedef boost::shared_ptr<CSqlBase> pCSqlBase_t;
 
-  CSqlBase(void);
+  CSqlBase( IDatabase& db );
   virtual ~CSqlBase(void);
 
-  void PrepareStatement( void );
 
 protected:
 
+  void PrepareStatement( void );  // automatically called upon object instantiation
   virtual void ComposeStatement( std::string& sStatement );
 
 private:
   bool m_bPrepared;
   std::string m_sSqlStatement;
+
+  IDatabase& m_db;
+
+  CSqlBase(void); // no default constructor
 };
 
 //
@@ -55,7 +59,7 @@ public:
 
   typedef typename boost::shared_ptr<CSql> pCSql_t;
 
-  CSql(void);
+  CSql( IDatabase& db );
   ~CSql(void);
 
 protected:
@@ -63,7 +67,8 @@ private:
 };
 
 template<typename F>
-CSql<F>::CSql( void ): CSqlBase() {
+CSql<F>::CSql( IDatabase& db )
+  : CSqlBase( db ) {
 }
 
 template<typename F>

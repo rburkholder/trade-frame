@@ -24,7 +24,10 @@ namespace db {
 // =====
 //
 
-CSqlBase::CSqlBase(void): m_bPrepared( false ) {
+CSqlBase::CSqlBase( IDatabase& db )
+  : m_bPrepared( false ), m_db( db )
+{
+  PrepareStatement();
 }
 
 
@@ -32,6 +35,11 @@ CSqlBase::~CSqlBase(void) {
 }
 
 void CSqlBase::PrepareStatement( void ) {
+
+  if ( m_bPrepared ) {
+  }
+  else {
+  }
 
   m_sSqlStatement.clear();
 
