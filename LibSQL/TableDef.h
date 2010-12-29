@@ -121,6 +121,7 @@ CTableDef<T>::CTableDef( IDatabase& db, const std::string& sTableName )
 : CSql<T>( db ), 
   m_sTableName( sTableName )
 {
+  PrepareStatement();
 }
 
 template<class T>

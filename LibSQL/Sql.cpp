@@ -27,9 +27,7 @@ namespace db {
 CSqlBase::CSqlBase( IDatabase& db )
   : m_bPrepared( false ), m_db( db )
 {
-  PrepareStatement();
 }
-
 
 CSqlBase::~CSqlBase(void) {
 }

@@ -41,6 +41,7 @@ protected:
   virtual void ComposeStatement( std::string& sStatement );
 
 private:
+
   bool m_bPrepared;
   std::string m_sSqlStatement;
 

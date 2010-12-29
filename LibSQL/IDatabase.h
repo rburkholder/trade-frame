@@ -15,6 +15,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 namespace ou {
 namespace db {
@@ -27,6 +28,10 @@ enum enumOpenFlags {
 class IDatabase {
 public:
 
+  struct structStatement {
+    std::string sSqlStatement;  // where the query goes
+  };
+
   IDatabase(void);
   virtual ~IDatabase(void);
 
@@ -38,6 +43,28 @@ protected:
   bool m_bDbOpened;
 
   std::string m_sDbFileName;
+
+private:
+};
+
+// used for common linked list processing
+template<class SS>  // StatementState is stuff for linked list from IDatabase specializations
+class IDatabaseCommon: public IDatabase {
+public:
+protected:
+
+  typedef IDatabase::structStatement structStatement;
+
+  struct structStatementControl: public structStatement {  // facilitates dynamic_cast
+    SS stateStatement;
+  };
+
+  // maintain list of statements submitted to database
+  // caller holds an iterator as a handle
+  typedef std::list<structStatementControl> lStmt_t;
+
+  lStmt_t m_lStmt;
+  typedef typename lStmt_t::iterator lStmt_iter_t;
 
 private:
 };
