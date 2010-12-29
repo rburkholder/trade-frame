@@ -43,7 +43,8 @@ protected:
 private:
 
   bool m_bPrepared;
-  std::string m_sSqlStatement;
+  //std::string m_sSqlStatement;
+  IDatabase::structStatement* m_pStatement;
 
   IDatabase& m_db;
 

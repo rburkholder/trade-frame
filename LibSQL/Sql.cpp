@@ -34,17 +34,18 @@ CSqlBase::~CSqlBase(void) {
 
 void CSqlBase::PrepareStatement( void ) {
 
+  IDatabase::structStatement& statement = m_db.AllocateStatement();
+  m_pStatement = &statement;
+
+  ComposeStatement( statement.sSqlStatement );
+
+  if ( statement.sSqlStatement.empty() ) {
+    throw std::runtime_error( "CSqlBase::PrepareStatement has empty statement" );
+  }
+
   if ( m_bPrepared ) {
   }
   else {
-  }
-
-  m_sSqlStatement.clear();
-
-  ComposeStatement( m_sSqlStatement );
-
-  if ( m_sSqlStatement.empty() ) {
-    throw std::runtime_error( "CSqlBase::PrepareStatement has empty statement" );
   }
 
 }

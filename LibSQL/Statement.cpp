@@ -22,8 +22,6 @@
 namespace ou {
 namespace db {
 
-
-
 void CStatementInsert::ComposeStatement( void ) {
 
   int ix = 0;

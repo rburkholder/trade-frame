@@ -1,3 +1,6 @@
+2010/12/29
+bjam --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static stage
+
 2010/10/17
 microsoft suggestion and problem reporting:
 https://connect.microsoft.com/dashboard/
