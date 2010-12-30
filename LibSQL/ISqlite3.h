@@ -37,6 +37,8 @@ public:
   void Close( void );
 
   void PrepareStatement( structStatement& statement );
+  void ExecuteStatement( structStatement& statement );
+  void CloseStatement( structStatement& statement );
 
 protected:
 

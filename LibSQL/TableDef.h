@@ -105,6 +105,7 @@ public:
 
   const std::string& TableName( void ) { return m_sTableName; };
 
+  void CreateTable( void );
 
 protected:
 
@@ -135,6 +136,10 @@ void CTableDef<T>::ComposeStatement( std::string& sStatement ) {
 
   ct.ComposeStatement( TableName(), sStatement );  // build statement from structures
 
+}
+
+template<class T>
+void CTableDef<T>::CreateTable( void ) {
 }
 
 } // db

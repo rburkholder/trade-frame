@@ -217,28 +217,26 @@ private:
 
 // Constructor
 template<class IDatabase>
-CSession<IDatabase>::CSession( void )
-{
+CSession<IDatabase>::CSession( void ) {
 }
 
 // Destructor
 template<class IDatabase>
-CSession<IDatabase>::~CSession(void)
-{
+CSession<IDatabase>::~CSession(void) {
   m_db.Close();
 }
 
 // Open
 template<class IDatabase>
 void CSession<IDatabase>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
-
   m_db.Open( sDbFileName, flags );
-
 }
 
 // Close
 template<class IDatabase>
 void CSession<IDatabase>::Close( void ) {
+  m_vSql.clear();
+  m_mapTableDefs.clear();
   m_db.Close();
 }
 
@@ -246,8 +244,7 @@ void CSession<IDatabase>::Close( void ) {
 template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    std::string sStatement;
-//    iter->second->PrepareStatement();  
+    iter->second->CreateTable();  
   }
 }
 

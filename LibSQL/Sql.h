@@ -44,9 +44,10 @@ protected:
 
   void PrepareStatement( void );  // automatically called upon object instantiation
   virtual void ComposeStatement( std::string& sStatement );
-  void RemoveStatement( void );
 
 private:
+
+  bool m_bPrepared;  // kill only if we have a statement, and by rights, we should
 
   IDatabase::structStatement* m_pStatement;
 

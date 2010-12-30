@@ -63,11 +63,44 @@ void ISqlite3::PrepareStatement( structStatement& statement ) {
   int rtn = sqlite3_prepare_v2( 
     m_db, statement.sSqlStatement.c_str(), -1, &psc->stateStatement.pStmt, NULL );
   if ( SQLITE_OK != rtn ) {
-    std::string sErr( "ISqlite3::Prepare: " );
+    std::string sErr( "ISqlite3::PrepareStatement: " );
     sErr += " error in prepare(";
     sErr += boost::lexical_cast<std::string>( rtn );
     sErr += ")";
     throw std::runtime_error( sErr );
+  }
+  assert( 0 != psc->stateStatement.pStmt );
+}
+
+void ISqlite3::ExecuteStatement( structStatement& statement ) {
+  IDatabaseCommon<structStatementState>::structStatementControl* psc =
+    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
+  if ( 0 != psc->stateStatement.pStmt ) {
+    int rtn = sqlite3_step( psc->stateStatement.pStmt );
+    if ( SQLITE_DONE != rtn ) {
+      std::string sErr( "ISqlite3::ExecuteStatement: " );
+      sErr += " error in execute(";
+      sErr += boost::lexical_cast<std::string>( rtn );
+      sErr += ")";
+      throw std::runtime_error( sErr );
+    }
+  }
+}
+
+void ISqlite3::CloseStatement( structStatement& statement ) {
+  IDatabaseCommon<structStatementState>::structStatementControl* psc =
+    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
+  if ( 0 != psc->stateStatement.pStmt ) { // it shouldn't be zero, but test anyway
+    int rtn = sqlite3_finalize( psc->stateStatement.pStmt );
+    if ( SQLITE_OK != rtn ) {
+      std::string sErr( "ISqlite3::CloseStatement: " );
+      sErr += " error in close(";
+      sErr += boost::lexical_cast<std::string>( rtn );
+      sErr += ")";
+      throw std::runtime_error( sErr );
+    }
+    psc->stateStatement.pStmt = 0;
+    // todo:  should the list element also be deleted here?
   }
 }
 

@@ -25,11 +25,15 @@ namespace db {
 //
 
 CSqlBase::CSqlBase( IDatabase& db )
-  : m_db( db )
+  : m_db( db ), m_bPrepared( false )
 {
 }
 
 CSqlBase::~CSqlBase(void) {
+  if ( m_bPrepared ) {
+    m_db.CloseStatement( *m_pStatement );
+    m_bPrepared = false;
+  }
 }
 
 void CSqlBase::ComposeStatement( std::string& sStatement ) {
@@ -47,6 +51,8 @@ void CSqlBase::PrepareStatement( void ) {
   }
 
   m_db.PrepareStatement( statement );
+
+  m_bPrepared = true;
 
 }
 

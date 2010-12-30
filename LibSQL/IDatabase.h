@@ -40,6 +40,9 @@ public:
 
   virtual structStatement& AllocateStatement( void ) = 0;
   virtual void PrepareStatement( structStatement& statement ) = 0;
+  virtual void CloseStatement( structStatement& statement ) = 0;
+
+  virtual void ExecuteStatement( structStatement& statement ) = 0;
 
 protected:
 
