@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <cassert>
 
+#include <boost/lexical_cast.hpp>
+
 #include "ISqlite3.h"
 
 
@@ -47,14 +49,26 @@ void ISqlite3::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
 }
 
 void ISqlite3::Close( void ) {
-
   if ( m_bDbOpened ) {
     int rtn = sqlite3_close( m_db );
     m_db = 0;
     m_bDbOpened = false;
     assert( SQLITE_OK == rtn );
   }
+}
 
+void ISqlite3::PrepareStatement( structStatement& statement ) {
+  IDatabaseCommon<structStatementState>::structStatementControl* psc =
+    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
+  int rtn = sqlite3_prepare_v2( 
+    m_db, statement.sSqlStatement.c_str(), -1, &psc->stateStatement.pStmt, NULL );
+  if ( SQLITE_OK != rtn ) {
+    std::string sErr( "ISqlite3::Prepare: " );
+    sErr += " error in prepare(";
+    sErr += boost::lexical_cast<std::string>( rtn );
+    sErr += ")";
+    throw std::runtime_error( sErr );
+  }
 }
 
 

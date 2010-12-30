@@ -36,6 +36,8 @@ public:
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
   void Close( void );
 
+  void PrepareStatement( structStatement& statement );
+
 protected:
 
 private:

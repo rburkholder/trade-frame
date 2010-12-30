@@ -13,6 +13,11 @@
 
 #pragma once
 
+// 
+// deals with a prepared statement
+// once prepared, cannot be re-used with a different string
+//
+
 #include <string>
 
 #include <boost\shared_ptr.hpp>
@@ -32,18 +37,17 @@ public:
   typedef boost::shared_ptr<CSqlBase> pCSqlBase_t;
 
   CSqlBase( IDatabase& db );
-  virtual ~CSqlBase(void);
+  virtual ~CSqlBase(void);  // sqlite requires 'finish', postgresql has no deletion 
 
 
 protected:
 
   void PrepareStatement( void );  // automatically called upon object instantiation
   virtual void ComposeStatement( std::string& sStatement );
+  void RemoveStatement( void );
 
 private:
 
-  bool m_bPrepared;
-  //std::string m_sSqlStatement;
   IDatabase::structStatement* m_pStatement;
 
   IDatabase& m_db;

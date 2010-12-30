@@ -25,11 +25,14 @@ namespace db {
 //
 
 CSqlBase::CSqlBase( IDatabase& db )
-  : m_bPrepared( false ), m_db( db )
+  : m_db( db )
 {
 }
 
 CSqlBase::~CSqlBase(void) {
+}
+
+void CSqlBase::ComposeStatement( std::string& sStatement ) {
 }
 
 void CSqlBase::PrepareStatement( void ) {
@@ -37,21 +40,14 @@ void CSqlBase::PrepareStatement( void ) {
   IDatabase::structStatement& statement = m_db.AllocateStatement();
   m_pStatement = &statement;
 
-  ComposeStatement( statement.sSqlStatement );
+  ComposeStatement( m_pStatement->sSqlStatement );
 
-  if ( statement.sSqlStatement.empty() ) {
+  if ( m_pStatement->sSqlStatement.empty() ) {
     throw std::runtime_error( "CSqlBase::PrepareStatement has empty statement" );
   }
 
-  if ( m_bPrepared ) {
-  }
-  else {
-  }
+  m_db.PrepareStatement( statement );
 
-}
-
-void CSqlBase::ComposeStatement( std::string& sStatement ) {
-  throw std::runtime_error( "CSqlBase::ComposeStatement is not overloaded" );
 }
 
 //

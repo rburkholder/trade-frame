@@ -38,7 +38,8 @@ public:
   virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
   virtual void Close( void ) {};
 
-  virtual structStatement& AllocateStatement( void )=0;
+  virtual structStatement& AllocateStatement( void ) = 0;
+  virtual void PrepareStatement( structStatement& statement ) = 0;
 
 protected:
 
@@ -54,6 +55,7 @@ template<class SS>  // StatementState is stuff for linked list from IDatabase sp
 class IDatabaseCommon: public IDatabase {
 public:
   structStatement& AllocateStatement( void );
+  //void PrepareStatement( structStatement& statement ) {};
 protected:
 
   typedef IDatabase::structStatement structStatement;
