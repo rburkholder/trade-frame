@@ -31,9 +31,14 @@ namespace db {
 class Action_CreateTable {
 public:
 
-  void Key( const std::string& sKey, const char* szDbKeyType  );
+  Action_CreateTable( void );
+  ~Action_CreateTable( void );
+
   void Field( const std::string& sField, const char* szDbFieldType );
+  //void Field( const std::string& sField, const char* szDbFieldType, const std::string& sFieldType );
   void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
+  void IsKey( const std::string& sLocalField );
+  void OverRideType( const std::string& sLocalField, const std::string& sFieldType );
 
   void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
@@ -46,15 +51,17 @@ private:
   struct structFieldDef {
     std::string sFieldName;
     std::string sFieldType;
-    structFieldDef( void ) {};
+    bool bIsKeyPart;
+    structFieldDef( void ): bIsKeyPart( false ) {};
     structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
-      : sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
+      : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
   };
 
   typedef std::vector<structFieldDef> vFields_t;
   typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vKeys;
   vFields_t m_vFields;
+
+  unsigned int m_cntKeys;
 
   struct structConstraint {
     std::string sLocalField;
@@ -75,13 +82,13 @@ private:
 //
 
 template<typename Var>
-void Key( Action_CreateTable& action, const std::string& sKeyName, Var& var ) {
-  action.Key( sKeyName, KeyType( var ) );
+void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var ) {
+  action.Field( sFieldName, FieldType( var ) );
 }
 
 template<typename Var>
-void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var ) {
-  action.Field( sFieldName, FieldType( var ) );
+void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var, const std::string& sFieldType  ) {
+  action.Field( sFieldName, sFieldType.c_str() );
 }
 
 // TableDef_BuildStatement
@@ -104,8 +111,6 @@ public:
   ~CTableDef( void ) {};
 
   const std::string& TableName( void ) { return m_sTableName; };
-
-  void CreateTable( void );
 
 protected:
 
@@ -136,10 +141,6 @@ void CTableDef<T>::ComposeStatement( std::string& sStatement ) {
 
   ct.ComposeStatement( TableName(), sStatement );  // build statement from structures
 
-}
-
-template<class T>
-void CTableDef<T>::CreateTable( void ) {
 }
 
 } // db

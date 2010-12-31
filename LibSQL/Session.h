@@ -243,8 +243,9 @@ void CSession<IDatabase>::Close( void ) {
 // CreateTables
 template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
+  // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    iter->second->CreateTable();  
+    iter->second->ExecuteStatement();  
   }
 }
 

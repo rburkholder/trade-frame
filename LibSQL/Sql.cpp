@@ -56,6 +56,11 @@ void CSqlBase::PrepareStatement( void ) {
 
 }
 
+void CSqlBase::ExecuteStatement( void ) {
+  assert( m_bPrepared );
+  m_db.ExecuteStatement( *m_pStatement );
+}
+
 //
 // =====
 //

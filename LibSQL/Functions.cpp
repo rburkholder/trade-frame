@@ -19,13 +19,13 @@ namespace ou {
 namespace db {
 
 //
-
+/*
 const char* KeyType( boost::int64_t key ) {
   return "INTEGER PRIMARY KEY";  //sqlite specific
 }
 
 const char* KeyType( std::string& key ) { return FieldType( key ); };
-
+*/
 //
 
 const char* FieldType( boost::posix_time::ptime& key ) { // don't use julian as ptime has no representation earlier than 1400 AD
@@ -41,7 +41,7 @@ const char* FieldType( bool key ) {
 }
 
 const char* FieldType( boost::int64_t key ) {
-  return "INT8";
+  return "INT8"; 
 }
 
 const char* FieldType( boost::int32_t key ) {

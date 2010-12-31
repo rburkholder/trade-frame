@@ -21,18 +21,6 @@
 namespace ou {
 namespace db {
 
-// keys
-
-template<typename Action, typename T> // A=Action, T=Type
-void Key( Action& action, const std::string& sName, T& var, const std::string& sDbType ) {
-  action.registerKey( sName, var, sDbType );
-};
-
-template<typename Action, typename T> // A=Action, T=Type
-void Key( Action& action, const std::string& sName, T& var ) {
-  action.registerKey( sName, var );
-};
-
 // fields
 
 template<typename Action, typename T> // A=Action, T=Type
@@ -44,6 +32,11 @@ template<typename Action, typename T> // A=Action, T=Type
 void Field( Action& action, const std::string& sName, T& var ) {
   action.registerField( sName, var );
 };
+
+template<typename Action> // A=Action
+void IsKey( Action& action, const std::string& sFieldName ) {
+  action.IsKey( sFieldName );
+}
 
 // where
 
@@ -79,9 +72,6 @@ const char* FieldType( boost::int16_t key );
 const char* FieldType( boost::int8_t key );
 const char* FieldType( std::string& key );
 const char* FieldType( double key );
-
-const char* KeyType( boost::int64_t key );
-const char* KeyType( std::string& key );
 
 } // db
 } // ou

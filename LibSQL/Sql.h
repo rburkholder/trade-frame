@@ -39,11 +39,13 @@ public:
   CSqlBase( IDatabase& db );
   virtual ~CSqlBase(void);  // sqlite requires 'finish', postgresql has no deletion 
 
+  void ExecuteStatement( void );
 
 protected:
 
   void PrepareStatement( void );  // automatically called upon object instantiation
   virtual void ComposeStatement( std::string& sStatement );
+
 
 private:
 
