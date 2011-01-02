@@ -15,7 +15,7 @@
 
 
 
-struct CTestTable {
+struct CFields {
 
   template<typename A> // A = Action
   void Fields( A& a ) {
@@ -23,8 +23,6 @@ struct CTestTable {
     ou::db::Field( a, "field1", m_field1 );
     ou::db::Field( a, "field2", m_field2 );
     ou::db::Field( a, "field3", m_field3 );
-
-    ou::db::IsKey( a, "mykey" );
   };
 
   enum enumfield2 { EOne, ETwo, EThree };
@@ -36,13 +34,23 @@ struct CTestTable {
 
 };
 
+struct CFieldsTable: public CFields {
+
+  template<typename A>
+  void Fields( A& a ) {
+    CFields::Fields( a );
+    ou::db::Key( a, "mykey" );
+  };
+
+};
+
 int _tmain(int argc, _TCHAR* argv[]) {
 
   ou::db::CSession<ou::db::ISqlite3> session;
   session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
-  session.RegisterTable<CTestTable>( "test" );
-  session.RegisterFields<CTestTable>();
+  session.RegisterTable<CFieldsTable>( "test" );
+  session.RegisterFields<CFields>();
 
   session.CreateTables();
 

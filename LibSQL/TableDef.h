@@ -13,11 +13,8 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
 
-#include <boost/shared_ptr.hpp>
-
+#include "FieldDef.h"
 #include "Functions.h"
 #include "Sql.h"
 
@@ -26,15 +23,14 @@ namespace db {
 
 // Action_CreateTable
 
-class Action_CreateTable {
+class Action_CreateTable: public Action_AddFields {
 public:
 
   Action_CreateTable( void );
   ~Action_CreateTable( void );
 
-  void registerField( const std::string& sField, const char* szDbFieldType );
   void registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
-  void setIsKey( const std::string& sLocalField );
+  void setKey( const std::string& sLocalField );
 
   void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
@@ -42,22 +38,7 @@ protected:
 
 private:
 
-  // definition of fields
-
-  struct structFieldDef {
-    std::string sFieldName;
-    std::string sFieldType;
-    bool bIsKeyPart;
-    structFieldDef( void ): bIsKeyPart( false ) {};
-    structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
-      : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
-  };
-
   unsigned int m_cntKeys;
-
-  typedef std::vector<structFieldDef> vFields_t;
-  typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vFields;
 
   struct structConstraint {
     std::string sLocalField;

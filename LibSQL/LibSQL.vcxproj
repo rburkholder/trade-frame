@@ -78,9 +78,13 @@
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="IPostgresql.h" />
     <ClInclude Include="ISqlite3.h" />
+    <ClInclude Include="SqlDelete.h" />
+    <ClInclude Include="SqlInsert.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="Sql.h" />
+    <ClInclude Include="SqlGeneric.h" />
+    <ClInclude Include="SqlUpdate.h" />
     <ClInclude Include="Statement.h" />
     <ClInclude Include="TableDef.h" />
     <ClInclude Include="stdafx.h" />
@@ -92,9 +96,13 @@
     <ClCompile Include="IDatabase.cpp" />
     <ClCompile Include="IPostgresql.cpp" />
     <ClCompile Include="ISqlite3.cpp" />
+    <ClCompile Include="SqlDelete.cpp" />
+    <ClCompile Include="SqlGeneric.cpp" />
+    <ClCompile Include="SqlInsert.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="Sql.cpp" />
+    <ClCompile Include="SqlUpdate.cpp" />
     <ClCompile Include="Statement.cpp" />
     <ClCompile Include="TableDef.cpp" />
     <ClCompile Include="stdafx.cpp">

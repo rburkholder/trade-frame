@@ -48,8 +48,8 @@ void Field( Action& action, const std::string& sFieldName, T& var, const std::st
 };
 
 template<typename Action> // A=Action
-void IsKey( Action& action, const std::string& sFieldName ) {
-  action.setIsKey( sFieldName );
+void Key( Action& action, const std::string& sFieldName ) {
+  action.setKey( sFieldName );
 }
 
 // where

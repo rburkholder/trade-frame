@@ -11,44 +11,40 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include <string>
-#include <vector>
+#include <boost/lexical_cast.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include "SqlInsert.h"
 
 namespace ou {
 namespace db {
 
-// Action_AddFields
+SqlInsert::SqlInsert( void ) {
+}
 
-class Action_AddFields {
-public:
+SqlInsert::~SqlInsert( void ) {
+}
 
-  Action_AddFields( void );
-  virtual ~Action_AddFields( void );
+void SqlInsert::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
-  void registerField( const std::string& sField, const char* szDbFieldType );
+  std::string sFields;
+  std::string sHolders;
 
-protected:
+  int ix = 1;
+  for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
+    if ( 1 < ix ) {
+      sFields += ", ";
+      sHolders += ", ";
+    }
+    sFields += iter->sFieldName;
+    sHolders += "$" + boost::lexical_cast<std::string>( ix );
+    ++ix;
+  }
 
-  // definition of fields
-  struct structFieldDef {
-    std::string sFieldName;
-    std::string sFieldType;
-    bool bIsKeyPart;
-    structFieldDef( void ): bIsKeyPart( false ) {};
-    structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
-      : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
-  };
+  sStatement = "INSERT INTO " + sTableName + "(" + sFields + ") VALUES (" + sHolders + ");";
 
-  typedef std::vector<structFieldDef> vFields_t;
-  typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vFields;
+}
 
-private:
-};
-  
 } // db
 } // ou

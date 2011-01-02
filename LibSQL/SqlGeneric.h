@@ -13,42 +13,20 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
+#include "FieldDef.h"
 
 namespace ou {
 namespace db {
 
-// Action_AddFields
-
-class Action_AddFields {
+class SqlGeneric: public Action_AddFields {
 public:
 
-  Action_AddFields( void );
-  virtual ~Action_AddFields( void );
-
-  void registerField( const std::string& sField, const char* szDbFieldType );
+  SqlGeneric( void );
+  ~SqlGeneric( void );
 
 protected:
-
-  // definition of fields
-  struct structFieldDef {
-    std::string sFieldName;
-    std::string sFieldType;
-    bool bIsKeyPart;
-    structFieldDef( void ): bIsKeyPart( false ) {};
-    structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
-      : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
-  };
-
-  typedef std::vector<structFieldDef> vFields_t;
-  typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vFields;
-
 private:
 };
-  
+
 } // db
 } // ou

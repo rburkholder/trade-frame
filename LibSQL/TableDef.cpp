@@ -26,6 +26,11 @@ namespace db {
 //using namespace boost::phoenix;
 //using namespace boost::phoenix::arg_names;
 
+void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteField ) {
+  action.registerConstraint( sLocalVar, sRemoteTable, sRemoteField );
+}
+
+// ====================
 
 Action_CreateTable::Action_CreateTable( void ) 
   : m_cntKeys( 0 )
@@ -35,18 +40,8 @@ Action_CreateTable::Action_CreateTable( void )
 Action_CreateTable::~Action_CreateTable( void ) {
 }
 
-void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteField ) {
-  action.registerConstraint( sLocalVar, sRemoteTable, sRemoteField );
-}
-
-// ----
-
-void Action_CreateTable::registerField( const std::string& sField, const char* szDbFieldType ) {
-  structFieldDef fd( sField, szDbFieldType );
-  m_vFields.push_back( fd );
-}
-
-void Action_CreateTable::setIsKey( const std::string& sFieldName ) {
+// setKey
+void Action_CreateTable::setKey( const std::string& sFieldName ) {
   //vFields_iter_t iter = std::find_if( m_vFields.begin(), m_vFields.end(), sFieldName,  );
   vFields_iter_t iter = m_vFields.begin();
   while (  iter != m_vFields.end() ) {
@@ -62,11 +57,13 @@ void Action_CreateTable::setIsKey( const std::string& sFieldName ) {
   }
 }
 
+// registerConstraint
 void Action_CreateTable::registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField ) {
   structConstraint constraint( sLocalField, sRemoteTable, sRemoteField );
   m_vConstraints.push_back( constraint );
 }
 
+// ComposeStatement
 void Action_CreateTable::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
   sStatement = "CREATE TABLE " + sTableName + " (";
