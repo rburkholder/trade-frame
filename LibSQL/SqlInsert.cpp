@@ -16,7 +16,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "SqlInsert.h"
-
+ 
 namespace ou {
 namespace db {
 
