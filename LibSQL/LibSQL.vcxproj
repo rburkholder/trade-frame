@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CountryCode.h" />
+    <ClInclude Include="FieldDef.h" />
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="IPostgresql.h" />
     <ClInclude Include="ISqlite3.h" />
@@ -87,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CountryCode.cpp" />
+    <ClCompile Include="FieldDef.cpp" />
     <ClCompile Include="IDatabase.cpp" />
     <ClCompile Include="IPostgresql.cpp" />
     <ClCompile Include="ISqlite3.cpp" />

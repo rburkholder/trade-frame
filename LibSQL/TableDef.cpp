@@ -16,15 +16,15 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include <boost/spirit/include/phoenix_core.hpp>
+//#include <boost/spirit/include/phoenix_core.hpp>
 
 #include "TableDef.h"
 
 namespace ou {
 namespace db {
 
-using namespace boost::phoenix;
-using namespace boost::phoenix::arg_names;
+//using namespace boost::phoenix;
+//using namespace boost::phoenix::arg_names;
 
 
 Action_CreateTable::Action_CreateTable( void ) 
@@ -36,17 +36,17 @@ Action_CreateTable::~Action_CreateTable( void ) {
 }
 
 void Constraint( Action_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteField ) {
-  action.Constraint( sLocalVar, sRemoteTable, sRemoteField );
+  action.registerConstraint( sLocalVar, sRemoteTable, sRemoteField );
 }
 
 // ----
 
-void Action_CreateTable::Field( const std::string& sField, const char* szDbFieldType ) {
+void Action_CreateTable::registerField( const std::string& sField, const char* szDbFieldType ) {
   structFieldDef fd( sField, szDbFieldType );
   m_vFields.push_back( fd );
 }
 
-void Action_CreateTable::IsKey( const std::string& sFieldName ) {
+void Action_CreateTable::setIsKey( const std::string& sFieldName ) {
   //vFields_iter_t iter = std::find_if( m_vFields.begin(), m_vFields.end(), sFieldName,  );
   vFields_iter_t iter = m_vFields.begin();
   while (  iter != m_vFields.end() ) {
@@ -62,7 +62,7 @@ void Action_CreateTable::IsKey( const std::string& sFieldName ) {
   }
 }
 
-void Action_CreateTable::Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField ) {
+void Action_CreateTable::registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField ) {
   structConstraint constraint( sLocalField, sRemoteTable, sRemoteField );
   m_vConstraints.push_back( constraint );
 }

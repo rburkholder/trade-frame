@@ -173,7 +173,7 @@ public:
 
   template<typename T> // T derived from CStatementBase
   void Prepare( T& stmt ) {
-    stmt.Prepare( m_db );
+    stmt.Prepare( m_db );  // is this actually called?
   }
 
   template<typename T> // T: Table Class with TableDef member function

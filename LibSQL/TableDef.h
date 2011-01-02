@@ -18,8 +18,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-//#include <LibSqlite/sqlite3.h>
-
 #include "Functions.h"
 #include "Sql.h"
 
@@ -34,11 +32,9 @@ public:
   Action_CreateTable( void );
   ~Action_CreateTable( void );
 
-  void Field( const std::string& sField, const char* szDbFieldType );
-  //void Field( const std::string& sField, const char* szDbFieldType, const std::string& sFieldType );
-  void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
-  void IsKey( const std::string& sLocalField );
-  void OverRideType( const std::string& sLocalField, const std::string& sFieldType );
+  void registerField( const std::string& sField, const char* szDbFieldType );
+  void registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
+  void setIsKey( const std::string& sLocalField );
 
   void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
@@ -57,11 +53,11 @@ private:
       : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
   };
 
+  unsigned int m_cntKeys;
+
   typedef std::vector<structFieldDef> vFields_t;
   typedef vFields_t::iterator vFields_iter_t;
   vFields_t m_vFields;
-
-  unsigned int m_cntKeys;
 
   struct structConstraint {
     std::string sLocalField;
@@ -76,20 +72,6 @@ private:
   vConstraints_t m_vConstraints;
 
 };
-
-//
-// pass through function specializations for Action_CreateTable
-//
-
-template<typename Var>
-void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var ) {
-  action.Field( sFieldName, FieldType( var ) );
-}
-
-template<typename Var>
-void Field( Action_CreateTable& action, const std::string& sFieldName, Var& var, const std::string& sFieldType  ) {
-  action.Field( sFieldName, sFieldType.c_str() );
-}
 
 // TableDef_BuildStatement
 
@@ -114,7 +96,6 @@ public:
 
 protected:
 
-  //void CreateTable( sqlite3* pDb, const std::string& sTableName );
   void ComposeStatement( std::string& sStatement );
 
 private:

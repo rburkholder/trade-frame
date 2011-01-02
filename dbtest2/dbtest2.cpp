@@ -19,10 +19,10 @@ struct CTestTable {
 
   template<typename A> // A = Action
   void Fields( A& a ) {
-    ou::db::Field(  a, "mykey",  m_key,   "INTEGER" );  // type needed to match sqlite rowid
-    ou::db::Field(  a, "field1", m_field1 );
-    ou::db::Field(  a, "field2", m_field2 );
-    ou::db::Field(  a, "field3", m_field3 );
+    ou::db::Field( a, "mykey",  m_key,   "INTEGER" );  // type needed to match sqlite rowid
+    ou::db::Field( a, "field1", m_field1 );
+    ou::db::Field( a, "field2", m_field2 );
+    ou::db::Field( a, "field3", m_field3 );
 
     ou::db::IsKey( a, "mykey" );
   };
