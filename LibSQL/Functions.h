@@ -37,6 +37,7 @@ const char* FieldType( boost::int8_t key );
 const char* FieldType( std::string& key );
 const char* FieldType( double key );
 
+// following functions are not used.  Need to fix the enumeration problem first.
 template<typename T>
 const char* FieldType2( void ) { // is called with enumerations, so need to figure out appropriate type conversion
   std::string s;

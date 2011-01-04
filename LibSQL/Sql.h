@@ -48,8 +48,6 @@ protected:
 
 private:
 
-  bool m_bPrepared;  // kill only if we have a statement, and by rights, we should
-
   IDatabase& m_db;
   IDatabase::structStatement* m_pStatement;
 
@@ -69,18 +67,35 @@ public:
   CSql( IDatabase& db );
   ~CSql(void);
 
+  F* Bind( void );
+
 protected:
 private:
+  F* m_f;
   CSql( void );
 };
 
 template<class F>
 CSql<F>::CSql( IDatabase& db )
-  : CSqlBase( db ) {
+  : CSqlBase( db ), m_f( 0 )
+{
 }
 
 template<class F>
 CSql<F>::~CSql( void ) {
+}
+
+template<class F>
+F* CSql<F>::Bind( void ) {
+  if ( 0 != m_f ) {
+    delete m_f;
+    m_f = 0;
+  }
+  m_f = new F;
+
+  // need to bind variables with an Action_...
+
+  return m_f;
 }
 
 //

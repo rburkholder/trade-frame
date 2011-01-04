@@ -25,14 +25,14 @@ namespace db {
 //
 
 CSqlBase::CSqlBase( IDatabase& db )
-  : m_db( db ), m_bPrepared( false )
+  : m_db( db ), m_pStatement( 0 )
 {
 }
 
 CSqlBase::~CSqlBase(void) {
-  if ( m_bPrepared ) {
+  if ( 0 != m_pStatement ) {
     m_db.CloseStatement( *m_pStatement );
-    m_bPrepared = false;
+    m_pStatement = 0;
   }
 }
 
@@ -49,15 +49,15 @@ void CSqlBase::PrepareStatement( void ) {
 
   m_db.PrepareStatement( statement );
 
-  m_bPrepared = true;
-
 }
 
 void CSqlBase::ComposeStatement( std::string& sStatement ) {
 }
 
 void CSqlBase::ExecuteStatement( void ) {
-  assert( m_bPrepared );
+  if ( 0 == m_pStatement ) {
+    throw std::runtime_error( "CSqlBase::ExecuteStatement has no prepared statement" );
+  }
   m_db.ExecuteStatement( *m_pStatement );
 }
 

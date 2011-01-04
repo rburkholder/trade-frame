@@ -20,17 +20,19 @@ struct CFields {
   template<typename A> // A = Action
   void Fields( A& a ) {
     ou::db::Field( a, "mykey",  m_key,   "INTEGER" );  // type needed to match sqlite rowid
-    ou::db::Field( a, "field1", m_field1 );
-    ou::db::Field( a, "field2", m_field2 );
-    ou::db::Field( a, "field3", m_field3 );
+    ou::db::Field( a, "field1", m_sField );
+    ou::db::Field( a, "field2", m_enumField );
+    ou::db::Field( a, "field3", m_intField );
+    ou::db::Field( a, "field4", m_dblField );
   };
 
   enum enumfield2 { EOne, ETwo, EThree };
 
   boost::int64_t m_key;
-  std::string m_field1;
-  enumfield2 m_field2;
-  int m_field3;
+  std::string m_sField;
+  enumfield2 m_enumField;
+  int m_intField;
+  double m_dblField;
 
 };
 
