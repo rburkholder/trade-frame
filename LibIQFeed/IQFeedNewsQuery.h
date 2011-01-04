@@ -48,11 +48,11 @@ namespace ascii = boost::spirit::ascii;
 
 
 template <typename T>
-class CIQFeedNewsQuery: public CNetwork<CIQFeedNewsQuery<T> > {
-  friend CNetwork<CIQFeedNewsQuery<T> >;
+class CIQFeedNewsQuery: public ou::CNetwork<CIQFeedNewsQuery<T> > {
+  friend ou::CNetwork<CIQFeedNewsQuery<T> >;
 public:
 
-  typedef typename CNetwork<CIQFeedNewsQuery<T> > inherited_t;
+  typedef typename ou::CNetwork<CIQFeedNewsQuery<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   struct structNCElements {

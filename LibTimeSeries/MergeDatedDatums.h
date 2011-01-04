@@ -47,7 +47,7 @@ public:
 
 protected:
 
-  CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_mhCarriers;
+  ou::CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_mhCarriers;
 
   // not all states or commands are implemented yet
   enum enumMergingCommands { eUnknown, eRun, eStop, ePause, eResume, eReset };

@@ -42,11 +42,11 @@ void __stdcall IQFeedCallBack( int x, int y );
 
 
 template <typename T>
-class CIQFeed: public CNetwork<CIQFeed<T> > {
-  friend CNetwork<CIQFeed<T> >;
+class CIQFeed: public ou::CNetwork<CIQFeed<T> > {
+  friend ou::CNetwork<CIQFeed<T> >;
 public:
 
-  typedef typename CNetwork<CIQFeed<T> > inherited_t;
+  typedef typename ou::CNetwork<CIQFeed<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   CIQFeed(void);
@@ -126,18 +126,18 @@ protected:
 
 private:
 
-  typename CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
-  typename CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
-  typename CBufferRepository<CIQFNewsMessage> m_reposNewsMessages;
-  typename CBufferRepository<CIQFFundamentalMessage> m_reposFundamentalMessages;
-  typename CBufferRepository<CIQFTimeMessage> m_reposTimeMessages;
-  typename CBufferRepository<CIQFSystemMessage> m_reposSystemMessages;
+  typename ou::CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
+  typename ou::CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
+  typename ou::CBufferRepository<CIQFNewsMessage> m_reposNewsMessages;
+  typename ou::CBufferRepository<CIQFFundamentalMessage> m_reposFundamentalMessages;
+  typename ou::CBufferRepository<CIQFTimeMessage> m_reposTimeMessages;
+  typename ou::CBufferRepository<CIQFSystemMessage> m_reposSystemMessages;
 
 };
 
 template <typename T>
 CIQFeed<T>::CIQFeed( void ) 
-: CNetwork<CIQFeed<T> >( "127.0.0.1", 5009 ),
+: ou::CNetwork<CIQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF )
 {
   SetCallbackFunction( &IQFeedCallBack );

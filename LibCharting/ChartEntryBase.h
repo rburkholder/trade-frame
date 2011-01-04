@@ -46,8 +46,8 @@ public:
   CChartEntryBase( void );
   CChartEntryBase( unsigned int nSize );
   virtual ~CChartEntryBase( void );
-  Colour::enumColour GetColour( void ) { return m_eColour; };
-  virtual void SetColour( Colour::enumColour colour ) { m_eColour = colour; };
+  ou::Colour::enumColour GetColour( void ) { return m_eColour; };
+  virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
   void Name( std::string name ) { m_sName = name; };
   const std::string &Name( void ) { return m_sName; };
   void Add( double price );
@@ -66,7 +66,7 @@ public:
 protected:
   virtual void Reserve( unsigned int );
   std::vector<double> m_vPrice;
-  Colour::enumColour m_eColour;
+  ou::Colour::enumColour m_eColour;
   std::string m_sName;
   DoubleArray GetPrice( void ) {
     vdouble_t::iterator iter = m_vPrice.begin();

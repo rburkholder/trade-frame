@@ -70,10 +70,10 @@ public:
   virtual ~CProviderInterfaceBase( void ) {};
 
   virtual  void Connect( void ) {};
-  Delegate<int> OnConnected;
+  ou::Delegate<int> OnConnected;
 
   virtual  void Disconnect( void ) {};
-  Delegate<int> OnDisconnected;
+  ou::Delegate<int> OnDisconnected;
 
   bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };
 

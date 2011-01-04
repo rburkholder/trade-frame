@@ -23,7 +23,7 @@ CChartEntryMark::CChartEntryMark(void)
 CChartEntryMark::~CChartEntryMark(void) {
 }
 
-void CChartEntryMark::AddMark(double price, Colour::enumColour colour, const std::string &name) {
+void CChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
   m_vPrice.push_back( price );
   m_vColour.push_back( colour );
   m_vName.push_back( name );

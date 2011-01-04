@@ -126,7 +126,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
 
   std::cout << "Initializing Structures" << std::endl;
 
-  CKeyWordMatch<size_t> kwmExchanges( 0, 200 );  // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
+  ou::CKeyWordMatch<size_t> kwmExchanges( 0, 200 );  // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
   kwmExchanges.AddPattern( "Unknown", 0 );
   std::vector<structCountPerString> vSymbolsPerExchange( 1 );
   vSymbolsPerExchange[ 0 ].s = "UNKNOWN";
@@ -157,7 +157,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
 
   size_t cntSymbolClassifiers = sizeof( rSymbolTypes ) / sizeof( structSymbolTypes );
 
-  CKeyWordMatch<size_t> kwmSymbolType( structSymbolRecord::Unknown, 120 );
+  ou::CKeyWordMatch<size_t> kwmSymbolType( structSymbolRecord::Unknown, 120 );
   std::vector<size_t> vSymbolTypeStats( cntSymbolClassifiers );  // number of symbols of this SymbolType
   for ( size_t ix = 0; ix < cntSymbolClassifiers; ++ix ) {
     kwmSymbolType.AddPattern( rSymbolTypes[ ix ].sSC, rSymbolTypes[ ix ].sc );

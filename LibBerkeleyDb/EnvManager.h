@@ -13,7 +13,7 @@
 
 #pragma once
 
-#if defined( WIN32 )
+#ifdef WIN32
 #include <db4/db_cxx.h>
 #include <LibCommon/Singleton.h>
 #else
@@ -34,7 +34,7 @@
 // CBerkeleyDBEnvManager =====
 
 //class CBerkeleyDBEnvManager: public CMultipleInstanceTest<CBerkeleyDBEnvManager> {
-class CBerkeleyDBEnvManager: public CSingleton<CBerkeleyDBEnvManager> {
+class CBerkeleyDBEnvManager: public ou::CSingleton<CBerkeleyDBEnvManager> {
 public:
 
   CBerkeleyDBEnvManager(void);

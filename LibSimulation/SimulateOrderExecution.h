@@ -36,19 +36,19 @@ public:
   CSimulateOrderExecution(void);
   ~CSimulateOrderExecution(void);
 
-  typedef FastDelegate1<COrder::orderid_t> OnOrderCancelledHandler;
+  typedef FastDelegate1<COrder::idOrder_t> OnOrderCancelledHandler;
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
     OnOrderCancelled = function;
   }
-  typedef FastDelegate2<COrder::orderid_t, const CExecution&> OnOrderFillHandler;
+  typedef FastDelegate2<COrder::idOrder_t, const CExecution&> OnOrderFillHandler;
   void SetOnOrderFill( OnOrderFillHandler function ) {
     OnOrderFill = function;
   }
-  typedef FastDelegate1<COrder::orderid_t> OnNoOrderFoundHandler;  // cancelling a non existant order
+  typedef FastDelegate1<COrder::idOrder_t> OnNoOrderFoundHandler;  // cancelling a non existant order
   void SetOnNoOrderFound( OnNoOrderFoundHandler function ) {
     OnNoOrderFound = function;
   }
-  typedef FastDelegate2<COrder::orderid_t, double> OnCommissionHandler;  // calculated once order filled
+  typedef FastDelegate2<COrder::idOrder_t, double> OnCommissionHandler;  // calculated once order filled
   void SetOnCommission( OnCommissionHandler function ) {
     OnCommission = function;
   }
@@ -68,12 +68,12 @@ public:
   void NewQuote( const CQuote& quote );
 
   void SubmitOrder( pOrder_t pOrder );
-  void CancelOrder( COrder::orderid_t nOrderId );
+  void CancelOrder( COrder::idOrder_t nOrderId );
 
 protected:
   struct structCancelOrder {
     ptime dtCancellation;
-    COrder::orderid_t nOrderId;
+    COrder::idOrder_t nOrderId;
     structCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ ) 
       : dtCancellation( dtCancellation_ ), nOrderId( nOrderId_ ) {};
   };

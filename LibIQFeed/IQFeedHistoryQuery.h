@@ -236,11 +236,11 @@ namespace IQFeedHistoryStructs {
 
 // T: CRTP inheriting class, U: type passed in for reference by inheriting class
 template <typename T>
-class CIQFeedHistoryQuery: public CNetwork<CIQFeedHistoryQuery<T> > {
-  friend CNetwork<CIQFeedHistoryQuery<T> >;
+class CIQFeedHistoryQuery: public ou::CNetwork<CIQFeedHistoryQuery<T> > {
+  friend ou::CNetwork<CIQFeedHistoryQuery<T> >;
 public:
 
-  typedef typename CNetwork<CIQFeedHistoryQuery<T> > inherited_t;
+  typedef typename ou::CNetwork<CIQFeedHistoryQuery<T> > inherited_t;
 
   typedef typename IQFeedHistoryStructs::structTickDataPoint structTickDataPoint;
   typedef typename IQFeedHistoryStructs::structInterval structInterval;
@@ -314,9 +314,9 @@ private:
   static const size_t m_nMillisecondsToSleep = 75;
 
   // used for containing parsed data and passing it on
-  CBufferRepository<structTickDataPoint> m_reposTickDataPoint;
-  CBufferRepository<structInterval> m_reposInterval;
-  CBufferRepository<structSummary> m_reposSummary;
+  ou::CBufferRepository<structTickDataPoint> m_reposTickDataPoint;
+  ou::CBufferRepository<structInterval> m_reposInterval;
+  ou::CBufferRepository<structSummary> m_reposSummary;
 
   IQFeedHistoryStructs::DataPointParser<const_iterator_t> m_grammarDataPoint;
   IQFeedHistoryStructs::IntervalParser<const_iterator_t> m_grammarInterval;

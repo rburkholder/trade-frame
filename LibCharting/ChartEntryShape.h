@@ -25,7 +25,7 @@ class CChartEntryShape :
 public:
   enum enumShape { EDefault, EBuy, ESell, EFillLong, EFillShort, EBuyStop, ESellStop };
   CChartEntryShape( void );
-  CChartEntryShape( enumShape eShape, Colour::enumColour colour );
+  CChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
   void SetShape( enumShape shape ) { m_eShape = shape; };
   enumShape GetShape( void ) { return m_eShape; };
   virtual ~CChartEntryShape(void);

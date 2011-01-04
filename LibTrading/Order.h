@@ -121,10 +121,10 @@ public:
     return m_dtOrderClosed; 
   };
 
-  Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
-  Delegate<const COrder&> OnOrderFilled; // on final fill
-  Delegate<const COrder&> OnPartialFill; // on intermediate fills only
-  Delegate<const COrder&> OnCommission;
+  ou::Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
+  ou::Delegate<const COrder&> OnOrderFilled; // on final fill
+  ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
+  ou::Delegate<const COrder&> OnCommission;
 
   static void CreateDbTable( sqlite3* pDb );
   int BindDbKey( sqlite3_stmt* pStmt );

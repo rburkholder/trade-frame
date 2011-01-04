@@ -195,7 +195,7 @@ COrder::~COrder(void) {
 
 void COrder::ConstructOrder() {
 //  try {
-  m_dtOrderCreated = CTimeSource::Instance().Internal();
+  m_dtOrderCreated = ou::CTimeSource::Instance().Internal();
   assert( NULL != m_pInstrument.get() );
   //m_dtOrderSubmitted = not_a_date_time;  // already set as such
 //  m_nOrderId = m_persistedorderid.GetNextOrderId();
@@ -209,7 +209,7 @@ void COrder::ConstructOrder() {
 void COrder::SetSendingToProvider() {
   assert( OrderStatus::Created == m_eOrderStatus );
   m_eOrderStatus = OrderStatus::SendingToProvider;
-  m_dtOrderSubmitted = CTimeSource::Instance().Internal();
+  m_dtOrderSubmitted = ou::CTimeSource::Instance().Internal();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
@@ -235,7 +235,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     m_dblAverageFillPrice = m_dblPriceXQuantity / m_nFilled;
     if ( 0 == m_nRemaining ) {
       m_eOrderStatus = OrderStatus::Filled;
-      m_dtOrderClosed = CTimeSource::Instance().Internal();
+      m_dtOrderClosed = ou::CTimeSource::Instance().Internal();
       OnOrderFilled( *this );
     }
     else {

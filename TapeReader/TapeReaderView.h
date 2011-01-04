@@ -133,7 +133,7 @@ protected:
   } m_prvValues;
 
   struct structRowForDisplay {
-    Colour::enumColour colourRow;
+    ou::Colour::enumColour colourRow;
     BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_ARRAY ), COLHDR_EMIT_StringVars, ~ )
   };
 

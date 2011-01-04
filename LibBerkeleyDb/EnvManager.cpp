@@ -39,7 +39,7 @@ When using environments/databases across threads, read: Registering database and
 */
 
 CBerkeleyDBEnvManager::CBerkeleyDBEnvManager( void ) 
-: CSingleton<CBerkeleyDBEnvManager>()
+: ou::CSingleton<CBerkeleyDBEnvManager>()
 {
   m_pDbEnv = new DbEnv( 0 );
   // http://www.oracle.com/technology/documentation/berkeley-db/db/api_reference/CXX/frame_main.html

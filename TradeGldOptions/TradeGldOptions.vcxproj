@@ -76,7 +76,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)LibCommon.lib;$(OutDir)LibWtlHeaders.lib;$(OutDir)LibIndicators.lib;$(OutDir)LibSimulation.lib;$(OutDir)LibTrading.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibInteractiveBrokers.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;$(OutDir)libdb50.lib;$(OutDir)szip.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)LibCommon.lib;$(OutDir)LibWtlHeaders.lib;$(OutDir)LibIndicators.lib;$(OutDir)LibSimulation.lib;$(OutDir)LibTrading.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibInteractiveBrokers.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_45.lib;$(OutDir)libdb50.lib;$(OutDir)szip.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>

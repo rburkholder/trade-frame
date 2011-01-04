@@ -47,7 +47,7 @@ public:
   void ReportExecution( idOrder_t orderId, const CExecution& exec );  // feedback from provider
   void ReportCommission( idOrder_t nOrderId, double dblCommission );
   void ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError );
-  Delegate<const COrder &> OnOrderCompleted;
+  ou::Delegate<const COrder &> OnOrderCompleted;
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 

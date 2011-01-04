@@ -35,9 +35,9 @@ public:
 
   struct structPivotInfo {
     std::string sName;
-    Colour::enumColour colour;
-    structPivotInfo( void ) : colour( Colour::Black ) {};
-    structPivotInfo( const std::string &sName_, Colour::enumColour colour_ ) 
+    ou::Colour::enumColour colour;
+    structPivotInfo( void ) : colour( ou::Colour::Black ) {};
+    structPivotInfo( const std::string &sName_, ou::Colour::enumColour colour_ ) 
       : sName( sName_ ), colour( colour_ ) {};
   };
 
@@ -71,7 +71,7 @@ public:
     assert( ix <= S3 );
     return m_sName + m_sPivotNames[ ix ];
   };
-  static Colour::enumColour GetPivotColour( enumPivots ix ) {
+  static ou::Colour::enumColour GetPivotColour( enumPivots ix ) {
     assert( ix >= R3 );
     assert( ix <= S3 );
     return m_rPivotColours[ ix ];
@@ -85,6 +85,6 @@ private:
 
   double m_rPivots[ PivotCount ];
   static const std::string m_sPivotNames[ PivotCount ];
-  static const Colour::enumColour m_rPivotColours[ PivotCount ];
+  static const ou::Colour::enumColour m_rPivotColours[ PivotCount ];
 
 };

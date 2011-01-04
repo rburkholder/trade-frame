@@ -23,7 +23,7 @@ CChartEntryBase::CChartEntryBase() {
 }
 
 CChartEntryBase::CChartEntryBase( unsigned int nSize ) 
-: m_eColour( Colour::Black )
+: m_eColour( ou::Colour::Black )
 {
   m_vPrice.reserve( nSize );
 }

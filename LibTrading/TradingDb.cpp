@@ -18,7 +18,7 @@
 #include <cassert>
 
 CTradingDb::CTradingDb( const char* szDbFileName ) 
-: CDbSession( szDbFileName )
+//: CDbSession( szDbFileName )
 {
 }
 

@@ -64,10 +64,10 @@ public:
   CIQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
   ~CIQFeedSymbol(void);
 
-  Delegate<CIQFeedSymbol*> OnFundamentalMessage;
-  Delegate<CIQFeedSymbol*> OnUpdateMessage;
-  Delegate<CIQFeedSymbol*> OnSummaryMessage;
-  Delegate<CIQFeedSymbol*> OnNewsMessage;
+  ou::Delegate<CIQFeedSymbol*> OnFundamentalMessage;
+  ou::Delegate<CIQFeedSymbol*> OnUpdateMessage;
+  ou::Delegate<CIQFeedSymbol*> OnSummaryMessage;
+  ou::Delegate<CIQFeedSymbol*> OnNewsMessage;
 
 protected:
 

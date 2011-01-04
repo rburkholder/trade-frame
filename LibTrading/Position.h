@@ -90,10 +90,10 @@ public:
   void CancelOrders( void );
   void ClosePosition( void );
 
-  Delegate<const CPosition*> OnQuote;
-  Delegate<const CPosition*> OnTrade;  // nothing useful currently
-  Delegate<execution_delegate_t> OnExecution;
-  Delegate<const CPosition*> OnCommission;
+  ou::Delegate<const CPosition*> OnQuote;
+  ou::Delegate<const CPosition*> OnTrade;  // nothing useful currently
+  ou::Delegate<execution_delegate_t> OnExecution;
+  ou::Delegate<const CPosition*> OnCommission;
 
   void EmitStatus( std::stringstream& ssStatus );
 

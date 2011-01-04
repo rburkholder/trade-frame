@@ -57,7 +57,7 @@ public:
   iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) { return m_sStrategy; };
   const std::string &GetName( void ) { return m_sName; };
-  Delegate<CChartDataView *> OnClosing;
+  ou::Delegate<CChartDataView *> OnClosing;
   void Close( void ); // call before destruction so can be removed from tree view and view port properly
   size_t GetChartCount( void ) { return m_mapCntChartIndexes.size(); };
   void SetChanged(void) { m_bChanged = true; };

@@ -40,16 +40,16 @@ public:
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
   typedef const CQuote& quote_t;
-  typedef Delegate<quote_t>::OnMessageHandler quotehandler_t;
+  typedef ou::Delegate<quote_t>::OnMessageHandler quotehandler_t;
 
   typedef const CTrade& trade_t;
-  typedef Delegate<trade_t>::OnMessageHandler tradehandler_t;
+  typedef ou::Delegate<trade_t>::OnMessageHandler tradehandler_t;
 
   typedef const CMarketDepth& depth_t;
-  typedef Delegate<depth_t>::OnMessageHandler depthhandler_t;
+  typedef ou::Delegate<depth_t>::OnMessageHandler depthhandler_t;
 
   typedef const CGreek& greek_t;
-  typedef Delegate<greek_t>::OnMessageHandler greekhandler_t;
+  typedef ou::Delegate<greek_t>::OnMessageHandler greekhandler_t;
 
   // these handlers are typically updated through the provider, rather than through client code
   bool AddQuoteHandler( quotehandler_t );
@@ -84,11 +84,11 @@ protected:
   symbol_id_t m_id;  // may be overwritten with provider specific override
   pInstrument_t m_pInstrument;  // composition rather than inheritance as same instrument refers to different market data and order providers
 
-  Delegate<trade_t> m_OnOpen;  // first value upon market opening
-  Delegate<quote_t> m_OnQuote; 
-  Delegate<trade_t> m_OnTrade;
-  Delegate<depth_t> m_OnDepth;
-  Delegate<greek_t> m_OnGreek;
+  ou::Delegate<trade_t> m_OnOpen;  // first value upon market opening
+  ou::Delegate<quote_t> m_OnQuote; 
+  ou::Delegate<trade_t> m_OnTrade;
+  ou::Delegate<depth_t> m_OnDepth;
+  ou::Delegate<greek_t> m_OnGreek;
 
 private:
 

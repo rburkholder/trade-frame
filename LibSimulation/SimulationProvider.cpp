@@ -200,12 +200,12 @@ void CSimulationProvider::Merge( void ) {
   }
 
   m_nProcessedDatums = 0;
-  bool bOldMode = CTimeSource::Instance().GetSimulationMode();
-  m_dtSimStart = CTimeSource::Instance().External();
-  CTimeSource::Instance().SetSimulationMode();
+  bool bOldMode = ou::CTimeSource::Instance().GetSimulationMode();
+  m_dtSimStart = ou::CTimeSource::Instance().External();
+  ou::CTimeSource::Instance().SetSimulationMode();
   m_pMerge -> Run();
-  CTimeSource::Instance().SetSimulationMode( bOldMode );
-  m_dtSimStop = CTimeSource::Instance().External();
+  ou::CTimeSource::Instance().SetSimulationMode( bOldMode );
+  m_dtSimStop = ou::CTimeSource::Instance().External();
   m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
 
   // use join to determine completion?  or state machine?
@@ -265,11 +265,11 @@ void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
   }
 }
 
-void CSimulationProvider::HandleExecution( COrder::orderid_t orderId, const CExecution &exec ) {
+void CSimulationProvider::HandleExecution( COrder::idOrder_t orderId, const CExecution &exec ) {
   COrderManager::Instance().ReportExecution( orderId, exec );
 }
 
-void CSimulationProvider::HandleCommission( COrder::orderid_t orderId, double commission ) {
+void CSimulationProvider::HandleCommission( COrder::idOrder_t orderId, double commission ) {
   COrderManager::Instance().ReportCommission( orderId, commission );
 }
 

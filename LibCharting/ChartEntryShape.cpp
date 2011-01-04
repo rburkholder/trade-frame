@@ -27,7 +27,7 @@ CChartEntryShape::CChartEntryShape( void )
 {
 }
 
-CChartEntryShape::CChartEntryShape( enumShape eShape, Colour::enumColour colour ) 
+CChartEntryShape::CChartEntryShape( enumShape eShape, ou::Colour::enumColour colour ) 
 : CChartEntryBaseWithTime(), m_eShape( eShape )
 {
   CChartEntryBase::SetColour( colour );

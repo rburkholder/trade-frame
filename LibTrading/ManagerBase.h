@@ -35,7 +35,7 @@
 // T: CRTP base
 // K: key
 // R: object or base type being managed
-template<class T, class K, class R> class ManagerBase: public CSingleton<T> {
+template<class T, class K, class R> class ManagerBase: public ou::CSingleton<T> {
 public:
 
   ManagerBase<T,K,R>( void );

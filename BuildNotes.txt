@@ -1,3 +1,7 @@
+2011/01/03
+db 4.8.30
+http://www.oracle.com/technetwork/database/berkeleydb/downloads/index-082944.html
+
 2010/12/29
 bjam --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static stage
 
@@ -14,7 +18,8 @@ https://www.interactivebrokers.com/smf/index.php?topic=83754.0
 
 2010/06/03
 
-ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots/v19/
+X ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots/v19/
+http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/hdf5/snapshots/v19/
 
 E:\Data\Projects\hdf5\hdf5-1.9.55\hdf5lib\debug\include\H5Include.h:
 change to #include "hdf5.h"

@@ -80,8 +80,8 @@ public:
   void SetAlternateName( enumProviderId_t, idInstrument_cref );
 
   typedef std::pair<idInstrument_cref,idInstrument_cref> pairNames_t;
-  Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
-  Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
+  ou::Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
+  ou::Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
   bool IsOption( void ) const { return ( InstrumentType::Option == m_InstrumentType ); };

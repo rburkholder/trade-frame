@@ -52,8 +52,8 @@ void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
   m_bOrdersQueued = true;
 }
 
-void CSimulateOrderExecution::CancelOrder( COrder::orderid_t nOrderId ) {
-  structCancelOrder co( CTimeSource::Instance().Internal(), nOrderId );
+void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
+  structCancelOrder co( ou::CTimeSource::Instance().Internal(), nOrderId );
   m_lDelayCancel.push_back( co );
   m_bCancelsQueued = true;
 }

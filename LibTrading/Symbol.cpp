@@ -35,7 +35,7 @@ void CSymbolBase::RemoveOnOpenHandler( tradehandler_t handler ) {
 }
 
 bool CSymbolBase::AddQuoteHandler(quotehandler_t handler) {
-  Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
+  ou::Delegate<quote_t>::vsize_t size = m_OnQuote.Size();
   m_OnQuote.Add( handler );
   assert( size == ( m_OnQuote.Size() - 1 ) );
   return ( 1 == m_OnQuote.Size() );  // start watch for the symbol
@@ -48,7 +48,7 @@ bool CSymbolBase::RemoveQuoteHandler(quotehandler_t handler) {
 }
 
 bool CSymbolBase::AddTradeHandler(tradehandler_t handler) {
-  Delegate<trade_t>::vsize_t size = m_OnTrade.Size();
+  ou::Delegate<trade_t>::vsize_t size = m_OnTrade.Size();
   m_OnTrade.Add( handler );
   assert( size == ( m_OnTrade.Size() - 1 ) );
   return ( 1 == m_OnTrade.Size() ); // start watch on first handler
@@ -61,7 +61,7 @@ bool CSymbolBase::RemoveTradeHandler(tradehandler_t handler) {
 }
 
 bool CSymbolBase::AddDepthHandler(depthhandler_t handler) {
-  Delegate<depth_t>::vsize_t size = m_OnDepth.Size();
+  ou::Delegate<depth_t>::vsize_t size = m_OnDepth.Size();
   m_OnDepth.Add( handler );
   assert( size == ( m_OnDepth.Size() - 1 ) );
   return ( 1 == m_OnDepth.Size() );  // when true, start watch
@@ -74,7 +74,7 @@ bool CSymbolBase::RemoveDepthHandler(depthhandler_t handler) {
 }
 
 bool CSymbolBase::AddGreekHandler ( greekhandler_t handler ) {
-  Delegate<greek_t>::vsize_t size = m_OnGreek.Size();
+  ou::Delegate<greek_t>::vsize_t size = m_OnGreek.Size();
   m_OnGreek.Add( handler );
   assert( size == ( m_OnGreek.Size() - 1 ) );
   return ( 1 == m_OnGreek.Size() );  // when true, start watch

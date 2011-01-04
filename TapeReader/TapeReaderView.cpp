@@ -280,7 +280,7 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
           ri.vAsk = msg->Double( CIQFUpdateMessage::QPAsk );
 //          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
           
-          COLORREF cBack = Colour::Beige;
+          COLORREF cBack = ou::Colour::Beige;
           // set colours so green range for higher buy/sell, new high buy/sell
           // set colours so red range for lower buy/sell, new log buy/sell
 
@@ -289,45 +289,45 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
               double dblMid = ( ri.vBid + ri.vAsk ) / 2.0;
               ri.vBate = "Trade";
               if ( ri.vTick > dblMid ) {
-                cBack = Colour::LightGreen;
+                cBack = ou::Colour::LightGreen;
                 ri.vBate = "Buy";
               }
               else {
-                cBack = Colour::LightPink;
+                cBack = ou::Colour::LightPink;
                 ri.vBate = "Sell";
               }
               if ( ri.vTick > m_dblMaxTick ) {
-                cBack = Colour::Blue;
+                cBack = ou::Colour::Blue;
               }
               if ( ri.vTick < m_dblMinTick ) {
-                cBack = Colour::Orange;
+                cBack = ou::Colour::Orange;
               }
             }
             else {  // process bid/ask stuff
               if ( ( ri.vBid > m_prvValues.vBid ) && ( ri.vAsk < m_prvValues.vAsk ) ) {
                 // new inside bid and new inside ask
-                cBack = Colour::Gray;
+                cBack = ou::Colour::Gray;
                 ri.vBate = "Best Bid/Ask";
               }
               else {
                 if ( ( ri.vBid > m_prvValues.vBid ) || ( ri.vAsk < m_prvValues.vAsk ) ) {
                   if ( ri.vBid > m_prvValues.vBid ) {
-                    cBack = Colour::Yellow;
+                    cBack = ou::Colour::Yellow;
                     ri.vBate = "Best Bid";
                   }
                   else {
-                    cBack = Colour::White;
+                    cBack = ou::Colour::White;
                     ri.vBate = "Best Ask";
                   }
                 }
                 else {  // regular bid or regular ask change
                   if ( 'b' == sLastTradeTime[8] ) {
                     ri.vBate = "Bid";
-                    cBack = Colour::LightYellow;
+                    cBack = ou::Colour::LightYellow;
                   }
                   if ( 'a' == sLastTradeTime[8] ) {
                     ri.vBate = "Ask";
-                    cBack = Colour::Snow;
+                    cBack = ou::Colour::Snow;
                   }
                 }
               }

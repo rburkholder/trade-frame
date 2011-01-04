@@ -491,7 +491,7 @@ void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDeta
 void CIBTWS::nextValidId( OrderId orderId) {
   // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  COrder::orderid_t id = COrderManager::Instance().CheckOrderId( orderId );
+  COrder::idOrder_t id = COrderManager::Instance().CheckOrderId( orderId );
   if ( orderId > id ) {
     m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
   }
