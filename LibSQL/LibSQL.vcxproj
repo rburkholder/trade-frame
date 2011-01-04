@@ -99,7 +99,6 @@
     <ClCompile Include="SqlDelete.cpp" />
     <ClCompile Include="SqlGeneric.cpp" />
     <ClCompile Include="SqlInsert.cpp" />
-    <ClCompile Include="Session.cpp" />
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="Sql.cpp" />
     <ClCompile Include="SqlUpdate.cpp" />

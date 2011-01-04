@@ -14,21 +14,64 @@
 #pragma once
 
 #include "FieldDef.h"
+#include "Sql.h"
 
 namespace ou {
 namespace db {
 
-class SqlDelete: public Action_AddFields {
+class Action_FieldsForDelete: public Action_AddFields {
 public:
 
-  SqlDelete( void );
-  ~SqlDelete( void );
+  Action_FieldsForDelete( void );
+  ~Action_FieldsForDelete( void );
 
   void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
 protected:
 private:
 };
+
+//
+// CSqlDelete
+//
+
+template<class F>  // F: Field Defs
+class CSqlDelete: public CSqlNamedTable<F> {
+public:
+
+  typedef boost::shared_ptr<CSqlDelete<F> > pCSqlDelete_t;
+
+  CSqlDelete( IDatabase& db, const std::string& sTableName );
+  ~CSqlDelete( void ) {};
+
+protected:
+
+  void ComposeStatement( std::string& sStatement );
+
+private:
+  CSqlDelete( void );  // no default constructor
+  CSqlDelete( const CSqlDelete& );  // no default copy constructor
+};
+
+template<class F>
+CSqlDelete<F>::CSqlDelete( IDatabase& db, const std::string& sTableName )
+: CSqlNamedTable<F>( db, sTableName )
+{
+  PrepareStatement();
+}
+
+template<class F>
+void CSqlDelete<F>::ComposeStatement( std::string& sStatement ) {
+
+  Action_FieldsForDelete ffd;  // action structure maintenance
+
+  F f;
+
+  f.Fields( ffd );  // build structure from source definitions
+
+  ffd.ComposeStatement( TableName(), sStatement );  // build statement from structures
+
+}
 
 } // db
 } // ou

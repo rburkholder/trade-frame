@@ -28,7 +28,7 @@ namespace ou {
 namespace db {
 
 //
-// =====
+// CSqlBase
 //
 
 class CSqlBase {
@@ -43,26 +43,24 @@ public:
 
 protected:
 
-  void PrepareStatement( void );  // automatically called upon object instantiation
+  void PrepareStatement( void );  // automatically called by inheritor upon object instantiation 
   virtual void ComposeStatement( std::string& sStatement );
-
 
 private:
 
   bool m_bPrepared;  // kill only if we have a statement, and by rights, we should
 
-  IDatabase::structStatement* m_pStatement;
-
   IDatabase& m_db;
+  IDatabase::structStatement* m_pStatement;
 
   CSqlBase(void); // no default constructor
 };
 
 //
-// =====
+// CSql
 //
 
-template<typename F>  // f: Field definitions
+template<class F>  // F: Field Definitions
 class CSql: public CSqlBase {
 public:
 
@@ -73,15 +71,39 @@ public:
 
 protected:
 private:
+  CSql( void );
 };
 
-template<typename F>
+template<class F>
 CSql<F>::CSql( IDatabase& db )
   : CSqlBase( db ) {
 }
 
-template<typename F>
+template<class F>
 CSql<F>::~CSql( void ) {
+}
+
+//
+// CSqlNamedTable
+//
+
+template<class F> // F: Field Definitions
+class CSqlNamedTable: public CSql<F> {
+public:
+  CSqlNamedTable( IDatabase& db, const std::string& sTableName );
+  ~CSqlNamedTable( void ) {};
+protected:
+  const std::string& TableName( void ) { return m_sTableName; };
+private:
+  std::string m_sTableName;
+  CSqlNamedTable( void );
+  CSqlNamedTable( const CSqlNamedTable& );
+};
+
+template<class F>
+CSqlNamedTable<F>::CSqlNamedTable( IDatabase& db, const std::string& sTableName ) 
+  : CSql<F>( db ), m_sTableName( sTableName )
+{
 }
 
 } // db

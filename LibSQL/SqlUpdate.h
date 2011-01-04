@@ -14,21 +14,64 @@
 #pragma once
 
 #include "FieldDef.h"
+#include "Sql.h"
 
 namespace ou {
 namespace db {
 
-class SqlUpdate: public Action_AddFields {
+class Action_FieldsForUpdate: public Action_AddFields {
 public:
 
-  SqlUpdate( void );
-  ~SqlUpdate( void );
+  Action_FieldsForUpdate( void );
+  ~Action_FieldsForUpdate( void );
 
   void ComposeStatement( const std::string& sTableName, std::string& sStatement );
 
 protected:
 private:
 };
+
+//
+// CSqlUpdate
+//
+
+template<class F>  // F: Field Defs
+class CSqlUpdate: public CSqlNamedTable<F> {
+public:
+
+  typedef boost::shared_ptr<CSqlUpdate<F> > pCSqlUpdate_t;
+
+  CSqlUpdate( IDatabase& db, const std::string& sTableName );
+  ~CSqlUpdate( void ) {};
+
+protected:
+
+  void ComposeStatement( std::string& sStatement );
+
+private:
+  CSqlUpdate( void );  // no default constructor
+  CSqlUpdate( const CSqlUpdate& );  // no default copy constructor
+};
+
+template<class F>
+CSqlUpdate<F>::CSqlUpdate( IDatabase& db, const std::string& sTableName )
+: CSqlNamedTable<F>( db, sTableName )
+{
+  PrepareStatement();
+}
+
+template<class F>
+void CSqlUpdate<F>::ComposeStatement( std::string& sStatement ) {
+
+  Action_FieldsForUpdate ffu;  // action structure maintenance
+
+  F f;
+
+  f.Fields( ffu );  // build structure from source definitions
+
+  ffu.ComposeStatement( TableName(), sStatement );  // build statement from structures
+
+}
 
 } // db
 } // ou

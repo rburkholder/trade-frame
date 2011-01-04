@@ -20,13 +20,13 @@
 namespace ou {
 namespace db {
 
-SqlInsert::SqlInsert( void ) {
+Action_FieldsForInsert::Action_FieldsForInsert( void ) {
 }
 
-SqlInsert::~SqlInsert( void ) {
+Action_FieldsForInsert::~Action_FieldsForInsert( void ) {
 }
 
-void SqlInsert::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_FieldsForInsert::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
   std::string sFields;
   std::string sHolders;
@@ -42,7 +42,7 @@ void SqlInsert::ComposeStatement( const std::string& sTableName, std::string& sS
     ++ix;
   }
 
-  sStatement = "INSERT INTO " + sTableName + "(" + sFields + ") VALUES (" + sHolders + ");";
+  sStatement = "INSERT INTO " + sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
 
 }
 

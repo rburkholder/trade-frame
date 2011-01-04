@@ -20,15 +20,15 @@
 namespace ou {
 namespace db {
 
-SqlUpdate::SqlUpdate( void ) {
+Action_FieldsForUpdate::Action_FieldsForUpdate( void ) {
 }
 
-SqlUpdate::~SqlUpdate( void ) {
+Action_FieldsForUpdate::~Action_FieldsForUpdate( void ) {
 }
 
-void SqlUpdate::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_FieldsForUpdate::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
-  sStatement = "UPDATE " + sTableName + "SET "; 
+  sStatement = "UPDATE " + sTableName + " SET "; 
 
   int ix = 1;
   for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {

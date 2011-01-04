@@ -54,18 +54,12 @@ private:
 
 };
 
-// TableDef_BuildStatement
-
-// TableDef_BindForWrite
-
-// TableDef_ColumnForRead
-
 //
 // CTableDef
 //
 
 template<class T>  // T: Table Class with TableDef member function
-class CTableDef: public CSql<T> {
+class CTableDef: public CSqlNamedTable<T> {
 public:
 
   typedef boost::shared_ptr<CTableDef<T> > pCTableDef_t;
@@ -73,21 +67,18 @@ public:
   CTableDef( IDatabase& db, const std::string& sTableName );
   ~CTableDef( void ) {};
 
-  const std::string& TableName( void ) { return m_sTableName; };
-
 protected:
 
   void ComposeStatement( std::string& sStatement );
 
 private:
-  std::string m_sTableName;
   CTableDef( void );  // no default constructor
+  CTableDef( const CTableDef& );  // no default copy constructor
 };
 
 template<class T>
 CTableDef<T>::CTableDef( IDatabase& db, const std::string& sTableName )
-: CSql<T>( db ), 
-  m_sTableName( sTableName )
+: CSqlNamedTable<T>( db, sTableName )
 {
   PrepareStatement();
 }

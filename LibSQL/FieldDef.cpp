@@ -13,11 +13,6 @@
 
 #include "StdAfx.h"
 
-#include <algorithm>
-#include <stdexcept>
-
-//#include <boost/spirit/include/phoenix_core.hpp>
-
 #include "FieldDef.h"
 
 namespace ou {

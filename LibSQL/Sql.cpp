@@ -36,9 +36,6 @@ CSqlBase::~CSqlBase(void) {
   }
 }
 
-void CSqlBase::ComposeStatement( std::string& sStatement ) {
-}
-
 void CSqlBase::PrepareStatement( void ) {
 
   IDatabase::structStatement& statement = m_db.AllocateStatement();
@@ -54,6 +51,9 @@ void CSqlBase::PrepareStatement( void ) {
 
   m_bPrepared = true;
 
+}
+
+void CSqlBase::ComposeStatement( std::string& sStatement ) {
 }
 
 void CSqlBase::ExecuteStatement( void ) {

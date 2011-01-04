@@ -31,6 +31,10 @@ public:
 
   void registerField( const std::string& sField, const char* szDbFieldType );
 
+  // inheritor will need one of two:
+  // void ComposeStatement( const std::string& sTableName, std::string& sStatement );
+  // void ComposeStatement( std::string& sStatement );
+
 protected:
 
   // definition of fields
@@ -49,6 +53,6 @@ protected:
 
 private:
 };
-  
+
 } // db
 } // ou

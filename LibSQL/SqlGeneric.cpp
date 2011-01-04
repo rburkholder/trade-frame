@@ -18,11 +18,6 @@
 namespace ou {
 namespace db {
 
-SqlGeneric::SqlGeneric( void ) {
-}
-
-SqlGeneric::~SqlGeneric( void ) {
-}
 
 } // db
 } // ou

@@ -50,9 +50,15 @@ int _tmain(int argc, _TCHAR* argv[]) {
   session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
   session.RegisterTable<CFieldsTable>( "test" );
-  session.RegisterFields<CFields>();
-
   session.CreateTables();
+
+  { // after use, delete shared pointers so close works properly, fix IDatabase::Close to use differently.
+    ou::db::CSqlInsert<CFields>::pCSqlInsert_t pInsert = session.RegisterInsert<CFields>( "test" );
+    ou::db::CSqlUpdate<CFields>::pCSqlUpdate_t pUpdate = session.RegisterUpdate<CFields>( "test" );
+    ou::db::CSqlDelete<CFields>::pCSqlDelete_t pDelete = session.RegisterDelete<CFields>( "test" );
+
+    ou::db::CSqlQuery<CFields>::pCSqlQuery_t pQuery = session.RegisterQuery<CFields>( "select * from test;" );
+  }
 
   session.Close();
 

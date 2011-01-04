@@ -18,13 +18,13 @@
 namespace ou {
 namespace db {
 
-SqlDelete::SqlDelete( void ) {
+Action_FieldsForDelete::Action_FieldsForDelete( void ) {
 }
 
-SqlDelete::~SqlDelete( void ) {
+Action_FieldsForDelete::~Action_FieldsForDelete( void ) {
 }
 
-void SqlDelete::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_FieldsForDelete::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
 
   sStatement = "DELETE FROM " + sTableName;
 
@@ -38,3 +38,4 @@ void SqlDelete::ComposeStatement( const std::string& sTableName, std::string& sS
 
 } // db
 } // ou
+
