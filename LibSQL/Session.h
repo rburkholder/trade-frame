@@ -19,6 +19,8 @@
 #include <stdexcept>
 #include <typeinfo>
 
+#include <boost\shared_ptr.hpp>
+
 #include "IDatabase.h"
 #include "Sql.h"
 
@@ -31,8 +33,43 @@
 namespace ou {
 namespace db {
 
+
+// CQuery contains:
+// * DB: structures dedicated to the specific database
+// * F: struct containing Fields function with ou::db::Field calls
+
+class QueryBase {  // used for stowage in vectors and such
+public:
+protected:
+private:
+};
+
+template<class F>  // used for returning structures to queriers
+class QueryFields: 
+  public QueryBase, 
+  public F
+{
+public:
+  typedef boost::shared_ptr<QueryFields<F> > pQueryFields_t;
+protected:
+private:
+};
+
+template<class DB, class F>  // used for getting stuff in and out of the database via the session
+class Query: 
+  public DB,
+  public QueryFields<F> 
+{
+public:
+  typedef boost::shared_ptr<Query<DB, F> > pQuery_t;
+  std::string m_sQueryText;  // 'compose' results end up here
+protected:
+private:
+};
+
 //
 // CSession
+//   IDatabase needs typedef for structStatementState
 //
 
 template<class IDatabase>

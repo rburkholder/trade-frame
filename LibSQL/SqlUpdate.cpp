@@ -13,38 +13,10 @@
 
 #include "StdAfx.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include "SqlUpdate.h"
 
 namespace ou {
 namespace db {
-
-Action_FieldsForUpdate::Action_FieldsForUpdate( void ) {
-}
-
-Action_FieldsForUpdate::~Action_FieldsForUpdate( void ) {
-}
-
-void Action_FieldsForUpdate::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
-
-  sStatement = "UPDATE " + sTableName + " SET "; 
-
-  int ix = 1;
-  for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
-    if ( 1 < ix ) {
-      sStatement += ", ";
-    }
-    sStatement += iter->sFieldName;
-    sStatement += " = $" + boost::lexical_cast<std::string>( ix );
-    ++ix;
-  }
-
-  // *** todo: need the 'where' clause yet
-
-  sStatement += ";";
-
-}
 
 } // db
 } // ou

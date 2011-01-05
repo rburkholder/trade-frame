@@ -67,8 +67,6 @@ public:
   CSql( IDatabase& db );
   ~CSql(void);
 
-  F* Bind( void );
-
 protected:
 private:
   F* m_f;
@@ -83,19 +81,6 @@ CSql<F>::CSql( IDatabase& db )
 
 template<class F>
 CSql<F>::~CSql( void ) {
-}
-
-template<class F>
-F* CSql<F>::Bind( void ) {
-  if ( 0 != m_f ) {
-    delete m_f;
-    m_f = 0;
-  }
-  m_f = new F;
-
-  // need to bind variables with an Action_...
-
-  return m_f;
 }
 
 //

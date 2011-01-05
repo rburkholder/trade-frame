@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include <LibSQL/Session.h>
-#include <LibSQL/ISqlite3.h>
+#include <LibSqlite/ISqlite3.h>
 
 
 

@@ -13,23 +13,10 @@
 
 #pragma once
 
-#include "FieldDef.h"
 #include "Sql.h"
 
 namespace ou {
 namespace db {
-
-class Action_FieldsForDelete: public Action_AddFields {
-public:
-
-  Action_FieldsForDelete( void );
-  ~Action_FieldsForDelete( void );
-
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
-
-protected:
-private:
-};
 
 //
 // CSqlDelete

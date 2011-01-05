@@ -12,6 +12,7 @@
  ************************************************************************/
 
 // inherited by ISqlite3 and IPostgresql for specialization
+
 #pragma once
 
 #include <string>

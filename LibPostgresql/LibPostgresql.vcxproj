@@ -11,15 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{00437625-753F-4206-A3C0-3D5C959F7D91}</ProjectGuid>
+    <ProjectGuid>{A7AE8B32-E0C4-453B-9FAF-D2FD3BFD4649}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>LibSQL</RootNamespace>
+    <RootNamespace>LibPostgresql</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -37,16 +37,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\;..\Lib;C:\Data\Projects\libraries\compress\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -56,7 +54,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -73,39 +72,10 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Actions.h" />
-    <ClInclude Include="CountryCode.h" />
-    <ClInclude Include="_FieldDef.h" />
-    <ClInclude Include="IDatabase.h" />
-    <ClInclude Include="SqlDelete.h" />
-    <ClInclude Include="SqlInsert.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="Functions.h" />
-    <ClInclude Include="Sql.h" />
-    <ClInclude Include="SqlGeneric.h" />
-    <ClInclude Include="SqlUpdate.h" />
-    <ClInclude Include="Statement.h" />
-    <ClInclude Include="TableDef.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
+    <ClCompile Include="IPostgresql.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Actions.cpp" />
-    <ClCompile Include="CountryCode.cpp" />
-    <ClCompile Include="_FieldDef.cpp" />
-    <ClCompile Include="IDatabase.cpp" />
-    <ClCompile Include="SqlDelete.cpp" />
-    <ClCompile Include="SqlGeneric.cpp" />
-    <ClCompile Include="SqlInsert.cpp" />
-    <ClCompile Include="Functions.cpp" />
-    <ClCompile Include="Sql.cpp" />
-    <ClCompile Include="SqlUpdate.cpp" />
-    <ClCompile Include="Statement.cpp" />
-    <ClCompile Include="TableDef.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClInclude Include="IPostgresql.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,7 +15,6 @@
 
 #include <string>
 
-#include "FieldDef.h"
 #include "Sql.h"
 
 namespace ou {

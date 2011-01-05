@@ -13,54 +13,45 @@
 
 #pragma once
 
+#include <string>
 
-#include "Functions.h"
-#include "Sql.h"
+#include <LibSQL/IDatabase.h>
+
+#include "sqlite3.h"
 
 namespace ou {
 namespace db {
+namespace sqlite {
 
-//
-// CTableDef
-//
+struct structStatementState {
+  sqlite3_stmt* pStmt;
+  structStatementState( void ) : pStmt( 0 ) {};
+};
 
-template<class T>  // T: Table Class with TableDef member function
-class CTableDef: public CSqlNamedTable<T> {
+} // namespace sqlite
+
+class ISqlite3: public IDatabaseCommon<sqlite::structStatementState> {
 public:
 
-  typedef boost::shared_ptr<CTableDef<T> > pCTableDef_t;
+  typedef sqlite::structStatementState structStatementState;
 
-  CTableDef( IDatabase& db, const std::string& sTableName );
-  ~CTableDef( void ) {};
+  ISqlite3(void);
+  ~ISqlite3(void);
+
+  void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
+  void Close( void );
+
+  void PrepareStatement( structStatement& statement );
+  void ExecuteStatement( structStatement& statement );
+  void CloseStatement( structStatement& statement );
 
 protected:
 
-  void ComposeStatement( std::string& sStatement );
-
 private:
-  CTableDef( void );  // no default constructor
-  CTableDef( const CTableDef& );  // no default copy constructor
+
+  sqlite3* m_db;
+
 };
-
-template<class T>
-CTableDef<T>::CTableDef( IDatabase& db, const std::string& sTableName )
-: CSqlNamedTable<T>( db, sTableName )
-{
-  PrepareStatement();
-}
-
-template<class T>
-void CTableDef<T>::ComposeStatement( std::string& sStatement ) {
-
-  Action_CreateTable ct;  // action structure maintenance
-
-  T t;
-
-  t.Fields( ct );  // build structure from source definitions
-
-  ct.ComposeStatement( TableName(), sStatement );  // build statement from structures
-
-}
 
 } // db
 } // ou

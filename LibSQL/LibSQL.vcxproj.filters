@@ -42,16 +42,7 @@
     <ClInclude Include="Sql.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ISqlite3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IPostgresql.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IDatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FieldDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SqlInsert.h">
@@ -64,6 +55,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SqlGeneric.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_FieldDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,16 +83,7 @@
     <ClCompile Include="Sql.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ISqlite3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IPostgresql.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IDatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FieldDef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SqlInsert.cpp">
@@ -108,6 +96,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SqlUpdate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_FieldDef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

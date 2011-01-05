@@ -11,27 +11,20 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+// LibSqlite/Actions.h
 
-#include <string>
+#pragma once
 
 #include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <LibSqlite/sqlite3.h>
-
-#include "IDatabase.h"
-#include "FieldDef.h"
+#include <LibSQL\Actions.h>
 
 namespace ou {
 namespace db {
+namespace sqlite {
 
-struct structStatementState {
-  sqlite3_stmt* pStmt;
-  structStatementState( void ) : pStmt( 0 ) {};
-};
-
-class Action_Sqlite_AddFields: public Action_AddFields {
+class Action_AddFields: public ou::db::Action_AddFields {
 public:
 
   const char* FieldType( char key );
@@ -44,8 +37,8 @@ public:
   const char* FieldType( double key );
   const char* FieldType( boost::posix_time::ptime& key ); // don't use julian as ptime has no representation earlier than 1400 AD
 
-  Action_Sqlite_AddFields( void ) {};
-  ~Action_Sqlite_AddFields( void ) {};
+  Action_AddFields( void ) {};
+  ~Action_AddFields( void ) {};
 
   template<typename T>
   void registerField( const std::string& sFieldName, T& var ) {
@@ -61,26 +54,6 @@ protected:
 private:
 };
 
-class ISqlite3: public IDatabaseCommon<structStatementState> {
-public:
-
-  ISqlite3(void);
-  ~ISqlite3(void);
-
-  void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
-  void Close( void );
-
-  void PrepareStatement( structStatement& statement );
-  void ExecuteStatement( structStatement& statement );
-  void CloseStatement( structStatement& statement );
-
-protected:
-
-private:
-
-  sqlite3* m_db;
-
-};
-
+} // sqlite
 } // db
 } // ou

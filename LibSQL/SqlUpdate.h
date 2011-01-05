@@ -13,23 +13,10 @@
 
 #pragma once
 
-#include "FieldDef.h"
 #include "Sql.h"
 
 namespace ou {
 namespace db {
-
-class Action_FieldsForUpdate: public Action_AddFields {
-public:
-
-  Action_FieldsForUpdate( void );
-  ~Action_FieldsForUpdate( void );
-
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
-
-protected:
-private:
-};
 
 //
 // CSqlUpdate
