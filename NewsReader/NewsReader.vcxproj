@@ -76,7 +76,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)IQ32.LIB;$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)IQ32.LIB;$(OutDir)libboost_system-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_45.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_45.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

@@ -25,7 +25,7 @@ Action_AddFields::Action_AddFields( void )
 Action_AddFields::~Action_AddFields( void ) {
 }
 
-void Action_AddFields::registerField( const std::string& sField, const char* szDbFieldType ) {
+void Action_AddFields::addField( const std::string& sField, const char* szDbFieldType ) {
   structFieldDef fd( sField, szDbFieldType );
   m_vFields.push_back( fd );
 }

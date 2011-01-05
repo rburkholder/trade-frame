@@ -29,8 +29,6 @@ public:
   Action_AddFields( void );
   virtual ~Action_AddFields( void );
 
-  void registerField( const std::string& sField, const char* szDbFieldType );
-
   // inheritor will need one of two:
   // void ComposeStatement( const std::string& sTableName, std::string& sStatement );
   // void ComposeStatement( std::string& sStatement );
@@ -50,6 +48,9 @@ protected:
   typedef std::vector<structFieldDef> vFields_t;
   typedef vFields_t::iterator vFields_iter_t;
   vFields_t m_vFields;
+
+  // called by inheritor
+  void addField( const std::string& sField, const char* szDbFieldType );
 
 private:
 };

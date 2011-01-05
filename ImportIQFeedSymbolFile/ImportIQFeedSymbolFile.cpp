@@ -23,7 +23,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
   CIQFeedSymbolFile file;
 
-  file.Load( "mktsymbols_v2.txt" );
+  file.Load( "mktsymbols_v2.txt", "symbols.db4" );
 
 	return 0;
 }

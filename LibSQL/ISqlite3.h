@@ -15,9 +15,13 @@
 
 #include <string>
 
+#include <boost/cstdint.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <LibSqlite/sqlite3.h>
 
 #include "IDatabase.h"
+#include "FieldDef.h"
 
 namespace ou {
 namespace db {
@@ -25,6 +29,36 @@ namespace db {
 struct structStatementState {
   sqlite3_stmt* pStmt;
   structStatementState( void ) : pStmt( 0 ) {};
+};
+
+class Action_Sqlite_AddFields: public Action_AddFields {
+public:
+
+  const char* FieldType( char key );
+  const char* FieldType( bool key );
+  const char* FieldType( boost::int64_t key );
+  const char* FieldType( boost::int32_t key );
+  const char* FieldType( boost::int16_t key );
+  const char* FieldType( boost::int8_t key );
+  const char* FieldType( std::string& key );
+  const char* FieldType( double key );
+  const char* FieldType( boost::posix_time::ptime& key ); // don't use julian as ptime has no representation earlier than 1400 AD
+
+  Action_Sqlite_AddFields( void ) {};
+  ~Action_Sqlite_AddFields( void ) {};
+
+  template<typename T>
+  void registerField( const std::string& sFieldName, T& var ) {
+    addField( sFieldName, FieldType( var ) );
+  }
+
+  template<typename T>
+  void registerField( const std::string& sFieldName, T& var, const std::string& sFieldType ) {
+    addField( sFieldName, sFieldType.c_str() );
+  }
+
+protected:
+private:
 };
 
 class ISqlite3: public IDatabaseCommon<structStatementState> {

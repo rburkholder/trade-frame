@@ -18,43 +18,6 @@
 namespace ou {
 namespace db {
 
-const char* FieldType( boost::posix_time::ptime& key ) { // don't use julian as ptime has no representation earlier than 1400 AD
-  return "TEXT";
-}
-
-const char* FieldType( char key ) {
-  return "TINYINT";
-}
-
-const char* FieldType( bool key ) {
-  return "TINYINT";
-}
-
-const char* FieldType( boost::int64_t key ) {
-  return "INT8"; 
-}
-
-const char* FieldType( boost::int32_t key ) {
-  return "BIGINT";
-}
-
-const char* FieldType( boost::int16_t key ) {
-  return "SMALLINT";
-}
-
-const char* FieldType( boost::int8_t key ) {
-  return "TINYINT";
-}
-
-const char* FieldType( std::string& key ) {
-  return "TEXT";
-}
-
-const char* FieldType( double key ) {
-  return "DOUBLE";
-}
-
-
 template<>
 const char* FieldType2<char>( void ) { return "TINYINT"; };
 
