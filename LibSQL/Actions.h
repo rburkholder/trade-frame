@@ -60,13 +60,13 @@ private:
 class Action_Compose_CreateTable: public Action_Compose {
 public:
 
-  Action_Compose_CreateTable( void );
+  Action_Compose_CreateTable( const std::string& sTableName );
   ~Action_Compose_CreateTable( void );
 
   void registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
   void setKey( const std::string& sLocalField );
 
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeStatement( std::string& sStatement );
 
 protected:
 
@@ -86,6 +86,8 @@ private:
   typedef vConstraints_t::iterator vConstraints_iter_t;
   vConstraints_t m_vConstraints;
 
+  std::string m_sTableName;
+
 };
 
 // Action_Compose_Insert
@@ -93,13 +95,14 @@ private:
 class Action_Compose_Insert: public Action_Compose {
 public:
 
-  Action_Compose_Insert( void );
+  Action_Compose_Insert( const std::string& sTableName );
   ~Action_Compose_Insert( void );
 
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeStatement( std::string& sStatement );
 
 protected:
 private:
+  std::string m_sTableName;
 };
 
 // Action_Compose_Update
@@ -107,13 +110,14 @@ private:
 class Action_Compose_Update: public Action_Compose {
 public:
 
-  Action_Compose_Update( void );
+  Action_Compose_Update( const std::string& sTableName );
   ~Action_Compose_Update( void );
 
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeStatement( std::string& sStatement );
 
 protected:
 private:
+  std::string m_sTableName;
 };
 
 // Action_Compose_Delete
@@ -121,17 +125,15 @@ private:
 class Action_Compose_Delete: public Action_Compose {
 public:
 
-  Action_Compose_Delete( void );
+  Action_Compose_Delete( const std::string& sTableName );
   ~Action_Compose_Delete( void );
 
-  void ComposeStatement( const std::string& sTableName, std::string& sStatement );
+  void ComposeStatement( std::string& sStatement );
 
 protected:
 private:
+  std::string m_sTableName;
 };
-
-
-
 
 
 } // db

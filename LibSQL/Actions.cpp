@@ -36,14 +36,20 @@ void Action_Compose::addField( const std::string& sField, const char* szDbFieldT
   m_vFields.push_back( fd );
 }
 
-// Action_Compose_CreateTable
-
-void Constraint( Action_Compose_CreateTable& action, const std::string& sLocalVar, const std::string& sRemoteTable, const std::string& sRemoteField ) {
+// =====
+void Constraint( 
+  Action_Compose_CreateTable& action, 
+  const std::string& sLocalVar, 
+  const std::string& sRemoteTable, 
+  const std::string& sRemoteField ) {
   action.registerConstraint( sLocalVar, sRemoteTable, sRemoteField );
 }
+// =====
 
-Action_Compose_CreateTable::Action_Compose_CreateTable( void ) 
-  : m_cntKeys( 0 )
+// Action_Compose_CreateTable
+
+Action_Compose_CreateTable::Action_Compose_CreateTable( const std::string& sTableName ) 
+  : Action_Compose(), m_cntKeys( 0 ), m_sTableName( sTableName )
 {
 }
 
@@ -68,15 +74,18 @@ void Action_Compose_CreateTable::setKey( const std::string& sFieldName ) {
 }
 
 // registerConstraint
-void Action_Compose_CreateTable::registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField ) {
+void Action_Compose_CreateTable::registerConstraint( 
+  const std::string& sLocalField, 
+  const std::string& sRemoteTable, 
+  const std::string& sRemoteField ) {
   structConstraint constraint( sLocalField, sRemoteTable, sRemoteField );
   m_vConstraints.push_back( constraint );
 }
 
 // ComposeStatement
-void Action_Compose_CreateTable::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_Compose_CreateTable::ComposeStatement( std::string& sStatement ) {
 
-  sStatement = "CREATE TABLE " + sTableName + " (";
+  sStatement = "CREATE TABLE " + m_sTableName + " (";
   int ix = 0;
 
   // fields
@@ -100,7 +109,7 @@ void Action_Compose_CreateTable::ComposeStatement( const std::string& sTableName
       sStatement += ", ";
     }
     ++ix;
-    sStatement += " CONSTRAINT PK_" + sTableName + " PRIMARY KEY (";
+    sStatement += " CONSTRAINT PK_" + m_sTableName + " PRIMARY KEY (";
     int iy = 0;
     for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
       if ( iter->bIsKeyPart ) {
@@ -121,7 +130,7 @@ void Action_Compose_CreateTable::ComposeStatement( const std::string& sTableName
     }
     ++ix;
     sStatement += "CONSTRAINT fk_"
-      + sTableName + "_" + iter->sLocalField
+      + m_sTableName + "_" + iter->sLocalField
       + " FOREIGN KEY(" + iter->sLocalField + ") REFERENCES "
       + iter->sRemoteTable + "(" + iter->sRemoteField + ") ON DELETE RESTRICT ON UPDATE CASCADE";
   }
@@ -133,13 +142,15 @@ void Action_Compose_CreateTable::ComposeStatement( const std::string& sTableName
 
 // Action_Compose_Insert
 
-Action_Compose_Insert::Action_Compose_Insert( void ) {
+Action_Compose_Insert::Action_Compose_Insert( const std::string& sTableName )
+  : Action_Compose(), m_sTableName( sTableName )
+{
 }
 
 Action_Compose_Insert::~Action_Compose_Insert( void ) {
 }
 
-void Action_Compose_Insert::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_Compose_Insert::ComposeStatement( std::string& sStatement ) {
 
   std::string sFields;
   std::string sHolders;
@@ -155,21 +166,23 @@ void Action_Compose_Insert::ComposeStatement( const std::string& sTableName, std
     ++ix;
   }
 
-  sStatement = "INSERT INTO " + sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
+  sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
 
 }
 
 // Action_Compose_Update
 
-Action_Compose_Update::Action_Compose_Update( void ) {
+Action_Compose_Update::Action_Compose_Update( const std::string& sTableName ) 
+  : Action_Compose(), m_sTableName( sTableName )
+{
 }
 
 Action_Compose_Update::~Action_Compose_Update( void ) {
 }
 
-void Action_Compose_Update::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_Compose_Update::ComposeStatement( std::string& sStatement ) {
 
-  sStatement = "UPDATE " + sTableName + " SET "; 
+  sStatement = "UPDATE " + m_sTableName + " SET "; 
 
   int ix = 1;
   for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
@@ -189,15 +202,17 @@ void Action_Compose_Update::ComposeStatement( const std::string& sTableName, std
 
 // Action_Compose_Delete
 
-Action_Compose_Delete::Action_Compose_Delete( void ) {
+Action_Compose_Delete::Action_Compose_Delete( const std::string& sTableName ) 
+  : Action_Compose(), m_sTableName( sTableName )
+{
 }
 
 Action_Compose_Delete::~Action_Compose_Delete( void ) {
 }
 
-void Action_Compose_Delete::ComposeStatement( const std::string& sTableName, std::string& sStatement ) {
+void Action_Compose_Delete::ComposeStatement( std::string& sStatement ) {
 
-  sStatement = "DELETE FROM " + sTableName;
+  sStatement = "DELETE FROM " + m_sTableName;
 
   // *** todo: need the 'where' clause yet
 

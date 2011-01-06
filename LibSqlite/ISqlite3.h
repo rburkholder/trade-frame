@@ -17,6 +17,7 @@
 
 #include <LibSQL/IDatabase.h>
 
+#include "Actions.h"
 #include "sqlite3.h"
 
 namespace ou {
@@ -34,6 +35,8 @@ class ISqlite3: public IDatabaseCommon<sqlite::structStatementState> {
 public:
 
   typedef sqlite::structStatementState structStatementState;
+
+  typedef ou::db::sqlite::Action_Compose_CreateTable Action_Compose_CreateTable;
 
   ISqlite3(void);
   ~ISqlite3(void);

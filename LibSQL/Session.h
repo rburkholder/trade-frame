@@ -38,11 +38,16 @@ namespace db {
 // * DB: structures dedicated to the specific database
 // * F: struct containing Fields function with ou::db::Field calls
 
-class QueryBase {  // used for stowage in vectors and such
+class QueryBase {  // used as base representation for stowage in vectors and such
 public:
+  typedef boost::shared_ptr<QueryBase> pQueryBase_t;
+  QueryBase( void ) {};
+  virtual ~QueryBase( void ) {};
 protected:
 private:
 };
+
+// =====
 
 template<class F>  // used for returning structures to queriers
 class QueryFields: 
@@ -55,13 +60,15 @@ protected:
 private:
 };
 
+// =====
+
 template<class DB, class F>  // used for getting stuff in and out of the database via the session
 class Query: 
-  public DB,
-  public QueryFields<F> 
+  public QueryFields<F>,
+  public DB
 {
 public:
-  typedef boost::shared_ptr<Query<DB, F> > pQuery_t;
+  typedef typename boost::shared_ptr<Query<DB, F> > pQuery_t;
   std::string m_sQueryText;  // 'compose' results end up here
 protected:
 private:
@@ -82,17 +89,26 @@ public:
   void Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   void Close( void );
 
-  template<typename T> // T: Table Class with TableDef member function
+  template<class F> // T: Table Class with TableDef member function
   typename CTableDef<T>::pCTableDef_t RegisterTable( const std::string& sTableName ) {
-    typedef typename CTableDef<T>::pCTableDef_t pCTableDef_t;
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
     if ( m_mapTableDefs.end() != iter ) {
       throw std::runtime_error( "table name already has definition" );
     }
-    pCTableDef_t pTableDef;
-    pTableDef.reset( new CTableDef<T>( m_db, sTableName ) );  // add empty table definition
-    iter = m_mapTableDefs.insert( m_mapTableDefs.begin(), mapTableDefs_pair_t( sTableName, pTableDef ) );
-    return pTableDef;
+    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+    pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );  // add empty table definition
+
+    IDatabase::Action_Compose_CreateTable ct( sTableName );
+    pQuery->Fields( ct );
+    ct.ComposeStatement( pQuery->m_sQueryText );
+
+    iter = m_mapTableDefs.insert( 
+      m_mapTableDefs.begin(), 
+      mapTableDefs_pair_t( sTableName, dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) );
+
+    m_vQuery.push_back( pQuery_t );
+
+    return pQuery_t;
   }
 
   void CreateTables( void );
@@ -134,16 +150,17 @@ private:
   
   IDatabase m_db;
 
-  typedef ou::db::CSqlBase::pCSqlBase_t pCSqlBase_t;  // track use_count on exit to ensure all removed properly
+  typedef IDatabase::structStatementState* pDBStatementState_t;
+  typedef QueryBase::pQueryBase_t pQueryBase_t;
 
-  typedef std::map<std::string, pCSqlBase_t> mapTableDefs_t;  // map table name to table definition
+  typedef std::map<std::string, pDBStatementState_t> mapTableDefs_t;  // map table name to table definition
   typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
-  typedef std::pair<std::string, pCSqlBase_t> mapTableDefs_pair_t;
+  typedef std::pair<std::string, pDBStatementState_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
-  typedef std::vector<pCSqlBase_t> vSql_t;
-  typedef vSql_t::iterator vSql_iter_t;
-  vSql_t m_vSql;
+  typedef std::vector<pQueryBase_t> vQuery_t;
+  typedef vQuery_t::iterator vQuery_iter_t;
+  vQuery_t m_vQuery;
 
 };
 
