@@ -19,40 +19,40 @@ namespace ou {
 namespace db {
 namespace sqlite {
 
-const char* Action_Compose_CreateTable::FieldType( char key ) {
+const char* Action_Assemble_TableDef::FieldType( char key ) {
   return "TINYINT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( bool key ) {
+const char* Action_Assemble_TableDef::FieldType( bool key ) {
   return "TINYINT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( boost::int64_t key ) {
+const char* Action_Assemble_TableDef::FieldType( boost::int64_t key ) {
   return "INT8"; 
 }
 
-const char* Action_Compose_CreateTable::FieldType( boost::int32_t key ) {
+const char* Action_Assemble_TableDef::FieldType( boost::int32_t key ) {
   return "BIGINT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( boost::int16_t key ) {
+const char* Action_Assemble_TableDef::FieldType( boost::int16_t key ) {
   return "SMALLINT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( boost::int8_t key ) {
+const char* Action_Assemble_TableDef::FieldType( boost::int8_t key ) {
   return "TINYINT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( std::string& key ) {
+const char* Action_Assemble_TableDef::FieldType( std::string& key ) {
   return "TEXT";
 }
 
-const char* Action_Compose_CreateTable::FieldType( double key ) {
+const char* Action_Assemble_TableDef::FieldType( double key ) {
   return "DOUBLE";
 }
 
 // don't use julian as ptime has no representation earlier than 1400 AD
-const char* Action_Compose_CreateTable::FieldType( boost::posix_time::ptime& key ) { 
+const char* Action_Assemble_TableDef::FieldType( boost::posix_time::ptime& key ) { 
   return "TEXT";
 }
 

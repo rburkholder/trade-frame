@@ -31,13 +31,13 @@ CSqlBase::CSqlBase( IDatabase& db )
 
 CSqlBase::~CSqlBase(void) {
   if ( 0 != m_pStatement ) {
-    m_db.CloseStatement( *m_pStatement );
+//    m_db.CloseStatement( *m_pStatement );
     m_pStatement = 0;
   }
 }
 
 void CSqlBase::PrepareStatement( void ) {
-
+/*
   IDatabase::structStatement& statement = m_db.AllocateStatement();
   m_pStatement = &statement;
 
@@ -48,17 +48,14 @@ void CSqlBase::PrepareStatement( void ) {
   }
 
   m_db.PrepareStatement( statement );
-
-}
-
-void CSqlBase::ComposeStatement( std::string& sStatement ) {
+*/
 }
 
 void CSqlBase::ExecuteStatement( void ) {
   if ( 0 == m_pStatement ) {
     throw std::runtime_error( "CSqlBase::ExecuteStatement has no prepared statement" );
   }
-  m_db.ExecuteStatement( *m_pStatement );
+//  m_db.ExecuteStatement( *m_pStatement );
 }
 
 //

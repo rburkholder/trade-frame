@@ -13,6 +13,8 @@
 
 // LibSql/Actions.cpp
 
+#include "StdAfx.h"
+
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
@@ -31,36 +33,41 @@ Action_Compose::Action_Compose( void )
 Action_Compose::~Action_Compose( void ) {
 }
 
-void Action_Compose::addField( const std::string& sField, const char* szDbFieldType ) {
-  structFieldDef fd( sField, szDbFieldType );
-  m_vFields.push_back( fd );
+void Action_Compose::addField( const std::string& sFieldName ) {
+  structField f( sFieldName );
+  m_vField.push_back( f );
 }
+
+// Action_Assemble_TableDef
 
 // =====
 void Constraint( 
-  Action_Compose_CreateTable& action, 
+  Action_Assemble_TableDef& action, 
   const std::string& sLocalVar, 
   const std::string& sRemoteTable, 
   const std::string& sRemoteField ) {
-  action.registerConstraint( sLocalVar, sRemoteTable, sRemoteField );
+  action.Constraint( sLocalVar, sRemoteTable, sRemoteField );
 }
 // =====
 
-// Action_Compose_CreateTable
-
-Action_Compose_CreateTable::Action_Compose_CreateTable( const std::string& sTableName ) 
+Action_Assemble_TableDef::Action_Assemble_TableDef( const std::string& sTableName ) 
   : Action_Compose(), m_cntKeys( 0 ), m_sTableName( sTableName )
 {
 }
 
-Action_Compose_CreateTable::~Action_Compose_CreateTable( void ) {
+Action_Assemble_TableDef::~Action_Assemble_TableDef( void ) {
+}
+
+void Action_Assemble_TableDef::addField( const std::string& sField, const char* szDbFieldType ) {
+  structFieldDef fd( sField, szDbFieldType );
+  m_vFieldDef.push_back( fd );
 }
 
 // setKey
-void Action_Compose_CreateTable::setKey( const std::string& sFieldName ) {
+void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
   //vFields_iter_t iter = std::find_if( m_vFields.begin(), m_vFields.end(), sFieldName,  );
-  vFields_iter_t iter = m_vFields.begin();
-  while (  iter != m_vFields.end() ) {
+  vFieldDef_iter_t iter = m_vFieldDef.begin();
+  while (  iter != m_vFieldDef.end() ) {
     if ( iter->sFieldName == sFieldName ) {
       iter->bIsKeyPart = true;
       ++m_cntKeys;
@@ -68,13 +75,13 @@ void Action_Compose_CreateTable::setKey( const std::string& sFieldName ) {
     }
     ++iter;
   }
-  if ( m_vFields.end() == iter ) {
+  if ( m_vFieldDef.end() == iter ) {
     throw std::runtime_error( "IsKey, can't find field " + sFieldName );
   }
 }
 
 // registerConstraint
-void Action_Compose_CreateTable::registerConstraint( 
+void Action_Assemble_TableDef::Constraint( 
   const std::string& sLocalField, 
   const std::string& sRemoteTable, 
   const std::string& sRemoteField ) {
@@ -83,13 +90,13 @@ void Action_Compose_CreateTable::registerConstraint(
 }
 
 // ComposeStatement
-void Action_Compose_CreateTable::ComposeStatement( std::string& sStatement ) {
+void Action_Assemble_TableDef::ComposeCreateStatement( std::string& sStatement ) {
 
   sStatement = "CREATE TABLE " + m_sTableName + " (";
   int ix = 0;
 
   // fields
-  for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
+  for ( vFieldDef_iter_t iter = m_vFieldDef.begin(); m_vFieldDef.end() != iter; ++iter ) {
     if ( 0 != ix ) {
       sStatement += ", ";
     }
@@ -111,7 +118,7 @@ void Action_Compose_CreateTable::ComposeStatement( std::string& sStatement ) {
     ++ix;
     sStatement += " CONSTRAINT PK_" + m_sTableName + " PRIMARY KEY (";
     int iy = 0;
-    for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
+    for ( vFieldDef_iter_t iter = m_vFieldDef.begin(); m_vFieldDef.end() != iter; ++iter ) {
       if ( iter->bIsKeyPart ) {
         if ( 0 < iy ) {
           sStatement += ", ";
@@ -156,7 +163,7 @@ void Action_Compose_Insert::ComposeStatement( std::string& sStatement ) {
   std::string sHolders;
 
   int ix = 1;
-  for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
+  for ( vField_iter_t iter = m_vField.begin(); m_vField.end() != iter; ++iter ) {
     if ( 1 < ix ) {
       sFields += ", ";
       sHolders += ", ";
@@ -185,7 +192,7 @@ void Action_Compose_Update::ComposeStatement( std::string& sStatement ) {
   sStatement = "UPDATE " + m_sTableName + " SET "; 
 
   int ix = 1;
-  for ( vFields_iter_t iter = m_vFields.begin(); m_vFields.end() != iter; ++iter ) {
+  for ( vField_iter_t iter = m_vField.begin(); m_vField.end() != iter; ++iter ) {
     if ( 1 < ix ) {
       sStatement += ", ";
     }

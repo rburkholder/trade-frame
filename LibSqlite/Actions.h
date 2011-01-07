@@ -24,7 +24,7 @@ namespace ou {
 namespace db {
 namespace sqlite {
 
-class Action_Compose_CreateTable: public ou::db::Action_Compose_CreateTable {
+class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
 public:
 
   const char* FieldType( char key );
@@ -37,16 +37,16 @@ public:
   const char* FieldType( double key );
   const char* FieldType( boost::posix_time::ptime& key ); // don't use julian as ptime has no representation earlier than 1400 AD
 
-  Action_Compose_CreateTable( const std::string& sTableName ): ou::db::Action_Compose_CreateTable( sTableName ) {};
-  ~Action_Compose_CreateTable( void ) {};
+  Action_Assemble_TableDef( const std::string& sTableName ): ou::db::Action_Assemble_TableDef( sTableName ) {};
+  ~Action_Assemble_TableDef( void ) {};
 
   template<typename T>
-  void registerField( const std::string& sFieldName, T& var ) {
+  void Field( const std::string& sFieldName, T& var ) {
     addField( sFieldName, FieldType( var ) );
   }
 
   template<typename T>
-  void registerField( const std::string& sFieldName, T& var, const std::string& sFieldType ) {
+  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType ) {
     addField( sFieldName, sFieldType.c_str() );
   }
 

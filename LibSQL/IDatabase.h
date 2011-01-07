@@ -39,11 +39,10 @@ public:
   virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
   virtual void Close( void ) {};
 
-  virtual structStatement& AllocateStatement( void ) = 0;
-  virtual void PrepareStatement( structStatement& statement ) = 0;
-  virtual void CloseStatement( structStatement& statement ) = 0;
+//  virtual void PrepareStatement( structStatement& statement ) = 0;
+//  virtual void CloseStatement( structStatement& statement ) = 0;
 
-  virtual void ExecuteStatement( structStatement& statement ) = 0;
+//  virtual void ExecuteStatement( structStatement& statement ) = 0;
 
 protected:
 
@@ -58,7 +57,6 @@ private:
 template<class SS>  // StatementState is stuff for linked list from IDatabase specializations
 class IDatabaseCommon: public IDatabase {
 public:
-  structStatement& AllocateStatement( void );
   //void PrepareStatement( structStatement& statement ) {};
 protected:
 
@@ -79,14 +77,6 @@ protected:
 private:
 };
 
-template<class SS>
-IDatabase::structStatement& IDatabaseCommon<SS>::AllocateStatement( void ) {
-  structStatementControl sc;  // dummy for pushing
-  m_lStmt.push_front( sc );
-  lStmt_iter_t iter = m_lStmt.begin();
-  iter->iterStmt = iter;
-  return m_lStmt.front();
-}
 
 
 

@@ -23,6 +23,44 @@
 namespace ou {
 namespace db {
 
+// fields
+
+template<typename Action, typename T> // A=Action, T=Type
+void Field( Action& action, const std::string& sFieldName, T& var ) {
+  action.Field( sFieldName, var );
+};
+
+template<typename Action, typename T> // A=Action, T=Type
+void Field( Action& action, const std::string& sFieldName, T& var, const std::string& sFieldType ) {
+  action.Field( sFieldName, var, sFieldType );
+};
+
+template<typename Action> // A=Action
+void Key( Action& action, const std::string& sFieldName ) {
+  action.Key( sFieldName );
+}
+
+// where
+
+template<typename Action, typename T> // A=Action, T=Type
+void Where( Action& action, const std::string& sName, T& var ) {  // expand functionality at a later date, defaults to '=' currently
+  action.Where( sName, var );
+};
+
+// orderby
+
+template<typename Action> // A=Action
+void OrderBy( Action& action, const std::string& sName ) {
+  action.OrderBy( sName );
+};
+
+// constraint
+
+template<typename Action> // A=Action
+void Constraint( Action& action, const std::string& sLocalKey, const std::string& sRemoteTable, const std::string& sRemoteKey ) {
+  action.Constraint( sLocalKey, sRemoteTable, sRemoteKey );
+};
+
 // 
 // dealing with key resolution: find db field type from c++ plain old data type
 //
@@ -48,46 +86,7 @@ template<> const char* FieldType2<boost::posix_time::ptime>( void );
 
 
 
-// fields
 
-template<typename Action, typename T> // A=Action, T=Type
-void Field( Action& action, const std::string& sFieldName, T& var ) {
-  //action.registerField( sFieldName, FieldType2<T>() );
-  //action.registerField( sFieldName, FieldType( var ) );
-  action.registerField( sFieldName, var );
-};
-
-template<typename Action, typename T> // A=Action, T=Type
-void Field( Action& action, const std::string& sFieldName, T& var, const std::string& sFieldType ) {
-  //action.registerField( sFieldName, sFieldType.c_str() );
-  action.registerField( sFieldName, var, sFieldType );
-};
-
-template<typename Action> // A=Action
-void Key( Action& action, const std::string& sFieldName ) {
-  action.setKey( sFieldName );
-}
-
-// where
-
-template<typename Action, typename T> // A=Action, T=Type
-void Where( Action& action, const std::string& sName, T& var ) {  // expand functionality at a later date, defaults to '=' currently
-  action.registerWhere( sName, var );
-};
-
-// orderby
-
-template<typename Action> // A=Action
-void OrderBy( Action& action, const std::string& sName ) {
-  action.registerOrderBy( sName );
-};
-
-// constraint
-
-template<typename Action> // A=Action
-void Constraint( Action& action, const std::string& sLocalKey, const std::string& sRemoteTable, const std::string& sRemoteKey ) {
-  action.registerConstraint( sLocalKey, sRemoteTable, sRemoteKey );
-};
 
 } // db
 } // ou

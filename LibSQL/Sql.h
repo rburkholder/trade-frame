@@ -44,7 +44,6 @@ public:
 protected:
 
   void PrepareStatement( void );  // automatically called by inheritor upon object instantiation 
-  virtual void ComposeStatement( std::string& sStatement );
 
 private:
 

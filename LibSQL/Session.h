@@ -22,13 +22,13 @@
 #include <boost\shared_ptr.hpp>
 
 #include "IDatabase.h"
-#include "Sql.h"
+//#include "Sql.h"
 
-#include "TableDef.h"
-#include "SqlInsert.h"
-#include "SqlUpdate.h"
-#include "SqlDelete.h"
-#include "SqlGeneric.h"
+//#include "TableDef.h"
+//#include "SqlInsert.h"
+//#include "SqlUpdate.h"
+//#include "SqlDelete.h"
+//#include "SqlGeneric.h"
 
 namespace ou {
 namespace db {
@@ -90,59 +90,101 @@ public:
   void Close( void );
 
   template<class F> // T: Table Class with TableDef member function
-  typename CTableDef<T>::pCTableDef_t RegisterTable( const std::string& sTableName ) {
+  typename QueryFields<F>::pQueryFields_t RegisterTable( const std::string& sTableName ) {
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
     if ( m_mapTableDefs.end() != iter ) {
       throw std::runtime_error( "table name already has definition" );
     }
+
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );  // add empty table definition
 
-    IDatabase::Action_Compose_CreateTable ct( sTableName );
-    pQuery->Fields( ct );
-    ct.ComposeStatement( pQuery->m_sQueryText );
+    IDatabase::Action_Assemble_TableDef action( sTableName );
+    pQuery->Fields( action );
+    action.ComposeCreateStatement( pQuery->m_sQueryText );
+
+    m_db.PrepareStatement( 
+      *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
+      pQuery->m_sQueryText );
 
     iter = m_mapTableDefs.insert( 
       m_mapTableDefs.begin(), 
-      mapTableDefs_pair_t( sTableName, dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) );
+      mapTableDefs_pair_t( sTableName, dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) ) );
 
-    m_vQuery.push_back( pQuery_t );
+    m_vQuery.push_back( pQuery );
 
-    return pQuery_t;
+    return pQuery;
   }
 
   void CreateTables( void );
 
   template<typename F>
-  typename ou::db::CSqlInsert<F>::pCSqlInsert_t RegisterInsert( const std::string& sTableName ) {
-    typename ou::db::CSqlInsert<F>::pCSqlInsert_t pCSql;
-    m_vSql.push_back( pCSql );
-    pCSql.reset( new CSqlInsert<F>( m_db, sTableName ) );
-    return pCSql;
+  typename QueryFields<F>::pQueryFields_t RegisterInsert( const std::string& sTableName ) {
+    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+    pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
+    m_vQuery.push_back( pQuery );
+    
+    IDatabase::Action_Compose_Insert action( sTableName );
+    pQuery->Fields( action );
+    action.ComposeStatement( pQuery->m_sQueryText );
+
+    m_db.PrepareStatement( 
+      *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
+      pQuery->m_sQueryText );
+
+    return pQuery;
   }
 
+  // need where clause
   template<typename F>
-  typename ou::db::CSqlUpdate<F>::pCSqlUpdate_t RegisterUpdate( const std::string& sTableName ) {
-    typename ou::db::CSqlUpdate<F>::pCSqlUpdate_t pCSql;
-    m_vSql.push_back( pCSql );
-    pCSql.reset( new CSqlUpdate<F>( m_db, sTableName ) );
-    return pCSql;
+  typename QueryFields<F>::pQueryFields_t RegisterUpdate( const std::string& sTableName ) {
+    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+    pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
+    m_vQuery.push_back( pQuery );
+    
+    IDatabase::Action_Compose_Update action( sTableName );
+    pQuery->Fields( action );
+    action.ComposeStatement( pQuery->m_sQueryText );
+
+    m_db.PrepareStatement( 
+      *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
+      pQuery->m_sQueryText );
+
+    return pQuery;
   }
 
+  // need where clause
   template<typename F>
-  typename ou::db::CSqlDelete<F>::pCSqlDelete_t RegisterDelete( const std::string& sTableName ) {
-    typename ou::db::CSqlDelete<F>::pCSqlDelete_t pCSql;
-    m_vSql.push_back( pCSql );
-    pCSql.reset( new CSqlDelete<F>( m_db, sTableName ) );
-    return pCSql;
+  typename QueryFields<F>::pQueryFields_t RegisterDelete( const std::string& sTableName ) {
+    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+    pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
+    m_vQuery.push_back( pQuery );
+    
+    IDatabase::Action_Compose_Delete action( sTableName );
+    pQuery->Fields( action );
+    action.ComposeStatement( pQuery->m_sQueryText );
+
+    m_db.PrepareStatement( 
+      *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
+      pQuery->m_sQueryText );
+
+    return pQuery;
   }
 
+  // also need non-F specialization as there may be no fields involved in some queries
   template<typename F>
-  typename ou::db::CSqlQuery<F>::pCSqlQuery_t RegisterQuery( const std::string& sSqlQuery ) {
-    typename ou::db::CSqlQuery<F>::pCSqlQuery_t pCSql;
-    m_vSql.push_back( pCSql );
-    pCSql.reset( new CSqlQuery<F>( m_db, sSqlQuery ) );
-    return pCSql;
+  typename QueryFields<F>::pQueryFields_t RegisterQuery( const std::string& sSqlQuery ) {
+    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+    pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
+    m_vQuery.push_back( pQuery );
+
+    pQuery->m_sQueryText = sSqlQuery;
+    
+    m_db.PrepareStatement( 
+      *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
+      pQuery->m_sQueryText );
+
+    return pQuery;
   }
 
 protected:
@@ -150,11 +192,11 @@ private:
   
   IDatabase m_db;
 
-  typedef IDatabase::structStatementState* pDBStatementState_t;
+  typedef typename IDatabase::structStatementState* pDBStatementState_t;
   typedef QueryBase::pQueryBase_t pQueryBase_t;
 
   typedef std::map<std::string, pDBStatementState_t> mapTableDefs_t;  // map table name to table definition
-  typedef mapTableDefs_t::iterator mapTableDefs_iter_t;
+  typedef typename mapTableDefs_t::iterator mapTableDefs_iter_t;
   typedef std::pair<std::string, pDBStatementState_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
@@ -184,7 +226,7 @@ void CSession<IDatabase>::Open( const std::string& sDbFileName, enumOpenFlags fl
 // Close
 template<class IDatabase>
 void CSession<IDatabase>::Close( void ) {
-  m_vSql.clear();
+  m_vQuery.clear();
   m_mapTableDefs.clear();
   m_db.Close();
 }
@@ -194,7 +236,7 @@ template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
   // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    iter->second->ExecuteStatement();  
+    //iter->second->ExecuteStatement();  
   }
 }
 

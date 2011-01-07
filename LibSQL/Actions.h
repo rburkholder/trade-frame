@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#include "Functions.h"
+
 namespace ou {
 namespace db {
 
@@ -29,13 +31,62 @@ public:
   Action_Compose( void );
   virtual ~Action_Compose( void );
 
-  // inheritor will need one of two:
+  template<typename T>
+  void Field( const std::string& sFieldName, T& var ) {
+    addField( sFieldName );
+  }
+
+  template<typename T>
+  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType ) {
+    addField( sFieldName );
+  }
+
+  // inheritor will likely need something like:
   // void ComposeStatement( const std::string& sTableName, std::string& sStatement );
   // void ComposeStatement( std::string& sStatement );
 
 protected:
 
-  // definition of fields
+  // definition of fields for table creation
+  struct structField {
+    std::string sFieldName;
+    structField( const std::string& sFieldName_ ): sFieldName( sFieldName_ ) {};
+  };
+
+  typedef std::vector<structField> vField_t;
+  typedef vField_t::iterator vField_iter_t;
+  vField_t m_vField;
+
+  void addField( const std::string& sFieldName );
+
+private:
+};
+
+// Action_Compose_CreateTable
+
+class Action_Assemble_TableDef: public Action_Compose {
+public:
+
+  Action_Assemble_TableDef( const std::string& sTableName );
+  ~Action_Assemble_TableDef( void );
+
+//  template<typename T> // located in inheritor
+//  void Field( const std::string& sFieldName, T& var ) { };
+
+//  template<typename T> // located in inheritor
+//  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType ) { };
+
+  void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
+  void Key( const std::string& sLocalField );
+
+  void ComposeCreateStatement( std::string& sStatement );
+
+protected:
+
+  // called by inheritor
+  void addField( const std::string& sField, const char* szDbFieldType );
+
+  // definition of fields for table creation
   struct structFieldDef {
     std::string sFieldName;
     std::string sFieldType;
@@ -45,32 +96,9 @@ protected:
       : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
   };
 
-  typedef std::vector<structFieldDef> vFields_t;
-  typedef vFields_t::iterator vFields_iter_t;
-  vFields_t m_vFields;
-
-  // called by inheritor
-  void addField( const std::string& sField, const char* szDbFieldType );
-
-private:
-};
-
-// Action_Compose_CreateTable
-
-class Action_Compose_CreateTable: public Action_Compose {
-public:
-
-  Action_Compose_CreateTable( const std::string& sTableName );
-  ~Action_Compose_CreateTable( void );
-
-  void registerConstraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
-  void setKey( const std::string& sLocalField );
-
-  void ComposeStatement( std::string& sStatement );
-
-protected:
-
-private:
+  typedef std::vector<structFieldDef> vFieldDef_t;
+  typedef vFieldDef_t::iterator vFieldDef_iter_t;
+  vFieldDef_t m_vFieldDef;
 
   unsigned int m_cntKeys;
 
@@ -87,6 +115,8 @@ private:
   vConstraints_t m_vConstraints;
 
   std::string m_sTableName;
+
+private:
 
 };
 

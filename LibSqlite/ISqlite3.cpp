@@ -55,11 +55,11 @@ void ISqlite3::Close( void ) {
   }
 }
 
-void ISqlite3::PrepareStatement( structStatement& statement ) {
+void ISqlite3::PrepareStatement( structStatementState& statement, const std::string& sStatement ) {
   IDatabaseCommon<structStatementState>::structStatementControl* psc =
     reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
   int rtn = sqlite3_prepare_v2( 
-    m_db, statement.sSqlStatement.c_str(), -1, &psc->stateStatement.pStmt, NULL );
+    m_db, sStatement.c_str(), -1, &psc->stateStatement.pStmt, NULL );
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "ISqlite3::PrepareStatement: " );
     sErr += " error in prepare(";
@@ -70,7 +70,7 @@ void ISqlite3::PrepareStatement( structStatement& statement ) {
   assert( 0 != psc->stateStatement.pStmt );
 }
 
-void ISqlite3::ExecuteStatement( structStatement& statement ) {
+void ISqlite3::ExecuteStatement( structStatementState& statement ) {
   IDatabaseCommon<structStatementState>::structStatementControl* psc =
     reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
   if ( 0 != psc->stateStatement.pStmt ) {
@@ -85,7 +85,7 @@ void ISqlite3::ExecuteStatement( structStatement& statement ) {
   }
 }
 
-void ISqlite3::CloseStatement( structStatement& statement ) {
+void ISqlite3::CloseStatement( structStatementState& statement ) {
   IDatabaseCommon<structStatementState>::structStatementControl* psc =
     reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
   if ( 0 != psc->stateStatement.pStmt ) { // it shouldn't be zero, but test anyway

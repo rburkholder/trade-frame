@@ -36,7 +36,10 @@ public:
 
   typedef sqlite::structStatementState structStatementState;
 
-  typedef ou::db::sqlite::Action_Compose_CreateTable Action_Compose_CreateTable;
+  typedef ou::db::sqlite::Action_Assemble_TableDef Action_Assemble_TableDef;
+  typedef ou::db::Action_Compose_Insert Action_Compose_Insert;
+  typedef ou::db::Action_Compose_Update Action_Compose_Update;
+  typedef ou::db::Action_Compose_Delete Action_Compose_Delete;
 
   ISqlite3(void);
   ~ISqlite3(void);
@@ -44,9 +47,9 @@ public:
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
   void Close( void );
 
-  void PrepareStatement( structStatement& statement );
-  void ExecuteStatement( structStatement& statement );
-  void CloseStatement( structStatement& statement );
+  void PrepareStatement( structStatementState& statement, const std::string& sStatement );
+  void ExecuteStatement( structStatementState& statement );
+  void CloseStatement(   structStatementState& statement );
 
 protected:
 
