@@ -114,6 +114,7 @@ public:
     m_vQuery.push_back( pQuery );
 
     return pQuery;
+
   }
 
   void CreateTables( void );

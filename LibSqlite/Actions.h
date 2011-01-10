@@ -54,6 +54,33 @@ protected:
 private:
 };
 
+
+
+// 
+// dealing with key resolution: find db field type from c++ plain old data type
+//
+
+// following functions are not used.  Need to fix the enumeration problem first.
+template<typename T>
+const char* FieldType2( void ) { // is called with enumerations, so need to figure out appropriate type conversion
+  std::string s;
+  s += "FieldType2 bad cast: ";
+  s += typeid( T ).name();
+  throw std::runtime_error( s ); 
+};
+template<> const char* FieldType2<char>( void );
+template<> const char* FieldType2<bool>( void );
+template<> const char* FieldType2<boost::int64_t>( void );
+template<> const char* FieldType2<boost::int32_t>( void );
+template<> const char* FieldType2<boost::int16_t>( void );
+template<> const char* FieldType2<boost::int8_t>( void );
+template<> const char* FieldType2<std::string>( void );
+template<> const char* FieldType2<double>( void );
+// don't use julian as ptime has no representation earlier than 1400 AD
+template<> const char* FieldType2<boost::posix_time::ptime>( void );
+
+
+
 } // sqlite
 } // db
 } // ou
