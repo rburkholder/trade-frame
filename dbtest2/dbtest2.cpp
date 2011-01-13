@@ -51,11 +51,21 @@ int _tmain(int argc, _TCHAR* argv[]) {
   ou::db::CSession<ou::db::ISqlite3> session;
   session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
-  session.RegisterTable<CFieldsTable>( "test" );
-  session.CreateTables();
 
   { // after use, delete shared pointers so close works properly, fix IDatabase::Close to use differently.
+    session.RegisterTable<CFieldsTable>( "test" );
+    session.CreateTables();
+
     ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.RegisterInsert<CFields>( "test" );
+
+    pInsert->m_key = 4;
+    pInsert->m_dblField = 3;
+    pInsert->m_enumField = pInsert->EThree;
+    pInsert->m_intField = -45;
+    pInsert->m_sField = "attempt";
+
+    session.Execute( pInsert );
+
     ou::db::QueryFields<CFields>::pQueryFields_t pUpdate = session.RegisterUpdate<CFields>( "test" );
     ou::db::QueryFields<CFields>::pQueryFields_t pDelete = session.RegisterDelete<CFields>( "test" );
 

@@ -45,6 +45,8 @@ public:
   // void ComposeStatement( const std::string& sTableName, std::string& sStatement );
   // void ComposeStatement( std::string& sStatement );
 
+  std::vector<int>::size_type FieldCount( void ) { return m_vField.size(); };
+
 protected:
 
   // definition of fields for table creation

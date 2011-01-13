@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
-#include <typeinfo>
+//#include <typeinfo>
 
 #include <boost\shared_ptr.hpp>
 
@@ -41,10 +41,16 @@ namespace db {
 class QueryBase {  // used as base representation for stowage in vectors and such
 public:
   typedef boost::shared_ptr<QueryBase> pQueryBase_t;
-  QueryBase( void ) {};
+
+  QueryBase( void ): m_bHasFields( false ) {};
   virtual ~QueryBase( void ) {};
+
+  void SetHasFields( void ) { m_bHasFields = true; };
+  bool HasFields( void ) { return m_bHasFields; };
+
 protected:
 private:
+  bool m_bHasFields;
 };
 
 // =====
@@ -89,6 +95,10 @@ public:
   void Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   void Close( void );
 
+  void Execute( QueryBase::pQueryBase_t pQuery ) {
+    m_db.ExecuteStatement( *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) );
+  }
+
   template<class F> // T: Table Class with TableDef member function
   typename QueryFields<F>::pQueryFields_t RegisterTable( const std::string& sTableName ) {
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
@@ -101,6 +111,7 @@ public:
 
     IDatabase::Action_Assemble_TableDef action( sTableName );
     pQuery->Fields( action );
+    if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeCreateStatement( pQuery->m_sQueryText );
 
     m_db.PrepareStatement( 
@@ -119,7 +130,7 @@ public:
 
   void CreateTables( void );
 
-  template<typename F>
+  template<typename F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterInsert( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -127,6 +138,7 @@ public:
     
     IDatabase::Action_Compose_Insert action( sTableName );
     pQuery->Fields( action );
+    if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->m_sQueryText );
 
     m_db.PrepareStatement( 
@@ -137,7 +149,7 @@ public:
   }
 
   // need where clause
-  template<typename F>
+  template<typename F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterUpdate( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -145,6 +157,7 @@ public:
     
     IDatabase::Action_Compose_Update action( sTableName );
     pQuery->Fields( action );
+    if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->m_sQueryText );
 
     m_db.PrepareStatement( 
@@ -155,7 +168,7 @@ public:
   }
 
   // need where clause
-  template<typename F>
+  template<typename F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterDelete( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -163,6 +176,7 @@ public:
     
     IDatabase::Action_Compose_Delete action( sTableName );
     pQuery->Fields( action );
+    if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->m_sQueryText );
 
     m_db.PrepareStatement( 
@@ -173,7 +187,8 @@ public:
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
-  template<typename F>
+  // todo:  need to do field processing, so can get field count, so need a processing action
+  template<typename F>  // do reset, auto bind if variables exist
   typename QueryFields<F>::pQueryFields_t RegisterQuery( const std::string& sSqlQuery ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -190,6 +205,8 @@ public:
 
 protected:
 private:
+
+  bool m_bOpened;
   
   IDatabase m_db;
 
@@ -209,27 +226,41 @@ private:
 
 // Constructor
 template<class IDatabase>
-CSession<IDatabase>::CSession( void ) {
+CSession<IDatabase>::CSession( void ): m_bOpened( false ) {
 }
 
 // Destructor
 template<class IDatabase>
 CSession<IDatabase>::~CSession(void) {
-  m_db.Close();
+  Close();
 }
 
 // Open
 template<class IDatabase>
 void CSession<IDatabase>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
-  m_db.Open( sDbFileName, flags );
+  if ( m_bOpened ) {
+    std::string sErr( "Session already opened" );
+    throw std::runtime_error( sErr );
+  }
+  else {
+    m_db.Open( sDbFileName, flags );
+    m_bOpened = true;
+  }
+  
 }
 
 // Close
 template<class IDatabase>
 void CSession<IDatabase>::Close( void ) {
-  m_vQuery.clear();
-  m_mapTableDefs.clear();
-  m_db.Close();
+  if ( m_bOpened ) {
+    m_mapTableDefs.clear();
+    for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
+      m_db.CloseStatement( *dynamic_cast<IDatabase::structStatementState*>( iter->get() ) );
+    }
+    m_vQuery.clear();
+    m_db.Close();
+    m_bOpened = false;
+  }
 }
 
 // CreateTables
@@ -237,11 +268,9 @@ template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
   // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    //iter->second->ExecuteStatement();  
+    m_db.ExecuteStatement( *(iter->second) );
   }
 }
-
-
 
 } // db
 } // ou

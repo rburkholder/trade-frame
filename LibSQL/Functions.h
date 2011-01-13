@@ -56,5 +56,8 @@ void Constraint( Action& action, const std::string& sLocalKey, const std::string
   action.Constraint( sLocalKey, sRemoteTable, sRemoteKey );
 };
 
+
+
+
 } // db
 } // ou

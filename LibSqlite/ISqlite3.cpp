@@ -51,7 +51,9 @@ void ISqlite3::Close( void ) {
     int rtn = sqlite3_close( m_db );
     m_db = 0;
     m_bDbOpened = false;
-    assert( SQLITE_OK == rtn );
+    if (  SQLITE_OK != rtn ) {
+      assert( false );
+    }
   }
 }
 

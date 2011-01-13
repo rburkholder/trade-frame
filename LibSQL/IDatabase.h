@@ -39,10 +39,6 @@ public:
   virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
   virtual void Close( void ) {};
 
-//  virtual void PrepareStatement( structStatement& statement ) = 0;
-//  virtual void CloseStatement( structStatement& statement ) = 0;
-
-//  virtual void ExecuteStatement( structStatement& statement ) = 0;
 
 protected:
 
