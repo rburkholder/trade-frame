@@ -15,10 +15,15 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <LibSQL\Actions.h>
+
+#include "StatementState.h"
 
 namespace ou {
 namespace db {
@@ -54,7 +59,39 @@ protected:
 private:
 };
 
+class Action_Bind_Values {
+public:
 
+  Action_Bind_Values( structStatementState& state ): m_state( state ), m_index( 0 ) {};
+  ~Action_Bind_Values( void ) {};
+
+  int Bind( char var );
+  int Bind( bool var );
+  int Bind( boost::int64_t var );
+  int Bind( boost::int32_t var );
+  int Bind( boost::int16_t var );
+  int Bind( boost::int8_t var );
+  int Bind( std::string& var );
+  int Bind( double var );
+  int Bind( boost::posix_time::ptime& var );
+
+  template<typename T>
+  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {
+    ++m_index;
+    int rtn = Bind( var );
+    if ( SQLITE_OK != rtn ) {
+      std::string sErr( "Action_Bind_Values::Field::Bind: " );
+      sErr += boost::lexical_cast<std::string>( rtn );
+      sErr += ")";
+      throw std::runtime_error( sErr );
+    }
+  }
+
+protected:
+private:
+  structStatementState m_state;
+  int m_index;  // index into sql statement, starts at 1
+};
 
 // 
 // dealing with key resolution: find db field type from c++ plain old data type

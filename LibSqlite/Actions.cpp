@@ -13,6 +13,8 @@
 
 // LibSqlite/Actions.cpp
 
+#include <sstream>
+
 #include "Actions.h"
 
 namespace ou {
@@ -56,7 +58,47 @@ const char* Action_Assemble_TableDef::FieldType( boost::posix_time::ptime& key )
   return "TEXT";
 }
 
+int Action_Bind_Values::Bind( char var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
 
+int Action_Bind_Values::Bind( bool var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var ? 1 : 0 );
+}
+
+int Action_Bind_Values::Bind( boost::int64_t var ) {
+  return sqlite3_bind_int64( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( boost::int32_t var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( boost::int16_t var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( boost::int8_t var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( std::string& var ) {
+  return sqlite3_bind_text( m_state.pStmt, m_index, var.c_str(), var.length() + 1, SQLITE_TRANSIENT );
+}
+
+int Action_Bind_Values::Bind( double var ) {
+  return sqlite3_bind_double( m_state.pStmt, m_index, var );
+}
+
+// http://www.boost.org/doc/libs/1_45_0/doc/html/date_time/date_time_io.html#date_time.io_tutorial
+int Action_Bind_Values::Bind( boost::posix_time::ptime& var ) {
+  // need to fix up with local time
+  std::stringstream ss;
+  ss << var;
+  return Bind( ss.str() );
+}
+
+// unused, untested stuff, needs fix on enum stuff
 template<>
 const char* FieldType2<char>( void ) { return "TINYINT"; };
 

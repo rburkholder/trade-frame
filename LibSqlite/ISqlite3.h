@@ -17,19 +17,12 @@
 
 #include <LibSQL/IDatabase.h>
 
-#include "Actions.h"
 #include "sqlite3.h"
+#include "StatementState.h"
+#include "Actions.h"
 
 namespace ou {
 namespace db {
-namespace sqlite {
-
-struct structStatementState {
-  sqlite3_stmt* pStmt;
-  structStatementState( void ) : pStmt( 0 ) {};
-};
-
-} // namespace sqlite
 
 class ISqlite3: public IDatabaseCommon<sqlite::structStatementState> {
 public:
@@ -40,6 +33,8 @@ public:
   typedef ou::db::Action_Compose_Insert Action_Compose_Insert;
   typedef ou::db::Action_Compose_Update Action_Compose_Update;
   typedef ou::db::Action_Compose_Delete Action_Compose_Delete;
+
+  typedef ou::db::sqlite::Action_Bind_Values Action_Bind_Values;
 
   ISqlite3(void);
   ~ISqlite3(void);

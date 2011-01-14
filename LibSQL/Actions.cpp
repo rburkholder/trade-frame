@@ -63,7 +63,7 @@ void Action_Assemble_TableDef::addField( const std::string& sField, const char* 
   m_vFieldDef.push_back( fd );
 }
 
-// setKey
+// Key
 void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
   //vFields_iter_t iter = std::find_if( m_vFields.begin(), m_vFields.end(), sFieldName,  );
   vFieldDef_iter_t iter = m_vFieldDef.begin();

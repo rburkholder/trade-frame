@@ -64,6 +64,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
     pInsert->m_intField = -45;
     pInsert->m_sField = "attempt";
 
+    session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
 
     ou::db::QueryFields<CFields>::pQueryFields_t pUpdate = session.RegisterUpdate<CFields>( "test" );

@@ -130,7 +130,7 @@ public:
 
   void CreateTables( void );
 
-  template<typename F>  // do reset, auto bind when doing execute
+  template<class F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterInsert( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -149,7 +149,7 @@ public:
   }
 
   // need where clause
-  template<typename F>  // do reset, auto bind when doing execute
+  template<class F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterUpdate( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -168,7 +168,7 @@ public:
   }
 
   // need where clause
-  template<typename F>  // do reset, auto bind when doing execute
+  template<class F>  // do reset, auto bind when doing execute
   typename QueryFields<F>::pQueryFields_t RegisterDelete( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -188,7 +188,7 @@ public:
 
   // also need non-F specialization as there may be no fields involved in some queries
   // todo:  need to do field processing, so can get field count, so need a processing action
-  template<typename F>  // do reset, auto bind if variables exist
+  template<class F>  // do reset, auto bind if variables exist
   typename QueryFields<F>::pQueryFields_t RegisterQuery( const std::string& sSqlQuery ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
@@ -201,6 +201,12 @@ public:
       pQuery->m_sQueryText );
 
     return pQuery;
+  }
+
+  template<class F>
+  void Bind( typename QueryFields<F>::pQueryFields_t pQuery ) {
+    IDatabase::Action_Bind_Values action( *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) );
+    pQuery->Fields( action );
   }
 
 protected:
