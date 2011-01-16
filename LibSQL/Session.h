@@ -71,17 +71,44 @@ class Query:
   public QueryFields<F>,
   public SS // statement state
 {
+private:
+  enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy };
 public:
   typedef boost::intrusive_ptr<Query<SS, F> > pQuery_t;
-  Query* Where( const std::string& sWhere ) { 
+  Query( void ): m_clause( EClauseNone ), m_bPrepared( false ) {};
+  ~Query( void ) {};
+  Query* Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
+    assert( EClauseWhere > m_clause );
     m_sQueryText += " " + sWhere;
+    m_clause = EClauseWhere;
     return this; 
   };
-  std::string& QueryText( void ) { return m_sQueryText; };
+  Query* OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
+    assert( EClauseOrderBy > m_clause );
+    m_sQueryText += " " + sOrderBy;
+    m_clause = EClauseOrderBy;
+    return this;
+  }
+  Query* GroupBy( const std::string& sGroupBy ) {
+    assert( EClauseGroupBy > m_clause );
+    m_sQueryText += " " + sGroupBy;
+    m_clause = EClauseGroupBy;
+    return this;
+  }
+  const std::string& QueryText( void ) { return m_sQueryText; };
+  std::string& SetQueryText( void ) { 
+    assert( EClauseQuery > m_clause );
+    m_clause = EClauseQuery;
+    return m_sQueryText; 
+  };
 protected:
 private:
+  enumClause m_clause;
   std::string m_sQueryText;  // 'compose' results end up here
+  bool m_bPrepared;
 };
+
+// functions for intrusive ptr
 
 template<class Q>
 void intrusive_ptr_add_ref( Q* pq ) {
@@ -127,11 +154,11 @@ public:
     IDatabase::Action_Assemble_TableDef action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeCreateStatement( pQuery->QueryText() );
+    action.ComposeCreateStatement( pQuery->SetQueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->QueryText() );
+      pQuery->SetQueryText() );
 
     iter = m_mapTableDefs.insert( 
       m_mapTableDefs.begin(), 
@@ -154,11 +181,11 @@ public:
     IDatabase::Action_Compose_Insert action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->QueryText() );
+    action.ComposeStatement( pQuery->SetQueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->QueryText() );
+      pQuery->SetQueryText() );
 
     return pQuery;
   }
@@ -173,11 +200,11 @@ public:
     IDatabase::Action_Compose_Update action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->QueryText() );
+    action.ComposeStatement( pQuery->SetQueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->QueryText() );
+      pQuery->SetQueryText() );
 
     return pQuery;
   }
@@ -192,11 +219,11 @@ public:
     IDatabase::Action_Compose_Delete action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->QueryText() );
+    action.ComposeStatement( pQuery->SetQueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->QueryText() );
+      pQuery->SetQueryText() );
 
     return pQuery;
   }
@@ -209,11 +236,11 @@ public:
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
     m_vQuery.push_back( pQuery );
 
-    pQuery->QueryText() = sSqlQuery;
+    pQuery->SetQueryText() = sSqlQuery;
     
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->QueryText() );
+      pQuery->SetQueryText() );
 
     return pQuery;
   }
