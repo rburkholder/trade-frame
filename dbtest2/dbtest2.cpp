@@ -46,11 +46,20 @@ struct CFieldsTable: public CFields {
 
 };
 
+struct CFieldsUpdate {
+  template<class A>
+  void Fields( A& a ){
+    ou::db::Field( a, "field", m_sField );
+  };
+
+  std::string m_sField;
+
+};
+
 int _tmain(int argc, _TCHAR* argv[]) {
 
   ou::db::CSession<ou::db::ISqlite3> session;
   session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
-
 
   { // after use, delete shared pointers so close works properly, fix IDatabase::Close to use differently.
     session.RegisterTable<CFieldsTable>( "test" );
@@ -67,7 +76,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
 
-    ou::db::QueryFields<CFields>::pQueryFields_t pUpdate = session.RegisterUpdate<CFields>( "test" );
+    ou::db::QueryFields<CFields>::pQueryFields_t pUpdate = session.RegisterUpdate<CFields>( "test" )->Where( "field1 = 'attempt'" );
     ou::db::QueryFields<CFields>::pQueryFields_t pDelete = session.RegisterDelete<CFields>( "test" );
 
     ou::db::QueryFields<CFields>::pQueryFields_t pQuery = session.RegisterQuery<CFields>( "select * from test;" );

@@ -57,11 +57,10 @@ void ISqlite3::Close( void ) {
   }
 }
 
-void ISqlite3::PrepareStatement( structStatementState& statement, const std::string& sStatement ) {
-  IDatabaseCommon<structStatementState>::structStatementControl* psc =
-    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
+void ISqlite3::PrepareStatement( structStatementState& statement, std::string& sStatement ) {
+  sStatement += ";";
   int rtn = sqlite3_prepare_v2( 
-    m_db, sStatement.c_str(), -1, &psc->stateStatement.pStmt, NULL );
+    m_db, sStatement.c_str(), -1, &statement.pStmt, NULL );
   if ( SQLITE_OK != rtn ) {
     std::string sErr( "ISqlite3::PrepareStatement: " );
     sErr += " error in prepare(";
@@ -69,14 +68,12 @@ void ISqlite3::PrepareStatement( structStatementState& statement, const std::str
     sErr += ")";
     throw std::runtime_error( sErr );
   }
-  assert( 0 != psc->stateStatement.pStmt );
+  assert( 0 != statement.pStmt );
 }
 
 void ISqlite3::ExecuteStatement( structStatementState& statement ) {
-  IDatabaseCommon<structStatementState>::structStatementControl* psc =
-    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
-  if ( 0 != psc->stateStatement.pStmt ) {
-    int rtn = sqlite3_step( psc->stateStatement.pStmt );
+  if ( 0 != statement.pStmt ) {
+    int rtn = sqlite3_step( statement.pStmt );
     if ( SQLITE_DONE != rtn ) {
       std::string sErr( "ISqlite3::ExecuteStatement: " );
       sErr += " error in execute(";
@@ -88,10 +85,8 @@ void ISqlite3::ExecuteStatement( structStatementState& statement ) {
 }
 
 void ISqlite3::CloseStatement( structStatementState& statement ) {
-  IDatabaseCommon<structStatementState>::structStatementControl* psc =
-    reinterpret_cast<IDatabaseCommon<structStatementState>::structStatementControl*>( &statement );
-  if ( 0 != psc->stateStatement.pStmt ) { // it shouldn't be zero, but test anyway
-    int rtn = sqlite3_finalize( psc->stateStatement.pStmt );
+  if ( 0 != statement.pStmt ) { // it shouldn't be zero, but test anyway
+    int rtn = sqlite3_finalize( statement.pStmt );
     if ( SQLITE_OK != rtn ) {
       std::string sErr( "ISqlite3::CloseStatement: " );
       sErr += " error in close(";
@@ -99,7 +94,7 @@ void ISqlite3::CloseStatement( structStatementState& statement ) {
       sErr += ")";
       throw std::runtime_error( sErr );
     }
-    psc->stateStatement.pStmt = 0;
+    statement.pStmt = 0;
     // todo:  should the list element also be deleted here?
   }
 }

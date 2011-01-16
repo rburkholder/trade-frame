@@ -11,20 +11,38 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// inherited by ISqlite3 and IPostgresql for specialization
+
 #pragma once
 
-#include "sqlite3.h"
+#include <string>
+#include <list>
 
 namespace ou {
 namespace db {
-namespace sqlite {
 
-struct structStatementState {
-  sqlite3_stmt* pStmt;
-  bool bIsReset;  // ensure it is reset just prior to execute
-  structStatementState( void ) : pStmt( 0 ), bIsReset( true ) {};
+enum enumOpenFlags { 
+  EOpenFlagsZero = 0, 
+  EOpenFlagsAutoCreate = 0x1 
 };
 
-} // namespace sqlite
+class Database {
+public:
+
+  Database(void);
+  virtual ~Database(void);
+
+  virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
+  virtual void Close( void ) {};
+
+protected:
+
+  bool m_bDbOpened;
+
+  std::string m_sDbFileName;
+
+private:
+};
+
 } // db
 } // ou

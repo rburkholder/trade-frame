@@ -30,34 +30,16 @@
     <ClInclude Include="Statement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TableDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sql.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IDatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SqlInsert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SqlUpdate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SqlDelete.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SqlGeneric.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Database.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,31 +53,10 @@
     <ClCompile Include="Statement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TableDef.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sql.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IDatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SqlInsert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SqlGeneric.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SqlDelete.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SqlUpdate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

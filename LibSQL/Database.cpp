@@ -11,20 +11,21 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include "sqlite3.h"
+#include "Database.h"
 
 namespace ou {
 namespace db {
-namespace sqlite {
 
-struct structStatementState {
-  sqlite3_stmt* pStmt;
-  bool bIsReset;  // ensure it is reset just prior to execute
-  structStatementState( void ) : pStmt( 0 ), bIsReset( true ) {};
-};
+Database::Database(void) 
+  : m_bDbOpened( false )
+{
+}
 
-} // namespace sqlite
+
+Database::~Database(void) {
+}
+
 } // db
 } // ou

@@ -17,40 +17,38 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
-//#include <typeinfo>
 
-#include <boost\shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 
-#include "IDatabase.h"
-//#include "Sql.h"
-
-//#include "TableDef.h"
-//#include "SqlInsert.h"
-//#include "SqlUpdate.h"
-//#include "SqlDelete.h"
-//#include "SqlGeneric.h"
+#include "Database.h"
 
 namespace ou {
 namespace db {
 
-
 // CQuery contains:
-// * DB: structures dedicated to the specific database
+// * SS: statement state structures dedicated to the specific database
 // * F: struct containing Fields function with ou::db::Field calls
 
 class QueryBase {  // used as base representation for stowage in vectors and such
 public:
-  typedef boost::shared_ptr<QueryBase> pQueryBase_t;
 
-  QueryBase( void ): m_bHasFields( false ) {};
+  typedef boost::intrusive_ptr<QueryBase> pQueryBase_t;
+
+  QueryBase( void ): m_bHasFields( false ), m_cntRef( 0 ) {};
   virtual ~QueryBase( void ) {};
 
   void SetHasFields( void ) { m_bHasFields = true; };
   bool HasFields( void ) { return m_bHasFields; };
 
+  // instrusive reference counting
+  size_t RefCnt( void ) { return m_cntRef; };
+  void Ref( void ) { ++m_cntRef; };
+  size_t UnRef( void ) { --m_cntRef; return m_cntRef; };
+
 protected:
 private:
   bool m_bHasFields;
+  size_t m_cntRef;
 };
 
 // =====
@@ -61,31 +59,48 @@ class QueryFields:
   public F
 {
 public:
-  typedef boost::shared_ptr<QueryFields<F> > pQueryFields_t;
+  typedef boost::intrusive_ptr<QueryFields<F> > pQueryFields_t;
 protected:
 private:
 };
 
 // =====
 
-template<class DB, class F>  // used for getting stuff in and out of the database via the session
+template<class SS, class F>  // used for getting stuff in and out of the database via the session
 class Query: 
   public QueryFields<F>,
-  public DB
+  public SS // statement state
 {
 public:
-  typedef typename boost::shared_ptr<Query<DB, F> > pQuery_t;
-  std::string m_sQueryText;  // 'compose' results end up here
+  typedef boost::intrusive_ptr<Query<SS, F> > pQuery_t;
+  Query* Where( const std::string& sWhere ) { 
+    m_sQueryText += " " + sWhere;
+    return this; 
+  };
+  std::string& QueryText( void ) { return m_sQueryText; };
 protected:
 private:
+  std::string m_sQueryText;  // 'compose' results end up here
 };
+
+template<class Q>
+void intrusive_ptr_add_ref( Q* pq ) {
+  pq->Ref();
+}
+
+template<class Q>
+void intrusive_ptr_release( Q* pq ) {
+  if ( 0 == pq->UnRef() ) {
+    delete pq;
+  }
+}
 
 //
 // CSession
 //   IDatabase needs typedef for structStatementState
 //
 
-template<class IDatabase>
+template<class IDatabase> // IDatabase is a the specific handler type:  sqlite3 or pg or ...
 class CSession {
 public:
 
@@ -100,7 +115,7 @@ public:
   }
 
   template<class F> // T: Table Class with TableDef member function
-  typename QueryFields<F>::pQueryFields_t RegisterTable( const std::string& sTableName ) {
+  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterTable( const std::string& sTableName ) {
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
     if ( m_mapTableDefs.end() != iter ) {
       throw std::runtime_error( "table name already has definition" );
@@ -112,11 +127,11 @@ public:
     IDatabase::Action_Assemble_TableDef action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeCreateStatement( pQuery->m_sQueryText );
+    action.ComposeCreateStatement( pQuery->QueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->m_sQueryText );
+      pQuery->QueryText() );
 
     iter = m_mapTableDefs.insert( 
       m_mapTableDefs.begin(), 
@@ -131,7 +146,7 @@ public:
   void CreateTables( void );
 
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryFields<F>::pQueryFields_t RegisterInsert( const std::string& sTableName ) {
+  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterInsert( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
     m_vQuery.push_back( pQuery );
@@ -139,18 +154,18 @@ public:
     IDatabase::Action_Compose_Insert action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->m_sQueryText );
+    action.ComposeStatement( pQuery->QueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->m_sQueryText );
+      pQuery->QueryText() );
 
     return pQuery;
   }
 
   // need where clause
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryFields<F>::pQueryFields_t RegisterUpdate( const std::string& sTableName ) {
+  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterUpdate( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
     m_vQuery.push_back( pQuery );
@@ -158,18 +173,18 @@ public:
     IDatabase::Action_Compose_Update action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->m_sQueryText );
+    action.ComposeStatement( pQuery->QueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->m_sQueryText );
+      pQuery->QueryText() );
 
     return pQuery;
   }
 
   // need where clause
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryFields<F>::pQueryFields_t RegisterDelete( const std::string& sTableName ) {
+  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterDelete( const std::string& sTableName ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
     m_vQuery.push_back( pQuery );
@@ -177,11 +192,11 @@ public:
     IDatabase::Action_Compose_Delete action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
-    action.ComposeStatement( pQuery->m_sQueryText );
+    action.ComposeStatement( pQuery->QueryText() );
 
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->m_sQueryText );
+      pQuery->QueryText() );
 
     return pQuery;
   }
@@ -189,16 +204,16 @@ public:
   // also need non-F specialization as there may be no fields involved in some queries
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
-  typename QueryFields<F>::pQueryFields_t RegisterQuery( const std::string& sSqlQuery ) {
+  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterQuery( const std::string& sSqlQuery ) {
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );
     m_vQuery.push_back( pQuery );
 
-    pQuery->m_sQueryText = sSqlQuery;
+    pQuery->QueryText() = sSqlQuery;
     
     m_db.PrepareStatement( 
       *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ),
-      pQuery->m_sQueryText );
+      pQuery->QueryText() );
 
     return pQuery;
   }

@@ -143,7 +143,8 @@ void Action_Assemble_TableDef::ComposeCreateStatement( std::string& sStatement )
   }
 
   // finish statement
-  sStatement += ");";
+  //sStatement += ");";
+  sStatement += ")";
 
 }
 
@@ -173,7 +174,8 @@ void Action_Compose_Insert::ComposeStatement( std::string& sStatement ) {
     ++ix;
   }
 
-  sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
+  //sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
+  sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ")";
 
 }
 
@@ -203,7 +205,7 @@ void Action_Compose_Update::ComposeStatement( std::string& sStatement ) {
 
   // *** todo: need the 'where' clause yet
 
-  sStatement += ";";
+  //sStatement += ";";
 
 }
 
@@ -225,7 +227,7 @@ void Action_Compose_Delete::ComposeStatement( std::string& sStatement ) {
 
   //sStatement += + "WHERE "; 
 
-  sStatement += ";";
+  //sStatement += ";";
 
 }
   

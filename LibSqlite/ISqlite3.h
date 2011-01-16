@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include <LibSQL/IDatabase.h>
+#include <LibSQL/Database.h>
 
 #include "sqlite3.h"
 #include "StatementState.h"
@@ -24,7 +24,7 @@
 namespace ou {
 namespace db {
 
-class ISqlite3: public IDatabaseCommon<sqlite::structStatementState> {
+class ISqlite3: public Database {
 public:
 
   typedef sqlite::structStatementState structStatementState;
@@ -42,7 +42,7 @@ public:
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
   void Close( void );
 
-  void PrepareStatement( structStatementState& statement, const std::string& sStatement );
+  void PrepareStatement( structStatementState& statement, std::string& sStatement );
   void ExecuteStatement( structStatementState& statement );
   void CloseStatement(   structStatementState& statement );
 
