@@ -26,6 +26,16 @@ namespace db {
 // Action_Compose
 
 class Action_Compose {
+private:
+
+  // definition of fields for table creation
+  struct structField {
+    std::string sFieldName;
+    structField( const std::string& sFieldName_ ): sFieldName( sFieldName_ ) {};
+  };
+
+  typedef std::vector<structField> vField_t;
+
 public:
 
   Action_Compose( void );
@@ -45,17 +55,10 @@ public:
   // void ComposeStatement( const std::string& sTableName, std::string& sStatement );
   // void ComposeStatement( std::string& sStatement );
 
-  std::vector<int>::size_type FieldCount( void ) { return m_vField.size(); };
+  vField_t::size_type FieldCount( void ) { return m_vField.size(); };
 
 protected:
 
-  // definition of fields for table creation
-  struct structField {
-    std::string sFieldName;
-    structField( const std::string& sFieldName_ ): sFieldName( sFieldName_ ) {};
-  };
-
-  typedef std::vector<structField> vField_t;
   typedef vField_t::iterator vField_iter_t;
   vField_t m_vField;
 
