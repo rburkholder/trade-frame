@@ -175,7 +175,6 @@ void Action_Compose_Insert::ComposeStatement( std::string& sStatement ) {
     ++ix;
   }
 
-  //sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ");";
   sStatement = "INSERT INTO " + m_sTableName + " (" + sFields + ") VALUES (" + sHolders + ")";
 
 }

@@ -83,7 +83,7 @@ int Action_Bind_Values::Bind( boost::int8_t var ) {
 }
 
 int Action_Bind_Values::Bind( std::string& var ) {
-  return sqlite3_bind_text( m_state.pStmt, m_index, var.c_str(), var.length() + 1, SQLITE_TRANSIENT );
+  return sqlite3_bind_text( m_state.pStmt, m_index, var.c_str(), var.length(), SQLITE_TRANSIENT );
 }
 
 int Action_Bind_Values::Bind( double var ) {

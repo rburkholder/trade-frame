@@ -89,7 +89,7 @@ public:
 
 protected:
 private:
-  structStatementState m_state;
+  structStatementState& m_state;
   int m_index;  // index into sql statement, starts at 1
 };
 

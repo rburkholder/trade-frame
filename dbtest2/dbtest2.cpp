@@ -49,10 +49,10 @@ struct CFieldsTable: public CFields {
 struct CFieldsUpdate {
   template<class A>
   void Fields( A& a ){
-    ou::db::Field( a, "field", m_sField );
+    ou::db::Field( a, "field3", m_intField );
   };
 
-  std::string m_sField;
+  int m_intField;
 
 };
 
@@ -76,10 +76,17 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
 
-    ou::db::QueryFields<CFields>::pQueryFields_t pUpdate = session.RegisterUpdate<CFields>( "test" )->Where( "field1 = 'attempt'" );
+    ou::db::QueryFields<CFieldsUpdate>::pQueryFields_t pUpdate = session.RegisterUpdate<CFieldsUpdate>( "test" )->Where( "field1 = 'attempt'" );
+
+    pUpdate->m_intField = 43;
+
+    session.Bind<CFieldsUpdate>( pUpdate );
+    session.Execute( pUpdate );
+
+    ou::db::QueryFields<CFields>::pQueryFields_t pQuery = session.RegisterQuery<CFields>( "select * from test" );
+
     ou::db::QueryFields<CFields>::pQueryFields_t pDelete = session.RegisterDelete<CFields>( "test" );
 
-    ou::db::QueryFields<CFields>::pQueryFields_t pQuery = session.RegisterQuery<CFields>( "select * from test;" );
   }
 
   session.Close();

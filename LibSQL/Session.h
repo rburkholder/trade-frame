@@ -50,8 +50,8 @@ public:
   size_t UnRef( void ) { --m_cntRef; return m_cntRef; };
 
   std::string& UpdateQueryText( void ) { 
-    assert( EClauseQuery >= m_clause );
-    m_clause = EClauseQuery;
+//    assert( EClauseQuery >= m_clause );
+//    m_clause = EClauseQuery;
     return m_sQueryText; 
   };
 
@@ -96,21 +96,21 @@ public:
 
   Query* Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
     assert( EClauseWhere > m_clause );
-    m_sQueryText += " " + sWhere;
+    m_sQueryText += " WHERE " + sWhere;
     m_clause = EClauseWhere;
     return this; 
   };
 
   Query* OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
     assert( EClauseOrderBy > m_clause );
-    m_sQueryText += " " + sOrderBy;
+    m_sQueryText += " ORDERBY " + sOrderBy;
     m_clause = EClauseOrderBy;
     return this;
   }
 
   Query* GroupBy( const std::string& sGroupBy ) {
     assert( EClauseGroupBy > m_clause );
-    m_sQueryText += " " + sGroupBy;
+    m_sQueryText += " GROUPBY " + sGroupBy;
     m_clause = EClauseGroupBy;
     return this;
   }
@@ -187,7 +187,7 @@ public:
 
     iter = m_mapTableDefs.insert( 
       m_mapTableDefs.begin(), 
-      mapTableDefs_pair_t( sTableName, dynamic_cast<IDatabase::structStatementState*>( pQuery.get() ) ) );
+      mapTableDefs_pair_t( sTableName, pQuery) );
 
     m_vQuery.push_back( pQuery );
 
@@ -261,12 +261,11 @@ private:
   
   IDatabase m_db;
 
-  typedef typename IDatabase::structStatementState* pDBStatementState_t;
   typedef QueryBase::pQueryBase_t pQueryBase_t;
 
-  typedef std::map<std::string, pDBStatementState_t> mapTableDefs_t;  // map table name to table definition
+  typedef std::map<std::string, pQueryBase_t> mapTableDefs_t;  // map table name to table definition
   typedef typename mapTableDefs_t::iterator mapTableDefs_iter_t;
-  typedef std::pair<std::string, pDBStatementState_t> mapTableDefs_pair_t;
+  typedef std::pair<std::string, pQueryBase_t> mapTableDefs_pair_t;
   mapTableDefs_t m_mapTableDefs;
 
   typedef std::vector<pQueryBase_t> vQuery_t;
@@ -319,7 +318,7 @@ template<class IDatabase>
 void CSession<IDatabase>::CreateTables( void ) {
   // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
-    m_db.ExecuteStatement( *(iter->second) );
+    Execute( iter->second );
   }
 }
 
