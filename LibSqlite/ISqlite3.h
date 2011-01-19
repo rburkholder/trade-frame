@@ -44,6 +44,7 @@ public:
 
   void PrepareStatement( structStatementState& statement, std::string& sStatement );
   void ExecuteStatement( structStatementState& statement );
+  void ResetStatement(   structStatementState& statement );
   void CloseStatement(   structStatementState& statement );
 
 protected:

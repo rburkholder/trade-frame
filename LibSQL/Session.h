@@ -170,6 +170,12 @@ public:
     m_db.ExecuteStatement( StatementState );
   }
 
+  void Reset( QueryBase::pQueryBase_t pQuery ) {
+    IDatabase::structStatementState& StatementState 
+      = *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() );
+    m_db.ResetStatement( StatementState );
+  }
+
   template<class F> // T: Table Class with TableDef member function
   typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterTable( const std::string& sTableName ) {
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );

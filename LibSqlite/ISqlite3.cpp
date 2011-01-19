@@ -73,6 +73,7 @@ void ISqlite3::PrepareStatement( structStatementState& statement, std::string& s
 
 void ISqlite3::ExecuteStatement( structStatementState& statement ) {
   if ( 0 != statement.pStmt ) {
+    statement.bIsReset = false;
     int rtn = sqlite3_step( statement.pStmt );
     if ( SQLITE_DONE != rtn ) {
       std::string sErr( "ISqlite3::ExecuteStatement: " );
@@ -81,6 +82,20 @@ void ISqlite3::ExecuteStatement( structStatementState& statement ) {
       sErr += ")";
       throw std::runtime_error( sErr );
     }
+  }
+}
+
+void ISqlite3::ResetStatement( structStatementState& statement ) {
+  if ( 0 != statement.pStmt ) {
+    int rtn = sqlite3_reset( statement.pStmt );
+    if ( SQLITE_OK != rtn ) {
+      std::string sErr( "ISqlite3::ResetStatement: " );
+      sErr += " error in reset(";
+      sErr += boost::lexical_cast<std::string>( rtn );
+      sErr += ")";
+      throw std::runtime_error( sErr );
+    }
+    statement.bIsReset = true;
   }
 }
 
