@@ -80,7 +80,7 @@ public:
     ++m_index;
     int rtn = Bind( var );
     if ( SQLITE_OK != rtn ) {
-      std::string sErr( "Action_Bind_Values::Field::Bind: " );
+      std::string sErr( "Action_Bind_Values::Field::Bind: (" );
       sErr += boost::lexical_cast<std::string>( rtn );
       sErr += ")";
       throw std::runtime_error( sErr );
@@ -91,6 +91,40 @@ protected:
 private:
   structStatementState& m_state;
   int m_index;  // index into sql statement, starts at 1
+};
+
+class Action_Extract_Columns {
+public:
+
+  Action_Extract_Columns( structStatementState& state ): m_state( state ), m_index( 0 ) {};
+  ~Action_Extract_Columns( void ) {};
+
+  void Column( char& var );
+  void Column( bool& var );
+  void Column( boost::int64_t& var );
+  void Column( boost::int32_t& var );
+  void Column( boost::int16_t& var );
+  void Column( boost::int8_t& var );
+  void Column( std::string& var );
+  void Column( double& var );
+  void Column( boost::posix_time::ptime& var );
+
+  template<typename T>
+  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {
+    int rtn = Column( var );
+    if ( SQLITE_OK != rtn ) {
+      std::string sErr( "Action_Extract_Columns::Field::Column: (" );
+      sErr += boost::lexical_cast<std::string>( rtn );
+      sErr += ")";
+      throw std::runtime_error( sErr );
+    }
+    ++m_index;
+  }
+
+protected:
+private:
+  structStatementState& m_state;
+  int m_index;  // index into sql statement, starts at 0
 };
 
 // 

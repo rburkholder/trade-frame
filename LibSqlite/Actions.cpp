@@ -21,6 +21,10 @@ namespace ou {
 namespace db {
 namespace sqlite {
 
+// 
+// determine field types
+//
+
 const char* Action_Assemble_TableDef::FieldType( char key ) {
   return "TINYINT";
 }
@@ -57,6 +61,10 @@ const char* Action_Assemble_TableDef::FieldType( double key ) {
 const char* Action_Assemble_TableDef::FieldType( boost::posix_time::ptime& key ) { 
   return "TEXT";
 }
+
+// 
+// bind values for query
+//
 
 int Action_Bind_Values::Bind( char var ) {
   return sqlite3_bind_int( m_state.pStmt, m_index, var );
@@ -98,7 +106,51 @@ int Action_Bind_Values::Bind( boost::posix_time::ptime& var ) {
   return Bind( ss.str() );
 }
 
+//
+// column extraction
+//
+
+void Action_Extract_Columns::Column( char& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( bool& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index ) == 0 ? false : true;
+}
+
+void Action_Extract_Columns::Column( boost::int64_t& var ) {
+  var = sqlite3_column_int64( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::int32_t& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::int16_t& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::int8_t& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( std::string& var ) {
+  var.assign( reinterpret_cast<const char*>( sqlite3_column_text( m_state.pStmt, m_index ) ) );
+}
+
+void Action_Extract_Columns::Column( double& var ) {
+  var = sqlite3_column_double( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::posix_time::ptime& var ) {
+  std::stringstream ss;
+  Column( ss.str() );
+  ss >> var;
+}
+
+//
 // unused, untested stuff, needs fix on enum stuff
+//
 template<>
 const char* FieldType2<char>( void ) { return "TINYINT"; };
 

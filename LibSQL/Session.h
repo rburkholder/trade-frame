@@ -248,6 +248,9 @@ public:
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
+  // also need two templates:  one for query parameters, one for column binding, or use a separate method for retrieval
+  // that would be why they have a a different database object for the field delivery:
+  //   one inbound, one outbound
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
   typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterQuery( const std::string& sSqlQuery ) {

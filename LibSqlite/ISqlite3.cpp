@@ -71,18 +71,52 @@ void ISqlite3::PrepareStatement( structStatementState& statement, std::string& s
   assert( 0 != statement.pStmt );
 }
 
-void ISqlite3::ExecuteStatement( structStatementState& statement ) {
+bool ISqlite3::ExecuteStatement( structStatementState& statement ) {
+  bool bRow = false;  // false, no rows, true, one or more rows
   if ( 0 != statement.pStmt ) {
     statement.bIsReset = false;
     int rtn = sqlite3_step( statement.pStmt );
-    if ( SQLITE_DONE != rtn ) {
+    switch ( rtn ) {
+      // todo:  create different runtime error objects for each exception
+    case SQLITE_DONE: {  // will need reset for subsequent re-use
+      // nothing to do, and no rows returned
+      }
+      break;
+    case SQLITE_ROW: {  // returned each time a new row of data is ready
+      bRow = true;
+      }
+      break;
+    case SQLITE_BUSY: {
+      // no transaction:  retry
+      // transaction and no commit: rollback
+      // transaction and commit: retry
       std::string sErr( "ISqlite3::ExecuteStatement: " );
-      sErr += " error in execute(";
+      sErr += " busy";
+      throw std::runtime_error( sErr );
+      }
+      break;
+    case SQLITE_ERROR: {
+      std::string sErr( "ISqlite3::ExecuteStatement: " );
+      sErr += " error";
+      throw std::runtime_error( sErr );
+      }
+      break;
+    case SQLITE_MISUSE: {
+      std::string sErr( "ISqlite3::ExecuteStatement: " );
+      sErr += " misuse";
+      throw std::runtime_error( sErr );
+      }
+      break;
+    default: {
+      std::string sErr( "ISqlite3::ExecuteStatement: " );
+      sErr += " unknown error in execute(";
       sErr += boost::lexical_cast<std::string>( rtn );
       sErr += ")";
       throw std::runtime_error( sErr );
+      }
     }
   }
+  return bRow;
 }
 
 void ISqlite3::ResetStatement( structStatementState& statement ) {
