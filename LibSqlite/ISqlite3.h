@@ -33,6 +33,7 @@ public:
   typedef ou::db::Action_Compose_Insert Action_Compose_Insert;
   typedef ou::db::Action_Compose_Update Action_Compose_Update;
   typedef ou::db::Action_Compose_Delete Action_Compose_Delete;
+  typedef ou::db::sqlite::Action_Extract_Columns Action_Extract_Columns;
 
   typedef ou::db::sqlite::Action_Bind_Values Action_Bind_Values;
 
@@ -43,7 +44,7 @@ public:
   void Close( void );
 
   void PrepareStatement( structStatementState& statement, std::string& sStatement );
-  bool ExecuteStatement( structStatementState& statement );
+  bool ExecuteStatement( structStatementState& statement );  // true when row available
   void ResetStatement(   structStatementState& statement );
   void CloseStatement(   structStatementState& statement );
 

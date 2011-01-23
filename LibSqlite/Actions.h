@@ -20,14 +20,28 @@
 #include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/type_traits/is_enum.hpp>
+#include <boost/type_traits/is_signed.hpp>
 
-#include <LibSQL\Actions.h>
+#include <LibSQL/Actions.h>
 
 #include "StatementState.h"
 
 namespace ou {
 namespace db {
 namespace sqlite {
+
+namespace typeselect {
+  template<int size, bool signed_> struct chooser{};  // default is empty
+  template<> struct chooser<1,false> { typedef boost::uint8_t  type; };
+  template<> struct chooser<1,true>  { typedef boost::int8_t   type; };
+  template<> struct chooser<2,false> { typedef boost::uint16_t type; };
+  template<> struct chooser<2,true>  { typedef boost::int16_t  type; };
+  template<> struct chooser<4,false> { typedef boost::uint32_t type; };
+  template<> struct chooser<4,true>  { typedef boost::int32_t  type; };
+  template<> struct chooser<8,false> { typedef boost::uint64_t type; };
+  template<> struct chooser<8,true>  { typedef boost::int64_t  type; };
+}
 
 class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
 public:
@@ -99,8 +113,8 @@ public:
   Action_Extract_Columns( structStatementState& state ): m_state( state ), m_index( 0 ) {};
   ~Action_Extract_Columns( void ) {};
 
-  void Column( char& var );
   void Column( bool& var );
+  void Column( char& var );
   void Column( boost::int64_t& var );
   void Column( boost::int32_t& var );
   void Column( boost::int16_t& var );
@@ -111,14 +125,18 @@ public:
 
   template<typename T>
   void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {
-    int rtn = Column( var );
-    if ( SQLITE_OK != rtn ) {
-      std::string sErr( "Action_Extract_Columns::Field::Column: (" );
-      sErr += boost::lexical_cast<std::string>( rtn );
-      sErr += ")";
-      throw std::runtime_error( sErr );
-    }
+    Field( var, boost::is_enum<T>() );
     ++m_index;
+  }
+
+  template<typename T, bool b> // is not enum
+  void Field( T& var, const boost::integral_constant<bool, b>& ) {
+    Column( var );
+  }
+
+  template<typename T>  // is enum
+  void Field( T& var, const boost::true_type& ) {
+    Column( reinterpret_cast<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type&>( var ) );
   }
 
 protected:

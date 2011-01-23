@@ -21,7 +21,7 @@ struct CFields {
   void Fields( A& a ) {
     ou::db::Field( a, "mykey",  m_key,   "INTEGER" );  // type needed to match sqlite rowid
     ou::db::Field( a, "field1", m_sField );
-    ou::db::Field( a, "field2", m_enumField );
+    ou::db::Field( a, "field2", m_enumField );  // find out what the compiler thinks it is
     ou::db::Field( a, "field3", m_intField );
     ou::db::Field( a, "field4", m_dblField );
   };
@@ -65,6 +65,9 @@ struct CFieldsDelete {
   typedef CFields::enumfield2 enumfield2;
   enumfield2 m_enumField;
 
+};
+
+struct EmptyQuery {
 };
 
 int _tmain(int argc, _TCHAR* argv[]) {
@@ -120,8 +123,13 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
 
-//    ou::db::QueryFields<CFields>::pQueryFields_t pSelect 
-//      = session.RegisterQuery<CFields>( se
+    CFields fields;
+    ou::db::QueryFields<EmptyQuery>::pQueryFields_t pSelect 
+      = session.RegisterQuery<EmptyQuery>( "select * from test" );
+    while ( session.Execute( pSelect ) ) {
+      session.Columns<EmptyQuery, CFields>( pSelect, fields );
+      std::cout << fields.m_key << ", " << fields.m_sField << ", " << fields.m_dblField << ", " << fields.m_intField << std::endl;
+    }
 
   }
 

@@ -160,14 +160,22 @@ public:
     pQuery->Fields( action );
   }
 
-  void Execute( QueryBase::pQueryBase_t pQuery ) {
+  bool Execute( QueryBase::pQueryBase_t pQuery ) {
     IDatabase::structStatementState& StatementState 
       = *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() );
     if ( !pQuery->m_bPrepared ) {
       m_db.PrepareStatement( StatementState, pQuery->UpdateQueryText() );
       pQuery->m_bPrepared = true;
     }
-    m_db.ExecuteStatement( StatementState );
+    return m_db.ExecuteStatement( StatementState );
+  }
+
+  template<class F, class C>
+  void Columns( typename QueryFields<F>::pQueryFields_t pQuery, C& columns ) {
+    IDatabase::structStatementState& StatementState 
+      = *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() );
+    IDatabase::Action_Extract_Columns action( StatementState );
+    columns.Fields( action );
   }
 
   void Reset( QueryBase::pQueryBase_t pQuery ) {

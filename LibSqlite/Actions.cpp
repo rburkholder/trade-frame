@@ -108,14 +108,15 @@ int Action_Bind_Values::Bind( boost::posix_time::ptime& var ) {
 
 //
 // column extraction
+// todo: validate column type matches requested type
 //
-
-void Action_Extract_Columns::Column( char& var ) {
-  var = sqlite3_column_int( m_state.pStmt, m_index );
-}
 
 void Action_Extract_Columns::Column( bool& var ) {
   var = sqlite3_column_int( m_state.pStmt, m_index ) == 0 ? false : true;
+}
+
+void Action_Extract_Columns::Column( char& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
 }
 
 void Action_Extract_Columns::Column( boost::int64_t& var ) {
@@ -154,23 +155,20 @@ void Action_Extract_Columns::Column( boost::posix_time::ptime& var ) {
 template<>
 const char* FieldType2<char>( void ) { return "TINYINT"; };
 
-template<> // don't use julian as ptime has no representation earlier than 1400 AD
-const char* FieldType2<boost::posix_time::ptime>( void ) { return "TEXT"; }
-
 template<>
 const char* FieldType2<bool>( void ) { return "TINYINT"; }
 
 template<>
-const char* FieldType2<boost::int64_t>( void ) { return "INT8"; }
-
-template<>
-const char* FieldType2<boost::int32_t>( void ) { return "BIGINT"; }
+const char* FieldType2<boost::int8_t>( void ) { return "TINYINT"; }
 
 template<>
 const char* FieldType2<boost::int16_t>( void ) { return "SMALLINT"; }
 
 template<>
-const char* FieldType2<boost::int8_t>( void ) { return "TINYINT"; }
+const char* FieldType2<boost::int32_t>( void ) { return "BIGINT"; }
+
+template<>
+const char* FieldType2<boost::int64_t>( void ) { return "INT8"; }
 
 template<>
 const char* FieldType2<std::string>( void ) { return "TEXT"; }
@@ -178,7 +176,8 @@ const char* FieldType2<std::string>( void ) { return "TEXT"; }
 template<>
 const char* FieldType2<double>( void ) { return "DOUBLE"; }
 
-
+template<> // don't use julian as ptime has no representation earlier than 1400 AD
+const char* FieldType2<boost::posix_time::ptime>( void ) { return "TEXT"; }
 
 
 } // sqlite
