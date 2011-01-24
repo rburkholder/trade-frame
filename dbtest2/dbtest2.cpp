@@ -8,13 +8,6 @@
 #include <LibSQL/Session.h>
 #include <LibSqlite/ISqlite3.h>
 
-
-
-// test template getting at type without instantiating variable: complains about static call to non static function
-// use full specialization or partial specialization
-
-
-
 struct CFields {
 
   template<typename A> // A = Action

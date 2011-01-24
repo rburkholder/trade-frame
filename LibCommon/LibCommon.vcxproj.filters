@@ -16,6 +16,9 @@
     <ClCompile Include="WuManber.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CountryCode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CharBuffer.h">
@@ -64,6 +67,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WuManber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CountryCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

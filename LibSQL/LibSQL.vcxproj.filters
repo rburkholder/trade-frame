@@ -18,16 +18,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CountryCode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Statement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Functions.h">
@@ -44,15 +35,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CountryCode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Statement.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Actions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

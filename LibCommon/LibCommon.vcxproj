@@ -73,6 +73,7 @@
   <ItemGroup>
     <ClCompile Include="CharBuffer.cpp" />
     <ClCompile Include="ConsoleStream.cpp" />
+    <ClCompile Include="CountryCode.cpp" />
     <ClCompile Include="Log.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -86,6 +87,7 @@
     <ClInclude Include="CharBuffer.h" />
     <ClInclude Include="Colour.h" />
     <ClInclude Include="ConsoleStream.h" />
+    <ClInclude Include="CountryCode.h" />
     <ClInclude Include="Delegate.h" />
     <ClInclude Include="FastDelegate.h" />
     <ClInclude Include="KeyWordMatch.h" />

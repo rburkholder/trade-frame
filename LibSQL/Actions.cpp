@@ -11,9 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// LibSql/Actions.cpp
-
-#include "StdAfx.h"
+// Library:  LibSql/Actions.cpp
 
 #include <stdexcept>
 
@@ -76,7 +74,7 @@ void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
     ++iter;
   }
   if ( m_vFieldDef.end() == iter ) {
-    throw std::runtime_error( "IsKey, can't find field " + sFieldName );
+    throw std::runtime_error( "Key, can't find field " + sFieldName );
   }
 }
 
@@ -143,7 +141,6 @@ void Action_Assemble_TableDef::ComposeCreateStatement( std::string& sStatement )
   }
 
   // finish statement
-  //sStatement += ");";
   sStatement += ")";
 
 }
@@ -204,10 +201,6 @@ void Action_Compose_Update::ComposeStatement( std::string& sStatement ) {
     ++ix;
   }
 
-  // *** todo: need the 'where' clause yet
-
-  //sStatement += ";";
-
 }
 
 // Action_Compose_Delete
@@ -223,12 +216,6 @@ Action_Compose_Delete::~Action_Compose_Delete( void ) {
 void Action_Compose_Delete::ComposeStatement( std::string& sStatement ) {
 
   sStatement = "DELETE FROM " + m_sTableName;
-
-  // *** todo: need the 'where' clause yet
-
-  //sStatement += + "WHERE "; 
-
-  //sStatement += ";";
 
 }
   

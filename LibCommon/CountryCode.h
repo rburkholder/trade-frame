@@ -11,19 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "Database.h"
+#pragma once
+
+#include <string>
 
 namespace ou {
-namespace db {
+namespace tables {
+namespace CountryCode {
 
-Database::Database(void) 
-  : m_bDbOpened( false )
-{
-}
+  const char* LuNameFromCode( const std::string& code );
 
-
-Database::~Database(void) {
-}
-
-} // db
+} // countrycode
+} // tables
 } // ou

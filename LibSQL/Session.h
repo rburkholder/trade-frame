@@ -194,6 +194,9 @@ public:
     typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
     pQuery_t pQuery( new Query<IDatabase::structStatementState, F> );  // add empty table definition
 
+// test template getting at type without instantiating variable: complains about static call to non static function
+// use full specialization or partial specialization
+
     IDatabase::Action_Assemble_TableDef action( sTableName );
     pQuery->Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();

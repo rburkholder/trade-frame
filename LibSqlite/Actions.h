@@ -46,22 +46,41 @@ namespace typeselect {
 class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
 public:
 
-  const char* FieldType( char key );
-  const char* FieldType( bool key );
-  const char* FieldType( boost::int64_t key );
-  const char* FieldType( boost::int32_t key );
-  const char* FieldType( boost::int16_t key );
-  const char* FieldType( boost::int8_t key );
-  const char* FieldType( std::string& key );
-  const char* FieldType( double key );
-  const char* FieldType( boost::posix_time::ptime& key ); // don't use julian as ptime has no representation earlier than 1400 AD
+  template<typename T>
+  const char* FieldType( void ) { // is called with enumerations, so need to figure out appropriate type conversion
+    std::string s;
+    s += "FieldType2 bad cast: ";
+    s += typeid( T ).name();
+    throw std::runtime_error( s ); 
+  };
+
+  template<> const char* FieldType<char>( void ) { return "TINYINT"; };
+  template<> const char* FieldType<bool>( void ) { return "TINYINT"; };
+  template<> const char* FieldType<boost::int64_t>( void ) { return "INT8"; };
+  template<> const char* FieldType<boost::int32_t>( void ) { return "BIGINT"; };
+  template<> const char* FieldType<boost::int16_t>( void ) { return "SMALLINT"; };
+  template<> const char* FieldType<boost::int8_t>( void ) { return "TINYINT"; };
+  template<> const char* FieldType<std::string>( void ) { return "TEXT"; };
+  template<> const char* FieldType<double>( void ) { return "DOUBLE"; };
+  // don't use julian as ptime has no representation earlier than 1400 AD
+  template<> const char* FieldType<boost::posix_time::ptime>( void ) { return "TEXT"; };
 
   Action_Assemble_TableDef( const std::string& sTableName ): ou::db::Action_Assemble_TableDef( sTableName ) {};
   ~Action_Assemble_TableDef( void ) {};
 
+  template<typename T, bool b> // is not enum
+  const char* FieldType( const boost::integral_constant<bool, b>& ) {
+    return FieldType<T>();
+  }
+
   template<typename T>
+  const char* FieldType( const boost::true_type& ) { // is enum
+    return FieldType<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type>();
+  }
+
+  template<typename T> // sample code: http://www.boost.org/doc/libs/1_45_0/libs/type_traits/doc/html/boost_typetraits/examples/copy.html
   void Field( const std::string& sFieldName, T& var ) {
-    addField( sFieldName, FieldType( var ) );
+    addField( sFieldName, FieldType<T>( boost::is_enum<T>() ) );
   }
 
   template<typename T>
@@ -144,31 +163,6 @@ private:
   structStatementState& m_state;
   int m_index;  // index into sql statement, starts at 0
 };
-
-// 
-// dealing with key resolution: find db field type from c++ plain old data type
-//
-
-// following functions are not used.  Need to fix the enumeration problem first.
-template<typename T>
-const char* FieldType2( void ) { // is called with enumerations, so need to figure out appropriate type conversion
-  std::string s;
-  s += "FieldType2 bad cast: ";
-  s += typeid( T ).name();
-  throw std::runtime_error( s ); 
-};
-template<> const char* FieldType2<char>( void );
-template<> const char* FieldType2<bool>( void );
-template<> const char* FieldType2<boost::int64_t>( void );
-template<> const char* FieldType2<boost::int32_t>( void );
-template<> const char* FieldType2<boost::int16_t>( void );
-template<> const char* FieldType2<boost::int8_t>( void );
-template<> const char* FieldType2<std::string>( void );
-template<> const char* FieldType2<double>( void );
-// don't use julian as ptime has no representation earlier than 1400 AD
-template<> const char* FieldType2<boost::posix_time::ptime>( void );
-
-
 
 } // sqlite
 } // db
