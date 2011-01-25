@@ -72,56 +72,51 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.RegisterTable<CFieldsTable>( "test" );
     session.CreateTables();
 
-    ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.RegisterInsert<CFields>( "test" );
+    CFields fields;
+    fields.m_key = 4;
+    fields.m_dblField = 3;
+    fields.m_enumField = CFields::EThree;
+    fields.m_intField = -45;
+    fields.m_sField = "attempt";
 
-    pInsert->m_key = 4;
-    pInsert->m_dblField = 3;
-    pInsert->m_enumField = CFields::EThree;
-    pInsert->m_intField = -45;
-    pInsert->m_sField = "attempt";
+    ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.Insert<CFields>( "test", fields );
 
-    session.Bind<CFields>( pInsert );
-    session.Execute( pInsert );
-
-    pInsert->m_key = 6;
-    pInsert->m_intField = 42;
-    pInsert->m_enumField = CFields::ETwo;
-    pInsert->m_sField = "answer";
+    fields.m_key = 6;
+    fields.m_intField = 42;
+    fields.m_enumField = CFields::ETwo;
+    fields.m_sField = "answer";
 
     session.Reset( pInsert );
     session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
+
+    CFieldsUpdate update;
+    update.m_sField = "good";
 
     ou::db::QueryFields<CFieldsUpdate>::pQueryFields_t pUpdate 
-      = session.RegisterUpdate<CFieldsUpdate>( "test" )->Where( "field1 = 'attempt'" );
+      = session.Update<CFieldsUpdate>( "test", update )->Where( "field1 = 'attempt'" );
 
-    pUpdate->m_sField = "good";
-
-    session.Bind<CFieldsUpdate>( pUpdate );
-    session.Execute( pUpdate );
+    CFieldsDelete delete_;
+    delete_.m_enumField = CFieldsDelete::enumfield2::ETwo;
 
     ou::db::QueryFields<CFieldsDelete>::pQueryFields_t pDelete 
-      = session.RegisterDelete<CFieldsDelete>( "test" )->Where( "field2 = ?" );;
+      = session.Delete<CFieldsDelete>( "test", delete_ )->Where( "field2 = ?" );;
 
-    pDelete->m_enumField = CFieldsDelete::enumfield2::ETwo;
-    session.Bind<CFieldsDelete>( pDelete );
-    session.Execute( pDelete );
-
-    pInsert->m_key = 7;
-    pInsert->m_intField = 82;
-    pInsert->m_enumField = CFields::EOne;
-    pInsert->m_sField = "changed";
+    fields.m_key = 7;
+    fields.m_intField = 82;
+    fields.m_enumField = CFields::EOne;
+    fields.m_sField = "changed";
 
     session.Reset( pInsert );
     session.Bind<CFields>( pInsert );
     session.Execute( pInsert );
 
-    CFields fields;
+    CFields fields2;
     ou::db::QueryFields<EmptyQuery>::pQueryFields_t pSelect 
-      = session.RegisterQuery<EmptyQuery>( "select * from test" );
+      = session.SQL<EmptyQuery>( "select * from test" );
     while ( session.Execute( pSelect ) ) {
-      session.Columns<EmptyQuery, CFields>( pSelect, fields );
-      std::cout << fields.m_key << ", " << fields.m_sField << ", " << fields.m_dblField << ", " << fields.m_intField << std::endl;
+      session.Columns<EmptyQuery, CFields>( pSelect, fields2 );
+      std::cout << fields2.m_key << ", " << fields2.m_sField << ", " << fields2.m_dblField << ", " << fields2.m_intField << std::endl;
     }
 
   }
