@@ -66,7 +66,8 @@ struct EmptyQuery {
 int _tmain(int argc, _TCHAR* argv[]) {
 
   ou::db::CSession<ou::db::ISqlite3> session;
-  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
+  session.Open( ":memory:", ou::db::EOpenFlagsAutoCreate );
+//  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
   { // after use, delete shared pointers so close works properly, fix IDatabase::Close to use differently.
     session.RegisterTable<CFieldsTable>( "test" );

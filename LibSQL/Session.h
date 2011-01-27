@@ -117,6 +117,25 @@ public:
     return this;
   }
 
+  template<class F>
+  operator QueryFields<F>() { 
+    return dynamic_cast<QueryFields<F> >( *this ); }
+
+  template<class F>
+  operator QueryFields<F>*() { 
+    return dynamic_cast<QueryFields<F>* >( this ); }
+
+protected:
+private:
+};
+
+// ===== 
+
+template<class SS, class F, class S> // SS = Statement State, F = Field, S = Session
+class QueryWithSession:
+  public Query<SS, F> 
+{
+public:
 protected:
 private:
 };
