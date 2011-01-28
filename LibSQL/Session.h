@@ -32,7 +32,7 @@ namespace db {
 
 class QueryBase {  // used as base representation for stowage in vectors and such
 protected:
-  enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy };
+  enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy, EClauseBind };
 public:
 
   typedef boost::intrusive_ptr<QueryBase> pQueryBase_t;
@@ -94,7 +94,7 @@ public:
 
   typedef boost::intrusive_ptr<Query<SS, F> > pQuery_t;
 
-  Query( F& f ): QueryFields<F>( f ) {};
+  Query( F& f ): QueryFields<F>( f ), m_bExecuteOneTime( true ) {};
   ~Query( void ) {};
 
   Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
@@ -118,27 +118,26 @@ public:
     return *this;
   }
 
+  Query& Bind( F& f ) {
+    assert( EClauseBind > m_clause );
+    m_clause = EClauseBind;
+    return *this;
+  }
+
   template<class F>
   operator QueryFields<F>() { 
     return dynamic_cast<QueryFields<F> >( *this ); }
 
   template<class F>
   operator QueryFields<F>*() { 
+    if ( m_bExecuteOneTime ) {
+      m_bExecuteOneTime = false;
+    }
     return dynamic_cast<QueryFields<F>* >( this ); }
 
 protected:
 private:
-};
-
-// ===== 
-
-template<class SS, class F, class S> // SS = Statement State, F = Field, S = Session
-class QueryWithSession:
-  public Query<SS, F> 
-{
-public:
-protected:
-private:
+  bool m_bExecuteOneTime;
 };
 
 // functions for intrusive ptr of the query structures
