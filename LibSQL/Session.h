@@ -17,6 +17,7 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+#include <typeinfo>
 
 #include <boost/intrusive_ptr.hpp>
 
@@ -96,25 +97,25 @@ public:
   Query( F& f ): QueryFields<F>( f ) {};
   ~Query( void ) {};
 
-  Query* Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
+  Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
     assert( EClauseWhere > m_clause );
     m_sQueryText += " WHERE " + sWhere;
     m_clause = EClauseWhere;
-    return this; 
+    return *this; 
   };
 
-  Query* OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
+  Query& OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
     assert( EClauseOrderBy > m_clause );
     m_sQueryText += " ORDERBY " + sOrderBy;
     m_clause = EClauseOrderBy;
-    return this;
+    return *this;
   }
 
-  Query* GroupBy( const std::string& sGroupBy ) {
+  Query& GroupBy( const std::string& sGroupBy ) {
     assert( EClauseGroupBy > m_clause );
     m_sQueryText += " GROUPBY " + sGroupBy;
     m_clause = EClauseGroupBy;
-    return this;
+    return *this;
   }
 
   template<class F>
@@ -206,18 +207,21 @@ public:
   }
 
   template<class F> // T: Table Class with TableDef member function
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t RegisterTable( const std::string& sTableName ) {
+  typename Query<typename IDatabase::structStatementState, F>& RegisterTable( const std::string& sTableName ) {
+
+    MapTableToFields<F>( sTableName );
+
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
     if ( m_mapTableDefs.end() != iter ) {
       throw std::runtime_error( "table name already has definition" );
     }
 
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
-    F f;  // warning, this variable goes out of scope before the query is destroyed
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );  // add empty table definition
+    // test template getting at type without instantiating variable: complains about static call to non static function
+    // use full specialization or partial specialization
 
-// test template getting at type without instantiating variable: complains about static call to non static function
-// use full specialization or partial specialization
+    F f;  // warning, this variable goes out of scope before the query is destroyed
+    typename Query<IDatabase::structStatementState, F>* pQuery
+      = new Query<IDatabase::structStatementState, F>( f );
 
     IDatabase::Action_Assemble_TableDef action( sTableName );
     f.Fields( action );
@@ -230,60 +234,60 @@ public:
 
     m_vQuery.push_back( pQuery );
 
-    return pQuery;
+    return *pQuery;
 
   }
 
   void CreateTables( void );
 
   template<class F>  // do reset, auto bind when doing execute
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t Insert( const std::string& sTableName, F& f ) {
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );
-    m_vQuery.push_back( pQuery );
+  typename Query<typename IDatabase::structStatementState, F>& Insert( F& f ) {
+
+    typename Query<typename IDatabase::structStatementState, F>* 
+      pQuery = new Query<IDatabase::structStatementState, F>( f );
     
-    IDatabase::Action_Compose_Insert action( sTableName );
+    IDatabase::Action_Compose_Insert action( MapFieldsToTable<F>() );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->UpdateQueryText() );
-    Bind<F>( pQuery );
-    Execute( pQuery );
 
-    return pQuery;
+    m_vQuery.push_back( pQuery );
+
+    return *pQuery;
   }
 
   // need where clause
   template<class F>  // do reset, auto bind when doing execute
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t Update( const std::string& sTableName, F& f ) {
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );
-    m_vQuery.push_back( pQuery );
+  typename Query<typename IDatabase::structStatementState, F>& Update( F& f ) {
+
+    typename Query<typename IDatabase::structStatementState, F>* 
+      pQuery = new Query<IDatabase::structStatementState, F>( f );
     
-    IDatabase::Action_Compose_Update action( sTableName );
+    IDatabase::Action_Compose_Update action( MapFieldsToTable<F>() );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->UpdateQueryText() );
-    Bind<F>( pQuery );
-    Execute( pQuery );
 
-    return pQuery;
+    m_vQuery.push_back( pQuery );
+
+    return *pQuery;
   }
 
   // need where clause
   template<class F>  // do reset, auto bind when doing execute
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t Delete( const std::string& sTableName, F& f ) {
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );
-    m_vQuery.push_back( pQuery );
+  typename Query<typename IDatabase::structStatementState, F>& Delete( F& f ) {
+
+    typename Query<typename IDatabase::structStatementState, F>* 
+      pQuery = new Query<IDatabase::structStatementState, F>( f );
     
-    IDatabase::Action_Compose_Delete action( sTableName );
+    IDatabase::Action_Compose_Delete action( MapFieldsToTable<F>() );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->UpdateQueryText() );
-    Bind<F>( pQuery );
-    Execute( pQuery );
 
-    return pQuery;
+    m_vQuery.push_back( pQuery );
+
+    return *pQuery;
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
@@ -292,32 +296,59 @@ public:
   //   one inbound, one outbound
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t SQL( const std::string& sSqlQuery, F& f ) {
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );
-    m_vQuery.push_back( pQuery );
+  typename Query<typename IDatabase::structStatementState, F>& SQL( const std::string& sSqlQuery, F& f ) {
+
+    typename Query<typename IDatabase::structStatementState, F>* 
+      pQuery = new Query<IDatabase::structStatementState, F>( f );
 
     pQuery->UpdateQueryText() = sSqlQuery;
-    Execute( pQuery );
     
-    return pQuery;
+    m_vQuery.push_back( pQuery );
+
+    return *pQuery;
   }
 
   // query with no parameters
   template<class F>
-  typename Query<typename IDatabase::structStatementState, F>::pQuery_t SQL( const std::string& sSqlQuery ) {
-    typedef typename Query<IDatabase::structStatementState, F>::pQuery_t pQuery_t; 
+  typename Query<typename IDatabase::structStatementState, F>& SQL( const std::string& sSqlQuery ) {
+
     F f;  // warning, this variable goes out of scope before the query is destroyed
-    pQuery_t pQuery( new Query<IDatabase::structStatementState, F>( f ) );
-    m_vQuery.push_back( pQuery );
+    typename Query<typename IDatabase::structStatementState, F>* 
+      pQuery = new Query<IDatabase::structStatementState, F>( f );
 
     pQuery->UpdateQueryText() = sSqlQuery;
-    Execute( pQuery );
     
-    return pQuery;
+    m_vQuery.push_back( pQuery );
+
+    return *pQuery;
+  }
+
+  template<class F>
+  void MapTableToFields( const std::string& sTableName ) {
+    std::string t( typeid( F ).name() );
+    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
+    if ( m_mapFieldsToTable.end() == iter ) {
+      m_mapFieldsToTable[ t ] = sTableName;
+    }
+    else {
+      if ( iter->second != sTableName ) {
+        throw std::runtime_error( "type already defined" );
+      }
+    }
   }
 
 protected:
+
+  template<class F>
+  const std::string& MapFieldsToTable( void ) {
+    std::string t( typeid( F ).name() );
+    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
+    if ( m_mapFieldsToTable.end() == iter ) {
+      throw std::runtime_error( "type not found" );
+    }
+    return iter->second;
+  }
+
 private:
 
   bool m_bOpened;
@@ -334,6 +365,11 @@ private:
   typedef std::vector<pQueryBase_t> vQuery_t;
   typedef vQuery_t::iterator vQuery_iter_t;
   vQuery_t m_vQuery;
+
+  typedef std::map<std::string, std::string> mapFieldsToTable_t;
+  typedef mapFieldsToTable_t::iterator mapFieldsToTable_iter_t;
+  typedef std::pair<std::string, std::string> mapFieldsToTable_pair_t;
+  mapFieldsToTable_t m_mapFieldsToTable;
 
 };
 

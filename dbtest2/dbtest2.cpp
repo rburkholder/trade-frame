@@ -70,6 +70,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 //  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 
   { // after use, delete shared pointers so close works properly, fix IDatabase::Close to use differently.
+    
     session.RegisterTable<CFieldsTable>( "test" );
     session.CreateTables();
 
@@ -80,7 +81,11 @@ int _tmain(int argc, _TCHAR* argv[]) {
     fields.m_intField = -45;
     fields.m_sField = "attempt";
 
-    ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.Insert<CFields>( "test", fields );
+    session.MapTableToFields<CFields>( "test" );
+    ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.Insert<CFields>( fields );
+
+    session.Bind<CFields>( pInsert );
+    session.Execute( pInsert );
 
     fields.m_key = 6;
     fields.m_intField = 42;
@@ -94,14 +99,22 @@ int _tmain(int argc, _TCHAR* argv[]) {
     CFieldsUpdate update;
     update.m_sField = "good";
 
+    session.MapTableToFields<CFieldsUpdate>( "test" );
     ou::db::QueryFields<CFieldsUpdate>::pQueryFields_t pUpdate 
-      = session.Update<CFieldsUpdate>( "test", update )->Where( "field1 = 'attempt'" );
+      = session.Update<CFieldsUpdate>( update ).Where( "field1 = 'attempt'" );
+
+    session.Bind<CFieldsUpdate>( pUpdate );
+    session.Execute( pUpdate );
 
     CFieldsDelete delete_;
     delete_.m_enumField = CFieldsDelete::enumfield2::ETwo;
 
+    session.MapTableToFields<CFieldsDelete>( "test" );
     ou::db::QueryFields<CFieldsDelete>::pQueryFields_t pDelete 
-      = session.Delete<CFieldsDelete>( "test", delete_ )->Where( "field2 = ?" );;
+      = session.Delete<CFieldsDelete>( delete_ ).Where( "field2 = ?" );;
+
+    session.Bind<CFieldsDelete>( pDelete );
+    session.Execute( pDelete );
 
     fields.m_key = 7;
     fields.m_intField = 82;
@@ -115,6 +128,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
     CFields fields2;
     ou::db::QueryFields<EmptyQuery>::pQueryFields_t pSelect 
       = session.SQL<EmptyQuery>( "select * from test" );
+    session.Execute( pSelect );
     while ( session.Execute( pSelect ) ) {
       session.Columns<EmptyQuery, CFields>( pSelect, fields2 );
       std::cout << fields2.m_key << ", " << fields2.m_sField << ", " << fields2.m_dblField << ", " << fields2.m_intField << std::endl;
