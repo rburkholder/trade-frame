@@ -60,9 +60,6 @@ struct CFieldsDelete {
 
 };
 
-struct EmptyQuery {
-};
-
 int _tmain(int argc, _TCHAR* argv[]) {
 
   ou::db::CSession<ou::db::ISqlite3> session;
@@ -84,9 +81,6 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.MapTableToFields<CFields>( "test" );
     ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.Insert<CFields>( fields );
 
-    session.Bind<CFields>( pInsert );
-    session.Execute( pInsert );
-
     fields.m_key = 6;
     fields.m_intField = 42;
     fields.m_enumField = CFields::ETwo;
@@ -103,18 +97,12 @@ int _tmain(int argc, _TCHAR* argv[]) {
     ou::db::QueryFields<CFieldsUpdate>::pQueryFields_t pUpdate 
       = session.Update<CFieldsUpdate>( update ).Where( "field1 = 'attempt'" );
 
-    session.Bind<CFieldsUpdate>( pUpdate );
-    session.Execute( pUpdate );
-
     CFieldsDelete delete_;
     delete_.m_enumField = CFieldsDelete::enumfield2::ETwo;
 
     session.MapTableToFields<CFieldsDelete>( "test" );
     ou::db::QueryFields<CFieldsDelete>::pQueryFields_t pDelete 
       = session.Delete<CFieldsDelete>( delete_ ).Where( "field2 = ?" );;
-
-    session.Bind<CFieldsDelete>( pDelete );
-    session.Execute( pDelete );
 
     fields.m_key = 7;
     fields.m_intField = 82;
@@ -126,12 +114,13 @@ int _tmain(int argc, _TCHAR* argv[]) {
     session.Execute( pInsert );
 
     CFields fields2;
-    ou::db::QueryFields<EmptyQuery>::pQueryFields_t pSelect 
-      = session.SQL<EmptyQuery>( "select * from test" );
-    while ( session.Execute( pSelect ) ) {
-      session.Columns<EmptyQuery, CFields>( pSelect, fields2 );
+    ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pSelect 
+      = session.SQL<ou::db::NoBind>( "select * from test" );
+    do {
+      session.Columns<ou::db::NoBind, CFields>( pSelect, fields2 );
       std::cout << fields2.m_key << ", " << fields2.m_sField << ", " << fields2.m_dblField << ", " << fields2.m_intField << std::endl;
     }
+    while ( session.Execute( pSelect ) );
 
   }
 

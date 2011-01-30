@@ -13,6 +13,11 @@
 
 #pragma once
 
+// 2011-01-30
+// need to work on:
+//   getting key back when inserting new record with auto-increment
+//   adding transactions with rollback and commit
+
 #include <string>
 #include <map>
 #include <vector>
@@ -26,9 +31,16 @@
 namespace ou {
 namespace db {
 
+// dummy place holder for when no fields to bind
+// will need to figure out a better way to handle this
+struct NoBind {
+};
+
 // CQuery contains:
 // * SS: statement state structures dedicated to the specific database
 // * F: struct containing Fields function with ou::db::Field calls
+
+// 2011-01-30  need to modify the structures so they can handle instance when there is no F.
 
 class QueryBase {  // used as base representation for stowage in vectors and such
 protected:
@@ -41,10 +53,10 @@ public:
   virtual ~QueryBase( void ) {};
 
   void SetHasFields( void ) { m_bHasFields = true; };
-  bool HasFields( void ) { return m_bHasFields; };
+  inline bool HasFields( void ) { return m_bHasFields; };
 
   void SetPrepared( void ) { m_bPrepared = true; };
-  bool IsPrepared( void ) { return m_bPrepared; };
+  inline bool IsPrepared( void ) { return m_bPrepared; };
 
   // instrusive reference counting
   size_t RefCnt( void ) { return m_cntRef; };
@@ -126,6 +138,10 @@ public:
   template<class F>
   operator QueryFields<F>*() { 
     if ( m_bExecuteOneTime ) {
+      if ( HasFields() ) {
+        m_session.Bind( *this );
+      }
+      m_session.Execute( *this );
       m_bExecuteOneTime = false;
     }
     return dynamic_cast<QueryFields<F>* >( this ); }
@@ -181,6 +197,10 @@ public:
     }
     IDatabase::Action_Bind_Values action( StatementState );
     qf.var.Fields( action );
+  }
+
+  template<>
+  void Bind<NoBind>( QueryFields<NoBind>& qf ) {
   }
 
   template<class F>
