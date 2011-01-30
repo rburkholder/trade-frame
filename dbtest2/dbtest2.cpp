@@ -128,7 +128,6 @@ int _tmain(int argc, _TCHAR* argv[]) {
     CFields fields2;
     ou::db::QueryFields<EmptyQuery>::pQueryFields_t pSelect 
       = session.SQL<EmptyQuery>( "select * from test" );
-    session.Execute( pSelect );
     while ( session.Execute( pSelect ) ) {
       session.Columns<EmptyQuery, CFields>( pSelect, fields2 );
       std::cout << fields2.m_key << ", " << fields2.m_sField << ", " << fields2.m_dblField << ", " << fields2.m_intField << std::endl;
