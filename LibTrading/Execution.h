@@ -18,9 +18,10 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <LibSqlite/sqlite3.h>
-
 #include "TradingEnumerations.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CExecution {
 public:
@@ -76,3 +77,6 @@ private:
   static const std::string m_sSqlDelete;
 
 };
+
+} // namespace tf
+} // namespace ou

@@ -25,13 +25,14 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <LibSqlite/sqlite3.h>
-
 #include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
 #include "Instrument.h"
 #include "Execution.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class COrderManager;
 
@@ -182,3 +183,6 @@ private:
   COrder(void);  // no default constructor
 
 };
+
+} // namespace tf
+} // namespace ou

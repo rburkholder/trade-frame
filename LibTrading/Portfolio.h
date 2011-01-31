@@ -22,6 +22,9 @@
 #include "AccountOwner.h"
 #include "Position.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 // has series of positions, CPosition
 
 // what about PositionCombos?
@@ -109,3 +112,6 @@ private:
   void HandleCommission( const CPosition* );
 
 };
+
+} // namespace tf
+} // namespace ou

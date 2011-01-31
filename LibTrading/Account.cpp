@@ -17,6 +17,9 @@
 
 #include "Account.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string CAccount::m_sSqlCreate(
   "create table accounts ( \
     accountid TEXT CONSTRAINT pk_accounts PRIMARY KEY, \
@@ -128,3 +131,5 @@ int CAccount::BindDbVariables( sqlite3_stmt* pStmt ) {
   return rtn;  // should be 0 if all goes well
 }
 
+} // namespace tf
+} // namespace ou

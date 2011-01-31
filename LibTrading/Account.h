@@ -15,9 +15,10 @@
 
 #include <string>
 
-#include <LibSqlite/sqlite3.h>
-
 #include "AccountOwner.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CAccount
 {
@@ -68,3 +69,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

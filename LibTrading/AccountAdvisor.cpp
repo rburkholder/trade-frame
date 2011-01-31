@@ -13,61 +13,23 @@
 
 #include "StdAfx.h"
 
-#include <stdexcept>
-
 #include "AccountAdvisor.h"
 
-const std::string CAccountAdvisor::m_sSqlCreate( 
-  "create table accountadvisors ( \
-    accountadvisorid TEXT CONSTRAINT pk_accountadvisors PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    name TEXT NOT NULL \
-    );" );
-const std::string CAccountAdvisor::m_sSqlSelect( "SELECT name FROM accountadvisors WHERE accountadvisorid = :id;" );
-const std::string CAccountAdvisor::m_sSqlInsert( "INSERT INTO accountadvisors (accountadvisorid, name ) VALUES ( :id, :name );" );
-const std::string CAccountAdvisor::m_sSqlUpdate( "UPDATE accountadvisors SET name = :name WHERE accountadvisorid = :id;" );
-const std::string CAccountAdvisor::m_sSqlDelete( "DELETE FROM accountadvisors WHERE accountadvisorid = :id;" );
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
-CAccountAdvisor::CAccountAdvisor( const keyAccountAdvisorId_t& sAdvisorId, const std::string& sAdvisorName ) 
-: m_sAdvisorId( sAdvisorId ), m_sAdvisorName( sAdvisorName )
+const std::string CAccountAdvisor::m_sTableName = "accountadvisors";
+
+CAccountAdvisor::CAccountAdvisor( const keyAccountAdvisorId_t& sAdvisorId, 
+  const std::string& sAdvisorName, const std::string& sCompanyName ) 
+: m_row( sAdvisorId, sAdvisorName, sCompanyName )
 {
 }
 
-CAccountAdvisor::CAccountAdvisor( const keyAccountAdvisorId_t& sAdvisorId, sqlite3_stmt* pStmt ) 
-: m_sAdvisorId( sAdvisorId ), 
-  m_sAdvisorName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) )
-{
-}
+CAccountAdvisor::CAccountAdvisor( const TableRowDef& row ) : m_row( row ) {};
 
 CAccountAdvisor::~CAccountAdvisor(void) {
 }
 
-void CAccountAdvisor::CreateDbTable( sqlite3* pDb ) {
-
-  char* pMsg;
-  int rtn;
-
-  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table accountadvisors: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-}
-
-int CAccountAdvisor::BindDbKey( sqlite3_stmt* pStmt ) {
-  int rtn( 0 );
-  rtn = sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_sAdvisorId.c_str(), -1, SQLITE_TRANSIENT );
-  return rtn;
-}
-
-int CAccountAdvisor::BindDbVariables( sqlite3_stmt* pStmt ) {
-  int rtn( 0 );
-  rtn = sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":name" ), m_sAdvisorName.c_str(), -1, SQLITE_TRANSIENT );
-  return rtn;
-}
-
+} // namespace tf
+} // namespace ou

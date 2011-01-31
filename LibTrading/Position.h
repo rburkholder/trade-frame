@@ -16,8 +16,6 @@
 #include <vector>
 #include <sstream>
 
-#include <LibSqlite/sqlite3.h>
-
 #include <boost/shared_ptr.hpp>
 
 #include <LibCommon/Delegate.h>
@@ -35,6 +33,9 @@
 // check that orders for both sell side and buy side are not opened simultaneously
 // a position is provider dependent, ie, only one provider per position
 // Create Delegates so trade and market data updates propogate to combo and portfolio
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CPosition {
 public:
@@ -179,3 +180,6 @@ private:
   void HandleGreek( greek_t );
 
 };
+
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,9 @@
 
 #include "Portfolio.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string CPortfolio::m_sSqlCreate( 
   "create table portfolios ( \
     portfolioid TEXT CONSTRAINT pk_portfolios PRIMARY KEY, \
@@ -244,3 +247,5 @@ int CPortfolio::BindDbVariables( sqlite3_stmt* pStmt ) {
   return rtn;  // should be 0 if all goes well
 }
 
+} // namespace tf
+} // namespace ou

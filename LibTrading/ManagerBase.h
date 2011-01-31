@@ -32,6 +32,9 @@
 
 #include "LibCommon/Singleton.h"
 
+namespace ou {
+namespace tf { // TradeFrame
+
 // T: CRTP base
 // K: key
 // R: object or base type being managed
@@ -56,3 +59,6 @@ template<class T, class K, class R> ManagerBase<T,K,R>::ManagerBase() {
 
 template<class T, class K, class R> ManagerBase<T,K,R>::~ManagerBase( void ) {
 }
+
+} // namespace tf
+} // ou

@@ -16,6 +16,9 @@
 #include "Position.h"
 #include <LibTrading/OrderManager.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string CPosition::m_sSqlCreate( 
   "create table positions ( \
     positionid INTEGER PRIMARY KEY, \
@@ -504,3 +507,6 @@ int CPosition::BindDbVariables( sqlite3_stmt* pStmt ) {
     pStmt, sqlite3_bind_parameter_index( pStmt, ":commissionpaid" ), m_dblCommissionPaid );
   return rtn;
 }
+
+} // namespace tf
+} // namespace ou

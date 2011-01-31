@@ -27,6 +27,9 @@
 #include "Order.h"
 #include "Execution.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // COrderManager
 //
@@ -68,3 +71,6 @@ private:
   void MoveActiveOrderToCompleted( idOrder_t nOrderId );
 
 };
+
+} // namespace tf
+} // namespace ou

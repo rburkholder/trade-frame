@@ -20,6 +20,9 @@
 
 #include "Order.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string COrder::m_sSqlCreate(     
   "create table orders ( \
     orderid INTEGER PRIMARY KEY, \
@@ -363,3 +366,6 @@ int COrder::BindDbVariables( sqlite3_stmt* pStmt ) {
     pStmt, sqlite3_bind_parameter_index( pStmt, ":datetimeclosed" ), &m_dtOrderClosed, sizeof( m_dtOrderClosed ), NULL );
   return rtn;
 }
+
+} // namespace tf
+} // namespace ou

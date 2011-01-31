@@ -19,6 +19,9 @@
 #include "ManagerBase.h"
 #include "Portfolio.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CPortfolioManager: public ManagerBase<CPortfolioManager, std::string, CPortfolio> {
 public:
 
@@ -51,3 +54,6 @@ private:
   map_t m_mapPortfolios;
 
 };
+
+} // namespace tf
+} // namespace ou

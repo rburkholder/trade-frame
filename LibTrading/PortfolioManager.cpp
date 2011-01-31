@@ -15,6 +15,9 @@
 
 #include "PortfolioManager.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CPortfolioManager::CPortfolioManager(void) {
 }
 
@@ -61,3 +64,5 @@ void CPortfolioManager::Delete( const std::string& sName ) {
   m_mapPortfolios.erase( iter );
 }
 
+} // namespace tf
+} // namespace ou

@@ -135,6 +135,8 @@ public:
   operator QueryFields<F>() { 
     return dynamic_cast<QueryFields<F> >( *this ); }
 
+  // conversion operator:  upon converstion from Query to QueryFields (upon assignment), execute the bind and execute
+  // may need to add an auto-reset before the bind:  therefore need m_bBound member variable
   template<class F>
   operator QueryFields<F>*() { 
     if ( m_bExecuteOneTime ) {
@@ -276,22 +278,17 @@ public:
     return ComposeSql<F, IDatabase::Action_Compose_Insert>( f );
   }
 
-  // need where clause
   template<class F>  // do reset, auto bind when doing execute
   typename Query<typename IDatabase::structStatementState, F, session_t>& Update( F& f ) {
     return ComposeSql<F, IDatabase::Action_Compose_Update>( f );
   }
 
-  // need where clause
   template<class F>  // do reset, auto bind when doing execute
   typename Query<typename IDatabase::structStatementState, F, session_t>& Delete( F& f ) {
     return ComposeSql<F, IDatabase::Action_Compose_Delete>( f );
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
-  // also need two templates:  one for query parameters, one for column binding, or use a separate method for retrieval
-  // that would be why they have a a different database object for the field delivery:
-  //   one inbound, one outbound
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
   typename Query<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery, F& f ) {
@@ -313,18 +310,8 @@ public:
   template<class F>
   typename Query<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
 
-    typedef Query<IDatabase::structStatementState, F, session_t> query_t;
-
     F f;  // warning, this variable goes out of scope before the query is destroyed
-    query_t* pQuery = new query_t( *this, f );
-
-    pQuery->UpdateQueryText() = sSqlQuery;
-
-    pQuery->SetExecuteOneTime();
-    
-    m_vQuery.push_back( pQuery );
-
-    return *pQuery;
+    return SQL( sSqlQuery, f );
   }
 
   template<class F>
@@ -343,7 +330,6 @@ public:
 
 protected:
 
-  // need where clause
   template<class F, class Action>  // do reset, auto bind when doing execute
   typename Query<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
 

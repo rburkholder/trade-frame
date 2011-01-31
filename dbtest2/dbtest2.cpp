@@ -86,9 +86,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
     fields.m_enumField = CFields::ETwo;
     fields.m_sField = "answer";
 
-    session.Reset( pInsert );
-    session.Bind<CFields>( pInsert );
-    session.Execute( pInsert );
+    session.Reset( pInsert );  // could also add ability to pInsert->Reset();
+    session.Bind<CFields>( pInsert );  // could also add ability to pInsert->Bind( fields );
+    session.Execute( pInsert );  // could also add ability to pInsert->Execute(), or pInsert->Execute( bindingfields );
 
     CFieldsUpdate update;
     update.m_sField = "good";

@@ -17,7 +17,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibSqlite/sqlite3.h>
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CAccountAdvisor
 {
@@ -25,44 +26,58 @@ class CAccountAdvisor
 
 public:
 
+  typedef std::string keyAccountAdvisorId_t;
   typedef boost::shared_ptr<CAccountAdvisor> pAccountAdvisor_t;
   typedef pAccountAdvisor_t sharedptr_t;
-  typedef std::string keyAccountAdvisorId_t;
 
-  CAccountAdvisor( const keyAccountAdvisorId_t& sAdvisorId, const std::string& sAdvisorName );
-  CAccountAdvisor( const keyAccountAdvisorId_t& sAdvisorId, sqlite3_stmt* pStmt );
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "accountadvisorid", idAccountAdvisor );
+      ou::db::Field( a, "name", sName );
+      ou::db::Field( a, "company", sCompanyName );
+
+      ou::db::Key( a, "accountadvisorid" );
+    }
+
+    keyAccountAdvisorId_t idAccountAdvisor;
+    std::string sName;
+    std::string sCompanyName;
+
+    TableRowDef( 
+      const keyAccountAdvisorId_t& idAdvisor_, const std::string& sName_, const std::string& sCompanyName_ ) 
+      : idAccountAdvisor( idAdvisor_ ), sName( sName_ ), sCompanyName( sCompanyName_ ) {};
+  };
+
+  const static std::string m_sTableName;
+
+  CAccountAdvisor( 
+    const keyAccountAdvisorId_t& sAdvisorId, 
+    const std::string& sAdvisorName, const std::string& sCompanyName );
+  CAccountAdvisor( const TableRowDef& row );
   ~CAccountAdvisor(void);
 
   const keyAccountAdvisorId_t& GetId( void ) const { 
-    return m_sAdvisorId; 
+    return m_row.idAccountAdvisor; 
   }
 
   const std::string& GetName( void ) const { 
-    return m_sAdvisorName; 
+    return m_row.sName; 
   }
 
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
+  const std::string& GetCompanyName( void ) const {
+    return m_row.sCompanyName;
+  }
 
 protected:
 
 private:
 
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
+  TableRowDef m_row;
 
-  keyAccountAdvisorId_t m_sAdvisorId;
-  std::string m_sAdvisorName;
-
-  CAccountAdvisor( void );
+  CAccountAdvisor( void );  // no default constructor
 };
 
+} // namespace tf
+} // namespace ou
 

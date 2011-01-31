@@ -20,6 +20,9 @@
 
 #include "OrderManager.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // COrderManager
 //
@@ -122,3 +125,6 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
     std::cout << "Problems in COrderManager::ReportErrors" << std::endl;
   }
 }
+
+} // namespace tf
+} // namespace ou
