@@ -15,6 +15,9 @@
 
 #include "Exchange.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string m_sSqlCreate( 
   "create table exchanges ( \
    exchangeid TEXT CONSTRAINT pk_exchanges PRIMARY KEY, \
@@ -92,3 +95,6 @@ void CExchange::CreateDbTable( sqlite3* pDb ) {
     throw std::runtime_error( "CExchange::CreateDbTable: could not insert records" );
   }
 }
+
+} // namespace tf
+} // namespace ou

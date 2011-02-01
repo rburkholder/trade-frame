@@ -12,7 +12,7 @@ struct CFields {
 
   template<typename A> // A = Action
   void Fields( A& a ) {
-    ou::db::Field( a, "mykey",  m_key,   "INTEGER" );  // type needed to match sqlite rowid
+    ou::db::Field( a, "mykey",  m_key );  // type needed to match sqlite rowid
     ou::db::Field( a, "field1", m_sField );
     ou::db::Field( a, "field2", m_enumField );  // find out what the compiler thinks it is
     ou::db::Field( a, "field3", m_intField );

@@ -27,6 +27,43 @@ public:
   typedef std::string keyAccountId_t;
   typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
 
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& A ) {
+      ou::db::Field( a, "accountid" );
+      ou::db::Field( a, "accountownerid" );
+      ou::db::Field( a, "accountname" );
+      ou::db::Field( a, "providername" );
+      ou::db::Field( a, "brokername" );
+      ou::db::Field( a, "brokeraccountid" );
+      ou::db::Field( a, "login" );
+      ou::db::Field( a, "password" );
+
+      ou::db::Key( a, "accountid" );
+      ou::db::Constraint( "accountownerid", CAccountOwner::m_sTableName, "accountownderid" );
+    }
+
+    keyAccountId_t idAccount;
+    keyAccountOwnerId_t idAccountOwner;
+    std::string sAccountName;
+    std::string sProviderName;
+    std::string sBrokerName;
+    std::string sBrokerAccountId;
+    std::string sLogin;
+    std::string sPassword;
+
+    TableRowDef( const keyAccountId_t& idAccount_, const keyAccountOwnerId_t& idAccountOwner_,
+      const std::string& sAccountName_, const std::string& sProviderName_, 
+      const std::string& sBrokerName_, const std::string& sBrokerAccountId_,
+      const std::string& sLogin_, const std::string& sPassword_ ) 
+      : idAccount( idAccount_ ), idAccountOwner( idAccountOwner_ ),
+        sAccountName( sAccountName_ ), sProviderName( sProviderName_ ), 
+        sBrokerName( sBrokerName_ ), sBrokerAccountId( sBrokerAccountId_ ),
+        sLogin( sLogin_ ), sPassword( sPassword_ ) {};
+  };
+
+  const static std::string m_sTableName;
+
   CAccount(
     const keyAccountId_t& sAccountId,
     const keyAccountOwnerId_t& sAccountOwnerId,
@@ -37,35 +74,14 @@ public:
     const std::string& sLogin, 
     const std::string& sPassword
     );
-  CAccount( const keyAccountId_t& sAccountId, sqlite3_stmt* pStmt );
+  CAccount( const TableRowDef& row ) : m_row( row ) {};
   ~CAccount(void);
-
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
 
 private:
 
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
-
-  keyAccountId_t m_sAccountId;
-  keyAccountOwnerId_t m_sAccountOwnerId;
-  std::string m_sAccountName;
-  std::string m_sProviderName;
-  std::string m_sBrokerName;
-  std::string m_sBrokerAccountId;
-  std::string m_sLogin;
-  std::string m_sPassword;
+  TableRowDef m_row;
 
 };
 

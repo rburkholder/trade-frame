@@ -21,6 +21,14 @@ namespace ou {
 namespace db {
 namespace sqlite {
 
+void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
+  // change this to a boost integral type check to catch all integer types?
+  if ( "INT8" == m_vFieldDef.begin()->sFieldType ) {  // proper way to get oid and key to be the same
+    m_vFieldDef.begin()->sFieldType = "INTEGER";
+  }
+  ou::db::Action_Assemble_TableDef::Key( sFieldName );
+}
+
 // 
 // bind values for query
 //

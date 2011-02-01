@@ -88,6 +88,8 @@ public:
     addField( sFieldName, sFieldType.c_str() );
   }
 
+  void Key( const std::string& sFieldName );
+
 protected:
 private:
 };

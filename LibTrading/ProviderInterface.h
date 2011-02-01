@@ -41,6 +41,9 @@ Discussion of calling sequence for open, quote, trade, depth handlers:
 // =======================
 //
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CProviderInterfaceBase {
 public:
 
@@ -382,3 +385,5 @@ void CProviderInterface<P,S>::CancelOrder( pOrder_t pOrder ) {
 //  }
 }
 
+} // namespace tf
+} // namespace ou

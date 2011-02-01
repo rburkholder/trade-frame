@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/cstdint.hpp>
 
 #include <LibCommon/Delegate.h>
 
@@ -53,22 +54,82 @@ public:
   typedef std::pair<const CPosition*, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
-  typedef sqlite3_int64 idPosition_t;
+  typedef boost::int64_t idPosition_t;
+
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "positionid", idPosition );
+      ou::db::Field( a, "portfolioid", idPortfolio );
+      ou::db::Field( a, "name", sName );
+      ou::db::Field( a, "notes", sNotes );
+      ou::db::Field( a, "executionaccountid", idExecutionAccount );
+      ou::db::Field( a, "dataaccountid", idDataAccount );
+      ou::db::Field( a, "instrumentid", idInstrument );
+      ou::db::Field( a, "ordersidepending", eOrderSidePending );
+      ou::db::Field( a, "quantitypending", nPositionPending );
+      ou::db::Field( a, "ordersideactive", eOrderSideActive );
+      ou::db::Field( a, "quantityactive", nPositionActive );
+      ou::db::Field( a, "constructedvalue", dblConstructedValue );
+      ou::db::Field( a, "marketvalue", dblMarketValue );
+      ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
+      ou::db::Field( a, "realizedpl", dblRealizedPL );
+      ou::db::Field( a, "CommissionPaid", dblCommissionPaid );
+
+      ou::db::Key( a, "positionid" );
+      ou::db::Constraint( a, "portfolioid", "portfolios", "portfolioid" );
+      ou::db::Constraint( a, "executionaccountid", "account", "accountid" );
+      ou::db::Constraint( a, "dataaccountid", "account", "accountid" );
+      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
+      //"create index idx_positions_portfolioid on positions( portfolioid );",
+    }
+
+    idPosition_t idPosition;
+    std::string idPortfolio;
+    std::string sName;
+    std::string sNotes;
+    std::string idExecutionAccount;
+    std::string idDataAccount;
+    std::string idInstrument;
+  // all pending orders must be on the same side
+  // pending orders need to cancelled in order to change sides
+  // use an opposing position if playing both sides of the market
+    OrderSide::enumOrderSide eOrderSidePending;  
+    unsigned long nPositionPending;
+  // indicates whether we are in a long or short position
+    OrderSide::enumOrderSide eOrderSideActive;
+    unsigned long nPositionActive;
+  // following value markers exclude commission
+    double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
+    double dblMarketValue;  // based upon market quotes
+  // following value markers exclude commission
+    double dblUnRealizedPL;  // based upon market quotes
+    double dblRealizedPL;  // based upon position trades
+  // contains total commissions
+    double dblCommissionPaid;
+
+    TableRowDef( void ) : idPosition( 0 ), eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
+      dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
+
+  };
+
+  const static std::string m_sTableName;
 
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
-    idPosition_t idPosition, sqlite3_stmt* pStmt );
-  CPosition( idPosition_t idPosition, sqlite3_stmt* pStmt );
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
+  CPosition( const TableRowDef& row );
+  CPosition( void );
   ~CPosition(void);
 
-  const std::string& Notes( void ) const { return m_sNotes; };
-  void Append( std::string& sNotes ) { m_sNotes += sNotes; };
+  const std::string& Notes( void ) const { return m_row.sNotes; };
+  void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
   pInstrument_cref GetInstrument( void ) const { return m_pInstrument; };
-  double GetUnRealizedPL( void ) const { return m_dblUnRealizedPL; };
-  double GetRealizedPL( void ) const { return m_dblRealizedPL; };
-  double GetCommissionPaid( void ) const { return m_dblCommissionPaid; };
+  double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
+  double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
+  double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
 
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
@@ -98,14 +159,6 @@ public:
 
   void EmitStatus( std::stringstream& ssStatus );
 
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
-
   void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
 
 protected:
@@ -114,38 +167,10 @@ protected:
   typedef CSymbolBase::trade_t trade_t;
   typedef CSymbolBase::greek_t greek_t;
 
-  std::string m_sidExecutionAccount;
-  std::string m_sidDataAccount;
-
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
 
   pInstrument_t m_pInstrument;
-  std::string m_sInstrumentName;
-
-  std::string m_sName;
-  std::string m_sNotes;
-
-  // all pending orders must be on the same side
-  // pending orders need to cancelled in order to change sides
-  // use an opposing position if playing both sides of the market
-  OrderSide::enumOrderSide m_eOrderSidePending;  
-  unsigned long m_nPositionPending;
-
-  // indicates whether we are in a long or short position
-  OrderSide::enumOrderSide m_eOrderSideActive;  
-  unsigned long m_nPositionActive;
-
-  // following value markers exclude commission
-  double m_dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
-  double m_dblMarketValue;  // based upon market quotes
-
-  // following value markers exclude commission
-  double m_dblUnRealizedPL;  // based upon market quotes
-  double m_dblRealizedPL;  // based upon position trades
-
-  // contains total commissions
-  double m_dblCommissionPaid;
 
   std::vector<pOrder_t> m_OpenOrders;  // active orders waiting to be executed or cancelled
   std::vector<pOrder_t> m_ClosedOrders;  // orders that have executed or have cancelled
@@ -153,14 +178,7 @@ protected:
 
 private:
 
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
-
-  idPosition_t m_idPosition;
-  std::string m_idPortfolio;
+  TableRowDef m_row;
 
   bool m_bInstrumentAssigned;
   bool m_bExecutionAccountAssigned;

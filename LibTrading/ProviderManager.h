@@ -27,6 +27,9 @@
 // it hould be converted over to boost::fusion for storing full types and values for the 
 // various providers, and then have specialized algorithms for processing the tuples of providers.
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
 public:
 
@@ -46,3 +49,6 @@ protected:
 
 private:
 };
+
+} // namespace tf
+} // namespace ou

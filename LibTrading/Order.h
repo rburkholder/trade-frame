@@ -24,6 +24,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include <boost/cstdint.hpp>
 
 #include <LibCommon/Delegate.h>
 
@@ -40,12 +41,21 @@ class COrder {
   friend class COrderManager;
 public:
 
-  typedef sqlite3_int64 idOrder_t;
-  typedef sqlite3_int64 idPosition_t;
+  typedef boost::int64_t idOrder_t;
+  typedef boost::int64_t idPosition_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::idInstrument_t idInstrument_t;
   typedef boost::shared_ptr<COrder> pOrder_t;
   typedef const pOrder_t& pOrder_ref;
+
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+    }
+    //"create index idx_orders_positionid on orders( positionid );",
+  };
+
+  const static std::string m_sTableName;
 
   COrder(  // market 
     CInstrument::pInstrument_cref instrument, 
@@ -127,9 +137,6 @@ public:
   ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const COrder&> OnCommission;
 
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
   static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
   static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
   static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };

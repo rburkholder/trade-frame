@@ -19,82 +19,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CPosition::m_sSqlCreate( 
-  "create table positions ( \
-    positionid INTEGER PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    portfolioid TEXT NOT NULL, \
-    name TEXT NOT NULL, \
-    notes TEXT DEFAULT "", \
-    executionaccountid TEXT NOT NULL, \
-    dataaccountid TEXT NOT NULL, \
-    instrumentid TEXT NOT NULL, \
-    ordersidepending SMALLINT NOT NULL, \
-    ordersideactive SMALLINT NOT NULL, \
-    quantitypending INT NOT NULL, \
-    quantityactive INT NOT NULL, \
-    constructedvalue double NOT NULL, \
-    marketvalue double NOT NULL, \
-    plunrealized double NOT NULL, \
-    plrealized double NOT NULL, \
-    commissionpaid double NOT NULL, \
-    CONSTRAINT fk_positions_portfolioid \
-      FOREIGN KEY(portfolioid) REFERENCES portfolios(portfolioid) \
-      ON DELETE RESTRICT ON UPDATE CASCADE, \
-    CONSTRAINT fk_positions_executionaccountid \
-      FOREIGN KEY(executionaccountid) REFERENCES accounts(accountid) \
-      ON DELETE RESTRICT ON UPDATE CASCADE, \
-    CONSTRAINT fk_positions_dataaccountid \
-      FOREIGN KEY(dataaccountid) REFERENCES accounts(accountid) \
-      ON DELETE RESTRICT ON UPDATE CASCADE, \
-    CONSTRAINT fk_postions_instrumentid \
-      FOREIGN KEY(instrumentid) REFERENCES instruments(instrumentid) \
-      ON DELETE RESTRICT ON UPDATE CASCADE \
-        \
-  );");
-const std::string CPosition::m_sSqlSelect( 
-  "SELECT portfolioid, name, notes, executionaccountid, dataaccountid, instrumentid, \
-    ordersidepending, ordersideactive, quantitypending, quantityactive, \
-    constructedvalue, marketvalue, plunrealized, plrealized, commissionpaid \
-  FROM positions WHERE positionid = :id \
-  ;" );
-const std::string CPosition::m_sSqlInsert( 
-  "INSERT into positions (positionid, portfolioid, name, notes, executionaccountid, dataaccountid, instrumentid, \
-    ordersidepending, ordersideactive, quantitypending, quantityactive, \
-    constructedvalue, marketvalue, plunrealized, plrealized, commissionpaid ) \
-  VALUES ( :positionid, :portfolioid, :name, :notes, :executionaccountid, :dataaccountid, :instrumentid, \
-    :ordersidepending, :ordersideactive, :quantitypending, :quantityactive, \
-    :constructedvalue, :marketvalue, :plunrealized, :plrealized, :commissionpaid ) \
-    ;" );
-const std::string CPosition::m_sSqlUpdate( 
-  "UPDATE positions SET \
-  portfolioid = :portfolioid, \
-  name = :name, \
-  notes = :notes, \
-  executionaccountid = :executionaccountid, \
-  dataaccountid = :dataaccountid, \
-  instrumentid = :instrumentid, \
-  ordersidepending = :ordersidepending, \
-  ordersideactive = :ordersideactive, \
-  quantitypending = :quantitypending, \
-  quantityactive = :quantityactive, \
-  constructedvalue = :constructedvalue, \
-  marketvalue = :marketvalue, \
-  plunrealized = :plunrealized, \
-  plrealized = :plrealized, \
-  WHERE positionid = ::id \
-  ;" );
-const std::string CPosition::m_sSqlDelete( "DELETE FROM positions WHERE positionid = :id;" );
+const std::string CPosition::m_sTableName = "positions";
 
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
-  m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
-  m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
-  m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblMultiplier( 1 ), 
-  m_dblCommissionPaid( 0 ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
@@ -103,62 +33,34 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_sNotes( sNotes ),
-  m_nPositionPending( 0 ), m_nPositionActive( 0 ), 
-  m_eOrderSidePending( OrderSide::Unknown ), m_eOrderSideActive( OrderSide::Unknown ),
-  m_dblConstructedValue( 0 ), m_dblMarketValue( 0 ),
-  m_dblUnRealizedPL( 0 ), m_dblRealizedPL( 0 ),
   m_dblMultiplier( 1 ), 
-  m_dblCommissionPaid( 0 ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
+  m_row.sNotes = sNotes;
   Construction();
 }
 
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
-  idPosition_t idPosition, sqlite3_stmt* pStmt ) 
-: m_idPosition( idPosition ),
-  m_dblMultiplier( 1 ), 
+  const TableRowDef& row ) 
+: m_row( row ),
   m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_idPortfolio( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
-  m_sName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
-  m_sNotes( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 2 ) ) ),
-  m_sidExecutionAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 3 ) ) ),
-  m_sidDataAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 4 ) ) ),
-  m_sInstrumentName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 5 ) ) ),
-  m_eOrderSidePending( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 6 ) ) ),
-  m_eOrderSideActive( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 7 ) ) ),
-  m_nPositionPending( sqlite3_column_int( pStmt, 8 ) ),
-  m_nPositionActive( sqlite3_column_int( pStmt, 9 ) ),
-  m_dblConstructedValue( sqlite3_column_double( pStmt, 10 ) ),
-  m_dblMarketValue( sqlite3_column_double( pStmt, 11 ) ),
-  m_dblUnRealizedPL( sqlite3_column_double( pStmt, 12 ) ),
-  m_dblRealizedPL( sqlite3_column_double( pStmt, 13 ) ),
-  m_dblCommissionPaid( sqlite3_column_double( pStmt, 14 ) ),
+  m_dblMultiplier( 1 ), 
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
 }
 
-CPosition::CPosition( idPosition_t idPosition, sqlite3_stmt* pStmt ) 
-: m_idPosition( idPosition ),
+CPosition::CPosition( const TableRowDef& row ) 
+: m_row( row ),
   m_dblMultiplier( 1 ), 
-  m_idPortfolio( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
-  m_sName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
-  m_sNotes( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 2 ) ) ),
-  m_sidExecutionAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 3 ) ) ),
-  m_sidDataAccount( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 4 ) ) ),
-  m_sInstrumentName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 5 ) ) ),
-  m_eOrderSidePending( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 6 ) ) ),
-  m_eOrderSideActive( static_cast<OrderSide::enumOrderSide>( sqlite3_column_int( pStmt, 7 ) ) ),
-  m_nPositionPending( sqlite3_column_int( pStmt, 8 ) ),
-  m_nPositionActive( sqlite3_column_int( pStmt, 9 ) ),
-  m_dblConstructedValue( sqlite3_column_double( pStmt, 10 ) ),
-  m_dblMarketValue( sqlite3_column_double( pStmt, 11 ) ),
-  m_dblUnRealizedPL( sqlite3_column_double( pStmt, 12 ) ),
-  m_dblRealizedPL( sqlite3_column_double( pStmt, 13 ) ),
-  m_dblCommissionPaid( sqlite3_column_double( pStmt, 14 ) ),
+  m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
+{
+  // need flags to wait for execution, data, instrument variables to be set
+}
+
+CPosition::CPosition( void ) 
+: m_dblMultiplier( 1 ), 
   m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
 {
   // need flags to wait for execution, data, instrument variables to be set
@@ -213,15 +115,15 @@ CPosition::~CPosition(void) {
 
 void CPosition::HandleQuote( quote_t quote ) {
   bool bProcessed(false);
-  switch ( m_eOrderSideActive ) {
+  switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
-      m_dblMarketValue = m_nPositionActive * quote.Bid() * m_dblMultiplier;
-      m_dblUnRealizedPL = m_dblMarketValue - m_dblConstructedValue;
+      m_row.dblMarketValue = m_row.nPositionActive * quote.Bid() * m_dblMultiplier;
+      m_row.dblUnRealizedPL = m_row.dblMarketValue - m_row.dblConstructedValue;
       bProcessed = true;
       break;
     case OrderSide::Sell:
-      m_dblMarketValue = - ( m_nPositionActive * quote.Ask() ) * m_dblMultiplier;
-      m_dblUnRealizedPL = m_dblConstructedValue - m_dblMarketValue;
+      m_row.dblMarketValue = - ( m_row.nPositionActive * quote.Ask() ) * m_dblMultiplier;
+      m_row.dblUnRealizedPL = m_row.dblConstructedValue - m_row.dblMarketValue;
       bProcessed = true;
       break;
   }
@@ -246,7 +148,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_idPosition ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -260,7 +162,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_idPosition ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -275,21 +177,21 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_idPosition ) );
+  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   PlaceOrder( pOrder );
   return pOrder;
 }
 
 void CPosition::PlaceOrder( pOrder_t pOrder ) {
 
-  if ( OrderSide::Unknown != m_eOrderSidePending ) { // ensure new order matches existing orders
-    if ( m_eOrderSidePending != pOrder->GetOrderSide() ) {
+  if ( OrderSide::Unknown != m_row.eOrderSidePending ) { // ensure new order matches existing orders
+    if ( m_row.eOrderSidePending != pOrder->GetOrderSide() ) {
       throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
     }
   }
-  m_eOrderSidePending = pOrder->GetOrderSide();
+  m_row.eOrderSidePending = pOrder->GetOrderSide();
 
-  m_nPositionPending += pOrder->GetQuantity();
+  m_row.nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
   pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
@@ -309,12 +211,12 @@ void CPosition::CancelOrders( void ) {
 void CPosition::ClosePosition( void ) {
   // should outstanding orders be auto cancelled?
   // position is closed with a market order, can try to do limit in the futre, but need active market data
-  switch ( m_eOrderSideActive ) {
+  switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
-      PlaceOrder( OrderType::Market, OrderSide::Sell, m_nPositionActive );
+      PlaceOrder( OrderType::Market, OrderSide::Sell, m_row.nPositionActive );
       break;
     case OrderSide::Sell:
-      PlaceOrder( OrderType::Market, OrderSide::Buy, m_nPositionActive );
+      PlaceOrder( OrderType::Market, OrderSide::Buy, m_row.nPositionActive );
       break;
     case OrderSide::Unknown:
       break;
@@ -322,7 +224,7 @@ void CPosition::ClosePosition( void ) {
 }
 
 void CPosition::HandleCommission( const COrder& order ) {
-  m_dblCommissionPaid += order.GetCommission();
+  m_row.dblCommissionPaid += order.GetCommission();
   OnCommission( this );
 }
 
@@ -341,24 +243,24 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
   //double dblNewAverageCostPerShare = 0;
   double dblAvgConstructedCost = 0;
   double dblRealizedPL = 0;
-  switch ( m_eOrderSideActive ) {
+  switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:  // existing is long
       switch ( exec.GetOrderSide() ) {
         case OrderSide::Buy:  // increase long
-          m_nPositionActive += exec.GetSize();
-          m_dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
+          m_row.nPositionActive += exec.GetSize();
+          m_row.dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Sell:  // decrease long
-          assert( m_nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_dblConstructedValue / ( m_nPositionActive * m_dblMultiplier );
+          assert( m_row.nPositionActive >= exec.GetSize() );
+          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
           dblRealizedPL = exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
-          m_dblRealizedPL += dblRealizedPL;
-          m_nPositionActive -= exec.GetSize();
-          m_dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost;
+          m_row.dblRealizedPL += dblRealizedPL;
+          m_row.nPositionActive -= exec.GetSize();
+          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost;
           //m_dblConstructedValue -= ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier - dblRealizedPL );
-          if ( 0 == m_nPositionActive ) {
-            m_eOrderSideActive = OrderSide::Unknown;
-            m_dblUnRealizedPL = 0.0;
+          if ( 0 == m_row.nPositionActive ) {
+            m_row.eOrderSideActive = OrderSide::Unknown;
+            m_row.dblUnRealizedPL = 0.0;
           }
           break;
       }
@@ -366,34 +268,34 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
     case OrderSide::Sell:  // existing is short
       switch ( exec.GetOrderSide() ) {
         case OrderSide::Sell:  // increase short
-          m_nPositionActive += exec.GetSize();
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
+          m_row.nPositionActive += exec.GetSize();
+          m_row.dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Buy:  // decrease short
-          assert( m_nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_dblConstructedValue / ( m_nPositionActive * m_dblMultiplier );
+          assert( m_row.nPositionActive >= exec.GetSize() );
+          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
           dblRealizedPL = exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
-          m_dblRealizedPL += dblRealizedPL;
-          m_nPositionActive -= exec.GetSize();
-          m_dblConstructedValue += exec.GetSize() * dblAvgConstructedCost;
+          m_row.dblRealizedPL += dblRealizedPL;
+          m_row.nPositionActive -= exec.GetSize();
+          m_row.dblConstructedValue += exec.GetSize() * dblAvgConstructedCost;
           //m_dblConstructedValue += ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier + dblRealizedPL );  // is this correctly calculated?
-          if ( 0 == m_nPositionActive ) {
-            m_eOrderSideActive = OrderSide::Unknown;
-            m_dblUnRealizedPL = 0.0;
+          if ( 0 == m_row.nPositionActive ) {
+            m_row.eOrderSideActive = OrderSide::Unknown;
+            m_row.dblUnRealizedPL = 0.0;
           }
           break;
       }
       break;
     case OrderSide::Unknown:
-      assert( 0 == m_nPositionActive );
-      m_eOrderSideActive = exec.GetOrderSide();
-      m_nPositionActive = exec.GetSize();
-      switch ( m_eOrderSideActive ) {
+      assert( 0 == m_row.nPositionActive );
+      m_row.eOrderSideActive = exec.GetOrderSide();
+      m_row.nPositionActive = exec.GetSize();
+      switch ( m_row.eOrderSideActive ) {
         case OrderSide::Buy:
-          m_dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
+          m_row.dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Sell:
-          m_dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
+          m_row.dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
       }
       break;
@@ -406,8 +308,8 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
       // update position based upon current position and what is executing
       //   decrease position when execution is opposite position
       //   increase position when execution is same as position
-      m_nPositionPending -= exec.GetSize();
-      if ( 0 == m_nPositionPending ) m_eOrderSidePending = OrderSide::Unknown;
+      m_row.nPositionPending -= exec.GetSize();
+      if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
 
       if ( 0 == order.GetQuanRemaining() ) {  // move from open to closed on order filled
         m_ClosedOrders.push_back( *iter );
@@ -428,85 +330,18 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
 }
 
 void CPosition::EmitStatus( std::stringstream& ssStatus ) {
-  ssStatus << "Position " << m_pInstrument->GetInstrumentName() << ": "
-    << "Active " << m_nPositionActive
-    << ", unRPL " << m_dblUnRealizedPL 
-    << ", RPL " << m_dblRealizedPL
-    << ", Cmsn " << m_dblCommissionPaid
-    << ", PL-C " << m_dblRealizedPL - m_dblCommissionPaid
+  ssStatus 
+    << "Position " << m_pInstrument->GetInstrumentName() << ": "
+    << "Active " << m_row.nPositionActive
+    << ", unRPL " << m_row.dblUnRealizedPL 
+    << ", RPL " << m_row.dblRealizedPL
+    << ", Cmsn " << m_row.dblCommissionPaid
+    << ", PL-C " << m_row.dblRealizedPL - m_row.dblCommissionPaid
     << std::endl
     ;
 }
 
 // process execution to convert Pending to Active
-
-void CPosition::CreateDbTable( sqlite3* pDb ) {
-
-  char* pMsg;
-  int rtn;
-
-  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table positions: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-
-  rtn = sqlite3_exec( pDb, 
-    "create index idx_positions_portfolioid on positions( portfolioid );",
-    0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating index idx_positions_portfolioid: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-}
-
-int CPosition::BindDbKey( sqlite3_stmt* pStmt ) {
-  int rtn( 0 );
-  rtn = sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_idPosition );
-  return rtn;
-}
-
-int CPosition::BindDbVariables( sqlite3_stmt* pStmt ) {
-  int rtn( 0 );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":portfolioid" ), m_idPortfolio.c_str(), -1, SQLITE_TRANSIENT );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":name" ), m_sName.c_str(), -1, SQLITE_TRANSIENT );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":notes" ), m_sNotes.c_str(), -1, SQLITE_TRANSIENT );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":executionaccountid" ), m_sidExecutionAccount.c_str(), -1, SQLITE_TRANSIENT );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":dataaccountid" ), m_sidDataAccount.c_str(), -1, SQLITE_TRANSIENT );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":instrumentid" ), m_sInstrumentName.c_str(), -1, SQLITE_TRANSIENT );
-  rtn = sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":ordersidepending" ), m_eOrderSidePending );
-  rtn = sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":ordersideactive" ), m_eOrderSideActive );
-  rtn = sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantitypending" ), m_nPositionPending );
-  rtn = sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantityactive" ), m_nPositionActive );
-  rtn = sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":constructedvalue" ), m_dblConstructedValue );
-  rtn = sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":marketvalue" ), m_dblMarketValue );
-  rtn = sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":plunrealized" ), m_dblUnRealizedPL );
-  rtn = sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":plrealized" ), m_dblRealizedPL );
-  rtn = sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":commissionpaid" ), m_dblCommissionPaid );
-  return rtn;
-}
 
 } // namespace tf
 } // namespace ou

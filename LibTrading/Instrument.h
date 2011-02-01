@@ -22,9 +22,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include <LibCommon/Delegate.h>
-#include <LibSqlite/sqlite3.h>
 
 #include "TradingEnumerations.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CInstrument {
 public:
@@ -148,3 +150,6 @@ private:
   CInstrument( const CInstrument& );  // copy ctor
   CInstrument& operator=( const CInstrument& ); // assignement
 };
+
+} // namespace tf
+} // namespace ou

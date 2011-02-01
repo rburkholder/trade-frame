@@ -15,7 +15,8 @@
 
 #include <string>
 
-#include <LibSqlite/sqlite3.h>
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CExchange
 {
@@ -47,4 +48,7 @@ private:
   static const std::string m_sSqlDelete;
 
 };
+
+} // namespace tf
+} // namespace ou
 

@@ -13,8 +13,6 @@
 
 #include "StdAfx.h"
 
-#include <stdexcept>
-
 #include "AccountOwner.h"
 
 namespace ou { // One Unified

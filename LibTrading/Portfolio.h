@@ -17,8 +17,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibSqlite/sqlite3.h>
-
 #include "AccountOwner.h"
 #include "Position.h"
 
@@ -38,8 +36,44 @@ public:
 
   typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
 
-  typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
   typedef std::string keyPortfolioId_t;
+  typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
+
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "portfolioid", idPorfolio );
+      ou::db::Field( a, "accountownerid", idAccountOwner );
+      ou::db::Field( a, "description", sDescription );
+      ou::db::Field( a, "realizedpl", dblRealizedPL );
+      ou::db::Field( a, "commissionspaid", dblCommissionsPaid );
+
+      ou::db::Key( a, "portfolioid" );
+      ou::db::Constraint( a, "accountownerid", CAccountOwner::m_sTableName, "accountownerid" );
+      // "create index idx_portfolio_accountid on portfolios( accountid );
+    }
+
+    keyPortfolioId_t idPortfolio;
+    keyAccountOwnerId_t idAccountOwner;
+    std::string sDescription;
+    double dblRealizedPL;
+    double dblCommissionsPaid;
+
+    TableRowDef(
+      const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_,
+      const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ),
+        sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
+    TableRowDef( const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_, const std::string& sDescription_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
+        sDescription( sDescription_ ),
+        dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+    TableRowDef( const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
+        dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+  };
+
+  const static std::string m_sTableName;
 
   CPortfolio( // for use in memory only
     const keyPortfolioId_t& sPortfolioId, 
@@ -48,7 +82,6 @@ public:
     const keyPortfolioId_t& sPortfolioId, 
     const keyAccountOwnerId_t& sAccountOwnerId, 
     const std::string& sDescription );
-  CPortfolio( const keyPortfolioId_t& sPortfolioId, sqlite3_stmt* pStmt );
   ~CPortfolio(void);
 
   void AddPosition( const std::string& sName, pPosition_t pPosition );
@@ -57,14 +90,6 @@ public:
   pPosition_t GetPosition( const std::string& sName );
 
   void EmitStats( std::stringstream& ss );
-
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
 
 protected:
   
@@ -78,15 +103,7 @@ private:
 
   bool m_bCanUseDb;
 
-  keyPortfolioId_t m_sPortfolioId;
-  keyAccountOwnerId_t m_sAccountOwnerId;
-  std::string m_sDescription;
-
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
+  TableRowDef m_row;
 
   struct structPL {
     double dblUnRealized;

@@ -38,16 +38,6 @@ void Action_Compose::addField( const std::string& sFieldName ) {
 
 // Action_Assemble_TableDef
 
-// =====
-void Constraint( 
-  Action_Assemble_TableDef& action, 
-  const std::string& sLocalVar, 
-  const std::string& sRemoteTable, 
-  const std::string& sRemoteField ) {
-  action.Constraint( sLocalVar, sRemoteTable, sRemoteField );
-}
-// =====
-
 Action_Assemble_TableDef::Action_Assemble_TableDef( const std::string& sTableName ) 
   : Action_Compose(), m_cntKeys( 0 ), m_sTableName( sTableName )
 {
@@ -77,6 +67,16 @@ void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
     throw std::runtime_error( "Key, can't find field " + sFieldName );
   }
 }
+
+// =====
+void Constraint( 
+  Action_Assemble_TableDef& action, 
+  const std::string& sLocalVar, 
+  const std::string& sRemoteTable, 
+  const std::string& sRemoteField ) {
+  action.Constraint( sLocalVar, sRemoteTable, sRemoteField );
+}
+// =====
 
 // registerConstraint
 void Action_Assemble_TableDef::Constraint( 

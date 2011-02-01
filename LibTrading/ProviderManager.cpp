@@ -15,6 +15,9 @@
 
 #include "ProviderManager.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CProviderManager::CProviderManager(void) {
 }
 
@@ -29,3 +32,6 @@ void CProviderManager::Register( const std::string& sKey, pProvider_t pProvider 
   m_mapProviders.insert( providers_pair_t( sKey, pProvider ) );
 
 }
+
+} // namespace tf
+} // namespace ou

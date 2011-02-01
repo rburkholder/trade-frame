@@ -81,8 +81,8 @@ public:
 //  template<typename T> // located in inheritor
 //  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType ) { };
 
-  void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
   void Key( const std::string& sLocalField );
+  void Constraint( const std::string& sLocalField, const std::string& sRemoteTable, const std::string& sRemoteField );
 
   void ComposeCreateStatement( std::string& sStatement );
 

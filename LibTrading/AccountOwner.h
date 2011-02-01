@@ -29,7 +29,7 @@ public:
 
   struct TableRowDef {
     template<class A>
-    void Fields( A& A ) {
+    void Fields( A& a ) {
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "accountadvisorid", idAccountAdvisor );
       ou::db::Field( a, "firstname", sFirstName );

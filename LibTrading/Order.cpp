@@ -23,6 +23,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+const std::string COrder::m_sTableName = "orders";
+
 const std::string COrder::m_sSqlCreate(     
   "create table orders ( \
     orderid INTEGER PRIMARY KEY, \
@@ -53,41 +55,6 @@ const std::string COrder::m_sSqlCreate(
        \
     );"
  );
-const std::string COrder::m_sSqlSelect( 
-  "SELECT positionid, instrumentid, orderstatus, ordertype, orderside, price1, price2, signalprice, description, \
-    quantityordered, quantityremaning, quantityfilled, averagefillprice, commission,  \
-    datetimecreated, datetimesubmitted, datetimeclosed \
-    from orders where orderid = :id \
-  ;" );
-const std::string COrder::m_sSqlInsert( 
-  "INSERT INTO orders (positionid, instrumentid, orderstatus, ordertype, orderside, price1, price2, description, signalprice, \
-      quantityordered, quantityremaining, quantityfilled, averagefillprice, commission, \
-      datetimecreated, datetimesubmitted, datetimeclosed ) \
-    VALUES (:positionid:, :instrumentid, :orderstatus, :ordertype, :orderside, :price1, :price2, :description, :signalprice, \
-      :quantityordered, :quantityremaining, :quantityfilled, :averagefillprice, :commission, \
-      :datetimecreated, :datetimesubmitted, :datetimeclosed ) \
-  ;" );
-const std::string COrder::m_sSqlUpdate( 
-  "UPDATE orders SET \
-    positionid = :positionid, \
-    instrumentid = :instrumentid, \
-    orderstatus = :orderstatus, \
-    ordertype = :ordertype, \
-    orderside = :orderside, \
-    price1 = :price1, \
-    price2 = :price2, \
-    description = :description, \
-    signalprice = :signalprice, \
-    quantityordered = :quantityordered, \
-    quantityremaining = :quantityremaining, \
-    quantityfilled = :quantityfilled, \
-    averagefillprice = :averagefillprice, \
-    commission = :commission, \
-    datetimesubmitted = :datetimesubmitted, \
-    datetimeclosed = :datetimeclosed \
-  WHERE orderid = :id \
-  ;" );
-const std::string COrder::m_sSqlDelete( "DELETE FROM orders WHERE orderid = :id;" );
 
 COrder::COrder(void) {
 }
@@ -291,80 +258,6 @@ void COrder::SetOrderId( idOrder_t id ) {
   assert( 0 != id );
   assert( m_idOrder == 0 );
   m_idOrder = id;
-}
-
-void COrder::CreateDbTable( sqlite3* pDb ) {
-
-  char* pMsg;
-  int rtn;
-
-  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table orders: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-
-  rtn = sqlite3_exec( pDb, 
-    "create index idx_orders_positionid on orders( positionid );",
-    0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating index idx_orders_positionid: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-}
-
-int COrder::BindDbKey( sqlite3_stmt* pStmt ) {
-  int rtn( 0 );
-  rtn = sqlite3_bind_int64( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_idOrder );
-  return rtn;
-}
-
-int COrder::BindDbVariables( sqlite3_stmt* pStmt ) {
-  // need to split out into two sets, one for full: (insert), one for partial: (update)
-  int rtn( 0 );
-  rtn += sqlite3_bind_int64(
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":positionid" ), m_idPosition );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":instrumentid" ), m_pInstrument->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":description" ), m_sDescription.c_str(), -1, SQLITE_STATIC );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":orderstatus" ), m_eOrderStatus );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":ordertype" ), m_eOrderType );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":orderside" ), m_eOrderSide );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":price1" ), m_dblPrice1 );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":price2" ), m_dblPrice2 );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":signalprice" ), m_dblSignalPrice );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantityordered" ), m_nOrderQuantity );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantityremaining" ), m_nFilled );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":quantityfilled" ), m_nRemaining );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":averagefillprice" ), m_dblAverageFillPrice );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":commission" ), m_dblCommission );
-  // timestamps needed here, try to get into database native format for query capability
-  rtn += sqlite3_bind_blob( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":datetimecreated" ), &m_dtOrderCreated, sizeof( m_dtOrderCreated ), NULL );
-  rtn += sqlite3_bind_blob( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":datetimesubmitted" ), &m_dtOrderSubmitted, sizeof( m_dtOrderSubmitted ), NULL );
-  rtn += sqlite3_bind_blob( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":datetimeclosed" ), &m_dtOrderClosed, sizeof( m_dtOrderClosed ), NULL );
-  return rtn;
 }
 
 } // namespace tf
