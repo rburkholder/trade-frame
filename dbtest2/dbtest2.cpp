@@ -116,6 +116,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
     CFields fields2;
     ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pSelect 
       = session.SQL<ou::db::NoBind>( "select * from test" );
+    // this doesn't work properly with 0 records being returned
     do {
       session.Columns<ou::db::NoBind, CFields>( pSelect, fields2 );
       std::cout << fields2.m_key << ", " << fields2.m_sField << ", " << fields2.m_dblField << ", " << fields2.m_intField << std::endl;

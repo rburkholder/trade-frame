@@ -33,14 +33,14 @@ namespace sqlite {
 
 namespace typeselect {
   template<int size, bool signed_> struct chooser{};  // default is empty
-  template<> struct chooser<1,false> { typedef boost::uint8_t  type; };
-  template<> struct chooser<1,true>  { typedef boost::int8_t   type; };
+  template<> struct chooser<1,false> { typedef boost:: uint8_t type; };
+  template<> struct chooser<1,true>  { typedef boost::  int8_t type; };
   template<> struct chooser<2,false> { typedef boost::uint16_t type; };
-  template<> struct chooser<2,true>  { typedef boost::int16_t  type; };
+  template<> struct chooser<2,true>  { typedef boost:: int16_t type; };
   template<> struct chooser<4,false> { typedef boost::uint32_t type; };
-  template<> struct chooser<4,true>  { typedef boost::int32_t  type; };
+  template<> struct chooser<4,true>  { typedef boost:: int32_t type; };
   template<> struct chooser<8,false> { typedef boost::uint64_t type; };
-  template<> struct chooser<8,true>  { typedef boost::int64_t  type; };
+  template<> struct chooser<8,true>  { typedef boost:: int64_t type; };
 }
 
 class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
