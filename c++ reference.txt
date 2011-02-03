@@ -11,3 +11,11 @@ Catch by reference.
 
 Memory allocation error troubleshooting
 http://msdn.microsoft.com/en-us/library/x98tx3cf.aspx
+
+Conversion Constructors and Subtle Dangers
+When you're designing a library involving C++ classes, be sure that you mark explicit 
+every one-parameter (or one-non-default-parameter) constructor, 
+unless you explicitly want to allow implicit conversion construction. Pretty much every 
+old C++ war-horse knows to use the explicit keyword when 
+defining constructors with one only (non-defaulted) parameter.  Is a subtle vulnerability 
+involving conversion constructors in a particular set of circumstances. 

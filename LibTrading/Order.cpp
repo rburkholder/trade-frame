@@ -25,37 +25,6 @@ namespace tf { // TradeFrame
 
 const std::string COrder::m_sTableName = "orders";
 
-const std::string COrder::m_sSqlCreate(     
-  "create table orders ( \
-    orderid INTEGER PRIMARY KEY, \
-    version SMALLINT DEFAULT 1, \
-    positionid BIGINT NOT NULL, \
-    instrumentid TEXT NOT NULL, \
-    description TEXT NOT NULL, \
-    orderstatus SMALLINT NOT NULL, \
-    ordertype SMALLINT NOT NULL, \
-    orderside SMALLINT NOT NULL, \
-    price1 double NOT NULL, \
-    price2 double NOT NULL, \
-    signalprice double NOT NULL, \
-    quantityordered INT NOT NULL, \
-    quantityremaining INT NOT NULL, \
-    quantityfilled INT NOT NULL, \
-    averagefillprice double NOT NULL, \
-    commission double NOT NULL, \
-    datetimecreated BLOB, \
-    datetimesubmitted BLOB, \
-    datetimeclosed BLOB, \
-    CONSTRAINT fk_orders_positionid \
-      FOREIGN KEY(positionid) REFERENCES positions(positionid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-    CONSTRAINT fk_orders_instrumentid, \
-      FOREIGN KEY(instrumentid) REFERENCES instruments(instrumentid) \
-        ON DELETE RESTRICT ON UPDATE CASCADE \
-       \
-    );"
- );
-
 COrder::COrder(void) {
 }
 

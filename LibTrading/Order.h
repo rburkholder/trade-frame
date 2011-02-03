@@ -51,8 +51,50 @@ public:
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
+      ou::db::Field( a, "orderid", idOrder );
+      ou::db::Field( a, "positionid", idPosition );
+      ou::db::Field( a, "instrumentid", idInstrument );
+      ou::db::Field( a, "description", sDescription );
+      ou::db::Field( a, "orderstatus", eOrderStatus );
+      ou::db::Field( a, "ordertype", eOrderType );
+      ou::db::Field( a, "orderside", eOrderSide );
+      ou::db::Field( a, "price1", dblPrice1 );
+      ou::db::Field( a, "price2", dblPrice2 );
+      ou::db::Field( a, "signalprice", dblSignalPrice );
+      ou::db::Field( a, "quantityordered", nOrderQuantity );
+      ou::db::Field( a, "quantityremaining", nQuantityRemaining );
+      ou::db::Field( a, "quantityfilled", nQuantityFilled );
+      ou::db::Field( a, "averagefillprice", dblAverageFillPrice );
+      ou::db::Field( a, "commission", dblCommission );
+      ou::db::Field( a, "datetimecreated", dtOrderCreated );
+      ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
+      ou::db::Field( a, "datetimeclosed", dtOrderClosed );
+
+      ou::db::Key( a, "orderid" );
+      ou::db::Constraint( a, "positionid", "positions", "positionid" );
+      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
     }
     //"create index idx_orders_positionid on orders( positionid );",
+
+    idOrder_t idOrder;
+    idPosition_t idPosition;
+    idInstrument_t idInstrument;
+    std::string sDescription;
+    OrderStatus::enumOrderStatus eOrderStatus;
+    OrderType::enumOrderType eOrderType;
+    OrderSide::enumOrderSide eOrderSide;
+    double dblPrice1; // for limit
+    double dblPrice2; // for stop
+    double dblSignalPrice;  // mark at which algorithm requested order
+    unsigned long nOrderQuantity;
+    unsigned long nQuantityRemaining;
+    unsigned long nQuantityFilled;
+    double dblAverageFillPrice;  // excludes commission
+    double dblCommission;
+    ptime dtOrderCreated;
+    ptime dtOrderSubmitted;
+    ptime dtOrderClosed;
+
   };
 
   const static std::string m_sTableName;
@@ -84,7 +126,6 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder( idOrder_t idOrder, sqlite3_stmt* pStmt );
   ~COrder(void);
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
@@ -104,32 +145,32 @@ public:
     }
     return m_pInstrument; 
   };
-  const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_eOrderSide ]; };
-  unsigned long GetQuantity( void ) const { return m_nOrderQuantity; };
-  OrderType::enumOrderType GetOrderType( void ) const { return m_eOrderType; };
-  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_eOrderSide; };
-  double GetPrice1( void ) const { return m_dblPrice1; };  // need to validate this on creation
-  double GetPrice2( void ) const { return m_dblPrice2; };
-  double GetAverageFillPrice( void ) const { return m_dblAverageFillPrice; };
-  idOrder_t GetOrderId( void ) const { assert( 0 != m_idOrder ); return m_idOrder; };
+  const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_row.eOrderSide ]; };
+  unsigned long GetQuantity( void ) const { return m_row.nOrderQuantity; };
+  OrderType::enumOrderType GetOrderType( void ) const { return m_row.eOrderType; };
+  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_row.eOrderSide; };
+  double GetPrice1( void ) const { return m_row.dblPrice1; };  // need to validate this on creation
+  double GetPrice2( void ) const { return m_row.dblPrice2; };
+  double GetAverageFillPrice( void ) const { return m_row.dblAverageFillPrice; };
+  idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
   unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
   void SetCommission( double dblCommission );
-  double GetCommission( void ) const{ return m_dblCommission; };
+  double GetCommission( void ) const{ return m_row.dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
-  unsigned long GetQuanRemaining( void ) const { return m_nRemaining; };
-  unsigned long GetQuanOrdered( void ) const { return m_nOrderQuantity; };
-  unsigned long GetQuanFilled( void ) const { return m_nFilled; };
-  void SetSignalPrice( double dblSignalPrice ) { m_dblSignalPrice = dblSignalPrice; };
-  double GetSignalPrice( void ) const { return m_dblSignalPrice; };
+  unsigned long GetQuanRemaining( void ) const { return m_row.nQuantityRemaining; };
+  unsigned long GetQuanOrdered( void ) const { return m_row.nOrderQuantity; };
+  unsigned long GetQuanFilled( void ) const { return m_row.nQuantityFilled; };
+  void SetSignalPrice( double dblSignalPrice ) { m_row.dblSignalPrice = dblSignalPrice; };
+  double GetSignalPrice( void ) const { return m_row.dblSignalPrice; };
   const ptime &GetDateTimeOrderSubmitted( void ) const { 
-    assert( not_a_date_time != m_dtOrderSubmitted ); 
-    return m_dtOrderSubmitted; 
+    assert( not_a_date_time != m_row.dtOrderSubmitted ); // is this a valid test?
+    return m_row.dtOrderSubmitted; 
   };
   const ptime &GetDateTimeOrderFilled( void ) const { 
-    assert( not_a_date_time != m_dtOrderClosed ); 
-    return m_dtOrderClosed; 
+    assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
+    return m_row.dtOrderClosed; 
   };
 
   ou::Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
@@ -137,55 +178,24 @@ public:
   ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const COrder&> OnCommission;
 
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
-
 protected:
 
   CInstrument::pInstrument_t m_pInstrument;
   idInstrument_t m_idInstrument;  // used temporarily in order to get instrument_t in place
-  
-  OrderStatus::enumOrderStatus m_eOrderStatus;
-  OrderType::enumOrderType m_eOrderType;
-  OrderSide::enumOrderSide m_eOrderSide;
-
-  double m_dblPrice1;  // for limit
-  double m_dblPrice2;  // for stop
-  double m_dblSignalPrice;  // mark at which algorithm requested order
-
-  ptime m_dtOrderCreated;
-  ptime m_dtOrderSubmitted;
-  ptime m_dtOrderClosed;
 
   bool m_bOutsideRTH;
 
   unsigned long m_nNextExecutionId;
 
   // statistics and status
-  unsigned long m_nOrderQuantity;
-  unsigned long m_nFilled;
-  unsigned long m_nRemaining;
-  double m_dblCommission;
   double m_dblPriceXQuantity; // used for calculating average price
-  double m_dblAverageFillPrice;  // excludes commission
 
   void ConstructOrder( void );
   void SetOrderId( idOrder_t );  // used by OrderManager
 
 private:
 
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
-
-  std::string m_sDescription;
-
-  idPosition_t m_idPosition;
-  idOrder_t m_idOrder;
+  TableRowDef m_row;
 
   COrder(void);  // no default constructor
 
