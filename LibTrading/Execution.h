@@ -17,6 +17,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include <boost/cstdint.hpp>
 
 #include "TradingEnumerations.h"
 
@@ -26,55 +27,66 @@ namespace tf { // TradeFrame
 class CExecution {
 public:
 
-  typedef unsigned long ExecutionId_t;  // used for database updates, need to persist like orderid
+  typedef boost::int64_t idExecution_t;  // used for database updates, need to persist like orderid
+  typedef boost::int64_t idOrder_t;
   typedef boost::shared_ptr<CExecution> pExecution_t;
   typedef const pExecution_t& pExecution_ref;
 
-  CExecution( sqlite3_int64 nExecutionId, sqlite3_stmt* pStmt );
-  CExecution( // in memory useage
-    double dblPrice, unsigned long nSize, OrderSide::enumOrderSide eOrderSide,
-    const std::string& sExchange, const std::string& sExecutionId );
-  CExecution( // for when record will be written to db
-    sqlite3_int64 nOrderId,
-    double dblPrice, unsigned long nSize, OrderSide::enumOrderSide eOrderSide,
-    const std::string& sExchange, const std::string& sExecutionId );
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "executionid", idExecution );
+      ou::db::Field( a, "orderid", idOrder );
+      ou::db::Field( a, "quantity", nQuantity );
+      ou::db::Field( a, "price", dblPrice );
+      ou::db::Field( a, "orderside", eOrderSide );
+      ou::db::Field( a, "executiontimestamp", dtExecutionTimeStamp );
+      ou::db::Field( a, "exchange", sExchange );
+      ou::db::Field( a, "exchangeexecutionid", sExchangeExecutionId );
+
+      ou::db::Key( a, "executionid" );
+      ou::db::Constraint( a, "orderid", "orders", "orderid" );
+    }
+    //  "create index if not exists idx_executions_orderid on executions( orderid );",
+
+  idExecution_t idExecution;
+  idOrder_t idOrder;
+  unsigned long nQuantity;  // quantity executed
+  double dblPrice;  // execution price
+  OrderSide::enumOrderSide eOrderSide;
+  ptime dtExecutionTimeStamp;
+  std::string sExchange;
+  std::string sExchangeExecutionId;  // unique execution id supplied by provider
+
+  TableRowDef( idExecution_t idExecution_, idOrder_t idOrder_, 
+    unsigned long nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+    std::string sExchange_, std::string sExchangeExecutionId_ )
+    : idExecution( idExecution_ ), idOrder( idOrder_ ), nQuantity( nQuantity_ ), 
+      dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
+      sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+  };
+
+  const static std::string m_sTableName;
+
+  CExecution( const TableRowDef& row ): m_row( row ) {};
+  CExecution( 
+    idExecution_t idExecution, idOrder_t nOrderId,
+    double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
+    const std::string& sExchange, const std::string& sExchangeExecutionId );
   ~CExecution(void);
 
-  double GetPrice( void ) const { return m_dblPrice; };
-  unsigned long GetSize( void ) const { return m_nSize; };
-  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_eOrderSide; };
-  const std::string& GetExchange( void ) const { return m_sExchange; };
-  const std::string& GetExchangeExecutionId( void ) const { return m_sExchangeExecutionId; };
-  ptime GetTimeStamp( void ) const { return m_dtExecutionTimeStamp; };
-
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
+  double GetPrice( void ) const { return m_row.dblPrice; };
+  unsigned long GetSize( void ) const { return m_row.nQuantity; };
+  OrderSide::enumOrderSide GetOrderSide( void ) const { return m_row.eOrderSide; };
+  const std::string& GetExchange( void ) const { return m_row.sExchange; };
+  const std::string& GetExchangeExecutionId( void ) const { return m_row.sExchangeExecutionId; };
+  ptime GetTimeStamp( void ) const { return m_row.dtExecutionTimeStamp; };
 
 protected:
 
-  sqlite3_int64 m_nExecutionId;
-  sqlite3_int64 m_nOrderId;
-  double m_dblPrice;  // execution price
-  unsigned long m_nSize;  // quantity executed
-  OrderSide::enumOrderSide m_eOrderSide;
-  ptime m_dtExecutionTimeStamp;
-  std::string m_sExchange;
-  std::string m_sExchangeExecutionId;  // unique execution id supplied by provider
-
 private:
 
-  bool m_bCanUseDb;
-
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
+  TableRowDef m_row;
 
 };
 

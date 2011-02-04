@@ -11,34 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#pragma once
 
-#include <stdexcept>
+#include <string>
 
-#include "LibCommon\TimeSource.h"
-
-#include "Execution.h"
+#include <boost/cstdint.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CExecution::m_sTableName = "executions";
-
-CExecution::CExecution( 
-  idExecution_t idExecution, idOrder_t idOrder,
-  double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
-  const std::string& sExchange, const std::string& sExchangeExecutionId )
-: 
-  m_row( idExecution, idOrder, nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )
-{
-  assert( 0 < dblPrice );
-  assert( 0 < nQuantity );
-  m_row.dtExecutionTimeStamp = ou::CTimeSource::Instance().Internal();
-}
-
-CExecution::~CExecution(void) {
-}
-
 } // namespace tf
 } // namespace ou
-

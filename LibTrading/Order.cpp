@@ -28,7 +28,7 @@ const std::string COrder::m_sTableName = "orders";
 COrder::COrder(void) {
 }
 
-COrder::COrder( 
+COrder::COrder( // market order
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -37,23 +37,16 @@ COrder::COrder(
   ptime dtOrderSubmitted
   ) 
 :
-  m_idPosition( idPosition ),
-  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-  m_dtOrderSubmitted( dtOrderSubmitted ),
-  m_eOrderStatus( OrderStatus::Created ),
-  m_nNextExecutionId ( 0 ),
-  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-  m_dblPrice1( 0 ), m_dblPrice2( 0 ), 
+  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted ),
+  m_pInstrument( instrument ),
   m_bOutsideRTH( false ),
-  m_dblSignalPrice( 0 ),
-  m_idOrder( 0 )
+  m_dblPriceXQuantity( 0 ), 
+  m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
-COrder::COrder( 
+COrder::COrder( // limit or stop
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -63,23 +56,16 @@ COrder::COrder(
   ptime dtOrderSubmitted
   ) 
 :
-  m_idPosition( idPosition ),
-  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-  m_dtOrderSubmitted( dtOrderSubmitted ), 
-  m_eOrderStatus( OrderStatus::Created ),
-  m_nNextExecutionId ( 0 ),
-  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-  m_dblPrice1( dblPrice1 ), m_dblPrice2( 0 ), 
+  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted ),
+  m_pInstrument( instrument ),
   m_bOutsideRTH( false ),
-  m_dblSignalPrice( 0 ),
-  m_idOrder( 0 )
+  m_dblPriceXQuantity( 0 ),
+  m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
-COrder::COrder( 
+COrder::COrder( // limit and stop
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -89,43 +75,21 @@ COrder::COrder(
   ptime dtOrderSubmitted
   ) 
 :
-  m_idPosition( idPosition ),
-  m_pInstrument( instrument ), m_eOrderType( eOrderType ),
-  m_eOrderSide( eOrderSide ), m_nOrderQuantity( nOrderQuantity ),
-  m_dtOrderSubmitted( dtOrderSubmitted ), 
-  m_eOrderStatus( OrderStatus::Created ),
-  m_nNextExecutionId ( 0 ),
-  m_dblCommission( 0 ), m_dblPriceXQuantity( 0 ), m_dblAverageFillPrice( 0 ),
-  m_nFilled( 0 ), m_nRemaining( nOrderQuantity ),
-  m_dblPrice1( dblPrice1 ), m_dblPrice2( dblPrice2 ), 
+  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted ),
+  m_pInstrument( instrument ), 
   m_bOutsideRTH( false ),
-  m_dblSignalPrice( 0 ),
-  m_idOrder( 0 )
+  m_dblPriceXQuantity( 0 ), 
+  m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
 }
 
-COrder::COrder( idOrder_t idOrder, sqlite3_stmt* pStmt ) 
-: m_idOrder( idOrder ),
+COrder::COrder( const TableRowDef& row  ) 
+: m_row( row ),
+// need something for the pInstrument construction
   m_bOutsideRTH( false ),
-  m_nNextExecutionId ( 0 ),
-  m_idPosition( sqlite3_column_int64( pStmt, 0 ) ),
-  m_idInstrument( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) ),
-  m_eOrderStatus( static_cast<OrderStatus::enumOrderStatus>(sqlite3_column_int( pStmt, 2 ) ) ),
-  m_eOrderType( static_cast<OrderType::enumOrderType>(sqlite3_column_int( pStmt, 3 ) ) ),
-  m_eOrderSide( static_cast<OrderSide::enumOrderSide>(sqlite3_column_int( pStmt, 4 ) ) ),
-  m_dblPrice1( sqlite3_column_double( pStmt, 5 ) ),
-  m_dblPrice2( sqlite3_column_double( pStmt, 6 ) ),
-  m_dblSignalPrice( sqlite3_column_double( pStmt, 7 ) ),
-  m_sDescription( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 8 ) ) ),
-  m_nOrderQuantity( sqlite3_column_int( pStmt, 9 ) ),
-  m_nRemaining( sqlite3_column_int( pStmt, 10 ) ),
-  m_nFilled( sqlite3_column_int( pStmt, 11 ) ),
-  m_dblAverageFillPrice( sqlite3_column_double( pStmt, 12 ) ),
-  m_dblCommission( sqlite3_column_double( pStmt, 13 ) ),
-  m_dtOrderCreated( *static_cast<const ptime*>( sqlite3_column_blob( pStmt, 14 ) ) ),
-  m_dtOrderSubmitted( *static_cast<const ptime*>( sqlite3_column_blob( pStmt, 15 ) ) ),
-  m_dtOrderClosed( *static_cast<const ptime*>( sqlite3_column_blob( pStmt, 16 ) ) )
+  m_dblPriceXQuantity( 0 ), 
+  m_nNextExecutionId ( 0 )
 {
 }
 
@@ -134,9 +98,11 @@ COrder::~COrder(void) {
 
 void COrder::ConstructOrder() {
 //  try {
-  m_dtOrderCreated = ou::CTimeSource::Instance().Internal();
+
+  // need to do something with idInstrument, into and out of the database
+
+  m_row.dtOrderCreated = ou::CTimeSource::Instance().Internal();
   assert( NULL != m_pInstrument.get() );
-  //m_dtOrderSubmitted = not_a_date_time;  // already set as such
 //  m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
 //  catch (...) {
@@ -146,72 +112,72 @@ void COrder::ConstructOrder() {
 }
 
 void COrder::SetSendingToProvider() {
-  assert( OrderStatus::Created == m_eOrderStatus );
-  m_eOrderStatus = OrderStatus::SendingToProvider;
-  m_dtOrderSubmitted = ou::CTimeSource::Instance().Internal();
+  assert( OrderStatus::Created == m_row.eOrderStatus );
+  m_row.eOrderStatus = OrderStatus::SendingToProvider;
+  m_row.dtOrderSubmitted = ou::CTimeSource::Instance().Internal();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
   // need to worry about fill after cancel
-  assert( exec.GetOrderSide() == m_eOrderSide );
+  assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
-  if ( 0 == m_nRemaining ) {
+  if ( 0 == m_row.nQuantityRemaining ) {
     // yes this has happened, 2008/07/09 vmw
-    std::cout << "Order " << m_idOrder << " overfilled with +" << exec.GetSize() << std::endl;
-    m_eOrderStatus = OrderStatus::OverFilled;
+    std::cout << "Order " << m_row.idOrder << " overfilled with +" << exec.GetSize() << std::endl;
+    m_row.eOrderStatus = OrderStatus::OverFilled;
     bOverDone = true;
   }
   else {
-    m_nRemaining -= exec.GetSize();
+    m_row.nQuantityRemaining -= exec.GetSize();
   }
-  m_nFilled += exec.GetSize();
-  if ( m_nFilled > m_nOrderQuantity ) {
-    std:: cout << "Order " << m_idOrder << " overfilled with +" << exec.GetSize() << std::endl;
+  m_row.nQuantityFilled += exec.GetSize();
+  if ( m_row.nQuantityFilled > m_row.nOrderQuantity ) {
+    std:: cout << "Order " << m_row.idOrder << " overfilled with +" << exec.GetSize() << std::endl;
     bOverDone = true;
   }
   if ( !bOverDone ) {
     m_dblPriceXQuantity += exec.GetPrice() * exec.GetSize();
-    m_dblAverageFillPrice = m_dblPriceXQuantity / m_nFilled;
-    if ( 0 == m_nRemaining ) {
-      m_eOrderStatus = OrderStatus::Filled;
-      m_dtOrderClosed = ou::CTimeSource::Instance().Internal();
+    m_row.dblAverageFillPrice = m_dblPriceXQuantity / m_row.nQuantityFilled;
+    if ( 0 == m_row.nQuantityRemaining ) {
+      m_row.eOrderStatus = OrderStatus::Filled;
+      m_row.dtOrderClosed = ou::CTimeSource::Instance().Internal();
       OnOrderFilled( *this );
     }
     else {
-      switch ( m_eOrderStatus ) {
+      switch ( m_row.eOrderStatus ) {
       case OrderStatus::SendingToProvider:
       case OrderStatus::Submitted:
       case OrderStatus::Filling:
       case OrderStatus::PreSubmission:
-        m_eOrderStatus = OrderStatus::Filling;
+        m_row.eOrderStatus = OrderStatus::Filling;
         break;
       case OrderStatus::Cancelled:
       case OrderStatus::CancelSubmitted:
       case OrderStatus::FillingDuringCancel:
       case OrderStatus::CancelledWithPartialFill:
-        m_eOrderStatus = OrderStatus::FillingDuringCancel;
+        m_row.eOrderStatus = OrderStatus::FillingDuringCancel;
         break;
       case OrderStatus::OverFilled:
         break;
       default:
-        std::cout << "COrder::ReportExecution " << static_cast<char>( m_eOrderStatus ) << std::endl;
+        std::cout << "COrder::ReportExecution " << static_cast<char>( m_row.eOrderStatus ) << std::endl;
         break;
       }
       OnPartialFill( *this );
     }
   }
   OnExecution( std::pair<const COrder&, const CExecution&>( *this, exec ) );
-  return m_eOrderStatus;
+  return m_row.eOrderStatus;
 }
 
 void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
   switch( eError ) {
     case OrderErrors::Cancelled:
-      m_eOrderStatus = OrderStatus::Cancelled;
+      m_row.eOrderStatus = OrderStatus::Cancelled;
       break;
     case OrderErrors::Rejected:
     case OrderErrors::InstrumentNotFound:
-      m_eOrderStatus = OrderStatus::Rejected;
+      m_row.eOrderStatus = OrderStatus::Rejected;
       break;
     case OrderErrors::NotCancellable:
       break;
@@ -219,14 +185,14 @@ void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
 }
 
 void COrder::SetCommission( double dblCommission ) { 
-  m_dblCommission = dblCommission; 
+  m_row.dblCommission = dblCommission; 
   OnCommission( *this );
 }
 
 void COrder::SetOrderId( idOrder_t id ) {
   assert( 0 != id );
-  assert( m_idOrder == 0 );
-  m_idOrder = id;
+  assert( m_row.idOrder == 0 );
+  m_row.idOrder = id;
 }
 
 } // namespace tf

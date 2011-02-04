@@ -95,6 +95,50 @@ public:
     ptime dtOrderSubmitted;
     ptime dtOrderClosed;
 
+    TableRowDef( void ) // default constructor
+      : idOrder( 0 ), idPosition( 0 ), 
+        eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ), 
+        dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ), 
+        nOrderQuantity( 0 ), nQuantityRemaining( 0 ), nQuantityFilled( 0 ),
+        dblAverageFillPrice( 0.0 ), dblCommission( 0.0 ) {};
+    TableRowDef( // market order
+      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      unsigned long nOrderQuantity_, ptime dtOrderSubmitted_ )
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+        eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
+        dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
+    TableRowDef( // limit or stop
+      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      unsigned long nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+        eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
+        dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
+    TableRowDef( // limit and stop
+      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      unsigned long nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+        eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( 0.0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
+        dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
+    TableRowDef( // complete row provided
+      idOrder_t idOrder_, idPosition_t idPosition_, idInstrument_t idInstrument_, std::string sDescription_, 
+      OrderStatus::enumOrderStatus eOrderStatus_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_, 
+      double dblPrice1_, double dblPrice2_, double dblSignalPrice_,
+      unsigned long nOrderQuantity_, unsigned long nQuantityRemaining_, unsigned long nQuantityFilled_, 
+      double dblAverageFillPrice_, double dblCommission_, 
+      ptime dtOrderCreated_, ptime dtOrderSubmitted_, ptime dtOrderClosed_ )
+      : idOrder( idOrder_ ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), sDescription( sDescription_ ),
+        eOrderStatus( eOrderStatus_ ), eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ),
+        dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( dblSignalPrice_ ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ),
+        dblAverageFillPrice( dblAverageFillPrice_ ), dblCommission( dblCommission_ ),
+        dtOrderCreated( dtOrderCreated_ ), dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( dtOrderClosed_ ) {};
+
   };
 
   const static std::string m_sTableName;
@@ -126,6 +170,7 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
+  COrder( const TableRowDef& row );
   ~COrder(void);
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
@@ -185,7 +230,7 @@ protected:
 
   bool m_bOutsideRTH;
 
-  unsigned long m_nNextExecutionId;
+  unsigned long m_nNextExecutionId;  // when is this set?
 
   // statistics and status
   double m_dblPriceXQuantity; // used for calculating average price
