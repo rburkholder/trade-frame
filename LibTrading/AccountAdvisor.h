@@ -17,16 +17,18 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "KeyTypes.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class CAccountAdvisor
 {
-  friend class CAccountManager;
+//  friend class CAccountManager;
 
 public:
 
-  typedef std::string keyAccountAdvisorId_t;
+  typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;
   typedef boost::shared_ptr<CAccountAdvisor> pAccountAdvisor_t;
   typedef pAccountAdvisor_t sharedptr_t;
 
@@ -40,24 +42,24 @@ public:
       ou::db::Key( a, "accountadvisorid" );
     }
 
-    keyAccountAdvisorId_t idAccountAdvisor;
+    idAccountAdvisor_t idAccountAdvisor;
     std::string sName;
     std::string sCompanyName;
 
     TableRowDef( 
-      const keyAccountAdvisorId_t& idAdvisor_, const std::string& sName_, const std::string& sCompanyName_ ) 
+      const idAccountAdvisor_t& idAdvisor_, const std::string& sName_, const std::string& sCompanyName_ ) 
       : idAccountAdvisor( idAdvisor_ ), sName( sName_ ), sCompanyName( sCompanyName_ ) {};
   };
 
   const static std::string m_sTableName;
 
   CAccountAdvisor( 
-    const keyAccountAdvisorId_t& sAdvisorId, 
+    const idAccountAdvisor_t& sAdvisorId, 
     const std::string& sAdvisorName, const std::string& sCompanyName );
   CAccountAdvisor( const TableRowDef& row );
   ~CAccountAdvisor(void);
 
-  const keyAccountAdvisorId_t& GetId( void ) const { 
+  const idAccountAdvisor_t& GetId( void ) const { 
     return m_row.idAccountAdvisor; 
   }
 

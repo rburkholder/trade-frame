@@ -17,14 +17,15 @@
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/cstdint.hpp>
 
 #include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
-#include "Instrument.h"
-#include "Order.h"
+#include "KeyTypes.h"
+
 #include "ProviderInterface.h"
+#include "Order.h"
+#include "Instrument.h"
 
 // Multiple position records grouped together would be a multi-legged instrument, aka Combo
 //   -- not sure how to construct this yet
@@ -34,6 +35,8 @@
 // check that orders for both sell side and buy side are not opened simultaneously
 // a position is provider dependent, ie, only one provider per position
 // Create Delegates so trade and market data updates propogate to combo and portfolio
+
+// todo:  there is nothing for setting a portfolio id
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -54,7 +57,8 @@ public:
   typedef std::pair<const CPosition*, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
-  typedef boost::int64_t idPosition_t;
+  typedef keytypes::idPosition_t idPosition_t;
+  typedef keytypes::idPortfolio_t idPortfolio_t;
 
   struct TableRowDef {
     template<class A>
@@ -85,7 +89,7 @@ public:
     }
 
     idPosition_t idPosition;
-    std::string idPortfolio;
+    idPortfolio_t idPortfolio;
     std::string sName;
     std::string sNotes;
     std::string idExecutionAccount;

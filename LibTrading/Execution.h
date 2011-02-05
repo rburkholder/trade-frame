@@ -17,9 +17,9 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-#include <boost/cstdint.hpp>
 
 #include "TradingEnumerations.h"
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -27,8 +27,8 @@ namespace tf { // TradeFrame
 class CExecution {
 public:
 
-  typedef boost::int64_t idExecution_t;  // used for database updates, need to persist like orderid
-  typedef boost::int64_t idOrder_t;
+  typedef keytypes::idExecution_t idExecution_t;  // used for database updates, need to persist like orderid
+  typedef keytypes::idOrder_t idOrder_t;
   typedef boost::shared_ptr<CExecution> pExecution_t;
   typedef const pExecution_t& pExecution_ref;
 

@@ -19,6 +19,22 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace keytypes { // KeyTypes
 
+typedef std::string idAccountAdvisor_t;
+typedef std::string idAccountOwner_t;
+typedef std::string idAccount_t;
+typedef std::string idPortfolio_t;
+typedef boost::int64_t idPosition_t;
+typedef boost::int64_t idOrder_t;
+typedef boost::int64_t idExecution_t;
+typedef std::string idInstrument_t;
+typedef std::string idExchange_t;
+
+typedef unsigned short idProvider_t;  // used in HDF5Attribute.h
+enum eidProvider_t: idProvider_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
+
+
+} // namespace keytypes
 } // namespace tf
 } // namespace ou

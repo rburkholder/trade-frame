@@ -32,14 +32,14 @@ const std::string m_sSqlInsert( "INSERT INTO exchanges (exchangeid, name, countr
 const std::string m_sSqlUpdate( "UPDATE exchanges SET name = :name, coutnryid = :countryid WHERE exchangeid = :id;" );
 const std::string m_sSqlDelete( "DELETE FROM exchanges WHERE exchangeid = :id;" );
 
-CExchange::CExchange( const std::string& sExchangeId, const std::string& sName, const std::string& sCountryId )
+CExchange::CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId )
 : m_sExchangeId( sExchangeId ), 
   m_sExchangeName( sName ),
   m_sCountryId( sCountryId )
 {
 }
 
-CExchange::CExchange( const std::string& sExchangeId, sqlite3_stmt* pStmt )
+CExchange::CExchange( const idExchange_t& sExchangeId, sqlite3_stmt* pStmt )
 : m_sExchangeId( sExchangeId ), 
   m_sExchangeName( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 0 ) ) ),
   m_sCountryId( reinterpret_cast<const char*>( sqlite3_column_text( pStmt, 1 ) ) )

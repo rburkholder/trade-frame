@@ -17,7 +17,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "AccountOwner.h"
+#include "KeyTypes.h"
 #include "Position.h"
 
 namespace ou { // One Unified
@@ -36,8 +36,8 @@ public:
 
   typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
 
-  typedef std::string keyPortfolioId_t;
-  typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
+  typedef keytypes::idPortfolio_t idPortfolio_t;
+  typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
   struct TableRowDef {
     template<class A>
@@ -53,22 +53,22 @@ public:
       // "create index idx_portfolio_accountid on portfolios( accountid );
     }
 
-    keyPortfolioId_t idPortfolio;
-    keyAccountOwnerId_t idAccountOwner;
+    idPortfolio_t idPortfolio;
+    idAccountOwner_t idAccountOwner;
     std::string sDescription;
     double dblRealizedPL;
     double dblCommissionsPaid;
 
     TableRowDef(
-      const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_,
+      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
       : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ),
         sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
-    TableRowDef( const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_, const std::string& sDescription_ )
+    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const std::string& sDescription_ )
       : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
         sDescription( sDescription_ ),
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
-    TableRowDef( const keyPortfolioId_t& idPortfolio_, const keyAccountOwnerId_t& idAccountOwner_ )
+    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_ )
       : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
   };
@@ -76,11 +76,11 @@ public:
   const static std::string m_sTableName;
 
   CPortfolio( // for use in memory only
-    const keyPortfolioId_t& sPortfolioId, 
+    const idPortfolio_t& idPortfolio, 
     const std::string& sDescription = "" );
   CPortfolio( // can be stored to disk
-    const keyPortfolioId_t& sPortfolioId, 
-    const keyAccountOwnerId_t& sAccountOwnerId, 
+    const idPortfolio_t& idPortfolio, 
+    const idAccountOwner_t& idAccountOwner, 
     const std::string& sDescription );
   ~CPortfolio(void);
 

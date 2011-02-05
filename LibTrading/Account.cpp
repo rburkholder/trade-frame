@@ -21,8 +21,8 @@ namespace tf { // TradeFrame
 const std::string CAccount::m_sTableName = "accounts";
 
 CAccount::CAccount(
-    const keyAccountId_t& sAccountId,
-    const keyAccountOwnerId_t& sAccountOwnerId,
+    const idAccount_t& idAccount,
+    const idAccountOwner_t& idAccountOwner,
     const std::string& sAccountName,
     const std::string& sProviderName,
     const std::string& sBrokerName,
@@ -30,7 +30,7 @@ CAccount::CAccount(
     const std::string& sLogin, 
     const std::string& sPassword
     ) 
-: m_row( sAccountId, sAccountOwnerId, sAccountName,
+: m_row( idAccount, idAccountOwner, sAccountName,
   sProviderName, sBrokerName, sBrokerAccountId, sLogin, sPassword )
 {
 }

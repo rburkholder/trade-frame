@@ -21,56 +21,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CInstrument::m_sSqlCreate( 
-  "create table instruments ( \
-   instrumentid TEXT CONSTRAINT pk_instruments PRIMARY KEY, \
-   version SMALLINT DEFAULT 1, \
-   description TEXT default '', \
-   exchangeid TEXT NOT NULL, \
-   type SMALLINT NOT NULL, \
-   currency SMALLINT NOT NULL, \
-   countercurrency SMALLINT NOT NULL, \
-   optionside SMALLINT NOT NULL, \
-   underlying TEXT default '', \
-   year SMALLINT NOT NULL, \
-   month SMALLINT NOT NULL, \
-   day SMALLINT NOT NULL, \
-   strike DOUBLE NOT NULL, \
-   contract INTEGER NOT NULL, \
-   multiplier UNSIGNED INTEGER NOT NULL, \
-   CONSTRAINT fk_instruments_exchangeid \
-     FOREIGN KEY(exchangeid) REFERENCES exchanges(exchangeid) \
-     ON DELETE RESTRICT ON UPDATE CASCADE, \
-   CONSTRAINT fk_instruments_underlying \
-     FOREIGN KEY(underlying) REFERENCES instruments(instrumentid) \
-     ON DELETE RESTRICT ON UPDATE CASCADE \
-  ;" );   
-const std::string CInstrument::m_sSqlSelect( 
-  "SELECT description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier \
-     from instruments where instrumentid = :id \
-  ;" );
-const std::string CInstrument::m_sSqlInsert( 
-  "INSERT INTO instruments (description, exchangeid, type, currency, countercurrency, optionside, underlying, year, month, day, strike, contract, multiplier ) \
-    VALUES (:description, :exchangeid, :type, :currency, :countercurrency, :optionside, :underlying, :year, :month, :day, :strike, :contract, :multiplier) \
-  ;" );
-const std::string CInstrument::m_sSqlUpdate( 
-  "UPDATE instruments SET \
-    description = :description, \
-    exchangeid = :exchangeid, \
-    type = :type, \
-    currency = :currency, \
-    countercurrency = :countercurrency, \
-    optionside = :optionside, \
-    underlying = :underlying, \
-    year = :year, \
-    month = :month, \
-    day = :day, \
-    strike = :strike, \
-    contract = :contract, \
-    multiplier = :multiplier \
-  WHERE instrumentid = :id \
-  ;" );
-const std::string CInstrument::m_sSqlDelete( "DELETE FROM instruments WHERE instrumentid = :id;" );
+const std::string CInstrument::m_sTableName = "instruments";
+
+/*
+  if ( NULL != m_pUnderlying.get() ) {
+    rtn += sqlite3_bind_text(  
+      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
+  }
+  else {
+    rtn += sqlite3_bind_text(   
+      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), "", -1, SQLITE_STATIC );
+  }
+*/
 
 // equity / generic creation
 CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &sExchangeName,
@@ -268,7 +230,7 @@ CInstrument::CInstrument(const CInstrument& instrument)
 CInstrument::~CInstrument(void) {
 }
 
-void CInstrument::SetAlternateName( enumProviderId_t id, idInstrument_cref name ) {
+void CInstrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
@@ -283,7 +245,7 @@ void CInstrument::SetAlternateName( enumProviderId_t id, idInstrument_cref name 
   }
 }
 
-CInstrument::idInstrument_cref CInstrument::GetInstrumentName( enumProviderId_t id ) {
+CInstrument::idInstrument_cref CInstrument::GetInstrumentName( eidProvider_t id ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() != iter ) {
     //throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );
@@ -299,7 +261,7 @@ CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( void ) {
   return m_pUnderlying->GetInstrumentName();
 }
 
-CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( enumProviderId_t id ) {
+CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( eidProvider_t id ) {
   if ( EUnderlyingNotSet != m_eUnderlyingStatus ) {
     throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
   }
@@ -318,70 +280,6 @@ void CInstrument::SetUnderlying( pInstrument_t pUnderlying ) {
   }
   m_pUnderlying = pUnderlying;
   m_eUnderlyingStatus = EUnderlyingSet;
-}
-
-void CInstrument::CreateDbTable( sqlite3* pDb ) {
-
-  char* pMsg;
-  int rtn;
-
-  rtn = sqlite3_exec( pDb, m_sSqlCreate.c_str(), 0, 0, &pMsg );
-
-  if ( SQLITE_OK != rtn ) {
-    std::string sErr( "Error creating table instruments: " );
-    sErr += pMsg;
-    sqlite3_free( pMsg );
-    throw std::runtime_error( sErr );
-  }
-
-}
-
-int CInstrument::BindDbKey( sqlite3_stmt* pStmt ) {
-
-  int rtn( 0 );
-  rtn = sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":id" ), m_sInstrumentName.c_str(), -1, SQLITE_STATIC );
-  return rtn;
-}
-
-int CInstrument::BindDbVariables( sqlite3_stmt* pStmt ) {
-
-  int rtn( 0 );
-
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":description" ), m_sDescription.c_str(), -1, SQLITE_STATIC );
-  rtn += sqlite3_bind_text( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":exchangeid" ), m_sExchange.c_str(), -1, SQLITE_STATIC );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":type" ), m_InstrumentType );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":currency" ), m_Currency );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":countercurrency" ), m_CurrencyCounter );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":optionside" ), m_OptionSide );
-  if ( NULL != m_pUnderlying.get() ) {
-    rtn += sqlite3_bind_text(  
-      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), m_pUnderlying->GetInstrumentName().c_str(), -1, SQLITE_STATIC );
-  }
-  else {
-    rtn += sqlite3_bind_text(   
-      pStmt, sqlite3_bind_parameter_index( pStmt, ":underlying" ), "", -1, SQLITE_STATIC );
-  }
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":year" ), m_nYear );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":month" ), m_nMonth );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":day" ), m_nDay );
-  rtn += sqlite3_bind_double( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":strike" ), m_dblStrike );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":contract" ), m_nContract );
-  rtn += sqlite3_bind_int( 
-    pStmt, sqlite3_bind_parameter_index( pStmt, ":multiplier" ), m_nMultiplier );
-
-  return rtn;  // should be 0 if all goes well
 }
 
 } // namespace tf

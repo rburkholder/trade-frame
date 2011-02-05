@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "AccountOwner.h"
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -24,8 +24,8 @@ class CAccount
 {
 public:
 
-  typedef std::string keyAccountId_t;
-  typedef CAccountOwner::keyAccountOwnerId_t keyAccountOwnerId_t;
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
   struct TableRowDef {
     template<class A>
@@ -43,8 +43,8 @@ public:
       ou::db::Constraint( "accountownerid", CAccountOwner::m_sTableName, "accountownderid" );
     }
 
-    keyAccountId_t idAccount;
-    keyAccountOwnerId_t idAccountOwner;
+    idAccount_t idAccount;
+    idAccountOwner_t idAccountOwner;
     std::string sAccountName;
     std::string sProviderName;
     std::string sBrokerName;
@@ -52,7 +52,7 @@ public:
     std::string sLogin;
     std::string sPassword;
 
-    TableRowDef( const keyAccountId_t& idAccount_, const keyAccountOwnerId_t& idAccountOwner_,
+    TableRowDef( const idAccount_t& idAccount_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sAccountName_, const std::string& sProviderName_, 
       const std::string& sBrokerName_, const std::string& sBrokerAccountId_,
       const std::string& sLogin_, const std::string& sPassword_ ) 
@@ -65,8 +65,8 @@ public:
   const static std::string m_sTableName;
 
   CAccount(
-    const keyAccountId_t& sAccountId,
-    const keyAccountOwnerId_t& sAccountOwnerId,
+    const idAccount_t& idAccount,
+    const idAccountOwner_t& idAccountOwner,
     const std::string& sAccountName,
     const std::string& sProviderName,
     const std::string& sBrokerName,

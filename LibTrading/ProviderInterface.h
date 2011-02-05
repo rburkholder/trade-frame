@@ -21,6 +21,7 @@
 
 #include <LibCommon/Delegate.h>
 
+#include "KeyTypes.h"
 #include "Symbol.h"
 #include "Order.h"
 #include "OrderManager.h"
@@ -50,7 +51,7 @@ public:
   typedef boost::shared_ptr<CProviderInterfaceBase> pProvider_t;
 
   typedef COrder::pOrder_t pOrder_t;
-  typedef unsigned short enumProviderId_t;  // used in HDF5Attribute.h
+  typedef keytypes::idProvider_t idProvider_t;
 
   typedef CSymbolBase::quotehandler_t quotehandler_t;
   typedef CSymbolBase::tradehandler_t tradehandler_t;
@@ -60,7 +61,7 @@ public:
   typedef CSymbolBase::pInstrument_t pInstrument_t;
   typedef CSymbolBase::pInstrument_cref pInstrument_cref;
 
-  enum enumProviderId: enumProviderId_t { EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
+  typedef keytypes::eidProvider_t eidProvider_t;
 
   const std::string& Name( void ) const { return m_sName; };
   unsigned short ID( void ) const { assert( 0 != m_nID ); return m_nID; };

@@ -6,8 +6,8 @@ PortfolioManager:
 *  Portfolio
 *  Position
 OrderManager:
-  Order
-  Execution
+* Order
+* Execution
 InstrumentManager:
   Instrument
   Exchange

@@ -23,18 +23,18 @@ namespace tf { // TradeFrame
 const std::string CPortfolio::m_sTableName = "portfolios";
 
 CPortfolio::CPortfolio( 
-    const keyPortfolioId_t& sPortfolioId, 
+    const idPortfolio_t& idPortfolio, 
     const std::string& sDescription ) 
-: m_row( sPortfolioId, "", sDescription ),
+: m_row( idPortfolio, "", sDescription ),
   m_bCanUseDb( false )
 {
 }
 
 CPortfolio::CPortfolio( 
-    const keyPortfolioId_t& sPortfolioId, 
-    const keyAccountOwnerId_t& sAccountOwnerId, 
+    const idPortfolio_t& idPortfolio, 
+    const idAccountOwner_t& idAccountOwner, 
     const std::string& sDescription ) 
-: m_row( sPortfolioId, sAccountOwnerId, sDescription ),
+: m_row( idPortfolio, idAccountOwner, sDescription ),
   m_bCanUseDb( true )
 {
 }

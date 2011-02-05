@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include "KeyTypes.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -22,8 +24,10 @@ class CExchange
 {
 public:
 
-  CExchange( const std::string& sExchangeId, const std::string& sName, const std::string& sCountryId );
-  CExchange( const std::string& sExchangeId, sqlite3_stmt* pStmt );
+  typedef keytypes::idExchange_t idExchange_t;
+
+  CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
+  CExchange( const idExchange_t& sExchangeId, sqlite3_stmt* pStmt );
   ~CExchange(void);
 
   static void CreateDbTable( sqlite3* pDb );
@@ -37,7 +41,7 @@ public:
 protected:
 private:
 
-  std::string m_sExchangeId;
+  idExchange_t m_sExchangeId;
   std::string m_sExchangeName;
   std::string m_sCountryId;
 

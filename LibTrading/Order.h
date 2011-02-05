@@ -24,11 +24,11 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-#include <boost/cstdint.hpp>
 
 #include <LibCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
+#include "KeyTypes.h"
 #include "Instrument.h"
 #include "Execution.h"
 
@@ -41,10 +41,10 @@ class COrder {
   friend class COrderManager;
 public:
 
-  typedef boost::int64_t idOrder_t;
-  typedef boost::int64_t idPosition_t;
+  typedef keytypes::idOrder_t idOrder_t;
+  typedef keytypes::idPosition_t idPosition_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::idInstrument_t idInstrument_t;
+  typedef keytypes::idInstrument_t idInstrument_t;
   typedef boost::shared_ptr<COrder> pOrder_t;
   typedef const pOrder_t& pOrder_ref;
 
