@@ -46,10 +46,10 @@ public:
       ou::db::Field( a, "type", eType );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "exchangeid", idExchange );
+      ou::db::Field( a, "underlyingid", idUnderlying );
       ou::db::Field( a, "currency", eCurrency );
       ou::db::Field( a, "countercurrency", eCounterCurrency );
       ou::db::Field( a, "optionside", eOptionSide );
-      ou::db::Field( a, "underlyingid", idUnderlying );
       ou::db::Field( a, "year", nYear );
       ou::db::Field( a, "month", nMonth );
       ou::db::Field( a, "day", nDay );
@@ -66,10 +66,10 @@ public:
     InstrumentType::enumInstrumentTypes eType;
     std::string sDescription;
     idExchange_t idExchange;
+    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
     Currency::enumCurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
     Currency::enumCurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
     OptionSide::enumOptionSide eOptionSide;
-    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
     unsigned short nYear; // future, option
     unsigned short nMonth; // future, option
     unsigned short nDay; // future, option
@@ -77,7 +77,12 @@ public:
     long nContract; // used with CIBTWS
     unsigned long nMultiplier;  // number of units per contract: stk 1x, option 100x
 
-    TableRowDef( void ) 
+//  m_eUnderlyingStatus = EUnderlyingNotSettable;
+//  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+//  if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+//  if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
+
+    TableRowDef( void ) // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
       nContract( 0 ), nMultiplier( 1 ) {};
@@ -89,7 +94,59 @@ public:
       nContract( 0 ), nMultiplier( 1 ) {
         assert( eType < InstrumentType::_Count );
         assert( eType > InstrumentType::Unknown );
-        assert( 0 < idInstrument.size() );    };
+        assert( 0 < idInstrument.size() );  
+    };
+    TableRowDef( // future
+      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
+      unsigned short nYear_, unsigned short nMonth_ )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( 0.0 ), 
+      nContract( 0 ), nMultiplier( 1 ) {
+        assert( eType == InstrumentType::Future  );
+        assert( 0 < idInstrument.size() );   
+    };
+    TableRowDef( // option with yymm
+      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
+      idInstrument_t idUnderlying_, 
+      unsigned short nYear_, unsigned short nMonth_, 
+      OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ), 
+      nContract( 0 ), nMultiplier( 100 ) {
+        assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
+        assert( ( eType_ == InstrumentType::Option )
+             || ( eType_ == InstrumentType::FuturesOption ) );
+        assert( 0 < idInstrument.size() );   
+        assert( 0 < idUnderlying.size() );
+    };
+    TableRowDef( // option with yymmdd
+      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
+      idInstrument_t idUnderlying_, 
+      unsigned short nYear_, unsigned short nMonth_, unsigned short nDay_,
+      OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ), 
+      nContract( 0 ), nMultiplier( 100 ) {
+        assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
+        assert( ( eType_ == InstrumentType::Option )
+             || ( eType_ == InstrumentType::FuturesOption ) );
+        assert( 0 < idInstrument.size() ); 
+        assert( 0 < idUnderlying.size() );
+    };
+    TableRowDef( // currency
+      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
+      idInstrument_t idUnderlying_, Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+        idUnderlying( idUnderlying_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
+        eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+        nContract( 0 ), nMultiplier( 1 ) {
+          assert( eType_ == InstrumentType::Currency );
+          assert( 0 < idInstrument.size() );
+          assert( 0 < idUnderlying.size() );
+    };
   };
 
   CInstrument( const TableRowDef& row );
@@ -99,28 +156,27 @@ public:
      );
   CInstrument(   // future
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
-    const std::string& sExchangeName,
+    const idExchange_t& sExchangeName,
     unsigned short year, unsigned short month );
   CInstrument(   // option with yymm
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
-    const std::string& sExchangeName,
+    const idExchange_t& sExchangeName,
     unsigned short year, unsigned short month,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   CInstrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
+    const idExchange_t& sExchangeName,
     unsigned short year, unsigned short month, unsigned short day,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   CInstrument(  // currency
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
-    const std::string& sExchangeName,
+    const idExchange_t& sExchangeName,
     pInstrument_t pUnderlying,
     Currency::enumCurrency base, Currency::enumCurrency counter );
-  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt ); // with no underlying
-  CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt, pInstrument_t pUnderlying ); // with an underlying
     
   virtual ~CInstrument(void);
 

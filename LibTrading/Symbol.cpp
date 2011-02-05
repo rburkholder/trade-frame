@@ -15,6 +15,9 @@
 
 #include "Symbol.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CSymbolBase::CSymbolBase( pInstrument_t pInstrument )
 : 
   m_id( pInstrument->GetInstrumentName() ),  // use the generic name, but in provider, use provider specific name
@@ -86,5 +89,7 @@ bool CSymbolBase::RemoveGreekHandler( greekhandler_t handler ) {
   return ( 0 == m_OnGreek.Size() );  // when true, stop watch
 }
 
+} // namespace tf
+} // namespace ou
 
 

@@ -25,6 +25,9 @@
 // change the Add/Remove...Handlers from virtual to CRTP?
 //  probably not, 
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CSymbolBase {
 public:
 
@@ -107,3 +110,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

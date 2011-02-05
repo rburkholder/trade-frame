@@ -20,6 +20,9 @@
 //#include "InstrumentFile.h"
 #include "ManagerBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CInstrumentManager
   : public ManagerBase<CInstrumentManager, CInstrument::idInstrument_t, CInstrument> {
 public:
@@ -56,6 +59,7 @@ public:
     idInstrument_cref sInstrumentName, 
     //const std::string& sUnderlyingName, // currency
     pInstrument_t pUnderlying,
+    const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
   bool Exists( idInstrument_cref );
@@ -84,3 +88,5 @@ private:
   void HandleAlternateNameChanged( CInstrument::pairNames_t );
 };
 
+} // namespace tf
+} // namespace ou

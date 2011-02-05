@@ -26,30 +26,34 @@ public:
 
   typedef keytypes::idExchange_t idExchange_t;
 
-  CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
-  CExchange( const idExchange_t& sExchangeId, sqlite3_stmt* pStmt );
-  ~CExchange(void);
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "exchangeid", idExchange );
+      ou::db::Field( a, "name", sName );
+      ou::db::Field( a, "countryid", idCountry );
 
-  static void CreateDbTable( sqlite3* pDb );
-  int BindDbKey( sqlite3_stmt* pStmt );
-  int BindDbVariables( sqlite3_stmt* pStmt );
-  static const std::string& GetSqlSelect( void ) { return m_sSqlSelect; };
-  static const std::string& GetSqlInsert( void ) { return m_sSqlInsert; };
-  static const std::string& GetSqlUpdate( void ) { return m_sSqlUpdate; };
-  static const std::string& GetSqlDelete( void ) { return m_sSqlDelete; };
+      ou::db::Key( a, "exchangeid" );
+
+    }
+
+    idExchange_t idExchange;
+    std::string sName;
+    std::string idCountry;
+
+    TableRowDef( const idExchange_t& idExchange_, const std::string& sName_, const std::string& idCountry_ )
+      : idExchange( idExchange_ ), sName( sName_ ), idCountry( idCountry_ ) {};
+  };
+
+  const static std::string m_sTableName;
+
+  CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
+  ~CExchange(void);
 
 protected:
 private:
 
-  idExchange_t m_sExchangeId;
-  std::string m_sExchangeName;
-  std::string m_sCountryId;
-
-  static const std::string m_sSqlCreate;
-  static const std::string m_sSqlSelect;
-  static const std::string m_sSqlInsert;
-  static const std::string m_sSqlUpdate;
-  static const std::string m_sSqlDelete;
+  TableRowDef m_row;
 
 };
 

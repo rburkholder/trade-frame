@@ -16,6 +16,9 @@
 
 #include <stdexcept>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CInstrumentManager::CInstrumentManager(void) {
 //  file.OpenIQFSymbols();
 }
@@ -59,7 +62,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
   pInstrument_t pInstrument( 
-    new CInstrument( sInstrumentName, sExchangeName, type ) );
+    new CInstrument( sInstrumentName, type, sExchangeName ) );
   Assign( pInstrument );
   return pInstrument;
 }
@@ -68,7 +71,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
   unsigned short year, unsigned short month ) {
   pInstrument_t pInstrument(
-    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Future, year, month ) );
+    new CInstrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month ) );
   Assign( pInstrument );
   return pInstrument;
 }
@@ -80,7 +83,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   OptionSide::enumOptionSide side, 
   double strike ) {
   pInstrument_t pInstrument( 
-    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Option, 
+    new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, pUnderlying, side, strike ) );
   Assign( pInstrument );
   return pInstrument;
@@ -93,7 +96,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   OptionSide::enumOptionSide side, 
   double strike ) {
   pInstrument_t pInstrument( 
-    new CInstrument( sInstrumentName, sExchangeName, InstrumentType::Option, 
+    new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, day, pUnderlying, side, strike ) );
   Assign( pInstrument );
   return pInstrument;
@@ -102,9 +105,10 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency( 
   idInstrument_cref sInstrumentName, 
   pInstrument_t pUnderlying,
+  const std::string& sExchangeName, 
   Currency::enumCurrency base, Currency::enumCurrency counter ) {
   pInstrument_t pInstrument(
-    new CInstrument( sInstrumentName, pUnderlying, InstrumentType::Currency, base, counter ) );
+    new CInstrument( sInstrumentName, InstrumentType::Currency, sExchangeName, pUnderlying, base, counter ) );
   Assign( pInstrument );
   return pInstrument;
 }
@@ -161,3 +165,5 @@ void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pa
   m_map.erase( iterOld );
 }
 
+} // namespace tf
+} // namespace ou
