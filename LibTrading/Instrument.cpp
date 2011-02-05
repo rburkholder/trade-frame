@@ -34,26 +34,25 @@ const std::string CInstrument::m_sTableName = "instruments";
   }
 */
 
+CInstrument::CInstrument( const TableRowDef& row ) 
+  : m_row( row ) 
+{
+  // other clean up and pointer stuff still yet to be done here
+}
+
 // equity / generic creation
-CInstrument::CInstrument(idInstrument_cref sInstrumentName, const std::string &sExchangeName,
-                         InstrumentType::enumInstrumentTypes type)
-: m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),
-  m_InstrumentType( type ), 
-  m_Currency( Currency::USD ), m_CurrencyCounter( Currency::USD ), 
-  m_nYear( 0 ), m_nMonth( 0 ), m_OptionSide( OptionSide::Unknown ), m_dblStrike( 0 ),
-  m_nMultiplier( 1 ),
-  m_nContract( 0 ),
+CInstrument::CInstrument(
+  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType,
+  const idExchange_t &idExchange
+                         )
+: m_row( idInstrument, eType, idExchange ),
   m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
-  assert( type < InstrumentType::_Count );
-  assert( type > InstrumentType::Unknown );
-  assert( 0 < m_sInstrumentName.size() );
-  //assert( 0 < m_sExchange.size() );
 }
 
  // future
 CInstrument::CInstrument( 
-  idInstrument_cref sInstrumentName, const std::string &sExchangeName,
+  idInstrument_cref idInstrument, const std::string &idExchange,
   InstrumentType::enumInstrumentTypes type, 
   unsigned short year, unsigned short month ) 
 : m_sInstrumentName( sInstrumentName ), m_sExchange( sExchangeName ),

@@ -43,9 +43,9 @@ public:
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "instrumentid", idInstrument );
+      ou::db::Field( a, "type", eType );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "exchangeid", idExchange );
-      ou::db::Field( a, "type", eType );
       ou::db::Field( a, "currency", eCurrency );
       ou::db::Field( a, "countercurrency", eCounterCurrency );
       ou::db::Field( a, "optionside", eOptionSide );
@@ -63,9 +63,9 @@ public:
     }
 
     idInstrument_t idInstrument; // main name
+    InstrumentType::enumInstrumentTypes eType;
     std::string sDescription;
     idExchange_t idExchange;
-    InstrumentType::enumInstrumentTypes eType;
     Currency::enumCurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
     Currency::enumCurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
     OptionSide::enumOptionSide eOptionSide;
@@ -76,36 +76,48 @@ public:
     double dblStrike;
     long nContract; // used with CIBTWS
     unsigned long nMultiplier;  // number of units per contract: stk 1x, option 100x
+
+    TableRowDef( void ) 
+      : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+      nContract( 0 ), nMultiplier( 1 ) {};
+    TableRowDef( // equity / generic creation
+      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_ )
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+      eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
+      eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
+      nContract( 0 ), nMultiplier( 1 ) {
+        assert( eType < InstrumentType::_Count );
+        assert( eType > InstrumentType::Unknown );
+        assert( 0 < idInstrument.size() );    };
   };
 
-  CInstrument( 
-    idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
-    InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
-  CInstrument( 
-    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
-    InstrumentType::enumInstrumentTypes type, 
+  CInstrument( const TableRowDef& row );
+  CInstrument( // equity / generic creation
+    idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
+    const idExchange_t& sExchangeName 
+     );
+  CInstrument(   // future
+    idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
+    const std::string& sExchangeName,
     unsigned short year, unsigned short month );
-  CInstrument( 
-    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
-    InstrumentType::enumInstrumentTypes type, 
+  CInstrument(   // option with yymm
+    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
+    const std::string& sExchangeName,
     unsigned short year, unsigned short month,
-    //const idInstrument_t &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( 
-    idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
-    InstrumentType::enumInstrumentTypes type, 
+  CInstrument(   // option with yymmdd
+    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     unsigned short year, unsigned short month, unsigned short day,
-    //const std::string &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument( 
-    idInstrument_cref sInstrumentName, 
-    //const std::string& sUnderlyingName, // currency
+  CInstrument(  // currency
+    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
+    const std::string& sExchangeName,
     pInstrument_t pUnderlying,
-    InstrumentType::enumInstrumentTypes type, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
   CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt ); // with no underlying
   CInstrument( idInstrument_cref sInstrumentId, sqlite3_stmt* pStmt, pInstrument_t pUnderlying ); // with an underlying
@@ -114,7 +126,7 @@ public:
 
   const static std::string m_sTableName;
 
-  idInstrument_cref GetInstrumentName( void ) const { return m_sInstrumentName; };
+  idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
   idInstrument_cref GetUnderlyingName( void );
 
   idInstrument_cref GetInstrumentName( eidProvider_t id );
@@ -128,25 +140,25 @@ public:
   ou::Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
   ou::Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
 
-  InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_InstrumentType; };
-  bool IsOption( void ) const { return ( InstrumentType::Option == m_InstrumentType ); };
-  bool IsFuture( void ) const { return ( InstrumentType::Future == m_InstrumentType ); };
+  InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_row.eType; };
+  bool IsOption( void ) const { return ( InstrumentType::Option == m_row.eType ); };
+  bool IsFuture( void ) const { return ( InstrumentType::Future == m_row.eType ); };
 
-  const std::string& GetExchangeName( void ) const { return m_sExchange; };
-  void SetCurrency( Currency::enumCurrency eCurrency ) { m_Currency = eCurrency; };
-  const char *GetCurrencyName( void ) { return Currency::Name[ m_Currency ]; };
+  const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
+  void SetCurrency( Currency::enumCurrency eCurrency ) { m_row.eCurrency = eCurrency; };
+  const char *GetCurrencyName( void ) { return Currency::Name[ m_row.eCurrency ]; };
 
-  double GetStrike( void ) const { return m_dblStrike; };
-  unsigned short GetExpiryYear( void ) const { return m_nYear; };
-  unsigned short GetExpiryMonth( void ) const { return m_nMonth; };
-  unsigned short GetExpiryDay( void ) const { return m_nDay; };
-  OptionSide::enumOptionSide GetOptionSide( void ) { return m_OptionSide; };
+  double GetStrike( void ) const { return m_row.dblStrike; };
+  unsigned short GetExpiryYear( void ) const { return m_row.nYear; };
+  unsigned short GetExpiryMonth( void ) const { return m_row.nMonth; };
+  unsigned short GetExpiryDay( void ) const { return m_row.nDay; };
+  OptionSide::enumOptionSide GetOptionSide( void ) { return m_row.eOptionSide; };
 
-  void SetContract( long id ) { m_nContract = id; };
-  long GetContract( void ) const { return m_nContract; };
+  void SetContract( long id ) { m_row.nContract = id; };
+  long GetContract( void ) const { return m_row.nContract; };
 
-  void SetMultiplier( unsigned long nMultiplier ) { m_nMultiplier = nMultiplier; };
-  unsigned long GetMultiplier( void ) const { return m_nMultiplier; };
+  void SetMultiplier( unsigned long nMultiplier ) { m_row.nMultiplier = nMultiplier; };
+  unsigned long GetMultiplier( void ) const { return m_row.nMultiplier; };
 
 protected:
 
