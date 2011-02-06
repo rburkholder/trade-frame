@@ -17,6 +17,9 @@
 
 #include "MergeDatedDatums.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // CMergeDatedDatums
 //
@@ -97,3 +100,5 @@ void CMergeDatedDatums::Stop( void ) {
   m_request = eStop;
 }
 
+} // namespace tf
+} // namespace ou

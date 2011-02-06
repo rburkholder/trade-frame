@@ -22,6 +22,9 @@
 //#include <boost/serialization/vector.hpp>
 // http://www.boost.org/libs/serialization/doc/traits.html
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<typename T> class CTimeSeries {
 public:
 
@@ -343,3 +346,5 @@ protected:
 private:
 };
 
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,9 @@
 
 #include "BarFactory.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CBarFactory::CBarFactory(duration_t nSeconds) : 
   m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
 {
@@ -69,3 +72,5 @@ void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
   
 }
 
+} // namespace tf
+} // namespace ou

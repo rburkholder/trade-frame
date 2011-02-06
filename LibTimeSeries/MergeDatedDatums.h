@@ -23,6 +23,9 @@ using namespace fastdelegate;
 #include "TimeSeries.h"
 #include "MergeDatedDatumCarrier.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CMergeDatedDatums {
 public:
 
@@ -61,3 +64,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

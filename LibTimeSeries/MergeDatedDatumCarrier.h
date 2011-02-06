@@ -26,6 +26,9 @@ using namespace fastdelegate;
 // The current DatedDatum timestamp is maintained for the merge process to figure out which DatedDatum to 
 // send into the merge process
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CMergeCarrierBase {
   friend class CMergeDatedDatums;
 public:
@@ -92,3 +95,6 @@ template<class T> void CMergeCarrier<T>::Reset() {
     ? boost::date_time::special_values::not_a_date_time 
     : m_pDatum->DateTime();
 }
+
+} // namespace tf
+} // namespace ou

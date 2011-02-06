@@ -18,6 +18,9 @@
 #include "LibCommon/FastDelegate.h"
 using namespace fastdelegate;
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CBarFactory {
 public:
 
@@ -58,3 +61,6 @@ protected:
   boost::posix_time::time_duration m_1Sec;
 private:
 };
+
+} // namespace tf
+} // namespace ou

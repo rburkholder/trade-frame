@@ -19,6 +19,9 @@
 
 //using namespace H5;
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // CDatedDatum
 //
@@ -274,3 +277,5 @@ H5::CompType *CGreek::DefineDataType( H5::CompType *pComp ) {
   return pComp;
 }
 
+} // namespace tf
+} // namespace ou

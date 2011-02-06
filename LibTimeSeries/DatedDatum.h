@@ -22,6 +22,9 @@ using namespace boost::gregorian;
   // http://www.boost.org/doc/html/date_time/posix_time.html#date_time.posix_time.ptime_class
   //ptime m_dt(boost::date_time::special_values::not_a_date_time);
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CDatedDatum {
 public:
 
@@ -244,4 +247,6 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou
 

@@ -52,6 +52,10 @@ CDatedDatums::~CDatedDatums( void ) {
 }
 
 */
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 // CBars
 
 CBars::CBars(void) {
@@ -112,3 +116,5 @@ CGreeks::CGreeks( size_t size )
 CGreeks::~CGreeks( void ) {
 }
 
+} // namespace tf
+} // namespace ou
