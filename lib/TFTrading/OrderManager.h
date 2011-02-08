@@ -18,9 +18,9 @@
 
 #include <map>
 
-#include <LibCommon/Delegate.h>
+#include <OUCommon/Delegate.h>
 
-#include <LibBerkeleyDb/AutoIncKeys.h>
+#include <OUBerkeleyDb/AutoIncKeys.h>
 
 #include "TradingEnumerations.h"
 #include "ManagerBase.h"

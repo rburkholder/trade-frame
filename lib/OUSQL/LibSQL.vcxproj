@@ -14,7 +14,7 @@
     <ProjectGuid>{00437625-753F-4206-A3C0-3D5C959F7D91}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LibSQL</RootNamespace>
-    <ProjectName>SQL</ProjectName>
+    <ProjectName>OUSQL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

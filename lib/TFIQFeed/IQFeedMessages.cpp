@@ -12,16 +12,20 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "IQFeedMessages.h"
 
 #include <iostream>
 #include <sstream>
 
 #include <boost/assert.hpp>
 
+#include "IQFeedMessages.h"
+
 // News Message: This does appear to be an error in the documentation. 
 // "SNT:AAPL::1:20070901:;" 
 // Enter the date with a range, such as "20070901-20070910" to get the data you are looking for.
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 //**** CIQFBaseMessage
 
@@ -134,3 +138,5 @@ void CIQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
   m_bMarketIsOpen = ( ( m_dt.time_of_day() >= m_timeMarketOpen ) && ( m_dt.time_of_day() < m_timeMarketClose ) );
 }
 
+} // namespace tf
+} // namespace ou

@@ -14,7 +14,7 @@
     <ProjectGuid>{23192E89-C17F-4C84-B35C-3677927D64A6}</ProjectGuid>
     <RootNamespace>LibIQFeed</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>IQFeed</ProjectName>
+    <ProjectName>TFIQFeed</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -46,7 +46,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;..\lib;..\lib\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\lib;..\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -111,6 +111,8 @@
     </CustomBuildStep>
     <CustomBuildStep Include="IQFeedProvider.h" />
     <CustomBuildStep Include="IQFeedSymbol.h" />
+    <ClInclude Include="IQFeedProvider.h" />
+    <ClInclude Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedSymbolFile.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

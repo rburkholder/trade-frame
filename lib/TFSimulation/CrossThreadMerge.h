@@ -13,9 +13,12 @@
 
 #pragma once
 
-#include <LibWtlCommon/ThreadCrossingMessage.h>
+#include <OUWtlCommon/ThreadCrossingMessage.h>
 
-#include <LibTimeSeries/MergeDatedDatums.h>
+#include <TFTimeSeries/MergeDatedDatums.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CCrossThreadMerge:
   public CMergeDatedDatums, 
@@ -44,3 +47,5 @@ private:
   HANDLE m_hSignal;  // used to sync between threads (prevents too many messages from piling up)
 };
 
+} // namespace tf
+} // namespace ou

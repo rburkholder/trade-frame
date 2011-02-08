@@ -17,6 +17,9 @@
 
 #include "IQFeedNewsQuery.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template <typename T>
 class CIQFeedNewsQueryMsgShim: public CIQFeedNewsQuery<CIQFeedNewsQueryMsgShim<T> > {
   friend CIQFeedNewsQuery<CIQFeedNewsQueryMsgShim<T> >;
@@ -109,3 +112,6 @@ protected:
 private:
   structMessageDestinations m_structMessageDestinations;
 };
+
+} // namespace tf
+} // namespace ou

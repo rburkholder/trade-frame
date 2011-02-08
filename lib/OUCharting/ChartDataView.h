@@ -17,7 +17,7 @@
 #include <string>
 #include <map>
 
-#include <LibCommon/Delegate.h>
+#include <OUCommon/Delegate.h>
 
 #include "ChartEntryBase.h"
 

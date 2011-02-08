@@ -41,8 +41,11 @@ namespace ascii = boost::spirit::ascii;
 
 #include <boost/fusion/include/adapt_struct.hpp>
 
-#include <LibCommon/ReusableBuffers.h>
-#include <LibCommon/Network.h>
+#include <OUCommon/ReusableBuffers.h>
+#include <OUCommon/Network.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
@@ -546,3 +549,5 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   }
 }
 
+} // namespace tf
+} // namespace ou

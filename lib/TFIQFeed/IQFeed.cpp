@@ -19,6 +19,6 @@
 
 void __stdcall IQFeedCallBack( int x, int y ) {
   std::stringstream ss;
-  ss << _T( "IQFeed Callback" ) << x << ", " << y;
+  ss << "IQFeed Callback" << x << ", " << y;
 }
 

@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include <LibSQL/Session.h>
-#include <LibSqlite/ISqlite3.h>
+#include <OUSQL/Session.h>
+#include <OUSqlite/ISqlite3.h>
 
 struct CFields {
 

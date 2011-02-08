@@ -17,9 +17,12 @@
 #include <stdexcept>
 #include <cassert>
 
-#include <LibTrading/TradingEnumerations.h>
+#include <TFTrading/TradingEnumerations.h>
 
 #include "IQFeedInstrumentFile.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 CInstrumentFile::CInstrumentFile(void) 
 : pRecord( NULL ), 
@@ -113,7 +116,7 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
 
   switch ( rec.eInstrumentType ) {
     case InstrumentType::Stock: {
-        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, InstrumentType::Stock ) );
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, InstrumentType::Stock, sExchange ) );
         return pInstrument;
       }
       break;
@@ -251,3 +254,5 @@ structSymbolRecord* CInstrumentFile::RetrieveSymbolRecordByUnderlying( u_int32_t
   return p;
 }
 
+} // namespace tf
+} // namespace ou

@@ -20,12 +20,15 @@
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
 
-#include <LibCommon/TimeSource.h>
-#include <LibTrading/ProviderInterface.h>
-#include <LibTrading/Order.h>
-#include <LibTimeSeries/MergeDatedDatums.h>
+#include <OUCommon/TimeSource.h>
+#include <TFTrading/ProviderInterface.h>
+#include <TFTrading/Order.h>
+#include <TFTimeSeries/MergeDatedDatums.h>
 
 #include "SimulationSymbol.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
@@ -102,3 +105,6 @@ private:
   boost::thread m_threadMerge;
 
 };
+
+} // namespace tf
+} // namespace ou

@@ -19,7 +19,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibCommon/Delegate.h>
+#include <OUCommon/Delegate.h>
 
 #include "KeyTypes.h"
 #include "Symbol.h"
@@ -67,7 +67,7 @@ public:
   unsigned short ID( void ) const { assert( 0 != m_nID ); return m_nID; };
 
   CProviderInterfaceBase( void )
-    : m_nID( 0 ), m_bConnected( false ),
+    : m_nID( keytypes::EProviderUnknown ), m_bConnected( false ),
       m_pProvidesBrokerInterface( false ),
       m_bProvidesQuotes( false ), m_bProvidesTrades( false ), m_bProvidesGreeks( false ), m_bProvidesDepth( false )
     {};
@@ -109,7 +109,7 @@ public:
 protected:
 
   std::string m_sName;  // name of provider
-  unsigned short m_nID;
+  keytypes::eidProvider_t m_nID;
 
   bool m_bConnected;
 

@@ -14,7 +14,7 @@
     <ProjectGuid>{BD8A7D5E-FD36-487F-88E9-8F3851ECF214}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LibCharting</RootNamespace>
-    <ProjectName>Charting</ProjectName>
+    <ProjectName>OUCharting</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

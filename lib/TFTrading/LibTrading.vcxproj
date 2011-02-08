@@ -14,7 +14,7 @@
     <ProjectGuid>{11243A27-764A-4119-BEFF-A8A80FD615EC}</ProjectGuid>
     <RootNamespace>LibTrading</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Trading</ProjectName>
+    <ProjectName>TFTrading</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

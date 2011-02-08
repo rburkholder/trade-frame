@@ -13,8 +13,6 @@
 
 #include "StdAfx.h"
 
-#include <LibCommon/KeywordMatch.h>
-
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -31,16 +29,20 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 //#include <boost/spirit/home/phoenix/algorithm.hpp>
 
-#include "IQFeedSymbolFile.h"
-
-// for options, need to decode symbol name in order to get expiry day.
-
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
 using namespace boost::phoenix;
 using namespace boost::phoenix::arg_names;
 
+#include <OUCommon/KeywordMatch.h>
+
+#include "IQFeedSymbolFile.h"
+
+// for options, need to decode symbol name in order to get expiry day.
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 CIQFeedSymbolFile::CIQFeedSymbolFile(void)
 : CInstrumentFile()
@@ -397,7 +399,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
             else {
               mapUnderlying[ sUnderlying ] = 1;  // simply create an entry for later use
             }
-            nUnderlyingSize = max( nUnderlyingSize, sUnderlying.size() );
+            nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, sUnderlying.size() );
           }
           else {
             std::cout  << "No option match on " << dbRecord.line << ", " << dbRecord.line + offset[structSymbolRecord::IXDesc] << std::endl;
@@ -477,7 +479,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
   std::stringstream ss;
   ss << "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl;
   ss << "#kwmSymbolType nodes " << kwmSymbolType.GetNodeCount() << std::endl;
-  OutputDebugString( ss.str().c_str() );
+//  OutputDebugString( ss.str().c_str() );
   ss.str() = "";
 #endif
 
@@ -494,3 +496,6 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
 
   return true;
 }
+
+} // namespace tf
+} // namespace ou

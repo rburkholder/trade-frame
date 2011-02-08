@@ -24,9 +24,9 @@
 // use bgr instead of rgb order as provided by windows define
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 
-#include <LibCommon/Colour.h>
+#include <OUCommon/Colour.h>
 
-#include <LibTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/TimeSeries.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

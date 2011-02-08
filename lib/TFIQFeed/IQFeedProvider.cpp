@@ -13,14 +13,19 @@
 
 #include "StdAfx.h"
 
+#include <TFTrading/KeyTypes.h>
+
 #include "IQFeedProvider.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 CIQFeedProvider::CIQFeedProvider( void ) 
 : CProviderInterface<CIQFeedProvider,CIQFeedSymbol>(), 
   CIQFeed<CIQFeedProvider>()
 {
   m_sName = "IQF";
-  m_nID = EProviderIQF;
+  m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
 }
@@ -162,3 +167,6 @@ void CIQFeedProvider::HandleTMessage( CIQFTimeMessage *pMsg ) {
 void CIQFeedProvider::HandleSMessage( CIQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
 }
+
+} // namespace tf
+} // namespace ou

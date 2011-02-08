@@ -14,7 +14,7 @@
     <ProjectGuid>{22BF5BE7-74F6-462A-A01F-E543825C0290}</ProjectGuid>
     <RootNamespace>LibInteractiveBrokers</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>InteractiveBrokers</ProjectName>
+    <ProjectName>TFInteractiveBrokers</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

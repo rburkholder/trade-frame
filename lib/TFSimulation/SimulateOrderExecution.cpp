@@ -13,9 +13,12 @@
 
 #include "StdAfx.h"
 
-#include <LibCommon/TimeSource.h>
+#include <OUCommon/TimeSource.h>
 
 #include "SimulateOrderExecution.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 int CSimulateOrderExecution::m_nExecId( 1000 );
 
@@ -207,3 +210,6 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
     }
   }
 }
+
+} // namespace tf
+} // namespace ou

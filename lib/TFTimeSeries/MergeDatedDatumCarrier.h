@@ -15,10 +15,10 @@
 
 #include <stdexcept>
 
-#include <LibCommon/FastDelegate.h>
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <LibCommon/TimeSource.h>
+#include <OUCommon/TimeSource.h>
 
 #include "TimeSeries.h"
 

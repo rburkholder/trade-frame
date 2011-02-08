@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <LibTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/TimeSeries.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

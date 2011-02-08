@@ -18,7 +18,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibCommon/Delegate.h>
+#include <OUCommon/Delegate.h>
 
 #include "TradingEnumerations.h"
 #include "KeyTypes.h"

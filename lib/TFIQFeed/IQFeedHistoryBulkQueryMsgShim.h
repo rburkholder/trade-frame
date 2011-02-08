@@ -17,6 +17,9 @@
 
 #include "IQFeedHistoryBulkQuery.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template <typename T>
 class CIQFeedHistoryBulkQueryMsgShim: public CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQueryMsgShim<T> > {
   friend CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQueryMsgShim<T> >;
@@ -51,3 +54,6 @@ protected:
 private:
   structMessageDestinations m_messageDestinations;
 };
+
+} // namespace tf
+} // namespace ou

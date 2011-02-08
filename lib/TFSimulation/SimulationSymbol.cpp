@@ -15,8 +15,11 @@
 
 #include "SimulationSymbol.h"
 
-#include "LibHDF5TimeSeries/HDF5TimeSeriesContainer.h"
-#include "LibHDF5TimeSeries/HDF5IterateGroups.h"
+#include "TFHDF5TimeSeries/HDF5TimeSeriesContainer.h"
+#include "TFHDF5TimeSeries/HDF5IterateGroups.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // sDirectory needs to be available on instantiation to enable signal availability
 CSimulationSymbol::CSimulationSymbol( 
@@ -114,3 +117,5 @@ void CSimulationSymbol::HandleGreekEvent( const CDatedDatum &datum ) {
   m_OnGreek( dynamic_cast<const CGreek &>( datum ) );  
 }
 
+} // namespace tf
+} // namespace ou

@@ -15,14 +15,17 @@
 
 #include <bitset>
 
-#include <LibBerkeleyDb/EnvManager.h>
+#include <OUBerkeleyDb/EnvManager.h>
 
-#include <LibTrading/Instrument.h>
+#include <TFTrading/Instrument.h>
 
 // 2010/05/02
 // try designing an iterator for the Retrieve* acces stuff
 
 // 2010/05/07 close cursors when finished
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 struct structSymbolRecord {  // member variables ordered by decreasing size for alignment purposes
 
@@ -173,3 +176,5 @@ private:
   CInstrumentFile_Exchange_iterator& operator=( const CInstrumentFile_Exchange_iterator& rhs ) {}; // disable assignment 
 };
 
+} // namespace tf
+} // namespace ou

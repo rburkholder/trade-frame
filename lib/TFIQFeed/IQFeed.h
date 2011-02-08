@@ -20,8 +20,8 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
-#include <LibCommon/Network.h>
-#include <LibCommon/ReusableBuffers.h>
+#include <OUCommon/Network.h>
+#include <OUCommon/ReusableBuffers.h>
 
 #include "IQ32.H"
 #include "IQFeedMessages.h"
@@ -40,6 +40,9 @@ void __stdcall IQFeedCallBack( int x, int y );
 //     m_pPort = m_pIQFeedProvider->CheckOutLookupPort();
 //     m_pIQFeedProvider->CheckInLookupPort( m_pPort );
 
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 template <typename T>
 class CIQFeed: public ou::CNetwork<CIQFeed<T> > {
@@ -141,7 +144,7 @@ CIQFeed<T>::CIQFeed( void )
   m_stateNews( NEWSISOFF )
 {
   SetCallbackFunction( &IQFeedCallBack );
-  int i = RegisterClientApp( NULL, _T("ONE_UNIFIED"), _T("0.11111111"), _T("2.0") );
+  int i = RegisterClientApp( NULL, "ONE_UNIFIED", "0.11111111", "2.0" );
 }
 
 template <typename T>
@@ -274,3 +277,5 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
 }
 
+} // namespace tf
+} // namespace ou

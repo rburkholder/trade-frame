@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "IDatabase.h"
+#include <OUSQL/Database.h>
 
 namespace ou {
 namespace db {

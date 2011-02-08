@@ -15,7 +15,7 @@
 
 #ifdef WIN32
 #include <db4/db_cxx.h>
-#include <LibCommon/Singleton.h>
+#include <OUCommon/Singleton.h>
 #else
 #include <db_cxx.h>
 #include <Singleton.h>

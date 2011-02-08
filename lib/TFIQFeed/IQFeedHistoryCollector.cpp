@@ -13,12 +13,15 @@
 
 #include "StdAfx.h"
 
-#include "IQFeedHistoryCollector.h"
-
 #include <cassert>
 
-#include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
-#include <LibHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+
+#include "IQFeedHistoryCollector.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 //
 // CHistoryCollector
@@ -115,3 +118,5 @@ void CHistoryCollectorTicks::WriteData( void ) {
   }
 }
 
+} // namespace tf
+} // namespace ou

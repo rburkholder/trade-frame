@@ -14,7 +14,7 @@
 #include "StdAfx.h"
 
 #include "Position.h"
-#include <LibTrading/OrderManager.h>
+#include "OrderManager.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

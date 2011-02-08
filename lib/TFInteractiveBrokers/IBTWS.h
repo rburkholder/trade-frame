@@ -29,13 +29,13 @@ using namespace boost::gregorian;
 #include <boost/thread.hpp> 
 #include <boost/bind.hpp>
 
-#include <LibCommon/FastDelegate.h>
-#include <LibCommon/Delegate.h>
+#include <OUCommon/FastDelegate.h>
+#include <OUCommon/Delegate.h>
 
-#include <LibTrading/TradingEnumerations.h>
-#include <LibTrading/Instrument.h>
-#include <LibTrading/ProviderInterface.h>
-#include <LibTrading/Order.h>
+#include <TFTrading/TradingEnumerations.h>
+#include <TFTrading/Instrument.h>
+#include <TFTrading/ProviderInterface.h>
+#include <TFTrading/Order.h>
 
 #include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
 

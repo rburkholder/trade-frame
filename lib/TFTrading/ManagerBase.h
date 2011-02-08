@@ -30,7 +30,7 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include "LibCommon/Singleton.h"
+#include "OUCommon/Singleton.h"
 
 namespace ou {
 namespace tf { // TradeFrame

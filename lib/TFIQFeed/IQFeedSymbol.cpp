@@ -17,6 +17,9 @@
 
 #include "IQFeedSymbol.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CIQFeedSymbol::CIQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument) 
 : 
   CSymbol<CIQFeedSymbol>( pInstrument ),
@@ -104,7 +107,7 @@ void CIQFeedSymbol::HandleSummaryMessage( CIQFSummaryMessage *pMsg ) {
 void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
 
   if ( qUnknown == m_QStatus ) {
-    m_QStatus = ( _T( "Not Found" ) == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
+    m_QStatus = ( "Not Found" == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
       std::cout << GetId() << " not found" << std::endl;
     }
@@ -130,3 +133,6 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
 
 void CIQFeedSymbol::HandleNewsMessage( CIQFNewsMessage *pMsg ) {
 }
+
+} // namespace tf
+} // namespace ou

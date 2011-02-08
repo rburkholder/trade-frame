@@ -16,10 +16,13 @@
 #include <vector>
 #include <string>
 
-#include "LibCommon\Delegate.h"
-#include "LibTrading\Symbol.h"
+#include "OUCommon\Delegate.h"
+#include "TFTrading\Symbol.h"
 
 #include "IQFeedMessages.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CIQFeedProvider;
 
@@ -94,3 +97,6 @@ protected:
 
 private:
 };
+
+} // namespace tf
+} // namespace ou

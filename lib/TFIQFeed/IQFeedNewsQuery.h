@@ -23,8 +23,6 @@
 #include <vector>
 #include <cassert>
 
-#include <LibCommon/Network.h>
-
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
@@ -32,6 +30,9 @@
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
+
+#include <OUCommon/Network.h>
+
 
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
@@ -45,7 +46,8 @@ namespace ascii = boost::spirit::ascii;
 // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/employee.cpp
 // http://svn.boost.org/svn/boost/trunk/libs/spirit/example/qi/calc2.cpp
 
-
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 template <typename T>
 class CIQFeedNewsQuery: public ou::CNetwork<CIQFeedNewsQuery<T> > {
@@ -483,3 +485,6 @@ void CIQFeedNewsQuery<T>::ProcessConfigurationRetrieval( linebuffer_t* buf ) {
   bool b = parse( bgn, end, ruleNewsConfigKeyword);
 
 }
+
+} // namespace tf
+} // namespace ou

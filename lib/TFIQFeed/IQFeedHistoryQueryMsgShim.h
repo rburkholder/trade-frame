@@ -17,6 +17,9 @@
 
 #include "IQFeedHistoryQuery.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template <typename T>
 class CIQFeedHistoryQueryMsgShim: public CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T> > {
   friend CIQFeedHistoryQuery<CIQFeedHistoryQueryMsgShim<T> >;
@@ -126,3 +129,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

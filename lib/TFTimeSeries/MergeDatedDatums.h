@@ -15,9 +15,9 @@
 
 #include <vector>
 
-#include <libCommon/MinHeap.h>
+#include <OUCommon/MinHeap.h>
 
-#include <LIbCommon/FastDelegate.h>
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include "TimeSeries.h"

@@ -16,9 +16,13 @@
 #include <stdexcept>
 #include <cassert>
 
-#include <LibHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFTrading/KeyTypes.h>
 
 #include "SimulationProvider.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 CSimulationProvider::CSimulationProvider(void)
 : CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
@@ -26,7 +30,7 @@ CSimulationProvider::CSimulationProvider(void)
   m_pMerge( NULL )
 {
   m_sName = "Simulator";
-  m_nID = EProviderSimulator;
+  m_nID = keytypes::EProviderSimulator;
 
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
@@ -273,3 +277,5 @@ void CSimulationProvider::HandleCommission( COrder::idOrder_t orderId, double co
   COrderManager::Instance().ReportCommission( orderId, commission );
 }
 
+} // namespace tf
+} // namespace ou

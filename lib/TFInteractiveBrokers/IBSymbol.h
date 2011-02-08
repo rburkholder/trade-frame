@@ -15,8 +15,8 @@
 
 #include <stdexcept>
 
-#include <LibTimeSeries/DatedDatum.h>
-#include <LibTrading/Symbol.h>
+#include <TFTimeSeries/DatedDatum.h>
+#include <TFTrading/Symbol.h>
 
 #ifndef IB_USE_STD_STRING
 #define IB_USE_STD_STRING

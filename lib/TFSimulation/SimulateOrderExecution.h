@@ -21,12 +21,15 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 #include <boost/lexical_cast.hpp>
 
-#include <LibCommon/FastDelegate.h>
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <LibTimeSeries/DatedDatum.h>
-#include <LibTrading/Order.h>
-#include <LibTrading/Execution.h>
+#include <TFTimeSeries/DatedDatum.h>
+#include <TFTrading/Order.h>
+#include <TFTrading/Execution.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CSimulateOrderExecution {  // one object per symbol
 public:
@@ -109,3 +112,6 @@ protected:
   }
 private:
 };
+
+} // namespace tf
+} // namespace ou

@@ -15,10 +15,13 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "LibTrading/ProviderInterface.h"
+#include "TFTrading/ProviderInterface.h"
 
 #include "IQFeed.h"
 #include "IQFeedSymbol.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CIQFeedProvider :
   public CProviderInterface<CIQFeedProvider,CIQFeedSymbol>, 
@@ -67,3 +70,6 @@ protected:
 private:
 
 };
+
+} // namespace tf
+} // namespace ou

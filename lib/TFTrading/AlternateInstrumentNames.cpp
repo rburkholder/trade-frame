@@ -13,8 +13,7 @@
 
 #include "StdAfx.h"
 
-#include <LibTrading/TradingEnumerations.h>
-
+#include "TradingEnumerations.h"
 #include "AlternateInstrumentNames.h"
 
 namespace ou { // One Unified

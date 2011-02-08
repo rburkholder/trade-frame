@@ -25,10 +25,14 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
-#include <LibCommon/ReusableBuffers.h>
-#include <LibTimeSeries/TimeSeries.h>
-#include <LibIQFeed/IQFeedInstrumentFile.h>
-#include <LibIQFeed/IQFeedHistoryQuery.h>
+#include <OUCommon/ReusableBuffers.h>
+#include <TFTimeSeries/TimeSeries.h>
+
+#include "IQFeedInstrumentFile.h"
+#include "IQFeedHistoryQuery.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 template <typename T, typename U>
 class CIQFeedHistoryQueryTag: public CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > {
@@ -410,4 +414,6 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
   ProcessSymbolList();
 }
 
+} // namespace tf
+} // namespace ou
 

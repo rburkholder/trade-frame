@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include <LibTrading/TradingEnumerations.h>
+#include <TFTrading/TradingEnumerations.h>
 
 #include "IQFeedInstrumentFile.h"
 
@@ -24,6 +24,9 @@
 // http://www.dtniq.com/product/mktsymbols_v2.zip
 
 // Is designed for running in debug mode at the moment.
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CIQFeedSymbolFile: public CInstrumentFile {
 public:
@@ -36,3 +39,6 @@ protected:
 
 private:
 };
+
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,9 @@
 
 // TODO:  convert OnNewResponse over to IQFeedRetrieval
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CIQFeedOptions::CIQFeedOptions(CIQFeedProvider *pProvider, const char *szSymbol) 
 : CIQFeedRetrieval( pProvider ) 
 {
@@ -91,3 +94,6 @@ void CIQFeedOptions::OnNewResponse( const char *szLine ) {
     m_bLookingForDetail = false;
   }
 }
+
+} // namespace tf
+} // namespace ou

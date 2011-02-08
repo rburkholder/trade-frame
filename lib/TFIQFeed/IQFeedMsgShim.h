@@ -17,6 +17,9 @@
 
 #include "IQfeed.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template <typename T>
 class CIQFeedMsgShim: public CIQFeed<CIQFeedMsgShim<T> > {
   friend CIQFeed<CIQFeedMsgShim<T> >;
@@ -169,3 +172,5 @@ private:
     structMessageDestinations m_structMessageDestinations;
 };
 
+} // namespace tf
+} // namespace ou

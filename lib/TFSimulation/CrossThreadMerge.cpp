@@ -15,6 +15,9 @@
 
 #include "CrossThreadMerge.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CCrossThreadMerge::CCrossThreadMerge(void) 
 : CMergeDatedDatums(), CThreadCrossingMessage<CCrossThreadMerge>()
 {
@@ -46,3 +49,6 @@ LRESULT CCrossThreadMerge::ProcessCarrierInForeGround( UINT, WPARAM w, LPARAM l,
   bHandled = TRUE;
   return 1;
 }
+
+} // namespace tf
+} // namespace ou

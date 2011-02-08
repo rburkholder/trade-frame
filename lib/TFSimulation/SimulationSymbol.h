@@ -17,10 +17,13 @@
 
 #include <boost/detail/atomic_count.hpp>
 
-#include "LibTimeSeries/TimeSeries.h"
-#include "LibTrading/Symbol.h"
+#include "TFTimeSeries/TimeSeries.h"
+#include "TFTrading/Symbol.h"
 
 #include "SimulateOrderExecution.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class CSimulationSymbol: public CSymbol<CSimulationSymbol> {
   friend class CSimulationProvider;
@@ -64,3 +67,6 @@ protected:
 private:
 
 };
+
+} // namespace tf
+} // namespace ou

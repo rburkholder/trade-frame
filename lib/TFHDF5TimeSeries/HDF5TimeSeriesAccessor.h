@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include <LibTimeSeries/DatedDatum.h>
+#include <TFTimeSeries/DatedDatum.h>
 
 #include "HDF5DataManager.h"
 

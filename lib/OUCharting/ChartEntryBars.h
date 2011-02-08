@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <LibTimeSeries/DatedDatum.h>
+#include <TFTimeSeries/DatedDatum.h>
 
 #include "ChartEntryBase.h"
 

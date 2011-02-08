@@ -13,6 +13,10 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+#include <utility>
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace boost::posix_time;
@@ -23,14 +27,13 @@ using namespace boost::gregorian;
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 
-#include <string>
-#include <vector>
-#include <utility>
-
 // will need to use the flex field capability where we get only the fields we need
 // field offsets are 1 based, in order to easily match up with documentation
 // for all the charT =  = unsigned char template parameters, need to turn into a trait
 //   trait is shared with IQFeedMessages and Network
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 template <class T, class charT = unsigned char>
 class CIQFBaseMessage {
@@ -471,4 +474,6 @@ ptime CIQFPricingMessage<T, charT>::LastTradeTime( void ) {
   }
 }
 
+} // namespace tf
+} // namespace ou
 

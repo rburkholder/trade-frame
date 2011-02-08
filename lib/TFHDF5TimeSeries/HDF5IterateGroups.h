@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#include <LIbCommon/FastDelegate.h>
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include "HDF5DataManager.h"
