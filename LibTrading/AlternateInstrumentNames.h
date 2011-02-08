@@ -21,7 +21,10 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #pragma warning( disable : 4996 )
 
-class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+  class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
 public:
   CAlternateInstrumentNames();
   ~CAlternateInstrumentNames(void);
@@ -98,3 +101,5 @@ void CProviderInterface<P,S>::GetAlternateInstrumentName(const std::string &Orig
 }
 */
 
+} // namespace tf
+} // namespace ou

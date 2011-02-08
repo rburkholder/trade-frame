@@ -15,6 +15,9 @@
 
 #include <HDF5/H5Cpp.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CHDF5DataManager {
 public:
   CHDF5DataManager(void);
@@ -33,6 +36,9 @@ protected:
   static H5::H5File m_H5File;
 private:
 };
+
+} // namespace tf
+} // namespace ou
 
 
 /*

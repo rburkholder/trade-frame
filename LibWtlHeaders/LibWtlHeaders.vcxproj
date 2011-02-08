@@ -14,6 +14,7 @@
     <ProjectGuid>{59B836F9-5799-4F25-82EB-F4C9F180CD94}</ProjectGuid>
     <RootNamespace>LibWtlHeaders</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>WtlHeaders</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

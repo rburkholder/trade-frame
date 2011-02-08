@@ -23,6 +23,9 @@
 #include "HDF5TimeSeriesAccessor.h"
 #include "HDF5TimeSeriesContainer.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<class T> class CHDF5TimeSeriesContainer;
 
 template<class T> class CHDF5TimeSeriesIterator: 
@@ -188,3 +191,5 @@ template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeries
 //  return (*this);
 //}
 
+} // namespace tf
+} // namespace ou

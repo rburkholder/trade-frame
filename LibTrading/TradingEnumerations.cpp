@@ -14,6 +14,9 @@
 #include "StdAfx.h"
 #include "TradingEnumerations.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 namespace InstrumentType {
   const char* Name[] = { "Unknown", "Stock", "Option", "Future", 
     "FuturesOption", "Currency", "Index", "ETF", "Bond", "Commodity", "Metal",  };
@@ -33,3 +36,5 @@ namespace OrderSide {
   const char* Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
 }
 
+} // namespace tf
+} // namespace ou

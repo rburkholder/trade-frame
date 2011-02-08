@@ -14,6 +14,7 @@
     <ProjectGuid>{23192E89-C17F-4C84-B35C-3677927D64A6}</ProjectGuid>
     <RootNamespace>LibIQFeed</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>IQFeed</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

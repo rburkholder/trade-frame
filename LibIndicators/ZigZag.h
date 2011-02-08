@@ -20,6 +20,9 @@ using namespace fastdelegate;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CZigZag {
 public:
   CZigZag(double FilterWidth);
@@ -53,3 +56,6 @@ private:
   OnPeakFoundHandler OnPeakFound;
   OnDecisionPointFoundHandler UpDecisionPointFound, DnDecisionPointFound;
 };
+
+} // namespace tf
+} // namespace ou

@@ -16,6 +16,9 @@
 #include <string>
 #include <stdexcept>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //class CTradingDb: public ou::db::CSession
 class CTradingDb
 {
@@ -28,3 +31,5 @@ protected:
 private:
 };
 
+} // namespace tf
+} // namespace ou

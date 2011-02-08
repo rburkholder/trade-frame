@@ -15,6 +15,9 @@
 
 #include "Pivots.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const std::string CPivotSet::m_sPivotNames[ CPivotSet::PivotCount ] 
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
@@ -93,6 +96,10 @@ void CPivotSet::CalcHalfPivots() {
   m_rPivots[ S23  ] = ( m_rPivots[ S2 ] + m_rPivots[ S3 ] ) / 2;
 }
 
+} // namespace tf
+} // namespace ou
+
+
 /*
 http://www.earnforex.com/pivot_points_calculator.php
 The floor pivot points, presented in the first column of the calculation results table, 
@@ -165,3 +172,4 @@ S3 = C - (H - L) X 1.1 / 4
 
 S4 = C - (H - L) X 1.1 / 2 
 */
+

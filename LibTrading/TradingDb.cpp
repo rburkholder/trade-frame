@@ -17,6 +17,9 @@
 #include <stdexcept>
 #include <cassert>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CTradingDb::CTradingDb( const char* szDbFileName ) 
 //: CDbSession( szDbFileName )
 {
@@ -25,3 +28,5 @@ CTradingDb::CTradingDb( const char* szDbFileName )
 CTradingDb::~CTradingDb(void) {
 }
 
+} // namespace tf
+} // namespace ou

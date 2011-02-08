@@ -15,6 +15,9 @@
 
 #include <map>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CRMMPointStat {
 public:
   CRMMPointStat(void) { m_cntObjectsAtPrice = 1; };
@@ -39,3 +42,6 @@ protected:
   typedef std::pair<double, CRMMPointStat*> m_mapPointStats_pair;
 private:
 };
+
+} // namespace tf
+} // namespace ou

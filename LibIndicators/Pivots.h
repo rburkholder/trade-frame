@@ -28,6 +28,9 @@
 
 #include <LibTimeSeries/TimeSeries.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CPivotSet {
 public:
 
@@ -88,3 +91,6 @@ private:
   static const ou::Colour::enumColour m_rPivotColours[ PivotCount ];
 
 };
+
+} // namespace tf
+} // namespace ou

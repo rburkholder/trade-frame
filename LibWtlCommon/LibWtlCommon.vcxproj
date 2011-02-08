@@ -14,6 +14,7 @@
     <ProjectGuid>{DF7C1FF7-075F-4DCC-8E43-0C704AD54163}</ProjectGuid>
     <RootNamespace>LibWtlCommon</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>WtlCommon</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

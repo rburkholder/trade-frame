@@ -18,6 +18,9 @@
 
 #include "HDF5DataManager.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
 const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.hdf5";
 H5::H5File CHDF5DataManager::m_H5File;
@@ -136,3 +139,5 @@ void CHDF5DataManager::DailyBarPath(const std::string &sSymbol, std::string &sPa
   sPath.append( sSymbol );
 }
 
+} // namespace tf
+} // namespace ou

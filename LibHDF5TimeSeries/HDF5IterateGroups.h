@@ -15,6 +15,9 @@
 #include <string>
 #include <iostream>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 #include <LIbCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -109,3 +112,5 @@ private:
   }
 };
 
+} // namespace tf
+} // namespace ou

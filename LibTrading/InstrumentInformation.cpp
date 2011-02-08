@@ -15,6 +15,9 @@
 
 #include "InstrumentInformation.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CInstrumentInformation::CInstrumentInformation( const std::string& sDbFileName ) 
 : CCommonDatabaseFunctions<CInstrumentInformation>( sDbFileName, "InstrumentInformation" ) {
 }
@@ -50,5 +53,9 @@ void CInstrumentInformation::Retrieve(const std::string &sSymbol) {
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentInformation::Retrieve get had error" );
   m_pValues = (structValues *) v.get_data();
 }
+
+} // namespace tf
+} // namespace ou
+
 
 

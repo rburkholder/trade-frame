@@ -20,6 +20,9 @@
 
 #include <LibTimeSeries/DatedDatum.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CDarvasResults {
 public:
   CDarvasResults( bool bTrigger, double dblStopLevel ): m_bTrigger( bTrigger ), m_dblStopLevel( dblStopLevel ) {};
@@ -200,6 +203,8 @@ void CDarvas<T>::Calc(const CBar& bar) {
 
 }
 
+} // namespace tf
+} // namespace ou
 
 
 // conservative trigger:  on a breakout after establishing the box

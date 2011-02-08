@@ -17,6 +17,9 @@
 
 // look up Tirone Levels, page 335, in Tech Anal, A-Z
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CRunningMinMax::CRunningMinMax(void) 
 : m_dblMax( 0 ), m_dblMin( 0 )
 {
@@ -74,3 +77,5 @@ void CRunningMinMax::Remove(double val) {
   }
 }
 
+} // namespace tf
+} // namespace ou

@@ -15,6 +15,9 @@
 
 #include "ZigZag.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CZigZag::CZigZag( double FilterWidth ) : 
   m_dblFilterWidth( FilterWidth ), 
   m_PatternState( EDirection::Init ),
@@ -82,3 +85,6 @@ void CZigZag::Check(boost::posix_time::ptime dt, double val) {
       break;
   }
 }
+
+} // namespace tf
+} // namespace ou

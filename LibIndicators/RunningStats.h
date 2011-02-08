@@ -13,6 +13,9 @@
 
 #pragma once
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CRunningStats {
 public:
   CRunningStats(void);
@@ -44,3 +47,6 @@ protected:
   double m_BBMultiplier;
 private:
 };
+
+} // namespace tf
+} // namespace ou

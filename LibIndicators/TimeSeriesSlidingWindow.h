@@ -15,6 +15,9 @@
 
 #include <LibTimeSeries/TimeSeries.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<class T> class CTimeSeriesSlidingWindow {
 public:
   CTimeSeriesSlidingWindow<T>( CTimeSeries<T> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
@@ -87,3 +90,5 @@ template<class T> void CTimeSeriesSlidingWindow<T>::Update( void ) {
   PostUpdate();
 }
 
+} // namespace tf
+} // namespace ou

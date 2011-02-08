@@ -23,6 +23,9 @@ using namespace boost::gregorian;
 
 #include "LibBerkeleyDB/CommonDatabaseFunctions.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CInstrumentInformation : public CCommonDatabaseFunctions<CInstrumentInformation> {
 public:
   CInstrumentInformation( const std::string& sDbFileName );
@@ -104,6 +107,9 @@ protected:
   } *m_pValues;
 private:
 };
+
+} // namespace tf
+} // namespace ou
 
 
 /*  Format Code
@@ -211,3 +217,4 @@ Market ID 	Market Name
 75 	Warenterminborse Hannover
 76 	EUREX Indexes
 */
+

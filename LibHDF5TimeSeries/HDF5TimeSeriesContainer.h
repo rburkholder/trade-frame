@@ -24,6 +24,9 @@
 #include "HDF5TimeSeriesIterator.h"
 #include "HDF5TimeSeriesAccessor.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<class T> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<T> {
 public:
   CHDF5TimeSeriesContainer<T>( const std::string &sPathName );
@@ -88,3 +91,6 @@ template<class T> void CHDF5TimeSeriesContainer<T>::Write( T *_begin, T *_end ) 
     CHDF5TimeSeriesAccessor<T>::Write( p.first.m_ItemIndex, cnt, _begin );
   }
 }
+
+} // namespace tf
+} // namespace ou

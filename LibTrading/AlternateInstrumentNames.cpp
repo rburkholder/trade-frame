@@ -17,6 +17,9 @@
 
 #include "AlternateInstrumentNames.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CAlternateInstrumentNames::CAlternateInstrumentNames() 
   : CCommonDatabaseFunctions<CAlternateInstrumentNames>( Trading::DbFileName, "AlternateInstrumentNames" ) {
 }
@@ -47,3 +50,6 @@ void CAlternateInstrumentNames::Get(const std::string &ProviderName, const std::
   if ( 0 != ret ) throw std::runtime_error( "CAlternateInstrumentNames::Get get had error" );
   pAlternate->assign( val.Value, val.nValueLength );
 }
+
+} // namespace tf
+} // namespace ou

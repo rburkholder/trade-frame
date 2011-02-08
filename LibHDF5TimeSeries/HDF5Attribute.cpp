@@ -15,6 +15,9 @@
 
 #include "HDF5Attribute.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 const char szInstrumentType[] = "InstrumentType";
 const char szProviderId[] = "ProviderId";
 const char szUnderlying[] = "Underlying";
@@ -178,3 +181,6 @@ void CHDF5Attributes::GetFutureAttributes( structFuture* future ) {
   attribDay.close();
 
 }
+
+} // namespace tf
+} // namespace ou

@@ -19,6 +19,9 @@
 
 #include "HDF5DataManager.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 // inherited by CHDF5TimeSeriesContainer
 // called by CHDF5TimeSeriesIterator to access elements
 // purpose is to get around the other circular reference of iterator needs to
@@ -209,3 +212,5 @@ template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_
   }
 }
 
+} // namespace tf
+} // namespace ou

@@ -14,6 +14,7 @@
     <ProjectGuid>{12CC3456-56CB-4AC1-979F-B6B73BB47929}</ProjectGuid>
     <RootNamespace>LibHDF5TimeSeries</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>HDF5TimeSeries</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

@@ -18,6 +18,9 @@
 
 #include "HDF5TimeSeriesContainer.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 // TS: TimeSeries, DD: DatedDatum, the type that TS uses
 // todo:  need to implement compile time type-matching for allowable TS/DD conbinations
 template<class TS, class DD> class CHDF5WriteTimeSeries {
@@ -113,3 +116,6 @@ template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::
         throw e;
       }
 */
+
+} // namespace tf
+} // namespace ou

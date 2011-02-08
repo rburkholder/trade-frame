@@ -15,6 +15,9 @@
 
 #include "TimeSeriesSlidingWindowStats.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // Trade
 //
@@ -65,3 +68,5 @@ void CTimeSeriesSlidingWindowStatsQuote::Expire( const CQuote &quote ) {
   m_stats.Remove( dif, quote.Ask() );
 }
 
+} // namespace tf
+} // namespace ou

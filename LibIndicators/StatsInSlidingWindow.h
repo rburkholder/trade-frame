@@ -20,6 +20,9 @@
 #include "slidingwindow.h"
 #include "RunningStats.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<class T> class CStatsInSlidingWindow :  public CSlidingWindow<T> {
 public:
   CStatsInSlidingWindow<T>(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
@@ -77,3 +80,6 @@ public:
 protected:
 private:
 };
+
+} // namespace tf
+} // namespace ou

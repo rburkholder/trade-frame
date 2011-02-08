@@ -16,6 +16,9 @@
 #include "TimeSeriesSlidingWindow.h"
 #include "RunningStats.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 template<class T> class CTimeSeriesSlidingWindowStats
 : public CTimeSeriesSlidingWindow<T> {
 public:
@@ -76,3 +79,5 @@ protected:
 private:
 };
 
+} // namespace tf
+} // namespace ou

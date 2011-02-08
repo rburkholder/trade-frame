@@ -17,6 +17,9 @@
 
 #include "Pivots.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CPivotGroup {
 public:
   CPivotGroup(void);
@@ -36,3 +39,6 @@ protected:
   void AddToMap( CPivotSet &set );
 private:
 };
+
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,9 @@
 
 #include "RunningStats.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CRunningStats::CRunningStats(void) : 
   b2( 0 ), b1( 0 ), b0( 0 ), 
   SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
@@ -86,3 +89,5 @@ void CRunningStats::CalcStats() {
   }
 }
 
+} // namespace tf
+} // namespace ou

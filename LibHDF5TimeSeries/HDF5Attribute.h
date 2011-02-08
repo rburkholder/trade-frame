@@ -18,6 +18,9 @@
 #include "HDF5DataManager.h"
 #include <LibTrading/TradingEnumerations.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CHDF5Attributes {
 public:
 
@@ -70,3 +73,5 @@ private:
   H5::DataSet *m_pDataSet;
 };
 
+} // namespace tf
+} // namespace ou

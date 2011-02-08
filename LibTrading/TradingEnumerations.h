@@ -15,6 +15,9 @@
 
 #pragma once
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
   enum enumInstrumentTypes : char { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
   const char* Name[];
@@ -65,4 +68,7 @@ namespace Trading {
 // http://en.wikipedia.org/wiki/Currency_pair
 // bigger number, base is stronger
 // smaller number, base is weaker
+
+} // namespace tf
+} // namespace ou
 

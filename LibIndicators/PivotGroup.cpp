@@ -15,6 +15,9 @@
 
 #include "PivotGroup.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CPivotGroup::CPivotGroup(void) 
  {
 }
@@ -106,3 +109,6 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
   }
 
 }
+
+} // namespace tf
+} // namespace ou

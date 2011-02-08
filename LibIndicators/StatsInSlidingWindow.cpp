@@ -15,6 +15,9 @@
 
 #include "StatsInSlidingWindow.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CTradeStats::CTradeStats( std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount ): 
   CStatsInSlidingWindow( sName, WindowSizeSeconds, WindowSizeCount  ) {
 }
@@ -34,3 +37,6 @@ CTrade *CTradeStats::Remove() {
   CStatsInSlidingWindow::Remove( trade->DateTime(), trade->Trade() );
   return trade;
 }
+
+} // namespace tf
+} // namespace ou

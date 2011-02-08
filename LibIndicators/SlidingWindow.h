@@ -22,6 +22,9 @@ using namespace boost::gregorian;
 
 #include <LibTimeSeries/DatedDatum.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 //
 // CObjectAtTime
 // Has a time reference, and holds an object related to the time reference
@@ -200,3 +203,6 @@ public:
 protected:
 private:
 };
+
+} // namespace tf
+} // namespace ou

@@ -15,6 +15,9 @@
 
 #include "SlidingWindow.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CSlidingWindowBars::CSlidingWindowBars(unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) : 
   CSlidingWindow<CBar>( WindowSizeSeconds, WindowSizeCount ) {
 }
@@ -35,3 +38,5 @@ CBar *CSlidingWindowBars::Remove( void ) {
   return NULL;
 }
 
+} // namespace tf
+} // namespace ou
