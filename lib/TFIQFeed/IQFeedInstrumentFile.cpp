@@ -132,8 +132,9 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
         }
 
         CInstrument::pInstrument_t pUnderlying( CreateInstrumentFromIQFeed( sUnderlying ) );
-        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, 
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, 
           (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          sExchange, 
           rec.nYear, rec.nMonth,
           pUnderlying, 
           (OptionSide::enumOptionSide) rec.nOptionSide, 
@@ -142,7 +143,8 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
       }
       break;
     case InstrumentType::Future: {
-         CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, rec.nYear, rec.nMonth ) );
+         CInstrument::pInstrument_t pInstrument( 
+           new CInstrument( sIQFeedSymbolName, (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, sExchange, rec.nYear, rec.nMonth ) );
          return pInstrument;
        }
       break;
@@ -164,8 +166,9 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
         const char *e = strchr( p, ' ' );  
         u_int32_t len = e - p;
         std::string sUnderlying( rec.line + rec.ix[1], len );
-        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, sExchange, 
+        CInstrument::pInstrument_t pInstrument( new CInstrument( sIQFeedSymbolName, 
           (InstrumentType::enumInstrumentTypes) rec.eInstrumentType, 
+          sExchange, 
           rec.nYear, rec.nMonth, rec.nDay,
           pUnderlying, 
           (OptionSide::enumOptionSide) rec.nOptionSide, 

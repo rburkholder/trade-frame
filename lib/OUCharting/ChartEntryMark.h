@@ -20,6 +20,8 @@
 
 // level markers (horizontal lines at a price level)
 
+namespace ou { // One Unified
+
 class CChartEntryMark :
   public CChartEntryBase {
 public:
@@ -32,3 +34,5 @@ protected:
   std::vector<std::string> m_vName;
 private:
 };
+
+} // namespace ou

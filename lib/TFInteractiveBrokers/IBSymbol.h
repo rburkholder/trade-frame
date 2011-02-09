@@ -24,6 +24,9 @@
 
 #include "TWS/EWrapper.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CIBSymbol : public CSymbol<CIBSymbol> {
   friend class CIBTWS;
 public:
@@ -96,3 +99,6 @@ private:
   long m_conId;  // matches IB contract id
 
 };
+
+} // namespace tf
+} // namespace ou

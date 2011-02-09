@@ -15,6 +15,8 @@
 
 #include "ChartEntryMark.h"
 
+namespace ou { // One Unified
+
 CChartEntryMark::CChartEntryMark(void) 
 : CChartEntryBase()
 {
@@ -41,3 +43,5 @@ void CChartEntryMark::AddDataToChart( XYChart *pXY, structChartAttributes *pAttr
   }
   
 }
+
+} // namespace ou

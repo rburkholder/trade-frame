@@ -20,6 +20,8 @@
 
 // need to add in std::string for commenting the shape
 
+namespace ou { // One Unified
+
 class CChartEntryShape :
   public CChartEntryBaseWithTime {
 public:
@@ -42,3 +44,5 @@ protected:
   }
 private:
 };
+
+} // namespace ou

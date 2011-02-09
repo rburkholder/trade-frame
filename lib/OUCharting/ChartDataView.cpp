@@ -15,6 +15,8 @@
 
 #include "ChartDataView.h"
 
+namespace ou { // One Unified
+
 //
 // CChartDataViewCarrier
 //
@@ -92,3 +94,4 @@ void CChartDataView::Close() {
   m_bClosed = true;
 }
 
+} // namespace ou

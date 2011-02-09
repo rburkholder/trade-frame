@@ -20,19 +20,21 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <LibTimeSeries/DatedDatum.h>
-#include <LibTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/DatedDatum.h>
+#include <TFTimeSeries/TimeSeries.h>
 
-#include <LibTrading/Instrument.h>
-#include <LibTrading/PortfolioManager.h>
-#include <LibTrading/ProviderManager.h>
+#include <TFTrading/Instrument.h>
+#include <TFTrading/PortfolioManager.h>
+#include <TFTrading/ProviderManager.h>
 
-#include <LibIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
-#include <LibIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
+#include <TFIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
+#include <TFIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
 
-#include <LibInteractiveBrokers/IBTWS.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 
-#include <LibSimulation/SimulationProvider.h>
+#include <TFSimulation/SimulationProvider.h>
+
+using namespace ou::tf;
 
 //
 // ==================

@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="EClientSocketBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EPosixClientSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IBSymbol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -16,54 +10,18 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EClientSocketBase.cpp">
+      <Filter>Source Files\TWS</Filter>
+    </ClCompile>
+    <ClCompile Include="EPosixClientSocket.cpp">
+      <Filter>Source Files\TWS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TWS\CommonDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\Contract.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EClientSocketBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EClientSocketBaseImpl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EPosixClientSocket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EPosixClientSocketPlatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\EWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\Execution.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\IBString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IBSymbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IBTWS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\Order.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\OrderState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\ScannerSubscription.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TWS\shared_ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -72,8 +30,50 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TWS\CommonDefs.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\Contract.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EClient.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EClientSocketBase.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EClientSocketBaseImpl.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EPosixClientSocket.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EPosixClientSocketPlatform.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\EWrapper.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\Execution.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\IBString.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
     <ClInclude Include="TWS\TwsSocketClientErrors.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\OrderState.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\Order.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\ScannerSubscription.h">
+      <Filter>Header Files\TWS</Filter>
+    </ClInclude>
+    <ClInclude Include="TWS\shared_ptr.h">
+      <Filter>Header Files\TWS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +85,12 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{0e2cce08-b373-41e6-9bae-1d584254ee64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\TWS">
+      <UniqueIdentifier>{b0aac7aa-9912-4c88-8a0d-7e13ecf551bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TWS">
+      <UniqueIdentifier>{e465dfcd-f469-40c2-aa7f-e7fe2b50252b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

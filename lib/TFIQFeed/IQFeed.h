@@ -251,13 +251,13 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       {
         CIQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( _T( "KEY" ) == msg->Field( 2 ) ) {
+        if ( "KEY" == msg->Field( 2 ) ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
           Send( ss.str() );
         }
-        if ( _T( "CUST" ) == msg->Field( 2 ) ) {
-          if ( _T( "4.3.0.3" ) > msg->Field( 7 ) ) {
+        if ( "CUST" == msg->Field( 2 ) ) {
+          if ( "4.3.0.3" > msg->Field( 7 ) ) {
 //            cout << "Need IQFeed version of 4.3.0.3 or greater (" << msg.Field( 7 ) << ")" << endl;
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }

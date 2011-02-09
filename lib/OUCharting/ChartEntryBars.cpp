@@ -15,6 +15,8 @@
 
 #include "ChartEntryBars.h"
 
+namespace ou { // One Unified
+
 //
 // CChartEntryVolume
 //
@@ -83,7 +85,7 @@ void CChartEntryBars::Reserve( unsigned int nSize ) {
   m_vClose.reserve( nSize );
 }
 
-void CChartEntryBars::AddBar(const CBar &bar) {
+void CChartEntryBars::AddBar(const ou::tf::CBar &bar) {
   if ( m_vOpen.capacity() == m_vOpen.size() ) {
     int sz = m_vOpen.size() + ( m_vOpen.size() / 5 ); // expand by 20%
     //CChartEntryBaseWithTime::Reserve( sz );
@@ -115,3 +117,5 @@ void CChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttri
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
   }
 }
+
+} // namespace ou

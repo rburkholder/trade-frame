@@ -56,9 +56,10 @@ public:
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructCurrency( 
-    idInstrument_cref sInstrumentName, 
+    idInstrument_cref idInstrumentName, 
+    idInstrument_cref idCounterInstrument,
     //const std::string& sUnderlyingName, // currency
-    pInstrument_t pUnderlying,
+    //pInstrument_t pUnderlying,
     const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
 

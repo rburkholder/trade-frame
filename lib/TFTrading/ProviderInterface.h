@@ -64,7 +64,7 @@ public:
   typedef keytypes::eidProvider_t eidProvider_t;
 
   const std::string& Name( void ) const { return m_sName; };
-  unsigned short ID( void ) const { assert( 0 != m_nID ); return m_nID; };
+  eidProvider_t ID( void ) const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
 
   CProviderInterfaceBase( void )
     : m_nID( keytypes::EProviderUnknown ), m_bConnected( false ),
@@ -109,7 +109,7 @@ public:
 protected:
 
   std::string m_sName;  // name of provider
-  keytypes::eidProvider_t m_nID;
+  eidProvider_t m_nID;
 
   bool m_bConnected;
 

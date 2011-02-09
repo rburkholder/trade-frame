@@ -94,13 +94,13 @@ CInstrument::CInstrument(
 
 // currency
 CInstrument::CInstrument(
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
-  pInstrument_t pUnderlying,
+  const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
+  InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
   Currency::enumCurrency base, Currency::enumCurrency counter
   ) 
-  : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), base, counter ),
-  m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingSet )
+  : m_row( idInstrument, idCounterInstrument, eType, idExchange, base, counter ),
+//  m_pUnderlying( pUnderlying ), 
+  m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
   
 }

@@ -47,6 +47,9 @@ using namespace boost::gregorian;
 #include "TWS/OrderState.h"
 #include "TWS/Execution.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class CIBTWS : 
   public CProviderInterface<CIBTWS, CIBSymbol>, 
   public EWrapper 
@@ -222,3 +225,6 @@ private:
     m_vReqId.push_back( id );
   }
 };
+
+} // namespace tf
+} // namespace ou

@@ -75,7 +75,9 @@
     <ClInclude Include="IQFeedSymbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IQFeedProvider.h" />
+    <ClInclude Include="IQFeedProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

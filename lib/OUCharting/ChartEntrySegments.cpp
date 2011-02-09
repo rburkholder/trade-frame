@@ -15,6 +15,8 @@
 
 #include "ChartEntrySegments.h"
 
+namespace ou { // One Unified
+
 CChartEntrySegments::CChartEntrySegments(void) 
 : CChartEntryBaseWithTime()
 {
@@ -32,3 +34,5 @@ void CChartEntrySegments::AddDataToChart(XYChart *pXY, structChartAttributes *pA
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
   }
 }
+
+} // namespace ou

@@ -138,10 +138,11 @@ public:
         assert( 0 < idUnderlying.size() );
     };
     TableRowDef( // currency
-      idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-      idInstrument_t idUnderlying_, Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
+      const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
+      InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
+      Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
-        idUnderlying( idUnderlying_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
+        idUnderlying( idCounterInstrument_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
         eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
         nContract( 0 ), nMultiplier( 1 ) {
           assert( eType_ == InstrumentType::Currency );
@@ -174,9 +175,8 @@ public:
     OptionSide::enumOptionSide side, 
     double strike ); 
   CInstrument(  // currency
-    idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
-    const idExchange_t& sExchangeName,
-    pInstrument_t pUnderlying,
+    const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
+    InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   virtual ~CInstrument(void);

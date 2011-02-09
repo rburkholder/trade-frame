@@ -27,13 +27,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChartDirector\bchartdir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ChartDataView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChartDirector\chartdir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ChartEntryBars.h">
@@ -54,17 +48,23 @@
     <ClInclude Include="ChartEntryShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ChartDirector\FinanceChart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChartDirector\memblock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector\bchartdir.h">
+      <Filter>ChartDir</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector\chartdir.h">
+      <Filter>ChartDir</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector\FinanceChart.h">
+      <Filter>ChartDir</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector\memblock.h">
+      <Filter>ChartDir</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +76,9 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{fbede45c-5801-4187-a087-d7be54d8da13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ChartDir">
+      <UniqueIdentifier>{0063f308-c1e3-407d-ae6a-2bfee8ad2ee6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

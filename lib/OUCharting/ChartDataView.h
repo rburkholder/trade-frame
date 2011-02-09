@@ -21,6 +21,8 @@
 
 #include "ChartEntryBase.h"
 
+namespace ou { // One Unified
+
 // CChartDataView contains the CChartEntries and related sub-chart 
 //   to be viewed in a master chart viewport 
 
@@ -81,5 +83,7 @@ protected:
   bool m_bChanged;
 private:
 };
+
+} // namespace ou
 
 // http://www.parashift.com/c++-faq-lite/assignment-operators.html

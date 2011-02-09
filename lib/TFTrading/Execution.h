@@ -64,13 +64,22 @@ public:
     : idExecution( idExecution_ ), idOrder( idOrder_ ), nQuantity( nQuantity_ ), 
       dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
       sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+  TableRowDef( /* idExecution_t idExecution_, idOrder_t idOrder_, */
+    unsigned long nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+    std::string sExchange_, std::string sExchangeExecutionId_ )
+    : idExecution( 0 ), idOrder( 0 ), nQuantity( nQuantity_ ),  // executionid from db, idOrder from owner
+      dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
+      sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
   };
 
   const static std::string m_sTableName;
 
   CExecution( const TableRowDef& row ): m_row( row ) {};
-  CExecution( 
+  CExecution( // when relating to database
     idExecution_t idExecution, idOrder_t nOrderId,
+    double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
+    const std::string& sExchange, const std::string& sExchangeExecutionId );
+  CExecution( // when supplied by provider
     double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExchangeExecutionId );
   ~CExecution(void);

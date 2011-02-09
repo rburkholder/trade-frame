@@ -20,9 +20,13 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
 #include "IBTWS.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
   CProviderInterface<CIBTWS,CIBSymbol>(), 
@@ -33,7 +37,7 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
   m_nxtReqId( 0 )
 {
   m_sName = "IB";
-  m_nID = EProviderIB;
+  m_nID = keytypes::EProviderIB;
   pSymbol_t p;
   m_vTickerToSymbol.push_back( p );  // first ticker is 1, so preload with nothing at position 0
   m_bProvidesQuotes = true;
@@ -544,7 +548,7 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
   switch ( it ) {
     case InstrumentType::Stock: 
       if ( "" == sExchange ) sExchange = "SMART";
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it ) );
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange ) );
       break;
     case InstrumentType::FuturesOption:
     case InstrumentType::Option:
@@ -556,13 +560,13 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
         throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
       }
       pInstrument = CInstrument::pInstrument_t( new CInstrument( 
-        sLocalSymbol, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day(), 
+        sLocalSymbol, it, sExchange, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day(), 
         iterSymbol->second->GetInstrument(), 
         os, contract.strike ) );
       break;
     case InstrumentType::Future:
       if ( "" == sExchange ) sExchange = "SMART";
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, sExchange, it, dtExpiry.date().year(), dtExpiry.date().month() ) );
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiry.date().year(), dtExpiry.date().month() ) );
       break;
     case InstrumentType::Currency:
       bFound = false;
@@ -597,7 +601,7 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
 
       if ( "" == sExchange ) sExchange = "IDEALPRO";
 
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, base, counter ) );
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
       break;
   }
   if ( NULL == pInstrument ) 
@@ -818,3 +822,6 @@ char *CIBTWS::TickTypeStrings[] = {
 				"SHORTABLE",
 				"NOT_SET"
 };
+
+} // namespace tf
+} // namespace ou

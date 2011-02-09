@@ -15,6 +15,8 @@
 
 #include "ChartEntryBase.h"
 
+namespace ou { // One Unified
+
 //
 // CChartEntryBase
 //
@@ -86,3 +88,4 @@ void CChartEntryBaseWithTime::Add( const boost::posix_time::ptime &dt, double pr
   Add( dt );
 }
 
+} // namespace ou

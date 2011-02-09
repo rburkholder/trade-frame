@@ -103,12 +103,13 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
 }
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency( 
-  idInstrument_cref sInstrumentName, 
-  pInstrument_t pUnderlying,
+  idInstrument_cref idInstrumentName, 
+  idInstrument_cref idCounterInstrument,
+//  pInstrument_t pUnderlying,
   const std::string& sExchangeName, 
   Currency::enumCurrency base, Currency::enumCurrency counter ) {
   pInstrument_t pInstrument(
-    new CInstrument( sInstrumentName, InstrumentType::Currency, sExchangeName, pUnderlying, base, counter ) );
+    new CInstrument( idInstrumentName, idCounterInstrument, InstrumentType::Currency, sExchangeName, base, counter ) );
   Assign( pInstrument );
   return pInstrument;
 }

@@ -15,6 +15,8 @@
 
 #include "ChartEntryIndicator.h"
 
+namespace ou { // One Unified
+
 CChartEntryIndicator::CChartEntryIndicator(void) 
 : CChartEntryBaseWithTime() 
 {
@@ -43,3 +45,5 @@ void CChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *p
     pds->setDataColor( m_eColour );
   }
 }
+
+} // namespace ou

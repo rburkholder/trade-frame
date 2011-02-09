@@ -120,16 +120,6 @@
   <ItemGroup>
     <None Include="ReadMe.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibTrading\LibTrading.vcxproj">
-      <Project>{11243a27-764a-4119-beff-a8a80fd615ec}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibWtlCommon\LibWtlCommon.vcxproj">
-      <Project>{df7c1ff7-075f-4dcc-8e43-0c704ad54163}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

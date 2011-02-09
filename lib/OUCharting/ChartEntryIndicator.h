@@ -15,6 +15,8 @@
 
 #include "ChartEntryBase.h"
 
+namespace ou { // One Unified
+
 class CChartEntryIndicator :
   public CChartEntryBaseWithTime {
 public:
@@ -26,3 +28,5 @@ public:
 protected:
 private:
 };
+
+} // namespace ou

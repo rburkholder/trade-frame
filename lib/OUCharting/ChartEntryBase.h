@@ -41,6 +41,8 @@ using namespace boost::gregorian;
 //#include "ChartDirector\memblock.h"
 //#include "ChartDirector\chartviewer.h"
 
+namespace ou { // One Unified
+
 class CChartEntryBase {
 public:
   CChartEntryBase( void );
@@ -92,3 +94,5 @@ protected:
   }
 private:
 };
+
+} // namespace ou

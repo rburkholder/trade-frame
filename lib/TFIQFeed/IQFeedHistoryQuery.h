@@ -44,9 +44,6 @@ namespace ascii = boost::spirit::ascii;
 #include <OUCommon/ReusableBuffers.h>
 #include <OUCommon/Network.h>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
 //#define _CRTDBG_MAP_ALLOC
@@ -236,6 +233,9 @@ namespace IQFeedHistoryStructs {
   };
 
 }
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // T: CRTP inheriting class, U: type passed in for reference by inheriting class
 template <typename T>

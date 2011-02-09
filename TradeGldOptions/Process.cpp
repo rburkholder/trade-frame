@@ -19,16 +19,16 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <LibCommon/TimeSource.h>
+#include <OUCommon/TimeSource.h>
 
-#include <LibIndicators/Pivots.h>
+#include <TFIndicators/Pivots.h>
 
-#include <LibHDF5TimeSeries/HDF5DataManager.h>
-#include <LibHDF5TimeSeries/HDF5WriteTimeSeries.h>
-#include <LibHDF5TimeSeries/HDF5IterateGroups.h>
-#include <LibHDF5TimeSeries/HDF5Attribute.h>
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
 
-#include <LibTrading/InstrumentManager.h>
+#include <TFTrading/InstrumentManager.h>
 
 #include "Process.h"
 
@@ -769,7 +769,7 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
 
   // set the actual watches
   m_bWatchingOptions = true;
-  if ( CProviderInterfaceBase::EProviderSimulator != m_pDataProvider->ID() ) {
+  if ( keytypes::EProviderSimulator != m_pDataProvider->ID() ) {
     for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
       m_pDataProvider->AddQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
@@ -932,7 +932,7 @@ void CProcess::SaveSeries( void ) {
   m_ss.str( "" );
   m_ss << ou::CTimeSource::Instance().Internal();
 
-  if ( CProviderInterfaceBase::EProviderSimulator == m_pDataProvider->ID() ) {
+  if ( keytypes::EProviderSimulator == m_pDataProvider->ID() ) {
     m_ss << " simulator stores nothing." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     return;

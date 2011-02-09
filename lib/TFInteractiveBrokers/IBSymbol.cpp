@@ -17,6 +17,9 @@
 
 #include "IBSymbol.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
   CSymbol<CIBSymbol>( pInstrument ), 
@@ -185,3 +188,6 @@ void CIBSymbol::Greeks( double optPrice, double undPrice, double pvDividend,
   m_OnGreek( greek );
 
 }
+
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,8 @@
 
 #include "ChartEntryBase.h"
 
+namespace ou { // One Unified
+
 class CChartEntryVolume: public CChartEntryBaseWithTime {
 public:
   CChartEntryVolume(void);
@@ -36,7 +38,7 @@ public:
   CChartEntryBars(unsigned int nSize);
   virtual ~CChartEntryBars(void);
   virtual void Reserve( unsigned int );
-  void AddBar( const CBar &bar );
+  void AddBar( const ou::tf::CBar &bar );
   virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   std::vector<double> m_vOpen;
@@ -61,3 +63,5 @@ protected:
   }
 private:
 };
+
+} // namespace ou

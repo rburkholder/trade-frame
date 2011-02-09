@@ -15,6 +15,8 @@
 
 #include "ChartEntryShape.h"
 
+namespace ou { // One Unified
+
 int CChartEntryShape::m_rShapes[] = { 
   Chart::DiamondShape,
   Chart::TriangleShape, Chart::InvertedTriangleShape, 
@@ -69,3 +71,5 @@ void CChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttr
     //textbox->setPos(4, 0);
   }
 }
+
+} // namespace ou
