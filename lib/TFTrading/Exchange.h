@@ -32,17 +32,23 @@ public:
       ou::db::Field( a, "exchangeid", idExchange );
       ou::db::Field( a, "name", sName );
       ou::db::Field( a, "countryid", idCountry );
-
-      ou::db::Key( a, "exchangeid" );
-
     }
 
     idExchange_t idExchange;
     std::string sName;
     std::string idCountry;
 
+    TableRowDef( void ) {};
     TableRowDef( const idExchange_t& idExchange_, const std::string& sName_, const std::string& idCountry_ )
       : idExchange( idExchange_ ), sName( sName_ ), idCountry( idCountry_ ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "exchangeid" );
+    }
   };
 
   const static std::string m_sTableName;

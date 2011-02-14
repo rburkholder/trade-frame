@@ -29,18 +29,15 @@ public:
 
   struct TableRowDef {
     template<class A>
-    void Fields( A& A ) {
-      ou::db::Field( a, "accountid" );
-      ou::db::Field( a, "accountownerid" );
-      ou::db::Field( a, "accountname" );
-      ou::db::Field( a, "providername" );
-      ou::db::Field( a, "brokername" );
-      ou::db::Field( a, "brokeraccountid" );
-      ou::db::Field( a, "login" );
-      ou::db::Field( a, "password" );
-
-      ou::db::Key( a, "accountid" );
-      ou::db::Constraint( "accountownerid", CAccountOwner::m_sTableName, "accountownderid" );
+    void Fields( A& a ) {
+      ou::db::Field( a, "accountid", idAccount );
+      ou::db::Field( a, "accountownerid", idAccountOwner );
+      ou::db::Field( a, "accountname", sAccountName );
+      ou::db::Field( a, "providername", sProviderName );
+      ou::db::Field( a, "brokername", sBrokerName );
+      ou::db::Field( a, "brokeraccountid", sBrokerAccountId );
+      ou::db::Field( a, "login", sLogin );
+      ou::db::Field( a, "password", sPassword );
     }
 
     idAccount_t idAccount;
@@ -52,6 +49,7 @@ public:
     std::string sLogin;
     std::string sPassword;
 
+    TableRowDef( void ) {};
     TableRowDef( const idAccount_t& idAccount_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sAccountName_, const std::string& sProviderName_, 
       const std::string& sBrokerName_, const std::string& sBrokerAccountId_,
@@ -60,6 +58,15 @@ public:
         sAccountName( sAccountName_ ), sProviderName( sProviderName_ ), 
         sBrokerName( sBrokerName_ ), sBrokerAccountId( sBrokerAccountId_ ),
         sLogin( sLogin_ ), sPassword( sPassword_ ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "accountid" );
+      ou::db::Constraint( a, "accountownerid", CAccountOwner::m_sTableName, "accountownderid" );
+    }
   };
 
   const static std::string m_sTableName;

@@ -167,6 +167,7 @@ CProcess::CProcess(void)
   m_contract.expiry = "20100917";
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
+  std::string sDbName( "dn.db" );
 
   // this is where we select which provider we will be working with on this run
 
@@ -181,6 +182,8 @@ CProcess::CProcess(void)
       break;
   }
 
+  m_db.Open( sDbName );
+
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
 
@@ -191,8 +194,8 @@ CProcess::CProcess(void)
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
 }
 
-CProcess::~CProcess(void)
-{
+CProcess::~CProcess(void) {
+  m_db.Close();
 }
 
 void CProcess::SetMode( enumMode mode ) {

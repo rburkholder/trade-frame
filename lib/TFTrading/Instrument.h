@@ -56,10 +56,6 @@ public:
       ou::db::Field( a, "strike", dblStrike );
       ou::db::Field( a, "contract", nContract );
       ou::db::Field( a, "multiplier", nMultiplier );
-
-      ou::db::Key( a, "instrumentid" );
-      ou::db::Constraint( a, "exchangeid", "exchanges", "exchangeid" );
-      ou::db::Constraint( a, "underlyingid", "instruments", "instrumentid" );
     }
 
     idInstrument_t idInstrument; // main name
@@ -151,6 +147,18 @@ public:
     };
   };
 
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "instrumentid" );
+      ou::db::Constraint( a, "exchangeid", "exchanges", "exchangeid" );
+      ou::db::Constraint( a, "underlyingid", "instruments", "instrumentid" );
+    }
+  };
+
+  const static std::string m_sTableName;
+
   CInstrument( const TableRowDef& row );
   CInstrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
@@ -180,8 +188,6 @@ public:
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   virtual ~CInstrument(void);
-
-  const static std::string m_sTableName;
 
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
   idInstrument_cref GetUnderlyingName( void );

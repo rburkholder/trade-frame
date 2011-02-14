@@ -23,7 +23,7 @@
 #include <TFTimeSeries/DatedDatum.h>
 #include <TFTimeSeries/TimeSeries.h>
 
-#include <TFTrading/Instrument.h>
+//#include <TFTrading/Instrument.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
 
@@ -33,6 +33,8 @@
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFSimulation/SimulationProvider.h>
+
+#include "DB.h"
 
 using namespace ou::tf;
 
@@ -251,6 +253,12 @@ private:
   //} m_stateTimeSeries;
 
   std::stringstream m_ss;
+
+  // db stuff
+
+  CDB m_db;
+
+  // end db stuff
 
   pProviderIQFeed_t m_iqfeed;
   bool m_bIQFeedConnected;

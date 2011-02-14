@@ -79,13 +79,6 @@ public:
       ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "CommissionPaid", dblCommissionPaid );
-
-      ou::db::Key( a, "positionid" );
-      ou::db::Constraint( a, "portfolioid", "portfolios", "portfolioid" );
-      ou::db::Constraint( a, "executionaccountid", "account", "accountid" );
-      ou::db::Constraint( a, "dataaccountid", "account", "accountid" );
-      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
-      //"create index idx_positions_portfolioid on positions( portfolioid );",
     }
 
     idPosition_t idPosition;
@@ -116,6 +109,19 @@ public:
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
 
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "positionid" );
+      ou::db::Constraint( a, "portfolioid", "portfolios", "portfolioid" );
+      ou::db::Constraint( a, "executionaccountid", "account", "accountid" );
+      ou::db::Constraint( a, "dataaccountid", "account", "accountid" );
+      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
+      //"create index idx_positions_portfolioid on positions( portfolioid );",
+    }
   };
 
   const static std::string m_sTableName;

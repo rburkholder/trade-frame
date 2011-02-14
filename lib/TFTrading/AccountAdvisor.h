@@ -35,20 +35,27 @@ public:
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "accountadvisorid", idAccountAdvisor );
+      ou::db::Field( a, "accountadvisorid", idAccountAdvisor );  // needs to be unique in database
       ou::db::Field( a, "name", sName );
       ou::db::Field( a, "company", sCompanyName );
-
-      ou::db::Key( a, "accountadvisorid" );
     }
 
     idAccountAdvisor_t idAccountAdvisor;
     std::string sName;
     std::string sCompanyName;
 
+    TableRowDef( void ) {};
     TableRowDef( 
       const idAccountAdvisor_t& idAdvisor_, const std::string& sName_, const std::string& sCompanyName_ ) 
       : idAccountAdvisor( idAdvisor_ ), sName( sName_ ), sCompanyName( sCompanyName_ ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "accountadvisorid" );
+    }
   };
 
   const static std::string m_sTableName;

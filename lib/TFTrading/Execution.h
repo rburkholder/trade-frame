@@ -43,9 +43,6 @@ public:
       ou::db::Field( a, "executiontimestamp", dtExecutionTimeStamp );
       ou::db::Field( a, "exchange", sExchange );
       ou::db::Field( a, "exchangeexecutionid", sExchangeExecutionId );
-
-      ou::db::Key( a, "executionid" );
-      ou::db::Constraint( a, "orderid", "orders", "orderid" );
     }
     //  "create index if not exists idx_executions_orderid on executions( orderid );",
 
@@ -58,6 +55,8 @@ public:
   std::string sExchange;
   std::string sExchangeExecutionId;  // unique execution id supplied by provider
 
+  TableRowDef( void ) : idExecution( 0 ), idOrder( 0 ), nQuantity( 0 ), dblPrice( 0.0 ),
+    eOrderSide( OrderSide::Unknown ) {};
   TableRowDef( idExecution_t idExecution_, idOrder_t idOrder_, 
     unsigned long nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
     std::string sExchange_, std::string sExchangeExecutionId_ )
@@ -70,6 +69,15 @@ public:
     : idExecution( 0 ), idOrder( 0 ), nQuantity( nQuantity_ ),  // executionid from db, idOrder from owner
       dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
       sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "executionid" );
+      ou::db::Constraint( a, "orderid", "orders", "orderid" );
+    }
   };
 
   const static std::string m_sTableName;

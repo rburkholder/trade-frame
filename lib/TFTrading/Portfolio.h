@@ -42,15 +42,11 @@ public:
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "portfolioid", idPorfolio );
+      ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commissionspaid", dblCommissionsPaid );
-
-      ou::db::Key( a, "portfolioid" );
-      ou::db::Constraint( a, "accountownerid", CAccountOwner::m_sTableName, "accountownerid" );
-      // "create index idx_portfolio_accountid on portfolios( accountid );
     }
 
     idPortfolio_t idPortfolio;
@@ -59,6 +55,7 @@ public:
     double dblRealizedPL;
     double dblCommissionsPaid;
 
+    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
     TableRowDef(
       const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
@@ -71,6 +68,16 @@ public:
     TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_ )
       : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "portfolioid" );
+      ou::db::Constraint( a, "accountownerid", CAccountOwner::m_sTableName, "accountownerid" );
+      // "create index idx_portfolio_accountid on portfolios( accountid );
+    }
   };
 
   const static std::string m_sTableName;

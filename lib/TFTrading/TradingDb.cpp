@@ -21,7 +21,6 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 CTradingDb::CTradingDb( const char* szDbFileName ) 
-//: CDbSession( szDbFileName )
 {
 }
 

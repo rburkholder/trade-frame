@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -10,25 +10,27 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-
 #pragma once
 
-#include <string>
-#include <stdexcept>
+#include <OUSQL/Session.h>
+#include <OUSqlite/ISqlite3.h>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-
-class CTradingDb
+class CDB
 {
 public:
 
-  CTradingDb( const char* szDbFileName );
-  ~CTradingDb(void);
+  CDB(void);
+  ~CDB(void);
+
+  void Open( const std::string& sDbName );
+  void Close( void );
 
 protected:
 private:
+
+  ou::db::CSession<ou::db::ISqlite3> m_db;
+
+  void Populate( void );
+
 };
 
-} // namespace tf
-} // namespace ou

@@ -30,13 +30,10 @@ public:
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "accountownerid", idAccountOwner );
+      ou::db::Field( a, "accountownerid", idAccountOwner );  // needs to be unique in database
       ou::db::Field( a, "accountadvisorid", idAccountAdvisor );
       ou::db::Field( a, "firstname", sFirstName );
       ou::db::Field( a, "lastname", sLastName );
-
-      ou::db::Key( a, "accountownerid" );
-      ou::db::Constraint( a, "accountadvisorid", CAccountAdvisor::m_sTableName, "accountadvisorid" );
     }
 
     idAccountOwner_t idAccountOwner;
@@ -44,11 +41,21 @@ public:
     std::string sFirstName;
     std::string sLastName;
 
+    TableRowDef( void ) {};
     TableRowDef( 
       const idAccountOwner_t& idAccountOwner_, const idAccountAdvisor_t& idAccountAdvisor_,
       const std::string& sFirstName_, const std::string& sLastName_ ) 
       : idAccountOwner( idAccountOwner_ ), idAccountAdvisor( idAccountAdvisor_ ),
         sFirstName( sFirstName_ ), sLastName( sLastName_ ) {}
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "accountownerid" );
+      ou::db::Constraint( a, "accountadvisorid", CAccountAdvisor::m_sTableName, "accountadvisorid" );
+    }
   };
 
   const static std::string m_sTableName;

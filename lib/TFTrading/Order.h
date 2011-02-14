@@ -69,10 +69,6 @@ public:
       ou::db::Field( a, "datetimecreated", dtOrderCreated );
       ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
       ou::db::Field( a, "datetimeclosed", dtOrderClosed );
-
-      ou::db::Key( a, "orderid" );
-      ou::db::Constraint( a, "positionid", "positions", "positionid" );
-      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
     }
     //"create index idx_orders_positionid on orders( positionid );",
 
@@ -139,6 +135,16 @@ public:
         dblAverageFillPrice( dblAverageFillPrice_ ), dblCommission( dblCommission_ ),
         dtOrderCreated( dtOrderCreated_ ), dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( dtOrderClosed_ ) {};
 
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "orderid" );
+      ou::db::Constraint( a, "positionid", "positions", "positionid" );
+      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
+    }
   };
 
   const static std::string m_sTableName;
