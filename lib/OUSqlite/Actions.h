@@ -106,9 +106,9 @@ public:
   int Bind( boost::int32_t var );
   int Bind( boost::int16_t var );
   int Bind( boost::int8_t var );
-  int Bind( std::string& var );
+  int Bind( const std::string& var );
   int Bind( double var );
-  int Bind( boost::posix_time::ptime& var );
+  int Bind( const boost::posix_time::ptime& var );
 
   template<typename T>
   void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {
@@ -157,7 +157,7 @@ public:
 
   template<typename T>  // is enum
   void Field( T& var, const boost::true_type& ) {
-    Column( reinterpret_cast<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type&>( var ) );
+    Column( reinterpret_cast<typename typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type&>( var ) );
   }
 
 protected:

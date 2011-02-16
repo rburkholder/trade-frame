@@ -57,7 +57,7 @@ int Action_Bind_Values::Bind( boost::int8_t var ) {
   return sqlite3_bind_int( m_state.pStmt, m_index, var );
 }
 
-int Action_Bind_Values::Bind( std::string& var ) {
+int Action_Bind_Values::Bind( const std::string& var ) {
   return sqlite3_bind_text( m_state.pStmt, m_index, var.c_str(), var.length(), SQLITE_TRANSIENT );
 }
 
@@ -66,7 +66,7 @@ int Action_Bind_Values::Bind( double var ) {
 }
 
 // http://www.boost.org/doc/libs/1_45_0/doc/html/date_time/date_time_io.html#date_time.io_tutorial
-int Action_Bind_Values::Bind( boost::posix_time::ptime& var ) {
+int Action_Bind_Values::Bind( const boost::posix_time::ptime& var ) {
   // need to fix up with local time
   std::stringstream ss;
   ss << var;
@@ -111,8 +111,9 @@ void Action_Extract_Columns::Column( double& var ) {
 }
 
 void Action_Extract_Columns::Column( boost::posix_time::ptime& var ) {
-  std::stringstream ss;
-  Column( ss.str() );
+  std::string s;
+  Column( s );
+  std::stringstream ss( s );
   ss >> var;
 }
 
