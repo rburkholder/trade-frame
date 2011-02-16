@@ -88,6 +88,13 @@ void CDB::Populate( void ) {
   CAccountOwner::TableRowDef ao( "ray", "ray", "Raymond", "Burkholder" );
   ou::db::QueryFields<CAccountOwner::TableRowDef>::pQueryFields_t pao = m_db.Insert<CAccountOwner::TableRowDef>( ao );
 
-  //CAccount::TableRowDef acctIB
+  CAccount::TableRowDef acctIB( "ib01", "ray", "Raymond Burkholder", "IB", "Interactive Brokers", "acctid", "login", "password" );
+  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIB = m_db.Insert<CAccount::TableRowDef>( acctIB );
+
+  CAccount::TableRowDef acctIQ( "iq01", "ray", "Raymond Burkholder", "IQF", "IQFeed", "acctid", "login", "password" );
+  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIQF = m_db.Insert<CAccount::TableRowDef>( acctIQ );
+
+  CPortfolio::TableRowDef portfolio( "vol01", "ray", "Volatility Tests" );
+  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_db.Insert<CPortfolio::TableRowDef>( portfolio );
 
 }

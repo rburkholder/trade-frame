@@ -50,8 +50,10 @@ public:
     std::string sPassword;
 
     TableRowDef( void ) {};
-    TableRowDef( const idAccount_t& idAccount_, const idAccountOwner_t& idAccountOwner_,
-      const std::string& sAccountName_, const std::string& sProviderName_, 
+    TableRowDef( 
+      const idAccount_t& idAccount_, 
+      const idAccountOwner_t& idAccountOwner_, const std::string& sAccountName_, 
+      const std::string& sProviderName_, 
       const std::string& sBrokerName_, const std::string& sBrokerAccountId_,
       const std::string& sLogin_, const std::string& sPassword_ ) 
       : idAccount( idAccount_ ), idAccountOwner( idAccountOwner_ ),
