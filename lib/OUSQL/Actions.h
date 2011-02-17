@@ -98,7 +98,7 @@ protected:
     bool bIsKeyPart;
     structFieldDef( void ): bIsKeyPart( false ) {};
     structFieldDef(const std::string& sFieldName_, const std::string& sFieldType_ ) 
-      : bIsKeyPart( false ), sFieldName( sFieldName_ ), sFieldType( sFieldType_ ) {};
+      : sFieldName( sFieldName_ ), sFieldType( sFieldType_ ), bIsKeyPart( false ) {};
   };
 
   typedef std::vector<structFieldDef> vFieldDef_t;
