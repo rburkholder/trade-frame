@@ -21,6 +21,23 @@ namespace ou {
 namespace db {
 namespace sqlite {
 
+namespace dispatch {
+
+template<> const char* FieldType<char>( void ) { return "TINYINT"; };
+template<> const char* FieldType<bool>( void ) { return "TINYINT"; };
+template<> const char* FieldType<boost::int64_t>( void ) { return "INT8"; };
+template<> const char* FieldType<boost::int32_t>( void ) { return "BIGINT"; };
+template<> const char* FieldType<boost::int16_t>( void ) { return "SMALLINT"; };
+template<> const char* FieldType<boost::int8_t>( void ) { return "TINYINT"; };
+template<> const char* FieldType<std::string>( void ) { return "TEXT"; };
+template<> const char* FieldType<double>( void ) { return "DOUBLE"; };
+// don't use julian as ptime has no representation earlier than 1400 AD
+template<> const char* FieldType<boost::posix_time::ptime>( void ) { return "TEXT"; };
+
+} // namespace dispatch
+
+//
+
 void Action_Assemble_TableDef::Key( const std::string& sFieldName ) {
   // change this to a boost integral type check to catch all integer types?
   if ( "INT8" == m_vFieldDef.begin()->sFieldType ) {  // proper way to get oid and key to be the same

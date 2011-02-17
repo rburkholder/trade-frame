@@ -43,6 +43,7 @@ namespace typeselect {
   template<> struct chooser<8,true>  { typedef boost:: int64_t type; };
 }
 
+namespace dispatch {
 template<typename T>
 const char* FieldType( void ) { // is called with enumerations, so need to figure out appropriate type conversion
 std::string s;
@@ -51,16 +52,19 @@ s += typeid( T ).name();
 throw std::runtime_error( s );
 };
 
-template<> const char* FieldType<char>( void ) { return "TINYINT"; };
-template<> const char* FieldType<bool>( void ) { return "TINYINT"; };
-template<> const char* FieldType<boost::int64_t>( void ) { return "INT8"; };
-template<> const char* FieldType<boost::int32_t>( void ) { return "BIGINT"; };
-template<> const char* FieldType<boost::int16_t>( void ) { return "SMALLINT"; };
-template<> const char* FieldType<boost::int8_t>( void ) { return "TINYINT"; };
-template<> const char* FieldType<std::string>( void ) { return "TEXT"; };
-template<> const char* FieldType<double>( void ) { return "DOUBLE"; };
+template<> const char* FieldType<char>( void );
+template<> const char* FieldType<bool>( void );
+template<> const char* FieldType<boost::int64_t>( void );
+template<> const char* FieldType<boost::int32_t>( void );
+template<> const char* FieldType<boost::int16_t>( void );
+template<> const char* FieldType<boost::int8_t>( void );
+template<> const char* FieldType<std::string>( void );
+template<> const char* FieldType<double>( void );
 // don't use julian as ptime has no representation earlier than 1400 AD
-template<> const char* FieldType<boost::posix_time::ptime>( void ) { return "TEXT"; };
+template<> const char* FieldType<boost::posix_time::ptime>( void );
+} // namespace dispatch
+
+// ====
 
 class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
 public:
@@ -70,12 +74,12 @@ public:
 
   template<typename T, bool b> // is not enum
   const char* FieldType( const boost::integral_constant<bool, b>& ) {
-    return FieldType<T>();
+    return dispatch::FieldType<T>();
   }
 
   template<typename T>
   const char* FieldType( const boost::true_type& ) { // is enum
-    return FieldType<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type>();
+    return dispatch::FieldType<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type>();
   }
 
   template<typename T> // sample code: http://www.boost.org/doc/libs/1_45_0/libs/type_traits/doc/html/boost_typetraits/examples/copy.html
