@@ -59,13 +59,13 @@ void CIBTWS::Connect() {
     assert( bReturn );
     m_bConnected = true;
     m_thrdIBMessages = boost::thread( boost::bind( &CIBTWS::ProcessMessages, this ) );
-    OnConnected( 0 );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
     pTWS->reqOpenOrders();
     //ExecutionFilter filter;
     //pTWS->reqExecutions( filter );
     pTWS->reqAccountUpdates( true, "" );
+    OnConnected( 0 );
   }
 }
 

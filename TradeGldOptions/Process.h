@@ -23,7 +23,6 @@
 #include <TFTimeSeries/DatedDatum.h>
 #include <TFTimeSeries/TimeSeries.h>
 
-//#include <TFTrading/Instrument.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
 

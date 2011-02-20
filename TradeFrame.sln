@@ -78,6 +78,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFTimeSeries", "lib\TFTimeS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFTrading", "lib\TFTrading\LibTrading.vcxproj", "{11243A27-764A-4119-BEFF-A8A80FD615EC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Phi", "Phi\Phi.vcxproj", "{36016D99-1FAC-4E5D-BF83-F2C15DE14184}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11243A27-764A-4119-BEFF-A8A80FD615EC} = {11243A27-764A-4119-BEFF-A8A80FD615EC}
+		{6AE9A695-3B0C-46C2-B363-7125C955BCF0} = {6AE9A695-3B0C-46C2-B363-7125C955BCF0}
+		{22BF5BE7-74F6-462A-A01F-E543825C0290} = {22BF5BE7-74F6-462A-A01F-E543825C0290}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -176,6 +183,10 @@ Global
 		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Debug|Win32.Build.0 = Debug|Win32
 		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Release|Win32.ActiveCfg = Release|Win32
 		{11243A27-764A-4119-BEFF-A8A80FD615EC}.Release|Win32.Build.0 = Release|Win32
+		{36016D99-1FAC-4E5D-BF83-F2C15DE14184}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36016D99-1FAC-4E5D-BF83-F2C15DE14184}.Debug|Win32.Build.0 = Debug|Win32
+		{36016D99-1FAC-4E5D-BF83-F2C15DE14184}.Release|Win32.ActiveCfg = Release|Win32
+		{36016D99-1FAC-4E5D-BF83-F2C15DE14184}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
