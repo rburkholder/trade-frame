@@ -437,6 +437,9 @@ void CIBTWS::error(const int id, const int errorCode, const IBString errorString
       break;
     case 2104:  // datafarm connected ok
       break;
+    case 200:  // no security definition has been found
+      if ( 0 != OnSecurityDefinitionNotFound ) OnSecurityDefinitionNotFound();
+      break;
     default:
       m_ss.str("");
       m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;

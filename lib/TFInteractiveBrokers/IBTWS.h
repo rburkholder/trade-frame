@@ -75,7 +75,7 @@ public:
   void CancelOrder( pOrder_t order );
 
   // TWS Function Calls
-  //  need ot make a container of re-usable request ids to be looked up in order to return data to appropriate caller
+  //  need to make a container of re-usable request ids to be looked up in order to return data to appropriate caller
   //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
   //   ie, may need an array of OnContractDetailsHandler_t
   void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };

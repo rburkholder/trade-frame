@@ -106,6 +106,12 @@ public:
   virtual void PlaceOrder( pOrder_t pOrder ) = 0;
   virtual void CancelOrder( pOrder_t pOrder ) = 0;
 
+  typedef FastDelegate0<void> OnSecurityDefinitionNotFoundHandler_t;
+  void SetOnSecurityDefinitionNotFoundHandler( OnSecurityDefinitionNotFoundHandler_t function ) {
+    OnSecurityDefinitionNotFound = function;
+  }
+
+
 protected:
 
   std::string m_sName;  // name of provider
@@ -119,6 +125,8 @@ protected:
   bool m_bProvidesTrades;
   bool m_bProvidesDepth;
   bool m_bProvidesGreeks;
+
+  OnSecurityDefinitionNotFoundHandler_t OnSecurityDefinitionNotFound;
 
 private:
 
