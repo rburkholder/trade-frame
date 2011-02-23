@@ -164,7 +164,7 @@ CProcess::CProcess(void)
   m_contract.currency = "USD";
   m_contract.exchange = "SMART";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20100917";
+  m_contract.expiry = "20110318";
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
   std::string sDbName( "dn.db" );
