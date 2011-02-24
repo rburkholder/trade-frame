@@ -174,6 +174,9 @@ protected:
   void StartDepthWatch( pSymbol_t pSymbol );
   void  StopDepthWatch( pSymbol_t pSymbol );
 
+  void StartGreekWatch( pSymbol_t pSymbol );
+  void  StopGreekWatch( pSymbol_t pSymbol );
+
 private:
   EPosixClientSocket *pTWS;
   long m_time;

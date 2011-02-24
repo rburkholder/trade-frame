@@ -17,6 +17,8 @@
 
 #include <OUSQL/Database.h>
 
+#define SQLITE_DEFAULT_FOREIGN_KEYS 1
+
 #include "sqlite3.h"
 #include "StatementState.h"
 #include "Actions.h"

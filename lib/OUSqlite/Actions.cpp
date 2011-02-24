@@ -26,9 +26,13 @@ namespace dispatch {
 template<> const char* FieldType<char>( void ) { return "TINYINT"; };
 template<> const char* FieldType<bool>( void ) { return "TINYINT"; };
 template<> const char* FieldType<boost::int64_t>( void ) { return "INT8"; };
+template<> const char* FieldType<boost::uint64_t>( void ) { return "INT8"; };
 template<> const char* FieldType<boost::int32_t>( void ) { return "BIGINT"; };
+template<> const char* FieldType<boost::uint32_t>( void ) { return "INT8"; };
 template<> const char* FieldType<boost::int16_t>( void ) { return "SMALLINT"; };
+template<> const char* FieldType<boost::uint16_t>( void ) { return "BIGINT"; };
 template<> const char* FieldType<boost::int8_t>( void ) { return "TINYINT"; };
+template<> const char* FieldType<boost::uint8_t>( void ) { return "SMALLINT"; };
 template<> const char* FieldType<std::string>( void ) { return "TEXT"; };
 template<> const char* FieldType<double>( void ) { return "DOUBLE"; };
 // don't use julian as ptime has no representation earlier than 1400 AD

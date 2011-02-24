@@ -55,9 +55,13 @@ throw std::runtime_error( s );
 template<> const char* FieldType<char>( void );
 template<> const char* FieldType<bool>( void );
 template<> const char* FieldType<boost::int64_t>( void );
+template<> const char* FieldType<boost::uint64_t>( void );
 template<> const char* FieldType<boost::int32_t>( void );
+template<> const char* FieldType<boost::uint32_t>( void );
 template<> const char* FieldType<boost::int16_t>( void );
+template<> const char* FieldType<boost::uint16_t>( void );
 template<> const char* FieldType<boost::int8_t>( void );
+template<> const char* FieldType<boost::uint8_t>( void );
 template<> const char* FieldType<std::string>( void );
 template<> const char* FieldType<double>( void );
 // don't use julian as ptime has no representation earlier than 1400 AD

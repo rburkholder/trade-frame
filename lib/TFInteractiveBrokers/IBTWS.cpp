@@ -124,6 +124,14 @@ void CIBTWS::StopTradeWatch( pSymbol_t pSymbol ) {  // overridden from base clas
   StopQuoteTradeWatch( pSymbol );
 }
 
+void CIBTWS::StartGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
+  StartQuoteTradeWatch( pSymbol );
+}
+
+void CIBTWS::StopGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
+  StopQuoteTradeWatch( pSymbol );
+}
+
 void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
@@ -138,8 +146,8 @@ void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
 }
 
 void CIBTWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
-  if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() ) {
-    // don't do anything if either a quote or trade watch still in progress
+  if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() || pIBSymbol->GreekWatchNeeded() ) {
+    // don't do anything if either a quote or trade or greek watch still in progress
   }
   else {
     // stop watch
