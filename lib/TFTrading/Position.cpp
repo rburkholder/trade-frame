@@ -143,7 +143,7 @@ void CPosition::HandleGreek( greek_t greek ) {
 COrder::pOrder_t CPosition::PlaceOrder( // market
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
-  unsigned long nOrderQuantity
+  boost::uint32_t nOrderQuantity
 ) {
 
   assert( OrderSide::Unknown != eOrderSide );
@@ -156,7 +156,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
 COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
-  unsigned long nOrderQuantity,
+  boost::uint32_t nOrderQuantity,
   double dblPrice1
 ) {
 
@@ -170,7 +170,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
-  unsigned long nOrderQuantity,
+  boost::uint32_t nOrderQuantity,
   double dblPrice1,  
   double dblPrice2
 ) {

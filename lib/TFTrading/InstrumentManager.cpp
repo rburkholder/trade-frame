@@ -69,7 +69,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument(
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(     
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
-  unsigned short year, unsigned short month ) {
+  boost::uint16_t year, boost::uint16_t month ) {
   pInstrument_t pInstrument(
     new CInstrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month ) );
   Assign( pInstrument );
@@ -78,7 +78,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
-  unsigned short year, unsigned short month,
+  boost::uint16_t year, boost::uint16_t month,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {
@@ -91,7 +91,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
-  unsigned short year, unsigned short month, unsigned short day,
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {

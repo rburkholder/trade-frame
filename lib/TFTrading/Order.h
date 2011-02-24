@@ -82,9 +82,9 @@ public:
     double dblPrice1; // for limit
     double dblPrice2; // for stop
     double dblSignalPrice;  // mark at which algorithm requested order
-    unsigned long nOrderQuantity;
-    unsigned long nQuantityRemaining;
-    unsigned long nQuantityFilled;
+    boost::uint32_t nOrderQuantity;
+    boost::uint32_t nQuantityRemaining;
+    boost::uint32_t nQuantityFilled;
     double dblAverageFillPrice;  // excludes commission
     double dblCommission;
     ptime dtOrderCreated;
@@ -99,7 +99,7 @@ public:
         dblAverageFillPrice( 0.0 ), dblCommission( 0.0 ) {};
     TableRowDef( // market order
       idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
-      unsigned long nOrderQuantity_, ptime dtOrderSubmitted_ )
+      boost::uint32_t nOrderQuantity_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
@@ -107,7 +107,7 @@ public:
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit or stop
       idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
-      unsigned long nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
+      boost::uint32_t nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
@@ -115,7 +115,7 @@ public:
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit and stop
       idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
-      unsigned long nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
+      boost::uint32_t nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
@@ -125,7 +125,7 @@ public:
       idOrder_t idOrder_, idPosition_t idPosition_, idInstrument_t idInstrument_, std::string sDescription_, 
       OrderStatus::enumOrderStatus eOrderStatus_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_, 
       double dblPrice1_, double dblPrice2_, double dblSignalPrice_,
-      unsigned long nOrderQuantity_, unsigned long nQuantityRemaining_, unsigned long nQuantityFilled_, 
+      boost::uint32_t nOrderQuantity_, boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, 
       double dblAverageFillPrice_, double dblCommission_, 
       ptime dtOrderCreated_, ptime dtOrderSubmitted_, ptime dtOrderClosed_ )
       : idOrder( idOrder_ ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), sDescription( sDescription_ ),
@@ -153,7 +153,7 @@ public:
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
+    boost::uint32_t nOrderQuantity,
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
@@ -161,7 +161,7 @@ public:
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
+    boost::uint32_t nOrderQuantity,
     double dblPrice1,  
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
@@ -170,7 +170,7 @@ public:
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
-    unsigned long nOrderQuantity,
+    boost::uint32_t nOrderQuantity,
     double dblPrice1,  
     double dblPrice2,
     idPosition_t idPosition = 0,
@@ -197,22 +197,22 @@ public:
     return m_pInstrument; 
   };
   const char *GetOrderSideName( void ) const { return OrderSide::Name[ m_row.eOrderSide ]; };
-  unsigned long GetQuantity( void ) const { return m_row.nOrderQuantity; };
+  boost::uint32_t GetQuantity( void ) const { return m_row.nOrderQuantity; };
   OrderType::enumOrderType GetOrderType( void ) const { return m_row.eOrderType; };
   OrderSide::enumOrderSide GetOrderSide( void ) const { return m_row.eOrderSide; };
   double GetPrice1( void ) const { return m_row.dblPrice1; };  // need to validate this on creation
   double GetPrice2( void ) const { return m_row.dblPrice2; };
   double GetAverageFillPrice( void ) const { return m_row.dblAverageFillPrice; };
   idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
-  unsigned long GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
+  boost::uint32_t GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
   OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
   void SetCommission( double dblCommission );
   double GetCommission( void ) const{ return m_row.dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
-  unsigned long GetQuanRemaining( void ) const { return m_row.nQuantityRemaining; };
-  unsigned long GetQuanOrdered( void ) const { return m_row.nOrderQuantity; };
-  unsigned long GetQuanFilled( void ) const { return m_row.nQuantityFilled; };
+  boost::uint32_t GetQuanRemaining( void ) const { return m_row.nQuantityRemaining; };
+  boost::uint32_t GetQuanOrdered( void ) const { return m_row.nOrderQuantity; };
+  boost::uint32_t GetQuanFilled( void ) const { return m_row.nQuantityFilled; };
   void SetSignalPrice( double dblSignalPrice ) { m_row.dblSignalPrice = dblSignalPrice; };
   double GetSignalPrice( void ) const { return m_row.dblSignalPrice; };
   const ptime &GetDateTimeOrderSubmitted( void ) const { 
@@ -236,7 +236,7 @@ protected:
 
   bool m_bOutsideRTH;
 
-  unsigned long m_nNextExecutionId;  // when is this set?
+  boost::uint32_t m_nNextExecutionId;  // when is this set?
 
   // statistics and status
   double m_dblPriceXQuantity; // used for calculating average price

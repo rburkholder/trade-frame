@@ -30,14 +30,11 @@
 
 using namespace ou::tf;
 
-CDB::CDB(void)
-{
-
+CDB::CDB(void) {
 }
 
 
-CDB::~CDB(void)
-{
+CDB::~CDB(void) {
 }
 
 void CDB::Open( const std::string& sDbName ) {

@@ -92,10 +92,10 @@ public:
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market
     OrderSide::enumOrderSide eOrderSidePending;  
-    unsigned long nPositionPending;
+    boost::uint32_t nPositionPending;
   // indicates whether we are in a long or short position
     OrderSide::enumOrderSide eOrderSideActive;
-    unsigned long nPositionActive;
+    boost::uint32_t nPositionActive;
   // following value markers exclude commission
     double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
     double dblMarketValue;  // based upon market quotes
@@ -144,18 +144,18 @@ public:
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
-    unsigned long nOrderQuantity
+    boost::uint32_t nOrderQuantity
     );
   COrder::pOrder_t PlaceOrder( // limit or stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
-    unsigned long nOrderQuantity,
+    boost::uint32_t nOrderQuantity,
     double dblPrice1
     );
   COrder::pOrder_t PlaceOrder( // limit and stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
-    unsigned long nOrderQuantity,
+    boost::uint32_t nOrderQuantity,
     double dblPrice1,  
     double dblPrice2
     );

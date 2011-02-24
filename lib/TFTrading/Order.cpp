@@ -32,7 +32,7 @@ COrder::COrder( // market order
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
-  unsigned long nOrderQuantity,
+  boost::uint32_t nOrderQuantity,
   idPosition_t idPosition,
   ptime dtOrderSubmitted
   ) 
@@ -50,7 +50,7 @@ COrder::COrder( // limit or stop
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
-  unsigned long nOrderQuantity,
+  boost::uint32_t nOrderQuantity,
   double dblPrice1,
   idPosition_t idPosition,
   ptime dtOrderSubmitted
@@ -69,7 +69,7 @@ COrder::COrder( // limit and stop
   CInstrument::pInstrument_cref instrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
-  unsigned long nOrderQuantity,
+  boost::uint32_t nOrderQuantity,
   double dblPrice1, double dblPrice2,
   idPosition_t idPosition,
   ptime dtOrderSubmitted

@@ -66,12 +66,12 @@ public:
     Currency::enumCurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
     Currency::enumCurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
     OptionSide::enumOptionSide eOptionSide;
-    unsigned short nYear; // future, option
-    unsigned short nMonth; // future, option
-    unsigned short nDay; // future, option
+    boost::uint16_t nYear; // future, option
+    boost::uint16_t nMonth; // future, option
+    boost::uint16_t nDay; // future, option
     double dblStrike;
-    long nContract; // used with CIBTWS
-    unsigned long nMultiplier;  // number of units per contract: stk 1x, option 100x
+    boost::int32_t nContract; // used with CIBTWS
+    boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
 
 //  m_eUnderlyingStatus = EUnderlyingNotSettable;
 //  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
@@ -95,7 +95,7 @@ public:
     };
     TableRowDef( // future
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-      unsigned short nYear_, unsigned short nMonth_ )
+      boost::uint16_t nYear_, boost::uint16_t nMonth_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( 0.0 ), 
@@ -106,7 +106,7 @@ public:
     TableRowDef( // option with yymm
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
       idInstrument_t idUnderlying_, 
-      unsigned short nYear_, unsigned short nMonth_, 
+      boost::uint16_t nYear_, boost::uint16_t nMonth_, 
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -121,7 +121,7 @@ public:
     TableRowDef( // option with yymmdd
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
       idInstrument_t idUnderlying_, 
-      unsigned short nYear_, unsigned short nMonth_, unsigned short nDay_,
+      boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -167,18 +167,18 @@ public:
   CInstrument(   // future
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
-    unsigned short year, unsigned short month );
+    boost::uint16_t year, boost::uint16_t month );
   CInstrument(   // option with yymm
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
-    unsigned short year, unsigned short month,
+    boost::uint16_t year, boost::uint16_t month,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   CInstrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
-    unsigned short year, unsigned short month, unsigned short day,
+    boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
@@ -212,16 +212,16 @@ public:
   const char *GetCurrencyName( void ) { return Currency::Name[ m_row.eCurrency ]; };
 
   double GetStrike( void ) const { return m_row.dblStrike; };
-  unsigned short GetExpiryYear( void ) const { return m_row.nYear; };
-  unsigned short GetExpiryMonth( void ) const { return m_row.nMonth; };
-  unsigned short GetExpiryDay( void ) const { return m_row.nDay; };
+  boost::uint16_t GetExpiryYear( void ) const { return m_row.nYear; };
+  boost::uint16_t GetExpiryMonth( void ) const { return m_row.nMonth; };
+  boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_row.eOptionSide; };
 
-  void SetContract( long id ) { m_row.nContract = id; };
-  long GetContract( void ) const { return m_row.nContract; };
+  void SetContract( boost::int32_t id ) { m_row.nContract = id; };
+  boost::int32_t GetContract( void ) const { return m_row.nContract; };
 
-  void SetMultiplier( unsigned long nMultiplier ) { m_row.nMultiplier = nMultiplier; };
-  unsigned long GetMultiplier( void ) const { return m_row.nMultiplier; };
+  void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
+  boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };
 
 protected:
 

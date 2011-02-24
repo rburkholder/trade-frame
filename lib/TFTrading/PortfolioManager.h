@@ -36,9 +36,9 @@ public:
 
 protected:
 
-  typedef unsigned long porfolio_key_t;
-  typedef unsigned long account_key_t;
-  typedef unsigned long string_key_t;
+  typedef boost::uint32_t porfolio_key_t;
+  typedef boost::uint32_t account_key_t;
+  typedef boost::uint32_t string_key_t;
   
   struct structPorfolio {
     porfolio_key_t pk;

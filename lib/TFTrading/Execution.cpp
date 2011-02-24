@@ -26,7 +26,7 @@ const std::string CExecution::m_sTableName = "executions";
 
 CExecution::CExecution( 
   idExecution_t idExecution, idOrder_t idOrder,
-  double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
+  double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
 : 
   m_row( idExecution, idOrder, nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )
@@ -38,7 +38,7 @@ CExecution::CExecution(
 
 CExecution::CExecution( 
 /*  idExecution_t idExecution, idOrder_t idOrder, */
-  double dblPrice, unsigned long nQuantity, OrderSide::enumOrderSide eOrderSide,
+  double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
 : 
   m_row( nQuantity, dblPrice, eOrderSide, sExchange, sExchangeExecutionId )

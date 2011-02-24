@@ -31,7 +31,7 @@ typedef boost::int64_t idExecution_t;
 typedef std::string idInstrument_t;
 typedef std::string idExchange_t;
 
-typedef unsigned short idProvider_t;  // used in HDF5Attribute.h
+typedef boost::uint16_t idProvider_t;  // used in HDF5Attribute.h
 enum eidProvider_t: idProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
 
 

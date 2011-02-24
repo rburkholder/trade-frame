@@ -40,17 +40,17 @@ public:
     InstrumentType::enumInstrumentTypes type = InstrumentType::Unknown );
   pInstrument_t ConstructFuture(     
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
-    unsigned short year, unsigned short month );
+    boost::uint16_t year, boost::uint16_t month );
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
-    unsigned short year, unsigned short month,
+    boost::uint16_t year, boost::uint16_t month,
     //const idInstrument_t &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
-    unsigned short year, unsigned short month, unsigned short day,
+    boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
     //const std::string &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 

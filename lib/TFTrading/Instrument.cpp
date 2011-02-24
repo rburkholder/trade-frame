@@ -54,7 +54,7 @@ CInstrument::CInstrument(
 CInstrument::CInstrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
-  unsigned short year, unsigned short month ) 
+  boost::uint16_t year, boost::uint16_t month ) 
 : m_row( idInstrument, eType, idExchange, year, month ),
   m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
@@ -66,7 +66,7 @@ CInstrument::CInstrument(
 CInstrument::CInstrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
-  unsigned short year, unsigned short month,
+  boost::uint16_t year, boost::uint16_t month,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide eOptionSide, 
   double dblStrike ) 
@@ -81,7 +81,7 @@ CInstrument::CInstrument(
 CInstrument::CInstrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
-  unsigned short year, unsigned short month, unsigned short day,
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide eOptionSide, 
   double dblStrike ) 
