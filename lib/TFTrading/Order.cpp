@@ -23,8 +23,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string COrder::m_sTableName = "orders";
-
 COrder::COrder(void) {
 }
 

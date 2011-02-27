@@ -116,15 +116,13 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "positionid" );
-      ou::db::Constraint( a, "portfolioid", "portfolios", "portfolioid" );
-      ou::db::Constraint( a, "executionaccountid", "account", "accountid" );
-      ou::db::Constraint( a, "dataaccountid", "account", "accountid" );
-      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
+      ou::db::Constraint( a, "portfolioid", tablenames::sPortfolio, "portfolioid" );
+      ou::db::Constraint( a, "executionaccountid", tablenames::sAccount, "accountid" );
+      ou::db::Constraint( a, "dataaccountid", tablenames::sAccount, "accountid" );
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstruments, "instrumentid" );
       //"create index idx_positions_portfolioid on positions( portfolioid );",
     }
   };
-
-  const static std::string m_sTableName;
 
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );

@@ -18,8 +18,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CAccountOwner::m_sTableName = "accountowners";
-
 CAccountOwner::CAccountOwner( 
     const idAccountOwner_t& idAccountOwner, 
     const idAccountAdvisor_t& idAccountAdvisor,

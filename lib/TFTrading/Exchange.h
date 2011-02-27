@@ -51,8 +51,6 @@ public:
     }
   };
 
-  const static std::string m_sTableName;
-
   CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
   ~CExchange(void);
 

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2009, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,28 +13,23 @@
 
 #include "StdAfx.h"
 
-#include "Account.h"
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace tablenames { // tablenames
 
-CAccount::CAccount(
-    const idAccount_t& idAccount,
-    const idAccountOwner_t& idAccountOwner,
-    const std::string& sAccountName,
-    keytypes::eidProvider_t idProvider,
-    const std::string& sBrokerName,
-    const std::string& sBrokerAccountId,
-    const std::string& sLogin, 
-    const std::string& sPassword
-    ) 
-: m_row( idAccount, idAccountOwner, sAccountName,
-  idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword )
-{
-}
+std::string sAccountAdvisor( "accountadvisors" );
+std::string sAccountOwner( "accountowners" );
+std::string sAccount( "accounts" );
+std::string sPortfolio( "portfolios" );
+std::string sPosition( "positions" );
+std::string sOrder( "orders" );
+std::string sExecution( "executions" );
+std::string sExchange( "exchanges" );
+std::string sInstrument( "instruments" );
+std::string sAltInstrumentName( "altinstrumentnames" );
 
-CAccount::~CAccount(void) {
-}
-
+} // namespace tablenames
 } // namespace tf
 } // namespace ou

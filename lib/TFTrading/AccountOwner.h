@@ -54,11 +54,9 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "accountownerid" );
-      ou::db::Constraint( a, "accountadvisorid", CAccountAdvisor::m_sTableName, "accountadvisorid" );
+      ou::db::Constraint( a, "accountadvisorid", tablenames::sAccountAdvisor, "accountadvisorid" );
     }
   };
-
-  const static std::string m_sTableName;
 
   CAccountOwner( 
     const idAccountOwner_t& idAccountOwner, 

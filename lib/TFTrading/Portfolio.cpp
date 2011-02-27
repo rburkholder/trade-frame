@@ -20,8 +20,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CPortfolio::m_sTableName = "portfolios";
-
 CPortfolio::CPortfolio( 
     const idPortfolio_t& idPortfolio, 
     const std::string& sDescription ) 

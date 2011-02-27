@@ -21,8 +21,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CInstrument::m_sTableName = "instruments";
-
 /*
   if ( NULL != m_pUnderlying.get() ) {
     rtn += sqlite3_bind_text(  

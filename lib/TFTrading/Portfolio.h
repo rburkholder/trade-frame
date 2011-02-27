@@ -75,12 +75,10 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "portfolioid" );
-      ou::db::Constraint( a, "accountownerid", CAccountOwner::m_sTableName, "accountownerid" );
+      ou::db::Constraint( a, "accountownerid", tablenames::sAccountOwner, "accountownerid" );
       // "create index idx_portfolio_accountid on portfolios( accountid );
     }
   };
-
-  const static std::string m_sTableName;
 
   CPortfolio( // for use in memory only
     const idPortfolio_t& idPortfolio, 

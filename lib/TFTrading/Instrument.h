@@ -152,12 +152,10 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "instrumentid" );
-      ou::db::Constraint( a, "exchangeid", "exchanges", "exchangeid" );
-      ou::db::Constraint( a, "underlyingid", "instruments", "instrumentid" );
+      ou::db::Constraint( a, "exchangeid", tablenames::sExchange, "exchangeid" );
+      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );
     }
   };
-
-  const static std::string m_sTableName;
 
   CInstrument( const TableRowDef& row );
   CInstrument( // equity / generic creation
@@ -241,6 +239,39 @@ private:
 
   CInstrument( const CInstrument& );  // copy ctor
   CInstrument& operator=( const CInstrument& ); // assignement
+};
+
+class CAlternateInstrumentName {
+public:
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "providerid", idProvider );  // this
+      ou::db::Field( a, "instrumentid", idInstrument ); // plus this
+      ou::db::Field( a, "alternateid", idAlternate );  // gets this
+    }
+
+    keytypes::idInstrument_t idInstrument;
+    keytypes::eidProvider_t idProvider;
+    keytypes::idInstrument_t idAlternate;
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "providerid" );
+      ou::db::Key( a, "instrumentid" );
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
+      //ou::db::Constraint( a, "alternateid", tablenames::sInstrument, "instrumentid" );  // don't think this one makes sense
+    }
+  };
+
+protected:
+private:
+
+  TableRowDef m_row;
+
 };
 
 } // namespace tf

@@ -60,8 +60,7 @@ namespace Currency {
 }
 
 namespace Trading {
-  static const std::string DbFileName = "TradeFrame.db";
-  static const std::string DbSqliteFileName = "TradeFrame.sqlite";
+  static const std::string DbFileName = "TradeFrame.db4";
 }
 
 // currency pair    base/quote(aka counter)  - depicts how many units of the counter currency are needed to buy one unit of the base currency.

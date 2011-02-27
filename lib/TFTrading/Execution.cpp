@@ -22,8 +22,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CExecution::m_sTableName = "executions";
-
 CExecution::CExecution( 
   idExecution_t idExecution, idOrder_t idOrder,
   double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,

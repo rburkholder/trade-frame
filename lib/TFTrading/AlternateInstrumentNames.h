@@ -24,7 +24,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-  class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
+class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
 public:
   CAlternateInstrumentNames();
   ~CAlternateInstrumentNames(void);

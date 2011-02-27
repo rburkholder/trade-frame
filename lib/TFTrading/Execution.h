@@ -76,11 +76,9 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "executionid" );
-      ou::db::Constraint( a, "orderid", "orders", "orderid" );
+      ou::db::Constraint( a, "orderid", tablenames::sOrder, "orderid" );
     }
   };
-
-  const static std::string m_sTableName;
 
   CExecution( const TableRowDef& row ): m_row( row ) {};
   CExecution( // when relating to database

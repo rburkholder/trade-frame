@@ -19,8 +19,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CPosition::m_sTableName = "positions";
-
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 

@@ -142,12 +142,10 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "orderid" );
-      ou::db::Constraint( a, "positionid", "positions", "positionid" );
-      ou::db::Constraint( a, "instrumentid", "instruments", "instrumentid" );
+      ou::db::Constraint( a, "positionid", tablenames::sPosition, "positionid" );
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstruments, "instrumentid" );
     }
   };
-
-  const static std::string m_sTableName;
 
   COrder(  // market 
     CInstrument::pInstrument_cref instrument, 

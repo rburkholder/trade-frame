@@ -32,9 +32,24 @@ typedef std::string idInstrument_t;
 typedef std::string idExchange_t;
 
 typedef boost::uint16_t idProvider_t;  // used in HDF5Attribute.h
-enum eidProvider_t: idProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT/*, _EProviderCount*/ };
-
+enum eidProvider_t: idProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
 
 } // namespace keytypes
+
+namespace tablenames { // tablenames
+
+extern std::string sAccountAdvisor;
+extern std::string sAccountOwner;
+extern std::string sAccount;
+extern std::string sPortfolio;
+extern std::string sPosition;
+extern std::string sOrder;
+extern std::string sExecution;
+extern std::string sExchange;
+extern std::string sInstrument;
+extern std::string sAltInstrumentName;
+
+} // namespace tablenames
+
 } // namespace tf
 } // namespace ou
