@@ -54,7 +54,7 @@ public:
       ou::db::Field( a, "month", nMonth );
       ou::db::Field( a, "day", nDay );
       ou::db::Field( a, "strike", dblStrike );
-      ou::db::Field( a, "contract", nContract );
+      ou::db::Field( a, "ibcontract", nIBContract );
       ou::db::Field( a, "multiplier", nMultiplier );
     }
 
@@ -70,7 +70,7 @@ public:
     boost::uint16_t nMonth; // future, option
     boost::uint16_t nDay; // future, option
     double dblStrike;
-    boost::int32_t nContract; // used with CIBTWS
+    boost::int32_t nIBContract; // used with CIBTWS
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
 
 //  m_eUnderlyingStatus = EUnderlyingNotSettable;
@@ -82,13 +82,13 @@ public:
     TableRowDef( void ) // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-      nContract( 0 ), nMultiplier( 1 ) {};
+      nIBContract( 0 ), nMultiplier( 1 ) {};
     TableRowDef( // equity / generic creation
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-      nContract( 0 ), nMultiplier( 1 ) {
+      nIBContract( 0 ), nMultiplier( 1 ) {
         assert( eType < InstrumentType::_Count );
         assert( eType > InstrumentType::Unknown );
         assert( 0 < idInstrument.size() );  
@@ -99,7 +99,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( 0.0 ), 
-      nContract( 0 ), nMultiplier( 1 ) {
+      nIBContract( 0 ), nMultiplier( 1 ) {
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );   
     };
@@ -111,7 +111,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ), 
-      nContract( 0 ), nMultiplier( 100 ) {
+      nIBContract( 0 ), nMultiplier( 100 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
@@ -126,7 +126,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ), 
-      nContract( 0 ), nMultiplier( 100 ) {
+      nIBContract( 0 ), nMultiplier( 100 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
@@ -140,7 +140,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
         idUnderlying( idCounterInstrument_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
         eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-        nContract( 0 ), nMultiplier( 1 ) {
+        nIBContract( 0 ), nMultiplier( 1 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
           assert( 0 < idUnderlying.size() );
@@ -215,8 +215,8 @@ public:
   boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_row.eOptionSide; };
 
-  void SetContract( boost::int32_t id ) { m_row.nContract = id; };
-  boost::int32_t GetContract( void ) const { return m_row.nContract; };
+  void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };
+  boost::int32_t GetContract( void ) const { return m_row.nIBContract; };
 
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
   boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };

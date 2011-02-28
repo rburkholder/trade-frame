@@ -32,7 +32,8 @@ typedef std::string idInstrument_t;
 typedef std::string idExchange_t;
 
 typedef boost::uint16_t idProvider_t;  // used in HDF5Attribute.h
-enum eidProvider_t: idProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
+//enum eidProvider_t: idProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
+enum eidProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
 
 } // namespace keytypes
 

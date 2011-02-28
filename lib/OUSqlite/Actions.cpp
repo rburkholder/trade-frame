@@ -66,15 +66,31 @@ int Action_Bind_Values::Bind( boost::int64_t var ) {
   return sqlite3_bind_int64( m_state.pStmt, m_index, var );
 }
 
+int Action_Bind_Values::Bind( boost::uint64_t var ) {
+  return sqlite3_bind_int64( m_state.pStmt, m_index, var );
+}
+
 int Action_Bind_Values::Bind( boost::int32_t var ) {
   return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( boost::uint32_t var ) {
+  return sqlite3_bind_int64( m_state.pStmt, m_index, var );
 }
 
 int Action_Bind_Values::Bind( boost::int16_t var ) {
   return sqlite3_bind_int( m_state.pStmt, m_index, var );
 }
 
+int Action_Bind_Values::Bind( boost::uint16_t var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
 int Action_Bind_Values::Bind( boost::int8_t var ) {
+  return sqlite3_bind_int( m_state.pStmt, m_index, var );
+}
+
+int Action_Bind_Values::Bind( boost::uint8_t var ) {
   return sqlite3_bind_int( m_state.pStmt, m_index, var );
 }
 
@@ -111,15 +127,31 @@ void Action_Extract_Columns::Column( boost::int64_t& var ) {
   var = sqlite3_column_int64( m_state.pStmt, m_index );
 }
 
+void Action_Extract_Columns::Column( boost::uint64_t& var ) {
+  var = sqlite3_column_int64( m_state.pStmt, m_index );
+}
+
 void Action_Extract_Columns::Column( boost::int32_t& var ) {
   var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::uint32_t& var ) {
+  var = sqlite3_column_int64( m_state.pStmt, m_index );
 }
 
 void Action_Extract_Columns::Column( boost::int16_t& var ) {
   var = sqlite3_column_int( m_state.pStmt, m_index );
 }
 
+void Action_Extract_Columns::Column( boost::uint16_t& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
 void Action_Extract_Columns::Column( boost::int8_t& var ) {
+  var = sqlite3_column_int( m_state.pStmt, m_index );
+}
+
+void Action_Extract_Columns::Column( boost::uint8_t& var ) {
   var = sqlite3_column_int( m_state.pStmt, m_index );
 }
 

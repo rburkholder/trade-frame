@@ -32,7 +32,7 @@ CNewsReaderView::CNewsReaderView()
     WM_IQFEED_NEWS_CONFIG_DONE, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE ),
   m_stateStoryRetrieval( INACTIVE )
 {
-  m_pIQFeed = new CIQFeedMsgShim<CNewsReaderView>( m_MsgIdsForIQFeed );
+  m_pIQFeed = new ou::tf::CIQFeedMsgShim<CNewsReaderView>( m_MsgIdsForIQFeed );
 }
 
 CNewsReaderView::~CNewsReaderView() {
@@ -83,7 +83,7 @@ BOOL CNewsReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
 
 LRESULT CNewsReaderView::OnIQFeedNewsConfigDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
-  typedef CIQFeedNewsQueryMsgShim<CNewsReaderView> connection_t;
+  typedef ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView> connection_t;
 
   connection_t::vNCCategory_t& categories = m_pIQFeedNewsQuery->GetConfigCategories();
   connection_t::vNCMajorType_t& majortypes = m_pIQFeedNewsQuery->GetConfigMajorTypes();
@@ -149,7 +149,7 @@ LRESULT CNewsReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
 
   m_pIQFeed->SetNewsOn();
 
-  m_pIQFeedNewsQuery = new CIQFeedNewsQueryMsgShim<CNewsReaderView>( m_MsgIdsForNewsQuery );
+  m_pIQFeedNewsQuery = new ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView>( m_MsgIdsForNewsQuery );
   m_pIQFeedNewsQuery->Connect();
 
   bHandled = true;
@@ -183,8 +183,8 @@ LRESULT CNewsReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 */
 LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
-  CIQFNewsMessage::fielddelimiter_t fd;
+  ou::tf::CIQFNewsMessage* msg = reinterpret_cast<ou::tf::CIQFNewsMessage*>( lParam );
+  ou::tf::CIQFNewsMessage::fielddelimiter_t fd;
 
   structNewsItem item;
   m_NewsItems.push_back( item );
@@ -224,7 +224,7 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
 LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
   // for when another module has processed the message and is passing it along back
 
-  CIQFNewsMessage* msg = reinterpret_cast<CIQFNewsMessage*>( lParam );
+  ou::tf::CIQFNewsMessage* msg = reinterpret_cast<ou::tf::CIQFNewsMessage*>( lParam );
 
   m_pIQFeed->NewsDone( reinterpret_cast<linebuffer_t*>( wParam ), msg );
 
@@ -234,7 +234,7 @@ LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, B
 
 LRESULT CNewsReaderView::OnIQFeedStoryLine( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  typedef CIQFeedNewsQueryMsgShim<CNewsReaderView> query_t;
+  typedef ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView> query_t;
 
   vNewsItems_t::size_type ix = static_cast<vNewsItems_t::size_type>( lParam );
 

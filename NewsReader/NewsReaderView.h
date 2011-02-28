@@ -20,8 +20,8 @@
 #include <vector>
 #include <string>
 
-#include "LibIQFeed/IQFeedMsgShim.h"
-#include "LibIQFeed/IQFeedNewsQueryMsgShim.h"
+#include "TFIQFeed/IQFeedMsgShim.h"
+#include "TFIQFeed/IQFeedNewsQueryMsgShim.h"
 
 #include "ListViewCtrl_Headlines.h"
 
@@ -54,7 +54,7 @@ public:
     DLGRESIZE_CONTROL( IDC_EDITSTORY, DLSZ_SIZE_X | DLSZ_SIZE_Y )
   END_DLGRESIZE_MAP()
 
-  typedef CIQFeedMsgShim<CNewsReaderView>::linebuffer_t linebuffer_t;
+  typedef ou::tf::CIQFeedMsgShim<CNewsReaderView>::linebuffer_t linebuffer_t;
 
 // Handler prototypes (uncomment arguments if needed):
 //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -184,11 +184,11 @@ protected:
 private:
   typedef CDialogImpl<CNewsReaderView> CThisClass;
 
-  CIQFeedMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
-  CIQFeedMsgShim<CNewsReaderView>* m_pIQFeed;
+  ou::tf::CIQFeedMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
+  ou::tf::CIQFeedMsgShim<CNewsReaderView>* m_pIQFeed;
 
-  CIQFeedNewsQueryMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForNewsQuery;
-  CIQFeedNewsQueryMsgShim<CNewsReaderView>* m_pIQFeedNewsQuery;
+  ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForNewsQuery;
+  ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView>* m_pIQFeedNewsQuery;
 
   vNewsItems_t m_NewsItems;
 

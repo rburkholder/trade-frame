@@ -25,6 +25,7 @@
 #include <typeinfo>
 
 #include <boost/intrusive_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "Database.h"
 
@@ -178,7 +179,7 @@ void intrusive_ptr_release( Q* pq ) {
 //
 
 template<class IDatabase> // IDatabase is a the specific handler type:  sqlite3 or pg or ...
-class CSession {
+class CSession: boost::noncopyable {
 public:
 
   typedef CSession<IDatabase> session_t;

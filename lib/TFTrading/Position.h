@@ -119,7 +119,7 @@ public:
       ou::db::Constraint( a, "portfolioid", tablenames::sPortfolio, "portfolioid" );
       ou::db::Constraint( a, "executionaccountid", tablenames::sAccount, "accountid" );
       ou::db::Constraint( a, "dataaccountid", tablenames::sAccount, "accountid" );
-      ou::db::Constraint( a, "instrumentid", tablenames::sInstruments, "instrumentid" );
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
       //"create index idx_positions_portfolioid on positions( portfolioid );",
     }
   };

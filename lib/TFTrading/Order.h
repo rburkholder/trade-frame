@@ -143,7 +143,7 @@ public:
       TableRowDef::Fields( a );
       ou::db::Key( a, "orderid" );
       ou::db::Constraint( a, "positionid", tablenames::sPosition, "positionid" );
-      ou::db::Constraint( a, "instrumentid", tablenames::sInstruments, "instrumentid" );
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
     }
   };
 

@@ -111,9 +111,13 @@ public:
   int Bind( char var );
   int Bind( bool var );
   int Bind( boost::int64_t var );
+  int Bind( boost::uint64_t var );
   int Bind( boost::int32_t var );
+  int Bind( boost::uint32_t var );
   int Bind( boost::int16_t var );
+  int Bind( boost::uint16_t var );
   int Bind( boost::int8_t var );
+  int Bind( boost::uint8_t var );
   int Bind( const std::string& var );
   int Bind( double var );
   int Bind( const boost::posix_time::ptime& var );
@@ -145,9 +149,13 @@ public:
   void Column( bool& var );
   void Column( char& var );
   void Column( boost::int64_t& var );
+  void Column( boost::uint64_t& var );
   void Column( boost::int32_t& var );
+  void Column( boost::uint32_t& var );
   void Column( boost::int16_t& var );
+  void Column( boost::uint16_t& var );
   void Column( boost::int8_t& var );
+  void Column( boost::uint8_t& var );
   void Column( std::string& var );
   void Column( double& var );
   void Column( boost::posix_time::ptime& var );
