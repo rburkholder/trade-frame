@@ -54,6 +54,8 @@ private:
 
   bool m_bActive;
 
+  CInstrument::TableRowDef m_rowInstrument;
+
   OnPopulateCompleteHandler_t OnPopulateComplete;
 
   void HandleOptionContractNotFound( void );
@@ -74,6 +76,8 @@ PopulateOptions::PopulateOptions( ou::db::CSession<DB>& session, CIBTWS& tws )
   m_contract.exchange = "SMART";
   m_contract.secType = "OPT";
 
+  m_rowInstrument.idExchange = "SMART";
+
   m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &PopulateOptions::HandleUnderlyingContractDetails ) );
   m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &PopulateOptions::HandleUnderlyingContractDetailsDone ) );
   m_tws->SetOnSecurityDefinitionNotFoundHandler( MakeDelegate( this, &PopulateOptions::HandleUnderlyingContractNotFound ) );
@@ -88,13 +92,32 @@ PopulateOptions::~PopulateOptions( void ) {
 }
   
 template<class DB>
-void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date expiry, bool bCall, bool bPut ) {
+void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date dExpiry, bool bCall, bool bPut ) {
   if ( m_bActive ) {
     throw std::runtime_error( "already in process" );
+  }
+  if ( !bCall and !bPut ) {
+    throw std::runtime_error( "neither call nor put set" );
   }
   m_bActive = true;
   unsigned int n( 0 );  // start with no options retrieved
   m_contract.symbol = sUnderlying;
+  m_contract.right = "";
+  if ( bCall and bPut ) {
+    // leave .right empty to get both
+  }
+  else {
+    if ( bCall ) m_contract.right = "CALL";
+    if ( bPut  ) m_contract.right = "PUT";
+  }
+
+  m_rowInstrument.eType = InstrumentType::Option;  // need to handle futuresoption as well?
+  m_rowInstrument.idUnderlying = sUnderlying;
+  m_rowInstrument.nYear = dExpiry.year();
+  m_rowInstrument.nMonth = dExpiry.month();
+  m_rowInstrument.nDay = dExpiry.day();
+
+  // delete any pre-existing first?
   m_tws->RequestContractDetails( m_contract );
 }
 
@@ -104,6 +127,8 @@ void PopulateOptions::HandleOptionContractNotFound( void ) {
 
 template<class DB>
 void PopulateOptions::HandleOptionContractDetails( const ContractDetails& details ) {
+  CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+  m_rowInstrument.idInstrument = details.
 }
 
 template<class DB>
