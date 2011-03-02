@@ -221,6 +221,8 @@ public:
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
   boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };
 
+  const TableRowDef& GetRow( void ) { return m_row; };
+
 protected:
 
   pInstrument_t m_pUnderlying;

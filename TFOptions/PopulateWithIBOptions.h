@@ -54,6 +54,8 @@ private:
 
   bool m_bActive;
 
+  unsigned int m_cntInstruments;
+
   CInstrument::TableRowDef m_rowInstrument;
 
   OnPopulateCompleteHandler_t OnPopulateComplete;
@@ -67,7 +69,7 @@ private:
 
 template<class DB>
 PopulateOptions::PopulateOptions( ou::db::CSession<DB>& session, CIBTWS& tws ) 
-  : m_tws( tws ), m_session( session ), m_bActive( false )
+  : m_tws( tws ), m_session( session ), m_bActive( false ), m_cntInstruments( 0 )
 {
   // assert( session active? );
   assert( tws.Connected() );
@@ -123,16 +125,20 @@ void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian
 
 template<class DB>
 void PopulateOptions::HandleOptionContractNotFound( void ) {
+  if ( 0 != OnPopulateComplete ) OnPopulateComplete( m_cntInstruments );
 }
 
 template<class DB>
 void PopulateOptions::HandleOptionContractDetails( const ContractDetails& details ) {
   CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-  m_rowInstrument.idInstrument = details.
+  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pInsert 
+    = session.Insert<CInstrument::TableRowDef>( pInstrument->GetRow() );
+  ++m_cntInstruments;
 }
 
 template<class DB>
 void PopulateOptions::HandleOptionContractDetailsDone( void ) {
+  if ( 0 != OnPopulateComplete ) OnPopulateComplete( m_cntInstruments );
 }
 
 
