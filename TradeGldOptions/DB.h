@@ -28,7 +28,7 @@ public:
 protected:
 private:
 
-  ou::db::CSession<ou::db::ISqlite3> m_db;
+  ou::db::CSession<ou::db::ISqlite3> m_session;
 
   void Populate( void );
 

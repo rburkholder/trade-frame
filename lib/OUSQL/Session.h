@@ -242,7 +242,7 @@ public:
   template<class F> // T: Table Class with TableDef member function
   typename Query<typename IDatabase::structStatementState, F, session_t>& RegisterTable( const std::string& sTableName ) {
 
-    MapTableToFields<F>( sTableName );
+    MapRowDefToTableName<F>( sTableName );
 
     mapTableDefs_iter_t iter = m_mapTableDefs.find( sTableName );
     if ( m_mapTableDefs.end() != iter ) {
@@ -310,17 +310,16 @@ public:
   // query with no parameters
   template<class F>
   typename Query<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
-
     F f;  // warning, this variable goes out of scope before the query is destroyed
     return SQL( sSqlQuery, f );
   }
 
   template<class F>
-  void MapTableToFields( const std::string& sTableName ) {
-    std::string t( typeid( F ).name() );
-    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
+  void MapRowDefToTableName( const std::string& sTableName ) {
+    std::string sF( typeid( F ).name() );
+    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( sF );
     if ( m_mapFieldsToTable.end() == iter ) {
-      m_mapFieldsToTable[ t ] = sTableName;
+      m_mapFieldsToTable[ sF ] = sTableName;
     }
     else {
       if ( iter->second != sTableName ) {
@@ -331,6 +330,17 @@ public:
 
 protected:
 
+  template<class F>
+  //const std::string& MapFieldsToTable( void ) {
+  const std::string& GetTableName( void ) {
+    std::string t( typeid( F ).name() );
+    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
+    if ( m_mapFieldsToTable.end() == iter ) {
+      throw std::runtime_error( "type not found" );
+    }
+    return iter->second;
+  }
+
   template<class F, class Action>  // do reset, auto bind when doing execute
   typename Query<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
 
@@ -338,7 +348,7 @@ protected:
 
     query_t* pQuery = new query_t( *this, f );
     
-    Action action( MapFieldsToTable<F>() );
+    Action action( GetTableName<F>() );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeStatement( pQuery->UpdateQueryText() );
@@ -348,16 +358,6 @@ protected:
     m_vQuery.push_back( pQuery );
 
     return *pQuery;
-  }
-
-  template<class F>
-  const std::string& MapFieldsToTable( void ) {
-    std::string t( typeid( F ).name() );
-    mapFieldsToTable_iter_t iter = m_mapFieldsToTable.find( t );
-    if ( m_mapFieldsToTable.end() == iter ) {
-      throw std::runtime_error( "type not found" );
-    }
-    return iter->second;
   }
 
 private:

@@ -89,6 +89,7 @@ void CNakedOption::HandleGreek( const CGreek& greek ) {
 CNakedCall::CNakedCall( pInstrument_t pInstrument )
 : CNakedOption( pInstrument )
 {
+  // assert instrument is a call
   m_sSide = "C";
 }
 
@@ -99,6 +100,7 @@ CNakedCall::CNakedCall( pInstrument_t pInstrument )
 CNakedPut::CNakedPut( pInstrument_t pInstrument )
 : CNakedOption( pInstrument )
 {
+  // assert instrument is a put
   m_sSide = "P";
 }
 
@@ -164,7 +166,7 @@ CProcess::CProcess(void)
   m_contract.currency = "USD";
   m_contract.exchange = "SMART";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20110318";
+  m_contract.expiry = "20110415";
 
   m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
   std::string sDbName( "dn.db" );
@@ -312,8 +314,8 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
     m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
+//    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+//    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
 }
 
@@ -458,8 +460,8 @@ void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
     pInstrument = pSymbol->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
+//    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+//    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
 
   // create strike entry
@@ -502,8 +504,8 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
     pInstrument = pSymbol->GetInstrument();
   }
   catch ( std::out_of_range& e ) {
-    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
+//    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+//    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
   m_iterStrikes->AssignPut( pInstrument );
 
@@ -694,7 +696,7 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
       HandleAfterMarket( quote );
       break;
     default:
-      throw std::out_of_range( "CProcess::HandleUnderlyingTrade" );
+      throw std::out_of_range( "CProcess::HandleUnderlyingQuote" );
       break;
   };
 

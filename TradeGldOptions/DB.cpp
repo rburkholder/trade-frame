@@ -13,12 +13,12 @@
 
 #include "StdAfx.h"
 
-#include "DB.h"
-
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
-#include <TFDatabase/Session.h>
+#include <TFDatabase/TableDefs.h>
+
+#include "DB.h"
 
 using namespace ou::tf;
 
@@ -33,35 +33,40 @@ void CDB::Open( const std::string& sDbName ) {
 
   if ( boost::filesystem::exists( sDbName ) ) {
     // open already created and loaded database
-    m_db.Open( sDbName );
+    m_session.Open( sDbName );
+    ou::tf::db::RegisterRowDefinitions( m_session );
   }
   else {
     // create and build new database
-    m_db.Open( sDbName, ou::db::EOpenFlagsAutoCreate );
+    m_session.Open( sDbName, ou::db::EOpenFlagsAutoCreate );
+    ou::tf::db::RegisterTableCreation( m_session );
+    m_session.CreateTables();
+    ou::tf::db::RegisterRowDefinitions( m_session );
+    ou::tf::db::PopulateTables( m_session );
     Populate();
   }
 
 }
 
 void CDB::Close( void ) {
-  m_db.Close();
+  m_session.Close();
 }
 
 void CDB::Populate( void ) {
 
   CAccountAdvisor::TableRowDef aa( "ray", "Raymond Burkholder", "One Unified" );
-  ou::db::QueryFields<CAccountAdvisor::TableRowDef>::pQueryFields_t paa = m_db.Insert<CAccountAdvisor::TableRowDef>( aa );
+  ou::db::QueryFields<CAccountAdvisor::TableRowDef>::pQueryFields_t paa = m_session.Insert<CAccountAdvisor::TableRowDef>( aa );
 
   CAccountOwner::TableRowDef ao( "ray", "ray", "Raymond", "Burkholder" );
-  ou::db::QueryFields<CAccountOwner::TableRowDef>::pQueryFields_t pao = m_db.Insert<CAccountOwner::TableRowDef>( ao );
+  ou::db::QueryFields<CAccountOwner::TableRowDef>::pQueryFields_t pao = m_session.Insert<CAccountOwner::TableRowDef>( ao );
 
   CAccount::TableRowDef acctIB( "ib01", "ray", "Raymond Burkholder", keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
-  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIB = m_db.Insert<CAccount::TableRowDef>( acctIB );
+  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIB = m_session.Insert<CAccount::TableRowDef>( acctIB );
 
   CAccount::TableRowDef acctIQ( "iq01", "ray", "Raymond Burkholder", keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
-  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIQF = m_db.Insert<CAccount::TableRowDef>( acctIQ );
+  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIQF = m_session.Insert<CAccount::TableRowDef>( acctIQ );
 
   CPortfolio::TableRowDef portfolio( "vol01", "ray", "Volatility Tests" );
-  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_db.Insert<CPortfolio::TableRowDef>( portfolio );
+  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
 
 }

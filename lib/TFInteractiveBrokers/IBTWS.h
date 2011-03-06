@@ -88,7 +88,6 @@ public:
     OnContractDetailsDone = function;
   }
 
-  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
@@ -160,6 +159,8 @@ protected:
   static const char *szOrderType[];
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );
+
+  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
 
   // overridden from ProviderInterface
   void StartQuoteWatch( pSymbol_t pSymbol );

@@ -78,7 +78,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
     fields.m_intField = -45;
     fields.m_sField = "attempt";
 
-    session.MapTableToFields<CFields>( "test" );
+    session.MapRowDefToTableName<CFields>( "test" );
     ou::db::QueryFields<CFields>::pQueryFields_t pInsert = session.Insert<CFields>( fields );
 
     fields.m_key = 6;
@@ -93,14 +93,14 @@ int _tmain(int argc, _TCHAR* argv[]) {
     CFieldsUpdate update;
     update.m_sField = "good";
 
-    session.MapTableToFields<CFieldsUpdate>( "test" );
+    session.MapRowDefToTableName<CFieldsUpdate>( "test" );
     ou::db::QueryFields<CFieldsUpdate>::pQueryFields_t pUpdate 
       = session.Update<CFieldsUpdate>( update ).Where( "field1 = 'attempt'" );
 
     CFieldsDelete delete_;
     delete_.m_enumField = CFieldsDelete::enumfield2::ETwo;
 
-    session.MapTableToFields<CFieldsDelete>( "test" );
+    session.MapRowDefToTableName<CFieldsDelete>( "test" );
     ou::db::QueryFields<CFieldsDelete>::pQueryFields_t pDelete 
       = session.Delete<CFieldsDelete>( delete_ ).Where( "field2 = ?" );;
 

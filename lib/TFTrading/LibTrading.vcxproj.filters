@@ -55,9 +55,6 @@
     <ClCompile Include="Symbol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TradingDb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TradingEnumerations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -127,9 +124,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TradingDb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TradingEnumerations.h">

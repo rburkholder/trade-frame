@@ -85,6 +85,7 @@ void CIBTWS::Disconnect() {
 }
 
 // this is executed in non-main thread, and the events below will be called from the processing here
+// so... be aware of cross thread issues
 void CIBTWS::ProcessMessages( void ) {
   bool bOK = true;
   while ( bOK && m_bConnected ) {
@@ -193,7 +194,7 @@ void CIBTWS::PlaceOrder( pOrder_t pOrder ) {
       contract.exchange = "SMART";
       break;
     case InstrumentType::Future:
-      assert( false );  // need to fix this formatter
+      assert( false );  // need to fix this formatter, use the boost::gregorian date stuff
 //      s.Format( "%04d%02d", pOrder->GetInstrument()->GetExpiryYear(), pOrder->GetInstrument()->GetExpiryMonth() );
 //      contract.expiry = s;
       if ( "CBOT" == contract.exchange ) contract.exchange = "ECBOT";
@@ -492,6 +493,15 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
     << contractDetails.summary.expiry 
     << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+
+  assert( 0 < contractDetails.summary.conId );
+
+  mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
+  if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
+    pInstrument_t pInstrument = BuildInstrumentFromContract( contractDetails.summary );
+    pSymbol_t pSymbol = NewCSymbol( pInstrument );
+  }
+
   if ( NULL != OnContractDetails ) OnContractDetails( contractDetails );
 }
 
