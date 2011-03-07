@@ -45,7 +45,7 @@ struct NoBind {
 
 class QueryBase {  // used as base representation for stowage in vectors and such
 protected:
-  enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy, EClauseBind };
+  enum enumClause { EClauseNone, EClauseQuery, EClauseWhere, EClauseOrderBy, EClauseGroupBy, EClauseBind, EClauseNoExecute };
 public:
 
   typedef boost::intrusive_ptr<QueryBase> pQueryBase_t;
@@ -129,6 +129,13 @@ public:
     assert( EClauseGroupBy > m_clause );
     m_sQueryText += " GROUPBY " + sGroupBy;
     m_clause = EClauseGroupBy;
+    return *this;
+  }
+
+  Query& NoExecute( void ) {
+    assert( EClauseNoExecute > m_clause );
+    m_bExecuteOneTime = false; // don't execute on the conversion
+    m_clause = EClauseNoExecute;
     return *this;
   }
 

@@ -15,6 +15,10 @@
 #include <OUSQL/Session.h>
 #include <OUSqlite/ISqlite3.h>
 
+#include <TFTrading/KeyTypes.h>
+
+#include <TFDatabase/TableDefs.h>
+
 class CDB
 {
 public:
@@ -25,8 +29,16 @@ public:
   void Open( const std::string& sDbName );
   void Close( void );
 
+  bool IsOpen( void ) { return m_bOpened; };
+
+  static ou::tf::keytypes::idPortfolio_t& PortfolioId( void ) { return std::string( "dn01" ); };
+
+  void LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, ou::tf::CPortfolio::pPortfolio_t& pPortfolio );
+
 protected:
 private:
+
+  bool m_bOpened;
 
   ou::db::CSession<ou::db::ISqlite3> m_session;
 

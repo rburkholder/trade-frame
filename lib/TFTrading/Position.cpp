@@ -323,7 +323,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
     throw std::runtime_error( "CPosition::HandleExecution doesn't have an Open Order" );
   }
 
-  OnExecution( execution_pair_t( this, exec ) );
+  OnExecution( execution_pair_t( *this, exec ) );
   
 }
 

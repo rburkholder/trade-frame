@@ -230,6 +230,7 @@ private:
   typedef CSimulationProvider::pProvider_t pProviderSim_t;
 
   typedef double strike_t;
+
   enum enumTradingState {  // arranged in chronological order
     ETSFirstPass,     // any state initialization
     ETSPreMarket,     // time frame before Markets open
@@ -361,7 +362,7 @@ private:
   void HandleTSCloseOrders( const CQuote& quote );
   void HandleAfterMarket( const CQuote& quote );
 
-  void HandlePositionExecution( const std::pair<const CPosition*, const CExecution&>& );
+  void HandlePositionExecution( CPosition::execution_delegate_t pair );
 
   void OpenPosition( void );
   void ClosePosition( void );

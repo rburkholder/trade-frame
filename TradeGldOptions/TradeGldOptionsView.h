@@ -35,6 +35,8 @@ public:
     COMMAND_HANDLER(IDC_RDIO_MODE_SIM, BN_CLICKED, OnBnClickedRdioModeSim)
     COMMAND_HANDLER(IDC_RDIO_DATA_IQFEED, BN_CLICKED, OnBnClickedRdioDataIqfeed)
     COMMAND_HANDLER(IDC_RDIO_DATA_IB, BN_CLICKED, OnBnClickedRdioDataIb)
+    COMMAND_HANDLER(IDC_BTN_SAVEUNDERLYING, BN_CLICKED, OnBnClickedBtnSaveUnderlying)
+    COMMAND_HANDLER(IDC_BTN_SAVEOPTIONS, BN_CLICKED, OnBnClickedBtnSaveOptions)
     MSG_WM_MOVE(OnMove)
     MSG_WM_SIZE(OnSize)
   END_MSG_MAP()
@@ -90,4 +92,6 @@ public:
   LRESULT OnBnClickedRdioModeSim(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedRdioDataIqfeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedRdioDataIb(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnSaveUnderlying(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnSaveOptions(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

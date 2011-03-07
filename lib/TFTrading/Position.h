@@ -54,7 +54,7 @@ public:
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
-  typedef std::pair<const CPosition*, const CExecution&> execution_pair_t;
+  typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
   typedef keytypes::idPosition_t idPosition_t;

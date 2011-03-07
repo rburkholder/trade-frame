@@ -140,6 +140,10 @@ CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
 // ==================
 //
 
+// 2011/03/06
+// when day to day trading commences, will need to automatically calculate days to expiry
+//   and exit current expiry and start new expiry when within 30 days of expiry.
+
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
@@ -168,8 +172,7 @@ CProcess::CProcess(void)
   m_contract.symbol = m_sSymbolName;
   m_contract.expiry = "20110415";
 
-  m_pPortfolio.reset( new CPortfolio( "DeltaNeutral" ) );
-  std::string sDbName( "dn.db" );
+  std::string sDbName( "TradeGldOptions.db" );
 
   // this is where we select which provider we will be working with on this run
 
@@ -177,14 +180,15 @@ CProcess::CProcess(void)
     case EModeSimulation:
       m_pExecutionProvider = m_sim;
       m_pDataProvider = m_sim;
+      m_pPortfolio.reset( new CPortfolio( CDB::PortfolioId() ) );
       break;
     case EModeLive:
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
+      m_db.Open( sDbName );
+      m_db.LoadPortfolio( CDB::PortfolioId(), m_pPortfolio );
       break;
   }
-
-  m_db.Open( sDbName );
 
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
@@ -292,6 +296,9 @@ void CProcess::HandleOnExecConnected(int e) {
     case EModeSimulation:
       break;
     case EModeLive:
+      // try load from database first
+
+      // otherwise request the contract information
       m_contract.secType = "STK";
       m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
       m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
@@ -304,19 +311,6 @@ void CProcess::HandleOnExecDisconnected(int e) {
   m_ss.str( "" );
   m_ss << "Exec disconnected." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
-}
-
-// --- listing 1 -- Uhderlying Contract
-
-void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
-  m_contractidUnderlying = details.summary.conId;
-  try {
-    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
-  }
-  catch ( std::out_of_range& e ) {
-//    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-//    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
-  }
 }
 
 void CProcess::AcquireSimulationSymbols( void ) {
@@ -411,7 +405,6 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
   }
 }
 
-
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
   
   //m_stateTimeSeries = EUnknown;
@@ -429,6 +422,19 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
     m_ss << "*";
   m_ss << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+}
+
+// --- listing 1 -- Uhderlying Contract
+
+void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
+  m_contractidUnderlying = details.summary.conId;
+  try {
+    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
+  }
+  catch ( std::out_of_range& e ) {
+//    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+//    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
+  }
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
@@ -459,7 +465,7 @@ void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
     pInstrument = pSymbol->GetInstrument();
   }
-  catch ( std::out_of_range& e ) {
+  catch ( std::out_of_range& e ) {  // has been built in to TWS now
 //    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
@@ -503,7 +509,7 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
     pInstrument = pSymbol->GetInstrument();
   }
-  catch ( std::out_of_range& e ) {
+  catch ( std::out_of_range& e ) {  // has been built in to TWS now
 //    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
@@ -516,13 +522,14 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   }
   else {
     // all done
-    m_ss.str( "" );
-    m_ss << "Option Acquisition Complete" << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+    HandleStrikeListing3Done();
   }
 }
 
 void CProcess::HandleStrikeListing3Done(  ) {
+  m_ss.str( "" );
+  m_ss << "Option Acquisition Complete" << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::OnHistorySummaryData( structSummary* pDP ) {
@@ -809,7 +816,7 @@ void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
   m_ss.str( "" );
   ptime dt = ou::CTimeSource::Instance().Internal();
   m_ss << dt;
-  m_ss << " Execution: " << pair.first->GetInstrument()->GetInstrumentName() << " " 
+  m_ss << " Execution: " << pair.first.GetInstrument()->GetInstrumentName() << " " 
     << OrderSide::Name[ pair.second.GetOrderSide() ] << " " 
     << pair.second.GetSize() << "@" << pair.second.GetPrice()
     << std::endl;
@@ -852,6 +859,7 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
       if ( dblDeltaDif > m_dblBaseDeltaIncrement ) { // sell underlying to get closer to put delta
         //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
         m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement );
+        bTraded = true;
         m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
         m_ss.str( "" );
         m_ss << dt;
@@ -862,6 +870,7 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
         if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
           //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
           m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement );
+          bTraded = true;
           m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
           m_ss.str( "" );
           m_ss << dt;
@@ -869,7 +878,6 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
           OutputDebugString( m_ss.str().c_str() );
         }
       }
-
 
     }
     catch ( std::logic_error &e ) {

@@ -70,12 +70,10 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveSeries(WORD /*wNotifyCode*/, WOR
   return 0;
 }
 
-
 LRESULT CTradeGldOptionsView::OnBnClickedBtnSimConnect(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   m_process.SimConnect();
   return 0;
 }
-
 
 LRESULT CTradeGldOptionsView::OnBnClickedBtnSimDisconnet(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   m_process.SimDisconnect();
@@ -88,37 +86,41 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnEmitStats(WORD /*wNotifyCode*/, WORD
   return 0;
 }
 
-
 LRESULT CTradeGldOptionsView::OnBnClickedBtnSimStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   m_process.SimStart();
   return 0;
 }
-
 
 LRESULT CTradeGldOptionsView::OnBnClickedBtnSimStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   m_process.SimStop();
   return 0;
 }
 
-
 LRESULT CTradeGldOptionsView::OnBnClickedRdioModeLive(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 
   return 0;
 }
-
 
 LRESULT CTradeGldOptionsView::OnBnClickedRdioModeSim(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 
   return 0;
 }
 
-
 LRESULT CTradeGldOptionsView::OnBnClickedRdioDataIqfeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   return 0;
 }
 
-
 LRESULT CTradeGldOptionsView::OnBnClickedRdioDataIb(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+
+  return 0;
+}
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveUnderlying(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+
+  return 0;
+}
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveOptions(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 
   return 0;
 }

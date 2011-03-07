@@ -56,6 +56,9 @@ public:
     double dblCommissionsPaid;
 
     TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+    TableRowDef ( const TableRowDef& row ) 
+      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), sDescription( row.sDescription ),
+      dblRealizedPL( row.dblRealizedPL ), dblCommissionsPaid( row.dblCommissionsPaid ) {};
     TableRowDef(
       const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
@@ -87,6 +90,7 @@ public:
     const idPortfolio_t& idPortfolio, 
     const idAccountOwner_t& idAccountOwner, 
     const std::string& sDescription );
+  CPortfolio( const TableRowDef& row );
   ~CPortfolio(void);
 
   void AddPosition( const std::string& sName, pPosition_t pPosition );

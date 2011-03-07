@@ -37,6 +37,11 @@ CPortfolio::CPortfolio(
 {
 }
 
+CPortfolio::CPortfolio( const TableRowDef& row ) 
+  : m_row( row ), m_bCanUseDb( true )
+{
+}
+
 CPortfolio::~CPortfolio(void) {
 }
 

@@ -91,9 +91,7 @@ void PopulateTables( ou::db::CSession<DB>& session ) {
 
   std::vector<std::string>::iterator iter = vsExchangesPreload.begin();
 
-  exchange.idExchange = *(iter++);
-  exchange.sName = *(iter++);
-  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<CExchange::TableRowDef>( exchange );
+  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<CExchange::TableRowDef>( exchange ).NoExecute();
 
   while ( vsExchangesPreload.end() != iter ) {
     exchange.idExchange = *(iter++);
