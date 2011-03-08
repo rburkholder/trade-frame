@@ -35,7 +35,7 @@ CTapeReaderView::CTapeReaderView( void )
   m_stateUI( UI_STARTING ),
   m_bRunning( false )
 {
-  m_pIQFeed = new CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
+  m_pIQFeed = new ou::tf::CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
 }
 
 CTapeReaderView::~CTapeReaderView( void ) {
@@ -230,28 +230,28 @@ LRESULT CTapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
 LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  CIQFUpdateMessage* msg = reinterpret_cast<CIQFUpdateMessage*>( lParam );
+  ou::tf::CIQFUpdateMessage* msg = reinterpret_cast<ou::tf::CIQFUpdateMessage*>( lParam );
 
-  if ( 'N' == *msg->FieldBegin( CIQFUpdateMessage::QPLast ) ) {  // field has "Not Found" in numeric field
+  if ( 'N' == *msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLast ) ) {  // field has "Not Found" in numeric field
     CWindow::MessageBoxA( "Symbol Not Found", "Error", MB_OK );
     m_stateUI = UI_SYMBOLENTRY;
     UpdateUIState();
   }
   else {
     std::string sSymbol( 
-      msg->FieldBegin( CIQFUpdateMessage::QPSymbol ),
-      msg->FieldEnd( CIQFUpdateMessage::QPSymbol ) );
+      msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPSymbol ),
+      msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPSymbol ) );
     if ( sSymbol == m_sSymbol ) {
       std::string sLastTradeTime( 
-        msg->FieldBegin( CIQFUpdateMessage::QPLastTradeTime ),
-        msg->FieldEnd( CIQFUpdateMessage::QPLastTradeTime ) );
+        msg->FieldBegin(ou::tf:: CIQFUpdateMessage::QPLastTradeTime ),
+        msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLastTradeTime ) );
       if ( 9 == sLastTradeTime.length() ) {
-        std::string sBid( msg->FieldBegin( CIQFUpdateMessage::QPBid ), msg->FieldEnd( CIQFUpdateMessage::QPBid ) );
-        std::string sBidVol( msg->FieldBegin( CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( CIQFUpdateMessage::QPBidSize ) );
-        std::string sTick( msg->FieldBegin( CIQFUpdateMessage::QPLast ), msg->FieldEnd( CIQFUpdateMessage::QPLast ) );
-        std::string sTickVol( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
-        std::string sAsk( msg->FieldBegin( CIQFUpdateMessage::QPAsk ), msg->FieldEnd( CIQFUpdateMessage::QPAsk ) );
-        std::string sAskVol( msg->FieldBegin( CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( CIQFUpdateMessage::QPAskSize ) );
+        std::string sBid( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPBid ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPBid ) );
+        std::string sBidVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPBidSize ) );
+        std::string sTick( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLast ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLast ) );
+        std::string sTickVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLastVol ) );
+        std::string sAsk( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPAsk ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPAsk ) );
+        std::string sAskVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPAskSize ) );
 //            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( CIQFUpdateMessage::QPExtTradeLast ) );
 //            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
 
@@ -273,11 +273,11 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 
           structRowItems ri;
           ri.vTime = sLastTradeTime;
-          ri.vBid = msg->Double( CIQFUpdateMessage::QPBid );
+          ri.vBid = msg->Double( ou::tf::CIQFUpdateMessage::QPBid );
 //          ri.vBidVol = msg->Integer( CIQFUpdateMessage::QPBidSize );
-          ri.vTick = msg->Double( CIQFUpdateMessage::QPLast );
+          ri.vTick = msg->Double( ou::tf::CIQFUpdateMessage::QPLast );
 //          ri.vTickVol = msg->Integer( CIQFUpdateMessage::QPLastVol );
-          ri.vAsk = msg->Double( CIQFUpdateMessage::QPAsk );
+          ri.vAsk = msg->Double( ou::tf::CIQFUpdateMessage::QPAsk );
 //          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
           
           COLORREF cBack = ou::Colour::Beige;
@@ -358,7 +358,7 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 
 LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  CIQFSummaryMessage* msg = reinterpret_cast<CIQFSummaryMessage*>( lParam );
+  ou::tf::CIQFSummaryMessage* msg = reinterpret_cast<ou::tf::CIQFSummaryMessage*>( lParam );
   linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
   m_pIQFeed->SummaryDone( p, msg );
@@ -369,7 +369,7 @@ LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BO
 
 LRESULT CTapeReaderView::OnIQFeedFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  CIQFFundamentalMessage* msg = reinterpret_cast<CIQFFundamentalMessage*>( lParam );
+  ou::tf::CIQFFundamentalMessage* msg = reinterpret_cast<ou::tf::CIQFFundamentalMessage*>( lParam );
   linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
   m_pIQFeed->FundamentalDone( p, msg );

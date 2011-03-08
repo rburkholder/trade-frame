@@ -179,9 +179,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   linebuffer_t::iterator end = (*pBuffer).end();
 
 #if defined _DEBUG
-  std::string str( iter, end );
-  str += '\n';
-  OutputDebugString( str.c_str() );
+//  std::string str( iter, end );
+//  str += '\n';
+//  OutputDebugString( str.c_str() );
 #endif
 
   BOOST_ASSERT( iter != end );

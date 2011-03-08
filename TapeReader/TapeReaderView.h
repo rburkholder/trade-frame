@@ -28,8 +28,8 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 
-#include <LibCommon/Colour.h>
-#include "LibIQFeed/IQFeedMsgShim.h"
+#include <OUCommon/Colour.h>
+#include <TFIQFeed/IQFeedMsgShim.h>
 
 #define COLHDR_ARRAY_ELEMENT_SIZE 7
 #define COLHDR_ARRAY_ROW_COUNT 8
@@ -204,9 +204,9 @@ protected:
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
 
-  CIQFeedMsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
-  CIQFeedMsgShim<CTapeReaderView>* m_pIQFeed;
-  typedef CIQFeedMsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
+  ou::tf::CIQFeedMsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
+  ou::tf::CIQFeedMsgShim<CTapeReaderView>* m_pIQFeed;
+  typedef ou::tf::CIQFeedMsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
 
   std::string m_sSymbol;
 
