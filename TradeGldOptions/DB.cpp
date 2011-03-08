@@ -22,6 +22,8 @@
 
 using namespace ou::tf;
 
+std::string CDB::m_sPortfolioId( "dn01" );
+
 CDB::CDB(void): m_bOpened( false ) {
 }
 
@@ -77,27 +79,27 @@ void CDB::Populate( void ) {
 
 }
 
-struct Query {
+struct PortfolioQuery { // can this be simplified?
   template<class A>
   void Fields( A& a ) {
     ou::db::Field( a, "portfolioid", idPortfolio );
   }
-  ou::tf::keytypes::idPortfolio_t idPortfolio;
-  Query( void ) {};
-  Query( ou::tf::keytypes::idPortfolio_t idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
+  const ou::tf::keytypes::idPortfolio_t& idPortfolio;
+  //PortfolioQuery( void ) {};
+  PortfolioQuery( const ou::tf::keytypes::idPortfolio_t& idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
 };
 
 void CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio ) {
 
-  Query query( PortfolioId() );
+  PortfolioQuery query( id );
   
-  CPortfolio::TableRowDef portfolio;
-  ou::db::QueryFields<Query>::pQueryFields_t pQuery 
-    = m_session.SQL<Query>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
+  CPortfolio::TableRowDef portfolio;  // can we put stuff directly into object?
+  ou::db::QueryFields<PortfolioQuery>::pQueryFields_t pQuery 
+    = m_session.SQL<PortfolioQuery>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
 
-  m_session.Bind<Query>( pQuery );
+  m_session.Bind<PortfolioQuery>( pQuery );
   if ( m_session.Execute( pQuery ) ) {
-    m_session.Columns<Query, CPortfolio::TableRowDef>( pQuery, portfolio );
+    m_session.Columns<PortfolioQuery, CPortfolio::TableRowDef>( pQuery, portfolio );
   }
   else {
     throw std::runtime_error( "no portfolio found" );
@@ -105,4 +107,38 @@ void CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::
 
   pPortfolio.reset( new CPortfolio( portfolio ) );
 
+}
+
+struct UnderlyingQuery {  // can this be simplified like PorfolioQuery?
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "instrumentid", idInstrument );
+  }
+  const ou::tf::keytypes::idInstrument_t& idInstrument;
+  //UnderlyingQuery( void ) {};
+  UnderlyingQuery( const ou::tf::keytypes::idInstrument_t& idInstrument_ ) : idInstrument( idInstrument_ ) {};
+};
+
+bool CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+
+  bool bFound = false;
+  UnderlyingQuery query( id );
+
+  CInstrument::TableRowDef instrument;  // can we put stuff direclty into object?
+  ou::db::QueryFields<UnderlyingQuery>::pQueryFields_t pQuery 
+    = m_session.SQL<UnderlyingQuery>( "select * from instruments", query ).Where( "instrumentid = ?" ).NoExecute();
+
+  m_session.Bind<UnderlyingQuery>( pQuery );
+  if ( m_session.Execute( pQuery ) ) {
+    m_session.Columns<UnderlyingQuery, CInstrument::TableRowDef>( pQuery, instrument );
+    pInstrument.reset( new CInstrument( instrument ) );
+    bFound = true;
+  }
+
+  return bFound;
+}
+
+void CDB::SaveUnderlying( ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
+    = m_session.Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
 }

@@ -42,12 +42,12 @@ public:
   virtual ~Action_Compose( void );
 
   template<typename T>
-  void Field( const std::string& sFieldName, T& var ) {
+  void Field( const std::string& sFieldName, const T& var ) {
     addField( sFieldName );
   }
 
   template<typename T>
-  void Field( const std::string& sFieldName, T& var, const std::string& sFieldType ) {
+  void Field( const std::string& sFieldName, const T& var, const std::string& sFieldType ) {
     addField( sFieldName );
   }
 

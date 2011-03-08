@@ -150,7 +150,7 @@ CProcess::CProcess(void)
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
-  m_dblBaseDelta( 1500.0 ), m_dblBaseDeltaIncrement( 200.0 ),
+  m_dblBaseDelta( 1500.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
@@ -297,12 +297,18 @@ void CProcess::HandleOnExecConnected(int e) {
       break;
     case EModeLive:
       // try load from database first
-
-      // otherwise request the contract information
-      m_contract.secType = "STK";
-      m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
-      m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
-      m_tws->RequestContractDetails( m_contract );
+      if ( !m_db.LoadUnderlying( m_sSymbolName, m_pUnderlying ) ) {
+        // otherwise request the contract information
+        m_contract.secType = "STK";
+        m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
+        m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
+        m_tws->RequestContractDetails( m_contract );
+      }
+      else {
+        // need to also prime TWS with symbol
+        m_tws->GetSymbol( m_pUnderlying );
+        HandleStrikeListing1Done();
+      }
       break;
   }
 }
@@ -424,7 +430,7 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
   OutputDebugString( m_ss.str().c_str() );
 }
 
-// --- listing 1 -- Uhderlying Contract
+// --- listing 1 -- Underlying Contract
 
 void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
   m_contractidUnderlying = details.summary.conId;
@@ -435,6 +441,7 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
 //    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
+  m_db.SaveUnderlying( m_pUnderlying );
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
@@ -522,14 +529,13 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
   }
   else {
     // all done
-    HandleStrikeListing3Done();
+    m_ss.str( "" );
+    m_ss << "Option Acquisition Complete" << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
 void CProcess::HandleStrikeListing3Done(  ) {
-  m_ss.str( "" );
-  m_ss << "Option Acquisition Complete" << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::OnHistorySummaryData( structSummary* pDP ) {
@@ -905,6 +911,8 @@ void CProcess::HandleTSCloseOrders( const CQuote& quote ) {
     m_posUnderlying->ClosePosition();
     m_posPut->CancelOrders();
     m_posPut->ClosePosition();
+
+    PrintGreeks();
 
     m_bTrading = false;
   }

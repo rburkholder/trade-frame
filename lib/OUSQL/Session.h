@@ -91,7 +91,8 @@ public:
   typedef boost::intrusive_ptr<QueryFields<F> > pQueryFields_t;
   QueryFields( F& f ): QueryBase(), var( f ) {};
   ~QueryFields( void ) {};
-  F& var;
+  F& var;  // 2011/03/07  I want to make this a reference to a constant var at some point
+   // will require mods to Bind, and will need Fields( A& a ) const, hopefully will work with the Actions passed in
 protected:
 private:
 };

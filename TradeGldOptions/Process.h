@@ -221,6 +221,7 @@ private:
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
 
+  typedef ou::tf::keytypes::idInstrument_t idInstrument_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
@@ -241,7 +242,7 @@ private:
     ETSAfterMarket    // after market closes
   } m_TradingState;
 
-  std::string m_sSymbolName;
+  idInstrument_t m_sSymbolName;
   long m_contractidUnderlying;
   pInstrument_t m_pUnderlying;
 

@@ -19,43 +19,43 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
-  enum enumInstrumentTypes : char { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
+  enum enumInstrumentTypes { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
   const char* Name[];
 }
 
 namespace OrderSide {
-  enum enumOrderSide : char { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
+  enum enumOrderSide { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
   const char* Name[];
 }
 
 namespace OrderStatus {
-  enum enumOrderStatus : char { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted, 
+  enum enumOrderStatus { Created=0, SendingToProvider, PreSubmission, Rejected, Submitted, 
     Filling, CancelSubmitted, FillingDuringCancel, Filled, Cancelled, CancelledWithPartialFill, OverFilled };
 }
 
 namespace OptionSide {
-  enum enumOptionSide : char { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
+  enum enumOptionSide { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
   const char* Name[];
   const char* LongName[];
   const char* ShortName[];
 }
 
 namespace OrderType { // ib szOrderType depends upon order
-  enum enumOrderType : char { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
+  enum enumOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }
 
 namespace OrderErrors {
-  enum enumOrderErrors : char { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
+  enum enumOrderErrors { Unknown=0, Rejected=0, Cancelled, NotCancellable, InstrumentNotFound };
 }
 
 namespace TimeInForce {
-  enum enumTimeInForce : char { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, AtTheClose, _Count };
+  enum enumTimeInForce { Unknown=0, Day, GoodTillCancel, AtTheOpening, ImmediateOrCancel, FillOrKill, GoodTillCrossing, GoodTillDate, AtTheClose, _Count };
 }
 
 namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_4217
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-  enum enumCurrency : char { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CYP, CZK, DKK, EEK, NZD, HUF, ILS, _Count };
+  enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CYP, CZK, DKK, EEK, NZD, HUF, ILS, _Count };
   const char* Name[];
 }
 

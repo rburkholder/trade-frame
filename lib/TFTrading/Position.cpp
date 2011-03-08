@@ -222,7 +222,8 @@ void CPosition::ClosePosition( void ) {
 }
 
 void CPosition::HandleCommission( const COrder& order ) {
-  m_row.dblCommissionPaid += order.GetCommission();
+  //m_row.dblCommissionPaid += order.GetCommission();
+  m_row.dblCommissionPaid = order.GetCommission();
   OnCommission( this );
 }
 
