@@ -138,7 +138,22 @@ bool CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CI
   return bFound;
 }
 
-void CDB::SaveUnderlying( ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+void CDB::SaveInstrument( ou::tf::CInstrument::pInstrument_t& pInstrument ) {
   ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
     = m_session.Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
 }
+
+struct OptionsQuery {
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "underlyingid", idUnderlying );
+    ou::db::Field( a, "year", nYear );
+    ou::db::Field( a, "month", nMonth );
+    ou::db::Field( a, "day", nDay );
+  }
+  const ou::tf::keytypes::idInstrument_t& idUnderlying;
+  boost::uint16_t nYear, nMonth, nDay;
+  OptionsQuery( const ou::tf::keytypes::idInstrument_t& id, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
+    : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ) {};
+};
+

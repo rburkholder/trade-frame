@@ -348,9 +348,10 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
       //<< ", ord.ref=" << order.orderRef 
       //<< ", state.warning=" << state.warningText 
       << std::endl; 
-    OutputDebugString( m_ss.str().c_str() );
+    //OutputDebugString( m_ss.str().c_str() );
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
+      // reports total commission for order rather than increment
       COrderManager::Instance().ReportCommission( orderId, state.commission ); 
   }
   if ( state.warningText != "" ) {

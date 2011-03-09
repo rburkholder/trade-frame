@@ -144,13 +144,30 @@ CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
 // when day to day trading commences, will need to automatically calculate days to expiry
 //   and exit current expiry and start new expiry when within 30 days of expiry.
 
+// 2011/03/08
+/*
+Buy on the way down
+Sell only when above average price
+Work with 2000 delta to start
+Below average price, buy anytime on delta change, except on high end
+implied volatility
+Above average price, sell on delta change
+At strike: vertical spread into new put (don't do anything, change strike
+when changing calendar)
+ * on way down, keep current delta (no)
+ * on way up, normalize delta: (buy puts, buy underlying) (no)
+Vertical spread when within n days of expiry - maybe not, see above
+On delta change for upside sell, if current multiple doesn't work, wait
+till next multiple to ensure a ways above average price
+*/
+
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_sSymbolName( "GLD" ), m_contractidUnderlying( 0 ),
   m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
-  m_dblBaseDelta( 1500.0 ), m_dblBaseDeltaIncrement( 100.0 ),
+  m_dblBaseDelta( 2000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
@@ -306,7 +323,7 @@ void CProcess::HandleOnExecConnected(int e) {
       }
       else {
         // need to also prime TWS with symbol
-        m_tws->GetSymbol( m_pUnderlying );
+        m_tws->GetSymbol( m_pUnderlying );  // preload symbol
         HandleStrikeListing1Done();
       }
       break;
@@ -441,7 +458,7 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
 //    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
-  m_db.SaveUnderlying( m_pUnderlying );
+  m_db.SaveInstrument( m_pUnderlying );
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
@@ -476,6 +493,7 @@ void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
 //    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
+//  m_db.SaveInstrument( pInstrument );
 
   // create strike entry
   CStrikeInfo oi( details.summary.strike );
@@ -520,6 +538,8 @@ void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
 //    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
+//  m_db.SaveInstrument( pInstrument );
+
   m_iterStrikes->AssignPut( pInstrument );
 
   ++m_iterStrikes;

@@ -35,7 +35,7 @@ public:
 
   void LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, ou::tf::CPortfolio::pPortfolio_t& pPortfolio );
   bool LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument );
-  void SaveUnderlying( ou::tf::CInstrument::pInstrument_t& pInstrument );
+  void SaveInstrument( ou::tf::CInstrument::pInstrument_t& pInstrument );
 
 protected:
 private:
