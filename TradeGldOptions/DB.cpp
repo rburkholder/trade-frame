@@ -159,10 +159,10 @@ struct OptionsQueryParameters {
     : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( InstrumentType::Option ) {};
 };
 
-bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
 
   bool bFound = false;
-  OptionsQueryParameters query( id, nYear, nMonth, nDay );
+  OptionsQueryParameters query( idUnderlying, nYear, nMonth, nDay );
 
   ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery 
     = m_session.SQL<OptionsQueryParameters>( 

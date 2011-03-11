@@ -20,6 +20,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <TFOptions/CalcExpiry.h>
+
 #include <TFTimeSeries/DatedDatum.h>
 #include <TFTimeSeries/TimeSeries.h>
 
@@ -133,6 +135,7 @@ private:
 class CStrikeInfo 
 {
 public:
+  CStrikeInfo( void );  // for construction in std::Map
   CStrikeInfo( double dblStrike );
   CStrikeInfo( const CStrikeInfo& rhs );
   ~CStrikeInfo( void );
@@ -242,6 +245,8 @@ private:
     ETSAfterMarket    // after market closes
   } m_TradingState;
 
+  boost::gregorian::date m_dExpiry;
+
   idInstrument_t m_sSymbolName;
   long m_contractidUnderlying;
   pInstrument_t m_pUnderlying;
@@ -289,20 +294,25 @@ private:
   typedef strikes_map_t::iterator strikes_iterator_t;
   strikes_map_t m_mapStrikes;
 
-  typedef std::vector<CStrikeInfo> vStrikeInfo_t;
-  typedef vStrikeInfo_t::iterator vStrikeInfo_iter_t;
+//  typedef std::vector<CStrikeInfo> vStrikeInfo_t;
+//  typedef vStrikeInfo_t::iterator vStrikeInfo_iter_t;
 
-  std::vector<double> m_vCrossOverPoints;  // has pivots and strikes in order
-  vStrikeInfo_t m_vStrikes;  // put/call info for each strike
-  vStrikeInfo_iter_t m_iterStrikes;
-
+  std::vector<double> m_vCrossOverPoints;  // has combination of pivots and strikes in order
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
 
-  vStrikeInfo_iter_t m_iterOILowestWatch;
-  vStrikeInfo_iter_t m_iterOIHighestWatch;
-  vStrikeInfo_iter_t m_iterOILatestGammaSelectCall;
-  vStrikeInfo_iter_t m_iterOILatestGammaSelectPut;
+//  vStrikeInfo_t m_vStrikes;  // put/call info for each strike
+//  vStrikeInfo_iter_t m_iterStrikes;
+
+  typedef std::map<double,CStrikeInfo> mapStrikeInfo_t;
+  typedef std::pair<double,CStrikeInfo> mapStrikeinfo_pair_t;
+  typedef mapStrikeInfo_t::iterator mapStrikeInfo_iter_t;
+  mapStrikeInfo_t m_mapStrikeInfo;
+
+  mapStrikeInfo_iter_t m_iterOILowestWatch;
+  mapStrikeInfo_iter_t m_iterOIHighestWatch;
+  mapStrikeInfo_iter_t m_iterOILatestGammaSelectCall;
+  mapStrikeInfo_iter_t m_iterOILatestGammaSelectPut;
 
   Contract m_contract; // re-usable, persistant contract scratchpad
 
@@ -347,10 +357,8 @@ private:
 
   void HandleStrikeListing1( const ContractDetails& );  // underlying
   void HandleStrikeListing1Done( void );
-  void HandleStrikeListing2( const ContractDetails& );  // symbols for Calls
+  void HandleStrikeListing2( const ContractDetails& );  // symbols for options
   void HandleStrikeListing2Done( void );
-  void HandleStrikeListing3( const ContractDetails& );  // symbols for Puts
-  void HandleStrikeListing3Done( void );
 
   void HandleUnderlyingQuote( const CQuote& quote );
   void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine

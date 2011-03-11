@@ -95,6 +95,7 @@ PopulateOptions::~PopulateOptions( void ) {
   
 template<class DB>
 void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date dExpiry, bool bCall, bool bPut ) {
+
   if ( m_bActive ) {
     throw std::runtime_error( "already in process" );
   }

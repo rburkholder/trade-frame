@@ -109,6 +109,14 @@ CNakedPut::CNakedPut( pInstrument_t pInstrument )
 // ==================
 //
 
+CStrikeInfo::CStrikeInfo( void ) 
+: m_dblStrike( 0 ),
+//  m_call( NULL ), m_put( NULL ),
+  m_bWatching( false )
+{
+  assert( true );  // see if it actaully gets called
+}
+
 CStrikeInfo::CStrikeInfo( double dblStrike ) 
 : m_dblStrike( dblStrike ),
 //  m_call( NULL ), m_put( NULL ),
@@ -161,6 +169,19 @@ On delta change for upside sell, if current multiple doesn't work, wait
 till next multiple to ensure a ways above average price
 */
 
+// gamma scalping:  http://www.schwab.com/public/schwab/research_strategies/market_insight/investing_strategies/options/gamma_scalping.html
+// in addition to staying delta neutral, watch the gamma, it may indicate when to reverse the position.
+// http://www.discoveroptions.com/mixed/content/education/articles/longsyntheticstraddle.html
+
+// Essentially, when my delta equaled my gamma, I would flatten my deltas. 
+// http://www.optionpit.com/option-education/gamma-scalping-part-two-deltagamma-ratio-hedging
+
+// The key to a good gamma position is that the option trader wants the underlying to have a great realized volatility higher than the implied volatility the trade bought.  
+// http://www.optionpit.com/blog/setting-greeks-long-gamma-or-gamma-scalp-trade
+// http://www.optionpit.com/option-education/gamma-scalping-part-one-pay-the-day   ********
+
+// ***** At day’s end, I always zero out deltas. 
+
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
@@ -184,10 +205,21 @@ CProcess::CProcess(void)
   //m_stateTimeSeries( EUnknown )
 {
 
+  boost::gregorian::date dToday = ou::CTimeSource::Instance().Internal().date();
+  m_dExpiry = ou::tf::options::Next3rdFriday( dToday );
+  while ( boost::gregorian::date_period( dToday, m_dExpiry ).length().days() < 8 ) { // some say use front month for scalping
+    boost::gregorian::date_duration dd( 1 );
+    boost::gregorian::date d = m_dExpiry + dd;
+    m_dExpiry = ou::tf::options::Next3rdFriday( d );
+  }
+
   m_contract.currency = "USD";
   m_contract.exchange = "SMART";
   m_contract.symbol = m_sSymbolName;
-  m_contract.expiry = "20110415";
+
+  // will need to use the expiry date to look at existing positions to see if a calendar spread is needed for rolling over
+
+  m_contract.expiry = boost::gregorian::to_iso_string( m_dExpiry );
 
   std::string sDbName( "TradeGldOptions.db" );
 
@@ -306,7 +338,7 @@ void CProcess::OnHistoryConnected( void ) {
 void CProcess::HandleOnExecConnected(int e) {
 
   // (1) create underlying symbol, then (2) get strike list
-  m_vStrikes.clear(); /// horribly buggy this way.
+  m_mapStrikeInfo.clear(); /// horribly buggy this way.
   m_vCrossOverPoints.clear();
 
   switch ( m_eMode ) {
@@ -343,23 +375,26 @@ void CProcess::AcquireSimulationSymbols( void ) {
   scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
   scan.Start( m_sPathForSeries );
 
-  if ( 0 != m_vStrikes.size() ) 
+  if ( 0 != m_mapStrikeInfo.size() ) 
     throw std::runtime_error( "CProcess::AcquireSimulationSymbols strikes already set" );
   for ( strikes_iterator_t iter = m_mapStrikes.begin(); iter != m_mapStrikes.end(); ++ iter ) {
+
     CStrikeInfo oi( iter->first );
-    m_vStrikes.push_back( oi );
+    //m_vStrikes.push_back( oi );
+    m_mapStrikeInfo[ iter->first ] = oi;
+    CStrikeInfo& poi = m_mapStrikeInfo.find( iter->first )->second;
 
-    m_vStrikes.back().AssignCall( iter->second.first );
+    poi.AssignCall( iter->second.first );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( m_vStrikes.back().Call(), &CNakedCall::HandleGreek ) );
+    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleGreek ) );
 
-    m_vStrikes.back().AssignPut( iter->second.second );
+    poi.AssignPut( iter->second.second );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( m_vStrikes.back().Put(), &CNakedPut::HandleGreek ) );
+    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleGreek ) );
 
     m_vCrossOverPoints.push_back( iter->first );
   }
@@ -458,7 +493,7 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
 //    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
-  m_db.SaveInstrument( m_pUnderlying );
+  m_db.SaveInstrument( m_pUnderlying );  // is it storing unique keys?
 }
 
 void CProcess::HandleStrikeListing1Done(  ) {
@@ -466,9 +501,10 @@ void CProcess::HandleStrikeListing1Done(  ) {
   m_ss << "Underlying Contract Done" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
+//  if ( m_db.LoadOptions( 
   // now request contract info for strike listing 
   m_contract.secType = "OPT";
-  m_contract.right = "CALL";
+  //m_contract.right = "CALL";  // get all calls and puts together
   m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
   m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2Done ) );
   m_tws->RequestContractDetails( m_contract );
@@ -480,82 +516,52 @@ void CProcess::HandleStrikeListing1Done(  ) {
 void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
 
   // create strike entries
-  m_vCrossOverPoints.push_back( details.summary.strike );
-
-  // process contract as a call
   CIBSymbol::pSymbol_t pSymbol;
   CIBTWS::pInstrument_t pInstrument;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
     pInstrument = pSymbol->GetInstrument();
+    assert( ou::tf::InstrumentType::Option == pInstrument->GetInstrumentType() );
   }
   catch ( std::out_of_range& e ) {  // has been built in to TWS now
 //    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
+
 //  m_db.SaveInstrument( pInstrument );
 
   // create strike entry
-  CStrikeInfo oi( details.summary.strike );
-  m_vStrikes.push_back( oi );
-  m_vStrikes.back().AssignCall( pInstrument );  // needs to come after push
-
+  mapStrikeInfo_iter_t iter = m_mapStrikeInfo.find( details.summary.strike );
+  if ( m_mapStrikeInfo.end() == iter ) {
+    CStrikeInfo oi( details.summary.strike );
+    m_mapStrikeInfo[ details.summary.strike ] = oi;
+    m_vCrossOverPoints.push_back( details.summary.strike );
+  }
+  
+  switch ( pInstrument->GetOptionSide() ) {
+    case ou::tf::OptionSide::Call:
+      m_mapStrikeInfo[ details.summary.strike ].AssignCall( pInstrument );
+      break;
+    case ou::tf::OptionSide::Put:
+      m_mapStrikeInfo[ details.summary.strike ].AssignPut( pInstrument );
+      break;
+  }
 }
 
 void CProcess::HandleStrikeListing2Done(  ) {
 
-  // strike listing is complete
-  m_ss.str( "" );
-  m_ss << "#strikes: " << m_vStrikes.size() << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
-
-  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
-  // request puts
-  m_iterStrikes = m_vStrikes.begin();
+  // strike listing is complete
+  m_ss.str( "" );
+  m_ss << "#strikes: " << m_mapStrikeInfo.size() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 
-  if ( m_vStrikes.end() != m_iterStrikes ) {
-    m_contract.strike = m_iterStrikes->Strike();
-    m_contract.right = "PUT";
+  // all done
+  m_ss.str( "" );
+  m_ss << "Option Acquisition Complete" << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 
-    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3 ) );
-    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing3Done ) );
-    m_tws->RequestContractDetails( m_contract );
-  }
-}
-
-// --- listing 3 -- Put Contracts
-
-void CProcess::HandleStrikeListing3( const ContractDetails& details ) {
-  CIBSymbol::pSymbol_t pSymbol;
-  CIBTWS::pInstrument_t pInstrument;
-  try {
-    pSymbol = m_tws->GetSymbol( details.summary.conId );
-    pInstrument = pSymbol->GetInstrument();
-  }
-  catch ( std::out_of_range& e ) {  // has been built in to TWS now
-//    pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-//    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
-  }
-//  m_db.SaveInstrument( pInstrument );
-
-  m_iterStrikes->AssignPut( pInstrument );
-
-  ++m_iterStrikes;
-  if ( m_vStrikes.end() != m_iterStrikes ) {
-    m_contract.strike = m_iterStrikes->Strike();
-    m_tws->RequestContractDetails( m_contract );
-  }
-  else {
-    // all done
-    m_ss.str( "" );
-    m_ss << "Option Acquisition Complete" << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
-  }
-}
-
-void CProcess::HandleStrikeListing3Done(  ) {
 }
 
 void CProcess::OnHistorySummaryData( structSummary* pDP ) {
@@ -583,11 +589,11 @@ void CProcess::OnHistoryRequestDone( void ) {
 
 void CProcess::StartWatch( void ) {
 
-  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
+//  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
-  m_iterOILatestGammaSelectCall = m_vStrikes.end();  // initialized for beginning of trading
-  m_iterOILatestGammaSelectPut = m_vStrikes.end();  // initialized for beginning of trading
+  m_iterOILatestGammaSelectCall = m_mapStrikeInfo.end();  // initialized for beginning of trading
+  m_iterOILatestGammaSelectPut = m_mapStrikeInfo.end();  // initialized for beginning of trading
 
   m_pDataProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
   m_pDataProvider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
@@ -601,15 +607,17 @@ void CProcess::StopWatch( void ) {
 
   if ( m_bWatchingOptions ) {
     m_bWatchingOptions = false;
-    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+    for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_pDataProvider->RemoveQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      CStrikeInfo& oi = iter->second;
 
-      m_pDataProvider->RemoveQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleGreek ) );
+
+      m_pDataProvider->RemoveQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
@@ -628,13 +636,13 @@ void CProcess::OpenPosition( void ) {
     m_iterOILatestGammaSelectCall = m_iterOILowestWatch;
     m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
     // find highest gamma option for call and for put
-    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-      gamma = iter->Call()->Gamma();
+    for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+      gamma = iter->second.Call()->Gamma();
       if ( gammaCall < gamma ) { 
         gammaCall = gamma;
         m_iterOILatestGammaSelectCall = iter;
       }
-      gamma = iter->Put()->Gamma();
+      gamma = iter->second.Put()->Gamma();
       if ( gammaPut < gamma ) { 
         gammaPut = gamma;
         m_iterOILatestGammaSelectPut = iter;
@@ -643,12 +651,12 @@ void CProcess::OpenPosition( void ) {
 
     // todo?  check that SelectCall != LowestWatch and SelectPut != HighestWatch
 
-    m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
-    m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
+    m_dblCallPrice = m_iterOILatestGammaSelectCall->second.Call()->Ask();
+    m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
     // depending upon gammas, could be straddle or strangle?
-    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->Call()->Delta() ) / 100 );
-    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->Put() ->Delta() ) / 100 );
+    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->second.Call()->Delta() ) / 100 );
+    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->second.Put() ->Delta() ) / 100 );
 
     // a normal delta neutral with long underlying and long put
     m_nLongPut = m_nPuts;
@@ -674,11 +682,11 @@ void CProcess::OpenPosition( void ) {
 
       m_bWaitingForTradeCompletion = true;
 
-      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
+      m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->second.Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
       m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
       m_pPortfolio->AddPosition( "Put", m_posPut );
-      m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->Put() ->Delta();
+      m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
       m_ss.str( "" );
       m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
@@ -790,17 +798,17 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
 
   // calculate where to have put/call option watches,
   //   have a range of strikes above and below current trade (have maximum 100 watches available)
-  m_iterOIHighestWatch = m_vStrikes.begin();
-  while ( *m_iterOIHighestWatch <= dblOpenValue ) {
+  m_iterOIHighestWatch = m_mapStrikeInfo.begin();
+  while ( (m_iterOIHighestWatch->first) <= dblOpenValue ) {
     ++m_iterOIHighestWatch;
   }
   m_iterOILowestWatch = m_iterOIHighestWatch;
   --m_iterOILowestWatch;
   for ( int i = 0; i < 15; ++i ) {
-    if ( m_vStrikes.begin() != m_iterOILowestWatch ) {
+    if ( m_mapStrikeInfo.begin() != m_iterOILowestWatch ) {
       --m_iterOILowestWatch;
     }
-    if ( m_vStrikes.end() != m_iterOIHighestWatch ) {
+    if ( m_mapStrikeInfo.end() != m_iterOIHighestWatch ) {
       ++m_iterOIHighestWatch;
     }
   }
@@ -808,15 +816,17 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
   // set the actual watches
   m_bWatchingOptions = true;
   if ( keytypes::EProviderSimulator != m_pDataProvider->ID() ) {
-    for ( std::vector<CStrikeInfo>::iterator iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+    for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      m_pDataProvider->AddQuoteHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( iter->Call()->GetInstrument(), MakeDelegate( iter->Call(), &CNakedCall::HandleGreek ) );
+      CStrikeInfo& oi = iter->second;
 
-      m_pDataProvider->AddQuoteHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( iter->Put()->GetInstrument(),  MakeDelegate( iter->Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->AddQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleGreek ) );
+
+      m_pDataProvider->AddQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 
@@ -867,8 +877,8 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
 
     double dblMidQuote = ( quote.Bid() + quote.Ask() ) / 2.0;
 
-    double dblDeltaPut  = m_iterOILatestGammaSelectPut->Put()->Delta() * m_nPuts * 100;
-    double dblDeltaCall = m_iterOILatestGammaSelectCall->Call()->Delta() * m_nCalls * 100;
+    double dblDeltaPut  = m_iterOILatestGammaSelectPut->second.Put()->Delta() * m_nPuts * 100;
+    double dblDeltaCall = m_iterOILatestGammaSelectCall->second.Call()->Delta() * m_nCalls * 100;
 
     bool bTraded = false;
     int nOptions = 0;
@@ -954,16 +964,16 @@ void CProcess::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
     << ou::CTimeSource::Instance().Internal()
-    << " Strk "  << m_iterOILatestGammaSelectCall->Strike()
+    << " Strk "  << m_iterOILatestGammaSelectCall->second.Strike()
 //    << " Call "  << m_iterOILatestGammaSelectCall->Call()->OptionPrice()
-    << " ImpVo " << m_iterOILatestGammaSelectCall->Call()->ImpliedVolatility()
-    << " Delta " << m_iterOILatestGammaSelectCall->Call()->Delta()
-    << " Gamma " << m_iterOILatestGammaSelectCall->Call()->Gamma() << " - "
-    << " Strk "  << m_iterOILatestGammaSelectPut->Strike()
+    << " ImpVo " << m_iterOILatestGammaSelectCall->second.Call()->ImpliedVolatility()
+    << " Delta " << m_iterOILatestGammaSelectCall->second.Call()->Delta()
+    << " Gamma " << m_iterOILatestGammaSelectCall->second.Call()->Gamma() << " - "
+    << " Strk "  << m_iterOILatestGammaSelectPut->second.Strike()
 //    << " Put "   << m_iterOILatestGammaSelectPut->Put()->OptionPrice()
-    << " ImpVo " << m_iterOILatestGammaSelectPut->Put()->ImpliedVolatility()
-    << " Delta " << m_iterOILatestGammaSelectPut->Put()->Delta()
-    << " Gamma " << m_iterOILatestGammaSelectPut->Put()->Gamma() 
+    << " ImpVo " << m_iterOILatestGammaSelectPut->second.Put()->ImpliedVolatility()
+    << " Delta " << m_iterOILatestGammaSelectPut->second.Put()->Delta()
+    << " Gamma " << m_iterOILatestGammaSelectPut->second.Put()->Gamma() 
     << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
@@ -1007,65 +1017,67 @@ void CProcess::SaveSeries( void ) {
   catch (...) {
   }
 
-  for ( vStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+  for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+
+    CStrikeInfo& oi = iter->second;
 
     try {
-      if ( 0 != iter->Call()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Call()->GetInstrument()->GetInstrumentName();
-        wtsQuotes.Write( sPathName, iter->Call()->Quotes() );
-        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
-          iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
-          iter->Call()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Call()->Quotes()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Call()->GetInstrument()->GetInstrumentName();
+        wtsQuotes.Write( sPathName, oi.Call()->Quotes() );
+        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
+          oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
-      if ( 0 != iter->Call()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Call()->GetInstrument()->GetInstrumentName();
-        wtsTrades.Write( sPathName, iter->Call()->Trades() );
-        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
-          iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
-          iter->Call()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Call()->Trades()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Call()->GetInstrument()->GetInstrumentName();
+        wtsTrades.Write( sPathName, oi.Call()->Trades() );
+        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
+          oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
-      if ( 0 != iter->Call()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Call()->GetInstrument()->GetInstrumentName();
-        wtsGreeks.Write( sPathName, iter->Call()->Greeks() );
-        CHDF5Attributes::structOption option( iter->Call()->GetInstrument()->GetStrike(), 
-          iter->Call()->GetInstrument()->GetExpiryYear(), iter->Call()->GetInstrument()->GetExpiryMonth(), iter->Call()->GetInstrument()->GetExpiryDay(),
-          iter->Call()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Call()->Greeks()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Call()->GetInstrument()->GetInstrumentName();
+        wtsGreeks.Write( sPathName, oi.Call()->Greeks() );
+        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
+          oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
-      if ( 0 != iter->Put()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + iter->Put()->GetInstrument()->GetInstrumentName();
-        wtsQuotes.Write( sPathName, iter->Put()->Quotes() );
-        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
-          iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
-          iter->Put()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Put()->Quotes()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Put()->GetInstrument()->GetInstrumentName();
+        wtsQuotes.Write( sPathName, oi.Put()->Quotes() );
+        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
+          oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
-      if ( 0 != iter->Put()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + iter->Put()->GetInstrument()->GetInstrumentName();
-        wtsTrades.Write( sPathName, iter->Put()->Trades() );
-        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
-          iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
-          iter->Put()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Put()->Trades()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Put()->GetInstrument()->GetInstrumentName();
+        wtsTrades.Write( sPathName, oi.Put()->Trades() );
+        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
+          oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
 
-      if ( 0 != iter->Put()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + iter->Put()->GetInstrument()->GetInstrumentName();
-        wtsGreeks.Write( sPathName, iter->Put()->Greeks() );
-        CHDF5Attributes::structOption option( iter->Put()->GetInstrument()->GetStrike(), 
-          iter->Put()->GetInstrument()->GetExpiryYear(), iter->Put()->GetInstrument()->GetExpiryMonth(), iter->Put()->GetInstrument()->GetExpiryDay(),
-          iter->Put()->GetInstrument()->GetOptionSide() );
+      if ( 0 != oi.Put()->Greeks()->Size() ) {
+        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Put()->GetInstrument()->GetInstrumentName();
+        wtsGreeks.Write( sPathName, oi.Put()->Greeks() );
+        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
+          oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
         attributes.SetProviderId( m_pDataProvider->ID() );
       }
@@ -1105,3 +1117,10 @@ void CProcess::EmitStats( void ) {
 //      sell high implied volatility, buy low implied volatility
 // add hdf5 link cross links for different groupings
 
+/*
+Some individual stocks carry a small edge for gamma scalping : unusual intraday hi-lo / close-to-close ratio. While an average is around 1.5 , a few (SNDK , MSTR) hitting 2. Stocks with high monthly numbers of up(down) grades are great too.
+So, you can only earn from this method if you do not adjust too often. You have to profit from the delta being non-zero, letting gamma do it's work. The profits are represented by the holes between the original delta-curve and the broken line formed by the adjusted position.
+Actually you probably could make a very good living gamma scalping stocks the last week of expiration. Due in part to the fact that volatility will have very little effect on the option premiums.
+It has nothing to do with model frequency. It's purely psychological factors. If statvol is proven to be > implied than the trade will be a winner, provided the trader doesn't fcuk it up.
+
+*/
