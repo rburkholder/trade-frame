@@ -114,7 +114,7 @@ CStrikeInfo::CStrikeInfo( void )
 //  m_call( NULL ), m_put( NULL ),
   m_bWatching( false )
 {
-  assert( true );  // see if it actaully gets called
+  //assert( false );  // see if it actaully gets called
 }
 
 CStrikeInfo::CStrikeInfo( double dblStrike ) 
@@ -195,7 +195,6 @@ CProcess::CProcess(void)
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
   m_sPathForSeries( "/strategy/deltaneutral2" ),
-  //m_sDesiredSimTradingDay( "2010-Jul-15 20:03:35.687500" ),
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
@@ -349,14 +348,14 @@ void CProcess::HandleOnExecConnected(int e) {
       if ( !m_db.LoadUnderlying( m_sSymbolName, m_pUnderlying ) ) {
         // otherwise request the contract information
         m_contract.secType = "STK";
-        m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1 ) );
-        m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing1Done ) );
+        m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
+        m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
         m_tws->RequestContractDetails( m_contract );
       }
       else {
         // need to also prime TWS with symbol
         m_tws->GetSymbol( m_pUnderlying );  // preload symbol
-        HandleStrikeListing1Done();
+        HandleUnderlyingListingDone();
       }
       break;
   }
@@ -484,7 +483,7 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
 
 // --- listing 1 -- Underlying Contract
 
-void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
+void CProcess::HandleUnderlyingListing( const ContractDetails& details ) {
   m_contractidUnderlying = details.summary.conId;
   try {
     m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
@@ -496,24 +495,32 @@ void CProcess::HandleStrikeListing1( const ContractDetails& details ) {
   m_db.SaveInstrument( m_pUnderlying );  // is it storing unique keys?
 }
 
-void CProcess::HandleStrikeListing1Done(  ) {
+void CProcess::HandleUnderlyingListingDone(  ) {
+
   m_ss.str( "" );
   m_ss << "Underlying Contract Done" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
-//  if ( m_db.LoadOptions( 
-  // now request contract info for strike listing 
-  m_contract.secType = "OPT";
-  //m_contract.right = "CALL";  // get all calls and puts together
-  m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2 ) );
-  m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListing2Done ) );
-  m_tws->RequestContractDetails( m_contract );
-
+  m_db.SetOnNewInstrumentHandler( MakeDelegate( this, &CProcess::HandleStrikeFromDb ) );
+  if ( m_db.LoadOptions( m_pUnderlying->GetInstrumentName(), m_dExpiry.year(), m_dExpiry.month(), m_dExpiry.day() ) ) {
+    // options have been loaded through HandleStrikeFromDb
+    HandleStrikeListingDone();
+  }
+  else {
+    // request contract info for strike listing 
+    m_contract.secType = "OPT";
+    //m_contract.right = "CALL";  // get all calls and puts together
+    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeFromIB ) );
+    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+    m_tws->RequestContractDetails( m_contract );
+  }
+  m_db.SetOnNewInstrumentHandler( 0 );
+  
 }
 
-// --- listing 2 -- listing of strikes, listing of calls
+// --- listing of strikes, listing of calls
 
-void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
+void CProcess::HandleStrikeFromIB( const ContractDetails& details ) {
 
   // create strike entries
   CIBSymbol::pSymbol_t pSymbol;
@@ -528,27 +535,38 @@ void CProcess::HandleStrikeListing2( const ContractDetails& details ) {
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
 
-//  m_db.SaveInstrument( pInstrument );
+  m_db.SaveInstrument( pInstrument );
+  AddOptionToStrikeInfo( pInstrument );
 
-  // create strike entry
-  mapStrikeInfo_iter_t iter = m_mapStrikeInfo.find( details.summary.strike );
+}
+
+void CProcess::HandleStrikeFromDb( ou::tf::CInstrument::pInstrument_t pInstrument ) {
+  m_tws->GetSymbol( pInstrument );  // preload symbol
+  AddOptionToStrikeInfo( pInstrument );
+}
+
+void CProcess::AddOptionToStrikeInfo( ou::tf::CInstrument::pInstrument_t pInstrument ) {
+
+  double dblStrike = pInstrument->GetStrike();
+
+  mapStrikeInfo_iter_t iter = m_mapStrikeInfo.find( dblStrike );
   if ( m_mapStrikeInfo.end() == iter ) {
-    CStrikeInfo oi( details.summary.strike );
-    m_mapStrikeInfo[ details.summary.strike ] = oi;
-    m_vCrossOverPoints.push_back( details.summary.strike );
+    CStrikeInfo oi( dblStrike );
+    m_mapStrikeInfo[ dblStrike ] = oi;
+    m_vCrossOverPoints.push_back( dblStrike );
   }
   
   switch ( pInstrument->GetOptionSide() ) {
     case ou::tf::OptionSide::Call:
-      m_mapStrikeInfo[ details.summary.strike ].AssignCall( pInstrument );
+      m_mapStrikeInfo[ dblStrike ].AssignCall( pInstrument );
       break;
     case ou::tf::OptionSide::Put:
-      m_mapStrikeInfo[ details.summary.strike ].AssignPut( pInstrument );
+      m_mapStrikeInfo[ dblStrike ].AssignPut( pInstrument );
       break;
   }
 }
 
-void CProcess::HandleStrikeListing2Done(  ) {
+void CProcess::HandleStrikeListingDone(  ) {
 
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 

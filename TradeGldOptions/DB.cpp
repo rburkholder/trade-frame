@@ -168,15 +168,18 @@ bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boo
     = m_session.SQL<OptionsQueryParameters>( 
     "select * from instruments", query ).Where( "underlyingid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
 
-  ou::tf::CInstrument::TableRowDef instrument;  // can we put stuff direclty into object?
+  ou::tf::CInstrument::TableRowDef instrument;  // can we put stuff directly into object?
   ou::tf::CInstrument::pInstrument_t pInstrument;
   m_session.Bind<OptionsQueryParameters>( pQuery );
   if ( m_session.Execute( pQuery ) ) {
     bFound = true;
     if ( NULL != OnNewInstrument ) {
-      m_session.Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
-      pInstrument.reset( new CInstrument( instrument ) );
-      OnNewInstrument( pInstrument );
+      do {
+        m_session.Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
+        pInstrument.reset( new CInstrument( instrument ) );
+        OnNewInstrument( pInstrument );
+      }
+      while ( m_session.Execute( pQuery ) );
     }
   }
 

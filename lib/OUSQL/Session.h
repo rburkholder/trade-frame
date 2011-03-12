@@ -121,14 +121,14 @@ public:
 
   Query& OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
     assert( EClauseOrderBy > m_clause );
-    m_sQueryText += " ORDERBY " + sOrderBy;
+    m_sQueryText += " ORDER BY " + sOrderBy;
     m_clause = EClauseOrderBy;
     return *this;
   }
 
   Query& GroupBy( const std::string& sGroupBy ) {
     assert( EClauseGroupBy > m_clause );
-    m_sQueryText += " GROUPBY " + sGroupBy;
+    m_sQueryText += " GROUP BY " + sGroupBy;
     m_clause = EClauseGroupBy;
     return *this;
   }

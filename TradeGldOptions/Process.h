@@ -355,10 +355,12 @@ private:
   void HandleHDF5Object( const std::string& sPath, const std::string& sName);
   void HandleHDF5Group( const std::string& sPath, const std::string& sName );
 
-  void HandleStrikeListing1( const ContractDetails& );  // underlying
-  void HandleStrikeListing1Done( void );
-  void HandleStrikeListing2( const ContractDetails& );  // symbols for options
-  void HandleStrikeListing2Done( void );
+  void HandleUnderlyingListing( const ContractDetails& );  // underlying
+  void HandleUnderlyingListingDone( void );
+  void HandleStrikeFromIB( const ContractDetails& );  // symbols for options
+  void HandleStrikeFromDb( ou::tf::CInstrument::pInstrument_t );
+  void AddOptionToStrikeInfo( ou::tf::CInstrument::pInstrument_t );
+  void HandleStrikeListingDone( void );
 
   void HandleUnderlyingQuote( const CQuote& quote );
   void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine
