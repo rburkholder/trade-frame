@@ -564,6 +564,10 @@ void CProcess::AddOptionToStrikeInfo( ou::tf::CInstrument::pInstrument_t pInstru
       m_mapStrikeInfo[ dblStrike ].AssignPut( pInstrument );
       break;
   }
+
+  m_ss.str("");
+  m_ss << "Option " << pInstrument->GetInstrumentName() << std::endl;
+  OutputDebugString( m_ss.str().c_str() );
 }
 
 void CProcess::HandleStrikeListingDone(  ) {
