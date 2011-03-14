@@ -32,10 +32,9 @@ public:
   typedef boost::shared_ptr<CExecution> pExecution_t;
   typedef const pExecution_t& pExecution_ref;
 
-  struct TableRowDef {
+  struct TableRowDefNoKey {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "executionid", idExecution );
       ou::db::Field( a, "orderid", idOrder );
       ou::db::Field( a, "quantity", nQuantity );
       ou::db::Field( a, "price", dblPrice );
@@ -46,29 +45,49 @@ public:
     }
     //  "create index if not exists idx_executions_orderid on executions( orderid );",
 
-  idExecution_t idExecution;
-  idOrder_t idOrder;
-  boost::uint32_t nQuantity;  // quantity executed
-  double dblPrice;  // execution price
-  OrderSide::enumOrderSide eOrderSide;
-  ptime dtExecutionTimeStamp;
-  std::string sExchange;
-  std::string sExchangeExecutionId;  // unique execution id supplied by provider
+    idOrder_t idOrder;
+    boost::uint32_t nQuantity;  // quantity executed
+    double dblPrice;  // execution price
+    OrderSide::enumOrderSide eOrderSide;
+    ptime dtExecutionTimeStamp;
+    std::string sExchange;
+    std::string sExchangeExecutionId;  // unique execution id supplied by provider
 
-  TableRowDef( void ) : idExecution( 0 ), idOrder( 0 ), nQuantity( 0 ), dblPrice( 0.0 ),
-    eOrderSide( OrderSide::Unknown ) {};
-  TableRowDef( idExecution_t idExecution_, idOrder_t idOrder_, 
-    boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
-    std::string sExchange_, std::string sExchangeExecutionId_ )
-    : idExecution( idExecution_ ), idOrder( idOrder_ ), nQuantity( nQuantity_ ), 
-      dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
-      sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
-  TableRowDef( /* idExecution_t idExecution_, idOrder_t idOrder_, */
-    boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
-    std::string sExchange_, std::string sExchangeExecutionId_ )
-    : idExecution( 0 ), idOrder( 0 ), nQuantity( nQuantity_ ),  // executionid from db, idOrder from owner
-      dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
-      sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+    TableRowDefNoKey( void ) : idOrder( 0 ), nQuantity( 0 ), dblPrice( 0.0 ),
+      eOrderSide( OrderSide::Unknown ) {};
+    TableRowDefNoKey( idOrder_t idOrder_, 
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      std::string sExchange_, std::string sExchangeExecutionId_ )
+      : idOrder( idOrder_ ), nQuantity( nQuantity_ ), 
+        dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
+        sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+    TableRowDefNoKey( /* idOrder_t idOrder_, */
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      std::string sExchange_, std::string sExchangeExecutionId_ )
+      : idOrder( 0 ), nQuantity( nQuantity_ ),  // idOrder from owner
+        dblPrice( dblPrice_ ), eOrderSide( eOrderSide_ ), 
+        sExchange( sExchange_ ), sExchangeExecutionId( sExchangeExecutionId_ ) {};
+  };
+
+  struct TableRowDef: TableRowDefNoKey {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "executionid", idExecution );
+      TableRowDefNoKey::Fields( a );
+    }
+    idExecution_t idExecution;
+
+    TableRowDef( void ) : idExecution( 0 ), TableRowDefNoKey() {};
+    TableRowDef( idExecution_t idExecution_, idOrder_t idOrder_, 
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      std::string sExchange_, std::string sExchangeExecutionId_ )
+      : idExecution( idExecution_ ), TableRowDefNoKey( idOrder_, nQuantity_, 
+        dblPrice_, eOrderSide_, sExchange_, sExchangeExecutionId_ ) {};
+    TableRowDef( /* idExecution_t idExecution_, idOrder_t idOrder_, */
+      boost::uint32_t nQuantity_, double dblPrice_, OrderSide::enumOrderSide eOrderSide_,
+      std::string sExchange_, std::string sExchangeExecutionId_ )
+      : idExecution( 0 ), TableRowDefNoKey( nQuantity_,  // executionid from db, idOrder from owner
+        dblPrice_, eOrderSide_, sExchange_, sExchangeExecutionId_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {

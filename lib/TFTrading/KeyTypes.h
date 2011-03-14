@@ -25,9 +25,9 @@ typedef std::string idAccountAdvisor_t;
 typedef std::string idAccountOwner_t;
 typedef std::string idAccount_t;
 typedef std::string idPortfolio_t;
-typedef boost::int64_t idPosition_t;
-typedef boost::int64_t idOrder_t;
-typedef boost::int64_t idExecution_t;
+typedef boost::int64_t idPosition_t;  // auto increment
+typedef boost::int64_t idOrder_t;  // supplied/sync'd with execution provider
+typedef boost::int64_t idExecution_t; // auto increment
 typedef std::string idInstrument_t;
 typedef std::string idExchange_t;
 

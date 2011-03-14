@@ -60,10 +60,10 @@ public:
   typedef keytypes::idPosition_t idPosition_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
 
-  struct TableRowDef {
+  struct TableRowDefNoKey {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "positionid", idPosition );
+      
       ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "name", sName );
       ou::db::Field( a, "notes", sNotes );
@@ -81,7 +81,6 @@ public:
       ou::db::Field( a, "commissionpaid", dblCommissionPaid );
     }
 
-    idPosition_t idPosition;
     idPortfolio_t idPortfolio;
     std::string sName;
     std::string sNotes;
@@ -105,10 +104,21 @@ public:
   // contains total commissions
     double dblCommissionPaid;
 
-    TableRowDef( void ) : idPosition( 0 ), eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+    TableRowDefNoKey( void ) : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
 
+  };
+
+  struct TableRowDef: TableRowDefNoKey { // separated out so can an auto key on insertion with only a TableRowDefNoKey
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "positionid", idPosition );
+      TableRowDefNoKey::Fields( a );
+    }
+    idPosition_t idPosition;
+
+    TableRowDef( void ) : idPosition( 0 ), TableRowDefNoKey() {};
   };
 
   struct TableCreateDef: TableRowDef {
