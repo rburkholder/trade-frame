@@ -89,8 +89,9 @@ struct PortfolioQueryParameters { // can this be simplified?
   PortfolioQueryParameters( const ou::tf::keytypes::idPortfolio_t& idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
 };
 
-void CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio ) {
+bool CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio ) {
 
+  bool bFound = false;
   PortfolioQueryParameters query( id );
   
   CPortfolio::TableRowDef portfolio;  // can we put stuff directly into object?
@@ -100,13 +101,12 @@ void CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::
   m_session.Bind<PortfolioQueryParameters>( pQuery );
   if ( m_session.Execute( pQuery ) ) {
     m_session.Columns<PortfolioQueryParameters, CPortfolio::TableRowDef>( pQuery, portfolio );
-  }
-  else {
-    throw std::runtime_error( "no portfolio found" );
+    bFound = true;
   }
 
   pPortfolio.reset( new CPortfolio( portfolio ) );
 
+  return bFound;
 }
 
 struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
@@ -186,3 +186,4 @@ bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boo
   return bFound;
 
 }
+

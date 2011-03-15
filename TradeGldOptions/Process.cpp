@@ -222,19 +222,32 @@ CProcess::CProcess(void)
 
   std::string sDbName( "TradeGldOptions.db" );
 
+  // Prepare Portfolio and associated Positions:  underlying plus covering option  long+put or short+call
+
+  ou::tf::keytypes::idPortfolio_t idPortfolio( "dn01-" + m_sSymbolName + "-" + m_contract.expiry );
+  if ( m_db.LoadPortfolio( idPortfolio, m_pPortfolio ) ) {
+    // load the underlying and covering positions
+  }
+  else {
+    // create and save the underlying and covering positions
+  }
+
+
+  // Implement the calendar roll over at some point
+
   // this is where we select which provider we will be working with on this run
 
   switch ( m_eMode ) {
     case EModeSimulation:
       m_pExecutionProvider = m_sim;
       m_pDataProvider = m_sim;
-      m_pPortfolio.reset( new CPortfolio( CDB::PortfolioId() ) );
+//      m_pPortfolio.reset( new CPortfolio( CDB::PortfolioId() ) );
       break;
     case EModeLive:
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
       m_db.Open( sDbName );
-      m_db.LoadPortfolio( CDB::PortfolioId(), m_pPortfolio );
+//      m_db.LoadPortfolio( CDB::PortfolioId(), m_pPortfolio );
       break;
   }
 
