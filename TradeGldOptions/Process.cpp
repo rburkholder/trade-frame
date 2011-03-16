@@ -225,13 +225,13 @@ CProcess::CProcess(void)
   // Prepare Portfolio and associated Positions:  underlying plus covering option  long+put or short+call
 
   ou::tf::keytypes::idPortfolio_t idPortfolio( "dn01-" + m_sSymbolName + "-" + m_contract.expiry );
-  if ( m_db.LoadPortfolio( idPortfolio, m_pPortfolio ) ) {
+//  if ( m_db.LoadPortfolio( idPortfolio, m_pPortfolio ) ) {
     // load the underlying and covering positions
-  }
-  else {
-    // create and save the underlying and covering positions
-  }
+//  }
+//  else {
+    // create and save the portfolio, the underlying and the covering positions
 
+//  }
 
   // Implement the calendar roll over at some point
 

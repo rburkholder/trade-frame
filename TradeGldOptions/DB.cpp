@@ -74,39 +74,9 @@ void CDB::Populate( void ) {
   CAccount::TableRowDef acctIQ( "iq01", "ray", "Raymond Burkholder", keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
   ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIQF = m_session.Insert<CAccount::TableRowDef>( acctIQ );
 
-  CPortfolio::TableRowDef portfolio( PortfolioId(), "ray", "Delta Neutral 01 - long und, long put" );
-  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
+//  CPortfolio::TableRowDef portfolio( PortfolioId(), "ray", "Delta Neutral 01 - long und, long put" );
+//  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
 
-}
-
-struct PortfolioQueryParameters { // can this be simplified?
-  template<class A>
-  void Fields( A& a ) {
-    ou::db::Field( a, "portfolioid", idPortfolio );
-  }
-  const ou::tf::keytypes::idPortfolio_t& idPortfolio;
-  //PortfolioQuery( void ) {};
-  PortfolioQueryParameters( const ou::tf::keytypes::idPortfolio_t& idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
-};
-
-bool CDB::LoadPortfolio( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio ) {
-
-  bool bFound = false;
-  PortfolioQueryParameters query( id );
-  
-  CPortfolio::TableRowDef portfolio;  // can we put stuff directly into object?
-  ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pQuery 
-    = m_session.SQL<PortfolioQueryParameters>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
-
-  m_session.Bind<PortfolioQueryParameters>( pQuery );
-  if ( m_session.Execute( pQuery ) ) {
-    m_session.Columns<PortfolioQueryParameters, CPortfolio::TableRowDef>( pQuery, portfolio );
-    bFound = true;
-  }
-
-  pPortfolio.reset( new CPortfolio( portfolio ) );
-
-  return bFound;
 }
 
 struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
@@ -185,5 +155,82 @@ bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boo
 
   return bFound;
 
+}
+
+void CDB::CreatePortfolioAndPositionRecords( 
+  const ou::tf::keytypes::idPortfolio_t& idPortfolio, 
+  const ou::tf::keytypes::idInstrument_t& idUnderlying, const ou::tf::keytypes::idInstrument_t& idOption,
+  const ou::tf::keytypes::idAccount_t& idExecutionAccount, const ou::tf::keytypes::idAccount_t& idDataAccount
+  ) {
+
+  CPortfolio::TableRowDef portfolio( idPortfolio, "ray", "Delta Neutral 01 - long und, long put" );
+  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
+
+  CPosition::TableRowDefNoKey posUnderlying( idPortfolio, "U", idUnderlying, idExecutionAccount, idDataAccount );
+  ou::db::QueryFields<CPosition::TableRowDefNoKey>::pQueryFields_t pPosUnderlying 
+    = m_session.Insert<CPosition::TableRowDefNoKey>( posUnderlying );
+
+  CPosition::TableRowDefNoKey posOption( idPortfolio, "O", idOption, idExecutionAccount, idDataAccount );
+  ou::db::QueryFields<CPosition::TableRowDefNoKey>::pQueryFields_t pPosOption 
+    = m_session.Insert<CPosition::TableRowDefNoKey>( posOption );
+}
+
+struct PortfolioQueryParameters { // can this be simplified?
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "portfolioid", idPortfolio );
+  }
+  const ou::tf::keytypes::idPortfolio_t& idPortfolio;
+  //PortfolioQuery( void ) {};
+  PortfolioQueryParameters( const ou::tf::keytypes::idPortfolio_t& idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
+};
+
+bool CDB::LoadPortfolioAndPositions( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio,
+                                     ou::tf::CPosition::pPosition_t& pPosUnderlying, ou::tf::CPosition::pPosition_t& pPosOption 
+) {
+
+  bool bFound = false;
+  PortfolioQueryParameters query( id );
+
+  ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPortfolioQuery 
+    = m_session.SQL<PortfolioQueryParameters>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
+
+  m_session.Bind<PortfolioQueryParameters>( pPortfolioQuery );
+  if ( m_session.Execute( pPortfolioQuery ) ) {
+    CPortfolio::TableRowDef portfolio; 
+    m_session.Columns<PortfolioQueryParameters, CPortfolio::TableRowDef>( pPortfolioQuery, portfolio );
+    pPortfolio.reset( new CPortfolio( portfolio ) );
+    bFound = true;
+  }
+
+  if ( bFound ) {
+    // load positions
+    ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPositionQuery 
+      = m_session.SQL<PortfolioQueryParameters>( "select * from positions", query ).Where( "portfolioid = ?" ).OrderBy( "name" ).NoExecute();
+    m_session.Bind<PortfolioQueryParameters>( pPositionQuery );
+    bool bOptionFound = false;
+    bool bUnderlyingFound = false;
+    if ( m_session.Execute( pPositionQuery ) ) {
+      CPosition::TableRowDef position;
+      m_session.Columns<PortfolioQueryParameters, CPosition::TableRowDef>( pPositionQuery, position );
+      if ( "O" == position.sName ) {
+        assert( !bOptionFound ); // turn into proper error later
+        pPosOption.reset( new CPosition( position ) );
+        bOptionFound = true;
+      }
+      if ( m_session.Execute( pPositionQuery ) ) {
+        CPosition::TableRowDef position;
+        m_session.Columns<PortfolioQueryParameters, CPosition::TableRowDef>( pPositionQuery, position );
+        if ( "U" == position.sName ) {
+          assert( !bUnderlyingFound ); // turn into proper error later
+          pPosUnderlying.reset( new CPosition( position ) );
+          bUnderlyingFound = true;
+        }
+      }
+    }
+    assert( bOptionFound && bUnderlyingFound );
+  }
+
+  return bFound;
 }
 

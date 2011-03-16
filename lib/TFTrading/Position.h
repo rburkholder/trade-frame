@@ -84,9 +84,9 @@ public:
     idPortfolio_t idPortfolio;
     std::string sName;
     std::string sNotes;
-    std::string idExecutionAccount;
-    std::string idDataAccount;
-    std::string idInstrument;
+    ou::tf::keytypes::idAccount_t idExecutionAccount;
+    ou::tf::keytypes::idAccount_t idDataAccount;
+    ou::tf::keytypes::idInstrument_t idInstrument;
   // all pending orders must be on the same side
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market
@@ -104,7 +104,16 @@ public:
   // contains total commissions
     double dblCommissionPaid;
 
-    TableRowDefNoKey( void ) : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+    // account and instrument objects need to be manually asssigned in a second step
+    TableRowDefNoKey( void ) 
+      : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
+      dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
+    TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const ou::tf::keytypes::idInstrument_t& idInstrument_,
+      const ou::tf::keytypes::idAccount_t& idExecutionAccount_, const ou::tf::keytypes::idAccount_t& idDataAccount_ ) 
+      : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), 
+      idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
+      eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
 
@@ -177,7 +186,7 @@ public:
 
   void EmitStatus( std::stringstream& ssStatus );
 
-  void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
+  void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );  // need to set verification that pointers have been set
 
 protected:
 
