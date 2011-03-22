@@ -13,14 +13,18 @@
 
 // construct a new session, complete with tables and a pre-populate
 
+#pragma once
+
 #include <string>
 #include <vector>
 
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include <OUSQL/Session.h>
+//#include <OUSQL/Session.h>
 
+#include <TFTrading/Instrument.h>
+#include <TFTrading/Exchange.h>
 #include <TFTrading/AccountAdvisor.h>
 #include <TFTrading/AccountOwner.h>
 #include <TFTrading/Account.h>
@@ -28,8 +32,6 @@ using namespace boost::assign;
 #include <TFTrading/Position.h>
 #include <TFTrading/Order.h>
 #include <TFTrading/Execution.h>
-#include <TFTrading/Instrument.h>
-#include <TFTrading/Exchange.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

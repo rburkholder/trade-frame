@@ -5,8 +5,9 @@
 
 #include <iostream>
 
-#include <OUSQL/Session.h>
-#include <OUSqlite/ISqlite3.h>
+//#include <OUSQL/Session.h>
+//#include <OUSqlite/ISqlite3.h>
+#include <OUSqlite/Session.h>
 
 struct CFields {
 
@@ -62,7 +63,8 @@ struct CFieldsDelete {
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-  ou::db::CSession<ou::db::ISqlite3> session;
+//  ou::db::CSession<ou::db::ISqlite3> session;
+  ou::db::CSession session;
   session.Open( ":memory:", ou::db::EOpenFlagsAutoCreate );
 //  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 

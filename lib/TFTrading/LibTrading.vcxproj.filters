@@ -132,6 +132,9 @@
     <ClInclude Include="KeyTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Managers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2009, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,40 +13,26 @@
 
 #pragma once
 
-#include <map>
+#include <OUSQL/Session.h>
 
-//#include <OUSQL/Session.h>
+#include "ProviderManager.h"
+#include "InstrumentManager.h"
+#include "AccountManager.h"
+#include "PortfolioManager.h"
+#include "OrderManager.h"
 
-// class T:  target class
-
-// Manager base class for 
-//  AccountManager,
-//  PortfolioManager
-//  OrderManager, 
-//  InstrumentManager, 
-//  ProviderManager, 
-
-#include <OUCommon/Singleton.h>
-
-namespace ou {
+namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// T: CRTP base
-template<class T> 
-class ManagerBase: public ou::CSingleton<T> {
-public:
-
-  ManagerBase( void )/*: m_pDbSession( 0 ) */{};
-  virtual ~ManagerBase( void ) {};
-
-//  void SetDbSession( ou::db::CSession<DB>* pDbSession ) {
-//    m_pDbSession = pDbSession;
-//  }
-
-protected:
-//  ou::db::CSession<DB>* m_pDbSession;
-private:
-};
+template<class DB>
+void InitializeManagers( ou::db::CSession<DB>* pDbSession ) {
+//  CProviderManager::Instance().SetSession( pDbSession );
+//  CInstrumentManager::Instance().SetSession( pDbSession );
+//  CAccountManager::Instance().SetSession( pDbSession );
+//  CPortfolioManager::Instance().SetSession( pDbSession );
+//  COrderManager::Instance().SetSession( pDbSession );
+}
 
 } // namespace tf
-} // ou
+} // namespace ou
+

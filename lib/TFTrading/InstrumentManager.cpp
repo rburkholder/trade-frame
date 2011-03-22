@@ -12,9 +12,10 @@
  ************************************************************************/
 
 #include "StdAfx.h"
-#include "InstrumentManager.h"
 
 #include <stdexcept>
+
+#include "InstrumentManager.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -31,31 +32,6 @@ CInstrumentManager::~CInstrumentManager(void) {
   }
   m_map.clear();
 }
-
-/*
-CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
-//  return GetIQFeedInstrument( sName, sName );
-  try {
-    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName ) );  // todo:  need to verify proper symbol usage
-    return pInstrument;
-  }
-  catch (...) {
-    throw std::runtime_error( "CInstrumentManager::GetIQFeedInstrument problems" );
-  }
-}
-*/
-/*
-CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
-  try {
-    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
-    return pInstrument;
-  }
-  catch (...) {
-    throw std::runtime_error( "CBasketTradeSymbolInfo::Initialize problems" );
-  }
-  //return pInstrument;
-}
-*/
 
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument( 
@@ -165,6 +141,31 @@ void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pa
   iterOld = m_map.find( pair.first );  // load again to ensure proper copy
   m_map.erase( iterOld );
 }
+
+/*
+CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
+//  return GetIQFeedInstrument( sName, sName );
+  try {
+    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName ) );  // todo:  need to verify proper symbol usage
+    return pInstrument;
+  }
+  catch (...) {
+    throw std::runtime_error( "CInstrumentManager::GetIQFeedInstrument problems" );
+  }
+}
+*/
+/*
+CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
+  try {
+    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
+    return pInstrument;
+  }
+  catch (...) {
+    throw std::runtime_error( "CBasketTradeSymbolInfo::Initialize problems" );
+  }
+  //return pInstrument;
+}
+*/
 
 } // namespace tf
 } // namespace ou

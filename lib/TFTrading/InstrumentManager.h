@@ -13,18 +13,21 @@
 
 #pragma once
 
-#include <string>
+// 2011/03/16  add persist-to-db superclass for saving/retrieving instruments
+
 #include <map>
+#include <string>
+
+#include "KeyTypes.h"
 
 #include "Instrument.h"
-//#include "InstrumentFile.h"
 #include "ManagerBase.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class CInstrumentManager
-  : public ManagerBase<CInstrumentManager, CInstrument::idInstrument_t, CInstrument> {
+  : public ManagerBase<CInstrumentManager> {
 public:
 
   typedef CInstrument::pInstrument_t pInstrument_t;
@@ -88,6 +91,7 @@ private:
   void HandleAlternateNameAdded( CInstrument::pairNames_t );
   void HandleAlternateNameChanged( CInstrument::pairNames_t );
 };
+
 
 } // namespace tf
 } // namespace ou

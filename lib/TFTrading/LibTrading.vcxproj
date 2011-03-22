@@ -107,6 +107,7 @@
     <ClInclude Include="InstrumentManager.h" />
     <ClInclude Include="KeyTypes.h" />
     <ClInclude Include="ManagerBase.h" />
+    <ClInclude Include="Managers.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderManager.h" />
     <ClInclude Include="Portfolio.h" />

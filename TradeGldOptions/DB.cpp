@@ -94,7 +94,7 @@ bool CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CI
   bool bFound = false;
   UnderlyingQueryParameter query( id );
 
-  CInstrument::TableRowDef instrument;  // can we put stuff direclty into object?
+  CInstrument::TableRowDef instrument;  // can we put stuff directly into the object?
   ou::db::QueryFields<UnderlyingQueryParameter>::pQueryFields_t pQuery 
     = m_session.SQL<UnderlyingQueryParameter>( "select * from instruments", query ).Where( "instrumentid = ?" ).NoExecute();
 
@@ -192,6 +192,7 @@ bool CDB::LoadPortfolioAndPositions( const ou::tf::keytypes::idPortfolio_t& id, 
   bool bFound = false;
   PortfolioQueryParameters query( id );
 
+  // obtain the portfolio record
   ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPortfolioQuery 
     = m_session.SQL<PortfolioQueryParameters>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
 
@@ -203,6 +204,7 @@ bool CDB::LoadPortfolioAndPositions( const ou::tf::keytypes::idPortfolio_t& id, 
     bFound = true;
   }
 
+  // obtain the position records
   if ( bFound ) {
     // load positions
     ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPositionQuery 

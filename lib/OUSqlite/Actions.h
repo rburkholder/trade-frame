@@ -17,7 +17,6 @@
 
 #include <stdexcept>
 
-#include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/type_traits/is_enum.hpp>
@@ -133,6 +132,8 @@ public:
       throw std::runtime_error( sErr );
     }
   }
+
+  void Key( const std::string& sFieldName ) {};  // kludge to provide for SessionImpl::QueryState::ProcessInQueryState::Bind
 
 protected:
 private:

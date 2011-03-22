@@ -13,11 +13,13 @@
   <ItemGroup>
     <ClCompile Include="Actions.cpp" />
     <ClCompile Include="ISqlite3.cpp" />
+    <ClCompile Include="Session.cpp" />
     <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actions.h" />
     <ClInclude Include="ISqlite3.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="StatementState.h" />
   </ItemGroup>

@@ -18,32 +18,26 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CPortfolioManager::CPortfolioManager(void) {
-}
-
-CPortfolioManager::~CPortfolioManager(void) {
-}
-
-CPortfolioManager::pPortfolio_t CPortfolioManager::Create( const std::string& sName ) {
+CPortfolioManager::pPortfolio_t CPortfolioManager::Create( const idPortfolio_t& sName ) {
   pPortfolio_t pPortfolio;
-  iterator iter = m_mapPortfolios.find( sName );
-  if ( m_mapPortfolios.end() != iter ) {
+  iterPortfolio_t iter = m_mapPortfolio.find( sName );
+  if ( m_mapPortfolio.end() != iter ) {
     throw std::runtime_error( "CPortfolioManager::Create, portfolio already exists" );
   }
   else {
     pPortfolio.reset( new CPortfolio( sName ) );
-    m_mapPortfolios.insert( m_mapPortfolios_pair( sName, pPortfolio ) );
+    m_mapPortfolio.insert( mapPortfolio_pair_t( sName, pPortfolio ) );
   }
   return pPortfolio;
 }
 
-CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const std::string& sName, bool bCreate ) {
+CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfolio_t& sName, bool bCreate ) {
   pPortfolio_t pPortfolio;
-  iterator iter = m_mapPortfolios.find( sName );
-  if ( m_mapPortfolios.end() == iter ) {
+  iterPortfolio_t iter = m_mapPortfolio.find( sName );
+  if ( m_mapPortfolio.end() == iter ) {
     if ( bCreate ) {
       pPortfolio.reset( new CPortfolio( sName ) );
-      m_mapPortfolios.insert( m_mapPortfolios_pair( sName, pPortfolio ) );
+      m_mapPortfolio.insert( mapPortfolio_pair_t( sName, pPortfolio ) );
     }
     else {
       throw std::runtime_error( "CPortfolioManager::GetPortfolio, portfolio does not exist" );
@@ -56,12 +50,12 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const std::stri
   return pPortfolio;
 }
 
-void CPortfolioManager::Delete( const std::string& sName ) {
-  iterator iter = m_mapPortfolios.find( sName );
-  if ( m_mapPortfolios.end() == iter ) {
+void CPortfolioManager::Delete( const idPortfolio_t& sName ) {
+  iterPortfolio_t iter = m_mapPortfolio.find( sName );
+  if ( m_mapPortfolio.end() == iter ) {
     throw std::runtime_error( "CPortfolioManager::Delete, portfolio does not exist" );
   }
-  m_mapPortfolios.erase( iter );
+  m_mapPortfolio.erase( iter );
 }
 
 } // namespace tf

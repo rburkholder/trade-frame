@@ -28,10 +28,13 @@ namespace ou {
 // CSingleton
 //
 
+// look in patterns book for protected version of creation:  double check lock pattern
+// but may need two versions:  1 singleton common across threads, 1 singleton per thread
+
 template<typename T> 
 class CSingleton {
 public:
-  static T& Instance() {
+  static T& Instance() {  
     static T _instance;
     return _instance;
   }
@@ -39,9 +42,9 @@ protected:
   CSingleton() {};          // ctor hidden
   ~CSingleton() {};          // dtor hidden
 private:
+  static T* pT;  // needs initialization when specialized
   CSingleton(CSingleton const&);    // copy ctor hidden
   CSingleton& operator=(CSingleton const&);  // assign op hidden
-
 };
 
 //

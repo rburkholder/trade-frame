@@ -70,6 +70,7 @@ public:
       ou::db::Field( a, "executionaccountid", idExecutionAccount );
       ou::db::Field( a, "dataaccountid", idDataAccount );
       ou::db::Field( a, "instrumentid", idInstrument );
+      ou::db::Field( a, "algorithm", sAlgorithm );
       ou::db::Field( a, "ordersidepending", eOrderSidePending );
       ou::db::Field( a, "quantitypending", nPositionPending );
       ou::db::Field( a, "ordersideactive", eOrderSideActive );
@@ -87,6 +88,7 @@ public:
     ou::tf::keytypes::idAccount_t idExecutionAccount;
     ou::tf::keytypes::idAccount_t idDataAccount;
     ou::tf::keytypes::idInstrument_t idInstrument;
+    std::string sAlgorithm;
   // all pending orders must be on the same side
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market

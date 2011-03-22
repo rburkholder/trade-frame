@@ -13,11 +13,6 @@
 
 #include "StdAfx.h"
 
-#include <stdexcept>
-
-#include "ProviderInterface.h"
-#include "TradingEnumerations.h"
-
 #include "OrderManager.h"
 
 namespace ou { // One Unified

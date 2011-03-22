@@ -17,11 +17,15 @@
 // At some point, make order manager responsible for constructing COrder
 
 #include <map>
+#include <stdexcept>
 
 #include <OUCommon/Delegate.h>
 
 #include <OUBerkeleyDb/AutoIncKeys.h>
 
+#include "KeyTypes.h"
+
+#include "ProviderInterface.h"
 #include "TradingEnumerations.h"
 #include "ManagerBase.h"
 #include "Order.h"
@@ -37,7 +41,7 @@ namespace tf { // TradeFrame
 class CProviderInterfaceBase;
 
 // this is a singleton so use the Instance() call from all users
-class COrderManager: public ManagerBase<COrderManager, COrder::idOrder_t, COrder> {
+class COrderManager: public ManagerBase<COrderManager> {
 public:
 
   typedef COrder::pOrder_t pOrder_t;

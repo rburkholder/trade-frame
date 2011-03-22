@@ -18,36 +18,43 @@
 #include <string>
 #include <map>
 
+#include "KeyTypes.h"
+
 #include "ManagerBase.h"
 #include "ProviderInterface.h"
 
 // key might be account or other similar globally known identifier
 
 // ProviderManager probably won't be used much at the moment
-// it hould be converted over to boost::fusion for storing full types and values for the 
+// it should be converted over to boost::fusion for storing full types and values for the 
 // various providers, and then have specialized algorithms for processing the tuples of providers.
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CProviderManager: public ManagerBase<CProviderManager, std::string, CProviderInterfaceBase> {
+class CProviderManager: public ManagerBase<CProviderManager> {
 public:
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef keytypes::idProvider_t idProvider_t;
 
-  CProviderManager(void);
-  ~CProviderManager(void);
+  CProviderManager(void) {};
+  ~CProviderManager(void) {};
 
-  void Register( const std::string& sKey,  pProvider_t pProvider );
+  void Register( const idProvider_t& key,  pProvider_t pProvider );
+  void Release( const idProvider_t& key );  // should we check for close or anything?
+  pProvider_t Get( const idProvider_t& key );
 
 protected:
 
-  typedef std::map<std::string, pProvider_t> providers_t;
-  typedef std::pair<std::string, pProvider_t> providers_pair_t;
-
-  providers_t m_mapProviders;
-
 private:
+
+  typedef std::map<idProvider_t, pProvider_t> mapProviders_t;
+  typedef std::pair<idProvider_t, pProvider_t> mapProviders_pair_t;
+  typedef mapProviders_t::iterator iterProviders_t;
+
+  mapProviders_t m_mapProviders;
+
 };
 
 } // namespace tf

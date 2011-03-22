@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include "KeyTypes.h"
 
 namespace ou { // One Unified
@@ -26,6 +28,7 @@ public:
 
   typedef keytypes::idAccount_t idAccount_t;
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
+  typedef boost::shared_ptr<CAccount> pAccount_t;
 
   struct TableRowDef {
     template<class A>

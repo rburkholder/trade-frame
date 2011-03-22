@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2010, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,42 +11,42 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-
-#include <map>
-
-//#include <OUSQL/Session.h>
-
-// class T:  target class
-
-// Manager base class for 
-//  AccountManager,
-//  PortfolioManager
-//  OrderManager, 
-//  InstrumentManager, 
-//  ProviderManager, 
-
-#include <OUCommon/Singleton.h>
+#include "Session.h"
 
 namespace ou {
-namespace tf { // TradeFrame
+namespace db {
 
-// T: CRTP base
-template<class T> 
-class ManagerBase: public ou::CSingleton<T> {
-public:
+CSession::CSession( void ): pImpl( new CSessionBase() ) {
+}
 
-  ManagerBase( void )/*: m_pDbSession( 0 ) */{};
-  virtual ~ManagerBase( void ) {};
+CSession::~CSession( void ) {
+  delete pImpl;
+}
 
-//  void SetDbSession( ou::db::CSession<DB>* pDbSession ) {
-//    m_pDbSession = pDbSession;
-//  }
+void CSession::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
+  pImpl->Open( sDbFileName, flags );
+}
 
-protected:
-//  ou::db::CSession<DB>* m_pDbSession;
-private:
-};
+void CSession::Close( void ) {
+  pImpl->Close();
+}
 
-} // namespace tf
+bool CSession::Execute( QueryBase& qb ) {
+  return pImpl->Execute( qb );
+}
+
+bool CSession::Execute( QueryBase::pQueryBase_t pQuery ) {
+  return pImpl->Execute( pQuery );
+}
+
+void CSession::Reset( QueryBase::pQueryBase_t pQuery ) {
+  pImpl->Reset( pQuery );
+}
+
+void CSession::CreateTables( void ) {
+  pImpl->CreateTables();
+}
+
+
+} // db
 } // ou
