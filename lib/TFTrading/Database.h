@@ -11,20 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// need to find a generic way of specifying the database used at solution level? at project level?
+// possibly through command line defines?
+
 #pragma once
 
-// http://www.theoptionsguide.com/expiration-date.aspx
-// http://www.cboe.com/TradTool/strikepricecode.aspx
-
-#include "boost/date_time/gregorian/gregorian.hpp"
-
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-namespace options { // options
-
-boost::gregorian::date Next3rdFriday( boost::gregorian::date date );
-
-} // namespace options
-} // namespace tf
-} // namespace ou
-
+#include <OUSqlite/Session.h>

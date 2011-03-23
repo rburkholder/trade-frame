@@ -35,17 +35,20 @@ namespace tf { // TradeFrame
 class CProviderManager: public ManagerBase<CProviderManager> {
 public:
 
-  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
   typedef keytypes::idProvider_t idProvider_t;
+  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
   CProviderManager(void) {};
   ~CProviderManager(void) {};
 
-  void Register( const idProvider_t& key,  pProvider_t pProvider );
+  pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
+  template<class P> pProvider_t Construct( const idProvider_t& key ); // construct given a provider 'P' type
   void Release( const idProvider_t& key );  // should we check for close or anything?
   pProvider_t Get( const idProvider_t& key );
 
 protected:
+
+  void Register( const idProvider_t& key,  pProvider_t& pProvider );
 
 private:
 
@@ -56,6 +59,14 @@ private:
   mapProviders_t m_mapProviders;
 
 };
+
+template<class P> CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& key ) {
+  // need to perform some construction asssertions to ensure P is of a valid type
+  pProvider_t pProvider;
+  pProvider.reset( new P() );
+  Register( key, pProvider );
+  return pProvider;
+}
 
 } // namespace tf
 } // namespace ou

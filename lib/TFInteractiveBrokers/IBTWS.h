@@ -63,7 +63,7 @@ public:
   typedef COrder::pOrder_t pOrder_t;
   typedef int reqId_t;  // request id type
 
-  CIBTWS( const std::string &acctCode, const std::string &address = "127.0.0.1", unsigned int port = 7496 );
+  CIBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
   ~CIBTWS(void);
   
   // From ProviderInterface:

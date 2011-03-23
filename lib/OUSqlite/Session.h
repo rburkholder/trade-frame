@@ -11,6 +11,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// OUSqlite Library
+// was going to be pimpl, but couldn't, as templates are in use, no 'export' keyword
+// includes are a bit messy, a compendium of ousql/session, ousql/sessionimpl, and this session file
+// maybe using Spirit::Phoenix tuplies will get me out of this mess?
+
 #include <OUSQL/Session.h>
 #include <OUSQL/SessionImpl.h>
 

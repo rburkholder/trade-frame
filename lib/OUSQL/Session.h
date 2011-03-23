@@ -21,6 +21,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include "Database.h"
 
@@ -173,10 +174,13 @@ class CSessionBase;
 //
 // CSessionBase
 //   independent of IDatabase / structStatementState stuff
+// this was an attempt at pimpl hiding, but the template<class F> class member function templates got in the way
 //
 
 class CSession {
 public:
+
+  typedef boost::shared_ptr<CSession> pSession_t;
 
   CSession( void );
   ~CSession( void );

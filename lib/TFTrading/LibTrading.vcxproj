@@ -81,6 +81,7 @@
     <ClCompile Include="InstrumentInformation.cpp" />
     <ClCompile Include="InstrumentManager.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
+    <ClCompile Include="Managers.cpp" />
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="OrderManager.cpp" />
     <ClCompile Include="Portfolio.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="AccountAdvisor.h" />
     <ClInclude Include="AccountOwner.h" />
     <ClInclude Include="AlternateInstrumentNames.h" />
+    <ClInclude Include="Database.h" />
     <ClInclude Include="Exchange.h" />
     <ClInclude Include="Execution.h" />
     <ClInclude Include="AccountManager.h" />
@@ -117,6 +119,7 @@
     <ClInclude Include="ProviderManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Symbol.h" />
+    <ClInclude Include="TableDefs.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TradingEnumerations.h" />
   </ItemGroup>

@@ -13,15 +13,40 @@
 
 #include "StdAfx.h"
 
+#include <stdexcept>
+
 #include "ProviderManager.h"
+
+#include <TFIQFeed/IQFeedProvider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
+#include <TFSimulation/SimulationProvider.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-void CProviderManager::Register( const idProvider_t& key, pProvider_t pProvider ) {
+CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& key, keytypes::eidProvider_t type ) {
+  pProvider_t pProvider;
+  switch ( type ) {
+  case keytypes::EProviderIB:
+    pProvider = Construct<CIBTWS>( key );
+    break;
+  case keytypes::EProviderIQF:
+    pProvider = Construct<CIQFeedProvider>( key );
+    break;
+  case keytypes::EProviderSimulator:
+    pProvider = Construct<CSimulationProvider>( key );
+    break;
+  case keytypes::EProviderGNDT:
+    throw std::runtime_error( "GNDT not implemented" );
+    break;
+  }
+  return pProvider;
+}
+
+void CProviderManager::Register( const idProvider_t& key, pProvider_t& pProvider ) {
 
   if ( m_mapProviders.end() == m_mapProviders.find( key ) ) {
-    throw std::runtime_error( "CProviderManager::Register already exists" );
+    throw std::runtime_error( "CProviderManager::Register, provider already exists" );
   }
   m_mapProviders.insert( mapProviders_pair_t( key, pProvider ) );
 

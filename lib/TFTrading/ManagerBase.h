@@ -15,8 +15,6 @@
 
 #include <map>
 
-//#include <OUSQL/Session.h>
-
 // class T:  target class
 
 // Manager base class for 
@@ -27,6 +25,8 @@
 //  ProviderManager, 
 
 #include <OUCommon/Singleton.h>
+
+#include "Database.h"
 
 namespace ou {
 namespace tf { // TradeFrame
@@ -39,12 +39,12 @@ public:
   ManagerBase( void )/*: m_pDbSession( 0 ) */{};
   virtual ~ManagerBase( void ) {};
 
-//  void SetDbSession( ou::db::CSession<DB>* pDbSession ) {
-//    m_pDbSession = pDbSession;
-//  }
+  void SetDbSession( ou::db::CSession::pSession_t& pDbSession ) {
+    m_pDbSession = pDbSession;
+  }
 
 protected:
-//  ou::db::CSession<DB>* m_pDbSession;
+  ou::db::CSession::pSession_t m_pDbSession;
 private:
 };
 

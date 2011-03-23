@@ -33,7 +33,6 @@ CInstrumentManager::~CInstrumentManager(void) {
   m_map.clear();
 }
 
-
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument( 
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
