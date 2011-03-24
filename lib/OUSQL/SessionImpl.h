@@ -38,7 +38,7 @@ class QueryState:
   public Query<F>,
   public SS // statement state
 {
-  friend S;
+//  friend S;  // ** g++ does not like this, need to provide specific function?
 public:
 
   typedef boost::intrusive_ptr<QueryState<SS, F, S> > pQueryState_t;
@@ -49,7 +49,7 @@ public:
 protected:
 
   void ProcessInQueryState( void ) {
-    if ( HasFields() ) {
+    if ( QueryBase::HasFields() ) {
       m_session.Bind( *this );
     }
     m_session.Execute( *this );
@@ -80,18 +80,14 @@ public:
 
   template<class F>
   void Bind( QueryFields<F>& qf ) {
-    IDatabase::structStatementState& StatementState 
-      = dynamic_cast<IDatabase::structStatementState&>( qf );
+    typename IDatabase::structStatementState& StatementState
+      = dynamic_cast<typename IDatabase::structStatementState&>( qf );
     if ( !qf.IsPrepared() ) {
       m_db.PrepareStatement( StatementState, qf.UpdateQueryText() );
       qf.SetPrepared();
     }
-    IDatabase::Action_Bind_Values action( StatementState );
+    typename IDatabase::Action_Bind_Values action( StatementState );
     qf.var.Fields( action );
-  }
-
-  template<>
-  void Bind<NoBind>( QueryFields<NoBind>& qf ) {
   }
 
   template<class F>
@@ -99,9 +95,12 @@ public:
     Bind( *pQuery.get() );
   }
 
+  void Bind( QueryFields<NoBind>& qf ) {
+  }
+
   bool Execute( QueryBase& qb ) {
-    IDatabase::structStatementState& StatementState 
-      = dynamic_cast<IDatabase::structStatementState&>( qb );
+    typename IDatabase::structStatementState& StatementState
+      = dynamic_cast<typename IDatabase::structStatementState&>( qb );
     if ( !qb.IsPrepared() ) {
       m_db.PrepareStatement( StatementState, qb.UpdateQueryText() );
       qb.SetPrepared();
@@ -115,20 +114,20 @@ public:
 
   template<class F, class C>
   void Columns( typename QueryFields<F>::pQueryFields_t pQuery, C& columns ) {
-    IDatabase::structStatementState& StatementState 
-      = *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() );
-    IDatabase::Action_Extract_Columns action( StatementState );
+    typename IDatabase::structStatementState& StatementState
+      = *dynamic_cast<typename IDatabase::structStatementState*>( pQuery.get() );
+    typename IDatabase::Action_Extract_Columns action( StatementState );
     columns.Fields( action );
   }
 
   void Reset( QueryBase::pQueryBase_t pQuery ) {
-    IDatabase::structStatementState& StatementState 
-      = *dynamic_cast<IDatabase::structStatementState*>( pQuery.get() );
+    typename IDatabase::structStatementState& StatementState
+      = *dynamic_cast<typename IDatabase::structStatementState*>( pQuery.get() );
     m_db.ResetStatement( StatementState );
   }
 
   template<class F> // T: Table Class with TableDef member function
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& RegisterTable( const std::string& sTableName ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& RegisterTable( const std::string& sTableName ) {
 
     MapRowDefToTableName<F>( sTableName );
 
@@ -140,12 +139,12 @@ public:
     // test template getting at type without instantiating variable: complains about static call to non static function
     // use full specialization or partial specialization
 
-    typedef QueryState<IDatabase::structStatementState, F, session_t> query_t;
+    typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
     F f;  // warning, this variable goes out of scope before the query is destroyed
     query_t* pQuery = new query_t( *this, f );
 
-    IDatabase::Action_Assemble_TableDef action( sTableName );
+    typename IDatabase::Action_Assemble_TableDef action( sTableName );
     f.Fields( action );
     if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
     action.ComposeCreateStatement( pQuery->UpdateQueryText() );
@@ -163,26 +162,26 @@ public:
   void CreateTables( void );
 
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& Insert( F& f ) {
-    return ComposeSql<F, IDatabase::Action_Compose_Insert>( f );
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Insert( F& f ) {
+    return ComposeSql<F, typename IDatabase::Action_Compose_Insert>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& Update( F& f ) {
-    return ComposeSql<F, IDatabase::Action_Compose_Update>( f );
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Update( F& f ) {
+    return ComposeSql<F, typename IDatabase::Action_Compose_Update>( f );
   }
 
   template<class F>  // do reset, auto bind when doing execute
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& Delete( F& f ) {
-    return ComposeSql<F, IDatabase::Action_Compose_Delete>( f );
+  QueryState<typename IDatabase::structStatementState, F, session_t>& Delete( F& f ) {
+    return ComposeSql<F, typename IDatabase::Action_Compose_Delete>( f );
   }
 
   // also need non-F specialization as there may be no fields involved in some queries
   // todo:  need to do field processing, so can get field count, so need a processing action
   template<class F>  // do reset, auto bind if variables exist
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery, F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery, F& f ) {
 
-    typedef QueryState<IDatabase::structStatementState, F, session_t> query_t;
+    typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
     query_t* pQuery = new query_t( *this, f );
 
@@ -197,7 +196,7 @@ public:
 
   // query with no parameters
   template<class F>
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& SQL( const std::string& sSqlQuery ) {
     F f;  // warning, this variable goes out of scope before the query is destroyed
     return SQL( sSqlQuery, f );
   }
@@ -230,9 +229,9 @@ protected:
   }
 
   template<class F, class Action>  // do reset, auto bind when doing execute
-  typename QueryState<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
+  QueryState<typename IDatabase::structStatementState, F, session_t>& ComposeSql( F& f ) {
 
-    typedef QueryState<IDatabase::structStatementState, F, session_t> query_t;
+    typedef QueryState<typename IDatabase::structStatementState, F, session_t> query_t;
 
     query_t* pQuery = new query_t( *this, f );
     
@@ -272,6 +271,7 @@ private:
 
 };
 
+
 // Constructor
 template<class IDatabase>
 CSessionImpl<IDatabase>::CSessionImpl( void ): m_bOpened( false ) {
@@ -302,7 +302,7 @@ void CSessionImpl<IDatabase>::Close( void ) {
   if ( m_bOpened ) {
     m_mapTableDefs.clear();
     for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
-      m_db.CloseStatement( *dynamic_cast<IDatabase::structStatementState*>( iter->get() ) );
+      m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
     }
     m_vQuery.clear();
     m_db.Close();

@@ -103,41 +103,39 @@ public:
   ~Query( void ) {};
 
   Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
-    assert( EClauseWhere > m_clause );
-    m_sQueryText += " WHERE " + sWhere;
-    m_clause = EClauseWhere;
+    assert( QueryBase::EClauseWhere > QueryBase::m_clause );
+    QueryBase::m_sQueryText += " WHERE " + sWhere;
+    QueryBase::m_clause = QueryBase::EClauseWhere;
     return *this; 
   };
 
   Query& OrderBy( const std::string& sOrderBy ) { // todo: ensure sub clause ordering
-    assert( EClauseOrderBy > m_clause );
-    m_sQueryText += " ORDER BY " + sOrderBy;
-    m_clause = EClauseOrderBy;
+    assert( QueryBase::EClauseOrderBy > QueryBase::m_clause );
+    QueryBase::m_sQueryText += " ORDER BY " + sOrderBy;
+    QueryBase::m_clause = QueryBase::EClauseOrderBy;
     return *this;
   }
 
   Query& GroupBy( const std::string& sGroupBy ) {
-    assert( EClauseGroupBy > m_clause );
-    m_sQueryText += " GROUP BY " + sGroupBy;
-    m_clause = EClauseGroupBy;
+    assert( QueryBase::EClauseGroupBy > QueryBase::m_clause );
+    QueryBase::m_sQueryText += " GROUP BY " + sGroupBy;
+    QueryBase::m_clause = QueryBase::EClauseGroupBy;
     return *this;
   }
 
   Query& NoExecute( void ) {
-    assert( EClauseNoExecute > m_clause );
+    assert( QueryBase::EClauseNoExecute > QueryBase::m_clause );
     m_bExecuteOneTime = false; // don't execute on the conversion
-    m_clause = EClauseNoExecute;
+    QueryBase::m_clause = QueryBase::EClauseNoExecute;
     return *this;
   }
 
-  template<class F>
   operator QueryFields<F>() { 
     return dynamic_cast<QueryFields<F> >( *this ); 
   }
 
   // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment), execute the bind and execute
   // may need to add an auto-reset before the bind:  therefore need m_bBound member variable
-  template<class F>
   operator QueryFields<F>*() { 
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
@@ -198,16 +196,16 @@ public:
 
   void Reset( QueryBase::pQueryBase_t pQuery );
 
-  template<class F> typename QueryFields<F>& RegisterTable( const std::string& sTableName );
+  template<class F> QueryFields<F>& RegisterTable( const std::string& sTableName );
 
   void CreateTables( void );
 
-  template<class F> typename Query<F>& Insert( F& f );
-  template<class F> typename Query<F>& Update( F& f );
-  template<class F> typename Query<F>& Delete( F& f );
+  template<class F> Query<F>& Insert( F& f );
+  template<class F> Query<F>& Update( F& f );
+  template<class F> Query<F>& Delete( F& f );
 
-  template<class F> typename Query< F>& SQL( const std::string& sSqlQuery, F& f );
-  template<class F> typename Query< F>& SQL( const std::string& sSqlQuery );
+  template<class F> Query< F>& SQL( const std::string& sSqlQuery, F& f );
+  template<class F> Query< F>& SQL( const std::string& sSqlQuery );
 
   template<class F> void MapRowDefToTableName( const std::string& sTableName );
 
