@@ -44,6 +44,7 @@ public:
   }
 
 protected:
+  // if session has been assigned, then persist records, if not, don't
   ou::db::CSession::pSession_t m_pDbSession;
 private:
 };

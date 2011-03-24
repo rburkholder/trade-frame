@@ -253,8 +253,8 @@ public:
       ou::db::Field( a, "alternateid", idAlternate );  // gets this
     }
 
-    keytypes::idInstrument_t idInstrument;
     keytypes::eidProvider_t idProvider;
+    keytypes::idInstrument_t idInstrument;
     keytypes::idInstrument_t idAlternate;
   };
 

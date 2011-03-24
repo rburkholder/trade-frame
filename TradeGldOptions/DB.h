@@ -15,12 +15,13 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <OUSQL/Session.h>
-#include <OUSqlite/ISqlite3.h>
+//#include <OUSQL/Session.h>
+//#include <OUSqlite/ISqlite3.h>
+#include <TFTrading/Database.h>
 
 #include <TFTrading/KeyTypes.h>
 
-#include <TFDatabase/TableDefs.h>
+#include <TFTrading/TableDefs.h>
 
 class CDB
 {
@@ -60,7 +61,7 @@ private:
 
   static std::string m_sPortfolioId;
 
-  ou::db::CSession<ou::db::ISqlite3> m_session;
+  ou::db::CSession m_session;
 
   void Populate( void );
 

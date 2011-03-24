@@ -36,8 +36,7 @@ CInstrumentManager::~CInstrumentManager(void) {
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument( 
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
-  pInstrument_t pInstrument( 
-    new CInstrument( sInstrumentName, type, sExchangeName ) );
+  pInstrument_t pInstrument( new CInstrument( sInstrumentName, type, sExchangeName ) );
   Assign( pInstrument );
   return pInstrument;
 }
@@ -110,9 +109,39 @@ CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idN
   }
 }
 
+namespace InstrumentManagerQueries {
+  struct InstrumentExists {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "instrumentid", idInstrument );
+    }
+    const ou::tf::keytypes::idInstrument_t& idInstrument;
+    InstrumentExists( const ou::tf::keytypes::idInstrument_t& idInstrument_ ): idInstrument( idInstrument_ ) {};
+  };
+}
+
 bool CInstrumentManager::Exists( idInstrument_cref id ) {
-  iterator iter = m_map.find( id );
-  return m_map.end() != iter;
+  bool bFound = ( m_map.end() != m_map.find( id ) );
+  if ( !bFound ) {
+    if ( 0 != m_pDbSession.get() ) {
+      InstrumentManagerQueries::InstrumentExists paramExists( id );
+      ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+        = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from instruments", paramExists ).Where( "idinstrument = ?" ).NoExecute();
+      m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
+      if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer
+        CInstrument::TableRowDef instrument;
+        m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CInstrument::TableRowDef>( pExistsQuery, instrument );
+      }
+      // check if exists in database (check idInstrument as well as alternate names?)
+      // if in database:
+      //   load instrument
+      //   load underlying, if needed
+      //   load alternate names for each
+      // set bFound on total success
+      // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
+    }
+  }
+  return bFound;
 }
 
 bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
