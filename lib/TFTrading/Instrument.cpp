@@ -33,9 +33,15 @@ namespace tf { // TradeFrame
 */
 
 CInstrument::CInstrument( const TableRowDef& row ) 
-  : m_row( row ) 
+  : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable )
 {
-  // other clean up and pointer stuff still yet to be done here
+  assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
+}
+
+CInstrument::CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
+  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ) 
+{
+  assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
 }
 
 // equity / generic creation
@@ -173,6 +179,19 @@ CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( eidProvider_t id 
   return m_pUnderlying->GetInstrumentName(id);
 }
 
+bool CInstrument::operator==( const CInstrument& rhs ) const {
+  return (
+    ( m_row.idInstrument == rhs.m_row.idInstrument ) 
+    && ( m_row.idExchange == rhs.m_row.idExchange )
+    && ( m_row.eType == rhs.m_row.eType )
+    && ( m_row.idUnderlying == rhs.m_row.idUnderlying )
+    && ( m_row.dblStrike == rhs.m_row.dblStrike )
+    && ( m_row.eOptionSide == rhs.m_row.eOptionSide )
+    );
+}
+
+
+/*
 void CInstrument::SetUnderlying( pInstrument_t pUnderlying ) {
   if ( EUnderlyingNotSettable == m_eUnderlyingStatus ) {
     throw std::runtime_error( "CInstrument::SetUnderlying: can not set underlying" );
@@ -186,7 +205,7 @@ void CInstrument::SetUnderlying( pInstrument_t pUnderlying ) {
   m_pUnderlying = pUnderlying;
   m_eUnderlyingStatus = EUnderlyingSet;
 }
-
+*/
 } // namespace tf
 } // namespace ou
 

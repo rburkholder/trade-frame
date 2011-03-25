@@ -1,5 +1,7 @@
 Regularily Used C++ Reference Sites:
 
+Look at SlickEdit as a cross platform editor.
+
 Exceptions:
 The hierarchy:
 http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/classstd_1_1exception.html

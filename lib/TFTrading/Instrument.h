@@ -153,11 +153,12 @@ public:
       TableRowDef::Fields( a );
       ou::db::Key( a, "instrumentid" );
       ou::db::Constraint( a, "exchangeid", tablenames::sExchange, "exchangeid" );
-      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );
+      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );  // what happens with empty string?
     }
   };
 
-  CInstrument( const TableRowDef& row );
+  CInstrument( const TableRowDef& row );  // regular instruments
+  CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
   CInstrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName 
@@ -193,7 +194,7 @@ public:
   idInstrument_cref GetInstrumentName( eidProvider_t id );
   idInstrument_cref GetUnderlyingName( eidProvider_t id );
 
-  void SetUnderlying( pInstrument_t pUnderlying );
+//  void SetUnderlying( pInstrument_t pUnderlying );
 
   void SetAlternateName( eidProvider_t, idInstrument_cref );
 
@@ -221,7 +222,9 @@ public:
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
   boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };
 
-  const TableRowDef& GetRow( void ) { return m_row; };
+  bool operator==( const CInstrument& rhs ) const;
+
+  const TableRowDef& GetRow( void ) const { return m_row; };
 
 protected:
 
@@ -243,14 +246,18 @@ private:
   CInstrument& operator=( const CInstrument& ); // assignement
 };
 
+//
+// CAlternateInstrumentName
+//
+
 class CAlternateInstrumentName {
 public:
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "providerid", idProvider );  // this
-      ou::db::Field( a, "instrumentid", idInstrument ); // plus this
-      ou::db::Field( a, "alternateid", idAlternate );  // gets this
+      ou::db::Field( a, "providerid", idProvider ); 
+      ou::db::Field( a, "alternateid", idAlternate );
+      ou::db::Field( a, "instrumentid", idInstrument );
     }
 
     keytypes::eidProvider_t idProvider;
@@ -263,9 +270,10 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "providerid" );
-      ou::db::Key( a, "instrumentid" );
+      ou::db::Key( a, "alternateid" );
       ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
       //ou::db::Constraint( a, "alternateid", tablenames::sInstrument, "instrumentid" );  // don't think this one makes sense
+      // set instrumentid as secondary index
     }
   };
 

@@ -26,7 +26,7 @@ CInstrumentManager::CInstrumentManager(void) {
 
 CInstrumentManager::~CInstrumentManager(void) {
 //  file.CloseIQFSymbols();
-  for ( iterator iter = m_map.begin(); iter != m_map.end(); ++iter ) {
+  for ( iterMap iter = m_map.begin(); iter != m_map.end(); ++iter ) {
     iter->second->OnAlternateNameAdded.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameAdded ) );
     iter->second->OnAlternateNameChanged.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameChanged ) );
   }
@@ -37,7 +37,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
   pInstrument_t pInstrument( new CInstrument( sInstrumentName, type, sExchangeName ) );
-  Assign( pInstrument );
+  Construct( pInstrument );
   return pInstrument;
 }
 
@@ -46,33 +46,35 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(
   boost::uint16_t year, boost::uint16_t month ) {
   pInstrument_t pInstrument(
     new CInstrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month ) );
-  Assign( pInstrument );
+  Construct( pInstrument );
   return pInstrument;
 }
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
-  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm
   boost::uint16_t year, boost::uint16_t month,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {
+    assert( 0 != pUnderlying.get() );
   pInstrument_t pInstrument( 
     new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, pUnderlying, side, strike ) );
-  Assign( pInstrument );
+  Construct( pInstrument );
   return pInstrument;
 }
 
 CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
-  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
+  idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
   pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {
+    assert( 0 != pUnderlying.get() );
   pInstrument_t pInstrument( 
     new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, day, pUnderlying, side, strike ) );
-  Assign( pInstrument );
+  Construct( pInstrument );
   return pInstrument;
 }
 
@@ -84,8 +86,18 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency(
   Currency::enumCurrency base, Currency::enumCurrency counter ) {
   pInstrument_t pInstrument(
     new CInstrument( idInstrumentName, idCounterInstrument, InstrumentType::Currency, sExchangeName, base, counter ) );
-  Assign( pInstrument );
+  Construct( pInstrument );
   return pInstrument;
+}
+
+void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
+  if ( Exists( pInstrument ) ) {
+    throw std::runtime_error( "CInstrumentManager::Construct instrument already exists" );
+  }
+  Assign( pInstrument );
+  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
+    = m_pDbSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
+  // save alternate instrument names
 }
 
 void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
@@ -100,13 +112,36 @@ void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
 }
 
 CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idName ) {
-  iterator iter = m_map.find( idName );
-  if ( m_map.end() == iter ) {
-    throw std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
+  pInstrument_t pInstrument;
+  iterMap iter = m_map.find( idName );
+  if ( m_map.end() != iter ) {
+    pInstrument = iter->second;
   }
   else {
-    return iter->second;
+    bool bFound = false;
+    if ( 0 != m_pDbSession.get() ) {
+      bFound = LoadInstrument( idName, pInstrument );
+    }
+    if ( !bFound ) {
+      throw std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
+    }
   }
+  return pInstrument;
+}
+
+bool CInstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the query to make the get faster rather than searching the map again
+  bool bFound = ( m_map.end() != m_map.find( id ) );
+  if ( !bFound ) {
+    if ( 0 != m_pDbSession.get() ) {
+      CInstrument::pInstrument_t pInstrument;
+      bFound = LoadInstrument( id, pInstrument );
+    }
+  }
+  return bFound;
+}
+
+bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
+  return Exists( pInstrument->GetInstrumentName() );
 }
 
 namespace InstrumentManagerQueries {
@@ -120,37 +155,66 @@ namespace InstrumentManagerQueries {
   };
 }
 
-bool CInstrumentManager::Exists( idInstrument_cref id ) {
-  bool bFound = ( m_map.end() != m_map.find( id ) );
-  if ( !bFound ) {
-    if ( 0 != m_pDbSession.get() ) {
-      InstrumentManagerQueries::InstrumentExists paramExists( id );
-      ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-        = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from instruments", paramExists ).Where( "idinstrument = ?" ).NoExecute();
-      m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
-      if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer
-        CInstrument::TableRowDef instrument;
-        m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CInstrument::TableRowDef>( pExistsQuery, instrument );
-      }
-      // check if exists in database (check idInstrument as well as alternate names?)
-      // if in database:
-      //   load instrument
-      //   load underlying, if needed
-      //   load alternate names for each
-      // set bFound on total success
+bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
       // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
+  assert( 0 != m_pDbSession.get() );
+  assert( m_map.end() != m_map.find( id ) );
+
+  bool bFound = false;
+  InstrumentManagerQueries::InstrumentExists idInstrument( id );
+  ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
+  if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+    CInstrument::TableRowDef instrument;
+    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CInstrument::TableRowDef>( pExistsQuery, instrument );
+    assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
+         || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) ) 
+      );
+    if ( "" == instrument.idUnderlying ) {
+      pInstrument.reset( new CInstrument( instrument ) );
+      Assign( pInstrument );
+      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
+      bFound = true;
+    }
+    else {
+      pInstrument_t pUnderlying;
+      iterMap iter = m_map.find( instrument.idUnderlying );
+      if ( m_map.end() != iter ) {
+        pUnderlying = iter->second;
+        bFound = true;
+      }
+      else {
+        bFound = LoadInstrument( instrument.idUnderlying, pUnderlying );
+        if ( !bFound ) {
+          throw std::runtime_error( "LoadInstrument: underlying does not exist in database" );
+        }
+      }
+      assert( ( InstrumentType::Stock == pUnderlying->GetInstrumentType() ) || ( InstrumentType::Future == pUnderlying->GetInstrumentType() ) );
+      pInstrument.reset( new CInstrument( instrument, pUnderlying ) );
+      Assign( pInstrument );
+      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
     }
   }
   return bFound;
 }
 
-bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
-  return Exists( pInstrument->GetInstrumentName() );
+void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument ) {
+  assert( 0 != pInstrument.get() );
+  InstrumentManagerQueries::InstrumentExists idInstrument( pInstrument->GetInstrumentName() );
+   ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+     = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
+  CAlternateInstrumentName::TableRowDef altname;
+  while ( m_pDbSession->Execute( pExistsQuery ) ) {
+    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
+    pInstrument->SetAlternateName( altname.idProvider, altname.idAlternate );
+  }
 }
 
-void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair ) {
-  iterator iterKey = m_map.find( pair.first );
-  iterator iterAlt = m_map.find( pair.second );
+void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair ) { //todo: need to update database
+  iterMap iterKey = m_map.find( pair.first );
+  iterMap iterAlt = m_map.find( pair.second );
   if ( m_map.end() == iterKey ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded key does not exist" );
   if ( m_map.end() != iterKey ) 
@@ -158,11 +222,11 @@ void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair
   m_map.insert( pair_t( pair.second, iterKey->second ) );
 }
 
-void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pair ) {
-  iterator iterOld = m_map.find( pair.first );
+void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pair ) { // todo: need to update database
+  iterMap iterOld = m_map.find( pair.first );
   if ( m_map.end() == iterOld ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged old name not found" );
-  iterator iterNew = m_map.find( pair.second );
+  iterMap iterNew = m_map.find( pair.second );
   if ( m_map.end() != iterNew ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged new name already exists" );
   m_map.insert( pair_t( pair.second, iterOld->second ) );

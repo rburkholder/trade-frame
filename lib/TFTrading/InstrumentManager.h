@@ -47,21 +47,18 @@ public:
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
     boost::uint16_t year, boost::uint16_t month,
-    //const idInstrument_t &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-    //const std::string &sUnderlyingName,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructCurrency( 
     idInstrument_cref idInstrumentName, 
     idInstrument_cref idCounterInstrument,
-    //const std::string& sUnderlyingName, // currency
     //pInstrument_t pUnderlying,
     const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
@@ -79,11 +76,15 @@ protected:
   //CInstrumentFile file;
 
   void Assign( pInstrument_cref pInstrument );
+  bool LoadInstrument( idInstrument_t idInstrument, pInstrument_t& pInstrument );
+  void LoadAlternateInstrumentNames( pInstrument_t& pInstrument );
+
+  void Construct( pInstrument_t& pInstrument );
 
 private:
 
   typedef std::map<idInstrument_t,pInstrument_t> map_t;
-  typedef map_t::iterator iterator;
+  typedef map_t::iterator iterMap;
   typedef std::pair<idInstrument_t,pInstrument_t> pair_t;
 
   map_t m_map;
