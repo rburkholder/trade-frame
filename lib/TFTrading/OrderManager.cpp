@@ -121,5 +121,18 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
   }
 }
 
+void COrderManager::RegisterTablesForCreation( void ) {
+  m_pDbSession->RegisterTable<COrder::TableCreateDef>( tablenames::sOrder );
+  m_pDbSession->RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
+}
+
+void COrderManager::RegisterRowDefinitions( void ) {
+  m_pDbSession->MapRowDefToTableName<COrder::TableRowDef>( tablenames::sOrder );
+  m_pDbSession->MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
+}
+
+void COrderManager::PopulateTables( void ) {
+}
+
 } // namespace tf
 } // namespace ou

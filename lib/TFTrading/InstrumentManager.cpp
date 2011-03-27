@@ -14,6 +14,10 @@
 #include "StdAfx.h"
 
 #include <stdexcept>
+#include <vector>
+
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
 
 #include "InstrumentManager.h"
 
@@ -97,7 +101,7 @@ void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
   Assign( pInstrument );
   ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
     = m_pDbSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
-  // save alternate instrument names
+  // todo: save alternate instrument names
 }
 
 void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
@@ -233,6 +237,52 @@ void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pa
   iterOld = m_map.find( pair.first );  // load again to ensure proper copy
   m_map.erase( iterOld );
 }
+
+void CInstrumentManager::RegisterTablesForCreation( void ) {
+  m_pDbSession->RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
+  m_pDbSession->RegisterTable<CInstrument::TableCreateDef>( tablenames::sInstrument );
+  m_pDbSession->RegisterTable<CAlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
+}
+
+void CInstrumentManager::RegisterRowDefinitions( void ) {
+  m_pDbSession->MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
+  m_pDbSession->MapRowDefToTableName<CInstrument::TableRowDef>( tablenames::sInstrument );
+  m_pDbSession->MapRowDefToTableName<CAlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
+}
+
+void CInstrumentManager::PopulateTables( void ) {
+
+  std::vector<std::string> vsExchangesPreload;
+  vsExchangesPreload +=
+    "NYSE", "New York Stock Exchange",
+    "CBOT", "Chicago Board of Trade",
+    "CBOE", "Chicago Board Options Exchange",
+    "OPRA", "Options Price Reporting Authority",
+    "NASDAQ", "NASDAQ",
+    "NMS", "NMS",
+    "SMART", "Interactive Brokers Smart"
+  ;
+  
+  assert( 0 < vsExchangesPreload.size() );
+  assert( 0 == ( vsExchangesPreload.size() % 2 ) );
+
+  CExchange::TableRowDef exchange;
+  exchange.idCountry = "US";
+
+  std::vector<std::string>::iterator iter = vsExchangesPreload.begin();
+
+  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = m_pDbSession->Insert<CExchange::TableRowDef>( exchange ).NoExecute();
+
+  while ( vsExchangesPreload.end() != iter ) {
+    exchange.idExchange = *(iter++);
+    exchange.sName = *(iter++);
+    m_pDbSession->Reset( pExchange );
+    m_pDbSession->Bind<CExchange::TableRowDef>( pExchange );
+    m_pDbSession->Execute( pExchange );
+  }
+
+}
+
 
 /*
 CInstrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {

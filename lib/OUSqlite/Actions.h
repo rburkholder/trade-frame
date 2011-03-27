@@ -134,6 +134,8 @@ public:
   }
 
   void Key( const std::string& sFieldName ) { assert( false ); };  // kludge to provide for SessionImpl::QueryState::ProcessInQueryState::Bind
+  void Constraint( const std::string& sFieldName, const std::string& sTableName, const std::string& sField2Name ) {
+    assert( false ); };  // kludge to provide for SessionImpl::QueryState::ProcessInQueryState::Bind
 
 protected:
 private:

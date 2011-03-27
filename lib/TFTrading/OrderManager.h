@@ -58,6 +58,10 @@ public:
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 
+  void RegisterTablesForCreation( void );
+  void RegisterRowDefinitions( void );
+  void PopulateTables( void );
+
 protected:
 
   typedef std::pair<CProviderInterfaceBase*,pOrder_t> pairProviderOrder_t;

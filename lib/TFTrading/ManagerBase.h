@@ -36,12 +36,16 @@ template<class T>
 class ManagerBase: public ou::CSingleton<T> {
 public:
 
-  ManagerBase( void )/*: m_pDbSession( 0 ) */{};
+  ManagerBase( void ) {};
   virtual ~ManagerBase( void ) {};
 
   void SetDbSession( ou::db::CSession::pSession_t& pDbSession ) {
     m_pDbSession = pDbSession;
   }
+
+  virtual void RegisterTablesForCreation( void ) {};
+  virtual void RegisterRowDefinitions( void ) {};
+  virtual void PopulateTables( void ) {};
 
 protected:
   // if session has been assigned, then persist records, if not, don't

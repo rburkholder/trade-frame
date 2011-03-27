@@ -25,7 +25,6 @@
 
 // key might be account or other similar globally known identifier
 
-// ProviderManager probably won't be used much at the moment
 // it should be converted over to boost::fusion for storing full types and values for the 
 // various providers, and then have specialized algorithms for processing the tuples of providers.
 

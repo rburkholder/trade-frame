@@ -58,5 +58,18 @@ void CPortfolioManager::Delete( const idPortfolio_t& sName ) {
   m_mapPortfolio.erase( iter );
 }
 
+void CPortfolioManager::RegisterTablesForCreation( void ) {
+  m_pDbSession->RegisterTable<CPortfolio::TableCreateDef>( tablenames::sPortfolio );
+  m_pDbSession->RegisterTable<CPosition::TableCreateDef>( tablenames::sPosition );
+}
+
+void CPortfolioManager::RegisterRowDefinitions( void ) {
+  m_pDbSession->MapRowDefToTableName<CPortfolio::TableRowDef>( tablenames::sPortfolio );
+  m_pDbSession->MapRowDefToTableName<CPosition::TableRowDef>( tablenames::sPosition );
+}
+
+void CPortfolioManager::PopulateTables( void ) {
+}
+
 } // namespace tf
 } // namespace ou

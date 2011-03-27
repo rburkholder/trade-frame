@@ -32,6 +32,30 @@ void InitializeManagersDb( ou::db::CSession::pSession_t& pDbSession ) {
   COrderManager::Instance().SetDbSession( pDbSession );
 }
 
+void RegisterTablesForCreation( void ) {
+  CProviderManager::Instance().RegisterTablesForCreation(  );
+  CInstrumentManager::Instance().RegisterTablesForCreation(  );
+  CAccountManager::Instance().RegisterTablesForCreation(  );
+  CPortfolioManager::Instance().RegisterTablesForCreation(  );
+  COrderManager::Instance().RegisterTablesForCreation(  );
+}
+
+void RegisterRowDefinitions( void ) {
+  CProviderManager::Instance().RegisterRowDefinitions(  );
+  CInstrumentManager::Instance().RegisterRowDefinitions(  );
+  CAccountManager::Instance().RegisterRowDefinitions(  );
+  CPortfolioManager::Instance().RegisterRowDefinitions(  );
+  COrderManager::Instance().RegisterRowDefinitions(  );
+}
+
+void PopulateTables( void ) {
+  CProviderManager::Instance().PopulateTables(  );
+  CInstrumentManager::Instance().PopulateTables(  );
+  CAccountManager::Instance().PopulateTables(  );
+  CPortfolioManager::Instance().PopulateTables(  );
+  COrderManager::Instance().PopulateTables(  );
+}
+
 } // namespace tf
 } // namespace ou
 

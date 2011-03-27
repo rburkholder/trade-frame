@@ -42,8 +42,6 @@ public:
   CAccountManager( void );
   ~CAccountManager(void);
 
-  void CreateDbTables( void );
-
   pAccountAdvisor_t AddAccountAdvisor( const idAccountAdvisor_t& sAdvisorId, const std::string& sAdvisorName );
   pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& sAdvisorId );
   pAccountAdvisor_t UpdateAccountAdvisor( const idAccountAdvisor_t& sAdvisorId );  // uses existing class variables
@@ -58,6 +56,10 @@ public:
   pAccountAdvisor_t GetAccount( const idAccount_t& sAccountId );
   pAccountAdvisor_t UpdateAccount( const idAccount_t& sAccountId );  // uses existing class variables
   void DeleteAccount( const idAccount_t& sAccountId );
+
+  void RegisterTablesForCreation( void );
+  void RegisterRowDefinitions( void );
+  void PopulateTables( void );
 
 protected:
 

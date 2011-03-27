@@ -37,6 +37,10 @@ public:
   pPortfolio_t GetPortfolio( const idPortfolio_t& sName, bool bCreate = false );
   void Delete( const idPortfolio_t& sName );
 
+  void RegisterTablesForCreation( void );
+  void RegisterRowDefinitions( void );
+  void PopulateTables( void );
+
 protected:
 
 private:

@@ -30,24 +30,6 @@ CAccountManager::CAccountManager( void )
 CAccountManager::~CAccountManager(void) {
 }
 
-void CAccountManager::CreateDbTables( void ) {
-
-  try {  // use Transaction here, or use automatically in table creation section
-/* add tables to session and create
-    CAccountAdvisor::CreateDbTable( m_pDb );
-    CAccountOwner::CreateDbTable( m_pDb );
-    CAccount::CreateDbTable( m_pDb );
-    CPortfolio::CreateDbTable( m_pDb );
-    CPosition::CreateDbTable( m_pDb );
-    COrder::CreateDbTable( m_pDb );
-    CExecution::CreateDbTable( m_pDb );
-*/
-  }
-  catch ( std::runtime_error &e ) {
-  }
-
-}
-
 CAccountAdvisor::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const idAccountAdvisor_t& sAdvisorId ) {
 
   pAccountAdvisor_t p;
@@ -101,6 +83,21 @@ void CAccountManager::DeleteAccountAdvisor( const idAccountAdvisor_t& sAdvisorId
 
   m_mapAccountAdvisor.erase( iter );
 
+}
+
+void CAccountManager::RegisterTablesForCreation( void ) {
+  m_pDbSession->RegisterTable<CAccountAdvisor::TableCreateDef>( tablenames::sAccountAdvisor );
+  m_pDbSession->RegisterTable<CAccountOwner::TableCreateDef>( tablenames::sAccountOwner );
+  m_pDbSession->RegisterTable<CAccount::TableCreateDef>( tablenames::sAccount );
+}
+
+void CAccountManager::RegisterRowDefinitions( void ) {
+  m_pDbSession->MapRowDefToTableName<CAccountAdvisor::TableRowDef>( tablenames::sAccountAdvisor );
+  m_pDbSession->MapRowDefToTableName<CAccountOwner::TableRowDef>( tablenames::sAccountOwner );
+  m_pDbSession->MapRowDefToTableName<CAccount::TableRowDef>( tablenames::sAccount );
+}
+
+void CAccountManager::PopulateTables( void ) {
 }
 
 

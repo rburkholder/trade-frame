@@ -138,9 +138,6 @@
     <ClInclude Include="Managers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TableDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Database.h">
       <Filter>Header Files</Filter>
     </ClInclude>

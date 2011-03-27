@@ -21,6 +21,7 @@
 #include "KeyTypes.h"
 
 #include "Instrument.h"
+#include "Exchange.h"
 #include "ManagerBase.h"
 
 namespace ou { // One Unified
@@ -66,6 +67,10 @@ public:
   bool Exists( idInstrument_cref );
   bool Exists( pInstrument_cref );
   pInstrument_t Get( idInstrument_cref );
+
+  void RegisterTablesForCreation( void );
+  void RegisterRowDefinitions( void );
+  void PopulateTables( void );
 
   // move these to IQFeed somewhere
 //  pInstrument_t GetIQFeedInstrument( const std::string& sName );

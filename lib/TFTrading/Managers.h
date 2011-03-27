@@ -19,6 +19,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 void InitializeManagersDb( ou::db::CSession::pSession_t& pDbSession );
+void RegisterTablesForCreation( void );
+void RegisterRowDefinitions( void );
+void PopulateTables( void );
 
 } // namespace tf
 } // namespace ou
