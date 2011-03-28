@@ -67,6 +67,7 @@ public:
   bool Exists( idInstrument_cref );
   bool Exists( pInstrument_cref );
   pInstrument_t Get( idInstrument_cref );
+  void Delete( idInstrument_cref );
 
   void RegisterTablesForCreation( void );
   void RegisterRowDefinitions( void );

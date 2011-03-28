@@ -31,28 +31,29 @@ namespace tf { // TradeFrame
 class CAccountManager: public ManagerBase<CAccountManager> {
 public:
 
-  typedef CAccountAdvisor::idAccountAdvisor_t idAccountAdvisor_t;
-  typedef CAccountOwner::idAccountOwner_t idAccountOwner_t;
-  typedef CAccount::idAccount_t idAccount_t;
-
+  typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;
   typedef CAccountAdvisor::pAccountAdvisor_t pAccountAdvisor_t;
+
+  typedef keytypes::idAccountOwner_t idAccountOwner_t;
   typedef CAccountOwner::pAccountOwner_t pAccountOwner_t;
+
+  typedef keytypes::idAccount_t idAccount_t;
   typedef CAccount::pAccount_t pAccount_t;
 
   CAccountManager( void );
   ~CAccountManager(void);
 
-  pAccountAdvisor_t AddAccountAdvisor( const idAccountAdvisor_t& sAdvisorId, const std::string& sAdvisorName );
-  pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& sAdvisorId );
-  pAccountAdvisor_t UpdateAccountAdvisor( const idAccountAdvisor_t& sAdvisorId );  // uses existing class variables
-  void DeleteAccountAdvisor( const idAccountAdvisor_t& sAdvisorId );
+  pAccountAdvisor_t ConstructAccountAdvisor( const idAccountAdvisor_t& idAdvisor, const std::string& sAdvisorName, const std::string& sCompanyName = "" );
+  pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
+  pAccountAdvisor_t UpdateAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
+  void DeleteAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
 
-  pAccountOwner_t AddAccountOwner( const idAccountOwner_t& sAdvisorId, const std::string& sAccountAdvisorName );
+  pAccountOwner_t ConstructAccountOwner( const idAccountOwner_t& sAccountOwnderId, const std::string& sAccountAdvisorName );
   pAccountOwner_t GetAccountOwner( const idAccountOwner_t& sAdvisorId );
   pAccountOwner_t UpdateAccountOwner( const idAccountOwner_t& sAdvisorId );  // uses existing class variables
   void DeleteAccountOwner( const idAccountOwner_t& sAdvisorId );
 
-  pAccountAdvisor_t AddAccount( const idAccount_t& sAccountId, const std::string& sAccountAdvisorName );
+  pAccountAdvisor_t ConstructAccount( const idAccount_t& sAccountId, const std::string& sAccountAdvisorName );
   pAccountAdvisor_t GetAccount( const idAccount_t& sAccountId );
   pAccountAdvisor_t UpdateAccount( const idAccount_t& sAccountId );  // uses existing class variables
   void DeleteAccount( const idAccount_t& sAccountId );

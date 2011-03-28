@@ -78,6 +78,8 @@ public:
     return m_row.sCompanyName;
   }
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
 
 private:

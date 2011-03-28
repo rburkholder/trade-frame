@@ -149,13 +149,13 @@ bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
 }
 
 namespace InstrumentManagerQueries {
-  struct InstrumentExists {
+  struct InstrumentKey {
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "instrumentid", idInstrument );
     }
     const ou::tf::keytypes::idInstrument_t& idInstrument;
-    InstrumentExists( const ou::tf::keytypes::idInstrument_t& idInstrument_ ): idInstrument( idInstrument_ ) {};
+    InstrumentKey( const ou::tf::keytypes::idInstrument_t& idInstrument_ ): idInstrument( idInstrument_ ) {};
   };
 }
 
@@ -165,13 +165,13 @@ bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInst
   assert( m_map.end() != m_map.find( id ) );
 
   bool bFound = false;
-  InstrumentManagerQueries::InstrumentExists idInstrument( id );
-  ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
+  InstrumentManagerQueries::InstrumentKey idInstrument( id );
+  ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
   if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     CInstrument::TableRowDef instrument;
-    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CInstrument::TableRowDef>( pExistsQuery, instrument );
+    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentKey, CInstrument::TableRowDef>( pExistsQuery, instrument );
     assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
          || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) ) 
       );
@@ -203,15 +203,21 @@ bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInst
   return bFound;
 }
 
+void CInstrumentManager::Delete( idInstrument_cref idInstrument ) {
+  // check if has dependencies first, and exception if there are 
+  // then delete alternate instrument names
+  // then delete instrument
+}
+
 void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument ) {
   assert( 0 != pInstrument.get() );
-  InstrumentManagerQueries::InstrumentExists idInstrument( pInstrument->GetInstrumentName() );
-   ou::db::QueryFields<InstrumentManagerQueries::InstrumentExists>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-     = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentExists>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentExists>( pExistsQuery );
+  InstrumentManagerQueries::InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
+   ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+     = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
   CAlternateInstrumentName::TableRowDef altname;
   while ( m_pDbSession->Execute( pExistsQuery ) ) {
-    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentExists, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
+    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentKey, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
     pInstrument->SetAlternateName( altname.idProvider, altname.idAlternate );
   }
 }
