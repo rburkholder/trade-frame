@@ -30,12 +30,16 @@ public:
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
 
+  typedef keytypes::idAccountOwner_t idAccountOwner_t;
+
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
 
-  pPortfolio_t Create( const idPortfolio_t& sName );
-  pPortfolio_t GetPortfolio( const idPortfolio_t& sName, bool bCreate = false );
-  void Delete( const idPortfolio_t& sName );
+  pPortfolio_t ConstructPortfolio( 
+    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription = "" );
+  pPortfolio_t GetPortfolio( const idPortfolio_t& idPortfolio );
+  void UpdatePortfolio( const idPortfolio_t& idPortfolio );
+  void DeletePortfolio( const idPortfolio_t& idPortfolio );
 
   void RegisterTablesForCreation( void );
   void RegisterRowDefinitions( void );

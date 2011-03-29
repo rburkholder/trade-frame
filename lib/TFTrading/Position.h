@@ -190,6 +190,8 @@ public:
 
   void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );  // need to set verification that pointers have been set
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
 
   typedef CSymbolBase::quote_t quote_t;

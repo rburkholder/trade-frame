@@ -100,6 +100,8 @@ public:
 
   void EmitStats( std::stringstream& ss );
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
   
 private:

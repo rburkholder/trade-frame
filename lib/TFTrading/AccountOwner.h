@@ -68,6 +68,8 @@ public:
   CAccountOwner( const TableRowDef& row );
   ~CAccountOwner(void);
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
 private:
 

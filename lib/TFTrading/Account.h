@@ -87,6 +87,8 @@ public:
   CAccount( const TableRowDef& row ) : m_row( row ) {};
   ~CAccount(void);
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
 
 private:

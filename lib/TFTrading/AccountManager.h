@@ -45,17 +45,24 @@ public:
 
   pAccountAdvisor_t ConstructAccountAdvisor( const idAccountAdvisor_t& idAdvisor, const std::string& sAdvisorName, const std::string& sCompanyName = "" );
   pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
-  pAccountAdvisor_t UpdateAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
+  void UpdateAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
   void DeleteAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
 
-  pAccountOwner_t ConstructAccountOwner( const idAccountOwner_t& sAccountOwnderId, const std::string& sAccountAdvisorName );
-  pAccountOwner_t GetAccountOwner( const idAccountOwner_t& sAdvisorId );
-  pAccountOwner_t UpdateAccountOwner( const idAccountOwner_t& sAdvisorId );  // uses existing class variables
-  void DeleteAccountOwner( const idAccountOwner_t& sAdvisorId );
+  pAccountOwner_t ConstructAccountOwner(
+    const idAccountOwner_t& idAccountOwner, const idAccountAdvisor_t& idAccountAdvisor,
+    const std::string& sFirstName, const std::string& sLastName
+    );
+  pAccountOwner_t GetAccountOwner( const idAccountOwner_t& idAccountOwner );
+  void UpdateAccountOwner( const idAccountOwner_t& idAccountOwner );  // uses existing class variables
+  void DeleteAccountOwner( const idAccountOwner_t& idAccountOwner );
 
-  pAccountAdvisor_t ConstructAccount( const idAccount_t& sAccountId, const std::string& sAccountAdvisorName );
-  pAccountAdvisor_t GetAccount( const idAccount_t& sAccountId );
-  pAccountAdvisor_t UpdateAccount( const idAccount_t& sAccountId );  // uses existing class variables
+  pAccount_t ConstructAccount( 
+    const idAccount_t& idAccount, const idAccountOwner_t& idAccountOwner,
+    std::string sAccountName, keytypes::eidProvider_t idProvider, 
+    std::string sBrokerName, std::string sBrokerAccountId, std::string sLogin, std::string sPassword
+    );
+  pAccount_t GetAccount( const idAccount_t& sAccountId );
+  void UpdateAccount( const idAccount_t& sAccountId );  // uses existing class variables
   void DeleteAccount( const idAccount_t& sAccountId );
 
   void RegisterTablesForCreation( void );
