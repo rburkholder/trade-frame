@@ -131,7 +131,7 @@ public:
   }
 
   operator QueryFields<F>() { 
-    return dynamic_cast<QueryFields<F> >( *this ); 
+    return dynamic_cast<QueryFields<F> >( *this );
   }
 
   // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment), execute the bind and execute
@@ -152,12 +152,12 @@ public:
     return dynamic_cast<QueryFields<F>&>( *this ); 
   }
 
-  operator QueryFields<F>::pQueryFields_t() { // this one is actually used
+  operator typename QueryFields<F>::pQueryFields_t() { // this one is actually used
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
       m_bExecuteOneTime = false;
     }
-    QueryFields<F>::pQueryFields_t p( this );
+    typename QueryFields<F>::pQueryFields_t p( this );
     return p; 
   }
 
