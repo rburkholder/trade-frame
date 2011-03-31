@@ -82,7 +82,7 @@ public:
 
   template<typename T>
   const char* FieldType( const boost::true_type& ) { // is enum
-    return dispatch::FieldType<typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type>();
+    return dispatch::FieldType<typename typeselect::chooser<sizeof(T),boost::is_signed<T>::value>::type>();
   }
 
   template<typename T> // sample code: http://www.boost.org/doc/libs/1_45_0/libs/type_traits/doc/html/boost_typetraits/examples/copy.html
