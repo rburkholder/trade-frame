@@ -144,6 +144,23 @@ public:
     return dynamic_cast<QueryFields<F>* >( this ); 
   }
 
+  operator QueryFields<F>&() { 
+    if ( m_bExecuteOneTime ) {
+      ProcessInQueryState();
+      m_bExecuteOneTime = false;
+    }
+    return dynamic_cast<QueryFields<F>&>( *this ); 
+  }
+
+  operator QueryFields<F>::pQueryFields_t() { // this one is actually used
+    if ( m_bExecuteOneTime ) {
+      ProcessInQueryState();
+      m_bExecuteOneTime = false;
+    }
+    QueryFields<F>::pQueryFields_t p( this );
+    return p; 
+  }
+
   void SetExecuteOneTime( void ) { m_bExecuteOneTime = true; };
 
 protected:

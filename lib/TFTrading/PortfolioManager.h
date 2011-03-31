@@ -20,6 +20,7 @@
 
 #include "ManagerBase.h"
 #include "Portfolio.h"
+#include "Position.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -29,6 +30,11 @@ public:
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
+
+  typedef CPosition::pPosition_t pPosition_t;
+  typedef keytypes::idPosition_t idPosition_t;
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::idInstrument_t idInstrument_t;
 
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
@@ -40,6 +46,15 @@ public:
   pPortfolio_t GetPortfolio( const idPortfolio_t& idPortfolio );
   void UpdatePortfolio( const idPortfolio_t& idPortfolio );
   void DeletePortfolio( const idPortfolio_t& idPortfolio );
+
+  pPosition_t ConstructPosition( 
+    const idPortfolio_t& idPortfolio, const std::string& sName, 
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idInstrument_t& idInstrument, const std::string& sAlgorithm 
+    );
+  pPosition_t GetPosition( const idPosition_t& idPosition );
+  void UpdatePosition( const idPosition_t& idPosition );
+  void DeletePosition( const idPosition_t& idPosition );
 
   void RegisterTablesForCreation( void );
   void RegisterRowDefinitions( void );
@@ -53,6 +68,11 @@ private:
   typedef std::map<idPortfolio_t, pPortfolio_t> mapPortfolio_t;
   typedef mapPortfolio_t::iterator iterPortfolio_t;
   mapPortfolio_t m_mapPortfolio;
+
+  typedef std::pair<idPosition_t, pPosition_t> mapPosition_pair_t;
+  typedef std::map<idPosition_t, pPosition_t> mapPosition_t;
+  typedef mapPosition_t::iterator iterPosition_t;
+  mapPosition_t m_mapPosition;
 
 };
 

@@ -20,6 +20,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+//
+// Portfolio
+//
+
 CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio( 
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription 
   ) {

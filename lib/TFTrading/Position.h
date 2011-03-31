@@ -111,6 +111,13 @@ public:
       : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
+    TableRowDefNoKey( const TableRowDefNoKey& row ) 
+      : idPortfolio( row.idPortfolio ), sName( row.sName ), sNotes( row.sNotes ), 
+      idExecutionAccount( row.idExecutionAccount ), idDataAccount( row.idDataAccount ), idInstrument( row.idInstrument ),
+      sAlgorithm( row.sAlgorithm ), eOrderSidePending( row.eOrderSidePending ), nPositionPending( row.nPositionPending ), 
+      eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ), 
+      dblConstructedValue( row.dblConstructedValue ), dblMarketValue( row.dblMarketValue ), 
+      dblUnRealizedPL( row.dblUnRealizedPL ), dblRealizedPL( row.dblRealizedPL ), dblCommissionPaid( row.dblCommissionPaid ) {};
     TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const ou::tf::keytypes::idInstrument_t& idInstrument_,
       const ou::tf::keytypes::idAccount_t& idExecutionAccount_, const ou::tf::keytypes::idAccount_t& idDataAccount_ ) 
       : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), 
