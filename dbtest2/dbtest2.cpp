@@ -133,3 +133,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
 }
 
+/*
+4, good, 3, -45
+7, changed, 3, 82
+*/

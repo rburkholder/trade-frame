@@ -91,20 +91,12 @@ CAccountManager::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const idA
   return pAccountAdvisor;
 }
 
-void CAccountManager::DeleteAccountAdvisor( const idAccountAdvisor_t& idAdvisor ) {
+void CAccountManager::DeleteAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor ) {
 
-  pAccountAdvisor_t pAccountAdvisor( GetAccountAdvisor( idAdvisor ) );  // has exception if does not exist
+  pAccountAdvisor_t pAccountAdvisor( GetAccountAdvisor( idAccountAdvisor ) );  // has exception if does not exist
 
-  iterAccountAdvisor_t iter = m_mapAccountAdvisor.find( idAdvisor );
-  if ( m_mapAccountAdvisor.end() == iter ) {
-    throw std::runtime_error( "CAccountManager::DeleteAccountAdvisor: could not find advisor in local storage" );
-  }
-
-  AccountManagerQueries::AccountAdvisorKey key( idAdvisor );
-  ou::db::QueryFields<AccountManagerQueries::AccountAdvisorKey>::pQueryFields_t pQueryDelete
-    = m_pDbSession->Delete<AccountManagerQueries::AccountAdvisorKey>( key ).Where( "accountadvisorid = ?" );
-  m_mapAccountAdvisor.erase( iter );
-
+  DeleteRecord<idAccountAdvisor_t, mapAccountAdvisor_t, AccountManagerQueries::AccountAdvisorKey>( 
+    idAccountAdvisor, m_mapAccountAdvisor, "accountadvisorid = ?" );
 }
 
 //
@@ -174,15 +166,8 @@ void CAccountManager::DeleteAccountOwner( const idAccountOwner_t& idAccountOwner
 
   pAccountOwner_t pAccountOwner( GetAccountOwner( idAccountOwner ) );  // has exception if does not exist
 
-  iterAccountOwner_t iter = m_mapAccountOwner.find( idAccountOwner );
-  if ( m_mapAccountOwner.end() == iter ) {
-    throw std::runtime_error( "CAccountManager::DeleteAccountOwner: could not find owner in local storage" );
-  }
-
-  AccountManagerQueries::AccountOwnerKey key( idAccountOwner );
-  ou::db::QueryFields<AccountManagerQueries::AccountOwnerKey>::pQueryFields_t pQueryDelete
-    = m_pDbSession->Delete<AccountManagerQueries::AccountOwnerKey>( key ).Where( "accountownerid = ?" );
-  m_mapAccountOwner.erase( iter );
+  DeleteRecord<idAccountOwner_t, mapAccountOwner_t, AccountManagerQueries::AccountOwnerKey>( 
+    idAccountOwner, m_mapAccountOwner, "accountownerid = ?" );
 
 }
 
@@ -254,15 +239,8 @@ void CAccountManager::DeleteAccount( const idAccount_t& idAccount ) {
 
   pAccount_t pAccount( GetAccount( idAccount ) );  // has exception if does not exist
 
-  iterAccount_t iter = m_mapAccount.find( idAccount );
-  if ( m_mapAccount.end() == iter ) {
-    throw std::runtime_error( "CAccountManager::DeleteAccount: could not find owner in local storage" );
-  }
-
-  AccountManagerQueries::AccountKey key( idAccount );
-  ou::db::QueryFields<AccountManagerQueries::AccountKey>::pQueryFields_t pQueryDelete
-    = m_pDbSession->Delete<AccountManagerQueries::AccountKey>( key ).Where( "accountid = ?" );
-  m_mapAccount.erase( iter );
+  DeleteRecord<idAccount_t, mapAccount_t, AccountManagerQueries::AccountKey>( 
+    idAccount, m_mapAccount, "accountid = ?" );
 
 }
 

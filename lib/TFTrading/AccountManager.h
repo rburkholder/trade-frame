@@ -43,10 +43,10 @@ public:
   CAccountManager( void );
   ~CAccountManager(void);
 
-  pAccountAdvisor_t ConstructAccountAdvisor( const idAccountAdvisor_t& idAdvisor, const std::string& sAdvisorName, const std::string& sCompanyName = "" );
-  pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
-  void UpdateAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
-  void DeleteAccountAdvisor( const idAccountAdvisor_t& idAdvisor );
+  pAccountAdvisor_t ConstructAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor, const std::string& sAdvisorName, const std::string& sCompanyName = "" );
+  pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor );
+  void UpdateAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor );
+  void DeleteAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor );
 
   pAccountOwner_t ConstructAccountOwner(
     const idAccountOwner_t& idAccountOwner, const idAccountAdvisor_t& idAccountAdvisor,

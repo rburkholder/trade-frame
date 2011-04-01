@@ -99,29 +99,17 @@ void CPortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
-  iterPortfolio_t iter = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() == iter ) {
-    throw std::runtime_error( "CPortfolioManager::UpdatePortfolio: could not find portfolio" );
-  }
+  UpdateRecord<idPortfolio_t, CPortfolio::TableRowDef, mapPortfolio_t, PortfolioManagerQueries::PortfolioUpdate>(
+    idPortfolio, p->GetRow(), m_mapPortfolio, "portfolioid = ?" );
 
-  PortfolioManagerQueries::PortfolioUpdate update( const_cast<CPortfolio::TableRowDef&>( p->GetRow() ), idPortfolio );
-  ou::db::QueryFields<PortfolioManagerQueries::PortfolioUpdate>::pQueryFields_t pQuery
-    = m_pDbSession->Update<PortfolioManagerQueries::PortfolioUpdate>( update ).Where( "portfolioid = ?" );
 }
 
 void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
-  iterPortfolio_t iter = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() == iter ) {
-    throw std::runtime_error( "CPortfolioManager::DeletePortfolio: could not find portfolio" );
-  }
-
-  PortfolioManagerQueries::PortfolioKey key( idPortfolio );
-  ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pQueryDelete
-    = m_pDbSession->Delete<PortfolioManagerQueries::PortfolioKey>( key ).Where( "portfolioid = ?" );
-  m_mapPortfolio.erase( iter );
+  DeleteRecord<idPortfolio_t, mapPortfolio_t, PortfolioManagerQueries::PortfolioKey>( 
+    idPortfolio, m_mapPortfolio, "portfolioid = ?" );
 
 }
 
