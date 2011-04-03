@@ -184,10 +184,10 @@ void intrusive_ptr_release( Q* pq ) {
 }
 
 // pimpl class
-class CSessionBase;
+class CSessionImplCustom;
 
 //
-// CSessionBase
+// CSessionImplCustom
 //   independent of IDatabase / structStatementState stuff
 // this was an attempt at pimpl hiding, but the template<class F> class member function templates got in the way
 //
@@ -217,6 +217,8 @@ public:
 
   void CreateTables( void );
 
+  boost::int64_t GetLastRowId( void );
+
   template<class F> Query<F>& Insert( F& f );
   template<class F> Query<F>& Update( F& f );
   template<class F> Query<F>& Delete( F& f );
@@ -228,7 +230,7 @@ public:
 
 protected:
 private:
-  CSessionBase* pImpl;
+  CSessionImplCustom* pImpl;
 };
 
 } // db

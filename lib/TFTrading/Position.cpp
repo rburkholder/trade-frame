@@ -19,6 +19,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+  const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+  const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
+: m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
+  m_pInstrument( pInstrument ), 
+  m_dblMultiplier( 1 ), 
+  m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
+  m_row( idPortfolio, sName, pInstrument->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm )
+{
+  Construction();
+}
+
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 

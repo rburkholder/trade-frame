@@ -16,7 +16,7 @@
 namespace ou {
 namespace db {
 
-CSession::CSession( void ): pImpl( new CSessionBase() ) {
+CSession::CSession( void ): pImpl( new CSessionImplCustom() ) {
 }
 
 CSession::~CSession( void ) {
@@ -46,6 +46,10 @@ void CSession::Reset( QueryBase::pQueryBase_t pQuery ) {
 void CSession::CreateTables( void ) {
   pImpl->CreateTables();
 }
+
+//boost::int64_t CSession::GetLastRowId( void ) { // relocated to header
+//  pImpl->GetLastRowId();
+//}
 
 
 } // db

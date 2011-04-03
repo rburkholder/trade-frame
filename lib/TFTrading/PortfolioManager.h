@@ -16,6 +16,9 @@
 #include <map>
 #include <string>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include "KeyTypes.h"
 
 #include "ManagerBase.h"
@@ -38,6 +41,9 @@ public:
 
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
+  typedef CInstrument::pInstrument_cref pInstrument_cref;
+  typedef CPosition::pProvider_t pProvider_t;
+
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
 
@@ -48,31 +54,44 @@ public:
   void DeletePortfolio( const idPortfolio_t& idPortfolio );
 
   pPosition_t ConstructPosition( 
-    const idPortfolio_t& idPortfolio, const std::string& sName, 
+    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
-    const idInstrument_t& idInstrument, const std::string& sAlgorithm 
+    const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
+    pInstrument_cref pInstrument
     );
-  pPosition_t GetPosition( const idPosition_t& idPosition );
-  void UpdatePosition( const idPosition_t& idPosition );
-  void DeletePosition( const idPosition_t& idPosition );
+  pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName );
+  void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
+  void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
 
   void RegisterTablesForCreation( void );
   void RegisterRowDefinitions( void );
   void PopulateTables( void );
 
+  typedef FastDelegate1<pPosition_t> OnPositionNeedsDetailsHandler;
+  void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
+    OnPositionNeedsDetails = function;
+  }
+
 protected:
 
 private:
 
-  typedef std::pair<idPortfolio_t, pPortfolio_t> mapPortfolio_pair_t;
-  typedef std::map<idPortfolio_t, pPortfolio_t> mapPortfolio_t;
+  typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
+  typedef std::map<std::string, pPosition_t> mapPosition_t;
+  typedef mapPosition_t::iterator iterPosition_t;
+
+  struct structPortfolio {
+    pPortfolio_t pPortfolio;
+    mapPosition_t mapPosition;
+    structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
+  };
+
+  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
+  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolio_t;
   typedef mapPortfolio_t::iterator iterPortfolio_t;
   mapPortfolio_t m_mapPortfolio;
 
-  typedef std::pair<idPosition_t, pPosition_t> mapPosition_pair_t;
-  typedef std::map<idPosition_t, pPosition_t> mapPosition_t;
-  typedef mapPosition_t::iterator iterPosition_t;
-  mapPosition_t m_mapPosition;
+  OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
 
 };
 

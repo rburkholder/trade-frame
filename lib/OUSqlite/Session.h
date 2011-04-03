@@ -24,10 +24,10 @@
 namespace ou {
 namespace db {
 
-class CSessionBase: public CSessionImpl<ISqlite3> {
+class CSessionImplCustom: public CSessionImpl<ISqlite3> {
 public:
-  CSessionBase( void ): CSessionImpl<ISqlite3>() {};
-  ~CSessionBase( void ) {};
+  CSessionImplCustom( void ): CSessionImpl<ISqlite3>() {};
+  ~CSessionImplCustom( void ) {};
 protected:
 private:
 };

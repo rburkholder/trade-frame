@@ -57,11 +57,28 @@ protected:
   template<class K, class M, class Q> // K:key, M:map, Q:query
   void DeleteRecord( const K& key, M& map, const std::string& sWhere );
 
+  template<class K, class Q> // K:key, Q:query
+  void DeleteRecord( const K& key, const std::string& sWhere );
+
   template<class K, class R, class M, class Q>
   void UpdateRecord( const K& key, const R& row, const M& map, const std::string& sWhere );
 
+  template<class K, class R, class Q>
+  void UpdateRecord( const K& key, const R& row, const std::string& sWhere );
+
 private:
 };
+
+template<class T>
+template<class K, class R, class Q>
+void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const std::string& sWhere ) {
+
+  if ( 0 != m_pDbSession ) {
+    Q q( const_cast<R&>( row ), key );
+    ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pDbSession->Update<Q>( q ).Where( sWhere );
+  }
+
+}
 
 template<class T>
 template<class K, class R, class M, class Q>
@@ -78,6 +95,17 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, con
   if ( 0 != m_pDbSession ) {
     Q q( const_cast<R&>( row ), key );
     ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pDbSession->Update<Q>( q ).Where( sWhere );
+  }
+
+}
+
+template<class T>
+template<class K, class Q> // K:key, Q:query
+void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
+     
+  if ( 0 != m_pDbSession ) {
+    Q q( key );
+    ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pDbSession->Delete<Q>( q ).Where( sWhere );
   }
 
 }

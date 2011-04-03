@@ -50,6 +50,10 @@ public:
   void ResetStatement(   structStatementState& statement );
   void CloseStatement(   structStatementState& statement );
 
+  boost::int64_t GetLastRowId( void ) {
+    return sqlite3_last_insert_rowid( m_db );
+  }
+
 protected:
 
 private:

@@ -19,7 +19,7 @@
 
 // contains single data point
 // emits event when data point changes
-// supplies a formatted string for output 
+// supplies a formatted string for output ( use lexical_cast for formatting)
 //   blank if no value, formatted value if non-null
 // may then incorporate code from CVisibleItemInDevContext to do fancy graphical self-drawing
 // designed for CListCtrl custom draw

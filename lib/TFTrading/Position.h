@@ -59,6 +59,8 @@ public:
 
   typedef keytypes::idPosition_t idPosition_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::idInstrument_t idInstrument_t;
 
   struct TableRowDefNoKey {
     template<class A>
@@ -118,9 +120,9 @@ public:
       eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ), 
       dblConstructedValue( row.dblConstructedValue ), dblMarketValue( row.dblMarketValue ), 
       dblUnRealizedPL( row.dblUnRealizedPL ), dblRealizedPL( row.dblRealizedPL ), dblCommissionPaid( row.dblCommissionPaid ) {};
-    TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const ou::tf::keytypes::idInstrument_t& idInstrument_,
-      const ou::tf::keytypes::idAccount_t& idExecutionAccount_, const ou::tf::keytypes::idAccount_t& idDataAccount_ ) 
-      : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), 
+    TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
+      : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), sAlgorithm( sAlgorithm_ ),
       idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
       eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
@@ -137,6 +139,10 @@ public:
     idPosition_t idPosition;
 
     TableRowDef( void ) : idPosition( 0 ), TableRowDefNoKey() {};
+    TableRowDef( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
+      : idPosition( 0 ), 
+        TableRowDefNoKey( idPortfolio_, sName_, idInstrument_, idExecutionAccount_, idDataAccount_, sAlgorithm_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {
@@ -152,6 +158,9 @@ public:
     }
   };
 
+  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+    const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
+    const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
@@ -196,6 +205,7 @@ public:
   void EmitStatus( std::stringstream& ssStatus );
 
   void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );  // need to set verification that pointers have been set
+  void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
