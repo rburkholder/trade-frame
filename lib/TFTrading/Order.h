@@ -98,25 +98,25 @@ public:
         nOrderQuantity( 0 ), nQuantityRemaining( 0 ), nQuantityFilled( 0 ),
         dblAverageFillPrice( 0.0 ), dblCommission( 0.0 ) {};
     TableRowDef( // market order
-      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit or stop
-      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit and stop
-      idPosition_t idPosition_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
+      idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
-      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( "" ), eOrderStatus( OrderStatus::Created ), 
+      : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( 0.0 ),
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
@@ -226,6 +226,8 @@ public:
   ou::Delegate<const COrder&> OnOrderFilled; // on final fill
   ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const COrder&> OnCommission;
+
+  const TableRowDef& GetRow( void ) const { return m_row; };
 
 protected:
 

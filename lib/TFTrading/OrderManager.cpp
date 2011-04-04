@@ -40,8 +40,50 @@ COrder::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
   return oldId;
 }
 
+COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, 
+    idPosition_t idPosition
+    ) {
+  pOrder_t pOrder( new COrder( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition ) );
+  ConstructOrder( pOrder );
+  return pOrder;
+}
+
+COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, double dblPrice1,  
+    idPosition_t idPosition
+    ) {
+  pOrder_t pOrder( new COrder( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition ) );
+  ConstructOrder( pOrder );
+  return pOrder;
+}
+
+COrderManager::pOrder_t COrderManager::ConstructOrder( // limit and stop
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
+    idPosition_t idPosition
+    ) {
+  pOrder_t pOrder( new COrder( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition ) );
+  ConstructOrder( pOrder );
+  return pOrder;
+}
+
+void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
+  if ( 0 != m_pDbSession ) {
+    assert( 0 != pOrder->GetRow().idPosition );
+  }
+}
+
 void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrder) {
   assert( NULL != pProvider );
+
+   // todo: orders placed in the manager need to be constructed in the manager
+
   idOrder_t id = m_orderIds.GetNextId();
   pOrder->SetOrderId( id );
   mapOrders_t::iterator iter = m_mapAllOrders.find( id );

@@ -27,7 +27,7 @@ COrder::COrder(void) {
 }
 
 COrder::COrder( // market order
-  CInstrument::pInstrument_cref instrument,
+  CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,
@@ -35,8 +35,8 @@ COrder::COrder( // market order
   ptime dtOrderSubmitted
   ) 
 :
-  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted ),
-  m_pInstrument( instrument ),
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted ),
+  m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
   m_dblPriceXQuantity( 0 ), 
   m_nNextExecutionId ( 0 )
@@ -45,7 +45,7 @@ COrder::COrder( // market order
 }
 
 COrder::COrder( // limit or stop
-  CInstrument::pInstrument_cref instrument,
+  CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,
@@ -54,8 +54,8 @@ COrder::COrder( // limit or stop
   ptime dtOrderSubmitted
   ) 
 :
-  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted ),
-  m_pInstrument( instrument ),
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted ),
+  m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
   m_dblPriceXQuantity( 0 ),
   m_nNextExecutionId ( 0 )
@@ -64,7 +64,7 @@ COrder::COrder( // limit or stop
 }
 
 COrder::COrder( // limit and stop
-  CInstrument::pInstrument_cref instrument,
+  CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,
@@ -73,8 +73,8 @@ COrder::COrder( // limit and stop
   ptime dtOrderSubmitted
   ) 
 :
-  m_row( idPosition, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted ),
-  m_pInstrument( instrument ), 
+  m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted ),
+  m_pInstrument( pInstrument ), 
   m_bOutsideRTH( false ),
   m_dblPriceXQuantity( 0 ), 
   m_nNextExecutionId ( 0 )

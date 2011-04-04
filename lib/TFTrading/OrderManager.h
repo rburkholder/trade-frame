@@ -44,11 +44,32 @@ class CProviderInterfaceBase;
 class COrderManager: public ManagerBase<COrderManager> {
 public:
 
+  typedef keytypes::idPosition_t idPosition_t;
+  typedef keytypes::idOrder_t idOrder_t;
   typedef COrder::pOrder_t pOrder_t;
-  typedef COrder::idOrder_t idOrder_t;
+  typedef keytypes::idExecution_t idExecution_t;
+  typedef CExecution::pExecution_t pExecution_t;
 
   COrderManager(void);
   ~COrderManager(void);
+  pOrder_t ConstructOrder( // market order
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, 
+    idPosition_t idPosition = 0
+    );
+  pOrder_t ConstructOrder( // limit or stop
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, double dblPrice1,  
+    idPosition_t idPosition = 0
+    );
+  pOrder_t ConstructOrder( // limit and stop
+    CInstrument::pInstrument_cref instrument, 
+    OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
+    boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
+    idPosition_t idPosition = 0
+    );
   void PlaceOrder( CProviderInterfaceBase* pProvider, COrder::pOrder_t pOrder );
   void CancelOrder( idOrder_t nOrderId );
   void ReportExecution( idOrder_t orderId, const CExecution& exec );  // feedback from provider
@@ -64,6 +85,16 @@ public:
 
 protected:
 
+  typedef std::pair<idExecution_t, pExecution_t> pairExecution_t;
+  typedef std::map<idExecution_t, pExecution_t> mapExecutions_t;
+  typedef mapExecutions_t::iterator iterExecutions_t;
+
+  struct structOrder {
+    CProviderInterfaceBase* pProvider;
+    pOrder_t pOrder;
+    mapExecutions_t mapExecutions;
+  };
+
   typedef std::pair<CProviderInterfaceBase*,pOrder_t> pairProviderOrder_t;
   typedef std::pair<idOrder_t, pairProviderOrder_t> pairIdOrder_t;
   typedef std::map<idOrder_t, pairProviderOrder_t> mapOrders_t;
@@ -77,6 +108,8 @@ private:
   mapOrders_t m_mapAllOrders; // all orders for when checking for consistency
   mapOrders_t::iterator LocateOrder( idOrder_t nOrderId );
   void MoveActiveOrderToCompleted( idOrder_t nOrderId );
+
+  void ConstructOrder( pOrder_t& pOrder );
 
 };
 

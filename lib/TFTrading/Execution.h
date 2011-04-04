@@ -116,6 +116,8 @@ public:
   const std::string& GetExchangeExecutionId( void ) const { return m_row.sExchangeExecutionId; };
   ptime GetTimeStamp( void ) const { return m_row.dtExecutionTimeStamp; };
 
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
 
 private:
