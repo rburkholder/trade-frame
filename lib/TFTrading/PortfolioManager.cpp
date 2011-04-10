@@ -86,9 +86,10 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
         CPosition::TableRowDef rowPosition;
         m_pDbSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
         pPosition_t pPosition( new CPosition( rowPosition ) );
-        if ( 0 != OnPositionNeedsDetails ) {  // fill in instrument, exection, data 
-          OnPositionNeedsDetails( pPosition );
+        if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, exection, data 
+          throw std::runtime_error( "CPortfolioManager::GetPortfolio has no Details Callback" );
         }
+        OnPositionNeedsDetails( pPosition );
         response.first->second.mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
       }
 

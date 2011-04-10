@@ -82,9 +82,8 @@ COrder::COrder( // limit and stop
   ConstructOrder();
 }
 
-COrder::COrder( const TableRowDef& row  ) 
-: m_row( row ),
-// need something for the pInstrument construction
+COrder::COrder( const TableRowDef& row, pInstrument_t& pInstrument  ) 
+: m_row( row ), m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
   m_dblPriceXQuantity( 0 ), 
   m_nNextExecutionId ( 0 )
@@ -98,9 +97,11 @@ void COrder::ConstructOrder() {
 //  try {
 
   // need to do something with idInstrument, into and out of the database
+  // will be dealt with by OrderManager
 
   m_row.dtOrderCreated = ou::CTimeSource::Instance().Internal();
   assert( NULL != m_pInstrument.get() );
+  // order id needs to be set externally, as it is dependent upon external factors
 //  m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
 //  catch (...) {

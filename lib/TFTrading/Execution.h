@@ -115,6 +115,7 @@ public:
   const std::string& GetExchange( void ) const { return m_row.sExchange; };
   const std::string& GetExchangeExecutionId( void ) const { return m_row.sExchangeExecutionId; };
   ptime GetTimeStamp( void ) const { return m_row.dtExecutionTimeStamp; };
+  void SetOrderId( idOrder_t idOrder ) { m_row.idOrder = idOrder; };
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

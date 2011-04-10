@@ -134,7 +134,6 @@ public:
         nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ),
         dblAverageFillPrice( dblAverageFillPrice_ ), dblCommission( dblCommission_ ),
         dtOrderCreated( dtOrderCreated_ ), dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( dtOrderClosed_ ) {};
-
   };
 
   struct TableCreateDef: TableRowDef {
@@ -174,7 +173,7 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder( const TableRowDef& row );
+  COrder( const TableRowDef& row, pInstrument_t& pInstrument );
   ~COrder(void);
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
