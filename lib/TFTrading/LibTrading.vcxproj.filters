@@ -64,6 +64,9 @@
     <ClCompile Include="Managers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CashAccount.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h">
@@ -139,6 +142,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Database.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CashAccount.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

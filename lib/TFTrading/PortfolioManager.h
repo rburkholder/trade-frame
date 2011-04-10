@@ -67,7 +67,7 @@ public:
   void RegisterRowDefinitions( void );
   void PopulateTables( void );
 
-  typedef FastDelegate1<pPosition_t> OnPositionNeedsDetailsHandler;
+  typedef FastDelegate1<pPosition_t&> OnPositionNeedsDetailsHandler;
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
     OnPositionNeedsDetails = function;
   }

@@ -51,7 +51,7 @@ public:
   typedef boost::shared_ptr<CProviderInterfaceBase> pProvider_t;
 
   typedef COrder::pOrder_t pOrder_t;
-  typedef keytypes::idProvider_t idProvider_t;
+//  typedef keytypes::idProvider_t idProvider_t;
 
   typedef CSymbolBase::quotehandler_t quotehandler_t;
   typedef CSymbolBase::tradehandler_t tradehandler_t;
@@ -73,15 +73,15 @@ public:
     {};
   virtual ~CProviderInterfaceBase( void ) {};
 
-  virtual  void Connect( void ) {};
+  virtual void Connect( void ) {};
   ou::Delegate<int> OnConnected;
 
   virtual  void Disconnect( void ) {};
   ou::Delegate<int> OnDisconnected;
 
-  bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };
-
   bool Connected( void ) const { return m_bConnected; };
+
+  bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };
 
   bool ProvidesQuotes( void ) const { return m_bProvidesQuotes; };
   bool ProvidesTrades( void ) const { return m_bProvidesTrades; };

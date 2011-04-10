@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -10,32 +10,21 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
+ 
+#pragma once
 
-#include "StdAfx.h"
+// http://www.theoptionsguide.com/expiration-date.aspx
+// http://www.cboe.com/TradTool/strikepricecode.aspx
 
-#include "Account.h"
+#include <boost/date_time/gregorian/gregorian.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace options { // options
 
-CAccount::CAccount(
-    const idAccount_t& idAccount,
-    const idAccountOwner_t& idAccountOwner,
-    const std::string& sAccountName,
-    keytypes::eidProvider_t idProvider,
-    const std::string& sBrokerName,
-    const std::string& sBrokerAccountId,
-    const std::string& sLogin, 
-    const std::string& sPassword, 
-    const std::string& sPort
-    ) 
-: m_row( idAccount, idAccountOwner, sAccountName,
-  idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword, sPort )
-{
-}
+boost::gregorian::date Next3rdFriday( boost::gregorian::date date );
 
-CAccount::~CAccount(void) {
-}
-
+} // namespace options
 } // namespace tf
 } // namespace ou
+

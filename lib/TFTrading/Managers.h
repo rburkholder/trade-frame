@@ -15,8 +15,13 @@
 
 #include "Database.h"
 
+#include "Account.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+void Initialization( void );
+void Denitialization( void );
 
 void InitializeManagersDb( ou::db::CSession::pSession_t& pDbSession );
 void RegisterTablesForCreation( void );

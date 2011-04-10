@@ -67,6 +67,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OUWtlHeaders", "lib\OUWtlHeaders\LibWtlHeaders.vcxproj", "{59B836F9-5799-4F25-82EB-F4C9F180CD94}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFHDF5TimeSeries", "lib\TFHDF5TimeSeries\LibHDF5TimeSeries.vcxproj", "{12CC3456-56CB-4AC1-979F-B6B73BB47929}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11243A27-764A-4119-BEFF-A8A80FD615EC} = {11243A27-764A-4119-BEFF-A8A80FD615EC}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFIndicators", "lib\TFIndicators\LibIndicators.vcxproj", "{662ACE5B-9B25-4BD7-9656-EC8815723EBB}"
 EndProject

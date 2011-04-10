@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,31 +11,34 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
-
-#include "Account.h"
+#include "CalcExpiry.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace options { // options
 
-CAccount::CAccount(
-    const idAccount_t& idAccount,
-    const idAccountOwner_t& idAccountOwner,
-    const std::string& sAccountName,
-    keytypes::eidProvider_t idProvider,
-    const std::string& sBrokerName,
-    const std::string& sBrokerAccountId,
-    const std::string& sLogin, 
-    const std::string& sPassword, 
-    const std::string& sPort
-    ) 
-: m_row( idAccount, idAccountOwner, sAccountName,
-  idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword, sPort )
-{
+boost::gregorian::months onemonth( 1 );
+
+boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
+
+  typedef boost::gregorian::nth_day_of_the_week_in_month nth_dom;
+  boost::gregorian::date dExpiry;
+
+  nth_dom domExpiry1( nth_dom::third, boost::gregorian::Friday, date.month() ); 
+  dExpiry = domExpiry1.get_date( date.year() );
+  if ( date < dExpiry ) { // use calculated expiry
+    // is upcoming in current month
+  }
+  else { // expiry is in next month
+    date = boost::gregorian::date( date.year(), date.month(), 1 ) + onemonth;
+    nth_dom domExpiry2( nth_dom::third, boost::gregorian::Friday, date.month() ); 
+    dExpiry = domExpiry2.get_date( date.year() );
+  }
+  return dExpiry;
+
 }
 
-CAccount::~CAccount(void) {
-}
-
+} // namespace options
 } // namespace tf
 } // namespace ou
+

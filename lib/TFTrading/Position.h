@@ -171,7 +171,7 @@ public:
   const std::string& Notes( void ) const { return m_row.sNotes; };
   void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
 
-  pInstrument_cref GetInstrument( void ) const { return m_pInstrument; };
+  pInstrument_cref GetInstrument( void ) const { assert( 0 != m_pInstrument ); return m_pInstrument; };
   double GetUnRealizedPL( void ) const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
@@ -204,7 +204,7 @@ public:
 
   void EmitStatus( std::stringstream& ssStatus );
 
-  void Set( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );  // need to set verification that pointers have been set
+  void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
 
   const TableRowDef& GetRow( void ) const { return m_row; };

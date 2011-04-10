@@ -25,7 +25,7 @@
 
 // key might be account or other similar globally known identifier
 
-// it should be converted over to boost::fusion for storing full types and values for the 
+// map could be converted over to boost::fusion for storing full types and values for the 
 // various providers, and then have specialized algorithms for processing the tuples of providers.
 
 namespace ou { // One Unified
@@ -40,9 +40,10 @@ public:
   CProviderManager(void) {};
   ~CProviderManager(void) {};
 
+  // when to use Construct and when to use Get?
   pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
   template<class P> pProvider_t Construct( const idProvider_t& key ); // construct given a provider 'P' type
-  void Release( const idProvider_t& key );  // should we check for close or anything?
+  void Release( const idProvider_t& key );  // should we check for close or anything?  need to keep a lock count.
   pProvider_t Get( const idProvider_t& key );
 
 protected:

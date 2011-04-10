@@ -41,6 +41,7 @@ public:
       ou::db::Field( a, "brokeraccountid", sBrokerAccountId );
       ou::db::Field( a, "login", sLogin );
       ou::db::Field( a, "password", sPassword );
+      ou::db::Field( a, "port", sPort );
     }
 
     idAccount_t idAccount;
@@ -51,6 +52,7 @@ public:
     std::string sBrokerAccountId;
     std::string sLogin;
     std::string sPassword;
+    std::string sPort;
 
     TableRowDef( void ) {};
     TableRowDef( 
@@ -58,11 +60,11 @@ public:
       const idAccountOwner_t& idAccountOwner_, const std::string& sAccountName_, 
       keytypes::eidProvider_t idProvider_, 
       const std::string& sBrokerName_, const std::string& sBrokerAccountId_,
-      const std::string& sLogin_, const std::string& sPassword_ ) 
+      const std::string& sLogin_, const std::string& sPassword_, const std::string& sPort_ ) 
       : idAccount( idAccount_ ), idAccountOwner( idAccountOwner_ ),
         sAccountName( sAccountName_ ), idProvider( idProvider_ ), 
         sBrokerName( sBrokerName_ ), sBrokerAccountId( sBrokerAccountId_ ),
-        sLogin( sLogin_ ), sPassword( sPassword_ ) {};
+        sLogin( sLogin_ ), sPassword( sPassword_ ), sPort( sPort_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {
@@ -82,10 +84,13 @@ public:
     const std::string& sBrokerName,
     const std::string& sBrokerAccountId,
     const std::string& sLogin, 
-    const std::string& sPassword
+    const std::string& sPassword, 
+    const std::string& sPort = "" 
     );
   CAccount( const TableRowDef& row ) : m_row( row ) {};
   ~CAccount(void);
+
+  void SetPort( const std::string& sPort ) { m_row.sPort = sPort; };
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

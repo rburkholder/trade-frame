@@ -65,7 +65,7 @@ CProviderManager::pProvider_t CProviderManager::Get( const idProvider_t& key ) {
 
   iterProviders_t iter = m_mapProviders.find( key );
   if ( m_mapProviders.end() == iter ) {
-    throw std::runtime_error( "CProviderManager::Release, provider does not exist" );
+    throw std::runtime_error( "CProviderManager::Get, provider does not exist" );
   }
   return iter->second;
 }

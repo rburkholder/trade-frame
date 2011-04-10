@@ -21,9 +21,6 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace keytypes { // KeyTypes
 
-// ProviderManager
-typedef boost::uint16_t idProvider_t;  // used in HDF5Attribute.h
-enum eidProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
 // InstrumentManager
 typedef std::string idInstrument_t;
 typedef std::string idExchange_t;
@@ -31,6 +28,10 @@ typedef std::string idExchange_t;
 typedef std::string idAccountAdvisor_t;
 typedef std::string idAccountOwner_t;
 typedef std::string idAccount_t;
+// ProviderManager
+//typedef boost::uint16_t idProvider_t;  // identifies instance of a provider
+typedef idAccount_t idProvider_t;
+enum eidProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
 // PortfolioManager
 typedef std::string idPortfolio_t;
 typedef boost::int64_t idPosition_t;  // auto increment

@@ -129,6 +129,8 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
   session.Close();
 
+  std::cout << std::endl << "Should be: " << std::endl << "4, good, 3, -45" << std::endl << "7, changed, 3, 82" << std::endl;
+
   return 0;
 
 }

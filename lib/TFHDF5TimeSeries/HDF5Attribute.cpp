@@ -19,7 +19,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 const char szInstrumentType[] = "InstrumentType";
-const char szProviderId[] = "ProviderId";
+const char szProviderType[] = "ProviderType";
 const char szUnderlying[] = "Underlying";
 const char szStrike[] = "Strike";
 const char szSide[] = "Side";
@@ -81,16 +81,16 @@ InstrumentType::enumInstrumentTypes CHDF5Attributes::GetInstrumentType( void ) {
   return typeInstrument;
 }
 
-void CHDF5Attributes::SetProviderId( unsigned short id ) {
+void CHDF5Attributes::SetProviderType( keytypes::eidProvider_t id ) {
   H5::DataSpace dspace;
-  H5::Attribute attribute( m_pDataSet->createAttribute( szProviderId, H5::PredType::NATIVE_UINT16, dspace ) );
+  H5::Attribute attribute( m_pDataSet->createAttribute( szProviderType, H5::PredType::NATIVE_UINT16, dspace ) );
   attribute.write( H5::PredType::NATIVE_UINT16, &id );
   attribute.close();
 }
 
-unsigned short CHDF5Attributes::GetProviderId( void ) {
-  unsigned short id;
-  H5::Attribute attribute( m_pDataSet->openAttribute( szProviderId ) );
+keytypes::eidProvider_t CHDF5Attributes::GetProviderType( void ) {
+  keytypes::eidProvider_t id;
+  H5::Attribute attribute( m_pDataSet->openAttribute( szProviderType ) );
   attribute.read(H5::PredType::NATIVE_UINT16, &id );
   attribute.close();
   return id;

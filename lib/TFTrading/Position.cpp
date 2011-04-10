@@ -89,7 +89,7 @@ void CPosition::Construction( void ) {
   }
 }
 
-void CPosition::Set( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) {
+void CPosition::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
 
   m_pInstrument = pInstrument;
   m_bInstrumentAssigned = true;

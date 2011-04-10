@@ -17,6 +17,7 @@
 
 #include "HDF5DataManager.h"
 #include <TFTrading/TradingEnumerations.h>
+#include <TFTrading/KeyTypes.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -58,8 +59,8 @@ public:
   void SetInstrumentType( InstrumentType::enumInstrumentTypes );
   InstrumentType::enumInstrumentTypes GetInstrumentType( void );
 
-  void SetProviderId( unsigned short );
-  unsigned short GetProviderId( void );
+  void SetProviderType( keytypes::eidProvider_t );
+  keytypes::eidProvider_t GetProviderType( void );
 
   void SetOptionAttributes( const structOption& );
   void GetOptionAttributes( structOption* );
