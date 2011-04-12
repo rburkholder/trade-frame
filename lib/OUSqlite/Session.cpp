@@ -47,6 +47,10 @@ void CSession::CreateTables( void ) {
   pImpl->CreateTables();
 }
 
+boost::int64_t CSession::GetLastRowId( void ) {
+  return pImpl->GetLastRowId();
+}
+
 //boost::int64_t CSession::GetLastRowId( void ) { // relocated to header
 //  pImpl->GetLastRowId();
 //}

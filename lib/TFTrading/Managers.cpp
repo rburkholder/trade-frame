@@ -37,14 +37,14 @@ void HandleOrderDetails( CInstrument::idInstrument_t idInstrument, CInstrument::
   pInstrument = CInstrumentManager::Instance().Get( idInstrument );
 }
 
-void Initialization( void ) {
+void Initialize( void ) {
   // link up with PortfolioManager for call back
   CPortfolioManager::Instance().SetOnPositionNeedDetails( &HandlePositionDetails );
   // link up with OrderManager for call back
   COrderManager::Instance().SetOnOrderNeedsDetails( &HandleOrderDetails );
 }
 
-void Denitialization( void ) {
+void Denitialize( void ) {
   // take down the links
   COrderManager::Instance().SetOnOrderNeedsDetails( 0 );
   CPortfolioManager::Instance().SetOnPositionNeedDetails( 0 );

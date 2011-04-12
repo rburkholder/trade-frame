@@ -20,8 +20,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-void Initialization( void );
-void Denitialization( void );
+void Initialize( void );
+void Denitialize( void );
 
 void InitializeManagersDb( ou::db::CSession::pSession_t& pDbSession );
 void RegisterTablesForCreation( void );

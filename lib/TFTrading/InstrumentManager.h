@@ -64,6 +64,8 @@ public:
     const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
+  void Construct( pInstrument_t& pInstrument );
+
   bool Exists( idInstrument_cref );
   bool Exists( pInstrument_cref );
   pInstrument_t Get( idInstrument_cref );
@@ -85,7 +87,6 @@ protected:
   bool LoadInstrument( idInstrument_t idInstrument, pInstrument_t& pInstrument );
   void LoadAlternateInstrumentNames( pInstrument_t& pInstrument );
 
-  void Construct( pInstrument_t& pInstrument );
 
 private:
 

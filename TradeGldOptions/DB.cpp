@@ -18,34 +18,44 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
+#include <TFTrading/AccountManager.h>
+#include <TFTrading/ProviderManager.h>
+
+#include <TFTrading/Managers.h>
+
 #include "DB.h"
 
-using namespace ou::tf;
+//using namespace ou::tf;
 
 std::string CDB::m_sPortfolioId( "dn01" );
 
 CDB::CDB(void): m_bOpened( false ) {
+  ou::tf::Initialize();
 }
 
 CDB::~CDB(void) {
   Close();
+  ou::tf::Denitialize();
 }
 
 void CDB::Open( const std::string& sDbName ) {
 
   if ( !m_bOpened ) {
+    m_pSession.reset( new ou::db::CSession );
     if ( boost::filesystem::exists( sDbName ) ) {
       // open already created and loaded database
-      m_session.Open( sDbName );
-      ou::tf::db::RegisterRowDefinitions( m_session );
+      m_pSession->Open( sDbName );
+      ou::tf::InitializeManagersDb( m_pSession );
+      ou::tf::RegisterRowDefinitions();
     }
     else {
       // create and build new database
-      m_session.Open( sDbName, ou::db::EOpenFlagsAutoCreate );
-      ou::tf::db::RegisterTableCreation( m_session );
-      m_session.CreateTables();
-      ou::tf::db::RegisterRowDefinitions( m_session );
-      ou::tf::db::PopulateTables( m_session );
+      m_pSession->Open( sDbName, ou::db::EOpenFlagsAutoCreate );
+      ou::tf::InitializeManagersDb( m_pSession );
+      ou::tf::RegisterTablesForCreation();
+      m_pSession->CreateTables();
+      ou::tf::RegisterRowDefinitions();
+      ou::tf::PopulateTables();
       Populate();
     }
     m_bOpened = true;
@@ -56,23 +66,23 @@ void CDB::Open( const std::string& sDbName ) {
 void CDB::Close( void ) {
   if ( m_bOpened ) {
     m_bOpened = false;
-    m_session.Close();
+    m_pSession->Close();
   }
 }
 
 void CDB::Populate( void ) {
 
-  CAccountAdvisor::TableRowDef aa( "ray", "Raymond Burkholder", "One Unified" );
-  ou::db::QueryFields<CAccountAdvisor::TableRowDef>::pQueryFields_t paa = m_session.Insert<CAccountAdvisor::TableRowDef>( aa );
+  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "ray", "Raymond Burkholder", "One Unified" );
 
-  CAccountOwner::TableRowDef ao( "ray", "ray", "Raymond", "Burkholder" );
-  ou::db::QueryFields<CAccountOwner::TableRowDef>::pQueryFields_t pao = m_session.Insert<CAccountOwner::TableRowDef>( ao );
+  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "ray", "ray", "Raymond", "Burkholder" );
 
-  CAccount::TableRowDef acctIB( "ib01", "ray", "Raymond Burkholder", keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
-  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIB = m_session.Insert<CAccount::TableRowDef>( acctIB );
+  ou::tf::CAccountManager::pAccount_t pAccountIB
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "ray", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
-  CAccount::TableRowDef acctIQ( "iq01", "ray", "Raymond Burkholder", keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
-  ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t paIQF = m_session.Insert<CAccount::TableRowDef>( acctIQ );
+  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "ray", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
 //  CPortfolio::TableRowDef portfolio( PortfolioId(), "ray", "Delta Neutral 01 - long und, long put" );
 //  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
@@ -89,28 +99,8 @@ struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
   UnderlyingQueryParameter( const ou::tf::keytypes::idInstrument_t& idInstrument_ ) : idInstrument( idInstrument_ ) {};
 };
 
-bool CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
-
-  bool bFound = false;
-  UnderlyingQueryParameter query( id );
-
-  CInstrument::TableRowDef instrument;  // can we put stuff directly into the object?
-  ou::db::QueryFields<UnderlyingQueryParameter>::pQueryFields_t pQuery 
-    = m_session.SQL<UnderlyingQueryParameter>( "select * from instruments", query ).Where( "instrumentid = ?" ).NoExecute();
-
-  m_session.Bind<UnderlyingQueryParameter>( pQuery );
-  if ( m_session.Execute( pQuery ) ) {
-    m_session.Columns<UnderlyingQueryParameter, CInstrument::TableRowDef>( pQuery, instrument );
-    pInstrument.reset( new CInstrument( instrument ) );
-    bFound = true;
-  }
-
-  return bFound;
-}
-
-void CDB::SaveInstrument( ou::tf::CInstrument::pInstrument_t& pInstrument ) {
-  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
-    = m_session.Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
+void CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+  pInstrument = ou::tf::CInstrumentManager::Instance().Get( id );
 }
 
 struct OptionsQueryParameters {
@@ -124,9 +114,9 @@ struct OptionsQueryParameters {
   }
   const ou::tf::keytypes::idInstrument_t& idUnderlying;
   boost::uint16_t nYear, nMonth, nDay;
-  InstrumentType::enumInstrumentTypes eType;
+  ou::tf::InstrumentType::enumInstrumentTypes eType;
   OptionsQueryParameters( const ou::tf::keytypes::idInstrument_t& id, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
-    : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( InstrumentType::Option ) {};
+    : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( ou::tf::InstrumentType::Option ) {};
 };
 
 bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
@@ -135,104 +125,25 @@ bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boo
   OptionsQueryParameters query( idUnderlying, nYear, nMonth, nDay );
 
   ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery 
-    = m_session.SQL<OptionsQueryParameters>( 
+    = m_pSession->SQL<OptionsQueryParameters>( 
     "select * from instruments", query ).Where( "underlyingid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
 
   ou::tf::CInstrument::TableRowDef instrument;  // can we put stuff directly into object?
   ou::tf::CInstrument::pInstrument_t pInstrument;
-  m_session.Bind<OptionsQueryParameters>( pQuery );
-  if ( m_session.Execute( pQuery ) ) {
+  m_pSession->Bind<OptionsQueryParameters>( pQuery );
+  if ( m_pSession->Execute( pQuery ) ) {
     bFound = true;
     if ( NULL != OnNewInstrument ) {
       do {
-        m_session.Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
-        pInstrument.reset( new CInstrument( instrument ) );
+        m_pSession->Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
+        pInstrument.reset( new ou::tf::CInstrument( instrument ) );
         OnNewInstrument( pInstrument );
       }
-      while ( m_session.Execute( pQuery ) );
+      while ( m_pSession->Execute( pQuery ) );
     }
   }
 
   return bFound;
 
-}
-
-void CDB::CreatePortfolioAndPositionRecords( 
-  const ou::tf::keytypes::idPortfolio_t& idPortfolio, 
-  const ou::tf::keytypes::idInstrument_t& idUnderlying, const ou::tf::keytypes::idInstrument_t& idOption,
-  const ou::tf::keytypes::idAccount_t& idExecutionAccount, const ou::tf::keytypes::idAccount_t& idDataAccount
-  ) {
-
-  CPortfolio::TableRowDef portfolio( idPortfolio, "ray", "Delta Neutral 01 - long und, long put" );
-  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
-
-  CPosition::TableRowDefNoKey posUnderlying( idPortfolio, "U", idUnderlying, idExecutionAccount, idDataAccount );
-  ou::db::QueryFields<CPosition::TableRowDefNoKey>::pQueryFields_t pPosUnderlying 
-    = m_session.Insert<CPosition::TableRowDefNoKey>( posUnderlying );
-
-  CPosition::TableRowDefNoKey posOption( idPortfolio, "O", idOption, idExecutionAccount, idDataAccount );
-  ou::db::QueryFields<CPosition::TableRowDefNoKey>::pQueryFields_t pPosOption 
-    = m_session.Insert<CPosition::TableRowDefNoKey>( posOption );
-}
-
-struct PortfolioQueryParameters { // can this be simplified?
-  template<class A>
-  void Fields( A& a ) {
-    ou::db::Field( a, "portfolioid", idPortfolio );
-  }
-  const ou::tf::keytypes::idPortfolio_t& idPortfolio;
-  //PortfolioQuery( void ) {};
-  PortfolioQueryParameters( const ou::tf::keytypes::idPortfolio_t& idPortfolio_ ) : idPortfolio( idPortfolio_ ) {};
-};
-
-bool CDB::LoadPortfolioAndPositions( const ou::tf::keytypes::idPortfolio_t& id, CPortfolio::pPortfolio_t& pPortfolio,
-                                     ou::tf::CPosition::pPosition_t& pPosUnderlying, ou::tf::CPosition::pPosition_t& pPosOption 
-) {
-
-  bool bFound = false;
-  PortfolioQueryParameters query( id );
-
-  // obtain the portfolio record
-  ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPortfolioQuery 
-    = m_session.SQL<PortfolioQueryParameters>( "select * from portfolios", query ).Where( "portfolioid = ?" ).NoExecute();
-
-  m_session.Bind<PortfolioQueryParameters>( pPortfolioQuery );
-  if ( m_session.Execute( pPortfolioQuery ) ) {
-    CPortfolio::TableRowDef portfolio; 
-    m_session.Columns<PortfolioQueryParameters, CPortfolio::TableRowDef>( pPortfolioQuery, portfolio );
-    pPortfolio.reset( new CPortfolio( portfolio ) );
-    bFound = true;
-  }
-
-  // obtain the position records
-  if ( bFound ) {
-    // load positions
-    ou::db::QueryFields<PortfolioQueryParameters>::pQueryFields_t pPositionQuery 
-      = m_session.SQL<PortfolioQueryParameters>( "select * from positions", query ).Where( "portfolioid = ?" ).OrderBy( "name" ).NoExecute();
-    m_session.Bind<PortfolioQueryParameters>( pPositionQuery );
-    bool bOptionFound = false;
-    bool bUnderlyingFound = false;
-    if ( m_session.Execute( pPositionQuery ) ) {
-      CPosition::TableRowDef position;
-      m_session.Columns<PortfolioQueryParameters, CPosition::TableRowDef>( pPositionQuery, position );
-      if ( "O" == position.sName ) {
-        assert( !bOptionFound ); // turn into proper error later
-        pPosOption.reset( new CPosition( position ) );
-        bOptionFound = true;
-      }
-      if ( m_session.Execute( pPositionQuery ) ) {
-        CPosition::TableRowDef position;
-        m_session.Columns<PortfolioQueryParameters, CPosition::TableRowDef>( pPositionQuery, position );
-        if ( "U" == position.sName ) {
-          assert( !bUnderlyingFound ); // turn into proper error later
-          pPosUnderlying.reset( new CPosition( position ) );
-          bUnderlyingFound = true;
-        }
-      }
-    }
-    assert( bOptionFound && bUnderlyingFound );
-  }
-
-  return bFound;
 }
 

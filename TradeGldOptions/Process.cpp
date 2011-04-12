@@ -358,17 +358,18 @@ void CProcess::HandleOnExecConnected(int e) {
       break;
     case EModeLive:
       // try load from database first
-      if ( !m_db.LoadUnderlying( m_sSymbolName, m_pUnderlying ) ) {
+      try {
+        m_pUnderlying = ou::tf::CInstrumentManager::Instance().Get( m_sSymbolName );
+        // need to also prime TWS with symbol
+        m_tws->GetSymbol( m_pUnderlying );  // preload symbol
+        HandleUnderlyingListingDone();
+      }
+      catch (...) {
         // otherwise request the contract information
         m_contract.secType = "STK";
         m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
         m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
         m_tws->RequestContractDetails( m_contract );
-      }
-      else {
-        // need to also prime TWS with symbol
-        m_tws->GetSymbol( m_pUnderlying );  // preload symbol
-        HandleUnderlyingListingDone();
       }
       break;
   }
@@ -505,7 +506,8 @@ void CProcess::HandleUnderlyingListing( const ContractDetails& details ) {
 //    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
   }
-  m_db.SaveInstrument( m_pUnderlying );  // is it storing unique keys?
+  // need to check if it exists first, might already be in database
+  ou::tf::CInstrumentManager::Instance().Construct( m_pUnderlying );
 }
 
 void CProcess::HandleUnderlyingListingDone(  ) {
@@ -548,7 +550,7 @@ void CProcess::HandleStrikeFromIB( const ContractDetails& details ) {
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
 
-  m_db.SaveInstrument( pInstrument );
+  ou::tf::CInstrumentManager::Instance().Construct( pInstrument );
   AddOptionToStrikeInfo( pInstrument );
 
 }
@@ -1035,7 +1037,7 @@ void CProcess::SaveSeries( void ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
       wtsQuotes.Write( sPathName, &m_quotes );
       CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
-      attributes.SetProviderId( m_pDataProvider->ID() );
+      attributes.SetProviderType( m_pDataProvider->ID() );
     }
   }
   catch (...) {
@@ -1046,7 +1048,7 @@ void CProcess::SaveSeries( void ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
       wtsTrades.Write( sPathName, &m_trades );
       CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
-      attributes.SetProviderId( m_pDataProvider->ID() );
+      attributes.SetProviderType( m_pDataProvider->ID() );
     }
   }
   catch (...) {
@@ -1064,7 +1066,7 @@ void CProcess::SaveSeries( void ) {
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Call()->Trades()->Size() ) {
@@ -1074,7 +1076,7 @@ void CProcess::SaveSeries( void ) {
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Call()->Greeks()->Size() ) {
@@ -1084,7 +1086,7 @@ void CProcess::SaveSeries( void ) {
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Quotes()->Size() ) {
@@ -1094,7 +1096,7 @@ void CProcess::SaveSeries( void ) {
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Trades()->Size() ) {
@@ -1104,7 +1106,7 @@ void CProcess::SaveSeries( void ) {
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Greeks()->Size() ) {
@@ -1114,7 +1116,7 @@ void CProcess::SaveSeries( void ) {
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
         CHDF5Attributes attributes( sPathName, option );
-        attributes.SetProviderId( m_pDataProvider->ID() );
+        attributes.SetProviderType( m_pDataProvider->ID() );
       }
     }
     catch (...) {

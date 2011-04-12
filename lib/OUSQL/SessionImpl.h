@@ -161,7 +161,7 @@ public:
 
   void CreateTables( void );
 
-  boost::int64_t GetLastRowId( void ) { return IDatabase::GetLastRowId(); };
+  boost::int64_t GetLastRowId( void ) { return m_db.GetLastRowId(); };
 
   template<class F>  // do reset, auto bind when doing execute
   QueryState<typename IDatabase::structStatementState, F, session_t>& Insert( F& f ) {
