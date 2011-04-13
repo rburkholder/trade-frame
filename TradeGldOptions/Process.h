@@ -337,6 +337,7 @@ private:
   double m_dblPutPrice;
   double m_dblUnderlyingPrice;
 
+  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
   pPortfolio_t m_pPortfolio;
 
   pPosition_t m_posPut;
@@ -374,6 +375,8 @@ private:
   void HandleAfterMarket( const CQuote& quote );
 
   void HandlePositionExecution( CPosition::execution_delegate_t pair );
+
+  void HandlePopulateDatabase( void ) ;
 
   void OpenPosition( void );
   void ClosePosition( void );

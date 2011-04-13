@@ -18,16 +18,9 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
-#include <TFTrading/AccountManager.h>
-#include <TFTrading/ProviderManager.h>
-
 #include <TFTrading/Managers.h>
 
 #include "DB.h"
-
-//using namespace ou::tf;
-
-std::string CDB::m_sPortfolioId( "dn01" );
 
 CDB::CDB(void): m_bOpened( false ) {
   ou::tf::Initialize();
@@ -56,7 +49,7 @@ void CDB::Open( const std::string& sDbName ) {
       m_pSession->CreateTables();
       ou::tf::RegisterRowDefinitions();
       ou::tf::PopulateTables();
-      Populate();
+      if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
     }
     m_bOpened = true;
   }
@@ -68,25 +61,6 @@ void CDB::Close( void ) {
     m_bOpened = false;
     m_pSession->Close();
   }
-}
-
-void CDB::Populate( void ) {
-
-  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "ray", "Raymond Burkholder", "One Unified" );
-
-  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "ray", "ray", "Raymond", "Burkholder" );
-
-  ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "ray", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
-
-  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "ray", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
-
-//  CPortfolio::TableRowDef portfolio( PortfolioId(), "ray", "Delta Neutral 01 - long und, long put" );
-//  ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pPortfolio = m_session.Insert<CPortfolio::TableRowDef>( portfolio );
-
 }
 
 struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
@@ -119,10 +93,10 @@ struct OptionsQueryParameters {
     : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( ou::tf::InstrumentType::Option ) {};
 };
 
-bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+bool CDB::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
 
   bool bFound = false;
-  OptionsQueryParameters query( idUnderlying, nYear, nMonth, nDay );
+  OptionsQueryParameters query( pUnderlying->GetInstrumentName(), nYear, nMonth, nDay );
 
   ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery 
     = m_pSession->SQL<OptionsQueryParameters>( 
@@ -136,7 +110,7 @@ bool CDB::LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boo
     if ( NULL != OnNewInstrument ) {
       do {
         m_pSession->Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
-        pInstrument.reset( new ou::tf::CInstrument( instrument ) );
+        pInstrument.reset( new ou::tf::CInstrument( instrument, pUnderlying ) );
         OnNewInstrument( pInstrument );
       }
       while ( m_pSession->Execute( pQuery ) );

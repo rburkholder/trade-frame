@@ -23,7 +23,7 @@ using namespace fastdelegate;
 
 //#include <TFTrading/TableDefs.h>
 #include <TFTrading/InstrumentManager.h>
-#include <TFTrading/PortfolioManager.h>
+//#include <TFTrading/PortfolioManager.h>
 
 class CDB
 {
@@ -37,10 +37,13 @@ public:
 
   bool IsOpen( void ) { return m_bOpened; };
 
-  static ou::tf::keytypes::idPortfolio_t& PortfolioId( void ) { return m_sPortfolioId; };
-
   void LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrumentManager::pInstrument_t& pInstrument );
-  bool LoadOptions( const ou::tf::keytypes::idInstrument_t& idUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
+  bool LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
+
+  typedef FastDelegate0<> OnPopulateDatabaseHandler_t;
+  void SetOnPopulateDatabaseHandler( OnPopulateDatabaseHandler_t function ) {
+    OnPopulateDatabaseHandler = function;
+  }
 
   typedef FastDelegate1<ou::tf::CInstrumentManager::pInstrument_t> OnNewInstrumentHandler_t;
   void SetOnNewInstrumentHandler( OnNewInstrumentHandler_t function ) {
@@ -52,12 +55,9 @@ private:
 
   bool m_bOpened;
 
-  static std::string m_sPortfolioId;
-
   ou::db::CSession::pSession_t m_pSession;
 
-  void Populate( void );
-
+  OnPopulateDatabaseHandler_t OnPopulateDatabaseHandler;
   OnNewInstrumentHandler_t OnNewInstrument;
 };
 

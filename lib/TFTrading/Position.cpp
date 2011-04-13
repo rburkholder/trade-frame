@@ -158,7 +158,9 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
+  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
+  pOrder_t pOrder
+   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -172,7 +174,9 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
+  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
+  pOrder_t pOrder
+   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -187,7 +191,9 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
-  pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
+  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
+  pOrder_t pOrder
+   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }

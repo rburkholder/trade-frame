@@ -29,6 +29,7 @@
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
 #include <TFTrading/InstrumentManager.h>
+#include <TFTrading/AccountManager.h>
 
 #include "Process.h"
 
@@ -220,35 +221,60 @@ CProcess::CProcess(void)
 
   m_contract.expiry = boost::gregorian::to_iso_string( m_dExpiry );
 
-  std::string sDbName( "TradeGldOptions.db" );
+  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &CProcess::HandlePopulateDatabase ) );
 
-  // Prepare Portfolio and associated Positions:  underlying plus covering option  long+put or short+call
-
-  ou::tf::keytypes::idPortfolio_t idPortfolio( "dn01-" + m_sSymbolName + "-" + m_contract.expiry );
-//  if ( m_db.LoadPortfolio( idPortfolio, m_pPortfolio ) ) {
-    // load the underlying and covering positions
-//  }
-//  else {
-    // create and save the portfolio, the underlying and the covering positions
-
-//  }
+  m_idPortfolio = "dn01-" + m_sSymbolName + "-" + m_contract.expiry;  // needs to come before database open
 
   // Implement the calendar roll over at some point
 
   // this is where we select which provider we will be working with on this run
+  // providers need to be registered in order for portfolio/position loading to function properly
+  // key needs to match to account
+  CProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
+  CProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
+  CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+
+  std::string sDbName;
 
   switch ( m_eMode ) {
     case EModeSimulation:
+      sDbName = ":memory:";
       m_pExecutionProvider = m_sim;
       m_pDataProvider = m_sim;
-//      m_pPortfolio.reset( new CPortfolio( CDB::PortfolioId() ) );
       break;
     case EModeLive:
+      sDbName = "TradeGldOptions.db";
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
       m_db.Open( sDbName );
-//      m_db.LoadPortfolio( CDB::PortfolioId(), m_pPortfolio );
       break;
+  }
+
+  m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
+
+  // need to load the positions: underlying plus covering option  long+put or short+call\
+  // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
+  // need to assume orders are closed and fully executed
+
+  // note that position loading have call backs:   instrument, execution, data
+  // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
+  int nPositionsOpened( 0 );
+  try {
+    m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
+    ++nPositionsOpened;
+  }
+  catch (...) {
+  }
+
+  try {
+    m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
+    ++nPositionsOpened;
+  }
+  catch (...) {
+  }
+
+  if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
+    throw std::runtime_error( "wrong number of positions available" );
   }
 
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
@@ -517,7 +543,7 @@ void CProcess::HandleUnderlyingListingDone(  ) {
   OutputDebugString( m_ss.str().c_str() );
 
   m_db.SetOnNewInstrumentHandler( MakeDelegate( this, &CProcess::HandleStrikeFromDb ) );
-  if ( m_db.LoadOptions( m_pUnderlying->GetInstrumentName(), m_dExpiry.year(), m_dExpiry.month(), m_dExpiry.day() ) ) {
+  if ( m_db.LoadOptions( m_pUnderlying, m_dExpiry.year(), m_dExpiry.month(), m_dExpiry.day() ) ) {
     // options have been loaded through HandleStrikeFromDb
     HandleStrikeListingDone();
   }
@@ -1140,6 +1166,25 @@ void CProcess::EmitStats( void ) {
   m_ss << std::endl;
 
   OutputDebugString( m_ss.str().c_str() );
+}
+
+void CProcess::HandlePopulateDatabase( void ) {
+
+  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+
+  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+
+  ou::tf::CAccountManager::pAccount_t pAccountIB
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+
+  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+
+  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "TradeGldOptions" );
+
 }
 
 // need to worry about rogue trades... trades out side of the normal trading range
