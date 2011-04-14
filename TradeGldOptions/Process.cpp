@@ -736,29 +736,34 @@ void CProcess::OpenPosition( void ) {
     else {
 
       if ( ( 0 == m_posUnderlying ) && ( 0 == m_posPut ) ) {
-        // orders for normal delta neutral
-        //m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
-        m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
-        m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-        //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
-        m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
-        //m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
-        m_dblDeltaTotalUnderlying = m_nLongUnderlying;
+        try {
+          // orders for normal delta neutral
+          //m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
+          m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
+          m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+          //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
+          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
+          //m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
+          m_dblDeltaTotalUnderlying = m_nLongUnderlying;
 
-        m_bWaitingForTradeCompletion = true;
+          m_bWaitingForTradeCompletion = true;
 
-        //m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->second.Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
-        m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
-        m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-        m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
-        //m_pPortfolio->AddPosition( "Put", m_posPut );
-        m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
+          //m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->second.Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
+          m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
+          m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+          m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
+          //m_pPortfolio->AddPosition( "Put", m_posPut );
+          m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
-        m_ss.str( "" );
-        m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
-                             << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
-                             << std::endl;
-        OutputDebugString( m_ss.str().c_str() );
+          m_ss.str( "" );
+          m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
+                               << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
+                               << std::endl;
+          OutputDebugString( m_ss.str().c_str() );
+        }
+        catch (...) {
+          throw std::runtime_error( "error" );
+        }
       }
       else {
         if ( ( 0 != m_posUnderlying ) && ( 0 != m_posPut ) ) {

@@ -81,10 +81,16 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
   // obtain an order id, then insert into maps, may need to change how this happens later in order to get rid of db4
   idOrder_t id = m_orderIds.GetNextId();
   pOrder->SetOrderId( id );
-  iterOrders_t iter = LocateOrder( id );
-  if ( m_mapOrders.end() != iter ) {
-    throw std::runtime_error( "COrderManager::ConstructOrder: order id already exists" );
+  // need to create an exception free way to check that order does not exist, in the meantime:
+  try {
+    iterOrders_t iter = LocateOrder( id );
+    if ( m_mapOrders.end() != iter ) {
+      throw std::runtime_error( "COrderManager::ConstructOrder: order id already exists" );
+    }
   }
+  catch (...) {
+  }
+  
   pairOrderState_t pair( id, structOrderState( pOrder ) );
   m_mapOrders.insert( pair );
 

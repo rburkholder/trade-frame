@@ -247,6 +247,7 @@ void CPortfolioManager::RegisterTablesForCreation( void ) {
 void CPortfolioManager::RegisterRowDefinitions( void ) {
   m_pDbSession->MapRowDefToTableName<CPortfolio::TableRowDef>( tablenames::sPortfolio );
   m_pDbSession->MapRowDefToTableName<CPosition::TableRowDef>( tablenames::sPosition );
+  m_pDbSession->MapRowDefToTableName<CPosition::TableRowDefNoKey>( tablenames::sPosition );
 }
 
 void CPortfolioManager::PopulateTables( void ) {

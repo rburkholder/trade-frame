@@ -100,17 +100,18 @@ protected:
   typedef std::pair<idExecution_t, pExecution_t> pairExecution_t;
   typedef std::map<idExecution_t, pExecution_t> mapExecutions_t;
   typedef mapExecutions_t::iterator iterExecutions_t;
+  typedef boost::shared_ptr<mapExecutions_t> pmapExecutions_t;
 
   struct structOrderState {
     pOrder_t pOrder;
     CProviderInterfaceBase* pProvider;
-    mapExecutions_t* pmapExecutions;
+    pmapExecutions_t pmapExecutions;
     structOrderState( pOrder_t& pOrder_ )
       : pOrder( pOrder_ ), pProvider( 0 ), pmapExecutions( new mapExecutions_t ) {};
     structOrderState( pOrder_t& pOrder_, CProviderInterfaceBase* pProvider_ )
       : pOrder( pOrder_ ), pProvider( pProvider_ ), pmapExecutions( new mapExecutions_t ) {};
     ~structOrderState( void ) {
-      delete pmapExecutions;  // check that executions have been committed to db?
+//      delete pmapExecutions;  // check that executions have been committed to db?
       // check that orders have been committed to db?
     }
   };
