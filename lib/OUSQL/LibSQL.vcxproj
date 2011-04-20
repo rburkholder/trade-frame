@@ -76,7 +76,6 @@
   <ItemGroup>
     <ClInclude Include="Actions.h" />
     <ClInclude Include="Database.h" />
-    <ClInclude Include="Session.h" />
     <ClInclude Include="SessionImpl.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="targetver.h" />

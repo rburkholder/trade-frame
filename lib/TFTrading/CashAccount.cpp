@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,10 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "Session.h"
+#include "StdAfx.h"
 
-namespace ou {
-namespace db {
+#include "CashAccount.h"
 
-} // db
-} // ou
+
+CCashAccount::CCashAccount(void) {
+}
+
+
+CCashAccount::~CCashAccount(void) {
+}
