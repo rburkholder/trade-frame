@@ -46,6 +46,7 @@ private:
   std::vector<OnMessageHandler> rToBeAdded;
   bool m_bIterating;
   typename std::vector<OnMessageHandler>::size_type m_size;
+  typedef typename std::vector<OnMessageHandler>::iterator iterator;
 };
 
 template<class RO> Delegate<RO>::Delegate(void) 
@@ -63,7 +64,7 @@ template<class RO> Delegate<RO>::~Delegate(void) {
 
 template<class RO> void Delegate<RO>::operator()( RO ro ) {
 
-  std::vector<OnMessageHandler>::iterator iter;
+  iterator iter;
 
   m_bIterating = true;
   iter = rOnFD.begin();
@@ -108,7 +109,7 @@ template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {
     rToBeRemoved.push_back( function );
   }
   else {
-    std::vector<OnMessageHandler>::iterator rOnFD_Iter = rOnFD.begin();
+    iterator rOnFD_Iter = rOnFD.begin();
 
     while ( rOnFD.end() != rOnFD_Iter ) {
       if ( function == *rOnFD_Iter ) {
