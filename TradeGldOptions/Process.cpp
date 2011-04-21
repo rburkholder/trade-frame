@@ -736,6 +736,10 @@ void CProcess::OpenPosition( void ) {
     else {
 
       if ( ( 0 == m_posUnderlying ) && ( 0 == m_posPut ) ) {
+
+        // need more finesse:  create positions if necessary, 
+        // then check positions, if both are 0, then create orders
+
         try {
           // orders for normal delta neutral
           //m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );

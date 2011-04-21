@@ -19,16 +19,16 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace tablenames { // tablenames
 
-std::string sAccountAdvisor( "accountadvisors" );
-std::string sAccountOwner( "accountowners" );
-std::string sAccount( "accounts" );
-std::string sPortfolio( "portfolios" );
-std::string sPosition( "positions" );
-std::string sOrder( "orders" );
-std::string sExecution( "executions" );
-std::string sExchange( "exchanges" );
-std::string sInstrument( "instruments" );
-std::string sAltInstrumentName( "altinstrumentnames" );
+const std::string sAccountAdvisor( "accountadvisors" );
+const std::string sAccountOwner( "accountowners" );
+const std::string sAccount( "accounts" );
+const std::string sPortfolio( "portfolios" );
+const std::string sPosition( "positions" );
+const std::string sOrder( "orders" );
+const std::string sExecution( "executions" );
+const std::string sExchange( "exchanges" );
+const std::string sInstrument( "instruments" );
+const std::string sAltInstrumentName( "altinstrumentnames" );
 
 } // namespace tablenames
 } // namespace tf

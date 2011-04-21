@@ -43,16 +43,16 @@ typedef boost::int64_t idExecution_t; // auto increment
 
 namespace tablenames { // tablenames
 
-extern std::string sAccountAdvisor;
-extern std::string sAccountOwner;
-extern std::string sAccount;
-extern std::string sPortfolio;
-extern std::string sPosition;
-extern std::string sOrder;
-extern std::string sExecution;
-extern std::string sExchange;
-extern std::string sInstrument;
-extern std::string sAltInstrumentName;
+extern const std::string sAccountAdvisor;
+extern const std::string sAccountOwner;
+extern const std::string sAccount;
+extern const std::string sPortfolio;
+extern const std::string sPosition;
+extern const std::string sOrder;
+extern const std::string sExecution;
+extern const std::string sExchange;
+extern const std::string sInstrument;
+extern const std::string sAltInstrumentName;
 
 } // namespace tablenames
 
