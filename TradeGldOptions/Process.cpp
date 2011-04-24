@@ -193,8 +193,10 @@ CProcess::CProcess(void)
   m_bWatchingOptions( false ), m_bTrading( false ),
   m_dblBaseDelta( 2000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
-  m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
-  m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
+//  m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
+//  m_dtMarketOpeningOrder( time_duration( 10, 31, 0 ) ),
+  m_dtMarketOpen( time_duration( 0, 30, 0 ) ),
+  m_dtMarketOpeningOrder( time_duration( 0, 31, 0 ) ),
 //  m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 23, 56, 0 ) ),
 //  m_dtMarketClose( time_duration( 17, 0, 0 ) ),
@@ -292,9 +294,21 @@ CProcess::CProcess(void)
 }
 
 CProcess::~CProcess(void) {
+
   m_posUnderlying.reset();
   m_posPut.reset();
+
   m_pPortfolio.reset();
+
+  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
+
+  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnDataConnected ) );
+  m_pDataProvider->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnDataDisconnected ) );
+
+  m_iqfeed->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Connected ) );
+  m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
+
   m_db.Close();
 }
 
@@ -749,21 +763,16 @@ void CProcess::OpenPosition( void ) {
 
         try {
           // orders for normal delta neutral
-          //m_posUnderlying.reset( new CPosition( m_pUnderlying, m_pExecutionProvider, m_pDataProvider, "Underlying" ) );
           m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
           m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-          //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying / 100 ); // <<=== temporary fix for this simulation set
           m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
-          //m_pPortfolio->AddPosition( "Underlying", m_posUnderlying );
           m_dblDeltaTotalUnderlying = m_nLongUnderlying;
 
           m_bWaitingForTradeCompletion = true;
 
-          //m_posPut.reset( new CPosition( m_iterOILatestGammaSelectPut->second.Put()->GetInstrument(), m_pExecutionProvider, m_pDataProvider, "Put" ) );
           m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
           m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
           m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
-          //m_pPortfolio->AddPosition( "Put", m_posPut );
           m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
           m_ss.str( "" );

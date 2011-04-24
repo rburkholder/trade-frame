@@ -101,7 +101,7 @@ namespace PortfolioManagerQueries {
   struct UpdatePositionCommission {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "commissionspaid", dblCommissionPaid );
+      ou::db::Field( a, "commission", dblCommissionPaid );
       ou::db::Field( a, "positionid", idPosition );
     }
     const ou::tf::keytypes::idPosition_t idPosition;
@@ -114,9 +114,9 @@ namespace PortfolioManagerQueries {
 void CPortfolioManager::HandlePositionOnCommission( const CPosition* pPosition ) {
   if ( 0 != m_pDbSession ) {
     const CPosition::TableRowDef& row( pPosition->GetRow() );
-    PortfolioManagerQueries::UpdatePositionCommission update( row.dblCommissionPaid, row.idPosition );
+    PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
-      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commissionspaid=?", update ).Where( "positionid=?" );
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commission=?", update ).Where( "positionid=?" );
   }
 }  // the Where could be appended with boost::fusion type structure for the fields, and bind?
   // need to cache the queries
@@ -142,7 +142,7 @@ void CPortfolioManager::HandlePortfolioOnExecution( const CPortfolio* pPortfolio
     const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
-      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "porfolioid=?" );
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "portfolioid=?" );
   }
 }
 
@@ -152,7 +152,7 @@ namespace PortfolioManagerQueries {
   struct UpdatePortfolioCommission {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "commissionspaid", dblCommissionsPaid );
+      ou::db::Field( a, "commission", dblCommissionsPaid );
       ou::db::Field( a, "portfolioid", idPortfolio );
     }
     const ou::tf::keytypes::idPortfolio_t idPortfolio;
@@ -167,7 +167,7 @@ void CPortfolioManager::HandlePortfolioOnCommission( const CPortfolio* pPortfoli
     const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
-      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commissionspaid=?", update ).Where( "portfolioid=?" );
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commission=?", update ).Where( "portfolioid=?" );
   }
 }
 
@@ -309,10 +309,11 @@ CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition(
     const_cast<CPosition::TableRowDefNoKey&>( dynamic_cast<const CPosition::TableRowDefNoKey&>( pPosition->GetRow() ) ) );
   idPosition_t idPosition( m_pDbSession->GetLastRowId() );
   pPosition->Set( idPosition );
-  iterPortfolio->second.mapPosition.insert( mapPosition_pair_t( sName, pPosition ) );
 
   pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
   pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
+
+  iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
 
   return pPosition;
 }

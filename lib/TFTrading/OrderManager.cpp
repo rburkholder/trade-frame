@@ -263,14 +263,15 @@ void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission )
   try {
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
-    pOrder->SetCommission( dblCommission );
     if ( 0 != m_pDbSession ) {
       OrderManagerQueries::UpdateCommission 
-        commission( pOrder->GetOrderId(), pOrder->GetRow().dblCommission );
+        commission( pOrder->GetOrderId(), dblCommission );
       ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
         = m_pDbSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
           "update orders set commission=?", commission ).Where( "orderid=?" );
     }
+    pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
+    // as a result, may need to set delegates here so database is updated before order calls delegates.
   }
   catch (...) {
     std::cout << "Problems in COrderManager::ReportCommission" << std::endl;

@@ -50,7 +50,7 @@ public:
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
-      ou::db::Field( a, "commissionspaid", dblCommissionsPaid );
+      ou::db::Field( a, "commission", dblCommissionsPaid );
     }
 
     idPortfolio_t idPortfolio;

@@ -140,7 +140,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     if ( 0 == m_row.nQuantityRemaining ) {
       m_row.eOrderStatus = OrderStatus::Filled;
       m_row.dtOrderClosed = ou::CTimeSource::Instance().Internal();
-      OnCommission( *this );
+//      OnCommission( *this ); // commission is reported separately
       OnOrderFilled( *this );
     }
     else {
@@ -186,7 +186,7 @@ void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
 
 void COrder::SetCommission( double dblCommission ) { 
   m_row.dblCommission = dblCommission; 
-  // OnCommission( *this );  // run on order completion
+   OnCommission( *this );  // run on order completion
 }
 
 void COrder::SetOrderId( idOrder_t id ) {
