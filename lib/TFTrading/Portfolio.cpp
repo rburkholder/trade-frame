@@ -131,21 +131,28 @@ void CPortfolio::ReCalc( void ) {
   m_plCurrent.Sum();
   if ( m_plCurrent > m_plMax ) m_plMax = m_plCurrent;
   if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
+
+  m_row.dblRealizedPL = m_plCurrent.dblRealized;
+  m_row.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
 }
 
 void CPortfolio::HandleQuote( const CPosition* pPosition ) {
   ReCalc();
+  OnQuote( this );
 }
 
 void CPortfolio::HandleTrade( const CPosition* pPosition ) {
+  OnTrade( this );
 }
 
-void CPortfolio::HandleExecution( CPosition::execution_delegate_t ) {
+void CPortfolio::HandleExecution( execution_delegate_t ) {
   ReCalc();
+  OnExecution( this );
 }
 
 void CPortfolio::HandleCommission( const CPosition* pPosition ) {
   ReCalc();
+  OnCommission( this );
 }
 
 void CPortfolio::EmitStats( std::stringstream& ss ) {

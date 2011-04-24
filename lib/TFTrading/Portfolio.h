@@ -17,6 +17,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <OUCommon/Delegate.h>
+
 #include "KeyTypes.h"
 #include "Position.h"
 
@@ -35,6 +37,8 @@ public:
   typedef CPosition::pPosition_t pPosition_t;
 
   typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
+
+  typedef CPosition::execution_delegate_t execution_delegate_t;
 
   typedef keytypes::idPortfolio_t idPortfolio_t;
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
@@ -102,6 +106,11 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
+  ou::Delegate<const CPortfolio*> OnQuote;
+  ou::Delegate<const CPortfolio*> OnTrade;  // nothing useful currently
+  ou::Delegate<const CPortfolio*> OnExecution;
+  ou::Delegate<const CPortfolio*> OnCommission;
+
 protected:
   
 private:
@@ -136,7 +145,7 @@ private:
 
   void HandleQuote( const CPosition* );
   void HandleTrade( const CPosition* );
-  void HandleExecution( CPosition::execution_delegate_t );
+  void HandleExecution( execution_delegate_t );
   void HandleCommission( const CPosition* );
 
 };

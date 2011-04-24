@@ -167,7 +167,6 @@ void Action_Compose_Insert::ComposeStatement( std::string& sStatement ) {
       sHolders += ", ";
     }
     sFields += iter->sFieldName;
-//    sHolders += "$" + boost::lexical_cast<std::string>( ix );
     sHolders += "?";
     ++ix;
   }
@@ -196,7 +195,6 @@ void Action_Compose_Update::ComposeStatement( std::string& sStatement ) {
       sStatement += ", ";
     }
     sStatement += iter->sFieldName;
-//    sStatement += " = $" + boost::lexical_cast<std::string>( ix );
     sStatement += " = ?";
     ++ix;
   }

@@ -81,7 +81,7 @@ public:
       ou::db::Field( a, "marketvalue", dblMarketValue );
       ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
-      ou::db::Field( a, "commissionpaid", dblCommissionPaid );
+      ou::db::Field( a, "commissionspaid", dblCommissionPaid );
     }
 
     idPortfolio_t idPortfolio;

@@ -355,6 +355,10 @@ public:
 
     query_t* pQuery = new query_t( *this, f );
 
+    Action_Compose action;
+    f.Fields( action );
+    if ( 0 < action.FieldCount() ) pQuery->SetHasFields();
+
     pQuery->UpdateQueryText() = sSqlQuery;
 
     pQuery->SetExecuteOneTime();

@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <OUCommon/TimeSource.h>
+
 #include "OrderManager.h"
 
 namespace ou { // One Unified
@@ -283,19 +285,23 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "quantityremaining", nQuantityRemaining );
       ou::db::Field( a, "quantityfilled", nQuantityFilled );
       ou::db::Field( a, "averagefillprice", dblAverageFillPrice );
+      ou::db::Field( a, "datetimeclosed", dtClosed );
       ou::db::Field( a, "orderid", idOrder );
     }
     OrderStatus::enumOrderStatus eOrderStatus;
     boost::uint32_t nQuantityRemaining;
     boost::uint32_t nQuantityFilled;
+    ptime dtClosed;
     double dblAverageFillPrice;
     COrder::idOrder_t idOrder;
     UpdateOrder( COrder::idOrder_t idOrder_, OrderStatus::enumOrderStatus eOrderStatus_, 
-      boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, double dblAverageFillPrice_ )
+      boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, double dblAverageFillPrice_, ptime dtClosed_ = boost::date_time::not_a_date_time )
       : idOrder( idOrder_ ), eOrderStatus( eOrderStatus_ ), 
       nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ), 
-      dblAverageFillPrice( dblAverageFillPrice_ ) {};
+      dblAverageFillPrice( dblAverageFillPrice_ ), dtClosed( dtClosed_ ) {};
   };
+
+  std::string sUpdateOrderQuery( "update orders set orderstatus=?, quantityremaining=?, quantityfilled=?, averagefillprice=?, datetimeclosed=?" );
 }
 
 void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec) { 
@@ -305,11 +311,20 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
     OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
     if ( 0 != m_pDbSession ) {
       const COrder::TableRowDef& row( pOrder->GetRow() );
-      OrderManagerQueries::UpdateOrder 
-        order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
-      ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-        = m_pDbSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-        "update orders set orderstatus=?, quantityremaining=?, quantityfilled=?, averagefillprice=?", order ).Where( "orderid=?" );
+      if ( OrderStatus::Filled == status ) {
+        OrderManagerQueries::UpdateOrder 
+          order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
+        ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+          = m_pDbSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+          OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+      }
+      else {
+        OrderManagerQueries::UpdateOrder 
+          order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
+        ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+          = m_pDbSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+          OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+      }
       // add execution record
       pExecution_t pExecution( new CExecution( exec ) );
       pExecution->SetOrderId( nOrderId );
@@ -374,6 +389,7 @@ void COrderManager::RegisterTablesForCreation( void ) {
 void COrderManager::RegisterRowDefinitions( void ) {
   m_pDbSession->MapRowDefToTableName<COrder::TableRowDef>( tablenames::sOrder );
   m_pDbSession->MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
+  m_pDbSession->MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
 }
 
 void COrderManager::PopulateTables( void ) {

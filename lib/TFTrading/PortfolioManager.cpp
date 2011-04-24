@@ -39,9 +39,139 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio(
       ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pQuery
         = m_pDbSession->Insert<CPortfolio::TableRowDef>( const_cast<CPortfolio::TableRowDef&>( pPortfolio->GetRow() ) );
     }
+    pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
   }
   return pPortfolio;
 }
+
+//////
+
+namespace PortfolioManagerQueries {
+  struct UpdatePositionData {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "ordersidepending", eOrderSidePending );
+      ou::db::Field( a, "quantitypending", nPositionPending );
+      ou::db::Field( a, "ordersideactive", eOrderSideActive );
+      ou::db::Field( a, "quantityactive", nPositionActive );
+      ou::db::Field( a, "constructedvalue", dblConstructedValue );
+      ou::db::Field( a, "marketvalue", dblMarketValue );
+      ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
+      ou::db::Field( a, "realizedpl", dblRealizedPL );
+      ou::db::Field( a, "positionid", idPosition );
+    }
+    const ou::tf::keytypes::idPosition_t idPosition;
+    OrderSide::enumOrderSide eOrderSidePending;  
+    boost::uint32_t nPositionPending;
+    OrderSide::enumOrderSide eOrderSideActive;
+    boost::uint32_t nPositionActive;
+    double dblConstructedValue;
+    double dblMarketValue; 
+    double dblUnRealizedPL;
+    double dblRealizedPL; 
+    UpdatePositionData( 
+      const ou::tf::keytypes::idPosition_t idPosition_, 
+      OrderSide::enumOrderSide eOrderSidePending_, boost::uint32_t nPositionPending_, 
+      OrderSide::enumOrderSide eOrderSideActive_,  boost::uint32_t nPositionActive_, 
+      double dblConstructedValue_, double dblMarketValue_,
+      double dblUnRealizedPL_, double dblRealizedPL_ ) 
+      : idPosition( idPosition_ ), 
+        eOrderSidePending( eOrderSidePending_ ), nPositionPending( nPositionPending_ ),
+        eOrderSideActive( eOrderSideActive_ ), nPositionActive( nPositionActive_ ), 
+        dblConstructedValue( dblConstructedValue_ ), dblMarketValue( dblMarketValue_ ),
+        dblUnRealizedPL( dblUnRealizedPL_ ), dblRealizedPL( dblRealizedPL_ ) {};
+  };
+}
+
+void CPortfolioManager::HandlePositionOnExecution( execution_delegate_t exec ) {
+  if ( 0 != m_pDbSession ) {
+    const CPosition::TableRowDef& row( exec.first.GetRow() );
+    PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
+      row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblMarketValue, row.dblUnRealizedPL, row.dblRealizedPL );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionData>::pQueryFields_t pQuery
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePositionData>( 
+        "update positions set ordersidepending=?, quantitypending=?, ordersideactive=?, quantityactive=?, constructedvalue=?, marketvalue=?, unrealizedpl=?, realizedpl=?", update ).Where( "positionid=?" );
+  }
+}
+
+//////
+
+namespace PortfolioManagerQueries {
+  struct UpdatePositionCommission {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "commissionspaid", dblCommissionPaid );
+      ou::db::Field( a, "positionid", idPosition );
+    }
+    const ou::tf::keytypes::idPosition_t idPosition;
+    double dblCommissionPaid;
+    UpdatePositionCommission( const ou::tf::keytypes::idPosition_t idPosition_, double dblCommissionPaid_ )
+      : idPosition( idPosition_ ), dblCommissionPaid( dblCommissionPaid_ ) {};
+  };
+}
+
+void CPortfolioManager::HandlePositionOnCommission( const CPosition* pPosition ) {
+  if ( 0 != m_pDbSession ) {
+    const CPosition::TableRowDef& row( pPosition->GetRow() );
+    PortfolioManagerQueries::UpdatePositionCommission update( row.dblCommissionPaid, row.idPosition );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commissionspaid=?", update ).Where( "positionid=?" );
+  }
+}  // the Where could be appended with boost::fusion type structure for the fields, and bind?
+  // need to cache the queries
+
+/////
+
+namespace PortfolioManagerQueries {
+  struct UpdatePortfolioRealizedPL {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "realizedpl", dblRealizedPL );
+      ou::db::Field( a, "portfolioid", idPortfolio );
+    }
+    const ou::tf::keytypes::idPortfolio_t idPortfolio;
+    double dblRealizedPL;
+    UpdatePortfolioRealizedPL( const ou::tf::keytypes::idPortfolio_t idPortfolio_, double dblRealizedPL_ )
+      : idPortfolio( idPortfolio_ ), dblRealizedPL( dblRealizedPL_ ) {};
+  };
+}
+
+void CPortfolioManager::HandlePortfolioOnExecution( const CPortfolio* pPortfolio ) {
+  if ( 0 != m_pDbSession ) {
+    const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
+    PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "porfolioid=?" );
+  }
+}
+
+////////
+
+namespace PortfolioManagerQueries {
+  struct UpdatePortfolioCommission {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "commissionspaid", dblCommissionsPaid );
+      ou::db::Field( a, "portfolioid", idPortfolio );
+    }
+    const ou::tf::keytypes::idPortfolio_t idPortfolio;
+    double dblCommissionsPaid;
+    UpdatePortfolioCommission( const ou::tf::keytypes::idPortfolio_t idPortfolio_, double dblCommissionsPaid_ )
+      : idPortfolio( idPortfolio_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
+  };
+}
+
+void CPortfolioManager::HandlePortfolioOnCommission( const CPortfolio* pPortfolio ) {
+  if ( 0 != m_pDbSession ) {
+    const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
+    PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
+    ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
+      = m_pDbSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commissionspaid=?", update ).Where( "portfolioid=?" );
+  }
+}
+
+///////
 
 namespace PortfolioManagerQueries {
   struct PortfolioKey {
@@ -78,10 +208,13 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
       if ( false == response.second ) {
         throw std::runtime_error( "GetPortfolio:  couldn't insert portfolio into map" );
       }
+      pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
+      pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
       // load up related positions as well
       ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
         = m_pDbSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key ).Where( "portfolioid = ?" ).NoExecute();
+      m_pDbSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
       while ( m_pDbSession->Execute( pPositionQuery ) ) {
         CPosition::TableRowDef rowPosition;
         m_pDbSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
@@ -91,6 +224,8 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
         }
         OnPositionNeedsDetails( pPosition );
         response.first->second.mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
+        pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
+        pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
       }
 
     }
@@ -175,6 +310,9 @@ CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition(
   idPosition_t idPosition( m_pDbSession->GetLastRowId() );
   pPosition->Set( idPosition );
   iterPortfolio->second.mapPosition.insert( mapPosition_pair_t( sName, pPosition ) );
+
+  pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
+  pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
 
   return pPosition;
 }

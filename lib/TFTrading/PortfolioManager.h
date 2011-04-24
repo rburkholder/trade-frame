@@ -44,6 +44,9 @@ public:
   typedef CInstrument::pInstrument_cref pInstrument_cref;
   typedef CPosition::pProvider_t pProvider_t;
 
+  typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
+  typedef const execution_pair_t& execution_delegate_t;
+
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
 
@@ -92,6 +95,12 @@ private:
   mapPortfolio_t m_mapPortfolio;
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
+
+  void HandlePositionOnExecution( execution_delegate_t );
+  void HandlePositionOnCommission( const CPosition* );
+
+  void HandlePortfolioOnExecution( const CPortfolio* );
+  void HandlePortfolioOnCommission( const CPortfolio* );
 
 };
 
