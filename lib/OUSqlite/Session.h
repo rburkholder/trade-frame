@@ -20,7 +20,8 @@ namespace db {
 
 class CSession: public CSessionImpl<ISqlite3>, public SessionBase<CSessionImpl<ISqlite3>, CSession> {
 public:
-  CSession( void ): CSessionImpl<ISqlite3>() {};
+  typedef boost::shared_ptr<CSession> pSession_t;
+  CSession( void ) {};
   ~CSession( void ) {};
 protected:
 private:
