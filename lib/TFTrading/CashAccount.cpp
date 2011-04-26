@@ -19,6 +19,5 @@
 CCashAccount::CCashAccount(void) {
 }
 
-
 CCashAccount::~CCashAccount(void) {
 }

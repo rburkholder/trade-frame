@@ -99,6 +99,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Phi", "Phi\Phi.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFOptions", "lib\TFOptions\TFOptions.vcxproj", "{6AED79D5-B166-4967-9EAE-ACC0B8524F2F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxtest", "wxtest\wxtest.vcxproj", "{DB991965-008E-48DA-B647-0BFDCBC87EB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -205,6 +207,10 @@ Global
 		{6AED79D5-B166-4967-9EAE-ACC0B8524F2F}.Debug|Win32.Build.0 = Debug|Win32
 		{6AED79D5-B166-4967-9EAE-ACC0B8524F2F}.Release|Win32.ActiveCfg = Release|Win32
 		{6AED79D5-B166-4967-9EAE-ACC0B8524F2F}.Release|Win32.Build.0 = Release|Win32
+		{DB991965-008E-48DA-B647-0BFDCBC87EB2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DB991965-008E-48DA-B647-0BFDCBC87EB2}.Debug|Win32.Build.0 = Debug|Win32
+		{DB991965-008E-48DA-B647-0BFDCBC87EB2}.Release|Win32.ActiveCfg = Release|Win32
+		{DB991965-008E-48DA-B647-0BFDCBC87EB2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

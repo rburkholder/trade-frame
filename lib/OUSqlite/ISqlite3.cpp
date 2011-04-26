@@ -30,7 +30,7 @@ ISqlite3::ISqlite3(void)
 ISqlite3::~ISqlite3(void) {
 }
 
-void ISqlite3::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
+void ISqlite3::SessionOpen( const std::string& sDbFileName, enumOpenFlags flags ) {
 
   int sqlite3_flags = SQLITE_OPEN_READWRITE;
   sqlite3_flags |= ( 0 < ( flags & EOpenFlagsAutoCreate ) ) ? SQLITE_OPEN_CREATE : 0;
@@ -41,19 +41,13 @@ void ISqlite3::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
     throw std::runtime_error( "Db open error" );
   }
 
-  m_sDbFileName = sDbFileName;
-  m_bDbOpened = true;
-
 }
 
-void ISqlite3::Close( void ) {
-  if ( m_bDbOpened ) {
-    int rtn = sqlite3_close( m_db );
-    m_db = 0;
-    m_bDbOpened = false;
-    if (  SQLITE_OK != rtn ) {
-      assert( false );
-    }
+void ISqlite3::SessionClose( void ) {
+  int rtn = sqlite3_close( m_db );
+  m_db = 0;
+  if (  SQLITE_OK != rtn ) {
+    assert( false );
   }
 }
 

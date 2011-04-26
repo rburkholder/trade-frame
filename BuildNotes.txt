@@ -1,3 +1,23 @@
+2011/04/24
+C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.1\lib\vc_lib\mswud\wx/setup.h 
+needs to be copied to
+C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.1\include\wx
+
+wxWidgets libraries:
+$(OutDir)wxmsw29ud_adv.lib
+$(OutDir)wxmsw29ud_core.lib
+$(OutDir)wxbase29ud.lib
+$(OutDir)wxtiffd.lib
+$(OutDir)wxjpegd.lib
+$(OutDir)wxpngd.lib
+$(OutDir)wxzlibd.lib
+$(OutDir)wxexpatd.lib
+winmm.lib
+comctl32.lib
+rpcrt4.lib
+wsock32.lib
+wininet.lib
+
 2011/01/03
 db 4.8.30
 http://www.oracle.com/technetwork/database/berkeleydb/downloads/index-082944.html

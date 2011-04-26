@@ -13,7 +13,7 @@
 
 #pragma once
 
-class CCashAccount {
+class CCashAccount { 
 public:
   CCashAccount(void);
   ~CCashAccount(void);

@@ -27,6 +27,11 @@
 // includes are a bit messy, a compendium of ousql/session, ousql/sessionimpl, and this session file
 // maybe using Spirit::Phoenix tuplies will get me out of this mess?
 
+// 2011/04/25
+// need to add 'constraint unique ... ' clause during table creation (needs revaming of constraint symbology)
+// need to add ''create index ... ' clause during table creation
+// need to add transaction/commit/rollback capabilities
+
 
 #include <string>
 #include <map>
@@ -47,6 +52,8 @@ namespace db {
 // dummy place holder for when no fields to bind
 // will need to figure out a better way to handle this
 struct NoBind {
+  template<class A>
+  void Fields( A& a ) { };
 };
 
 // CQuery contains:
@@ -243,8 +250,8 @@ public:
   CSessionImpl( void );
   virtual ~CSessionImpl( void );
 
-  void Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
-  void Close( void );
+  void ImplOpen( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
+  void ImplClose( void );
 
   void CreateTables( void );
 
@@ -453,32 +460,32 @@ CSessionImpl<IDatabase>::CSessionImpl( void ): m_bOpened( false ) {
 // Destructor
 template<class IDatabase>
 CSessionImpl<IDatabase>::~CSessionImpl(void) {
-  Close();
+  ImplClose();
 }
 
 // Open
 template<class IDatabase>
-void CSessionImpl<IDatabase>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
+void CSessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpenFlags flags ) {
   if ( m_bOpened ) {
     std::string sErr( "Session already opened" );
     throw std::runtime_error( sErr );
   }
   else {
-    m_db.Open( sDbFileName, flags );
+    m_db.SessionOpen( sDbFileName, flags );
     m_bOpened = true;
   }
 }
 
 // Close
 template<class IDatabase>
-void CSessionImpl<IDatabase>::Close( void ) {
+void CSessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
     m_mapTableDefs.clear();
     for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
       m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
     }
     m_vQuery.clear();
-    m_db.Close();
+    m_db.SessionClose();
     m_bOpened = false;
   }
 }

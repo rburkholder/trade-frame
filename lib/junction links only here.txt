@@ -1,8 +1,13 @@
 
 ..\..\junction boost C:\Data\Projects\libraries\boost_1_45_0\boost
 
+
 ..\..\junction hdf5 C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\debug\include
+
 
 ..\..\junction db4 "C:\Program Files (x86)\Oracle\Berkeley DB 4.8.30\include"
 
+
 ..\..\junction wtl C:\Data\Projects\VSC++\wtl\trunk\wtl\include
+..\..\junction wx C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.1\include\wx
+..\..\junction wxvc C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.1\include\msvc

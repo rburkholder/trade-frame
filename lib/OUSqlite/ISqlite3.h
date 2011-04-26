@@ -15,9 +15,10 @@
 
 #include <string>
 
-#include <OUSQL/Database.h>
+#include <OUSQL/Database.h>  // for the enumerations
 
 #define SQLITE_DEFAULT_FOREIGN_KEYS 1
+#define SQLITE_DEFAULT_FILE_FORMAT 4
 
 #include "sqlite3.h"
 #include "StatementState.h"
@@ -26,7 +27,9 @@
 namespace ou {
 namespace db {
 
-class ISqlite3: public Database {
+// needs to be called as db: public ISqlite3, SessionBase<db, ISqlite3>
+
+class ISqlite3 {
 public:
 
   typedef sqlite::structStatementState structStatementState;
@@ -42,8 +45,8 @@ public:
   ISqlite3(void);
   ~ISqlite3(void);
 
-  void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
-  void Close( void );
+  void SessionOpen( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
+  void SessionClose( void );
 
   void PrepareStatement( structStatementState& statement, std::string& sStatement );
   bool ExecuteStatement( structStatementState& statement );  // true when row available

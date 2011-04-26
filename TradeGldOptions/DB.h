@@ -17,6 +17,7 @@ using namespace fastdelegate;
 
 //#include <OUSQL/Session.h>
 //#include <OUSqlite/ISqlite3.h>
+#include <OUSQL/Database.h>
 #include <TFTrading/Database.h>
 
 #include <TFTrading/KeyTypes.h>
@@ -25,7 +26,7 @@ using namespace fastdelegate;
 #include <TFTrading/InstrumentManager.h>
 //#include <TFTrading/PortfolioManager.h>
 
-class CDB
+class CDB: public ou::db::DatabaseBase<ou::db::CSession,CDB>
 {
 public:
 

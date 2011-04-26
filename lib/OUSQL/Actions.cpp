@@ -134,7 +134,7 @@ void Action_Assemble_TableDef::ComposeCreateStatement( std::string& sStatement )
       sStatement += ", ";
     }
     ++ix;
-    sStatement += "CONSTRAINT fk_"
+    sStatement += "CONSTRAINT FK_"
       + m_sTableName + "_" + iter->sLocalField
       + " FOREIGN KEY(" + iter->sLocalField + ") REFERENCES "
       + iter->sRemoteTable + "(" + iter->sRemoteField + ") ON DELETE RESTRICT ON UPDATE CASCADE";

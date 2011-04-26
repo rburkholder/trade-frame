@@ -16,7 +16,9 @@
 #pragma once
 
 #include <string>
-#include <list>
+
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
 
 namespace ou {
 namespace db {
@@ -26,23 +28,81 @@ enum enumOpenFlags {
   EOpenFlagsAutoCreate = 0x1 
 };
 
-class Database {
+template<class S, class T> // S Session variable (ou::db::CSession), T class for CRTP operations
+class SessionBase {
 public:
 
-  Database(void);
-  virtual ~Database(void);
+  typedef typename S::pSession_t pSession_t;
 
-  virtual void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero ) {};
-  virtual void Close( void ) {};
+  SessionBase(void);
+  virtual ~SessionBase(void);
+
+  void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
+  void Close( void );
 
 protected:
 
-  bool m_bDbOpened;
+  bool m_bOpened;
 
   std::string m_sDbFileName;
 
+  pSession_t m_pSession;
+
+  void Initialize( void ) {};
+  void InitializeManagersDb( pSession_t& pSession ) {};
+  void RegisterRowDefinitions( void ) {};
+  void RegisterTablesForCreation( void ) {};
+  void PopulateTables( void ) {};
+  void Denitialize( void ) {};
+
 private:
 };
+
+template<class S, class T>
+SessionBase<S,T>::SessionBase(void) 
+  : m_bOpened( false )
+{
+  static_cast<T*>( this )->Initialize();
+}
+
+template<class S, class T>
+SessionBase<S,T>::~SessionBase(void) {
+  Close();
+  static_cast<T*>( this )->Denitialize();
+}
+
+template<class S, class T>
+void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero ) {
+
+  if ( !m_bOpened ) {
+    m_pSession.reset( new S );
+    if ( boost::filesystem::exists( sDbFileName ) ) {
+      // open already created and loaded database
+      dynamic_cast<S*>( this )->ImplOpen( sDbFileName, flags );
+      static_cast<T*>( this )->InitializeManagersDb( m_pSession );
+      static_cast<T*>( this )->RegisterRowDefinitions();
+    }
+    else {
+      // create and build new database
+      dynamic_cast<S*>( this )->ImplOpen( sDbFileName, ou::db::EOpenFlagsAutoCreate );
+      static_cast<T*>( this )->InitializeManagersDb( m_pSession );
+      static_cast<T*>( this )->RegisterTablesForCreation();
+      dynamic_cast<S*>( this )->CreateTables();
+      static_cast<T*>( this )->RegisterRowDefinitions();
+      static_cast<T*>( this )->PopulateTables();
+    }
+    m_bOpened = true;
+  }
+
+}
+
+template<class S, class T>
+void SessionBase<S,T>::Close( void ) {
+  if ( m_bOpened ) {
+    m_bOpened = false;
+    dynamic_cast<S*>( this )->ImplClose();
+  }
+}
 
 } // db
 } // ou

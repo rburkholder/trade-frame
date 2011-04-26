@@ -16,14 +16,5 @@
 namespace ou {
 namespace db {
 
-Database::Database(void) 
-  : m_bDbOpened( false )
-{
-}
-
-
-Database::~Database(void) {
-}
-
 } // db
 } // ou
