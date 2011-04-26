@@ -44,7 +44,8 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "Database.h"
+#include "Constants.h"
+#include "Actions.h"
 
 namespace ou {
 namespace db {
@@ -69,7 +70,7 @@ public:
 
   typedef boost::intrusive_ptr<QueryBase> pQueryBase_t;
 
-  QueryBase( void ): m_bHasFields( false ), m_cntRef( 0 ), m_bPrepared( false ), m_clause( EClauseNone ) {};
+  QueryBase( void ): m_clause( EClauseNone ), m_bHasFields( false ), m_cntRef( 0 ), m_bPrepared( false ) {};
   virtual ~QueryBase( void ) {};
 
   void SetHasFields( void ) { m_bHasFields = true; };
@@ -95,9 +96,9 @@ protected:
   enumClause m_clause;
   std::string m_sQueryText;  // 'compose' results end up here
 private:
-  bool m_bPrepared;  // used by session.execute
   bool m_bHasFields;
   size_t m_cntRef;
+  bool m_bPrepared;  // used by session.execute
 };
 
 // =====

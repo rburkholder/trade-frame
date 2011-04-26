@@ -20,13 +20,10 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
+#include "Constants.h"
+
 namespace ou {
 namespace db {
-
-enum enumOpenFlags { 
-  EOpenFlagsZero = 0, 
-  EOpenFlagsAutoCreate = 0x1 
-};
 
 template<class S, class T> // S Session variable (ou::db::CSession), T class for CRTP operations
 class SessionBase {
@@ -72,7 +69,7 @@ SessionBase<S,T>::~SessionBase(void) {
 }
 
 template<class S, class T>
-void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero ) {
+void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
 
   if ( !m_bOpened ) {
     m_pSession.reset( new S );
@@ -84,7 +81,7 @@ void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags
     }
     else {
       // create and build new database
-      dynamic_cast<S*>( this )->ImplOpen( sDbFileName, ou::db::EOpenFlagsAutoCreate );
+      dynamic_cast<S*>( this )->ImplOpen( sDbFileName, EOpenFlagsAutoCreate );
       static_cast<T*>( this )->InitializeManagersDb( m_pSession );
       static_cast<T*>( this )->RegisterTablesForCreation();
       dynamic_cast<S*>( this )->CreateTables();
