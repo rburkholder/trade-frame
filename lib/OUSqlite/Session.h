@@ -18,6 +18,8 @@
 namespace ou {
 namespace db {
 
+// this is an example of how to integrate everything together for session management.
+
 class CSession: public CSessionImpl<ISqlite3>, public SessionBase<CSessionImpl<ISqlite3>, CSession> {
 public:
   typedef boost::shared_ptr<CSession> pSession_t;

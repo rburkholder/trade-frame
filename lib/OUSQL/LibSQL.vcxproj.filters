@@ -27,10 +27,13 @@
     <ClInclude Include="Actions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Database.h">
+    <ClInclude Include="SessionImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SessionImpl.h">
+    <ClInclude Include="SessionBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
