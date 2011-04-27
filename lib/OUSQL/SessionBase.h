@@ -29,13 +29,13 @@ template<class S, class T> // S Session variable (ou::db::CSession), T class for
 class SessionBase {
 public:
 
-  typedef typename S::pSession_t pSession_t;
-
   SessionBase(void);
   virtual ~SessionBase(void);
 
   void Open( const std::string& sDbFileName, enumOpenFlags = EOpenFlagsZero );
   void Close( void );
+
+  bool IsOpen( void ) { return m_bOpened; }
 
 protected:
 
@@ -43,15 +43,11 @@ protected:
 
   std::string m_sDbFileName;
 
-  pSession_t m_pSession;
-
-  void Initialize( void ) {};
-  void InitializeManagersDb( pSession_t& pSession ) {};
-  void RegisterRowDefinitions( void ) {};
-  void RegisterTablesForCreation( void ) {};
-  void PopulateTables( void ) {};
-  void Denitialize( void ) {};
-
+  void InitializeManagers( void ) {}; // null placeholder
+  void RegisterRowDefinitions( void ) {}; // null placeholder
+  void RegisterTablesForCreation( void ) {}; // null placeholder
+  void PopulateTables( void ) {}; // null placeholder
+  void DenitializeManagers( void ) {}; // null placeholder
 private:
 };
 
@@ -59,30 +55,29 @@ template<class S, class T>
 SessionBase<S,T>::SessionBase(void) 
   : m_bOpened( false )
 {
-  static_cast<T*>( this )->Initialize();
+//  static_cast<T*>( this )->Initialize();
 }
 
 template<class S, class T>
 SessionBase<S,T>::~SessionBase(void) {
   Close();
-  static_cast<T*>( this )->Denitialize();
+//  static_cast<T*>( this )->Denitialize();
 }
 
 template<class S, class T>
 void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags ) {
 
   if ( !m_bOpened ) {
-    m_pSession.reset( new S );
     if ( boost::filesystem::exists( sDbFileName ) ) {
       // open already created and loaded database
       dynamic_cast<S*>( this )->ImplOpen( sDbFileName, flags );
-      static_cast<T*>( this )->InitializeManagersDb( m_pSession );
+      static_cast<T*>( this )->InitializeManagers();
       static_cast<T*>( this )->RegisterRowDefinitions();
     }
     else {
       // create and build new database
       dynamic_cast<S*>( this )->ImplOpen( sDbFileName, EOpenFlagsAutoCreate );
-      static_cast<T*>( this )->InitializeManagersDb( m_pSession );
+      static_cast<T*>( this )->InitializeManagers();
       static_cast<T*>( this )->RegisterTablesForCreation();
       dynamic_cast<S*>( this )->CreateTables();
       static_cast<T*>( this )->RegisterRowDefinitions();
@@ -97,6 +92,7 @@ template<class S, class T>
 void SessionBase<S,T>::Close( void ) {
   if ( m_bOpened ) {
     m_bOpened = false;
+    static_cast<T*>( this )->DenitializeManagers();
     dynamic_cast<S*>( this )->ImplClose();
   }
 }
