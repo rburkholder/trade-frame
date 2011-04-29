@@ -16,5 +16,33 @@
 namespace ou {
 namespace db {
 
+CSession::CSession( void )
+  : CSessionImpl<ISqlite3>(),
+    SessionBase<CSessionImpl<ISqlite3>, CSession>() {
+}
+
+CSession::~CSession( void ) {
+}
+
+void CSession::InitializeManagers( void ) {
+  OnInitializeManagers( this );
+}
+
+void CSession::RegisterTablesForCreation( void ) {
+  OnRegisterTables( *this );
+}
+
+void CSession::RegisterRowDefinitions( void ) {
+  OnRegisterRows( *this );
+}
+
+void CSession::PopulateTables( void ) {
+  OnPopulate( *this );
+}
+
+void CSession::DenitializeManagers( void ) {
+  OnDenitializeManagers( *this );
+}
+
 } // db
 } // ou

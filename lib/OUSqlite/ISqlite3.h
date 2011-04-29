@@ -15,7 +15,8 @@
 
 #include <string>
 
-#include <OUSQL/SessionBase.h>  // for the enumerations
+//#include <OUSQL/SessionBase.h>  // for the enumerations
+#include <OUSQL/Constants.h>
 
 #define SQLITE_DEFAULT_FOREIGN_KEYS 1
 #define SQLITE_DEFAULT_FILE_FORMAT 4
