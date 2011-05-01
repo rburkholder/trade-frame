@@ -96,11 +96,11 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
   pairOrderState_t pair( id, structOrderState( pOrder ) );
   m_mapOrders.insert( pair );
 
-  if ( 0 != m_pDbSession ) {
+  if ( 0 != m_pSession ) {
     // add to database
     assert( 0 != pOrder->GetRow().idPosition );
     ou::db::QueryFields<COrder::TableRowDef>::pQueryFields_t pQuery
-      = m_pDbSession->Insert<COrder::TableRowDef>( const_cast<COrder::TableRowDef&>( pOrder->GetRow() ) );
+      = m_pSession->Insert<COrder::TableRowDef>( const_cast<COrder::TableRowDef&>( pOrder->GetRow() ) );
   }
 }
 
@@ -131,11 +131,11 @@ void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrde
   iter->second.pProvider = pProvider;
   pOrder->SetSendingToProvider();
   pProvider->PlaceOrder( pOrder );
-  if ( 0 != m_pDbSession ) {
+  if ( 0 != m_pSession ) {
     OrderManagerQueries::UpdateAtPlaceOrder 
       update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted );
     ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder>::pQueryFields_t pQuery
-      = m_pDbSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder>( // todo:  cache this query
+      = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder>( // todo:  cache this query
         "update orders set orderstatus=?, datetimesubmitted=?", update ).Where( "orderid=?" );
   }
 }
@@ -169,16 +169,16 @@ COrderManager::iterOrders_t COrderManager::LocateOrder( idOrder_t nOrderId ) {
   }
   else {
     // check in database first, and if found, load order and executions
-    if ( 0 != m_pDbSession ) {
+    if ( 0 != m_pSession ) {
       OrderManagerQueries::OrderKey keyOrder( nOrderId );
       ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pOrderExistsQuery
-        = m_pDbSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder ).Where( "orderid=?" ).NoExecute();
-      m_pDbSession->Bind<OrderManagerQueries::OrderKey>( pOrderExistsQuery );
-      if ( m_pDbSession->Execute( pOrderExistsQuery ) ) {
+        = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder ).Where( "orderid=?" ).NoExecute();
+      m_pSession->Bind<OrderManagerQueries::OrderKey>( pOrderExistsQuery );
+      if ( m_pSession->Execute( pOrderExistsQuery ) ) {
         bool bFound = true;
         // load order as well as associated executions
         COrder::TableRowDef rowOrder;
-        m_pDbSession->Columns<OrderManagerQueries::OrderKey, COrder::TableRowDef>( pOrderExistsQuery, rowOrder );
+        m_pSession->Columns<OrderManagerQueries::OrderKey, COrder::TableRowDef>( pOrderExistsQuery, rowOrder );
         if ( 0 == OnOrderNeedsDetails ) {
           throw std::runtime_error( "COrderManager::LocateOrder: needs Order Details Callback" );
         }
@@ -194,10 +194,10 @@ COrderManager::iterOrders_t COrderManager::LocateOrder( idOrder_t nOrderId ) {
 
         // load up executions
         ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pExecutionQuery
-          = m_pDbSession->SQL<OrderManagerQueries::OrderKey>( "select * from executions", keyOrder ).Where( "orderid=?" ).NoExecute();
-        while ( m_pDbSession->Execute( pExecutionQuery ) ) {
+          = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from executions", keyOrder ).Where( "orderid=?" ).NoExecute();
+        while ( m_pSession->Execute( pExecutionQuery ) ) {
           CExecution::TableRowDef rowExecution;
-          m_pDbSession->Columns<OrderManagerQueries::OrderKey, CExecution::TableRowDef>( pExecutionQuery, rowExecution );
+          m_pSession->Columns<OrderManagerQueries::OrderKey, CExecution::TableRowDef>( pExecutionQuery, rowExecution );
           pExecution_t pExecution( new CExecution( rowExecution ) );
           iter->second.pmapExecutions->insert( pairExecution_t( rowExecution.idExecution, pExecution ) );
         }
@@ -232,11 +232,11 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
     iter->second.pProvider->CancelOrder( pOrder );  // check which fields have changed for the db
-    if ( 0 != m_pDbSession ) {
+    if ( 0 != m_pSession ) {
       OrderManagerQueries::UpdateAtOrderClose 
         close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
       ou::db::QueryFields<OrderManagerQueries::UpdateAtOrderClose>::pQueryFields_t pQuery
-        = m_pDbSession->SQL<OrderManagerQueries::UpdateAtOrderClose>( // todo:  cache this query
+        = m_pSession->SQL<OrderManagerQueries::UpdateAtOrderClose>( // todo:  cache this query
           "update orders set orderstatus=?, datetimeclosed=?", close ).Where( "orderid=?" );
     }
   }
@@ -263,11 +263,11 @@ void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission )
   try {
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
-    if ( 0 != m_pDbSession ) {
+    if ( 0 != m_pSession ) {
       OrderManagerQueries::UpdateCommission 
         commission( pOrder->GetOrderId(), dblCommission );
       ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
-        = m_pDbSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
+        = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
           "update orders set commission=?", commission ).Where( "orderid=?" );
     }
     pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
@@ -310,29 +310,29 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
     OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
-    if ( 0 != m_pDbSession ) {
+    if ( 0 != m_pSession ) {
       const COrder::TableRowDef& row( pOrder->GetRow() );
       if ( OrderStatus::Filled == status ) {
         OrderManagerQueries::UpdateOrder 
           order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
         ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-          = m_pDbSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+          = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
           OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
       }
       else {
         OrderManagerQueries::UpdateOrder 
           order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
         ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-          = m_pDbSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+          = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
           OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
       }
       // add execution record
       pExecution_t pExecution( new CExecution( exec ) );
       pExecution->SetOrderId( nOrderId );
       ou::db::QueryFields<CExecution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
-        = m_pDbSession->Insert<CExecution::TableRowDefNoKey>( 
+        = m_pSession->Insert<CExecution::TableRowDefNoKey>( 
           const_cast<CExecution::TableRowDefNoKey&>( dynamic_cast<const CExecution::TableRowDefNoKey&>( pExecution->GetRow() ) ) );
-      idExecution_t idExecution = m_pDbSession->GetLastRowId();
+      idExecution_t idExecution = m_pSession->GetLastRowId();
       pairExecution_t pair( idExecution, pExecution );
       iter->second.pmapExecutions->insert( pair );
     }
@@ -369,11 +369,11 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
     pOrder_t pOrder = iter->second.pOrder;
     pOrder->ActOnError( eError );
     //MoveActiveOrderToCompleted( nOrderId );
-    if ( 0 != m_pDbSession ) {
+    if ( 0 != m_pSession ) {
       OrderManagerQueries::UpdateOnOrderError 
         error( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
       ou::db::QueryFields<OrderManagerQueries::UpdateOnOrderError>::pQueryFields_t pQuery
-        = m_pDbSession->SQL<OrderManagerQueries::UpdateOnOrderError>( // todo:  cache this query
+        = m_pSession->SQL<OrderManagerQueries::UpdateOnOrderError>( // todo:  cache this query
           "update orders set orderstatus=?, datetimeclosed=?", error ).Where( "orderid=?" );
     }
   }
@@ -382,18 +382,34 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
   }
 }
 
-void COrderManager::RegisterTablesForCreation( void ) {
-  m_pDbSession->RegisterTable<COrder::TableCreateDef>( tablenames::sOrder );
-  m_pDbSession->RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
+void COrderManager::HandleRegisterTables( ou::db::CSession& session ) {
+  session.RegisterTable<COrder::TableCreateDef>( tablenames::sOrder );
+  session.RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
 }
 
-void COrderManager::RegisterRowDefinitions( void ) {
-  m_pDbSession->MapRowDefToTableName<COrder::TableRowDef>( tablenames::sOrder );
-  m_pDbSession->MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
-  m_pDbSession->MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
+void COrderManager::HandleRegisterRows( ou::db::CSession& session ) {
+  session.MapRowDefToTableName<COrder::TableRowDef>( tablenames::sOrder );
+  session.MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
+  session.MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
 }
 
-void COrderManager::PopulateTables( void ) {
+void COrderManager::HandlePopulateTables( ou::db::CSession& session ) {
+}
+
+// this stuff could probably be rolled into CSession with a template
+void COrderManager::AttachToSession( ou::db::CSession* pSession ) {
+  ManagerBase::AttachToSession( pSession );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &COrderManager::HandlePopulateTables ) );
+
+}
+
+void COrderManager::DetachFromSession( ou::db::CSession* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &COrderManager::HandlePopulateTables ) );
+  ManagerBase::DetachFromSession( pSession );
 }
 
 } // namespace tf

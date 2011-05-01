@@ -37,49 +37,29 @@ void HandleOrderDetails( CInstrument::idInstrument_t idInstrument, CInstrument::
   pInstrument = CInstrumentManager::Instance().Get( idInstrument );
 }
 
-void Initialize( void ) {
+void HandleInitializeManagers( ou::db::CSession* pSession ) {
+  CProviderManager::Instance().AttachToSession( pSession );
+  CInstrumentManager::Instance().AttachToSession( pSession );
+  CAccountManager::Instance().AttachToSession( pSession );
+  CPortfolioManager::Instance().AttachToSession( pSession );
+  COrderManager::Instance().AttachToSession( pSession );
+
   // link up with PortfolioManager for call back
   CPortfolioManager::Instance().SetOnPositionNeedDetails( &HandlePositionDetails );
   // link up with OrderManager for call back
   COrderManager::Instance().SetOnOrderNeedsDetails( &HandleOrderDetails );
 }
 
-void Denitialize( void ) {
+void HandleDenitializeManagers( ou::db::CSession& session ) {
   // take down the links
   COrderManager::Instance().SetOnOrderNeedsDetails( 0 );
   CPortfolioManager::Instance().SetOnPositionNeedDetails( 0 );
-}
 
-void InitializeManagersDb( ou::db::CSession::pSession_t& pDbSession ) {
-  CProviderManager::Instance().SetDbSession( pDbSession );
-  CInstrumentManager::Instance().SetDbSession( pDbSession );
-  CAccountManager::Instance().SetDbSession( pDbSession );
-  CPortfolioManager::Instance().SetDbSession( pDbSession );
-  COrderManager::Instance().SetDbSession( pDbSession );
-}
-
-void RegisterTablesForCreation( void ) {
-  CProviderManager::Instance().RegisterTablesForCreation(  );
-  CInstrumentManager::Instance().RegisterTablesForCreation(  );
-  CAccountManager::Instance().RegisterTablesForCreation(  );
-  CPortfolioManager::Instance().RegisterTablesForCreation(  );
-  COrderManager::Instance().RegisterTablesForCreation(  );
-}
-
-void RegisterRowDefinitions( void ) {
-  CProviderManager::Instance().RegisterRowDefinitions(  );
-  CInstrumentManager::Instance().RegisterRowDefinitions(  );
-  CAccountManager::Instance().RegisterRowDefinitions(  );
-  CPortfolioManager::Instance().RegisterRowDefinitions(  );
-  COrderManager::Instance().RegisterRowDefinitions(  );
-}
-
-void PopulateTables( void ) {
-  CProviderManager::Instance().PopulateTables(  );
-  CInstrumentManager::Instance().PopulateTables(  );
-  CAccountManager::Instance().PopulateTables(  );
-  CPortfolioManager::Instance().PopulateTables(  );
-  COrderManager::Instance().PopulateTables(  );
+  CProviderManager::Instance().DetachFromSession( &session );
+  CInstrumentManager::Instance().DetachFromSession( &session );
+  CAccountManager::Instance().DetachFromSession( &session );
+  CPortfolioManager::Instance().DetachFromSession( &session );
+  COrderManager::Instance().DetachFromSession( &session );
 }
 
 } // namespace tf

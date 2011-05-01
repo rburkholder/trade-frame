@@ -65,9 +65,8 @@ public:
   void UpdateAccount( const idAccount_t& sAccountId );  // uses existing class variables
   void DeleteAccount( const idAccount_t& sAccountId );
 
-  void RegisterTablesForCreation( void );
-  void RegisterRowDefinitions( void );
-  void PopulateTables( void );
+  void AttachToSession( ou::db::CSession* pSession );
+  void DetachFromSession( ou::db::CSession* pSession );
 
 protected:
 
@@ -87,6 +86,10 @@ private:
   typedef std::map<idAccount_t, pAccount_t> mapAccount_t;
   typedef mapAccount_t::iterator iterAccount_t;
   mapAccount_t m_mapAccount;
+
+  void HandleRegisterTables( ou::db::CSession& session );
+  void HandleRegisterRows( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::CSession& session );
 
 };
 

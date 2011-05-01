@@ -47,7 +47,7 @@ CAccountManager::pAccountAdvisor_t CAccountManager::ConstructAccountAdvisor( con
   else {
     m_mapAccountAdvisor.insert( pairAccountAdvisor_t( idAdvisor, p ) );
     ou::db::QueryFields<CAccountAdvisor::TableRowDef>::pQueryFields_t pQuery 
-      = m_pDbSession->Insert<CAccountAdvisor::TableRowDef>( const_cast<CAccountAdvisor::TableRowDef&>( p->GetRow() ) );
+      = m_pSession->Insert<CAccountAdvisor::TableRowDef>( const_cast<CAccountAdvisor::TableRowDef&>( p->GetRow() ) );
   }
 
   return p;
@@ -75,11 +75,11 @@ CAccountManager::pAccountAdvisor_t CAccountManager::GetAccountAdvisor( const idA
   else {
     AccountManagerQueries::AccountAdvisorKey key( idAdvisor );
     ou::db::QueryFields<AccountManagerQueries::AccountAdvisorKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pDbSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key ).Where( "accountadvisorid = ?" ).NoExecute();
-    m_pDbSession->Bind<AccountManagerQueries::AccountAdvisorKey>( pExistsQuery );
-    if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+      = m_pSession->SQL<AccountManagerQueries::AccountAdvisorKey>( "select * from accountadvisors", key ).Where( "accountadvisorid = ?" ).NoExecute();
+    m_pSession->Bind<AccountManagerQueries::AccountAdvisorKey>( pExistsQuery );
+    if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       CAccountAdvisor::TableRowDef rowAccountAdvisor;
-      m_pDbSession->Columns<AccountManagerQueries::AccountAdvisorKey, CAccountAdvisor::TableRowDef>( pExistsQuery, rowAccountAdvisor );
+      m_pSession->Columns<AccountManagerQueries::AccountAdvisorKey, CAccountAdvisor::TableRowDef>( pExistsQuery, rowAccountAdvisor );
       pAccountAdvisor.reset( new CAccountAdvisor( rowAccountAdvisor ) );
       m_mapAccountAdvisor.insert( pairAccountAdvisor_t( idAdvisor, pAccountAdvisor ) );
     }
@@ -118,7 +118,7 @@ CAccountManager::pAccountOwner_t CAccountManager::ConstructAccountOwner(
   else {
     m_mapAccountOwner.insert( pairAccountOwner_t( idAccountOwner, p ) );
     ou::db::QueryFields<CAccountOwner::TableRowDef>::pQueryFields_t pQuery 
-      = m_pDbSession->Insert<CAccountOwner::TableRowDef>( const_cast<CAccountOwner::TableRowDef&>( p->GetRow() ) );
+      = m_pSession->Insert<CAccountOwner::TableRowDef>( const_cast<CAccountOwner::TableRowDef&>( p->GetRow() ) );
   }
 
   return p;
@@ -146,11 +146,11 @@ CAccountManager::pAccountOwner_t CAccountManager::GetAccountOwner( const idAccou
   else {
     AccountManagerQueries::AccountOwnerKey key( idAccountOwner );
     ou::db::QueryFields<AccountManagerQueries::AccountOwnerKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pDbSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key ).Where( "accountownerid = ?" ).NoExecute();
-    m_pDbSession->Bind<AccountManagerQueries::AccountOwnerKey>( pExistsQuery );
-    if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+      = m_pSession->SQL<AccountManagerQueries::AccountOwnerKey>( "select * from accountowners", key ).Where( "accountownerid = ?" ).NoExecute();
+    m_pSession->Bind<AccountManagerQueries::AccountOwnerKey>( pExistsQuery );
+    if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       CAccountOwner::TableRowDef rowAccountOwner;
-      m_pDbSession->Columns<AccountManagerQueries::AccountOwnerKey, CAccountOwner::TableRowDef>( pExistsQuery, rowAccountOwner );
+      m_pSession->Columns<AccountManagerQueries::AccountOwnerKey, CAccountOwner::TableRowDef>( pExistsQuery, rowAccountOwner );
       pAccountOwner.reset( new CAccountOwner( rowAccountOwner ) );
       m_mapAccountOwner.insert( pairAccountOwner_t( idAccountOwner, pAccountOwner ) );
     }
@@ -191,7 +191,7 @@ CAccountManager::pAccount_t CAccountManager::ConstructAccount(
   else {
     m_mapAccount.insert( pairAccount_t( idAccount, p ) );
     ou::db::QueryFields<CAccount::TableRowDef>::pQueryFields_t pQuery 
-      = m_pDbSession->Insert<CAccount::TableRowDef>( const_cast<CAccount::TableRowDef&>( p->GetRow() ) );
+      = m_pSession->Insert<CAccount::TableRowDef>( const_cast<CAccount::TableRowDef&>( p->GetRow() ) );
   }
 
   return p;
@@ -219,11 +219,11 @@ CAccountManager::pAccount_t CAccountManager::GetAccount( const idAccount_t& idAc
   else {
     AccountManagerQueries::AccountKey key( idAccount );
     ou::db::QueryFields<AccountManagerQueries::AccountKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-      = m_pDbSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key ).Where( "accountid = ?" ).NoExecute();
-    m_pDbSession->Bind<AccountManagerQueries::AccountKey>( pExistsQuery );
-    if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+      = m_pSession->SQL<AccountManagerQueries::AccountKey>( "select * from accounts", key ).Where( "accountid = ?" ).NoExecute();
+    m_pSession->Bind<AccountManagerQueries::AccountKey>( pExistsQuery );
+    if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
       CAccount::TableRowDef rowAccount;
-      m_pDbSession->Columns<AccountManagerQueries::AccountKey, CAccount::TableRowDef>( pExistsQuery, rowAccount );
+      m_pSession->Columns<AccountManagerQueries::AccountKey, CAccount::TableRowDef>( pExistsQuery, rowAccount );
       pAccount.reset( new CAccount( rowAccount ) );
       m_mapAccount.insert( pairAccount_t( idAccount, pAccount ) );
     }
@@ -248,21 +248,36 @@ void CAccountManager::DeleteAccount( const idAccount_t& idAccount ) {
 // Table Management
 //
 
-void CAccountManager::RegisterTablesForCreation( void ) {
-  m_pDbSession->RegisterTable<CAccountAdvisor::TableCreateDef>( tablenames::sAccountAdvisor );
-  m_pDbSession->RegisterTable<CAccountOwner::TableCreateDef>( tablenames::sAccountOwner );
-  m_pDbSession->RegisterTable<CAccount::TableCreateDef>( tablenames::sAccount );
+void CAccountManager::HandleRegisterTables( ou::db::CSession& session ) {
+  session.RegisterTable<CAccountAdvisor::TableCreateDef>( tablenames::sAccountAdvisor );
+  session.RegisterTable<CAccountOwner::TableCreateDef>( tablenames::sAccountOwner );
+  session.RegisterTable<CAccount::TableCreateDef>( tablenames::sAccount );
 }
 
-void CAccountManager::RegisterRowDefinitions( void ) {
-  m_pDbSession->MapRowDefToTableName<CAccountAdvisor::TableRowDef>( tablenames::sAccountAdvisor );
-  m_pDbSession->MapRowDefToTableName<CAccountOwner::TableRowDef>( tablenames::sAccountOwner );
-  m_pDbSession->MapRowDefToTableName<CAccount::TableRowDef>( tablenames::sAccount );
+void CAccountManager::HandleRegisterRows( ou::db::CSession& session ) {
+  session.MapRowDefToTableName<CAccountAdvisor::TableRowDef>( tablenames::sAccountAdvisor );
+  session.MapRowDefToTableName<CAccountOwner::TableRowDef>( tablenames::sAccountOwner );
+  session.MapRowDefToTableName<CAccount::TableRowDef>( tablenames::sAccount );
 }
 
-void CAccountManager::PopulateTables( void ) {
+void CAccountManager::HandlePopulateTables( ou::db::CSession& session ) {
 }
 
+// this stuff could probably be rolled into CSession with a template
+void CAccountManager::AttachToSession( ou::db::CSession* pSession ) {
+  ManagerBase::AttachToSession( pSession );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &CAccountManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &CAccountManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &CAccountManager::HandlePopulateTables ) );
+
+}
+
+void CAccountManager::DetachFromSession( ou::db::CSession* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &CAccountManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &CAccountManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &CAccountManager::HandlePopulateTables ) );
+  ManagerBase::DetachFromSession( pSession );
+}
 
 } // namespace tf
 } // namespace ou

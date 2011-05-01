@@ -19,6 +19,8 @@
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
+//using namespace fastdelegate;
+
 #include "InstrumentManager.h"
 
 namespace ou { // One Unified
@@ -100,7 +102,7 @@ void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
   }
   Assign( pInstrument );
   ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
-    = m_pDbSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
+    = m_pSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
   // todo: save alternate instrument names
 }
 
@@ -123,7 +125,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idN
   }
   else {
     bool bFound = false;
-    if ( 0 != m_pDbSession.get() ) {
+    if ( 0 != m_pSession ) {
       bFound = LoadInstrument( idName, pInstrument );
     }
     if ( !bFound ) {
@@ -136,7 +138,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idN
 bool CInstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the query to make the get faster rather than searching the map again
   bool bFound = ( m_map.end() != m_map.find( id ) );
   if ( !bFound ) {
-    if ( 0 != m_pDbSession.get() ) {
+    if ( 0 != m_pSession ) {
       CInstrument::pInstrument_t pInstrument;
       bFound = LoadInstrument( id, pInstrument );
     }
@@ -161,17 +163,17 @@ namespace InstrumentManagerQueries {
 
 bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
       // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
-  assert( 0 != m_pDbSession.get() );
+  assert( 0 != m_pSession );
   assert( m_map.end() == m_map.find( id ) );
 
   bool bFound = false;
   InstrumentManagerQueries::InstrumentKey idInstrument( id );
   ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
-  if ( m_pDbSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+    = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from instruments", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
+  if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     CInstrument::TableRowDef instrument;
-    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentKey, CInstrument::TableRowDef>( pExistsQuery, instrument );
+    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, CInstrument::TableRowDef>( pExistsQuery, instrument );
     assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
          || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) ) 
       );
@@ -213,11 +215,11 @@ void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrumen
   assert( 0 != pInstrument.get() );
   InstrumentManagerQueries::InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
    ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-     = m_pDbSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
-  m_pDbSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
+     = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
+  m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
   CAlternateInstrumentName::TableRowDef altname;
-  while ( m_pDbSession->Execute( pExistsQuery ) ) {
-    m_pDbSession->Columns<InstrumentManagerQueries::InstrumentKey, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
+  while ( m_pSession->Execute( pExistsQuery ) ) {
+    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
     pInstrument->SetAlternateName( altname.idProvider, altname.idAlternate );
   }
 }
@@ -244,19 +246,19 @@ void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pa
   m_map.erase( iterOld );
 }
 
-void CInstrumentManager::RegisterTablesForCreation( void ) {
-  m_pDbSession->RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
-  m_pDbSession->RegisterTable<CInstrument::TableCreateDef>( tablenames::sInstrument );
-  m_pDbSession->RegisterTable<CAlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
+void CInstrumentManager::HandleRegisterTables( ou::db::CSession& session ) {
+  session.RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
+  session.RegisterTable<CInstrument::TableCreateDef>( tablenames::sInstrument );
+  session.RegisterTable<CAlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::RegisterRowDefinitions( void ) {
-  m_pDbSession->MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
-  m_pDbSession->MapRowDefToTableName<CInstrument::TableRowDef>( tablenames::sInstrument );
-  m_pDbSession->MapRowDefToTableName<CAlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
+void CInstrumentManager::HandleRegisterRows( ou::db::CSession& session ) {
+  session.MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
+  session.MapRowDefToTableName<CInstrument::TableRowDef>( tablenames::sInstrument );
+  session.MapRowDefToTableName<CAlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::PopulateTables( void ) {
+void CInstrumentManager::HandlePopulateTables( ou::db::CSession& session ) {
 
   std::vector<std::string> vsExchangesPreload;
   vsExchangesPreload +=
@@ -277,16 +279,32 @@ void CInstrumentManager::PopulateTables( void ) {
 
   std::vector<std::string>::iterator iter = vsExchangesPreload.begin();
 
-  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = m_pDbSession->Insert<CExchange::TableRowDef>( exchange ).NoExecute();
+  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<CExchange::TableRowDef>( exchange ).NoExecute();
 
   while ( vsExchangesPreload.end() != iter ) {
     exchange.idExchange = *(iter++);
     exchange.sName = *(iter++);
-    m_pDbSession->Reset( pExchange );
-    m_pDbSession->Bind<CExchange::TableRowDef>( pExchange );
-    m_pDbSession->Execute( pExchange );
+    session.Reset( pExchange );
+    session.Bind<CExchange::TableRowDef>( pExchange );
+    session.Execute( pExchange );
   }
 
+}
+
+// this stuff could probably be rolled into CSession with a template
+void CInstrumentManager::AttachToSession( ou::db::CSession* pSession ) {
+  ManagerBase::AttachToSession( pSession );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &CInstrumentManager::HandlePopulateTables ) );
+
+}
+
+void CInstrumentManager::DetachFromSession( ou::db::CSession* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &CInstrumentManager::HandlePopulateTables ) );
+  ManagerBase::DetachFromSession( pSession );
 }
 
 

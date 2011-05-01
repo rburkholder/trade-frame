@@ -33,11 +33,6 @@ public:
   CDB(void);
   ~CDB(void);
 
-  void Open( const std::string& sDbName );
-  void Close( void );
-
-  bool IsOpen( void ) { return m_bOpened; };
-
   void LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrumentManager::pInstrument_t& pInstrument );
   bool LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
 
@@ -54,11 +49,9 @@ public:
 protected:
 private:
 
-  bool m_bOpened;
-
-  ou::db::CSession::pSession_t m_pSession;
-
   OnPopulateDatabaseHandler_t OnPopulateDatabaseHandler;
   OnNewInstrumentHandler_t OnNewInstrument;
-};
 
+  void HandlePopulateTables( ou::db::CSession& session );
+};
+ 

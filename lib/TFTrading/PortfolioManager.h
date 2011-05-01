@@ -66,14 +66,13 @@ public:
   void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
   void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
 
-  void RegisterTablesForCreation( void );
-  void RegisterRowDefinitions( void );
-  void PopulateTables( void );
-
   typedef FastDelegate1<pPosition_t&> OnPositionNeedsDetailsHandler;
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
     OnPositionNeedsDetails = function;
   }
+
+  void AttachToSession( ou::db::CSession* pSession );
+  void DetachFromSession( ou::db::CSession* pSession );
 
 protected:
 
@@ -95,6 +94,10 @@ private:
   mapPortfolio_t m_mapPortfolio;
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
+
+  void HandleRegisterTables( ou::db::CSession& session );
+  void HandleRegisterRows( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::CSession& session );
 
   void HandlePositionOnExecution( execution_delegate_t );
   void HandlePositionOnCommission( const CPosition* );

@@ -71,9 +71,8 @@ public:
   pInstrument_t Get( idInstrument_cref );
   void Delete( idInstrument_cref );
 
-  void RegisterTablesForCreation( void );
-  void RegisterRowDefinitions( void );
-  void PopulateTables( void );
+  void AttachToSession( ou::db::CSession* pSession );
+  void DetachFromSession( ou::db::CSession* pSession );
 
   // move these to IQFeed somewhere
 //  pInstrument_t GetIQFeedInstrument( const std::string& sName );
@@ -87,7 +86,6 @@ protected:
   bool LoadInstrument( idInstrument_t idInstrument, pInstrument_t& pInstrument );
   void LoadAlternateInstrumentNames( pInstrument_t& pInstrument );
 
-
 private:
 
   typedef std::map<idInstrument_t,pInstrument_t> map_t;
@@ -95,6 +93,10 @@ private:
   typedef std::pair<idInstrument_t,pInstrument_t> pair_t;
 
   map_t m_map;
+
+  void HandleRegisterTables( ou::db::CSession& session );
+  void HandleRegisterRows( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::CSession& session );
 
   void HandleAlternateNameAdded( CInstrument::pairNames_t );
   void HandleAlternateNameChanged( CInstrument::pairNames_t );

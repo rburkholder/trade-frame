@@ -87,14 +87,14 @@ public:
 
   // need a query to find pending orders like GTC, etc
 
-  void RegisterTablesForCreation( void );
-  void RegisterRowDefinitions( void );
-  void PopulateTables( void );
-
   typedef FastDelegate2<idInstrument_t,pInstrument_t&> OnOrderNeedsDetailsHandler;
   void SetOnOrderNeedsDetails( OnOrderNeedsDetailsHandler function ) {
     OnOrderNeedsDetails = function;
   }
+
+  void AttachToSession( ou::db::CSession* pSession );
+  void DetachFromSession( ou::db::CSession* pSession );
+
 protected:
 
   typedef std::pair<idExecution_t, pExecution_t> pairExecution_t;
@@ -133,6 +133,10 @@ private:
   OnOrderNeedsDetailsHandler OnOrderNeedsDetails;
 
   void ConstructOrder( pOrder_t& pOrder );
+
+  void HandleRegisterTables( ou::db::CSession& session );
+  void HandleRegisterRows( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::CSession& session );
 
 };
 

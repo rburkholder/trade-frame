@@ -15,52 +15,24 @@
 
 #include <stdexcept>
 
-#define BOOST_FILESYSTEM_VERSION 3
-#include <boost/filesystem.hpp>
-
 #include <TFTrading/Managers.h>
 
 #include "DB.h"
 
-CDB::CDB(void): m_bOpened( false ) {
-  ou::tf::Initialize();
+CDB::CDB(void): ou::db::CSession() {
+  OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
+  OnPopulate.Add( MakeDelegate( this, &CDB::HandlePopulateTables ) );
+  OnDenitializeManagers.Add( &ou::tf::HandleDenitializeManagers );
 }
 
 CDB::~CDB(void) {
-  Close();
-  ou::tf::Denitialize();
+  this->OnPopulate.Remove( MakeDelegate( this, &CDB::HandlePopulateTables ) );
+  OnInitializeManagers.Remove( &ou::tf::HandleInitializeManagers );
+  OnDenitializeManagers.Remove( &ou::tf::HandleDenitializeManagers );
 }
 
-void CDB::Open( const std::string& sDbName ) {
-
-  if ( !m_bOpened ) {
-    m_pSession.reset( new ou::db::CSession );
-    if ( boost::filesystem::exists( sDbName ) ) {
-      // open already created and loaded database
-      m_pSession->Open( sDbName );
-      ou::tf::InitializeManagersDb( m_pSession );
-      ou::tf::RegisterRowDefinitions();
-    }
-    else {
-      // create and build new database
-      m_pSession->Open( sDbName, ou::db::EOpenFlagsAutoCreate );
-      ou::tf::InitializeManagersDb( m_pSession );
-      ou::tf::RegisterTablesForCreation();
-      m_pSession->CreateTables();
-      ou::tf::RegisterRowDefinitions();
-      ou::tf::PopulateTables();
-      if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
-    }
-    m_bOpened = true;
-  }
-
-}
-
-void CDB::Close( void ) {
-  if ( m_bOpened ) {
-    m_bOpened = false;
-    m_pSession->Close();
-  }
+void CDB::HandlePopulateTables( ou::db::CSession& session ) {
+  if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
 }
 
 struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
@@ -99,21 +71,21 @@ bool CDB::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, b
   OptionsQueryParameters query( pUnderlying->GetInstrumentName(), nYear, nMonth, nDay );
 
   ou::db::QueryFields<OptionsQueryParameters>::pQueryFields_t pQuery 
-    = m_pSession->SQL<OptionsQueryParameters>( 
-    "select * from instruments", query ).Where( "underlyingid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
+    = SQL<OptionsQueryParameters>( 
+      "select * from instruments", query ).Where( "underlyingid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
 
   ou::tf::CInstrument::TableRowDef instrument;  // can we put stuff directly into object?
   ou::tf::CInstrument::pInstrument_t pInstrument;
-  m_pSession->Bind<OptionsQueryParameters>( pQuery );
-  if ( m_pSession->Execute( pQuery ) ) {
+  Bind<OptionsQueryParameters>( pQuery );
+  if ( Execute( pQuery ) ) {
     bFound = true;
     if ( NULL != OnNewInstrument ) {
       do {
-        m_pSession->Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
+        Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
         pInstrument.reset( new ou::tf::CInstrument( instrument, pUnderlying ) );
         OnNewInstrument( pInstrument );
       }
-      while ( m_pSession->Execute( pQuery ) );
+      while ( Execute( pQuery ) );
     }
   }
 

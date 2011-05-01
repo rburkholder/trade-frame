@@ -49,7 +49,6 @@ public:
 
 protected:
 
-
 private:
 
   typedef std::map<idProvider_t, pProvider_t> mapProviders_t;
