@@ -11,12 +11,20 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#pragma once
+
 #include <OUCommon/Delegate.h>
 
 #include <OUSQL/SessionImpl.h>
 #include <OUSQL/SessionBase.h>
 
 #include "ISqlite3.h"
+
+// 2011/04/21
+// no in-session caching.  everything comes from the database.
+// need to think about session/window/view management if logged in from several browsers
+
+// need to create various classes for various execeptions
 
 namespace ou {
 namespace db {
