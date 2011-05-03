@@ -256,32 +256,37 @@ CProcess::CProcess(void)
       break;
   }
 
-  m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
-
-  // need to load the positions: underlying plus covering option  long+put or short+call\
-  // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
-  // need to assume orders are closed and fully executed
-
-  // note that position loading have call backs:   instrument, execution, data
-  // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
-  int nPositionsOpened( 0 );
   try {
-    m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
-    ++nPositionsOpened;
+    m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
+
+    // need to load the positions: underlying plus covering option  long+put or short+call\
+    // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
+    // need to assume orders are closed and fully executed
+
+    // note that position loading have call backs:   instrument, execution, data
+    // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
+    int nPositionsOpened( 0 );
+    try {
+      m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
+      ++nPositionsOpened;
+    }
+    catch (...) {
+    }
+
+    try {
+      m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
+      ++nPositionsOpened;
+    }
+    catch (...) {
+    }
+
+    if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
+      throw std::runtime_error( "wrong number of positions available" );
+    }
+
   }
   catch (...) {
-  }
-
-  try {
-    m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
-    ++nPositionsOpened;
-  }
-  catch (...) {
-  }
-
-  if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
-    throw std::runtime_error( "wrong number of positions available" );
-  }
+  } // catch
 
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
