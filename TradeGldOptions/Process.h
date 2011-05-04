@@ -254,9 +254,6 @@ private:
   std::string m_sPathForSeries;
   std::string m_sDesiredSimTradingDay;
   bool m_bProcessSimTradingDayGroup;
-  //enum enumTimeSeriesType {
-  //  EUnknown, EQuotes, ETrades, EGreeks
-  //} m_stateTimeSeries;
 
   std::stringstream m_ss;
 
@@ -279,6 +276,11 @@ private:
 
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
+
+  bool m_bExecConnected;
+  bool m_bDataConnected;
+  bool m_bData2Connected;
+  bool m_bConnectDone;
   
   CQuotes m_quotes;
   CTrades m_trades;
@@ -348,6 +350,8 @@ private:
 
   void HandleOnDataConnected( int );
   void HandleOnDataDisconnected( int );
+
+  void HandleOnConnected( int );
 
   void HandleOnData2Connected( int );
   void HandleOnData2Disconnected( int );

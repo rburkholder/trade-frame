@@ -183,6 +183,8 @@ till next multiple to ensure a ways above average price
 
 // ***** At day’s end, I always zero out deltas. 
 
+//#define testing
+
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
@@ -193,22 +195,25 @@ CProcess::CProcess(void)
   m_bWatchingOptions( false ), m_bTrading( false ),
   m_dblBaseDelta( 2000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
+#ifdef testing
+  m_dtMarketOpen( time_duration( 0, 30, 0 ) ),
+  m_dtMarketOpeningOrder( time_duration( 0, 31, 0 ) ),
+  m_dtMarketClosingOrder( time_duration( 23, 56, 0 ) ),
+  m_dtMarketClose( time_duration( 23, 59, 59 ) ),
+#else
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 30, 20 ) ),
-//  m_dtMarketOpen( time_duration( 0, 30, 0 ) ),
-//  m_dtMarketOpeningOrder( time_duration( 0, 31, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
-//  m_dtMarketClosingOrder( time_duration( 23, 56, 0 ) ),
   m_dtMarketClose( time_duration( 17, 0, 0 ) ),
-//  m_dtMarketClose( time_duration( 23, 59, 59 ) ),
+#endif
   m_sPathForSeries( "/strategy/deltaneutral2" ),
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
   m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
-  m_eMode( EModeLive )
+  m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
-  //m_stateTimeSeries( EUnknown )
+  m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false )
 {
 
   boost::gregorian::date dToday = ou::CTimeSource::Instance().Internal().date();
@@ -255,38 +260,6 @@ CProcess::CProcess(void)
       m_db.Open( sDbName );
       break;
   }
-
-  try {
-    m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
-
-    // need to load the positions: underlying plus covering option  long+put or short+call\
-    // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
-    // need to assume orders are closed and fully executed
-
-    // note that position loading have call backs:   instrument, execution, data
-    // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
-    int nPositionsOpened( 0 );
-    try {
-      m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
-      ++nPositionsOpened;
-    }
-    catch (...) {
-    }
-
-    try {
-      m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
-      ++nPositionsOpened;
-    }
-    catch (...) {
-    }
-
-    if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
-      throw std::runtime_error( "wrong number of positions available" );
-    }
-
-  }
-  catch (...) {
-  } // catch
 
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
@@ -382,17 +355,25 @@ void CProcess::IQFeedDisconnect( void ) {
 }
 
 void CProcess::HandleOnDataConnected(int e) {
+  m_bDataConnected = true;
+  HandleOnConnected(e);
 //  CIQFeedHistoryQuery<CProcess>::Connect();  
 }
 
 void CProcess::HandleOnDataDisconnected(int e) {
+  m_bDataConnected = false;
+  HandleOnConnected(e);
 }
 
 void CProcess::HandleOnData2Connected(int e) {
   CIQFeedHistoryQuery<CProcess>::Connect();  
+  m_bData2Connected = true;
+  HandleOnConnected( e );
 }
 
 void CProcess::HandleOnData2Disconnected(int e) {
+  m_bData2Connected = false;
+  HandleOnConnected( e );
 }
 
 void CProcess::OnHistoryConnected( void ) {
@@ -425,16 +406,63 @@ void CProcess::HandleOnExecConnected(int e) {
       }
       break;
   }
+
+  m_bExecConnected = true;
+  HandleOnConnected( e );
 }
 
 void CProcess::HandleOnExecDisconnected(int e) {
+  m_bExecConnected = false;
+  HandleOnConnected(e);
   m_ss.str( "" );
   m_ss << "Exec disconnected." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
+void CProcess::HandleOnConnected( int e ) {
+
+  if ( m_bConnectDone ) {
+  }
+  else {
+    if ( m_bExecConnected && m_bDataConnected ) {
+      m_bConnectDone = true;
+
+      try {
+        m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
+
+        // need to load the positions: underlying plus covering option  long+put or short+call\
+        // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
+        // need to assume orders are closed and fully executed
+
+        // note that position loading have call backs:   instrument, execution, data
+        // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
+        int nPositionsOpened( 0 );
+        try {
+          m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
+          ++nPositionsOpened;
+        }
+        catch (...) {
+        }
+
+        try {
+          m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
+          ++nPositionsOpened;
+        }
+        catch (...) {
+        }
+
+        if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
+          throw std::runtime_error( "wrong number of positions available" );
+        }
+
+      }
+      catch (...) {
+      } // catch
+    }
+  }
+}
+
 void CProcess::AcquireSimulationSymbols( void ) {
-  //m_stateTimeSeries = EUnknown;
   HDF5IterateGroups scan;
   scan.SetOnHandleObject( MakeDelegate( this, &CProcess::HandleHDF5Object ) );
   scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
@@ -445,7 +473,6 @@ void CProcess::AcquireSimulationSymbols( void ) {
   for ( strikes_iterator_t iter = m_mapStrikes.begin(); iter != m_mapStrikes.end(); ++ iter ) {
 
     CStrikeInfo oi( iter->first );
-    //m_vStrikes.push_back( oi );
     m_mapStrikeInfo[ iter->first ] = oi;
     CStrikeInfo& poi = m_mapStrikeInfo.find( iter->first )->second;
 
@@ -530,7 +557,6 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
 
 void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
   
-  //m_stateTimeSeries = EUnknown;
   if ( 18 < sName.length() ) {
     m_sim->SetGroupDirectory( sPath );   // may need to do this conditionally on the following flag
     m_bProcessSimTradingDayGroup = ( sName == m_sDesiredSimTradingDay );
@@ -539,9 +565,6 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
   m_ss.str( "" );
   m_ss << "Group:  \"" << sPath << "\"";
   if ( m_bProcessSimTradingDayGroup ) 
-    //if ( "quotes" == sName ) m_stateTimeSeries = EQuotes;
-    //if ( "trades" == sName ) m_stateTimeSeries = ETrades;
-    //if ( "greeks" == sName ) m_stateTimeSeries = EGreeks;
     m_ss << "*";
   m_ss << std::endl;
   OutputDebugString( m_ss.str().c_str() );
