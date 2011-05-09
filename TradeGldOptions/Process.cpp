@@ -14,6 +14,7 @@
 #include "StdAfx.h"
 
 #include <algorithm>
+#include <cassert>
 
 #include <math.h>
 
@@ -91,6 +92,7 @@ CNakedCall::CNakedCall( pInstrument_t pInstrument )
 : CNakedOption( pInstrument )
 {
   // assert instrument is a call
+  assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
   m_sSide = "C";
 }
 
@@ -102,6 +104,7 @@ CNakedPut::CNakedPut( pInstrument_t pInstrument )
 : CNakedOption( pInstrument )
 {
   // assert instrument is a put
+  assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
   m_sSide = "P";
 }
 
@@ -112,7 +115,6 @@ CNakedPut::CNakedPut( pInstrument_t pInstrument )
 
 CStrikeInfo::CStrikeInfo( void ) 
 : m_dblStrike( 0 ),
-//  m_call( NULL ), m_put( NULL ),
   m_bWatching( false )
 {
   //assert( false );  // see if it actaully gets called
@@ -120,7 +122,6 @@ CStrikeInfo::CStrikeInfo( void )
 
 CStrikeInfo::CStrikeInfo( double dblStrike ) 
 : m_dblStrike( dblStrike ),
-//  m_call( NULL ), m_put( NULL ),
   m_bWatching( false )
 {
 }
@@ -183,7 +184,7 @@ till next multiple to ensure a ways above average price
 
 // ***** At day’s end, I always zero out deltas. 
 
-#define testing
+//#define testing
 
 CProcess::CProcess(void)
 :
@@ -209,7 +210,9 @@ CProcess::CProcess(void)
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-  m_bWaitingForTradeCompletion( false ), m_dblDeltaTotalPut( 0 ), m_dblDeltaTotalUnderlying( 0 ),
+  m_bWaitingForTradeCompletion( false ), 
+//  m_dblDeltaTotalPut( 0 ), 
+  m_dblDeltaTotalUnderlying( 0 ),
   m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
   m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false )
@@ -456,6 +459,7 @@ void CProcess::HandleOnConnected( int e ) {
 
       }
       catch (...) {
+        std::cout << "crap happened" << std::endl;
       } // catch
     }
   }
@@ -733,6 +737,30 @@ void CProcess::StopWatch( void ) {
   }
 }
 
+void CProcess::SetActiveOption( void ) {
+
+  double gammaCall = 0;
+  double gammaPut = 0;
+  double gamma;
+
+  m_iterOILatestGammaSelectCall = m_iterOILowestWatch;
+  m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
+  // find highest gamma option for call and for put
+  for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
+    gamma = iter->second.Call()->Gamma();
+    if ( gammaCall < gamma ) { 
+      gammaCall = gamma;
+      m_iterOILatestGammaSelectCall = iter;
+    }
+    gamma = iter->second.Put()->Gamma();
+    if ( gammaPut < gamma ) { 
+      gammaPut = gamma;
+      m_iterOILatestGammaSelectPut = iter;
+    }
+  }
+
+}
+
 void CProcess::OpenPosition( void ) {
 
   // assert( !m_bTrading );
@@ -742,31 +770,14 @@ void CProcess::OpenPosition( void ) {
 
   // if no position, create a zero delta position.
 //  if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
-  if ( 0 == m_posPut->GetRow().nPositionActive ) {
+//  if ( 0 == m_posPut->GetRow().nPositionActive ) {
+  if ( 0 == m_posPut ) {
 
-    double gammaCall = 0;
-    double gammaPut = 0;
-    double gamma;
-
-    m_iterOILatestGammaSelectCall = m_iterOILowestWatch;
-    m_iterOILatestGammaSelectPut = m_iterOIHighestWatch;
-    // find highest gamma option for call and for put
-    for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
-      gamma = iter->second.Call()->Gamma();
-      if ( gammaCall < gamma ) { 
-        gammaCall = gamma;
-        m_iterOILatestGammaSelectCall = iter;
-      }
-      gamma = iter->second.Put()->Gamma();
-      if ( gammaPut < gamma ) { 
-        gammaPut = gamma;
-        m_iterOILatestGammaSelectPut = iter;
-      }
-    }
+    SetActiveOption();
 
     // todo?  check that SelectCall != LowestWatch and SelectPut != HighestWatch
 
-    m_dblCallPrice = m_iterOILatestGammaSelectCall->second.Call()->Ask();
+//    m_dblCallPrice = m_iterOILatestGammaSelectCall->second.Call()->Ask();
     m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
     // depending upon gammas, could be straddle or strangle?
@@ -805,7 +816,7 @@ void CProcess::OpenPosition( void ) {
           m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
           m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
           m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
-          m_dblDeltaTotalPut = nPuts * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
+//          m_dblDeltaTotalPut = nPuts * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
           m_ss.str( "" );
           m_ss << "Opening Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
@@ -994,7 +1005,7 @@ void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
 void CProcess::HandleTSTrading( const CQuote& quote ) {
 
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
-//  m_dblPutPrice = m_iterOILatestGammaSelectPut->Put()->Ask();
+  m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
   ptime dt = ou::CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketClosingOrder ) {
@@ -1013,10 +1024,6 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
     //double dblDeltaCall = m_iterOILatestGammaSelectCall->second.Call()->Delta() * m_nCalls * 100;
 
     bool bTraded = false;
-    int nOptions = 0;
-
-    double dblDeltaHi = m_dblBaseDelta + m_dblBaseDeltaIncrement;
-    double dblDeltaLo = m_dblBaseDelta - m_dblBaseDeltaIncrement;
 
     try {
 

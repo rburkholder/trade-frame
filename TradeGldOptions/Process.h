@@ -296,15 +296,9 @@ private:
   typedef strikes_map_t::iterator strikes_iterator_t;
   strikes_map_t m_mapStrikes;
 
-//  typedef std::vector<CStrikeInfo> vStrikeInfo_t;
-//  typedef vStrikeInfo_t::iterator vStrikeInfo_iter_t;
-
   std::vector<double> m_vCrossOverPoints;  // has combination of pivots and strikes in order
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
-
-//  vStrikeInfo_t m_vStrikes;  // put/call info for each strike
-//  vStrikeInfo_iter_t m_iterStrikes;
 
   typedef std::map<double,CStrikeInfo> mapStrikeInfo_t;
   typedef std::pair<double,CStrikeInfo> mapStrikeinfo_pair_t;
@@ -323,11 +317,11 @@ private:
   time_duration m_dtMarketClosingOrder;
   time_duration m_dtMarketClose;
 
-  double m_dblDeltaTotalPut;
+//  double m_dblDeltaTotalPut;
   double m_dblDeltaTotalUnderlying;
   bool m_bWaitingForTradeCompletion;
 
-  double m_dblCallPrice;
+//  double m_dblCallPrice;
   double m_dblPutPrice;
   double m_dblUnderlyingPrice;
 
@@ -374,6 +368,7 @@ private:
 
   void HandlePopulateDatabase( void ) ;
 
+  void SetActiveOption( void );
   void OpenPosition( void );
   void ClosePosition( void );
   void PrintGreeks( void );
