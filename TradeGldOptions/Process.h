@@ -323,14 +323,6 @@ private:
   time_duration m_dtMarketClosingOrder;
   time_duration m_dtMarketClose;
 
-  // straddle
-  int m_nCalls;
-  int m_nPuts;
-
-  // delta neutral long call, long put
-  int m_nLongPut;
-  int m_nLongUnderlying;
-
   double m_dblDeltaTotalPut;
   double m_dblDeltaTotalUnderlying;
   bool m_bWaitingForTradeCompletion;

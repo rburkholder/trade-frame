@@ -176,6 +176,7 @@ public:
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
 
+
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,

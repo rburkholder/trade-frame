@@ -183,24 +183,23 @@ till next multiple to ensure a ways above average price
 
 // ***** At day’s end, I always zero out deltas. 
 
-//#define testing
+#define testing
 
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
-  m_sSymbolName( "GLD" ), 
-//  m_sSymbolName( "DELL" ), 
   m_contractidUnderlying( 0 ),
-  m_nCalls( 0 ), m_nPuts( 0 ), m_nLongPut( 0 ), m_nLongUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
   m_dblBaseDelta( 2000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
 #ifdef testing
+  m_sSymbolName( "DELL" ), 
   m_dtMarketOpen( time_duration( 0, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 0, 31, 0 ) ),
   m_dtMarketClosingOrder( time_duration( 23, 56, 0 ) ),
   m_dtMarketClose( time_duration( 23, 59, 59 ) ),
 #else
+  m_sSymbolName( "GLD" ), 
   m_dtMarketOpen( time_duration( 10, 30, 0 ) ),
   m_dtMarketOpeningOrder( time_duration( 10, 30, 20 ) ),
   m_dtMarketClosingOrder( time_duration( 16, 56, 0 ) ),
@@ -738,8 +737,12 @@ void CProcess::OpenPosition( void ) {
 
   // assert( !m_bTrading );
 
+  int nPuts;
+  int nLong;
+
   // if no position, create a zero delta position.
-  if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
+//  if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
+  if ( 0 == m_posPut->GetRow().nPositionActive ) {
 
     double gammaCall = 0;
     double gammaPut = 0;
@@ -767,24 +770,25 @@ void CProcess::OpenPosition( void ) {
     m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
     // depending upon gammas, could be straddle or strangle?
-    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->second.Call()->Delta() ) / 100 );
-    m_nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->second.Put() ->Delta() ) / 100 );
+//    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->second.Call()->Delta() ) / 100 );
+    nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->second.Put() ->Delta() ) / 100 );
 
     // a normal delta neutral with long underlying and long put
-    m_nLongPut = m_nPuts;
-    m_nLongUnderlying = m_dblBaseDelta;
+    nLong = m_dblBaseDelta;
 
     // generate orders
-    if ( ( 0 == m_nCalls ) || ( 0 == m_nPuts ) ) {
+//    if ( ( 0 == m_nCalls ) || ( 0 == m_nPuts ) ) {
+    if ( 0 == nPuts ) {
       // don't buy anything if either side is zero
       m_ss.str( "" );
       m_ss << "puts or calls are zero" << std::endl;
       OutputDebugString( m_ss.str().c_str() );
-      m_nCalls = m_nPuts = 0;
+//      m_nCalls = m_nPuts = 0;
     }
     else {
 
-      if ( ( 0 == m_posUnderlying ) && ( 0 == m_posPut ) ) {
+//      if ( ( 0 == m_posPut->GetRow().nPositionActive ) && ( 0 == m_posUnderlying->GetRow().nPositionActive ) ) {
+      if ( (  0 == m_posPut ) || ( 0 == m_posUnderlying ) ) {  // no positions created, so create positions
 
         // need more finesse:  create positions if necessary, 
         // then check positions, if both are 0, then create orders
@@ -793,19 +797,19 @@ void CProcess::OpenPosition( void ) {
           // orders for normal delta neutral
           m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
           m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongUnderlying );
-          m_dblDeltaTotalUnderlying = m_nLongUnderlying;
+          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
+          m_dblDeltaTotalUnderlying = nLong;
 
           m_bWaitingForTradeCompletion = true;
 
           m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
           m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-          m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, m_nLongPut );
-          m_dblDeltaTotalPut = m_nLongPut * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
+          m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
+          m_dblDeltaTotalPut = nPuts * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
           m_ss.str( "" );
-          m_ss << "Opening Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
-                               << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
+          m_ss << "Opening Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
+                               << ", P" << nPuts << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                                << std::endl;
           OutputDebugString( m_ss.str().c_str() );
         }
@@ -1005,8 +1009,8 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
 
     double dblMidQuote = ( quote.Bid() + quote.Ask() ) / 2.0;
 
-    double dblDeltaPut  = m_iterOILatestGammaSelectPut->second.Put()->Delta() * m_nPuts * 100;
-    double dblDeltaCall = m_iterOILatestGammaSelectCall->second.Call()->Delta() * m_nCalls * 100;
+    double dblDeltaPut  = m_iterOILatestGammaSelectPut->second.Put()->Delta() * m_posPut->GetRow().nPositionActive * 100;
+    //double dblDeltaCall = m_iterOILatestGammaSelectCall->second.Call()->Delta() * m_nCalls * 100;
 
     bool bTraded = false;
     int nOptions = 0;
@@ -1058,9 +1062,12 @@ void CProcess::HandleTSCloseOrders( const CQuote& quote ) {
 
   if ( m_bTrading ) {
 
+    int nPuts = m_posPut->GetRow().nPositionActive;
+    int nLong = m_posUnderlying->GetRow().nPositionActive;
+
     m_ss.str( "" );
-    m_ss << "Closing Delta N:  U" << m_nLongUnderlying << "@" << m_dblUnderlyingPrice << " for " << 100 * m_nLongUnderlying * m_dblUnderlyingPrice
-                         << ", P" << m_nLongPut        << "@" << m_dblPutPrice        << " for " << 100 * m_nLongPut * m_dblPutPrice 
+    m_ss << "Closing Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
+                         << ", P" << nPuts             << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                           << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
