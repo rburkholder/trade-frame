@@ -1,0 +1,276 @@
+This sensitivity or stock exposure is measured by the slope of the price of
+the investment, not the actual level or value of the investment. With volatility trades we
+specifically design portfolios in such a \\a\ that the exposure varies constantly with the
+underlying share price.
+
+The strict definition of volatility as used by market participants is quite complex
+and involves the use of natural logarithms and a knowledge of the statistics
+associated with what is known as the lognormal distribution.
+
+on what is known as the implied volatility. The implied
+volatility is probably one of the most important measures for the volatility player
+and will be dealt with later.
+
+The volatility of a price series is a measure of the deviation of price
+changes around the trend.
+
+The strict definition of volatility as used by market participants uses a function
+of relative price changes rather than price changes
+
+d some mean trend. One use of the standard volatility measure is to make
+probability statements about the approximate likely range of the stock price in the
+future. Assuming that the st
+
+1. There is a 66% chance that the stock price is in the range (100 - x)% to (100 + x)% of the price today.
+2. There is a 95% chance that the stock price is in the range (100 - 2x)% to (100 + 2x)% of the price today.
+3. There is a 99% chance that the stock price is in the range (100 - 3x)% to (100 + 3x)% of the price today.
+
+weeks or 50 weeks? If we
+go back as far as 200 weeks we may be including data that are so out of date as to
+be increasing, rather than reducing, the error of the estimate. Empirical evidence
+suggests that volatility is constantly changing and so it is important not to go too
+far back in time. Another issue is that of using inter-day data. In the above we
+used one price per day and many practitioners are content with the results obtained
+from daily closing prices. Some traders advocate using more than one piece of
+information per day such as the open, high, low and close.
+
+There is evidence for what
+is known as "reversion to the mean" with volatility. Simply put, this means that if
+a particular price series begins to exhibit high volatility this will eventually fall.
+Similarly if the series begins to exhibit particularly low volatility then it will
+eventually rise. The theory suggests the presence of some long-term average
+volatility level. The trick is of course picking the high and low volatility points.
+
+. Most individuals would assign a higher probability to the current stock price
+and a lower probability to prices further away. Unless some extraordinary event
+occurs one would normally assume that the stock price in three months' time will
+be near the present price.
+
+. Because this ratio is so important in constructing hedged portfolios,
+the delta is also often referred to as the hedge ratio.
+
+extent of the time decay at each stock price. The
+curves are furthest apart with the stock price near the exercise price and most
+bunched together at the extremes. It is clear that the near-the-money options suffer
+the most time decay. As one moves further away from the exercise price, the
+effects of time decay get smaller and smaller. Deep out-of-the-money or deep inthe-money
+options have virtually no time decay at all.
+
+mple. The very options that have no time
+decay also have very little price curvature. And we need price curvature for the
+volatility trade. Options with the most curvature unfortunately suffer the most time
+decay. Again we return to this subject later.
+
+The new option
+contract value is 100 X (8.95 - 8.19) = $76 lower than the one used in the naive
+description of the trade without time value considerations. So what was a profit of
+$49 turns out to be a profit ot $49 - $76 = -$27, i.e. a loss. So what sort of price
+move in one iliiection do we need to make a profit? It is clear from Figure 4.5 that
+it tlu- price had moved as far $106 in the three months then the trade ^vould break
+even. If the price had moved higher then a profit would n-siilt. One c
+
+One can repeat this exercise for various different scenarios to get an
+idea of what type of price swings one would need to make a profit.
+
+Rehedging more frequently will
+certainly capture profits due to small price swings but has the disadvantage of
+missing out on the really large profits obtained with large price swings. Rehedging
+less frequently gives more scope for the large profits but will mean that the little
+profits associated with smaller price swings will be missed.
+
+. With a bigger portfolio, rehedging can be done by adjusting the option or
+stock size, and costs such as the bid to offer spread, taxes and commissions will
+dictate which side to adjust. The chosen rehedging strategy will be a question of
+compromise. If the dealing costs are high (as with options on stocks) one has to
+wait for a significant price move to justify the transaction charges. If the dealing
+costs are low (as with options on futures) then rehedging can take place relatively
+frequently.
+
+experienced. If the price paid is low and the volatility is high, the player will win
+overall. If the price paid is high and the actual volatility is low then the player will
+lose. If the individual in question executes this trade on many occasions there will
+be a long-run average rehedging revenue. If this long-run revenue exactly matches
+the price paid, then we can say that the option price was fair in volatility terms.
+This, then, gives us another way to see if an option is expensive or not.
+
+If we assume that the relevant distribution is lognormal and that the
+dispersion measure used is set equal to the expected volatility, then both fair value
+methods give identical results. If the volatility input into both models is high (low)
+then both fair values will be high (low). The volatility of the day-to-day price
+changes directly affects the distribution of prices on expiry. If the volatility is high
+then the distribution of stock prices on the one future expiry day will be very
+dispersed. If the volatility is high, then there will be a much higher chance of the
+expiring option ending up deep-in-the-money and being worth a considerable sum.
+So an option on a highly volatile stock should have a higher fair value even when one considers the static buy and hold
+strategy.
+
+The sensitivity of option prices to changes in volatility is similar to the sensitivity
+to time. Near-the-money options are most sensitive and deep out-of-the money and deep in-the-money options are less sensitive. The
+figures illustrate the importance of getting the volatility right. The standard long
+volatility trade was explained using a fixed volatility of 15%. At the start with the
+stock price at $99 the option was priced at $5.46. If immediately after putting this
+trade on, the market priced all one-year options as if future volatility was only
+going to be 10% we see that the option price would immediately drop to $3.49
+resulting in a loss without anything really happening. The sensitivity of option
+prices to changes in volatility is so important to market participants that it has been
+assigned a special symbol. The rate of change of an option price with respect to
+volatility is known as vega. Vega usually is defined as the change in option price
+caused by a change in volatility of 1%.
+
+3. The vega of an option
+not only varies with the underlying stock price but also with time to maturity.
+Other things being equal, shorter dated options are less sensitive of volatility
+inputs—shorter-dated options have lower vegas. This is
+
+Accurate volatility estimation is very important for very longdated
+options and virtually irrelevant for very short-dated options.
+
+value. Options with different times to maturity, different stock prices and
+different exercise prices can be compared by simple reference to the implied
+volatility.
+
+=========================
+an option with a more marked degree of curvature. The long
+volatility player is always looking for low-priced curvature. Curvature is so
+important in the option market that it also has been assigned a Greek letter—
+gamma. This concept is best demonstrated by considering two imaginary option
+curves in Figure 4.8.
+=============================
+
+price changes. The real use of gamma to the option trader
+and the volatility player is in the estimation of future rehedging activity. Gamma is
+the change in delta associated with a change in price of the underlying and so the
+gamma is also a measure of the rate at which we rehedge a delta neutral position. T
+
+The long volatility trade generates profits from the curvature and these
+profits are locked in by the rehedging process. So the gamma of the position is a
+direct measure of the potential profit due to volatility and often the term long
+gamma is used instead of long volatility. The term long gamma also refers to the
+fact that the gamma of the position is positive.
+
+Unfortunately these are the very options that suffer the most theta decay.
+
+page 85
+
+o rise. As one crosses higher and
+higher delta contours the portfolio becomes increasingly unbalanced on the long
+side. There will be a point, depending on the rehedging strategy, at which
+rebalancing must take place. One can in fact use the contours to dictate when to
+rehedge. If we make an arbitrary rule that we only adjust the stock hedge each time
+the delta changes say by 0.10 then each time the stock price crosses one of the
+fixed contours we would rehedge. It is thus possible to see on a traditional stock
+price versus time chart when a rehedging trade occurs.
+
+. This particular simulation shows a high profit not only because of the high
+volatility but also because the stock price path happened to stay in the high gamma
+region right up to expiry.
+
+Understanding the complexities of the effects of the stock price, the time to expiry
+and the volatility on the option price, the delta and the gamma is essential in
+managing a volatility strategy. The simple long volatility strategy will make a profit
+in the right circumstances and will make a loss in the wrong circumstances. The
+right circumstances are buying relatively low implied volatility options and
+subsequently experiencing relatively high volatility. This can mean buying volatility
+at 25% and experiencing 35% or buying at 5% and experiencing 15%. 1 he wrong
+circumstances are buying what one thought was relatively low volatility and
+actually experiencing even lower volatility. With any trading strategy it is useful to look at what is the most one can make or lose. We
+need to examine the worst and best case scenarios.
+
+The strategy needs volatility to make a profit and the worst case scenario is that in
+which there is no volatility at all. There are a number of ways a price series can
+have zero volatility.
+The simplest case is that of the stock price staying completely constant through
+to expiry. As expiry approaches the hedge will be altered but all transactions will
+involve stock at the one constant price and on expiry the stock hedge will be
+completely unwound at the same constant price. In this situation the only loss to the
+strategy will be the time value of the option. Figure 4.16 shows the losses (type 1)
+suffered under this type of zero volatility.
+A second type of zero volatility (type 2), that in fact can cause higher losses, is
+that in which the stock price moves in a gradual and orderly fashion towards the
+exercise price, finishing exactly at the exercise price on the expiry date. The option
+will thus always expire worthless, resulting in the total loss of the initial option
+value. If the option was initially in-the-money then these losses will be slightly offset
+by the profits caused by the short stock position. If the option is initially out-ofthe-money
+then these losses will be added to by the short stock position
+
+There are many best case scenarios, the most obvious one being that immediately
+after implementation of the trade, the stock price swings violently up and down
+around the point of maximum gamma (near-the-money). There are, however, two
+other interesting extreme situations in which very large profits can be made.
+
+As when using calls, the long volatility strategy using puts produces rehedging
+profits because of the presence of price curvature or gamma, and the basic idea
+underpinning the strategy is to find cheap options with high gamma.
+
+page 145
+d not suit. There are situations, however, when the individual may decide that
+if the market rises, volatility will fall and if the market falls, then volatility will
+rise. The above combination would perfectly suit such a view. The player would
+automatically become short volatility on the way up and long volatility on the way
+down.
+Another situation that may make such a combination attractive, is one in which
+the individual viewed the upper option expensive compared to the lower option.
+Here the individual has no view on volatility or the direction of the market price
+but wishes to arbitrage out the difference in option values. In order to do this he must short the expensive option
+and buy the cheap one. The net combination would be long of the underlying and
+in order to remove market risk, the appropriate hedge would be used. The portfolio
+would be run either to expiry or until the apparent anomalous price difference
+disappeared.
+
+
+The way in which the implied volatilities vary across strike prices depends on
+the market and market conditions. Stock options typically have higher volatilities at
+lower strikes and lower volatilities at higher strikes. The standard reasoning behind
+this type of volatility profile is that in a falling market everyone needs out-of-themoney
+puts for insurance and will pay a higher price for the lower strike options.
+Also equity fund managers round the world are long billions of dollars worth of
+stock and like writing (selling) out-of-the-money call options against their holdings
+as a way of generating extra income. It is believed that this large scale selling of
+options has the effect of lowering the implied volatilities of higher strikes. Figure
+8.2 shows a graph of such volatilities versus strike prices and this is referred to as a
+volatility profile or volatility skew. Practitioners refer to this particular profile as
+a volatility smirk.
+
+As with the differences across strike prices, the
+differences over expiry cycles are always a function of supply and demand. When
+markets are very quiet, the implied volatilities of the near month options are
+generally lower than those of the far month and when markets are
+very volatile, the reverse is generally true. In quiet markets, option players often
+get lulled into believing that the quiet times will persist. In quiet markets no one
+wants a portfolio long of near-dated options and so selling is often the best
+strategy. Selling in any significant size will drive the price (and the implied
+volatility) of the near-dated options down. In very volatile markets, everyone
+wants or needs to load up with gamma. Near-dated options provide the most
+gamma and the resultant buying pressure will have the effect of pushing prices
+(and the implied volatilities) up.
+Managing a complex options portfolio thus requires the use of a twodimensional
+implied volatility matrix. One dimension is across strike prices and
+the other is across time. The individual volatilities used should reflect, as near as
+possible, the prices of the options in the market-place. As time passes the structure
+of the implied volatility matrix may change and this is yet another source of
+uncertainty that has to be considered.
+
+page 185
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

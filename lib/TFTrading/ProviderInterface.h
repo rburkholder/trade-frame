@@ -74,9 +74,11 @@ public:
   virtual ~CProviderInterfaceBase( void ) {};
 
   virtual void Connect( void ) {};
+  ou::Delegate<int> OnConnecting;
   ou::Delegate<int> OnConnected;
 
   virtual  void Disconnect( void ) {};
+  ou::Delegate<int> OnDisconnecting;
   ou::Delegate<int> OnDisconnected;
 
   bool Connected( void ) const { return m_bConnected; };

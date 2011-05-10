@@ -35,6 +35,7 @@ CIQFeedProvider::~CIQFeedProvider(void) {
 
 void CIQFeedProvider::Connect() {
   if ( !m_bConnected ) {
+    OnConnecting( 0 );
     inherited_t::Connect();
     IQFeed_t::Connect();
     m_bConnected = true;
@@ -44,6 +45,7 @@ void CIQFeedProvider::Connect() {
 
 void CIQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
+    CProviderInterfaceBase::OnDisconnecting( 0 );
     IQFeed_t::Disconnect();
     inherited_t::Disconnect();
     m_bConnected = false;

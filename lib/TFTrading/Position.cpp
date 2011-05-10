@@ -24,7 +24,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), 
+  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true ),
   m_row( idPortfolio, sName, pInstrument->GetInstrumentName(), idExecutionAccount, idDataAccount, sAlgorithm )
 {
@@ -34,7 +34,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), 
+  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
@@ -43,7 +43,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), 
+  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   m_row.sNotes = sNotes;
@@ -55,7 +55,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 : m_row( row ),
   m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
-  m_dblMultiplier( 1 ), 
+  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( true ), m_bExecutionAccountAssigned( true ), m_bDataAccountAssigned( true )
 {
   Construction();
@@ -63,14 +63,14 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
 
 CPosition::CPosition( const TableRowDef& row ) 
 : m_row( row ),
-  m_dblMultiplier( 1 ), 
+  m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
 {
   // need flags to wait for execution, data, instrument variables to be set
 }
 
 CPosition::CPosition( void ) 
-: m_dblMultiplier( 1 ), 
+: m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
 {
   // need flags to wait for execution, data, instrument variables to be set
@@ -87,6 +87,8 @@ void CPosition::Construction( void ) {
   if ( m_pDataProvider->ProvidesGreeks() ) {
     m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
   }
+  m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &CPosition::DisconnectFromDataProvider ) );
+  m_bConnectedToDataProvider = true;
 }
 
 void CPosition::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
@@ -105,6 +107,20 @@ void CPosition::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvid
 }
 
 CPosition::~CPosition(void) {
+  if ( m_bConnectedToDataProvider ) {
+    DisconnectFromDataProvider( 0 );
+  }
+  for ( std::vector<pOrder_t>::iterator iter = m_AllOrders.begin(); iter != m_AllOrders.end(); ++iter ) {
+    iter->get()->OnCommission.Remove( MakeDelegate( this, &CPosition::HandleCommission ) );
+    iter->get()->OnExecution.Remove( MakeDelegate( this, &CPosition::HandleExecution ) );
+  }
+  m_OpenOrders.clear();
+  m_ClosedOrders.clear();
+  m_AllOrders.clear();
+}
+
+void CPosition::DisconnectFromDataProvider( int ) {
+  m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &CPosition::DisconnectFromDataProvider ) );
   if ( m_pDataProvider->ProvidesQuotes() ) {
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
   }
@@ -114,13 +130,7 @@ CPosition::~CPosition(void) {
   if ( m_pDataProvider->ProvidesGreeks() ) {
     m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
   }
-  for ( std::vector<pOrder_t>::iterator iter = m_AllOrders.begin(); iter != m_AllOrders.end(); ++iter ) {
-    iter->get()->OnCommission.Remove( MakeDelegate( this, &CPosition::HandleCommission ) );
-    iter->get()->OnExecution.Remove( MakeDelegate( this, &CPosition::HandleExecution ) );
-  }
-  m_OpenOrders.clear();
-  m_ClosedOrders.clear();
-  m_AllOrders.clear();
+  m_bConnectedToDataProvider = false;
 }
 
 void CPosition::HandleQuote( quote_t quote ) {

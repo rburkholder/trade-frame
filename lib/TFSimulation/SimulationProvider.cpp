@@ -62,6 +62,7 @@ void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory )
 
 void CSimulationProvider::Connect() {
   if ( !m_bConnected ) {
+    OnConnecting( 0 );
     m_bConnected = true;
     CProviderInterface::Connect();
     OnConnected( 0 );
@@ -70,6 +71,7 @@ void CSimulationProvider::Connect() {
 
 void CSimulationProvider::Disconnect() {
   if ( m_bConnected ) {
+    OnDisconnecting( 0 );
     m_bConnected = false;
     CProviderInterface::Disconnect();
     OnDisconnected( 0 );

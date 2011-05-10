@@ -184,13 +184,14 @@ till next multiple to ensure a ways above average price
 
 // ***** At day’s end, I always zero out deltas. 
 
-//#define testing
+#define testing
 
 CProcess::CProcess(void)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_contractidUnderlying( 0 ),
   m_bWatchingOptions( false ), m_bTrading( false ),
+  m_bPositionsOpened( false ),
   m_dblBaseDelta( 2000.0 ), m_dblBaseDeltaIncrement( 100.0 ),
   m_TradingState( ETSFirstPass ), 
 #ifdef testing
@@ -383,37 +384,44 @@ void CProcess::OnHistoryConnected( void ) {
 }
 
 void CProcess::HandleOnExecConnected(int e) {
+  // is this called only from program, or does a port reconnect also call this?  if so, some logic in connect/disconnect needs to be fixed
 
-  // (1) create underlying symbol, then (2) get strike list
-  m_mapStrikeInfo.clear(); /// horribly buggy this way.
-  m_vCrossOverPoints.clear();
-
-  switch ( m_eMode ) {
-    case EModeSimulation:
-      break;
-    case EModeLive:
-      // try load from database first
-      try {
-        m_pUnderlying = ou::tf::CInstrumentManager::Instance().Get( m_sSymbolName );
-        // need to also prime TWS with symbol
-        m_tws->GetSymbol( m_pUnderlying );  // preload symbol
-        HandleUnderlyingListingDone();
-      }
-      catch (...) {
-        // otherwise request the contract information
-        m_contract.secType = "STK";
-        m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
-        m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
-        m_tws->RequestContractDetails( m_contract );
-      }
-      break;
+  if ( m_bExecConnected ) {
+    std::cout << "was this due to port reconnect?" << std::endl;
   }
+  else {
+    // (1) create underlying symbol, then (2) get strike list
+    m_mapStrikeInfo.clear(); /// horribly buggy this way.
+    m_vCrossOverPoints.clear();
 
-  m_bExecConnected = true;
-  HandleOnConnected( e );
+    switch ( m_eMode ) {
+      case EModeSimulation:
+        break;
+      case EModeLive:
+        // try load from database first
+        try {
+          m_pUnderlying = ou::tf::CInstrumentManager::Instance().Get( m_sSymbolName );
+          // need to also prime TWS with symbol
+          m_tws->GetSymbol( m_pUnderlying );  // preload symbol
+          HandleUnderlyingListingDone();
+        }
+        catch (...) {
+          // otherwise request the contract information
+          m_contract.secType = "STK";
+          m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
+          m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
+          m_tws->RequestContractDetails( m_contract );
+        }
+        break;
+    }
+
+    m_bExecConnected = true;
+    HandleOnConnected( e );
+  }
 }
 
 void CProcess::HandleOnExecDisconnected(int e) {
+  // what happens when a port disconnects?  will this be called?  If so, the logic needs to be changed to turn off only certain things
   m_bExecConnected = false;
   HandleOnConnected(e);
   m_ss.str( "" );
@@ -455,6 +463,9 @@ void CProcess::HandleOnConnected( int e ) {
 
         if ( ( 0 != nPositionsOpened ) && ( 2 != nPositionsOpened ) ) {
           throw std::runtime_error( "wrong number of positions available" );
+        }
+        if ( 2 == nPositionsOpened ) {
+          m_bPositionsOpened = true;
         }
 
       }
@@ -633,12 +644,12 @@ void CProcess::HandleStrikeFromIB( const ContractDetails& details ) {
 
 }
 
-void CProcess::HandleStrikeFromDb( ou::tf::CInstrument::pInstrument_t pInstrument ) {
+void CProcess::HandleStrikeFromDb( pInstrument_t pInstrument ) {
   m_tws->GetSymbol( pInstrument );  // preload symbol
   AddOptionToStrikeInfo( pInstrument );
 }
 
-void CProcess::AddOptionToStrikeInfo( ou::tf::CInstrument::pInstrument_t pInstrument ) {
+void CProcess::AddOptionToStrikeInfo( pInstrument_t pInstrument ) {
 
   double dblStrike = pInstrument->GetStrike();
 
@@ -704,7 +715,6 @@ void CProcess::OnHistoryRequestDone( void ) {
 
 void CProcess::StartWatch( void ) {
 
-//  std::sort( m_vStrikes.begin(), m_vStrikes.end() );
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
   m_iterOILatestGammaSelectCall = m_mapStrikeInfo.end();  // initialized for beginning of trading
@@ -724,20 +734,37 @@ void CProcess::StopWatch( void ) {
     m_bWatchingOptions = false;
     for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      CStrikeInfo& oi = iter->second;
+      CStrikeInfo& si = iter->second;
 
-      m_pDataProvider->RemoveQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleGreek ) );
 
-      m_pDataProvider->RemoveQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleGreek ) );
     }
   }
 }
 
-void CProcess::SetActiveOption( void ) {
+CProcess::mapStrikeInfo_iter_t CProcess::LocateOptionStrikeInfo( const pInstrument_t& pInstrument ) {
+
+  assert( 0 != m_mapStrikeInfo.size() );
+  assert( ou::tf::InstrumentType::Option == pInstrument->GetInstrumentType() );
+  double strike = pInstrument->GetStrike();
+  mapStrikeInfo_iter_t iter = m_mapStrikeInfo.begin();
+  while ( iter != m_mapStrikeInfo.end() ) {
+    if ( strike = iter->second.Strike() ) {
+      break;
+    }
+  }
+  if ( iter == m_mapStrikeInfo.end() ) {
+    throw std::runtime_error( "CProcess::LocateOptionStrikeInfo: couldn't find StrikeInfo" );
+  }
+  return iter;
+}
+
+void CProcess::CalculateHighGammaOption( void ) {
 
   double gammaCall = 0;
   double gammaPut = 0;
@@ -761,81 +788,63 @@ void CProcess::SetActiveOption( void ) {
 
 }
 
-void CProcess::OpenPosition( void ) {
-
-  // assert( !m_bTrading );
+void CProcess::OpenPositions( void ) {
 
   int nPuts;
   int nLong;
 
-  // if no position, create a zero delta position.
-//  if ( ( 0 == m_nCalls ) && ( 0 == m_nPuts ) ) {
-//  if ( 0 == m_posPut->GetRow().nPositionActive ) {
-  if ( 0 == m_posPut ) {
+  assert( 0 == m_posPut );
+  assert( 0 == m_posUnderlying );
 
-    SetActiveOption();
+  CalculateHighGammaOption();
 
-    // todo?  check that SelectCall != LowestWatch and SelectPut != HighestWatch
+  // todo?  check that SelectCall != LowestWatch and SelectPut != HighestWatch
 
 //    m_dblCallPrice = m_iterOILatestGammaSelectCall->second.Call()->Ask();
-    m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
+  m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
-    // depending upon gammas, could be straddle or strangle?
+  // depending upon gammas, could be straddle or strangle?
 //    m_nCalls = (int) floor(      ( m_dblBaseDelta / m_iterOILatestGammaSelectCall->second.Call()->Delta() ) / 100 );
-    nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->second.Put() ->Delta() ) / 100 );
+  nPuts  = (int) floor( -1 * ( m_dblBaseDelta / m_iterOILatestGammaSelectPut ->second.Put() ->Delta() ) / 100 );
 
-    // a normal delta neutral with long underlying and long put
-    nLong = m_dblBaseDelta;
+  // a normal delta neutral with long underlying and long put
+  nLong = m_dblBaseDelta;
 
-    // generate orders
+  // generate orders
 //    if ( ( 0 == m_nCalls ) || ( 0 == m_nPuts ) ) {
-    if ( 0 == nPuts ) {
-      // don't buy anything if either side is zero
-      m_ss.str( "" );
-      m_ss << "puts or calls are zero" << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
+  if ( 0 == nPuts ) {
+    // don't buy anything if either side is zero
+    m_ss.str( "" );
+    m_ss << "count of puts are zero" << std::endl;
+    OutputDebugString( m_ss.str().c_str() );
 //      m_nCalls = m_nPuts = 0;
-    }
-    else {
+  }
+  else {
 
-//      if ( ( 0 == m_posPut->GetRow().nPositionActive ) && ( 0 == m_posUnderlying->GetRow().nPositionActive ) ) {
-      if ( (  0 == m_posPut ) || ( 0 == m_posUnderlying ) ) {  // no positions created, so create positions
+    try {
+      // orders for normal delta neutral
+      m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
+      m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+      m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
+      m_dblDeltaTotalUnderlying = nLong;
 
-        // need more finesse:  create positions if necessary, 
-        // then check positions, if both are 0, then create orders
+      m_bWaitingForTradeCompletion = true;
 
-        try {
-          // orders for normal delta neutral
-          m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
-          m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
-          m_dblDeltaTotalUnderlying = nLong;
-
-          m_bWaitingForTradeCompletion = true;
-
-          m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
-          m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
-          m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
+      m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
+      m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+      m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
 //          m_dblDeltaTotalPut = nPuts * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
-          m_ss.str( "" );
-          m_ss << "Opening Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
-                               << ", P" << nPuts << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
-                               << std::endl;
-          OutputDebugString( m_ss.str().c_str() );
-        }
-        catch (...) {
-          throw std::runtime_error( "error" );
-        }
-      }
-      else {
-        if ( ( 0 != m_posUnderlying ) && ( 0 != m_posPut ) ) {
-          // don't do anything, already have positions going
-        }
-        else {
-          throw std::runtime_error( "openposition has unmatched positions" );
-        }
-      }
+      m_bPositionsOpened = true;
+
+      m_ss.str( "" );
+      m_ss << "Opening Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
+                            << ", P" << nPuts << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
+                            << std::endl;
+      OutputDebugString( m_ss.str().c_str() );
+    }
+    catch (...) {
+      throw std::runtime_error( "CProcess::OpenPositions error" );
     }
   }
 
@@ -871,7 +880,7 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
 //      HandleTSMarketopened( trade );
 //      break;
     case ETSFirstTrade:
-      HandleTSOpeningOrder( quote );
+      HandleTSActiveMarketStart( quote );
       break;
     case ETSCloseOrders:
       HandleTSCloseOrders( quote );
@@ -895,11 +904,11 @@ void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
 
 void CProcess::HandleTSFirstPass( const CQuote& quote ) {
   // may need to open portfoloio and evaluate existing positions here
-  m_TradingState = ETSPreMarket;
   m_ss.str( "" );
   m_ss << ou::CTimeSource::Instance().Internal();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
+  m_TradingState = ETSPreMarket;
 }
 
 void CProcess::HandleTSPreMarket( const CQuote& quote ) {
@@ -976,7 +985,7 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
   m_TradingState = ETSFirstTrade;
 }
 
-void CProcess::HandleTSOpeningOrder( const CQuote& quote ) {
+void CProcess::HandleTSActiveMarketStart( const CQuote& quote ) {
 
   ptime dt = ou::CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
@@ -986,7 +995,13 @@ void CProcess::HandleTSOpeningOrder( const CQuote& quote ) {
     OutputDebugString( m_ss.str().c_str() );
 
     m_bTrading = true;
-    OpenPosition();
+    if ( m_bPositionsOpened ) {
+      m_iterOILatestGammaSelectCall =
+        m_iterOILatestGammaSelectPut = LocateOptionStrikeInfo( m_posPut->GetInstrument() );
+    }
+    else {
+      OpenPositions();
+    }
     m_TradingState = ETSTrading;
   }
 }
@@ -1033,24 +1048,28 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
       double dblDeltaDif = dblDeltaPut + m_dblDeltaTotalUnderlying;
       if ( dblDeltaDif > m_dblBaseDeltaIncrement ) { // sell underlying to get closer to put delta
         //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
-        m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement );
-        bTraded = true;
-        m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
-        m_ss.str( "" );
-        m_ss << dt;
-        m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
-        OutputDebugString( m_ss.str().c_str() );
+        if ( m_posUnderlying->SellOrdersPending() ) {
+          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement );
+          bTraded = true;
+          m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
+          m_ss.str( "" );
+          m_ss << dt;
+          m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
+          OutputDebugString( m_ss.str().c_str() );
+        }
       }
       else {
         if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
           //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
-          m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement );
-          bTraded = true;
-          m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
-          m_ss.str( "" );
-          m_ss << dt;
-          m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
-          OutputDebugString( m_ss.str().c_str() );
+          if ( m_posUnderlying->BuyOrdersPending() ) {
+            m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement );
+            bTraded = true;
+            m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
+            m_ss.str( "" );
+            m_ss << dt;
+            m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
+            OutputDebugString( m_ss.str().c_str() );
+          }
         }
       }
 

@@ -202,13 +202,13 @@ public:
   ou::Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
   ou::Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
 
-  InstrumentType::enumInstrumentTypes GetInstrumentType( void ) { return m_row.eType; };
+  InstrumentType::enumInstrumentTypes GetInstrumentType( void ) const { return m_row.eType; };
   bool IsOption( void ) const { return ( InstrumentType::Option == m_row.eType ); };
   bool IsFuture( void ) const { return ( InstrumentType::Future == m_row.eType ); };
 
   const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_row.eCurrency = eCurrency; };
-  const char *GetCurrencyName( void ) { return Currency::Name[ m_row.eCurrency ]; };
+  const char *GetCurrencyName( void ) const { return Currency::Name[ m_row.eCurrency ]; };
 
   double GetStrike( void ) const { return m_row.dblStrike; };
   boost::uint16_t GetExpiryYear( void ) const { return m_row.nYear; };

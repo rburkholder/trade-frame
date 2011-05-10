@@ -176,6 +176,9 @@ public:
   double GetRealizedPL( void ) const { return m_row.dblRealizedPL; };
   double GetCommissionPaid( void ) const { return m_row.dblCommissionPaid; };
 
+  bool OrdersPending( void ) const { return ( 0 != m_row.nPositionPending ); };
+  bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
+  bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
 
   COrder::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
@@ -232,10 +235,12 @@ private:
   bool m_bInstrumentAssigned;
   bool m_bExecutionAccountAssigned;
   bool m_bDataAccountAssigned;
+  bool m_bConnectedToDataProvider;
 
   double m_dblMultiplier;
 
   void Construction( void );
+  void DisconnectFromDataProvider( int );
 
   void HandleExecution( const std::pair<const COrder&, const CExecution&>& );
   void HandleCommission( const COrder& );

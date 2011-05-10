@@ -281,6 +281,8 @@ private:
   bool m_bDataConnected;
   bool m_bData2Connected;
   bool m_bConnectDone;
+
+  bool m_bPositionsOpened;
   
   CQuotes m_quotes;
   CTrades m_trades;
@@ -305,7 +307,7 @@ private:
   typedef mapStrikeInfo_t::iterator mapStrikeInfo_iter_t;
   mapStrikeInfo_t m_mapStrikeInfo;
 
-  mapStrikeInfo_iter_t m_iterOILowestWatch;
+  mapStrikeInfo_iter_t m_iterOILowestWatch;  // 15 watches, balance low and high option watch around opening of underlying
   mapStrikeInfo_iter_t m_iterOIHighestWatch;
   mapStrikeInfo_iter_t m_iterOILatestGammaSelectCall;
   mapStrikeInfo_iter_t m_iterOILatestGammaSelectPut;
@@ -349,8 +351,7 @@ private:
   void HandleUnderlyingListing( const ContractDetails& );  // underlying
   void HandleUnderlyingListingDone( void );
   void HandleStrikeFromIB( const ContractDetails& );  // symbols for options
-  void HandleStrikeFromDb( ou::tf::CInstrument::pInstrument_t );
-  void AddOptionToStrikeInfo( ou::tf::CInstrument::pInstrument_t );
+  void HandleStrikeFromDb( pInstrument_t );
   void HandleStrikeListingDone( void );
 
   void HandleUnderlyingQuote( const CQuote& quote );
@@ -359,7 +360,7 @@ private:
   void HandleTSFirstPass( const CQuote& quote );
   void HandleTSPreMarket( const CQuote& quote );
   void HandleTSMarketOpened( const CQuote& quote );
-  void HandleTSOpeningOrder( const CQuote& quote );
+  void HandleTSActiveMarketStart( const CQuote& quote );
   void HandleTSTrading( const CQuote& quote );
   void HandleTSCloseOrders( const CQuote& quote );
   void HandleAfterMarket( const CQuote& quote );
@@ -368,8 +369,11 @@ private:
 
   void HandlePopulateDatabase( void ) ;
 
-  void SetActiveOption( void );
-  void OpenPosition( void );
+  void AddOptionToStrikeInfo( pInstrument_t );
+  mapStrikeInfo_iter_t LocateOptionStrikeInfo( const pInstrument_t& pInstrument );
+
+  void CalculateHighGammaOption( void );
+  void OpenPositions( void );
   void ClosePosition( void );
   void PrintGreeks( void );
 

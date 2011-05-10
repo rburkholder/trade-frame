@@ -54,6 +54,7 @@ CIBTWS::~CIBTWS(void) {
 
 void CIBTWS::Connect() {
   if ( NULL == pTWS ) {
+    OnConnecting( 0 );
     pTWS = new EPosixClientSocket( this );
     bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
     assert( bReturn );
@@ -72,6 +73,7 @@ void CIBTWS::Connect() {
 void CIBTWS::Disconnect() {
   // check to see if there are any watches happening, and get them disconnected
   if ( NULL != pTWS ) {
+    OnDisconnecting( 0 );
     m_bConnected = false;
     pTWS->eDisconnect();
     m_thrdIBMessages.join();  // wait for message processing to exit
