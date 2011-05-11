@@ -184,7 +184,7 @@ till next multiple to ensure a ways above average price
 
 // ***** At day’s end, I always zero out deltas. 
 
-//#define testing
+#define testing
 
 CProcess::CProcess(void)
 :
@@ -211,9 +211,6 @@ CProcess::CProcess(void)
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-//  m_bWaitingForTradeCompletion( false ), 
-//  m_dblDeltaTotalPut( 0 ), 
-//  m_dblDeltaTotalUnderlying( 0 ),
   m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
   m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false )
@@ -827,14 +824,10 @@ void CProcess::OpenPositions( void ) {
       m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
       m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
-//      m_dblDeltaTotalUnderlying = nLong;
-
-//      m_bWaitingForTradeCompletion = true;
 
       m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
       m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
-//          m_dblDeltaTotalPut = nPuts * 100.0 * m_iterOILatestGammaSelectPut ->second.Put() ->Delta();
 
       m_bPositionsOpened = true;
 
@@ -1057,28 +1050,22 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
 
         if ( dblDeltaDif > m_dblBaseDeltaIncrement ) { // sell underlying to get closer to put delta
           //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
-//          if ( !m_posUnderlying->SellOrdersPending() ) {
             m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Sell, m_dblBaseDeltaIncrement );
             bTraded = true;
-//            m_dblDeltaTotalUnderlying -= m_dblBaseDeltaIncrement;
             m_ss.str( "" );
             m_ss << dt;
             m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
             OutputDebugString( m_ss.str().c_str() );
-//          }
         }
         else {
           if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
             //m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement / 100 ); // <<=== temporary fix for this simulation set
-//            if ( !m_posUnderlying->BuyOrdersPending() ) {
               m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, m_dblBaseDeltaIncrement );
               bTraded = true;
-//              m_dblDeltaTotalUnderlying += m_dblBaseDeltaIncrement;
               m_ss.str( "" );
               m_ss << dt;
               m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
               OutputDebugString( m_ss.str().c_str() );
-//            }
           }
         }
 

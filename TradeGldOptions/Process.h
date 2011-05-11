@@ -319,10 +319,6 @@ private:
   time_duration m_dtMarketClosingOrder;
   time_duration m_dtMarketClose;
 
-//  double m_dblDeltaTotalPut;
-//  double m_dblDeltaTotalUnderlying;
-//  bool m_bWaitingForTradeCompletion;
-
 //  double m_dblCallPrice;
   double m_dblPutPrice;
   double m_dblUnderlyingPrice;
