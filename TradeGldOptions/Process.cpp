@@ -290,6 +290,15 @@ CProcess::~CProcess(void) {
   m_db.Close();
 }
 
+void CProcess::EnterTrade( const std::string& sSymbol ) {
+}
+
+void CProcess::PauseTrade( void ) {
+}
+
+void CProcess::ExitTrade( void ) {
+}
+
 void CProcess::SetMode( enumMode mode ) {
 }
 

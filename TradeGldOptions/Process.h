@@ -212,6 +212,10 @@ public:
   void EmitStats( void );
   void SaveSeries( void );
 
+  void EnterTrade( const std::string& sSymbol );
+  void PauseTrade( void );
+  void ExitTrade( void );
+
 protected:
 
   void OnHistoryConnected( void );

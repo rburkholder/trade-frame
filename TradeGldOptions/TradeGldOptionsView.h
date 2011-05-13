@@ -37,6 +37,9 @@ public:
     COMMAND_HANDLER(IDC_RDIO_DATA_IB, BN_CLICKED, OnBnClickedRdioDataIb)
     COMMAND_HANDLER(IDC_BTN_SAVEUNDERLYING, BN_CLICKED, OnBnClickedBtnSaveUnderlying)
     COMMAND_HANDLER(IDC_BTN_SAVEOPTIONS, BN_CLICKED, OnBnClickedBtnSaveOptions)
+    COMMAND_HANDLER(IDC_BTN_ENTER, BN_CLICKED, OnBnClickedBtnEnter)
+    COMMAND_HANDLER(IDC_BTN_EXIT, BN_CLICKED, OnBnClickedBtnExit)
+    COMMAND_HANDLER(IDC_BTN_PAUSE, BN_CLICKED, OnBnClickedBtnPause)
     MSG_WM_MOVE(OnMove)
     MSG_WM_SIZE(OnSize)
   END_MSG_MAP()
@@ -46,20 +49,6 @@ private:
 
   CProcess m_process;
 
-  CButton* m_prdioDataIQFeed;
-  CButton* m_prdioDataIB;
-  CButton* m_pbtnSimConnect;
-  CButton* m_pbtnSimStart;
-  CButton* m_pbtnSimStop;
-  CButton* m_pbtnSimDisconnect;
-  CButton* m_pbtnWatchStart;
-  CButton* m_pbtnWatchStop;
-  CButton* m_pbtnSaveSeries;
-  CButton* m_pbtnEmitStats;
-  CButton* m_pbtnIBConnect;
-  CButton* m_pbtnIBDisconnect;
-  CButton* m_pbtnIQConnect;
-  CButton* m_pbtnIQDisconnect;
 
 public:
 
@@ -86,12 +75,13 @@ public:
 
   void OnMove(CPoint ptPos);
   void OnSize(UINT nType, CSize size);
-//  BEGIN_MSG_MAP(CTradeGldOptionsView)
-//  END_MSG_MAP()
   LRESULT OnBnClickedRdioModeLive(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedRdioModeSim(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedRdioDataIqfeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedRdioDataIb(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnSaveUnderlying(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnSaveOptions(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnEnter(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedBtnPause(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

@@ -15,6 +15,7 @@ HWND CTradeGldOptionsView::Create( HWND hWndParent, LPARAM dwInitParam ) {
   HWND h = CDialogImpl<CTradeGldOptionsView>::Create( hWndParent, dwInitParam );
   //m_prdioDataIQFeed = (CButton*) GetDlgItem( IDC_RDIO_DATA_IQFEED );
   //m_prdioDataIB = (CButton*) GetDlgItem( IDC_RDIO_DATA_IB );
+  //m_pedtSymbol = (CEdit) GetDlgItem( IDC_EDT_SYMBOL ); 
   return h;
 }
 
@@ -122,5 +123,26 @@ LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveUnderlying(WORD /*wNotifyCode*/,
 
 LRESULT CTradeGldOptionsView::OnBnClickedBtnSaveOptions(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnEnter(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+  char szSymbol[ 100 ];
+  GetDlgItemTextA( IDC_EDT_SYMBOL, szSymbol, 100 );
+  std::string s( szSymbol );
+  m_process.EnterTrade( szSymbol );
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+  m_process.ExitTrade();
+  return 0;
+}
+
+
+LRESULT CTradeGldOptionsView::OnBnClickedBtnPause(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+  m_process.PauseTrade();
   return 0;
 }

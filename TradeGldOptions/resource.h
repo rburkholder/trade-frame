@@ -25,6 +25,10 @@
 #define IDC_RDIO_DATA_IB                1017
 #define IDC_BTN_SAVEUNDERLYING          1018
 #define IDC_BTN_SAVEOPTIONS             1019
+#define IDC_EDT_SYMBOL                  1020
+#define IDC_BTN_ENTER                   1021
+#define IDC_BTN_EXIT                    1022
+#define IDC_BTN_PAUSE                   1023
 #define ID_FILE_NEW_WINDOW              32771
 
 // Next default values for new objects
@@ -33,7 +37,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        201
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
