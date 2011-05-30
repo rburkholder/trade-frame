@@ -64,6 +64,7 @@ public:
       ou::db::Field( a, "quantityordered", nOrderQuantity );
       ou::db::Field( a, "quantityremaining", nQuantityRemaining );
       ou::db::Field( a, "quantityfilled", nQuantityFilled );
+      ou::db::Field( a, "quantitypaired", nQuantityPaired );  // used for pairing profitable trades
       ou::db::Field( a, "averagefillprice", dblAverageFillPrice );
       ou::db::Field( a, "commission", dblCommission );
       ou::db::Field( a, "datetimecreated", dtOrderCreated );
@@ -85,6 +86,7 @@ public:
     boost::uint32_t nOrderQuantity;
     boost::uint32_t nQuantityRemaining;
     boost::uint32_t nQuantityFilled;
+    boost::uint32_t nQuantityPaired;
     double dblAverageFillPrice;  // excludes commission
     double dblCommission;
     ptime dtOrderCreated;
@@ -95,14 +97,14 @@ public:
       : idOrder( 0 ), idPosition( 0 ), 
         eOrderStatus( OrderStatus::Created ), eOrderType( OrderType::Unknown ), eOrderSide( OrderSide::Unknown ), 
         dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ), 
-        nOrderQuantity( 0 ), nQuantityRemaining( 0 ), nQuantityFilled( 0 ),
+        nOrderQuantity( 0 ), nQuantityRemaining( 0 ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0.0 ), dblCommission( 0.0 ) {};
     TableRowDef( // market order
       idPosition_t idPosition_, idInstrument_t idInstrument_, OrderType::enumOrderType eOrderType_, OrderSide::enumOrderSide eOrderSide_,
       boost::uint32_t nOrderQuantity_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( 0.0 ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
-        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit or stop
@@ -110,7 +112,7 @@ public:
       boost::uint32_t nOrderQuantity_, double dblPrice1_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( 0.0 ), dblSignalPrice( 0.0 ),
-        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // limit and stop
@@ -118,7 +120,7 @@ public:
       boost::uint32_t nOrderQuantity_, double dblPrice1_, double dblPrice2_, ptime dtOrderSubmitted_ )
       : idOrder( 0 ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), eOrderStatus( OrderStatus::Created ), 
         eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ), dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( 0.0 ),
-        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nOrderQuantity_ ), nQuantityFilled( 0 ), nQuantityPaired( 0 ),
         dblAverageFillPrice( 0 ), dblCommission( 0 ), dtOrderCreated( boost::date_time::not_a_date_time ),
         dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( boost::date_time::not_a_date_time ) {};
     TableRowDef( // complete row provided
@@ -131,7 +133,7 @@ public:
       : idOrder( idOrder_ ), idPosition( idPosition_ ), idInstrument( idInstrument_ ), sDescription( sDescription_ ),
         eOrderStatus( eOrderStatus_ ), eOrderType( eOrderType_ ), eOrderSide( eOrderSide_ ),
         dblPrice1( dblPrice1_ ), dblPrice2( dblPrice2_ ), dblSignalPrice( dblSignalPrice_ ),
-        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ),
+        nOrderQuantity( nOrderQuantity_ ), nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ), nQuantityPaired( 0 ),
         dblAverageFillPrice( dblAverageFillPrice_ ), dblCommission( dblCommission_ ),
         dtOrderCreated( dtOrderCreated_ ), dtOrderSubmitted( dtOrderSubmitted_ ), dtOrderClosed( dtOrderClosed_ ) {};
   };

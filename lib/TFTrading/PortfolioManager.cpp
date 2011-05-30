@@ -194,6 +194,7 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
     pPortfolio = iter->second.pPortfolio;
   }
   else {
+    // following portfolio / position code is shared with LoadActivePortfolios and could be factored out
     PortfolioManagerQueries::PortfolioKey key( idPortfolio );
     ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
       = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from portfolios", key ).Where( "portfolioid = ?" ).NoExecute();
@@ -211,22 +212,7 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
       pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
       pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
-      // load up related positions as well
-      ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
-        = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key ).Where( "portfolioid = ?" ).NoExecute();
-      m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
-      while ( m_pSession->Execute( pPositionQuery ) ) {
-        CPosition::TableRowDef rowPosition;
-        m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
-        pPosition_t pPosition( new CPosition( rowPosition ) );
-        if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, execution, data 
-          throw std::runtime_error( "CPortfolioManager::GetPortfolio has no Details Callback" );
-        }
-        OnPositionNeedsDetails( pPosition );
-        response.first->second.mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
-        pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
-        pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
-      }
+      LoadPositions( idPortfolio, response.first->second.mapPosition );
 
     }
     else {
@@ -258,6 +244,65 @@ void CPortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
   UpdateRecord<idPortfolio_t, CPortfolio::TableRowDef, mapPortfolio_t, PortfolioManagerQueries::PortfolioUpdate>(
     idPortfolio, p->GetRow(), m_mapPortfolio, "portfolioid = ?" );
 
+}
+
+namespace PortfolioManagerQueries {
+  struct ActivePortfolios {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "active", bActive );
+    }
+    bool bActive;
+    ActivePortfolios( bool bActive_ ) : bActive( bActive_ ) {};
+  };
+}
+
+void CPortfolioManager::LoadActivePortfolios( void ) {
+
+  PortfolioManagerQueries::ActivePortfolios parameter( true );
+  ou::db::QueryFields<PortfolioManagerQueries::ActivePortfolios>::pQueryFields_t pQuery
+    = m_pSession->SQL<PortfolioManagerQueries::ActivePortfolios>( "select * from portfolios", parameter ).Where( "active=?" ).NoExecute();
+  m_pSession->Bind<PortfolioManagerQueries::ActivePortfolios>( pQuery );
+  while ( m_pSession->Execute( pQuery ) ) {
+    pPortfolio_t pPortfolio;
+
+    // following portfolio / position code is shared with GetPortfolio and could be factored out
+    CPortfolio::TableRowDef rowPortfolio;
+    m_pSession->Columns<PortfolioManagerQueries::ActivePortfolios, CPortfolio::TableRowDef>( pQuery, rowPortfolio );
+    pPortfolio.reset( new CPortfolio( rowPortfolio ) );
+
+    std::pair<iterPortfolio_t, bool> response;
+    response = m_mapPortfolio.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
+    if ( false == response.second ) {
+      throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
+    }
+    pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
+
+    LoadPositions( rowPortfolio.idPortfolio, response.first->second.mapPosition );
+
+  }
+}
+
+void CPortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition ) {
+
+  PortfolioManagerQueries::PortfolioKey key( idPortfolio );
+
+  ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
+    = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key ).Where( "portfolioid = ?" ).NoExecute();
+  m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
+  while ( m_pSession->Execute( pPositionQuery ) ) {
+    CPosition::TableRowDef rowPosition;
+    m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
+    pPosition_t pPosition( new CPosition( rowPosition ) );
+    if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, execution, data 
+      throw std::runtime_error( "CPortfolioManager::LoadPositions has no Details Callback" );
+    }
+    OnPositionNeedsDetails( pPosition );
+    mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
+    pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
+    pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
+  }
 }
 
 void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {

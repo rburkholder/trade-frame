@@ -48,6 +48,8 @@ public:
     void Fields( A& a ) {
       ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "accountownerid", idAccountOwner );
+      ou::db::Field( a, "ownerid", idOwner );  // portfolio of portfolios for classifying and grouping positions
+      ou::db::Field( a, "active", bActive );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commission", dblCommissionsPaid );
@@ -55,25 +57,27 @@ public:
 
     idPortfolio_t idPortfolio;
     idAccountOwner_t idAccountOwner;
+    idPortfolio_t idOwner;
+    bool bActive;
     std::string sDescription;
     double dblRealizedPL;
     double dblCommissionsPaid;
 
-    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ) {};
     TableRowDef ( const TableRowDef& row ) 
-      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), sDescription( row.sDescription ),
+      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), bActive( true ), sDescription( row.sDescription ),
       dblRealizedPL( row.dblRealizedPL ), dblCommissionsPaid( row.dblCommissionsPaid ) {};
     TableRowDef(
       const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_,
       const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ),
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ),
         sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
     TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const std::string& sDescription_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ),
         sDescription( sDescription_ ),
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
     TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), 
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ),
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
   };
 

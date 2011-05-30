@@ -47,6 +47,21 @@ public:
   typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
+  typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
+  typedef std::map<std::string, pPosition_t> mapPosition_t;
+  typedef mapPosition_t::iterator iterPosition_t;
+
+  struct structPortfolio {
+    pPortfolio_t pPortfolio;
+    mapPosition_t mapPosition;
+    structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
+  };
+
+  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
+  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolio_t;
+  typedef mapPortfolio_t::iterator iterPortfolio_t;
+  typedef mapPortfolio_t::const_iterator citerPortfolio_t;
+
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
 
@@ -71,6 +86,10 @@ public:
     OnPositionNeedsDetails = function;
   }
 
+  void LoadActivePortfolios( void );
+
+  citerPortfolio_t FirstPortfolio( void ) { return m_mapPortfolio.begin(); };
+
   void AttachToSession( ou::db::CSession* pSession );
   void DetachFromSession( ou::db::CSession* pSession );
 
@@ -78,19 +97,6 @@ protected:
 
 private:
 
-  typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
-  typedef std::map<std::string, pPosition_t> mapPosition_t;
-  typedef mapPosition_t::iterator iterPosition_t;
-
-  struct structPortfolio {
-    pPortfolio_t pPortfolio;
-    mapPosition_t mapPosition;
-    structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
-  };
-
-  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
-  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolio_t;
-  typedef mapPortfolio_t::iterator iterPortfolio_t;
   mapPortfolio_t m_mapPortfolio;
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
@@ -104,6 +110,8 @@ private:
 
   void HandlePortfolioOnExecution( const CPortfolio* );
   void HandlePortfolioOnCommission( const CPortfolio* );
+
+  void LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition );
 
 };
 
