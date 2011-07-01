@@ -209,6 +209,11 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
       if ( false == response.second ) {
         throw std::runtime_error( "GetPortfolio:  couldn't insert portfolio into map" );
       }
+
+      if ( !rowPortfolio.idOwner.empty() ) {
+        UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
+      }
+
       pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
       pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
@@ -257,6 +262,16 @@ namespace PortfolioManagerQueries {
   };
 }
 
+void CPortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting ) {
+  iterReportingPortfolios_t iter = m_mapReportingPortfolios.find( idOwner );
+  if ( m_mapReportingPortfolios.end() == iter ) {
+    setPortfolioId_t setPortfolioId;
+    iter = m_mapReportingPortfolios.insert( m_mapReportingPortfolios.begin(), 
+      mapReportingPortfolios_pair_t( idOwner, setPortfolioId ) );
+  }
+  iter->second.insert( iter->second.begin(), idReporting );
+}
+
 void CPortfolioManager::LoadActivePortfolios( void ) {
 
   PortfolioManagerQueries::ActivePortfolios parameter( true );
@@ -264,6 +279,7 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
     = m_pSession->SQL<PortfolioManagerQueries::ActivePortfolios>( "select * from portfolios", parameter ).Where( "active=?" ).NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::ActivePortfolios>( pQuery );
   while ( m_pSession->Execute( pQuery ) ) {
+
     pPortfolio_t pPortfolio;
 
     // following portfolio / position code is shared with GetPortfolio and could be factored out
@@ -276,6 +292,11 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
     if ( false == response.second ) {
       throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
     }
+
+    if ( !rowPortfolio.idOwner.empty() ) {
+      UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
+    }
+
     pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
@@ -289,7 +310,10 @@ void CPortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosi
   PortfolioManagerQueries::PortfolioKey key( idPortfolio );
 
   ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
-    = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key ).Where( "portfolioid = ?" ).NoExecute();
+    = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key )
+      .Where( "portfolioid = ?" )
+      .OrderBy( "ownerid" )
+      .NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
   while ( m_pSession->Execute( pPositionQuery ) ) {
     CPosition::TableRowDef rowPosition;
@@ -314,8 +338,13 @@ void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 //    idPortfolio, m_mapPortfolio, "portfolioid = ?" );
 
   // delete portfolio records
-  DeleteRecord<idPortfolio_t, mapPortfolio_t, PortfolioManagerQueries::PortfolioKey>( 
-    idPortfolio, m_mapPortfolio, "portfolioid = ?" );
+  try {
+    DeleteRecord<idPortfolio_t, mapPortfolio_t, PortfolioManagerQueries::PortfolioKey>( 
+      idPortfolio, m_mapPortfolio, "portfolioid = ?" );
+  }
+  catch (...) {
+    throw std::runtime_error( "CPortfolioManager::DeletePortfolio has dependencies" );
+  }
 
 }
 
@@ -412,10 +441,20 @@ namespace PortfolioManagerQueries {
 
 void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
-  iterPortfolio_t iterPortfolio = m_mapPortfolio.find( idPortfolio );  // no error checking as performed in previous step
-  iterPosition_t iterPosition = iterPortfolio->second.mapPosition.find( sName ); // no error checking as performed in previous step
-  iterPortfolio->second.mapPosition.erase( iterPosition );
-  DeleteRecord<idPosition_t, PortfolioManagerQueries::PositionKey>( pPosition->GetRow().idPosition, "positionid = ?" );
+  if ( pPosition->OrdersPending() ) {
+    throw std::runtime_error( "CPortfolioManager::DeletePosition has orders pending" );
+  }
+  else {
+    iterPortfolio_t iterPortfolio = m_mapPortfolio.find( idPortfolio );  // no error checking as performed in previous step
+    iterPosition_t iterPosition = iterPortfolio->second.mapPosition.find( sName ); // no error checking as performed in previous step
+    try {
+      DeleteRecord<idPosition_t, PortfolioManagerQueries::PositionKey>( pPosition->GetRow().idPosition, "positionid = ?" );
+      iterPortfolio->second.mapPosition.erase( iterPosition );
+    }
+    catch (...) {
+      throw std::runtime_error( "CPortfolioManager::DeletePosition position has dependencies" );
+    }
+  }
 }
 
 

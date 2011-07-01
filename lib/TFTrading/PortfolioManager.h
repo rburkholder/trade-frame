@@ -14,6 +14,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 
 #include <OUCommon/FastDelegate.h>
@@ -33,6 +34,7 @@ public:
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
+  typedef std::set<idPortfolio_t> setPortfolioId_t;
 
   typedef CPosition::pPosition_t pPosition_t;
   typedef keytypes::idPosition_t idPosition_t;
@@ -88,7 +90,8 @@ public:
 
   void LoadActivePortfolios( void );
 
-  citerPortfolio_t FirstPortfolio( void ) { return m_mapPortfolio.begin(); };
+  citerPortfolio_t PortfolioListBegin( void ) { return m_mapPortfolio.begin(); };
+  citerPortfolio_t PortfolioListEnd( void ) { return m_mapPortfolio.end(); };
 
   void AttachToSession( ou::db::CSession* pSession );
   void DetachFromSession( ou::db::CSession* pSession );
@@ -98,6 +101,13 @@ protected:
 private:
 
   mapPortfolio_t m_mapPortfolio;
+
+  typedef std::map<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_t;
+  typedef std::pair<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_pair_t;
+  mapReportingPortfolios_t m_mapReportingPortfolios;
+  typedef mapReportingPortfolios_t::iterator iterReportingPortfolios_t;
+
+  void UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting );
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
 

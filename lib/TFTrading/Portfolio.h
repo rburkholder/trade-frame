@@ -101,6 +101,8 @@ public:
   CPortfolio( const TableRowDef& row );
   ~CPortfolio(void);
 
+  const idPortfolio_t& Id( void ) { return m_row.idPortfolio; };
+
   void AddPosition( const std::string& sName, pPosition_t pPosition );
   void DeletePosition( const std::string& sName );
   void RenamePosition( const std::string& sOld, const std::string& sNew );
