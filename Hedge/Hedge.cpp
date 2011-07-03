@@ -1,3 +1,16 @@
+/************************************************************************
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
+
 // Hedge.cpp : Defines the entry point for the console application.
 //
 
@@ -5,7 +18,12 @@
 
 #include <wx/wx.h>
 #include <wx/splitter.h>
-#include <wx/treectrl.h>
+//#include <wx/treectrl.h>
+
+#include "VuPortfolios.h"
+#include "VuPositions.h"
+#include "VuOrders.h"
+#include "VuExecutions.h"
 
 class MyApp : public wxApp {
    virtual bool OnInit();
@@ -80,25 +98,72 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
   CreateStatusBar();
   SetStatusText("Hedge");
 
-//  wxPanel *panel = new wxPanel(this, wxID_ANY);  // main panel for splitter
+  // Portfolio View sized with Positions, Orders, Executions
+  wxBoxSizer* pSizerForFrame = new wxBoxSizer( wxVERTICAL );
+  SetSizer( pSizerForFrame );
 
-  wxSplitterWindow* split = new wxSplitterWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );
-  split->SetMinimumPaneSize( 20 );
+  wxSplitterWindow* pSplitPortfolioAndRemainder = new wxSplitterWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );
+  pSplitPortfolioAndRemainder->SetMinimumPaneSize( 20 );
 
+  pSizerForFrame->Add( pSplitPortfolioAndRemainder, 1, wxEXPAND | wxALL, 5 );
+
+  VuPortfolios* pDVPortfolios = new VuPortfolios( pSplitPortfolioAndRemainder, wxID_ANY );
+
+  wxPanel* pPanelForPositionsOrdersExecutions = new wxPanel( pSplitPortfolioAndRemainder, wxID_ANY );
+
+  pSplitPortfolioAndRemainder->Initialize( pDVPortfolios );
+  pSplitPortfolioAndRemainder->SplitHorizontally( pDVPortfolios, pPanelForPositionsOrdersExecutions );
+
+  pPanelForPositionsOrdersExecutions->Show( true );
+
+  // Position view sized with Orders, Executions
+
+  wxBoxSizer* pSizerForPositionOrderExecution = new wxBoxSizer( wxVERTICAL );
+  pPanelForPositionsOrdersExecutions->SetSizer( pSizerForPositionOrderExecution );
+
+  wxSplitterWindow* pSplitForPositionAndOrderExecution = new wxSplitterWindow( pPanelForPositionsOrdersExecutions, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );
+  pSplitForPositionAndOrderExecution->SetMinimumPaneSize( 20 );
+
+  pSizerForPositionOrderExecution->Add( pSplitForPositionAndOrderExecution, 1, wxEXPAND | wxALL, 5 );
+
+  VuPositions* pDVPositions = new VuPositions( pSplitForPositionAndOrderExecution, wxID_ANY );
+
+  wxPanel* pPanelForOrdersExecutions = new wxPanel( pSplitForPositionAndOrderExecution, wxID_ANY );
+
+  pSplitForPositionAndOrderExecution->Initialize( pDVPositions );
+  pSplitForPositionAndOrderExecution->SplitHorizontally( pDVPositions, pPanelForOrdersExecutions );
+
+  pPanelForOrdersExecutions->Show( true );
+
+  // Order view sized with Executions
+
+  wxBoxSizer* pSizerForOrderAndExecution = new wxBoxSizer( wxVERTICAL );
+  pPanelForOrdersExecutions->SetSizer( pSizerForOrderAndExecution );
+
+  wxSplitterWindow* pSplitForOrderAndExecution = new wxSplitterWindow( pPanelForOrdersExecutions, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );
+  pSplitForOrderAndExecution->SetMinimumPaneSize( 20 );
+
+  pSizerForOrderAndExecution->Add( pSplitForOrderAndExecution, 1, wxEXPAND | wxALL, 5 );
+
+  VuOrders* pDVOrders = new VuOrders( pSplitForOrderAndExecution, wxID_ANY );
+
+  VuExecutions* pDVExecutions = new VuExecutions( pSplitForOrderAndExecution, wxID_ANY );
+
+  pSplitForOrderAndExecution->Initialize( pDVOrders );
+  pSplitForOrderAndExecution->SplitHorizontally( pDVOrders, pDVExecutions );
+
+/*
   wxTreeCtrl* tree = new wxTreeCtrl( split, wxID_ANY );
   wxTreeItemId treeRoot = tree->AddRoot( wxT( "Hedge" ) );
   wxTreeItemId itemAccounts = tree->AppendItem( treeRoot, wxT( "Accounts" ) );
   wxTreeItemId itemPortfolios = tree->AppendItem( treeRoot, wxT( "Portfolios" ) );
   wxTreeItemId itemInstruments = tree->AppendItem( treeRoot, wxT( "Instruments" ) );
   wxTreeItemId itemExchanges = tree->AppendItem( treeRoot, wxT( "Exchanges" ) );
+*/
+//  wxPanel *panelVarious = new wxPanel( split, wxID_ANY );
 
-  wxPanel *panelVarious = new wxPanel( split, wxID_ANY );
-
-  split->Initialize( tree );
-  split->SplitVertically( tree, panelVarious );
-
-  tree->Show( true );
-  panelVarious->Show( true );
+//  tree->Show( true );
+//  panelVarious->Show( true );
 
 //  wxStaticBox *st = new wxStaticBox(panel, -1, wxT("Colors"), wxPoint(5, 5), wxSize(240, 150));
 
@@ -112,17 +177,15 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
   //wxButton *okButton = new wxButton(panel, -1, wxT("Ok"), wxDefaultPosition, wxSize(70, 30));
   //wxButton *closeButton = new wxButton(panel, -1, wxT("Close"), wxDefaultPosition, wxSize(70, 30));
 
-  wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+//  wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 //  wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
 
 //  hbox->Add(okButton, 1);
 //  hbox->Add(closeButton, 1, wxLEFT, 5);
 
-  vbox->Add( split, 1, wxEXPAND|wxALL, 5 );
+//  vbox->Add( split, 1, wxEXPAND|wxALL, 5 );
 //  vbox->Add(panel, 1);
 //  vbox->Add(hbox, 1, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
-
-  SetSizer(vbox);
 
   Centre();
 

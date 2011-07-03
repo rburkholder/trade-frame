@@ -81,10 +81,18 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="VuExecutions.h" />
+    <ClInclude Include="VuOrders.h" />
+    <ClInclude Include="VuPortfolios.h" />
+    <ClInclude Include="VuPositions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Hedge.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="VuExecutions.cpp" />
+    <ClCompile Include="VuOrders.cpp" />
+    <ClCompile Include="VuPortfolios.cpp" />
+    <ClCompile Include="VuPositions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
