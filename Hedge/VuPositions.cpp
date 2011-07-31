@@ -13,14 +13,25 @@
 
 #include "VuPositions.h"
 
-
-VuPositions::VuPositions(void) {
+VuPositions::VuPositions(void): VuBase() {
+  Construct();
 }
 
 VuPositions::VuPositions( wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : wxDataViewListCtrl( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ) {
+    Construct();
 }
 
 VuPositions::~VuPositions(void) {
+}
+
+void VuPositions::Construct( void ) {
+        
+  m_dvmdlPositions = new dvmdlPositions_t;
+  AssociateModel( m_dvmdlPositions.get() );
+
+  structPopulateColumns f( this );
+  m_dvmdlPositions.get()->IterateColumnNames( f );
+
 }

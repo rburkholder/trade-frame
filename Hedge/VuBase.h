@@ -13,25 +13,31 @@
 
 #pragma once
 
-#include "VuBase.h"
+#include <wx/dataview.h>
 
-#include "ModelPosition.h"
-
-class VuPositions: public VuBase {
+class VuBase: public wxDataViewCtrl {
 public:
-  VuPositions(void);
-  VuPositions(wxWindow *parent, wxWindowID id, 
+  VuBase(void);
+  VuBase(wxWindow *parent, wxWindowID id, 
     const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
     long style=0, const wxValidator &validator=wxDefaultValidator);
-  ~VuPositions(void);
+  ~VuBase(void);
+
 protected:
+
+  struct structPopulateColumns {
+    void operator()( const std::string& s ) {
+      // will a wxObjectDataPtr<> be required here for leak prevention
+      wxDataViewColumn* col = new wxDataViewColumn( s, new wxDataViewTextRenderer(), ixColumn++ );
+      pdvc->AppendColumn( col );
+    }
+    explicit structPopulateColumns( wxDataViewCtrl* pdvc_ ): pdvc( pdvc_ ), ixColumn( 0 ) {
+    }
+    wxDataViewCtrl* pdvc;
+    unsigned int ixColumn;
+  };
+
 private:
-
-  typedef ModelPosition dvmdlPositions_t;
-
-  wxObjectDataPtr<dvmdlPositions_t> m_dvmdlPositions;
-
-  void Construct( void );
 
 };
 

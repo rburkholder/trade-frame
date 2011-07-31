@@ -11,27 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-
-#include "VuBase.h"
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
 
 #include "ModelPosition.h"
 
-class VuPositions: public VuBase {
-public:
-  VuPositions(void);
-  VuPositions(wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
-    long style=0, const wxValidator &validator=wxDefaultValidator);
-  ~VuPositions(void);
-protected:
-private:
+ModelPosition::ModelPosition(void) {
+  m_vColumnNames += "Name", "Instrument", "Algorithm",
+    "Side Pend", "Quan Pend", "Side Active", "Quan Active", 
+    "Constructed Value", "Mkt Value", "UnRlzd PL", "Rlzd PL", "Comm.", "Net";
+}
 
-  typedef ModelPosition dvmdlPositions_t;
-
-  wxObjectDataPtr<dvmdlPositions_t> m_dvmdlPositions;
-
-  void Construct( void );
-
-};
-
+ModelPosition::~ModelPosition(void) {
+}

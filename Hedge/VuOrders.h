@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <wx/dataview.h>
+#include "VuBase.h"
 
-class VuOrders: public wxDataViewListCtrl {
+#include "ModelOrder.h"
+
+class VuOrders: public VuBase {
 public:
   VuOrders(void);
   VuOrders(wxWindow *parent, wxWindowID id, 
@@ -24,5 +26,12 @@ public:
   ~VuOrders(void);
 protected:
 private:
+
+  typedef ModelOrder dvmdlOrders_t;
+
+  wxObjectDataPtr<dvmdlOrders_t> m_pdvmdlOrders;
+
+  void Construct( void );
+
 };
 

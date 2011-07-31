@@ -60,9 +60,8 @@ public:
   };
 
   typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
-  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolio_t;
-  typedef mapPortfolio_t::iterator iterPortfolio_t;
-  typedef mapPortfolio_t::const_iterator citerPortfolio_t;
+  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolios_t;
+  typedef mapPortfolios_t::iterator iterPortfolio_t;
 
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
@@ -90,9 +89,6 @@ public:
 
   void LoadActivePortfolios( void );
 
-  citerPortfolio_t PortfolioListBegin( void ) { return m_mapPortfolio.begin(); };
-  citerPortfolio_t PortfolioListEnd( void ) { return m_mapPortfolio.end(); };
-
   void AttachToSession( ou::db::CSession* pSession );
   void DetachFromSession( ou::db::CSession* pSession );
 
@@ -100,7 +96,7 @@ protected:
 
 private:
 
-  mapPortfolio_t m_mapPortfolio;
+  mapPortfolios_t m_mapPortfolios;
 
   typedef std::map<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_t;
   typedef std::pair<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_pair_t;

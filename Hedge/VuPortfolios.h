@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <wx/dataview.h>
+#include "VuBase.h"
 
-class VuPortfolios: public wxDataViewCtrl {
+#include "ModelPortfolio.h"
+
+class VuPortfolios: public VuBase {
 public:
   VuPortfolios(void);
   VuPortfolios(wxWindow *parent, wxWindowID id, 
@@ -25,10 +27,14 @@ public:
 protected:
 private:
 
-//  typedef wxDataViewModel dvmPorfolios_t;
+  typedef ModelPortfolio dvmdlPorfolios_t;
 
-//  wxObjectDataPtr<dvmPorfolios_t> m_pdvmPortfolios;
+  wxDataViewItem item0;
+  wxDataViewItem item1;
+
+  wxObjectDataPtr<dvmdlPorfolios_t> m_pdvmdlPortfolios;
 
   void Construct( void );
+
 };
 

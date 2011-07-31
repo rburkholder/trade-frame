@@ -11,17 +11,21 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <wx/any.h>
+
 #include "VuPortfolios.h"
 
 VuPortfolios::VuPortfolios(void)
-  : wxDataViewCtrl()
+  : VuBase()
 {
   Construct();
 }
 
 VuPortfolios::VuPortfolios( wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : wxDataViewCtrl( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ),
+    item1( reinterpret_cast<void*>( 1 ) )
+{
   Construct();
 }
 
@@ -30,7 +34,14 @@ VuPortfolios::~VuPortfolios(void) {
 
 void VuPortfolios::Construct( void ) {
         
-//  m_pdvmPortfolios = new dvmPorfolios_t;
-//  AssociateModel( m_pdvmPortfolios.get() );
+  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
+  AssociateModel( m_pdvmdlPortfolios.get() );
+
+  structPopulateColumns f( this );
+  m_pdvmdlPortfolios.get()->IterateColumnNames( f );
+
+  wxAny any = "test data";
+  m_pdvmdlPortfolios.get()->ChangeValue( any, item1, 0 );
+  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
 
 }

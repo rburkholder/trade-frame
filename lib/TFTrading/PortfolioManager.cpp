@@ -28,13 +28,13 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio(
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription 
   ) {
   pPortfolio_t pPortfolio;
-  iterPortfolio_t iter = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() != iter ) {
+  iterPortfolio_t iter = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() != iter ) {
     throw std::runtime_error( "CPortfolioManager::Create, portfolio already exists" );
   }
   else {
     pPortfolio.reset( new CPortfolio( idPortfolio, idAccountOwner, sDescription ) );
-    m_mapPortfolio.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
+    m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
     if ( 0 != m_pSession ) {
       ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pQuery
         = m_pSession->Insert<CPortfolio::TableRowDef>( const_cast<CPortfolio::TableRowDef&>( pPortfolio->GetRow() ) );
@@ -189,8 +189,8 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
   assert( "" != idPortfolio );  // todo:  add this check in other handlers
 
   pPortfolio_t pPortfolio;
-  iterPortfolio_t iter = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() != iter ) {
+  iterPortfolio_t iter = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() != iter ) {
     pPortfolio = iter->second.pPortfolio;
   }
   else {
@@ -205,7 +205,7 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
       pPortfolio.reset( new CPortfolio( rowPortfolio ) );
 
       std::pair<iterPortfolio_t, bool> response;
-      response = m_mapPortfolio.insert( mapPortfolio_pair_t( idPortfolio, structPortfolio( pPortfolio ) ) );
+      response = m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, structPortfolio( pPortfolio ) ) );
       if ( false == response.second ) {
         throw std::runtime_error( "GetPortfolio:  couldn't insert portfolio into map" );
       }
@@ -246,8 +246,8 @@ void CPortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
-  UpdateRecord<idPortfolio_t, CPortfolio::TableRowDef, mapPortfolio_t, PortfolioManagerQueries::PortfolioUpdate>(
-    idPortfolio, p->GetRow(), m_mapPortfolio, "portfolioid = ?" );
+  UpdateRecord<idPortfolio_t, CPortfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
+    idPortfolio, p->GetRow(), m_mapPortfolios, "portfolioid = ?" );
 
 }
 
@@ -288,7 +288,7 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
     pPortfolio.reset( new CPortfolio( rowPortfolio ) );
 
     std::pair<iterPortfolio_t, bool> response;
-    response = m_mapPortfolio.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
+    response = m_mapPortfolios.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
     if ( false == response.second ) {
       throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
     }
@@ -334,13 +334,13 @@ void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
   // need to delete position records first
-//  DeleteRecord<idPortfolio_t, mapPortfolio_t, PortfolioManagerQueries::PortfolioKey>( 
-//    idPortfolio, m_mapPortfolio, "portfolioid = ?" );
+//  DeleteRecord<idPortfolio_t, mapPortfolios_t, PortfolioManagerQueries::PortfolioKey>( 
+//    idPortfolio, m_mapPortfolios, "portfolioid = ?" );
 
   // delete portfolio records
   try {
-    DeleteRecord<idPortfolio_t, mapPortfolio_t, PortfolioManagerQueries::PortfolioKey>( 
-      idPortfolio, m_mapPortfolio, "portfolioid = ?" );
+    DeleteRecord<idPortfolio_t, mapPortfolios_t, PortfolioManagerQueries::PortfolioKey>( 
+      idPortfolio, m_mapPortfolios, "portfolioid = ?" );
   }
   catch (...) {
     throw std::runtime_error( "CPortfolioManager::DeletePortfolio has dependencies" );
@@ -361,8 +361,8 @@ CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition(
   pPosition_t pPosition;
   // confirm portfolio exists
   GetPortfolio( idPortfolio );
-  iterPortfolio_t iterPortfolio = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() == iterPortfolio ) {  // should exist as we already just 'got' it
+  iterPortfolio_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() == iterPortfolio ) {  // should exist as we already just 'got' it
     throw std::runtime_error( "ConstructPosition:  idPortfolio does not exist" );
   }
 
@@ -394,8 +394,8 @@ CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition(
 
 CPortfolioManager::pPosition_t CPortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
 
-  iterPortfolio_t iterPortfolio = m_mapPortfolio.find( idPortfolio );
-  if ( m_mapPortfolio.end() == iterPortfolio ) {
+  iterPortfolio_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() == iterPortfolio ) {
     throw std::runtime_error( "GetPosition:  idPortfolio does not exist" );
   }
   assert( "" != sName );
@@ -445,7 +445,7 @@ void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const 
     throw std::runtime_error( "CPortfolioManager::DeletePosition has orders pending" );
   }
   else {
-    iterPortfolio_t iterPortfolio = m_mapPortfolio.find( idPortfolio );  // no error checking as performed in previous step
+    iterPortfolio_t iterPortfolio = m_mapPortfolios.find( idPortfolio );  // no error checking as performed in previous step
     iterPosition_t iterPosition = iterPortfolio->second.mapPosition.find( sName ); // no error checking as performed in previous step
     try {
       DeleteRecord<idPosition_t, PortfolioManagerQueries::PositionKey>( pPosition->GetRow().idPosition, "positionid = ?" );

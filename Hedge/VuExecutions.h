@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <wx/dataview.h>
+#include "VuBase.h"
 
-class VuExecutions: public wxDataViewListCtrl {
+#include "ModelExecution.h"
+
+class VuExecutions: public VuBase {
 public:
   VuExecutions(void);
   VuExecutions(wxWindow *parent, wxWindowID id, 
@@ -24,6 +26,12 @@ public:
   ~VuExecutions(void);
 protected:
 private:
+
+  typedef ModelExecution dvmdlExecutions_t;
+
+  wxObjectDataPtr<dvmdlExecutions_t> m_pdvmdlExecutions;
+
   void Construct( void );
+
 };
 

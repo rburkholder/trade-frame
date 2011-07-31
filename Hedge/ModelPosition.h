@@ -13,25 +13,11 @@
 
 #pragma once
 
-#include "VuBase.h"
+#include "ModelBase.h"
 
-#include "ModelPosition.h"
-
-class VuPositions: public VuBase {
+class ModelPosition: public ModelBase {
 public:
-  VuPositions(void);
-  VuPositions(wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
-    long style=0, const wxValidator &validator=wxDefaultValidator);
-  ~VuPositions(void);
-protected:
-private:
-
-  typedef ModelPosition dvmdlPositions_t;
-
-  wxObjectDataPtr<dvmdlPositions_t> m_dvmdlPositions;
-
-  void Construct( void );
-
+  ModelPosition(void);
+  ~ModelPosition(void);
 };
 
