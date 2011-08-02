@@ -50,13 +50,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\;..\lib;</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>wxmsw29ud_adv.lib;wxmsw29ud_core.lib;wxbase29ud.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxexpatd.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib;$(OutDir)libboost_system-vc100-mt-gd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-gd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-gd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-gd-1_47.lib;$(OutDir)libboost_filesystem-vc100-mt-gd-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.1\lib\vc_lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(OutDir)OUBerkeleyDb.lib;$(OutDir)OUCommon.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)TFOptions.lib;wxmsw29d_adv.lib;wxmsw29d_core.lib;wxbase29d.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxexpatd.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_filesystem-vc100-mt-sgd-1_47.lib;$(OutDir)libdb48.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.2\lib\vc_lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -81,14 +81,20 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DB.h" />
+    <ClInclude Include="FramePortfolioPositionOrderExec.h" />
+    <ClInclude Include="AppHedge.h" />
+    <ClInclude Include="HedgeCommon.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelExecution.h" />
     <ClInclude Include="ModelOrder.h" />
     <ClInclude Include="ModelPortfolio.h" />
     <ClInclude Include="ModelPosition.h" />
+    <ClInclude Include="Process.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThreadMain.h" />
     <ClInclude Include="VuBase.h" />
     <ClInclude Include="VuExecutions.h" />
     <ClInclude Include="VuOrders.h" />
@@ -96,13 +102,17 @@
     <ClInclude Include="VuPositions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Hedge.cpp" />
+    <ClCompile Include="DB.cpp" />
+    <ClCompile Include="FramePortfolioPositionOrderExec.cpp" />
+    <ClCompile Include="AppHedge.cpp" />
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="ModelExecution.cpp" />
     <ClCompile Include="ModelOrder.cpp" />
     <ClCompile Include="ModelPortfolio.cpp" />
     <ClCompile Include="ModelPosition.cpp" />
+    <ClCompile Include="Process.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="ThreadMain.cpp" />
     <ClCompile Include="VuBase.cpp" />
     <ClCompile Include="VuExecutions.cpp" />
     <ClCompile Include="VuOrders.cpp" />

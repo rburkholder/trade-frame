@@ -11,57 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// Hedge.cpp : Defines the entry point for the console application.
-//
+#include "FramePortfolioPositionOrderExec.h"
 
-//#include "stdafx.h"
-
-#include <wx/wx.h>
-#include <wx/splitter.h>
-//#include <wx/treectrl.h>
-
-#include "VuPortfolios.h"
-#include "VuPositions.h"
-#include "VuOrders.h"
-#include "VuExecutions.h"
-
-class MyApp : public wxApp {
-   virtual bool OnInit();
-   virtual int OnExit();
-};
- 
-IMPLEMENT_APP(MyApp)
-
-// Implements MyApp& wxGetApp()
-DECLARE_APP(MyApp)
- 
-class MyFrame : public wxFrame {
-public:
-   MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
-protected:
-   // Do we really need to expose the implementation detail? I guess not.
-   void OnQuit(wxCommandEvent& event);
-   void OnAbout(wxCommandEvent& event);
-private:
-   enum { ID_Quit=wxID_HIGHEST + 1, ID_About, 
-     ID_ConnectIB, ID_ConnectIQFeed, ID_ConnectSim,
-     ID_DisConnectIB, ID_DisConnectIQFeed, ID_DisConnectSim,
-     ID_AddPortfolio
-   };
-};
- 
-bool MyApp::OnInit() {
-   wxFrame *frame = new MyFrame("Hedge", wxPoint(50,50), wxSize(600,900));
-     frame->Show(TRUE);
-     SetTopWindow(frame);
-     return TRUE;
-}
-
-int MyApp::OnExit() {
-  return 0;
-}
- 
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+FramePortfolioPositionOrderExec::FramePortfolioPositionOrderExec(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame((wxFrame*)NULL, -1, title, pos, size)
 {
   // create menubar
@@ -92,8 +44,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
   // set frame menubar
   SetMenuBar(menuBar);
  
-  Bind( wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnQuit, this, ID_Quit );
-  Bind( wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnAbout, this, ID_About );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &FramePortfolioPositionOrderExec::OnQuit, this, ID_Quit );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &FramePortfolioPositionOrderExec::OnAbout, this, ID_About );
  
   CreateStatusBar();
   SetStatusText("Hedge");
@@ -190,12 +142,16 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
   Centre();
 
 }
- 
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
+
+FramePortfolioPositionOrderExec::~FramePortfolioPositionOrderExec(void) {
+}
+
+
+void FramePortfolioPositionOrderExec::OnQuit(wxCommandEvent& WXUNUSED(event)) {
    Close(TRUE);
 }
  
-void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event)) {
+void FramePortfolioPositionOrderExec::OnAbout(wxCommandEvent& WXUNUSED(event)) {
    wxMessageBox( "Hedge\nCopyright (2011) One Unified\nWritten By: Raymond Burkholder\ninfo@oneunified.net", "TradeFrame FrameWork",
         wxOK|wxICON_INFORMATION, this);
 }

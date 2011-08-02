@@ -254,7 +254,7 @@ CProcess::CProcess(void)
       m_pDataProvider = m_sim;
       break;
     case EModeLive:
-      sDbName = "TradeGldOptions.db";
+      sDbName = "Hedge.db";
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
       break;

@@ -18,13 +18,22 @@ namespace ou {
 
 // http://en.wikipedia.org/wiki/Color#cite_note-0
 
-/* 
+typedef unsigned char BYTE;
+typedef unsigned short WORD;
+typedef unsigned long DWORD;
+typedef DWORD COLORREF;
+
+ 
 #ifdef RGB
 #undef RGB
-// windows COLORREF is backwards from what ChartDir is expecting
-#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 #endif
-*/
+
+// windows COLORREF is backwards from what ChartDir is expecting
+// ChartDir:
+//#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+// from WinGDI.h:
+#define RGB(r,g,b)          ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
+
 
 // we may get into problems if this file is used for windows colours as well as ChartDir colours
 

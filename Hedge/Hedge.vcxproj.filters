@@ -57,12 +57,27 @@
     <ClInclude Include="VuBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HedgeCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FramePortfolioPositionOrderExec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppHedge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Hedge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VuPortfolios.cpp">
@@ -93,6 +108,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VuBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FramePortfolioPositionOrderExec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppHedge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

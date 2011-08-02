@@ -113,13 +113,13 @@ template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) 
     << cntCheckins << " Checkins, " 
     << maxQsize << " Max Q Size" 
     << std::endl;
-  OutputDebugString( ss.str().c_str() );
+//  OutputDebugString( ss.str().c_str() );
   ss.str() = "";
   if ( cntCreated != cntDestroyed ) {
-    OutputDebugString( "  ** Created != Destroyed\n" );
+//    OutputDebugString( "  ** Created != Destroyed\n" );
   }
   if ( cntCheckins != cntCheckouts ) {
-    OutputDebugString( "  ** Checkins != Checkouts\n" );
+//    OutputDebugString( "  ** Checkins != Checkouts\n" );
   }
 #endif
 }

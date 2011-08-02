@@ -96,6 +96,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="MinHeap.h" />
+    <ClInclude Include="MSWindows.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="ReusableBuffers.h" />
     <ClInclude Include="Singleton.h" />

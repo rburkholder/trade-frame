@@ -72,6 +72,9 @@
     <ClInclude Include="CountryCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MSWindows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="notes.txt" />
