@@ -13,7 +13,8 @@
 
 #include "ThreadMain.h"
 
-ThreadMain::ThreadMain(void) {
+ThreadMain::ThreadMain(enumMode eMode)
+  : m_eMode(eMode) {
 
   std::string sDbName;
 
@@ -31,10 +32,12 @@ ThreadMain::ThreadMain(void) {
   }
 
   m_db.Open( sDbName );
+  m_pProcess = new CProcess( eMode, m_db );
 
 }
 
 
 ThreadMain::~ThreadMain(void) {
+  delete m_pProcess;
   m_db.Close();
 }

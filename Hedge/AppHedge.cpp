@@ -20,12 +20,16 @@ IMPLEMENT_APP(AppHedge)
 bool AppHedge::OnInit() {
 
   wxFrame *frame = new FramePortfolioPositionOrderExec("Hedge", wxPoint(50,50), wxSize(600,900));
-    frame->Show(TRUE);
-    SetTopWindow(frame);
-    return TRUE;
+  frame->Show(TRUE);
+  SetTopWindow(frame);
+
+  m_pThreadMain = new ThreadMain( EModeLive );
+
+  return TRUE;
 }
 
 int AppHedge::OnExit() {
+  delete m_pThreadMain;
   return 0;
 }
  

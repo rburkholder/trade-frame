@@ -115,6 +115,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hedge", "Hedge\Hedge.vcxpro
 		{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4} = {F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testforincludes", "testforincludes\testforincludes.vcxproj", "{31D26305-275A-45CC-AF46-10753B155410}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testincludes2", "testincludes2\testincludes2.vcxproj", "{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -225,6 +229,14 @@ Global
 		{07976E31-000C-4EED-AE65-F4043C7DBA4D}.Debug|Win32.Build.0 = Debug|Win32
 		{07976E31-000C-4EED-AE65-F4043C7DBA4D}.Release|Win32.ActiveCfg = Release|Win32
 		{07976E31-000C-4EED-AE65-F4043C7DBA4D}.Release|Win32.Build.0 = Release|Win32
+		{31D26305-275A-45CC-AF46-10753B155410}.Debug|Win32.ActiveCfg = Debug|Win32
+		{31D26305-275A-45CC-AF46-10753B155410}.Debug|Win32.Build.0 = Debug|Win32
+		{31D26305-275A-45CC-AF46-10753B155410}.Release|Win32.ActiveCfg = Release|Win32
+		{31D26305-275A-45CC-AF46-10753B155410}.Release|Win32.Build.0 = Release|Win32
+		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Debug|Win32.Build.0 = Debug|Win32
+		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Release|Win32.ActiveCfg = Release|Win32
+		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,13 +17,16 @@
 
 #include "DB.h"
 
+#include "Process.h"
+
 class ThreadMain {
 public:
-  ThreadMain(void);
+  ThreadMain(enumMode eMode);
   ~ThreadMain(void);
 protected:
 private:
-  CDB m_db;
   enumMode m_eMode;
+  CDB m_db;
+  CProcess* m_pProcess;
 };
 

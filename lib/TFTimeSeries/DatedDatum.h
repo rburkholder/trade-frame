@@ -13,6 +13,10 @@
 
 #pragma once
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <HDF5/H5Cpp.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>

@@ -13,6 +13,11 @@
 
 #pragma once
 
+// http://boost.2283326.n4.nabble.com/WinSock-h-has-already-been-included-td2580721.html
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <string>
 #include <vector>
 #include <cassert>
@@ -20,9 +25,9 @@
 #include <typeinfo.h>
 #include <sstream>
 
-#include <boost/asio.hpp>  // class outbound processing
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/asio.hpp>  // class outbound processing
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
@@ -264,7 +269,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
 
 #if defined _DEBUG
   if ( 0 != m_pline->size() ) {
-    OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
+//    OutputDebugString( "CNetwork::~CNetwork: m_line is non-zero in size.\n" );
   }
 #endif
 
@@ -280,7 +285,7 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
     << m_cntBytesTransferred_send << " bytes out on " 
     << m_cntSends << " sends." 
     << std::endl;
-  OutputDebugString( ss.str().c_str() );
+//  OutputDebugString( ss.str().c_str() );
   ss.str() = "";
 #endif
 

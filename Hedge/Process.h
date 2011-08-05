@@ -13,6 +13,14 @@
 
 #pragma once
 
+//#include "targetver.h"
+//#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+//#include <windows.h>
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <vector>
 #include <string>
 #include <sstream>
@@ -175,8 +183,6 @@ class CProcess:
   friend CIQFeedHistoryQuery<CProcess>;
 public:
 
-  enumMode m_eMode;
-
   enum enumDataConnection {
     EDCSim,
     EDCIQFeed,
@@ -184,10 +190,9 @@ public:
   } m_eDataConn;
 
 
-  CProcess(void);
+  CProcess(enumMode eMode, CDB& db);
   ~CProcess(void);
 
-  void SetMode( enumMode );
   void SetDataConnection( enumDataConnection );
 
   void SimConnect( void );
@@ -237,6 +242,8 @@ private:
 
   typedef double strike_t;
 
+  enumMode m_eMode;
+
   enum enumTradingState {  // arranged in chronological order
     ETSFirstPass,     // any state initialization
     ETSPreMarket,     // time frame before Markets open
@@ -261,7 +268,7 @@ private:
 
   // db stuff
 
-  CDB m_db;
+  CDB& m_db;
 
   // end db stuff
 

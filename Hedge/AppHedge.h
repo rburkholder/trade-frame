@@ -22,7 +22,7 @@ class AppHedge : public wxApp {
   virtual int OnExit();
 protected:
 private:
-  ThreadMain m_ThreadMain;
+  ThreadMain* m_pThreadMain;
 };
  
 // Implements MyApp& wxGetApp()

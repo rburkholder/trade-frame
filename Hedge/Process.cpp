@@ -11,7 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
 
 #include <algorithm>
 #include <cassert>
@@ -186,7 +185,7 @@ till next multiple to ensure a ways above average price
 
 #define testing
 
-CProcess::CProcess(void)
+CProcess::CProcess(enumMode eMode, CDB& db)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_contractidUnderlying( 0 ),
@@ -211,9 +210,10 @@ CProcess::CProcess(void)
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
   m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
-  m_eMode( EModeLive ),
+//  m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
-  m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false )
+  m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false ),
+  m_db( db ), m_eMode( eMode ) /* EModeSimulation, EModeLive */
 {
 
   boost::gregorian::date dToday = ou::CTimeSource::Instance().Internal().date();
@@ -245,22 +245,22 @@ CProcess::CProcess(void)
   CProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
   CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
-  std::string sDbName;
+//  std::string sDbName;
 
   switch ( m_eMode ) {
     case EModeSimulation:
-      sDbName = ":memory:";
+//      sDbName = ":memory:";
       m_pExecutionProvider = m_sim;
       m_pDataProvider = m_sim;
       break;
     case EModeLive:
-      sDbName = "Hedge.db";
+//      sDbName = "Hedge.db";
       m_pExecutionProvider = m_tws;
       m_pDataProvider = m_tws;
       break;
   }
 
-  m_db.Open( sDbName );
+//  m_db.Open( sDbName );
 
   m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
@@ -288,7 +288,7 @@ CProcess::~CProcess(void) {
   m_iqfeed->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Connected ) );
   m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
 
-  m_db.Close();
+//  m_db.Close();
 }
 
 void CProcess::EnterTrade( const std::string& sSymbol ) {
@@ -298,9 +298,6 @@ void CProcess::PauseTrade( void ) {
 }
 
 void CProcess::ExitTrade( void ) {
-}
-
-void CProcess::SetMode( enumMode mode ) {
 }
 
 void CProcess::SetDataConnection( enumDataConnection dc ) {
