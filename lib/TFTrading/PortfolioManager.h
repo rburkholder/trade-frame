@@ -17,6 +17,11 @@
 #include <set>
 #include <string>
 
+#include <boost/range.hpp>
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/adaptor/map.hpp>
+//#include <boost/range/adaptor/
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -59,10 +64,6 @@ public:
     structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
   };
 
-  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
-  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolios_t;
-  typedef mapPortfolios_t::iterator iterPortfolio_t;
-
   CPortfolioManager(void) {};
   ~CPortfolioManager(void) {};
 
@@ -87,6 +88,10 @@ public:
     OnPositionNeedsDetails = function;
   }
 
+  template<class F> void IteratePortfolios( F, const idPortfolio_t& id = "" );
+  template<class F> void IteratePositions( mapPosition_t&, F );
+  template<class F> void IteratePositions( const idPortfolio_t&, F );
+
   void LoadActivePortfolios( void );
 
   void AttachToSession( ou::db::CSession* pSession );
@@ -96,8 +101,14 @@ protected:
 
 private:
 
+  typedef std::pair<idPortfolio_t, structPortfolio> mapPortfolio_pair_t;
+  typedef std::map<idPortfolio_t, structPortfolio> mapPortfolios_t;
+  typedef mapPortfolios_t::iterator iterPortfolio_t;
+
   mapPortfolios_t m_mapPortfolios;
 
+  // method for getting at child portfolios
+  // porfolio id "" is root where all top level portfolios are linked
   typedef std::map<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_t;
   typedef std::pair<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_pair_t;
   mapReportingPortfolios_t m_mapReportingPortfolios;
@@ -121,6 +132,23 @@ private:
 
 };
 
+template<class F> void CPortfolioManager::IteratePortfolios( F f, const idPortfolio_t& id ) {
+  using namespace boost::adaptors;
+  iterReportingPortfolios_t iter = m_mapReportingPortfolios.find( id );
+  if ( m_mapReportingPortfolios.end() != iter ) {
+    boost::for_each( iter->second, f );  // processes each reporting idPortfolio
+  }
+}
+
+template<class F> void CPortfolioManager::IteratePositions( mapPosition_t& mapPosition, F f ) {
+  using namespace boost::adaptors;
+  boost::for_each( mapPosition | map_values, f );
+}
+
+template<class F> void CPortfolioManager::IteratePositions( const idPortfolio_t& idPortfolio, F f ) {
+  using namespace boost::adaptors;
+  assert( false );  // break here as we havn't implemented this yet.
+}
 
 } // namespace tf
 } // namespace ou

@@ -210,9 +210,9 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
         throw std::runtime_error( "GetPortfolio:  couldn't insert portfolio into map" );
       }
 
-      if ( !rowPortfolio.idOwner.empty() ) {
+//      if ( !rowPortfolio.idOwner.empty() ) {
         UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
-      }
+//      }
 
       pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
       pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
@@ -293,9 +293,9 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
       throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
     }
 
-    if ( !rowPortfolio.idOwner.empty() ) {
+//    if ( !rowPortfolio.idOwner.empty() ) {
       UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
-    }
+//    }
 
     pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );

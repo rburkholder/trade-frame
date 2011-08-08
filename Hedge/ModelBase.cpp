@@ -24,11 +24,13 @@ bool ModelBase::IsContainer(	const wxDataViewItem&	item ) const {
 }
 
 wxDataViewItem ModelBase::GetParent( const wxDataViewItem&	item ) const {
-  return wxDataViewItem(NULL);
+  //return wxDataViewItem(NULL);
+  return itemNull;
 }
 
 unsigned int ModelBase::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
   // called when clicking on plus
+  //children.
   return 0;
 }
 

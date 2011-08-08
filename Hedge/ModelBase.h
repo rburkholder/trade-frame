@@ -27,7 +27,7 @@ public:
   ModelBase(void);
   ~ModelBase(void);
 
-  template<class F> void IterateColumnNames( F ) const;
+  template<class F> void IterateColumnNames( F );
 
   bool IsContainer(	const wxDataViewItem&	item ) const;
   wxDataViewItem GetParent( const wxDataViewItem&	item ) const;
@@ -41,12 +41,14 @@ protected:
 
   typedef std::vector<std::string> vString_t;
 
+  wxDataViewItem itemNull;
+
   vString_t m_vColumnNames;
 
 private:
   
 };
 
-template<class F> void ModelBase::IterateColumnNames( F f ) const {
+template<class F> void ModelBase::IterateColumnNames( F f ) {
   boost::for_each( m_vColumnNames, f );
 }

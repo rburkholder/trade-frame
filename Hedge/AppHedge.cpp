@@ -19,11 +19,11 @@ IMPLEMENT_APP(AppHedge)
 
 bool AppHedge::OnInit() {
 
+  m_pThreadMain = new ThreadMain( EModeLive );
+
   wxFrame *frame = new FramePortfolioPositionOrderExec("Hedge", wxPoint(50,50), wxSize(600,900));
   frame->Show(TRUE);
   SetTopWindow(frame);
-
-  m_pThreadMain = new ThreadMain( EModeLive );
 
   return TRUE;
 }
