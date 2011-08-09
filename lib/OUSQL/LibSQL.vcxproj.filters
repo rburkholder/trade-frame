@@ -36,6 +36,9 @@
     <ClInclude Include="SessionBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GKV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actions.cpp">

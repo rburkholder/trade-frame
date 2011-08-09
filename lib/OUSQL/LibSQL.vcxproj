@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClInclude Include="Actions.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="GKV.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionImpl.h" />
     <ClInclude Include="Functions.h" />
