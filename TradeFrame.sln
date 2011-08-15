@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		story.txt = story.txt
 		symbol stats.txt = symbol stats.txt
 		wtl sites.txt = wtl sites.txt
+		wx sites.txt = wx sites.txt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TapeReader", "TapeReader\TapeReader.vcxproj", "{F0BF4F84-45E6-439B-937D-7DCA29BB8A78}"
@@ -118,6 +119,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testforincludes", "testforincludes\testforincludes.vcxproj", "{31D26305-275A-45CC-AF46-10753B155410}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testincludes2", "testincludes2\testincludes2.vcxproj", "{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SemiAuto", "SemiAuto\SemiAuto.vcxproj", "{05364235-802E-4D0C-95A0-7647558C633E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -237,6 +240,10 @@ Global
 		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Debug|Win32.Build.0 = Debug|Win32
 		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Release|Win32.ActiveCfg = Release|Win32
 		{D5EED0CB-E11A-4DDE-A1C5-1B0661A1EC9D}.Release|Win32.Build.0 = Release|Win32
+		{05364235-802E-4D0C-95A0-7647558C633E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{05364235-802E-4D0C-95A0-7647558C633E}.Debug|Win32.Build.0 = Debug|Win32
+		{05364235-802E-4D0C-95A0-7647558C633E}.Release|Win32.ActiveCfg = Release|Win32
+		{05364235-802E-4D0C-95A0-7647558C633E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -47,11 +47,11 @@ private:
   typedef mapItems_t::const_iterator mapItems_iter_t;
   mapItems_t m_mapItems;
 
-  CPortfolioManager& m_mgrPortfolio;
+  CPortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
 
   void PopulateWithRootPortfolios( void );
 
-  void ProcessPortfolioIds( const idPortfolio_t& idPortfolio );
+  void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
   void ProcessUpdatedItemDetails( ItemPortfolio& item );
 
 };

@@ -16,6 +16,8 @@
 #include <wx/wx.h>
 #include <wx/splitter.h>
 
+#include <OUCommon/Delegate.h>
+
 #include "VuPortfolios.h"
 #include "VuPositions.h"
 #include "VuOrders.h"
@@ -23,8 +25,25 @@
 
 class FramePortfolioPositionOrderExec : public wxFrame {
 public:
+
   FramePortfolioPositionOrderExec(const wxString& title, const wxPoint& pos, const wxSize& size);
   ~FramePortfolioPositionOrderExec(void);
+
+  ou::Delegate<void> OnBtnClickedConnectToIb;
+  ou::Delegate<void> OnBtnClickedDisconnectFromIb;
+  ou::Delegate<void> OnBtnClickedConnectToIQFeed;
+  ou::Delegate<void> OnBtnClickedDisconnectFromIQFeed;
+  ou::Delegate<void> OnBtnClickedConnectToSimulator;
+  ou::Delegate<void> OnBtnClickedDisconnectFromSimulator;
+  ou::Delegate<void> OnBtnClickedStartTrading;
+  ou::Delegate<void> OnBtnClickedStopTrading;
+  ou::Delegate<void> OnBtnClickedStartWatch;
+  ou::Delegate<void> OnBtnClickedStopWatch;
+  ou::Delegate<void> OnBtnClickedSaveSeries;
+  ou::Delegate<void> OnBtnClickedEmitStats;
+  ou::Delegate<void> OnBtnClickedStartSimulation;
+  ou::Delegate<void> OnBtnClickedStopSimulation;
+
 protected:
    // Do we really need to expose the implementation detail? I guess not.
    void OnQuit(wxCommandEvent& event);

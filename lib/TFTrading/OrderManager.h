@@ -22,7 +22,7 @@
 
 #include <OUCommon/Delegate.h>
 
-#include <OUBerkeleyDb/AutoIncKeys.h>
+//#include <OUBerkeleyDb/AutoIncKeys.h>
 
 #include "KeyTypes.h"
 
@@ -122,9 +122,17 @@ protected:
 
 private:
 
-  CAutoIncKey m_orderIds;  // may need to worry about multi-threading at some point in time
+  //CAutoIncKey m_orderIds;  // may need to worry about multi-threading at some point in time
   // ToDo:  migrate away from this later on, may need to deal with multiple programs interacting with same 
   //  database table, and will need to auto-key from the order table instead.
+
+  struct AutoIncKey {
+    int i;
+    AutoIncKey( void ) : i( 1 ) {};
+    int GetNextId( void ) { return ++i; };
+    void SetNextId( int i_ ) { assert( 0 < i_ ); i = i_; };
+    int GetCurrentId( void ) { return i; };
+  } m_orderIds;
 
   mapOrders_t m_mapOrders; // all orders for when checking for consistency
 

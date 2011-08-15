@@ -25,7 +25,8 @@ namespace tf { // TradeFrame
 //
 
 COrderManager::COrderManager(void) 
-: m_orderIds( Trading::DbFileName, "OrderId" )  // need to remove dependency on DB4 and migrate to sql
+//: 
+//   m_orderIds( Trading::DbFileName, "OrderId" )  // need to remove dependency on DB4 and migrate to sql
 {
 }
 

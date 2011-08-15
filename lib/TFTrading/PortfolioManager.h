@@ -24,6 +24,7 @@
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
+#include <OUCommon/Delegate.h>
 
 #include "KeyTypes.h"
 
@@ -87,6 +88,10 @@ public:
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
     OnPositionNeedsDetails = function;
   }
+
+  ou::Delegate<const idPortfolio_t&> OnPortfolioAdded;
+  ou::Delegate<const idPortfolio_t&> OnPortfolioUpdated;
+  ou::Delegate<const idPortfolio_t&> OnPortfolioDeleted;
 
   template<class F> void IteratePortfolios( F, const idPortfolio_t& id = "" );
   template<class F> void IteratePositions( mapPosition_t&, F );

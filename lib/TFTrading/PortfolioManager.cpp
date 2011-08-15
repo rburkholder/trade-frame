@@ -42,6 +42,9 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio(
     pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
   }
+
+  OnPortfolioAdded( idPortfolio );
+
   return pPortfolio;
 }
 
@@ -217,6 +220,8 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
       pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
       pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
+      OnPortfolioAdded( idPortfolio );
+
       LoadPositions( idPortfolio, response.first->second.mapPosition );
 
     }
@@ -300,6 +305,8 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
     pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
 
+    OnPortfolioAdded( rowPortfolio.idPortfolio );
+
     LoadPositions( rowPortfolio.idPortfolio, response.first->second.mapPosition );
 
   }
@@ -341,6 +348,7 @@ void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
   try {
     DeleteRecord<idPortfolio_t, mapPortfolios_t, PortfolioManagerQueries::PortfolioKey>( 
       idPortfolio, m_mapPortfolios, "portfolioid = ?" );
+    OnPortfolioDeleted( idPortfolio );
   }
   catch (...) {
     throw std::runtime_error( "CPortfolioManager::DeletePortfolio has dependencies" );

@@ -26,8 +26,9 @@ using namespace fastdelegate;
 
 namespace ou {
 
-  template<class RO> class Delegate {
-  // RO: Return Object in call
+template<class RO> class Delegate {
+// RO: Return Object in call
+// example:  m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
 
 public:
   Delegate<RO>(void);

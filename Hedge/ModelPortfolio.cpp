@@ -18,19 +18,21 @@ using namespace boost::assign;
 #include <boost/spirit/home/phoenix/bind.hpp> 
 #include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
 
-
 #include "ModelPortfolio.h"
 
 ModelPortfolio::ModelPortfolio(void) 
   : ModelBase(), m_mgrPortfolio( ou::tf::CPortfolioManager::Instance() )
 {
   m_vColumnNames += "Name", "Rlzd PL", "Comm.", "Net";
+  m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
   PopulateWithRootPortfolios();
 }
 
 ModelPortfolio::~ModelPortfolio(void) {
+  m_mgrPortfolio.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
 }
 /*
+// may not need this any more.  old style of processing?
 namespace ProcessPortolios {
 
   template<class F>
@@ -58,21 +60,18 @@ namespace ProcessPortolios {
 } // ns ProcessPortfolios
 */
 void ModelPortfolio::PopulateWithRootPortfolios( void ) { 
-  m_mgrPortfolio.IteratePortfolios( boost::phoenix::bind( &ModelPortfolio::ProcessPortfolioIds, this, boost::phoenix::arg_names::arg1 ) );
+  m_mgrPortfolio.IteratePortfolios( boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, this, boost::phoenix::arg_names::arg1 ) );
 }
 
-void ModelPortfolio::ProcessPortfolioIds( const idPortfolio_t& idPortfolio ) {
+// part of the process of the initial sync, can be used for adding additional portfolios
+void ModelPortfolio::AddPortfolioToModel( const idPortfolio_t& idPortfolio ) {
   mapItems_iter_t iter = m_mapItems.find( idPortfolio );
   if ( m_mapItems.end() == iter ) {
     ItemPortfolio item( m_mgrPortfolio.GetPortfolio( idPortfolio ) );
     iter = m_mapItems.insert( m_mapItems.begin(), mapItem_pair_t( idPortfolio, item ) );
+    ItemAdded( itemNull, item );
   }
-  //ItemPortfolio item( m_manager.GetPortfolio( id ) );
-  //m_model.ItemAdded( parent, 
-  wxAny anyId = idPortfolio;
   // may desire to use boost::fusion to work on variable types
-  // assign a wxDataViewItem
-  // process fields to 
 }
 
 void ModelPortfolio::ProcessUpdatedItemDetails( ItemPortfolio& item ) {
