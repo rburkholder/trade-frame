@@ -1,0 +1,11 @@
+http://wiki.wxwidgets.org/WxSplitterWindow
+http://docs.wxwidgets.org/trunk/classwx_data_view_item.html
+http://docs.wxwidgets.org/trunk/classwx_splitter_window-members.html
+http://www.rhyous.com/programming-development/c-ides-wxwidgets/
+http://wxwidgets.blogspot.com/
+http://docs.wxwidgets.org/trunk/classwx_evt_handler.html#84b1e446053bda8f76f13336839e8b64
+http://wiki.wxwidgets.org/Microsoft_Visual_C%2B%2B_Guide
+http://docs.wxwidgets.org/trunk/classwx_ribbon_control.html
+http://www.zytrax.com/tech/survival/wxwidgets.html
+http://wiki.wxwidgets.org/Compiling_WxWidgets_with_MSVC_%282%29
+http://accountingplusplus.blogspot.com/
