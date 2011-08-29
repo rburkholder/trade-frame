@@ -10,8 +10,7 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-#pragma once
 
-#include <TFTrading/Database.h>
+#include "StdAfx.h"
 
- 
+#include "Database.h"

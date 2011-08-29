@@ -21,16 +21,33 @@
 
 #include "FrameManualOrder.h"
 
-// style: wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX
+FrameManualOrder::FrameManualOrder( void ) {
+  Init();
+};
+  
+  // style: wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX
 FrameManualOrder::FrameManualOrder(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-  : wxFrame(parent, wxID_ANY, title, pos, size, style),
-    m_eOrderType( ou::tf::OrderType::Limit )
-{
-  CreateControls();
+ {
+  Init();
+  Create(parent, title, pos, size, style);
 }
 
 FrameManualOrder::~FrameManualOrder(void) {
   // test for open and then close?
+}
+
+void FrameManualOrder::Init( void ) {
+}
+
+bool FrameManualOrder::Create( wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style) {
+  wxFrame::Create( parent, wxID_ANY, title, pos, size, style );
+  CreateControls();
+  if (GetSizer())
+  {
+      GetSizer()->SetSizeHints(this);
+  }
+//  Centre();
+  return true;
 }
 
 void FrameManualOrder::CreateControls( void ) {
@@ -50,7 +67,7 @@ void FrameManualOrder::CreateControls( void ) {
   itemBoxSizer4->Add(itemStaticText5, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
   wxTextCtrl* itemTextCtrl6 = new wxTextCtrl( itemFrame1, ID_TxtInstrument, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, 
-    InstrumentNameValidator( &m_sInstrument) );
+    InstrumentNameValidator( &m_order.sInstrument) );
   itemTextCtrl6->SetMaxLength(20);
   if (FrameManualOrder::ShowToolTips())
       itemTextCtrl6->SetToolTip(_("Instrument Symbol"));
@@ -63,7 +80,7 @@ void FrameManualOrder::CreateControls( void ) {
   itemBoxSizer7->Add(itemStaticText8, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
   wxTextCtrl* itemTextCtrl9 = new wxTextCtrl( itemFrame1, ID_TxtQuantity, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxIntegerValidator<unsigned long>( &m_nQuantity, wxNUM_VAL_ZERO_AS_BLANK ) );
+    wxIntegerValidator<unsigned long>( &m_order.nQuantity, wxNUM_VAL_ZERO_AS_BLANK ) );
   itemTextCtrl9->SetMaxLength(20);
   if (FrameManualOrder::ShowToolTips())
       itemTextCtrl9->SetToolTip(_("Quantity"));
@@ -76,7 +93,7 @@ void FrameManualOrder::CreateControls( void ) {
   itemBoxSizer10->Add(itemStaticText11, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
   wxTextCtrl* itemTextCtrl12 = new wxTextCtrl( itemFrame1, ID_TxtPrice1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxFloatingPointValidator<double>( 4, &m_dblPrice1, wxNUM_VAL_ZERO_AS_BLANK )  );
+    wxFloatingPointValidator<double>( 4, &m_order.dblPrice1, wxNUM_VAL_ZERO_AS_BLANK )  );
   itemTextCtrl12->SetMaxLength(20);
   if (FrameManualOrder::ShowToolTips())
       itemTextCtrl12->SetToolTip(_("Limit Price"));
@@ -89,7 +106,7 @@ void FrameManualOrder::CreateControls( void ) {
   itemBoxSizer13->Add(itemStaticText14, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
   wxTextCtrl* itemTextCtrl15 = new wxTextCtrl( itemFrame1, ID_TxtPrice2, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxFloatingPointValidator<double>( 4, &m_dblPrice2, wxNUM_VAL_ZERO_AS_BLANK ) );
+    wxFloatingPointValidator<double>( 4, &m_order.dblPrice2, wxNUM_VAL_ZERO_AS_BLANK ) );
   itemTextCtrl15->SetMaxLength(20);
   itemBoxSizer13->Add(itemTextCtrl15, 0, wxALIGN_CENTER_HORIZONTAL, 5);
 
@@ -122,20 +139,16 @@ void FrameManualOrder::CreateControls( void ) {
   wxButton* itemButton24 = new wxButton( itemFrame1, ID_BtnSell, _("Sell"), wxDefaultPosition, wxDefaultSize, 0 );
   itemBoxSizer22->Add(itemButton24, 0, wxALIGN_CENTER_VERTICAL, 3);
 
-  wxButton* itemButton25 = new wxButton( itemFrame1, ID_BtnCancel, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer22->Add(itemButton25, 0, wxALIGN_CENTER_VERTICAL, 3);
-
   // Connect events and objects
 
   Bind( wxEVT_CLOSE_WINDOW, &FrameManualOrder::OnClose, this );
 
-  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnMarket, this );
-  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnLimit, this );
-  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnStop, this );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnMarket, this, ID_BtnOrderTypeMarket );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnLimit, this, ID_BtnOrderTypeLimit );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnStop, this, ID_BtnOrderTypeStop );
 
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnBuy, this );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnSell, this );
-  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnCancel, this );
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnBuy, this, ID_BtnBuy );
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnSell, this, ID_BtnSell );
 }
 
 void FrameManualOrder::OnClose( wxCloseEvent& event ) {
@@ -145,11 +158,26 @@ void FrameManualOrder::OnClose( wxCloseEvent& event ) {
 }
 
 void FrameManualOrder::OnBtnBuy( wxCommandEvent& event ) {
+  m_order.eOrderSide = ou::tf::OrderSide::Buy;
+  EmitOrder();
 };
 
 void FrameManualOrder::OnBtnSell( wxCommandEvent& event ) {
+  m_order.eOrderSide = ou::tf::OrderSide::Sell;
+  EmitOrder();
 };
 
-void FrameManualOrder::OnBtnCancel( wxCommandEvent& event ) {
-};
+// need to set state on buttons sometime to make validations below unneeded
 
+void FrameManualOrder::EmitOrder( void ) const {
+  bool bOk = true;
+  if ( 0 == m_order.nQuantity ) bOk = false;
+  if ( 0 == m_order.sInstrument.length() ) bOk = false;
+  if ( ou::tf::OrderType::Limit == m_order.eOrderType ) {
+    if ( 0.0 == m_order.dblPrice1 ) bOk = false;
+  }
+  if ( bOk ) {
+    if ( 0 != OnNewOrder ) 
+      OnNewOrder( m_order );
+  }
+}

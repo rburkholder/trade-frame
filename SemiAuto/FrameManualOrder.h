@@ -18,7 +18,9 @@
 #include <wx/wx.h>
 #include <wx/string.h>
 
-#include <OUCommon/Delegate.h>
+//#include <OUCommon/Delegate.h>
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
 
 #include <TFTrading/TradingEnumerations.h>
 
@@ -26,32 +28,63 @@
 
 class FrameManualOrder: public wxFrame {
 public:
-  FrameManualOrder(wxWindow* parent, const wxString& title = "Manual Orders", const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxSize(500, 120), long style=wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
-);
+
+  struct structOrder {
+    wxString sInstrument;
+    ou::tf::OrderSide::enumOrderSide eOrderSide;
+    ou::tf::OrderType::enumOrderType eOrderType;
+    unsigned long nQuantity;
+    double dblPrice1;
+    double dblPrice2;
+    structOrder( void ): eOrderSide( ou::tf::OrderSide::Buy ), eOrderType( ou::tf::OrderType::Limit ), nQuantity( 0 ), dblPrice1( 0.0 ), dblPrice2( 0.0 ) {};
+  };
+
+  typedef FastDelegate1<const structOrder&> OnNewOrderHandler_t;
+  void SetOnNewOrderHandler( OnNewOrderHandler_t function ) {
+    OnNewOrder = function;
+  }
+
+  FrameManualOrder( void );
+  FrameManualOrder(
+    wxWindow* parent,
+   const wxString& title = "Manual Orders", 
+   const wxPoint& pos=wxDefaultPosition, 
+   const wxSize& size=wxSize(500, 120), 
+   long style=wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
+   );
   ~FrameManualOrder(void);
+
+  bool Create(
+    wxWindow* parent,
+   const wxString& title = "Manual Orders", 
+   const wxPoint& pos=wxDefaultPosition, 
+   const wxSize& size=wxSize(500, 120), 
+   long style=wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
+   );
+
 protected:
 private:
 
   enum { ID_Null=wxID_HIGHEST, ID_LblInstrument, ID_LblQuantity, ID_LblPrice1, ID_LblPrice2,
     ID_TxtInstrument, ID_TxtQuantity, ID_TxtPrice1, ID_TxtPrice2,
-    ID_BtnOrderTypeMarket, ID_BtnOrderTypeLimit, ID_BtnOrderTypeStop, ID_BtnBuy, ID_BtnSell, ID_BtnCancel
+    ID_BtnOrderTypeMarket, ID_BtnOrderTypeLimit, ID_BtnOrderTypeStop, ID_BtnBuy, ID_BtnSell
   };
 
-  ou::tf::OrderType::enumOrderType m_eOrderType;
-  wxString m_sInstrument;
-  unsigned long m_nQuantity;
-  double m_dblPrice1;
-  double m_dblPrice2;
+  structOrder m_order;
 
+  OnNewOrderHandler_t OnNewOrder;
+
+  void Init( void );
   void CreateControls( void );
   bool ShowToolTips( void ) { return true; };
 
+  void EmitOrder( void ) const;
+
   void OnClose( wxCloseEvent& event );
-  void OnBtnMarket( wxCommandEvent& event ) { m_eOrderType = ou::tf::OrderType::Market; };
-  void OnBtnLimit( wxCommandEvent& event ) { m_eOrderType = ou::tf::OrderType::Limit; };
-  void OnBtnStop( wxCommandEvent& event ) { m_eOrderType = ou::tf::OrderType::Stop; };
+  void OnBtnMarket( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Market; };
+  void OnBtnLimit( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Limit; };
+  void OnBtnStop( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Stop; };
   void OnBtnBuy( wxCommandEvent& event );
   void OnBtnSell( wxCommandEvent& event );
-  void OnBtnCancel( wxCommandEvent& event );
 };
 

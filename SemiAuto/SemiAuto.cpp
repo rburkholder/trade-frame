@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "FrameMain.h"
-
 #include "SemiAuto.h"
 
 IMPLEMENT_APP(AppSemiAuto)
@@ -21,14 +19,18 @@ bool AppSemiAuto::OnInit() {
 
 //  m_pThreadMain = new ThreadMain( EModeLive );
 
-  wxFrame *frame = new FrameMain("Semi-Auto Trading", wxPoint(50,50), wxSize(600,900));
-  frame->Show(TRUE);
-  SetTopWindow(frame);
+  m_FrameMain = new FrameMain("Semi-Auto Trading", wxPoint(50,50), wxSize(600,900));
+  m_FrameMain->Show(TRUE);
+  SetTopWindow(m_FrameMain);
+
+  m_FrameProviderControl = new FrameProviderControl( m_FrameMain );
+  m_FrameProviderControl->Show( true );
 
   return TRUE;
 }
 
 int AppSemiAuto::OnExit() {
+//  delete m_FrameMain;
 //  delete m_pThreadMain;
   return 0;
 }

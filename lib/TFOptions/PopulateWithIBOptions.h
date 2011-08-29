@@ -21,8 +21,6 @@
 
 #include <OUCommon/Delegate.h>
 
-#include <OUSQL/Session.h>
-
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFTrading/Instrument.h>
 

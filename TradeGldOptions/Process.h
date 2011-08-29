@@ -27,6 +27,7 @@
 
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
+#include <TFTrading/DBOps.h>
 
 #include <TFIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <TFIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
@@ -263,7 +264,7 @@ private:
 
   // db stuff
 
-  CDB m_db;
+  DBOps m_db;
 
   // end db stuff
 
