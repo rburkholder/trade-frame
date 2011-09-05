@@ -13,11 +13,12 @@
 
 #pragma once
 
-#include <vector>
-
 #include <wx/wx.h>
 
 #include <OUCommon/Delegate.h>
+
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
 
 #include "FrameManualOrder.h"
 
@@ -42,6 +43,13 @@ public:
   ou::Delegate<void*> OnBtnClickedStartSimulation;
   ou::Delegate<void*> OnBtnClickedStopSimulation;
 
+  typedef FastDelegate0<void> OnCreateNewFrameManualOrder_t;
+  void SetCreateNewFrameManualOrder( OnCreateNewFrameManualOrder_t function ) {
+    OnCreateNewFrameManualOrder = function;
+  }
+
+  ou::Delegate<int> OnCleanUpForExit;
+
 protected:
 
   // Do we really need to expose the implementation detail? I guess not.
@@ -59,8 +67,7 @@ private:
     ID_AddPortfolio, ID_ManualTrade
   };
 
-  typedef std::vector<FrameManualOrder*> vFrameManualOrder_t;
-  vFrameManualOrder_t m_vFrameManualOrders;
+  OnCreateNewFrameManualOrder_t OnCreateNewFrameManualOrder;
 
   void CleanUpForExit( void );
 

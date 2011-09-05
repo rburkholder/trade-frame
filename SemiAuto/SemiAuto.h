@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <wx/wx.h>
 
 #include <TFTrading/PortfolioManager.h>
@@ -31,6 +33,7 @@
 //#include "ThreadMain.h"
 #include "FrameMain.h"
 #include "FrameProviderControl.h"
+#include "FrameManualOrder.h"
 
 using namespace ou::tf;
 
@@ -47,11 +50,6 @@ class AppSemiAuto : public wxApp {
   virtual int OnExit();
 protected:
 private:
-  FrameMain* m_FrameMain;
-  FrameProviderControl* m_FrameProviderControl;
-
-  DBOps m_db;
-//  ThreadMain* m_pThreadMain;
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
@@ -65,25 +63,73 @@ private:
   typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef CSimulationProvider::pProvider_t pProviderSim_t;
 
-  pProviderIQFeed_t m_iqfeed;
-  bool m_bIQFeedConnected;
+  typedef FrameProviderControl::eProviderState_t eProviderState_t;
+
+  typedef FrameManualOrder::Order_t ManualOrder_t;
+
+  FrameMain* m_FrameMain;
+  FrameProviderControl* m_FrameProviderControl;
+
+  DBOps m_db;
+
+//  ThreadMain* m_pThreadMain;
+
+  bool m_bWatchingOptions;
+  bool m_bTrading;
+
+  bool m_bExecConnected;
+  bool m_bData1Connected;
+  bool m_bData2Connected;
 
   pProviderIBTWS_t m_tws;
   bool m_bIBConnected;
-  bool m_bWatchingOptions;
-  bool m_bTrading;
+
+  pProviderIQFeed_t m_iqfeed;
+  bool m_bIQFeedConnected;
 
   pProviderSim_t m_sim;
   bool m_bSimConnected;
 
   pProvider_t m_pExecutionProvider;
-  pProvider_t m_pDataProvider;
+  pProvider_t m_pData1Provider;
+  pProvider_t m_pData2Provider;
 
-  bool m_bExecConnected;
-  bool m_bDataConnected;
-  bool m_bData2Connected;
-  bool m_bConnectDone;
+  typedef std::vector<FrameManualOrder*> vFrameManualOrder_t;
+  vFrameManualOrder_t m_vFrameManualOrders;
 
+  void HandlePopulateDatabase( void );
+
+  void HandleOnExecConnected( int );  // need to test for connection failure, when ib is not running
+  void HandleOnExecDisconnected( int );
+
+  void HandleOnData1Connected( int );
+  void HandleOnData1Disconnected( int );
+
+  void HandleOnData2Connected( int );
+  void HandleOnData2Disconnected( int );
+
+  void HandleIBStateChangeRequest( eProviderState_t );
+  void HandleIQFeedStateChangeRequest( eProviderState_t );
+  void HandleSimulatorStateChangeRequest( eProviderState_t );
+
+  void HandleStateChangeRequest( eProviderState_t, bool&, pProvider_t );
+
+  void HandleIBConnected( int );
+  void HandleIQFeedConnected( int );
+  void HandleSimulatorConnected( int );
+
+  void HandleIBDisConnected( int );
+  void HandleIQFeedDisConnected( int );
+  void HandleSimulatorDisConnected( int );
+
+  void HandleCreateNewFrameManualOrder( void );
+  void HandleManualOrder( const ManualOrder_t& );
+
+  void HandleOnCleanUpForExitForFrameMain( int );
+
+  void HandleCheckSymbolNameAgainstIB( const std::string& );
+  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& );
+  void HandleIBContractDetailsDone( void );
 
 };
  

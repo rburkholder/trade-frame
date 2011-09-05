@@ -52,92 +52,96 @@ bool FrameManualOrder::Create( wxWindow* parent, const wxString& title, const wx
 
 void FrameManualOrder::CreateControls( void ) {
 
-  FrameManualOrder* itemFrame1 = this;
+    FrameManualOrder* itemFrame1 = this;
 
-  wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
-  itemFrame1->SetSizer(itemBoxSizer2);
+    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    itemFrame1->SetSizer(itemBoxSizer2);
 
-  wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 4);
+    wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_LEFT|wxALL, 4);
 
-  wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxVERTICAL);
-  itemBoxSizer3->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxRIGHT, 2);
+    wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer3->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxRIGHT, 2);
 
-  wxStaticText* itemStaticText5 = new wxStaticText( itemFrame1, ID_LblInstrument, _("Instrument"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
-  itemBoxSizer4->Add(itemStaticText5, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
+    wxStaticText* itemStaticText5 = new wxStaticText( itemFrame1, ID_LblInstrumentSymbol, _("Instrument:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
+    itemBoxSizer4->Add(itemStaticText5, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
-  wxTextCtrl* itemTextCtrl6 = new wxTextCtrl( itemFrame1, ID_TxtInstrument, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, 
-    InstrumentNameValidator( &m_order.sInstrument) );
-  itemTextCtrl6->SetMaxLength(20);
-  if (FrameManualOrder::ShowToolTips())
-      itemTextCtrl6->SetToolTip(_("Instrument Symbol"));
-  itemBoxSizer4->Add(itemTextCtrl6, 0, wxALIGN_CENTER_HORIZONTAL, 2);
+    m_txtInstrumentSymbol = new wxTextCtrl( itemFrame1, ID_TxtInstrumentSymbol, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, InstrumentNameValidator( &m_order.sSymbol) );
+    m_txtInstrumentSymbol->SetMaxLength(20);
+    if (FrameManualOrder::ShowToolTips())
+        m_txtInstrumentSymbol->SetToolTip(_("Instrument Symbol"));
+    itemBoxSizer4->Add(m_txtInstrumentSymbol, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
-  wxBoxSizer* itemBoxSizer7 = new wxBoxSizer(wxVERTICAL);
-  itemBoxSizer3->Add(itemBoxSizer7, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT, 2);
+    wxStaticText* itemStaticText7 = new wxStaticText( itemFrame1, ID_LblInstrumentName, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(itemStaticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-  wxStaticText* itemStaticText8 = new wxStaticText( itemFrame1, ID_LblQuantity, _("Quantity"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
-  itemBoxSizer7->Add(itemStaticText8, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
+    wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer8, 0, wxALIGN_LEFT|wxALL, 5);
 
-  wxTextCtrl* itemTextCtrl9 = new wxTextCtrl( itemFrame1, ID_TxtQuantity, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxIntegerValidator<unsigned long>( &m_order.nQuantity, wxNUM_VAL_ZERO_AS_BLANK ) );
-  itemTextCtrl9->SetMaxLength(20);
-  if (FrameManualOrder::ShowToolTips())
-      itemTextCtrl9->SetToolTip(_("Quantity"));
-  itemBoxSizer7->Add(itemTextCtrl9, 0, wxALIGN_CENTER_HORIZONTAL, 2);
+    wxBoxSizer* itemBoxSizer9 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer8->Add(itemBoxSizer9, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT, 2);
 
-  wxBoxSizer* itemBoxSizer10 = new wxBoxSizer(wxVERTICAL);
-  itemBoxSizer3->Add(itemBoxSizer10, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT, 2);
+    wxStaticText* itemStaticText10 = new wxStaticText( itemFrame1, ID_LblQuantity, _("Quantity:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
+    itemBoxSizer9->Add(itemStaticText10, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
-  wxStaticText* itemStaticText11 = new wxStaticText( itemFrame1, ID_LblPrice1, _("Price 1"), wxDefaultPosition, wxDefaultSize, 0);
-  itemBoxSizer10->Add(itemStaticText11, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
+    wxTextCtrl* itemTextCtrl11 = new wxTextCtrl( itemFrame1, ID_TxtQuantity, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxIntegerValidator<unsigned long>( &m_order.nQuantity, wxNUM_VAL_ZERO_AS_BLANK ) );
+    itemTextCtrl11->SetMaxLength(20);
+    if (FrameManualOrder::ShowToolTips())
+        itemTextCtrl11->SetToolTip(_("Quantity"));
+    itemBoxSizer9->Add(itemTextCtrl11, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
-  wxTextCtrl* itemTextCtrl12 = new wxTextCtrl( itemFrame1, ID_TxtPrice1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxFloatingPointValidator<double>( 4, &m_order.dblPrice1, wxNUM_VAL_ZERO_AS_BLANK )  );
-  itemTextCtrl12->SetMaxLength(20);
-  if (FrameManualOrder::ShowToolTips())
-      itemTextCtrl12->SetToolTip(_("Limit Price"));
-  itemBoxSizer10->Add(itemTextCtrl12, 0, wxALIGN_CENTER_HORIZONTAL, 2);
+    wxBoxSizer* itemBoxSizer12 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer8->Add(itemBoxSizer12, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT, 2);
 
-  wxBoxSizer* itemBoxSizer13 = new wxBoxSizer(wxVERTICAL);
-  itemBoxSizer3->Add(itemBoxSizer13, 0, wxALIGN_CENTER_VERTICAL, 2);
+    wxStaticText* itemStaticText13 = new wxStaticText( itemFrame1, ID_LblPrice1, _("Price 1:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer12->Add(itemStaticText13, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
-  wxStaticText* itemStaticText14 = new wxStaticText( itemFrame1, ID_LblPrice2, _("Price 2"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer13->Add(itemStaticText14, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
+    wxTextCtrl* itemTextCtrl14 = new wxTextCtrl( itemFrame1, ID_TxtPrice1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxFloatingPointValidator<double>( 4, &m_order.dblPrice1, wxNUM_VAL_ZERO_AS_BLANK ) );
+    itemTextCtrl14->SetMaxLength(20);
+    if (FrameManualOrder::ShowToolTips())
+        itemTextCtrl14->SetToolTip(_("Limit Price"));
+    itemBoxSizer12->Add(itemTextCtrl14, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
-  wxTextCtrl* itemTextCtrl15 = new wxTextCtrl( itemFrame1, ID_TxtPrice2, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-    wxFloatingPointValidator<double>( 4, &m_order.dblPrice2, wxNUM_VAL_ZERO_AS_BLANK ) );
-  itemTextCtrl15->SetMaxLength(20);
-  itemBoxSizer13->Add(itemTextCtrl15, 0, wxALIGN_CENTER_HORIZONTAL, 5);
+    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer8->Add(itemBoxSizer15, 0, wxALIGN_CENTER_VERTICAL, 2);
 
-  wxBoxSizer* itemBoxSizer16 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer2->Add(itemBoxSizer16, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
+    wxStaticText* itemStaticText16 = new wxStaticText( itemFrame1, ID_LblPrice2, _("Price 2:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer15->Add(itemStaticText16, 0, wxALIGN_LEFT|wxLEFT|wxBOTTOM, 3);
 
-  wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer16->Add(itemBoxSizer17, 0, wxALIGN_CENTER_VERTICAL, 5);
+    wxTextCtrl* itemTextCtrl17 = new wxTextCtrl( itemFrame1, ID_TxtPrice2, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxFloatingPointValidator<double>( 4, &m_order.dblPrice2, wxNUM_VAL_ZERO_AS_BLANK ) );
+    itemTextCtrl17->SetMaxLength(20);
+    itemBoxSizer15->Add(itemTextCtrl17, 0, wxALIGN_CENTER_HORIZONTAL, 5);
 
-  wxRadioButton* itemRadioButton18 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeMarket, _("Market"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemRadioButton18->SetValue(false);
-  itemBoxSizer17->Add(itemRadioButton18, 0, wxALIGN_CENTER_VERTICAL, 5);
+    wxBoxSizer* itemBoxSizer18 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer18, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
-  wxRadioButton* itemRadioButton19 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeLimit, _("Limit"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemRadioButton19->SetValue(true);
-  itemBoxSizer17->Add(itemRadioButton19, 0, wxALIGN_CENTER_VERTICAL, 5);
+    wxBoxSizer* itemBoxSizer19 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer18->Add(itemBoxSizer19, 0, wxALIGN_CENTER_VERTICAL, 5);
 
-  wxRadioButton* itemRadioButton20 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeStop, _("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemRadioButton20->SetValue(false);
-  itemBoxSizer17->Add(itemRadioButton20, 0, wxALIGN_CENTER_VERTICAL, 5);
+    wxRadioButton* itemRadioButton20 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeMarket, _("Market"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemRadioButton20->SetValue(false);
+    itemBoxSizer19->Add(itemRadioButton20, 0, wxALIGN_CENTER_VERTICAL, 5);
 
-  itemBoxSizer16->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    wxRadioButton* itemRadioButton21 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeLimit, _("&Limit"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemRadioButton21->SetValue(true);
+    itemBoxSizer19->Add(itemRadioButton21, 0, wxALIGN_CENTER_VERTICAL, 5);
 
-  wxBoxSizer* itemBoxSizer22 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer16->Add(itemBoxSizer22, 0, wxALIGN_CENTER_VERTICAL, 5);
+    wxRadioButton* itemRadioButton22 = new wxRadioButton( itemFrame1, ID_BtnOrderTypeStop, _("S&top"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemRadioButton22->SetValue(false);
+    itemBoxSizer19->Add(itemRadioButton22, 0, wxALIGN_CENTER_VERTICAL, 5);
 
-  wxButton* itemButton23 = new wxButton( itemFrame1, ID_BtnBuy, _("Buy"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer22->Add(itemButton23, 0, wxALIGN_CENTER_VERTICAL, 3);
+    itemBoxSizer18->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-  wxButton* itemButton24 = new wxButton( itemFrame1, ID_BtnSell, _("Sell"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer22->Add(itemButton24, 0, wxALIGN_CENTER_VERTICAL, 3);
+    wxBoxSizer* itemBoxSizer24 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer18->Add(itemBoxSizer24, 0, wxALIGN_CENTER_VERTICAL, 5);
+
+    wxButton* itemButton25 = new wxButton( itemFrame1, ID_BtnBuy, _("&Buy"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemButton25->Enable(false);
+    itemBoxSizer24->Add(itemButton25, 0, wxALIGN_CENTER_VERTICAL, 3);
+
+    wxButton* itemButton26 = new wxButton( itemFrame1, ID_BtnSell, _("&Sell"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemButton26->Enable(false);
+    itemBoxSizer24->Add(itemButton26, 0, wxALIGN_CENTER_VERTICAL, 3);
 
   // Connect events and objects
 
@@ -149,6 +153,10 @@ void FrameManualOrder::CreateControls( void ) {
 
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnBuy, this, ID_BtnBuy );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameManualOrder::OnBtnSell, this, ID_BtnSell );
+
+  Bind( wxEVT_IDLE, &FrameManualOrder::OnInstrumentSymbolTextIdle, this, ID_TxtInstrumentSymbol );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &FrameManualOrder::OnInstrumentSymbolTextUpdated, this, ID_TxtInstrumentSymbol );
+  Bind( wxEVT_COMMAND_TEXT_ENTER, &FrameManualOrder::OnInstrumentSymbolTextEnter, this, ID_TxtInstrumentSymbol );
 }
 
 void FrameManualOrder::OnClose( wxCloseEvent& event ) {
@@ -167,12 +175,32 @@ void FrameManualOrder::OnBtnSell( wxCommandEvent& event ) {
   EmitOrder();
 };
 
+// doesn't appear to be functional
+void FrameManualOrder::OnInstrumentSymbolTextIdle( wxIdleEvent& event ) {
+  event.Skip();
+}
+
+// one character at a time
+// on successful symbol, then set flag to enable buttons
+void FrameManualOrder::OnInstrumentSymbolTextUpdated( wxCommandEvent& event ) {
+  if ( 0 < m_txtInstrumentSymbol->GetLineLength( 0 ) ) {
+    if ( 0 != OnSymbolTextUpdated )
+      OnSymbolTextUpdated( m_txtInstrumentSymbol->GetLineText( 0 ).ToStdString() );
+  }
+  //event.Skip();
+}
+
+void FrameManualOrder::OnInstrumentSymbolTextEnter( wxCommandEvent& event ) {
+  event.Skip();
+}
+
+
 // need to set state on buttons sometime to make validations below unneeded
 
 void FrameManualOrder::EmitOrder( void ) const {
   bool bOk = true;
   if ( 0 == m_order.nQuantity ) bOk = false;
-  if ( 0 == m_order.sInstrument.length() ) bOk = false;
+  if ( 0 == m_order.sSymbol.length() ) bOk = false;
   if ( ou::tf::OrderType::Limit == m_order.eOrderType ) {
     if ( 0.0 == m_order.dblPrice1 ) bOk = false;
   }

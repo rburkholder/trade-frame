@@ -36,138 +36,12 @@
 
 #include <TFSimulation/SimulationProvider.h>
 
+#include <TFOptions/Option.h>
+#include <TFOptions/Strike.h>
+
 #include "DB.h"
 
 using namespace ou::tf;
-
-//
-// ==================
-//
-
-class CNakedOption
-{
-public:
-
-  typedef CInstrument::pInstrument_t pInstrument_t;
-
-  CNakedOption( pInstrument_t pInstrument );
-  CNakedOption( const CNakedOption& rhs );
-  virtual ~CNakedOption( void ) {};
-
-  CNakedOption& operator=( const CNakedOption& rhs );
-
-  bool operator< ( const CNakedOption& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
-  bool operator<=( const CNakedOption& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
-
-  double Strike( void ) { return m_dblStrike; };
-  pInstrument_t GetInstrument( void ) { return m_pInstrument; };
-
-  void HandleQuote( const CQuote& quote );
-  void HandleTrade( const CTrade& trade );
-  void HandleGreek( const CGreek& greek );
-
-  double Bid( void ) const { return m_dblBid; };
-  double Ask( void ) const { return m_dblAsk; };
-
-  double ImpliedVolatility( void ) const { return m_greek.ImpliedVolatility(); };
-  double Delta( void ) const { return m_greek.Delta(); };
-  double Gamma( void ) const { return m_greek.Gamma(); };
-  double Theta( void ) const { return m_greek.Theta(); };
-  double Vega( void ) const { return m_greek.Vega(); };
-
-  CQuotes* Quotes( void ) { return &m_quotes; };
-  CTrades* Trades( void ) { return &m_trades; };
-  CGreeks* Greeks( void ) { return &m_greeks; };
-
-protected:
-
-  std::string m_sSide;
-
-  double m_dblBid;
-  double m_dblAsk;
-  double m_dblTrade;
-
-  double m_dblStrike;
-  CGreek m_greek;
-
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CGreeks m_greeks;
-
-  bool m_bWatching;
-
-  pInstrument_t m_pInstrument;
-
-  std::stringstream m_ss;
-
-private:
-};
-
-//
-// ==================
-//
-
-class CNakedCall: public CNakedOption
-{
-public:
-  CNakedCall( pInstrument_t pInstrument );
-  virtual ~CNakedCall( void ) {};
-protected:
-private:
-};
-
-//
-// ==================
-//
-
-class CNakedPut: public CNakedOption
-{
-public:
-  CNakedPut( pInstrument_t pInstrument );
-  virtual ~CNakedPut( void ) {};
-protected:
-private:
-};
-
-//
-// ==================
-//
-
-class CStrikeInfo 
-{
-public:
-  CStrikeInfo( void );  // for construction in std::Map
-  CStrikeInfo( double dblStrike );
-  CStrikeInfo( const CStrikeInfo& rhs );
-  ~CStrikeInfo( void );
-
-  CStrikeInfo& operator=( const CStrikeInfo& rhs );
-
-  bool operator< ( const CStrikeInfo& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
-  bool operator<=( const CStrikeInfo& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
-
-  double Strike( void ) const { return m_dblStrike; };
-
-  void AssignCall( CInstrument::pInstrument_t pInstrument ) { assert( 0 == m_call.use_count() ); m_call.reset( new CNakedCall( pInstrument ) ); };
-  void AssignPut( CInstrument::pInstrument_t pInstrument )  { assert( 0 == m_put.use_count() );  m_put.reset( new CNakedPut( pInstrument ) ); };
-
-  CNakedCall* Call( void ) { return m_call.get(); };
-  CNakedPut*  Put( void )  { return m_put.get(); };
-
-protected:
-
-  boost::shared_ptr<CNakedCall> m_call;
-  boost::shared_ptr<CNakedPut>  m_put;
-
-private:
-  std::stringstream m_ss;
-  bool m_bWatching;  // this needs to be implemented.
-  double m_dblStrike;
-};
-
-//
-// ==================
-//
 
 class CProcess: 
   public CIQFeedHistoryQuery<CProcess>
@@ -307,8 +181,8 @@ private:
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
 
-  typedef std::map<double,CStrikeInfo> mapStrikeInfo_t;
-  typedef std::pair<double,CStrikeInfo> mapStrikeinfo_pair_t;
+  typedef std::map<double,ou::tf::option::Strike> mapStrikeInfo_t;
+  typedef std::pair<double,ou::tf::option::Strike> mapStrikeinfo_pair_t;
   typedef mapStrikeInfo_t::iterator mapStrikeInfo_iter_t;
   mapStrikeInfo_t m_mapStrikeInfo;
 

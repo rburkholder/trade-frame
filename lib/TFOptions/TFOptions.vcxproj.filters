@@ -24,9 +24,21 @@
     <ClInclude Include="PopulateWithIBOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Strike.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Option.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Strike.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

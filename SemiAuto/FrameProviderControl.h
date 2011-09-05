@@ -30,11 +30,11 @@ public:
   enum eProviderState_t { ProviderOff, ProviderGoingOn, ProviderOn, ProviderGoingOff };
 
   typedef FastDelegate1<eProviderState_t> OnProviderStateChange_t;
+  void SetOnIBStateChangeHandler( OnProviderStateChange_t function ) {
+    OnIBStateChange = function;
+  }
   void SetOnIQFeedStateChangeHandler( OnProviderStateChange_t function ) {
     OnIQFeedStateChange = function;
-  }
-  void SetOnIGStateChangeHandler( OnProviderStateChange_t function ) {
-    OnIBStateChange = function;
   }
   void SetOnSimulatorStateChangeHandler( OnProviderStateChange_t function ) {
     OnSimulatorStateChange = function;

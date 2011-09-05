@@ -75,10 +75,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CalcExpiry.h" />
+    <ClInclude Include="Option.h" />
     <ClInclude Include="PopulateWithIBOptions.h" />
+    <ClInclude Include="Strike.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp" />
+    <ClCompile Include="Option.cpp" />
+    <ClCompile Include="Strike.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

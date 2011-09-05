@@ -19,6 +19,7 @@
 #include <string>
 
 #include <boost/lexical_cast.hpp>
+//#include <boost/thread/locks.hpp>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
@@ -97,6 +98,24 @@ void CIBTWS::ProcessMessages( void ) {
 
   // need to deal with pre=mature exit so that flags get reset
   // maybe a state machine would keep track
+}
+
+void CIBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // needs to be thread protected:
+  boost::mutex::scoped_lock lock(m_mutexContractRequest);
+  structRequest_t* pRequest;
+  pRequest = 0;
+  if ( 0 == m_vInActiveRequestId.size() ) {
+    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone );
+  }
+  else {
+    pRequest = m_vInActiveRequestId.back();
+    m_vInActiveRequestId.pop_back();
+    pRequest->fProcess = fProcess;
+    pRequest->fDone = fDone;
+  }
+  m_mapActiveRequestId[ pRequest->id ] = pRequest;
+  pTWS->reqContractDetails( pRequest->id, contract );
 }
 
 //CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
@@ -505,12 +524,34 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
 
-  if ( NULL != OnContractDetails ) OnContractDetails( contractDetails );
+  OnContractDetailsHandler_t handler = 0;
+  {
+    boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
+    mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
+    if ( m_mapActiveRequestId.end() == iterRequest ) {
+      throw std::runtime_error( "contractDetails out of sync" );
+    }
+    handler = iterRequest->second->fProcess;
+  }
+  if ( 0 != handler ) 
+    handler( contractDetails );
+
 }
 
 void CIBTWS::contractDetailsEnd( int reqId ) {
-  GiveBackReqId( reqId );
-  if ( NULL != OnContractDetailsDone ) OnContractDetailsDone();
+  OnContractDetailsDoneHandler_t handler = 0;
+  {
+    boost::mutex::scoped_lock lock(m_mutexContractRequest);
+    mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
+    if ( m_mapActiveRequestId.end() == iterRequest ) {
+      throw std::runtime_error( "contractDetailsEnd out of sync" );
+    }
+    handler = iterRequest->second->fDone;
+    m_vInActiveRequestId.push_back( iterRequest->second );
+    m_mapActiveRequestId.erase( iterRequest );
+  }
+  if ( NULL != handler ) 
+    handler();
 }
 
 void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {

@@ -29,19 +29,24 @@ using namespace fastdelegate;
 class FrameManualOrder: public wxFrame {
 public:
 
-  struct structOrder {
-    wxString sInstrument;
+  struct Order_t {
+    wxString sSymbol;
     ou::tf::OrderSide::enumOrderSide eOrderSide;
     ou::tf::OrderType::enumOrderType eOrderType;
     unsigned long nQuantity;
     double dblPrice1;
     double dblPrice2;
-    structOrder( void ): eOrderSide( ou::tf::OrderSide::Buy ), eOrderType( ou::tf::OrderType::Limit ), nQuantity( 0 ), dblPrice1( 0.0 ), dblPrice2( 0.0 ) {};
+    Order_t( void ): eOrderSide( ou::tf::OrderSide::Buy ), eOrderType( ou::tf::OrderType::Limit ), nQuantity( 0 ), dblPrice1( 0.0 ), dblPrice2( 0.0 ) {};
   };
 
-  typedef FastDelegate1<const structOrder&> OnNewOrderHandler_t;
+  typedef FastDelegate1<const Order_t&> OnNewOrderHandler_t;
   void SetOnNewOrderHandler( OnNewOrderHandler_t function ) {
     OnNewOrder = function;
+  }
+
+  typedef FastDelegate1<const std::string&> OnSymbolTextUpdated_t;
+  void SetOnSymbolTextUpdated( OnSymbolTextUpdated_t function ) {
+    OnSymbolTextUpdated = function;
   }
 
   FrameManualOrder( void );
@@ -65,14 +70,17 @@ public:
 protected:
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_LblInstrument, ID_LblQuantity, ID_LblPrice1, ID_LblPrice2,
-    ID_TxtInstrument, ID_TxtQuantity, ID_TxtPrice1, ID_TxtPrice2,
+  enum { ID_Null=wxID_HIGHEST, ID_LblInstrumentSymbol, ID_LblInstrumentName, ID_LblQuantity, ID_LblPrice1, ID_LblPrice2,
+    ID_TxtInstrumentSymbol, ID_TxtQuantity, ID_TxtPrice1, ID_TxtPrice2,
     ID_BtnOrderTypeMarket, ID_BtnOrderTypeLimit, ID_BtnOrderTypeStop, ID_BtnBuy, ID_BtnSell
   };
 
-  structOrder m_order;
+  Order_t m_order;
 
   OnNewOrderHandler_t OnNewOrder;
+  OnSymbolTextUpdated_t OnSymbolTextUpdated;
+
+  wxTextCtrl* m_txtInstrumentSymbol;
 
   void Init( void );
   void CreateControls( void );
@@ -86,5 +94,9 @@ private:
   void OnBtnStop( wxCommandEvent& event ) { m_order.eOrderType = ou::tf::OrderType::Stop; };
   void OnBtnBuy( wxCommandEvent& event );
   void OnBtnSell( wxCommandEvent& event );
+
+  void OnInstrumentSymbolTextIdle( wxIdleEvent& event );
+  void OnInstrumentSymbolTextUpdated( wxCommandEvent& event );
+  void OnInstrumentSymbolTextEnter( wxCommandEvent& event );
 };
 

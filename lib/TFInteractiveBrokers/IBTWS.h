@@ -28,6 +28,7 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 #include <boost/thread.hpp> 
 #include <boost/bind.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
@@ -62,6 +63,8 @@ public:
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef COrder::pOrder_t pOrder_t;
   typedef int reqId_t;  // request id type
+  typedef ::Contract Contract;
+  typedef ::ContractDetails ContractDetails;
 
   CIBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
   ~CIBTWS(void);
@@ -78,15 +81,16 @@ public:
   //  need to make a container of re-usable request ids to be looked up in order to return data to appropriate caller
   //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
   //   ie, may need an array of OnContractDetailsHandler_t
-  void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };
   typedef FastDelegate1<const ContractDetails&> OnContractDetailsHandler_t;
-  void SetOnContractDetailsHandler( OnContractDetailsHandler_t function ) {
-    OnContractDetails = function;
-  }
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
-  void SetOnContractDetailsDoneHandler( OnContractDetailsDoneHandler_t function ) {
-    OnContractDetailsDone = function;
-  }
+  //void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };
+  void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
+  //void SetOnContractDetailsHandler( OnContractDetailsHandler_t function ) {
+  //  OnContractDetails = function;
+  //}
+  //void SetOnContractDetailsDoneHandler( OnContractDetailsDoneHandler_t function ) {
+  //  OnContractDetailsDone = function;
+  //}
 
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
@@ -206,28 +210,21 @@ private:
 
   void ProcessMessages( void );
 
-  std::vector<reqId_t> m_vReqId;
+  struct structRequest_t {
+    reqId_t id;
+    OnContractDetailsHandler_t fProcess;
+    OnContractDetailsDoneHandler_t fDone;
+    structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
+      : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
+  };
+
   reqId_t m_nxtReqId; 
+  std::vector<structRequest_t*> m_vInActiveRequestId;
+  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
+  typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
+  mapActiveRequestId_t m_mapActiveRequestId;
+  boost::mutex m_mutexContractRequest;
 
-  // todo:  turn this stuff into a class so that each request has its own fastdelegate
-  reqId_t NextReqId( void ) {
-    reqId_t tmp;
-    if ( 0 == m_vReqId.size() ) {
-      // starts with 0
-      tmp = m_nxtReqId++;
-    }
-    else {
-      tmp = m_vReqId.back();
-      m_vReqId.pop_back();
-    }
-    return tmp;
-  }
-
-  void GiveBackReqId( reqId_t  id ) {
-//    assert( 0 < id );
-    assert( id < m_nxtReqId );
-    m_vReqId.push_back( id );
-  }
 };
 
 } // namespace tf

@@ -133,7 +133,7 @@ void FrameProviderControl::OnBtnIB( wxCommandEvent& event ) {
   OnBtnCommon( event, m_stateIB );
   SetIBState( m_stateIB );
   if ( 0 != OnIBStateChange ) 
-    OnIBStateChange( m_stateIQFeed );
+    OnIBStateChange( m_stateIB );
 }
 
 void FrameProviderControl::OnBtnSimulation( wxCommandEvent& event ) {

@@ -61,16 +61,11 @@ FrameMain::FrameMain(const wxString& title, const wxPoint& pos, const wxSize& si
 
 }
 
-
 FrameMain::~FrameMain(void) {
 }
 
 void FrameMain::CleanUpForExit( void ) {
-  for ( vFrameManualOrder_t::iterator iter = m_vFrameManualOrders.begin(); iter != m_vFrameManualOrders.end(); ++iter ) {
-    (*iter)->Close();
-    delete *iter;
-  }
-  m_vFrameManualOrders.clear();
+  OnCleanUpForExit( 0 );
 }
 
 void FrameMain::OnCloseThis( wxCloseEvent& event ) {
@@ -92,10 +87,9 @@ void FrameMain::OnClose( wxCommandEvent& event ) {
 }
 
 void FrameMain::OnOpenFrameManualOrder( wxCommandEvent& event ) {
-  // need to keep a vector of these so can trade multiple symbols simulataneously
-  // maybe something like genesis with market depth book built in
-  FrameManualOrder* frame = new FrameManualOrder( this );
-  m_vFrameManualOrders.push_back( frame );
-  frame->Show( true );
-  event.Skip();
+
+  if ( 0 != OnCreateNewFrameManualOrder ) 
+    OnCreateNewFrameManualOrder();
+
+//  event.Skip();
 }

@@ -20,11 +20,11 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace options { // options
+namespace option { // options
 
 boost::gregorian::date Next3rdFriday( boost::gregorian::date date );
 
-} // namespace options
+} // namespace option
 } // namespace tf
 } // namespace ou
 
