@@ -1,6 +1,8 @@
 #ifndef eclientsocketbase_h__INCLUDED
 #define eclientsocketbase_h__INCLUDED
 
+#include <boost/thread/mutex.hpp>
+
 #include "EClient.h"
 
 #include <memory>
@@ -154,6 +156,9 @@ private:
 	bool m_connected;
 	int m_serverVersion;
 	IBString m_TwsTime;
+
+  // addition 2011/09/05
+  boost::mutex mutexSend;
 
 };
 

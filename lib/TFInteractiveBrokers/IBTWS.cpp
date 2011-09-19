@@ -101,6 +101,7 @@ void CIBTWS::ProcessMessages( void ) {
 }
 
 void CIBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // requires secType in addition to symbol name
   // needs to be thread protected:
   boost::mutex::scoped_lock lock(m_mutexContractRequest);
   structRequest_t* pRequest;
@@ -111,6 +112,7 @@ void CIBTWS::RequestContractDetails( const Contract& contract, OnContractDetails
   else {
     pRequest = m_vInActiveRequestId.back();
     m_vInActiveRequestId.pop_back();
+    pRequest->id = m_nxtReqId++;
     pRequest->fProcess = fProcess;
     pRequest->fDone = fDone;
   }
@@ -538,7 +540,8 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
 
 }
 
-void CIBTWS::contractDetailsEnd( int reqId ) {
+void CIBTWS::contractDetailsEnd( int reqId ) {  
+  // not called when no symbol available
   OnContractDetailsDoneHandler_t handler = 0;
   {
     boost::mutex::scoped_lock lock(m_mutexContractRequest);
@@ -546,9 +549,17 @@ void CIBTWS::contractDetailsEnd( int reqId ) {
     if ( m_mapActiveRequestId.end() == iterRequest ) {
       throw std::runtime_error( "contractDetailsEnd out of sync" );
     }
+    reqId_t id = iterRequest->second->id;
     handler = iterRequest->second->fDone;
     m_vInActiveRequestId.push_back( iterRequest->second );
     m_mapActiveRequestId.erase( iterRequest );
+    while ( 0 != m_mapActiveRequestId.size() ) {
+      // check for expired / ignored requests
+      iterRequest = m_mapActiveRequestId.begin();
+      if ( id < iterRequest->second->id ) break;
+      m_vInActiveRequestId.push_back( iterRequest->second );
+      m_mapActiveRequestId.erase( iterRequest );
+    }
   }
   if ( NULL != handler ) 
     handler();

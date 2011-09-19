@@ -2,6 +2,9 @@
 #define eclientsocketbaseimpl_h__INCLUDED
 
 //#include "StdAfx.h"
+
+// used to lock sendmessage at line 1742
+
 #include "EClientSocketBase.h"
 
 #include "EWrapper.h"
@@ -1745,6 +1748,8 @@ int EClientSocketBase::sendBufferedData()
 
 int EClientSocketBase::bufferedSend(const char* buf, size_t sz)
 {
+  boost::mutex::scoped_lock lock(mutexSend);
+
 	if( sz <= 0)
 		return 0;
 

@@ -63,7 +63,7 @@ private:
   typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef CSimulationProvider::pProvider_t pProviderSim_t;
 
-  typedef FrameProviderControl::eProviderState_t eProviderState_t;
+  //typedef FrameProviderControl::eProviderState_t eProviderState_t;
 
   typedef FrameManualOrder::Order_t ManualOrder_t;
 

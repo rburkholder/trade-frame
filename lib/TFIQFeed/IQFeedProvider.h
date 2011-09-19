@@ -27,6 +27,7 @@ class CIQFeedProvider :
   public CProviderInterface<CIQFeedProvider,CIQFeedSymbol>, 
   public CIQFeed<CIQFeedProvider> 
 {
+  friend CIQFeed<CIQFeedProvider>;
 public:
 
   typedef boost::shared_ptr<CIQFeedProvider> pProvider_t;
@@ -66,6 +67,9 @@ protected:
   virtual void HandleNMessage( CIQFNewsMessage *pMsg );
   virtual void HandleTMessage( CIQFTimeMessage *pMsg );
   virtual void HandleSMessage( CIQFSystemMessage *pMsg );
+
+  void OnIQFeedDisConnected( void );  // CRTP on IQFeed
+  void OnIQFeedConnected( void ); // CRTP on IQFeed
 
 private:
 

@@ -24,10 +24,29 @@ using namespace fastdelegate;
 
 // wxFrame (wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE, const wxString &name=wxFrameNameStr)
 
+enum eProviderState_t { ProviderOff, ProviderGoingOn, ProviderOn, ProviderGoingOff };
+//enum eProviderEvent_t { EVT_ProviderIB=wxID_HIGHEST+1, EVT_ProviderIQFeed, EVT_ProviderSimulator };
+
+class UpdateProviderStatusEvent: public wxEvent {
+public:
+  UpdateProviderStatusEvent( wxEventType eventType, eProviderState_t state )
+    : wxEvent( 0, eventType ), m_state( state ) {
+  }
+  UpdateProviderStatusEvent( const UpdateProviderStatusEvent& event ): wxEvent( *this ), m_state( event.m_state ) {};
+  ~UpdateProviderStatusEvent( void ) {};
+  UpdateProviderStatusEvent* Clone( void ) const { return new UpdateProviderStatusEvent( *this ); }
+  eProviderState_t GetState( void ) const { return m_state; };
+protected:
+private:
+  eProviderState_t m_state;
+};
+
+wxDECLARE_EVENT( EVT_ProviderIB, UpdateProviderStatusEvent );
+wxDECLARE_EVENT( EVT_ProviderIQFeed, UpdateProviderStatusEvent );
+wxDECLARE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
+
 class FrameProviderControl: public wxFrame {
 public:
-
-  enum eProviderState_t { ProviderOff, ProviderGoingOn, ProviderOn, ProviderGoingOff };
 
   typedef FastDelegate1<eProviderState_t> OnProviderStateChange_t;
   void SetOnIBStateChangeHandler( OnProviderStateChange_t function ) {
@@ -59,6 +78,8 @@ public:
   void SetIQFeedState( eProviderState_t state );
   void SetIBState( eProviderState_t state );
   void SetSimulatorState( eProviderState_t state );
+
+  void QueueEvent( wxEvent* event ) { wxEvtHandler::QueueEvent( event ); };
 
 protected:
 private:
@@ -94,6 +115,11 @@ private:
   void OnBtnIQFeed( wxCommandEvent& event );
   void OnBtnIB( wxCommandEvent& event );
   void OnBtnSimulation( wxCommandEvent& event );
+
+  void OnIQFeedState( UpdateProviderStatusEvent& event );
+  void OnIBState( UpdateProviderStatusEvent& event );
+  void OnSimulatorState( UpdateProviderStatusEvent& event );
+
 
 };
 

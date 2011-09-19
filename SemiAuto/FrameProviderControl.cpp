@@ -15,6 +15,10 @@
 
 #include "FrameProviderControl.h"
 
+wxDEFINE_EVENT( EVT_ProviderIB, UpdateProviderStatusEvent );
+wxDEFINE_EVENT( EVT_ProviderIQFeed, UpdateProviderStatusEvent );
+wxDEFINE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
+
 FrameProviderControl::FrameProviderControl( void ) {
   Init();
 }
@@ -101,6 +105,10 @@ void FrameProviderControl::CreateControls( void ) {
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameProviderControl::OnBtnIB, this, ID_BtnInteractiveBrokers );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &FrameProviderControl::OnBtnSimulation, this, ID_BtnSimulation );
 
+  Bind( EVT_ProviderIB, &FrameProviderControl::OnIBState, this );
+  Bind( EVT_ProviderIQFeed, &FrameProviderControl::OnIQFeedState, this );
+  Bind( EVT_ProviderSimulator, &FrameProviderControl::OnSimulatorState, this );
+
 }
 
 void FrameProviderControl::OnClose( wxCloseEvent& event ) {
@@ -177,4 +185,16 @@ void FrameProviderControl::SetIBState( eProviderState_t state ) {
 void FrameProviderControl::SetSimulatorState( eProviderState_t state ) {
   SetState( m_btnSimulator, state );
   m_stateSimulator = state;
+}
+
+void FrameProviderControl::OnIQFeedState( UpdateProviderStatusEvent& event ) {
+  SetIQFeedState( event.GetState() );
+}
+
+void FrameProviderControl::OnIBState( UpdateProviderStatusEvent& event ) {
+  SetIBState( event.GetState() );
+}
+
+void FrameProviderControl::OnSimulatorState( UpdateProviderStatusEvent& event ) {
+  SetSimulatorState( event.GetState() );
 }

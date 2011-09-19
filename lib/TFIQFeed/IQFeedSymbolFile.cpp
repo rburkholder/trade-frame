@@ -22,6 +22,8 @@
 
 #include <boost/regex.hpp> 
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <boost/spirit/include/qi.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>

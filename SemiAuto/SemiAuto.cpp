@@ -108,8 +108,6 @@ bool AppSemiAuto::OnInit() {
 
 int AppSemiAuto::OnExit() {
 
-  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
-
   m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
 
@@ -168,34 +166,34 @@ void AppSemiAuto::HandleSimulatorStateChangeRequest( eProviderState_t state ) {
   HandleStateChangeRequest( state, m_bSimConnected, m_sim );
 }
 
-void AppSemiAuto::HandleIBConnected( int ) {  // need cross thread fixup
+void AppSemiAuto::HandleIBConnected( int ) { // cross thread event
   m_bIBConnected = true;
-  m_FrameProviderControl->SetIBState( eProviderState_t::ProviderOn );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderOn ) );
 }
 
-void AppSemiAuto::HandleIQFeedConnected( int ) {  // need cross thread fixup
+void AppSemiAuto::HandleIQFeedConnected( int ) {  // cross thread event
   m_bIQFeedConnected = true;
-  m_FrameProviderControl->SetIQFeedState( eProviderState_t::ProviderOn );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOn ) );
 }
 
-void AppSemiAuto::HandleSimulatorConnected( int ) { // need cross thread fix up
+void AppSemiAuto::HandleSimulatorConnected( int ) { // cross thread event
   m_bSimConnected = true;
-  m_FrameProviderControl->SetSimulatorState( eProviderState_t::ProviderOn );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderOn ) );
 }
 
-void AppSemiAuto::HandleIBDisConnected( int ) {  // need cross thread fix up
+void AppSemiAuto::HandleIBDisConnected( int ) {  // cross thread event
   m_bIBConnected = false;
-  m_FrameProviderControl->SetIBState( eProviderState_t::ProviderOff );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIB, eProviderState_t::ProviderOff ) );
 }
 
-void AppSemiAuto::HandleIQFeedDisConnected( int ) {  // need cross thread fixup
+void AppSemiAuto::HandleIQFeedDisConnected( int ) { // cross thread event
   m_bIQFeedConnected = false;
-  m_FrameProviderControl->SetIQFeedState( eProviderState_t::ProviderOff );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOff ) );
 }
 
-void AppSemiAuto::HandleSimulatorDisConnected( int ) {  // need cross thread fixup
+void AppSemiAuto::HandleSimulatorDisConnected( int ) {  // cross thread event
   m_bSimConnected = false;
-  m_FrameProviderControl->SetSimulatorState( eProviderState_t::ProviderOff );
+  m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderOff ) );
 }
 
 void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
@@ -214,6 +212,7 @@ void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
   contract.exchange = "SMART";
   contract.secType = "STK";
   contract.symbol = sSymbol;
+  // as IB only responds when symbol is found, 
   m_tws->RequestContractDetails( contract, MakeDelegate( this, &AppSemiAuto::HandleIBContractDetails ), MakeDelegate( this, &AppSemiAuto::HandleIBContractDetailsDone ) );
 }
 
@@ -257,6 +256,8 @@ void AppSemiAuto::HandleOnExecDisconnected(int e) {
 }
 
 void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {
+
+  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
 
   // this doesn't work properly for user closed windows
   for ( vFrameManualOrder_t::iterator iter = m_vFrameManualOrders.begin(); iter != m_vFrameManualOrders.end(); ++iter ) {

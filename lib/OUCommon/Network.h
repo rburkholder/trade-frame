@@ -31,6 +31,7 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/interprocess/detail/atomic.hpp>
 
 #include "ReusableBuffers.h"
 
@@ -141,8 +142,8 @@ private:
   boost::asio::ip::tcp::socket* m_psocket;
 
   // variables used to sync for thread ending
-  volatile LONG m_cntActiveSends;  // number of active sends
-  volatile LONG m_lReadProgress; // >0 when read buffer processing is active
+  volatile boost::uint32_t m_cntActiveSends;  // number of active sends
+  volatile boost::uint32_t m_lReadProgress; // >0 when read buffer processing is active
 
   inputrepository_t m_reposInputBuffers;  // content received from the network
   linerepository_t m_reposLineBuffers;  // parsed lines sent to the callers
@@ -384,9 +385,6 @@ void CNetwork<ownerT,charT>::Disconnect( void ) {
     if ( NS_CONNECTED == m_stateNetwork ) {
       m_stateNetwork = NS_DISCONNECTING;
       m_psocket->shutdown( boost::asio::ip::tcp::socket::shutdown_both );
-      m_psocket->close();
-      delete m_psocket;
-      m_psocket = NULL;
       OnDisconnecting();
     }
     else {
@@ -407,6 +405,10 @@ void CNetwork<ownerT,charT>::OnDisconnecting( void ) {
 //    && ( !m_reposLineBuffers.Outstanding() )  // all clients buffers have been returned. [ can't as destroy doesn't clean up]
   ) {
     // signal disconnect complete
+    m_psocket->close();
+    delete m_psocket;
+    m_psocket = NULL;
+
     m_stateNetwork = NS_DISCONNECTED;
     if ( &CNetwork<ownerT, charT>::OnNetworkDisconnected != &ownerT::OnNetworkDisconnected ) {
       static_cast<ownerT*>( this )->OnNetworkDisconnected();
@@ -425,9 +427,15 @@ void CNetwork<ownerT,charT>::OnDisconnecting( void ) {
 template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::AsyncRead( void ) {
 
-  assert( NS_CONNECTED == m_stateNetwork );
+  if ( NS_DISCONNECTING == m_stateNetwork ) {
+    //bool i = true;  // break point, waiting for network stuff to clear out
+  }
+  else {
+    assert( NS_CONNECTED == m_stateNetwork );
+  }
 
-  InterlockedIncrement( &m_lReadProgress );
+  //InterlockedIncrement( &m_lReadProgress );
+  boost::interprocess::detail::atomic_inc32( &m_lReadProgress );
 
   inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOutL();
 //  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
@@ -495,7 +503,8 @@ void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error,
   }
   m_reposInputBuffers.CheckInL( pbuffer );
 
-  InterlockedDecrement( &m_lReadProgress );
+  //InterlockedDecrement( &m_lReadProgress );
+  boost::interprocess::detail::atomic_dec32( &m_lReadProgress );
 }
 
 //
@@ -506,7 +515,8 @@ template <typename ownerT, typename charT>
 void CNetwork<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) {
 
   if ( NS_CONNECTED == m_stateNetwork ) {
-    InterlockedIncrement( &m_cntActiveSends );
+    //InterlockedIncrement( &m_cntActiveSends );
+    boost::interprocess::detail::atomic_inc32( &m_cntActiveSends );
 
     linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
@@ -551,7 +561,8 @@ void CNetwork<ownerT,charT>::OnSendDoneCommon(
   assert( bytes_transferred == pbuffer->size() );
   m_cntBytesTransferred_send += bytes_transferred;
 
-  InterlockedDecrement( &m_cntActiveSends );
+//  InterlockedDecrement( &m_cntActiveSends );
+  boost::interprocess::detail::atomic_dec32( &m_cntActiveSends );
 
   if ( 0 != error ) {
     if ( &CNetwork<ownerT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {

@@ -194,7 +194,6 @@ void FrameManualOrder::OnInstrumentSymbolTextEnter( wxCommandEvent& event ) {
   event.Skip();
 }
 
-
 // need to set state on buttons sometime to make validations below unneeded
 
 void FrameManualOrder::EmitOrder( void ) const {

@@ -75,11 +75,11 @@ public:
 
   virtual void Connect( void ) {};
   ou::Delegate<int> OnConnecting;
-  ou::Delegate<int> OnConnected;
+  ou::Delegate<int> OnConnected;  // could be in another thread
 
   virtual  void Disconnect( void ) {};
   ou::Delegate<int> OnDisconnecting;
-  ou::Delegate<int> OnDisconnected;
+  ou::Delegate<int> OnDisconnected;  // could be in another thread
 
   bool Connected( void ) const { return m_bConnected; };
 

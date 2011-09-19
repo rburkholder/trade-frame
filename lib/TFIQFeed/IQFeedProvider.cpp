@@ -38,9 +38,12 @@ void CIQFeedProvider::Connect() {
     OnConnecting( 0 );
     inherited_t::Connect();
     IQFeed_t::Connect();
-    m_bConnected = true;
-    OnConnected( 0 );
   }
+}
+
+void CIQFeedProvider::OnIQFeedConnected( void ) {
+  m_bConnected = true;
+  OnConnected( 0 );
 }
 
 void CIQFeedProvider::Disconnect() {
@@ -48,9 +51,12 @@ void CIQFeedProvider::Disconnect() {
     CProviderInterfaceBase::OnDisconnecting( 0 );
     IQFeed_t::Disconnect();
     inherited_t::Disconnect();
-    m_bConnected = false;
-    OnDisconnected( 0 );
   }
+}
+
+void CIQFeedProvider::OnIQFeedDisConnected( void ) {
+  m_bConnected = false;
+  OnDisconnected( 0 );
 }
 
 CIQFeedProvider::pSymbol_t CIQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
