@@ -85,6 +85,7 @@
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="FrameManualOrder.h" />
     <ClInclude Include="FrameProviderControl.h" />
+    <ClInclude Include="InstrumentData.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SemiAuto.h" />
     <ClInclude Include="stdafx.h" />
@@ -95,6 +96,7 @@
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="FrameManualOrder.cpp" />
     <ClCompile Include="FrameProviderControl.cpp" />
+    <ClCompile Include="InstrumentData.cpp" />
     <ClCompile Include="SemiAuto.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

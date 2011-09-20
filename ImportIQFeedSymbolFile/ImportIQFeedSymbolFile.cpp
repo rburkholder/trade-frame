@@ -16,15 +16,15 @@
 
 #include "stdafx.h"
 
-#include <LibIQFeed\IQFeedSymbolFile.h>
+#include <TFIQFeed\IQFeedSymbolFile.h>
 
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-  CIQFeedSymbolFile file;
+  ou::tf::CIQFeedSymbolFile file;
 
   file.Load( "mktsymbols_v2.txt", "symbols.db4" );
 
-	return 0;
+ 	return 0;
 }
 

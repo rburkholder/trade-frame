@@ -189,6 +189,8 @@ protected:
   virtual void StartGreekWatch( pSymbol_t pSymbol ) {};
   virtual void  StopGreekWatch( pSymbol_t pSymbol ) {};
 
+  bool Exists( pInstrument_cref pInstrument, typename m_mapSymbols_t::iterator& iter );
+
   virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0; 
   pSymbol_t AddCSymbol( pSymbol_t pSymbol );
 
@@ -217,6 +219,12 @@ CProviderInterface<P,S>::~CProviderInterface(void) {
 template <typename P, typename S>
 bool CProviderInterface<P,S>::Exists( pInstrument_cref pInstrument ) {
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+  return ( m_mapSymbols.end() != iter );
+}
+
+template <typename P, typename S>
+bool CProviderInterface<P,S>::Exists( pInstrument_cref pInstrument, typename m_mapSymbols_t::iterator& iter ) {
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   return ( m_mapSymbols.end() != iter );
 }
 
@@ -254,9 +262,10 @@ typename CProviderInterface<P,S>::pSymbol_t CProviderInterface<P,S>::GetSymbol( 
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddQuoteHandler(pInstrument_cref pInstrument, quotehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+  if ( !Exists( pInstrument, iter ) ) {
+    Add( pInstrument );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddQuoteHandler( handler ) ) {
     StartQuoteWatch( iter->second );
@@ -280,9 +289,10 @@ void CProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, q
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddTradeHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+  if ( !Exists( pInstrument, iter ) ) {
+    Add( pInstrument );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddTradeHandler( handler ) ) {
     StartTradeWatch( iter->second );
@@ -306,9 +316,10 @@ void CProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, t
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddOnOpenHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+  if ( !Exists( pInstrument, iter ) ) {
+    Add( pInstrument );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    assert( m_mapSymbols.end() != iter );
   }
   iter->second->AddOnOpenHandler( handler );
 }
@@ -328,9 +339,10 @@ void CProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, 
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddDepthHandler(pInstrument_cref pInstrument, depthhandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+  if ( !Exists( pInstrument, iter ) ) {
+    Add( pInstrument );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddDepthHandler( handler ) ) {
     StartDepthWatch( iter->second );
@@ -354,9 +366,10 @@ void CProviderInterface<P,S>::RemoveDepthHandler(pInstrument_cref pInstrument, d
 template <typename P, typename S>
 void CProviderInterface<P,S>::AddGreekHandler(pInstrument_cref pInstrument, greekhandler_t handler) {
   m_mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+  if ( !Exists( pInstrument, iter ) ) {
+    Add( pInstrument );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    assert( m_mapSymbols.end() != iter );
   }
   if ( iter->second->AddGreekHandler( handler ) ) {
     StartGreekWatch( iter->second );

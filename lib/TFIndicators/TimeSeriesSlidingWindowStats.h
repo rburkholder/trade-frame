@@ -16,6 +16,12 @@
 #include "TimeSeriesSlidingWindow.h"
 #include "RunningStats.h"
 
+// batch mode time series processing
+// used for processing a time series and obtaining the results at the end
+// Construct then run Update to process the time series
+
+// at some point, redo Add, Expire, PostUpdate as CRTP mechanism
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -41,6 +47,7 @@ protected:
 private:
 };
 
+// constructor
 template<class T> CTimeSeriesSlidingWindowStats<T>::CTimeSeriesSlidingWindowStats( 
   CTimeSeries<T> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
 : CTimeSeriesSlidingWindow<T>( pSeries, WindowSizeSeconds, WindowSizeCount )

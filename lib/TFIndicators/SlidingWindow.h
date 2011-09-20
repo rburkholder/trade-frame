@@ -32,17 +32,17 @@ namespace tf { // TradeFrame
 
 template<class T> class CObjectAtTime {
 public:
-  CObjectAtTime<T>( ptime dt, T *object );
+  CObjectAtTime<T>( ptime dt, T* object );
   virtual ~CObjectAtTime<T>(void);
   ptime getDateTime(void) { return m_dt; };
-  T *getObject(void) { return m_object; };
+  T* getObject(void) { return m_object; };
 protected:
   ptime m_dt;
-  T *m_object;
+  T* m_object;
 private:
 };
 
-template<class T> CObjectAtTime<T>::CObjectAtTime(boost::posix_time::ptime dt, T *object) {
+template<class T> CObjectAtTime<T>::CObjectAtTime(boost::posix_time::ptime dt, T* object) {
   m_dt = dt;
   m_object = object;
 }
@@ -71,14 +71,14 @@ public:
   void SetSlidingWindowCount( long );
   long GetSlidingWindowCount( void ) { return m_nWindowSizeCount; };
 
-  T *Add( ptime t, T *object );
-  T *UndoPush( void );
-  virtual T *Remove( void );  // inheritor needs to ensure destruction of held object
+  T* Add( ptime t, T *object );
+  T* UndoPush( void );
+  virtual T* Remove( void );  // inheritor needs to ensure destruction of held object
   void UpdateWindow();
   size_t Count();
 
-  T *First();
-  T *Next();
+  T* First();
+  T* Next();
 
 protected:
   // put in lock variable, method?
@@ -88,9 +88,8 @@ protected:
   time_duration m_tdWindowWidth;
   ptime m_dtLast;
 
-  //queue<CObjectAtTime<T> *> m_qT;
-  std::deque<CObjectAtTime<T> *> m_qT;
-  typename std::deque<CObjectAtTime<T> *>::iterator iter;
+  std::deque<CObjectAtTime<T>*> m_qT;
+  typename std::deque<CObjectAtTime<T>*>::iterator iter;
 
 private:
 };
@@ -125,23 +124,23 @@ template<class T> void CSlidingWindow<T>::SetSlidingWindowCount(long nWindowSize
   m_nWindowSizeCount = nWindowSizeCount;
 }
 
-template<class T> T *CSlidingWindow<T>::First() {
+template<class T> T* CSlidingWindow<T>::First() {
   iter = m_qT.begin();
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> T *CSlidingWindow<T>::Next() {
+template<class T> T* CSlidingWindow<T>::Next() {
   iter++;
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> T *CSlidingWindow<T>::Add(boost::posix_time::ptime dt, T *object) {
+template<class T> T* CSlidingWindow<T>::Add(boost::posix_time::ptime dt, T *object) {
   m_qT.push_back( new CObjectAtTime<T>( dt, object ) );
   m_dtLast = dt;
   return object;
 }
 
-template<class T> T *CSlidingWindow<T>::UndoPush(void) {
+template<class T> T* CSlidingWindow<T>::UndoPush(void) {
   CObjectAtTime<T> *oat = NULL;
   T *object = NULL;
   if ( !m_qT.empty() ) {
@@ -154,7 +153,7 @@ template<class T> T *CSlidingWindow<T>::UndoPush(void) {
   return object;
 }
 
-template<class T> T *CSlidingWindow<T>::Remove() {
+template<class T> T* CSlidingWindow<T>::Remove() {
   CObjectAtTime<T> *oat = NULL;
   T *object = NULL;
   if ( !m_qT.empty() ) {
@@ -194,6 +193,7 @@ template<class T> void CSlidingWindow<T>::UpdateWindow() {
   }
 }
 
+// ================ CSlidingWindowBars =================
 
 class CSlidingWindowBars: public CSlidingWindow<CBar> {
 public:

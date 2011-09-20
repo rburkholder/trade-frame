@@ -17,7 +17,7 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
-#include "slidingwindow.h"
+#include "SlidingWindow.h"
 #include "RunningStats.h"
 
 namespace ou { // One Unified

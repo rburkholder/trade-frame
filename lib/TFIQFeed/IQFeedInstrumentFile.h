@@ -37,7 +37,7 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
 
   enum enumSymbolClassifier: unsigned char { // bits in bitmap of stored data record
     Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
-      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, 
+      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries, 
       FrontMonth, HasOptions  // these last two are calculated differently than previous enumerations
   };
 

@@ -68,7 +68,7 @@ public:
 
   bool Exists( idInstrument_cref );
   bool Exists( pInstrument_cref );
-  pInstrument_t Get( idInstrument_cref );
+  pInstrument_t Get( idInstrument_cref ); // for getting existing associated with id
   void Delete( idInstrument_cref );
 
   void AttachToSession( ou::db::CSession* pSession );

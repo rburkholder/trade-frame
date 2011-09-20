@@ -13,6 +13,11 @@
 
 #pragma once
 
+// used with TimeSeriesSlidingWindowStats in batch mode on a TimeSeries
+// Construct then run Update to process the time series
+// Each time timeseries updated, run Update to continue
+// useful when timeseries serves multiple windows
+
 #include <TFTimeSeries/TimeSeries.h>
 
 namespace ou { // One Unified
@@ -57,22 +62,24 @@ template<class T> CTimeSeriesSlidingWindow<T>::~CTimeSeriesSlidingWindow(void) {
 template<class T> void CTimeSeriesSlidingWindow<T>::Update( void ) {
   if ( !m_bFirstDatumFound ) {
     if ( 0 < m_pSeries->Size() ) {
-      T *datum = (*m_pSeries)[ 0 ];
-      m_dtZero = datum->m_dt;
+      //T *datum = (*m_pSeries)[ 0 ]->m_dt;
+      m_dtZero = (*m_pSeries)[ 0 ]->m_dt;  // used for zeroing the statistics
       m_bFirstDatumFound = true;
     }
   }
+  bool bMovedIndex = false;
   while ( m_ixLeading < m_pSeries->Size() ) {
     T *datum = (*m_pSeries)[ m_ixLeading ];
     m_dtLeading = datum->m_dt;
-    Add( *datum );
+    Add( *datum ); // add datum to stats
     ++m_ixLeading;
+    bMovedIndex = true;
   }
-  if ( 0 < m_pSeries->Size() ) {
+  if ( bMovedIndex ) {
     if ( 0 < m_nWindowSizeCount ) {
       while ( ( m_ixLeading - m_ixTrailing ) > m_nWindowSizeCount ) {
         T *datum = (*m_pSeries)[ m_ixTrailing ];
-        Expire( *datum );
+        Expire( *datum );  // expire datum from stats
         ++m_ixTrailing;
       }
     }
@@ -80,8 +87,11 @@ template<class T> void CTimeSeriesSlidingWindow<T>::Update( void ) {
       T *datum = (*m_pSeries)[ m_ixTrailing ];
       time_duration dif = m_dtLeading - datum->m_dt;
       while ( dif > m_tdWindowWidth ) {
-        Expire( *datum );
+        Expire( *datum );  // expire datum from stats
         ++m_ixTrailing;
+        if ( m_ixTrailing >= m_ixLeading ) {
+          break;
+        }
         datum = (*m_pSeries)[ m_ixTrailing ];
         dif = m_dtLeading - datum->m_dt;
       }

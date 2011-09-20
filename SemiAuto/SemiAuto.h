@@ -17,6 +17,10 @@
 
 #include <wx/wx.h>
 
+//#include <TFTimeSeries/DatedDatum.h>
+//#include <TFTimeSeries/TimeSeries.h>
+//#include <TFTimeSeries/BarFactory.h>
+
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
 
@@ -34,6 +38,8 @@
 #include "FrameMain.h"
 #include "FrameProviderControl.h"
 #include "FrameManualOrder.h"
+
+#include "InstrumentData.h"
 
 using namespace ou::tf;
 
@@ -76,6 +82,12 @@ private:
 
   bool m_bWatchingOptions;
   bool m_bTrading;
+
+
+  typedef std::vector<InstrumentData> vInstrumentData_t;
+  vInstrumentData_t m_vInstruments;
+
+
 
   bool m_bExecConnected;
   bool m_bData1Connected;
@@ -130,6 +142,7 @@ private:
   void HandleCheckSymbolNameAgainstIB( const std::string& );
   void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& );
   void HandleIBContractDetailsDone( void );
+
 
 };
  

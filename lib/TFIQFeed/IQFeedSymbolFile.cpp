@@ -107,8 +107,10 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
   // TODO:  need to prevent re-entrant execution:  ie, turn invoking button off
   // TODO:  need to put this inside a background thread, and lock out other database access processes while running
 
-  static const boost::regex rxFuture( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
+  static const boost::regex rxFuture0( "[[:blank:]](JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
+  static const boost::regex rxFuture1( "[[:blank:]](JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)[[:blank:]]{1}([0-9]{4})" );  // GOOG1CQ07	GOOG AUG 2007	ONECH
   static const boost::regex rxFuture2( "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]][0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
+//  static const boost::regex rxFuture2( "(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)[[:blank:]][0-9]{2}/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[[:blank:]]20[0-9]{2}" ); //     No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
 
   std::ifstream file;
 
@@ -156,7 +158,41 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
     { structSymbolRecord::PrecMtl , "PRECMTL" },
     { structSymbolRecord::Spot , "SPOT" },
     { structSymbolRecord::Spread , "SPREAD" },
-    { structSymbolRecord::StratSpread, "STRATSPREAD" }
+    { structSymbolRecord::StratSpread, "STRATSPREAD" },
+    { structSymbolRecord::Swaps, "SWAPS" },
+    { structSymbolRecord::Treasuries, "TREASURIES" }
+  };
+
+//  FUTURE MONTH CODES
+//  Jan-F    Feb-G    Mar-H    Apr-J    May-K    Jun-M   
+//  Jul-N    Aug-Q    Sep-U    Oct-V    Nov-X    Dec-Z 
+  unsigned short rFutureMonth[] = {
+    0,  // A
+    0,  // B
+    0,  // C
+    0,  // D
+    0,  // E
+      1,  // F
+      2,  // G
+      3,  // H
+    0,  // I
+      4,  // J
+      5,  // K
+    0,  // L
+      6,  // M
+      7,  // N
+    0,  // O
+    0,  // P
+      8,  // Q
+    0,  // R
+    0,  // S
+    0,  // T
+      9,  // U
+     10,  // V
+    0,  // W
+     11,  // X
+    0,  // Y
+     12  // Z
   };
 
   size_t cntSymbolClassifiers = sizeof( rSymbolTypes ) / sizeof( structSymbolTypes );
@@ -272,7 +308,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
       }
 
       if ( 0 == count[structSymbolRecord::IXDesc] ) {
-        std::cout << dbRecord.line << ": no description supplied" << std::endl;
+        std::cout << dbRecord.line << ": warning, no description supplied" << std::endl;
       }
 
       if ( ( 0 == count[structSymbolRecord::IXSymbol] ) 
@@ -365,23 +401,33 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
         }
         
         // parse out contract expiry information
+        // · For combined session symbols, the first character is "+".
+        //· For Night/Electronic sessions, the first character is "@".
+        // · Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
+        // · NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
+        // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
         if ( structSymbolRecord::Future == dbRecord.eInstrumentType ) {
           if ( 'Y' == *(dbRecord.line + offset[structSymbolRecord::IXFrontMonth]) ) {
             dbRecord.sc.set( structSymbolRecord::FrontMonth );
           }
-          boost::cmatch what;
-          if ( boost::regex_search( dbRecord.line + offset[structSymbolRecord::IXDesc], what, rxFuture ) ) {
-            std::string sMonth( what[1].first, what[1].second );
-            std::string sYear( what[2].first, what[2].second );
-            dbRecord.nMonth = DecodeMonth( sMonth );
-            dbRecord.nYear = atoi( sYear.c_str() );
+          std::string sSymbol( dbRecord.line );
+          bool bDecode = true;
+//          if ( '+' == sSymbol[0] ) {
+//          }
+//          if ( '@' == sSymbol[0] ) {
+//          }
+          if ( '#' == sSymbol[ sSymbol.length() - 1 ] ) {
+            bDecode = false;
           }
-          else {  // No future match on HOX8-HOJ9, HEATING OIL #2 NOV 08/APR 09
-            if ( boost::regex_search( dbRecord.line + offset[structSymbolRecord::IXDesc], what, rxFuture2 ) ) {
-              // just ignore the double future set
+          if ( bDecode ) {
+            std::string sYear = sSymbol.substr( sSymbol.length() - 2 );
+            char mon = sSymbol[ sSymbol.length() - 3 ];
+            if ( ( 'F' > mon ) || ( 'Z' < mon ) || ( 0 == rFutureMonth[ mon - 'A' ] ) ) {
+              std::cout << "Bad future month on " << dbRecord.line << ", " << dbRecord.line + offset[structSymbolRecord::IXDesc] << std::endl;
             }
             else {
-              std::cout << "No future match on " << dbRecord.line << ", " << dbRecord.line + offset[structSymbolRecord::IXDesc] << std::endl;
+              dbRecord.nMonth = rFutureMonth[ mon - 'A' ];
+              dbRecord.nYear = 2000 + atoi( sYear.c_str() );
             }
           }
         }

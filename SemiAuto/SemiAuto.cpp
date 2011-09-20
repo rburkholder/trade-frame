@@ -103,6 +103,22 @@ bool AppSemiAuto::OnInit() {
   m_FrameProviderControl->SetOnIQFeedStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleIQFeedStateChangeRequest ) ) ;
   m_FrameProviderControl->SetOnSimulatorStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleSimulatorStateChangeRequest ) );
 
+  CInstrumentManager& mgr( CInstrumentManager::Instance() );
+
+  if ( mgr.Exists( "+GCV11" ) ) {
+    m_vInstruments.push_back( InstrumentData( mgr.Get( "+GCV11" ) ) );
+  }
+  else {
+    m_vInstruments.push_back( InstrumentData( mgr.ConstructFuture( "+GCV11", "SMART", 2011, 10 ) ) );  // October
+  }
+
+  if ( mgr.Exists( "+GCZ11" ) ) {
+    m_vInstruments.push_back( InstrumentData( mgr.Get( "+GCZ11" ) ) );
+  }
+  else {
+    m_vInstruments.push_back( InstrumentData( mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 ) ) );  // December
+  }
+
   return TRUE;
 }
 
@@ -174,6 +190,10 @@ void AppSemiAuto::HandleIBConnected( int ) { // cross thread event
 void AppSemiAuto::HandleIQFeedConnected( int ) {  // cross thread event
   m_bIQFeedConnected = true;
   m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOn ) );
+  for ( vInstrumentData_t::iterator iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++iter ) {
+    iter->AddQuoteHandler( m_iqfeed );
+    iter->AddTradeHandler( m_iqfeed );
+  }
 }
 
 void AppSemiAuto::HandleSimulatorConnected( int ) { // cross thread event
@@ -187,6 +207,10 @@ void AppSemiAuto::HandleIBDisConnected( int ) {  // cross thread event
 }
 
 void AppSemiAuto::HandleIQFeedDisConnected( int ) { // cross thread event
+  for ( vInstrumentData_t::iterator iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++iter ) {
+    iter->RemoveQuoteHandler( m_iqfeed );
+    iter->RemoveTradeHandler( m_iqfeed );
+  }
   m_bIQFeedConnected = false;
   m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOff ) );
 }

@@ -83,20 +83,20 @@ void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   }
 }
 
-void CIQFeedProvider::StartQuoteWatch(CIQFeedSymbol* pSymbol) {
-  StartQuoteTradeWatch( pSymbol );
+void CIQFeedProvider::StartQuoteWatch(pSymbol_t pSymbol) {
+  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StopQuoteWatch(CIQFeedSymbol* pSymbol) {
-  StopQuoteTradeWatch( pSymbol );
+void CIQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
+  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StartTradeWatch(CIQFeedSymbol* pSymbol) {
-  StartQuoteTradeWatch( pSymbol );
+void CIQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
+  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StopTradeWatch(CIQFeedSymbol* pSymbol) {
-  StopQuoteTradeWatch( pSymbol );
+void CIQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
+  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
 }
 
 void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {

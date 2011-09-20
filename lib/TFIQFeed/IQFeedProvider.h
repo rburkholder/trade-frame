@@ -50,14 +50,14 @@ protected:
   void StopQuoteTradeWatch( CIQFeedSymbol *pSymbol );
 
   // overridden from ProviderInterface, called when application adds/removes watches
-  virtual void StartQuoteWatch( CIQFeedSymbol* pSymbol ) ;
-  virtual void  StopQuoteWatch( CIQFeedSymbol* pSymbol );
+  virtual void StartQuoteWatch( pSymbol_t pSymbol ) ;
+  virtual void  StopQuoteWatch( pSymbol_t pSymbol );
 
-  virtual void StartTradeWatch( CIQFeedSymbol* pSymbol );
-  virtual void  StopTradeWatch( CIQFeedSymbol* pSymbol );
+  virtual void StartTradeWatch( pSymbol_t pSymbol );
+  virtual void  StopTradeWatch( pSymbol_t pSymbol );
 
-  virtual void StartDepthWatch( CIQFeedSymbol* pSymbol ) {};
-  virtual void  StopDepthWatch( CIQFeedSymbol* pSymbol ) {};
+  virtual void StartDepthWatch( pSymbol_t pSymbol ) {};
+  virtual void  StopDepthWatch( pSymbol_t pSymbol ) {};
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
