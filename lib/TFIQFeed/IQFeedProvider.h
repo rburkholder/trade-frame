@@ -61,12 +61,12 @@ protected:
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
-  virtual void HandleQMessage( CIQFUpdateMessage *pMsg );
-  virtual void HandlePMessage( CIQFSummaryMessage *pMsg );
-  virtual void HandleFMessage( CIQFFundamentalMessage *pMsg );
-  virtual void HandleNMessage( CIQFNewsMessage *pMsg );
-  virtual void HandleTMessage( CIQFTimeMessage *pMsg );
-  virtual void HandleSMessage( CIQFSystemMessage *pMsg );
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage *pMsg );
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage *pMsg );
+  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage *pMsg );
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage *pMsg );
+  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage *pMsg );
+  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage *pMsg );
 
   void OnIQFeedDisConnected( void );  // CRTP on IQFeed
   void OnIQFeedConnected( void ); // CRTP on IQFeed

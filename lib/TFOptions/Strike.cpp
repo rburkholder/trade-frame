@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,33 +11,46 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-
-#include <map>
+#include "Strike.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace option { // options
 
-class RunningMinMax {
-public:
+Strike::Strike( void ) 
+: m_dblStrike( 0 ),
+  m_bWatching( false )
+{
+  //assert( false );  // see if it actaully gets called
+}
 
-  RunningMinMax(void);
-  virtual ~RunningMinMax(void);
+Strike::Strike( double dblStrike ) 
+: m_dblStrike( dblStrike ),
+  m_bWatching( false )
+{
+}
 
-  virtual void Add( double );
-  virtual void Remove( double );
+Strike::Strike( const Strike& rhs ) 
+: m_dblStrike( rhs.m_dblStrike ),
+  m_call( rhs.m_call ), m_put( rhs.m_put ),
+  m_bWatching( false )
+{ 
+  assert( !rhs.m_bWatching );
+}
 
-  double Min() const { return m_dblMin; };
-  double Max() const { return m_dblMax; };
+Strike::~Strike( void ) {
+}
 
-protected:
-  typedef std::map<double,unsigned int> map_t;
-  map_t m_mapPointStats;
-  typedef std::pair<double, unsigned int> m_mapPointStats_pair_t;
-private:
-  double m_dblMax;
-  double m_dblMin;
+Strike& Strike::operator=( const Strike& rhs ) {
+  assert( !rhs.m_bWatching );
+  assert( !m_bWatching );
+  m_dblStrike = rhs.m_dblStrike;
+  m_call = rhs.m_call;
+  m_put = rhs.m_put;
+  return *this;
 };
 
+} // namespace option
 } // namespace tf
 } // namespace ou
+

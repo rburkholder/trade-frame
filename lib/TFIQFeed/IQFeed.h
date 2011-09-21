@@ -120,10 +120,10 @@ protected:
   void OnIQFeedConnected( void ) {};
   void OnIQFeedDisConnected( void ) {};
   void OnIQFeedSendDone( void ) {};
-  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {};
-  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage* msg) {};
-  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage* msg) {};
   void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage* msg) {};
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage* msg) {};
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {};
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage* msg) {};
   void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage* msg) {};
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage* msg) {};
 

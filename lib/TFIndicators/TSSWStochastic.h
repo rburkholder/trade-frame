@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,30 +13,30 @@
 
 #pragma once
 
-#include <map>
+#include "RunningMinMax.h"
+#include "TimeSeriesSlidingWindow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class RunningMinMax {
+// 14,3,1 is standard  14 periods, 3 slow average, 1 fast average
+
+class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, CQuote> {
+  friend TimeSeriesSlidingWindow<TSSWStochastic, CQuote>;
 public:
-
-  RunningMinMax(void);
-  virtual ~RunningMinMax(void);
-
-  virtual void Add( double );
-  virtual void Remove( double );
-
-  double Min() const { return m_dblMin; };
-  double Max() const { return m_dblMax; };
-
+  TSSWStochastic( CQuotes* quotes, long WindowSizeSeconds );
+  ~TSSWStochastic(void);
+  double K( void ) const { return m_k; };
 protected:
-  typedef std::map<double,unsigned int> map_t;
-  map_t m_mapPointStats;
-  typedef std::pair<double, unsigned int> m_mapPointStats_pair_t;
+  void Add( const CQuote& quote );
+  void Expire( const CQuote& quote );
+  void PostUpdate( void );
 private:
-  double m_dblMax;
-  double m_dblMin;
+  long m_seconds;
+  RunningMinMax m_minmax;
+
+  double m_last;
+  double m_k;
 };
 
 } // namespace tf

@@ -15,7 +15,9 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 
-#include <TFIndicators/TimeSeriesSlidingWindowStats.h>
+//#include <TFIndicators/TimeSeriesSlidingWindow.h>
+#include <TFIndicators/TSSWStats.h>
+#include <TFIndicators/TSSWStochastic.h>
 
 #include <TFTrading/Instrument.h>
 #include <TFTrading/ProviderManager.h>
@@ -41,6 +43,9 @@ private:
   CInstrument::pInstrument_t m_pInstrument;
   CQuotes m_quotes;
   CTrades m_trades;
+
+  TSSWStatsMidQuote m_stats;
+  TSSWStochastic m_stoch;
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );

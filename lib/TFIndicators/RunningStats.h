@@ -22,11 +22,27 @@ public:
   CRunningStats(double BBMultiplier);
   virtual ~CRunningStats(void);
   void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
-  double GetBBMultiplier( void ) { return m_BBMultiplier; };
+  double GetBBMultiplier( void ) const { return m_BBMultiplier; };
 
   void Add( double, double );
   void Remove( double, double );
   virtual void CalcStats( void );
+
+  double B2() const { return b2; }; // acceleration
+  double B1() const { return b1; }; // slope
+  double B0() const { return b0; }; // offset
+
+  double MeanY() const { return meanY; };
+
+  double RR() const { return rr; };
+  double R() const { return r; };
+
+  double SD() const { return sd; };
+
+  double BBUpper() const { return bbUpper; };
+  double BBLower() const { return bbLower; };
+
+protected:
 
   double b2; // acceleration
   double b1; // slope
@@ -34,14 +50,13 @@ public:
 
   double meanY;
 
-  double RR;
-  double R;
+  double rr;
+  double r;
 
-  double SD;
+  double sd;
 
-  double BBUpper, BBLower;
+  double bbUpper, bbLower;
 
-protected:
   unsigned int nX, nY;
   double SumXX, SumX, SumXY, SumY, SumYY;
   double m_BBMultiplier;

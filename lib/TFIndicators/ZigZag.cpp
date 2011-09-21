@@ -33,26 +33,6 @@ void CZigZag::Check(boost::posix_time::ptime dt, double val) {
   double dif;
 
   switch ( m_PatternState ) {
-    case EDirection::Init:
-      m_dblPatternPt0 = val;
-      m_dblPatternPt1 = val;
-      m_dtPatternPt1 = dt;
-      m_PatternState = EDirection::Start;
-      if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
-      break;
-    case EDirection::Start:
-      if ( abs( val - m_dblPatternPt1 ) >= m_dblFilterWidth ) {
-        m_dtPatternPt1 = dt;
-        m_dblPatternPt0 = val;
-        if ( val > m_dblPatternPt1 ) {
-          m_PatternState = EDirection::Up;
-        }
-        else {
-          m_PatternState = EDirection::Down;
-        }
-        m_dblPatternPt1 = val;
-      }
-      break;
     case EDirection::Up:
       m_dblPatternPt0 = val;
       if ( val > m_dblPatternPt1 ) {
@@ -81,6 +61,26 @@ void CZigZag::Check(boost::posix_time::ptime dt, double val) {
         ++cntTurns;
         if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
         if ( m_dblPatternPt1 < m_dblPatternPt0 ) m_PatternState = EDirection::Up;
+      }
+      break;
+    case EDirection::Init:
+      m_dblPatternPt0 = val;
+      m_dblPatternPt1 = val;
+      m_dtPatternPt1 = dt;
+      m_PatternState = EDirection::Start;
+      if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
+      break;
+    case EDirection::Start:
+      if ( abs( val - m_dblPatternPt1 ) >= m_dblFilterWidth ) {
+        m_dtPatternPt1 = dt;
+        m_dblPatternPt0 = val;
+        if ( val > m_dblPatternPt1 ) {
+          m_PatternState = EDirection::Up;
+        }
+        else {
+          m_PatternState = EDirection::Down;
+        }
+        m_dblPatternPt1 = val;
       }
       break;
   }

@@ -99,7 +99,7 @@ void CIQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
   StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFUpdateMessage::QPSymbol ) );
   pSymbol_t pSym;
@@ -107,9 +107,10 @@ void CIQFeedProvider::HandleQMessage( CIQFUpdateMessage *pMsg ) {
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleUpdateMessage( pMsg );
   }
+  UpdateDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFSummaryMessage::QPSymbol ) );
   pSymbol_t pSym;
@@ -117,9 +118,10 @@ void CIQFeedProvider::HandlePMessage( CIQFSummaryMessage *pMsg ) {
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleSummaryMessage( pMsg );
   }
+  SummaryDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
   m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFFundamentalMessage::FSymbol ) );
   pSymbol_t pSym;
@@ -127,9 +129,10 @@ void CIQFeedProvider::HandleFMessage( CIQFFundamentalMessage *pMsg ) {
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleFundamentalMessage( pMsg );
   }
+  FundamentalDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage *pMsg ) {
 
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
 /*
@@ -166,14 +169,17 @@ void CIQFeedProvider::HandleNMessage( CIQFNewsMessage *pMsg ) {
     } while ( 0 != *ixLstColon );
   }
   */
+  NewsDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::HandleTMessage( CIQFTimeMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  TimeDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::HandleSMessage( CIQFSystemMessage *pMsg ) {
+void CIQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
+  SystemDone( pBuffer, pMsg );
 }
 
 } // namespace tf

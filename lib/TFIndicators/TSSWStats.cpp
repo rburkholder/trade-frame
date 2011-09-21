@@ -13,7 +13,7 @@
 
 #include "StdAfx.h"
 
-#include "TimeSeriesSlidingWindowStats.h"
+#include "TSSWStats.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -22,21 +22,21 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-CTimeSeriesSlidingWindowStatsTrade::CTimeSeriesSlidingWindowStatsTrade(CTimeSeries<CTrade> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: CTimeSeriesSlidingWindowStats<CTrade>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( pSeries, WindowSizeSeconds, WindowSizeCount )
 {
 }
 
-CTimeSeriesSlidingWindowStatsTrade::~CTimeSeriesSlidingWindowStatsTrade( void ) {
+TSSWStatsTrade::~TSSWStatsTrade( void ) {
 }
 
-void CTimeSeriesSlidingWindowStatsTrade::Add( const CTrade &trade ) {
+void TSSWStatsTrade::Add( const CTrade &trade ) {
   time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, trade.Trade() );
 }
 
-void CTimeSeriesSlidingWindowStatsTrade::Expire( const CTrade &trade ) {
+void TSSWStatsTrade::Expire( const CTrade &trade ) {
   time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, trade.Trade() );
@@ -46,26 +46,50 @@ void CTimeSeriesSlidingWindowStatsTrade::Expire( const CTrade &trade ) {
 // Quote
 //
 
-CTimeSeriesSlidingWindowStatsQuote::CTimeSeriesSlidingWindowStatsQuote(CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: CTimeSeriesSlidingWindowStats<CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
 {
 }
 
-CTimeSeriesSlidingWindowStatsQuote::~CTimeSeriesSlidingWindowStatsQuote( void ) {
+TSSWStatsQuote::~TSSWStatsQuote( void ) {
 }
 
-void CTimeSeriesSlidingWindowStatsQuote::Add( const CQuote &quote ) {
+void TSSWStatsQuote::Add( const CQuote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, quote.Bid() );
   m_stats.Add( dif, quote.Ask() );
 }
 
-void CTimeSeriesSlidingWindowStatsQuote::Expire( const CQuote &quote ) {
+void TSSWStatsQuote::Expire( const CQuote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, quote.Bid() );
   m_stats.Remove( dif, quote.Ask() );
+}
+
+//
+// MidQuote
+//
+
+TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
+{
+}
+
+TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
+}
+
+void TSSWStatsMidQuote::Add( const CQuote &quote ) {
+  time_duration dur = quote.DateTime() - m_dtZero;
+  double dif = (double) dur.total_seconds();
+  m_stats.Add( dif, ( quote.Bid() + quote.Ask() ) / 2.0 );
+}
+
+void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
+  time_duration dur = quote.DateTime() - m_dtZero;
+  double dif = (double) dur.total_seconds();
+  m_stats.Remove( dif, ( quote.Bid() + quote.Ask() ) / 2.0 );
 }
 
 } // namespace tf

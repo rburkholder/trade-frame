@@ -23,6 +23,7 @@ namespace tf { // TradeFrame
 CRunningStats::CRunningStats(void) : 
   b2( 0 ), b1( 0 ), b0( 0 ), 
   SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
+  rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
   nX( 0 ), m_BBMultiplier( 2.0 )
 {
 }
@@ -30,6 +31,7 @@ CRunningStats::CRunningStats(void) :
 CRunningStats::CRunningStats( double BBMultiplier ) : 
   b2( 0 ), b1( 0 ), b0( 0 ), 
   SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
+  rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
   nX( 0 ), m_BBMultiplier( BBMultiplier )
 {
 }
@@ -72,16 +74,16 @@ void CRunningStats::CalcStats() {
     SSR = ( Sxy * Sxy ) / Sxx;
     SSE = SST - SSR;
 
-    RR = SSR / SST;
-    R = Sxy / sqrt(Sxx * Syy);
+    rr = SSR / SST;
+    r = Sxy / sqrt(Sxx * Syy);
 
-    SD = sqrt(Syy / nX);
+    sd = sqrt(Syy / nX);
 
     meanY = SumY / nX;
 
-    double BBOffset = m_BBMultiplier * SD;
-    BBUpper = meanY + BBOffset;
-    BBLower = meanY - BBOffset;
+    double BBOffset = m_BBMultiplier * sd;
+    bbUpper = meanY + BBOffset;
+    bbLower = meanY - BBOffset;
 
     b1 = ( nX > 1 ) ? Sxy / Sxx : 0;
     b0 = (1 / nX) * ( SumY - b1 * SumX );

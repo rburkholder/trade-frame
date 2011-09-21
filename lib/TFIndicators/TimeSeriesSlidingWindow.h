@@ -23,18 +23,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T> class CTimeSeriesSlidingWindow {
+template<class T, class D> class TimeSeriesSlidingWindow { // T=CRTP class for Add, Expire, PostUpdate; D=DatedDatum
 public:
-  CTimeSeriesSlidingWindow<T>( CTimeSeries<T> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
-  virtual ~CTimeSeriesSlidingWindow<T>(void);
+  TimeSeriesSlidingWindow<T,D>( CTimeSeries<D> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  virtual ~TimeSeriesSlidingWindow<T,D>(void);
   void Update( void );
 protected:
-  virtual void Add( const T &datum ) {}; // override to process elements passing into window scope
-  virtual void Expire( const T &datum ) {};  // override to process elements passing out of window scope 
-  virtual void PostUpdate( void ) {};
+  void Add( const D &datum ) {}; // CRTP override to process elements passing into window scope
+  void Expire( const D &datum ) {};  // CRTP override to process elements passing out of window scope 
+  void PostUpdate( void ) {};  // CRTP override to do final calcs
   ptime m_dtZero;  // datetime of first element, used as offset
 private:
-  CTimeSeries<T> *m_pSeries;
+  CTimeSeries<D> *m_pSeries;
   long m_nWindowSizeSeconds;
   size_t m_nWindowSizeCount;
   time_duration m_tdWindowWidth;
@@ -44,8 +44,8 @@ private:
   bool m_bFirstDatumFound;
 };
 
-template<class T> CTimeSeriesSlidingWindow<T>::CTimeSeriesSlidingWindow( 
-  CTimeSeries<T> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+template<class T, class D> TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( 
+  CTimeSeries<D> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
 : m_pSeries( pSeries ), //m_iterTrailing( pSeries->begin() ), 
   m_ixTrailing( 0 ), m_ixLeading( 0 ), m_dtLeading( not_a_date_time ),
   m_nWindowSizeSeconds( WindowSizeSeconds ), m_nWindowSizeCount( WindowSizeCount ),
@@ -56,49 +56,81 @@ template<class T> CTimeSeriesSlidingWindow<T>::CTimeSeriesSlidingWindow(
   assert( 0 <= WindowSizeCount );
 }
 
-template<class T> CTimeSeriesSlidingWindow<T>::~CTimeSeriesSlidingWindow(void) {
+template<class T, class D> TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow(void) {
 }
 
-template<class T> void CTimeSeriesSlidingWindow<T>::Update( void ) {
+template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {
   if ( !m_bFirstDatumFound ) {
     if ( 0 < m_pSeries->Size() ) {
       //T *datum = (*m_pSeries)[ 0 ]->m_dt;
-      m_dtZero = (*m_pSeries)[ 0 ]->m_dt;  // used for zeroing the statistics
+      m_dtZero = (*m_pSeries)[ 0 ]->DateTime();  // used for zeroing the statistics
       m_bFirstDatumFound = true;
     }
   }
   bool bMovedIndex = false;
   while ( m_ixLeading < m_pSeries->Size() ) {
-    T *datum = (*m_pSeries)[ m_ixLeading ];
-    m_dtLeading = datum->m_dt;
-    Add( *datum ); // add datum to stats
+    D *datum = (*m_pSeries)[ m_ixLeading ];
+    m_dtLeading = datum->DateTime();
+    if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
+      static_cast<T*>( this )->Add( *datum ); // add datum to stats
+    }
+    
     ++m_ixLeading;
     bMovedIndex = true;
   }
   if ( bMovedIndex ) {
     if ( 0 < m_nWindowSizeCount ) {
       while ( ( m_ixLeading - m_ixTrailing ) > m_nWindowSizeCount ) {
-        T *datum = (*m_pSeries)[ m_ixTrailing ];
-        Expire( *datum );  // expire datum from stats
+        D *datum = (*m_pSeries)[ m_ixTrailing ];
+        if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
+          static_cast<T*>( this )->Expire( *datum );  // expire datum from stats
+        }
         ++m_ixTrailing;
       }
     }
     if ( 0 < m_nWindowSizeSeconds ) {
-      T *datum = (*m_pSeries)[ m_ixTrailing ];
-      time_duration dif = m_dtLeading - datum->m_dt;
+      D *datum = (*m_pSeries)[ m_ixTrailing ];
+      time_duration dif = m_dtLeading - datum->DateTime();
       while ( dif > m_tdWindowWidth ) {
-        Expire( *datum );  // expire datum from stats
+        if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
+          static_cast<T*>( this )->Expire( *datum );  // expire datum from stats
+        }
         ++m_ixTrailing;
         if ( m_ixTrailing >= m_ixLeading ) {
           break;
         }
         datum = (*m_pSeries)[ m_ixTrailing ];
-        dif = m_dtLeading - datum->m_dt;
+        dif = m_dtLeading - datum->DateTime();
       }
     }
   }
-  PostUpdate();
+  if ( &TimeSeriesSlidingWindow<T,D>::PostUpdate != &T::PostUpdate ) {
+    static_cast<T*>( this )->PostUpdate();
+  }
 }
+
+// ======== QuoteBidAsk
+
+// ======== QuoteMidPoint
+
+// not sure how to use this yet.may not even use it
+template<class T> class TimeSeriesSlidingWindowQuoteMidPoint: public TimeSeriesSlidingWindow<T, CQuote>
+{
+public:
+  TimeSeriesSlidingWindowQuoteMidPoint<T>( CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
+    : TimeSeriesSlidingWindow<T, Quote>( pSeries, WindowSizeSeconds, WindowSizeCount ) {
+  };
+  ~TimeSeriesSlidingWindowQuoteMidPoint<T>( void );
+protected:
+  void Add( const CQuote &datum ) { // CRTP override to process elements passing into window scope
+  };
+  void Expire( const CQuote &datum ) { // CRTP override to process elements passing out of window scope 
+  };  
+  void PostUpdate( void ) {};  // CRTPover ride to do final calcs
+private:
+};
+
+// ======== Trade
 
 } // namespace tf
 } // namespace ou

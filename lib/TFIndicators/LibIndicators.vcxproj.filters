@@ -22,10 +22,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TimeSeriesSlidingWindowStats.cpp">
+    <ClCompile Include="ZigZag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ZigZag.cpp">
+    <ClCompile Include="TSSWStats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TSSWStochastic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,10 +63,13 @@
     <ClInclude Include="TimeSeriesSlidingWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TimeSeriesSlidingWindowStats.h">
+    <ClInclude Include="ZigZag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ZigZag.h">
+    <ClInclude Include="TSSWStats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TSSWStochastic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

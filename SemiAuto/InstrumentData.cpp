@@ -15,17 +15,18 @@
 #include "InstrumentData.h"
 
 InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument ) 
-  : m_pInstrument( pInstrument )
+  : m_pInstrument( pInstrument ), m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 )
 {
 }
 
 InstrumentData::InstrumentData( CInstrument* pInstrument ) 
-  : m_pInstrument( pInstrument )
+  : m_pInstrument( pInstrument ), m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 )
 {
 }
 
 InstrumentData::InstrumentData( const InstrumentData& data ) 
-  : m_pInstrument( data.m_pInstrument ), m_quotes( data.m_quotes ), m_trades( data.m_trades )
+  : m_pInstrument( data.m_pInstrument ), m_quotes( data.m_quotes ), m_trades( data.m_trades ),
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 )
 {
 }
 
@@ -34,6 +35,8 @@ InstrumentData::~InstrumentData(void) {
 
 void InstrumentData::HandleQuote( const CQuote& quote ) {
   m_quotes.Append( quote );
+  m_stats.Update();
+  m_stoch.Update();
 }
 
 void InstrumentData::HandleTrade( const CTrade& trade ) {
