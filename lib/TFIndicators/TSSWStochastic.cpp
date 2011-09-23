@@ -21,7 +21,7 @@ namespace tf { // TradeFrame
 
 TSSWStochastic::TSSWStochastic(  CQuotes* quotes, long WindowSizeSeconds ) 
   : TimeSeriesSlidingWindow<TSSWStochastic, CQuote>( quotes, WindowSizeSeconds ),
-    m_seconds( WindowSizeSeconds ), m_last( 0 ), m_k( 0 )
+    m_seconds( WindowSizeSeconds ), m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 )
 {
 }
 
@@ -30,18 +30,22 @@ TSSWStochastic::~TSSWStochastic(void) {
 
 void TSSWStochastic::Add( const CQuote& quote ) {
   double tmp = ( quote.Ask() + quote.Bid() ) / 2.0;
-  if ( tmp != m_last ) {  // cut down on number of updates
-    m_last = tmp;
-    m_minmax.Add( m_last );
+  if ( tmp != m_lastAdd ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
+    m_lastAdd = tmp;
+    m_minmax.Add( m_lastAdd );
   }
 }
 
 void TSSWStochastic::Expire( const CQuote& quote ) {
-  m_minmax.Remove( ( quote.Ask() + quote.Bid() ) / 2.0 );
+  double tmp = ( quote.Ask() + quote.Bid() ) / 2.0;
+  if ( tmp != m_lastExpire ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
+    m_lastExpire = tmp;
+    m_minmax.Remove( m_lastExpire );
+  }
 }
 
 void TSSWStochastic::PostUpdate( void ) {
-  m_k = m_minmax.Max() == m_minmax.Min() ? 0 : ( ( m_last - m_minmax.Min() ) / ( m_minmax.Max() - m_minmax.Min() ) ) * 100.0;
+  m_k = m_minmax.Max() == m_minmax.Min() ? 0 : ( ( m_lastAdd - m_minmax.Min() ) / ( m_minmax.Max() - m_minmax.Min() ) ) * 100.0;
 }
 
 

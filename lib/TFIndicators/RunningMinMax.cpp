@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <math.h>
+
 #include "RunningMinMax.h"
 
 // look up Tirone Levels, page 335, in Tech Anal, A-Z

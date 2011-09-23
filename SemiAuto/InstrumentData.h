@@ -37,6 +37,8 @@ public:
   void AddTradeHandler( CProviderManager::pProvider_t pProvider );
   void RemoveTradeHandler( CProviderManager::pProvider_t pProvider );
 
+  void SaveSeries( void );
+
 protected:
 private:
 

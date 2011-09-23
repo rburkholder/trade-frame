@@ -48,26 +48,33 @@ public:
     OnCreateNewFrameManualOrder = function;
   }
 
+  typedef FastDelegate0<void> OnSaveSeriesEvent_t;
+  void SetSaveSeriesEvent( OnSaveSeriesEvent_t function ) {
+    OnSaveSeriesEvent = function;
+  }
+
   ou::Delegate<int> OnCleanUpForExit;
 
 protected:
 
   // Do we really need to expose the implementation detail? I guess not.
-  void OnQuit(wxCommandEvent& event);
-  void OnAbout(wxCommandEvent& event);
+  void OnQuit( wxCommandEvent& event );
+  void OnAbout( wxCommandEvent& event );
   void OnClose( wxCommandEvent& event );
-  void OnOpenFrameManualOrder(wxCommandEvent& event);
+  void OnOpenFrameManualOrder(wxCommandEvent& event  );
   void OnCloseThis( wxCloseEvent& event );
+  void OnSaveSeries( wxCommandEvent& event );
 
 private:
 
   enum { ID_Quit=wxID_HIGHEST + 1, ID_About, ID_CloseWindow,
     ID_ConnectIB, ID_ConnectIQFeed, ID_ConnectSim,
     ID_DisConnectIB, ID_DisConnectIQFeed, ID_DisConnectSim,
-    ID_AddPortfolio, ID_ManualTrade
+    ID_AddPortfolio, ID_ManualTrade, ID_WriteData
   };
 
   OnCreateNewFrameManualOrder_t OnCreateNewFrameManualOrder;
+  OnSaveSeriesEvent_t OnSaveSeriesEvent;
 
   void CleanUpForExit( void );
 

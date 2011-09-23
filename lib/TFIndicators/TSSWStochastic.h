@@ -35,7 +35,8 @@ private:
   long m_seconds;
   RunningMinMax m_minmax;
 
-  double m_last;
+  double m_lastAdd;
+  double m_lastExpire;
   double m_k;
 };
 

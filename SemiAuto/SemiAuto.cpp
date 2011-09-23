@@ -94,6 +94,8 @@ bool AppSemiAuto::OnInit() {
   SetTopWindow(m_FrameMain);
 
   m_FrameMain->SetCreateNewFrameManualOrder( MakeDelegate( this, &AppSemiAuto::HandleCreateNewFrameManualOrder ) );
+  m_FrameMain->SetSaveSeriesEvent( MakeDelegate( this, &AppSemiAuto::HandleSaveSeriesEvent ) );
+
   m_FrameMain->OnCleanUpForExit.Add( MakeDelegate( this, &AppSemiAuto::HandleOnCleanUpForExitForFrameMain ) );
 
   m_FrameProviderControl = new FrameProviderControl( m_FrameMain );
@@ -123,6 +125,9 @@ bool AppSemiAuto::OnInit() {
 }
 
 int AppSemiAuto::OnExit() {
+
+  m_FrameMain->SetSaveSeriesEvent( 0 );
+  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
 
   m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
@@ -277,6 +282,14 @@ void AppSemiAuto::HandleOnExecConnected(int e) {
 
 void AppSemiAuto::HandleOnExecDisconnected(int e) {
   m_bExecConnected = false;
+}
+
+void AppSemiAuto::HandleSaveSeriesEvent( void ) {
+  // data collection must be stopped before doing this
+  // is there a state machine state somewhere to view?
+  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++iter ) {
+    iter->SaveSeries();
+  }
 }
 
 void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {

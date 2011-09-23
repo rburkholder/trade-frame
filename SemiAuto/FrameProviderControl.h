@@ -13,19 +13,14 @@
 
 #pragma once
 
-//#include <string>
-
 #include <wx/wx.h>
-//#include <wx/string.h>
 
-//#include <OUCommon/Delegate.h>
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 // wxFrame (wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE, const wxString &name=wxFrameNameStr)
 
 enum eProviderState_t { ProviderOff, ProviderGoingOn, ProviderOn, ProviderGoingOff };
-//enum eProviderEvent_t { EVT_ProviderIB=wxID_HIGHEST+1, EVT_ProviderIQFeed, EVT_ProviderSimulator };
 
 class UpdateProviderStatusEvent: public wxEvent {
 public:

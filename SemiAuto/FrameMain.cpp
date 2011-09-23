@@ -40,6 +40,7 @@ FrameMain::FrameMain(const wxString& title, const wxPoint& pos, const wxSize& si
   menuBar->Append( menuDisConnect, "&Disconnect" );
 
   wxMenu* menuActivities = new wxMenu;
+  menuActivities->Append( ID_WriteData, "Write Data" );
   menuActivities->Append( ID_AddPortfolio, "Add P&ortfolio" );
   menuActivities->Append( ID_ManualTrade, "Manual &Trade" );
   menuBar->Append( menuActivities, "&Activities" );
@@ -50,6 +51,7 @@ FrameMain::FrameMain(const wxString& title, const wxPoint& pos, const wxSize& si
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnQuit, this, ID_Quit );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnAbout, this, ID_About );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnOpenFrameManualOrder, this, ID_ManualTrade );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnSaveSeries, this, ID_WriteData );
 
   Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnCloseThis, this );
   //Bind( EVT_CLOSE, &FrameMain::OnCloseThis, this, ID_CloseWindow );
@@ -90,6 +92,12 @@ void FrameMain::OnOpenFrameManualOrder( wxCommandEvent& event ) {
 
   if ( 0 != OnCreateNewFrameManualOrder ) 
     OnCreateNewFrameManualOrder();
-
 //  event.Skip();
+}
+
+void FrameMain::OnSaveSeries( wxCommandEvent& event ) {
+  if ( 0 != OnSaveSeriesEvent ) {
+    OnSaveSeriesEvent();
+  }
+  event.Skip();
 }

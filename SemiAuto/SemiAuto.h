@@ -83,11 +83,9 @@ private:
   bool m_bWatchingOptions;
   bool m_bTrading;
 
-
   typedef std::vector<InstrumentData> vInstrumentData_t;
+  typedef vInstrumentData_t::iterator vInstrumentData_iter_t;
   vInstrumentData_t m_vInstruments;
-
-
 
   bool m_bExecConnected;
   bool m_bData1Connected;
@@ -142,6 +140,8 @@ private:
   void HandleCheckSymbolNameAgainstIB( const std::string& );
   void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& );
   void HandleIBContractDetailsDone( void );
+
+  void HandleSaveSeriesEvent( void );
 
 
 };
