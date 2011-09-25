@@ -45,17 +45,21 @@ void InstrumentData::HandleQuote( const CQuote& quote ) {
   m_stats.Update();
   m_stoch.Update();
 
-  m_Summary.m_dblRoc = m_stats.Slope();
-  m_Summary.m_dblStochastic = m_stoch.K();
+  m_rSummary[ Roc ] = m_stats.Slope();
+  m_rSummary[ Stochastic ] = m_stoch.K();
 }
 
 void InstrumentData::HandleTrade( const CTrade& trade ) {
   m_trades.Append( trade );
-  m_Summary.m_dblPrice = trade.Trade();
-  if ( m_Summary.m_dblHigh < m_Summary.m_dblPrice ) m_Summary.m_dblHigh = m_Summary.m_dblPrice;
-  if ( 0 == m_Summary.m_dblLow ) m_Summary.m_dblLow = m_Summary.m_dblPrice;
+
+  // may need to protect cross thread updates
+  // may need to do this calculation in a lockable thread, so main stream processor can continue on
+  double dblPrice = trade.Trade();
+  m_rSummary[ Price ] = dblPrice;
+  if ( m_rSummary[ High ] < m_rSummary[ Price ] ) m_rSummary[ High ] = dblPrice;
+  if ( m_rSummary[ Low ] == 0 ) m_rSummary[ Low ] = dblPrice;
   else {
-    if ( m_Summary.m_dblPrice < m_Summary.m_dblLow ) m_Summary.m_dblLow = m_Summary.m_dblPrice;
+    if ( m_rSummary[ Price ] < m_rSummary[ Low ] ) m_rSummary[ Low ] = dblPrice;
   }
 }
 

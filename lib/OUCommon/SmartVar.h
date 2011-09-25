@@ -40,40 +40,49 @@ namespace ou {
 
 /////////////////////////
 
-// try and get rid of the virtual and make into Curiously Recurring Template
+// try and get rid of the virtual and make into Curiously Recurring Template... can't, base class isn't templated
 class SmartVarBase: public boost::noncopyable {
   // simple base class for use in vector with static_cast
 public:
-  virtual const std::string& AsString( void ) = 0;
+  virtual const std::string& str( void ) = 0;
 protected:
 private:
 };
 
 /////////////////////////
 
-template<class DT> class SmartVar: public SmartVarBase {
+template<class T> class SmartVar: public SmartVarBase {
 public:
-  SmartVar<DT>( void );
-  SmartVar<DT>( 
-    DT dtBlank // GUI shows blank with this value
+  SmartVar<T>( void );
+  SmartVar<T>( 
+    T tBlank // GUI shows blank with this value
     );
-  ~SmartVar<DT>( void );
+  ~SmartVar<T>( void );
 
-  DT& operator=(const DT& rhs );
-  DT& Value( void ) { return m_dtItem; };
-  const std::string& AsString( void );
-  void SetBlank( const DT& dtBlank ) { m_dtBlank = dtBlank; };
+  const T& operator=(const T& rhs );
+  const SmartVar<T>& operator=( const SmartVar<T>& rhs );
+
+  T& Value( void ) { return m_tItem; };
+  const std::string& str( void );
+  void SetBlank( const T& tBlank ) { m_tBlank = tBlank; };
 
   typedef FastDelegate0<> OnUpdateHandler;
   void SetOnUpdate( OnUpdateHandler function ) {
     OnUpdate = function;
   }
 
+  bool operator<( const SmartVar<T>& rhs ) { return m_tItem < rhs.m_tItem; };
+  bool operator>( const SmartVar<T>& rhs ) { return m_tItem > rhs.m_tItem; };
+  bool operator==( const SmartVar<T>& rhs ) { return m_tItem == rhs.m_tItem; };
+  bool operator!=( const SmartVar<T>& rhs ) { return m_tItem != rhs.m_tItem; };
+  bool operator>=( const SmartVar<T>& rhs ) { return m_tItem >= rhs.m_tItem; };
+  bool operator<=( const SmartVar<T>& rhs ) { return m_tItem <= rhs.m_tItem; };
+
 protected:
   OnUpdateHandler OnUpdate;
 private:
-  DT m_dtBlank;
-  DT m_dtItem;
+  T m_tBlank;
+  T m_tItem;
   std::string m_sItem;
 
   bool m_bValueUpdated;  // indicates when string has been updated
@@ -82,57 +91,59 @@ private:
 //  COLORREF colourBackground;
 //  COLORREF colourForeground;
 
+
 };
 
 // Constructors
-template<class DT> SmartVar<DT>::SmartVar( DT dtBlank ) 
-: m_bValueUpdated( false ), m_bEventCleared( true ), m_dtBlank( dtBlank ), m_dtItem( dtBlank ), 
+template<class T> SmartVar<T>::SmartVar( T tBlank ) 
+: m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( tBlank ), m_tItem( tBlank )
 {
 }
 
-template<class DT> SmartVar<DT>::SmartVar( void ) 
+template<class T> SmartVar<T>::SmartVar( void ) 
 : m_bValueUpdated( false ), m_bEventCleared( true )
 {
 }
 
-template<> SmartVar<int>::SmartVar( void ) 
-: m_bValueUpdated( false ), m_bEventCleared( true ), m_dtBlank( 0 ), m_dtItem( 0 ) {
-}
-
-template<> SmartVar<unsigned int>::SmartVar( void ) 
-: m_bValueUpdated( false ), m_bEventCleared( true ), m_dtBlank( 0 ), m_dtItem( 0 ) {
-}
-
-template<> SmartVar<double>::SmartVar( void ) 
-: m_bValueUpdated( false ), m_bEventCleared( true ), m_dtBlank( 0.0 ), m_dtItem( 0.0 ) {
-}
-
 // Destructor
-template<class DT> SmartVar<DT>::~SmartVar() {
+template<class T> SmartVar<T>::~SmartVar() {
 }
+
+// may need to protect cross thread updates here
 
 // Assignment
-template<class DT> DT& SmartVar<DT>::operator=(const DT &rhs) {
-  if ( m_dtItem != rhs ) {
-    m_dtItem = rhs;
+template<class T> const T& SmartVar<T>::operator=(const T &rhs) {
+  if ( m_tItem != rhs ) {
+    m_tItem = rhs;
     m_bValueUpdated = true;
     if ( m_bEventCleared ) {
       m_bEventCleared = false;
       if ( NULL != OnUpdate ) OnUpdate();
     }
-    
   }
-  return m_dtItem;
+  return m_tItem;
+}
+
+template<class T> const SmartVar<T>& SmartVar<T>::operator=( const SmartVar<T>& rhs ) {
+  if ( m_tItem != rhs.m_tItem ) {
+    m_tItem = rhs.m_tItem;
+    m_bValueUpdated = true;
+    if ( m_bEventCleared ) {
+      m_bEventCleared = false;
+      if ( NULL != OnUpdate ) OnUpdate();
+    }
+  }
+  return *this;
 }
 
 // Convert to string for display
-template<class DT> const std::string& SmartVar<DT>::AsString() {
+template<class T> const std::string& SmartVar<T>::str() {
   if ( m_bValueUpdated ) {
-    if ( m_dtBlank == m_dtItem ) {
+    if ( m_tBlank == m_tItem ) {
       m_sItem = "";
     }
     else {
-      m_sItem = boost::lexical_cast<std::string>( m_dtItem );
+      m_sItem = boost::lexical_cast<std::string>( m_tItem );
     }
     m_bValueUpdated = false;
   }

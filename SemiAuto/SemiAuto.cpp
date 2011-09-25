@@ -145,12 +145,12 @@ bool AppSemiAuto::OnInit() {
 
 void AppSemiAuto::Notify( void ) {
 
-  int ix = 0;
+  int iy = 0;
   for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
-    //m_FrameGridInstrumentData->Grid()->setv
-    //m_FrameGridInstrumentData->Grid()->SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
+    for ( unsigned int ix = InstrumentData::Low; InstrumentData::_Count != ix; ++ix ) {
+      m_FrameGridInstrumentData->Grid()->SetCellValue( iy, ix, iter->Var( static_cast<InstrumentData::enumIndex>( ix ) ).str() );
+    }
   }
-
 }
 
 int AppSemiAuto::OnExit() {
