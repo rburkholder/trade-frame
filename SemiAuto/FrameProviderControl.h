@@ -40,6 +40,8 @@ wxDECLARE_EVENT( EVT_ProviderIB, UpdateProviderStatusEvent );
 wxDECLARE_EVENT( EVT_ProviderIQFeed, UpdateProviderStatusEvent );
 wxDECLARE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
 
+// ===================================
+
 class FrameProviderControl: public wxFrame {
 public:
 

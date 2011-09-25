@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+//#include "StdAfx.h"
 
 #include "ChartEntryBars.h"
 

@@ -25,6 +25,7 @@ class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, CQuote> {
   friend TimeSeriesSlidingWindow<TSSWStochastic, CQuote>;
 public:
   TSSWStochastic( CQuotes* quotes, long WindowSizeSeconds );
+  TSSWStochastic( const TSSWStochastic& );
   ~TSSWStochastic(void);
   double K( void ) const { return m_k; };
 protected:

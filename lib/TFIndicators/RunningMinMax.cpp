@@ -27,6 +27,12 @@ RunningMinMax::RunningMinMax(void)
 {
 }
 
+RunningMinMax::RunningMinMax( const RunningMinMax& rmm ) 
+  : m_dblMax( rmm.m_dblMax ), m_dblMin( rmm.m_dblMin ),
+  m_mapPointStats( rmm.m_mapPointStats )
+{
+}
+
 RunningMinMax::~RunningMinMax(void) {
   m_mapPointStats.clear();
 }

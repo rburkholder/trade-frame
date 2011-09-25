@@ -17,9 +17,9 @@
 // also use for high and low indicators, keep redoing last segment so stretches to 
 //   right hand edge (optionally, perhaps in a super class)
 
-namespace ou { // One Unified
-
 #include "ChartEntryBase.h"
+
+namespace ou { // One Unified
 
 class CChartEntrySegments :
   public CChartEntryBaseWithTime {

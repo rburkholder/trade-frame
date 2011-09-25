@@ -26,6 +26,7 @@ namespace tf { // TradeFrame
 template<class T, class D> class TimeSeriesSlidingWindow { // T=CRTP class for Add, Expire, PostUpdate; D=DatedDatum
 public:
   TimeSeriesSlidingWindow<T,D>( CTimeSeries<D> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );
   virtual ~TimeSeriesSlidingWindow<T,D>(void);
   void Update( void );
 protected:
@@ -54,6 +55,14 @@ template<class T, class D> TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow
 {
   assert( 0 <= WindowSizeSeconds );
   assert( 0 <= WindowSizeCount );
+}
+
+template<class T, class D> TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( const TimeSeriesSlidingWindow<T,D>& sw ) 
+  : m_pSeries( sw.m_pSeries ), m_nWindowSizeSeconds( sw.m_nWindowSizeSeconds ),
+  m_nWindowSizeCount( sw.m_nWindowSizeCount ), m_tdWindowWidth( sw.m_tdWindowWidth ),
+  m_ixTrailing( sw.m_ixTrailing ), m_ixLeading( sw.m_ixLeading ), m_dtLeading( sw.m_dtLeading ),
+  m_bFirstDatumFound( sw.m_bFirstDatumFound ), m_dtZero( sw.m_dtZero )
+{
 }
 
 template<class T, class D> TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow(void) {

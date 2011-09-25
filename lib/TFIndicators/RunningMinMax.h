@@ -22,6 +22,7 @@ class RunningMinMax {
 public:
 
   RunningMinMax(void);
+  RunningMinMax( const RunningMinMax& );
   virtual ~RunningMinMax(void);
 
   virtual void Add( double );

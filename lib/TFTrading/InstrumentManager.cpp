@@ -98,7 +98,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency(
 
 void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
   if ( Exists( pInstrument ) ) {
-    throw std::runtime_error( "CInstrumentManager::Construct instrument already exists" );
+    throw std::runtime_error( "CInstrumentManager::Construct: instrument already exists" );
   }
   Assign( pInstrument );
   ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 

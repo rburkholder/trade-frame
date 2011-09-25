@@ -4,6 +4,7 @@
 #include "chartdir.h"
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <vector>
 
@@ -18,8 +19,10 @@
 // is subjected to the terms and condition of the ChartDirector license.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4996)
+#endif
 
 /// <summary>
 /// Represents a Financial Chart
@@ -2343,6 +2346,8 @@ class FinanceChart : public MultiChart
 
 };
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #endif

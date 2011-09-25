@@ -13,6 +13,8 @@
 
 #include <cassert>
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 
@@ -105,29 +107,55 @@ bool AppSemiAuto::OnInit() {
   m_FrameProviderControl->SetOnIQFeedStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleIQFeedStateChangeRequest ) ) ;
   m_FrameProviderControl->SetOnSimulatorStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleSimulatorStateChangeRequest ) );
 
+  m_FrameGridInstrumentData = new FrameInstrumentStatus( m_FrameMain, "Instrument Status", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX );
+  m_FrameGridInstrumentData->Show( true );
+
   CInstrumentManager& mgr( CInstrumentManager::Instance() );
 
-  if ( mgr.Exists( "+GCV11" ) ) {
-    m_vInstruments.push_back( InstrumentData( mgr.Get( "+GCV11" ) ) );
-  }
-  else {
-    m_vInstruments.push_back( InstrumentData( mgr.ConstructFuture( "+GCV11", "SMART", 2011, 10 ) ) );  // October
+  // XAUUSDO.ABBA hvy, XAUUSDO.COMP hvy, XAUUSDO.MIGF med, XAUUSDO.SAXO med, XAUUSDO.UBSW lgt, XAUUSDO.UWCL med, XAUUSDO.WBLT hvy
+  // EURUSD.COMP, EURUSD.FXCM, BEURUSD
+  // HUI.X, XAU.X, GDX, GDXJ
+  // DX.X dollar index  https://www.theice.com/productguide/ProductDetails.shtml?specId=194
+
+  // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCV11" ) ? mgr.Get( "+GCV11" ) : mgr.ConstructFuture( "+GCV11", "SMART", 2011, 10 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURUSD.COMP" ) ? mgr.Get( "EURUSD.COMP" ) : mgr.ConstructInstrument( "EURUSD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "USDCAD.COMP" ) ? mgr.Get( "USDCAD.COMP" ) : mgr.ConstructInstrument( "USDCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURCAD.COMP" ) ? mgr.Get( "EURCAD.COMP" ) : mgr.ConstructInstrument( "EURCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
+
+  m_FrameGridInstrumentData->Grid()->AppendRows( m_vInstruments.size() );
+
+  int ix = 0;
+  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
+    m_FrameGridInstrumentData->Grid()->SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
   }
 
-  if ( mgr.Exists( "+GCZ11" ) ) {
-    m_vInstruments.push_back( InstrumentData( mgr.Get( "+GCZ11" ) ) );
-  }
-  else {
-    m_vInstruments.push_back( InstrumentData( mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 ) ) );  // December
-  }
+  Start( 200 );
 
   return TRUE;
 }
 
+void AppSemiAuto::Notify( void ) {
+
+  int ix = 0;
+  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
+    //m_FrameGridInstrumentData->Grid()->setv
+    //m_FrameGridInstrumentData->Grid()->SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
+  }
+
+}
+
 int AppSemiAuto::OnExit() {
 
-  m_FrameMain->SetSaveSeriesEvent( 0 );
-  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
+  // Note: disconnecting from frame events should be done in HandleOnCleanUpForExitForFrameMain
 
   m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
   m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
@@ -166,6 +194,12 @@ void AppSemiAuto::HandleStateChangeRequest( eProviderState_t state, bool& flag, 
     break;
   case eProviderState_t::ProviderOn:
     assert( flag );
+    {
+      std::stringstream ss;
+      ss.str( "" );
+      ss << ou::CTimeSource::Instance().Internal();
+      m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
+    }
     break;
   case eProviderState_t::ProviderGoingOff:
     if ( flag ) {
@@ -226,7 +260,7 @@ void AppSemiAuto::HandleSimulatorDisConnected( int ) {  // cross thread event
 }
 
 void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
-  // need to keep a vector of these so can trade multiple symbols simulataneously
+  // need to keep a vector of these so can trade multiple symbols simultaneously
   // maybe something like genesis with market depth book built in
   FrameManualOrder* frame = new FrameManualOrder( m_FrameMain );
   m_vFrameManualOrders.push_back( frame );
@@ -287,13 +321,18 @@ void AppSemiAuto::HandleOnExecDisconnected(int e) {
 void AppSemiAuto::HandleSaveSeriesEvent( void ) {
   // data collection must be stopped before doing this
   // is there a state machine state somewhere to view?
+  assert( 0 < m_sTSDataStreamOpened.length() );
   for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++iter ) {
-    iter->SaveSeries();
+    iter->SaveSeries( m_sTSDataStreamOpened );
   }
 }
 
 void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {
 
+  Stop();
+
+  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
+  m_FrameMain->SetSaveSeriesEvent( 0 );
   m_FrameMain->SetCreateNewFrameManualOrder( 0 );
 
   // this doesn't work properly for user closed windows

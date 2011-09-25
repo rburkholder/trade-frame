@@ -82,6 +82,8 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FrameGrid.h" />
+    <ClInclude Include="FrameInstrumentStatus.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="FrameManualOrder.h" />
     <ClInclude Include="FrameProviderControl.h" />
@@ -93,6 +95,8 @@
     <ClInclude Include="ValidatorInstrumentName.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FrameGrid.cpp" />
+    <ClCompile Include="FrameInstrumentStatus.cpp" />
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="FrameManualOrder.cpp" />
     <ClCompile Include="FrameProviderControl.cpp" />

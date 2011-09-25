@@ -19,9 +19,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWStochastic::TSSWStochastic(  CQuotes* quotes, long WindowSizeSeconds ) 
+TSSWStochastic::TSSWStochastic( CQuotes* quotes, long WindowSizeSeconds ) 
   : TimeSeriesSlidingWindow<TSSWStochastic, CQuote>( quotes, WindowSizeSeconds ),
     m_seconds( WindowSizeSeconds ), m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 )
+{
+}
+
+TSSWStochastic::TSSWStochastic( const TSSWStochastic& stoch) 
+  : TimeSeriesSlidingWindow<TSSWStochastic, CQuote>( stoch ),
+  m_seconds( stoch.m_seconds ), m_lastAdd( stoch.m_lastAdd ), m_lastExpire( stoch.m_lastExpire ), m_k( stoch.m_k ),
+  m_minmax( stoch.m_minmax )
 {
 }
 

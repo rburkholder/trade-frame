@@ -16,10 +16,7 @@
 #include <vector>
 
 #include <wx/wx.h>
-
-//#include <TFTimeSeries/DatedDatum.h>
-//#include <TFTimeSeries/TimeSeries.h>
-//#include <TFTimeSeries/BarFactory.h>
+#include <wx/timer.h>
 
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
@@ -38,6 +35,7 @@
 #include "FrameMain.h"
 #include "FrameProviderControl.h"
 #include "FrameManualOrder.h"
+#include "FrameInstrumentStatus.h"
 
 #include "InstrumentData.h"
 
@@ -45,7 +43,10 @@ using namespace ou::tf;
 
 //wxFrame (wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE, const wxString &name=wxFrameNameStr)
 
-class AppSemiAuto : public wxApp {
+class AppSemiAuto : 
+  public wxApp, 
+  public wxTimer
+{
 
   enum enumMode {
     EModeSimulation,
@@ -75,6 +76,7 @@ private:
 
   FrameMain* m_FrameMain;
   FrameProviderControl* m_FrameProviderControl;
+  FrameInstrumentStatus* m_FrameGridInstrumentData;
 
   DBOps m_db;
 
@@ -106,6 +108,10 @@ private:
 
   typedef std::vector<FrameManualOrder*> vFrameManualOrder_t;
   vFrameManualOrder_t m_vFrameManualOrders;
+
+  std::string m_sTSDataStreamOpened;
+
+  void Notify( void );  // override of wxTimer::Notify
 
   void HandlePopulateDatabase( void );
 
