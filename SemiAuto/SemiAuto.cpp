@@ -113,17 +113,17 @@ bool AppSemiAuto::OnInit() {
   CInstrumentManager& mgr( CInstrumentManager::Instance() );
 
   // XAUUSDO.ABBA hvy, XAUUSDO.COMP hvy, XAUUSDO.MIGF med, XAUUSDO.SAXO med, XAUUSDO.UBSW lgt, XAUUSDO.UWCL med, XAUUSDO.WBLT hvy
-  // EURUSD.COMP, EURUSD.FXCM, BEURUSD
+  // EURUSD.FXCM, BEURUSD
   // HUI.X, XAU.X, GDX, GDXJ
   // DX.X dollar index  https://www.theice.com/productguide/ProductDetails.shtml?specId=194
 
   // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
-
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCV11" ) ? mgr.Get( "+GCV11" ) : mgr.ConstructFuture( "+GCV11", "SMART", 2011, 10 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURUSD.COMP" ) ? mgr.Get( "EURUSD.COMP" ) : mgr.ConstructInstrument( "EURUSD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "USDCAD.COMP" ) ? mgr.Get( "USDCAD.COMP" ) : mgr.ConstructInstrument( "USDCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
@@ -138,7 +138,7 @@ bool AppSemiAuto::OnInit() {
     m_FrameGridInstrumentData->Grid()->SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
   }
 
-  Start( 200 );
+  Start( 200 ); // 200ms grid interface update
 
   return TRUE;
 }

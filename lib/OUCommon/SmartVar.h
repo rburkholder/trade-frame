@@ -41,6 +41,7 @@ namespace ou {
 /////////////////////////
 
 // try and get rid of the virtual and make into Curiously Recurring Template... can't, base class isn't templated
+// could use boost::fusion here instead.  would get rid of the need for a base class
 class SmartVarBase: public boost::noncopyable {
   // simple base class for use in vector with static_cast
 public:

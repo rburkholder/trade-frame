@@ -31,6 +31,9 @@
     <ClCompile Include="TSSWStochastic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CalcAboveBelow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Darvas.h">
@@ -70,6 +73,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TSSWStochastic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CalcAboveBelow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

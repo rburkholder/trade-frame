@@ -1,0 +1,7 @@
+Need to include Dow Jones, Nasdaq, SPX in calculations
+Any other indexes, indicators to run as well?
+
+Assemblies to leave:
+  SmartQuant.Optimization
+  SmartQuant.Trading
+  
