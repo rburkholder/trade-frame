@@ -49,6 +49,11 @@ public:
     OnSymbolTextUpdated = function;
   }
 
+  typedef FastDelegate1<unsigned int> OnFocusPropogate_t;
+  void SetOnFocusPropogate( OnFocusPropogate_t function ) {
+    OnFocusPropogate = function;
+  }
+
   FrameManualOrder( void );
   FrameManualOrder(
     wxWindow* parent,
@@ -67,6 +72,9 @@ public:
    long style=wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
    );
 
+  void SetInstrumentName( const std::string& sName );
+  void SetIxStruct( unsigned int ix ) { m_ixStruct = ix; };
+
 protected:
 private:
 
@@ -77,14 +85,20 @@ private:
 
   Order_t m_order;
 
+  unsigned int m_ixStruct;  // for use by SemiAuto
+
   OnNewOrderHandler_t OnNewOrder;
   OnSymbolTextUpdated_t OnSymbolTextUpdated;
+  OnFocusPropogate_t OnFocusPropogate;
 
   wxTextCtrl* m_txtInstrumentSymbol;
+  wxStaticText* m_txtInstrumentName;
 
   void Init( void );
   void CreateControls( void );
   bool ShowToolTips( void ) { return true; };
+
+  void OnFocusChange( wxFocusEvent& event );
 
   void EmitOrder( void ) const;
 

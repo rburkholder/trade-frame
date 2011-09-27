@@ -52,7 +52,7 @@ private:
 
 /////////////////////////
 
-template<class T> class SmartVar: public SmartVarBase {
+template<typename T> class SmartVar: public SmartVarBase {
 public:
   SmartVar<T>( void );
   SmartVar<T>( 
@@ -82,12 +82,14 @@ public:
 protected:
   OnUpdateHandler OnUpdate;
 private:
-  T m_tBlank;
   T m_tItem;
+  T m_tBlank;
   std::string m_sItem;
 
   bool m_bValueUpdated;  // indicates when string has been updated
   bool m_bEventCleared;  // don't signal another event until current one processed (
+
+  void Init(  );  // needs a specialization for each type.
 
 //  COLORREF colourBackground;
 //  COLORREF colourForeground;
@@ -96,14 +98,16 @@ private:
 };
 
 // Constructors
-template<class T> SmartVar<T>::SmartVar( T tBlank ) 
+template<typename T> SmartVar<T>::SmartVar( T tBlank ) 
 : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( tBlank ), m_tItem( tBlank )
 {
+  Init(  );
 }
 
-template<class T> SmartVar<T>::SmartVar( void ) 
+template<typename T> SmartVar<T>::SmartVar( void ) 
 : m_bValueUpdated( false ), m_bEventCleared( true )
 {
+  Init(  );
 }
 
 // Destructor
@@ -113,7 +117,7 @@ template<class T> SmartVar<T>::~SmartVar() {
 // may need to protect cross thread updates here
 
 // Assignment
-template<class T> const T& SmartVar<T>::operator=(const T &rhs) {
+template<typename T> const T& SmartVar<T>::operator=(const T &rhs) {
   if ( m_tItem != rhs ) {
     m_tItem = rhs;
     m_bValueUpdated = true;
@@ -125,7 +129,7 @@ template<class T> const T& SmartVar<T>::operator=(const T &rhs) {
   return m_tItem;
 }
 
-template<class T> const SmartVar<T>& SmartVar<T>::operator=( const SmartVar<T>& rhs ) {
+template<typename T> const SmartVar<T>& SmartVar<T>::operator=( const SmartVar<T>& rhs ) {
   if ( m_tItem != rhs.m_tItem ) {
     m_tItem = rhs.m_tItem;
     m_bValueUpdated = true;
@@ -138,7 +142,7 @@ template<class T> const SmartVar<T>& SmartVar<T>::operator=( const SmartVar<T>& 
 }
 
 // Convert to string for display
-template<class T> const std::string& SmartVar<T>::str() {
+template<typename T> const std::string& SmartVar<T>::str() {
   if ( m_bValueUpdated ) {
     if ( m_tBlank == m_tItem ) {
       m_sItem = "";

@@ -25,8 +25,10 @@ namespace tf { // TradeFrame
 
 class CZigZag {
 public:
+
   CZigZag(double FilterWidth);
-  virtual ~CZigZag(void);
+  ~CZigZag(void);
+
   void Check( ptime dt, double val );
 
   enum EDirection { Init, Start, Down, Up };

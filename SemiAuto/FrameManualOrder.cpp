@@ -27,6 +27,7 @@ FrameManualOrder::FrameManualOrder( void ) {
   
   // style: wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX
 FrameManualOrder::FrameManualOrder(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+  : m_ixStruct( 0 )
  {
   Init();
   Create(parent, title, pos, size, style);
@@ -72,8 +73,8 @@ void FrameManualOrder::CreateControls( void ) {
         m_txtInstrumentSymbol->SetToolTip(_("Instrument Symbol"));
     itemBoxSizer4->Add(m_txtInstrumentSymbol, 0, wxALIGN_CENTER_HORIZONTAL, 2);
 
-    wxStaticText* itemStaticText7 = new wxStaticText( itemFrame1, ID_LblInstrumentName, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer3->Add(itemStaticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_txtInstrumentName = new wxStaticText( itemFrame1, ID_LblInstrumentName, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(m_txtInstrumentName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer8, 0, wxALIGN_LEFT|wxALL, 5);
@@ -147,6 +148,9 @@ void FrameManualOrder::CreateControls( void ) {
 
   Bind( wxEVT_CLOSE_WINDOW, &FrameManualOrder::OnClose, this );
 
+  Bind( wxEVT_SET_FOCUS, &FrameManualOrder::OnFocusChange, this );
+  Bind( wxEVT_KILL_FOCUS, &FrameManualOrder::OnFocusChange, this );
+
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnMarket, this, ID_BtnOrderTypeMarket );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnLimit, this, ID_BtnOrderTypeLimit );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &FrameManualOrder::OnBtnStop, this, ID_BtnOrderTypeStop );
@@ -184,6 +188,7 @@ void FrameManualOrder::OnInstrumentSymbolTextIdle( wxIdleEvent& event ) {
 // on successful symbol, then set flag to enable buttons
 void FrameManualOrder::OnInstrumentSymbolTextUpdated( wxCommandEvent& event ) {
   if ( 0 < m_txtInstrumentSymbol->GetLineLength( 0 ) ) {
+    if ( 0 != OnFocusPropogate ) OnFocusPropogate( m_ixStruct );
     if ( 0 != OnSymbolTextUpdated )
       OnSymbolTextUpdated( m_txtInstrumentSymbol->GetLineText( 0 ).ToStdString() );
   }
@@ -192,6 +197,10 @@ void FrameManualOrder::OnInstrumentSymbolTextUpdated( wxCommandEvent& event ) {
 
 void FrameManualOrder::OnInstrumentSymbolTextEnter( wxCommandEvent& event ) {
   event.Skip();
+}
+
+void FrameManualOrder::OnFocusChange( wxFocusEvent& event ) {
+  if ( 0 != OnFocusPropogate ) OnFocusPropogate( m_ixStruct );
 }
 
 // need to set state on buttons sometime to make validations below unneeded
@@ -207,4 +216,8 @@ void FrameManualOrder::EmitOrder( void ) const {
     if ( 0 != OnNewOrder ) 
       OnNewOrder( m_order );
   }
+}
+
+void FrameManualOrder::SetInstrumentName( const std::string& sName ) {
+  m_txtInstrumentName->SetLabelText( sName );
 }

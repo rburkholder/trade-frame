@@ -51,6 +51,8 @@ public:
 protected:
 private:
 
+  bool m_bHasData;
+
   var_t m_rSummary[ _Count ];
 
   CInstrument::pInstrument_t m_pInstrument;

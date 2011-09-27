@@ -45,7 +45,8 @@ using namespace ou::tf;
 
 class AppSemiAuto : 
   public wxApp, 
-  public wxTimer
+  public wxTimer,
+  public wxGridTableBase
 {
 
   enum enumMode {
@@ -55,6 +56,18 @@ class AppSemiAuto :
 
   virtual bool OnInit();
   virtual int OnExit();
+
+  // wxGridTableBase
+  int GetNumberRows();
+  int GetNumberCols();
+  wxString GetValue(int row, int col);
+  void SetValue(int row, int col, const wxString &value);
+  double GetValueAsDouble( int row, int col );
+  bool CanGetValueAs( int row, int col, const wxString& name );
+  wxString GetRowLabelValue(int row);
+  wxString GetColLabelValue(int col);
+  wxGridCellAttr*	GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind);
+
 protected:
 private:
 
@@ -71,6 +84,8 @@ private:
   typedef CSimulationProvider::pProvider_t pProviderSim_t;
 
   //typedef FrameProviderControl::eProviderState_t eProviderState_t;
+
+  wxGridCellAttr* m_pattrCell;
 
   typedef FrameManualOrder::Order_t ManualOrder_t;
 
@@ -106,8 +121,14 @@ private:
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
 
-  typedef std::vector<FrameManualOrder*> vFrameManualOrder_t;
-  vFrameManualOrder_t m_vFrameManualOrders;
+  unsigned int m_curFrameManualOrder;
+  struct structManualOrder {
+    FrameManualOrder* pFrameManualOrder;
+    ou::tf::CIBTWS::ContractDetails details;
+  };
+
+  typedef std::vector<structManualOrder> vManualOrder_t;
+  vManualOrder_t m_vManualOrders;
 
   std::string m_sTSDataStreamOpened;
 
@@ -139,6 +160,7 @@ private:
   void HandleSimulatorDisConnected( int );
 
   void HandleCreateNewFrameManualOrder( void );
+  void HandleFrameManualOrderFocus( unsigned int );
   void HandleManualOrder( const ManualOrder_t& );
 
   void HandleOnCleanUpForExitForFrameMain( int );
@@ -148,6 +170,8 @@ private:
   void HandleIBContractDetailsDone( void );
 
   void HandleSaveSeriesEvent( void );
+
+
 
 
 };

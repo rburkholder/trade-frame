@@ -16,7 +16,7 @@
 #include "SmartVar.h"
 
 namespace ou {
-
+/*
 template<> SmartVar<int>::SmartVar( void ) 
   : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( 0 ), m_tItem( 0 ) {
 }
@@ -27,6 +27,11 @@ template<> SmartVar<unsigned int>::SmartVar( void )
 
 template<> SmartVar<double>::SmartVar( void ) 
   : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( 0.0 ), m_tItem( 0.0 ) {
+}
+*/
+
+template<> void SmartVar<double>::Init( void ) {
+  m_tItem = 0.0;
 }
 
 } // ou

@@ -137,6 +137,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GTScalp", "GTScalp\GTScalp.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OUGP", "lib\OUGP\OUGP.vcxproj", "{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BookTrader", "BookTrader\BookTrader.vcxproj", "{B7712CD1-F346-4FAF-89DF-D9B927B64ABC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -267,6 +269,10 @@ Global
 		{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}.Debug|Win32.Build.0 = Debug|Win32
 		{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}.Release|Win32.ActiveCfg = Release|Win32
 		{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}.Release|Win32.Build.0 = Release|Win32
+		{B7712CD1-F346-4FAF-89DF-D9B927B64ABC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B7712CD1-F346-4FAF-89DF-D9B927B64ABC}.Debug|Win32.Build.0 = Debug|Win32
+		{B7712CD1-F346-4FAF-89DF-D9B927B64ABC}.Release|Win32.ActiveCfg = Release|Win32
+		{B7712CD1-F346-4FAF-89DF-D9B927B64ABC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

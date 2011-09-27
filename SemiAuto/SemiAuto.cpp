@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#pragma warning( disable: 4996 4482 )
+
 #include <cassert>
 
 #include <OUCommon/TimeSource.h>
@@ -107,15 +109,13 @@ bool AppSemiAuto::OnInit() {
   m_FrameProviderControl->SetOnIQFeedStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleIQFeedStateChangeRequest ) ) ;
   m_FrameProviderControl->SetOnSimulatorStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleSimulatorStateChangeRequest ) );
 
-  m_FrameGridInstrumentData = new FrameInstrumentStatus( m_FrameMain, "Instrument Status", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX );
-  m_FrameGridInstrumentData->Show( true );
-
   CInstrumentManager& mgr( CInstrumentManager::Instance() );
 
   // XAUUSDO.ABBA hvy, XAUUSDO.COMP hvy, XAUUSDO.MIGF med, XAUUSDO.SAXO med, XAUUSDO.UBSW lgt, XAUUSDO.UWCL med, XAUUSDO.WBLT hvy
   // EURUSD.FXCM, BEURUSD
   // HUI.X, XAU.X, GDX, GDXJ
   // DX.X dollar index  https://www.theice.com/productguide/ProductDetails.shtml?specId=194
+  // http://www.dtniq.com/template.cfm?navgroup=supportlist&view=1&urlcode=323406&type=TENFORE  // tenfore symbols and descriptions
 
   // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
@@ -131,26 +131,111 @@ bool AppSemiAuto::OnInit() {
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
 
-  m_FrameGridInstrumentData->Grid()->AppendRows( m_vInstruments.size() );
+//  wxGridTableBase::SetColLabelValue( 0, "Low" );
+//  wxGridTableBase::SetColLabelValue( 1, "Price" );
+//  wxGridTableBase::SetColLabelValue( 2, "High" );
+//  wxGridTableBase::SetColLabelValue( 3, "ROC" );
+//  wxGridTableBase::SetColLabelValue( 4, "%D" );
 
-  int ix = 0;
-  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
-    m_FrameGridInstrumentData->Grid()->SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
-  }
+//  int ix = 0;
+//  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
+    //wxGridTableBase::SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
+//  }
 
-  Start( 200 ); // 200ms grid interface update
+  m_pattrCell = new wxGridCellAttr();
+  m_pattrCell->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTRE );
+
+  m_FrameGridInstrumentData = new FrameInstrumentStatus( m_FrameMain, "Instrument Status", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX );
+  m_FrameGridInstrumentData->Show( true );
+
+  wxGridCellFloatRenderer* ren = new wxGridCellFloatRenderer(-1, 2 );
+  m_FrameGridInstrumentData->Grid()->EnableEditing( false );
+  m_FrameGridInstrumentData->Grid()->SetDefaultRenderer( ren );
+  m_FrameGridInstrumentData->Grid()->SetTable( this );
+
+  Start( 300 ); // 200ms grid interface update
 
   return TRUE;
 }
 
-void AppSemiAuto::Notify( void ) {
+wxString AppSemiAuto::GetRowLabelValue(int row) {
+  wxString s( m_vInstruments[ row ].GetInstrument()->GetInstrumentName() );
+  return s;
+}
 
-  int iy = 0;
-  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
-    for ( unsigned int ix = InstrumentData::Low; InstrumentData::_Count != ix; ++ix ) {
-      m_FrameGridInstrumentData->Grid()->SetCellValue( iy, ix, iter->Var( static_cast<InstrumentData::enumIndex>( ix ) ).str() );
-    }
+wxString AppSemiAuto::GetColLabelValue(int col) {
+  switch ( col ) {
+  case 0:
+    return "Low";
+    break;
+  case 1:
+    return "Price";
+    break;
+  case 2:
+    return "High";
+    break;
+  case 3:
+    return "ROC";
+    break;
+  case 4:
+    return "%D";
+    break;
   }
+  return "";
+}
+
+bool AppSemiAuto::CanGetValueAs( int row, int col, const wxString& name ) {
+  return "double" == name;
+}
+
+double AppSemiAuto::GetValueAsDouble( int row, int col ) {
+  return m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) ).Value();
+}
+
+int AppSemiAuto::GetNumberRows() {
+  return m_vInstruments.size();
+}
+
+int AppSemiAuto::GetNumberCols() {
+  return 5;
+}
+
+wxString AppSemiAuto::GetValue(int row, int col) {
+  wxString s( m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) ).str() );
+  if ( 0 != s.Length() ) {
+    int i = 1;
+  }
+  return s;
+}
+
+void AppSemiAuto::SetValue(int row, int col, const wxString &value) {
+  // external doesn't set value
+}
+
+wxGridCellAttr*	AppSemiAuto::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind) {
+  //return m_pattrCell;
+  wxGridCellAttr* pattrCell = new wxGridCellAttr();
+  pattrCell->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTRE );
+  return pattrCell;
+}
+
+void AppSemiAuto::Notify( void ) {
+  /*
+  int iy = 0;
+  try {
+    m_FrameGridInstrumentData->Grid()->BeginBatch();
+    for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
+      for ( unsigned int ix = InstrumentData::Low; InstrumentData::_Count != ix; ++ix ) {
+        m_FrameGridInstrumentData->Grid()->SetCellValue( iy, ix, iter->Var( static_cast<InstrumentData::enumIndex>( ix ) ).str() );
+      }
+    }
+    m_FrameGridInstrumentData->Grid()->EndBatch();
+  }
+  catch (...) {
+    int i = 1;
+  }
+  */
+  m_FrameGridInstrumentData->Grid()->ForceRefresh();
 }
 
 int AppSemiAuto::OnExit() {
@@ -189,17 +274,17 @@ void AppSemiAuto::HandleStateChangeRequest( eProviderState_t state, bool& flag, 
     break;
   case eProviderState_t::ProviderGoingOn:
     if ( !flag ) {
+      {
+        std::stringstream ss;
+        ss.str( "" );
+        ss << ou::CTimeSource::Instance().Internal();
+        m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
+      }
       p->Connect();
     }
     break;
   case eProviderState_t::ProviderOn:
     assert( flag );
-    {
-      std::stringstream ss;
-      ss.str( "" );
-      ss << ou::CTimeSource::Instance().Internal();
-      m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
-    }
     break;
   case eProviderState_t::ProviderGoingOff:
     if ( flag ) {
@@ -262,11 +347,15 @@ void AppSemiAuto::HandleSimulatorDisConnected( int ) {  // cross thread event
 void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
   // need to keep a vector of these so can trade multiple symbols simultaneously
   // maybe something like genesis with market depth book built in
-  FrameManualOrder* frame = new FrameManualOrder( m_FrameMain );
-  m_vFrameManualOrders.push_back( frame );
-  frame->SetOnNewOrderHandler( MakeDelegate( this, &AppSemiAuto::HandleManualOrder ) );
-  frame->SetOnSymbolTextUpdated( MakeDelegate( this, &AppSemiAuto::HandleCheckSymbolNameAgainstIB ) );
-  frame->Show( true );
+  m_vManualOrders.resize( m_vManualOrders.size() + 1 );
+  structManualOrder& mo( m_vManualOrders.back() );
+  mo.pFrameManualOrder = new FrameManualOrder( m_FrameMain );
+  mo.pFrameManualOrder->SetIxStruct( m_vManualOrders.size() - 1 );
+  mo.pFrameManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppSemiAuto::HandleManualOrder ) );
+  mo.pFrameManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppSemiAuto::HandleCheckSymbolNameAgainstIB ) );
+  mo.pFrameManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppSemiAuto::HandleFrameManualOrderFocus ) );
+  mo.pFrameManualOrder->Show( true );
+  // update events in HandleOnCleanUpForExitForFrameMain
 }
 
 void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
@@ -275,11 +364,17 @@ void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
   contract.exchange = "SMART";
   contract.secType = "STK";
   contract.symbol = sSymbol;
-  // as IB only responds when symbol is found, 
+  // IB responds only when symbol is found, bad symbols will not illicit a response
   m_tws->RequestContractDetails( contract, MakeDelegate( this, &AppSemiAuto::HandleIBContractDetails ), MakeDelegate( this, &AppSemiAuto::HandleIBContractDetailsDone ) );
 }
 
-void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& ) {  // need to handle cross thread
+void AppSemiAuto::HandleFrameManualOrderFocus( unsigned int ix ) {
+  m_curFrameManualOrder = ix;
+}
+
+void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details ) {  // need to handle cross thread
+  assert( m_curFrameManualOrder < m_vManualOrders.size() );
+  m_vManualOrders[ m_curFrameManualOrder ].details = details;
 }
 
 void AppSemiAuto::HandleIBContractDetailsDone( void ) {  // called only on successful contract found, need to handle cross thread
@@ -336,12 +431,14 @@ void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {
   m_FrameMain->SetCreateNewFrameManualOrder( 0 );
 
   // this doesn't work properly for user closed windows
-  for ( vFrameManualOrder_t::iterator iter = m_vFrameManualOrders.begin(); iter != m_vFrameManualOrders.end(); ++iter ) {
-    (*iter)->SetOnNewOrderHandler( 0 );
-    (*iter)->Close();
-    delete *iter;
+  for ( vManualOrder_t::iterator iter = m_vManualOrders.begin(); iter != m_vManualOrders.end(); ++iter ) {
+    iter->pFrameManualOrder->SetOnNewOrderHandler( 0 );
+    iter->pFrameManualOrder->SetOnSymbolTextUpdated( 0 );
+    iter->pFrameManualOrder->SetOnFocusPropogate( 0 );
+    iter->pFrameManualOrder->Close();
+    delete iter->pFrameManualOrder;
   }
-  m_vFrameManualOrders.clear();
+  m_vManualOrders.clear();
 
   m_FrameProviderControl->SetOnIBStateChangeHandler( 0 );
   m_FrameProviderControl->SetOnIQFeedStateChangeHandler( 0 ) ;

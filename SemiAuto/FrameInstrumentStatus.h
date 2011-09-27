@@ -43,6 +43,8 @@ protected:
   wxGrid* m_gridStatus;
 private:
 
+  //wxGridCellStringRenderer* m_pRender;
+
   void Init( void );
   void CreateControls( void );
   bool ShowToolTips( void ) { return true; };

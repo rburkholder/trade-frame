@@ -152,7 +152,7 @@ template<typename T> T* CTimeSeries<T>::Ago( size_t ix ) {
 
 template<typename T> T* CTimeSeries<T>::operator []( size_t ix ) {
   T* datum = NULL;
-  if ( ix < m_vSeries.size() ) {
+  if ( ix < m_vSeries. size() ) {
     m_vIterator = m_vSeries.begin() + ix;
     datum = &(*m_vIterator);
   }

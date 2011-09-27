@@ -13,6 +13,15 @@
 
 #include "FrameInstrumentStatus.h"
 
+class Grid: public wxGrid {
+public:
+  Grid( void ) : wxGrid() {};
+  Grid (wxWindow *parent, wxWindowID id, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=wxWANTS_CHARS, const wxString &name=wxGridNameStr)
+    : wxGrid( parent, id, pos, size, style, name ) {};
+protected:
+  void OnEraseBackground( wxEraseEvent& event ) {};
+};
+
 // style: wxCAPTION | wxRESIZE_BORDER | wxMINIMIZE_BOX | wxMAXIMIZE_BOX
 FrameInstrumentStatus::FrameInstrumentStatus(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
 {
@@ -41,19 +50,13 @@ void FrameInstrumentStatus::CreateControls( void ) {
 
   FrameInstrumentStatus* itemFrame1 = this;
 
-  m_gridStatus = new wxGrid( itemFrame1, wxID_ANY, wxDefaultPosition, wxSize(200, 150), wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL|wxRESIZE_BORDER );
+  m_gridStatus = new ::Grid( itemFrame1, wxID_ANY, wxDefaultPosition, wxSize(200, 150), wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL|wxRESIZE_BORDER );
 
   m_gridStatus->SetDefaultColSize(50);
-  m_gridStatus->SetDefaultRowSize(25);
-  m_gridStatus->SetColLabelSize(25);
+  m_gridStatus->SetDefaultRowSize(21);
+  m_gridStatus->SetColLabelSize(21);
   m_gridStatus->SetRowLabelSize(100);
   m_gridStatus->CreateGrid(0, 5, wxGrid::wxGridSelectCells);
-
-  m_gridStatus->SetColLabelValue( 0, "Low" );
-  m_gridStatus->SetColLabelValue( 1, "Price" );
-  m_gridStatus->SetColLabelValue( 2, "High" );
-  m_gridStatus->SetColLabelValue( 3, "ROC" );
-  m_gridStatus->SetColLabelValue( 4, "%D" );
 
 }
 

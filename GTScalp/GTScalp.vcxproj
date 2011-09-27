@@ -72,22 +72,81 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="fuzzycandles.txt" />
     <None Include="GTScalp.ico" />
+    <None Include="mfc.txt" />
+    <None Include="notes.txt" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChartArmsIntraDay.h" />
+    <ClInclude Include="ChartDatedDatum.h" />
+    <ClInclude Include="ChartViewerShim.h" />
+    <ClInclude Include="CtlKeyValues.h" />
+    <ClInclude Include="CtlMarketDepth.h" />
+    <ClInclude Include="CtlPendingOrders.h" />
+    <ClInclude Include="DataRow.h" />
+    <ClInclude Include="DataRowElement.h" />
+    <ClInclude Include="DataRows.h" />
+    <ClInclude Include="DeltaMarker.h" />
     <ClInclude Include="GTScalp.h" />
+    <ClInclude Include="GTScalpDlg.h" />
+    <ClInclude Include="MarketProfile.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RowKeyValues.h" />
+    <ClInclude Include="Scripts.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SymbolSelectionFilter.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TradeFrame.h" />
+    <ClInclude Include="TradingLogic.h" />
+    <ClInclude Include="VisibleElement.h" />
+    <ClInclude Include="VisibleRow.h" />
+    <ClInclude Include="VuChart.h" />
+    <ClInclude Include="VuChartArmsIntraDay.h" />
+    <ClInclude Include="VuIndicies.h" />
+    <ClInclude Include="VuKeyValues.h" />
+    <ClInclude Include="VuListCtl.h" />
+    <ClInclude Include="VuMarketDepth.h" />
+    <ClInclude Include="VuOptions.h" />
+    <ClInclude Include="VuPendingOrders.h" />
+    <ClInclude Include="VuSymbolsOfInterest.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChartArmsIntraDay.cpp" />
+    <ClCompile Include="ChartDatedDatum.cpp" />
+    <ClCompile Include="ChartViewerShim.cpp" />
+    <ClCompile Include="CtlKeyValues.cpp" />
+    <ClCompile Include="CtlMarketDepth.cpp" />
+    <ClCompile Include="CtlPendingOrders.cpp" />
+    <ClCompile Include="DataRow.cpp" />
+    <ClCompile Include="DataRowElement.cpp" />
+    <ClCompile Include="DataRows.cpp" />
+    <ClCompile Include="DeltaMarker.cpp" />
+    <ClCompile Include="Demo.cpp" />
     <ClCompile Include="GTScalp.cpp" />
+    <ClCompile Include="GTScalpDlg.cpp" />
+    <ClCompile Include="MarketProfile.cpp" />
+    <ClCompile Include="RowKeyValues.cpp" />
+    <ClCompile Include="Scripts.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SymbolSelectionFilter.cpp" />
+    <ClCompile Include="TradeFrame.cpp" />
+    <ClCompile Include="TradingLogic.cpp" />
+    <ClCompile Include="VisibleElement.cpp" />
+    <ClCompile Include="VisibleRow.cpp" />
+    <ClCompile Include="VuChart.cpp" />
+    <ClCompile Include="VuChartArmsIntraDay.cpp" />
+    <ClCompile Include="VuIndicies.cpp" />
+    <ClCompile Include="VuKeyValues.cpp" />
+    <ClCompile Include="VuMarketDepth.cpp" />
+    <ClCompile Include="VuOptions.cpp" />
+    <ClCompile Include="VuPendingOrders.cpp" />
+    <ClCompile Include="VuSymbolsOfInterest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GTScalp.rc" />

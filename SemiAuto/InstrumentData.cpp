@@ -21,18 +21,20 @@
 #include "InstrumentData.h"
 
 InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument ) 
-  : m_pInstrument( pInstrument ), m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 )
+  : m_pInstrument( pInstrument ), 
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
 {
 }
 
 InstrumentData::InstrumentData( CInstrument* pInstrument ) 
-  : m_pInstrument( pInstrument ), m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 )
+  : m_pInstrument( pInstrument ), 
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
 {
 }
 
 InstrumentData::InstrumentData( const InstrumentData& data ) 
-  : m_pInstrument( data.m_pInstrument ), m_quotes( data.m_quotes ), m_trades( data.m_trades ),
-    m_stats( data.m_stats ), m_stoch( data.m_stoch )
+  : m_pInstrument( data.m_pInstrument ),  // only instrument is copied, everything else starts at scratch
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
 {
 }
 
@@ -57,9 +59,9 @@ void InstrumentData::HandleTrade( const CTrade& trade ) {
   double dblPrice = trade.Trade();
   m_rSummary[ Price ] = dblPrice;
   if ( m_rSummary[ High ] < m_rSummary[ Price ] ) m_rSummary[ High ] = dblPrice;
-  if ( m_rSummary[ Low ] == 0 ) m_rSummary[ Low ] = dblPrice;
+  if ( m_rSummary[ Low ].Value() == 0 ) m_rSummary[ Low ] = dblPrice;
   else {
-    if ( m_rSummary[ Price ] < m_rSummary[ Low ] ) m_rSummary[ Low ] = dblPrice;
+    if ( dblPrice < m_rSummary[ Low ].Value() ) m_rSummary[ Low ] = dblPrice;
   }
 }
 
