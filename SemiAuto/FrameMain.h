@@ -20,7 +20,7 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include "FrameManualOrder.h"
+#include "DialogManualOrder.h"
 
 class FrameMain : public wxFrame {
 public:
@@ -43,9 +43,9 @@ public:
   ou::Delegate<void*> OnBtnClickedStartSimulation;
   ou::Delegate<void*> OnBtnClickedStopSimulation;
 
-  typedef FastDelegate0<void> OnCreateNewFrameManualOrder_t;
-  void SetCreateNewFrameManualOrder( OnCreateNewFrameManualOrder_t function ) {
-    OnCreateNewFrameManualOrder = function;
+  typedef FastDelegate0<void> OnCreateNewDialogManualOrder_t;
+  void SetCreateNewDialogManualOrder( OnCreateNewDialogManualOrder_t function ) {
+    OnCreateNewDialogManualOrder = function;
   }
 
   typedef FastDelegate0<void> OnSaveSeriesEvent_t;
@@ -61,7 +61,7 @@ protected:
   void OnQuit( wxCommandEvent& event );
   void OnAbout( wxCommandEvent& event );
   void OnClose( wxCommandEvent& event );
-  void OnOpenFrameManualOrder(wxCommandEvent& event  );
+  void OnOpenDialogManualOrder(wxCommandEvent& event  );
   void OnCloseThis( wxCloseEvent& event );
   void OnSaveSeries( wxCommandEvent& event );
 
@@ -73,7 +73,7 @@ private:
     ID_AddPortfolio, ID_ManualTrade, ID_WriteData
   };
 
-  OnCreateNewFrameManualOrder_t OnCreateNewFrameManualOrder;
+  OnCreateNewDialogManualOrder_t OnCreateNewDialogManualOrder;
   OnSaveSeriesEvent_t OnSaveSeriesEvent;
 
   void CleanUpForExit( void );

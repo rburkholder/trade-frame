@@ -50,7 +50,7 @@ FrameMain::FrameMain(const wxString& title, const wxPoint& pos, const wxSize& si
  
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnQuit, this, ID_Quit );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnAbout, this, ID_About );
-  Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnOpenFrameManualOrder, this, ID_ManualTrade );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnOpenDialogManualOrder, this, ID_ManualTrade );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnSaveSeries, this, ID_WriteData );
 
   Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnCloseThis, this );
@@ -88,10 +88,10 @@ void FrameMain::OnAbout(wxCommandEvent& WXUNUSED(event)) {
 void FrameMain::OnClose( wxCommandEvent& event ) {
 }
 
-void FrameMain::OnOpenFrameManualOrder( wxCommandEvent& event ) {
+void FrameMain::OnOpenDialogManualOrder( wxCommandEvent& event ) {
 
-  if ( 0 != OnCreateNewFrameManualOrder ) 
-    OnCreateNewFrameManualOrder();
+  if ( 0 != OnCreateNewDialogManualOrder ) 
+    OnCreateNewDialogManualOrder();
 //  event.Skip();
 }
 

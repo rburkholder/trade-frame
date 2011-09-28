@@ -19,6 +19,7 @@
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
+#include <TFTrading/OrderManager.h>
 
 #include "SemiAuto.h"
 
@@ -97,7 +98,7 @@ bool AppSemiAuto::OnInit() {
   m_FrameMain->Show(TRUE);
   SetTopWindow(m_FrameMain);
 
-  m_FrameMain->SetCreateNewFrameManualOrder( MakeDelegate( this, &AppSemiAuto::HandleCreateNewFrameManualOrder ) );
+  m_FrameMain->SetCreateNewDialogManualOrder( MakeDelegate( this, &AppSemiAuto::HandleCreateNewFrameManualOrder ) );
   m_FrameMain->SetSaveSeriesEvent( MakeDelegate( this, &AppSemiAuto::HandleSaveSeriesEvent ) );
 
   m_FrameMain->OnCleanUpForExit.Add( MakeDelegate( this, &AppSemiAuto::HandleOnCleanUpForExitForFrameMain ) );
@@ -125,9 +126,9 @@ bool AppSemiAuto::OnInit() {
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURUSD.COMP" ) ? mgr.Get( "EURUSD.COMP" ) : mgr.ConstructInstrument( "EURUSD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "USDCAD.COMP" ) ? mgr.Get( "USDCAD.COMP" ) : mgr.ConstructInstrument( "USDCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURCAD.COMP" ) ? mgr.Get( "EURCAD.COMP" ) : mgr.ConstructInstrument( "EURCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURUSD.COMP" ) ? mgr.Get( "EURUSD.COMP" ) : mgr.ConstructInstrument( "EURUSD.COMP", "SMART", ou::tf::InstrumentType::Currency ), 4 ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "USDCAD.COMP" ) ? mgr.Get( "USDCAD.COMP" ) : mgr.ConstructInstrument( "USDCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ), 4 ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURCAD.COMP" ) ? mgr.Get( "EURCAD.COMP" ) : mgr.ConstructInstrument( "EURCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ), 4 ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
 
@@ -152,6 +153,8 @@ bool AppSemiAuto::OnInit() {
   m_FrameGridInstrumentData->Grid()->EnableEditing( false );
   m_FrameGridInstrumentData->Grid()->SetDefaultRenderer( ren );
   m_FrameGridInstrumentData->Grid()->SetTable( this );
+
+  // need to add custom renderer for currency with 6 decimal places.
 
   Start( 300 ); // 200ms grid interface update
 
@@ -189,7 +192,7 @@ bool AppSemiAuto::CanGetValueAs( int row, int col, const wxString& name ) {
 }
 
 double AppSemiAuto::GetValueAsDouble( int row, int col ) {
-  return m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) ).Value();
+  return m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) );
 }
 
 int AppSemiAuto::GetNumberRows() {
@@ -201,11 +204,12 @@ int AppSemiAuto::GetNumberCols() {
 }
 
 wxString AppSemiAuto::GetValue(int row, int col) {
-  wxString s( m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) ).str() );
-  if ( 0 != s.Length() ) {
-    int i = 1;
-  }
-  return s;
+//  wxString s( m_vInstruments[ row ].Var( static_cast<InstrumentData::enumIndex>( col ) ).str() );
+//  if ( 0 != s.Length() ) {
+//    int i = 1;
+//  }
+//  return s;
+  return "";
 }
 
 void AppSemiAuto::SetValue(int row, int col, const wxString &value) {
@@ -349,12 +353,12 @@ void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
   // maybe something like genesis with market depth book built in
   m_vManualOrders.resize( m_vManualOrders.size() + 1 );
   structManualOrder& mo( m_vManualOrders.back() );
-  mo.pFrameManualOrder = new FrameManualOrder( m_FrameMain );
-  mo.pFrameManualOrder->SetIxStruct( m_vManualOrders.size() - 1 );
-  mo.pFrameManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppSemiAuto::HandleManualOrder ) );
-  mo.pFrameManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppSemiAuto::HandleCheckSymbolNameAgainstIB ) );
-  mo.pFrameManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppSemiAuto::HandleFrameManualOrderFocus ) );
-  mo.pFrameManualOrder->Show( true );
+  mo.pDialogManualOrder = new DialogManualOrder( m_FrameMain );
+  mo.pDialogManualOrder->SetIxStruct( m_vManualOrders.size() - 1 );
+  mo.pDialogManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppSemiAuto::HandleManualOrder ) );
+  mo.pDialogManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppSemiAuto::HandleCheckSymbolNameAgainstIB ) );
+  mo.pDialogManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppSemiAuto::HandleFrameManualOrderFocus ) );
+  mo.pDialogManualOrder->Show( true );
   // update events in HandleOnCleanUpForExitForFrameMain
 }
 
@@ -365,22 +369,50 @@ void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
   contract.secType = "STK";
   contract.symbol = sSymbol;
   // IB responds only when symbol is found, bad symbols will not illicit a response
+  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->QueueEvent( new UpdateInstrumentNameEvent( EVT_UpdateInstrumentName, "" ) );
   m_tws->RequestContractDetails( contract, MakeDelegate( this, &AppSemiAuto::HandleIBContractDetails ), MakeDelegate( this, &AppSemiAuto::HandleIBContractDetailsDone ) );
 }
 
 void AppSemiAuto::HandleFrameManualOrderFocus( unsigned int ix ) {
-  m_curFrameManualOrder = ix;
+  m_curDialogManualOrder = ix;
 }
 
-void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details ) {  // need to handle cross thread
-  assert( m_curFrameManualOrder < m_vManualOrders.size() );
-  m_vManualOrders[ m_curFrameManualOrder ].details = details;
+void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {  // need to handle cross thread
+  assert( m_curDialogManualOrder < m_vManualOrders.size() );
+  m_vManualOrders[ m_curDialogManualOrder ].details = details;
+  m_vManualOrders[ m_curDialogManualOrder ].pInstrument = pInstrument;
+  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->QueueEvent( new UpdateInstrumentNameEvent( EVT_UpdateInstrumentName, details.longName ) );
 }
 
 void AppSemiAuto::HandleIBContractDetailsDone( void ) {  // called only on successful contract found, need to handle cross thread
 }
 
 void AppSemiAuto::HandleManualOrder( const ManualOrder_t& order ) {
+  try {
+    CInstrumentManager& mgr( CInstrumentManager::Instance() );
+    pInstrument_t pInstrument = m_vManualOrders[ m_curDialogManualOrder ].pInstrument;
+    if ( !mgr.Exists( pInstrument ) ) {
+      mgr.Construct( pInstrument );
+    }
+    ou::tf::COrderManager& om( ou::tf::COrderManager::Instance() );
+    ou::tf::COrderManager::pOrder_t pOrder;
+    switch ( order.eOrderType ) {
+    case OrderType::Market: 
+      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
+      break;
+    case OrderType::Limit:
+      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      break;
+    case OrderType::Stop:
+      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      break;
+    }
+    //ou::tf::COrderManager::pOrder_t pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1, order.dblPrice2 );
+    om.PlaceOrder( m_tws.get(), pOrder );
+  }
+  catch (...) {
+    int i = 1;
+  }
 }
 
 void AppSemiAuto::HandleOnData1Connected(int e) {
@@ -426,17 +458,17 @@ void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {
 
   Stop();
 
-  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
+  m_FrameMain->SetCreateNewDialogManualOrder( 0 );
   m_FrameMain->SetSaveSeriesEvent( 0 );
-  m_FrameMain->SetCreateNewFrameManualOrder( 0 );
+  m_FrameMain->SetCreateNewDialogManualOrder( 0 );
 
   // this doesn't work properly for user closed windows
   for ( vManualOrder_t::iterator iter = m_vManualOrders.begin(); iter != m_vManualOrders.end(); ++iter ) {
-    iter->pFrameManualOrder->SetOnNewOrderHandler( 0 );
-    iter->pFrameManualOrder->SetOnSymbolTextUpdated( 0 );
-    iter->pFrameManualOrder->SetOnFocusPropogate( 0 );
-    iter->pFrameManualOrder->Close();
-    delete iter->pFrameManualOrder;
+    iter->pDialogManualOrder->SetOnNewOrderHandler( 0 );
+    iter->pDialogManualOrder->SetOnSymbolTextUpdated( 0 );
+    iter->pDialogManualOrder->SetOnFocusPropogate( 0 );
+    iter->pDialogManualOrder->Close();
+    delete iter->pDialogManualOrder;
   }
   m_vManualOrders.clear();
 

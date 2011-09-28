@@ -520,10 +520,14 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
 
   assert( 0 < contractDetails.summary.conId );
 
+  pInstrument_t pInstrument;
   mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
   if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
-    pInstrument_t pInstrument = BuildInstrumentFromContract( contractDetails.summary );
+    pInstrument = BuildInstrumentFromContract( contractDetails.summary );
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
+  }
+  else {
+    pInstrument.reset( iter->second->GetInstrument().get() );
   }
 
   OnContractDetailsHandler_t handler = 0;
@@ -536,7 +540,7 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
     handler = iterRequest->second->fProcess;
   }
   if ( 0 != handler ) 
-    handler( contractDetails );
+    handler( contractDetails, pInstrument );
 
 }
 

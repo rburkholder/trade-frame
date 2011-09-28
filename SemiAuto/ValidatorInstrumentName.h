@@ -19,7 +19,7 @@
 
 class InstrumentNameValidator: public wxValidator {
 public:
-  InstrumentNameValidator( const InstrumentNameValidator& validator ): wxValidator() { Init(); };
+  InstrumentNameValidator( const InstrumentNameValidator& validator ): wxValidator(), m_pString( validator.m_pString ) { Init(); };
   InstrumentNameValidator( wxString* p = 0 ): wxValidator(), m_pString( p ) { Init(); };
   InstrumentNameValidator* Clone( void ) const {
     return new InstrumentNameValidator( *this );

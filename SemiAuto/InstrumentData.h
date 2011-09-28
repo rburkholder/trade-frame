@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include <OUCommon/SmartVar.h>
+//#include <OUCommon/SmartVar.h>
 
 #include <TFTimeSeries/TimeSeries.h>
 
@@ -31,10 +31,11 @@ class InstrumentData {
 public:
 
   enum enumIndex { Low = 0, Price, High, Roc, Stochastic, _Count };
-  typedef ou::SmartVar<double> var_t;
+  //typedef ou::SmartVar<double> var_t;
+  typedef double var_t;
 
-  InstrumentData( const CInstrument::pInstrument_t& pInstrument );
-  InstrumentData( CInstrument* pInstrument );
+  InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits = 2 );
+  InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits = 2 );
   InstrumentData( const InstrumentData& data );
   ~InstrumentData(void);
 
@@ -47,11 +48,14 @@ public:
 
   void SaveSeries( const std::string& sPrefix );
   var_t& Var( enumIndex ix ) { return m_rSummary[ ix ]; };
+  unsigned int SigDigits( void ) { return m_nSignificantDigits; };
 
 protected:
 private:
 
   bool m_bHasData;
+
+  unsigned int m_nSignificantDigits;
 
   var_t m_rSummary[ _Count ];
 
@@ -61,6 +65,8 @@ private:
 
   TSSWStatsMidQuote m_stats;
   TSSWStochastic m_stoch;
+
+  void Init( void );
 
   void HandleQuote( const CQuote& quote );
   void HandleTrade( const CTrade& trade );

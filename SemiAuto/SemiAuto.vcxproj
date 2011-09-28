@@ -85,7 +85,7 @@
     <ClInclude Include="FrameGrid.h" />
     <ClInclude Include="FrameInstrumentStatus.h" />
     <ClInclude Include="FrameMain.h" />
-    <ClInclude Include="FrameManualOrder.h" />
+    <ClInclude Include="DialogManualOrder.h" />
     <ClInclude Include="FrameProviderControl.h" />
     <ClInclude Include="InstrumentData.h" />
     <ClInclude Include="Resource.h" />
@@ -98,7 +98,7 @@
     <ClCompile Include="FrameGrid.cpp" />
     <ClCompile Include="FrameInstrumentStatus.cpp" />
     <ClCompile Include="FrameMain.cpp" />
-    <ClCompile Include="FrameManualOrder.cpp" />
+    <ClCompile Include="DialogManualOrder.cpp" />
     <ClCompile Include="FrameProviderControl.cpp" />
     <ClCompile Include="InstrumentData.cpp" />
     <ClCompile Include="SemiAuto.cpp" />

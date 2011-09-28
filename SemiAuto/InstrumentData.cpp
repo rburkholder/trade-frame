@@ -20,22 +20,30 @@
 
 #include "InstrumentData.h"
 
-InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument ) 
+InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false ), m_nSignificantDigits( nSigDigits )
 {
+  Init();
 }
 
-InstrumentData::InstrumentData( CInstrument* pInstrument ) 
+InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false ), m_nSignificantDigits( nSigDigits )
 {
+  Init();
 }
 
 InstrumentData::InstrumentData( const InstrumentData& data ) 
   : m_pInstrument( data.m_pInstrument ),  // only instrument is copied, everything else starts at scratch
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false )
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ),
+    m_bHasData( false ), m_nSignificantDigits( data.m_nSignificantDigits )
 {
+  Init();
+}
+
+void InstrumentData::Init( void ) {
+  for ( int ix = 0; ix < _Count; ++ix ) m_rSummary[ ix ] = 0.0;
 }
 
 InstrumentData::~InstrumentData(void) {
@@ -47,7 +55,7 @@ void InstrumentData::HandleQuote( const CQuote& quote ) {
   m_stats.Update();
   m_stoch.Update();
 
-  m_rSummary[ Roc ] = m_stats.Slope();
+  m_rSummary[ Roc ] = m_stats.Slope() * 100.0;
   m_rSummary[ Stochastic ] = m_stoch.K();
 }
 
@@ -59,9 +67,9 @@ void InstrumentData::HandleTrade( const CTrade& trade ) {
   double dblPrice = trade.Trade();
   m_rSummary[ Price ] = dblPrice;
   if ( m_rSummary[ High ] < m_rSummary[ Price ] ) m_rSummary[ High ] = dblPrice;
-  if ( m_rSummary[ Low ].Value() == 0 ) m_rSummary[ Low ] = dblPrice;
+  if ( m_rSummary[ Low ] == 0 ) m_rSummary[ Low ] = dblPrice;
   else {
-    if ( dblPrice < m_rSummary[ Low ].Value() ) m_rSummary[ Low ] = dblPrice;
+    if ( dblPrice < m_rSummary[ Low ] ) m_rSummary[ Low ] = dblPrice;
   }
 }
 

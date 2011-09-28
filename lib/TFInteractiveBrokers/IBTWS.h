@@ -81,7 +81,7 @@ public:
   //  need to make a container of re-usable request ids to be looked up in order to return data to appropriate caller
   //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
   //   ie, may need an array of OnContractDetailsHandler_t
-  typedef FastDelegate1<const ContractDetails&> OnContractDetailsHandler_t;
+  typedef FastDelegate2<const ContractDetails&, const pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
   //void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
@@ -94,6 +94,8 @@ public:
 
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
+
+  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
 
   // TWS Specific events
   // From TWS Wrapper:
@@ -163,8 +165,6 @@ protected:
   static const char *szOrderType[];
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );
-
-  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
 
   // overridden from ProviderInterface
   void StartQuoteWatch( pSymbol_t pSymbol );

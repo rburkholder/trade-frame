@@ -34,7 +34,7 @@
 //#include "ThreadMain.h"
 #include "FrameMain.h"
 #include "FrameProviderControl.h"
-#include "FrameManualOrder.h"
+#include "DialogManualOrder.h"
 #include "FrameInstrumentStatus.h"
 
 #include "InstrumentData.h"
@@ -87,7 +87,7 @@ private:
 
   wxGridCellAttr* m_pattrCell;
 
-  typedef FrameManualOrder::Order_t ManualOrder_t;
+  typedef DialogManualOrder::Order_t ManualOrder_t;
 
   FrameMain* m_FrameMain;
   FrameProviderControl* m_FrameProviderControl;
@@ -121,10 +121,11 @@ private:
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
 
-  unsigned int m_curFrameManualOrder;
+  unsigned int m_curDialogManualOrder;
   struct structManualOrder {
-    FrameManualOrder* pFrameManualOrder;
+    DialogManualOrder* pDialogManualOrder;
     ou::tf::CIBTWS::ContractDetails details;
+    pInstrument_t pInstrument;
   };
 
   typedef std::vector<structManualOrder> vManualOrder_t;
@@ -166,7 +167,7 @@ private:
   void HandleOnCleanUpForExitForFrameMain( int );
 
   void HandleCheckSymbolNameAgainstIB( const std::string& );
-  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& );
+  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails&, const pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
   void HandleSaveSeriesEvent( void );
