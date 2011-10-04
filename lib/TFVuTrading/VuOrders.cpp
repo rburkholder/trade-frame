@@ -11,37 +11,29 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <wx/any.h>
+#include "StdAfx.h"
 
-#include "VuPortfolios.h"
+#include "VuOrders.h"
 
-VuPortfolios::VuPortfolios(void)
-  : VuBase()
-{
+VuOrders::VuOrders(void): VuBase() {
   Construct();
 }
 
-VuPortfolios::VuPortfolios( wxWindow *parent, wxWindowID id, 
+VuOrders::VuOrders( wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ),
-    item1( reinterpret_cast<void*>( 1 ) )
-{
-  Construct();
+  : VuBase( parent, id, pos, size, style, validator ) {
+    Construct();
 }
 
-VuPortfolios::~VuPortfolios(void) {
+VuOrders::~VuOrders(void) {
 }
 
-void VuPortfolios::Construct( void ) {
+void VuOrders::Construct( void ) {
         
-  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
-  AssociateModel( m_pdvmdlPortfolios.get() );
+  m_pdvmdlOrders = new dvmdlOrders_t;
+  AssociateModel( m_pdvmdlOrders.get() );
 
   structPopulateColumns f( this );
-  m_pdvmdlPortfolios.get()->IterateColumnNames( f );
-
-  wxAny any = "test data";
-  m_pdvmdlPortfolios.get()->ChangeValue( any, item1, 0 );
-  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
+  m_pdvmdlOrders.get()->IterateColumnNames( f );
 
 }

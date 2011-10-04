@@ -11,28 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "VuOrders.h"
+#include "StdAfx.h"
 
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
 
-VuOrders::VuOrders(void): VuBase() {
-  Construct();
+#include "ModelExecution.h"
+
+ModelExecution::ModelExecution(void) {
+  m_vColumnNames += "Quan", "Price", "Side";
 }
 
-VuOrders::VuOrders( wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ) {
-    Construct();
-}
-
-VuOrders::~VuOrders(void) {
-}
-
-void VuOrders::Construct( void ) {
-        
-  m_pdvmdlOrders = new dvmdlOrders_t;
-  AssociateModel( m_pdvmdlOrders.get() );
-
-  structPopulateColumns f( this );
-  m_pdvmdlOrders.get()->IterateColumnNames( f );
-
+ModelExecution::~ModelExecution(void) {
 }

@@ -11,14 +11,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
+
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include "ModelExecution.h"
+#include "ModelOrder.h"
 
-ModelExecution::ModelExecution(void) {
-  m_vColumnNames += "Quan", "Price", "Side";
+ModelOrder::ModelOrder(void) {
+  m_vColumnNames += "Status", "Type", "Side", "Price1", "Price2", 
+    "Ordered", "Remaining", "Filled", "Fill Price", "Comm";
 }
 
-ModelExecution::~ModelExecution(void) {
+
+ModelOrder::~ModelOrder(void) {
 }

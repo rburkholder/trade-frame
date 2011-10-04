@@ -23,6 +23,8 @@
 
 #include <TFIndicators/Pivots.h>
 
+#include <TFOptions/CalcExpiry.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -32,118 +34,6 @@
 #include <TFTrading/AccountManager.h>
 
 #include "Process.h"
-
-//
-// ==================
-//
-
-CNakedOption::CNakedOption( pInstrument_t pInstrument ) 
-: m_pInstrument( pInstrument ),
-  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
-  m_dblStrike( pInstrument->GetStrike() ),
-  m_bWatching( false ),
-  m_sSide( "-" )
-{
-}
-
-CNakedOption::CNakedOption( const CNakedOption& rhs ) 
-: m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblTrade( rhs.m_dblTrade ),
-  m_dblStrike( rhs.m_dblStrike ),
-  m_greek( rhs.m_greek ),
-  m_bWatching( false ),
-  m_sSide( rhs.m_sSide ),
-  m_pInstrument( rhs.m_pInstrument )
-{
-  assert( !rhs.m_bWatching );
-}
-
-CNakedOption& CNakedOption::operator=( const CNakedOption& rhs ) {
-  assert( !rhs.m_bWatching );
-  assert( !m_bWatching );
-  m_dblStrike = rhs.m_dblStrike;
-  m_greek = rhs.m_greek;
-  m_sSide = rhs.m_sSide;
-  m_pInstrument = rhs.m_pInstrument;
-  return *this;
-}
-
-void CNakedOption::HandleQuote( const CQuote& quote ) {
-  m_dblBid = quote.Bid();
-  m_dblAsk = quote.Ask();
-  m_quotes.Append( quote );
-}
-
-void CNakedOption::HandleTrade( const CTrade& trade ) {
-  m_dblTrade = trade.Trade();
-  m_trades.Append( trade );
-}
-
-void CNakedOption::HandleGreek( const CGreek& greek ) {
-  m_greek = greek;
-  m_greeks.Append( greek );
-}
-
-//
-// ==================
-//
-
-CNakedCall::CNakedCall( pInstrument_t pInstrument )
-: CNakedOption( pInstrument )
-{
-  // assert instrument is a call
-  assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-  m_sSide = "C";
-}
-
-//
-// ==================
-//
-
-CNakedPut::CNakedPut( pInstrument_t pInstrument )
-: CNakedOption( pInstrument )
-{
-  // assert instrument is a put
-  assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-  m_sSide = "P";
-}
-
-
-//
-// ==================
-//
-
-CStrikeInfo::CStrikeInfo( void ) 
-: m_dblStrike( 0 ),
-  m_bWatching( false )
-{
-  //assert( false );  // see if it actaully gets called
-}
-
-CStrikeInfo::CStrikeInfo( double dblStrike ) 
-: m_dblStrike( dblStrike ),
-  m_bWatching( false )
-{
-}
-
-CStrikeInfo::CStrikeInfo( const CStrikeInfo& rhs ) 
-: m_dblStrike( rhs.m_dblStrike ),
-  m_call( rhs.m_call ), m_put( rhs.m_put ),
-  m_bWatching( false )
-{ 
-  assert( !rhs.m_bWatching );
-}
-
-CStrikeInfo::~CStrikeInfo( void ) {
-}
-
-CStrikeInfo& CStrikeInfo::operator=( const CStrikeInfo& rhs ) {
-  assert( !rhs.m_bWatching );
-  assert( !m_bWatching );
-  m_dblStrike = rhs.m_dblStrike;
-  m_call = rhs.m_call;
-  m_put = rhs.m_put;
-  return *this;
-}
 
 //
 // ==================
@@ -217,11 +107,11 @@ CProcess::CProcess(enumMode eMode, CDB& db)
 {
 
   boost::gregorian::date dToday = ou::CTimeSource::Instance().Internal().date();
-  m_dExpiry = ou::tf::options::Next3rdFriday( dToday );
+  m_dExpiry = ou::tf::option::Next3rdFriday( dToday );
   while ( boost::gregorian::date_period( dToday, m_dExpiry ).length().days() < 8 ) { // some say use front month for scalping
     boost::gregorian::date_duration dd( 1 );
     boost::gregorian::date d = m_dExpiry + dd;
-    m_dExpiry = ou::tf::options::Next3rdFriday( d );
+    m_dExpiry = ou::tf::option::Next3rdFriday( d );
   }
 
   m_contract.currency = "USD";
@@ -412,9 +302,13 @@ void CProcess::HandleOnExecConnected(int e) {
         catch (...) {
           // otherwise request the contract information
           m_contract.secType = "STK";
-          m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
-          m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
-          m_tws->RequestContractDetails( m_contract );
+          //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
+          //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
+          //m_tws->RequestContractDetails( m_contract );
+          m_tws->RequestContractDetails( 
+            m_contract, 
+            MakeDelegate( this, &CProcess::HandleUnderlyingListing ), 
+            MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
         }
         break;
     }
@@ -496,15 +390,15 @@ void CProcess::AcquireSimulationSymbols( void ) {
 
     poi.AssignCall( iter->second.first );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( poi.Call(), &CNakedCall::HandleGreek ) );
+    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleGreek ) );
 
     poi.AssignPut( iter->second.second );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( poi.Put(), &CNakedPut::HandleGreek ) );
+    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleQuote ) );
+    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleTrade ) );
+    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleGreek ) );
 
     m_vCrossOverPoints.push_back( iter->first );
   }
@@ -590,16 +484,17 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
 
 // --- listing 1 -- Underlying Contract
 
-void CProcess::HandleUnderlyingListing( const ContractDetails& details ) {
-  m_contractidUnderlying = details.summary.conId;
-  try {
-    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
-  }
-  catch ( std::out_of_range& e ) {
+void CProcess::HandleUnderlyingListing( const ContractDetails& details, const pInstrument_t& pInstrument ) {
+//  m_contractidUnderlying = details.summary.conId;
+//  try {
+//    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
+//  }
+//  catch ( std::out_of_range& e ) {
 //    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
-  }
+//  }
   // need to check if it exists first, might already be in database
+  m_pUnderlying = pInstrument;
   ou::tf::CInstrumentManager::Instance().Construct( m_pUnderlying );
 }
 
@@ -618,9 +513,13 @@ void CProcess::HandleUnderlyingListingDone(  ) {
     // request contract info for strike listing 
     m_contract.secType = "OPT";
     //m_contract.right = "CALL";  // get all calls and puts together
-    m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeFromIB ) );
-    m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
-    m_tws->RequestContractDetails( m_contract );
+    //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeFromIB ) );
+    //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+    //m_tws->RequestContractDetails( m_contract );
+    m_tws->RequestContractDetails( 
+      m_contract, 
+      MakeDelegate( this, &CProcess::HandleStrikeFromIB ), 
+      MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
   }
   m_db.SetOnNewInstrumentHandler( 0 );
   
@@ -628,7 +527,7 @@ void CProcess::HandleUnderlyingListingDone(  ) {
 
 // --- listing of strikes, listing of calls
 
-void CProcess::HandleStrikeFromIB( const ContractDetails& details ) {
+void CProcess::HandleStrikeFromIB( const ContractDetails& details, const pInstrument_t& ) {
 
   // create strike entries
   CIBSymbol::pSymbol_t pSymbol;
@@ -740,13 +639,13 @@ void CProcess::StopWatch( void ) {
 
       CStrikeInfo& si = iter->second;
 
-      m_pDataProvider->RemoveQuoteHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleGreek ) );
 
-      m_pDataProvider->RemoveQuoteHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->RemoveQuoteHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleQuote ) );
+      m_pDataProvider->RemoveTradeHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleTrade ) );
+      m_pDataProvider->RemoveGreekHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleGreek ) );
     }
   }
 }
@@ -758,7 +657,7 @@ CProcess::mapStrikeInfo_iter_t CProcess::LocateOptionStrikeInfo( const pInstrume
   double strike = pInstrument->GetStrike();
   mapStrikeInfo_iter_t iter = m_mapStrikeInfo.begin();
   while ( iter != m_mapStrikeInfo.end() ) {
-    if ( strike == iter->second.Strike() ) {
+    if ( strike == iter->second.GetStrike() ) {
       break;
     }
     ++iter;
@@ -973,13 +872,13 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
 
       CStrikeInfo& oi = iter->second;
 
-      m_pDataProvider->AddQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &CNakedCall::HandleGreek ) );
+      m_pDataProvider->AddQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleGreek ) );
 
-      m_pDataProvider->AddQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &CNakedPut::HandleGreek ) );
+      m_pDataProvider->AddQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleQuote ) );
+      m_pDataProvider->AddTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleTrade ) );
+      m_pDataProvider->AddGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleGreek ) );
     }
   }
 
@@ -1130,12 +1029,12 @@ void CProcess::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
     << ou::CTimeSource::Instance().Internal()
-    << " Strk "  << m_iterOILatestGammaSelectCall->second.Strike()
+    << " Strk "  << m_iterOILatestGammaSelectCall->second.GetStrike()
 //    << " Call "  << m_iterOILatestGammaSelectCall->Call()->OptionPrice()
     << " ImpVo " << m_iterOILatestGammaSelectCall->second.Call()->ImpliedVolatility()
     << " Delta " << m_iterOILatestGammaSelectCall->second.Call()->Delta()
     << " Gamma " << m_iterOILatestGammaSelectCall->second.Call()->Gamma() << " - "
-    << " Strk "  << m_iterOILatestGammaSelectPut->second.Strike()
+    << " Strk "  << m_iterOILatestGammaSelectPut->second.GetStrike()
 //    << " Put "   << m_iterOILatestGammaSelectPut->Put()->OptionPrice()
     << " ImpVo " << m_iterOILatestGammaSelectPut->second.Put()->ImpliedVolatility()
     << " Delta " << m_iterOILatestGammaSelectPut->second.Put()->Delta()

@@ -11,15 +11,29 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "VuBase.h"
+#include "StdAfx.h"
 
-VuBase::VuBase(void) {
+#include "VuPositions.h"
+
+VuPositions::VuPositions(void): VuBase() {
+  Construct();
 }
 
-VuBase::VuBase( wxWindow *parent, wxWindowID id, 
+VuPositions::VuPositions( wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : wxDataViewCtrl( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ) {
+    Construct();
 }
 
-VuBase::~VuBase(void) {
+VuPositions::~VuPositions(void) {
+}
+
+void VuPositions::Construct( void ) {
+        
+  m_dvmdlPositions = new dvmdlPositions_t;
+  AssociateModel( m_dvmdlPositions.get() );
+
+  structPopulateColumns f( this );
+  m_dvmdlPositions.get()->IterateColumnNames( f );
+
 }

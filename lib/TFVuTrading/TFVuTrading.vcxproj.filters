@@ -24,25 +24,37 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="ModelBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DB.h">
+    <ClInclude Include="ModelExecution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Process.h">
+    <ClInclude Include="ModelOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HedgeCommon.h">
+    <ClInclude Include="ModelPortfolio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FramePortfolioPositionOrderExec.h">
+    <ClInclude Include="ModelPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AppHedge.h">
+    <ClInclude Include="VuBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadMain.h">
+    <ClInclude Include="VuExecutions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VuOrders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VuPortfolios.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VuPositions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelPortfolioPositionOrderExecution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,25 +62,38 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DB.cpp">
+    <ClCompile Include="ModelBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Process.cpp">
+    <ClCompile Include="ModelExecution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FramePortfolioPositionOrderExec.cpp">
+    <ClCompile Include="ModelOrder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AppHedge.cpp">
+    <ClCompile Include="ModelPortfolio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadMain.cpp">
+    <ClCompile Include="ModelPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Hedge.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <ClCompile Include="VuBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VuExecutions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VuOrders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VuPortfolios.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VuPositions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelPortfolioPositionOrderExecution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -18,10 +18,10 @@
 
 #include <OUCommon/Delegate.h>
 
-#include "VuPortfolios.h"
-#include "VuPositions.h"
-#include "VuOrders.h"
-#include "VuExecutions.h"
+#include <TFVuTrading/VuPortfolios.h>
+#include <TFVuTrading/VuPositions.h>
+#include <TFVuTrading/VuOrders.h>
+#include <TFVuTrading/VuExecutions.h>
 
 class FramePortfolioPositionOrderExec : public wxFrame {
 public:
@@ -29,20 +29,20 @@ public:
   FramePortfolioPositionOrderExec(const wxString& title, const wxPoint& pos, const wxSize& size);
   ~FramePortfolioPositionOrderExec(void);
 
-  ou::Delegate<void> OnBtnClickedConnectToIb;
-  ou::Delegate<void> OnBtnClickedDisconnectFromIb;
-  ou::Delegate<void> OnBtnClickedConnectToIQFeed;
-  ou::Delegate<void> OnBtnClickedDisconnectFromIQFeed;
-  ou::Delegate<void> OnBtnClickedConnectToSimulator;
-  ou::Delegate<void> OnBtnClickedDisconnectFromSimulator;
-  ou::Delegate<void> OnBtnClickedStartTrading;
-  ou::Delegate<void> OnBtnClickedStopTrading;
-  ou::Delegate<void> OnBtnClickedStartWatch;
-  ou::Delegate<void> OnBtnClickedStopWatch;
-  ou::Delegate<void> OnBtnClickedSaveSeries;
-  ou::Delegate<void> OnBtnClickedEmitStats;
-  ou::Delegate<void> OnBtnClickedStartSimulation;
-  ou::Delegate<void> OnBtnClickedStopSimulation;
+//  ou::Delegate<void> OnBtnClickedConnectToIb;
+//  ou::Delegate<void> OnBtnClickedDisconnectFromIb;
+//  ou::Delegate<void> OnBtnClickedConnectToIQFeed;
+//  ou::Delegate<void> OnBtnClickedDisconnectFromIQFeed;
+//  ou::Delegate<void> OnBtnClickedConnectToSimulator;
+//  ou::Delegate<void> OnBtnClickedDisconnectFromSimulator;
+//  ou::Delegate<void> OnBtnClickedStartTrading;
+//  ou::Delegate<void> OnBtnClickedStopTrading;
+//  ou::Delegate<void> OnBtnClickedStartWatch;
+//  ou::Delegate<void> OnBtnClickedStopWatch;
+//  ou::Delegate<void> OnBtnClickedSaveSeries;
+//  ou::Delegate<void> OnBtnClickedEmitStats;
+//  ou::Delegate<void> OnBtnClickedStartSimulation;
+//  ou::Delegate<void> OnBtnClickedStopSimulation;
 
 protected:
    // Do we really need to expose the implementation detail? I guess not.

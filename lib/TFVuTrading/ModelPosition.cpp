@@ -11,27 +11,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "VuPositions.h"
+#include "StdAfx.h"
 
-VuPositions::VuPositions(void): VuBase() {
-  Construct();
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
+
+#include "ModelPosition.h"
+
+ModelPosition::ModelPosition(void) {
+  m_vColumnNames += "Name", "Instrument", "Algorithm",
+    "Side Pend", "Quan Pend", "Side Active", "Quan Active", 
+    "Constructed Value", "Mkt Value", "UnRlzd PL", "Rlzd PL", "Comm.", "Net";
 }
 
-VuPositions::VuPositions( wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ) {
-    Construct();
-}
-
-VuPositions::~VuPositions(void) {
-}
-
-void VuPositions::Construct( void ) {
-        
-  m_dvmdlPositions = new dvmdlPositions_t;
-  AssociateModel( m_dvmdlPositions.get() );
-
-  structPopulateColumns f( this );
-  m_dvmdlPositions.get()->IterateColumnNames( f );
-
+ModelPosition::~ModelPosition(void) {
 }

@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
+
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 

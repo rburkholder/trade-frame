@@ -11,16 +11,39 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <boost/assign/std/vector.hpp>
-using namespace boost::assign;
+#include "StdAfx.h"
 
-#include "ModelPosition.h"
+#include <wx/any.h>
 
-ModelPosition::ModelPosition(void) {
-  m_vColumnNames += "Name", "Instrument", "Algorithm",
-    "Side Pend", "Quan Pend", "Side Active", "Quan Active", 
-    "Constructed Value", "Mkt Value", "UnRlzd PL", "Rlzd PL", "Comm.", "Net";
+#include "VuPortfolios.h"
+
+VuPortfolios::VuPortfolios(void)
+  : VuBase()
+{
+  Construct();
 }
 
-ModelPosition::~ModelPosition(void) {
+VuPortfolios::VuPortfolios( wxWindow *parent, wxWindowID id, 
+    const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
+  : VuBase( parent, id, pos, size, style, validator ),
+    item1( reinterpret_cast<void*>( 1 ) )
+{
+  Construct();
+}
+
+VuPortfolios::~VuPortfolios(void) {
+}
+
+void VuPortfolios::Construct( void ) {
+        
+  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
+  AssociateModel( m_pdvmdlPortfolios.get() );
+
+  structPopulateColumns f( this );
+  m_pdvmdlPortfolios.get()->IterateColumnNames( f );
+
+  wxAny any = "test data";
+  m_pdvmdlPortfolios.get()->ChangeValue( any, item1, 0 );
+  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
+
 }

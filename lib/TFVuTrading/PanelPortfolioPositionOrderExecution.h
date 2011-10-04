@@ -11,16 +11,23 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <boost/assign/std/vector.hpp>
-using namespace boost::assign;
+#pragma once
 
-#include "ModelOrder.h"
+#include "VuPortfolios.h"
+#include "VuPositions.h"
+#include "VuOrders.h"
+#include "VuExecutions.h"
 
-ModelOrder::ModelOrder(void) {
-  m_vColumnNames += "Status", "Type", "Side", "Price1", "Price2", 
-    "Ordered", "Remaining", "Filled", "Fill Price", "Comm";
-}
+class PanelPortfolioPositionOrderExecution :
+  public wxPanel {
+public:
+  PanelPortfolioPositionOrderExecution(void);
+  ~PanelPortfolioPositionOrderExecution(void);
 
+  void Init( void );
+  void CreateControls( void );
+protected:
+private:
+  
+};
 
-ModelOrder::~ModelOrder(void) {
-}
