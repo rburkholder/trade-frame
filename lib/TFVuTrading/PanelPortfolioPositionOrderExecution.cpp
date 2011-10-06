@@ -17,6 +17,7 @@
 
 #include "PanelPortfolioPositionOrderExecution.h"
 
+// need to fix this constructor for proper use of xwPanel inherit
 PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution(void) {
 }
 

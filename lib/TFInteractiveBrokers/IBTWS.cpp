@@ -448,7 +448,10 @@ CIBTWS::pSymbol_t CIBTWS::GetSymbol( pInstrument_t instrument ) {
 
   long contractId;
   contractId = instrument->GetContract();
-  assert( 0 != contractId );
+  //assert( 0 != contractId );
+  if ( 0 == contractId ) {
+    throw std::runtime_error( "CIBTWS::GetSymbol: contract id not supplied" );
+  }
 
   pSymbol_t pSymbol;
 

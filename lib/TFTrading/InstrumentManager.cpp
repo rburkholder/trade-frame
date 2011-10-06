@@ -101,9 +101,11 @@ void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
     throw std::runtime_error( "CInstrumentManager::Construct: instrument already exists" );
   }
   Assign( pInstrument );
-  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
-    = m_pSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
-  // todo: save alternate instrument names
+  if ( 0 != m_pSession ) {
+    ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
+      = m_pSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
+    // todo: save alternate instrument names
+  }
 }
 
 void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
@@ -229,7 +231,7 @@ void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair
   iterMap iterAlt = m_map.find( pair.second );
   if ( m_map.end() == iterKey ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded key does not exist" );
-  if ( m_map.end() != iterKey ) 
+  if ( m_map.end() != iterAlt ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded alt exists" );
   m_map.insert( pair_t( pair.second, iterKey->second ) );
 }
