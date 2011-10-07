@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <boost/bind.hpp>
+
 #include "App.h"
 
 
@@ -40,7 +42,6 @@ void App::Run( void ) {
   m_tws.Connect();
   m_iqfeed.Connect();
 
-
   // start up worker thread here
   m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running 
   m_asioThread = boost::thread( boost::bind( &App::WorkerThread, this ) );
@@ -54,12 +55,16 @@ void App::Run( void ) {
   } while ( "x" != s );
 
   // clean up 
+  StopWatch();
   m_tws.Disconnect();
   m_iqfeed.Disconnect();
 
   // wait for worker thread to end
 //  delete m_pwork;  // stop the asio service (let it run out of work, which at this point should be none)
   m_asioThread.join();  // wait for i/o thread to cleanup and terminate
+
+  ou::tf::CProviderManager::Instance().Release( "ib01" );
+  ou::tf::CProviderManager::Instance().Release( "iq01" );
 
 }
 
@@ -89,9 +94,14 @@ void App::DisConnected( int i ) {
 }
 
 void App::HandleQuote( const ou::tf::CQuote& quote ) {
+  m_quotes.Append( quote );
 }
 
 void App::HandleTrade( const ou::tf::CTrade& trade ) {
+  m_trades.Append( trade );
+}
+
+void App::HandleOpen( const ou::tf::CTrade& trade ) {
 }
 
 // separate thread 
@@ -102,7 +112,21 @@ void App::WorkerThread( void ) {
 void App::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {
   m_pInstrument = pInstrument;
   m_pInstrument->SetAlternateName( m_iqfeed.ID(), "+GCZ11" );
+  m_io.post( boost::bind( &App::StartWatch, this ) );
 }
 
 void App::HandleIBContractDetailsDone( void ) {
 }
+
+void App::StartWatch( void ) {
+  m_iqfeed.AddQuoteHandler( m_pInstrument, MakeDelegate( this, &App::HandleQuote ) );
+  m_iqfeed.AddTradeHandler( m_pInstrument, MakeDelegate( this, &App::HandleTrade ) );
+  m_iqfeed.AddOnOpenHandler( m_pInstrument, MakeDelegate( this, &App::HandleOpen ) );
+}
+
+void App::StopWatch( void ) {
+  m_iqfeed.RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &App::HandleQuote ) );
+  m_iqfeed.RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &App::HandleTrade ) );
+  m_iqfeed.RemoveOnOpenHandler( m_pInstrument, MakeDelegate( this, &App::HandleOpen ) );
+}
+

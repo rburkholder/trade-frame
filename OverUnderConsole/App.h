@@ -13,7 +13,6 @@
 
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFIQFeed/IQFeedProvider.h>
@@ -46,14 +45,21 @@ private:
 
   ou::tf::CInstrument::pInstrument_t m_pInstrument;
 
+  ou::tf::CQuotes m_quotes;
+  ou::tf::CTrades m_trades;
+
   void WorkerThread( void ); // worker thread
 
   void Connected( int i );
   void DisConnected( int i );
 
+  void StartWatch( void );
+  void StopWatch( void );
+
   // will need to migrate to a container when doing more than one instrument
   void HandleQuote( const ou::tf::CQuote& quote );
   void HandleTrade( const ou::tf::CTrade& trade );
+  void HandleOpen( const ou::tf::CTrade& trade );
 
   void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );

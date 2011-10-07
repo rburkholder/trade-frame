@@ -36,7 +36,9 @@ public:
   typedef CInstrument::idInstrument_t symbol_id_t;
   //   may need to use provider specific name in alternate instrument name in CInstrument
 
-  CSymbolBase( pInstrument_t pInstrument ); // class should only be constructed with valid instrument, which already has general name as well as provider specific names
+  // class should only be constructed with valid instrument, which already has general name as well as provider specific names
+  CSymbolBase( pInstrument_t pInstrument );  // instrument supplied name
+  CSymbolBase( pInstrument_t pInstrument, const std::string& sName );  // provider specific name
   virtual ~CSymbolBase(void);
 
   const symbol_id_t& GetId( void ) { return m_id; };  // used for mapping and indexing
@@ -101,9 +103,8 @@ template <typename S>  // S for Provider specific CRTP Symbol type
 class CSymbol: public CSymbolBase {
 public:
   typedef boost::shared_ptr<S> pSymbol_t;
-  CSymbol( pInstrument_t pInstrument )
-    : CSymbolBase( pInstrument )
-    {};
+  CSymbol( pInstrument_t pInstrument ) : CSymbolBase( pInstrument ) {};
+  CSymbol( pInstrument_t pInstrument, const std::string& sName ) : CSymbolBase( pInstrument, sName ) {};
   ~CSymbol( void ) {};
 protected:
 private:

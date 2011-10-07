@@ -22,7 +22,7 @@ namespace tf { // TradeFrame
 
 CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<CIBSymbol>( pInstrument ), 
+  CSymbol<CIBSymbol>( pInstrument, idSym ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),

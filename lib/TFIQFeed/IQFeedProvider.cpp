@@ -60,7 +60,7 @@ void CIQFeedProvider::OnIQFeedDisConnected( void ) {
 }
 
 CIQFeedProvider::pSymbol_t CIQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
-  pSymbol_t pSymbol( new CIQFeedSymbol( pInstrument->GetInstrumentName(), pInstrument ) );
+  pSymbol_t pSymbol( new CIQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
