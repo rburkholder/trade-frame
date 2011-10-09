@@ -27,7 +27,7 @@
     <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarketActivity.h">
+    <ClInclude Include="MarketStates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,7 +41,7 @@
     <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MarketActivity.cpp">
+    <ClCompile Include="MarketStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

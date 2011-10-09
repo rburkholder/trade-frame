@@ -15,9 +15,4 @@
 
 namespace rtd { // real time data processing
 
-sc::result StateInitialization::react( const EvInitialize& event ) {
-  return transit<StatePreMarket>();  //  can a determination be made as to which to transit to?
-  //return transit<StateMarketOpen();  // 
-}
-
 }; // namespace rtd

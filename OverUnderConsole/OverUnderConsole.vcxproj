@@ -81,13 +81,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="MarketActivity.h" />
+    <ClInclude Include="MarketStates.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="MarketActivity.cpp" />
+    <ClCompile Include="MarketStates.cpp" />
     <ClCompile Include="OverUnderConsole.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>

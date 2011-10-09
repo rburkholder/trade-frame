@@ -99,6 +99,7 @@
     <ClCompile Include="TradingEnumerations.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\OverUnderConsole\MarketStates.h" />
     <ClInclude Include="Account.h" />
     <ClInclude Include="AccountAdvisor.h" />
     <ClInclude Include="AccountOwner.h" />

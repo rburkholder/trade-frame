@@ -22,6 +22,8 @@
 #include <boost/statechart/custom_reaction.hpp>
 #include <boost/statechart/transition.hpp>
 
+#include <TFTimeSeries/DatedDatum.h>
+
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;
 
@@ -29,19 +31,30 @@ namespace rtd { // real time data processing
 
 // Events
 struct EvInitialize: sc::event<EvInitialize> {};
-struct EvQuote: sc::event<EvQuote> {};
-struct EvTrade: sc::event<EvTrade> {};
+struct EvQuote: sc::event<EvQuote> {
+  EvQuote( const ou::tf::CQuote& quote ): sc::event<EvQuote>(), m_quote( quote ) {};
+private:
+  const ou::tf::CQuote& m_quote;
+};
+struct EvTrade: sc::event<EvTrade> {
+  EvTrade( const ou::tf::CTrade& trade ): sc::event<EvTrade>(), m_trade( trade ) {};
+private:
+  const ou::tf::CTrade& m_trade;
+};
+struct EvScheduled: sc::event<EvScheduled> {};
 
 // States & Machine
 
 struct StateInitialization;  // initialize for market data, intial state for the machine
 
-struct MachineMarketData: sc::state_machine<MachineMarketData, StateInitialization> {
+struct MachineMarketData: 
+  sc::state_machine<MachineMarketData, StateInitialization> 
+{
 };
 
 struct StateInitialization: sc::simple_state<StateInitialization, MachineMarketData> {
   typedef sc::custom_reaction<EvInitialize> reactions;
-  sc::result react( const EvInitialize& );
+  sc::result react( const EvInitialize& event ) { return transit<StatePreMarket>(); };  //return transit<StateMarketOpen();  // 
 };
 
 struct StatePreMarket: sc::simple_state<StatePreMarket, MachineMarketData> {
@@ -117,6 +130,15 @@ struct StateClosePositionsIdle: sc::simple_state<StateClosePositionsIdle, Machin
 };
 
 struct StateAfterMarket: sc::simple_state<StateAfterMarket, MachineMarketData> {
+  typedef mpl::list<
+    sc::custom_reaction<EvQuote>,
+    sc::custom_reaction<EvTrade>
+  > reactions;
+  sc::result react( const EvQuote& ) { return discard_event(); };
+  sc::result react( const EvTrade& ) { return discard_event(); };
+};
+
+struct StateMarketClosed: sc::simple_state<StateMarketClosed, MachineMarketData> {
   typedef mpl::list<
     sc::custom_reaction<EvQuote>,
     sc::custom_reaction<EvTrade>
