@@ -21,6 +21,8 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include "MarketActivity.h"
+
 #pragma once
 class App {
 public:
@@ -34,8 +36,8 @@ private:
   typedef ou::tf::CProviderManager::pProvider_t pProvider_t;
   typedef ou::tf::CInstrumentManager::pInstrument_t pInstrument_t;
 
-  ou::tf::CIBTWS m_tws;
-  ou::tf::CIQFeedProvider m_iqfeed;
+  ou::tf::CIBTWS::pProvider_t m_ptws;
+  ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
 
   boost::thread m_asioThread;
   boost::asio::io_service m_io;
@@ -47,6 +49,8 @@ private:
 
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
+
+  rtd::MachineMarketData m_md;  // market data state chart
 
   void WorkerThread( void ); // worker thread
 
