@@ -85,6 +85,7 @@
     <ClCompile Include="InstrumentManager.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
     <ClCompile Include="Managers.cpp" />
+    <ClCompile Include="MarketStates.cpp" />
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="OrderManager.cpp" />
     <ClCompile Include="Portfolio.cpp" />
@@ -99,7 +100,6 @@
     <ClCompile Include="TradingEnumerations.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\OverUnderConsole\MarketStates.h" />
     <ClInclude Include="Account.h" />
     <ClInclude Include="AccountAdvisor.h" />
     <ClInclude Include="AccountOwner.h" />
@@ -116,6 +116,7 @@
     <ClInclude Include="KeyTypes.h" />
     <ClInclude Include="ManagerBase.h" />
     <ClInclude Include="Managers.h" />
+    <ClInclude Include="MarketStates.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderManager.h" />
     <ClInclude Include="Portfolio.h" />

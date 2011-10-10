@@ -11,8 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "MarketActivity.h"
+#include "StdAfx.h"
 
-namespace rtd { // real time data processing
+#include "MarketStates.h"
 
-}; // namespace rtd
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+
+} // namespace tf
+} // namespace ou
+

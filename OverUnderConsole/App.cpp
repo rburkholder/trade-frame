@@ -11,28 +11,42 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <cassert>
+
 #include <boost/bind.hpp>
 
 #include "App.h"
 
+// following are specific for gold futures
+InstrumentState::InstrumentState( void ):
+  tdMarketOpen( time_duration( 19, 0, 0 ) ), // time relative to day
+  tdMarketOpenIdle( time_duration( 0, 0, 30 ) ),  // time relative to tdMarketOpen to allow initial collection of data
+  tdCancelOrders( time_duration( 18, 0, 0 ) ),// time relative to day
+  tdClosePositions( time_duration( 18, 10, 0 ) ),// time relative to day
+  tdAfterMarket( time_duration( 18, 45, 0 ) ), // time relative to day
+  tdMarketClosed( time_duration( 18, 45, 0 ) ), // time relative to day
+  stoch30sec( &quotes, 30 ), stoch5min( &quotes, 300 ), stoch30min( &quotes, 1800 ),
+  stats30sec( &quotes, 30 ),
+  bDaySession( true )
+  {
+    bMarketHoursCrossMidnight = tdMarketOpen > tdMarketClosed;
+  }
 
 App::App(void) 
   : m_mgrInstrument( ou::tf::CInstrumentManager::Instance() ),
   m_ptws( new ou::tf::CIBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider )
 {
-
 }
 
 App::~App(void) {
+  m_ptws.reset();
+  m_piqfeed.reset();
 }
 
 void App::Run( void ) {
 
   ou::tf::CProviderManager::Instance().Register( "ib01", static_cast<ou::tf::CProviderManager::pProvider_t>( m_ptws ) );
   ou::tf::CProviderManager::Instance().Register( "iq01", static_cast<ou::tf::CProviderManager::pProvider_t>( m_piqfeed ) );
-
-//  m_pInstrument = m_mgrInstrument.ConstructFuture( "GC", "SMART", 2011, 12 );
-//  m_pInstrument->SetAlternateName( m_iqfeed.ID(), "+GCZ11" );
 
   m_ptws->OnConnected.Add( MakeDelegate( this, &App::Connected ) );
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &App::Connected ) );
@@ -48,7 +62,7 @@ void App::Run( void ) {
   m_asioThread = boost::thread( boost::bind( &App::WorkerThread, this ) );
 
   m_md.initiate();  // start state chart for market data
-  m_md.process_event( rtd::EvInitialize() );
+  m_md.process_event( ou::tf::EvInitialize() );
 
   // handle console input while thread is working in background
   // http://www.cplusplus.com/doc/tutorial/basic_io/
@@ -56,6 +70,9 @@ void App::Run( void ) {
   do {
     std::cout << "command: ";
     std::cin >> s;
+    if ( "s" == s ) {
+      std::cout << "Q:" << m_md.data.quotes.Size() << ", T:" << m_md.data.trades.Size() << std::endl;
+    }
   } while ( "x" != s );
 
   // clean up 
@@ -87,7 +104,6 @@ void App::Connected( int i ) {
     // IB responds only when symbol is found, bad symbols will not illicit a response
     m_ptws->RequestContractDetails( contract, MakeDelegate( this, &App::HandleIBContractDetails ), MakeDelegate( this, &App::HandleIBContractDetailsDone ) );
 
-    //m_tws.GetSymbol( m_pInstrument );
   }
 }
 
@@ -98,11 +114,27 @@ void App::DisConnected( int i ) {
 }
 
 void App::HandleQuote( const ou::tf::CQuote& quote ) {
-  m_quotes.Append( quote );
+  InstrumentState& is( m_md.data );
+  if ( is.bMarketHoursCrossMidnight ) {
+    is.bDaySession = quote.DateTime().time_of_day() <= is.tdMarketClosed;
+  }
+  assert( is.bDaySession || is.bMarketHoursCrossMidnight );
+  is.quotes.Append( quote );
+  is.stoch30sec.Update();
+  is.stoch5min.Update();
+  is.stoch30min.Update();
+  is.stats30sec.Update();
+  m_md.process_event( ou::tf::EvQuote( quote ) );
 }
 
 void App::HandleTrade( const ou::tf::CTrade& trade ) {
-  m_trades.Append( trade );
+  InstrumentState& is( m_md.data );
+  if ( is.bMarketHoursCrossMidnight ) {
+    is.bDaySession = trade.DateTime().time_of_day() <= is.tdMarketClosed;
+  }
+  assert( is.bDaySession || is.bMarketHoursCrossMidnight );
+  is.trades.Append( trade );
+  m_md.process_event( ou::tf::EvTrade( trade ) );
 }
 
 void App::HandleOpen( const ou::tf::CTrade& trade ) {
@@ -132,5 +164,109 @@ void App::StopWatch( void ) {
   m_piqfeed->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &App::HandleQuote ) );
   m_piqfeed->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &App::HandleTrade ) );
   m_piqfeed->RemoveOnOpenHandler( m_pInstrument, MakeDelegate( this, &App::HandleOpen ) );
+}
+
+sc::result App::StatePreMarket::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+  if ( is.bMarketHoursCrossMidnight && is.bDaySession ) { // transit
+    return transit<App::StateMarketOpen>();  // late but transit anyway
+  }
+  else { // test
+    if ( quote.Quote().DateTime().time_of_day() >= is.tdMarketOpen ) {
+      return transit<App::StateMarketOpen>();
+    }
+    else {
+      return discard_event();
+    }
+  }
+}
+
+sc::result App::StateMarketOpen::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+  is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
+  return transit<App::StatePreTrading>();
+}
+
+sc::result App::StatePreTrading::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+
+  if ( quote.Quote().DateTime() >= is.dtPreTradingStop ) {
+    return transit<App::StateTrading>();
+  }
+  else {
+    return discard_event();
+  }
+
+}
+
+sc::result App::StateTrading::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+
+  if ( is.bDaySession ) { // transit
+    if ( quote.Quote().DateTime().time_of_day() >= is.tdCancelOrders ) {
+      return transit<App::StateCancelOrders>();
+    }
+    else {
+      return discard_event();
+    }
+  }
+
+}
+
+sc::result App::StateCancelOrders::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+  return transit<App::StateCancelOrdersIdle>();
+}
+
+sc::result App::StateCancelOrdersIdle::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+
+  if ( is.bDaySession ) { // transit
+    if ( quote.Quote().DateTime().time_of_day() >= is.tdClosePositions ) {
+      return transit<App::StateClosePositions>();
+    }
+    else {
+      return discard_event();
+    }
+  }
+
+}
+
+sc::result App::StateClosePositions::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+  return transit<App::StateClosePositionsIdle>();
+}
+
+sc::result App::StateClosePositionsIdle::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+
+  if ( is.bDaySession ) { // transit
+    if ( quote.Quote().DateTime().time_of_day() >= is.tdAfterMarket ) {
+      return transit<App::StateAfterMarket>();
+    }
+    else {
+      return discard_event();
+    }
+  }
+
+}
+
+sc::result App::StateAfterMarket::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+
+  if ( is.bDaySession ) { // transit
+    if ( quote.Quote().DateTime().time_of_day() >= is.tdMarketClosed ) {
+      return transit<App::StateMarketClosed>();
+    }
+    else {
+      return discard_event();
+    }
+  }
+
+}
+
+sc::result App::StateMarketClosed::Handle( const EvQuote& quote ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data );
+  return discard_event();
 }
 

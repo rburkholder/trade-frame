@@ -11,8 +11,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#pragma once
+
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/asio.hpp>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFIQFeed/IQFeedProvider.h>
@@ -20,16 +26,93 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/OrderManager.h>
+#include <TFTrading/MarketStates.h>
+#include <TFIndicators/TSSWStochastic.h>
+#include <TFIndicators/TSSWStats.h>
 
-#include "MarketActivity.h"
+struct InstrumentState {
 
-#pragma once
+  InstrumentState( void );
+  ~InstrumentState( void ) {};
+
+  ou::tf::CQuotes quotes;
+  ou::tf::CTrades trades;
+
+  ou::tf::TSSWStochastic stoch30sec;
+  ou::tf::TSSWStochastic stoch5min;
+  ou::tf::TSSWStochastic stoch30min;
+  ou::tf::TSSWStatsMidQuote stats30sec;
+
+  time_duration tdMarketOpen;
+  time_duration tdMarketOpenIdle;
+  //time_duration tdMarketTrading;
+  time_duration tdCancelOrders;
+  time_duration tdClosePositions;
+  time_duration tdAfterMarket;
+  time_duration tdMarketClosed;
+
+  ptime dtPreTradingStop;
+
+  bool bMarketHoursCrossMidnight;
+  bool bDaySession;
+};
+
+
 class App {
 public:
   App(void);
   ~App(void);
 
   void Run( void );
+
+  struct StateInitialization;
+  struct StatePreMarket;
+  typedef ou::tf::MachineMarketStates<InstrumentState, StateInitialization> MachineMarketStates;
+  MachineMarketStates m_md;  // market data state chart
+  
+  typedef ou::tf::EvQuote EvQuote;
+  struct StateInitialization: ou::tf::StateInitialization<StateInitialization, MachineMarketStates, StatePreMarket> {};
+  struct StatePreMarket: ou::tf::StateBase<MachineMarketStates, StatePreMarket> {
+    using ou::tf::StateBase<MachineMarketStates, StatePreMarket>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateMarketOpen: ou::tf::StateBase<MachineMarketStates, StateMarketOpen> {
+    using ou::tf::StateBase<MachineMarketStates, StateMarketOpen>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StatePreTrading: ou::tf::StateBase<MachineMarketStates, StatePreTrading> {
+    using ou::tf::StateBase<MachineMarketStates, StatePreTrading>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateTrading: ou::tf::StateBase<MachineMarketStates, StateTrading> {
+    using ou::tf::StateBase<MachineMarketStates, StateTrading>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateCancelOrders: ou::tf::StateBase<MachineMarketStates, StateCancelOrders> {
+    using ou::tf::StateBase<MachineMarketStates, StateCancelOrders>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateCancelOrdersIdle: ou::tf::StateBase<MachineMarketStates, StateCancelOrdersIdle> {
+    using ou::tf::StateBase<MachineMarketStates, StateCancelOrdersIdle>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateClosePositions: ou::tf::StateBase<MachineMarketStates, StateClosePositions> {
+    using ou::tf::StateBase<MachineMarketStates, StateClosePositions>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateClosePositionsIdle: ou::tf::StateBase<MachineMarketStates, StateClosePositionsIdle> {
+    using ou::tf::StateBase<MachineMarketStates, StateClosePositionsIdle>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateAfterMarket: ou::tf::StateBase<MachineMarketStates, StateAfterMarket> {
+    using ou::tf::StateBase<MachineMarketStates, StateAfterMarket>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateMarketClosed: ou::tf::StateBase<MachineMarketStates, StateMarketClosed> {
+    using ou::tf::StateBase<MachineMarketStates, StateMarketClosed>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  
 protected:
 private:
 
@@ -47,10 +130,8 @@ private:
 
   ou::tf::CInstrument::pInstrument_t m_pInstrument;
 
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
-
-  rtd::MachineMarketData m_md;  // market data state chart
+  //ou::tf::CQuotes m_quotes;
+  //ou::tf::CTrades m_trades;
 
   void WorkerThread( void ); // worker thread
 

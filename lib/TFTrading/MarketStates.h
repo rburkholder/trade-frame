@@ -27,124 +27,66 @@
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;
 
-namespace rtd { // real time data processing
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // Events
 struct EvInitialize: sc::event<EvInitialize> {};
 struct EvQuote: sc::event<EvQuote> {
   EvQuote( const ou::tf::CQuote& quote ): sc::event<EvQuote>(), m_quote( quote ) {};
+  const ou::tf::CQuote& Quote( void ) const { return m_quote; };
 private:
   const ou::tf::CQuote& m_quote;
 };
 struct EvTrade: sc::event<EvTrade> {
   EvTrade( const ou::tf::CTrade& trade ): sc::event<EvTrade>(), m_trade( trade ) {};
+  const ou::tf::CTrade& Trade( void ) const { return m_trade; };
 private:
   const ou::tf::CTrade& m_trade;
 };
 struct EvScheduled: sc::event<EvScheduled> {};
 
-// States & Machine
+// Machine
 
-struct StateInitialization;  // initialize for market data, intial state for the machine
-
-struct MachineMarketData: 
-  sc::state_machine<MachineMarketData, StateInitialization> 
+template<typename T, typename I>  // I = StateInitialization
+struct MachineMarketStates: 
+  sc::state_machine<MachineMarketStates<T,I>, I> 
 {
+  T data;
 };
 
-struct StateInitialization: sc::simple_state<StateInitialization, MachineMarketData> {
+// States
+
+template<typename S, typename O, typename P> // S = CRTP State, O = Outer State, P = StatePreMarket
+struct StateInitialization: sc::simple_state<StateInitialization<S,O,P>, O> {
   typedef sc::custom_reaction<EvInitialize> reactions;
-  sc::result react( const EvInitialize& event ) { return transit<StatePreMarket>(); };  //return transit<StateMarketOpen();  // 
+  sc::result react( const EvInitialize& event ) { return static_cast<S*>( this )->Handle( event ); }; 
+protected:
+  sc::result Handle( const EvInitialize& event ) { return transit<P>(); }; 
 };
 
-struct StatePreMarket: sc::simple_state<StatePreMarket, MachineMarketData> {
+template<typename O, typename S> // O = Outer State, S = State
+struct StateBase: sc::simple_state<StateBase<O,S>, O > {
+
   typedef mpl::list<
     sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
+    sc::custom_reaction<EvTrade>,
+    sc::custom_reaction<EvScheduled>
   > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
+
+
+//protected:
+  sc::result Handle( const EvQuote& ) { return discard_event(); }
+  sc::result Handle( const EvTrade& ) { return discard_event(); };
+  sc::result Handle( const EvScheduled& ) { return discard_event(); };
+
+  template<typename E>
+  sc::result react( const E& event ) { return static_cast<S*>( this )->Handle( event ); };
+  //sc::result react( const E& event ) { return Handle( event ); };
+
+private:
 };
 
-struct StateMarketOpen: sc::simple_state<StateMarketOpen, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
+} // namespace tf
+} // namespace ou
 
-struct StatePreTrading: sc::simple_state<StatePreTrading, MachineMarketData> { // collect some info before initiating trades
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateTrading: sc::simple_state<StateTrading, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateCancelOrders: sc::simple_state<StateCancelOrders, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateCancelOrdersIdle: sc::simple_state<StateCancelOrdersIdle, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateClosePositions: sc::simple_state<StateClosePositions, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateClosePositionsIdle: sc::simple_state<StateClosePositionsIdle, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateAfterMarket: sc::simple_state<StateAfterMarket, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-struct StateMarketClosed: sc::simple_state<StateMarketClosed, MachineMarketData> {
-  typedef mpl::list<
-    sc::custom_reaction<EvQuote>,
-    sc::custom_reaction<EvTrade>
-  > reactions;
-  sc::result react( const EvQuote& ) { return discard_event(); };
-  sc::result react( const EvTrade& ) { return discard_event(); };
-};
-
-}; // namespace rtd
