@@ -65,8 +65,8 @@ protected:
   sc::result Handle( const EvInitialize& event ) { return transit<P>(); }; 
 };
 
-template<typename O, typename S> // O = Outer State, S = State
-struct StateBase: sc::simple_state<StateBase<O,S>, O > {
+template<typename O, typename S, typename InnerInitial=mpl::list<> > // O = Outer State, S = State
+struct StateBase: sc::simple_state<StateBase<O,S,InnerInitial>, O, InnerInitial > {
 
   typedef mpl::list<
     sc::custom_reaction<EvQuote>,

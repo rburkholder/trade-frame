@@ -29,6 +29,7 @@ using namespace boost::gregorian;
 #include <TFTrading/MarketStates.h>
 #include <TFIndicators/TSSWStochastic.h>
 #include <TFIndicators/TSSWStats.h>
+#include <TFTrading/Position.h>
 
 struct InstrumentState {
 
@@ -37,6 +38,8 @@ struct InstrumentState {
 
   ou::tf::CQuotes quotes;
   ou::tf::CTrades trades;
+
+  double dblMidQuoteAtOpen;
 
   ou::tf::TSSWStochastic stoch30sec;
   ou::tf::TSSWStochastic stoch5min;
@@ -52,6 +55,8 @@ struct InstrumentState {
   time_duration tdMarketClosed;
 
   ptime dtPreTradingStop;
+
+  ou::tf::CPosition::pPosition_t pPosition;
 
   bool bMarketHoursCrossMidnight;
   bool bDaySession;
@@ -84,9 +89,10 @@ public:
     using ou::tf::StateBase<MachineMarketStates, StatePreTrading>::Handle;
     sc::result Handle( const EvQuote& ); 
   };
-  struct StateTrading: ou::tf::StateBase<MachineMarketStates, StateTrading> {
-    using ou::tf::StateBase<MachineMarketStates, StateTrading>::Handle;
-    sc::result Handle( const EvQuote& ); 
+  struct StateZeroPosition;
+  struct StateTrading: ou::tf::StateBase<MachineMarketStates, StateTrading, StateZeroPosition> {
+    using ou::tf::StateBase<MachineMarketStates, StateTrading, StateZeroPosition>::Handle;
+//    sc::result Handle( const EvQuote& ); // not called, goes to inner directly
   };
   struct StateCancelOrders: ou::tf::StateBase<MachineMarketStates, StateCancelOrders> {
     using ou::tf::StateBase<MachineMarketStates, StateCancelOrders>::Handle;
@@ -110,6 +116,20 @@ public:
   };
   struct StateMarketClosed: ou::tf::StateBase<MachineMarketStates, StateMarketClosed> {
     using ou::tf::StateBase<MachineMarketStates, StateMarketClosed>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+
+  // these three states determine trading pattern
+  struct StateZeroPosition: ou::tf::StateBase<StateTrading, StateZeroPosition> {
+    using ou::tf::StateBase<StateTrading, StateZeroPosition>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateLong: ou::tf::StateBase<StateTrading, StateLong> {
+    using ou::tf::StateBase<StateTrading, StateLong>::Handle;
+    sc::result Handle( const EvQuote& ); 
+  };
+  struct StateShort: ou::tf::StateBase<StateTrading, StateShort> {
+    using ou::tf::StateBase<StateTrading, StateShort>::Handle;
     sc::result Handle( const EvQuote& ); 
   };
   
