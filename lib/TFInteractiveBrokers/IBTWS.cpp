@@ -18,8 +18,11 @@
 #include <limits>
 #include <string>
 
+#include <boost/regex.hpp> 
 #include <boost/lexical_cast.hpp>
 //#include <boost/thread/locks.hpp>
+#include <boost/date_time/local_time_adjustor.hpp>
+
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
@@ -217,10 +220,15 @@ void CIBTWS::PlaceOrder( pOrder_t pOrder ) {
       contract.exchange = "SMART";
       break;
     case InstrumentType::Future:
-      assert( false );  // need to fix this formatter, use the boost::gregorian date stuff
+      //
 //      s.Format( "%04d%02d", pOrder->GetInstrument()->GetExpiryYear(), pOrder->GetInstrument()->GetExpiryMonth() );
 //      contract.expiry = s;
-      if ( "CBOT" == contract.exchange ) contract.exchange = "ECBOT";
+      //if ( "CBOT" == contract.exchange ) contract.exchange = "ECBOT";
+      if ( 0 != pOrder->GetInstrument()->GetContract() ) {
+      }
+      else {
+        assert( false );  // need to fix this formatter, use the boost::gregorian date stuff
+      }
       break;
   }
   twsorder.action = pOrder->GetOrderSideName();
@@ -506,6 +514,48 @@ void CIBTWS::currentTime(long time) {
 void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 }
 
+// convert to boost::spirit?
+void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
+  static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
+  //static const boost::regex rxFields( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);([0-9]{4})([0-9]{2})([0-9]{2}):(.+)" );
+  static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})" );
+  dtOpen = dtClose = boost::posix_time::special_values::not_a_date_time;
+  boost::cmatch what; 
+  if ( !boost::regex_match( mh.c_str(), what, rxFields ) ) {
+    std::runtime_error( "no proper market info found" );
+  }
+  else {
+    // "20111015:CLOSED;20111017:1800-1715"
+    // "20111015:CLOSED;20111017:0930-1600"
+    //std::string a( what[1].first, what[1].second );
+    //std::string b( what[2].first, what[2].second );
+    std::string c( what[3].first, what[3].second );
+    std::string d( what[4].first, what[4].second );
+    //std::string e( what[5].first, what[5].second );
+    //std::string f( what[6].first, what[6].second );
+    //std::string g( what[7].first, what[7].second );
+    //std::string h( what[8].first, what[8].second );
+    if ( "CLOSED" == d ) {
+    }
+    else {
+      if ( !boost::regex_match( d.c_str(), what, rxTime ) ) {
+        std::runtime_error( "no time range found" );
+      }
+      else {
+        std::string i( what[1].first, what[1].second );
+        std::string j( what[2].first, what[2].second );
+        //std::string k( what[3].first, what[3].second );
+        //std::string l( what[4].first, what[4].second );
+        dtOpen = boost::posix_time::from_iso_string( c + "T" + i + "00" );
+        dtClose = boost::posix_time::from_iso_string( c + "T" + j + "00" );
+      }
+    }
+  }
+  if ( dtOpen > dtClose ) {
+    dtOpen -= boost::gregorian::date_duration( 1 );
+  }
+}
+
 void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   m_ss.str("");
   m_ss << "contract Details "
@@ -527,6 +577,33 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
   mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
   if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
     pInstrument = BuildInstrumentFromContract( contractDetails.summary );
+    pInstrument->SetMinTick( contractDetails.minTick );
+
+    ptime dtOpen;
+    ptime dtClose;
+    typedef boost::date_time::local_adjustor<ptime, -5, us_dst> tzEST_t;
+    typedef boost::date_time::local_adjustor<ptime, -4, us_dst> tzATL_t;
+
+    if ( "EST" != contractDetails.timeZoneId ) {
+      std::runtime_error( "different time zone to deal with" );
+    }
+
+    DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
+    pInstrument->SetTimeTrading( 
+      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+      );
+
+    std::cout << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
+
+    DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
+    pInstrument->SetTimeLiquid( 
+      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+      );
+
+    std::cout << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
+
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
   else {
@@ -628,16 +705,16 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
 
   m_mapSymbols_t::iterator iterSymbol;
 
+  if ( "" == sExchange ) sExchange = "SMART";
+
   switch ( it ) {
     case InstrumentType::Stock: 
-      if ( "" == sExchange ) sExchange = "SMART";
       pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange ) );
       break;
     case InstrumentType::FuturesOption:
     case InstrumentType::Option:
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
-      if ( "" == sExchange ) sExchange = "SMART";
       iterSymbol = m_mapSymbols.find( sUnderlying );
       if ( m_mapSymbols.end() == iterSymbol ) {
         throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
@@ -648,43 +725,46 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
         os, contract.strike ) );
       break;
     case InstrumentType::Future:
-      if ( "" == sExchange ) sExchange = "SMART";
       pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiry.date().year(), dtExpiry.date().month() ) );
       break;
-    case InstrumentType::Currency:
-      bFound = false;
-      Currency::enumCurrency base = Currency::_Count;
-      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-        if ( 0 == strcmp( Currency::Name[ ix ], sUnderlying.c_str() ) ) {
-          bFound = true;
-          base = static_cast<Currency::enumCurrency>( ix );
-          break;
+    case InstrumentType::Currency: {
+        bFound = false;
+        Currency::enumCurrency base = Currency::_Count;
+        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+          if ( 0 == strcmp( Currency::Name[ ix ], sUnderlying.c_str() ) ) {
+            bFound = true;
+            base = static_cast<Currency::enumCurrency>( ix );
+            break;
+          }
         }
-      }
-      if ( !bFound ) 
-        throw std::out_of_range( "base currency lookup not found" );
+        if ( !bFound ) 
+          throw std::out_of_range( "base currency lookup not found" );
 
-      const char* szCounter = NULL;
-      szCounter = strchr( sLocalSymbol.c_str(), '.' );
-      if ( NULL == szCounter ) 
-        throw std::out_of_range( "counter currency not in LocalSymbol" );
-      ++szCounter;  // advance to character after '.'
+        const char* szCounter = NULL;
+        szCounter = strchr( sLocalSymbol.c_str(), '.' );
+        if ( NULL == szCounter ) 
+          throw std::out_of_range( "counter currency not in LocalSymbol" );
+        ++szCounter;  // advance to character after '.'
 
-      bFound = false;
-      Currency::enumCurrency counter = Currency::_Count;
-      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-        if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
-          bFound = true;
-          counter = static_cast<Currency::enumCurrency>( ix );
-          break;
+        bFound = false;
+        Currency::enumCurrency counter = Currency::_Count;
+        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+          if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
+            bFound = true;
+            counter = static_cast<Currency::enumCurrency>( ix );
+            break;
+          }
         }
+        if ( !bFound ) 
+          throw std::out_of_range( "counter currency lookup not found" );
+
+        if ( "" == sExchange ) sExchange = "IDEALPRO";
+
+        pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
       }
-      if ( !bFound ) 
-        throw std::out_of_range( "counter currency lookup not found" );
-
-      if ( "" == sExchange ) sExchange = "IDEALPRO";
-
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
+      break;
+    case InstrumentType::Index:
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, it, sExchange ) );
       break;
   }
   if ( NULL == pInstrument ) 

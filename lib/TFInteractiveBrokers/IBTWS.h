@@ -210,6 +210,8 @@ private:
 
   void ProcessMessages( void );
 
+  void DecodeMarketHours( const std::string&, ptime& dtOpen, ptime& dtClose );
+
   struct structRequest_t {
     reqId_t id;
     OnContractDetailsHandler_t fProcess;

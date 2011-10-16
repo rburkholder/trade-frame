@@ -32,14 +32,19 @@ namespace tf { // TradeFrame
   }
 */
 
+  //static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
+  static const ptime dtDefault( boost::posix_time::not_a_date_time );
+
 CInstrument::CInstrument( const TableRowDef& row ) 
-  : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable )
+  : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
 }
 
 CInstrument::CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
-  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ) 
+  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ) 
 {
   assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
 }
@@ -50,7 +55,8 @@ CInstrument::CInstrument(
   const idExchange_t &idExchange
                          )
 : m_row( idInstrument, eType, idExchange ),
-  m_eUnderlyingStatus( EUnderlyingNotSettable )
+  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
 }
 
@@ -60,7 +66,8 @@ CInstrument::CInstrument(
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month ) 
 : m_row( idInstrument, eType, idExchange, year, month ),
-  m_eUnderlyingStatus( EUnderlyingNotSettable )
+  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sSymbolName.size() );
   //assert( 0 < m_sExchange.size() );
@@ -76,7 +83,8 @@ CInstrument::CInstrument(
   double dblStrike ) 
   : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, eOptionSide, dblStrike ),
   m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingSet )
+  m_eUnderlyingStatus( EUnderlyingSet ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sExchange.size() );
 }
@@ -91,7 +99,8 @@ CInstrument::CInstrument(
   double dblStrike ) 
   : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, day, eOptionSide, dblStrike ),
   m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingSet )
+  m_eUnderlyingStatus( EUnderlyingSet ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sExchange.size() );
 }
@@ -104,7 +113,8 @@ CInstrument::CInstrument(
   ) 
   : m_row( idInstrument, idCounterInstrument, eType, idExchange, base, counter ),
 //  m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingNotSettable )
+  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   
 }
@@ -130,7 +140,8 @@ CInstrument::CInstrument(const CInstrument& instrument)
 :
   m_row( instrument.m_row ),
   m_pUnderlying( instrument.m_pUnderlying ),
-  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus )
+  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ), 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
   while ( instrument.m_mapAlternateNames.end() != iter ) {

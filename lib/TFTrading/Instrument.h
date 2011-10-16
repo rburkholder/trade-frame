@@ -20,6 +20,8 @@
 #include <map>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
 
 #include <OUCommon/Delegate.h>
 
@@ -56,6 +58,7 @@ public:
       ou::db::Field( a, "strike", dblStrike );
       ou::db::Field( a, "ibcontract", nIBContract );
       ou::db::Field( a, "multiplier", nMultiplier );
+      ou::db::Field( a, "mintick", dblMinTick );
     }
 
     idInstrument_t idInstrument; // main name
@@ -72,6 +75,7 @@ public:
     double dblStrike;
     boost::int32_t nIBContract; // used with CIBTWS
     boost::uint32_t nMultiplier;  // number of units per contract: stk 1x, option 100x
+    double dblMinTick; 
 
 //  m_eUnderlyingStatus = EUnderlyingNotSettable;
 //  if ( InstrumentType::Option == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingNotSet;
@@ -82,13 +86,13 @@ public:
     TableRowDef( void ) // default constructor
       : eType( InstrumentType::Unknown ), eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-      nIBContract( 0 ), nMultiplier( 1 ) {};
+      nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ) {};
     TableRowDef( // equity / generic creation
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-      nIBContract( 0 ), nMultiplier( 1 ) {
+      nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ) {
         assert( eType < InstrumentType::_Count );
         assert( eType > InstrumentType::Unknown );
         assert( 0 < idInstrument.size() );  
@@ -99,7 +103,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( 0.0 ), 
-      nIBContract( 0 ), nMultiplier( 1 ) {
+      nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ) {
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );   
     };
@@ -111,7 +115,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ), 
-      nIBContract( 0 ), nMultiplier( 100 ) {
+      nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
@@ -126,7 +130,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ), 
-      nIBContract( 0 ), nMultiplier( 100 ) {
+      nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ) {
         assert( ( OptionSide::Call == eOptionSide_ ) || ( OptionSide::Put == eOptionSide_ ) );
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
@@ -140,7 +144,7 @@ public:
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
         idUnderlying( idCounterInstrument_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
         eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
-        nIBContract( 0 ), nMultiplier( 1 ) {
+        nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.00005 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
           assert( 0 < idUnderlying.size() );
@@ -222,6 +226,16 @@ public:
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };
   boost::uint32_t GetMultiplier( void ) const { return m_row.nMultiplier; };
 
+  void SetMinTick( double dblMinTick ) { m_row.dblMinTick = dblMinTick; };
+  double GetMinTick( void ) const { return m_row.dblMinTick; };
+
+  typedef boost::posix_time::time_period dtrMarketOpenClose_t;
+  void SetTimeLiquid( const ptime& dtOpen, const ptime& dtClose ) { m_dtrTimeLiquid = dtrMarketOpenClose_t( dtOpen, dtClose ); };
+  const dtrMarketOpenClose_t& GetTimeLiquid( void ) const { return m_dtrTimeLiquid; };
+
+  void SetTimeTrading( const ptime& dtOpen, const ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
+  const dtrMarketOpenClose_t& GetTimeTrading( void ) const { return m_dtrTimeTrading; };
+
   bool operator==( const CInstrument& rhs ) const;
 
   const TableRowDef& GetRow( void ) const { return m_row; };
@@ -241,6 +255,9 @@ private:
   } m_eUnderlyingStatus;
 
   TableRowDef m_row;
+
+  dtrMarketOpenClose_t m_dtrTimeLiquid;
+  dtrMarketOpenClose_t m_dtrTimeTrading;
 
   CInstrument( const CInstrument& );  // copy ctor
   CInstrument& operator=( const CInstrument& ); // assignement

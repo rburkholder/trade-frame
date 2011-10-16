@@ -19,14 +19,14 @@
 
 // following are specific for gold futures
 InstrumentState::InstrumentState( void ):
-  tdMarketOpen( time_duration( 19, 0, 0 ) ), // time relative to day
+  tdMarketOpen( time_duration( 19, 0, 0 ) ), // time relative to day  // pick up from symbol
   tdMarketOpenIdle( time_duration( 0, 0, 30 ) ),  // time relative to tdMarketOpen to allow initial collection of data
-  tdCancelOrders( time_duration( 18, 0, 0 ) ),// time relative to day
-  tdClosePositions( time_duration( 18, 10, 0 ) ),// time relative to day
-  tdAfterMarket( time_duration( 18, 45, 0 ) ), // time relative to day
-  tdMarketClosed( time_duration( 18, 45, 0 ) ), // time relative to day
-  stoch30sec( &quotes, 30 ), stoch5min( &quotes, 300 ), stoch30min( &quotes, 1800 ),
-  stats30sec( &quotes, 30 ),
+  tdCancelOrders( time_duration( 17, 50, 0 ) ),// time relative to day
+  tdClosePositions( time_duration( 17, 51, 0 ) ),// time relative to day
+  tdAfterMarket( time_duration( 18, 15, 0 ) ), // time relative to day
+  tdMarketClosed( time_duration( 18, 15, 0 ) ), // time relative to day
+  stochFast( &quotes, 60 ), stochMed( &quotes, 300 ), stochSlow( &quotes, 1800 ), // 1, 5, 30 min
+  statsFast( &quotes, 60 ), statsMed( &quotes, 180 ), statsSlow( &quotes, 600 ), // 1, 3, 5 min
   bDaySession( true )
   {
     bMarketHoursCrossMidnight = tdMarketOpen > tdMarketClosed;
@@ -70,8 +70,12 @@ void App::Run( void ) {
   do {
     std::cout << "command: ";
     std::cin >> s;
-    if ( "s" == s ) {
+    if ( "s" == s ) {  // stats
       std::cout << "Q:" << m_md.data.quotes.Size() << ", T:" << m_md.data.trades.Size() << std::endl;
+    }
+    if ( "c" == s ) { // close position
+      m_md.data.pPosition->ClosePosition();
+//      m_md.post_event(
     }
   } while ( "x" != s );
 
@@ -120,10 +124,10 @@ void App::HandleQuote( const ou::tf::CQuote& quote ) {
   }
   assert( is.bDaySession || is.bMarketHoursCrossMidnight );
   is.quotes.Append( quote );
-  is.stoch30sec.Update();
-  is.stoch5min.Update();
-  is.stoch30min.Update();
-  is.stats30sec.Update();
+  is.stochFast.Update();
+  is.stochMed.Update();
+  is.stochSlow.Update();
+  is.statsFast.Update();
   m_md.process_event( ou::tf::EvQuote( quote ) );
 }
 
@@ -149,6 +153,8 @@ void App::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& detail
   m_pInstrument = pInstrument;
   m_pInstrument->SetAlternateName( m_piqfeed->ID(), "+GCZ11" );
   m_md.data.pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_ptws, m_piqfeed ) );
+  m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
+  m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
   m_io.post( boost::bind( &App::StartWatch, this ) );
 }
 
@@ -167,23 +173,40 @@ void App::StopWatch( void ) {
   m_piqfeed->RemoveOnOpenHandler( m_pInstrument, MakeDelegate( this, &App::HandleOpen ) );
 }
 
-sc::result App::StatePreMarket::Handle( const EvQuote& quote ) {
+sc::result App::StatePreMarket::Handle( const EvQuote& quote ) {  // requires quotes to come before trades.
   InstrumentState& is( context<App::MachineMarketStates>().data );
   if ( is.bMarketHoursCrossMidnight && is.bDaySession ) { // transit
+    is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
+    is.dblMidQuoteAtOpen = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
     return transit<App::StateMarketOpen>();  // late but transit anyway
   }
   else { // test
     if ( quote.Quote().DateTime().time_of_day() >= is.tdMarketOpen ) {
+      is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
+      is.dblMidQuoteAtOpen = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
       return transit<App::StateMarketOpen>();
     }
   }
   return discard_event();
 }
 
-sc::result App::StateMarketOpen::Handle( const EvQuote& quote ) {
+sc::result App::StatePreMarket::Handle( const EvTrade& trade ) {
+  InstrumentState& is( context<App::MachineMarketStates>().data ); 
+  if ( is.bMarketHoursCrossMidnight && is.bDaySession ) { // transit
+    //return transit<App::StateMarketOpen>();  // late but transit anyway
+    return discard_event();  // see if we get a pre-market trade for GC futures, possibly when starting mid market
+  }
+  else { // test
+    if ( trade.Trade().DateTime().time_of_day() >= is.tdMarketOpen ) {
+      return discard_event();  // see if we get a pre-market trade for GC futures, possibly when starting mid market
+    }
+  }
+  return discard_event();
+}
+
+sc::result App::StateMarketOpen::Handle( const EvTrade& trade ) {
   InstrumentState& is( context<App::MachineMarketStates>().data );
-  is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
-  is.dblMidQuoteAtOpen = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  is.dblOpeningTrade = trade.Trade().Trade();
   return transit<App::StatePreTrading>();
 }
 
@@ -254,13 +277,13 @@ sc::result App::StateZeroPosition::Handle( const EvQuote& quote ) {
   }
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
-  if ( ( 0 < is.stats30sec.Slope() ) && ( mid > is.dblMidQuoteAtOpen ) ) {
+  if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
     return transit<App::StateLong>();
   }
   else {
-    if ( ( 0 > is.stats30sec.Slope() ) && ( mid < is.dblMidQuoteAtOpen ) ) {
+    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
       // go short
       is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
       return transit<App::StateShort>();
@@ -280,7 +303,7 @@ sc::result App::StateLong::Handle( const EvQuote& quote ) {
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  if ( ( 0 > is.stats30sec.Slope() ) && ( mid < is.dblMidQuoteAtOpen ) ) {
+  if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
     // go short
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
@@ -300,7 +323,7 @@ sc::result App::StateShort::Handle( const EvQuote& quote ) {
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  if ( ( 0 < is.stats30sec.Slope() ) && ( mid > is.dblMidQuoteAtOpen ) ) {
+  if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );

@@ -40,11 +40,15 @@ struct InstrumentState {
   ou::tf::CTrades trades;
 
   double dblMidQuoteAtOpen;
+  double dblOpeningTrade;
 
-  ou::tf::TSSWStochastic stoch30sec;
-  ou::tf::TSSWStochastic stoch5min;
-  ou::tf::TSSWStochastic stoch30min;
-  ou::tf::TSSWStatsMidQuote stats30sec;
+  ou::tf::TSSWStochastic stochFast;
+  ou::tf::TSSWStochastic stochMed;
+  ou::tf::TSSWStochastic stochSlow;
+
+  ou::tf::TSSWStatsMidQuote statsFast;
+  ou::tf::TSSWStatsMidQuote statsMed;
+  ou::tf::TSSWStatsMidQuote statsSlow;
 
   time_duration tdMarketOpen;
   time_duration tdMarketOpenIdle;
@@ -76,14 +80,17 @@ public:
   MachineMarketStates m_md;  // market data state chart
   
   typedef ou::tf::EvQuote EvQuote;
+  typedef ou::tf::EvTrade EvTrade;
   struct StateInitialization: ou::tf::StateInitialization<StateInitialization, MachineMarketStates, StatePreMarket> {};
   struct StatePreMarket: ou::tf::StateBase<MachineMarketStates, StatePreMarket> {
     using ou::tf::StateBase<MachineMarketStates, StatePreMarket>::Handle;
     sc::result Handle( const EvQuote& ); 
+    sc::result Handle( const EvTrade& );
   };
   struct StateMarketOpen: ou::tf::StateBase<MachineMarketStates, StateMarketOpen> {
     using ou::tf::StateBase<MachineMarketStates, StateMarketOpen>::Handle;
-    sc::result Handle( const EvQuote& ); 
+//    sc::result Handle( const EvQuote& ); 
+    sc::result Handle( const EvTrade& );
   };
   struct StatePreTrading: ou::tf::StateBase<MachineMarketStates, StatePreTrading> {
     using ou::tf::StateBase<MachineMarketStates, StatePreTrading>::Handle;
