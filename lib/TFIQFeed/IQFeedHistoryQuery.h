@@ -255,6 +255,7 @@ public:
   // start a query with one of these commands
   void RetrieveNDataPoints( const std::string& sSymbol, unsigned int n );  // HTX ticks
   void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ); // HTD ticks
+  void RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, ptime dtStart, ptime dtEnd ); // HTT ticks
 
   void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n );  // HIX i=interval in seconds  (bars)
   void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ); // HID i=interval in seconds (bars)
@@ -408,6 +409,30 @@ void CIQFeedHistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymb
     std::stringstream ss;
     Sleep( m_nMillisecondsToSleep );
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
+    Send( ss.str().c_str() );
+  }
+}
+
+template <typename T>
+void CIQFeedHistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, ptime dtStart, ptime dtEnd ) {
+  if ( RETRIEVE_IDLE != m_stateRetrieval ) {
+    throw std::logic_error( "CIQFeedHistoryQuery<T>::RetrieveDatedRangeOfDataPoints: not in IDLE");
+  }
+  else {
+    m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
+
+    std::stringstream ss;
+    //date_facet* facet( new date_facet( "&Y%m%d %H%M%S" ) );
+    boost::posix_time::time_facet* facet( new boost::posix_time::time_facet );
+    //ss.imbue( std::locale(ss.getloc(), facet ) );
+    //ss.imbue( std::locale(std::locale::classic(), facet ) );
+    std::locale special_locale (std::locale(""), facet);
+    ss.imbue( special_locale );
+    (*facet).format( "%Y%m%d %H%M%S" );
+
+    Sleep( m_nMillisecondsToSleep );
+
+    ss << "HTT," << sSymbol << "," << dtStart << "," << dtEnd << ",,,,1,D\n";
     Send( ss.str().c_str() );
   }
 }

@@ -72,7 +72,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)libboost_system-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_43.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_43.lib;$(OutDir)LibHDF5TimeSeries.lib;$(OutDir)zlib1.lib;$(OutDir)libtrading.lib;$(OutDir)LibTimeSeries.lib;$(OutDir)LibIQFeed.lib;$(OutDir)LibIndicators.lib;$(OutDir)LibBerkeleyDb.lib;$(OutDir)libdb50.lib;$(OutDir)hdf5d.lib;$(OutDir)szip.lib;$(OutDir)zlib.lib;$(OutDir)hdf5_cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)zlib1.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFIndicators.lib;$(OutDir)OUBerkeleyDb.lib;$(OutDir)libdb48.lib;$(OutDir)hdf5d.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)hdf5_cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>

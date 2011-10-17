@@ -17,7 +17,7 @@
 
 #include <boost/foreach.hpp>
 
-#include <LibIndicators/Darvas.h>
+#include <TFIndicators/Darvas.h>
 
 #include "Process.h"
 
@@ -25,12 +25,12 @@
 // CProcessDarvas
 //
 
-class CProcessDarvas: public CDarvas<CProcessDarvas> {
-  friend CDarvas<CProcessDarvas>;
+class CProcessDarvas: public ou::tf::CDarvas<CProcessDarvas> {
+  friend ou::tf::CDarvas<CProcessDarvas>;
 public:
   CProcessDarvas( size_t ix );
   ~CProcessDarvas( void ) {};
-  bool Calc( const CBar& );
+  bool Calc( const ou::tf::CBar& );
   void Result( std::string& s );  // should only be called once
 protected:
   // CRTP from CDarvas<CProcess>
@@ -51,13 +51,13 @@ private:
 };
 
 CProcessDarvas::CProcessDarvas( size_t ix ) 
-: CDarvas<CProcessDarvas>(), 
+: ou::tf::CDarvas<CProcessDarvas>(), 
   m_bTriggered( false ), m_dblStop( 0 ), m_ix( ix )
 {
 }
 
-bool CProcessDarvas::Calc( const CBar& bar ) {
-  CDarvas<CProcessDarvas>::Calc( bar );
+bool CProcessDarvas::Calc( const ou::tf::CBar& bar ) {
+  ou::tf::CDarvas<CProcessDarvas>::Calc( bar );
   --m_ix;
   bool b = m_bTriggered; 
   m_bTriggered = false; 
@@ -129,7 +129,7 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
   // look for index of high
   if ( m_cntBars == bars->bars.Size() ) {  // we have our bar count, so perform calc
     size_t ix = 0;
-    for ( CBars::const_iterator iter = bars->bars.begin(); iter != bars->bars.end(); ++iter ) {
+    for ( ou::tf::CBars::const_iterator iter = bars->bars.begin(); iter != bars->bars.end(); ++iter ) {
       if ( dblHigh < (*iter).High() ) {
         ixHigh = ix;
         dblHigh = (*iter).High();
@@ -142,7 +142,7 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
     CProcessDarvas darvas( m_BarWindow );
     size_t ix = m_cntBars - m_BarWindow;
     bool bTrigger;  // wait for trigger on final day
-    for ( CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
+    for ( ou::tf::CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
       bTrigger = darvas.Calc( *iter );
     }
 

@@ -80,7 +80,9 @@ void App::Run( void ) {
   } while ( "x" != s );
 
   // clean up 
+
   StopWatch();
+
   m_ptws->Disconnect();
   m_piqfeed->Disconnect();
 
@@ -107,7 +109,6 @@ void App::Connected( int i ) {
     contract.expiry = "201112";
     // IB responds only when symbol is found, bad symbols will not illicit a response
     m_ptws->RequestContractDetails( contract, MakeDelegate( this, &App::HandleIBContractDetails ), MakeDelegate( this, &App::HandleIBContractDetailsDone ) );
-
   }
 }
 
@@ -155,10 +156,14 @@ void App::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& detail
   m_md.data.pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_ptws, m_piqfeed ) );
   m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
   m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
-  m_io.post( boost::bind( &App::StartWatch, this ) );
 }
 
 void App::HandleIBContractDetailsDone( void ) {
+  this->Connect();
+}
+
+void App::StartStateMachine( void ) {
+  m_io.post( boost::bind( &App::StartWatch, this ) );
 }
 
 void App::StartWatch( void ) {
@@ -331,5 +336,45 @@ sc::result App::StateShort::Handle( const EvQuote& quote ) {
   }
 
   return discard_event();
+}
+
+void App::OnHistoryConnected( void ) {
+  InstrumentState& is( m_md.data );
+  is.dblOpen = is.dblHigh = is.dblLow = is.dblClose = 0.0;
+  ptime dtStart = m_pInstrument->GetTimeTrading().begin();
+  ptime dtEnd = m_pInstrument->GetTimeTrading().end();
+  if ( 0 == dtStart.date().day_of_week() ) {
+    RetrieveDatedRangeOfDataPoints( 
+      m_pInstrument->GetInstrumentName( m_piqfeed->ID() ), dtStart - date_duration( 3 ), dtEnd - date_duration( 3 ) );
+  }
+  else {
+    RetrieveDatedRangeOfDataPoints( 
+      m_pInstrument->GetInstrumentName( m_piqfeed->ID() ), dtStart - date_duration( 1 ), dtEnd - date_duration( 1 ) );
+  }
+}
+
+void App::OnHistoryDisconnected( void ) {
+}
+
+void App::OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
+  InstrumentState& is( m_md.data );
+  if ( 0 == is.dblOpen ) {
+    is.dblOpen = is.dblHigh = is.dblLow = is.dblClose = pDP->Last;
+  }
+  else {
+    if ( pDP->Last > is.dblHigh ) is.dblHigh = pDP->Last;
+    if ( pDP->Last < is.dblLow ) is.dblLow = pDP->Last;
+    is.dblClose = pDP->Last;
+  }
+  is.history.Append( ou::tf::CTrade( pDP->DateTime, pDP->Last, pDP->LastSize ) );
+
+}
+
+void App::OnHistoryRequestDone( void ) {
+  InstrumentState& is( m_md.data );
+  this->Disconnect();
+  is.pivots.CalcPivots( "eod", is.dblHigh, is.dblLow, is.dblClose );
+  std::cout << "History complete" << std::endl;
+  StartStateMachine();
 }
 

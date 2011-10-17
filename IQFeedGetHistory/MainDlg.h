@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <LibIQFeed/IQFeedHistoryQueryMsgShim.h>
+#include <TFIQFeed/IQFeedHistoryQueryMsgShim.h>
 
 #include "Process.h"
 
@@ -30,7 +30,7 @@ class CMainDlg :
 public:
 	enum { IDD = IDD_MAINDLG };
 
-  typedef CIQFeedHistoryQueryMsgShim<CMainDlg> history_query_t;
+  typedef ou::tf::CIQFeedHistoryQueryMsgShim<CMainDlg> history_query_t;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
@@ -92,8 +92,8 @@ public:
 	void CloseDialog(int nVal);
 
 protected:
-  CIQFeedHistoryQueryMsgShim<CMainDlg>::structMessageDestinations m_MsgIdsForIQFeedHistoryQuery;
-  CIQFeedHistoryQueryMsgShim<CMainDlg>* m_pIQFeedHistoryQuery;
+  ou::tf::CIQFeedHistoryQueryMsgShim<CMainDlg>::structMessageDestinations m_MsgIdsForIQFeedHistoryQuery;
+  ou::tf::CIQFeedHistoryQueryMsgShim<CMainDlg>* m_pIQFeedHistoryQuery;
 private:
   WORD m_DialogCloseCode;
   CProcess m_process;

@@ -20,16 +20,19 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <TFInteractiveBrokers/IBTWS.h>
-#include <TFIQFeed/IQFeedProvider.h>
 #include <TFTimeSeries/TimeSeries.h>
+#include <TFInteractiveBrokers/IBTWS.h>
+// history comes before provider
+#include <TFIQFeed/IQFeedHistoryQuery.h>
+#include <TFIQFeed/IQFeedProvider.h>
+#include <TFTrading/Position.h>
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/MarketStates.h>
 #include <TFIndicators/TSSWStochastic.h>
 #include <TFIndicators/TSSWStats.h>
-#include <TFTrading/Position.h>
+#include <TFIndicators/Pivots.h>
 
 struct InstrumentState {
 
@@ -38,6 +41,10 @@ struct InstrumentState {
 
   ou::tf::CQuotes quotes;
   ou::tf::CTrades trades;
+
+  ou::tf::CTrades history;
+
+  double dblOpen, dblHigh, dblLow, dblClose;
 
   double dblMidQuoteAtOpen;
   double dblOpeningTrade;
@@ -49,6 +56,8 @@ struct InstrumentState {
   ou::tf::TSSWStatsMidQuote statsFast;
   ou::tf::TSSWStatsMidQuote statsMed;
   ou::tf::TSSWStatsMidQuote statsSlow;
+
+  ou::tf::CPivotSet pivots;
 
   time_duration tdMarketOpen;
   time_duration tdMarketOpenIdle;
@@ -67,7 +76,10 @@ struct InstrumentState {
 };
 
 
-class App {
+class App:
+  public ou::tf::CIQFeedHistoryQuery<App>
+{
+  friend ou::tf::CIQFeedHistoryQuery<App>;
 public:
   App(void);
   ~App(void);
@@ -141,6 +153,11 @@ public:
   };
   
 protected:
+  // CRTP from CIQFeedHistoryQuery
+  void OnHistoryConnected( void );
+  void OnHistoryDisconnected( void );
+  void OnHistoryRequestDone( void );
+  void OnHistoryTickDataPoint( structTickDataPoint* pDP );
 private:
 
   typedef ou::tf::CProviderManager::pProvider_t pProvider_t;
@@ -165,6 +182,8 @@ private:
   void Connected( int i );
   void DisConnected( int i );
 
+  void StartStateMachine( void );
+
   void StartWatch( void );
   void StopWatch( void );
 
@@ -175,5 +194,6 @@ private:
 
   void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
+
 };
 

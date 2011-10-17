@@ -259,7 +259,7 @@ void CIQFeedHistoryBulkQuery<T>::SetExchanges(const exchange_list_t& list) {
 
   structSymbolRecord *pRec;
 
-  file.OpenIQFSymbols();
+  file.OpenIQFSymbols( "symbols.db4" );
   iterSymbols.SetInstrumentFile( &file );
   m_listSymbols.clear();
 
