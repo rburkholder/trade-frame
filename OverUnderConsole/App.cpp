@@ -212,7 +212,17 @@ sc::result App::StatePreMarket::Handle( const EvTrade& trade ) {
 sc::result App::StateMarketOpen::Handle( const EvTrade& trade ) {
   InstrumentState& is( context<App::MachineMarketStates>().data );
   is.dblOpeningTrade = trade.Trade().Trade();
-  return transit<App::StatePreTrading>();
+  is.vZeroMarks.push_back( is.dblOpeningTrade );
+  std::sort( is.vZeroMarks.begin(), is.vZeroMarks.end() );
+  is.iterZeroMark = is.vZeroMarks.begin();
+  while ( is.dblOpeningTrade != *is.iterZeroMark ) {
+    is.iterZeroMark++;
+    if ( is.vZeroMarks.end() == is.iterZeroMark ) 
+      throw std::runtime_error( "can't find our zero mark" );
+  }
+  is.iterNextMark = is.iterZeroMark;
+  //return transit<App::StatePreTrading>();
+  return transit<App::StateTrading>();
 }
 
 sc::result App::StatePreTrading::Handle( const EvQuote& quote ) {
@@ -274,6 +284,7 @@ sc::result App::StateMarketClosed::Handle( const EvQuote& quote ) {
 }
 
 sc::result App::StateZeroPosition::Handle( const EvQuote& quote ) {
+
   InstrumentState& is( context<App::MachineMarketStates>().data );
   if ( is.bDaySession ) { // transit
     if ( quote.Quote().DateTime().time_of_day() >= is.tdCancelOrders ) {
@@ -281,14 +292,20 @@ sc::result App::StateZeroPosition::Handle( const EvQuote& quote ) {
     }
   }
 
-  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
-  if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
+  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  //if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
+  if ( quote.Quote().Bid() > *is.iterZeroMark ) {
+    if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+    std::cout << "Zero Position going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
     return transit<App::StateLong>();
   }
   else {
-    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
+    //if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
+    if ( quote.Quote().Ask() < *is.iterZeroMark ) {
+      if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
+      std::cout << "Zero Position going short" << std::endl;
       // go short
       is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
       return transit<App::StateShort>();
@@ -306,13 +323,30 @@ sc::result App::StateLong::Handle( const EvQuote& quote ) {
     }
   }
 
-  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  if ( is.pPosition->OrdersPending() ) {
+    return discard_event();
+  }
 
-  if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
+  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+
+  //if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
+  if ( quote.Quote().Ask() < *is.iterZeroMark ) {
+    is.iterNextMark = is.iterZeroMark;
+    if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
+    std::cout << "long going short" << std::endl;
     // go short
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
     return transit<App::StateShort>();
+  }
+  else {
+    if ( quote.Quote().Ask() >= *is.iterNextMark ) {
+      if ( is.iterZeroMark != is.iterNextMark ) {
+        is.iterZeroMark = is.iterNextMark;
+        std::cout << "long crossing next zero: " << *is.iterZeroMark << std::endl;
+        if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+      }
+    }
   }
 
   return discard_event();
@@ -326,13 +360,30 @@ sc::result App::StateShort::Handle( const EvQuote& quote ) {
     }
   }
 
-  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  if ( is.pPosition->OrdersPending() ) {
+    return discard_event();
+  }
 
-  if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
+  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+
+  //if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
+  if ( quote.Quote().Bid() > *is.iterZeroMark ) {
+    is.iterNextMark = is.iterZeroMark;
+    if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+    std::cout << "short going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
     return transit<App::StateLong>();
+  }
+  else {
+    if ( quote.Quote().Bid() <= *is.iterNextMark ) {
+      if ( is.iterZeroMark != is.iterNextMark ) {
+        is.iterZeroMark = is.iterNextMark;
+        std::cout << "short crossing next zero: " << *is.iterZeroMark << std::endl;
+        if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark --;
+      }
+    }
   }
 
   return discard_event();
@@ -374,6 +425,13 @@ void App::OnHistoryRequestDone( void ) {
   InstrumentState& is( m_md.data );
   this->Disconnect();
   is.pivots.CalcPivots( "eod", is.dblHigh, is.dblLow, is.dblClose );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::R3 ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::R2 ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::R1 ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::PV ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::S1 ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::S2 ) );
+  is.vZeroMarks.push_back( is.pivots.GetPivotValue( ou::tf::CPivotSet::S3 ) );
   std::cout << "History complete" << std::endl;
   StartStateMachine();
 }

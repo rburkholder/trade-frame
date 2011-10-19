@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/asio.hpp>
 
@@ -73,6 +75,12 @@ struct InstrumentState {
 
   bool bMarketHoursCrossMidnight;
   bool bDaySession;
+
+  typedef std::vector<double> vZeroMark_t;
+  typedef vZeroMark_t::const_iterator vZeroMark_iter_t;
+  vZeroMark_t vZeroMarks;
+  vZeroMark_iter_t iterZeroMark;
+  vZeroMark_iter_t iterNextMark; // relative to the zero mark, if long, higher mark, if short, lower mark
 };
 
 

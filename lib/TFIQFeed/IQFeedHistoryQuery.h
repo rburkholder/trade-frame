@@ -421,6 +421,7 @@ void CIQFeedHistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& 
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
 
+    // http://rhubbarb.wordpress.com/2009/10/17/boost-datetime-locales-and-facets/#more-944
     std::stringstream ss;
     //date_facet* facet( new date_facet( "&Y%m%d %H%M%S" ) );
     boost::posix_time::time_facet* facet( new boost::posix_time::time_facet );
