@@ -34,7 +34,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template <typename T, typename U>
+template <typename T, typename U>  // T=CRTP caller, U=internal use for marking queries
 class CIQFeedHistoryQueryTag: public CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> > {
   friend CIQFeedHistoryQuery<CIQFeedHistoryQueryTag<T,U> >;
 public:
@@ -120,7 +120,7 @@ private:
 // =====================
 //
 
-template <typename T>
+template <typename T>  // T=CRTP based class
 class CIQFeedHistoryBulkQuery {
 public:
 
@@ -151,8 +151,9 @@ public:
   typedef typename std::vector<std::string> exchange_list_t;
   void SetExchanges( const exchange_list_t& exchanges );
 
-  typedef typename std::vector<std::string> symbol_list_t;
-  void SetSymbols( const symbol_list_t& symbols );
+  //typedef typename std::vector<std::string> symbol_list_t;
+  template<typename Iter>
+  void SetSymbols( Iter begin, Iter end );
 
   void SetMaxSimultaneousQueries( size_t n ) { 
     assert( n > 0 );
@@ -183,14 +184,16 @@ public:
   };
 
   // CRTP based callbacks from CIQFeedHistoryQueryTag
-  void OnHistoryConnected( structQueryState* pqs );
-  void OnHistoryDisconnected( structQueryState* pqs );
-  void OnHistoryError( structQueryState* pqs, size_t e );
-  void OnHistorySendDone( structQueryState* pqs );
-  void OnHistoryTickDataPoint( structQueryState* pqs, IQFeedHistoryStructs::structTickDataPoint* pDP );
-  void OnHistoryIntervalData( structQueryState* pqs, IQFeedHistoryStructs::structInterval* pDP );
-  void OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP );
-  void OnHistoryRequestDone( structQueryState* pqs );
+  void OnHistoryConnected( structQueryState* pqs );  // optional
+  void OnHistoryDisconnected( structQueryState* pqs ); // optional
+  void OnHistoryError( structQueryState* pqs, size_t e ); // optional
+  void OnHistorySendDone( structQueryState* pqs ); // otional
+  void OnHistoryTickDataPoint( structQueryState* pqs, IQFeedHistoryStructs::structTickDataPoint* pDP ); // for per tick processing
+  void OnHistoryIntervalData( structQueryState* pqs, IQFeedHistoryStructs::structInterval* pDP ); // for per bar processing
+  void OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP ); // for per bar processing
+  void OnHistoryRequestDone( structQueryState* pqs ); // for processing finished ticks, bars
+
+  void OnCompletion( void );  // over ride to find out when all symbols are complete, needs to friend this class
 
 protected:  
 
@@ -210,13 +213,13 @@ protected:
     //ticks->Clear();
     ReQueueTicks( ticks ); 
   };
-  void OnCompletion( void );
 
   void GenerateQueries( void );
   void ProcessSymbolList( void );
 
 private:
 
+  typedef std::vector<std::string> symbol_list_t;
   symbol_list_t m_listSymbols;
   size_t m_n;  // number of data points to retrieve
 
@@ -281,15 +284,17 @@ void CIQFeedHistoryBulkQuery<T>::SetExchanges(const exchange_list_t& list) {
 }
 
 template <typename T>
-void CIQFeedHistoryBulkQuery<T>::SetSymbols(const symbol_list_t& list) {
+template<typename Iter>
+void CIQFeedHistoryBulkQuery<T>::SetSymbols (Iter begin, Iter end ) {
 
   assert( EQuiescent == m_stateBulkQuery );
 
-  m_vSymbols.clear();
-  BOOST_FOREACH( std::string s, list ) {
-    m_vSymbols.push_back( list );
+  m_listSymbols.clear();
+  while ( begin != end ) {
+    m_listSymbols.push_back( *begin );
+    begin++;
   }
-  std::sort( m_vSymbols.begin(), m_vSymbols.end() );
+  std::sort( m_listSymbols.begin(), m_listSymbols.end() );
   m_stateBulkQuery = ESymbolListBuilt;
 
 }
@@ -373,30 +378,53 @@ void CIQFeedHistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, IQFeedHistoryStructs::structTickDataPoint* pDP ) {
+
   CQuote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
   pqs->ticks->quotes.Append( quote );
   CTrade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
   pqs->ticks->trades.Append( trade );
+
+  if ( &CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
+    static_cast<T*>( this )->OnHistoryTickDataPoint( pqs, pDP );
+  }
+
   pqs->query.ReQueueTickDataPoint( pDP );
 }
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, IQFeedHistoryStructs::structInterval* pDP ) {
+
   CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
+
+  if ( &CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
+    static_cast<T*>( this )->OnHistoryIntervalData( pqs, pDP );
+  }
+
   pqs->query.ReQueueInterval( pDP );
 }
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP ) {
+
   CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
+
+  if ( &CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
+    static_cast<T*>( this )->OnHistorySummaryData( pqs, pDP );
+  }
+
   pqs->query.ReQueueSummary( pDP );
 }
 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
 
+  if ( &CIQFeedHistoryBulkQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
+    static_cast<T*>( this )->OnHistoryRequestDone( pqs );
+  }
+
+  // clean up.
   switch ( m_ResultType ) {
     case ETicks:
       static_cast<T*>( this )->OnTicks( pqs->ticks );  // structure is reclaimed later

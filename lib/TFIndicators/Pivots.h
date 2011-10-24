@@ -47,16 +47,18 @@ public:
   CPivotSet(void);
   CPivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
   CPivotSet( const std::string &sName, double Hi, double Lo, double Close );
+  CPivotSet( const std::string &sName, const CBar& bar );
   CPivotSet( const std::string &sName, CBars *bars );
 
   virtual ~CPivotSet(void);
 
-  void CalcHalfPivots();
   void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
+  void CalcPivots( double Hi, double Lo, double Close );
+  void CalcHalfPivots();
 
   typedef std::pair<double, structPivotInfo> pivot_t;
 
-  const std::string &Name( void ) { return m_sName; };
+  const std::string &Name( void ) const { return m_sName; };
 
   pivot_t operator[]( unsigned short ix ) { // this probably copies twice or thrice in succession
     assert( ix >= R3 );
@@ -64,12 +66,12 @@ public:
     structPivotInfo pivot( m_sName + m_sPivotNames[ ix ], m_rPivotColours[ ix ] );
     return pivot_t( m_rPivots[ ix ], pivot ); 
   }
-  double GetPivotValue( enumPivots ix ) {
+  double GetPivotValue( enumPivots ix ) const {
     assert( ix >= R3 );
     assert( ix <= S3 );
     return m_rPivots[ ix ];
   };
-  std::string GetPivotName( enumPivots ix ) {
+  std::string GetPivotName( enumPivots ix ) const {
     assert( ix >= R3 );
     assert( ix <= S3 );
     return m_sName + m_sPivotNames[ ix ];

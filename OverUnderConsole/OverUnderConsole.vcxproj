@@ -56,7 +56,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)TFSimulation.lib;$(OutDir)TFIndicators.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)IQ32.LIB;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)libboost_filesystem-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)libdb48.lib;$(OutDir)OUBerkeleyDb.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFIndicators.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)IQ32.LIB;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)libboost_filesystem-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,12 +81,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="ScanHistory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="OverUnderConsole.cpp" />
+    <ClCompile Include="ScanHistory.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

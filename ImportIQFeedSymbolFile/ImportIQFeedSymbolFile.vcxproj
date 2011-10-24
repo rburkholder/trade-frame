@@ -57,7 +57,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)IQ32.lib;$(OutDir)TFIQFeed.lib;$(OutDir)OUBerkeleyDb.lib;$(OutDir)libdb48.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)TFTrading.lib;$(OutDir)OUCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)IQ32.lib;$(OutDir)TFIQFeed.lib;$(OutDir)OUBerkeleyDb.lib;$(OutDir)libdb48.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)TFTrading.lib;$(OutDir)OUCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

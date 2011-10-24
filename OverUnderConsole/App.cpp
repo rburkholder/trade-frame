@@ -15,6 +15,7 @@
 
 #include <boost/bind.hpp>
 
+#include "ScanHistory.h"
 #include "App.h"
 
 // following are specific for gold futures
@@ -101,6 +102,9 @@ void App::Connected( int i ) {
   }
 
   if ( m_ptws->Connected() && m_piqfeed->Connected() ) {
+
+    SelectTradeableSymbols();
+
     ou::tf::CIBTWS::Contract contract;
     contract.currency = "USD";
     //contract.exchange = "SMART";  in this case is NYMEX
@@ -436,3 +440,7 @@ void App::OnHistoryRequestDone( void ) {
   StartStateMachine();
 }
 
+void App::SelectTradeableSymbols( void ) {
+  ScanHistory sh;
+  sh.Run();
+}

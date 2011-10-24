@@ -89,10 +89,12 @@ class App:
 {
   friend ou::tf::CIQFeedHistoryQuery<App>;
 public:
+
   App(void);
   ~App(void);
 
   void Run( void );
+  void SelectTradeableSymbols( void );
 
   struct StateInitialization;
   struct StatePreMarket;

@@ -1,19 +1,19 @@
 #include "StdAfx.h"
-#include "SymbolSelectionFilter.h"
-
-#include "HDF5DataManager.h"
-using namespace H5;
-
-#include "TimeSeries.h"
-#include "HDF5TimeSeriesContainer.h"
-#include "HDF5IterateGroups.h"
-
-#include "RunningStats.h"
-
-#include "Darvas.h"
 
 #include <stdexcept>
 #include <map>
+
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+using namespace H5;
+
+#include <TFIndicators/RunningStats.h>
+#include <TFIndicators/Darvas.h>
+
+#include "SymbolSelectionFilter.h"
+
+using namespace ou::tf;
 
 // need to destroy self when done
 // http://www.codeproject.com/KB/stl/xingstlarticle.aspx  functors

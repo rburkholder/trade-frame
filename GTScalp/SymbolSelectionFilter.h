@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TimeSeries.h"
-
-#include "FastDelegate.h"
-
 #include <string>
 using namespace std;
+
+#include <TFTimeSeries/TimeSeries.h>
+
+#include <OUCommon/FastDelegate.h>
 
 class CSymbolSelectionFilter {
 public:

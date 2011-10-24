@@ -46,6 +46,10 @@ CPivotSet::CPivotSet( const std::string &sName, double _S3, double _S2, double _
   CalcHalfPivots();
 }
 
+CPivotSet::CPivotSet( const std::string &sName, const CBar& bar ) {
+  CalcPivots( sName, bar.High(), bar.Low(), bar.Close() );
+}
+
 CPivotSet::CPivotSet( const std::string &sName, CBars *bars ) {
   double hi = 0;
   double lo = 0;
@@ -76,6 +80,10 @@ CPivotSet::~CPivotSet() {
 
 void CPivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, double Close ) {
   m_sName = sName;
+  CalcPivots( Hi, Lo, Close );
+}
+
+void CPivotSet::CalcPivots( double Hi, double Lo, double Close ) {
   double dif = Hi - Lo;
   m_rPivots[ PV ] = ( Hi + Lo + Close ) / 3;
   m_rPivots[ R1 ] = 2 * m_rPivots[ PV ] - Lo;
@@ -84,7 +92,7 @@ void CPivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, doub
   m_rPivots[ S1 ] = 2 * m_rPivots[ PV ] - Hi;
   m_rPivots[ S2 ] = m_rPivots[ PV ] - dif;
   m_rPivots[ S3 ] = m_rPivots[ S1 ] - dif;
-  CalcHalfPivots();
+//  CalcHalfPivots();  // removed 2011/10/23
 }
 
 void CPivotSet::CalcHalfPivots() {

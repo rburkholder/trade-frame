@@ -1,13 +1,4 @@
 #include "StdAfx.h"
-#include "Scripts.h"
-
-#include "IQFeedSymbolFile.h"
-
-#include "HDF5TimeSeriesContainer.h"
-#include "SymbolSelectionFilter.h"
-
-#include "HDF5DataManager.h"
-using namespace H5;
 
 #include <vector>
 #include <stdexcept>
@@ -16,11 +7,23 @@ using namespace H5;
 #include <string>
 using namespace std;
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
+using namespace H5;
+
+#include <TFIQFeed/IQFeedSymbolFile.h>
+
+#include "SymbolSelectionFilter.h"
+
+#include "Scripts.h"
+
+using namespace ou::tf;
+
+//#ifdef _DEBUG
+//#define new DEBUG_NEW
+//#undef THIS_FILE
+//static char THIS_FILE[] = __FILE__;
+//#endif
 
 //
 // CScripts

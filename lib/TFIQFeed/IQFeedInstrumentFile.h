@@ -60,9 +60,9 @@ struct structSymbolRecord {  // member variables ordered by decreasing size for 
   unsigned char nOptionSide;  // OptionSide
   char line[nMaxBufferSize];
 
-  const char *GetSymbol() { return line; };
-  const char *GetDescription() { return line + ix[IXDesc]; };
-  const char *GetExchange() { return line + ix[IXExchange]; };
+  const char *GetSymbol() const { return line; };
+  const char *GetDescription() const { return line + ix[IXDesc]; };
+  const char *GetExchange() const { return line + ix[IXExchange]; };
   unsigned char GetInstrumentType() const { return eInstrumentType; };
   unsigned char GetOptionSide() const { return nOptionSide; };
   unsigned short GetYear() const { return nYear; };
@@ -93,6 +93,8 @@ public:
 
   void SetSearchExchange( const char *szExchange );  // must remain set for duration of search
   void SetSearchUnderlying( const char *szUnderlying );
+  // flags =  DB_SET: find first record
+  //          DB_NEXT_DUP:  retrieve next record for same exchange
   structSymbolRecord* RetrieveSymbolRecordByExchange( u_int32_t flags );
   structSymbolRecord* RetrieveSymbolRecordByUnderlying( u_int32_t flags );
   void EndSearch( void ) {};
