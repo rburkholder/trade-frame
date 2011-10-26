@@ -13,10 +13,10 @@
 
 #include <cassert>
 
-#include <boost/bind.hpp>
-
 #include "ScanHistory.h"
 #include "App.h"
+
+#include <boost/phoenix/bind/bind_member_function.hpp>
 
 // following are specific for gold futures
 InstrumentState::InstrumentState( void ):
@@ -60,7 +60,7 @@ void App::Run( void ) {
 
   // start up worker thread here
   m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running 
-  m_asioThread = boost::thread( boost::bind( &App::WorkerThread, this ) );
+  m_asioThread = boost::thread( boost::phoenix::bind( &App::WorkerThread, this ) );
 
   m_md.initiate();  // start state chart for market data
   m_md.process_event( ou::tf::EvInitialize() );
@@ -167,7 +167,7 @@ void App::HandleIBContractDetailsDone( void ) {
 }
 
 void App::StartStateMachine( void ) {
-  m_io.post( boost::bind( &App::StartWatch, this ) );
+  m_io.post( boost::phoenix::bind( &App::StartWatch, this ) );
 }
 
 void App::StartWatch( void ) {
@@ -443,4 +443,9 @@ void App::OnHistoryRequestDone( void ) {
 void App::SelectTradeableSymbols( void ) {
   ScanHistory sh;
   sh.Run();
+  sh.GetInfo<structSymbolInfo>( boost::phoenix::bind( &App::GetTradeableSymbols, this, boost::phoenix::arg_names::arg1 ) );
+}
+
+void App::GetTradeableSymbols( const structSymbolInfo& si ) {
+  std::cout << si.sName << std::endl;
 }

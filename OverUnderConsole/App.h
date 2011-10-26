@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/asio.hpp>
@@ -183,6 +184,14 @@ private:
   ou::tf::CInstrumentManager& m_mgrInstrument;
 
   ou::tf::CInstrument::pInstrument_t m_pInstrument;
+
+  struct structSymbolInfo {
+    std::string sName;
+    double S3, S2, S1, PV, R1, R2, R3;
+    double dblClose;
+  };
+
+  void GetTradeableSymbols( const structSymbolInfo& );
 
   //ou::tf::CQuotes m_quotes;
   //ou::tf::CTrades m_trades;
