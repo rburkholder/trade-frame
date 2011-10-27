@@ -23,72 +23,12 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#include <TFTimeSeries/TimeSeries.h>
-#include <TFInteractiveBrokers/IBTWS.h>
-// history comes before provider
-#include <TFIQFeed/IQFeedHistoryQuery.h>
-#include <TFIQFeed/IQFeedProvider.h>
-#include <TFTrading/Position.h>
-#include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/OrderManager.h>
-#include <TFTrading/MarketStates.h>
-#include <TFIndicators/TSSWStochastic.h>
-#include <TFIndicators/TSSWStats.h>
-#include <TFIndicators/Pivots.h>
 
-struct InstrumentState {
+#include "Operation.h"
 
-  InstrumentState( void );
-  ~InstrumentState( void ) {};
-
-  ou::tf::CQuotes quotes;
-  ou::tf::CTrades trades;
-
-  ou::tf::CTrades history;
-
-  double dblOpen, dblHigh, dblLow, dblClose;
-
-  double dblMidQuoteAtOpen;
-  double dblOpeningTrade;
-
-  ou::tf::TSSWStochastic stochFast;
-  ou::tf::TSSWStochastic stochMed;
-  ou::tf::TSSWStochastic stochSlow;
-
-  ou::tf::TSSWStatsMidQuote statsFast;
-  ou::tf::TSSWStatsMidQuote statsMed;
-  ou::tf::TSSWStatsMidQuote statsSlow;
-
-  ou::tf::CPivotSet pivots;
-
-  time_duration tdMarketOpen;
-  time_duration tdMarketOpenIdle;
-  //time_duration tdMarketTrading;
-  time_duration tdCancelOrders;
-  time_duration tdClosePositions;
-  time_duration tdAfterMarket;
-  time_duration tdMarketClosed;
-
-  ptime dtPreTradingStop;
-
-  ou::tf::CPosition::pPosition_t pPosition;
-
-  bool bMarketHoursCrossMidnight;
-  bool bDaySession;
-
-  typedef std::vector<double> vZeroMark_t;
-  typedef vZeroMark_t::const_iterator vZeroMark_iter_t;
-  vZeroMark_t vZeroMarks;
-  vZeroMark_iter_t iterZeroMark;
-  vZeroMark_iter_t iterNextMark; // relative to the zero mark, if long, higher mark, if short, lower mark
-};
-
-
-class App:
-  public ou::tf::CIQFeedHistoryQuery<App>
-{
-  friend ou::tf::CIQFeedHistoryQuery<App>;
+class App {
 public:
 
   App(void);
@@ -97,78 +37,8 @@ public:
   void Run( void );
   void SelectTradeableSymbols( void );
 
-  struct StateInitialization;
-  struct StatePreMarket;
-  typedef ou::tf::MachineMarketStates<InstrumentState, StateInitialization> MachineMarketStates;
-  MachineMarketStates m_md;  // market data state chart
-  
-  typedef ou::tf::EvQuote EvQuote;
-  typedef ou::tf::EvTrade EvTrade;
-  struct StateInitialization: ou::tf::StateInitialization<StateInitialization, MachineMarketStates, StatePreMarket> {};
-  struct StatePreMarket: ou::tf::StateBase<MachineMarketStates, StatePreMarket> {
-    using ou::tf::StateBase<MachineMarketStates, StatePreMarket>::Handle;
-    sc::result Handle( const EvQuote& ); 
-    sc::result Handle( const EvTrade& );
-  };
-  struct StateMarketOpen: ou::tf::StateBase<MachineMarketStates, StateMarketOpen> {
-    using ou::tf::StateBase<MachineMarketStates, StateMarketOpen>::Handle;
-//    sc::result Handle( const EvQuote& ); 
-    sc::result Handle( const EvTrade& );
-  };
-  struct StatePreTrading: ou::tf::StateBase<MachineMarketStates, StatePreTrading> {
-    using ou::tf::StateBase<MachineMarketStates, StatePreTrading>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateZeroPosition;
-  struct StateTrading: ou::tf::StateBase<MachineMarketStates, StateTrading, StateZeroPosition> {
-    using ou::tf::StateBase<MachineMarketStates, StateTrading, StateZeroPosition>::Handle;
-//    sc::result Handle( const EvQuote& ); // not called, goes to inner directly
-  };
-  struct StateCancelOrders: ou::tf::StateBase<MachineMarketStates, StateCancelOrders> {
-    using ou::tf::StateBase<MachineMarketStates, StateCancelOrders>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateCancelOrdersIdle: ou::tf::StateBase<MachineMarketStates, StateCancelOrdersIdle> {
-    using ou::tf::StateBase<MachineMarketStates, StateCancelOrdersIdle>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateClosePositions: ou::tf::StateBase<MachineMarketStates, StateClosePositions> {
-    using ou::tf::StateBase<MachineMarketStates, StateClosePositions>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateClosePositionsIdle: ou::tf::StateBase<MachineMarketStates, StateClosePositionsIdle> {
-    using ou::tf::StateBase<MachineMarketStates, StateClosePositionsIdle>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateAfterMarket: ou::tf::StateBase<MachineMarketStates, StateAfterMarket> {
-    using ou::tf::StateBase<MachineMarketStates, StateAfterMarket>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateMarketClosed: ou::tf::StateBase<MachineMarketStates, StateMarketClosed> {
-    using ou::tf::StateBase<MachineMarketStates, StateMarketClosed>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-
-  // these three states determine trading pattern
-  struct StateZeroPosition: ou::tf::StateBase<StateTrading, StateZeroPosition> {
-    using ou::tf::StateBase<StateTrading, StateZeroPosition>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateLong: ou::tf::StateBase<StateTrading, StateLong> {
-    using ou::tf::StateBase<StateTrading, StateLong>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  struct StateShort: ou::tf::StateBase<StateTrading, StateShort> {
-    using ou::tf::StateBase<StateTrading, StateShort>::Handle;
-    sc::result Handle( const EvQuote& ); 
-  };
-  
 protected:
-  // CRTP from CIQFeedHistoryQuery
-  void OnHistoryConnected( void );
-  void OnHistoryDisconnected( void );
-  void OnHistoryRequestDone( void );
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP );
+
 private:
 
   typedef ou::tf::CProviderManager::pProvider_t pProvider_t;
@@ -183,15 +53,10 @@ private:
 
   ou::tf::CInstrumentManager& m_mgrInstrument;
 
-  ou::tf::CInstrument::pInstrument_t m_pInstrument;
+  typedef std::vector<Operation> vOperation_t;
+  vOperation_t m_vOperation;
 
-  struct structSymbolInfo {
-    std::string sName;
-    double S3, S2, S1, PV, R1, R2, R3;
-    double dblClose;
-  };
-
-  void GetTradeableSymbols( const structSymbolInfo& );
+  void AppendTradeableSymbol( const Operation::structSymbolInfo& );
 
   //ou::tf::CQuotes m_quotes;
   //ou::tf::CTrades m_trades;
@@ -203,16 +68,7 @@ private:
 
   void StartStateMachine( void );
 
-  void StartWatch( void );
-  void StopWatch( void );
 
-  // will need to migrate to a container when doing more than one instrument
-  void HandleQuote( const ou::tf::CQuote& quote );
-  void HandleTrade( const ou::tf::CTrade& trade );
-  void HandleOpen( const ou::tf::CTrade& trade );
-
-  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
-  void HandleIBContractDetailsDone( void );
 
 };
 
