@@ -20,7 +20,8 @@
 
 App::App(void) 
   : m_mgrInstrument( ou::tf::CInstrumentManager::Instance() ),
-  m_ptws( new ou::tf::CIBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider )
+  m_ptws( new ou::tf::CIBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider ),
+  m_dblPortfolioCashToTrade( 110000.0 ), m_dblPortfolioMargin( 0.15 )
 {
 }
 
@@ -87,8 +88,10 @@ void App::Connected( int i ) {
 
     SelectTradeableSymbols();  // adds symbols to m_vOperation
 
+    double dblAmountToTradePerSymbol = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / m_vOperation.size();
+
     for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
-      iter->Start();
+      (*iter)->Start( dblAmountToTradePerSymbol );
     }
 
   }
@@ -105,47 +108,9 @@ void App::WorkerThread( void ) {
   m_io.run();  // deal with the submitted work
 }
 
-void App::StartStateMachine( void ) {
-  m_io.post( boost::phoenix::bind( &App::StartWatch, this ) );
-}
-
-void App::OnHistoryConnected( void ) {
-  InstrumentState& is( m_md.data );
-  is.dblOpen = is.dblHigh = is.dblLow = is.dblClose = 0.0;
-  ptime dtStart = m_pInstrument->GetTimeTrading().begin();
-  ptime dtEnd = m_pInstrument->GetTimeTrading().end();
-  if ( 0 == dtStart.date().day_of_week() ) {
-    RetrieveDatedRangeOfDataPoints( 
-      m_pInstrument->GetInstrumentName( m_piqfeed->ID() ), dtStart - date_duration( 3 ), dtEnd - date_duration( 3 ) );
-  }
-  else {
-    RetrieveDatedRangeOfDataPoints( 
-      m_pInstrument->GetInstrumentName( m_piqfeed->ID() ), dtStart - date_duration( 1 ), dtEnd - date_duration( 1 ) );
-  }
-}
-
-void App::OnHistoryDisconnected( void ) {
-}
-
-void App::OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
-  InstrumentState& is( m_md.data );
-  if ( 0 == is.dblOpen ) {
-    is.dblOpen = is.dblHigh = is.dblLow = is.dblClose = pDP->Last;
-  }
-  else {
-    if ( pDP->Last > is.dblHigh ) is.dblHigh = pDP->Last;
-    if ( pDP->Last < is.dblLow ) is.dblLow = pDP->Last;
-    is.dblClose = pDP->Last;
-  }
-  is.history.Append( ou::tf::CTrade( pDP->DateTime, pDP->Last, pDP->LastSize ) );
-
-}
-
-void App::OnHistoryRequestDone( void ) {
-  InstrumentState& is( m_md.data );
-  std::cout << "History complete" << std::endl;
-  StartStateMachine();
-}
+//void App::StartStateMachine( void ) {
+//  m_io.post( boost::phoenix::bind( &App::StartWatch, this ) );
+//}
 
 void App::SelectTradeableSymbols( void ) {
   ScanHistory sh;
@@ -154,7 +119,7 @@ void App::SelectTradeableSymbols( void ) {
 }
 
 void App::AppendTradeableSymbol( const Operation::structSymbolInfo& si ) {
-  Operation op( si, m_piqfeed, m_ptws );
+  pOperation_t p( new Operation( si, m_piqfeed, m_ptws ) );
   //std::cout << si.sName << std::endl;
-  m_vOperation.push_back( op );
+  m_vOperation.push_back( p );
 }

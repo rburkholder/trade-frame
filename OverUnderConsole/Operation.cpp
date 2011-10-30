@@ -56,7 +56,7 @@ InstrumentState::InstrumentState( void ):
 Operation::~Operation(void) {
 }
 
-void Operation::Start( void ) {
+void Operation::Start( double dblAmountToTrade ) {
 
   InstrumentState& is( m_md.data );
   is.vZeroMarks.push_back( m_si.R3 );
@@ -66,6 +66,8 @@ void Operation::Start( void ) {
   is.vZeroMarks.push_back( m_si.S1 );
   is.vZeroMarks.push_back( m_si.S2 );
   is.vZeroMarks.push_back( m_si.S3 );
+
+  is.dblAmountToTrade = dblAmountToTrade;
 
   ou::tf::CIBTWS::Contract contract;
   contract.currency = "USD";
@@ -92,7 +94,7 @@ void Operation::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& 
 }
 
 void Operation::HandleIBContractDetailsDone( void ) {
-  //this->Connect();
+  //this->Connect();  // meant to start history download, no longer necessary
 }
 
 void Operation::StartWatch( void ) {

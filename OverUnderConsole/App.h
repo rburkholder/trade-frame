@@ -22,6 +22,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include <boost/shared_ptr.hpp>
 
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/OrderManager.h>
@@ -51,24 +52,21 @@ private:
   boost::asio::io_service m_io;
   boost::asio::io_service::work* m_pwork;
 
+  double m_dblPortfolioCashToTrade;
+  double m_dblPortfolioMargin;
+
   ou::tf::CInstrumentManager& m_mgrInstrument;
 
-  typedef std::vector<Operation> vOperation_t;
+  typedef boost::shared_ptr<Operation> pOperation_t;
+  typedef std::vector<pOperation_t> vOperation_t;
   vOperation_t m_vOperation;
 
   void AppendTradeableSymbol( const Operation::structSymbolInfo& );
-
-  //ou::tf::CQuotes m_quotes;
-  //ou::tf::CTrades m_trades;
 
   void WorkerThread( void ); // worker thread
 
   void Connected( int i );
   void DisConnected( int i );
-
-  void StartStateMachine( void );
-
-
 
 };
 

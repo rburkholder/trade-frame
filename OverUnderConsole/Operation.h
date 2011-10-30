@@ -32,6 +32,8 @@ struct InstrumentState {
   InstrumentState( void );
   ~InstrumentState( void ) {};
 
+  double dblAmountToTrade;
+
   ou::tf::CQuotes quotes;
   ou::tf::CTrades trades;
 
@@ -87,7 +89,7 @@ public:
   Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t, ou::tf::CIBTWS::pProvider_t );
   ~Operation(void);
 
-  void Start( void );
+  void Start( double dblAmountToTrade );
 
   // ===================== State Chart
   struct StateInitialization;
