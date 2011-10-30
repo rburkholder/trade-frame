@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="InstrumentState.h" />
     <ClInclude Include="Operation.h" />
     <ClInclude Include="ScanHistory.h" />
     <ClInclude Include="stdafx.h" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="InstrumentState.cpp" />
     <ClCompile Include="Operation.cpp" />
     <ClCompile Include="OverUnderConsole.cpp" />
     <ClCompile Include="ScanHistory.cpp" />

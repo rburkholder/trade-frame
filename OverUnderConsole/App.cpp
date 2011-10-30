@@ -13,6 +13,8 @@
 
 #include <cassert>
 
+#include <OUCommon/TimeSource.h>
+
 #include "ScanHistory.h"
 #include "App.h"
 
@@ -41,6 +43,11 @@ void App::Run( void ) {
   m_ptws->OnDisconnected.Add( MakeDelegate( this, &App::DisConnected ) );
   m_piqfeed->OnDisconnected.Add( MakeDelegate( this, &App::DisConnected ) );
 
+  std::stringstream ss;
+  ss.str( "" );
+  ss << ou::CTimeSource::Instance().Internal();
+  m_sTSDataStreamOpened = "/app/OverUnderConsole/" + ss.str();  // will need to make this generic if need some for multiple providers.
+
   m_ptws->Connect();
   m_piqfeed->Connect();
 
@@ -57,6 +64,11 @@ void App::Run( void ) {
     if ( "s" == s ) {  // stats
       //std::cout << "Q:" << m_md.data.quotes.Size() << ", T:" << m_md.data.trades.Size() << std::endl;
     }
+    if ( "a" == s ) { // save quotes/trades
+      for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
+        (*iter)->SaveSeries( m_sTSDataStreamOpened );
+      }
+    }
     if ( "c" == s ) { // close position
       //m_md.data.pPosition->ClosePosition();
 //      m_md.post_event(
@@ -65,7 +77,11 @@ void App::Run( void ) {
 
   // clean up 
 
-//  StopWatch();
+  for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
+    if ( (*iter)->ToBeTraded() ) {
+      (*iter)->Stop();
+    }
+  }
 
   m_ptws->Disconnect();
   m_piqfeed->Disconnect();
@@ -88,12 +104,28 @@ void App::Connected( int i ) {
 
     SelectTradeableSymbols();  // adds symbols to m_vOperation
 
+    // first pass: to get rough idea of which can be traded given our funding level
     double dblAmountToTradePerSymbol = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / m_vOperation.size();
 
+    unsigned int cntToBeTraded = 0;
     for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
-      (*iter)->Start( dblAmountToTradePerSymbol );
+      if ( 100 <= (*iter)->CalcShareCount( dblAmountToTradePerSymbol ) ) {
+        cntToBeTraded++;
+        (*iter)->ToBeTraded() = true;
+      }
+      else {
+        (*iter)->ToBeTraded() = false;
+      }
     }
 
+    // second pass: start trading with the ones that we can
+    dblAmountToTradePerSymbol = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / cntToBeTraded;
+
+    for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
+      if ( (*iter)->ToBeTraded() ) {
+        (*iter)->Start( dblAmountToTradePerSymbol );
+      }
+    }
   }
 }
 

@@ -11,44 +11,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <sstream>
+
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
 #include "Operation.h"
-
-//================= InstrumentState ========================
-
-// following are specific for gold futures
-/*
-InstrumentState::InstrumentState( void ):
-  tdMarketOpen( time_duration( 19, 0, 0 ) ), // time relative to day  // pick up from symbol
-  tdMarketOpenIdle( time_duration( 0, 0, 30 ) ),  // time relative to tdMarketOpen to allow initial collection of data
-  tdCancelOrders( time_duration( 17, 50, 0 ) ),// time relative to day
-  tdClosePositions( time_duration( 17, 51, 0 ) ),// time relative to day
-  tdAfterMarket( time_duration( 18, 15, 0 ) ), // time relative to day
-  tdMarketClosed( time_duration( 18, 15, 0 ) ), // time relative to day
-  stochFast( &quotes, 60 ), stochMed( &quotes, 300 ), stochSlow( &quotes, 1800 ), // 1, 5, 30 min
-  statsFast( &quotes, 60 ), statsMed( &quotes, 180 ), statsSlow( &quotes, 600 ), // 1, 3, 5 min
-  bDaySession( true )
-  {
-    bMarketHoursCrossMidnight = tdMarketOpen > tdMarketClosed;
-  }
-  */
-// following are specific for standard equities
-InstrumentState::InstrumentState( void ):
-  tdMarketOpen( time_duration( 10, 30, 0 ) ), // time relative to day  // pick up from symbol
-  tdMarketOpenIdle( time_duration( 0, 0, 30 ) ),  // time relative to tdMarketOpen to allow initial collection of data
-  tdCancelOrders( time_duration( 16, 50, 0 ) ),// time relative to day
-  tdClosePositions( time_duration( 16, 51, 0 ) ),// time relative to day
-  tdAfterMarket( time_duration( 17, 0, 0 ) ), // time relative to day
-  tdMarketClosed( time_duration( 18, 0, 0 ) ), // time relative to day
-  stochFast( &quotes, 60 ), stochMed( &quotes, 300 ), stochSlow( &quotes, 1800 ), // 1, 5, 30 min
-  statsFast( &quotes, 60 ), statsMed( &quotes, 180 ), statsSlow( &quotes, 600 ), // 1, 3, 5 min
-  bDaySession( true )
-  {
-    bMarketHoursCrossMidnight = tdMarketOpen > tdMarketClosed;
-  }
 
 //================= Operation ========================
   
-  Operation::Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t piqfeed, ou::tf::CIBTWS::pProvider_t ptws ) 
+Operation::Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t piqfeed, ou::tf::CIBTWS::pProvider_t ptws ) 
   : m_si( si ), m_piqfeed( piqfeed ), m_ptws( ptws )
 {
 }
@@ -56,22 +30,29 @@ InstrumentState::InstrumentState( void ):
 Operation::~Operation(void) {
 }
 
+unsigned int Operation::CalcShareCount( double dblFunds ) {
+  InstrumentState& is( m_md.data );
+  return ( static_cast<unsigned int>( dblFunds / is.dblClose ) / 100 ) * 100;  // round to nearest 100
+}
+
 void Operation::Start( double dblAmountToTrade ) {
 
   InstrumentState& is( m_md.data );
+
   is.vZeroMarks.push_back( m_si.R3 );
   is.vZeroMarks.push_back( m_si.R2 );
   is.vZeroMarks.push_back( m_si.R1 );
-  is.vZeroMarks.push_back( m_si.PV );
+//  is.vZeroMarks.push_back( m_si.PV );  // should we or should we not include this as a trading level?
   is.vZeroMarks.push_back( m_si.S1 );
   is.vZeroMarks.push_back( m_si.S2 );
   is.vZeroMarks.push_back( m_si.S3 );
 
   is.dblAmountToTrade = dblAmountToTrade;
+  is.nSharesToTrade = CalcShareCount( dblAmountToTrade );
 
   ou::tf::CIBTWS::Contract contract;
   contract.currency = "USD";
-  //contract.exchange = "SMART";  in this case is NYMEX
+  contract.exchange = "SMART";  
   //contract.secType = "FUT";
   contract.secType = "STK";
   //contract.symbol = "GC";
@@ -85,6 +66,11 @@ void Operation::Start( double dblAmountToTrade ) {
 
 }
 
+void Operation::Stop( void ) {
+  // may want to close positions, save values, etc.
+  StopWatch();
+}
+
 void Operation::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {
   m_pInstrument = pInstrument;
   //m_pInstrument->SetAlternateName( m_piqfeed->ID(), "+GCZ11" );
@@ -94,7 +80,7 @@ void Operation::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& 
 }
 
 void Operation::HandleIBContractDetailsDone( void ) {
-  //this->Connect();  // meant to start history download, no longer necessary
+  StartWatch();
 }
 
 void Operation::StartWatch( void ) {
@@ -116,10 +102,12 @@ void Operation::HandleQuote( const ou::tf::CQuote& quote ) {
   }
   assert( is.bDaySession || is.bMarketHoursCrossMidnight );
   is.quotes.Append( quote );
-  is.stochFast.Update();
-  is.stochMed.Update();
   is.stochSlow.Update();
-  is.statsFast.Update();
+  is.stochMed.Update();
+  is.stochFast.Update();
+  //is.statsFast.Update();
+  is.statsMed.Update();
+  //is.statsSlow.Update();
   m_md.process_event( ou::tf::EvQuote( quote ) );
 }
 
@@ -178,12 +166,13 @@ sc::result Operation::StateMarketOpen::Handle( const EvTrade& trade ) {
     if ( is.vZeroMarks.end() == is.iterZeroMark ) 
       throw std::runtime_error( "can't find our zero mark" );
   }
-  is.iterNextMark = is.iterZeroMark;
+  is.iterNextMark = is.iterZeroMark;  // set next same as zero as don't know which direction next will be
   //return transit<App::StatePreTrading>();
   return transit<Operation::StateTrading>();
 }
 
-sc::result Operation::StatePreTrading::Handle( const EvQuote& quote ) {
+sc::result Operation::StatePreTrading::Handle( const EvQuote& quote ) {  // not currently used
+
   InstrumentState& is( context<Operation::MachineMarketStates>().data );
 
   if ( quote.Quote().DateTime() >= is.dtPreTradingStop ) {
@@ -195,6 +184,7 @@ sc::result Operation::StatePreTrading::Handle( const EvQuote& quote ) {
 
 sc::result Operation::StateCancelOrders::Handle( const EvQuote& quote ) {
   InstrumentState& is( context<Operation::MachineMarketStates>().data );
+  is.pPosition->CancelOrders();
   return transit<Operation::StateCancelOrdersIdle>();
 }
 
@@ -211,6 +201,7 @@ sc::result Operation::StateCancelOrdersIdle::Handle( const EvQuote& quote ) {
 
 sc::result Operation::StateClosePositions::Handle( const EvQuote& quote ) {
   InstrumentState& is( context<Operation::MachineMarketStates>().data );
+  is.pPosition->ClosePosition();
   return transit<Operation::StateClosePositionsIdle>();
 }
 
@@ -256,7 +247,7 @@ sc::result Operation::StateZeroPosition::Handle( const EvQuote& quote ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     std::cout << "Zero Position going long" << std::endl;
     // go long
-    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     return transit<Operation::StateLong>();
   }
   else {
@@ -265,7 +256,7 @@ sc::result Operation::StateZeroPosition::Handle( const EvQuote& quote ) {
       if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       std::cout << "Zero Position going short" << std::endl;
       // go short
-      is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+      is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
       return transit<Operation::StateShort>();
     }
   }
@@ -293,8 +284,8 @@ sc::result Operation::StateLong::Handle( const EvQuote& quote ) {
     if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
     std::cout << "long going short" << std::endl;
     // go short
-    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
+    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
     return transit<Operation::StateShort>();
   }
   else {
@@ -330,8 +321,8 @@ sc::result Operation::StateShort::Handle( const EvQuote& quote ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     std::cout << "short going long" << std::endl;
     // go long
-    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
+    is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     return transit<Operation::StateLong>();
   }
   else {
@@ -339,11 +330,38 @@ sc::result Operation::StateShort::Handle( const EvQuote& quote ) {
       if ( is.iterZeroMark != is.iterNextMark ) {
         is.iterZeroMark = is.iterNextMark;
         std::cout << "short crossing next zero: " << *is.iterZeroMark << std::endl;
-        if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark --;
+        if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       }
     }
   }
 
   return discard_event();
+}
+
+void Operation::SaveSeries( const std::string& sPrefix ) {
+
+  InstrumentState& is( m_md.data );
+
+  std::string sPathName;
+
+//  CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+
+  if ( 0 != is.quotes.Size() ) {
+    sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+    wtsQuotes.Write( sPathName, &is.quotes );
+    ou::tf::CHDF5Attributes attrQuotes( sPathName, ou::tf::InstrumentType::Stock );
+    //CHDF5Attributes attrQuotes( sPathName, future );
+    attrQuotes.SetProviderType( m_piqfeed->ID() );
+  }
+
+  if ( 0 != is.trades.Size() ) {
+    sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+    wtsTrades.Write( sPathName, &is.trades );
+    ou::tf::CHDF5Attributes attrTrades( sPathName, ou::tf::InstrumentType::Stock );
+    //CHDF5Attributes attrTrades( sPathName, future );
+    attrTrades.SetProviderType( m_piqfeed->ID() );
+  }
 }
 

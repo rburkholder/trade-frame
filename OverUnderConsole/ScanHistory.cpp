@@ -46,7 +46,7 @@ void ScanHistory::Run( void ) {
   this->SetMaxSimultaneousQueries( 15 );
   DailyBars( m_nRequestedBars );
 
-  // need to wait here, so need a thread, or something.
+  // need to wait here for async history request to complete
   m_barrier.wait();
 }
 
@@ -69,8 +69,8 @@ void ScanHistory::Process( const ou::tf::structSymbolRecord& sym ) {
 void ScanHistory::OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP ) {
   bool& bPass( m_mapSymbolInfo[ pqs->bars->sSymbol ].bPass );
   if ( 1000000 > pDP->PeriodVolume ) bPass = false;
-  if ( 30 > pDP->Close ) bPass = false;
-  if ( 100 < pDP->Close ) bPass = false;
+  if ( 35 > pDP->Close ) bPass = false;
+  if ( 120 < pDP->Close ) bPass = false;
 }
 
 void ScanHistory::OnHistoryRequestDone( structQueryState* pqs ) {

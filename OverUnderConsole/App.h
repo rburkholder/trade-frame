@@ -25,7 +25,7 @@ using namespace boost::gregorian;
 #include <boost/shared_ptr.hpp>
 
 #include <TFTrading/ProviderManager.h>
-#include <TFTrading/OrderManager.h>
+//#include <TFTrading/OrderManager.h>
 
 #include "Operation.h"
 
@@ -51,6 +51,8 @@ private:
   boost::thread m_asioThread;
   boost::asio::io_service m_io;
   boost::asio::io_service::work* m_pwork;
+
+  std::string m_sTSDataStreamOpened;
 
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;

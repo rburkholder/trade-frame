@@ -19,63 +19,10 @@
 // history comes before provider
 #include <TFIQFeed/IQFeedHistoryQuery.h>
 #include <TFIQFeed/IQFeedProvider.h>
-#include <TFTrading/Position.h>
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/MarketStates.h>
-#include <TFIndicators/TSSWStochastic.h>
-#include <TFIndicators/TSSWStats.h>
-#include <TFIndicators/Pivots.h>
-#include <TFTimeSeries/TimeSeries.h>
 
-struct InstrumentState {
-
-  InstrumentState( void );
-  ~InstrumentState( void ) {};
-
-  double dblAmountToTrade;
-
-  ou::tf::CQuotes quotes;
-  ou::tf::CTrades trades;
-
-  ou::tf::CTrades history;
-
-  double dblOpen, dblHigh, dblLow, dblClose;
-
-  double dblMidQuoteAtOpen;
-  double dblOpeningTrade;
-
-  ou::tf::TSSWStochastic stochFast;
-  ou::tf::TSSWStochastic stochMed;
-  ou::tf::TSSWStochastic stochSlow;
-
-  ou::tf::TSSWStatsMidQuote statsFast;
-  ou::tf::TSSWStatsMidQuote statsMed;
-  ou::tf::TSSWStatsMidQuote statsSlow;
-
-  //ou::tf::CPivotSet pivots;
-
-  time_duration tdMarketOpen;
-  time_duration tdMarketOpenIdle;
-  //time_duration tdMarketTrading;
-  time_duration tdCancelOrders;
-  time_duration tdClosePositions;
-  time_duration tdAfterMarket;
-  time_duration tdMarketClosed;
-
-  ptime dtPreTradingStop;
-
-  ou::tf::CPosition::pPosition_t pPosition;
-
-  bool bMarketHoursCrossMidnight;
-  bool bDaySession;
-
-  typedef std::vector<double> vZeroMark_t;
-  typedef vZeroMark_t::const_iterator vZeroMark_iter_t;
-  vZeroMark_t vZeroMarks;
-  vZeroMark_iter_t iterZeroMark;
-  vZeroMark_iter_t iterNextMark; // relative to the zero mark, if long, higher mark, if short, lower mark
-};
-
+#include "InstrumentState.h"
 
 class Operation {
 public:
@@ -89,7 +36,11 @@ public:
   Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t, ou::tf::CIBTWS::pProvider_t );
   ~Operation(void);
 
+  unsigned int CalcShareCount( double dblFunds );
+  bool& ToBeTraded( void ) { return m_bToBeTraded; };
   void Start( double dblAmountToTrade );
+  void SaveSeries( const std::string& sPrefix );
+  void Stop( void );
 
   // ===================== State Chart
   struct StateInitialization;
@@ -169,6 +120,8 @@ private:
   ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
 
   ou::tf::CInstrument::pInstrument_t m_pInstrument;
+
+  bool m_bToBeTraded;
 
   void StartWatch( void );
   void StopWatch( void );
