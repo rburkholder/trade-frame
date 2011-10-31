@@ -12,12 +12,11 @@
  ************************************************************************/
 
 // ImportIQFeedSymbolFile.cpp : Defines the entry point for the console application.
-//
+// http://www.dtniq.com/product/mktsymbols_v2.zip
 
 #include "stdafx.h"
 
 #include <TFIQFeed\IQFeedSymbolFile.h>
-
 
 int _tmain(int argc, _TCHAR* argv[]) {
 

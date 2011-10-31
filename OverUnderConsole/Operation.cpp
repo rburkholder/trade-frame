@@ -31,8 +31,8 @@ Operation::~Operation(void) {
 }
 
 unsigned int Operation::CalcShareCount( double dblFunds ) {
-  InstrumentState& is( m_md.data );
-  return ( static_cast<unsigned int>( dblFunds / is.dblClose ) / 100 ) * 100;  // round to nearest 100
+  //InstrumentState& is( m_md.data );
+  return ( static_cast<unsigned int>( dblFunds / m_si.dblClose ) / 100 ) * 100;  // round to nearest 100
 }
 
 void Operation::Start( double dblAmountToTrade ) {
@@ -42,7 +42,7 @@ void Operation::Start( double dblAmountToTrade ) {
   is.vZeroMarks.push_back( m_si.R3 );
   is.vZeroMarks.push_back( m_si.R2 );
   is.vZeroMarks.push_back( m_si.R1 );
-//  is.vZeroMarks.push_back( m_si.PV );  // should we or should we not include this as a trading level?
+  is.vZeroMarks.push_back( m_si.PV );
   is.vZeroMarks.push_back( m_si.S1 );
   is.vZeroMarks.push_back( m_si.S2 );
   is.vZeroMarks.push_back( m_si.S3 );

@@ -130,9 +130,9 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
     }
   }
 
-  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
-  //if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
-  if ( quote.Quote().Bid() > *is.iterZeroMark ) {
+  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  if ( ( 0 < is.statsMed.Slope() ) && ( mid > is.dblOpeningTrade ) && ( 0 < is.statsMed.Accel() ) ) {
+  //if ( quote.Quote().Bid() > *is.iterZeroMark ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     std::cout << "Zero Position going long" << std::endl;
     // go long
@@ -140,8 +140,8 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
     return transit<StateLong>();
   }
   else {
-    //if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
-    if ( quote.Quote().Ask() < *is.iterZeroMark ) {
+    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) && ( 0 > is.statsMed.Accel() ) ) {
+    //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
       if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       std::cout << "Zero Position going short" << std::endl;
       // go short
@@ -165,10 +165,10 @@ sc::result StateLong::Handle( const EvQuote& quote ) {
     return discard_event();
   }
 
-  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  //if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) ) {
-  if ( quote.Quote().Ask() < *is.iterZeroMark ) {
+  if ( ( 0 > is.statsFast.Slope() ) && ( mid < *is.iterZeroMark ) && ( 0 > is.statsMed.Accel() ) ) {
+  //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
     std::cout << "long going short" << std::endl;
@@ -204,10 +204,10 @@ sc::result StateShort::Handle( const EvQuote& quote ) {
     return discard_event();
   }
 
-  //double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+  double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  //if ( ( 0 < is.statsFast.Slope() ) && ( mid > is.dblOpeningTrade ) ) {
-  if ( quote.Quote().Bid() > *is.iterZeroMark ) {
+  if ( ( 0 < is.statsMed.Slope() ) && ( mid > *is.iterZeroMark ) && ( 0 < is.statsMed.Accel() ) ) {
+  //if ( quote.Quote().Bid() > *is.iterZeroMark ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     std::cout << "short going long" << std::endl;

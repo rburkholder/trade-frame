@@ -650,13 +650,13 @@ void CIBTWS::contractDetailsEnd( int reqId ) {
     handler = iterRequest->second->fDone;
     m_vInActiveRequestId.push_back( iterRequest->second );
     m_mapActiveRequestId.erase( iterRequest );
-    while ( 0 != m_mapActiveRequestId.size() ) {
+//    while ( 0 != m_mapActiveRequestId.size() ) {
       // check for expired / ignored requests
-      iterRequest = m_mapActiveRequestId.begin();
-      if ( id < iterRequest->second->id ) break;
-      m_vInActiveRequestId.push_back( iterRequest->second );
-      m_mapActiveRequestId.erase( iterRequest );
-    }
+//      iterRequest = m_mapActiveRequestId.begin();
+//      if ( id < iterRequest->second->id ) break;
+//      m_vInActiveRequestId.push_back( iterRequest->second );
+//      m_mapActiveRequestId.erase( iterRequest );
+//    }
   }
   if ( NULL != handler ) 
     handler();

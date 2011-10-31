@@ -32,7 +32,7 @@ struct InstrumentState {
 
   ou::tf::CTrades history;
 
-  double dblOpen, dblHigh, dblLow, dblClose;
+  //double dblOpen, dblHigh, dblLow, dblClose;
 
   double dblMidQuoteAtOpen;
   double dblOpeningTrade;
