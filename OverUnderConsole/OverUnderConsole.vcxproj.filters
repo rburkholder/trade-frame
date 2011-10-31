@@ -36,6 +36,12 @@
     <ClInclude Include="InstrumentState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SignalsWithQuotes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StatesOfTrading.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -54,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InstrumentState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalsWithQuotes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StatesOfTrading.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
