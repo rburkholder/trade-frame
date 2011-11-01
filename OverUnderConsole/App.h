@@ -18,14 +18,9 @@
 
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/asio.hpp>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 #include <boost/shared_ptr.hpp>
 
 #include <TFTrading/ProviderManager.h>
-//#include <TFTrading/OrderManager.h>
 
 #include "Operation.h"
 
@@ -52,7 +47,7 @@ private:
   boost::asio::io_service m_io;
   boost::asio::io_service::work* m_pwork;
 
-  std::string m_sTSDataStreamOpened;
+  std::string m_sTSDataStreamStarted;
 
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;

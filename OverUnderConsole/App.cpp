@@ -46,7 +46,7 @@ void App::Run( void ) {
   std::stringstream ss;
   ss.str( "" );
   ss << ou::CTimeSource::Instance().Internal();
-  m_sTSDataStreamOpened = "/app/OverUnderConsole/" + ss.str();  // will need to make this generic if need some for multiple providers.
+  m_sTSDataStreamStarted = "/app/OverUnderConsole/" + ss.str();  // will need to make this generic if need some for multiple providers.
 
   m_ptws->Connect();
   m_piqfeed->Connect();
@@ -66,7 +66,7 @@ void App::Run( void ) {
     }
     if ( "a" == s ) { // save quotes/trades
       for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
-        (*iter)->SaveSeries( m_sTSDataStreamOpened );
+        (*iter)->SaveSeries( m_sTSDataStreamStarted );
       }
     }
     if ( "c" == s ) { // close position

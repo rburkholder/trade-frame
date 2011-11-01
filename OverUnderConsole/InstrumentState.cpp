@@ -36,7 +36,7 @@ InstrumentState::InstrumentState( void ):
 // following are specific for standard equities
 InstrumentState::InstrumentState( void ):
   tdMarketOpen( time_duration( 10, 30, 0 ) ), // time relative to day  // pick up from symbol
-  tdMarketOpenIdle( time_duration( 0, 0, 30 ) ),  // time relative to tdMarketOpen to allow initial collection of data
+  tdMarketOpenIdle( time_duration( 0, 0, 45 ) ),  // time relative to tdMarketOpen to allow initial collection of data
   tdCancelOrders( time_duration( 16, 50, 0 ) ),// time relative to day
   tdClosePositions( time_duration( 16, 51, 0 ) ),// time relative to day
   tdAfterMarket( time_duration( 17, 0, 0 ) ), // time relative to day

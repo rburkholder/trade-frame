@@ -153,6 +153,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OverUnderConsole", "OverUnd
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFBitsNPieces", "lib\TFBitsNPieces\TFBitsNPieces.vcxproj", "{A088239C-5653-418E-B7CA-E1114FD93BC7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TradeGC", "TradeGC\TradeGC.vcxproj", "{AF84BDFB-A21B-4268-AA89-78F0C0E14DF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -291,6 +293,10 @@ Global
 		{A088239C-5653-418E-B7CA-E1114FD93BC7}.Debug|Win32.Build.0 = Debug|Win32
 		{A088239C-5653-418E-B7CA-E1114FD93BC7}.Release|Win32.ActiveCfg = Release|Win32
 		{A088239C-5653-418E-B7CA-E1114FD93BC7}.Release|Win32.Build.0 = Release|Win32
+		{AF84BDFB-A21B-4268-AA89-78F0C0E14DF6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AF84BDFB-A21B-4268-AA89-78F0C0E14DF6}.Debug|Win32.Build.0 = Debug|Win32
+		{AF84BDFB-A21B-4268-AA89-78F0C0E14DF6}.Release|Win32.ActiveCfg = Release|Win32
+		{AF84BDFB-A21B-4268-AA89-78F0C0E14DF6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

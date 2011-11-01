@@ -56,8 +56,8 @@ sc::result StateMarketOpen::Handle( const EvTrade& trade ) {
       throw std::runtime_error( "can't find our zero mark" );
   }
   is.iterNextMark = is.iterZeroMark;  // set next same as zero as don't know which direction next will be
-  //return transit<App::StatePreTrading>();
-  return transit<StateTrading>();
+  return transit<StatePreTrading>();
+  //return transit<StateTrading>();
 }
 
 sc::result StatePreTrading::Handle( const EvQuote& quote ) {  // not currently used
@@ -131,16 +131,17 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
   }
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
-  if ( ( 0 < is.statsMed.Slope() ) && ( mid > is.dblOpeningTrade ) && ( 0 < is.statsMed.Accel() ) ) {
+  if ( ( 0 < is.statsMed.Slope() ) && ( mid > is.dblOpeningTrade ) /*&& ( 0 < is.statsMed.Accel() ) */) {
   //if ( quote.Quote().Bid() > *is.iterZeroMark ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+    if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
     std::cout << "Zero Position going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     return transit<StateLong>();
   }
   else {
-    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade ) && ( 0 > is.statsMed.Accel() ) ) {
+    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade )/* && ( 0 > is.statsMed.Accel() )*/ ) {
     //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
       if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       std::cout << "Zero Position going short" << std::endl;
@@ -167,7 +168,7 @@ sc::result StateLong::Handle( const EvQuote& quote ) {
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  if ( ( 0 > is.statsFast.Slope() ) && ( mid < *is.iterZeroMark ) && ( 0 > is.statsMed.Accel() ) ) {
+  if ( ( 0 > is.statsFast.Slope() ) && ( mid < *is.iterZeroMark ) /*&& ( 0 > is.statsMed.Accel() )*/ ) {
   //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
@@ -183,6 +184,7 @@ sc::result StateLong::Handle( const EvQuote& quote ) {
         is.iterZeroMark = is.iterNextMark;
         std::cout << "long crossing next zero: " << *is.iterZeroMark << std::endl;
         if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+        if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
       }
     }
   }
@@ -206,10 +208,11 @@ sc::result StateShort::Handle( const EvQuote& quote ) {
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  if ( ( 0 < is.statsMed.Slope() ) && ( mid > *is.iterZeroMark ) && ( 0 < is.statsMed.Accel() ) ) {
+  if ( ( 0 < is.statsMed.Slope() ) && ( mid > *is.iterZeroMark ) /*&& ( 0 < is.statsMed.Accel() )*/ ) {
   //if ( quote.Quote().Bid() > *is.iterZeroMark ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
+    if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
     std::cout << "short going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
