@@ -599,7 +599,7 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
       std::runtime_error( "different time zone to deal with" );
     }
 
-    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
+//    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
 
     DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
     pInstrument->SetTimeTrading( 
@@ -607,7 +607,7 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
       tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
       );
 
-    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
+//    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
 
     DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
     pInstrument->SetTimeLiquid( 
@@ -615,7 +615,7 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
       tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
       );
 
-    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
+//    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
 
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }

@@ -47,17 +47,8 @@ sc::result StatePreMarket::Handle( const EvTrade& trade ) {
 sc::result StateMarketOpen::Handle( const EvTrade& trade ) {
   InstrumentState& is( context<MachineMarketStates>().data );
   is.dblOpeningTrade = trade.Trade().Trade();
-  is.vZeroMarks.push_back( is.dblOpeningTrade );
-  std::sort( is.vZeroMarks.begin(), is.vZeroMarks.end() );
-  is.iterZeroMark = is.vZeroMarks.begin();
-  while ( is.dblOpeningTrade != *is.iterZeroMark ) {
-    is.iterZeroMark++;
-    if ( is.vZeroMarks.end() == is.iterZeroMark ) 
-      throw std::runtime_error( "can't find our zero mark" );
-  }
-  is.iterNextMark = is.iterZeroMark;  // set next same as zero as don't know which direction next will be
+  std::cout << trade.Trade().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << "Open " << is.dblOpeningTrade << std::endl;
   return transit<StatePreTrading>();
-  //return transit<StateTrading>();
 }
 
 sc::result StatePreTrading::Handle( const EvQuote& quote ) {  // not currently used
@@ -131,27 +122,43 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
   }
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
-  if ( ( 0 < is.statsMed.Slope() ) && ( mid > is.dblOpeningTrade ) /*&& ( 0 < is.statsMed.Accel() ) */) {
+
+  is.vZeroMarks.push_back( mid );
+  std::sort( is.vZeroMarks.begin(), is.vZeroMarks.end() );
+  is.iterZeroMark = is.vZeroMarks.begin();
+  while ( mid != *is.iterZeroMark ) {
+    is.iterZeroMark++;
+    if ( is.vZeroMarks.end() == is.iterZeroMark ) 
+      throw std::runtime_error( "can't find our zero mark" );
+  }
+  is.iterNextMark = is.iterZeroMark;  // set next same as zero as don't know which direction next will be
+
+  std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() 
+    << "Opening Order mid@" << mid << ", slope@" << is.statsMed.Slope() << " ";
+
+  if ( ( 0 < is.statsMed.Slope() ) /*&& ( mid > is.dblOpeningTrade )*/ /*&& ( 0 < is.statsMed.Accel() ) */) {
   //if ( quote.Quote().Bid() > *is.iterZeroMark ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
-    std::cout << "Zero Position going long" << std::endl;
+    std::cout << "going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     return transit<StateLong>();
   }
   else {
-    if ( ( 0 > is.statsFast.Slope() ) && ( mid < is.dblOpeningTrade )/* && ( 0 > is.statsMed.Accel() )*/ ) {
+    if ( ( 0 > is.statsMed.Slope() ) /*&& ( mid < is.dblOpeningTrade )*/ /* && ( 0 > is.statsMed.Accel() )*/ ) {
     //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
       if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
-      std::cout << "Zero Position going short" << std::endl;
+      std::cout << "going short" << std::endl;
       // go short
       is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
       return transit<StateShort>();
     }
   }
 
-  return discard_event();
+  std::cout << " -- no order, quiescent" << std::endl;
+  
+  return transit<StateAfterMarket>();
 }
 
 sc::result StateLong::Handle( const EvQuote& quote ) {
@@ -168,11 +175,11 @@ sc::result StateLong::Handle( const EvQuote& quote ) {
 
   double mid = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
 
-  if ( ( 0 > is.statsFast.Slope() ) && ( mid < *is.iterZeroMark ) /*&& ( 0 > is.statsMed.Accel() )*/ ) {
+  if ( ( 0 > is.statsMed.Slope() ) && ( mid < *is.iterZeroMark ) /*&& ( 0 > is.statsMed.Accel() )*/ ) {
   //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
-    std::cout << "long going short" << std::endl;
+    std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " long going short" << std::endl;
     // go short
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
@@ -182,7 +189,7 @@ sc::result StateLong::Handle( const EvQuote& quote ) {
     if ( quote.Quote().Ask() >= *is.iterNextMark ) {
       if ( is.iterZeroMark != is.iterNextMark ) {
         is.iterZeroMark = is.iterNextMark;
-        std::cout << "long crossing next zero: " << *is.iterZeroMark << std::endl;
+        std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " long crossing next zero: " << *is.iterZeroMark << std::endl;
         if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
         if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
       }
@@ -213,7 +220,7 @@ sc::result StateShort::Handle( const EvQuote& quote ) {
     is.iterNextMark = is.iterZeroMark;
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
-    std::cout << "short going long" << std::endl;
+    std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " short going long" << std::endl;
     // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
@@ -223,7 +230,7 @@ sc::result StateShort::Handle( const EvQuote& quote ) {
     if ( quote.Quote().Bid() <= *is.iterNextMark ) {
       if ( is.iterZeroMark != is.iterNextMark ) {
         is.iterZeroMark = is.iterNextMark;
-        std::cout << "short crossing next zero: " << *is.iterZeroMark << std::endl;
+        std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " short crossing next zero: " << *is.iterZeroMark << std::endl;
         if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       }
     }

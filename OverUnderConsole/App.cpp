@@ -109,7 +109,7 @@ void App::Connected( int i ) {
 
     unsigned int cntToBeTraded = 0;
     for ( vOperation_t::iterator iter = m_vOperation.begin(); m_vOperation.end() != iter; iter++ ) {
-      if ( 100 <= (*iter)->CalcShareCount( dblAmountToTradePerSymbol ) ) {
+      if ( 200 <= (*iter)->CalcShareCount( dblAmountToTradePerSymbol ) ) {
         cntToBeTraded++;
         (*iter)->ToBeTraded() = true;
       }
@@ -152,6 +152,6 @@ void App::SelectTradeableSymbols( void ) {
 
 void App::AppendTradeableSymbol( const Operation::structSymbolInfo& si ) {
   pOperation_t p( new Operation( si, m_piqfeed, m_ptws ) );
-  //std::cout << si.sName << std::endl;
+  std::cout << "Tradeable Symbol: " << si.sName << std::endl;
   m_vOperation.push_back( p );
 }
