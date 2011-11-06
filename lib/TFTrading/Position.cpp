@@ -278,7 +278,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
           m_row.dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Sell:  // decrease long
-          assert( m_row.nPositionActive >= exec.GetSize() );
+//          assert( m_row.nPositionActive >= exec.GetSize() );
           dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
           dblRealizedPL = exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_row.dblRealizedPL += dblRealizedPL;
@@ -299,7 +299,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
           m_row.dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
           break;
         case OrderSide::Buy:  // decrease short
-          assert( m_row.nPositionActive >= exec.GetSize() );
+//          assert( m_row.nPositionActive >= exec.GetSize() );
           dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
           dblRealizedPL = exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_row.dblRealizedPL += dblRealizedPL;

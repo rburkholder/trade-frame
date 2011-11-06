@@ -11,15 +11,22 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+// Strategy1.cpp : Defines the entry point for the application.
+//
 
-#include "App.h"
+#include "stdafx.h"
 
-App::App(void) {
+#include "Strategy1.h"
+
+IMPLEMENT_APP(AppStrategy1)
+
+bool AppStrategy1::OnInit() {
+  m_pStrategy = new Strategy;
+  m_pStrategy->Start( "" );
+  return 1;
 }
 
-App::~App(void) {
-}
-
-void App::Run( void ) {
+int AppStrategy1::OnExit() {
+  delete m_pStrategy;
+  return 0;
 }

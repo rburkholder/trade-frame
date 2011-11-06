@@ -81,7 +81,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CrossThreadMerge.h" />
+    <ClInclude Include="CrossThreadMerge.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="SimulateOrderExecution.h" />
     <ClInclude Include="SimulationProvider.h" />
     <ClInclude Include="SimulationSymbol.h" />

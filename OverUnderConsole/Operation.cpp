@@ -100,6 +100,8 @@ void Operation::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( is.bMarketHoursCrossMidnight ) {
     is.bDaySession = quote.DateTime().time_of_day() <= is.tdMarketClosed;
   }
+//  is.bDaySession = ( quote.DateTime().time_of_day() >= is.pPosition->GetInstrument()->GetTimeTrading().begin().time_of_day() )
+//    && ( quote.DateTime().time_of_day() < is.pPosition->GetInstrument()->GetTimeTrading().last().time_of_day() );
   assert( is.bDaySession || is.bMarketHoursCrossMidnight );
   is.quotes.Append( quote );
   is.stochSlow.Update();
@@ -113,9 +115,9 @@ void Operation::HandleQuote( const ou::tf::CQuote& quote ) {
 
 void Operation::HandleTrade( const ou::tf::CTrade& trade ) {
   InstrumentState& is( m_md.data );
-  if ( is.bMarketHoursCrossMidnight ) {
-    is.bDaySession = trade.DateTime().time_of_day() <= is.tdMarketClosed;
-  }
+//  if ( is.bMarketHoursCrossMidnight ) {
+//    is.bDaySession = trade.DateTime().time_of_day() <= is.tdMarketClosed;
+//  }
   assert( is.bDaySession || is.bMarketHoursCrossMidnight );
   is.trades.Append( trade );
   m_md.process_event( ou::tf::EvTrade( trade ) );

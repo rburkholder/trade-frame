@@ -16,6 +16,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+    <None Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Strategy1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,7 +30,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="App.h">
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Strategy1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Strategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,11 +44,16 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TradeGC.cpp">
+    <ClCompile Include="Strategy1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="App.cpp">
+    <ClCompile Include="Strategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Strategy1.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

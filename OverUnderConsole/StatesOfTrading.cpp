@@ -18,12 +18,17 @@ sc::result StatePreMarket::Handle( const EvQuote& quote ) {  // requires quotes 
   if ( is.bMarketHoursCrossMidnight && is.bDaySession ) { // transit
     is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
     is.dblMidQuoteAtOpen = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+    std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " PreMarket A -> Open" << std::endl;
     return transit<StateMarketOpen>();  // late but transit anyway
   }
   else { // test
+    std::stringstream s;
+    s << quote.Quote().DateTime().time_of_day() << " " << is.tdMarketOpen;
+    std::string ss( s.str() );
     if ( quote.Quote().DateTime().time_of_day() >= is.tdMarketOpen ) {
       is.dtPreTradingStop = quote.Quote().DateTime() + is.tdMarketOpenIdle;
       is.dblMidQuoteAtOpen = ( quote.Quote().Ask() + quote.Quote().Bid() ) / 2.0;
+      std::cout << quote.Quote().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " PreMarket B -> Open" << std::endl;
       return transit<StateMarketOpen>();
     }
   }
@@ -47,7 +52,7 @@ sc::result StatePreMarket::Handle( const EvTrade& trade ) {
 sc::result StateMarketOpen::Handle( const EvTrade& trade ) {
   InstrumentState& is( context<MachineMarketStates>().data );
   is.dblOpeningTrade = trade.Trade().Trade();
-  std::cout << trade.Trade().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << "Open " << is.dblOpeningTrade << std::endl;
+  std::cout << trade.Trade().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " Open " << is.dblOpeningTrade << std::endl;
   return transit<StatePreTrading>();
 }
 
@@ -141,7 +146,6 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
     if ( is.vZeroMarks.end() != is.iterZeroMark ) is.iterNextMark++;
     if ( is.vZeroMarks.end() == is.iterNextMark ) is.iterNextMark--;  // how does this effect issues?
     std::cout << "going long" << std::endl;
-    // go long
     is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, is.nSharesToTrade );
     return transit<StateLong>();
   }
@@ -150,7 +154,6 @@ sc::result StateZeroPosition::Handle( const EvQuote& quote ) {
     //if ( quote.Quote().Ask() < *is.iterZeroMark ) {
       if ( is.vZeroMarks.begin() != is.iterZeroMark ) is.iterNextMark--;
       std::cout << "going short" << std::endl;
-      // go short
       is.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, is.nSharesToTrade );
       return transit<StateShort>();
     }

@@ -12,12 +12,22 @@
  ************************************************************************/
 
 #pragma once
-class App {
+
+#include "Strategy.h"
+
+class AppStrategy1:
+  public wxApp
+{
 public:
-  App(void);
-  ~App(void);
-  void Run( void );
 protected:
 private:
+
+  Strategy* m_pStrategy;
+
+  virtual bool OnInit();
+  virtual int OnExit();
 };
+
+// Implements MyApp& wxGetApp()
+DECLARE_APP(AppStrategy1)
 
