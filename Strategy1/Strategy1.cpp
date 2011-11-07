@@ -21,12 +21,29 @@
 IMPLEMENT_APP(AppStrategy1)
 
 bool AppStrategy1::OnInit() {
+
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Strategy Simulator" );
+  m_pFrameMain->Center();
+  m_pFrameMain->Show( true );
+  SetTopWindow( m_pFrameMain );
+
+  m_pPanelSimulationControl = new PanelSimulationControl( m_pFrameMain, wxID_ANY );
+  m_pPanelSimulationControl->Show( true );
+
+  m_pPanelSimulationControl->SetOnStartSimulation( MakeDelegate( this, &AppStrategy1::HandleBtnSimulationStart) );
+
   m_pStrategy = new Strategy;
-  m_pStrategy->Start( "" );
+
   return 1;
+
 }
 
 int AppStrategy1::OnExit() {
-  delete m_pStrategy;
+//  m_pPanelSimulationControl->SetOnStartSimulation(0 );
+//  delete m_pStrategy;
   return 0;
+}
+
+void AppStrategy1::HandleBtnSimulationStart( void ) {
+  m_pStrategy->Start( "" );
 }

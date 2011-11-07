@@ -20,10 +20,8 @@
 HistoryDailyTick::HistoryDailyTick(void) {
 }
 
-
 HistoryDailyTick::~HistoryDailyTick(void) {
 }
-
 
 void HistoryDailyTick::OnHistoryConnected( void ) {
   InstrumentState& is( m_md.data );
@@ -65,11 +63,4 @@ void HistoryDailyTick::OnHistoryRequestDone( void ) {
   std::cout << "History complete" << std::endl;
   StartStateMachine();
 }
-
-void HistoryDailyTick::OnHistoryRequestDone( void ) {
-  InstrumentState& is( m_md.data );
-  std::cout << "History complete" << std::endl;
-  StartStateMachine();
-}
-
 

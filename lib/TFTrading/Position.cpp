@@ -13,8 +13,9 @@
 
 #include "StdAfx.h"
 
-#include "Position.h"
 #include "OrderManager.h"
+
+#include "Position.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -143,7 +144,7 @@ void CPosition::HandleQuote( quote_t quote ) {
       break;
     case OrderSide::Sell:
       m_row.dblMarketValue = - ( m_row.nPositionActive * quote.Ask() ) * m_dblMultiplier;
-      m_row.dblUnRealizedPL = m_row.dblConstructedValue - m_row.dblMarketValue;
+      m_row.dblUnRealizedPL = m_row.dblMarketValue - m_row.dblConstructedValue;
       bProcessed = true;
       break;
   }
@@ -234,15 +235,15 @@ void CPosition::CancelOrders( void ) {
   m_OpenOrders.clear();
 }
 
-void CPosition::ClosePosition( void ) {
+void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
   // should outstanding orders be auto cancelled?
-  // position is closed with a market order, can try to do limit in the futre, but need active market data
+  // position is closed with a market order, can try to do limit in the future, but need active market data
   switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
-      PlaceOrder( OrderType::Market, OrderSide::Sell, m_row.nPositionActive );
+      PlaceOrder( eOrderType, OrderSide::Sell, m_row.nPositionActive );
       break;
     case OrderSide::Sell:
-      PlaceOrder( OrderType::Market, OrderSide::Buy, m_row.nPositionActive );
+      PlaceOrder( eOrderType, OrderSide::Buy, m_row.nPositionActive );
       break;
     case OrderSide::Unknown:
       break;
@@ -283,7 +284,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
           dblRealizedPL = exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_row.dblRealizedPL += dblRealizedPL;
           m_row.nPositionActive -= exec.GetSize();
-          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost;
+          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost * m_dblMultiplier;
           //m_dblConstructedValue -= ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier - dblRealizedPL );
           if ( 0 == m_row.nPositionActive ) {
             m_row.eOrderSideActive = OrderSide::Unknown;
@@ -304,7 +305,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
           dblRealizedPL = exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
           m_row.dblRealizedPL += dblRealizedPL;
           m_row.nPositionActive -= exec.GetSize();
-          m_row.dblConstructedValue += exec.GetSize() * dblAvgConstructedCost;
+          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost * m_dblMultiplier;
           //m_dblConstructedValue += ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier + dblRealizedPL );  // is this correctly calculated?
           if ( 0 == m_row.nPositionActive ) {
             m_row.eOrderSideActive = OrderSide::Unknown;
@@ -313,7 +314,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
           break;
       }
       break;
-    case OrderSide::Unknown:
+    case OrderSide::Unknown:  // no active position, so start here
       assert( 0 == m_row.nPositionActive );
       m_row.eOrderSideActive = exec.GetOrderSide();
       m_row.nPositionActive = exec.GetSize();
@@ -356,7 +357,7 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
   
 }
 
-void CPosition::EmitStatus( std::stringstream& ssStatus ) {
+void CPosition::EmitStatus( std::stringstream& ssStatus ) const {
   ssStatus 
     << "Position " << m_pInstrument->GetInstrumentName() << ": "
     << "Active " << m_row.nPositionActive

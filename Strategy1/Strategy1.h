@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include "FrameMain.h"
+#include "PanelSimulationControl.h"
+
 #include "Strategy.h"
 
 class AppStrategy1:
@@ -24,8 +27,14 @@ private:
 
   Strategy* m_pStrategy;
 
+  FrameMain* m_pFrameMain;
+  PanelSimulationControl* m_pPanelSimulationControl;
+
   virtual bool OnInit();
   virtual int OnExit();
+
+  void HandleBtnSimulationStart( void );
+
 };
 
 // Implements MyApp& wxGetApp()

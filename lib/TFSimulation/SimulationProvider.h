@@ -20,6 +20,9 @@
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include <OUCommon/TimeSource.h>
 #include <TFTrading/ProviderInterface.h>
 #include <TFTrading/Order.h>
@@ -73,6 +76,11 @@ public:
 
   void EmitStats( std::stringstream& ss );
 
+  typedef FastDelegate0<> OnSimulationComplete_t;
+  void SetOnSimulationComplete( OnSimulationComplete_t function ) {
+    m_OnSimulationComplete = function;
+  }
+
 protected:
 
   enumExecuteAgainst m_ea;
@@ -90,6 +98,8 @@ protected:
   std::string m_sGroupDirectory;
 
   CMergeDatedDatums *m_pMerge;
+
+  OnSimulationComplete_t m_OnSimulationComplete;
 
   void Merge( void );  // the background thread
 

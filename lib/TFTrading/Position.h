@@ -199,14 +199,14 @@ public:
     double dblPrice2
     );
   void CancelOrders( void );
-  void ClosePosition( void );
+  void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
   ou::Delegate<const CPosition*> OnQuote;
   ou::Delegate<const CPosition*> OnTrade;  // nothing useful currently
   ou::Delegate<execution_delegate_t> OnExecution;
   ou::Delegate<const CPosition*> OnCommission;
 
-  void EmitStatus( std::stringstream& ssStatus );
+  void EmitStatus( std::stringstream& ssStatus ) const;
 
   void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };

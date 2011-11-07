@@ -172,7 +172,7 @@ void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
   pSymbol->StopGreekWatch();
 }
 
-// root of background simulation thread, started from Run.
+// root of background simulation thread, thread is started from Run.
 void CSimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote, trade and greek series
@@ -206,16 +206,19 @@ void CSimulationProvider::Merge( void ) {
   }
 
   m_nProcessedDatums = 0;
-  bool bOldMode = ou::CTimeSource::Instance().GetSimulationMode();
   m_dtSimStart = ou::CTimeSource::Instance().External();
-  ou::CTimeSource::Instance().SetSimulationMode();
-  m_pMerge -> Run();
-  ou::CTimeSource::Instance().SetSimulationMode( bOldMode );
-  m_dtSimStop = ou::CTimeSource::Instance().External();
-  m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
 
-  // use join to determine completion?  or state machine?
-  // be careful, as it may deadlock
+  bool bOldMode = ou::CTimeSource::Instance().GetSimulationMode();
+  ou::CTimeSource::Instance().SetSimulationMode();
+
+  m_pMerge -> Run();
+
+  m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
+  m_dtSimStop = ou::CTimeSource::Instance().External();
+
+  if ( 0 != m_OnSimulationComplete ) m_OnSimulationComplete();
+
+  ou::CTimeSource::Instance().SetSimulationMode( bOldMode );
 }
 
 void CSimulationProvider::Run() {

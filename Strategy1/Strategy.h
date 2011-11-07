@@ -23,6 +23,7 @@
 
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
+#include <TFTrading/Position.h>
 #include <TFTrading/Instrument.h>
 
 
@@ -38,6 +39,12 @@ public:
 protected:
 private:
 
+  enum stateTrade {
+    ETradeOut, ETradeLong, ETradeShort, ETradeDone
+  } m_stateTrade;
+
+  std::stringstream m_ss;
+
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
@@ -47,11 +54,17 @@ private:
   pInstrument_t m_pShortInstrument;
   pInstrument_t m_pLongInstrument;
   pInstrument_t m_pTestInstrument;
+
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
   ou::tf::CBars m_bars;
 
   typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
+
+  ou::tf::CPosition::pPosition_t pPosition;
+
+  ptime m_dtEnd;
+  unsigned int m_nTransitions;
 
   ou::tf::TSSWStatsMidQuote m_sma1min;
   ou::tf::TSSWStatsMidQuote m_sma2min;
@@ -76,6 +89,9 @@ private:
 
   void HandleQuote( const ou::tf::CQuote& quote );
   void HandleTrade( const ou::tf::CTrade& trade );
+  void HandleSimulationComplete( void );
 
+  void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
+  void HandleCommission( const ou::tf::CPosition* pPosition );
 };
 

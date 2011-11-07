@@ -27,6 +27,5 @@ private:
   void OnHistoryConnected( void );
   void OnHistoryDisconnected( void );
   void OnHistoryRequestDone( void );
-  void OnHistoryRequestDone( void );
 };
 

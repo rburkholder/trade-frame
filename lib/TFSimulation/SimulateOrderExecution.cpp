@@ -62,6 +62,7 @@ void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
 }
 
 void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
+  // COrder should have commission calculation?
   if ( 0 != quan ) {
     if ( NULL != OnCommission ) {
       double dblCommission( 0 );
@@ -75,6 +76,7 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
           dblCommission = 0.95 * (double) quan;
           break;
         case InstrumentType::Future:
+          dblCommission = 2.50 * (double) quan;  // GC futures have this commission
           break;
         case InstrumentType::Currency:
           break;
@@ -127,19 +129,30 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
   if ( NULL == m_pCurrentOrder ) {
     m_pCurrentOrder = m_lDelayOrder.front();
     if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
-      m_lDelayOrder.pop_front();
-      m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
-      m_nOrderQuanProcessed = 0;
-      assert( 0 != m_nOrderQuanRemaining );
+      if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
+        // can't process  
+        m_pCurrentOrder.reset();
+        m_nOrderQuanRemaining = 0;  // is this needed?
+      }
+      else {
+        m_lDelayOrder.pop_front();
+        m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
+        m_nOrderQuanProcessed = 0;
+        assert( 0 != m_nOrderQuanRemaining );
+      }
     }
     else {
       m_pCurrentOrder.reset();
-      m_nOrderQuanRemaining = 0;
+      m_nOrderQuanRemaining = 0;  // is this needed?
     }
   }
   if ( NULL != m_pCurrentOrder ) {
     assert( 0 != m_nOrderQuanRemaining );
-    if ( ( 0 != quote.AskSize() ) && ( 0 != quote.BidSize() ) ) {
+    if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
+      std::runtime_error( "zero ask or zero bid size" );
+      // need to requeue the order here
+    }
+    else {
       CTrade::tradesize_t quanAvail;
       double dblPrice;
       OrderSide::enumOrderSide orderSide = m_pCurrentOrder->GetOrderSide();
