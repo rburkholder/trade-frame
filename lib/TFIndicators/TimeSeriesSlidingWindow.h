@@ -29,6 +29,7 @@ public:
   TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );
   virtual ~TimeSeriesSlidingWindow<T,D>(void);
   void Update( void );
+  virtual void Reset( void );
 protected:
   void Add( const D &datum ) {}; // CRTP override to process elements passing into window scope
   void Expire( const D &datum ) {};  // CRTP override to process elements passing out of window scope 
@@ -66,6 +67,11 @@ template<class T, class D> TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow
 }
 
 template<class T, class D> TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow(void) {
+}
+
+template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Reset( void ) {
+  m_ixTrailing = m_ixLeading = 0;
+  m_dtLeading = not_a_date_time;
 }
 
 template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {

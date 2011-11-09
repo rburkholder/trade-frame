@@ -29,6 +29,8 @@ IMPLEMENT_APP(AppSemiAuto)
 
 bool AppSemiAuto::OnInit() {
 
+  m_stateAcquisition = EStartUp;
+
   m_bWatchingOptions = false;
   m_bTrading = false;
 
@@ -133,12 +135,6 @@ bool AppSemiAuto::OnInit() {
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
 
-//  wxGridTableBase::SetColLabelValue( 0, "Low" );
-//  wxGridTableBase::SetColLabelValue( 1, "Price" );
-//  wxGridTableBase::SetColLabelValue( 2, "High" );
-//  wxGridTableBase::SetColLabelValue( 3, "ROC" );
-//  wxGridTableBase::SetColLabelValue( 4, "%D" );
-
 //  int ix = 0;
 //  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {
     //wxGridTableBase::SetRowLabelValue( ix++, iter->GetInstrument()->GetInstrumentName() );
@@ -157,7 +153,7 @@ bool AppSemiAuto::OnInit() {
 
   // need to add custom renderer for currency with 6 decimal places.
 
-  Start( 300 ); // 200ms grid interface update
+  Start( 300 ); // 300ms grid interface update via Notify
 
   return TRUE;
 }
@@ -241,6 +237,23 @@ void AppSemiAuto::Notify( void ) {
   }
   */
   m_FrameGridInstrumentData->Grid()->ForceRefresh();
+
+  switch ( m_stateAcquisition ) {
+  case EStartUp:
+    break;
+  case EStartLogging:
+    break;
+  case EAfterMarketOpen:
+    break;
+  case EAfterMarketClose:
+    break;
+  case EWriteData:
+    break;
+  case EResetStructures:
+    break;
+  case EWaitToStartLogging:
+    break;
+  }
 }
 
 int AppSemiAuto::OnExit() {

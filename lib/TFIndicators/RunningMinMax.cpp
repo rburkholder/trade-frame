@@ -38,9 +38,8 @@ RunningMinMax::~RunningMinMax(void) {
 }
 
 void RunningMinMax::Add(double val) {
-  map_t::iterator iter;
-  
-  iter = m_mapPointStats.find( val );
+
+  map_t::iterator iter = m_mapPointStats.find( val );
   if ( m_mapPointStats.end() == iter ) {
     m_mapPointStats.insert( m_mapPointStats_pair_t( val, 1 ) );
     m_dblMin = m_mapPointStats.begin()->first;
@@ -53,11 +52,10 @@ void RunningMinMax::Add(double val) {
 }
 
 void RunningMinMax::Remove(double val) {
-  map_t::iterator iter;
   
-  iter = m_mapPointStats.find( val );
+  map_t::iterator iter = m_mapPointStats.find( val );
   if ( (m_mapPointStats.end() == iter) ) {
-    int i = 1;
+    int i = 1;  // shouldn't land here, a bug if we do
   }
   else {
     --(iter->second);
@@ -69,6 +67,11 @@ void RunningMinMax::Remove(double val) {
       }
     }
   }
+}
+
+void RunningMinMax::Reset( void ) {
+  m_mapPointStats.clear();
+  m_dblMax = m_dblMin = 0;
 }
 
 } // namespace tf

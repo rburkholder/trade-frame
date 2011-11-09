@@ -27,6 +27,7 @@ public:
   void Add( double, double );
   void Remove( double, double );
   virtual void CalcStats( void );
+  void Reset( void );
 
   double B2() const { return b2; }; // acceleration
   double B1() const { return b1; }; // slope

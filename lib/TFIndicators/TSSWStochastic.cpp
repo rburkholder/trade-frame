@@ -55,6 +55,11 @@ void TSSWStochastic::PostUpdate( void ) {
   m_k = m_minmax.Max() == m_minmax.Min() ? 0 : ( ( m_lastAdd - m_minmax.Min() ) / ( m_minmax.Max() - m_minmax.Min() ) ) * 100.0;
 }
 
+void TSSWStochastic::Reset( void ) {
+  m_lastAdd = m_lastExpire = m_k = 0;
+  m_minmax.Reset();
+}
+
 
 } // namespace tf
 } // namespace ou

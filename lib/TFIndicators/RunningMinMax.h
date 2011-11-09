@@ -31,6 +31,8 @@ public:
   double Min() const { return m_dblMin; };
   double Max() const { return m_dblMax; };
 
+  void Reset( void );
+
 protected:
   typedef std::map<double,unsigned int> map_t;
   map_t m_mapPointStats;

@@ -50,10 +50,10 @@ public:
   var_t& Var( enumIndex ix ) { return m_rSummary[ ix ]; };
   unsigned int SigDigits( void ) { return m_nSignificantDigits; };
 
+  void Reset( void );
+
 protected:
 private:
-
-  bool m_bHasData;
 
   unsigned int m_nSignificantDigits;
 

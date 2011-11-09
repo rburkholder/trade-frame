@@ -68,6 +68,12 @@ public:
   void SetFutureAttributes( const structFuture& );
   void GetFutureAttributes( structFuture* );
 
+  void SetSignificantDigits( unsigned char );
+  unsigned char GetSignificantDigits( void );
+
+  void SetMultiplier( unsigned short );
+  unsigned short GetMultiplier( void );
+
 protected:
 private:
   CHDF5DataManager dm;

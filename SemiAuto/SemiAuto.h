@@ -71,6 +71,10 @@ class AppSemiAuto :
 protected:
 private:
 
+  enum enumAcquisitionStates {
+    EStartUp, EStartLogging, EAfterMarketOpen, EAfterMarketClose, EWriteData, EResetStructures, EWaitToStartLogging
+  } m_stateAcquisition;
+
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
   typedef CPosition::pPosition_t pPosition_t;
 

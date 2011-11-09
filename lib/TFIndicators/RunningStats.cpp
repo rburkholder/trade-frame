@@ -39,6 +39,15 @@ CRunningStats::CRunningStats( double BBMultiplier ) :
 CRunningStats::~CRunningStats(void) {
 }
 
+void CRunningStats::Reset( void ) {
+  b2 = b1 = b0 
+    = meanY 
+    = rr = r 
+    = sd = bbUpper = bbLower 
+    = nX = nY 
+    = SumXX = SumX = SumXY = SumY = SumYY = 0;
+}
+
 void CRunningStats::Add(double x, double y) {
   SumXX += x * x;
   SumX += x;

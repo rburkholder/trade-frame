@@ -41,6 +41,7 @@ public:
   double BBLower( void ) const { return m_stats.BBLower(); };
   void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); };
   double GetBBMultiplier( void ) const { return m_stats.SetBBMultiplier(); };
+  void Reset( void ) { TimeSeriesSlidingWindow<T,D>::Reset(); m_stats.Reset(); };
 protected:
 //  void Add( const T &datum ) {}; // override to process elements passing into window scope
 //  void Expire( const T &datum ) {};  // override to process elements passing out of window scope 

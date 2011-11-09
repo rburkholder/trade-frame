@@ -22,14 +22,14 @@
 
 InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false ), m_nSignificantDigits( nSigDigits )
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
 InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_bHasData( false ), m_nSignificantDigits( nSigDigits )
+    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
@@ -37,7 +37,7 @@ InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigit
 InstrumentData::InstrumentData( const InstrumentData& data ) 
   : m_pInstrument( data.m_pInstrument ),  // only instrument is copied, everything else starts at scratch
     m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ),
-    m_bHasData( false ), m_nSignificantDigits( data.m_nSignificantDigits )
+    m_nSignificantDigits( data.m_nSignificantDigits )
 {
   Init();
 }
@@ -100,7 +100,9 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
     CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
     CHDF5Attributes attrQuotes( sPathName, future );
-    //attributes.SetProviderType( m_pDataProvider->ID() );
+    //attrQuotes.SetMultiplier( 1 );
+    //attrQuotes.SetSignificantDigits( 2 );
+    //attrTrades.SetProviderType( m_pDataProvider->ID() );
   }
 
   if ( 0 != m_trades.Size() ) {
@@ -108,7 +110,16 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
     CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
     CHDF5Attributes attrTrades( sPathName, future );
-    //attributes.SetProviderType( m_pDataProvider->ID() );
+    //attrTrades.SetMultiplier( 1 );
+    //attrTrades.SetSignificantDigits( 2 );
+    //attrTrades.SetProviderType( m_pDataProvider->ID() );
   }
 }
 
+void InstrumentData::Reset( void ) {
+  m_quotes.Clear();
+  m_trades.Clear();
+  m_stats.Reset();
+  m_stoch.Reset();
+  Init();  // takes care of m_rSummary
+}

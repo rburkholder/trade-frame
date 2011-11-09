@@ -28,6 +28,7 @@ public:
   TSSWStochastic( const TSSWStochastic& );
   ~TSSWStochastic(void);
   double K( void ) const { return m_k; };
+  void Reset( void );
 protected:
   void Add( const CQuote& quote );
   void Expire( const CQuote& quote );

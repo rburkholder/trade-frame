@@ -26,6 +26,8 @@ const char szSide[] = "Side";
 const char szYear[] = "Year";
 const char szMonth[] = "Month";
 const char szDay[] = "Day";
+const char szMultiplier[] = "Multiplier";
+const char szSignificantDigits[] = "SignificantDigits";
 
  CHDF5Attributes::CHDF5Attributes(void) 
  : m_pDataSet( NULL )
@@ -95,6 +97,38 @@ keytypes::eidProvider_t CHDF5Attributes::GetProviderType( void ) {
   attribute.close();
   return id;
 }
+
+void CHDF5Attributes::SetSignificantDigits( unsigned char sd ) {
+  H5::DataSpace dspace;
+  H5::Attribute attribute( m_pDataSet->createAttribute( szSignificantDigits, H5::PredType::NATIVE_UINT8, dspace ) );
+  attribute.write( H5::PredType::NATIVE_UINT8, &sd );
+  attribute.close();
+}
+
+unsigned char CHDF5Attributes::GetSignificantDigits( void ) {
+  unsigned char sd;
+  H5::Attribute attribute( m_pDataSet->openAttribute( szSignificantDigits ) );
+  attribute.read(H5::PredType::NATIVE_UINT8, &sd );
+  attribute.close();
+  return sd;
+}
+
+void CHDF5Attributes::SetMultiplier( unsigned short mult ) {
+  H5::DataSpace dspace;
+  H5::Attribute attribute( m_pDataSet->createAttribute( szMultiplier, H5::PredType::NATIVE_UINT16, dspace ) );
+  attribute.write( H5::PredType::NATIVE_UINT16, &mult );
+  attribute.close();
+}
+
+unsigned short CHDF5Attributes::GetMultiplier( void ) {
+  unsigned short mult;
+  H5::Attribute attribute( m_pDataSet->openAttribute( szMultiplier ) );
+  attribute.read(H5::PredType::NATIVE_UINT16, &mult );
+  attribute.close();
+  return mult;
+}
+
+
 
 void CHDF5Attributes::SetOptionAttributes( const structOption& option ) {
 
