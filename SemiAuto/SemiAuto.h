@@ -72,7 +72,9 @@ protected:
 private:
 
   enum enumAcquisitionStates {
-    EStartUp, EStartLogging, EAfterMarketOpen, EAfterMarketClose, EWriteData, EResetStructures, EWaitToStartLogging
+    EStartUp, 
+    EWaitForMarketOpen, EWaitForMarketClose, 
+    EWriteData, EResetStructures, EWaitToStartLogging, EQuiescent
   } m_stateAcquisition;
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;

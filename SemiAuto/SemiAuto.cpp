@@ -30,6 +30,7 @@ IMPLEMENT_APP(AppSemiAuto)
 bool AppSemiAuto::OnInit() {
 
   m_stateAcquisition = EStartUp;
+  //m_stateAcquisition = EQuiescent;
 
   m_bWatchingOptions = false;
   m_bTrading = false;
@@ -240,18 +241,45 @@ void AppSemiAuto::Notify( void ) {
 
   switch ( m_stateAcquisition ) {
   case EStartUp:
+    HandleStateChangeRequest( eProviderState_t::ProviderGoingOn, m_bIQFeedConnected, m_iqfeed );
+    m_stateAcquisition = EWaitForMarketOpen;
     break;
-  case EStartLogging:
+  case EWaitForMarketOpen: { // while logging, wait for market open
+      ptime dt = ou::CTimeSource::Instance().Internal();
+      time_duration tdMarketOpen( 19, 0, 0 );
+      if ( tdMarketOpen <= dt.time_of_day() ) {
+        m_stateAcquisition = EWaitForMarketClose;
+      }
+    }
     break;
-  case EAfterMarketOpen:
-    break;
-  case EAfterMarketClose:
+  case EWaitForMarketClose: {
+      ptime dt = ou::CTimeSource::Instance().Internal();
+      time_duration tdMarketClose( 18, 20, 0 );
+      if ( tdMarketClose <= dt.time_of_day() ) {
+        HandleStateChangeRequest( eProviderState_t::ProviderGoingOff, m_bIQFeedConnected, m_iqfeed );
+        // disconnecting will set the state of EWriteData
+      }
+    }
     break;
   case EWriteData:
+    HandleSaveSeriesEvent();
+    m_stateAcquisition = EResetStructures;
     break;
   case EResetStructures:
+    for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++iter ) {
+      iter->Reset();
+    }
+    m_stateAcquisition = EWaitToStartLogging;
     break;
-  case EWaitToStartLogging:
+  case EWaitToStartLogging: {
+      ptime dt = ou::CTimeSource::Instance().Internal();
+      time_duration tdLoggingStart( 18, 40, 0 );
+      if ( tdLoggingStart <= dt.time_of_day() ) {
+        m_stateAcquisition = EStartUp;
+      }
+    }
+    break;
+  case EQuiescent: // nothing happening
     break;
   }
 }
@@ -355,6 +383,9 @@ void AppSemiAuto::HandleIQFeedDisConnected( int ) { // cross thread event
   }
   m_bIQFeedConnected = false;
   m_FrameProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderIQFeed, eProviderState_t::ProviderOff ) );
+  if ( EQuiescent != m_stateAcquisition ) {
+    m_stateAcquisition = EWriteData;
+  }
 }
 
 void AppSemiAuto::HandleSimulatorDisConnected( int ) {  // cross thread event

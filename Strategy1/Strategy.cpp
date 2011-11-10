@@ -25,7 +25,7 @@ Strategy::Strategy(void)
   m_sma1min( &m_quotes, 60 ), m_sma2min( &m_quotes, 120 ), m_sma3min( &m_quotes, 180 ),
   m_sma5min( &m_quotes, 300 ), m_sma15min( &m_quotes, 1800 ),
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
-  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 58, 0 ) ),  // put in time start
+  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 58, 0 ) ),  // put in time start
   m_nTransitions( 0 )
 {
   ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
@@ -46,7 +46,9 @@ Strategy::Strategy(void)
   m_pTestInstrument->SetMultiplier( 100 );
 
 //  m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
-  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
+  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
   m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
   
   m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
