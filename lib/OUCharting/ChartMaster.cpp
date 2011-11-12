@@ -1,18 +1,28 @@
-#include "StdAfx.h"
-#include "ChartMaster.h"
+/************************************************************************
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ *                                                                      *
+ * This file is provided as is WITHOUT ANY WARRANTY                     *
+ *  without even the implied warranty of                                *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+ *                                                                      *
+ * This software may not be used nor distributed without proper license *
+ * agreement.                                                           *
+ *                                                                      *
+ * See the file LICENSE.txt for redistribution information.             *
+ ************************************************************************/
 
-#include "Colour.h"
+//#include "StdAfx.h"
 
 #include <vector>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#include <OUCommon/Colour.h>
 
-CChartMaster::CChartMaster(void) 
-: CChartViewer(), m_pCdv( NULL),
+#include "ChartMaster.h"
+
+namespace ou { // One Unified
+
+  ChartMaster::ChartMaster(void) 
+: m_pCdv( NULL),
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
@@ -22,8 +32,8 @@ CChartMaster::CChartMaster(void)
   assert( b );
 }
 
-CChartMaster::CChartMaster( unsigned int width, unsigned int height ) 
-: CChartViewer(), m_pCdv( NULL),
+ChartMaster::ChartMaster( unsigned int width, unsigned int height ) 
+: m_pCdv( NULL),
   m_nChartWidth( width ), m_nChartHeight( height ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
@@ -31,38 +41,17 @@ CChartMaster::CChartMaster( unsigned int width, unsigned int height )
 {
 }
 
-afx_msg int CChartMaster::OnCreate( LPCREATESTRUCT lpCreateStruct ) { // virtual from within CChartViewer
-  CChartViewer::OnCreate( lpCreateStruct );
-
-  //CChartViewer::setZoomInWidthLimit( m_dblMinDuration );
-  //CChartViewer::setViewPortWidth( m_dblCurDuration );
-  //CChartViewer::updateViewPort( true, false );
-
-  m_bCreated = true;
-
-  return 0;  // 0 to continue creation, -1 to destroy
+ChartMaster::~ChartMaster(void) {
 }
 
-afx_msg void CChartMaster::OnDestroy( ) {
-  CChartViewer::OnDestroy();
-}
-
-CChartMaster::~CChartMaster(void) {
-}
-
-BEGIN_MESSAGE_MAP(CChartMaster, CChartViewer)
-  ON_WM_CREATE()
-	ON_WM_DESTROY()
-END_MESSAGE_MAP()
-
-void CChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
+void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   m_nChartWidth = width;
   m_nChartHeight = height;
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
 
-void CChartMaster::DrawChart( bool bViewPortChanged ) {
+void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
   struct structSubChart {
     XYChart *xy; // xy chart at this position
@@ -133,12 +122,12 @@ void CChartMaster::DrawChart( bool bViewPortChanged ) {
       // determine XAxis min/max while adding chart data
       m_dblXMin = 0;
       m_dblXMax = 0;
-      for ( CChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
+      for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = (*iter).GetActualChartId();
         CChartEntryBase::structChartAttributes Attributes;
         (*iter).GetChartEntry()->AddDataToChart( vCharts[ ixChart ].xy, &Attributes );
-        m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : min( m_dblXMin, Attributes.dblXMin );
-        m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : max( m_dblXMax, Attributes.dblXMax );
+        m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : std::min<double>( m_dblXMin, Attributes.dblXMin );
+        m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : std::max<double>( m_dblXMax, Attributes.dblXMax );
       }
 
       // time axis scales
@@ -150,15 +139,15 @@ void CChartMaster::DrawChart( bool bViewPortChanged ) {
           dblLower = dblUpper - m_dblMinDuration;
         }
         else {
-          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
-          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
+//          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
+//          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
           //dblUpper = m_dblXMax;
           //dblLower = m_dblXMin;
         }
         pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
       }
 
-      setChart( &multi );
+//      setChart( &multi );
 
       for ( std::vector<structSubChart>::iterator iter = vCharts.begin(); iter < vCharts.end(); ++iter ) {
         delete (*iter).xy;
@@ -167,3 +156,4 @@ void CChartMaster::DrawChart( bool bViewPortChanged ) {
   }
 }
 
+} // namespace ou

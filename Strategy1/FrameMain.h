@@ -45,6 +45,8 @@ public:
   void Init();
   void CreateControls();
 
+  wxPanel* MainPanel( void ) { return m_panelMain; };
+
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -52,10 +54,11 @@ public:
 protected:
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR
+  enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN
   };
 
   wxStatusBar* m_statusBar;
+  wxPanel* m_panelMain;
 
 };
 

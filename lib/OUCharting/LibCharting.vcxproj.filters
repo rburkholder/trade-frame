@@ -25,6 +25,9 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChartMaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChartDataView.h">
@@ -65,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="ChartDirector\memblock.h">
       <Filter>ChartDir</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartMaster.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

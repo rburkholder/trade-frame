@@ -44,9 +44,9 @@ void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, int volume) {
 
 void CChartEntryVolume::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   if ( 0 != this->m_vDateTime.size() ) {
-    BarLayer *bl = pXY->addBarLayer( this->GetPrice() );
+    BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
 
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
     bl->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
@@ -111,7 +111,7 @@ void CChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttri
       0x00ff00, 0xff0000
       );
     //candle->setDataGap( 0 );
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
     candle->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

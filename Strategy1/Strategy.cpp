@@ -108,14 +108,14 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //  m_ss << quote.DateTime();
 
   m_quotes.Append( quote );
-  m_sma15min.Update();
+  m_sma5min.Update();
 
   if ( 1000 < m_quotes.Size() ) {
 
     switch ( m_stateTrade ) {
     case ETradeOut:
-      if ( 0 != m_sma15min.Slope() ) {
-        if ( 0 < m_sma15min.Slope() ) { //rising
+      if ( 0 != m_sma5min.Slope() ) {
+        if ( 0 < m_sma5min.Slope() ) { //rising
           m_ss.str( "" );
           m_ss << "Ordered: " << quote.DateTime() << "; ";
           pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
@@ -138,7 +138,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_stateTrade = ETradeDone;
         }
         else {
-          if ( 0 > m_sma15min.Slope() ) {
+          if ( 0 > m_sma5min.Slope() ) {
             //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             ++m_nTransitions;
             m_ss.str( "" );
@@ -159,7 +159,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_stateTrade = ETradeDone;
         }
         else {
-          if ( 0 < m_sma15min.Slope() ) {
+          if ( 0 < m_sma5min.Slope() ) {
             //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             ++m_nTransitions;
             m_ss.str( "" );

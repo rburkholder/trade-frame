@@ -21,23 +21,23 @@ namespace ou { // One Unified
 // CChartDataViewCarrier
 //
 
-CChartDataViewCarrier::CChartDataViewCarrier( void ) 
+ChartDataViewCarrier::ChartDataViewCarrier( void ) 
 : m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( NULL )
 {
 }
 
-CChartDataViewCarrier::CChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry ) 
+ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry ) 
 : m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
 {
 }
 
-CChartDataViewCarrier::CChartDataViewCarrier( const CChartDataViewCarrier &carrier ) 
+ChartDataViewCarrier::ChartDataViewCarrier( const ChartDataViewCarrier &carrier ) 
 : m_nLogicalChart( carrier.m_nLogicalChart ), m_nActualChart( carrier.m_nActualChart ), 
   m_pChartEntry( carrier.m_pChartEntry )
 {
 }
 
-CChartDataViewCarrier::~CChartDataViewCarrier() {
+ChartDataViewCarrier::~ChartDataViewCarrier() {
   m_nLogicalChart = 0;
   m_nActualChart = 0;
   m_pChartEntry = NULL;
@@ -48,19 +48,19 @@ CChartDataViewCarrier::~CChartDataViewCarrier() {
 // CChartDataView
 //
 
-CChartDataView::CChartDataView( const std::string &sStrategy, const std::string &sName )
+ChartDataView::ChartDataView( const std::string &sStrategy, const std::string &sName )
 : m_bClosed( false ), m_sStrategy( sStrategy ), m_sName( sName ), m_bChanged( false )
 {
   m_vChartDataViewEntry.reserve( 10 );
 }
 
-CChartDataView::~CChartDataView(void) {
+ChartDataView::~ChartDataView(void) {
   assert( m_bClosed );
   m_vChartDataViewEntry.clear();
 }
 
-void CChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
-  CChartDataViewCarrier carrier( nChart, pChartEntry );
+void ChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
+  ChartDataViewCarrier carrier( nChart, pChartEntry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;
   iter1 = m_mapCntChartIndexes.find( nChart );
@@ -75,7 +75,7 @@ void CChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
       iter3->second.ixActualChartId = ix++;
     }
     // need to update actualchartid's in all the carriers.
-    for ( std::vector<CChartDataViewCarrier>::iterator iter2 = m_vChartDataViewEntry.begin();
+    for ( std::vector<ChartDataViewCarrier>::iterator iter2 = m_vChartDataViewEntry.begin();
       m_vChartDataViewEntry.end() != iter2; ++iter2 ) {
         iter3 = m_mapCntChartIndexes.find( (*iter2).GetLogicalChartId() );
         (*iter2).SetActualChartId( iter3->second.ixActualChartId );
@@ -88,7 +88,7 @@ void CChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
   
 }
 
-void CChartDataView::Close() {
+void ChartDataView::Close() {
   assert( !m_bClosed );
   OnClosing( this );
   m_bClosed = true;

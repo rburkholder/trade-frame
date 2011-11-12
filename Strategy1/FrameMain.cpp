@@ -41,6 +41,7 @@ void FrameMain::Init() {
 }
 
 void FrameMain::CreateControls( void ) {
+
     FrameMain* itemFrame1 = this;
 
     wxMenuBar* menuBar = new wxMenuBar;
@@ -49,10 +50,11 @@ void FrameMain::CreateControls( void ) {
     menuBar->Append(itemMenu3, _("Menu"));
     itemFrame1->SetMenuBar(menuBar);
 
+    //m_panelMain = new wxPanel( itemFrame1, ID_PANELMAIN, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
+
     m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
     m_statusBar->SetFieldsCount(2);
     itemFrame1->SetStatusBar(m_statusBar);
-
     
 }
 

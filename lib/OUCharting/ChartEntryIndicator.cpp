@@ -36,8 +36,8 @@ void CChartEntryIndicator::Reserve( unsigned int nSize ) {
 
 void CChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   if ( 0 != this->m_vDateTime.size() ) {
-    LineLayer *ll = pXY->addLineLayer( this->GetPrice() );
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
     ll->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

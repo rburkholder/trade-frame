@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChartDirector\ChartViewer.h"
+#include <ChartDirector\ChartViewer.h>
 #include <string>
 using namespace std;
 

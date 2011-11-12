@@ -27,8 +27,20 @@ bool AppStrategy1::OnInit() {
   m_pFrameMain->Show( true );
   SetTopWindow( m_pFrameMain );
 
+  wxBoxSizer* m_sizerMain;
+  m_sizerMain = new wxBoxSizer(wxHORIZONTAL);
+  m_pFrameMain->SetSizer(m_sizerMain);
+
   m_pPanelSimulationControl = new PanelSimulationControl( m_pFrameMain, wxID_ANY );
+  m_sizerMain->Add( m_pPanelSimulationControl, 0, wxALIGN_LEFT|wxALL, 5);
   m_pPanelSimulationControl->Show( true );
+
+  //ID_CHART
+  m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(800, 450), wxSIMPLE_BORDER );
+  m_sizerMain->Add( m_winChart, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+//  m_pPanelFinancialChart = new PanelFinancialChart( m_pFrameMain, wxID_ANY );
+//  m_pPanelFinancialChart->Show( true );
 
   m_pPanelSimulationControl->SetOnStartSimulation( MakeDelegate( this, &AppStrategy1::HandleBtnSimulationStart) );
 

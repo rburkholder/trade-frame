@@ -26,13 +26,13 @@ namespace ou { // One Unified
 // CChartDataView contains the CChartEntries and related sub-chart 
 //   to be viewed in a master chart viewport 
 
-class CChartDataViewCarrier { // used by CChartViewPort objects to chart data
+class ChartDataViewCarrier { // used by CChartViewPort objects to chart data
 public:
   //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
-  CChartDataViewCarrier( void );
-  CChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry );
-  CChartDataViewCarrier( const CChartDataViewCarrier &carrier );
-  ~CChartDataViewCarrier( void );
+  ChartDataViewCarrier( void );
+  ChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry );
+  ChartDataViewCarrier( const ChartDataViewCarrier &carrier );
+  ~ChartDataViewCarrier( void );
   size_t GetLogicalChartId( void ) { return m_nLogicalChart; };
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
   size_t GetActualChartId( void ) { return m_nActualChart; };
@@ -48,24 +48,24 @@ private:
 //   0: main price chart
 //   1: main volume chart
 
-class CChartDataView {
+class ChartDataView {
 public:
-  CChartDataView( const std::string &sStrategy, const std::string &sName );
-  ~CChartDataView(void);
+  ChartDataView( const std::string &sStrategy, const std::string &sName );
+  ~ChartDataView(void);
   void Add( size_t nChart, CChartEntryBase *pChartEntry );
-  typedef std::vector<CChartDataViewCarrier>::const_iterator const_iterator;
-  typedef std::vector<CChartDataViewCarrier>::iterator iterator;
+  typedef std::vector<ChartDataViewCarrier>::const_iterator const_iterator;
+  typedef std::vector<ChartDataViewCarrier>::iterator iterator;
   iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
   iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) { return m_sStrategy; };
   const std::string &GetName( void ) { return m_sName; };
-  ou::Delegate<CChartDataView *> OnClosing;
+  ou::Delegate<ChartDataView *> OnClosing;
   void Close( void ); // call before destruction so can be removed from tree view and view port properly
   size_t GetChartCount( void ) { return m_mapCntChartIndexes.size(); };
   void SetChanged(void) { m_bChanged = true; };
   bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
 protected:
-  std::vector<CChartDataViewCarrier> m_vChartDataViewEntry;
+  std::vector<ChartDataViewCarrier> m_vChartDataViewEntry;
   struct structChartMapping {
     size_t ixActualChartId;  // actual chart index
     size_t nCharts;  // number of charts at this index

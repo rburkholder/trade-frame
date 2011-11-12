@@ -15,6 +15,7 @@
 
 #include "FrameMain.h"
 #include "PanelSimulationControl.h"
+#include "PanelFinancialChart.h"
 
 #include "Strategy.h"
 
@@ -29,6 +30,9 @@ private:
 
   FrameMain* m_pFrameMain;
   PanelSimulationControl* m_pPanelSimulationControl;
+  PanelFinancialChart* m_pPanelFinancialChart;
+
+  wxWindow* m_winChart;
 
   virtual bool OnInit();
   virtual int OnExit();

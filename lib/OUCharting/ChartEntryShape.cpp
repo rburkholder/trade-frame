@@ -56,9 +56,9 @@ void CChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttr
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
-        GetDateTime(), GetPrice(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
+        GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
 
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTime();
+    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
     layer->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

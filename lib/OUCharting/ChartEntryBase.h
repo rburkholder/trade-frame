@@ -36,14 +36,11 @@ using namespace boost::gregorian;
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 #include <OUCommon/Colour.h>
 
-//#include "ChartDirector\FinanceChart.h"
 #include "ChartDirector/chartdir.h"
-//#include "ChartDirector\memblock.h"
-//#include "ChartDirector\chartviewer.h"
 
 namespace ou { // One Unified
 
-class CChartEntryBase {
+class CChartEntryBase {  // maintains chart information for a set of prices
 public:
   CChartEntryBase( void );
   CChartEntryBase( unsigned int nSize );
@@ -70,14 +67,14 @@ protected:
   std::vector<double> m_vPrice;
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
-  DoubleArray GetPrice( void ) {
+  DoubleArray GetPrices( void ) {
     vdouble_t::iterator iter = m_vPrice.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vPrice.size() ) );
   }
 private:
 };
 
-class CChartEntryBaseWithTime : public CChartEntryBase {
+class CChartEntryBaseWithTime : public CChartEntryBase { // maintains chart information for a set of price@datetime points
 public:
   CChartEntryBaseWithTime( void );
   CChartEntryBaseWithTime( unsigned int nSize );
@@ -88,7 +85,7 @@ protected:
   std::vector<ptime> m_vDateTime;
   std::vector<double> m_vChartTime;  // used by ChartDir
   virtual void Reserve( unsigned int );
-  DoubleArray GetDateTime( void ) {
+  DoubleArray GetDateTimes( void ) {
     vdouble_t::iterator iter = m_vChartTime.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vChartTime.size() ) );
   }
