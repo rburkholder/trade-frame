@@ -28,6 +28,9 @@
     <ClCompile Include="ChartMaster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChartEntryVolume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChartDataView.h">
@@ -70,6 +73,9 @@
       <Filter>ChartDir</Filter>
     </ClInclude>
     <ClInclude Include="ChartMaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartEntryVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

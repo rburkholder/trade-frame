@@ -17,27 +17,27 @@
 
 namespace ou { // One Unified
 
-CChartEntryIndicator::CChartEntryIndicator(void) 
-: CChartEntryBaseWithTime() 
+ChartEntryIndicator::ChartEntryIndicator(void) 
+: ChartEntryBaseWithTime() 
 {
 }
 
-CChartEntryIndicator::CChartEntryIndicator( unsigned int nSize ) 
-: CChartEntryBaseWithTime( nSize )
+ChartEntryIndicator::ChartEntryIndicator( unsigned int nSize ) 
+: ChartEntryBaseWithTime( nSize )
 {
 }
 
-CChartEntryIndicator::~CChartEntryIndicator(void) {
+ChartEntryIndicator::~ChartEntryIndicator(void) {
 }
 
-void CChartEntryIndicator::Reserve( unsigned int nSize ) {
-  CChartEntryBaseWithTime::Reserve( nSize );
+void ChartEntryIndicator::Reserve( unsigned int nSize ) {
+  ChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void CChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+void ChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 != this->m_vDateTime.size() ) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
+    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
     ll->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

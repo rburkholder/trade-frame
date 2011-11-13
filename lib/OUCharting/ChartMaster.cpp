@@ -55,7 +55,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
   struct structSubChart {
     XYChart *xy; // xy chart at this position
-    structSubChart( void ) : xy( NULL ) {};
+    structSubChart( void ) : xy( 0 ) {};
   };
 
   if ( NULL != m_pCdv ) { // DataView has something to draw
@@ -122,10 +122,10 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       // determine XAxis min/max while adding chart data
       m_dblXMin = 0;
       m_dblXMax = 0;
-      for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
-        size_t ixChart = (*iter).GetActualChartId();
-        CChartEntryBase::structChartAttributes Attributes;
-        (*iter).GetChartEntry()->AddDataToChart( vCharts[ ixChart ].xy, &Attributes );
+      for ( ChartDataView::const_iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
+        size_t ixChart = iter->GetActualChartId();
+        ChartEntryBase::structChartAttributes Attributes;
+        iter->GetChartEntry().AddDataToChart( vCharts[ ixChart ].xy, &Attributes );
         m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : std::min<double>( m_dblXMin, Attributes.dblXMin );
         m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : std::max<double>( m_dblXMax, Attributes.dblXMax );
       }
@@ -134,20 +134,23 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       double dblLower;
       double dblUpper;
       if ( m_dblXMin != m_dblXMax ) {
-        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {  // minimum time window
+//*        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {  // minimum time window
           dblUpper = m_dblXMax;
           dblLower = dblUpper - m_dblMinDuration;
-        }
-        else {
-//          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
-//          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
+//*        }
+//*        else {
+          // fracional viewport calculation, for when mfc was used
+//*          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
+//*          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
           //dblUpper = m_dblXMax;
           //dblLower = m_dblXMin;
-        }
-        pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
+//*        }
+//        pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
       }
 
-//      setChart( &multi );
+//*      setChart( &multi );
+      MemBlock m = multi.makeChart( BMP );
+      if ( 0 != m_OnDrawChart ) m_OnDrawChart( m );
 
       for ( std::vector<structSubChart>::iterator iter = vCharts.begin(); iter < vCharts.end(); ++iter ) {
         delete (*iter).xy;

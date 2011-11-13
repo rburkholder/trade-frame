@@ -17,14 +17,14 @@
 
 namespace ou { // One Unified
 
-class CChartEntryIndicator :
-  public CChartEntryBaseWithTime {
+class ChartEntryIndicator :
+  public ChartEntryBaseWithTime {
 public:
-  CChartEntryIndicator(void);
-  CChartEntryIndicator( unsigned int nSize );
-  virtual ~CChartEntryIndicator(void);
+  ChartEntryIndicator(void);
+  ChartEntryIndicator( unsigned int nSize );
+  virtual ~ChartEntryIndicator(void);
   virtual void Reserve( unsigned int );
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
 private:
 };

@@ -43,11 +43,11 @@ void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
     m_curInterval = interval;
     m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
     m_dtLastIntermediateEmission = dt - m_1Sec; // prime the value
-    if ( NULL != OnNewBarStarted ) OnNewBarStarted( m_bar );
+    if ( 0 != OnNewBarStarted ) OnNewBarStarted( m_bar );
   }
   else {
-    if ( interval > m_curInterval ) { // emit bar and start again
-      if ( NULL != OnBarComplete ) OnBarComplete( m_bar );
+    if ( interval != m_curInterval ) { // emit bar and start again
+      if ( 0 != OnBarComplete ) OnBarComplete( m_bar );
       m_bar.Close( val );
       m_bar.High( val );
       m_bar.Low( val );
@@ -55,7 +55,7 @@ void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
       m_bar.Volume( volume );
       m_curInterval = interval;
       m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
-      if ( NULL != OnNewBarStarted ) OnNewBarStarted( m_bar );
+      if ( 0 != OnNewBarStarted ) OnNewBarStarted( m_bar );
     }
     else { // update current interval
       m_bar.Close( val );
@@ -66,7 +66,7 @@ void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
     }
   }
   if ( m_1Sec <= ( dt - m_dtLastIntermediateEmission ) ) {
-    if ( NULL != OnBarUpdated ) OnBarUpdated( m_bar );
+    if ( 0 != OnBarUpdated ) OnBarUpdated( m_bar );
     m_dtLastIntermediateEmission = dt;
   }
   

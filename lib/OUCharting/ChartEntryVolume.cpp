@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * Copyright(c) 2011, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,26 +13,47 @@
 
 //#include "StdAfx.h"
 
-#include "ChartEntrySegments.h"
+#include "ChartEntryVolume.h"
 
 namespace ou { // One Unified
 
-ChartEntrySegments::ChartEntrySegments(void) 
+//
+// CChartEntryVolume
+//
+
+ChartEntryVolume::ChartEntryVolume(void)
 : ChartEntryBaseWithTime()
 {
 }
 
-ChartEntrySegments::~ChartEntrySegments(void) {
+ChartEntryVolume::ChartEntryVolume(unsigned int nSize) 
+: ChartEntryBaseWithTime(nSize)
+{
 }
 
-void ChartEntrySegments::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
-  if ( 0 < m_vPrice.size() ) {
-    LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
+ChartEntryVolume::~ChartEntryVolume(void) {
+}
+
+void ChartEntryVolume::Reserve(unsigned int nSize ) {
+  ChartEntryBaseWithTime::Reserve( nSize );
+}
+
+void ChartEntryVolume::Add(const boost::posix_time::ptime &dt, int volume) {
+  ChartEntryBaseWithTime::Add( dt, (double) volume );
+}
+
+void ChartEntryVolume::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const {
+  if ( 0 != this->m_vDateTime.size() ) {
+    BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
+
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    layer->setXData( daXData );
+    bl->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+
+    DataSet *pds = bl->getDataSet(0);
+    pds->setDataColor( m_eColour );
   }
 }
 
-} // namespace ou
+} // ou namespace

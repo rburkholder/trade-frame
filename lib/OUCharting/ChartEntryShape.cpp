@@ -17,25 +17,25 @@
 
 namespace ou { // One Unified
 
-int CChartEntryShape::m_rShapes[] = { 
+int ChartEntryShape::m_rShapes[] = { 
   Chart::DiamondShape,
   Chart::TriangleShape, Chart::InvertedTriangleShape, 
   Chart::PolygonShape( 5 ), Chart::PolygonShape( 5 ), 
   Chart::Polygon2Shape( 6 ), Chart::Polygon2Shape( 6 ) 
 };
 
-CChartEntryShape::CChartEntryShape( void )
-: CChartEntryBaseWithTime(), m_eShape( EDefault )
+ChartEntryShape::ChartEntryShape( void )
+: ChartEntryBaseWithTime(), m_eShape( EDefault )
 {
 }
 
-CChartEntryShape::CChartEntryShape( enumShape eShape, ou::Colour::enumColour colour ) 
-: CChartEntryBaseWithTime(), m_eShape( eShape )
+ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour ) 
+: ChartEntryBaseWithTime(), m_eShape( eShape )
 {
-  CChartEntryBase::SetColour( colour );
+  ChartEntryBase::SetColour( colour );
 }
 
-CChartEntryShape::~CChartEntryShape(void) {
+ChartEntryShape::~ChartEntryShape(void) {
   if ( !m_vpChar.empty() ) {
     for ( std::vector<const char *>::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;
@@ -43,8 +43,8 @@ CChartEntryShape::~CChartEntryShape(void) {
   }
 }
 
-void CChartEntryShape::AddLabel(const ptime &dt, double price, const std::string &sText ) {
-  CChartEntryBaseWithTime::Add( dt, price );
+void ChartEntryShape::AddLabel(const ptime &dt, double price, const std::string &sText ) {
+  ChartEntryBaseWithTime::Add( dt, price );
   char *pszLabel = new char[ sText.size() + 1 ];
   strcpy( pszLabel, sText.c_str() );
   //m_vLabel.push_back( sText );
@@ -52,13 +52,13 @@ void CChartEntryShape::AddLabel(const ptime &dt, double price, const std::string
   m_vpChar.push_back( pszLabel );
 }
 
-void CChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+void ChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 
         GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
 
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
+    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
     layer->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

@@ -15,6 +15,9 @@
 
 #include <string>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include "ChartDataView.h"
 
 namespace ou { // One Unified
@@ -26,25 +29,32 @@ public:
   virtual ~ChartMaster(void);
   void SetChartDimensions( unsigned int width, unsigned int height);
   //void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
-  void SetChartDataView( ChartDataView *pcdv ) { m_pCdv = pcdv; if ( NULL != pcdv ) m_pCdv->SetChanged(); };
+  void SetChartDataView( ChartDataView* pcdv ) { m_pCdv = pcdv; if ( NULL != pcdv ) m_pCdv->SetChanged(); };
   ChartDataView *GetChartDataView( void ) { return m_pCdv; };
-  double GetXMin( void ) { return m_dblXMin; };
-  double GetXMax( void ) { return m_dblXMax; };
+  double GetXMin( void ) const { return m_dblXMin; };
+  double GetXMax( void ) const { return m_dblXMax; };
   bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
   void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
-  bool isCreated( void ) { return m_bCreated; };
+  bool isCreated( void ) const { return m_bCreated; };
+
+  typedef FastDelegate1<const MemBlock&> OnDrawChart_t;
+  void SetOnDrawChart( OnDrawChart_t function ) {
+    m_OnDrawChart = function;
+  }
 protected:
 
   //std::string m_sChartTitle;  // data view has this information
   unsigned int m_nChartWidth;
   unsigned int m_nChartHeight;
-  ChartDataView *m_pCdv;
+  ChartDataView* m_pCdv;
 
   double m_dblMinDuration;  // minimum viewport width in seconds
   double m_dblCurDuration;  // current viewport width in seconds
 
   double m_dblXMin;  // initial data time stamp
   double m_dblXMax;  // last data time stamp
+
+  OnDrawChart_t m_OnDrawChart;
 
   bool m_bCreated;
 

@@ -25,10 +25,18 @@ Strategy::Strategy(void)
   m_sma1min( &m_quotes, 60 ), m_sma2min( &m_quotes, 120 ), m_sma3min( &m_quotes, 180 ),
   m_sma5min( &m_quotes, 300 ), m_sma15min( &m_quotes, 1800 ),
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
-  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 58, 0 ) ),  // put in time start
-  m_nTransitions( 0 )
+  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 8 ), time_duration( 17, 58, 0 ) ),  // put in time start
+  m_nTransitions( 0 ),
+  m_barFactory( 180 ),
+  m_dvChart( "Strategy1", "GC" )
 {
+
   ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+
+  m_dvChart.Add( 0, m_ceBars );
+  m_dvChart.Add( 1, m_ceVolume );
+  m_dvChart.Add( 2, m_ceSlope );
+  m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
 
   m_sim->OnConnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
@@ -47,8 +55,8 @@ Strategy::Strategy(void)
 
 //  m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
-  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
-  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
+  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
   m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
   
   m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -74,6 +82,8 @@ Strategy::~Strategy(void) {
 
   m_sim->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
+
+  m_barFactory.SetOnBarComplete( 0 );
 
   ou::tf::CProviderManager::Instance().Release( "sim01" );
 
@@ -109,6 +119,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   m_quotes.Append( quote );
   m_sma5min.Update();
+  m_ceSlope.Add( quote.DateTime(), m_sma5min.Slope() );
 
   if ( 1000 < m_quotes.Size() ) {
 
@@ -179,6 +190,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
 void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   m_trades.Append( trade );
+  m_barFactory.Add( trade );
 }
 
 void Strategy::HandleSimulationComplete( void ) {
@@ -200,4 +212,9 @@ void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
   m_ss.str( "" );
   pPosition->EmitStatus( m_ss );
   std::cout << m_ss << std::endl;
+}
+
+void Strategy::HandleBarCompletion( const ou::tf::CBar& bar ) {
+  m_ceBars.AddBar( bar );
+  m_ceVolume.Add( bar.DateTime(), bar.Volume() );
 }

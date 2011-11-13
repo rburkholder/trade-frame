@@ -73,7 +73,11 @@ void PanelSimulationControl::CreateControls() {
     m_gaugeProgress->SetValue(1);
     itemBoxSizer2->Add(m_gaugeProgress, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
+    wxButton* itemButton9 = new wxButton( itemPanel1, ID_BTN_DRAWCHART, _("Draw Chart"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer2->Add(itemButton9, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
     Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSimulationControl::OnBtnStartSimulationClicked, this, ID_BTN_STARTSIM );
+    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSimulationControl::OnBtnDrawChartClicked, this, ID_BTN_DRAWCHART );
 }
 
 wxBitmap PanelSimulationControl::GetBitmapResource( const wxString& name ) {
@@ -90,3 +94,6 @@ void PanelSimulationControl::OnBtnStartSimulationClicked( wxCommandEvent& event 
   if ( 0 != m_OnStartSimulation ) m_OnStartSimulation();
 }
 
+void PanelSimulationControl::OnBtnDrawChartClicked( wxCommandEvent& event ) {
+  if ( 0 != m_OnDrawChart ) m_OnDrawChart();
+}

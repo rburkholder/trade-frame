@@ -22,12 +22,12 @@ namespace ou { // One Unified
 //
 
 ChartDataViewCarrier::ChartDataViewCarrier( void ) 
-: m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( NULL )
+: m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( 0 )
 {
 }
 
-ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, CChartEntryBase *pChartEntry ) 
-: m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
+ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, const ChartEntryBase& entry ) 
+: m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( &entry )
 {
 }
 
@@ -40,9 +40,8 @@ ChartDataViewCarrier::ChartDataViewCarrier( const ChartDataViewCarrier &carrier 
 ChartDataViewCarrier::~ChartDataViewCarrier() {
   m_nLogicalChart = 0;
   m_nActualChart = 0;
-  m_pChartEntry = NULL;
+  m_pChartEntry = 0;
 }
-
 
 // 
 // CChartDataView
@@ -59,8 +58,8 @@ ChartDataView::~ChartDataView(void) {
   m_vChartDataViewEntry.clear();
 }
 
-void ChartDataView::Add(size_t nChart, CChartEntryBase *pChartEntry) {
-  ChartDataViewCarrier carrier( nChart, pChartEntry );
+void ChartDataView::Add(size_t nChart, const ChartEntryBase& entry ) {
+  ChartDataViewCarrier carrier( nChart, entry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;
   iter1 = m_mapCntChartIndexes.find( nChart );

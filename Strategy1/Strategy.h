@@ -16,6 +16,7 @@
 #include <string>
 
 #include <TFTimeSeries/TimeSeries.h>
+#include <TFTimeSeries/BarFactory.h>
 
 #include <TFIndicators/TSSWStats.h>
 
@@ -26,6 +27,10 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/Instrument.h>
 
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 class Strategy
 {
@@ -35,6 +40,8 @@ public:
   ~Strategy(void);
 
   void Start( const std::string& sSymbolPath );
+
+  ou::ChartDataView& GetChartDataView( void ) {return m_dvChart; };
 
 protected:
 private:
@@ -58,6 +65,14 @@ private:
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
   ou::tf::CBars m_bars;
+
+  ou::tf::CBarFactory m_barFactory;
+
+  typedef ou::ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
+  ou::ChartDataView m_dvChart;
+  ou::ChartEntryBars m_ceBars;
+  ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryIndicator m_ceSlope;
 
   typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
 
@@ -93,5 +108,7 @@ private:
 
   void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
   void HandleCommission( const ou::tf::CPosition* pPosition );
+
+  void HandleBarCompletion( const ou::tf::CBar& );
 };
 

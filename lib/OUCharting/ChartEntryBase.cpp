@@ -21,27 +21,29 @@ namespace ou { // One Unified
 // CChartEntryBase
 //
 
-CChartEntryBase::CChartEntryBase() {
+ChartEntryBase::ChartEntryBase() {
 }
 
-CChartEntryBase::CChartEntryBase( unsigned int nSize ) 
+ChartEntryBase::ChartEntryBase( unsigned int nSize ) 
 : m_eColour( ou::Colour::Black )
 {
   m_vPrice.reserve( nSize );
 }
 
-CChartEntryBase::~CChartEntryBase() {
+ChartEntryBase::~ChartEntryBase() {
   m_vPrice.clear();
 }
 
-void CChartEntryBase::Reserve(unsigned int nSize ) {
+void ChartEntryBase::Reserve(unsigned int nSize ) {
   m_vPrice.reserve( nSize );
 }
 
-void CChartEntryBase::Add(double price) {
+void ChartEntryBase::Add(double price) {
+  /*
   if ( m_vPrice.capacity() == m_vPrice.size() ) {
     m_vPrice.reserve( m_vPrice.size() + ( m_vPrice.size() / 5 ) ); // expand by 20%
   }
+  */
   m_vPrice.push_back( price );
 }
 
@@ -49,33 +51,35 @@ void CChartEntryBase::Add(double price) {
 // CChartEntryBaseWithTime
 //
 
-CChartEntryBaseWithTime::CChartEntryBaseWithTime() : CChartEntryBase() {
+ChartEntryBaseWithTime::ChartEntryBaseWithTime() : ChartEntryBase() {
 }
 
-CChartEntryBaseWithTime::CChartEntryBaseWithTime( unsigned int nSize )
-: CChartEntryBase( nSize ) 
+ChartEntryBaseWithTime::ChartEntryBaseWithTime( unsigned int nSize )
+: ChartEntryBase( nSize ) 
 {
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
 }
 
-CChartEntryBaseWithTime::~CChartEntryBaseWithTime() {
+ChartEntryBaseWithTime::~ChartEntryBaseWithTime() {
   m_vDateTime.clear();
   m_vChartTime.clear();
 }
 
-void CChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
-  CChartEntryBase::Reserve( nSize );
+void ChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
+  ChartEntryBase::Reserve( nSize );
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
 }
 
-void CChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
+void ChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
   // some Chart Entries don't use the built in vector
+  /*
   if ( m_vDateTime.capacity() == m_vDateTime.size() ) {
     m_vDateTime.reserve( m_vDateTime.size() + ( m_vDateTime.size() / 5 ) ); // expand by 20%
     m_vChartTime.reserve( m_vChartTime.size() + ( m_vChartTime.size() / 5 ) ); // expand by 20%
   }
+  */
   m_vDateTime.push_back( dt );
   m_vChartTime.push_back( 
     Chart::chartTime( 
@@ -83,8 +87,8 @@ void CChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
       dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 }
 
-void CChartEntryBaseWithTime::Add( const boost::posix_time::ptime &dt, double price) {
-  CChartEntryBase::Add( price );
+void ChartEntryBaseWithTime::Add( const boost::posix_time::ptime &dt, double price) {
+  ChartEntryBase::Add( price );
   Add( dt );
 }
 

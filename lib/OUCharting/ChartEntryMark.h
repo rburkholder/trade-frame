@@ -22,13 +22,13 @@
 
 namespace ou { // One Unified
 
-class CChartEntryMark :
-  public CChartEntryBase {
+class ChartEntryMark :
+  public ChartEntryBase {
 public:
-  CChartEntryMark(void);
-  virtual ~CChartEntryMark(void);
+  ChartEntryMark(void);
+  virtual ~ChartEntryMark(void);
   void AddMark( double price, ou::Colour::enumColour colour, const std::string &name );
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
   std::vector<ou::Colour::enumColour> m_vColour;
   std::vector<std::string> m_vName;

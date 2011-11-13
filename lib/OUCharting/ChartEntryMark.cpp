@@ -17,21 +17,21 @@
 
 namespace ou { // One Unified
 
-CChartEntryMark::CChartEntryMark(void) 
-: CChartEntryBase()
+ChartEntryMark::ChartEntryMark(void) 
+: ChartEntryBase()
 {
 }
 
-CChartEntryMark::~CChartEntryMark(void) {
+ChartEntryMark::~ChartEntryMark(void) {
 }
 
-void CChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
+void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
   m_vPrice.push_back( price );
   m_vColour.push_back( colour );
   m_vName.push_back( name );
 }
 
-void CChartEntryMark::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+void ChartEntryMark::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const {
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {

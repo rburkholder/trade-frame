@@ -54,10 +54,15 @@ public:
     m_OnStartSimulation = function;
   }
 
+  typedef FastDelegate0<> OnDrawChart_t;
+  void SetOnDrawChart( OnDrawChart_t function ) {
+    m_OnDrawChart = function;
+  }
+
 protected:
 private:
   enum { ID_Null=wxID_HIGHEST, ID_PANELSIMULATIONCONTROL, 
-    ID_TEXT_INSTRUMENTNAME, ID_TEXT_GROUPDIRECTORY, ID_BTN_STARTSIM,
+    ID_TEXT_INSTRUMENTNAME, ID_TEXT_GROUPDIRECTORY, ID_BTN_STARTSIM, ID_BTN_DRAWCHART,
     ID_STATIC_RESULT, ID_GAUGE_PROGRESS
   };
 
@@ -67,8 +72,10 @@ private:
   wxGauge* m_gaugeProgress;
 
   OnStartSimulation_t m_OnStartSimulation;
+  OnDrawChart_t m_OnDrawChart;
 
   void OnBtnStartSimulationClicked( wxCommandEvent& event );
+  void OnBtnDrawChartClicked( wxCommandEvent& event );
 
 };
 

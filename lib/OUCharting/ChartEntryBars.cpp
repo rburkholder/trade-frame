@@ -18,74 +18,35 @@
 namespace ou { // One Unified
 
 //
-// CChartEntryVolume
+// CChartEntryBars, volume portion of bar is in ChartEntryVolume.h
 //
 
-CChartEntryVolume::CChartEntryVolume(void)
-: CChartEntryBaseWithTime()
+ChartEntryBars::ChartEntryBars(void) 
+: ChartEntryBaseWithTime()
 {
 }
 
-CChartEntryVolume::CChartEntryVolume(unsigned int nSize) 
-: CChartEntryBaseWithTime(nSize)
+ChartEntryBars::ChartEntryBars(unsigned int nSize) 
+: ChartEntryBaseWithTime(nSize)
 {
 }
 
-CChartEntryVolume::~CChartEntryVolume(void) {
-}
-
-void CChartEntryVolume::Reserve(unsigned int nSize ) {
-  CChartEntryBaseWithTime::Reserve( nSize );
-}
-
-void CChartEntryVolume::Add(const boost::posix_time::ptime &dt, int volume) {
-  CChartEntryBaseWithTime::Add( dt, (double) volume );
-}
-
-void CChartEntryVolume::AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
-  if ( 0 != this->m_vDateTime.size() ) {
-    BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
-
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
-    bl->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
-
-    DataSet *pds = bl->getDataSet(0);
-    pds->setDataColor( m_eColour );
-  }
-}
-
-//
-// CChartEntryBars
-//
-
-CChartEntryBars::CChartEntryBars(void) 
-: CChartEntryBaseWithTime()
-{
-}
-
-CChartEntryBars::CChartEntryBars(unsigned int nSize) 
-: CChartEntryBaseWithTime(nSize)
-{
-}
-
-CChartEntryBars::~CChartEntryBars(void) {
+ChartEntryBars::~ChartEntryBars(void) {
   m_vOpen.clear();
   m_vHigh.clear();
   m_vLow.clear();
   m_vClose.clear();
 }
 
-void CChartEntryBars::Reserve( unsigned int nSize ) {
-  CChartEntryBaseWithTime::Reserve( nSize );
+void ChartEntryBars::Reserve( unsigned int nSize ) {
+  ChartEntryBaseWithTime::Reserve( nSize );
   m_vOpen.reserve( nSize );
   m_vHigh.reserve( nSize );
   m_vLow.reserve( nSize );
   m_vClose.reserve( nSize );
 }
 
-void CChartEntryBars::AddBar(const ou::tf::CBar &bar) {
+void ChartEntryBars::AddBar(const ou::tf::CBar &bar) {/*
   if ( m_vOpen.capacity() == m_vOpen.size() ) {
     int sz = m_vOpen.size() + ( m_vOpen.size() / 5 ); // expand by 20%
     //CChartEntryBaseWithTime::Reserve( sz );
@@ -94,14 +55,15 @@ void CChartEntryBars::AddBar(const ou::tf::CBar &bar) {
     m_vLow.reserve( sz ); 
     m_vClose.reserve( sz ); 
   }
-  CChartEntryBaseWithTime::Add( bar.DateTime() );
+  */
+  ChartEntryBaseWithTime::Add( bar.DateTime() );
   m_vOpen.push_back( bar.Open() );
   m_vHigh.push_back( bar.High() );
   m_vLow.push_back( bar.Low() );
   m_vClose.push_back( bar.Close() );
 }
 
-void CChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+void ChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 != this->m_vDateTime.size() ) {
     CandleStickLayer *candle = pXY->addCandleStickLayer( 
       this->GetHigh(),
@@ -111,7 +73,7 @@ void CChartEntryBars::AddDataToChart(XYChart *pXY, structChartAttributes *pAttri
       0x00ff00, 0xff0000
       );
     //candle->setDataGap( 0 );
-    DoubleArray daXData = CChartEntryBaseWithTime::GetDateTimes();
+    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
     candle->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];

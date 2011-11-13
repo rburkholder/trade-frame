@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <OUCharting/ChartMaster.h>
+
 #include "FrameMain.h"
 #include "PanelSimulationControl.h"
 #include "PanelFinancialChart.h"
@@ -34,10 +36,19 @@ private:
 
   wxWindow* m_winChart;
 
+  ou::ChartMaster m_chart;
+
+  bool m_bReadyToDrawChart;
+
   virtual bool OnInit();
   virtual int OnExit();
 
   void HandleBtnSimulationStart( void );
+  void HandleBtnDrawChart( void );
+
+  void HandleDrawChart( const MemBlock& );
+  void HandlePaint( wxPaintEvent& event );
+  void HandleSize( wxSizeEvent& event );
 
 };
 

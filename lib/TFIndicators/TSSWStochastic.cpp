@@ -15,7 +15,6 @@
 
 #include "TSSWStochastic.h"
 
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 

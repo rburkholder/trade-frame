@@ -22,24 +22,24 @@
 
 namespace ou { // One Unified
 
-class CChartEntryShape :
-  public CChartEntryBaseWithTime {
+class ChartEntryShape :
+  public ChartEntryBaseWithTime {
 public:
   enum enumShape { EDefault, EBuy, ESell, EFillLong, EFillShort, EBuyStop, ESellStop };
-  CChartEntryShape( void );
-  CChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
+  ChartEntryShape( void );
+  ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
   void SetShape( enumShape shape ) { m_eShape = shape; };
-  enumShape GetShape( void ) { return m_eShape; };
-  virtual ~CChartEntryShape(void);
+  enumShape GetShape( void ) const { return m_eShape; };
+  virtual ~ChartEntryShape(void);
   void AddLabel( const ptime &dt, double price, const std::string &sLabel );
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
   static int m_rShapes[];
   enumShape m_eShape;
   //std::vector<std::string> m_vLabel;
   std::vector<const char *> m_vpChar;
-  StringArray GetLabels( void ) {
-    std::vector<const char *>::iterator iter = m_vpChar.begin();
+  StringArray GetLabels( void ) const {
+    std::vector<const char *>::const_iterator iter = m_vpChar.begin();
     return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );
   }
 private:
