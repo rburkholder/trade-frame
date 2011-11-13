@@ -226,6 +226,17 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
+void CPosition::CancelOrder( idOrder_t idOrder ) {
+  for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+    if ( idOrder == iter->get()->GetOrderId() ) {
+      COrderManager::Instance().CancelOrder( idOrder );
+      m_OpenOrders.erase( iter );
+      m_ClosedOrders.push_back( *iter );
+      break;
+    }
+  }
+}
+
 void CPosition::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
   for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {

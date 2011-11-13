@@ -74,7 +74,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       std::vector<structSubChart> vCharts;
       vCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
       size_t ix = 0;
-      int y = 25;
+      int y = 15;  // was 25
       int x = 50;
       int xAxisHeight = 50;
       XYChart *pXY;  // used for each sub-chart
@@ -94,7 +94,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             break;
           case 1: // volume chart
             pXY = new XYChart( m_nChartWidth, heightChart1 );
-            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 - 50 );
+            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 );
             pXY->setClipping();
             pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart

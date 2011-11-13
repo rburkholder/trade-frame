@@ -51,6 +51,7 @@ public:
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::pInstrument_cref pInstrument_cref;
 
+  typedef COrder::idOrder_t idOrder_t;
   typedef COrder::pOrder_t pOrder_t;
   typedef COrder::pOrder_ref pOrder_ref;
 
@@ -198,6 +199,7 @@ public:
     double dblPrice1,  
     double dblPrice2
     );
+  void CancelOrder( idOrder_t idOrder );
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
@@ -224,9 +226,10 @@ protected:
 
   pInstrument_t m_pInstrument;
 
-  std::vector<pOrder_t> m_OpenOrders;  // active orders waiting to be executed or cancelled
-  std::vector<pOrder_t> m_ClosedOrders;  // orders that have executed or have cancelled
-  std::vector<pOrder_t> m_AllOrders;  // keeps track of all orders in case we have to search both lists
+  typedef std::vector<pOrder_t> vOrders_t;
+  vOrders_t m_OpenOrders;  // active orders waiting to be executed or cancelled
+  vOrders_t m_ClosedOrders;  // orders that have executed or have cancelled
+  vOrders_t m_AllOrders;  // keeps track of all orders in case we have to search both lists
 
 private:
 

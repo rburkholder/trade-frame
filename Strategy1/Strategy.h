@@ -14,6 +14,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
@@ -31,9 +32,11 @@
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
+#include <OUCharting/ChartEntryShape.h>
 
-class Strategy
-{
+#include "OrdersOutstanding.h"
+
+class Strategy {
 public:
 
   Strategy(void);
@@ -52,6 +55,7 @@ private:
 
   std::stringstream m_ss;
 
+  typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
@@ -73,10 +77,22 @@ private:
   ou::ChartEntryBars m_ceBars;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryIndicator m_ceSlope;
+  ou::ChartEntryIndicator m_ceSMA;
+  ou::ChartEntryIndicator m_cePLLong;
+  ou::ChartEntryIndicator m_cePLShort;
+  //ou::ChartEntryIndicator m_ceRR;
+  ou::ChartEntryShape m_ceShorts;
+  ou::ChartEntryShape m_ceLongs;
 
   typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
 
-  ou::tf::CPosition::pPosition_t pPosition;
+  pPosition_t m_pPositionLong;
+  pPosition_t m_pPositionShort;
+
+  pOrder_t m_pOrder;  // active order
+
+  OrdersOutstandingLongs* m_pOrdersOutstandingLongs;
+  OrdersOutstandingShorts* m_pOrdersOutstandingShorts;
 
   ptime m_dtEnd;
   unsigned int m_nTransitions;
