@@ -78,16 +78,20 @@ private:
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryIndicator m_ceSlope;
   ou::ChartEntryIndicator m_ceSMA;
-  ou::ChartEntryIndicator m_cePLLong;
-  ou::ChartEntryIndicator m_cePLShort;
+  ou::ChartEntryIndicator m_cePLLongOpen;
+  ou::ChartEntryIndicator m_cePLShortOpen;
+  ou::ChartEntryIndicator m_cePLLongClose;
+  ou::ChartEntryIndicator m_cePLShortClose;
   //ou::ChartEntryIndicator m_ceRR;
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;
 
   typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
 
-  pPosition_t m_pPositionLong;
-  pPosition_t m_pPositionShort;
+  pPosition_t m_pPositionLongOpen;
+  pPosition_t m_pPositionShortOpen;
+  pPosition_t m_pPositionLongClose;
+  pPosition_t m_pPositionShortClose;
 
   pOrder_t m_pOrder;  // active order
 

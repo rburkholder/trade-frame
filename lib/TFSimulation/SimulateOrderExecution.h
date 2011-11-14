@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <map>
 #include <list>
 #include <string>
 
@@ -74,6 +75,7 @@ public:
   void CancelOrder( COrder::idOrder_t nOrderId );
 
 protected:
+
   struct structCancelOrder {
     ptime dtCancellation;
     COrder::idOrder_t nOrderId;
@@ -97,9 +99,11 @@ protected:
   CTrade::tradesize_t m_nOrderQuanRemaining;
   CTrade::tradesize_t m_nOrderQuanProcessed;
 
+  typedef std::multimap<double,pOrder_t> mapOrderBook_t;
+  mapOrderBook_t m_mapAsks; // lowest at beginning
+  mapOrderBook_t m_mapBids; // highest at end
+
   pOrder_t m_pCurrentOrder;
-  bool m_bOrdersQueued;
-  bool m_bCancelsQueued;
 
   void ProcessDelayQueues( const CQuote &quote );
   void CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan );

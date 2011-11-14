@@ -21,6 +21,9 @@ OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) : m_pPosition( pPo
 void OrdersOutstanding::AddOrderFilling( pOrder_t pOrder ) {
   m_mapOrdersFilling[ pOrder->GetOrderId() ] = pOrder;
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleOrderFilled ) );
+  if ( 0 == pOrder->GetQuanRemaining() ) {
+    HandleOrderFilled( *pOrder.get() );
+  }
 }
 
 void OrdersOutstanding::HandleOrderFilled( const ou::tf::COrder& order ) {

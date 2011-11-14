@@ -23,10 +23,9 @@ namespace tf { // TradeFrame
 int CSimulateOrderExecution::m_nExecId( 1000 );
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
-: m_dtQueueDelay( milliseconds( 800 ) ), m_dblCommission( 1.00 ), 
+: m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 ), 
   m_ea( EAQuotes ),
-  m_bOrdersQueued( false ),
-  m_bCancelsQueued( false ), m_nOrderQuanRemaining( 0 )
+  m_nOrderQuanRemaining( 0 )
 {
 }
 
@@ -36,7 +35,7 @@ CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
   if ( EATrades == m_ea ) {
     CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
-    if ( m_bOrdersQueued || m_bCancelsQueued ) {
+    if ( !m_lDelayOrder.empty() || !m_lDelayCancel.empty() ) {
       ProcessDelayQueues( quote );
     }
   }
@@ -44,7 +43,7 @@ void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
 
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
   if ( EAQuotes == m_ea ) {
-    if ( m_bOrdersQueued || m_bCancelsQueued ) {
+    if ( !m_lDelayOrder.empty() || !m_lDelayCancel.empty() ) {
       ProcessDelayQueues( quote );
     }
   }
@@ -52,13 +51,11 @@ void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
 
 void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
   m_lDelayOrder.push_back( pOrder );
-  m_bOrdersQueued = true;
 }
 
 void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
   structCancelOrder co( ou::CTimeSource::Instance().Internal(), nOrderId );
   m_lDelayCancel.push_back( co );
-  m_bCancelsQueued = true;
 }
 
 void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
@@ -88,6 +85,10 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
 
 void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
 
+  if ( ( 0.0 == quote.Ask() ) || ( 0.0 == quote.Bid() ) || ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
+    return;
+  }
+
   // process cancels list
   bool bNoMore = false;
   while ( !bNoMore && !m_lDelayCancel.empty() ) {
@@ -96,18 +97,18 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
       bNoMore = true;  // havn't waited long enough to simulate cancel submission
     }
     else {
+      structCancelOrder co = m_lDelayCancel.front();
       m_lDelayCancel.pop_front();
-      m_bCancelsQueued = !m_lDelayCancel.empty();
       bool bOrderFound = false;
       for ( lDelayOrder_iter_t iter = m_lDelayOrder.begin(); iter != m_lDelayOrder.end(); ++iter ) {
         if ( co.nOrderId == (*iter)->GetOrderId() ) {
           // perform cancellation on in-process order
-          if ( NULL != m_pCurrentOrder ) {
+          if ( 0 != m_pCurrentOrder ) {
             if ( co.nOrderId == m_pCurrentOrder->GetOrderId() ) {
               m_pCurrentOrder.reset();
             }
           }
-          if ( NULL != OnOrderCancelled ) {
+          if ( 0 != OnOrderCancelled ) {
             CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
             OnOrderCancelled( co.nOrderId );
           }
@@ -126,27 +127,20 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
   // process orders list
   // only handles first in queue
   // need to build and maintain order book, particularily for handling limit orders
-  if ( NULL == m_pCurrentOrder ) {
+  if ( ( 0  == m_pCurrentOrder ) && ( !m_lDelayOrder.empty() ) ) {
     m_pCurrentOrder = m_lDelayOrder.front();
     if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
-      if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
-        // can't process  
-        m_pCurrentOrder.reset();
-        m_nOrderQuanRemaining = 0;  // is this needed?
-      }
-      else {
-        m_lDelayOrder.pop_front();
-        m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
-        m_nOrderQuanProcessed = 0;
-        assert( 0 != m_nOrderQuanRemaining );
-      }
+      m_lDelayOrder.pop_front();
+      m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
+      m_nOrderQuanProcessed = 0;
+      assert( 0 != m_nOrderQuanRemaining );
     }
     else {
       m_pCurrentOrder.reset();
       m_nOrderQuanRemaining = 0;  // is this needed?
     }
   }
-  if ( NULL != m_pCurrentOrder ) {
+  if ( 0 != m_pCurrentOrder ) {
     assert( 0 != m_nOrderQuanRemaining );
     if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
       std::runtime_error( "zero ask or zero bid size" );
@@ -218,7 +212,6 @@ void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
       if ( 0 == m_nOrderQuanRemaining ) {
         CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
         m_pCurrentOrder.reset();
-        m_bOrdersQueued = !m_lDelayOrder.empty();
       }
     }
   }

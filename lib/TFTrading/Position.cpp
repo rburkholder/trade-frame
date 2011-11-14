@@ -135,6 +135,9 @@ void CPosition::DisconnectFromDataProvider( int ) {
 }
 
 void CPosition::HandleQuote( quote_t quote ) {
+
+  if ( ( 0 == quote.Ask() ) || ( 0 == quote.Bid() ) ) return;
+
   bool bProcessed(false);
   switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
@@ -230,8 +233,8 @@ void CPosition::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       COrderManager::Instance().CancelOrder( idOrder );
-      m_OpenOrders.erase( iter );
       m_ClosedOrders.push_back( *iter );
+      m_OpenOrders.erase( iter );
       break;
     }
   }
