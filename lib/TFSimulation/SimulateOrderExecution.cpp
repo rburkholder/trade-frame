@@ -24,8 +24,7 @@ int CSimulateOrderExecution::m_nExecId( 1000 );
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
 : m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 ), 
-  m_ea( EAQuotes ),
-  m_nOrderQuanRemaining( 0 )
+  m_ea( EAQuotes )
 {
 }
 
@@ -35,27 +34,23 @@ CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
   if ( EATrades == m_ea ) {
     CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
-    if ( !m_lDelayOrder.empty() || !m_lDelayCancel.empty() ) {
-      ProcessDelayQueues( quote );
-    }
+    ProcessOrderQueues( quote );
   }
 }
 
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
   if ( EAQuotes == m_ea ) {
-    if ( !m_lDelayOrder.empty() || !m_lDelayCancel.empty() ) {
-      ProcessDelayQueues( quote );
-    }
+    ProcessOrderQueues( quote );
   }
 }
 
 void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
-  m_lDelayOrder.push_back( pOrder );
+  m_lOrderDelay.push_back( pOrder );
 }
 
 void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
   structCancelOrder co( ou::CTimeSource::Instance().Internal(), nOrderId );
-  m_lDelayCancel.push_back( co );
+  m_lCancelDelay.push_back( co );
 }
 
 void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
@@ -83,138 +78,296 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
   }
 }
 
-void CSimulateOrderExecution::ProcessDelayQueues( const CQuote &quote ) {
+void CSimulateOrderExecution::ProcessOrderQueues( const CQuote &quote ) {
 
   if ( ( 0.0 == quote.Ask() ) || ( 0.0 == quote.Bid() ) || ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
     return;
   }
 
-  // process cancels list
-  bool bNoMore = false;
-  while ( !bNoMore && !m_lDelayCancel.empty() ) {
-    structCancelOrder &co = m_lDelayCancel.front();
-    if ( ( co.dtCancellation + m_dtQueueDelay ) < quote.DateTime() ) {
-      bNoMore = true;  // havn't waited long enough to simulate cancel submission
+  ProcessCancelQueue( quote );
+
+  ProcessDelayQueue( quote );
+
+  ProcessStopOrders( quote ); // places orders into market orders queue
+
+  bool bProcessed;
+  bProcessed = ProcessMarketOrders( quote );
+  if ( !bProcessed ) {
+    bProcessed = ProcessLimitOrders( quote );
+  }
+
+}
+
+void CSimulateOrderExecution::ProcessStopOrders( const CQuote& quote ) {
+  // not yet implemented
+}
+
+bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
+
+  pOrder_t pOrderFrontOfQueue;
+  bool bProcessed = false;
+
+  // process market orders
+  if ( !m_lOrderMarket.empty() ) {
+
+    pOrderFrontOfQueue = m_lOrderMarket.front();
+    bProcessed = true;
+
+    boost::uint32_t nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
+    assert( 0 != nOrderQuanRemaining );
+
+    // figure out price of execution
+    CTrade::tradesize_t quanAvail;
+    double dblPrice;
+    OrderSide::enumOrderSide orderSide = pOrderFrontOfQueue->GetOrderSide();
+    switch ( orderSide ) {
+      case OrderSide::Buy:
+        quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+        dblPrice = quote.Ask();
+        break;
+      case OrderSide::Sell:
+        quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+        dblPrice = quote.Bid();
+        break;
+      default:
+        throw std::runtime_error( "CSimulateOrderExecution::ProcessMarketOrders unknown order side" );
+        break;
+    }
+
+    // execute order
+    if ( 0 != OnOrderFill ) {
+      std::string id;
+      GetExecId( &id );
+      CExecution exec( dblPrice, quanAvail, orderSide, "SIMMkt", id );
+      OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
     }
     else {
-      structCancelOrder co = m_lDelayCancel.front();
-      m_lDelayCancel.pop_front();
-      bool bOrderFound = false;
-      for ( lDelayOrder_iter_t iter = m_lDelayOrder.begin(); iter != m_lDelayOrder.end(); ++iter ) {
-        if ( co.nOrderId == (*iter)->GetOrderId() ) {
-          // perform cancellation on in-process order
-          if ( 0 != m_pCurrentOrder ) {
-            if ( co.nOrderId == m_pCurrentOrder->GetOrderId() ) {
-              m_pCurrentOrder.reset();
-            }
-          }
-          if ( 0 != OnOrderCancelled ) {
-            CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
-            OnOrderCancelled( co.nOrderId );
-          }
-          m_lDelayOrder.erase( iter );
-          bOrderFound = true;
-          break;
+      int i = 1;  // we have a problem as nOrderQuanRemaining won't be updated for the next pass through on partial orders
+      std::runtime_error( "no onorderfill to keep housekeeping in place" );
+    }
+        
+    nOrderQuanRemaining -= quanAvail;
+
+    // when order done, commission and toss away
+    if ( 0 == nOrderQuanRemaining ) {
+      CalculateCommission( pOrderFrontOfQueue.get(), pOrderFrontOfQueue->GetQuanFilled() );
+      m_lOrderMarket.pop_front();
+    }
+  }
+  return bProcessed;
+}
+
+bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
+
+  pOrder_t pOrderFrontOfQueue;
+  bool bProcessed = false;
+  boost::uint32_t nOrderQuanRemaining = 0;
+
+  // todo: what about self's own crossing orders, could fill with out qoute
+
+  if ( !m_mapAsks.empty() ) {
+    if ( quote.Bid() >= m_mapAsks.begin()->first ) { 
+      bProcessed = true;
+      pOrderFrontOfQueue = m_mapAsks.begin()->second;
+      nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
+      assert( 0 != nOrderQuanRemaining );
+      CTrade::tradesize_t quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+      if ( 0 != OnOrderFill ) {
+        std::string id;
+        GetExecId( &id );
+        CExecution exec( quote.Bid(), quanAvail, OrderSide::Sell, "SIMLmtSell", id );
+        OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
+        nOrderQuanRemaining -= quanAvail;
+        if ( 0 == nOrderQuanRemaining ) {
+          CalculateCommission( pOrderFrontOfQueue.get(), pOrderFrontOfQueue->GetQuanFilled() );
+          m_mapAsks.erase( m_mapAsks.begin() );
         }
       }
-      if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
-        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
-        if ( NULL != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+    }
+  }
+  if ( !m_mapBids.empty() && !bProcessed) {
+    if ( quote.Ask() <= m_mapBids.rbegin()->first ) {
+      bProcessed = true;
+      pOrderFrontOfQueue = m_mapBids.begin()->second;
+      nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
+      assert( 0 != nOrderQuanRemaining );
+      CTrade::tradesize_t quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+      if ( 0 != OnOrderFill ) {
+        std::string id;
+        GetExecId( &id );
+        CExecution exec( quote.Ask(), quanAvail, OrderSide::Buy, "SIMLmtBuy", id );
+        OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
+        nOrderQuanRemaining -= quanAvail;
+        if ( 0 == nOrderQuanRemaining ) {
+          CalculateCommission( pOrderFrontOfQueue.get(), pOrderFrontOfQueue->GetQuanFilled() );
+          m_mapBids.erase( --m_mapBids.rbegin().base() );
+        }
       }
     }
   }
 
-  // process orders list
-  // only handles first in queue
-  // need to build and maintain order book, particularily for handling limit orders
-  if ( ( 0  == m_pCurrentOrder ) && ( !m_lDelayOrder.empty() ) ) {
-    m_pCurrentOrder = m_lDelayOrder.front();
-    if ( ( m_pCurrentOrder->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
-      m_lDelayOrder.pop_front();
-      m_nOrderQuanRemaining = m_pCurrentOrder->GetQuanOrdered();
-      m_nOrderQuanProcessed = 0;
-      assert( 0 != m_nOrderQuanRemaining );
-    }
-    else {
-      m_pCurrentOrder.reset();
-      m_nOrderQuanRemaining = 0;  // is this needed?
-    }
-  }
-  if ( 0 != m_pCurrentOrder ) {
-    assert( 0 != m_nOrderQuanRemaining );
-    if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
-      std::runtime_error( "zero ask or zero bid size" );
-      // need to requeue the order here
-    }
-    else {
-      CTrade::tradesize_t quanAvail;
-      double dblPrice;
-      OrderSide::enumOrderSide orderSide = m_pCurrentOrder->GetOrderSide();
-      switch ( orderSide ) {
-        case OrderSide::Buy:
-          quanAvail = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, quote.AskSize() );
-          dblPrice = quote.Ask();
-          break;
-        case OrderSide::Sell:
-          quanAvail = std::min<CTrade::tradesize_t>( m_nOrderQuanRemaining, quote.BidSize() );
-          dblPrice = quote.Bid();
-          break;
-        default:
-          throw std::runtime_error( "CSimulateOrderExecution::ProcessDelayQueues unknown order side" );
-          break;
-      }
+  return bProcessed;
+}
 
-      switch ( m_pCurrentOrder->GetOrderType() ) {
-        case OrderType::Market: 
-          {
-          std::string id;
-          GetExecId( &id );
-          CExecution exec( dblPrice, quanAvail, orderSide, "SIMMkt", id );
-          if ( NULL != OnOrderFill ) 
-            OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-          m_nOrderQuanRemaining -= quanAvail;
-          m_nOrderQuanProcessed += quanAvail;
-          }
+void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {
+
+  pOrder_t pOrderFrontOfQueue;
+
+  // process the delay list
+  while ( !m_lOrderDelay.empty() ) {
+    if ( ( m_lOrderDelay.front()->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
+      break;
+    }
+    else {
+      pOrderFrontOfQueue = m_lOrderDelay.front();
+      m_lOrderDelay.pop_front();
+      switch ( pOrderFrontOfQueue->GetOrderType() ) {
+        case OrderType::Market:
+          // place into market order book
+          m_lOrderMarket.push_back( pOrderFrontOfQueue );
           break;
-        case OrderType::Limit: {
-          // need to handle order book
-          double dblLimitOrderPrice = m_pCurrentOrder->GetPrice1();
-          assert( 0 < dblLimitOrderPrice );
-          switch ( orderSide ) {
+        case OrderType::Limit:
+          // place into limit book
+          assert( 0 < pOrderFrontOfQueue->GetPrice1() );
+          switch ( pOrderFrontOfQueue->GetOrderSide() ) {
             case OrderSide::Buy:
-              if ( quote.Ask() <= dblLimitOrderPrice ) {
-                std::string id;
-                GetExecId( &id );
-                CExecution exec( quote.Ask(), quanAvail, orderSide, "SIMLmtBuy", id );
-                if ( NULL != OnOrderFill ) 
-                  OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-                m_nOrderQuanRemaining -= quanAvail;
-                m_nOrderQuanProcessed += quanAvail;
-              }
+              m_mapBids.insert( mapOrderBook_pair_t( pOrderFrontOfQueue->GetPrice1(), pOrderFrontOfQueue ) );
               break;
             case OrderSide::Sell:
-              if ( quote.Bid() >= dblLimitOrderPrice ) {
-                std::string id;
-                GetExecId( &id );
-                CExecution exec( quote.Bid(), quanAvail, orderSide, "SIMLmtSell", id );
-                if ( NULL != OnOrderFill ) 
-                  OnOrderFill( m_pCurrentOrder->GetOrderId(), exec );
-                m_nOrderQuanRemaining -= quanAvail;
-                m_nOrderQuanProcessed += quanAvail;
-              }
+              m_mapAsks.insert( mapOrderBook_pair_t( pOrderFrontOfQueue->GetPrice1(), pOrderFrontOfQueue ) );
               break;
             default:
               break;
           }
           break;
-        }
-      }
-      if ( 0 == m_nOrderQuanRemaining ) {
-        CalculateCommission( m_pCurrentOrder.get(), m_nOrderQuanProcessed );
-        m_pCurrentOrder.reset();
+        case OrderType::Stop:
+          // place into stop book
+          assert( 0 < pOrderFrontOfQueue->GetPrice1() );
+          switch ( pOrderFrontOfQueue->GetOrderSide() ) {
+            case OrderSide::Buy:
+              m_mapBuyStops.insert( mapOrderBook_pair_t( pOrderFrontOfQueue->GetPrice1(), pOrderFrontOfQueue ) );
+              break;
+            case OrderSide::Sell:
+              m_mapSellStops.insert( mapOrderBook_pair_t( pOrderFrontOfQueue->GetPrice1(), pOrderFrontOfQueue ) );
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          break;
       }
     }
   }
+
+}
+
+void CSimulateOrderExecution::ProcessCancelQueue( const CQuote& quote ) {
+
+  // process cancels list
+  while ( !m_lCancelDelay.empty() ) {
+    if ( ( m_lCancelDelay.front().dtCancellation + m_dtQueueDelay ) < quote.DateTime() ) {
+      break;  // havn't waited long enough to simulate cancel submission
+    }
+    else {
+      structCancelOrder& co = m_lCancelDelay.front();  // capture the information
+      bool bOrderFound = false;
+
+      // need a fusion array based upon orders so can zero in on order without looping through all the structures
+
+      // check the delay queue
+      for ( lOrderQueue_iter_t iter = m_lOrderDelay.begin(); iter != m_lOrderDelay.end(); ++iter ) {
+        if ( co.nOrderId == (*iter)->GetOrderId() ) {
+          m_lOrderDelay.erase( iter );
+          bOrderFound = true;
+          break;
+        }
+      }
+
+      // check the market order queue
+      if ( !bOrderFound ) {
+        for ( lOrderQueue_iter_t iter = m_lOrderMarket.begin(); iter != m_lOrderMarket.end(); ++iter ) {
+          if ( co.nOrderId == (*iter)->GetOrderId() ) {
+            if ( co.nOrderId == m_lOrderMarket.front()->GetOrderId() ) { // check order front of queue
+              boost::uint32_t nOrderQuanProcessed = (*iter)->GetQuanFilled();
+              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
+                CalculateCommission( (*iter).get(), nOrderQuanProcessed );
+              }
+            }
+            m_lOrderMarket.erase( iter );
+            bOrderFound = true;
+            break;
+          }
+        }
+      }
+
+      // need to check orders in ask limit list
+      if ( !bOrderFound ) { 
+        for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
+          if ( co.nOrderId == iter->second->GetOrderId() ) {
+            if ( co.nOrderId == m_mapAsks.begin()->second->GetOrderId() ) {
+              boost::uint32_t nOrderQuanProcessed = iter->second->GetQuanFilled();
+              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
+                CalculateCommission( iter->second.get(), nOrderQuanProcessed );
+              }
+            }
+            m_mapAsks.erase( iter );
+            bOrderFound = true;
+            break;
+          }
+        }
+      }
+
+      // need to check orders in bid limit list
+      if ( !bOrderFound ) { 
+        for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
+          if ( co.nOrderId == iter->second->GetOrderId() ) {
+            if ( co.nOrderId == m_mapAsks.rbegin()->second->GetOrderId() ) {
+              boost::uint32_t nOrderQuanProcessed = iter->second->GetQuanFilled();
+              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
+                CalculateCommission( iter->second.get(), nOrderQuanProcessed );
+              }
+            }
+            m_mapBids.erase( iter );
+            bOrderFound = true;
+            break;
+          }
+        }
+      }
+
+      // need to check orders in stop list sells
+      if ( !bOrderFound ) { 
+        for ( mapOrderBook_iter_t iter = m_mapSellStops.begin(); iter != m_mapSellStops.end(); ++iter ) {
+          if ( co.nOrderId == iter->second->GetOrderId() ) {
+            m_mapSellStops.erase( iter );
+            bOrderFound = true;
+            break;
+          }
+        }
+      }
+
+      // need to check orders in stop list buys
+      if ( !bOrderFound ) { 
+        for ( mapOrderBook_iter_t iter = m_mapBuyStops.begin(); iter != m_mapBuyStops.end(); ++iter ) {
+          if ( co.nOrderId == iter->second->GetOrderId() ) {
+            m_mapBuyStops.erase( iter );
+            bOrderFound = true;
+            break;
+          }
+        }
+      }
+
+      if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
+        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
+        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+      }
+      else {
+        if ( 0 != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );
+      }
+      m_lCancelDelay.pop_front();  // remove from list
+    }
+  }
+
 }
 
 } // namespace tf

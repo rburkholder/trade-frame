@@ -91,22 +91,27 @@ protected:
   OnNoOrderFoundHandler OnNoOrderFound;
   OnCommissionHandler OnCommission;
 
-  typedef std::list<pOrder_t> lDelayOrder_t;
-  typedef lDelayOrder_t::iterator lDelayOrder_iter_t;
-  lDelayOrder_t m_lDelayOrder;  // all orders put in delay queue, taken out then processed as limit or market
-  std::list<structCancelOrder> m_lDelayCancel;
-
-  CTrade::tradesize_t m_nOrderQuanRemaining;
-  CTrade::tradesize_t m_nOrderQuanProcessed;
+  typedef std::list<pOrder_t> lOrderQueue_t;
+  typedef lOrderQueue_t::iterator lOrderQueue_iter_t;
+  std::list<structCancelOrder> m_lCancelDelay; // separate structure for the cancellations, since not an order
+  lOrderQueue_t m_lOrderDelay;  // all orders put in delay queue, taken out then processed as limit or market or stop
+  lOrderQueue_t m_lOrderMarket;  // market orders to be processed
 
   typedef std::multimap<double,pOrder_t> mapOrderBook_t;
+  typedef mapOrderBook_t::iterator mapOrderBook_iter_t;
+  typedef std::pair<double,pOrder_t> mapOrderBook_pair_t;
   mapOrderBook_t m_mapAsks; // lowest at beginning
   mapOrderBook_t m_mapBids; // highest at end
+  mapOrderBook_t m_mapSellStops;  // pending sell stops, turned into market order when touched
+  mapOrderBook_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
 
-  pOrder_t m_pCurrentOrder;
-
-  void ProcessDelayQueues( const CQuote &quote );
+  void ProcessOrderQueues( const CQuote& quote );
   void CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan );
+  void ProcessCancelQueue( const CQuote& quote );
+  void ProcessDelayQueue( const CQuote& quote );
+  void ProcessStopOrders( const CQuote& quote ); // true if order executed, not yet implemented
+  bool ProcessMarketOrders( const CQuote& quote ); // true if order executed
+  bool ProcessLimitOrders( const CQuote& quote ); // true if order executed
 
   static int m_nExecId;  // static provides unique number across universe of symbols
   void GetExecId( std::string* sId ) { 
