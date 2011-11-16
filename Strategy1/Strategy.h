@@ -75,6 +75,8 @@ private:
   typedef ou::ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
   ou::ChartDataView m_dvChart;
   ou::ChartEntryBars m_ceBars;
+  ou::ChartEntryIndicator m_ceUpperBollinger;
+  ou::ChartEntryIndicator m_ceLowerBollinger;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryIndicator m_ceSlope;
   ou::ChartEntryIndicator m_ceSMA;
@@ -88,10 +90,8 @@ private:
 
   typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
 
-  pPosition_t m_pPositionLongOpen;
-  pPosition_t m_pPositionShortOpen;
-  pPosition_t m_pPositionLongClose;
-  pPosition_t m_pPositionShortClose;
+  pPosition_t m_pPositionLong;
+  pPosition_t m_pPositionShort;
 
   pOrder_t m_pOrder;  // active order
 
@@ -101,11 +101,13 @@ private:
   ptime m_dtEnd;
   unsigned int m_nTransitions;
 
-  ou::tf::TSSWStatsMidQuote m_sma1min;
-  ou::tf::TSSWStatsMidQuote m_sma2min;
-  ou::tf::TSSWStatsMidQuote m_sma3min;
-  ou::tf::TSSWStatsMidQuote m_sma5min;
-  ou::tf::TSSWStatsMidQuote m_sma15min;
+  ou::tf::TSSWStatsMidQuote m_sma1;
+  ou::tf::TSSWStatsMidQuote m_sma2;
+  ou::tf::TSSWStatsMidQuote m_sma3;
+  ou::tf::TSSWStatsMidQuote m_sma4;
+  ou::tf::TSSWStatsMidQuote m_sma5;
+  ou::tf::TSSWStatsMidQuote m_sma6;
+  ou::tf::TSSWStatsMidQuote m_sma7;
 
   pProviderSim_t m_sim;
   bool m_bSimConnected;

@@ -104,7 +104,7 @@ void CSimulateOrderExecution::ProcessStopOrders( const CQuote& quote ) {
 
 bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
 
-  pOrder_t pOrderFrontOfQueue;
+  pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
 
   // process market orders
@@ -159,7 +159,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
 
 bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
 
-  pOrder_t pOrderFrontOfQueue;
+  pOrder_t pOrderFrontOfQueue; // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
   boost::uint32_t nOrderQuanRemaining = 0;
 
@@ -188,7 +188,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
   if ( !m_mapBids.empty() && !bProcessed) {
     if ( quote.Ask() <= m_mapBids.rbegin()->first ) {
       bProcessed = true;
-      pOrderFrontOfQueue = m_mapBids.begin()->second;
+      pOrderFrontOfQueue = m_mapBids.rbegin()->second;
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
       assert( 0 != nOrderQuanRemaining );
       CTrade::tradesize_t quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
@@ -211,7 +211,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
 
 void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {
 
-  pOrder_t pOrderFrontOfQueue;
+  pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
 
   // process the delay list
   while ( !m_lOrderDelay.empty() ) {
@@ -322,7 +322,7 @@ void CSimulateOrderExecution::ProcessCancelQueue( const CQuote& quote ) {
       if ( !bOrderFound ) { 
         for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
           if ( co.nOrderId == iter->second->GetOrderId() ) {
-            if ( co.nOrderId == m_mapAsks.rbegin()->second->GetOrderId() ) {
+            if ( co.nOrderId == m_mapBids.rbegin()->second->GetOrderId() ) {
               boost::uint32_t nOrderQuanProcessed = iter->second->GetQuanFilled();
               if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
                 CalculateCommission( iter->second.get(), nOrderQuanProcessed );

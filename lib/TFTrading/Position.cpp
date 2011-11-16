@@ -214,12 +214,12 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
 void CPosition::PlaceOrder( pOrder_t pOrder ) {
 
-  if ( OrderSide::Unknown != m_row.eOrderSidePending ) { // ensure new order matches existing orders
-    if ( m_row.eOrderSidePending != pOrder->GetOrderSide() ) {
-      throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
-    }
-  }
-  m_row.eOrderSidePending = pOrder->GetOrderSide();
+//  if ( OrderSide::Unknown != m_row.eOrderSidePending ) { // ensure new order matches existing orders
+//    if ( ( m_row.eOrderSidePending != pOrder->GetOrderSide() ) && ( OrderType::Market == pOrder->GetOrderType() ) ) {  // check only for market orders, not limit orders?
+//      throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
+//    }
+//  }
+  m_row.eOrderSidePending = pOrder->GetOrderSide();  // removing above check screws this up.
 
   m_row.nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
@@ -232,6 +232,8 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
 void CPosition::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
+      m_row.nPositionPending -= iter->get()->GetQuanRemaining();  // is going to have problems if filled during cancellation
+      if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
       COrderManager::Instance().CancelOrder( idOrder );
       m_ClosedOrders.push_back( *iter );
       m_OpenOrders.erase( iter );
@@ -243,10 +245,8 @@ void CPosition::CancelOrder( idOrder_t idOrder ) {
 void CPosition::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
   for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
-    COrderManager::Instance().CancelOrder( iter->get()->GetOrderId() );
-    m_ClosedOrders.push_back( *iter );
+    CancelOrder( iter->get()->GetOrderId() );
   }
-  m_OpenOrders.clear();
 }
 
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {

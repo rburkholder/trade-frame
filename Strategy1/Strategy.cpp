@@ -22,10 +22,15 @@
 
 Strategy::Strategy(void) 
   : m_sim( new ou::tf::CSimulationProvider() ),
-  m_sma1min( &m_quotes, 60 ), m_sma2min( &m_quotes, 120 ), m_sma3min( &m_quotes, 180 ),
-  m_sma5min( &m_quotes, 300 ), m_sma15min( &m_quotes, 1800 ),
+  m_sma1( &m_quotes, 60 ), // 1 min
+  m_sma2( &m_quotes, 120 ),  // 2 min
+  m_sma3( &m_quotes, 180 ),  // 3 min
+  m_sma4( &m_quotes, 300 ),  // 5 min
+  m_sma5( &m_quotes, 600 ),  // 10 min
+  m_sma6( &m_quotes, 1800 ), // 30 min
+  m_sma7( &m_quotes, 3600 ), // 60 min
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
-  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 8 ), time_duration( 17, 58, 0 ) ),  // put in time start
+  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 8 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_nTransitions( 0 ),
   m_barFactory( 180 ),
   m_dvChart( "Strategy1", "GC" ), 
@@ -39,6 +44,8 @@ Strategy::Strategy(void)
   m_dvChart.Add( 0, m_ceSMA );
   m_dvChart.Add( 0, m_ceShorts );
   m_dvChart.Add( 0, m_ceLongs );
+  m_dvChart.Add( 0, m_ceUpperBollinger );
+  m_dvChart.Add( 0, m_ceLowerBollinger );
   m_dvChart.Add( 1, m_ceVolume );
   m_dvChart.Add( 2, m_ceSlope );
 //  m_dvChart.Add( 3, m_ceRR );
@@ -80,25 +87,17 @@ Strategy::Strategy(void)
   m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &Strategy::HandleSimulationComplete ) );
 
-  m_pPositionLongOpen.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  m_pPositionLongOpen->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  m_pPositionLongOpen->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+  m_pPositionLong.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
+  m_pPositionLong->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionLong->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
-  m_pPositionLongClose.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  //m_pPositionLongClose->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  //m_pPositionLongClose->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLong );
 
-  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLongClose );
+  m_pPositionShort.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
+  m_pPositionShort->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionShort->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
-  m_pPositionShortOpen.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  m_pPositionShortOpen->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  m_pPositionShortOpen->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
-
-  m_pPositionShortClose.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  //m_pPositionShortClose->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  //m_pPositionShortClose->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
-
-  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShortClose );
+  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShort );
 }
 
 Strategy::~Strategy(void) {
@@ -154,18 +153,21 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   // problems occur when long trend happens and can't get out of oposing position.
 
   m_quotes.Append( quote );
-  m_sma5min.Update();
+  m_sma7.Update();
+  ou::tf::TSSWStatsMidQuote& sma( m_sma7 );
 
   if ( 500 < m_quotes.Size() ) {
 
-    //m_pOrdersOutstandingLongs->HandleQuote( quote );
-    //m_pOrdersOutstandingShorts->HandleQuote( quote );
+    m_pOrdersOutstandingLongs->HandleQuote( quote );
+    m_pOrdersOutstandingShorts->HandleQuote( quote );
 
-    m_ceSlope.Add( quote.DateTime(), m_sma5min.Slope() );
-    m_ceSMA.Add( quote.DateTime(), m_sma5min.MeanY() );
+    m_ceSlope.Add( quote.DateTime(), sma.Slope() );
+    m_ceSMA.Add( quote.DateTime(), sma.MeanY() );
+    m_ceUpperBollinger.Add( quote.DateTime(), sma.BBUpper() );
+    m_ceLowerBollinger.Add( quote.DateTime(), sma.BBLower() );
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
-    m_cePLLongOpen.Add( quote.DateTime(), m_pPositionLongOpen->GetRealizedPL() );
-    m_cePLShortOpen.Add( quote.DateTime(), m_pPositionShortOpen->GetRealizedPL() );
+    m_cePLLongOpen.Add( quote.DateTime(), m_pPositionLong->GetRealizedPL() );
+    m_cePLShortOpen.Add( quote.DateTime(), m_pPositionShort->GetRealizedPL() );
 //    m_cePLLongClose.Add( quote.DateTime(), m_pPositionLongOpen->GetUnRealizedPL() );
 //    m_cePLShortClose.Add( quote.DateTime(), m_pPositionShortOpen->GetUnRealizedPL() );
 
@@ -176,25 +178,25 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
     switch ( m_stateTrade ) {
     case ETradeOut:
-      if ( 0 != m_sma5min.Slope() ) {
-        if ( 0 < m_sma5min.Slope() ) { //rising
+      if ( 0 != sma.Slope() ) {
+        if ( 0 < sma.Slope() ) { //rising
           m_ss.str( "" );
           m_ss << "Ordered: " << quote.DateTime() << "; ";
-          m_pOrder = m_pPositionLongOpen->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+          m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
           m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "Long a" );
           m_stateTrade = ETradeLong;
         }
         else { // falling
           m_ss.str( "" );
           m_ss << "Ordered: " << quote.DateTime() << "; ";
-          m_pOrder = m_pPositionShortOpen->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+          m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
           m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "Short a" );
           m_stateTrade = ETradeShort;
         }
       }
       break;
     case ETradeLong:
-      if ( m_pPositionLongOpen->OrdersPending() ) {
+      if ( m_pPositionLong->OrdersPending() ) {
       //if ( false ) {
       }
       else {
@@ -202,20 +204,20 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrder.reset();
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrdersOutstandingShorts->CancelAll();
-          m_pPositionLongOpen->ClosePosition();
-          m_pPositionShortOpen->ClosePosition();
+          m_pPositionLong->ClosePosition();
+          m_pPositionShort->ClosePosition();
           m_stateTrade = ETradeDone;
         }
         else {
-          if ( 0 > m_sma5min.Slope() ) {
+          if ( 0 > sma.Slope() ) {
             //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             ++m_nTransitions;
             //m_ss.str( "" );
             //m_ss << "Ordered: " << quote.DateTime() << "; ";
-            m_pPositionLongOpen->ClosePosition();
-            //m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
+            //m_pPositionLongOpen->ClosePosition();
+            m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
             m_pOrder.reset();
-            m_pOrder = m_pPositionShortOpen->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+            m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "Short b" );
             m_stateTrade = ETradeShort;
           }
@@ -223,7 +225,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       }
       break;
     case ETradeShort:
-      if ( m_pPositionShortOpen->OrdersPending() ) {
+      if ( m_pPositionShort->OrdersPending() ) {
       //if ( false ) {
       }
       else {
@@ -231,20 +233,20 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrder.reset();
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrdersOutstandingShorts->CancelAll();
-          m_pPositionLongOpen->ClosePosition();
-          m_pPositionShortOpen->ClosePosition();
+          m_pPositionLong->ClosePosition();
+          m_pPositionShort->ClosePosition();
           m_stateTrade = ETradeDone;
         }
         else {
-          if ( 0 < m_sma5min.Slope() ) {
+          if ( 0 < sma.Slope() ) {
             //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             ++m_nTransitions;
             //m_ss.str( "" );
             //m_ss << "Ordered: " << quote.DateTime() << "; ";
-            m_pPositionShortOpen->ClosePosition();
-            //m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
+            //m_pPositionShortOpen->ClosePosition();
+            m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
             m_pOrder.reset();
-            m_pOrder = m_pPositionLongOpen->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+            m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "Long b" );
             m_stateTrade = ETradeLong;
           }
@@ -265,9 +267,9 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 void Strategy::HandleSimulationComplete( void ) {
   m_ss.str( "" );
   m_ss << m_nTransitions << " changes, ";
-  m_pPositionLongOpen->EmitStatus( m_ss );
+  m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";
-  m_pPositionShortOpen->EmitStatus( m_ss );
+  m_pPositionShort->EmitStatus( m_ss );
   m_ss << ". ";
   m_sim->EmitStats( m_ss );
   std::cout << m_ss << std::endl;
@@ -275,17 +277,17 @@ void Strategy::HandleSimulationComplete( void ) {
 
 void Strategy::HandleExecution( ou::tf::CPosition::execution_delegate_t del ) {
   m_ss << "Exec: " << del.second.GetTimeStamp() << ": ";
-  m_pPositionLongOpen->EmitStatus( m_ss );
+  m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";
-  m_pPositionShortOpen->EmitStatus( m_ss );
+  m_pPositionShort->EmitStatus( m_ss );
   std::cout << m_ss << std::endl;
 }
 
 void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
   m_ss.str( "" );
-  m_pPositionLongOpen->EmitStatus( m_ss );
+  m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";
-  m_pPositionShortOpen->EmitStatus( m_ss );
+  m_pPositionShort->EmitStatus( m_ss );
   std::cout << m_ss << std::endl;
 }
 
