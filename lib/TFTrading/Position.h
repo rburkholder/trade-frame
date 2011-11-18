@@ -227,6 +227,7 @@ protected:
   pInstrument_t m_pInstrument;
 
   typedef std::vector<pOrder_t> vOrders_t;
+  typedef vOrders_t::iterator vOrders_iter_t;
   vOrders_t m_OpenOrders;  // active orders waiting to be executed or cancelled
   vOrders_t m_ClosedOrders;  // orders that have executed or have cancelled
   vOrders_t m_AllOrders;  // keeps track of all orders in case we have to search both lists
@@ -249,6 +250,7 @@ private:
   void HandleCommission( const COrder& );
 
   void PlaceOrder( pOrder_t pOrder );
+  void CancelOrder( vOrders_iter_t iter );
 
   void HandleQuote( quote_t );
   void HandleTrade( trade_t );

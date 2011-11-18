@@ -229,24 +229,29 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
+void CPosition::CancelOrders( void ) {
+  // may have a problem getting out of sync with broker if orders are cancelled by broker
+  for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+    CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
+  }
+  m_OpenOrders.clear();
+}
+
 void CPosition::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
-      m_row.nPositionPending -= iter->get()->GetQuanRemaining();  // is going to have problems if filled during cancellation
-      if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
-      COrderManager::Instance().CancelOrder( idOrder );
-      m_ClosedOrders.push_back( *iter );
+      CancelOrder( iter );
       m_OpenOrders.erase( iter );
       break;
     }
   }
 }
 
-void CPosition::CancelOrders( void ) {
-  // may have a problem getting out of sync with broker if orders are cancelled by broker
-  for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
-    CancelOrder( iter->get()->GetOrderId() );
-  }
+void CPosition::CancelOrder( vOrders_iter_t iter ) {
+  m_row.nPositionPending -= iter->get()->GetQuanRemaining();  // is going to have problems if filled during cancellation
+  if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
+  COrderManager::Instance().CancelOrder( iter->get()->GetOrderId() );
+  m_ClosedOrders.push_back( *iter );
 }
 
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {

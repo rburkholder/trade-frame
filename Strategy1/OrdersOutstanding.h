@@ -24,8 +24,12 @@ public:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   OrdersOutstanding( pPosition_t pPosition );
   virtual ~OrdersOutstanding( void ) {};
-  void AddOrderFilling( pOrder_t pOrder );
+  void AddOrderFilling( pOrder_t pOrder );  // base order we need to match with closing order
   void CancelAll( void );
+
+  // should be protected but doesn't work there
+  void HandleMatchingOrderFilled( const ou::tf::COrder& order );
+
 protected:
 
   pPosition_t m_pPosition;
@@ -47,10 +51,10 @@ protected:
   mapOrders_t m_mapOrdersToMatch;
 
   typedef std::map<idOrder_t, pOrder_t> mapOrdersFilling_t;
-  mapOrdersFilling_t m_mapOrdersFilling;
-
+  mapOrdersFilling_t m_mapBaseOrdersFilling;
+  
 private:
-  void HandleOrderFilled( const ou::tf::COrder& order );
+  void HandleBaseOrderFilled( const ou::tf::COrder& order );
 };
 
 class OrdersOutstandingLongs: public OrdersOutstanding {
