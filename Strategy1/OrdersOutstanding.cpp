@@ -52,11 +52,15 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
   // is there an event for order cancellation?
   ou::tf::COrder::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-    if ( id == iter->second.pOrderClosing->GetOrderId() ) {
-      pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-      pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-      m_mapOrdersToMatch.erase( iter );
-      break;
+    if ( 0 != iter->second.pOrderClosing.get() ) {  // we've already cancelled
+    }
+    else {
+      if ( id == iter->second.pOrderClosing->GetOrderId() ) {
+        pOrder_t& pOrderClosing( iter->second.pOrderClosing );
+        pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+        m_mapOrdersToMatch.erase( iter );
+        break;
+      }
     }
   }
 }

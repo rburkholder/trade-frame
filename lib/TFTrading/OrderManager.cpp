@@ -228,7 +228,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void COrderManager::CancelOrder( idOrder_t nOrderId) {
+void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in conjunction with ReportCancellation, database update maybe premature
   try {
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
@@ -243,39 +243,6 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {
   }
   catch (...) {
     std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
-  }
-}
-
-namespace OrderManagerQueries {
-  struct UpdateCommission {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "commission", dblCommission );
-      ou::db::Field( a, "orderid", idOrder );
-    }
-    COrder::idOrder_t idOrder;
-    double dblCommission;
-    UpdateCommission( COrder::idOrder_t id, double dblCommission_ )
-      : idOrder( id ), dblCommission( dblCommission_ ) {};
-  };
-}
-
-void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) {
-  try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    if ( 0 != m_pSession ) {
-      OrderManagerQueries::UpdateCommission 
-        commission( pOrder->GetOrderId(), dblCommission );
-      ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
-        = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
-          "update orders set commission=?", commission ).Where( "orderid=?" );
-    }
-    pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
-    // as a result, may need to set delegates here so database is updated before order calls delegates.
-  }
-  catch (...) {
-    std::cout << "Problems in COrderManager::ReportCommission" << std::endl;
   }
 }
 
@@ -345,6 +312,39 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
   }
   catch (...) {
     std::cout << "Problems in COrderManager::ReportExecution" << std::endl;
+  }
+}
+
+namespace OrderManagerQueries {
+  struct UpdateCommission {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "commission", dblCommission );
+      ou::db::Field( a, "orderid", idOrder );
+    }
+    COrder::idOrder_t idOrder;
+    double dblCommission;
+    UpdateCommission( COrder::idOrder_t id, double dblCommission_ )
+      : idOrder( id ), dblCommission( dblCommission_ ) {};
+  };
+}
+
+void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) {
+  try {
+    mapOrders_t::iterator iter = LocateOrder( nOrderId );
+    pOrder_t pOrder = iter->second.pOrder;
+    if ( 0 != m_pSession ) {
+      OrderManagerQueries::UpdateCommission 
+        commission( pOrder->GetOrderId(), dblCommission );
+      ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
+        = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
+          "update orders set commission=?", commission ).Where( "orderid=?" );
+    }
+    pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
+    // as a result, may need to set delegates here so database is updated before order calls delegates.
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::ReportCommission" << std::endl;
   }
 }
 

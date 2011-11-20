@@ -80,10 +80,9 @@ private:
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryIndicator m_ceSlope;
   ou::ChartEntryIndicator m_ceSMA;
-  ou::ChartEntryIndicator m_cePLLongOpen;
-  ou::ChartEntryIndicator m_cePLShortOpen;
-  ou::ChartEntryIndicator m_cePLLongClose;
-  ou::ChartEntryIndicator m_cePLShortClose;
+  ou::ChartEntryIndicator m_cePLLong;
+  ou::ChartEntryIndicator m_cePLShort;
+  ou::ChartEntryIndicator m_cePLNet;
   //ou::ChartEntryIndicator m_ceRR;
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;

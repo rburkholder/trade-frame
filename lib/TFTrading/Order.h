@@ -227,6 +227,7 @@ public:
   ou::Delegate<const COrder&> OnOrderFilled; // on final fill
   ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const COrder&> OnCommission;
+  ou::Delegate<const COrder&> OnCancelled;
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

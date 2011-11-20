@@ -49,16 +49,14 @@ Strategy::Strategy(void)
   m_dvChart.Add( 1, m_ceVolume );
   m_dvChart.Add( 2, m_ceSlope );
 //  m_dvChart.Add( 3, m_ceRR );
-  m_dvChart.Add( 4, m_cePLLongOpen );
-  m_dvChart.Add( 4, m_cePLShortOpen );
-  m_dvChart.Add( 4, m_cePLLongClose );
-  m_dvChart.Add( 4, m_cePLShortClose );
+  m_dvChart.Add( 4, m_cePLLong );
+  m_dvChart.Add( 4, m_cePLShort );
+  m_dvChart.Add( 4, m_cePLNet );
 
   m_ceSMA.SetColour( ou::Colour::DarkOliveGreen );
-  m_cePLLongOpen.SetColour( ou::Colour::Green );
-  m_cePLShortOpen.SetColour( ou::Colour::Red );
-  m_cePLLongClose.SetColour( ou::Colour::GreenYellow );
-  m_cePLShortClose.SetColour( ou::Colour::RosyBrown );
+  m_cePLLong.SetColour( ou::Colour::Green );
+  m_cePLShort.SetColour( ou::Colour::Red );
+  m_cePLNet.SetColour( ou::Colour::Blue );
 
   m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
 
@@ -153,8 +151,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   // problems occur when long trend happens and can't get out of oposing position.
 
   m_quotes.Append( quote );
-  m_sma7.Update();
-  ou::tf::TSSWStatsMidQuote& sma( m_sma7 );
+  m_sma5.Update();
+  ou::tf::TSSWStatsMidQuote& sma( m_sma5 );
 
   if ( 500 < m_quotes.Size() ) {
 
@@ -166,15 +164,11 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_ceUpperBollinger.Add( quote.DateTime(), sma.BBUpper() );
     m_ceLowerBollinger.Add( quote.DateTime(), sma.BBLower() );
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
-    m_cePLLongOpen.Add( quote.DateTime(), m_pPositionLong->GetRealizedPL() );
-    m_cePLShortOpen.Add( quote.DateTime(), m_pPositionShort->GetRealizedPL() );
-//    m_cePLLongClose.Add( quote.DateTime(), m_pPositionLongOpen->GetUnRealizedPL() );
-//    m_cePLShortClose.Add( quote.DateTime(), m_pPositionShortOpen->GetUnRealizedPL() );
-
-    //m_cePLLongOpen.Add( quote.DateTime(), 
-      //m_pPositionLongOpen->GetUnRealizedPL()
-      //+ m_pPositionShortOpen->GetUnRealizedPL()
-       //);
+    double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();
+    double dblPLShort = m_pPositionShort->GetRealizedPL() + m_pPositionShort->GetUnRealizedPL() - m_pPositionShort->GetCommissionPaid();
+    m_cePLLong.Add( quote.DateTime(), dblPLLong );
+    m_cePLShort.Add( quote.DateTime(), dblPLShort );
+    m_cePLNet.Add( quote.DateTime(), dblPLLong + dblPLShort );
 
     switch ( m_stateTrade ) {
     case ETradeOut:

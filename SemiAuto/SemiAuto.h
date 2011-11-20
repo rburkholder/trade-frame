@@ -137,6 +137,10 @@ private:
   typedef std::vector<structManualOrder> vManualOrder_t;
   vManualOrder_t m_vManualOrders;
 
+  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
+
+  pPosition_t m_pPosition;
+
   std::string m_sTSDataStreamOpened;
 
   void Notify( void );  // override of wxTimer::Notify

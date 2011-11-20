@@ -29,8 +29,8 @@ IMPLEMENT_APP(AppSemiAuto)
 
 bool AppSemiAuto::OnInit() {
 
-  m_stateAcquisition = EStartUp;
-  //m_stateAcquisition = EQuiescent;
+  //m_stateAcquisition = EStartUp;
+  m_stateAcquisition = EQuiescent;
 
   m_bWatchingOptions = false;
   m_bTrading = false;
@@ -71,6 +71,8 @@ bool AppSemiAuto::OnInit() {
       m_pData1Provider = m_tws;
       break;
   }
+
+  m_idPortfolio = "test";
 
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppSemiAuto::HandlePopulateDatabase ) );
 
@@ -439,21 +441,27 @@ void AppSemiAuto::HandleManualOrder( const ManualOrder_t& order ) {
     if ( !mgr.Exists( pInstrument ) ) {
       mgr.Construct( pInstrument );
     }
+    if ( 0 == m_pPosition.get() ) {
+      m_pPosition = ou::tf::CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "Dell", "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
+    }
     ou::tf::COrderManager& om( ou::tf::COrderManager::Instance() );
     ou::tf::COrderManager::pOrder_t pOrder;
     switch ( order.eOrderType ) {
     case OrderType::Market: 
-      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
+      //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
+      m_pPosition->PlaceOrder( OrderType::Market, order.eOrderSide, order.nQuantity );
       break;
     case OrderType::Limit:
-      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      m_pPosition->PlaceOrder( OrderType::Limit, order.eOrderSide, order.nQuantity, order.dblPrice1 );
       break;
     case OrderType::Stop:
-      pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+      m_pPosition->PlaceOrder( OrderType::Stop, order.eOrderSide, order.nQuantity, order.dblPrice1 );
       break;
     }
     //ou::tf::COrderManager::pOrder_t pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1, order.dblPrice2 );
-    om.PlaceOrder( m_tws.get(), pOrder );
+    //om.PlaceOrder( m_tws.get(), pOrder );
   }
   catch (...) {
     int i = 1;
@@ -541,8 +549,8 @@ void AppSemiAuto::HandlePopulateDatabase( void ) {
   ou::tf::CAccountManager::pAccount_t pAccountIQFeed
     = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-//  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-//    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "TradeGldOptions" );
+  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
 
 }
 

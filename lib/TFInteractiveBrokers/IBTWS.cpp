@@ -329,28 +329,6 @@ void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, c
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
-                         int remaining, double avgFillPrice, int permId, int parentId,
-                         double lastFillPrice, int clientId, const IBString& whyHeld) 
-{
-  if ( true ) {
-    m_ss.str("");
-    m_ss
-      << "OrderStatus: ordid=" << orderId 
-      << ", stat=" << status 
-      << ", fild=" << filled 
-      << ", rem=" << remaining 
-      << ", avgfillprc=" << avgFillPrice 
-      << ", permid=" << permId 
-      //<< ", parentid=" << parentId 
-      << ", lfp=" << lastFillPrice 
-      //<< ", clid=" << clientId 
-      //<< ", yh=" << whyHeld 
-      << std::endl;
-//    OutputDebugString( m_ss.str().c_str() );
-  }
-}
-
 void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& order, const OrderState& state) {
   if ( order.whatIf ) {
     m_ss.str("");
@@ -389,6 +367,28 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
     m_ss.str("");
     m_ss << "Open Order Warning: " << state.warningText << std::endl;
     OutputDebugString( m_ss.str().c_str() );
+  }
+}
+
+void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
+                         int remaining, double avgFillPrice, int permId, int parentId,
+                         double lastFillPrice, int clientId, const IBString& whyHeld) 
+{
+  if ( true ) {
+    m_ss.str("");
+    m_ss
+      << "OrderStatus: ordid=" << orderId 
+      << ", stat=" << status 
+      << ", fild=" << filled 
+      << ", rem=" << remaining 
+      << ", avgfillprc=" << avgFillPrice 
+      << ", permid=" << permId 
+      //<< ", parentid=" << parentId 
+      << ", lfp=" << lastFillPrice 
+      //<< ", clid=" << clientId 
+      //<< ", yh=" << whyHeld 
+      << std::endl;
+//    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
@@ -518,7 +518,7 @@ void CIBTWS::updateAccountTime(const IBString& timeStamp) {
 void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
   static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
   //static const boost::regex rxFields( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);([0-9]{4})([0-9]{2})([0-9]{2}):(.+)" );
-  static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})" );
+  static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})(?:,([0-9]{4})-([0-9]{4}))?" );
   dtOpen = dtClose = boost::posix_time::special_values::not_a_date_time;
   boost::cmatch what; 
   if ( !boost::regex_match( mh.c_str(), what, rxFields ) ) {
@@ -527,6 +527,7 @@ void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtC
   else {
     // "20111015:CLOSED;20111017:1800-1715"
     // "20111015:CLOSED;20111017:0930-1600"
+    // "20111119:CLOSED;20111120:0015-2355,0015-2355"
     //std::string a( what[1].first, what[1].second );
     //std::string b( what[2].first, what[2].second );
     std::string c( what[3].first, what[3].second );
