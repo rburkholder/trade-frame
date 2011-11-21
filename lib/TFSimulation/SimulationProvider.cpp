@@ -82,6 +82,7 @@ CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbo
   pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
   pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &CSimulationProvider::HandleCommission ) );
+  pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &CSimulationProvider::HandleCancellation ) );
   inherited_t::AddCSymbol( pSymbol );
   pSymbol->m_simExec.SetExecuteAgainst( m_ea );
   return pSymbol;
@@ -281,6 +282,11 @@ void CSimulationProvider::HandleExecution( COrder::idOrder_t orderId, const CExe
 void CSimulationProvider::HandleCommission( COrder::idOrder_t orderId, double commission ) {
   COrderManager::Instance().ReportCommission( orderId, commission );
 }
+
+void CSimulationProvider::HandleCancellation( COrder::idOrder_t orderId ) {
+  COrderManager::Instance().ReportCancellation( orderId );
+}
+
 
 } // namespace tf
 } // namespace ou

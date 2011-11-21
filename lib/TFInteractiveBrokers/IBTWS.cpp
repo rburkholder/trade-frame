@@ -23,6 +23,7 @@
 //#include <boost/thread/locks.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 
+#include <OUCommon/KeyWordMatch.h>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
@@ -31,6 +32,23 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+struct DecodeStatusWord {
+  enum enumStatus{ Unknown, PreSubmitted, Submitted, Cancelled, Filled, Inactive };
+  DecodeStatusWord( void ): kwm( Unknown, 50 ) {
+    kwm.AddPattern( "Cancelled", Cancelled );
+    kwm.AddPattern( "Filled", Filled );
+    kwm.AddPattern( "Inactive", Inactive );
+    kwm.AddPattern( "PreSubmitted", PreSubmitted );
+    kwm.AddPattern( "Submitted", Submitted );
+  }
+  enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
+private:
+  KeyWordMatch<enumStatus> kwm;;
+};
+
+DecodeStatusWord dsw;
+
 
 CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
   CProviderInterface<CIBTWS,CIBSymbol>(), 
@@ -362,6 +380,24 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
     if ( 1e308 > state.commission ) 
       // reports total commission for order rather than increment
       COrderManager::Instance().ReportCommission( orderId, state.commission ); 
+    // use spirit to do this to make it faster with a trie, or use keyword match
+    DecodeStatusWord::enumStatus status = dsw.Match( state.status );
+    switch ( status ) {
+    case DecodeStatusWord::Submitted:
+      break;
+    case DecodeStatusWord::Filled:
+      break;
+    case DecodeStatusWord::Cancelled:
+      COrderManager::Instance().ReportCancellation( order.orderId );
+      break;
+    case DecodeStatusWord::Inactive:
+      break;
+    case DecodeStatusWord::PreSubmitted:
+      break;
+    case DecodeStatusWord::Unknown:
+      assert( false );
+      break;
+    }
   }
   if ( state.warningText != "" ) {
     m_ss.str("");

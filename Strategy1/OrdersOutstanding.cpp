@@ -47,17 +47,38 @@ void OrdersOutstanding::CancelAll( void ) {
   }
 }
 
-void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order ) {
-  // use this to check when order filled before cancellation
-  // is there an event for order cancellation?
+void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& order ) {
   ou::tf::COrder::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-    if ( 0 != iter->second.pOrderClosing.get() ) {  // we've already cancelled
+    // need to handle partial fill orders, do market order or manage partial fills based upon position?
+    if ( 0 == iter->second.pOrderClosing.get() ) {  // map may have multiple orders, some of which don't have a matching order at the present
+//      assert( false );
     }
     else {
       if ( id == iter->second.pOrderClosing->GetOrderId() ) {
         pOrder_t& pOrderClosing( iter->second.pOrderClosing );
         pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+        pOrderClosing->OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+        //m_mapOrdersToMatch.erase( iter );
+        iter->second.pOrderClosing.reset();
+        break;
+      }
+    }
+  }
+}
+
+void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order ) {
+  // use this to check when order filled before cancellation
+  // is there an event for order cancellation?
+  ou::tf::COrder::idOrder_t id = order.GetOrderId();
+  for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+    if ( 0 == iter->second.pOrderClosing.get() ) {  // we've already cancelled
+    }
+    else {
+      if ( id == iter->second.pOrderClosing->GetOrderId() ) {
+        pOrder_t& pOrderClosing( iter->second.pOrderClosing );
+        pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+        pOrderClosing->OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         m_mapOrdersToMatch.erase( iter );
         break;
       }
@@ -72,9 +93,9 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
       if ( iter->first >= ask ) { // price is outside of profitable range
         if ( 0 == iter->second.pOrderClosing.use_count() ) { // nothing to do
         }
-        else { // cancel existing order
+        else { // cancel existing order, but only do once, so look at status
           m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
-          iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
         }
       }
       else { // price is inside profitable range
@@ -82,8 +103,10 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.10 );
+          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.20 );
+          ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
           pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+          pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         }
         else { // do nothing
         }
@@ -99,9 +122,9 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
       if ( iter->first <= bid ) { // price is outside of profitable range
         if ( 0 == iter->second.pOrderClosing.use_count() ) { // nothing to do
         }
-        else { // cancel existing order
+        else { // cancel existing order, but only do once, so look at status
           m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
-          iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
         }
       }
       else { // price is inside profitable range
@@ -109,8 +132,10 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.10 );
+          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.20 );
+          ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
           pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+          pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         }
         else { // do nothing
         }

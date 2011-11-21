@@ -33,7 +33,6 @@ protected:
   virtual void Add( ptime dt, double val );
   virtual void Remove( ptime dt, double val );
   ptime m_dtFirstTime;
-//  double m_dblTicksPerSecond;
   std::string m_sName;
 private:
 };
@@ -42,7 +41,6 @@ template<class T> CStatsInSlidingWindow<T>::CStatsInSlidingWindow(
   std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0) :
     CSlidingWindow( WindowSizeSeconds, WindowSizeCount ) {
   m_sName = sName;
-//  m_dblTicksPerSecond = (double) time_duration::ticks_per_second();
 }
 
 template<class T> CStatsInSlidingWindow<T>::~CStatsInSlidingWindow(void) {
@@ -75,8 +73,8 @@ class CTradeStats: CStatsInSlidingWindow<CTrade> {
 public:
   CTradeStats(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
   virtual ~CTradeStats(void);
-  CTrade *Add( ptime dt, CTrade *trade );
-  CTrade *Remove();
+  CTrade* Add( ptime dt, CTrade *trade );
+  CTrade* Remove();
 protected:
 private:
 };

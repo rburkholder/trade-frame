@@ -59,7 +59,8 @@ template<class T> CObjectAtTime<T>::~CObjectAtTime(void) {
 // Assumes objects are added in forward chronological order
 //
 
-template<class T> class CSlidingWindow {
+template<class T> 
+class CSlidingWindow {
 public:
   // when both are zero, then do no windowing, should actually raise an exception
   CSlidingWindow<T>(long WindowSizeSeconds = 0, long WindowSizeCount = 0);
@@ -71,7 +72,7 @@ public:
   void SetSlidingWindowCount( long );
   long GetSlidingWindowCount( void ) { return m_nWindowSizeCount; };
 
-  T* Add( ptime t, T *object );
+  T* Add( ptime t, T* object );
   T* UndoPush( void );
   virtual T* Remove( void );  // inheritor needs to ensure destruction of held object
   void UpdateWindow();
@@ -94,7 +95,8 @@ protected:
 private:
 };
 
-template<class T> CSlidingWindow<T>::CSlidingWindow(long nWindowSizeSeconds, long nWindowSizeCount) {
+template<class T> 
+CSlidingWindow<T>::CSlidingWindow(long nWindowSizeSeconds, long nWindowSizeCount) {
   //if ( ( 0 == nWindowSizeSeconds ) && ( 0 == nWindowSizeCount ) ) {
   //  throw std::runtime_error( "WindowSize (seconds) and WindowSize (count) cannot both be zero" );
   //}  // can't do this as many things construct with 0 window then set parameters later
@@ -103,7 +105,8 @@ template<class T> CSlidingWindow<T>::CSlidingWindow(long nWindowSizeSeconds, lon
   m_tdWindowWidth = seconds(nWindowSizeSeconds);
 }
 
-template<class T> CSlidingWindow<T>::~CSlidingWindow(void) {
+template<class T> 
+CSlidingWindow<T>::~CSlidingWindow(void) {
   while ( !m_qT.empty() ) {
     //delete m_qT.front();
     //m_qT.pop_front();
@@ -115,32 +118,38 @@ template<class T> size_t CSlidingWindow<T>::Count() {
   return m_qT.size();
 }
 
-template<class T> void CSlidingWindow<T>::SetSlidingWindowSeconds(long nWindowSizeSeconds) {
+template<class T> 
+void CSlidingWindow<T>::SetSlidingWindowSeconds(long nWindowSizeSeconds) {
   m_nWindowSizeSeconds = nWindowSizeSeconds;
   m_tdWindowWidth = seconds(nWindowSizeSeconds);
 }
 
-template<class T> void CSlidingWindow<T>::SetSlidingWindowCount(long nWindowSizeCount) {
+template<class T> 
+void CSlidingWindow<T>::SetSlidingWindowCount(long nWindowSizeCount) {
   m_nWindowSizeCount = nWindowSizeCount;
 }
 
-template<class T> T* CSlidingWindow<T>::First() {
+template<class T> 
+T* CSlidingWindow<T>::First() {
   iter = m_qT.begin();
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> T* CSlidingWindow<T>::Next() {
+template<class T> 
+T* CSlidingWindow<T>::Next() {
   iter++;
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> T* CSlidingWindow<T>::Add(boost::posix_time::ptime dt, T *object) {
+template<class T> 
+T* CSlidingWindow<T>::Add(boost::posix_time::ptime dt, T *object) {
   m_qT.push_back( new CObjectAtTime<T>( dt, object ) );
   m_dtLast = dt;
   return object;
 }
 
-template<class T> T* CSlidingWindow<T>::UndoPush(void) {
+template<class T> 
+T* CSlidingWindow<T>::UndoPush(void) {
   CObjectAtTime<T> *oat = NULL;
   T *object = NULL;
   if ( !m_qT.empty() ) {
@@ -153,7 +162,8 @@ template<class T> T* CSlidingWindow<T>::UndoPush(void) {
   return object;
 }
 
-template<class T> T* CSlidingWindow<T>::Remove() {
+template<class T> 
+T* CSlidingWindow<T>::Remove() {
   CObjectAtTime<T> *oat = NULL;
   T *object = NULL;
   if ( !m_qT.empty() ) {
@@ -165,7 +175,8 @@ template<class T> T* CSlidingWindow<T>::Remove() {
   return object;
 }
 
-template<class T> void CSlidingWindow<T>::UpdateWindow() {
+template<class T> 
+void CSlidingWindow<T>::UpdateWindow() {
   if ( !m_qT.empty() ) {
     // Time Based Decimation
     if ( 0 != m_nWindowSizeSeconds ) {

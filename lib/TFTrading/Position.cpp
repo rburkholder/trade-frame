@@ -219,13 +219,15 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
 //      throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
 //    }
 //  }
-  m_row.eOrderSidePending = pOrder->GetOrderSide();  // removing above check screws this up.
+
+  if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
 
   m_row.nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
   pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
   pOrder->OnCommission.Add( MakeDelegate( this, &CPosition::HandleCommission ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &CPosition::HandleCancellation ) );
   COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
@@ -234,13 +236,28 @@ void CPosition::CancelOrders( void ) {
   for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
   }
-  m_OpenOrders.clear();
+  //m_OpenOrders.clear();
 }
 
 void CPosition::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       CancelOrder( iter );
+      //m_OpenOrders.erase( iter );
+      break;
+    }
+  }
+}
+
+void CPosition::HandleCancellation( const COrder& order ) {
+  COrder::idOrder_t idOrder = order.GetOrderId();
+  for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+    if ( idOrder == iter->get()->GetOrderId() ) {
+      assert( m_row.nPositionPending >= iter->get()->GetQuanRemaining()  );
+      m_row.nPositionPending -= iter->get()->GetQuanRemaining(); 
+      if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
+      //CancelOrder( iter );
+      m_ClosedOrders.push_back( *iter );
       m_OpenOrders.erase( iter );
       break;
     }
@@ -248,10 +265,7 @@ void CPosition::CancelOrder( idOrder_t idOrder ) {
 }
 
 void CPosition::CancelOrder( vOrders_iter_t iter ) {
-  m_row.nPositionPending -= iter->get()->GetQuanRemaining();  // is going to have problems if filled during cancellation
-  if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
   COrderManager::Instance().CancelOrder( iter->get()->GetOrderId() );
-  m_ClosedOrders.push_back( *iter );
 }
 
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {

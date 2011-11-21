@@ -78,11 +78,16 @@ private:
   ou::ChartEntryIndicator m_ceUpperBollinger;
   ou::ChartEntryIndicator m_ceLowerBollinger;
   ou::ChartEntryVolume m_ceVolume;
-  ou::ChartEntryIndicator m_ceSlope;
+  ou::ChartEntryIndicator m_ceSlopeOfSMA;
+  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA;
   ou::ChartEntryIndicator m_ceSMA;
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
   ou::ChartEntryIndicator m_cePLNet;
+  ou::ChartEntryIndicator m_ceOutstandingLong;
+  ou::ChartEntryIndicator m_ceOutstandingShort;
+  //ou::ChartEntryIndicator m_ceBids;
+  //ou::ChartEntryIndicator m_ceAsks;
   //ou::ChartEntryIndicator m_ceRR;
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;
@@ -107,6 +112,9 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma5;
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
+
+  ou::tf::CTrades m_tradesSlopeOfSlopeOfSMA;
+  ou::tf::TSSWStatsTrade m_tsswSlopeOfSlopeOfSMA;
 
   pProviderSim_t m_sim;
   bool m_bSimConnected;

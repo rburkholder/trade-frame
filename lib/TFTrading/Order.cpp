@@ -117,7 +117,7 @@ void COrder::SetSendingToProvider() {
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
-  // need to worry about fill after cancel
+  // need to worry about fill after cancel, has multiple states:  cancelling, fill during cancel, cancelled
   assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
   if ( 0 == m_row.nQuantityRemaining ) {
@@ -127,6 +127,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     bOverDone = true;
   }
   else {
+    assert( exec.GetSize() <= m_row.nQuantityRemaining );
     m_row.nQuantityRemaining -= exec.GetSize();
   }
   m_row.nQuantityFilled += exec.GetSize();
@@ -138,7 +139,19 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
     m_dblPriceXQuantity += exec.GetPrice() * exec.GetSize();
     m_row.dblAverageFillPrice = m_dblPriceXQuantity / m_row.nQuantityFilled;
     if ( 0 == m_row.nQuantityRemaining ) {
-      m_row.eOrderStatus = OrderStatus::Filled;
+      switch ( m_row.eOrderStatus ) {
+      case OrderStatus::CancelSubmitted:
+      case OrderStatus::Cancelled:
+        m_row.eOrderStatus = OrderStatus::CancelledWithPartialFill;
+        break;
+      case OrderStatus::Filling:
+      case OrderStatus::SendingToProvider:
+        m_row.eOrderStatus = OrderStatus::Filled;
+        break;
+      default:
+        m_row.eOrderStatus = OrderStatus::Filled;
+        break;
+      }
       m_row.dtOrderClosed = ou::CTimeSource::Instance().Internal();
 //      OnCommission( *this ); // commission is reported separately
       OnOrderFilled( *this );
@@ -193,6 +206,31 @@ void COrder::SetOrderId( idOrder_t id ) {
   assert( 0 != id );
   assert( m_row.idOrder == 0 );
   m_row.idOrder = id;
+}
+
+void COrder::MarkAsCancelled( void ) {
+  switch ( m_row.eOrderStatus ) {
+  case OrderStatus::Created:
+    m_row.eOrderStatus = OrderStatus::Cancelled;
+    break;
+  case OrderStatus::SendingToProvider:
+  case OrderStatus::Submitted:
+    m_row.eOrderStatus = 0 == m_row.nQuantityFilled ? OrderStatus::Cancelled : OrderStatus::CancelledWithPartialFill;
+    break;
+  case OrderStatus::Filling:
+    m_row.eOrderStatus = OrderStatus::CancelledWithPartialFill;
+    break;
+  case OrderStatus::FillingDuringCancel:  // these ones should not be reachable
+  case OrderStatus::Cancelled:
+  case OrderStatus::CancelledWithPartialFill:
+  case OrderStatus::CancelSubmitted:
+    m_row.eOrderStatus = OrderStatus::Cancelled;
+    break;
+  case OrderStatus::Filled:
+    m_row.eOrderStatus = OrderStatus::Filled;  // this one re-affirms, as cancel was too late
+    break;
+  }
+  OnOrderCancelled( *this );
 }
 
 } // namespace tf

@@ -233,6 +233,17 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in
     mapOrders_t::iterator iter = LocateOrder( nOrderId );
     pOrder_t pOrder = iter->second.pOrder;
     iter->second.pProvider->CancelOrder( pOrder );  // check which fields have changed for the db
+  }
+  catch (...) {
+    std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
+  }
+}
+
+void COrderManager::ReportCancellation( idOrder_t nOrderId ) {
+  try {
+    mapOrders_t::iterator iter = LocateOrder( nOrderId );
+    pOrder_t pOrder = iter->second.pOrder;
+    pOrder->MarkAsCancelled();
     if ( 0 != m_pSession ) {
       OrderManagerQueries::UpdateAtOrderClose 
         close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
@@ -242,7 +253,7 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in
     }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
+    std::cout << "Problems in COrderManager::ReportCancellation" << std::endl;
   }
 }
 
@@ -280,19 +291,26 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
     OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
     if ( 0 != m_pSession ) {
       const COrder::TableRowDef& row( pOrder->GetRow() );
-      if ( OrderStatus::Filled == status ) {
-        OrderManagerQueries::UpdateOrder 
-          order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
-        ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-          = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-          OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
-      }
-      else {
-        OrderManagerQueries::UpdateOrder 
-          order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
-        ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-          = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-          OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+      switch ( status ) {
+      case OrderStatus::CancelledWithPartialFill:
+      case OrderStatus::Filled:
+        {
+          OrderManagerQueries::UpdateOrder 
+            order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
+          ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+            = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+            OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+        }
+        break;
+      default:
+        {
+          OrderManagerQueries::UpdateOrder 
+            order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
+          ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+            = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+            OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+        }
+        break;
       }
       // add execution record
       pExecution_t pExecution( new CExecution( exec ) );

@@ -18,21 +18,13 @@
 #include <TFTrading/Position.h>
 
 class OrdersOutstanding {
+
 public:
   typedef ou::tf::COrder::idOrder_t idOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
-  OrdersOutstanding( pPosition_t pPosition );
-  virtual ~OrdersOutstanding( void ) {};
-  void AddOrderFilling( pOrder_t pOrder );  // base order we need to match with closing order
-  void CancelAll( void );
-
-  // should be protected but doesn't work there
-  void HandleMatchingOrderFilled( const ou::tf::COrder& order );
 
 protected:
-
-  pPosition_t m_pPosition;
 
   struct structOrderMatching {
     double dblBasis;
@@ -49,6 +41,22 @@ protected:
   typedef std::pair<double, structOrderMatching> mapOrders_pair_t;
   typedef mapOrders_t::iterator mapOrders_iter_t;
   mapOrders_t m_mapOrdersToMatch;
+
+public:
+  OrdersOutstanding( pPosition_t pPosition );
+  virtual ~OrdersOutstanding( void ) {};
+  void AddOrderFilling( pOrder_t pOrder );  // base order we need to match with closing order
+  void CancelAll( void );
+
+  // should be protected but doesn't work there
+  void HandleMatchingOrderFilled( const ou::tf::COrder& order );
+  void HandleMatchingOrderCancelled( const ou::tf::COrder& order );
+
+  unsigned int GetCountOfOutstandingMatches( void ) { return m_mapOrdersToMatch.size(); };
+
+protected:
+
+  pPosition_t m_pPosition;
 
   typedef std::map<idOrder_t, pOrder_t> mapOrdersFilling_t;
   mapOrdersFilling_t m_mapBaseOrdersFilling;

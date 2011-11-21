@@ -73,7 +73,7 @@ void AppStrategy1::HandleBtnSimulationStart( void ) {
 
 void AppStrategy1::HandleBtnDrawChart( void ) {
   m_bReadyToDrawChart = true;
-  m_winChart->RefreshRect( m_winChart->GetRect(), false );
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
 void AppStrategy1::HandleDrawChart( const MemBlock& m ) {
@@ -97,6 +97,6 @@ void AppStrategy1::HandlePaint( wxPaintEvent& event ) {
   }
 }
 
-void AppStrategy1::HandleSize( wxSizeEvent& event ) {
-  m_winChart->RefreshRect( m_winChart->GetRect(), false );
+void AppStrategy1::HandleSize( wxSizeEvent& event ) { 
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }

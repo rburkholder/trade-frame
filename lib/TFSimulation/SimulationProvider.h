@@ -105,6 +105,7 @@ protected:
 
   void HandleExecution( COrder::idOrder_t orderId, const CExecution &exec );
   void HandleCommission( COrder::idOrder_t orderId, double commission );
+  void HandleCancellation( COrder::idOrder_t orderId );
 
   ptime m_dtSimStart;
   ptime m_dtSimStop;

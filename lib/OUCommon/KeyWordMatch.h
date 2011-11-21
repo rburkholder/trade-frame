@@ -21,19 +21,18 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-//#include <iostream>
 
 namespace ou {
 
 template<typename T> 
-class CKeyWordMatch {
+class KeyWordMatch {
   // T is something to be returned once a match is found, requires copy constructor and operator!=()
   // example usage is to return per minute rate for longest match on telephone number prefix
 public:
-  explicit CKeyWordMatch<T>( T initializer, size_t size );  // initializer is some default value of T
-  ~CKeyWordMatch<T>(void);
+  explicit KeyWordMatch<T>( T initializer, size_t size );  // initializer is some default value of T
+  ~KeyWordMatch<T>(void);
   void ClearPatterns( void );
-  void AddPattern( const std::string &sPattern, T object );
+  void AddPattern( const std::string &sPattern, T object );  // do patterns need to be pre-sorted?
   size_t GetNodeCount( void ) { return m_vNodes.size(); };
   size_t GetPatternCount( void ) { return m_cntPatterns; };
   T FindMatch( const std::string &sMatch );
@@ -52,25 +51,25 @@ private:
   size_t m_cntPatterns;
 };
 
-template<typename T> CKeyWordMatch<T>::CKeyWordMatch( T initializer, size_t size )
+template<typename T> KeyWordMatch<T>::KeyWordMatch( T initializer, size_t size )
 : m_Initializer( initializer ), m_cntPatterns( 0 )
 {
   m_vNodes.reserve( size );
   ClearPatterns();
 }
 
-template<typename T> CKeyWordMatch<T>::~CKeyWordMatch(void) {
+template<typename T> KeyWordMatch<T>::~KeyWordMatch(void) {
   m_vNodes.clear();
 }
 
-template<typename T> void CKeyWordMatch<T>::ClearPatterns() {
+template<typename T> void KeyWordMatch<T>::ClearPatterns() {
   m_vNodes.clear();
   structNode node( m_Initializer );
   m_vNodes.push_back( node ); // root node with nothing
   m_cntPatterns = 0;
 }
 
-template<typename T> void CKeyWordMatch<T>::AddPattern( 
+template<typename T> void KeyWordMatch<T>::AddPattern( 
               const std::string &sPattern, T object ) {
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {
@@ -133,7 +132,7 @@ template<typename T> void CKeyWordMatch<T>::AddPattern(
   ++m_cntPatterns;
 }
 
-template<typename T> T CKeyWordMatch<T>::FindMatch( const std::string &sPattern ) {
+template<typename T> T KeyWordMatch<T>::FindMatch( const std::string &sPattern ) {
   // traverse structure looking for matches, object at longest match is returned
   std::string::const_iterator iter = sPattern.begin(); 
   if ( sPattern.end() == iter ) {

@@ -25,7 +25,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<typename T> class CTimeSeries {
+template<typename T> 
+class CTimeSeries {
 public:
 
   typedef typename std::vector<T>::iterator iterator;
@@ -60,9 +61,9 @@ public:
   iterator iterAt( const ptime &time );
   iterator iterAtOrAfter( const ptime &time );
 
-  const_iterator begin() const { return m_vSeries.begin(); };
-  const_iterator end() const { return m_vSeries.end(); };
-  const_iterator at( size_t ix ) const { return begin() + ix; };
+  const_iterator begin() const { return m_vSeries.cbegin(); };
+  const_iterator end() const { return m_vSeries.cend(); };
+  const_iterator at( size_t ix ) const { return cbegin() + ix; };
 
   virtual CTimeSeries<T> *Subset( const ptime &time ); // from At or After to end
   virtual CTimeSeries<T> *Subset( const ptime &time, unsigned int n ); // from At or After for n T
@@ -74,23 +75,28 @@ protected:
 private:
 };
 
-template<typename T> CTimeSeries<T>::CTimeSeries(void) {
+template<typename T> 
+CTimeSeries<T>::CTimeSeries(void) {
 }
 
-template<typename T> CTimeSeries<T>::CTimeSeries( size_t size ) {
+template<typename T> 
+CTimeSeries<T>::CTimeSeries( size_t size ) {
   m_vSeries.reserve( size );
 }
 
-template<typename T> CTimeSeries<T>::~CTimeSeries(void) {
+template<typename T> 
+CTimeSeries<T>::~CTimeSeries(void) {
   Clear();
 }
 
-template<typename T> void CTimeSeries<T>::Append(const T &datum) { // changed name 'cause VC++ doesn't do symbol results properly
+template<typename T> 
+void CTimeSeries<T>::Append(const T &datum) { // changed name 'cause VC++ doesn't do symbol results properly
   m_vSeries.push_back( datum );
   m_vIterator = m_vSeries.end() - 1;
 }
 
-template<typename T> void CTimeSeries<T>::Insert( const ptime &dt, const T &datum ) {
+template<typename T> 
+void CTimeSeries<T>::Insert( const ptime &dt, const T &datum ) {
   T key( dt );
   // T *datum = NULL;  // is this needed?
   std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
@@ -103,12 +109,14 @@ template<typename T> void CTimeSeries<T>::Insert( const ptime &dt, const T &datu
   }
 }
 
-template<typename T> void CTimeSeries<T>::Clear( void ) {
+template<typename T> 
+void CTimeSeries<T>::Clear( void ) {
   m_vSeries.clear();
   m_vIterator = m_vSeries.end();
 }
 
-template<typename T> T* CTimeSeries<T>::First() {
+template<typename T> 
+T* CTimeSeries<T>::First() {
   m_vIterator = m_vSeries.begin();
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
@@ -118,7 +126,8 @@ template<typename T> T* CTimeSeries<T>::First() {
   }
 }
 
-template<typename T> T* CTimeSeries<T>::Next() {
+template<typename T> 
+T* CTimeSeries<T>::Next() {
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
   }
@@ -133,12 +142,14 @@ template<typename T> T* CTimeSeries<T>::Next() {
   }
 }
 
-template<typename T> T* CTimeSeries<T>::Last() {
+template<typename T> 
+T* CTimeSeries<T>::Last() {
   // TODO:  Can we use .back on this?
   return m_vSeries.empty() ? NULL : &m_vSeries[ m_vSeries.size() - 1 ];
 }
 
-template<typename T> T* CTimeSeries<T>::Ago( size_t ix ) {
+template<typename T> 
+T* CTimeSeries<T>::Ago( size_t ix ) {
   T* datum = NULL;
   if ( 0 != m_vSeries.size() ) {
     if ( ix < m_vSeries.size() ) {
@@ -150,7 +161,8 @@ template<typename T> T* CTimeSeries<T>::Ago( size_t ix ) {
   return datum;
 }
 
-template<typename T> T* CTimeSeries<T>::operator []( size_t ix ) {
+template<typename T> 
+T* CTimeSeries<T>::operator []( size_t ix ) {
   T* datum = NULL;
   if ( ix < m_vSeries. size() ) {
     m_vIterator = m_vSeries.begin() + ix;
@@ -159,7 +171,8 @@ template<typename T> T* CTimeSeries<T>::operator []( size_t ix ) {
   return datum;
 }
 
-template<typename T> T* CTimeSeries<T>::At( size_t ix ) {
+template<typename T> 
+T* CTimeSeries<T>::At( size_t ix ) {
   T* datum = NULL;
   if ( ix < m_vSeries.size() ) {
     m_vIterator = m_vSeries.begin() + ix;
@@ -168,7 +181,8 @@ template<typename T> T* CTimeSeries<T>::At( size_t ix ) {
   return datum;
 }
 
-template<typename T> T* CTimeSeries<T>::At( const ptime &dt ) {
+template<typename T> 
+T* CTimeSeries<T>::At( const ptime &dt ) {
   // assumes sorted vector
   // TODO: Check that this is correct
   T key( dt );
@@ -182,14 +196,16 @@ template<typename T> T* CTimeSeries<T>::At( const ptime &dt ) {
   return datum;
 }
 
-template<typename T> typename std::vector<T>::iterator CTimeSeries<T>::iterAt( const ptime &time ) {
+template<typename T> 
+typename std::vector<T>::iterator CTimeSeries<T>::iterAt( const ptime &time ) {
   T key( time );
   std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   return ( p.first != p.second ) ? *(p.first) : m_vSeries.end();
 }
 
-template<typename T> T* CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
+template<typename T> 
+T* CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
   // TODO:  Check that this is correct
   T key( dt );
   T *datum = NULL;
@@ -204,14 +220,16 @@ template<typename T> T* CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
   return datum;
 }
 
-template<typename T> typename std::vector<T>::iterator CTimeSeries<T>::iterAtOrAfter( const ptime &time ) {
+template<typename T> 
+typename std::vector<T>::iterator CTimeSeries<T>::iterAtOrAfter( const ptime &time ) {
   T key( time );
   std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
   p = std::equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   return p.first;
 }
 
-template<typename T> T *CTimeSeries<T>::After( const ptime &dt ) {
+template<typename T> 
+T *CTimeSeries<T>::After( const ptime &dt ) {
   // assumes sorted vector
   // TODO: Check that this is correct
   T key( dt );
@@ -225,11 +243,13 @@ template<typename T> T *CTimeSeries<T>::After( const ptime &dt ) {
   return datum;
 }
 
-template<typename T> void CTimeSeries<T>::Sort( void ) {
+template<typename T> 
+void CTimeSeries<T>::Sort( void ) {
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order
 }
 
-template<typename T> CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt ) {
+template<typename T> 
+CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
   CTimeSeries<T> *series = NULL;
   std::vector<T>::iterator iter;
@@ -247,7 +267,8 @@ template<typename T> CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt ) {
   return series;
 }
 
-template<typename T> CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n is max count
+template<typename T> 
+CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n is max count
   T datum( dt );
   CTimeSeries<T> *series = NULL;
   std::vector<T>::iterator iter;
@@ -267,7 +288,8 @@ template<typename T> CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt, un
   return series;
 }
 
-template<typename T> H5::DataSpace* CTimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
+template<typename T> 
+H5::DataSpace* CTimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
   if ( NULL == pSpace ) pSpace = new H5::DataSpace( H5S_SIMPLE );
   hsize_t curSize = m_vSeries.size();
   hsize_t maxSize = H5S_UNLIMITED; 
@@ -345,6 +367,8 @@ public:
 protected:
 private:
 };
+
+
 
 } // namespace tf
 } // namespace ou

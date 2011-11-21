@@ -248,6 +248,7 @@ private:
 
   void HandleExecution( const std::pair<const COrder&, const CExecution&>& );
   void HandleCommission( const COrder& );
+  void HandleCancellation( const COrder& );
 
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( vOrders_iter_t iter );
