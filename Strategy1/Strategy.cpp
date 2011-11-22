@@ -36,7 +36,8 @@ Strategy::Strategy(void)
   m_dvChart( "Strategy1", "GC" ), 
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
-  m_tsswSlopeOfSlopeOfSMA( &m_tradesSlopeOfSlopeOfSMA, 90 ) 
+  m_tsswSlopeOfSlopeOfSMA( &m_tradesSlopeOfSlopeOfSMA, 90 ), 
+  m_tsswSpreads( &m_spreads, 120 )
 {
 
   ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
@@ -58,6 +59,7 @@ Strategy::Strategy(void)
   m_dvChart.Add( 4, m_cePLLong );
   m_dvChart.Add( 4, m_cePLShort );
   m_dvChart.Add( 4, m_cePLNet );
+  m_dvChart.Add( 5, m_ceSpread );
 
   m_ceSMA.SetColour( ou::Colour::DarkOliveGreen );
   m_cePLLong.SetColour( ou::Colour::Blue );
@@ -159,49 +161,58 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( ( 0 == quote.Ask() ) || ( 0 == quote.Bid() ) || ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
     return;
   }
+  // should also check that a price within 2 - 3 sigma of last
 
-  // problems occur when long trend happens and can't get out of oposing position.
+  // problems occur when long trend happens and can't get out of opposing position.
+
+  ptime dt( quote.DateTime() );
 
   m_quotes.Append( quote );
   m_sma5.Update();
   ou::tf::TSSWStatsMidQuote& sma( m_sma5 );
 
+  double spread = quote.Ask() - quote.Bid();
+  m_spreads.Append( ou::tf::CPrice( quote.DateTime(), spread ) );
+  m_tsswSpreads.Update();
+
   //double mid = ( quote.Ask() + quote.Bid() ) / 2.0;
-  //m_ceAsks.Add( quote.DateTime(), quote.Ask() - mid );
-  //m_ceBids.Add( quote.DateTime(), quote.Bid() - mid );
+  //m_ceAsks.Add( dt, quote.Ask() - mid );
+  //m_ceBids.Add( dt, quote.Bid() - mid );
   
-  m_tradesSlopeOfSlopeOfSMA.Append( ou::tf::CTrade( quote.DateTime(), sma.Slope(), 0 ) );
+  m_tradesSlopeOfSlopeOfSMA.Append( ou::tf::CPrice( quote.DateTime(), sma.Slope() ) );
   m_tsswSlopeOfSlopeOfSMA.Update();
 
   if ( 500 < m_quotes.Size() ) {
 
-    double direction = 0.0;
-
     m_pOrdersOutstandingLongs->HandleQuote( quote );
     m_pOrdersOutstandingShorts->HandleQuote( quote );
 
-    m_ceOutstandingLong.Add( quote.DateTime(), m_pOrdersOutstandingLongs->GetCountOfOutstandingMatches() );
-    m_ceOutstandingShort.Add( quote.DateTime(), m_pOrdersOutstandingShorts->GetCountOfOutstandingMatches() );
+    m_ceSpread.Add( dt, m_tsswSpreads.MeanY() );
 
-    m_ceSMA.Add( quote.DateTime(), sma.MeanY() );
-    m_ceSlopeOfSMA.Add( quote.DateTime(), sma.Slope() );
-    double d = m_tsswSlopeOfSlopeOfSMA.Slope();
-    if ( ( 0.00005 < d ) || ( -0.00005 > d ) ) {
-      //assert( false );
+    unsigned int cntLongs = m_pOrdersOutstandingLongs->GetCountOfOutstandingMatches();
+    m_ceOutstandingLong.Add( dt, cntLongs );
+    unsigned int cntShorts = m_pOrdersOutstandingShorts->GetCountOfOutstandingMatches();
+    m_ceOutstandingShort.Add( dt, cntShorts );
+    unsigned int dif = ( cntLongs > cntShorts ) ? cntLongs - cntShorts : cntShorts - cntLongs;
+
+    m_ceSMA.Add( dt, sma.MeanY() );
+    m_ceSlopeOfSMA.Add( dt, sma.Slope() );
+    double direction = m_tsswSlopeOfSlopeOfSMA.Slope();
+    if ( ( 0.00005 < direction ) || ( -0.00005 > direction ) ) {
+      direction = 0.0;
     }
     else {
-      m_ceSlopeOfSlopeOfSMA.Add( quote.DateTime(), d*200.0 );
-      direction = d;
+      m_ceSlopeOfSlopeOfSMA.Add( dt, direction * 200.0 );
     }
 
-    m_ceUpperBollinger.Add( quote.DateTime(), sma.BBUpper() );
-    m_ceLowerBollinger.Add( quote.DateTime(), sma.BBLower() );
+    m_ceUpperBollinger.Add( dt, sma.BBUpper() );
+    m_ceLowerBollinger.Add( dt, sma.BBLower() );
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
     double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();
     double dblPLShort = m_pPositionShort->GetRealizedPL() + m_pPositionShort->GetUnRealizedPL() - m_pPositionShort->GetCommissionPaid();
-    m_cePLLong.Add( quote.DateTime(), dblPLLong );
-    m_cePLShort.Add( quote.DateTime(), dblPLShort );
-    m_cePLNet.Add( quote.DateTime(), dblPLLong + dblPLShort );
+    m_cePLLong.Add( dt, dblPLLong );
+    m_cePLShort.Add( dt, dblPLShort );
+    m_cePLNet.Add( dt, dblPLLong + dblPLShort );
 
     switch ( m_stateTrade ) {
     case ETradeOut:
@@ -229,7 +240,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       if ( false ) {
       }
       else {
-        if ( quote.DateTime() > m_dtEnd ) {
+        if ( dt > m_dtEnd ) {
           m_pOrder.reset();
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrdersOutstandingShorts->CancelAll();
@@ -259,7 +270,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       if ( false ) {
       }
       else {
-        if ( quote.DateTime() > m_dtEnd ) {
+        if ( dt > m_dtEnd ) {
           m_pOrder.reset();
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrdersOutstandingShorts->CancelAll();

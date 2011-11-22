@@ -56,7 +56,7 @@ public:
   const ptime& DateTime( void ) const { return m_dt; };
   void DateTime( const ptime& dt ) { m_dt = dt; };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );  // create new one if null
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );  // create new one if null
 
 protected:
   ptime m_dt;
@@ -87,7 +87,7 @@ public:
   bidsize_t BidSize( void ) const { return m_nBidSize; };
   asksize_t AskSize( void ) const { return m_nAskSize; };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 
 protected:
 private:
@@ -114,7 +114,7 @@ public:
   price_t Trade( void ) const { return m_dblTrade; };
   volume_t Volume( void ) const { return m_nTradeSize; };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 
 protected:
 private:
@@ -149,7 +149,7 @@ public:
   void Close( price_t price ) { m_dblClose = price; };
   void Volume( volume_t vol ) { m_nVolume = vol; };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 
 protected:
 private:
@@ -185,7 +185,7 @@ public:
   ESide m_eSide; 
   const char& MMIDStr( void ) const { return *m_uMMID.rch; };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 
 protected:
   union unionMMID {
@@ -237,7 +237,7 @@ public:
     m_dblRho = dblRho;
   };
 
-  static H5::CompType *DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 
 protected:
 
@@ -249,6 +249,29 @@ private:
   double m_dblVega;   // measure of options value's sensivity to passage of time
   double m_dblRho;    // measure of option value's sensivity to interest rates
 
+};
+
+//
+// CPrice
+//
+
+class CPrice: public CDatedDatum {
+public:
+
+  CPrice( void );
+  CPrice( const ptime &dt );
+  CPrice( const CPrice &price );
+  CPrice( const ptime &dt, price_t dblPrice );
+  CPrice( const std::string &dt, const std::string &price );
+  ~CPrice( void );
+
+  price_t Price( void ) const { return m_dblPrice; };
+
+  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+
+protected:
+private:
+  price_t m_dblPrice;
 };
 
 } // namespace tf

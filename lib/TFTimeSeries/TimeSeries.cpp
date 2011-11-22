@@ -61,8 +61,7 @@ namespace tf { // TradeFrame
 CBars::CBars(void) {
 }
 
-CBars::CBars( size_t size )
-:CTimeSeries<CBar>( size ) {
+CBars::CBars( size_t size ) :CTimeSeries<CBar>( size ) {
 }
 
 CBars::~CBars( void ) {
@@ -73,8 +72,7 @@ CBars::~CBars( void ) {
 CTrades::CTrades(void) {
 }
 
-CTrades::CTrades( size_t size )
-:CTimeSeries<CTrade>( size ) {
+CTrades::CTrades( size_t size ) :CTimeSeries<CTrade>( size ) {
 }
 
 CTrades::~CTrades( void ) {
@@ -85,8 +83,7 @@ CTrades::~CTrades( void ) {
 CQuotes::CQuotes(void) {
 }
 
-CQuotes::CQuotes( size_t size )
-:CTimeSeries<CQuote>( size ) {
+CQuotes::CQuotes( size_t size ) :CTimeSeries<CQuote>( size ) {
 }
 
 CQuotes::~CQuotes( void ) {
@@ -100,8 +97,7 @@ CMarketDepths::CMarketDepths() {
 CMarketDepths::~CMarketDepths() {
 }
 
-CMarketDepths::CMarketDepths(size_t size) 
-: CTimeSeries<CMarketDepth>( size ) {
+CMarketDepths::CMarketDepths(size_t size) : CTimeSeries<CMarketDepth>( size ) {
 }
 
 // CGreeks
@@ -109,11 +105,21 @@ CMarketDepths::CMarketDepths(size_t size)
 CGreeks::CGreeks(void) {
 }
 
-CGreeks::CGreeks( size_t size )
-:CTimeSeries<CGreek>( size ) {
+CGreeks::CGreeks( size_t size ) :CTimeSeries<CGreek>( size ) {
 }
 
 CGreeks::~CGreeks( void ) {
+}
+
+// CPrices
+
+CPrices::CPrices(void) {
+}
+
+CPrices::CPrices( size_t size ) :CTimeSeries<CPrice>( size ) {
+}
+
+CPrices::~CPrices( void ) {
 }
 
 } // namespace tf

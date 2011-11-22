@@ -86,6 +86,7 @@ private:
   ou::ChartEntryIndicator m_cePLNet;
   ou::ChartEntryIndicator m_ceOutstandingLong;
   ou::ChartEntryIndicator m_ceOutstandingShort;
+  ou::ChartEntryIndicator m_ceSpread;
   //ou::ChartEntryIndicator m_ceBids;
   //ou::ChartEntryIndicator m_ceAsks;
   //ou::ChartEntryIndicator m_ceRR;
@@ -113,8 +114,11 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
 
-  ou::tf::CTrades m_tradesSlopeOfSlopeOfSMA;
-  ou::tf::TSSWStatsTrade m_tsswSlopeOfSlopeOfSMA;
+  ou::tf::CPrices m_tradesSlopeOfSlopeOfSMA;
+  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA;
+
+  ou::tf::CPrices m_spreads;
+  ou::tf::TSSWStatsPrice m_tsswSpreads;
 
   pProviderSim_t m_sim;
   bool m_bSimConnected;

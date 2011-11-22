@@ -17,8 +17,6 @@
 
 #include "DatedDatum.h"
 
-//using namespace H5;
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -50,7 +48,7 @@ CDatedDatum::CDatedDatum(const std::string &dt) {
 CDatedDatum::~CDatedDatum(void) {
 }
 
-H5::CompType *CDatedDatum::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CDatedDatum::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CDatedDatum ) );
   pComp->insertMember( "DateTime", HOFFSET( CDatedDatum, m_dt ), H5::PredType::NATIVE_LLONG );
   return pComp;
@@ -93,7 +91,7 @@ CQuote::~CQuote(void) {
   CDatedDatum::~CDatedDatum();
 }
 
-H5::CompType *CQuote::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CQuote::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CQuote ) );
   CDatedDatum::DefineDataType( pComp );
   pComp->insertMember( "Bid",     HOFFSET( CQuote, m_dblBid ),   H5::PredType::NATIVE_DOUBLE );
@@ -132,7 +130,7 @@ CTrade::~CTrade(void) {
   CDatedDatum::~CDatedDatum();
 }
 
-H5::CompType *CTrade::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CTrade::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CTrade ) );
   CDatedDatum::DefineDataType( pComp );
   pComp->insertMember( "Trade", HOFFSET( CTrade, m_dblTrade ),   H5::PredType::NATIVE_DOUBLE );
@@ -173,7 +171,7 @@ CBar::~CBar(void) {
   CDatedDatum::~CDatedDatum();
 }
 
-H5::CompType *CBar::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CBar::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CBar ) );
   CDatedDatum::DefineDataType( pComp );
   pComp->insertMember( "Open",   HOFFSET( CBar, m_dblOpen ),  H5::PredType::NATIVE_DOUBLE );
@@ -227,7 +225,7 @@ CMarketDepth::~CMarketDepth() {
   CDatedDatum::~CDatedDatum();
 }
 
-H5::CompType *CMarketDepth::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CMarketDepth::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CMarketDepth ) );
   CDatedDatum::DefineDataType( pComp );
   pComp->insertMember( "Shares", HOFFSET( CMarketDepth, m_nShares ),      H5::PredType::NATIVE_LONG );
@@ -265,7 +263,7 @@ CGreek::~CGreek( void ) {
   CDatedDatum::~CDatedDatum();
 }
 
-H5::CompType *CGreek::DefineDataType( H5::CompType *pComp ) {
+H5::CompType* CGreek::DefineDataType( H5::CompType *pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CGreek ) );
   CDatedDatum::DefineDataType( pComp );
   pComp->insertMember( "ImplVol", HOFFSET( CGreek, m_dblImpliedVolatility ), H5::PredType::NATIVE_DOUBLE );
@@ -274,6 +272,41 @@ H5::CompType *CGreek::DefineDataType( H5::CompType *pComp ) {
   pComp->insertMember( "Theta",   HOFFSET( CGreek, m_dblTheta ), H5::PredType::NATIVE_DOUBLE );
   pComp->insertMember( "Vega",    HOFFSET( CGreek, m_dblVega ),  H5::PredType::NATIVE_DOUBLE );
   pComp->insertMember( "Rho",     HOFFSET( CGreek, m_dblRho ),   H5::PredType::NATIVE_DOUBLE );
+  return pComp;
+}
+
+//
+// CPrice
+//
+
+CPrice::CPrice(void): CDatedDatum(), m_dblPrice( 0 ) {
+}
+
+CPrice::CPrice(const ptime &dt): CDatedDatum(dt), m_dblPrice( 0 ) {
+}
+
+CPrice::CPrice(const CPrice &price): CDatedDatum( price.m_dt ), 
+    m_dblPrice( price.m_dblPrice ) {
+}
+
+CPrice::CPrice( const ptime &dt, price_t dblPrice ) :
+CDatedDatum( dt ), m_dblPrice( dblPrice ) {
+}
+
+CPrice::CPrice( const std::string &dt, const std::string &price ) :
+CDatedDatum( dt ) {
+  char *stopchar;
+  m_dblPrice = strtod( price.c_str(), &stopchar );
+}
+
+CPrice::~CPrice(void) {
+  CDatedDatum::~CDatedDatum();
+}
+
+H5::CompType* CPrice::DefineDataType( H5::CompType *pComp ) {
+  if ( NULL == pComp ) pComp = new H5::CompType( sizeof( CTrade ) );
+  CDatedDatum::DefineDataType( pComp );
+  pComp->insertMember( "Price", HOFFSET( CPrice, m_dblPrice ),   H5::PredType::NATIVE_DOUBLE );
   return pComp;
 }
 

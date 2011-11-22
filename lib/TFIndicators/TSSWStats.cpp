@@ -22,7 +22,7 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( pSeries, WindowSizeSeconds, WindowSizeCount )
 {
 }
@@ -46,7 +46,7 @@ void TSSWStatsTrade::Expire( const CTrade &trade ) {
 // Quote
 //
 
-TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
 {
 }
@@ -72,7 +72,7 @@ void TSSWStatsQuote::Expire( const CQuote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
 {
 }
@@ -90,6 +90,30 @@ void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, ( quote.Bid() + quote.Ask() ) / 2.0 );
+}
+
+//
+// CPrice
+//
+
+TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( pSeries, WindowSizeSeconds, WindowSizeCount )
+{
+}
+
+TSSWStatsPrice::~TSSWStatsPrice( void ) {
+}
+
+void TSSWStatsPrice::Add( const CPrice &price ) {
+  time_duration dur = price.DateTime() - m_dtZero;
+  double dif = (double) dur.total_seconds();
+  m_stats.Add( dif, price.Price() );
+}
+
+void TSSWStatsPrice::Expire( const CPrice &price ) {
+  time_duration dur = price.DateTime() - m_dtZero;
+  double dif = (double) dur.total_seconds();
+  m_stats.Remove( dif, price.Price() );
 }
 
 } // namespace tf

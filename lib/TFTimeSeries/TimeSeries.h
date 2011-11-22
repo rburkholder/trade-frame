@@ -310,8 +310,8 @@ public:
   CBars(void);
   CBars( size_t );
   virtual ~CBars(void);
-  CBars *Subset( ptime time ) { return (CBars *) CTimeSeries<CBar>::Subset( time ); };
-  CBars *Subset( ptime time, unsigned int n ) { return (CBars *) CTimeSeries<CBar>::Subset( time, n ); };
+  CBars* Subset( ptime time ) { return (CBars*) CTimeSeries<CBar>::Subset( time ); };
+  CBars* Subset( ptime time, unsigned int n ) { return (CBars*) CTimeSeries<CBar>::Subset( time, n ); };
 protected:
 private:
 };
@@ -323,8 +323,8 @@ public:
   CTrades( void );
   CTrades( size_t );
   ~CTrades( void );
-  CTrades *Subset( ptime time ) { return (CTrades *) CTimeSeries<CTrade>::Subset( time ); };
-  CTrades *Subset( ptime time, unsigned int n ) { return (CTrades *) CTimeSeries<CTrade>::Subset( time, n ); };
+  CTrades* Subset( ptime time ) { return (CTrades*) CTimeSeries<CTrade>::Subset( time ); };
+  CTrades* Subset( ptime time, unsigned int n ) { return (CTrades*) CTimeSeries<CTrade>::Subset( time, n ); };
 protected:
 private:
 };
@@ -336,8 +336,8 @@ public:
   CQuotes( void );
   CQuotes( size_t );
   ~CQuotes( void );
-  CQuotes *Subset( ptime time ) { return (CQuotes *) CTimeSeries<CQuote>::Subset( time ); };
-  CQuotes *Subset( ptime time, unsigned int n ) { return (CQuotes *) CTimeSeries<CQuote>::Subset( time, n ); };
+  CQuotes* Subset( ptime time ) { return (CQuotes*) CTimeSeries<CQuote>::Subset( time ); };
+  CQuotes* Subset( ptime time, unsigned int n ) { return (CQuotes*) CTimeSeries<CQuote>::Subset( time, n ); };
 protected:
 private:
 };
@@ -349,8 +349,8 @@ public:
   CMarketDepths( void );
   CMarketDepths( size_t );
   ~CMarketDepths( void );
-  CMarketDepths *Subset( ptime time ) { return (CMarketDepths *) CTimeSeries<CMarketDepth>::Subset( time ); };
-  CMarketDepths *Subset( ptime time, unsigned int n ) { return (CMarketDepths *) CTimeSeries<CMarketDepth>::Subset( time, n ); };
+  CMarketDepths* Subset( ptime time ) { return (CMarketDepths*) CTimeSeries<CMarketDepth>::Subset( time ); };
+  CMarketDepths* Subset( ptime time, unsigned int n ) { return (CMarketDepths*) CTimeSeries<CMarketDepth>::Subset( time, n ); };
 protected:
 private:
 };
@@ -362,8 +362,21 @@ public:
   CGreeks( void );
   CGreeks( size_t );
   ~CGreeks( void );
-  CGreeks *Subset( ptime time ) { return (CGreeks *) CTimeSeries<CGreek>::Subset( time ); };
-  CGreeks *Subset( ptime time, unsigned int n ) { return (CGreeks *) CTimeSeries<CGreek>::Subset( time, n ); };
+  CGreeks* Subset( ptime time ) { return (CGreeks*) CTimeSeries<CGreek>::Subset( time ); };
+  CGreeks* Subset( ptime time, unsigned int n ) { return (CGreeks *) CTimeSeries<CGreek>::Subset( time, n ); };
+protected:
+private:
+};
+
+// Prices
+
+class CPrices: public CTimeSeries<CPrice> {
+public:
+  CPrices( void );
+  CPrices( size_t );
+  ~CPrices( void );
+  CPrices* Subset( ptime time ) { return (CPrices*) CTimeSeries<CPrice>::Subset( time ); };
+  CPrices* Subset( ptime time, unsigned int n ) { return (CPrices*) CTimeSeries<CPrice>::Subset( time, n ); };
 protected:
 private:
 };

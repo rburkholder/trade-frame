@@ -111,5 +111,21 @@ protected:
 private:
 };
 
+//
+// with CPrice
+//
+
+class TSSWStatsPrice: public TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice> {
+//  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>;
+  friend TimeSeriesSlidingWindow<TSSWStatsPrice, CPrice>;
+public:
+  TSSWStatsPrice( CTimeSeries<CPrice>* pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  ~TSSWStatsPrice( void );
+protected:
+  void Add( const CPrice &price ); // override to process elements passing into window scope
+  void Expire( const CPrice &price );  // override to process elements passing out of window scope 
+private:
+};
+
 } // namespace tf
 } // namespace ou
