@@ -60,6 +60,11 @@ protected:
 
   typedef std::map<idOrder_t, pOrder_t> mapOrdersFilling_t;
   mapOrdersFilling_t m_mapBaseOrdersFilling;
+
+  boost::posix_time::time_duration m_durRoundTripTime;
+  unsigned int m_cntRoundTrips;
+
+  boost::posix_time::time_duration m_durForceRoundTripClose;
   
 private:
   void HandleBaseOrderFilled( const ou::tf::COrder& order );

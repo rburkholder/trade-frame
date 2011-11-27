@@ -237,7 +237,7 @@ void CSimulationProvider::Run() {
 
 void CSimulationProvider::EmitStats( std::stringstream& ss ) {
   boost::posix_time::time_duration dur = m_dtSimStop - m_dtSimStart;
-  unsigned long nDuration = dur.seconds();
+  unsigned long nDuration = dur.total_seconds();
   unsigned long nDatumsPerSecond = m_nProcessedDatums / nDuration;
   ss << m_nProcessedDatums << " datums in " << nDuration << " seconds, " << nDatumsPerSecond << " datums/second." << std::endl;
 }

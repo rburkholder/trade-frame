@@ -84,6 +84,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
           case 0:  // main chart
             pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
             pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight );
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
             pXY->setClipping();
             pXY->setXAxisOnTop( true );
             pXY->xAxis()->setWidth( 2 );
@@ -96,7 +97,8 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY = new XYChart( m_nChartWidth, heightChart1 );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 );
             pXY->setClipping();
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
@@ -107,7 +109,8 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY = new XYChart( m_nChartWidth, heightChartN );
             pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN );
             pXY->setClipping();
-            pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
+            pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
