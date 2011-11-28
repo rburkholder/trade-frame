@@ -30,13 +30,14 @@ template<class T, class D> class TimeSeriesSlidingWindowStats
 public:
   TimeSeriesSlidingWindowStats<T,D>( CTimeSeries<D> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   virtual ~TimeSeriesSlidingWindowStats<T,D>( void );
-  double Accel( void ) const { return m_stats.B2(); };
+//  double Accel( void ) const { return m_stats.B2(); };
   double Slope( void ) const { return m_stats.B1(); };
   double Offset( void ) const { return m_stats.B0(); };
   double MeanY( void ) const { return m_stats.MeanY(); };
   double RR( void ) const { return m_stats.RR(); };
   double R( void ) const { return m_stats.R(); };
   double SD( void ) const { return m_stats.SD(); };
+  double BBOffset( void ) const { return m_stats.BBOffset(); };
   double BBUpper( void ) const { return m_stats.BBUpper(); };
   double BBLower( void ) const { return m_stats.BBLower(); };
   void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); };

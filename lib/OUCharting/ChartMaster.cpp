@@ -83,7 +83,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
         switch ( ix ) {
           case 0:  // main chart
             pXY0 = pXY = new XYChart( m_nChartWidth, heightChart0 );
-            pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight );
+            pXY->setPlotArea( x, xAxisHeight, m_nChartWidth - 2 * x, heightChart0 - xAxisHeight )->setGridColor(0xc0c0c0, 0xc0c0c0);
             pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
             pXY->setClipping();
             pXY->setXAxisOnTop( true );
@@ -95,7 +95,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             break;
           case 1: // volume chart
             pXY = new XYChart( m_nChartWidth, heightChart1 );
-            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 );
+            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChart1 )->setGridColor(0xc0c0c0, 0xc0c0c0);
             pXY->setClipping();
             //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 
@@ -107,7 +107,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             break;
           default:  // secondary indicator charts
             pXY = new XYChart( m_nChartWidth, heightChartN );
-            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN );
+            pXY->setPlotArea( x, 0, m_nChartWidth - 2 * x, heightChartN )->setGridColor(0xc0c0c0, 0xc0c0c0);
             pXY->setClipping();
             //pXY->xAxis()->setColors(Chart::LineColor, Chart::Transparent);  // turn off axis
             pXY->xAxis()->setColors(Chart::LineColor, Chart::LineColor); 

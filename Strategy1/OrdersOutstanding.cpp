@@ -96,14 +96,7 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( 0.0 != ask ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first >= ask ) { // price is outside of profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) { // after a period of waiting, close out position with no good match
-          if ( ( iter->second.pOrderBasis->GetDateTimeOrderFilled() + m_durForceRoundTripClose ) < quote.DateTime() ) {
-            pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-            pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-            //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
-            pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-            pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
-          }
+        if ( 0 == iter->second.pOrderClosing.use_count() ) { 
         }
         else { // cancel existing order, but only do once, so look at status
           m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
@@ -132,14 +125,7 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( 0.0 != bid ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first <= bid ) { // price is outside of profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) { // after a period of waiting, close out position with no good match
-          if ( ( iter->second.pOrderBasis->GetDateTimeOrderFilled() + m_durForceRoundTripClose ) < quote.DateTime() ) {
-            pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-            pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-            //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
-            pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-            pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
-          }
+        if ( 0 == iter->second.pOrderClosing.use_count() ) {
         }
         else { // cancel existing order, but only do once, so look at status
           m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?

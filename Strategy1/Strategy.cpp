@@ -36,7 +36,9 @@ Strategy::Strategy(void)
   m_dvChart( "Strategy1", "GC" ), 
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
-  m_tsswSlopeOfSlopeOfSMA( &m_tradesSlopeOfSlopeOfSMA, 90 ), 
+  m_tsswSlopeOfSlopeOfSMA1( &m_pricesSlopeOfSlopeOfSMA1, 90 ), 
+  m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 600 ),
+  m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
   m_tsswSpreads( &m_spreads, 120 )
 {
 
@@ -53,16 +55,18 @@ Strategy::Strategy(void)
   m_dvChart.Add( 0, m_ceLowerBollinger2 );
   m_dvChart.Add( 1, m_ceVolume );
   m_dvChart.Add( 2, m_ceSlopeOfSMA1 );
-  m_dvChart.Add( 2, m_ceSlopeOfSMA2 );
-  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA );
-  m_dvChart.Add( 3, m_ceBollinger1Width );
-  m_dvChart.Add( 3, m_ceBollinger2Width );
-  m_dvChart.Add( 4, m_ceOutstandingLong );
-  m_dvChart.Add( 4, m_ceOutstandingShort );
+  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA1 );
+  m_dvChart.Add( 3, m_ceSlopeOfSMA2 );
+  m_dvChart.Add( 3, m_ceSlopeOfSlopeOfSMA2 );
+  m_dvChart.Add( 3, m_ceSlopeOfBollinger2Offset );
+  m_dvChart.Add( 4, m_ceBollinger1Offset );
+  m_dvChart.Add( 4, m_ceBollinger2Offset );
+  m_dvChart.Add( 5, m_ceOutstandingLong );
+  m_dvChart.Add( 5, m_ceOutstandingShort );
 //  m_dvChart.Add( 3, m_ceRR );
-  m_dvChart.Add( 5, m_cePLLong );
-  m_dvChart.Add( 5, m_cePLShort );
-  m_dvChart.Add( 5, m_cePLNet );
+  m_dvChart.Add( 6, m_cePLLong );
+  m_dvChart.Add( 6, m_cePLShort );
+  m_dvChart.Add( 6, m_cePLNet );
 //  m_dvChart.Add( 5, m_ceSpread );
 
   m_ceSMA1.SetColour( ou::Colour::DarkOliveGreen );
@@ -72,7 +76,8 @@ Strategy::Strategy(void)
   m_cePLNet.SetColour( ou::Colour::Green );
   m_ceSlopeOfSMA1.SetColour( ou::Colour::DeepSkyBlue );
   m_ceSlopeOfSMA2.SetColour( ou::Colour::Turquoise );
-  m_ceSlopeOfSlopeOfSMA.SetColour( ou::Colour::ForestGreen );
+  m_ceSlopeOfSlopeOfSMA1.SetColour( ou::Colour::ForestGreen );
+  m_ceSlopeOfSlopeOfSMA2.SetColour( ou::Colour::ForestGreen );
   m_ceOutstandingLong.SetColour( ou::Colour::Blue );
   m_ceOutstandingShort.SetColour( ou::Colour::Red );
 
@@ -81,8 +86,9 @@ Strategy::Strategy(void)
   m_ceUpperBollinger2.SetColour( ou::Colour::Turquoise );
   m_ceLowerBollinger2.SetColour( ou::Colour::Turquoise );
 
-  m_ceBollinger1Width.SetColour( ou::Colour::DarkOliveGreen );
-  m_ceBollinger2Width.SetColour( ou::Colour::Turquoise );
+  m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );
+  m_ceSlopeOfBollinger2Offset.SetColour( ou::Colour::DarkMagenta );
 
   m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
 
@@ -180,16 +186,27 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   ptime dt( quote.DateTime() );
 
   m_quotes.Append( quote );
-  ou::tf::TSSWStatsMidQuote& sma( m_sma5 );
-  sma.Update();
-  m_sma7.Update();
 
-  double spread = quote.Ask() - quote.Bid();
-  m_spreads.Append( ou::tf::CPrice( quote.DateTime(), spread ) );
-  m_tsswSpreads.Update();
+  // high speed simple moving average
+  ou::tf::TSSWStatsMidQuote& sma1( m_sma5 );
+  sma1.Update();
 
-  m_tradesSlopeOfSlopeOfSMA.Append( ou::tf::CPrice( quote.DateTime(), sma.Slope() ) );
-  m_tsswSlopeOfSlopeOfSMA.Update();
+  m_pricesSlopeOfSlopeOfSMA1.Append( ou::tf::CPrice( dt, sma1.Slope() ) );
+  m_tsswSlopeOfSlopeOfSMA1.Update();
+
+  // slow speed moving average
+  ou::tf::TSSWStatsMidQuote& sma2( m_sma7 );
+  sma2.Update();
+
+  m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
+  m_tsswSlopeOfSlopeOfSMA2.Update();
+
+  m_pricesBollinger2Offset.Append( ou::tf::CPrice( dt, sma2.BBOffset() ) );
+  m_tsswSlopeOfBollinger2Offset.Update();
+
+//  double spread = quote.Ask() - quote.Bid();
+//  m_spreads.Append( ou::tf::CPrice( dt, spread ) );
+//  m_tsswSpreads.Update();
 
   if ( 500 < m_quotes.Size() ) {
 
@@ -204,25 +221,35 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_ceOutstandingShort.Add( dt, cntShorts );
     unsigned int dif = ( cntLongs > cntShorts ) ? cntLongs - cntShorts : cntShorts - cntLongs;
 
-    m_ceSMA1.Add( dt, sma.MeanY() );
-    m_ceSlopeOfSMA1.Add( dt, sma.Slope() );
-    double direction = m_tsswSlopeOfSlopeOfSMA.Slope();
+    m_ceSMA1.Add( dt, sma1.MeanY() );
+    m_ceSlopeOfSMA1.Add( dt, sma1.Slope() );
+    double direction = m_tsswSlopeOfSlopeOfSMA1.Slope();
     if ( ( 0.00005 < direction ) || ( -0.00005 > direction ) ) {
       direction = 0.0;
     }
     else {
-      m_ceSlopeOfSlopeOfSMA.Add( dt, direction * 200.0 );
+      m_ceSlopeOfSlopeOfSMA1.Add( dt, direction * 200.0 );
     }
 
-    m_ceUpperBollinger1.Add( dt, sma.BBUpper() );
-    m_ceLowerBollinger1.Add( dt, sma.BBLower() );
-    m_ceBollinger1Width.Add( dt, sma.BBUpper() - sma.BBLower() );
+    m_ceUpperBollinger1.Add( dt, sma1.BBUpper() );
+    m_ceLowerBollinger1.Add( dt, sma1.BBLower() );
+    m_ceBollinger1Offset.Add( dt, sma1.BBOffset() );
 
-    m_ceSMA2.Add( dt, m_sma7.MeanY() );
-    m_ceSlopeOfSMA2.Add( dt, m_sma7.Slope() * 10.0 );
-    m_ceUpperBollinger2.Add( dt, m_sma7.BBUpper() );
-    m_ceLowerBollinger2.Add( dt, m_sma7.BBLower() );
-    m_ceBollinger2Width.Add( dt, m_sma7.BBUpper() - m_sma7.BBLower() );
+    m_ceSMA2.Add( dt, sma2.MeanY() );
+    m_ceSlopeOfSMA2.Add( dt, sma2.Slope() * 10.0 );
+    m_ceUpperBollinger2.Add( dt, sma2.BBUpper() );
+    m_ceLowerBollinger2.Add( dt, sma2.BBLower() );
+    m_ceBollinger2Offset.Add( dt, sma2.BBOffset() );
+
+    double direction2 = m_tsswSlopeOfSlopeOfSMA2.Slope();
+    if ( ( 0.00001 < direction2 ) || ( -0.00001 > direction2 ) ) {
+      direction2 = 0.0;
+    }
+    else {
+      m_ceSlopeOfSlopeOfSMA2.Add( dt, direction2 * 2000.0 );
+    }
+
+    m_ceSlopeOfBollinger2Offset.Add( dt, m_tsswSlopeOfBollinger2Offset.Slope() * 2.0 );
 
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
     double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();

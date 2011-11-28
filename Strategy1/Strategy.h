@@ -79,12 +79,14 @@ private:
   ou::ChartEntryIndicator m_ceLowerBollinger1;
   ou::ChartEntryIndicator m_ceUpperBollinger2;
   ou::ChartEntryIndicator m_ceLowerBollinger2;
-  ou::ChartEntryIndicator m_ceBollinger1Width;
-  ou::ChartEntryIndicator m_ceBollinger2Width;
+  ou::ChartEntryIndicator m_ceBollinger1Offset;
+  ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryIndicator m_ceSlopeOfSMA1;
+  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
   ou::ChartEntryIndicator m_ceSlopeOfSMA2;
-  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA;
+  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA2;
+  ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
   ou::ChartEntryIndicator m_ceSMA1;
   ou::ChartEntryIndicator m_ceSMA2;
   ou::ChartEntryIndicator m_cePLLong;
@@ -118,8 +120,14 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
 
-  ou::tf::CPrices m_tradesSlopeOfSlopeOfSMA;
-  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA;
+  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
+  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
+
+  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA2;
+  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA2;
+
+  ou::tf::CPrices m_pricesBollinger2Offset;
+  ou::tf::TSSWStatsPrice m_tsswSlopeOfBollinger2Offset;
 
   ou::tf::CPrices m_spreads;
   ou::tf::TSSWStatsPrice m_tsswSpreads;

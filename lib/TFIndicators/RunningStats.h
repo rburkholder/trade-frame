@@ -29,7 +29,7 @@ public:
   virtual void CalcStats( void );
   void Reset( void );
 
-  double B2() const { return b2; }; // acceleration
+//  double B2() const { return b2; }; // acceleration
   double B1() const { return b1; }; // slope
   double B0() const { return b0; }; // offset
 
@@ -40,12 +40,13 @@ public:
 
   double SD() const { return sd; };
 
-  double BBUpper() const { return bbUpper; };
-  double BBLower() const { return bbLower; };
+  double BBOffset() const { return sd * m_BBMultiplier; };
+  double BBUpper() const { return meanY + sd * m_BBMultiplier; };
+  double BBLower() const { return  meanY - sd * m_BBMultiplier; };
 
 protected:
 
-  double b2; // acceleration
+//  double b2; // acceleration
   double b1; // slope
   double b0; // offset
 
@@ -56,7 +57,7 @@ protected:
 
   double sd;
 
-  double bbUpper, bbLower;
+//  double bbUpper, bbLower;
 
   unsigned int nX, nY;
   double SumXX, SumX, SumXY, SumY, SumYY;
