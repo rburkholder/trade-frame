@@ -30,14 +30,14 @@ Strategy::Strategy(void)
   m_sma6( &m_quotes, 1800 ), // 30 min
   m_sma7( &m_quotes, 3600 ), // 60 min
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
-  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 45, 0 ) ),  // put in time start
+  m_stateTrade( ETradeStart ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_nTransitions( 0 ),
   m_barFactory( 180 ),
   m_dvChart( "Strategy1", "GC" ), 
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
   m_tsswSlopeOfSlopeOfSMA1( &m_pricesSlopeOfSlopeOfSMA1, 90 ), 
-  m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 600 ),
+  m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 360 ),
   m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
   m_tsswSpreads( &m_spreads, 120 )
 {
@@ -235,8 +235,10 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_ceLowerBollinger1.Add( dt, sma1.BBLower() );
     m_ceBollinger1Offset.Add( dt, sma1.BBOffset() );
 
+    double slope2 = sma2.Slope();
+
     m_ceSMA2.Add( dt, sma2.MeanY() );
-    m_ceSlopeOfSMA2.Add( dt, sma2.Slope() * 10.0 );
+    m_ceSlopeOfSMA2.Add( dt, slope2 * 10.0 );
     m_ceUpperBollinger2.Add( dt, sma2.BBUpper() );
     m_ceLowerBollinger2.Add( dt, sma2.BBLower() );
     m_ceBollinger2Offset.Add( dt, sma2.BBOffset() );
@@ -249,7 +251,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       m_ceSlopeOfSlopeOfSMA2.Add( dt, direction2 * 2000.0 );
     }
 
-    m_ceSlopeOfBollinger2Offset.Add( dt, m_tsswSlopeOfBollinger2Offset.Slope() * 2.0 );
+    double dblBollingerSlope = m_tsswSlopeOfBollinger2Offset.Slope();
+    m_ceSlopeOfBollinger2Offset.Add( dt, dblBollingerSlope * 2.0 );
 
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
     double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();
@@ -259,85 +262,81 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_cePLNet.Add( dt, dblPLLong + dblPLShort );
 
     switch ( m_stateTrade ) {
-    case ETradeOut:
-      //if ( 0 != sma.Slope() ) {
-      if ( 0 != direction ) {
-        if ( 0.00001 < direction ) { //rising
-          m_ss.str( "" );
-          m_ss << "Ordered: " << quote.DateTime() << "; ";
-          m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-          m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "Long a" );
-          m_stateTrade = ETradeLong;
-        }
-        if ( -0.00001 > direction ) {
-        //else { // falling
-          m_ss.str( "" );
-          m_ss << "Ordered: " << quote.DateTime() << "; ";
-          m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-          m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "Short a" );
-          m_stateTrade = ETradeShort;
+    case ETradeStart:
+      m_stateTrade = ETradeOutOfMarket;
+      break;
+    case ETradeOutOfMarket:
+      //if ( m_pPositionLong->OrdersPending() ) {
+      if ( dt > m_dtEnd ) {
+        m_stateTrade = ETradeCancel;
+      }
+      else {
+        if ( 0.0 < dblBollingerSlope ) { // enter market
+          if ( 0.0 == slope2 ) {
+            // do nothing
+          }
+          else {
+            if ( 0.0 < slope2 ) { // go long
+              m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+              m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "Long a" );
+              ++m_nTransitions;
+              m_stateTrade = ETradeWaitLongExit;
+            }
+            else { // go short
+              m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+              m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "Short a" );
+              ++m_nTransitions;
+              m_stateTrade = ETradeWaitShortExit;
+            }
+          }
         }
       }
       break;
-    case ETradeLong:
-      //if ( m_pPositionLong->OrdersPending() ) {
-      if ( false ) {
-      }
-      else {
-        if ( dt > m_dtEnd ) {
+    case ETradeWaitLongExit:
+      if ( 0.0 != dblBollingerSlope ) { // on flat, do nothing
+        if  ( 0.0 >= dblBollingerSlope ) { // bollinger declining, so get out
+          m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
+          //m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
           m_pOrder.reset();
-          m_pOrdersOutstandingLongs->CancelAll();
-          m_pOrdersOutstandingShorts->CancelAll();
-          m_pPositionLong->ClosePosition();
-          m_pPositionShort->ClosePosition();
-          m_stateTrade = ETradeDone;
+          m_stateTrade = ETradeOutOfMarket; // try again
         }
         else {
-          //if ( 0 > sma.Slope() ) {
-          if ( -0.00001 > direction ) {
-            //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-            ++m_nTransitions;
-            //m_ss.str( "" );
-            //m_ss << "Ordered: " << quote.DateTime() << "; ";
-            //m_pPositionLongOpen->ClosePosition();
-            m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
-            m_pOrder.reset();
+          if ( 0.0 > slope2 ) { // on rising, but sma slope changes to negative, get out, go other way to get the trend
+            m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "Short b" );
-            m_stateTrade = ETradeShort;
+            m_stateTrade = ETradeWaitShortExit;
           }
         }
       }
       break;
-    case ETradeShort:
-      //if ( m_pPositionShort->OrdersPending() ) {
-      if ( false ) {
-      }
-      else {
-        if ( dt > m_dtEnd ) {
+    case ETradeWaitShortExit:
+      if ( 0.0 != dblBollingerSlope ) { // on flat, do nothing
+        if ( 0.0 >= dblBollingerSlope ) {  // exit market
+          m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
+          //m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
           m_pOrder.reset();
-          m_pOrdersOutstandingLongs->CancelAll();
-          m_pOrdersOutstandingShorts->CancelAll();
-          m_pPositionLong->ClosePosition();
-          m_pPositionShort->ClosePosition();
-          m_stateTrade = ETradeDone;
+          m_stateTrade = ETradeOutOfMarket; // try again
         }
         else {
-          //if ( 0 < sma.Slope() ) {
-          if ( 0.00001 < direction ) {
-            //pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-            ++m_nTransitions;
-            //m_ss.str( "" );
-            //m_ss << "Ordered: " << quote.DateTime() << "; ";
-            //m_pPositionShortOpen->ClosePosition();
-            m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
-            m_pOrder.reset();
+          if ( 0.0 < slope2 ) { // on falling, but sma slope changes to positive, get out, go other way to get the trend
+            m_pOrder = m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             m_pOrder = m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "Long b" );
-            m_stateTrade = ETradeLong;
+            m_stateTrade = ETradeWaitLongExit;
           }
         }
       }
+      break;
+    case ETradeCancel:
+          m_pOrdersOutstandingLongs->CancelAll();
+          m_pOrdersOutstandingShorts->CancelAll();
+          m_stateTrade = ETradeClose;
+      break;
+    case ETradeClose:
+          m_pPositionLong->ClosePosition();
+          m_pPositionShort->ClosePosition();
+          m_stateTrade = ETradeDone;
       break;
     case ETradeDone:
       break;

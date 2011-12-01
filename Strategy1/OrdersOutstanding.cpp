@@ -48,7 +48,11 @@ void OrdersOutstanding::CancelAll( void ) {
 //      iter->second.pOrderClosing.reset();
     }
   }
-  unsigned long ave = m_durRoundTripTime.total_milliseconds() / m_cntRoundTrips;
+  if ( 0 == m_cntRoundTrips ) {
+  }
+  else {
+    unsigned long ave = m_durRoundTripTime.total_milliseconds() / m_cntRoundTrips;
+  }
 }
 
 void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& order ) {

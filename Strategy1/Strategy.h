@@ -50,7 +50,7 @@ protected:
 private:
 
   enum stateTrade {
-    ETradeOut, ETradeLong, ETradeShort, ETradeDone
+    ETradeStart, ETradeOutOfMarket, ETradeWaitLongExit, ETradeWaitShortExit, ETradeCancel, ETradeClose, ETradeDone
   } m_stateTrade;
 
   std::stringstream m_ss;
