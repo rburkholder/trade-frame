@@ -33,7 +33,7 @@ Strategy::Strategy(void)
   m_stateTrade( ETradeStart ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_nTransitions( 0 ),
   m_barFactory( 180 ),
-  m_dvChart( "Strategy1", "GC" ), 
+  m_dvChart( "Strategy1", "GC" ),
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
   m_tsswSlopeOfSlopeOfSMA1( &m_pricesSlopeOfSlopeOfSMA1, 90 ), 
@@ -49,8 +49,8 @@ Strategy::Strategy(void)
   m_dvChart.Add( 0, m_ceBars );
   m_dvChart.Add( 0, m_ceSMA1 );
   m_dvChart.Add( 0, m_ceSMA2 );
-  m_dvChart.Add( 0, m_ceUpperBollinger1 );
-  m_dvChart.Add( 0, m_ceLowerBollinger1 );
+//  m_dvChart.Add( 0, m_ceUpperBollinger1 );
+//  m_dvChart.Add( 0, m_ceLowerBollinger1 );
   m_dvChart.Add( 0, m_ceUpperBollinger2 );
   m_dvChart.Add( 0, m_ceLowerBollinger2 );
   m_dvChart.Add( 1, m_ceVolume );
@@ -69,14 +69,14 @@ Strategy::Strategy(void)
   m_dvChart.Add( 6, m_cePLNet );
 //  m_dvChart.Add( 5, m_ceSpread );
 
-  m_ceSMA1.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceSMA1.SetColour( ou::Colour::Magenta );
   m_ceSMA2.SetColour( ou::Colour::Turquoise );
   m_cePLLong.SetColour( ou::Colour::Blue );
   m_cePLShort.SetColour( ou::Colour::Orange );
   m_cePLNet.SetColour( ou::Colour::Green );
-  m_ceSlopeOfSMA1.SetColour( ou::Colour::DeepSkyBlue );
+  m_ceSlopeOfSMA1.SetColour( ou::Colour::Magenta );
   m_ceSlopeOfSMA2.SetColour( ou::Colour::Turquoise );
-  m_ceSlopeOfSlopeOfSMA1.SetColour( ou::Colour::ForestGreen );
+  m_ceSlopeOfSlopeOfSMA1.SetColour( ou::Colour::MediumAquamarine );
   m_ceSlopeOfSlopeOfSMA2.SetColour( ou::Colour::ForestGreen );
   m_ceOutstandingLong.SetColour( ou::Colour::Blue );
   m_ceOutstandingShort.SetColour( ou::Colour::Red );
@@ -188,14 +188,14 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   m_quotes.Append( quote );
 
   // high speed simple moving average
-  ou::tf::TSSWStatsMidQuote& sma1( m_sma5 );
+  ou::tf::TSSWStatsMidQuote& sma1( m_sma3 );
   sma1.Update();
 
   m_pricesSlopeOfSlopeOfSMA1.Append( ou::tf::CPrice( dt, sma1.Slope() ) );
   m_tsswSlopeOfSlopeOfSMA1.Update();
 
   // slow speed moving average
-  ou::tf::TSSWStatsMidQuote& sma2( m_sma7 );
+  ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
   sma2.Update();
 
   m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
@@ -231,8 +231,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       m_ceSlopeOfSlopeOfSMA1.Add( dt, direction * 200.0 );
     }
 
-    m_ceUpperBollinger1.Add( dt, sma1.BBUpper() );
-    m_ceLowerBollinger1.Add( dt, sma1.BBLower() );
+//    m_ceUpperBollinger1.Add( dt, sma1.BBUpper() );
+//    m_ceLowerBollinger1.Add( dt, sma1.BBLower() );
     m_ceBollinger1Offset.Add( dt, sma1.BBOffset() );
 
     double slope2 = sma2.Slope();
