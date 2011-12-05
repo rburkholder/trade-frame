@@ -230,6 +230,7 @@ public:
 
   void SetMinTick( double dblMinTick ) { m_row.dblMinTick = dblMinTick; };
   double GetMinTick( void ) const { return m_row.dblMinTick; };
+  double NormalizeOrderPrice( double price ) const;
 
   void SetSignificantDigits( boost::uint8_t nSignificantDigits ) { m_row.nSignificantDigits = nSignificantDigits; };
   boost::uint8_t GetSignificantDigits( void ) const { return m_row.nSignificantDigits; };

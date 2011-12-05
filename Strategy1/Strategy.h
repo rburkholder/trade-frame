@@ -50,7 +50,7 @@ protected:
 private:
 
   enum stateTrade {
-    ETradeStart, ETradeOutOfMarket, ETradeWaitLongExit, ETradeWaitShortExit, ETradeCancel, ETradeClose, ETradeDone
+    ETradeStart, ETradeOutOfMarket, ETradeWaitLongEntry, ETradeWaitShortEntry, ETradeCancel, ETradeClose, ETradeDone
   } m_stateTrade;
 
   std::stringstream m_ss;
@@ -66,6 +66,9 @@ private:
   pInstrument_t m_pLongInstrument;
   pInstrument_t m_pTestInstrument;
 
+  enum enumTradeDirection { ETradeDirUnkn, ETradeDirUp, ETradeDirDn } m_TradeDirection;
+  ou::tf::CQuote m_quoteLast;  // used for classifying the current trade
+
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
   ou::tf::CBars m_bars;
@@ -73,22 +76,31 @@ private:
   ou::tf::CBarFactory m_barFactory;
 
   typedef ou::ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
+
   ou::ChartDataView m_dvChart;
   ou::ChartEntryBars m_ceBars;
-  ou::ChartEntryIndicator m_ceUpperBollinger1;
-  ou::ChartEntryIndicator m_ceLowerBollinger1;
-  ou::ChartEntryIndicator m_ceUpperBollinger2;
-  ou::ChartEntryIndicator m_ceLowerBollinger2;
-  ou::ChartEntryIndicator m_ceBollinger1Offset;
-  ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryVolume m_ceVolume;
+
+  ou::ChartEntryIndicator m_ceSMA1;
   ou::ChartEntryIndicator m_ceSlopeOfSMA1;
   ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
+  ou::ChartEntryIndicator m_ceUpperBollinger1;
+  ou::ChartEntryIndicator m_ceLowerBollinger1;
+  ou::ChartEntryIndicator m_ceBollinger1Offset;
+
+  ou::ChartEntryIndicator m_ceSMA2;
   ou::ChartEntryIndicator m_ceSlopeOfSMA2;
   ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA2;
+  ou::ChartEntryIndicator m_ceUpperBollinger2;
+  ou::ChartEntryIndicator m_ceLowerBollinger2;
+  ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
-  ou::ChartEntryIndicator m_ceSMA1;
-  ou::ChartEntryIndicator m_ceSMA2;
+
+  ou::ChartEntryIndicator m_ceSMA3;
+  ou::ChartEntryIndicator m_ceUpperBollinger3;
+  ou::ChartEntryIndicator m_ceLowerBollinger3;
+  ou::ChartEntryIndicator m_ceBollinger3Offset;
+
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
   ou::ChartEntryIndicator m_cePLNet;
@@ -96,6 +108,10 @@ private:
   ou::ChartEntryIndicator m_ceOutstandingShort;
   ou::ChartEntryIndicator m_ceSpread;
   //ou::ChartEntryIndicator m_ceRR;
+
+  //ou::ChartEntryIndicator m_ceLongTicks;
+  //ou::ChartEntryIndicator m_ceShortTicks;
+
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;
 
@@ -119,6 +135,7 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma5;
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
+  ou::tf::TSSWStatsMidQuote m_sma8;
 
   ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
   ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
@@ -147,6 +164,8 @@ private:
   void HandleOnData1Connected( int );
   void HandleOnData1Disconnected( int );
 
+  void HandleFirstQuote( const ou::tf::CQuote& quote );
+  void HandleFirstTrade( const ou::tf::CTrade& trade );
   void HandleQuote( const ou::tf::CQuote& quote );
   void HandleTrade( const ou::tf::CTrade& trade );
   void HandleSimulationComplete( void );
