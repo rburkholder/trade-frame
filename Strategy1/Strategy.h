@@ -20,6 +20,7 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIndicators/TSSWStats.h>
+#include <TFIndicators/TSSWEfficiencyRatio.h>
 
 #include <TFSimulation/SimulationProvider.h>
 
@@ -109,6 +110,10 @@ private:
   ou::ChartEntryIndicator m_ceSpread;
   //ou::ChartEntryIndicator m_ceRR;
 
+  ou::ChartEntryIndicator m_ceER1;
+  ou::ChartEntryIndicator m_ceER2;
+  ou::ChartEntryIndicator m_ceER3;
+
   //ou::ChartEntryIndicator m_ceLongTicks;
   //ou::ChartEntryIndicator m_ceShortTicks;
 
@@ -136,6 +141,10 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
+
+  ou::tf::TSSWEfficiencyRatio m_er1;
+  ou::tf::TSSWEfficiencyRatio m_er2;
+  ou::tf::TSSWEfficiencyRatio m_er3;
 
   ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
   ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;

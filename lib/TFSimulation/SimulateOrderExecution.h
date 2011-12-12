@@ -63,7 +63,7 @@ public:
 
   void SetExecuteAgainst( enumExecuteAgainst ea ) { 
     assert( ( EAQuotes == ea ) || ( EATrades == ea ) );
-    m_ea = ea;
+//    m_ea = ea;
   }
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
@@ -84,7 +84,7 @@ protected:
   };
   boost::posix_time::time_duration m_dtQueueDelay; // used to simulate network / handling delays
   double m_dblCommission;  // currency, per share (need also per trade)
-  enumExecuteAgainst m_ea;
+//  enumExecuteAgainst m_ea;
 
   OnOrderCancelledHandler OnOrderCancelled;
   OnOrderFillHandler OnOrderFill;
@@ -112,6 +112,7 @@ protected:
   void ProcessStopOrders( const CQuote& quote ); // true if order executed, not yet implemented
   bool ProcessMarketOrders( const CQuote& quote ); // true if order executed
   bool ProcessLimitOrders( const CQuote& quote ); // true if order executed
+  bool ProcessLimitOrders( const CTrade& trade );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
   void GetExecId( std::string* sId ) { 

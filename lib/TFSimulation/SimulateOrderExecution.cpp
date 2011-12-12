@@ -23,8 +23,7 @@ namespace tf { // TradeFrame
 int CSimulateOrderExecution::m_nExecId( 1000 );
 
 CSimulateOrderExecution::CSimulateOrderExecution(void)
-: m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 ), 
-  m_ea( EAQuotes )
+: m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 )//, m_ea( EAQuotes )
 {
 }
 
@@ -32,16 +31,15 @@ CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 }
 
 void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
-  if ( EATrades == m_ea ) {
-    CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
-    ProcessOrderQueues( quote );
-  }
+//  if ( EATrades == m_ea ) {
+    ProcessLimitOrders( trade );
+//  }
 }
 
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
-  if ( EAQuotes == m_ea ) {
+//  if ( EAQuotes == m_ea ) {
     ProcessOrderQueues( quote );
-  }
+//  }
 }
 
 void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
@@ -80,7 +78,7 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
 
 void CSimulateOrderExecution::ProcessOrderQueues( const CQuote &quote ) {
 
-  if ( ( 0.0 == quote.Ask() ) || ( 0.0 == quote.Bid() ) || ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {
+  if ( !quote.Valid() ) {
     return;
   }
 
@@ -207,6 +205,11 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
   }
 
   return bProcessed;
+}
+
+bool CSimulateOrderExecution::ProcessLimitOrders( const CTrade& trade ) {
+  CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
+  return ProcessLimitOrders( quote );
 }
 
 void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {

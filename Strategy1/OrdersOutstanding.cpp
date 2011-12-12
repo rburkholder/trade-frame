@@ -29,6 +29,9 @@ void OrdersOutstanding::AddOrderFilling( pOrder_t pOrder ) {
   }
 }
 
+void OrdersOutstanding::AddOrderFilling( const structRoundTripStats& stats ) {
+}
+
 void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
   idOrder_t id = order.GetOrderId();
   mapOrdersFilling_t::iterator iter = m_mapBaseOrdersFilling.find( id );
@@ -112,7 +115,7 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.20 );
+          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.10 );
           //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
           pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
           pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
@@ -141,7 +144,7 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.20 );
+          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.10 );
           //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
           pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
           pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );

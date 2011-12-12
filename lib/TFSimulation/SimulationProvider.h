@@ -61,8 +61,8 @@ public:
 
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
-  void SetExecuteAgainst( enumExecuteAgainst ea ) { m_ea = ea; };
-  enumExecuteAgainst GetExecuteAgainst( void ) { return m_ea; };
+//  void SetExecuteAgainst( enumExecuteAgainst ea ) { m_ea = ea; };
+//  enumExecuteAgainst GetExecuteAgainst( void ) { return m_ea; };
 
   void Run( void );
   void Stop( void );
@@ -83,7 +83,7 @@ public:
 
 protected:
 
-  enumExecuteAgainst m_ea;
+//  enumExecuteAgainst m_ea;
 
   pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
   void StartQuoteWatch( pSymbol_t pSymbol );

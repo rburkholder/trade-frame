@@ -41,7 +41,8 @@ Strategy::Strategy(void)
   m_tsswSlopeOfSlopeOfSMA1( &m_pricesSlopeOfSlopeOfSMA1, 90 ), 
   m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 360 ),
   m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
-  m_tsswSpreads( &m_spreads, 120 )
+  m_tsswSpreads( &m_spreads, 120 ),
+  m_er1( &m_trades, 10 ), m_er2( &m_trades, 30 ), m_er3( &m_trades, 90 )
 {
 
   ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
@@ -77,6 +78,10 @@ Strategy::Strategy(void)
   //m_dvChart.Add( 7, m_ceShortTicks );
 //  m_dvChart.Add( 5, m_ceSpread );
 
+  m_dvChart.Add( 7, m_ceER3 );
+  m_dvChart.Add( 7, m_ceER2 );
+  m_dvChart.Add( 7, m_ceER1 );
+
   m_ceSMA1.SetColour( ou::Colour::Magenta );
   m_ceSMA2.SetColour( ou::Colour::Turquoise );
   m_ceSMA3.SetColour( ou::Colour::GreenYellow );
@@ -89,6 +94,10 @@ Strategy::Strategy(void)
   m_ceSlopeOfSlopeOfSMA2.SetColour( ou::Colour::ForestGreen );
   m_ceOutstandingLong.SetColour( ou::Colour::Blue );
   m_ceOutstandingShort.SetColour( ou::Colour::Red );
+
+  m_ceER1.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceER2.SetColour( ou::Colour::Turquoise );
+  m_ceER3.SetColour( ou::Colour::GreenYellow );
 
   m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
@@ -127,7 +136,7 @@ Strategy::Strategy(void)
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
   m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
-  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
+//  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
   
   m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
   m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -396,6 +405,14 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   m_trades.Append( trade );
   m_barFactory.Add( trade );
 
+  m_er1.Update();
+  m_er2.Update();
+  m_er3.Update();
+
+  m_ceER1.Add( trade.DateTime(), m_er1.Ratio() );
+  m_ceER2.Add( trade.DateTime(), m_er2.Ratio() );
+  m_ceER3.Add( trade.DateTime(), m_er3.Ratio() );
+
   ou::tf::CTrade::price_t price = trade.Trade();
 
   double mid = m_quoteLast.Midpoint();
@@ -426,6 +443,7 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
       //m_ceLongTicks.Add( trade.DateTime(), 0 );
     }
   }
+
 }
 
 void Strategy::HandleSimulationComplete( void ) {

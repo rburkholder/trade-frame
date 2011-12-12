@@ -18,11 +18,26 @@
 #include <TFTrading/Position.h>
 
 class OrdersOutstanding {
-
 public:
+
   typedef ou::tf::COrder::idOrder_t idOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
+
+  enum enumState {
+    EStateOpenWaiting, EStateOpen, EStateProfit, EStateLoss, EStateEven
+  };
+
+  struct structRoundTripStats {
+    enumState eState;
+    pOrder_t pOrderEntry;
+    pOrder_t pOrderExit;
+    double dblTarget;
+    double dblStop;
+    double dblSlope1, dblSlope2, dblSlope3;
+    double dblSlopeSlope1, dblSlopeSlope2;
+    double dblSlopeBollingerOffset;
+  };
 
 protected:
 
@@ -43,9 +58,11 @@ protected:
   mapOrders_t m_mapOrdersToMatch;
 
 public:
+
   OrdersOutstanding( pPosition_t pPosition );
   virtual ~OrdersOutstanding( void ) {};
   void AddOrderFilling( pOrder_t pOrder );  // base order we need to match with closing order
+  void AddOrderFilling( const structRoundTripStats& stats );  // migrate to using this instead
   void CancelAll( void );
 
   // should be protected but doesn't work there
@@ -67,6 +84,9 @@ protected:
   boost::posix_time::time_duration m_durForceRoundTripClose;
   
 private:
+  typedef std::vector<structRoundTripStats> vStats_t;
+  vStats_t m_vStats;
+
   void HandleBaseOrderFilled( const ou::tf::COrder& order );
 };
 
