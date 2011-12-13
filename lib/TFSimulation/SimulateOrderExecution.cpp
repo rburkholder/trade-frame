@@ -141,7 +141,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
     }
     else {
       int i = 1;  // we have a problem as nOrderQuanRemaining won't be updated for the next pass through on partial orders
-      std::runtime_error( "no onorderfill to keep housekeeping in place" );
+      throw std::runtime_error( "no onorderfill to keep housekeeping in place" );
     }
         
     nOrderQuanRemaining -= quanAvail;

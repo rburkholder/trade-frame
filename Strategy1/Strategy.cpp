@@ -82,22 +82,34 @@ Strategy::Strategy(void)
   m_dvChart.Add( 7, m_ceER2 );
   m_dvChart.Add( 7, m_ceER1 );
 
-  m_ceSMA1.SetColour( ou::Colour::Magenta );
+  m_dvChart.Add( 8, m_ceBollinger3Ratio );
+  m_dvChart.Add( 8, m_ceBollinger2Ratio );
+  m_dvChart.Add( 8, m_ceBollinger1Ratio );
+
+  m_ceSMA1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceSMA2.SetColour( ou::Colour::Turquoise );
   m_ceSMA3.SetColour( ou::Colour::GreenYellow );
+
   m_cePLLong.SetColour( ou::Colour::Blue );
   m_cePLShort.SetColour( ou::Colour::Orange );
   m_cePLNet.SetColour( ou::Colour::Green );
-  m_ceSlopeOfSMA1.SetColour( ou::Colour::Magenta );
+
+  m_ceSlopeOfSMA1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceSlopeOfSMA2.SetColour( ou::Colour::Turquoise );
+
   m_ceSlopeOfSlopeOfSMA1.SetColour( ou::Colour::MediumAquamarine );
   m_ceSlopeOfSlopeOfSMA2.SetColour( ou::Colour::ForestGreen );
+
   m_ceOutstandingLong.SetColour( ou::Colour::Blue );
   m_ceOutstandingShort.SetColour( ou::Colour::Red );
 
   m_ceER1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceER2.SetColour( ou::Colour::Turquoise );
   m_ceER3.SetColour( ou::Colour::GreenYellow );
+
+  m_ceBollinger1Ratio.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceBollinger2Ratio.SetColour( ou::Colour::Turquoise );
+  m_ceBollinger3Ratio.SetColour( ou::Colour::GreenYellow );
 
   m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
@@ -109,6 +121,7 @@ Strategy::Strategy(void)
   m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
   m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );
   m_ceBollinger3Offset.SetColour( ou::Colour::GreenYellow );
+
   m_ceSlopeOfBollinger2Offset.SetColour( ou::Colour::DarkMagenta );
 
   //m_ceLongTicks.SetColour( ou::Colour::Blue );
@@ -297,6 +310,26 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_cePLLong.Add( dt, dblPLLong );
     m_cePLShort.Add( dt, dblPLShort );
     m_cePLNet.Add( dt, dblPLLong + dblPLShort );
+
+    double midpoint = quote.Midpoint();
+    double val;
+    val = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );
+    if ( 1.1 < val ) val = 1.1;
+    else 
+      if ( -1.1 > val ) val = -1.1;
+    m_ceBollinger1Ratio.Add( dt, val );
+
+    val = ( midpoint - sma2.MeanY() ) / ( sma2.BBOffset() );
+    if ( 1.1 < val ) val = 1.1;
+    else 
+      if ( -1.1 > val ) val = -1.1;
+    m_ceBollinger2Ratio.Add( dt, val );
+
+    val = ( midpoint - sma3.MeanY() ) / ( sma3.BBOffset() );
+    if ( 1.1 < val ) val = 1.1;
+    else 
+      if ( -1.1 > val ) val = -1.1;
+    m_ceBollinger3Ratio.Add( dt, val );
 
     switch ( m_stateTrade ) {
     case ETradeStart:

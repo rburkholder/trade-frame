@@ -88,6 +88,7 @@ private:
   ou::ChartEntryIndicator m_ceUpperBollinger1;
   ou::ChartEntryIndicator m_ceLowerBollinger1;
   ou::ChartEntryIndicator m_ceBollinger1Offset;
+  ou::ChartEntryIndicator m_ceBollinger1Ratio;
 
   ou::ChartEntryIndicator m_ceSMA2;
   ou::ChartEntryIndicator m_ceSlopeOfSMA2;
@@ -96,11 +97,13 @@ private:
   ou::ChartEntryIndicator m_ceLowerBollinger2;
   ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
+  ou::ChartEntryIndicator m_ceBollinger2Ratio;
 
   ou::ChartEntryIndicator m_ceSMA3;
   ou::ChartEntryIndicator m_ceUpperBollinger3;
   ou::ChartEntryIndicator m_ceLowerBollinger3;
   ou::ChartEntryIndicator m_ceBollinger3Offset;
+  ou::ChartEntryIndicator m_ceBollinger3Ratio;
 
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
