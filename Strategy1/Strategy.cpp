@@ -33,7 +33,7 @@ Strategy::Strategy(void)
   m_sma8( &m_quotes, 7200 ), // 120 min
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
   m_stateTrade( ETradeStart ), m_dtEnd( date( 2011, 11, 9 ), time_duration( 17, 45, 0 ) ),  // put in time start
-  m_nTransitions( 0 ),
+  m_nUpTransitions( 0 ), m_nDnTransitions( 0 ), 
   m_barFactory( 180 ),
   m_dvChart( "Strategy1", "GC" ),
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
@@ -85,6 +85,19 @@ Strategy::Strategy(void)
   m_dvChart.Add( 8, m_ceBollinger3Ratio );
   m_dvChart.Add( 8, m_ceBollinger2Ratio );
   m_dvChart.Add( 8, m_ceBollinger1Ratio );
+
+  m_ceSlopeOfSMA1.SetName( "SlopeOfSMA1" );
+  m_ceSlopeOfSlopeOfSMA1.SetName( "SlopeOfSlopeOfSMA1" );
+
+  m_ceSlopeOfSMA1.SetName( "SlopeOfSMA1" );
+  m_ceSlopeOfSlopeOfSMA2.SetName( "SlopeOfSlopeOfSMA2" );
+  m_ceSlopeOfBollinger2Offset.SetName( "SlopeOfBollinger2Offset" );
+
+  m_cePLNet.SetName( "PL Net" );
+
+  m_ceBollinger1Offset.SetName( "Bollinger1Offset" );
+  m_ceBollinger2Offset.SetName( "Bollinger2Offset" );
+  m_ceBollinger3Offset.SetName( "Bollinger3Offset" );
 
   m_ceSMA1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceSMA2.SetColour( ou::Colour::Turquoise );
@@ -350,17 +363,16 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
             m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
             m_pOrder.reset();
-            m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "a" );
-            ++m_nTransitions;
+            ++m_nUpTransitions;
             m_stateTrade = ETradeWaitShortEntry;
           }
           else { // go short
             m_pOrder = m_pPositionShort->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
             m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
             m_pOrder.reset();
-            m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "a" );
-            ++m_nTransitions;
+            ++m_nDnTransitions;
             m_stateTrade = ETradeWaitLongEntry;
           }
         }
@@ -375,10 +387,10 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrder = m_pPositionLong->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
+          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
           m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
           m_pOrder.reset();
-          m_ceLongs.AddLabel( quote.DateTime(), quote.Ask(), "b" );
-          ++m_nTransitions;
+          ++m_nUpTransitions;
           m_stateTrade = ETradeWaitShortEntry;
         }
       }
@@ -392,10 +404,10 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrdersOutstandingShorts->CancelAll();
           m_pOrder = m_pPositionShort->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
+          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
           m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
           m_pOrder.reset();
-          m_ceShorts.AddLabel( quote.DateTime(), quote.Bid(), "b" );
-          ++m_nTransitions;
+          ++m_nDnTransitions;
           m_stateTrade = ETradeWaitLongEntry;
         }
       }
@@ -414,6 +426,18 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       break;
     }
   }
+}
+
+void Strategy::HandleOrderFilled( const ou::tf::COrder& order ) {
+  switch ( order.GetOrderSide() ) {
+  case ou::tf::OrderSide::Sell:
+    m_ceShorts.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
+    break;
+  case ou::tf::OrderSide::Buy:
+    m_ceLongs.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
+    break;
+  }
+  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 }
 
 void Strategy::HandleFirstQuote( const ou::tf::CQuote& quote ) {
@@ -481,7 +505,8 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 
 void Strategy::HandleSimulationComplete( void ) {
   m_ss.str( "" );
-  m_ss << m_nTransitions << " changes, ";
+  m_ss << m_nUpTransitions << " up changes, ";
+  m_ss << m_nDnTransitions << " dn changes, ";
   m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";
   m_pPositionShort->EmitStatus( m_ss );

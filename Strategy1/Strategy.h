@@ -134,7 +134,8 @@ private:
   OrdersOutstandingShorts* m_pOrdersOutstandingShorts;
 
   ptime m_dtEnd;
-  unsigned int m_nTransitions;
+  unsigned int m_nUpTransitions;
+  unsigned int m_nDnTransitions;
 
   ou::tf::TSSWStatsMidQuote m_sma1;
   ou::tf::TSSWStatsMidQuote m_sma2;
@@ -181,6 +182,8 @@ private:
   void HandleQuote( const ou::tf::CQuote& quote );
   void HandleTrade( const ou::tf::CTrade& trade );
   void HandleSimulationComplete( void );
+
+  void HandleOrderFilled( const ou::tf::COrder& );
 
   void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
   void HandleCommission( const ou::tf::CPosition* pPosition );

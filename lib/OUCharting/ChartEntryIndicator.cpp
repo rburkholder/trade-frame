@@ -43,6 +43,7 @@ void ChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pA
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
     DataSet *pds = ll->getDataSet(0);
     pds->setDataColor( m_eColour );
+    pds->setDataName( GetName().c_str() );
   }
 }
 

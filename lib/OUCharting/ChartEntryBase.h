@@ -53,8 +53,8 @@ public:
 
   ou::Colour::enumColour GetColour( void ) const { return m_eColour; };
   virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
-  void Name( std::string name ) { m_sName = name; };
-  const std::string &Name( void ) const { return m_sName; };
+  void SetName( std::string name ) { m_sName = name; };
+  const std::string &GetName( void ) const { return m_sName; };
   void Add( double price );
   typedef std::vector<double> vdouble_t;
   virtual size_t Size( void ) const { return m_vPrice.size(); };
