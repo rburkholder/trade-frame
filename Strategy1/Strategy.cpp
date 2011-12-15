@@ -344,6 +344,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       if ( -1.1 > val ) val = -1.1;
     m_ceBollinger3Ratio.Add( dt, val );
 
+    typedef OrdersOutstanding::structRoundTrip structRoundTrip;
+
     switch ( m_stateTrade ) {
     case ETradeStart:
       m_stateTrade = ETradeOutOfMarket;
@@ -361,7 +363,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           if ( 0.0 < direction1 ) { // go long
             m_pOrder = m_pPositionLong->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
-            m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
+            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder ) );
             m_pOrder.reset();
             ++m_nUpTransitions;
             m_stateTrade = ETradeWaitShortEntry;
@@ -370,7 +372,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             m_pOrder = m_pPositionShort->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
             m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
+            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder ) );
             m_pOrder.reset();
             ++m_nDnTransitions;
             m_stateTrade = ETradeWaitLongEntry;
@@ -388,7 +390,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrder = m_pPositionLong->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-          m_pOrdersOutstandingLongs->AddOrderFilling( m_pOrder );
+          m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder ) );
           m_pOrder.reset();
           ++m_nUpTransitions;
           m_stateTrade = ETradeWaitShortEntry;
@@ -405,7 +407,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_pOrder = m_pPositionShort->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-          m_pOrdersOutstandingShorts->AddOrderFilling( m_pOrder );
+          m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder ) );
           m_pOrder.reset();
           ++m_nDnTransitions;
           m_stateTrade = ETradeWaitLongEntry;
@@ -413,6 +415,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       }
       break;
     case ETradeCancel:
+          m_pPositionLong->CancelOrders();
+          m_pPositionShort->CancelOrders();
           m_pOrdersOutstandingLongs->CancelAll();
           m_pOrdersOutstandingShorts->CancelAll();
           m_stateTrade = ETradeClose;

@@ -28,41 +28,40 @@ public:
     EStateOpenWaiting, EStateOpen, EStateProfit, EStateLoss, EStateEven
   };
 
-  struct structRoundTripStats {
+  struct structRoundTrip {
     enumState eState;
     pOrder_t pOrderEntry;
     pOrder_t pOrderExit;
-    double dblTarget;
-    double dblStop;
-    double dblSlope1, dblSlope2, dblSlope3;
+    double dblBasis; // average price at which entry order filled
+    double dblTarget; // target exit value
+    double dblStop; // target stop out
+    double dblSlope1, dblSlope2, dblSlope3;  // stats for post analysis
     double dblSlopeSlope1, dblSlopeSlope2;
     double dblSlopeBollingerOffset;
+    structRoundTrip( void ): eState( EStateOpenWaiting ), dblBasis( 0.0 ) {};
+    structRoundTrip( pOrder_t entry )
+      : eState( EStateOpenWaiting ), pOrderEntry( entry ), dblBasis( 0.0 ) {};
+    structRoundTrip( pOrder_t entry, double target, double stop )
+      : eState( EStateOpenWaiting ), pOrderEntry( entry ), dblBasis( 0.0 ),
+        dblTarget( target ), dblStop( stop ) {};
   };
+  typedef boost::shared_ptr<structRoundTrip> pRoundTrip_t;
 
 protected:
 
-  struct structOrderMatching {
-    double dblBasis;
-    pOrder_t pOrderBasis;
-    pOrder_t pOrderClosing;
-    structOrderMatching( void ) : dblBasis( 0 ) {};
-    structOrderMatching( double dblBasis_, pOrder_t pOrderBasis_, pOrder_t pOrderClosing_ ) 
-      : dblBasis( dblBasis_ ), pOrderBasis( pOrderBasis_ ), pOrderClosing( pOrderClosing_ ) {};
-    structOrderMatching( double dblBasis_, pOrder_t pOrderBasis_ ) 
-      : dblBasis( dblBasis_ ), pOrderBasis( pOrderBasis_ ) {};
-  };
-
-  typedef std::multimap<double, structOrderMatching> mapOrders_t;
-  typedef std::pair<double, structOrderMatching> mapOrders_pair_t;
+  typedef std::multimap<double, pRoundTrip_t> mapOrders_t;
+  typedef std::pair<double, pRoundTrip_t> mapOrders_pair_t;
   typedef mapOrders_t::iterator mapOrders_iter_t;
   mapOrders_t m_mapOrdersToMatch;
+
+  typedef std::vector<pRoundTrip_t> vCompletedRoundTrip_t;
+  vCompletedRoundTrip_t m_vCompletedRoundTrip;
 
 public:
 
   OrdersOutstanding( pPosition_t pPosition );
   virtual ~OrdersOutstanding( void ) {};
-  void AddOrderFilling( pOrder_t pOrder );  // base order we need to match with closing order
-  void AddOrderFilling( const structRoundTripStats& stats );  // migrate to using this instead
+  void AddOrderFilling( structRoundTrip* pTrip );  // migrate to using this instead
   void CancelAll( void );
 
   // should be protected but doesn't work there
@@ -75,8 +74,8 @@ protected:
 
   pPosition_t m_pPosition;
 
-  typedef std::map<idOrder_t, pOrder_t> mapOrdersFilling_t;
-  mapOrdersFilling_t m_mapBaseOrdersFilling;
+  typedef std::map<idOrder_t, pRoundTrip_t> mapOrdersFilling_t;
+  mapOrdersFilling_t m_mapEntryOrdersFilling;
 
   boost::posix_time::time_duration m_durRoundTripTime;
   unsigned int m_cntRoundTrips;
@@ -84,10 +83,9 @@ protected:
   boost::posix_time::time_duration m_durForceRoundTripClose;
   
 private:
-  typedef std::vector<structRoundTripStats> vStats_t;
-  vStats_t m_vStats;
 
   void HandleBaseOrderFilled( const ou::tf::COrder& order );
+
 };
 
 class OrdersOutstandingLongs: public OrdersOutstanding {

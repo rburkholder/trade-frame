@@ -21,33 +21,34 @@ OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) :
 {
 }
 
-void OrdersOutstanding::AddOrderFilling( pOrder_t pOrder ) {
-  m_mapBaseOrdersFilling[ pOrder->GetOrderId() ] = pOrder;
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
-  if ( 0 == pOrder->GetQuanRemaining() ) {
-    HandleBaseOrderFilled( *pOrder.get() );
+void OrdersOutstanding::AddOrderFilling( structRoundTrip* pTrip ) {
+  ou::tf::COrder& order( *pTrip->pOrderEntry.get() );
+  ou::tf::COrder::idOrder_t idOrder = order.GetOrderId();
+  assert( m_mapEntryOrdersFilling.end() == m_mapEntryOrdersFilling.find( idOrder ) );
+  m_mapEntryOrdersFilling[ idOrder ] = pRoundTrip_t( pTrip );
+  order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );  // yes, this belongs here as it will be unconditionally removed later
+  if ( 0 == order.GetQuanRemaining() ) {
+    HandleBaseOrderFilled( order );
   }
-}
-
-void OrdersOutstanding::AddOrderFilling( const structRoundTripStats& stats ) {
 }
 
 void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
   idOrder_t id = order.GetOrderId();
-  mapOrdersFilling_t::iterator iter = m_mapBaseOrdersFilling.find( id );
-  if ( m_mapBaseOrdersFilling.end() == iter ) {
+  mapOrdersFilling_t::iterator iter = m_mapEntryOrdersFilling.find( id );
+  if ( m_mapEntryOrdersFilling.end() == iter ) {
     throw std::runtime_error( "can't find order" );
   }
-  iter->second->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
-  double dblBasis = iter->second->GetAverageFillPrice();
-  m_mapOrdersToMatch.insert( mapOrders_pair_t( dblBasis, structOrderMatching( dblBasis, iter->second ) ) );
-  m_mapBaseOrdersFilling.erase( iter );
+  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
+  double dblBasis = order.GetAverageFillPrice();
+  iter->second->dblBasis = dblBasis;
+  m_mapOrdersToMatch.insert( mapOrders_pair_t( dblBasis, iter->second ) );
+  m_mapEntryOrdersFilling.erase( iter ); 
 }
 
 void OrdersOutstanding::CancelAll( void ) {
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-    if ( 0 != iter->second.pOrderClosing.use_count() ) {
-      m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
+    if ( 0 != iter->second->pOrderExit.use_count() ) {
+      m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
 //      iter->second.pOrderClosing.reset();
     }
   }
@@ -62,16 +63,16 @@ void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& orde
   ou::tf::COrder::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
     // need to handle partial fill orders, do market order or manage partial fills based upon position?
-    if ( 0 == iter->second.pOrderClosing.get() ) {  // map may have multiple orders, some of which don't have a matching order at the present
+    if ( 0 == iter->second->pOrderExit.get() ) {  // map may have multiple orders, some of which don't have a matching order at the present
 //      assert( false );
     }
     else {
-      if ( id == iter->second.pOrderClosing->GetOrderId() ) {
-        pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-        pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-        pOrderClosing->OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+      ou::tf::COrder& order( *iter->second->pOrderExit.get() );
+      if ( id == order.GetOrderId() ) {
+        order.OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+        order.OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         //m_mapOrdersToMatch.erase( iter );
-        iter->second.pOrderClosing.reset();
+        iter->second->pOrderExit.reset();
         break;
       }
     }
@@ -82,16 +83,16 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
   // use this to check when order filled before cancellation
   ou::tf::COrder::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-    if ( 0 == iter->second.pOrderClosing.get() ) {  // we've already cancelled
+    if ( 0 == iter->second->pOrderExit.get() ) {  // we've already cancelled
     }
     else {
-      if ( id == iter->second.pOrderClosing->GetOrderId() ) {
-        pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-        m_durRoundTripTime += pOrderClosing->GetDateTimeOrderFilled() - iter->second.pOrderBasis->GetDateTimeOrderFilled();
+      ou::tf::COrder& order( *iter->second->pOrderExit.get() );
+      if ( id == order.GetOrderId() ) {
+        m_durRoundTripTime += order.GetDateTimeOrderFilled() - order.GetDateTimeOrderFilled();
         ++m_cntRoundTrips;
-        pOrderClosing->OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-        pOrderClosing->OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
-        m_mapOrdersToMatch.erase( iter );
+        order.OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+        order.OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+        m_mapOrdersToMatch.erase( iter ); // move to vector instead for post processing
         break;
       }
     }
@@ -103,22 +104,23 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( 0.0 != ask ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first >= ask ) { // price is outside of profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) { 
+        if ( 0 == iter->second->pOrderExit.use_count() ) { 
         }
         else { // cancel existing order, but only do once, so look at status
-          m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
+          m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
           //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
         }
       }
       else { // price is inside profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) { // create a limit order to attempt profit
+        if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.10 );
+          pOrder_t& pOrderExit( iter->second->pOrderExit );
+          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.10 );
           //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
-          pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-          pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+          ou::tf::COrder& order( *pOrderExit.get() );
+          order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+          order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         }
         else { // do nothing
         }
@@ -132,22 +134,23 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( 0.0 != bid ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first <= bid ) { // price is outside of profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) {
+        if ( 0 == iter->second->pOrderExit.use_count() ) {
         }
         else { // cancel existing order, but only do once, so look at status
-          m_pPosition->CancelOrder( iter->second.pOrderClosing->GetOrderId() );  // what happens if filled during cancel?
+          m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
           //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
         }
       }
       else { // price is inside profitable range
-        if ( 0 == iter->second.pOrderClosing.use_count() ) { // create a limit order to attempt profit
+        if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          pOrder_t& pOrderClosing( iter->second.pOrderClosing );
-          pOrderClosing = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.10 );
+          pOrder_t& pOrderExit( iter->second->pOrderExit );
+          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.10 );
           //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
-          pOrderClosing->OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-          pOrderClosing->OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+          ou::tf::COrder& order( *pOrderExit.get() );
+          order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+          order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
         }
         else { // do nothing
         }
