@@ -13,11 +13,15 @@
 
 #include "StdAfx.h"
 
+#include <math.h>
+
 #include "OrdersOutstanding.h"
 
 OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) : 
   m_pPosition( pPosition ), m_cntRoundTrips( 0 ),
-  m_durRoundTripTime( 0, 0, 0 ), m_durForceRoundTripClose( 0, 60, 0 )
+  m_durRoundTripTime( 0, 0, 0 ), 
+  m_durForceRoundTripClose( 0, 60, 0 ),  // try something from 5 minutes to 10 minutes
+  m_durOrderOpenTimeOut( 0, 0, 30 )
 {
 }
 
@@ -27,9 +31,24 @@ void OrdersOutstanding::AddOrderFilling( structRoundTrip* pTrip ) {
   assert( m_mapEntryOrdersFilling.end() == m_mapEntryOrdersFilling.find( idOrder ) );
   m_mapEntryOrdersFilling[ idOrder ] = pRoundTrip_t( pTrip );
   order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );  // yes, this belongs here as it will be unconditionally removed later
+  order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
   if ( 0 == order.GetQuanRemaining() ) {
     HandleBaseOrderFilled( order );
   }
+}
+
+void OrdersOutstanding::HandleBaseOrderCancelled( const ou::tf::COrder& order ) {
+  idOrder_t id = order.GetOrderId();
+  mapOrdersFilling_t::iterator iter = m_mapEntryOrdersFilling.find( id );
+  if ( m_mapEntryOrdersFilling.end() == iter ) {
+    throw std::runtime_error( "can't find order" );
+  }
+  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
+  const_cast<ou::tf::COrder&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
+
+  iter->second->eState = EStateCancelled;
+
+  m_mapEntryOrdersFilling.erase( iter ); 
 }
 
 void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
@@ -39,10 +58,27 @@ void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
     throw std::runtime_error( "can't find order" );
   }
   const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
+  const_cast<ou::tf::COrder&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
+
+  iter->second->eState = EStateOpen;
+
   double dblBasis = order.GetAverageFillPrice();
   iter->second->dblBasis = dblBasis;
   m_mapOrdersToMatch.insert( mapOrders_pair_t( dblBasis, iter->second ) );
+
   m_mapEntryOrdersFilling.erase( iter ); 
+}
+
+void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) {
+  for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
+    if ( EStateOpenWaitingFill == iter->second->eState ) {
+      if ( iter->second->pOrderEntry->GetDateTimeOrderSubmitted() + m_durOrderOpenTimeOut < quote.DateTime() ) {
+        // close out order after time out
+        m_pPosition->CancelOrder( iter->second->pOrderEntry->GetOrderId() );
+        iter->second->eState = EStateOpenCancelling;
+      }
+    }
+  }
 }
 
 void OrdersOutstanding::CancelAll( void ) {
@@ -92,7 +128,8 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
         ++m_cntRoundTrips;
         order.OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
         order.OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
-        m_mapOrdersToMatch.erase( iter ); // move to vector instead for post processing
+        m_vCompletedRoundTrips.push_back( iter->second );
+        m_mapOrdersToMatch.erase( iter );
         break;
       }
     }
@@ -100,15 +137,27 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
 }
 
 void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
+  CheckBaseOrder( quote );
   double ask = quote.Ask();
   if ( 0.0 != ask ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first >= ask ) { // price is outside of profitable range
         if ( 0 == iter->second->pOrderExit.use_count() ) { 
+          if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
+            // close out round trip
+            pOrder_t& pOrderExit( iter->second->pOrderExit );
+            pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+            ou::tf::COrder& order( *pOrderExit.get() );
+            order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+            order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+            iter->second->eState = EStateClosing;
+          }
         }
         else { // cancel existing order, but only do once, so look at status
-          m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
-          //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          if ( EStateClosing != iter->second->eState ) {
+              m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
+              //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          }
         }
       }
       else { // price is inside profitable range
@@ -116,8 +165,7 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderExit( iter->second->pOrderExit );
-          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.10 );
-          //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
+          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.20 );
           ou::tf::COrder& order( *pOrderExit.get() );
           order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
           order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
@@ -130,15 +178,27 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
 }
 
 void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
+  CheckBaseOrder( quote );
   double bid = quote.Bid();
   if ( 0.0 != bid ) {
     for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
       if ( iter->first <= bid ) { // price is outside of profitable range
         if ( 0 == iter->second->pOrderExit.use_count() ) {
+          if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
+            // close out round trip
+            pOrder_t& pOrderExit( iter->second->pOrderExit );
+            pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+            ou::tf::COrder& order( *pOrderExit.get() );
+            order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+            order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+            iter->second->eState = EStateClosing;
+          }
         }
         else { // cancel existing order, but only do once, so look at status
-          m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
-          //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          if ( EStateClosing != iter->second->eState ) {
+            m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
+            //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          }
         }
       }
       else { // price is inside profitable range
@@ -146,8 +206,7 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
           pOrder_t& pOrderExit( iter->second->pOrderExit );
-          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.10 );
-          //ou::tf::COrder::idOrder_t id = pOrderClosing->GetOrderId();
+          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.20 );
           ou::tf::COrder& order( *pOrderExit.get() );
           order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
           order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
@@ -159,3 +218,30 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
+void OrdersOutstanding::PostMortemReport( void ) {
+  double dif( 0.0 );
+  long td( 0 );
+  std::vector<long> vtd;
+  for ( vCompletedRoundTrip_citer_t iter = m_vCompletedRoundTrips.begin(); m_vCompletedRoundTrips.end() != iter; ++iter ) {
+    dif += iter->get()->pOrderExit->GetAverageFillPrice() - iter->get()->pOrderEntry->GetAverageFillPrice();
+    time_duration t( iter->get()->pOrderExit->GetDateTimeOrderFilled() - iter->get()->pOrderEntry->GetDateTimeOrderFilled() );
+    long lt = t.total_seconds();
+    td += lt;
+    vtd.push_back( lt );
+  }
+  if ( 0 != m_vCompletedRoundTrips.size() ) {
+    long mn( td / m_vCompletedRoundTrips.size() );
+    long long sum( 0 );
+    for ( std::vector<long>::iterator iter = vtd.begin(); vtd.end() != iter; ++iter ) {
+      long num( mn - *iter );
+      sum += ( num * num );
+    }
+    double sq = sqrt( (double) sum );
+
+    std::stringstream ss;
+    ss << "round trips=" << m_vCompletedRoundTrips.size() 
+      << ", avg dur=" << mn << ", stddev=" << sq / ( m_vCompletedRoundTrips.size() - 1 )
+      << ", avg dif=" << dif / m_vCompletedRoundTrips.size() 
+      << std::endl;
+  }
+}

@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <algorithm>
+
 #include "PivotGroup.h"
 
 namespace ou { // One Unified
@@ -72,11 +74,11 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
 
   if ( pBars->Size() >= 3 ) {
     pBar = pBars->Ago( 1 );
-    day3hi = max( day3hi, pBar->High() );
-    day3lo = min( day3lo, pBar->Low() );
+    day3hi = std::max<double>( day3hi, pBar->High() );
+    day3lo = std::min<double>( day3lo, pBar->Low() );
     pBar = pBars->Ago( 2 );
-    day3hi = max( day3hi, pBar->High() );
-    day3lo = min( day3lo, pBar->Low() );
+    day3hi = std::max<double>( day3hi, pBar->High() );
+    day3lo = std::min<double>( day3lo, pBar->Low() );
     CPivotSet Pivot3Day( "pv3Dy", day3hi, day3lo, day3cl );
     AddToMap( Pivot3Day );
   }

@@ -13,6 +13,9 @@
 
 #pragma once
 
+// Bollinger page 91 suggests 0.17 * sqrt( price ) is a good filter width
+// could set this number on each new peak
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -23,22 +26,26 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CZigZag {
+class ZigZag{
 public:
 
-  CZigZag(double FilterWidth);
-  ~CZigZag(void);
+  ZigZag( void );
+  ZigZag(double FilterWidth);
+  ~ZigZag(void);
+
+  void SetFilterWidth( double width ) { m_dblFilterWidth = width; };
+  double GetFilterWidth( void ) const { return m_dblFilterWidth; };
 
   void Check( ptime dt, double val );
 
   enum EDirection { Init, Start, Down, Up };
 
-  typedef FastDelegate4<CZigZag *, ptime, double, EDirection> OnPeakFoundHandler;
+  typedef FastDelegate4<ZigZag*, ptime, double, EDirection> OnPeakFoundHandler;
   void SetOnPeakFound( OnPeakFoundHandler function ) {
     OnPeakFound = function; 
   }
 
-  typedef FastDelegate1<CZigZag *> OnDecisionPointFoundHandler;
+  typedef FastDelegate1<ZigZag*> OnDecisionPointFoundHandler;
   void SetUpDecisionPointFound( OnDecisionPointFoundHandler function ) {
     UpDecisionPointFound = function;
   }
@@ -48,7 +55,7 @@ public:
 
 protected:
   double m_dblFilterWidth; // pt1 becomes new anchor when abs(pt0-pt1)>delta
-  int cntNewUp, cntNewDown, cntTurns;
+  int m_cntNewUp, m_cntNewDown, m_cntTurns;
   EDirection m_PatternState;
 
 private:

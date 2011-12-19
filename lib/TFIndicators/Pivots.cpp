@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <algorithm>
+
 #include "Pivots.h"
 
 namespace ou { // One Unified
@@ -63,8 +65,8 @@ CPivotSet::CPivotSet( const std::string &sName, CBars *bars ) {
     cl = bar->Close();
     for ( unsigned int i = 1; i < cnt; i++ ) {
       bar = bars->At( i );
-      hi = max( hi, bar->High() );
-      lo = min( lo, bar->Low() );
+      hi = std::max<double>( hi, bar->High() );
+      lo = std::min<double>( lo, bar->Low() );
       cl = bar->Close();
     }
   }

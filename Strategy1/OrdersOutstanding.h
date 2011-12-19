@@ -25,7 +25,7 @@ public:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
 
   enum enumState {
-    EStateOpenWaiting, EStateOpen, EStateProfit, EStateLoss, EStateEven
+    EStateOpenWaitingFill, EStateOpenCancelling, EStateOpen, EStateProfit, EStateLoss, EStateEven, EStateClosing, EStateCancelled
   };
 
   struct structRoundTrip {
@@ -38,11 +38,11 @@ public:
     double dblSlope1, dblSlope2, dblSlope3;  // stats for post analysis
     double dblSlopeSlope1, dblSlopeSlope2;
     double dblSlopeBollingerOffset;
-    structRoundTrip( void ): eState( EStateOpenWaiting ), dblBasis( 0.0 ) {};
+    structRoundTrip( void ): eState( EStateOpenWaitingFill ), dblBasis( 0.0 ) {};
     structRoundTrip( pOrder_t entry )
-      : eState( EStateOpenWaiting ), pOrderEntry( entry ), dblBasis( 0.0 ) {};
+      : eState( EStateOpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ) {};
     structRoundTrip( pOrder_t entry, double target, double stop )
-      : eState( EStateOpenWaiting ), pOrderEntry( entry ), dblBasis( 0.0 ),
+      : eState( EStateOpenWaitingFill ), pOrderEntry( entry ), dblBasis( 0.0 ),
         dblTarget( target ), dblStop( stop ) {};
   };
   typedef boost::shared_ptr<structRoundTrip> pRoundTrip_t;
@@ -55,7 +55,8 @@ protected:
   mapOrders_t m_mapOrdersToMatch;
 
   typedef std::vector<pRoundTrip_t> vCompletedRoundTrip_t;
-  vCompletedRoundTrip_t m_vCompletedRoundTrip;
+  typedef vCompletedRoundTrip_t::const_iterator vCompletedRoundTrip_citer_t;
+  vCompletedRoundTrip_t m_vCompletedRoundTrips;
 
 public:
 
@@ -63,6 +64,7 @@ public:
   virtual ~OrdersOutstanding( void ) {};
   void AddOrderFilling( structRoundTrip* pTrip );  // migrate to using this instead
   void CancelAll( void );
+  void PostMortemReport( void );
 
   // should be protected but doesn't work there
   void HandleMatchingOrderFilled( const ou::tf::COrder& order );
@@ -75,16 +77,22 @@ protected:
   pPosition_t m_pPosition;
 
   typedef std::map<idOrder_t, pRoundTrip_t> mapOrdersFilling_t;
+  typedef mapOrdersFilling_t::iterator mapOrdersFilling_iter_t;
   mapOrdersFilling_t m_mapEntryOrdersFilling;
 
   boost::posix_time::time_duration m_durRoundTripTime;
   unsigned int m_cntRoundTrips;
 
   boost::posix_time::time_duration m_durForceRoundTripClose;
+
+  void CheckBaseOrder( const ou::tf::CQuote& quote );
   
 private:
 
+  time_duration m_durOrderOpenTimeOut;
+
   void HandleBaseOrderFilled( const ou::tf::COrder& order );
+  void HandleBaseOrderCancelled( const ou::tf::COrder& order );
 
 };
 

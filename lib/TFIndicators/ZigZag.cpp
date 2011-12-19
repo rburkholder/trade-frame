@@ -18,18 +18,26 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CZigZag::CZigZag( double FilterWidth ) : 
-  m_dblFilterWidth( FilterWidth ), 
+ZigZag::ZigZag( void ) : 
+  m_dblFilterWidth( 1.0 ), 
   m_PatternState( EDirection::Init ),
   m_dblPatternPt0( 0 ), m_dblPatternPt1( 0 ),
-  cntNewUp( 0 ), cntNewDown( 0 ), cntTurns( 0 )
+  m_cntNewUp( 0 ), m_cntNewDown( 0 ), m_cntTurns( 0 )
   {
 }
 
-CZigZag::~CZigZag(void) {
+ZigZag::ZigZag( double FilterWidth ) : 
+  m_dblFilterWidth( FilterWidth ), 
+  m_PatternState( EDirection::Init ),
+  m_dblPatternPt0( 0 ), m_dblPatternPt1( 0 ),
+  m_cntNewUp( 0 ), m_cntNewDown( 0 ), m_cntTurns( 0 )
+  {
 }
 
-void CZigZag::Check(boost::posix_time::ptime dt, double val) {
+ZigZag::~ZigZag(void) {
+}
+
+void ZigZag::Check(boost::posix_time::ptime dt, double val) {
   double dif;
 
   switch ( m_PatternState ) {
@@ -38,12 +46,12 @@ void CZigZag::Check(boost::posix_time::ptime dt, double val) {
       if ( val > m_dblPatternPt1 ) {
         m_dblPatternPt1 = val;
         m_dtPatternPt1 = dt;
-        ++cntNewUp;
+        ++m_cntNewUp;
         if ( NULL != UpDecisionPointFound ) UpDecisionPointFound( this );
       }
       dif = m_dblPatternPt1 - m_dblPatternPt0;
       if ( dif >= m_dblFilterWidth ) {
-        ++cntTurns;
+        ++m_cntTurns;
         if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
         if ( m_dblPatternPt1 > m_dblPatternPt0 ) m_PatternState = EDirection::Down;
       }
@@ -53,12 +61,12 @@ void CZigZag::Check(boost::posix_time::ptime dt, double val) {
       if ( val < m_dblPatternPt1 ) {
         m_dblPatternPt1 = val;
         m_dtPatternPt1 = dt;
-        ++cntNewDown;
+        ++m_cntNewDown;
         if ( NULL != DnDecisionPointFound ) DnDecisionPointFound( this );
       }
       dif = m_dblPatternPt0 - m_dblPatternPt1;
       if ( dif >= m_dblFilterWidth ) {
-        ++cntTurns;
+        ++m_cntTurns;
         if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
         if ( m_dblPatternPt1 < m_dblPatternPt0 ) m_PatternState = EDirection::Up;
       }

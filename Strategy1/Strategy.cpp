@@ -27,7 +27,7 @@ Strategy::Strategy(void)
   m_sma2( &m_quotes,  120 ), //   2 min
   m_sma3( &m_quotes,  180 ), //   3 min
   m_sma4( &m_quotes,  300 ), //   5 min
-  m_sma5( &m_quotes,  600 ), //  10 min
+  m_sma5( &m_quotes, 1200 ), //  20 min
   m_sma6( &m_quotes, 1800 ), //  30 min
   m_sma7( &m_quotes, 3600 ), //  60 min
   m_sma8( &m_quotes, 7200 ), // 120 min
@@ -42,11 +42,13 @@ Strategy::Strategy(void)
   m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 360 ),
   m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
   m_tsswSpreads( &m_spreads, 120 ),
-  m_er1( &m_trades, 10 ), m_er2( &m_trades, 30 ), m_er3( &m_trades, 90 )
+  m_er1( &m_trades, 10 ), m_er2( &m_trades, 30 ), m_er3( &m_trades, 90 ),
+  m_bFirstTrade( true )
 {
 
   ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
+  m_dvChart.Add( 0, m_ceZigZag );
   m_dvChart.Add( 0, m_ceShorts );
   m_dvChart.Add( 0, m_ceLongs );
   m_dvChart.Add( 0, m_ceBars );
@@ -137,8 +139,14 @@ Strategy::Strategy(void)
 
   m_ceSlopeOfBollinger2Offset.SetColour( ou::Colour::DarkMagenta );
 
+  m_ceZigZag.SetColour( ou::Colour::DarkBlue );
+
   //m_ceLongTicks.SetColour( ou::Colour::Blue );
   //m_ceShortTicks.SetColour( ou::Colour::Red );
+
+  m_zigzagPrice.SetOnPeakFound( MakeDelegate( this, &Strategy::HandleZigZagPeak ) );
+  m_zigzagPrice.SetUpDecisionPointFound( MakeDelegate( this, &Strategy::HandleZigZagUpDp ) );
+  m_zigzagPrice.SetDnDecisionPointFound( MakeDelegate( this, &Strategy::HandleZigZagDnDp ) );
 
   m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
 
@@ -249,7 +257,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   m_tsswSlopeOfSlopeOfSMA1.Update();
 
   // medium speed moving average
-  ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
+  ou::tf::TSSWStatsMidQuote& sma2( m_sma5 );
   sma2.Update();
 
   m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
@@ -280,7 +288,11 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     unsigned int dif = ( cntLongs > cntShorts ) ? cntLongs - cntShorts : cntShorts - cntLongs;
 
     m_ceSMA1.Add( dt, sma1.MeanY() );
-    m_ceSlopeOfSMA1.Add( dt, sma1.Slope() );
+
+    double slope1 = sma1.Slope();
+    if ( 0.04 < slope1 ) { slope1 = 0.04; } else { if ( -0.04 > slope1 ) slope1 = -0.04; };
+
+    m_ceSlopeOfSMA1.Add( dt, slope1 );
     double direction1 = m_tsswSlopeOfSlopeOfSMA1.Slope();
     if ( ( 0.00008 < direction1 ) || ( -0.00008 > direction1 ) ) {
       direction1 = 0.00008;
@@ -325,85 +337,125 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_cePLNet.Add( dt, dblPLLong + dblPLShort );
 
     double midpoint = quote.Midpoint();
-    double val;
-    val = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );
-    if ( 1.1 < val ) val = 1.1;
+    double val1, val2, val3;
+    val1 = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );
+    if ( 1.1 < val1 ) val1 = 1.1;
     else 
-      if ( -1.1 > val ) val = -1.1;
-    m_ceBollinger1Ratio.Add( dt, val );
+      if ( -1.1 > val1 ) val1 = -1.1;
+    m_ceBollinger1Ratio.Add( dt, val1 );
 
-    val = ( midpoint - sma2.MeanY() ) / ( sma2.BBOffset() );
-    if ( 1.1 < val ) val = 1.1;
+    val2 = ( midpoint - sma2.MeanY() ) / ( sma2.BBOffset() );
+    if ( 1.1 < val2 ) val2 = 1.1;
     else 
-      if ( -1.1 > val ) val = -1.1;
-    m_ceBollinger2Ratio.Add( dt, val );
+      if ( -1.1 > val2 ) val2 = -1.1;
+    m_ceBollinger2Ratio.Add( dt, val2 );
 
-    val = ( midpoint - sma3.MeanY() ) / ( sma3.BBOffset() );
-    if ( 1.1 < val ) val = 1.1;
+    val3 = ( midpoint - sma3.MeanY() ) / ( sma3.BBOffset() );
+    if ( 1.1 < val3 ) val3 = 1.1;
     else 
-      if ( -1.1 > val ) val = -1.1;
-    m_ceBollinger3Ratio.Add( dt, val );
+      if ( -1.1 > val3 ) val3 = -1.1;
+    m_ceBollinger3Ratio.Add( dt, val3 );
 
     typedef OrdersOutstanding::structRoundTrip structRoundTrip;
 
+    if ( dt > m_dtEnd ) {
+      m_stateTrade = ETradeCancel;
+    }
+
     switch ( m_stateTrade ) {
     case ETradeStart:
-      m_stateTrade = ETradeOutOfMarket;
+      //m_stateTrade = ETradeOutOfMarket;
+      //m_stateTrade = ETradeWaitForBollingerInside;
+      m_stateTrade = ETradeWaitForBollingerToFall;
+      //m_stateTrade = ETradeWaitForUp;
+      break;
+    case ETradeWaitForUp:
+      if ( 0.0 < direction1 ) {
+        m_stateTrade = ETradeWaitForDn;
+        if ( 0.0 < dblBollingerSlope ) {
+          if ( ( 0.0 < slope2 ) && ( midpoint > sma2.MeanY() ) && ( 0 == cntLongs ) ) {
+            m_pOrder = m_pPositionLong->
+              PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.10 ) );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder, sma1.MeanY(), midpoint + 0.2 ) );
+            m_pOrder.reset();
+            ++m_nUpTransitions;
+          }
+        }
+      }
+      break;
+    case ETradeWaitForDn:
+      if ( 0.0 > direction1 ) {
+        m_stateTrade = ETradeWaitForUp;
+        if ( 0.0 < dblBollingerSlope ) {
+          if ( ( 0.0 > slope2 ) && ( midpoint < sma2.MeanY() ) && ( 0 == cntShorts ) ) {
+            m_pOrder = m_pPositionShort->
+              PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.10 ) );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder, sma1.MeanY(), midpoint - 0.2 ) );
+            m_pOrder.reset();
+            ++m_nDnTransitions;
+          }
+        }
+      }
+      break;
+    case ETradeWaitForBollingerToRise:
+      if ( 0.0 < dblBollingerSlope ) {
+        m_stateTrade = ETradeWaitForBollingerToFall;
+      }
+      break;
+    case ETradeWaitForBollingerToFall:
+      if ( 0.0 > dblBollingerSlope ) {
+        //m_stateTrade = ETradeWaitForBollingerToRise;
+        m_stateTrade = ETradeWaitForUp;
+      }
+      break;
+    case ETradeWaitForBollingerOutside:
+      if ( 1.0 < val1 ) { // high side
+        if ( ( 0.0 > direction1 ) && ( 0.0 > val2 ) && ( 0.0 > val3 ) ) {
+          m_pOrder = m_pPositionShort->
+            PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.10 ) );
+          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+          m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder, sma1.MeanY(), midpoint + 0.2 ) );
+          m_pOrder.reset();
+          ++m_nDnTransitions;
+          m_stateTrade = ETradeWaitForBollingerInside;
+        }
+      }
+      else {
+        if ( -1.0 > val1 ) { // low side
+          if ( ( 0.0 <  direction1 ) && ( 0.0 < val2 ) && ( 0.0 < val3 ) ) {
+            m_pOrder = m_pPositionLong->
+              PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.10 ) );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder, sma1.MeanY(), midpoint - 0.2 ) );
+            m_pOrder.reset();
+            ++m_nUpTransitions;
+            m_stateTrade = ETradeWaitForBollingerInside;
+          }
+        }
+      }
+      break;
+    case ETradeWaitForBollingerInside:
+      if ( ( 1.0 >= val1 ) && ( val1 >= -1.0 ) ) {
+        m_stateTrade = ETradeWaitForBollingerOutside;
+      }
       break;
     case ETradeOutOfMarket:
       //if ( m_pPositionLong->OrdersPending() ) {
-      if ( dt > m_dtEnd ) {
-        m_stateTrade = ETradeCancel;
+      if ( 0.0 == direction1 ) {
+        // don't do anything
       }
-      else {
-        if ( 0.0 == direction1 ) {
-          // don't do anything
-        }
-        else { // ** need to put in stop price into structure, use a bollinger band
-          if ( 0.0 < direction1 ) { // go long
-            m_pOrder = m_pPositionLong->
-              PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
-            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder ) );
-            m_pOrder.reset();
-            ++m_nUpTransitions;
-            m_stateTrade = ETradeWaitShortEntry;
-          }
-          else { // go short
-            m_pOrder = m_pPositionShort->
-              PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
-            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder ) );
-            m_pOrder.reset();
-            ++m_nDnTransitions;
-            m_stateTrade = ETradeWaitLongEntry;
-          }
-        }
-      }
-      break;
-    case ETradeWaitLongEntry:
-      if ( dt > m_dtEnd ) {
-        m_stateTrade = ETradeCancel;
-      }
-      else {
-        if ( 0.0 < direction1 ) {
-          m_pOrdersOutstandingLongs->CancelAll();
+      else { // ** need to put in stop price into structure, use a bollinger band
+        if ( 0.0 < direction1 ) { // go long
           m_pOrder = m_pPositionLong->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
-          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
           m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder ) );
           m_pOrder.reset();
           ++m_nUpTransitions;
           m_stateTrade = ETradeWaitShortEntry;
         }
-      }
-      break;
-    case ETradeWaitShortEntry:
-      if ( dt > m_dtEnd ) {
-        m_stateTrade = ETradeCancel;
-      }
-      else {
-        if ( 0.0 > direction1 ) {
-          m_pOrdersOutstandingShorts->CancelAll();
+        else { // go short
           m_pOrder = m_pPositionShort->
             PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -412,6 +464,30 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           ++m_nDnTransitions;
           m_stateTrade = ETradeWaitLongEntry;
         }
+      }
+      break;
+    case ETradeWaitLongEntry:
+      if ( 0.0 < direction1 ) {
+        m_pOrdersOutstandingLongs->CancelAll();
+        m_pOrder = m_pPositionLong->
+          PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.1 ) );
+        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+        m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder ) );
+        m_pOrder.reset();
+        ++m_nUpTransitions;
+        m_stateTrade = ETradeWaitShortEntry;
+      }
+      break;
+    case ETradeWaitShortEntry:
+      if ( 0.0 > direction1 ) {
+        m_pOrdersOutstandingShorts->CancelAll();
+        m_pOrder = m_pPositionShort->
+          PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.1 ) );
+        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+        m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder ) );
+        m_pOrder.reset();
+        ++m_nDnTransitions;
+        m_stateTrade = ETradeWaitLongEntry;
       }
       break;
     case ETradeCancel:
@@ -463,6 +539,12 @@ void Strategy::HandleFirstTrade( const ou::tf::CTrade& trade ) {
 
 void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 
+  if ( m_bFirstTrade ) {
+    m_bFirstTrade = false;
+    //m_zigzagPrice.SetFilterWidth( 0.17 * sqrt( trade.Trade() ) );
+    m_zigzagPrice.SetFilterWidth( 4.0 );
+  }
+
   m_trades.Append( trade );
   m_barFactory.Add( trade );
 
@@ -475,6 +557,8 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   m_ceER3.Add( trade.DateTime(), m_er3.Ratio() );
 
   ou::tf::CTrade::price_t price = trade.Trade();
+
+  m_zigzagPrice.Check( trade.DateTime(), price );
 
   double mid = m_quoteLast.Midpoint();
   if ( price == mid ) {
@@ -508,6 +592,8 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 }
 
 void Strategy::HandleSimulationComplete( void ) {
+  m_pOrdersOutstandingLongs->PostMortemReport();
+  m_pOrdersOutstandingShorts->PostMortemReport();
   m_ss.str( "" );
   m_ss << m_nUpTransitions << " up changes, ";
   m_ss << m_nDnTransitions << " dn changes, ";
@@ -538,5 +624,16 @@ void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
 void Strategy::HandleBarCompletion( const ou::tf::CBar& bar ) {
   m_ceBars.AddBar( bar );
   m_ceVolume.Add( bar.DateTime(), bar.Volume() );
+}
+
+void Strategy::HandleZigZagPeak( ou::tf::ZigZag*, ptime dt, double price, ou::tf::ZigZag::EDirection ) {
+  m_ceZigZag.Add( dt, price );
+  //m_zigzagPrice.SetFilterWidth( 0.17 * sqrt( price ) );
+}
+
+void Strategy::HandleZigZagUpDp( ou::tf::ZigZag* ) {
+}
+
+void Strategy::HandleZigZagDnDp( ou::tf::ZigZag* ) {
 }
 

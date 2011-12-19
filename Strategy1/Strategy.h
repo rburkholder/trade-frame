@@ -21,6 +21,7 @@
 
 #include <TFIndicators/TSSWStats.h>
 #include <TFIndicators/TSSWEfficiencyRatio.h>
+#include <TFIndicators/ZigZag.h>
 
 #include <TFSimulation/SimulationProvider.h>
 
@@ -50,8 +51,13 @@ public:
 protected:
 private:
 
+  bool m_bFirstTrade;
+
   enum stateTrade {
-    ETradeStart, ETradeOutOfMarket, ETradeWaitLongEntry, ETradeWaitShortEntry, ETradeCancel, ETradeClose, ETradeDone
+    ETradeStart, ETradeOutOfMarket, ETradeWaitLongEntry, ETradeWaitShortEntry, ETradeCancel, ETradeClose, ETradeDone,
+    ETradeWaitForBollingerOutside, ETradeWaitForBollingerInside,
+    ETradeWaitForBollingerToRise, ETradeWaitForBollingerToFall,
+    ETradeWaitForUp, ETradeWaitForDn
   } m_stateTrade;
 
   std::stringstream m_ss;
@@ -117,6 +123,8 @@ private:
   ou::ChartEntryIndicator m_ceER2;
   ou::ChartEntryIndicator m_ceER3;
 
+  ou::ChartEntryIndicator m_ceZigZag;
+
   //ou::ChartEntryIndicator m_ceLongTicks;
   //ou::ChartEntryIndicator m_ceShortTicks;
 
@@ -162,6 +170,8 @@ private:
   ou::tf::CPrices m_spreads;
   ou::tf::TSSWStatsPrice m_tsswSpreads;
 
+  ou::tf::ZigZag m_zigzagPrice;
+
   pProviderSim_t m_sim;
   bool m_bSimConnected;
 
@@ -189,5 +199,9 @@ private:
   void HandleCommission( const ou::tf::CPosition* pPosition );
 
   void HandleBarCompletion( const ou::tf::CBar& );
+
+  void HandleZigZagPeak( ou::tf::ZigZag*, ptime, double, ou::tf::ZigZag::EDirection );
+  void HandleZigZagUpDp( ou::tf::ZigZag* );
+  void HandleZigZagDnDp( ou::tf::ZigZag* );
 };
 
