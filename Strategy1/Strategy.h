@@ -59,7 +59,7 @@ private:
     ETradeWaitForUp, ETradeWaitForDn,
     ETradeWaitForBollingerToRise, ETradeWaitForBollingerToFall,
     ETradeWaitForTrendConfirmation,
-    ETradeWaitForCrossingSMADownwards, ETradeWaitForCrossingSMAUpwards, 
+    ETradeLongAndWaitForCrossingSMADownwards, ETradeShortAndWaitForCrossingSMAUpwards, 
   } m_stateTrade;
 
   std::stringstream m_ss;

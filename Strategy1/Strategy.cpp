@@ -367,33 +367,33 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
     switch ( m_stateTrade ) {
     case ETradeStart:
-      m_stateTrade = ETradeWaitForBollingerToFall;
+      m_stateTrade = ETradeWaitForTrendConfirmation;
       break;
     case ETradeWaitForTrendConfirmation:
-      if ( 0.0 > dblBollingerSlope ) { // reset for another attempt if falling
-        m_stateTrade = ETradeWaitForBollingerToRise;
-      }
-      else {  // ensure enough indicators are pointing in the correct direction
-        if ( 0.0 < slope2 ) {
+//      if ( 0.0 > dblBollingerSlope ) { // reset for another attempt if falling
+//        m_stateTrade = ETradeWaitForBollingerToRise;
+//      }
+//      else {  // ensure enough indicators are pointing in the correct direction
+        if ( sma1.MeanY() > sma2.MeanY() ) {
           //m_dblLastMidpoint = midpoint;
 //          m_pOrdersOutstandingLongs->ResetGlobalStop();
-          m_stateTrade = ETradeWaitForCrossingSMADownwards;
+          m_stateTrade = ETradeLongAndWaitForCrossingSMADownwards;
         }
-        if ( 0.0 > slope2 ) {
+        if ( sma1.MeanY() < sma2.MeanY() ) {
           //m_dblLastMidpoint = midpoint;
 //          m_pOrdersOutstandingShorts->ResetGlobalStop();
-          m_stateTrade = ETradeWaitForCrossingSMAUpwards;
+          m_stateTrade = ETradeShortAndWaitForCrossingSMAUpwards;
         }
-      }
+//      }
       break;
-    case ETradeWaitForCrossingSMADownwards:  // long oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( midpoint < sma2.MeanY() )*/ ) { // reset for another attempt
+    case ETradeLongAndWaitForCrossingSMADownwards:  // long oriented
+      if ( ( sma1.MeanY() < sma2.MeanY() ) /*|| ( midpoint < sma2.MeanY() )*/ ) { // reset for another attempt
 //        m_pOrdersOutstandingLongs->SetGlobalStop( sma2.MeanY() );
-        m_stateTrade = ETradeWaitForBollingerToRise;
+        m_stateTrade = ETradeShortAndWaitForCrossingSMAUpwards;
         // stop out stuff here 
       }
       else {
-        if ( ( 0.0 < slope2 ) && ( midpoint > sma2.MeanY() ) && ( m_dblLastMidpoint < midpoint ) && ( 0 == cntLongs ) ) {
+        if ( ( m_dblLastMidpoint < midpoint ) && ( 0 == cntLongs ) ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
@@ -402,7 +402,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             m_pOrder = m_pPositionLong->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalized );
             m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized + 0.3, sma1.MeanY() - sma1.BBOffset() ) );
+            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized + 0.2, sma1.MeanY() - sma1.BBOffset() ) );
             m_pOrder.reset();
             ++m_nUpTransitions;
             m_dblLastMidpoint = midpoint;
@@ -410,22 +410,16 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             //m_pOrdersOutstandingLongs->SetGlobalStop( sma2.MeanY() );
           }
         }
-        else {
-          if ( midpoint < sma2.MeanY() ) {
-//            m_pOrdersOutstandingLongs->SetGlobalStop( sma2.MeanY() );
-            m_stateTrade = ETradeWaitForBollingerToRise;
-          }
-        }
       }
       break;
-    case ETradeWaitForCrossingSMAUpwards:  // short oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( midpoint > sma2.MeanY() )*/ ) { // reset for another attempt
+    case ETradeShortAndWaitForCrossingSMAUpwards:  // short oriented
+      if ( ( sma1.MeanY() > sma2.MeanY() ) /*|| ( midpoint > sma2.MeanY() )*/ ) { // reset for another attempt
 //        m_pOrdersOutstandingShorts->SetGlobalStop( sma2.MeanY() );
-        m_stateTrade = ETradeWaitForBollingerToRise;
+        m_stateTrade = ETradeLongAndWaitForCrossingSMADownwards;
         // stop out stuff here 
       }
       else {
-        if ( ( 0.0 > slope2 ) && ( midpoint < sma2.MeanY() ) && ( m_dblLastMidpoint > midpoint ) && ( 0 == cntShorts ) ) {
+        if ( ( m_dblLastMidpoint > midpoint ) && ( 0 == cntShorts ) ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
@@ -434,18 +428,12 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             m_pOrder = m_pPositionShort->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, dblNormalized );
             m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized - 0.3, sma1.MeanY() + sma1.BBOffset() ) );
+            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized - 0.2, sma1.MeanY() + sma1.BBOffset() ) );
             m_pOrder.reset();
             ++m_nDnTransitions;
             m_dblLastMidpoint = midpoint;
             m_dtLastSubmission = quote.DateTime();
             //m_pOrdersOutstandingShorts->SetGlobalStop( sma2.MeanY() );
-          }
-        }
-        else {
-          if ( midpoint > sma2.MeanY() ) {
-//            m_pOrdersOutstandingShorts->SetGlobalStop( sma2.MeanY() );
-            m_stateTrade = ETradeWaitForBollingerToRise;
           }
         }
       }
