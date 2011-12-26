@@ -56,8 +56,10 @@ private:
   enum stateTrade {
     ETradeStart, ETradeOutOfMarket, ETradeWaitLongEntry, ETradeWaitShortEntry, ETradeCancel, ETradeClose, ETradeDone,
     ETradeWaitForBollingerOutside, ETradeWaitForBollingerInside,
+    ETradeWaitForUp, ETradeWaitForDn,
     ETradeWaitForBollingerToRise, ETradeWaitForBollingerToFall,
-    ETradeWaitForUp, ETradeWaitForDn
+    ETradeWaitForTrendConfirmation,
+    ETradeWaitForCrossingSMADownwards, ETradeWaitForCrossingSMAUpwards, 
   } m_stateTrade;
 
   std::stringstream m_ss;
@@ -74,7 +76,12 @@ private:
   pInstrument_t m_pTestInstrument;
 
   enum enumTradeDirection { ETradeDirUnkn, ETradeDirUp, ETradeDirDn } m_TradeDirection;
-  ou::tf::CQuote m_quoteLast;  // used for classifying the current trade
+  ou::tf::CQuote m_quoteLast;  // used for classifying the current trade direction
+
+  double m_dblLastMidpoint;
+
+  time_duration m_tdTimeBetweenTrades;
+  ptime m_dtLastSubmission;
 
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
@@ -88,9 +95,9 @@ private:
   ou::ChartEntryBars m_ceBars;
   ou::ChartEntryVolume m_ceVolume;
 
-  ou::ChartEntryIndicator m_ceSMA1;
-  ou::ChartEntryIndicator m_ceSlopeOfSMA1;
-  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
+//  ou::ChartEntryIndicator m_ceSMA1;
+//  ou::ChartEntryIndicator m_ceSlopeOfSMA1;
+//  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
   ou::ChartEntryIndicator m_ceUpperBollinger1;
   ou::ChartEntryIndicator m_ceLowerBollinger1;
   ou::ChartEntryIndicator m_ceBollinger1Offset;
@@ -119,9 +126,9 @@ private:
   ou::ChartEntryIndicator m_ceSpread;
   //ou::ChartEntryIndicator m_ceRR;
 
-  ou::ChartEntryIndicator m_ceER1;
-  ou::ChartEntryIndicator m_ceER2;
-  ou::ChartEntryIndicator m_ceER3;
+//  ou::ChartEntryIndicator m_ceER1;
+//  ou::ChartEntryIndicator m_ceER2;
+//  ou::ChartEntryIndicator m_ceER3;
 
   ou::ChartEntryIndicator m_ceZigZag;
 
@@ -154,12 +161,12 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
 
-  ou::tf::TSSWEfficiencyRatio m_er1;
-  ou::tf::TSSWEfficiencyRatio m_er2;
-  ou::tf::TSSWEfficiencyRatio m_er3;
+//  ou::tf::TSSWEfficiencyRatio m_er1;
+//  ou::tf::TSSWEfficiencyRatio m_er2;
+//  ou::tf::TSSWEfficiencyRatio m_er3;
 
-  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
-  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
+//  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
+//  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
 
   ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA2;
   ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA2;

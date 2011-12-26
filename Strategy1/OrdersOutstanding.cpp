@@ -21,7 +21,8 @@ OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) :
   m_pPosition( pPosition ), m_cntRoundTrips( 0 ),
   m_durRoundTripTime( 0, 0, 0 ), 
   m_durForceRoundTripClose( 0, 60, 0 ),  // try something from 5 minutes to 10 minutes
-  m_durOrderOpenTimeOut( 0, 0, 30 )
+  m_durOrderOpenTimeOut( 0, 0, 30 ), 
+  m_dblGlobalStop( 0.0 )
 {
 }
 
@@ -69,7 +70,7 @@ void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
   m_mapEntryOrdersFilling.erase( iter ); 
 }
 
-void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) {
+void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) { // cancel after minimal pending time
   for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
     if ( EStateOpenWaitingFill == iter->second->eState ) {
       if ( iter->second->pOrderEntry->GetDateTimeOrderSubmitted() + m_durOrderOpenTimeOut < quote.DateTime() ) {
@@ -81,7 +82,7 @@ void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) {
   }
 }
 
-void OrdersOutstanding::CancelAll( void ) {
+void OrdersOutstanding::CancelAllMatchingOrders( void ) {
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
     if ( 0 != iter->second->pOrderExit.use_count() ) {
       m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
@@ -145,12 +146,16 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
         if ( 0 == iter->second->pOrderExit.use_count() ) { 
           if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
             // close out round trip
-            pOrder_t& pOrderExit( iter->second->pOrderExit );
-            pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-            ou::tf::COrder& order( *pOrderExit.get() );
-            order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-            order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
             iter->second->eState = EStateClosing;
+          }
+          else { // check stop
+            if ( 0.0 != iter->second->dblStop ) {
+              if ( iter->second->dblStop > ask ) {
+                PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+                iter->second->eState = EStateClosing;
+              }
+            }
           }
         }
         else { // cancel existing order, but only do once, so look at status
@@ -164,11 +169,7 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
         if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          pOrder_t& pOrderExit( iter->second->pOrderExit );
-          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->first + 0.20 );
-          ou::tf::COrder& order( *pOrderExit.get() );
-          order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-          order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+          PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->second->dblTarget );
         }
         else { // do nothing
         }
@@ -186,12 +187,16 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
         if ( 0 == iter->second->pOrderExit.use_count() ) {
           if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
             // close out round trip
-            pOrder_t& pOrderExit( iter->second->pOrderExit );
-            pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-            ou::tf::COrder& order( *pOrderExit.get() );
-            order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-            order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
             iter->second->eState = EStateClosing;
+          }
+          else { // check stop
+            if ( 0.0 != iter->second->dblStop ) {
+              if ( iter->second->dblStop < bid ) {
+                PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+                iter->second->eState = EStateClosing;
+              }
+            }
           }
         }
         else { // cancel existing order, but only do once, so look at status
@@ -205,11 +210,7 @@ void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
         if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
           // may need to do some rounding when using larger quantities
           // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          pOrder_t& pOrderExit( iter->second->pOrderExit );
-          pOrderExit = m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->first - 0.20 );
-          ou::tf::COrder& order( *pOrderExit.get() );
-          order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
-          order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+          PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->second->dblTarget );
         }
         else { // do nothing
         }
@@ -244,4 +245,25 @@ void OrdersOutstanding::PostMortemReport( void ) {
       << ", avg dif=" << dif / m_vCompletedRoundTrips.size() 
       << std::endl;
   }
+}
+
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder ) {
+  ou::tf::COrder& order( *pOrder.get() );
+  order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
+  order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
+}
+
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity ) {
+  pOrder = m_pPosition->PlaceOrder(type, side, nOrderQuantity );
+  PlaceOrder( pOrder );
+}
+
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1  ) {
+  pOrder = m_pPosition->PlaceOrder(type, side, nOrderQuantity, dblPrice1 );
+  PlaceOrder( pOrder );
+}
+
+void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType type, ou::tf::OrderSide::enumOrderSide side, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 ) {
+  pOrder = m_pPosition->PlaceOrder(type, side, nOrderQuantity, dblPrice1, dblPrice2 );
+  PlaceOrder( pOrder );
 }

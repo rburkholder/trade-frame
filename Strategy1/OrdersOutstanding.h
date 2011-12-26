@@ -25,7 +25,8 @@ public:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
 
   enum enumState {
-    EStateOpenWaitingFill, EStateOpenCancelling, EStateOpen, EStateProfit, EStateLoss, EStateEven, EStateClosing, EStateCancelled
+    EStateOpenWaitingFill, EStateOpenCancelling, EStateOpen, 
+    EStateProfit, EStateLoss, EStateEven, EStateClosing, EStateCancelled
   };
 
   struct structRoundTrip {
@@ -62,17 +63,23 @@ public:
 
   OrdersOutstanding( pPosition_t pPosition );
   virtual ~OrdersOutstanding( void ) {};
+
   void AddOrderFilling( structRoundTrip* pTrip );  // migrate to using this instead
-  void CancelAll( void );
+  void CancelAllMatchingOrders( void );
   void PostMortemReport( void );
+
+  void SetGlobalStop( double stop ) { m_dblGlobalStop = stop; };
+  void ResetGlobalStop( void ) { m_dblGlobalStop = 0.0; };
+
+  unsigned int GetCountOfOutstandingMatches( void ) { return m_mapOrdersToMatch.size(); };
 
   // should be protected but doesn't work there
   void HandleMatchingOrderFilled( const ou::tf::COrder& order );
   void HandleMatchingOrderCancelled( const ou::tf::COrder& order );
 
-  unsigned int GetCountOfOutstandingMatches( void ) { return m_mapOrdersToMatch.size(); };
-
 protected:
+
+  double m_dblGlobalStop;
 
   pPosition_t m_pPosition;
 
@@ -86,6 +93,11 @@ protected:
   boost::posix_time::time_duration m_durForceRoundTripClose;
 
   void CheckBaseOrder( const ou::tf::CQuote& quote );
+
+  void PlaceOrder( pOrder_t& pOrder );
+  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
+  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1 );
+  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
   
 private:
 
