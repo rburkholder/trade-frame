@@ -121,8 +121,10 @@ private:
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
   ou::ChartEntryIndicator m_cePLNet;
-  ou::ChartEntryIndicator m_ceOutstandingLong;
-  ou::ChartEntryIndicator m_ceOutstandingShort;
+  ou::ChartEntryIndicator m_ceOutstandingEntriesLong;
+  ou::ChartEntryIndicator m_ceOutstandingEntriesShort;
+  ou::ChartEntryIndicator m_ceOutstandingExitsLong;
+  ou::ChartEntryIndicator m_ceOutstandingExitsShort;
   ou::ChartEntryIndicator m_ceSpread;
   //ou::ChartEntryIndicator m_ceRR;
 

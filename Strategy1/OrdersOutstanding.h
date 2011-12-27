@@ -65,13 +65,16 @@ public:
   virtual ~OrdersOutstanding( void ) {};
 
   void AddOrderFilling( structRoundTrip* pTrip );  // migrate to using this instead
+  void CancelAllButNEntryOrders( unsigned int n );
   void CancelAllMatchingOrders( void );
+  void CancelAndCloseAllOrders( void );
   void PostMortemReport( void );
 
   void SetGlobalStop( double stop ) { m_dblGlobalStop = stop; };
   void ResetGlobalStop( void ) { m_dblGlobalStop = 0.0; };
 
-  unsigned int GetCountOfOutstandingMatches( void ) { return m_mapOrdersToMatch.size(); };
+  unsigned int GetCountOfOutstandingEntries( void ) const { return m_mapEntryOrdersFilling.size(); };
+  unsigned int GetCountOfOutstandingMatches( void ) const { return m_mapOrdersToMatch.size(); };
 
   // should be protected but doesn't work there
   void HandleMatchingOrderFilled( const ou::tf::COrder& order );
@@ -93,6 +96,7 @@ protected:
   boost::posix_time::time_duration m_durForceRoundTripClose;
 
   void CheckBaseOrder( const ou::tf::CQuote& quote );
+  bool CancelAndCloseInProgress( void );
 
   void PlaceOrder( pOrder_t& pOrder );
   void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
@@ -100,6 +104,11 @@ protected:
   void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
   
 private:
+
+  bool m_bCancelAndCloseInProgress;
+  enum stateCancelAndClose {
+    CACStarted, CACWaitingForEntryCancels, CACWaitingForExitCancels, CACWaitingForMatchingCloses, CACDone
+  } m_stateCancelAndClose;
 
   time_duration m_durOrderOpenTimeOut;
 

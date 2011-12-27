@@ -22,11 +22,13 @@ OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) :
   m_durRoundTripTime( 0, 0, 0 ), 
   m_durForceRoundTripClose( 0, 60, 0 ),  // try something from 5 minutes to 10 minutes
   m_durOrderOpenTimeOut( 0, 0, 30 ), 
-  m_dblGlobalStop( 0.0 )
+  m_dblGlobalStop( 0.0 ),
+  m_bCancelAndCloseInProgress( false )
 {
 }
 
 void OrdersOutstanding::AddOrderFilling( structRoundTrip* pTrip ) {
+  assert( !m_bCancelAndCloseInProgress );
   ou::tf::COrder& order( *pTrip->pOrderEntry.get() );
   ou::tf::COrder::idOrder_t idOrder = order.GetOrderId();
   assert( m_mapEntryOrdersFilling.end() == m_mapEntryOrdersFilling.find( idOrder ) );
@@ -82,6 +84,19 @@ void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) { // cance
   }
 }
 
+void OrdersOutstanding::CancelAllButNEntryOrders( unsigned int n ) {
+  unsigned m = m_mapEntryOrdersFilling.size();
+  mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin();
+  while ( m > n ) {
+    if ( EStateOpenWaitingFill == iter->second->eState ) {
+      iter->second->eState = EStateOpenCancelling;
+      m_pPosition->CancelOrder( iter->first );
+    }
+    ++iter;
+    --m;
+  }
+}
+
 void OrdersOutstanding::CancelAllMatchingOrders( void ) {
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
     if ( 0 != iter->second->pOrderExit.use_count() ) {
@@ -94,6 +109,70 @@ void OrdersOutstanding::CancelAllMatchingOrders( void ) {
   else {
     unsigned long ave = m_durRoundTripTime.total_milliseconds() / m_cntRoundTrips;
   }
+}
+
+void OrdersOutstanding::CancelAndCloseAllOrders( void ) {
+  m_bCancelAndCloseInProgress = true;
+  m_stateCancelAndClose = CACStarted;
+  for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
+    if ( EStateOpenWaitingFill == iter->second->eState ) {
+      m_pPosition->CancelOrder( iter->second->pOrderEntry->GetOrderId() );
+      iter->second->eState = EStateOpenCancelling;
+    }
+  }
+  for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+    if ( 0 != iter->second->pOrderExit.use_count() ) {
+      m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );
+    }
+  }
+  m_stateCancelAndClose = CACWaitingForEntryCancels;
+}
+
+bool OrdersOutstanding::CancelAndCloseInProgress( void ) {
+  if ( m_bCancelAndCloseInProgress ) {
+    switch ( m_stateCancelAndClose ) {
+    case CACWaitingForEntryCancels:
+      if ( 0 == m_mapEntryOrdersFilling.size() ) {
+        m_stateCancelAndClose = CACWaitingForExitCancels;
+      }
+      break;
+    case CACWaitingForExitCancels: {
+        bool bStillWaiting = false;
+        for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+          if ( 0 != iter->second->pOrderExit.use_count() ) {
+            bStillWaiting = true;
+          }
+        }
+        if ( !bStillWaiting ) {
+          for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+            switch ( iter->second->pOrderEntry->GetOrderSide() ) {
+            case ou::tf::OrderSide::Buy:
+              PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+              iter->second->eState = EStateClosing;
+              break;
+            case ou::tf::OrderSide::Sell:
+              PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+              iter->second->eState = EStateClosing;
+              break;
+            }
+          }
+          m_stateCancelAndClose = CACWaitingForMatchingCloses;
+        }
+      }
+      break;
+    case CACWaitingForMatchingCloses:
+      if ( 0 == m_mapOrdersToMatch.size() ) {
+        m_stateCancelAndClose = CACDone;
+        m_bCancelAndCloseInProgress = false;
+      }
+      break;
+    case CACStarted: // shouldn't reach this
+      break;
+    case CACDone:
+      break;
+    }
+  }
+  return m_bCancelAndCloseInProgress;
 }
 
 void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& order ) {
@@ -138,40 +217,42 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
 }
 
 void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
-  CheckBaseOrder( quote );
-  double ask = quote.Ask();
-  if ( 0.0 != ask ) {
-    for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-      if ( iter->first >= ask ) { // price is outside of profitable range
-        if ( 0 == iter->second->pOrderExit.use_count() ) { 
-          if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
-            // close out round trip
-            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-            iter->second->eState = EStateClosing;
-          }
-          else { // check stop
-            if ( 0.0 != iter->second->dblStop ) {
-              if ( iter->second->dblStop > ask ) {
-                PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-                iter->second->eState = EStateClosing;
+  if ( !CancelAndCloseInProgress() ) {
+    CheckBaseOrder( quote );
+    double ask = quote.Ask();
+    if ( 0.0 != ask ) {
+      for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+        if ( iter->first >= ask ) { // price is outside of profitable range
+          if ( 0 == iter->second->pOrderExit.use_count() ) { 
+            if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
+              // close out round trip
+              PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+              iter->second->eState = EStateClosing;
+            }
+            else { // check stop
+              if ( 0.0 != iter->second->dblStop ) {
+                if ( iter->second->dblStop > ask ) {
+                  PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+                  iter->second->eState = EStateClosing;
+                }
               }
             }
           }
-        }
-        else { // cancel existing order, but only do once, so look at status
-          if ( EStateClosing != iter->second->eState ) {
-              m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
-              //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          else { // cancel existing order, but only do once, so look at status
+            if ( EStateClosing != iter->second->eState ) {
+                m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
+                //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+            }
           }
         }
-      }
-      else { // price is inside profitable range
-        if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
-          // may need to do some rounding when using larger quantities
-          // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->second->dblTarget );
-        }
-        else { // do nothing
+        else { // price is inside profitable range
+          if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
+            // may need to do some rounding when using larger quantities
+            // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
+            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, iter->second->dblTarget );
+          }
+          else { // do nothing
+          }
         }
       }
     }
@@ -179,40 +260,42 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
 }
 
 void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
-  CheckBaseOrder( quote );
-  double bid = quote.Bid();
-  if ( 0.0 != bid ) {
-    for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
-      if ( iter->first <= bid ) { // price is outside of profitable range
-        if ( 0 == iter->second->pOrderExit.use_count() ) {
-          if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
-            // close out round trip
-            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-            iter->second->eState = EStateClosing;
-          }
-          else { // check stop
-            if ( 0.0 != iter->second->dblStop ) {
-              if ( iter->second->dblStop < bid ) {
-                PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-                iter->second->eState = EStateClosing;
+  if ( !CancelAndCloseInProgress() ) {
+    CheckBaseOrder( quote );
+    double bid = quote.Bid();
+    if ( 0.0 != bid ) {
+      for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
+        if ( iter->first <= bid ) { // price is outside of profitable range
+          if ( 0 == iter->second->pOrderExit.use_count() ) {
+            if ( iter->second->pOrderEntry->GetDateTimeOrderFilled() + m_durForceRoundTripClose < quote.DateTime() ) {
+              // close out round trip
+              PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+              iter->second->eState = EStateClosing;
+            }
+            else { // check stop
+              if ( 0.0 != iter->second->dblStop ) {
+                if ( iter->second->dblStop < bid ) {
+                  PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+                  iter->second->eState = EStateClosing;
+                }
               }
             }
           }
-        }
-        else { // cancel existing order, but only do once, so look at status
-          if ( EStateClosing != iter->second->eState ) {
-            m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
-            //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+          else { // cancel existing order, but only do once, so look at status
+            if ( EStateClosing != iter->second->eState ) {
+              m_pPosition->CancelOrder( iter->second->pOrderExit->GetOrderId() );  // what happens if filled during cancel?
+              //iter->second.pOrderClosing.reset();  // this will be a problem if order is filled during cancellation
+            }
           }
         }
-      }
-      else { // price is inside profitable range
-        if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
-          // may need to do some rounding when using larger quantities
-          // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
-          PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->second->dblTarget );
-        }
-        else { // do nothing
+        else { // price is inside profitable range
+          if ( 0 == iter->second->pOrderExit.use_count() ) { // create a limit order to attempt profit
+            // may need to do some rounding when using larger quantities
+            // use quantities from opening order, also will need to deal with fractional quantities on partial filled orders
+            PlaceOrder( iter->second->pOrderExit, ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, iter->second->dblTarget );
+          }
+          else { // do nothing
+          }
         }
       }
     }

@@ -123,12 +123,23 @@ bool AppSemiAuto::OnInit() {
   // DX.X dollar index  https://www.theice.com/productguide/ProductDetails.shtml?specId=194
   // http://www.dtniq.com/template.cfm?navgroup=supportlist&view=1&urlcode=323406&type=TENFORE  // tenfore symbols and descriptions
 
+  //@YMZ11	E-MINI DOW JONES $5 DECEMBER 2011	CBOT	CBOTMINI	FUTURE			
+  //@YMH12	E-MINI DOW JONES $5 MARCH 2012	CBOT	CBOTMINI	FUTURE		Y	
+  //@YM#	E-MINI DOW JONES $5 MARCH 2012	CBOT	CBOTMINI	FUTURE	
+  //@YMM12	E-MINI DOW JONES $5 JUNE 2012	CBOT	CBOTMINI	FUTURE		
+  //@YMU12	E-MINI DOW JONES $5 SEPTEMBER 2012	CBOT	CBOTMINI	FUTURE	
+  //@YMZ12	E-MINI DOW JONES $5 DECEMBER 2012	CBOT	CBOTMINI	FUTURE			
+
   // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCF12" ) ? mgr.Get( "+GCF12" ) : mgr.ConstructFuture( "+GCF12", "SMART", 2012, 01 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCG12" ) ? mgr.Get( "+GCG12" ) : mgr.ConstructFuture( "+GCG12", "SMART", 2012, 02 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCJ12" ) ? mgr.Get( "+GCJ12" ) : mgr.ConstructFuture( "+GCJ12", "SMART", 2012, 04 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCM12" ) ? mgr.Get( "+GCM12" ) : mgr.ConstructFuture( "+GCM12", "SMART", 2012, 06 ) ) );
+
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLJ12" ) ? mgr.Get( "+CLJ12" ) : mgr.ConstructFuture( "+CLJ12", "SMART", 2012, 04 ) ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
 
