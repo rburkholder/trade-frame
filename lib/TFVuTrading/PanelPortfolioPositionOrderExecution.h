@@ -18,6 +18,9 @@
 #include "VuOrders.h"
 #include "VuExecutions.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class PanelPortfolioPositionOrderExecution :
   public wxPanel {
 public:
@@ -31,3 +34,5 @@ private:
   
 };
 
+} // namespace tf
+} // namespace ou

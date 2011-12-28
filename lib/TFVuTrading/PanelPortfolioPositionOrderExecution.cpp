@@ -17,6 +17,9 @@
 
 #include "PanelPortfolioPositionOrderExecution.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 // need to fix this constructor for proper use of xwPanel inherit
 PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution(void) {
 }
@@ -76,3 +79,6 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   Show( true );
 
 }
+
+} // namespace tf
+} // namespace ou

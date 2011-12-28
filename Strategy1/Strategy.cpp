@@ -45,7 +45,6 @@ Strategy::Strategy(void)
   m_tsswSpreads( &m_spreads, 120 ),
   m_rtTickDiffs( &m_pricesTickDiffs, 120 ),
   m_rocTickDiffs( &m_pricesTickDiffsROC, 30 ),
-//  m_er1( &m_trades, 10 ), m_er2( &m_trades, 30 ), m_er3( &m_trades, 90 ),
   m_bFirstTrade( true ),
   m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
@@ -71,14 +70,8 @@ Strategy::Strategy(void)
   m_dvChart.Add( 1, m_ceVolume );
 //  m_dvChart.Add( 2, m_ceSlopeOfSMA1 );
 //  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA1 );
-//  m_dvChart.Add( 2, m_ceUpTicks );
-//  m_dvChart.Add( 2, m_ceMdTicks );
   m_dvChart.Add( 2, m_ceTickDiffs );
   m_dvChart.Add( 2, m_ceTickDiffsRoc );
-//  m_dvChart.Add( 2, m_ceDnTicks );
-//  m_dvChart.Add( 3, m_ceUpVolume );
-//  m_dvChart.Add( 3, m_ceMdVolume );
-//  m_dvChart.Add( 3, m_ceDnVolume );
   m_dvChart.Add( 4, m_ceSlopeOfSMA2 );
   m_dvChart.Add( 4, m_ceSlopeOfSlopeOfSMA2 );
   m_dvChart.Add( 4, m_ceSlopeOfBollinger2Offset );
@@ -93,13 +86,7 @@ Strategy::Strategy(void)
   m_dvChart.Add( 7, m_cePLLong );
   m_dvChart.Add( 7, m_cePLShort );
   m_dvChart.Add( 7, m_cePLNet );
-  //m_dvChart.Add( 7, m_ceLongTicks );
-  //m_dvChart.Add( 7, m_ceShortTicks );
 //  m_dvChart.Add( 5, m_ceSpread );
-
-//  m_dvChart.Add( 7, m_ceER3 );
-//  m_dvChart.Add( 7, m_ceER2 );
-//  m_dvChart.Add( 7, m_ceER1 );
 
 //  m_dvChart.Add( 8, m_ceBollinger3Ratio );
 //  m_dvChart.Add( 8, m_ceBollinger2Ratio );
@@ -137,10 +124,6 @@ Strategy::Strategy(void)
   m_ceOutstandingExitsLong.SetColour( ou::Colour::DarkCyan );
   m_ceOutstandingExitsShort.SetColour( ou::Colour::OrangeRed );
 
-//  m_ceER1.SetColour( ou::Colour::DarkOliveGreen );
-//  m_ceER2.SetColour( ou::Colour::Turquoise );
-//  m_ceER3.SetColour( ou::Colour::GreenYellow );
-
 //  m_ceBollinger1Ratio.SetColour( ou::Colour::DarkOliveGreen );
 //  m_ceBollinger2Ratio.SetColour( ou::Colour::Turquoise );
 //  m_ceBollinger3Ratio.SetColour( ou::Colour::GreenYellow );
@@ -161,18 +144,7 @@ Strategy::Strategy(void)
   m_ceTickDiffs.SetColour( ou::Colour::Turquoise );
   m_ceTickDiffsRoc.SetColour( ou::Colour::Purple );
 
-//  m_ceUpTicks.SetColour( ou::Colour::Blue );
-//  m_ceMdTicks.SetColour( ou::Colour::Turquoise );
-//  m_ceDnTicks.SetColour( ou::Colour::Red );
-
-//  m_ceUpVolume.SetColour( ou::Colour::Blue );
-//  m_ceMdVolume.SetColour( ou::Colour::Turquoise );
-//  m_ceDnVolume.SetColour( ou::Colour::Red );
-
   m_ceZigZag.SetColour( ou::Colour::DarkBlue );
-
-  //m_ceLongTicks.SetColour( ou::Colour::Blue );
-  //m_ceShortTicks.SetColour( ou::Colour::Red );
 
   m_zigzagPrice.SetOnPeakFound( MakeDelegate( this, &Strategy::HandleZigZagPeak ) );
   m_zigzagPrice.SetUpDecisionPointFound( MakeDelegate( this, &Strategy::HandleZigZagUpDp ) );
