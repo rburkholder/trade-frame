@@ -135,11 +135,11 @@ bool AppSemiAuto::OnInit() {
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCG12" ) ? mgr.Get( "+GCG12" ) : mgr.ConstructFuture( "+GCG12", "SMART", 2012, 02 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCJ12" ) ? mgr.Get( "+GCJ12" ) : mgr.ConstructFuture( "+GCJ12", "SMART", 2012, 04 ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCM12" ) ? mgr.Get( "+GCM12" ) : mgr.ConstructFuture( "+GCM12", "SMART", 2012, 06 ) ) );
+//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCM12" ) ? mgr.Get( "+GCM12" ) : mgr.ConstructFuture( "+GCM12", "SMART", 2012, 06 ) ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLJ12" ) ? mgr.Get( "+CLJ12" ) : mgr.ConstructFuture( "+CLJ12", "SMART", 2012, 04 ) ) );
+//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLJ12" ) ? mgr.Get( "+CLJ12" ) : mgr.ConstructFuture( "+CLJ12", "SMART", 2012, 04 ) ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
 
@@ -147,7 +147,7 @@ bool AppSemiAuto::OnInit() {
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "USDCAD.COMP" ) ? mgr.Get( "USDCAD.COMP" ) : mgr.ConstructInstrument( "USDCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ), 4 ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "EURCAD.COMP" ) ? mgr.Get( "EURCAD.COMP" ) : mgr.ConstructInstrument( "EURCAD.COMP", "SMART", ou::tf::InstrumentType::Currency ), 4 ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
+//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "DX.X" ) ? mgr.Get( "DX.X" ) : mgr.ConstructInstrument( "DX.X", "SMART", ou::tf::InstrumentType::Index ) ) );
 
 //  int ix = 0;
 //  for ( vInstrumentData_iter_t iter = m_vInstruments.begin(); iter != m_vInstruments.end(); ++ iter ) {

@@ -43,8 +43,12 @@ Strategy::Strategy(void)
   m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 360 ),
   m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
   m_tsswSpreads( &m_spreads, 120 ),
+  m_rtTickDiffs( &m_pricesTickDiffs, 120 ),
+  m_rocTickDiffs( &m_pricesTickDiffsROC, 30 ),
 //  m_er1( &m_trades, 10 ), m_er2( &m_trades, 30 ), m_er3( &m_trades, 90 ),
-  m_bFirstTrade( true )
+  m_bFirstTrade( true ),
+  m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
+  m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
 
   m_tdTimeBetweenTrades += boost::posix_time::millisec( 30 );
@@ -67,20 +71,28 @@ Strategy::Strategy(void)
   m_dvChart.Add( 1, m_ceVolume );
 //  m_dvChart.Add( 2, m_ceSlopeOfSMA1 );
 //  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA1 );
-  m_dvChart.Add( 3, m_ceSlopeOfSMA2 );
-  m_dvChart.Add( 3, m_ceSlopeOfSlopeOfSMA2 );
-  m_dvChart.Add( 3, m_ceSlopeOfBollinger2Offset );
+//  m_dvChart.Add( 2, m_ceUpTicks );
+//  m_dvChart.Add( 2, m_ceMdTicks );
+  m_dvChart.Add( 2, m_ceTickDiffs );
+  m_dvChart.Add( 2, m_ceTickDiffsRoc );
+//  m_dvChart.Add( 2, m_ceDnTicks );
+//  m_dvChart.Add( 3, m_ceUpVolume );
+//  m_dvChart.Add( 3, m_ceMdVolume );
+//  m_dvChart.Add( 3, m_ceDnVolume );
+  m_dvChart.Add( 4, m_ceSlopeOfSMA2 );
+  m_dvChart.Add( 4, m_ceSlopeOfSlopeOfSMA2 );
+  m_dvChart.Add( 4, m_ceSlopeOfBollinger2Offset );
 //  m_dvChart.Add( 4, m_ceBollinger1Offset );
-  m_dvChart.Add( 4, m_ceBollinger2Offset );
-  m_dvChart.Add( 4, m_ceBollinger3Offset );
-  m_dvChart.Add( 5, m_ceOutstandingEntriesLong );
-  m_dvChart.Add( 5, m_ceOutstandingEntriesShort );
-  m_dvChart.Add( 5, m_ceOutstandingExitsLong );
-  m_dvChart.Add( 5, m_ceOutstandingExitsShort );
+  m_dvChart.Add( 5, m_ceBollinger2Offset );
+  m_dvChart.Add( 5, m_ceBollinger3Offset );
+  m_dvChart.Add( 6, m_ceOutstandingEntriesLong );
+  m_dvChart.Add( 6, m_ceOutstandingEntriesShort );
+  m_dvChart.Add( 6, m_ceOutstandingExitsLong );
+  m_dvChart.Add( 6, m_ceOutstandingExitsShort );
 //  m_dvChart.Add( 3, m_ceRR );
-  m_dvChart.Add( 6, m_cePLLong );
-  m_dvChart.Add( 6, m_cePLShort );
-  m_dvChart.Add( 6, m_cePLNet );
+  m_dvChart.Add( 7, m_cePLLong );
+  m_dvChart.Add( 7, m_cePLShort );
+  m_dvChart.Add( 7, m_cePLNet );
   //m_dvChart.Add( 7, m_ceLongTicks );
   //m_dvChart.Add( 7, m_ceShortTicks );
 //  m_dvChart.Add( 5, m_ceSpread );
@@ -89,8 +101,8 @@ Strategy::Strategy(void)
 //  m_dvChart.Add( 7, m_ceER2 );
 //  m_dvChart.Add( 7, m_ceER1 );
 
-  m_dvChart.Add( 8, m_ceBollinger3Ratio );
-  m_dvChart.Add( 8, m_ceBollinger2Ratio );
+//  m_dvChart.Add( 8, m_ceBollinger3Ratio );
+//  m_dvChart.Add( 8, m_ceBollinger2Ratio );
 //  m_dvChart.Add( 8, m_ceBollinger1Ratio );
 
 //  m_ceSlopeOfSMA1.SetName( "SlopeOfSMA1" );
@@ -122,16 +134,16 @@ Strategy::Strategy(void)
 
   m_ceOutstandingEntriesLong.SetColour( ou::Colour::Blue );
   m_ceOutstandingEntriesShort.SetColour( ou::Colour::Red );
-  m_ceOutstandingExitsLong.SetColour( ou::Colour::BlueViolet );
-  m_ceOutstandingExitsShort.SetColour( ou::Colour::Salmon );
+  m_ceOutstandingExitsLong.SetColour( ou::Colour::DarkCyan );
+  m_ceOutstandingExitsShort.SetColour( ou::Colour::OrangeRed );
 
 //  m_ceER1.SetColour( ou::Colour::DarkOliveGreen );
 //  m_ceER2.SetColour( ou::Colour::Turquoise );
 //  m_ceER3.SetColour( ou::Colour::GreenYellow );
 
-  m_ceBollinger1Ratio.SetColour( ou::Colour::DarkOliveGreen );
-  m_ceBollinger2Ratio.SetColour( ou::Colour::Turquoise );
-  m_ceBollinger3Ratio.SetColour( ou::Colour::GreenYellow );
+//  m_ceBollinger1Ratio.SetColour( ou::Colour::DarkOliveGreen );
+//  m_ceBollinger2Ratio.SetColour( ou::Colour::Turquoise );
+//  m_ceBollinger3Ratio.SetColour( ou::Colour::GreenYellow );
 
   m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
@@ -145,6 +157,17 @@ Strategy::Strategy(void)
   m_ceBollinger3Offset.SetColour( ou::Colour::GreenYellow );
 
   m_ceSlopeOfBollinger2Offset.SetColour( ou::Colour::DarkMagenta );
+
+  m_ceTickDiffs.SetColour( ou::Colour::Turquoise );
+  m_ceTickDiffsRoc.SetColour( ou::Colour::Purple );
+
+//  m_ceUpTicks.SetColour( ou::Colour::Blue );
+//  m_ceMdTicks.SetColour( ou::Colour::Turquoise );
+//  m_ceDnTicks.SetColour( ou::Colour::Red );
+
+//  m_ceUpVolume.SetColour( ou::Colour::Blue );
+//  m_ceMdVolume.SetColour( ou::Colour::Turquoise );
+//  m_ceDnVolume.SetColour( ou::Colour::Red );
 
   m_ceZigZag.SetColour( ou::Colour::DarkBlue );
 
@@ -347,13 +370,13 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_cePLNet.Add( dt, dblPLLong + dblPLShort );
 
     double midpoint = quote.Midpoint();
-    double /* val1,*/ val2, val3;
+//    double /* val1,*/ val2, val3;
 //    val1 = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );
 //    if ( 1.1 < val1 ) val1 = 1.1;
 //    else 
 //      if ( -1.1 > val1 ) val1 = -1.1;
 //    m_ceBollinger1Ratio.Add( dt, val1 );
-
+/*
     val2 = ( midpoint - sma2.MeanY() ) / ( sma2.BBOffset() );
     if ( 1.1 < val2 ) val2 = 1.1;
     else 
@@ -365,7 +388,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     else 
       if ( -1.1 > val3 ) val3 = -1.1;
     m_ceBollinger3Ratio.Add( dt, val3 );
-
+*/
     typedef OrdersOutstanding::structRoundTrip structRoundTrip;
 
     if ( dt > m_dtEnd ) {
@@ -390,18 +413,20 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       }
       break;
     case ETradeLongAndWaitForCrossingSMADownwards:  // long oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( midpoint < sma2.MeanY() )*/ ) { // reset for another attempt
+      if ( ( 0.0 > dblBollingerSlope) /*|| ( 0.0 > m_rtTickDiffs.Net() )*/ ) { // reset for another attempt
         // stop out stuff here 
         m_pOrdersOutstandingLongs->CancelAndCloseAllOrders();
         m_stateTrade = ETradeWaitForBollingerToRise;
       }
       else {
-        if ( ( 0.0 < slope2 ) && ( sma1.MeanY() > sma2.MeanY() ) && ( ( m_dblLastMidpoint + 0.010 ) < midpoint ) && ( 0 == cntLongs ) && ( 2.0 < sma2.BBOffset() ) ) {
+        if ( ( 0.0 < slope2 ) && ( sma1.MeanY() > sma2.MeanY() ) && ( ( m_dblLastMidpoint + 0.010 ) < midpoint ) 
+            //&& ( 0.0 < m_rocTickDiffs.RateOfChange() )
+            && ( 0 == cntLongs ) /*&& ( 2.0 < sma2.BBOffset() )*/ ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
           if ( bAllowTrade ) {
-            m_pOrdersOutstandingLongs->CancelAllButNEntryOrders( 3 );
+            m_pOrdersOutstandingLongs->CancelAllButNEntryOrders( 2 );
             double dblNormalized = m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.10 );
             m_pOrder = m_pPositionLong->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalized );
@@ -421,18 +446,20 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       }
       break;
     case ETradeShortAndWaitForCrossingSMAUpwards:  // short oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( midpoint > sma2.MeanY() )*/ ) { // reset for another attempt
+      if ( ( 0.0 > dblBollingerSlope) /*|| ( 0.0 < m_rtTickDiffs.Net() )*/ ) { // reset for another attempt
         // stop out stuff here 
         m_pOrdersOutstandingShorts->CancelAndCloseAllOrders();
         m_stateTrade = ETradeWaitForBollingerToRise;
       }
       else {
-        if ( ( 0.0 > slope2 ) && ( sma1.MeanY() < sma2.MeanY() ) && ( ( m_dblLastMidpoint - 0.010 ) > midpoint ) && ( 0 == cntShorts ) && ( 2.0 < sma2.BBOffset() ) ) {
+        if ( ( 0.0 > slope2 ) && ( sma1.MeanY() < sma2.MeanY() ) && ( ( m_dblLastMidpoint - 0.010 ) > midpoint ) 
+            //&& ( 0.0 > m_rocTickDiffs.RateOfChange() )
+            && ( 0 == cntShorts ) /*&& ( 2.0 < sma2.BBOffset() )*/ ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
           if ( bAllowTrade ) {
-            m_pOrdersOutstandingShorts->CancelAllButNEntryOrders( 3 );
+            m_pOrdersOutstandingShorts->CancelAllButNEntryOrders( 2 );
             double dblNormalized = m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() + 0.10 );
             m_pOrder = m_pPositionShort->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, dblNormalized );
@@ -508,6 +535,9 @@ void Strategy::HandleFirstTrade( const ou::tf::CTrade& trade ) {
 
 void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 
+  ptime dt( trade.DateTime() );
+  ou::tf::CTrade::price_t price = trade.Trade();
+
   if ( m_bFirstTrade ) {
     m_bFirstTrade = false;
     //m_zigzagPrice.SetFilterWidth( 0.17 * sqrt( trade.Trade() ) );
@@ -517,47 +547,52 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   m_trades.Append( trade );
   m_barFactory.Add( trade );
 
-//  m_er1.Update();
-//  m_er2.Update();
-//  m_er3.Update();
-
-//  m_ceER1.Add( trade.DateTime(), m_er1.Ratio() );
-//  m_ceER2.Add( trade.DateTime(), m_er2.Ratio() );
-//  m_ceER3.Add( trade.DateTime(), m_er3.Ratio() );
-
-  ou::tf::CTrade::price_t price = trade.Trade();
-
-  m_zigzagPrice.Check( trade.DateTime(), price );
+  m_zigzagPrice.Check( dt, price );
 
   double mid = m_quoteLast.Midpoint();
   if ( price == mid ) {
     switch ( m_TradeDirection ) {
     case ETradeDirUnkn:
-      m_TradeDirection = ETradeDirUp;
+      m_TradeDirection = ETradeDirUp;  // default to up
       //break; fall through instead
-    case ETradeDirUp:
-      //m_ceLongTicks.Add( trade.DateTime(), 1 );
-      //m_ceShortTicks.Add( trade.DateTime(), 0 );
+    case ETradeDirUp:  // leave as is
       break;
-    case ETradeDirDn:
-      //m_ceShortTicks.Add( trade.DateTime(), -1 );
-      //m_ceLongTicks.Add( trade.DateTime(), 0 );
+    case ETradeDirDn: // leave as is
       break;
     }
+    ++m_dblMdTicks;
+    //m_dblMdVolume += trade.Volume();
   }
   else {
     if ( price > mid ) {
-      m_TradeDirection = ETradeDirUp;
-      //m_ceLongTicks.Add( trade.DateTime(), 1 );
-      //m_ceShortTicks.Add( trade.DateTime(), 0 );
+      m_TradeDirection = ETradeDirUp;   // definitively up
+      //++m_dblMdTicks;
+      m_pricesTickDiffs.Append( ou::tf::CPrice( dt, +1.0 ) );
+      ++m_dblUpTicks;
+      m_dblUpVolume += trade.Volume();
     }
     else {
-      m_TradeDirection = ETradeDirDn;
-      //m_ceShortTicks.Add( trade.DateTime(), -1 );
-      //m_ceLongTicks.Add( trade.DateTime(), 0 );
+      m_TradeDirection = ETradeDirDn;  // definitively dow
+      //--m_dblMdTicks;
+      m_pricesTickDiffs.Append( ou::tf::CPrice( dt, -1.0 ) );
+      ++m_dblDnTicks;
+      m_dblDnVolume += trade.Volume();
     }
   }
 
+  m_rtTickDiffs.Update();
+  double dif = m_rtTickDiffs.Net();
+  m_pricesTickDiffsROC.Append( ou::tf::CPrice( dt, dif ) );
+
+  if (  45 < dif ) dif = 45;
+  if ( -45 > dif ) dif = -45;
+  m_ceTickDiffs.Add( dt, dif );
+
+  m_rocTickDiffs.Update();
+  dif = m_rocTickDiffs.RateOfChange();
+  if (  45 < dif ) dif = 45;
+  if ( -45 > dif ) dif = -45;
+  m_ceTickDiffsRoc.Add( dt, dif );
 }
 
 void Strategy::HandleSimulationComplete( void ) {
@@ -591,8 +626,12 @@ void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
 }
 
 void Strategy::HandleBarCompletion( const ou::tf::CBar& bar ) {
+
+  ptime dt( bar.DateTime() );
   m_ceBars.AddBar( bar );
-  m_ceVolume.Add( bar.DateTime(), bar.Volume() );
+
+  m_ceVolume.Add( dt, bar.Volume() );
+
 }
 
 void Strategy::HandleZigZagPeak( ou::tf::ZigZag*, ptime dt, double price, ou::tf::ZigZag::EDirection ) {

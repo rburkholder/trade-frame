@@ -35,7 +35,7 @@ TSSWStochastic::~TSSWStochastic(void) {
 }
 
 void TSSWStochastic::Add( const CQuote& quote ) {
-  double tmp = ( quote.Ask() + quote.Bid() ) / 2.0;
+  double tmp = quote.Midpoint();
   if ( tmp != m_lastAdd ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
     m_lastAdd = tmp;
     m_minmax.Add( m_lastAdd );
@@ -43,7 +43,7 @@ void TSSWStochastic::Add( const CQuote& quote ) {
 }
 
 void TSSWStochastic::Expire( const CQuote& quote ) {
-  double tmp = ( quote.Ask() + quote.Bid() ) / 2.0;
+  double tmp = quote.Midpoint();
   if ( tmp != m_lastExpire ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
     m_lastExpire = tmp;
     m_minmax.Remove( m_lastExpire );

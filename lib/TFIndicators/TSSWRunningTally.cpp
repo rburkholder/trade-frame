@@ -11,37 +11,35 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-// useful for determining trending vs mean reverting
-
-#include "TimeSeriesSlidingWindow.h"
+#include "TSSWRunningTally.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade> {
-  friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>;
-public:
+TSSWRunningTally::TSSWRunningTally( CPrices* prices, long WindowSizeSeconds ) 
+  : TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>( prices, WindowSizeSeconds ),
+  m_net( 0.0 )
+{
+}
 
-  TSSWEfficiencyRatio( CTrades*, long WindowSizeSeconds );
-  TSSWEfficiencyRatio( const TSSWEfficiencyRatio& );
-  ~TSSWEfficiencyRatio( void );
+//TSSWRunningTally::TSSWRunningTally( const TSSWRunningTally& ) {
+//}
 
-  double Ratio( void ) const { return m_ratio; };
-  double Total( void ) const { return m_total; };
+TSSWRunningTally::~TSSWRunningTally(void) {
+}
 
-protected:
-  void Add( const CTrade& );
-  void Expire( const CTrade& );
-  void PostUpdate( void );
-private:
-  double m_lastAdd;
-  double m_lastExpire;
-  double m_sum;  // moving sum
-  double m_total;  // over complete time series
-  double m_ratio;
-};
+void TSSWRunningTally::Add( const CPrice& price ) {
+  m_net += price.Price();
+}
+
+void TSSWRunningTally::Expire( const CPrice& price ) {
+  m_net -= price.Price();
+}
+
+void TSSWRunningTally::PostUpdate( void ) {
+}
 
 } // namespace tf
 } // namespace ou

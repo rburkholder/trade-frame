@@ -13,34 +13,27 @@
 
 #pragma once
 
-// useful for determining trending vs mean reverting
-
 #include "TimeSeriesSlidingWindow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
-class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade> {
-  friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>;
+  
+class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, CPrice> {
+  friend TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>;
 public:
 
-  TSSWEfficiencyRatio( CTrades*, long WindowSizeSeconds );
-  TSSWEfficiencyRatio( const TSSWEfficiencyRatio& );
-  ~TSSWEfficiencyRatio( void );
+  TSSWRunningTally( CPrices*, long WindowSizeSeconds );
+//  TSSWRunningTally( const TSSWRunningTally& );
+  ~TSSWRunningTally( void );
 
-  double Ratio( void ) const { return m_ratio; };
-  double Total( void ) const { return m_total; };
+  double Net( void ) const { return m_net; };
 
 protected:
-  void Add( const CTrade& );
-  void Expire( const CTrade& );
+  void Add( const CPrice& );
+  void Expire( const CPrice& );
   void PostUpdate( void );
 private:
-  double m_lastAdd;
-  double m_lastExpire;
-  double m_sum;  // moving sum
-  double m_total;  // over complete time series
-  double m_ratio;
+  double m_net;
 };
 
 } // namespace tf

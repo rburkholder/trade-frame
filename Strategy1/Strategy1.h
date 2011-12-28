@@ -50,6 +50,9 @@ private:
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
 
+  void HandleFrameMainSize( wxSizeEvent& event );
+  void HandleFrameMainMove( wxMoveEvent& event );
+
 };
 
 // Implements MyApp& wxGetApp()

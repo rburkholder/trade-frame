@@ -127,7 +127,7 @@ template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {
 // ======== QuoteBidAsk
 
 // ======== QuoteMidPoint
-
+/*
 // not sure how to use this yet.may not even use it
 template<class T> class TimeSeriesSlidingWindowQuoteMidPoint: public TimeSeriesSlidingWindow<T, CQuote>
 {
@@ -144,7 +144,7 @@ protected:
   void PostUpdate( void ) {};  // CRTPover ride to do final calcs
 private:
 };
-
+*/
 // ======== Trade
 
 } // namespace tf

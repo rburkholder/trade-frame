@@ -11,37 +11,32 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-// useful for determining trending vs mean reverting
-
-#include "TimeSeriesSlidingWindow.h"
+#include "TSSWRateOfChange.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade> {
-  friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>;
-public:
+TSSWRateOfChange::TSSWRateOfChange( CPrices* prices, long WindowSizeSeconds ) 
+  : TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>( prices, WindowSizeSeconds ),
+  m_tail( 0.0 ), m_head( 0.0 )
+{
+}
 
-  TSSWEfficiencyRatio( CTrades*, long WindowSizeSeconds );
-  TSSWEfficiencyRatio( const TSSWEfficiencyRatio& );
-  ~TSSWEfficiencyRatio( void );
+TSSWRateOfChange::~TSSWRateOfChange(void) {
+}
 
-  double Ratio( void ) const { return m_ratio; };
-  double Total( void ) const { return m_total; };
+void TSSWRateOfChange::Add( const CPrice& price ) {
+  m_head = price.Price();
+}
 
-protected:
-  void Add( const CTrade& );
-  void Expire( const CTrade& );
-  void PostUpdate( void );
-private:
-  double m_lastAdd;
-  double m_lastExpire;
-  double m_sum;  // moving sum
-  double m_total;  // over complete time series
-  double m_ratio;
-};
+void TSSWRateOfChange::Expire( const CPrice& price ) {
+  m_tail = price.Price();
+}
+
+void TSSWRateOfChange::PostUpdate( void ) {
+}
 
 } // namespace tf
 } // namespace ou

@@ -28,7 +28,12 @@ bool AppStrategy1::OnInit() {
   m_bReadyToDrawChart = false;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Strategy Simulator" );
-  m_pFrameMain->Center();
+  wxWindowID idFrameMain = m_pFrameMain->GetId();
+  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
+  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+  //m_pFrameMain->Center();
+  m_pFrameMain->Move( -2500, 50 );
+  m_pFrameMain->SetSize( 4400, 1500 );
   m_pFrameMain->Show( true );
   SetTopWindow( m_pFrameMain );
 
@@ -43,9 +48,9 @@ bool AppStrategy1::OnInit() {
   //ID_CHART
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerMain->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
-  wxWindowID id = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &AppStrategy1::HandlePaint, this, id );
-  m_winChart->Bind( wxEVT_SIZE, &AppStrategy1::HandleSize, this, id );
+  wxWindowID idChart = m_winChart->GetId();
+  m_winChart->Bind( wxEVT_PAINT, &AppStrategy1::HandlePaint, this, idChart );
+  m_winChart->Bind( wxEVT_SIZE, &AppStrategy1::HandleSize, this, idChart );
 
 //  m_pPanelFinancialChart = new PanelFinancialChart( m_pFrameMain, wxID_ANY );
 //  m_pPanelFinancialChart->Show( true );
@@ -99,4 +104,12 @@ void AppStrategy1::HandlePaint( wxPaintEvent& event ) {
 
 void AppStrategy1::HandleSize( wxSizeEvent& event ) { 
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+}
+
+void AppStrategy1::HandleFrameMainSize( wxSizeEvent& event ) {
+  event.Skip();
+}
+
+void AppStrategy1::HandleFrameMainMove( wxMoveEvent& event ) {
+  event.Skip();
 }

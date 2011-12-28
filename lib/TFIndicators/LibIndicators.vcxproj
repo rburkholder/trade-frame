@@ -83,6 +83,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TSSWEfficiencyRatio.cpp" />
+    <ClCompile Include="TSSWRateOfChange.cpp" />
+    <ClCompile Include="TSSWRunningTally.cpp" />
     <ClCompile Include="TSSWStats.cpp" />
     <ClCompile Include="TSSWStochastic.cpp" />
     <ClCompile Include="ZigZag.cpp" />
@@ -102,6 +104,8 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TimeSeriesSlidingWindow.h" />
     <ClInclude Include="TSSWEfficiencyRatio.h" />
+    <ClInclude Include="TSSWRateOfChange.h" />
+    <ClInclude Include="TSSWRunningTally.h" />
     <ClInclude Include="TSSWStats.h" />
     <ClInclude Include="TSSWStochastic.h" />
     <ClInclude Include="ZigZag.h" />

@@ -20,7 +20,8 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIndicators/TSSWStats.h>
-#include <TFIndicators/TSSWEfficiencyRatio.h>
+#include <TFIndicators/TSSWRunningTally.h>
+#include <TFIndicators/TSSWRateOfChange.h>
 #include <TFIndicators/ZigZag.h>
 
 #include <TFSimulation/SimulationProvider.h>
@@ -101,7 +102,7 @@ private:
   ou::ChartEntryIndicator m_ceUpperBollinger1;
   ou::ChartEntryIndicator m_ceLowerBollinger1;
   ou::ChartEntryIndicator m_ceBollinger1Offset;
-  ou::ChartEntryIndicator m_ceBollinger1Ratio;
+//  ou::ChartEntryIndicator m_ceBollinger1Ratio;
 
   ou::ChartEntryIndicator m_ceSMA2;
   ou::ChartEntryIndicator m_ceSlopeOfSMA2;
@@ -110,13 +111,13 @@ private:
   ou::ChartEntryIndicator m_ceLowerBollinger2;
   ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
-  ou::ChartEntryIndicator m_ceBollinger2Ratio;
+  //ou::ChartEntryIndicator m_ceBollinger2Ratio;
 
   ou::ChartEntryIndicator m_ceSMA3;
   ou::ChartEntryIndicator m_ceUpperBollinger3;
   ou::ChartEntryIndicator m_ceLowerBollinger3;
   ou::ChartEntryIndicator m_ceBollinger3Offset;
-  ou::ChartEntryIndicator m_ceBollinger3Ratio;
+  //ou::ChartEntryIndicator m_ceBollinger3Ratio;
 
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
@@ -126,16 +127,15 @@ private:
   ou::ChartEntryIndicator m_ceOutstandingExitsLong;
   ou::ChartEntryIndicator m_ceOutstandingExitsShort;
   ou::ChartEntryIndicator m_ceSpread;
-  //ou::ChartEntryIndicator m_ceRR;
 
-//  ou::ChartEntryIndicator m_ceER1;
-//  ou::ChartEntryIndicator m_ceER2;
-//  ou::ChartEntryIndicator m_ceER3;
+  //ou::ChartEntryIndicator m_ceUpVolume;
+  //ou::ChartEntryIndicator m_ceMdVolume;
+  //ou::ChartEntryIndicator m_ceDnVolume;
+
+  ou::ChartEntryIndicator m_ceTickDiffs;
+  ou::ChartEntryIndicator m_ceTickDiffsRoc;
 
   ou::ChartEntryIndicator m_ceZigZag;
-
-  //ou::ChartEntryIndicator m_ceLongTicks;
-  //ou::ChartEntryIndicator m_ceShortTicks;
 
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;
@@ -154,6 +154,15 @@ private:
   unsigned int m_nUpTransitions;
   unsigned int m_nDnTransitions;
 
+  double m_dblUpTicks, m_dblMdTicks, m_dblDnTicks;
+  double m_dblUpVolume, m_dblMdVolume, m_dblDnVolume;
+
+  ou::tf::CPrices m_pricesTickDiffs;
+  ou::tf::TSSWRunningTally m_rtTickDiffs;
+
+  ou::tf::CPrices m_pricesTickDiffsROC;
+  ou::tf::TSSWRateOfChange m_rocTickDiffs;
+
   ou::tf::TSSWStatsMidQuote m_sma1;
   ou::tf::TSSWStatsMidQuote m_sma2;
   ou::tf::TSSWStatsMidQuote m_sma3;
@@ -162,10 +171,6 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
-
-//  ou::tf::TSSWEfficiencyRatio m_er1;
-//  ou::tf::TSSWEfficiencyRatio m_er2;
-//  ou::tf::TSSWEfficiencyRatio m_er3;
 
 //  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
 //  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
