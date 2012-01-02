@@ -147,14 +147,14 @@ private:
 
   void HandlePopulateDatabase( void );
 
-  void HandleOnExecConnected( int );  // need to test for connection failure, when ib is not running
-  void HandleOnExecDisconnected( int );
-
   void HandleOnData1Connected( int );
   void HandleOnData1Disconnected( int );
 
   void HandleOnData2Connected( int );
   void HandleOnData2Disconnected( int );
+
+  void HandleOnExecConnected( int );  // need to test for connection failure, when ib is not running
+  void HandleOnExecDisconnected( int );
 
   void HandleIBStateChangeRequest( eProviderState_t );
   void HandleIQFeedStateChangeRequest( eProviderState_t );

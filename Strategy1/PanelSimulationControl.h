@@ -49,6 +49,9 @@ public:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
+  std::string GetInstrumentName( void) const { return m_txtInstrumentName->GetLineText( 0 ); };
+  std::string GetGroupDirectory( void ) const { return m_txtGroupDirectory->GetLineText( 0 ); };
+
   typedef FastDelegate0<> OnStartSimulation_t;
   void SetOnStartSimulation( OnStartSimulation_t function ) {
     m_OnStartSimulation = function;

@@ -88,14 +88,14 @@ bool AppSemiAuto::OnInit() {
   m_sim->OnConnected.Add( MakeDelegate( this, &AppSemiAuto::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Add( MakeDelegate( this, &AppSemiAuto::HandleSimulatorDisConnected ) );
 
-  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
-
   m_pData1Provider->OnConnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnData1Connected ) );
   m_pData1Provider->OnDisconnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnData1Disconnected ) );
 
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnData2Connected ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnData2Disconnected ) );
+
+  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
 
 //  m_pThreadMain = new ThreadMain( EModeLive );
 
@@ -301,14 +301,14 @@ int AppSemiAuto::OnExit() {
 
   // Note: disconnecting from frame events should be done in HandleOnCleanUpForExitForFrameMain
 
-  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
-
   m_pData1Provider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnData1Connected ) );
   m_pData1Provider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnData1Disconnected ) );
 
   m_iqfeed->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnData2Connected ) );
   m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnData2Disconnected ) );
+
+  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleOnExecDisconnected ) );
 
   m_tws->OnConnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleIBConnected ) );
   m_tws->OnDisconnected.Remove( MakeDelegate( this, &AppSemiAuto::HandleIBDisConnected ) );

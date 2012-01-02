@@ -13,6 +13,9 @@
 
 #pragma once
 
+// 2012/01/01  could find a way to feed live data in and simulate executions against live quote/tick data
+// is this really needed?  useful if no paper trading available
+
 #include <map>
 #include <list>
 #include <string>

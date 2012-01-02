@@ -49,54 +49,85 @@ bool PanelProviderControl::Create( wxWindow* parent, wxWindowID id, const wxPoin
 }
 
 void PanelProviderControl::Init( void ) {
+//  m_nProvidersOn = 0;
   m_stateIQFeed = ProviderOff;
   m_stateIB = ProviderOff;
   m_stateSimulator = ProviderOff;
-  m_btnIQFeed = m_btnIB = m_btnSimulator = 0;
 }
 
 void PanelProviderControl::CreateControls( void ) {
 
+  // radio buttons could be auto-enabled based upon how provider indicates data, execution capability flags
+
   PanelProviderControl* itemFrame1 = this;
 
-  wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
-  itemFrame1->SetSizer(itemBoxSizer2);
+    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    itemFrame1->SetSizer(itemBoxSizer2);
 
-  wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_LEFT|wxALL, 5);
+    wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_LEFT|wxALL, 5);
 
-  wxStaticBitmap* itemStaticBitmap4 = new wxStaticBitmap( itemFrame1, wxID_BitmapIQfeed, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer3->Add(itemStaticBitmap4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnD1IQFeed = new wxRadioButton( itemFrame1, ID_RBTN_D1_IQF, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD1IQFeed->SetValue(false);
+    itemBoxSizer3->Add(m_btnD1IQFeed, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
 
-  m_btnIQFeed = new wxButton( itemFrame1, ID_BtnIQFeed, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer3->Add(m_btnIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnD2IQFeed = new wxRadioButton( itemFrame1, ID_RBTN_D2_IQF, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD2IQFeed->SetValue(false);
+    itemBoxSizer3->Add(m_btnD2IQFeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-  wxStaticText* itemStaticText6 = new wxStaticText( itemFrame1, wxID_LblIQFeed, _("IQ Feed"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer3->Add(itemStaticText6, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnXIQFeed = new wxRadioButton( itemFrame1, ID_RBTN_X_IQF, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnXIQFeed->SetValue(false);
+    m_btnXIQFeed->Enable(false);
+    itemBoxSizer3->Add(m_btnXIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-  wxBoxSizer* itemBoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer2->Add(itemBoxSizer7, 0, wxALIGN_LEFT|wxALL, 5);
+    m_btnIQFeed = new wxButton( itemFrame1, ID_BtnIQFeed, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(m_btnIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-  wxStaticBitmap* itemStaticBitmap8 = new wxStaticBitmap( itemFrame1, wxID_BitmapInteractiveBrokers, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer7->Add(itemStaticBitmap8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    wxStaticText* itemStaticText8 = new wxStaticText( itemFrame1, wxID_LblIQFeed, _("IQF"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer3->Add(itemStaticText8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-  m_btnIB = new wxButton( itemFrame1, ID_BtnInteractiveBrokers, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer7->Add(m_btnIB, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    wxBoxSizer* itemBoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer9, 0, wxALIGN_LEFT|wxALL, 5);
 
-  wxStaticText* itemStaticText10 = new wxStaticText( itemFrame1, wxID_LblInteractiveBrokers, _("Interactive Brokers"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer7->Add(itemStaticText10, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnD1IB = new wxRadioButton( itemFrame1, ID_RBTN_D1_IB, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD1IB->SetValue(false);
+    itemBoxSizer9->Add(m_btnD1IB, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
 
-  wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxHORIZONTAL);
-  itemBoxSizer2->Add(itemBoxSizer11, 0, wxALIGN_LEFT|wxALL, 5);
+    m_btnD2IB = new wxRadioButton( itemFrame1, ID_RBTN_D2_IB, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD2IB->SetValue(false);
+    itemBoxSizer9->Add(m_btnD2IB, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-  wxStaticBitmap* itemStaticBitmap12 = new wxStaticBitmap( itemFrame1, wxID_BitmapSimulation, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer11->Add(itemStaticBitmap12, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnXIB = new wxRadioButton( itemFrame1, ID_RBTN_X_IB, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnXIB->SetValue(false);
+    itemBoxSizer9->Add(m_btnXIB, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-  m_btnSimulator = new wxButton( itemFrame1, ID_BtnSimulation, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer11->Add(m_btnSimulator, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_btnIB = new wxButton( itemFrame1, ID_BtnInteractiveBrokers, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(m_btnIB, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-  wxStaticText* itemStaticText14 = new wxStaticText( itemFrame1, wxID_LblSimulation, _("Simulation"), wxDefaultPosition, wxDefaultSize, 0 );
-  itemBoxSizer11->Add(itemStaticText14, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    wxStaticText* itemStaticText14 = new wxStaticText( itemFrame1, wxID_LblInteractiveBrokers, _("IB"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(itemStaticText14, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer15, 0, wxALIGN_LEFT|wxALL, 5);
+
+    m_btnD1Simulator = new wxRadioButton( itemFrame1, ID_RBTN_D1_SIM, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD1Simulator->SetValue(false);
+    itemBoxSizer15->Add(m_btnD1Simulator, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
+
+    m_btnD2Simulator = new wxRadioButton( itemFrame1, ID_RBTN_D2_SIM, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnD2Simulator->SetValue(false);
+    m_btnD2Simulator->Enable(false);
+    itemBoxSizer15->Add(m_btnD2Simulator, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+
+    m_btnXSimulator = new wxRadioButton( itemFrame1, ID_RBTN_X_SIM, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
+    m_btnXSimulator->SetValue(false);
+    itemBoxSizer15->Add(m_btnXSimulator, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+
+    m_btnSimulator = new wxButton( itemFrame1, ID_BtnSimulation, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer15->Add(m_btnSimulator, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxStaticText* itemStaticText20 = new wxStaticText( itemFrame1, wxID_LblSimulation, _("Sim"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer15->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
   // Connect events and objects
 
@@ -109,6 +140,16 @@ void PanelProviderControl::CreateControls( void ) {
   Bind( EVT_ProviderIB, &PanelProviderControl::OnIBState, this );
   Bind( EVT_ProviderIQFeed, &PanelProviderControl::OnIQFeedState, this );
   Bind( EVT_ProviderSimulator, &PanelProviderControl::OnSimulatorState, this );
+
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD1IQFeed, this, ID_RBTN_D1_IQF );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD2IQFeed, this, ID_RBTN_D2_IQF );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioXIQFeed, this, ID_RBTN_X_IQF );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD1IB, this, ID_RBTN_D1_IB );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD2IB, this, ID_RBTN_D2_IB );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioXIB, this, ID_RBTN_X_IB );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD1Sim, this, ID_RBTN_D1_SIM );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioD2Sim, this, ID_RBTN_D2_SIM );
+  Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &PanelProviderControl::OnRadioXSim, this, ID_RBTN_X_SIM );
 
 }
 
@@ -157,6 +198,9 @@ void PanelProviderControl::SetState( wxButton* btn, eProviderState_t state ) {
   case ProviderOff:
     btn->SetLabelText( "Turn On" );
     btn->Enable();
+    if ( ( ProviderOff == m_stateIQFeed ) && ( ProviderOff == m_stateIB ) && ( ProviderOff == m_stateSimulator ) ) {
+      EnableAllRadio();
+    }
     break;
   case ProviderOn:
     btn->SetLabelText( "Turn Off" );
@@ -165,6 +209,9 @@ void PanelProviderControl::SetState( wxButton* btn, eProviderState_t state ) {
   case ProviderGoingOn:
     btn->SetLabelText( "Going On" );
     btn->Disable();
+    if ( ( ProviderOff != m_stateIQFeed ) || ( ProviderOff != m_stateIB ) || ( ProviderOff != m_stateSimulator ) ) {
+      DisableAllRadio();
+    }
     break;
   case ProviderGoingOff:
     btn->SetLabelText( "Going Off" );
@@ -174,18 +221,18 @@ void PanelProviderControl::SetState( wxButton* btn, eProviderState_t state ) {
 }
 
 void PanelProviderControl::SetIQFeedState( eProviderState_t state ) {
-  SetState( m_btnIQFeed, state );
   m_stateIQFeed = state;
+  SetState( m_btnIQFeed, state );
 }
 
 void PanelProviderControl::SetIBState( eProviderState_t state ) {
-  SetState( m_btnIB, state );
   m_stateIB = state;
+  SetState( m_btnIB, state );
 }
 
 void PanelProviderControl::SetSimulatorState( eProviderState_t state ) {
-  SetState( m_btnSimulator, state );
   m_stateSimulator = state;
+  SetState( m_btnSimulator, state );
 }
 
 void PanelProviderControl::OnIQFeedState( UpdateProviderStatusEvent& event ) {
@@ -199,5 +246,103 @@ void PanelProviderControl::OnIBState( UpdateProviderStatusEvent& event ) {
 void PanelProviderControl::OnSimulatorState( UpdateProviderStatusEvent& event ) {
   SetSimulatorState( event.GetState() );
 }
+
+void PanelProviderControl::OnRadioD1IQFeed( wxCommandEvent& event ) {
+  ResetAllRadioData1();
+  m_btnD1IQFeed->SetValue( true );
+  if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
+}
+
+void PanelProviderControl::OnRadioD2IQFeed( wxCommandEvent& event ) {
+  ResetAllRadioData2();
+  m_btnD2IQFeed->SetValue( true );
+  if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
+}
+
+void PanelProviderControl::OnRadioXIQFeed( wxCommandEvent& event ) {
+  ResetAllRadioExec();
+  //m_btnXIQFeed->SetValue( true );
+  //if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIQFeed );
+}
+
+void PanelProviderControl::OnRadioD1IB( wxCommandEvent& event ) {
+  ResetAllRadioData1();
+  m_btnD1IB->SetValue( true );
+  if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIB );
+}
+
+void PanelProviderControl::OnRadioD2IB( wxCommandEvent& event ) {
+  ResetAllRadioData2();
+  m_btnD2IB->SetValue( true );
+  if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIB );
+}
+
+void PanelProviderControl::OnRadioXIB( wxCommandEvent& event ) {
+  ResetAllRadioExec();
+  m_btnXIB->SetValue( true );
+  if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIB );
+}
+
+void PanelProviderControl::OnRadioD1Sim( wxCommandEvent& event ) {
+  ResetAllRadioData1();
+  m_btnD1Simulator->SetValue( true );
+  if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( ESim );
+}
+
+void PanelProviderControl::OnRadioD2Sim( wxCommandEvent& event ) {
+  ResetAllRadioData2();
+  //m_btnD2Simulator->SetValue( true );
+  //if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( ESim );
+}
+
+void PanelProviderControl::OnRadioXSim( wxCommandEvent& event ) {
+  ResetAllRadioExec();
+  m_btnXSimulator->SetValue( true );
+  if ( 0 != OnProviderSelectX ) OnProviderSelectX( ESim );
+}
+
+void PanelProviderControl::ResetAllRadioData1( void ) {
+  m_btnD1IQFeed->SetValue( false );
+  m_btnD1IB->SetValue( false );
+  m_btnD1Simulator->SetValue( false );
+}
+
+void PanelProviderControl::ResetAllRadioData2( void ) {
+  m_btnD2IQFeed->SetValue( false );
+  m_btnD2IB->SetValue( false );
+  m_btnD2Simulator->SetValue( false );
+}
+
+void PanelProviderControl::ResetAllRadioExec( void ) {
+  m_btnXIQFeed->SetValue( false );
+  m_btnXIB->SetValue( false );
+  m_btnXSimulator->SetValue( false );
+}
+
+void PanelProviderControl::EnableAllRadio( void ) {
+  m_btnD1IQFeed->Enable();
+  m_btnD2IQFeed->Enable();
+  //m_btnXIQFeed->Enable();  // IQFeed does not have execution ability
+  m_btnD1IB->Enable();
+  m_btnD2IB->Enable();
+  m_btnXIB->Enable();
+  m_btnD1Simulator->Enable();
+  //m_btnD2Simulator->Enable();  // special provider specific
+  m_btnXSimulator->Enable();
+}
+
+void PanelProviderControl::DisableAllRadio( void ) {
+  m_btnD1IQFeed->Disable();
+  m_btnD2IQFeed->Disable();
+  m_btnXIQFeed->Disable();
+  m_btnD1IB->Disable();
+  m_btnD2IB->Disable();
+  m_btnXIB->Disable();
+  m_btnD1Simulator->Disable();
+  m_btnD2Simulator->Disable();
+  m_btnXSimulator->Disable();
+}
+
+
 } // namespace tf
 } // namespace ou

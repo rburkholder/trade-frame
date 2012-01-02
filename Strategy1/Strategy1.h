@@ -15,6 +15,8 @@
 
 #include <OUCharting/ChartMaster.h>
 
+#include <TFBitsNPieces/FrameWork01.h>
+
 #include "FrameMain.h"
 #include "PanelSimulationControl.h"
 #include "PanelFinancialChart.h"
@@ -22,11 +24,18 @@
 #include "Strategy.h"
 
 class AppStrategy1:
-  public wxApp
+  public wxApp, public ou::tf::FrameWork01<AppStrategy1>
 {
 public:
 protected:
 private:
+
+  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::eProviderState_t eProviderState_t;
+
+  typedef ou::tf::CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
 
   Strategy* m_pStrategy;
 
@@ -39,6 +48,8 @@ private:
   ou::ChartMaster m_chart;
 
   bool m_bReadyToDrawChart;
+
+  std::string m_sTSDataStreamOpened;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -53,7 +64,7 @@ private:
   void HandleFrameMainSize( wxSizeEvent& event );
   void HandleFrameMainMove( wxMoveEvent& event );
 
-};
+  };
 
 // Implements MyApp& wxGetApp()
 DECLARE_APP(AppStrategy1)

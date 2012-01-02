@@ -42,10 +42,13 @@
 class Strategy {
 public:
 
-  Strategy(void);
+  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+
+  Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider );
   ~Strategy(void);
 
-  void Start( const std::string& sSymbolPath );
+  void Start( void ); // for real time
+  void Start( const std::string& sSymbolPath );  // for simulation
 
   ou::ChartDataView& GetChartDataView( void ) {return m_dvChart; };
 
@@ -68,7 +71,6 @@ private:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
 
   typedef ou::tf::CInstrument::pInstrument_t m_pInstrument_t;
@@ -140,8 +142,6 @@ private:
   ou::ChartEntryShape m_ceShorts;
   ou::ChartEntryShape m_ceLongs;
 
-  typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
-
   pPosition_t m_pPositionLong;
   pPosition_t m_pPositionShort;
 
@@ -186,11 +186,13 @@ private:
 
   ou::tf::ZigZag m_zigzagPrice;
 
+  typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
+
   pProviderSim_t m_sim;
   bool m_bSimConnected;
 
-  pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
+  pProvider_t m_pExecutionProvider;
 
   void HandleSimulatorConnected( int );
   void HandleSimulatorDisConnected( int );

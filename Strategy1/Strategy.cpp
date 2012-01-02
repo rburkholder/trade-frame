@@ -20,8 +20,10 @@
 
 #include "Strategy.h"
 
-Strategy::Strategy(void) 
-  : m_sim( new ou::tf::CSimulationProvider() ),
+Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider ) 
+  : 
+  m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider ),
+  //m_sim( new ou::tf::CSimulationProvider() ),
   m_TradeDirection( ETradeDirUnkn ),
   m_sma1( &m_quotes,   60 ), //   1 min
   m_sma2( &m_quotes,  120 ), //   2 min
@@ -32,7 +34,8 @@ Strategy::Strategy(void)
   m_sma7( &m_quotes, 3600 ), //  60 min
   m_sma8( &m_quotes, 7200 ), // 120 min
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
-  m_stateTrade( ETradeStart ), m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
+  m_stateTrade( ETradeStart ), //m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
+  m_dtEnd( boost::date_time::not_a_date_time ),
   m_tdTimeBetweenTrades( 0, 0, 0 ), m_dtLastSubmission( boost::date_time::not_a_date_time ),
   m_nUpTransitions( 0 ), m_nDnTransitions( 0 ), 
   m_barFactory( 180 ),
@@ -50,9 +53,12 @@ Strategy::Strategy(void)
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
 
+  assert( m_pDataProvider->Connected() && m_pExecutionProvider->Connected() );
+
   m_tdTimeBetweenTrades += boost::posix_time::millisec( 30 );
 
-  ou::tf::CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+//  ou::tf::CProviderManager::Instance().Register( "data01", m_pDataProvider );
+//  ou::tf::CProviderManager::Instance().Register( "exec01", m_pExecutionProvider );
 
   m_dvChart.Add( 0, m_ceZigZag );
   m_dvChart.Add( 0, m_ceShorts );
@@ -152,70 +158,46 @@ Strategy::Strategy(void)
 
   m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
 
-  m_sim->OnConnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
-  m_sim->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
+//  m_sim->OnConnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
+//  m_sim->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
 
-  m_pExecutionProvider = m_sim;
-  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &Strategy::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleOnExecDisconnected ) );
+//  m_pExecutionProvider = m_sim;
+//  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &Strategy::HandleOnExecConnected ) );
+//  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleOnExecDisconnected ) );
 
-  m_pDataProvider = m_sim;
-  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Strategy::HandleOnData1Connected ) );
-  m_pDataProvider->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleOnData1Disconnected ) );
+//  m_pDataProvider = m_sim;
+//  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Strategy::HandleOnData1Connected ) );
+//  m_pDataProvider->OnDisconnected.Add( MakeDelegate( this, &Strategy::HandleOnData1Disconnected ) );
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   m_pTestInstrument = mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 );
   m_pTestInstrument->SetMultiplier( 100 );
   m_pTestInstrument->SetMinTick( 0.1 );
 
-  //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
-  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
-  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
-  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
-//  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
-  
-  m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
-  m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
-  //m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstQuote ) );
-  //m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstTrade ) );
-  m_sim->SetOnSimulationComplete( MakeDelegate( this, &Strategy::HandleSimulationComplete ) );
-
-  m_pPositionLong.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  m_pPositionLong->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  m_pPositionLong->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
-
-  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLong );
-
-  m_pPositionShort.reset( new ou::tf::CPosition( m_pTestInstrument, m_sim, m_sim ) );
-  m_pPositionShort->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
-  m_pPositionShort->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
-
-  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShort );
 }
 
 Strategy::~Strategy(void) {
 
-  m_sim->SetOnSimulationComplete( 0 );
-  m_sim->RemoveQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
-  m_sim->RemoveTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
+//  m_sim->SetOnSimulationComplete( 0 );
+//  m_sim->RemoveQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
+//  m_sim->RemoveTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
 
-  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleOnData1Connected ) );
-  m_pDataProvider->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleOnData1Disconnected ) );
+//  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleOnData1Connected ) );
+//  m_pDataProvider->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleOnData1Disconnected ) );
 
-  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleOnExecDisconnected ) );
+//  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleOnExecConnected ) );
+//  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleOnExecDisconnected ) );
 
-  m_sim->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
-  m_sim->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
+//  m_sim->OnConnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorConnected ) );
+//  m_sim->OnDisconnected.Remove( MakeDelegate( this, &Strategy::HandleSimulatorDisConnected ) );
 
   m_barFactory.SetOnBarComplete( 0 );
 
-  ou::tf::CProviderManager::Instance().Release( "sim01" );
+//  ou::tf::CProviderManager::Instance().Release( "sim01" );
 
 }
 
 void Strategy::HandleSimulatorConnected( int ) {
-  m_sim->Run();
 }
 
 void Strategy::HandleSimulatorDisConnected( int ) {
@@ -233,8 +215,38 @@ void Strategy::HandleOnData1Connected( int ) {
 void Strategy::HandleOnData1Disconnected( int ) {
 }
 
+void Strategy::Start( void ) {
+}
+
 void Strategy::Start( const std::string& sSymbolPath ) {
-  m_sim->Connect();
+  m_sim = boost::dynamic_pointer_cast<ou::tf::CSimulationProvider>( m_pExecutionProvider );
+  //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
+  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
+//  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
+
+  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
+  
+  m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
+  m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
+  //m_sim->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstQuote ) );
+  //m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstTrade ) );
+  m_sim->SetOnSimulationComplete( MakeDelegate( this, &Strategy::HandleSimulationComplete ) );
+
+  m_pPositionLong.reset( new ou::tf::CPosition( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
+  m_pPositionLong->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionLong->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+
+  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLong );
+
+  m_pPositionShort.reset( new ou::tf::CPosition( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
+  m_pPositionShort->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionShort->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+
+  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShort );
+
+  m_sim->Run();
 }
 
 void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
