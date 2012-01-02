@@ -194,14 +194,16 @@ private:
   pProvider_t m_pDataProvider;
   pProvider_t m_pExecutionProvider;
 
-  void HandleSimulatorConnected( int );
-  void HandleSimulatorDisConnected( int );
+  void Activate( void );
 
-  void HandleOnExecConnected( int ); 
-  void HandleOnExecDisconnected( int );
+  void HandleSimulatorConnected( int ) {};
+  void HandleSimulatorDisConnected( int ) {};
 
-  void HandleOnData1Connected( int );
-  void HandleOnData1Disconnected( int );
+  void HandleOnExecConnected( int ) {}; 
+  void HandleOnExecDisconnected( int ) {};
+
+  void HandleOnData1Connected( int ) {};
+  void HandleOnData1Disconnected( int ) {};
 
   void HandleFirstQuote( const ou::tf::CQuote& quote );
   void HandleFirstTrade( const ou::tf::CTrade& trade );
