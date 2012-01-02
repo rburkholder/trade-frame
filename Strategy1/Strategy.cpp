@@ -178,13 +178,13 @@ void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 
   m_sim = boost::dynamic_pointer_cast<ou::tf::CSimulationProvider>( m_pExecutionProvider );
 
-  //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
-  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
+  m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
 //  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
 
-  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
+  m_dtEnd = boost::posix_time::ptime( date( 2011, 9, 24 ), time_duration( 17, 45, 0 ) );  // put in time start
   
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &Strategy::HandleSimulationComplete ) );
 
@@ -196,12 +196,6 @@ void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 void Strategy::Activate( void ) {
 
   // all this needs to run together, as the group directory from above required for symbol access
-  // things screw up if these two lines come last
-  m_pDataProvider->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
-  m_pDataProvider->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
-  //m_pDataProvider->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstQuote ) );
-  //m_pDataProvider->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstTrade ) );
-
   m_pPositionLong.reset( new ou::tf::CPosition( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
   m_pPositionLong->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pPositionLong->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
@@ -213,6 +207,12 @@ void Strategy::Activate( void ) {
   m_pPositionShort->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
   m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShort );
+
+  // things screw up if these two lines come last
+  m_pDataProvider->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleQuote ) );
+  m_pDataProvider->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
+  //m_pDataProvider->AddQuoteHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstQuote ) );
+  //m_pDataProvider->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleFirstTrade ) );
 
 }
 
@@ -380,9 +380,11 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             m_pOrdersOutstandingLongs->CancelAllButNEntryOrders( 2 );
             double dblNormalized = m_pTestInstrument->NormalizeOrderPrice( quote.Midpoint() - 0.10 );
             m_pOrder = m_pPositionLong->
+
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalized );
             m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingLongs->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized + 0.2, sma2.MeanY() ) );
+            m_pOrdersOutstandingLongs->AddOrderFilling( 
+              new structRoundTrip( m_pOrder, dblNormalized + 0.2, m_pTestInstrument->NormalizeOrderPrice(sma2.MeanY() ) ) );
             m_pOrder.reset();
             ++m_nUpTransitions;
             m_dblLastMidpoint = midpoint;
@@ -415,7 +417,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
             m_pOrder = m_pPositionShort->
               PlaceOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, dblNormalized );
             m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-            m_pOrdersOutstandingShorts->AddOrderFilling( new structRoundTrip( m_pOrder, dblNormalized - 0.2, sma2.MeanY() ) );
+            m_pOrdersOutstandingShorts->AddOrderFilling( 
+              new structRoundTrip( m_pOrder, dblNormalized - 0.2, m_pTestInstrument->NormalizeOrderPrice( sma2.MeanY() ) ) );
             m_pOrder.reset();
             ++m_nDnTransitions;
             m_dblLastMidpoint = midpoint;

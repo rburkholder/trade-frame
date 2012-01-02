@@ -89,6 +89,8 @@ protected:
   double m_dblCommission;  // currency, per share (need also per trade)
 //  enumExecuteAgainst m_ea;
 
+  CQuote m_lastQuote;
+
   OnOrderCancelledHandler OnOrderCancelled;
   OnOrderFillHandler OnOrderFill;
   OnNoOrderFoundHandler OnNoOrderFound;

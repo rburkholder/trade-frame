@@ -39,6 +39,7 @@ void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
 //  if ( EAQuotes == m_ea ) {
     ProcessOrderQueues( quote );
+    m_lastQuote = quote;
 //  }
 }
 
@@ -208,7 +209,20 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
 }
 
 bool CSimulateOrderExecution::ProcessLimitOrders( const CTrade& trade ) {
-  CQuote quote( trade.DateTime(), trade.Trade(), trade.Volume(), trade.Trade(), trade.Volume() );
+  //bool bAllow( true );
+  double bid( trade.Trade() );
+  double ask( trade.Trade() );
+  if ( !m_mapAsks.empty() ) {
+    if ( m_lastQuote.Ask() <= m_mapAsks.begin()->first ) {
+      ask = m_lastQuote.Ask();
+    }
+  }
+  if ( !m_mapBids.empty() ) {
+    if ( m_lastQuote.Bid() >= m_mapBids.rbegin()->first ) {
+      bid = m_lastQuote.Bid();
+    }
+  }
+  CQuote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
   return ProcessLimitOrders( quote );
 }
 
@@ -218,7 +232,7 @@ void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {
 
   // process the delay list
   while ( !m_lOrderDelay.empty() ) {
-    if ( ( m_lOrderDelay.front()->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) < quote.DateTime() ) {
+    if ( ( m_lOrderDelay.front()->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) >= quote.DateTime() ) {
       break;
     }
     else {
@@ -269,7 +283,7 @@ void CSimulateOrderExecution::ProcessCancelQueue( const CQuote& quote ) {
 
   // process cancels list
   while ( !m_lCancelDelay.empty() ) {
-    if ( ( m_lCancelDelay.front().dtCancellation + m_dtQueueDelay ) < quote.DateTime() ) {
+    if ( ( m_lCancelDelay.front().dtCancellation + m_dtQueueDelay ) >= quote.DateTime() ) {
       break;  // havn't waited long enough to simulate cancel submission
     }
     else {
