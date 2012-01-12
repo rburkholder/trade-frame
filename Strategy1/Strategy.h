@@ -64,7 +64,11 @@ private:
     ETradeWaitForBollingerToRise, ETradeWaitForBollingerToFall,
     ETradeWaitForTrendConfirmation,
     ETradeLongAndWaitForCrossingSMADownwards, ETradeShortAndWaitForCrossingSMAUpwards, 
+    ETradeAbove21Starting, ETradeAbove21Ending, ETradeAbove21, ETradeBelow19, ETradeBelow05, ETradeAbove60,
+    ETradeLong, ETradeShort
   } m_stateTrade;
+
+  enum enumTradeDirection { ETradeDirUnkn, ETradeDirUp, ETradeDirDn } m_TradeDirection;
 
   std::stringstream m_ss;
 
@@ -78,7 +82,6 @@ private:
   pInstrument_t m_pLongInstrument;
   pInstrument_t m_pTestInstrument;
 
-  enum enumTradeDirection { ETradeDirUnkn, ETradeDirUp, ETradeDirDn } m_TradeDirection;
   ou::tf::CQuote m_quoteLast;  // used for classifying the current trade direction
 
   double m_dblLastMidpoint;
@@ -105,6 +108,7 @@ private:
   ou::ChartEntryIndicator m_ceLowerBollinger1;
   ou::ChartEntryIndicator m_ceBollinger1Offset;
 //  ou::ChartEntryIndicator m_ceBollinger1Ratio;
+//  ou::ChartEntryIndicator m_ceSMA1RR;
 
   ou::ChartEntryIndicator m_ceSMA2;
   ou::ChartEntryIndicator m_ceSlopeOfSMA2;
@@ -114,12 +118,14 @@ private:
   ou::ChartEntryIndicator m_ceBollinger2Offset;
   ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
   //ou::ChartEntryIndicator m_ceBollinger2Ratio;
+  ou::ChartEntryIndicator m_ceSMA2RR;
 
   ou::ChartEntryIndicator m_ceSMA3;
   ou::ChartEntryIndicator m_ceUpperBollinger3;
   ou::ChartEntryIndicator m_ceLowerBollinger3;
   ou::ChartEntryIndicator m_ceBollinger3Offset;
   //ou::ChartEntryIndicator m_ceBollinger3Ratio;
+  ou::ChartEntryIndicator m_ceSMA3RR;
 
   ou::ChartEntryIndicator m_cePLLong;
   ou::ChartEntryIndicator m_cePLShort;
