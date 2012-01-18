@@ -79,9 +79,10 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_dvChart.Add( 2, m_ceSMA2RR );
 //  m_dvChart.Add( 2, m_ceTickDiffsRoc );
 //  m_dvChart.Add( 2, m_ceSMA1RR );
-  m_dvChart.Add( 2, m_ceSMA2RR );
+/*  m_dvChart.Add( 2, m_ceSMA2RR );
   m_dvChart.Add( 2, m_ceSMA3RR );
   m_dvChart.Add( 4, m_ceSlopeOfSMA2 );
+  m_dvChart.Add( 4, m_ceSlopeOfSMA3 );
   m_dvChart.Add( 4, m_ceSlopeOfSlopeOfSMA2 );
 //  m_dvChart.Add( 4, m_ceSlopeOfBollinger2Offset );
 //  m_dvChart.Add( 4, m_ceBollinger1Offset );
@@ -94,7 +95,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_dvChart.Add( 3, m_ceRR );
   m_dvChart.Add( 7, m_cePLLong );
   m_dvChart.Add( 7, m_cePLShort );
-  m_dvChart.Add( 7, m_cePLNet );
+  m_dvChart.Add( 7, m_cePLNet ); */
 //  m_dvChart.Add( 5, m_ceSpread );
 
 //  m_dvChart.Add( 8, m_ceBollinger3Ratio );
@@ -128,6 +129,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 
 //  m_ceSlopeOfSMA1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceSlopeOfSMA2.SetColour( ou::Colour::Turquoise );
+  m_ceSlopeOfSMA3.SetColour( ou::Colour::GreenYellow );
 
 //  m_ceSlopeOfSlopeOfSMA1.SetColour( ou::Colour::MediumAquamarine );
   m_ceSlopeOfSlopeOfSMA2.SetColour( ou::Colour::Green );
@@ -238,7 +240,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   m_quotes.Append( quote );
 
   // high speed simple moving average
-  ou::tf::TSSWStatsMidQuote& sma1( m_sma3 );
+  ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );
   sma1.Update();
 
 //  m_ceSMA1RR.Add( dt, sma1.RR() );
@@ -247,7 +249,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //  m_tsswSlopeOfSlopeOfSMA1.Update();
 
   // medium speed moving average
-  ou::tf::TSSWStatsMidQuote& sma2( m_sma5 );
+  ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
   sma2.Update();
 
   double dblSMA2RR = sma2.RR();
@@ -257,7 +259,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   m_tsswSlopeOfBollinger2Offset.Update();
 
   // slow speed moving average
-  ou::tf::TSSWStatsMidQuote& sma3( m_sma6 );
+  ou::tf::TSSWStatsMidQuote& sma3( m_sma7 );
   sma3.Update();
 
   m_ceSMA3RR.Add( dt, sma3.RR() );
@@ -324,6 +326,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_ceSlopeOfBollinger2Offset.Add( dt, dblBollingerSlope * 2.0 );
 
     m_ceSMA3.Add( dt, sma3.MeanY() );
+    m_ceSlopeOfSMA3.Add( dt, sma3.Slope() * 10.0 );
     m_ceUpperBollinger3.Add( dt, sma3.BBUpper() );
     m_ceLowerBollinger3.Add( dt, sma3.BBLower() );
     m_ceBollinger3Offset.Add( dt, sma3.BBOffset() );
@@ -366,12 +369,12 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       m_stateTrade = ETradeAbove21Starting;
       break;
     case ETradeAbove21Starting:
-      if ( 21 < dblSMA2RR ) {
+      if ( 0.21 < dblSMA2RR ) {
         m_stateTrade = ETradeAbove21Ending;
       }
       break;
     case ETradeAbove21Ending:
-      if ( 19 > dblSMA2RR ) {
+      if ( 0.19 > dblSMA2RR ) {
         m_stateTrade = ETradeBelow19;
       }
       break;
@@ -396,7 +399,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //          m_stateTrade = ETradeBelow05;
 //          bTimeToExit = true;
 //        }
-        if ( 60 < dblSMA2RR ) {
+        if ( 0.60 < dblSMA2RR ) {
           m_stateTrade = ETradeAbove60;
           bTimeToExit = true;
         }
@@ -433,7 +436,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //          m_stateTrade = ETradeBelow05;
 //          bTimeToExit = true;
 //        }
-        if ( 60 < dblSMA2RR ) {
+        if ( 0.60 < dblSMA2RR ) {
           m_stateTrade = ETradeAbove60;
           bTimeToExit = true;
         }

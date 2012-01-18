@@ -26,7 +26,6 @@ namespace tf { // TradeFrame
 
 CSimulationProvider::CSimulationProvider(void)
 : CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
-//  m_ea( CSimulateOrderExecution::EAQuotes ), 
   m_pMerge( NULL )
 {
   m_sName = "Simulator";
@@ -84,7 +83,6 @@ CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbo
   pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &CSimulationProvider::HandleCommission ) );
   pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &CSimulationProvider::HandleCancellation ) );
   inherited_t::AddCSymbol( pSymbol );
-//  pSymbol->m_simExec.SetExecuteAgainst( m_ea );
   return pSymbol;
 }
 

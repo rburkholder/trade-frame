@@ -31,16 +31,12 @@ CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 }
 
 void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
-//  if ( EATrades == m_ea ) {
-    ProcessLimitOrders( trade );
-//  }
+  ProcessLimitOrders( trade );
 }
 
 void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
-//  if ( EAQuotes == m_ea ) {
-    ProcessOrderQueues( quote );
-    m_lastQuote = quote;
-//  }
+  ProcessOrderQueues( quote );
+  m_lastQuote = quote;
 }
 
 void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
@@ -53,7 +49,7 @@ void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
 }
 
 void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
-  // COrder should have commission calculation?
+  // COrder or CInstrument should have commission calculation?
   if ( 0 != quan ) {
     if ( NULL != OnCommission ) {
       double dblCommission( 0 );

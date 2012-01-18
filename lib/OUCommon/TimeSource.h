@@ -13,7 +13,9 @@
 
 #pragma once
 
-#include "assert.h"
+#include <assert.h>
+
+#include <vector>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
@@ -21,69 +23,63 @@ using namespace boost::gregorian;
 #include <boost/thread/mutex.hpp>
 
 #include "Singleton.h"
+#include "ReusableBuffers.h"
 
 namespace ou {
 
 class CTimeSource : public CSingleton<CTimeSource> {
 public:
 
-  CTimeSource(void)
-  : m_bInSimulation( false ),
-    m_dtSimulationTime( boost::date_time::not_a_date_time ),
-    m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) {};
+  struct SimulationContext {
+    ptime m_dtSimulationTime;
+    bool m_bInSimulation;
+    SimulationContext( void ) : m_bInSimulation( false ), m_dtSimulationTime( boost::date_time::not_a_date_time ) {};
+  };
+
+  CTimeSource(void);
   ~CTimeSource(void) {};
 
-  ptime External( ptime* dt ) { 
-    // this ensures we always have a monotonically increasing time (for use in simulations)
-    boost::mutex::scoped_lock lock( m_mutex );
-    ptime& dt_ = *dt;  // create reference to existing location for ease of use
-    dt_ = boost::posix_time::microsec_clock::local_time();
-    if ( m_dtLastRetrievedExternalTime >= dt_ ) {  
-      m_dtLastRetrievedExternalTime += boost::posix_time::microsec( 1 );
-      dt_ = m_dtLastRetrievedExternalTime;
-    }
-    else {
-      m_dtLastRetrievedExternalTime = dt_;
-    }
-    return dt_;
-  };
+  ptime External( ptime* dt );
 
   inline ptime External( void ) {
     ptime dt;
     return External( &dt );
   };
 
-  ptime Internal( void ) { 
-    if ( m_bInSimulation ) 
-      return m_dtSimulationTime;
-    else 
-      return External(); 
+  inline ptime Internal( void ) { 
+    return Internal( &m_contextCommon );
   };
 
   inline void Internal( ptime* dt ) {
     *dt = Internal();
   }
 
-  void SetSimulationMode( bool bMode = true ) { m_bInSimulation = bMode; m_dtSimulationTime = boost::date_time::not_a_date_time; };
-  void ResetSimulationMode( void ) { m_bInSimulation = false; };
-  bool GetSimulationMode( void ) { return m_bInSimulation; };
+  void Internal( ptime* dt, SimulationContext* );
+  ptime Internal( SimulationContext* );
+
+  void SetSimulationMode( bool bMode = true ) { m_contextCommon.m_bInSimulation = bMode; m_contextCommon.m_dtSimulationTime = boost::date_time::not_a_date_time; };
+  void ResetSimulationMode( void ) { m_contextCommon.m_bInSimulation = false; };
+  bool GetSimulationMode( void ) { return m_contextCommon.m_bInSimulation; };
   void SetSimulationTime(const ptime &dt) {
 #ifdef _DEBUG
-    if ( boost::date_time::not_a_date_time != m_dtSimulationTime ) {
-      assert( m_dtSimulationTime <= dt );
+    if ( boost::date_time::not_a_date_time != m_contextCommon.m_dtSimulationTime ) {
+      assert( m_contextCommon.m_dtSimulationTime <= dt );
     }
 #endif
-    m_dtSimulationTime = dt; 
+    m_contextCommon.m_dtSimulationTime = dt; 
   }
-  void ForceSimulationTime( const ptime &dt ) { m_bInSimulation = true; m_dtSimulationTime = dt; };
+  void ForceSimulationTime( const ptime &dt ) { m_contextCommon.m_bInSimulation = true; m_contextCommon.m_dtSimulationTime = dt; };
+
+  SimulationContext* AcquireSimulationContext( void );
+  void ReleaseSimulationContext( SimulationContext* );
 
 protected:
-
-  bool m_bInSimulation;
-  ptime m_dtSimulationTime;
-  ptime m_dtLastRetrievedExternalTime;
-
 private:
+
+  CBufferRepository<SimulationContext> m_contexts;
+
+  SimulationContext m_contextCommon;
+  ptime m_dtLastRetrievedExternalTime;
 
   boost::mutex m_mutex;
 };

@@ -52,7 +52,6 @@ public:
   typedef CInstrument::pInstrument_cref pInstrument_cref;
   typedef COrder::pOrder_t pOrder_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
-  typedef CSimulateOrderExecution::enumExecuteAgainst enumExecuteAgainst;
 
   CSimulationProvider(void);
   virtual ~CSimulationProvider(void);
@@ -61,8 +60,6 @@ public:
 
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
-//  void SetExecuteAgainst( enumExecuteAgainst ea ) { m_ea = ea; };
-//  enumExecuteAgainst GetExecuteAgainst( void ) { return m_ea; };
 
   void Run( void );
   void Stop( void );
@@ -82,8 +79,6 @@ public:
   }
 
 protected:
-
-//  enumExecuteAgainst m_ea;
 
   pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
   void StartQuoteWatch( pSymbol_t pSymbol );

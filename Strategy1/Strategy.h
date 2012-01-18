@@ -121,6 +121,7 @@ private:
   ou::ChartEntryIndicator m_ceSMA2RR;
 
   ou::ChartEntryIndicator m_ceSMA3;
+  ou::ChartEntryIndicator m_ceSlopeOfSMA3;
   ou::ChartEntryIndicator m_ceUpperBollinger3;
   ou::ChartEntryIndicator m_ceLowerBollinger3;
   ou::ChartEntryIndicator m_ceBollinger3Offset;

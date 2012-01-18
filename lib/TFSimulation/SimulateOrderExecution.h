@@ -60,14 +60,6 @@ public:
     OnCommission = function;
   }
 
-  enum enumExecuteAgainst {
-    EAQuotes, EATrades
-  };
-
-  void SetExecuteAgainst( enumExecuteAgainst ea ) { 
-    assert( ( EAQuotes == ea ) || ( EATrades == ea ) );
-//    m_ea = ea;
-  }
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
 
@@ -87,7 +79,6 @@ protected:
   };
   boost::posix_time::time_duration m_dtQueueDelay; // used to simulate network / handling delays
   double m_dblCommission;  // currency, per share (need also per trade)
-//  enumExecuteAgainst m_ea;
 
   CQuote m_lastQuote;
 
