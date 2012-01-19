@@ -71,6 +71,16 @@
   <ItemGroup>
     <None Include="ReadMe.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GPIndividual.h" />
+    <ClInclude Include="GPNode.h" />
+    <ClInclude Include="GPPopulation.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GPIndividual.cpp" />
+    <ClCompile Include="GPNode.cpp" />
+    <ClCompile Include="GPPopulation.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
