@@ -11,14 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "GPIndividual.h"
+#include "Individual.h"
 
 namespace ou { // One Unified
+namespace gp { // genetic programming
 
-GPIndividual::GPIndividual(void) {
+Individual::Individual(void) {
 }
 
-GPIndividual::~GPIndividual(void) {
+Individual::~Individual(void) {
 }
 
+} // namespace gp
 } // namespace ou

@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <TFTrading/ProviderManager.h>
+
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFSimulation/SimulationProvider.h>
@@ -39,6 +41,7 @@ public:
 
 protected:
 
+  typedef ou::tf::CProviderManager CProviderManager;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::eProviderState_t eProviderState_t;
 

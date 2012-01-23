@@ -11,14 +11,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "GPPopulation.h"
+#include "Population.h"
 
 namespace ou { // One Unified
+namespace gp { // genetic programming
 
-GPPopulation::GPPopulation(void) {
+Population::Population(void) {
 }
 
-GPPopulation::~GPPopulation(void) {
+Population::~Population(void) {
 }
 
+} // namespace gp
 } // namespace ou

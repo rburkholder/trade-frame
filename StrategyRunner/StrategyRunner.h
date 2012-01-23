@@ -13,16 +13,32 @@
 
 #pragma once
 
-namespace ou { // One Unified
-namespace gp { // genetic programming
+//#include "resource.h"
 
-class Population {
+#include <TFBitsNPieces/FrameWork01.h>
+
+#include "FrameMain.h"
+
+class AppStrategyRunner:
+  public wxApp, public ou::tf::FrameWork01<AppStrategyRunner> {
 public:
-  Population(void);
-  ~Population(void);
 protected:
 private:
+
+  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::eProviderState_t eProviderState_t;
+
+  typedef ou::tf::CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+
+  FrameMain* m_pFrameMain;
+
+  virtual bool OnInit();
+  virtual int OnExit();
+
 };
 
-} // namespace gp
-} // namespace ou
+// Implements MyApp& wxGetApp()
+DECLARE_APP(AppStrategyRunner)
+

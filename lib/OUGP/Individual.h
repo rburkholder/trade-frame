@@ -14,13 +14,15 @@
 #pragma once
 
 namespace ou { // One Unified
+namespace gp { // genetic programming
 
-  class GPIndividual {
+class Individual {
 public:
-  GPIndividual(void);
-  ~GPIndividual(void);
+  Individual(void);
+  ~Individual(void);
 protected:
 private:
 };
 
+} // namespace gp
 } // namespace ou

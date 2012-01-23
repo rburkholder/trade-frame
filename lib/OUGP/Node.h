@@ -13,14 +13,53 @@
 
 #pragma once
 
-namespace ou { // One Unified
+#include <string>
+#include <sstream>
+#include <vector>
 
-class GPNode {
+namespace ou { // One Unified
+namespace gp { // genetic programming
+
+class Node {
 public:
-  GPNode(void);
-  ~GPNode(void);
+
+  enum EParentLink {
+    None = 0, Left, Center, Right
+  };
+
+  Node(void);
+  ~Node(void);
+
+  bool IsTerminal( void ) const { return m_bTerminal; };
+
+  virtual void TreeToString( std::stringstream& ) const;
+  virtual void ToString( std::stringstream& ) const = 0;
+
+  void AddLeft( Node* node );
+  void AddCenter( Node* node );
+  void AddRight( Node* node );
+
+  virtual void AddRandomChildren( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth ) = 0;
+  void AddRandomChildren( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth, std::vector<int>& ); // fix vector
+
 protected:
+
+  EParentLink m_eParentSide;
+
+  bool m_bTerminal;
+
+  Node* m_pParent;
+
+  Node* m_pChildLeft;
+  Node* m_pChildCenter;
+  Node* m_pChildRight;
+
+  unsigned int  m_cntNodes; // how many child nodes by default (0 for terminal nodes)
+
 private:
 };
 
+std::stringstream& operator<<( std::stringstream& ss, const Node& );
+
+} // namespace gp
 } // namespace ou
