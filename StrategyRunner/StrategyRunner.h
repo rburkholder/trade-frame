@@ -15,9 +15,15 @@
 
 //#include "resource.h"
 
+// Started 2012/01/22
+
 #include <TFBitsNPieces/FrameWork01.h>
 
+// may need to inherit and add more functionality to the class:
+#include <TFTrading/DBOps.h>
+
 #include "FrameMain.h"
+#include "PanelOptionsParameters.h"
 
 class AppStrategyRunner:
   public wxApp, public ou::tf::FrameWork01<AppStrategyRunner> {
@@ -33,9 +39,12 @@ private:
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
 
   FrameMain* m_pFrameMain;
+  PanelOptionsParameters* m_pPanelOptionsParameters;
 
   virtual bool OnInit();
   virtual int OnExit();
+
+  void HandlePopulateDatabase( void );
 
 };
 

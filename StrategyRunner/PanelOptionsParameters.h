@@ -54,7 +54,8 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_PANELOPTIONSPARAMETERS, 
     ID_LBL_Underlying, ID_TXT_Underlying, 
     ID_LBL_OPTIONNEARDATE, ID_DATE_NearDate,
-    ID_LBL_OPTIONFARDATE, ID_DATE_FarDate
+    ID_LBL_OPTIONFARDATE, ID_DATE_FarDate,
+    ID_BTN_START
   };
 
   wxTextCtrl* m_txtUnderlying;

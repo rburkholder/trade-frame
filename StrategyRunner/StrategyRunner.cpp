@@ -18,6 +18,11 @@
 
 #include <wx/bitmap.h>
 
+#include <TFTrading/InstrumentManager.h>
+#include <TFTrading/AccountManager.h>
+#include <TFTrading/OrderManager.h>
+//#include <TFTrading/PortfolioManager.h>
+
 #include "StrategyRunner.h"
 
 IMPLEMENT_APP(AppStrategyRunner)
@@ -45,6 +50,10 @@ bool AppStrategyRunner::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
   m_pPanelProviderControl->Show( true );
 
+  m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
+  m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
+  m_pPanelOptionsParameters->Show( true );
+
   m_pFrameMain->Show( true );
 
   return 1;
@@ -54,5 +63,24 @@ bool AppStrategyRunner::OnInit() {
 int AppStrategyRunner::OnExit() {
 
   return 0;
+}
+
+void AppStrategyRunner::HandlePopulateDatabase( void ) {
+
+  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+
+  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+
+  ou::tf::CAccountManager::pAccount_t pAccountIB
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+
+  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+
+//  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
+//    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+
 }
 

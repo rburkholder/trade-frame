@@ -79,6 +79,9 @@ void PanelOptionsParameters::CreateControls() {
     m_ctrlFarDate = new wxDatePickerCtrl( itemPanel1, ID_DATE_FarDate, wxDateTime(), wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT );
     itemBoxSizer9->Add(m_ctrlFarDate, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+    wxButton* itemButton12 = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer2->Add(itemButton12, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
 }
 
 wxBitmap PanelOptionsParameters::GetBitmapResource( const wxString& name ) {
