@@ -21,7 +21,7 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
-//#include <TFTrading/PortfolioManager.h>
+#include <TFTrading/PortfolioManager.h>
 
 #include "StrategyRunner.h"
 
@@ -50,11 +50,16 @@ bool AppStrategyRunner::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
   m_pPanelProviderControl->Show( true );
 
+  LinkToPanelProviderControl();
+
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
   m_pPanelOptionsParameters->Show( true );
+  m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
 
   m_pFrameMain->Show( true );
+
+  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppStrategyRunner::HandlePopulateDatabase ) );
 
   return 1;
 
@@ -62,7 +67,40 @@ bool AppStrategyRunner::OnInit() {
 
 int AppStrategyRunner::OnExit() {
 
+  DelinkFromPanelProviderControl();
+
+  if ( m_db.IsOpen() ) m_db.Close();
+
   return 0;
+}
+
+void AppStrategyRunner::HandleBtnStart( void ) {
+
+  m_pPanelOptionsParameters->SetBtnStartEnable( false);
+
+  std::string sDbName;
+
+  if ( m_bExecConnected && m_bData1Connected && m_bData2Connected ) {
+    if ( ou::tf::keytypes::EProviderSimulator == m_pExecutionProvider->ID() ) {
+      sDbName = ":memory:";
+    }
+    else {
+      sDbName = "StrategyTradeOptions.db";
+    }
+
+    assert( 0 != sDbName.length() );
+    m_db.Open( sDbName );
+
+    m_pStrategyTradeOptions = new StrategyTradeOptions( m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+    m_pStrategyTradeOptions->Start( 
+      m_pPanelOptionsParameters->GetUnderlying(),
+      m_pPanelOptionsParameters->GetOptionNearDate(), 
+      m_pPanelOptionsParameters->GetOptionFarDate()
+      );
+  }
+  else {
+    m_pPanelOptionsParameters->SetBtnStartEnable( true);
+  }
 }
 
 void AppStrategyRunner::HandlePopulateDatabase( void ) {
@@ -79,8 +117,9 @@ void AppStrategyRunner::HandlePopulateDatabase( void ) {
   ou::tf::CAccountManager::pAccount_t pAccountIQFeed
     = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-//  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-//    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
+    //= ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "portOptions", "aoRay", "options" );
 
 }
 

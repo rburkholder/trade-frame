@@ -127,7 +127,8 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   m_pPanelProviderControl( 0 ),
   m_tws( new ou::tf::CIBTWS( "U000000" ) ), m_bIBConnected( false ), 
   m_iqfeed( new ou::tf::CIQFeedProvider() ), m_bIQFeedConnected( false ),
-  m_sim( new ou::tf::CSimulationProvider() ), m_bSimConnected( false )
+  m_sim( new ou::tf::CSimulationProvider() ), m_bSimConnected( false ),
+  m_bExecConnected( false ), m_bData1Connected( false ), m_bData2Connected( false )
 
 {
   // this is where we select which provider we will be working with on this run

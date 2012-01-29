@@ -50,6 +50,7 @@ bool PanelProviderControl::Create( wxWindow* parent, wxWindowID id, const wxPoin
 
 void PanelProviderControl::Init( void ) {
 //  m_nProvidersOn = 0;
+  m_bDisabling = false;
   m_stateIQFeed = ProviderOff;
   m_stateIB = ProviderOff;
   m_stateSimulator = ProviderOff;
@@ -80,7 +81,7 @@ void PanelProviderControl::CreateControls( void ) {
     m_btnXIQFeed->Enable(false);
     itemBoxSizer3->Add(m_btnXIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnIQFeed = new wxButton( itemFrame1, ID_BtnIQFeed, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnIQFeed = new wxButton( itemFrame1, ID_BtnIQFeed, _("Turn On"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );  // fixes radio button interference?
     itemBoxSizer3->Add(m_btnIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText8 = new wxStaticText( itemFrame1, wxID_LblIQFeed, _("IQF"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -101,7 +102,7 @@ void PanelProviderControl::CreateControls( void ) {
     m_btnXIB->SetValue(false);
     itemBoxSizer9->Add(m_btnXIB, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnIB = new wxButton( itemFrame1, ID_BtnInteractiveBrokers, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnIB = new wxButton( itemFrame1, ID_BtnInteractiveBrokers, _("Turn On"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );  // fixes radio button interference?
     itemBoxSizer9->Add(m_btnIB, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText14 = new wxStaticText( itemFrame1, wxID_LblInteractiveBrokers, _("IB"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -123,7 +124,7 @@ void PanelProviderControl::CreateControls( void ) {
     m_btnXSimulator->SetValue(false);
     itemBoxSizer15->Add(m_btnXSimulator, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnSimulator = new wxButton( itemFrame1, ID_BtnSimulation, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnSimulator = new wxButton( itemFrame1, ID_BtnSimulation, _("Turn On"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );  // fixes radio button interference?
     itemBoxSizer15->Add(m_btnSimulator, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText20 = new wxStaticText( itemFrame1, wxID_LblSimulation, _("Sim"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -208,7 +209,9 @@ void PanelProviderControl::SetState( wxButton* btn, eProviderState_t state ) {
     break;
   case ProviderGoingOn:
     btn->SetLabelText( "Going On" );
+    m_bDisabling = true;  // fixes some sort of gui auto update thing I don't like
     btn->Disable();
+    m_bDisabling = false;
     if ( ( ProviderOff != m_stateIQFeed ) || ( ProviderOff != m_stateIB ) || ( ProviderOff != m_stateSimulator ) ) {
       DisableAllRadio();
     }
@@ -248,39 +251,51 @@ void PanelProviderControl::OnSimulatorState( UpdateProviderStatusEvent& event ) 
 }
 
 void PanelProviderControl::OnRadioD1IQFeed( wxCommandEvent& event ) {
-  ResetAllRadioData1();
-  m_btnD1IQFeed->SetValue( true );
-  if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
+  if ( !m_bDisabling ) {
+    ResetAllRadioData1();
+    m_btnD1IQFeed->SetValue( true );
+    if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIQFeed );
+  }
 }
 
 void PanelProviderControl::OnRadioD2IQFeed( wxCommandEvent& event ) {
-  ResetAllRadioData2();
-  m_btnD2IQFeed->SetValue( true );
-  if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
+  if ( !m_bDisabling ) {
+    ResetAllRadioData2();
+    m_btnD2IQFeed->SetValue( true );
+    if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIQFeed );
+  }
 }
 
 void PanelProviderControl::OnRadioXIQFeed( wxCommandEvent& event ) {
-  ResetAllRadioExec();
-  //m_btnXIQFeed->SetValue( true );
-  //if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIQFeed );
+  if ( !m_bDisabling ) {
+    ResetAllRadioExec();
+    //m_btnXIQFeed->SetValue( true );
+    //if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIQFeed );
+  }
 }
 
 void PanelProviderControl::OnRadioD1IB( wxCommandEvent& event ) {
-  ResetAllRadioData1();
-  m_btnD1IB->SetValue( true );
-  if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIB );
+  if ( !m_bDisabling ) {
+    ResetAllRadioData1();
+    m_btnD1IB->SetValue( true );
+    if ( 0 != OnProviderSelectD1 ) OnProviderSelectD1( EIB );
+  }
 }
 
 void PanelProviderControl::OnRadioD2IB( wxCommandEvent& event ) {
-  ResetAllRadioData2();
-  m_btnD2IB->SetValue( true );
-  if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIB );
+  if ( !m_bDisabling ) {
+    ResetAllRadioData2();
+    m_btnD2IB->SetValue( true );
+    if ( 0 != OnProviderSelectD2 ) OnProviderSelectD2( EIB );
+  }
 }
 
 void PanelProviderControl::OnRadioXIB( wxCommandEvent& event ) {
-  ResetAllRadioExec();
-  m_btnXIB->SetValue( true );
-  if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIB );
+  if ( !m_bDisabling ) {
+    ResetAllRadioExec();
+    m_btnXIB->SetValue( true );
+    if ( 0 != OnProviderSelectX ) OnProviderSelectX( EIB );
+  }
 }
 
 void PanelProviderControl::OnRadioD1Sim( wxCommandEvent& event ) {
@@ -296,9 +311,11 @@ void PanelProviderControl::OnRadioD2Sim( wxCommandEvent& event ) {
 }
 
 void PanelProviderControl::OnRadioXSim( wxCommandEvent& event ) {
-  ResetAllRadioExec();
-  m_btnXSimulator->SetValue( true );
-  if ( 0 != OnProviderSelectX ) OnProviderSelectX( ESim );
+  if ( !m_bDisabling ) {
+    ResetAllRadioExec();
+    m_btnXSimulator->SetValue( true );
+    if ( 0 != OnProviderSelectX ) OnProviderSelectX( ESim );
+  }
 }
 
 void PanelProviderControl::ResetAllRadioData1( void ) {
@@ -332,15 +349,17 @@ void PanelProviderControl::EnableAllRadio( void ) {
 }
 
 void PanelProviderControl::DisableAllRadio( void ) {
+  m_bDisabling = true;  // fixes some sort of gui auto update thing I don't like
   m_btnD1IQFeed->Disable();
   m_btnD2IQFeed->Disable();
-  m_btnXIQFeed->Disable();
+//  m_btnXIQFeed->Disable();
   m_btnD1IB->Disable();
   m_btnD2IB->Disable();
   m_btnXIB->Disable();
   m_btnD1Simulator->Disable();
-  m_btnD2Simulator->Disable();
+//  m_btnD2Simulator->Disable();
   m_btnXSimulator->Disable();
+  m_bDisabling = false;
 }
 
 

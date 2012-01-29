@@ -79,9 +79,36 @@ void PanelOptionsParameters::CreateControls() {
     m_ctrlFarDate = new wxDatePickerCtrl( itemPanel1, ID_DATE_FarDate, wxDateTime(), wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT );
     itemBoxSizer9->Add(m_ctrlFarDate, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    wxButton* itemButton12 = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer2->Add(itemButton12, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    m_btnStart = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer2->Add(m_btnStart, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
+    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOptionsParameters::OnBtnStartClicked, this, ID_BTN_START );
+
+}
+
+void PanelOptionsParameters::OnBtnStartClicked( wxCommandEvent& event ) {
+  if ( 0 != m_OnStart ) m_OnStart();
+}
+
+void PanelOptionsParameters::SetBtnStartEnable( bool b ) {
+  m_btnStart->Enable( b );
+}
+
+std::string PanelOptionsParameters::GetUnderlying( void ) {
+  wxString s( m_txtUnderlying->GetLineText( 0 ) );
+  return s.ToStdString();
+}
+
+boost::gregorian::date PanelOptionsParameters::GetOptionFarDate( void ) {
+  wxDateTime d1 = m_ctrlFarDate->GetValue();
+  boost::gregorian::date d2( d1.GetYear(), d1.GetMonth() + 1, d1.GetDay() );
+  return d2;
+}
+
+boost::gregorian::date PanelOptionsParameters::GetOptionNearDate( void ) {
+  wxDateTime d1 = m_ctrlNearDate->GetValue();
+  boost::gregorian::date d2( d1.GetYear(), d1.GetMonth() + 1, d1.GetDay() );
+  return d2;
 }
 
 wxBitmap PanelOptionsParameters::GetBitmapResource( const wxString& name ) {

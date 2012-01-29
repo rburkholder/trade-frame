@@ -130,6 +130,8 @@ private:
   eProviderState_t m_stateIB;
   eProviderState_t m_stateSimulator;
 
+  bool m_bDisabling;
+
 //  int m_nProvidersOn;  // # number of providers not off
 
     wxRadioButton* m_btnD1IQFeed;

@@ -19,3 +19,8 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
 
 StrategyTradeOptions::~StrategyTradeOptions(void) {
 }
+
+void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregorian::date dtOptionNearDate, boost::gregorian::date dtOptionFarDate ) {
+  assert( dtOptionNearDate < dtOptionFarDate );
+  assert( "" != sUnderlying );
+}

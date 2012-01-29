@@ -24,6 +24,7 @@
 
 #include "FrameMain.h"
 #include "PanelOptionsParameters.h"
+#include "StrategyTradeOptions.h"
 
 class AppStrategyRunner:
   public wxApp, public ou::tf::FrameWork01<AppStrategyRunner> {
@@ -41,10 +42,15 @@ private:
   FrameMain* m_pFrameMain;
   PanelOptionsParameters* m_pPanelOptionsParameters;
 
+  DBOps m_db;
+
+  StrategyTradeOptions* m_pStrategyTradeOptions;
+
   virtual bool OnInit();
   virtual int OnExit();
 
   void HandlePopulateDatabase( void );
+  void HandleBtnStart( void );
 
 };
 

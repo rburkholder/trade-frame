@@ -17,6 +17,11 @@
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #define SYMBOL_PANELOPTIONSPARAMETERS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELOPTIONSPARAMETERS_TITLE _("Options Parameters")
 #define SYMBOL_PANELOPTIONSPARAMETERS_IDNAME ID_PANELOPTIONSPARAMETERS
@@ -49,6 +54,17 @@ public:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
+  typedef FastDelegate0<> OnStart_t;
+  void SetOnStart( OnStart_t function ) {
+    m_OnStart = function;
+  }
+
+  void SetBtnStartEnable( bool );
+
+  std::string GetUnderlying( void );
+  boost::gregorian::date GetOptionFarDate( void );
+  boost::gregorian::date GetOptionNearDate( void );
+
 protected:
 private:
   enum { ID_Null=wxID_HIGHEST, ID_PANELOPTIONSPARAMETERS, 
@@ -61,6 +77,11 @@ private:
   wxTextCtrl* m_txtUnderlying;
   wxDatePickerCtrl* m_ctrlNearDate;
   wxDatePickerCtrl* m_ctrlFarDate;
+  wxButton* m_btnStart;
+
+  OnStart_t m_OnStart;
+
+  void OnBtnStartClicked( wxCommandEvent& event );
 
 };
 

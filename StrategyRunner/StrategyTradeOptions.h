@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <TFTrading/ProviderManager.h>
 
 class StrategyTradeOptions {
@@ -25,6 +27,7 @@ public:
 
   void Start( void ); // for real time
   void Start( const std::string& sSymbolPath );  // for simulation
+  void Start( const std::string& sUnderlying, boost::gregorian::date dtOptionNearDate, boost::gregorian::date dtOptionFarDate );
 
 protected:
 private:
