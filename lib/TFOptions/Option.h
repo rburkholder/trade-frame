@@ -13,6 +13,8 @@
 
 #pragma once
 
+// 20120129 Inherit from <TFTrading/InstrumentData.h> ?
+
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <TFTrading/Instrument.h>

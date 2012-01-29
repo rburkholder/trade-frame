@@ -65,6 +65,9 @@ public:
   boost::gregorian::date GetOptionFarDate( void );
   boost::gregorian::date GetOptionNearDate( void );
 
+  void SetOptionFarDate( boost::gregorian::date );
+  void SetOptionNearDate( boost::gregorian::date );
+
 protected:
 private:
   enum { ID_Null=wxID_HIGHEST, ID_PANELOPTIONSPARAMETERS, 

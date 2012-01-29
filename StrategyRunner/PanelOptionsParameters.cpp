@@ -111,6 +111,17 @@ boost::gregorian::date PanelOptionsParameters::GetOptionNearDate( void ) {
   return d2;
 }
 
+void PanelOptionsParameters::SetOptionFarDate( boost::gregorian::date date ) {
+  wxDateTime dt( date.day(), static_cast<wxDateTime::Month>( date.month() - 1 ), date.year(), 0, 0, 0 );
+  m_ctrlFarDate->SetValue( dt );
+}
+
+void PanelOptionsParameters::SetOptionNearDate( boost::gregorian::date date ) {
+  wxDateTime dt( date.day(), static_cast<wxDateTime::Month>( date.month() - 1 ), date.year(), 0, 0, 0 );
+  m_ctrlNearDate->SetValue( dt );
+}
+
+
 wxBitmap PanelOptionsParameters::GetBitmapResource( const wxString& name ) {
     // Bitmap retrieval
     wxUnusedVar(name);

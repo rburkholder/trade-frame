@@ -76,6 +76,9 @@
     <ClCompile Include="MarketStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InstrumentData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h">
@@ -160,6 +163,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MarketStates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrumentData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -119,6 +119,8 @@ private:
   void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int ) {};
 
+  void HandlePanelClosing( void );
+
 };
 
 template<typename CRTP>
@@ -176,6 +178,8 @@ void FrameWork01<CRTP>::LinkToPanelProviderControl( void ) {
   m_pPanelProviderControl->SetOnProviderSelectD1Handler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderSelectD1 ) );
   m_pPanelProviderControl->SetOnProviderSelectD2Handler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderSelectD2 ) );
   m_pPanelProviderControl->SetOnProviderSelectXHandler( MakeDelegate( this, &FrameWork01<CRTP>::HandleProviderSelectX ) );
+
+  m_pPanelProviderControl->SyncInitialState();
 }
 
 template<typename CRTP>
@@ -413,7 +417,11 @@ void FrameWork01<CRTP>::SetMode( void ) {
       m_mode = EModeLive;
     }
   }
-  
+}
+
+template<typename CRTP>
+void FrameWork01<CRTP>::HandlePanelClosing( void ) {
+  DelinkFromPanelProviderControl();
 }
 
 } // namespace tf

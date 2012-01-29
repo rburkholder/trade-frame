@@ -16,6 +16,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <TFTrading/ProviderManager.h>
+#include <TFTrading/InstrumentData.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 
 class StrategyTradeOptions {
 public:
@@ -25,11 +27,25 @@ public:
   StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider );
   ~StrategyTradeOptions(void);
 
-  void Start( void ); // for real time
-  void Start( const std::string& sSymbolPath );  // for simulation
+//  void Start( void ); // for real time
+//  void Start( const std::string& sSymbolPath );  // for simulation
   void Start( const std::string& sUnderlying, boost::gregorian::date dtOptionNearDate, boost::gregorian::date dtOptionFarDate );
+  void Stop( void );
 
 protected:
 private:
+
+  pProvider_t m_pExecutionProvider;
+  pProvider_t m_pData1Provider;
+  pProvider_t m_pData2Provider;
+
+  ou::tf::CIBTWS::pProvider_t m_pData2ProviderIB;
+  ou::tf::CIBTWS::pProvider_t m_pExecutionProviderIB;
+
+  ou::tf::InstrumentData* m_pUnderlying;
+
+  void HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails&, const ou::tf::CIBTWS::pInstrument_t& );
+  void HandleUnderlyingContractDetailsDone( void );
+
 };
 

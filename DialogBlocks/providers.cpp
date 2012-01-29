@@ -73,17 +73,17 @@ Providers::~Providers()
 void Providers::Init()
 {
 ////@begin Providers member initialisation
-    m_btnD1IQFeed = NULL;
-    m_btnD2IQFeed = NULL;
-    m_btnXIQFeed = NULL;
+    m_cbIQFeedD1 = NULL;
+    m_cbIQFeedD2 = NULL;
+    m_cbIQFeedX = NULL;
     m_btnIQFeed = NULL;
-    m_btnD1IB = NULL;
-    m_btnD2IB = NULL;
-    m_btnXIB = NULL;
+    m_cbIBD1 = NULL;
+    m_cbIBD2 = NULL;
+    m_cbIBX = NULL;
     m_btnIB = NULL;
-    m_btnD1Simulator = NULL;
-    m_btnD2Simulator = NULL;
-    m_btnXSimulator = NULL;
+    m_cbSimD1 = NULL;
+    m_cbSimD2 = NULL;
+    m_cbSimX = NULL;
     m_btnSimulator = NULL;
 ////@end Providers member initialisation
 }
@@ -104,20 +104,21 @@ void Providers::CreateControls()
     wxBoxSizer* itemBoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer3, 0, wxALIGN_LEFT|wxALL, 5);
 
-    m_btnD1IQFeed = new wxRadioButton( itemFrame1, ID_RBTN_D1_IQF, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD1IQFeed->SetValue(false);
-    itemBoxSizer3->Add(m_btnD1IQFeed, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
+    m_cbIQFeedD1 = new wxCheckBox( itemFrame1, ID_CB_IQF_D1, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIQFeedD1->SetValue(true);
+    itemBoxSizer3->Add(m_cbIQFeedD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
 
-    m_btnD2IQFeed = new wxRadioButton( itemFrame1, ID_RBTN_D2_IQF, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD2IQFeed->SetValue(false);
-    itemBoxSizer3->Add(m_btnD2IQFeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbIQFeedD2 = new wxCheckBox( itemFrame1, ID_CB_IQF_D2, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIQFeedD2->SetValue(false);
+    itemBoxSizer3->Add(m_cbIQFeedD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnXIQFeed = new wxRadioButton( itemFrame1, ID_RBTN_X_IQF, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnXIQFeed->SetValue(false);
-    m_btnXIQFeed->Enable(false);
-    itemBoxSizer3->Add(m_btnXIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbIQFeedX = new wxCheckBox( itemFrame1, ID_CB_IQF_X, _("X"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIQFeedX->SetValue(false);
+    m_cbIQFeedX->Enable(false);
+    itemBoxSizer3->Add(m_cbIQFeedX, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
     m_btnIQFeed = new wxButton( itemFrame1, ID_BtnIQFeed, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnIQFeed->Enable(false);
     itemBoxSizer3->Add(m_btnIQFeed, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText8 = new wxStaticText( itemFrame1, wxID_LblIQFeed, _("IQF"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -126,19 +127,20 @@ void Providers::CreateControls()
     wxBoxSizer* itemBoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer9, 0, wxALIGN_LEFT|wxALL, 5);
 
-    m_btnD1IB = new wxRadioButton( itemFrame1, ID_RBTN_D1_IB, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD1IB->SetValue(false);
-    itemBoxSizer9->Add(m_btnD1IB, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
+    m_cbIBD1 = new wxCheckBox( itemFrame1, ID_CB_IB_D1, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIBD1->SetValue(false);
+    itemBoxSizer9->Add(m_cbIBD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
 
-    m_btnD2IB = new wxRadioButton( itemFrame1, ID_RBTN_D2_IB, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD2IB->SetValue(false);
-    itemBoxSizer9->Add(m_btnD2IB, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbIBD2 = new wxCheckBox( itemFrame1, ID_CB_IB_D2, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIBD2->SetValue(true);
+    itemBoxSizer9->Add(m_cbIBD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnXIB = new wxRadioButton( itemFrame1, ID_RBTN_X_IB, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnXIB->SetValue(false);
-    itemBoxSizer9->Add(m_btnXIB, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbIBX = new wxCheckBox( itemFrame1, ID_CB_IB_X, _("X"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbIBX->SetValue(true);
+    itemBoxSizer9->Add(m_cbIBX, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
     m_btnIB = new wxButton( itemFrame1, ID_BtnInteractiveBrokers, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnIB->Enable(false);
     itemBoxSizer9->Add(m_btnIB, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText14 = new wxStaticText( itemFrame1, wxID_LblInteractiveBrokers, _("IB"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -147,20 +149,21 @@ void Providers::CreateControls()
     wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer15, 0, wxALIGN_LEFT|wxALL, 5);
 
-    m_btnD1Simulator = new wxRadioButton( itemFrame1, ID_RBTN_D1_SIM, _("D1"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD1Simulator->SetValue(false);
-    itemBoxSizer15->Add(m_btnD1Simulator, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
+    m_cbSimD1 = new wxCheckBox( itemFrame1, ID_CB_SIM_D1, _("D1"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbSimD1->SetValue(false);
+    itemBoxSizer15->Add(m_cbSimD1, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 5);
 
-    m_btnD2Simulator = new wxRadioButton( itemFrame1, ID_RBTN_D2_SIM, _("D2"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnD2Simulator->SetValue(false);
-    m_btnD2Simulator->Enable(false);
-    itemBoxSizer15->Add(m_btnD2Simulator, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbSimD2 = new wxCheckBox( itemFrame1, ID_CB_SIM_D2, _("D2"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbSimD2->SetValue(false);
+    m_cbSimD2->Enable(false);
+    itemBoxSizer15->Add(m_cbSimD2, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
-    m_btnXSimulator = new wxRadioButton( itemFrame1, ID_RBTN_X_SIM, _("X"), wxDefaultPosition, wxDefaultSize, wxRB_SINGLE );
-    m_btnXSimulator->SetValue(false);
-    itemBoxSizer15->Add(m_btnXSimulator, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
+    m_cbSimX = new wxCheckBox( itemFrame1, ID_CB_SIM_X, _("X"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_cbSimX->SetValue(false);
+    itemBoxSizer15->Add(m_cbSimX, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
 
     m_btnSimulator = new wxButton( itemFrame1, ID_BtnSimulation, _("Turn On"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnSimulator->Enable(false);
     itemBoxSizer15->Add(m_btnSimulator, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText20 = new wxStaticText( itemFrame1, wxID_LblSimulation, _("Sim"), wxDefaultPosition, wxDefaultSize, 0 );

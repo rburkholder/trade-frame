@@ -34,19 +34,19 @@
 
 ////@begin control identifiers
 #define ID_PROVIDERS 10015
-#define ID_RBTN_D1_IQF 10049
-#define ID_RBTN_D2_IQF 10018
-#define ID_RBTN_X_IQF 10023
+#define ID_CB_IQF_D1 10060
+#define ID_CB_IQF_D2 10061
+#define ID_CB_IQF_X 10062
 #define ID_BtnIQFeed 10022
 #define wxID_LblIQFeed 10019
-#define ID_RBTN_D1_IB 10050
-#define ID_RBTN_D2_IB 10024
-#define ID_RBTN_X_IB 10046
+#define ID_CB_IB_D1 10018
+#define ID_CB_IB_D2 10023
+#define ID_CB_IB_X 10049
 #define ID_BtnInteractiveBrokers 10016
 #define wxID_LblInteractiveBrokers 10020
-#define ID_RBTN_D1_SIM 10051
-#define ID_RBTN_D2_SIM 10048
-#define ID_RBTN_X_SIM 10047
+#define ID_CB_SIM_D1 10024
+#define ID_CB_SIM_D2 10046
+#define ID_CB_SIM_X 10050
 #define ID_BtnSimulation 10017
 #define wxID_LblSimulation 10021
 #define SYMBOL_PROVIDERS_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
@@ -100,17 +100,17 @@ public:
     static bool ShowToolTips();
 
 ////@begin Providers member variables
-    wxRadioButton* m_btnD1IQFeed;
-    wxRadioButton* m_btnD2IQFeed;
-    wxRadioButton* m_btnXIQFeed;
+    wxCheckBox* m_cbIQFeedD1;
+    wxCheckBox* m_cbIQFeedD2;
+    wxCheckBox* m_cbIQFeedX;
     wxButton* m_btnIQFeed;
-    wxRadioButton* m_btnD1IB;
-    wxRadioButton* m_btnD2IB;
-    wxRadioButton* m_btnXIB;
+    wxCheckBox* m_cbIBD1;
+    wxCheckBox* m_cbIBD2;
+    wxCheckBox* m_cbIBX;
     wxButton* m_btnIB;
-    wxRadioButton* m_btnD1Simulator;
-    wxRadioButton* m_btnD2Simulator;
-    wxRadioButton* m_btnXSimulator;
+    wxCheckBox* m_cbSimD1;
+    wxCheckBox* m_cbSimD2;
+    wxCheckBox* m_cbSimX;
     wxButton* m_btnSimulator;
 ////@end Providers member variables
 };

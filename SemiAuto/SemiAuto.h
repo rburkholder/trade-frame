@@ -21,6 +21,8 @@
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/ProviderManager.h>
 
+#include <TFVuTrading/PanelManualOrder.h>  // need to put this is a frame for local use
+
 #include <TFIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
 #include <TFIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
 
@@ -34,7 +36,7 @@
 //#include "ThreadMain.h"
 #include "FrameMain.h"
 #include "FrameProviderControl.h"
-#include "DialogManualOrder.h"
+//#include "DialogManualOrder.h"
 #include "FrameInstrumentStatus.h"
 
 #include "InstrumentData.h"
@@ -93,7 +95,7 @@ private:
 
   wxGridCellAttr* m_pattrCell;
 
-  typedef DialogManualOrder::Order_t ManualOrder_t;
+  typedef ou::tf::PanelManualOrder::Order_t ManualOrder_t;
 
   FrameMain* m_FrameMain;
   FrameProviderControl* m_FrameProviderControl;
@@ -129,7 +131,7 @@ private:
 
   unsigned int m_curDialogManualOrder;
   struct structManualOrder {
-    DialogManualOrder* pDialogManualOrder;
+    ou::tf::PanelManualOrder* pDialogManualOrder;
     ou::tf::CIBTWS::ContractDetails details;
     pInstrument_t pInstrument;
   };
@@ -181,9 +183,6 @@ private:
   void HandleIBContractDetailsDone( void );
 
   void HandleSaveSeriesEvent( void );
-
-
-
 
 };
  

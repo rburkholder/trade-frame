@@ -81,6 +81,7 @@
     <ClCompile Include="Execution.cpp" />
     <ClCompile Include="AccountManager.cpp" />
     <ClCompile Include="Instrument.cpp" />
+    <ClCompile Include="InstrumentData.cpp" />
     <ClCompile Include="InstrumentInformation.cpp" />
     <ClCompile Include="InstrumentManager.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="Execution.h" />
     <ClInclude Include="AccountManager.h" />
     <ClInclude Include="Instrument.h" />
+    <ClInclude Include="InstrumentData.h" />
     <ClInclude Include="InstrumentInformation.h" />
     <ClInclude Include="InstrumentManager.h" />
     <ClInclude Include="KeyTypes.h" />

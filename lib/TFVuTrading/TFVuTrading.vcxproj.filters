@@ -60,6 +60,12 @@
     <ClInclude Include="PanelProviderControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PanelManualOrder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ValidatorInstrumentName.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -99,6 +105,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelProviderControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelManualOrder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ValidatorInstrumentName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

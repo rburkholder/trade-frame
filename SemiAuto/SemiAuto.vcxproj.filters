@@ -39,9 +39,6 @@
     <ClInclude Include="FrameMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ValidatorInstrumentName.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FrameProviderControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,9 +49,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FrameInstrumentStatus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DialogManualOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,9 +62,6 @@
     <ClCompile Include="FrameMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ValidatorInstrumentName.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FrameProviderControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,9 +72,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FrameInstrumentStatus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DialogManualOrder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

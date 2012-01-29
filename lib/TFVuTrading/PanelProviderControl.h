@@ -20,9 +20,9 @@ using namespace fastdelegate;
 
 // wxFrame (wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE, const wxString &name=wxFrameNameStr)
 
-// D1: data provider 1, could be iqfeed
-// D2: data provider 2, could be ib, 
-// X: execution provider
+// D1: data provider 1, could be iqfeed, regular data
+// D2: data provider 2, could be ib, typically option info
+// X: execution provider, typically IB or Sim
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -114,15 +114,22 @@ public:
     OnProviderSelectX = function;
   }
 
+  void SyncInitialState( void );
+
+  typedef FastDelegate0<> OnPanelClosing_t;
+  void SetOnPanelClosingHandler( OnPanelClosing_t function ) {
+    OnPanelClosing = function;
+  }
+
 protected:
 private:
 
   enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELPROVIDERCONTROL_IDNAME,
     wxID_BitmapIQfeed, ID_BtnIQFeed, wxID_LblIQFeed,
     wxID_BitmapInteractiveBrokers,ID_BtnInteractiveBrokers, wxID_LblInteractiveBrokers,
-    ID_RBTN_D1_IQF, ID_RBTN_D2_IQF, ID_RBTN_X_IQF, 
-    ID_RBTN_D1_IB, ID_RBTN_D2_IB, ID_RBTN_X_IB, 
-    ID_RBTN_D1_SIM, ID_RBTN_D2_SIM, ID_RBTN_X_SIM,
+    ID_CB_IQF_D1, ID_CB_IQF_D2, ID_CB_IQF_X, 
+    ID_CB_IB_D1, ID_CB_IB_D2, ID_CB_IB_X, 
+    ID_CB_SIM_D1, ID_CB_SIM_D2, ID_CB_SIM_X,
     wxID_BitmapSimulation, ID_BtnSimulation, wxID_LblSimulation
   };
 
@@ -130,21 +137,19 @@ private:
   eProviderState_t m_stateIB;
   eProviderState_t m_stateSimulator;
 
-  bool m_bDisabling;
-
 //  int m_nProvidersOn;  // # number of providers not off
 
-    wxRadioButton* m_btnD1IQFeed;
-    wxRadioButton* m_btnD2IQFeed;
-    wxRadioButton* m_btnXIQFeed;
+    wxCheckBox* m_cbIQFeedD1;
+    wxCheckBox* m_cbIQFeedD2;
+    wxCheckBox* m_cbIQFeedX;
     wxButton* m_btnIQFeed;
-    wxRadioButton* m_btnD1IB;
-    wxRadioButton* m_btnD2IB;
-    wxRadioButton* m_btnXIB;
+    wxCheckBox* m_cbIBD1;
+    wxCheckBox* m_cbIBD2;
+    wxCheckBox* m_cbIBX;
     wxButton* m_btnIB;
-    wxRadioButton* m_btnD1Simulator;
-    wxRadioButton* m_btnD2Simulator;
-    wxRadioButton* m_btnXSimulator;
+    wxCheckBox* m_cbSimD1;
+    wxCheckBox* m_cbSimD2;
+    wxCheckBox* m_cbSimX;
     wxButton* m_btnSimulator;
 
   OnProviderStateChange_t OnIQFeedStateChange;
@@ -154,6 +159,8 @@ private:
   OnProviderSelect_t OnProviderSelectD1;
   OnProviderSelect_t OnProviderSelectD2;
   OnProviderSelect_t OnProviderSelectX;
+
+  OnPanelClosing_t OnPanelClosing;
 
   void SetState( wxButton* btn, eProviderState_t state );
 
@@ -168,6 +175,8 @@ private:
   void EnableAllRadio( void );
   void DisableAllRadio( void );
 
+  void UpdateProviderButtons( void );
+
   void OnClose( wxCloseEvent& event );
 
   void OnBtnCommon( wxCommandEvent& event, eProviderState_t& state );
@@ -180,15 +189,15 @@ private:
   void OnIBState( UpdateProviderStatusEvent& event );
   void OnSimulatorState( UpdateProviderStatusEvent& event );
   
-  void OnRadioD1IQFeed( wxCommandEvent& event );
-  void OnRadioD2IQFeed( wxCommandEvent& event );
-  void OnRadioXIQFeed( wxCommandEvent& event );
-  void OnRadioD1IB( wxCommandEvent& event );
-  void OnRadioD2IB( wxCommandEvent& event );
-  void OnRadioXIB( wxCommandEvent& event );
-  void OnRadioD1Sim( wxCommandEvent& event );
-  void OnRadioD2Sim( wxCommandEvent& event );
-  void OnRadioXSim( wxCommandEvent& event );
+  void OnBtnD1IQFeed( wxCommandEvent& event );
+  void OnBtnD2IQFeed( wxCommandEvent& event );
+  void OnBtnXIQFeed( wxCommandEvent& event );
+  void OnBtnD1IB( wxCommandEvent& event );
+  void OnBtnD2IB( wxCommandEvent& event );
+  void OnBtnXIB( wxCommandEvent& event );
+  void OnBtnD1Sim( wxCommandEvent& event );
+  void OnBtnD2Sim( wxCommandEvent& event );
+  void OnBtnXSim( wxCommandEvent& event );
 };
 
 } // namespace tf

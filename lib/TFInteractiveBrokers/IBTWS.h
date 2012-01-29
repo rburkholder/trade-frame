@@ -83,14 +83,7 @@ public:
   //   ie, may need an array of OnContractDetailsHandler_t
   typedef FastDelegate2<const ContractDetails&, const pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
-  //void RequestContractDetails( const Contract& contract ) { pTWS->reqContractDetails( NextReqId(), contract ); };
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
-  //void SetOnContractDetailsHandler( OnContractDetailsHandler_t function ) {
-  //  OnContractDetails = function;
-  //}
-  //void SetOnContractDetailsDoneHandler( OnContractDetailsDoneHandler_t function ) {
-  //  OnContractDetailsDone = function;
-  //}
 
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
