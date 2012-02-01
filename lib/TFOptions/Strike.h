@@ -46,7 +46,7 @@ protected:
   boost::shared_ptr<ou::tf::option::Put>  m_put;
 
 private:
-  std::stringstream m_ss;
+//  std::stringstream m_ss;
   bool m_bWatching;  // this needs to be implemented.
   double m_dblStrike;
 };

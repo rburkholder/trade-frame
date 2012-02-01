@@ -31,22 +31,26 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
 StrategyTradeOptions::~StrategyTradeOptions(void) {
 }
 
-void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregorian::date dtOptionNearDate, boost::gregorian::date dtOptionFarDate ) {
-  assert( dtOptionNearDate < dtOptionFarDate );
+void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregorian::date dateOptionNearDate, boost::gregorian::date dateOptionFarDate ) {
+  assert( dateOptionNearDate < dateOptionFarDate );
   assert( "" != sUnderlying );
+
+  m_dateOptionNearDate = dateOptionNearDate;
+  m_dateOptionFarDate = dateOptionFarDate;
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
 
-  if ( mgr.Exists( sUnderlying ) ) {
-    m_pUnderlying = new ou::tf::InstrumentData( mgr.Get( sUnderlying ) );
-    HandleUnderlyingContractDetailsDone();
+  if ( mgr.Exists( sUnderlying ) ) { // instruments should already exist so load from database
+    LoadExistingInstruments( sUnderlying );
   }
   else {
-    if ( 0 == m_pData2ProviderIB.get() ) {
-      m_pUnderlying = new ou::tf::InstrumentData( mgr.ConstructInstrument( sUnderlying, "SMART", ou::tf::InstrumentType::Stock ) );
-      HandleUnderlyingContractDetailsDone();
+    if ( 0 == m_pData2ProviderIB.get() ) { // probably simulation, so maybe use LoadExistingInstruments() ?
+      //m_pUnderlying = new ou::tf::InstrumentData( mgr.ConstructInstrument( sUnderlying, "SMART", ou::tf::InstrumentType::Stock ) );
+      //HandleUnderlyingContractDetailsDone();
+      // we need info from IB to do anything so this is pretty much null code
+      throw std::runtime_error( "not a good code branch" );
     }
-    else {
+    else {  // initialize instruments from scratch
       ou::tf::CIBTWS::Contract contract;
       contract.symbol = sUnderlying;
       contract.exchange = "SMART";
@@ -66,11 +70,62 @@ void StrategyTradeOptions::Stop( void ) {
   m_pUnderlying->RemoveTradeHandler( m_pData1Provider );
 }
 
-void StrategyTradeOptions::HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails& cd, const ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+void StrategyTradeOptions::HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails& cd, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  mgr.Register( pInstrument );
   m_pUnderlying = new ou::tf::InstrumentData( pInstrument );
 }
 
 void StrategyTradeOptions::HandleUnderlyingContractDetailsDone( void ) {
+
   m_pUnderlying->AddQuoteHandler( m_pData1Provider );
   m_pUnderlying->AddTradeHandler( m_pData1Provider );
+
+  // obtain near date contracts
+  ou::tf::CIBTWS::Contract contract;
+  contract.symbol = m_pUnderlying->GetInstrument()->GetInstrumentName();
+  contract.exchange = "SMART";
+  contract.secType = "OPT";
+  contract.currency = "USD";
+  contract.expiry = boost::gregorian::to_iso_string( m_dateOptionNearDate );
+  m_pData2ProviderIB->RequestContractDetails( 
+    contract,
+    MakeDelegate( this, &StrategyTradeOptions::HandleNearDateContractDetails ),
+    MakeDelegate( this, &StrategyTradeOptions::HandleNearDateContractDetailsDone )
+    );
+
+}
+
+void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  mgr.Register( pInstrument );
+}
+
+void StrategyTradeOptions::HandleNearDateContractDetailsDone( void ) {
+  // obtain far date contracts
+  ou::tf::CIBTWS::Contract contract;
+  contract.symbol = m_pUnderlying->GetInstrument()->GetInstrumentName();
+  contract.exchange = "SMART";
+  contract.secType = "OPT";
+  contract.currency = "USD";
+  contract.expiry = boost::gregorian::to_iso_string( m_dateOptionFarDate );
+  m_pData2ProviderIB->RequestContractDetails( 
+    contract,
+    MakeDelegate( this, &StrategyTradeOptions::HandleFarDateContractDetails ),
+    MakeDelegate( this, &StrategyTradeOptions::HandleFarDateContractDetailsDone )
+    );
+}
+
+void StrategyTradeOptions::HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  mgr.Register( pInstrument );
+}
+
+void StrategyTradeOptions::HandleFarDateContractDetailsDone( void ) {
+}
+
+void StrategyTradeOptions::LoadExistingInstruments( const std::string& sUnderlying ) {
+  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  m_pUnderlying = new ou::tf::InstrumentData( mgr.Get( sUnderlying ) );
+  // load options as well
 }

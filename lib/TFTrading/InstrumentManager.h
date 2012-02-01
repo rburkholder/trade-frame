@@ -64,7 +64,7 @@ public:
     const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
 
-  void Construct( pInstrument_t& pInstrument );
+  void Register( pInstrument_t& pInstrument );
 
   bool Exists( idInstrument_cref );
   bool Exists( pInstrument_cref );

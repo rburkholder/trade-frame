@@ -605,6 +605,7 @@ void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtC
 }
 
 void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
+  // instrument is constructed, but is not registered with InstrumentManager
   m_ss.str("");
   m_ss << "contract Details "
     << contractDetails.marketName << ", "

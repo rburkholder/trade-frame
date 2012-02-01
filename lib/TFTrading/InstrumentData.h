@@ -46,15 +46,16 @@ public:
   void Reset( void );
 
 protected:
+
+  CQuotes m_quotes;
+  CTrades m_trades;
+  CGreeks m_greeks;
+
 private:
 
   unsigned int m_nSignificantDigits;
 
   CInstrument::pInstrument_t m_pInstrument;
-
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CGreeks m_greeks;
 
   void Init( void );
 

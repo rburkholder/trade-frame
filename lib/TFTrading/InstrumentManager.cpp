@@ -43,7 +43,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
   pInstrument_t pInstrument( new CInstrument( sInstrumentName, type, sExchangeName ) );
-  Construct( pInstrument );
+  Register( pInstrument );
   return pInstrument;
 }
 
@@ -52,7 +52,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(
   boost::uint16_t year, boost::uint16_t month ) {
   pInstrument_t pInstrument(
     new CInstrument( sInstrumentName, InstrumentType::Future, sExchangeName, year, month ) );
-  Construct( pInstrument );
+  Register( pInstrument );
   return pInstrument;
 }
 
@@ -66,7 +66,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   pInstrument_t pInstrument( 
     new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, pUnderlying, side, strike ) );
-  Construct( pInstrument );
+  Register( pInstrument );
   return pInstrument;
 }
 
@@ -80,7 +80,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   pInstrument_t pInstrument( 
     new CInstrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
     year, month, day, pUnderlying, side, strike ) );
-  Construct( pInstrument );
+  Register( pInstrument );
   return pInstrument;
 }
 
@@ -92,11 +92,11 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency(
   Currency::enumCurrency base, Currency::enumCurrency counter ) {
   pInstrument_t pInstrument(
     new CInstrument( idInstrumentName, idCounterInstrument, InstrumentType::Currency, sExchangeName, base, counter ) );
-  Construct( pInstrument );
+  Register( pInstrument );
   return pInstrument;
 }
 
-void CInstrumentManager::Construct( pInstrument_t& pInstrument ) {
+void CInstrumentManager::Register( pInstrument_t& pInstrument ) {
   if ( Exists( pInstrument ) ) {
     throw std::runtime_error( "CInstrumentManager::Construct: instrument already exists" );
   }

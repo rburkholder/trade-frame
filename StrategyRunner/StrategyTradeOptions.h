@@ -44,8 +44,18 @@ private:
 
   ou::tf::InstrumentData* m_pUnderlying;
 
-  void HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails&, const ou::tf::CIBTWS::pInstrument_t& );
+  boost::gregorian::date m_dateOptionNearDate;
+  boost::gregorian::date m_dateOptionFarDate;
+
+  void LoadExistingInstruments( const std::string& sUnderlying );
+
+  void HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
   void HandleUnderlyingContractDetailsDone( void );
 
+  void HandleNearDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
+  void HandleNearDateContractDetailsDone( void );
+
+  void HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
+  void HandleFarDateContractDetailsDone( void );
 };
 
