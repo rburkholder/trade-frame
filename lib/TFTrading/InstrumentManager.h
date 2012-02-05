@@ -21,6 +21,7 @@
 #include "KeyTypes.h"
 
 #include "Instrument.h"
+#include "AlternateInstrumentNames.h"
 #include "Exchange.h"
 #include "ManagerBase.h"
 
@@ -94,12 +95,16 @@ private:
 
   map_t m_map;
 
+  void SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& );
+  void SaveAlternateInstrumentName( 
+    const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t& );
+
   void HandleRegisterTables( ou::db::CSession& session );
   void HandleRegisterRows( ou::db::CSession& session );
   void HandlePopulateTables( ou::db::CSession& session );
 
-  void HandleAlternateNameAdded( CInstrument::pairNames_t );
-  void HandleAlternateNameChanged( CInstrument::pairNames_t );
+  void HandleAlternateNameAdded( const CInstrument::AlternateNameChangeInfo_t& );
+  void HandleAlternateNameChanged( const CInstrument::AlternateNameChangeInfo_t& );
 };
 
 

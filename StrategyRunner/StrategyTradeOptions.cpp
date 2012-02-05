@@ -20,6 +20,9 @@
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider )
 {
+  if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
+    m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
+  }
   if ( ou::tf::keytypes::EProviderIB == m_pData2Provider->ID() ) {
     m_pData2ProviderIB = boost::shared_dynamic_cast<ou::tf::CIBTWS>( m_pData2Provider );
   }
@@ -98,6 +101,7 @@ void StrategyTradeOptions::HandleUnderlyingContractDetailsDone( void ) {
 
 void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );
   mgr.Register( pInstrument );
 }
 
@@ -118,6 +122,7 @@ void StrategyTradeOptions::HandleNearDateContractDetailsDone( void ) {
 
 void StrategyTradeOptions::HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );
   mgr.Register( pInstrument );
 }
 

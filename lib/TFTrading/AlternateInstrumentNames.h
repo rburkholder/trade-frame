@@ -14,92 +14,53 @@
 #pragma once
 
 #include <string>
-#include <cassert>
 
-#include "OUBerkeleyDb\CommonDatabaseFunctions.h"
-
-#define _CRT_SECURE_NO_DEPRECATE
-#pragma warning( disable : 4996 )
+#include "TradingEnumerations.h"
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAlternateInstrumentNames : public CCommonDatabaseFunctions<CAlternateInstrumentNames>{
+class AlternateInstrumentName {
 public:
-  CAlternateInstrumentNames();
-  ~CAlternateInstrumentNames(void);
-  void Save( const std::string &ProviderName, const std::string &InstrumentName, const std::string &AlternateInstrumentName );
-  void Get( const std::string &ProviderName, const std::string &InstrumentName, std::string *pAlternate );
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "providerid", idProvider ); // part of unique key
+      ou::db::Field( a, "alternateid", idAlternate ); // part of unique key
+      ou::db::Field( a, "instrumentid", idInstrument );  // can be used for secondary index
+    }
+
+    keytypes::eidProvider_t idProvider;
+    keytypes::idInstrument_t idAlternate;
+    keytypes::idInstrument_t idInstrument;
+
+    TableRowDef( const keytypes::eidProvider_t& idProvider_, const keytypes::idInstrument_t& idAlternate_, const keytypes::idInstrument_t& idInstrument_ ):
+      idProvider( idProvider_ ), idAlternate( idAlternate_ ), idInstrument( idInstrument_ ) {};
+    TableRowDef( void ) {};
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "providerid" );  // unique key part
+      //ou::db::Key( a, "instrumentid" );
+      ou::db::Key( a, "alternateid" ); // unique key part
+      ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
+      //ou::db::Constraint( a, "alternateid", tablenames::sInstrument, "instrumentid" );  // don't think this one makes sense
+      // set idInstrument as secondary index
+    }
+  };
+
+  const TableRowDef& GetRow( void ) const { return m_row; };
+
 protected:
-  static const char nMaxKeySize = 30;
-  static const char nMaxSymbolNameSize = 15;
-  struct structKey {
-    char nKeyLength;  // key is provider name + instrument name
-    char Key[ nMaxKeySize ];
-    structKey( void ) : nKeyLength( 0 ) {};
-    structKey( const std::string &sProviderName, const std::string &sInstrumentName ) : nKeyLength( 0 ) {
-      assert( ( sProviderName.size() + sInstrumentName.size() ) <= nMaxKeySize );
-      nKeyLength = (char) sProviderName.size() + (char) sInstrumentName.size();
-      std::string t = sProviderName + sInstrumentName;
-      strncpy( Key, t.c_str(), nKeyLength );
-    };
-  };
-  struct structValue {
-    char nValueLength;
-    char Value[ nMaxSymbolNameSize ];
-    structValue( void ) : nValueLength( 0 ) {};
-    structValue( const std::string &sValue ) {
-      assert( sValue.size() <= nMaxSymbolNameSize );
-      nValueLength = (char) sValue.size();
-      strncpy( Value, sValue.c_str(), nValueLength );
-    };
-  };
 private:
+
+  TableRowDef m_row;
+
 };
-
-// sample code which was in ProviderInterface.h:
-
-//  std::map<std::string, std::string> m_mapAlternateNames;  // caching map to save database lookups
-//  CAlternateInstrumentNames m_lutAlternateInstrumentNames;
-
-  // need to redo this and place into CInstrument? => CInstrument has basic AlternateName stuff
-//  void SetAlternateInstrumentName( const std::string& OriginalInstrumentName, const std::string& AlternateIntrumentName );
-//  void GetAlternateInstrumentName( const std::string& OriginalInstrumentName, std::string* pAlternateInstrumentName );
-
-/*
-template <typename P, typename S>
-void CProviderInterface<P,S>::SetAlternateInstrumentName(const std::string &OriginalInstrumentName, const std::string &AlternateIntrumentName) {
-  m_lutAlternateInstrumentNames.Save( m_sName, OriginalInstrumentName, AlternateIntrumentName );
-  std::map<std::string, std::string>::iterator iter 
-    = m_mapAlternateNames.find( OriginalInstrumentName );
-  if ( m_mapAlternateNames.end() == iter ) {
-    m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, AlternateIntrumentName ) );
-  }
-  else m_mapAlternateNames[ OriginalInstrumentName ] = AlternateIntrumentName;
-}
-
-template <typename P, typename S>
-void CProviderInterface<P,S>::GetAlternateInstrumentName(const std::string &OriginalInstrumentName, std::string *pAlternateInstrumentName) {
-  std::map<std::string, std::string>::iterator iter 
-    = m_mapAlternateNames.find( OriginalInstrumentName );
-  if ( m_mapAlternateNames.end() != iter ) {
-    pAlternateInstrumentName->assign( iter->second );
-  }
-  else {
-    try {
-      m_lutAlternateInstrumentNames.Get( m_sName, OriginalInstrumentName, pAlternateInstrumentName );
-      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, *pAlternateInstrumentName ) );
-    }
-    catch ( std::out_of_range e ) {
-      m_mapAlternateNames.insert( std::pair<std::string, std::string>( OriginalInstrumentName, OriginalInstrumentName ) );
-      pAlternateInstrumentName->assign( OriginalInstrumentName );
-    }
-    catch ( std::exception e ) {
-      std::cout << "CProviderInterface::GetAlternateInstrumentName has error: " << e.what() << std::endl;
-    }
-  }
-}
-*/
 
 } // namespace tf
 } // namespace ou

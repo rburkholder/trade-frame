@@ -56,7 +56,7 @@ bool AppStrategyRunner::OnInit() {
   m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 02, 03 ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 02, 10 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 05, 18 ) );
 
   m_pFrameMain->Show( true );

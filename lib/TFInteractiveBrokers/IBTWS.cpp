@@ -727,13 +727,15 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
 
   OptionSide::enumOptionSide os = OptionSide::Unknown;
 
-  // calculate expiry, used with FuturesOption, Option, Future
-  ptime dtExpiry = not_a_date_time;
+  // calculate expiry, used with FuturesOption, Option, Future   "GLD   120210C00159000"
+  boost::gregorian::date dtExpiry( boost::gregorian::not_a_date_time );
   try {  // is this only calculated on futures and options?
     if ( 0 != contract.expiry.length() ) {
-      std::string s( contract.expiry );
-      boost::gregorian::date d( boost::gregorian::from_undelimited_string( s ) );
-      dtExpiry = ptime( d );
+      dtExpiry = boost::gregorian::date( boost::gregorian::date( 
+        boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
+        boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
+        boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
+        ) );
     }
   }
   catch ( std::exception e ) {
@@ -771,12 +773,12 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
         throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
       }
       pInstrument = CInstrument::pInstrument_t( new CInstrument( 
-        sLocalSymbol, it, sExchange, dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day(), 
+        sLocalSymbol, it, sExchange, dtExpiry.year(), dtExpiry.month(), dtExpiry.day(), 
         iterSymbol->second->GetInstrument(), 
         os, contract.strike ) );
       break;
     case InstrumentType::Future:
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiry.date().year(), dtExpiry.date().month() ) );
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiry.year(), dtExpiry.month() ) );
       break;
     case InstrumentType::Currency: {
         bFound = false;

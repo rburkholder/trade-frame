@@ -87,6 +87,10 @@ CInstrument::CInstrument(
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sExchange.size() );
+  assert( 0 != pUnderlying.get() );
+  assert( "" != pUnderlying->GetInstrumentName() );
+  //m_eUnderlyingStatus = EUnderlyingSet;
+  //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
 }
 
  // option yymmdd
@@ -103,6 +107,10 @@ CInstrument::CInstrument(
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
 {
   //assert( 0 < m_sExchange.size() );
+  assert( 0 != pUnderlying.get() );
+  assert( "" != pUnderlying->GetInstrumentName() );
+  //m_eUnderlyingStatus = EUnderlyingSet;
+  //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
 }
 
 // currency
@@ -156,13 +164,13 @@ void CInstrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
-    OnAlternateNameAdded( pairNames_t( m_row.idInstrument, name ) );
+    OnAlternateNameAdded( AlternateNameChangeInfo_t( id, m_row.idInstrument, name ) );
   }
   else {
     if ( iter->second != name ) {
       idInstrument_t old = iter->second;
       iter->second.assign( name );
-      OnAlternateNameChanged( pairNames_t( old, name ) );
+      OnAlternateNameChanged( AlternateNameChangeInfo_t( id, old, name ) );
     }
   }
 }
@@ -177,14 +185,14 @@ CInstrument::idInstrument_cref CInstrument::GetInstrumentName( eidProvider_t id 
 }
 
 CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( void ) {
-  if ( EUnderlyingNotSet != m_eUnderlyingStatus ) {
+  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
     throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName();
 }
 
 CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( eidProvider_t id ) {
-  if ( EUnderlyingNotSet != m_eUnderlyingStatus ) {
+  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
     throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName(id);

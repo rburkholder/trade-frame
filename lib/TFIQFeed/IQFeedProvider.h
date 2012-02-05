@@ -44,6 +44,8 @@ public:
   virtual void Connect( void );
   virtual void Disconnect( void );
 
+  void SetAlternateInstrumentName( pInstrument_t );
+
 protected:
 
   void StartQuoteTradeWatch( CIQFeedSymbol *pSymbol );

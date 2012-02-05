@@ -21,6 +21,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian_calendar.hpp>
 using namespace boost::posix_time;
 
 #include <OUCommon/Delegate.h>
@@ -200,13 +201,22 @@ public:
   idInstrument_cref GetInstrumentName( eidProvider_t id );
   idInstrument_cref GetUnderlyingName( eidProvider_t id );
 
-//  void SetUnderlying( pInstrument_t pUnderlying );
-
   void SetAlternateName( eidProvider_t, idInstrument_cref );
 
-  typedef std::pair<idInstrument_cref,idInstrument_cref> pairNames_t;
-  ou::Delegate<pairNames_t> OnAlternateNameAdded;  // key, alt
-  ou::Delegate<pairNames_t> OnAlternateNameChanged;  // old, new
+  struct AlternateNameChangeInfo_t {
+    eidProvider_t id;
+    const std::string& s1;
+    const std::string& s2;
+    AlternateNameChangeInfo_t( eidProvider_t id_, const std::string& s1_, const std::string& s2_ ):
+      id( id ), s1( s1_ ), s2( s2_ ) {};
+  };
+  ou::Delegate<const AlternateNameChangeInfo_t&> OnAlternateNameAdded;  // idProvider, key, alt
+  ou::Delegate<const AlternateNameChangeInfo_t&> OnAlternateNameChanged;  // idProvider, old, new
+  template<typename F> void ScanAlternateNames( F f ) {
+    for ( mapAlternateNames_t::const_iterator iter = m_mapAlternateNames.begin(); m_mapAlternateNames.end() != iter; ++iter ) {
+      f( iter->first, iter->second, m_row.idInstrument );
+    }
+  };
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) const { return m_row.eType; };
   bool IsOption( void ) const { return ( InstrumentType::Option == m_row.eType ); };
@@ -220,6 +230,7 @@ public:
   boost::uint16_t GetExpiryYear( void ) const { return m_row.nYear; };
   boost::uint16_t GetExpiryMonth( void ) const { return m_row.nMonth; };
   boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
+  std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ) ); };
   OptionSide::enumOptionSide GetOptionSide( void ) { return m_row.eOptionSide; };
 
   void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };
@@ -256,8 +267,10 @@ private:
   typedef std::pair<eidProvider_t, idInstrument_t> mapAlternateNames_pair_t;
   mapAlternateNames_t m_mapAlternateNames;
 
-  enum enunUnderlyingStatus {
-    EUnderlyingNotSettable, EUnderlyingNotSet, EUnderlyingSet
+  enum enunUnderlyingStatus { // when should each be used?
+    EUnderlyingNotSettable, // when instrument has no underlying?
+    EUnderlyingNotSet, // when instrument does have underlying, but hasn't been set
+    EUnderlyingSet // when instrument does have underlying, and has been set
   } m_eUnderlyingStatus;
 
   TableRowDef m_row;
@@ -267,44 +280,6 @@ private:
 
   CInstrument( const CInstrument& );  // copy ctor
   CInstrument& operator=( const CInstrument& ); // assignement
-};
-
-//
-// CAlternateInstrumentName
-//
-
-class CAlternateInstrumentName {
-public:
-  struct TableRowDef {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "providerid", idProvider ); 
-      ou::db::Field( a, "alternateid", idAlternate );
-      ou::db::Field( a, "instrumentid", idInstrument );
-    }
-
-    keytypes::eidProvider_t idProvider;
-    keytypes::idInstrument_t idInstrument;
-    keytypes::idInstrument_t idAlternate;
-  };
-
-  struct TableCreateDef: TableRowDef {
-    template<class A>
-    void Fields( A& a ) {
-      TableRowDef::Fields( a );
-      ou::db::Key( a, "providerid" );
-      ou::db::Key( a, "alternateid" );
-      ou::db::Constraint( a, "instrumentid", tablenames::sInstrument, "instrumentid" );
-      //ou::db::Constraint( a, "alternateid", tablenames::sInstrument, "instrumentid" );  // don't think this one makes sense
-      // set instrumentid as secondary index
-    }
-  };
-
-protected:
-private:
-
-  TableRowDef m_row;
-
 };
 
 } // namespace tf

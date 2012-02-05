@@ -18,6 +18,7 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/InstrumentData.h>
 #include <TFInteractiveBrokers/IBTWS.h>
+#include <TFIQFeed/IQFeedProvider.h>
 
 class StrategyTradeOptions {
 public:
@@ -39,6 +40,7 @@ private:
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
 
+  ou::tf::CIQFeedProvider::pProvider_t m_pData1ProviderIQFeed;
   ou::tf::CIBTWS::pProvider_t m_pData2ProviderIB;
   ou::tf::CIBTWS::pProvider_t m_pExecutionProviderIB;
 

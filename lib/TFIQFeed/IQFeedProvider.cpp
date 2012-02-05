@@ -13,6 +13,8 @@
 
 #include "StdAfx.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <TFTrading/KeyTypes.h>
 
 #include "IQFeedProvider.h"
@@ -180,6 +182,30 @@ void CIQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessag
 void CIQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   SystemDone( pBuffer, pMsg );
+}
+
+//http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
+void CIQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
+  // need to check if it already set or not
+  std::string sName;
+  switch ( pInstrument->GetInstrumentType() ) {
+  case ou::tf::InstrumentType::Option:
+    sName += pInstrument->GetUnderlyingName();
+    std::string d = pInstrument->GetExpiryAsIsoString();
+    sName += d.substr( 2, 2 );
+    sName += d.substr( 6, 2 );
+    switch ( pInstrument->GetOptionSide() ) {
+    case ou::tf::OptionSide::Call:
+      sName += 'A' + pInstrument->GetExpiryMonth() - 1;
+      break;
+    case ou::tf::OptionSide::Put:
+      sName += 'M' + pInstrument->GetExpiryMonth() - 1;
+      break;
+    }
+    sName += boost::lexical_cast<std::string>( pInstrument->GetStrike() );
+    break;
+  }
+  pInstrument->SetAlternateName( ID(), sName );
 }
 
 } // namespace tf

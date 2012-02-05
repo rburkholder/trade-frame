@@ -19,6 +19,10 @@
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
+//#include <boost/bind.hpp>
+
 //using namespace fastdelegate;
 
 #include "InstrumentManager.h"
@@ -104,7 +108,22 @@ void CInstrumentManager::Register( pInstrument_t& pInstrument ) {
   if ( 0 != m_pSession ) {
     ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pQuery 
       = m_pSession->Insert<CInstrument::TableRowDef>( const_cast<CInstrument::TableRowDef&>( pInstrument->GetRow() ) );
-    // todo: save alternate instrument names
+    // save alternate instrument names
+    pInstrument->ScanAlternateNames( boost::phoenix::bind( &CInstrumentManager::SaveAlternateInstrumentName, this, 
+      boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+  }
+}
+
+void CInstrumentManager::SaveAlternateInstrumentName( 
+    const keytypes::eidProvider_t& idProvider, const keytypes::idInstrument_t& idAlternate, const keytypes::idInstrument_t& idInstrument ) {
+  AlternateInstrumentName::TableRowDef row( idProvider, idAlternate, idInstrument );
+  SaveAlternateInstrumentName( row );
+}
+
+void CInstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& row ) {
+  if ( 0 != m_pSession ) {
+    ou::db::QueryFields<AlternateInstrumentName::TableRowDef>::pQueryFields_t pQuery 
+      = m_pSession->Insert<AlternateInstrumentName::TableRowDef>( const_cast<AlternateInstrumentName::TableRowDef&>( row ) );
   }
 }
 
@@ -219,45 +238,48 @@ void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrumen
    ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
      = m_pSession->SQL<InstrumentManagerQueries::InstrumentKey>( "select * from altinstrumentnames", idInstrument ).Where( "instrumentid = ?" ).NoExecute();
   m_pSession->Bind<InstrumentManagerQueries::InstrumentKey>( pExistsQuery );
-  CAlternateInstrumentName::TableRowDef altname;
+  AlternateInstrumentName::TableRowDef altname;
   while ( m_pSession->Execute( pExistsQuery ) ) {
-    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, CAlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
+    m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, AlternateInstrumentName::TableRowDef>( pExistsQuery, altname );
     pInstrument->SetAlternateName( altname.idProvider, altname.idAlternate );
   }
 }
 
-void CInstrumentManager::HandleAlternateNameAdded( CInstrument::pairNames_t pair ) { //todo: need to update database
-  iterMap iterKey = m_map.find( pair.first );
-  iterMap iterAlt = m_map.find( pair.second );
+void CInstrumentManager::HandleAlternateNameAdded( const CInstrument::AlternateNameChangeInfo_t& info ) {
+  iterMap iterKey = m_map.find( info.s1 );
+  iterMap iterAlt = m_map.find( info.s2 );
   if ( m_map.end() == iterKey ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded key does not exist" );
   if ( m_map.end() != iterAlt ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded alt exists" );
-  m_map.insert( pair_t( pair.second, iterKey->second ) );
+  m_map.insert( pair_t( info.s2, iterKey->second ) );
+  SaveAlternateInstrumentName( info.id, info.s2, info.s1 );
 }
 
-void CInstrumentManager::HandleAlternateNameChanged( CInstrument::pairNames_t pair ) { // todo: need to update database
-  iterMap iterOld = m_map.find( pair.first );
+void CInstrumentManager::HandleAlternateNameChanged( const CInstrument::AlternateNameChangeInfo_t& info ) { // todo: need to update database
+  iterMap iterOld = m_map.find( info.s1 );
   if ( m_map.end() == iterOld ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged old name not found" );
-  iterMap iterNew = m_map.find( pair.second );
+  iterMap iterNew = m_map.find( info.s2 );
   if ( m_map.end() != iterNew ) 
     throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged new name already exists" );
-  m_map.insert( pair_t( pair.second, iterOld->second ) );
-  iterOld = m_map.find( pair.first );  // load again to ensure proper copy
+  m_map.insert( pair_t( info.s2, iterOld->second ) );
+  iterOld = m_map.find( info.s1 );  // load again to ensure proper copy
   m_map.erase( iterOld );
+  // need database delete
+  // need database insert
 }
 
 void CInstrumentManager::HandleRegisterTables( ou::db::CSession& session ) {
   session.RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
   session.RegisterTable<CInstrument::TableCreateDef>( tablenames::sInstrument );
-  session.RegisterTable<CAlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
+  session.RegisterTable<AlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
 }
 
 void CInstrumentManager::HandleRegisterRows( ou::db::CSession& session ) {
   session.MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
   session.MapRowDefToTableName<CInstrument::TableRowDef>( tablenames::sInstrument );
-  session.MapRowDefToTableName<CAlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
+  session.MapRowDefToTableName<AlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
 }
 
 void CInstrumentManager::HandlePopulateTables( ou::db::CSession& session ) {
