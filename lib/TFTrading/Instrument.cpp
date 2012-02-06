@@ -37,14 +37,16 @@ namespace tf { // TradeFrame
 
 CInstrument::CInstrument( const TableRowDef& row ) 
   : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
 }
 
 CInstrument::CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
   : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ) 
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
 }
@@ -56,7 +58,8 @@ CInstrument::CInstrument(
                          )
 : m_row( idInstrument, eType, idExchange ),
   m_eUnderlyingStatus( EUnderlyingNotSettable ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
 }
 
@@ -67,7 +70,8 @@ CInstrument::CInstrument(
   boost::uint16_t year, boost::uint16_t month ) 
 : m_row( idInstrument, eType, idExchange, year, month ),
   m_eUnderlyingStatus( EUnderlyingNotSettable ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sSymbolName.size() );
   //assert( 0 < m_sExchange.size() );
@@ -84,7 +88,8 @@ CInstrument::CInstrument(
   : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, eOptionSide, dblStrike ),
   m_pUnderlying( pUnderlying ), 
   m_eUnderlyingStatus( EUnderlyingSet ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
   assert( 0 != pUnderlying.get() );
@@ -104,7 +109,8 @@ CInstrument::CInstrument(
   : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, day, eOptionSide, dblStrike ),
   m_pUnderlying( pUnderlying ), 
   m_eUnderlyingStatus( EUnderlyingSet ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
   assert( 0 != pUnderlying.get() );
@@ -122,7 +128,8 @@ CInstrument::CInstrument(
   : m_row( idInstrument, idCounterInstrument, eType, idExchange, base, counter ),
 //  m_pUnderlying( pUnderlying ), 
   m_eUnderlyingStatus( EUnderlyingNotSettable ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   
 }
@@ -149,7 +156,8 @@ CInstrument::CInstrument(const CInstrument& instrument)
   m_row( instrument.m_row ),
   m_pUnderlying( instrument.m_pUnderlying ),
   m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault )
+  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+  m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   mapAlternateNames_t::const_iterator iter = instrument.m_mapAlternateNames.begin();
   while ( instrument.m_mapAlternateNames.end() != iter ) {
@@ -164,7 +172,7 @@ void CInstrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
-    OnAlternateNameAdded( AlternateNameChangeInfo_t( id, m_row.idInstrument, name ) );
+//    OnAlternateNameAdded( AlternateNameChangeInfo_t( id, m_row.idInstrument, name ) );  // 2012/02/05  this creates a loop when loading alt names in instrument manager
   }
   else {
     if ( iter->second != name ) {

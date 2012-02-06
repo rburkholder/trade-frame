@@ -21,7 +21,6 @@ using namespace boost::assign;
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
-//#include <boost/bind.hpp>
 
 //using namespace fastdelegate;
 

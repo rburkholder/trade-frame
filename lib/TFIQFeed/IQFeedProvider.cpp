@@ -191,15 +191,16 @@ void CIQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   switch ( pInstrument->GetInstrumentType() ) {
   case ou::tf::InstrumentType::Option:
     sName += pInstrument->GetUnderlyingName();
-    std::string d = pInstrument->GetExpiryAsIsoString();
+    std::string d = pInstrument->GetCommonCalcExpiryAsIsoString();
     sName += d.substr( 2, 2 );
+    int month = boost::lexical_cast<int>( d.substr( 4, 2 ) );
     sName += d.substr( 6, 2 );
     switch ( pInstrument->GetOptionSide() ) {
     case ou::tf::OptionSide::Call:
-      sName += 'A' + pInstrument->GetExpiryMonth() - 1;
+      sName += 'A' + month - 1;
       break;
     case ou::tf::OptionSide::Put:
-      sName += 'M' + pInstrument->GetExpiryMonth() - 1;
+      sName += 'M' + month - 1;
       break;
     }
     sName += boost::lexical_cast<std::string>( pInstrument->GetStrike() );

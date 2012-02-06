@@ -231,7 +231,11 @@ public:
   boost::uint16_t GetExpiryMonth( void ) const { return m_row.nMonth; };
   boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
   std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ) ); };
-  OptionSide::enumOptionSide GetOptionSide( void ) { return m_row.eOptionSide; };
+  OptionSide::enumOptionSide GetOptionSide( void ) const { return m_row.eOptionSide; };
+
+  void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday
+  boost::gregorian::date GetCommonCalcExpiry( void ) const { return m_dateCommonCalc; };
+  std::string GetCommonCalcExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); };
 
   void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };
   boost::int32_t GetContract( void ) const { return m_row.nIBContract; };
@@ -274,6 +278,8 @@ private:
   } m_eUnderlyingStatus;
 
   TableRowDef m_row;
+
+  boost::gregorian::date m_dateCommonCalc;
 
   dtrMarketOpenClose_t m_dtrTimeLiquid;
   dtrMarketOpenClose_t m_dtrTimeTrading;

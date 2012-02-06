@@ -72,6 +72,8 @@ public:
   pInstrument_t Get( idInstrument_cref ); // for getting existing associated with id
   void Delete( idInstrument_cref );
 
+  template<typename F> void ScanOptions( F f, idInstrument_cref, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day );
+
   void AttachToSession( ou::db::CSession* pSession );
   void DetachFromSession( ou::db::CSession* pSession );
 
@@ -107,6 +109,48 @@ private:
   void HandleAlternateNameChanged( const CInstrument::AlternateNameChangeInfo_t& );
 };
 
+namespace InstrumentManagerQueries {
+  struct OptionSelection {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "underlyingid", idInstrument );
+      ou::db::Field( a, "year", nYear );
+      ou::db::Field( a, "month", nMonth );
+      ou::db::Field( a, "day", nDay );
+    }
+    const ou::tf::keytypes::idInstrument_t& idInstrument;
+    boost::uint16_t nYear; // future, option
+    boost::uint16_t nMonth; // future, option
+    boost::uint16_t nDay; // future, option    
+    OptionSelection( const ou::tf::keytypes::idInstrument_t& idInstrument_, boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ )
+      : idInstrument( idInstrument_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ) {};
+  };
+
+  struct OptionSymbolName {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "instrumentid", idInstrument );
+    }
+    ou::tf::keytypes::idInstrument_t idInstrument;
+    OptionSymbolName( void ) {};
+  };
+}
+
+template<typename F> 
+void CInstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+  InstrumentManagerQueries::OptionSelection idInstrument( id, nYear, nMonth, nDay );
+  ou::db::QueryFields<InstrumentManagerQueries::OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>( 
+      "select instrumentid from instruments", idInstrument ).Where( "underlyingid = ? and year = ? and month = ? and day = ?" ).NoExecute();
+  m_pSession->Bind<InstrumentManagerQueries::OptionSelection>( pExistsQuery );
+  InstrumentManagerQueries::OptionSymbolName name;
+  pInstrument_t pInstrument;
+  while ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+    m_pSession->Columns<InstrumentManagerQueries::OptionSelection, InstrumentManagerQueries::OptionSymbolName>( pExistsQuery, name );
+    pInstrument = Get( name.idInstrument );
+    f( pInstrument );
+  }
+}
 
 } // namespace tf
 } // namespace ou

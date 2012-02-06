@@ -77,12 +77,16 @@
     <ClInclude Include="CalcExpiry.h" />
     <ClInclude Include="Option.h" />
     <ClInclude Include="PopulateWithIBOptions.h" />
-    <ClInclude Include="Strike.h" />
+    <ClInclude Include="Strike.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp" />
     <ClCompile Include="Option.cpp" />
-    <ClCompile Include="Strike.cpp" />
+    <ClCompile Include="Strike.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

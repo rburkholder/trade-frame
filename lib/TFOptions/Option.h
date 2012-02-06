@@ -13,11 +13,12 @@
 
 #pragma once
 
-// 20120129 Inherit from <TFTrading/InstrumentData.h> ?
+// 2012/02/05 http://seekingalpha.com/article/274736-option-expiration-for-metals-lots-of-puts-on-slv-more-calls-on-gld
 
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <TFTrading/Instrument.h>
+#include <TFTrading/ProviderInterface.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -27,22 +28,19 @@ class Option {
 public:
 
   typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
 
-  Option( pInstrument_t pInstrument );
+  Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( const Option& rhs );
-  virtual ~Option( void ) {};
+  virtual ~Option( void );
 
   Option& operator=( const Option& rhs );
 
   bool operator< ( const Option& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
   bool operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
-  double GetStrike( void ) { return m_dblStrike; };
+  double GetStrike( void ) const { return m_dblStrike; };
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
-
-  void HandleQuote( const CQuote& quote );
-  void HandleTrade( const CTrade& trade );
-  void HandleGreek( const CGreek& greek );
 
   double Bid( void ) const { return m_dblBid; };
   double Ask( void ) const { return m_dblAsk; };
@@ -56,6 +54,11 @@ public:
   CQuotes* Quotes( void ) { return &m_quotes; };
   CTrades* Trades( void ) { return &m_trades; };
   CGreeks* Greeks( void ) { return &m_greeks; };
+
+  void StartMonitoring( void );
+  void StopMonitoring( void );
+
+  void SaveSeries( const std::string& sPrefix );
 
 protected:
 
@@ -76,9 +79,21 @@ protected:
 
   pInstrument_t m_pInstrument;
 
+  pProvider_t m_pDataProvider;
+  pProvider_t m_pGreekProvider;
+
   std::stringstream m_ss;
 
 private:
+
+  bool m_bMonitoring;
+
+  void Initialize( void );
+
+  void HandleQuote( const CQuote& quote );
+  void HandleTrade( const CTrade& trade );
+  void HandleGreek( const CGreek& greek );
+
 };
 
 //
@@ -88,7 +103,7 @@ private:
 class Call: public Option
 {
 public:
-  Call( pInstrument_t pInstrument );
+  Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   virtual ~Call( void ) {};
 protected:
 private:
@@ -101,7 +116,7 @@ private:
 class Put: public Option
 {
 public:
-  Put( pInstrument_t pInstrument );
+  Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   virtual ~Put( void ) {};
 protected:
 private:

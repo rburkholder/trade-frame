@@ -170,7 +170,8 @@ public:
   }
 
   template<typename T, bool b> // is not enum
-  void Field( T& var, const boost::integral_constant<bool, b>& ) {
+  void Field( T& var, const boost::integral_constant<bool, b>& ) {  
+  //void Field( T& var, const boost::false_type& ) {  // 2012/02/05
     Column( var );
   }
 

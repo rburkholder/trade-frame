@@ -728,14 +728,17 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
   OptionSide::enumOptionSide os = OptionSide::Unknown;
 
   // calculate expiry, used with FuturesOption, Option, Future   "GLD   120210C00159000"
-  boost::gregorian::date dtExpiry( boost::gregorian::not_a_date_time );
+  boost::gregorian::date dtExpiryRequested( boost::gregorian::not_a_date_time );
+  boost::gregorian::date dtExpiryInSymbol( boost::gregorian::not_a_date_time );
   try {  // is this only calculated on futures and options?
     if ( 0 != contract.expiry.length() ) {
-      dtExpiry = boost::gregorian::date( boost::gregorian::date( 
+      // save actual date in instrument, as last-day-to-trade and expiry-date  in symbol naming varies between Fri and Sat
+      dtExpiryRequested = boost::gregorian::from_undelimited_string( contract.expiry );
+      dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date( 
         boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
         boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
         boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
-        ) );
+        ) ); 
     }
   }
   catch ( std::exception e ) {
@@ -773,12 +776,14 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
         throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
       }
       pInstrument = CInstrument::pInstrument_t( new CInstrument( 
-        sLocalSymbol, it, sExchange, dtExpiry.year(), dtExpiry.month(), dtExpiry.day(), 
+        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
         iterSymbol->second->GetInstrument(), 
         os, contract.strike ) );
+      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiry.year(), dtExpiry.month() ) );
+      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
+      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Currency: {
         bFound = false;
