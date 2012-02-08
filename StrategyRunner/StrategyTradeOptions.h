@@ -42,7 +42,7 @@ private:
 
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
 
-  enum enumStates { EPreOpen, EAfterBell, ETrading, ECancelling, EClosing, EAfterHours };
+  enum enumTradeStates { EPreOpen, EBellHeard, AfterBell, ETrading, ECancelling, EClosing, EAfterHours };
 
   struct options_t  {
     double strike;
@@ -62,7 +62,14 @@ private:
   };
 
   typedef std::map<double,options_t> mapOptions_t;
+  typedef mapOptions_t::iterator mapOptions_iter_t;
+  typedef std::pair<double,options_t> mapOptions_pair_t;
   mapOptions_t m_mapOptions;
+  mapOptions_iter_t m_iterMapOptionsAbove, m_iterMapOptionsBelow;
+
+  enumTradeStates m_TradeStates;
+
+  time_duration m_timeOpeningBell, m_timeCancel, m_timeClose, m_timeClosingBell;
 
   std::string m_sUnderlying;
 

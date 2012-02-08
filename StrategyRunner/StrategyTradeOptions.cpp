@@ -21,7 +21,9 @@
 #include "StrategyTradeOptions.h"
 
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
-  m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider )
+  m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
+    m_TradeStates( EPreOpen ),
+    m_timeOpeningBell( 10, 0, 0 ), m_timeCancel( 16, 50, 0 ), m_timeClose( 16, 51, 0 ), m_timeClosingBell( 17, 0, 0 )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
@@ -188,6 +190,39 @@ void StrategyTradeOptions::HandleTrade( const ou::tf::CTrade& trade ) {
 }
 
 void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
+
   m_quotes.Append( quote );
+
+  //  quote.DateTime().time_of_day()
+  time_duration dt( quote.DateTime().time_of_day() );
+
+  switch ( m_TradeStates ) {
+  case EPreOpen:
+    if ( m_timeOpeningBell <= dt ) {
+      m_TradeStates = EBellHeard;
+    }
+    break;
+  case EBellHeard:
+    m_TradeStates = AfterBell;
+    break;
+  case AfterBell:
+  case ETrading:
+    if ( m_timeCancel <= dt ) {
+      m_TradeStates = ECancelling;
+    }
+    break;
+  case ECancelling:
+    if ( m_timeClose <= dt ) {
+      m_TradeStates = EClosing;
+    }
+    break;
+  case EClosing:
+    if ( m_timeClosingBell <= dt ) {
+      m_TradeStates = EAfterHours;
+    }
+    break;
+  case EAfterHours:
+    break;
+  }
 }
 

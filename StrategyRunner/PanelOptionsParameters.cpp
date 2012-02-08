@@ -79,10 +79,25 @@ void PanelOptionsParameters::CreateControls() {
     m_ctrlFarDate = new wxDatePickerCtrl( itemPanel1, ID_DATE_FarDate, wxDateTime(), wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT );
     itemBoxSizer9->Add(m_ctrlFarDate, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+    wxBoxSizer* itemBoxSizer12 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer12, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
     m_btnStart = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer2->Add(m_btnStart, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer12->Add(m_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_btnStop = new wxButton( itemPanel1, ID_BTN_STOP, _("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnStop->Enable(false);
+    itemBoxSizer12->Add(m_btnStop, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer15, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+    m_btnSave = new wxButton( itemPanel1, ID_BTN_SAVE, _("Save"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer15->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOptionsParameters::OnBtnStartClicked, this, ID_BTN_START );
+    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOptionsParameters::OnBtnStopClicked, this, ID_BTN_STOP );
+    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelOptionsParameters::OnBtnSaveClicked, this, ID_BTN_SAVE );
 
 }
 
@@ -90,8 +105,20 @@ void PanelOptionsParameters::OnBtnStartClicked( wxCommandEvent& event ) {
   if ( 0 != m_OnStart ) m_OnStart();
 }
 
+void PanelOptionsParameters::OnBtnStopClicked( wxCommandEvent& event ) {
+  if ( 0 != m_OnStop ) m_OnStop();
+}
+
+void PanelOptionsParameters::OnBtnSaveClicked( wxCommandEvent& event ) {
+  if ( 0 != m_OnSave ) m_OnSave();
+}
+
 void PanelOptionsParameters::SetBtnStartEnable( bool b ) {
   m_btnStart->Enable( b );
+}
+
+void PanelOptionsParameters::SetBtnStopEnable( bool b ) {
+  m_btnStop->Enable( b );
 }
 
 std::string PanelOptionsParameters::GetUnderlying( void ) {

@@ -54,12 +54,21 @@ public:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
 
-  typedef FastDelegate0<> OnStart_t;
-  void SetOnStart( OnStart_t function ) {
+  typedef FastDelegate0<> OnButton_t;
+  void SetOnStart( OnButton_t function ) {
     m_OnStart = function;
   }
 
+  void SetOnStop( OnButton_t function ) {
+    m_OnStop = function;
+  }
+
+  void SetOnSave( OnButton_t function ) {
+    m_OnSave = function;
+  }
+
   void SetBtnStartEnable( bool );
+  void SetBtnStopEnable( bool );
 
   std::string GetUnderlying( void );
   boost::gregorian::date GetOptionFarDate( void );
@@ -74,17 +83,23 @@ private:
     ID_LBL_Underlying, ID_TXT_Underlying, 
     ID_LBL_OPTIONNEARDATE, ID_DATE_NearDate,
     ID_LBL_OPTIONFARDATE, ID_DATE_FarDate,
-    ID_BTN_START
+    ID_BTN_START, ID_BTN_STOP, ID_BTN_SAVE
   };
 
   wxTextCtrl* m_txtUnderlying;
   wxDatePickerCtrl* m_ctrlNearDate;
   wxDatePickerCtrl* m_ctrlFarDate;
   wxButton* m_btnStart;
+  wxButton* m_btnStop;
+  wxButton* m_btnSave;
 
-  OnStart_t m_OnStart;
+  OnButton_t m_OnStart;
+  OnButton_t m_OnStop;
+  OnButton_t m_OnSave;
 
   void OnBtnStartClicked( wxCommandEvent& event );
+  void OnBtnStopClicked( wxCommandEvent& event );
+  void OnBtnSaveClicked( wxCommandEvent& event );
 
 };
 

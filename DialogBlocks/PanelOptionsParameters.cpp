@@ -30,34 +30,34 @@
 
 
 /*
- * PanelOptionSelection type definition
+ * PanelOptionsParameters type definition
  */
 
-IMPLEMENT_DYNAMIC_CLASS( PanelOptionSelection, wxPanel )
+IMPLEMENT_DYNAMIC_CLASS( PanelOptionsParameters, wxPanel )
 
 
 /*
- * PanelOptionSelection event table definition
+ * PanelOptionsParameters event table definition
  */
 
-BEGIN_EVENT_TABLE( PanelOptionSelection, wxPanel )
+BEGIN_EVENT_TABLE( PanelOptionsParameters, wxPanel )
 
-////@begin PanelOptionSelection event table entries
-////@end PanelOptionSelection event table entries
+////@begin PanelOptionsParameters event table entries
+////@end PanelOptionsParameters event table entries
 
 END_EVENT_TABLE()
 
 
 /*
- * PanelOptionSelection constructors
+ * PanelOptionsParameters constructors
  */
 
-PanelOptionSelection::PanelOptionSelection()
+PanelOptionsParameters::PanelOptionsParameters()
 {
     Init();
 }
 
-PanelOptionSelection::PanelOptionSelection( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
+PanelOptionsParameters::PanelOptionsParameters( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
 {
     Init();
     Create(parent, id, pos, size, style);
@@ -68,9 +68,9 @@ PanelOptionSelection::PanelOptionSelection( wxWindow* parent, wxWindowID id, con
  * PanelOptionSelection creator
  */
 
-bool PanelOptionSelection::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
+bool PanelOptionsParameters::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
 {
-////@begin PanelOptionSelection creation
+////@begin PanelOptionsParameters creation
     wxPanel::Create( parent, id, pos, size, style );
 
     CreateControls();
@@ -79,19 +79,19 @@ bool PanelOptionSelection::Create( wxWindow* parent, wxWindowID id, const wxPoin
         GetSizer()->SetSizeHints(this);
     }
     Centre();
-////@end PanelOptionSelection creation
+////@end PanelOptionsParameters creation
     return true;
 }
 
 
 /*
- * PanelOptionSelection destructor
+ * PanelOptionsParameters destructor
  */
 
-PanelOptionSelection::~PanelOptionSelection()
+PanelOptionsParameters::~PanelOptionsParameters()
 {
-////@begin PanelOptionSelection destruction
-////@end PanelOptionSelection destruction
+////@begin PanelOptionsParameters destruction
+////@end PanelOptionsParameters destruction
 }
 
 
@@ -99,14 +99,16 @@ PanelOptionSelection::~PanelOptionSelection()
  * Member initialisation
  */
 
-void PanelOptionSelection::Init()
+void PanelOptionsParameters::Init()
 {
-////@begin PanelOptionSelection member initialisation
+////@begin PanelOptionsParameters member initialisation
     m_txtUnderlying = NULL;
     m_ctrlNearDate = NULL;
     m_ctrlFarDate = NULL;
     m_btnStart = NULL;
-////@end PanelOptionSelection member initialisation
+    m_btnStop = NULL;
+    m_btnSave = NULL;
+////@end PanelOptionsParameters member initialisation
 }
 
 
@@ -114,10 +116,10 @@ void PanelOptionSelection::Init()
  * Control creation for PanelOptionSelection
  */
 
-void PanelOptionSelection::CreateControls()
+void PanelOptionsParameters::CreateControls()
 {    
-////@begin PanelOptionSelection content construction
-    PanelOptionSelection* itemPanel1 = this;
+////@begin PanelOptionsParameters content construction
+    PanelOptionsParameters* itemPanel1 = this;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(itemBoxSizer2);
@@ -150,10 +152,23 @@ void PanelOptionSelection::CreateControls()
     m_ctrlFarDate = new wxDatePickerCtrl( itemPanel1, ID_DATE_FarDate, wxDateTime(), wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT );
     itemBoxSizer9->Add(m_ctrlFarDate, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_btnStart = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer2->Add(m_btnStart, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    wxBoxSizer* itemBoxSizer12 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer12, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
-////@end PanelOptionSelection content construction
+    m_btnStart = new wxButton( itemPanel1, ID_BTN_START, _("Start"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer12->Add(m_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_btnStop = new wxButton( itemPanel1, ID_BTN_STOP, _("Stop"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnStop->Enable(false);
+    itemBoxSizer12->Add(m_btnStop, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer15, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+    m_btnSave = new wxButton( itemPanel1, ID_BTN_SAVE, _("Save"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer15->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+////@end PanelOptionsParameters content construction
 }
 
 
@@ -161,7 +176,7 @@ void PanelOptionSelection::CreateControls()
  * Should we show tooltips?
  */
 
-bool PanelOptionSelection::ShowToolTips()
+bool PanelOptionsParameters::ShowToolTips()
 {
     return true;
 }
@@ -170,24 +185,24 @@ bool PanelOptionSelection::ShowToolTips()
  * Get bitmap resources
  */
 
-wxBitmap PanelOptionSelection::GetBitmapResource( const wxString& name )
+wxBitmap PanelOptionsParameters::GetBitmapResource( const wxString& name )
 {
     // Bitmap retrieval
-////@begin PanelOptionSelection bitmap retrieval
+////@begin PanelOptionsParameters bitmap retrieval
     wxUnusedVar(name);
     return wxNullBitmap;
-////@end PanelOptionSelection bitmap retrieval
+////@end PanelOptionsParameters bitmap retrieval
 }
 
 /*
  * Get icon resources
  */
 
-wxIcon PanelOptionSelection::GetIconResource( const wxString& name )
+wxIcon PanelOptionsParameters::GetIconResource( const wxString& name )
 {
     // Icon retrieval
-////@begin PanelOptionSelection icon retrieval
+////@begin PanelOptionsParameters icon retrieval
     wxUnusedVar(name);
     return wxNullIcon;
-////@end PanelOptionSelection icon retrieval
+////@end PanelOptionsParameters icon retrieval
 }
