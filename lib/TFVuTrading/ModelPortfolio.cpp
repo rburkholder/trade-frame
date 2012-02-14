@@ -62,7 +62,7 @@ namespace ProcessPortolios {
 } // ns ProcessPortfolios
 */
 void ModelPortfolio::PopulateWithRootPortfolios( void ) { 
-  m_mgrPortfolio.IteratePortfolios( boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, this, boost::phoenix::arg_names::arg1 ) );
+  m_mgrPortfolio.ScanPortfolios( boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, this, boost::phoenix::arg_names::arg1 ) );
 }
 
 // part of the process of the initial sync, can be used for adding additional portfolios

@@ -51,6 +51,8 @@ private:
 
   void HandlePopulateDatabase( void );
   void HandleBtnStart( void );
+  void HandleBtnStop( void );
+  void HandleBtnSave( void );
 
 };
 

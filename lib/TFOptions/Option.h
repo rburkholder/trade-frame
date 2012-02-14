@@ -55,8 +55,8 @@ public:
   CTrades* Trades( void ) { return &m_trades; };
   CGreeks* Greeks( void ) { return &m_greeks; };
 
-  void StartMonitoring( void );
-  void StopMonitoring( void );
+  void StartWatch( void );
+  void StopWatch( void );
 
   void SaveSeries( const std::string& sPrefix );
 
@@ -75,8 +75,6 @@ protected:
   CTrades m_trades;
   CGreeks m_greeks;
 
-  bool m_bWatching;
-
   pInstrument_t m_pInstrument;
 
   pProvider_t m_pDataProvider;
@@ -86,7 +84,7 @@ protected:
 
 private:
 
-  bool m_bMonitoring;
+  bool m_bWatching;  // maybe implement counter at some point to allow multiple calls
 
   void Initialize( void );
 

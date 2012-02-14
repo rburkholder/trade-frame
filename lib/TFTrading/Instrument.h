@@ -230,7 +230,9 @@ public:
   boost::uint16_t GetExpiryYear( void ) const { return m_row.nYear; };
   boost::uint16_t GetExpiryMonth( void ) const { return m_row.nMonth; };
   boost::uint16_t GetExpiryDay( void ) const { return m_row.nDay; };
-  std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ) ); };
+  boost::gregorian::date GetExpiry( void ) const { return boost::gregorian::date( m_row.nYear, m_row.nMonth, m_row.nDay ); };
+  std::string GetExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( GetExpiry() ); };
+
   OptionSide::enumOptionSide GetOptionSide( void ) const { return m_row.eOptionSide; };
 
   void SetCommonCalcExpiry( boost::gregorian::date date ) { m_dateCommonCalc = date; };  // kludge for options with actual expiry on Friday, but dated Saturday

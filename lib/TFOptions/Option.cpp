@@ -28,8 +28,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
   m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
   m_dblStrike( pInstrument->GetStrike() ),
   m_bWatching( false ),
-  m_sSide( "-" ),
-  m_bMonitoring( false )
+  m_sSide( "-" )
 {
   Initialize();
 }
@@ -41,15 +40,14 @@ Option::Option( const Option& rhs )
   m_bWatching( false ),
   m_sSide( rhs.m_sSide ),
   m_pInstrument( rhs.m_pInstrument ),
-  m_pDataProvider( rhs.m_pDataProvider ), m_pGreekProvider( rhs.m_pGreekProvider ),
-  m_bMonitoring( false )
+  m_pDataProvider( rhs.m_pDataProvider ), m_pGreekProvider( rhs.m_pGreekProvider )
 {
   assert( !rhs.m_bWatching );
   Initialize();
 }
 
 Option::~Option( void ) {
-  StopMonitoring();
+  StopWatch();
 }
 
 Option& Option::operator=( const Option& rhs ) {
@@ -61,7 +59,7 @@ Option& Option::operator=( const Option& rhs ) {
   m_pInstrument = rhs.m_pInstrument;
   m_pDataProvider = rhs.m_pDataProvider;
   m_pGreekProvider = rhs.m_pGreekProvider;
-  m_bMonitoring = false;
+  m_bWatching = false;
   Initialize();
   return *this;
 }
@@ -72,23 +70,23 @@ void Option::Initialize( void ) {
   assert( m_pGreekProvider->ProvidesGreeks() );
 }
 
-void Option::StartMonitoring( void ) {
-  if ( m_bMonitoring ) {
+void Option::StartWatch( void ) {
+  if ( m_bWatching ) {
   }
   else {
-    m_bMonitoring = true;
+    m_bWatching = true;
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
     m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
 }
 
-void Option::StopMonitoring( void ) {
-  if ( m_bMonitoring ) {
+void Option::StopWatch( void ) {
+  if ( m_bWatching ) {
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
     m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
-    m_bMonitoring = false;
+    m_bWatching = false;
   }
   else {
   }

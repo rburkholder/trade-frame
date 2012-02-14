@@ -56,6 +56,8 @@ bool AppStrategyRunner::OnInit() {
   m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
+  m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
+  m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
   m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 02, 10 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 05, 18 ) );
 
@@ -99,10 +101,19 @@ void AppStrategyRunner::HandleBtnStart( void ) {
       m_pPanelOptionsParameters->GetOptionNearDate(), 
       m_pPanelOptionsParameters->GetOptionFarDate()
       );
+    m_pPanelOptionsParameters->SetBtnStopEnable( true );
   }
   else {
     m_pPanelOptionsParameters->SetBtnStartEnable( true);
   }
+}
+
+void AppStrategyRunner::HandleBtnStop( void ) {
+  m_pStrategyTradeOptions->Stop();
+  m_pPanelOptionsParameters->SetBtnStartEnable( true);
+}
+
+void AppStrategyRunner::HandleBtnSave( void ) {
 }
 
 void AppStrategyRunner::HandlePopulateDatabase( void ) {

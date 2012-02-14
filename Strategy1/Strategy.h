@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// 2012/02/11 - Use book 'Intro to HF Finance' to fix the summary operators
+
 #pragma once
 
 #include <string>

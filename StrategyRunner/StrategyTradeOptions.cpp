@@ -13,8 +13,12 @@
 
 #include "StdAfx.h"
 
+#include <sstream>
+
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
+
+#include <OUCommon/TimeSource.h>
 
 #include <TFTrading/InstrumentManager.h>
 
@@ -23,7 +27,8 @@
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
     m_TradeStates( EPreOpen ),
-    m_timeOpeningBell( 10, 0, 0 ), m_timeCancel( 16, 50, 0 ), m_timeClose( 16, 51, 0 ), m_timeClosingBell( 17, 0, 0 )
+    m_timeOpeningBell( 10, 0, 0 ), m_timeCancel( 16, 50, 0 ), m_timeClose( 16, 51, 0 ), m_timeClosingBell( 17, 0, 0 ),
+    m_paramWorkingDelta( 2000 )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
@@ -47,9 +52,16 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
   m_dateOptionFarDate = dateOptionFarDate;
   m_sUnderlying = sUnderlying;
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::CPortfolioManager& mgrPortfolios( ou::tf::CPortfolioManager::Instance() );
+  m_pPortfolio = mgrPortfolios.GetPortfolio( "pflioOptions" );  // from StrategyRunner::HandlePopulateDatabase
+  mgrPortfolios.ScanPositions( 
+    "pflioOptions", 
+    boost::phoenix::bind( &StrategyTradeOptions::HandlePositionsLoad, this, boost::phoenix::arg_names::arg1 )
+    );
 
-  if ( mgr.Exists( sUnderlying ) ) { // instruments should already exist so load from database
+  ou::tf::CInstrumentManager& mgrInstruments( ou::tf::CInstrumentManager::Instance() );
+
+  if ( mgrInstruments.Exists( sUnderlying ) ) { // instruments should already exist so load from database
     LoadExistingInstruments( sUnderlying );
   }
   else {
@@ -137,6 +149,11 @@ void StrategyTradeOptions::HandleFarDateContractDetailsDone( void ) {
 }
 
 void StrategyTradeOptions::LoadExistingInstruments( const std::string& sUnderlying ) {
+
+  std::stringstream ss;
+  ss << ou::CTimeSource::Instance().External();
+  m_sTimeStampWatchStarted = "/app/strategy/options/" + ss.str();  // will need to make this generic if need some for multiple providers.
+
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   m_pUnderlying = mgr.Get( sUnderlying );
   mgr.ScanOptions( 
@@ -161,10 +178,10 @@ void StrategyTradeOptions::HandleNearOptionsLoad( pInstrument_t pInstrument ) {
   }
   switch ( pInstrument->GetOptionSide() ) {
   case ou::tf::OptionSide::Call:
-    m_mapOptions[ strike ].pNearDateCall = new ou::tf::option::Call( pInstrument, m_pData1Provider, m_pData2Provider );
+    m_mapOptions[ strike ].optionNearDateCall.pOption.reset( new ou::tf::option::Call( pInstrument, m_pData1Provider, m_pData2Provider ) );
     break;
   case ou::tf::OptionSide::Put:
-    m_mapOptions[ strike ].pNearDatePut = new ou::tf::option::Put( pInstrument, m_pData1Provider, m_pData2Provider );
+    m_mapOptions[ strike ].optionNearDatePut.pOption.reset( new ou::tf::option::Put( pInstrument, m_pData1Provider, m_pData2Provider ) );
     break;
   }
 }
@@ -177,10 +194,10 @@ void StrategyTradeOptions::HandleFarOptionsLoad( pInstrument_t pInstrument ) {
   }
   switch ( pInstrument->GetOptionSide() ) {
   case ou::tf::OptionSide::Call:
-    m_mapOptions[ strike ].pFarDateCall = new ou::tf::option::Call( pInstrument, m_pData1Provider, m_pData2Provider );
+    m_mapOptions[ strike ].optionFarDateCall.pOption.reset( new ou::tf::option::Call( pInstrument, m_pData1Provider, m_pData2Provider ) );
     break;
   case ou::tf::OptionSide::Put:
-    m_mapOptions[ strike ].pFarDatePut = new ou::tf::option::Put( pInstrument, m_pData1Provider, m_pData2Provider );
+    m_mapOptions[ strike ].optionFarDatePut.pOption.reset( new ou::tf::option::Put( pInstrument, m_pData1Provider, m_pData2Provider ) );
     break;
   }
 }
@@ -192,8 +209,8 @@ void StrategyTradeOptions::HandleTrade( const ou::tf::CTrade& trade ) {
 void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
 
   m_quotes.Append( quote );
+  double midpoint = quote.Midpoint();
 
-  //  quote.DateTime().time_of_day()
   time_duration dt( quote.DateTime().time_of_day() );
 
   switch ( m_TradeStates ) {
@@ -202,19 +219,40 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
       m_TradeStates = EBellHeard;
     }
     break;
-  case EBellHeard:
+  case EBellHeard:  // will need to wait for a bit for options to settle
+    assert( 0 != m_mapOptions.size() );
+    m_iterMapOptionsAbove = m_mapOptions.begin();
+    AdjustThePointers( quote );
     m_TradeStates = AfterBell;
     break;
   case AfterBell:
   case ETrading:
+    // two stages:  profit taking, then re-balancing
+    // * profit taking on anything not with current strike
+    // * wait for executions, then neutralize
     if ( m_timeCancel <= dt ) {
       m_TradeStates = ECancelling;
+    }
+    else {
+      if ( midpoint >= m_iterMapOptionsAbove->first ) {
+        AdjustTheOptions( quote );
+        AdjustThePointers( quote );
+      }
+      else {
+        if ( midpoint <= m_iterMapOptionsBelow->first ) {
+          AdjustTheOptions( quote );
+          AdjustThePointers( quote );
+        }
+      }
     }
     break;
   case ECancelling:
     if ( m_timeClose <= dt ) {
-      m_TradeStates = EClosing;
+      m_TradeStates = EGoingNeutral;
     }
+    break;
+  case EGoingNeutral:
+    m_TradeStates = EClosing;
     break;
   case EClosing:
     if ( m_timeClosingBell <= dt ) {
@@ -226,3 +264,84 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
+void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
+}
+
+void StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
+  // turn on and turn off monitoring as move over the options
+  // non zero positions remain unaffected
+  double midpoint = quote.Midpoint();
+  while ( midpoint >= m_iterMapOptionsAbove->first ) {
+    ++m_iterMapOptionsAbove;
+    assert( m_mapOptions.end() != m_iterMapOptionsAbove );
+  }
+  m_iterMapOptionsBelow = m_iterMapOptionsAbove;
+  while ( midpoint <= m_iterMapOptionsBelow->first ) {
+    assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
+    --m_iterMapOptionsBelow;
+  }
+}
+
+void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
+
+  if ( 0 == pPosition->GetRow().nPositionActive ) return; // ignore zero size positions
+
+  ou::tf::CInstrument::pInstrument_cref pInstrument( pPosition->GetInstrument() );
+  assert( pInstrument->IsOption() );  // ensure everything is an option, underlying is being tracked but not traded, yet
+
+  double strike = pInstrument->GetStrike();
+  mapOptions_iter_t iter = m_mapOptions.find( strike );
+  assert( m_mapOptions.end() != iter );
+
+  switch( pInstrument->GetOptionSide() ) {
+  case ou::tf::OptionSide::Call:
+    if ( m_dateOptionNearDate == pInstrument->GetExpiry() ) {
+      iter->second.optionNearDateCall.pPosition = pPosition;
+      call_t call( iter->second.optionNearDateCall.pOption, pPosition );
+      m_vCalls.push_back( call );
+      call.pOption->StartWatch();
+    }
+    else {
+      if ( m_dateOptionFarDate == pInstrument->GetExpiry() ) {
+        iter->second.optionFarDateCall.pPosition = pPosition;
+        call_t call( iter->second.optionFarDateCall.pOption, pPosition );
+        m_vCalls.push_back( call );
+        call.pOption->StartWatch();
+      }
+      else {
+        call_t::pOption_t pOption( new ou::tf::option::Call( pPosition->GetInstrument(), m_pData1Provider, m_pData2Provider ) );
+        call_t call( pOption, pPosition );
+        iter->second.vOtherCalls.push_back( call );
+        m_vCalls.push_back( call );
+        call.pOption->StartWatch();
+      }
+    }
+    break;
+  case ou::tf::OptionSide::Put:
+    if ( m_dateOptionNearDate == pInstrument->GetExpiry() ) {
+      iter->second.optionNearDatePut.pPosition = pPosition;
+      put_t put( iter->second.optionNearDatePut.pOption, pPosition );
+      m_vPuts.push_back( put );
+      put.pOption->StartWatch();
+    }
+    else {
+      if ( m_dateOptionFarDate == pInstrument->GetExpiry() ) {
+        iter->second.optionFarDatePut.pPosition = pPosition;
+        put_t put( iter->second.optionFarDatePut.pOption, pPosition );
+        m_vPuts.push_back( put );
+        put.pOption->StartWatch();
+      }
+      else {
+        put_t::pOption_t pOption( new ou::tf::option::Put( pPosition->GetInstrument(), m_pData1Provider, m_pData2Provider ) );
+        put_t put( pOption, pPosition );
+        iter->second.vOtherPuts.push_back( put );
+        m_vPuts.push_back( put );
+        put.pOption->StartWatch();
+      }
+    }
+    break;
+  }
+}
+
+void StrategyTradeOptions::Save( const std::string& sPath ) {
+}
