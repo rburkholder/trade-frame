@@ -83,6 +83,19 @@ private:
     options_t( void ): strike( 0.0 ) {};
     options_t( double strike_ ) : strike( strike_ ) {};
     ~options_t( void ) {};
+
+    void Save( const std::string& sPrefix ) {
+      if ( 0 != optionNearDateCall.pOption.get() ) optionNearDateCall.pOption->SaveSeries( sPrefix );
+      if ( 0 != optionNearDatePut.pOption.get() ) optionNearDatePut.pOption->SaveSeries( sPrefix );
+      if ( 0 != optionFarDateCall.pOption.get() ) optionFarDateCall.pOption->SaveSeries( sPrefix );
+      if ( 0 != optionFarDatePut.pOption.get() ) optionFarDatePut.pOption->SaveSeries( sPrefix );
+      for ( vCalls_t::iterator iter = vOtherCalls.begin(); vOtherCalls.end() != iter; ++iter ) {
+        iter->pOption->SaveSeries( sPrefix );
+      }
+      for ( vPuts_t::iterator iter = vOtherPuts.begin(); vOtherPuts.end() != iter; ++iter ) {
+        iter->pOption->SaveSeries( sPrefix );
+      }
+    }
   };
 
   typedef std::map<double,options_t> mapOptions_t;

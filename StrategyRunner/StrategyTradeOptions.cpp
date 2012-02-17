@@ -18,6 +18,11 @@
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -343,5 +348,32 @@ void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
   }
 }
 
-void StrategyTradeOptions::Save( const std::string& sPath ) {
+void StrategyTradeOptions::Save( const std::string& sPrefix ) {
+
+  std::string sPathName;
+
+  if ( 0 != m_quotes.Size() ) {
+    sPathName = sPrefix + "/quotes/" + m_pUnderlying->GetInstrumentName();
+    ou::tf::CHDF5Attributes attrQuotes( sPrefix, m_pUnderlying->GetInstrumentType() );
+    attrQuotes.SetMultiplier( m_pUnderlying->GetMultiplier() );
+    attrQuotes.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
+    attrQuotes.SetProviderType( m_pData1ProviderIQFeed->ID() );
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+    wtsQuotes.Write( sPathName, &m_quotes );
+  }
+
+  if ( 0 != m_trades.Size() ) {
+    sPathName = sPrefix + "/trades/" + m_pUnderlying->GetInstrumentName();
+    ou::tf::CHDF5Attributes attrTrades( sPrefix, m_pUnderlying->GetInstrumentType() );
+    attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
+    attrTrades.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
+    attrTrades.SetProviderType( m_pData1ProviderIQFeed->ID() );
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+    wtsTrades.Write( sPathName, &m_trades );
+  }
+
+  for ( mapOptions_iter_t iter = m_mapOptions.begin(); m_mapOptions.end() != iter; ++iter ) {
+    iter->second.Save( sPrefix );
+  }
+
 }

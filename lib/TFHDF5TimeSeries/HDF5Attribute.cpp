@@ -163,19 +163,19 @@ void CHDF5Attributes::GetOptionAttributes( structOption* option ) {
   attribStrike.read(H5::PredType::NATIVE_DOUBLE, &option->dblStrike );
   attribStrike.close();
 
-  H5::Attribute attribSide( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribSide( m_pDataSet->openAttribute( szSide ) );
   attribSide.read(H5::PredType::NATIVE_INT8, &option->eSide );
   attribSide.close();
 
-  H5::Attribute attribYear( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribYear( m_pDataSet->openAttribute( szYear ) );
   attribYear.read(H5::PredType::NATIVE_UINT16, &option->nYear );
   attribYear.close();
 
-  H5::Attribute attribSMonth( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribSMonth( m_pDataSet->openAttribute( szMonth ) );
   attribSMonth.read(H5::PredType::NATIVE_UINT16, &option->nMonth );
   attribSMonth.close();
 
-  H5::Attribute attribDay( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribDay( m_pDataSet->openAttribute( szDay ) );
   attribDay.read(H5::PredType::NATIVE_UINT16, &option->nDay );
   attribDay.close();
 
@@ -183,7 +183,7 @@ void CHDF5Attributes::GetOptionAttributes( structOption* option ) {
 
 void CHDF5Attributes::SetFutureAttributes( const structFuture& future ) {
 
-  SetInstrumentType( InstrumentType::Option );
+  SetInstrumentType( InstrumentType::Future );
 
   H5::DataSpace dspace;
 
@@ -202,15 +202,15 @@ void CHDF5Attributes::SetFutureAttributes( const structFuture& future ) {
 
 void CHDF5Attributes::GetFutureAttributes( structFuture* future ) {
 
-  H5::Attribute attribYear( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribYear( m_pDataSet->openAttribute( szYear ) );
   attribYear.read(H5::PredType::NATIVE_UINT16, &future->nYear );
   attribYear.close();
 
-  H5::Attribute attribSMonth( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribSMonth( m_pDataSet->openAttribute( szMonth ) );
   attribSMonth.read(H5::PredType::NATIVE_UINT16, &future->nMonth );
   attribSMonth.close();
 
-  H5::Attribute attribDay( m_pDataSet->openAttribute( szStrike ) );
+  H5::Attribute attribDay( m_pDataSet->openAttribute( szDay ) );
   attribDay.read(H5::PredType::NATIVE_UINT16, &future->nDay );
   attribDay.close();
 
