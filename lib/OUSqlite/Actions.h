@@ -43,13 +43,14 @@ namespace typeselect {
 }
 
 namespace dispatch {
+
 template<typename T>
 const char* FieldType( void ) { // is called with enumerations, so need to figure out appropriate type conversion
-std::string s;
-s += "FieldType2 bad cast: ";
-s += typeid( T ).name();
-throw std::runtime_error( s );
-};
+  std::string s;
+  s += "FieldType2 bad cast: ";
+  s += typeid( T ).name();
+  throw std::runtime_error( s );
+}
 
 template<> const char* FieldType<char>( void );
 template<> const char* FieldType<bool>( void );
@@ -65,6 +66,7 @@ template<> const char* FieldType<std::string>( void );
 template<> const char* FieldType<double>( void );
 // don't use julian as ptime has no representation earlier than 1400 AD
 template<> const char* FieldType<boost::posix_time::ptime>( void );
+
 } // namespace dispatch
 
 // ====

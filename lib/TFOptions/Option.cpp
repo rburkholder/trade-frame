@@ -27,7 +27,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
   m_pDataProvider( pDataProvider ), m_pGreekProvider( pGreekProvider ),
   m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
   m_dblStrike( pInstrument->GetStrike() ),
-  m_bWatching( false ),
+  m_cntWatching( 0 ),
   m_sSide( "-" )
 {
   Initialize();
@@ -37,12 +37,12 @@ Option::Option( const Option& rhs )
 : m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblTrade( rhs.m_dblTrade ),
   m_dblStrike( rhs.m_dblStrike ),
   m_greek( rhs.m_greek ),
-  m_bWatching( false ),
+  m_cntWatching( 0 ),
   m_sSide( rhs.m_sSide ),
   m_pInstrument( rhs.m_pInstrument ),
   m_pDataProvider( rhs.m_pDataProvider ), m_pGreekProvider( rhs.m_pGreekProvider )
 {
-  assert( !rhs.m_bWatching );
+  assert( 0 == rhs.m_cntWatching );
   Initialize();
 }
 
@@ -51,15 +51,15 @@ Option::~Option( void ) {
 }
 
 Option& Option::operator=( const Option& rhs ) {
-  assert( !rhs.m_bWatching );
-  assert( !m_bWatching );
+  assert( 0 == rhs.m_cntWatching );
+  assert( 0 == m_cntWatching );
   m_dblStrike = rhs.m_dblStrike;
   m_greek = rhs.m_greek;
   m_sSide = rhs.m_sSide;
   m_pInstrument = rhs.m_pInstrument;
   m_pDataProvider = rhs.m_pDataProvider;
   m_pGreekProvider = rhs.m_pGreekProvider;
-  m_bWatching = false;
+  m_cntWatching = 0;
   Initialize();
   return *this;
 }
@@ -71,24 +71,21 @@ void Option::Initialize( void ) {
 }
 
 void Option::StartWatch( void ) {
-  if ( m_bWatching ) {
-  }
-  else {
-    m_bWatching = true;
+  if ( 0 == m_cntWatching ) {
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
     m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
+  ++m_cntWatching;
 }
 
 void Option::StopWatch( void ) {
-  if ( m_bWatching ) {
+  assert( 0 != m_cntWatching );
+  --m_cntWatching;
+  if ( 0 == m_cntWatching ) {
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
     m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
-    m_bWatching = false;
-  }
-  else {
   }
 }
 

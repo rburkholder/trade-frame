@@ -84,6 +84,37 @@ private:
     options_t( double strike_ ) : strike( strike_ ) {};
     ~options_t( void ) {};
 
+    template<class Visitor>
+    void ScanCallOptions( Visitor f ) {
+      f( optionNearDateCall );
+      f( optionFarDateCall );
+      for ( vCalls_t::iterator iter = vOtherCalls.begin(); vOtherCalls.end() != iter; ++iter ) {
+        f( *iter );
+      }
+    }
+
+    template<class Visitor>
+    void ScanPutOptions( Visitor f ) {
+      f( optionNearDatePut );
+      f( optionFarDatePut );
+      for ( vPuts_t::iterator iter = vOtherPuts.begin(); vOtherPuts.end() != iter; ++iter ) {
+        f( *iter );
+      }
+    }
+
+    void StartWatch( void ) {
+      if ( 0 != optionNearDateCall.pOption.get() ) optionNearDateCall.pOption->StartWatch();
+      if ( 0 != optionNearDatePut.pOption.get() ) optionNearDatePut.pOption->StartWatch();
+      if ( 0 != optionFarDateCall.pOption.get() ) optionFarDateCall.pOption->StartWatch();
+      if ( 0 != optionFarDatePut.pOption.get() ) optionFarDatePut.pOption->StartWatch();
+    }
+    void StopWatch( void ) {
+      if ( 0 != optionNearDateCall.pOption.get() ) optionNearDateCall.pOption->StopWatch();
+      if ( 0 != optionNearDatePut.pOption.get() ) optionNearDatePut.pOption->StopWatch();
+      if ( 0 != optionFarDateCall.pOption.get() ) optionFarDateCall.pOption->StopWatch();
+      if ( 0 != optionFarDatePut.pOption.get() ) optionFarDatePut.pOption->StopWatch();
+    }
+
     void Save( const std::string& sPrefix ) {
       if ( 0 != optionNearDateCall.pOption.get() ) optionNearDateCall.pOption->SaveSeries( sPrefix );
       if ( 0 != optionNearDatePut.pOption.get() ) optionNearDatePut.pOption->SaveSeries( sPrefix );
@@ -102,7 +133,7 @@ private:
   typedef mapOptions_t::iterator mapOptions_iter_t;
   typedef std::pair<double,options_t> mapOptions_pair_t;
   mapOptions_t m_mapOptions;
-  mapOptions_iter_t m_iterMapOptionsAbove, m_iterMapOptionsBelow;
+  mapOptions_iter_t m_iterMapOptionsBelow, m_iterMapOptionsMiddle, m_iterMapOptionsAbove;
 
   vCalls_t m_vCalls;  // loaded with HandlePositionsLoad:  near, far, other, used for calc delta
   vPuts_t m_vPuts;    // loaded with HandlePositionsLoad:  near, far, other, used for calc delta
@@ -112,6 +143,9 @@ private:
   time_duration m_timeOpeningBell, m_timeCancel, m_timeClose, m_timeClosingBell;
 
   std::string m_sUnderlying;
+
+  double m_deltaCall;
+  double m_deltaPut;
 
   std::string m_sTimeStampWatchStarted;
 
@@ -135,9 +169,13 @@ private:
   boost::gregorian::date m_dateOptionFarDate;
 
   void AdjustTheOptions( const ou::tf::CQuote& quote );
-  void AdjustThePointers( const ou::tf::CQuote& quote );
+  bool SetPointersFirstTime( const ou::tf::CQuote& quote );
+  bool AdjustThePointers( const ou::tf::CQuote& quote );
 
   void LoadExistingInstruments( const std::string& sUnderlying );
+
+  void ProcessCallOptions( call_t& call );
+  void ProcessPutOptions( put_t& put );
 
   void HandlePositionsLoad( pPosition_t pPosition );
 

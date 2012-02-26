@@ -84,7 +84,7 @@ protected:
 
 private:
 
-  bool m_bWatching;  // maybe implement counter at some point to allow multiple calls
+  unsigned int m_cntWatching;  // maybe implement counter at some point to allow multiple calls
 
   void Initialize( void );
 

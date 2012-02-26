@@ -18,6 +18,8 @@
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -227,27 +229,20 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
   case EBellHeard:  // will need to wait for a bit for options to settle
     assert( 0 != m_mapOptions.size() );
     m_iterMapOptionsAbove = m_mapOptions.begin();
-    AdjustThePointers( quote );
+    m_iterMapOptionsBelow = m_iterMapOptionsMiddle = m_mapOptions.end();
+    SetPointersFirstTime( quote );
     m_TradeStates = AfterBell;
     break;
   case AfterBell:
   case ETrading:
     // two stages:  profit taking, then re-balancing
     // * profit taking on anything not with current strike
-    // * wait for executions, then neutralize
     if ( m_timeCancel <= dt ) {
       m_TradeStates = ECancelling;
     }
     else {
-      if ( midpoint >= m_iterMapOptionsAbove->first ) {
+      if ( AdjustThePointers( quote ) ) {
         AdjustTheOptions( quote );
-        AdjustThePointers( quote );
-      }
-      else {
-        if ( midpoint <= m_iterMapOptionsBelow->first ) {
-          AdjustTheOptions( quote );
-          AdjustThePointers( quote );
-        }
       }
     }
     break;
@@ -269,22 +264,171 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
-void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
+void StrategyTradeOptions::ProcessCallOptions( call_t& call ) {
+  if ( 0 != call.pPosition.get() ) {
+    if ( 0 == call.pPosition->GetRow().nPositionActive ) {
+      if ( 0 < call.pPosition->GetUnRealizedPL() ) {
+        // close out profitable positions
+        call.pPosition->ClosePosition();
+      }
+      else {
+        // determine remaining delta for balancing purposes
+        m_deltaCall += call.pPosition->GetRow().nPositionActive * call.pOption->Delta();
+      }
+    }
+  }
 }
 
-void StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
+void StrategyTradeOptions::ProcessPutOptions( put_t& put ) {
+  if ( 0 != put.pPosition.get() ) {
+    if ( 0 == put.pPosition->GetRow().nPositionActive ) {
+      if ( 0 < put.pPosition->GetUnRealizedPL() ) {
+        // close out profitable positions
+        put.pPosition->ClosePosition();
+      }
+      else {
+        // determine remaining delta for balancing purposes
+        m_deltaPut += put.pPosition->GetRow().nPositionActive * put.pOption->Delta();
+      }
+    }
+  }
+}
+
+void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
+  // add up put delta, call delta, rebalance each side to working delta
+  // use m_iterMapOptionsMiddle as the current strike adjustment
+  // might be more efficient to have an active list of options and positions to make it easy to scan and update for:
+  //   check over all delta
+  //   see if something is at current strike for adjustment
+  m_deltaCall = 0.0;
+  m_deltaPut = 0.0;
+  for ( mapOptions_iter_t iter = m_mapOptions.begin(); m_mapOptions.end() != iter; ++iter ) {
+    // use visitor pattern to access each call and put
+    iter->second.ScanCallOptions( boost::phoenix::bind( &StrategyTradeOptions::ProcessCallOptions, this, boost::phoenix::arg_names::arg1 ) );
+    iter->second.ScanPutOptions(  boost::phoenix::bind( &StrategyTradeOptions::ProcessPutOptions,  this, boost::phoenix::arg_names::arg1 ) );
+  }
+  // after call delta and put delta tallied up, rebalance the portfolio
+  if ( m_paramWorkingDelta < m_deltaCall ) {
+    // something wierd
+  }
+  else {
+    int n = ( m_paramWorkingDelta - m_deltaCall ) / 100.0;  
+    if ( 0 < n ) {
+      if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
+        // problems
+      }
+      else {
+        if ( 0 == m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition.get() ) {
+          // create the position
+          m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition =  
+            ou::tf::CPortfolioManager::Instance().ConstructPosition( "pflioOptions", 
+            "callfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far option buy",
+            m_pExecutionProviderIB->Name(), m_pData1ProviderIQFeed->Name(), 
+            m_pExecutionProviderIB, m_pData1ProviderIQFeed,
+            m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->GetInstrument() );
+        }
+        m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, n );
+      }
+    }
+  }
+
+  if ( m_paramWorkingDelta < -m_deltaPut ) {
+    // something wierd
+  }
+  else {
+    int n = ( m_paramWorkingDelta + m_deltaPut ) / 100.0;  
+    if ( 0 < n ) {
+      if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
+        // problems
+      }
+      else {
+        if ( 0 == m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition.get() ) {
+          // create the position
+          m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition =  
+            ou::tf::CPortfolioManager::Instance().ConstructPosition( "pflioOptions", 
+            "putfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far option buy",
+            m_pExecutionProviderIB->Name(), m_pData1ProviderIQFeed->Name(), 
+            m_pExecutionProviderIB, m_pData1ProviderIQFeed,
+            m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->GetInstrument() );
+        }
+        m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, n );
+      }
+    }
+  }
+  
+}
+
+bool StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
   // turn on and turn off monitoring as move over the options
-  // non zero positions remain unaffected
+  bool bReturn = false;
+  double midpoint = quote.Midpoint();
+  if ( midpoint >= m_iterMapOptionsAbove->first ) {  // adjust upwards
+    if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
+      m_iterMapOptionsMiddle = m_iterMapOptionsAbove;
+      ++m_iterMapOptionsAbove;
+      assert( m_mapOptions.end() != m_iterMapOptionsAbove );
+      m_iterMapOptionsAbove->second.StartWatch();
+    }
+    else {
+      ++m_iterMapOptionsAbove;
+      assert( m_mapOptions.end() != m_iterMapOptionsAbove );
+      m_iterMapOptionsAbove->second.StartWatch();
+      ++m_iterMapOptionsMiddle;
+      m_iterMapOptionsBelow->second.StopWatch();
+      ++m_iterMapOptionsBelow;
+      m_iterMapOptionsBelow->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
+    }
+    bReturn = true;
+  }
+  else {
+    if ( midpoint <= m_iterMapOptionsBelow->first ) { // adjust downwards
+      if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
+        m_iterMapOptionsMiddle = m_iterMapOptionsBelow;
+        assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
+        --m_iterMapOptionsBelow;
+        m_iterMapOptionsBelow->second.StartWatch();
+      }
+      else {
+        assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
+        --m_iterMapOptionsBelow;
+        m_iterMapOptionsBelow->second.StartWatch();
+        --m_iterMapOptionsMiddle;
+        m_iterMapOptionsAbove->second.StopWatch();
+        --m_iterMapOptionsAbove;
+        m_iterMapOptionsAbove->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
+      }
+      bReturn = true;
+    }
+  }
+  return bReturn;
+}
+
+bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::CQuote& quote ) {
+
+  bool bReturn = false;
+
   double midpoint = quote.Midpoint();
   while ( midpoint >= m_iterMapOptionsAbove->first ) {
     ++m_iterMapOptionsAbove;
     assert( m_mapOptions.end() != m_iterMapOptionsAbove );
   }
+  m_iterMapOptionsAbove->second.StartWatch();
+
+  unsigned int cnt = 0;
   m_iterMapOptionsBelow = m_iterMapOptionsAbove;
   while ( midpoint <= m_iterMapOptionsBelow->first ) {
     assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
     --m_iterMapOptionsBelow;
+    m_iterMapOptionsBelow->second.StartWatch();
+    if ( 0 == cnt ) {
+      if ( midpoint == m_iterMapOptionsBelow->first ) {
+        m_iterMapOptionsMiddle = m_iterMapOptionsBelow;
+        bReturn = true;
+      }
+    }
+    ++cnt;
   }
+  return bReturn;
 }
 
 void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
@@ -349,6 +493,8 @@ void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
 }
 
 void StrategyTradeOptions::Save( const std::string& sPrefix ) {
+
+  // stop watch, wait for a sec, then save?
 
   std::string sPathName;
 
