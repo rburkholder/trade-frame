@@ -31,6 +31,10 @@
 
 #include "StrategyTradeOptions.h"
 
+namespace StrategyTradeOptionsConstants {
+  std::string sPortfolioName = "pflioOptions";
+}
+
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
     m_TradeStates( EPreOpen ),
@@ -60,9 +64,9 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
   m_sUnderlying = sUnderlying;
 
   ou::tf::CPortfolioManager& mgrPortfolios( ou::tf::CPortfolioManager::Instance() );
-  m_pPortfolio = mgrPortfolios.GetPortfolio( "pflioOptions" );  // from StrategyRunner::HandlePopulateDatabase
+  m_pPortfolio = mgrPortfolios.GetPortfolio( StrategyTradeOptionsConstants::sPortfolioName );  // from StrategyRunner::HandlePopulateDatabase
   mgrPortfolios.ScanPositions( 
-    "pflioOptions", 
+    StrategyTradeOptionsConstants::sPortfolioName, 
     boost::phoenix::bind( &StrategyTradeOptions::HandlePositionsLoad, this, boost::phoenix::arg_names::arg1 )
     );
 
@@ -72,7 +76,7 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
     LoadExistingInstruments( sUnderlying );
   }
   else {
-    if ( 0 == m_pData2ProviderIB.get() ) { // probably simulation, so maybe use LoadExistingInstruments() ?
+    if ( 0 == m_pData2Provider.get() ) { // probably simulation, so maybe use LoadExistingInstruments() ?
       //m_pUnderlying = new ou::tf::InstrumentData( mgr.ConstructInstrument( sUnderlying, "SMART", ou::tf::InstrumentType::Stock ) );
       //HandleUnderlyingContractDetailsDone();
       // we need info from IB to do anything so this is pretty much null code
@@ -173,8 +177,8 @@ void StrategyTradeOptions::LoadExistingInstruments( const std::string& sUnderlyi
     sUnderlying,
     m_dateOptionFarDate.year(), m_dateOptionFarDate.month(), m_dateOptionFarDate.day() 
     );
-  m_pData1ProviderIQFeed->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &StrategyTradeOptions::HandleQuote ) );
-  m_pData1ProviderIQFeed->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyTradeOptions::HandleTrade ) );
+  m_pData1Provider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &StrategyTradeOptions::HandleQuote ) );
+  m_pData1Provider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyTradeOptions::HandleTrade ) );
 }
 
 void StrategyTradeOptions::HandleNearOptionsLoad( pInstrument_t pInstrument ) {
@@ -215,6 +219,8 @@ void StrategyTradeOptions::HandleTrade( const ou::tf::CTrade& trade ) {
 
 void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
 
+  if ( !quote.IsValid() ) return;
+  
   m_quotes.Append( quote );
   double midpoint = quote.Midpoint();
 
@@ -321,10 +327,10 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
         if ( 0 == m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition.get() ) {
           // create the position
           m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition =  
-            ou::tf::CPortfolioManager::Instance().ConstructPosition( "pflioOptions", 
+            ou::tf::CPortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
             "callfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far option buy",
-            m_pExecutionProviderIB->Name(), m_pData1ProviderIQFeed->Name(), 
-            m_pExecutionProviderIB, m_pData1ProviderIQFeed,
+            m_pExecutionProvider->Name(), m_pData1Provider->Name(), 
+            m_pExecutionProvider, m_pData1Provider,
             m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->GetInstrument() );
         }
         m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, n );
@@ -345,10 +351,10 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
         if ( 0 == m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition.get() ) {
           // create the position
           m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition =  
-            ou::tf::CPortfolioManager::Instance().ConstructPosition( "pflioOptions", 
+            ou::tf::CPortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
             "putfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far option buy",
-            m_pExecutionProviderIB->Name(), m_pData1ProviderIQFeed->Name(), 
-            m_pExecutionProviderIB, m_pData1ProviderIQFeed,
+            m_pExecutionProvider->Name(), m_pData1Provider->Name(), 
+            m_pExecutionProvider, m_pData1Provider,
             m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->GetInstrument() );
         }
         m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, n );
@@ -503,7 +509,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
     ou::tf::CHDF5Attributes attrQuotes( sPrefix, m_pUnderlying->GetInstrumentType() );
     attrQuotes.SetMultiplier( m_pUnderlying->GetMultiplier() );
     attrQuotes.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
-    attrQuotes.SetProviderType( m_pData1ProviderIQFeed->ID() );
+    attrQuotes.SetProviderType( m_pData1Provider->ID() );
     ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
   }
@@ -513,7 +519,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
     ou::tf::CHDF5Attributes attrTrades( sPrefix, m_pUnderlying->GetInstrumentType() );
     attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
     attrTrades.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
-    attrTrades.SetProviderType( m_pData1ProviderIQFeed->ID() );
+    attrTrades.SetProviderType( m_pData1Provider->ID() );
     ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
   }

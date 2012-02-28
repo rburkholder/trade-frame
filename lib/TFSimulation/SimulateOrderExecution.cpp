@@ -75,7 +75,7 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
 
 void CSimulateOrderExecution::ProcessOrderQueues( const CQuote &quote ) {
 
-  if ( !quote.Valid() ) {
+  if ( !quote.IsValid() ) {
     return;
   }
 

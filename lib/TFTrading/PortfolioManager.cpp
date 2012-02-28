@@ -319,7 +319,7 @@ void CPortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosi
   ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pPositionQuery
     = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from positions", key )
       .Where( "portfolioid = ?" )
-      .OrderBy( "ownerid" )
+      .OrderBy( "positionid" )
       .NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
   while ( m_pSession->Execute( pPositionQuery ) ) {

@@ -58,7 +58,7 @@ bool AppStrategyRunner::OnInit() {
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
   m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 02, 10 ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 03, 02 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 05, 18 ) );
 
   m_pFrameMain->Show( true );
