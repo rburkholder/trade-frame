@@ -63,7 +63,8 @@ public:
 
   typedef keytypes::eidProvider_t eidProvider_t;
 
-  const std::string& Name( void ) const { return m_sName; };
+  const std::string& GetName( void ) const { return m_sName; };
+  void SetName( const std::string& sName ) { m_sName = sName; };
   eidProvider_t ID( void ) const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
 
   CProviderInterfaceBase( void )

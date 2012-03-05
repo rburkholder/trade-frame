@@ -18,7 +18,6 @@
 #include <wx/wx.h>
 #include <wx/string.h>
 
-//#include <OUCommon/Delegate.h>
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 

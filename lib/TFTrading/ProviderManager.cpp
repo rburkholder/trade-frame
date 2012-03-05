@@ -48,6 +48,7 @@ void CProviderManager::Register( const idProvider_t& key, pProvider_t& pProvider
   if ( m_mapProviders.end() != m_mapProviders.find( key ) ) {
     throw std::runtime_error( "CProviderManager::Register, provider already exists" );
   }
+  pProvider->SetName( key );
   m_mapProviders.insert( mapProviders_pair_t( key, pProvider ) );
 
 }

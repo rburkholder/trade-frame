@@ -77,6 +77,7 @@
     <ClInclude Include="ModelOrder.h" />
     <ClInclude Include="ModelPortfolio.h" />
     <ClInclude Include="ModelPosition.h" />
+    <ClInclude Include="PanelLogging.h" />
     <ClInclude Include="PanelManualOrder.h" />
     <ClInclude Include="PanelPortfolioPositionOrderExecution.h" />
     <ClInclude Include="PanelProviderControl.h" />
@@ -95,6 +96,7 @@
     <ClCompile Include="ModelOrder.cpp" />
     <ClCompile Include="ModelPortfolio.cpp" />
     <ClCompile Include="ModelPosition.cpp" />
+    <ClCompile Include="PanelLogging.cpp" />
     <ClCompile Include="PanelManualOrder.cpp" />
     <ClCompile Include="PanelPortfolioPositionOrderExecution.cpp" />
     <ClCompile Include="PanelProviderControl.cpp" />

@@ -35,31 +35,38 @@ bool AppStrategyRunner::OnInit() {
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
   //m_pFrameMain->Center();
 //  m_pFrameMain->Move( -2500, 50 );
-//  m_pFrameMain->SetSize( 4400, 1500 );
+  m_pFrameMain->SetSize( 500, 600 );
   SetTopWindow( m_pFrameMain );
 
   wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxHORIZONTAL);
+  m_sizerMain = new wxBoxSizer(wxVERTICAL);
   m_pFrameMain->SetSizer(m_sizerMain);
 
   wxBoxSizer* m_sizerControls;
-  m_sizerControls = new wxBoxSizer( wxVERTICAL );
+  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerControls, 0, wxALL, 5 );
 
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
+  m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_CENTRE_VERTICAL|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
 
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP|wxBOTTOM, 5);
+  m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP, 5);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
   m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 03, 02 ) );
-  m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 05, 18 ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 3, 9 ) );
+  m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 5, 18 ) );
+
+  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
+  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_pPanelLogging->Show( true );
 
   m_pFrameMain->Show( true );
 

@@ -16,7 +16,6 @@
 
 
 #include <iostream>
-//using namespace std;
 
 #include "FastDelegate.h"
 using namespace fastdelegate;

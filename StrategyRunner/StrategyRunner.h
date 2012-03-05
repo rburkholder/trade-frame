@@ -21,6 +21,7 @@
 
 // may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
+#include <TFVuTrading/PanelLogging.h>
 
 #include "FrameMain.h"
 #include "PanelOptionsParameters.h"
@@ -41,6 +42,7 @@ private:
 
   FrameMain* m_pFrameMain;
   PanelOptionsParameters* m_pPanelOptionsParameters;
+  ou::tf::PanelLogging* m_pPanelLogging;
 
   DBOps m_db;
 
