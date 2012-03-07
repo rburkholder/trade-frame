@@ -48,6 +48,8 @@ private:
 
   StrategyTradeOptions* m_pStrategyTradeOptions;
 
+  std::string m_sTimeSamplingStarted;
+
   virtual bool OnInit();
   virtual int OnExit();
 

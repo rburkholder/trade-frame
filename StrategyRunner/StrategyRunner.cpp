@@ -44,16 +44,16 @@ bool AppStrategyRunner::OnInit() {
 
   wxBoxSizer* m_sizerControls;
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxALL, 5 );
+  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_CENTRE_VERTICAL|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
 
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelOptionsParameters, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_TOP, 5);
+  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
   m_pPanelOptionsParameters->Show( true );
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
@@ -99,6 +99,11 @@ void AppStrategyRunner::HandleBtnStart( void ) {
       sDbName = "StrategyTradeOptions.db";
     }
 
+    std::stringstream ss;
+    ss.str( "" );
+    ss << ou::CTimeSource::Instance().Internal();
+    m_sTimeSamplingStarted = "/app/StrategyTradeOptions/" + ss.str();
+
     assert( 0 != sDbName.length() );
     m_db.Open( sDbName );
 
@@ -121,6 +126,13 @@ void AppStrategyRunner::HandleBtnStop( void ) {
 }
 
 void AppStrategyRunner::HandleBtnSave( void ) {
+  if ( 0 == m_sTimeSamplingStarted.size() ) {
+    std::cout << "Nothing To do." << std::endl;
+  }
+  else {
+    m_pStrategyTradeOptions->Save( m_sTimeSamplingStarted );
+  }
+  
 }
 
 void AppStrategyRunner::HandlePopulateDatabase( void ) {

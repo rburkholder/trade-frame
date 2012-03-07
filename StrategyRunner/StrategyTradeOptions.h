@@ -49,7 +49,7 @@ private:
   typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
 
-  enum enumTradeStates { EPreOpen, EBellHeard, AfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
+  enum enumTradeStates { EPreOpen, EBellHeard, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
   template<typename Side> 
   struct option_t { // individual option state plus position state
@@ -141,6 +141,7 @@ private:
   enumTradeStates m_TradeStates;
 
   time_duration m_timeOpeningBell, m_timeCancel, m_timeClose, m_timeClosingBell;
+  time_duration m_timePauseForQuotes;
 
   std::string m_sUnderlying;
 
@@ -172,7 +173,7 @@ private:
   bool SetPointersFirstTime( const ou::tf::CQuote& quote );
   bool AdjustThePointers( const ou::tf::CQuote& quote );
 
-  void LoadExistingInstruments( const std::string& sUnderlying );
+  void LoadExistingInstrumentsAndPortfolios( const std::string& sUnderlying );
 
   void ProcessCallOptions( call_t& call );
   void ProcessPutOptions( put_t& put );
