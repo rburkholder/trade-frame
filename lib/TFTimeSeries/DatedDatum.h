@@ -211,9 +211,19 @@ private:
 class CGreek: public CDatedDatum {
 public:
 
+  struct greeks_t {
+    double delta;
+    double gamma;
+    double theta;
+    double vega;
+    double rho;
+    greeks_t( void ) : delta( 0.0 ), gamma( 0.0 ), theta( 0.0 ), vega( 0.0 ), rho( 0.0 ) {};
+  };
+
   CGreek( void );
   CGreek( const ptime &dt );
   CGreek( const CGreek& greeks );
+  CGreek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks );
   CGreek( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
   ~CGreek( void );
 

@@ -253,6 +253,11 @@ CGreek::CGreek( const CGreek& greeks ): CDatedDatum( greeks.m_dt ),
   m_dblDelta( greeks.m_dblDelta ), m_dblGamma( greeks.m_dblGamma ), m_dblTheta( greeks.m_dblTheta ), m_dblVega( greeks.m_dblVega ), m_dblRho( greeks.m_dblRho ) {
 }
 
+CGreek::CGreek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks ): CDatedDatum( dt ), 
+  m_dblImpliedVolatility( dblImpliedVolatility ), 
+  m_dblDelta( greeks.delta ), m_dblGamma( greeks.gamma ), m_dblTheta( greeks.theta ), m_dblVega( greeks.vega ), m_dblRho( greeks.rho ) {
+}
+
 CGreek::CGreek( const boost::posix_time::ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho ):
   CDatedDatum( dt ), 
   m_dblImpliedVolatility( dblImpliedVolatility ), 

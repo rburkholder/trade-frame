@@ -64,6 +64,8 @@ protected:
 
   std::string m_sSide;
 
+  // use an interator instead?  or keep as is as it facilitates multithread append and access operations
+  // or will the stuff in TBB help with this type of access?
   double m_dblBid;
   double m_dblAsk;
   double m_dblTrade;

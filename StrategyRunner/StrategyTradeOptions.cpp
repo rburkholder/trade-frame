@@ -39,12 +39,12 @@
 
 namespace StrategyTradeOptionsConstants {
   std::string sPortfolioName = "pflioOptions";
-  bool bTesting = true;
+  bool bTesting = false;
 }
 
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
-    m_TradeStates( EPreOpen ), m_paramWorkingDelta( 2000 )
+    m_TradeStates( EPreOpen ), m_paramWorkingDelta( 2000.0 )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
@@ -59,15 +59,15 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
   if ( StrategyTradeOptionsConstants::bTesting ) {
     m_timeOpeningBell = time_duration(  0,  0,  1 );
     m_timeClosingBell = time_duration( 23, 59, 59 );
-    m_timeCancel = m_timeClosingBell - time_duration( 0, 6, 0 );
-    m_timeClose =  m_timeClosingBell - time_duration( 0, 3, 0 );
   }
   else {
     m_timeOpeningBell = time_duration( 10, 30, 0 );
     m_timeClosingBell = time_duration( 17,  0, 0 );
-    m_timeCancel = m_timeClosingBell - time_duration( 0, 6, 0 );
-    m_timeClose =  m_timeClosingBell - time_duration( 0, 3, 0 );
   }
+  m_timeCancel = m_timeClosingBell - time_duration( 0, 6, 0 );
+  m_timeClose =  m_timeClosingBell - time_duration( 0, 3, 0 );
+
+  std::cout << ou::CTimeSource::Instance().Internal() << " Starting State: EPreOpen(" <<  StrategyTradeOptionsConstants::bTesting << ")" << std::endl;
 }
 
 StrategyTradeOptions::~StrategyTradeOptions(void) {
@@ -246,7 +246,7 @@ void StrategyTradeOptions::HandleTrade( const ou::tf::CTrade& trade ) {
 
 void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
 
-  if ( !quote.IsValid() ) return;
+  if ( !quote.IsValid() ) return;  // ** check this for options as well
   
   m_quotes.Append( quote );
   double midpoint = quote.Midpoint();
@@ -292,12 +292,16 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
     }
     break;
   case ECancelling:
+    AdjustThePointers( quote );
     if ( m_timeClose <= tod ) {
       m_TradeStates = EGoingNeutral;
       std::cout << ou::CTimeSource::Instance().Internal() << " New State: EGoingNeutral" << std::endl;
     }
     break;
-  case EGoingNeutral:  // *** need to balance out delta here
+  case EGoingNeutral: 
+    AdjustThePointers( quote );
+    std::cout << ou::CTimeSource::Instance().Internal() << " Final Options Go Neutral" << std::endl;
+    AdjustTheOptions( quote );  // rebalance
     m_TradeStates = EClosing;
     break;
   case EClosing:
@@ -311,51 +315,27 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
-void StrategyTradeOptions::ProcessCallOptions( call_t& call ) {
-  if ( 0 != call.pPosition.get() ) {
-    if ( 0 != call.pPosition->GetRow().nPositionActive ) {
-      if ( 0 < call.pPosition->GetUnRealizedPL() ) {
-        // close out profitable positions
-        call.pPosition->ClosePosition();
-        std::cout << ou::CTimeSource::Instance().Internal() << " closed call" << std::endl;
-      }
-      else {
-        // determine remaining delta for balancing purposes
-        m_deltaCall += call.pPosition->GetRow().nPositionActive * call.pOption->Delta() * 100.0;
-      }
-    }
-  }
-}
-
-void StrategyTradeOptions::ProcessPutOptions( put_t& put ) {
-  if ( 0 != put.pPosition.get() ) {
-    if ( 0 != put.pPosition->GetRow().nPositionActive ) {
-      if ( 0 < put.pPosition->GetUnRealizedPL() ) {
-        // close out profitable positions
-        put.pPosition->ClosePosition();
-        std::cout << ou::CTimeSource::Instance().Internal() << " closed put" << std::endl;
-      }
-      else {
-        // determine remaining delta for balancing purposes
-        m_deltaPut += put.pPosition->GetRow().nPositionActive * put.pOption->Delta() * 100.0;
-      }
-    }
-  }
-}
-
 void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
   // add up put delta, call delta, rebalance each side to working delta
   // use m_iterMapOptionsMiddle as the current strike adjustment
   // might be more efficient to have an active list of options and positions to make it easy to scan and update for:
   //   check over all delta
   //   see if something is at current strike for adjustment
-  m_deltaCall = 0.0;
-  m_deltaPut = 0.0;
+
+  greeks_t greekCalls;
+  greeks_t greekPuts;
+
+  statsOptions statsCalls;
+  statsOptions statsPuts;
+
   for ( mapOptions_iter_t iter = m_mapOptions.begin(); m_mapOptions.end() != iter; ++iter ) {
     // use visitor pattern to access each call and put
-    iter->second.ScanCallOptions( boost::phoenix::bind( &StrategyTradeOptions::ProcessCallOptions, this, boost::phoenix::arg_names::arg1 ) );
-    iter->second.ScanPutOptions(  boost::phoenix::bind( &StrategyTradeOptions::ProcessPutOptions,  this, boost::phoenix::arg_names::arg1 ) );
+    iter->second.ScanCallOptions( greekCalls, statsCalls, boost::phoenix::bind( &StrategyTradeOptions::ProcessOptions<call_t>, this, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
+    iter->second.ScanPutOptions(  greekPuts,  statsPuts, boost::phoenix::bind( &StrategyTradeOptions::ProcessOptions<put_t>,  this, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
   }
+
+  double deltaCall( greekCalls.delta * 100.0 );
+  double deltaPut( greekPuts.delta *  100.0 );
 
   int nToBuy;
 
@@ -364,7 +344,8 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
     // something wierd
 //  }
 //  else {
-    nToBuy = ( ( m_paramWorkingDelta - m_deltaCall ) / 100.0 )
+  std::cout << ou::CTimeSource::Instance().Internal() << " calls: " << deltaCall << ", " << m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->Delta() << std::endl;
+    nToBuy = ( ( m_paramWorkingDelta - deltaCall ) / 100.0 )
       / m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->Delta();
     if ( 0 < nToBuy ) {
       if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
@@ -390,11 +371,12 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
 //    std::cout << "deltaPut Problem" << std::endl;
 //  }
 //  else {
-    nToBuy = ( ( m_paramWorkingDelta + m_deltaPut ) / 100.0 )
+    std::cout << ou::CTimeSource::Instance().Internal() << "  puts: " << deltaPut << ", " << m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->Delta() << std::endl;
+    nToBuy = ( ( m_paramWorkingDelta + deltaPut ) / 100.0 )
       / -m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->Delta();
     if ( 0 < nToBuy ) {
       if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
-        // problems
+        std::cout << "deltaPut Problem" << std::endl;
       }
       else {
         if ( 0 == m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition.get() ) {

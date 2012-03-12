@@ -51,6 +51,16 @@ private:
 
   enum enumTradeStates { EPreOpen, EBellHeard, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
+  typedef ou::tf::CGreek::greeks_t greeks_t;
+
+  struct statsOptions {
+    unsigned int nLong;
+    double sumStrikeLong; // add nLong * strike so to find average strike price determining spread sizes
+    unsigned int nShort;
+    double sumStrikeShort; // add nShort * strike so to find average strike price determining spread sizes
+    statsOptions( void ) : nLong( 0 ), nShort( 0 ), sumStrikeLong( 0.0 ), sumStrikeShort( 0.0 ) {};
+  };
+
   template<typename Side> 
   struct option_t { // individual option state plus position state
     typedef boost::shared_ptr<Side> pOption_t;
@@ -85,20 +95,20 @@ private:
     ~options_t( void ) {};
 
     template<class Visitor>
-    void ScanCallOptions( Visitor f ) {
-      f( optionNearDateCall );
-      f( optionFarDateCall );
+    void ScanCallOptions( greeks_t& greeks, Visitor f ) {
+      f( greeks, optionNearDateCall );
+      f( greeks, optionFarDateCall );
       for ( vCalls_t::iterator iter = vOtherCalls.begin(); vOtherCalls.end() != iter; ++iter ) {
-        f( *iter );
+        f( greeks, *iter );
       }
     }
 
     template<class Visitor>
-    void ScanPutOptions( Visitor f ) {
-      f( optionNearDatePut );
-      f( optionFarDatePut );
+    void ScanPutOptions( greeks_t& greeks, Visitor f ) {
+      f( greeks, optionNearDatePut );
+      f( greeks, optionFarDatePut );
       for ( vPuts_t::iterator iter = vOtherPuts.begin(); vOtherPuts.end() != iter; ++iter ) {
-        f( *iter );
+        f( greeks, *iter );
       }
     }
 
@@ -145,9 +155,6 @@ private:
 
   std::string m_sUnderlying;
 
-  double m_deltaCall;
-  double m_deltaPut;
-
   std::string m_sTimeStampWatchStarted;
 
   double m_paramWorkingDelta;
@@ -168,6 +175,9 @@ private:
 
   boost::gregorian::date m_dateOptionNearDate;
   boost::gregorian::date m_dateOptionFarDate;
+
+  template<class Option>
+  void ProcessOptions( greeks_t& greeks, statsOptions& stats, Option& option );
 
   void AdjustTheOptions( const ou::tf::CQuote& quote );
   bool SetPointersFirstTime( const ou::tf::CQuote& quote );
@@ -196,3 +206,37 @@ private:
   void HandleTrade( const ou::tf::CTrade& );
 };
 
+template<class Option>
+void StrategyTradeOptions::ProcessOptions( greeks_t& greeks, statsOptions& stats, Option& option ) {
+  if ( 0 != option.pPosition.get() ) {
+    if ( 0 != option.pPosition->GetRow().nPositionActive ) {
+      ou::tf::CPosition::TableRowDefNoKey& row( option.pPosition->GetRow() );
+      if ( ( m_iterMapOptionsMiddle->first == option.pOption->GetStrike() )  // don't sell what we'll just buy back
+        || ( 0 >= ( option.pPosition->GetUnRealizedPL() - ( 1.00 /*minprofit*/ + ( 2.0 * 0.75 /*commission*/ * row.nPositionActive ) ) ) ) // some basic profit minimum plus in + out * average option contract price
+        ) {
+          // determine remaining delta for balancing purposes
+          greeks.delta += row.nPositionActive * option.pOption->Delta();
+          greeks.gamma += row.nPositionActive * option.pOption->Gamma();
+          greeks.theta += row.nPositionActive * option.pOption->Theta();
+          greeks.vega  += row.nPositionActive * option.pOption->Vega();
+//          greeks.rho += option.pPosition->GetRow().nPositionActive * option.pOption->Rho();
+          switch ( row.eOrderSideActive ) {
+          case ou::tf::OrderSide::Buy:
+            stats.nLong += row.nPositionActive;
+            stats.sumStrikeLong += row.nPositionActive * option.pOption->GetStrike();
+            break;
+          case ou::tf::OrderSide::Sell:
+            stats.nShort += row.nPositionActive;
+            stats.sumStrikeShort += row.nPositionActive * option.pOption->GetStrike();
+            break;
+          }
+          
+      }
+      else {
+        // close out profitable positions
+        option.pPosition->ClosePosition();
+        std::cout << ou::CTimeSource::Instance().Internal() << " closing option " << option.pOption->GetInstrument()->GetInstrumentName() << std::endl;
+      }
+    }
+  }
+}
