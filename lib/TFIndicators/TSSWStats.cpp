@@ -22,8 +22,8 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( Series, WindowSizeSeconds, WindowSizeCount )
 {
 }
 
@@ -46,8 +46,8 @@ void TSSWStatsTrade::Expire( const CTrade &trade ) {
 // Quote
 //
 
-TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( Series, WindowSizeSeconds, WindowSizeCount )
 {
 }
 
@@ -72,8 +72,8 @@ void TSSWStatsQuote::Expire( const CQuote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( Series, WindowSizeSeconds, WindowSizeCount )
 {
 }
 
@@ -96,8 +96,8 @@ void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
 // CPrice
 //
 
-TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>* pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( pSeries, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( Series, WindowSizeSeconds, WindowSizeCount )
 {
 }
 

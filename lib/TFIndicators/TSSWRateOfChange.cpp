@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRateOfChange::TSSWRateOfChange( CPrices* prices, long WindowSizeSeconds ) 
+TSSWRateOfChange::TSSWRateOfChange( CPrices& prices, long WindowSizeSeconds ) 
   : TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>( prices, WindowSizeSeconds ),
   m_tail( 0.0 ), m_head( 0.0 )
 {

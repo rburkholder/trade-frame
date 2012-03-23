@@ -24,7 +24,7 @@ class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, C
   friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>;
 public:
 
-  TSSWEfficiencyRatio( CTrades*, long WindowSizeSeconds );
+  TSSWEfficiencyRatio( CTrades&, long WindowSizeSeconds );
   TSSWEfficiencyRatio( const TSSWEfficiencyRatio& );
   ~TSSWEfficiencyRatio( void );
 

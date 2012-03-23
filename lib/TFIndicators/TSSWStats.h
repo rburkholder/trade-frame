@@ -28,7 +28,7 @@ namespace tf { // TradeFrame
 template<class T, class D> class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
 public:
-  TimeSeriesSlidingWindowStats<T,D>( CTimeSeries<D> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TimeSeriesSlidingWindowStats<T,D>( CTimeSeries<D>& Series, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   virtual ~TimeSeriesSlidingWindowStats<T,D>( void );
 //  double Accel( void ) const { return m_stats.B2(); };
   double Slope( void ) const { return m_stats.B1(); };
@@ -53,8 +53,8 @@ private:
 
 // constructor
 template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats( 
-  CTimeSeries<D> *pSeries, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindow<T,D>( pSeries, WindowSizeSeconds, WindowSizeCount )
+  CTimeSeries<D>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindow<T,D>( Series, WindowSizeSeconds, WindowSizeCount )
 {
   m_stats.SetBBMultiplier( 2.0 );
 }
@@ -72,7 +72,7 @@ class TSSWStatsTrade: public TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>;
   friend TimeSeriesSlidingWindow<TSSWStatsTrade, CTrade>;
 public:
-  TSSWStatsTrade( CTimeSeries<CTrade> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TSSWStatsTrade( CTimeSeries<CTrade>& Series, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   ~TSSWStatsTrade( void );
 protected:
   void Add( const CTrade &trade ); // override to process elements passing into window scope
@@ -88,7 +88,7 @@ class TSSWStatsQuote: public TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>;
   friend TimeSeriesSlidingWindow<TSSWStatsQuote, CQuote>;
 public:
-  TSSWStatsQuote( CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TSSWStatsQuote( CTimeSeries<CQuote>& Series, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   ~TSSWStatsQuote( void );
 protected:
   void Add( const CQuote &quote ); // override to process elements passing into window scope
@@ -104,7 +104,7 @@ class TSSWStatsMidQuote: public TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, 
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>;
   friend TimeSeriesSlidingWindow<TSSWStatsMidQuote, CQuote>;
 public:
-  TSSWStatsMidQuote( CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TSSWStatsMidQuote( CTimeSeries<CQuote>& Series, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   ~TSSWStatsMidQuote( void );
 protected:
   void Add( const CQuote &quote ); // override to process elements passing into window scope
@@ -120,7 +120,7 @@ class TSSWStatsPrice: public TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>;
   friend TimeSeriesSlidingWindow<TSSWStatsPrice, CPrice>;
 public:
-  TSSWStatsPrice( CTimeSeries<CPrice>* pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
+  TSSWStatsPrice( CTimeSeries<CPrice>& Series, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   ~TSSWStatsPrice( void );
 protected:
   void Add( const CPrice &price ); // override to process elements passing into window scope

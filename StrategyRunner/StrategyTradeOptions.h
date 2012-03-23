@@ -26,6 +26,7 @@
 #include <TFIQFeed/IQFeedProvider.h>
 #include <TFOptions/Option.h>
 #include <TFTimeSeries/TimeSeries.h>
+#include <TFIndicators/TSSWStochastic.h>
 
 class StrategyTradeOptions {
 public:
@@ -49,7 +50,7 @@ private:
   typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
 
-  enum enumTradeStates { EPreOpen, EBellHeard, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
+  enum enumTradeStates { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
   typedef ou::tf::CGreek::greeks_t greeks_t;
 
@@ -95,20 +96,20 @@ private:
     ~options_t( void ) {};
 
     template<class Visitor>
-    void ScanCallOptions( greeks_t& greeks, Visitor f ) {
-      f( greeks, optionNearDateCall );
-      f( greeks, optionFarDateCall );
+    void ScanCallOptions( greeks_t& greeks, statsOptions& stats, Visitor f ) {
+      f( greeks, stats, optionNearDateCall );
+      f( greeks, stats, optionFarDateCall );
       for ( vCalls_t::iterator iter = vOtherCalls.begin(); vOtherCalls.end() != iter; ++iter ) {
-        f( greeks, *iter );
+        f( greeks, stats, *iter );
       }
     }
 
     template<class Visitor>
-    void ScanPutOptions( greeks_t& greeks, Visitor f ) {
-      f( greeks, optionNearDatePut );
-      f( greeks, optionFarDatePut );
+    void ScanPutOptions( greeks_t& greeks, statsOptions& stats, Visitor f ) {
+      f( greeks, stats, optionNearDatePut );
+      f( greeks, stats, optionFarDatePut );
       for ( vPuts_t::iterator iter = vOtherPuts.begin(); vOtherPuts.end() != iter; ++iter ) {
-        f( greeks, *iter );
+        f( greeks, stats, *iter );
       }
     }
 
@@ -139,11 +140,23 @@ private:
     }
   };
 
+  struct stochastic_t {
+    enum EActiveSide { ESideOut, ESideTop, ESideBottom };
+    ou::tf::TSSWStochastic ts;
+    EActiveSide sideCall, sidePut;  // near call is out, short at top, exit at bottom; put is out, short at bottom, exit at top
+    stochastic_t( ou::tf::CQuotes& quotes, long WindowSizeSeconds ): ts( quotes, WindowSizeSeconds ), sideCall( ESideOut ), sidePut( ESideOut ) {};
+  };
+
   typedef std::map<double,options_t> mapOptions_t;
   typedef mapOptions_t::iterator mapOptions_iter_t;
   typedef std::pair<double,options_t> mapOptions_pair_t;
   mapOptions_t m_mapOptions;
-  mapOptions_iter_t m_iterMapOptionsBelow, m_iterMapOptionsMiddle, m_iterMapOptionsAbove;
+
+  mapOptions_iter_t m_iterMapOptionsAbove2;
+  mapOptions_iter_t m_iterMapOptionsAbove1;
+  mapOptions_iter_t m_iterMapOptionsMiddle;
+  mapOptions_iter_t m_iterMapOptionsBelow1; 
+  mapOptions_iter_t m_iterMapOptionsBelow2; 
 
   vCalls_t m_vCalls;  // loaded with HandlePositionsLoad:  near, far, other, used for calc delta
   vPuts_t m_vPuts;    // loaded with HandlePositionsLoad:  near, far, other, used for calc delta
@@ -159,8 +172,27 @@ private:
 
   double m_paramWorkingDelta;
 
+  stochastic_t m_stoch1;
+  stochastic_t m_stoch2;
+  stochastic_t m_stoch3;
+  stochastic_t m_stoch4;
+
+  pPortfolio_t m_pPortfolio;
+  pInstrument_t m_pUnderlying;
+
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
+
+  struct bundle_t {
+    pInstrument_t pInstrument;
+    ou::tf::CQuotes quotes;
+    ou::tf::CTrades trades;
+    void HandleTrade( const ou::tf::CTrade& trade ) { trades.Append( trade ); };
+    void HandleQuote( const ou::tf::CQuote& quote ) { quotes.Append( quote ); };
+  };
+
+  //bundle_t bundleUnderlying;
+  bundle_t bundle10YrTreasury;
 
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pData1Provider;
@@ -169,9 +201,6 @@ private:
   ou::tf::CIQFeedProvider::pProvider_t m_pData1ProviderIQFeed;
   ou::tf::CIBTWS::pProvider_t m_pData2ProviderIB;
   ou::tf::CIBTWS::pProvider_t m_pExecutionProviderIB;
-
-  pPortfolio_t m_pPortfolio;
-  pInstrument_t m_pUnderlying;
 
   boost::gregorian::date m_dateOptionNearDate;
   boost::gregorian::date m_dateOptionFarDate;
@@ -210,7 +239,7 @@ template<class Option>
 void StrategyTradeOptions::ProcessOptions( greeks_t& greeks, statsOptions& stats, Option& option ) {
   if ( 0 != option.pPosition.get() ) {
     if ( 0 != option.pPosition->GetRow().nPositionActive ) {
-      ou::tf::CPosition::TableRowDefNoKey& row( option.pPosition->GetRow() );
+      const ou::tf::CPosition::TableRowDef& row( option.pPosition->GetRow() );
       if ( ( m_iterMapOptionsMiddle->first == option.pOption->GetStrike() )  // don't sell what we'll just buy back
         || ( 0 >= ( option.pPosition->GetUnRealizedPL() - ( 1.00 /*minprofit*/ + ( 2.0 * 0.75 /*commission*/ * row.nPositionActive ) ) ) ) // some basic profit minimum plus in + out * average option contract price
         ) {

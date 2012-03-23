@@ -19,6 +19,25 @@
 
 // 2012/03/06:  add stochastic in for the day.  re-adjust deltas on each swing
 
+// 2012/03/12:  need to remove asserts and find some graceful way of handling begin/end of mapOptions table,
+//              perhaps ignore any possible trades out side the boundaries (will be issues with flash crashes and such)
+
+// 2012/03/12:  rotate far term options to next couple of months once within 30 days of expiry
+//              perform on high low volatility, or high volatility?  or can sell high and buy low?
+//              track the volatility, try to sell high volatility, buy low volatility
+
+// 2012/03/12:  track open interest and buy/sell ratios on the tracked options
+//              to see if there is useful predictive information
+
+// 2012/03/12:  bayesian prediction machine to use the various factors
+
+// 2012/03/17:  by rebalancing at the pivot, another opportunity for profit taking
+//              watch volatility during the day:  weight buying on low volatility, weight selling on high volatility
+//              can pivots be done on implied volatility?
+//              run volatility smiles.  does that provide any trading opportunities
+//              need panel for selecting option to perform a calendar roll over, and add in to position for cost recovery
+//              put in %d with %k in stochastic once tools from Intro to HF are created
+
 #include <sstream>
 
 #include <boost/phoenix/core.hpp>
@@ -44,7 +63,11 @@ namespace StrategyTradeOptionsConstants {
 
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
-    m_TradeStates( EPreOpen ), m_paramWorkingDelta( 2000.0 )
+    m_TradeStates( EPreOpen ), m_paramWorkingDelta( 2000.0 ), 
+    m_stoch1( m_quotes, 1 * 14 * 60 ), 
+    m_stoch2( m_quotes, 2 * 14 * 60 ), 
+    m_stoch3( m_quotes, 3 * 14 * 60 ), 
+    m_stoch4( m_quotes, 4 * 14 * 60 )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
@@ -82,9 +105,23 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
   m_dateOptionFarDate = dateOptionFarDate;
   m_sUnderlying = sUnderlying;
 
-  ou::tf::CInstrumentManager& mgrInstruments( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
 
-  if ( mgrInstruments.Exists( sUnderlying ) ) { // instruments should already exist so load from database
+  if ( 0 != m_pData1ProviderIQFeed.get() ) {  // risk free rate for IV calcs
+    pInstrument_t p10YT;
+    if ( mgr.Exists( "TNX.XO" ) ) {
+      p10YT = mgr.Get( "TNX.XO" );
+    }
+    else {
+      p10YT = bundle10YrTreasury.pInstrument = mgr.ConstructInstrument( "TNX.XO", "DTN", ou::tf::InstrumentType::Index );
+    }
+    bundle10YrTreasury.pInstrument = p10YT;
+    
+    m_pData1ProviderIQFeed->AddQuoteHandler( p10YT, MakeDelegate( &bundle10YrTreasury, &bundle_t::HandleQuote ) );
+    m_pData1ProviderIQFeed->AddTradeHandler( p10YT, MakeDelegate( &bundle10YrTreasury, &bundle_t::HandleTrade ) );
+  }
+
+  if ( mgr.Exists( sUnderlying ) ) { // instruments should already exist so load from database
 
     LoadExistingInstrumentsAndPortfolios( sUnderlying );
 
@@ -109,6 +146,7 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
         );
     }
   }
+
 }
 
 void StrategyTradeOptions::Stop( void ) {
@@ -262,16 +300,27 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
     break;
   case EBellHeard:  // will need to wait for a bit for options to settle
     assert( 0 != m_mapOptions.size() );
-    m_iterMapOptionsAbove = m_mapOptions.begin();
-    m_iterMapOptionsBelow = m_iterMapOptionsMiddle = m_mapOptions.end();
+    m_iterMapOptionsAbove1 = m_mapOptions.begin();
+    m_iterMapOptionsAbove2 
+      = m_iterMapOptionsMiddle
+      = m_iterMapOptionsBelow1 = m_iterMapOptionsBelow2 
+      = m_mapOptions.end();
     SetPointersFirstTime( quote );
     m_timePauseForQuotes = tod + time_duration( 0, 0, 30 );
-    m_TradeStates = EAfterBell;
-    std::cout << ou::CTimeSource::Instance().Internal() << " New State: EAfterBell" << std::endl;
+    m_TradeStates = EPauseForQuotes;
+    std::cout << ou::CTimeSource::Instance().Internal() << " New State: EPauseForQuotes" << std::endl;
+    break;
+  case EPauseForQuotes:
+    if ( m_timePauseForQuotes <= tod ) {
+      m_timePauseForQuotes = tod + time_duration( 0, 0, 30 );
+      m_TradeStates = EAfterBell;
+      std::cout << ou::CTimeSource::Instance().Internal() << " New State: EAfterBell" << std::endl;
+    }
     break;
   case EAfterBell:
     AdjustThePointers( quote );  // keep everything adjusted for when ready to adjust the options
     if ( m_timePauseForQuotes <= tod ) {
+      std::cout << ou::CTimeSource::Instance().Internal() << " EAfterBell: Adjust Options" << std::endl;
       AdjustTheOptions( quote );  // opening balance
       m_TradeStates = ETrading;
       std::cout << ou::CTimeSource::Instance().Internal() << " New State: ETrading" << std::endl;
@@ -321,6 +370,8 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
   // might be more efficient to have an active list of options and positions to make it easy to scan and update for:
   //   check over all delta
   //   see if something is at current strike for adjustment
+
+  // 2012/03/12  don't rebalance during large directional movement (something to check in the state machine above)
 
   greeks_t greekCalls;
   greeks_t greekPuts;
@@ -400,52 +451,46 @@ bool StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
   // turn on and turn off monitoring as move over the options
   bool bReturn = false;
   double midpoint = quote.Midpoint();
-  if ( midpoint >= m_iterMapOptionsAbove->first ) {  // adjust upwards
-    if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
-      m_iterMapOptionsMiddle = m_iterMapOptionsAbove;
-      ++m_iterMapOptionsAbove;
-      assert( m_mapOptions.end() != m_iterMapOptionsAbove );
-      m_iterMapOptionsAbove->second.StartWatch();
-    }
-    else {
-      ++m_iterMapOptionsAbove;
-      assert( m_mapOptions.end() != m_iterMapOptionsAbove );
-      m_iterMapOptionsAbove->second.StartWatch();
-      ++m_iterMapOptionsMiddle;
-      m_iterMapOptionsBelow->second.StopWatch();
-      ++m_iterMapOptionsBelow;
-      m_iterMapOptionsBelow->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
-    }
+  if ( midpoint >= m_iterMapOptionsAbove1->first ) {  // adjust upwards
+    ++m_iterMapOptionsAbove2;
+    assert( m_mapOptions.end() != m_iterMapOptionsAbove2 );
+    m_iterMapOptionsAbove2->second.StartWatch();
+    ++m_iterMapOptionsAbove1;
+    ++m_iterMapOptionsMiddle;
+    ++m_iterMapOptionsBelow1;
+    m_iterMapOptionsBelow2->second.StopWatch();
+    ++m_iterMapOptionsBelow2;
+    //m_iterMapOptionsBelow2->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
+
     std::cout << ou::CTimeSource::Instance().Internal() << " strikes upwards: " 
-      << m_iterMapOptionsAbove->first << ", " 
-      << m_iterMapOptionsMiddle->first << ", " 
-      << m_iterMapOptionsBelow->first 
+    << m_iterMapOptionsBelow2->first << ", " 
+    << m_iterMapOptionsBelow1->first << ", " 
+    << m_iterMapOptionsMiddle->first << ", " 
+    << m_iterMapOptionsAbove1->first << ", " 
+    << m_iterMapOptionsAbove2->first
       << std::endl;
     bReturn = true;
   }
   else {
-    if ( midpoint <= m_iterMapOptionsBelow->first ) { // adjust downwards
-      if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
-        m_iterMapOptionsMiddle = m_iterMapOptionsBelow;
-        assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
-        --m_iterMapOptionsBelow;
-        m_iterMapOptionsBelow->second.StartWatch();
-      }
-      else {
-        assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
-        --m_iterMapOptionsBelow;
-        m_iterMapOptionsBelow->second.StartWatch();
-        --m_iterMapOptionsMiddle;
-        m_iterMapOptionsAbove->second.StopWatch();
-        --m_iterMapOptionsAbove;
-        m_iterMapOptionsAbove->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
-      }
-    std::cout << ou::CTimeSource::Instance().Internal() << " strikes downwards: " 
-      << m_iterMapOptionsAbove->first << ", " 
+    if ( midpoint <= m_iterMapOptionsBelow1->first ) { // adjust downwards
+      assert( m_mapOptions.begin() != m_iterMapOptionsBelow2 );
+      --m_iterMapOptionsBelow2;
+      m_iterMapOptionsBelow2->second.StartWatch();
+      --m_iterMapOptionsBelow1;
+      --m_iterMapOptionsMiddle;
+      --m_iterMapOptionsAbove1;
+      m_iterMapOptionsAbove2->second.StopWatch();
+      --m_iterMapOptionsAbove2;
+      //m_iterMapOptionsAbove2->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
+
+      std::cout << ou::CTimeSource::Instance().Internal() << " strikes downwards: " 
+      << m_iterMapOptionsBelow2->first << ", " 
+      << m_iterMapOptionsBelow1->first << ", " 
       << m_iterMapOptionsMiddle->first << ", " 
-      << m_iterMapOptionsBelow->first 
-      << std::endl;
-      bReturn = true;
+      << m_iterMapOptionsAbove1->first << ", " 
+      << m_iterMapOptionsAbove2->first
+        << std::endl;
+        bReturn = true;
     }
   }
   return bReturn;
@@ -453,22 +498,24 @@ bool StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
 
 bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::CQuote& quote ) {
 
+  // get close to the current strike to start collecting greek information
+
   bool bReturn = false;
 
   double midpoint = quote.Midpoint();
-  while ( midpoint >= m_iterMapOptionsAbove->first ) {
-    ++m_iterMapOptionsAbove;
-    assert( m_mapOptions.end() != m_iterMapOptionsAbove );
+  while ( midpoint >= m_iterMapOptionsAbove1->first ) {
+    ++m_iterMapOptionsAbove1;
+    assert( m_mapOptions.end() != m_iterMapOptionsAbove1 );
   }
 
   unsigned int cnt = 0;
-  m_iterMapOptionsBelow = m_iterMapOptionsAbove;
-  while ( midpoint <= m_iterMapOptionsBelow->first ) {
-    assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
-    --m_iterMapOptionsBelow;
+  m_iterMapOptionsBelow1 = m_iterMapOptionsAbove1;
+  while ( midpoint <= m_iterMapOptionsBelow1->first ) {
+    assert( m_mapOptions.begin() != m_iterMapOptionsBelow1 );
+    --m_iterMapOptionsBelow1;
     if ( 0 == cnt ) {
-      if ( midpoint == m_iterMapOptionsBelow->first ) {
-        m_iterMapOptionsMiddle = m_iterMapOptionsBelow;
+      if ( midpoint == m_iterMapOptionsBelow1->first ) {
+        m_iterMapOptionsMiddle = m_iterMapOptionsBelow1;
         bReturn = true;
       }
     }
@@ -477,35 +524,47 @@ bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::CQuote& quote ) {
 
   // take average then adjust upwards or downwards based upon in upper half or in lower half
   if ( m_mapOptions.end() == m_iterMapOptionsMiddle ) {
-    double average = ( m_iterMapOptionsAbove->first + m_iterMapOptionsBelow->first ) / 2.0;
+    double average = ( m_iterMapOptionsAbove1->first + m_iterMapOptionsBelow1->first ) / 2.0;
     if ( midpoint >= average ) {
-      m_iterMapOptionsMiddle = m_iterMapOptionsAbove;
-      ++m_iterMapOptionsAbove;
-      assert(  m_mapOptions.end() != m_iterMapOptionsAbove );
+      m_iterMapOptionsMiddle = m_iterMapOptionsAbove1;
+      ++m_iterMapOptionsAbove1;
+      assert( m_mapOptions.end() != m_iterMapOptionsAbove1 );
     }
     else {
-      assert( m_mapOptions.begin() != m_iterMapOptionsBelow );
-      m_iterMapOptionsMiddle = m_iterMapOptionsBelow;
-      --m_iterMapOptionsBelow;
+      assert( m_mapOptions.begin() != m_iterMapOptionsBelow1 );
+      m_iterMapOptionsMiddle = m_iterMapOptionsBelow1;
+      --m_iterMapOptionsBelow1;
     }
   }
 
-  std::cout << ou::CTimeSource::Instance().Internal() << " opening strikes: " 
-    << m_iterMapOptionsAbove->first << ", " 
-    << m_iterMapOptionsMiddle->first << ", " 
-    << m_iterMapOptionsBelow->first 
-    << std::endl;
+  assert( m_mapOptions.begin() != m_iterMapOptionsBelow1 );
+  m_iterMapOptionsBelow2 = m_iterMapOptionsBelow1;
+  --m_iterMapOptionsBelow2;
 
-  m_iterMapOptionsAbove->second.StartWatch();
+  m_iterMapOptionsAbove2 = m_iterMapOptionsAbove1;
+  ++m_iterMapOptionsAbove2;
+  assert( m_mapOptions.end() != m_iterMapOptionsAbove2 );
+
+  m_iterMapOptionsAbove2->second.StartWatch();
+  m_iterMapOptionsAbove1->second.StartWatch();
   m_iterMapOptionsMiddle->second.StartWatch();
-  m_iterMapOptionsBelow->second.StartWatch();
+  m_iterMapOptionsBelow1->second.StartWatch();
+  m_iterMapOptionsBelow2->second.StartWatch();
+
+  std::cout << ou::CTimeSource::Instance().Internal() << " opening strikes: " 
+    << m_iterMapOptionsBelow2->first << ", " 
+    << m_iterMapOptionsBelow1->first << ", " 
+    << m_iterMapOptionsMiddle->first << ", " 
+    << m_iterMapOptionsAbove1->first << ", " 
+    << m_iterMapOptionsAbove2->first
+    << std::endl;
 
   return bReturn;
 }
 
 void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
 
-  if ( 0 == pPosition->GetRow().nPositionActive ) return; // ignore zero size positions
+//  if ( 0 == pPosition->GetRow().nPositionActive ) return; // ignore zero size positions
 
   ou::tf::CInstrument::pInstrument_cref pInstrument( pPosition->GetInstrument() );
   assert( pInstrument->IsOption() );  // ensure everything is an option, underlying is being tracked but not traded, yet
@@ -584,6 +643,12 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
       attrQuotes.SetProviderType( m_pData1Provider->ID() );
     }
 
+    if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.quotes.Size() ) ) {
+      sPathName = sPrefix + "/quotes/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+      wtsQuotes.Write( sPathName, &bundle10YrTreasury.quotes );
+    }
+
     std::cout << "Saving Trades:" << std::endl;
 
     if ( 0 != m_trades.Size() ) {
@@ -594,6 +659,12 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
       attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
       attrTrades.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
       attrTrades.SetProviderType( m_pData1Provider->ID() );
+    }
+
+    if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.trades.Size() ) ) {
+      sPathName = sPrefix + "/trades/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+      wtsTrades.Write( sPathName, &bundle10YrTreasury.trades );
     }
 
     std::cout << "Saving Options:" << std::endl;

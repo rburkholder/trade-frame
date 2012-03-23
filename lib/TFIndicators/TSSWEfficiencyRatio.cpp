@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWEfficiencyRatio::TSSWEfficiencyRatio( CTrades* trades, long WindowSizeSeconds ) 
+TSSWEfficiencyRatio::TSSWEfficiencyRatio( CTrades& trades, long WindowSizeSeconds ) 
   : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>( trades, WindowSizeSeconds ),
     m_lastAdd( 0.0 ), m_lastExpire( 0.0 ), m_sum( 0.0 ), m_ratio( 0.0 ), m_total( 0.0 )
 {

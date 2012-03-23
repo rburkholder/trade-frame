@@ -22,7 +22,7 @@ class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>
   friend TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>;
 public:
 
-  TSSWRunningTally( CPrices*, long WindowSizeSeconds );
+  TSSWRunningTally( CPrices&, long WindowSizeSeconds );
 //  TSSWRunningTally( const TSSWRunningTally& );
   ~TSSWRunningTally( void );
 

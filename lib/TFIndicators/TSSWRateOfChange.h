@@ -22,7 +22,7 @@ class TSSWRateOfChange: public TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>
   friend TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>;
 public:
 
-  TSSWRateOfChange( CPrices*, long WindowSizeSeconds );
+  TSSWRateOfChange( CPrices&, long WindowSizeSeconds );
   ~TSSWRateOfChange(void);
 
   double RateOfChange( void ) const { return m_head - m_tail; };

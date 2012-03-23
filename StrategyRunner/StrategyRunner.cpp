@@ -58,7 +58,7 @@ bool AppStrategyRunner::OnInit() {
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
   m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 3, 16 ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 3, 23 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );

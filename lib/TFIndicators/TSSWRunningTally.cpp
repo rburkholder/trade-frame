@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRunningTally::TSSWRunningTally( CPrices* prices, long WindowSizeSeconds ) 
+TSSWRunningTally::TSSWRunningTally( CPrices& prices, long WindowSizeSeconds ) 
   : TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>( prices, WindowSizeSeconds ),
   m_net( 0.0 )
 {
