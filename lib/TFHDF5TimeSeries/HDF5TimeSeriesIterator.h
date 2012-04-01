@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -16,7 +17,7 @@
 #include <iterator>
 #include <stdexcept>
 
-#include "TFTimeSeries/DatedDatum.h"
+#include <TFTimeSeries/DatedDatum.h>
 
 #include "HDF5DataManager.h"
 
@@ -32,42 +33,46 @@ template<class T> class CHDF5TimeSeriesIterator:
   public std::iterator<std::random_access_iterator_tag, T, hsize_t> {
     friend class CHDF5TimeSeriesContainer<T>;
 public:
+
+  //typedef CHDF5TimeSeriesIterator self_type;
+  //typedef self_type& self_reference;
+  typedef std::random_access_iterator_tag iterator_category;
+
   explicit CHDF5TimeSeriesIterator<T>( void );
   explicit CHDF5TimeSeriesIterator<T>( CHDF5TimeSeriesAccessor<T> *pAccessor, hsize_t Index );  // begin() or later init
-  typedef std::random_access_iterator_tag iterator_category;
   CHDF5TimeSeriesIterator<T>( const CHDF5TimeSeriesIterator<T>& other );  // copy constructor
   ~CHDF5TimeSeriesIterator<T>( void ) { };
-  //typedef CHDF5TimeSeriesIterator self_type;
-  //typedef self_type &self_reference;
-  CHDF5TimeSeriesIterator<T>& operator=( const CHDF5TimeSeriesIterator<T> &other );
+  CHDF5TimeSeriesIterator<T>& operator=( const CHDF5TimeSeriesIterator<T>& other );
   CHDF5TimeSeriesIterator<T>& operator++(); // pre-increment
   CHDF5TimeSeriesIterator<T>  operator++( int ); // post-increment
   CHDF5TimeSeriesIterator<T>& operator+=( const hsize_t inc );
   CHDF5TimeSeriesIterator<T>& operator-=( const hsize_t inc );
   CHDF5TimeSeriesIterator<T>  operator-( const hsize_t val );
-  hsize_t operator-( const CHDF5TimeSeriesIterator<T> &other ) const;
-  bool operator<( const CHDF5TimeSeriesIterator<T> &other ) const;
-  bool operator==( const CHDF5TimeSeriesIterator<T> &other ) const;
-  bool operator!=( const CHDF5TimeSeriesIterator<T> &other ) const;
+  hsize_t operator-( const CHDF5TimeSeriesIterator<T>& other ) const;
+  bool operator<( const CHDF5TimeSeriesIterator<T>& other ) const;
+  bool operator==( const CHDF5TimeSeriesIterator<T>& other ) const;
+  bool operator!=( const CHDF5TimeSeriesIterator<T>& other ) const;
   //CHDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
   reference operator*();
   //reference operator->();
 protected:
   bool m_bValidIndex;  // m_ItemIndex is valid ie, is something from .begin() to .end()
-  CHDF5TimeSeriesAccessor<T> *m_pAccessor;
+  CHDF5TimeSeriesAccessor<T>* m_pAccessor;
   hsize_t m_ItemIndex; // index into specific item
   T m_T; // the currently retrieved datum, could keep and track two values in order to optimize lower_bound speed somewhat
 private:
 };
 
-template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( void ):
+template<class T> 
+CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( void ):
   m_pAccessor( NULL ), 
   m_ItemIndex( 0 ),
   m_bValidIndex( false )
    {
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5TimeSeriesAccessor<T> *pAccessor, hsize_t Index ):
+template<class T> 
+CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5TimeSeriesAccessor<T> *pAccessor, hsize_t Index ):
   m_pAccessor( pAccessor ), 
   m_ItemIndex( Index ),
   m_bValidIndex( false ) { 
@@ -80,7 +85,8 @@ template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( CHDF5Time
   m_bValidIndex = true;
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( const CHDF5TimeSeriesIterator<T>& other ) :
+template<class T> 
+CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( const CHDF5TimeSeriesIterator<T>& other ) :
   m_pAccessor( other.m_pAccessor ),
   m_bValidIndex( other.m_bValidIndex ), 
   m_ItemIndex( other.m_ItemIndex ),
@@ -88,7 +94,8 @@ template<class T> CHDF5TimeSeriesIterator<T>::CHDF5TimeSeriesIterator( const CHD
   {
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator=( const CHDF5TimeSeriesIterator<T> &other ) {
+template<class T> 
+CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator=( const CHDF5TimeSeriesIterator<T> &other ) {
   // has two choices:  first assigned from, second being assigned to
   if ( this == &other ) {
     // a) being assigned from, so just return reference
@@ -103,7 +110,8 @@ template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operat
   return( *this );
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator++() { // pre-increment
+template<class T> 
+CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator++() { // pre-increment
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   ++m_ItemIndex;
@@ -113,7 +121,8 @@ template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operat
   return( *this );
 }
 
-template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator++( int ) { // post-increment
+template<class T> 
+CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator++( int ) { // post-increment
   CHDF5TimeSeriesIterator<T> result( *this );  // make a copy of what is before increment
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
@@ -124,7 +133,8 @@ template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operato
   return( result ); 
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator+=( const hsize_t inc ) { // plus assignment
+template<class T> 
+CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator+=( const hsize_t inc ) { // plus assignment
   assert( m_bValidIndex );
   m_ItemIndex += inc;
   assert( m_ItemIndex <= m_pAccessor->size() );
@@ -134,7 +144,8 @@ template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operat
   return( *this );
 }
 
-template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator-=( const hsize_t inc ) { // plus assignment
+template<class T> 
+CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operator-=( const hsize_t inc ) { // plus assignment
   assert( m_bValidIndex );
   assert( inc <= m_ItemIndex );
   m_ItemIndex -= inc;
@@ -144,33 +155,39 @@ template<class T> CHDF5TimeSeriesIterator<T>& CHDF5TimeSeriesIterator<T>::operat
   return( *this );
 }
 
-template<class T> CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator-( const hsize_t val ) { // subtraction
+template<class T> 
+CHDF5TimeSeriesIterator<T> CHDF5TimeSeriesIterator<T>::operator-( const hsize_t val ) { // subtraction
   assert( val <= m_ItemIndex );
   CHDF5TimeSeriesIterator<T> result( *this );  // make a copy of this
   result.m_ItemIndex -= val;
   return result;
 }
 
-template<class T> hsize_t CHDF5TimeSeriesIterator<T>::operator-( const CHDF5TimeSeriesIterator<T> &other ) const { // subtraction
+template<class T> 
+hsize_t CHDF5TimeSeriesIterator<T>::operator-( const CHDF5TimeSeriesIterator<T>& other ) const { // subtraction
   return m_ItemIndex - other.m_ItemIndex;
 }
 
-template<class T> bool CHDF5TimeSeriesIterator<T>::operator<( const CHDF5TimeSeriesIterator<T> &other ) const {
+template<class T> 
+bool CHDF5TimeSeriesIterator<T>::operator<( const CHDF5TimeSeriesIterator<T>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return ( m_ItemIndex < other.m_ItemIndex );
 }
 
-template<class T> bool CHDF5TimeSeriesIterator<T>::operator==( const CHDF5TimeSeriesIterator<T> &other ) const {
+template<class T> 
+bool CHDF5TimeSeriesIterator<T>::operator==( const CHDF5TimeSeriesIterator<T>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return ( m_ItemIndex == other.m_ItemIndex );
 }
 
-template<class T> bool CHDF5TimeSeriesIterator<T>::operator!=( const CHDF5TimeSeriesIterator<T> &other ) const {
+template<class T> 
+bool CHDF5TimeSeriesIterator<T>::operator!=( const CHDF5TimeSeriesIterator<T>& other ) const {
   assert( m_pAccessor == other.m_pAccessor );
   return !( m_ItemIndex == other.m_ItemIndex );
 }
 
-template<class T> typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator*() {
+template<class T> 
+typename CHDF5TimeSeriesIterator<T>::reference CHDF5TimeSeriesIterator<T>::operator*() {
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   m_pAccessor->Read( m_ItemIndex, &m_T );

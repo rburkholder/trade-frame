@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -15,6 +16,8 @@
 
 // Bollinger page 91 suggests 0.17 * sqrt( price ) is a good filter width
 // could set this number on each new peak
+
+// 2012/03/31 http://www.olsenblog.com/wp-content/uploads/2009/11/conferencemanchester091004.pdf
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;

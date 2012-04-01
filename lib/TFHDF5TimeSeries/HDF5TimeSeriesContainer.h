@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -37,7 +38,7 @@ public:
   const iterator &end();
   //void Read( const iterator &_begin, const iterator &_end, T *_dest ); 
   void Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ); 
-  void Write( T *_begin, T *_end );
+  void Write( const T* _begin, const T* _end );
 protected:
   iterator *m_end;
   virtual void SetNewSize( size_type newsize );
@@ -72,17 +73,17 @@ template<class T> void CHDF5TimeSeriesContainer<T>::SetNewSize( size_type newsiz
   m_end = new iterator( this, newsize );
 }
 
-template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ) {
+template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator& _begin, iterator& _end, typename CTimeSeries<T>* _dest ) {
   hsize_t cnt = _end - _begin;
   H5::DataSpace *pDs = _dest->DefineDataSpace();
   if ( cnt > 0 ) {
-    CHDF5TimeSeriesAccessor<T>::Read( _begin.m_ItemIndex, cnt, pDs, _dest->First() );
+    CHDF5TimeSeriesAccessor<T>::Read( _begin.m_ItemIndex, cnt, pDs, const_cast<T*>( &(*_dest->First()) ) );
   }
   pDs->close();
   delete pDs;
 }
 
-template<class T> void CHDF5TimeSeriesContainer<T>::Write( T *_begin, T *_end ) {
+template<class T> void CHDF5TimeSeriesContainer<T>::Write( const T* _begin, const T* _end ) {
   size_t cnt = _end - _begin;
   if ( cnt > 0 ) {
     std::pair<CHDF5TimeSeriesContainer<T>::iterator, CHDF5TimeSeriesContainer<T>::iterator> p;

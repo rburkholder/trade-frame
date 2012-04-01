@@ -1,6 +1,7 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
- *                                                                      *
+ * email: info@oneunified.net                                           *
+*                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *

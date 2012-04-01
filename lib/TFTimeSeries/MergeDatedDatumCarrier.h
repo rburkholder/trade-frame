@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -40,13 +41,13 @@ public:
   virtual void Reset( void ) 
     { throw std::runtime_error( "Reset not defined" ); };
   inline const ptime &GetDateTime( void ) { return m_dt; };
-  CDatedDatum *GetDatedDatum( void ) { return m_pDatum; };
-  bool operator<( const CMergeCarrierBase &other ) const { return m_dt < other.m_dt; };
-  bool operator<( const CMergeCarrierBase *pOther ) const { return m_dt < pOther->m_dt; };
-  static bool lt( CMergeCarrierBase *plhs, CMergeCarrierBase *prhs ) { return plhs->m_dt < prhs->m_dt; };
+  const CDatedDatum* GetDatedDatum( void ) const { return m_pDatum; };
+  bool operator<( const CMergeCarrierBase& other ) const { return m_dt < other.m_dt; };
+  bool operator<( const CMergeCarrierBase* pOther ) const { return m_dt < pOther->m_dt; };
+  static bool lt( CMergeCarrierBase* plhs, CMergeCarrierBase *prhs ) { return plhs->m_dt < prhs->m_dt; };
 protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
-  CDatedDatum *m_pDatum;
+  const CDatedDatum* m_pDatum;
   OnDatumHandler OnDatum;
 private:
 };
@@ -65,7 +66,8 @@ private:
 };
 
 template<class T> CMergeCarrier<T>::CMergeCarrier( CTimeSeries<T> *pSeries, OnDatumHandler function ) : CMergeCarrierBase() {
-  
+  assert( 0 != pSeries );
+  assert( 0 != pSeries->Size() );
   m_pSeries = pSeries;
   OnDatum = function;
   m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison

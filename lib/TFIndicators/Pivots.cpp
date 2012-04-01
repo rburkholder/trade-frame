@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -52,22 +53,22 @@ CPivotSet::CPivotSet( const std::string &sName, const CBar& bar ) {
   CalcPivots( sName, bar.High(), bar.Low(), bar.Close() );
 }
 
-CPivotSet::CPivotSet( const std::string &sName, CBars *bars ) {
+CPivotSet::CPivotSet( const std::string &sName, CBars* bars ) {
   double hi = 0;
   double lo = 0;
   double cl = 0;
   size_t cnt = bars->Size();
-  CBar *bar;
+  //const CBar* pBar;
   if ( cnt > 0 ) {
-    bar = bars->At( 0 );
-    hi = bar->High();
-    lo = bar->Low();
-    cl = bar->Close();
+    const CBar& bar0( bars->At( 0 ) );
+    hi = bar0.High();
+    lo = bar0.Low();
+    cl = bar0.Close();
     for ( unsigned int i = 1; i < cnt; i++ ) {
-      bar = bars->At( i );
-      hi = std::max<double>( hi, bar->High() );
-      lo = std::min<double>( lo, bar->Low() );
-      cl = bar->Close();
+      const CBar& bar( bars->At( i ) );
+      hi = std::max<double>( hi, bar.High() );
+      lo = std::min<double>( lo, bar.Low() );
+      cl = bar.Close();
     }
   }
   CalcPivots( sName, hi, lo, cl );

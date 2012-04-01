@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2010, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -40,10 +41,10 @@ void CPivotGroup::AddToMap( CPivotSet &set ) {
 
 void CPivotGroup::CalculatePivotSets(CBars *pBars) {
 
-  CBar *pBar = pBars->Last();
+  const CBar& bar0( *pBars->Last() );
 
   //stringstream ss;
-  date dtThisDay = pBar->DateTime().date();
+  date dtThisDay = bar0.DateTime().date();
   //ss << "This Day: " << dtThisDay;
   date dtPrevDay = ( boost::date_time::Monday == dtThisDay.day_of_week() ) 
     ? dtThisDay - days( 3 )
@@ -65,20 +66,23 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
   date dt200BarsAgo = dtThisDay - days( ( ( 200 /*bars wanted*/ / 5 /*days/wk*=#wks*/ ) * 7 /*days/wk*/ ) + 10 /*trade holidays*/ ); // ensures 200 bars is within reasonable time frame
   //ss << ", 200 Days ago: " << dt200DaysAgo;
 
-  CPivotSet Pivot1Day( "pv1Dy", pBar->High(), pBar->Low(), pBar->Close() );
+  CPivotSet Pivot1Day( "pv1Dy", bar0.High(), bar0.Low(), bar0.Close() );
   AddToMap( Pivot1Day );
 
-  double day3hi = pBar->High();
-  double day3lo = pBar->Low();
-  double day3cl = pBar->Close();
+  double day3hi = bar0.High();
+  double day3lo = bar0.Low();
+  double day3cl = bar0.Close();
 
   if ( pBars->Size() >= 3 ) {
-    pBar = pBars->Ago( 1 );
-    day3hi = std::max<double>( day3hi, pBar->High() );
-    day3lo = std::min<double>( day3lo, pBar->Low() );
-    pBar = pBars->Ago( 2 );
-    day3hi = std::max<double>( day3hi, pBar->High() );
-    day3lo = std::min<double>( day3lo, pBar->Low() );
+
+    const CBar& bar1( pBars->Ago( 1 ) );
+    day3hi = std::max<double>( day3hi, bar1.High() );
+    day3lo = std::min<double>( day3lo, bar1.Low() );
+
+    const CBar& bar2( pBars->Ago( 2 ) );
+    day3hi = std::max<double>( day3hi, bar2.High() );
+    day3lo = std::min<double>( day3lo, bar2.Low() );
+
     CPivotSet Pivot3Day( "pv3Dy", day3hi, day3lo, day3cl );
     AddToMap( Pivot3Day );
   }

@@ -90,9 +90,6 @@
     <ClInclude Include="TSMicrostructure.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\LibCommon\LibCommon.vcxproj">
       <Project>{f03f73ea-df5f-48da-abae-a860bcee54d4}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

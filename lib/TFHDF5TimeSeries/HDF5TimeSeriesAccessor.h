@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -36,7 +37,7 @@ public:
   size_type size() const { return m_curElementCount; };
   void Read( hsize_t index, T* );
   void Read( hsize_t ixStart, hsize_t count, H5::DataSpace *pMemoryDataSpace, T *pDatedDatum );
-  void Write( hsize_t ixStart, size_t count, T * );
+  void Write( hsize_t ixStart, size_t count, const T* );
 protected:
   std::string m_sPathName;
   CHDF5DataManager dm;
@@ -167,7 +168,7 @@ template <class T> void CHDF5TimeSeriesAccessor<T>::Read( hsize_t ixStart, hsize
   }
 }
 
-template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_t count, T *pDatedDatum ) {
+template<class T> void CHDF5TimeSeriesAccessor<T>::Write( hsize_t ixStart, size_t count, const T* pDatedDatum ) {
   assert( ixStart <= m_curElementCount );  // at an existing position, or one past the end (sparseness not allowed)
   try {
     hsize_t oldElementCount = m_curElementCount;  // keep for later comparison

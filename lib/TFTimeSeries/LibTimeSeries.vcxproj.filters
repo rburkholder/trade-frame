@@ -54,9 +54,4 @@
       <UniqueIdentifier>{f9e1f692-1890-4a4f-b8f8-66d3deffc562}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt">
-      <Filter>Header Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -14,6 +15,8 @@
 #pragma once
 
 // 2012/02/05 http://seekingalpha.com/article/274736-option-expiration-for-metals-lots-of-puts-on-slv-more-calls-on-gld
+// 2012/03/31 be aware that some options do not expire on friday.  Some like, next week, 
+//            expire on thursday due to good friday being a holiday
 
 #include <TFTimeSeries/TimeSeries.h>
 

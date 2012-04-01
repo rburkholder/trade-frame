@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -16,6 +17,8 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+#include <math.h>
 
 #include <HDF5/H5Cpp.h>
 
@@ -90,6 +93,9 @@ public:
   bool IsValid( void ) const { return ( ( 0 != m_dblBid ) && ( 0 != m_dblAsk ) && ( 0 != m_nBidSize ) && ( 0 != m_nAskSize ) ); };
   bool CrossedQuote( void ) const { return ( m_dblBid >= m_dblAsk ); };
   price_t Midpoint( void ) const { return ( m_dblBid + m_dblAsk ) / 2.0; };
+  price_t GeometricMidPoint( void ) const { return std::sqrt( m_dblBid * m_dblAsk ); };  // pg 53, Intro HF Finance
+  price_t LogarithmicMidPointA( void ) const { return ( std::log( m_dblBid ) + std::log( m_dblAsk ) ) / 2.0; }; // eq 3.4 pg 39, Intro HF Finance
+  price_t LogarithmicMidPointB( void ) const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance
 
   static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
 

@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,6 +14,12 @@
 
 // StrategyRunner.cpp : Defines the entry point for the application.
 //
+
+// 2012/03/31 The Stop-Loss-Start-Gain (SLSG) is roughly the following strategy: fix a price
+// level K, if the stock price St at time t rises from < K to  K, then buy 1 share
+// immediately (SG); if St drops from  K to < K, then sell immediately the share
+// already hold, if any (SL); do nothing in other cases.
+// -- An Infinitesimal Analysis of the Stop-Loss-Start-Gain Strategy1
 
 #include "stdafx.h"
 
@@ -58,7 +65,7 @@ bool AppStrategyRunner::OnInit() {
   m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
   m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
   m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
-  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 3, 23 ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 6 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
