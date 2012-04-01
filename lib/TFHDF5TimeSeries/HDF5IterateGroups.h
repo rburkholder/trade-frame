@@ -16,13 +16,13 @@
 #include <string>
 #include <iostream>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include "HDF5DataManager.h"
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 // called from IterateCallback (which is called as HDF5 iterates the directory
 // this class is called recursively as the group hierarchy is traversed
@@ -49,7 +49,7 @@ public:
     HandleGroup = handler;
   }
 
-  int Start( const std::string &sBaseGroup ) {
+  int Start( const std::string& sBaseGroup ) {
     CHDF5DataManager dm;
     m_sBaseGroup = sBaseGroup;
     int idx = 0;  // starting location for interrupted queries

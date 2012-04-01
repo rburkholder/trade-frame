@@ -28,33 +28,34 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<T> {
+// DD is expecting type derived from DatedDatum
+template<class DD> class CHDF5TimeSeriesContainer: public CHDF5TimeSeriesAccessor<DD> {
 public:
-  CHDF5TimeSeriesContainer<T>( const std::string &sPathName );
-  virtual ~CHDF5TimeSeriesContainer<T>( void );
+  CHDF5TimeSeriesContainer<DD>( const std::string& sPathName );
+  virtual ~CHDF5TimeSeriesContainer<DD>( void );
   //typedef CHDF5TimeSeriesIterator<T> const_iterator;
-  typedef CHDF5TimeSeriesIterator<T> iterator;
+  typedef CHDF5TimeSeriesIterator<DD> iterator;
   iterator begin();
   const iterator &end();
   //void Read( const iterator &_begin, const iterator &_end, T *_dest ); 
-  void Read( iterator &_begin, iterator &_end, typename CTimeSeries<T> *_dest ); 
-  void Write( const T* _begin, const T* _end );
+  void Read( iterator &_begin, iterator &_end, typename CTimeSeries<DD> *_dest ); 
+  void Write( const DD* _begin, const DD* _end );
 protected:
   iterator *m_end;
   virtual void SetNewSize( size_type newsize );
 private:
 };
 
-template<class T> CHDF5TimeSeriesContainer<T>::CHDF5TimeSeriesContainer( const std::string &sPathName ):
-  CHDF5TimeSeriesAccessor<T>( sPathName ) {
+template<class DD> CHDF5TimeSeriesContainer<DD>::CHDF5TimeSeriesContainer( const std::string& sPathName ):
+  CHDF5TimeSeriesAccessor<DD>( sPathName ) {
     m_end = new iterator( this, size() );
 }
 
-template<class T> CHDF5TimeSeriesContainer<T>::~CHDF5TimeSeriesContainer(void) {
+template<class DD> CHDF5TimeSeriesContainer<DD>::~CHDF5TimeSeriesContainer(void) {
   delete m_end;
 }
 
-template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeriesContainer<T>::begin() {
+template<class DD> typename CHDF5TimeSeriesContainer<DD>::iterator CHDF5TimeSeriesContainer<DD>::begin() {
   iterator result( this, 0 );
   return result;
 }
@@ -64,32 +65,32 @@ template<class T> typename CHDF5TimeSeriesContainer<T>::iterator CHDF5TimeSeries
 //  return result;
 //}
 
-template<class T> const typename CHDF5TimeSeriesContainer<T>::iterator &CHDF5TimeSeriesContainer<T>::end() {
+template<class DD> const typename CHDF5TimeSeriesContainer<DD>::iterator &CHDF5TimeSeriesContainer<DD>::end() {
   return *m_end;
 }
 
-template<class T> void CHDF5TimeSeriesContainer<T>::SetNewSize( size_type newsize ) {
+template<class DD> void CHDF5TimeSeriesContainer<DD>::SetNewSize( size_type newsize ) {
   delete m_end;
   m_end = new iterator( this, newsize );
 }
 
-template<class T> void CHDF5TimeSeriesContainer<T>::Read( iterator& _begin, iterator& _end, typename CTimeSeries<T>* _dest ) {
+template<class DD> void CHDF5TimeSeriesContainer<DD>::Read( iterator& _begin, iterator& _end, typename CTimeSeries<DD>* _dest ) {
   hsize_t cnt = _end - _begin;
   H5::DataSpace *pDs = _dest->DefineDataSpace();
   if ( cnt > 0 ) {
-    CHDF5TimeSeriesAccessor<T>::Read( _begin.m_ItemIndex, cnt, pDs, const_cast<T*>( &(*_dest->First()) ) );
+    CHDF5TimeSeriesAccessor<DD>::Read( _begin.m_ItemIndex, cnt, pDs, const_cast<DD*>( &(*_dest->First()) ) );
   }
   pDs->close();
   delete pDs;
 }
 
-template<class T> void CHDF5TimeSeriesContainer<T>::Write( const T* _begin, const T* _end ) {
+template<class DD> void CHDF5TimeSeriesContainer<DD>::Write( const DD* _begin, const DD* _end ) {
   size_t cnt = _end - _begin;
   if ( cnt > 0 ) {
-    std::pair<CHDF5TimeSeriesContainer<T>::iterator, CHDF5TimeSeriesContainer<T>::iterator> p;
+    std::pair<CHDF5TimeSeriesContainer<DD>::iterator, CHDF5TimeSeriesContainer<DD>::iterator> p;
     p = equal_range( begin(), end(), *_begin );
     // whether we found something or not, p.first is insertion point
-    CHDF5TimeSeriesAccessor<T>::Write( p.first.m_ItemIndex, cnt, _begin );
+    CHDF5TimeSeriesAccessor<DD>::Write( p.first.m_ItemIndex, cnt, _begin );
   }
 }
 

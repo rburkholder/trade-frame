@@ -636,7 +636,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( 0 != m_quotes.Size() ) {
       sPathName = sPrefix + "/quotes/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes> wtsQuotes;
       wtsQuotes.Write( sPathName, &m_quotes );
       ou::tf::CHDF5Attributes attrQuotes( sPathName, m_pUnderlying->GetInstrumentType() );
       attrQuotes.SetMultiplier( m_pUnderlying->GetMultiplier() );
@@ -646,7 +646,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.quotes.Size() ) ) {
       sPathName = sPrefix + "/quotes/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes> wtsQuotes;
       wtsQuotes.Write( sPathName, &bundle10YrTreasury.quotes );
     }
 
@@ -654,7 +654,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( 0 != m_trades.Size() ) {
       sPathName = sPrefix + "/trades/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades> wtsTrades;
       wtsTrades.Write( sPathName, &m_trades );
       ou::tf::CHDF5Attributes attrTrades( sPathName, m_pUnderlying->GetInstrumentType() );
       attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
@@ -664,7 +664,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.trades.Size() ) ) {
       sPathName = sPrefix + "/trades/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades> wtsTrades;
       wtsTrades.Write( sPathName, &bundle10YrTreasury.trades );
     }
 

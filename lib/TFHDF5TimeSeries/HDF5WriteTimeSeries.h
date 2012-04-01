@@ -22,24 +22,27 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// TS: TimeSeries, DD: DatedDatum, the type that TS uses
-// todo:  need to implement compile time type-matching for allowable TS/DD conbinations
-template<class TS, class DD> class CHDF5WriteTimeSeries {
+// TS: TimeSeries
+template<class TS> class CHDF5WriteTimeSeries {
 public:
-  CHDF5WriteTimeSeries<TS,DD>( void );
-  virtual ~CHDF5WriteTimeSeries<TS,DD>( void );
+
+  typedef typename TS::datum_t DD;  // type for inherited type with base of CDatedDatum
+
+  CHDF5WriteTimeSeries<TS>( void );
+  virtual ~CHDF5WriteTimeSeries<TS>( void );
   void Write( const std::string &sPathName, TS* timeseries );
+
 protected:
 private:
 };
 
-template<class TS, class DD> CHDF5WriteTimeSeries<TS,DD>::CHDF5WriteTimeSeries() {
+template<class TS> CHDF5WriteTimeSeries<TS>::CHDF5WriteTimeSeries() {
 }
 
-template<class TS, class DD> CHDF5WriteTimeSeries<TS,DD>::~CHDF5WriteTimeSeries() {
+template<class TS> CHDF5WriteTimeSeries<TS>::~CHDF5WriteTimeSeries() {
 }
 
-template<class TS, class DD> void CHDF5WriteTimeSeries<TS,DD>::Write(const std::string &sPathName, TS *timeseries) {
+template<class TS> void CHDF5WriteTimeSeries<TS>::Write(const std::string &sPathName, TS* timeseries) {
 
   if ( 0 == timeseries->Size() ) {
     throw std::invalid_argument( "zero length time series found" );

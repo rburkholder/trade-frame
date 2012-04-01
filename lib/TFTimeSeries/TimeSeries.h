@@ -369,6 +369,7 @@ private:
 };
 
 // Prices
+// used for holding indicators, returns, ...
 
 class CPrices: public CTimeSeries<CPrice> {
 public:
