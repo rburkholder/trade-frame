@@ -32,8 +32,8 @@ public:
   void Update( void );
   virtual void Reset( void );
 protected:
-  void Add( const D &datum ) {}; // CRTP override to process elements passing into window scope
-  void Expire( const D &datum ) {};  // CRTP override to process elements passing out of window scope 
+  void Add( const D& datum ) {}; // CRTP override to process elements passing into window scope
+  void Expire( const D& datum ) {};  // CRTP override to process elements passing out of window scope 
   void PostUpdate( void ) {};  // CRTP override to do final calcs
   ptime m_dtZero;  // datetime of first element, used as offset
 private:
@@ -85,7 +85,7 @@ template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {
   }
   bool bMovedIndex = false;
   while ( m_ixLeading < m_Series.Size() ) {
-    D *datum = m_Series[ m_ixLeading ];
+    D* datum = m_Series[ m_ixLeading ];
     m_dtLeading = datum->DateTime();
     if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
       static_cast<T*>( this )->Add( *datum ); // add datum to stats
@@ -97,7 +97,7 @@ template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {
   if ( bMovedIndex ) {
     if ( 0 < m_nWindowSizeCount ) {
       while ( ( m_ixLeading - m_ixTrailing ) > m_nWindowSizeCount ) {
-        D *datum = m_Series[ m_ixTrailing ];
+        D* datum = m_Series[ m_ixTrailing ];
         if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
           static_cast<T*>( this )->Expire( *datum );  // expire datum from stats
         }
@@ -105,7 +105,7 @@ template<class T, class D> void TimeSeriesSlidingWindow<T,D>::Update( void ) {
       }
     }
     if ( 0 < m_nWindowSizeSeconds ) {
-      D *datum = m_Series[ m_ixTrailing ];
+      D* datum = m_Series[ m_ixTrailing ];
       time_duration dif = m_dtLeading - datum->DateTime();
       while ( dif > m_tdWindowWidth ) {
         if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {

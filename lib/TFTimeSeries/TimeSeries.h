@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <OUCommon/Delegate.h>
+
 #include "DatedDatum.h"
 
 // 2012/04/01 use Intel Thread Building Blocks to use concurrent_vector?
@@ -80,15 +82,17 @@ public:
     return m_vSeries.cbegin() + ix; 
   };
 
+  ou::Delegate<const T&> OnAppend;
+
   virtual CTimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
   virtual CTimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
 
   H5::DataSpace* DefineDataSpace( H5::DataSpace *pSpace = NULL );
 
 protected:
+private:
   std::vector<T> m_vSeries;
   const_iterator m_vIterator;
-private:
 };
 
 template<typename T> 
@@ -108,6 +112,7 @@ CTimeSeries<T>::~CTimeSeries(void) {
 template<typename T> 
 void CTimeSeries<T>::Append(const T& datum) {
   m_vSeries.push_back( datum );
+  OnAppend( datum );
 }
 
 template<typename T> 
