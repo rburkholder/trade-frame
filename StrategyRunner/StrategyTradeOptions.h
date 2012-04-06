@@ -145,7 +145,7 @@ private:
     enum EActiveSide { ESideOut, ESideTop, ESideBottom };
     ou::tf::TSSWStochastic ts;
     EActiveSide sideCall, sidePut;  // near call is out, short at top, exit at bottom; put is out, short at bottom, exit at top
-    stochastic_t( ou::tf::CQuotes& quotes, long WindowSizeSeconds ): ts( quotes, WindowSizeSeconds ), sideCall( ESideOut ), sidePut( ESideOut ) {};
+    stochastic_t( ou::tf::CQuotes& quotes, time_duration tdWindowWidth ): ts( quotes, tdWindowWidth ), sideCall( ESideOut ), sidePut( ESideOut ) {};
   };
 
   typedef std::map<double,options_t> mapOptions_t;

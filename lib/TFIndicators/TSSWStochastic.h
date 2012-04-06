@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, CQuote> {
   friend TimeSeriesSlidingWindow<TSSWStochastic, CQuote>;
 public:
-  TSSWStochastic( CQuotes& quotes, long WindowSizeSeconds );
+  TSSWStochastic( CQuotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( const TSSWStochastic& );
   ~TSSWStochastic(void);
   double K( void ) const { return m_k; };
@@ -35,7 +35,6 @@ protected:
   void Expire( const CQuote& quote );
   void PostUpdate( void );
 private:
-  long m_seconds;
   RunningMinMax m_minmax;
 
   double m_lastAdd;

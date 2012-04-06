@@ -23,8 +23,8 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( Series, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
@@ -47,8 +47,8 @@ void TSSWStatsTrade::Expire( const CTrade &trade ) {
 // Quote
 //
 
-TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( Series, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
@@ -73,8 +73,8 @@ void TSSWStatsQuote::Expire( const CQuote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( Series, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
@@ -97,8 +97,8 @@ void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
 // CPrice
 //
 
-TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>& Series, long WindowSizeSeconds, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( Series, WindowSizeSeconds, WindowSizeCount )
+TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 

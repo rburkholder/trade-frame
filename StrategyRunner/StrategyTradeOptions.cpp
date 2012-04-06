@@ -65,10 +65,10 @@ namespace StrategyTradeOptionsConstants {
 StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider ) :
   m_pExecutionProvider( pExecutionProvider ), m_pData1Provider( pData1Provider ), m_pData2Provider( pData2Provider ),
     m_TradeStates( EPreOpen ), m_paramWorkingDelta( 2000.0 ), 
-    m_stoch1( m_quotes, 1 * 14 * 60 ), 
-    m_stoch2( m_quotes, 2 * 14 * 60 ), 
-    m_stoch3( m_quotes, 3 * 14 * 60 ), 
-    m_stoch4( m_quotes, 4 * 14 * 60 )
+    m_stoch1( m_quotes, seconds( 1 * 14 * 60 ) ), 
+    m_stoch2( m_quotes, seconds( 2 * 14 * 60 ) ), 
+    m_stoch3( m_quotes, seconds( 3 * 14 * 60 ) ), 
+    m_stoch4( m_quotes, seconds( 4 * 14 * 60 ) )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
