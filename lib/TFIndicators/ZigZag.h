@@ -18,6 +18,7 @@
 // could set this number on each new peak
 
 // 2012/03/31 http://www.olsenblog.com/wp-content/uploads/2009/11/conferencemanchester091004.pdf
+// 2012/04/07 http://finance.martinsewell.com/stylized-facts/scaling/Guillaume-etal1997.pdf  3.7 Def 7 Direction Change Indicator, refines zigzag for risk profiles
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;

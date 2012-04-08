@@ -39,8 +39,8 @@ protected:
   void Expire( const D& datum ) {};  // CRTP override to process elements passing out of window scope 
   void PostUpdate( void ) {};  // CRTP override to do final calcs
   ptime m_dtZero;  // datetime of first element, used as offset
+  time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
 private:
-  
   CTimeSeries<D>& m_Series;
   long m_nWindowSizeSeconds;
   time_duration m_tdWindowWidth;

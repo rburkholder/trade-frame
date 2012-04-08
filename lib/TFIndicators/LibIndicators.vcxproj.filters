@@ -49,6 +49,15 @@
     <ClCompile Include="TSHomogenization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TSSWTickFrequency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TSSWRealizedVolatility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TSEMA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Darvas.h">
@@ -106,6 +115,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TSHomogenization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TSSWTickFrequency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TSSWRealizedVolatility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TSEMA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
