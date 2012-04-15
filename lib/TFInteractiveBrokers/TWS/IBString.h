@@ -32,7 +32,7 @@ inline void Empty(IBString& str)
 inline bool Compare(IBString str, const char* strToCompare)
 {
 #ifdef IB_USE_STD_STRING
-	return str.compare(strToCompare);
+	return 0 == str.compare(strToCompare);  // *** 2012/04/15 changed
 #else
 	return str.CompareNoCase(strToCompare);
 #endif
@@ -41,7 +41,7 @@ inline bool Compare(IBString str, const char* strToCompare)
 inline bool Compare(IBString str, IBString strToCompare)
 {
 #ifdef IB_USE_STD_STRING
-	return str.compare(strToCompare);
+	return 0 == str.compare(strToCompare);    // *** 2012/04/15 changed
 #else
 	return str.CompareNoCase(strToCompare);
 #endif

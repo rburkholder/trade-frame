@@ -16,3 +16,11 @@
 
 #include "TSHomogenization.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace TSHomogenization_Private {
+  const int zero = 0;
+}
+} // namespace tf
+} // namespace ou
+

@@ -33,8 +33,8 @@ private:
   time_duration m_dtTimeRange;
   double m_dblTimeRange;
   CTimeSeries<D>& m_seriesSource;
-  double m_zPrev;
-  double EMA( ptime t, double zt );
+  double m_XatTminus1;
+  double EMA( ptime t, double XatT );
   void HandleAppend( const CPrice& );
   void HandleAppend( const CQuote& );
   void HandleAppend( const CTrade& );
@@ -42,10 +42,10 @@ private:
 
 template<class D>
 TSEMA<D>::TSEMA( CTimeSeries<D>& series, time_duration dt )
-  : m_seriesSource( series ), m_dtTimeRange( dt ), m_zPrev( 0.0 )
+  : m_seriesSource( series ), m_dtTimeRange( dt ), m_prvX( 0.0 )
 {
   assert( 0 < dt.total_milliseconds() );
-  m_dblTimeRange = dt.total_milliseconds();
+  m_dblTimeRange = (double) dt.total_milliseconds();
   series.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
@@ -54,23 +54,26 @@ TSEMA<D>::~TSEMA( void ) {
   m_seriesSource.OnAppend.Remove( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
+// refer to paper : "Specially Weighted Movng Averages With Repeated Application of the EMA Operator"
+// Intro to HF Finance, pg 59, has further variation
 template<class D>
-double TSEMA<D>::EMA( ptime t, double zt ) {
+double TSEMA<D>::EMA( ptime t, double XatT ) {
+  double ema( XatT );
   if ( 0 == CPrices::Size() ) {
-    m_zPrev = zt;
-    CPrices::Append( CPrice( t, zt ) );
+    CPrices::Append( CPrice( t, XatT ) );  // initialize first element of series
   }
-  else { // pg 59, Intro HF Finance
-    const CPrice& prev( CPrices::Ago( 0 ) );
-    double alpha = (double) ( ( t - prev.DateTime() ).total_milliseconds() ) / m_dblTimeRange;
-    double mu = std::exp( -alpha );
+  else { 
+    const CPrice& prvEMA( CPrices::Ago( 0 ) );
+    double alpha = (double) ( ( t - prvEMA.DateTime() ).total_milliseconds() ) / m_dblTimeRange;
+    double mu = std::exp( -alpha );  // used with any form of interpolation
+    double v = ( 1.0 - mu ) / alpha;  // linear interpolation
     //double v = 1.0;  // previous point 
-    double v = ( 1.0 - mu ) / alpha;  // interpolation
+    //double v = std::exp( -alpha / 2.0 ); // or std::sqrt( mu );  // nearest value
     //double v = mu;  // next point
-    double ema = mu * prev.Price() + ( v - mu ) * m_zPrev + ( 1.0 - v ) * zt;
-    m_zPrev = zt;
+    ema = mu * prvEMA.Price() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
     CPrices::Append( CPrice( t, ema ) );
   }
+  m_XatTminus1 = XatT;
   return ema;
 }
 

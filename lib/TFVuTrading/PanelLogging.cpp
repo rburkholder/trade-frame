@@ -66,14 +66,12 @@ void PanelLogging::CreateControls() {
 }
 
 
-wxBitmap PanelLogging::GetBitmapResource( const wxString& name )
-{
+wxBitmap PanelLogging::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;
 }
 
-wxIcon PanelLogging::GetIconResource( const wxString& name )
-{
+wxIcon PanelLogging::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
 }

@@ -84,13 +84,13 @@ TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
 void TSSWStatsMidQuote::Add( const CQuote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Add( dif, ( quote.Bid() + quote.Ask() ) / 2.0 );
+  m_stats.Add( dif, quote.Midpoint() );
 }
 
 void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Remove( dif, ( quote.Bid() + quote.Ask() ) / 2.0 );
+  m_stats.Remove( dif, quote.Midpoint() );
 }
 
 //

@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
 #include <OUCommon/Delegate.h>
 

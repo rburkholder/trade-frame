@@ -95,13 +95,18 @@ template<class RO> void Delegate<RO>::operator()( RO ro ) {
 }
 
 template<class RO> void Delegate<RO>::Add( OnMessageHandler function ) {
-  if ( m_bIterating ) {
-    rToBeAdded.push_back( function );
+  try {
+    if ( m_bIterating ) {
+      rToBeAdded.push_back( function );
+    }
+    else {
+      rOnFD.push_back( function );
+    }
+    ++m_size;
+    }
+  catch (...) {
+    std::cout << "junk\n" << std::endl;
   }
-  else {
-    rOnFD.push_back( function );
-  }
-  ++m_size;
 }
 
 template<class RO> void Delegate<RO>::Remove( OnMessageHandler function ) {

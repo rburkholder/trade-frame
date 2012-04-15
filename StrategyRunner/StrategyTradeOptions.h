@@ -173,16 +173,17 @@ private:
 
   double m_paramWorkingDelta;
 
-  stochastic_t m_stoch1;
-  stochastic_t m_stoch2;
-  stochastic_t m_stoch3;
-  stochastic_t m_stoch4;
-
   pPortfolio_t m_pPortfolio;
   pInstrument_t m_pUnderlying;
 
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
+
+  // these need to come after m_quotes
+  stochastic_t m_stoch1;
+  stochastic_t m_stoch2;
+  stochastic_t m_stoch3;
+  stochastic_t m_stoch4;
 
   struct bundle_t {
     pInstrument_t pInstrument;

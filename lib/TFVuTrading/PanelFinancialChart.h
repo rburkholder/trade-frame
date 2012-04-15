@@ -16,6 +16,9 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 #define SYMBOL_PANELFINANCIALCHART_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELFINANCIALCHART_TITLE _("PanelFinancialChart")
 #define SYMBOL_PANELFINANCIALCHART_IDNAME ID_PANELFINANCIALCHART
@@ -54,3 +57,5 @@ private:
   wxWindow* m_winChart;
 };
 
+} // namespace tf
+} // namespace ou

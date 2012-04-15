@@ -26,14 +26,14 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider ),
   //m_sim( new ou::tf::CSimulationProvider() ),
   m_TradeDirection( ETradeDirUnkn ),
-  m_sma1( &m_quotes,   60 ), //   1 min
-  m_sma2( &m_quotes,  120 ), //   2 min
-  m_sma3( &m_quotes,  180 ), //   3 min
-  m_sma4( &m_quotes,  300 ), //   5 min
-  m_sma5( &m_quotes,  900 ), //  15 min
-  m_sma6( &m_quotes, 1800 ), //  30 min
-  m_sma7( &m_quotes, 3600 ), //  60 min
-  m_sma8( &m_quotes, 7200 ), // 120 min
+  m_sma1( m_quotes, seconds(   60 ) ), //   1 min
+  m_sma2( m_quotes, seconds(  120 ) ), //   2 min
+  m_sma3( m_quotes, seconds(  180 ) ), //   3 min
+  m_sma4( m_quotes, seconds(  300 ) ), //   5 min
+  m_sma5( m_quotes, seconds(  900 ) ), //  15 min
+  m_sma6( m_quotes, seconds( 1800 ) ), //  30 min
+  m_sma7( m_quotes, seconds( 3600 ) ), //  60 min
+  m_sma8( m_quotes, seconds( 7200 ) ), // 120 min
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
   m_stateTrade( ETradeStart ), //m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_dtEnd( boost::date_time::not_a_date_time ),
@@ -44,11 +44,11 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
 //  m_tsswSlopeOfSlopeOfSMA1( &m_pricesSlopeOfSlopeOfSMA1, 90 ), 
-  m_tsswSlopeOfSlopeOfSMA2( &m_pricesSlopeOfSlopeOfSMA2, 180 ),
-  m_tsswSlopeOfBollinger2Offset( &m_pricesBollinger2Offset, 240 ),
-  m_tsswSpreads( &m_spreads, 120 ),
-  m_rtTickDiffs( &m_pricesTickDiffs, 120 ),
-  m_rocTickDiffs( &m_pricesTickDiffsROC, 30 ),
+  m_tsswSlopeOfSlopeOfSMA2( m_pricesSlopeOfSlopeOfSMA2, seconds( 180 ) ),
+  m_tsswSlopeOfBollinger2Offset( m_pricesBollinger2Offset, seconds( 240 ) ),
+  m_tsswSpreads( m_spreads, seconds( 120 ) ),
+  m_rtTickDiffs( m_pricesTickDiffs, seconds( 120 ) ),
+  m_rocTickDiffs( m_pricesTickDiffsROC, seconds( 30 ) ),
   m_bFirstTrade( true ),
   m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
@@ -228,7 +228,7 @@ void Strategy::Activate( void ) {
 
 void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
-  if ( !quote.Valid() ) {
+  if ( !quote.IsValid() ) {
     return;
   }
   // should also check that a price within 2 - 3 sigma of last
@@ -242,7 +242,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   // high speed simple moving average
   ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );
-  sma1.Update();
+//  sma1.Update();
 
 //  m_ceSMA1RR.Add( dt, sma1.RR() );
 
@@ -251,17 +251,17 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   // medium speed moving average
   ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
-  sma2.Update();
+//  sma2.Update();
 
   double dblSMA2RR = sma2.RR();
   m_ceSMA2RR.Add( dt, dblSMA2RR );
 
   m_pricesBollinger2Offset.Append( ou::tf::CPrice( dt, sma2.BBOffset() ) );
-  m_tsswSlopeOfBollinger2Offset.Update();
+//  m_tsswSlopeOfBollinger2Offset.Update();
 
   // slow speed moving average
   ou::tf::TSSWStatsMidQuote& sma3( m_sma7 );
-  sma3.Update();
+//  sma3.Update();
 
   m_ceSMA3RR.Add( dt, sma3.RR() );
 
@@ -272,7 +272,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
   if ( 500 < m_quotes.Size() ) {
 
     m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
-    m_tsswSlopeOfSlopeOfSMA2.Update();
+//    m_tsswSlopeOfSlopeOfSMA2.Update();
 
     m_pOrdersOutstandingLongs->HandleQuote( quote );
     m_pOrdersOutstandingShorts->HandleQuote( quote );
@@ -593,7 +593,7 @@ void Strategy::HandleOrderFilled( const ou::tf::COrder& order ) {
 
 void Strategy::HandleFirstQuote( const ou::tf::CQuote& quote ) {
 
-  if ( !quote.Valid() ) {
+  if ( !quote.IsValid() ) {
     return;
   }
 
@@ -655,7 +655,7 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
     }
   }
 
-  m_rtTickDiffs.Update();
+//  m_rtTickDiffs.Update();
   double dif = m_rtTickDiffs.Net();
   m_pricesTickDiffsROC.Append( ou::tf::CPrice( dt, dif ) );
 
@@ -663,7 +663,7 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   if ( -45 > dif ) dif = -45;
   m_ceTickDiffs.Add( dt, dif );
 
-  m_rocTickDiffs.Update();
+//  m_rocTickDiffs.Update();
   dif = m_rocTickDiffs.RateOfChange();
   if (  45 < dif ) dif = 45;
   if ( -45 > dif ) dif = -45;

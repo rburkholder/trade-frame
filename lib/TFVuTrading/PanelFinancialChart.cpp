@@ -17,6 +17,9 @@
 
 //IMPLEMENT_DYNAMIC_CLASS( PanelFinancialChart, wxPanel )
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 PanelFinancialChart::PanelFinancialChart(void) {
   Init();
 }
@@ -65,3 +68,6 @@ wxIcon PanelFinancialChart::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
 }
+
+} // namespace tf
+} // namespace ou
