@@ -46,9 +46,6 @@
     <ClCompile Include="TSReturns.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TSHomogenization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TSSWTickFrequency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -56,7 +53,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TSEMA.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\HF</Filter>
+    </ClCompile>
+    <ClCompile Include="TSHomogenization.cpp">
+      <Filter>Source Files\HF</Filter>
+    </ClCompile>
+    <ClCompile Include="TSMA.cpp">
+      <Filter>Source Files\HF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,17 +117,20 @@
     <ClInclude Include="TSReturns.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TSHomogenization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TSSWTickFrequency.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TSSWRealizedVolatility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TSMA.h">
+      <Filter>Header Files\HF</Filter>
+    </ClInclude>
     <ClInclude Include="TSEMA.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\HF</Filter>
+    </ClInclude>
+    <ClInclude Include="TSHomogenization.h">
+      <Filter>Header Files\HF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +142,12 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{e3a15ea8-3ff1-4aed-a683-47035e0d3ffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\HF">
+      <UniqueIdentifier>{2f4b8327-d73e-4488-8803-d264b3c49516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HF">
+      <UniqueIdentifier>{58e86720-8b82-40a6-95f7-29e96c678c52}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

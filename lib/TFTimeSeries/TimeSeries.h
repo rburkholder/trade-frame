@@ -49,6 +49,7 @@ public:
 
   CTimeSeries<T>( void );
   CTimeSeries<T>( size_type Size );
+  CTimeSeries<T>( const CTimeSeries<T>& );
   virtual ~CTimeSeries<T>( void );
 
   size_type Size() const { return m_vSeries.size(); };
@@ -90,8 +91,8 @@ public:
 
 protected:
 private:
-  std::vector<T> m_vSeries;
   const_iterator m_vIterator;
+  std::vector<T> m_vSeries;
 };
 
 template<typename T> 
@@ -99,8 +100,14 @@ CTimeSeries<T>::CTimeSeries(void): m_vIterator( m_vSeries.end() ) {
 }
 
 template<typename T> 
-CTimeSeries<T>::CTimeSeries( size_type size ) {
+CTimeSeries<T>::CTimeSeries( size_type size ): m_vIterator( m_vSeries.end() ) {
   m_vSeries.reserve( size );
+}
+
+template<typename T>
+CTimeSeries<T>::CTimeSeries( const CTimeSeries<T>& series ) {
+  m_vSeries = series.m_vSeries;
+  m_vIterator = m_vSeries.end();
 }
 
 template<typename T> 
@@ -385,8 +392,6 @@ public:
 protected:
 private:
 };
-
-
 
 } // namespace tf
 } // namespace ou

@@ -12,17 +12,35 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#pragma once
 
-#include "TSHomogenization.h"
+#include <vector>
+
+#include "TSEMA.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
-namespace TSHomogenization_Private {
-  const int zero = 0;
-}
+
+class TSMA: public CPrices {
+public:
+  TSMA( CPrices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
+  TSMA( CPrices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
+  ~TSMA(void);
+  double GetMA( void ) { return m_dblRecentMA; };
+protected:
+private:
+  
+  time_duration m_dtTimeRange;
+  unsigned int m_nInf;
+  unsigned int m_nSup;
+  CPrices& m_seriesSource;
+  std::vector<TSEMA<CPrice>*> m_vEMA;
+  double m_dblRecentMA;
+  void Init( void );
+  void HandleUpdate( const CPrice& );
+};
+
 } // namespace hf
 } // namespace tf
 } // namespace ou
-

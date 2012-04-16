@@ -25,6 +25,7 @@
 #include <TFIndicators/TSSWRunningTally.h>
 #include <TFIndicators/TSSWRateOfChange.h>
 #include <TFIndicators/ZigZag.h>
+#include <TFIndicators/TSEMA.h>
 
 #include <TFSimulation/SimulationProvider.h>
 
@@ -103,6 +104,9 @@ private:
   ou::ChartEntryBars m_ceBars;
   ou::ChartEntryVolume m_ceVolume;
 
+  ou::ChartEntryIndicator m_ceEma1;
+  ou::ChartEntryIndicator m_ceEma2;
+
 //  ou::ChartEntryIndicator m_ceSMA1;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA1;
 //  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
@@ -180,6 +184,9 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
+
+  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema1;
+  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema2;
 
 //  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
 //  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;

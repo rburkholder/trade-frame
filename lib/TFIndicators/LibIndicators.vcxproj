@@ -84,6 +84,7 @@
     </ClCompile>
     <ClCompile Include="TSEMA.cpp" />
     <ClCompile Include="TSHomogenization.cpp" />
+    <ClCompile Include="TSMA.cpp" />
     <ClCompile Include="TSSWRealizedVolatility.cpp" />
     <ClCompile Include="TSReturns.cpp" />
     <ClCompile Include="TSSWEfficiencyRatio.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="TimeSeriesSlidingWindow.h" />
     <ClInclude Include="TSEMA.h" />
     <ClInclude Include="TSHomogenization.h" />
+    <ClInclude Include="TSMA.h" />
     <ClInclude Include="TSSWRealizedVolatility.h" />
     <ClInclude Include="TSReturns.h" />
     <ClInclude Include="TSSWEfficiencyRatio.h" />

@@ -42,7 +42,6 @@ protected:
   time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
 private:
   CTimeSeries<D>& m_Series;
-//  long m_nWindowSizeSeconds;
   time_duration m_tdWindowWidth;
   size_type m_nWindowSizeCount;
   size_type m_ixTrailing;  // index to datums to be processed out (expired)
@@ -125,7 +124,6 @@ void TimeSeriesSlidingWindow<T,D>::Update( void ) {
       }
     }
     if ( 0 < m_tdWindowWidth.total_milliseconds() ) {
-//      time_duration dif = m_dtLeading - m_Series[ m_ixTrailing ].DateTime();
       while ( ( m_dtLeading - m_Series[ m_ixTrailing ].DateTime() ) > m_tdWindowWidth ) {
         if ( &TimeSeriesSlidingWindow<T,D>::Add != &T::Add ) {
           static_cast<T*>( this )->Expire( m_Series[ m_ixTrailing ] );  // expire datum from stats
@@ -134,7 +132,6 @@ void TimeSeriesSlidingWindow<T,D>::Update( void ) {
         if ( m_ixTrailing >= m_ixLeading ) {
           break;
         }
-//        dif = m_dtLeading - m_Series[ m_ixTrailing ].DateTime();
       }
     }
   }

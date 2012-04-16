@@ -20,6 +20,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace hf { // high frequency
 
 template<typename T>
 class TSHomogenization {
@@ -139,6 +140,7 @@ void TSHomogenization<T>::CalcDatum( const CTrade& datum, double ratio ) {
   OnAppend( trade );
 }
 
+} // namespace hf
 } // namespace tf
 } // namespace ou
 

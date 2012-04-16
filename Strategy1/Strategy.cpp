@@ -34,6 +34,8 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_sma6( m_quotes, seconds( 1800 ) ), //  30 min
   m_sma7( m_quotes, seconds( 3600 ) ), //  60 min
   m_sma8( m_quotes, seconds( 7200 ) ), // 120 min
+  m_ema1( m_quotes, minutes(  4 ) ), 
+  m_ema2( m_quotes, minutes( 16 ) ), 
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
   m_stateTrade( ETradeStart ), //m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_dtEnd( boost::date_time::not_a_date_time ),
@@ -68,12 +70,14 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_dvChart.Add( 0, m_ceSMA1 );
   m_dvChart.Add( 0, m_ceSMA2 );
   m_dvChart.Add( 0, m_ceSMA3 );
+  m_dvChart.Add( 0, m_ceEma1 );
+  m_dvChart.Add( 0, m_ceEma2 );
 //  m_dvChart.Add( 0, m_ceUpperBollinger1 );
 //  m_dvChart.Add( 0, m_ceLowerBollinger1 );
-  m_dvChart.Add( 0, m_ceUpperBollinger2 );
-  m_dvChart.Add( 0, m_ceLowerBollinger2 );
-  m_dvChart.Add( 0, m_ceUpperBollinger3 );
-  m_dvChart.Add( 0, m_ceLowerBollinger3 );
+//  m_dvChart.Add( 0, m_ceUpperBollinger2 );
+//  m_dvChart.Add( 0, m_ceLowerBollinger2 );
+//  m_dvChart.Add( 0, m_ceUpperBollinger3 );
+//  m_dvChart.Add( 0, m_ceLowerBollinger3 );
   m_dvChart.Add( 1, m_ceVolume );
 //  m_dvChart.Add( 2, m_ceSlopeOfSMA1 );
 //  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA1 );
@@ -119,6 +123,9 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_ceSMA1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceSMA2.SetColour( ou::Colour::Turquoise );
   m_ceSMA3.SetColour( ou::Colour::GreenYellow );
+
+  m_ceEma1.SetColour( ou::Colour::MediumVioletRed );
+  m_ceEma2.SetColour( ou::Colour::RoyalBlue );
 
 //  m_ceSMA1RR.SetColour( ou::Colour::Yellow );
   m_ceSMA2RR.SetColour( ou::Colour::Turquoise );
@@ -176,9 +183,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 }
 
 Strategy::~Strategy(void) {
-
   m_barFactory.SetOnBarComplete( 0 );
-
 }
 
 void Strategy::Start( void ) {  // live trading
@@ -239,6 +244,9 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   m_quoteLast = quote;
   m_quotes.Append( quote );
+
+  m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Price() );
+  m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Price() );
 
   // high speed simple moving average
   ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );

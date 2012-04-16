@@ -18,9 +18,11 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace hf { // high frequency
 namespace TSEMA_Private {
   const int zero = 0;
 }
+} // namespace hf
 } // namespace tf
 } // namespace ou
 

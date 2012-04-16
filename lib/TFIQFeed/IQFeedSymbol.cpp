@@ -16,6 +16,8 @@
 
 #include <iostream>
 
+#include <OUCommon/TimeSource.h>
+
 #include "IQFeedSymbol.h"
 
 namespace ou { // One Unified
@@ -116,7 +118,8 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
   if ( qFound == m_QStatus ) {
     DecodePricingMessage<CIQFUpdateMessage>( pMsg );
     OnUpdateMessage( this );
-    ptime dt( microsec_clock::local_time() );
+    //ptime dt( microsec_clock::local_time() );
+    ptime dt( ou::CTimeSource::Instance().External() );
     // quote needs to be sent before the trade
     if ( m_bNewQuote ) {
       CQuote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
