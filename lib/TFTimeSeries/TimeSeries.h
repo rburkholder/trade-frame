@@ -91,8 +91,8 @@ public:
 
 protected:
 private:
-  const_iterator m_vIterator;
   std::vector<T> m_vSeries;
+  const_iterator m_vIterator;  // belongs after vector declaration
 };
 
 template<typename T> 

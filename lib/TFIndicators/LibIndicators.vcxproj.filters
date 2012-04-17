@@ -61,6 +61,12 @@
     <ClCompile Include="TSMA.cpp">
       <Filter>Source Files\HF</Filter>
     </ClCompile>
+    <ClCompile Include="TSNorm.cpp">
+      <Filter>Source Files\HF</Filter>
+    </ClCompile>
+    <ClCompile Include="TSVariance.cpp">
+      <Filter>Source Files\HF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Darvas.h">
@@ -130,6 +136,12 @@
       <Filter>Header Files\HF</Filter>
     </ClInclude>
     <ClInclude Include="TSHomogenization.h">
+      <Filter>Header Files\HF</Filter>
+    </ClInclude>
+    <ClInclude Include="TSNorm.h">
+      <Filter>Header Files\HF</Filter>
+    </ClInclude>
+    <ClInclude Include="TSVariance.h">
       <Filter>Header Files\HF</Filter>
     </ClInclude>
   </ItemGroup>

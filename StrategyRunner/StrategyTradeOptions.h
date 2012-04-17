@@ -153,6 +153,9 @@ private:
   typedef std::pair<double,options_t> mapOptions_pair_t;
   mapOptions_t m_mapOptions;
 
+  ou::tf::CQuotes m_quotes;
+  ou::tf::CTrades m_trades;
+
   mapOptions_iter_t m_iterMapOptionsAbove2;
   mapOptions_iter_t m_iterMapOptionsAbove1;
   mapOptions_iter_t m_iterMapOptionsMiddle;
@@ -175,9 +178,6 @@ private:
 
   pPortfolio_t m_pPortfolio;
   pInstrument_t m_pUnderlying;
-
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
 
   // these need to come after m_quotes
   stochastic_t m_stoch1;

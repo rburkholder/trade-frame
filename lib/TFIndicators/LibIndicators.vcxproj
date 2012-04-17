@@ -72,6 +72,7 @@
     <ClCompile Include="CalcAboveBelow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="TSNorm.cpp" />
     <ClCompile Include="PivotGroup.cpp" />
     <ClCompile Include="Pivots.cpp" />
     <ClCompile Include="RunningMinMax.cpp" />
@@ -93,6 +94,7 @@
     <ClCompile Include="TSSWStats.cpp" />
     <ClCompile Include="TSSWStochastic.cpp" />
     <ClCompile Include="TSSWTickFrequency.cpp" />
+    <ClCompile Include="TSVariance.cpp" />
     <ClCompile Include="ZigZag.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +102,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Darvas.h" />
+    <ClInclude Include="TSNorm.h" />
     <ClInclude Include="PivotGroup.h" />
     <ClInclude Include="Pivots.h" />
     <ClInclude Include="RunningMinMax.h" />
@@ -120,6 +123,7 @@
     <ClInclude Include="TSSWStats.h" />
     <ClInclude Include="TSSWStochastic.h" />
     <ClInclude Include="TSSWTickFrequency.h" />
+    <ClInclude Include="TSVariance.h" />
     <ClInclude Include="ZigZag.h" />
   </ItemGroup>
   <ItemGroup>
