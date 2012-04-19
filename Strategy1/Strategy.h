@@ -106,6 +106,7 @@ private:
 
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
+  ou::ChartEntryIndicator m_ceEma3;
 
 //  ou::ChartEntryIndicator m_ceSMA1;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA1;
@@ -175,7 +176,7 @@ private:
 
   ou::tf::CPrices m_pricesTickDiffsROC;
   ou::tf::TSSWRateOfChange m_rocTickDiffs;
-
+/*
   ou::tf::TSSWStatsMidQuote m_sma1;
   ou::tf::TSSWStatsMidQuote m_sma2;
   ou::tf::TSSWStatsMidQuote m_sma3;
@@ -184,9 +185,10 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma6;
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
-
+*/
   ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema1;
   ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema2;
+  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema3;
 
 //  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
 //  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;

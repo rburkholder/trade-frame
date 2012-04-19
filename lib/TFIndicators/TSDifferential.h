@@ -14,30 +14,46 @@
 
 #pragma once
 
-#include <vector>
-
 #include "TSEMA.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSMA: public CPrices {
+class TSDifferential: public CPrices { // page 65 Intro to HF Finance
 public:
-  TSMA( CPrices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( CPrices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
-  ~TSMA(void);
-  double GetMA( void ) { return m_dblRecentMA; };
+  TSDifferential( CPrices& series, time_duration dt );
+  TSDifferential( CPrices& series, time_duration dt, double dblGammaDerivative, time_duration dtNormalization = hours( 365 * 24 ) );
+  ~TSDifferential(void);
 protected:
 private:
+
+  static const double m_gamma;
+  static const double m_beta;
+  static const double m_alpha;
   time_duration m_dtTimeRange;
-  unsigned int m_nInf;
-  unsigned int m_nSup;
+  time_duration m_dtAlphaTau;
+  time_duration m_dtAlphaBetaTau;
+  double m_dblTerm1;
+  double m_dblTerm2;
+
+  bool m_bDerivative;
+  time_duration m_dtNormalization;
+  double m_dblNormalization;
+  double m_dblGammaDerivative;
   CPrices& m_seriesSource;
-  std::vector<TSEMA<CPrice>*> m_vEMA;
-  double m_dblRecentMA;
+
+  TSEMA<CPrice>* m_pema1;
+  TSEMA<CPrice>* m_pema2;
+  TSEMA<CPrice>* m_pema3;
+  TSEMA<CPrice>* m_pema4;
+  TSEMA<CPrice>* m_pema5;
+  TSEMA<CPrice>* m_pema6;
+
+  void HandleTerm1Update( const CPrice& );
+  void HandleTerm2Update( const CPrice& );
+  void HandleTerm3Update( const CPrice& );
   void Init( void );
-  void HandleUpdate( const CPrice& );
 };
 
 } // namespace hf

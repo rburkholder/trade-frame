@@ -26,16 +26,17 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider ),
   //m_sim( new ou::tf::CSimulationProvider() ),
   m_TradeDirection( ETradeDirUnkn ),
-  m_sma1( m_quotes, seconds(   60 ) ), //   1 min
-  m_sma2( m_quotes, seconds(  120 ) ), //   2 min
-  m_sma3( m_quotes, seconds(  180 ) ), //   3 min
-  m_sma4( m_quotes, seconds(  300 ) ), //   5 min
-  m_sma5( m_quotes, seconds(  900 ) ), //  15 min
-  m_sma6( m_quotes, seconds( 1800 ) ), //  30 min
-  m_sma7( m_quotes, seconds( 3600 ) ), //  60 min
-  m_sma8( m_quotes, seconds( 7200 ) ), // 120 min
+//  m_sma1( m_quotes, seconds(   60 ) ), //   1 min
+//  m_sma2( m_quotes, seconds(  120 ) ), //   2 min
+//  m_sma3( m_quotes, seconds(  180 ) ), //   3 min
+//  m_sma4( m_quotes, seconds(  300 ) ), //   5 min
+//  m_sma5( m_quotes, seconds(  900 ) ), //  15 min
+//  m_sma6( m_quotes, seconds( 1800 ) ), //  30 min
+//  m_sma7( m_quotes, seconds( 3600 ) ), //  60 min
+//  m_sma8( m_quotes, seconds( 7200 ) ), // 120 min
   m_ema1( m_quotes, minutes(  4 ) ), 
   m_ema2( m_quotes, minutes( 16 ) ), 
+  m_ema3( m_quotes, minutes( 32 ) ), 
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
   m_stateTrade( ETradeStart ), //m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_dtEnd( boost::date_time::not_a_date_time ),
@@ -68,10 +69,11 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_dvChart.Add( 0, m_ceLongs );
   m_dvChart.Add( 0, m_ceBars );
 //  m_dvChart.Add( 0, m_ceSMA1 );
-  m_dvChart.Add( 0, m_ceSMA2 );
-  m_dvChart.Add( 0, m_ceSMA3 );
+//  m_dvChart.Add( 0, m_ceSMA2 );
+//  m_dvChart.Add( 0, m_ceSMA3 );
   m_dvChart.Add( 0, m_ceEma1 );
   m_dvChart.Add( 0, m_ceEma2 );
+  m_dvChart.Add( 0, m_ceEma3 );
 //  m_dvChart.Add( 0, m_ceUpperBollinger1 );
 //  m_dvChart.Add( 0, m_ceLowerBollinger1 );
 //  m_dvChart.Add( 0, m_ceUpperBollinger2 );
@@ -126,6 +128,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 
   m_ceEma1.SetColour( ou::Colour::MediumVioletRed );
   m_ceEma2.SetColour( ou::Colour::RoyalBlue );
+  m_ceEma3.SetColour( ou::Colour::MediumSpringGreen );
 
 //  m_ceSMA1RR.SetColour( ou::Colour::Yellow );
   m_ceSMA2RR.SetColour( ou::Colour::Turquoise );
@@ -244,12 +247,14 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   m_quoteLast = quote;
   m_quotes.Append( quote );
+  double midpoint = quote.Midpoint();
 
   m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Price() );
   m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Price() );
+  m_ceEma3.Add( dt, m_ema3.Ago( 0 ).Price() );
 
   // high speed simple moving average
-  ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );
+//  ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );
 //  sma1.Update();
 
 //  m_ceSMA1RR.Add( dt, sma1.RR() );
@@ -258,20 +263,20 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //  m_tsswSlopeOfSlopeOfSMA1.Update();
 
   // medium speed moving average
-  ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
+//  ou::tf::TSSWStatsMidQuote& sma2( m_sma6 );
 //  sma2.Update();
 
-  double dblSMA2RR = sma2.RR();
-  m_ceSMA2RR.Add( dt, dblSMA2RR );
+//  double dblSMA2RR = sma2.RR();
+//  m_ceSMA2RR.Add( dt, dblSMA2RR );
 
-  m_pricesBollinger2Offset.Append( ou::tf::CPrice( dt, sma2.BBOffset() ) );
+//  m_pricesBollinger2Offset.Append( ou::tf::CPrice( dt, sma2.BBOffset() ) );
 //  m_tsswSlopeOfBollinger2Offset.Update();
 
   // slow speed moving average
-  ou::tf::TSSWStatsMidQuote& sma3( m_sma7 );
+//  ou::tf::TSSWStatsMidQuote& sma3( m_sma7 );
 //  sma3.Update();
 
-  m_ceSMA3RR.Add( dt, sma3.RR() );
+//  m_ceSMA3RR.Add( dt, sma3.RR() );
 
 //  double spread = quote.Ask() - quote.Bid();
 //  m_spreads.Append( ou::tf::CPrice( dt, spread ) );
@@ -279,7 +284,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
   if ( 500 < m_quotes.Size() ) {
 
-    m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
+//    m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
 //    m_tsswSlopeOfSlopeOfSMA2.Update();
 
     m_pOrdersOutstandingLongs->HandleQuote( quote );
@@ -314,31 +319,28 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //    m_ceLowerBollinger1.Add( dt, sma1.BBLower() );
 //    m_ceBollinger1Offset.Add( dt, sma1.BBOffset() );
 
-    double slope2 = sma2.Slope();
-
+//    double slope2 = sma2.Slope();
+/*
     m_ceSMA2.Add( dt, sma2.MeanY() );
     m_ceSlopeOfSMA2.Add( dt, slope2 * 10.0 );
     m_ceUpperBollinger2.Add( dt, sma2.BBUpper() );
     m_ceLowerBollinger2.Add( dt, sma2.BBLower() );
     m_ceBollinger2Offset.Add( dt, sma2.BBOffset() );
-
-    double direction2 = m_tsswSlopeOfSlopeOfSMA2.Slope();
-    if ( ( 0.00001 > direction2 ) || ( -0.00001 < direction2 ) ) {
+*/
+//    double direction2 = m_tsswSlopeOfSlopeOfSMA2.Slope();
+//    if ( ( 0.00001 > direction2 ) || ( -0.00001 < direction2 ) ) {
 //      direction2 = 0.0;
-    }
-    else {
-      
-    }
-    m_ceSlopeOfSlopeOfSMA2.Add( dt, direction2 * 2000.0 );
+//    }
+//    m_ceSlopeOfSlopeOfSMA2.Add( dt, direction2 * 2000.0 );
 
-    double dblBollingerSlope = m_tsswSlopeOfBollinger2Offset.Slope();
-    m_ceSlopeOfBollinger2Offset.Add( dt, dblBollingerSlope * 2.0 );
+//    double dblBollingerSlope = m_tsswSlopeOfBollinger2Offset.Slope();
+//    m_ceSlopeOfBollinger2Offset.Add( dt, dblBollingerSlope * 2.0 );
 
-    m_ceSMA3.Add( dt, sma3.MeanY() );
-    m_ceSlopeOfSMA3.Add( dt, sma3.Slope() * 10.0 );
-    m_ceUpperBollinger3.Add( dt, sma3.BBUpper() );
-    m_ceLowerBollinger3.Add( dt, sma3.BBLower() );
-    m_ceBollinger3Offset.Add( dt, sma3.BBOffset() );
+//    m_ceSMA3.Add( dt, sma3.MeanY() );
+//    m_ceSlopeOfSMA3.Add( dt, sma3.Slope() * 10.0 );
+//    m_ceUpperBollinger3.Add( dt, sma3.BBUpper() );
+//    m_ceLowerBollinger3.Add( dt, sma3.BBLower() );
+//    m_ceBollinger3Offset.Add( dt, sma3.BBOffset() );
 
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
     double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();
@@ -347,7 +349,6 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
     m_cePLShort.Add( dt, dblPLShort );
     m_cePLNet.Add( dt, dblPLLong + dblPLShort );
 
-    double midpoint = quote.Midpoint();
 //    double /* val1,*/ val2, val3;
 //    val1 = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );
 //    if ( 1.1 < val1 ) val1 = 1.1;
@@ -378,36 +379,37 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       m_stateTrade = ETradeAbove21Starting;
       break;
     case ETradeAbove21Starting:
-      if ( 0.21 < dblSMA2RR ) {
-        m_stateTrade = ETradeAbove21Ending;
-      }
+//      if ( 0.21 < dblSMA2RR ) {
+//        m_stateTrade = ETradeAbove21Ending;
+//      }
       break;
     case ETradeAbove21Ending:
-      if ( 0.19 > dblSMA2RR ) {
-        m_stateTrade = ETradeBelow19;
-      }
+//      if ( 0.19 > dblSMA2RR ) {
+//        m_stateTrade = ETradeBelow19;
+//      }
       break;
     case ETradeAbove21:
       break;
     case ETradeBelow19:
       m_dblLastMidpoint = midpoint;
       m_dtLastSubmission = quote.DateTime();
-      if ( 0.0 < direction2 ) {
-        m_stateTrade = ETradeLong;
-      }
-      else {
-        if ( 0.0 > direction2 ) {
-          m_stateTrade = ETradeShort;
-        }
-      }
+ //     if ( 0.0 < direction2 ) {
+ //       m_stateTrade = ETradeLong;
+ //     }
+ //     else {
+ //       if ( 0.0 > direction2 ) {
+ //         m_stateTrade = ETradeShort;
+ //       }
+ //     }
       break;
     case ETradeLong:
-      {
-        bool bTimeToExit( false );
+//      {
+//        bool bTimeToExit( false );
 //        if ( 5 > dblSMA2RR ) {
 //          m_stateTrade = ETradeBelow05;
 //          bTimeToExit = true;
 //        }
+/*
         if ( 0.60 < dblSMA2RR ) {
           m_stateTrade = ETradeAbove60;
           bTimeToExit = true;
@@ -416,6 +418,8 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_stateTrade = ETradeAbove60;
           bTimeToExit = true;
         }
+*/
+/*
         if ( !bTimeToExit ) {
           if ( ( ( m_dblLastMidpoint + 0.010 ) < midpoint ) && ( 0 == cntLongs ) ) {
             bool bAllowTrade( true );
@@ -437,8 +441,10 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           }
         }
       }
+*/
       break;
     case ETradeShort:
+/*
       {
         bool bTimeToExit( false );
 //        if ( 5 > dblSMA2RR ) {
@@ -474,13 +480,15 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           }
         }
       }
+*/
       break;
     case ETradeBelow05:
       break;
     case ETradeAbove60:
-      m_stateTrade = ETradeAbove21Starting;
+//      m_stateTrade = ETradeAbove21Starting;
       break;
     case ETradeWaitForTrendConfirmation:
+/*
       if ( 0.0 > dblBollingerSlope ) { // reset for another attempt if falling
         m_stateTrade = ETradeWaitForBollingerToRise;
       }
@@ -492,9 +500,11 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           m_stateTrade = ETradeShortAndWaitForCrossingSMAUpwards;
         }
       }
+*/
       break;
     case ETradeLongAndWaitForCrossingSMADownwards:  // long oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( 0.0 > m_rtTickDiffs.Net() )*/ ) { // reset for another attempt
+/*
+      if ( ( 0.0 > dblBollingerSlope) || ( 0.0 > m_rtTickDiffs.Net() ) ) { // reset for another attempt
         // stop out stuff here 
         m_pOrdersOutstandingLongs->CancelAndCloseAllOrders();
         m_stateTrade = ETradeWaitForBollingerToRise;
@@ -502,7 +512,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       else {
         if ( ( 0.0 < slope2 ) && ( sma1.MeanY() > sma2.MeanY() ) && ( ( m_dblLastMidpoint + 0.010 ) < midpoint ) 
             //&& ( 0.0 < m_rocTickDiffs.RateOfChange() )
-            && ( 0 == cntLongs ) /*&& ( 2.0 < sma2.BBOffset() )*/ ) {
+            && ( 0 == cntLongs ) && ( 2.0 < sma2.BBOffset() ) ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
@@ -526,9 +536,11 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           }
         }
       }
+*/
       break;
     case ETradeShortAndWaitForCrossingSMAUpwards:  // short oriented
-      if ( ( 0.0 > dblBollingerSlope) /*|| ( 0.0 < m_rtTickDiffs.Net() )*/ ) { // reset for another attempt
+/*
+//      if ( ( 0.0 > dblBollingerSlope) || ( 0.0 < m_rtTickDiffs.Net() ) ) { // reset for another attempt
         // stop out stuff here 
         m_pOrdersOutstandingShorts->CancelAndCloseAllOrders();
         m_stateTrade = ETradeWaitForBollingerToRise;
@@ -536,7 +548,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
       else {
         if ( ( 0.0 > slope2 ) && ( sma1.MeanY() < sma2.MeanY() ) && ( ( m_dblLastMidpoint - 0.010 ) > midpoint ) 
             //&& ( 0.0 > m_rocTickDiffs.RateOfChange() )
-            && ( 0 == cntShorts ) /*&& ( 2.0 < sma2.BBOffset() )*/ ) {
+//            && ( 0 == cntShorts ) && ( 2.0 < sma2.BBOffset() ) ) {
           bool bAllowTrade( true );
           if ( !m_dtLastSubmission.is_not_a_date_time() ) 
             bAllowTrade = (m_dtLastSubmission + m_tdTimeBetweenTrades ) <= quote.DateTime();
@@ -560,18 +572,19 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
           }
         }
       }
+*/
       break;
     case ETradeWaitForBollingerToRise:
-      if ( 0.0 < dblBollingerSlope ) {
-        m_stateTrade = ETradeWaitForTrendConfirmation;
-      }
+//      if ( 0.0 < dblBollingerSlope ) {
+//        m_stateTrade = ETradeWaitForTrendConfirmation;
+//      }
       break;
     case ETradeWaitForBollingerToFall:
-      if ( 0.0 > dblBollingerSlope ) {
-        m_dblLastMidpoint = midpoint;
-        m_stateTrade = ETradeWaitForBollingerToRise;
+//      if ( 0.0 > dblBollingerSlope ) {
+//        m_dblLastMidpoint = midpoint;
+//        m_stateTrade = ETradeWaitForBollingerToRise;
         //m_stateTrade = ETradeWaitForUp;
-      }
+//      }
       break;
     case ETradeCancel:
       m_pOrdersOutstandingLongs->CancelAndCloseAllOrders();

@@ -14,6 +14,8 @@
 
 #pragma once
 
+// could use traits template mechanism to deal with the multiple GetPrice methods
+
 #include <math.h>
 
 #include <TFTimeSeries/TimeSeries.h>

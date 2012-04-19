@@ -12,33 +12,25 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-
-#include <vector>
-
-#include "TSEMA.h"
+#include "StdAfx.h"
+#include "TSVolatility.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSMA: public CPrices {
-public:
-  TSMA( CPrices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( CPrices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
-  ~TSMA(void);
-  double GetMA( void ) { return m_dblRecentMA; };
-protected:
-private:
-  time_duration m_dtTimeRange;
-  unsigned int m_nInf;
-  unsigned int m_nSup;
-  CPrices& m_seriesSource;
-  std::vector<TSEMA<CPrice>*> m_vEMA;
-  double m_dblRecentMA;
-  void Init( void );
-  void HandleUpdate( const CPrice& );
-};
+TSVolatility::TSVolatility( CPrices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n ) 
+  : m_seriesSource( series ), m_dtTau( dtTau ), m_dtTauPrime( microseconds( dtTauPrime.total_microseconds() / 2 ) ), m_p( p ), m_n( n ),
+    m_tsDif( series, dtTauPrime ), m_tsNorm( m_tsDif, dtTau, n, p )
+{
+}
+
+TSVolatility::~TSVolatility(void) {
+}
+
+void TSVolatility::HandleUpdate( const CPrice& price ) {
+  Append( price );
+}
 
 } // namespace hf
 } // namespace tf

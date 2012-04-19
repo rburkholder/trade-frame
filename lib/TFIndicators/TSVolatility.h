@@ -14,30 +14,27 @@
 
 #pragma once
 
-#include <vector>
-
-#include "TSEMA.h"
+#include "TSNorm.h"
+#include "TSDifferential.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSMA: public CPrices {
+class TSVolatility: public CPrices {
 public:
-  TSMA( CPrices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( CPrices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
-  ~TSMA(void);
-  double GetMA( void ) { return m_dblRecentMA; };
+  TSVolatility( CPrices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n = 4 );
+  ~TSVolatility(void);
 protected:
 private:
-  time_duration m_dtTimeRange;
-  unsigned int m_nInf;
-  unsigned int m_nSup;
+  time_duration m_dtTau;
+  time_duration m_dtTauPrime;
+  double m_p;
+  unsigned int m_n;
   CPrices& m_seriesSource;
-  std::vector<TSEMA<CPrice>*> m_vEMA;
-  double m_dblRecentMA;
-  void Init( void );
-  void HandleUpdate( const CPrice& );
+  TSDifferential m_tsDif;  // needs to be before norm
+  TSNorm m_tsNorm;
+  void HandleUpdate( const CPrice& price );
 };
 
 } // namespace hf
