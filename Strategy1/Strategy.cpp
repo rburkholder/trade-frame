@@ -42,7 +42,9 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_dtEnd( boost::date_time::not_a_date_time ),
   m_tdTimeBetweenTrades( 0, 0, 0 ), m_dtLastSubmission( boost::date_time::not_a_date_time ),
   m_nUpTransitions( 0 ), m_nDnTransitions( 0 ), 
-  m_barFactory( 180 ),
+  m_bfTrades( 180 ),
+  m_bfBuys( 180 ),
+  m_bfSells( 180 ),
   m_dvChart( "Strategy1", "GC" ),
   m_ceShorts( ou::ChartEntryShape::ESell, ou::Colour::Orange ),
   m_ceLongs( ou::ChartEntryShape::EBuy, ou::Colour::Blue ),
@@ -80,7 +82,12 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_dvChart.Add( 0, m_ceLowerBollinger2 );
 //  m_dvChart.Add( 0, m_ceUpperBollinger3 );
 //  m_dvChart.Add( 0, m_ceLowerBollinger3 );
-  m_dvChart.Add( 1, m_ceVolume );
+  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeUp );
+  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeNeutral );
+  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeDn );
+  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeUp );
+  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeNeutral );
+  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeDn );
 //  m_dvChart.Add( 2, m_ceSlopeOfSMA1 );
 //  m_dvChart.Add( 2, m_ceSlopeOfSlopeOfSMA1 );
 //  m_dvChart.Add( 2, m_ceSMA2RR );
@@ -108,6 +115,13 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_dvChart.Add( 8, m_ceBollinger3Ratio );
 //  m_dvChart.Add( 8, m_ceBollinger2Ratio );
 //  m_dvChart.Add( 8, m_ceBollinger1Ratio );
+
+  m_rVolumes[ VUp ].ceVolumeUp.SetColour( ou::Colour::Green );
+  m_rVolumes[ VUp ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
+  m_rVolumes[ VUp ].ceVolumeDn.SetColour( ou::Colour::Red );
+  m_rVolumes[ VDn ].ceVolumeUp.SetColour( ou::Colour::Green );
+  m_rVolumes[ VDn ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
+  m_rVolumes[ VDn ].ceVolumeDn.SetColour( ou::Colour::Red );
 
 //  m_ceSlopeOfSMA1.SetName( "SlopeOfSMA1" );
 //  m_ceSlopeOfSlopeOfSMA1.SetName( "SlopeOfSlopeOfSMA1" );
@@ -176,7 +190,9 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_zigzagPrice.SetUpDecisionPointFound( MakeDelegate( this, &Strategy::HandleZigZagUpDp ) );
   m_zigzagPrice.SetDnDecisionPointFound( MakeDelegate( this, &Strategy::HandleZigZagDnDp ) );
 
-  m_barFactory.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletion ) );
+  m_bfTrades.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionTrades ) );
+  m_bfBuys.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionBuys ) );
+  m_bfSells.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionSells ) );
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   m_pTestInstrument = mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 );
@@ -186,7 +202,8 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 }
 
 Strategy::~Strategy(void) {
-  m_barFactory.SetOnBarComplete( 0 );
+  m_bfBuys.SetOnBarComplete( 0 );
+  m_bfSells.SetOnBarComplete( 0 );
 }
 
 void Strategy::Start( void ) {  // live trading
@@ -641,7 +658,7 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
   }
 
   m_trades.Append( trade );
-  m_barFactory.Add( trade );
+  m_bfTrades.Add( trade );
 
   m_zigzagPrice.Check( dt, price );
 
@@ -674,6 +691,17 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
       ++m_dblDnTicks;
       m_dblDnVolume += trade.Volume();
     }
+  }
+
+  switch ( m_TradeDirection ) {
+  case ETradeDirUp:
+    m_bfBuys.Add( trade );
+    break;
+  case ETradeDirDn:
+    m_bfSells.Add( trade );
+    break;
+  case ETradeDirUnkn:
+    break;
   }
 
 //  m_rtTickDiffs.Update();
@@ -727,13 +755,54 @@ void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
   std::cout << m_ss << std::endl;
 }
 
-void Strategy::HandleBarCompletion( const ou::tf::CBar& bar ) {
+void Strategy::HandleBarCompletionTrades( const ou::tf::CBar& bar ) {
+  m_ceBars.AddBar( bar );
+}
+
+void Strategy::HandleBarCompletionBuys( const ou::tf::CBar& bar ) {
 
   ptime dt( bar.DateTime() );
-  m_ceBars.AddBar( bar );
 
-  m_ceVolume.Add( dt, bar.Volume() );
+  if ( bar.Open() == bar.Close() ) {
+    m_rVolumes[ VUp ].ceVolumeUp.Add( dt, 0.0 );
+    m_rVolumes[ VUp ].ceVolumeNeutral.Add( dt, bar.Volume() );
+    m_rVolumes[ VUp ].ceVolumeDn.Add( dt, 0.0 );
+  }
+  else {
+    if ( bar.Close() > bar.Open() ) {
+      m_rVolumes[ VUp ].ceVolumeUp.Add( dt, bar.Volume() );
+      m_rVolumes[ VUp ].ceVolumeNeutral.Add( dt, 0.0 );
+      m_rVolumes[ VUp ].ceVolumeDn.Add( dt, 0.0 );
+    }
+    else {
+      m_rVolumes[ VUp ].ceVolumeUp.Add( dt, 0.0 );
+      m_rVolumes[ VUp ].ceVolumeNeutral.Add( dt, 0.0 );
+      m_rVolumes[ VUp ].ceVolumeDn.Add( dt, bar.Volume() );
+    }
+  }
+}
 
+void Strategy::HandleBarCompletionSells( const ou::tf::CBar& bar ) {
+
+  ptime dt( bar.DateTime() );
+
+  if ( bar.Open() == bar.Close() ) {
+    m_rVolumes[ VDn ].ceVolumeUp.Add( dt, 0.0 );
+    m_rVolumes[ VDn ].ceVolumeNeutral.Add( dt, -bar.Volume() );
+    m_rVolumes[ VDn ].ceVolumeDn.Add( dt, 0.0 );
+  }
+  else {
+    if ( bar.Close() > bar.Open() ) {
+      m_rVolumes[ VDn ].ceVolumeUp.Add( dt, -bar.Volume() );
+      m_rVolumes[ VDn ].ceVolumeNeutral.Add( dt, 0.0 );
+      m_rVolumes[ VDn ].ceVolumeDn.Add( dt, 0.0 );
+    }
+    else {
+      m_rVolumes[ VDn ].ceVolumeUp.Add( dt, 0.0 );
+      m_rVolumes[ VDn ].ceVolumeNeutral.Add( dt, 0.0 );
+      m_rVolumes[ VDn ].ceVolumeDn.Add( dt, -bar.Volume() );
+    }
+  }
 }
 
 void Strategy::HandleZigZagPeak( ou::tf::ZigZag*, ptime dt, double price, ou::tf::ZigZag::EDirection ) {

@@ -14,16 +14,56 @@
 
 #pragma once
 
+#include "NodeBoolean.h"
+
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class Population {
+class NodeCompareGT: public Node<NodeCompareGT> {
+  friend Node<NodeCompareGT>;
 public:
-  Population(void);
-  ~Population(void);
+  NodeCompareGT( void );
+  ~NodeCompareGT( void );
+  void ToString( std::stringstream& ss ) const { ss << ">"; };
 protected:
 private:
+  bool EvaluateBooleanImpl( void ) const;
 };
+
+class NodeCompareGE: public Node<NodeCompareGE> {
+  friend Node<NodeCompareGE>;
+public:
+  NodeCompareGE( void );
+  ~NodeCompareGE( void );
+  void ToString( std::stringstream& ss ) const { ss << ">="; };
+protected:
+private:
+  bool EvaluateBooleanImpl( void ) const;
+};
+
+class NodeCompareLT: public Node<NodeCompareLT> {
+  friend Node<NodeCompareLT>;
+public:
+  NodeCompareLT( void );
+  ~NodeCompareLT( void );
+  void ToString( std::stringstream& ss ) const { ss << "<"; };
+protected:
+private:
+  bool EvaluateBooleanImpl( void ) const;
+};
+
+class NodeCompareLE: public Node<NodeCompareLE> {
+  friend Node<NodeCompareLE>;
+public:
+  NodeCompareLE( void );
+  ~NodeCompareLE( void );
+  void ToString( std::stringstream& ss ) const { ss << "<="; };
+protected:
+private:
+  bool EvaluateBooleanImpl( void ) const;
+};
+
+
 
 } // namespace gp
 } // namespace ou

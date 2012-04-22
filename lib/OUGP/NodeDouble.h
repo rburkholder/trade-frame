@@ -14,16 +14,55 @@
 
 #pragma once
 
+#include "node.h"
+
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class Population {
+class NodeDoubleAdd: public Node<NodeDoubleAdd> {
+  friend Node<NodeDoubleAdd>;
 public:
-  Population(void);
-  ~Population(void);
+  NodeDoubleAdd( void );
+  ~NodeDoubleAdd( void );
+  void ToString( std::stringstream& ss ) const { ss << "+"; };
 protected:
 private:
+  double EvaluateDoubleImpl( void ) const;
 };
+
+class NodeDoubleSub: public Node<NodeDoubleSub> {
+  friend Node<NodeDoubleSub>;
+public:
+  NodeDoubleSub( void );
+  ~NodeDoubleSub( void );
+  void ToString( std::stringstream& ss ) const { ss << "-"; };
+protected:
+private:
+  double EvaluateDoubleImpl( void ) const;
+};
+
+class NodeDoubleMlt: public Node<NodeDoubleMlt> {
+  friend Node<NodeDoubleMlt>;
+public:
+  NodeDoubleMlt( void );
+  ~NodeDoubleMlt( void );
+  void ToString( std::stringstream& ss ) const { ss << "*"; };
+protected:
+private:
+  double EvaluateDoubleImpl( void ) const;
+};
+
+class NodeDoubleDvd: public Node<NodeDoubleDvd> {
+  friend Node<NodeDoubleDvd>;
+public:
+  NodeDoubleDvd( void );
+  ~NodeDoubleDvd( void );
+  void ToString( std::stringstream& ss ) const { ss << "/"; };
+protected:
+private:
+  double EvaluateDoubleImpl( void ) const;
+};
+
 
 } // namespace gp
 } // namespace ou

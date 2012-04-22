@@ -284,7 +284,7 @@ namespace OneUnified.GeneticProgramming {
     // input: one bool
     // output: one bool
 
-    // these three arrays take care of handling strongly typed gentic crossovers
+    // these three arrays take care of handling strongly typed genetic crossovers
     public ArrayList alAllCandidateNodes;
     public ArrayList alBoolCandidateNodes;
     public ArrayList alDblCandidateNodes;
@@ -446,7 +446,7 @@ namespace OneUnified.GeneticProgramming {
       Node node = ChildCenter;
       bool b = node.EvaluateBool(o);
       // return !bn.Evaluate(strategy);
-      return b;
+      return !b;
       //return !GetChildCenter.Evaluate(strategy);
     }
   }

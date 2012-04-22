@@ -192,6 +192,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StrategyRunner", "StrategyR
 		{F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4} = {F03F73EA-DF5F-48DA-ABAE-A860BCEE54D4}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestGpFusion", "TestGpFusion\TestGpFusion.vcxproj", "{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9} = {1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -338,6 +343,10 @@ Global
 		{AF8E7459-681E-427C-AF77-68A061215E62}.Debug|Win32.Build.0 = Debug|Win32
 		{AF8E7459-681E-427C-AF77-68A061215E62}.Release|Win32.ActiveCfg = Release|Win32
 		{AF8E7459-681E-427C-AF77-68A061215E62}.Release|Win32.Build.0 = Release|Win32
+		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Debug|Win32.Build.0 = Debug|Win32
+		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Release|Win32.ActiveCfg = Release|Win32
+		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

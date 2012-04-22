@@ -94,15 +94,23 @@ private:
 
   ou::tf::CQuotes m_quotes;
   ou::tf::CTrades m_trades;
-  ou::tf::CBars m_bars;
 
-  ou::tf::CBarFactory m_barFactory;
+  ou::tf::CBarFactory m_bfTrades;
+  ou::tf::CBarFactory m_bfBuys;
+  ou::tf::CBarFactory m_bfSells;
 
   typedef ou::ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
 
   ou::ChartDataView m_dvChart;
   ou::ChartEntryBars m_ceBars;
-  ou::ChartEntryVolume m_ceVolume;
+
+  struct ceVolumes_t {
+    ou::ChartEntryVolume ceVolumeUp;
+    ou::ChartEntryVolume ceVolumeNeutral;
+    ou::ChartEntryVolume ceVolumeDn;
+  };
+  enum EVolumes_t { VDn, VUp, VCnt_ };
+  ceVolumes_t m_rVolumes[ VCnt_ ];
 
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
@@ -234,7 +242,9 @@ private:
   void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
   void HandleCommission( const ou::tf::CPosition* pPosition );
 
-  void HandleBarCompletion( const ou::tf::CBar& );
+  void HandleBarCompletionTrades( const ou::tf::CBar& );
+  void HandleBarCompletionBuys( const ou::tf::CBar& );
+  void HandleBarCompletionSells( const ou::tf::CBar& );
 
   void HandleZigZagPeak( ou::tf::ZigZag*, ptime, double, ou::tf::ZigZag::EDirection );
   void HandleZigZagUpDp( ou::tf::ZigZag* );
