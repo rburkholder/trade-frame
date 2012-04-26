@@ -19,20 +19,6 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-// ********* RootNode *********
-
-RootNode::RootNode(void): Node<RootNode>() {
-  m_cntNodes = 1;
-}
-
-RootNode::~RootNode(void) {
-}
-
-bool RootNode::EvaluateBooleanImpl( void ) const {
-  assert( 0 != m_pChildCenter );
-  return m_pChildCenter->EvaluateBoolean();
-}
-
 // ********* NodeBooleanFalse *********
 
 NodeBooleanFalse::NodeBooleanFalse( void ) : Node<NodeBooleanFalse>() {

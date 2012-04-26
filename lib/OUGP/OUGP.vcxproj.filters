@@ -36,6 +36,9 @@
     <ClInclude Include="NodeCompare.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RootNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Population.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NodeCompare.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RootNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

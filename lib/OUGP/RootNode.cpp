@@ -12,30 +12,23 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "Individual.h"
+#include "RootNode.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-Individual::Individual(void)
-  : m_bComputed( false ), m_nCount( 1 ), m_id( m_nCount++ ),
-  m_dblRawFitness( 0.0 ), m_dblRelativeFitness( 0.0 ), m_dblAdjustedFitness( 0.0 ), m_dblNormalizedFitness( 0.0 )
-{
+// ********* RootNode *********
+
+RootNode::RootNode(void): Node<RootNode>() {
+  m_cntNodes = 1;
 }
 
-Individual::~Individual(void) {
+RootNode::~RootNode(void) {
 }
 
-void Individual::TreeToString( std::stringstream& ss ) const {
-  ss << "LEnter=";
-  m_Signals.rnLongEnter.TreeToString( ss );
-  ss << "\nLExit=";
-  m_Signals.rnLongExit.TreeToString( ss );
-  ss << "\nSEnter=";
-  m_Signals.rnShortEnter.TreeToString( ss );
-  ss << "\nLExit=";
-  m_Signals.rnShortExit.TreeToString( ss );
-  ss << "\n";
+bool RootNode::EvaluateBooleanImpl( void ) const {
+  assert( 0 != m_pChildCenter );
+  return m_pChildCenter->EvaluateBoolean();
 }
 
 } // namespace gp

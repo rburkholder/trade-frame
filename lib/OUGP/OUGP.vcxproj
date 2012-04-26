@@ -80,6 +80,7 @@
     <ClInclude Include="NodeCompare.h" />
     <ClInclude Include="NodeDouble.h" />
     <ClInclude Include="Population.h" />
+    <ClInclude Include="RootNode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Individual.cpp" />
@@ -87,6 +88,7 @@
     <ClCompile Include="NodeCompare.cpp" />
     <ClCompile Include="NodeDouble.cpp" />
     <ClCompile Include="Population.cpp" />
+    <ClCompile Include="RootNode.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
