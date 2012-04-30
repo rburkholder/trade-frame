@@ -30,9 +30,12 @@
 #include <boost/fusion/sequence/io.hpp>
 #include <boost/fusion/include/io.hpp>
 
+#include <boost/fusion/include/size.hpp>
+
 #include <boost/type_traits.hpp>
 
 #include <lib/OUGP/NodeDouble.h>
+#include <lib/OUGP/TreeBuilder.h>
 
 using namespace boost::fusion;
 
@@ -54,18 +57,26 @@ using namespace boost::fusion;
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
+  std::stringstream ss;
+
+  typedef boost::fusion::vector<int, short, double> vector_type;
+  vector_type vec(2, 5, 3.3);
+
+  boost::fusion::transform_view<vector_type, square> transform(vec, square());
+  std::cout << transform << std::endl;
+
+  typedef boost::fusion::result_of::size<vector_type> whatsit;
+
+  std::cout << whatsit::value << std::endl;
+
+  ou::gp::TreeBuilder tb;
+//  tb.CreateChild<ou::gp::TreeBuilder::boolean_t>( false, true, 1, 5 );
+
   ou::gp::NodeDoubleAdd node;
 
-  std::stringstream ss;
   ss << node;
 
   node.EvaluateDouble();
-
-  typedef boost::fusion::vector<int, short, double> vector_type;
-vector_type vec(2, 5, 3.3);
-
-boost::fusion::transform_view<vector_type, square> transform(vec, square());
-std::cout << transform << std::endl;
 
 
 	return 0;

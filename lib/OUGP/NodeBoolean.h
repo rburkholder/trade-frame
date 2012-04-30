@@ -14,65 +14,64 @@
 
 #pragma once
 
+#include <boost/fusion/container/vector.hpp>
+
 #include "Node.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeBooleanFalse: public Node<NodeBooleanFalse> {
-  friend Node<NodeBooleanFalse>;
+class NodeBooleanFalse: public Node {
 public:
   NodeBooleanFalse( void );
   ~NodeBooleanFalse( void );
   void ToString( std::stringstream& ss ) const { ss << "false"; };
+  bool EvaluateBoolean( void ) const { return false; };
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const { return false; };
 };
 
-class NodeBooleanTrue: public Node<NodeBooleanTrue> {
-  friend Node<NodeBooleanTrue>;
+class NodeBooleanTrue: public Node {
 public:
   NodeBooleanTrue( void );
   ~NodeBooleanTrue( void );
   void ToString( std::stringstream& ss ) const { ss << "true"; };
+  bool EvaluateBoolean( void ) const { return true; };
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const { return true; };
 };
 
-class NodeBooleanNot: public Node<NodeBooleanNot> {
-  friend Node<NodeBooleanNot>;
+class NodeBooleanNot: public Node {
 public:
   NodeBooleanNot( void );
   ~NodeBooleanNot( void );
   void ToString( std::stringstream& ss ) const { ss << "!"; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-class NodeBooleanAnd: public Node<NodeBooleanAnd> {
-  friend Node<NodeBooleanAnd>;
+class NodeBooleanAnd: public Node {
 public:
   NodeBooleanAnd( void );
   ~NodeBooleanAnd( void );
   void ToString( std::stringstream& ss ) const { ss << "&&"; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-class NodeBooleanOr: public Node<NodeBooleanOr> {
-  friend Node<NodeBooleanOr>;
+class NodeBooleanOr: public Node {
 public:
   NodeBooleanOr( void );
   ~NodeBooleanOr( void );
   void ToString( std::stringstream& ss ) const { ss << "||"; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
+
+typedef boost::fusion::vector<NodeBooleanFalse, NodeBooleanTrue, NodeBooleanNot, NodeBooleanAnd, NodeBooleanOr> NodeBoolean_t;
 
 } // namespace gp
 } // namespace ou

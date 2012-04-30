@@ -12,44 +12,40 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include <boost/fusion/include/for_each.hpp>
 
-#include "RootNode.h"
+#include "TreeBuilder.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class Individual {
-public:
+  template<class T>
+  Node* CreateNode( void ) {
+    return new T();
+  }
 
-  unsigned int m_id;
-
-  struct Signals_t {
-    RootNode rnLongEnter;
-    RootNode rnLongExit;
-    RootNode rnShortEnter;
-    RootNode rnShortExit;
-    static const unsigned int  cntSignals = 4;
-  } m_Signals;
-
-  double m_dblRawFitness; // absolute dollars value
-  double m_dblRelativeFitness;  // maxrawfitness - rawfitness, larger numbers therefore worse (aka standardized fitness)
-  double m_dblAdjustedFitness;  // 1 / ( 1 + rf ), range 0 to 1, with 1 being best
-  double m_dblNormalizedFitness;  // af / sum(af), range 0 to 1, with 1 being best, sum is 1
-
-  Individual(void);
-  ~Individual(void);
-
-  void TreeToString( std::stringstream& ss ) const;
-
-  bool operator>( const Individual& rhs ) const { return m_dblNormalizedFitness > rhs.m_dblNormalizedFitness; };
-  bool operator<( const Individual& rhs ) const { return m_dblNormalizedFitness < rhs.m_dblNormalizedFitness; };
-
-protected:
-private:
-  bool m_bComputed;
-  unsigned int m_nCount;
+struct NodeFactoryInit {
+  template<typename T>
+  void operator()( T& t ) const {
+    v.push_back( &CreateNode<T> );
+  }
+  NodeFactoryInit( std::vector<Node* (*)()>& v_ ): v( v_ ) {}
+  std::vector<Node* (*)()>& v;
 };
+
+TreeBuilder::TreeBuilder(void) 
+  : m_rng( std::time( 0 ) )  // possible issue after jan 18, 2038?
+{
+  NodeBoolean_t b1;
+  boost::fusion::for_each( b1, NodeFactoryInit(m_vNodeFactoryBoolean) );
+  NodeCompare_t b2;
+  boost::fusion::for_each( b2, NodeFactoryInit(m_vNodeFactoryBoolean) );
+  NodeDouble_t d1;
+  boost::fusion::for_each( d1, NodeFactoryInit(m_vNodeFactoryDouble) );
+}
+
+TreeBuilder::~TreeBuilder(void) {
+}
 
 } // namespace gp
 } // namespace ou

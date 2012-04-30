@@ -21,69 +21,61 @@ namespace gp { // genetic programming
 
 // ********* NodeCompareGT *********
 
-NodeCompareGT::NodeCompareGT( void ) : Node<NodeCompareGT>() {
+NodeCompareGT::NodeCompareGT( void ) : Node() {
   m_cntNodes = 2;
 }
 
 NodeCompareGT::~NodeCompareGT( void ) {
 }
 
-bool NodeCompareGT::EvaluateBooleanImpl( void ) const {
-  assert( 0 != m_pChildLeft );
-  assert( 0 != m_pChildRight );
-  double d1 = m_pChildLeft->EvaluateBoolean();
-  double d2 = m_pChildRight->EvaluateBoolean();
+bool NodeCompareGT::EvaluateBoolean( void ) const {
+  double d1 = ChildLeft().EvaluateDouble();
+  double d2 = ChildRight().EvaluateDouble();
   return d1 > d2;
 }
 
 // ********* NodeCompareGE *********
 
-NodeCompareGE::NodeCompareGE( void ) : Node<NodeCompareGE>() {
+NodeCompareGE::NodeCompareGE( void ) : Node() {
   m_cntNodes = 2;
 }
 
 NodeCompareGE::~NodeCompareGE( void ) {
 }
 
-bool NodeCompareGE::EvaluateBooleanImpl( void ) const {
-  assert( 0 != m_pChildLeft );
-  assert( 0 != m_pChildRight );
-  double d1 = m_pChildLeft->EvaluateBoolean();
-  double d2 = m_pChildRight->EvaluateBoolean();
+bool NodeCompareGE::EvaluateBoolean( void ) const {
+  double d1 = ChildLeft().EvaluateDouble();
+  double d2 = ChildRight().EvaluateDouble();
   return d1 >= d2;
 }
 
 // ********* NodeCompareLT *********
 
-NodeCompareLT::NodeCompareLT( void ) : Node<NodeCompareLT>() {
+NodeCompareLT::NodeCompareLT( void ) : Node() {
   m_cntNodes = 2;
 }
 
 NodeCompareLT::~NodeCompareLT( void ) {
 }
 
-bool NodeCompareLT::EvaluateBooleanImpl( void ) const {
-  assert( 0 != m_pChildLeft );
-  assert( 0 != m_pChildRight );
-  double d1 = m_pChildLeft->EvaluateBoolean();
-  double d2 = m_pChildRight->EvaluateBoolean();
+bool NodeCompareLT::EvaluateBoolean( void ) const {
+  double d1 = ChildLeft().EvaluateDouble();
+  double d2 = ChildRight().EvaluateDouble();
   return d1 < d2;
 }
 
 // ********* NodeCompareLE *********
 
-NodeCompareLE::NodeCompareLE( void ) : Node<NodeCompareLE>() {
+NodeCompareLE::NodeCompareLE( void ) : Node() {
   m_cntNodes = 2;
 }
 
 NodeCompareLE::~NodeCompareLE( void ) {
 }
 
-bool NodeCompareLE::EvaluateBooleanImpl( void ) const {
-  assert( 0 != m_pChildLeft );
-  assert( 0 != m_pChildRight );
-  double d1 = m_pChildLeft->EvaluateBoolean();
-  double d2 = m_pChildRight->EvaluateBoolean();
+bool NodeCompareLE::EvaluateBoolean( void ) const {
+  double d1 = ChildLeft().EvaluateDouble();
+  double d2 = ChildRight().EvaluateDouble();
   return d1 <= d2;
 }
 

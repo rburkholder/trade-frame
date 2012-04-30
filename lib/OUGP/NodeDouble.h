@@ -14,54 +14,54 @@
 
 #pragma once
 
+#include <boost/fusion/container/vector.hpp>
+
 #include "node.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeDoubleAdd: public Node<NodeDoubleAdd> {
-  friend Node<NodeDoubleAdd>;
+class NodeDoubleAdd: public Node {
 public:
   NodeDoubleAdd( void );
   ~NodeDoubleAdd( void );
   void ToString( std::stringstream& ss ) const { ss << "+"; };
+  double EvaluateDouble( void ) const;
 protected:
 private:
-  double EvaluateDoubleImpl( void ) const;
 };
 
-class NodeDoubleSub: public Node<NodeDoubleSub> {
-  friend Node<NodeDoubleSub>;
+class NodeDoubleSub: public Node {
 public:
   NodeDoubleSub( void );
   ~NodeDoubleSub( void );
   void ToString( std::stringstream& ss ) const { ss << "-"; };
+  double EvaluateDouble( void ) const;
 protected:
 private:
-  double EvaluateDoubleImpl( void ) const;
 };
 
-class NodeDoubleMlt: public Node<NodeDoubleMlt> {
-  friend Node<NodeDoubleMlt>;
+class NodeDoubleMlt: public Node {
 public:
   NodeDoubleMlt( void );
   ~NodeDoubleMlt( void );
   void ToString( std::stringstream& ss ) const { ss << "*"; };
+  double EvaluateDouble( void ) const;
 protected:
 private:
-  double EvaluateDoubleImpl( void ) const;
 };
 
-class NodeDoubleDvd: public Node<NodeDoubleDvd> {
-  friend Node<NodeDoubleDvd>;
+class NodeDoubleDvd: public Node {
 public:
   NodeDoubleDvd( void );
   ~NodeDoubleDvd( void );
   void ToString( std::stringstream& ss ) const { ss << "/"; };
+  double EvaluateDouble( void ) const;
 protected:
 private:
-  double EvaluateDoubleImpl( void ) const;
 };
+
+typedef boost::fusion::vector<NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeDouble_t;
 
 
 } // namespace gp

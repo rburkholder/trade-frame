@@ -19,15 +19,14 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class RootNode: public Node<RootNode> {
-  friend Node<RootNode>;
+class RootNode: public Node {
 public:
   RootNode(void);
   ~RootNode(void);
   void ToString( std::stringstream& ss ) const { ss << "root="; };
+    bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
 

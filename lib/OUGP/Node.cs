@@ -96,7 +96,8 @@ namespace OneUnified.GeneticProgramming {
       node.ParentSide = EParentLink.Right;
     }
 
-    public virtual void AddRandomChildren( bool UseTerminal, bool UseNode, int Depth, int MaxDepth ) {
+    public virtual void AddRandomChildren( 
+        bool UseTerminal, bool UseNode, int Depth, int MaxDepth ) {
       throw new NotSupportedException("AddRandomChildren called from virtual, no override");
     }
 

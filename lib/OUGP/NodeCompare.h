@@ -14,56 +14,54 @@
 
 #pragma once
 
+#include <boost/fusion/container/vector.hpp>
+
 #include "NodeBoolean.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeCompareGT: public Node<NodeCompareGT> {
-  friend Node<NodeCompareGT>;
+class NodeCompareGT: public Node {
 public:
   NodeCompareGT( void );
   ~NodeCompareGT( void );
   void ToString( std::stringstream& ss ) const { ss << ">"; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-class NodeCompareGE: public Node<NodeCompareGE> {
-  friend Node<NodeCompareGE>;
+class NodeCompareGE: public Node {
 public:
   NodeCompareGE( void );
   ~NodeCompareGE( void );
   void ToString( std::stringstream& ss ) const { ss << ">="; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-class NodeCompareLT: public Node<NodeCompareLT> {
-  friend Node<NodeCompareLT>;
+class NodeCompareLT: public Node {
 public:
   NodeCompareLT( void );
   ~NodeCompareLT( void );
   void ToString( std::stringstream& ss ) const { ss << "<"; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-class NodeCompareLE: public Node<NodeCompareLE> {
-  friend Node<NodeCompareLE>;
+class NodeCompareLE: public Node {
 public:
   NodeCompareLE( void );
   ~NodeCompareLE( void );
   void ToString( std::stringstream& ss ) const { ss << "<="; };
+  bool EvaluateBoolean( void ) const;
 protected:
 private:
-  bool EvaluateBooleanImpl( void ) const;
 };
 
-
+typedef boost::fusion::vector<NodeCompareGT, NodeCompareGE, NodeCompareLT, NodeCompareLE> NodeCompare_t;
 
 } // namespace gp
 } // namespace ou
