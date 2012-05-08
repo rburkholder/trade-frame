@@ -21,42 +21,50 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeCompareGT: public Node {
+class NodeCompare: public Node {
+public:
+  NodeCompare( void ): Node( NodeType::Bool, NodeType::Double ) {};
+  ~NodeCompare( void ) {};
+protected:
+private:
+};
+
+class NodeCompareGT: public NodeCompare {
 public:
   NodeCompareGT( void );
   ~NodeCompareGT( void );
   void ToString( std::stringstream& ss ) const { ss << ">"; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };
 
-class NodeCompareGE: public Node {
+class NodeCompareGE: public NodeCompare {
 public:
   NodeCompareGE( void );
   ~NodeCompareGE( void );
   void ToString( std::stringstream& ss ) const { ss << ">="; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };
 
-class NodeCompareLT: public Node {
+class NodeCompareLT: public NodeCompare {
 public:
   NodeCompareLT( void );
   ~NodeCompareLT( void );
   void ToString( std::stringstream& ss ) const { ss << "<"; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };
 
-class NodeCompareLE: public Node {
+class NodeCompareLE: public NodeCompare {
 public:
   NodeCompareLE( void );
   ~NodeCompareLE( void );
   void ToString( std::stringstream& ss ) const { ss << "<="; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };

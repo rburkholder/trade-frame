@@ -21,42 +21,50 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeDoubleAdd: public Node {
+class NodeDouble: public Node {
+public:
+  NodeDouble( void ): Node( NodeType::Double, NodeType::Double ) {};
+  ~NodeDouble( void ) {};
+protected:
+private:
+};
+
+class NodeDoubleAdd: public NodeDouble {
 public:
   NodeDoubleAdd( void );
   ~NodeDoubleAdd( void );
   void ToString( std::stringstream& ss ) const { ss << "+"; };
-  double EvaluateDouble( void ) const;
+  double EvaluateDouble( void );
 protected:
 private:
 };
 
-class NodeDoubleSub: public Node {
+class NodeDoubleSub: public NodeDouble {
 public:
   NodeDoubleSub( void );
   ~NodeDoubleSub( void );
   void ToString( std::stringstream& ss ) const { ss << "-"; };
-  double EvaluateDouble( void ) const;
+  double EvaluateDouble( void );
 protected:
 private:
 };
 
-class NodeDoubleMlt: public Node {
+class NodeDoubleMlt: public NodeDouble {
 public:
   NodeDoubleMlt( void );
   ~NodeDoubleMlt( void );
   void ToString( std::stringstream& ss ) const { ss << "*"; };
-  double EvaluateDouble( void ) const;
+  double EvaluateDouble( void );
 protected:
 private:
 };
 
-class NodeDoubleDvd: public Node {
+class NodeDoubleDvd: public NodeDouble {
 public:
   NodeDoubleDvd( void );
   ~NodeDoubleDvd( void );
   void ToString( std::stringstream& ss ) const { ss << "/"; };
-  double EvaluateDouble( void ) const;
+  double EvaluateDouble( void );
 protected:
 private:
 };

@@ -16,9 +16,6 @@
 
 #include <vector>
 
-#include <boost/fusion/include/size.hpp>
-#include <boost/fusion/include/value_at.hpp>
-
 #include <boost/random.hpp>
 
 #include "Node.h"
@@ -30,24 +27,32 @@ namespace ou { // One Unified
 namespace gp { // genetic programming
 
 class TreeBuilder {
+private:
+  typedef std::vector<Node* (*)()> vNodeFactory_t; 
 public:
 
   TreeBuilder(void);
   ~TreeBuilder(void);
 
-  template<typename S> // S=fusion sequence
-  Node* CreateChild( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth ) {
+  template<typename V> // V vector of CreateNode calls
+  Node* CreateChild( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth, const V& v ) {
+
+      /*               | !depth==max | depth==max |
+       *               |-------------|------------|
+       * !term * !node | illegal     | illegal    |
+       *  term * !node | term        | term       |
+       * !term *  node | node        | term       |
+       *  term *  node | node, term  | term       |
+       */
+
     Node* node( 0 );
-/*
-    typedef boost::fusion::result_of::size<S> size_of_s_type;
-//    size_of_s_type::type sizeofS( size_of_s_type::value );
-    unsigned int sizeofS( size_of_s_type::value );
+
     bool bEnd( false );
     bool bTerminal = ( ( 1 == nDepth ) && ( nDepth < nMaxDepth ) ) ? false : bUseTerminal; // don't use a terminal on first node
     while ( !bEnd ) {
-      boost::random::uniform_int_distribution<unsigned int> dist( 0, size_of_s_type::value - 1 );
-      unsigned int ix( dist( m_rng ) );
-      node = new boost::fusion::result_of::value_at_c<S,dist( m_rng )>;
+      boost::random::uniform_int_distribution<unsigned int> dist( 0, v.size() - 1 );
+      V::size_type ix( dist( m_rng ) );
+      node = v[ ix ]();
       if ( bUseNode && ( nDepth < nMaxDepth ) ) {
         if ( !bTerminal && node->IsTerminal() ) {
           // reject and try another;
@@ -70,36 +75,21 @@ public:
       }
     }
     assert( 0 != node );
-*/
+
     return node;
   }
 
-  template<typename S> // S is fusion view of node types
-  void AddRandomChildren( 
-    Node& node, bool bUseTerminal, bool bUseNode, unsigned int Depth, unsigned int MaxDepth ) {
-    assert( !bUseTerminal && !bUseNode ); // use one or both
-    assert( nDepth <= nMaxDepth ); 
-    switch ( node.NodeCount() ) {
-    case 0: // nothing
-      break;
-    case 1:
-      node.AddCenter( CreateChild<T>( bUseTerminal, bUseNode, nDepth, nMaxDepth ) );
-      if ( !node.ChildCenter().IsTerminal() ) {
-      }
-      break;
-    case 2: 
-      node.AddLeft( CreateChild<T>( bUseTerminal, bUseNode, nDepth, nMaxDepth ) );
-      node.AddRight( CreateChild<T>( bUseTerminal, bUseNode, nDepth, nMaxDepth ) );
-      break;
-    }
-  }
+  void AddRandomChildren( Node& node, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth );
 
 protected:
 private:
+
   boost::random::mt19937 m_rng;
-  typedef std::vector<Node* (*)()> vNodeFactory_t;
-  vNodeFactory_t m_vNodeFactoryBoolean;
+  vNodeFactory_t m_vNodeFactoryAllNodes;
+  vNodeFactory_t m_vNodeFactoryBoolean; 
   vNodeFactory_t m_vNodeFactoryDouble;
+
+  vNodeFactory_t* m_vNodeFactories[ NodeType::Count ];
 
 };
 

@@ -28,14 +28,14 @@ namespace gp { // genetic programming
 
 // ********* NodeDoubleAdd *********
 
-NodeDoubleAdd::NodeDoubleAdd( void ) : Node() {
+NodeDoubleAdd::NodeDoubleAdd( void ) : NodeDouble() {
   m_cntNodes = 2;
 }
 
 NodeDoubleAdd::~NodeDoubleAdd( void ) {
 }
 
-double NodeDoubleAdd::EvaluateDouble( void ) const {
+double NodeDoubleAdd::EvaluateDouble( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 + d2;
@@ -43,14 +43,14 @@ double NodeDoubleAdd::EvaluateDouble( void ) const {
 
 // ********* NodeDoubleSub *********
 
-NodeDoubleSub::NodeDoubleSub( void ) : Node() {
+NodeDoubleSub::NodeDoubleSub( void ) : NodeDouble() {
   m_cntNodes = 2;
 }
 
 NodeDoubleSub::~NodeDoubleSub( void ) {
 }
 
-double NodeDoubleSub::EvaluateDouble( void ) const {
+double NodeDoubleSub::EvaluateDouble( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 - d2;
@@ -58,14 +58,14 @@ double NodeDoubleSub::EvaluateDouble( void ) const {
 
 // ********* NodeDoubleMlt *********
 
-NodeDoubleMlt::NodeDoubleMlt( void ) : Node() {
+NodeDoubleMlt::NodeDoubleMlt( void ) : NodeDouble() {
   m_cntNodes = 2;
 }
 
 NodeDoubleMlt::~NodeDoubleMlt( void ) {
 }
 
-double NodeDoubleMlt::EvaluateDouble( void ) const {
+double NodeDoubleMlt::EvaluateDouble( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 * d2;
@@ -73,14 +73,14 @@ double NodeDoubleMlt::EvaluateDouble( void ) const {
 
 // ********* NodeDoubleDvd *********
 
-NodeDoubleDvd::NodeDoubleDvd( void ) : Node() {
+NodeDoubleDvd::NodeDoubleDvd( void ) : NodeDouble() {
   m_cntNodes = 2;
 }
 
 NodeDoubleDvd::~NodeDoubleDvd( void ) {
 }
 
-double NodeDoubleDvd::EvaluateDouble( void ) const {
+double NodeDoubleDvd::EvaluateDouble( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return ( 0.0 == d2 ) ? HUGE : d1 / d2;

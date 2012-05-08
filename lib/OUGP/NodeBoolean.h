@@ -21,7 +21,15 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeBooleanFalse: public Node {
+class NodeBoolean: public Node {
+public:
+  NodeBoolean( void ): Node( NodeType::Bool, NodeType::Bool ) {};
+  ~NodeBoolean( void ) {};
+protected:
+private:
+};
+
+class NodeBooleanFalse: public NodeBoolean {
 public:
   NodeBooleanFalse( void );
   ~NodeBooleanFalse( void );
@@ -31,7 +39,7 @@ protected:
 private:
 };
 
-class NodeBooleanTrue: public Node {
+class NodeBooleanTrue: public NodeBoolean {
 public:
   NodeBooleanTrue( void );
   ~NodeBooleanTrue( void );
@@ -41,32 +49,32 @@ protected:
 private:
 };
 
-class NodeBooleanNot: public Node {
+class NodeBooleanNot: public NodeBoolean {
 public:
   NodeBooleanNot( void );
   ~NodeBooleanNot( void );
   void ToString( std::stringstream& ss ) const { ss << "!"; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };
 
-class NodeBooleanAnd: public Node {
+class NodeBooleanAnd: public NodeBoolean {
 public:
   NodeBooleanAnd( void );
   ~NodeBooleanAnd( void );
   void ToString( std::stringstream& ss ) const { ss << "&&"; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };
 
-class NodeBooleanOr: public Node {
+class NodeBooleanOr: public NodeBoolean {
 public:
   NodeBooleanOr( void );
   ~NodeBooleanOr( void );
   void ToString( std::stringstream& ss ) const { ss << "||"; };
-  bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };

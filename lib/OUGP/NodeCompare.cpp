@@ -21,14 +21,14 @@ namespace gp { // genetic programming
 
 // ********* NodeCompareGT *********
 
-NodeCompareGT::NodeCompareGT( void ) : Node() {
+NodeCompareGT::NodeCompareGT( void ) : NodeCompare() {
   m_cntNodes = 2;
 }
 
 NodeCompareGT::~NodeCompareGT( void ) {
 }
 
-bool NodeCompareGT::EvaluateBoolean( void ) const {
+bool NodeCompareGT::EvaluateBoolean( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 > d2;
@@ -36,14 +36,14 @@ bool NodeCompareGT::EvaluateBoolean( void ) const {
 
 // ********* NodeCompareGE *********
 
-NodeCompareGE::NodeCompareGE( void ) : Node() {
+NodeCompareGE::NodeCompareGE( void ) : NodeCompare() {
   m_cntNodes = 2;
 }
 
 NodeCompareGE::~NodeCompareGE( void ) {
 }
 
-bool NodeCompareGE::EvaluateBoolean( void ) const {
+bool NodeCompareGE::EvaluateBoolean( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 >= d2;
@@ -51,14 +51,14 @@ bool NodeCompareGE::EvaluateBoolean( void ) const {
 
 // ********* NodeCompareLT *********
 
-NodeCompareLT::NodeCompareLT( void ) : Node() {
+NodeCompareLT::NodeCompareLT( void ) : NodeCompare() {
   m_cntNodes = 2;
 }
 
 NodeCompareLT::~NodeCompareLT( void ) {
 }
 
-bool NodeCompareLT::EvaluateBoolean( void ) const {
+bool NodeCompareLT::EvaluateBoolean( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 < d2;
@@ -66,14 +66,14 @@ bool NodeCompareLT::EvaluateBoolean( void ) const {
 
 // ********* NodeCompareLE *********
 
-NodeCompareLE::NodeCompareLE( void ) : Node() {
+NodeCompareLE::NodeCompareLE( void ) : NodeCompare() {
   m_cntNodes = 2;
 }
 
 NodeCompareLE::~NodeCompareLE( void ) {
 }
 
-bool NodeCompareLE::EvaluateBoolean( void ) const {
+bool NodeCompareLE::EvaluateBoolean( void ) {
   double d1 = ChildLeft().EvaluateDouble();
   double d2 = ChildRight().EvaluateDouble();
   return d1 <= d2;

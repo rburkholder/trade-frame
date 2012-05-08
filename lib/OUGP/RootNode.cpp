@@ -19,14 +19,14 @@ namespace gp { // genetic programming
 
 // ********* RootNode *********
 
-RootNode::RootNode(void): Node() {
+RootNode::RootNode(void): Node( NodeType::Bool, NodeType::Bool ) {
   m_cntNodes = 1;
 }
 
 RootNode::~RootNode(void) {
 }
 
-bool RootNode::EvaluateBoolean( void ) const {
+bool RootNode::EvaluateBoolean( void ) {
   return ChildCenter().EvaluateBoolean();
 }
 

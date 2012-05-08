@@ -21,7 +21,7 @@ namespace gp { // genetic programming
 
 // ********* NodeBooleanFalse *********
 
-NodeBooleanFalse::NodeBooleanFalse( void ) : Node() {
+NodeBooleanFalse::NodeBooleanFalse( void ) : NodeBoolean() {
   m_cntNodes = 0;
 }
 
@@ -30,7 +30,7 @@ NodeBooleanFalse::~NodeBooleanFalse( void ) {
 
 // ********* NodeBooleanTrue *********
 
-NodeBooleanTrue::NodeBooleanTrue( void ) : Node() {
+NodeBooleanTrue::NodeBooleanTrue( void ) : NodeBoolean() {
   m_cntNodes = 0;
 }
 
@@ -39,7 +39,7 @@ NodeBooleanTrue::~NodeBooleanTrue( void ) {
 
 // ********* NodeBooleanNot *********
 
-NodeBooleanNot::NodeBooleanNot( void ) : Node() {
+NodeBooleanNot::NodeBooleanNot( void ) : NodeBoolean() {
   m_cntNodes = 1;
 }
 
@@ -47,13 +47,13 @@ NodeBooleanNot::~NodeBooleanNot( void ) {
 }
 
 //bool NodeBooleanNot::EvaluateBooleanImpl( void ) const {
-bool NodeBooleanNot::EvaluateBoolean( void ) const {
+bool NodeBooleanNot::EvaluateBoolean( void ) {
   return !ChildCenter().EvaluateBoolean();
 }
 
 // ********* NodeBooleanAnd *********
 
-NodeBooleanAnd::NodeBooleanAnd( void ) : Node() {
+NodeBooleanAnd::NodeBooleanAnd( void ) : NodeBoolean() {
   m_cntNodes = 2;
 }
 
@@ -61,7 +61,7 @@ NodeBooleanAnd::~NodeBooleanAnd( void ) {
 }
 
 //bool NodeBooleanAnd::EvaluateBooleanImpl( void ) const {
-bool NodeBooleanAnd::EvaluateBoolean( void ) const {
+bool NodeBooleanAnd::EvaluateBoolean( void ) {
   bool b1 = ChildLeft().EvaluateBoolean();
   bool b2 = ChildRight().EvaluateBoolean();
   return b1 && b2;
@@ -69,7 +69,7 @@ bool NodeBooleanAnd::EvaluateBoolean( void ) const {
 
 // ********* NodeBooleanOr *********
 
-NodeBooleanOr::NodeBooleanOr( void ) : Node() {
+NodeBooleanOr::NodeBooleanOr( void ) : NodeBoolean() {
   m_cntNodes = 2;
 }
 
@@ -77,7 +77,7 @@ NodeBooleanOr::~NodeBooleanOr( void ) {
 }
 
 //bool NodeBooleanOr::EvaluateBooleanImpl( void ) const {
-bool NodeBooleanOr::EvaluateBoolean( void ) const {
+bool NodeBooleanOr::EvaluateBoolean( void ) {
   bool b1 = ChildLeft().EvaluateBoolean();
   bool b2 = ChildRight().EvaluateBoolean();
   return b1 || b2;

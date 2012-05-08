@@ -70,13 +70,14 @@ int _tmain(int argc, _TCHAR* argv[]) {
   std::cout << whatsit::value << std::endl;
 
   ou::gp::TreeBuilder tb;
-//  tb.CreateChild<ou::gp::TreeBuilder::boolean_t>( false, true, 1, 5 );
 
-  ou::gp::NodeDoubleAdd node;
+  //ou::gp::Node* node = tb.CreateChild( false, true, 1, 5, tb.m_vNodeFactoryBoolean );
 
-  ss << node;
+//  ou::gp::NodeDoubleAdd node;
 
-  node.EvaluateDouble();
+//  ss << *node;
+
+//  node.EvaluateDouble();
 
 
 	return 0;

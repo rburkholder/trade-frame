@@ -24,7 +24,7 @@ public:
   RootNode(void);
   ~RootNode(void);
   void ToString( std::stringstream& ss ) const { ss << "root="; };
-    bool EvaluateBoolean( void ) const;
+  bool EvaluateBoolean( void );
 protected:
 private:
 };

@@ -22,6 +22,10 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
+namespace NodeType {
+  enum E { Bool = 0, Double = 1, Count = 2 };  // used for indexing to correct lookup vector
+}
+
 class Node {
 public:
 
@@ -29,11 +33,13 @@ public:
     None = 0, Left, Center, Right
   };
 
-  Node(void);
+  Node( NodeType::E ReturnType, NodeType::E ChildType );
   virtual ~Node(void);
 
   bool IsTerminal( void ) const { return 0 == m_cntNodes; };
   unsigned int NodeCount( void ) const { return m_cntNodes; };
+  NodeType::E ReturnType( void ) const { return m_ReturnType; };
+  NodeType::E ChildType( void ) const  { return m_ChildType; };
 
   virtual void TreeToString( std::stringstream& ) const;
   virtual void ToString( std::stringstream& ) const {};
@@ -46,11 +52,14 @@ public:
   void AddCenter( Node* node );  // used with terminal node
   void AddRight( Node* node );  // used with two node
 
-  const Node& ChildLeft( void ) const { assert( 0 != m_pChildLeft ); return *m_pChildLeft; };
-  const Node& ChildCenter( void ) const{ assert( 0 != m_pChildCenter ); return *m_pChildCenter; };
-  const Node& ChildRight( void ) const { assert( 0 != m_pChildRight ); return *m_pChildRight; };
+  Node& ChildLeft( void ) { assert( 0 != m_pChildLeft ); return *m_pChildLeft; };
+  Node& ChildCenter( void ) { assert( 0 != m_pChildCenter ); return *m_pChildCenter; };
+  Node& ChildRight( void ) { assert( 0 != m_pChildRight ); return *m_pChildRight; };
 
 protected:
+
+  NodeType::E m_ReturnType;
+  NodeType::E m_ChildType;
 
   Node* m_pParent;
 

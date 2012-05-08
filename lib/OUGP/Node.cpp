@@ -22,8 +22,8 @@ std::stringstream& operator<<( std::stringstream& ss, const Node& node ) {
   return ss;
 }
 
-Node::Node(void) 
-  : m_cntNodes( 0 ), m_eParentSide( None ), 
+Node::Node( NodeType::E ReturnType, NodeType::E ChildType ) 
+  : m_cntNodes( 0 ), m_eParentSide( None ), m_ReturnType( ReturnType ), m_ChildType( ChildType ),
     m_pParent( 0 ), m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 )
 {
   m_pParent = 0;
@@ -31,20 +31,24 @@ Node::Node(void)
 
 Node::~Node(void) {
 #ifdef _DEBUG
-  if ( 0 == m_cntNodes ) {
-    assert( 0 == m_pChildLeft );
-    assert( 0 == m_pChildCenter );
-    assert( 0 == m_pChildRight );
+  if ( ( 0 == m_pChildLeft ) && ( 0 == m_pChildCenter ) && ( 0 == m_pChildRight ) ) {
   }
-  if ( 1 == m_cntNodes ) {
-    assert( 0 == m_pChildLeft );
-    assert( 0 != m_pChildCenter );
-    assert( 0 == m_pChildRight );
-  }
-  if ( 2 == m_cntNodes ) {
-    assert( 0 != m_pChildLeft );
-    assert( 0 == m_pChildCenter );
-    assert( 0 != m_pChildRight );
+  else {
+    if ( 0 == m_cntNodes ) {
+      assert( 0 == m_pChildLeft );
+      assert( 0 == m_pChildCenter );
+      assert( 0 == m_pChildRight );
+    }
+    if ( 1 == m_cntNodes ) {
+      assert( 0 == m_pChildLeft );
+      assert( 0 != m_pChildCenter );
+      assert( 0 == m_pChildRight );
+    }
+    if ( 2 == m_cntNodes ) {
+      assert( 0 != m_pChildLeft );
+      assert( 0 == m_pChildCenter );
+      assert( 0 != m_pChildRight );
+    }
   }
 #endif
   if ( 0 != m_pChildLeft ) delete m_pChildLeft;
