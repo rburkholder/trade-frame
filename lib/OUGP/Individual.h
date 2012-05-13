@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+
 #include "RootNode.h"
 
 namespace ou { // One Unified
@@ -24,11 +26,13 @@ public:
 
   unsigned int m_id;
 
+  typedef boost::shared_ptr<RootNode> pRootNode_t;
+
   struct Signals_t {
-    RootNode rnLongEnter;
-    RootNode rnLongExit;
-    RootNode rnShortEnter;
-    RootNode rnShortExit;
+    pRootNode_t rnLongEnter;
+    pRootNode_t rnLongExit;
+    pRootNode_t rnShortEnter;
+    pRootNode_t rnShortExit;
     static const unsigned int  cntSignals = 4;
   } m_Signals;
 
@@ -37,8 +41,11 @@ public:
   double m_dblAdjustedFitness;  // 1 / ( 1 + rf ), range 0 to 1, with 1 being best
   double m_dblNormalizedFitness;  // af / sum(af), range 0 to 1, with 1 being best, sum is 1
 
-  Individual(void);
-  ~Individual(void);
+  Individual( void );
+  Individual( const Individual& rhs );
+  ~Individual( void );
+
+  const Individual& operator=( const Individual& rhs );
 
   void TreeToString( std::stringstream& ss ) const;
 
@@ -48,7 +55,8 @@ public:
 protected:
 private:
   bool m_bComputed;
-  unsigned int m_nCount;
+  static unsigned int m_nIdGenerator;
+  unsigned int m_nCount;  // how many times has this Individual crossed generations
 };
 
 } // namespace gp

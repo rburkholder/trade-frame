@@ -18,7 +18,9 @@
 #include <array>
 
 #include <boost/random.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
 
+#include "TreeBuilder.h"
 #include "Individual.h"
 
 namespace ou { // One Unified
@@ -31,39 +33,46 @@ public:
 protected:
 private:
   // page 114, Kosa 1992
-  unsigned int m_nPopulationSize; // should be multiple of ( 2 * ( size / maxdepth - 1 ) )
-  unsigned int m_nMaxGenerations;
+  const unsigned int m_nPopulationSize; // should be multiple of ( 2 * ( size / maxdepth - 1 ) )
+  const double m_dblPopulationSize;
+  const unsigned int m_nMaxGenerations;
 
-  unsigned int m_nMaxDepthOnCreation;
-  unsigned int m_nMaxDepthOnCrossover;
+  const unsigned int m_nMaxDepthOnCreation;
+  const unsigned int m_nMaxDepthOnCrossover;
 
-  double m_probFunctionPointCrossover;
-  double m_probTerminalPointCrossover;
+  const double m_probFunctionPointCrossover;
+  const double m_probTerminalPointCrossover;
 
-  double m_probCrossover;
-  double m_probReproduction;
+  const double m_probCrossover;
+  const double m_probReproduction;
+
+  const double m_probDecimation;
+  const double m_ratioElitism;
+
+  const unsigned int m_nTournamentSize;
+  const double m_probTournamentSegregation;
 
   double m_probMutation;
   double m_probPermutation;
 
-  double m_probDecimation;
-  double m_ratioElitism;
-
-  unsigned int m_nTournamentSize;
-
-  unsigned int m_cntSignals;
   unsigned int m_cntAboveAverage;
 
-  // pointer to array of individuals
-  Individual* m_pCurGeneration;
-  Individual* m_pNxtGeneration;
+  typedef std::vector<Individual> vGeneration_t;
+  vGeneration_t* m_pvCurGeneration;
+  vGeneration_t* m_pvNxtGeneration;
 
-  typedef std::vector<Individual*> vGenerations_t;
+  typedef std::vector<vGeneration_t*> vGenerations_t;
   vGenerations_t m_vGenerations;
 
   boost::random::mt19937 m_rng;
+  boost::random::uniform_real_distribution<double> m_urd;
 
-  void CreateIndividuals( unsigned int cntIndividuals, Individual* pGeneration );
+  TreeBuilder m_tb;
+
+  void BuildIndividuals( vGeneration_t& vGeneration );
+  unsigned int TournamentSelection( unsigned int cntAboveAverage );
+  bool IsMatchInGeneration( const Individual&, const vGeneration_t&, vGeneration_t::size_type ixMax );
+  bool MakeNewGeneration( bool bCopyValues );
 
 };
 

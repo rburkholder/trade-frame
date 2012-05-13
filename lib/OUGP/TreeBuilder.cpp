@@ -39,8 +39,8 @@ struct NodeFactoryInit {
 TreeBuilder::TreeBuilder(void) 
   : m_rng( std::time( 0 ) )  // possible issue after jan 18, 2038?
 {
-  m_vNodeFactories[ NodeType::Bool ] = &m_vNodeFactoryBoolean;
-  m_vNodeFactories[ NodeType::Double ] = &m_vNodeFactoryDouble;
+  m_rNodeFactories[ NodeType::Bool ] = &m_vNodeFactoryBoolean;
+  m_rNodeFactories[ NodeType::Double ] = &m_vNodeFactoryDouble;
 
   NodeBoolean_t b1;
   boost::fusion::for_each( b1, NodeFactoryInit(m_vNodeFactoryBoolean) );
@@ -54,11 +54,55 @@ TreeBuilder::TreeBuilder(void)
 TreeBuilder::~TreeBuilder(void) {
 }
 
+Node* TreeBuilder::CreateChild( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth, const vNodeFactory_t& v ) {
+
+    /*               | !depth==max | depth==max |
+      *               |-------------|------------|
+      * !term * !node | illegal     | illegal    |
+      *  term * !node | term        | term       |
+      * !term *  node | node        | term       |
+      *  term *  node | node, term  | term       |
+      */
+
+  Node* node( 0 );
+
+  bool bEnd( false );
+  bool bTerminal = ( ( 1 == nDepth ) && ( nDepth < nMaxDepth ) ) ? false : bUseTerminal; // don't use a terminal on first node
+  boost::random::uniform_int_distribution<unsigned int> dist( 0, v.size() - 1 );
+  while ( !bEnd ) {
+    vNodeFactory_t::size_type ix( dist( m_rng ) );
+    node = v[ ix ]();
+    if ( bUseNode && ( nDepth < nMaxDepth ) ) {
+      if ( !bTerminal && node->IsTerminal() ) {
+        // reject and try another;
+      }
+      else {
+        bEnd = true;
+      }
+    }
+    else {
+      if ( node->IsTerminal() ) {
+        bEnd = true;
+      }
+      else {
+        // reject and try another;
+      }
+    }
+    if ( !bEnd ) {
+      delete node;
+      node = 0;
+    }
+  }
+  assert( 0 != node );
+
+  return node;
+}
+
 void TreeBuilder::AddRandomChildren( 
   Node& node, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth ) {
   assert( !bUseTerminal && !bUseNode ); // use one or both
   assert( nDepth <= nMaxDepth ); 
-  vNodeFactory_t& vFactory( *m_vNodeFactories[ node.ChildType() ] );
+  vNodeFactory_t& vFactory( *m_rNodeFactories[ node.ChildType() ] );
   switch ( node.NodeCount() ) {
   case 0: // nothing, this is terminal node
     assert( node.IsTerminal() );

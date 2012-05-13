@@ -17,24 +17,48 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
+unsigned int Individual::m_nIdGenerator( 0 );
+
 Individual::Individual(void)
-  : m_bComputed( false ), m_nCount( 1 ), m_id( m_nCount++ ),
+  : m_bComputed( false ), m_nCount( 1 ), m_id( m_nIdGenerator++ ),
   m_dblRawFitness( 0.0 ), m_dblRelativeFitness( 0.0 ), m_dblAdjustedFitness( 0.0 ), m_dblNormalizedFitness( 0.0 )
+{
+}
+
+Individual::Individual( const Individual& rhs )
+  : m_bComputed( rhs.m_bComputed ), m_nCount( rhs.m_nCount + 1 ), m_id( rhs.m_id ),
+  m_dblRawFitness( rhs.m_dblRawFitness ), m_dblRelativeFitness( rhs.m_dblRelativeFitness ), 
+  m_dblAdjustedFitness( rhs.m_dblAdjustedFitness ), m_dblNormalizedFitness( rhs.m_dblNormalizedFitness ),
+  m_Signals( rhs.m_Signals )
 {
 }
 
 Individual::~Individual(void) {
 }
 
+const Individual& Individual::operator=( const Individual& rhs ) {
+  if ( &rhs != this ) {
+    m_bComputed = rhs.m_bComputed;
+    m_nCount = rhs.m_nCount + 1;
+    m_id = rhs.m_id;
+    m_dblRawFitness = rhs.m_dblRawFitness;
+    m_dblRelativeFitness = rhs.m_dblRelativeFitness;
+    m_dblAdjustedFitness = rhs.m_dblAdjustedFitness;
+    m_dblNormalizedFitness = rhs.m_dblNormalizedFitness;
+    m_Signals = rhs.m_Signals;
+  }
+  return *this;
+}
+
 void Individual::TreeToString( std::stringstream& ss ) const {
   ss << "LEnter=";
-  m_Signals.rnLongEnter.TreeToString( ss );
+  m_Signals.rnLongEnter->TreeToString( ss );
   ss << "\nLExit=";
-  m_Signals.rnLongExit.TreeToString( ss );
+  m_Signals.rnLongExit->TreeToString( ss );
   ss << "\nSEnter=";
-  m_Signals.rnShortEnter.TreeToString( ss );
+  m_Signals.rnShortEnter->TreeToString( ss );
   ss << "\nLExit=";
-  m_Signals.rnShortExit.TreeToString( ss );
+  m_Signals.rnShortExit->TreeToString( ss );
   ss << "\n";
 }
 
