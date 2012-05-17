@@ -21,15 +21,16 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeDouble: public Node {
+template<class T>
+class NodeDouble: public NodeProxy<T> {
 public:
-  NodeDouble( void ): Node( NodeType::Double, NodeType::Double ) {};
+  NodeDouble( void ): NodeProxy<T>( NodeType::Double, NodeType::Double ) {};
   ~NodeDouble( void ) {};
 protected:
 private:
 };
 
-class NodeDoubleAdd: public NodeDouble {
+class NodeDoubleAdd: public NodeDouble<NodeDoubleAdd> {
 public:
   NodeDoubleAdd( void );
   ~NodeDoubleAdd( void );
@@ -39,7 +40,7 @@ protected:
 private:
 };
 
-class NodeDoubleSub: public NodeDouble {
+class NodeDoubleSub: public NodeDouble<NodeDoubleSub> {
 public:
   NodeDoubleSub( void );
   ~NodeDoubleSub( void );
@@ -49,7 +50,7 @@ protected:
 private:
 };
 
-class NodeDoubleMlt: public NodeDouble {
+class NodeDoubleMlt: public NodeDouble<NodeDoubleMlt> {
 public:
   NodeDoubleMlt( void );
   ~NodeDoubleMlt( void );
@@ -59,7 +60,7 @@ protected:
 private:
 };
 
-class NodeDoubleDvd: public NodeDouble {
+class NodeDoubleDvd: public NodeDouble<NodeDoubleDvd> {
 public:
   NodeDoubleDvd( void );
   ~NodeDoubleDvd( void );

@@ -14,8 +14,13 @@
 
 #include <vector>
 
-#include <boost/assign/std/vector.hpp>
-using namespace boost::assign;
+//#include <boost/assign/std/vector.hpp>
+//using namespace boost::assign;
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/core/reference.hpp>
+#include <boost/phoenix/stl/container.hpp>
 
 #include "Individual.h"
 
@@ -46,6 +51,9 @@ Population::~Population(void) {
 }
 
 void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
+
+  using boost::phoenix::arg_names::arg1;
+
   // can only populate starting at beginning
   // create individuals with RootNode signals
   // keep rootnodes in a list so they can be populated with random expressions
@@ -56,10 +64,8 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
   vSignals.resize( n );
   unsigned int iy = 0;
   for ( vSignals_t::size_type ix = 0; ix < vGeneration.size(); ++ix ) {
-    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnLongEnter;
-    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnLongExit;
-    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnShortEnter;
-    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnShortExit;
+//    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnLong;
+    vGeneration[ ix ].m_Signals.EachSignal( boost::phoenix::ref( vSignals.at(iy++) ) = arg1 );
   }
 
   // implement ramped half and half, koza, 1992, page 93
@@ -133,6 +139,8 @@ bool Population::IsMatchInGeneration( const Individual& individual, const vGener
 
 bool Population::MakeNewGeneration( bool bCopyValues ) {
 
+  using boost::phoenix::arg_names::arg1;
+
   typedef Individual::pRootNode_t pRootNode_t;
 
   bool bMore( false );
@@ -196,31 +204,16 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         pRootNode_t rnNode( new RootNode() );  // holds node
 
         std::vector<pRootNode_t> vSrcNodes;
-        vSrcNodes +=  
-          i1.m_Signals.rnLongEnter,
-          i1.m_Signals.rnLongExit,
-          i1.m_Signals.rnShortEnter,
-          i1.m_Signals.rnShortExit,
-          i2.m_Signals.rnLongEnter,
-          i2.m_Signals.rnLongExit,
-          i2.m_Signals.rnShortEnter,
-          i2.m_Signals.rnShortExit
-        ;
+        i1.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
+        i2.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
 
         Individual i3;
         Individual i4;
 
         std::vector<pRootNode_t> vDstNodes;
-        vDstNodes +=  
-          i3.m_Signals.rnLongEnter,
-          i3.m_Signals.rnLongExit,
-          i3.m_Signals.rnShortEnter,
-          i3.m_Signals.rnShortExit,
-          i4.m_Signals.rnLongEnter,
-          i4.m_Signals.rnLongExit,
-          i4.m_Signals.rnShortEnter,
-          i4.m_Signals.rnShortExit
-        ;
+
+        i3.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
+        i4.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
 
         // crossover all but two random pairs
         typedef std::vector<pRootNode_t>::size_type prob2_t;

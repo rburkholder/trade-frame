@@ -21,7 +21,7 @@ namespace gp { // genetic programming
 
 // ********* NodeBooleanFalse *********
 
-NodeBooleanFalse::NodeBooleanFalse( void ) : NodeBoolean() {
+NodeBooleanFalse::NodeBooleanFalse( void ) : NodeBoolean<NodeBooleanFalse>() {
   m_cntNodes = 0;
 }
 
@@ -30,7 +30,7 @@ NodeBooleanFalse::~NodeBooleanFalse( void ) {
 
 // ********* NodeBooleanTrue *********
 
-NodeBooleanTrue::NodeBooleanTrue( void ) : NodeBoolean() {
+NodeBooleanTrue::NodeBooleanTrue( void ) : NodeBoolean<NodeBooleanTrue>() {
   m_cntNodes = 0;
 }
 
@@ -39,7 +39,7 @@ NodeBooleanTrue::~NodeBooleanTrue( void ) {
 
 // ********* NodeBooleanNot *********
 
-NodeBooleanNot::NodeBooleanNot( void ) : NodeBoolean() {
+NodeBooleanNot::NodeBooleanNot( void ) : NodeBoolean<NodeBooleanNot>() {
   m_cntNodes = 1;
 }
 
@@ -53,7 +53,7 @@ bool NodeBooleanNot::EvaluateBoolean( void ) {
 
 // ********* NodeBooleanAnd *********
 
-NodeBooleanAnd::NodeBooleanAnd( void ) : NodeBoolean() {
+NodeBooleanAnd::NodeBooleanAnd( void ) : NodeBoolean<NodeBooleanAnd>() {
   m_cntNodes = 2;
 }
 
@@ -69,7 +69,7 @@ bool NodeBooleanAnd::EvaluateBoolean( void ) {
 
 // ********* NodeBooleanOr *********
 
-NodeBooleanOr::NodeBooleanOr( void ) : NodeBoolean() {
+NodeBooleanOr::NodeBooleanOr( void ) : NodeBoolean<NodeBooleanOr>() {
   m_cntNodes = 2;
 }
 

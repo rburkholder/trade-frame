@@ -21,15 +21,16 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeCompare: public Node {
+template<class T>
+class NodeCompare: public NodeProxy<T> {
 public:
-  NodeCompare( void ): Node( NodeType::Bool, NodeType::Double ) {};
+  NodeCompare( void ): NodeProxy<T>( NodeType::Bool, NodeType::Double ) {};
   ~NodeCompare( void ) {};
 protected:
 private:
 };
 
-class NodeCompareGT: public NodeCompare {
+class NodeCompareGT: public NodeCompare<NodeCompareGT> {
 public:
   NodeCompareGT( void );
   ~NodeCompareGT( void );
@@ -39,7 +40,7 @@ protected:
 private:
 };
 
-class NodeCompareGE: public NodeCompare {
+class NodeCompareGE: public NodeCompare<NodeCompareGE> {
 public:
   NodeCompareGE( void );
   ~NodeCompareGE( void );
@@ -49,7 +50,7 @@ protected:
 private:
 };
 
-class NodeCompareLT: public NodeCompare {
+class NodeCompareLT: public NodeCompare<NodeCompareLT> {
 public:
   NodeCompareLT( void );
   ~NodeCompareLT( void );
@@ -59,7 +60,7 @@ protected:
 private:
 };
 
-class NodeCompareLE: public NodeCompare {
+class NodeCompareLE: public NodeCompare<NodeCompareLE> {
 public:
   NodeCompareLE( void );
   ~NodeCompareLE( void );

@@ -51,7 +51,11 @@ const Individual& Individual::operator=( const Individual& rhs ) {
 }
 
 void Individual::TreeToString( std::stringstream& ss ) const {
-  ss << "LEnter=";
+  ss << "Long=";
+  m_Signals.rnLong->TreeToString( ss );
+  ss << "\nShort=";
+  m_Signals.rnShort->TreeToString( ss );
+/*
   m_Signals.rnLongEnter->TreeToString( ss );
   ss << "\nLExit=";
   m_Signals.rnLongExit->TreeToString( ss );
@@ -59,6 +63,7 @@ void Individual::TreeToString( std::stringstream& ss ) const {
   m_Signals.rnShortEnter->TreeToString( ss );
   ss << "\nLExit=";
   m_Signals.rnShortExit->TreeToString( ss );
+  */
   ss << "\n";
 }
 

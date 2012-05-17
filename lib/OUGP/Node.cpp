@@ -24,9 +24,9 @@ std::stringstream& operator<<( std::stringstream& ss, const Node& node ) {
 
 Node::Node( NodeType::E ReturnType, NodeType::E ChildType ) 
   : m_cntNodes( 0 ), m_eParentSide( None ), m_ReturnType( ReturnType ), m_ChildType( ChildType ),
-    m_pParent( 0 ), m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 )
+    m_pParent( 0 ), m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 ),
+    m_ixCreateNode( 0 )
 {
-  m_pParent = 0;
 }
 
 Node::~Node(void) {
@@ -91,6 +91,20 @@ void Node::TreeToString( std::stringstream& ss ) const {
     ss << ')';
     break;
   }
+}
+
+Node* Node::Replicate( bool bCopyValues ) {
+  Node* node = Clone( bCopyValues );
+  if ( 0 != m_pChildLeft ) {
+    node->AddLeft( m_pChildLeft->Replicate( bCopyValues ) );
+  }
+  if ( 0 != m_pChildCenter ) {
+    node->AddCenter( m_pChildCenter->Replicate( bCopyValues ) );
+  }
+  if ( 0 != m_pChildRight ) {
+    node->AddRight( m_pChildRight->Replicate( bCopyValues ) );
+  }
+  return node;
 }
 
 } // namespace gp

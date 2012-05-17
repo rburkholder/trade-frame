@@ -39,15 +39,21 @@ struct NodeFactoryInit {
 TreeBuilder::TreeBuilder(void) 
   : m_rng( std::time( 0 ) )  // possible issue after jan 18, 2038?
 {
+
   m_rNodeFactories[ NodeType::Bool ] = &m_vNodeFactoryBoolean;
   m_rNodeFactories[ NodeType::Double ] = &m_vNodeFactoryDouble;
 
   NodeBoolean_t b1;
   boost::fusion::for_each( b1, NodeFactoryInit(m_vNodeFactoryBoolean) );
+  boost::fusion::for_each( b1, NodeFactoryInit(m_vNodeFactoryAllNodes) );
+
   NodeCompare_t b2;
   boost::fusion::for_each( b2, NodeFactoryInit(m_vNodeFactoryBoolean) );
+  boost::fusion::for_each( b2, NodeFactoryInit(m_vNodeFactoryAllNodes) );
+
   NodeDouble_t d1;
   boost::fusion::for_each( d1, NodeFactoryInit(m_vNodeFactoryDouble) );
+  boost::fusion::for_each( d1, NodeFactoryInit(m_vNodeFactoryAllNodes) );
 
 }
 

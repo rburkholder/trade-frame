@@ -21,15 +21,16 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class NodeBoolean: public Node {
+template<class T>
+class NodeBoolean: public NodeProxy<T> {
 public:
-  NodeBoolean( void ): Node( NodeType::Bool, NodeType::Bool ) {};
+  NodeBoolean( void ): NodeProxy<T>( NodeType::Bool, NodeType::Bool ) {};
   ~NodeBoolean( void ) {};
 protected:
 private:
 };
 
-class NodeBooleanFalse: public NodeBoolean {
+class NodeBooleanFalse: public NodeBoolean<NodeBooleanFalse> {
 public:
   NodeBooleanFalse( void );
   ~NodeBooleanFalse( void );
@@ -39,7 +40,7 @@ protected:
 private:
 };
 
-class NodeBooleanTrue: public NodeBoolean {
+class NodeBooleanTrue: public NodeBoolean<NodeBooleanTrue> {
 public:
   NodeBooleanTrue( void );
   ~NodeBooleanTrue( void );
@@ -49,7 +50,7 @@ protected:
 private:
 };
 
-class NodeBooleanNot: public NodeBoolean {
+class NodeBooleanNot: public NodeBoolean<NodeBooleanNot> {
 public:
   NodeBooleanNot( void );
   ~NodeBooleanNot( void );
@@ -59,7 +60,7 @@ protected:
 private:
 };
 
-class NodeBooleanAnd: public NodeBoolean {
+class NodeBooleanAnd: public NodeBoolean<NodeBooleanAnd> {
 public:
   NodeBooleanAnd( void );
   ~NodeBooleanAnd( void );
@@ -69,7 +70,7 @@ protected:
 private:
 };
 
-class NodeBooleanOr: public NodeBoolean {
+class NodeBooleanOr: public NodeBoolean<NodeBooleanOr> {
 public:
   NodeBooleanOr( void );
   ~NodeBooleanOr( void );

@@ -19,7 +19,7 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-class RootNode: public Node {
+class RootNode: public NodeProxy<RootNode> {
 public:
   RootNode(void);
   ~RootNode(void);

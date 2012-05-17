@@ -21,7 +21,7 @@ namespace gp { // genetic programming
 
 // ********* NodeCompareGT *********
 
-NodeCompareGT::NodeCompareGT( void ) : NodeCompare() {
+NodeCompareGT::NodeCompareGT( void ) : NodeCompare<NodeCompareGT>() {
   m_cntNodes = 2;
 }
 
@@ -36,7 +36,7 @@ bool NodeCompareGT::EvaluateBoolean( void ) {
 
 // ********* NodeCompareGE *********
 
-NodeCompareGE::NodeCompareGE( void ) : NodeCompare() {
+NodeCompareGE::NodeCompareGE( void ) : NodeCompare<NodeCompareGE>() {
   m_cntNodes = 2;
 }
 
@@ -51,7 +51,7 @@ bool NodeCompareGE::EvaluateBoolean( void ) {
 
 // ********* NodeCompareLT *********
 
-NodeCompareLT::NodeCompareLT( void ) : NodeCompare() {
+NodeCompareLT::NodeCompareLT( void ) : NodeCompare<NodeCompareLT>() {
   m_cntNodes = 2;
 }
 
@@ -66,7 +66,7 @@ bool NodeCompareLT::EvaluateBoolean( void ) {
 
 // ********* NodeCompareLE *********
 
-NodeCompareLE::NodeCompareLE( void ) : NodeCompare() {
+NodeCompareLE::NodeCompareLE( void ) : NodeCompare<NodeCompareLE>() {
   m_cntNodes = 2;
 }
 

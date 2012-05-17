@@ -29,6 +29,8 @@ namespace NodeType {
 class Node {
 public:
 
+  typedef std::vector<Node* (*)()> fnCreateNode_t;
+
   enum EParentLink {
     None = 0, Left, Center, Right
   };
@@ -56,6 +58,11 @@ public:
   Node& ChildCenter( void ) { assert( 0 != m_pChildCenter ); return *m_pChildCenter; };
   Node& ChildRight( void ) { assert( 0 != m_pChildRight ); return *m_pChildRight; };
 
+  void SetCreateNodeIndex( fnCreateNode_t::size_type ix ) { m_ixCreateNode = ix; };
+  fnCreateNode_t::size_type GetCreateNodeIndex( void ) { return m_ixCreateNode; };
+
+  Node* Replicate( bool bCopyValues );
+
 protected:
 
   NodeType::E m_ReturnType;
@@ -71,10 +78,31 @@ protected:
 
   EParentLink m_eParentSide;
 
+  virtual Node* Clone( bool bCopyValues ) = 0;
+
 private:
+  fnCreateNode_t::size_type m_ixCreateNode; // indexs into m_vNodeFactoryAllNodes for self creation
 };
 
 std::stringstream& operator<<( std::stringstream& ss, const Node& node );
+
+template<typename T> // CRTP 
+class NodeProxy: public Node {
+public:
+  NodeProxy( NodeType::E ReturnType, NodeType::E ChildType ): Node( ReturnType, ChildType ) {};
+  virtual ~NodeProxy( void ) {};
+
+  virtual Node* Clone( bool bCopyValues ) {
+    T* t = new T;
+    if ( bCopyValues ) {
+      *t = dynamic_cast<T&>( *this );
+    }
+    return t;
+  }
+
+protected:
+private:
+};
 
 } // namespace gp
 } // namespace ou

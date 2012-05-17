@@ -29,11 +29,14 @@ public:
   typedef boost::shared_ptr<RootNode> pRootNode_t;
 
   struct Signals_t {
-    pRootNode_t rnLongEnter;
-    pRootNode_t rnLongExit;
-    pRootNode_t rnShortEnter;
-    pRootNode_t rnShortExit;
-    static const unsigned int  cntSignals = 4;
+    pRootNode_t rnLong; // mutually exclusive, when long is set, be long, when short is set, be short, 
+    pRootNode_t rnShort;  // when both are set or unset, be out of market
+    static const unsigned int  cntSignals = 2;
+    template<typename F> // function
+    void EachSignal( F f ) {
+      f( rnLong );
+      f( rnShort );
+    }
   } m_Signals;
 
   double m_dblRawFitness; // absolute dollars value

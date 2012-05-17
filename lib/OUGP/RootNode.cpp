@@ -19,7 +19,7 @@ namespace gp { // genetic programming
 
 // ********* RootNode *********
 
-RootNode::RootNode(void): Node( NodeType::Bool, NodeType::Bool ) {
+RootNode::RootNode(void): NodeProxy<RootNode>( NodeType::Bool, NodeType::Bool ) {
   m_cntNodes = 1;
 }
 

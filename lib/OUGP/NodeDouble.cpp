@@ -28,7 +28,7 @@ namespace gp { // genetic programming
 
 // ********* NodeDoubleAdd *********
 
-NodeDoubleAdd::NodeDoubleAdd( void ) : NodeDouble() {
+NodeDoubleAdd::NodeDoubleAdd( void ) : NodeDouble<NodeDoubleAdd>() {
   m_cntNodes = 2;
 }
 
@@ -43,7 +43,7 @@ double NodeDoubleAdd::EvaluateDouble( void ) {
 
 // ********* NodeDoubleSub *********
 
-NodeDoubleSub::NodeDoubleSub( void ) : NodeDouble() {
+NodeDoubleSub::NodeDoubleSub( void ) : NodeDouble<NodeDoubleSub>() {
   m_cntNodes = 2;
 }
 
@@ -58,7 +58,7 @@ double NodeDoubleSub::EvaluateDouble( void ) {
 
 // ********* NodeDoubleMlt *********
 
-NodeDoubleMlt::NodeDoubleMlt( void ) : NodeDouble() {
+NodeDoubleMlt::NodeDoubleMlt( void ) : NodeDouble<NodeDoubleMlt>() {
   m_cntNodes = 2;
 }
 
@@ -73,7 +73,7 @@ double NodeDoubleMlt::EvaluateDouble( void ) {
 
 // ********* NodeDoubleDvd *********
 
-NodeDoubleDvd::NodeDoubleDvd( void ) : NodeDouble() {
+NodeDoubleDvd::NodeDoubleDvd( void ) : NodeDouble<NodeDoubleDvd>() {
   m_cntNodes = 2;
 }
 
