@@ -64,7 +64,6 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
   vSignals.resize( n );
   unsigned int iy = 0;
   for ( vSignals_t::size_type ix = 0; ix < vGeneration.size(); ++ix ) {
-//    vSignals[iy++] = vGeneration[ ix ].m_Signals.rnLong;
     vGeneration[ ix ].m_Signals.EachSignal( boost::phoenix::ref( vSignals.at(iy++) ) = arg1 );
   }
 
@@ -140,8 +139,6 @@ bool Population::IsMatchInGeneration( const Individual& individual, const vGener
 bool Population::MakeNewGeneration( bool bCopyValues ) {
 
   using boost::phoenix::arg_names::arg1;
-
-  typedef Individual::pRootNode_t pRootNode_t;
 
   bool bMore( false );
   unsigned int cntMaxElites( (unsigned int) std::floor( m_ratioElitism * m_dblPopulationSize + 0.5 ) );
@@ -228,6 +225,13 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
           prob2 = dist2( m_rng );
           rnOldXOver2 = vSrcNodes[ prob2 ];
           vSrcNodes.erase( vSrcNodes.begin() + prob2 );
+
+          rnNewXOver1.reset( dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) ) );
+          rnNewXOver2.reset( dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) ) );
+
+          // rebuild candidate lists here, if we need them
+
+          // do the crossover
         }
 
       }
@@ -236,6 +240,12 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
   }
 
   return bMore;
+}
+
+bool Population::CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 ) {
+  bool bSuccessful = false;
+  unsigned int probability;
+  return bSuccessful;
 }
 
 } // namespace gp

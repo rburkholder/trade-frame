@@ -14,6 +14,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include "Node.h"
 
 namespace ou { // One Unified
@@ -21,12 +25,28 @@ namespace gp { // genetic programming
 
 class RootNode: public NodeProxy<RootNode> {
 public:
+
+  typedef std::vector<Node*> vpNode_t;
+
   RootNode(void);
   ~RootNode(void);
+
   void ToString( std::stringstream& ss ) const { ss << "root="; };
   bool EvaluateBoolean( void );
+
+  void PopulateCandidates( void );  // ** todo:  calculate maximum depth?
+
 protected:
 private:
+
+  vpNode_t m_vAllCandidates;
+  vpNode_t m_vBooleanCandidates;
+  vpNode_t m_vDoubleCandidates;
+  vpNode_t m_vTerminalCandidates;
+  vpNode_t m_vFunctionCandidates;
+
+  void AddCandidateNode( Node* );
+
 };
 
 

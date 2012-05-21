@@ -19,6 +19,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include <boost/shared_ptr.hpp>
+
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
@@ -29,6 +31,7 @@ namespace NodeType {
 class Node {
 public:
 
+  typedef boost::shared_ptr<Node> pNode_t;
   typedef std::vector<Node* (*)()> fnCreateNode_t;
 
   enum EParentLink {

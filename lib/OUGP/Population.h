@@ -32,6 +32,9 @@ public:
   ~Population(void);
 protected:
 private:
+
+  typedef Individual::pRootNode_t pRootNode_t;
+
   // page 114, Kosa 1992
   const unsigned int m_nPopulationSize; // should be multiple of ( 2 * ( size / maxdepth - 1 ) )
   const double m_dblPopulationSize;
@@ -73,6 +76,7 @@ private:
   unsigned int TournamentSelection( unsigned int cntAboveAverage );
   bool IsMatchInGeneration( const Individual&, const vGeneration_t&, vGeneration_t::size_type ixMax );
   bool MakeNewGeneration( bool bCopyValues );
+  bool CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 );
 
 };
 
