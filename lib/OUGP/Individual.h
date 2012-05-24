@@ -26,7 +26,7 @@ public:
 
   unsigned int m_id;
 
-  typedef boost::shared_ptr<RootNode> pRootNode_t;
+  typedef RootNode* pRootNode_t;
 
   struct Signals_t {
     pRootNode_t rnLong; // mutually exclusive, when long is set, be long, when short is set, be short, 
@@ -34,8 +34,13 @@ public:
     static const unsigned int  cntSignals = 2;
     template<typename F> // function
     void EachSignal( F f ) {
-      f( rnLong );
-      f( rnShort );
+      f( &rnLong );  // send the address of the pointer
+      f( &rnShort ); // send the address of the pointer
+    }
+    Signals_t( void ) : rnLong( 0 ), rnShort( 0 ) {};
+    ~Signals_t( void ) { 
+      if ( 0 == rnLong ) delete rnLong; 
+      if ( 0 == rnShort ) delete rnShort;
     }
   } m_Signals;
 
@@ -57,7 +62,6 @@ public:
 
 protected:
 private:
-  bool m_bComputed;
   static unsigned int m_nIdGenerator;
   unsigned int m_nCount;  // how many times has this Individual crossed generations
 };

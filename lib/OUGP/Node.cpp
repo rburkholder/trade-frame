@@ -23,8 +23,9 @@ std::stringstream& operator<<( std::stringstream& ss, const Node& node ) {
 }
 
 Node::Node( NodeType::E ReturnType, NodeType::E ChildType ) 
-  : m_cntNodes( 0 ), m_eParentSide( None ), m_ReturnType( ReturnType ), m_ChildType( ChildType ),
-    m_pParent( 0 ), m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 ),
+  : m_cntNodes( 0 ), 
+    m_pParent( 0 ), m_eParentSide( ParentLink::None ), m_ReturnType( ReturnType ), m_ChildType( ChildType ),
+    m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 ),
     m_ixCreateNode( 0 )
 {
 }
@@ -59,19 +60,19 @@ Node::~Node(void) {
 void Node::AddLeft( Node* node ) {
   m_pChildLeft = node;
   node->m_pParent = this;
-  node->m_eParentSide = Left;
+  node->m_eParentSide = ParentLink::Left;
 }
 
 void Node::AddCenter( Node* node ) {
   m_pChildCenter = node;
   node->m_pParent = this;
-  node->m_eParentSide = Center;
+  node->m_eParentSide = ParentLink::Center;
 }
 
 void Node::AddRight( Node* node ) {
   m_pChildRight = node;
   node->m_pParent = this;
-  node->m_eParentSide = Right;
+  node->m_eParentSide = ParentLink::Right;
 }
 
 void Node::TreeToString( std::stringstream& ss ) const {

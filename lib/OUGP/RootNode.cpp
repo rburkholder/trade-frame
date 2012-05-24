@@ -19,7 +19,10 @@ namespace gp { // genetic programming
 
 // ********* RootNode *********
 
-RootNode::RootNode(void): NodeProxy<RootNode>( NodeType::Bool, NodeType::Bool ) {
+RootNode::RootNode(void)
+  : NodeProxy<RootNode>( NodeType::Bool, NodeType::Bool ), 
+    m_nMaxDepth( 0 ), m_prng( 0 )
+{
   m_cntNodes = 1;
 }
 
@@ -30,12 +33,15 @@ bool RootNode::EvaluateBoolean( void ) {
   return ChildCenter().EvaluateBoolean();
 }
 
-void RootNode::PopulateCandidates( void ) {
+void RootNode::PopulateCandidates( boost::random::mt19937* prng ) {
+  m_prng = prng;
   assert( 0 == m_vAllCandidates.size() );  // if not, then we need a ResetCandidates method?
-  AddCandidateNode( this );
+  AddCandidateNode( 0, this );
 }
 
-void RootNode::AddCandidateNode( Node* pNode ) {
+void RootNode::AddCandidateNode( unsigned int nDepth, Node* pNode ) {
+  if ( nDepth > m_nMaxDepth ) m_nMaxDepth = nDepth;
+  ++nDepth;
   if ( 0 == dynamic_cast<RootNode*>( pNode ) ) { // assign vectors for all but RootNode type
     m_vAllCandidates.push_back( pNode );
     if ( NodeType::Bool == pNode->ReturnType() ) m_vBooleanCandidates.push_back( pNode );
@@ -48,13 +54,38 @@ void RootNode::AddCandidateNode( Node* pNode ) {
     // do nothing
     break;
   case 1:
-    AddCandidateNode( &pNode->ChildCenter() ); 
+    AddCandidateNode( nDepth, &pNode->ChildCenter() ); 
     break;
   case 2:
-    AddCandidateNode( &pNode->ChildLeft() );
-    AddCandidateNode( &pNode->ChildRight() );
+    AddCandidateNode( nDepth, &pNode->ChildLeft() );
+    AddCandidateNode( nDepth, &pNode->ChildRight() );
     break;
   }
+}
+
+Node* RootNode::RandomAllCandidate( void ) {
+  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vAllCandidates.size() - 1 );
+  return m_vAllCandidates[ dist( *m_prng ) ];
+}
+
+Node* RootNode::RandomBooleanCandidate( void ) {
+  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vBooleanCandidates.size() - 1 );
+  return m_vBooleanCandidates[ dist( *m_prng ) ];
+}
+
+Node* RootNode::RandomDoubleCandidate( void ) {
+  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vDoubleCandidates.size() - 1 );
+  return m_vDoubleCandidates[ dist( *m_prng ) ];
+}
+
+Node* RootNode::RandomTerminalCandidate( void ) {
+  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vTerminalCandidates.size() - 1 );
+  return m_vTerminalCandidates[ dist( *m_prng ) ];
+}
+
+Node* RootNode::RandomFunctionCandidate( void ) {
+  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vFunctionCandidates.size() - 1 );
+  return m_vFunctionCandidates[ dist( *m_prng ) ];
 }
 
 } // namespace gp

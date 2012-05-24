@@ -77,6 +77,7 @@ private:
   bool IsMatchInGeneration( const Individual&, const vGeneration_t&, vGeneration_t::size_type ixMax );
   bool MakeNewGeneration( bool bCopyValues );
   bool CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 );
+  void CalcFitness( void );
 
 };
 

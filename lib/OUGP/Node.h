@@ -25,7 +25,11 @@ namespace ou { // One Unified
 namespace gp { // genetic programming
 
 namespace NodeType {
-  enum E { Bool = 0, Double = 1, Count = 2 };  // used for indexing to correct lookup vector
+  enum E { Bool = 0, Double, Count };  // used for indexing to correct lookup vector
+}
+
+namespace ParentLink {
+  enum E { None = 0, Left, Center, Right };
 }
 
 class Node {
@@ -34,9 +38,6 @@ public:
   typedef boost::shared_ptr<Node> pNode_t;
   typedef std::vector<Node* (*)()> fnCreateNode_t;
 
-  enum EParentLink {
-    None = 0, Left, Center, Right
-  };
 
   Node( NodeType::E ReturnType, NodeType::E ChildType );
   virtual ~Node(void);
@@ -46,11 +47,15 @@ public:
   NodeType::E ReturnType( void ) const { return m_ReturnType; };
   NodeType::E ChildType( void ) const  { return m_ChildType; };
 
+  ParentLink::E ParentSide( void ) const { return m_eParentSide; };
+
   virtual void TreeToString( std::stringstream& ) const;
   virtual void ToString( std::stringstream& ) const {};
 
   virtual bool EvaluateBoolean( void ) const { throw std::logic_error( "EvaluateBoolean no override" ); };
   virtual double EvaluateDouble( void ) const { throw std::logic_error( "EvaluateDouble no override" ); };
+
+  Node& Parent( void ) { assert( 0 != m_pParent ); return *m_pParent; };
 
   // maybe use union here or change names to suit
   void AddLeft( Node* node );  // used with two node
@@ -79,7 +84,7 @@ protected:
 
   unsigned int m_cntNodes; // how many child nodes permitted by default (0 for terminal nodes, 1 for single, 2 for two nodes)
 
-  EParentLink m_eParentSide;
+  ParentLink::E m_eParentSide;
 
   virtual Node* Clone( bool bCopyValues ) = 0;
 

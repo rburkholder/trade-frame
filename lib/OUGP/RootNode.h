@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/random.hpp>
 
 #include "Node.h"
 
@@ -34,18 +35,31 @@ public:
   void ToString( std::stringstream& ss ) const { ss << "root="; };
   bool EvaluateBoolean( void );
 
-  void PopulateCandidates( void );  // ** todo:  calculate maximum depth?
+  bool HasBooleanCandidates( void ) { return ( 0 != m_vBooleanCandidates.size() ); };  // should always be true
+  bool HasDoubleCandidates( void ) { return ( 0 != m_vDoubleCandidates.size() ); };
+
+  Node* RandomAllCandidate( void );
+  Node* RandomBooleanCandidate( void );
+  Node* RandomDoubleCandidate( void );
+  Node* RandomTerminalCandidate( void );
+  Node* RandomFunctionCandidate( void );
+
+  void PopulateCandidates( boost::random::mt19937* prng );
 
 protected:
 private:
 
-  vpNode_t m_vAllCandidates;
+  unsigned int m_nMaxDepth;  // count excludes root level
+
+  boost::random::mt19937* m_prng;
+
+  vpNode_t m_vAllCandidates;  // use this to determine node count
   vpNode_t m_vBooleanCandidates;
   vpNode_t m_vDoubleCandidates;
   vpNode_t m_vTerminalCandidates;
   vpNode_t m_vFunctionCandidates;
 
-  void AddCandidateNode( Node* );
+  void AddCandidateNode( unsigned int nDepth, Node* );
 
 };
 

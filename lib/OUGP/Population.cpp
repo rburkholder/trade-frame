@@ -13,9 +13,7 @@
  ************************************************************************/
 
 #include <vector>
-
-//#include <boost/assign/std/vector.hpp>
-//using namespace boost::assign;
+#include <algorithm>
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/operator.hpp>
@@ -58,7 +56,7 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
   // create individuals with RootNode signals
   // keep rootnodes in a list so they can be populated with random expressions
   typedef Individual::pRootNode_t pRootNode_t;
-  typedef std::vector<pRootNode_t> vSignals_t;
+  typedef std::vector<pRootNode_t*> vSignals_t;
   vSignals_t vSignals;
   unsigned int n( vGeneration.size() * Individual::Signals_t::cntSignals );
   vSignals.resize( n );
@@ -68,7 +66,7 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
   }
 
   // implement ramped half and half, koza, 1992, page 93
-  pRootNode_t node;
+  pRootNode_t* pRootNode;
   unsigned int nNodesPerStep = n / ( m_nMaxDepthOnCreation - 1 );
   unsigned int nNodesPerHalf = nNodesPerStep / 2;
 
@@ -81,24 +79,24 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
       boost::random::uniform_int_distribution<vSignals_t::size_type> dist1( 0, vSignals.size() - 1 );  // closed range
       ix = dist1( m_rng );
       iter = vSignals.begin() + ix;
-      node = *iter;
+      pRootNode = *iter;
       vSignals.erase( iter );
-      m_tb.BuildTree( *node, true, true, step1 );  // random tree
+      m_tb.BuildTree( **pRootNode, true, true, step1 );  // random tree
 
       boost::random::uniform_int_distribution<vSignals_t::size_type> dist2( 0, vSignals.size() - 1 );  // closed range
       ix = dist2( m_rng );
       iter = vSignals.begin() + ix;
-      node = *iter;
+      pRootNode = *iter;
       vSignals.erase( iter );
-      m_tb.BuildTree( *node, false, true, step1 );  // full tree
+      m_tb.BuildTree( **pRootNode, false, true, step1 );  // full tree
     }
   }
   // due to rounding above, finish up any unused rootnodes
   while ( 0 != vSignals.size() ) {
     iter = vSignals.begin();  // change this to use end of vector instead
-    node = *iter;
+    pRootNode = *iter;
     vSignals.erase( iter );
-    m_tb.BuildTree( *node, true, true, m_nMaxDepthOnCreation );  // full tree
+    m_tb.BuildTree( **pRootNode, true, true, m_nMaxDepthOnCreation );  // full tree
   }
 }
 
@@ -200,52 +198,176 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         pRootNode_t rnOldXOver2;
         pRootNode_t rnNode( new RootNode() );  // holds node
 
-        std::vector<pRootNode_t> vSrcNodes;
+        std::vector<pRootNode_t*> vSrcNodes;
         i1.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
         i2.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
 
         Individual i3;
         Individual i4;
 
-        std::vector<pRootNode_t> vDstNodes;
+        std::vector<pRootNode_t*> vDstNodes;
 
         i3.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
         i4.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
 
-        // crossover all but two random pairs
+        // crossover all but last random pair
         typedef std::vector<pRootNode_t>::size_type prob2_t;
         prob2_t prob2;
         for ( unsigned int k = Individual::Signals_t::cntSignals - 1; k >= 1; --k ) {
           boost::random::uniform_int_distribution<prob2_t> dist1( 0, vSrcNodes.size() - 1 );  // closed range
           prob2 = dist1( m_rng );
-          rnOldXOver1 = vSrcNodes[ prob2 ];
+          rnOldXOver1 = *vSrcNodes[ prob2 ];
           vSrcNodes.erase( vSrcNodes.begin() + prob2 );
 
           boost::random::uniform_int_distribution<prob2_t> dist2( 0, vSrcNodes.size() - 1 );  // closed range
           prob2 = dist2( m_rng );
-          rnOldXOver2 = vSrcNodes[ prob2 ];
+          rnOldXOver2 = *vSrcNodes[ prob2 ];
           vSrcNodes.erase( vSrcNodes.begin() + prob2 );
 
-          rnNewXOver1.reset( dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) ) );
-          rnNewXOver2.reset( dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) ) );
+          rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) );
+          rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) );
 
           // rebuild candidate lists here, if we need them
+          rnNewXOver1->PopulateCandidates( &m_rng );
+          rnNewXOver2->PopulateCandidates( &m_rng );
 
           // do the crossover
+          CrossOver( rnNewXOver1, rnNewXOver2 );
+
+          *vDstNodes.back() = rnNewXOver1;
+          vDstNodes.pop_back();
+          *vDstNodes.back() = rnNewXOver2;
+          vDstNodes.pop_back();
         }
 
-      }
-    }
+        // cross over last pair
+        rnOldXOver1 = *vSrcNodes.back();
+        vSrcNodes.pop_back();
+        rnOldXOver2 = *vSrcNodes.back();
+        vSrcNodes.pop_back();
+        assert( 0 == vSrcNodes.size() );
 
+        rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) );
+        rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) );
+
+        rnNewXOver1->PopulateCandidates( &m_rng );
+        rnNewXOver2->PopulateCandidates( &m_rng );
+
+        CrossOver( rnNewXOver1, rnNewXOver2 );
+
+        *vDstNodes.back() = rnNewXOver1;
+        vDstNodes.pop_back();
+        *vDstNodes.back() = rnNewXOver2;
+        vDstNodes.pop_back();
+
+        // add to generation
+        m_pvNxtGeneration->push_back( i3 ); // does this properly copy Signals_t?
+        m_pvNxtGeneration->push_back( i4 ); 
+      }
+      m_pvCurGeneration = m_pvNxtGeneration;
+    }
   }
 
   return bMore;
 }
 
 bool Population::CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 ) {
-  bool bSuccessful = false;
-  unsigned int probability;
+
+  bool bSuccessful = true;
+
+  Node* node1( 0 );
+
+  NodeType::E ntCrossOver;
+
+  assert( rn1->HasBooleanCandidates() );
+  assert( rn2->HasBooleanCandidates() );
+
+  if ( !rn1->HasDoubleCandidates() || !rn2->HasDoubleCandidates() ) {
+    // crossover on boolean candidates, there will always be boolean candidates if one or the other doesn't have double candidates
+    node1 = rn1->RandomBooleanCandidate();
+    assert( NodeType::Bool == node1->ReturnType() );
+    ntCrossOver = NodeType::Bool;
+  }
+  else {
+    // crossover on all candidates
+    node1 = rn1->RandomAllCandidate();
+    ntCrossOver = node1->ReturnType();
+  }
+
+  Node* node2( 0 );
+  switch ( ntCrossOver ) {
+  case NodeType::Bool:
+    node2 = rn2->RandomBooleanCandidate();
+    break;
+  case NodeType::Double:
+    node2 = rn2->RandomDoubleCandidate();
+    break;
+  }
+
+  Node& parent1( node1->Parent() );
+  Node& parent2( node2->Parent() );
+
+  switch ( node1->ParentSide() ) {
+  case ParentLink::Left:
+    parent1.AddLeft( node2 );
+    break;
+  case ParentLink::Center:
+    parent1.AddCenter( node2 );
+    break;
+  case ParentLink::Right:
+    parent1.AddRight( node2 );
+    break;
+  }
+
+  switch ( node2->ParentSide() ) {
+  case ParentLink::Left:
+    parent2.AddLeft( node1 );
+    break;
+  case ParentLink::Center:
+    parent2.AddCenter( node1 );
+    break;
+  case ParentLink::Right:
+    parent2.AddRight( node1 );
+    break;
+  }
+
   return bSuccessful;
+}
+
+void Population::CalcFitness( void ) {
+  double dblMax( 0.0 );
+  double dblMin( 0.0 );
+
+  for ( vGeneration_t::iterator iter = (*m_pvCurGeneration).begin(); (*m_pvCurGeneration).end() != iter; ++iter ) {
+    if ( (*m_pvCurGeneration).begin() == iter ) {
+      dblMin = iter->m_dblRawFitness;
+      dblMax = iter->m_dblRawFitness;
+    }
+    else {
+      dblMin = std::min<double>( dblMin, iter->m_dblRawFitness );
+      dblMax = std::max<double>( dblMax, iter->m_dblRawFitness );
+    }
+  }
+
+  double dblSum( 0.0 );
+  for ( vGeneration_t::iterator iter = (*m_pvCurGeneration).begin(); (*m_pvCurGeneration).end() != iter; ++iter ) {
+    iter->m_dblRelativeFitness = dblMax - iter->m_dblRawFitness;
+    dblSum += iter->m_dblAdjustedFitness = 1.0 / ( 1.0 + iter->m_dblRelativeFitness );
+  }
+
+  m_cntAboveAverage = 0;
+  double dblMean = dblSum / m_pvCurGeneration->size();
+  for ( vGeneration_t::iterator iter = (*m_pvCurGeneration).begin(); (*m_pvCurGeneration).end() != iter; ++iter ) {
+    iter->m_dblNormalizedFitness = iter->m_dblAdjustedFitness / dblSum;
+    m_cntAboveAverage += ( iter->m_dblAdjustedFitness > dblMean ) ? 1 : 0;
+  }
+
+  using boost::phoenix::arg_names::arg1;
+  using boost::phoenix::arg_names::arg2;
+
+  vGeneration_t& gen( *m_pvCurGeneration );
+
+  std::sort( gen.begin(), gen.end(), arg1 < arg2 );
 }
 
 } // namespace gp
