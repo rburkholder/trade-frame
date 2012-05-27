@@ -30,6 +30,29 @@ protected:
 private:
 };
 
+class NodeDoubleZero: public NodeDouble<NodeDoubleZero> {
+public:
+  NodeDoubleZero( void );
+  ~NodeDoubleZero( void );
+  void ToString( std::stringstream& ss ) const { ss << "0.0"; };
+  double EvaluateDouble( void );
+protected:
+private:
+};
+
+class NodeDoubleRandom: public NodeDouble<NodeDoubleRandom> {
+public:
+  NodeDoubleRandom( void );
+  NodeDoubleRandom( const NodeDoubleRandom& rhs );
+  NodeDoubleRandom& operator=( const NodeDoubleRandom& rhs );
+  ~NodeDoubleRandom( void );
+  void ToString( std::stringstream& ss ) const { ss << m_val; };
+  double EvaluateDouble( void );
+protected:
+private:
+  double m_val;
+};
+
 class NodeDoubleAdd: public NodeDouble<NodeDoubleAdd> {
 public:
   NodeDoubleAdd( void );
@@ -70,7 +93,7 @@ protected:
 private:
 };
 
-typedef boost::fusion::vector<NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeDouble_t;
+typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleRandom, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeDouble_t;
 
 
 } // namespace gp

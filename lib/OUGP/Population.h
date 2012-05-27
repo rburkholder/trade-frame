@@ -28,8 +28,17 @@ namespace gp { // genetic programming
 
 class Population {
 public:
+
+  typedef std::vector<Individual> vGeneration_t;
+
   Population( unsigned int nPopulationSize = 20 );
   ~Population(void);
+
+  const vGeneration_t& CurrentGeneration( void ) { return *m_pvCurGeneration; };
+
+  bool MakeNewGeneration( bool bCopyValues );
+  void CalcFitness( void );
+
 protected:
 private:
 
@@ -60,7 +69,6 @@ private:
 
   unsigned int m_cntAboveAverage;
 
-  typedef std::vector<Individual> vGeneration_t;
   vGeneration_t* m_pvCurGeneration;
   vGeneration_t* m_pvNxtGeneration;
 
@@ -75,9 +83,7 @@ private:
   void BuildIndividuals( vGeneration_t& vGeneration );
   unsigned int TournamentSelection( unsigned int cntAboveAverage );
   bool IsMatchInGeneration( const Individual&, const vGeneration_t&, vGeneration_t::size_type ixMax );
-  bool MakeNewGeneration( bool bCopyValues );
   bool CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 );
-  void CalcFitness( void );
 
 };
 

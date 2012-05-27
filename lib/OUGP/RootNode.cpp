@@ -46,7 +46,7 @@ void RootNode::AddCandidateNode( unsigned int nDepth, Node* pNode ) {
     m_vAllCandidates.push_back( pNode );
     if ( NodeType::Bool == pNode->ReturnType() ) m_vBooleanCandidates.push_back( pNode );
     if ( NodeType::Double == pNode->ReturnType() ) m_vDoubleCandidates.push_back( pNode );
-    if ( 0 == pNode->IsTerminal() ) m_vTerminalCandidates.push_back( pNode );
+//    if ( 0 == pNode->IsTerminal() ) m_vTerminalCandidates.push_back( pNode );
     // need to handle function candidates yet
   }
   switch ( pNode->NodeCount() ) {
@@ -76,16 +76,6 @@ Node* RootNode::RandomBooleanCandidate( void ) {
 Node* RootNode::RandomDoubleCandidate( void ) {
   boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vDoubleCandidates.size() - 1 );
   return m_vDoubleCandidates[ dist( *m_prng ) ];
-}
-
-Node* RootNode::RandomTerminalCandidate( void ) {
-  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vTerminalCandidates.size() - 1 );
-  return m_vTerminalCandidates[ dist( *m_prng ) ];
-}
-
-Node* RootNode::RandomFunctionCandidate( void ) {
-  boost::random::uniform_int_distribution<vpNode_t::size_type> dist( 0, m_vFunctionCandidates.size() - 1 );
-  return m_vFunctionCandidates[ dist( *m_prng ) ];
 }
 
 } // namespace gp

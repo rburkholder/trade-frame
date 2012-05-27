@@ -34,8 +34,7 @@
 
 #include <boost/type_traits.hpp>
 
-#include <lib/OUGP/NodeDouble.h>
-#include <lib/OUGP/TreeBuilder.h>
+#include <lib/OUGP/Population.h>
 
 using namespace boost::fusion;
 
@@ -69,16 +68,8 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
   std::cout << whatsit::value << std::endl;
 
-  ou::gp::TreeBuilder tb;
-
-  //ou::gp::Node* node = tb.CreateChild( false, true, 1, 5, tb.m_vNodeFactoryBoolean );
-
-//  ou::gp::NodeDoubleAdd node;
-
-//  ss << *node;
-
-//  node.EvaluateDouble();
-
+  ou::gp::Population pop1;
+  pop1.MakeNewGeneration( true );
 
 	return 0;
 }

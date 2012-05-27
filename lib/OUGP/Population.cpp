@@ -29,7 +29,7 @@ namespace gp { // genetic programming
 
 Population::Population( unsigned int nPopulationSize ) 
   : m_nPopulationSize( nPopulationSize ), m_dblPopulationSize( nPopulationSize ),
-  m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 5 ), m_nMaxDepthOnCrossover( 17 ),
+  m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 6 ), m_nMaxDepthOnCrossover( 17 ),
   m_probCrossover( 0.95 ), m_probReproduction( 0.10 ), m_probFunctionPointCrossover( 0.90 ), m_probTerminalPointCrossover( 0.10), 
   m_probMutation( 0.0 ), m_probPermutation( 0.0 ), m_probDecimation( 0.58 ), m_ratioElitism( 0.012 ),
   m_probTournamentSegregation( 0.35 ),
@@ -45,7 +45,9 @@ Population::Population( unsigned int nPopulationSize )
 }
 
 Population::~Population(void) {
-  // the various generations will require careful destruction
+  for ( vGenerations_t::iterator iter = m_vGenerations.begin(); m_vGenerations.end() != iter; ++iter ) {
+    delete *iter;
+  }
 }
 
 void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
@@ -59,44 +61,53 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
   typedef std::vector<pRootNode_t*> vSignals_t;
   vSignals_t vSignals;
   unsigned int n( vGeneration.size() * Individual::Signals_t::cntSignals );
-  vSignals.resize( n );
-  unsigned int iy = 0;
+  vSignals.reserve( n );
   for ( vSignals_t::size_type ix = 0; ix < vGeneration.size(); ++ix ) {
-    vGeneration[ ix ].m_Signals.EachSignal( boost::phoenix::ref( vSignals.at(iy++) ) = arg1 );
+    vGeneration[ ix ].m_Signals.EachSignal( boost::phoenix::push_back( boost::phoenix::ref(vSignals), arg1 ) );
   }
 
   // implement ramped half and half, koza, 1992, page 93
-  pRootNode_t* pRootNode;
+  pRootNode_t* ppRootNode;
   unsigned int nNodesPerStep = n / ( m_nMaxDepthOnCreation - 1 );
   unsigned int nNodesPerHalf = nNodesPerStep / 2;
 
   vSignals_t::const_iterator iter;
   vSignals_t::size_type ix;
   
-  for ( unsigned int step1 = 2; step1 <=m_nMaxDepthOnCreation; ++step1 ) {
+  assert( n >= ( ( m_nMaxDepthOnCreation - 1 ) * nNodesPerHalf * 2 ) );
+  for ( unsigned int step1 = 2; step1 <= m_nMaxDepthOnCreation; ++step1 ) {
     for ( unsigned int step2 = 1; step2 <= nNodesPerHalf; ++step2 ) {
 
       boost::random::uniform_int_distribution<vSignals_t::size_type> dist1( 0, vSignals.size() - 1 );  // closed range
       ix = dist1( m_rng );
       iter = vSignals.begin() + ix;
-      pRootNode = *iter;
+      ppRootNode = *iter;
       vSignals.erase( iter );
-      m_tb.BuildTree( **pRootNode, true, true, step1 );  // random tree
+      assert( 0 != ppRootNode );
+      assert( 0 == *ppRootNode );
+      *ppRootNode = new RootNode;
+      m_tb.BuildTree( **ppRootNode, true, true, step1 );  // random tree
 
       boost::random::uniform_int_distribution<vSignals_t::size_type> dist2( 0, vSignals.size() - 1 );  // closed range
       ix = dist2( m_rng );
       iter = vSignals.begin() + ix;
-      pRootNode = *iter;
+      ppRootNode = *iter;
       vSignals.erase( iter );
-      m_tb.BuildTree( **pRootNode, false, true, step1 );  // full tree
+      assert( 0 != ppRootNode );
+      assert( 0 == *ppRootNode );
+      *ppRootNode = new RootNode;
+      m_tb.BuildTree( **ppRootNode, false, true, step1 );  // full tree
     }
   }
   // due to rounding above, finish up any unused rootnodes
   while ( 0 != vSignals.size() ) {
     iter = vSignals.begin();  // change this to use end of vector instead
-    pRootNode = *iter;
+    ppRootNode = *iter;
     vSignals.erase( iter );
-    m_tb.BuildTree( **pRootNode, true, true, m_nMaxDepthOnCreation );  // full tree
+    assert( 0 != ppRootNode );
+    assert( 0 == *ppRootNode );
+    *ppRootNode = new RootNode;
+    m_tb.BuildTree( **ppRootNode, true, true, m_nMaxDepthOnCreation );  // full tree
   }
 }
 
@@ -146,9 +157,8 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
     bMore = true;
     m_pvNxtGeneration = new vGeneration_t;  // set no individuals
 
-//    unsigned int ix( 0 );
+//    assert( 0 != m_cntAboveAverage );  // put back in sometime
 
-    assert( 0 != m_cntAboveAverage );
     double dblPopulationSize( m_nPopulationSize );
     // decimate and repopulate minimum of ( 40% population, count below average )
     unsigned int decimation = std::min<unsigned int>( (unsigned int) std::floor( 0.40 * m_dblPopulationSize + 0.5 ), m_nPopulationSize - m_cntAboveAverage );
@@ -156,7 +166,7 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
     decimation = std::max<unsigned int>( decimation, (unsigned int) std::floor( 0.04 * m_dblPopulationSize + 0.5 ) );
 
     m_pvNxtGeneration->resize( decimation );
-    BuildIndividuals( *m_pvNxtGeneration );
+    BuildIndividuals( *m_pvNxtGeneration );  // build the beginning population
     m_vGenerations.push_back( m_pvNxtGeneration );
 
     // elitism
@@ -176,9 +186,9 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
     }
 
     // reproduction and crossover
-    while ( m_nPopulationSize > m_pvCurGeneration->size() ) {
+    while ( m_nPopulationSize > m_pvNxtGeneration->size() ) {
       double prob1( m_urd( m_rng ) );
-      if ( ( m_probReproduction > prob1 ) || ( 1 == ( m_nPopulationSize - m_pvCurGeneration->size() ) ) ) {  // cross over appends two individuals
+      if ( ( m_probReproduction > prob1 ) || ( 1 == ( m_nPopulationSize - m_pvNxtGeneration->size() ) ) ) {  // cross over appends two individuals
         // reproduction
         const Individual& test( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
         if ( !IsMatchInGeneration( test, *m_pvNxtGeneration, m_pvNxtGeneration->size() - 1 ) ) {
@@ -189,8 +199,8 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         // cross over
         bool bOk( true );
 
-        Individual& i1( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
-        Individual& i2( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
+        Individual& indvlSrc1( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
+        Individual& indvlSrc2( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
 
         pRootNode_t rnNewXOver1; // seed and grow crossovers here
         pRootNode_t rnNewXOver2;
@@ -199,16 +209,16 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         pRootNode_t rnNode( new RootNode() );  // holds node
 
         std::vector<pRootNode_t*> vSrcNodes;
-        i1.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
-        i2.m_Signals.EachSignal( push_back( vSrcNodes, arg1 ) );
+        indvlSrc1.m_Signals.EachSignal( push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
+        indvlSrc2.m_Signals.EachSignal( push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
 
-        Individual i3;
-        Individual i4;
+        Individual indvlDst1;
+        Individual indvlDst2;
 
         std::vector<pRootNode_t*> vDstNodes;
 
-        i3.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
-        i4.m_Signals.EachSignal( push_back( vDstNodes, arg1 ) );
+        indvlDst1.m_Signals.EachSignal( push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
+        indvlDst2.m_Signals.EachSignal( push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
 
         // crossover all but last random pair
         typedef std::vector<pRootNode_t>::size_type prob2_t;
@@ -261,8 +271,8 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         vDstNodes.pop_back();
 
         // add to generation
-        m_pvNxtGeneration->push_back( i3 ); // does this properly copy Signals_t?
-        m_pvNxtGeneration->push_back( i4 ); 
+        m_pvNxtGeneration->push_back( indvlDst1 ); // does this properly copy Signals_t?
+        m_pvNxtGeneration->push_back( indvlDst2 ); 
       }
       m_pvCurGeneration = m_pvNxtGeneration;
     }
@@ -367,7 +377,7 @@ void Population::CalcFitness( void ) {
 
   vGeneration_t& gen( *m_pvCurGeneration );
 
-  std::sort( gen.begin(), gen.end(), arg1 < arg2 );
+  std::sort( gen.begin(), gen.end(), arg1 > arg2 );
 }
 
 } // namespace gp

@@ -32,12 +32,15 @@ namespace ParentLink {
   enum E { None = 0, Left, Center, Right };
 }
 
+namespace FactoryType {
+  enum E { All = 0, Terminals, Nodes, Count };
+}
+
 class Node {
 public:
 
   typedef boost::shared_ptr<Node> pNode_t;
   typedef std::vector<Node* (*)()> fnCreateNode_t;
-
 
   Node( NodeType::E ReturnType, NodeType::E ChildType );
   virtual ~Node(void);

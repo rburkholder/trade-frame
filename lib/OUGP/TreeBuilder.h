@@ -42,13 +42,18 @@ private:
   typedef std::vector<Node* (*)()> vNodeFactory_t; 
 
   boost::random::mt19937 m_rng;
-  vNodeFactory_t m_vNodeFactoryAllNodes;
-  vNodeFactory_t m_vNodeFactoryBoolean; 
-  vNodeFactory_t m_vNodeFactoryDouble;
 
-  vNodeFactory_t* m_rNodeFactories[ NodeType::Count ];
+  vNodeFactory_t m_vNodeFactoryBooleanAll; 
+  vNodeFactory_t m_vNodeFactoryBooleanTerminals;
+  vNodeFactory_t m_vNodeFactoryBooleanNodes; // non terminal 
 
-  Node* CreateChild( bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth, const vNodeFactory_t& v );
+  vNodeFactory_t m_vNodeFactoryDoubleAll;
+  vNodeFactory_t m_vNodeFactoryDoubleTerminals;
+  vNodeFactory_t m_vNodeFactoryDoubleNodes;  // non terminal
+
+  vNodeFactory_t* m_rNodeFactories[ NodeType::Count ][ FactoryType::Count ];
+
+  Node* CreateChild( NodeType::E nt, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth );
   void AddRandomChildren( Node& node, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth );
 };
 

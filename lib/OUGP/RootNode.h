@@ -41,8 +41,6 @@ public:
   Node* RandomAllCandidate( void );
   Node* RandomBooleanCandidate( void );
   Node* RandomDoubleCandidate( void );
-  Node* RandomTerminalCandidate( void );
-  Node* RandomFunctionCandidate( void );
 
   void PopulateCandidates( boost::random::mt19937* prng );
 
@@ -56,8 +54,6 @@ private:
   vpNode_t m_vAllCandidates;  // use this to determine node count
   vpNode_t m_vBooleanCandidates;
   vpNode_t m_vDoubleCandidates;
-  vpNode_t m_vTerminalCandidates;
-  vpNode_t m_vFunctionCandidates;
 
   void AddCandidateNode( unsigned int nDepth, Node* );
 

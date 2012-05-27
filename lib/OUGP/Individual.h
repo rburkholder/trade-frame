@@ -57,11 +57,15 @@ public:
 
   void TreeToString( std::stringstream& ss ) const;
 
+  bool IsComputed( void ) const { return m_bComputed; };
+  void SetComputed( bool bComputed ) { m_bComputed = bComputed; };
+
   bool operator>( const Individual& rhs ) const { return m_dblNormalizedFitness > rhs.m_dblNormalizedFitness; };
   bool operator<( const Individual& rhs ) const { return m_dblNormalizedFitness < rhs.m_dblNormalizedFitness; };
 
 protected:
 private:
+  bool m_bComputed;  // don't waste time recalculating in subsequent populations, reset on CrossOver
   static unsigned int m_nIdGenerator;
   unsigned int m_nCount;  // how many times has this Individual crossed generations
 };
