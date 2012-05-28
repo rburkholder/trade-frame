@@ -114,7 +114,6 @@ public:
     OnSecurityDefinitionNotFound = function;
   }
 
-
 protected:
 
   std::string m_sName;  // name of provider

@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Generic frame for wx based applications
+
 #pragma once
 
 #include "wx/frame.h"

@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Generic frame for wx based applications
+
 #include "StdAfx.h"
 
 #include "FrameMain.h"

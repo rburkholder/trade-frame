@@ -11,18 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3EB6F41C-A83F-4874-B7F7-20CDA2DB2EB6}</ProjectGuid>
+    <ProjectGuid>{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TFVuTrading</RootNamespace>
+    <RootNamespace>OptimizeStrategy</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -37,19 +37,26 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_LIB;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0501;WIN32;_DEBUG;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\;..\lib;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.2\lib\vc_lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(OutDir)OUCharting.lib;$(OutDir)chartdir50.lib;$(OutDir)OUCommon.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)TFOptions.lib;$(OutDir)TFVuTrading.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_filesystem-vc100-mt-sgd-1_47.lib;$(OutDir)libdb48.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)hdf5d.lib;$(OutDir)hdf5_cppd.lib;$(OutDir)IQ32.LIB;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -59,7 +66,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -69,51 +76,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="OptimizeStrategy.ico" />
     <None Include="ReadMe.txt" />
+    <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FrameMain.h" />
-    <ClInclude Include="ModelBase.h" />
-    <ClInclude Include="ModelExecution.h" />
-    <ClInclude Include="ModelOrder.h" />
-    <ClInclude Include="ModelPortfolio.h" />
-    <ClInclude Include="ModelPosition.h" />
-    <ClInclude Include="PanelFinancialChart.h" />
-    <ClInclude Include="PanelLogging.h" />
-    <ClInclude Include="PanelManualOrder.h" />
-    <ClInclude Include="PanelPortfolioPositionOrderExecution.h" />
-    <ClInclude Include="PanelProviderControl.h" />
+    <ClInclude Include="OptimizeStrategy.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StrategyEquity.h" />
+    <ClInclude Include="StrategyWrapper.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ValidatorInstrumentName.h" />
-    <ClInclude Include="VuBase.h" />
-    <ClInclude Include="VuExecutions.h" />
-    <ClInclude Include="VuOrders.h" />
-    <ClInclude Include="VuPortfolios.h" />
-    <ClInclude Include="VuPositions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FrameMain.cpp" />
-    <ClCompile Include="ModelBase.cpp" />
-    <ClCompile Include="ModelExecution.cpp" />
-    <ClCompile Include="ModelOrder.cpp" />
-    <ClCompile Include="ModelPortfolio.cpp" />
-    <ClCompile Include="ModelPosition.cpp" />
-    <ClCompile Include="PanelFinancialChart.cpp" />
-    <ClCompile Include="PanelLogging.cpp" />
-    <ClCompile Include="PanelManualOrder.cpp" />
-    <ClCompile Include="PanelPortfolioPositionOrderExecution.cpp" />
-    <ClCompile Include="PanelProviderControl.cpp" />
+    <ClCompile Include="OptimizeStrategy.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ValidatorInstrumentName.cpp" />
-    <ClCompile Include="VuBase.cpp" />
-    <ClCompile Include="VuExecutions.cpp" />
-    <ClCompile Include="VuOrders.cpp" />
-    <ClCompile Include="VuPortfolios.cpp" />
-    <ClCompile Include="VuPositions.cpp" />
+    <ClCompile Include="StrategyEquity.cpp" />
+    <ClCompile Include="StrategyWrapper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OptimizeStrategy.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

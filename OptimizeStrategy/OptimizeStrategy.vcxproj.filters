@@ -19,7 +19,7 @@
     <None Include="small.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="StrategyRunner.ico">
+    <None Include="OptimizeStrategy.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -33,13 +33,13 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StrategyRunner.h">
+    <ClInclude Include="OptimizeStrategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StrategyTradeOptions.h">
+    <ClInclude Include="StrategyEquity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PanelOptionsParameters.h">
+    <ClInclude Include="StrategyWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,18 +47,18 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StrategyRunner.cpp">
+    <ClCompile Include="OptimizeStrategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StrategyTradeOptions.cpp">
+    <ClCompile Include="StrategyEquity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PanelOptionsParameters.cpp">
+    <ClCompile Include="StrategyWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="StrategyRunner.rc">
+    <ResourceCompile Include="OptimizeStrategy.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

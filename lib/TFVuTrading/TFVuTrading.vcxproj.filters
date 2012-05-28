@@ -72,6 +72,9 @@
     <ClInclude Include="PanelFinancialChart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FrameMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelFinancialChart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

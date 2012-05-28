@@ -14,54 +14,39 @@
 
 #pragma once
 
-//#include "resource.h"
+// Started 2012/05/27
 
-// Started 2012/01/22
+//#include <TFBitsNPieces/FrameWork01.h>
 
-#include <TFBitsNPieces/FrameWork01.h>
-
-// may need to inherit and add more functionality to the class:
-#include <TFTrading/DBOps.h>
+#include <TFTrading/ProviderManager.h>
+#include <TFTrading/InstrumentManager.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
-#include "PanelOptionsParameters.h"
-#include "StrategyTradeOptions.h"
-
-class AppStrategyRunner:
-  public wxApp, public ou::tf::FrameWork01<AppStrategyRunner> {
+class AppOptimizeStrategy: public wxApp {
 public:
 protected:
 private:
 
+  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef ou::tf::eProviderState_t eProviderState_t;
-
-  typedef ou::tf::CIBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
 
   FrameMain* m_pFrameMain;
-  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
 
-  DBOps m_db;
-
-  StrategyTradeOptions* m_pStrategyTradeOptions;
-
-  std::string m_sTimeSamplingStarted;
+  pInstrument_t m_pInstrument;
 
   virtual bool OnInit();
   virtual int OnExit();
 
   void HandlePopulateDatabase( void );
+
   void HandleBtnStart( void );
   void HandleBtnStop( void );
-  void HandleBtnSave( void );
 
 };
 
 // Implements MyApp& wxGetApp()
-DECLARE_APP(AppStrategyRunner)
+DECLARE_APP(AppOptimizeStrategy)
 

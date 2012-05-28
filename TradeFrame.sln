@@ -197,6 +197,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestGpFusion", "TestGpFusio
 		{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9} = {1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OptimizeStrategy", "OptimizeStrategy\OptimizeStrategy.vcxproj", "{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -347,6 +349,10 @@ Global
 		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Debug|Win32.Build.0 = Debug|Win32
 		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Release|Win32.ActiveCfg = Release|Win32
 		{7FE1BB7A-1E86-42D6-B0DE-5E31C5B568E0}.Release|Win32.Build.0 = Release|Win32
+		{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}.Debug|Win32.Build.0 = Debug|Win32
+		{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}.Release|Win32.ActiveCfg = Release|Win32
+		{7B15BACD-AF81-4F7D-90E2-D17F48C9BDFC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
