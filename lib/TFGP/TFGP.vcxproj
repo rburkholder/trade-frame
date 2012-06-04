@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1FC4E48C-5AFF-4F1C-89C0-C71C2A8B7BC9}</ProjectGuid>
+    <ProjectGuid>{48EC4EFC-3D85-4BDA-B115-E57BD056E9B0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>OUGP</RootNamespace>
+    <RootNamespace>TFGP</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -40,12 +40,12 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\;..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -73,24 +73,13 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Individual.h" />
-    <ClInclude Include="Node.h" />
-    <ClInclude Include="NodeBoolean.h" />
-    <ClInclude Include="NodeCompare.h" />
-    <ClInclude Include="NodeDouble.h" />
-    <ClInclude Include="Population.h" />
-    <ClInclude Include="RootNode.h" />
-    <ClInclude Include="TreeBuilder.h" />
+    <ClInclude Include="NodeTimeSeries.h" />
+    <ClInclude Include="TimeSeriesForNode.h" />
+    <ClInclude Include="TimeSeriesRegistration.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Individual.cpp" />
-    <ClCompile Include="Node.cpp" />
-    <ClCompile Include="NodeBoolean.cpp" />
-    <ClCompile Include="NodeCompare.cpp" />
-    <ClCompile Include="NodeDouble.cpp" />
-    <ClCompile Include="Population.cpp" />
-    <ClCompile Include="RootNode.cpp" />
-    <ClCompile Include="TreeBuilder.cpp" />
+    <ClCompile Include="NodeTimeSeries.cpp" />
+    <ClCompile Include="TimeSeriesRegistration.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

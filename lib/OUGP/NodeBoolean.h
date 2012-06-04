@@ -21,15 +21,6 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-template<class T>
-class NodeBoolean: public NodeProxy<T> {
-public:
-  NodeBoolean( void ): NodeProxy<T>( NodeType::Bool, NodeType::Bool ) {};
-  ~NodeBoolean( void ) {};
-protected:
-private:
-};
-
 class NodeBooleanFalse: public NodeBoolean<NodeBooleanFalse> {
 public:
   NodeBooleanFalse( void );
@@ -80,7 +71,7 @@ protected:
 private:
 };
 
-typedef boost::fusion::vector<NodeBooleanFalse, NodeBooleanTrue, NodeBooleanNot, NodeBooleanAnd, NodeBooleanOr> NodeBoolean_t;
+typedef boost::fusion::vector<NodeBooleanFalse, NodeBooleanTrue, NodeBooleanNot, NodeBooleanAnd, NodeBooleanOr> NodeTypesBoolean_t;
 
 } // namespace gp
 } // namespace ou

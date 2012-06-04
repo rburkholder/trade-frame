@@ -21,6 +21,8 @@
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
+#include <OUGP/Population.h>
+
 #include "OptimizeStrategy.h"
 
 IMPLEMENT_APP(AppOptimizeStrategy)
@@ -65,6 +67,7 @@ bool AppOptimizeStrategy::OnInit( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
+  ou::gp::Population pop( 100 );
 
   return 1;
 

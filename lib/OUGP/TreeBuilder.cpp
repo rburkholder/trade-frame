@@ -14,36 +14,10 @@
 
 #include <algorithm>
 
-#include <boost/fusion/include/for_each.hpp>
-
 #include "TreeBuilder.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
-
-// CreateNode from http://stackoverflow.com/questions/363453/looking-for-a-better-c-class-factory
-
-template<class T>
-Node* CreateNode( void ) {
-  return new T();
-}
-
-struct NodeFactoryInit {
-  template<typename T>
-  void operator()( T& t ) const {
-    vAll.push_back( &CreateNode<T> );
-    if ( t.IsTerminal() ) 
-      vTerm.push_back( &CreateNode<T> );
-    else 
-      vNode.push_back( &CreateNode<T> );
-  }
-  typedef std::vector<Node* (*)()> vCreateNode_t;
-  NodeFactoryInit( vCreateNode_t& vAll_, vCreateNode_t& vTerm_, vCreateNode_t& vNode_ )
-    : vAll( vAll_ ), vTerm( vTerm_ ), vNode( vNode_ ) {}
-  vCreateNode_t& vAll;
-  vCreateNode_t& vTerm;
-  vCreateNode_t& vNode;
-};
 
 //struct SortNodeFactoryOnBoolean
 
@@ -51,14 +25,9 @@ TreeBuilder::TreeBuilder(void)
   : m_rng( std::time( 0 ) )  // possible issue after jan 18, 2038?
 {
 
-  NodeBoolean_t b1;
-  boost::fusion::for_each( b1, NodeFactoryInit( m_vNodeFactoryBooleanAll, m_vNodeFactoryBooleanTerminals, m_vNodeFactoryBooleanNodes ) );
-
-  NodeCompare_t b2;
-  boost::fusion::for_each( b2, NodeFactoryInit( m_vNodeFactoryBooleanAll, m_vNodeFactoryBooleanTerminals, m_vNodeFactoryBooleanNodes ) );
-
-  NodeDouble_t d1;
-  boost::fusion::for_each( d1, NodeFactoryInit( m_vNodeFactoryDoubleAll, m_vNodeFactoryDoubleTerminals, m_vNodeFactoryDoubleNodes ) );
+  RegisterBoolean<NodeTypesBoolean_t>();
+  RegisterBoolean<NodeTypesCompare_t>();
+  RegisterDouble<NodeTypesDouble_t>();
 
   m_rNodeFactories[ NodeType::Bool ][ FactoryType::All ] = &m_vNodeFactoryBooleanAll;
   m_rNodeFactories[ NodeType::Bool ][ FactoryType::Terminals ] = &m_vNodeFactoryBooleanTerminals;
@@ -85,6 +54,8 @@ Node* TreeBuilder::CreateChild( NodeType::E nt, bool bUseTerminal, bool bUseNode
 
   Node* node( 0 );
 
+  // determine what type of Node to Construct
+
   FactoryType::E ft( FactoryType::All ); // default to mixture of nodes and terminals
 
   if ( nDepth == nMaxDepth ) {
@@ -101,8 +72,10 @@ Node* TreeBuilder::CreateChild( NodeType::E nt, bool bUseTerminal, bool bUseNode
     }
   }
 
+  // choose factory based upon factors computed above
   vNodeFactory_t& vFactory( *m_rNodeFactories[ nt ][ ft ] );
 
+  // construct the node
   boost::random::uniform_int_distribution<unsigned int> dist( 0, vFactory.size() - 1 );
   vNodeFactory_t::size_type ix( dist( m_rng ) );
   node = vFactory[ ix ]();

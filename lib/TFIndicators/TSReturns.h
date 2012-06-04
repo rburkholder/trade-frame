@@ -42,6 +42,7 @@ public:
 protected:
 private:
 
+  bool m_bFirstAppend;
   price_t m_priceLast;
 
 };

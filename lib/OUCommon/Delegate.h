@@ -13,8 +13,6 @@
 
 #pragma once
 
-
-
 #include "FastDelegate.h"
 // http://www.codeproject.com/cpp/FastDelegate.asp
 using namespace fastdelegate;

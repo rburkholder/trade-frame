@@ -23,18 +23,12 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 namespace rng { // random number generator
-boost::random::mt19937 rng( std::time( 0 ) );
-boost::random::uniform_real_distribution<double> m_urd( -1.0, 1.0 );
-double calc( void ) {
-  return m_urd( rng );
+boost::random::mt19937 common( std::time( 0 ) );
+boost::random::uniform_real_distribution<double> urdUnity( -1.0, 1.0 );
+double CalcUrdUnity( void ) {
+  return urdUnity( common );
 }
 } // namespace rng
-
-//NodeDouble::NodeDouble(void) {
-//}
-
-//NodeDouble::~NodeDouble(void) {
-//}
 
 // ********* NodeDoubleZero *********
 
@@ -51,7 +45,7 @@ double NodeDoubleZero::EvaluateDouble( void ) {
 
 // ********* NodeDoubleRandom *********
 
-NodeDoubleRandom::NodeDoubleRandom( void ) : NodeDouble<NodeDoubleRandom>(), m_val( rng::calc() ) {
+NodeDoubleRandom::NodeDoubleRandom( void ) : NodeDouble<NodeDoubleRandom>(), m_val( rng::CalcUrdUnity() ) {
   m_cntNodes = 0;
 }
 
@@ -72,6 +66,30 @@ NodeDoubleRandom::~NodeDoubleRandom( void ) {
 
 double NodeDoubleRandom::EvaluateDouble( void ) {
   return m_val;
+}
+
+// ********* NodeDoubleAbs *********
+
+NodeDoubleAbs::NodeDoubleAbs( void ) : NodeDouble<NodeDoubleAbs>() {
+  m_cntNodes = 0;
+}
+
+NodeDoubleAbs::NodeDoubleAbs( const NodeDoubleAbs& rhs ): NodeDouble<NodeDoubleAbs>() {
+  m_cntNodes = 0;
+}
+
+NodeDoubleAbs& NodeDoubleAbs::operator=( const NodeDoubleAbs& rhs ) {
+  if ( this != &rhs ) {
+    m_cntNodes = 0;
+  }
+  return *this;
+}
+
+NodeDoubleAbs::~NodeDoubleAbs( void ) {
+}
+
+double NodeDoubleAbs::EvaluateDouble( void ) {
+  return std::abs( ChildCenter().EvaluateDouble() );
 }
 
 // ********* NodeDoubleAdd *********

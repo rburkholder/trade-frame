@@ -70,7 +70,7 @@ protected:
 private:
 };
 
-typedef boost::fusion::vector<NodeCompareGT, NodeCompareGE, NodeCompareLT, NodeCompareLE> NodeCompare_t;
+typedef boost::fusion::vector<NodeCompareGT, NodeCompareGE, NodeCompareLT, NodeCompareLE> NodeTypesCompare_t;
 
 } // namespace gp
 } // namespace ou

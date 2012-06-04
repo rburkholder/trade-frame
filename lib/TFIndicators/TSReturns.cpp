@@ -21,10 +21,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSReturns::TSReturns(void) {
+TSReturns::TSReturns(void): m_bFirstAppend( true ) {
 }
 
-TSReturns::TSReturns(size_type size) : CPrices( size ) {
+TSReturns::TSReturns(size_type size) : CPrices( size ), m_bFirstAppend( true ) {
 }
 
 TSReturns::~TSReturns(void) {
@@ -32,25 +32,29 @@ TSReturns::~TSReturns(void) {
 
 void TSReturns::Append( const CBar& bar ) {
   price_t price_ = std::log( bar.Close() );
-  if ( 0 != CPrices::Size() ) CPrices::Append( CPrice( bar.DateTime(), price_ - m_priceLast ) );
+  if ( m_bFirstAppend ) m_bFirstAppend = false;
+  else CPrices::Append( CPrice( bar.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 
 void TSReturns::Append( const CQuote& quote ) {
   price_t price_ = std::log( quote.LogarithmicMidPointA() );
-  if ( 0 != CPrices::Size() ) CPrices::Append( CPrice( quote.DateTime(), price_ - m_priceLast  ) );
+  if ( m_bFirstAppend ) m_bFirstAppend = false;
+  else CPrices::Append( CPrice( quote.DateTime(), price_ - m_priceLast  ) );
   m_priceLast = price_;
 }
 
 void TSReturns::Append( const CTrade& trade ) {
   price_t price_ = std::log( trade.Trade() );
-  if ( 0 != CPrices::Size() ) CPrices::Append( CPrice( trade.DateTime(), price_ - m_priceLast ) );
+  if ( m_bFirstAppend ) m_bFirstAppend = false;
+  else CPrices::Append( CPrice( trade.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 
 void TSReturns::Append( const CPrice& price ) {
   price_t price_ = std::log( price.Price() );
-  if ( 0 != CPrices::Size() ) CPrices::Append( CPrice( price.DateTime(), price_ - m_priceLast ) );
+  if ( m_bFirstAppend ) m_bFirstAppend = false;
+  else CPrices::Append( CPrice( price.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 

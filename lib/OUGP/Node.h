@@ -50,6 +50,8 @@ public:
   NodeType::E ReturnType( void ) const { return m_ReturnType; };
   NodeType::E ChildType( void ) const  { return m_ChildType; };
 
+  bool IsTimeSeries( void ) const { return m_bIsTimeSeries; };
+
   ParentLink::E ParentSide( void ) const { return m_eParentSide; };
 
   virtual void TreeToString( std::stringstream& ) const;
@@ -86,6 +88,7 @@ protected:
   Node* m_pChildRight;
 
   unsigned int m_cntNodes; // how many child nodes permitted by default (0 for terminal nodes, 1 for single, 2 for two nodes)
+  bool m_bIsTimeSeries;
 
   ParentLink::E m_eParentSide;
 
@@ -97,20 +100,38 @@ private:
 
 std::stringstream& operator<<( std::stringstream& ss, const Node& node );
 
-template<typename T> // CRTP 
+template<typename N> // CRTP 
 class NodeProxy: public Node {
 public:
   NodeProxy( NodeType::E ReturnType, NodeType::E ChildType ): Node( ReturnType, ChildType ) {};
   virtual ~NodeProxy( void ) {};
 
   virtual Node* Clone( bool bCopyValues ) {
-    T* t = new T;
+    N* t = new N;
     if ( bCopyValues ) {
-      *t = dynamic_cast<T&>( *this );
+      *t = dynamic_cast<N&>( *this );
     }
     return t;
   }
 
+protected:
+private:
+};
+
+template<class N>
+class NodeDouble: public NodeProxy<N> {
+public:
+  NodeDouble( void ): NodeProxy<N>( NodeType::Double, NodeType::Double ) {};
+  ~NodeDouble( void ) {};
+protected:
+private:
+};
+
+template<class N>
+class NodeBoolean: public NodeProxy<N> {
+public:
+  NodeBoolean( void ): NodeProxy<N>( NodeType::Bool, NodeType::Bool ) {};
+  ~NodeBoolean( void ) {};
 protected:
 private:
 };

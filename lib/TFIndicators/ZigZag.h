@@ -27,6 +27,8 @@ using namespace boost::gregorian;
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
+#include <TFTimeSeries/TimeSeries.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -42,9 +44,9 @@ public:
 
   void Check( ptime dt, double val );
 
-  enum EDirection { Init, Start, Down, Up };
+  enum EDirection { Init, Start, Down, Up };  // start, down, up are visible in OnPeakFoundHandler
 
-  typedef FastDelegate4<ZigZag*, ptime, double, EDirection> OnPeakFoundHandler;
+  typedef FastDelegate4<ZigZag&, ptime, double, EDirection> OnPeakFoundHandler;
   void SetOnPeakFound( OnPeakFoundHandler function ) {
     OnPeakFound = function; 
   }
@@ -68,6 +70,21 @@ private:
   ptime m_dtPatternPt1;   // when it was last encountered
   OnPeakFoundHandler OnPeakFound;
   OnDecisionPointFoundHandler UpDecisionPointFound, DnDecisionPointFound;
+};
+
+// template sometime to handle CQuote, CTrade, CPrice
+class ZigZagTotalMovement: public ZigZag {
+public:
+  ZigZagTotalMovement( CQuotes&, double );
+  ~ZigZagTotalMovement( void );
+  double Sum( void ) const { return m_sum; };
+protected:
+private:
+  double m_sum;
+  double m_last;
+  CQuotes& m_quotes;
+  void HandleQuote( const CQuote& );
+  void HandlePeakFound( ZigZag&, ptime, double, ZigZag::EDirection );
 };
 
 } // namespace tf

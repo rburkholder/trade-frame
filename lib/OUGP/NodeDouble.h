@@ -20,15 +20,9 @@
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
-
-template<class T>
-class NodeDouble: public NodeProxy<T> {
-public:
-  NodeDouble( void ): NodeProxy<T>( NodeType::Double, NodeType::Double ) {};
-  ~NodeDouble( void ) {};
-protected:
-private:
-};
+namespace rng {
+  extern boost::random::mt19937 common;
+}
 
 class NodeDoubleZero: public NodeDouble<NodeDoubleZero> {
 public:
@@ -51,6 +45,18 @@ public:
 protected:
 private:
   double m_val;
+};
+
+class NodeDoubleAbs: public NodeDouble<NodeDoubleAbs> {
+public:
+  NodeDoubleAbs( void );
+  NodeDoubleAbs( const NodeDoubleAbs& rhs );
+  NodeDoubleAbs& operator=( const NodeDoubleAbs& rhs );
+  ~NodeDoubleAbs( void );
+  void ToString( std::stringstream& ss ) const { ss << "abs"; };
+  double EvaluateDouble( void );
+protected:
+private:
 };
 
 class NodeDoubleAdd: public NodeDouble<NodeDoubleAdd> {
@@ -93,7 +99,7 @@ protected:
 private:
 };
 
-typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleRandom, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeDouble_t;
+typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleRandom, NodeDoubleAbs, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeTypesDouble_t;
 
 
 } // namespace gp

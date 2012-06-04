@@ -17,8 +17,10 @@
 #include "StrategyEquity.h"
 
 StrategyEquity::StrategyEquity( pProviderSim_t pProvider ) 
-  : m_pProvider( pProvider )
-  // 2 minutes, 8 minutes, 32 minutes
+  : m_pProvider( pProvider ),
+    m_emaQuotes1( m_quotes, time_duration( 0,  2, 0 ) ), //  2 minutes
+    m_emaQuotes2( m_quotes, time_duration( 0,  8, 0 ) ), //  8 minutes
+    m_emaQuotes3( m_quotes, time_duration( 0, 32, 0 ) ) // 32 minutes
 {
 }
 
@@ -40,9 +42,13 @@ void StrategyEquity::Stop( void ) {
   m_pProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleTrade ) );
 }
 
-void StrategyEquity::HandleQuote( const ou::tf::CQuote& ) {
+void StrategyEquity::HandleQuote( const ou::tf::CQuote& quote ) {
+  if ( quote.IsValid() ) {
+    m_quotes.Append( quote );
+  }
 }
 
-void StrategyEquity::HandleTrade( const ou::tf::CTrade& ) {
+void StrategyEquity::HandleTrade( const ou::tf::CTrade& trade ) {
+  m_trades.Append( trade );
 }
 

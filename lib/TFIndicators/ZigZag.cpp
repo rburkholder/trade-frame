@@ -53,7 +53,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
       dif = m_dblPatternPt1 - m_dblPatternPt0;
       if ( dif >= m_dblFilterWidth ) {
         ++m_cntTurns;
-        if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
+        if ( NULL != OnPeakFound ) OnPeakFound( *this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
         if ( m_dblPatternPt1 > m_dblPatternPt0 ) m_PatternState = EDirection::Down;
       }
       break;
@@ -68,7 +68,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
       dif = m_dblPatternPt0 - m_dblPatternPt1;
       if ( dif >= m_dblFilterWidth ) {
         ++m_cntTurns;
-        if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
+        if ( NULL != OnPeakFound ) OnPeakFound( *this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
         if ( m_dblPatternPt1 < m_dblPatternPt0 ) m_PatternState = EDirection::Up;
       }
       break;
@@ -77,7 +77,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
       m_dblPatternPt1 = val;
       m_dtPatternPt1 = dt;
       m_PatternState = EDirection::Start;
-      if ( NULL != OnPeakFound ) OnPeakFound( this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
+      if ( NULL != OnPeakFound ) OnPeakFound( *this, m_dtPatternPt1, m_dblPatternPt1, m_PatternState );
       break;
     case EDirection::Start:
       if ( abs( val - m_dblPatternPt1 ) >= m_dblFilterWidth ) {
@@ -93,6 +93,38 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
       }
       break;
   }
+}
+
+//=================
+
+ZigZagTotalMovement::ZigZagTotalMovement( CQuotes& quotes, double width )
+  : ZigZag( width ), m_quotes( quotes ), m_sum( 0.0 ), m_last( 0.0 )
+{
+  ZigZag::SetOnPeakFound( MakeDelegate( this, &ZigZagTotalMovement::HandlePeakFound ) );
+  m_quotes.OnAppend.Add( MakeDelegate( this, &ZigZagTotalMovement::HandleQuote ) );
+}
+
+ZigZagTotalMovement::~ZigZagTotalMovement( void ) {
+  m_quotes.OnAppend.Remove( MakeDelegate( this, &ZigZagTotalMovement::HandleQuote ) );
+  ZigZag::SetOnPeakFound( 0 );
+}
+
+void ZigZagTotalMovement::HandleQuote( const CQuote& quote ) {
+  ZigZag::Check( quote.DateTime(), quote.Midpoint() );
+}
+
+void ZigZagTotalMovement::HandlePeakFound( ZigZag& zigzag, ptime dt, double val, ZigZag::EDirection direction ) {
+  switch ( direction ) {
+  case EDirection::Start:
+    break;
+  case EDirection::Up:
+    m_sum += m_last - val;
+    break;
+  case EDirection::Down:
+    m_sum += val - m_last;
+    break;
+  }
+  m_last = val;
 }
 
 } // namespace tf

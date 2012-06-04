@@ -23,7 +23,7 @@ std::stringstream& operator<<( std::stringstream& ss, const Node& node ) {
 }
 
 Node::Node( NodeType::E ReturnType, NodeType::E ChildType ) 
-  : m_cntNodes( 0 ), 
+  : m_cntNodes( 0 ), m_bIsTimeSeries( false ),
     m_pParent( 0 ), m_eParentSide( ParentLink::None ), m_ReturnType( ReturnType ), m_ChildType( ChildType ),
     m_pChildLeft( 0 ), m_pChildCenter( 0 ), m_pChildRight( 0 ),
     m_ixCreateNode( 0 )

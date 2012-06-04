@@ -16,6 +16,9 @@
 
 // Started 2012/05/27
 
+// Deals with user interface and population control
+// Separate population control out into an optimizer at some point int time
+
 //#include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFTrading/ProviderManager.h>
