@@ -36,7 +36,7 @@ public:
   typedef inherited_t::symbol_id_t symbol_id_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef CIQFeed<CIQFeedProvider>  IQFeed_t;
+  typedef CIQFeed<CIQFeedProvider> IQFeed_t;
 
   CIQFeedProvider( void );
   ~CIQFeedProvider( void );

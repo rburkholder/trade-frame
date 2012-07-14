@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "wx/frame.h"
-#include "wx/statusbr.h"
+#include <wx/frame.h>
+#include <wx/statusbr.h>
 
 #define SYMBOL_FRAMEGENERIC_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
 #define SYMBOL_FRAMEGENERIC_TITLE _("Strategy Runner")

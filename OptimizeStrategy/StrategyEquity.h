@@ -70,9 +70,6 @@ private:
 
   ou::tf::ZigZag m_zigzagPrice;  // provides a basis for maximizing profitability, crossover is some fraction of previous day's average range
 
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
-
   ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes1;
   ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes2;
   ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes3;

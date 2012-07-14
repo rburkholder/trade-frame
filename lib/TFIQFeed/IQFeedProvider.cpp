@@ -68,7 +68,7 @@ CIQFeedProvider::pSymbol_t CIQFeedProvider::NewCSymbol( pInstrument_t pInstrumen
   return pSymbol;
 }
 
-void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
+void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol* pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
     std::string s = "w" + pSymbol->GetId() + "\n";
     CIQFeed<CIQFeedProvider>::Send( s );
@@ -76,7 +76,7 @@ void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
   }
 }
 
-void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol *pSymbol ) {
+void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol* pSymbol ) {
   if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
     // don't do anything, as stuff still active
   }

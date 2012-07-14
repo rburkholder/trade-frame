@@ -1,3 +1,6 @@
+2012/07/07
+See C:\Data\Projects\VSC++\wxWidgets\build.txt for wxWidgets new library build for debug
+
 2011/07/29
 wx requires runtime dll, so boost needs to be compiled the same:
 b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=shared stage
@@ -8,6 +11,7 @@ copy
 C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.2\include\msvc\wx\setup.h
 to 
 C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.2\include\wx
+
 
 #define wxSETUPH_PATH_STR "C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.2\lib\vc_lib\mswd\wx\setup.h"
 
