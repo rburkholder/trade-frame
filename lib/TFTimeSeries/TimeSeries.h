@@ -318,11 +318,12 @@ H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
 
 class Bars: public TimeSeries<Bar> {
 public:
+  typedef Bar datum_t;
   Bars(void) {};
-  Bars( size_t size ): TimeSeries<Bar>( size ) {};
+  Bars( size_t size ): TimeSeries<datum_t>( size ) {};
   virtual ~Bars(void) {};
-  Bars* Subset( ptime time ) const { return (Bars*) TimeSeries<Bar>::Subset( time ); };
-  Bars* Subset( ptime time, unsigned int n ) const { return (Bars*) TimeSeries<Bar>::Subset( time, n ); };
+  Bars* Subset( ptime time ) const { return (Bars*) TimeSeries<datum_t>::Subset( time ); };
+  Bars* Subset( ptime time, unsigned int n ) const { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -331,11 +332,12 @@ private:
 
 class Trades: public TimeSeries<Trade> {
 public:
+  typedef Trade datum_t;
   Trades( void ) {};
-  Trades( size_t size ): TimeSeries<Trade>( size ) {};
+  Trades( size_t size ): TimeSeries<datum_t>( size ) {};
   ~Trades( void ) {};
-  Trades* Subset( ptime time ) const { return (Trades*) TimeSeries<Trade>::Subset( time ); };
-  Trades* Subset( ptime time, unsigned int n ) const { return (Trades*) TimeSeries<Trade>::Subset( time, n ); };
+  Trades* Subset( ptime time ) const { return (Trades*) TimeSeries<datum_t>::Subset( time ); };
+  Trades* Subset( ptime time, unsigned int n ) const { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -344,11 +346,12 @@ private:
 
 class Quotes: public TimeSeries<Quote> {
 public:
+  typedef Quote datum_t;
   Quotes( void ) {};
-  Quotes( size_t size ): TimeSeries<Quote>( size ) {};
+  Quotes( size_t size ): TimeSeries<datum_t>( size ) {};
   ~Quotes( void ) {};
-  Quotes* Subset( ptime time ) const { return (Quotes*) TimeSeries<Quote>::Subset( time ); };
-  Quotes* Subset( ptime time, unsigned int n ) const { return (Quotes*) TimeSeries<Quote>::Subset( time, n ); };
+  Quotes* Subset( ptime time ) const { return (Quotes*) TimeSeries<datum_t>::Subset( time ); };
+  Quotes* Subset( ptime time, unsigned int n ) const { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -357,11 +360,12 @@ private:
 
 class MarketDepths: public TimeSeries<MarketDepth> {
 public:
+  typedef MarketDepth datum_t;
   MarketDepths( void ) {};
-  MarketDepths( size_t size ): TimeSeries<MarketDepth>( size ) {};
+  MarketDepths( size_t size ): TimeSeries<datum_t>( size ) {};
   ~MarketDepths( void ) {};
-  MarketDepths* Subset( ptime time ) const { return (MarketDepths*) TimeSeries<MarketDepth>::Subset( time ); };
-  MarketDepths* Subset( ptime time, unsigned int n ) const { return (MarketDepths*) TimeSeries<MarketDepth>::Subset( time, n ); };
+  MarketDepths* Subset( ptime time ) const { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); };
+  MarketDepths* Subset( ptime time, unsigned int n ) const { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -370,11 +374,12 @@ private:
 
 class Greeks: public TimeSeries<Greek> {
 public:
+  typedef Greek datum_t;
   Greeks( void ) {};
-  Greeks( size_t size ): TimeSeries<Greek>( size ) {};
+  Greeks( size_t size ): TimeSeries<datum_t>( size ) {};
   ~Greeks( void ) {};
-  Greeks* Subset( ptime time ) const { return (Greeks*) TimeSeries<Greek>::Subset( time ); };
-  Greeks* Subset( ptime time, unsigned int n ) const { return (Greeks*) TimeSeries<Greek>::Subset( time, n ); };
+  Greeks* Subset( ptime time ) const { return (Greeks*) TimeSeries<datum_t>::Subset( time ); };
+  Greeks* Subset( ptime time, unsigned int n ) const { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -384,11 +389,12 @@ private:
 
 class Prices: public TimeSeries<Price> {
 public:
+  typedef Price datum_t;
   Prices( void ) {};
-  Prices( size_t size ): TimeSeries<Price>( size ) {};
+  Prices( size_t size ): TimeSeries<datum_t>( size ) {};
   ~Prices( void ) {};
-  Prices* Subset( ptime time ) const { return (Prices*) TimeSeries<Price>::Subset( time ); };
-  Prices* Subset( ptime time, unsigned int n ) const { return (Prices*) TimeSeries<Price>::Subset( time, n ); };
+  Prices* Subset( ptime time ) const { return (Prices*) TimeSeries<datum_t>::Subset( time ); };
+  Prices* Subset( ptime time, unsigned int n ) const { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };

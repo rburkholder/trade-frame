@@ -151,17 +151,17 @@ void TimeSeriesSlidingWindow<T,D>::HandleDatum( const D& datum ) {
 // ======== QuoteMidPoint
 /*
 // not sure how to use this yet.may not even use it
-template<class T> class TimeSeriesSlidingWindowQuoteMidPoint: public TimeSeriesSlidingWindow<T, CQuote>
+template<class T> class TimeSeriesSlidingWindowQuoteMidPoint: public TimeSeriesSlidingWindow<T, Quote>
 {
 public:
-  TimeSeriesSlidingWindowQuoteMidPoint<T>( TimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
+  TimeSeriesSlidingWindowQuoteMidPoint<T>( TimeSeries<Quote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
     : TimeSeriesSlidingWindow<T, Quote>( pSeries, WindowSizeSeconds, WindowSizeCount ) {
   };
   ~TimeSeriesSlidingWindowQuoteMidPoint<T>( void );
 protected:
-  void Add( const CQuote &datum ) { // CRTP override to process elements passing into window scope
+  void Add( const Quote &datum ) { // CRTP override to process elements passing into window scope
   };
-  void Expire( const CQuote &datum ) { // CRTP override to process elements passing out of window scope 
+  void Expire( const Quote &datum ) { // CRTP override to process elements passing out of window scope 
   };  
   void PostUpdate( void ) {};  // CRTPover ride to do final calcs
 private:
