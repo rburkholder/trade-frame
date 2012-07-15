@@ -72,7 +72,7 @@ void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
   m_mapEntryOrdersFilling.erase( iter ); 
 }
 
-void OrdersOutstanding::CheckBaseOrder( const ou::tf::CQuote& quote ) { // cancel after minimal pending time
+void OrdersOutstanding::CheckBaseOrder( const ou::tf::Quote& quote ) { // cancel after minimal pending time
   for ( mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin(); m_mapEntryOrdersFilling.end() != iter; ++iter ) {
     if ( EStateOpenWaitingFill == iter->second->eState ) {
       if ( iter->second->pOrderEntry->GetDateTimeOrderSubmitted() + m_durOrderOpenTimeOut < quote.DateTime() ) {
@@ -216,7 +216,7 @@ void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order )
   }
 }
 
-void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
+void OrdersOutstandingLongs::HandleQuote( const ou::tf::Quote& quote ) {
   if ( !CancelAndCloseInProgress() ) {
     CheckBaseOrder( quote );
     double ask = quote.Ask();
@@ -259,7 +259,7 @@ void OrdersOutstandingLongs::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
-void OrdersOutstandingShorts::HandleQuote( const ou::tf::CQuote& quote ) {
+void OrdersOutstandingShorts::HandleQuote( const ou::tf::Quote& quote ) {
   if ( !CancelAndCloseInProgress() ) {
     CheckBaseOrder( quote );
     double bid = quote.Bid();

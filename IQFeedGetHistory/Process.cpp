@@ -30,7 +30,7 @@ class CProcessDarvas: public ou::tf::CDarvas<CProcessDarvas> {
 public:
   CProcessDarvas( size_t ix );
   ~CProcessDarvas( void ) {};
-  bool Calc( const ou::tf::CBar& );
+  bool Calc( const ou::tf::Bar& );
   void Result( std::string& s );  // should only be called once
 protected:
   // CRTP from CDarvas<CProcess>
@@ -56,7 +56,7 @@ CProcessDarvas::CProcessDarvas( size_t ix )
 {
 }
 
-bool CProcessDarvas::Calc( const ou::tf::CBar& bar ) {
+bool CProcessDarvas::Calc( const ou::tf::Bar& bar ) {
   ou::tf::CDarvas<CProcessDarvas>::Calc( bar );
   --m_ix;
   bool b = m_bTriggered; 
@@ -129,7 +129,7 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
   // look for index of high
   if ( m_cntBars == bars->bars.Size() ) {  // we have our bar count, so perform calc
     size_t ix = 0;
-    for ( ou::tf::CBars::const_iterator iter = bars->bars.begin(); iter != bars->bars.end(); ++iter ) {
+    for ( ou::tf::Bars::const_iterator iter = bars->bars.begin(); iter != bars->bars.end(); ++iter ) {
       if ( dblHigh < (*iter).High() ) {
         ixHigh = ix;
         dblHigh = (*iter).High();
@@ -142,7 +142,7 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
     CProcessDarvas darvas( m_BarWindow );
     size_t ix = m_cntBars - m_BarWindow;
     bool bTrigger;  // wait for trigger on final day
-    for ( ou::tf::CBars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
+    for ( ou::tf::Bars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
       bTrigger = darvas.Calc( *iter );
     }
 

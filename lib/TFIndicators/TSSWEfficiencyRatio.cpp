@@ -21,14 +21,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWEfficiencyRatio::TSSWEfficiencyRatio( CTrades& trades, time_duration tdWindowWidth ) 
-  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>( trades, tdWindowWidth ),
+TSSWEfficiencyRatio::TSSWEfficiencyRatio( Trades& trades, time_duration tdWindowWidth ) 
+  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade>( trades, tdWindowWidth ),
     m_lastAdd( 0.0 ), m_lastExpire( 0.0 ), m_sum( 0.0 ), m_ratio( 0.0 ), m_total( 0.0 )
 {
 }
 
 TSSWEfficiencyRatio::TSSWEfficiencyRatio( const TSSWEfficiencyRatio& ratio ) 
-  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>( ratio ),
+  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade>( ratio ),
     m_lastAdd( 0.0 ), m_lastExpire( 0.0 ), m_sum( 0.0 ), m_ratio( 0.0 ), m_total( 0.0 )
 {
 }
@@ -36,8 +36,8 @@ TSSWEfficiencyRatio::TSSWEfficiencyRatio( const TSSWEfficiencyRatio& ratio )
 TSSWEfficiencyRatio::~TSSWEfficiencyRatio(void) {
 }
 
-void TSSWEfficiencyRatio::Add( const CTrade& trade ) {
-  double tmp = trade.Trade();
+void TSSWEfficiencyRatio::Add( const Trade& trade ) {
+  double tmp = trade.Price();
   if ( 0.0 != m_lastAdd ) {
     double dif = fabs( tmp - m_lastAdd );
     m_sum += dif;
@@ -49,8 +49,8 @@ void TSSWEfficiencyRatio::Add( const CTrade& trade ) {
   m_lastAdd = tmp;
 }
 
-void TSSWEfficiencyRatio::Expire( const CTrade& trade ) {
-  double tmp = trade.Trade();
+void TSSWEfficiencyRatio::Expire( const Trade& trade ) {
+  double tmp = trade.Price();
   double dif = fabs( tmp - m_lastExpire );
   m_sum -= dif;
   m_lastExpire = tmp;  // not perfectly correct, but good enough, is next to last

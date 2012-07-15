@@ -53,7 +53,7 @@ private:
 
   enum enumTradeStates { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
-  typedef ou::tf::CGreek::greeks_t greeks_t;
+  typedef ou::tf::Greek::greeks_t greeks_t;
 
   struct statsOptions {
     unsigned int nLong;
@@ -145,7 +145,7 @@ private:
     enum EActiveSide { ESideOut, ESideTop, ESideBottom };
     ou::tf::TSSWStochastic ts;
     EActiveSide sideCall, sidePut;  // near call is out, short at top, exit at bottom; put is out, short at bottom, exit at top
-    stochastic_t( ou::tf::CQuotes& quotes, time_duration tdWindowWidth ): ts( quotes, tdWindowWidth ), sideCall( ESideOut ), sidePut( ESideOut ) {};
+    stochastic_t( ou::tf::Quotes& quotes, time_duration tdWindowWidth ): ts( quotes, tdWindowWidth ), sideCall( ESideOut ), sidePut( ESideOut ) {};
   };
 
   typedef std::map<double,options_t> mapOptions_t;
@@ -153,8 +153,8 @@ private:
   typedef std::pair<double,options_t> mapOptions_pair_t;
   mapOptions_t m_mapOptions;
 
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
+  ou::tf::Quotes m_quotes;
+  ou::tf::Trades m_trades;
 
   mapOptions_iter_t m_iterMapOptionsAbove2;
   mapOptions_iter_t m_iterMapOptionsAbove1;
@@ -187,10 +187,10 @@ private:
 
   struct bundle_t {
     pInstrument_t pInstrument;
-    ou::tf::CQuotes quotes;
-    ou::tf::CTrades trades;
-    void HandleTrade( const ou::tf::CTrade& trade ) { trades.Append( trade ); };
-    void HandleQuote( const ou::tf::CQuote& quote ) { quotes.Append( quote ); };
+    ou::tf::Quotes quotes;
+    ou::tf::Trades trades;
+    void HandleTrade( const ou::tf::Trade& trade ) { trades.Append( trade ); };
+    void HandleQuote( const ou::tf::Quote& quote ) { quotes.Append( quote ); };
   };
 
   //bundle_t bundleUnderlying;
@@ -210,9 +210,9 @@ private:
   template<class Option>
   void ProcessOptions( greeks_t& greeks, statsOptions& stats, Option& option );
 
-  void AdjustTheOptions( const ou::tf::CQuote& quote );
-  bool SetPointersFirstTime( const ou::tf::CQuote& quote );
-  bool AdjustThePointers( const ou::tf::CQuote& quote );
+  void AdjustTheOptions( const ou::tf::Quote& quote );
+  bool SetPointersFirstTime( const ou::tf::Quote& quote );
+  bool AdjustThePointers( const ou::tf::Quote& quote );
 
   void LoadExistingInstrumentsAndPortfolios( const std::string& sUnderlying );
 
@@ -233,8 +233,8 @@ private:
   void HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
   void HandleFarDateContractDetailsDone( void );
 
-  void HandleQuote( const ou::tf::CQuote& );
-  void HandleTrade( const ou::tf::CTrade& );
+  void HandleQuote( const ou::tf::Quote& );
+  void HandleTrade( const ou::tf::Trade& );
 };
 
 template<class Option>

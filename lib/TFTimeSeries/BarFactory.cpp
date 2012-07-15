@@ -21,18 +21,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CBarFactory::CBarFactory(duration_t nSeconds) : 
+BarFactory::BarFactory(duration_t nSeconds) : 
   m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
 {
 }
 
-CBarFactory::~CBarFactory(void) {
+BarFactory::~BarFactory(void) {
   OnNewBarStarted = NULL;
   OnBarUpdated = NULL;
   OnBarComplete = NULL;
 }
 
-void CBarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
+void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
   duration_t seconds = dt.time_of_day().total_seconds();
   duration_t interval = seconds / m_nBarWidthSeconds;
   if ( m_bar.IsNull() ) {

@@ -24,11 +24,11 @@ namespace tf { // TradeFrame
 template<typename D> // D => DatedDatum
 class TSSWTickFrequency: 
   public TimeSeriesSlidingWindow<TSSWTickFrequency<D>, D>,
-  public CPrices
+  public Prices
 {
 public:
-  typedef typename CTimeSeries<D>::size_type size_type;
-  TSSWTickFrequency<D>( CTimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize = 0 );
+  typedef typename TimeSeries<D>::size_type size_type;
+  TSSWTickFrequency<D>( TimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize = 0 );
   virtual ~TSSWTickFrequency<D>(void);
   ou::Delegate<const D&> OnAppend;
 protected:
@@ -41,7 +41,7 @@ private:
 };
 
 template<typename D>
-TSSWTickFrequency<D>::TSSWTickFrequency( CTimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize ):
+TSSWTickFrequency<D>::TSSWTickFrequency( TimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize ):
   TimeSeriesSlidingWindow<TSSWTickFrequency<D>, D>( series, tdWindowWidth, stWindowSize ),
     m_n( 0 )
 {
@@ -64,7 +64,7 @@ void TSSWTickFrequency<D>::Expire( const D& datum ) {
 
 template<typename D>
 void TSSWTickFrequency<D>::PostUpdate( void ) {
-  CPrices::Append( CPrice( m_dt, (double) m_n ) );
+  Prices::Append( Price( m_dt, (double) m_n ) );
 }
 
 } // namespace tf

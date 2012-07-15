@@ -19,19 +19,19 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, CPrice> {
-  friend TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>;
+class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, Price> {
+  friend TimeSeriesSlidingWindow<TSSWRunningTally, Price>;
 public:
 
-  TSSWRunningTally( CPrices&, time_duration tdWindowWidth );
+  TSSWRunningTally( Prices&, time_duration tdWindowWidth );
 //  TSSWRunningTally( const TSSWRunningTally& );
   ~TSSWRunningTally( void );
 
   double Net( void ) const { return m_net; };
 
 protected:
-  void Add( const CPrice& );
-  void Expire( const CPrice& );
+  void Add( const Price& );
+  void Expire( const Price& );
   void PostUpdate( void );
 private:
   double m_net;

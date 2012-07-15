@@ -64,8 +64,8 @@ public:
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
   void SetCommission( double Commission ) { m_dblCommission = Commission; };
 
-  void NewTrade( const CTrade& trade );
-  void NewQuote( const CQuote& quote );
+  void NewTrade( const Trade& trade );
+  void NewQuote( const Quote& quote );
 
   void SubmitOrder( pOrder_t pOrder );
   void CancelOrder( COrder::idOrder_t nOrderId );
@@ -81,7 +81,7 @@ protected:
   boost::posix_time::time_duration m_dtQueueDelay; // used to simulate network / handling delays
   double m_dblCommission;  // currency, per share (need also per trade)
 
-  CQuote m_lastQuote;
+  Quote m_lastQuote;
 
   OnOrderCancelledHandler OnOrderCancelled;
   OnOrderFillHandler OnOrderFill;
@@ -102,14 +102,14 @@ protected:
   mapOrderBook_t m_mapSellStops;  // pending sell stops, turned into market order when touched
   mapOrderBook_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
 
-  void ProcessOrderQueues( const CQuote& quote );
-  void CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan );
-  void ProcessCancelQueue( const CQuote& quote );
-  void ProcessDelayQueue( const CQuote& quote );
-  void ProcessStopOrders( const CQuote& quote ); // true if order executed, not yet implemented
-  bool ProcessMarketOrders( const CQuote& quote ); // true if order executed
-  bool ProcessLimitOrders( const CQuote& quote ); // true if order executed
-  bool ProcessLimitOrders( const CTrade& trade );
+  void ProcessOrderQueues( const Quote& quote );
+  void CalculateCommission( COrder* pOrder, Trade::tradesize_t quan );
+  void ProcessCancelQueue( const Quote& quote );
+  void ProcessDelayQueue( const Quote& quote );
+  void ProcessStopOrders( const Quote& quote ); // true if order executed, not yet implemented
+  bool ProcessMarketOrders( const Quote& quote ); // true if order executed
+  bool ProcessLimitOrders( const Quote& quote ); // true if order executed
+  bool ProcessLimitOrders( const Trade& trade );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
   void GetExecId( std::string* sId ) { 

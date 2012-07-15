@@ -24,37 +24,37 @@ namespace tf { // TradeFrame
 TSReturns::TSReturns(void): m_bFirstAppend( true ) {
 }
 
-TSReturns::TSReturns(size_type size) : CPrices( size ), m_bFirstAppend( true ) {
+TSReturns::TSReturns(size_type size) : Prices( size ), m_bFirstAppend( true ) {
 }
 
 TSReturns::~TSReturns(void) {
 }
 
-void TSReturns::Append( const CBar& bar ) {
+void TSReturns::Append( const Bar& bar ) {
   price_t price_ = std::log( bar.Close() );
   if ( m_bFirstAppend ) m_bFirstAppend = false;
-  else CPrices::Append( CPrice( bar.DateTime(), price_ - m_priceLast ) );
+  else Prices::Append( Price( bar.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 
-void TSReturns::Append( const CQuote& quote ) {
+void TSReturns::Append( const Quote& quote ) {
   price_t price_ = std::log( quote.LogarithmicMidPointA() );
   if ( m_bFirstAppend ) m_bFirstAppend = false;
-  else CPrices::Append( CPrice( quote.DateTime(), price_ - m_priceLast  ) );
+  else Prices::Append( Price( quote.DateTime(), price_ - m_priceLast  ) );
   m_priceLast = price_;
 }
 
-void TSReturns::Append( const CTrade& trade ) {
-  price_t price_ = std::log( trade.Trade() );
+void TSReturns::Append( const Trade& trade ) {
+  price_t price_ = std::log( trade.Price() );
   if ( m_bFirstAppend ) m_bFirstAppend = false;
-  else CPrices::Append( CPrice( trade.DateTime(), price_ - m_priceLast ) );
+  else Prices::Append( Price( trade.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 
-void TSReturns::Append( const CPrice& price ) {
-  price_t price_ = std::log( price.Price() );
+void TSReturns::Append( const Price& price ) {
+  price_t price_ = std::log( price.Value() );
   if ( m_bFirstAppend ) m_bFirstAppend = false;
-  else CPrices::Append( CPrice( price.DateTime(), price_ - m_priceLast ) );
+  else Prices::Append( Price( price.DateTime(), price_ - m_priceLast ) );
   m_priceLast = price_;
 }
 

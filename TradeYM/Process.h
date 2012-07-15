@@ -46,8 +46,8 @@ private:
   CIBTWS m_tws;
   bool m_bIBConnected;
   CIBSymbol* m_pSymbol;
-  CQuotes m_vQuotes;
-  CTrades m_vTrades;
+  Quotes m_vQuotes;
+  Trades m_vTrades;
 
   void HandleOnQuote( CIBSymbol::quote_t );
   void HandleOnTrade( CIBSymbol::trade_t );

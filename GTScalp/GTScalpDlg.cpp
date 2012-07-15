@@ -874,7 +874,7 @@ class CTestTrade {
 public:
   CTestTrade( void ) {};
   ~CTestTrade( void ) {};
-  void HandleTrade( const CTrade &trade ) { 
+  void HandleTrade( const Trade &trade ) { 
     //std::cout << trade.m_dblTrade << " " << trade.m_nTradeSize << endl; 
   };
 protected:

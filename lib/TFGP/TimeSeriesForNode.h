@@ -20,7 +20,7 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-template<typename TS>
+template<typename TS> // TS TimeSeries
 class TimeSeriesForNode {
 public:
 
@@ -30,7 +30,7 @@ public:
     if ( 0 != m_OnNodeTimeSeriesCreated )
       m_OnNodeTimeSeriesCreated( *this ); // obtain a new value for m_pTimeSeries
   };
-  TimeSeriesForNode( const TimeSeriesForNode& rhs ): m_pTimeSeries( rhs.m_pTimeSeries ) {
+  TimeSeriesForNode( const TimeSeriesForNode& rhs ): m_pTimeSeries( rhs.m_pTimeSeries ) {  // handles copy constructor to keep existing timeseries
   }
   ~TimeSeriesForNode( void ) {};
 

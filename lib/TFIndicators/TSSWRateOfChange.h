@@ -19,19 +19,19 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-class TSSWRateOfChange: public TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice> {
-  friend TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>;
+class TSSWRateOfChange: public TimeSeriesSlidingWindow<TSSWRateOfChange, Price> {
+  friend TimeSeriesSlidingWindow<TSSWRateOfChange, Price>;
 public:
 
-  TSSWRateOfChange( CPrices&, time_duration tdWindowWidth );
+  TSSWRateOfChange( Prices&, time_duration tdWindowWidth );
   ~TSSWRateOfChange(void);
 
   double RateOfChange( void ) const { return m_head - m_tail; };
   double RateOfChangePct( void ) const { return ( 0 == m_tail ) ? 0.0 : ( ( m_head - m_tail ) / m_tail ); };
 
 protected:
-  void Add( const CPrice& );
-  void Expire( const CPrice& );
+  void Add( const Price& );
+  void Expire( const Price& );
   void PostUpdate( void );
 private:
   double m_tail;

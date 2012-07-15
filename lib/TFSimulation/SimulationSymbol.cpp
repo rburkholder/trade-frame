@@ -44,8 +44,8 @@ void CSimulationSymbol::StartTradeWatch( void ) {
   if ( 0 == m_trades.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/trades/" + GetId() );
-      CHDF5TimeSeriesContainer<CTrade> tradeRepository( sPath );
-      CHDF5TimeSeriesContainer<CTrade>::iterator begin, end;
+      CHDF5TimeSeriesContainer<Trade> tradeRepository( sPath );
+      CHDF5TimeSeriesContainer<Trade>::iterator begin, end;
       begin = tradeRepository.begin();
       end = tradeRepository.end();
       m_trades.Resize( end - begin );
@@ -64,8 +64,8 @@ void CSimulationSymbol::StartQuoteWatch( void ) {
   if ( 0 == m_quotes.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/quotes/" + GetId() );
-      CHDF5TimeSeriesContainer<CQuote> quoteRepository( sPath );
-      CHDF5TimeSeriesContainer<CQuote>::iterator begin, end;
+      CHDF5TimeSeriesContainer<Quote> quoteRepository( sPath );
+      CHDF5TimeSeriesContainer<Quote>::iterator begin, end;
       begin = quoteRepository.begin();
       end = quoteRepository.end();
       m_quotes.Resize( end - begin );
@@ -84,8 +84,8 @@ void CSimulationSymbol::StartGreekWatch( void ) {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
       std::string sPath( m_sDirectory + "/greeks/" + GetId() );
-      CHDF5TimeSeriesContainer<CGreek> greekRepository( sPath );
-      CHDF5TimeSeriesContainer<CGreek>::iterator begin, end;
+      CHDF5TimeSeriesContainer<Greek> greekRepository( sPath );
+      CHDF5TimeSeriesContainer<Greek>::iterator begin, end;
       begin = greekRepository.begin();
       end = greekRepository.end();
       m_greeks.Resize( end - begin );
@@ -106,16 +106,16 @@ void CSimulationSymbol::StartDepthWatch( void ) {
 void CSimulationSymbol::StopDepthWatch( void ) {
 }
 
-void CSimulationSymbol::HandleQuoteEvent( const CDatedDatum &datum ) {
-  m_OnQuote( dynamic_cast<const CQuote &>( datum ) ); 
+void CSimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
+  m_OnQuote( dynamic_cast<const Quote &>( datum ) ); 
 }
 
-void CSimulationSymbol::HandleTradeEvent( const CDatedDatum &datum ) {
-  m_OnTrade( dynamic_cast<const CTrade &>( datum ) );  
+void CSimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
+  m_OnTrade( dynamic_cast<const Trade &>( datum ) );  
 }
 
-void CSimulationSymbol::HandleGreekEvent( const CDatedDatum &datum ) {
-  m_OnGreek( dynamic_cast<const CGreek &>( datum ) );  
+void CSimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
+  m_OnGreek( dynamic_cast<const Greek &>( datum ) );  
 }
 
 } // namespace tf

@@ -21,9 +21,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRealizedVolatility::TSSWRealizedVolatility( CPrices& prices, time_duration tdWindowWidth, double p )
+TSSWRealizedVolatility::TSSWRealizedVolatility( Prices& prices, time_duration tdWindowWidth, double p )
   : m_dblSum( 0.0 ), m_dblP( p ), m_n( 0 ), m_dt( not_a_date_time ), m_tdScaledWidth( hours( 365 * 24 ) + hours( 6 ) ),
-    TimeSeriesSlidingWindow<TSSWRealizedVolatility, CPrice>( prices, tdWindowWidth, 0 )
+    TimeSeriesSlidingWindow<TSSWRealizedVolatility, Price>( prices, tdWindowWidth, 0 )
 {
   CalcScaleFactor();
 }
@@ -31,9 +31,9 @@ TSSWRealizedVolatility::TSSWRealizedVolatility( CPrices& prices, time_duration t
 TSSWRealizedVolatility::~TSSWRealizedVolatility( void ) {
 }
 
-void TSSWRealizedVolatility::Add( const CPrice& price ) {
+void TSSWRealizedVolatility::Add( const Price& price ) {
   m_dt = price.DateTime();
-  double val( price.Price() );
+  double val( price.Value() );
   ++m_n;
   if ( 1.0 == m_dblP ) {
     m_dblSum += val;
@@ -48,9 +48,9 @@ void TSSWRealizedVolatility::Add( const CPrice& price ) {
   }
 }
 
-void TSSWRealizedVolatility::Expire( const CPrice& price ) {
+void TSSWRealizedVolatility::Expire( const Price& price ) {
   --m_n;
-  double val( price.Price() );
+  double val( price.Value() );
   --m_n;
   if ( 1.0 == m_dblP ) {
     m_dblSum -= val;
@@ -78,14 +78,14 @@ void TSSWRealizedVolatility::PostUpdate( void ) {
       result = std::pow( m_dblSum / m_n, 1.0 / m_dblP );
     }
   }
-  CPrices::Append( CPrice( m_dt, result * m_dblScaleFactor ) );
+  Prices::Append( Price( m_dt, result * m_dblScaleFactor ) );
 }
 
 void TSSWRealizedVolatility::CalcScaleFactor( void ) {
   m_dblScaleFactor = 
     std::sqrt( 
     (double) m_tdScaledWidth.total_milliseconds() / 
-    ( (double) TimeSeriesSlidingWindow<TSSWRealizedVolatility, CPrice>::WindowWidth().total_milliseconds() / m_n ) 
+    ( (double) TimeSeriesSlidingWindow<TSSWRealizedVolatility, Price>::WindowWidth().total_milliseconds() / m_n ) 
     );
 }
 

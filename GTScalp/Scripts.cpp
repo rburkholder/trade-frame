@@ -130,11 +130,11 @@ void CScripts::GetIQFeedHistoryForSymbolRange( EHistoryType typeHistory, unsigne
   symbolfile.CloseIQFSymbols();
 }
 
-class ShowItem: public std::unary_function<CBar &, void> {
+class ShowItem: public std::unary_function<Bar&,void> {
 public:
   //ShowItem( void );
   //~ShowItem( void );
-  void operator()( CBar &bar ) {
+  void operator()( Bar& bar ) {
     cout << "bar is " << bar.m_dblOpen << endl;
   }
 protected:

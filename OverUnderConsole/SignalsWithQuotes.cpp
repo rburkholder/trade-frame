@@ -20,12 +20,12 @@ SignalsWithQuotes::SignalsWithQuotes(void) {
 SignalsWithQuotes::~SignalsWithQuotes(void) {
 }
 
-void SignalsWithQuotes::ZeroPosition( const ou::tf::CQuote& quote, InstrumentState* pis ) {
+void SignalsWithQuotes::ZeroPosition( const ou::tf::Quote& quote, InstrumentState* pis ) {
 }
 
-void SignalsWithQuotes::LongPosition( const ou::tf::CQuote& quote, InstrumentState* pis ) {
+void SignalsWithQuotes::LongPosition( const ou::tf::Quote& quote, InstrumentState* pis ) {
 }
 
-void SignalsWithQuotes::ShortPosition( const ou::tf::CQuote& quote, InstrumentState* pis ) {
+void SignalsWithQuotes::ShortPosition( const ou::tf::Quote& quote, InstrumentState* pis ) {
 }
 

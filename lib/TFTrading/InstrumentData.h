@@ -47,9 +47,9 @@ public:
 
 protected:
 
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CGreeks m_greeks;
+  Quotes m_quotes;
+  Trades m_trades;
+  Greeks m_greeks;
 
 private:
 
@@ -59,9 +59,9 @@ private:
 
   void Init( void );
 
-  void HandleQuote( const CQuote& quote );
-  void HandleTrade( const CTrade& trade );
-  void HandleGreek( const CGreek& greek );
+  void HandleQuote( const Quote& quote );
+  void HandleTrade( const Trade& trade );
+  void HandleGreek( const Greek& greek );
 };
 
 } // namespace tf

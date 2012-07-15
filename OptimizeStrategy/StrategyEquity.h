@@ -51,8 +51,8 @@ private:
 
   enum enumTradeStates { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
+  ou::tf::Quotes m_quotes;
+  ou::tf::Trades m_trades;
 
   time_duration m_timeOpeningBell, m_timeCancel, m_timeClose, m_timeClosingBell;
 
@@ -70,12 +70,12 @@ private:
 
   ou::tf::ZigZag m_zigzagPrice;  // provides a basis for maximizing profitability, crossover is some fraction of previous day's average range
 
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes1;
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes2;
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_emaQuotes3;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes1;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes2;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes3;
 
-  void HandleQuote( const ou::tf::CQuote& );
-  void HandleTrade( const ou::tf::CTrade& );
+  void HandleQuote( const ou::tf::Quote& );
+  void HandleTrade( const ou::tf::Trade& );
 
 };
 

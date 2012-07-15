@@ -73,8 +73,8 @@ CTradingLogic::CTradingLogic( CString sSymbol, CGTSessionX *pGTSession1, CGTSess
   stkSession2->SetOnOpenPositionHandler( MakeDelegate( pTradeFrame, &CTradeFrame::HandleAcct2OnOpenPosition ) );
 
   //bool bLive = true;
-  pQuotes = new CQuotes( 100000 );
-  pTrades = new CTrades( 100000 );
+  pQuotes = new Quotes( 100000 );
+  pTrades = new Trades( 100000 );
 
   pChartIntraDay->m_chart.SetBarFactoryWidthSeconds( 60 );
   pChartIntraDay->m_chart.SetWindowWidthSeconds( 90 * 60 ); // 90 minute window
@@ -86,7 +86,7 @@ CTradingLogic::CTradingLogic( CString sSymbol, CGTSessionX *pGTSession1, CGTSess
 
   m_state = EState::History;
 
-  pBars = new CBars( 250 );
+  pBars = new Bars( 250 );
   phd = new IQFeedHistoryHD( m_IQFeedProvider.GetIQFeedProvider(), pBars );
   phd->SetOnRequestComplete( MakeDelegate( this, &CTradingLogic::OnDailyBarHistoryDone ) );
   pht = new IQFeedHistoryHT( m_IQFeedProvider.GetIQFeedProvider(), pQuotes, pTrades );
@@ -171,8 +171,8 @@ void CTradingLogic::OnTickHistoryDone( IQFeedHistory *pHistory ) {
 
     pChartIntraDay->m_chart.SetUpdateChart( false );
 
-    CTrade *pTrade;
-    CQuote *pQuote;
+    Trade *pTrade;
+    Quote *pQuote;
     for ( i = 0; i < nTrades; i++ ) {
       pQuote = pQuotes -> At( i );
       pTradeFrame->NewQuoteLevel1( *pQuote );
@@ -186,7 +186,7 @@ void CTradingLogic::OnTickHistoryDone( IQFeedHistory *pHistory ) {
   pTradeFrame->SetAllowRedraw( true );
 }
 
-void CTradingLogic::OnPrintCommon( const CTrade &trade ) {
+void CTradingLogic::OnPrintCommon( const Trade &trade ) {
   if ( !m_bFirstTradeFound ) {
     if ( trade.m_dt.time_of_day() >= time_duration( 9, 30, 0 ) && trade.m_dt.time_of_day() < time_duration( 16, 0 ,0 ) ) {
       m_bFirstTradeFound = true;
@@ -198,7 +198,7 @@ void CTradingLogic::OnPrintCommon( const CTrade &trade ) {
   pChartIntraDay->m_chart.Add( trade );
 }
 
-void CTradingLogic::OnPrint( const CTrade &trade ) {
+void CTradingLogic::OnPrint( const Trade &trade ) {
   //pChartIntraDay->m_chart.ClearChart();
   switch ( m_state ) {
     case EState::RealTime:
@@ -218,7 +218,7 @@ void CTradingLogic::OnPrint( const CTrade &trade ) {
   }
 }
 
-void CTradingLogic::OnQuoteLevel1( const CQuote &quote ) {
+void CTradingLogic::OnQuoteLevel1( const Quote &quote ) {
   switch ( m_state ) {
     case EState::RealTime:
       pQuotes->AppendDatum( quote );
@@ -233,13 +233,13 @@ void CTradingLogic::OnQuoteLevel1( const CQuote &quote ) {
 
 //void CTradingLogic::OnLevel2( char Side, long Shares, double Price, LPSTR MMID ) {
 // called as refresh from GT routines, but don't update display at this time
-void CTradingLogic::OnLevel2( const CMarketDepth &md ) {
+void CTradingLogic::OnLevel2( const MarketDepth &md ) {
   switch ( m_state ) {
     case EState::RealTime:
       switch ( md.m_eSide ) {
-        case CMarketDepth::Ask: stateMDUpdate = ( MDUpdateBid == stateMDUpdate ) ? MDUpdateBoth : MDUpdateAsk;
+        case MarketDepth::Ask: stateMDUpdate = ( MDUpdateBid == stateMDUpdate ) ? MDUpdateBoth : MDUpdateAsk;
           break;
-        case CMarketDepth::Bid: stateMDUpdate = ( MDUpdateAsk == stateMDUpdate ) ? MDUpdateBoth : MDUpdateBid;
+        case MarketDepth::Bid: stateMDUpdate = ( MDUpdateAsk == stateMDUpdate ) ? MDUpdateBoth : MDUpdateBid;
           break;
       }
       break;

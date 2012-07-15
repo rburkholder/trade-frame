@@ -37,37 +37,37 @@ protected:
   //CPivotGroup *m_pPivotGroup;
   CIQFeedProviderSingleton m_IQFeedProvider;
 
-  IQFeedHistoryHD *phd;
-  CBars *pBars;
+  IQFeedHistoryHD* phd;
+  Bars* pBars;
   void OnDailyBarHistoryDone( IQFeedHistory *pHistory );
 
-  IQFeedHistoryHT *pht;
-  CQuotes *pQuotes;
-  CTrades *pTrades;
+  IQFeedHistoryHT* pht;
+  Quotes* pQuotes;
+  Trades* pTrades;
   void OnTickHistoryDone( IQFeedHistory *pHistory );
 
-  //CQuote *pLatestQuote;
-  //CTrade *pLatestTrade;
+  //Quote *pLatestQuote;
+  //Trade *pLatestTrade;
   
   CGTStockX *stkSession1;
   CGTStockX *stkSession2;
 
-  CTradeFrame *pTradeFrame;
+  CTradeFrame* pTradeFrame;
   //CVuKeyValues *pVuKeyValues;
-  CVuPendingOrders *pVuPendingOrders;
+  CVuPendingOrders* pVuPendingOrders;
   //CVuChart *pChartDaily;
-  CVuChart *pChartIntraDay;
-  CVuMarketDepth *pVuMarketDepth;
+  CVuChart* pChartIntraDay;
+  CVuMarketDepth* pVuMarketDepth;
 
   static const int nLevels = 10;
   long rShares[ nLevels ];
   double rPrices[ nLevels ];
 
-  void OnQuoteLevel1( const CQuote &quote );
-  void OnPrint( const CTrade &trade );
-  void OnPrintCommon( const CTrade &trade );
+  void OnQuoteLevel1( const Quote &quote );
+  void OnPrint( const Trade &trade );
+  void OnPrintCommon( const Trade &trade );
   //void OnLevel2( char, long, double, LPSTR );
-  void OnLevel2( const CMarketDepth &md );
+  void OnLevel2( const MarketDepth &md );
   void OnCancelAcct1Order( DWORD_PTR );
   void OnCancelAcct2Order( DWORD_PTR );
 
@@ -81,6 +81,6 @@ protected:
 
   CGeneratePeriodicRefresh m_refresh;
 private:
-  void OnIQFeedTimeMessage( CIQFTimeMessage *pMsg );
-  void OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg );
+  void OnIQFeedTimeMessage( CIQFTimeMessage* pMsg );
+  void OnPeriodicRefresh( CGeneratePeriodicRefresh* pMsg );
 };

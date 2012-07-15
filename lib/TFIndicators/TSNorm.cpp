@@ -20,7 +20,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-TSNorm::TSNorm( CPrices& series, time_duration dt, unsigned int n, double p ) 
+TSNorm::TSNorm( Prices& series, time_duration dt, unsigned int n, double p ) 
   : m_seriesSource( series ), m_dtTimeRange( dt ), m_n( n ), m_p( p ), m_ma( *this, dt, n )
 {
   m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSNorm::HandleUpdate ) );
@@ -32,30 +32,30 @@ TSNorm::~TSNorm(void) {
   m_ma.OnAppend.Remove( MakeDelegate( this, &TSNorm::HandleMAUpdate ) );
 }
 
-void TSNorm::HandleUpdate( const CPrice& price ) {
+void TSNorm::HandleUpdate( const Price& price ) {
   if ( 1.0 == m_p ) {
-    m_ma.Append( CPrice( price.DateTime(), std::abs( price.Price() ) ) );
+    m_ma.Append( Price( price.DateTime(), std::abs( price.Value() ) ) );
   }
   else {
     if ( 2.0 == m_p ) {
-      m_ma.Append( CPrice( price.DateTime(), price.Price() * price.Price() ) );
+      m_ma.Append( Price( price.DateTime(), price.Value() * price.Value() ) );
     }
     else {
-      m_ma.Append( CPrice( price.DateTime(), std::pow( std::abs( price.Price() ), m_p ) ) ); 
+      m_ma.Append( Price( price.DateTime(), std::pow( std::abs( price.Value() ), m_p ) ) ); 
     }
   }
 }
 
-void TSNorm::HandleMAUpdate( const CPrice& price ) {
+void TSNorm::HandleMAUpdate( const Price& price ) {
   if ( 1.0 == m_p ) {
     Append( price );
   }
   else {
     if ( 2.0 == m_p ) {
-      Append( CPrice( price.DateTime(), std::sqrt( price.Price() ) ) );
+      Append( Price( price.DateTime(), std::sqrt( price.Value() ) ) );
     }
     else {
-      Append( CPrice( price.DateTime(), std::pow( price.Price(), 1.0 / m_p ) ) );
+      Append( Price( price.DateTime(), std::pow( price.Value(), 1.0 / m_p ) ) );
     }
   }
 }

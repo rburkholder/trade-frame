@@ -28,18 +28,18 @@ namespace tf { // TradeFrame
 // delta T should be 15min to 2hr
 
 class TSSWRealizedVolatility: 
-  public TimeSeriesSlidingWindow<TSSWRealizedVolatility, CPrice>,
-  public CPrices
+  public TimeSeriesSlidingWindow<TSSWRealizedVolatility, Price>,
+  public Prices
 {
-  friend TimeSeriesSlidingWindow<TSSWRealizedVolatility, CPrice>;
+  friend TimeSeriesSlidingWindow<TSSWRealizedVolatility, Price>;
 public:
-  TSSWRealizedVolatility( CPrices& prices, time_duration tdWindowWidth, double p );
+  TSSWRealizedVolatility( Prices& prices, time_duration tdWindowWidth, double p );
   ~TSSWRealizedVolatility( void );
   void SetScaleFactor( time_duration tdScaledWidth ) { m_tdScaledWidth = tdScaledWidth; CalcScaleFactor(); };
   time_duration GetScaleFactor( void  ) { return m_tdScaledWidth; };
 protected:
-  void Add( const CPrice& price );
-  void Expire( const CPrice& price );
+  void Add( const Price& price );
+  void Expire( const Price& price );
   void PostUpdate( void );
 private:
   unsigned int m_n;

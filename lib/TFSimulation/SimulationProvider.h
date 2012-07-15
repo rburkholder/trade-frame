@@ -36,7 +36,7 @@ namespace tf { // TradeFrame
 
 // simulation provider needs to send an open event on each symbol it does
 //  will need to be based upon time
-// looks like CMergeDatedDatums will need an OnOpen event simulated
+// looks like MergeDatedDatums will need an OnOpen event simulated
 
 // 20100821:  todo: provide cache mechanism for multiple runs
 //    first time through, use the minheap, 
@@ -93,7 +93,7 @@ protected:
 
   std::string m_sGroupDirectory;
 
-  CMergeDatedDatums *m_pMerge;
+  MergeDatedDatums *m_pMerge;
 
   OnSimulationComplete_t m_OnSimulationComplete;
 

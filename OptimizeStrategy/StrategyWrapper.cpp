@@ -60,4 +60,6 @@ void StrategyWrapper::HandleProviderDisconnected( int i ) {
 }
 
 void StrategyWrapper::HandleSimulationComplete( void ) {
+  // generate statistics here?
+  // any clean up required?
 }

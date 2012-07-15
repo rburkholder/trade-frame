@@ -24,10 +24,10 @@ namespace tf { // TradeFrame
 class CPivotGroup {
 public:
   CPivotGroup(void);
-  CPivotGroup( CBars *pBars );
+  CPivotGroup( Bars* pBars );
   virtual ~CPivotGroup(void);
 
-  void CalculatePivotSets( CBars *pBars );
+  void CalculatePivotSets( Bars* pBars );
   //CPivotSet *operator[]( unsigned short ix ) { return m_vPivotSetGroup[ ix ]; }; 
   void Clear( void ) { m_mmPivots.clear(); };
 

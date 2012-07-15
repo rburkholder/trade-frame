@@ -54,9 +54,9 @@ public:
   double Theta( void ) const { return m_greek.Theta(); };
   double Vega( void ) const { return m_greek.Vega(); };
 
-  CQuotes* Quotes( void ) { return &m_quotes; };
-  CTrades* Trades( void ) { return &m_trades; };
-  CGreeks* Greeks( void ) { return &m_greeks; };
+  Quotes* Quotes( void ) { return &m_quotes; };
+  Trades* Trades( void ) { return &m_trades; };
+  Greeks* Greeks( void ) { return &m_greeks; };
 
   void StartWatch( void );
   void StopWatch( void );
@@ -74,11 +74,11 @@ protected:
   double m_dblTrade;
 
   double m_dblStrike;
-  CGreek m_greek;
+  Greek m_greek;
 
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CGreeks m_greeks;
+  ou::tf::Quotes m_quotes;
+  ou::tf::Trades m_trades;
+  ou::tf::Greeks m_greeks;
 
   pInstrument_t m_pInstrument;
 
@@ -93,9 +93,9 @@ private:
 
   void Initialize( void );
 
-  void HandleQuote( const CQuote& quote );
-  void HandleTrade( const CTrade& trade );
-  void HandleGreek( const CGreek& greek );
+  void HandleQuote( const Quote& quote );
+  void HandleTrade( const Trade& trade );
+  void HandleGreek( const Greek& greek );
 
 };
 

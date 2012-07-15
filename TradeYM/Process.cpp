@@ -98,13 +98,13 @@ void CProcess::StopWatch( void ) {
 
     if ( 0 != m_vQuotes.Size() ) {
       sPathName = "/quote/" + m_sSymbolName;
-      CHDF5WriteTimeSeries<CQuotes, CQuote> wtsq;
+      CHDF5WriteTimeSeries<Quotes, Quote> wtsq;
       wtsq.Write( sPathName, &m_vQuotes );
     }
 
     if ( 0 != m_vTrades.Size() ) {
       sPathName = "/trade/" + m_sSymbolName;
-      CHDF5WriteTimeSeries<CTrades, CTrade> wtst;
+      CHDF5WriteTimeSeries<Trades, Trade> wtst;
       wtst.Write( sPathName, &m_vTrades );
     }
   }

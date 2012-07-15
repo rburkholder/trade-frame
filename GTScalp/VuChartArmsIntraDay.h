@@ -27,9 +27,9 @@ public:
   CChartDatedDatum m_ChartTrin;
   CChartDatedDatum m_ChartTick;
 
-  void OnInduHistoryDone( IQFeedHistory *pHistory );
-  void OnTickHistoryDone( IQFeedHistory *pHistory );
-  void OnTrinHistoryDone( IQFeedHistory *pHistory );
+  void OnInduHistoryDone( IQFeedHistory* pHistory );
+  void OnTickHistoryDone( IQFeedHistory* pHistory );
+  void OnTrinHistoryDone( IQFeedHistory* pHistory );
 
   void ProcessHistory( void );
 
@@ -40,17 +40,17 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-  CMergeDatedDatums merge;
+  MergeDatedDatums merge;
 
-  CTrades *pTradesIndu, *pTradesTrin, *pTradesTick;
-  CQuotes *pQuotesIndu, *pQuotesTrin, *pQuotesTick;
+  Trades *pTradesIndu, *pTradesTrin, *pTradesTick;
+  Quotes *pQuotesIndu, *pQuotesTrin, *pQuotesTick;
 
   IQFeedHistoryHT *pHistoryIndu, *pHistoryTrin, *pHistoryTick;
   bool m_bInduHistoryDone, m_bTrinHistoryDone, m_bTickHistoryDone;
 
-  void ProcessMergeIndu( const CTrade &trade );
-  void ProcessMergeTrin( const CTrade &trade );
-  void ProcessMergeTick( const CTrade &trade );
+  void ProcessMergeIndu( const Trade &trade );
+  void ProcessMergeTrin( const Trade &trade );
+  void ProcessMergeTick( const Trade &trade );
 
   void HandleInduUpdate( CIQFeedSymbol *pSym );
   void HandleTrinUpdate( CIQFeedSymbol *pSym );

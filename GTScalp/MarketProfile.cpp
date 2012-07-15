@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 CMarketProfile::CMarketProfile(void) 
 : m_nMin( 0 ), m_nMax( 0 ), m_nBucketSize( 5 )
 {
-  m_pBars = new CBars( 20 );
+  m_pBars = new Bars( 20 );
   m_bf.SetBarWidth( 30 * 60 );  // 30 minutes
   m_bf.SetOnBarComplete( MakeDelegate( this, &CMarketProfile::OnNewBar ) );
   m_bf.SetOnBarUpdated( MakeDelegate( this, &CMarketProfile::OnBarUpdate ) );
@@ -29,14 +29,14 @@ CMarketProfile::~CMarketProfile(void) {
   }
 }
 
-void CMarketProfile::Add(const CTrade &trade) {
+void CMarketProfile::Add(const Trade &trade) {
   m_bf.Add( trade.m_dt, trade.m_dblTrade, trade.m_nTradeSize );
 }
 
-void CMarketProfile::OnNewBar( const CBar &bar ) {
+void CMarketProfile::OnNewBar( const Bar &bar ) {
 }
 
-void CMarketProfile::OnBarUpdate( const CBar &bar ) {
+void CMarketProfile::OnBarUpdate( const Bar &bar ) {
 }
 
 void CMarketProfile::Draw() {
@@ -46,7 +46,7 @@ void CMarketProfile::Draw() {
   m_mapProfile.clear();
   std::map<int, string *>::iterator iter;
   char ch = 'A';
-  CBar *pBar = m_pBars->First();
+  Bar* pBar = m_pBars->First();
   while ( NULL != pBar ) {
     int Hi = (int) (pBar->m_dblHigh * 100.0 + 0.5); // scale and round to the nearest penny
     int Lo = (int) (pBar->m_dblLow * 100.0 + 0.5);  // scale and round to the nearest penny

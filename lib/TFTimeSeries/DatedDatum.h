@@ -32,7 +32,7 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CDatedDatum {
+class DatedDatum {
 public:
 
   typedef long volume_t;
@@ -41,25 +41,25 @@ public:
 
   typedef double price_t;
 
-  CDatedDatum( void );
-  CDatedDatum( const ptime &dt );
-  CDatedDatum( const CDatedDatum &datum );
-  CDatedDatum( const std::string &dt ); // YYYY-MM-DD HH:MM:SS
-  virtual ~CDatedDatum( void );
+  DatedDatum( void );
+  DatedDatum( const ptime& dt );
+  DatedDatum( const DatedDatum& datum );
+  DatedDatum( const std::string& dt ); // YYYY-MM-DD HH:MM:SS
+  virtual ~DatedDatum( void );
 
   bool IsNull( void ) const { return m_dt.is_not_a_date_time(); };
 
-  bool operator<( const CDatedDatum &datum ) const { return m_dt < datum.m_dt; };
-  bool operator<=( const CDatedDatum& datum ) const { return m_dt <= datum.m_dt; };
-  bool operator>( const CDatedDatum& datum ) const { return m_dt > datum.m_dt; };
-  bool operator>=( const CDatedDatum& datum ) const { return m_dt >= datum.m_dt; };
-  bool operator==( const CDatedDatum& datum ) const { return m_dt == datum.m_dt; };
-  bool operator!=( const CDatedDatum& datum ) const { return m_dt != datum.m_dt; };
+  bool operator<( const DatedDatum &datum ) const { return m_dt < datum.m_dt; };
+  bool operator<=( const DatedDatum& datum ) const { return m_dt <= datum.m_dt; };
+  bool operator>( const DatedDatum& datum ) const { return m_dt > datum.m_dt; };
+  bool operator>=( const DatedDatum& datum ) const { return m_dt >= datum.m_dt; };
+  bool operator==( const DatedDatum& datum ) const { return m_dt == datum.m_dt; };
+  bool operator!=( const DatedDatum& datum ) const { return m_dt != datum.m_dt; };
 
   const ptime& DateTime( void ) const { return m_dt; };
   void DateTime( const ptime& dt ) { m_dt = dt; };
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );  // create new one if null
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );  // create new one if null
 
 protected:
   ptime m_dt;
@@ -67,23 +67,23 @@ private:
 };
 
 //
-// CQuote
+// Quote
 //
 
-class CQuote: public CDatedDatum {
+class Quote: public DatedDatum {
 public:
 
   typedef quotesize_t bidsize_t;
   typedef quotesize_t asksize_t;
 
-  CQuote( void );
-  CQuote( const ptime &dt );
-  CQuote( const CQuote &quote );
-  CQuote( const ptime &dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
-  CQuote( const std::string &dt, 
-    const std::string &bid, const std::string &bidsize, 
-    const std::string &ask, const std::string &asksize );
-  virtual ~CQuote( void );
+  Quote( void );
+  Quote( const ptime& dt );
+  Quote( const Quote& quote );
+  Quote( const ptime& dt, double dblBid, bidsize_t nBidSize, double dblAsk, asksize_t nAskSize );
+  Quote( const std::string& dt, 
+    const std::string& bid, const std::string& bidsize, 
+    const std::string& ask, const std::string& asksize );
+  virtual ~Quote( void );
 
   price_t Bid( void ) const { return m_dblBid; };
   price_t Ask( void ) const { return m_dblAsk; };
@@ -97,7 +97,7 @@ public:
   price_t LogarithmicMidPointA( void ) const { return ( std::log( m_dblBid ) + std::log( m_dblAsk ) ) / 2.0; }; // eq 3.4 pg 39, Intro HF Finance
   price_t LogarithmicMidPointB( void ) const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
 
 protected:
 private:
@@ -108,27 +108,27 @@ private:
 };
 
 //
-// CTrade
+// Trade
 //
 
-class CTrade: public CDatedDatum {
+class Trade: public DatedDatum {
 public:
 
-  CTrade( void );
-  CTrade( const ptime &dt );
-  CTrade( const CTrade &trade );
-  CTrade( const ptime &dt, price_t dblTrade, volume_t nTradeSize );
-  CTrade( const std::string &dt, const std::string &trade, const std::string &size );
-  ~CTrade( void );
+  Trade( void );
+  Trade( const ptime &dt );
+  Trade( const Trade &trade );
+  Trade( const ptime& dt, price_t dblTrade, volume_t nTradeSize );
+  Trade( const std::string& dt, const std::string& trade, const std::string& size );
+  ~Trade( void );
 
-  price_t Trade( void ) const { return m_dblTrade; };
+  price_t Price( void ) const { return m_dblPrice; };  // 20120715 was Trace, may cause problems in other areas.
   volume_t Volume( void ) const { return m_nTradeSize; };
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
 
 protected:
 private:
-  price_t m_dblTrade;
+  price_t m_dblPrice;
   volume_t m_nTradeSize;
 };
 
@@ -136,16 +136,16 @@ private:
 // CBar
 //
 
-class CBar: public CDatedDatum {
+class Bar: public DatedDatum {
 public:
 
-  CBar( void );
-  CBar( const ptime& dt );
-  CBar( const CBar& bar );
-  CBar( const ptime& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
-  CBar( const std::string& dt, const std::string& open, const std::string& high, 
+  Bar( void );
+  Bar( const ptime& dt );
+  Bar( const Bar& bar );
+  Bar( const ptime& dt, price_t dblOpen, price_t dblHigh, price_t dblLow, price_t dblClose, volume_t nVolume );
+  Bar( const std::string& dt, const std::string& open, const std::string& high, 
     const std::string& low, const std::string& close, const std::string& volume );
-  ~CBar (void );
+  ~Bar (void );
 
   price_t Open( void ) const { return m_dblOpen; };
   price_t High( void ) const { return m_dblHigh; };
@@ -159,7 +159,7 @@ public:
   void Close( price_t price ) { m_dblClose = price; };
   void Volume( volume_t vol ) { m_nVolume = vol; };
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
 
 protected:
 private:
@@ -171,22 +171,22 @@ private:
 };
 
 // 
-// CMarketDepth
+// MarketDepth
 //
 
-class CMarketDepth: public CDatedDatum {
+class MarketDepth: public DatedDatum {
 public:
 
   typedef unsigned long MMID_t;
   enum ESide : char { Bid, Ask, None };
 
-  CMarketDepth( void );
-  CMarketDepth( const ptime &dt );
-  CMarketDepth( const CMarketDepth &md );
-  CMarketDepth( const ptime &dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
-  CMarketDepth( const std::string &dt, char chSide, const std::string &shares, 
-    const std::string &price, const std::string &mmid );
-   ~CMarketDepth(void);
+  MarketDepth( void );
+  MarketDepth( const ptime& dt );
+  MarketDepth( const MarketDepth& md );
+  MarketDepth( const ptime& dt, char chSide, quotesize_t nShares, price_t dblPrice, MMID_t mmid );
+  MarketDepth( const std::string& dt, char chSide, const std::string& shares, 
+    const std::string& price, const std::string& mmid );
+   ~MarketDepth(void);
 
   MMID_t MMID( void ) const { return m_uMMID.mmid; };
   price_t Price( void ) const { return m_dblPrice; };
@@ -195,7 +195,7 @@ public:
   ESide m_eSide; 
   const char& MMIDStr( void ) const { return *m_uMMID.rch; };
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
 
 protected:
   union unionMMID {
@@ -211,10 +211,10 @@ private:
 };
 
 //
-// CGreek
+// Greek
 //
 
-class CGreek: public CDatedDatum {
+class Greek: public DatedDatum {
 public:
 
   struct greeks_t {
@@ -226,12 +226,12 @@ public:
     greeks_t( void ) : delta( 0.0 ), gamma( 0.0 ), theta( 0.0 ), vega( 0.0 ), rho( 0.0 ) {};
   };
 
-  CGreek( void );
-  CGreek( const ptime &dt );
-  CGreek( const CGreek& greeks );
-  CGreek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks );
-  CGreek( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
-  ~CGreek( void );
+  Greek( void );
+  Greek( const ptime& dt );
+  Greek( const Greek& greeks );
+  Greek( const ptime& dt, double dblImpliedVolatility, const greeks_t& greeks );
+  Greek( const ptime& dt, double dblImpliedVolatility, double dblDelta, double dblGamma, double dblTheta, double dblVega, double dblRho );
+  ~Greek( void );
 
   double ImpliedVolatility( void ) const { return m_dblImpliedVolatility; };
   double Delta( void ) const { return m_dblDelta; };
@@ -272,22 +272,22 @@ private:
 };
 
 //
-// CPrice
+// Price
 //
 
-class CPrice: public CDatedDatum {
+class Price: public DatedDatum {
 public:
 
-  CPrice( void );
-  CPrice( const ptime &dt );
-  CPrice( const CPrice &price );
-  CPrice( const ptime &dt, price_t dblPrice );
-  CPrice( const std::string &dt, const std::string &price );
-  ~CPrice( void );
+  Price( void );
+  Price( const ptime& dt );
+  Price( const Price& price );
+  Price( const ptime& dt, price_t dblPrice );
+  Price( const std::string &dt, const std::string& price );
+  ~Price( void );
 
-  price_t Price( void ) const { return m_dblPrice; };
+  price_t Value( void ) const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
 
-  static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
 
 protected:
 private:

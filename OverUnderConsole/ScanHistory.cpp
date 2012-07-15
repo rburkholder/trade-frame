@@ -81,7 +81,7 @@ void ScanHistory::OnHistoryRequestDone( structQueryState* pqs ) {
       // need to check for time as well
       // may decide not to trade a day with a large pivot
       unsigned int cnt = 0;
-      ou::tf::CBars::const_iterator iter = pqs->bars->bars.begin();
+      ou::tf::Bars::const_iterator iter = pqs->bars->bars.begin();
       for ( int ix = 0; ix < ( m_nRequestedBars - 1 ); ix++ ) { // n - 1 bars, extra bar is pivot calc
         ou::tf::CPivotSet pivot( "", *iter );
         iter++;

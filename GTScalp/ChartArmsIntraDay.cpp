@@ -29,11 +29,11 @@ CChartArmsIntraDay::~CChartArmsIntraDay(void) {
   delete pzzTrin;
 }
 
-void CChartArmsIntraDay::ProcessIndu( const CTrade &trade ) {
+void CChartArmsIntraDay::ProcessIndu( const Trade &trade ) {
   //stringstream ss;
   //ss << "Indu " << pmc->m_dt;
   //theApp.pConsoleMessages->WriteLine( ss.str().c_str() );
-  //CTrade *pTrade = (CTrade *) pDatum;
+  //Trade *pTrade = (Trade *) pDatum;
   if ( !m_bFirstInduFound ) {
     m_bFirstInduFound = true;
     m_dblFirstIndu = trade.m_dblTrade;
@@ -44,22 +44,22 @@ void CChartArmsIntraDay::ProcessIndu( const CTrade &trade ) {
   DrawChart();
 }
 
-void CChartArmsIntraDay::ProcessTrin( const CTrade &trade ) {
+void CChartArmsIntraDay::ProcessTrin( const Trade &trade ) {
   //stringstream ss;
   //ss << "Trin " << pmc->m_dt;
   //theApp.pConsoleMessages->WriteLine( ss.str().c_str() );
-  //CTrade *pTrade = (CTrade *) pDatum;
+  //Trade *pTrade = (Trade *) pDatum;
   double t = trade.m_dblTrade;
   m_dblTrin = t;
   pzzTrin->Check( trade.m_dt, t );
   //DrawChart();
 }
 
-void CChartArmsIntraDay::ProcessTick( const CTrade &trade ) {
+void CChartArmsIntraDay::ProcessTick( const Trade &trade ) {
   //stringstream ss;
   //ss << "Tick " << pmc->m_dt;
   //theApp.pConsoleMessages->WriteLine( ss.str().c_str() );
-  //CTrade *pTrade = (CTrade *) pDatum;
+  //Trade *pTrade = (Trade *) pDatum;
 }
 
 void CChartArmsIntraDay::ZZInduChanged( CZigZag *zz, ptime dt, double pt, CZigZag::EDirection dir) {

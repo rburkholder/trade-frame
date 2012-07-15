@@ -62,13 +62,13 @@ void CVuChartArmsIntraDay::StartCharts( bool bLive, unsigned int nDaysAgo ) {
   m_ChartTick.setMinorTickInc( 60 );
   m_ChartTick.SetTitle( "Tick" );
 
-  pQuotesIndu = new CQuotes( 100000 );
-  pQuotesTrin = new CQuotes( 100000 );
-  pQuotesTick = new CQuotes( 100000 );
+  pQuotesIndu = new Quotes( 100000 );
+  pQuotesTrin = new Quotes( 100000 );
+  pQuotesTick = new Quotes( 100000 );
 
-  pTradesIndu = new CTrades( 100000 );
-  pTradesTrin = new CTrades( 100000 );
-  pTradesTick = new CTrades( 100000 );
+  pTradesIndu = new Trades( 100000 );
+  pTradesTrin = new Trades( 100000 );
+  pTradesTick = new Trades( 100000 );
 
   pHistoryIndu = new IQFeedHistoryHT( m_IQFeedProvider.GetIQFeedProvider(), pQuotesIndu, pTradesIndu );
   pHistoryTrin = new IQFeedHistoryHT(m_IQFeedProvider.GetIQFeedProvider(), pQuotesTrin, pTradesTrin );
@@ -163,34 +163,34 @@ void CVuChartArmsIntraDay::HandleRealTime() {
 }
 
 //void CVuChartArmsIntraDay::HandleInduUpdate( CIQFSymbol *pSym ) {
-//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  Trade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
 //  ProcessMergeIndu( trade );
 //}
 
 //void CVuChartArmsIntraDay::HandleTrinUpdate( CIQFSymbol *pSym ) {
-//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  Trade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
 //  ProcessMergeTrin( trade );
 //}
 
 //void CVuChartArmsIntraDay::HandleTickUpdate( CIQFSymbol *pSym ) {
-//  CTrade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
+//  Trade trade( pSym->m_dtLastTrade, pSym->m_dblTrade, pSym->m_nTradeSize );
 //  ProcessMergeTick( trade );
 //}
 
-void CVuChartArmsIntraDay::ProcessMergeIndu( const CTrade &trade ) {
-  //CTrade *pTrade = (CTrade *) pDatum;
+void CVuChartArmsIntraDay::ProcessMergeIndu( const Trade &trade ) {
+  //Trade *pTrade = (Trade *) pDatum;
   m_ChartArmsIntraDay.ProcessIndu( trade );
   m_ChartIndu.Add( trade );
 }
 
-void CVuChartArmsIntraDay::ProcessMergeTrin( const CTrade &trade ) {
-  //CTrade *pTrade = (CTrade *) pDatum;
+void CVuChartArmsIntraDay::ProcessMergeTrin( const Trade &trade ) {
+  //Trade *pTrade = (Trade *) pDatum;
   m_ChartArmsIntraDay.ProcessTrin( trade );
   m_ChartTrin.Add( trade );
 }
 
-void CVuChartArmsIntraDay::ProcessMergeTick( const CTrade &trade ) {
-  //CTrade *pTrade = (CTrade *) pDatum;
+void CVuChartArmsIntraDay::ProcessMergeTick( const Trade &trade ) {
+  //Trade *pTrade = (Trade *) pDatum;
   m_ChartArmsIntraDay.ProcessTick( trade );
   m_ChartTick.Add( trade );
 }

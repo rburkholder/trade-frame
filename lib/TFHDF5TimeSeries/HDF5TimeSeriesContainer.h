@@ -37,11 +37,11 @@ public:
   typedef CHDF5TimeSeriesIterator<DD> iterator;
   iterator begin();
   const iterator &end();
-  //void Read( const iterator &_begin, const iterator &_end, T *_dest ); 
-  void Read( iterator &_begin, iterator &_end, typename CTimeSeries<DD> *_dest ); 
+  //void Read( const iterator &_begin, const iterator &_end, T* _dest ); 
+  void Read( iterator &_begin, iterator &_end, typename TimeSeries<DD>* _dest ); 
   void Write( const DD* _begin, const DD* _end );
 protected:
-  iterator *m_end;
+  iterator* m_end;
   virtual void SetNewSize( size_type newsize );
 private:
 };
@@ -66,7 +66,7 @@ template<class DD> typename CHDF5TimeSeriesContainer<DD>::iterator CHDF5TimeSeri
 //}
 
 template<class DD> const typename CHDF5TimeSeriesContainer<DD>::iterator &CHDF5TimeSeriesContainer<DD>::end() {
-  return *m_end;
+  return* m_end;
 }
 
 template<class DD> void CHDF5TimeSeriesContainer<DD>::SetNewSize( size_type newsize ) {
@@ -74,9 +74,9 @@ template<class DD> void CHDF5TimeSeriesContainer<DD>::SetNewSize( size_type news
   m_end = new iterator( this, newsize );
 }
 
-template<class DD> void CHDF5TimeSeriesContainer<DD>::Read( iterator& _begin, iterator& _end, typename CTimeSeries<DD>* _dest ) {
+template<class DD> void CHDF5TimeSeriesContainer<DD>::Read( iterator& _begin, iterator& _end, typename TimeSeries<DD>* _dest ) {
   hsize_t cnt = _end - _begin;
-  H5::DataSpace *pDs = _dest->DefineDataSpace();
+  H5::DataSpace* pDs = _dest->DefineDataSpace();
   if ( cnt > 0 ) {
     CHDF5TimeSeriesAccessor<DD>::Read( _begin.m_ItemIndex, cnt, pDs, const_cast<DD*>( &(*_dest->First()) ) );
   }

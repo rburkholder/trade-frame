@@ -25,7 +25,7 @@ CPivotGroup::CPivotGroup(void)
  {
 }
 
-CPivotGroup::CPivotGroup( CBars *pBars ) {
+CPivotGroup::CPivotGroup( Bars* pBars ) {
   CalculatePivotSets( pBars );
 }
 
@@ -39,9 +39,9 @@ void CPivotGroup::AddToMap( CPivotSet &set ) {
   }
 }
 
-void CPivotGroup::CalculatePivotSets(CBars *pBars) {
+void CPivotGroup::CalculatePivotSets(Bars* pBars) {
 
-  const CBar& bar0( *pBars->Last() );
+  const Bar& bar0( *pBars->Last() );
 
   //stringstream ss;
   date dtThisDay = bar0.DateTime().date();
@@ -75,11 +75,11 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
 
   if ( pBars->Size() >= 3 ) {
 
-    const CBar& bar1( pBars->Ago( 1 ) );
+    const Bar& bar1( pBars->Ago( 1 ) );
     day3hi = std::max<double>( day3hi, bar1.High() );
     day3lo = std::min<double>( day3lo, bar1.Low() );
 
-    const CBar& bar2( pBars->Ago( 2 ) );
+    const Bar& bar2( pBars->Ago( 2 ) );
     day3hi = std::max<double>( day3hi, bar2.High() );
     day3lo = std::min<double>( day3lo, bar2.Low() );
 
@@ -87,7 +87,7 @@ void CPivotGroup::CalculatePivotSets(CBars *pBars) {
     AddToMap( Pivot3Day );
   }
 
-  CBars *pBarsForPeriod;
+  Bars* pBarsForPeriod;
 
   if ( pBars->Size() >= 10 ) {
     pBarsForPeriod = pBars->Subset( ptime( dtPrevMonday ), 5 );

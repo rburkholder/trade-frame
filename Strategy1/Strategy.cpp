@@ -251,7 +251,7 @@ void Strategy::Activate( void ) {
 
 }
 
-void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
+void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   if ( !quote.IsValid() ) {
     return;
@@ -276,7 +276,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 
 //  m_ceSMA1RR.Add( dt, sma1.RR() );
 
-//  m_pricesSlopeOfSlopeOfSMA1.Append( ou::tf::CPrice( dt, sma1.Slope() ) );
+//  m_pricesSlopeOfSlopeOfSMA1.Append( ou::tf::Price( dt, sma1.Slope() ) );
 //  m_tsswSlopeOfSlopeOfSMA1.Update();
 
   // medium speed moving average
@@ -286,7 +286,7 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //  double dblSMA2RR = sma2.RR();
 //  m_ceSMA2RR.Add( dt, dblSMA2RR );
 
-//  m_pricesBollinger2Offset.Append( ou::tf::CPrice( dt, sma2.BBOffset() ) );
+//  m_pricesBollinger2Offset.Append( ou::tf::Price( dt, sma2.BBOffset() ) );
 //  m_tsswSlopeOfBollinger2Offset.Update();
 
   // slow speed moving average
@@ -296,12 +296,12 @@ void Strategy::HandleQuote( const ou::tf::CQuote& quote ) {
 //  m_ceSMA3RR.Add( dt, sma3.RR() );
 
 //  double spread = quote.Ask() - quote.Bid();
-//  m_spreads.Append( ou::tf::CPrice( dt, spread ) );
+//  m_spreads.Append( ou::tf::Price( dt, spread ) );
 //  m_tsswSpreads.Update();
 
   if ( 500 < m_quotes.Size() ) {
 
-//    m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::CPrice( dt, sma2.Slope() ) );
+//    m_pricesSlopeOfSlopeOfSMA2.Append( ou::tf::Price( dt, sma2.Slope() ) );
 //    m_tsswSlopeOfSlopeOfSMA2.Update();
 
     m_pOrdersOutstandingLongs->HandleQuote( quote );
@@ -629,7 +629,7 @@ void Strategy::HandleOrderFilled( const ou::tf::COrder& order ) {
   const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 }
 
-void Strategy::HandleFirstQuote( const ou::tf::CQuote& quote ) {
+void Strategy::HandleFirstQuote( const ou::tf::Quote& quote ) {
 
   if ( !quote.IsValid() ) {
     return;
@@ -643,13 +643,13 @@ void Strategy::HandleFirstQuote( const ou::tf::CQuote& quote ) {
   m_sim->AddTradeHandler( m_pTestInstrument, MakeDelegate( this, &Strategy::HandleTrade ) );
 }
 
-void Strategy::HandleFirstTrade( const ou::tf::CTrade& trade ) {
+void Strategy::HandleFirstTrade( const ou::tf::Trade& trade ) {
 }
 
-void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
+void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   ptime dt( trade.DateTime() );
-  ou::tf::CTrade::price_t price = trade.Trade();
+  ou::tf::Trade::price_t price = trade.Trade();
 
   if ( m_bFirstTrade ) {
     m_bFirstTrade = false;
@@ -680,14 +680,14 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
     if ( price > mid ) {
       m_TradeDirection = ETradeDirUp;   // definitively up
       //++m_dblMdTicks;
-      m_pricesTickDiffs.Append( ou::tf::CPrice( dt, +1.0 ) );
+      m_pricesTickDiffs.Append( ou::tf::Price( dt, +1.0 ) );
       ++m_dblUpTicks;
       m_dblUpVolume += trade.Volume();
     }
     else {
       m_TradeDirection = ETradeDirDn;  // definitively dow
       //--m_dblMdTicks;
-      m_pricesTickDiffs.Append( ou::tf::CPrice( dt, -1.0 ) );
+      m_pricesTickDiffs.Append( ou::tf::Price( dt, -1.0 ) );
       ++m_dblDnTicks;
       m_dblDnVolume += trade.Volume();
     }
@@ -706,7 +706,7 @@ void Strategy::HandleTrade( const ou::tf::CTrade& trade ) {
 
 //  m_rtTickDiffs.Update();
   double dif = m_rtTickDiffs.Net();
-  m_pricesTickDiffsROC.Append( ou::tf::CPrice( dt, dif ) );
+  m_pricesTickDiffsROC.Append( ou::tf::Price( dt, dif ) );
 
   if (  45 < dif ) dif = 45;
   if ( -45 > dif ) dif = -45;
@@ -755,11 +755,11 @@ void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
   std::cout << m_ss << std::endl;
 }
 
-void Strategy::HandleBarCompletionTrades( const ou::tf::CBar& bar ) {
+void Strategy::HandleBarCompletionTrades( const ou::tf::Bar& bar ) {
   m_ceBars.AddBar( bar );
 }
 
-void Strategy::HandleBarCompletionBuys( const ou::tf::CBar& bar ) {
+void Strategy::HandleBarCompletionBuys( const ou::tf::Bar& bar ) {
 
   ptime dt( bar.DateTime() );
 
@@ -782,7 +782,7 @@ void Strategy::HandleBarCompletionBuys( const ou::tf::CBar& bar ) {
   }
 }
 
-void Strategy::HandleBarCompletionSells( const ou::tf::CBar& bar ) {
+void Strategy::HandleBarCompletionSells( const ou::tf::Bar& bar ) {
 
   ptime dt( bar.DateTime() );
 

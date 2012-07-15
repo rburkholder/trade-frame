@@ -37,91 +37,11 @@ if a dataset uses a dataspace with any unlimited dimension, chunking has to be u
 
 HDF5 uses C storage conventions, assuming that the last listed dimension is the 
 fastest-changing dimension and the first-listed dimension is the slowest changing.
-*/
-
-// CDatedDatums
-/*
-CDatedDatums::CDatedDatums(void) {
-}
-
-CDatedDatums::CDatedDatums( unsigned int size )
-:CTimeSeries<CDatedDatum>( size ) {
-}
-
-CDatedDatums::~CDatedDatums( void ) {
-
-}
 
 */
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
-// CBars
-
-CBars::CBars(void) {
-}
-
-CBars::CBars( size_t size ) :CTimeSeries<CBar>( size ) {
-}
-
-CBars::~CBars( void ) {
-}
-
-// CTrades
-
-CTrades::CTrades(void) {
-}
-
-CTrades::CTrades( size_t size ) :CTimeSeries<CTrade>( size ) {
-}
-
-CTrades::~CTrades( void ) {
-}
-
-// CQuotes
-
-CQuotes::CQuotes(void) {
-}
-
-CQuotes::CQuotes( size_t size ) :CTimeSeries<CQuote>( size ) {
-}
-
-CQuotes::~CQuotes( void ) {
-}
-
-// CMarketDepths
-
-CMarketDepths::CMarketDepths() {
-}
-
-CMarketDepths::~CMarketDepths() {
-}
-
-CMarketDepths::CMarketDepths(size_t size) : CTimeSeries<CMarketDepth>( size ) {
-}
-
-// CGreeks
-
-CGreeks::CGreeks(void) {
-}
-
-CGreeks::CGreeks( size_t size ) :CTimeSeries<CGreek>( size ) {
-}
-
-CGreeks::~CGreeks( void ) {
-}
-
-// CPrices
-
-CPrices::CPrices(void) {
-}
-
-CPrices::CPrices( size_t size ) :CTimeSeries<CPrice>( size ) {
-}
-
-CPrices::~CPrices( void ) {
-}
 
 } // namespace tf
 } // namespace ou

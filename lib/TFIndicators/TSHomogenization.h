@@ -30,7 +30,7 @@ public:
 
   enum interpolation_t { eNone, ePreviousTick, eLinear };
 
-  TSHomogenization<T>( CTimeSeries<T>&, time_duration interval = m_zeroDuration, interpolation_t interpolation = eNone );
+  TSHomogenization<T>( TimeSeries<T>&, time_duration interval = m_zeroDuration, interpolation_t interpolation = eNone );
   virtual ~TSHomogenization<T>(void);
 
   ou::Delegate<const T&> OnAppend;
@@ -38,23 +38,23 @@ public:
 protected:
 private:
   interpolation_t m_interpolation;
-  CTimeSeries<T>& m_ts;
+  TimeSeries<T>& m_ts;
   time_duration m_tdHomogenizingInterval;  // 0 if no homoginization
   ptime m_dtMarker;
   T m_datum;  // this is Tau at j
   void HandleFirstDatum( const T& );
-  void HandleDatum( const T& ); // this is Tau at j+1, need to handle CPrice, CTrade, CBar
+  void HandleDatum( const T& ); // this is Tau at j+1, need to handle Price, Trade, CBar
   void FlowThrough( const T& ) { OnAppend( datum ); };
 
-  void CalcDatum( const CPrice& price, double ratio );
-  void CalcDatum( const CTrade& trade, double ratio );
+  void CalcDatum( const Price& price, double ratio );
+  void CalcDatum( const Trade& trade, double ratio );
 };
 
 template<typename T>
 time_duration TSHomogenization<T>::m_zeroDuration = time_duration( 0, 0, 0 );
 
 template<typename T>
-TSHomogenization<T>::TSHomogenization( CTimeSeries<T>& ts, time_duration interval, interpolation_t interpolation ) 
+TSHomogenization<T>::TSHomogenization( TimeSeries<T>& ts, time_duration interval, interpolation_t interpolation ) 
   : m_zeroDuration( time_duration( 0, 0, 0 ) ), m_nHomogenizingInterval( interval ), 
     m_ts( ts ), m_interpolation( interpolation ), m_dtMarker( not_a_date_time )
 {
@@ -129,14 +129,14 @@ void TSHomogenization<T>::HandleDatum( const T& datum ) {
 }
 
 template<typename T>
-void TSHomogenization<T>::CalcDatum( const CPrice& datum, double ratio ) {
-  CPrice price( m_dtMarker, m_datum.Price() + ratio * ( datum.Price() - m_datum.Price ) );
+void TSHomogenization<T>::CalcDatum( const Price& datum, double ratio ) {
+  Price price( m_dtMarker, m_datum.Price() + ratio * ( datum.Price() - m_datum.Price ) );
   OnAppend( price );
 }
 
 template<typename T>
-void TSHomogenization<T>::CalcDatum( const CTrade& datum, double ratio ) {
-  CTrade trade( m_dtMarker, m_datum.Trade() + ratio * ( datum.Trade() - m_datum.Trade ), m_datum.Volume() );
+void TSHomogenization<T>::CalcDatum( const Trade& datum, double ratio ) {
+  Trade trade( m_dtMarker, m_datum.Trade() + ratio * ( datum.Trade() - m_datum.Trade ), m_datum.Volume() );
   OnAppend( trade );
 }
 

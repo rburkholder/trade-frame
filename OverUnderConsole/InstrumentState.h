@@ -27,10 +27,10 @@ struct InstrumentState {
   double dblAmountToTrade;
   unsigned int nSharesToTrade;
 
-  ou::tf::CQuotes quotes;
-  ou::tf::CTrades trades;
+  ou::tf::Quotes quotes;
+  ou::tf::Trades trades;
 
-  ou::tf::CTrades history;
+  ou::tf::Trades history;
 
   //double dblOpen, dblHigh, dblLow, dblClose;
 

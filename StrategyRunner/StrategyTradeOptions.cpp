@@ -279,11 +279,11 @@ void StrategyTradeOptions::HandleFarOptionsLoad( pInstrument_t pInstrument ) {
   }
 }
 
-void StrategyTradeOptions::HandleTrade( const ou::tf::CTrade& trade ) {
+void StrategyTradeOptions::HandleTrade( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
 }
 
-void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
+void StrategyTradeOptions::HandleQuote( const ou::tf::Quote& quote ) {
 
   if ( !quote.IsValid() ) return;  // ** check this for options as well
   
@@ -365,7 +365,7 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::CQuote& quote ) {
   }
 }
 
-void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
+void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
   // add up put delta, call delta, rebalance each side to working delta
   // use m_iterMapOptionsMiddle as the current strike adjustment
   // might be more efficient to have an active list of options and positions to make it easy to scan and update for:
@@ -448,7 +448,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::CQuote& quote ) {
   
 }
 
-bool StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
+bool StrategyTradeOptions::AdjustThePointers( const ou::tf::Quote& quote ) {
   // turn on and turn off monitoring as move over the options
   bool bReturn = false;
   double midpoint = quote.Midpoint();
@@ -497,7 +497,7 @@ bool StrategyTradeOptions::AdjustThePointers( const ou::tf::CQuote& quote ) {
   return bReturn;
 }
 
-bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::CQuote& quote ) {
+bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::Quote& quote ) {
 
   // get close to the current strike to start collecting greek information
 
@@ -636,7 +636,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( 0 != m_quotes.Size() ) {
       sPathName = sPrefix + "/quotes/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes> wtsQuotes;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
       wtsQuotes.Write( sPathName, &m_quotes );
       ou::tf::CHDF5Attributes attrQuotes( sPathName, m_pUnderlying->GetInstrumentType() );
       attrQuotes.SetMultiplier( m_pUnderlying->GetMultiplier() );
@@ -646,7 +646,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.quotes.Size() ) ) {
       sPathName = sPrefix + "/quotes/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes> wtsQuotes;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
       wtsQuotes.Write( sPathName, &bundle10YrTreasury.quotes );
     }
 
@@ -654,7 +654,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( 0 != m_trades.Size() ) {
       sPathName = sPrefix + "/trades/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades> wtsTrades;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
       wtsTrades.Write( sPathName, &m_trades );
       ou::tf::CHDF5Attributes attrTrades( sPathName, m_pUnderlying->GetInstrumentType() );
       attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
@@ -664,7 +664,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.trades.Size() ) ) {
       sPathName = sPrefix + "/trades/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades> wtsTrades;
+      ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
       wtsTrades.Write( sPathName, &bundle10YrTreasury.trades );
     }
 

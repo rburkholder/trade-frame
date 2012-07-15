@@ -760,7 +760,7 @@ void CProcess::StopTrading( void ) {
 
 }
 
-void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
+void CProcess::HandleUnderlyingQuote( const Quote& quote ) {
 //  m_ss.str( "" );
 //  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
@@ -795,14 +795,14 @@ void CProcess::HandleUnderlyingQuote( const CQuote& quote ) {
 
 }
 
-void CProcess::HandleUnderlyingTrade( const CTrade& trade ) {
+void CProcess::HandleUnderlyingTrade( const Trade& trade ) {
 
   m_dblUnderlyingPrice = trade.Trade();
   m_trades.Append( trade );
 
 }
 
-void CProcess::HandleTSFirstPass( const CQuote& quote ) {
+void CProcess::HandleTSFirstPass( const Quote& quote ) {
   // may need to open portfoloio and evaluate existing positions here
   m_ss.str( "" );
   m_ss << ou::CTimeSource::Instance().Internal();
@@ -811,7 +811,7 @@ void CProcess::HandleTSFirstPass( const CQuote& quote ) {
   m_TradingState = ETSPreMarket;
 }
 
-void CProcess::HandleTSPreMarket( const CQuote& quote ) {
+void CProcess::HandleTSPreMarket( const Quote& quote ) {
   ptime dt = ou::CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
@@ -823,7 +823,7 @@ void CProcess::HandleTSPreMarket( const CQuote& quote ) {
   }
 }
 
-void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
+void CProcess::HandleTSMarketOpened( const Quote& quote ) {
 
   double dblOpenValue = ( quote.Bid() + quote.Ask() ) / 2.0;
 
@@ -885,7 +885,7 @@ void CProcess::HandleTSMarketOpened( const CQuote& quote ) {
   m_TradingState = ETSFirstTrade;
 }
 
-void CProcess::HandleTSActiveMarketStart( const CQuote& quote ) {
+void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
 
   ptime dt = ou::CTimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
@@ -917,7 +917,7 @@ void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleTSTrading( const CQuote& quote ) {
+void CProcess::HandleTSTrading( const Quote& quote ) {
 
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
   m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
@@ -987,7 +987,7 @@ void CProcess::HandleTSTrading( const CQuote& quote ) {
   }
 }
 
-void CProcess::HandleTSCloseOrders( const CQuote& quote ) {
+void CProcess::HandleTSCloseOrders( const Quote& quote ) {
 
   if ( m_bTrading ) {
 
@@ -1022,7 +1022,7 @@ void CProcess::HandleTSCloseOrders( const CQuote& quote ) {
   }
 }
 
-void CProcess::HandleAfterMarket( const CQuote& quote ) {
+void CProcess::HandleAfterMarket( const Quote& quote ) {
 }
 
 void CProcess::PrintGreeks( void ) {
@@ -1056,9 +1056,9 @@ void CProcess::SaveSeries( void ) {
 
   std::string sPathName;
 
-  CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
-  CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
-  CHDF5WriteTimeSeries<CGreeks, CGreek> wtsGreeks;
+  CHDF5WriteTimeSeries<Quotes, Quote> wtsQuotes;
+  CHDF5WriteTimeSeries<Trades, Trade> wtsTrades;
+  CHDF5WriteTimeSeries<Greeks, Greek> wtsGreeks;
 
   try {
     if ( 0 != m_quotes.Size() ) {

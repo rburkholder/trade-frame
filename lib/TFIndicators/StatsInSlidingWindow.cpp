@@ -26,16 +26,16 @@ CTradeStats::CTradeStats( std::string sName, unsigned int WindowSizeSeconds, uns
 CTradeStats::~CTradeStats() {
 }
 
-CTrade* CTradeStats::Add(boost::posix_time::ptime dt, CTrade *trade) {
-  CStatsInSlidingWindow::Add( dt, trade->Trade() );
+Trade* CTradeStats::Add(boost::posix_time::ptime dt, Trade *trade) {
+  CStatsInSlidingWindow::Add( dt, trade->Price() );
   CSlidingWindow::Add( dt, trade );
   return trade;
 }
 
-CTrade* CTradeStats::Remove() {
-  CTrade* trade = CSlidingWindow::Remove();
+Trade* CTradeStats::Remove() {
+  Trade* trade = CSlidingWindow::Remove();
   // what is stored in the removal, does dt need to come from trade?
-  CStatsInSlidingWindow::Remove( trade->DateTime(), trade->Trade() );
+  CStatsInSlidingWindow::Remove( trade->DateTime(), trade->Price() );
   return trade;
 }
 

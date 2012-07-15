@@ -23,9 +23,9 @@ namespace hf { // high frequency
 // p1 = power
 // p2 = 1 / p2 for Standard Deviation
 
-class TSVariance: public CPrices {
+class TSVariance: public Prices {
 public:
-  TSVariance( CPrices& series, time_duration dt, unsigned int n, double p1, double p2 = 1.0 );
+  TSVariance( Prices& series, time_duration dt, unsigned int n, double p1, double p2 = 1.0 );
   ~TSVariance(void);
 protected:
 private:
@@ -34,13 +34,13 @@ private:
   double m_p1;
   double m_p2;
   double m_z;
-  CPrices m_dummy;
-  CPrices& m_seriesSource;
+  Prices m_dummy;
+  Prices& m_seriesSource;
   TSMA m_ma1;
   TSMA m_ma2;
-  void HandleUpdate( const CPrice& );
-  void HandleMA1Update( const CPrice& );
-  void HandleMA2Update( const CPrice& );
+  void HandleUpdate( const Price& );
+  void HandleMA1Update( const Price& );
+  void HandleMA2Update( const Price& );
 };
 
 } // namespace hf

@@ -9,9 +9,9 @@ public:
   CChartArmsIntraDay(void);
   virtual ~CChartArmsIntraDay(void);
 
-  void ProcessIndu( const CTrade &trade );
-  void ProcessTrin( const CTrade &trade );
-  void ProcessTick( const CTrade &trade );
+  void ProcessIndu( const Trade &trade );
+  void ProcessTrin( const Trade &trade );
+  void ProcessTick( const Trade &trade );
 
 protected:
   CZigZag *pzzIndu, *pzzTrin;

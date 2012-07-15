@@ -19,14 +19,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWStochastic::TSSWStochastic( CQuotes& quotes, time_duration tdWindowWidth ) 
-  : TimeSeriesSlidingWindow<TSSWStochastic, CQuote>( quotes, tdWindowWidth ),
+TSSWStochastic::TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth ) 
+  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( quotes, tdWindowWidth ),
     m_lastAdd( 0 ), m_lastExpire( 0 ), m_k( 0 )
 {
 }
 
 TSSWStochastic::TSSWStochastic( const TSSWStochastic& stoch) 
-  : TimeSeriesSlidingWindow<TSSWStochastic, CQuote>( stoch ),
+  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( stoch ),
   m_lastAdd( stoch.m_lastAdd ), m_lastExpire( stoch.m_lastExpire ), m_k( stoch.m_k ),
   m_minmax( stoch.m_minmax )
 {
@@ -35,7 +35,7 @@ TSSWStochastic::TSSWStochastic( const TSSWStochastic& stoch)
 TSSWStochastic::~TSSWStochastic(void) {
 }
 
-void TSSWStochastic::Add( const CQuote& quote ) {
+void TSSWStochastic::Add( const Quote& quote ) {
   double tmp = quote.Midpoint();
   if ( tmp != m_lastAdd ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
     m_lastAdd = tmp;
@@ -43,7 +43,7 @@ void TSSWStochastic::Add( const CQuote& quote ) {
   }
 }
 
-void TSSWStochastic::Expire( const CQuote& quote ) {
+void TSSWStochastic::Expire( const Quote& quote ) {
   double tmp = quote.Midpoint();
   if ( tmp != m_lastExpire ) {  // cut down on number of updates (can't use, needs to be replicated in Expire)
     m_lastExpire = tmp;

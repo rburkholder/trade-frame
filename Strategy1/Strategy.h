@@ -85,19 +85,19 @@ private:
   pInstrument_t m_pLongInstrument;
   pInstrument_t m_pTestInstrument;
 
-  ou::tf::CQuote m_quoteLast;  // used for classifying the current trade direction
+  ou::tf::Quote m_quoteLast;  // used for classifying the current trade direction
 
   double m_dblLastMidpoint;
 
   time_duration m_tdTimeBetweenTrades;
   ptime m_dtLastSubmission;
 
-  ou::tf::CQuotes m_quotes;
-  ou::tf::CTrades m_trades;
+  ou::tf::Quotes m_quotes;
+  ou::tf::Trades m_trades;
 
-  ou::tf::CBarFactory m_bfTrades;
-  ou::tf::CBarFactory m_bfBuys;
-  ou::tf::CBarFactory m_bfSells;
+  ou::tf::BarFactory m_bfTrades;
+  ou::tf::BarFactory m_bfBuys;
+  ou::tf::BarFactory m_bfSells;
 
   typedef ou::ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
 
@@ -179,10 +179,10 @@ private:
   double m_dblUpTicks, m_dblMdTicks, m_dblDnTicks;
   double m_dblUpVolume, m_dblMdVolume, m_dblDnVolume;
 
-  ou::tf::CPrices m_pricesTickDiffs;
+  ou::tf::Prices m_pricesTickDiffs;
   ou::tf::TSSWRunningTally m_rtTickDiffs;
 
-  ou::tf::CPrices m_pricesTickDiffsROC;
+  ou::tf::Prices m_pricesTickDiffsROC;
   ou::tf::TSSWRateOfChange m_rocTickDiffs;
 /*
   ou::tf::TSSWStatsMidQuote m_sma1;
@@ -194,20 +194,20 @@ private:
   ou::tf::TSSWStatsMidQuote m_sma7;
   ou::tf::TSSWStatsMidQuote m_sma8;
 */
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema1;
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema2;
-  ou::tf::hf::TSEMA<ou::tf::CQuote> m_ema3;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema1;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
-//  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA1;
+//  ou::tf::Prices m_pricesSlopeOfSlopeOfSMA1;
 //  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
 
-  ou::tf::CPrices m_pricesSlopeOfSlopeOfSMA2;
+  ou::tf::Prices m_pricesSlopeOfSlopeOfSMA2;
   ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA2;
 
-  ou::tf::CPrices m_pricesBollinger2Offset;
+  ou::tf::Prices m_pricesBollinger2Offset;
   ou::tf::TSSWStatsPrice m_tsswSlopeOfBollinger2Offset;
 
-  ou::tf::CPrices m_spreads;
+  ou::tf::Prices m_spreads;
   ou::tf::TSSWStatsPrice m_tsswSpreads;
 
   ou::tf::ZigZag m_zigzagPrice;
@@ -231,10 +231,10 @@ private:
   void HandleOnData1Connected( int ) {};
   void HandleOnData1Disconnected( int ) {};
 
-  void HandleFirstQuote( const ou::tf::CQuote& quote );
-  void HandleFirstTrade( const ou::tf::CTrade& trade );
-  void HandleQuote( const ou::tf::CQuote& quote );
-  void HandleTrade( const ou::tf::CTrade& trade );
+  void HandleFirstQuote( const ou::tf::Quote& quote );
+  void HandleFirstTrade( const ou::tf::Trade& trade );
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
   void HandleSimulationComplete( void );
 
   void HandleOrderFilled( const ou::tf::COrder& );
@@ -242,9 +242,9 @@ private:
   void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
   void HandleCommission( const ou::tf::CPosition* pPosition );
 
-  void HandleBarCompletionTrades( const ou::tf::CBar& );
-  void HandleBarCompletionBuys( const ou::tf::CBar& );
-  void HandleBarCompletionSells( const ou::tf::CBar& );
+  void HandleBarCompletionTrades( const ou::tf::Bar& );
+  void HandleBarCompletionBuys( const ou::tf::Bar& );
+  void HandleBarCompletionSells( const ou::tf::Bar& );
 
   void HandleZigZagPeak( ou::tf::ZigZag*, ptime, double, ou::tf::ZigZag::EDirection );
   void HandleZigZagUpDp( ou::tf::ZigZag* );

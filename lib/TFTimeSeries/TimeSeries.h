@@ -36,7 +36,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 template<typename T> 
-class CTimeSeries {
+class TimeSeries {
 public:
 
   typedef typename T datum_t;
@@ -47,10 +47,10 @@ public:
   typedef typename std::vector<T>::reference reference;
   typedef typename std::vector<T>::const_reference const_reference;
 
-  CTimeSeries<T>( void );
-  CTimeSeries<T>( size_type Size );
-  CTimeSeries<T>( const CTimeSeries<T>& );
-  virtual ~CTimeSeries<T>( void );
+  TimeSeries<T>( void );
+  TimeSeries<T>( size_type Size );
+  TimeSeries<T>( const TimeSeries<T>& );
+  virtual ~TimeSeries<T>( void );
 
   size_type Size() const { return m_vSeries.size(); };
 
@@ -84,8 +84,8 @@ public:
 
   ou::Delegate<const T&> OnAppend;
 
-  virtual CTimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
-  virtual CTimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
+  virtual TimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
+  virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
 
   H5::DataSpace* DefineDataSpace( H5::DataSpace *pSpace = NULL );
 
@@ -96,33 +96,33 @@ private:
 };
 
 template<typename T> 
-CTimeSeries<T>::CTimeSeries(void): m_vIterator( m_vSeries.end() ) {
+TimeSeries<T>::TimeSeries(void): m_vIterator( m_vSeries.end() ) {
 }
 
 template<typename T> 
-CTimeSeries<T>::CTimeSeries( size_type size ): m_vIterator( m_vSeries.end() ) {
+TimeSeries<T>::TimeSeries( size_type size ): m_vIterator( m_vSeries.end() ) {
   m_vSeries.reserve( size );
 }
 
 template<typename T>
-CTimeSeries<T>::CTimeSeries( const CTimeSeries<T>& series ) {
+TimeSeries<T>::TimeSeries( const TimeSeries<T>& series ) {
   m_vSeries = series.m_vSeries;
   m_vIterator = m_vSeries.end();
 }
 
 template<typename T> 
-CTimeSeries<T>::~CTimeSeries(void) {
+TimeSeries<T>::~TimeSeries(void) {
   Clear();
 }
 
 template<typename T> 
-void CTimeSeries<T>::Append(const T& datum) {
+void TimeSeries<T>::Append(const T& datum) {
   m_vSeries.push_back( datum );
   OnAppend( datum );
 }
 
 template<typename T> 
-void CTimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
+void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   T key( dt );
   std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
@@ -135,7 +135,7 @@ void CTimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
 }
 
 template<typename T> 
-void CTimeSeries<T>::Insert( const T& datum ) {
+void TimeSeries<T>::Insert( const T& datum ) {
   std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() == p.second ) {
@@ -147,13 +147,13 @@ void CTimeSeries<T>::Insert( const T& datum ) {
 }
 
 template<typename T> 
-void CTimeSeries<T>::Clear( void ) {
+void TimeSeries<T>::Clear( void ) {
   m_vSeries.clear();
 }
 
 
 template<typename T> 
-const T* CTimeSeries<T>::First() {
+const T* TimeSeries<T>::First() {
   m_vIterator = m_vSeries.begin();
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
@@ -164,7 +164,7 @@ const T* CTimeSeries<T>::First() {
 }
 
 template<typename T> 
-const T* CTimeSeries<T>::Next() {
+const T* TimeSeries<T>::Next() {
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
   }
@@ -180,7 +180,7 @@ const T* CTimeSeries<T>::Next() {
 }
 
 template<typename T> 
-const T* CTimeSeries<T>::Last() {
+const T* TimeSeries<T>::Last() {
   m_vIterator = m_vSeries.end();
   if ( 0 == m_vSeries.size() ) {
     return NULL;
@@ -192,7 +192,7 @@ const T* CTimeSeries<T>::Last() {
 }
 
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::Ago( size_type ix ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
   assert( ix < m_vSeries.size() );
   typename std::vector<T>::const_reverse_iterator iter( m_vSeries.rbegin() );
   iter += ix;
@@ -200,20 +200,20 @@ typename CTimeSeries<T>::const_reference CTimeSeries<T>::Ago( size_type ix ) {
 }
 
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::operator []( size_type ix ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::operator []( size_type ix ) {
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
 
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::At( size_type ix ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
 
 /*
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::At( const ptime& dt ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -229,7 +229,7 @@ typename CTimeSeries<T>::const_reference CTimeSeries<T>::At( const ptime& dt ) {
 */
 
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::AtOrAfter( const ptime &dt ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::AtOrAfter( const ptime &dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -244,7 +244,7 @@ typename CTimeSeries<T>::const_reference CTimeSeries<T>::AtOrAfter( const ptime 
 }
 
 template<typename T> 
-typename CTimeSeries<T>::const_reference CTimeSeries<T>::After( const ptime &dt ) {
+typename TimeSeries<T>::const_reference TimeSeries<T>::After( const ptime &dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -255,38 +255,38 @@ typename CTimeSeries<T>::const_reference CTimeSeries<T>::After( const ptime &dt 
 }
 
 template<typename T> 
-void CTimeSeries<T>::Sort( void ) {
+void TimeSeries<T>::Sort( void ) {
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
 }
 
 template<typename T> 
-CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt ) const {
+TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) const {
   T datum( dt );
-  CTimeSeries<T> *series = NULL;
+  TimeSeries<T>* series = NULL;
   const_iterator iter;
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
-    series = new CTimeSeries<T>( (unsigned int) (m_vSeries.end() - iter) );
+    series = new TimeSeries<T>( (unsigned int) (m_vSeries.end() - iter) );
     while ( m_vSeries.end() != iter ) {
       series->Append( *iter );
       ++iter;
     }
   }
   else {
-    series = new CTimeSeries<T>();
+    series = new TimeSeries<T>();
   }
   return series;
 }
 
 template<typename T> 
-CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt, unsigned int n ) const { // n is max count
+TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) const { // n is max count
   T datum( dt );
-  CTimeSeries<T> *series = NULL;
+  TimeSeries<T>* series = NULL;
   const_iterator iter;
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
     unsigned int todo = std::min<unsigned int>( n, (unsigned int) ( m_vSeries.end() - iter ) );
-    series = new CTimeSeries<T>( todo );
+    series = new TimeSeries<T>( todo );
     while ( 0 < todo ) {
       series->Append( *iter );
       ++iter;
@@ -294,13 +294,13 @@ CTimeSeries<T>* CTimeSeries<T>::Subset( const ptime &dt, unsigned int n ) const 
     }
   }
   else {
-    series = new CTimeSeries<T>();
+    series = new TimeSeries<T>();
   }
   return series;
 }
 
 template<typename T> 
-H5::DataSpace* CTimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
+H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
   if ( NULL == pSpace ) pSpace = new H5::DataSpace( H5S_SIMPLE );
   hsize_t curSize = m_vSeries.size();
   hsize_t maxSize = H5S_UNLIMITED; 
@@ -308,73 +308,73 @@ H5::DataSpace* CTimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
     pSpace->setExtentSimple( 1, &curSize, &maxSize ); 
   }
   else {
-    //throw runtime_error( "CTimeSeries<T>::DefineDataSpace series is empty" );
-    std::cout << "CTimeSeries<T>::DefineDataSpace series is empty" << std::endl;
+    //throw runtime_error( "TimeSeries<T>::DefineDataSpace series is empty" );
+    std::cout << "TimeSeries<T>::DefineDataSpace series is empty" << std::endl;
   }
   return pSpace; 
 }
 
 // Bars
 
-class CBars: public CTimeSeries<CBar> {
+class Bars: public TimeSeries<Bar> {
 public:
-  CBars(void);
-  CBars( size_type );
-  virtual ~CBars(void);
-  CBars* Subset( ptime time ) const { return (CBars*) CTimeSeries<CBar>::Subset( time ); };
-  CBars* Subset( ptime time, unsigned int n ) const { return (CBars*) CTimeSeries<CBar>::Subset( time, n ); };
+  Bars(void) {};
+  Bars( size_t size ): TimeSeries<Bar>( size ) {};
+  virtual ~Bars(void) {};
+  Bars* Subset( ptime time ) const { return (Bars*) TimeSeries<Bar>::Subset( time ); };
+  Bars* Subset( ptime time, unsigned int n ) const { return (Bars*) TimeSeries<Bar>::Subset( time, n ); };
 protected:
 private:
 };
 
 // Trades
 
-class CTrades: public CTimeSeries<CTrade> {
+class Trades: public TimeSeries<Trade> {
 public:
-  CTrades( void );
-  CTrades( size_type );
-  ~CTrades( void );
-  CTrades* Subset( ptime time ) const { return (CTrades*) CTimeSeries<CTrade>::Subset( time ); };
-  CTrades* Subset( ptime time, unsigned int n ) const { return (CTrades*) CTimeSeries<CTrade>::Subset( time, n ); };
+  Trades( void ) {};
+  Trades( size_t size ): TimeSeries<Trade>( size ) {};
+  ~Trades( void ) {};
+  Trades* Subset( ptime time ) const { return (Trades*) TimeSeries<Trade>::Subset( time ); };
+  Trades* Subset( ptime time, unsigned int n ) const { return (Trades*) TimeSeries<Trade>::Subset( time, n ); };
 protected:
 private:
 };
 
 // Quotes
 
-class CQuotes: public CTimeSeries<CQuote> {
+class Quotes: public TimeSeries<Quote> {
 public:
-  CQuotes( void );
-  CQuotes( size_type );
-  ~CQuotes( void );
-  CQuotes* Subset( ptime time ) const { return (CQuotes*) CTimeSeries<CQuote>::Subset( time ); };
-  CQuotes* Subset( ptime time, unsigned int n ) const { return (CQuotes*) CTimeSeries<CQuote>::Subset( time, n ); };
+  Quotes( void ) {};
+  Quotes( size_t size ): TimeSeries<Quote>( size ) {};
+  ~Quotes( void ) {};
+  Quotes* Subset( ptime time ) const { return (Quotes*) TimeSeries<Quote>::Subset( time ); };
+  Quotes* Subset( ptime time, unsigned int n ) const { return (Quotes*) TimeSeries<Quote>::Subset( time, n ); };
 protected:
 private:
 };
 
 // MarketDepth
 
-class CMarketDepths: public CTimeSeries<CMarketDepth> {
+class MarketDepths: public TimeSeries<MarketDepth> {
 public:
-  CMarketDepths( void );
-  CMarketDepths( size_type );
-  ~CMarketDepths( void );
-  CMarketDepths* Subset( ptime time ) const { return (CMarketDepths*) CTimeSeries<CMarketDepth>::Subset( time ); };
-  CMarketDepths* Subset( ptime time, unsigned int n ) const { return (CMarketDepths*) CTimeSeries<CMarketDepth>::Subset( time, n ); };
+  MarketDepths( void ) {};
+  MarketDepths( size_t size ): TimeSeries<MarketDepth>( size ) {};
+  ~MarketDepths( void ) {};
+  MarketDepths* Subset( ptime time ) const { return (MarketDepths*) TimeSeries<MarketDepth>::Subset( time ); };
+  MarketDepths* Subset( ptime time, unsigned int n ) const { return (MarketDepths*) TimeSeries<MarketDepth>::Subset( time, n ); };
 protected:
 private:
 };
 
 // Greeks
 
-class CGreeks: public CTimeSeries<CGreek> {
+class Greeks: public TimeSeries<Greek> {
 public:
-  CGreeks( void );
-  CGreeks( size_type );
-  ~CGreeks( void );
-  CGreeks* Subset( ptime time ) const { return (CGreeks*) CTimeSeries<CGreek>::Subset( time ); };
-  CGreeks* Subset( ptime time, unsigned int n ) const { return (CGreeks *) CTimeSeries<CGreek>::Subset( time, n ); };
+  Greeks( void ) {};
+  Greeks( size_t size ): TimeSeries<Greek>( size ) {};
+  ~Greeks( void ) {};
+  Greeks* Subset( ptime time ) const { return (Greeks*) TimeSeries<Greek>::Subset( time ); };
+  Greeks* Subset( ptime time, unsigned int n ) const { return (Greeks*) TimeSeries<Greek>::Subset( time, n ); };
 protected:
 private:
 };
@@ -382,13 +382,13 @@ private:
 // Prices
 // used for holding indicators, returns, ...
 
-class CPrices: public CTimeSeries<CPrice> {
+class Prices: public TimeSeries<Price> {
 public:
-  CPrices( void );
-  CPrices( size_type );
-  ~CPrices( void );
-  CPrices* Subset( ptime time ) const { return (CPrices*) CTimeSeries<CPrice>::Subset( time ); };
-  CPrices* Subset( ptime time, unsigned int n ) const { return (CPrices*) CTimeSeries<CPrice>::Subset( time, n ); };
+  Prices( void ) {};
+  Prices( size_t size ): TimeSeries<Price>( size ) {};
+  ~Prices( void ) {};
+  Prices* Subset( ptime time ) const { return (Prices*) TimeSeries<Price>::Subset( time ); };
+  Prices* Subset( ptime time, unsigned int n ) const { return (Prices*) TimeSeries<Price>::Subset( time, n ); };
 protected:
 private:
 };

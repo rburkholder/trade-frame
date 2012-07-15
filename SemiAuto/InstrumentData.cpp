@@ -49,7 +49,7 @@ void InstrumentData::Init( void ) {
 InstrumentData::~InstrumentData(void) {
 }
 
-void InstrumentData::HandleQuote( const CQuote& quote ) {
+void InstrumentData::HandleQuote( const Quote& quote ) {
 
   m_quotes.Append( quote );
   m_stats.Update();
@@ -59,7 +59,7 @@ void InstrumentData::HandleQuote( const CQuote& quote ) {
   m_rSummary[ Stochastic ] = m_stoch.K();
 }
 
-void InstrumentData::HandleTrade( const CTrade& trade ) {
+void InstrumentData::HandleTrade( const Trade& trade ) {
   m_trades.Append( trade );
 
   // may need to protect cross thread updates
@@ -97,7 +97,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<CQuotes, CQuote> wtsQuotes;
+    CHDF5WriteTimeSeries<Quotes, Quote> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
     CHDF5Attributes attrQuotes( sPathName, future );
     //attrQuotes.SetMultiplier( 1 );
@@ -107,7 +107,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<CTrades, CTrade> wtsTrades;
+    CHDF5WriteTimeSeries<Trades, Trade> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
     CHDF5Attributes attrTrades( sPathName, future );
     //attrTrades.SetMultiplier( 1 );

@@ -12,7 +12,7 @@ public:
   enum enumDayCalc { NoDayCalc, DaySelect, BarCount, DayCount };
   CSymbolSelectionFilter( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd );
   virtual ~CSymbolSelectionFilter(void);
-  CTimeSeries<CBar> *Bars( void ) { return &m_bars; };
+  TimeSeries<Bar> *Bars( void ) { return &m_bars; };
   virtual bool Validate( void ) { return true; };
   typedef fastdelegate::FastDelegate3<const string &, const string &,const string &> OnAddSymbolHandler;
   void SetOnAddSymbolHandler( OnAddSymbolHandler function ) {
@@ -23,7 +23,7 @@ public:
   virtual void WrapUp( void ) {};
 protected:
   OnAddSymbolHandler OnAddSymbol;
-  CTimeSeries<CBar> m_bars;
+  TimeSeries<Bar> m_bars;
   enumDayCalc m_DayStartType;
   int m_nCount;
   bool m_bUseStart;

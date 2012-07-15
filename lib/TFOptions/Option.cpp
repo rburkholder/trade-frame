@@ -90,18 +90,18 @@ void Option::StopWatch( void ) {
   }
 }
 
-void Option::HandleQuote( const CQuote& quote ) {
+void Option::HandleQuote( const Quote& quote ) {
   m_dblBid = quote.Bid();
   m_dblAsk = quote.Ask();
   m_quotes.Append( quote );
 }
 
-void Option::HandleTrade( const CTrade& trade ) {
-  m_dblTrade = trade.Trade();
+void Option::HandleTrade( const Trade& trade ) {
+  m_dblTrade = trade.Price();
   m_trades.Append( trade );
 }
 
-void Option::HandleGreek( const CGreek& greek ) {
+void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
   m_greeks.Append( greek );
 }
@@ -115,7 +115,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<CQuotes> wtsQuotes;
+    CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
     CHDF5Attributes attrQuotes( sPathName, option );
     attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
@@ -125,7 +125,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<CTrades> wtsTrades;
+    CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
     CHDF5Attributes attrTrades( sPathName, option );
     attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
@@ -135,7 +135,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<CGreeks> wtsGreeks;
+    CHDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks;
     wtsGreeks.Write( sPathName, &m_greeks );
     CHDF5Attributes attrGreeks( sPathName, option );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );

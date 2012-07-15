@@ -95,7 +95,7 @@ protected:
 
   boost::posix_time::time_duration m_durForceRoundTripClose;
 
-  void CheckBaseOrder( const ou::tf::CQuote& quote );
+  void CheckBaseOrder( const ou::tf::Quote& quote );
   bool CancelAndCloseInProgress( void );
 
   void PlaceOrder( pOrder_t& pOrder );
@@ -123,7 +123,7 @@ public:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   OrdersOutstandingLongs( pPosition_t pPosition ): OrdersOutstanding( pPosition ) {};
   ~OrdersOutstandingLongs( void ) {};
-  void HandleQuote( const ou::tf::CQuote& quote );  // set from external
+  void HandleQuote( const ou::tf::Quote& quote );  // set from external
 protected:
 private:
 };
@@ -134,7 +134,7 @@ public:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   OrdersOutstandingShorts( pPosition_t pPosition ): OrdersOutstanding( pPosition ) {};
   ~OrdersOutstandingShorts( void ) {};
-  void HandleQuote( const ou::tf::CQuote& quote );  // set from external
+  void HandleQuote( const ou::tf::Quote& quote );  // set from external
 protected:
 private:
 };

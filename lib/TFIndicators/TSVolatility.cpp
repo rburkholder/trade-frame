@@ -19,7 +19,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-TSVolatility::TSVolatility( CPrices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n ) 
+TSVolatility::TSVolatility( Prices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n ) 
   : m_seriesSource( series ), m_dtTau( dtTau ), m_dtTauPrime( microseconds( dtTauPrime.total_microseconds() / 2 ) ), m_p( p ), m_n( n ),
     m_tsDif( series, dtTauPrime ), m_tsNorm( m_tsDif, dtTau, n, p )
 {
@@ -28,7 +28,7 @@ TSVolatility::TSVolatility( CPrices& series, time_duration dtTau, time_duration 
 TSVolatility::~TSVolatility(void) {
 }
 
-void TSVolatility::HandleUpdate( const CPrice& price ) {
+void TSVolatility::HandleUpdate( const Price& price ) {
   Append( price );
 }
 

@@ -21,9 +21,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSVolatility: public CPrices {
+class TSVolatility: public Prices {
 public:
-  TSVolatility( CPrices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n = 4 );
+  TSVolatility( Prices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n = 4 );
   ~TSVolatility(void);
 protected:
 private:
@@ -31,10 +31,10 @@ private:
   time_duration m_dtTauPrime;
   double m_p;
   unsigned int m_n;
-  CPrices& m_seriesSource;
+  Prices& m_seriesSource;
   TSDifferential m_tsDif;  // needs to be before norm
   TSNorm m_tsNorm;
-  void HandleUpdate( const CPrice& price );
+  void HandleUpdate( const Price& price );
 };
 
 } // namespace hf

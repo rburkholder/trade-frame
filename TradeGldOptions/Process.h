@@ -163,10 +163,10 @@ private:
 
   bool m_bPositionsOpened;
   
-  CQuotes m_quotes;
-  CTrades m_trades;
+  Quotes m_quotes;
+  Trades m_trades;
 
-  CBar m_Bar;  // keep pointer for when data arrives
+  Bar m_Bar;  // keep pointer for when data arrives
 
   double m_dblBaseDelta; // keep trades balanced at this level
   double m_dblBaseDeltaIncrement;
@@ -229,16 +229,16 @@ private:
   void HandleStrikeFromDb( pInstrument_t );
   void HandleStrikeListingDone( void );
 
-  void HandleUnderlyingQuote( const CQuote& quote );
-  void HandleUnderlyingTrade( const CTrade& trade );  // handles trade state machine
+  void HandleUnderlyingQuote( const Quote& quote );
+  void HandleUnderlyingTrade( const Trade& trade );  // handles trade state machine
 
-  void HandleTSFirstPass( const CQuote& quote );
-  void HandleTSPreMarket( const CQuote& quote );
-  void HandleTSMarketOpened( const CQuote& quote );
-  void HandleTSActiveMarketStart( const CQuote& quote );
-  void HandleTSTrading( const CQuote& quote );
-  void HandleTSCloseOrders( const CQuote& quote );
-  void HandleAfterMarket( const CQuote& quote );
+  void HandleTSFirstPass( const Quote& quote );
+  void HandleTSPreMarket( const Quote& quote );
+  void HandleTSMarketOpened( const Quote& quote );
+  void HandleTSActiveMarketStart( const Quote& quote );
+  void HandleTSTrading( const Quote& quote );
+  void HandleTSCloseOrders( const Quote& quote );
+  void HandleAfterMarket( const Quote& quote );
 
   void HandlePositionExecution( CPosition::execution_delegate_t pair );
 

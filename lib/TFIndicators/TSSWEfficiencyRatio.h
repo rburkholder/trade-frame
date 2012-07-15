@@ -21,11 +21,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade> {
-  friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, CTrade>;
+class TSSWEfficiencyRatio: public TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade> {
+  friend TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade>;
 public:
 
-  TSSWEfficiencyRatio( CTrades&, time_duration tdWindowWidth );
+  TSSWEfficiencyRatio( Trades&, time_duration tdWindowWidth );
   TSSWEfficiencyRatio( const TSSWEfficiencyRatio& );
   ~TSSWEfficiencyRatio( void );
 
@@ -33,8 +33,8 @@ public:
   double Total( void ) const { return m_total; };
 
 protected:
-  void Add( const CTrade& );
-  void Expire( const CTrade& );
+  void Add( const Trade& );
+  void Expire( const Trade& );
   void PostUpdate( void );
 private:
   double m_lastAdd;

@@ -22,10 +22,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSMA: public CPrices {
+class TSMA: public Prices {
 public:
-  TSMA( CPrices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( CPrices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
+  TSMA( Prices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
+  TSMA( Prices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61
   ~TSMA(void);
   double GetMA( void ) { return m_dblRecentMA; };
 protected:
@@ -33,11 +33,11 @@ private:
   time_duration m_dtTimeRange;
   unsigned int m_nInf;
   unsigned int m_nSup;
-  CPrices& m_seriesSource;
-  std::vector<TSEMA<CPrice>*> m_vEMA;
+  Prices& m_seriesSource;
+  std::vector<TSEMA<Price>*> m_vEMA;
   double m_dblRecentMA;
   void Init( void );
-  void HandleUpdate( const CPrice& );
+  void HandleUpdate( const Price& );
 };
 
 } // namespace hf

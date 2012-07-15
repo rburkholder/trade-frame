@@ -20,19 +20,19 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSNorm: public CPrices {
+class TSNorm: public Prices {
 public:
-  TSNorm( CPrices& series, time_duration dt, unsigned int n, double p );
+  TSNorm( Prices& series, time_duration dt, unsigned int n, double p );
   ~TSNorm(void);
 protected:
 private:
   time_duration m_dtTimeRange;
   unsigned int m_n;
   double m_p;
-  CPrices& m_seriesSource;
+  Prices& m_seriesSource;
   TSMA m_ma;
-  void HandleUpdate( const CPrice& );
-  void HandleMAUpdate( const CPrice& );
+  void HandleUpdate( const Price& );
+  void HandleMAUpdate( const Price& );
 };
 
 } // namespace hf

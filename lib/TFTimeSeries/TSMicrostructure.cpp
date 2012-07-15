@@ -15,10 +15,8 @@
 #include "StdAfx.h"
 #include "TSMicrostructure.h"
 
-
-TSMicrostructure::TSMicrostructure(void) {
+TSMicrostructure::TSMicrostructure(void) { 
 }
-
 
 TSMicrostructure::~TSMicrostructure(void) {
 }

@@ -64,7 +64,7 @@ void CChartDatedDatum::Add(const CBar &bar) {
   UpdateChart();
 }
 
-void CChartDatedDatum::Add( const CTrade &trade ) {
+void CChartDatedDatum::Add( const Trade &trade ) {
   m_factory.Add( trade.m_dt, trade.m_dblTrade, trade.m_nTradeSize );
 }
 

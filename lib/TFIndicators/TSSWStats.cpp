@@ -23,46 +23,46 @@ namespace tf { // TradeFrame
 // Trade
 //
 
-TSSWStatsTrade::TSSWStatsTrade(CTimeSeries<CTrade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsTrade, CTrade>( Series, tdWindowWidth, WindowSizeCount )
+TSSWStatsTrade::TSSWStatsTrade(TimeSeries<Trade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
 TSSWStatsTrade::~TSSWStatsTrade( void ) {
 }
 
-void TSSWStatsTrade::Add( const CTrade &trade ) {
+void TSSWStatsTrade::Add( const Trade &trade ) {
   time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Add( dif, trade.Trade() );
+  m_stats.Add( dif, trade.Price() );
 }
 
-void TSSWStatsTrade::Expire( const CTrade &trade ) {
+void TSSWStatsTrade::Expire( const Trade &trade ) {
   time_duration dur = trade.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Remove( dif, trade.Trade() );
+  m_stats.Remove( dif, trade.Price() );
 }
 
 //
 // Quote
 //
 
-TSSWStatsQuote::TSSWStatsQuote(CTimeSeries<CQuote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsQuote, CQuote>( Series, tdWindowWidth, WindowSizeCount )
+TSSWStatsQuote::TSSWStatsQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
 TSSWStatsQuote::~TSSWStatsQuote( void ) {
 }
 
-void TSSWStatsQuote::Add( const CQuote &quote ) {
+void TSSWStatsQuote::Add( const Quote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, quote.Bid() );
   m_stats.Add( dif, quote.Ask() );
 }
 
-void TSSWStatsQuote::Expire( const CQuote &quote ) {
+void TSSWStatsQuote::Expire( const Quote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, quote.Bid() );
@@ -73,48 +73,48 @@ void TSSWStatsQuote::Expire( const CQuote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(CTimeSeries<CQuote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, CQuote>( Series, tdWindowWidth, WindowSizeCount )
+TSSWStatsMidQuote::TSSWStatsMidQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
 TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
 }
 
-void TSSWStatsMidQuote::Add( const CQuote &quote ) {
+void TSSWStatsMidQuote::Add( const Quote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, quote.Midpoint() );
 }
 
-void TSSWStatsMidQuote::Expire( const CQuote &quote ) {
+void TSSWStatsMidQuote::Expire( const Quote &quote ) {
   time_duration dur = quote.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, quote.Midpoint() );
 }
 
 //
-// CPrice
+// Price
 //
 
-TSSWStatsPrice::TSSWStatsPrice(CTimeSeries<CPrice>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
-: TimeSeriesSlidingWindowStats<TSSWStatsPrice, CPrice>( Series, tdWindowWidth, WindowSizeCount )
+TSSWStatsPrice::TSSWStatsPrice(TimeSeries<Price>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+: TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>( Series, tdWindowWidth, WindowSizeCount )
 {
 }
 
 TSSWStatsPrice::~TSSWStatsPrice( void ) {
 }
 
-void TSSWStatsPrice::Add( const CPrice &price ) {
+void TSSWStatsPrice::Add( const Price& price ) {
   time_duration dur = price.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Add( dif, price.Price() );
+  m_stats.Add( dif, price.Value() );
 }
 
-void TSSWStatsPrice::Expire( const CPrice &price ) {
+void TSSWStatsPrice::Expire( const Price& price ) {
   time_duration dur = price.DateTime() - m_dtZero;
   double dif = (double) dur.total_seconds();
-  m_stats.Remove( dif, price.Price() );
+  m_stats.Remove( dif, price.Value() );
 }
 
 } // namespace tf

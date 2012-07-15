@@ -207,11 +207,11 @@ void CSlidingWindow<T>::UpdateWindow() {
 
 // ================ CSlidingWindowBars =================
 
-class CSlidingWindowBars: public CSlidingWindow<CBar> {
+class CSlidingWindowBars: public CSlidingWindow<Bar> {
 public:
   CSlidingWindowBars(unsigned int WindowSizeSeconds = 0, unsigned int WindowSizeCount = 0);
   virtual ~CSlidingWindowBars();
-  virtual CBar *Remove( void );
+  virtual Bar *Remove( void );
 protected:
 private:
 };

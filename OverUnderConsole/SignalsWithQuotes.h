@@ -21,13 +21,13 @@ public:
   SignalsWithQuotes(void);
   ~SignalsWithQuotes(void);
 
-  void ZeroPosition( const ou::tf::CQuote& quote, InstrumentState* pis );
+  void ZeroPosition( const ou::tf::Quote& quote, InstrumentState* pis );
 //  void ZeroPosition( const ou::tf::CTrade& trade ) {};
 
-  void LongPosition( const ou::tf::CQuote& quote, InstrumentState* pis );
+  void LongPosition( const ou::tf::Quote& quote, InstrumentState* pis );
 //  void LongPosition( const ou::tf::CTrade& trade ) {};
 
-  void ShortPosition( const ou::tf::CQuote& quote, InstrumentState* pis );
+  void ShortPosition( const ou::tf::Quote& quote, InstrumentState* pis );
 //  void ShortPosition( const ou::tf::CTrade& trade ) {};
 
 protected:

@@ -31,11 +31,11 @@ CSimulateOrderExecution::CSimulateOrderExecution(void)
 CSimulateOrderExecution::~CSimulateOrderExecution(void) {
 }
 
-void CSimulateOrderExecution::NewTrade( const CTrade& trade ) {
+void CSimulateOrderExecution::NewTrade( const Trade& trade ) {
   ProcessLimitOrders( trade );
 }
 
-void CSimulateOrderExecution::NewQuote( const CQuote& quote ) {
+void CSimulateOrderExecution::NewQuote( const Quote& quote ) {
   ProcessOrderQueues( quote );
   m_lastQuote = quote;
 }
@@ -49,7 +49,7 @@ void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
   m_lCancelDelay.push_back( co );
 }
 
-void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::tradesize_t quan ) {
+void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, Trade::tradesize_t quan ) {
   // COrder or CInstrument should have commission calculation?
   if ( 0 != quan ) {
     if ( NULL != OnCommission ) {
@@ -74,7 +74,7 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, CTrade::trade
   }
 }
 
-void CSimulateOrderExecution::ProcessOrderQueues( const CQuote &quote ) {
+void CSimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
   if ( !quote.IsValid() ) {
     return;
@@ -94,11 +94,11 @@ void CSimulateOrderExecution::ProcessOrderQueues( const CQuote &quote ) {
 
 }
 
-void CSimulateOrderExecution::ProcessStopOrders( const CQuote& quote ) {
+void CSimulateOrderExecution::ProcessStopOrders( const Quote& quote ) {
   // not yet implemented
 }
 
-bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
+bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -113,16 +113,16 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
     assert( 0 != nOrderQuanRemaining );
 
     // figure out price of execution
-    CTrade::tradesize_t quanAvail;
+    Trade::tradesize_t quanAvail;
     double dblPrice;
     OrderSide::enumOrderSide orderSide = pOrderFrontOfQueue->GetOrderSide();
     switch ( orderSide ) {
       case OrderSide::Buy:
-        quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+        quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
         dblPrice = quote.Ask();
         break;
       case OrderSide::Sell:
-        quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+        quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
         dblPrice = quote.Bid();
         break;
       default:
@@ -153,7 +153,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const CQuote& quote ) {
   return bProcessed;
 }
 
-bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
+bool CSimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue; // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -167,7 +167,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
       pOrderFrontOfQueue = m_mapAsks.begin()->second;
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
       assert( 0 != nOrderQuanRemaining );
-      CTrade::tradesize_t quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+      Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
       if ( 0 != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
@@ -187,7 +187,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
       pOrderFrontOfQueue = m_mapBids.rbegin()->second;
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
       assert( 0 != nOrderQuanRemaining );
-      CTrade::tradesize_t quanAvail = std::min<CTrade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+      Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
       if ( 0 != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
@@ -205,10 +205,10 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CQuote& quote ) {
   return bProcessed;
 }
 
-bool CSimulateOrderExecution::ProcessLimitOrders( const CTrade& trade ) {
+bool CSimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
   //bool bAllow( true );
-  double bid( trade.Trade() );
-  double ask( trade.Trade() );
+  double bid( trade.Price() );
+  double ask( trade.Price() );
   if ( !m_mapAsks.empty() ) {
     if ( m_lastQuote.Ask() <= m_mapAsks.begin()->first ) {
       ask = m_lastQuote.Ask();
@@ -219,11 +219,11 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const CTrade& trade ) {
       bid = m_lastQuote.Bid();
     }
   }
-  CQuote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
+  Quote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
   return ProcessLimitOrders( quote );
 }
 
-void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {
+void CSimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
 
@@ -276,7 +276,7 @@ void CSimulateOrderExecution::ProcessDelayQueue( const CQuote& quote ) {
 
 }
 
-void CSimulateOrderExecution::ProcessCancelQueue( const CQuote& quote ) {
+void CSimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
   // process cancels list
   while ( !m_lCancelDelay.empty() ) {

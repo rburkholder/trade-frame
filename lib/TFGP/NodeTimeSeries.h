@@ -44,7 +44,7 @@ NodeTimeSeries<N,TS>::~NodeTimeSeries( void ) {
 
 // =======================
 
-class NodeTSTrade: public NodeTimeSeries<NodeTSTrade, ou::tf::CTrades> {
+class NodeTSTrade: public NodeTimeSeries<NodeTSTrade, ou::tf::Trades> {
 public:
   NodeTSTrade(void);
   ~NodeTSTrade(void);
@@ -56,7 +56,7 @@ private:
 
 // =======================
 
-class NodeTSQuoteBid: public NodeTimeSeries<NodeTSQuoteBid, ou::tf::CQuotes> {
+class NodeTSQuoteBid: public NodeTimeSeries<NodeTSQuoteBid, ou::tf::Quotes> {
 public:
   NodeTSQuoteBid(void);
   ~NodeTSQuoteBid(void);
@@ -66,7 +66,7 @@ protected:
 private:
 };
 
-class NodeTSQuoteAsk: public NodeTimeSeries<NodeTSQuoteAsk, ou::tf::CQuotes> {
+class NodeTSQuoteAsk: public NodeTimeSeries<NodeTSQuoteAsk, ou::tf::Quotes> {
 public:
   NodeTSQuoteAsk(void);
   ~NodeTSQuoteAsk(void);
@@ -76,7 +76,7 @@ protected:
 private:
 };
 
-class NodeTSQuoteMid: public NodeTimeSeries<NodeTSQuoteMid, ou::tf::CQuotes> {
+class NodeTSQuoteMid: public NodeTimeSeries<NodeTSQuoteMid, ou::tf::Quotes> {
 public:
   NodeTSQuoteMid(void);
   ~NodeTSQuoteMid(void);
@@ -88,7 +88,7 @@ private:
 
 // =======================
 
-class NodeTSPrice: public NodeTimeSeries<NodeTSPrice, ou::tf::CPrices> {
+class NodeTSPrice: public NodeTimeSeries<NodeTSPrice, ou::tf::Prices> {
 public:
   NodeTSPrice(void);
   ~NodeTSPrice(void);

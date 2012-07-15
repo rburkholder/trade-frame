@@ -201,7 +201,7 @@ void CTradeFrame::NewLevel2Bid( int cntLevels, long *pShares, double *pPrices ) 
   }
 }
 
-void CTradeFrame::NewQuoteLevel1( const CQuote &quote ) {
+void CTradeFrame::NewQuoteLevel1( const Quote &quote ) {
   //CString s;
   //s.Format( "TL: Bid %d@%0.2f, Ask %d@%0.2f",
   //  BidSize, BidPrice, AskSize, AskPrice );
@@ -248,7 +248,7 @@ void CTradeFrame::NewQuoteLevel1( const CQuote &quote ) {
   ixLastBidPrint = ixBidPrice;
 }
 
-void CTradeFrame::NewPrint( const CTrade &trade ) {
+void CTradeFrame::NewPrint( const Trade &trade ) {
 
   //CString s;
   //s.Format( "TL: Price %d@%0.2f", Shares, Price );

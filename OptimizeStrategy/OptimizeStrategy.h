@@ -27,6 +27,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "StrategyWrapper.h"
+
 class AppOptimizeStrategy: public wxApp {
 public:
 protected:
@@ -39,6 +41,8 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 
   pInstrument_t m_pInstrument;
+
+  StrategyWrapper* m_swStrategy;  // will ultimately need one per simultaneous individual running from population
 
   virtual bool OnInit();
   virtual int OnExit();

@@ -19,8 +19,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRateOfChange::TSSWRateOfChange( CPrices& prices, time_duration tdWindowWidth ) 
-  : TimeSeriesSlidingWindow<TSSWRateOfChange, CPrice>( prices, tdWindowWidth ),
+TSSWRateOfChange::TSSWRateOfChange( Prices& prices, time_duration tdWindowWidth ) 
+  : TimeSeriesSlidingWindow<TSSWRateOfChange, Price>( prices, tdWindowWidth ),
   m_tail( 0.0 ), m_head( 0.0 )
 {
 }
@@ -28,12 +28,12 @@ TSSWRateOfChange::TSSWRateOfChange( CPrices& prices, time_duration tdWindowWidth
 TSSWRateOfChange::~TSSWRateOfChange(void) {
 }
 
-void TSSWRateOfChange::Add( const CPrice& price ) {
-  m_head = price.Price();
+void TSSWRateOfChange::Add( const Price& price ) {
+  m_head = price.Value();
 }
 
-void TSSWRateOfChange::Expire( const CPrice& price ) {
-  m_tail = price.Price();
+void TSSWRateOfChange::Expire( const Price& price ) {
+  m_tail = price.Value();
 }
 
 void TSSWRateOfChange::PostUpdate( void ) {

@@ -5,7 +5,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-TSVariance::TSVariance( CPrices& series, time_duration dt, unsigned int n, double p1, double p2 ) 
+TSVariance::TSVariance( Prices& series, time_duration dt, unsigned int n, double p1, double p2 ) 
   : m_seriesSource( series ), m_dtTimeRange( dt ), m_n( n ), m_p1( p1 ), m_p2( p2 ),
     m_ma1( series, dt, n ), m_ma2( m_dummy, dt, n )
 {
@@ -22,36 +22,36 @@ TSVariance::~TSVariance(void) {
   m_ma2.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
 }
 
-void TSVariance::HandleUpdate( const CPrice& price ) {
-  m_z = price.Price();
+void TSVariance::HandleUpdate( const Price& price ) {
+  m_z = price.Value();
 }
 
-void TSVariance::HandleMA1Update( const CPrice& price ) {
-  double t = m_z - price.Price();
+void TSVariance::HandleMA1Update( const Price& price ) {
+  double t = m_z - price.Value();
   if ( 1.0 == m_p1 ) {
-    m_dummy.Append( CPrice( price.DateTime(), std::abs( t ) ) );
+    m_dummy.Append( Price( price.DateTime(), std::abs( t ) ) );
   }
   else {
     if ( 2.0 == m_p1 ) {
-      double t = m_z - price.Price();
-      m_dummy.Append( CPrice( price.DateTime(), t * t ) );
+      double t = m_z - price.Value();
+      m_dummy.Append( Price( price.DateTime(), t * t ) );
     }
     else {
-      m_dummy.Append( CPrice( price.DateTime(), std::pow( std::abs( t ), m_p1 ) ) );
+      m_dummy.Append( Price( price.DateTime(), std::pow( std::abs( t ), m_p1 ) ) );
     }
   }
 }
 
-void TSVariance::HandleMA2Update( const CPrice& price ) {
+void TSVariance::HandleMA2Update( const Price& price ) {
   if ( 1.0 == m_p2 ) {
     Append( price );
   }
   else {
     if ( 2.0 == m_p2 ) {
-      Append( CPrice( price.DateTime(), std::sqrt( price.Price() ) ) );
+      Append( Price( price.DateTime(), std::sqrt( price.Value() ) ) );
     }
     else {
-      Append( CPrice( price.DateTime(), std::pow( price.Price(), 1.0 / m_p2 ) ) );
+      Append( Price( price.DateTime(), std::pow( price.Value(), 1.0 / m_p2 ) ) );
     }
   }
 }

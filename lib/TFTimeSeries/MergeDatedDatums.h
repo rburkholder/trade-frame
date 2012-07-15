@@ -27,21 +27,21 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CMergeDatedDatums {
+class MergeDatedDatums {
 public:
 
   enum enumMergingState { eInit, eRunning, ePaused, eStopped };
 
-  CMergeDatedDatums(void);
-  virtual ~CMergeDatedDatums(void);
+  MergeDatedDatums(void);
+  virtual ~MergeDatedDatums(void);
 
-  typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
+  typedef FastDelegate1<const DatedDatum &> OnDatumHandler;
 
-  void Add( CTimeSeries<CQuote>* pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CTrade>* pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CBar>* pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CGreek>* pSeries, OnDatumHandler );
-  void Add( CTimeSeries<CMarketDepth>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<Quote>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<Trade>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<Bar>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<Greek>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<MarketDepth>* pSeries, OnDatumHandler );
   void Run( void );
   void Stop( void );
 
@@ -51,7 +51,7 @@ public:
 
 protected:
 
-  ou::CMinHeap<CMergeCarrierBase*, CMergeCarrierBase> m_mhCarriers;
+  ou::CMinHeap<MergeCarrierBase*, MergeCarrierBase> m_mhCarriers;
 
   // not all states or commands are implemented yet
   enum enumMergingCommands { eUnknown, eRun, eStop, ePause, eResume, eReset };

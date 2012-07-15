@@ -20,7 +20,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 CSlidingWindowBars::CSlidingWindowBars(unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) : 
-  CSlidingWindow<CBar>( WindowSizeSeconds, WindowSizeCount ) {
+  CSlidingWindow<Bar>( WindowSizeSeconds, WindowSizeCount ) {
 }
 
 CSlidingWindowBars::~CSlidingWindowBars() {
@@ -32,9 +32,9 @@ CSlidingWindowBars::~CSlidingWindowBars() {
   }
 }
 
-CBar *CSlidingWindowBars::Remove( void ) {
+Bar *CSlidingWindowBars::Remove( void ) {
   // default deleter so it doesn't end up no where
-  CBar *pBar = CSlidingWindow::Remove();
+  Bar *pBar = CSlidingWindow::Remove();
   delete pBar;
   return NULL;
 }

@@ -22,17 +22,17 @@ namespace tf { // TradeFrame
 
 // 14,3,1 is standard  14 periods, 3 slow average, 1 fast average
 
-class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, CQuote> {
-  friend TimeSeriesSlidingWindow<TSSWStochastic, CQuote>;
+class TSSWStochastic: public TimeSeriesSlidingWindow<TSSWStochastic, Quote> {
+  friend TimeSeriesSlidingWindow<TSSWStochastic, Quote>;
 public:
-  TSSWStochastic( CQuotes& quotes, time_duration tdWindowWidth );
+  TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth );
   TSSWStochastic( const TSSWStochastic& );
   ~TSSWStochastic(void);
   double K( void ) const { return m_k; };
   void Reset( void );
 protected:
-  void Add( const CQuote& quote );
-  void Expire( const CQuote& quote );
+  void Add( const Quote& quote );
+  void Expire( const Quote& quote );
   void PostUpdate( void );
 private:
   RunningMinMax m_minmax;

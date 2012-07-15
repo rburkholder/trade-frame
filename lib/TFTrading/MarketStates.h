@@ -33,16 +33,16 @@ namespace tf { // TradeFrame
 // Events
 struct EvInitialize: sc::event<EvInitialize> {};
 struct EvQuote: sc::event<EvQuote> {
-  EvQuote( const ou::tf::CQuote& quote ): sc::event<EvQuote>(), m_quote( quote ) {};
-  const ou::tf::CQuote& Quote( void ) const { return m_quote; };
+  EvQuote( const ou::tf::Quote& quote ): sc::event<EvQuote>(), m_quote( quote ) {};
+  const ou::tf::Quote& Quote( void ) const { return m_quote; };
 private:
-  const ou::tf::CQuote& m_quote;
+  const ou::tf::Quote& m_quote;
 };
 struct EvTrade: sc::event<EvTrade> {
-  EvTrade( const ou::tf::CTrade& trade ): sc::event<EvTrade>(), m_trade( trade ) {};
-  const ou::tf::CTrade& Trade( void ) const { return m_trade; };
+  EvTrade( const ou::tf::Trade& trade ): sc::event<EvTrade>(), m_trade( trade ) {};
+  const ou::tf::Trade& Trade( void ) const { return m_trade; };
 private:
-  const ou::tf::CTrade& m_trade;
+  const ou::tf::Trade& m_trade;
 };
 struct EvScheduled: sc::event<EvScheduled> {};
 

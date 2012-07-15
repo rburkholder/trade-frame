@@ -70,12 +70,12 @@ template<class T> void CStatsInSlidingWindow<T>::CalcStats() {
 
 // CTradeStats
 
-class CTradeStats: CStatsInSlidingWindow<CTrade> {
+class CTradeStats: CStatsInSlidingWindow<Trade> {
 public:
   CTradeStats(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
   virtual ~CTradeStats(void);
-  CTrade* Add( ptime dt, CTrade *trade );
-  CTrade* Remove();
+  Trade* Add( ptime dt, Trade *trade );
+  Trade* Remove();
 protected:
 private:
 };

@@ -53,15 +53,15 @@ protected:
   void StartGreekWatch( void );
   void StopGreekWatch( void );
 
-  void HandleTradeEvent( const CDatedDatum &datum );
-  void HandleQuoteEvent( const CDatedDatum &datum );
-  void HandleGreekEvent( const CDatedDatum &datum );
+  void HandleTradeEvent( const DatedDatum &datum );
+  void HandleQuoteEvent( const DatedDatum &datum );
+  void HandleGreekEvent( const DatedDatum &datum );
 
   std::string m_sDirectory;
 
-  CQuotes m_quotes;
-  CTrades m_trades;
-  CGreeks m_greeks;
+  Quotes m_quotes;
+  Trades m_trades;
+  Greeks m_greeks;
 
   CSimulateOrderExecution m_simExec;
 

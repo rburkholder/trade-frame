@@ -182,21 +182,21 @@ void CSimulationProvider::Merge( void ) {
 
       pSymbol_t sym( iter->second );
 
-      CQuotes* quotes = &sym->m_quotes;
+      Quotes* quotes = &sym->m_quotes;
       if ( 0 != quotes->Size() ) {
         m_pMerge -> Add( 
           quotes, 
           MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
       }
 
-      CTrades* trades = &sym->m_trades;
+      Trades* trades = &sym->m_trades;
       if ( 0 != trades->Size() ) {
         m_pMerge -> Add( 
           trades, 
           MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
       }
 
-      CGreeks* greeks = &sym->m_greeks;
+      Greeks* greeks = &sym->m_greeks;
       if ( 0 != greeks->Size() ) {
         m_pMerge -> Add(
           greeks,
@@ -229,7 +229,7 @@ void CSimulationProvider::Run() {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
-    m_pMerge = new CMergeDatedDatums();
+    m_pMerge = new MergeDatedDatums();
     m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
   }
 }

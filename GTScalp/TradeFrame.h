@@ -24,9 +24,9 @@ public:
   //virtual BOOL Create(UINT nIDTemplate, CWnd* pParentWnd = NULL);
   virtual BOOL Create(CWnd* pParentWnd = NULL);
   //void NewQuoteLevel1( int BidSize, double BidPrice, int AskSize, double AskPrice );
-  void NewQuoteLevel1( const CQuote &quote );
+  void NewQuoteLevel1( const Quote &quote );
   //void NewPrint( double Price, DWORD Shares );
-  void NewPrint( const CTrade &trade );
+  void NewPrint( const Trade &trade );
   void NewLevel2Ask( int cntLevels, long *pShares, double *pPrices );
   void NewLevel2Bid( int cntLevels, long *pShares, double *pPrices );
 
@@ -113,8 +113,8 @@ private:
   bool bControl;
   bool bAlt;
 
-  CTrade m_latestTrade;
-  CQuote m_latestQuote;
+  Trade m_latestTrade;
+  Quote m_latestQuote;
   double dblQuoteMidPoint;
 
   void HandleRowInsert( CDataRow* pDataRow );

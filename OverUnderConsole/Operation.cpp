@@ -95,7 +95,7 @@ void Operation::StopWatch( void ) {
   m_piqfeed->RemoveOnOpenHandler( m_pInstrument, MakeDelegate( this, &Operation::HandleOpen ) );
 }
 
-void Operation::HandleQuote( const ou::tf::CQuote& quote ) {
+void Operation::HandleQuote( const ou::tf::Quote& quote ) {
   InstrumentState& is( m_md.data );
   if ( is.bMarketHoursCrossMidnight ) {
     is.bDaySession = quote.DateTime().time_of_day() <= is.tdMarketClosed;
@@ -113,7 +113,7 @@ void Operation::HandleQuote( const ou::tf::CQuote& quote ) {
   m_md.process_event( ou::tf::EvQuote( quote ) );
 }
 
-void Operation::HandleTrade( const ou::tf::CTrade& trade ) {
+void Operation::HandleTrade( const ou::tf::Trade& trade ) {
   InstrumentState& is( m_md.data );
 //  if ( is.bMarketHoursCrossMidnight ) {
 //    is.bDaySession = trade.DateTime().time_of_day() <= is.tdMarketClosed;
@@ -123,7 +123,7 @@ void Operation::HandleTrade( const ou::tf::CTrade& trade ) {
   m_md.process_event( ou::tf::EvTrade( trade ) );
 }
 
-void Operation::HandleOpen( const ou::tf::CTrade& trade ) {
+void Operation::HandleOpen( const ou::tf::Trade& trade ) {
 }
 
 void Operation::SaveSeries( const std::string& sPrefix ) {
@@ -136,7 +136,7 @@ void Operation::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != is.quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::CQuotes, ou::tf::CQuote> wtsQuotes;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes;
     wtsQuotes.Write( sPathName, &is.quotes );
     ou::tf::CHDF5Attributes attrQuotes( sPathName, ou::tf::InstrumentType::Stock );
     //CHDF5Attributes attrQuotes( sPathName, future );
@@ -145,7 +145,7 @@ void Operation::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != is.trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::CTrades, ou::tf::CTrade> wtsTrades;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades;
     wtsTrades.Write( sPathName, &is.trades );
     ou::tf::CHDF5Attributes attrTrades( sPathName, ou::tf::InstrumentType::Stock );
     //CHDF5Attributes attrTrades( sPathName, future );

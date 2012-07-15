@@ -19,8 +19,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRunningTally::TSSWRunningTally( CPrices& prices, time_duration tdWindowWidth ) 
-  : TimeSeriesSlidingWindow<TSSWRunningTally, CPrice>( prices, tdWindowWidth ),
+TSSWRunningTally::TSSWRunningTally( Prices& prices, time_duration tdWindowWidth ) 
+  : TimeSeriesSlidingWindow<TSSWRunningTally, Price>( prices, tdWindowWidth ),
   m_net( 0.0 )
 {
 }
@@ -31,12 +31,12 @@ TSSWRunningTally::TSSWRunningTally( CPrices& prices, time_duration tdWindowWidth
 TSSWRunningTally::~TSSWRunningTally(void) {
 }
 
-void TSSWRunningTally::Add( const CPrice& price ) {
-  m_net += price.Price();
+void TSSWRunningTally::Add( const Price& price ) {
+  m_net += price.Value();
 }
 
-void TSSWRunningTally::Expire( const CPrice& price ) {
-  m_net -= price.Price();
+void TSSWRunningTally::Expire( const Price& price ) {
+  m_net -= price.Value();
 }
 
 void TSSWRunningTally::PostUpdate( void ) {

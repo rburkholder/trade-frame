@@ -27,8 +27,8 @@ namespace tf { // TradeFrame
 template<class T, class D> 
 class TimeSeriesSlidingWindow { // T=CRTP class for Add, Expire, PostUpdate; D=DatedDatum
 public:
-  typedef typename CTimeSeries<D>::size_type size_type;
-  TimeSeriesSlidingWindow<T,D>( CTimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount = 0 );
+  typedef typename TimeSeries<D>::size_type size_type;
+  TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount = 0 );
   //TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );  // hard to do with the Delegate
   virtual ~TimeSeriesSlidingWindow<T,D>(void);
   void Update( void );
@@ -41,7 +41,7 @@ protected:
   ptime m_dtZero;  // datetime of first element, used as offset
   time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
 private:
-  CTimeSeries<D>& m_Series;
+  TimeSeries<D>& m_Series;
   time_duration m_tdWindowWidth;
   size_type m_nWindowSizeCount;
   size_type m_ixTrailing;  // index to datums to be processed out (expired)
@@ -55,7 +55,7 @@ private:
 
 template<class T, class D> 
 TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( 
-  CTimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount ) 
+  TimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount ) 
 : m_Series( Series ), //m_iterTrailing( Series.begin() ), 
   m_ixTrailing( 0 ), m_ixLeading( 0 ), m_dtLeading( not_a_date_time ),
   m_tdWindowWidth( tdWindowWidth ), m_nWindowSizeCount( WindowSizeCount ),
@@ -154,7 +154,7 @@ void TimeSeriesSlidingWindow<T,D>::HandleDatum( const D& datum ) {
 template<class T> class TimeSeriesSlidingWindowQuoteMidPoint: public TimeSeriesSlidingWindow<T, CQuote>
 {
 public:
-  TimeSeriesSlidingWindowQuoteMidPoint<T>( CTimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
+  TimeSeriesSlidingWindowQuoteMidPoint<T>( TimeSeries<CQuote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
     : TimeSeriesSlidingWindow<T, Quote>( pSeries, WindowSizeSeconds, WindowSizeCount ) {
   };
   ~TimeSeriesSlidingWindowQuoteMidPoint<T>( void );

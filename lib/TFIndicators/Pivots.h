@@ -48,8 +48,8 @@ public:
   CPivotSet(void);
   CPivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
   CPivotSet( const std::string &sName, double Hi, double Lo, double Close );
-  CPivotSet( const std::string &sName, const CBar& bar );
-  CPivotSet( const std::string &sName, CBars *bars );
+  CPivotSet( const std::string &sName, const Bar& bar );
+  CPivotSet( const std::string &sName, Bars* bars );
 
   virtual ~CPivotSet(void);
 

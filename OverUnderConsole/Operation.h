@@ -64,8 +64,8 @@ private:
   void HandleIBContractDetailsDone( void );
 
   // will need to migrate to a container when doing more than one instrument
-  void HandleQuote( const ou::tf::CQuote& quote );
-  void HandleTrade( const ou::tf::CTrade& trade );
-  void HandleOpen( const ou::tf::CTrade& trade );
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
+  void HandleOpen( const ou::tf::Trade& trade );
 };
 

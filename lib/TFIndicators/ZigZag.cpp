@@ -97,7 +97,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
 
 //=================
 
-ZigZagTotalMovement::ZigZagTotalMovement( CQuotes& quotes, double width )
+ZigZagTotalMovement::ZigZagTotalMovement( Quotes& quotes, double width )
   : ZigZag( width ), m_quotes( quotes ), m_sum( 0.0 ), m_last( 0.0 )
 {
   ZigZag::SetOnPeakFound( MakeDelegate( this, &ZigZagTotalMovement::HandlePeakFound ) );
@@ -109,7 +109,7 @@ ZigZagTotalMovement::~ZigZagTotalMovement( void ) {
   ZigZag::SetOnPeakFound( 0 );
 }
 
-void ZigZagTotalMovement::HandleQuote( const CQuote& quote ) {
+void ZigZagTotalMovement::HandleQuote( const Quote& quote ) {
   ZigZag::Check( quote.DateTime(), quote.Midpoint() );
 }
 

@@ -127,7 +127,7 @@ public:
 
   struct structResultBar {
     std::string sSymbol;
-    CBars bars;
+    Bars bars;
     void Clear( void ) {
       sSymbol.clear();
       bars.Clear();
@@ -136,8 +136,8 @@ public:
 
   struct structResultTicks {
     std::string sSymbol;
-    CQuotes quotes;  // quote added in sequence before trade
-    CTrades trades;
+    Quotes quotes;  // quote added in sequence before trade
+    Trades trades;
     void Clear( void ) {
       sSymbol.clear();
       quotes.Clear();
@@ -380,9 +380,9 @@ void CIQFeedHistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, IQFeedHistoryStructs::structTickDataPoint* pDP ) {
 
-  CQuote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
+  Quote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
   pqs->ticks->quotes.Append( quote );
-  CTrade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
+  Trade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
   pqs->ticks->trades.Append( trade );
 
   if ( &CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
@@ -395,7 +395,7 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, 
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, IQFeedHistoryStructs::structInterval* pDP ) {
 
-  CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
+  Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
 
   if ( &CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
@@ -408,7 +408,7 @@ void CIQFeedHistoryBulkQuery<T>::OnHistoryIntervalData( structQueryState* pqs, I
 template <typename T>
 void CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP ) {
 
-  CBar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
+  Bar bar( pDP->DateTime, pDP->Open, pDP->High, pDP->Low, pDP->Close, pDP->PeriodVolume );
   pqs->bars->bars.Append( bar );
 
   if ( &CIQFeedHistoryBulkQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {

@@ -69,11 +69,32 @@ bool AppOptimizeStrategy::OnInit( void ) {
   // manage the genetic programming discovery process here
   ou::gp::Population pop( 100 );
 
+  /*
+  steps:
+  * create skeletal structure with various time series
+  * add time series to arrays for use in randomized selection
+    * strategy is provided the routines for registering the time series it is using, 
+    * so needs to inherit from something which has those routines available
+  * need the random selector, which is templated on time series type
+    * probably also inherited by the strategy
+  * add the time series nodes to the set of node types for doubles
+  * strategy:
+    * updates the various time series
+    * calcs using gp formulas
+    * executes against results
+  * at end of time series, calculate 'winner'
+  */
+
+  m_swStrategy = new StrategyWrapper;
+
   return 1;
 
 }
 
 int AppOptimizeStrategy::OnExit(  void ) {
+
+  delete m_swStrategy;
+  m_swStrategy = 0;
 
   return 0;
 }
@@ -81,19 +102,24 @@ int AppOptimizeStrategy::OnExit(  void ) {
 void AppOptimizeStrategy::HandlePopulateDatabase( void ) {
 
   ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( 
+    "aaRay", "Raymond Burkholder", "One Unified" );
 
   ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( 
+    "aoRay", "aaRay", "Raymond", "Burkholder" );
 
   ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+    = ou::tf::CAccountManager::Instance().ConstructAccount( 
+    "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
   ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+    = ou::tf::CAccountManager::Instance().ConstructAccount( 
+    "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
   ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "pflioGold", "aoRay", "options" );
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( 
+    "pflioGold", "aoRay", "options" );
 
 }
 

@@ -72,18 +72,18 @@ private:
   OnDecisionPointFoundHandler UpDecisionPointFound, DnDecisionPointFound;
 };
 
-// template sometime to handle CQuote, CTrade, CPrice
+// template sometime to handle Quote, CTrade, CPrice
 class ZigZagTotalMovement: public ZigZag {
 public:
-  ZigZagTotalMovement( CQuotes&, double );
+  ZigZagTotalMovement( Quotes&, double );
   ~ZigZagTotalMovement( void );
   double Sum( void ) const { return m_sum; };
 protected:
 private:
   double m_sum;
   double m_last;
-  CQuotes& m_quotes;
-  void HandleQuote( const CQuote& );
+  Quotes& m_quotes;
+  void HandleQuote( const Quote& );
   void HandlePeakFound( ZigZag&, ptime, double, ZigZag::EDirection );
 };
 

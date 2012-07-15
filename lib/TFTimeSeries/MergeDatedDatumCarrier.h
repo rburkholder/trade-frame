@@ -23,49 +23,49 @@ using namespace fastdelegate;
 
 #include "TimeSeries.h"
 
-// Each carrier holds a CTimeSeries.  The carrier holds an index to the current DatedDatum in each CTimeSeries.
+// Each carrier holds a TimeSeries.  The carrier holds an index to the current DatedDatum in each TimeSeries.
 // The current DatedDatum timestamp is maintained for the merge process to figure out which DatedDatum to 
 // send into the merge process
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CMergeCarrierBase {
-  friend class CMergeDatedDatums;
+class MergeCarrierBase {
+  friend class MergeDatedDatums;
 public:
-  typedef FastDelegate1<const CDatedDatum &> OnDatumHandler;
-  CMergeCarrierBase( void ) {};
-  virtual ~CMergeCarrierBase( void ) {};
+  typedef FastDelegate1<const DatedDatum &> OnDatumHandler;
+  MergeCarrierBase( void ) {};
+  virtual ~MergeCarrierBase( void ) {};
   virtual void ProcessDatum( void ) 
     { throw std::runtime_error( "ProcessDatum not defined" ); };
   virtual void Reset( void ) 
     { throw std::runtime_error( "Reset not defined" ); };
   inline const ptime &GetDateTime( void ) { return m_dt; };
-  const CDatedDatum* GetDatedDatum( void ) const { return m_pDatum; };
-  bool operator<( const CMergeCarrierBase& other ) const { return m_dt < other.m_dt; };
-  bool operator<( const CMergeCarrierBase* pOther ) const { return m_dt < pOther->m_dt; };
-  static bool lt( CMergeCarrierBase* plhs, CMergeCarrierBase *prhs ) { return plhs->m_dt < prhs->m_dt; };
+  const DatedDatum* GetDatedDatum( void ) const { return m_pDatum; };
+  bool operator<( const MergeCarrierBase& other ) const { return m_dt < other.m_dt; };
+  bool operator<( const MergeCarrierBase* pOther ) const { return m_dt < pOther->m_dt; };
+  static bool lt( MergeCarrierBase* plhs, MergeCarrierBase *prhs ) { return plhs->m_dt < prhs->m_dt; };
 protected:
   ptime m_dt;  // datetime of datum to be merged (used in comparison)
-  const CDatedDatum* m_pDatum;
+  const DatedDatum* m_pDatum;
   OnDatumHandler OnDatum;
 private:
 };
 
-template<class T> class CMergeCarrier: public CMergeCarrierBase {
+template<class T> class CMergeCarrier: public MergeCarrierBase {
   // T is a DatedDatum type
-  friend class CMergeDatedDatums;
+  friend class MergeDatedDatums;
 public:
-  CMergeCarrier<T>( CTimeSeries<T> *pSeries, OnDatumHandler function );
+  CMergeCarrier<T>( TimeSeries<T> *pSeries, OnDatumHandler function );
   virtual ~CMergeCarrier<T>( void );
   void ProcessDatum( void );
   void Reset( void );
 protected:
-  CTimeSeries<T> *m_pSeries;  // series from which a datum is to be merged to output
+  TimeSeries<T> *m_pSeries;  // series from which a datum is to be merged to output
 private:
 };
 
-template<class T> CMergeCarrier<T>::CMergeCarrier( CTimeSeries<T> *pSeries, OnDatumHandler function ) : CMergeCarrierBase() {
+template<class T> CMergeCarrier<T>::CMergeCarrier( TimeSeries<T> *pSeries, OnDatumHandler function ) : MergeCarrierBase() {
   assert( 0 != pSeries );
   assert( 0 != pSeries->Size() );
   m_pSeries = pSeries;

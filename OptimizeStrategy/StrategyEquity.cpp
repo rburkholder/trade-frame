@@ -42,13 +42,13 @@ void StrategyEquity::Stop( void ) {
   m_pProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleTrade ) );
 }
 
-void StrategyEquity::HandleQuote( const ou::tf::CQuote& quote ) {
+void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
   if ( quote.IsValid() ) {
     m_quotes.Append( quote );
   }
 }
 
-void StrategyEquity::HandleTrade( const ou::tf::CTrade& trade ) {
+void StrategyEquity::HandleTrade( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
 }
 

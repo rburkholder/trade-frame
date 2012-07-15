@@ -49,23 +49,23 @@ CPivotSet::CPivotSet( const std::string &sName, double _S3, double _S2, double _
   CalcHalfPivots();
 }
 
-CPivotSet::CPivotSet( const std::string &sName, const CBar& bar ) {
+CPivotSet::CPivotSet( const std::string &sName, const Bar& bar ) {
   CalcPivots( sName, bar.High(), bar.Low(), bar.Close() );
 }
 
-CPivotSet::CPivotSet( const std::string &sName, CBars* bars ) {
+CPivotSet::CPivotSet( const std::string &sName, Bars* bars ) {
   double hi = 0;
   double lo = 0;
   double cl = 0;
   size_t cnt = bars->Size();
-  //const CBar* pBar;
+  //const Bar* pBar;
   if ( cnt > 0 ) {
-    const CBar& bar0( bars->At( 0 ) );
+    const Bar& bar0( bars->At( 0 ) );
     hi = bar0.High();
     lo = bar0.Low();
     cl = bar0.Close();
     for ( unsigned int i = 1; i < cnt; i++ ) {
-      const CBar& bar( bars->At( i ) );
+      const Bar& bar( bars->At( i ) );
       hi = std::max<double>( hi, bar.High() );
       lo = std::min<double>( lo, bar.Low() );
       cl = bar.Close();

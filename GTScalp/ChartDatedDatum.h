@@ -10,8 +10,8 @@ public:
   CChartDatedDatum(void);
   virtual ~CChartDatedDatum(void);
   void Add( const CBar &bar );
-  void Add( const CTrade &trade );
-  void AddTrade( const CTrade &trade ) { Add( trade ); };
+  void Add( const Trade &trade );
+  void AddTrade( const Trade &trade ) { Add( trade ); };
   void SetWindowWidthSeconds( long seconds );
   long GetWindowWidthSeconds( void ) { return m_pWindowBars -> GetSlidingWindowSeconds(); };
   void SetBarFactoryWidthSeconds( long seconds ) { m_factory.SetBarWidth( seconds ); };
@@ -25,7 +25,7 @@ protected:
   FinanceChart *chart;
   //long m_nWindowWidthSeconds;
   CSlidingWindowBars *m_pWindowBars;  // this list of bars are the ones visible in the chart
-  CBarFactory m_factory;
+  BarFactory m_factory;
   void HandleOnNewBar( const CBar &bar );
   void HandleOnBarUpdated( const CBar &bar );
   double m_majorTickInc, m_minorTickInc; 

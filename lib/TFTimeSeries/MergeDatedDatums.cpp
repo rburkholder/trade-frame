@@ -22,39 +22,39 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 //
-// CMergeDatedDatums
+// MergeDatedDatums
 //
 
-CMergeDatedDatums::CMergeDatedDatums(void) 
+MergeDatedDatums::MergeDatedDatums(void) 
 : m_state( eInit ), m_request( eUnknown )
 {
 }
 
-CMergeDatedDatums::~CMergeDatedDatums(void) {
+MergeDatedDatums::~MergeDatedDatums(void) {
   while ( !m_mhCarriers.Empty() ) {
-    CMergeCarrierBase *p = m_mhCarriers.RemoveEnd();
+    MergeCarrierBase *p = m_mhCarriers.RemoveEnd();
     delete p;
   }
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CQuote>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<CQuote>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Quote>* pSeries, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new CMergeCarrier<Quote>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CTrade>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<CTrade>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Trade>* pSeries, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new CMergeCarrier<Trade>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CBar>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<CBar>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Bar>* pSeries, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new CMergeCarrier<Bar>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CGreek>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<CGreek>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Greek>* pSeries, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new CMergeCarrier<Greek>( pSeries, function ) );
 }
 
-void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth>* pSeries, CMergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<CMarketDepth>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<MarketDepth>* pSeries, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new CMergeCarrier<MarketDepth>( pSeries, function ) );
 }
 
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html
@@ -62,21 +62,21 @@ void CMergeDatedDatums::Add( CTimeSeries<CMarketDepth>* pSeries, CMergeDatedDatu
 /*
 struct SortByMergeCarrier {
 public:
-  SortByMergeCarrier( std::vector<CMergeCarrierBase *> *v ): m_v( v ) {};
+  SortByMergeCarrier( std::vector<MergeCarrierBase *> *v ): m_v( v ) {};
   bool operator() ( size_t lhs, size_t rhs ) { return (*m_v)[lhs]->GetDateTime() < (*m_v)[rhs]->GetDateTime(); };
 protected:
-  std::vector<CMergeCarrierBase *> *m_v;
+  std::vector<MergeCarrierBase *> *m_v;
 };
 */
 
 // be aware that this maybe running in alternate thread
 // the thread is not created in this class 
 // for example, see CSimulationProvider
-void CMergeDatedDatums::Run() {
+void MergeDatedDatums::Run() {
   m_request = eRun;
   size_t cntCarriers = m_mhCarriers.Size();
 //  LOG << "#carriers: " << cntCarriers;  // need cross thread writing 
-  CMergeCarrierBase *pCarrier;
+  MergeCarrierBase *pCarrier;
   m_cntProcessedDatums = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
@@ -97,7 +97,7 @@ void CMergeDatedDatums::Run() {
 //  LOG << "Merge stats: " << m_cntProcessedDatums << ", " << m_cntReorders;
 }
 
-void CMergeDatedDatums::Stop( void ) {
+void MergeDatedDatums::Stop( void ) {
   m_request = eStop;
 }
 

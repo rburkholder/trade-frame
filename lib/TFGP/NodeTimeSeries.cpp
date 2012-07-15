@@ -17,7 +17,7 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
-NodeTSTrade::NodeTSTrade(void): NodeTimeSeries<NodeTSTrade, ou::tf::CTrades>() {
+NodeTSTrade::NodeTSTrade(void): NodeTimeSeries<NodeTSTrade, ou::tf::Trades>() {
   m_cntNodes = 0;
 }
 
@@ -25,12 +25,12 @@ NodeTSTrade::~NodeTSTrade(void) {
 }
 
 double NodeTSTrade::EvaluateDouble( void ) {
-  return TimeSeries()->Last()->Trade();
+  return TimeSeries()->Last()->Price();
 }
 
 // =======================
 
-NodeTSQuoteBid::NodeTSQuoteBid(void): NodeTimeSeries<NodeTSQuoteBid, ou::tf::CQuotes>() {
+NodeTSQuoteBid::NodeTSQuoteBid(void): NodeTimeSeries<NodeTSQuoteBid, ou::tf::Quotes>() {
   m_cntNodes = 0;
 }
 
@@ -43,7 +43,7 @@ double NodeTSQuoteBid::EvaluateDouble( void ) {
 
 // =======================
 
-NodeTSQuoteAsk::NodeTSQuoteAsk(void): NodeTimeSeries<NodeTSQuoteAsk, ou::tf::CQuotes>() {
+NodeTSQuoteAsk::NodeTSQuoteAsk(void): NodeTimeSeries<NodeTSQuoteAsk, ou::tf::Quotes>() {
   m_cntNodes = 0;
 }
 
@@ -56,7 +56,7 @@ double NodeTSQuoteAsk::EvaluateDouble( void ) {
 
 // =======================
 
-NodeTSQuoteMid::NodeTSQuoteMid(void): NodeTimeSeries<NodeTSQuoteMid, ou::tf::CQuotes>() {
+NodeTSQuoteMid::NodeTSQuoteMid(void): NodeTimeSeries<NodeTSQuoteMid, ou::tf::Quotes>() {
   m_cntNodes = 0;
 }
 
@@ -69,7 +69,7 @@ double NodeTSQuoteMid::EvaluateDouble( void ) {
 
 // =======================
 
-NodeTSPrice::NodeTSPrice(void): NodeTimeSeries<NodeTSPrice, ou::tf::CPrices>() {
+NodeTSPrice::NodeTSPrice(void): NodeTimeSeries<NodeTSPrice, ou::tf::Prices>() {
   m_cntNodes = 0;
 }
 
@@ -77,7 +77,7 @@ NodeTSPrice::~NodeTSPrice(void) {
 }
 
 double NodeTSPrice::EvaluateDouble( void ) {
-  return TimeSeries()->Last()->Price();
+  return TimeSeries()->Last()->Value();
 }
 
 // =======================

@@ -22,30 +22,30 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CBarFactory {
+class BarFactory {
 public:
 
   typedef unsigned long duration_t;
-  typedef CBar::volume_t volume_t;
-  typedef CBar::price_t price_t;
+  typedef Bar::volume_t volume_t;
+  typedef Bar::price_t price_t;
 
-  CBarFactory( duration_t nSeconds = 60);
-  virtual ~CBarFactory(void);
+  BarFactory( duration_t nSeconds = 60);
+  virtual ~BarFactory(void);
   void Add( const ptime &, price_t, volume_t);
-  void Add( const CTrade &trade ) { Add( trade.DateTime(), trade.Trade(), trade.Volume() ); };
-  const CBar& getCurrentBar() const { return m_bar; };
+  void Add( const Trade &trade ) { Add( trade.DateTime(), trade.Price(), trade.Volume() ); };
+  const Bar getCurrentBar() const { return m_bar; };
   void SetBarWidth( duration_t seconds ) { m_nBarWidthSeconds = seconds; };
   duration_t GetBarWidth( void ) const { return m_nBarWidthSeconds; };
 
-  typedef FastDelegate1<const CBar&> OnNewBarStartedHandler;  // turn this into a phoenix lambda function?
+  typedef FastDelegate1<const Bar&> OnNewBarStartedHandler;  // turn this into a phoenix lambda function?
   void SetOnNewBarStarted( OnNewBarStartedHandler function ) {
     OnNewBarStarted = function;
   }
-  typedef FastDelegate1<const CBar&> OnBarUpdatedHandler;  // turn this into a phoenix lambda function?
+  typedef FastDelegate1<const Bar&> OnBarUpdatedHandler;  // turn this into a phoenix lambda function?
   void SetOnBarUpdated( OnBarUpdatedHandler function ) {  // called at most once a second
     OnBarUpdated = function;
   }
-  typedef FastDelegate1<const CBar&> OnBarCompleteHandler;  // turn this into a phoenix lambda function?
+  typedef FastDelegate1<const Bar&> OnBarCompleteHandler;  // turn this into a phoenix lambda function?
   void SetOnBarComplete( OnBarCompleteHandler function ) {
     OnBarComplete = function;
   }
@@ -58,7 +58,7 @@ protected:
   ptime m_dtLastIntermediateEmission; // changes emitted no less than 1 second apart
   boost::posix_time::time_duration m_1Sec;
 
-  CBar m_bar;
+  Bar m_bar;
 
   OnNewBarStartedHandler OnNewBarStarted;
   OnBarUpdatedHandler OnBarUpdated;

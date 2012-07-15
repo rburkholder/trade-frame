@@ -25,16 +25,16 @@ namespace tf { // TradeFrame
 namespace hf { // high frequency
 
 template<class D> // D => type derived from DatedDatum
-class TSEMA: public CPrices {  // new time series built up from linked time series
+class TSEMA: public Prices {  // new time series built up from linked time series
 public:
-  TSEMA( CTimeSeries<D>& series, time_duration dt );
+  TSEMA( TimeSeries<D>& series, time_duration dt );
   virtual ~TSEMA(void);
   double GetEMA( void ) { return m_dblRecentEMA; };
 protected:
 private:
   time_duration m_dtTimeRange;
   double m_dblTimeRange;
-  CTimeSeries<D>& m_seriesSource;
+  TimeSeries<D>& m_seriesSource;
   double m_XatTminus1;
   double EMA( ptime t, double XatT );
   double m_dblRecentEMA;
@@ -43,16 +43,16 @@ private:
     EMA( datum.DateTime(), GetPrice( datum ) ); 
   }
 
-  double GetPrice( const CPrice& price ) const {
-    return price.Price();
+  double GetPrice( const Price& price ) const {
+    return price.Value();
   }
 
-  double GetPrice( const CQuote& quote ) const {
+  double GetPrice( const Quote& quote ) const {
     return quote.Midpoint();
   }
 
-  double GetPrice( const CTrade& trade ) const {
-    return trade.Trade();
+  double GetPrice( const Trade& trade ) const {
+    return trade.Price();
   }
 /*
   // http://stackoverflow.com/questions/6013066/explicit-specialization-template-class-member-function-with-different-return-typ
@@ -61,18 +61,18 @@ private:
   template<class T, class=void> struct EMA_impl {
     static void calc( T& t, const D& ) { throw std::logic_error( "no specialization" ); };
   };
-  template<class T> struct EMA_impl<CPrice,T> {
-    static void calc( T& t, const CPrice& price ) { 
+  template<class T> struct EMA_impl<Price,T> {
+    static void calc( T& t, const Price& price ) { 
       t.EMA( price.DateTime(), price.Price() );
     };
   };
-  template<class T> struct EMA_impl<CQuote,T> {
-    static void calc( T& t, const CQuote& quote ) { 
+  template<class T> struct EMA_impl<Quote,T> {
+    static void calc( T& t, const Quote& quote ) { 
       t.EMA( quote.DateTime(), quote.LogarithmicMidPointA() );
     };
   };
-  template<class T> struct EMA_impl<CTrade,T> {
-    static void calc( T& t, const CTrade& trade ) { 
+  template<class T> struct EMA_impl<Trade,T> {
+    static void calc( T& t, const Trade& trade ) { 
       t.EMA( trade.DateTime(), trade.Trade() );
     };
   };
@@ -80,7 +80,7 @@ private:
 };
 
 template<class D>
-TSEMA<D>::TSEMA( CTimeSeries<D>& series, time_duration dt )
+TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration dt )
   : m_seriesSource( series ), m_dtTimeRange( dt ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
   assert( 0 < dt.total_seconds() );
@@ -99,11 +99,11 @@ template<class D>
 double TSEMA<D>::EMA( ptime t, double XatT ) {
   static const time_duration tdOne( microseconds( 1 ) );
   double ema( XatT );
-  if ( 0 == CPrices::Size() ) {
-    CPrices::Append( CPrice( t, XatT ) );  // initialize first element of series
+  if ( 0 == Prices::Size() ) {
+    Prices::Append( Price( t, XatT ) );  // initialize first element of series
   }
   else { 
-    const CPrice& prvEMA( CPrices::Ago( 0 ) );
+    const Price& prvEMA( Prices::Ago( 0 ) );
     ptime dtPrv = prvEMA.DateTime();
     time_duration tdDif = t == dtPrv ? tdOne : t - dtPrv;
     double alpha = ( (double) tdDif.total_microseconds() ) / m_dblTimeRange;
@@ -112,8 +112,8 @@ double TSEMA<D>::EMA( ptime t, double XatT ) {
     //double v = 1.0;  // previous point 
     //double v = std::exp( -alpha / 2.0 ); // or std::sqrt( mu );  // nearest value
     //double v = mu;  // next point
-    ema = mu * prvEMA.Price() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
-    CPrices::Append( CPrice( t, ema ) );
+    ema = mu * prvEMA.Value() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
+    Prices::Append( Price( t, ema ) );
   }
   m_XatTminus1 = XatT;
   m_dblRecentEMA = ema;

@@ -20,10 +20,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-class TSDifferential: public CPrices { // page 65 Intro to HF Finance
+class TSDifferential: public Prices { // page 65 Intro to HF Finance
 public:
-  TSDifferential( CPrices& series, time_duration dt );
-  TSDifferential( CPrices& series, time_duration dt, double dblGammaDerivative, time_duration dtNormalization = hours( 365 * 24 ) );
+  TSDifferential( Prices& series, time_duration dt );
+  TSDifferential( Prices& series, time_duration dt, double dblGammaDerivative, time_duration dtNormalization = hours( 365 * 24 ) );
   ~TSDifferential(void);
 protected:
 private:
@@ -41,18 +41,18 @@ private:
   time_duration m_dtNormalization;
   double m_dblNormalization;
   double m_dblGammaDerivative;
-  CPrices& m_seriesSource;
+  Prices& m_seriesSource;
 
-  TSEMA<CPrice>* m_pema1;
-  TSEMA<CPrice>* m_pema2;
-  TSEMA<CPrice>* m_pema3;
-  TSEMA<CPrice>* m_pema4;
-  TSEMA<CPrice>* m_pema5;
-  TSEMA<CPrice>* m_pema6;
+  TSEMA<Price>* m_pema1;
+  TSEMA<Price>* m_pema2;
+  TSEMA<Price>* m_pema3;
+  TSEMA<Price>* m_pema4;
+  TSEMA<Price>* m_pema5;
+  TSEMA<Price>* m_pema6;
 
-  void HandleTerm1Update( const CPrice& );
-  void HandleTerm2Update( const CPrice& );
-  void HandleTerm3Update( const CPrice& );
+  void HandleTerm1Update( const Price& );
+  void HandleTerm2Update( const Price& );
+  void HandleTerm3Update( const Price& );
   void Init( void );
 };
 

@@ -122,11 +122,11 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
     ptime dt( ou::CTimeSource::Instance().External() );
     // quote needs to be sent before the trade
     if ( m_bNewQuote ) {
-      CQuote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
+      Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
       CSymbol::m_OnQuote( quote );
     }
     if ( m_bNewTrade ) {
-      CTrade trade( dt, m_dblTrade, m_nTradeSize );
+      Trade trade( dt, m_dblTrade, m_nTradeSize );
       CSymbol::m_OnTrade( trade );
       if ( m_bNewOpen ) {
         CSymbol::m_OnOpen( trade );
