@@ -52,3 +52,15 @@ void StrategyEquity::HandleTrade( const ou::tf::Trade& trade ) {
   m_trades.Append( trade );
 }
 
+void StrategyEquity::Register( ou::tf::Prices* series ) {
+  m_RegisteredPrices.Register( series );
+}
+
+void StrategyEquity::Register( ou::tf::Quotes* series ) {
+  m_RegisteredQuotes.Register( series );
+}
+
+void StrategyEquity::Register( ou::tf::Trades* series ) {
+  m_RegisteredTrades.Register( series );
+}
+

@@ -29,6 +29,8 @@
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
 
+#include <TFGP/TimeSeriesRegistration.h>
+
 class StrategyEquity {
 public:
 
@@ -73,6 +75,14 @@ private:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes1;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes3;
+
+  void Register( ou::tf::Prices* series );
+  void Register( ou::tf::Quotes* series );
+  void Register( ou::tf::Trades* series );
+
+  ou::gp::TimeSeriesRegistration<ou::tf::Prices> m_RegisteredPrices;
+  ou::gp::TimeSeriesRegistration<ou::tf::Quotes> m_RegisteredQuotes;
+  ou::gp::TimeSeriesRegistration<ou::tf::Trades> m_RegisteredTrades;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

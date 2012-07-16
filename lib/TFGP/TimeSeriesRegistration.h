@@ -27,7 +27,7 @@ namespace rng {  // dependent upon linking OUGP/NodeDouble.cpp
   extern boost::random::mt19937 common;
 }
 
-template<typename TS>  // CTrade, CQuotes, CPrices
+template<typename TS>  // Trades, Quotes, Prices
 class TimeSeriesRegistration {
 public:
   TimeSeriesRegistration(void);

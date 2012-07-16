@@ -21,49 +21,50 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<typename D> // D => DatedDatum
+template<typename TS> // TS => TimeSeries
 class TSSWTickFrequency: 
-  public TimeSeriesSlidingWindow<TSSWTickFrequency<D>, D>,
+  public TimeSeriesSlidingWindow<TSSWTickFrequency<TS>, typename TS::datum_t>,
   public Prices
 {
 public:
-  typedef typename TimeSeries<D>::size_type size_type;
-  TSSWTickFrequency<D>( TimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize = 0 );
-  virtual ~TSSWTickFrequency<D>(void);
-  ou::Delegate<const D&> OnAppend;
+  typedef typename TimeSeries<datum_t>::size_type size_type;
+  TSSWTickFrequency( TS& series, time_duration tdWindowWidth, size_type stWindowSize = 0 );
+  virtual ~TSSWTickFrequency(void);
+  ou::Delegate<const datum_t&> OnAppend;
 protected:
-  void Add( const D& datum );
-  void Expire( const D& datum );
+  typedef typename TS::datum_t datum_t;
+  void Add( const datum_t& datum );
+  void Expire( const datum_t& datum );
   void PostUpdate( void );
 private:
   unsigned int m_n;
   ptime m_dt;
 };
 
-template<typename D>
-TSSWTickFrequency<D>::TSSWTickFrequency( TimeSeries<D>& series, time_duration tdWindowWidth, size_type stWindowSize ):
-  TimeSeriesSlidingWindow<TSSWTickFrequency<D>, D>( series, tdWindowWidth, stWindowSize ),
+template<typename TS>
+TSSWTickFrequency<TS>::TSSWTickFrequency( TS& series, time_duration tdWindowWidth, size_type stWindowSize ):
+  TimeSeriesSlidingWindow<TSSWTickFrequency<TS>, datum_t>( series, tdWindowWidth, stWindowSize ),
     m_n( 0 )
 {
 }
 
-template<typename D>
-TSSWTickFrequency<D>::~TSSWTickFrequency(void) {
+template<typename TS>
+TSSWTickFrequency<TS>::~TSSWTickFrequency(void) {
 }
 
-template<typename D>
-void TSSWTickFrequency<D>::Add( const D& datum ) {
+template<typename TS>
+void TSSWTickFrequency<TS>::Add( const datum_t& datum ) {
   ++m_n;
   m_dt = datum.DateTime();
 }
 
-template<typename D>
-void TSSWTickFrequency<D>::Expire( const D& datum ) {
+template<typename TS>
+void TSSWTickFrequency<TS>::Expire( const datum_t& datum ) {
   --m_n;
 }
 
-template<typename D>
-void TSSWTickFrequency<D>::PostUpdate( void ) {
+template<typename TS>
+void TSSWTickFrequency<TS>::PostUpdate( void ) {
   Prices::Append( Price( m_dt, (double) m_n ) );
 }
 

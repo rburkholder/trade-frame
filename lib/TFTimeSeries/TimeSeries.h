@@ -41,9 +41,10 @@ public:
 
   typedef typename T datum_t;
 
+  typedef typename std::vector<T>::size_type size_type;
+
   typedef typename std::vector<T>::iterator iterator;
   typedef typename std::vector<T>::const_iterator const_iterator;
-  typedef typename std::vector<T>::size_type size_type;
   typedef typename std::vector<T>::reference reference;
   typedef typename std::vector<T>::const_reference const_reference;
 
@@ -124,7 +125,7 @@ void TimeSeries<T>::Append(const T& datum) {
 template<typename T> 
 void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   T key( dt );
-  std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
+  std::pair<iterator, iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -136,7 +137,7 @@ void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
 
 template<typename T> 
 void TimeSeries<T>::Insert( const T& datum ) {
-  std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
+  std::pair<iterator, iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -218,7 +219,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
   // assumes valid access, else undefined
   // TODO: Check that this is correct
   T key( dt );
-  std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
+  std::pair<iterator, iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
 //  if ( p.first != p.second ) {
 //    m_vIterator = p.first;
@@ -234,7 +235,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::AtOrAfter( const ptime &d
   // assumes valid access, else undefined
   // TODO: Check that this is correct
   T key( dt );
-  std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
+  std::pair<iterator, iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
 //  if ( p.first != p.second ) {
 //    m_vIterator = p.first;
@@ -249,7 +250,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::After( const ptime &dt ) 
   // assumes valid access, else undefined
   // TODO: Check that this is correct
   T key( dt );
-  std::pair<std::vector<T>::iterator, std::vector<T>::iterator> p;
+  std::pair<iterator, iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   return *p.second;
 }
@@ -300,7 +301,7 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) const { 
 }
 
 template<typename T> 
-H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace *pSpace ) {
+H5::DataSpace* TimeSeries<T>::DefineDataSpace( H5::DataSpace* pSpace ) {
   if ( NULL == pSpace ) pSpace = new H5::DataSpace( H5S_SIMPLE );
   hsize_t curSize = m_vSeries.size();
   hsize_t maxSize = H5S_UNLIMITED; 

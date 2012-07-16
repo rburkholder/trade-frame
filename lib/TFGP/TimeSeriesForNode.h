@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <boost/thread/tss.hpp>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -23,15 +25,17 @@ namespace gp { // genetic programming
 template<typename TS> // TS TimeSeries
 class TimeSeriesForNode {
 public:
-
   typedef FastDelegate1<TimeSeriesForNode<TS>&> OnNodeTimeSeriesCreatedHandler;
+private:
 
-  TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
-    if ( 0 != m_OnNodeTimeSeriesCreated )
-      m_OnNodeTimeSeriesCreated( *this ); // obtain a new value for m_pTimeSeries
-  };
-  TimeSeriesForNode( const TimeSeriesForNode& rhs ): m_pTimeSeries( rhs.m_pTimeSeries ) {  // handles copy constructor to keep existing timeseries
-  }
+  TS* m_pTimeSeries;
+  static boost::thread_specific_ptr<OnNodeTimeSeriesCreatedHandler> m_tsp;  
+
+protected:
+public:
+
+  TimeSeriesForNode( void );
+  TimeSeriesForNode( const TimeSeriesForNode& rhs );
   ~TimeSeriesForNode( void ) {};
 
   TimeSeriesForNode& operator=( const TimeSeriesForNode& rhs ) {
@@ -41,17 +45,39 @@ public:
     return *this;
   }
 
-  static void Set( OnNodeTimeSeriesCreatedHandler function ) { m_OnNodeTimeSeriesCreated = function; };
-  static void Clear( void ) { m_OnNodeTimeSeriesCreated = 0; };
+  static void Set( OnNodeTimeSeriesCreatedHandler function ) { 
+    if ( 0 != m_tsp.get() ) {
+      assert( false );
+    }
+    OnNodeTimeSeriesCreatedHandler* pHandler = new OnNodeTimeSeriesCreatedHandler;
+    m_tsp.reset( pHandler );
+    *pHandler = function;
+  };
+  static void Clear( void ) { 
+    OnNodeTimeSeriesCreatedHandler* pHandler = m_tsp.get();
+    *pHandler = 0;
+    m_tsp.reset();
+  };
 
   void Set( TS* pTimeSeries ) { m_pTimeSeries = pTimeSeries; };
   TS* TimeSeries( void ) const { return m_pTimeSeries; };
-protected:
-  static OnNodeTimeSeriesCreatedHandler m_OnNodeTimeSeriesCreated;
-private:
-  TS* m_pTimeSeries;
 
 };
+
+template<typename TS>
+boost::thread_specific_ptr<typename TimeSeriesForNode<TS>::OnNodeTimeSeriesCreatedHandler> TimeSeriesForNode<TS>::m_tsp;  
+
+template<typename TS>
+TimeSeriesForNode<TS>::TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
+  OnNodeTimeSeriesCreatedHandler* pHandler = m_tsp.get();
+  if ( 0 != *pHandler )
+    (*pHandler)( *this ); // obtain a new value for m_pTimeSeries
+}
+
+template<typename TS>
+TimeSeriesForNode<TS>::TimeSeriesForNode( const TimeSeriesForNode<TS>& rhs ): m_pTimeSeries( rhs.m_pTimeSeries ) {  
+  // handles copy constructor to keep existing timeseries
+}
 
 } // namespace gp
 } // namespace ou

@@ -13,6 +13,9 @@
  ************************************************************************/
 
 #include "StdAfx.h"
+
+// this is anticipated to be started in a new thread in order to handle multiple simultaneous simulations
+
 #include "StrategyWrapper.h"
 
 StrategyWrapper::StrategyWrapper(void)
@@ -63,3 +66,4 @@ void StrategyWrapper::HandleSimulationComplete( void ) {
   // generate statistics here?
   // any clean up required?
 }
+ 

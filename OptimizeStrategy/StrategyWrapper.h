@@ -21,8 +21,6 @@
 #include <TFSimulation/SimulationProvider.h>
 #include <TFTrading/Instrument.h>
 
-#include <TFGP/TimeSeriesRegistration.h>
-
 #include "StrategyEquity.h"
 
 class StrategyWrapper {

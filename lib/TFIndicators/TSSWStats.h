@@ -26,7 +26,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T, class D> class TimeSeriesSlidingWindowStats
+template<class T, class D> 
+class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
 public:
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
