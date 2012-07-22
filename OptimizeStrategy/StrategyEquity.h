@@ -19,6 +19,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <OUCommon/FastDelegate.h>
+
 #include <TFSimulation/SimulationProvider.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/Position.h>
@@ -34,15 +36,14 @@
 class StrategyEquity {
 public:
 
-  typedef bool (*pfnExecute_t)( void );  // used for executing from root node
-
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef fastdelegate::FastDelegate0<bool> fdEvaluate_t;
 
   StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument );
   ~StrategyEquity(void);
 
-  void Set( pfnExecute_t pfnLong, pfnExecute_t pfnShort );
+  void Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
   void Start( void );  // for simulation
   double GetPL( void );
   void Stop( void );
@@ -62,8 +63,8 @@ private:
   enumTimeFrames m_stateTimeFrame;
   enumTradeState m_stateTrading;
 
-  pfnExecute_t m_pfnLong;
-  pfnExecute_t m_pfnShort;
+  fdEvaluate_t m_pfnLong;
+  fdEvaluate_t m_pfnShort;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;

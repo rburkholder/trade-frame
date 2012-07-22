@@ -41,10 +41,6 @@ Population::Population( unsigned int nPopulationSize )
   m_urd( 0.0, 1.0 ),  // probability in [0.0, 1.0)
   m_cntAboveAverage( 0 )
 {
-  m_pvCurGeneration = new vGeneration_t;
-  m_pvCurGeneration->resize( nPopulationSize );
-  BuildIndividuals( *m_pvCurGeneration );
-  m_vGenerations.push_back( m_pvCurGeneration );
 }
 
 Population::~Population(void) {
@@ -155,7 +151,14 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
   bool bMore( false );
   unsigned int cntMaxElites( (unsigned int) std::floor( m_ratioElitism * m_dblPopulationSize + 0.5 ) );
 
-  if ( m_nMaxGenerations > m_vGenerations.size() + 1 ) { // is this a correct validation?
+  if ( 0 == m_vGenerations.size() ) {
+    bMore = true;
+    m_pvCurGeneration = new vGeneration_t;
+    m_pvCurGeneration->resize( m_nPopulationSize );
+    BuildIndividuals( *m_pvCurGeneration );
+    m_vGenerations.push_back( m_pvCurGeneration );
+  }
+  else if ( m_nMaxGenerations > m_vGenerations.size() + 1 ) { // is this a correct validation?
 
     bMore = true;
     m_pvNxtGeneration = new vGeneration_t;  // set no individuals

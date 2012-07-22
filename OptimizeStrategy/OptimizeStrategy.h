@@ -36,13 +36,14 @@ private:
 
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::gp::Population::vGeneration_t vGeneration_t;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
 
   pInstrument_t m_pInstrument;
 
-  StrategyWrapper* m_swStrategy;  // will ultimately need one per simultaneous individual running from population
+  StrategyWrapper* m_pswStrategy;  // will ultimately need one per simultaneous individual running from population
 
   virtual bool OnInit();
   virtual int OnExit();

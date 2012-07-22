@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+#include <boost/foreach.hpp>
+
 #include <wx/bitmap.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -89,7 +91,21 @@ bool AppOptimizeStrategy::OnInit( void ) {
   * at end of time series, calculate 'winner'
   */
 
-  m_swStrategy = new StrategyWrapper;
+  // can parallize this once all is working sequentially
+  while ( pop.MakeNewGeneration( true ) ) {
+    const vGeneration_t& gen( pop.CurrentGeneration() );
+    BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
+      m_pswStrategy = new StrategyWrapper;
+      m_pswStrategy->Set( 
+        fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
+        fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
+      m_pswStrategy->Start( m_pInstrument, "/semiauto/2011-Sep-23 19:17:48.252497" );  // run provider synchronously
+      const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
+      delete m_pswStrategy;
+      m_pswStrategy = 0;
+    }
+    pop.CalcFitness();
+  }
 
   return 1;
 
@@ -97,8 +113,8 @@ bool AppOptimizeStrategy::OnInit( void ) {
 
 int AppOptimizeStrategy::OnExit(  void ) {
 
-  delete m_swStrategy;
-  m_swStrategy = 0;
+  delete m_pswStrategy;
+  m_pswStrategy = 0;
 
   return 0;
 }

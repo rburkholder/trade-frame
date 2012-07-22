@@ -63,8 +63,8 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
     m_quotes.Append( quote );
 
     // run the gp generated formula
-    bool bLong = (*m_pfnLong)();
-    bool bShort = (*m_pfnShort)();
+    bool bLong = m_pfnLong();
+    bool bShort = m_pfnShort();
 
     // execute with result
     switch ( m_stateTrading ) {
@@ -75,46 +75,28 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
       }
       else {
         if ( !bLong && bShort ) { // go short
-          m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+          m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
           m_stateTrading = EShort;
         }
       }
       break;
     case ELong:
-      if ( !bLong && !bShort ) { // exit
+      if ( bShort ) { // exit
         m_pPositionLong->ClosePosition();
         m_stateTrading = ENeutral;
-      }
-      else {
-        if ( bLong && bShort ) { // exit
-          m_pPositionLong->ClosePosition();
-          m_stateTrading = ENeutral;
-        }
-        else {
-          if ( !bLong && bShort ) { // exit then go short
-            m_pPositionLong->ClosePosition();
-            m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-            m_stateTrading = EShort;
-          }
+        if ( !bLong ) { // go short
+          m_pPositionShort->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+          m_stateTrading = EShort;
         }
       }
       break;
     case EShort:
-      if ( !bLong && !bShort ) { // exit
+      if ( bLong ) { // exit
         m_pPositionShort->ClosePosition();
         m_stateTrading = ENeutral;
-      }
-      else {
-        if ( bLong && bShort ) { // exit
-          m_pPositionShort->ClosePosition();
-          m_stateTrading = ENeutral;
-        }
-        else {
-          if ( bLong && !bShort ) { // exit then go long
-            m_pPositionShort->ClosePosition();
-            m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
-            m_stateTrading = ELong;
-          }
+        if ( !bShort ) { // go long
+          m_pPositionLong->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+          m_stateTrading = ELong;
         }
       }
       break;
@@ -139,7 +121,7 @@ void StrategyEquity::Register( ou::tf::Trades* series ) {
   m_RegisteredTrades.Register( series );
 }
 
-void StrategyEquity::Set( pfnExecute_t pfnLong, pfnExecute_t pfnShort ) {
+void StrategyEquity::Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
   m_pfnLong = pfnLong;
   m_pfnShort = pfnShort;
 }

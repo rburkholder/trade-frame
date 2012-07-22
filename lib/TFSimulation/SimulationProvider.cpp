@@ -221,7 +221,7 @@ void CSimulationProvider::Merge( void ) {
   ou::CTimeSource::Instance().SetSimulationMode( bOldMode );
 }
 
-void CSimulationProvider::Run() {
+void CSimulationProvider::Run( bool bAsync ) {
   if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
   // how to detect end of thread, and reset m_hMergeThread?
@@ -231,6 +231,9 @@ void CSimulationProvider::Run() {
   else {
     m_pMerge = new MergeDatedDatums();
     m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
+    if ( !bAsync ) {
+      m_threadMerge.join();
+    }
   }
 }
 

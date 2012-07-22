@@ -26,9 +26,15 @@ StrategyWrapper::StrategyWrapper(void)
 StrategyWrapper::~StrategyWrapper(void) {
 }
 
+void StrategyWrapper::Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
+  m_pfnLong = pfnLong;
+  m_pfnShort = pfnShort;
+}
+
 void StrategyWrapper::Start( pInstrument_t pInstrument, const std::string& sSourcePath ) {
   m_pInstrument = pInstrument;
   m_pProvider.reset( new ou::tf::CSimulationProvider );
+  m_pProvider->SetGroupDirectory( sSourcePath );
   m_pProvider->OnConnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
   m_pProvider->OnDisconnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_pProvider->Connect();
@@ -42,30 +48,33 @@ void StrategyWrapper::HandleProviderConnected( int i ) {
 
   m_bRunning = true;
   m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument );
+  m_pStrategy->Set( m_pfnLong, m_pfnShort );
   m_pStrategy->Start();
 
 //  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
   
   m_pProvider->SetOnSimulationComplete( MakeDelegate( this, &StrategyWrapper::HandleSimulationComplete ) );
 
-//  Activate();
-
-  m_pProvider->Run();
+  m_pProvider->Run( false );
 
 }
 
 void StrategyWrapper::HandleProviderDisconnected( int i ) {
+  m_pProvider->OnConnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
+  m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_bRunning = false;
   m_pStrategy->Stop();
   delete m_pStrategy;
   m_pStrategy = 0;
-  m_pProvider->OnConnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
-  m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_pProvider.reset();
 }
 
 void StrategyWrapper::HandleSimulationComplete( void ) {
   // generate statistics here?
   // any clean up required?
+  m_pProvider->Disconnect();
 }
  
+double StrategyWrapper::GetPL( void ) {
+  return m_pStrategy->GetPL();
+}

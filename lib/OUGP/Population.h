@@ -34,6 +34,7 @@ public:
   Population( unsigned int nPopulationSize = 20 );
   ~Population(void);
 
+  // registering additional nodes types:
   template<typename L>
   void RegisterBoolean( void ) { m_tb.RegisterBoolean<L>(); };
   template<typename L>

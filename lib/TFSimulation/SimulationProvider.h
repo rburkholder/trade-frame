@@ -62,7 +62,7 @@ public:
   void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
   const std::string &GetGroupDirectory( void ) { return m_sGroupDirectory; };
 
-  void Run( void );
+  void Run( bool bAsync = true );
   void Stop( void );
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
