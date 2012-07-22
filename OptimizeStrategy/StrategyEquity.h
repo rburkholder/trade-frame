@@ -34,12 +34,17 @@
 class StrategyEquity {
 public:
 
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef bool (*pfnExecute_t)( void );  // used for executing from root node
 
-  StrategyEquity( pProviderSim_t pProvider );
+  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+
+  StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument );
   ~StrategyEquity(void);
 
+  void Set( pfnExecute_t pfnLong, pfnExecute_t pfnShort );
   void Start( void );  // for simulation
+  double GetPL( void );
   void Stop( void );
 
 protected:
@@ -48,10 +53,17 @@ private:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
+  //typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
+  //typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
 
-  enum enumTradeStates { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
+  enum enumTimeFrames { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
+  enum enumTradeState { ENeutral, ELong, EShort };
+
+  enumTimeFrames m_stateTimeFrame;
+  enumTradeState m_stateTrading;
+
+  pfnExecute_t m_pfnLong;
+  pfnExecute_t m_pfnShort;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
@@ -63,7 +75,8 @@ private:
 
   pProviderSim_t m_pProvider;
 
-  pPortfolio_t m_pPortfolio;
+  //pPortfolio_t m_pPortfolio;
+  ou::tf::CPortfolio m_portfolio;
 
   pPosition_t m_pPositionLong;
   pPosition_t m_pPositionShort;

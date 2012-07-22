@@ -42,6 +42,7 @@ private:
   bool m_bRunning;
 
   pProviderSim_t m_pProvider;
+  pInstrument_t m_pInstrument;
 
   StrategyEquity* m_pStrategy;
 

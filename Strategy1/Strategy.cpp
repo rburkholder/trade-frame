@@ -266,9 +266,9 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quotes.Append( quote );
   double midpoint = quote.Midpoint();
 
-  m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Price() );
-  m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Price() );
-  m_ceEma3.Add( dt, m_ema3.Ago( 0 ).Price() );
+  m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Value() );
+  m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Value() );
+  m_ceEma3.Add( dt, m_ema3.Ago( 0 ).Value() );
 
   // high speed simple moving average
 //  ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );

@@ -27,6 +27,9 @@
 namespace ou { // One Unified
 namespace gp { // genetic programming
 
+// assumption:  each population and individual will be sharing the same set of Node types.  Additional non default Node types should only be 
+//  registered once
+
 Population::Population( unsigned int nPopulationSize ) 
   : m_nPopulationSize( nPopulationSize ), m_dblPopulationSize( nPopulationSize ),
   m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 6 ), m_nMaxDepthOnCrossover( 17 ),

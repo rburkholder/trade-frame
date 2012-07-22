@@ -411,7 +411,7 @@ void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
   // maybe something like genesis with market depth book built in
   m_vManualOrders.resize( m_vManualOrders.size() + 1 );
   structManualOrder& mo( m_vManualOrders.back() );
-  mo.pDialogManualOrder = new DialogManualOrder( m_FrameMain );
+  mo.pDialogManualOrder = new ou::tf::PanelManualOrder( m_FrameMain );
   mo.pDialogManualOrder->SetIxStruct( m_vManualOrders.size() - 1 );
   mo.pDialogManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppSemiAuto::HandleManualOrder ) );
   mo.pDialogManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppSemiAuto::HandleCheckSymbolNameAgainstIB ) );

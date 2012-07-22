@@ -20,7 +20,7 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include "PanelManualOrder.h"
+#include <TFVuTrading/PanelManualOrder.h>
 
 class FrameMain : public wxFrame {
 public:

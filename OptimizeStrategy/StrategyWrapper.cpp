@@ -27,6 +27,7 @@ StrategyWrapper::~StrategyWrapper(void) {
 }
 
 void StrategyWrapper::Start( pInstrument_t pInstrument, const std::string& sSourcePath ) {
+  m_pInstrument = pInstrument;
   m_pProvider.reset( new ou::tf::CSimulationProvider );
   m_pProvider->OnConnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
   m_pProvider->OnDisconnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
@@ -38,8 +39,9 @@ void StrategyWrapper::Stop( void ) {
 }
 
 void StrategyWrapper::HandleProviderConnected( int i ) {
+
   m_bRunning = true;
-  m_pStrategy = new StrategyEquity( m_pProvider );
+  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument );
   m_pStrategy->Start();
 
 //  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start

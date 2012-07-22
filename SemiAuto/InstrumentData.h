@@ -59,16 +59,16 @@ private:
   var_t m_rSummary[ _Count ];
 
   CInstrument::pInstrument_t m_pInstrument;
-  Quotes m_quotes;
-  Trades m_trades;
+  ou::tf::Quotes m_quotes;
+  ou::tf::Trades m_trades;
 
-  TSSWStatsMidQuote m_stats;
-  TSSWStochastic m_stoch;
+  ou::tf::TSSWStatsMidQuote m_stats;
+  ou::tf::TSSWStochastic m_stoch;
 
   void Init( void );
 
-  void HandleQuote( const Quote& quote );
-  void HandleTrade( const Trade& trade );
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
 
 };
 

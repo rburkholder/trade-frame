@@ -39,8 +39,8 @@ public:
     }
     Signals_t( void ) : rnLong( 0 ), rnShort( 0 ) {};
     ~Signals_t( void ) { 
-      if ( 0 == rnLong ) delete rnLong; 
-      if ( 0 == rnShort ) delete rnShort;
+      if ( 0 != rnLong ) { delete rnLong; rnLong = 0; };
+      if ( 0 != rnShort ) { delete rnShort; rnShort = 0; };
     }
   } m_Signals;
 

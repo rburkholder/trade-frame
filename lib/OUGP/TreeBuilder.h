@@ -65,6 +65,18 @@ public:
     AddRandomChildren( node, bUseTerminal, bUseNode, 1, nMaxDepth );
   }
 
+  template<typename L> // list of node types
+  void RegisterBoolean( void ) {
+    L list;
+    boost::fusion::for_each( list, NodeFactoryInit( m_vNodeFactoryBooleanAll, m_vNodeFactoryBooleanTerminals, m_vNodeFactoryBooleanNodes ) );
+  }
+
+  template<typename L> // list of node types
+  void RegisterDouble( void ) {
+    L list;
+    boost::fusion::for_each( list, NodeFactoryInit( m_vNodeFactoryDoubleAll, m_vNodeFactoryDoubleTerminals, m_vNodeFactoryDoubleNodes ) );
+  }
+
 protected:
 private:
 
@@ -81,18 +93,6 @@ private:
   vNodeFactory_t m_vNodeFactoryDoubleNodes;  // non terminal
 
   vNodeFactory_t* m_rNodeFactories[ NodeType::Count ][ FactoryType::Count ];
-
-  template<typename L> // list of node types
-  void RegisterBoolean( void ) {
-    L list;
-    boost::fusion::for_each( list, NodeFactoryInit( m_vNodeFactoryBooleanAll, m_vNodeFactoryBooleanTerminals, m_vNodeFactoryBooleanNodes ) );
-  }
-
-  template<typename L> // list of node types
-  void RegisterDouble( void ) {
-    L list;
-    boost::fusion::for_each( list, NodeFactoryInit( m_vNodeFactoryDoubleAll, m_vNodeFactoryDoubleTerminals, m_vNodeFactoryDoubleNodes ) );
-  }
 
   Node* CreateChild( NodeType::E nt, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth );
   void AddRandomChildren( Node& node, bool bUseTerminal, bool bUseNode, unsigned int nDepth, unsigned int nMaxDepth );

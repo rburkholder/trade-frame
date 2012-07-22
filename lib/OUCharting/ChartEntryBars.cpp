@@ -46,7 +46,7 @@ void ChartEntryBars::Reserve( unsigned int nSize ) {
   m_vClose.reserve( nSize );
 }
 
-void ChartEntryBars::AddBar(const ou::tf::CBar &bar) {/*
+void ChartEntryBars::AddBar(const ou::tf::Bar &bar) {/*
   if ( m_vOpen.capacity() == m_vOpen.size() ) {
     int sz = m_vOpen.size() + ( m_vOpen.size() / 5 ); // expand by 20%
     //CChartEntryBaseWithTime::Reserve( sz );

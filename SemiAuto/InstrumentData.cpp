@@ -22,21 +22,21 @@
 
 InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_nSignificantDigits( nSigDigits )
+    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
 InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ), m_nSignificantDigits( nSigDigits )
+    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
 InstrumentData::InstrumentData( const InstrumentData& data ) 
   : m_pInstrument( data.m_pInstrument ),  // only instrument is copied, everything else starts at scratch
-    m_stats( &m_quotes, 14*60 ), m_stoch( &m_quotes, 9*60 ),
+    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ),
     m_nSignificantDigits( data.m_nSignificantDigits )
 {
   Init();
@@ -64,7 +64,7 @@ void InstrumentData::HandleTrade( const Trade& trade ) {
 
   // may need to protect cross thread updates
   // may need to do this calculation in a lockable thread, so main stream processor can continue on
-  double dblPrice = trade.Trade();
+  double dblPrice = trade.Price();
   m_rSummary[ Price ] = dblPrice;
   if ( m_rSummary[ High ] < m_rSummary[ Price ] ) m_rSummary[ High ] = dblPrice;
   if ( m_rSummary[ Low ] == 0 ) m_rSummary[ Low ] = dblPrice;
@@ -93,13 +93,13 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
 
-  CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+  ou::tf::CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<Quotes, Quote> wtsQuotes;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
-    CHDF5Attributes attrQuotes( sPathName, future );
+    ou::tf::CHDF5Attributes attrQuotes( sPathName, future );
     //attrQuotes.SetMultiplier( 1 );
     //attrQuotes.SetSignificantDigits( 2 );
     //attrTrades.SetProviderType( m_pDataProvider->ID() );
@@ -107,9 +107,9 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<Trades, Trade> wtsTrades;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
-    CHDF5Attributes attrTrades( sPathName, future );
+    ou::tf::CHDF5Attributes attrTrades( sPathName, future );
     //attrTrades.SetMultiplier( 1 );
     //attrTrades.SetSignificantDigits( 2 );
     //attrTrades.SetProviderType( m_pDataProvider->ID() );

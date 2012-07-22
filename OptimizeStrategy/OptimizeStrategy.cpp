@@ -22,6 +22,7 @@
 #include <TFTrading/PortfolioManager.h>
 
 #include <OUGP/Population.h>
+#include <TFGP/NodeTimeSeries.h>
 
 #include "OptimizeStrategy.h"
 
@@ -68,6 +69,9 @@ bool AppOptimizeStrategy::OnInit( void ) {
 
   // manage the genetic programming discovery process here
   ou::gp::Population pop( 100 );
+
+  // Register time series types for use by registrations in strategy
+  pop.RegisterDouble<ou::gp::NodeTypesTimeSeries_t>();
 
   /*
   steps:

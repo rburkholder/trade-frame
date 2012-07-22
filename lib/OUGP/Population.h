@@ -34,6 +34,11 @@ public:
   Population( unsigned int nPopulationSize = 20 );
   ~Population(void);
 
+  template<typename L>
+  void RegisterBoolean( void ) { m_tb.RegisterBoolean<L>(); };
+  template<typename L>
+  void RegisterDouble( void ) { m_tb.RegisterDouble<L>(); };
+
   const vGeneration_t& CurrentGeneration( void ) { return *m_pvCurGeneration; };
 
   bool MakeNewGeneration( bool bCopyValues );
