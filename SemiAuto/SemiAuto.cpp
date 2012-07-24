@@ -133,12 +133,12 @@ bool AppSemiAuto::OnInit() {
   // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCG12" ) ? mgr.Get( "+GCG12" ) : mgr.ConstructFuture( "+GCG12", "SMART", 2012, 02 ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCJ12" ) ? mgr.Get( "+GCJ12" ) : mgr.ConstructFuture( "+GCJ12", "SMART", 2012, 04 ) ) );
-//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCM12" ) ? mgr.Get( "+GCM12" ) : mgr.ConstructFuture( "+GCM12", "SMART", 2012, 06 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012,  8 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCU12" ) ? mgr.Get( "+GCU12" ) : mgr.ConstructFuture( "+GCU12", "SMART", 2012,  9 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCV12" ) ? mgr.Get( "+GCV12" ) : mgr.ConstructFuture( "+GCV12", "SMART", 2012, 10 ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );
+//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
+//  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );
 //  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLJ12" ) ? mgr.Get( "+CLJ12" ) : mgr.ConstructFuture( "+CLJ12", "SMART", 2012, 04 ) ) );
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "GLD" ) ? mgr.Get( "GLD" ) : mgr.ConstructInstrument( "GLD", "SMART", ou::tf::InstrumentType::Stock ) ) );
@@ -435,7 +435,7 @@ void AppSemiAuto::HandleFrameManualOrderFocus( unsigned int ix ) {
   m_curDialogManualOrder = ix;
 }
 
-void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {  // need to handle cross thread
+void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {  // need to handle cross thread
   assert( m_curDialogManualOrder < m_vManualOrders.size() );
   m_vManualOrders[ m_curDialogManualOrder ].details = details;
   m_vManualOrders[ m_curDialogManualOrder ].pInstrument = pInstrument;
@@ -450,7 +450,7 @@ void AppSemiAuto::HandleManualOrder( const ManualOrder_t& order ) {
     CInstrumentManager& mgr( CInstrumentManager::Instance() );
     pInstrument_t pInstrument = m_vManualOrders[ m_curDialogManualOrder ].pInstrument;
     if ( !mgr.Exists( pInstrument ) ) {
-      mgr.Construct( pInstrument );
+      mgr.Register( pInstrument );
     }
     if ( 0 == m_pPosition.get() ) {
       m_pPosition = ou::tf::CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "Dell", "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );

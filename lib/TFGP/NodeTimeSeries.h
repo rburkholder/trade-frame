@@ -48,7 +48,7 @@ class NodeTSTrade: public NodeTimeSeries<NodeTSTrade, ou::tf::Trades> {
 public:
   NodeTSTrade(void);
   ~NodeTSTrade(void);
-  void ToString( std::stringstream& ss ) const { ss << "trade()"; };
+  void ToString( std::stringstream& ss ) const { ss << m_pTimeSeries->GetName() << ".price()"; };
   double EvaluateDouble( void );
 protected:
 private:
@@ -60,7 +60,7 @@ class NodeTSQuoteBid: public NodeTimeSeries<NodeTSQuoteBid, ou::tf::Quotes> {
 public:
   NodeTSQuoteBid(void);
   ~NodeTSQuoteBid(void);
-  void ToString( std::stringstream& ss ) const { ss << "bid()"; };
+  void ToString( std::stringstream& ss ) const { ss << m_pTimeSeries->GetName() << ".bid()"; };
   double EvaluateDouble( void );
 protected:
 private:
@@ -70,7 +70,7 @@ class NodeTSQuoteAsk: public NodeTimeSeries<NodeTSQuoteAsk, ou::tf::Quotes> {
 public:
   NodeTSQuoteAsk(void);
   ~NodeTSQuoteAsk(void);
-  void ToString( std::stringstream& ss ) const { ss << "ask()"; };
+  void ToString( std::stringstream& ss ) const { ss << m_pTimeSeries->GetName() << ".ask()"; };
   double EvaluateDouble( void );
 protected:
 private:
@@ -80,7 +80,7 @@ class NodeTSQuoteMid: public NodeTimeSeries<NodeTSQuoteMid, ou::tf::Quotes> {
 public:
   NodeTSQuoteMid(void);
   ~NodeTSQuoteMid(void);
-  void ToString( std::stringstream& ss ) const { ss << "mid()"; };
+  void ToString( std::stringstream& ss ) const { ss << m_pTimeSeries->GetName() << ".mid()"; };
   double EvaluateDouble( void );
 protected:
 private:
@@ -92,7 +92,7 @@ class NodeTSPrice: public NodeTimeSeries<NodeTSPrice, ou::tf::Prices> {
 public:
   NodeTSPrice(void);
   ~NodeTSPrice(void);
-  void ToString( std::stringstream& ss ) const { ss << "price()"; };
+  void ToString( std::stringstream& ss ) const { ss << m_pTimeSeries->GetName() << ".value()"; };
   double EvaluateDouble( void );
 protected:
 private:

@@ -22,21 +22,21 @@
 
 InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ), m_nSignificantDigits( nSigDigits )
+    m_stats( m_quotes, time_duration( 0, 14, 0 ) ), m_stoch( m_quotes, time_duration( 0, 9, 0 ) ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
 InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
-    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ), m_nSignificantDigits( nSigDigits )
+    m_stats( m_quotes, time_duration( 0, 14, 0 ) ), m_stoch( m_quotes, time_duration( 0, 9, 0 ) ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
 InstrumentData::InstrumentData( const InstrumentData& data ) 
   : m_pInstrument( data.m_pInstrument ),  // only instrument is copied, everything else starts at scratch
-    m_stats( &m_quotes, minutes( 14 ) ), m_stoch( &m_quotes, minutes( 9 ) ),
+    m_stats( m_quotes, time_duration( 0, 14, 0 ) ), m_stoch( m_quotes, time_duration( 0, 9, 0 ) ),
     m_nSignificantDigits( data.m_nSignificantDigits )
 {
   Init();
@@ -97,7 +97,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
     wtsQuotes.Write( sPathName, &m_quotes );
     ou::tf::CHDF5Attributes attrQuotes( sPathName, future );
     //attrQuotes.SetMultiplier( 1 );
@@ -107,7 +107,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades;
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
     wtsTrades.Write( sPathName, &m_trades );
     ou::tf::CHDF5Attributes attrTrades( sPathName, future );
     //attrTrades.SetMultiplier( 1 );

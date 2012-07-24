@@ -179,7 +179,7 @@ private:
   void HandleOnCleanUpForExitForFrameMain( int );
 
   void HandleCheckSymbolNameAgainstIB( const std::string& );
-  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails&, const pInstrument_t& pInstrument );
+  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails&, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
   void HandleSaveSeriesEvent( void );

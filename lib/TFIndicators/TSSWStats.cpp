@@ -73,7 +73,7 @@ void TSSWStatsQuote::Expire( const Quote &quote ) {
 // MidQuote
 //
 
-TSSWStatsMidQuote::TSSWStatsMidQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
+TSSWStatsMidQuote::TSSWStatsMidQuote(Quotes& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
 {
 }

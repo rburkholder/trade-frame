@@ -54,6 +54,7 @@ void CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) 
   }
 
   // prepare to add position to instrument named map
+  // instrument can only have one position associated with it
   const std::string& sInstrumentName( pPosition->GetInstrument()->GetInstrumentName() );
   iterator iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
   if ( m_mapPositionsViaInstrumentName.end() != iterInst ) {

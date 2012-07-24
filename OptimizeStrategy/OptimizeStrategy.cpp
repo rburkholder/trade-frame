@@ -65,7 +65,7 @@ bool AppOptimizeStrategy::OnInit( void ) {
 //  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
-  m_pInstrument = mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 );
+  m_pInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 8 );
   m_pInstrument->SetMultiplier( 100 );
   m_pInstrument->SetMinTick( 0.1 );
 
@@ -91,6 +91,8 @@ bool AppOptimizeStrategy::OnInit( void ) {
   * at end of time series, calculate 'winner'
   */
 
+  // add optimization code so that copied individuals are not recomputed
+
   // can parallize this once all is working sequentially
   while ( pop.MakeNewGeneration( true ) ) {
     const vGeneration_t& gen( pop.CurrentGeneration() );
@@ -99,12 +101,23 @@ bool AppOptimizeStrategy::OnInit( void ) {
       m_pswStrategy->Set( 
         fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
         fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
-      m_pswStrategy->Start( m_pInstrument, "/semiauto/2011-Sep-23 19:17:48.252497" );  // run provider synchronously
+      //m_pswStrategy->Start( m_pInstrument, "/semiauto/2011-Sep-23 19:17:48.252497" );  // run provider synchronously
+      m_pswStrategy->Start( m_pInstrument, "/app/semiauto/2012-Jul-22 18:08:14.285807" );  // run provider synchronously
       const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
       delete m_pswStrategy;
       m_pswStrategy = 0;
     }
     pop.CalcFitness();
+
+    // optimization:
+    // number of trades similar to number in ZigZag?
+    // minimize drawdown 
+    // # winning trades > # losing trades, 60/40?  70/30?
+    // pareto minimum concept
+
+    std::stringstream ss;
+    gen.front().TreeToString( ss );
+    std::cout << gen.front().m_dblRawFitness << ", " << ss << std::endl;
   }
 
   return 1;

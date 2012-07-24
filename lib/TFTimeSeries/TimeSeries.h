@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <string>
 
 #include <OUCommon/Delegate.h>
 
@@ -49,7 +50,8 @@ public:
   typedef typename std::vector<T>::const_reference const_reference;
 
   TimeSeries<T>( void );
-  TimeSeries<T>( size_type Size );
+  TimeSeries<T>( size_type nSize );
+  TimeSeries<T>( const std::string& sName, size_type nSize = 0 );
   TimeSeries<T>( const TimeSeries<T>& );
   virtual ~TimeSeries<T>( void );
 
@@ -85,19 +87,31 @@ public:
 
   ou::Delegate<const T&> OnAppend;
 
+  void SetName( const std::string& sName ) { m_sName = sName; };
+  const std::string& GetName( void ) { return m_sName; };
+
   virtual TimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
   virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
 
-  H5::DataSpace* DefineDataSpace( H5::DataSpace *pSpace = NULL );
+  H5::DataSpace* DefineDataSpace( H5::DataSpace* pSpace = NULL );
+
+  void Reserve( size_type n ) { m_vSeries.reserve( n ); };
 
 protected:
 private:
   std::vector<T> m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
+  std::string m_sName;
 };
 
 template<typename T> 
 TimeSeries<T>::TimeSeries(void): m_vIterator( m_vSeries.end() ) {
+}
+
+template<typename T> 
+TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
+  : m_vIterator( m_vSeries.end() ), m_sName( sName ) {
+  if ( 0 != nSize ) m_vSeries.reserve( size );
 }
 
 template<typename T> 

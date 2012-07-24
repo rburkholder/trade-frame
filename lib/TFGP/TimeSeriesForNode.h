@@ -27,11 +27,9 @@ class TimeSeriesForNode {
 public:
   typedef FastDelegate1<TimeSeriesForNode<TS>&> OnNodeTimeSeriesCreatedHandler;
 private:
-
-  TS* m_pTimeSeries;
   static boost::thread_specific_ptr<OnNodeTimeSeriesCreatedHandler> m_tsp;  
-
 protected:
+  TS* m_pTimeSeries;
 public:
 
   TimeSeriesForNode( void );
@@ -70,8 +68,9 @@ boost::thread_specific_ptr<typename TimeSeriesForNode<TS>::OnNodeTimeSeriesCreat
 template<typename TS>
 TimeSeriesForNode<TS>::TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
   OnNodeTimeSeriesCreatedHandler* pHandler = m_tsp.get();
-  if ( 0 != *pHandler )
-    (*pHandler)( *this ); // obtain a new value for m_pTimeSeries
+  if ( 0 != pHandler )
+    if ( 0 != *pHandler ) 
+      (*pHandler)( *this ); // obtain a new value for m_pTimeSeries
 }
 
 template<typename TS>

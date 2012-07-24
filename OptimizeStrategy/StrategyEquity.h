@@ -22,7 +22,7 @@
 #include <OUCommon/FastDelegate.h>
 
 #include <TFSimulation/SimulationProvider.h>
-#include <TFTrading/PortfolioManager.h>
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/Instrument.h>
 
@@ -54,8 +54,6 @@ private:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
-  //typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
-  //typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
 
   enum enumTimeFrames { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
   enum enumTradeState { ENeutral, ELong, EShort };
@@ -76,11 +74,11 @@ private:
 
   pProviderSim_t m_pProvider;
 
-  //pPortfolio_t m_pPortfolio;
   ou::tf::CPortfolio m_portfolio;
 
-  pPosition_t m_pPositionLong;
-  pPosition_t m_pPositionShort;
+//  pPosition_t m_pPositionLong;
+//  pPosition_t m_pPositionShort;
+  pPosition_t m_pPosition;
 
   pOrder_t m_pOrder;  // active order
 
@@ -97,6 +95,8 @@ private:
   ou::gp::TimeSeriesRegistration<ou::tf::Prices> m_RegisteredPrices;
   ou::gp::TimeSeriesRegistration<ou::tf::Quotes> m_RegisteredQuotes;
   ou::gp::TimeSeriesRegistration<ou::tf::Trades> m_RegisteredTrades;
+
+  void Trade( void );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

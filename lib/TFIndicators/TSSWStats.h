@@ -106,7 +106,7 @@ class TSSWStatsMidQuote: public TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, 
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>;
   friend TimeSeriesSlidingWindow<TSSWStatsMidQuote, Quote>;
 public:
-  TSSWStatsMidQuote( TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsMidQuote( Quotes& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   ~TSSWStatsMidQuote( void );
 protected:
   void Add( const Quote &quote ); // override to process elements passing into window scope
