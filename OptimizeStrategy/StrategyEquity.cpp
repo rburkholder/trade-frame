@@ -16,15 +16,20 @@
 
 #include "StrategyEquity.h"
 
-StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument ) 
+StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument, const boost::gregorian::date& dateStart ) 
   : m_pProvider( pProvider ), m_pUnderlying( pInstrument ),
     m_stateTimeFrame( EPreOpen ), m_stateTrading( ENeutral ),
     m_pfnLong( 0 ), m_pfnShort( 0 ),
     m_portfolio( "gp" ), 
     m_timeOpeningBell( 19, 0, 0 ),
-    m_timeCancel( 16, 40, 0 ),
-    m_timeClose( 16, 45, 0 ),
+    m_timeCancelTrades( 16, 40, 0 ),
+    m_timeClosePositions( 16, 45, 0 ),
     m_timeClosingBell( 17, 0, 0 ),
+    m_dtOpeningBell( dateStart, m_timeOpeningBell ),
+    m_dtStartTrading( m_dtOpeningBell + time_duration( 0, 16, 0 ) ),
+    m_dtCancelTrades( dateStart + date_duration( 1 ), m_timeCancelTrades ),
+    m_dtClosePositions( dateStart + date_duration( 1 ), m_timeClosePositions ),
+    m_dtClosingBell( dateStart + date_duration( 1 ), m_timeClosingBell ),
     m_emaQuotes1( m_quotes, time_duration( 0,  2, 0 ) ), //  2 minutes
     m_emaQuotes2( m_quotes, time_duration( 0,  8, 0 ) ), //  8 minutes
     m_emaQuotes3( m_quotes, time_duration( 0, 32, 0 ) ) // 32 minutes
@@ -69,14 +74,14 @@ void StrategyEquity::Stop( void ) {
 
 void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
 
-  time_duration td( quote.DateTime().time_of_day() );
+  ptime dt( quote.DateTime() );
 
   if ( quote.IsValid() ) {
     m_quotes.Append( quote );
 
     switch ( m_stateTimeFrame ) {
     case EPreOpen:
-      if ( m_timeOpeningBell <= td ) {
+      if ( m_dtOpeningBell <= dt ) {
         m_stateTimeFrame = EBellHeard;
       }
       break;
@@ -84,7 +89,7 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
       m_stateTimeFrame = EPauseForQuotes;
       break;
     case EPauseForQuotes:
-      if ( ( m_timeOpeningBell + time_duration( 0, 28, 0 ) ) <= td ) {
+      if ( m_dtStartTrading <= dt ) {
         m_stateTimeFrame = EAfterBell;
       }
       break;
@@ -92,7 +97,7 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
       m_stateTimeFrame = ETrading;
       break;
     case ETrading:
-      if ( m_timeCancel <= td ) {
+      if ( m_dtCancelTrades <= dt ) {
         m_pPosition->CancelOrders();
         m_stateTimeFrame = ECancelling;
       }
@@ -101,7 +106,7 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
       }
       break;
     case ECancelling:
-      if ( m_timeClose <= td ) {
+      if ( m_dtClosePositions <= dt ) {
         m_pPosition->ClosePosition();
         m_stateTimeFrame = EClosing;
       }
@@ -110,7 +115,7 @@ void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
       assert( false );
       break;
     case EClosing:
-      if ( m_timeClosingBell <= td ) {
+      if ( m_dtClosingBell <= dt ) {
         m_stateTimeFrame = EAfterHours;
       }
       break;

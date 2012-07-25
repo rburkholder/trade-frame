@@ -93,6 +93,8 @@ bool AppOptimizeStrategy::OnInit( void ) {
 
   // add optimization code so that copied individuals are not recomputed
 
+  std::stringstream ss;
+
   // can parallize this once all is working sequentially
   while ( pop.MakeNewGeneration( true ) ) {
     const vGeneration_t& gen( pop.CurrentGeneration() );
@@ -101,8 +103,11 @@ bool AppOptimizeStrategy::OnInit( void ) {
       m_pswStrategy->Set( 
         fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
         fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
+      ss.str( "" );
+      ind.TreeToString( ss );
+      std::cout << ss << std::endl;
       //m_pswStrategy->Start( m_pInstrument, "/semiauto/2011-Sep-23 19:17:48.252497" );  // run provider synchronously
-      m_pswStrategy->Start( m_pInstrument, "/app/semiauto/2012-Jul-22 18:08:14.285807" );  // run provider synchronously
+      m_pswStrategy->Start( m_pInstrument, "/app/semiauto/2012-Jul-22 18:08:14.285807", date( 2012, 7, 22 ) );  // run provider synchronously
       const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
       delete m_pswStrategy;
       m_pswStrategy = 0;
@@ -115,7 +120,7 @@ bool AppOptimizeStrategy::OnInit( void ) {
     // # winning trades > # losing trades, 60/40?  70/30?
     // pareto minimum concept
 
-    std::stringstream ss;
+    ss.str( "" );
     gen.front().TreeToString( ss );
     std::cout << gen.front().m_dblRawFitness << ", " << ss << std::endl;
   }

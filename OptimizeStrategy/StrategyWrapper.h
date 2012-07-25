@@ -33,7 +33,7 @@ public:
   ~StrategyWrapper(void);
 
   void Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
-  void Start( pInstrument_t pInstrument, const std::string& sSourcePath );
+  void Start( pInstrument_t pInstrument, const std::string& sSourcePath, const boost::gregorian::date& dateStart );
   double GetPL( void );
   void Stop( void );
 
@@ -41,6 +41,8 @@ protected:
 private:
 
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+
+  date m_dtStart;
 
   fdEvaluate_t m_pfnLong;  // placeholder only
   fdEvaluate_t m_pfnShort; // placeholder only, no execution

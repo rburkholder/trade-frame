@@ -31,7 +31,8 @@ void StrategyWrapper::Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
   m_pfnShort = pfnShort;
 }
 
-void StrategyWrapper::Start( pInstrument_t pInstrument, const std::string& sSourcePath ) {
+void StrategyWrapper::Start( pInstrument_t pInstrument, const std::string& sSourcePath, const boost::gregorian::date& dateStart ) {
+  m_dtStart = dateStart;
   m_pInstrument = pInstrument;
   m_pProvider.reset( new ou::tf::CSimulationProvider );
   m_pProvider->SetGroupDirectory( sSourcePath );
@@ -47,7 +48,7 @@ void StrategyWrapper::Stop( void ) {
 void StrategyWrapper::HandleProviderConnected( int i ) {
 
   m_bRunning = true;
-  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument );
+  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument, m_dtStart );
   m_pStrategy->Set( m_pfnLong, m_pfnShort );
   m_pStrategy->Start();
 

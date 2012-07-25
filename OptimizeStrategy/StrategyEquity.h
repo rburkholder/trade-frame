@@ -40,7 +40,7 @@ public:
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef fastdelegate::FastDelegate0<bool> fdEvaluate_t;
 
-  StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument );
+  StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument, const boost::gregorian::date& dateStart );
   ~StrategyEquity(void);
 
   void Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
@@ -67,7 +67,8 @@ private:
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
-  time_duration m_timeOpeningBell, m_timeCancel, m_timeClose, m_timeClosingBell;
+  time_duration m_timeOpeningBell, m_timeCancelTrades, m_timeClosePositions, m_timeClosingBell;
+  ptime m_dtOpeningBell, m_dtStartTrading, m_dtCancelTrades, m_dtClosePositions, m_dtClosingBell;
 
   pInstrument_t m_pUnderlying;
   std::string m_sUnderlying;
@@ -76,8 +77,6 @@ private:
 
   ou::tf::CPortfolio m_portfolio;
 
-//  pPosition_t m_pPositionLong;
-//  pPosition_t m_pPositionShort;
   pPosition_t m_pPosition;
 
   pOrder_t m_pOrder;  // active order
