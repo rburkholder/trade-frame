@@ -76,6 +76,8 @@ public:
 
   Node* Replicate( bool bCopyValues );
 
+  virtual void PreProcess( void ) {}; // used with Genetic Programming Module for initializating time series
+
 protected:
 
   NodeType::E m_ReturnType;

@@ -14,6 +14,9 @@
 
 #include "StdAfx.h"
 
+#include <boost/fusion/include/at_key.hpp>
+#include <boost/fusion/include/has_key.hpp>
+
 #include "StrategyEquity.h"
 
 StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument, const boost::gregorian::date& dateStart ) 
@@ -34,29 +37,50 @@ StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrum
     m_emaQuotes2( m_quotes, time_duration( 0,  8, 0 ) ), //  8 minutes
     m_emaQuotes3( m_quotes, time_duration( 0, 32, 0 ) ) // 32 minutes
 {
-  m_emaQuotes1.SetName( "Q1" );
-  m_emaQuotes2.SetName( "Q2" );
-  m_emaQuotes3.SetName( "Q3" );
+
+  m_emaQuotes1.SetName( "EMA1" );
+  m_emaQuotes2.SetName( "EMA2" );
+  m_emaQuotes3.SetName( "EMA3" );
+
   m_quotes.SetName( "Q" );
   m_trades.SetName( "T" );
+
   m_quotes.Reserve( 400000 );
   m_trades.Reserve( 100000 );
+
 }
 
 StrategyEquity::~StrategyEquity(void) {
 }
 
-void StrategyEquity::Start( void ) {
+void StrategyEquity::Register( registrations_t& registrations, ou::tf::Prices* series ) {
+  assert( boost::fusion::has_key<ou::gp::TimeSeriesRegistration<ou::tf::Prices> >( registrations ) );
+  boost::fusion::at_key<ou::gp::TimeSeriesRegistration<ou::tf::Prices> >( registrations ).Register( series );
+}
 
-  Register( &m_quotes );
-  Register( &m_trades );
-  Register( &m_emaQuotes1 );
-  Register( &m_emaQuotes2 );
-  Register( &m_emaQuotes3 );
+void StrategyEquity::Register( registrations_t& registrations, ou::tf::Quotes* series ) {
+  assert( boost::fusion::has_key<ou::gp::TimeSeriesRegistration<ou::tf::Quotes> >( registrations ) );
+  boost::fusion::at_key<ou::gp::TimeSeriesRegistration<ou::tf::Quotes> >( registrations ).Register( series );
+}
+
+void StrategyEquity::Register( registrations_t& registrations, ou::tf::Trades* series ) {
+  assert( boost::fusion::has_key<ou::gp::TimeSeriesRegistration<ou::tf::Trades> >( registrations ) );
+  boost::fusion::at_key<ou::gp::TimeSeriesRegistration<ou::tf::Trades> >( registrations ).Register( series );
+}
+
+void StrategyEquity::Init( StrategyEquity::registrations_t& registrations, fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
+
+  m_pfnLong = pfnLong;
+  m_pfnShort = pfnShort;
+
+  Register( registrations, &m_quotes );
+  Register( registrations, &m_trades );
+  Register( registrations, &m_emaQuotes1 );
+  Register( registrations, &m_emaQuotes2 );
+  Register( registrations, &m_emaQuotes3 );
 
   m_pPosition.reset( new ou::tf::CPosition( m_pUnderlying, m_pProvider, m_pProvider ) );
   m_portfolio.AddPosition( "pos", m_pPosition );
-
 
   m_pProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleQuote ) );
   m_pProvider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleTrade ) );
@@ -67,9 +91,13 @@ double StrategyEquity::GetPL( void ) {
   return m_portfolio.GetRow().dblRealizedPL;
 }
 
-void StrategyEquity::Stop( void ) {
+void StrategyEquity::End( void ) {
   m_pProvider->RemoveQuoteHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleQuote ) );
   m_pProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleTrade ) );
+}
+
+void StrategyEquity::HandleTrade( const ou::tf::Trade& trade ) {
+  m_trades.Append( trade );
 }
 
 void StrategyEquity::HandleQuote( const ou::tf::Quote& quote ) {
@@ -172,23 +200,3 @@ void StrategyEquity::Trade( void ) {
   }
 }
 
-void StrategyEquity::HandleTrade( const ou::tf::Trade& trade ) {
-  m_trades.Append( trade );
-}
-
-void StrategyEquity::Register( ou::tf::Prices* series ) {
-  m_RegisteredPrices.Register( series );
-}
-
-void StrategyEquity::Register( ou::tf::Quotes* series ) {
-  m_RegisteredQuotes.Register( series );
-}
-
-void StrategyEquity::Register( ou::tf::Trades* series ) {
-  m_RegisteredTrades.Register( series );
-}
-
-void StrategyEquity::Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
-  m_pfnLong = pfnLong;
-  m_pfnShort = pfnShort;
-}

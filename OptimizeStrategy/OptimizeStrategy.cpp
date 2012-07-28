@@ -72,8 +72,7 @@ bool AppOptimizeStrategy::OnInit( void ) {
   // manage the genetic programming discovery process here
   ou::gp::Population pop( 100 );
 
-  // Register time series types for use by registrations in strategy
-  pop.RegisterDouble<ou::gp::NodeTypesTimeSeries_t>();
+  pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 
   /*
   steps:
@@ -94,20 +93,44 @@ bool AppOptimizeStrategy::OnInit( void ) {
   // add optimization code so that copied individuals are not recomputed
 
   std::stringstream ss;
+  struct PreProcessNodes {
+    void operator()( ou::gp::Node& node ) {
+      node.PreProcess();  // set time series on nodes of type time series
+      switch ( node.NodeCount() ) {
+      case 0:
+        break;
+      case 1:
+        (*this)( node.ChildCenter() );
+        break;
+      case 2: 
+        (*this)( node.ChildLeft() );
+        (*this)( node.ChildRight() );
+        break;
+      }
+    }
+    void operator()( ou::gp::RootNode** pNode ) {
+      (*this)( **pNode );
+    }
+  };
 
   // can parallize this once all is working sequentially
   while ( pop.MakeNewGeneration( true ) ) {
     const vGeneration_t& gen( pop.CurrentGeneration() );
     BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
       m_pswStrategy = new StrategyWrapper;
-      m_pswStrategy->Set( 
+      StrategyEquity::registrations_t m_registrations;
+      m_pswStrategy->Init( 
+        m_registrations,
+        m_pInstrument, date( 2012, 7, 22 ), "/app/semiauto/2012-Jul-22 18:08:14.285807",
         fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
         fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
+      // update nodes with specific time series:
+      static_cast<ou::gp::Individual>(ind).m_Signals.EachSignal( PreProcessNodes() );
+      // output the time series description:
       ss.str( "" );
       ind.TreeToString( ss );
       std::cout << ss << std::endl;
-      //m_pswStrategy->Start( m_pInstrument, "/semiauto/2011-Sep-23 19:17:48.252497" );  // run provider synchronously
-      m_pswStrategy->Start( m_pInstrument, "/app/semiauto/2012-Jul-22 18:08:14.285807", date( 2012, 7, 22 ) );  // run provider synchronously
+      m_pswStrategy->Start();  // run provider synchronously
       const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
       delete m_pswStrategy;
       m_pswStrategy = 0;

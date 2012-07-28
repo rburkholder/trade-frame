@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <boost/thread/tss.hpp>
-
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -25,10 +23,9 @@ namespace gp { // genetic programming
 template<typename TS> // TS TimeSeries
 class TimeSeriesForNode {
 public:
-  typedef FastDelegate1<TimeSeriesForNode<TS>&> OnNodeTimeSeriesCreatedHandler;
 private:
-  static boost::thread_specific_ptr<OnNodeTimeSeriesCreatedHandler> m_tsp;  
 protected:
+  typename TS::size_type m_ixTimeSeries;
   TS* m_pTimeSeries;
 public:
 
@@ -43,34 +40,14 @@ public:
     return *this;
   }
 
-  static void Set( OnNodeTimeSeriesCreatedHandler function ) { 
-    if ( 0 != m_tsp.get() ) {
-      assert( false );
-    }
-    OnNodeTimeSeriesCreatedHandler* pHandler = new OnNodeTimeSeriesCreatedHandler;
-    m_tsp.reset( pHandler );
-    *pHandler = function;
-  };
-  static void Clear( void ) { 
-    OnNodeTimeSeriesCreatedHandler* pHandler = m_tsp.get();
-    *pHandler = 0;
-    m_tsp.reset();
-  };
-
+  typename TS::size_type GetAssignedTimeSeriesIndex( void ) { return m_ixTimeSeries; };
   void Set( TS* pTimeSeries ) { m_pTimeSeries = pTimeSeries; };
   TS* TimeSeries( void ) const { return m_pTimeSeries; };
 
 };
 
 template<typename TS>
-boost::thread_specific_ptr<typename TimeSeriesForNode<TS>::OnNodeTimeSeriesCreatedHandler> TimeSeriesForNode<TS>::m_tsp;  
-
-template<typename TS>
 TimeSeriesForNode<TS>::TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
-  OnNodeTimeSeriesCreatedHandler* pHandler = m_tsp.get();
-  if ( 0 != pHandler )
-    if ( 0 != *pHandler ) 
-      (*pHandler)( *this ); // obtain a new value for m_pTimeSeries
 }
 
 template<typename TS>

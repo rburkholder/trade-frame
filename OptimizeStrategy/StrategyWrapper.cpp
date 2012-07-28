@@ -26,16 +26,22 @@ StrategyWrapper::StrategyWrapper(void)
 StrategyWrapper::~StrategyWrapper(void) {
 }
 
-void StrategyWrapper::Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) {
-  m_pfnLong = pfnLong;
-  m_pfnShort = pfnShort;
-}
-
-void StrategyWrapper::Start( pInstrument_t pInstrument, const std::string& sSourcePath, const boost::gregorian::date& dateStart ) {
+void StrategyWrapper::Init( 
+  StrategyEquity::registrations_t& registrations, 
+  pInstrument_t pInstrument, 
+  const boost::gregorian::date& dateStart, 
+  const std::string& sSourcePath, 
+  fdEvaluate_t pfnLong, fdEvaluate_t pfnShort ) 
+{
   m_dtStart = dateStart;
   m_pInstrument = pInstrument;
   m_pProvider.reset( new ou::tf::CSimulationProvider );
   m_pProvider->SetGroupDirectory( sSourcePath );
+  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument, m_dtStart );
+  m_pStrategy->Init( registrations, pfnLong, pfnShort );
+}
+
+void StrategyWrapper::Start( void ) {
   m_pProvider->OnConnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
   m_pProvider->OnDisconnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_pProvider->Connect();
@@ -48,9 +54,6 @@ void StrategyWrapper::Stop( void ) {
 void StrategyWrapper::HandleProviderConnected( int i ) {
 
   m_bRunning = true;
-  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument, m_dtStart );
-  m_pStrategy->Set( m_pfnLong, m_pfnShort );
-  m_pStrategy->Start();
 
 //  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
   
@@ -64,7 +67,7 @@ void StrategyWrapper::HandleProviderDisconnected( int i ) {
   m_pProvider->OnConnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
   m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_bRunning = false;
-  m_pStrategy->Stop();
+  m_pStrategy->End();
   delete m_pStrategy;
   m_pStrategy = 0;
   m_pProvider.reset();

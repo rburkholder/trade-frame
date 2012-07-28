@@ -32,8 +32,13 @@ public:
   StrategyWrapper(void);
   ~StrategyWrapper(void);
 
-  void Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
-  void Start( pInstrument_t pInstrument, const std::string& sSourcePath, const boost::gregorian::date& dateStart );
+  void Init( 
+    StrategyEquity::registrations_t& registrations,
+    pInstrument_t pInstrument, 
+    const boost::gregorian::date& dateStart, 
+    const std::string& sSourcePath, 
+    fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
+  void Start( void );
   double GetPL( void );
   void Stop( void );
 
@@ -43,9 +48,6 @@ private:
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
 
   date m_dtStart;
-
-  fdEvaluate_t m_pfnLong;  // placeholder only
-  fdEvaluate_t m_pfnShort; // placeholder only, no execution
 
   bool m_bRunning;
 

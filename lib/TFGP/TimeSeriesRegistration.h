@@ -19,8 +19,6 @@
 #include <boost/random.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-#include "TimeSeriesForNode.h"
-
 namespace ou { // One Unified
 namespace gp { // genetic programming
 namespace rng {  // dependent upon linking OUGP/NodeDouble.cpp
@@ -30,43 +28,35 @@ namespace rng {  // dependent upon linking OUGP/NodeDouble.cpp
 template<typename TS>  // Trades, Quotes, Prices
 class TimeSeriesRegistration {
 public:
+  typedef TS TimeSeries_t;
+  typedef typename TS::size_type size_type;
   TimeSeriesRegistration(void);
   ~TimeSeriesRegistration(void);
-
   void Register( TS* series );
+  static void SetTimeSeries( TS** series, size_type ix ) { *series = m_this->m_vTimeSeries[ ix ]; };
 protected:
 private:
   typedef std::vector<TS*> vTimeSeries_t;
   vTimeSeries_t m_vTimeSeries;
-  void HandleTimeSeriesRequest( TimeSeriesForNode<TS>& node );
+  static TimeSeriesRegistration<TS>* m_this; // used for static reconstruction
 };
 
 template<typename TS>
+TimeSeriesRegistration<TS>* TimeSeriesRegistration<TS>::m_this;
+
+template<typename TS>
 TimeSeriesRegistration<TS>::TimeSeriesRegistration(void) {
-  TimeSeriesForNode<TS>::Set( MakeDelegate( this, &TimeSeriesRegistration<TS>::HandleTimeSeriesRequest ) );
+  m_this = this;
 }
 
 template<typename TS>
 TimeSeriesRegistration<TS>::~TimeSeriesRegistration(void) { 
-  TimeSeriesForNode<TS>::Clear();
   m_vTimeSeries.clear();
 }
 
 template<typename TS>
 void TimeSeriesRegistration<TS>::Register( TS* series ) {
   m_vTimeSeries.push_back( series );
-}
-
-template<typename TS>
-void TimeSeriesRegistration<TS>::HandleTimeSeriesRequest( TimeSeriesForNode<TS>& node ) {
-  if ( 0 == m_vTimeSeries.size() ) {
-    assert( false );  // need non-zero sized timeseries.  probably logic error somewhere.
-  }
-  else {
-    boost::random::uniform_int_distribution<vTimeSeries_t::size_type> dist( 0, m_vTimeSeries.size() - 1 );  // closed range
-    vTimeSeries_t::size_type ix( dist( rng::common ) );
-    node.Set( m_vTimeSeries[ ix ] );
-  }
 }
 
 } // namespace gp

@@ -18,6 +18,7 @@
 //  ie, similar to what is in StrategyRunner
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/fusion/container/set.hpp>
 
 #include <OUCommon/FastDelegate.h>
 
@@ -31,6 +32,7 @@
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
 
+#include <TFGP/NodeTimeSeries.h>
 #include <TFGP/TimeSeriesRegistration.h>
 
 class StrategyEquity {
@@ -39,14 +41,30 @@ public:
   typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef fastdelegate::FastDelegate0<bool> fdEvaluate_t;
+  typedef boost::fusion::set<
+    ou::gp::IndexedNode<ou::gp::NodeTSQuoteBid,0>, // main quotes
+    ou::gp::IndexedNode<ou::gp::NodeTSQuoteMid,0>, // main quotes
+    ou::gp::IndexedNode<ou::gp::NodeTSQuoteAsk,0>, // main quotes
+    ou::gp::IndexedNode<ou::gp::NodeTSTrade,0>, // main trades
+    ou::gp::IndexedNode<ou::gp::NodeTSPrice,0>, // ema1
+    ou::gp::IndexedNode<ou::gp::NodeTSPrice,1>, // ema2
+    ou::gp::IndexedNode<ou::gp::NodeTSPrice,2>  // ema3
+  > NodeTypesTimeSeries_t;
+
+    typedef boost::fusion::set<
+      ou::gp::TimeSeriesRegistration<ou::tf::Quotes>,
+      ou::gp::TimeSeriesRegistration<ou::tf::Trades>,
+      ou::gp::TimeSeriesRegistration<ou::tf::Prices>
+    > registrations_t;
 
   StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument, const boost::gregorian::date& dateStart );
   ~StrategyEquity(void);
 
-  void Set( fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
-  void Start( void );  // for simulation
+  void Init( 
+    StrategyEquity::registrations_t& registrations,
+    fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );  // for simulation
   double GetPL( void );
-  void Stop( void );
+  void End( void );
 
 protected:
 private:
@@ -87,13 +105,9 @@ private:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_emaQuotes3;
 
-  void Register( ou::tf::Prices* series );
-  void Register( ou::tf::Quotes* series );
-  void Register( ou::tf::Trades* series );
-
-  ou::gp::TimeSeriesRegistration<ou::tf::Prices> m_RegisteredPrices;
-  ou::gp::TimeSeriesRegistration<ou::tf::Quotes> m_RegisteredQuotes;
-  ou::gp::TimeSeriesRegistration<ou::tf::Trades> m_RegisteredTrades;
+  void Register( registrations_t&, ou::tf::Quotes* series );
+  void Register( registrations_t&, ou::tf::Trades* series );
+  void Register( registrations_t&, ou::tf::Prices* series );
 
   void Trade( void );
 

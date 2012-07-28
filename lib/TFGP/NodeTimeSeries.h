@@ -14,13 +14,12 @@
 
 #pragma once
 
-#include <boost/fusion/container/vector.hpp>
-
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <OUGP/Node.h>
 
 #include "TimeSeriesForNode.h"
+#include "TimeSeriesRegistration.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
@@ -30,6 +29,9 @@ class NodeTimeSeries: public NodeDouble<N>, public TimeSeriesForNode<TS> {
 public:
   NodeTimeSeries( void );
   ~NodeTimeSeries( void );
+  virtual void PreProcess( void ) {
+    TimeSeriesRegistration<TS>::SetTimeSeries( &m_pTimeSeries, m_ixTimeSeries );
+  }
 protected:
 private:
 };
@@ -100,7 +102,17 @@ private:
 
 // =======================
 
-typedef boost::fusion::vector<NodeTSTrade, NodeTSQuoteBid, NodeTSQuoteAsk, NodeTSQuoteMid, NodeTSPrice> NodeTypesTimeSeries_t;
+template<typename Node, size_t ixTimeSeries>
+class IndexedNode: public Node {
+public:
+  IndexedNode( void ) {
+    m_ixTimeSeries = ixTimeSeries;
+  };
+  ~IndexedNode( void ) {};
+  
+protected:
+private:
+};
 
 } // namespace gp
 } // namespace ou
