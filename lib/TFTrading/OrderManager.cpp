@@ -86,23 +86,26 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
   pOrder->SetOrderId( id );
   // need to create an exception free way to check that order does not exist, in the meantime:
   try {
-    iterOrders_t iter = LocateOrder( id );
-    if ( m_mapOrders.end() != iter ) {
-      throw std::runtime_error( "COrderManager::ConstructOrder: order id already exists" );
+    iterOrders_t iter;
+    if ( LocateOrder( id, iter ) ) {
+      std::cout << "COrderManager::ConstructOrder:  OrderId Already Exists" << std::endl;
+    }
+    else {
+      pairOrderState_t pair( id, structOrderState( pOrder ) );
+      m_mapOrders.insert( pair );
+
+      if ( 0 != m_pSession ) {
+        // add to database
+        assert( 0 != pOrder->GetRow().idPosition );
+        ou::db::QueryFields<COrder::TableRowDef>::pQueryFields_t pQuery
+          = m_pSession->Insert<COrder::TableRowDef>( const_cast<COrder::TableRowDef&>( pOrder->GetRow() ) );
+      }
     }
   }
   catch (...) {
+    std::cout << "COrderManager::ConstructOrder:  Major Problems" << std::endl;
   }
   
-  pairOrderState_t pair( id, structOrderState( pOrder ) );
-  m_mapOrders.insert( pair );
-
-  if ( 0 != m_pSession ) {
-    // add to database
-    assert( 0 != pOrder->GetRow().idPosition );
-    ou::db::QueryFields<COrder::TableRowDef>::pQueryFields_t pQuery
-      = m_pSession->Insert<COrder::TableRowDef>( const_cast<COrder::TableRowDef&>( pOrder->GetRow() ) );
-  }
 }
 
 namespace OrderManagerQueries {
@@ -123,21 +126,27 @@ namespace OrderManagerQueries {
 
 void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrder) {
 
-  iterOrders_t iter = LocateOrder( pOrder->GetOrderId() );
-  if ( m_mapOrders.end() == iter ) {
-    throw std::runtime_error( "COrderManager::PlaceOrder:  order is not current in the order manager" );
+  try {
+    iterOrders_t iter;
+    if ( LocateOrder( pOrder->GetOrderId(), iter ) ) {
+      assert( NULL != pProvider );
+      iter->second.pProvider = pProvider;
+      pOrder->SetSendingToProvider();
+      pProvider->PlaceOrder( pOrder );
+      if ( 0 != m_pSession ) {
+        OrderManagerQueries::UpdateAtPlaceOrder 
+          update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted );
+        ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder>( // todo:  cache this query
+            "update orders set orderstatus=?, datetimesubmitted=?", update ).Where( "orderid=?" );
+      }
+    }
+    else {
+      std::cout << "COrderManager::PlaceOrder:  OrderId Not Found" << std::endl;
+    }
   }
-
-  assert( NULL != pProvider );
-  iter->second.pProvider = pProvider;
-  pOrder->SetSendingToProvider();
-  pProvider->PlaceOrder( pOrder );
-  if ( 0 != m_pSession ) {
-    OrderManagerQueries::UpdateAtPlaceOrder 
-      update( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted );
-    ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder>::pQueryFields_t pQuery
-      = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder>( // todo:  cache this query
-        "update orders set orderstatus=?, datetimesubmitted=?", update ).Where( "orderid=?" );
+  catch (...) {
+    std::cout << "COrderManager::PlaceOrder:  Major Problems" << std::endl;
   }
 }
 
@@ -161,10 +170,11 @@ namespace OrderManagerQueries {
   };
 }
 
-COrderManager::iterOrders_t COrderManager::LocateOrder( idOrder_t nOrderId ) {
+bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
   // if not in memory, the load order and executions from disk
   bool bFound = false;
-  iterOrders_t iter = m_mapOrders.find( nOrderId );
+//  iterOrders_t iter = m_mapOrders.find( nOrderId );
+  iter = m_mapOrders.find( nOrderId );
   if ( m_mapOrders.end() != iter ) {
     bFound = true;
   }
@@ -205,11 +215,12 @@ COrderManager::iterOrders_t COrderManager::LocateOrder( idOrder_t nOrderId ) {
       }
     }
   }
-  if ( !bFound ) {
-    std::cout << "COrderManager::LocateOrder order not found:  " << nOrderId << std::endl;
-    throw std::out_of_range( "OrderId not found" );
-  }
-  return iter;
+//  if ( !bFound ) {
+//    std::cout << "COrderManager::LocateOrder order not found:  " << nOrderId << std::endl;
+//    throw std::out_of_range( "OrderId not found" );
+//  }
+//  return iter;
+  return bFound;
 }
 
 namespace OrderManagerQueries {
@@ -230,30 +241,40 @@ namespace OrderManagerQueries {
 
 void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in conjunction with ReportCancellation, database update maybe premature
   try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    iter->second.pProvider->CancelOrder( pOrder );  // check which fields have changed for the db
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( nOrderId, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      iter->second.pProvider->CancelOrder( pOrder );  // check which fields have changed for the db
+    }
+    else {
+      std::cout << "COrderManager::CancelOrder:  OrderId Not Found" << std::endl;
+    }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::CancelOrder" << std::endl;
+    std::cout << "COrderManager::CancelOrder:  Major Problems" << std::endl;
   }
 }
 
 void COrderManager::ReportCancellation( idOrder_t nOrderId ) {
   try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    pOrder->MarkAsCancelled();
-    if ( 0 != m_pSession ) {
-      OrderManagerQueries::UpdateAtOrderClose 
-        close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
-      ou::db::QueryFields<OrderManagerQueries::UpdateAtOrderClose>::pQueryFields_t pQuery
-        = m_pSession->SQL<OrderManagerQueries::UpdateAtOrderClose>( // todo:  cache this query
-          "update orders set orderstatus=?, datetimeclosed=?", close ).Where( "orderid=?" );
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( nOrderId, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      pOrder->MarkAsCancelled();
+      if ( 0 != m_pSession ) {
+        OrderManagerQueries::UpdateAtOrderClose 
+          close( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
+        ou::db::QueryFields<OrderManagerQueries::UpdateAtOrderClose>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateAtOrderClose>( // todo:  cache this query
+            "update orders set orderstatus=?, datetimeclosed=?", close ).Where( "orderid=?" );
+      }
+    }
+    else {
+      std::cout << "COrderManager::ReportCancellation:  OrderId Not Found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::ReportCancellation" << std::endl;
+    std::cout << "COrderManager::ReportCancellation:  Major Problems" << std::endl;
   }
 }
 
@@ -286,50 +307,55 @@ namespace OrderManagerQueries {
 
 void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec) { 
   try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
-    if ( 0 != m_pSession ) {
-      const COrder::TableRowDef& row( pOrder->GetRow() );
-      switch ( status ) {
-      case OrderStatus::CancelledWithPartialFill:
-      case OrderStatus::Filled:
-        {
-          OrderManagerQueries::UpdateOrder 
-            order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
-          ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-            = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-            OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( nOrderId, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
+      if ( 0 != m_pSession ) {
+        const COrder::TableRowDef& row( pOrder->GetRow() );
+        switch ( status ) {
+        case OrderStatus::CancelledWithPartialFill:
+        case OrderStatus::Filled:
+          {
+            OrderManagerQueries::UpdateOrder 
+              order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
+            ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+              = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+              OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+          }
+          break;
+        default:
+          {
+            OrderManagerQueries::UpdateOrder 
+              order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
+            ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
+              = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
+              OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
+          }
+          break;
         }
-        break;
-      default:
-        {
-          OrderManagerQueries::UpdateOrder 
-            order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice );
-          ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
-            = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
-            OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
-        }
-        break;
+        // add execution record
+        pExecution_t pExecution( new CExecution( exec ) );
+        pExecution->SetOrderId( nOrderId );
+        ou::db::QueryFields<CExecution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
+          = m_pSession->Insert<CExecution::TableRowDefNoKey>( 
+            const_cast<CExecution::TableRowDefNoKey&>( dynamic_cast<const CExecution::TableRowDefNoKey&>( pExecution->GetRow() ) ) );
+        idExecution_t idExecution = m_pSession->GetLastRowId();
+        pairExecution_t pair( idExecution, pExecution );
+        iter->second.pmapExecutions->insert( pair );
       }
-      // add execution record
-      pExecution_t pExecution( new CExecution( exec ) );
-      pExecution->SetOrderId( nOrderId );
-      ou::db::QueryFields<CExecution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
-        = m_pSession->Insert<CExecution::TableRowDefNoKey>( 
-          const_cast<CExecution::TableRowDefNoKey&>( dynamic_cast<const CExecution::TableRowDefNoKey&>( pExecution->GetRow() ) ) );
-      idExecution_t idExecution = m_pSession->GetLastRowId();
-      pairExecution_t pair( idExecution, pExecution );
-      iter->second.pmapExecutions->insert( pair );
+  //    switch ( status ) {
+  //      case OrderStatus::Filled:
+          //MoveActiveOrderToCompleted( nOrderId );
+  //        break;
+  //    }
     }
-//    switch ( status ) {
-//      case OrderStatus::Filled:
-        //MoveActiveOrderToCompleted( nOrderId );
-//        break;
-//    }
+    else {
+      std::cout << "COrderManager::ReportExecution:  OrderId not found" << std::endl;
+    }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::ReportExecution" << std::endl;
+    std::cout << "COrderManager::ReportExecution:  Major Problems" << std::endl;
   }
 }
 
@@ -349,20 +375,25 @@ namespace OrderManagerQueries {
 
 void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) {
   try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    if ( 0 != m_pSession ) {
-      OrderManagerQueries::UpdateCommission 
-        commission( pOrder->GetOrderId(), dblCommission );
-      ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
-        = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
-          "update orders set commission=?", commission ).Where( "orderid=?" );
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( nOrderId, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      if ( 0 != m_pSession ) {
+        OrderManagerQueries::UpdateCommission 
+          commission( pOrder->GetOrderId(), dblCommission );
+        ou::db::QueryFields<OrderManagerQueries::UpdateCommission>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateCommission>( // todo:  cache this query
+            "update orders set commission=?", commission ).Where( "orderid=?" );
+      }
+      pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
+      // as a result, may need to set delegates here so database is updated before order calls delegates.
     }
-    pOrder->SetCommission( dblCommission );  // need to do afterwards as delegated objects may query the db (other stuff above may not obey this format)
-    // as a result, may need to set delegates here so database is updated before order calls delegates.
+    else {
+      std::cout << "COrderManager::ReportCommission:  Can't locate order id" << std::endl;
+    }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::ReportCommission" << std::endl;
+    std::cout << "COrderManager::ReportCommission:  Major Problems" << std::endl;
   }
 }
 
@@ -384,20 +415,25 @@ namespace OrderManagerQueries {
 
 void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError) {
   try {
-    mapOrders_t::iterator iter = LocateOrder( nOrderId );
-    pOrder_t pOrder = iter->second.pOrder;
-    pOrder->ActOnError( eError );
-    //MoveActiveOrderToCompleted( nOrderId );
-    if ( 0 != m_pSession ) {
-      OrderManagerQueries::UpdateOnOrderError 
-        error( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
-      ou::db::QueryFields<OrderManagerQueries::UpdateOnOrderError>::pQueryFields_t pQuery
-        = m_pSession->SQL<OrderManagerQueries::UpdateOnOrderError>( // todo:  cache this query
-          "update orders set orderstatus=?, datetimeclosed=?", error ).Where( "orderid=?" );
+    mapOrders_t::iterator iter;
+    if ( LocateOrder( nOrderId, iter ) ) {
+      pOrder_t pOrder = iter->second.pOrder;
+      pOrder->ActOnError( eError );
+      //MoveActiveOrderToCompleted( nOrderId );
+      if ( 0 != m_pSession ) {
+        OrderManagerQueries::UpdateOnOrderError 
+          error( pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderClosed );
+        ou::db::QueryFields<OrderManagerQueries::UpdateOnOrderError>::pQueryFields_t pQuery
+          = m_pSession->SQL<OrderManagerQueries::UpdateOnOrderError>( // todo:  cache this query
+            "update orders set orderstatus=?, datetimeclosed=?", error ).Where( "orderid=?" );
+      }
+    }
+    else {
+      std::cout << "COrderManager::ReportErrors:  OrderId not found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "Problems in COrderManager::ReportErrors" << std::endl;
+    std::cout << "COrderManager::ReportErrors:  Major Problems" << std::endl;
   }
 }
 

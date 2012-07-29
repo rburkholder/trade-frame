@@ -37,8 +37,6 @@ Node* CreateNode( void ) {
 }
 
 struct NodeFactoryInit {  
-  // todo:  if IsTimeSeries, have array available to hold caller assigned NodeTSxxxx nodes for cloning
-  //  need to change CreateNode?
   template<typename T>
   void operator()( T& t ) const {
     vAll.push_back( &CreateNode<T> );

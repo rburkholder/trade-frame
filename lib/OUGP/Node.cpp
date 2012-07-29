@@ -82,7 +82,9 @@ void Node::TreeToString( std::stringstream& ss ) const {
     break;
   case 1:
     ToString( ss );
+//    ss << '(';
     m_pChildCenter->TreeToString( ss );
+//    ss << ')';
     break;
   case 2:
     ss << '(';

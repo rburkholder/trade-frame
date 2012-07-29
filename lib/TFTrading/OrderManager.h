@@ -137,7 +137,8 @@ private:
 
   mapOrders_t m_mapOrders; // all orders for when checking for consistency
 
-  iterOrders_t LocateOrder( idOrder_t nOrderId );  // in memory or from disk
+//  iterOrders_t LocateOrder( idOrder_t nOrderId );  // in memory or from disk
+  bool LocateOrder( idOrder_t nOrderId, iterOrders_t& );  // in memory or from disk, return true if order found
 
   OnOrderNeedsDetailsHandler OnOrderNeedsDetails;
 

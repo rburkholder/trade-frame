@@ -48,6 +48,8 @@ private:
   virtual bool OnInit();
   virtual int OnExit();
 
+  void Optimizer( void );
+
   void HandlePopulateDatabase( void );
 
   void HandleBtnStart( void );

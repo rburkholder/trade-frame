@@ -253,13 +253,17 @@ void CPosition::HandleCancellation( const COrder& order ) {
   COrder::idOrder_t idOrder = order.GetOrderId();
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
-      assert( m_row.nPositionPending >= iter->get()->GetQuanRemaining()  );
-      m_row.nPositionPending -= iter->get()->GetQuanRemaining(); 
-      if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
-      //CancelOrder( iter );
-      m_ClosedOrders.push_back( *iter );
-      m_OpenOrders.erase( iter );
-      break;
+      if ( m_row.nPositionPending >= iter->get()->GetQuanRemaining() ) {
+        m_row.nPositionPending -= iter->get()->GetQuanRemaining(); 
+        if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
+        //CancelOrder( iter );
+        m_ClosedOrders.push_back( *iter );
+        m_OpenOrders.erase( iter );
+        break;
+      }
+      else {
+        throw std::runtime_error( "problems" );
+      }
     }
   }
 }

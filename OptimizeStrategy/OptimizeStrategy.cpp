@@ -15,6 +15,8 @@
 #include "stdafx.h"
 
 #include <boost/foreach.hpp>
+#include <boost/thread.hpp>  // separate thread background merge processing
+#include <boost/bind.hpp>
 
 #include <wx/bitmap.h>
 
@@ -58,6 +60,13 @@ bool AppOptimizeStrategy::OnInit( void ) {
 
   m_pFrameMain->Show( true );
 
+  boost::thread sim( boost::bind( &AppOptimizeStrategy::Optimizer, this ) );
+
+  return 1;
+
+}
+
+void AppOptimizeStrategy::Optimizer( void ) {
   //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
 // ->  m_pProvider->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
@@ -147,8 +156,6 @@ bool AppOptimizeStrategy::OnInit( void ) {
     gen.front().TreeToString( ss );
     std::cout << gen.front().m_dblRawFitness << ", " << ss << std::endl;
   }
-
-  return 1;
 
 }
 
