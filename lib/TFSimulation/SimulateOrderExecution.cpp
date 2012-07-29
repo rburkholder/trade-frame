@@ -145,6 +145,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
     nOrderQuanRemaining -= quanAvail;
 
     // when order done, commission and toss away
+    // what happens on cancelled orders and partial fills?
     if ( 0 == nOrderQuanRemaining ) {
       CalculateCommission( pOrderFrontOfQueue.get(), pOrderFrontOfQueue->GetQuanFilled() );
       m_lOrderMarket.pop_front();

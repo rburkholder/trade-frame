@@ -167,12 +167,12 @@ void StrategyEquity::Trade( void ) {
   switch ( m_stateTrading ) {
   case ENeutral:
     if ( bLong && !bShort ) { // go long
-      m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+      m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
       m_stateTrading = ELong;
     }
     else {
       if ( !bLong && bShort ) { // go short
-        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
         m_stateTrading = EShort;
       }
     }
@@ -182,7 +182,7 @@ void StrategyEquity::Trade( void ) {
       m_pPosition->ClosePosition();
       m_stateTrading = ENeutral;
       if ( !bLong ) { // go short
-        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
         m_stateTrading = EShort;
       }
     }
@@ -192,7 +192,7 @@ void StrategyEquity::Trade( void ) {
       m_pPosition->ClosePosition();
       m_stateTrading = ENeutral;
       if ( !bShort ) { // go long
-        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+        m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
         m_stateTrading = ELong;
       }
     }

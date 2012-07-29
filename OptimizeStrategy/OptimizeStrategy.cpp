@@ -14,11 +14,11 @@
 
 #include "stdafx.h"
 
+#include <wx/bitmap.h>
+
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
-
-#include <wx/bitmap.h>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>

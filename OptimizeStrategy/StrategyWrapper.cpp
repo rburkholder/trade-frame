@@ -63,7 +63,9 @@ void StrategyWrapper::HandleProviderConnected( int i ) {
   
   m_pProvider->SetOnSimulationComplete( MakeDelegate( this, &StrategyWrapper::HandleSimulationComplete ) );
 
-  m_pProvider->Run( false );
+  m_pProvider->Run( false );  // returns upon completion of simulation
+
+  m_pProvider->SetOnSimulationComplete( 0 );
 
 }
 
