@@ -230,10 +230,12 @@ void CSimulationProvider::Run( bool bAsync ) {
   }
   else {
     m_pMerge = new MergeDatedDatums();
-    m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
+    boost::thread sim( boost::bind( &CSimulationProvider::Merge, this ) );
+    //m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
     if ( !bAsync ) {
-      m_threadMerge.join();
+      sim.join();
     }
+//    m_threadMerge = sim;
   }
 }
 

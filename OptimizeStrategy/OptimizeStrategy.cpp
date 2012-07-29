@@ -125,11 +125,11 @@ bool AppOptimizeStrategy::OnInit( void ) {
         fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
         fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
       // update nodes with specific time series:
-      static_cast<ou::gp::Individual>(ind).m_Signals.EachSignal( PreProcessNodes() );
+      const_cast<ou::gp::Individual&>(ind).m_Signals.EachSignal( PreProcessNodes() );
       // output the time series description:
       ss.str( "" );
       ind.TreeToString( ss );
-      std::cout << ss << std::endl;
+      std::cout << ss.str() << std::endl;
       m_pswStrategy->Start();  // run provider synchronously
       const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
       delete m_pswStrategy;

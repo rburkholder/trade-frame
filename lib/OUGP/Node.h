@@ -54,11 +54,11 @@ public:
 
   ParentLink::E ParentSide( void ) const { return m_eParentSide; };
 
-  virtual void TreeToString( std::stringstream& ) const;
+  void TreeToString( std::stringstream& ) const;
   virtual void ToString( std::stringstream& ) const {};
 
-  virtual bool EvaluateBoolean( void ) const { throw std::logic_error( "EvaluateBoolean no override" ); };
-  virtual double EvaluateDouble( void ) const { throw std::logic_error( "EvaluateDouble no override" ); };
+  virtual bool EvaluateBoolean( void ) { throw std::logic_error( "EvaluateBoolean no override" ); };
+  virtual double EvaluateDouble( void ) { throw std::logic_error( "EvaluateDouble no override" ); };
 
   Node& Parent( void ) { assert( 0 != m_pParent ); return *m_pParent; };
 

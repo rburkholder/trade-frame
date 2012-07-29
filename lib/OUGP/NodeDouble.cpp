@@ -71,16 +71,16 @@ double NodeDoubleRandom::EvaluateDouble( void ) {
 // ********* NodeDoubleAbs *********
 
 NodeDoubleAbs::NodeDoubleAbs( void ) : NodeDouble<NodeDoubleAbs>() {
-  m_cntNodes = 0;
+  m_cntNodes = 1;
 }
 
 NodeDoubleAbs::NodeDoubleAbs( const NodeDoubleAbs& rhs ): NodeDouble<NodeDoubleAbs>() {
-  m_cntNodes = 0;
+  m_cntNodes = 1;
 }
 
 NodeDoubleAbs& NodeDoubleAbs::operator=( const NodeDoubleAbs& rhs ) {
   if ( this != &rhs ) {
-    m_cntNodes = 0;
+    m_cntNodes = 1;
   }
   return *this;
 }

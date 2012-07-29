@@ -24,6 +24,10 @@ StrategyWrapper::StrategyWrapper(void)
 }
 
 StrategyWrapper::~StrategyWrapper(void) {
+  m_pProvider->Disconnect();
+  delete m_pStrategy;
+  m_pStrategy = 0;
+  m_pProvider.reset();
 }
 
 void StrategyWrapper::Init( 
@@ -47,9 +51,9 @@ void StrategyWrapper::Start( void ) {
   m_pProvider->Connect();
 }
 
-void StrategyWrapper::Stop( void ) {
-  m_pProvider->Disconnect();
-}
+//void StrategyWrapper::Stop( void ) {
+//  m_pProvider->Disconnect();
+//}
 
 void StrategyWrapper::HandleProviderConnected( int i ) {
 
@@ -68,15 +72,12 @@ void StrategyWrapper::HandleProviderDisconnected( int i ) {
   m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_bRunning = false;
   m_pStrategy->End();
-  delete m_pStrategy;
-  m_pStrategy = 0;
-  m_pProvider.reset();
 }
 
 void StrategyWrapper::HandleSimulationComplete( void ) {
   // generate statistics here?
   // any clean up required?
-  m_pProvider->Disconnect();
+//  m_pProvider->Disconnect();
 }
  
 double StrategyWrapper::GetPL( void ) {

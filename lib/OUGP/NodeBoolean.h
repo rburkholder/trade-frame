@@ -26,7 +26,7 @@ public:
   NodeBooleanFalse( void );
   ~NodeBooleanFalse( void );
   void ToString( std::stringstream& ss ) const { ss << "false"; };
-  bool EvaluateBoolean( void ) const { return false; };
+  bool EvaluateBoolean( void ) { return false; };
 protected:
 private:
 };
@@ -36,7 +36,7 @@ public:
   NodeBooleanTrue( void );
   ~NodeBooleanTrue( void );
   void ToString( std::stringstream& ss ) const { ss << "true"; };
-  bool EvaluateBoolean( void ) const { return true; };
+  bool EvaluateBoolean( void ) { return true; };
 protected:
 private:
 };

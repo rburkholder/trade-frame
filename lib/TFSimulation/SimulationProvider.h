@@ -93,7 +93,7 @@ protected:
 
   std::string m_sGroupDirectory;
 
-  MergeDatedDatums *m_pMerge;
+  MergeDatedDatums* m_pMerge;
 
   OnSimulationComplete_t m_OnSimulationComplete;
 

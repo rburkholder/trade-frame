@@ -40,7 +40,7 @@ public:
     fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
   void Start( void );
   double GetPL( void );
-  void Stop( void );
+//  void Stop( void );
 
 protected:
 private:
