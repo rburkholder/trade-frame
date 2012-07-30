@@ -257,6 +257,8 @@ private:
   void HandleTrade( trade_t );
   void HandleGreek( greek_t );
 
+  void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
+
 };
 
 } // namespace tf

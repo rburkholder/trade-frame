@@ -27,11 +27,22 @@
 
 class RunSequence {
 public:
-  RunSequence(void);
+  RunSequence( const boost::gregorian::date& dateStart );
   ~RunSequence(void);
   void Run( void );
 protected:
 private:
+
+  enum enumTimeFrames { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
+  enum enumTradeState { ENeutral, ELong, EShort };
+
+  enumTimeFrames m_stateTimeFrame;
+  enumTradeState m_stateTrading;
+
+  time_duration m_timeOpeningBell, m_timeCancelTrades, m_timeClosePositions, m_timeClosingBell;
+  ptime m_dtOpeningBell, m_dtStartTrading, m_dtCancelTrades, m_dtClosePositions, m_dtClosingBell;
+
+
 
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
@@ -41,13 +52,18 @@ private:
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;  // active order
 
+  ou::tf::Quote m_quote;
+  ou::tf::Trade m_trade;
+
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 
   void HandleProviderConnected( int );
   void HandleProviderDisconnected( int );
   void HandleSimulationComplete( void );
-  void HandleQuote( const ou::tf::Quote& );
+  void HandleQuote1( const ou::tf::Quote& );  // simple simulation
+  void HandleQuote2( const ou::tf::Quote& );  // for testing OptimizeStrategy code
+  void Trade( void ); // used with HandleQuote2
   void HandleTrade( const ou::tf::Trade& );
   void HandlePortfolioExecution( const ou::tf::CPortfolio*  );
   void HandlePortfolioCommission( const ou::tf::CPortfolio*  );

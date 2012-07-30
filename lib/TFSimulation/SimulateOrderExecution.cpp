@@ -133,8 +133,10 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
     // execute order
     if ( 0 != OnOrderFill ) {
       std::string id;
+      int nId( m_nExecId );  // before it gets incremented in next function
       GetExecId( &id );
-      CExecution exec( dblPrice, quanAvail, orderSide, "SIMMkt", id );
+      // using id in first parameter may or may not work
+      CExecution exec( nId, pOrderFrontOfQueue->GetOrderId(), dblPrice, quanAvail, orderSide, "SIMMkt", id );
       OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
     }
     else {
@@ -239,7 +241,19 @@ void CSimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
       switch ( pOrderFrontOfQueue->GetOrderType() ) {
         case OrderType::Market:
           // place into market order book
-          m_lOrderMarket.push_back( pOrderFrontOfQueue );
+          if ( 0 == m_lOrderMarket.size() ) {
+            m_lOrderMarket.push_back( pOrderFrontOfQueue );
+          }
+          else {
+            if ( pOrderFrontOfQueue->GetOrderSide() == m_lOrderMarket.front()->GetOrderSide() ) {
+              m_lOrderMarket.push_back( pOrderFrontOfQueue );
+            }
+            else {
+              // can't have market orders in two different directions
+              if ( 0 != OnOrderCancelled ) OnOrderCancelled( pOrderFrontOfQueue->GetOrderId() );
+            }
+          }
+          
           break;
         case OrderType::Limit:
           // place into limit book
@@ -374,7 +388,8 @@ void CSimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
         std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
-        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+        // todo:  propogate this into the OrderManager
+        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );   
       }
       else {
         if ( 0 != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );

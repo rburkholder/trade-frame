@@ -275,15 +275,17 @@ void CPosition::CancelOrder( vOrders_iter_t iter ) {
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
   // should outstanding orders be auto cancelled?
   // position is closed with a market order, can try to do limit in the future, but need active market data
-  switch ( m_row.eOrderSideActive ) {
-    case OrderSide::Buy:
-      PlaceOrder( eOrderType, OrderSide::Sell, m_row.nPositionActive );
-      break;
-    case OrderSide::Sell:
-      PlaceOrder( eOrderType, OrderSide::Buy, m_row.nPositionActive );
-      break;
-    case OrderSide::Unknown:
-      break;
+  if ( 0 != m_row.nPositionActive ) {
+    switch ( m_row.eOrderSideActive ) {
+      case OrderSide::Buy:
+        PlaceOrder( eOrderType, OrderSide::Sell, m_row.nPositionActive );
+        break;
+      case OrderSide::Sell:
+        PlaceOrder( eOrderType, OrderSide::Buy, m_row.nPositionActive );
+        break;
+      case OrderSide::Unknown:
+        break;
+    }
   }
 }
 
@@ -291,6 +293,87 @@ void CPosition::HandleCommission( const COrder& order ) {
   //m_row.dblCommissionPaid += order.GetCommission();
   m_row.dblCommissionPaid += order.GetCommission();
   OnCommission( this );
+}
+
+void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
+
+  double dblAvgConstructedCost = 0;
+  double dblRealizedPL = 0;
+  bool bTwoStep = false;
+  boost::uint32_t nRemaining( 0 );
+
+  switch ( m_row.eOrderSideActive ) {
+    case OrderSide::Buy:  // existing is long
+      switch ( side ) {
+        case OrderSide::Buy:  // increase long
+          m_row.nPositionActive += quan;
+          m_row.dblConstructedValue += quan * price * m_dblMultiplier;
+          break;
+        case OrderSide::Sell:  // decrease long
+          if ( quan > m_row.nPositionActive ) {
+            bTwoStep = true;
+            nRemaining = quan - m_row.nPositionActive;
+            quan = m_row.nPositionActive;
+          }
+          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
+          dblRealizedPL = quan * ( price - dblAvgConstructedCost ) * m_dblMultiplier;
+          m_row.dblRealizedPL += dblRealizedPL;
+          m_row.nPositionActive -= quan;
+          m_row.dblConstructedValue -= quan * dblAvgConstructedCost * m_dblMultiplier;
+          //m_dblConstructedValue -= ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier - dblRealizedPL );
+          if ( 0 == m_row.nPositionActive ) {
+            m_row.eOrderSideActive = OrderSide::Unknown;
+            m_row.dblUnRealizedPL = 0.0;
+          }
+          if ( bTwoStep ) {
+            UpdateRowValues( price, nRemaining, side );
+          }
+          break;
+      }
+      break;
+    case OrderSide::Sell:  // existing is short
+      switch ( side ) {
+        case OrderSide::Sell:  // increase short
+          m_row.nPositionActive += quan;
+          m_row.dblConstructedValue -= quan * price * m_dblMultiplier;
+          break;
+        case OrderSide::Buy:  // decrease short
+          if ( quan > m_row.nPositionActive ) {
+            bTwoStep = true;
+            nRemaining = quan - m_row.nPositionActive;
+            quan = m_row.nPositionActive;
+          }
+          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
+          dblRealizedPL = quan * ( - price - dblAvgConstructedCost ) * m_dblMultiplier;
+          m_row.dblRealizedPL += dblRealizedPL;
+          m_row.nPositionActive -= quan;
+          m_row.dblConstructedValue -= quan * dblAvgConstructedCost * m_dblMultiplier;
+          //m_dblConstructedValue += ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier + dblRealizedPL );  // is this correctly calculated?
+          if ( 0 == m_row.nPositionActive ) {
+            m_row.eOrderSideActive = OrderSide::Unknown;
+            m_row.dblUnRealizedPL = 0.0;
+          }
+          if ( bTwoStep ) {
+            UpdateRowValues( price, nRemaining, side );
+          }
+          break;
+      }
+      break;
+    case OrderSide::Unknown:  // no active position, so start here
+      assert( 0 == m_row.nPositionActive );
+      m_row.eOrderSideActive = side;
+      m_row.nPositionActive = quan;
+      switch ( m_row.eOrderSideActive ) {
+        case OrderSide::Buy:
+          m_row.dblConstructedValue += quan * price * m_dblMultiplier;
+          break;
+        case OrderSide::Sell:
+          m_row.dblConstructedValue -= quan * price * m_dblMultiplier;
+          break;
+      }
+      break;
+  }
+
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
@@ -305,67 +388,12 @@ void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution
   COrder::idOrder_t orderId = order.GetOrderId();
 
   // update position, regardless of whether we see order open or closed
-  //double dblNewAverageCostPerShare = 0;
-  double dblAvgConstructedCost = 0;
-  double dblRealizedPL = 0;
-  switch ( m_row.eOrderSideActive ) {
-    case OrderSide::Buy:  // existing is long
-      switch ( exec.GetOrderSide() ) {
-        case OrderSide::Buy:  // increase long
-          m_row.nPositionActive += exec.GetSize();
-          m_row.dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
-          break;
-        case OrderSide::Sell:  // decrease long
-//          assert( m_row.nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
-          dblRealizedPL = exec.GetSize() * ( exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
-          m_row.dblRealizedPL += dblRealizedPL;
-          m_row.nPositionActive -= exec.GetSize();
-          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost * m_dblMultiplier;
-          //m_dblConstructedValue -= ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier - dblRealizedPL );
-          if ( 0 == m_row.nPositionActive ) {
-            m_row.eOrderSideActive = OrderSide::Unknown;
-            m_row.dblUnRealizedPL = 0.0;
-          }
-          break;
-      }
-      break;
-    case OrderSide::Sell:  // existing is short
-      switch ( exec.GetOrderSide() ) {
-        case OrderSide::Sell:  // increase short
-          m_row.nPositionActive += exec.GetSize();
-          m_row.dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
-          break;
-        case OrderSide::Buy:  // decrease short
-//          assert( m_row.nPositionActive >= exec.GetSize() );
-          dblAvgConstructedCost = m_row.dblConstructedValue / ( m_row.nPositionActive * m_dblMultiplier );
-          dblRealizedPL = exec.GetSize() * ( - exec.GetPrice() - dblAvgConstructedCost ) * m_dblMultiplier;
-          m_row.dblRealizedPL += dblRealizedPL;
-          m_row.nPositionActive -= exec.GetSize();
-          m_row.dblConstructedValue -= exec.GetSize() * dblAvgConstructedCost * m_dblMultiplier;
-          //m_dblConstructedValue += ( exec.GetSize() * exec.GetPrice() * m_dblMultiplier + dblRealizedPL );  // is this correctly calculated?
-          if ( 0 == m_row.nPositionActive ) {
-            m_row.eOrderSideActive = OrderSide::Unknown;
-            m_row.dblUnRealizedPL = 0.0;
-          }
-          break;
-      }
-      break;
-    case OrderSide::Unknown:  // no active position, so start here
-      assert( 0 == m_row.nPositionActive );
-      m_row.eOrderSideActive = exec.GetOrderSide();
-      m_row.nPositionActive = exec.GetSize();
-      switch ( m_row.eOrderSideActive ) {
-        case OrderSide::Buy:
-          m_row.dblConstructedValue += exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
-          break;
-        case OrderSide::Sell:
-          m_row.dblConstructedValue -= exec.GetSize() * exec.GetPrice() * m_dblMultiplier;
-          break;
-      }
-      break;
-  }
+  UpdateRowValues( exec.GetPrice(), exec.GetSize(), exec.GetOrderSide() );
 
+  if ( ( 0 == m_row.nPositionActive ) && ( OrderSide::Unknown != m_row.eOrderSideActive ) ) {
+    std::cout << "problems" << std::endl;
+  }
+  
   // check that we think that the order is still active
   bool bOrderFound = false;
   for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {

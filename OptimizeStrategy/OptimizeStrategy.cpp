@@ -143,6 +143,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
       const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
       delete m_pswStrategy;
       m_pswStrategy = 0;
+      std::cout << "----------------------------" << std::endl;
     }
     pop.CalcFitness();
 

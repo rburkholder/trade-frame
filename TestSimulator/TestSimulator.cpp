@@ -24,7 +24,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 //  CreateDataSet cds;
 //  cds.Save();
 
-  RunSequence seq;
+  RunSequence seq(date( 2012, 7, 22 ));
   seq.Run();
 
 	return 0;

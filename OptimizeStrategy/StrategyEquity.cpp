@@ -88,6 +88,9 @@ void StrategyEquity::Init( StrategyEquity::registrations_t& registrations, fdEva
 }
 
 double StrategyEquity::GetPL( void ) {
+  std::stringstream ss;
+  m_portfolio.EmitStats( ss );
+  std::cout << ss.str() << std::endl;
   return m_portfolio.GetRow().dblRealizedPL;
 }
 
@@ -179,6 +182,7 @@ void StrategyEquity::Trade( void ) {
     break;
   case ELong:
     if ( bShort ) { // exit
+      m_pPosition->CancelOrders();
       m_pPosition->ClosePosition();
       m_stateTrading = ENeutral;
       if ( !bLong ) { // go short
@@ -189,6 +193,7 @@ void StrategyEquity::Trade( void ) {
     break;
   case EShort:
     if ( bLong ) { // exit
+      m_pPosition->CancelOrders();
       m_pPosition->ClosePosition();
       m_stateTrading = ENeutral;
       if ( !bShort ) { // go long

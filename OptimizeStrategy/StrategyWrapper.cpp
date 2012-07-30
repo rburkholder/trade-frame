@@ -65,6 +65,10 @@ void StrategyWrapper::HandleProviderConnected( int i ) {
 
   m_pProvider->Run( false );  // returns upon completion of simulation
 
+  std::stringstream ss;
+  m_pProvider->EmitStats( ss );
+  std::cout << ss.str() << std::endl;
+
   m_pProvider->SetOnSimulationComplete( 0 );
 
 }
