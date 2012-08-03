@@ -80,7 +80,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
-  ou::gp::Population pop( 24 );
+  ou::gp::Population pop( 50 );
 
   pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 

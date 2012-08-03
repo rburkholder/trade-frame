@@ -33,15 +33,15 @@ public:
   TimeSeriesForNode( const TimeSeriesForNode& rhs );
   ~TimeSeriesForNode( void ) {};
 
+  // doesnt' appear to be used, but included for anyway
   TimeSeriesForNode& operator=( const TimeSeriesForNode& rhs ) {
     if ( &rhs != this ) {
+      m_ixTimeSeries = rhs.m_ixTimeSeries;
       m_pTimeSeries = rhs.m_pTimeSeries;
     }
     return *this;
   }
 
-  typename TS::size_type GetAssignedTimeSeriesIndex( void ) { return m_ixTimeSeries; };
-  void Set( TS* pTimeSeries ) { m_pTimeSeries = pTimeSeries; };
   TS* TimeSeries( void ) const { return m_pTimeSeries; };
 
 };
@@ -52,7 +52,7 @@ TimeSeriesForNode<TS>::TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
 
 template<typename TS>
 TimeSeriesForNode<TS>::TimeSeriesForNode( const TimeSeriesForNode& rhs ) 
-  : m_pTimeSeries( rhs.m_pTimeSeries ) { // handles copy constructor to keep existing timeseries
+  : m_ixTimeSeries( rhs.m_ixTimeSeries ), m_pTimeSeries( rhs.m_pTimeSeries ) { // handles copy constructor to keep existing timeseries
 }
 
 } // namespace gp

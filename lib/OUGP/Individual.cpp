@@ -55,7 +55,7 @@ void Individual::TreeToString( std::stringstream& ss ) const {
   m_Signals.rnLong->TreeToString( ss );
   ss << "\nShort=";
   m_Signals.rnShort->TreeToString( ss );
-  ss << "\n";
+//  ss << "\n";
 }
 
 } // namespace gp

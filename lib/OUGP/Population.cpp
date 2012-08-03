@@ -41,7 +41,7 @@ Population::Population( unsigned int nPopulationSize )
   m_urd( 0.0, 1.0 ),  // probability in [0.0, 1.0)
   m_cntAboveAverage( 0 )
 {
-  assert( 0 == ( nPopulationSize % 2 ) ); // ensure even number of population elements
+//  assert( 0 == ( nPopulationSize % 2 ) ); // ensure even number of population elements
 }
 
 Population::~Population(void) {
@@ -112,12 +112,13 @@ void Population::BuildIndividuals( vGeneration_t& vGeneration ) {
 }
 
 unsigned int Population::TournamentSelection( unsigned int cntAboveAverage ) {
+  assert( cntAboveAverage < ( m_nPopulationSize - 1 ) );
   double prob1; // use above average individuals % of the time
   unsigned int prob2; // used for selecting individual
   unsigned int result = m_nPopulationSize - 1;  // default to worst individual (vector is sorted)
   boost::random::uniform_int_distribution<unsigned int> dist1( 0, cntAboveAverage - 1 );
   boost::random::uniform_int_distribution<unsigned int> dist2( cntAboveAverage, m_nPopulationSize - 1 );
-  for ( unsigned int i = m_nTournamentSize; i>=1; --i ) {
+  for ( unsigned int i = m_nTournamentSize; i >= 1; i-- ) {
     prob1 = m_urd( m_rng );
     if ( m_probTournamentSegregation > prob1 ) {
       prob2 = dist1( m_rng );
@@ -151,6 +152,7 @@ bool Population::MakeNewGeneration( void ) {
 
   bool bMore( false );
   unsigned int cntMaxElites( (unsigned int) std::floor( m_ratioElitism * m_dblPopulationSize + 0.5 ) );
+  if (  0 == cntMaxElites ) cntMaxElites = 1;
 
   if ( 0 == m_vGenerations.size() ) {
     bMore = true;
@@ -281,8 +283,8 @@ bool Population::MakeNewGeneration( void ) {
         m_pvNxtGeneration->push_back( indvlDst1 ); // does this properly copy Signals_t?
         m_pvNxtGeneration->push_back( indvlDst2 ); 
       }
-      m_pvCurGeneration = m_pvNxtGeneration;
     }
+    m_pvCurGeneration = m_pvNxtGeneration;
   }
 
   return bMore;
