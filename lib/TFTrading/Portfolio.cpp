@@ -168,7 +168,8 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
     << ": Min=" << m_plMin.dblNet
     << ", Net=" << m_plCurrent.dblNet
     << ", Max=" << m_plMax.dblNet
-    << std::endl;
+//    << std::endl
+    ;
 }
 
 } // namespace tf

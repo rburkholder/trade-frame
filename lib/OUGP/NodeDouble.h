@@ -100,8 +100,8 @@ private:
 };
 
 //typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleRandom, NodeDoubleAbs, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeTypesDouble_t;
-// remove NodeDoubleAbs for now
-typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleRandom, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeTypesDouble_t;
+// remove NodeDoubleAbs for now, no random
+typedef boost::fusion::vector<NodeDoubleZero, NodeDoubleAdd, NodeDoubleSub, NodeDoubleMlt, NodeDoubleDvd> NodeTypesDouble_t;
 
 
 } // namespace gp

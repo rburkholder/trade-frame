@@ -32,11 +32,12 @@ namespace gp { // genetic programming
 
 Population::Population( unsigned int nPopulationSize ) 
   : m_nPopulationSize( nPopulationSize ), m_dblPopulationSize( nPopulationSize ),
-  m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 6 ), m_nMaxDepthOnCrossover( 17 ),
+  m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 5 ), m_nMaxDepthOnCrossover( 17 ),
   m_probCrossover( 0.95 ), m_probReproduction( 0.10 ), m_probFunctionPointCrossover( 0.90 ), m_probTerminalPointCrossover( 0.10), 
   m_probMutation( 0.0 ), m_probPermutation( 0.0 ), m_probDecimation( 0.58 ), m_ratioElitism( 0.012 ),
   m_probTournamentSegregation( 0.35 ),
   m_nTournamentSize( 2 ), 
+  m_nElites( 0 ), m_nReproductions( 0 ), m_nCrossOvers( 0 ), m_nNew( 0 ),
   m_rng( std::time( 0 ) ),  // possible issue after jan 18, 2038?
   m_urd( 0.0, 1.0 ),  // probability in [0.0, 1.0)
   m_cntAboveAverage( 0 )
@@ -150,9 +151,11 @@ bool Population::MakeNewGeneration( void ) {
 
   using boost::phoenix::arg_names::arg1;
 
+  m_nElites = m_nReproductions = m_nCrossOvers = m_nNew = 0;
+
   bool bMore( false );
   unsigned int cntMaxElites( (unsigned int) std::floor( m_ratioElitism * m_dblPopulationSize + 0.5 ) );
-  if (  0 == cntMaxElites ) cntMaxElites = 1;
+  if (  2 > cntMaxElites ) cntMaxElites = 2;
 
   if ( 0 == m_vGenerations.size() ) {
     bMore = true;
@@ -160,6 +163,7 @@ bool Population::MakeNewGeneration( void ) {
     m_pvCurGeneration->resize( m_nPopulationSize );
     BuildIndividuals( *m_pvCurGeneration );
     m_vGenerations.push_back( m_pvCurGeneration );
+    m_nNew = m_pvCurGeneration->size();
   }
   else if ( m_nMaxGenerations > m_vGenerations.size() + 1 ) { // is this a correct validation?
 
@@ -177,6 +181,7 @@ bool Population::MakeNewGeneration( void ) {
     m_pvNxtGeneration->resize( decimation );
     BuildIndividuals( *m_pvNxtGeneration );  // build the beginning population
     m_vGenerations.push_back( m_pvNxtGeneration );
+    m_nNew = m_pvNxtGeneration->size();
 
     // elitism
     unsigned int cntAcceptedElites( 0 );
@@ -184,14 +189,16 @@ bool Population::MakeNewGeneration( void ) {
     if ( ( 0 == m_pvNxtGeneration->size() ) && ( 0 < cntMaxElites ) ) { // bring over at least one elite
       m_pvNxtGeneration->push_back( *iter );
       ++cntAcceptedElites;
+      iter++;
     }
     while ( cntAcceptedElites < cntMaxElites ) {
-      iter++;
       if ( m_pvCurGeneration->end() == iter ) break;
       if ( !IsMatchInGeneration( *iter, *m_pvNxtGeneration, m_pvNxtGeneration->size() - 1 ) ) {
         m_pvNxtGeneration->push_back( *iter );
         ++cntAcceptedElites;
+        ++m_nElites;
       }
+      iter++;
     }
 
     // reproduction and crossover
@@ -202,6 +209,7 @@ bool Population::MakeNewGeneration( void ) {
         const Individual& test( m_pvCurGeneration->at( TournamentSelection( m_cntAboveAverage ) ) );
         if ( !IsMatchInGeneration( test, *m_pvNxtGeneration, m_pvNxtGeneration->size() - 1 ) ) {
           m_pvNxtGeneration->push_back( test ); 
+          m_nReproductions++;
         }
       }
       else {
@@ -281,7 +289,9 @@ bool Population::MakeNewGeneration( void ) {
 
         // add to generation
         m_pvNxtGeneration->push_back( indvlDst1 ); // does this properly copy Signals_t?
+        m_nCrossOvers++;
         m_pvNxtGeneration->push_back( indvlDst2 ); 
+        m_nCrossOvers++;
       }
     }
     m_pvCurGeneration = m_pvNxtGeneration;

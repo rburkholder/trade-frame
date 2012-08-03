@@ -31,6 +31,7 @@ Individual::Individual( const Individual& rhs )
   m_dblAdjustedFitness( rhs.m_dblAdjustedFitness ), m_dblNormalizedFitness( rhs.m_dblNormalizedFitness ),
   m_Signals( rhs.m_Signals )
 {
+  m_ssFormula.str( ( rhs.m_ssFormula.str() ) ); 
 }
 
 Individual::~Individual(void) {
@@ -45,6 +46,7 @@ const Individual& Individual::operator=( const Individual& rhs ) {
     m_dblRelativeFitness = rhs.m_dblRelativeFitness;
     m_dblAdjustedFitness = rhs.m_dblAdjustedFitness;
     m_dblNormalizedFitness = rhs.m_dblNormalizedFitness;
+    m_ssFormula.str( rhs.m_ssFormula.str() ), 
     m_Signals = rhs.m_Signals;
   }
   return *this;

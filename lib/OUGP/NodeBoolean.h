@@ -72,6 +72,8 @@ private:
 };
 
 typedef boost::fusion::vector<NodeBooleanFalse, NodeBooleanTrue, NodeBooleanNot, NodeBooleanAnd, NodeBooleanOr> NodeTypesBoolean_t;
+// this generates problems without terminals
+//typedef boost::fusion::vector<NodeBooleanNot, NodeBooleanAnd, NodeBooleanOr> NodeTypesBoolean_t;
 
 } // namespace gp
 } // namespace ou

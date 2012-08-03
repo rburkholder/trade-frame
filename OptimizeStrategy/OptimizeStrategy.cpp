@@ -80,7 +80,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
-  ou::gp::Population pop( 50 );
+  ou::gp::Population pop( 75 );
 
   pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 
@@ -159,8 +159,10 @@ void AppOptimizeStrategy::Optimizer( void ) {
 //      threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
 //    }
     while ( pop.MakeNewGeneration() ) {
+      std::cout << "==== N:" << pop.m_nNew << ",E:" << pop.m_nElites << ",R:" << pop.m_nReproductions << ",X:" << pop.m_nCrossOvers << " ====" << std::endl;
       const vGeneration_t& gen( pop.CurrentGeneration() );
       BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
+        std::cout << "---- " << ind.m_id << " ----------------------------" << std::endl;
         if ( ind.IsComputed() ) {
           std::cout 
             << "Computed: " 
@@ -174,7 +176,6 @@ void AppOptimizeStrategy::Optimizer( void ) {
           std::cout << ind.m_ssFormula.str() << std::endl;
           pi.Run();  // can't run asynchronously due to singleton managers and singleton hdf5 manager
           i.SetComputed();
-          std::cout << "----------------------------" << std::endl;
         }
       }
 
@@ -190,11 +191,10 @@ void AppOptimizeStrategy::Optimizer( void ) {
       // # winning trades > # losing trades, 60/40?  70/30?
       // pareto minimum concept
 
-      ss.str( "" );
+      //ss.str( "" );
       //gen.front().TreeToString( ss );  // can't do this as the strategy no longer exists
       std::cout 
-        << "Winner: " 
-        << gen.front().m_dblRawFitness << std::endl
+        << "==== " << gen.front().m_id << " @ " << gen.front().m_dblRawFitness << " ====" << std::endl
         << gen.front().m_ssFormula.str() << std::endl;
     }
 //  }

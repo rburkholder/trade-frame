@@ -31,6 +31,11 @@ public:
 
   typedef std::vector<Individual> vGeneration_t;
 
+  unsigned int m_nElites;
+  unsigned int m_nReproductions;
+  unsigned int m_nCrossOvers;
+  unsigned int m_nNew;
+
   Population( unsigned int nPopulationSize = 20 );
   ~Population(void);
 
