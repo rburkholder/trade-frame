@@ -26,7 +26,24 @@ RootNode::RootNode(void)
   m_cntNodes = 1;
 }
 
+RootNode::RootNode( const RootNode& rhs ) 
+  : NodeProxy<RootNode>( rhs ),
+    m_nMaxDepth( rhs.m_nMaxDepth ), m_prng( rhs.m_prng )
+  // don't bother with copying xCandidate vectors
+{
+}
+
 RootNode::~RootNode(void) {
+}
+
+const RootNode& RootNode::operator=( const RootNode& rhs ) {
+  if ( &rhs != this ) {
+    NodeProxy<RootNode>::operator=( rhs );
+    m_nMaxDepth = rhs.m_nMaxDepth;
+    m_prng = rhs.m_prng;
+    // don't bother with copying xCandidate vectors
+  }
+  return *this;
 }
 
 bool RootNode::EvaluateBoolean( void ) {

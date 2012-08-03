@@ -387,7 +387,7 @@ void CSimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       }
 
       if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
-        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
+//        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
         // todo:  propogate this into the OrderManager
         if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );   
       }

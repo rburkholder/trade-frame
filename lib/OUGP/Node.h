@@ -40,10 +40,12 @@ class Node {
 public:
 
   typedef boost::shared_ptr<Node> pNode_t;
-  typedef std::vector<Node* (*)()> fnCreateNode_t;
 
   Node( NodeType::E ReturnType, NodeType::E ChildType );
+  Node( const Node& rhs );
   virtual ~Node(void);
+
+  const Node& operator=( const Node& rhs );
 
   bool IsTerminal( void ) const { return 0 == m_cntNodes; };
   unsigned int NodeCount( void ) const { return m_cntNodes; };
@@ -71,10 +73,7 @@ public:
   Node& ChildCenter( void ) { assert( 0 != m_pChildCenter ); return *m_pChildCenter; };
   Node& ChildRight( void ) { assert( 0 != m_pChildRight ); return *m_pChildRight; };
 
-  void SetCreateNodeIndex( fnCreateNode_t::size_type ix ) { m_ixCreateNode = ix; };
-  fnCreateNode_t::size_type GetCreateNodeIndex( void ) { return m_ixCreateNode; };
-
-  Node* Replicate( bool bCopyValues );
+  Node* Replicate( void );  // makes a copy of this node, plus recursed copies of children
 
   virtual void PreProcess( void ) {}; // used with Genetic Programming Module for initializating time series
 
@@ -94,10 +93,9 @@ protected:
 
   ParentLink::E m_eParentSide;
 
-  virtual Node* Clone( bool bCopyValues ) = 0;
+  virtual Node* CloneBasics( void ) = 0;
 
 private:
-  fnCreateNode_t::size_type m_ixCreateNode; // indexs into m_vNodeFactoryAllNodes for self creation
 };
 
 std::stringstream& operator<<( std::stringstream& ss, const Node& node );
@@ -106,16 +104,19 @@ template<typename N> // CRTP
 class NodeProxy: public Node {
 public:
   NodeProxy( NodeType::E ReturnType, NodeType::E ChildType ): Node( ReturnType, ChildType ) {};
+  NodeProxy( const NodeProxy& rhs ): Node( rhs ) {};
+  const NodeProxy& operator=( const NodeProxy& rhs ) {
+    if ( &rhs != this ) {
+      Node::operator=( rhs );
+    }
+    return *this;
+  }
   virtual ~NodeProxy( void ) {};
 
-  virtual Node* Clone( bool bCopyValues ) {
-    N* t = new N;
-    if ( bCopyValues ) {
-      *t = dynamic_cast<N&>( *this );
-    }
+  virtual Node* CloneBasics( void ) {
+    N* t = new N( dynamic_cast<N&>( *this ) );
     return t;
   }
-
 protected:
 private:
 };

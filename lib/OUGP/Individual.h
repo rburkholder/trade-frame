@@ -37,7 +37,18 @@ public:
       f( &rnLong );  // send the address of the pointer
       f( &rnShort ); // send the address of the pointer
     }
-    Signals_t( void ) : rnLong( 0 ), rnShort( 0 ) {};
+    void Replicate( const Signals_t& rhs ) {
+      if ( 0 != rhs.rnLong ) rnLong = dynamic_cast<pRootNode_t>( rhs.rnLong->Replicate() );
+      if ( 0 != rhs.rnShort ) rnShort = dynamic_cast<pRootNode_t>( rhs.rnShort->Replicate() );
+    }
+    Signals_t( void ) : rnLong( 0 ), rnShort( 0 ) {}
+    Signals_t( const Signals_t& rhs ) : rnLong( 0 ), rnShort( 0 ) { Replicate( rhs ); };
+    const Signals_t& operator=( const Signals_t& rhs ) { 
+      if ( &rhs != this ) {
+        Replicate( rhs ); 
+      }
+      return *this;
+    };
     ~Signals_t( void ) { 
       if ( 0 != rnLong ) { delete rnLong; rnLong = 0; };
       if ( 0 != rnShort ) { delete rnShort; rnShort = 0; };
@@ -48,6 +59,7 @@ public:
   double m_dblRelativeFitness;  // maxrawfitness - rawfitness, larger numbers therefore worse (aka standardized fitness)
   double m_dblAdjustedFitness;  // 1 / ( 1 + rf ), range 0 to 1, with 1 being best
   double m_dblNormalizedFitness;  // af / sum(af), range 0 to 1, with 1 being best, sum is 1
+  std::stringstream m_ssFormula;
 
   Individual( void );
   Individual( const Individual& rhs );
@@ -58,7 +70,7 @@ public:
   void TreeToString( std::stringstream& ss ) const;
 
   bool IsComputed( void ) const { return m_bComputed; };
-  void SetComputed( bool bComputed ) { m_bComputed = bComputed; };
+  void SetComputed( bool bComputed = true ) { m_bComputed = bComputed; };
 
   bool operator>( const Individual& rhs ) const { return m_dblNormalizedFitness > rhs.m_dblNormalizedFitness; };
   bool operator<( const Individual& rhs ) const { return m_dblNormalizedFitness < rhs.m_dblNormalizedFitness; };

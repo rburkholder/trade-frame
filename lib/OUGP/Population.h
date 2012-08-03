@@ -42,7 +42,7 @@ public:
 
   const vGeneration_t& CurrentGeneration( void ) { return *m_pvCurGeneration; };
 
-  bool MakeNewGeneration( bool bCopyValues );
+  bool MakeNewGeneration( void );
   void CalcFitness( void );
 
 protected:

@@ -25,8 +25,8 @@ class TimeSeriesForNode {
 public:
 private:
 protected:
-  typename TS::size_type m_ixTimeSeries;
-  TS* m_pTimeSeries;
+  typename TS::size_type m_ixTimeSeries;  // supplied through template parameter
+  TS* m_pTimeSeries;  // supplied through Node PreProcessing, after strategy instantiated
 public:
 
   TimeSeriesForNode( void );
@@ -51,8 +51,8 @@ TimeSeriesForNode<TS>::TimeSeriesForNode( void ): m_pTimeSeries( 0 ) {
 }
 
 template<typename TS>
-TimeSeriesForNode<TS>::TimeSeriesForNode( const TimeSeriesForNode<TS>& rhs ): m_pTimeSeries( rhs.m_pTimeSeries ) {  
-  // handles copy constructor to keep existing timeseries
+TimeSeriesForNode<TS>::TimeSeriesForNode( const TimeSeriesForNode& rhs ) 
+  : m_pTimeSeries( rhs.m_pTimeSeries ) { // handles copy constructor to keep existing timeseries
 }
 
 } // namespace gp

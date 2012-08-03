@@ -30,7 +30,10 @@ public:
   typedef std::vector<Node*> vpNode_t;
 
   RootNode(void);
+  RootNode( const RootNode& rhs );
   ~RootNode(void);
+
+  const RootNode& operator=( const RootNode& rhs );
 
   void ToString( std::stringstream& ss ) const { ss << "root="; };
   bool EvaluateBoolean( void );

@@ -19,6 +19,7 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>  // separate thread background merge processing
 #include <boost/bind.hpp>
+#include <boost/asio.hpp>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -79,7 +80,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
-  ou::gp::Population pop( 100 );
+  ou::gp::Population pop( 24 );
 
   pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 
@@ -122,48 +123,86 @@ void AppOptimizeStrategy::Optimizer( void ) {
     }
   };
 
-  // can parallize this once all is working sequentially
-  while ( pop.MakeNewGeneration( true ) ) {
-    const vGeneration_t& gen( pop.CurrentGeneration() );
-    BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
-      m_pswStrategy = new StrategyWrapper;
-      StrategyEquity::registrations_t m_registrations;
-      m_pswStrategy->Init( 
+  struct ProcessIndividual {
+    ProcessIndividual( ou::gp::Individual& ind, pInstrument_t pInstrument )
+      : m_ind( ind ), m_pInstrument( pInstrument ) {
+    }
+    ~ProcessIndividual( void ) {
+    }
+    void Init( void ) {  // run synchronously
+      StrategyEquity::registrations_t m_registrations; // contains a static component, be careful
+      m_swStrategy.Init( 
         m_registrations,
         m_pInstrument, date( 2012, 7, 22 ), "/app/semiauto/2012-Jul-22 18:08:14.285807",
-        fastdelegate::MakeDelegate( ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
-        fastdelegate::MakeDelegate( ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
-      // update nodes with specific time series:
-      const_cast<ou::gp::Individual&>(ind).m_Signals.EachSignal( PreProcessNodes() );
-      // output the time series description:
-      ss.str( "" );
-      ind.TreeToString( ss );
-      std::cout << ss.str() << std::endl;
-      m_pswStrategy->Start();  // run provider synchronously
-      const_cast<ou::gp::Individual&>( ind ).m_dblRawFitness = m_pswStrategy->GetPL();
-      delete m_pswStrategy;
-      m_pswStrategy = 0;
-      std::cout << "----------------------------" << std::endl;
+        fastdelegate::MakeDelegate( m_ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
+        fastdelegate::MakeDelegate( m_ind.m_Signals.rnShort, &ou::gp::RootNode::EvaluateBoolean ) );
+      const_cast<ou::gp::Individual&>(m_ind).m_Signals.EachSignal( PreProcessNodes() );
+      m_ind.TreeToString( m_ind.m_ssFormula );
     }
-    pop.CalcFitness();
+    void Run( void ) { // run asynchronously
+      m_swStrategy.Start(); 
+      m_ind.m_dblRawFitness = m_swStrategy.GetPL();
+    }
+  private:
+    ou::gp::Individual& m_ind;
+    pInstrument_t m_pInstrument;
+    StrategyWrapper m_swStrategy;
+  };
 
-    // optimization:
-    // number of trades similar to number in ZigZag?
-    // minimize drawdown 
-    // # winning trades > # losing trades, 60/40?  70/30?
-    // pareto minimum concept
+  // http://boost.2283326.n4.nabble.com/Is-thread-pool-using-asio-and-thread-group-working-as-intended-td4552297.html
+  // set up some threads for running the strategy
+//  boost::asio::io_service srvc;
+//  boost::thread_group threads;
+//  {
+//    boost::asio::io_service::work work( srvc );  // keep things running while real work arrives
+//    for ( std::size_t ix = 0; ix < 10; ix++ ) {
+//      threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
+//    }
+    while ( pop.MakeNewGeneration() ) {
+      const vGeneration_t& gen( pop.CurrentGeneration() );
+      BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
+        if ( ind.IsComputed() ) {
+          std::cout 
+            << "Computed: " 
+            << ind.m_dblRawFitness << std::endl
+            << ind.m_ssFormula.str() << std::endl;
+        }
+        else {
+          ou::gp::Individual& i( const_cast<ou::gp::Individual&>( ind ) );
+          ProcessIndividual pi( i, m_pInstrument );
+          pi.Init();
+          std::cout << ind.m_ssFormula.str() << std::endl;
+          pi.Run();  // can't run asynchronously due to singleton managers and singleton hdf5 manager
+          i.SetComputed();
+          std::cout << "----------------------------" << std::endl;
+        }
+      }
 
-    ss.str( "" );
-    gen.front().TreeToString( ss );
-    std::cout << gen.front().m_dblRawFitness << ", " << ss << std::endl;
-  }
+      // at some point, add the above Formula strings to master table, so random calcs which match prior randoms aren't computed
+
+//      threads.join_all();  // wait for all work to complete
+
+      pop.CalcFitness();
+
+      // optimization:
+      // number of trades similar to number in ZigZag?
+      // minimize drawdown 
+      // # winning trades > # losing trades, 60/40?  70/30?
+      // pareto minimum concept
+
+      ss.str( "" );
+      //gen.front().TreeToString( ss );  // can't do this as the strategy no longer exists
+      std::cout 
+        << "Winner: " 
+        << gen.front().m_dblRawFitness << std::endl
+        << gen.front().m_ssFormula.str() << std::endl;
+    }
+//  }
+
 
 }
 
 int AppOptimizeStrategy::OnExit(  void ) {
-
-  delete m_pswStrategy;
-  m_pswStrategy = 0;
 
   return 0;
 }

@@ -41,6 +41,7 @@ Population::Population( unsigned int nPopulationSize )
   m_urd( 0.0, 1.0 ),  // probability in [0.0, 1.0)
   m_cntAboveAverage( 0 )
 {
+  assert( 0 == ( nPopulationSize % 2 ) ); // ensure even number of population elements
 }
 
 Population::~Population(void) {
@@ -131,12 +132,12 @@ unsigned int Population::TournamentSelection( unsigned int cntAboveAverage ) {
 
 bool Population::IsMatchInGeneration( const Individual& individual, const vGeneration_t& generation, vGeneration_t::size_type ixMax ) {
   bool b = false;
-  std::stringstream ssIndividual1;
-  individual.TreeToString( ssIndividual1 );
+//  std::stringstream ssIndividual1;
+//  individual.TreeToString( ssIndividual1 );
   for ( vGenerations_t::size_type ix = 0; ix <= ixMax; ++ix ) {
-    std::stringstream ssIndividual2;
-    generation[ ix ].TreeToString( ssIndividual2 );
-    if ( ssIndividual1.str() == ssIndividual2.str() ) {
+//    std::stringstream ssIndividual2;
+//    generation[ ix ].TreeToString( ssIndividual2 );
+    if ( individual.m_ssFormula.str() == generation[ ix ].m_ssFormula.str() ) {
       b = true;
       break;
     }
@@ -144,7 +145,7 @@ bool Population::IsMatchInGeneration( const Individual& individual, const vGener
   return b;
 }
 
-bool Population::MakeNewGeneration( bool bCopyValues ) {
+bool Population::MakeNewGeneration( void ) {
 
   using boost::phoenix::arg_names::arg1;
 
@@ -240,8 +241,8 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
           rnOldXOver2 = *vSrcNodes[ prob2 ];
           vSrcNodes.erase( vSrcNodes.begin() + prob2 );
 
-          rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) );
-          rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) );
+          rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate() );
+          rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate() );
 
           // rebuild candidate lists here, if we need them
           rnNewXOver1->PopulateCandidates( &m_rng );
@@ -263,8 +264,8 @@ bool Population::MakeNewGeneration( bool bCopyValues ) {
         vSrcNodes.pop_back();
         assert( 0 == vSrcNodes.size() );
 
-        rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate( bCopyValues ) );
-        rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate( bCopyValues ) );
+        rnNewXOver1 = dynamic_cast<RootNode*>( rnOldXOver1->Replicate() );
+        rnNewXOver2 = dynamic_cast<RootNode*>( rnOldXOver2->Replicate() );
 
         rnNewXOver1->PopulateCandidates( &m_rng );
         rnNewXOver2->PopulateCandidates( &m_rng );
@@ -323,7 +324,10 @@ bool Population::CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 ) {
   Node& parent1( node1->Parent() );
   Node& parent2( node2->Parent() );
 
-  switch ( node1->ParentSide() ) {
+  ParentLink::E eNode1( node1->ParentSide() );
+  ParentLink::E eNode2( node2->ParentSide() );
+
+  switch ( eNode1 ) {
   case ParentLink::Left:
     parent1.AddLeft( node2 );
     break;
@@ -335,7 +339,7 @@ bool Population::CrossOver( pRootNode_t& rn1, pRootNode_t& rn2 ) {
     break;
   }
 
-  switch ( node2->ParentSide() ) {
+  switch ( eNode2 ) {
   case ParentLink::Left:
     parent2.AddLeft( node1 );
     break;

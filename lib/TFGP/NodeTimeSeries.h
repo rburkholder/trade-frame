@@ -28,6 +28,7 @@ template<typename N, typename TS>  // Specific Node, TimeSeries
 class NodeTimeSeries: public NodeDouble<N>, public TimeSeriesForNode<TS> {
 public:
   NodeTimeSeries( void );
+  NodeTimeSeries( const NodeTimeSeries& rhs );
   ~NodeTimeSeries( void );
   virtual void PreProcess( void ) {
     TimeSeriesRegistration<TS>::SetTimeSeries( &m_pTimeSeries, m_ixTimeSeries );
@@ -38,6 +39,12 @@ private:
 
 template<typename N, typename TS>
 NodeTimeSeries<N,TS>::NodeTimeSeries( void ): NodeDouble<N>(), TimeSeriesForNode<TS>() {
+}
+
+template<typename N, typename TS>
+NodeTimeSeries<N,TS>::NodeTimeSeries( const NodeTimeSeries& rhs )
+  : NodeDouble<N>( rhs ), TimeSeriesForNode<TS>( rhs )
+{
 }
 
 template<typename N, typename TS>

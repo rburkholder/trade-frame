@@ -43,7 +43,7 @@ private:
 
   pInstrument_t m_pInstrument;
 
-  StrategyWrapper* m_pswStrategy;  // will ultimately need one per simultaneous individual running from population
+//  StrategyWrapper* m_pswStrategy;  // will ultimately need one per simultaneous individual running from population
 
   virtual bool OnInit();
   virtual int OnExit();
