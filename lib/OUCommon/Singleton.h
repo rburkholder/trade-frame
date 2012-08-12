@@ -13,8 +13,10 @@
 
 #pragma once
 
-
 #include <stdexcept>
+
+#include <boost/thread/tss.hpp>
+#include <boost/utility.hpp>
 
 // other classes to fix:
 //   IQFeedProviderSingleton
@@ -31,21 +33,65 @@ namespace ou {
 // look in patterns book for protected version of creation:  double check lock pattern
 // but may need two versions:  1 singleton common across threads, 1 singleton per thread
 
-template<typename T> 
-class CSingleton {
+class SingletonBase {
 public:
-  static T& Instance() {  
+  enum ELocalCommonInstanceSource_t {
+    Global, // useful in simple program environments
+    Assigned  // required for multi-threaded simultaneous simulations
+  };
+  void SetLocalCommonInstanceSource( ELocalCommonInstanceSource_t source ) { m_source = source; };
+  ELocalCommonInstanceSource_t GetLocalCommonInstanceSource( void ) { return m_source; };
+protected:
+private:
+  static ELocalCommonInstanceSource_t m_source;
+};
+
+template<typename T> 
+class CSingleton: boost::noncopyable, public SingletonBase {
+public:
+  static T& Instance() { return GlobalInstance(); }  // to be deprecated
+  static T& GlobalInstance() {  // global to whole program
     static T _instance;
     return _instance;
   }
+  static T& LocalUniqueInstance() {  // unique to this thread instance
+    T* t( 0 );
+    if ( 0 == m_pT.get() ) {
+      t = new T;
+      m_pT.reset( t );
+      m_nLUI++;
+    }
+    else {
+      t = m_pT.get();
+    }
+    return *t;
+  }
+  static T& LocalCommonInstance() { // unique to a number of thread instances, set with SetLocalCommonInstance
+    T* t = m_pT.get();
+    if ( 0 == t ) 
+      throw std::runtime_error( "LocalCommonInstance not available" );
+    return *t;
+  }
+  void SetLocalCommonInstance( T* t ) {
+    m_pT.reset( t );
+  }
+  void ClearLocalCommonInstance( void ) {
+    m_pT.reset();
+  }
+
 protected:
   CSingleton() {};          // ctor hidden
-  ~CSingleton() {};          // dtor hidden
+  virtual ~CSingleton() {}; // dtor hidden
 private:
-  static T* pT;  // needs initialization when specialized
-  CSingleton(CSingleton const&);    // copy ctor hidden
-  CSingleton& operator=(CSingleton const&);  // assign op hidden
+  static std::size_t m_nLUI;
+  static boost::thread_specific_ptr<T> m_pT;
 };
+
+template<typename T>
+std::size_t CSingleton<T>::m_nLUI( 0 );
+
+template<typename T>
+boost::thread_specific_ptr<T> CSingleton<T>::m_pT;
 
 //
 // CMultipleInstanceTest

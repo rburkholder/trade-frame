@@ -80,8 +80,8 @@ template<class T> CMergeCarrier<T>::~CMergeCarrier() {
 }
 
 template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
-  if ( ou::CTimeSource::Instance().GetSimulationMode() ) {
-    ou::CTimeSource::Instance().SetSimulationTime( m_pDatum->DateTime() );
+  if ( ou::CTimeSource::LocalCommonInstance().GetSimulationMode() ) {
+    ou::CTimeSource::LocalCommonInstance().SetSimulationTime( m_pDatum->DateTime() );
   }
   if ( NULL != OnDatum ) 
     OnDatum( *m_pDatum );

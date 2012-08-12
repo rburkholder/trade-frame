@@ -99,7 +99,7 @@ void COrder::ConstructOrder() {
   // need to do something with idInstrument, into and out of the database
   // will be dealt with by OrderManager
 
-  m_row.dtOrderCreated = ou::CTimeSource::Instance().Internal();
+  m_row.dtOrderCreated = ou::CTimeSource::LocalCommonInstance().Internal();
   assert( NULL != m_pInstrument.get() );
   // order id needs to be set externally, as it is dependent upon external factors
 //  m_nOrderId = m_persistedorderid.GetNextOrderId();
@@ -113,7 +113,7 @@ void COrder::ConstructOrder() {
 void COrder::SetSendingToProvider() {
   assert( OrderStatus::Created == m_row.eOrderStatus );
   m_row.eOrderStatus = OrderStatus::SendingToProvider;
-  m_row.dtOrderSubmitted = ou::CTimeSource::Instance().Internal();
+  m_row.dtOrderSubmitted = ou::CTimeSource::LocalCommonInstance().Internal();
 }
 
 OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
@@ -152,7 +152,7 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
         m_row.eOrderStatus = OrderStatus::Filled;
         break;
       }
-      m_row.dtOrderClosed = ou::CTimeSource::Instance().Internal();
+      m_row.dtOrderClosed = ou::CTimeSource::LocalCommonInstance().Internal();
 //      OnCommission( *this ); // commission is reported separately
       OnOrderFilled( *this );
     }

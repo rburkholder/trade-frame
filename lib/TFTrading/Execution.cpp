@@ -31,7 +31,7 @@ CExecution::CExecution(
 {
   assert( 0 < dblPrice );
   assert( 0 < nQuantity );
-  m_row.dtExecutionTimeStamp = ou::CTimeSource::Instance().Internal();
+  m_row.dtExecutionTimeStamp = ou::CTimeSource::LocalCommonInstance().Internal();
 }
 
 CExecution::CExecution( 
@@ -43,7 +43,7 @@ CExecution::CExecution(
 {
   assert( 0 < dblPrice );
   assert( 0 < nQuantity );
-  m_row.dtExecutionTimeStamp = ou::CTimeSource::Instance().Internal();
+  m_row.dtExecutionTimeStamp = ou::CTimeSource::LocalCommonInstance().Internal();
 }
 
 CExecution::~CExecution(void) {

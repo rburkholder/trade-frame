@@ -174,7 +174,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
   assert( OrderType::Market == eOrderType );
   //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
+   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -190,7 +190,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
   //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
+   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -207,7 +207,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
   //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::Instance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
+   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -228,7 +228,7 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
   pOrder->OnCommission.Add( MakeDelegate( this, &CPosition::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &CPosition::HandleCancellation ) );
-  COrderManager::Instance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
+  COrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
 void CPosition::CancelOrders( void ) {
@@ -269,7 +269,7 @@ void CPosition::HandleCancellation( const COrder& order ) {
 }
 
 void CPosition::CancelOrder( vOrders_iter_t iter ) {
-  COrderManager::Instance().CancelOrder( iter->get()->GetOrderId() );
+  COrderManager::LocalCommonInstance().CancelOrder( iter->get()->GetOrderId() );
 }
 
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {

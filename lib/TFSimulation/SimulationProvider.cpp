@@ -27,7 +27,7 @@ namespace tf { // TradeFrame
 
 CSimulationProvider::CSimulationProvider(void)
 : CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
-  m_pMerge( NULL )
+  m_pMerge( 0 )
 {
   m_sName = "Simulator";
   m_nID = keytypes::EProviderSimulator;
@@ -40,7 +40,7 @@ CSimulationProvider::CSimulationProvider(void)
 
 CSimulationProvider::~CSimulationProvider(void) {
 
-  if ( NULL != m_pMerge ) {
+  if ( 0 != m_pMerge ) {
     delete m_pMerge;
     m_pMerge = NULL;
   }
@@ -208,17 +208,17 @@ void CSimulationProvider::Merge( void ) {
   m_nProcessedDatums = 0;
   m_dtSimStart = ou::CTimeSource::Instance().External();
 
-  bool bOldMode = ou::CTimeSource::Instance().GetSimulationMode();
-  ou::CTimeSource::Instance().SetSimulationMode();
+  bool bOldMode = ou::CTimeSource::LocalCommonInstance().GetSimulationMode();
+  ou::CTimeSource::LocalCommonInstance().SetSimulationMode();
 
   m_pMerge -> Run();
 
   m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
-  m_dtSimStop = ou::CTimeSource::Instance().External();
+  m_dtSimStop = ou::CTimeSource::LocalCommonInstance().External();
 
   if ( 0 != m_OnSimulationComplete ) m_OnSimulationComplete();
 
-  ou::CTimeSource::Instance().SetSimulationMode( bOldMode );
+  ou::CTimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
 }
 
 void CSimulationProvider::Run( bool bAsync ) {
@@ -281,15 +281,15 @@ void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
 }
 
 void CSimulationProvider::HandleExecution( COrder::idOrder_t orderId, const CExecution &exec ) {
-  COrderManager::Instance().ReportExecution( orderId, exec );
+  COrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
 }
 
 void CSimulationProvider::HandleCommission( COrder::idOrder_t orderId, double commission ) {
-  COrderManager::Instance().ReportCommission( orderId, commission );
+  COrderManager::LocalCommonInstance().ReportCommission( orderId, commission );
 }
 
 void CSimulationProvider::HandleCancellation( COrder::idOrder_t orderId ) {
-  COrderManager::Instance().ReportCancellation( orderId );
+  COrderManager::LocalCommonInstance().ReportCancellation( orderId );
 }
 
 

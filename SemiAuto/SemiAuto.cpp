@@ -133,9 +133,9 @@ bool AppSemiAuto::OnInit() {
   // this form of InstrumentData is constructed three times each step, maybe reduce in the future?
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "XAUUSDO.COMP" ) ? mgr.Get( "XAUUSDO.COMP" ) : mgr.ConstructInstrument( "XAUUSDO.COMP", "SMART", ou::tf::InstrumentType::Commodity ) ) );
 
-  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012,  8 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCU12" ) ? mgr.Get( "+GCU12" ) : mgr.ConstructFuture( "+GCU12", "SMART", 2012,  9 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCV12" ) ? mgr.Get( "+GCV12" ) : mgr.ConstructFuture( "+GCV12", "SMART", 2012, 10 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCZ12" ) ? mgr.Get( "+GCZ12" ) : mgr.ConstructFuture( "+GCZ12", "SMART", 2012, 12 ) ) );
 
 //  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
 //  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );

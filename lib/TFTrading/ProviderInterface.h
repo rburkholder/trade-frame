@@ -173,7 +173,7 @@ public:
 
 protected:
 
-   typedef std::map<symbol_id_t, pSymbol_t> m_mapSymbols_t;
+  typedef std::map<symbol_id_t, pSymbol_t> m_mapSymbols_t;
   typedef std::pair<symbol_id_t, pSymbol_t> pair_mapSymbols_t;
   m_mapSymbols_t m_mapSymbols;
 

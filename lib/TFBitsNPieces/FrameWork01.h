@@ -138,9 +138,9 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
   // ensure providers have been initialized above first
-  CProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
-  CProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
-  CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+  CProviderManager::LocalCommonInstance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
+  CProviderManager::LocalCommonInstance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
+  CProviderManager::LocalCommonInstance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisConnected ) );
@@ -164,9 +164,9 @@ FrameWork01<CRTP>::~FrameWork01( void ) {
   m_sim->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorDisConnected ) );
 
-  ou::tf::CProviderManager::Instance().Release( "iq01" );
-  ou::tf::CProviderManager::Instance().Release( "ib01" );
-  ou::tf::CProviderManager::Instance().Release( "sim01" );
+  ou::tf::CProviderManager::LocalCommonInstance().Release( "iq01" );
+  ou::tf::CProviderManager::LocalCommonInstance().Release( "ib01" );
+  ou::tf::CProviderManager::LocalCommonInstance().Release( "sim01" );
 
 }
 
@@ -220,7 +220,7 @@ void FrameWork01<CRTP>::HandleStateChangeRequest( eProviderState_t state, bool& 
       {
         std::stringstream ss;
         ss.str( "" );
-        ss << ou::CTimeSource::Instance().Internal();
+        ss << ou::CTimeSource::LocalCommonInstance().Internal();
 //        m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
       }
       p->Connect();

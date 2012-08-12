@@ -318,7 +318,7 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
         case OrderStatus::Filled:
           {
             OrderManagerQueries::UpdateOrder 
-              order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::Instance().Internal() );
+              order( nOrderId, row.eOrderStatus, row.nQuantityRemaining, row.nQuantityFilled, row.dblAverageFillPrice, ou::CTimeSource::LocalCommonInstance().Internal() );
             ou::db::QueryFields<OrderManagerQueries::UpdateOrder>::pQueryFields_t pQuery
               = m_pSession->SQL<OrderManagerQueries::UpdateOrder>( // todo:  cache this query
               OrderManagerQueries::sUpdateOrderQuery, order ).Where( "orderid=?" );
