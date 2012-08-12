@@ -23,24 +23,24 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // sDirectory needs to be available on instantiation to enable signal availability
-CSimulationSymbol::CSimulationSymbol( 
+SimulationSymbol::SimulationSymbol( 
   const std::string &sSymbol, 
   pInstrument_cref pInstrument, 
   const std::string &sGroup
   ) 
-: CSymbol<CSimulationSymbol>(pInstrument), m_sDirectory( sGroup )
+: CSymbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
-CSimulationSymbol::~CSimulationSymbol(void) {
+SimulationSymbol::~SimulationSymbol(void) {
   // we don't yet have a .Remove for this in SimulationProvider yet.
   //m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 
 }
 
-void CSimulationSymbol::StartTradeWatch( void ) {
+void SimulationSymbol::StartTradeWatch( void ) {
   if ( 0 == m_trades.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/trades/" + GetId() );
@@ -57,10 +57,10 @@ void CSimulationSymbol::StartTradeWatch( void ) {
   }
 }
 
-void CSimulationSymbol::StopTradeWatch( void ) {
+void SimulationSymbol::StopTradeWatch( void ) {
 }
 
-void CSimulationSymbol::StartQuoteWatch( void ) {
+void SimulationSymbol::StartQuoteWatch( void ) {
   if ( 0 == m_quotes.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/quotes/" + GetId() );
@@ -77,10 +77,10 @@ void CSimulationSymbol::StartQuoteWatch( void ) {
   }
 }
 
-void CSimulationSymbol::StopQuoteWatch( void ) {
+void SimulationSymbol::StopQuoteWatch( void ) {
 }
 
-void CSimulationSymbol::StartGreekWatch( void ) {
+void SimulationSymbol::StartGreekWatch( void ) {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
       std::string sPath( m_sDirectory + "/greeks/" + GetId() );
@@ -97,24 +97,24 @@ void CSimulationSymbol::StartGreekWatch( void ) {
   }
 }
 
-void CSimulationSymbol::StopGreekWatch( void ) {
+void SimulationSymbol::StopGreekWatch( void ) {
 }
 
-void CSimulationSymbol::StartDepthWatch( void ) {
+void SimulationSymbol::StartDepthWatch( void ) {
 }
 
-void CSimulationSymbol::StopDepthWatch( void ) {
+void SimulationSymbol::StopDepthWatch( void ) {
 }
 
-void CSimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
+void SimulationSymbol::HandleQuoteEvent( const DatedDatum &datum ) {
   m_OnQuote( dynamic_cast<const Quote &>( datum ) ); 
 }
 
-void CSimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
+void SimulationSymbol::HandleTradeEvent( const DatedDatum &datum ) {
   m_OnTrade( dynamic_cast<const Trade &>( datum ) );  
 }
 
-void CSimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
+void SimulationSymbol::HandleGreekEvent( const DatedDatum &datum ) {
   m_OnGreek( dynamic_cast<const Greek &>( datum ) );  
 }
 

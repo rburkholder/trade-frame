@@ -21,36 +21,36 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-int CSimulateOrderExecution::m_nExecId( 1000 );
+int SimulateOrderExecution::m_nExecId( 1000 );
 
-CSimulateOrderExecution::CSimulateOrderExecution(void)
+SimulateOrderExecution::SimulateOrderExecution(void)
 : m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 )//, m_ea( EAQuotes )
 {
 }
 
-CSimulateOrderExecution::~CSimulateOrderExecution(void) {
+SimulateOrderExecution::~SimulateOrderExecution(void) {
 }
 
-void CSimulateOrderExecution::NewTrade( const Trade& trade ) {
+void SimulateOrderExecution::NewTrade( const Trade& trade ) {
   ProcessLimitOrders( trade );
 }
 
-void CSimulateOrderExecution::NewQuote( const Quote& quote ) {
+void SimulateOrderExecution::NewQuote( const Quote& quote ) {
   ProcessOrderQueues( quote );
   m_lastQuote = quote;
 }
 
-void CSimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
+void SimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
   m_lOrderDelay.push_back( pOrder );
 }
 
-void CSimulateOrderExecution::CancelOrder( COrder::idOrder_t nOrderId ) {
+void SimulateOrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
   structCancelOrder co( ou::CTimeSource::LocalCommonInstance().Internal(), nOrderId );
   m_lCancelDelay.push_back( co );
 }
 
-void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, Trade::tradesize_t quan ) {
-  // COrder or CInstrument should have commission calculation?
+void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesize_t quan ) {
+  // Order or CInstrument should have commission calculation?
   if ( 0 != quan ) {
     if ( NULL != OnCommission ) {
       double dblCommission( 0 );
@@ -74,7 +74,7 @@ void CSimulateOrderExecution::CalculateCommission( COrder* pOrder, Trade::trades
   }
 }
 
-void CSimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
+void SimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
   if ( !quote.IsValid() ) {
     return;
@@ -94,11 +94,11 @@ void CSimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
 }
 
-void CSimulateOrderExecution::ProcessStopOrders( const Quote& quote ) {
+void SimulateOrderExecution::ProcessStopOrders( const Quote& quote ) {
   // not yet implemented
 }
 
-bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
+bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -126,7 +126,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
         dblPrice = quote.Bid();
         break;
       default:
-        throw std::runtime_error( "CSimulateOrderExecution::ProcessMarketOrders unknown order side" );
+        throw std::runtime_error( "SimulateOrderExecution::ProcessMarketOrders unknown order side" );
         break;
     }
 
@@ -156,7 +156,7 @@ bool CSimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
   return bProcessed;
 }
 
-bool CSimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
+bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue; // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -208,7 +208,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
   return bProcessed;
 }
 
-bool CSimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
+bool SimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
   //bool bAllow( true );
   double bid( trade.Price() );
   double ask( trade.Price() );
@@ -226,7 +226,7 @@ bool CSimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
   return ProcessLimitOrders( quote );
 }
 
-void CSimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
+void SimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
 
@@ -291,7 +291,7 @@ void CSimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
 }
 
-void CSimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
+void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
   // process cancels list
   while ( !m_lCancelDelay.empty() ) {

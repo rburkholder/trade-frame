@@ -50,7 +50,7 @@ public:
 
   typedef boost::shared_ptr<CProviderInterfaceBase> pProvider_t;
 
-  typedef COrder::pOrder_t pOrder_t;
+  typedef Order::pOrder_t pOrder_t;
 //  typedef keytypes::idProvider_t idProvider_t;
 
   typedef CSymbolBase::quotehandler_t quotehandler_t;
@@ -168,8 +168,8 @@ public:
 
   pSymbol_t GetSymbol( const symbol_id_t& );
 
-  void  PlaceOrder( COrder::pOrder_t pOrder );
-  void CancelOrder( COrder::pOrder_t pOrder );
+  void  PlaceOrder( Order::pOrder_t pOrder );
+  void CancelOrder( Order::pOrder_t pOrder );
 
 protected:
 

@@ -34,7 +34,7 @@
 // CBerkeleyDBEnvManager =====
 
 //class CBerkeleyDBEnvManager: public CMultipleInstanceTest<CBerkeleyDBEnvManager> {
-class CBerkeleyDBEnvManager: public ou::CSingleton<CBerkeleyDBEnvManager> {
+class CBerkeleyDBEnvManager: public ou::Singleton<CBerkeleyDBEnvManager> {
 public:
 
   CBerkeleyDBEnvManager(void);
@@ -56,7 +56,7 @@ private:
 // ==== singleton
 //
 /*
-class CBerkeleyDBEnvManagerSingleton: public CSingleton<CBerkeleyDBEnvManager> {
+class CBerkeleyDBEnvManagerSingleton: public Singleton<CBerkeleyDBEnvManager> {
 public:
 protected:
 private:

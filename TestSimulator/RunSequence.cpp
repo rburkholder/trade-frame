@@ -40,7 +40,7 @@ void RunSequence::Run( void ) {
 
   ;
 
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
   pProviderSim_t m_pProvider;
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::LocalCommonInstance() );
@@ -49,7 +49,7 @@ void RunSequence::Run( void ) {
   m_pInstrument->SetMultiplier( 100 );
   m_pInstrument->SetMinTick( 0.1 );
 
-  m_pProvider.reset( new ou::tf::CSimulationProvider );
+  m_pProvider.reset( new ou::tf::SimulationProvider );
   //m_pProvider->SetGroupDirectory( "/app/TestSimulator" );
   m_pProvider->SetGroupDirectory( "/app/semiauto/2012-Jul-22 18:08:14.285807" );
 

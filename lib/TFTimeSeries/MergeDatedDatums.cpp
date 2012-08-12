@@ -37,24 +37,24 @@ MergeDatedDatums::~MergeDatedDatums(void) {
   }
 }
 
-void MergeDatedDatums::Add( TimeSeries<Quote>* pSeries, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<Quote>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Quote>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<Quote>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Trade>* pSeries, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<Trade>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Trade>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<Trade>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Bar>* pSeries, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<Bar>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Bar>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<Bar>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Greek>* pSeries, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<Greek>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<Greek>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<Greek>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<MarketDepth>* pSeries, MergeDatedDatums::OnDatumHandler function) {
-  m_mhCarriers.Append( new CMergeCarrier<MarketDepth>( pSeries, function ) );
+void MergeDatedDatums::Add( TimeSeries<MarketDepth>& series, MergeDatedDatums::OnDatumHandler function) {
+  m_mhCarriers.Append( new MergeCarrier<MarketDepth>( series, function ) );
 }
 
 // http://www.codeguru.com/forum/archive/index.php/t-344661.html

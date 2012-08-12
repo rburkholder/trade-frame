@@ -22,7 +22,7 @@
 
 App::App(void) 
   : m_mgrInstrument( ou::tf::CInstrumentManager::Instance() ),
-  m_ptws( new ou::tf::CIBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider ),
+  m_ptws( new ou::tf::IBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider ),
   m_dblPortfolioCashToTrade( 110000.0 ), m_dblPortfolioMargin( 0.15 )
 {
 }

@@ -25,8 +25,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CSimulationProvider::CSimulationProvider(void)
-: CProviderInterface<CSimulationProvider,CSimulationSymbol>(), 
+SimulationProvider::SimulationProvider(void)
+: CProviderInterface<SimulationProvider,SimulationSymbol>(), 
   m_pMerge( 0 )
 {
   m_sName = "Simulator";
@@ -38,7 +38,7 @@ CSimulationProvider::CSimulationProvider(void)
   m_pProvidesBrokerInterface = true;
 }
 
-CSimulationProvider::~CSimulationProvider(void) {
+SimulationProvider::~SimulationProvider(void) {
 
   if ( 0 != m_pMerge ) {
     delete m_pMerge;
@@ -46,7 +46,7 @@ CSimulationProvider::~CSimulationProvider(void) {
   }
 }
 
-void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
+void SimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
   CHDF5DataManager dm;
   std::string s;
   if( !dm.GroupExists( sGroupDirectory ) ) 
@@ -60,7 +60,7 @@ void CSimulationProvider::SetGroupDirectory( const std::string sGroupDirectory )
   m_sGroupDirectory = sGroupDirectory;
 }
 
-void CSimulationProvider::Connect() {
+void SimulationProvider::Connect() {
   if ( !m_bConnected ) {
     OnConnecting( 0 );
     m_bConnected = true;
@@ -69,7 +69,7 @@ void CSimulationProvider::Connect() {
   }
 }
 
-void CSimulationProvider::Disconnect() {
+void SimulationProvider::Disconnect() {
   if ( m_bConnected ) {
     OnDisconnecting( 0 );
     m_bConnected = false;
@@ -78,27 +78,27 @@ void CSimulationProvider::Disconnect() {
   }
 }
 
-CSimulationProvider::pSymbol_t CSimulationProvider::NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument ) {
-  pSymbol_t pSymbol( new CSimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
-  pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &CSimulationProvider::HandleExecution ) );
-  pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &CSimulationProvider::HandleCommission ) );
-  pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &CSimulationProvider::HandleCancellation ) );
+SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( SimulationSymbol::pInstrument_t pInstrument ) {
+  pSymbol_t pSymbol( new SimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
+  pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &SimulationProvider::HandleExecution ) );
+  pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &SimulationProvider::HandleCommission ) );
+  pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &SimulationProvider::HandleCancellation ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
 
-void CSimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler ) {
+void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::AddQuoteHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetQuoteHandlerCount() ) {
-    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewQuote ) );
+    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
   }
 }
 
-void CSimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler ) {
+void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::RemoveQuoteHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
@@ -108,23 +108,23 @@ void CSimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, CSim
   else {
     if ( 1 == iter->second->GetQuoteHandlerCount() ) {
       pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewQuote ) );
+      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
     }
   }
 }
 
-void CSimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler ) {
+void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::AddTradeHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) {
-    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
   }
 }
 
-void CSimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler ) {
+void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::RemoveTradeHandler( pInstrument, handler );
   inherited_t::m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
@@ -134,46 +134,46 @@ void CSimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, CSim
   else {
     if ( 1 == iter->second->GetTradeHandlerCount() ) {
       pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &CSimulateOrderExecution::NewTrade ) );
+      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
     }
   }
 }
 
 // these need to open the data file, load the data, and prepare to simulate
-void CSimulationProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
   pSymbol->StartQuoteWatch();
 }
 
-void CSimulationProvider::StopQuoteWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StopQuoteWatch( pSymbol_t pSymbol ) {
   pSymbol->StopQuoteWatch();
 }
 
-void CSimulationProvider::StartTradeWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StartTradeWatch( pSymbol_t pSymbol ) {
   pSymbol->StartTradeWatch();
 }
 
-void CSimulationProvider::StopTradeWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StopTradeWatch( pSymbol_t pSymbol ) {
   pSymbol->StopTradeWatch();
 }
 
-void CSimulationProvider::StartDepthWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StartDepthWatch( pSymbol_t pSymbol ) {
   pSymbol->StartDepthWatch();
 }
 
-void CSimulationProvider::StopDepthWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StopDepthWatch( pSymbol_t pSymbol ) {
   pSymbol->StopDepthWatch();
 }
 
-void CSimulationProvider::StartGreekWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StartGreekWatch( pSymbol_t pSymbol ) {
   pSymbol->StartGreekWatch();
 }
 
-void CSimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
+void SimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
   pSymbol->StopGreekWatch();
 }
 
 // root of background simulation thread, thread is started from Run.
-void CSimulationProvider::Merge( void ) {
+void SimulationProvider::Merge( void ) {
 
   // for each of the symbols, add the quote, trade and greek series
   // datums from each series will be merged and emitted in chronological order
@@ -182,25 +182,25 @@ void CSimulationProvider::Merge( void ) {
 
       pSymbol_t sym( iter->second );
 
-      Quotes* quotes = &sym->m_quotes;
-      if ( 0 != quotes->Size() ) {
+      Quotes& quotes( sym->m_quotes );
+      if ( 0 != quotes.Size() ) {
         m_pMerge -> Add( 
           quotes, 
-          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleQuoteEvent ) );
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleQuoteEvent ) );
       }
 
-      Trades* trades = &sym->m_trades;
-      if ( 0 != trades->Size() ) {
+      Trades& trades( sym->m_trades );
+      if ( 0 != trades.Size() ) {
         m_pMerge -> Add( 
           trades, 
-          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleTradeEvent ) );
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleTradeEvent ) );
       }
 
-      Greeks* greeks = &sym->m_greeks;
-      if ( 0 != greeks->Size() ) {
+      Greeks& greeks( sym->m_greeks );
+      if ( 0 != greeks.Size() ) {
         m_pMerge -> Add(
           greeks,
-          MakeDelegate( iter->second.get(), &CSimulationSymbol::HandleGreekEvent ) );
+          MakeDelegate( iter->second.get(), &SimulationSymbol::HandleGreekEvent ) );
       }
 
   }
@@ -221,7 +221,7 @@ void CSimulationProvider::Merge( void ) {
   ou::CTimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
 }
 
-void CSimulationProvider::Run( bool bAsync ) {
+void SimulationProvider::Run( bool bAsync ) {
   if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
   // how to detect end of thread, and reset m_hMergeThread?
@@ -230,8 +230,8 @@ void CSimulationProvider::Run( bool bAsync ) {
   }
   else {
     m_pMerge = new MergeDatedDatums();
-    boost::thread sim( boost::bind( &CSimulationProvider::Merge, this ) );
-    //m_threadMerge = boost::thread( boost::bind( &CSimulationProvider::Merge, this ) );
+    boost::thread sim( boost::bind( &SimulationProvider::Merge, this ) );
+    //m_threadMerge = boost::thread( boost::bind( &SimulationProvider::Merge, this ) );
     if ( !bAsync ) {
       sim.join();
     }
@@ -239,7 +239,7 @@ void CSimulationProvider::Run( bool bAsync ) {
   }
 }
 
-void CSimulationProvider::EmitStats( std::stringstream& ss ) {
+void SimulationProvider::EmitStats( std::stringstream& ss ) {
   boost::posix_time::time_duration dur = m_dtSimStop - m_dtSimStart;
   unsigned long nDuration = dur.total_seconds();
   unsigned long nDatumsPerSecond = m_nProcessedDatums / nDuration;
@@ -248,7 +248,7 @@ void CSimulationProvider::EmitStats( std::stringstream& ss ) {
 }
 
 // at some point:  run, stop, pause, resume, reset
-void CSimulationProvider::Stop() {
+void SimulationProvider::Stop() {
   if ( NULL == m_pMerge ) {
     std::cout << "no simulation to stop" << std::endl;
   }
@@ -258,7 +258,7 @@ void CSimulationProvider::Stop() {
   }
 }
 
-void CSimulationProvider::PlaceOrder( pOrder_t pOrder ) {
+void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
@@ -269,7 +269,7 @@ void CSimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   }
 }
 
-void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
+void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
   inherited_t::CancelOrder( pOrder );
   m_mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
   if ( m_mapSymbols.end() == iter ) {
@@ -280,15 +280,15 @@ void CSimulationProvider::CancelOrder( pOrder_t pOrder ) {
   }
 }
 
-void CSimulationProvider::HandleExecution( COrder::idOrder_t orderId, const CExecution &exec ) {
+void SimulationProvider::HandleExecution( Order::idOrder_t orderId, const CExecution &exec ) {
   COrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
 }
 
-void CSimulationProvider::HandleCommission( COrder::idOrder_t orderId, double commission ) {
+void SimulationProvider::HandleCommission( Order::idOrder_t orderId, double commission ) {
   COrderManager::LocalCommonInstance().ReportCommission( orderId, commission );
 }
 
-void CSimulationProvider::HandleCancellation( COrder::idOrder_t orderId ) {
+void SimulationProvider::HandleCancellation( Order::idOrder_t orderId ) {
   COrderManager::LocalCommonInstance().ReportCancellation( orderId );
 }
 

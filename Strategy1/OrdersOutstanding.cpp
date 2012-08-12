@@ -29,8 +29,8 @@ OrdersOutstanding::OrdersOutstanding( pPosition_t pPosition ) :
 
 void OrdersOutstanding::AddOrderFilling( structRoundTrip* pTrip ) {
   assert( !m_bCancelAndCloseInProgress );
-  ou::tf::COrder& order( *pTrip->pOrderEntry.get() );
-  ou::tf::COrder::idOrder_t idOrder = order.GetOrderId();
+  ou::tf::Order& order( *pTrip->pOrderEntry.get() );
+  ou::tf::Order::idOrder_t idOrder = order.GetOrderId();
   assert( m_mapEntryOrdersFilling.end() == m_mapEntryOrdersFilling.find( idOrder ) );
   m_mapEntryOrdersFilling[ idOrder ] = pRoundTrip_t( pTrip );
   order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );  // yes, this belongs here as it will be unconditionally removed later
@@ -40,28 +40,28 @@ void OrdersOutstanding::AddOrderFilling( structRoundTrip* pTrip ) {
   }
 }
 
-void OrdersOutstanding::HandleBaseOrderCancelled( const ou::tf::COrder& order ) {
+void OrdersOutstanding::HandleBaseOrderCancelled( const ou::tf::Order& order ) {
   idOrder_t id = order.GetOrderId();
   mapOrdersFilling_t::iterator iter = m_mapEntryOrdersFilling.find( id );
   if ( m_mapEntryOrdersFilling.end() == iter ) {
     throw std::runtime_error( "can't find order" );
   }
-  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
-  const_cast<ou::tf::COrder&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
+  const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
+  const_cast<ou::tf::Order&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
 
   iter->second->eState = EStateCancelled;
 
   m_mapEntryOrdersFilling.erase( iter ); 
 }
 
-void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::COrder& order ) {
+void OrdersOutstanding::HandleBaseOrderFilled( const ou::tf::Order& order ) {
   idOrder_t id = order.GetOrderId();
   mapOrdersFilling_t::iterator iter = m_mapEntryOrdersFilling.find( id );
   if ( m_mapEntryOrdersFilling.end() == iter ) {
     throw std::runtime_error( "can't find order" );
   }
-  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
-  const_cast<ou::tf::COrder&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
+  const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderFilled ) );
+  const_cast<ou::tf::Order&>( order ).OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleBaseOrderCancelled ) );
 
   iter->second->eState = EStateOpen;
 
@@ -175,15 +175,15 @@ bool OrdersOutstanding::CancelAndCloseInProgress( void ) {
   return m_bCancelAndCloseInProgress;
 }
 
-void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& order ) {
-  ou::tf::COrder::idOrder_t id = order.GetOrderId();
+void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::Order& order ) {
+  ou::tf::Order::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
     // need to handle partial fill orders, do market order or manage partial fills based upon position?
     if ( 0 == iter->second->pOrderExit.get() ) {  // map may have multiple orders, some of which don't have a matching order at the present
 //      assert( false );
     }
     else {
-      ou::tf::COrder& order( *iter->second->pOrderExit.get() );
+      ou::tf::Order& order( *iter->second->pOrderExit.get() );
       if ( id == order.GetOrderId() ) {
         order.OnOrderFilled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
         order.OnOrderCancelled.Remove( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
@@ -195,14 +195,14 @@ void OrdersOutstanding::HandleMatchingOrderCancelled( const ou::tf::COrder& orde
   }
 }
 
-void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::COrder& order ) {
+void OrdersOutstanding::HandleMatchingOrderFilled( const ou::tf::Order& order ) {
   // use this to check when order filled before cancellation
-  ou::tf::COrder::idOrder_t id = order.GetOrderId();
+  ou::tf::Order::idOrder_t id = order.GetOrderId();
   for ( mapOrders_iter_t iter = m_mapOrdersToMatch.begin(); m_mapOrdersToMatch.end() != iter; ++iter ) {
     if ( 0 == iter->second->pOrderExit.get() ) {  // we've already cancelled
     }
     else {
-      ou::tf::COrder& order( *iter->second->pOrderExit.get() );
+      ou::tf::Order& order( *iter->second->pOrderExit.get() );
       if ( id == order.GetOrderId() ) {
         m_durRoundTripTime += order.GetDateTimeOrderFilled() - order.GetDateTimeOrderFilled();
         ++m_cntRoundTrips;
@@ -331,7 +331,7 @@ void OrdersOutstanding::PostMortemReport( void ) {
 }
 
 void OrdersOutstanding::PlaceOrder( pOrder_t& pOrder ) {
-  ou::tf::COrder& order( *pOrder.get() );
+  ou::tf::Order& order( *pOrder.get() );
   order.OnOrderFilled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderFilled ) );
   order.OnOrderCancelled.Add( MakeDelegate( this, &OrdersOutstanding::HandleMatchingOrderCancelled ) );
 }

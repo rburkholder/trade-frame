@@ -13,12 +13,14 @@
 
 #pragma once
 
-#include <OUSQL/Database.h>
+//#include <OUSQL/Database.h>
+#include <OUSQL/Constants.h>
 
 namespace ou {
 namespace db {
 
-class IPostgresql: public IDatabase {
+//class IPostgresql: public IDatabase {
+class IPostgresql {
 public:
   IPostgresql(void);
   virtual ~IPostgresql(void);

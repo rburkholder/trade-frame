@@ -27,7 +27,7 @@ using namespace boost::gregorian;
 
 namespace ou {
 
-class CTimeSource : public CSingleton<CTimeSource> {
+class CTimeSource : public Singleton<CTimeSource> {
 public:
 
   struct SimulationContext {

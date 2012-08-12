@@ -32,7 +32,7 @@ public:
     double dblClose;
   };
 
-  Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t, ou::tf::CIBTWS::pProvider_t );
+  Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t, ou::tf::IBTWS::pProvider_t );
   ~Operation(void);
 
   unsigned int CalcShareCount( double dblFunds );
@@ -45,10 +45,10 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CIBTWS::pInstrument_t pInstrument_t;
+  typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
 
   structSymbolInfo m_si;
-  ou::tf::CIBTWS::pProvider_t m_ptws;
+  ou::tf::IBTWS::pProvider_t m_ptws;
   ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
 
   ou::tf::CInstrument::pInstrument_t m_pInstrument;
@@ -60,7 +60,7 @@ private:
   void StartWatch( void );
   void StopWatch( void );
 
-  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
+  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
   // will need to migrate to a container when doing more than one instrument

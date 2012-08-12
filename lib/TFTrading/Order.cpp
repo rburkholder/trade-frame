@@ -23,10 +23,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-COrder::COrder(void) {
+Order::Order(void) {
 }
 
-COrder::COrder( // market order
+Order::Order( // market order
   CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -44,7 +44,7 @@ COrder::COrder( // market order
   ConstructOrder();
 }
 
-COrder::COrder( // limit or stop
+Order::Order( // limit or stop
   CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -63,7 +63,7 @@ COrder::COrder( // limit or stop
   ConstructOrder();
 }
 
-COrder::COrder( // limit and stop
+Order::Order( // limit and stop
   CInstrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
@@ -82,7 +82,7 @@ COrder::COrder( // limit and stop
   ConstructOrder();
 }
 
-COrder::COrder( const TableRowDef& row, pInstrument_t& pInstrument  ) 
+Order::Order( const TableRowDef& row, pInstrument_t& pInstrument  ) 
 : m_row( row ), m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
   m_dblPriceXQuantity( 0 ), 
@@ -90,10 +90,10 @@ COrder::COrder( const TableRowDef& row, pInstrument_t& pInstrument  )
 {
 }
 
-COrder::~COrder(void) {
+Order::~Order(void) {
 }
 
-void COrder::ConstructOrder() {
+void Order::ConstructOrder() {
 //  try {
 
   // need to do something with idInstrument, into and out of the database
@@ -110,13 +110,13 @@ void COrder::ConstructOrder() {
 //  }
 }
 
-void COrder::SetSendingToProvider() {
+void Order::SetSendingToProvider() {
   assert( OrderStatus::Created == m_row.eOrderStatus );
   m_row.eOrderStatus = OrderStatus::SendingToProvider;
   m_row.dtOrderSubmitted = ou::CTimeSource::LocalCommonInstance().Internal();
 }
 
-OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) { 
+OrderStatus::enumOrderStatus Order::ReportExecution(const CExecution &exec) { 
   // need to worry about fill after cancel, has multiple states:  cancelling, fill during cancel, cancelled
   assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
@@ -173,17 +173,17 @@ OrderStatus::enumOrderStatus COrder::ReportExecution(const CExecution &exec) {
       case OrderStatus::OverFilled:
         break;
       default:
-        std::cout << "COrder::ReportExecution " << static_cast<char>( m_row.eOrderStatus ) << std::endl;
+        std::cout << "Order::ReportExecution " << static_cast<char>( m_row.eOrderStatus ) << std::endl;
         break;
       }
       OnPartialFill( *this );
     }
   }
-  OnExecution( std::pair<const COrder&, const CExecution&>( *this, exec ) );
+  OnExecution( std::pair<const Order&, const CExecution&>( *this, exec ) );
   return m_row.eOrderStatus;
 }
 
-void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
+void Order::ActOnError(OrderErrors::enumOrderErrors eError) {
   switch( eError ) {
     case OrderErrors::Cancelled:
       m_row.eOrderStatus = OrderStatus::Cancelled;
@@ -197,18 +197,18 @@ void COrder::ActOnError(OrderErrors::enumOrderErrors eError) {
   }
 }
 
-void COrder::SetCommission( double dblCommission ) { 
+void Order::SetCommission( double dblCommission ) { 
   m_row.dblCommission = dblCommission; 
    OnCommission( *this );  // run on order completion
 }
 
-void COrder::SetOrderId( idOrder_t id ) {
+void Order::SetOrderId( idOrder_t id ) {
   assert( 0 != id );
   assert( m_row.idOrder == 0 );
   m_row.idOrder = id;
 }
 
-void COrder::MarkAsCancelled( void ) {
+void Order::MarkAsCancelled( void ) {
   switch ( m_row.eOrderStatus ) {
   case OrderStatus::Created:
     m_row.eOrderStatus = OrderStatus::Cancelled;

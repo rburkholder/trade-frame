@@ -53,13 +53,13 @@ void CProcess::IBDisconnect( void ) {
 }
 
 void CProcess::PlaceBuyOrder( void ) {
-  COrder::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
-  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
+  Order::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
+  m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
 }
 
 void CProcess::PlaceSellOrder( void ) {
-  COrder::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
-  m_tws.PlaceOrder( new COrder( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
+  Order::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
+  m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
 }
 
 void CProcess::OnIQFeedConnected( void ) {
@@ -110,14 +110,14 @@ void CProcess::StopWatch( void ) {
   }
 }
 
-void CProcess::HandleOnQuote(CIBSymbol::quote_t quote) {
+void CProcess::HandleOnQuote(IBSymbol::quote_t quote) {
 //  std::stringstream ss;
 //  ss << "Q: " << quote.DateTime() << "," << quote.Bid() << "," << quote.Ask() << std::endl;
 //  OutputDebugString( ss.str().c_str() );
   m_vQuotes.Append( quote );
 }
 
-void CProcess::HandleOnTrade(CIBSymbol::trade_t trade ) {
+void CProcess::HandleOnTrade(IBSymbol::trade_t trade ) {
 //  std::stringstream ss;
 //  ss << "T: " << trade.DateTime() << "," << trade.Volume() << "@" << trade.Trade() << std::endl;
 //  OutputDebugString( ss.str().c_str() );

@@ -35,7 +35,7 @@ namespace tf { // TradeFrame
 
 // T: CRTP base
 template<class T> 
-class ManagerBase: public ou::CSingleton<T> {
+class ManagerBase: public ou::Singleton<T> {
 public:
 
   ManagerBase( void ): m_pSession( 0 ) {};

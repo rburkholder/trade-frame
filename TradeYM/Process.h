@@ -43,12 +43,12 @@ protected:
 private:
 
   std::string m_sSymbolName;
-  CIBTWS m_tws;
+  IBTWS m_tws;
   bool m_bIBConnected;
-  CIBSymbol* m_pSymbol;
+  IBSymbol* m_pSymbol;
   Quotes m_vQuotes;
   Trades m_vTrades;
 
-  void HandleOnQuote( CIBSymbol::quote_t );
-  void HandleOnTrade( CIBSymbol::trade_t );
+  void HandleOnQuote( IBSymbol::quote_t );
+  void HandleOnTrade( IBSymbol::trade_t );
 };

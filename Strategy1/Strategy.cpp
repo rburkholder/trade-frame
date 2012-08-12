@@ -24,7 +24,7 @@
 Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider ) 
   : 
   m_pDataProvider( pDataProvider ), m_pExecutionProvider( pExecutionProvider ),
-  //m_sim( new ou::tf::CSimulationProvider() ),
+  //m_sim( new ou::tf::SimulationProvider() ),
   m_TradeDirection( ETradeDirUnkn ),
 //  m_sma1( m_quotes, seconds(   60 ) ), //   1 min
 //  m_sma2( m_quotes, seconds(  120 ) ), //   2 min
@@ -211,7 +211,7 @@ void Strategy::Start( void ) {  // live trading
 
 void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 
-  m_sim = boost::dynamic_pointer_cast<ou::tf::CSimulationProvider>( m_pExecutionProvider );
+  m_sim = boost::dynamic_pointer_cast<ou::tf::SimulationProvider>( m_pExecutionProvider );
 
   //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
   m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
@@ -617,7 +617,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   }
 }
 
-void Strategy::HandleOrderFilled( const ou::tf::COrder& order ) {
+void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
   case ou::tf::OrderSide::Sell:
     m_ceShorts.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
@@ -626,7 +626,7 @@ void Strategy::HandleOrderFilled( const ou::tf::COrder& order ) {
     m_ceLongs.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
     break;
   }
-  const_cast<ou::tf::COrder&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 }
 
 void Strategy::HandleFirstQuote( const ou::tf::Quote& quote ) {

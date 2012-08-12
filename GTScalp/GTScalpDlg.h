@@ -78,10 +78,10 @@ private:
   CGTSessionX m_session1;
   CGTSessionX m_session2;
 
-  CIBTWS* m_pIB;
+  IBTWS* m_pIB;
   CIQFeedProviderSingleton* m_pIQFeedSingleton;
   CIQFeedProvider* m_pIQFeed;
-  CSimulationProvider* m_pSimulation;
+  SimulationProvider* m_pSimulation;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
   CConsoleCoutMessages* pConsoleMessages;

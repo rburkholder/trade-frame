@@ -37,11 +37,11 @@ public:
 
   typedef FastDelegate1<const DatedDatum &> OnDatumHandler;
 
-  void Add( TimeSeries<Quote>* pSeries, OnDatumHandler );
-  void Add( TimeSeries<Trade>* pSeries, OnDatumHandler );
-  void Add( TimeSeries<Bar>* pSeries, OnDatumHandler );
-  void Add( TimeSeries<Greek>* pSeries, OnDatumHandler );
-  void Add( TimeSeries<MarketDepth>* pSeries, OnDatumHandler );
+  void Add( TimeSeries<Quote>& series, OnDatumHandler );
+  void Add( TimeSeries<Trade>& series, OnDatumHandler );
+  void Add( TimeSeries<Bar>& series, OnDatumHandler );
+  void Add( TimeSeries<Greek>& series, OnDatumHandler );
+  void Add( TimeSeries<MarketDepth>& series, OnDatumHandler );
   void Run( void );
   void Stop( void );
 

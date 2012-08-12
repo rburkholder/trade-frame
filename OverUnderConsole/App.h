@@ -40,7 +40,7 @@ private:
   typedef ou::tf::CProviderManager::pProvider_t pProvider_t;
   typedef ou::tf::CInstrumentManager::pInstrument_t pInstrument_t;
 
-  ou::tf::CIBTWS::pProvider_t m_ptws;
+  ou::tf::IBTWS::pProvider_t m_ptws;
   ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
 
   boost::thread m_asioThread;

@@ -61,7 +61,9 @@ bool AppOptimizeStrategy::OnInit( void ) {
 
   m_pFrameMain->Show( true );
 
-  boost::thread sim( boost::bind( &AppOptimizeStrategy::Optimizer, this ) );
+  ou::SingletonBase::SetLocalCommonInstanceSource( ou::SingletonBase::Assigned );
+
+  boost::thread thrdOptimizer( boost::bind( &AppOptimizeStrategy::Optimizer, this ) );
 
   return 1;
 
@@ -73,6 +75,8 @@ void AppOptimizeStrategy::Optimizer( void ) {
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
 //  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
+
+  ou::tf::CInstrumentManager::SetLocalCommonInstance( new ou::tf::CInstrumentManager );
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::LocalCommonInstance() );
   m_pInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 8 );

@@ -201,8 +201,8 @@ private:
   pProvider_t m_pData2Provider;
 
   ou::tf::CIQFeedProvider::pProvider_t m_pData1ProviderIQFeed;
-  ou::tf::CIBTWS::pProvider_t m_pData2ProviderIB;
-  ou::tf::CIBTWS::pProvider_t m_pExecutionProviderIB;
+  ou::tf::IBTWS::pProvider_t m_pData2ProviderIB;
+  ou::tf::IBTWS::pProvider_t m_pExecutionProviderIB;
 
   boost::gregorian::date m_dateOptionNearDate;
   boost::gregorian::date m_dateOptionFarDate;
@@ -224,13 +224,13 @@ private:
   void HandleNearOptionsLoad( pInstrument_t pInstrument );
   void HandleFarOptionsLoad( pInstrument_t pInstrument );
 
-  void HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
+  void HandleUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& );
   void HandleUnderlyingContractDetailsDone( void );
 
-  void HandleNearDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
+  void HandleNearDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& );
   void HandleNearDateContractDetailsDone( void );
 
-  void HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& );
+  void HandleFarDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& );
   void HandleFarDateContractDetailsDone( void );
 
   void HandleQuote( const ou::tf::Quote& );

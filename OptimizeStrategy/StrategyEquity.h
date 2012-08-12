@@ -38,7 +38,7 @@
 class StrategyEquity {
 public:
 
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
   typedef fastdelegate::FastDelegate0<bool> fdEvaluate_t;
   typedef boost::fusion::set<

@@ -52,48 +52,53 @@ protected:
 private:
 };
 
-template<class T> class CMergeCarrier: public MergeCarrierBase {
+template<class T> 
+class MergeCarrier: public MergeCarrierBase {
   // T is a DatedDatum type
   friend class MergeDatedDatums;
 public:
-  CMergeCarrier<T>( TimeSeries<T> *pSeries, OnDatumHandler function );
-  virtual ~CMergeCarrier<T>( void );
+  MergeCarrier<T>( TimeSeries<T>& series, OnDatumHandler function );
+  virtual ~MergeCarrier<T>( void );
   void ProcessDatum( void );
   void Reset( void );
 protected:
-  TimeSeries<T> *m_pSeries;  // series from which a datum is to be merged to output
+  TimeSeries<T>& m_series;  // series from which a datum is to be merged to output
 private:
 };
 
-template<class T> CMergeCarrier<T>::CMergeCarrier( TimeSeries<T> *pSeries, OnDatumHandler function ) : MergeCarrierBase() {
-  assert( 0 != pSeries );
-  assert( 0 != pSeries->Size() );
-  m_pSeries = pSeries;
+template<class T> 
+MergeCarrier<T>::MergeCarrier( TimeSeries<T>& series, OnDatumHandler function ) 
+  : MergeCarrierBase(), m_series( series )
+{
+  assert( 0 != m_series.Size() );
   OnDatum = function;
-  m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison
-  m_dt = ( NULL == m_pDatum ) 
+  m_pDatum = m_series.First();  // preload with first datum so we have it's time available for comparison
+  m_dt = ( 0 == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
     : m_pDatum->DateTime();
 }
 
-template<class T> CMergeCarrier<T>::~CMergeCarrier() {
+template<class T> 
+MergeCarrier<T>::~MergeCarrier() {
 }
 
-template<class T> void CMergeCarrier<T>::ProcessDatum(void) {
+template<class T> 
+void MergeCarrier<T>::ProcessDatum(void) {
   if ( ou::CTimeSource::LocalCommonInstance().GetSimulationMode() ) {
     ou::CTimeSource::LocalCommonInstance().SetSimulationTime( m_pDatum->DateTime() );
   }
-  if ( NULL != OnDatum ) 
+  if ( 0 != OnDatum ) 
     OnDatum( *m_pDatum );
-  m_pDatum = m_pSeries->Next();
+  m_pDatum = m_series.Next();
   m_dt = ( NULL == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
     : m_pDatum->DateTime();
 }
 
-template<class T> void CMergeCarrier<T>::Reset() {
-  m_pDatum = m_pSeries->First();  // preload with first datum so we have it's time available for comparison
-  m_dt = ( NULL == m_pDatum ) 
+template<class T> 
+void MergeCarrier<T>::Reset() {
+  m_pDatum = m_series.First();  // preload with first datum so we have it's time available for comparison
+  m_dt = ( 0 == m_pDatum ) 
     ? boost::date_time::special_values::not_a_date_time 
     : m_pDatum->DateTime();
 }

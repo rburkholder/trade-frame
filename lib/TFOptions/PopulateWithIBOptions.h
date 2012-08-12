@@ -35,7 +35,7 @@ template<class DB>
 class PopulateOptions {
 public:
 
-  PopulateOptions( ou::db::CSession<DB>& session, CIBTWS& tws );
+  PopulateOptions( ou::db::CSession<DB>& session, IBTWS& tws );
   ~PopulateOptions( void );
 
   typedef FastDelegate1<unsigned int> OnPopulateCompleteHandler_t;
@@ -49,7 +49,7 @@ private:
 
   Contract m_contract; // re-usable, persistant contract scratchpad
   ou::db::CSession<ou::db::ISqlite3> m_session;
-  CIBTWS& m_tws;
+  IBTWS& m_tws;
 
   bool m_bActive;
 
@@ -67,7 +67,7 @@ private:
 };
 
 template<class DB>
-PopulateOptions::PopulateOptions( ou::db::CSession<DB>& session, CIBTWS& tws ) 
+PopulateOptions::PopulateOptions( ou::db::CSession<DB>& session, IBTWS& tws ) 
   : m_tws( tws ), m_session( session ), m_bActive( false ), m_cntInstruments( 0 )
 {
   // assert( session active? );
@@ -130,7 +130,7 @@ void PopulateOptions::HandleOptionContractNotFound( void ) {
 
 template<class DB>
 void PopulateOptions::HandleOptionContractDetails( const ContractDetails& details ) {
-  CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+  IBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
   ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pInsert 
     = session.Insert<CInstrument::TableRowDef>( pInstrument->GetRow() );
   ++m_cntInstruments;

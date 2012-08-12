@@ -14,7 +14,7 @@
 #pragma once
 
 // 2010/09/12
-// At some point, make order manager responsible for constructing COrder
+// At some point, make order manager responsible for constructing Order
 
 #include <map>
 #include <vector>
@@ -51,7 +51,7 @@ public:
   typedef keytypes::idPosition_t idPosition_t;
 
   typedef keytypes::idOrder_t idOrder_t;
-  typedef COrder::pOrder_t pOrder_t;
+  typedef Order::pOrder_t pOrder_t;
 
   typedef keytypes::idExecution_t idExecution_t;
   typedef CExecution::pExecution_t pExecution_t;
@@ -76,13 +76,13 @@ public:
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition = 0
     );
-  void PlaceOrder( CProviderInterfaceBase* pProvider, COrder::pOrder_t pOrder );
+  void PlaceOrder( CProviderInterfaceBase* pProvider, Order::pOrder_t pOrder );
   void CancelOrder( idOrder_t nOrderId );
   void ReportCancellation( idOrder_t nOrderId );  // feedback from provider
   void ReportExecution( idOrder_t orderId, const CExecution& exec );  // feedback from provider
   void ReportCommission( idOrder_t nOrderId, double dblCommission );  // feedback from provider
   void ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError );  // feedback from provider
-//  ou::Delegate<const COrder &> OnOrderCompleted;
+//  ou::Delegate<const Order &> OnOrderCompleted;
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
 

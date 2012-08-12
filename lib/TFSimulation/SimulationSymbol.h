@@ -26,21 +26,21 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CSimulationSymbol: public CSymbol<CSimulationSymbol> {
-  friend class CSimulationProvider;
+class SimulationSymbol: public CSymbol<SimulationSymbol> {
+  friend class SimulationProvider;
 public:
 
-  typedef CSymbol<CSimulationSymbol> inherited_t;
+  typedef CSymbol<SimulationSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef inherited_t::pInstrument_cref pInstrument_cref;
   typedef inherited_t::trade_t trade_t;
   typedef inherited_t::quote_t quote_t;
   typedef inherited_t::greek_t greek_t;
   
-  CSimulationSymbol( const std::string& sSymbol, 
+  SimulationSymbol( const std::string& sSymbol, 
                      pInstrument_cref pInstrument, 
                      const std::string& sGroup ); // base with trades/ quotes/, greeks/
-  ~CSimulationSymbol(void);
+  ~SimulationSymbol(void);
 
 protected:
 
@@ -63,7 +63,7 @@ protected:
   Trades m_trades;
   Greeks m_greeks;
 
-  CSimulateOrderExecution m_simExec;
+  SimulateOrderExecution m_simExec;
 
 private:
 

@@ -105,9 +105,9 @@ private:
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
-  typedef CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef IBTWS::pProvider_t pProviderIBTWS_t;
   typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef SimulationProvider::pProvider_t pProviderSim_t;
 
   typedef ou::tf::option::Strike CStrikeInfo;
 

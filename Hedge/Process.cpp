@@ -99,7 +99,7 @@ CProcess::CProcess(enumMode eMode, CDB& db)
   m_sPathForSeries( "/strategy/deltaneutral2" ),
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
-  m_tws( new CIBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new CSimulationProvider() ),
+  m_tws( new IBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new SimulationProvider() ),
 //  m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
   m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false ),
@@ -490,7 +490,7 @@ void CProcess::HandleUnderlyingListing( const ContractDetails& details, const pI
 //    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
 //  }
 //  catch ( std::out_of_range& e ) {
-//    CIBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
+//    IBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
 //    m_pUnderlying = m_tws->GetSymbol( pInstrument )->GetInstrument();  // create the symbol, then get the instrument again
 //  }
   // need to check if it exists first, might already be in database
@@ -530,8 +530,8 @@ void CProcess::HandleUnderlyingListingDone(  ) {
 void CProcess::HandleStrikeFromIB( const ContractDetails& details, const pInstrument_t& ) {
 
   // create strike entries
-  CIBSymbol::pSymbol_t pSymbol;
-  CIBTWS::pInstrument_t pInstrument;
+  IBSymbol::pSymbol_t pSymbol;
+  IBTWS::pInstrument_t pInstrument;
   try {
     pSymbol = m_tws->GetSymbol( details.summary.conId );
     pInstrument = pSymbol->GetInstrument();

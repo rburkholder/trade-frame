@@ -36,27 +36,27 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CSimulateOrderExecution {  // one object per symbol
+class SimulateOrderExecution {  // one object per symbol
 public:
 
-  typedef COrder::pOrder_t pOrder_t;
+  typedef Order::pOrder_t pOrder_t;
 
-  CSimulateOrderExecution(void);
-  ~CSimulateOrderExecution(void);
+  SimulateOrderExecution(void);
+  ~SimulateOrderExecution(void);
 
-  typedef FastDelegate1<COrder::idOrder_t> OnOrderCancelledHandler;
+  typedef FastDelegate1<Order::idOrder_t> OnOrderCancelledHandler;
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
     OnOrderCancelled = function;
   }
-  typedef FastDelegate2<COrder::idOrder_t, const CExecution&> OnOrderFillHandler;
+  typedef FastDelegate2<Order::idOrder_t, const CExecution&> OnOrderFillHandler;
   void SetOnOrderFill( OnOrderFillHandler function ) {
     OnOrderFill = function;
   }
-  typedef FastDelegate1<COrder::idOrder_t> OnNoOrderFoundHandler;  // cancelling a non existant order
+  typedef FastDelegate1<Order::idOrder_t> OnNoOrderFoundHandler;  // cancelling a non existant order
   void SetOnNoOrderFound( OnNoOrderFoundHandler function ) {
     OnNoOrderFound = function;
   }
-  typedef FastDelegate2<COrder::idOrder_t, double> OnCommissionHandler;  // calculated once order filled
+  typedef FastDelegate2<Order::idOrder_t, double> OnCommissionHandler;  // calculated once order filled
   void SetOnCommission( OnCommissionHandler function ) {
     OnCommission = function;
   }
@@ -68,13 +68,13 @@ public:
   void NewQuote( const Quote& quote );
 
   void SubmitOrder( pOrder_t pOrder );
-  void CancelOrder( COrder::idOrder_t nOrderId );
+  void CancelOrder( Order::idOrder_t nOrderId );
 
 protected:
 
   struct structCancelOrder {
     ptime dtCancellation;
-    COrder::idOrder_t nOrderId;
+    Order::idOrder_t nOrderId;
     structCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ ) 
       : dtCancellation( dtCancellation_ ), nOrderId( nOrderId_ ) {};
   };
@@ -103,7 +103,7 @@ protected:
   mapOrderBook_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
 
   void ProcessOrderQueues( const Quote& quote );
-  void CalculateCommission( COrder* pOrder, Trade::tradesize_t quan );
+  void CalculateCommission( Order* pOrder, Trade::tradesize_t quan );
   void ProcessCancelQueue( const Quote& quote );
   void ProcessDelayQueue( const Quote& quote );
   void ProcessStopOrders( const Quote& quote ); // true if order executed, not yet implemented

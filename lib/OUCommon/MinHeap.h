@@ -25,7 +25,7 @@
 
 namespace ou {
 
-template<class T, class C> 
+template<class T, class C> // T is type for heap, C is comparison operator for lt
 class CMinHeap {
 public:
   CMinHeap<T,C>( size_t size );

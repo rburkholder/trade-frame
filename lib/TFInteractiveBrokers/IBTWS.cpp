@@ -51,8 +51,8 @@ private:
 DecodeStatusWord dsw;
 
 
-CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
-  CProviderInterface<CIBTWS,CIBSymbol>(), 
+IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
+  CProviderInterface<IBTWS,IBSymbol>(), 
   EWrapper(),
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
@@ -69,20 +69,20 @@ CIBTWS::CIBTWS( const std::string &acctCode, const std::string &address, unsigne
   m_pProvidesBrokerInterface = true;
 }
 
-CIBTWS::~CIBTWS(void) {
+IBTWS::~IBTWS(void) {
   Disconnect();
   m_vTickerToSymbol.clear();
   m_mapContractToSymbol.clear();
 }
 
-void CIBTWS::Connect() {
+void IBTWS::Connect() {
   if ( NULL == pTWS ) {
     OnConnecting( 0 );
     pTWS = new EPosixClientSocket( this );
     bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
     assert( bReturn );
     m_bConnected = true;
-    m_thrdIBMessages = boost::thread( boost::bind( &CIBTWS::ProcessMessages, this ) );
+    m_thrdIBMessages = boost::thread( boost::bind( &IBTWS::ProcessMessages, this ) );
     pTWS->reqCurrentTime();
     pTWS->reqNewsBulletins( true );
     pTWS->reqOpenOrders();
@@ -93,7 +93,7 @@ void CIBTWS::Connect() {
   }
 }
 
-void CIBTWS::Disconnect() {
+void IBTWS::Disconnect() {
   // check to see if there are any watches happening, and get them disconnected
   if ( NULL != pTWS ) {
     OnDisconnecting( 0 );
@@ -111,7 +111,7 @@ void CIBTWS::Disconnect() {
 
 // this is executed in non-main thread, and the events below will be called from the processing here
 // so... be aware of cross thread issues
-void CIBTWS::ProcessMessages( void ) {
+void IBTWS::ProcessMessages( void ) {
   bool bOK = true;
   while ( bOK && m_bConnected ) {
     bOK = pTWS->checkMessages();
@@ -122,7 +122,7 @@ void CIBTWS::ProcessMessages( void ) {
   // maybe a state machine would keep track
 }
 
-void CIBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
   // requires secType in addition to symbol name
   // needs to be thread protected:
   boost::mutex::scoped_lock lock(m_mutexContractRequest);
@@ -142,43 +142,43 @@ void CIBTWS::RequestContractDetails( const Contract& contract, OnContractDetails
   pTWS->reqContractDetails( pRequest->id, contract );
 }
 
-//CIBSymbol *CIBTWS::NewCSymbol( const std::string &sSymbolName ) {
-CIBTWS::pSymbol_t CIBTWS::NewCSymbol( CIBSymbol::pInstrument_t pInstrument ) {
+//IBSymbol *IBTWS::NewCSymbol( const std::string &sSymbolName ) {
+IBTWS::pSymbol_t IBTWS::NewCSymbol( IBSymbol::pInstrument_t pInstrument ) {
   // todo:  check that contract doesn't already exist
   TickerId ticker = ++m_curTickerId;
-  pSymbol_t pSymbol( new CIBSymbol( pInstrument, ticker ) );  // is there someplace with the IB specific symbol name, or is it set already?
+  pSymbol_t pSymbol( new IBSymbol( pInstrument, ticker ) );  // is there someplace with the IB specific symbol name, or is it set already?
   // todo:  do an existance check on the instrument/symbol
-  CProviderInterface<CIBTWS,CIBSymbol>::AddCSymbol( pSymbol );
+  CProviderInterface<IBTWS,IBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
   m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol ) );
   return pSymbol;
 }
 
-void CIBTWS::StartQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StartQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StopQuoteWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StartTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StopTradeWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StartGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StartQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StopGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
+void IBTWS::StopGreekWatch( pSymbol_t pSymbol ) {  // overridden from base class
   StopQuoteTradeWatch( pSymbol );
 }
 
-void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
+void IBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   if ( !pIBSymbol->GetQuoteTradeWatchInProgress() ) {
     // start watch
     Contract contract;
@@ -191,7 +191,7 @@ void CIBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   }
 }
 
-void CIBTWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
+void IBTWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   if ( pIBSymbol->QuoteWatchNeeded() || pIBSymbol->TradeWatchNeeded() || pIBSymbol->GreekWatchNeeded() ) {
     // don't do anything if either a quote or trade or greek watch still in progress
   }
@@ -202,14 +202,14 @@ void CIBTWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
   }
 }
 
-void CIBTWS::StartDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
+void IBTWS::StartDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
   if ( !pIBSymbol->GetDepthWatchInProgress() ) {
     // start watch
     pIBSymbol->SetDepthWatchInProgress();
   }
 }
 
-void CIBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
+void IBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base class
   if ( pIBSymbol->DepthWatchNeeded() ) {
   }
   else {
@@ -219,13 +219,13 @@ void CIBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base cla
 }
 
 // indexed with InstrumentType::enumInstrumentTypes
-const char *CIBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
-const char *CIBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
+const char *IBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
+const char *IBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
                    "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
-void CIBTWS::PlaceOrder( pOrder_t pOrder ) {
+void IBTWS::PlaceOrder( pOrder_t pOrder ) {
 
-  Order twsorder; 
+  ::Order twsorder; 
   twsorder.orderId = pOrder->GetOrderId();
 
   Contract contract;
@@ -277,39 +277,39 @@ void CIBTWS::PlaceOrder( pOrder_t pOrder ) {
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
 
-  CProviderInterface<CIBTWS,CIBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
+  CProviderInterface<IBTWS,IBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
-void CIBTWS::CancelOrder( pOrder_t pOrder ) {
-  CProviderInterface<CIBTWS,CIBSymbol>::CancelOrder( pOrder );
+void IBTWS::CancelOrder( pOrder_t pOrder ) {
+  CProviderInterface<IBTWS,IBSymbol>::CancelOrder( pOrder );
   pTWS->cancelOrder( pOrder->GetOrderId() );
 }
 
-void CIBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
+void IBTWS::tickPrice( TickerId tickerId, TickType tickType, double price, int canAutoExecute) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
+    IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickPrice " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << price << std::endl;
     pSym->AcceptTickPrice( tickType, price );
   }
 }
 
-void CIBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
+void IBTWS::tickSize( TickerId tickerId, TickType tickType, int size) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
+    IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickSize " << pSym->Name() << ", " << TickTypeStrings[tickType] << ", " << size << std::endl;
     pSym->AcceptTickSize( tickType, size );
   }
 }
 
-void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
+void IBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice ) {
 
-  CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
+  IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
   switch ( tickType ) {
     case MODEL_OPTION: 
       pSym->Greeks( optPrice, undPrice, pvDividend, impliedVol, delta, gamma, vega, theta );
@@ -325,15 +325,15 @@ void CIBTWS::tickOptionComputation( TickerId tickerId, TickType tickType, double
   }
 }
 
-void CIBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
+void IBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
 //  std::cout << "tickGeneric " << m_vTickerToSymbol[ tickerId ]->Name() << ", " << TickTypeStrings[tickType] << ", " << value << std::endl;
 }
 
-void CIBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& value) {
+void IBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& value) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
-    CIBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
+    IBSymbol::pSymbol_t pSym( m_vTickerToSymbol[ tickerId ] );
     //std::cout << "tickString " << pSym->Name() << ", " 
     //  << TickTypeStrings[tickType] << ", " << value;
     //std::cout << std::endl;
@@ -341,14 +341,14 @@ void CIBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& va
   }
 }
 
-void CIBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
+void IBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
   double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry ) {
   m_ss.str("");
   m_ss << "tickEFP" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& order, const OrderState& state) {
+void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order& order, const OrderState& state) {
   if ( order.whatIf ) {
     m_ss.str("");
     m_ss
@@ -407,7 +407,7 @@ void CIBTWS::openOrder( OrderId orderId, const Contract& contract, const Order& 
   }
 }
 
-void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
+void IBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
                          int remaining, double avgFillPrice, int permId, int parentId,
                          double lastFillPrice, int clientId, const IBString& whyHeld) 
 {
@@ -429,7 +429,7 @@ void CIBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
   }
 }
 
-void CIBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
+void IBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
   m_ss.str("");
   m_ss  
     << "execDetails: " 
@@ -480,7 +480,7 @@ current time 1212851947
 */
 
 // check for symbol existance and return, else exeption
-CIBTWS::pSymbol_t CIBTWS::GetSymbol( long ContractId ) {
+IBTWS::pSymbol_t IBTWS::GetSymbol( long ContractId ) {
   mapContractToSymbol_t::iterator iterId = m_mapContractToSymbol.find( ContractId );
   if ( m_mapContractToSymbol.end() == iterId ) {
     throw std::out_of_range( "can't find contract" );
@@ -489,13 +489,13 @@ CIBTWS::pSymbol_t CIBTWS::GetSymbol( long ContractId ) {
 }
 
 // check for symbol existance, and return, else add and return
-CIBTWS::pSymbol_t CIBTWS::GetSymbol( pInstrument_t instrument ) {
+IBTWS::pSymbol_t IBTWS::GetSymbol( pInstrument_t instrument ) {
 
   long contractId;
   contractId = instrument->GetContract();
   //assert( 0 != contractId );
   if ( 0 == contractId ) {
-    throw std::runtime_error( "CIBTWS::GetSymbol: contract id not supplied" );
+    throw std::runtime_error( "IBTWS::GetSymbol: contract id not supplied" );
   }
 
   pSymbol_t pSymbol;
@@ -511,7 +511,7 @@ CIBTWS::pSymbol_t CIBTWS::GetSymbol( pInstrument_t instrument ) {
   return pSymbol;
 }
 
-void CIBTWS::error(const int id, const int errorCode, const IBString errorString) {
+void IBTWS::error(const int id, const int errorCode, const IBString errorString) {
   switch ( errorCode ) {
     case 1102: // Connectivity has been restored
       pTWS->reqAccountUpdates( true, "" );
@@ -529,30 +529,30 @@ void CIBTWS::error(const int id, const int errorCode, const IBString errorString
   }
 }
 
-void CIBTWS::winError( const IBString &str, int lastError) {
+void IBTWS::winError( const IBString &str, int lastError) {
   m_ss.str("");
   m_ss << "winerror " << str << ", " << lastError << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
+void IBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
   m_ss.str("");
   m_ss << "news bulletin " << msgId << ", " << msgType << ", " << newsMessage << ", " << originExch << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::currentTime(long time) {
+void IBTWS::currentTime(long time) {
   m_ss.str("");
   m_ss << "current time " << time << std::endl;
   OutputDebugString( m_ss.str().c_str() );
   m_time = time;
 }
 
-void CIBTWS::updateAccountTime(const IBString& timeStamp) {
+void IBTWS::updateAccountTime(const IBString& timeStamp) {
 }
 
 // convert to boost::spirit?
-void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
+void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClose ) {
   static const boost::regex rxFields( "([^:]+):([^;]+);([^:]+):(.+)" );
   //static const boost::regex rxFields( "([0-9]{4})([0-9]{2})([0-9]{2}):([^;]+);([0-9]{4})([0-9]{2})([0-9]{2}):(.+)" );
   static const boost::regex rxTime( "([0-9]{4})-([0-9]{4})(?:,([0-9]{4})-([0-9]{4}))?" );
@@ -605,7 +605,7 @@ void CIBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtC
   */
 }
 
-void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
+void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   // instrument is constructed, but is not registered with InstrumentManager
   m_ss.str("");
   m_ss << "contract Details "
@@ -676,7 +676,7 @@ void CIBTWS::contractDetails( int reqId, const ContractDetails& contractDetails 
 
 }
 
-void CIBTWS::contractDetailsEnd( int reqId ) {  
+void IBTWS::contractDetailsEnd( int reqId ) {  
   // not called when no symbol available
   OnContractDetailsDoneHandler_t handler = 0;
   {
@@ -701,13 +701,13 @@ void CIBTWS::contractDetailsEnd( int reqId ) {
     handler();
 }
 
-void CIBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {
+void IBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {
 }
 
-void CIBTWS::nextValidId( OrderId orderId) {
+void IBTWS::nextValidId( OrderId orderId) {
   // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  COrder::idOrder_t id = COrderManager::Instance().CheckOrderId( orderId );
+  Order::idOrder_t id = COrderManager::Instance().CheckOrderId( orderId );
   if ( orderId > id ) {
     m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
   }
@@ -718,7 +718,7 @@ void CIBTWS::nextValidId( OrderId orderId) {
   OutputDebugString( m_ss.str().c_str() );
 }
 
-CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contract ) {
+IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contract ) {
 
   pInstrument_t pInstrument;
 
@@ -774,7 +774,7 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
       if ( "C" == contract.right ) os = OptionSide::Call;
       iterSymbol = m_mapSymbols.find( sUnderlying );
       if ( m_mapSymbols.end() == iterSymbol ) {
-        throw std::runtime_error( "CIBTWS::BuildInstrumentFromContract underlying not found" );
+        throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying not found" );
       }
       pInstrument = CInstrument::pInstrument_t( new CInstrument( 
         sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
@@ -837,12 +837,12 @@ CIBTWS::pInstrument_t CIBTWS::BuildInstrumentFromContract( const Contract& contr
 
 }
 
-void CIBTWS::updatePortfolio( const Contract& contract, int position,
+void IBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
       double unrealizedPNL, double realizedPNL, const IBString& accountName) {
 
 //  pInstrument_t pInstrument;
-//  CIBSymbol* pSymbol;
+//  IBSymbol* pSymbol;
 //  mapGreeks_t::iterator iterGreeks;
 
   mapContractToSymbol_t::iterator iterId = m_mapContractToSymbol.find( contract.conId );
@@ -933,7 +933,7 @@ void CIBTWS::updatePortfolio( const Contract& contract, int position,
 
 // todo: use the keyword lookup to make this faster
 //   key, bool, double, string
-void CIBTWS::updateAccountValue(const IBString& key, const IBString& val,
+void IBTWS::updateAccountValue(const IBString& key, const IBString& val,
                                 const IBString& currency, const IBString& accountName) {
   bool bEmit = false;
   if ( "AccountCode" == key ) bEmit = true;
@@ -962,47 +962,47 @@ void CIBTWS::updateAccountValue(const IBString& key, const IBString& val,
   }
 }
 
-void CIBTWS::connectionClosed() {
+void IBTWS::connectionClosed() {
   m_ss.str("");
   m_ss << "connection closed" << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 }
 
-void CIBTWS::updateMktDepth(TickerId id, int position, int operation, int side,
+void IBTWS::updateMktDepth(TickerId id, int position, int operation, int side,
                             double price, int size) {
 }
 
-void CIBTWS::updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
+void IBTWS::updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
                               int side, double price, int size) {
 }
 
-void CIBTWS::managedAccounts( const IBString& accountsList) {
+void IBTWS::managedAccounts( const IBString& accountsList) {
 }
 
-void CIBTWS::receiveFA(faDataType pFaDataType, const IBString& cxml) {
+void IBTWS::receiveFA(faDataType pFaDataType, const IBString& cxml) {
 }
 
-void CIBTWS::historicalData(TickerId reqId, const IBString& date, double open, double high, 
+void IBTWS::historicalData(TickerId reqId, const IBString& date, double open, double high, 
                             double low, double close, int volume, int barCount, double WAP, int hasGaps) {
 }
 
-void CIBTWS::scannerParameters(const IBString &xml) {
+void IBTWS::scannerParameters(const IBString &xml) {
 }
 
-void CIBTWS::scannerData(int reqId, int rank, const ContractDetails &contractDetails,
+void IBTWS::scannerData(int reqId, int rank, const ContractDetails &contractDetails,
                          const IBString &distance, const IBString &benchmark, const IBString &projection,
                          const IBString &legsStr) {
 }
 
-void CIBTWS::scannerDataEnd(int reqId) {
+void IBTWS::scannerDataEnd(int reqId) {
 }
 
-void CIBTWS::realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
+void IBTWS::realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
                          long volume, double wap, int count) {
 }
 
 // From EWrapper.h
-char *CIBTWS::TickTypeStrings[] = {
+char *IBTWS::TickTypeStrings[] = {
   "BID_SIZE", "BID", "ASK", "ASK_SIZE", "LAST", "LAST_SIZE",
 				"HIGH", "LOW", "VOLUME", "CLOSE",
 				"BID_OPTION_COMPUTATION", 

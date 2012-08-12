@@ -52,23 +52,23 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CIBTWS : 
-  public CProviderInterface<CIBTWS, CIBSymbol>, 
+class IBTWS : 
+  public CProviderInterface<IBTWS, IBSymbol>, 
   public EWrapper 
 {
 public:
 
-  typedef boost::shared_ptr<CIBTWS> pProvider_t;
-  typedef CProviderInterface<CIBTWS, CIBSymbol> ProviderInterface_t;
-  typedef CIBSymbol::pSymbol_t pSymbol_t;
+  typedef boost::shared_ptr<IBTWS> pProvider_t;
+  typedef CProviderInterface<IBTWS, IBSymbol> ProviderInterface_t;
+  typedef IBSymbol::pSymbol_t pSymbol_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef COrder::pOrder_t pOrder_t;
+  typedef Order::pOrder_t pOrder_t;
   typedef int reqId_t;  // request id type
   typedef ::Contract Contract;
   typedef ::ContractDetails ContractDetails;
 
-  CIBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
-  ~CIBTWS(void);
+  IBTWS( const std::string &acctCode = "", const std::string &address = "127.0.0.1", unsigned int port = 7496 );
+  ~IBTWS(void);
   
   // From ProviderInterface:
   void Connect( void );
@@ -105,7 +105,7 @@ public:
   void orderStatus( OrderId orderId, const IBString &status, int filled,
 	   int remaining, double avgFillPrice, int permId, int parentId,
 	   double lastFillPrice, int clientId, const IBString& whyHeld);
-  void openOrder( OrderId orderId, const Contract&, const Order&, const OrderState&);
+  void openOrder( OrderId orderId, const Contract&, const ::Order&, const OrderState&);
   void openOrderEnd() {};  // **
   void execDetails( int reqId, const Contract& contract, const Execution& execution );
   void execDetailsEnd( int reqId) {};  // **

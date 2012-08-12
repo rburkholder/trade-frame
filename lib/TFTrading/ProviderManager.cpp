@@ -28,13 +28,13 @@ CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& k
   pProvider_t pProvider;
   switch ( type ) {
   case keytypes::EProviderIB:
-    pProvider = Construct<CIBTWS>( key );
+    pProvider = Construct<IBTWS>( key );
     break;
   case keytypes::EProviderIQF:
     pProvider = Construct<CIQFeedProvider>( key );
     break;
   case keytypes::EProviderSimulator:
-    pProvider = Construct<CSimulationProvider>( key );
+    pProvider = Construct<SimulationProvider>( key );
     break;
   case keytypes::EProviderGNDT:
     throw std::runtime_error( "GNDT not implemented" );

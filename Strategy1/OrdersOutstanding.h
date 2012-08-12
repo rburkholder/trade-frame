@@ -20,7 +20,7 @@
 class OrdersOutstanding {
 public:
 
-  typedef ou::tf::COrder::idOrder_t idOrder_t;
+  typedef ou::tf::Order::idOrder_t idOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
 
@@ -77,8 +77,8 @@ public:
   unsigned int GetCountOfOutstandingMatches( void ) const { return m_mapOrdersToMatch.size(); };
 
   // should be protected but doesn't work there
-  void HandleMatchingOrderFilled( const ou::tf::COrder& order );
-  void HandleMatchingOrderCancelled( const ou::tf::COrder& order );
+  void HandleMatchingOrderFilled( const ou::tf::Order& order );
+  void HandleMatchingOrderCancelled( const ou::tf::Order& order );
 
 protected:
 
@@ -112,8 +112,8 @@ private:
 
   time_duration m_durOrderOpenTimeOut;
 
-  void HandleBaseOrderFilled( const ou::tf::COrder& order );
-  void HandleBaseOrderCancelled( const ou::tf::COrder& order );
+  void HandleBaseOrderFilled( const ou::tf::Order& order );
+  void HandleBaseOrderCancelled( const ou::tf::Order& order );
 
 };
 

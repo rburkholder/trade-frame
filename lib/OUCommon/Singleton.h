@@ -27,7 +27,7 @@
 namespace ou {
 
 //
-// CSingleton
+// Singleton
 //
 
 // look in patterns book for protected version of creation:  double check lock pattern
@@ -39,15 +39,15 @@ public:
     Global, // useful in simple program environments
     Assigned  // required for multi-threaded simultaneous simulations
   };
-  void SetLocalCommonInstanceSource( ELocalCommonInstanceSource_t source ) { m_source = source; };
-  ELocalCommonInstanceSource_t GetLocalCommonInstanceSource( void ) { return m_source; };
+  static void SetLocalCommonInstanceSource( ELocalCommonInstanceSource_t source ) { m_source = source; };
+  static ELocalCommonInstanceSource_t GetLocalCommonInstanceSource( void ) { return m_source; };
 protected:
-private:
   static ELocalCommonInstanceSource_t m_source;
+private:
 };
 
 template<typename T> 
-class CSingleton: boost::noncopyable, public SingletonBase {
+class Singleton: boost::noncopyable, public SingletonBase {
 public:
   static T& Instance() { return GlobalInstance(); }  // to be deprecated
   static T& GlobalInstance() {  // global to whole program
@@ -67,31 +67,42 @@ public:
     return *t;
   }
   static T& LocalCommonInstance() { // unique to a number of thread instances, set with SetLocalCommonInstance
-    T* t = m_pT.get();
-    if ( 0 == t ) 
-      throw std::runtime_error( "LocalCommonInstance not available" );
-    return *t;
+    T* t;
+    switch ( m_source ) {
+    case Global:
+      return GlobalInstance();
+      break;
+    case Assigned:
+      t = m_pT.get();
+      if ( 0 == t ) 
+        throw std::runtime_error( "LocalCommonInstance not available" );
+      return *t;
+      break;
+    default: 
+      throw std::runtime_error( "m_source mis-assigned" );
+      break;
+    }
   }
-  void SetLocalCommonInstance( T* t ) {
+  static void SetLocalCommonInstance( T* t ) {
     m_pT.reset( t );
   }
-  void ClearLocalCommonInstance( void ) {
+  static void ClearLocalCommonInstance( void ) {
     m_pT.reset();
   }
 
 protected:
-  CSingleton() {};          // ctor hidden
-  virtual ~CSingleton() {}; // dtor hidden
+  Singleton() {};          // ctor hidden
+  virtual ~Singleton() {}; // dtor hidden
 private:
   static std::size_t m_nLUI;
   static boost::thread_specific_ptr<T> m_pT;
 };
 
 template<typename T>
-std::size_t CSingleton<T>::m_nLUI( 0 );
+std::size_t Singleton<T>::m_nLUI( 0 );
 
 template<typename T>
-boost::thread_specific_ptr<T> CSingleton<T>::m_pT;
+boost::thread_specific_ptr<T> Singleton<T>::m_pT;
 
 //
 // CMultipleInstanceTest
@@ -100,13 +111,13 @@ boost::thread_specific_ptr<T> CSingleton<T>::m_pT;
 // a CRTP class to ensure Singleton'd class isn't multiply defined
 // see CBerkeleyDBEnvManager as an example
 template<typename T>
-class CMultipleInstanceTest {
+class MultipleInstanceTest {
 public:
-  CMultipleInstanceTest( void ) {
+  MultipleInstanceTest( void ) {
 #ifdef _DEBUG
     ++m_ref;
     // this may be changed to handle multi thread stuff, Dr. Dobbs has a solution
-    if ( 1 != m_ref ) throw std::runtime_error( "too many instances of CSingleton typename T" );
+    if ( 1 != m_ref ) throw std::runtime_error( "too many instances of Singleton typename T" );
 #endif
   }
 protected:
@@ -117,7 +128,7 @@ private:
 };
 
 #ifdef _DEBUG
-template<typename T> int CMultipleInstanceTest<T>::m_ref = 0;
+template<typename T> int MultipleInstanceTest<T>::m_ref = 0;
 #endif
 
 } // ou

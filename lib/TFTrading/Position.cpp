@@ -164,7 +164,7 @@ void CPosition::HandleTrade( trade_t trade ) {
 void CPosition::HandleGreek( greek_t greek ) {
 }
 
-COrder::pOrder_t CPosition::PlaceOrder( // market
+Order::pOrder_t CPosition::PlaceOrder( // market
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity
@@ -172,14 +172,14 @@ COrder::pOrder_t CPosition::PlaceOrder( // market
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( OrderType::Market == eOrderType );
-  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
+  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   pOrder_t pOrder
    = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
 
-COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
+Order::pOrder_t CPosition::PlaceOrder( // limit or stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
@@ -188,14 +188,14 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit or stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
+  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   pOrder_t pOrder
    = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
 
-COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
+Order::pOrder_t CPosition::PlaceOrder( // limit and stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
@@ -205,7 +205,7 @@ COrder::pOrder_t CPosition::PlaceOrder( // limit and stop
 
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
-  //pOrder_t pOrder( new COrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
+  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
    = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
   PlaceOrder( pOrder );
@@ -249,8 +249,8 @@ void CPosition::CancelOrder( idOrder_t idOrder ) {
   }
 }
 
-void CPosition::HandleCancellation( const COrder& order ) {
-  COrder::idOrder_t idOrder = order.GetOrderId();
+void CPosition::HandleCancellation( const Order& order ) {
+  Order::idOrder_t idOrder = order.GetOrderId();
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       if ( m_row.nPositionPending >= iter->get()->GetQuanRemaining() ) {
@@ -289,7 +289,7 @@ void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
   }
 }
 
-void CPosition::HandleCommission( const COrder& order ) {
+void CPosition::HandleCommission( const Order& order ) {
   //m_row.dblCommissionPaid += order.GetCommission();
   m_row.dblCommissionPaid += order.GetCommission();
   OnCommission( this );
@@ -377,15 +377,15 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
-void CPosition::HandleExecution( const std::pair<const COrder&, const CExecution&>& status ) {
+void CPosition::HandleExecution( const std::pair<const Order&, const CExecution&>& status ) {
 
   // should be able to calculate profit/loss & position cost as exections are encountered
   // should be able to calculate position cost basis as position is updated (with and without commissions)
   // will need market feed in order to calculate profit/loss
 
-  const COrder& order = status.first;
+  const Order& order = status.first;
   const CExecution& exec = status.second;
-  COrder::idOrder_t orderId = order.GetOrderId();
+  Order::idOrder_t orderId = order.GetOrderId();
 
   // update position, regardless of whether we see order open or closed
   UpdateRowValues( exec.GetPrice(), exec.GetSize(), exec.GetOrderSide() );

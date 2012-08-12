@@ -46,9 +46,9 @@ protected:
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::eProviderState_t eProviderState_t;
 
-  typedef ou::tf::CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
   typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   Mode_t m_mode;
 
@@ -128,9 +128,9 @@ template<typename CRTP>
 FrameWork01<CRTP>::FrameWork01( void ) :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
-  m_tws( new ou::tf::CIBTWS( "U000000" ) ), m_bIBConnected( false ), 
+  m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ), 
   m_iqfeed( new ou::tf::CIQFeedProvider() ), m_bIQFeedConnected( false ),
-  m_sim( new ou::tf::CSimulationProvider() ), m_bSimConnected( false ),
+  m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
   m_bExecConnected( false ), m_bData1Connected( false ), m_bData2Connected( false )
 
 {

@@ -45,7 +45,7 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   date m_dtStart;
 

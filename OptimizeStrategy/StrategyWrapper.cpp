@@ -39,7 +39,7 @@ void StrategyWrapper::Init(
 {
   m_dtStart = dateStart;
   m_pInstrument = pInstrument;
-  m_pProvider.reset( new ou::tf::CSimulationProvider );
+  m_pProvider.reset( new ou::tf::SimulationProvider );
   m_pProvider->SetGroupDirectory( sSourcePath );
   m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument, m_dtStart );
   m_pStrategy->Init( registrations, pfnLong, pfnShort );

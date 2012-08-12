@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -16,5 +16,7 @@
 #include "Singleton.h"
 
 namespace ou {
+
   SingletonBase::ELocalCommonInstanceSource_t SingletonBase::m_source( SingletonBase::Global );
+
 } // ou

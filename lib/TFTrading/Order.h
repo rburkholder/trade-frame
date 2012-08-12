@@ -37,7 +37,7 @@ namespace tf { // TradeFrame
 
 class COrderManager;
 
-class COrder {
+class Order {
   friend class COrderManager;
 public:
 
@@ -45,7 +45,7 @@ public:
   typedef keytypes::idPosition_t idPosition_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef keytypes::idInstrument_t idInstrument_t;
-  typedef boost::shared_ptr<COrder> pOrder_t;
+  typedef boost::shared_ptr<Order> pOrder_t;
   typedef const pOrder_t& pOrder_ref;
 
   struct TableRowDef {
@@ -148,7 +148,7 @@ public:
     }
   };
 
-  COrder(  // market 
+  Order(  // market 
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
@@ -156,7 +156,7 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder(  // limit or stop
+  Order(  // limit or stop
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
@@ -165,7 +165,7 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder(  // limit and stop
+  Order(  // limit and stop
     CInstrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
@@ -175,8 +175,8 @@ public:
     idPosition_t idPosition = 0,
     ptime dtOrderSubmitted = not_a_date_time
     );
-  COrder( const TableRowDef& row, pInstrument_t& pInstrument );
-  ~COrder(void);
+  Order( const TableRowDef& row, pInstrument_t& pInstrument );
+  ~Order(void);
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
@@ -185,13 +185,13 @@ public:
       throw std::runtime_error( "Corder::SetInstrument: instrument already assigned" );
     }
     if ( m_idInstrument != pInstrument->GetInstrumentName() ) {
-      throw std::runtime_error( "COrder::SetInstrument: instrument name does not match expected" );
+      throw std::runtime_error( "Order::SetInstrument: instrument name does not match expected" );
     }
     m_pInstrument = pInstrument;
   }
   CInstrument::pInstrument_t GetInstrument( void ) const { 
     if ( NULL == m_pInstrument.get() ) {
-      throw std::runtime_error( "COrder::GetInstrument:  no instrument defined" );
+      throw std::runtime_error( "Order::GetInstrument:  no instrument defined" );
     }
     return m_pInstrument; 
   };
@@ -224,11 +224,11 @@ public:
   };
   void MarkAsCancelled( void );  // called from COrderManager
 
-  ou::Delegate<const std::pair<const COrder&, const CExecution&>& > OnExecution;
-  ou::Delegate<const COrder&> OnOrderCancelled;
-  ou::Delegate<const COrder&> OnPartialFill; // on intermediate fills only
-  ou::Delegate<const COrder&> OnOrderFilled; // on final fill
-  ou::Delegate<const COrder&> OnCommission;
+  ou::Delegate<const std::pair<const Order&, const CExecution&>& > OnExecution;
+  ou::Delegate<const Order&> OnOrderCancelled;
+  ou::Delegate<const Order&> OnPartialFill; // on intermediate fills only
+  ou::Delegate<const Order&> OnOrderFilled; // on final fill
+  ou::Delegate<const Order&> OnCommission;
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
@@ -251,7 +251,7 @@ private:
 
   TableRowDef m_row;
 
-  COrder(void);  // no default constructor
+  Order(void);  // no default constructor
 
 };
 

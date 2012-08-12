@@ -78,7 +78,7 @@ private:
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
   typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   typedef ou::tf::CInstrument::pInstrument_t m_pInstrument_t;
   pInstrument_t m_pShortInstrument;
@@ -212,7 +212,7 @@ private:
 
   ou::tf::ZigZag m_zigzagPrice;
 
-  typedef ou::tf::CSimulationProvider::pSymbol_t pSimSymbol_t;
+  typedef ou::tf::SimulationProvider::pSymbol_t pSimSymbol_t;
 
   pProviderSim_t m_sim;
   bool m_bSimConnected;
@@ -237,7 +237,7 @@ private:
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleSimulationComplete( void );
 
-  void HandleOrderFilled( const ou::tf::COrder& );
+  void HandleOrderFilled( const ou::tf::Order& );
 
   void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
   void HandleCommission( const ou::tf::CPosition* pPosition );

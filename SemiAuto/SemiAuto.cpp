@@ -39,13 +39,13 @@ bool AppSemiAuto::OnInit() {
   m_bData1Connected = false;
   m_bData2Connected = false;
 
-  m_tws.reset( new CIBTWS( "U215226" ) );
+  m_tws.reset( new IBTWS( "U215226" ) );
   m_bIBConnected = false;
 
   m_iqfeed.reset( new CIQFeedProvider() );
   m_bIQFeedConnected = false;
 
-  m_sim.reset( new CSimulationProvider() ); 
+  m_sim.reset( new SimulationProvider() ); 
   m_bSimConnected = false;
 
   m_eMode = EModeLive;
@@ -421,7 +421,7 @@ void AppSemiAuto::HandleCreateNewFrameManualOrder( void ) {
 }
 
 void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
-  ou::tf::CIBTWS::Contract contract;
+  ou::tf::IBTWS::Contract contract;
   contract.currency = "USD";
   contract.exchange = "SMART";
   contract.secType = "STK";
@@ -435,7 +435,7 @@ void AppSemiAuto::HandleFrameManualOrderFocus( unsigned int ix ) {
   m_curDialogManualOrder = ix;
 }
 
-void AppSemiAuto::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {  // need to handle cross thread
+void AppSemiAuto::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {  // need to handle cross thread
   assert( m_curDialogManualOrder < m_vManualOrders.size() );
   m_vManualOrders[ m_curDialogManualOrder ].details = details;
   m_vManualOrders[ m_curDialogManualOrder ].pInstrument = pInstrument;

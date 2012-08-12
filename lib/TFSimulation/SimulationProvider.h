@@ -42,20 +42,20 @@ namespace tf { // TradeFrame
 //    first time through, use the minheap, 
 //    subsequent times through, scan a vector
 
-class CSimulationProvider
-: public CProviderInterface<CSimulationProvider,CSimulationSymbol>
+class SimulationProvider
+: public CProviderInterface<SimulationProvider,SimulationSymbol>
 {
 public:
 
-  typedef boost::shared_ptr<CSimulationProvider> pProvider_t;
-  typedef CProviderInterface<CSimulationProvider,CSimulationSymbol> inherited_t;
+  typedef boost::shared_ptr<SimulationProvider> pProvider_t;
+  typedef CProviderInterface<SimulationProvider,SimulationSymbol> inherited_t;
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::pInstrument_cref pInstrument_cref;
-  typedef COrder::pOrder_t pOrder_t;
+  typedef Order::pOrder_t pOrder_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
 
-  CSimulationProvider(void);
-  virtual ~CSimulationProvider(void);
+  SimulationProvider(void);
+  virtual ~SimulationProvider(void);
   virtual void Connect( void );
   virtual void Disconnect( void );
 
@@ -67,10 +67,10 @@ public:
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
 
-  void AddTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
-  void RemoveTradeHandler( pInstrument_cref pInstrument, CSimulationSymbol::tradehandler_t handler );
-  void AddQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
-  void RemoveQuoteHandler( pInstrument_cref pInstrument, CSimulationSymbol::quotehandler_t handler );
+  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+  void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
+  void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
 
   void EmitStats( std::stringstream& ss );
 
@@ -81,7 +81,7 @@ public:
 
 protected:
 
-  pSymbol_t NewCSymbol( CSimulationSymbol::pInstrument_t pInstrument );
+  pSymbol_t NewCSymbol( SimulationSymbol::pInstrument_t pInstrument );
   void StartQuoteWatch( pSymbol_t pSymbol );
   void StopQuoteWatch( pSymbol_t Symbol );
   void StartTradeWatch( pSymbol_t pSymbol );
@@ -99,9 +99,9 @@ protected:
 
   void Merge( void );  // the background thread
 
-  void HandleExecution( COrder::idOrder_t orderId, const CExecution &exec );
-  void HandleCommission( COrder::idOrder_t orderId, double commission );
-  void HandleCancellation( COrder::idOrder_t orderId );
+  void HandleExecution( Order::idOrder_t orderId, const CExecution &exec );
+  void HandleCommission( Order::idOrder_t orderId, double commission );
+  void HandleCancellation( Order::idOrder_t orderId );
 
   ptime m_dtSimStart;
   ptime m_dtSimStop;

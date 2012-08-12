@@ -21,9 +21,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
+IBSymbol::IBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<CIBSymbol>( pInstrument, idSym ), 
+  CSymbol<IBSymbol>( pInstrument, idSym ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
@@ -38,9 +38,9 @@ CIBSymbol::CIBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument,
   inherited_t::m_id = idSym;
 }
 
-CIBSymbol::CIBSymbol( pInstrument_t pInstrument, TickerId idTicker )
+IBSymbol::IBSymbol( pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<CIBSymbol>( pInstrument ), 
+  CSymbol<IBSymbol>( pInstrument ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
@@ -54,10 +54,10 @@ CIBSymbol::CIBSymbol( pInstrument_t pInstrument, TickerId idTicker )
 {
 }
 
-CIBSymbol::~CIBSymbol(void) {
+IBSymbol::~IBSymbol(void) {
 }
 
-void CIBSymbol::AcceptTickPrice(TickType tickType, double price) {
+void IBSymbol::AcceptTickPrice(TickType tickType, double price) {
   switch ( tickType ) {
     case TickType::BID:
       if ( price != m_dblBid ) {
@@ -93,7 +93,7 @@ void CIBSymbol::AcceptTickPrice(TickType tickType, double price) {
   }
 }
 
-void CIBSymbol::AcceptTickSize(TickType tickType, int size) {
+void IBSymbol::AcceptTickSize(TickType tickType, int size) {
 
   switch ( m_pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
@@ -132,7 +132,7 @@ void CIBSymbol::AcceptTickSize(TickType tickType, int size) {
   }
 }
 
-void CIBSymbol::AcceptTickString(TickType tickType, const IBString &value) {
+void IBSymbol::AcceptTickString(TickType tickType, const IBString &value) {
   switch ( tickType ) {
     case TickType::LAST_TIMESTAMP:
       m_bLastTimeStampFound = true;
@@ -142,7 +142,7 @@ void CIBSymbol::AcceptTickString(TickType tickType, const IBString &value) {
   }
 }
 
-void CIBSymbol::BuildQuote() {
+void IBSymbol::BuildQuote() {
 //  if ( m_bAskFound && m_bBidFound && m_bAskSizeFound && m_bBidSizeFound ) {
     if ( m_bAskFound || m_bBidFound ) {
     //boost::local_time::local_date_time ldt = 
@@ -160,7 +160,7 @@ void CIBSymbol::BuildQuote() {
   }
 }
 
-void CIBSymbol::BuildTrade() {
+void IBSymbol::BuildTrade() {
   //if ( !m_bLastTimeStampFound && m_bLastFound && m_bLastSizeFound ) {
   //  std::cout << m_sSymbolName << " Trade is weird" << std::endl;
   //}
@@ -174,7 +174,7 @@ void CIBSymbol::BuildTrade() {
   }
 }
 
-void CIBSymbol::Greeks( double optPrice, double undPrice, double pvDividend, 
+void IBSymbol::Greeks( double optPrice, double undPrice, double pvDividend, 
                         double impliedVol, double delta, double gamma, double vega, double theta ) {
 
   m_dblOptionPrice = optPrice;

@@ -893,7 +893,7 @@ void CGTScalpDlg::OnBnClickedOpenib() {
     }
 //    else {
       string sAcct( szAcct );
-      m_pIB = new CIBTWS( sAcct );
+      m_pIB = new IBTWS( sAcct );
       m_pIB->Connect();
       m_btnIBExecution.EnableWindow( TRUE );
       m_btnIBData.EnableWindow( TRUE );
@@ -1260,17 +1260,17 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
     m_ebStopPrice.GetWindowTextA( szStopPrice, 30 );
 
     double dblLimit, dblStop;
-    COrder *pOrder = NULL;
+    Order *pOrder = NULL;
     switch ( m_eOrderType ) {
     case OrderType::Market:
-      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize );
+      pOrder = new Order( pInstrument, m_eOrderType, m_eOrderSide, nSize );
       break;
     case OrderType::Limit:
       if ( 0 == *szLimitPrice ) throw std::invalid_argument( "No Limit Price Provided" );
       else {
         dblLimit = atof( szLimitPrice );
         if ( 0 == dblLimit ) throw std::invalid_argument( "Limit Price was 0" );
-        pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit );
+        pOrder = new Order( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit );
       }
       break;
     case OrderType::StopLimit:
@@ -1282,13 +1282,13 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
       dblStop = atof( szStopPrice );
       if ( 0 == dblStop ) throw std::invalid_argument( "Stop Price was 0" );
 
-      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit, dblStop );
+      pOrder = new Order( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblLimit, dblStop );
       break;
     case OrderType::Stop:
       if ( 0 == *szStopPrice ) throw std::invalid_argument( "No Stop Price Provided" );
       dblStop = atof( szStopPrice );
       if ( 0 == dblStop ) throw std::invalid_argument( "Stop Price was 0" );
-      pOrder = new COrder( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblStop );
+      pOrder = new Order( pInstrument, m_eOrderType, m_eOrderSide, nSize, dblStop );
       break;
     }
 
@@ -1401,7 +1401,7 @@ void CGTScalpDlg::OnEnChangeEntry1()
 void CGTScalpDlg::OnBnClickedCbsimulator() {
   if ( BST_CHECKED == m_cbSimulatorOn.GetCheck() ) {
     if ( NULL == m_pSimulation ) {
-      m_pSimulation = new CSimulationProvider();
+      m_pSimulation = new SimulationProvider();
     }
     if ( !m_pSimulation->Connected() ) {
       m_pSimulation->Connect();

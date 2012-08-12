@@ -74,10 +74,10 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
     m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
   }
   if ( ou::tf::keytypes::EProviderIB == m_pData2Provider->ID() ) {
-    m_pData2ProviderIB = boost::shared_dynamic_cast<ou::tf::CIBTWS>( m_pData2Provider );
+    m_pData2ProviderIB = boost::shared_dynamic_cast<ou::tf::IBTWS>( m_pData2Provider );
   }
   if ( ou::tf::keytypes::EProviderIB == pExecutionProvider->ID() ) {
-    m_pExecutionProviderIB = boost::shared_dynamic_cast<ou::tf::CIBTWS>( pExecutionProvider );
+    m_pExecutionProviderIB = boost::shared_dynamic_cast<ou::tf::IBTWS>( pExecutionProvider );
   }
 
   if ( StrategyTradeOptionsConstants::bTesting ) {
@@ -135,7 +135,7 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
       throw std::runtime_error( "not a good code branch" );
     }
     else {  // initialize instruments from scratch
-      ou::tf::CIBTWS::Contract contract;
+      ou::tf::IBTWS::Contract contract;
       contract.symbol = sUnderlying;
       contract.exchange = "SMART";
       contract.secType = "STK";
@@ -155,7 +155,7 @@ void StrategyTradeOptions::Stop( void ) {
 //  m_pUnderlying->RemoveTradeHandler( m_pData1Provider );
 }
 
-void StrategyTradeOptions::HandleUnderlyingContractDetails( const ou::tf::CIBTWS::ContractDetails& cd, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+void StrategyTradeOptions::HandleUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails& cd, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   mgr.Register( pInstrument );
 //  m_pUnderlying = new ou::tf::InstrumentData( pInstrument );
@@ -167,7 +167,7 @@ void StrategyTradeOptions::HandleUnderlyingContractDetailsDone( void ) {
 //  m_pUnderlying->AddTradeHandler( m_pData1Provider );
 
   // obtain near date contracts
-  ou::tf::CIBTWS::Contract contract;
+  ou::tf::IBTWS::Contract contract;
   contract.symbol = m_sUnderlying;
   contract.exchange = "SMART";
   contract.secType = "OPT";
@@ -181,7 +181,7 @@ void StrategyTradeOptions::HandleUnderlyingContractDetailsDone( void ) {
 
 }
 
-void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   if ( 0 != m_pData1ProviderIQFeed.get() ) {
     m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );
@@ -191,7 +191,7 @@ void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::CIBTWS::
 
 void StrategyTradeOptions::HandleNearDateContractDetailsDone( void ) {
   // obtain far date contracts
-  ou::tf::CIBTWS::Contract contract;
+  ou::tf::IBTWS::Contract contract;
   contract.symbol = m_sUnderlying;
   contract.exchange = "SMART";
   contract.secType = "OPT";
@@ -204,7 +204,7 @@ void StrategyTradeOptions::HandleNearDateContractDetailsDone( void ) {
     );
 }
 
-void StrategyTradeOptions::HandleFarDateContractDetails( const ou::tf::CIBTWS::ContractDetails&, ou::tf::CIBTWS::pInstrument_t& pInstrument ) {
+void StrategyTradeOptions::HandleFarDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
   if ( 0 != m_pData1ProviderIQFeed.get() ) {
     m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );

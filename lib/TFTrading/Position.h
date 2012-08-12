@@ -51,9 +51,9 @@ public:
   typedef CInstrument::pInstrument_t pInstrument_t;
   typedef CInstrument::pInstrument_cref pInstrument_cref;
 
-  typedef COrder::idOrder_t idOrder_t;
-  typedef COrder::pOrder_t pOrder_t;
-  typedef COrder::pOrder_ref pOrder_ref;
+  typedef Order::idOrder_t idOrder_t;
+  typedef Order::pOrder_t pOrder_t;
+  typedef Order::pOrder_ref pOrder_ref;
 
   typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
@@ -181,18 +181,18 @@ public:
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
   bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
 
-  COrder::pOrder_t PlaceOrder( // market
+  Order::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity
     );
-  COrder::pOrder_t PlaceOrder( // limit or stop
+  Order::pOrder_t PlaceOrder( // limit or stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
     double dblPrice1
     );
-  COrder::pOrder_t PlaceOrder( // limit and stop
+  Order::pOrder_t PlaceOrder( // limit and stop
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
     boost::uint32_t nOrderQuantity,
@@ -246,9 +246,9 @@ private:
   void Construction( void );
   void DisconnectFromDataProvider( int );
 
-  void HandleExecution( const std::pair<const COrder&, const CExecution&>& );
-  void HandleCommission( const COrder& );
-  void HandleCancellation( const COrder& );
+  void HandleExecution( const std::pair<const Order&, const CExecution&>& );
+  void HandleCommission( const Order& );
+  void HandleCancellation( const Order& );
 
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( vOrders_iter_t iter );

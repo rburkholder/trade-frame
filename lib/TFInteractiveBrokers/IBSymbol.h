@@ -28,18 +28,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CIBSymbol : public CSymbol<CIBSymbol> {
-  friend class CIBTWS;
+class IBSymbol : public CSymbol<IBSymbol> {
+  friend class IBTWS;
 public:
 
-  typedef CSymbol<CIBSymbol> inherited_t;
+  typedef CSymbol<IBSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
 
-  //CIBSymbol( TickerId id, pInstrument_t pInstrument );
-  CIBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
-  CIBSymbol( pInstrument_t pInstrument, TickerId id );
-  ~CIBSymbol(void);
+  //IBSymbol( TickerId id, pInstrument_t pInstrument );
+  IBSymbol( inherited_t::symbol_id_t, pInstrument_t pInstrument, TickerId id );
+  IBSymbol( pInstrument_t pInstrument, TickerId id );
+  ~IBSymbol(void);
 
   TickerId GetTickerId( void ) { return m_TickerId; };
 

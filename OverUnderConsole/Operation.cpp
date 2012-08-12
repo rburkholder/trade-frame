@@ -22,7 +22,7 @@
 
 //================= Operation ========================
   
-Operation::Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t piqfeed, ou::tf::CIBTWS::pProvider_t ptws ) 
+Operation::Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t piqfeed, ou::tf::IBTWS::pProvider_t ptws ) 
   : m_si( si ), m_piqfeed( piqfeed ), m_ptws( ptws )
 {
 }
@@ -50,7 +50,7 @@ void Operation::Start( double dblAmountToTrade ) {
   is.dblAmountToTrade = dblAmountToTrade;
   is.nSharesToTrade = CalcShareCount( dblAmountToTrade );
 
-  ou::tf::CIBTWS::Contract contract;
+  ou::tf::IBTWS::Contract contract;
   contract.currency = "USD";
   contract.exchange = "SMART";  
   //contract.secType = "FUT";
@@ -71,7 +71,7 @@ void Operation::Stop( void ) {
   StopWatch();
 }
 
-void Operation::HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {
+void Operation::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {
   m_pInstrument = pInstrument;
   //m_pInstrument->SetAlternateName( m_piqfeed->ID(), "+GCZ11" );
   m_md.data.pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_ptws, m_piqfeed ) );

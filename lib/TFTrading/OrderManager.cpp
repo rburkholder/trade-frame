@@ -33,7 +33,7 @@ COrderManager::COrderManager(void)
 COrderManager::~COrderManager(void) {
 }
 
-COrder::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
+Order::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
   idOrder_t oldId = m_orderIds.GetCurrentId();
   if ( id > oldId ) {
     m_orderIds.SetNextId( id );
@@ -48,7 +48,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
     idPosition_t idPosition
     ) {
   assert( nOrderQuantity > 0 );
-  pOrder_t pOrder( new COrder( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition ) );
+  pOrder_t pOrder( new Order( instrument,  eOrderType, eOrderSide, nOrderQuantity, idPosition ) );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -61,7 +61,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
     ) {
   assert( nOrderQuantity > 0 );
   assert( dblPrice1 > 0 );
-  pOrder_t pOrder( new COrder( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition ) );
+  pOrder_t pOrder( new Order( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, idPosition ) );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -75,7 +75,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // limit and stop
   assert( nOrderQuantity > 0 );
   assert( dblPrice1 > 0 );
   assert( dblPrice2 > 0 );
-  pOrder_t pOrder( new COrder( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition ) );
+  pOrder_t pOrder( new Order( instrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, idPosition ) );
   ConstructOrder( pOrder );
   return pOrder;
 }
@@ -97,8 +97,8 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
       if ( 0 != m_pSession ) {
         // add to database
         assert( 0 != pOrder->GetRow().idPosition );
-        ou::db::QueryFields<COrder::TableRowDef>::pQueryFields_t pQuery
-          = m_pSession->Insert<COrder::TableRowDef>( const_cast<COrder::TableRowDef&>( pOrder->GetRow() ) );
+        ou::db::QueryFields<Order::TableRowDef>::pQueryFields_t pQuery
+          = m_pSession->Insert<Order::TableRowDef>( const_cast<Order::TableRowDef&>( pOrder->GetRow() ) );
       }
     }
   }
@@ -116,10 +116,10 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
       ou::db::Field( a, "orderid", idOrder );
     }
-    COrder::idOrder_t idOrder;
+    Order::idOrder_t idOrder;
     ptime dtOrderSubmitted;
     OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateAtPlaceOrder( COrder::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_ )
+    UpdateAtPlaceOrder( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderSubmitted_ )
       : idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ) {};
   };
 }
@@ -188,14 +188,14 @@ bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
       if ( m_pSession->Execute( pOrderExistsQuery ) ) {
         bool bFound = true;
         // load order as well as associated executions
-        COrder::TableRowDef rowOrder;
-        m_pSession->Columns<OrderManagerQueries::OrderKey, COrder::TableRowDef>( pOrderExistsQuery, rowOrder );
+        Order::TableRowDef rowOrder;
+        m_pSession->Columns<OrderManagerQueries::OrderKey, Order::TableRowDef>( pOrderExistsQuery, rowOrder );
         if ( 0 == OnOrderNeedsDetails ) {
           throw std::runtime_error( "COrderManager::LocateOrder: needs Order Details Callback" );
         }
         pInstrument_t pInstrument;
         OnOrderNeedsDetails( rowOrder.idInstrument, pInstrument );
-        pOrder_t pOrder( new COrder( rowOrder, pInstrument ) );
+        pOrder_t pOrder( new Order( rowOrder, pInstrument ) );
         std::pair<iterOrders_t, bool> response;
         response = m_mapOrders.insert( pairOrderState_t(rowOrder.idOrder, structOrderState( pOrder ) ) );
         if ( false == response.second ) {
@@ -231,10 +231,10 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "datetimeclosed", dtOrderClosed );
       ou::db::Field( a, "orderid", idOrder );
     }
-    COrder::idOrder_t idOrder;
+    Order::idOrder_t idOrder;
     ptime dtOrderClosed;
     OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateAtOrderClose( COrder::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
+    UpdateAtOrderClose( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
       : idOrder( id ), dtOrderClosed( dtOrderClosed_ ), eOrderStatus( status ) {};
   };
 }
@@ -294,8 +294,8 @@ namespace OrderManagerQueries {
     boost::uint32_t nQuantityFilled;
     ptime dtClosed;
     double dblAverageFillPrice;
-    COrder::idOrder_t idOrder;
-    UpdateOrder( COrder::idOrder_t idOrder_, OrderStatus::enumOrderStatus eOrderStatus_, 
+    Order::idOrder_t idOrder;
+    UpdateOrder( Order::idOrder_t idOrder_, OrderStatus::enumOrderStatus eOrderStatus_, 
       boost::uint32_t nQuantityRemaining_, boost::uint32_t nQuantityFilled_, double dblAverageFillPrice_, ptime dtClosed_ = boost::date_time::not_a_date_time )
       : idOrder( idOrder_ ), eOrderStatus( eOrderStatus_ ), 
       nQuantityRemaining( nQuantityRemaining_ ), nQuantityFilled( nQuantityFilled_ ), 
@@ -312,7 +312,7 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
       pOrder_t pOrder = iter->second.pOrder;
       OrderStatus::enumOrderStatus status = pOrder->ReportExecution( exec );
       if ( 0 != m_pSession ) {
-        const COrder::TableRowDef& row( pOrder->GetRow() );
+        const Order::TableRowDef& row( pOrder->GetRow() );
         switch ( status ) {
         case OrderStatus::CancelledWithPartialFill:
         case OrderStatus::Filled:
@@ -366,9 +366,9 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "commission", dblCommission );
       ou::db::Field( a, "orderid", idOrder );
     }
-    COrder::idOrder_t idOrder;
+    Order::idOrder_t idOrder;
     double dblCommission;
-    UpdateCommission( COrder::idOrder_t id, double dblCommission_ )
+    UpdateCommission( Order::idOrder_t id, double dblCommission_ )
       : idOrder( id ), dblCommission( dblCommission_ ) {};
   };
 }
@@ -405,10 +405,10 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "datetimeclosed", dtOrderClosed );
       ou::db::Field( a, "orderid", idOrder );
     }
-    COrder::idOrder_t idOrder;
+    Order::idOrder_t idOrder;
     ptime dtOrderClosed;
     OrderStatus::enumOrderStatus eOrderStatus;
-    UpdateOnOrderError( COrder::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
+    UpdateOnOrderError( Order::idOrder_t id, OrderStatus::enumOrderStatus status, ptime dtOrderClosed_ )
       : idOrder( id ), dtOrderClosed( dtOrderClosed_ ), eOrderStatus( status ) {};
   };
 }
@@ -438,12 +438,12 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
 }
 
 void COrderManager::HandleRegisterTables( ou::db::CSession& session ) {
-  session.RegisterTable<COrder::TableCreateDef>( tablenames::sOrder );
+  session.RegisterTable<Order::TableCreateDef>( tablenames::sOrder );
   session.RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
 }
 
 void COrderManager::HandleRegisterRows( ou::db::CSession& session ) {
-  session.MapRowDefToTableName<COrder::TableRowDef>( tablenames::sOrder );
+  session.MapRowDefToTableName<Order::TableRowDef>( tablenames::sOrder );
   session.MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
   session.MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
 }

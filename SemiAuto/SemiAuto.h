@@ -87,9 +87,9 @@ private:
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
-  typedef CIBTWS::pProvider_t pProviderIBTWS_t;
+  typedef IBTWS::pProvider_t pProviderIBTWS_t;
   typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
-  typedef CSimulationProvider::pProvider_t pProviderSim_t;
+  typedef SimulationProvider::pProvider_t pProviderSim_t;
 
   //typedef FrameProviderControl::eProviderState_t eProviderState_t;
 
@@ -132,7 +132,7 @@ private:
   unsigned int m_curDialogManualOrder;
   struct structManualOrder {
     ou::tf::PanelManualOrder* pDialogManualOrder;
-    ou::tf::CIBTWS::ContractDetails details;
+    ou::tf::IBTWS::ContractDetails details;
     pInstrument_t pInstrument;
   };
 
@@ -179,7 +179,7 @@ private:
   void HandleOnCleanUpForExitForFrameMain( int );
 
   void HandleCheckSymbolNameAgainstIB( const std::string& );
-  void HandleIBContractDetails( const ou::tf::CIBTWS::ContractDetails&, pInstrument_t& pInstrument );
+  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
   void HandleSaveSeriesEvent( void );
