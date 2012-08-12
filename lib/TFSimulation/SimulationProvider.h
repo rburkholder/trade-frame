@@ -74,6 +74,15 @@ public:
 
   void EmitStats( std::stringstream& ss );
 
+  typedef FastDelegate0<> OnSimulationThreadStarted_t; // Allows Singleton LocalCommonInstances to be set, called within new thread
+  void SetOnSimulationThreadStarted( OnSimulationThreadStarted_t function ) {
+    m_OnSimulationThreadStarted = function;
+  }
+  typedef FastDelegate0<> OnSimulationThreadEnded_t; // Allows Singleton LocalCommonInstances to be reset
+  void SetOnSimulationThreadEnded( OnSimulationThreadEnded_t function ) {
+    m_OnSimulationThreadEnded = function;
+  }
+
   typedef FastDelegate0<> OnSimulationComplete_t;
   void SetOnSimulationComplete( OnSimulationComplete_t function ) {
     m_OnSimulationComplete = function;
@@ -95,6 +104,8 @@ protected:
 
   MergeDatedDatums* m_pMerge;
 
+  OnSimulationThreadStarted_t m_OnSimulationThreadStarted;
+  OnSimulationThreadEnded_t m_OnSimulationThreadEnded;
   OnSimulationComplete_t m_OnSimulationComplete;
 
   void Merge( void );  // the background thread

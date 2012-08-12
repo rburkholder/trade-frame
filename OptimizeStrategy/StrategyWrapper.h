@@ -51,13 +51,16 @@ private:
 
   bool m_bRunning;
 
-  pProviderSim_t m_pProvider;
+  pProviderSim_t m_pSimulator;
   pInstrument_t m_pInstrument;
 
   StrategyEquity* m_pStrategy;
 
   void HandleProviderConnected( int );
   void HandleProviderDisconnected( int );
+
+  void HandleSimulationThreadStart( void );
+  void HandleSimulationThreadEnd( void );
 
   void HandleSimulationComplete( void );
 };

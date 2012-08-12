@@ -24,10 +24,10 @@ StrategyWrapper::StrategyWrapper(void)
 }
 
 StrategyWrapper::~StrategyWrapper(void) {
-  m_pProvider->Disconnect();
+  m_pSimulator->Disconnect();
   delete m_pStrategy;
   m_pStrategy = 0;
-  m_pProvider.reset();
+  m_pSimulator.reset();
 }
 
 void StrategyWrapper::Init( 
@@ -39,20 +39,22 @@ void StrategyWrapper::Init(
 {
   m_dtStart = dateStart;
   m_pInstrument = pInstrument;
-  m_pProvider.reset( new ou::tf::SimulationProvider );
-  m_pProvider->SetGroupDirectory( sSourcePath );
-  m_pStrategy = new StrategyEquity( m_pProvider, m_pInstrument, m_dtStart );
+  m_pSimulator.reset( new ou::tf::SimulationProvider );
+  m_pSimulator->SetGroupDirectory( sSourcePath );
+  m_pSimulator->SetOnSimulationThreadStarted( MakeDelegate( this, &StrategyWrapper::HandleSimulationThreadStart ) );
+  m_pSimulator->SetOnSimulationThreadEnded( MakeDelegate( this, &StrategyWrapper::HandleSimulationThreadEnd ) );
+  m_pStrategy = new StrategyEquity( m_pSimulator, m_pInstrument, m_dtStart );
   m_pStrategy->Init( registrations, pfnLong, pfnShort );
 }
 
 void StrategyWrapper::Start( void ) {
-  m_pProvider->OnConnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
-  m_pProvider->OnDisconnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
-  m_pProvider->Connect();
+  m_pSimulator->OnConnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
+  m_pSimulator->OnDisconnected.Add( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
+  m_pSimulator->Connect();
 }
 
 //void StrategyWrapper::Stop( void ) {
-//  m_pProvider->Disconnect();
+//  m_pSimulator->Disconnect();
 //}
 
 void StrategyWrapper::HandleProviderConnected( int i ) {
@@ -61,29 +63,39 @@ void StrategyWrapper::HandleProviderConnected( int i ) {
 
 //  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
   
-  m_pProvider->SetOnSimulationComplete( MakeDelegate( this, &StrategyWrapper::HandleSimulationComplete ) );
+  m_pSimulator->SetOnSimulationComplete( MakeDelegate( this, &StrategyWrapper::HandleSimulationComplete ) );
 
-  m_pProvider->Run( false );  // returns upon completion of simulation
+  m_pSimulator->Run( false );  // returns upon completion of simulation
 
   std::stringstream ss;
-  m_pProvider->EmitStats( ss );
+  m_pSimulator->EmitStats( ss );
   std::cout << ss.str() << std::endl;
 
-  m_pProvider->SetOnSimulationComplete( 0 );
+  m_pSimulator->SetOnSimulationComplete( 0 );
 
 }
 
 void StrategyWrapper::HandleProviderDisconnected( int i ) {
-  m_pProvider->OnConnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
-  m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
+  m_pSimulator->OnConnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderConnected ) );
+  m_pSimulator->OnDisconnected.Remove( MakeDelegate( this, &StrategyWrapper::HandleProviderDisconnected ) );
   m_bRunning = false;
   m_pStrategy->End();
+}
+
+void StrategyWrapper::HandleSimulationThreadStart( void ) {
+  ou::CTimeSource::SetLocalCommonInstance( new ou::CTimeSource );
+  ou::tf::COrderManager::SetLocalCommonInstance( new ou::tf::COrderManager );
+}
+
+void StrategyWrapper::HandleSimulationThreadEnd( void ) {
+  ou::CTimeSource::SetLocalCommonInstance( 0 );
+  ou::tf::COrderManager::SetLocalCommonInstance( 0 );
 }
 
 void StrategyWrapper::HandleSimulationComplete( void ) {
   // generate statistics here?
   // any clean up required?
-//  m_pProvider->Disconnect();
+//  m_pSimulator->Disconnect();
 }
  
 double StrategyWrapper::GetPL( void ) {

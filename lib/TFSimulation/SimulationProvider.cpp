@@ -175,9 +175,12 @@ void SimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
 // root of background simulation thread, thread is started from Run.
 void SimulationProvider::Merge( void ) {
 
+  if ( 0 != m_OnSimulationThreadStarted ) m_OnSimulationThreadStarted();
+
   // for each of the symbols, add the quote, trade and greek series
   // datums from each series will be merged and emitted in chronological order
   for ( m_mapSymbols_t::iterator iter = m_mapSymbols.begin();
+
     iter != m_mapSymbols.end(); ++iter ) {
 
       pSymbol_t sym( iter->second );
@@ -219,23 +222,25 @@ void SimulationProvider::Merge( void ) {
   if ( 0 != m_OnSimulationComplete ) m_OnSimulationComplete();
 
   ou::CTimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
+
+  if ( 0 != m_OnSimulationThreadEnded ) m_OnSimulationThreadEnded();
 }
 
 void SimulationProvider::Run( bool bAsync ) {
   if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
-  // how to detect end of thread, and reset m_hMergeThread?
-  if ( NULL != m_pMerge ) {
+
+  if ( 0 != m_pMerge ) {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
     m_pMerge = new MergeDatedDatums();
     boost::thread sim( boost::bind( &SimulationProvider::Merge, this ) );
-    //m_threadMerge = boost::thread( boost::bind( &SimulationProvider::Merge, this ) );
+
     if ( !bAsync ) {
       sim.join();
     }
-//    m_threadMerge = sim;
+
   }
 }
 
