@@ -24,14 +24,16 @@ namespace tf { // TradeFrame
 
 //const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
 const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.hdf5";
-H5::H5File CHDF5DataManager::m_H5File;
-unsigned int CHDF5DataManager::m_RefCount = 0;
+//H5::H5File CHDF5DataManager::m_H5File;
+//unsigned int CHDF5DataManager::m_RefCount = 0;
 
-CHDF5DataManager HDF5DM;  // statically defined, so at least one instance is always present
+//CHDF5DataManager HDF5DM;  // statically defined, so at least one instance is always present 
+//  (2012/08/12: why?) because code is inefficient.  file is open/closed repeatedly.,  need to be able to pass a handle for operations.
+//  needs a good rethink and re-architect for file handle handling
 
 CHDF5DataManager::CHDF5DataManager(void) {
-  ++m_RefCount;
-  if ( 1 == m_RefCount ) {
+//  ++m_RefCount;
+//  if ( 1 == m_RefCount ) {
     //std::cout << "Opening DataManager" << std::endl;
 
     // Open and prepare HDF5 stuff (HDF5 precompiled utilities cannot handle split files
@@ -58,19 +60,19 @@ CHDF5DataManager::CHDF5DataManager(void) {
     catch (...) {
       printf( "problems with HDF5 system\n" );
     }
-    std::cout << "DataManager opened" << std::endl;
-  }
-  else {
+//    std::cout << "DataManager opened" << std::endl;
+//  }
+//  else {
     //throw std::exception( "Only one DataManager may be instantiated." );
     // multiple instantiations are allowed as we may be using a number of different files
-  }
+//  }
 }
 
 CHDF5DataManager::~CHDF5DataManager(void) {
-  --m_RefCount;
-  if ( 0 == m_RefCount ) {
+//  --m_RefCount;
+//  if ( 0 == m_RefCount ) {
     m_H5File.close();
-  }
+//  }
 }
 
 void CHDF5DataManager::Flush( void ) {

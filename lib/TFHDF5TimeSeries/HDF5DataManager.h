@@ -33,8 +33,9 @@ public:
   void Flush( void );
 protected:
   static const char m_H5FileName[];
-  static unsigned int m_RefCount;
-  static H5::H5File m_H5File;
+//  static unsigned int m_RefCount;
+//  static H5::H5File m_H5File;
+  H5::H5File m_H5File;
 private:
 };
 

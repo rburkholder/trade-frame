@@ -48,7 +48,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
         m_dblPatternPt1 = val;
         m_dtPatternPt1 = dt;
         ++m_cntNewUp;
-        if ( NULL != UpDecisionPointFound ) UpDecisionPointFound( this );
+        if ( 0 != UpDecisionPointFound ) UpDecisionPointFound( *this );
       }
       dif = m_dblPatternPt1 - m_dblPatternPt0;
       if ( dif >= m_dblFilterWidth ) {
@@ -63,7 +63,7 @@ void ZigZag::Check(boost::posix_time::ptime dt, double val) {
         m_dblPatternPt1 = val;
         m_dtPatternPt1 = dt;
         ++m_cntNewDown;
-        if ( NULL != DnDecisionPointFound ) DnDecisionPointFound( this );
+        if ( 0 != DnDecisionPointFound ) DnDecisionPointFound( *this );
       }
       dif = m_dblPatternPt0 - m_dblPatternPt1;
       if ( dif >= m_dblFilterWidth ) {
@@ -113,7 +113,7 @@ void ZigZagTotalMovement::HandleQuote( const Quote& quote ) {
   ZigZag::Check( quote.DateTime(), quote.Midpoint() );
 }
 
-void ZigZagTotalMovement::HandlePeakFound( ZigZag& zigzag, ptime dt, double val, ZigZag::EDirection direction ) {
+void ZigZagTotalMovement::HandlePeakFound( const ZigZag& zigzag, ptime dt, double val, ZigZag::EDirection direction ) {
   switch ( direction ) {
   case EDirection::Start:
     break;

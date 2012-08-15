@@ -14,10 +14,10 @@
 
 #include "StdAfx.h"
 
+#include "StrategyEquity.h"
+
 #include <boost/fusion/include/at_key.hpp>
 #include <boost/fusion/include/has_key.hpp>
-
-#include "StrategyEquity.h"
 
 StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrument, const boost::gregorian::date& dateStart ) 
   : m_pProvider( pProvider ), m_pUnderlying( pInstrument ),
@@ -35,19 +35,46 @@ StrategyEquity::StrategyEquity( pProviderSim_t pProvider, pInstrument_t pInstrum
     m_dtClosingBell( dateStart + date_duration( 1 ), m_timeClosingBell ),
     m_emaQuotes1( m_quotes, time_duration( 0,  2, 0 ) ), //  2 minutes
     m_emaQuotes2( m_quotes, time_duration( 0,  8, 0 ) ), //  8 minutes
-    m_emaQuotes3( m_quotes, time_duration( 0, 32, 0 ) ) // 32 minutes
+    m_emaQuotes3( m_quotes, time_duration( 0, 32, 0 ) ), // 32 minutes
+  m_Ema1Dif1( m_emaQuotes1, minutes(  1 ), 1.0 ),
+  m_Ema2Dif1( m_emaQuotes2, minutes(  1 ), 1.0 ),
+  m_Ema3Dif1( m_emaQuotes3, minutes(  1 ), 1.0 ),
+  m_Ema1Dif2( m_Ema1Dif1, seconds( 30 ), 1.0 ),
+  m_Ema2Dif2( m_Ema2Dif1, seconds( 30 ), 1.0 ),
+  m_Ema3Dif2( m_Ema3Dif1, seconds( 30 ), 1.0 )
 {
 
   m_emaQuotes1.SetName( "EMA1" );
   m_emaQuotes2.SetName( "EMA2" );
   m_emaQuotes3.SetName( "EMA3" );
 
+  m_Ema1Dif1.SetName( "EMA1Dif1" );
+  m_Ema2Dif1.SetName( "EMA2Dif1" );
+  m_Ema3Dif1.SetName( "EMA3Dif1" );
+
+  m_Ema1Dif2.SetName( "EMA1Dif2" );
+  m_Ema2Dif2.SetName( "EMA2Dif2" );
+  m_Ema3Dif2.SetName( "EMA3Dif2" );
+
   m_quotes.SetName( "Q" );
   m_trades.SetName( "T" );
 
+/*
   m_quotes.Reserve( 400000 );
   m_trades.Reserve( 100000 );
 
+  m_emaQuotes1.Reserve( 400000 );
+  m_emaQuotes1.Reserve( 400000 );
+  m_emaQuotes1.Reserve( 400000 );
+
+  m_Ema1Dif1.Reserve( 400000 );
+  m_Ema2Dif1.Reserve( 400000 );
+  m_Ema3Dif1.Reserve( 400000 );
+
+  m_Ema1Dif2.Reserve( 400000 );
+  m_Ema2Dif2.Reserve( 400000 );
+  m_Ema3Dif2.Reserve( 400000 );
+  */
 }
 
 StrategyEquity::~StrategyEquity(void) {
@@ -78,6 +105,12 @@ void StrategyEquity::Init( StrategyEquity::registrations_t& registrations, fdEva
   Register( registrations, &m_emaQuotes1 );
   Register( registrations, &m_emaQuotes2 );
   Register( registrations, &m_emaQuotes3 );
+  Register( registrations, &m_Ema1Dif1 );
+  Register( registrations, &m_Ema2Dif1 );
+  Register( registrations, &m_Ema3Dif1 );
+  Register( registrations, &m_Ema1Dif2 );
+  Register( registrations, &m_Ema2Dif2 );
+  Register( registrations, &m_Ema3Dif2 );
 
   m_pPosition.reset( new ou::tf::CPosition( m_pUnderlying, m_pProvider, m_pProvider ) );
   m_portfolio.AddPosition( "pos", m_pPosition );
@@ -91,7 +124,7 @@ double StrategyEquity::GetPL( void ) {
   std::stringstream ss;
   m_portfolio.EmitStats( ss );
   std::cout << ss.str() << std::endl;
-  return m_portfolio.GetRow().dblRealizedPL;
+  return m_portfolio.GetRow().dblRealizedPL - m_portfolio.GetRow().dblCommissionsPaid;
 }
 
 void StrategyEquity::End( void ) {

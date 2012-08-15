@@ -46,12 +46,12 @@ public:
 
   enum EDirection { Init, Start, Down, Up };  // start, down, up are visible in OnPeakFoundHandler
 
-  typedef FastDelegate4<ZigZag&, ptime, double, EDirection> OnPeakFoundHandler;
+  typedef FastDelegate4<const ZigZag&, ptime, double, EDirection> OnPeakFoundHandler;
   void SetOnPeakFound( OnPeakFoundHandler function ) {
     OnPeakFound = function; 
   }
 
-  typedef FastDelegate1<ZigZag*> OnDecisionPointFoundHandler;
+  typedef FastDelegate1<const ZigZag&> OnDecisionPointFoundHandler;
   void SetUpDecisionPointFound( OnDecisionPointFoundHandler function ) {
     UpDecisionPointFound = function;
   }
@@ -84,7 +84,7 @@ private:
   double m_last;
   Quotes& m_quotes;
   void HandleQuote( const Quote& );
-  void HandlePeakFound( ZigZag&, ptime, double, ZigZag::EDirection );
+  void HandlePeakFound( const ZigZag&, ptime, double, ZigZag::EDirection );
 };
 
 } // namespace tf

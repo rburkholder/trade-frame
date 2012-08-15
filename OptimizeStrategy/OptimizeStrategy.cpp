@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+#define FUSION_MAX_VECTOR_SIZE 13
+
 #include <wx/bitmap.h>
 
 #include <boost/foreach.hpp>
@@ -129,18 +131,19 @@ void AppOptimizeStrategy::Optimizer( void ) {
 
   struct ProcessIndividual {
     ProcessIndividual( ou::gp::Individual& ind, pInstrument_t pInstrument )
-      : m_ind( ind ), m_pInstrument( pInstrument ) {
+      : m_ind( ind ), m_pInstrument( pInstrument ), m_pswStrategy( new StrategyWrapper )
+    {
     }
     ~ProcessIndividual( void ) {
     }
     void Init( void ) {  // run synchronously
-      StrategyEquity::registrations_t m_registrations; // contains a static component, be careful
       // /app/semiauto/2012-Jul-22 18:08:14.285807
       // /app/semiauto/2012-Jul-23 18:41:49.332859
       // /app/semiauto/2012-Jul-24 18:37:57.017369
       // /app/semiauto/2012-Jul-25 18:50:17.756534
       // /app/semiauto/2012-Jul-26 19:17:28.757619
-      m_swStrategy.Init( 
+      StrategyEquity::registrations_t m_registrations; // contains a static component, be careful, which is used in Init of next step
+      m_pswStrategy->Init( 
         m_registrations,
         m_pInstrument, date( 2012, 7, 22 ), "/app/semiauto/2012-Jul-22 18:08:14.285807",
         fastdelegate::MakeDelegate( m_ind.m_Signals.rnLong, &ou::gp::RootNode::EvaluateBoolean ),
@@ -149,48 +152,69 @@ void AppOptimizeStrategy::Optimizer( void ) {
       m_ind.TreeToString( m_ind.m_ssFormula );
     }
     void Run( void ) { // run asynchronously
-      m_swStrategy.Start(); 
-      m_ind.m_dblRawFitness = m_swStrategy.GetPL();
+      m_pswStrategy->Start(); 
+      std::cout << m_ind.m_ssFormula.str() << std::endl;
+      m_ind.m_dblRawFitness = m_pswStrategy->GetPL();
+      std::cout << "---- " << m_ind.m_id << " ----------------------------" << std::endl;
+      delete m_pswStrategy;
+      m_pswStrategy = 0;
     }
   private:
     ou::gp::Individual& m_ind;
     pInstrument_t m_pInstrument;
-    StrategyWrapper m_swStrategy;
+    StrategyWrapper* m_pswStrategy;
   };
+
+  std::vector<ProcessIndividual*> vpi;
 
   // http://boost.2283326.n4.nabble.com/Is-thread-pool-using-asio-and-thread-group-working-as-intended-td4552297.html
   // set up some threads for running the strategy
-//  boost::asio::io_service srvc;
-//  boost::thread_group threads;
-//  {
-//    boost::asio::io_service::work work( srvc );  // keep things running while real work arrives
-//    for ( std::size_t ix = 0; ix < 10; ix++ ) {
-//      threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
-//    }
     while ( pop.MakeNewGeneration() ) {
       std::cout << "==== N:" << pop.m_nNew << ",E:" << pop.m_nElites << ",R:" << pop.m_nReproductions << ",X:" << pop.m_nCrossOvers << " ====" << std::endl;
       const vGeneration_t& gen( pop.CurrentGeneration() );
-      BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
-        std::cout << "---- " << ind.m_id << " ----------------------------" << std::endl;
-        if ( ind.IsComputed() ) {
-          std::cout 
-            << "Computed: " 
-            << ind.m_dblRawFitness << std::endl
-            << ind.m_ssFormula.str() << std::endl;
+
+      boost::asio::io_service srvc;
+      boost::thread_group threads;
+
+      {
+
+        boost::asio::io_service::work work( srvc );  // keep things running while real work arrives
+        for ( std::size_t ix = 0; ix < 2; ix++ ) {
+          threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
         }
-        else {
-          ou::gp::Individual& i( const_cast<ou::gp::Individual&>( ind ) );
-          ProcessIndividual pi( i, m_pInstrument );
-          pi.Init();
-          std::cout << ind.m_ssFormula.str() << std::endl;
-          pi.Run();  // can't run asynchronously due to singleton managers and singleton hdf5 manager
-          i.SetComputed();
+
+        BOOST_FOREACH( const ou::gp::Individual& ind, gen ) {
+          
+          if ( ind.IsComputed() ) {
+            std::cout 
+              << "Computed: " 
+              << ind.m_dblRawFitness << std::endl
+              << ind.m_ssFormula.str() << std::endl;
+            std::cout << "---- " << ind.m_id << " ----------------------------" << std::endl;
+          }
+          else {
+            ou::gp::Individual& i( const_cast<ou::gp::Individual&>( ind ) );
+            i.SetComputed();
+            //ProcessIndividual pi( i, m_pInstrument );
+            ProcessIndividual* ppi( new ProcessIndividual( i, m_pInstrument ) );
+            vpi.push_back( ppi );
+            ppi->Init();
+            //std::cout << ind.m_ssFormula.str() << std::endl;
+  //          pi.Run();  // can't run asynchronously due to singleton managers and singleton hdf5 manager
+            srvc.post( boost::bind( &ProcessIndividual::Run, ppi ) );  
+          }
         }
+
       }
 
       // at some point, add the above Formula strings to master table, so random calcs which match prior randoms aren't computed
 
-//      threads.join_all();  // wait for all work to complete
+      threads.join_all();  // wait for all work to complete
+
+      for ( std::vector<ProcessIndividual*>::iterator iter = vpi.begin(); vpi.end() != iter; iter++ ) {
+        delete *iter;
+      }
+      vpi.clear();
 
       pop.CalcFitness();
 

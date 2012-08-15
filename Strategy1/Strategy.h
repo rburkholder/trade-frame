@@ -26,6 +26,7 @@
 #include <TFIndicators/TSSWRateOfChange.h>
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
+#include <TFIndicators/TSDifferential.h>
 
 #include <TFSimulation/SimulationProvider.h>
 
@@ -116,6 +117,14 @@ private:
   ou::ChartEntryIndicator m_ceEma2;
   ou::ChartEntryIndicator m_ceEma3;
 
+  ou::ChartEntryIndicator m_ceEma1Dif1;
+  ou::ChartEntryIndicator m_ceEma2Dif1;
+  ou::ChartEntryIndicator m_ceEma3Dif1;
+
+  ou::ChartEntryIndicator m_ceEma1Dif2;
+  ou::ChartEntryIndicator m_ceEma2Dif2;
+  ou::ChartEntryIndicator m_ceEma3Dif2;
+
 //  ou::ChartEntryIndicator m_ceSMA1;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA1;
 //  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA1;
@@ -198,6 +207,14 @@ private:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
+  ou::tf::hf::TSDifferential m_Ema1Dif1;
+  ou::tf::hf::TSDifferential m_Ema2Dif1;
+  ou::tf::hf::TSDifferential m_Ema3Dif1;
+
+  ou::tf::hf::TSDifferential m_Ema1Dif2;
+  ou::tf::hf::TSDifferential m_Ema2Dif2;
+  ou::tf::hf::TSDifferential m_Ema3Dif2;
+
 //  ou::tf::Prices m_pricesSlopeOfSlopeOfSMA1;
 //  ou::tf::TSSWStatsPrice m_tsswSlopeOfSlopeOfSMA1;
 
@@ -246,8 +263,8 @@ private:
   void HandleBarCompletionBuys( const ou::tf::Bar& );
   void HandleBarCompletionSells( const ou::tf::Bar& );
 
-  void HandleZigZagPeak( ou::tf::ZigZag*, ptime, double, ou::tf::ZigZag::EDirection );
-  void HandleZigZagUpDp( ou::tf::ZigZag* );
-  void HandleZigZagDnDp( ou::tf::ZigZag* );
+  void HandleZigZagPeak( const ou::tf::ZigZag&, ptime, double, ou::tf::ZigZag::EDirection );
+  void HandleZigZagUpDp( const ou::tf::ZigZag& );
+  void HandleZigZagDnDp( const ou::tf::ZigZag& );
 };
 

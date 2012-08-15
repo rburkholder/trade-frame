@@ -34,9 +34,15 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
 //  m_sma6( m_quotes, seconds( 1800 ) ), //  30 min
 //  m_sma7( m_quotes, seconds( 3600 ) ), //  60 min
 //  m_sma8( m_quotes, seconds( 7200 ) ), // 120 min
-  m_ema1( m_quotes, minutes(  4 ) ), 
-  m_ema2( m_quotes, minutes( 16 ) ), 
+  m_ema1( m_quotes, minutes(  2 ) ), 
+  m_ema2( m_quotes, minutes(  8 ) ), 
   m_ema3( m_quotes, minutes( 32 ) ), 
+  m_Ema1Dif1( m_ema1, minutes(  1 ), 1.0 ),
+  m_Ema2Dif1( m_ema2, minutes(  1 ), 1.0 ),
+  m_Ema3Dif1( m_ema3, minutes(  1 ), 1.0 ),
+  m_Ema1Dif2( m_Ema1Dif1, seconds( 30 ), 1.0 ),
+  m_Ema2Dif2( m_Ema2Dif1, seconds( 30 ), 1.0 ),
+  m_Ema3Dif2( m_Ema3Dif1, seconds( 30 ), 1.0 ),
 //  m_stateTrade( ETradeOut ), m_dtEnd( date( 2011, 9, 23 ), time_duration( 17, 58, 0 ) ),
   m_stateTrade( ETradeStart ), //m_dtEnd( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) ),  // put in time start
   m_dtEnd( boost::date_time::not_a_date_time ),
@@ -111,6 +117,23 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_dvChart.Add( 7, m_cePLShort );
   m_dvChart.Add( 7, m_cePLNet ); */
 //  m_dvChart.Add( 5, m_ceSpread );
+
+  m_dvChart.Add( 2, m_ceEma1Dif1 );
+  m_dvChart.Add( 2, m_ceEma2Dif1 );
+  m_dvChart.Add( 2, m_ceEma3Dif1 );
+
+  m_dvChart.Add( 3, m_ceEma1Dif2 );
+  m_dvChart.Add( 3, m_ceEma2Dif2 );
+  m_dvChart.Add( 3, m_ceEma3Dif2 );
+
+  m_ceEma1Dif1.SetColour( ou::Colour::MediumVioletRed );
+  m_ceEma2Dif1.SetColour( ou::Colour::RoyalBlue );
+  m_ceEma3Dif1.SetColour( ou::Colour::MediumSpringGreen );
+
+  m_ceEma1Dif2.SetColour( ou::Colour::MediumVioletRed );
+  m_ceEma2Dif2.SetColour( ou::Colour::RoyalBlue );
+  m_ceEma3Dif2.SetColour( ou::Colour::MediumSpringGreen );
+
 
 //  m_dvChart.Add( 8, m_ceBollinger3Ratio );
 //  m_dvChart.Add( 8, m_ceBollinger2Ratio );
@@ -195,7 +218,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_bfSells.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionSells ) );
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
-  m_pTestInstrument = mgr.Exists( "+GCZ11" ) ? mgr.Get( "+GCZ11" ) : mgr.ConstructFuture( "+GCZ11", "SMART", 2011, 12 );
+  m_pTestInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 7 );
   m_pTestInstrument->SetMultiplier( 100 );
   m_pTestInstrument->SetMinTick( 0.1 );
 
@@ -213,13 +236,16 @@ void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 
   m_sim = boost::dynamic_pointer_cast<ou::tf::SimulationProvider>( m_pExecutionProvider );
 
+  m_sim->SetGroupDirectory( "/app/semiauto/2012-Jul-22 18:08:14.285807" );
+
+
   //m_sim->SetGroupDirectory( "/semiauto/2011-Sep-23 19:17:48.252497" );
-  m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
+  //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
 //  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
 
-  m_dtEnd = boost::posix_time::ptime( date( 2011, 11, 7 ), time_duration( 17, 45, 0 ) );  // put in time start
+  m_dtEnd = boost::posix_time::ptime( date( 2012, 7, 23 ), time_duration( 17, 45, 0 ) );  // put in time start
   
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &Strategy::HandleSimulationComplete ) );
 
@@ -269,6 +295,14 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Value() );
   m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Value() );
   m_ceEma3.Add( dt, m_ema3.Ago( 0 ).Value() );
+
+  m_ceEma1Dif1.Add( dt, m_Ema1Dif1.Ago( 0 ).Value() );
+  m_ceEma2Dif1.Add( dt, m_Ema2Dif1.Ago( 0 ).Value() );
+  m_ceEma3Dif1.Add( dt, m_Ema3Dif1.Ago( 0 ).Value() );
+
+  m_ceEma1Dif2.Add( dt, m_Ema1Dif2.Ago( 0 ).Value() );
+  m_ceEma2Dif2.Add( dt, m_Ema2Dif2.Ago( 0 ).Value() );
+  m_ceEma3Dif2.Add( dt, m_Ema3Dif2.Ago( 0 ).Value() );
 
   // high speed simple moving average
 //  ou::tf::TSSWStatsMidQuote& sma1( m_sma4 );
@@ -649,7 +683,7 @@ void Strategy::HandleFirstTrade( const ou::tf::Trade& trade ) {
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   ptime dt( trade.DateTime() );
-  ou::tf::Trade::price_t price = trade.Trade();
+  ou::tf::Trade::price_t price = trade.Price();
 
   if ( m_bFirstTrade ) {
     m_bFirstTrade = false;
@@ -805,14 +839,14 @@ void Strategy::HandleBarCompletionSells( const ou::tf::Bar& bar ) {
   }
 }
 
-void Strategy::HandleZigZagPeak( ou::tf::ZigZag*, ptime dt, double price, ou::tf::ZigZag::EDirection ) {
+void Strategy::HandleZigZagPeak( const ou::tf::ZigZag&, ptime dt, double price, ou::tf::ZigZag::EDirection ) {
   m_ceZigZag.Add( dt, price );
   //m_zigzagPrice.SetFilterWidth( 0.17 * sqrt( price ) );
 }
 
-void Strategy::HandleZigZagUpDp( ou::tf::ZigZag* ) {
+void Strategy::HandleZigZagUpDp( const ou::tf::ZigZag& ) {
 }
 
-void Strategy::HandleZigZagDnDp( ou::tf::ZigZag* ) {
+void Strategy::HandleZigZagDnDp( const ou::tf::ZigZag& ) {
 }
 

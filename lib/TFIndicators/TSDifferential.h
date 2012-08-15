@@ -20,6 +20,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
+// gamma is 0.0: differential, used for generating return value of the time duration
+// gamma is 0.5: stochistic diffusion process
+// gamma is 1.0: the usual derivative
+
 class TSDifferential: public Prices { // page 65 Intro to HF Finance
 public:
   TSDifferential( Prices& series, time_duration dt );

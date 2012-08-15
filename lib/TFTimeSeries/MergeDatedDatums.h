@@ -16,6 +16,7 @@
 
 #include <vector>
 
+// 2012/08/12 could try using std:priority_queue instead or boost::max_heap
 #include <OUCommon/MinHeap.h>
 
 #include <OUCommon/FastDelegate.h>
