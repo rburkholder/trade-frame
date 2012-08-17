@@ -4,7 +4,14 @@ See C:\Data\Projects\VSC++\wxWidgets\build.txt for wxWidgets new library build f
 2011/07/29
 wx requires runtime dll, so boost needs to be compiled the same:
 b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=shared stage
-b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static stage
+but I am now building wx as static (manually changed all projects), so can do static now:
+b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static address-model=64  stage
+b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static address-model=64 --stagedir=stage\x64 stage
+b2 --layout=versioned toolset=msvc variant=debug link=static threading=multi runtime-link=static address-model=32 --stagedir=stage\x32 stage
+b2 --layout=versioned toolset=msvc variant=release link=static threading=multi runtime-link=static address-model=64 -j4  --stagedir=stage\x64 stage
+b2 --layout=versioned toolset=msvc variant=release link=static threading=multi runtime-link=static address-model=32 --stagedir=stage\x32 stage
+
+j is number of processors to build with
 
 2011/07/31
 copy 

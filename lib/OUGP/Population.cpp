@@ -226,16 +226,16 @@ bool Population::MakeNewGeneration( void ) {
         pRootNode_t rnNode( new RootNode() );  // holds node
 
         std::vector<pRootNode_t*> vSrcNodes;
-        indvlSrc1.m_Signals.EachSignal( push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
-        indvlSrc2.m_Signals.EachSignal( push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
+        indvlSrc1.m_Signals.EachSignal( boost::phoenix::push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
+        indvlSrc2.m_Signals.EachSignal( boost::phoenix::push_back( boost::phoenix::ref( vSrcNodes ), arg1 ) );
 
         Individual indvlDst1;
         Individual indvlDst2;
 
         std::vector<pRootNode_t*> vDstNodes;
 
-        indvlDst1.m_Signals.EachSignal( push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
-        indvlDst2.m_Signals.EachSignal( push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
+        indvlDst1.m_Signals.EachSignal( boost::phoenix::push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
+        indvlDst2.m_Signals.EachSignal( boost::phoenix::push_back( boost::phoenix::ref( vDstNodes ), arg1 ) );
 
         // crossover all but last random pair
         typedef std::vector<pRootNode_t>::size_type prob2_t;

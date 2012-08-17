@@ -435,7 +435,7 @@ void CNetwork<ownerT,charT>::AsyncRead( void ) {
   }
 
   //InterlockedIncrement( &m_lReadProgress );
-  boost::interprocess::detail::atomic_inc32( &m_lReadProgress );
+  boost::interprocess::ipcdetail::atomic_inc32( &m_lReadProgress );
 
   inputbuffer_t* pbuffer = m_reposInputBuffers.CheckOutL();
 //  if ( NETWORK_INPUT_BUF_SIZE > pbuffer->capacity() ) {
@@ -504,7 +504,7 @@ void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error,
   m_reposInputBuffers.CheckInL( pbuffer );
 
   //InterlockedDecrement( &m_lReadProgress );
-  boost::interprocess::detail::atomic_dec32( &m_lReadProgress );
+  boost::interprocess::ipcdetail::atomic_dec32( &m_lReadProgress );
 }
 
 //
@@ -516,7 +516,7 @@ void CNetwork<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone )
 
   if ( NS_CONNECTED == m_stateNetwork ) {
     //InterlockedIncrement( &m_cntActiveSends );
-    boost::interprocess::detail::atomic_inc32( &m_cntActiveSends );
+    boost::interprocess::ipcdetail::atomic_inc32( &m_cntActiveSends );
 
     linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
@@ -562,7 +562,7 @@ void CNetwork<ownerT,charT>::OnSendDoneCommon(
   m_cntBytesTransferred_send += bytes_transferred;
 
 //  InterlockedDecrement( &m_cntActiveSends );
-  boost::interprocess::detail::atomic_dec32( &m_cntActiveSends );
+  boost::interprocess::ipcdetail::atomic_dec32( &m_cntActiveSends );
 
   if ( 0 != error ) {
     if ( &CNetwork<ownerT, charT>::OnNetworkError != &ownerT::OnNetworkError ) {
