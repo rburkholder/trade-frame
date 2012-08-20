@@ -79,10 +79,12 @@
     <ClCompile Include="IQFeed.cpp" />
     <ClCompile Include="IQFeedHistoryCollector.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="IQFeedMessages.cpp" />
     <ClCompile Include="IQFeedOptions.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="IQFeedProvider.cpp" />
     <ClCompile Include="IQFeedSymbol.cpp" />

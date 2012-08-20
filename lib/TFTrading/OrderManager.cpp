@@ -257,7 +257,7 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in
 
 void COrderManager::ReportCancellation( idOrder_t nOrderId ) {
   try {
-    mapOrders_t::iterator iter;
+    iterOrders_t iter;
     if ( LocateOrder( nOrderId, iter ) ) {
       pOrder_t pOrder = iter->second.pOrder;
       pOrder->MarkAsCancelled();

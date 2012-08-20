@@ -72,6 +72,7 @@
   <ItemGroup>
     <ClCompile Include="CrossThreadMerge.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SimulateOrderExecution.cpp" />
     <ClCompile Include="SimulationProvider.cpp" />
@@ -83,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CrossThreadMerge.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="SimulateOrderExecution.h" />
     <ClInclude Include="SimulationProvider.h" />

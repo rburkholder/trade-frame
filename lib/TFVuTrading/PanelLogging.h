@@ -15,8 +15,6 @@
 
 #include <iostream>
 
-#include <wx/wx.h>
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
