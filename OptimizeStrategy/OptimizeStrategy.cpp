@@ -86,7 +86,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
-  ou::gp::Population pop( 75 );
+  ou::gp::Population pop( 100 );
 
   pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 
@@ -179,7 +179,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
       {
 
         boost::asio::io_service::work work( srvc );  // keep things running while real work arrives
-        for ( std::size_t ix = 0; ix < 2; ix++ ) {
+        for ( std::size_t ix = 0; ix < 10; ix++ ) {
           threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
         }
 

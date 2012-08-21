@@ -38,7 +38,7 @@ using namespace boost::gregorian;
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 #include <OUCommon/Colour.h>
 
-#include "ChartDirector/chartdir.h"
+#include "ChartDirector64/chartdir.h"
 
 namespace ou { // One Unified
 

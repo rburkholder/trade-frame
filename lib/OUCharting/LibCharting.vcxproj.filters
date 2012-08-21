@@ -78,6 +78,18 @@
     <ClInclude Include="ChartEntryVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ChartDirector64\bchartdir.h">
+      <Filter>ChartDir64</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector64\chartdir.h">
+      <Filter>ChartDir64</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector64\FinanceChart.h">
+      <Filter>ChartDir64</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartDirector64\memblock.h">
+      <Filter>ChartDir64</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -91,6 +103,9 @@
     </Filter>
     <Filter Include="ChartDir">
       <UniqueIdentifier>{0063f308-c1e3-407d-ae6a-2bfee8ad2ee6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ChartDir64">
+      <UniqueIdentifier>{586e0da7-7cc3-4c41-848f-ffee4ad3fca2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

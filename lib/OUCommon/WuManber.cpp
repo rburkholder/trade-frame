@@ -105,7 +105,7 @@ void WuManber::Initialize( const std::vector<const char *>& patterns,
 
   m_nTableSize = (size_t) pow( pow( (double) 2, m_nBitsInShift ), (int) B );
     // 2 ** bits ** B, will be some unused space when not hashed
-  m_ShiftTable = new unsigned int[ m_nTableSize ];
+  m_ShiftTable = new size_t[ m_nTableSize ];
 
   for ( size_t i = 0; i < m_nTableSize; ++i ) {
     m_ShiftTable[ i ] = m_lcpl - B + 1; // default to m-B+1 for shift
