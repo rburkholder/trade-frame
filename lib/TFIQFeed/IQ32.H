@@ -84,6 +84,7 @@
 enum eIQFeedMessages { IQFeed_Active=0, IQFeed_Offline=1, IQFeed_Terminated=2, IQFeed_Login_Failed=200};
 
 #ifdef _UNICODE 
+//static UINT m_IQFeedMessages = RegisterWindowMessage(_T("IQFeedMessages"));
 static UINT m_IQFeedMessages = RegisterWindowMessage((LPCWSTR)"IQFeedMessages");
 #else
 static UINT m_IQFeedMessages = RegisterWindowMessage("IQFeedMessages");
