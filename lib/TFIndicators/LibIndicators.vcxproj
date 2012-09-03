@@ -192,12 +192,6 @@
   <ItemGroup>
     <None Include="ReadMe.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibTimeSeries\LibTimeSeries.vcxproj">
-      <Project>{6ae9a695-3b0c-46c2-b363-7125c955bcf0}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

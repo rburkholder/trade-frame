@@ -32,7 +32,7 @@ namespace gp { // genetic programming
 
 Population::Population( unsigned int nPopulationSize ) 
   : m_nPopulationSize( nPopulationSize ), m_dblPopulationSize( nPopulationSize ),
-  m_nMaxGenerations( 25 ), m_nMaxDepthOnCreation( 5 ), m_nMaxDepthOnCrossover( 17 ),
+  m_nMaxGenerations( 40 ), m_nMaxDepthOnCreation( 5 ), m_nMaxDepthOnCrossover( 17 ),
   m_probCrossover( 0.95 ), m_probReproduction( 0.10 ), m_probFunctionPointCrossover( 0.90 ), m_probTerminalPointCrossover( 0.10), 
   m_probMutation( 0.0 ), m_probPermutation( 0.0 ), m_probDecimation( 0.58 ), m_ratioElitism( 0.012 ),
   m_probTournamentSegregation( 0.35 ),

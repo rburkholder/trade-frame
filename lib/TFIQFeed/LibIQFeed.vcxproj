@@ -161,7 +161,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IQFeedInstrumentFile.h" />
-    <ClInclude Include="IQ32.H" />
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />
     <ClInclude Include="IQFeedHistoryBulkQueryMsgShim.h" />

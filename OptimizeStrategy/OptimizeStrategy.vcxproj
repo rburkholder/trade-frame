@@ -109,7 +109,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>zlib.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(Outdir)OUGP.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFGP.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
-      <ShowProgress>LinkVerbose</ShowProgress>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

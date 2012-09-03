@@ -105,7 +105,7 @@ void IBTWS::Disconnect() {
     OnDisconnected( 0 );
     m_ss.str("");
     m_ss << "IB Disconnected " << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
@@ -345,7 +345,7 @@ void IBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, co
   double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry ) {
   m_ss.str("");
   m_ss << "tickEFP" << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order& order, const OrderState& state) {
@@ -361,7 +361,7 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
       << ", state.maxcom=" << state.maxCommission
       << ", state.mincom=" << state.minCommission 
       << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
   else { 
     m_ss.str("");
@@ -403,7 +403,7 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
   if ( state.warningText != "" ) {
     m_ss.str("");
     m_ss << "Open Order Warning: " << state.warningText << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
 }
 
@@ -448,7 +448,7 @@ void IBTWS::execDetails( int reqId, const Contract& contract, const Execution& e
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
   if ( "BOT" == execution.side ) side = OrderSide::Buy;  // could try just first character for fast comparison
@@ -456,7 +456,7 @@ void IBTWS::execDetails( int reqId, const Contract& contract, const Execution& e
   if ( OrderSide::Unknown == side ) {
     m_ss.str("");
     m_ss << "Unknown execution side: " << execution.side << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
   }
   else {
     CExecution exec( execution.price, execution.shares, side, execution.exchange, execution.execId );
@@ -524,7 +524,7 @@ void IBTWS::error(const int id, const int errorCode, const IBString errorString)
     default:
       m_ss.str("");
       m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
+//      OutputDebugString( m_ss.str().c_str() );
       break;
   }
 }
@@ -532,19 +532,19 @@ void IBTWS::error(const int id, const int errorCode, const IBString errorString)
 void IBTWS::winError( const IBString &str, int lastError) {
   m_ss.str("");
   m_ss << "winerror " << str << ", " << lastError << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 void IBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
   m_ss.str("");
   m_ss << "news bulletin " << msgId << ", " << msgType << ", " << newsMessage << ", " << originExch << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 void IBTWS::currentTime(long time) {
   m_ss.str("");
   m_ss << "current time " << time << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
   m_time = time;
 }
 
@@ -619,7 +619,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     << contractDetails.summary.right  << ", "
     << contractDetails.summary.expiry 
     << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   assert( 0 < contractDetails.summary.conId );
 
@@ -715,7 +715,7 @@ void IBTWS::nextValidId( OrderId orderId) {
     m_ss << "next order id (" << id << "), IB had (" << orderId << ")" << std::endl;
   }
   
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contract ) {
@@ -745,7 +745,7 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
   catch ( std::exception e ) {
       m_ss.str("");
       m_ss << "contract expiry is funny: " << e.what() << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
+//      OutputDebugString( m_ss.str().c_str() );
   }
 
   InstrumentType::enumInstrumentTypes it;
@@ -963,9 +963,9 @@ void IBTWS::updateAccountValue(const IBString& key, const IBString& val,
 }
 
 void IBTWS::connectionClosed() {
-  m_ss.str("");
-  m_ss << "connection closed" << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  m_ss.str("");
+//  m_ss << "connection closed" << std::endl;
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 void IBTWS::updateMktDepth(TickerId id, int position, int operation, int side,

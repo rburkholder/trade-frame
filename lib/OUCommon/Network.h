@@ -456,7 +456,7 @@ void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error,
 
   if ( 0 == bytes_transferred ) {
     // probably infers that connection has been closed
-    OutputDebugString( "CNetwork::ReadHandler: connection probably closed.\n" );
+//    OutputDebugString( "CNetwork::ReadHandler: connection probably closed.\n" );
     if ( 0 != m_pline->size() ) {
       m_pline->clear();
     }
@@ -477,7 +477,7 @@ void CNetwork<ownerT,charT>::OnReadDone( const boost::system::error_code& error,
       ch = *input;
       ++input;
       if ( 0 == ch ) {
-        OutputDebugString( "CNetwork::ReadHandler: have a 0x00 character.\n" );
+//        OutputDebugString( "CNetwork::ReadHandler: have a 0x00 character.\n" );
       }
       if ( 0x0a == ch ) {
         // send the buffer off 

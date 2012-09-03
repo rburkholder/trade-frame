@@ -30,9 +30,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IQ32.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IQFeed.h">
       <Filter>Header Files</Filter>
     </ClInclude>

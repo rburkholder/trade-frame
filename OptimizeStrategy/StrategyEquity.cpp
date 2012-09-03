@@ -120,10 +120,9 @@ void StrategyEquity::Init( StrategyEquity::registrations_t& registrations, fdEva
 
 }
 
-double StrategyEquity::GetPL( void ) {
-  std::stringstream ss;
+double StrategyEquity::GetPL( std::stringstream& ss ) {
   m_portfolio.EmitStats( ss );
-  std::cout << ss.str() << std::endl;
+//  ss << ss.str() << std::endl;
   return m_portfolio.GetRow().dblRealizedPL - m_portfolio.GetRow().dblCommissionsPaid;
 }
 

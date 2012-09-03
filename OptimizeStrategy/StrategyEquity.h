@@ -61,10 +61,10 @@ public:
     ou::gp::IndexedNode<ou::gp::NodeTSTrade,0>, // main trades
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,0>, // ema1
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,1>, // ema2
-    ou::gp::IndexedNode<ou::gp::NodeTSPrice,2>,  // ema3
+    ou::gp::IndexedNode<ou::gp::NodeTSPrice,2>, // ema3
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,3>, // ema1
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,4>, // ema2
-    ou::gp::IndexedNode<ou::gp::NodeTSPrice,5>,  // ema3
+    ou::gp::IndexedNode<ou::gp::NodeTSPrice,5>, // ema3
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,6>, // ema1
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,7>, // ema2
     ou::gp::IndexedNode<ou::gp::NodeTSPrice,8>  // ema3
@@ -76,7 +76,7 @@ public:
   void Init( 
     StrategyEquity::registrations_t& registrations,
     fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );  // for simulation
-  double GetPL( void );
+  double GetPL( std::stringstream& );
   void End( void );
 
 protected:

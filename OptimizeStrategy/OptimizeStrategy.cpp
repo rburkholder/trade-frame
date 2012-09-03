@@ -86,7 +86,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
   m_pInstrument->SetMinTick( 0.1 );
 
   // manage the genetic programming discovery process here
-  ou::gp::Population pop( 400 );
+  ou::gp::Population pop( 300 );
 
   pop.RegisterDouble<StrategyEquity::NodeTypesTimeSeries_t>();
 
@@ -153,9 +153,10 @@ void AppOptimizeStrategy::Optimizer( void ) {
     }
     void Run( void ) { // run asynchronously
       m_pswStrategy->Start(); 
-      std::cout << m_ind.m_ssFormula.str() << std::endl;
-      m_ind.m_dblRawFitness = m_pswStrategy->GetPL();
-      std::cout << "---- " << m_ind.m_id << " ----------------------------" << std::endl;
+      std::stringstream ss;
+      ss << m_ind.m_ssFormula.str() << std::endl;
+      m_ind.m_dblRawFitness = m_pswStrategy->GetPL( ss );
+//      std::cout << ss.str() << "---- " << m_ind.m_id << " ----------------------------" << std::endl;
       delete m_pswStrategy;
       m_pswStrategy = 0;
     }
@@ -163,7 +164,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
     ou::gp::Individual& m_ind;
     pInstrument_t m_pInstrument;
     StrategyWrapper* m_pswStrategy;
-  };
+  };  // struct ProcessIndividual
 
   std::vector<ProcessIndividual*> vpi;
 
@@ -179,7 +180,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
       {
 
         boost::asio::io_service::work work( srvc );  // keep things running while real work arrives
-        for ( std::size_t ix = 0; ix < 10; ix++ ) {
+        for ( std::size_t ix = 0; ix < 12; ix++ ) {
           threads.create_thread( boost::bind( &boost::asio::io_service::run, &srvc ) ); // add handlers
         }
 
@@ -227,7 +228,7 @@ void AppOptimizeStrategy::Optimizer( void ) {
       //ss.str( "" );
       //gen.front().TreeToString( ss );  // can't do this as the strategy no longer exists
       std::cout 
-        << "==== " << gen.front().m_id << " @ " << gen.front().m_dblRawFitness << " ====" << std::endl
+        << "==== " << gen.front().m_id << " @ $" << gen.front().m_dblRawFitness << " ====" << std::endl
         << gen.front().m_ssFormula.str() << std::endl;
     }
 //  }

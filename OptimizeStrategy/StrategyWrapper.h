@@ -39,7 +39,7 @@ public:
     const std::string& sSourcePath, 
     fdEvaluate_t pfnLong, fdEvaluate_t pfnShort );
   void Start( void );
-  double GetPL( void );
+  double GetPL( std::stringstream& );
 //  void Stop( void );
 
 protected:

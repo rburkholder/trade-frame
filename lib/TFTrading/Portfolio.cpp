@@ -157,7 +157,6 @@ void CPortfolio::HandleCommission( const CPosition* pPosition ) {
 }
 
 void CPortfolio::EmitStats( std::stringstream& ss ) {
-  ss.str( "" );
   for ( iterator iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
     iter->second->EmitStatus( ss );
   }
@@ -168,7 +167,7 @@ void CPortfolio::EmitStats( std::stringstream& ss ) {
     << ": Min=" << m_plMin.dblNet
     << ", Net=" << m_plCurrent.dblNet
     << ", Max=" << m_plMax.dblNet
-//    << std::endl
+    << std::endl
     ;
 }
 

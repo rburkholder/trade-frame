@@ -241,7 +241,7 @@ double CKeyValuePair::GetDouble(const std::string &key) {
 
 CKeyValuePair::structValue CKeyValuePair::GetBlob(const std::string &key) {
   structKey k( Blob, key.size(), key.c_str() );
-  u_int32_t size;
+  size_t size;
   void *p;
   Get( k, &p, &size );
   structValue v( p, size );

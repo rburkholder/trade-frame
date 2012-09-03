@@ -67,9 +67,9 @@ void StrategyWrapper::HandleProviderConnected( int i ) {
 
   m_pSimulator->Run( false );  // returns upon completion of simulation
 
-  std::stringstream ss;
-  m_pSimulator->EmitStats( ss );
-  std::cout << ss.str() << std::endl;
+//  std::stringstream ss;
+//  m_pSimulator->EmitStats( ss );
+//  std::cout << ss.str() << std::endl;
 
   m_pSimulator->SetOnSimulationComplete( 0 );
 
@@ -98,6 +98,6 @@ void StrategyWrapper::HandleSimulationComplete( void ) {
 //  m_pSimulator->Disconnect();
 }
  
-double StrategyWrapper::GetPL( void ) {
-  return m_pStrategy->GetPL();
+double StrategyWrapper::GetPL( std::stringstream& ss ) {
+  return m_pStrategy->GetPL( ss );
 }

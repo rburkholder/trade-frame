@@ -24,17 +24,7 @@
 #include <OUCommon/Network.h>
 #include <OUCommon/ReusableBuffers.h>
 
-#include "IQ32.H"
 #include "IQFeedMessages.h"
-
-// custom on
-// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-// custom off
-
-void __stdcall IQFeedCallBack( int x, int y );
 
 // In the future, for auxilliary routines making use of IQFeed, 
 //   think about incorporating the following concept:
@@ -144,13 +134,10 @@ CIQFeed<T>::CIQFeed( void )
 : ou::CNetwork<CIQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF )
 {
-  SetCallbackFunction( &IQFeedCallBack );
-  int i = RegisterClientApp( NULL, "ONE_UNIFIED", "0.11111111", "2.0" );
 }
 
 template <typename T>
 CIQFeed<T>::~CIQFeed(void) {
-  RemoveClientApp( NULL );
 }
 
 template <typename T>

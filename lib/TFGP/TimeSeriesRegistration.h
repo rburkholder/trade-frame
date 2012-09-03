@@ -14,16 +14,13 @@
 
 #pragma once
 
-#include <vector>
+// registers a series of time series 
+// has a static component so is not multi-threaded capable
 
-#include <boost/random.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
+#include <vector>
 
 namespace ou { // One Unified
 namespace gp { // genetic programming
-namespace rng {  // dependent upon linking OUGP/NodeDouble.cpp
-  extern boost::random::mt19937 common;
-}
 
 template<typename TS>  // Trades, Quotes, Prices
 class TimeSeriesRegistration {

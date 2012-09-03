@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -12,7 +12,17 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+// As there are no 64 bit libraries from IQFeed, 
+// IQFeed needs to be started manually or from a 32 bit application
 
-#include "IQFeed.h"
+#include "IQ32.H"
 
+void __stdcall IQFeedCallBack( int x, int y );
+
+class IQFeed32 {
+public:
+  IQFeed32( void );
+  virtual ~IQFeed32( void );
+protected:
+private:
+};
