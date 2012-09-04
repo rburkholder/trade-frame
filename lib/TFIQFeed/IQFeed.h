@@ -21,6 +21,7 @@
 #include <boost/assert.hpp>
 #include <boost/foreach.hpp>
 
+#include <OUCommon/Debug.h>
 #include <OUCommon/Network.h>
 #include <OUCommon/ReusableBuffers.h>
 
@@ -167,6 +168,7 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   linebuffer_t::iterator end = (*pBuffer).end();
 
 #if defined _DEBUG
+
 //  std::string str( iter, end );
 //  str += '\n';
 //  OutputDebugString( str.c_str() );

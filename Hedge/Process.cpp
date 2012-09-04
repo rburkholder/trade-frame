@@ -75,7 +75,7 @@ till next multiple to ensure a ways above average price
 
 #define testing
 
-CProcess::CProcess(enumMode eMode, CDB& db)
+CProcess::CProcess(enumMode eMode, DB& db)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_contractidUnderlying( 0 ),

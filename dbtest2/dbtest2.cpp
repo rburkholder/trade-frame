@@ -63,8 +63,8 @@ struct CFieldsDelete {
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-//  ou::db::CSession<ou::db::ISqlite3> session;
-  ou::db::CSession session;
+//  ou::db::Session<ou::db::ISqlite3> session;
+  ou::db::Session session;
   session.Open( ":memory:", ou::db::EOpenFlagsAutoCreate );
 //  session.Open( "dbtest2.db", ou::db::EOpenFlagsAutoCreate );
 

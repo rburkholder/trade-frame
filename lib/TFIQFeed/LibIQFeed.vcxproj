@@ -94,7 +94,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\;..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -134,6 +134,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CurlGetMktSymbols.cpp" />
     <ClCompile Include="IQFeedInstrumentFile.cpp" />
     <ClCompile Include="IQFeed.cpp" />
     <ClCompile Include="IQFeedHistoryCollector.cpp">
@@ -160,6 +161,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CurlGetMktSymbols.h" />
     <ClInclude Include="IQFeedInstrumentFile.h" />
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />

@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,20 +14,25 @@
 
 #pragma once
 
-#include "HedgeCommon.h"
+#ifndef CURL_STATICLIB
+#define CURL_STATICLIB
+#endif
 
-#include "DB.h"
+#include <curl/curl.h>
 
-#include "Process.h"
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
-class ThreadMain {
+class CurlGetMktSymbols {
 public:
-  ThreadMain(enumMode eMode);
-  ~ThreadMain(void);
+  CurlGetMktSymbols(void);
+  ~CurlGetMktSymbols(void);
 protected:
 private:
-  enumMode m_eMode;
-  DB m_db;
-  CProcess* m_pProcess;
+  CURL* m_hCurl;
+  static size_t WriteMemoryCallback( void* contents, size_t size, size_t nmemb, void* self );
+  static size_t HeaderFunctionCallback( void* ptr, size_t size, size_t nmemb, void* self );
 };
 
+} // namespace tf
+} // namespace ou

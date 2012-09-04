@@ -59,7 +59,7 @@ public:
   } m_eDataConn;
 
 
-  CProcess(enumMode eMode, CDB& db);
+  CProcess(enumMode eMode, DB& db);
   ~CProcess(void);
 
   void SetDataConnection( enumDataConnection );
@@ -139,7 +139,7 @@ private:
 
   // db stuff
 
-  CDB& m_db;
+  DB& m_db;
 
   // end db stuff
 

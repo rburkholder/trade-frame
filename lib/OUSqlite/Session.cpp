@@ -17,31 +17,31 @@
 namespace ou {
 namespace db {
 
-CSession::CSession( void )
-  : CSessionImpl<ISqlite3>(),
-    SessionBase<CSessionImpl<ISqlite3>, CSession>() {
+Session::Session( void )
+  : SessionImpl<ISqlite3>(),
+    SessionBase<SessionImpl<ISqlite3>, Session>() {
 }
 
-CSession::~CSession( void ) {
+Session::~Session( void ) {
 }
 
-void CSession::InitializeManagers( void ) {
+void Session::InitializeManagers( void ) {
   OnInitializeManagers( this );
 }
 
-void CSession::RegisterTablesForCreation( void ) {
+void Session::RegisterTablesForCreation( void ) {
   OnRegisterTables( *this );
 }
 
-void CSession::RegisterRowDefinitions( void ) {
+void Session::RegisterRowDefinitions( void ) {
   OnRegisterRows( *this );
 }
 
-void CSession::PopulateTables( void ) {
+void Session::PopulateTables( void ) {
   OnPopulate( *this );
 }
 
-void CSession::DenitializeManagers( void ) {
+void Session::DenitializeManagers( void ) {
   OnDenitializeManagers( *this );
 }
 

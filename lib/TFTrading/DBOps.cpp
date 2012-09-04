@@ -21,7 +21,7 @@
 
 #include "Database.h"
 
-DBOps::DBOps(void): ou::db::CSession() {
+DBOps::DBOps(void): ou::db::Session() {
   OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
   OnPopulate.Add( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
   OnDenitializeManagers.Add( &ou::tf::HandleDenitializeManagers );
@@ -33,7 +33,7 @@ DBOps::~DBOps(void) {
   OnDenitializeManagers.Remove( &ou::tf::HandleDenitializeManagers );
 }
 
-void DBOps::HandlePopulateTables( ou::db::CSession& session ) {
+void DBOps::HandlePopulateTables( ou::db::Session& session ) {
   if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
 }
 

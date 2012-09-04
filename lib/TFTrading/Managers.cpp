@@ -37,7 +37,7 @@ void HandleOrderDetails( CInstrument::idInstrument_t idInstrument, CInstrument::
   pInstrument = CInstrumentManager::Instance().Get( idInstrument );
 }
 
-void HandleInitializeManagers( ou::db::CSession* pSession ) {
+void HandleInitializeManagers( ou::db::Session* pSession ) {
   CProviderManager::Instance().AttachToSession( pSession );
   CInstrumentManager::Instance().AttachToSession( pSession );
   CAccountManager::Instance().AttachToSession( pSession );
@@ -50,7 +50,7 @@ void HandleInitializeManagers( ou::db::CSession* pSession ) {
   COrderManager::Instance().SetOnOrderNeedsDetails( &HandleOrderDetails );
 }
 
-void HandleDenitializeManagers( ou::db::CSession& session ) {
+void HandleDenitializeManagers( ou::db::Session& session ) {
   // take down the links
   COrderManager::Instance().SetOnOrderNeedsDetails( 0 );
   CPortfolioManager::Instance().SetOnPositionNeedDetails( 0 );

@@ -18,8 +18,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-void HandleInitializeManagers( ou::db::CSession* pSession );
-void HandleDenitializeManagers( ou::db::CSession& session );
+void HandleInitializeManagers( ou::db::Session* pSession );
+void HandleDenitializeManagers( ou::db::Session& session );
 
 } // namespace tf
 } // namespace ou

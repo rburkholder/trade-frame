@@ -32,21 +32,21 @@ namespace db {
 
 // this is an example of how to integrate everything together for session management.
 
-class CSession: 
-  public CSessionImpl<ISqlite3>,  // various session functionality
-  public SessionBase<CSessionImpl<ISqlite3>, CSession> {  // session open/close control
+class Session: 
+  public SessionImpl<ISqlite3>,  // various session functionality
+  public SessionBase<SessionImpl<ISqlite3>, Session> {  // session open/close control
 public:
 
-  typedef boost::shared_ptr<CSession> pSession_t;
+  typedef boost::shared_ptr<Session> pSession_t;
 
-  CSession( void );
-  virtual ~CSession( void );
+  Session( void );
+  virtual ~Session( void );
 
-  ou::Delegate<CSession*> OnInitializeManagers;  // various managers to be initialized with db pointers
-  ou::Delegate<CSession&> OnRegisterTables;  // get callbacks to register their tables
-  ou::Delegate<CSession&> OnRegisterRows;  // get callbacks to register their rows
-  ou::Delegate<CSession&> OnPopulate;  // get callbacks to populate their tables
-  ou::Delegate<CSession&> OnDenitializeManagers; //
+  ou::Delegate<Session*> OnInitializeManagers;  // various managers to be initialized with db pointers
+  ou::Delegate<Session&> OnRegisterTables;  // get callbacks to register their tables
+  ou::Delegate<Session&> OnRegisterRows;  // get callbacks to register their rows
+  ou::Delegate<Session&> OnPopulate;  // get callbacks to populate their tables
+  ou::Delegate<Session&> OnDenitializeManagers; //
   
   void InitializeManagers( void );  // called by inherited SessionBase.h
   void RegisterRowDefinitions( void );  // called by inherited SessionBase.h

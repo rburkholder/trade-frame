@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,20 +14,34 @@
 
 #pragma once
 
-#include "HedgeCommon.h"
+// Started 2012/09/03
 
-#include "DB.h"
+#include <TFBitsNPieces/FrameWork01.h>
 
-#include "Process.h"
+// may need to inherit and add more functionality to the class:
+#include <TFTrading/DBOps.h>
 
-class ThreadMain {
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelLogging.h>
+
+class AppCollectAndView:
+  public wxApp, public ou::tf::FrameWork01<AppCollectAndView> {
 public:
-  ThreadMain(enumMode eMode);
-  ~ThreadMain(void);
 protected:
 private:
-  enumMode m_eMode;
-  DB m_db;
-  CProcess* m_pProcess;
+  FrameMain* m_pFrameMain;
+//  PanelOptionsParameters* m_pPanelOptionsParameters;
+  ou::tf::PanelLogging* m_pPanelLogging;
+
+  DBOps m_db;
+
+  virtual bool OnInit();
+  virtual int OnExit();
+
+  void HandlePopulateDatabase( void );
+
 };
+
+// Implements MyApp& wxGetApp()
+DECLARE_APP(AppCollectAndView)
 

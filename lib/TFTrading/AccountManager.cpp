@@ -248,23 +248,23 @@ void CAccountManager::DeleteAccount( const idAccount_t& idAccount ) {
 // Table Management
 //
 
-void CAccountManager::HandleRegisterTables( ou::db::CSession& session ) {
+void CAccountManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<CAccountAdvisor::TableCreateDef>( tablenames::sAccountAdvisor );
   session.RegisterTable<CAccountOwner::TableCreateDef>( tablenames::sAccountOwner );
   session.RegisterTable<CAccount::TableCreateDef>( tablenames::sAccount );
 }
 
-void CAccountManager::HandleRegisterRows( ou::db::CSession& session ) {
+void CAccountManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<CAccountAdvisor::TableRowDef>( tablenames::sAccountAdvisor );
   session.MapRowDefToTableName<CAccountOwner::TableRowDef>( tablenames::sAccountOwner );
   session.MapRowDefToTableName<CAccount::TableRowDef>( tablenames::sAccount );
 }
 
-void CAccountManager::HandlePopulateTables( ou::db::CSession& session ) {
+void CAccountManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
-// this stuff could probably be rolled into CSession with a template
-void CAccountManager::AttachToSession( ou::db::CSession* pSession ) {
+// this stuff could probably be rolled into Session with a template
+void CAccountManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
   pSession->OnRegisterTables.Add( MakeDelegate( this, &CAccountManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &CAccountManager::HandleRegisterRows ) );
@@ -272,7 +272,7 @@ void CAccountManager::AttachToSession( ou::db::CSession* pSession ) {
 
 }
 
-void CAccountManager::DetachFromSession( ou::db::CSession* pSession ) {
+void CAccountManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &CAccountManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &CAccountManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &CAccountManager::HandlePopulateTables ) );

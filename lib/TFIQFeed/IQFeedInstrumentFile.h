@@ -108,15 +108,15 @@ protected:
 
   structSymbolRecord  dbRecord, *pRecord;
 
-  Db *m_pdbSymbols;
-  Db *m_pdbIxSymbols_Market;
-  Dbc *m_pdbcIxSymbols_Market;
-  Db *m_pdbIxSymbols_Underlying;
-  Dbc *m_pdbcIxSymbols_Underlying;
+  Db* m_pdbSymbols;
+  Db* m_pdbIxSymbols_Market;
+  Dbc* m_pdbcIxSymbols_Market;
+  Db* m_pdbIxSymbols_Underlying;
+  Dbc* m_pdbcIxSymbols_Underlying;
   Dbt m_dbtKey;
   Dbt m_dbtData;
   const char *m_szSearchKey;
-  u_int32_t m_lenSearchKey;
+  size_t m_lenSearchKey;
 
   void GetRecord( const std::string& sName, structSymbolRecord* pRec );
 

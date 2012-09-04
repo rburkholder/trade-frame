@@ -437,22 +437,22 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
   }
 }
 
-void COrderManager::HandleRegisterTables( ou::db::CSession& session ) {
+void COrderManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<Order::TableCreateDef>( tablenames::sOrder );
   session.RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
 }
 
-void COrderManager::HandleRegisterRows( ou::db::CSession& session ) {
+void COrderManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<Order::TableRowDef>( tablenames::sOrder );
   session.MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
   session.MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
 }
 
-void COrderManager::HandlePopulateTables( ou::db::CSession& session ) {
+void COrderManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
-// this stuff could probably be rolled into CSession with a template
-void COrderManager::AttachToSession( ou::db::CSession* pSession ) {
+// this stuff could probably be rolled into Session with a template
+void COrderManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
   pSession->OnRegisterTables.Add( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
@@ -460,7 +460,7 @@ void COrderManager::AttachToSession( ou::db::CSession* pSession ) {
 
 }
 
-void COrderManager::DetachFromSession( ou::db::CSession* pSession ) {
+void COrderManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &COrderManager::HandlePopulateTables ) );

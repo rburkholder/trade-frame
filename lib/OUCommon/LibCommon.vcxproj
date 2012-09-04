@@ -155,6 +155,7 @@
     <ClInclude Include="Colour.h" />
     <ClInclude Include="ConsoleStream.h" />
     <ClInclude Include="CountryCode.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="Delegate.h" />
     <ClInclude Include="FastDelegate.h" />
     <ClInclude Include="KeyWordMatch.h" />

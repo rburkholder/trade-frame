@@ -41,13 +41,13 @@ public:
   ManagerBase( void ): m_pSession( 0 ) {};
   virtual ~ManagerBase( void ) {};
 
-  virtual void AttachToSession( ou::db::CSession* pSession ) { m_pSession = pSession; };
-  virtual void DetachFromSession( ou::db::CSession* pSession ) { m_pSession = 0; };
+  virtual void AttachToSession( ou::db::Session* pSession ) { m_pSession = pSession; };
+  virtual void DetachFromSession( ou::db::Session* pSession ) { m_pSession = 0; };
 
 protected:
 
   // if session has been assigned, then persist records, if not, don't
-  ou::db::CSession* m_pSession;
+  ou::db::Session* m_pSession;
 
   template<class K, class M, class Q> // K:key, M:map, Q:query
   void DeleteRecord( const K& key, M& map, const std::string& sWhere );

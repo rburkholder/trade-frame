@@ -17,19 +17,19 @@
 
 #include "DB.h"
 
-CDB::CDB(void): ou::db::CSession() {
+DB::DB(void): ou::db::Session() {
   OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
-  OnPopulate.Add( MakeDelegate( this, &CDB::HandlePopulateTables ) );
+  OnPopulate.Add( MakeDelegate( this, &DB::HandlePopulateTables ) );
   OnDenitializeManagers.Add( &ou::tf::HandleDenitializeManagers );
 }
 
-CDB::~CDB(void) {
-  this->OnPopulate.Remove( MakeDelegate( this, &CDB::HandlePopulateTables ) );
+DB::~DB(void) {
+  this->OnPopulate.Remove( MakeDelegate( this, &DB::HandlePopulateTables ) );
   OnInitializeManagers.Remove( &ou::tf::HandleInitializeManagers );
   OnDenitializeManagers.Remove( &ou::tf::HandleDenitializeManagers );
 }
 
-void CDB::HandlePopulateTables( ou::db::CSession& session ) {
+void DB::HandlePopulateTables( ou::db::Session& session ) {
   if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
 }
 
@@ -43,7 +43,7 @@ struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
   UnderlyingQueryParameter( const ou::tf::keytypes::idInstrument_t& idInstrument_ ) : idInstrument( idInstrument_ ) {};
 };
 
-void CDB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+void DB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
   pInstrument = ou::tf::CInstrumentManager::Instance().Get( id );
 }
 
@@ -63,7 +63,7 @@ struct OptionsQueryParameters {
     : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( ou::tf::InstrumentType::Option ) {};
 };
 
-bool CDB::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+bool DB::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
 
   bool bFound = false;
   OptionsQueryParameters query( pUnderlying->GetInstrumentName(), nYear, nMonth, nDay );

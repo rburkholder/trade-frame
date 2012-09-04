@@ -470,22 +470,22 @@ void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const 
 // Table Management
 //
 
-void CPortfolioManager::HandleRegisterTables( ou::db::CSession& session ) {
+void CPortfolioManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<CPortfolio::TableCreateDef>( tablenames::sPortfolio );
   session.RegisterTable<CPosition::TableCreateDef>( tablenames::sPosition );
 }
 
-void CPortfolioManager::HandleRegisterRows( ou::db::CSession& session ) {
+void CPortfolioManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<CPortfolio::TableRowDef>( tablenames::sPortfolio );
   session.MapRowDefToTableName<CPosition::TableRowDef>( tablenames::sPosition );
   session.MapRowDefToTableName<CPosition::TableRowDefNoKey>( tablenames::sPosition );
 }
 
-void CPortfolioManager::HandlePopulateTables( ou::db::CSession& session ) {
+void CPortfolioManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
-// this stuff could probably be rolled into CSession with a template
-void CPortfolioManager::AttachToSession( ou::db::CSession* pSession ) {
+// this stuff could probably be rolled into Session with a template
+void CPortfolioManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
   pSession->OnRegisterTables.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterRows ) );
@@ -493,7 +493,7 @@ void CPortfolioManager::AttachToSession( ou::db::CSession* pSession ) {
 
 }
 
-void CPortfolioManager::DetachFromSession( ou::db::CSession* pSession ) {
+void CPortfolioManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &CPortfolioManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &CPortfolioManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &CPortfolioManager::HandlePopulateTables ) );

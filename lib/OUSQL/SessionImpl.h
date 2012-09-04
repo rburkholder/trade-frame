@@ -240,17 +240,17 @@ private:
 
 
 //
-// CSessionImpl
+// SessionImpl
 
 template<class IDatabase> // IDatabase is a the specific handler type:  sqlite3 or pg or ...
-class CSessionImpl: boost::noncopyable {
+class SessionImpl: boost::noncopyable {
 public:
 
-  typedef CSessionImpl<IDatabase> session_t;
+  typedef SessionImpl<IDatabase> session_t;
   typedef boost::shared_ptr<session_t> pSession_t;
 
-  CSessionImpl( void );
-  virtual ~CSessionImpl( void );
+  SessionImpl( void );
+  virtual ~SessionImpl( void );
 
   void ImplOpen( const std::string& sDbFileName, enumOpenFlags flags = EOpenFlagsZero );
   void ImplClose( void );
@@ -456,18 +456,18 @@ private:
 
 // Constructor
 template<class IDatabase>
-CSessionImpl<IDatabase>::CSessionImpl( void ): m_bOpened( false ) {
+SessionImpl<IDatabase>::SessionImpl( void ): m_bOpened( false ) {
 }
 
 // Destructor
 template<class IDatabase>
-CSessionImpl<IDatabase>::~CSessionImpl(void) {
+SessionImpl<IDatabase>::~SessionImpl(void) {
   ImplClose();
 }
 
 // Open
 template<class IDatabase>
-void CSessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpenFlags flags ) {
+void SessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpenFlags flags ) {
   if ( m_bOpened ) {
     std::string sErr( "Session already opened" );
     throw std::runtime_error( sErr );
@@ -480,7 +480,7 @@ void CSessionImpl<IDatabase>::ImplOpen( const std::string& sDbFileName, enumOpen
 
 // Close
 template<class IDatabase>
-void CSessionImpl<IDatabase>::ImplClose( void ) {
+void SessionImpl<IDatabase>::ImplClose( void ) {
   if ( m_bOpened ) {
     m_mapTableDefs.clear();
     for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
@@ -494,7 +494,7 @@ void CSessionImpl<IDatabase>::ImplClose( void ) {
 
 // CreateTables
 template<class IDatabase>
-void CSessionImpl<IDatabase>::CreateTables( void ) {
+void SessionImpl<IDatabase>::CreateTables( void ) {
   // todo: need to add a transaction around this set of instructions
   for ( mapTableDefs_iter_t iter = m_mapTableDefs.begin(); m_mapTableDefs.end() != iter; ++iter ) {
     Execute( iter->second );

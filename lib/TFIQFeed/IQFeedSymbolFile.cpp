@@ -39,6 +39,7 @@ using namespace boost::phoenix;
 using namespace boost::phoenix::arg_names;
 
 #include <OUCommon/KeywordMatch.h>
+#include <OUCommon/Debug.h>
 
 #include "IQFeedSymbolFile.h"
 
@@ -525,11 +526,10 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
     std::cout << "Symbol List Complete" << std::endl;
 
 #ifdef _DEBUG
-  std::stringstream ss;
-  ss << "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl;
-  ss << "#kwmSymbolType nodes " << kwmSymbolType.GetNodeCount() << std::endl;
-//  OutputDebugString( ss.str().c_str() );
-  ss.str() = "";
+  DEBUGOUT( 
+    "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl <<
+    "#kwmSymbolType nodes " << kwmSymbolType.GetNodeCount() << std::endl
+    )
 #endif
 
   }

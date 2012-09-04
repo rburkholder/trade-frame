@@ -25,6 +25,7 @@
 #include <boost/date_time/local_time_adjustor.hpp>
 
 #include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/Debug.h>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
@@ -963,9 +964,7 @@ void IBTWS::updateAccountValue(const IBString& key, const IBString& val,
 }
 
 void IBTWS::connectionClosed() {
-//  m_ss.str("");
-//  m_ss << "connection closed" << std::endl;
-//  OutputDebugString( m_ss.str().c_str() );
+  DEBUGOUT( "connection closed" << std::endl );
 }
 
 void IBTWS::updateMktDepth(TickerId id, int position, int operation, int side,

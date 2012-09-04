@@ -135,7 +135,9 @@ bool AppSemiAuto::OnInit() {
 
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCU12" ) ? mgr.Get( "+GCU12" ) : mgr.ConstructFuture( "+GCU12", "SMART", 2012,  9 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCV12" ) ? mgr.Get( "+GCV12" ) : mgr.ConstructFuture( "+GCV12", "SMART", 2012, 10 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCX12" ) ? mgr.Get( "+GCX12" ) : mgr.ConstructFuture( "+GCX12", "SMART", 2012, 11 ) ) );
   m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCZ12" ) ? mgr.Get( "+GCZ12" ) : mgr.ConstructFuture( "+GCZ12", "SMART", 2012, 12 ) ) );
+  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+GCG13" ) ? mgr.Get( "+GCG13" ) : mgr.ConstructFuture( "+GCG13", "SMART", 2013,  2 ) ) );
 
 //  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLG12" ) ? mgr.Get( "+CLG12" ) : mgr.ConstructFuture( "+CLG12", "SMART", 2012, 02 ) ) );
 //  m_vInstruments.push_back( InstrumentData( mgr.Exists( "+CLH12" ) ? mgr.Get( "+CLH12" ) : mgr.ConstructFuture( "+CLH12", "SMART", 2012, 03 ) ) );

@@ -22,7 +22,7 @@ using namespace fastdelegate;
 
 #include <TFTrading/InstrumentManager.h>
 
-class DBOps: public ou::db::CSession {
+class DBOps: public ou::db::Session {
 public:
 
   DBOps(void);
@@ -47,5 +47,5 @@ private:
   OnPopulateDatabaseHandler_t OnPopulateDatabaseHandler;
   OnNewInstrumentHandler_t OnNewInstrument;
 
-  void HandlePopulateTables( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::Session& session );
 };

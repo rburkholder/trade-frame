@@ -33,6 +33,8 @@
 #include <boost/foreach.hpp>
 #include <boost/interprocess/detail/atomic.hpp>
 
+#include <OUCommon/Debug.h>
+
 #include "ReusableBuffers.h"
 
 // custom on
@@ -151,12 +153,12 @@ private:
 
   linebuffer_t* m_pline;  // current parsing results
 
-  unsigned int m_cntAsyncReads;
-  unsigned int m_cntBytesTransferred_input;
-  unsigned int m_cntLinesProcessed;
+  size_t m_cntAsyncReads;
+  size_t m_cntBytesTransferred_input;
+  size_t m_cntLinesProcessed;
 
-  unsigned int m_cntSends;
-  unsigned int m_cntBytesTransferred_send;
+  size_t m_cntSends;
+  size_t m_cntBytesTransferred_send;
 
   void OnConnectDone( const boost::system::error_code& error );
   void OnDisconnecting( void);
@@ -279,15 +281,13 @@ CNetwork<ownerT,charT>::~CNetwork(void) {
   m_pline = NULL;
 
 #if defined _DEBUG
-  std::stringstream ss;
-  ss << typeid( this ).name()
+  DEBUGOUT( typeid( this ).name()
     << " " << m_cntBytesTransferred_input << " bytes in on "
     << m_cntAsyncReads << " reads with " << m_cntLinesProcessed << " lines out, "
     << m_cntBytesTransferred_send << " bytes out on " 
     << m_cntSends << " sends." 
-    << std::endl;
-//  OutputDebugString( ss.str().c_str() );
-  ss.str() = "";
+    << std::endl
+  )
 #endif
 
   m_stateNetwork = NS_CLOSED;
@@ -304,10 +304,7 @@ void CNetwork<ownerT,charT>::AsioThread( void ) {
   m_io.run();  // handles async socket 
 
 #ifdef _DEBUG
-  std::stringstream ss;
-  ss << "ASIO Thread Exit:  " << typeid( this ).name() << std::endl;
-  OutputDebugString( ss.str().c_str() );
-  ss.str() = "";
+  DEBUGOUT( "ASIO Thread Exit:  " << typeid( this ).name() << std::endl )
 #endif
 }
 
@@ -320,7 +317,7 @@ void CNetwork<ownerT,charT>::Connect( void ) {
 
 #ifdef _DEBUG
   if ( NULL != m_psocket ) {
-    OutputDebugString( "CNetwork::OnConnect:  m_psocket not null.\n" );
+    DEBUGOUT( "CNetwork::OnConnect:  m_psocket not null.\n" );
   }
 #endif
 

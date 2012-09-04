@@ -183,7 +183,7 @@ CInstrument::pInstrument_t CInstrumentFile::CreateInstrumentFromIQFeed(const std
 }
 
 // Sets SubIndex (static function) for Exchange
-int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
+int CInstrumentFile::GetMarketName( Db *secondary, const Dbt* pKey, const Dbt* data, Dbt* secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p = dbIxRecord->line + dbIxRecord->ix[structSymbolRecord::IXExchange];  // get at the 'exchange' string
   unsigned long l = dbIxRecord->lenExchangeKey;  // set the key and its length
@@ -193,10 +193,10 @@ int CInstrumentFile::GetMarketName( Db *secondary, const Dbt *pKey, const Dbt *d
 }
 
 // Sets SubIndex (static function) for Underlying
-int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Dbt *data, Dbt *secKey ) {
+int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt* pKey, const Dbt* data, Dbt* secKey ) {
   structSymbolRecord *dbIxRecord = (structSymbolRecord *) data->get_data();
   char *p; 
-  u_int32_t len;
+  size_t len;
   bool bUseIndex = true;
   if ( InstrumentType::Option == dbIxRecord->eInstrumentType ) { // OPRA option
     p = dbIxRecord->line + dbIxRecord->ix[structSymbolRecord::IXDesc];  // start of description
@@ -213,7 +213,7 @@ int CInstrumentFile::GetUnderlyingName( Db *secondary, const Dbt *pKey, const Db
   return 0;
 }
 
-void CInstrumentFile::SetSearchExchange( const char *szExchange ) {
+void CInstrumentFile::SetSearchExchange( const char* szExchange ) {
   m_szSearchKey = szExchange;
   m_lenSearchKey = strlen( szExchange );
   m_dbtKey.set_data( (void*) szExchange );
@@ -222,7 +222,7 @@ void CInstrumentFile::SetSearchExchange( const char *szExchange ) {
   if ( 0 != ret ) throw std::runtime_error( "CInstrumentFile::SetSearchExchange has problems" );
 }
 
-void CInstrumentFile::SetSearchUnderlying( const char *szUnderlying ) {
+void CInstrumentFile::SetSearchUnderlying( const char* szUnderlying ) {
   m_szSearchKey = szUnderlying;
   m_lenSearchKey = strlen( szUnderlying );
   m_dbtKey.set_data( (void*) szUnderlying );

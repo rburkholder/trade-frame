@@ -270,19 +270,19 @@ void CInstrumentManager::HandleAlternateNameChanged( const CInstrument::Alternat
   // need database insert
 }
 
-void CInstrumentManager::HandleRegisterTables( ou::db::CSession& session ) {
+void CInstrumentManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
   session.RegisterTable<CInstrument::TableCreateDef>( tablenames::sInstrument );
   session.RegisterTable<AlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::HandleRegisterRows( ou::db::CSession& session ) {
+void CInstrumentManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
   session.MapRowDefToTableName<CInstrument::TableRowDef>( tablenames::sInstrument );
   session.MapRowDefToTableName<AlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::HandlePopulateTables( ou::db::CSession& session ) {
+void CInstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
 
   std::vector<std::string> vsExchangesPreload;
   vsExchangesPreload +=
@@ -315,8 +315,8 @@ void CInstrumentManager::HandlePopulateTables( ou::db::CSession& session ) {
 
 }
 
-// this stuff could probably be rolled into CSession with a template
-void CInstrumentManager::AttachToSession( ou::db::CSession* pSession ) {
+// this stuff could probably be rolled into Session with a template
+void CInstrumentManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
   pSession->OnRegisterTables.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
@@ -324,7 +324,7 @@ void CInstrumentManager::AttachToSession( ou::db::CSession* pSession ) {
 
 }
 
-void CInstrumentManager::DetachFromSession( ou::db::CSession* pSession ) {
+void CInstrumentManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &CInstrumentManager::HandlePopulateTables ) );

@@ -66,7 +66,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
   int i = sizeof( CTestCase::enumfield2 );
 
   CTestCase tc;
-  ou::db::CSession session( sDbFileName );
+  ou::db::Session session( sDbFileName );
   CStatementCreateTable ct;
   tc.TableDef( ct );
   session.Prepare( ct );

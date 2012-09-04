@@ -74,8 +74,8 @@ public:
 
   template<typename F> void ScanOptions( F f, idInstrument_cref, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day );
 
-  void AttachToSession( ou::db::CSession* pSession );
-  void DetachFromSession( ou::db::CSession* pSession );
+  void AttachToSession( ou::db::Session* pSession );
+  void DetachFromSession( ou::db::Session* pSession );
 
   // move these to IQFeed somewhere
 //  pInstrument_t GetIQFeedInstrument( const std::string& sName );
@@ -101,9 +101,9 @@ private:
   void SaveAlternateInstrumentName( 
     const keytypes::eidProvider_t&, const keytypes::idInstrument_t&, const keytypes::idInstrument_t& );
 
-  void HandleRegisterTables( ou::db::CSession& session );
-  void HandleRegisterRows( ou::db::CSession& session );
-  void HandlePopulateTables( ou::db::CSession& session );
+  void HandleRegisterTables( ou::db::Session& session );
+  void HandleRegisterRows( ou::db::Session& session );
+  void HandlePopulateTables( ou::db::Session& session );
 
   void HandleAlternateNameAdded( const CInstrument::AlternateNameChangeInfo_t& );
   void HandleAlternateNameChanged( const CInstrument::AlternateNameChangeInfo_t& );

@@ -36,7 +36,6 @@ namespace ascii = boost::spirit::ascii;
 
 #include <OUCommon/Network.h>
 
-
 // custom on
 // http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
 //#define _CRTDBG_MAP_ALLOC
@@ -312,7 +311,7 @@ void CIQFeedNewsQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
     std::string str( bgn, end );
     str += "\n";
-    OutputDebugString( str.c_str() );
+    DEBUGOUT( str.c_str() );
   }
 #endif
 
@@ -326,7 +325,7 @@ void CIQFeedNewsQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       GiveBackBuffer( buf );
       break;
     case RETRIEVE_IDLE:
-      OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess\n" );
+      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess\n" );
       GiveBackBuffer( buf );
       break;
   }

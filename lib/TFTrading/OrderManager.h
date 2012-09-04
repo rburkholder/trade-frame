@@ -93,8 +93,8 @@ public:
     OnOrderNeedsDetails = function;
   }
 
-  void AttachToSession( ou::db::CSession* pSession );
-  void DetachFromSession( ou::db::CSession* pSession );
+  void AttachToSession( ou::db::Session* pSession );
+  void DetachFromSession( ou::db::Session* pSession );
 
 protected:
 
@@ -144,9 +144,9 @@ private:
 
   void ConstructOrder( pOrder_t& pOrder );
 
-  void HandleRegisterTables( ou::db::CSession& session );
-  void HandleRegisterRows( ou::db::CSession& session );
-  void HandlePopulateTables( ou::db::CSession& session );
+  void HandleRegisterTables( ou::db::Session& session );
+  void HandleRegisterRows( ou::db::Session& session );
+  void HandlePopulateTables( ou::db::Session& session );
 
 };
 

@@ -371,13 +371,13 @@ void CIQFeedHistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
     case RETRIEVE_DONE:
       // it is an error to land here
-      OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_DONE\n" );
+      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_DONE\n" );
       //throw std::logic_error( "RETRIEVE_DONE");
       //ReturnLineBuffer( wParam );
       break;
     case RETRIEVE_IDLE:
       // it is an error to land here
-      OutputDebugString( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_IDLE\n" );
+      DEBUGOUT( "Unknown CIQFeedNewsQuery<T>::OnConnProcess RETRIEVE_IDLE\n" );
       //throw std::logic_error( "RETRIEVE_IDLE");
       //ReturnLineBuffer( wParam );
       break;
@@ -554,7 +554,7 @@ void CIQFeedHistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     if ( 'E' == *bgn2 ) { // indication of an error
       b = parse( bgn2, end, m_ruleErrorInvalidSymbol );
       if ( b ) {
-        OutputDebugString( "Invalid Symbol\n" );
+        DEBUGOUT( "Invalid Symbol\n" );
         m_stateRetrieval = RETRIEVE_IDLE;
           if ( &CIQFeedHistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
             static_cast<T*>( this )->OnHistoryRequestDone();

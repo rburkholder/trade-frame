@@ -1,3 +1,6 @@
+2012/09/03
+CURL_DISABLE_LDAP used when building curl
+
 2012/08/20
 This looks suspiciously like you're not using a recent enough value for WINVER. From memory, Win64 requires 0x502 or later (i.e. Windows Server 2003). 
 

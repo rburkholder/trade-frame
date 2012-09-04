@@ -22,12 +22,12 @@ using namespace fastdelegate;
 
 #include <TFTrading/InstrumentManager.h>
 
-class CDB: public ou::db::CSession
+class DB: public ou::db::Session
 {
 public:
 
-  CDB(void);
-  ~CDB(void);
+  DB(void);
+  ~DB(void);
 
   void LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrumentManager::pInstrument_t& pInstrument );
   bool LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
@@ -48,7 +48,7 @@ private:
   OnPopulateDatabaseHandler_t OnPopulateDatabaseHandler;
   OnNewInstrumentHandler_t OnNewInstrument;
 
-  void HandlePopulateTables( ou::db::CSession& session );
+  void HandlePopulateTables( ou::db::Session& session );
 
 };
  
