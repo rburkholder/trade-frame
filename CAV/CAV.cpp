@@ -17,12 +17,19 @@
 
 #include "stdafx.h"
 
+#include <stdio.h>
+#include <tchar.h>
+
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
 #include <TFIQFeed/CurlGetMktSymbols.h>
+
+#include <ioapi.h>
+#include <ioapi_mem.h>
+#include <unzip.h>
 
 #include "CAV.h"
 
@@ -73,6 +80,63 @@ bool AppCollectAndView::OnInit() {
 
   {
     ou::tf::CurlGetMktSymbols cgms;
+
+    char* sZipFile( "**inmem**" );
+    char* sSourceName( "mktsymbols_v2.txt" );
+    //char* sSourceName( "DIAX.CHM" );
+
+    unzFile uf=NULL;
+    int err=UNZ_OK;
+    unz_file_info64 file_info;
+    char filename_inzip[256];
+    ourmemory_t om;
+    om.base = 0;
+    om.cur_offset = om.limit = om.size = 0;
+
+    om.base = cgms.Buffer();
+    om.size = cgms.Size();
+
+    char* UnzippedFileContent;
+    UnzippedFileContent = 0;
+
+    zlib_filefunc64_def ffunc;
+
+    fill_memory_filefunc64( &ffunc, &om );
+
+    uf = unzOpen2_64(sZipFile, &ffunc);
+    if ( 0 == uf ) 
+      throw std::runtime_error( "open" );
+
+    err = unzLocateFile( uf, sSourceName, 0 );
+    if ( UNZ_OK != err ) 
+      throw  std::runtime_error( "locate" );
+
+    err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+    if ( UNZ_OK != err ) 
+      throw  std::runtime_error( "get info" );
+
+    err = unzOpenCurrentFile( uf );
+    if ( UNZ_OK != err ) 
+      throw  std::runtime_error( "open current" );
+
+    UnzippedFileContent = new char[ file_info.uncompressed_size ];
+    if ( 0 == UnzippedFileContent ) {
+      throw  std::runtime_error( "UnzippedFileContent" );
+    }
+
+    int cnt = unzReadCurrentFile(uf,UnzippedFileContent,file_info.uncompressed_size);
+    if ( file_info.uncompressed_size != cnt ) 
+      throw  std::runtime_error( "read" );
+
+    err = unzCloseCurrentFile( uf );
+    if ( UNZ_OK != err ) 
+      throw  std::runtime_error( "close current" );
+
+    err = unzClose( uf );
+    if ( UNZ_OK != err ) 
+      throw  std::runtime_error( "close" );
+
+    delete[] UnzippedFileContent;
   }
 
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppCollectAndView::HandlePopulateDatabase ) );
