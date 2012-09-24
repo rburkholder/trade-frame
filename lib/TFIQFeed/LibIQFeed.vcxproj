@@ -153,6 +153,10 @@
     <ClCompile Include="IQFeedProvider.cpp" />
     <ClCompile Include="IQFeedSymbol.cpp" />
     <ClCompile Include="IQFeedSymbolFile.cpp" />
+    <ClCompile Include="LoadMktSymbolsTable.cpp" />
+    <ClCompile Include="MarketSymbol.cpp" />
+    <ClCompile Include="MarketSymbols.cpp" />
+    <ClCompile Include="ParseMktSymbols.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -185,6 +189,10 @@
     <ClInclude Include="IQFeedProvider.h" />
     <ClInclude Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedSymbolFile.h" />
+    <ClInclude Include="LoadMktSymbolsTable.h" />
+    <ClInclude Include="MarketSymbol.h" />
+    <ClInclude Include="MarketSymbols.h" />
+    <ClInclude Include="ParseMktSymbols.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

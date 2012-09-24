@@ -28,8 +28,20 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MarketSymbols.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
     <ClCompile Include="CurlGetMktSymbols.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
+    <ClCompile Include="MarketSymbol.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
+    <ClCompile Include="ParseMktSymbols.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadMktSymbolsTable.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,7 +91,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CurlGetMktSymbols.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="MarketSymbol.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="MarketSymbols.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseMktSymbols.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadMktSymbolsTable.h">
+      <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +115,12 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{fee044c0-3ca5-4317-bde4-1936e4f256e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MarketSymbols">
+      <UniqueIdentifier>{e89af7fd-e224-4d76-96b3-b5859b05f83d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MarketSymbols">
+      <UniqueIdentifier>{a045e3c8-a29c-42cf-889e-2e3923ab835b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

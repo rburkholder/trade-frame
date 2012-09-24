@@ -17,19 +17,18 @@
 
 #include "stdafx.h"
 
-#include <stdio.h>
-#include <tchar.h>
+//#include <stdio.h>
+//#include <tchar.h>
+
+#include <fstream>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
-#include <TFIQFeed/CurlGetMktSymbols.h>
-
-#include <ioapi.h>
-#include <ioapi_mem.h>
-#include <unzip.h>
+#include <TFIQFeed/ParseMktSymbols.h>
+//#include <TFIQFeed/LoadMktSymbolsTable.h>
 
 #include "CAV.h"
 
@@ -78,66 +77,55 @@ bool AppCollectAndView::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  {
-    ou::tf::CurlGetMktSymbols cgms;
+  // load mktsymbols somewhere
 
-    char* sZipFile( "**inmem**" );
-    char* sSourceName( "mktsymbols_v2.txt" );
-    //char* sSourceName( "DIAX.CHM" );
+    std::ifstream file;
+    char* name = "mktsymbols_v2.txt";
+    std::cout << "Opening Input Instrument File ";
+    std::cout << name;
+    std::cout << " ... ";
+    file.open( name );
+    std::cout << std::endl;
 
-    unzFile uf=NULL;
-    int err=UNZ_OK;
-    unz_file_info64 file_info;
-    char filename_inzip[256];
-    ourmemory_t om;
-    om.base = 0;
-    om.cur_offset = om.limit = om.size = 0;
+    std::cout << "Loading Symbols ..." << std::endl;
 
-    om.base = cgms.Buffer();
-    om.size = cgms.Size();
+    char line[ 500 ];
+    unsigned int cntLines( 0 );
 
-    char* UnzippedFileContent;
-    UnzippedFileContent = 0;
+    ou::tf::iqfeed::MktSymbolsParser<const char*> parser;
 
-    zlib_filefunc64_def ffunc;
+    file.getline( line, 500 );  // remove header line
+    file.getline( line, 500 );
+    while ( !file.fail() ) {
 
-    fill_memory_filefunc64( &ffunc, &om );
+      ++cntLines;  // number data lines processed
 
-    uf = unzOpen2_64(sZipFile, &ffunc);
-    if ( 0 == uf ) 
-      throw std::runtime_error( "open" );
+      ou::tf::iqfeed::MarketSymbol::TableRowDef trd;
+      const char* pLine1( line );
+      const char* pLine2( line + 500 );
 
-    err = unzLocateFile( uf, sSourceName, 0 );
-    if ( UNZ_OK != err ) 
-      throw  std::runtime_error( "locate" );
+      // try http://stackoverflow.com/questions/2291802/is-there-a-c-iterator-that-can-iterate-over-a-file-line-by-line
 
-    err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
-    if ( UNZ_OK != err ) 
-      throw  std::runtime_error( "get info" );
+      try {
+        bool b = qi::parse( pLine1, pLine2, parser, trd );
+        if ( b ) {
+        }
+        else {
+          std::cout << "problems parsing" << std::endl;
+        }
+        if ( 0 == trd.sDescription.length() ) {
+          std::cout << trd.sSymbol << ": missing description" << std::endl;
+        }
+      }
+      catch (...) {
+        std::cout << "broken" << std::endl;
+      }
 
-    err = unzOpenCurrentFile( uf );
-    if ( UNZ_OK != err ) 
-      throw  std::runtime_error( "open current" );
+//      std::cout << trd.sSymbol << std::endl;
 
-    UnzippedFileContent = new char[ file_info.uncompressed_size ];
-    if ( 0 == UnzippedFileContent ) {
-      throw  std::runtime_error( "UnzippedFileContent" );
+      file.getline( line, 500 );
     }
-
-    int cnt = unzReadCurrentFile(uf,UnzippedFileContent,file_info.uncompressed_size);
-    if ( file_info.uncompressed_size != cnt ) 
-      throw  std::runtime_error( "read" );
-
-    err = unzCloseCurrentFile( uf );
-    if ( UNZ_OK != err ) 
-      throw  std::runtime_error( "close current" );
-
-    err = unzClose( uf );
-    if ( UNZ_OK != err ) 
-      throw  std::runtime_error( "close" );
-
-    delete[] UnzippedFileContent;
-  }
+    file.close();
 
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppCollectAndView::HandlePopulateDatabase ) );
   m_db.Open( "cav.db" );

@@ -21,6 +21,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 static boost::regex rxHttpStatus( "^HTTP/1\\.[0-9] ([0-9]+) ([A-Z]+)" );
 
@@ -56,12 +57,14 @@ size_t CurlGetMktSymbols::WriteMemoryCallback(void *contents, size_t size, size_
   CurlGetMktSymbols* p = reinterpret_cast<CurlGetMktSymbols*>( self );
   if ( !p->m_bSizeFound ) {
     std::cerr << "problems" << std::endl;
+    throw std::runtime_error( "CurlGetMktSymbols::WriteMemoryCallback 1" );
   }
   size_t cnt = size * nmemb;
   size_t whatwehave = p->m_offset - p->m_buf;
   size_t whatsleft = p->m_size - whatwehave;
   if ( cnt > whatsleft ) {
     std::cerr << "problems" << std::endl;
+    throw std::runtime_error( "CurlGetMktSymbols::WriteMemoryCallback 2" );
     cnt = whatsleft;
   }
   memcpy( p->m_offset, contents, cnt );
@@ -74,7 +77,7 @@ size_t CurlGetMktSymbols::WriteMemoryCallback(void *contents, size_t size, size_
   return cnt;
 }
 
-static boost::regex rxContentLength( "[Cc]ontent\-[Ll]ength[ ]*:[ ]*([0-9]+)" );
+static boost::regex rxContentLength( "[Cc]ontent-[Ll]ength[ ]*:[ ]*([0-9]+)" );
 
 size_t CurlGetMktSymbols::HeaderFunctionCallback(void* ptr, size_t size, size_t nmemb, void* self) {
   CurlGetMktSymbols* p = reinterpret_cast<CurlGetMktSymbols*>( self );
@@ -84,6 +87,7 @@ size_t CurlGetMktSymbols::HeaderFunctionCallback(void* ptr, size_t size, size_t 
     bool bResult = boost::regex_search( s.c_str(), what, rxContentLength, boost::match_continuous  );
     if ( !bResult ) {
       //std::cout << "problem" << std::endl;  // nothing found
+      throw std::runtime_error( "CurlGetMktSymbols::HeaderFunctionCallback nothing found" );
     }
     else { 
       p->m_size = boost::lexical_cast<size_t>( what[1].str() );
@@ -100,5 +104,6 @@ int CurlGetMktSymbols::ProgressFunctionCallback( void *self, double dltotal, dou
   return 0;  // non zero will cause transfer abort
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

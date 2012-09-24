@@ -22,8 +22,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAccount
-{
+class CAccount {
 public:
 
   typedef keytypes::idAccount_t idAccount_t;
