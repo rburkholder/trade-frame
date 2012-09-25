@@ -21,6 +21,7 @@
 //#include <tchar.h>
 
 #include <fstream>
+#include <vector>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -92,7 +93,9 @@ bool AppCollectAndView::OnInit() {
     char line[ 500 ];
     unsigned int cntLines( 0 );
 
+    typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc_t;
     ou::tf::iqfeed::MktSymbolsParser<const char*> parser;
+    std::vector<size_t> vSymbolTypeStats( sc_t::_Count );  // number of symbols of this SymbolType
 
     file.getline( line, 500 );  // remove header line
     file.getline( line, 500 );
@@ -109,6 +112,11 @@ bool AppCollectAndView::OnInit() {
       try {
         bool b = qi::parse( pLine1, pLine2, parser, trd );
         if ( b ) {
+          vSymbolTypeStats[ trd.sc ]++;
+          if ( sc_t::Unknown == trd.sc ) {
+            // set marker not to save record
+            std::cout << "Unknown symbol type for:  " << trd.sSymbol << std::endl;
+          }
         }
         else {
           std::cout << "problems parsing" << std::endl;

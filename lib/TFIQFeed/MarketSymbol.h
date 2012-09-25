@@ -30,7 +30,8 @@ public:
 
   enum enumSymbolClassifier: boost::uint8_t { // bits in bitmap of stored data record
     Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
-      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries
+      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
+      _Count
   };
 
   struct TableRowDef {

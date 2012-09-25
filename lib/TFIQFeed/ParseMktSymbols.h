@@ -76,7 +76,7 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
       ( "FOPTION", sc_t::FOption )
       ( "FOREX", sc_t::Forex )
       ( "FORWARD", sc_t::Forward )
-      ( "FUTURE", sc_t::Future )
+//      ( "FUTURE", sc_t::Future )
       ( "ICSPREAD", sc_t::ICSpread )
       ( "IEOPTION", sc_t::IEOption )
       ( "INDEX", sc_t::Index )
@@ -91,14 +91,18 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
       ( "TREASURIES", sc_t::Treasuries )
       ;
 
-    rSymbolClassifier %= symTypes;
+    //rDefaultSymType %= ( qi::eps[ qi::_val = sc_t::Unknown, qi::_pass = false ] >> qi::omit[ rNotATab ] );  // proper syntax
+    rDefaultSymType %= ( qi::eps[ qi::_val = sc_t::Unknown ] >> qi::omit[ rNotATab ] );
 
-    rSymbol       %= qi::lexeme[ +( qi::char_ - '\t' ) ];
-    rDescription  %= qi::lexeme[ +( qi::char_ - '\t' ) ];
-    rExchange     %= qi::lexeme[ +( qi::char_ - '\t' ) ];
-    rListedMarket %= qi::lexeme[ +( qi::char_ - '\t' ) ];
+    rNotATab      %= qi::lexeme[ +( qi::char_ - '\t' ) ];
+
+    rSymbol       %= rNotATab;
+    rDescription  %= rNotATab;
+    rExchange     %= rNotATab;
+    rListedMarket %= rNotATab;
+    rSymbolClassifier %= ( symTypes | rDefaultSymType ); 
     rSic          %= qi::lexeme[    qi::uint_ ];
-    rFrontMonth   %= qi::lexeme[ +( qi::char_ - '\t' ) ];
+    rFrontMonth   %= rNotATab;
     rNaics        %= qi::lexeme[    qi::uint_ ];
 
     start %=               rSymbol
@@ -110,21 +114,23 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
       > qi::lit( '\t' ) > -rFrontMonth 
       > qi::lit( '\t' ) > -rNaics 
       > ( qi::eol | qi::eps );
-
+/*
     qi::on_error<qi::fail>(
-      rSymbolClassifier,
+      start,
       std::cout 
       << phoenix::val( "unknown symbol type: " ) 
       << qi::_4 
       << "," 
-      << phoenix::construct<std::string>( qi::_3, qi::_2 ) 
+      << phoenix::construct<std::string>( qi::_1, qi::_3 ) 
       << std::endl
       );
-      
+   */
   }
 
   qi::symbols<char, sc_t> symTypes;
 
+  qi::rule<Iterator, sc_t()> rDefaultSymType;
+  qi::rule<Iterator, std::string()> rNotATab;
   qi::rule<Iterator, std::string()> rSymbol;
   qi::rule<Iterator, std::string()> rDescription;
   qi::rule<Iterator, std::string()> rExchange;
