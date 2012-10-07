@@ -24,11 +24,9 @@
 //#include <boost/spirit/include/phoenix_operator.hpp>
 //#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
+//#include <boost/spirit/include/phoenix_object.hpp>
 
-#include <boost/fusion/include/adapt_struct.hpp>
-
-//#include <boost/variant/recursive_variant.hpp>
+//#include <boost/fusion/include/adapt_struct.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -76,7 +74,7 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
       ( "FOPTION", sc_t::FOption )
       ( "FOREX", sc_t::Forex )
       ( "FORWARD", sc_t::Forward )
-//      ( "FUTURE", sc_t::Future )
+      ( "FUTURE", sc_t::Future )
       ( "ICSPREAD", sc_t::ICSpread )
       ( "IEOPTION", sc_t::IEOption )
       ( "INDEX", sc_t::Index )
@@ -91,10 +89,10 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
       ( "TREASURIES", sc_t::Treasuries )
       ;
 
+    rNotATab      %= qi::lexeme[ +( qi::char_ - '\t' ) ];
+
     //rDefaultSymType %= ( qi::eps[ qi::_val = sc_t::Unknown, qi::_pass = false ] >> qi::omit[ rNotATab ] );  // proper syntax
     rDefaultSymType %= ( qi::eps[ qi::_val = sc_t::Unknown ] >> qi::omit[ rNotATab ] );
-
-    rNotATab      %= qi::lexeme[ +( qi::char_ - '\t' ) ];
 
     rSymbol       %= rNotATab;
     rDescription  %= rNotATab;

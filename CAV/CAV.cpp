@@ -29,7 +29,6 @@
 #include <TFTrading/PortfolioManager.h>
 
 #include <TFIQFeed/ParseMktSymbols.h>
-//#include <TFIQFeed/LoadMktSymbolsTable.h>
 
 #include "CAV.h"
 
@@ -117,6 +116,7 @@ bool AppCollectAndView::OnInit() {
             // set marker not to save record
             std::cout << "Unknown symbol type for:  " << trd.sSymbol << std::endl;
           }
+
         }
         else {
           std::cout << "problems parsing" << std::endl;
