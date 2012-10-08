@@ -165,7 +165,7 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
 //  FUTURE MONTH CODES
 //  Jan-F    Feb-G    Mar-H    Apr-J    May-K    Jun-M   
 //  Jul-N    Aug-Q    Sep-U    Oct-V    Nov-X    Dec-Z 
-  unsigned short rFutureMonth[] = {
+  boost::uint8_t rFutureMonth[] = {
     0,  // A
     0,  // B
     0,  // C

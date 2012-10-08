@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -59,9 +59,9 @@ namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace ascii = boost::spirit::ascii;
 
-void doout( const std::string& s ) {
-  std::cout << "'" << s << "'" << std::endl;
-}
+void doout( const std::string& s );
+
+extern boost::uint8_t rFutureMonth[];
 
 template<typename Iterator>
 struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
@@ -100,7 +100,7 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
     rListedMarket %= rNotATab;
     rSymbolClassifier %= ( symTypes | rDefaultSymType ); 
     rSic          %= qi::lexeme[    qi::uint_ ];
-    rFrontMonth   %= rNotATab;
+    rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = true ] | qi::eps );
     rNaics        %= qi::lexeme[    qi::uint_ ];
 
     start %=               rSymbol
@@ -140,14 +140,6 @@ struct MktSymbolsParser: qi::grammar<Iterator, trd_t()> {
   qi::rule<Iterator, trd_t()> start;
 };
 
-class ParseMktSymbols {
-public:
-  ParseMktSymbols(void);
-  ~ParseMktSymbols(void);
-  void Parse( void );
-protected:
-private:
-};
 
 } // namespace iqfeed
 } // namespace tf

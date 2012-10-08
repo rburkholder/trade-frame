@@ -14,12 +14,13 @@
 
 #include "StdAfx.h"
 
-#include <map>
-#include <vector>
-#include <algorithm>
+//#include <map>
+//#include <vector>
+//#include <algorithm>
+#include <string>
 
 #include <OUCommon/KeywordMatch.h>
-#include <OUCommon/Debug.h>
+//#include <OUCommon/Debug.h>
 
 #include "ParseMktSymbols.h"
 
@@ -27,10 +28,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-ParseMktSymbols::ParseMktSymbols(void) {
-}
-
-ParseMktSymbols::~ParseMktSymbols(void) {
+void doout( const std::string& s ) {
+  std::cout << "'" << s << "'" << std::endl;
 }
 
 // http://www.relisoft.com/book/tech/6lib.html
@@ -43,46 +42,38 @@ public:
     }
 };
 
-unsigned char DecodeMonth( const std::string &s ) {
-  unsigned char month2 = 0;
-  if ( 'J' < s[0] ) {
-    if ( 'N' < s[0] ) {
-      month2 = ( 'O' == s[0] ) ? 10 : 9;
-    }
-    else {
-      if ( 'M' == s[0] ) {
-        month2 = ( 'R' == s[2] ) ? 3 : 5;
-      }
-      else {
-        month2 = 11;
-      }
-    }
-  }
-  else {
-    if ( 'J' == s[0] ) {
-      if ( 'U' == s[1] ) {
-        month2 = ( 'N' == s[2] ) ? 6 : 7;
-      }
-      else {
-        month2 = 1;
-      }
-    }
-    else {
-      if ( 'A' == s[0] ) {
-        month2 = ( 'P' == s[1] ) ? 4 : 8;
-      }
-      else {
-        month2 = ( 'D' == s[0] ) ? 12 : 2;
-      }
-    }
-  }
-  assert( month2 > 0 );
-  return month2;
-}
-
-void ParseMktSymbols::Parse( void ) {
-}
-
+//  FUTURE MONTH CODES
+//  Jan-F    Feb-G    Mar-H    Apr-J    May-K    Jun-M   
+//  Jul-N    Aug-Q    Sep-U    Oct-V    Nov-X    Dec-Z 
+boost::uint8_t rFutureMonth[] = {
+    0,  // A
+    0,  // B
+    0,  // C
+    0,  // D
+    0,  // E
+      1,  // F
+      2,  // G
+      3,  // H
+    0,  // I
+      4,  // J
+      5,  // K
+    0,  // L
+      6,  // M
+      7,  // N
+    0,  // O
+    0,  // P
+      8,  // Q
+    0,  // R
+    0,  // S
+    0,  // T
+      9,  // U
+     10,  // V
+    0,  // W
+     11,  // X
+    0,  // Y
+     12  // Z
+  };
+ 
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou

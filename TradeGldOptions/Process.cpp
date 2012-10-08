@@ -899,7 +899,7 @@ void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
       OpenPositions();
     }
     m_TradingState = ETSTrading;
-  }
+  } 
 }
 
 void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {

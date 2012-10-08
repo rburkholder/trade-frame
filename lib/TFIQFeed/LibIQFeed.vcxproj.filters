@@ -105,6 +105,9 @@
     <ClInclude Include="LoadMktSymbolsTable.h">
       <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
+    <ClInclude Include="ParseOptionDescription.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
