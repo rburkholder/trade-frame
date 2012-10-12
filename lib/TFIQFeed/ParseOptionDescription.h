@@ -20,11 +20,7 @@
 #include <boost/spirit/include/qi_symbols.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
-//#include <boost/spirit/include/phoenix_bind.hpp>
-//#include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
-//#include <boost/spirit/include/phoenix_object.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
@@ -45,7 +41,8 @@ struct structParsedOptionDescription {
   ou::tf::OptionSide::enumOptionSide& eOptionSide;
   double& dblStrike;
   structParsedOptionDescription( 
-    boost::uint8_t& nMonth_, boost::uint16_t& nYear_, ou::tf::OptionSide::enumOptionSide& eOptionSide_, double& dblStrike_ ):
+    boost::uint8_t& nMonth_, boost::uint16_t& nYear_, 
+        ou::tf::OptionSide::enumOptionSide& eOptionSide_, double& dblStrike_ ):
       nMonth( nMonth_ ), nYear( nYear_ ), eOptionSide( eOptionSide_ ), dblStrike( dblStrike_ ) {};
 };
 

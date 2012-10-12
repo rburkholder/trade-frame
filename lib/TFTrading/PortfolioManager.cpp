@@ -490,7 +490,6 @@ void CPortfolioManager::AttachToSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterRows ) );
   pSession->OnPopulate.Add( MakeDelegate( this, &CPortfolioManager::HandlePopulateTables ) );
-
 }
 
 void CPortfolioManager::DetachFromSession( ou::db::Session* pSession ) {

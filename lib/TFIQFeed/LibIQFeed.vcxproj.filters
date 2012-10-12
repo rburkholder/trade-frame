@@ -37,10 +37,10 @@
     <ClCompile Include="MarketSymbol.cpp">
       <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
-    <ClCompile Include="ParseMktSymbols.cpp">
+    <ClCompile Include="LoadMktSymbolsTable.cpp">
       <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
-    <ClCompile Include="LoadMktSymbolsTable.cpp">
+    <ClCompile Include="ParseMktSymbolLine.cpp">
       <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,13 +99,19 @@
     <ClInclude Include="MarketSymbols.h">
       <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
-    <ClInclude Include="ParseMktSymbols.h">
-      <Filter>Header Files\MarketSymbols</Filter>
-    </ClInclude>
     <ClInclude Include="LoadMktSymbolsTable.h">
       <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
     <ClInclude Include="ParseOptionDescription.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseMktSymbolLine.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="ValidateMktSymbolLine.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseMktSymbolDiskFile.h">
       <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
   </ItemGroup>

@@ -269,7 +269,6 @@ void CAccountManager::AttachToSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Add( MakeDelegate( this, &CAccountManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &CAccountManager::HandleRegisterRows ) );
   pSession->OnPopulate.Add( MakeDelegate( this, &CAccountManager::HandlePopulateTables ) );
-
 }
 
 void CAccountManager::DetachFromSession( ou::db::Session* pSession ) {
