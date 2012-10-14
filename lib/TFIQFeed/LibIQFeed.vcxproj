@@ -156,6 +156,7 @@
     <ClCompile Include="LoadMktSymbolsTable.cpp" />
     <ClCompile Include="MarketSymbol.cpp" />
     <ClCompile Include="MarketSymbols.cpp" />
+    <ClCompile Include="ParseMktSymbolDiskFile.cpp" />
     <ClCompile Include="ParseMktSymbolLine.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -163,6 +164,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ValidateMktSymbolLine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CurlGetMktSymbols.h" />

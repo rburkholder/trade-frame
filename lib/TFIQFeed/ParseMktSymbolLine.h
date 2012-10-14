@@ -20,6 +20,7 @@
 #include <boost/spirit/include/qi_symbols.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 
 namespace qi = boost::spirit::qi;
@@ -40,9 +41,9 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sExchange)
   (std::string, sListedMarket)
   (sc_t, sc)
-  (std::string, sSIC)
-  (std::string, sFrontMonth)
-  (std::string, sNAICS)
+  (boost::uint32_t, nSIC)
+  (boost::uint32_t, nNAICS)
+  (bool, bFrontMonth)
   )
 
 namespace ou { // One Unified
@@ -91,9 +92,9 @@ struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
     rExchange     %= rNotATab;
     rListedMarket %= rNotATab;
     rSymbolClassifier %= ( symTypes | rDefaultSymType ); 
-    rSic          %= qi::lexeme[    qi::uint_ ];
-    rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = true ] | qi::eps );
-    rNaics        %= qi::lexeme[    qi::uint_ ];
+    rSic          %= qi::lexeme[ qi::uint_ ];
+    rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = qi::true_ ] | qi::eps );
+    rNaics        %= qi::lexeme[ qi::uint_ ];
 
     start %=               rSymbol
       > qi::lit( '\t' ) > -rDescription 
@@ -126,9 +127,9 @@ struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
   qi::rule<Iterator, std::string()> rExchange;
   qi::rule<Iterator, std::string()> rListedMarket;
   qi::rule<Iterator, sc_t()> rSymbolClassifier;
-  qi::rule<Iterator, std::string()> rSic;
-  qi::rule<Iterator, std::string()> rFrontMonth;
-  qi::rule<Iterator, std::string()> rNaics;
+  qi::rule<Iterator, boost::uint32_t()> rSic;
+  qi::rule<Iterator, bool> rFrontMonth;
+  qi::rule<Iterator, boost::uint32_t()> rNaics;
   qi::rule<Iterator, trd_t()> start;
 };
 

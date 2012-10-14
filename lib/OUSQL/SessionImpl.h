@@ -33,6 +33,12 @@
 // need to add ''create index ... ' clause during table creation
 // need to add transaction/commit/rollback capabilities
 
+// 2012/10/13
+// QueryFields has a problem.  Things have to be re-written so that a statement can be prepared 
+// independently of a supplied structure.  A new structure may be required on each execution of the statement.
+// Currently, the same physical structure needs to be re-used.  Structure is provided during statement construction,
+// not necessarily a good thing all the time.
+
 
 #include <string>
 #include <map>
@@ -110,7 +116,7 @@ class QueryFields:
 {
 public:
   typedef boost::intrusive_ptr<QueryFields<F> > pQueryFields_t;
-  QueryFields( F& f ): QueryBase(), var( f ) {};
+  explicit QueryFields( F& f ): QueryBase(), var( f ) {};
   ~QueryFields( void ) {};
   F& var;  // 2011/03/07  I want to make this a reference to a constant var at some point
    // will require mods to Bind, and will need Fields( A& a ) const, hopefully will work with the Actions passed in
@@ -124,7 +130,7 @@ template<class F>
 class Query: public QueryFields<F> {  // rename to Query once SessionImpl Query has been renamed successfully
 public:
 
-  Query( F& f ): m_bExecuteOneTime( false ), QueryFields<F>( f ) {};
+  explicit Query( F& f ): m_bExecuteOneTime( false ), QueryFields<F>( f ) {};
   ~Query( void ) {};
 
   Query& Where( const std::string& sWhere ) { // todo: ensure sub clause ordering
@@ -161,6 +167,7 @@ public:
 
   // conversion operator:  upon conversion from QueryState to QueryFields (upon assignment), execute the bind and execute
   // may need to add an auto-reset before the bind:  therefore need m_bBound member variable
+/*
   operator QueryFields<F>*() { 
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
@@ -168,7 +175,8 @@ public:
     }
     return dynamic_cast<QueryFields<F>* >( this ); 
   }
-
+*/
+/*
   operator QueryFields<F>&() { 
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
@@ -176,7 +184,7 @@ public:
     }
     return dynamic_cast<QueryFields<F>&>( *this ); 
   }
-
+*/
   operator typename QueryFields<F>::pQueryFields_t() { // this one is actually used
     if ( m_bExecuteOneTime ) {
       ProcessInQueryState();
@@ -334,7 +342,7 @@ public:
       m_mapTableDefs.begin(), 
       mapTableDefs_pair_t( sTableName, pQuery) );
 
-    m_vQuery.push_back( pQuery );
+//    m_vQuery.push_back( pQuery );
 
     return *pQuery;
 
@@ -372,7 +380,7 @@ public:
 
     pQuery->SetExecuteOneTime();
     
-    m_vQuery.push_back( pQuery );
+//    m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }
@@ -425,7 +433,7 @@ protected:
 
     pQuery->SetExecuteOneTime();
 
-    m_vQuery.push_back( pQuery );
+//    m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }

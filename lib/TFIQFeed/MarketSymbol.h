@@ -28,7 +28,7 @@ namespace iqfeed { // IQFeed
 class MarketSymbol {
 public:
 
-  enum enumSymbolClassifier: boost::uint8_t { // bits in bitmap of stored data record
+  enum enumSymbolClassifier: boost::uint32_t { // bits in bitmap of stored data record
     Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
       IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
       _Count
@@ -41,9 +41,9 @@ public:
     std::string sExchange;
     std::string sListedMarket;
     enumSymbolClassifier sc;
-//    ou::tf::InstrumentType::enumInstrumentTypes eContractTypes;
-    std::string sSIC;
-    std::string sNAICS;
+    boost::uint32_t nSIC;
+    boost::uint32_t nNAICS;
+    std::string sUnderlying;
     ou::tf::OptionSide::enumOptionSide eOptionSide;
     double dblStrike;
     boost::uint16_t nYear;
@@ -62,9 +62,9 @@ public:
       ou::db::Field( a, "exchange", sExchange );
       ou::db::Field( a, "market", sListedMarket );
       ou::db::Field( a, "symbolclass", sc );
-//      ou::db::Field( a, "type", eContractTypes );
-      ou::db::Field( a, "sic", sSIC );
-      ou::db::Field( a, "naics", sNAICS );
+      ou::db::Field( a, "sic", nSIC );
+      ou::db::Field( a, "naics", nNAICS );
+      ou::db::Field( a, "underlying", sUnderlying );
       ou::db::Field( a, "optionside", eOptionSide );
       ou::db::Field( a, "strike", dblStrike );
       ou::db::Field( a, "year", nYear );
@@ -75,8 +75,7 @@ public:
     }
 
     TableRowDef(void): dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), 
-      sc( Unknown ), bFrontMonth( false ), bHasOptions( false ),
-//      eContractTypes( ou::tf::InstrumentType::Unknown ), 
+      sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ),
       eOptionSide( ou::tf::OptionSide::Unknown ) {};
 
   };

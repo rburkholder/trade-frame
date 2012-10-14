@@ -43,6 +43,12 @@
     <ClCompile Include="ParseMktSymbolLine.cpp">
       <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
+    <ClCompile Include="ValidateMktSymbolLine.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
+    <ClCompile Include="ParseMktSymbolDiskFile.cpp">
+      <Filter>Source Files\MarketSymbols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IQFeed.h">

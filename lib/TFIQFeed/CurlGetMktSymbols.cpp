@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+#include <iostream>
+
 #include <boost/regex.hpp> 
 #include <boost/lexical_cast.hpp>
 

@@ -35,14 +35,16 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 struct structParsedOptionDescription {
-  std::string sUnderlying;
+  std::string& sUnderlying;
   boost::uint8_t& nMonth;
   boost::uint16_t& nYear;
   ou::tf::OptionSide::enumOptionSide& eOptionSide;
   double& dblStrike;
   structParsedOptionDescription( 
+    std::string& sUnderlying_,
     boost::uint8_t& nMonth_, boost::uint16_t& nYear_, 
         ou::tf::OptionSide::enumOptionSide& eOptionSide_, double& dblStrike_ ):
+      sUnderlying( sUnderlying_ ),
       nMonth( nMonth_ ), nYear( nYear_ ), eOptionSide( eOptionSide_ ), dblStrike( dblStrike_ ) {};
 };
 
