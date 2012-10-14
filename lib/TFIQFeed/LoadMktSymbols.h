@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -14,18 +14,25 @@
 
 #pragma once
 
+// Started 2012/10/14
+
+#include "InMemoryMktSymbolList.h"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-class LoadMktSymbolsTable {
+class LoadMktSymbols {
 public:
-  LoadMktSymbolsTable(void);
-  ~LoadMktSymbolsTable(void);
-
-  void Load( void );
+  LoadMktSymbols(void);
+  ~LoadMktSymbols(void);
+  void Load( bool bDownload, bool bLoadFromDisk, bool bSaveToDisk );
 protected:
 private:
+  typedef MarketSymbol::TableRowDef trd_t;
+  typedef InMemoryMktSymbolList symbols_t;
+  symbols_t m_symbols;
+
 };
 
 } // namespace iqfeed

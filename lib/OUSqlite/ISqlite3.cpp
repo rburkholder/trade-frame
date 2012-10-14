@@ -48,7 +48,13 @@ void ISqlite3::SessionClose( void ) {
   int rtn = sqlite3_close( m_db );
   m_db = 0;
   if (  SQLITE_OK != rtn ) {
-    assert( false );
+    if ( SQLITE_BUSY == rtn ) {
+      std::cout << "sqlite busy" << std::endl;  // prepared statements need to be closed
+    }
+    else {
+      assert( false );
+    }
+    
   }
 }
 

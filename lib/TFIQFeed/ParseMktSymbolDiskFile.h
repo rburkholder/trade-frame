@@ -14,9 +14,6 @@
 
 #pragma once
 
-#include <fstream>
-#include <iostream>
-
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -28,7 +25,7 @@ class ParseMktSymbolDiskFile {
 public:
 
   typedef const char* iterator_t;
-  typedef FastDelegate2<iterator_t,iterator_t> OnProcessLine_t;
+  typedef FastDelegate2<iterator_t&,iterator_t&> OnProcessLine_t;
 
   void SetOnProcessLine( OnProcessLine_t function ) {
     m_OnProcessLine = function;

@@ -342,7 +342,7 @@ public:
       m_mapTableDefs.begin(), 
       mapTableDefs_pair_t( sTableName, pQuery) );
 
-//    m_vQuery.push_back( pQuery );
+    m_vQuery.push_back( pQuery );
 
     return *pQuery;
 
@@ -380,7 +380,7 @@ public:
 
     pQuery->SetExecuteOneTime();
     
-//    m_vQuery.push_back( pQuery );
+    m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }
@@ -433,7 +433,7 @@ protected:
 
     pQuery->SetExecuteOneTime();
 
-//    m_vQuery.push_back( pQuery );
+    m_vQuery.push_back( pQuery );
 
     return *pQuery;
   }

@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CurlGetMktSymbols.cpp" />
+    <ClCompile Include="InMemoryMktSymbolList.cpp" />
     <ClCompile Include="IQFeedInstrumentFile.cpp" />
     <ClCompile Include="IQFeed.cpp" />
     <ClCompile Include="IQFeedHistoryCollector.cpp">
@@ -153,7 +154,8 @@
     <ClCompile Include="IQFeedProvider.cpp" />
     <ClCompile Include="IQFeedSymbol.cpp" />
     <ClCompile Include="IQFeedSymbolFile.cpp" />
-    <ClCompile Include="LoadMktSymbolsTable.cpp" />
+    <ClCompile Include="LoadMktSymbols.cpp" />
+    <ClCompile Include="UnzipMktSymbols.cpp" />
     <ClCompile Include="MarketSymbol.cpp" />
     <ClCompile Include="MarketSymbols.cpp" />
     <ClCompile Include="ParseMktSymbolDiskFile.cpp" />
@@ -168,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CurlGetMktSymbols.h" />
+    <ClInclude Include="InMemoryMktSymbolList.h" />
     <ClInclude Include="IQFeedInstrumentFile.h" />
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />
@@ -191,7 +194,8 @@
     <ClInclude Include="IQFeedProvider.h" />
     <ClInclude Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedSymbolFile.h" />
-    <ClInclude Include="LoadMktSymbolsTable.h" />
+    <ClInclude Include="LoadMktSymbols.h" />
+    <ClInclude Include="UnzipMktSymbols.h" />
     <ClInclude Include="MarketSymbol.h" />
     <ClInclude Include="MarketSymbols.h" />
     <ClInclude Include="ParseMktSymbolDiskFile.h" />

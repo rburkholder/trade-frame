@@ -16,7 +16,8 @@
 
 #include <vector>
 #include <map>
-#include<string>
+#include <string>
+#include <set>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -35,7 +36,8 @@ public:
 
   typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
   typedef FastDelegate1<trd_t&> OnProcessLine_t;
-  typedef FastDelegate1<const std::string&> OnProcessHasOption_t;
+  typedef FastDelegate1<const std::string&,bool> OnProcessHasOption_t;
+  typedef FastDelegate2<const std::string&,const std::string&> OnUpdateOptionUnderlying_t; // option name, underlying name
 
   void SetOnProcessLine( OnProcessLine_t function ) {
     m_OnProcessLine = function;
@@ -43,12 +45,18 @@ public:
   void SetOnProcessHasOption( OnProcessHasOption_t function ) {
     m_OnProcessHasOption = function;
   }
+  void SetOnUpdateOptionUnderlying( OnUpdateOptionUnderlying_t function ) {
+    m_OnUpdateOptionUnderlying = function;
+  }
 
   ValidateMktSymbolLine( void );
   virtual ~ValidateMktSymbolLine( void ) {};
 
   template<typename Iterator>
-  void Parse( Iterator begin, Iterator end );
+  void Parse( Iterator& begin, Iterator& end );
+
+  template<typename Iterator>
+  void ParseHeaderLine( Iterator& begin, Iterator& end );
 
   void PostProcess( void );
 
@@ -56,7 +64,7 @@ public:
 
   size_t LinesProcessed( void ) const { return cntLinesTotal; };
   void HandleParsedStructure( trd_t& trd ) {};  // override by inheriting class
-  void HandleUpdateHasOption( const std::string& ) {}; // override by inheriting class
+  bool HandleUpdateHasOption( const std::string& ) {}; // override by inheriting class
 protected:
 private:
 
@@ -64,6 +72,7 @@ private:
 
   OnProcessLine_t m_OnProcessLine;
   OnProcessHasOption_t m_OnProcessHasOption;
+  OnUpdateOptionUnderlying_t m_OnUpdateOptionUnderlying;
 
   struct structCountPerString { // count cnt of string s
     size_t cnt;
@@ -74,7 +83,8 @@ private:
 
   ou::KeyWordMatch<size_t> kwmExchanges;
   std::vector<structCountPerString> vSymbolsPerExchange;
-  std::map<std::string, unsigned long> mapUnderlying;  // keeps track of optionable symbols, to fix bool at end
+  typedef std::map<std::string,std::string> mapUnderlying_t;  // option name, underlying name
+  mapUnderlying_t mapUnderlying;  // keeps track of optionable symbols, to fix bool at end
 
   unsigned short nUnderlyingSize;
   size_t cntLinesTotal;
@@ -85,12 +95,20 @@ private:
   ou::tf::iqfeed::MktSymbolLineParser<const char*> parserFullLine;
   ou::tf::iqfeed::OptionDescriptionParser<std::string::const_iterator> parserOptionDescription;
   std::vector<size_t> vSymbolTypeStats;  // number of symbols of this SymbolType
+
+  std::vector<std::string> m_vSuffixesToTest;
+  std::set<std::string> m_setNoUnderlying;
 };
 
 extern boost::uint8_t rFutureMonth[];
 
 template<typename Iterator>
-void ValidateMktSymbolLine::Parse( Iterator begin, Iterator end ) {
+void ValidateMktSymbolLine::ParseHeaderLine( Iterator& begin, Iterator& end ) {
+  bool b = qi::parse( begin, end, qi::lexeme[ +( qi::char_ - qi::eol ) ] >> qi::eol );
+}
+
+template<typename Iterator>
+void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
   ++cntLinesTotal;  // number data lines processed
 
@@ -180,11 +198,11 @@ void ValidateMktSymbolLine::Parse( Iterator begin, Iterator end ) {
         std::string::const_iterator se( trd.sDescription.end() );
         bool b = parse( sb, se, parserOptionDescription, structOption );
         if ( b && ( sb == se ) ) {
-          if ( 0 == trd.sUnderlying ) {
+          if ( 0 == trd.sUnderlying.length() ) {
             std::cout << "Option Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
           }
           else {
-            mapUnderlying[ structOption.sUnderlying ] = 1;  // simply create an entry for later use
+            mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
           }
           nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
         }

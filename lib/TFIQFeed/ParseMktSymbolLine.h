@@ -71,6 +71,7 @@ struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
       ( "ICSPREAD", sc_t::ICSpread )
       ( "IEOPTION", sc_t::IEOption )
       ( "INDEX", sc_t::Index )
+      ( "MKTRPT", sc_t::MktRpt )
       ( "MKTSTATS", sc_t::MktStats )
       ( "MONEY", sc_t::Money )
       ( "MUTUAL", sc_t::Mutual )

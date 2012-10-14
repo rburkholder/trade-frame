@@ -14,28 +14,22 @@
 
 #include "StdAfx.h"
 
-#include <boost/scope_exit.hpp>
+//#include <boost/scope_exit.hpp>
 
 #include <ioapi.h>
 #include <ioapi_mem.h>
 #include <unzip.h>
 
-#include "CurlGetMktSymbols.h"
-#include "LoadMktSymbolsTable.h"
+//#include "CurlGetMktSymbols.h"
+#include "UnzipMktSymbols.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-LoadMktSymbolsTable::LoadMktSymbolsTable(void) {
-}
+UnZipMktSymbolsFile::pUnZippedFile_t UnZipMktSymbolsFile::UnZip( char* pchSource, size_t nSourceSize ) {
 
-LoadMktSymbolsTable::~LoadMktSymbolsTable(void) {
-}
-
-void LoadMktSymbolsTable::Load( void ) {
-
-  CurlGetMktSymbols cgms;
+//  CurlGetMktSymbols cgms;
 
   char* sZipFile( "**inmem**" );
   char* sSourceName( "mktsymbols_v2.txt" );
@@ -48,18 +42,20 @@ void LoadMktSymbolsTable::Load( void ) {
   om.base = 0;
   om.cur_offset = om.limit = om.size = 0;
 
-  om.base = cgms.Buffer();
-  om.size = cgms.Size();
+//  om.base = cgms.Buffer();
+//  om.size = cgms.Size();
+  om.base = pchSource;
+  om.size = nSourceSize;
 
-  char* pchUnzippedFileContent;
-  pchUnzippedFileContent = 0;
+//  char* pchUnzippedFileContent;
+//  pchUnzippedFileContent = 0;
 
-  BOOST_SCOPE_EXIT( &pchUnzippedFileContent ) {
-    if ( 0 != pchUnzippedFileContent ) {
-      delete[] pchUnzippedFileContent;
-      pchUnzippedFileContent = 0;
-    }
-  } BOOST_SCOPE_EXIT_END
+//  BOOST_SCOPE_EXIT( &pchUnzippedFileContent ) {
+//    if ( 0 != pchUnzippedFileContent ) {
+//      delete[] pchUnzippedFileContent;
+//      pchUnzippedFileContent = 0;
+//    }
+//  } BOOST_SCOPE_EXIT_END
 
   zlib_filefunc64_def ffunc;
 
@@ -81,12 +77,17 @@ void LoadMktSymbolsTable::Load( void ) {
   if ( UNZ_OK != err ) 
     throw  std::runtime_error( "open current" );
 
-  pchUnzippedFileContent = new char[ file_info.uncompressed_size ];
-  if ( 0 == pchUnzippedFileContent ) {
+  m_nUnZippedFileSize = file_info.uncompressed_size;
+  assert( 0 != m_nUnZippedFileSize );
+  pUnZippedFile_t pUnZippedFileContent;
+  pUnZippedFileContent.reset( new char[ file_info.uncompressed_size ] ); 
+//  pchUnzippedFileContent = new char[ file_info.uncompressed_size ];
+  if ( 0 == pUnZippedFileContent.get() ) {
     throw  std::runtime_error( "UnzippedFileContent" );
   }
 
-  int cnt = unzReadCurrentFile(uf,pchUnzippedFileContent,file_info.uncompressed_size);
+  int cnt = unzReadCurrentFile(uf,pUnZippedFileContent.get(),file_info.uncompressed_size);
+
   if ( file_info.uncompressed_size != cnt ) 
     throw  std::runtime_error( "read" );
 
@@ -98,6 +99,7 @@ void LoadMktSymbolsTable::Load( void ) {
   if ( UNZ_OK != err ) 
     throw  std::runtime_error( "close" );
 
+  return pUnZippedFileContent;
 }
 
 } // namespace iqfeed

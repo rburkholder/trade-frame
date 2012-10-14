@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * Copyright(c) 2009, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -14,44 +14,24 @@
 
 #pragma once
 
-// Started 2012/09/03
+#include <boost/shared_array.hpp>
 
-#include <string>
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
-#include <TFBitsNPieces/FrameWork01.h>
-
-// may need to inherit and add more functionality to the class:
-#include <TFTrading/DBOps.h>
-
-#include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/PanelLogging.h>
-
-#include <TFIQFeed/LoadMktSymbols.h>
-
-class AppCollectAndView:
-  public wxApp, public ou::tf::FrameWork01<AppCollectAndView> {
+class UnZipMktSymbolsFile {
 public:
+  UnZipMktSymbolsFile(void): m_nUnZippedFileSize( 0 ) {};
+  ~UnZipMktSymbolsFile(void) {};
+  typedef boost::shared_array<char> pUnZippedFile_t;
+  pUnZippedFile_t UnZip( char* pchSource, size_t nSourceSize );
+  size_t UnZippedFileSize( void ) const { return m_nUnZippedFileSize; };
 protected:
 private:
-
-  FrameMain* m_pFrameMain;
-//  PanelOptionsParameters* m_pPanelOptionsParameters;
-  ou::tf::PanelLogging* m_pPanelLogging;
-
-  DBOps m_db;
-
-  ou::tf::iqfeed::LoadMktSymbols m_MktSymbols;
-
-  virtual bool OnInit();
-  virtual int OnExit();
-
-  void HandlePopulateDatabase( void );
-
-  void HandleRegisterTables( ou::db::Session& session );
-  void HandleRegisterRows( ou::db::Session& session );
-
+  size_t m_nUnZippedFileSize;
 };
 
-// Implements MyApp& wxGetApp()
-DECLARE_APP(AppCollectAndView)
-
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

@@ -21,6 +21,18 @@
 
 #include "CurlGetMktSymbols.h"
 
+/*
+Header:  HTTP/1.1 200 OK
+Header:  Content-Length: 6824968
+Header:  Content-Type: application/x-zip-compressed
+Header:  Last-Modified: Sun, 14 Oct 2012 11:06:31 GMT
+Header:  Accept-Ranges: bytes
+Header:  ETag: "23f414f7fba9cd1:1432"
+Header:  Server: Microsoft-IIS/6.0
+Header:  X-Powered-By: ASP.NET
+Header:  Date: Sun, 14 Oct 2012 23:39:13 GMT
+Header:  */
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
@@ -84,12 +96,14 @@ static boost::regex rxContentLength( "[Cc]ontent-[Ll]ength[ ]*:[ ]*([0-9]+)" );
 size_t CurlGetMktSymbols::HeaderFunctionCallback(void* ptr, size_t size, size_t nmemb, void* self) {
   CurlGetMktSymbols* p = reinterpret_cast<CurlGetMktSymbols*>( self );
   if ( 0 != nmemb ) {
-    std::string s( reinterpret_cast<char*>( ptr ), size * nmemb );
+    char* pChar( reinterpret_cast<char*>( ptr ) );
+    std::string s( pChar, size * nmemb );
+    std::cout << "Header:  " << s;
     boost::cmatch what;
     bool bResult = boost::regex_search( s.c_str(), what, rxContentLength, boost::match_continuous  );
     if ( !bResult ) {
-      //std::cout << "problem" << std::endl;  // nothing found
-      throw std::runtime_error( "CurlGetMktSymbols::HeaderFunctionCallback nothing found" );
+      // no errors as we are waiting for the header we need
+      // flag is evaluated elsewhere
     }
     else { 
       p->m_size = boost::lexical_cast<size_t>( what[1].str() );

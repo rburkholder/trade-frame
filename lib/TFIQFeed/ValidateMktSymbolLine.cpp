@@ -63,20 +63,35 @@ ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
 {
     kwmExchanges.AddPattern( "Unknown", 0 );
     vSymbolsPerExchange[ 0 ].s = "UNKNOWN";
+    m_vSuffixesToTest.push_back( "" );
+    m_vSuffixesToTest.push_back( ".X" );
+    m_vSuffixesToTest.push_back( ".XI" );
+    m_vSuffixesToTest.push_back( ".XO" );
 }
 
 void ValidateMktSymbolLine::PostProcess( void ) {
-  for ( std::map<std::string, unsigned long>::iterator iter = mapUnderlying.begin();
-        mapUnderlying.end() != iter; 
-        iter++ ) {
+  for ( mapUnderlying_t::iterator iterMap = mapUnderlying.begin(); mapUnderlying.end() != iterMap; iterMap++ ) {
     // iterate through map and update bHasOptions flag in each record
       // ? check if underlying is a stock/equity/future  (sc should be set as such as well)
-      // if no record found for the symbol, then error:
-      //std::cout << "option with " << iter->first << " in DESCRIPTION has no underlying entry" << std::endl; // no underlying listed
-    if ( 0 != m_OnProcessHasOption ) m_OnProcessHasOption( iter->first );
-//    if ( &ValidateMktSymbolLine<CRTP,IteratorLines>::HandleUpdateHasOption != &CRTP::HandleUpdateHasOption ) {
-//      static_cast<CRTP*>( this )->HandleUpdateHasOption( iter->first );
-//    }
+    bool bStatus;  // todo:  check all combinations to see if any overlap
+    if ( 0 != m_OnProcessHasOption ) {
+      for ( std::vector<std::string>::const_iterator interVec = m_vSuffixesToTest.begin(); m_vSuffixesToTest.end() != interVec; interVec++ ) {
+        bStatus = m_OnProcessHasOption( iterMap->second + *interVec );
+        if ( bStatus ) {
+          if ( m_vSuffixesToTest.begin() != interVec ) {
+            if ( 0 != m_OnUpdateOptionUnderlying ) m_OnUpdateOptionUnderlying( iterMap->first, iterMap->second );
+          }
+          break;
+        }
+      }
+      if ( !bStatus ) {
+        std::set<std::string>::iterator iterSet = m_setNoUnderlying.find( iterMap->second );
+        if ( m_setNoUnderlying.end() == iterSet ) {
+          m_setNoUnderlying.insert( iterMap->second );
+          std::cout << "Error: can't find underlying " << iterMap->second << " for options like " << iterMap->first << std::endl;
+        }
+      }
+    }
   }
 }
 

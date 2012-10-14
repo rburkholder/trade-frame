@@ -25,12 +25,15 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+// Coding for writing to a sqlite database was stopped as it appeared to take about four to five hours to update
+// about a million records.  A bit too long for instant gratification.
+
 class MarketSymbol {
 public:
 
   enum enumSymbolClassifier: boost::uint32_t { // bits in bitmap of stored data record
     Unknown = 0, Bonds, Calc, Equity, FOption, Forex, Forward, Future, ICSpread, 
-      IEOption, Index, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
+      IEOption, Index, MktRpt, MktStats, Money, Mutual, PrecMtl, Spot, Spread, StratSpread, Swaps, Treasuries,
       _Count
   };
 
