@@ -12,24 +12,37 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+// CAV.cpp : Defines the entry point for the application.
+//
 
-// Started 2012/10/14
+#include "StdAfx.h"
 
-#include "InMemoryMktSymbolList.h"
+#include <iostream>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-namespace iqfeed { // IQFeed
+#include <TFIQFeed/LoadMktSymbols.h>
 
-namespace MktSymbolLoadType {
-  enum Enum { Download, LoadTextFromDisk };
+#include "Worker.h"
+
+Worker::Worker(void): m_thread( boost::ref( *this ) ) {
 }
 
-typedef InMemoryMktSymbolList symbols_t;
+Worker::~Worker(void) {
+}
 
-void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk );
+void Worker::operator()( void ) {
+  std::cout << "running" << std::endl;
 
-} // namespace iqfeed
-} // namespace tf
-} // namespace ou
+  ou::tf::iqfeed::symbols_t symbols;
+//  ou::tf::iqfeed::LoadMktSymbols( symbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true );
+//  ou::tf::iqfeed::LoadMktSymbols( symbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );
+//  symbols.SaveToFile( "symbols.ser" );
+  try {
+    std::cout << "Loading serialized symbols ... ";
+    symbols.LoadFromFile( "symbols.ser" );
+    std::cout << "done." << std::endl;
+  }
+  catch (...) {
+    std::cout << "ouch" << std::endl;
+  }
+
+}

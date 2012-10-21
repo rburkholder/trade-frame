@@ -25,9 +25,6 @@
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
-using namespace boost::phoenix;
-using namespace boost::phoenix::arg_names;
-
 #include "MarketSymbol.h"
 
 namespace ou { // One Unified

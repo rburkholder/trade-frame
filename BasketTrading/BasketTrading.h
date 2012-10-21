@@ -14,22 +14,40 @@
 
 #pragma once
 
-// Started 2012/10/14
+// Started 2012/10/15
 
-#include "InMemoryMktSymbolList.h"
+#include <string>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-namespace iqfeed { // IQFeed
+#include <TFBitsNPieces/FrameWork01.h>
 
-namespace MktSymbolLoadType {
-  enum Enum { Download, LoadTextFromDisk };
-}
+// may need to inherit and add more functionality to the class:
+#include <TFTrading/DBOps.h>
 
-typedef InMemoryMktSymbolList symbols_t;
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelLogging.h>
 
-void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk );
+class AppBasketTrading:
+  public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
+public:
+protected:
+private:
 
-} // namespace iqfeed
-} // namespace tf
-} // namespace ou
+  FrameMain* m_pFrameMain;
+//  PanelOptionsParameters* m_pPanelOptionsParameters;
+  ou::tf::PanelLogging* m_pPanelLogging;
+
+  DBOps m_db;
+
+  virtual bool OnInit();
+  virtual int OnExit();
+
+  void HandlePopulateDatabase( void );
+
+  void HandleRegisterTables( ou::db::Session& session );
+  void HandleRegisterRows( ou::db::Session& session );
+
+};
+
+// Implements MyApp& wxGetApp()
+DECLARE_APP(AppBasketTrading)
+

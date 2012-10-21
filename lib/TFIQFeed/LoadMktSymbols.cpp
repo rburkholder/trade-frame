@@ -31,28 +31,24 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-LoadMktSymbols::LoadMktSymbols(void) {
-}
+typedef MarketSymbol::TableRowDef trd_t;
 
-LoadMktSymbols::~LoadMktSymbols(void) {
-}
-
-void LoadMktSymbols::Load( bool bDownload, bool bLoadFromDisk, bool bSaveToDisk ) {
+void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk ) {
   // valid combinations:
-  // bDownload      t t f
-  // bLoadFromDisk  f f t
-  // bSaveToDisk    f t f
+  // bDownload            t t t t f f
+  // bLoadTextFromDisk    f f f f t t 
+  // bSaveTextToDisk      f t t f f f
+  // bSaveStructureToDisk f f t t f t
   if (
-    (  bDownload && !bLoadFromDisk && !bSaveToDisk ) ||
-    (  bDownload && !bLoadFromDisk &&  bSaveToDisk ) ||
-    ( !bDownload &&  bLoadFromDisk && !bSaveToDisk ) 
+    ( MktSymbolLoadType::Download == e ) ||
+    ( ( MktSymbolLoadType::LoadTextFromDisk == e ) && !bSaveTextToDisk )
     ) {
   }
   else {
     throw std::runtime_error( "illegal option combination" );
   }
-
-  if ( bDownload ) {
+  switch ( e ) {
+  case MktSymbolLoadType::Download:
     try {
 
       CurlGetMktSymbols cgms;
@@ -60,7 +56,7 @@ void LoadMktSymbols::Load( bool bDownload, bool bLoadFromDisk, bool bSaveToDisk 
       UnZipMktSymbolsFile uzmsf;
       UnZipMktSymbolsFile::pUnZippedFile_t pUnZippedFile = uzmsf.UnZip( cgms.Buffer(), cgms.Size() );
 
-      if ( bSaveToDisk ) {
+      if ( bSaveTextToDisk ) {
         std::ofstream file;
         char* name = "mktsymbols_v2.txt";
         std::cout << "Writing Symbol File " << std::endl;
@@ -78,24 +74,21 @@ void LoadMktSymbols::Load( bool bDownload, bool bLoadFromDisk, bool bSaveToDisk 
       ValidateMktSymbolLine validator;
       const char* pBegin = pUnZippedFile.get();
       const char* pEnd = pBegin + uzmsf.UnZippedFileSize();
-      validator.SetOnProcessLine( MakeDelegate( &m_symbols, &symbols_t::HandleParsedStructure ) );
+      validator.SetOnProcessLine( MakeDelegate( &symbols, &symbols_t::HandleParsedStructure ) );
       validator.ParseHeaderLine( pBegin, pEnd );
       while ( pBegin != pEnd ) {
         validator.Parse( pBegin, pEnd );
       } 
-      validator.SetOnProcessHasOption( MakeDelegate( &m_symbols, &symbols_t::HandleSymbolHasOption ) );
-      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &m_symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
+      validator.SetOnProcessHasOption( MakeDelegate( &symbols, &symbols_t::HandleSymbolHasOption ) );
+      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
       validator.PostProcess();
       validator.Summary();
-
     }
     catch( ... ) {
       std::cout << "Some Sort of failure in Download" << std::endl;
     }
-  }
-
-  if ( bLoadFromDisk ) {
-
+    break;
+  case MktSymbolLoadType::LoadTextFromDisk:
     typedef ParseMktSymbolDiskFile diskfile_t;
 
     try {
@@ -103,19 +96,19 @@ void LoadMktSymbols::Load( bool bDownload, bool bLoadFromDisk, bool bSaveToDisk 
       diskfile_t diskfile;
       ValidateMktSymbolLine validator;
       diskfile.SetOnProcessLine( MakeDelegate( &validator, &ValidateMktSymbolLine::Parse<diskfile_t::iterator_t> ) );
-      validator.SetOnProcessLine( MakeDelegate( &m_symbols, &symbols_t::HandleParsedStructure ) );
+      validator.SetOnProcessLine( MakeDelegate( &symbols, &symbols_t::HandleParsedStructure ) );
 
       diskfile.Run();
 
-      validator.SetOnProcessHasOption( MakeDelegate( &m_symbols, &symbols_t::HandleSymbolHasOption ) );
-      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &m_symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
+      validator.SetOnProcessHasOption( MakeDelegate( &symbols, &symbols_t::HandleSymbolHasOption ) );
+      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
       validator.PostProcess();
       validator.Summary();
     }
     catch (...) {
       std::cout << "Some sort of failure on disk read" << std::endl;
     }
-
+    break;
   }
 
 }

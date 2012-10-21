@@ -14,22 +14,19 @@
 
 #pragma once
 
-// Started 2012/10/14
+#include <boost/thread/thread.hpp>
+#include <boost/ref.hpp>
+#include <boost/noncopyable.hpp>
 
-#include "InMemoryMktSymbolList.h"
+class Worker {
+public:
+  Worker(void);
+  ~Worker(void);
+  void operator()( void );
+  void Join( void ) { m_thread.join(); };
+protected:
+private:
+  boost::thread m_thread;
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-namespace iqfeed { // IQFeed
+};
 
-namespace MktSymbolLoadType {
-  enum Enum { Download, LoadTextFromDisk };
-}
-
-typedef InMemoryMktSymbolList symbols_t;
-
-void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk );
-
-} // namespace iqfeed
-} // namespace tf
-} // namespace ou

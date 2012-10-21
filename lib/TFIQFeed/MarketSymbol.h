@@ -17,6 +17,9 @@
 #include <bitset>
 #include <string>
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+
 #include <boost/cstdint.hpp>
 
 #include <TFTrading/TradingEnumerations.h>
@@ -55,9 +58,6 @@ public:
     bool bFrontMonth;
     bool bHasOptions;
 
-    std::string sSecurityType;  // used during initial parsing
-    std::string sFrontMonth;  // used during initial parsing
-
     template<class A>
     void Fields( A& a) {
       ou::db::Field( a, "symbol", sSymbol );
@@ -81,6 +81,33 @@ public:
       sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ),
       eOptionSide( ou::tf::OptionSide::Unknown ) {};
 
+  private:
+
+    /* serialization support */
+
+    friend class boost::serialization::access;
+    
+    template<class Archive>
+    void serialize(Archive& ar,const unsigned int) {
+      ar 
+        & BOOST_SERIALIZATION_NVP(sSymbol)
+        & BOOST_SERIALIZATION_NVP(sDescription)
+        & BOOST_SERIALIZATION_NVP(sExchange)
+        & BOOST_SERIALIZATION_NVP(sListedMarket)
+        & BOOST_SERIALIZATION_NVP(sc)
+        & BOOST_SERIALIZATION_NVP(nSIC)
+        & BOOST_SERIALIZATION_NVP(nNAICS)
+        & BOOST_SERIALIZATION_NVP(sUnderlying)
+        & BOOST_SERIALIZATION_NVP(eOptionSide)
+        & BOOST_SERIALIZATION_NVP(dblStrike)
+        & BOOST_SERIALIZATION_NVP(nYear)
+        & BOOST_SERIALIZATION_NVP(nMonth) 
+        & BOOST_SERIALIZATION_NVP(nDay)
+        & BOOST_SERIALIZATION_NVP(bFrontMonth)
+        & BOOST_SERIALIZATION_NVP(bHasOptions)
+        ;
+    }
+
   };
 
   struct TableCreateDef: TableRowDef {
@@ -100,6 +127,7 @@ public:
 protected:
 private:
   TableRowDef m_row;
+
 };
 
 } // namespace iqfeed

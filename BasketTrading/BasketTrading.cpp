@@ -17,19 +17,20 @@
 
 #include "stdafx.h"
 
-#include "CAV.h"
-IMPLEMENT_APP(AppCollectAndView)
-
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
-#include <TFIQFeed/ParseMktSymbolDiskFile.h>
+#include "Worker.h"
 
-bool AppCollectAndView::OnInit() {
+#include "BasketTrading.h"
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Collect And View" );
+IMPLEMENT_APP(AppBasketTrading)
+
+bool AppBasketTrading::OnInit() {
+
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Basket Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -70,20 +71,20 @@ bool AppCollectAndView::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterRows ) );
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppCollectAndView::HandlePopulateDatabase ) );
+  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
+  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
+  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
 
   // maybe set scenario with database and with in memory data structure
-  m_db.Open( "cav.db" );
+  m_db.Open( "basket.db" );
 
-  m_MktSymbols.Load( true, false, true );  // put this into a thread
+  Worker worker;
 
   return 1;
 
 }
 
-int AppCollectAndView::OnExit() {
+int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
 
@@ -93,13 +94,13 @@ int AppCollectAndView::OnExit() {
 }
 
 
-void AppCollectAndView::HandleRegisterTables(  ou::db::Session& session ) {
+void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
 }
 
-void AppCollectAndView::HandleRegisterRows(  ou::db::Session& session ) {
+void AppBasketTrading::HandleRegisterRows(  ou::db::Session& session ) {
 }
 
-void AppCollectAndView::HandlePopulateDatabase( void ) {
+void AppBasketTrading::HandlePopulateDatabase( void ) {
 
   ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
     = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
