@@ -16,9 +16,8 @@
 
 #include <TFIQFeed/IQFeedHistoryQuery.h>
 
-class HistoryDailyTick:  public ou::tf::CIQFeedHistoryQuery<HistoryDailyTick>
-{
-  friend ou::tf::CIQFeedHistoryQuery<HistoryDailyTick>;
+class HistoryDailyTick:  public ou::tf::iqfeed::HistoryQuery<HistoryDailyTick> {
+  friend ou::tf::iqfeed::HistoryQuery<HistoryDailyTick>;
 public:
   HistoryDailyTick(void);
   ~HistoryDailyTick(void);

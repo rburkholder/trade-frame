@@ -259,7 +259,7 @@ void CProcess::IQFeedDisconnect( void ) {
 void CProcess::HandleOnDataConnected(int e) {
   m_bDataConnected = true;
   HandleOnConnected(e);
-//  CIQFeedHistoryQuery<CProcess>::Connect();  
+//  HistoryQuery<CProcess>::Connect();  
 }
 
 void CProcess::HandleOnDataDisconnected(int e) {
@@ -268,7 +268,7 @@ void CProcess::HandleOnDataDisconnected(int e) {
 }
 
 void CProcess::HandleOnData2Connected(int e) {
-  CIQFeedHistoryQuery<CProcess>::Connect();  
+  HistoryQuery<CProcess>::Connect();  
   m_bData2Connected = true;
   HandleOnConnected( e );
 }
@@ -279,7 +279,7 @@ void CProcess::HandleOnData2Disconnected(int e) {
 }
 
 void CProcess::OnHistoryConnected( void ) {
-  CIQFeedHistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
+  HistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
 }
 
 void CProcess::HandleOnExecConnected(int e) {
@@ -600,7 +600,7 @@ void CProcess::OnHistorySummaryData( structSummary* pDP ) {
 }
 
 void CProcess::OnHistoryRequestDone( void ) {
-  CIQFeedHistoryQuery<CProcess>::Disconnect();  
+  HistoryQuery<CProcess>::Disconnect();  
   CPivotSet pivots;
   pivots.CalcPivots( m_sSymbolName, m_Bar.High(), m_Bar.Low(), m_Bar.Close() );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::R3 ) );

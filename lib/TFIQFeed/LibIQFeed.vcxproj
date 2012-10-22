@@ -136,7 +136,9 @@
   <ItemGroup>
     <ClCompile Include="CurlGetMktSymbols.cpp" />
     <ClCompile Include="InMemoryMktSymbolList.cpp" />
-    <ClCompile Include="IQFeedInstrumentFile.cpp" />
+    <ClCompile Include="IQFeedInstrumentFile.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="IQFeed.cpp" />
     <ClCompile Include="IQFeedHistoryCollector.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -171,7 +173,9 @@
   <ItemGroup>
     <ClInclude Include="CurlGetMktSymbols.h" />
     <ClInclude Include="InMemoryMktSymbolList.h" />
-    <ClInclude Include="IQFeedInstrumentFile.h" />
+    <ClInclude Include="IQFeedInstrumentFile.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />
     <ClInclude Include="IQFeedHistoryBulkQueryMsgShim.h" />

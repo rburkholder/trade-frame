@@ -14,6 +14,8 @@
 
 #pragma once
 
+// 2012/10/21 Deprecated, no longer use db4
+
 #include <bitset>
 
 #include <OUBerkeleyDb/EnvManager.h>

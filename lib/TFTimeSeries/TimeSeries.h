@@ -97,11 +97,20 @@ public:
 
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
 
+  template<typename Functor>
+  typename Functor::return_type ForEach( Functor f ) const {
+    return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
+//    for ( std::vector<T>::const_iterator iter = m_vSeries.begin(); iter != m_vSeries.end(); iter++ ) {
+//      f( *iter );
+//    }
+//    return (f);
+  }
+
 protected:
 private:
+  std::string m_sName;
   std::vector<T> m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
-  std::string m_sName;
 };
 
 template<typename T> 

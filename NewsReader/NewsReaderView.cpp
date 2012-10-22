@@ -32,7 +32,7 @@ CNewsReaderView::CNewsReaderView()
     WM_IQFEED_NEWS_CONFIG_DONE, WM_IQFEED_STORY_LINE, WM_IQFEED_STORY_DONE ),
   m_stateStoryRetrieval( INACTIVE )
 {
-  m_pIQFeed = new ou::tf::CIQFeedMsgShim<CNewsReaderView>( m_MsgIdsForIQFeed );
+  m_pIQFeed = new ou::tf::iqfeed::MsgShim<CNewsReaderView>( m_MsgIdsForIQFeed );
 }
 
 CNewsReaderView::~CNewsReaderView() {

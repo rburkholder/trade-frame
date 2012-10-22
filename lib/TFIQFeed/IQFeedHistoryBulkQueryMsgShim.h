@@ -14,18 +14,19 @@
 
 #pragma once
 
-// 2010/05/31 translates CIQFeedHistoryBulkQuery events to Win API Messages for cross thread consumption
+// 2010/05/31 translates HistoryBulkQuery events to Win API Messages for cross thread consumption
 
 #include "IQFeedHistoryBulkQuery.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 template <typename T>
-class CIQFeedHistoryBulkQueryMsgShim: public CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQueryMsgShim<T> > {
-  friend CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQueryMsgShim<T> >;
+class HistoryBulkQueryMsgShim: public HistoryBulkQuery<HistoryBulkQueryMsgShim<T> > {
+  friend HistoryBulkQuery<HistoryBulkQuery<HistoryBulkQueryMsgShim<T> >;
 public:
-  typedef typename CIQFeedHistoryBulkQuery<CIQFeedHistoryBulkQueryMsgShim<T> > inherited_t;
+  typedef typename HistoryBulkQuery<HistoryBulkQueryMsgShim<T> > inherited_t;
 
   enum enumMessages {
     WM_HBQ_Done,
@@ -56,5 +57,6 @@ private:
   structMessageDestinations m_messageDestinations;
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

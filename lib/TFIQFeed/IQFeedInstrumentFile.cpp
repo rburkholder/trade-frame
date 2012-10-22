@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+// 2012/10/21 Deprecated, no longer use db4
+
 #include <string>
 #include <stdexcept>
 #include <cassert>

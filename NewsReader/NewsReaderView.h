@@ -54,7 +54,7 @@ public:
     DLGRESIZE_CONTROL( IDC_EDITSTORY, DLSZ_SIZE_X | DLSZ_SIZE_Y )
   END_DLGRESIZE_MAP()
 
-  typedef ou::tf::CIQFeedMsgShim<CNewsReaderView>::linebuffer_t linebuffer_t;
+  typedef ou::tf::iqfeed::MsgShim<CNewsReaderView>::linebuffer_t linebuffer_t;
 
 // Handler prototypes (uncomment arguments if needed):
 //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -184,8 +184,8 @@ protected:
 private:
   typedef CDialogImpl<CNewsReaderView> CThisClass;
 
-  ou::tf::CIQFeedMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
-  ou::tf::CIQFeedMsgShim<CNewsReaderView>* m_pIQFeed;
+  ou::tf::iqfeed::MsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForIQFeed;
+  ou::tf::iqfeed::MsgShim<CNewsReaderView>* m_pIQFeed;
 
   ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView>::structMessageDestinations m_MsgIdsForNewsQuery;
   ou::tf::CIQFeedNewsQueryMsgShim<CNewsReaderView>* m_pIQFeedNewsQuery;

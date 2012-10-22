@@ -33,20 +33,23 @@ namespace iqfeed { // IQFeed
 
 typedef MarketSymbol::TableRowDef trd_t;
 
-void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk ) {
+void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk ) {
   // valid combinations:
-  // bDownload            t t t t f f
-  // bLoadTextFromDisk    f f f f t t 
-  // bSaveTextToDisk      f t t f f f
-  // bSaveStructureToDisk f f t t f t
+  // bDownload            t t f
+  // bLoadTextFromDisk    f f t 
+  // bSaveTextToDisk      f t f
   if (
-    ( MktSymbolLoadType::Download == e ) ||
+    (   MktSymbolLoadType::Download == e ) ||
     ( ( MktSymbolLoadType::LoadTextFromDisk == e ) && !bSaveTextToDisk )
     ) {
   }
   else {
     throw std::runtime_error( "illegal option combination" );
   }
+
+  ValidateMktSymbolLine validator;
+  validator.SetOnProcessLine( MakeDelegate( &symbols, &InMemoryMktSymbolList::HandleParsedStructure ) );
+
   switch ( e ) {
   case MktSymbolLoadType::Download:
     try {
@@ -71,18 +74,12 @@ void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum e, bool bSaveTe
       }
 
       std::cout << "Processing Contents" << std::endl;
-      ValidateMktSymbolLine validator;
       const char* pBegin = pUnZippedFile.get();
       const char* pEnd = pBegin + uzmsf.UnZippedFileSize();
-      validator.SetOnProcessLine( MakeDelegate( &symbols, &symbols_t::HandleParsedStructure ) );
       validator.ParseHeaderLine( pBegin, pEnd );
       while ( pBegin != pEnd ) {
         validator.Parse( pBegin, pEnd );
       } 
-      validator.SetOnProcessHasOption( MakeDelegate( &symbols, &symbols_t::HandleSymbolHasOption ) );
-      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
-      validator.PostProcess();
-      validator.Summary();
     }
     catch( ... ) {
       std::cout << "Some Sort of failure in Download" << std::endl;
@@ -94,22 +91,20 @@ void LoadMktSymbols( symbols_t& symbols, MktSymbolLoadType::Enum e, bool bSaveTe
     try {
 
       diskfile_t diskfile;
-      ValidateMktSymbolLine validator;
       diskfile.SetOnProcessLine( MakeDelegate( &validator, &ValidateMktSymbolLine::Parse<diskfile_t::iterator_t> ) );
-      validator.SetOnProcessLine( MakeDelegate( &symbols, &symbols_t::HandleParsedStructure ) );
 
       diskfile.Run();
-
-      validator.SetOnProcessHasOption( MakeDelegate( &symbols, &symbols_t::HandleSymbolHasOption ) );
-      validator.SetOnUpdateOptionUnderlying( MakeDelegate( &symbols, &symbols_t::HandleUpdateOptionUnderlying ) );
-      validator.PostProcess();
-      validator.Summary();
     }
     catch (...) {
       std::cout << "Some sort of failure on disk read" << std::endl;
     }
     break;
   }
+
+  validator.SetOnProcessHasOption( MakeDelegate( &symbols, &InMemoryMktSymbolList::HandleSymbolHasOption ) );
+  validator.SetOnUpdateOptionUnderlying( MakeDelegate( &symbols, &InMemoryMktSymbolList::HandleUpdateOptionUnderlying ) );
+  validator.PostProcess();
+  validator.Summary();
 
 }
 

@@ -26,16 +26,16 @@
 
 #include <boost/thread/locks.hpp>
 
-#include <TFIQFeed/IQFeedInstrumentFile.h>
+//#include <TFIQFeed/IQFeedInstrumentFile.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 
 class CProcess: 
-  public ou::tf::CIQFeedHistoryBulkQuery<CProcess>
+  public ou::tf::iqfeed::HistoryBulkQuery<CProcess>
 {
-  friend ou::tf::CIQFeedHistoryBulkQuery<CProcess>;
+  friend ou::tf::iqfeed::HistoryBulkQuery<CProcess>;
 public:
 
-  typedef ou::tf::CIQFeedHistoryBulkQuery<CProcess> inherited_t;
+  typedef ou::tf::iqfeed::HistoryBulkQuery<CProcess> inherited_t;
 
   CProcess(void);
   ~CProcess(void);
@@ -43,15 +43,15 @@ public:
 
 protected:
 
-  // CRTP from CIQFeedHistoryBulkQuery<CProcess>
+  // CRTP from HistoryBulkQuery<CProcess>
   void OnBars( inherited_t::structResultBar* bars );
   void OnTicks( inherited_t::structResultTicks* ticks );
   void OnCompletion( void );
 
 private:
 
-  ou::tf::CInstrumentFile m_IF;
-  ou::tf::CInstrumentFile::iterator m_iterSymbols;
+//  ou::tf::CInstrumentFile m_IF;
+//  ou::tf::CInstrumentFile::iterator m_iterSymbols;
 
   std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::vector<std::string> m_vSymbols;  // list of symbols to be scanned

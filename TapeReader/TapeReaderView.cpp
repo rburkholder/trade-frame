@@ -35,7 +35,7 @@ CTapeReaderView::CTapeReaderView( void )
   m_stateUI( UI_STARTING ),
   m_bRunning( false )
 {
-  m_pIQFeed = new ou::tf::CIQFeedMsgShim<CTapeReaderView>( m_Destinations );
+  m_pIQFeed = new ou::tf::iqfeed::MsgShim<CTapeReaderView>( m_Destinations );
 }
 
 CTapeReaderView::~CTapeReaderView( void ) {

@@ -14,20 +14,24 @@
 
 #pragma once
 
-// Started 2012/10/14
+#include <boost/thread/mutex.hpp>
 
-#include "InMemoryMktSymbolList.h"
+#include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 
-namespace ou { // One Unified
-namespace tf { // TradeFrame
-namespace iqfeed { // IQFeed
+class SymbolSelection: public ou::tf::iqfeed::HistoryBulkQuery<SymbolSelection> {
+  friend class ou::tf::iqfeed::HistoryBulkQuery<SymbolSelection>;
+public:
+  explicit SymbolSelection( size_t nBarsExpected );
+  ~SymbolSelection(void);
 
-namespace MktSymbolLoadType {
-  enum Enum { Download, LoadTextFromDisk };
-}
+  
+protected:
+private:
+  size_t m_nBarsExpected;  // number of expected bars
+  boost::mutex m_mutexProcessBarsScopeLock;
+//  void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structInterval* pDP );
+//  void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP );
+  void OnHistoryRequestDone( structQueryState* pqs );
+  void OnCompletion( void );
+};
 
-void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk );
-
-} // namespace iqfeed
-} // namespace tf
-} // namespace ou

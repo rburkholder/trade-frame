@@ -44,9 +44,9 @@
 using namespace ou::tf;
 
 class CProcess: 
-  public CIQFeedHistoryQuery<CProcess>
+  public HistoryQuery<CProcess>
 {
-  friend CIQFeedHistoryQuery<CProcess>;
+  friend HistoryQuery<CProcess>;
 public:
 
   enum enumMode {

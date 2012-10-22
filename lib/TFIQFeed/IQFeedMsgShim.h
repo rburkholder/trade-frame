@@ -20,12 +20,13 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
 template <typename T>
-class CIQFeedMsgShim: public CIQFeed<CIQFeedMsgShim<T> > {
-  friend CIQFeed<CIQFeedMsgShim<T> >;
+class MsgShim: public CIQFeed<MsgShim<T> > {
+  friend CIQFeed<MsgShim<T> >;
 public:
-  typedef typename CIQFeed<CIQFeedMsgShim<T> > inherited_t;
+  typedef typename CIQFeed<MsgShim<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   // pre-initialized message ids for messages delivered to and accepted by external caller
@@ -56,11 +57,11 @@ public:
     };
   };
  
-  CIQFeedMsgShim( const structMessageDestinations& MessageDestinations) 
+  MsgShim( const structMessageDestinations& MessageDestinations) 
     : m_structMessageDestinations( MessageDestinations ) {
       assert( NULL != MessageDestinations.owner );
   };
-  ~CIQFeedMsgShim( void ) {};
+  ~MsgShim( void ) {};
 
 
 protected:
@@ -173,5 +174,6 @@ private:
     structMessageDestinations m_structMessageDestinations;
 };
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

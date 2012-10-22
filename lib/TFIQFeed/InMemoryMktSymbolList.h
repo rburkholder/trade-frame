@@ -74,7 +74,6 @@ struct InMemoryMktSymbolList {
   }
 
   bool HandleSymbolHasOption( const std::string& s ) {
-    typedef ou::tf::iqfeed::InMemoryMktSymbolList::ixSymbol ixSymbol;
     typedef symbols_t::index<ixSymbol>::type SymbolsByName_t;
     SymbolsByName_t::iterator iter = m_symbols.get<ixSymbol>().find( s );
     bool bReturn = false;
@@ -86,7 +85,6 @@ struct InMemoryMktSymbolList {
   }
 
   void HandleUpdateOptionUnderlying( const std::string& sSymbol, const std::string& sUnderlying ) {
-    typedef ou::tf::iqfeed::InMemoryMktSymbolList::ixSymbol ixSymbol;
     typedef symbols_t::index<ixSymbol>::type SymbolsByName_t;
     SymbolsByName_t::iterator iter = m_symbols.get<ixSymbol>().find( sSymbol );
     bool bReturn = false;

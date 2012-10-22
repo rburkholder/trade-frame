@@ -204,9 +204,9 @@ protected:
 private:
   typedef CDialogImpl<CTapeReaderView> CThisClass;
 
-  ou::tf::CIQFeedMsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
-  ou::tf::CIQFeedMsgShim<CTapeReaderView>* m_pIQFeed;
-  typedef ou::tf::CIQFeedMsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
+  ou::tf::iqfeed::MsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
+  ou::tf::iqfeed::MsgShim<CTapeReaderView>* m_pIQFeed;
+  typedef ou::tf::iqfeed::MsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
 
   std::string m_sSymbol;
 

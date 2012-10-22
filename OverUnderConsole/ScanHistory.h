@@ -19,16 +19,16 @@
 
 #include <boost/thread/barrier.hpp>
 
-#include <TFIQFeed/IQFeedInstrumentFile.h>
+//#include <TFIQFeed/IQFeedInstrumentFile.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFTimeSeries/TimeSeries.h>
 
 class ScanHistory;
-typedef ou::tf::CIQFeedHistoryBulkQuery<ScanHistory> HistoryBulkQuery_t;
+typedef ou::tf::iqfeed::HistoryBulkQuery<ScanHistory> HistoryBulkQuery_t;
 
 class ScanHistory:
-  public HistoryBulkQuery_t {
-  friend HistoryBulkQuery_t;
+  public ou::tf::iqfeed::HistoryBulkQuery_t {
+  friend ou::tf::iqfeed::HistoryBulkQuery_t;
 public:
 
   ScanHistory( void );
@@ -41,10 +41,10 @@ public:
 
 protected:
 
-  typedef HistoryBulkQuery_t::structQueryState structQueryState;
+  typedef ou::tf::iqfeed::HistoryBulkQuery_t::structQueryState structQueryState;
 
-  // CRTP from CIQFeedHistoryBulkQuery
-  void OnHistorySummaryData( structQueryState* pqs, IQFeedHistoryStructs::structSummary* pDP );
+  // CRTP from HistoryBulkQuery
+  void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP );
   void OnHistoryRequestDone( structQueryState* );
   void OnCompletion( void );  // when all queries are done
 
@@ -55,7 +55,7 @@ private:
   unsigned int m_cntSub;
   unsigned int m_cntTotal;
 
-  ou::tf::CInstrumentFile m_file;
+//  ou::tf::CInstrumentFile m_file;
 
   struct structSymbolInfo {
     bool bPass;  // symbol passed primary selection criteria
@@ -79,7 +79,7 @@ private:
 
   boost::barrier m_barrier;
 
-  void Process( const ou::tf::structSymbolRecord& sym );
+  void Process( const ou::tf::iqfeed::structSymbolRecord& sym );
 
 };
 
