@@ -19,6 +19,9 @@
 
 #include <TFIndicators/Darvas.h>
 
+#include <TFIQFeed/IQFeedHistoryBulkQuery.h>
+#include <TFIQFeed/LoadMktSymbols.h>
+
 #include "Process.h"
 
 // 
@@ -93,11 +96,11 @@ CProcess::CProcess(void)
 : ou::tf::iqfeed::HistoryBulkQuery<CProcess>(), 
   m_cntBars( 200 )
 {
-  m_vExchanges.push_back( "NYSE" );
-  m_vExchanges.push_back( "NYSE_AMEX" );
-  m_vExchanges.push_back( "NYSE,ARCA" );
-  m_vExchanges.push_back( "NASDAQ" );
-  m_vExchanges.push_back( "NASDAQ,NMS" );
+  m_vExchanges.insert( "NYSE" );
+  //m_vExchanges.push_back( "NYSE_AMEX" );
+  //m_vExchanges.push_back( "NYSE,ARCA" );
+  m_vExchanges.insert( "NGSM" );
+  //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
   //m_vExchanges.push_back( "NASDAQ,OTC" );
@@ -108,7 +111,29 @@ CProcess::~CProcess(void) {
 
 void CProcess::Start( void ) {
 
-  SetExchanges( m_vExchanges );
+  ou::tf::iqfeed::InMemoryMktSymbolList list;
+  std::cout << "Loading From File ... ";
+  list.LoadFromFile( "symbols.ser" );
+  std::cout << " done." << std::endl;
+
+  typedef std::set<std::string> SymbolList_t;
+  SymbolList_t setSelected;
+
+  struct SelectSymbols {
+    SelectSymbols( SymbolList_t& set ): m_selected( set ) {  };
+    SymbolList_t& m_selected;
+    void operator() ( const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd ) {
+      if ( ou::tf::iqfeed::MarketSymbol::Equity == trd.sc ) {
+        if ( trd.bHasOptions ) {
+          m_selected.insert( trd.sSymbol );
+        }
+      }
+    }
+  };
+
+  list.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), SelectSymbols( setSelected ) );
+  std::cout << "# symbols selected: " << setSelected.size() << std::endl;
+
   SetMaxSimultaneousQueries( 15 );
   DailyBars( m_cntBars );
 

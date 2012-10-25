@@ -48,40 +48,34 @@ void Worker::operator()( void ) {
     std::cout << "ouch" << std::endl;
   }
 
-  typedef std::vector<std::string> vStrings_t;
-  std::vector<std::string> vExchanges;
-  vExchanges.push_back( "NYSE" );
-  vExchanges.push_back( "NGSM" );
+  typedef std::set<std::string> vStrings_t;
+  vStrings_t vExchanges;
+  vExchanges.insert( "NYSE" );
+  vExchanges.insert( "NGSM" );
 
-  std::set<std::string> setSelected;
+  typedef std::set<std::string> SymbolList_t;
+  SymbolList_t setSelected;
 
-  size_t total( 0 );
-  typedef InMemoryMktSymbolList::symbols_t symbols_t;
-  typedef symbols_t::index<InMemoryMktSymbolList::ixExchange>::type SymbolsByExchange_t;
-  SymbolsByExchange_t::iterator endSymbols = list.m_symbols.get<InMemoryMktSymbolList::ixExchange>().end();
-  for ( vStrings_t::iterator iterExchanges = vExchanges.begin(); vExchanges.end() != iterExchanges; iterExchanges++ ) {
-    size_t cnt( 0 );
-    SymbolsByExchange_t::iterator iterSymbols = list.m_symbols.get<InMemoryMktSymbolList::ixExchange>().find( *iterExchanges );
-    while ( endSymbols != iterSymbols ) {
-      if ( *iterExchanges != iterSymbols->sExchange ) break;
-      if ( ou::tf::iqfeed::MarketSymbol::Equity == iterSymbols->sc ) {
-        if ( iterSymbols->bHasOptions ) {
+  struct SelectSymbols {
+    SelectSymbols( SymbolList_t& set ): m_selected( set ) {  };
+    SymbolList_t& m_selected;
+    void operator() ( ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd ) {
+      if ( ou::tf::iqfeed::MarketSymbol::Equity == trd.sc ) {
+        if ( trd.bHasOptions ) {
+          m_selected.insert( trd.sSymbol );
 /*          std::cout 
             << iterSymbols->sSymbol << ", " 
             << iterSymbols->nNAICS << ", " 
             << iterSymbols->sExchange << ", " 
             << iterSymbols->sListedMarket 
             << std::endl; */
-          setSelected.insert( iterSymbols->sSymbol ); 
-          cnt++;
         }
       }
-      iterSymbols++;
     }
-    std::cout << "Count for " << *iterExchanges << ": " << cnt << std::endl;
-    total += cnt;
-  }
-  std::cout << "Total for exchanges: " << total << std::endl;
+  };
+
+  list.SelectSymbolsByExchange( vExchanges.begin(), vExchanges.end(), SelectSymbols( setSelected ) );
+  std::cout << "# symbols selected: " << setSelected.size() << std::endl;
 
   SymbolSelection selection( 30 );
   selection.SetSymbols( setSelected.begin(), setSelected.end() );

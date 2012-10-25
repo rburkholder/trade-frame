@@ -43,8 +43,8 @@ class CDarvas {
 public:
   CDarvas<T>(void);
   ~CDarvas<T>(void);
-  void operator()( const CBar& bar ) { Calc( bar ); };
-  void Calc( const CBar& bar );
+  void operator()( const Bar& bar ) { Calc( bar ); };
+  void Calc( const Bar& bar );
   void Clear( void ) { 
     ResetState(); 
     m_dblTop = m_dblBottom = m_dblStop = m_dblGhostHeight = m_cntBreakOuts = 0;
@@ -96,7 +96,7 @@ void CDarvas<T>::ResetState( void ) {
 }
 
 template <typename T>
-void CDarvas<T>::Calc(const CBar& bar) {
+void CDarvas<T>::Calc(const Bar& bar) {
   switch ( m_stateTop ) {
     case ELookingForHigh: 
       ResetState();

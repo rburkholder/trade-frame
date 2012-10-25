@@ -108,6 +108,20 @@ struct InMemoryMktSymbolList {
     }
   }
 
+  template<typename ExchangeInterator, typename Function>
+  void SelectSymbolsByExchange( ExchangeInterator beginExchange, ExchangeInterator endExchange, Function f ) {
+    typedef symbols_t::index<ixExchange>::type SymbolsByExchange_t;
+    SymbolsByExchange_t::const_iterator endSymbols = m_symbols.get<ixExchange>().end();
+    while ( beginExchange != endExchange ) {
+      SymbolsByExchange_t::const_iterator iterSymbols = m_symbols.get<ixExchange>().find( *beginExchange );
+      while ( endSymbols != iterSymbols ) {
+        if ( *beginExchange != iterSymbols->sExchange ) break;
+        f( *iterSymbols );
+        iterSymbols++;
+      }
+    }
+  }
+
 private:
 
   /* serialization support */

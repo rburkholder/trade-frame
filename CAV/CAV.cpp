@@ -77,7 +77,9 @@ bool AppCollectAndView::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_db.Open( "cav.db" );
 
-  m_MktSymbols.Load( true, false, true );  // put this into a thread
+//  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );  // put this into a thread
+  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );  // put this into a thread
+  m_list.SaveToFile( "symbols.ser" );
 
   return 1;
 

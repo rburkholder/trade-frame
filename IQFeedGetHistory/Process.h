@@ -21,7 +21,7 @@
   * processing the structures looking for promising trades
 */
 
-#include <vector>
+#include <set>
 #include <string>
 
 #include <boost/thread/locks.hpp>
@@ -53,8 +53,8 @@ private:
 //  ou::tf::CInstrumentFile m_IF;
 //  ou::tf::CInstrumentFile::iterator m_iterSymbols;
 
-  std::vector<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
-  std::vector<std::string> m_vSymbols;  // list of symbols to be scanned
+  std::set<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
+  std::set<std::string> m_vSymbols;  // list of symbols to be scanned
 
   static const size_t m_BarWindow = 20;  // number of bars to examine
 

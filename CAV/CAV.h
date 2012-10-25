@@ -40,7 +40,7 @@ private:
 
   DBOps m_db;
 
-  ou::tf::iqfeed::LoadMktSymbols m_MktSymbols;
+  ou::tf::iqfeed::InMemoryMktSymbolList m_list;
 
   virtual bool OnInit();
   virtual int OnExit();
