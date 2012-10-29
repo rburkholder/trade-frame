@@ -21,6 +21,7 @@
 
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFIQFeed/LoadMktSymbols.h>
+//#include <TFIQFeed/ParseMktSymbolDiskFile.h>
 
 #include "Process.h"
 
@@ -28,11 +29,11 @@
 // CProcessDarvas
 //
 
-class CProcessDarvas: public ou::tf::CDarvas<CProcessDarvas> {
-  friend ou::tf::CDarvas<CProcessDarvas>;
+class ProcessDarvas: public ou::tf::CDarvas<ProcessDarvas> {
+  friend ou::tf::CDarvas<ProcessDarvas>;
 public:
-  CProcessDarvas( size_t ix );
-  ~CProcessDarvas( void ) {};
+  ProcessDarvas( size_t ix );
+  ~ProcessDarvas( void ) {};
   bool Calc( const ou::tf::Bar& );
   void Result( std::string& s );  // should only be called once
 protected:
@@ -53,36 +54,36 @@ private:
 
 };
 
-CProcessDarvas::CProcessDarvas( size_t ix ) 
-: ou::tf::CDarvas<CProcessDarvas>(), 
+ProcessDarvas::ProcessDarvas( size_t ix ) 
+: ou::tf::CDarvas<ProcessDarvas>(), 
   m_bTriggered( false ), m_dblStop( 0 ), m_ix( ix )
 {
 }
 
-bool CProcessDarvas::Calc( const ou::tf::Bar& bar ) {
-  ou::tf::CDarvas<CProcessDarvas>::Calc( bar );
+bool ProcessDarvas::Calc( const ou::tf::Bar& bar ) {
+  ou::tf::CDarvas<ProcessDarvas>::Calc( bar );
   --m_ix;
   bool b = m_bTriggered; 
   m_bTriggered = false; 
   return b;
 }
 
-void CProcessDarvas::ConservativeTrigger( void ) {
+void ProcessDarvas::ConservativeTrigger( void ) {
   m_ss << " CT(" << m_ix << ")";
   m_bTriggered = true;
 }
 
-void CProcessDarvas::AggressiveTrigger( void ) {
+void ProcessDarvas::AggressiveTrigger( void ) {
   m_ss << " AT(" << m_ix << ")";
   m_bTriggered = true;
 }
 
-void CProcessDarvas::BreakOutAlert( size_t cnt ) {
+void ProcessDarvas::BreakOutAlert( size_t cnt ) {
   m_ss << " BO(" << m_ix << ")";
   m_bTriggered = true;
 }
 
-void CProcessDarvas::Result( std::string& s ) {
+void ProcessDarvas::Result( std::string& s ) {
   m_ss << " stop(" << m_dblStop << ")";
   s = m_ss.str();
 }
@@ -92,8 +93,8 @@ void CProcessDarvas::Result( std::string& s ) {
 // CProcess
 //
 
-CProcess::CProcess(void)
-: ou::tf::iqfeed::HistoryBulkQuery<CProcess>(), 
+Process::Process(void)
+: ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
   m_cntBars( 200 )
 {
   m_vExchanges.insert( "NYSE" );
@@ -106,14 +107,25 @@ CProcess::CProcess(void)
   //m_vExchanges.push_back( "NASDAQ,OTC" );
 }
 
-CProcess::~CProcess(void) {
+Process::~Process(void) {
 }
 
-void CProcess::Start( void ) {
+void Process::Start( void ) {
 
   ou::tf::iqfeed::InMemoryMktSymbolList list;
-  std::cout << "Loading From File ... ";
-  list.LoadFromFile( "symbols.ser" );
+
+//  if (true) {
+  if (false) {
+    std::cout << "Downloading File ... ";
+    ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );  // put this into a thread
+  //  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );  // put this into a thread
+    std::cout << "Saving File ... ";
+    list.SaveToFile( "symbols.ser" );
+  }
+  else {
+    std::cout << "Loading From File ... ";
+    list.LoadFromFile( "symbols.ser" );
+  }
   std::cout << " done." << std::endl;
 
   typedef std::set<std::string> SymbolList_t;
@@ -135,11 +147,13 @@ void CProcess::Start( void ) {
   std::cout << "# symbols selected: " << setSelected.size() << std::endl;
 
   SetMaxSimultaneousQueries( 15 );
+  SetSymbols( setSelected.begin(), setSelected.end() );
   DailyBars( m_cntBars );
+  Block();
 
 }
 
-void CProcess::OnBars( inherited_t::structResultBar* bars ) {
+void Process::OnBars( inherited_t::structResultBar* bars ) {
 
   // warning:  this section is re-entrant from multiple threads
 
@@ -164,7 +178,7 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
   }
 
   if ( ixHigh > ( m_cntBars - m_BarWindow ) ) {  // if high is in last n days, then can push bars through Darvas
-    CProcessDarvas darvas( m_BarWindow );
+    ProcessDarvas darvas( m_BarWindow );
     size_t ix = m_cntBars - m_BarWindow;
     bool bTrigger;  // wait for trigger on final day
     for ( ou::tf::Bars::const_iterator iter = bars->bars.at( ix ); iter != bars->bars.end(); ++iter ) {
@@ -182,18 +196,20 @@ void CProcess::OnBars( inherited_t::structResultBar* bars ) {
 
   if ( bEmit ) {
     s += "\n";
-    OutputDebugString( s.c_str() );
+    std::cout << s;
+//    OutputDebugString( s.c_str() );
   }
 
   ReQueueBars( bars ); 
 
 }
 
-void CProcess::OnTicks( inherited_t::structResultTicks* ticks ) {
+void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
   ReQueueTicks( ticks ); 
 }
 
-void CProcess::OnCompletion( void ) {
-  OutputDebugString( "all processing complete\n" );
+void Process::OnCompletion( void ) {
+  std::cout << "all processing complete" << std::endl;
+//  OutputDebugString( "all processing complete\n" );
 }
 

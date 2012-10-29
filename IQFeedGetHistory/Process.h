@@ -29,16 +29,16 @@
 //#include <TFIQFeed/IQFeedInstrumentFile.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 
-class CProcess: 
-  public ou::tf::iqfeed::HistoryBulkQuery<CProcess>
+class Process: 
+  public ou::tf::iqfeed::HistoryBulkQuery<Process>
 {
-  friend ou::tf::iqfeed::HistoryBulkQuery<CProcess>;
+  friend ou::tf::iqfeed::HistoryBulkQuery<Process>;
 public:
 
-  typedef ou::tf::iqfeed::HistoryBulkQuery<CProcess> inherited_t;
+  typedef ou::tf::iqfeed::HistoryBulkQuery<Process> inherited_t;
 
-  CProcess(void);
-  ~CProcess(void);
+  Process(void);
+  ~Process(void);
   void Start( void );
 
 protected:

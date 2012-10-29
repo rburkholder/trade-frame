@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,23 +12,22 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// aboutdlg.cpp : implementation of the CAboutDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-#include "stdafx.h"
-#include "resource.h"
+// For IQFeedGetHistory
 
-#include "aboutdlg.h"
+#include <boost/thread/thread.hpp>
+//#include <boost/noncopyable.hpp>
 
-LRESULT CAboutDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-{
-	CenterWindow(GetParent());
-	return TRUE;
-}
+class Worker {
+public:
+  Worker(void);
+  ~Worker(void);
+  void operator()( void );
+  void Join( void ) { m_thread.join(); };
+protected:
+private:
+  boost::thread m_thread;
 
-LRESULT CAboutDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	EndDialog(wID);
-	return 0;
-}
+};
+

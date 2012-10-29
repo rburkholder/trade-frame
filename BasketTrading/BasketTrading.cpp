@@ -78,7 +78,7 @@ bool AppBasketTrading::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_db.Open( "basket.db" );
 
-  Worker worker;
+//  Worker worker;  // need to do a new with this
 
   return 1;
 

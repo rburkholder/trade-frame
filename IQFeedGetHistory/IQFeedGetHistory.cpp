@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,62 +12,86 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// IQFeedGetHistory.cpp : main source file for IQFeedGetHistory.exe
+// CAV.cpp : Defines the entry point for the application.
 //
 
 #include "stdafx.h"
 
-#include "resource.h"
+#include "IQFeedGetHistory.h"
 
-#include "aboutdlg.h"
-#include "MainDlg.h"
+IMPLEMENT_APP(AppIQFeedGetHistory)
 
-CAppModule _Module;
+#include <TFTrading/InstrumentManager.h>
+#include <TFTrading/AccountManager.h>
+#include <TFTrading/OrderManager.h>
+#include <TFTrading/PortfolioManager.h>
 
-int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
-{
-	CMessageLoop theLoop;
-	_Module.AddMessageLoop(&theLoop);
+//#include <TFIQFeed/ParseMktSymbolDiskFile.h>
 
-	CMainDlg dlgMain;
+bool AppIQFeedGetHistory::OnInit() {
 
-	if(dlgMain.Create(NULL) == NULL)
-	{
-		ATLTRACE(_T("Main dialog creation failed!\n"));
-		return 0;
-	}
+  m_pWorker = 0;
 
-	dlgMain.ShowWindow(nCmdShow);
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "IQFeed Get History" );
+  wxWindowID idFrameMain = m_pFrameMain->GetId();
+  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
+  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
+  //m_pFrameMain->Center();
+//  m_pFrameMain->Move( -2500, 50 );
+  m_pFrameMain->SetSize( 500, 600 );
+  SetTopWindow( m_pFrameMain );
 
-	int nRet = theLoop.Run();
+  wxBoxSizer* m_sizerMain;
+  m_sizerMain = new wxBoxSizer(wxVERTICAL);
+  m_pFrameMain->SetSizer(m_sizerMain);
 
-	_Module.RemoveMessageLoop();
-	return nRet;
+  wxBoxSizer* m_sizerControls;
+  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
+  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+
+  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
+  m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_pPanelProviderControl->Show( true );
+
+  LinkToPanelProviderControl();
+/*
+  m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
+  m_sizerControls->Add( m_pPanelOptionsParameters, 1, wxEXPAND|wxALIGN_LEFT, 0);
+  m_pPanelOptionsParameters->Show( true );
+  m_pPanelOptionsParameters->SetOnStart( MakeDelegate( this, &AppStrategyRunner::HandleBtnStart ) );
+  m_pPanelOptionsParameters->SetOnStop( MakeDelegate( this, &AppStrategyRunner::HandleBtnStop ) );
+  m_pPanelOptionsParameters->SetOnSave( MakeDelegate( this, &AppStrategyRunner::HandleBtnSave ) );
+  m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
+  m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
+*/
+  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
+  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_pPanelLogging->Show( true );
+
+  m_pFrameMain->Show( true );
+
+//  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterTables ) );
+//  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppCollectAndView::HandleRegisterRows ) );
+//  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppCollectAndView::HandlePopulateDatabase ) );
+
+  // maybe set scenario with database and with in memory data structure
+//  m_db.Open( "cav.db" );
+
+  m_pWorker = new Worker;
+
+  return 1;
+
 }
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
-{
+int AppIQFeedGetHistory::OnExit() {
 
-  _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+//  DelinkFromPanelProviderControl();  generates stack errors
 
-	HRESULT hRes = ::CoInitialize(NULL);
-// If you are running on NT 4.0 or higher you can use the following call instead to 
-// make the EXE free threaded. This means that calls come in on a random RPC thread.
-//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	ATLASSERT(SUCCEEDED(hRes));
+//  if ( m_db.IsOpen() ) m_db.Close();
 
-	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
-	::DefWindowProc(NULL, 0, 0, 0L);
-
-	AtlInitCommonControls(ICC_BAR_CLASSES);	// add flags to support other controls
-
-	hRes = _Module.Init(NULL, hInstance);
-	ATLASSERT(SUCCEEDED(hRes));
-
-	int nRet = Run(lpstrCmdLine, nCmdShow);
-
-	_Module.Term();
-	::CoUninitialize();
-
-	return nRet;
+  return 0;
 }
+

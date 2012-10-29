@@ -20,9 +20,12 @@
 #include <iostream>
 #include <set>
 
+#include <boost/ref.hpp>
+
 #include <TFIQFeed/LoadMktSymbols.h>
 
 #include "Worker.h"
+
 #include "SymbolSelection.h"
 
 Worker::Worker(void): m_thread( boost::ref( *this ) ) {

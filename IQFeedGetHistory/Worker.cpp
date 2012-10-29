@@ -12,20 +12,22 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include <boost/thread/thread.hpp>
-//#include <boost/noncopyable.hpp>
+#include "Process.h"
 
-class Worker {
-public:
-  Worker(void);
-  ~Worker(void);
-  void operator()( void );
-  void Join( void ) { m_thread.join(); };
-protected:
-private:
-  boost::thread m_thread;
+#include "Worker.h"
 
-};
+// For IQFeedGetHistory
 
+Worker::Worker(void): m_thread( boost::ref( *this ) ) {
+}
+
+Worker::~Worker(void) {
+}
+
+void Worker::operator()( void ) {
+
+  Process process;
+  process.Start();
+}

@@ -119,6 +119,7 @@ struct InMemoryMktSymbolList {
         f( *iterSymbols );
         iterSymbols++;
       }
+      beginExchange++;
     }
   }
 
