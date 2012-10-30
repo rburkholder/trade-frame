@@ -16,18 +16,20 @@
 
 // For IQFeedGetHistory
 
+#include <string>
+
 #include <boost/thread/thread.hpp>
 //#include <boost/noncopyable.hpp>
 
 class Worker {
 public:
-  Worker(void);
+  explicit Worker( const std::string& sPrefixPath );
   ~Worker(void);
   void operator()( void );
   void Join( void ) { m_thread.join(); };
 protected:
 private:
+  std::string m_sPrefixPath;
   boost::thread m_thread;
-
 };
 

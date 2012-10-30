@@ -18,7 +18,7 @@
 #include "LibCommon/FastDelegate.h"
 using namespace fastdelegate;
 
-#include "IQFeedRetrieveHistory.h"
+//#include "IQFeedRetrieveHistory.h"
 
 // 
 // CHistoryCollector: base class for Daily Bars HD, Trades/Quotes HT

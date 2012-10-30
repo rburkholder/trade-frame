@@ -80,7 +80,7 @@ bool AppIQFeedGetHistory::OnInit() {
   // maybe set scenario with database and with in memory data structure
 //  m_db.Open( "cav.db" );
 
-  m_pWorker = new Worker;
+  m_pWorker = new Worker( "" );
 
   return 1;
 

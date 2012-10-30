@@ -95,10 +95,10 @@ namespace HistoryStructs {
     ptime DateTime;
     double Last;
     long  LastSize;
-    long TotalVolume;
+    unsigned long TotalVolume;
     double Bid;
     double Ask;
-    long TickID;
+    unsigned long TickID;
     long BidSize;
     long AskSize;
     char BasisForLast;  // 'C' normal, 'E' extended
@@ -117,8 +117,8 @@ namespace HistoryStructs {
     double Low;
     double Open;
     double Close;
-    long TotalVolume;
-    long PeriodVolume;
+    unsigned long TotalVolume;
+    unsigned long PeriodVolume;
   };
 
   struct structSummary {
@@ -133,8 +133,8 @@ namespace HistoryStructs {
     double Low;
     double Open;
     double Close;
-    long PeriodVolume;
-    long OpenInterest;
+    unsigned long PeriodVolume;
+    unsigned long OpenInterest;
   };
 
 } // namespace HistoryStructs
@@ -153,10 +153,10 @@ BOOST_FUSION_ADAPT_STRUCT(
   (unsigned short, Second)
   (double, Last)
   (long, LastSize)
-  (long, TotalVolume)
+  (unsigned long, TotalVolume)
   (double, Bid)
   (double, Ask)
-  (long, TickID)
+  (unsigned long, TickID)
   (long, BidSize)
   (long, AskSize)
   (char, BasisForLast)
@@ -174,8 +174,8 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, Low)
   (double, Open)
   (double, Close)
-  (long, TotalVolume)
-  (long, PeriodVolume)
+  (unsigned long, TotalVolume)
+  (unsigned long, PeriodVolume)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -190,8 +190,8 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, Low)
   (double, Open)
   (double, Close)
-  (long, PeriodVolume)
-  (long, OpenInterest)
+  (unsigned long, PeriodVolume)
+  (unsigned long, OpenInterest)
   )
 
 namespace ou { // One Unified
@@ -206,8 +206,8 @@ namespace HistoryStructs {
       start %= 
                   qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_ 
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::long_   >> ',' >> qi::long_
-        >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::long_
+        >> ',' >> qi::double_ >> ',' >> qi::long_   >> ',' >> qi::ulong_
+        >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::ulong_
         >> ',' >> qi::long_   >> ',' >> qi::long_   >> ',' >> ascii::char_ 
         >> ','
         ;
@@ -223,7 +223,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
         >> ',' >> qi::double_ >> ',' >> qi::double_ 
         >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::long_   >> ',' >> qi::long_ 
+        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_ 
         >> ','
         ;
     }
@@ -238,7 +238,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
         >> ',' >> qi::double_ >> ',' >> qi::double_ 
         >> ',' >> qi::double_ >> ',' >> qi::double_ 
-        >> ',' >> qi::long_   >> ',' >> qi::long_ 
+        >> ',' >> qi::ulong_   >> ',' >> qi::ulong_ 
         >> ','
         ;
     }

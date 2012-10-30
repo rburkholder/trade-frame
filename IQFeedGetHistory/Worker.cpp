@@ -20,7 +20,10 @@
 
 // For IQFeedGetHistory
 
-Worker::Worker(void): m_thread( boost::ref( *this ) ) {
+Worker::Worker( const std::string& sPrefixPath ): 
+  m_sPrefixPath( sPrefixPath ),
+  m_thread( boost::ref( *this ) ) 
+{
 }
 
 Worker::~Worker(void) {
@@ -28,6 +31,6 @@ Worker::~Worker(void) {
 
 void Worker::operator()( void ) {
 
-  Process process;
+  Process process( m_sPrefixPath );
   process.Start();
 }

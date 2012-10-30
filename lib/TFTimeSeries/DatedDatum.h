@@ -35,7 +35,7 @@ namespace tf { // TradeFrame
 class DatedDatum {
 public:
 
-  typedef long volume_t;
+  typedef unsigned long volume_t;
   typedef volume_t tradesize_t;
   typedef volume_t quotesize_t;
 

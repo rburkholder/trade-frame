@@ -23,6 +23,9 @@
 #include <TFIQFeed/LoadMktSymbols.h>
 //#include <TFIQFeed/ParseMktSymbolDiskFile.h>
 
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+
 #include "Process.h"
 
 // 
@@ -93,9 +96,10 @@ void ProcessDarvas::Result( std::string& s ) {
 // CProcess
 //
 
-Process::Process(void)
+Process::Process( const std::string& sPrefixPath )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
-  m_cntBars( 200 )
+  m_sPrefixPath( sPrefixPath ),
+  m_cntBars( 0 )
 {
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );
@@ -157,6 +161,63 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
   // warning:  this section is re-entrant from multiple threads
 
+  // save the data
+
+  boost::mutex::scoped_lock lock( m_mutexProcessResults ); 
+
+  assert( bars->sSymbol.length() > 0 );
+
+  std::cout << bars->sSymbol << ": " << bars->bars.Size();
+
+  if ( 0 != bars->bars.Size() ) {
+
+    std::string sPath;
+
+    ou::tf::CHDF5DataManager::DailyBarPath( bars->sSymbol, sPath );  // build hierchical path based upon symbol name
+
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Bars> wts;
+    wts.Write( sPath, &bars->bars );
+  }
+
+  ReQueueBars( bars ); 
+
+  std::cout << std::endl;
+
+}
+
+void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
+
+  boost::mutex::scoped_lock lock( m_mutexProcessResults ); 
+
+  assert( ticks->sSymbol.length() > 0 );
+
+  if ( 0 != ticks->trades.Size() ) {
+    std::string sPath( "/optionables/trade/" + ticks->sSymbol );
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtst;
+    wtst.Write( sPath, &ticks->trades );
+  }
+
+  if ( 0 != ticks->quotes.Size() ) {
+    std::string sPath( "/optionables/quote/" + ticks->sSymbol );
+    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsq;
+    wtsq.Write( sPath, &ticks->quotes );
+  }
+
+  ReQueueTicks( ticks ); 
+}
+
+void Process::OnCompletion( void ) {
+  std::cout << "all processing complete" << std::endl;
+//  OutputDebugString( "all processing complete\n" );
+}
+
+// 2012/10/29
+// placed here for future reference and utilization
+// not used at this time, but does function
+void Process::OnBarsForDarvas( inherited_t::structResultBar* bars ) {
+
+  // warning:  this section is re-entrant from multiple threads
+
   std::string s;
   bool bEmit = false;
   
@@ -202,14 +263,5 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
   ReQueueBars( bars ); 
 
-}
-
-void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
-  ReQueueTicks( ticks ); 
-}
-
-void Process::OnCompletion( void ) {
-  std::cout << "all processing complete" << std::endl;
-//  OutputDebugString( "all processing complete\n" );
 }
 

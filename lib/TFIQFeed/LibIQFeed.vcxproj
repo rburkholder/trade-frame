@@ -173,6 +173,9 @@
   <ItemGroup>
     <ClInclude Include="CurlGetMktSymbols.h" />
     <ClInclude Include="InMemoryMktSymbolList.h" />
+    <ClInclude Include="IQFeedHistoryCollector.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="IQFeedInstrumentFile.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>

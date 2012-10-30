@@ -24,6 +24,7 @@
 #include <set>
 #include <string>
 
+#include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
 //#include <TFIQFeed/IQFeedInstrumentFile.h>
@@ -37,7 +38,7 @@ public:
 
   typedef ou::tf::iqfeed::HistoryBulkQuery<Process> inherited_t;
 
-  Process(void);
+  explicit Process( const std::string& sPrefixPath );
   ~Process(void);
   void Start( void );
 
@@ -48,10 +49,16 @@ protected:
   void OnTicks( inherited_t::structResultTicks* ticks );
   void OnCompletion( void );
 
+  void OnBarsForDarvas( inherited_t::structResultBar* bars );
+
 private:
 
 //  ou::tf::CInstrumentFile m_IF;
 //  ou::tf::CInstrumentFile::iterator m_iterSymbols;
+
+  boost::mutex m_mutexProcessResults;
+
+  std::string m_sPrefixPath;
 
   std::set<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::set<std::string> m_vSymbols;  // list of symbols to be scanned
