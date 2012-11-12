@@ -132,23 +132,25 @@ void Operation::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
 
-//  CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+//  HDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   if ( 0 != is.quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &is.quotes );
-    ou::tf::CHDF5Attributes attrQuotes( sPathName, ou::tf::InstrumentType::Stock );
-    //CHDF5Attributes attrQuotes( sPathName, future );
+    ou::tf::HDF5Attributes attrQuotes( dm, sPathName, ou::tf::InstrumentType::Stock );
+    //HDF5Attributes attrQuotes( sPathName, future );
     attrQuotes.SetProviderType( m_piqfeed->ID() );
   }
 
   if ( 0 != is.trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades( dm );
     wtsTrades.Write( sPathName, &is.trades );
-    ou::tf::CHDF5Attributes attrTrades( sPathName, ou::tf::InstrumentType::Stock );
-    //CHDF5Attributes attrTrades( sPathName, future );
+    ou::tf::HDF5Attributes attrTrades( dm, sPathName, ou::tf::InstrumentType::Stock );
+    //HDF5Attributes attrTrades( sPathName, future );
     attrTrades.SetProviderType( m_piqfeed->ID() );
   }
 }

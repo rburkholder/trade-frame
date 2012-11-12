@@ -22,16 +22,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-//const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
-const char CHDF5DataManager::m_H5FileName[] = "TradeFrame.hdf5";
-//H5::H5File CHDF5DataManager::m_H5File;
-//unsigned int CHDF5DataManager::m_RefCount = 0;
+//const char HDF5DataManager::m_H5FileName[] = "TradeFrame.%03d.hdf5";
+const char HDF5DataManager::m_H5FileName[] = "TradeFrame.hdf5";
+//H5::H5File HDF5DataManager::m_H5File;
+//unsigned int HDF5DataManager::m_RefCount = 0;
 
-//CHDF5DataManager HDF5DM;  // statically defined, so at least one instance is always present 
+//HDF5DataManager HDF5DM;  // statically defined, so at least one instance is always present 
 //  (2012/08/12: why?) because code is inefficient.  file is open/closed repeatedly.,  need to be able to pass a handle for operations.
 //  needs a good rethink and re-architect for file handle handling
 
-CHDF5DataManager::CHDF5DataManager(void) {
+HDF5DataManager::HDF5DataManager( enumFileOptionType fot ) {
 //  ++m_RefCount;
 //  if ( 1 == m_RefCount ) {
     //std::cout << "Opening DataManager" << std::endl;
@@ -43,7 +43,15 @@ CHDF5DataManager::CHDF5DataManager(void) {
     try {
       try {
         // try for existing file
-        m_H5File.openFile( m_H5FileName, H5F_ACC_RDWR, pl2 );
+        switch ( fot ) {
+        case RO:
+          m_H5File.openFile( m_H5FileName, H5F_ACC_RDONLY, pl2 );
+          break;
+        case RDWR:
+          m_H5File.openFile( m_H5FileName, H5F_ACC_RDWR, pl2 );
+          break;
+        }
+        
       }
       catch (...) {
         // try to create and open if it doesn't exist
@@ -68,18 +76,18 @@ CHDF5DataManager::CHDF5DataManager(void) {
 //  }
 }
 
-CHDF5DataManager::~CHDF5DataManager(void) {
+HDF5DataManager::~HDF5DataManager(void) {
 //  --m_RefCount;
 //  if ( 0 == m_RefCount ) {
     m_H5File.close();
 //  }
 }
 
-void CHDF5DataManager::Flush( void ) {
+void HDF5DataManager::Flush( void ) {
   GetH5File()->flush( H5F_SCOPE_GLOBAL );
 }
 
-bool CHDF5DataManager::GroupExists( const std::string &sGroup ) {
+bool HDF5DataManager::GroupExists( const std::string &sGroup ) {
   bool bGroupExists = false;
   try {
     H5::Group g = GetH5File()->openGroup( sGroup );
@@ -90,12 +98,12 @@ bool CHDF5DataManager::GroupExists( const std::string &sGroup ) {
     // group doesn't exist so just ignore
   }
   catch ( ... ) {
-    std::cout << "CHDF5DataManager::GroupExists unknown error" << std::endl;
+    std::cout << "HDF5DataManager::GroupExists unknown error" << std::endl;
   }
   return bGroupExists;
 }
 
-void CHDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to have terminating '/'
+void HDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to have terminating '/'
   //  /symbol, /symbol/G, /symbol/G/O, /symbol/G/O/GOOG
   std::string sSubPath;
   // ensure that appropriate group has been created in the file
@@ -120,11 +128,11 @@ void CHDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to h
   }
 }
 
-void CHDF5DataManager::AddGroupForSymbol( const std::string &sSymbol ) {
+void HDF5DataManager::AddGroupForSymbol( const std::string &sSymbol ) {
   AddGroup( "/symbol/" + sSymbol );
 }
 
-herr_t CHDF5DataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data ) {
+herr_t HDF5DataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data ) {
   // this is a call back from within an exception handler
   std::cout << "H5 Error Level " << n << ": " 
     << err_desc->file_name << "::" 
@@ -133,7 +141,7 @@ herr_t CHDF5DataManager::PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, vo
   return 1;
 }
 
-void CHDF5DataManager::DailyBarPath(const std::string &sSymbol, std::string &sPath) {
+void HDF5DataManager::DailyBarPath(const std::string &sSymbol, std::string &sPath) {
   sPath = "/bar/86400/";
   sPath.append( sSymbol.substr( 0, 1 ) );
   sPath.append( "/" );

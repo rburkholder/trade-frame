@@ -1056,15 +1056,17 @@ void CProcess::SaveSeries( void ) {
 
   std::string sPathName;
 
-  CHDF5WriteTimeSeries<Quotes, Quote> wtsQuotes;
-  CHDF5WriteTimeSeries<Trades, Trade> wtsTrades;
-  CHDF5WriteTimeSeries<Greeks, Greek> wtsGreeks;
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  HDF5WriteTimeSeries<Quotes, Quote> wtsQuotes( dm );
+  HDF5WriteTimeSeries<Trades, Trade> wtsTrades( dm );
+  HDF5WriteTimeSeries<Greeks, Greek> wtsGreeks( dm );
 
   try {
     if ( 0 != m_quotes.Size() ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + m_sSymbolName;
       wtsQuotes.Write( sPathName, &m_quotes );
-      CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
+      HDF5Attributes attributes( dm, sPathName, InstrumentType::Stock );
       attributes.SetProviderType( m_pDataProvider->ID() );
     }
   }
@@ -1075,7 +1077,7 @@ void CProcess::SaveSeries( void ) {
     if ( 0 != m_trades.Size() ) {
       sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + m_sSymbolName;
       wtsTrades.Write( sPathName, &m_trades );
-      CHDF5Attributes attributes( sPathName, InstrumentType::Stock );
+      HDF5Attributes attributes( dm, sPathName, InstrumentType::Stock );
       attributes.SetProviderType( m_pDataProvider->ID() );
     }
   }
@@ -1090,60 +1092,60 @@ void CProcess::SaveSeries( void ) {
       if ( 0 != oi.Call()->Quotes()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Call()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, oi.Call()->Quotes() );
-        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Call()->Trades()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Call()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, oi.Call()->Trades() );
-        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Call()->Greeks()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Call()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, oi.Call()->Greeks() );
-        CHDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
           oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
           oi.Call()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Quotes()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Put()->GetInstrument()->GetInstrumentName();
         wtsQuotes.Write( sPathName, oi.Put()->Quotes() );
-        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Trades()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Put()->GetInstrument()->GetInstrumentName();
         wtsTrades.Write( sPathName, oi.Put()->Trades() );
-        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
 
       if ( 0 != oi.Put()->Greeks()->Size() ) {
         sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Put()->GetInstrument()->GetInstrumentName();
         wtsGreeks.Write( sPathName, oi.Put()->Greeks() );
-        CHDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
+        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
           oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
           oi.Put()->GetInstrument()->GetOptionSide() );
-        CHDF5Attributes attributes( sPathName, option );
+        HDF5Attributes attributes( dm, sPathName, option );
         attributes.SetProviderType( m_pDataProvider->ID() );
       }
     }

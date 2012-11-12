@@ -1484,7 +1484,7 @@ void CGTScalpDlg::OnBnClickedBtnstopsim() {
 }
 
 void CGTScalpDlg::OnBnClickedBtnhdf5flush() {
-  CHDF5DataManager dm;
+  HDF5DataManager dm;
   dm.Flush();
   std::cout << "HDF5 Flushed" << std::endl;
 }

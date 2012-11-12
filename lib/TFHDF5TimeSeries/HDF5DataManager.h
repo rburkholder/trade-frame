@@ -19,16 +19,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CHDF5DataManager {
+class HDF5DataManager {
 public:
-  CHDF5DataManager(void);
-  ~CHDF5DataManager(void);
+  enum enumFileOptionType{ RDWR, RO };
+  HDF5DataManager( enumFileOptionType );
+  ~HDF5DataManager(void);
   H5::H5File *GetH5File( void ) { return &m_H5File; };
   bool GroupExists( const std::string &sGroup );
   void AddGroup( const std::string &sGroupPath );  // last group needs trailing '/'
   void AddGroupForSymbol( const std::string &sSymbol );
   static herr_t PrintH5ErrorStackItem( int n, H5E_error_t *err_desc, void *client_data );
-  static hsize_t H5ChunkSize( void ) { return 1024; };  // # elements to be shuffled/compressed in one block,  was 64
+//  static hsize_t H5ChunkSize( void ) { return 1024; };  // # elements to be shuffled/compressed in one block,  was 64
+//  static hsize_t H5ChunkSize( void ) { return 32; };  // # elements to be shuffled/compressed in one block,  was 64
   static void DailyBarPath( const std::string &sSymbol, std::string &sPath );
   void Flush( void );
 protected:

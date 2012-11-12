@@ -27,5 +27,7 @@ protected:
 private:
   boost::thread m_thread;
 
+  void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
+
 };
 

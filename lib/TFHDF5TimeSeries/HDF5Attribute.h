@@ -23,7 +23,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CHDF5Attributes {
+class HDF5Attributes{
 public:
 
   struct structOption {
@@ -47,15 +47,12 @@ public:
       : nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_) {};
   };
 
-  CHDF5Attributes(void);
-  CHDF5Attributes( const std::string& sPath );
-  CHDF5Attributes( const std::string& sPath, InstrumentType::enumInstrumentTypes );
-  CHDF5Attributes( const std::string& sPath, const structOption& );
-  CHDF5Attributes( const std::string& sPath, const structFuture& );
-  ~CHDF5Attributes(void);
-
-  void OpenDataSet( const std::string& sPath );
-  void CloseDataSet( void );
+  HDF5Attributes( HDF5DataManager& dm );
+  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath );
+  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, InstrumentType::enumInstrumentTypes );
+  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structOption& );
+  HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structFuture& );
+  ~HDF5Attributes(void);
 
   void SetInstrumentType( InstrumentType::enumInstrumentTypes );
   InstrumentType::enumInstrumentTypes GetInstrumentType( void );
@@ -76,8 +73,10 @@ public:
   unsigned short GetMultiplier( void );
 
 protected:
+  void OpenDataSet( const std::string& sPath );
+  void CloseDataSet( void );
 private:
-  CHDF5DataManager dm;
+  HDF5DataManager& m_dm;
   H5::DataSet *m_pDataSet;
 };
 

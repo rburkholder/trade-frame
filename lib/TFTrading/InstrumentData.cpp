@@ -89,10 +89,11 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
   std::string sPathName;
 
 //  CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<Quotes> wtsQuotes;
+    HDF5WriteTimeSeries<Quotes> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &m_quotes );
 //    CHDF5Attributes attrQuotes( sPathName, future );
     //attrQuotes.SetMultiplier( 1 );
@@ -102,7 +103,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<Trades> wtsTrades;
+    HDF5WriteTimeSeries<Trades> wtsTrades( dm );
     wtsTrades.Write( sPathName, &m_trades );
 //    CHDF5Attributes attrTrades( sPathName, future );
     //attrTrades.SetMultiplier( 1 );
@@ -112,7 +113,7 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<Greeks> wtsGreeks;
+    HDF5WriteTimeSeries<Greeks> wtsGreeks( dm );
     wtsGreeks.Write( sPathName, &m_greeks );
 //    CHDF5Attributes attrTrades( sPathName, future );
     //attrTrades.SetMultiplier( 1 );

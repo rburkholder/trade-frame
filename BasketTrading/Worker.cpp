@@ -22,7 +22,8 @@
 
 #include <boost/ref.hpp>
 
-#include <TFIQFeed/LoadMktSymbols.h>
+//#include <TFIQFeed/LoadMktSymbols.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "Worker.h"
 
@@ -35,56 +36,30 @@ Worker::~Worker(void) {
 }
 
 void Worker::operator()( void ) {
+
   std::cout << "running" << std::endl;
 
-  typedef ou::tf::iqfeed::InMemoryMktSymbolList InMemoryMktSymbolList;
-  InMemoryMktSymbolList list;
-//  ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );
-//  ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );
-//  symbols.SaveToFile( "symbols.ser" );
+  ou::tf::HDF5IterateGroups groups;
+  groups.SetOnHandleObject( MakeDelegate( this, &Worker::ProcessGroupItem ) );
   try {
-    std::cout << "Loading serialized symbols ... ";
-    list.LoadFromFile( "symbols.ser" );
-    std::cout << "done." << std::endl;
+    int result = groups.Start( "/bar/86400/" );
   }
   catch (...) {
     std::cout << "ouch" << std::endl;
   }
 
-  typedef std::set<std::string> vStrings_t;
-  vStrings_t vExchanges;
-  vExchanges.insert( "NYSE" );
-  vExchanges.insert( "NGSM" );
 
-  typedef std::set<std::string> SymbolList_t;
-  SymbolList_t setSelected;
-
-  struct SelectSymbols {
-    SelectSymbols( SymbolList_t& set ): m_selected( set ) {  };
-    SymbolList_t& m_selected;
-    void operator() ( ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd ) {
-      if ( ou::tf::iqfeed::MarketSymbol::Equity == trd.sc ) {
-        if ( trd.bHasOptions ) {
-          m_selected.insert( trd.sSymbol );
-/*          std::cout 
-            << iterSymbols->sSymbol << ", " 
-            << iterSymbols->nNAICS << ", " 
-            << iterSymbols->sExchange << ", " 
-            << iterSymbols->sListedMarket 
-            << std::endl; */
-        }
-      }
-    }
-  };
-
-  list.SelectSymbolsByExchange( vExchanges.begin(), vExchanges.end(), SelectSymbols( setSelected ) );
-  std::cout << "# symbols selected: " << setSelected.size() << std::endl;
-
+  /*
   SymbolSelection selection( 30 );
   selection.SetSymbols( setSelected.begin(), setSelected.end() );
   selection.DailyBars( 30 );
   selection.Block();
+  */
 
-  std::cout << "History Downloaded" << std::endl;
+  std::cout << "History Scanned." << std::endl;
  
+}
+
+void Worker::ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName ) {
+  std::cout << sObjectName << std::endl;
 }

@@ -50,15 +50,21 @@ public:
   }
 
   int Start( const std::string& sBaseGroup ) {
-    CHDF5DataManager dm;
+    HDF5DataManager dm( HDF5DataManager::RO );
     m_sBaseGroup = sBaseGroup;
     int idx = 0;  // starting location for interrupted queries
     int result = dm.GetH5File()->iterateElems( sBaseGroup, &idx, &HDF5IterateCallback, this );  
     return result;
   }
 
+protected:
+  std::string m_sBaseGroup;
+private:
+  OnObjectHandler_t HandleObject;
+  OnObjectHandler_t HandleGroup;
+
   void Process( const std::string &sObjectName ) {
-    CHDF5DataManager dm;
+    HDF5DataManager dm( HDF5DataManager::RO );
     std::string sObjectPath;
     if ( '/' == m_sBaseGroup[ m_sBaseGroup.size() - 1 ] ) {
       sObjectPath = m_sBaseGroup + sObjectName;
@@ -97,20 +103,16 @@ public:
     }
     catch ( H5::Exception e ) {
       std::cout << "CFilterSelectionIteratorControl::Process H5::Exception " << e.getDetailMsg() << std::endl;
-      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &CHDF5DataManager::PrintH5ErrorStackItem, 0 );
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, 0 );
     }
   }
-protected:
-  std::string m_sBaseGroup;
-private:
-  OnObjectHandler_t HandleObject;
-  OnObjectHandler_t HandleGroup;
 
   static herr_t HDF5IterateCallback( hid_t group, const char *name, void *op_data ) {
     HDF5IterateGroups *pControl = ( HDF5IterateGroups *) op_data;
     pControl->Process( name );
   return 0;  
   }
+
 };
 
 } // namespace tf

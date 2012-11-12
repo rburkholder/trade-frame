@@ -96,15 +96,17 @@ void CProcess::StopWatch( void ) {
 
     string sPathName;
 
+    ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
     if ( 0 != m_vQuotes.Size() ) {
       sPathName = "/quote/" + m_sSymbolName;
-      CHDF5WriteTimeSeries<Quotes, Quote> wtsq;
+      HDF5WriteTimeSeries<Quotes, Quote> wtsq( dm );
       wtsq.Write( sPathName, &m_vQuotes );
     }
 
     if ( 0 != m_vTrades.Size() ) {
       sPathName = "/trade/" + m_sSymbolName;
-      CHDF5WriteTimeSeries<Trades, Trade> wtst;
+      HDF5WriteTimeSeries<Trades, Trade> wtst( dm );
       wtst.Write( sPathName, &m_vTrades );
     }
   }

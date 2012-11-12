@@ -26,6 +26,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "Worker.h"
+
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
 public:
@@ -35,6 +37,8 @@ private:
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
+
+  Worker* m_pWorker;
 
   DBOps m_db;
 

@@ -632,13 +632,15 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
   try {
 
+    ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
     std::cout << "Saving Quotes:" << std::endl;
 
     if ( 0 != m_quotes.Size() ) {
       sPathName = sPrefix + "/quotes/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
+      ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
       wtsQuotes.Write( sPathName, &m_quotes );
-      ou::tf::CHDF5Attributes attrQuotes( sPathName, m_pUnderlying->GetInstrumentType() );
+      ou::tf::HDF5Attributes attrQuotes( dm, sPathName, m_pUnderlying->GetInstrumentType() );
       attrQuotes.SetMultiplier( m_pUnderlying->GetMultiplier() );
       attrQuotes.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
       attrQuotes.SetProviderType( m_pData1Provider->ID() );
@@ -646,7 +648,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.quotes.Size() ) ) {
       sPathName = sPrefix + "/quotes/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
+      ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
       wtsQuotes.Write( sPathName, &bundle10YrTreasury.quotes );
     }
 
@@ -654,9 +656,9 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( 0 != m_trades.Size() ) {
       sPathName = sPrefix + "/trades/" + m_pUnderlying->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
+      ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
       wtsTrades.Write( sPathName, &m_trades );
-      ou::tf::CHDF5Attributes attrTrades( sPathName, m_pUnderlying->GetInstrumentType() );
+      ou::tf::HDF5Attributes attrTrades( dm, sPathName, m_pUnderlying->GetInstrumentType() );
       attrTrades.SetMultiplier( m_pUnderlying->GetMultiplier() );
       attrTrades.SetSignificantDigits( m_pUnderlying->GetSignificantDigits() );
       attrTrades.SetProviderType( m_pData1Provider->ID() );
@@ -664,7 +666,7 @@ void StrategyTradeOptions::Save( const std::string& sPrefix ) {
 
     if ( ( 0 != m_pData1ProviderIQFeed.get() ) && ( 0 != bundle10YrTreasury.trades.Size() ) ) {
       sPathName = sPrefix + "/trades/" + bundle10YrTreasury.pInstrument->GetInstrumentName();
-      ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
+      ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
       wtsTrades.Write( sPathName, &bundle10YrTreasury.trades );
     }
 

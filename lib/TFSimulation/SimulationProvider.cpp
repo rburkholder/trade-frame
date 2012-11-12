@@ -47,7 +47,7 @@ SimulationProvider::~SimulationProvider(void) {
 }
 
 void SimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
-  CHDF5DataManager dm;
+  HDF5DataManager dm( HDF5DataManager::RO );
   std::string s;
   if( !dm.GroupExists( sGroupDirectory ) ) 
     throw std::invalid_argument( "Could not find: " + sGroupDirectory );

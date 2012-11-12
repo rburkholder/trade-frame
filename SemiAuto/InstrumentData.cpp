@@ -93,13 +93,15 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
 
-  ou::tf::CHDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+  ou::tf::HDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &m_quotes );
-    ou::tf::CHDF5Attributes attrQuotes( sPathName, future );
+    ou::tf::HDF5Attributes attrQuotes( dm, sPathName, future );
     //attrQuotes.SetMultiplier( 1 );
     //attrQuotes.SetSignificantDigits( 2 );
     //attrTrades.SetProviderType( m_pDataProvider->ID() );
@@ -107,9 +109,9 @@ void InstrumentData::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
     wtsTrades.Write( sPathName, &m_trades );
-    ou::tf::CHDF5Attributes attrTrades( sPathName, future );
+    ou::tf::HDF5Attributes attrTrades( dm, sPathName, future );
     //attrTrades.SetMultiplier( 1 );
     //attrTrades.SetSignificantDigits( 2 );
     //attrTrades.SetProviderType( m_pDataProvider->ID() );

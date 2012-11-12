@@ -109,6 +109,7 @@ Process::Process( const std::string& sPrefixPath )
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
   //m_vExchanges.push_back( "NASDAQ,OTC" );
+  m_vExchanges.insert( "CANADIAN,TSE" );
 }
 
 Process::~Process(void) {
@@ -118,8 +119,8 @@ void Process::Start( void ) {
 
   ou::tf::iqfeed::InMemoryMktSymbolList list;
 
-//  if (true) {
-  if (false) {
+  if (true) {
+//  if (false) {
     std::cout << "Downloading File ... ";
     ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );  // put this into a thread
   //  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );  // put this into a thread
@@ -155,6 +156,8 @@ void Process::Start( void ) {
   DailyBars( m_cntBars );
   Block();
 
+  std::cout << "Process complete." << std::endl;
+
 }
 
 void Process::OnBars( inherited_t::structResultBar* bars ) {
@@ -173,15 +176,15 @@ void Process::OnBars( inherited_t::structResultBar* bars ) {
 
     std::string sPath;
 
-    ou::tf::CHDF5DataManager::DailyBarPath( bars->sSymbol, sPath );  // build hierchical path based upon symbol name
+    ou::tf::HDF5DataManager::DailyBarPath( bars->sSymbol, sPath );  // build hierchical path based upon symbol name
 
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Bars> wts;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Bars> wts( false, true, 0, 64 );
     wts.Write( sPath, &bars->bars );
   }
 
   ReQueueBars( bars ); 
 
-  std::cout << std::endl;
+  std::cout << "." << std::endl;
 
 }
 
@@ -193,13 +196,13 @@ void Process::OnTicks( inherited_t::structResultTicks* ticks ) {
 
   if ( 0 != ticks->trades.Size() ) {
     std::string sPath( "/optionables/trade/" + ticks->sSymbol );
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Trades> wtst;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtst;
     wtst.Write( sPath, &ticks->trades );
   }
 
   if ( 0 != ticks->quotes.Size() ) {
     std::string sPath( "/optionables/quote/" + ticks->sSymbol );
-    ou::tf::CHDF5WriteTimeSeries<ou::tf::Quotes> wtsq;
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsq;
     wtsq.Write( sPath, &ticks->quotes );
   }
 

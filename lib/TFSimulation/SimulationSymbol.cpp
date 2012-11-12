@@ -44,8 +44,9 @@ void SimulationSymbol::StartTradeWatch( void ) {
   if ( 0 == m_trades.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/trades/" + GetId() );
-      CHDF5TimeSeriesContainer<Trade> tradeRepository( sPath );
-      CHDF5TimeSeriesContainer<Trade>::iterator begin, end;
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      HDF5TimeSeriesContainer<Trade> tradeRepository( dm, sPath );
+      HDF5TimeSeriesContainer<Trade>::iterator begin, end;
       begin = tradeRepository.begin();
       end = tradeRepository.end();
       m_trades.Resize( end - begin );
@@ -64,8 +65,9 @@ void SimulationSymbol::StartQuoteWatch( void ) {
   if ( 0 == m_quotes.Size() ) {
     try {
       std::string sPath( m_sDirectory + "/quotes/" + GetId() );
-      CHDF5TimeSeriesContainer<Quote> quoteRepository( sPath );
-      CHDF5TimeSeriesContainer<Quote>::iterator begin, end;
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      HDF5TimeSeriesContainer<Quote> quoteRepository( dm, sPath );
+      HDF5TimeSeriesContainer<Quote>::iterator begin, end;
       begin = quoteRepository.begin();
       end = quoteRepository.end();
       m_quotes.Resize( end - begin );
@@ -84,8 +86,9 @@ void SimulationSymbol::StartGreekWatch( void ) {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
       std::string sPath( m_sDirectory + "/greeks/" + GetId() );
-      CHDF5TimeSeriesContainer<Greek> greekRepository( sPath );
-      CHDF5TimeSeriesContainer<Greek>::iterator begin, end;
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      HDF5TimeSeriesContainer<Greek> greekRepository( dm, sPath );
+      HDF5TimeSeriesContainer<Greek>::iterator begin, end;
       begin = greekRepository.begin();
       end = greekRepository.end();
       m_greeks.Resize( end - begin );

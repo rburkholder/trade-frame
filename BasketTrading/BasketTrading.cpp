@@ -22,8 +22,6 @@
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
-#include "Worker.h"
-
 #include "BasketTrading.h"
 
 IMPLEMENT_APP(AppBasketTrading)
@@ -78,7 +76,7 @@ bool AppBasketTrading::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_db.Open( "basket.db" );
 
-//  Worker worker;  // need to do a new with this
+  m_pWorker = new Worker;
 
   return 1;
 

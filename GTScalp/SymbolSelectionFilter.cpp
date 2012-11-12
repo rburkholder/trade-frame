@@ -122,8 +122,8 @@ bool CSelectSymbolWithDarvas::Validate( void ) {
 
 void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPath ) {
   //cout << "Darvas for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
-  CHDF5TimeSeriesContainer<Bar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<Bar>::iterator begin, end;
+  HDF5TimeSeriesContainer<Bar> barRepository( sPath );
+  HDF5TimeSeriesContainer<Bar>::iterator begin, end;
   ptime dtPt1 = m_dtStart - m_dtStart.time_of_day();  // normalize day of max
   ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
   ptime dtOneYrAgo = dtPt2 - date_duration(52 * 7); // get 52 weeks of values from day of max value
@@ -189,8 +189,8 @@ bool CSelectSymbolWith10Percent::Validate( void ) {
 void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &sPath ) {
   //cout << "10 Percent for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   m_sPath = sPath;
-  CHDF5TimeSeriesContainer<Bar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<Bar>::iterator begin, end;
+  HDF5TimeSeriesContainer<Bar> barRepository( sPath );
+  HDF5TimeSeriesContainer<Bar>::iterator begin, end;
   ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
   end = lower_bound( barRepository.begin(), barRepository.end(), dtPt2 );
   //if (  ( end != barRepository.end() ) ) {
@@ -289,8 +289,8 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
   try {
   m_sPath = sPath;
   //cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
-  CHDF5TimeSeriesContainer<Bar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<Bar>::iterator begin, end;
+  HDF5TimeSeriesContainer<Bar> barRepository( sPath );
+  HDF5TimeSeriesContainer<Bar>::iterator begin, end;
   ptime dtPt2 = m_dtLast - m_dtLast.time_of_day();  // normalize end day ( 1 past day of last bar )
   end = lower_bound( barRepository.begin(), barRepository.end(), dtPt2 );
   if ( 20 < ( end - barRepository.begin() ) ) {  // make sure there are at least 20 bars available
@@ -367,8 +367,8 @@ CSelectSymbolWithXWeekHigh::~CSelectSymbolWithXWeekHigh(void) {
 
 void CSelectSymbolWithXWeekHigh::Process( const string &sSymbol, const string &sPath ) {
   //cout << "CSelectSymbolWithXWeekHigh for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
-  CHDF5TimeSeriesContainer<Bar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<Bar>::iterator begin, end;
+  HDF5TimeSeriesContainer<Bar> barRepository( sPath );
+  HDF5TimeSeriesContainer<Bar>::iterator begin, end;
   ptime dtStart = m_dtStart - date_duration(52 * 7); // get 52 weeks of values from day of max value
   begin = lower_bound( barRepository.begin(), barRepository.end(), dtStart );
   //end = lower_bound( begin, barRepository.end(), m_dtLast );  // retrieve to end for the trigger
@@ -401,8 +401,8 @@ CSelectSymbolWithBollinger::~CSelectSymbolWithBollinger(void) {
 
 void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &sPath ) {
   cout << "Bollinger for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
-  CHDF5TimeSeriesContainer<Bar> barRepository( sPath );
-  CHDF5TimeSeriesContainer<Bar>::iterator begin, end;
+  HDF5TimeSeriesContainer<Bar> barRepository( sPath );
+  HDF5TimeSeriesContainer<Bar>::iterator begin, end;
   end = lower_bound( barRepository.begin(), barRepository.end(), m_dtStart );
   switch ( m_DayStartType ) {
     case DaySelect:

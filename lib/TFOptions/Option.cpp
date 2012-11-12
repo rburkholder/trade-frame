@@ -110,14 +110,16 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
 
-  CHDF5Attributes::structOption option( 
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  HDF5Attributes::structOption option( 
     m_dblStrike, m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay(), m_pInstrument->GetOptionSide() );
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes;
+    HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &m_quotes );
-    CHDF5Attributes attrQuotes( sPathName, option );
+    HDF5Attributes attrQuotes( dm, sPathName, option );
     attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
     attrQuotes.SetProviderType( m_pDataProvider->ID() );
@@ -125,9 +127,9 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<ou::tf::Trades> wtsTrades;
+    HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
     wtsTrades.Write( sPathName, &m_trades );
-    CHDF5Attributes attrTrades( sPathName, option );
+    HDF5Attributes attrTrades( dm, sPathName, option );
     attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
     attrTrades.SetProviderType( m_pDataProvider->ID() );
@@ -135,9 +137,9 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
-    CHDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks;
+    HDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks( dm );
     wtsGreeks.Write( sPathName, &m_greeks );
-    CHDF5Attributes attrGreeks( sPathName, option );
+    HDF5Attributes attrGreeks( dm, sPathName, option );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrGreeks.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
     attrGreeks.SetProviderType( m_pGreekProvider->ID() );
