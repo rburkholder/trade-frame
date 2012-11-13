@@ -24,10 +24,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CDarvasResults {
+class DarvasResults {
 public:
-  CDarvasResults( bool bTrigger, double dblStopLevel ): m_bTrigger( bTrigger ), m_dblStopLevel( dblStopLevel ) {};
-  ~CDarvasResults( void ) {};
+  DarvasResults( bool bTrigger, double dblStopLevel ): m_bTrigger( bTrigger ), m_dblStopLevel( dblStopLevel ) {};
+  ~DarvasResults( void ) {};
   bool GetTrigger( void ) { return m_bTrigger; };
   double GetStopLevel( void ) { return m_dblStopLevel; };
 protected:
@@ -37,12 +37,11 @@ private:
 };
 
 // is a functor
-//class CDarvas: public std::unary_function<CBar &, void> {
 template <typename T>
-class CDarvas {
+class Darvas {
 public:
-  CDarvas<T>(void);
-  ~CDarvas<T>(void);
+  Darvas<T>(void);
+  ~Darvas<T>(void);
   void operator()( const Bar& bar ) { Calc( bar ); };
   void Calc( const Bar& bar );
   void Clear( void ) { 
@@ -76,18 +75,18 @@ private:
 };
 
 template <typename T>
-CDarvas<T>::CDarvas(void)
+Darvas<T>::Darvas(void)
 : m_stateTop( ELookingForHigh ), m_stateBottom( ELookingForBottom ),
   m_dblTop( 0 ), m_dblBottom( 0 ), m_dblStop( 0 ), m_dblGhostHeight( 0 ), m_cntBreakOuts( 0 )
 {
 }
 
 template <typename T>
-CDarvas<T>::~CDarvas(void) {
+Darvas<T>::~Darvas(void) {
 }
 
 template <typename T>
-void CDarvas<T>::ResetState( void ) {
+void Darvas<T>::ResetState( void ) {
   m_stateTop = ELookingForLowerHigh1;
   m_stateBottom = ELookingForBottom;
   if ( 0 != m_dblGhostHeight ) {
@@ -96,7 +95,7 @@ void CDarvas<T>::ResetState( void ) {
 }
 
 template <typename T>
-void CDarvas<T>::Calc(const Bar& bar) {
+void Darvas<T>::Calc(const Bar& bar) {
   switch ( m_stateTop ) {
     case ELookingForHigh: 
       ResetState();

@@ -85,7 +85,7 @@ bool AppBasketTrading::OnInit() {
 int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
-
+  delete m_pWorker;
   if ( m_db.IsOpen() ) m_db.Close();
 
   return 0;

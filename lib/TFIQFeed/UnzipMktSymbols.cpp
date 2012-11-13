@@ -20,6 +20,8 @@
 #include <ioapi_mem.h>
 #include <unzip.h>
 
+#include <stdexcept>
+
 //#include "CurlGetMktSymbols.h"
 #include "UnzipMktSymbols.h"
 

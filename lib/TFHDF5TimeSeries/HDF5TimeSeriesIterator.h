@@ -159,7 +159,7 @@ HDF5TimeSeriesIterator<DD>& HDF5TimeSeriesIterator<DD>::operator-=( const hsize_
 template<class DD> 
 HDF5TimeSeriesIterator<DD> HDF5TimeSeriesIterator<DD>::operator-( const hsize_t val ) { // subtraction
   assert( val <= m_ItemIndex );
-  HDF5TimeSeriesIterator<T> result( *this );  // make a copy of this
+  HDF5TimeSeriesIterator<DD> result( *this );  // make a copy of this
   result.m_ItemIndex -= val;
   return result;
 }

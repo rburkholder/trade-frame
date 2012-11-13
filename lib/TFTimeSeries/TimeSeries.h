@@ -74,9 +74,10 @@ public:
   const_reference Ago( size_type ix );
   const_reference operator[]( size_type ix );
   const_reference At( size_type ix );
+
   //const_reference At( const ptime& time );
-  const_reference AtOrAfter( const ptime& time );
-  const_reference After( const ptime& time );
+  const_iterator AtOrAfter( const ptime& time );
+  const_iterator After( const ptime& time );
 
   const_iterator begin() const { return m_vSeries.cbegin(); };
   const_iterator end() const { return m_vSeries.cend(); };
@@ -253,29 +254,29 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
 */
 
 template<typename T> 
-typename TimeSeries<T>::const_reference TimeSeries<T>::AtOrAfter( const ptime &dt ) {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
   T key( dt );
-  std::pair<iterator, iterator> p;
+  std::pair<const_iterator, const_iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
 //  if ( p.first != p.second ) {
 //    m_vIterator = p.first;
 //  }
 //  return &(*m_vIterator);
-  return *p.first;
+  return p.first;
 }
 
 template<typename T> 
-typename TimeSeries<T>::const_reference TimeSeries<T>::After( const ptime &dt ) {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
   T key( dt );
-  std::pair<iterator, iterator> p;
+  std::pair<const_iterator, const_iterator> p;
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
-  return *p.second;
+  return p.second;
 }
 
 template<typename T> 

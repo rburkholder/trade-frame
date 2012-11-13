@@ -157,7 +157,7 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
                 ", close=" << m_bars.Last()->m_dblClose <<
                 ", volume=" << m_bars.Last()->m_nVolume;
               vector<Bar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
-              CDarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
+              DarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
               if ( results.GetTrigger() ) {
                 cout << " triggered, stop=" << results.GetStopLevel();
                 iter = m_bars.iterAtOrAfter( dt26WksAgo );
