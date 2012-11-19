@@ -33,12 +33,18 @@
     <ClInclude Include="IQFeedSymbolFileToSqlite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DailyTradeTimeFrames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HistoryDailyTick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DailyTradeTimeFrames.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

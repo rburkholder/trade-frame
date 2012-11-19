@@ -12,28 +12,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// CAV.cpp : Defines the entry point for the application.
-//
-
 #include "StdAfx.h"
 
-#include <boost/ref.hpp>
+#include "DailyTradeTimeFrames.h"
 
-#include "Worker.h"
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+  
 
-#include "SymbolSelection.h"
-
-Worker::Worker(void) {
-  m_pThread = new boost::thread( boost::ref( *this ) );
-}
-
-Worker::~Worker(void) {
-  delete m_pThread; 
-}
-
-void Worker::operator()( void ) {
-
-  SymbolSelection selector( ptime( date( 2012, 11, 16 ), time_duration( 0, 0, 0 ) ) );
-
-}
-
+} // namespace tf
+} // namespace ou
