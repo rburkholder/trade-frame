@@ -71,7 +71,7 @@ void Operation::Stop( void ) {
   StopWatch();
 }
 
-void Operation::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, const pInstrument_t& pInstrument ) {
+void Operation::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
   m_pInstrument = pInstrument;
   //m_pInstrument->SetAlternateName( m_piqfeed->ID(), "+GCZ11" );
   m_md.data.pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_ptws, m_piqfeed ) );
@@ -138,7 +138,7 @@ void Operation::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != is.quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes, ou::tf::Quote> wtsQuotes( dm );
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &is.quotes );
     ou::tf::HDF5Attributes attrQuotes( dm, sPathName, ou::tf::InstrumentType::Stock );
     //HDF5Attributes attrQuotes( sPathName, future );
@@ -147,7 +147,7 @@ void Operation::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != is.trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades, ou::tf::Trade> wtsTrades( dm );
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
     wtsTrades.Write( sPathName, &is.trades );
     ou::tf::HDF5Attributes attrTrades( dm, sPathName, ou::tf::InstrumentType::Stock );
     //HDF5Attributes attrTrades( sPathName, future );

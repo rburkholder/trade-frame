@@ -15,6 +15,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
@@ -27,6 +28,7 @@ class SymbolSelection {
 public:
   explicit SymbolSelection( ptime eod );
   ~SymbolSelection( void );
+  void Process( std::set<std::string>& selected );
 protected:
 private:
   ou::tf::HDF5DataManager m_dm;
@@ -38,6 +40,8 @@ private:
   ptime m_dtEnd;  // dtLast + 1
   ptime m_dtOneYearAgo;
   ptime m_dt26WeeksAgo;
+
+  std::set<std::string>* m_psetSymbols;
 
   struct MaxNegativesCompare {
     bool operator() ( double dbl1, double dbl2 ) {
@@ -58,8 +62,8 @@ private:
   void CheckFor10Percent( const std::string& sSymbol, citer begin, citer end );
   void CheckForVolatility( const std::string& sSymbol, citer begin, citer end );
 
-  void WrapUp10Percent( void );
-  void WrapUpVolatility( void );
+  void WrapUp10Percent( std::set<std::string>& selected );
+  void WrapUpVolatility( std::set<std::string>& selected );
 
 };
 

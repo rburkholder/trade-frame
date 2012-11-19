@@ -19,7 +19,7 @@
 
 #include <boost/thread/barrier.hpp>
 
-//#include <TFIQFeed/IQFeedInstrumentFile.h>
+#include <TFIQFeed/IQFeedInstrumentFile.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFTimeSeries/TimeSeries.h>
 
@@ -27,8 +27,8 @@ class ScanHistory;
 typedef ou::tf::iqfeed::HistoryBulkQuery<ScanHistory> HistoryBulkQuery_t;
 
 class ScanHistory:
-  public ou::tf::iqfeed::HistoryBulkQuery_t {
-  friend ou::tf::iqfeed::HistoryBulkQuery_t;
+  public HistoryBulkQuery_t {
+  friend HistoryBulkQuery_t;
 public:
 
   ScanHistory( void );
@@ -41,7 +41,7 @@ public:
 
 protected:
 
-  typedef ou::tf::iqfeed::HistoryBulkQuery_t::structQueryState structQueryState;
+  typedef HistoryBulkQuery_t::structQueryState structQueryState;
 
   // CRTP from HistoryBulkQuery
   void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP );
@@ -79,7 +79,7 @@ private:
 
   boost::barrier m_barrier;
 
-  void Process( const ou::tf::iqfeed::structSymbolRecord& sym );
+  void Process( const ou::tf::structSymbolRecord& sym );
 
 };
 

@@ -51,7 +51,7 @@ sc::result StatePreMarket::Handle( const EvTrade& trade ) {
 
 sc::result StateMarketOpen::Handle( const EvTrade& trade ) {
   InstrumentState& is( context<MachineMarketStates>().data );
-  is.dblOpeningTrade = trade.Trade().Trade();
+  is.dblOpeningTrade = trade.Trade().Price();
   std::cout << trade.Trade().DateTime() << ": " << is.pPosition->GetInstrument()->GetInstrumentName() << " Open " << is.dblOpeningTrade << std::endl;
   return transit<StatePreTrading>();
 }

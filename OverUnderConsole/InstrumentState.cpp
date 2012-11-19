@@ -41,8 +41,8 @@ InstrumentState::InstrumentState( void ):
   tdClosePositions( time_duration( 16, 55, 0 ) ),// time relative to day
   tdAfterMarket( time_duration( 17, 0, 0 ) ), // time relative to day
   tdMarketClosed( time_duration( 18, 0, 0 ) ), // time relative to day
-  stochFast( &quotes, 60 ), stochMed( &quotes, 300 ), stochSlow( &quotes, 1800 ), // 1, 5, 30 min
-  statsFast( &quotes, 60 ), statsMed( &quotes, 180 ), statsSlow( &quotes, 300 ), // 1, 3, 5 min
+  stochFast( quotes, time_duration( 0, 0, 60 ) ), stochMed( quotes, time_duration( 0, 0, 300 ) ), stochSlow( quotes, time_duration( 0, 0, 1800 ) ), // 1, 5, 30 min
+  statsFast( quotes, time_duration( 0, 0, 60 ) ), statsMed( quotes, time_duration( 0, 0, 180 ) ), statsSlow( quotes, time_duration( 0, 0, 300 ) ), // 1, 3, 5 min
   bDaySession( true )
   {
     bMarketHoursCrossMidnight = tdMarketOpen > tdMarketClosed;

@@ -60,7 +60,7 @@ private:
   void StartWatch( void );
   void StopWatch( void );
 
-  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, const pInstrument_t& pInstrument );
+  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
   // will need to migrate to a container when doing more than one instrument

@@ -17,6 +17,9 @@
 
 #include "StdAfx.h"
 
+#include <set>
+#include <string>
+
 #include <boost/ref.hpp>
 
 #include "Worker.h"
@@ -33,7 +36,16 @@ Worker::~Worker(void) {
 
 void Worker::operator()( void ) {
 
+  std::set<std::string> symbols;
+
   SymbolSelection selector( ptime( date( 2012, 11, 16 ), time_duration( 0, 0, 0 ) ) );
+  selector.Process( symbols );
+
+  std::cout << "Symbol List: " << std::endl;
+  for ( std::set<std::string>::const_iterator iter = symbols.begin(); iter != symbols.end(); iter++ ) {
+    std::cout << *iter << std::endl;
+  }
+
 
 }
 

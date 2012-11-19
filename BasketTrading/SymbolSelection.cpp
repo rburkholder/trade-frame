@@ -28,14 +28,25 @@
 // 2012/11/18 Look for symbols which regularily hit their pivots
 
 SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ),  m_dm( ou::tf::HDF5DataManager::RO ) {
+
   m_dtEnd = m_dtLast + date_duration( 1 );
   m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
 //  m_dt26WeeksAgo = m_dtLast - date_duration( 26 * 7 );
   m_dtDarvasTrigger = m_dtLast - date_duration( 8 );
 
-  std::cout << "running" << std::endl;
+}
+
+SymbolSelection::~SymbolSelection(void) {
+}
+
+void SymbolSelection::Process( std::set<std::string>& selected ) {
+
+  m_psetSymbols = &selected;
+
+  std::cout << "Running" << std::endl;
 
   ou::tf::HDF5IterateGroups groups;
+
   groups.SetOnHandleObject( MakeDelegate( this, &SymbolSelection::ProcessGroupItem ) );
   try {
     int result = groups.Start( "/bar/86400/" );
@@ -44,21 +55,11 @@ SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ),  m_dm( ou:
     std::cout << "ouch" << std::endl;
   }
 
-  WrapUp10Percent();
-  WrapUpVolatility();
-
-  /*
-  SymbolSelection selection( 30 );
-  selection.SetSymbols( setSelected.begin(), setSelected.end() );
-  selection.DailyBars( 30 );
-  selection.Block();
-  */
+  WrapUp10Percent(selected);
+  WrapUpVolatility(selected);
 
   std::cout << "History Scanned." << std::endl;
 
-}
-
-SymbolSelection::~SymbolSelection(void) {
 }
 
 struct AverageVolume {
@@ -212,6 +213,7 @@ void SymbolSelection::CheckForDarvas( const std::string& sSymbol, citer begin, c
     }
 
     if ( bTrigger ) {
+      m_psetSymbols->insert( sSymbol );
       darvas.StopValue();
       std::cout << ss.str() << std::endl;
     }
@@ -250,7 +252,7 @@ void SymbolSelection::CheckFor10Percent( const std::string& sSymbol, citer begin
   }
 }
 
-void SymbolSelection::WrapUp10Percent( void ) {
+void SymbolSelection::WrapUp10Percent( std::set<std::string>& selected ) {
   std::cout << "Positives: " << std::endl;
   std::multimap<double, std::string>::iterator iterPos;
   for ( iterPos = m_mapMaxPositives.begin(); iterPos != m_mapMaxPositives.end(); ++iterPos ) {
@@ -259,6 +261,7 @@ void SymbolSelection::WrapUp10Percent( void ) {
 //    std::cout << " " << sSymbolName << "=" << iterPos->first << std::endl;
     std::cout << iterPos->second << ": " << iterPos->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "10%+" );
+    selected.insert( iterPos->second );
   }
   m_mapMaxPositives.clear();
 
@@ -270,6 +273,7 @@ void SymbolSelection::WrapUp10Percent( void ) {
 //    std::cout << " " << sSymbolName << "=" << iterNeg->first << std::endl;
     std::cout << " " << iterNeg->second << ": " << iterNeg->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterNeg->second, "10%-" );
+    selected.insert( iterNeg->second );
   }
   m_mapMaxNegatives.clear();
 }
@@ -310,7 +314,7 @@ void SymbolSelection::CheckForVolatility( const std::string& sSymbol, citer begi
   }
 }
 
-void SymbolSelection::WrapUpVolatility( void ) {
+void SymbolSelection::WrapUpVolatility( std::set<std::string>& selected ) {
   std::cout << "Volatiles: " << std::endl;
   std::multimap<double, std::string>::iterator iterPos;
   for ( iterPos = m_mapMaxVolatility.begin(); iterPos != m_mapMaxVolatility.end(); ++iterPos ) {
@@ -319,6 +323,7 @@ void SymbolSelection::WrapUpVolatility( void ) {
 //    cout << " " << sSymbolName << "=" << iterPos->first << endl;
     std::cout << " " << iterPos->second << ": " << iterPos->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "Volatile" );
+    selected.insert( iterPos->second );
   }
   m_mapMaxVolatility.clear();
 }
