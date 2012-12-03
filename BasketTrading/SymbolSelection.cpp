@@ -31,7 +31,8 @@ SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ),  m_dm( ou:
 
   m_dtEnd = m_dtLast + date_duration( 1 );
   m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
-//  m_dt26WeeksAgo = m_dtLast - date_duration( 26 * 7 );
+  m_dt26WeeksAgo = m_dtLast - date_duration( 26 * 7 );
+  m_dtDateOfFirstBar = m_dt26WeeksAgo;
   m_dtDarvasTrigger = m_dtLast - date_duration( 8 );
 
 }
@@ -94,12 +95,12 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
 //  std::cout << sObjectName << std::endl;
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> barRepository( m_dm, sObjectPath );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
-  begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtOneYearAgo );
+  begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDateOfFirstBar );
   end = lower_bound( begin, barRepository.end(), m_dtEnd ); 
   hsize_t cnt = end - begin;
   if ( 20 <= cnt ) {
     ptime dttmp = (*(end-1)).DateTime();
-    if ( ( 240 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {  // 240 bars and last bar is current
+//    std::cout << sObjectName << m_dtLast << ", " << dttmp << std::endl;
       ou::tf::Bars bars;
       bars.Resize( cnt );
       barRepository.Read( begin, end, &bars );
@@ -108,11 +109,12 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
       if ( ( 1000000 < volAverage ) 
         && ( 10.0 <= bars.Last()->Close() )
         && ( 75.0 >= bars.Last()->Close() ) ) {
-          CheckForDarvas( sObjectName, bars.begin(), bars.end() );
+          if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
+            CheckForDarvas( sObjectName, bars.begin(), bars.end() );
+          }
           CheckFor10Percent( sObjectName, bars.end() - 20, bars.end() );
           CheckForVolatility( sObjectName, bars.end() - 20, bars.end() );
       }
-    }
   }
 }
 

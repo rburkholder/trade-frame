@@ -40,6 +40,7 @@ private:
   ptime m_dtEnd;  // dtLast + 1
   ptime m_dtOneYearAgo;
   ptime m_dt26WeeksAgo;
+  ptime m_dtDateOfFirstBar;
 
   std::set<std::string>* m_psetSymbols;
 

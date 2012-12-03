@@ -38,7 +38,8 @@ void Worker::operator()( void ) {
 
   std::set<std::string> symbols;
 
-  SymbolSelection selector( ptime( date( 2012, 11, 16 ), time_duration( 0, 0, 0 ) ) );
+  // last day of available data
+  SymbolSelection selector( ptime( date( 2012, 11, 30 ), time_duration( 0, 0, 0 ) ) );
   selector.Process( symbols );
 
   std::cout << "Symbol List: " << std::endl;
