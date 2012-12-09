@@ -91,7 +91,7 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
   m_timeCancel = m_timeClosingBell - time_duration( 0, 6, 0 );
   m_timeClose =  m_timeClosingBell - time_duration( 0, 3, 0 );
 
-  std::cout << ou::CTimeSource::Instance().Internal() << " Starting State: EPreOpen(" <<  StrategyTradeOptionsConstants::bTesting << ")" << std::endl;
+  std::cout << ou::TimeSource::Instance().Internal() << " Starting State: EPreOpen(" <<  StrategyTradeOptionsConstants::bTesting << ")" << std::endl;
 }
 
 StrategyTradeOptions::~StrategyTradeOptions(void) {
@@ -219,7 +219,7 @@ void StrategyTradeOptions::HandleFarDateContractDetailsDone( void ) {
 void StrategyTradeOptions::LoadExistingInstrumentsAndPortfolios( const std::string& sUnderlying ) {
 
   std::stringstream ss;
-  ss << ou::CTimeSource::Instance().External();
+  ss << ou::TimeSource::Instance().External();
   m_sTimeStampWatchStarted = "/app/strategy/options/" + ss.str();  // will need to make this generic if need some for multiple providers.
 
   ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
@@ -296,7 +296,7 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::Quote& quote ) {
   case EPreOpen:
     if ( m_timeOpeningBell <= tod ) {
       m_TradeStates = EBellHeard;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: EBellHeard" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: EBellHeard" << std::endl;
     }
     break;
   case EBellHeard:  // will need to wait for a bit for options to settle
@@ -309,22 +309,22 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::Quote& quote ) {
     SetPointersFirstTime( quote );
     m_timePauseForQuotes = tod + time_duration( 0, 0, 30 );
     m_TradeStates = EPauseForQuotes;
-    std::cout << ou::CTimeSource::Instance().Internal() << " New State: EPauseForQuotes" << std::endl;
+    std::cout << ou::TimeSource::Instance().Internal() << " New State: EPauseForQuotes" << std::endl;
     break;
   case EPauseForQuotes:
     if ( m_timePauseForQuotes <= tod ) {
       m_timePauseForQuotes = tod + time_duration( 0, 0, 30 );
       m_TradeStates = EAfterBell;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: EAfterBell" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: EAfterBell" << std::endl;
     }
     break;
   case EAfterBell:
     AdjustThePointers( quote );  // keep everything adjusted for when ready to adjust the options
     if ( m_timePauseForQuotes <= tod ) {
-      std::cout << ou::CTimeSource::Instance().Internal() << " EAfterBell: Adjust Options" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " EAfterBell: Adjust Options" << std::endl;
       AdjustTheOptions( quote );  // opening balance
       m_TradeStates = ETrading;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: ETrading" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: ETrading" << std::endl;
     }
     break;
   case ETrading:
@@ -332,11 +332,11 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::Quote& quote ) {
     // * profit taking on anything not with current strike
     if ( m_timeCancel <= tod ) {
       m_TradeStates = ECancelling;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: ECancelling" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: ECancelling" << std::endl;
     }
     else {
       if ( AdjustThePointers( quote ) ) {
-        std::cout << ou::CTimeSource::Instance().Internal() << " Adjusting Options" << std::endl;
+        std::cout << ou::TimeSource::Instance().Internal() << " Adjusting Options" << std::endl;
         AdjustTheOptions( quote );  // rebalance
       }
     }
@@ -345,19 +345,19 @@ void StrategyTradeOptions::HandleQuote( const ou::tf::Quote& quote ) {
     AdjustThePointers( quote );
     if ( m_timeClose <= tod ) {
       m_TradeStates = EGoingNeutral;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: EGoingNeutral" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: EGoingNeutral" << std::endl;
     }
     break;
   case EGoingNeutral: 
     AdjustThePointers( quote );
-    std::cout << ou::CTimeSource::Instance().Internal() << " Final Options Go Neutral" << std::endl;
+    std::cout << ou::TimeSource::Instance().Internal() << " Final Options Go Neutral" << std::endl;
     AdjustTheOptions( quote );  // rebalance
     m_TradeStates = EClosing;
     break;
   case EClosing:
     if ( m_timeClosingBell <= tod ) {
       m_TradeStates = EAfterHours;
-      std::cout << ou::CTimeSource::Instance().Internal() << " New State: EAfterHours" << std::endl;
+      std::cout << ou::TimeSource::Instance().Internal() << " New State: EAfterHours" << std::endl;
     }
     break;
   case EAfterHours:
@@ -396,7 +396,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
     // something wierd
 //  }
 //  else {
-  std::cout << ou::CTimeSource::Instance().Internal() << " calls: " << deltaCall << ", " << m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->Delta() << std::endl;
+  std::cout << ou::TimeSource::Instance().Internal() << " calls: " << deltaCall << ", " << m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->Delta() << std::endl;
     nToBuy = ( ( m_paramWorkingDelta - deltaCall ) / 100.0 )
       / m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->Delta();
     if ( 0 < nToBuy ) {
@@ -413,7 +413,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
             m_pExecutionProvider, m_pData1Provider,
             m_iterMapOptionsMiddle->second.optionFarDateCall.pOption->GetInstrument() );
         }
-        std::cout << ou::CTimeSource::Instance().Internal() << " place far call buy" << std::endl;
+        std::cout << ou::TimeSource::Instance().Internal() << " place far call buy" << std::endl;
         m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, nToBuy );
       }
     }
@@ -423,7 +423,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
 //    std::cout << "deltaPut Problem" << std::endl;
 //  }
 //  else {
-    std::cout << ou::CTimeSource::Instance().Internal() << "  puts: " << deltaPut << ", " << m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->Delta() << std::endl;
+    std::cout << ou::TimeSource::Instance().Internal() << "  puts: " << deltaPut << ", " << m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->Delta() << std::endl;
     nToBuy = ( ( m_paramWorkingDelta + deltaPut ) / 100.0 )
       / -m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->Delta();
     if ( 0 < nToBuy ) {
@@ -440,7 +440,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
             m_pExecutionProvider, m_pData1Provider,
             m_iterMapOptionsMiddle->second.optionFarDatePut.pOption->GetInstrument() );
         }
-        std::cout << ou::CTimeSource::Instance().Internal() << " place far put buy" << std::endl;
+        std::cout << ou::TimeSource::Instance().Internal() << " place far put buy" << std::endl;
         m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, nToBuy );
       }
     }
@@ -463,7 +463,7 @@ bool StrategyTradeOptions::AdjustThePointers( const ou::tf::Quote& quote ) {
     ++m_iterMapOptionsBelow2;
     //m_iterMapOptionsBelow2->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
 
-    std::cout << ou::CTimeSource::Instance().Internal() << " strikes upwards: " 
+    std::cout << ou::TimeSource::Instance().Internal() << " strikes upwards: " 
     << m_iterMapOptionsBelow2->first << ", " 
     << m_iterMapOptionsBelow1->first << ", " 
     << m_iterMapOptionsMiddle->first << ", " 
@@ -484,7 +484,7 @@ bool StrategyTradeOptions::AdjustThePointers( const ou::tf::Quote& quote ) {
       --m_iterMapOptionsAbove2;
       //m_iterMapOptionsAbove2->second.StartWatch();  // is there a delay in trading necessary until first quotes arrive?
 
-      std::cout << ou::CTimeSource::Instance().Internal() << " strikes downwards: " 
+      std::cout << ou::TimeSource::Instance().Internal() << " strikes downwards: " 
       << m_iterMapOptionsBelow2->first << ", " 
       << m_iterMapOptionsBelow1->first << ", " 
       << m_iterMapOptionsMiddle->first << ", " 
@@ -552,7 +552,7 @@ bool StrategyTradeOptions::SetPointersFirstTime( const ou::tf::Quote& quote ) {
   m_iterMapOptionsBelow1->second.StartWatch();
   m_iterMapOptionsBelow2->second.StartWatch();
 
-  std::cout << ou::CTimeSource::Instance().Internal() << " opening strikes: " 
+  std::cout << ou::TimeSource::Instance().Internal() << " opening strikes: " 
     << m_iterMapOptionsBelow2->first << ", " 
     << m_iterMapOptionsBelow1->first << ", " 
     << m_iterMapOptionsMiddle->first << ", " 

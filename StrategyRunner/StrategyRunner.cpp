@@ -108,7 +108,7 @@ void AppStrategyRunner::HandleBtnStart( void ) {
 
     std::stringstream ss;
     ss.str( "" );
-    ss << ou::CTimeSource::Instance().Internal();
+    ss << ou::TimeSource::Instance().Internal();
     m_sTimeSamplingStarted = "/app/StrategyTradeOptions/" + ss.str();
 
     assert( 0 != sDbName.length() );

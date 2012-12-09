@@ -45,7 +45,7 @@ void App::Run( void ) {
 
   std::stringstream ss;
   ss.str( "" );
-  ss << ou::CTimeSource::Instance().Internal();
+  ss << ou::TimeSource::Instance().Internal();
   m_sTSDataStreamStarted = "/app/OverUnderConsole/" + ss.str();  // will need to make this generic if need some for multiple providers.
 
   m_ptws->Connect();

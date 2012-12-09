@@ -115,9 +115,8 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
   ou::tf::CAccountManager::pAccount_t pAccountSimulator
     = ou::tf::CAccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
-//  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-//    //= ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
-//    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "pflioOptions", "aoRay", "options" );
+  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "pflioEquitiesBasket", "aoRay", "Basket of Equities" );
 
 }
 

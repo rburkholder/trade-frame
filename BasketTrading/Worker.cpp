@@ -22,6 +22,8 @@
 
 #include <boost/ref.hpp>
 
+#include <OUCommon/TimeSource.h>
+
 #include "Worker.h"
 
 #include "SymbolSelection.h"
@@ -39,8 +41,13 @@ void Worker::operator()( void ) {
   std::set<std::string> symbols;
 
   // last day of available data
-  SymbolSelection selector( ptime( date( 2012, 11, 30 ), time_duration( 0, 0, 0 ) ) );
+  SymbolSelection selector( ptime( date( 2012, 12, 7 ), time_duration( 0, 0, 0 ) ) );
   selector.Process( symbols );
+
+  std::stringstream ss;
+  ss.str( "" );
+  ss << ou::TimeSource::Instance().Internal();
+  m_sTSDataStreamStarted = "/app/OverUnderConsole/" + ss.str();  // will need to make this generic if need some for multiple providers.
 
   std::cout << "Symbol List: " << std::endl;
   for ( std::set<std::string>::const_iterator iter = symbols.begin(); iter != symbols.end(); iter++ ) {

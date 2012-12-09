@@ -266,7 +266,7 @@ void StrategyTradeOptions::ProcessOptions( greeks_t& greeks, statsOptions& stats
       else {
         // close out profitable positions
         option.pPosition->ClosePosition();
-        std::cout << ou::CTimeSource::Instance().Internal() << " closing option " << option.pOption->GetInstrument()->GetInstrumentName() << std::endl;
+        std::cout << ou::TimeSource::Instance().Internal() << " closing option " << option.pOption->GetInstrument()->GetInstrumentName() << std::endl;
       }
     }
   }

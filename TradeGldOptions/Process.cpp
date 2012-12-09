@@ -108,7 +108,7 @@ CProcess::CProcess(void)
   m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false )
 {
 
-  boost::gregorian::date dToday = ou::CTimeSource::Instance().Internal().date();
+  boost::gregorian::date dToday = ou::TimeSource::Instance().Internal().date();
   m_dExpiry = ou::tf::options::Next3rdFriday( dToday );
   while ( boost::gregorian::date_period( dToday, m_dExpiry ).length().days() < 8 ) { // some say use front month for scalping
     boost::gregorian::date_duration dd( 1 );
@@ -801,14 +801,14 @@ void CProcess::HandleUnderlyingTrade( const Trade& trade ) {
 void CProcess::HandleTSFirstPass( const Quote& quote ) {
   // may need to open portfoloio and evaluate existing positions here
   m_ss.str( "" );
-  m_ss << ou::CTimeSource::Instance().Internal();
+  m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
   OutputDebugString( m_ss.str().c_str() );
   m_TradingState = ETSPreMarket;
 }
 
 void CProcess::HandleTSPreMarket( const Quote& quote ) {
-  ptime dt = ou::CTimeSource::Instance().Internal();
+  ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -825,7 +825,7 @@ void CProcess::HandleTSMarketOpened( const Quote& quote ) {
 
   // comment our starting trade of the day
   m_ss.str( "" );
-  m_ss << ou::CTimeSource::Instance().Internal();
+  m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " Opening mid quote: " << dblOpenValue << std::endl;
   OutputDebugString( m_ss.str().c_str() );
 
@@ -883,10 +883,10 @@ void CProcess::HandleTSMarketOpened( const Quote& quote ) {
 
 void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
 
-  ptime dt = ou::CTimeSource::Instance().Internal();
+  ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
     m_ss.str( "" );
-    m_ss << ou::CTimeSource::Instance().Internal();
+    m_ss << ou::TimeSource::Instance().Internal();
     m_ss << " State:  Opening Order." << std::endl;
     OutputDebugString( m_ss.str().c_str() );
 
@@ -904,7 +904,7 @@ void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
 
 void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
   m_ss.str( "" );
-  ptime dt = ou::CTimeSource::Instance().Internal();
+  ptime dt = ou::TimeSource::Instance().Internal();
   m_ss << dt;
   m_ss << " Execution: " << pair.first.GetInstrument()->GetInstrumentName() << " " 
     << OrderSide::Name[ pair.second.GetOrderSide() ] << " " 
@@ -918,7 +918,7 @@ void CProcess::HandleTSTrading( const Quote& quote ) {
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
   m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
 
-  ptime dt = ou::CTimeSource::Instance().Internal();
+  ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketClosingOrder ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -1008,7 +1008,7 @@ void CProcess::HandleTSCloseOrders( const Quote& quote ) {
     m_bTrading = false;
   }
 
-  ptime dt = ou::CTimeSource::Instance().Internal();
+  ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketClose ) {
     m_ss.str( "" );
     m_ss << dt;
@@ -1024,7 +1024,7 @@ void CProcess::HandleAfterMarket( const Quote& quote ) {
 void CProcess::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
-    << ou::CTimeSource::Instance().Internal()
+    << ou::TimeSource::Instance().Internal()
     << " Strk "  << m_iterOILatestGammaSelectCall->second.Strike()
 //    << " Call "  << m_iterOILatestGammaSelectCall->Call()->OptionPrice()
     << " ImpVo " << m_iterOILatestGammaSelectCall->second.Call()->ImpliedVolatility()
@@ -1042,7 +1042,7 @@ void CProcess::PrintGreeks( void ) {
 void CProcess::SaveSeries( void ) {
 
   m_ss.str( "" );
-  m_ss << ou::CTimeSource::Instance().Internal();
+  m_ss << ou::TimeSource::Instance().Internal();
 
   if ( keytypes::EProviderSimulator == m_pDataProvider->ID() ) {
     m_ss << " simulator stores nothing." << std::endl;
@@ -1157,7 +1157,7 @@ void CProcess::SaveSeries( void ) {
 void CProcess::EmitStats( void ) {
 
   m_ss.str( "" );
-  m_ss << ou::CTimeSource::Instance().Internal();
+  m_ss << ou::TimeSource::Instance().Internal();
   m_ss << ": ";
   m_pPortfolio->EmitStats( m_ss );
   if ( EModeSimulation == m_eMode ) {

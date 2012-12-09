@@ -129,6 +129,7 @@
     <ClCompile Include="AccountOwner.cpp" />
     <ClCompile Include="AlternateInstrumentNames.cpp" />
     <ClCompile Include="CashAccount.cpp" />
+    <ClCompile Include="DailyTradeTimeFrames.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="DBOps.cpp" />
     <ClCompile Include="Exchange.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="AccountOwner.h" />
     <ClInclude Include="AlternateInstrumentNames.h" />
     <ClInclude Include="CashAccount.h" />
+    <ClInclude Include="DailyTradeTimeFrames.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="DBOps.h" />
     <ClInclude Include="Exchange.h" />

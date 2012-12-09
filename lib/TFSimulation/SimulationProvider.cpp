@@ -209,19 +209,19 @@ void SimulationProvider::Merge( void ) {
   }
 
   m_nProcessedDatums = 0;
-  m_dtSimStart = ou::CTimeSource::Instance().External();
+  m_dtSimStart = ou::TimeSource::Instance().External();
 
-  bool bOldMode = ou::CTimeSource::LocalCommonInstance().GetSimulationMode();
-  ou::CTimeSource::LocalCommonInstance().SetSimulationMode();
+  bool bOldMode = ou::TimeSource::LocalCommonInstance().GetSimulationMode();
+  ou::TimeSource::LocalCommonInstance().SetSimulationMode();
 
   m_pMerge -> Run();
 
   m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
-  m_dtSimStop = ou::CTimeSource::LocalCommonInstance().External();
+  m_dtSimStop = ou::TimeSource::LocalCommonInstance().External();
 
   if ( 0 != m_OnSimulationComplete ) m_OnSimulationComplete();
 
-  ou::CTimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
+  ou::TimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
 
   if ( 0 != m_OnSimulationThreadEnded ) m_OnSimulationThreadEnded();
 }

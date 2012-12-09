@@ -260,7 +260,7 @@ void AppSemiAuto::Notify( void ) {
     m_stateAcquisition = EWaitForMarketOpen;
     break;
   case EWaitForMarketOpen: { // while logging, wait for market open
-      ptime dt = ou::CTimeSource::Instance().Internal();
+      ptime dt = ou::TimeSource::Instance().Internal();
       time_duration tdMarketOpen( 19, 0, 0 );
       if ( tdMarketOpen <= dt.time_of_day() ) {
         m_stateAcquisition = EWaitForMarketClose;
@@ -268,7 +268,7 @@ void AppSemiAuto::Notify( void ) {
     }
     break;
   case EWaitForMarketClose: {
-      ptime dt = ou::CTimeSource::Instance().Internal();
+      ptime dt = ou::TimeSource::Instance().Internal();
       time_duration tdMarketClose( 18, 20, 0 );
       if ( tdMarketClose <= dt.time_of_day() ) {
         HandleStateChangeRequest( eProviderState_t::ProviderGoingOff, m_bIQFeedConnected, m_iqfeed );
@@ -287,7 +287,7 @@ void AppSemiAuto::Notify( void ) {
     m_stateAcquisition = EWaitToStartLogging;
     break;
   case EWaitToStartLogging: {
-      ptime dt = ou::CTimeSource::Instance().Internal();
+      ptime dt = ou::TimeSource::Instance().Internal();
       time_duration tdLoggingStart( 18, 40, 0 );
       if ( tdLoggingStart <= dt.time_of_day() ) {
         m_stateAcquisition = EStartUp;
@@ -338,7 +338,7 @@ void AppSemiAuto::HandleStateChangeRequest( eProviderState_t state, bool& flag, 
       {
         std::stringstream ss;
         ss.str( "" );
-        ss << ou::CTimeSource::Instance().Internal();
+        ss << ou::TimeSource::Instance().Internal();
         m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
       }
       p->Connect();

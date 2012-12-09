@@ -84,8 +84,8 @@ MergeCarrier<T>::~MergeCarrier() {
 
 template<class T> 
 void MergeCarrier<T>::ProcessDatum(void) {
-  if ( ou::CTimeSource::LocalCommonInstance().GetSimulationMode() ) {
-    ou::CTimeSource::LocalCommonInstance().SetSimulationTime( m_pDatum->DateTime() );
+  if ( ou::TimeSource::LocalCommonInstance().GetSimulationMode() ) {
+    ou::TimeSource::LocalCommonInstance().SetSimulationTime( m_pDatum->DateTime() );
   }
   if ( 0 != OnDatum ) 
     OnDatum( *m_pDatum );

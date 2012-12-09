@@ -27,7 +27,7 @@ using namespace boost::gregorian;
 
 namespace ou {
 
-class CTimeSource : public Singleton<CTimeSource> {
+class TimeSource : public Singleton<TimeSource> {
 public:
 
   struct SimulationContext {
@@ -36,8 +36,8 @@ public:
     SimulationContext( void ) : m_bInSimulation( false ), m_dtSimulationTime( boost::date_time::not_a_date_time ) {};
   };
 
-  CTimeSource(void);
-  ~CTimeSource(void) {};
+  TimeSource(void);
+  ~TimeSource(void) {};
 
   ptime External( ptime* dt );
 

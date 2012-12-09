@@ -119,7 +119,7 @@ void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
     DecodePricingMessage<CIQFUpdateMessage>( pMsg );
     OnUpdateMessage( this );
     //ptime dt( microsec_clock::local_time() );
-    ptime dt( ou::CTimeSource::Instance().External() );
+    ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade
     if ( m_bNewQuote ) {
       Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );

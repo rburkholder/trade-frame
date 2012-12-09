@@ -79,6 +79,9 @@
     <ClCompile Include="InstrumentData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DailyTradeTimeFrames.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h">
@@ -166,6 +169,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InstrumentData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DailyTradeTimeFrames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

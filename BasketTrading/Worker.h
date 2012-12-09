@@ -27,6 +27,8 @@ public:
 protected:
 private:
 
+  std::string m_sTSDataStreamStarted;
+
   boost::thread* m_pThread;
 
 };

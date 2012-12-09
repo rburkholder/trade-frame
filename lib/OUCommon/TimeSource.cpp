@@ -17,11 +17,11 @@
 
 namespace ou {
 
-CTimeSource::CTimeSource(void)
+TimeSource::TimeSource(void)
 : m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) {
 }
 
-ptime CTimeSource::External( ptime* dt ) { 
+ptime TimeSource::External( ptime* dt ) { 
   // this ensures we always have a monotonically increasing time (for use in simulations)
   boost::mutex::scoped_lock lock( m_mutex );
   ptime& dt_ = *dt;  // create reference to existing location for ease of use
@@ -36,19 +36,19 @@ ptime CTimeSource::External( ptime* dt ) {
   return dt_;
 }
 
-CTimeSource::SimulationContext* CTimeSource::AcquireSimulationContext( void ) {
+TimeSource::SimulationContext* TimeSource::AcquireSimulationContext( void ) {
   return m_contexts.CheckOutL();
 }
 
-void CTimeSource::ReleaseSimulationContext( SimulationContext* context ) {
+void TimeSource::ReleaseSimulationContext( SimulationContext* context ) {
   m_contexts.CheckInL( context );
 }
 
-void CTimeSource::Internal( ptime* dt, SimulationContext* context ) {
+void TimeSource::Internal( ptime* dt, SimulationContext* context ) {
   *dt = Internal( context );
 }
 
-ptime CTimeSource::Internal( SimulationContext* context ) {
+ptime TimeSource::Internal( SimulationContext* context ) {
   if ( context->m_bInSimulation ) 
     return context->m_dtSimulationTime;
   else 
