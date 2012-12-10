@@ -15,21 +15,44 @@
 #pragma once
 
 #include <string>
+#include <set>
 
 #include <boost/thread/thread.hpp>
+#include <boost/foreach.hpp>
+
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
+#include <TFTimeSeries/DatedDatum.h>
+#include "SymbolSelection.h"
 
 class Worker {
 public:
-  Worker(void);
+
+  typedef FastDelegate0<> OnCompletionHandler;
+  typedef SymbolSelection::setInstrumentInfo_t setInstrumentInfo_t;
+
+  Worker( OnCompletionHandler f );
   ~Worker(void);
-  void operator()( void );
+
+  template<typename Function>
+  void IterateInstrumentList( Function f ) {
+    BOOST_FOREACH( const SymbolSelection::InstrumentInfo& ii, m_setInstrumentInfo ) {
+      f( ii.sName, ii.barLast );
+    }
+  }
+
   void Join( void ) { m_pThread->join(); };
+  void operator()( void );
+
 protected:
 private:
 
-  std::string m_sTSDataStreamStarted;
+  OnCompletionHandler m_OnCompletion;
+  
+  setInstrumentInfo_t m_setInstrumentInfo;
 
   boost::thread* m_pThread;
-
+  
 };
 

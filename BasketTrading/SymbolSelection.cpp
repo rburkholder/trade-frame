@@ -40,7 +40,7 @@ SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ),  m_dm( ou:
 SymbolSelection::~SymbolSelection(void) {
 }
 
-void SymbolSelection::Process( std::set<std::string>& selected ) {
+void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
 
   m_psetSymbols = &selected;
 
@@ -109,11 +109,12 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
       if ( ( 1000000 < volAverage ) 
         && ( 10.0 <= bars.Last()->Close() )
         && ( 75.0 >= bars.Last()->Close() ) ) {
+          InstrumentInfo ii( sObjectName, *bars.Last() );
           if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
-            CheckForDarvas( sObjectName, bars.begin(), bars.end() );
+            CheckForDarvas( ii, bars.begin(), bars.end() );
           }
-          CheckFor10Percent( sObjectName, bars.end() - 20, bars.end() );
-          CheckForVolatility( sObjectName, bars.end() - 20, bars.end() );
+          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
+          CheckForVolatility( ii, bars.end() - 20, bars.end() );
       }
   }
 }
@@ -195,13 +196,13 @@ void ProcessDarvas::StopValue( void ) {
   m_ss << " stop(" << m_dblStop << ")";
 }
 
-void SymbolSelection::CheckForDarvas( const std::string& sSymbol, citer begin, citer end ) {
+void SymbolSelection::CheckForDarvas( const InstrumentInfo& ii, citer begin, citer end ) {
   size_t nTriggerWindow( 10 );
   ptime dtDayOfMax = std::for_each( begin, end, CalcMaxDate() );
   citer iterLast( end - 1 );
   if ( dtDayOfMax >= m_dtDarvasTrigger ) {
     std::stringstream ss;
-    ss << "Darvas max for " << sSymbol 
+    ss << "Darvas max for " << ii.sName 
       << " on " << dtDayOfMax 
       << ", close=" << iterLast->Close()
       << ", volume=" << iterLast->Volume();
@@ -215,7 +216,7 @@ void SymbolSelection::CheckForDarvas( const std::string& sSymbol, citer begin, c
     }
 
     if ( bTrigger ) {
-      m_psetSymbols->insert( sSymbol );
+      m_psetSymbols->insert( ii );
       darvas.StopValue();
       std::cout << ss.str() << std::endl;
     }
@@ -223,57 +224,57 @@ void SymbolSelection::CheckForDarvas( const std::string& sSymbol, citer begin, c
   }
 }
 
-void SymbolSelection::CheckFor10Percent( const std::string& sSymbol, citer begin, citer end ) {
+void SymbolSelection::CheckFor10Percent( const InstrumentInfo& ii, citer begin, citer end ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
   citer iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
-    std::multimap<double, std::string>::iterator iterPos;
-    std::multimap<double, std::string, MaxNegativesCompare>::iterator iterNeg;
+    m_mapRankingPos_t::iterator iterPos;
+    m_mapRankingNeg_t::iterator iterNeg;
     //double dblReturn = ( m_bars.Last()->m_dblClose - m_bars.Last()->m_dblOpen ) / m_bars.Last()->m_dblClose;
     double dblReturn = ( iterLast->Close() - iterLast->Open() ) / iterLast->Close();
     if ( m_nMaxInList > m_mapMaxPositives.size() ) {
-      m_mapMaxPositives.insert( std::pair<double, std::string>( dblReturn, sSymbol ) );  // need to insert the path instead
+      m_mapMaxPositives.insert( m_pairRanking_t( dblReturn, ii ) );  // need to insert the path instead
     }
     else {
       iterPos = m_mapMaxPositives.begin();
       if ( dblReturn > iterPos->first ) {
         m_mapMaxPositives.erase( iterPos );
-        m_mapMaxPositives.insert( std::pair<double, std::string>( dblReturn, sSymbol ) ); // need to insert the path instead
+        m_mapMaxPositives.insert( m_pairRanking_t( dblReturn, ii ) ); // need to insert the path instead
       }
     }
     if ( m_nMaxInList > m_mapMaxNegatives.size() ) {
-      m_mapMaxNegatives.insert( std::pair<double, std::string>( dblReturn, sSymbol ) );// need to insert the path instead
+      m_mapMaxNegatives.insert( m_pairRanking_t( dblReturn, ii ) );// need to insert the path instead
     }
     else {
       iterNeg = m_mapMaxNegatives.begin();
       if ( dblReturn < iterNeg->first ) {
         m_mapMaxNegatives.erase( iterNeg );
-        m_mapMaxNegatives.insert( std::pair<double, std::string>( dblReturn, sSymbol ) );// need to insert the path instead
+        m_mapMaxNegatives.insert( m_pairRanking_t( dblReturn, ii ) );// need to insert the path instead
       }
     }
   }
 }
 
-void SymbolSelection::WrapUp10Percent( std::set<std::string>& selected ) {
+void SymbolSelection::WrapUp10Percent( setInstrumentInfo_t& selected ) {
   std::cout << "Positives: " << std::endl;
-  std::multimap<double, std::string>::iterator iterPos;
+  m_mapRankingPos_t::iterator iterPos;
   for ( iterPos = m_mapMaxPositives.begin(); iterPos != m_mapMaxPositives.end(); ++iterPos ) {
 //    size_t pos = (iterPos->second).find_last_of( "/" );
 //    std::string sSymbolName = (iterPos->second).substr( pos + 1 );
 //    std::cout << " " << sSymbolName << "=" << iterPos->first << std::endl;
-    std::cout << iterPos->second << ": " << iterPos->first << std::endl;
+    std::cout << iterPos->second.sName << ": " << iterPos->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "10%+" );
     selected.insert( iterPos->second );
   }
   m_mapMaxPositives.clear();
 
   std::cout << "Negatives: " << std::endl;
-  std::multimap<double, std::string, MaxNegativesCompare>::iterator iterNeg;
+  m_mapRankingNeg_t::iterator iterNeg;
   for ( iterNeg = m_mapMaxNegatives.begin(); iterNeg != m_mapMaxNegatives.end(); ++iterNeg ) {
 //    size_t pos = (iterNeg->second).find_last_of( "/" );
 //    std::string sSymbolName = (iterNeg->second).substr( pos + 1 );
 //    std::cout << " " << sSymbolName << "=" << iterNeg->first << std::endl;
-    std::cout << " " << iterNeg->second << ": " << iterNeg->first << std::endl;
+    std::cout << " " << iterNeg->second.sName << ": " << iterNeg->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterNeg->second, "10%-" );
     selected.insert( iterNeg->second );
   }
@@ -297,33 +298,33 @@ public:
   operator double() { return m_dblVolatility / m_nNumberOfValues; };
 };
 
-void SymbolSelection::CheckForVolatility( const std::string& sSymbol, citer begin, citer end ) {
+void SymbolSelection::CheckForVolatility( const InstrumentInfo& ii, citer begin, citer end ) {
   double dblAveragePrice = std::for_each( begin, end, AveragePrice() );
   citer iterLast( end - 1 );
   if ( 25.0 < dblAveragePrice ) {
     double dblAverageVolatility = std::for_each( begin, end, AverageVolatility() );
-    std::multimap<double, std::string>::iterator iterPos;
+    m_mapRankingPos_t::iterator iterPos;
     if ( m_nMaxInList > m_mapMaxVolatility.size() ) {
-      m_mapMaxVolatility.insert( std::pair<double, std::string>( dblAverageVolatility, sSymbol ) );
+      m_mapMaxVolatility.insert( m_pairRanking_t( dblAverageVolatility, ii ) );
     }
     else {
       iterPos = m_mapMaxVolatility.begin();
       if ( dblAverageVolatility > iterPos->first ) {
         m_mapMaxVolatility.erase( iterPos );
-        m_mapMaxVolatility.insert( std::pair<double, std::string>( dblAverageVolatility, sSymbol ) );
+        m_mapMaxVolatility.insert( m_pairRanking_t( dblAverageVolatility, ii ) );
       }
     }
   }
 }
 
-void SymbolSelection::WrapUpVolatility( std::set<std::string>& selected ) {
+void SymbolSelection::WrapUpVolatility( setInstrumentInfo_t& selected ) {
   std::cout << "Volatiles: " << std::endl;
-  std::multimap<double, std::string>::iterator iterPos;
+  m_mapRankingPos_t::iterator iterPos;
   for ( iterPos = m_mapMaxVolatility.begin(); iterPos != m_mapMaxVolatility.end(); ++iterPos ) {
 //    size_t pos = (iterPos->second).find_last_of( "/" );
 //    std::string sSymbolName = (iterPos->second).substr( pos + 1 );;
 //    cout << " " << sSymbolName << "=" << iterPos->first << endl;
-    std::cout << " " << iterPos->second << ": " << iterPos->first << std::endl;
+    std::cout << " " << iterPos->second.sName << ": " << iterPos->first << std::endl;
 //    if ( NULL != OnAddSymbol ) OnAddSymbol( sSymbolName, iterPos->second, "Volatile" );
     selected.insert( iterPos->second );
   }

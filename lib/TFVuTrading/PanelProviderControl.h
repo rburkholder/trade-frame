@@ -34,7 +34,7 @@ public:
   UpdateProviderStatusEvent( wxEventType eventType, eProviderState_t state )
     : wxEvent( 0, eventType ), m_state( state ) {
   }
-  UpdateProviderStatusEvent( const UpdateProviderStatusEvent& event ): wxEvent( *this ), m_state( event.m_state ) {};
+  UpdateProviderStatusEvent( const UpdateProviderStatusEvent& event ): wxEvent( event ), m_state( event.m_state ) {};
   ~UpdateProviderStatusEvent( void ) {};
   UpdateProviderStatusEvent* Clone( void ) const { return new UpdateProviderStatusEvent( *this ); }
   eProviderState_t GetState( void ) const { return m_state; };

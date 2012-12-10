@@ -26,9 +26,24 @@ using namespace boost::gregorian;
 
 class SymbolSelection {
 public:
+
+  struct InstrumentInfo {
+    std::string sName;
+    ou::tf::Bar barLast; // last bar in series for closing/ pivot calcs
+    InstrumentInfo( const std::string& sName_, const ou::tf::Bar& bar )
+      : sName( sName_ ), barLast( bar ) {};
+    bool operator<( const InstrumentInfo& rhs ) { return sName < rhs.sName; };
+  };
+  struct InstrumentInfoCompare {
+    bool operator() ( const InstrumentInfo& lhs, const InstrumentInfo& rhs ) { return lhs.sName < rhs.sName; };
+  };
+  typedef std::set<InstrumentInfo, InstrumentInfoCompare> setInstrumentInfo_t;
+
   explicit SymbolSelection( ptime eod );
   ~SymbolSelection( void );
-  void Process( std::set<std::string>& selected );
+
+  void Process( setInstrumentInfo_t& selected );
+
 protected:
 private:
   ou::tf::HDF5DataManager m_dm;
@@ -42,7 +57,7 @@ private:
   ptime m_dt26WeeksAgo;
   ptime m_dtDateOfFirstBar;
 
-  std::set<std::string>* m_psetSymbols;
+  setInstrumentInfo_t* m_psetSymbols;
 
   struct MaxNegativesCompare {
     bool operator() ( double dbl1, double dbl2 ) {
@@ -50,21 +65,25 @@ private:
     }
   };
 
-  static const unsigned short m_nMaxInList = 10;  // maximum of 10 items in each list
-  std::multimap<double, std::string> m_mapMaxPositives;
-  std::multimap<double, std::string, MaxNegativesCompare> m_mapMaxNegatives;
+  typedef std::multimap<double, InstrumentInfo> m_mapRankingPos_t;
+  typedef std::multimap<double, InstrumentInfo, MaxNegativesCompare> m_mapRankingNeg_t;
+  typedef std::pair<double,InstrumentInfo> m_pairRanking_t;
 
-  std::multimap<double, std::string> m_mapMaxVolatility;
+  static const unsigned short m_nMaxInList = 10;  // maximum of 10 items in each list
+  m_mapRankingPos_t m_mapMaxPositives;
+  m_mapRankingNeg_t m_mapMaxNegatives;
+
+  m_mapRankingPos_t m_mapMaxVolatility;
   
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 
   typedef ou::tf::Bars::const_iterator citer;
-  void CheckForDarvas( const std::string& sSymbol, citer begin, citer end );
-  void CheckFor10Percent( const std::string& sSymbol, citer begin, citer end );
-  void CheckForVolatility( const std::string& sSymbol, citer begin, citer end );
+  void CheckForDarvas( const InstrumentInfo& sSymbol, citer begin, citer end );
+  void CheckFor10Percent( const InstrumentInfo& sSymbol, citer begin, citer end );
+  void CheckForVolatility( const InstrumentInfo& sSymbol, citer begin, citer end );
 
-  void WrapUp10Percent( std::set<std::string>& selected );
-  void WrapUpVolatility( std::set<std::string>& selected );
+  void WrapUp10Percent( setInstrumentInfo_t& selected );
+  void WrapUpVolatility( setInstrumentInfo_t& selected );
 
 };
 

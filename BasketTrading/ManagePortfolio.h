@@ -12,41 +12,42 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// CAV.cpp : Defines the entry point for the application.
-//
-
-#include "StdAfx.h"
+#pragma once
 
 #include <string>
+#include <map>
 
-#include <boost/ref.hpp>
-#include <boost/foreach.hpp>
+#include <TFTrading/ProviderManager.h>
 
-#include "Worker.h"
+#include "Position.h"
 
-#include "SymbolSelection.h"
+class ManagePortfolio {
+public:
 
-Worker::Worker( OnCompletionHandler f ) {
-  m_OnCompletion = f;
-  m_pThread = new boost::thread( boost::ref( *this ) );
-}
+  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
 
-Worker::~Worker(void) {
-  delete m_pThread; 
-}
+  ManagePortfolio(void);
+  ~ManagePortfolio(void);
 
-void Worker::operator()( void ) {
+  void AddSymbol( const std::string& sName, const ou::tf::Bar& bar );
+  void Start( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
+  void SaveSeries( const std::string& sPath );
 
-  // last day of available data
-  SymbolSelection selector( ptime( date( 2012, 12, 7 ), time_duration( 0, 0, 0 ) ) );
-  selector.Process( m_setInstrumentInfo );
+protected:
+private:
 
-//  std::cout << "Symbol List: " << std::endl;
-//  BOOST_FOREACH( const std::string& sName, m_setSymbols ) {
-//    std::cout << sName << std::endl;
-//  }
+  std::string m_sTSDataStreamStarted;
 
-  if ( 0 != m_OnCompletion ) m_OnCompletion();
+  double m_dblPortfolioCashToTrade;
+  double m_dblPortfolioMargin;
 
-}
+  pProvider_t m_pExec;
+  pProvider_t m_pData1;
+  pProvider_t m_pData2;
+
+  typedef std::map<std::string,Position*> mapPositions_t;
+  typedef std::pair<std::string,Position*> mapPositions_pair_t;
+  mapPositions_t m_mapPositions;
+
+};
 

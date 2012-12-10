@@ -17,12 +17,16 @@
 
 #include "stdafx.h"
 
+#include <boost/phoenix/bind/bind_member_function.hpp>
+
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 #include <TFTrading/PortfolioManager.h>
 
 #include "BasketTrading.h"
+
+wxDEFINE_EVENT( EVT_WorkerDone, WorkerDoneEvent );
 
 IMPLEMENT_APP(AppBasketTrading)
 
@@ -73,10 +77,15 @@ bool AppBasketTrading::OnInit() {
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
 
+  Bind( EVT_WorkerDone, &AppBasketTrading::HandleWorkerCompletion1, this );
+
   // maybe set scenario with database and with in memory data structure
   m_db.Open( "basket.db" );
 
-  m_pWorker = new Worker;
+  // need to change this later.... only start up once providers have been started
+  // worker will change depending upon provider type
+  // big worker when going live, hdf5 worker when simulating
+  m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
 
   return 1;
 
@@ -85,12 +94,27 @@ bool AppBasketTrading::OnInit() {
 int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
-  delete m_pWorker;
+  if ( 0 != m_pWorker ) {
+    delete m_pWorker;
+    m_pWorker = 0; 
+  }
   if ( m_db.IsOpen() ) m_db.Close();
 
   return 0;
 }
 
+void AppBasketTrading::HandleWorkerCompletion0( void ) {
+  wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
+}
+
+void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) {
+  m_pWorker->IterateInstrumentList( 
+    boost::phoenix::bind( &ManagePortfolio::AddSymbol, m_portfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2 ) );
+  m_pWorker->Join();
+  delete m_pWorker;
+  m_pWorker = 0;
+  m_portfolio.Start( m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+}
 
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
 }

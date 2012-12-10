@@ -43,7 +43,7 @@ Process::Process( const std::string& sPrefixPath )
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
   //m_vExchanges.push_back( "NASDAQ,OTC" );
-  m_vExchanges.insert( "CANADIAN,TSE" );
+  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
 }
 
 Process::~Process(void) {

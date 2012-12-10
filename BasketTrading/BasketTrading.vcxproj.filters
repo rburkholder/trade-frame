@@ -42,7 +42,10 @@
     <ClInclude Include="SymbolSelection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TradingStateMachine.h">
+    <ClInclude Include="ManagePortfolio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,7 +62,10 @@
     <ClCompile Include="SymbolSelection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TradingStateMachine.cpp">
+    <ClCompile Include="ManagePortfolio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Position.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
