@@ -28,6 +28,7 @@
 
 #include "Worker.h"
 #include "ManagePortfolio.h"
+#include "PanelBasketTradingMain.h"
 
 class WorkerDoneEvent: public wxEvent {
 public:
@@ -41,22 +42,40 @@ wxDECLARE_EVENT( EVT_WorkerDone, WorkerDoneEvent );
 
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
+    friend ou::tf::FrameWork01<AppBasketTrading>;
 public:
 protected:
 private:
 
+  std::string m_sDbPortfolioName;
+
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
+  PanelBasketTradingMain* m_pPanelBasketTradingMain;
 
   Worker* m_pWorker;
 
   DBOps m_db;
 
-  ManagePortfolio m_portfolio;
+  ManagePortfolio m_ManagePortfolio;
+  ou::tf::CPortfolioManager::pPortfolio_t m_pPortfolio;
+
+  bool m_bData1Connected;
+  bool m_bExecConnected;
 
   virtual bool OnInit();
   virtual int OnExit();
+  void OnClose( wxCloseEvent& event );
+
+  void OnData1Connected( int );
+//  void OnData2Connected( int ) {};
+  void OnExecConnected( int );
+  void OnData1Disconnected( int );
+//  void OnData2Disconnteted( int ) {};
+  void OnExecDisconnected( int );
+
+  void HandleStartButton( void );
 
   void HandlePopulateDatabase( void );
 

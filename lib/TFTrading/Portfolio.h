@@ -103,7 +103,7 @@ public:
 
   const idPortfolio_t& Id( void ) { return m_row.idPortfolio; };
 
-  void AddPosition( const std::string& sName, pPosition_t pPosition );
+  pPosition_t AddPosition( const std::string& sName, pPosition_t pPosition );
   void DeletePosition( const std::string& sName );
   void RenamePosition( const std::string& sOld, const std::string& sNew );
   pPosition_t GetPosition( const std::string& sName );

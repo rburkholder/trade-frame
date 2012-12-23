@@ -45,7 +45,7 @@ CPortfolio::CPortfolio( const TableRowDef& row )
 CPortfolio::~CPortfolio(void) {
 }
 
-void CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) {
+CPortfolio::pPosition_t CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) {
 
   // prepare to add position to user named map
   iterator iterUser = m_mapPositionsViaUserName.find( sName );
@@ -68,6 +68,7 @@ void CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) 
   pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolio::HandleExecution ) );
   pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolio::HandleCommission ) );
 
+  return pPosition;
 }
 
 void CPortfolio::DeletePosition( const std::string& sName ) {

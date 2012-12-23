@@ -36,6 +36,10 @@
 // a position is provider dependent, ie, only one provider per position
 // Create Delegates so trade and market data updates propogate to combo and portfolio
 
+// 20121222
+// therefore, position record is simply a summary record for legs of the position
+// create another database record type:  leg
+
 // todo:  there is nothing for setting a portfolio id
 
 namespace ou { // One Unified

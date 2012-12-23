@@ -20,7 +20,7 @@
 
 #include "ManagePortfolio.h"
 
-ManagePortfolio::ManagePortfolio(void)
+ManagePortfolio::ManagePortfolio( void )
   : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.15 )
 {
 
@@ -37,13 +37,16 @@ ManagePortfolio::~ManagePortfolio(void) {
   }
 }
 
-void ManagePortfolio::Start( pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
+void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 ) {
 
   assert( 0 != m_mapPositions.size() );
+
+  m_pPortfolio = pPortfolio;
 
   m_pExec = pExec;
   m_pData1 = pData1;
   m_pData2 = pData2;
+
 
   // first pass: to get rough idea of which can be traded given our funding level
   double dblAmountToTradePerInstrument = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / m_mapPositions.size();
@@ -61,11 +64,28 @@ void ManagePortfolio::Start( pProvider_t pExec, pProvider_t pData1, pProvider_t 
 
   // second pass: start trading with the ones that we can
   dblAmountToTradePerInstrument = ( m_dblPortfolioCashToTrade / m_dblPortfolioMargin ) / cntToBeTraded;
-  BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
-    if ( pair.second->ToBeTraded() ) {
-      pair.second->Start( dblAmountToTradePerInstrument );
+  switch ( pExec->ID() ) {
+    case ou::tf::keytypes::EProviderIB:
+      m_pIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( pExec );
+      BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
+        if ( pair.second->ToBeTraded() ) {
+
+          pair.second->SetFundsToTrade( dblAmountToTradePerInstrument );
+
+          ou::tf::IBTWS::Contract contract;
+          contract.currency = "USD";
+          contract.exchange = "SMART";  
+          contract.secType = "STK";
+          contract.symbol = pair.first;
+          // IB responds only when symbol is found, bad symbols will not illicit a response
+          m_pIB->RequestContractDetails( contract, MakeDelegate( this, &ManagePortfolio::HandleIBContractDetails ), MakeDelegate( this, &ManagePortfolio::HandleIBContractDetailsDone ) );
+        }
+      }
+      break;
+    default:
+      std::cout << "cant' get symbols" << std::endl;
     }
-  }
+
 }
 
 void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar ) {
@@ -78,3 +98,19 @@ void ManagePortfolio::SaveSeries( const std::string& sPath ) {
     pair.second->SaveSeries( sPath );
   }
 }
+
+void ManagePortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
+  mapPositions_iter_t iter = m_mapPositions.find( pInstrument->GetInstrumentName() );
+  assert( m_mapPositions.end() != iter );
+  pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
+  iter->second->SetPosition( m_pPortfolio->AddPosition( pInstrument->GetInstrumentName(), pPosition ) );
+  iter->second->Start();
+//  m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
+//  m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
+}
+
+void ManagePortfolio::HandleIBContractDetailsDone( void ) {
+//  StartWatch();
+}
+
+

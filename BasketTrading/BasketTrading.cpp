@@ -17,12 +17,15 @@
 
 #include "stdafx.h"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
-#include <TFTrading/PortfolioManager.h>
 
 #include "BasketTrading.h"
 
@@ -53,6 +56,10 @@ bool AppBasketTrading::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
+  m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
+  m_sizerControls->Add( m_pPanelBasketTradingMain, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_pPanelBasketTradingMain->Show( true );
+
   LinkToPanelProviderControl();
 /*
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
@@ -77,17 +84,37 @@ bool AppBasketTrading::OnInit() {
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
 
+  m_pWorker = 0;
+  m_bData1Connected = false;
+  m_bExecConnected = false;
+
+  Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
   Bind( EVT_WorkerDone, &AppBasketTrading::HandleWorkerCompletion1, this );
 
   // maybe set scenario with database and with in memory data structure
-  m_db.Open( "basket.db" );
+  m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "EquitiesBasket";
+  m_db.Open( "BasketTrading.db" );
 
-  // need to change this later.... only start up once providers have been started
-  // worker will change depending upon provider type
-  // big worker when going live, hdf5 worker when simulating
-  m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
+  m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
 
   return 1;
+
+}
+
+void AppBasketTrading::HandleStartButton(void) {
+  if ( 0 == m_pPortfolio.get() ) {  // if not newly created below, then load previously created portfolio
+    // code currently does not allow a restart of session
+    std::cout << "Cannot create new portfolio: " << m_sDbPortfolioName << std::endl;
+    //m_pPortfolio = ou::tf::CPortfolioManager::Instance().GetPortfolio( sDbPortfolioName );
+    // this may create issues on mid-trading session restart.  most logic in the basket relies on newly created positions.
+  }
+  else {
+    // need to change this later.... only start up once providers have been started
+    // worker will change depending upon provider type
+    // big worker when going live, hdf5 worker when simulating
+    std::cout << "Starting Symbol Evaluation ... " << std::endl;
+    m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
+  }
 
 }
 
@@ -103,17 +130,17 @@ int AppBasketTrading::OnExit() {
   return 0;
 }
 
-void AppBasketTrading::HandleWorkerCompletion0( void ) {
+void AppBasketTrading::HandleWorkerCompletion0( void ) {  // called in worker thread, generate gui event to start processing in gui thread
   wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
 }
 
-void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) {
+void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) { // process in gui thread
   m_pWorker->IterateInstrumentList( 
-    boost::phoenix::bind( &ManagePortfolio::AddSymbol, m_portfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2 ) );
+    boost::phoenix::bind( &ManagePortfolio::AddSymbol, &m_ManagePortfolio, boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2 ) );
   m_pWorker->Join();
   delete m_pWorker;
   m_pWorker = 0;
-  m_portfolio.Start( m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+  m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
 }
 
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {
@@ -139,8 +166,36 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
   ou::tf::CAccountManager::pAccount_t pAccountSimulator
     = ou::tf::CAccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
-  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "pflioEquitiesBasket", "aoRay", "Basket of Equities" );
+  m_pPortfolio
+    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_sDbPortfolioName, "aoRay", "Basket of Equities" );
 
 }
 
+void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a 
+  event.Skip();  // auto followed by Destroy();
+}
+
+void AppBasketTrading::OnData1Connected( int ) {
+  m_bData1Connected = true;
+  if ( m_bData1Connected & m_bExecConnected ) {
+    // set start to enabled
+  }
+}
+
+void AppBasketTrading::OnExecConnected( int ) {
+  m_bExecConnected = true;
+  if ( m_bData1Connected & m_bExecConnected ) {
+    // set start to enabled
+  }
+}
+
+void AppBasketTrading::OnData1Disconnected( int ) {
+  m_bData1Connected = false;
+}
+
+void AppBasketTrading::OnExecDisconnected( int ) {
+  m_bExecConnected = false;
+}
