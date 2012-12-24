@@ -21,13 +21,14 @@
 #include "ManagePortfolio.h"
 
 ManagePortfolio::ManagePortfolio( void )
-  : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.15 )
+  : m_dblPortfolioCashToTrade( 100000.0 ), m_dblPortfolioMargin( 0.25 ), m_nSharesTrading( 0 )
 {
 
   std::stringstream ss;
   ss.str( "" );
   ss << ou::TimeSource::Instance().External();
-  m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  // will need to make this generic if need some for multiple providers.
+  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  // will need to make this generic if need some for multiple providers.
+  m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
 }
 
@@ -71,6 +72,7 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
         if ( pair.second->ToBeTraded() ) {
 
           pair.second->SetFundsToTrade( dblAmountToTradePerInstrument );
+          m_nSharesTrading += pair.second->CalcShareCount( dblAmountToTradePerInstrument );
 
           ou::tf::IBTWS::Contract contract;
           contract.currency = "USD";
@@ -85,25 +87,38 @@ void ManagePortfolio::Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvid
     default:
       std::cout << "cant' get symbols" << std::endl;
     }
+  std::cout << "#Shares to be traded: " << m_nSharesTrading << std::endl;
+}
 
+void ManagePortfolio::Stop( void ) {
+  BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
+    if ( pair.second->ToBeTraded() ) {
+      pair.second->Stop();
+    }
+  }
 }
 
 void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& bar ) {
   assert( m_mapPositions.end() == m_mapPositions.find( sName ) );
-  m_mapPositions[ sName ] = new Position( sName, bar );
+  m_mapPositions[ sName ] = new ManagePosition( sName, bar );
 }
 
-void ManagePortfolio::SaveSeries( const std::string& sPath ) {
+void ManagePortfolio::SaveSeries( const std::string& sPrefix ) {
+  std::string sPath( sPrefix + m_sTSDataStreamStarted );
   BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
     pair.second->SaveSeries( sPath );
   }
 }
 
+// comes in on a different thread, so no gui operations
 void ManagePortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
   mapPositions_iter_t iter = m_mapPositions.find( pInstrument->GetInstrumentName() );
   assert( m_mapPositions.end() != iter );
-  pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
-  iter->second->SetPosition( m_pPortfolio->AddPosition( pInstrument->GetInstrumentName(), pPosition ) );
+  //pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
+  pPosition_t pPosition = ou::tf::CPortfolioManager::Instance().ConstructPosition( 
+    m_pPortfolio->Id(), pInstrument->GetInstrumentName(), "Basket", 
+    "ib01", "iq01", m_pExec, m_pData1, pInstrument );
+  iter->second->SetPosition( pPosition );
   iter->second->Start();
 //  m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
 //  m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();

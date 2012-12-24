@@ -25,6 +25,13 @@ namespace TimeFrame {
   enum enumTimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AfterRH };
 }
 
+// 20121223 note a weakness in the statemachine: assumes continuous quotes to update statemachine
+//     will a period time injection be required to step the machine given a lack of quotes?
+
+// 20121223
+//  during one shots:  emit event for all DD types
+//  during periods:  simply call the crtp method
+
 template<class T> // CRTP type call for the overrides
 class DailyTradeTimeFrame {
 public:
@@ -44,19 +51,21 @@ public:
   void SetMarketClose( time_duration tdMarketClose ) { m_tdMarketClose = tdMarketClose; };
 
 protected:
+  // per type
   template<typename DD> void HandleCommon( const DD& dd ) {};
   template<typename DD> void HandleRHTrading( const DD& dd ) {};
-  template<typename DD> void HandleBellHeard( const DD& dd ) {};
   template<typename DD> void HandlePauseForQuotes( const DD& dd ) {};
-  template<typename DD> void HandleCancel( const DD& dd ) {};
   template<typename DD> void HandleCancelling( const DD& dd ) {};
-  template<typename DD> void HandleGoNeutral( const DD& dd ) {};
   template<typename DD> void HandleGoingNeutral( const DD& dd ) {};
   template<typename DD> void HandlePreOpen( const DD& dd ) {};
   template<typename DD> void HandleWaitForRHClose( const DD& dd ) {};
   template<typename DD> void HandleAfterRH( const DD& dd ) {};
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
   template<typename DD> void HandleMarketClosed( const DD& dd ) {};
+  // event change one shots
+  void HandleBellHeard( void ) {};
+  void HandleCancel( void ) {};
+  void HandleGoNeutral( void ) {};
 private:
   time_duration m_tdMarketOpen;
   time_duration m_tdRHOpen;
@@ -74,11 +83,12 @@ private:
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame( void ) 
   :
+  // turn these into traits:  equities, futures, currencies
   m_tdMarketOpen( time_duration( 8, 0, 0 ) ),
   m_tdRHOpen( time_duration( 10, 30, 0 ) ),
   m_tdStartTrading( time_duration( 10, 30, 30 ) ),
-  m_tdTimeForCancellation( time_duration( 16, 50, 0 ) ), 
-  m_tdGoNeutral( time_duration( 16, 52, 0 ) ),
+  m_tdTimeForCancellation( time_duration( 16, 57, 0 ) ), 
+  m_tdGoNeutral( time_duration( 16, 57, 15 ) ),
   m_tdWaitForRHClose( time_duration( 16, 58, 0 ) ),
   m_tdRHClose( time_duration( 17, 0, 0 ) ),
   m_tdMarketClose( time_duration( 18, 30, 0 ) ), 
@@ -98,7 +108,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
   case TimeFrame::RHTrading:
     if ( td >= m_tdTimeForCancellation ) {  // any problems crossing midnight for futures type trading?
       m_stateTimeFrame = TimeFrame::Cancel;
-      static_cast<T*>(this)->HandleCancel( dd );
+      static_cast<T*>(this)->HandleCancel();  // one shot
       m_stateTimeFrame = TimeFrame::Cancelling;
     }
     else {
@@ -117,7 +127,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
   case TimeFrame::Cancelling:
     if ( td >= m_tdGoNeutral ) {
       m_stateTimeFrame = TimeFrame::GoNeutral;
-      static_cast<T*>(this)->HandleGoNeutral( dd );
+      static_cast<T*>(this)->HandleGoNeutral();  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
     }
     else {
@@ -154,7 +164,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
   case TimeFrame::PreRH:
     if ( td >= m_tdRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
-      static_cast<T*>(this)->HandleBellHeard( dd );
+      static_cast<T*>(this)->HandleBellHeard();  // one shot
       m_stateTimeFrame = TimeFrame::PauseForQuotes;
     }
     else {

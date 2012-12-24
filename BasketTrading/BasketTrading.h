@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include <wx/timer.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 // may need to inherit and add more functionality to the class:
@@ -29,6 +31,7 @@
 #include "Worker.h"
 #include "ManagePortfolio.h"
 #include "PanelBasketTradingMain.h"
+#include "PanelPortfolioStats.h"
 
 class WorkerDoneEvent: public wxEvent {
 public:
@@ -53,6 +56,7 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   PanelBasketTradingMain* m_pPanelBasketTradingMain;
+  PanelPortfolioStats* m_pPanelPortfolioStats;
 
   Worker* m_pWorker;
 
@@ -63,6 +67,8 @@ private:
 
   bool m_bData1Connected;
   bool m_bExecConnected;
+
+  wxTimer m_timerGuiRefresh;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -76,6 +82,9 @@ private:
   void OnExecDisconnected( int );
 
   void HandleStartButton( void );
+  void HandleExitPositionsButton( void );
+  void HandleStopButton( void );
+  void HandleSaveButton( void );
 
   void HandlePopulateDatabase( void );
 
@@ -84,6 +93,8 @@ private:
 
   void HandleWorkerCompletion0( void ); // for direct execution by worker thread
   void HandleWorkerCompletion1( wxEvent& event ); // cross thread migration
+
+  void HandleGuiRefresh( wxTimerEvent& event );
 
 };
 

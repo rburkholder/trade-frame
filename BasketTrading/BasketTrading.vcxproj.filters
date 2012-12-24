@@ -51,6 +51,9 @@
     <ClInclude Include="PanelBasketTradingMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PanelPortfolioStats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelBasketTradingMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelPortfolioStats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

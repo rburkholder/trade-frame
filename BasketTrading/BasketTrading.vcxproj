@@ -153,6 +153,7 @@
     <ClInclude Include="BasketTrading.h" />
     <ClInclude Include="ManagePortfolio.h" />
     <ClInclude Include="PanelBasketTradingMain.h" />
+    <ClInclude Include="PanelPortfolioStats.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SymbolSelection.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="BasketTrading.cpp" />
     <ClCompile Include="ManagePortfolio.cpp" />
     <ClCompile Include="PanelBasketTradingMain.cpp" />
+    <ClCompile Include="PanelPortfolioStats.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

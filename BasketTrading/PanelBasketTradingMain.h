@@ -53,20 +53,25 @@ public:
   void SetOnButtonPressedStop( OnBtn_t function ) {
     m_OnBtnStop = function;
   }
+  void SetOnButtonPressedSave( OnBtn_t function ) {
+    m_OnBtnSave = function;
+  }
 protected:
 private:
 
   enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELBASKETTRADINGMAIN_IDNAME,
-    ID_BtnStart, ID_BtnExitPositions, ID_BtnStop
+    ID_BtnStart, ID_BtnExitPositions, ID_BtnStop, ID_BtnSave
   };
 
   wxButton* m_btnStart;
-  wxButton* m_btnExitPosition;
+  wxButton* m_btnExitPositions;
   wxButton* m_btnStop;
+  wxButton* m_btnSave;
 
   OnBtn_t m_OnBtnStart;
   OnBtn_t m_OnBtnExitPositions;
   OnBtn_t m_OnBtnStop;
+  OnBtn_t m_OnBtnSave;
 
   void Init();
   void CreateControls();
@@ -75,5 +80,6 @@ private:
   void OnBtnStart( wxCommandEvent& event );
   void OnBtnExitPositions( wxCommandEvent& event );
   void OnBtnStop( wxCommandEvent& event );
+  void OnBtnSave( wxCommandEvent& event );
 };
 

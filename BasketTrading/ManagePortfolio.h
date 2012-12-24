@@ -38,6 +38,7 @@ public:
 
   void AddSymbol( const std::string& sName, const ou::tf::Bar& bar );
   void Start( pPortfolio_t pPortfolio, pProvider_t pExec, pProvider_t pData1, pProvider_t pData2 );
+  void Stop( void );
   void SaveSeries( const std::string& sPath );
 
 protected:
@@ -53,6 +54,7 @@ private:
 
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;
+  ou::tf::DatedDatum::volume_t m_nSharesTrading;
 
   pProvider_t m_pExec;
   pProvider_t m_pData1;
@@ -64,8 +66,8 @@ private:
 
   pPortfolio_t m_pPortfolio;
 
-  typedef std::map<std::string,Position*> mapPositions_t;
-  typedef std::pair<std::string,Position*> mapPositions_pair_t;
+  typedef std::map<std::string,ManagePosition*> mapPositions_t;
+  typedef std::pair<std::string,ManagePosition*> mapPositions_pair_t;
   typedef mapPositions_t::iterator mapPositions_iter_t;
   mapPositions_t m_mapPositions;
 

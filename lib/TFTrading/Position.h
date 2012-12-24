@@ -219,6 +219,9 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
+  pProvider_t GetExecutionProvider( void ) { return m_pExecutionProvider; };
+  pProvider_t GetDataProvider( void ) { return m_pDataProvider; };
+
 protected:
 
   typedef CSymbolBase::quote_t quote_t;

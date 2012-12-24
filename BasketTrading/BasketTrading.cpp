@@ -53,11 +53,11 @@ bool AppBasketTrading::OnInit() {
   m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
   m_pPanelBasketTradingMain = new PanelBasketTradingMain( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelBasketTradingMain, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerControls->Add( m_pPanelBasketTradingMain, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelBasketTradingMain->Show( true );
 
   LinkToPanelProviderControl();
@@ -71,6 +71,11 @@ bool AppBasketTrading::OnInit() {
   m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
+  m_pPanelPortfolioStats = new PanelPortfolioStats( m_pFrameMain, wxID_ANY );
+  //m_sizerMain->Add( m_pPanelPortfolioStats, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_sizerMain->Add( m_pPanelPortfolioStats, 0, wxLEFT|wxTOP|wxRIGHT, 5);
+  m_pPanelPortfolioStats->Show( true );
+
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -88,17 +93,27 @@ bool AppBasketTrading::OnInit() {
   m_bData1Connected = false;
   m_bExecConnected = false;
 
+  m_timerGuiRefresh.SetOwner( this );
+
   Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
   Bind( EVT_WorkerDone, &AppBasketTrading::HandleWorkerCompletion1, this );
+  Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   // maybe set scenario with database and with in memory data structure
-  m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "EquitiesBasket";
+  m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
   m_db.Open( "BasketTrading.db" );
 
   m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
+  m_pPanelBasketTradingMain->SetOnButtonPressedExitPositions( MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) );
+  m_pPanelBasketTradingMain->SetOnButtonPressedStop( MakeDelegate( this, &AppBasketTrading::HandleStopButton ) );
+  m_pPanelBasketTradingMain->SetOnButtonPressedSave( MakeDelegate( this, &AppBasketTrading::HandleSaveButton ) );
 
   return 1;
 
+}
+
+void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
+  // update portfolio results and tracker timeseries for portfolio value
 }
 
 void AppBasketTrading::HandleStartButton(void) {
@@ -115,12 +130,24 @@ void AppBasketTrading::HandleStartButton(void) {
     std::cout << "Starting Symbol Evaluation ... " << std::endl;
     m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
   }
+}
 
+void AppBasketTrading::HandleStopButton(void) {
+  m_ManagePortfolio.Stop();
+}
+
+void AppBasketTrading::HandleExitPositionsButton(void) {
+  // to implement
+}
+
+void AppBasketTrading::HandleSaveButton(void) {
+  m_ManagePortfolio.SaveSeries( "/app/BasketTrading/" );
 }
 
 int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
+  m_timerGuiRefresh.Stop();
   if ( 0 != m_pWorker ) {
     delete m_pWorker;
     m_pWorker = 0; 
@@ -141,6 +168,7 @@ void AppBasketTrading::HandleWorkerCompletion1( wxEvent& event ) { // process in
   delete m_pWorker;
   m_pWorker = 0;
   m_ManagePortfolio.Start( m_pPortfolio, m_pExecutionProvider, m_pData1Provider, m_pData2Provider );
+  m_timerGuiRefresh.Start( 250 );
 }
 
 void AppBasketTrading::HandleRegisterTables(  ou::db::Session& session ) {

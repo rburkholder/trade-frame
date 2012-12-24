@@ -22,42 +22,64 @@
 
 #include "Position.h"
 
-Position::Position( const std::string& sName, const ou::tf::Bar& bar ) 
-  : ou::tf::DailyTradeTimeFrame<Position>(),
+ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar ) 
+  : ou::tf::DailyTradeTimeFrame<ManagePosition>(),
   m_sName( sName ),
   m_bToBeTraded( false ), m_barInfo( bar ), 
-  m_dblFundsToTrade( 0 )
+  m_dblFundsToTrade( 0 ), m_bfTrades( 60 ),
+  m_bCountBars( false ), m_nRHBars( 0 ),
+  m_stateTrading( TSWaitForEntry ), m_nAttempts( 0 )
 {
+  m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManagePosition::HandleBar ) );
 }
 
-Position::~Position(void) {
+ManagePosition::~ManagePosition(void) {
 }
 
-void Position::Start( void ) {
+void ManagePosition::Start( void ) {
 
   assert( 0.0 != m_dblFundsToTrade );
   m_nSharesToTrade = CalcShareCount( m_dblFundsToTrade );
 
   assert( 0 != m_pPosition.get() );
 
-  std::cout << "Position: starting for " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  std::cout << "Position: starting for " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+
+  m_pPosition->GetDataProvider()->AddQuoteHandler( m_pPosition->GetInstrument(), MakeDelegate( this, &ManagePosition::HandleQuote ) );
+  m_pPosition->GetDataProvider()->AddTradeHandler( m_pPosition->GetInstrument(), MakeDelegate( this, &ManagePosition::HandleTrade ) );
 
 }
 
- void Position::HandleQuote( const ou::tf::Quote& quote ) {
- }
+void ManagePosition::Stop( void ) {
+  m_pPosition->GetDataProvider()->RemoveQuoteHandler( m_pPosition->GetInstrument(), MakeDelegate( this, &ManagePosition::HandleQuote ) );
+  m_pPosition->GetDataProvider()->RemoveTradeHandler( m_pPosition->GetInstrument(), MakeDelegate( this, &ManagePosition::HandleTrade ) );
+}
 
- void Position::HandleTrade( const ou::tf::Trade& trade ) {
- }
+void ManagePosition::HandleQuote( const ou::tf::Quote& quote ) {
+  if ( quote.IsValid() ) {
+    m_quotes.Append( quote );
+    TimeTick( quote );
+  }
+}
 
- void Position::HandleOpen( const ou::tf::Trade& trade ) {
- }
+void ManagePosition::HandleBar( const ou::tf::Bar& bar ) {
+  m_bars.Append( bar );
+  m_nRHBars++;
+  // *** step in to state to test last three bars to see if trade should be entered
+  TimeTick( bar );
+}
 
-void Position::SaveSeries( const std::string& sPrefix ) {
+void ManagePosition::HandleTrade( const ou::tf::Trade& trade ) {
+  m_trades.Append( trade );
+  m_bfTrades.Add( trade );
+}
+
+void ManagePosition::HandleOpen( const ou::tf::Trade& trade ) {
+}
+
+void ManagePosition::SaveSeries( const std::string& sPrefix ) {
 
   std::string sPathName;
-
-//  HDF5Attributes::structFuture future( m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay() );
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
@@ -66,8 +88,7 @@ void Position::SaveSeries( const std::string& sPrefix ) {
     ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
     wtsQuotes.Write( sPathName, &m_quotes );
     ou::tf::HDF5Attributes attrQuotes( dm, sPathName, ou::tf::InstrumentType::Stock );
-    //HDF5Attributes attrQuotes( sPathName, future );
-//    attrQuotes.SetProviderType( m_pPosition->->ID() );
+    attrQuotes.SetProviderType( m_pPosition->GetDataProvider()->ID() );
   }
 
   if ( 0 != m_trades.Size() ) {
@@ -75,12 +96,100 @@ void Position::SaveSeries( const std::string& sPrefix ) {
     ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
     wtsTrades.Write( sPathName, &m_trades );
     ou::tf::HDF5Attributes attrTrades( dm, sPathName, ou::tf::InstrumentType::Stock );
-    //HDF5Attributes attrTrades( sPathName, future );
-//    attrTrades.SetProviderType( m_pIQ->ID() );
+    attrTrades.SetProviderType( m_pPosition->GetDataProvider()->ID() );
   }
+
+  //SetSignificantDigits?
+  //SetMultiplier?
 }
 
-ou::tf::DatedDatum::volume_t Position::CalcShareCount( double dblFunds ) {
+ou::tf::DatedDatum::volume_t ManagePosition::CalcShareCount( double dblFunds ) {
   return ( static_cast<ou::tf::DatedDatum::volume_t>( dblFunds / m_barInfo.Close() ) / 100 ) * 100;  // round down to nearest 100
 }
 
+void ManagePosition::HandleBellHeard( void ) {
+  m_bCountBars = true;
+}
+
+void ManagePosition::HandleCancel( void ) {
+  m_pPosition->CancelOrders();
+}
+
+void ManagePosition::HandleGoNeutral( void ) {
+  m_pPosition->ClosePosition();
+}
+
+void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
+  // use stop of open, or bottom of first bar of series?
+  if ( 1 == m_nRHBars ) {
+    m_dblOpen = bar.Open();
+  }
+  switch ( m_stateTrading ) {
+  case TSWaitForEntry:
+    if ( 3 <= m_nRHBars ) {
+      ou::tf::Bars::const_reference bar1( m_bars.Ago( 2 ) );
+      ou::tf::Bars::const_reference bar2( m_bars.Ago( 1 ) );
+      ou::tf::Bars::const_reference bar3( m_bars.Ago( 0 ) );
+      if ( m_dblOpen < bar.Open() ) { // test for rising from open
+        if ( 
+          ( bar1.Open() < bar2.Open() ) && 
+          ( bar2.Open() < bar3.Open() ) && 
+          ( bar1.High() < bar2.High() ) && 
+          ( bar2.High() < bar3.High() ) && 
+          ( bar1.Low() < bar2.Low() ) && 
+          ( bar2.Low() < bar3.Low() ) && 
+          ( bar1.Close() < bar3.Close() ) ) { 
+            // open a long position
+            m_nAttempts++;
+            m_dblStop = bar1.Low();
+            m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+            m_stateTrading = TSMonitorLong;
+        }
+      }
+      else {
+        if ( m_dblOpen > bar.Open() ) { // test for falling from open
+          if ( 
+            ( bar1.Open() > bar2.Open() ) && 
+            ( bar2.Open() > bar3.Open() ) && 
+            ( bar1.High() > bar2.High() ) && 
+            ( bar2.High() > bar3.High() ) && 
+            ( bar1.Low() > bar2.Low() ) && 
+            ( bar2.Low() > bar3.Low() ) && 
+            ( bar1.Close() > bar3.Close() ) ) { 
+              // open a short position
+              m_nAttempts++;
+              m_dblStop = bar1.High();
+              m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+              m_stateTrading = TSMonitorShort;
+          }
+        }
+      }
+    }
+    break;
+  }
+}
+
+void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
+  // need parabolic stop
+  // also need over all risk management of 3% loss of total investment
+  switch ( m_stateTrading ) {
+  case TSMonitorLong:
+    if ( quote.Ask() < m_dblStop ) {
+      m_pPosition->ClosePosition();
+      m_stateTrading = TSNoMore;
+      if ( 3 > m_nAttempts ) {
+        m_stateTrading = TSWaitForEntry;
+      }
+    }
+    break;
+  case TSMonitorShort:
+    if ( quote.Bid() > m_dblStop ) {
+      m_pPosition->ClosePosition();
+      m_stateTrading = TSNoMore;
+      if ( 3 > m_nAttempts ) {
+        m_stateTrading = TSWaitForEntry;
+      }
+    }
+    break;
+  }
+}
