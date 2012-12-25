@@ -42,7 +42,7 @@ bool AppSemiAuto::OnInit() {
   m_tws.reset( new IBTWS( "U215226" ) );
   m_bIBConnected = false;
 
-  m_iqfeed.reset( new CIQFeedProvider() );
+  m_iqfeed.reset( new IQFeedProvider() );
   m_bIQFeedConnected = false;
 
   m_sim.reset( new SimulationProvider() ); 
@@ -53,9 +53,9 @@ bool AppSemiAuto::OnInit() {
   // this is where we select which provider we will be working with on this run
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
-  CProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
-  CProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
-  CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+  ProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
+  ProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
+  ProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
   std::string sDbName;
 
@@ -115,7 +115,7 @@ bool AppSemiAuto::OnInit() {
   m_FrameProviderControl->SetOnIQFeedStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleIQFeedStateChangeRequest ) ) ;
   m_FrameProviderControl->SetOnSimulatorStateChangeHandler( MakeDelegate( this, &AppSemiAuto::HandleSimulatorStateChangeRequest ) );
 
-  CInstrumentManager& mgr( CInstrumentManager::Instance() );
+  InstrumentManager& mgr( InstrumentManager::Instance() );
 
   // XAUUSDO.ABBA hvy, XAUUSDO.COMP hvy, XAUUSDO.MIGF med, XAUUSDO.SAXO med, XAUUSDO.UBSW lgt, XAUUSDO.UWCL med, XAUUSDO.WBLT hvy
   // EURUSD.FXCM, BEURUSD
@@ -449,16 +449,16 @@ void AppSemiAuto::HandleIBContractDetailsDone( void ) {  // called only on succe
 
 void AppSemiAuto::HandleManualOrder( const ManualOrder_t& order ) {
   try {
-    CInstrumentManager& mgr( CInstrumentManager::Instance() );
+    InstrumentManager& mgr( InstrumentManager::Instance() );
     pInstrument_t pInstrument = m_vManualOrders[ m_curDialogManualOrder ].pInstrument;
     if ( !mgr.Exists( pInstrument ) ) {
       mgr.Register( pInstrument );
     }
     if ( 0 == m_pPosition.get() ) {
-      m_pPosition = ou::tf::CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "Dell", "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
+      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( m_idPortfolio, "Dell", "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
     }
-    ou::tf::COrderManager& om( ou::tf::COrderManager::Instance() );
-    ou::tf::COrderManager::pOrder_t pOrder;
+    ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
+    ou::tf::OrderManager::pOrder_t pOrder;
     switch ( order.eOrderType ) {
     case OrderType::Market: 
       //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
@@ -473,7 +473,7 @@ void AppSemiAuto::HandleManualOrder( const ManualOrder_t& order ) {
       m_pPosition->PlaceOrder( OrderType::Stop, order.eOrderSide, order.nQuantity, order.dblPrice1 );
       break;
     }
-    //ou::tf::COrderManager::pOrder_t pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1, order.dblPrice2 );
+    //ou::tf::OrderManager::pOrder_t pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1, order.dblPrice2 );
     //om.PlaceOrder( m_tws.get(), pOrder );
   }
   catch (...) {
@@ -550,20 +550,20 @@ void AppSemiAuto::HandleOnCleanUpForExitForFrameMain( int ) {
 
 void AppSemiAuto::HandlePopulateDatabase( void ) {
 
-  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
-  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+  ou::tf::AccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIB
+    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
 
 }
 

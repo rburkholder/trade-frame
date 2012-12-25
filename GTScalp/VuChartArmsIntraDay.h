@@ -52,9 +52,9 @@ protected:
   void ProcessMergeTrin( const Trade &trade );
   void ProcessMergeTick( const Trade &trade );
 
-  void HandleInduUpdate( CIQFeedSymbol *pSym );
-  void HandleTrinUpdate( CIQFeedSymbol *pSym );
-  void HandleTickUpdate( CIQFeedSymbol *pSym );
+  void HandleInduUpdate( IQFeedSymbol *pSym );
+  void HandleTrinUpdate( IQFeedSymbol *pSym );
+  void HandleTickUpdate( IQFeedSymbol *pSym );
 
   void HandleRealTime( void );
 

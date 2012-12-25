@@ -99,7 +99,7 @@ CProcess::CProcess(enumMode eMode, DB& db)
   m_sPathForSeries( "/strategy/deltaneutral2" ),
   m_sDesiredSimTradingDay( "2010-Sep-10 20:10:25.562500" ),
   m_bProcessSimTradingDayGroup( false ),
-  m_tws( new IBTWS( "U215226" ) ), m_iqfeed( new CIQFeedProvider() ), m_sim( new SimulationProvider() ),
+  m_tws( new IBTWS( "U215226" ) ), m_iqfeed( new IQFeedProvider() ), m_sim( new SimulationProvider() ),
 //  m_eMode( EModeLive ),
   //m_eMode( EModeSimulation )
   m_bExecConnected( false ), m_bDataConnected( false ), m_bData2Connected( false ), m_bConnectDone( false ),
@@ -131,9 +131,9 @@ CProcess::CProcess(enumMode eMode, DB& db)
   // this is where we select which provider we will be working with on this run
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
-  CProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
-  CProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
-  CProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+  ProviderManager::Instance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
+  ProviderManager::Instance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
+  ProviderManager::Instance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
 //  std::string sDbName;
 
@@ -294,7 +294,7 @@ void CProcess::HandleOnExecConnected(int e) {
       case EModeLive:
         // try load from database first
         try {
-          m_pUnderlying = ou::tf::CInstrumentManager::Instance().Get( m_sSymbolName );
+          m_pUnderlying = ou::tf::InstrumentManager::Instance().Get( m_sSymbolName );
           // need to also prime TWS with symbol
           m_tws->GetSymbol( m_pUnderlying );  // preload symbol
           HandleUnderlyingListingDone();
@@ -336,7 +336,7 @@ void CProcess::HandleOnConnected( int e ) {
       m_bConnectDone = true;
 
       try {
-        m_pPortfolio = CPortfolioManager::Instance().GetPortfolio( m_idPortfolio );
+        m_pPortfolio = PortfolioManager::Instance().GetPortfolio( m_idPortfolio );
 
         // need to load the positions: underlying plus covering option  long+put or short+call\
         // if positions are coming from the database, any other stuff to link up?  take a look at Opening Order
@@ -346,14 +346,14 @@ void CProcess::HandleOnConnected( int e ) {
         // note: providers need to be in the provider map, so need to be constructed from or registered with the ProviderManager
         int nPositionsOpened( 0 );
         try {
-          m_posUnderlying = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
+          m_posUnderlying = PortfolioManager::Instance().GetPosition( m_idPortfolio, "U" ); // underlying
           ++nPositionsOpened;
         }
         catch (...) {
         }
 
         try {
-          m_posPut = CPortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
+          m_posPut = PortfolioManager::Instance().GetPosition( m_idPortfolio, "O" );  // option
           ++nPositionsOpened;
         }
         catch (...) {
@@ -422,8 +422,8 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
     OutputDebugString( m_ss.str().c_str() );
     if ( 6 >= sName.size() ) {  // process as stock
-      if ( !CInstrumentManager::Instance().Exists( sName ) ) {
-        m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
+      if ( !InstrumentManager::Instance().Exists( sName ) ) {
+        m_pUnderlying = InstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
         m_sim->Add( m_pUnderlying );
       }
     }
@@ -436,9 +436,9 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
       side = sName[12];
       strike = boost::lexical_cast<double>( sName.substr(13,8) ) / 1000.0;
 
-      if ( !CInstrumentManager::Instance().Exists( sName ) ) {
-        if ( !CInstrumentManager::Instance().Exists( underlying ) ) {
-          m_pUnderlying = CInstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
+      if ( !InstrumentManager::Instance().Exists( sName ) ) {
+        if ( !InstrumentManager::Instance().Exists( underlying ) ) {
+          m_pUnderlying = InstrumentManager::Instance().ConstructInstrument( underlying, "Sim", InstrumentType::Stock );
           m_sim->Add( m_pUnderlying );
         }
         pInstrument_t instCall;
@@ -450,13 +450,13 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
         }
         switch ( side ) {
         case 'C':
-          instCall = CInstrumentManager::Instance().ConstructOption( 
+          instCall = InstrumentManager::Instance().ConstructOption( 
             sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
           iter->second.first = instCall;
           m_sim->Add( instCall );
           break;
         case 'P':
-          instPut = CInstrumentManager::Instance().ConstructOption( 
+          instPut = InstrumentManager::Instance().ConstructOption( 
             sName, "Sim", yy, mm, dd, m_pUnderlying, static_cast<OptionSide::enumOptionSide>( side ), strike );
           iter->second.second = instPut;
           m_sim->Add( instPut );
@@ -495,7 +495,7 @@ void CProcess::HandleUnderlyingListing( const ContractDetails& details, const pI
 //  }
   // need to check if it exists first, might already be in database
   m_pUnderlying = pInstrument;
-  ou::tf::CInstrumentManager::Instance().Construct( m_pUnderlying );
+  ou::tf::InstrumentManager::Instance().Construct( m_pUnderlying );
 }
 
 void CProcess::HandleUnderlyingListingDone(  ) {
@@ -542,7 +542,7 @@ void CProcess::HandleStrikeFromIB( const ContractDetails& details, const pInstru
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
 
-  ou::tf::CInstrumentManager::Instance().Construct( pInstrument );
+  ou::tf::InstrumentManager::Instance().Construct( pInstrument );
   AddOptionToStrikeInfo( pInstrument );
 
 }
@@ -727,11 +727,11 @@ void CProcess::OpenPositions( void ) {
 
     try {
       // orders for normal delta neutral
-      m_posUnderlying = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
+      m_posUnderlying = PortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
       m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
 
-      m_posPut = CPortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
+      m_posPut = PortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
       m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
 
@@ -1174,20 +1174,20 @@ void CProcess::EmitStats( void ) {
 
 void CProcess::HandlePopulateDatabase( void ) {
 
-  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
-  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+  ou::tf::AccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIB
+    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "TradeGldOptions" );
+  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "TradeGldOptions" );
 
 }
 

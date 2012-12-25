@@ -26,11 +26,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class SimulationSymbol: public CSymbol<SimulationSymbol> {
+class SimulationSymbol: public Symbol<SimulationSymbol> {
   friend class SimulationProvider;
 public:
 
-  typedef CSymbol<SimulationSymbol> inherited_t;
+  typedef Symbol<SimulationSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef inherited_t::pInstrument_cref pInstrument_cref;
   typedef inherited_t::trade_t trade_t;

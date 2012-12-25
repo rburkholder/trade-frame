@@ -85,10 +85,10 @@ private:
   typedef ou::tf::keytypes::idInstrument_t idInstrument_t;
   typedef Instrument::pInstrument_t pInstrument_t;
 
-  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
   typedef IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef SimulationProvider::pProvider_t pProviderSim_t;
 
   //typedef FrameProviderControl::eProviderState_t eProviderState_t;

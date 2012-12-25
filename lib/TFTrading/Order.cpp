@@ -116,7 +116,7 @@ void Order::SetSendingToProvider() {
   m_row.dtOrderSubmitted = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-OrderStatus::enumOrderStatus Order::ReportExecution(const CExecution &exec) { 
+OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) { 
   // need to worry about fill after cancel, has multiple states:  cancelling, fill during cancel, cancelled
   assert( exec.GetOrderSide() == m_row.eOrderSide );
   bool bOverDone = false;
@@ -179,7 +179,7 @@ OrderStatus::enumOrderStatus Order::ReportExecution(const CExecution &exec) {
       OnPartialFill( *this );
     }
   }
-  OnExecution( std::pair<const Order&, const CExecution&>( *this, exec ) );
+  OnExecution( std::pair<const Order&, const Execution&>( *this, exec ) );
   return m_row.eOrderStatus;
 }
 

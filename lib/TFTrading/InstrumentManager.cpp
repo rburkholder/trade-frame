@@ -30,20 +30,20 @@ using namespace boost::assign;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CInstrumentManager::CInstrumentManager(void) {
+InstrumentManager::InstrumentManager(void) {
 //  file.OpenIQFSymbols();
 }
 
-CInstrumentManager::~CInstrumentManager(void) {
+InstrumentManager::~InstrumentManager(void) {
 //  file.CloseIQFSymbols();
   for ( iterMap iter = m_map.begin(); iter != m_map.end(); ++iter ) {
-    iter->second->OnAlternateNameAdded.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameAdded ) );
-    iter->second->OnAlternateNameChanged.Remove( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameChanged ) );
+    iter->second->OnAlternateNameAdded.Remove( MakeDelegate( this, &InstrumentManager::HandleAlternateNameAdded ) );
+    iter->second->OnAlternateNameChanged.Remove( MakeDelegate( this, &InstrumentManager::HandleAlternateNameChanged ) );
   }
   m_map.clear();
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument( 
+InstrumentManager::pInstrument_t InstrumentManager::ConstructInstrument( 
   idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
   InstrumentType::enumInstrumentTypes type ) {
   pInstrument_t pInstrument( new Instrument( sInstrumentName, type, sExchangeName ) );
@@ -51,7 +51,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructInstrument(
   return pInstrument;
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(     
+InstrumentManager::pInstrument_t InstrumentManager::ConstructFuture(     
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // future
   boost::uint16_t year, boost::uint16_t month ) {
   pInstrument_t pInstrument(
@@ -60,7 +60,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructFuture(
   return pInstrument;
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
+InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm
   boost::uint16_t year, boost::uint16_t month,
   pInstrument_t pUnderlying,
@@ -74,7 +74,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   return pInstrument;
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
+InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
   pInstrument_t pUnderlying,
@@ -88,7 +88,7 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructOption(
   return pInstrument;
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency( 
+InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency( 
   idInstrument_cref idInstrumentName, 
   idInstrument_cref idCounterInstrument,
 //  pInstrument_t pUnderlying,
@@ -100,45 +100,45 @@ CInstrumentManager::pInstrument_t CInstrumentManager::ConstructCurrency(
   return pInstrument;
 }
 
-void CInstrumentManager::Register( pInstrument_t& pInstrument ) {
+void InstrumentManager::Register( pInstrument_t& pInstrument ) {
   if ( Exists( pInstrument ) ) {
-    throw std::runtime_error( "CInstrumentManager::Construct: instrument already exists" );
+    throw std::runtime_error( "InstrumentManager::Construct: instrument already exists" );
   }
   Assign( pInstrument );
   if ( 0 != m_pSession ) {
     ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pQuery 
       = m_pSession->Insert<Instrument::TableRowDef>( const_cast<Instrument::TableRowDef&>( pInstrument->GetRow() ) );
     // save alternate instrument names
-    pInstrument->ScanAlternateNames( boost::phoenix::bind( &CInstrumentManager::SaveAlternateInstrumentName, this, 
+    pInstrument->ScanAlternateNames( boost::phoenix::bind( &InstrumentManager::SaveAlternateInstrumentName, this, 
       boost::phoenix::arg_names::arg1, boost::phoenix::arg_names::arg2, boost::phoenix::arg_names::arg3 ) );
   }
 }
 
-void CInstrumentManager::SaveAlternateInstrumentName( 
+void InstrumentManager::SaveAlternateInstrumentName( 
     const keytypes::eidProvider_t& idProvider, const keytypes::idInstrument_t& idAlternate, const keytypes::idInstrument_t& idInstrument ) {
   AlternateInstrumentName::TableRowDef row( idProvider, idAlternate, idInstrument );
   SaveAlternateInstrumentName( row );
 }
 
-void CInstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& row ) {
+void InstrumentManager::SaveAlternateInstrumentName( const AlternateInstrumentName::TableRowDef& row ) {
   if ( 0 != m_pSession ) {
     ou::db::QueryFields<AlternateInstrumentName::TableRowDef>::pQueryFields_t pQuery 
       = m_pSession->Insert<AlternateInstrumentName::TableRowDef>( const_cast<AlternateInstrumentName::TableRowDef&>( row ) );
   }
 }
 
-void CInstrumentManager::Assign( pInstrument_cref pInstrument ) {
+void InstrumentManager::Assign( pInstrument_cref pInstrument ) {
   if ( m_map.end() != m_map.find( pInstrument->GetInstrumentName() ) ) {
-    throw std::runtime_error( "CInstrumentManager::Assign instrument already exists" );
+    throw std::runtime_error( "InstrumentManager::Assign instrument already exists" );
   }
   else {
     m_map.insert( pair_t( pInstrument->GetInstrumentName(), pInstrument ) );
   }
-  pInstrument->OnAlternateNameAdded.Add( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameAdded ) );
-  pInstrument->OnAlternateNameChanged.Add( MakeDelegate( this, &CInstrumentManager::HandleAlternateNameChanged ) );
+  pInstrument->OnAlternateNameAdded.Add( MakeDelegate( this, &InstrumentManager::HandleAlternateNameAdded ) );
+  pInstrument->OnAlternateNameChanged.Add( MakeDelegate( this, &InstrumentManager::HandleAlternateNameChanged ) );
 }
 
-CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idName ) {
+InstrumentManager::pInstrument_t InstrumentManager::Get( idInstrument_cref idName ) {
   pInstrument_t pInstrument;
   iterMap iter = m_map.find( idName );
   if ( m_map.end() != iter ) {
@@ -150,13 +150,13 @@ CInstrumentManager::pInstrument_t CInstrumentManager::Get( idInstrument_cref idN
       bFound = LoadInstrument( idName, pInstrument );
     }
     if ( !bFound ) {
-      throw std::runtime_error( "CInstrumentManager::Get can't find idInstrument" );
+      throw std::runtime_error( "InstrumentManager::Get can't find idInstrument" );
     }
   }
   return pInstrument;
 }
 
-bool CInstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the query to make the get faster rather than searching the map again
+bool InstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the query to make the get faster rather than searching the map again
   bool bFound = ( m_map.end() != m_map.find( id ) );
   if ( !bFound ) {
     if ( 0 != m_pSession ) {
@@ -167,7 +167,7 @@ bool CInstrumentManager::Exists( idInstrument_cref id ) {  // todo:  cache the q
   return bFound;
 }
 
-bool CInstrumentManager::Exists( pInstrument_cref pInstrument ) {
+bool InstrumentManager::Exists( pInstrument_cref pInstrument ) {
   return Exists( pInstrument->GetInstrumentName() );
 }
 
@@ -182,7 +182,7 @@ namespace InstrumentManagerQueries {
   };
 }
 
-bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
+bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
       // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
   assert( 0 != m_pSession );
   assert( m_map.end() == m_map.find( id ) );
@@ -226,13 +226,13 @@ bool CInstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInst
   return bFound;
 }
 
-void CInstrumentManager::Delete( idInstrument_cref idInstrument ) {
+void InstrumentManager::Delete( idInstrument_cref idInstrument ) {
   // check if has dependencies first, and exception if there are 
   // then delete alternate instrument names
   // then delete instrument
 }
 
-void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument ) {
+void InstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrument ) {
   assert( 0 != pInstrument.get() );
   InstrumentManagerQueries::InstrumentKey idInstrument( pInstrument->GetInstrumentName() );
    ou::db::QueryFields<InstrumentManagerQueries::InstrumentKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
@@ -245,24 +245,24 @@ void CInstrumentManager::LoadAlternateInstrumentNames( pInstrument_t& pInstrumen
   }
 }
 
-void CInstrumentManager::HandleAlternateNameAdded( const Instrument::AlternateNameChangeInfo_t& info ) {
+void InstrumentManager::HandleAlternateNameAdded( const Instrument::AlternateNameChangeInfo_t& info ) {
   iterMap iterKey = m_map.find( info.s1 );
   iterMap iterAlt = m_map.find( info.s2 );
   if ( m_map.end() == iterKey ) 
-    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded key does not exist" );
+    throw std::runtime_error( "InstrumentManager::HandleAlternateNameAdded key does not exist" );
   if ( m_map.end() != iterAlt ) 
-    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameAdded alt exists" );
+    throw std::runtime_error( "InstrumentManager::HandleAlternateNameAdded alt exists" );
   m_map.insert( pair_t( info.s2, iterKey->second ) );
   SaveAlternateInstrumentName( info.id, info.s2, info.s1 );
 }
 
-void CInstrumentManager::HandleAlternateNameChanged( const Instrument::AlternateNameChangeInfo_t& info ) { // todo: need to update database
+void InstrumentManager::HandleAlternateNameChanged( const Instrument::AlternateNameChangeInfo_t& info ) { // todo: need to update database
   iterMap iterOld = m_map.find( info.s1 );
   if ( m_map.end() == iterOld ) 
-    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged old name not found" );
+    throw std::runtime_error( "InstrumentManager::HandleAlternateNameChanged old name not found" );
   iterMap iterNew = m_map.find( info.s2 );
   if ( m_map.end() != iterNew ) 
-    throw std::runtime_error( "CInstrumentManager::HandleAlternateNameChanged new name already exists" );
+    throw std::runtime_error( "InstrumentManager::HandleAlternateNameChanged new name already exists" );
   m_map.insert( pair_t( info.s2, iterOld->second ) );
   iterOld = m_map.find( info.s1 );  // load again to ensure proper copy
   m_map.erase( iterOld );
@@ -270,19 +270,19 @@ void CInstrumentManager::HandleAlternateNameChanged( const Instrument::Alternate
   // need database insert
 }
 
-void CInstrumentManager::HandleRegisterTables( ou::db::Session& session ) {
+void InstrumentManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
   session.RegisterTable<Instrument::TableCreateDef>( tablenames::sInstrument );
   session.RegisterTable<AlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::HandleRegisterRows( ou::db::Session& session ) {
+void InstrumentManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
   session.MapRowDefToTableName<Instrument::TableRowDef>( tablenames::sInstrument );
   session.MapRowDefToTableName<AlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
 }
 
-void CInstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
+void InstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
 
   std::vector<std::string> vsExchangesPreload;
   vsExchangesPreload +=
@@ -316,36 +316,36 @@ void CInstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
 // this stuff could probably be rolled into Session with a template
-void CInstrumentManager::AttachToSession( ou::db::Session* pSession ) {
+void InstrumentManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
-  pSession->OnRegisterTables.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Add( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Add( MakeDelegate( this, &CInstrumentManager::HandlePopulateTables ) );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &InstrumentManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &InstrumentManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &InstrumentManager::HandlePopulateTables ) );
 
 }
 
-void CInstrumentManager::DetachFromSession( ou::db::Session* pSession ) {
-  pSession->OnRegisterTables.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Remove( MakeDelegate( this, &CInstrumentManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Remove( MakeDelegate( this, &CInstrumentManager::HandlePopulateTables ) );
+void InstrumentManager::DetachFromSession( ou::db::Session* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &InstrumentManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &InstrumentManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &InstrumentManager::HandlePopulateTables ) );
   ManagerBase::DetachFromSession( pSession );
 }
 
 
 /*
-Instrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName) {
+Instrument::pInstrument_t InstrumentManager::GetIQFeedInstrument(const std::string &sName) {
 //  return GetIQFeedInstrument( sName, sName );
   try {
     Instrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName ) );  // todo:  need to verify proper symbol usage
     return pInstrument;
   }
   catch (...) {
-    throw std::runtime_error( "CInstrumentManager::GetIQFeedInstrument problems" );
+    throw std::runtime_error( "InstrumentManager::GetIQFeedInstrument problems" );
   }
 }
 */
 /*
-Instrument::pInstrument_t CInstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
+Instrument::pInstrument_t InstrumentManager::GetIQFeedInstrument(const std::string &sName, const std::string &sAlternateName) {
   try {
     Instrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sName, sAlternateName ) );  // todo:  need to verify proper symbol usage
     return pInstrument;

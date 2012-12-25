@@ -45,7 +45,7 @@ CRowKeyValues::~CRowKeyValues(void) {
   //delete m_piVolume;
 }
 
-void CRowKeyValues::HandleSymbolFundamental( CIQFeedSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolFundamental( IQFeedSymbol *pSym ) {
 
  // TODO look at setting precision at some point in time
 
@@ -66,7 +66,7 @@ void CRowKeyValues::HandleSymbolFundamental( CIQFeedSymbol *pSym ) {
   */
 }
 
-void CRowKeyValues::HandleSymbolSummary( CIQFeedSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolSummary( IQFeedSymbol *pSym ) {
   //CString s;
   //s.Format( "%s summary", pSym->m_sSymbol );
   //theApp.pConsoleMessages->WriteLine( s );
@@ -80,7 +80,7 @@ void CRowKeyValues::HandleSymbolSummary( CIQFeedSymbol *pSym ) {
   m_piVolume->SetValue( pSym->m_nTotalVolume );
 }
 
-void CRowKeyValues::HandleSymbolUpdate( CIQFeedSymbol *pSym ) {
+void CRowKeyValues::HandleSymbolUpdate( IQFeedSymbol *pSym ) {
   //CString s;
   //s.Format( "%s update", pSym->m_sSymbol );
   //theApp.pConsoleMessages->WriteLine( s );

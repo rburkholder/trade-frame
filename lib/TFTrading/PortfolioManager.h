@@ -35,7 +35,7 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CPortfolioManager: public ManagerBase<CPortfolioManager> {
+class PortfolioManager: public ManagerBase<PortfolioManager> {
 public:
 
   typedef CPortfolio::pPortfolio_t pPortfolio_t;
@@ -52,7 +52,7 @@ public:
   typedef Instrument::pInstrument_cref pInstrument_cref;
   typedef CPosition::pProvider_t pProvider_t;
 
-  typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
+  typedef std::pair<const CPosition&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
   typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
@@ -65,8 +65,8 @@ public:
     structPortfolio( pPortfolio_t& pPortfolio_ ) : pPortfolio( pPortfolio_ ) {};
   };
 
-  CPortfolioManager(void) {};
-  ~CPortfolioManager(void) {};
+  PortfolioManager(void) {};
+  ~PortfolioManager(void) {};
 
   pPortfolio_t ConstructPortfolio( 
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription = "" );
@@ -137,7 +137,7 @@ private:
 
 };
 
-template<class F> void CPortfolioManager::ScanPortfolios( F f, const idPortfolio_t& id ) {
+template<class F> void PortfolioManager::ScanPortfolios( F f, const idPortfolio_t& id ) {
   using namespace boost::adaptors;
   iterReportingPortfolios_t iter = m_mapReportingPortfolios.find( id );
   if ( m_mapReportingPortfolios.end() != iter ) {
@@ -145,12 +145,12 @@ template<class F> void CPortfolioManager::ScanPortfolios( F f, const idPortfolio
   }
 }
 
-template<class F> void CPortfolioManager::ScanPositions( mapPosition_t& mapPosition, F f ) {
+template<class F> void PortfolioManager::ScanPositions( mapPosition_t& mapPosition, F f ) {
   using namespace boost::adaptors;
   boost::for_each( mapPosition | map_values, f );
 }
 
-template<class F> void CPortfolioManager::ScanPositions( const idPortfolio_t& idPortfolio, F f ) {
+template<class F> void PortfolioManager::ScanPositions( const idPortfolio_t& idPortfolio, F f ) {
   using namespace boost::adaptors;
   pPortfolio_t pPortfolio = GetPortfolio( idPortfolio );  // ensure portfolio and positions are loaded
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );

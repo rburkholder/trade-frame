@@ -42,12 +42,12 @@ public:
 
 protected:
 
-  typedef ou::tf::CProviderManager CProviderManager;
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::ProviderManager ProviderManager;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::tf::eProviderState_t eProviderState_t;
 
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   Mode_t m_mode;
@@ -129,7 +129,7 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   m_mode( EModeUnknown ),
   m_pPanelProviderControl( 0 ),
   m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ), 
-  m_iqfeed( new ou::tf::CIQFeedProvider() ), m_bIQFeedConnected( false ),
+  m_iqfeed( new ou::tf::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
   m_bExecConnected( false ), m_bData1Connected( false ), m_bData2Connected( false )
 
@@ -138,9 +138,9 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
   // ensure providers have been initialized above first
-  CProviderManager::LocalCommonInstance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
-  CProviderManager::LocalCommonInstance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
-  CProviderManager::LocalCommonInstance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+  ProviderManager::LocalCommonInstance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
+  ProviderManager::LocalCommonInstance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
+  ProviderManager::LocalCommonInstance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
 
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisConnected ) );
@@ -164,9 +164,9 @@ FrameWork01<CRTP>::~FrameWork01( void ) {
   m_sim->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorDisConnected ) );
 
-  ou::tf::CProviderManager::LocalCommonInstance().Release( "iq01" );
-  ou::tf::CProviderManager::LocalCommonInstance().Release( "ib01" );
-  ou::tf::CProviderManager::LocalCommonInstance().Release( "sim01" );
+  ou::tf::ProviderManager::LocalCommonInstance().Release( "iq01" );
+  ou::tf::ProviderManager::LocalCommonInstance().Release( "ib01" );
+  ou::tf::ProviderManager::LocalCommonInstance().Release( "sim01" );
 
 }
 

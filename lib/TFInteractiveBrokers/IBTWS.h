@@ -53,13 +53,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class IBTWS : 
-  public CProviderInterface<IBTWS, IBSymbol>, 
+  public ProviderInterface<IBTWS, IBSymbol>, 
   public EWrapper 
 {
 public:
 
   typedef boost::shared_ptr<IBTWS> pProvider_t;
-  typedef CProviderInterface<IBTWS, IBSymbol> ProviderInterface_t;
+  typedef ProviderInterface<IBTWS, IBSymbol> ProviderInterface_t;
   typedef IBSymbol::pSymbol_t pSymbol_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef Order::pOrder_t pOrder_t;
@@ -107,7 +107,7 @@ public:
 	   double lastFillPrice, int clientId, const IBString& whyHeld);
   void openOrder( OrderId orderId, const Contract&, const ::Order&, const OrderState&);
   void openOrderEnd() {};  // **
-  void execDetails( int reqId, const Contract& contract, const Execution& execution );
+  void execDetails( int reqId, const Contract& contract, const ::Execution& execution );
   void execDetailsEnd( int reqId) {};  // **
   void error(const int id, const int errorCode, const IBString errorString);
   void winError( const IBString &str, int lastError);

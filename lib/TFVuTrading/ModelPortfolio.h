@@ -28,9 +28,9 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CPortfolioManager CPortfolioManager;
-  typedef CPortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef CPortfolioManager::idPortfolio_t idPortfolio_t;
+  typedef ou::tf::PortfolioManager PortfolioManager;
+  typedef PortfolioManager::pPortfolio_t pPortfolio_t;
+  typedef PortfolioManager::idPortfolio_t idPortfolio_t;
 
   struct ItemPortfolio: public wxDataViewItem {
     ItemPortfolio( pPortfolio_t& pPortfolio )
@@ -47,7 +47,7 @@ private:
   typedef mapItems_t::const_iterator mapItems_iter_t;
   mapItems_t m_mapItems;
 
-  CPortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
+  PortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
 
   void PopulateWithRootPortfolios( void );
 

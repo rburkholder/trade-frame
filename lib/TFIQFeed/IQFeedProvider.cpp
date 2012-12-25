@@ -23,9 +23,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CIQFeedProvider::CIQFeedProvider( void ) 
-: CProviderInterface<CIQFeedProvider,CIQFeedSymbol>(), 
-  CIQFeed<CIQFeedProvider>()
+IQFeedProvider::IQFeedProvider( void ) 
+: ProviderInterface<IQFeedProvider,IQFeedSymbol>(), 
+  IQFeed<IQFeedProvider>()
 {
   m_sName = "IQF";
   m_nID = keytypes::EProviderIQF;
@@ -33,10 +33,10 @@ CIQFeedProvider::CIQFeedProvider( void )
   m_bProvidesTrades = true;
 }
 
-CIQFeedProvider::~CIQFeedProvider(void) {
+IQFeedProvider::~IQFeedProvider(void) {
 }
 
-void CIQFeedProvider::Connect() {
+void IQFeedProvider::Connect() {
   if ( !m_bConnected ) {
     OnConnecting( 0 );
     inherited_t::Connect();
@@ -44,67 +44,67 @@ void CIQFeedProvider::Connect() {
   }
 }
 
-void CIQFeedProvider::OnIQFeedConnected( void ) {
+void IQFeedProvider::OnIQFeedConnected( void ) {
   m_bConnected = true;
   OnConnected( 0 );
 }
 
-void CIQFeedProvider::Disconnect() {
+void IQFeedProvider::Disconnect() {
   if ( m_bConnected ) {
-    CProviderInterfaceBase::OnDisconnecting( 0 );
+    ProviderInterfaceBase::OnDisconnecting( 0 );
     IQFeed_t::Disconnect();
     inherited_t::Disconnect();
   }
 }
 
-void CIQFeedProvider::OnIQFeedDisConnected( void ) {
+void IQFeedProvider::OnIQFeedDisConnected( void ) {
   m_bConnected = false;
   OnDisconnected( 0 );
 }
 
-CIQFeedProvider::pSymbol_t CIQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
-  pSymbol_t pSymbol( new CIQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
+IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
+  pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
 
-void CIQFeedProvider::StartQuoteTradeWatch( CIQFeedSymbol* pSymbol ) {
+void IQFeedProvider::StartQuoteTradeWatch( IQFeedSymbol* pSymbol ) {
   if ( !pSymbol->GetQuoteTradeWatchInProgress() ) {
     std::string s = "w" + pSymbol->GetId() + "\n";
-    CIQFeed<CIQFeedProvider>::Send( s );
+    IQFeed<IQFeedProvider>::Send( s );
     pSymbol->SetQuoteTradeWatchInProgress();
   }
 }
 
-void CIQFeedProvider::StopQuoteTradeWatch( CIQFeedSymbol* pSymbol ) {
+void IQFeedProvider::StopQuoteTradeWatch( IQFeedSymbol* pSymbol ) {
   if ( pSymbol->QuoteWatchNeeded() || pSymbol->TradeWatchNeeded() ) {
     // don't do anything, as stuff still active
   }
   else {
     std::string s = "r" + pSymbol->GetId() + "\n";
-    CIQFeed<CIQFeedProvider>::Send( s );
+    IQFeed<IQFeedProvider>::Send( s );
   }
 }
 
-void CIQFeedProvider::StartQuoteWatch(pSymbol_t pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
+void IQFeedProvider::StartQuoteWatch(pSymbol_t pSymbol) {
+  StartQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
+void IQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
+  StopQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
-  StartQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
+void IQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
+  StartQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
-  StopQuoteTradeWatch( dynamic_cast<CIQFeedSymbol*>( pSymbol.get() ) );
+void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
+  StopQuoteTradeWatch( dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
 }
 
-void CIQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFUpdateMessage::QPSymbol ) );
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFUpdateMessage::QPSymbol ) );
   pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
     pSym = m_mapSymbols_Iter -> second;
@@ -113,9 +113,9 @@ void CIQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMe
   UpdateDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFSummaryMessage::QPSymbol ) );
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFSummaryMessage::QPSymbol ) );
   pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
     pSym = m_mapSymbols_Iter -> second;
@@ -124,9 +124,9 @@ void CIQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummary
   SummaryDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg ) {
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
-  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( CIQFFundamentalMessage::FSymbol ) );
+  m_mapSymbols_Iter = m_mapSymbols.find( pMsg->Field( IQFFundamentalMessage::FSymbol ) );
   pSymbol_t pSym;
   if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
     pSym = m_mapSymbols_Iter -> second;
@@ -135,7 +135,7 @@ void CIQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFun
   FundamentalDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg ) {
 
   inherited_t::m_mapSymbols_t::iterator m_mapSymbols_Iter;
 /*
@@ -154,9 +154,9 @@ void CIQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessag
           s.assign( ++ixFstColon, cnt );
 
           m_mapSymbols_Iter = m_mapSymbols.find( s.c_str() );
-          CIQFeedSymbol *pSym;
+          IQFeedSymbol *pSym;
           if ( m_mapSymbols.end() != m_mapSymbols_Iter ) {
-            pSym = (CIQFeedSymbol *) m_mapSymbols_Iter -> second;
+            pSym = (IQFeedSymbol *) m_mapSymbols_Iter -> second;
             pSym ->HandleNewsMessage( pMsg );
           }
           ixFstColon = ixLstColon;
@@ -175,18 +175,18 @@ void CIQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessag
   NewsDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   TimeDone( pBuffer, pMsg );
 }
 
-void CIQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage *pMsg ) {
+void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   SystemDone( pBuffer, pMsg );
 }
 
 //http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
-void CIQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
+void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   // need to check if it already set or not
   std::string sName;
   switch ( pInstrument->GetInstrumentType() ) {

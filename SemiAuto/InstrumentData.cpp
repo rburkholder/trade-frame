@@ -73,19 +73,19 @@ void InstrumentData::HandleTrade( const Trade& trade ) {
   }
 }
 
-void InstrumentData::AddQuoteHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::AddQuoteHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->AddQuoteHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleQuote ) );
 }
 
-void InstrumentData::RemoveQuoteHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::RemoveQuoteHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->RemoveQuoteHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleQuote ) );
 }
 
-void InstrumentData::AddTradeHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::AddTradeHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->AddTradeHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleTrade ) );
 }
 
-void InstrumentData::RemoveTradeHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::RemoveTradeHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->RemoveTradeHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleTrade ) );
 }
 

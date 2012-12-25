@@ -117,7 +117,7 @@ void ManagePortfolio::HandleIBContractDetails( const ou::tf::IBTWS::ContractDeta
   mapPositions_iter_t iter = m_mapPositions.find( pInstrument->GetInstrumentName() );
   assert( m_mapPositions.end() != iter );
   //pPosition_t pPosition( new ou::tf::CPosition( pInstrument, m_pIB, m_pData1 ) );
-  pPosition_t pPosition = ou::tf::CPortfolioManager::Instance().ConstructPosition( 
+  pPosition_t pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
     m_pPortfolio->Id(), pInstrument->GetInstrumentName(), "Basket", 
     "ib01", "iq01", m_pExec, m_pData1, pInstrument );
   iter->second->SetPosition( pPosition );

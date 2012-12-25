@@ -24,14 +24,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& key, keytypes::eidProvider_t type ) {
+ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key, keytypes::eidProvider_t type ) {
   pProvider_t pProvider;
   switch ( type ) {
   case keytypes::EProviderIB:
     pProvider = Construct<IBTWS>( key );
     break;
   case keytypes::EProviderIQF:
-    pProvider = Construct<CIQFeedProvider>( key );
+    pProvider = Construct<IQFeedProvider>( key );
     break;
   case keytypes::EProviderSimulator:
     pProvider = Construct<SimulationProvider>( key );
@@ -43,30 +43,30 @@ CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& k
   return pProvider;
 }
 
-void CProviderManager::Register( const idProvider_t& key, pProvider_t& pProvider ) {
+void ProviderManager::Register( const idProvider_t& key, pProvider_t& pProvider ) {
 
   if ( m_mapProviders.end() != m_mapProviders.find( key ) ) {
-    throw std::runtime_error( "CProviderManager::Register, provider already exists" );
+    throw std::runtime_error( "ProviderManager::Register, provider already exists" );
   }
   pProvider->SetName( key );
   m_mapProviders.insert( mapProviders_pair_t( key, pProvider ) );
 
 }
 
-void CProviderManager::Release( const idProvider_t& key ) {
+void ProviderManager::Release( const idProvider_t& key ) {
 
   iterProviders_t iter = m_mapProviders.find( key );
   if ( m_mapProviders.end() == iter ) {
-    throw std::runtime_error( "CProviderManager::Release, provider does not exist" );
+    throw std::runtime_error( "ProviderManager::Release, provider does not exist" );
   }
   m_mapProviders.erase( iter );
 }
 
-CProviderManager::pProvider_t CProviderManager::Get( const idProvider_t& key ) {
+ProviderManager::pProvider_t ProviderManager::Get( const idProvider_t& key ) {
 
   iterProviders_t iter = m_mapProviders.find( key );
   if ( m_mapProviders.end() == iter ) {
-    throw std::runtime_error( "CProviderManager::Get, provider does not exist" );
+    throw std::runtime_error( "ProviderManager::Get, provider does not exist" );
   }
   return iter->second;
 }

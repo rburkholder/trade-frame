@@ -144,21 +144,21 @@ void AppStrategyRunner::HandleBtnSave( void ) {
 
 void AppStrategyRunner::HandlePopulateDatabase( void ) {
 
-  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
-  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
+  ou::tf::AccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::AccountManager::Instance().ConstructAccountOwner( "aoRay", "aaRay", "Raymond", "Burkholder" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIB
+    = ou::tf::AccountManager::Instance().ConstructAccount( "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
+  ou::tf::AccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    //= ou::tf::CPortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
-    = ou::tf::CPortfolioManager::Instance().ConstructPortfolio( "pflioOptions", "aoRay", "options" );
+  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
+    //= ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( "pflioOptions", "aoRay", "options" );
 
 }
 

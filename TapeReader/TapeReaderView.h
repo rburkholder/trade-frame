@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// TapeReaderView.h : interface of the CTapeReaderView class
+// TapeReaderView.h : interface of the TapeReaderView class
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +75,8 @@
   COLHDR_EXTRACT_COL_DETAILS(z, n, 5, ~)\
   ;
 
-class CTapeReaderView : public CDialogImpl<CTapeReaderView>,
-                        public CDialogResize<CTapeReaderView>
+class TapeReaderView : public CDialogImpl<TapeReaderView>,
+                        public CDialogResize<TapeReaderView>
 {
 public:
 	enum { IDD = IDD_TAPEREADER_FORM };
@@ -90,15 +90,15 @@ public:
 //    * DLSZ_MOVE_Y: Move the control vertically as the dialog resizes vertically.
 //    * DLSZ_REPAINT: Invalidate the control after every move/resize so it repaints every time.
 
-  BEGIN_DLGRESIZE_MAP(CTapeReaderView)
+  BEGIN_DLGRESIZE_MAP(TapeReaderView)
     DLGRESIZE_CONTROL( IDC_EDTSYMBOL, DLSZ_SIZE_X )
     DLGRESIZE_CONTROL( IDC_BTNSTART, DLSZ_MOVE_X )
     DLGRESIZE_CONTROL( IDC_BTNSTOP, DLSZ_MOVE_X )
     DLGRESIZE_CONTROL( IDC_LISTTAPE, DLSZ_SIZE_X | DLSZ_SIZE_Y )
   END_DLGRESIZE_MAP()
 
-  CTapeReaderView( void );
-  ~CTapeReaderView( void );
+  TapeReaderView( void );
+  ~TapeReaderView( void );
 protected:
 
   enum enumMessages {
@@ -146,8 +146,8 @@ protected:
   void StopData( void );
   void UpdateUIState( void );
 
-	BEGIN_MSG_MAP_EX(CTapeReaderView)
-//	BEGIN_MSG_MAP(CTapeReaderView)
+	BEGIN_MSG_MAP_EX(TapeReaderView)
+//	BEGIN_MSG_MAP(TapeReaderView)
     MESSAGE_HANDLER( WM_IQFEED_UPDATE, OnIQFeedUpdate )
     MESSAGE_HANDLER( WM_IQFEED_SUMMARY, OnIQFeedSummary )
     MESSAGE_HANDLER( WM_IQFEED_FUNDAMENTAL, OnIQFeedFundamental )
@@ -167,7 +167,7 @@ protected:
     MSG_WM_INITDIALOG(OnInitDialog)
     MSG_WM_DESTROY(OnDestroy)
     MSG_WM_CLOSE(OnClose)
-    CHAIN_MSG_MAP(CDialogResize<CTapeReaderView>)
+    CHAIN_MSG_MAP(CDialogResize<TapeReaderView>)
 	END_MSG_MAP()
 
   CEdit m_edtSymbol;
@@ -202,11 +202,11 @@ protected:
   void OnClose();
 
 private:
-  typedef CDialogImpl<CTapeReaderView> CThisClass;
+  typedef CDialogImpl<TapeReaderView> CThisClass;
 
-  ou::tf::iqfeed::MsgShim<CTapeReaderView>::structMessageDestinations m_Destinations;
-  ou::tf::iqfeed::MsgShim<CTapeReaderView>* m_pIQFeed;
-  typedef ou::tf::iqfeed::MsgShim<CTapeReaderView>::linebuffer_t linebuffer_t;
+  ou::tf::iqfeed::MsgShim<TapeReaderView>::structMessageDestinations m_Destinations;
+  ou::tf::iqfeed::MsgShim<TapeReaderView>* m_pIQFeed;
+  typedef ou::tf::iqfeed::MsgShim<TapeReaderView>::linebuffer_t linebuffer_t;
 
   std::string m_sSymbol;
 

@@ -53,7 +53,7 @@ afx_msg void CVuKeyValues::OnSize( UINT i, int x, int y ) {
 
 void CVuKeyValues::WatchSymbol( const string &sSymbol, CRowKeyValues *row ) {
 
-  CIQFeedSymbol *pSym;
+  IQFeedSymbol *pSym;
 
   pSym = m_IQFeedProvider.GetIQFeedProvider()->GetSymbol( sSymbol );
   //pSym = theApp.m_pIQFeed->Attach( sSymbol );
@@ -66,7 +66,7 @@ void CVuKeyValues::WatchSymbol( const string &sSymbol, CRowKeyValues *row ) {
 
 void CVuKeyValues::UnWatchSymbol( const string &sSymbol, CRowKeyValues *row ) {
 
-  CIQFeedSymbol *pSym;
+  IQFeedSymbol *pSym;
 
   pSym = m_IQFeedProvider.GetIQFeedProvider()->GetSymbol( sSymbol );
   //pSym = theApp.m_pIQFeed->Attach( sSymbol );

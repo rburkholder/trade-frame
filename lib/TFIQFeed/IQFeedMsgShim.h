@@ -23,10 +23,10 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 template <typename T>
-class MsgShim: public CIQFeed<MsgShim<T> > {
-  friend CIQFeed<MsgShim<T> >;
+class MsgShim: public IQFeed<MsgShim<T> > {
+  friend IQFeed<MsgShim<T> >;
 public:
-  typedef typename CIQFeed<MsgShim<T> > inherited_t;
+  typedef typename IQFeed<MsgShim<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   // pre-initialized message ids for messages delivered to and accepted by external caller
@@ -92,7 +92,7 @@ protected:
     }
   }
 
-  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* pMsg ) {
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageUpdate ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageUpdate, 
@@ -105,7 +105,7 @@ protected:
     }
   }
 
-  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage* pMsg ) {
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageSummary ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageSummary, 
@@ -118,7 +118,7 @@ protected:
     }
   }
 
-  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage* pMsg ) {
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageNews ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageNews, 
@@ -131,7 +131,7 @@ protected:
     }
   }
 
-  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage* pMsg ) {
+  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageFundamental ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageFundamental, 
@@ -144,7 +144,7 @@ protected:
     }
   }
 
-  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage* pMsg ) {
+  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageTime ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageTime, 
@@ -157,7 +157,7 @@ protected:
     }
   }
 
-  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage* pMsg ) {
+  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage* pMsg ) {
     if ( 0 != m_structMessageDestinations.msgMessageSystem ) {
       m_structMessageDestinations.owner->PostMessage( 
         m_structMessageDestinations.msgMessageSystem, 

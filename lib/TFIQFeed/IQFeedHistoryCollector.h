@@ -26,7 +26,7 @@ using namespace fastdelegate;
 
 class CHistoryCollector {
 public:
-  CHistoryCollector( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
+  CHistoryCollector( IQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
   virtual ~CHistoryCollector( void );
 
   virtual void Start( void );
@@ -46,7 +46,7 @@ protected:
   void FinalizeCreation( void ) {
     m_phistory->SetOnRequestComplete( MakeDelegate( this, &CHistoryCollector::OnCompletion ) );
   }
-  CIQFeedProvider *m_pProvider;
+  IQFeedProvider *m_pProvider;
 private:
 };
 
@@ -56,7 +56,7 @@ private:
 
 class CHistoryCollectorDaily: public CHistoryCollector {
 public:
-  CHistoryCollectorDaily( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
+  CHistoryCollectorDaily( IQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
   virtual ~CHistoryCollectorDaily( void );
   virtual void Start( void );
   virtual void WriteData( void );
@@ -71,7 +71,7 @@ private:
 
 class CHistoryCollectorTicks: public CHistoryCollector {
 public:
-  CHistoryCollectorTicks( CIQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
+  CHistoryCollectorTicks( IQFeedProvider *pProvider, const char *szSymbol, unsigned long nCount );
   virtual ~CHistoryCollectorTicks( void );
   virtual void Start( void );
   virtual void WriteData( void );

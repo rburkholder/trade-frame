@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// TapeReaderView.cpp : implementation of the CTapeReaderView class
+// TapeReaderView.cpp : implementation of the TapeReaderView class
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -27,27 +27,27 @@
 
 #include "TapeReaderView.h"
 
-CTapeReaderView::CTapeReaderView( void ) 
-: CDialogImpl<CTapeReaderView>(), 
-  CDialogResize<CTapeReaderView>(),
+TapeReaderView::TapeReaderView( void ) 
+: CDialogImpl<TapeReaderView>(), 
+  CDialogResize<TapeReaderView>(),
   m_Destinations( this, WM_IQFEED_CONNECTED, WM_IQFEED_SENDDONE, WM_IQFEED_DISCONNECTED, WM_IQFEED_ERROR,
   WM_IQFEED_UPDATE, WM_IQFEED_SUMMARY, 0, WM_IQFEED_FUNDAMENTAL, 0, 0 ),
   m_stateUI( UI_STARTING ),
   m_bRunning( false )
 {
-  m_pIQFeed = new ou::tf::iqfeed::MsgShim<CTapeReaderView>( m_Destinations );
+  m_pIQFeed = new ou::tf::iqfeed::MsgShim<TapeReaderView>( m_Destinations );
 }
 
-CTapeReaderView::~CTapeReaderView( void ) {
+TapeReaderView::~TapeReaderView( void ) {
   delete m_pIQFeed;
 }
 
-BOOL CTapeReaderView::PreTranslateMessage(MSG* pMsg)
+BOOL TapeReaderView::PreTranslateMessage(MSG* pMsg)
 {
 	return CWindow::IsDialogMessage(pMsg);
 }
 
-HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
+HWND TapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
 
   HWND h;
   h = CThisClass::Create( hWndParent, dwInitParam );
@@ -55,7 +55,7 @@ HWND CTapeReaderView::Create(HWND hWndParent, LPARAM dwInitParam) {
   return h;
 }
 
-BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
+BOOL TapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
 
   DlgResize_Init( false, true );
 
@@ -74,21 +74,21 @@ BOOL CTapeReaderView::OnInitDialog(CWindow wndFocus, LPARAM lInitParam) {
   return TRUE;
 }
 
-void CTapeReaderView::OnClose( void ) {  // doesn't appear to be called, needs to be used in main window
+void TapeReaderView::OnClose( void ) {  // doesn't appear to be called, needs to be used in main window
   // main thread would need to wait for disconnect and then do destroy
 }
 
 // wait for disconnect completion
-LRESULT CTapeReaderView::OnWaitForDisconnect( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnWaitForDisconnect( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   return TRUE;
 }
 
-void CTapeReaderView::OnDestroy( void ) {
+void TapeReaderView::OnDestroy( void ) {
   StopData();
   m_pIQFeed->Disconnect();
 }
 
-LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT TapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 
   m_stateUI = UI_STARTING;
@@ -117,7 +117,7 @@ LRESULT CTapeReaderView::OnBnClickedBtnstart(WORD /*wNotifyCode*/, WORD /*wID*/,
   return 0;
 }
 
-void CTapeReaderView::StopData( void ) {
+void TapeReaderView::StopData( void ) {
   if ( UI_STARTED == m_stateUI ) {
     std::string sSend = _T( "r" );
     sSend += m_sSymbol;
@@ -130,7 +130,7 @@ void CTapeReaderView::StopData( void ) {
   }
 }
 
-LRESULT CTapeReaderView::OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT TapeReaderView::OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 
   StopData();
@@ -138,10 +138,10 @@ LRESULT CTapeReaderView::OnBnClickedBtnstop(WORD /*wNotifyCode*/, WORD /*wID*/, 
   return 0;
 }
 
-LRESULT CTapeReaderView::OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT TapeReaderView::OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   // TODO:  If this is a RICHEDIT control, the control will not
-  // send this notification unless you override the CDialogImpl<CTapeReaderView>::OnInitDialog()
+  // send this notification unless you override the CDialogImpl<TapeReaderView>::OnInitDialog()
   // function and call CRichEditCtrl().SetEventMask()
   // with the ENM_CHANGE flag ORed into the mask.
 
@@ -157,7 +157,7 @@ LRESULT CTapeReaderView::OnEnChangeEdtsymbol(WORD /*wNotifyCode*/, WORD /*wID*/,
   return 0;
 }
 
-void CTapeReaderView::UpdateUIState( void ) {
+void TapeReaderView::UpdateUIState( void ) {
   switch ( m_stateUI ) {
     case UI_DISCONNECTED:
     case UI_STARTING:
@@ -183,7 +183,7 @@ void CTapeReaderView::UpdateUIState( void ) {
 }
 
 
-LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
+LRESULT TapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
 {
   LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
   
@@ -191,7 +191,7 @@ LRESULT CTapeReaderView::OnLvnItemchangedListtape(int /*idCtrl*/, LPNMHDR pNMHDR
   return 0;
 }
 
-LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
   m_stateUI = UI_NOSYMBOL;
   UpdateUIState();
@@ -202,7 +202,7 @@ LRESULT CTapeReaderView::OnIQFeedConnected( UINT, WPARAM, LPARAM, BOOL& bHandled
   return 1;
 }
 
-LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   // this message never arrives
 
   m_stateUI = UI_DISCONNECTED;
@@ -214,12 +214,12 @@ LRESULT CTapeReaderView::OnIQFeedDisconnected( UINT, WPARAM, LPARAM, BOOL& bHand
   return 1;
 }
 
-LRESULT CTapeReaderView::OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedSendDone( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   bHandled = true;
   return 1;
 }
 
-LRESULT CTapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
   bHandled = true;
   return 1;
 }
@@ -228,32 +228,32 @@ LRESULT CTapeReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 
 // S,WATCHES,@ES,+CL#,@IA#,@QM#,@IE#,@QO#,BZ#,CRD#,@ES#,@ES@,#ES#,@LA#,+CLF#,@NQ#,@NS#,@NX#,#NX#,@QC#,@YM#
 
-LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  ou::tf::CIQFUpdateMessage* msg = reinterpret_cast<ou::tf::CIQFUpdateMessage*>( lParam );
+  ou::tf::IQFUpdateMessage* msg = reinterpret_cast<ou::tf::IQFUpdateMessage*>( lParam );
 
-  if ( 'N' == *msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLast ) ) {  // field has "Not Found" in numeric field
+  if ( 'N' == *msg->FieldBegin( ou::tf::IQFUpdateMessage::QPLast ) ) {  // field has "Not Found" in numeric field
     CWindow::MessageBoxA( "Symbol Not Found", "Error", MB_OK );
     m_stateUI = UI_SYMBOLENTRY;
     UpdateUIState();
   }
   else {
     std::string sSymbol( 
-      msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPSymbol ),
-      msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPSymbol ) );
+      msg->FieldBegin( ou::tf::IQFUpdateMessage::QPSymbol ),
+      msg->FieldEnd( ou::tf::IQFUpdateMessage::QPSymbol ) );
     if ( sSymbol == m_sSymbol ) {
       std::string sLastTradeTime( 
-        msg->FieldBegin(ou::tf:: CIQFUpdateMessage::QPLastTradeTime ),
-        msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLastTradeTime ) );
+        msg->FieldBegin(ou::tf:: IQFUpdateMessage::QPLastTradeTime ),
+        msg->FieldEnd( ou::tf::IQFUpdateMessage::QPLastTradeTime ) );
       if ( 9 == sLastTradeTime.length() ) {
-        std::string sBid( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPBid ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPBid ) );
-        std::string sBidVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPBidSize ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPBidSize ) );
-        std::string sTick( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLast ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLast ) );
-        std::string sTickVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPLastVol ) );
-        std::string sAsk( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPAsk ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPAsk ) );
-        std::string sAskVol( msg->FieldBegin( ou::tf::CIQFUpdateMessage::QPAskSize ), msg->FieldEnd( ou::tf::CIQFUpdateMessage::QPAskSize ) );
-//            sPrice.assign( msg->FieldBegin( CIQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( CIQFUpdateMessage::QPExtTradeLast ) );
-//            sSize.assign( msg->FieldBegin( CIQFUpdateMessage::QPLastVol ), msg->FieldEnd( CIQFUpdateMessage::QPLastVol ) );
+        std::string sBid( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPBid ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPBid ) );
+        std::string sBidVol( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPBidSize ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPBidSize ) );
+        std::string sTick( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPLast ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPLast ) );
+        std::string sTickVol( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPLastVol ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPLastVol ) );
+        std::string sAsk( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPAsk ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPAsk ) );
+        std::string sAskVol( msg->FieldBegin( ou::tf::IQFUpdateMessage::QPAskSize ), msg->FieldEnd( ou::tf::IQFUpdateMessage::QPAskSize ) );
+//            sPrice.assign( msg->FieldBegin( IQFUpdateMessage::QPExtTradeLast ), msg->FieldEnd( IQFUpdateMessage::QPExtTradeLast ) );
+//            sSize.assign( msg->FieldBegin( IQFUpdateMessage::QPLastVol ), msg->FieldEnd( IQFUpdateMessage::QPLastVol ) );
 
         int cntPerPage = m_lvTape.GetCountPerPage();
         if ( 0 < cntPerPage ) {
@@ -273,12 +273,12 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 
           structRowItems ri;
           ri.vTime = sLastTradeTime;
-          ri.vBid = msg->Double( ou::tf::CIQFUpdateMessage::QPBid );
-//          ri.vBidVol = msg->Integer( CIQFUpdateMessage::QPBidSize );
-          ri.vTick = msg->Double( ou::tf::CIQFUpdateMessage::QPLast );
-//          ri.vTickVol = msg->Integer( CIQFUpdateMessage::QPLastVol );
-          ri.vAsk = msg->Double( ou::tf::CIQFUpdateMessage::QPAsk );
-//          ri.vAskVol = msg->Integer( CIQFUpdateMessage::QPAskSize );
+          ri.vBid = msg->Double( ou::tf::IQFUpdateMessage::QPBid );
+//          ri.vBidVol = msg->Integer( IQFUpdateMessage::QPBidSize );
+          ri.vTick = msg->Double( ou::tf::IQFUpdateMessage::QPLast );
+//          ri.vTickVol = msg->Integer( IQFUpdateMessage::QPLastVol );
+          ri.vAsk = msg->Double( ou::tf::IQFUpdateMessage::QPAsk );
+//          ri.vAskVol = msg->Integer( IQFUpdateMessage::QPAskSize );
           
           COLORREF cBack = ou::Colour::Beige;
           // set colours so green range for higher buy/sell, new high buy/sell
@@ -356,9 +356,9 @@ LRESULT CTapeReaderView::OnIQFeedUpdate( UINT, WPARAM wParam, LPARAM lParam, BOO
 }
 
 
-LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  ou::tf::CIQFSummaryMessage* msg = reinterpret_cast<ou::tf::CIQFSummaryMessage*>( lParam );
+  ou::tf::IQFSummaryMessage* msg = reinterpret_cast<ou::tf::IQFSummaryMessage*>( lParam );
   linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
   m_pIQFeed->SummaryDone( p, msg );
@@ -367,9 +367,9 @@ LRESULT CTapeReaderView::OnIQFeedSummary( UINT, WPARAM wParam, LPARAM lParam, BO
   return 1;
 }
 
-LRESULT CTapeReaderView::OnIQFeedFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
+LRESULT TapeReaderView::OnIQFeedFundamental( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  ou::tf::CIQFFundamentalMessage* msg = reinterpret_cast<ou::tf::CIQFFundamentalMessage*>( lParam );
+  ou::tf::IQFFundamentalMessage* msg = reinterpret_cast<ou::tf::IQFFundamentalMessage*>( lParam );
   linebuffer_t* p = reinterpret_cast<linebuffer_t*>( wParam );
 
   m_pIQFeed->FundamentalDone( p, msg );

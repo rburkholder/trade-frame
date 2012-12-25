@@ -50,7 +50,7 @@ public:
 
   typedef boost::shared_ptr<CPosition> pPosition_t;
 
-  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef Instrument::pInstrument_cref pInstrument_cref;
@@ -59,7 +59,7 @@ public:
   typedef Order::pOrder_t pOrder_t;
   typedef Order::pOrder_ref pOrder_ref;
 
-  typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;
+  typedef std::pair<const CPosition&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
   typedef keytypes::idPosition_t idPosition_t;
@@ -224,9 +224,9 @@ public:
 
 protected:
 
-  typedef CSymbolBase::quote_t quote_t;
-  typedef CSymbolBase::trade_t trade_t;
-  typedef CSymbolBase::greek_t greek_t;
+  typedef SymbolBase::quote_t quote_t;
+  typedef SymbolBase::trade_t trade_t;
+  typedef SymbolBase::greek_t greek_t;
 
   pProvider_t m_pExecutionProvider;
   pProvider_t m_pDataProvider;
@@ -253,7 +253,7 @@ private:
   void Construction( void );
   void DisconnectFromDataProvider( int );
 
-  void HandleExecution( const std::pair<const Order&, const CExecution&>& );
+  void HandleExecution( const std::pair<const Order&, const Execution&>& );
   void HandleCommission( const Order& );
   void HandleCancellation( const Order& );
 

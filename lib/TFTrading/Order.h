@@ -35,10 +35,10 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class COrderManager;
+class OrderManager;
 
 class Order {
-  friend class COrderManager;
+  friend class OrderManager;
 public:
 
   typedef keytypes::idOrder_t idOrder_t;
@@ -205,7 +205,7 @@ public:
   idOrder_t GetOrderId( void ) const { assert( 0 != m_row.idOrder ); return m_row.idOrder; };
   boost::uint32_t GetNextExecutionId( void ) { return ++m_nNextExecutionId; };
   void SetSendingToProvider( void );
-  OrderStatus::enumOrderStatus ReportExecution( const CExecution &exec ); // called from COrderManager
+  OrderStatus::enumOrderStatus ReportExecution( const Execution &exec ); // called from OrderManager
   void SetCommission( double dblCommission );
   double GetCommission( void ) const{ return m_row.dblCommission; };
   void ActOnError( OrderErrors::enumOrderErrors eError );
@@ -222,9 +222,9 @@ public:
     assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
     return m_row.dtOrderClosed; 
   };
-  void MarkAsCancelled( void );  // called from COrderManager
+  void MarkAsCancelled( void );  // called from OrderManager
 
-  ou::Delegate<const std::pair<const Order&, const CExecution&>& > OnExecution;
+  ou::Delegate<const std::pair<const Order&, const Execution&>& > OnExecution;
   ou::Delegate<const Order&> OnOrderCancelled;
   ou::Delegate<const Order&> OnPartialFill; // on intermediate fills only
   ou::Delegate<const Order&> OnOrderFilled; // on final fill

@@ -39,7 +39,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 template <class T, class charT = unsigned char>
-class CIQFBaseMessage {
+class IQFBaseMessage {
 public:
 
   // factor this out of here and CNetwork and turn into trait
@@ -49,9 +49,9 @@ public:
   typedef std::pair<iterator_t, iterator_t> fielddelimiter_t;
   typedef typename linebuffer_t::size_type vector_size_type;
 
-  CIQFBaseMessage( void );
-  CIQFBaseMessage( iterator_t& current, iterator_t& end );
-  ~CIQFBaseMessage(void);
+  IQFBaseMessage( void );
+  IQFBaseMessage( iterator_t& current, iterator_t& end );
+  ~IQFBaseMessage(void);
 
   void Assign( iterator_t& current, iterator_t& end );
 
@@ -77,23 +77,23 @@ private:
 };
 
 //****
-class CIQFSystemMessage: public CIQFBaseMessage<CIQFSystemMessage> { // S
+class IQFSystemMessage: public IQFBaseMessage<IQFSystemMessage> { // S
 public:
 
-  CIQFSystemMessage( void );
-  CIQFSystemMessage( iterator_t& current, iterator_t& end );
-  ~CIQFSystemMessage(void);
+  IQFSystemMessage( void );
+  IQFSystemMessage( iterator_t& current, iterator_t& end );
+  ~IQFSystemMessage(void);
 
 private:
 };
 
 //****
-class CIQFTimeMessage: public CIQFBaseMessage<CIQFTimeMessage> { // T
+class IQFTimeMessage: public IQFBaseMessage<IQFTimeMessage> { // T
 public:
 
-  CIQFTimeMessage( void );
-  CIQFTimeMessage( iterator_t& current, iterator_t& end );
-  ~CIQFTimeMessage(void);
+  IQFTimeMessage( void );
+  IQFTimeMessage( iterator_t& current, iterator_t& end );
+  ~IQFTimeMessage(void);
 
   void Assign( iterator_t& current, iterator_t& end );
 
@@ -109,7 +109,7 @@ private:
 };
 
 //****
-class CIQFNewsMessage: public CIQFBaseMessage<CIQFNewsMessage> { // N
+class IQFNewsMessage: public IQFBaseMessage<IQFNewsMessage> { // N
 public:
 
   enum enumFieldIds {
@@ -120,9 +120,9 @@ public:
     NHeadLine
   };
 
-  CIQFNewsMessage( void );
-  CIQFNewsMessage( iterator_t& current, iterator_t& end );
-  ~CIQFNewsMessage(void);
+  IQFNewsMessage( void );
+  IQFNewsMessage( iterator_t& current, iterator_t& end );
+  ~IQFNewsMessage(void);
 
   const std::string& Distributor( void ) { return Field( NDistributor ); };
   const std::string& StoryId( void ) { return Field( NStoryId ); };
@@ -161,8 +161,8 @@ private:
   std::string m_sHeadLine;
 };
 
-//**** CIQFFundamentalMessage
-class CIQFFundamentalMessage: public CIQFBaseMessage<CIQFFundamentalMessage> { // F
+//**** IQFFundamentalMessage
+class IQFFundamentalMessage: public IQFBaseMessage<IQFFundamentalMessage> { // F
 public:
 
   enum enumFieldIds {
@@ -210,16 +210,16 @@ public:
     _FLastEntry
   };
 
-  CIQFFundamentalMessage( void );
-  CIQFFundamentalMessage( iterator_t& current, iterator_t& end );
-  ~CIQFFundamentalMessage(void);
+  IQFFundamentalMessage( void );
+  IQFFundamentalMessage( iterator_t& current, iterator_t& end );
+  ~IQFFundamentalMessage(void);
 
 private:
 };
 
-//**** CIQFPricingMessage ( root for CIQFUpdateMessage, CIQFSummaryMessage )
+//**** IQFPricingMessage ( root for IQFUpdateMessage, IQFSummaryMessage )
 template <class T, class charT = unsigned char>
-class CIQFPricingMessage: public CIQFBaseMessage<CIQFPricingMessage<T, charT> > { // Q, P
+class IQFPricingMessage: public IQFBaseMessage<IQFPricingMessage<T, charT> > { // Q, P
 public:
 
   enum enumFieldIds {
@@ -275,9 +275,9 @@ public:
     _QPLastEntry
   };
 
-  CIQFPricingMessage( void );
-  CIQFPricingMessage( iterator_t& current, iterator_t& end );
-  ~CIQFPricingMessage(void);
+  IQFPricingMessage( void );
+  IQFPricingMessage( iterator_t& current, iterator_t& end );
+  ~IQFPricingMessage(void);
 
   ptime LastTradeTime( void );
 protected:
@@ -286,53 +286,53 @@ private:
 };
 
 
-//**** CIQFUpdateMessage
-class CIQFUpdateMessage: public CIQFPricingMessage<CIQFUpdateMessage> { // Q
+//**** IQFUpdateMessage
+class IQFUpdateMessage: public IQFPricingMessage<IQFUpdateMessage> { // Q
 public:
 
-  CIQFUpdateMessage( void );
-  CIQFUpdateMessage( iterator_t& current, iterator_t& end );
-  ~CIQFUpdateMessage(void);
+  IQFUpdateMessage( void );
+  IQFUpdateMessage( iterator_t& current, iterator_t& end );
+  ~IQFUpdateMessage(void);
 
 protected:
 
 private:
 };
 
-//**** CIQFSummaryMessage
-class CIQFSummaryMessage: public CIQFPricingMessage<CIQFSummaryMessage> { // P
+//**** IQFSummaryMessage
+class IQFSummaryMessage: public IQFPricingMessage<IQFSummaryMessage> { // P
 public:
 
-  CIQFSummaryMessage( void );
-  CIQFSummaryMessage( iterator_t& current, iterator_t& end );
-  ~CIQFSummaryMessage(void);
+  IQFSummaryMessage( void );
+  IQFSummaryMessage( iterator_t& current, iterator_t& end );
+  ~IQFSummaryMessage(void);
 
 private:
 };
 
 
 template <class T, class charT>
-CIQFBaseMessage<T, charT>::CIQFBaseMessage( void )
+IQFBaseMessage<T, charT>::IQFBaseMessage( void )
 {
 }
 
 template <class T, class charT>
-CIQFBaseMessage<T, charT>::CIQFBaseMessage( iterator_t& current, iterator_t& end )
+IQFBaseMessage<T, charT>::IQFBaseMessage( iterator_t& current, iterator_t& end )
 {
   Tokenize( current, end );
 }
 
 template <class T, class charT>
-CIQFBaseMessage<T, charT>::~CIQFBaseMessage(void) {
+IQFBaseMessage<T, charT>::~IQFBaseMessage(void) {
 }
 
 template <class T, class charT>
-void CIQFBaseMessage<T, charT>::Assign( iterator_t& current, iterator_t& end ) {
+void IQFBaseMessage<T, charT>::Assign( iterator_t& current, iterator_t& end ) {
   Tokenize( current, end );
 }
 
 template <class T, class charT>
-void CIQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end ) {
+void IQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end ) {
   // used in IQFeedLookupPort::Parse
 
   m_vFieldDelimiters.clear();
@@ -354,7 +354,7 @@ void CIQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end )
 }
 
 template <class T, class charT>
-const std::string& CIQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
+const std::string& IQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
@@ -364,7 +364,7 @@ const std::string& CIQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-double CIQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
+double IQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -385,7 +385,7 @@ double CIQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-int CIQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
+int IQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -406,40 +406,40 @@ int CIQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-typename CIQFBaseMessage<T, charT>::iterator_t CIQFBaseMessage<T, charT>::FieldBegin( vector_size_type fld ) {
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldBegin( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].first;
 }
 
 template <class T, class charT>
-typename CIQFBaseMessage<T, charT>::iterator_t CIQFBaseMessage<T, charT>::FieldEnd( vector_size_type fld ) {
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd( vector_size_type fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].second;
 }
 
-//**** CIQFPricingMessage
+//**** IQFPricingMessage
 // resize the vector to accept with out resizing so often?
 
 template <class T, class charT>
-CIQFPricingMessage<T, charT>::CIQFPricingMessage( void ) 
-: CIQFBaseMessage<CIQFPricingMessage<T> >()
+IQFPricingMessage<T, charT>::IQFPricingMessage( void ) 
+: IQFBaseMessage<IQFPricingMessage<T> >()
 {
 }
 
 template <class T, class charT>
-CIQFPricingMessage<T, charT>::CIQFPricingMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFPricingMessage>( current, end )
+IQFPricingMessage<T, charT>::IQFPricingMessage( iterator_t& current, iterator_t& end ) 
+: IQFBaseMessage<IQFPricingMessage>( current, end )
 {
 }
 
 template <class T, class charT>
-CIQFPricingMessage<T, charT>::~CIQFPricingMessage() {
+IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 }
 
 template <class T, class charT>
-ptime CIQFPricingMessage<T, charT>::LastTradeTime( void ) {
+ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) {
 
   fielddelimiter_t date = m_vFieldDelimiters[ QPLastTradeDate ];
   fielddelimiter_t time = m_vFieldDelimiters[ QPLastTradeTime ];

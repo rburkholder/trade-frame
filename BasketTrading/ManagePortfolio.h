@@ -29,9 +29,9 @@
 class ManagePortfolio {
 public:
 
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
 
   ManagePortfolio( void );
   ~ManagePortfolio(void);
@@ -45,7 +45,7 @@ protected:
 private:
 
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::CIQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;  
 
   typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;

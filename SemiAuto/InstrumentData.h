@@ -38,10 +38,10 @@ public:
   InstrumentData( const InstrumentData& data );
   ~InstrumentData(void);
 
-  void AddQuoteHandler( CProviderManager::pProvider_t pProvider );
-  void RemoveQuoteHandler( CProviderManager::pProvider_t pProvider );
-  void AddTradeHandler( CProviderManager::pProvider_t pProvider );
-  void RemoveTradeHandler( CProviderManager::pProvider_t pProvider );
+  void AddQuoteHandler( ProviderManager::pProvider_t pProvider );
+  void RemoveQuoteHandler( ProviderManager::pProvider_t pProvider );
+  void AddTradeHandler( ProviderManager::pProvider_t pProvider );
+  void RemoveTradeHandler( ProviderManager::pProvider_t pProvider );
 
   Instrument::pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 

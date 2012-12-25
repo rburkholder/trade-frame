@@ -63,7 +63,7 @@ private:
   DBOps m_db;
 
   ManagePortfolio m_ManagePortfolio;
-  ou::tf::CPortfolioManager::pPortfolio_t m_pPortfolio;
+  ou::tf::PortfolioManager::pPortfolio_t m_pPortfolio;
 
   bool m_bData1Connected;
   bool m_bExecConnected;

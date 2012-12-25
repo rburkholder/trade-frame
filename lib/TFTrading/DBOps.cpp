@@ -48,7 +48,7 @@ struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
 };
 
 void DBOps::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::Instrument::pInstrument_t& pInstrument ) {
-  pInstrument = ou::tf::CInstrumentManager::Instance().Get( id );
+  pInstrument = ou::tf::InstrumentManager::Instance().Get( id );
 }
 
 struct OptionsQueryParameters {
@@ -67,7 +67,7 @@ struct OptionsQueryParameters {
     : idUnderlying( id ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), eType( ou::tf::InstrumentType::Option ) {};
 };
 
-bool DBOps::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+bool DBOps::LoadOptions( ou::tf::InstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
 
   bool bFound = false;
   OptionsQueryParameters query( pUnderlying->GetInstrumentName(), nYear, nMonth, nDay );

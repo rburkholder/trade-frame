@@ -24,12 +24,12 @@ using namespace boost::gregorian;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CExecution {
+class Execution {
 public:
 
   typedef keytypes::idExecution_t idExecution_t;  // used for database updates, need to persist like orderid
   typedef keytypes::idOrder_t idOrder_t;
-  typedef boost::shared_ptr<CExecution> pExecution_t;
+  typedef boost::shared_ptr<Execution> pExecution_t;
   typedef const pExecution_t& pExecution_ref;
 
   struct TableRowDefNoKey {
@@ -99,15 +99,15 @@ public:
     }
   };
 
-  CExecution( const TableRowDef& row ): m_row( row ) {};
-  CExecution( // when relating to database
+  Execution( const TableRowDef& row ): m_row( row ) {};
+  Execution( // when relating to database
     idExecution_t idExecution, idOrder_t nOrderId,
     double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExchangeExecutionId );
-  CExecution( // when supplied by provider
+  Execution( // when supplied by provider
     double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
     const std::string& sExchange, const std::string& sExchangeExecutionId );
-  ~CExecution(void);
+  ~Execution(void);
 
   double GetPrice( void ) const { return m_row.dblPrice; };
   boost::uint32_t GetSize( void ) const { return m_row.nQuantity; };

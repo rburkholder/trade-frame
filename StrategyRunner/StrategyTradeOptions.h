@@ -32,7 +32,7 @@
 class StrategyTradeOptions {
 public:
 
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   StrategyTradeOptions( pProvider_t pExecutionProvider, pProvider_t pData1Provider, pProvider_t pData2Provider );
   ~StrategyTradeOptions(void);
@@ -48,8 +48,8 @@ protected:
 private:
 
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
+  typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::PortfolioManager::pPosition_t pPosition_t;
 
   enum enumTradeStates { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
 
@@ -200,7 +200,7 @@ private:
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
 
-  ou::tf::CIQFeedProvider::pProvider_t m_pData1ProviderIQFeed;
+  ou::tf::IQFeedProvider::pProvider_t m_pData1ProviderIQFeed;
   ou::tf::IBTWS::pProvider_t m_pData2ProviderIB;
   ou::tf::IBTWS::pProvider_t m_pExecutionProviderIB;
 

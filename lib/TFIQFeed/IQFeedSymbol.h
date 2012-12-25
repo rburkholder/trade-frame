@@ -25,13 +25,13 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CIQFeedProvider;
+class IQFeedProvider;
 
-class CIQFeedSymbol : public CSymbol<CIQFeedSymbol> {
-  friend class CIQFeedProvider;
+class IQFeedSymbol : public Symbol<IQFeedSymbol> {
+  friend class IQFeedProvider;
 public:
 
-  typedef CSymbol<CIQFeedSymbol> inherited_t;
+  typedef Symbol<IQFeedSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef std::string symbol_id_t;
 
@@ -65,13 +65,13 @@ public:
   bool m_bNewQuote;
   bool m_bNewOpen;
 
-  CIQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
-  ~CIQFeedSymbol(void);
+  IQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
+  ~IQFeedSymbol(void);
 
-  ou::Delegate<CIQFeedSymbol*> OnFundamentalMessage;
-  ou::Delegate<CIQFeedSymbol*> OnUpdateMessage;
-  ou::Delegate<CIQFeedSymbol*> OnSummaryMessage;
-  ou::Delegate<CIQFeedSymbol*> OnNewsMessage;
+  ou::Delegate<IQFeedSymbol*> OnFundamentalMessage;
+  ou::Delegate<IQFeedSymbol*> OnUpdateMessage;
+  ou::Delegate<IQFeedSymbol*> OnSummaryMessage;
+  ou::Delegate<IQFeedSymbol*> OnNewsMessage;
 
 protected:
 
@@ -88,13 +88,13 @@ protected:
   bool GetDepthWatchInProgress( void ) { return m_bDepthWatchInProgress; };
   bool m_bDepthWatchInProgress;
 
-  void HandleFundamentalMessage( CIQFFundamentalMessage *pMsg );
-  void HandleUpdateMessage( CIQFUpdateMessage *pMsg );
-  void HandleSummaryMessage( CIQFSummaryMessage *pMsg );
-  void HandleNewsMessage( CIQFNewsMessage *pMsg );
+  void HandleFundamentalMessage( IQFFundamentalMessage *pMsg );
+  void HandleUpdateMessage( IQFUpdateMessage *pMsg );
+  void HandleSummaryMessage( IQFSummaryMessage *pMsg );
+  void HandleNewsMessage( IQFNewsMessage *pMsg );
 
   template <typename T>
-  void DecodePricingMessage( CIQFPricingMessage<T> *pMsg );
+  void DecodePricingMessage( IQFPricingMessage<T> *pMsg );
 
 private:
 };

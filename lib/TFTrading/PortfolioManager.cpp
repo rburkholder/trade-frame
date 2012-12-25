@@ -24,13 +24,13 @@ namespace tf { // TradeFrame
 // Portfolio
 //
 
-CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio( 
+PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio( 
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription 
   ) {
   pPortfolio_t pPortfolio;
   mapPortfolios_iter_t iter = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() != iter ) {
-    throw std::runtime_error( "CPortfolioManager::Create, portfolio already exists" );
+    throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
   else {
     pPortfolio.reset( new CPortfolio( idPortfolio, idAccountOwner, sDescription ) );
@@ -39,8 +39,8 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::ConstructPortfolio(
       ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pQuery
         = m_pSession->Insert<CPortfolio::TableRowDef>( const_cast<CPortfolio::TableRowDef&>( pPortfolio->GetRow() ) );
     }
-    pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
+    pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
   }
 
   OnPortfolioAdded( idPortfolio );
@@ -87,7 +87,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::HandlePositionOnExecution( execution_delegate_t exec ) {
+void PortfolioManager::HandlePositionOnExecution( execution_delegate_t exec ) {
   if ( 0 != m_pSession ) {
     const CPosition::TableRowDef& row( exec.first.GetRow() );
     PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
@@ -114,7 +114,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::HandlePositionOnCommission( const CPosition* pPosition ) {
+void PortfolioManager::HandlePositionOnCommission( const CPosition* pPosition ) {
   if ( 0 != m_pSession ) {
     const CPosition::TableRowDef& row( pPosition->GetRow() );
     PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
@@ -140,7 +140,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::HandlePortfolioOnExecution( const CPortfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnExecution( const CPortfolio* pPortfolio ) {
   if ( 0 != m_pSession ) {
     const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
@@ -165,7 +165,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::HandlePortfolioOnCommission( const CPortfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnCommission( const CPortfolio* pPortfolio ) {
   if ( 0 != m_pSession ) {
     const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
@@ -187,7 +187,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfolio_t& idPortfolio ) {
+PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio_t& idPortfolio ) {
 
   assert( "" != idPortfolio );  // todo:  add this check in other handlers
 
@@ -217,8 +217,8 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
         UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 //      }
 
-      pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
-      pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
+      pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+      pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
       OnPortfolioAdded( idPortfolio );
 
@@ -226,7 +226,7 @@ CPortfolioManager::pPortfolio_t CPortfolioManager::GetPortfolio( const idPortfol
 
     }
     else {
-      throw std::runtime_error( "CPortfolioManager::GetPortfolio, portfolio does not exist" );
+      throw std::runtime_error( "PortfolioManager::GetPortfolio, portfolio does not exist" );
     }
   }
   
@@ -247,7 +247,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
+void PortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
@@ -267,7 +267,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting ) {
+void PortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfolio_t idReporting ) {
   iterReportingPortfolios_t iter = m_mapReportingPortfolios.find( idOwner );
   if ( m_mapReportingPortfolios.end() == iter ) {
     setPortfolioId_t setPortfolioId;
@@ -277,7 +277,7 @@ void CPortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortf
   iter->second.insert( iter->second.begin(), idReporting );
 }
 
-void CPortfolioManager::LoadActivePortfolios( void ) {
+void PortfolioManager::LoadActivePortfolios( void ) {
 
   PortfolioManagerQueries::ActivePortfolios parameter( true );
   ou::db::QueryFields<PortfolioManagerQueries::ActivePortfolios>::pQueryFields_t pQuery
@@ -302,8 +302,8 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
       UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 //    }
 
-    pPortfolio->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePortfolioOnExecution ) );
+    pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
     OnPortfolioAdded( rowPortfolio.idPortfolio );
 
@@ -312,7 +312,7 @@ void CPortfolioManager::LoadActivePortfolios( void ) {
   }
 }
 
-void CPortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition ) {
+void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition ) {
 
   PortfolioManagerQueries::PortfolioKey key( idPortfolio );
 
@@ -327,16 +327,16 @@ void CPortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosi
     m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
     pPosition_t pPosition( new CPosition( rowPosition ) );
     if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, execution, data 
-      throw std::runtime_error( "CPortfolioManager::LoadPositions has no Details Callback" );
+      throw std::runtime_error( "PortfolioManager::LoadPositions has no Details Callback" );
     }
     OnPositionNeedsDetails( pPosition );
     mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
-    pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
-    pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
+    pPosition->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
+    pPosition->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
   }
 }
 
-void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
+void PortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
@@ -351,7 +351,7 @@ void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
     OnPortfolioDeleted( idPortfolio );
   }
   catch (...) {
-    throw std::runtime_error( "CPortfolioManager::DeletePortfolio has dependencies" );
+    throw std::runtime_error( "PortfolioManager::DeletePortfolio has dependencies" );
   }
 
 }
@@ -360,7 +360,7 @@ void CPortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 // Position
 //
 
-CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition( 
+PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( 
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
@@ -392,15 +392,15 @@ CPortfolioManager::pPosition_t CPortfolioManager::ConstructPosition(
   idPosition_t idPosition( m_pSession->GetLastRowId() );
   pPosition->Set( idPosition );
 
-  pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnCommission ) );
-  pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolioManager::HandlePositionOnExecution ) );
+  pPosition->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
+  pPosition->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
 
   iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
 
   return pPosition;
 }
 
-CPortfolioManager::pPosition_t CPortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
 
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() == iterPortfolio ) {
@@ -430,7 +430,7 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+void PortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
   UpdateRecord<idPosition_t, CPosition::TableRowDefNoKey, PortfolioManagerQueries::PositionUpdate>(
     pPosition->GetRow().idPosition, dynamic_cast<const CPosition::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
@@ -447,10 +447,10 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+void PortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
   if ( pPosition->OrdersPending() ) {
-    throw std::runtime_error( "CPortfolioManager::DeletePosition has orders pending" );
+    throw std::runtime_error( "PortfolioManager::DeletePosition has orders pending" );
   }
   else {
     mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );  // no error checking as performed in previous step
@@ -460,7 +460,7 @@ void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const 
       iterPortfolio->second.mapPosition.erase( iterPosition );
     }
     catch (...) {
-      throw std::runtime_error( "CPortfolioManager::DeletePosition position has dependencies" );
+      throw std::runtime_error( "PortfolioManager::DeletePosition position has dependencies" );
     }
   }
 }
@@ -470,32 +470,32 @@ void CPortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const 
 // Table Management
 //
 
-void CPortfolioManager::HandleRegisterTables( ou::db::Session& session ) {
+void PortfolioManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<CPortfolio::TableCreateDef>( tablenames::sPortfolio );
   session.RegisterTable<CPosition::TableCreateDef>( tablenames::sPosition );
 }
 
-void CPortfolioManager::HandleRegisterRows( ou::db::Session& session ) {
+void PortfolioManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<CPortfolio::TableRowDef>( tablenames::sPortfolio );
   session.MapRowDefToTableName<CPosition::TableRowDef>( tablenames::sPosition );
   session.MapRowDefToTableName<CPosition::TableRowDefNoKey>( tablenames::sPosition );
 }
 
-void CPortfolioManager::HandlePopulateTables( ou::db::Session& session ) {
+void PortfolioManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
 // this stuff could probably be rolled into Session with a template
-void CPortfolioManager::AttachToSession( ou::db::Session* pSession ) {
+void PortfolioManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
-  pSession->OnRegisterTables.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Add( MakeDelegate( this, &CPortfolioManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Add( MakeDelegate( this, &CPortfolioManager::HandlePopulateTables ) );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &PortfolioManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &PortfolioManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &PortfolioManager::HandlePopulateTables ) );
 }
 
-void CPortfolioManager::DetachFromSession( ou::db::Session* pSession ) {
-  pSession->OnRegisterTables.Remove( MakeDelegate( this, &CPortfolioManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Remove( MakeDelegate( this, &CPortfolioManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Remove( MakeDelegate( this, &CPortfolioManager::HandlePopulateTables ) );
+void PortfolioManager::DetachFromSession( ou::db::Session* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &PortfolioManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &PortfolioManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &PortfolioManager::HandlePopulateTables ) );
   ManagerBase::DetachFromSession( pSession );
 }
 

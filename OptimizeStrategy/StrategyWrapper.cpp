@@ -84,12 +84,12 @@ void StrategyWrapper::HandleProviderDisconnected( int i ) {
 
 void StrategyWrapper::HandleSimulationThreadStart( void ) {
   ou::TimeSource::SetLocalCommonInstance( new ou::TimeSource );
-  ou::tf::COrderManager::SetLocalCommonInstance( new ou::tf::COrderManager );
+  ou::tf::OrderManager::SetLocalCommonInstance( new ou::tf::OrderManager );
 }
 
 void StrategyWrapper::HandleSimulationThreadEnd( void ) {
   ou::TimeSource::SetLocalCommonInstance( 0 );
-  ou::tf::COrderManager::SetLocalCommonInstance( 0 );
+  ou::tf::OrderManager::SetLocalCommonInstance( 0 );
 }
 
 void StrategyWrapper::HandleSimulationComplete( void ) {

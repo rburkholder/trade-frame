@@ -138,7 +138,7 @@ CTradingLogic::~CTradingLogic(void){
   //delete( pProvider );
 }
 
-void CTradingLogic::OnIQFeedTimeMessage( CIQFTimeMessage *pMsg ) {
+void CTradingLogic::OnIQFeedTimeMessage( IQFTimeMessage *pMsg ) {
 }
 
 void CTradingLogic::OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg ) {

@@ -26,7 +26,7 @@ class CMainFrame :
 public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
-	CTapeReaderView m_view;
+	TapeReaderView m_view;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();

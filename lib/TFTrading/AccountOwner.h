@@ -22,13 +22,13 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAccountOwner
+class AccountOwner
 {
 public:
 
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
   typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;
-  typedef boost::shared_ptr<CAccountOwner> pAccountOwner_t;
+  typedef boost::shared_ptr<AccountOwner> pAccountOwner_t;
 
   struct TableRowDef {
     template<class A>
@@ -61,12 +61,12 @@ public:
     }
   };
 
-  CAccountOwner( 
+  AccountOwner( 
     const idAccountOwner_t& idAccountOwner, 
     const idAccountAdvisor_t& idAccountAdvisor,
     const std::string& sFirstName, const std::string& sLastName );
-  CAccountOwner( const TableRowDef& row );
-  ~CAccountOwner(void);
+  AccountOwner( const TableRowDef& row );
+  ~AccountOwner(void);
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

@@ -136,7 +136,7 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
       int nId( m_nExecId );  // before it gets incremented in next function
       GetExecId( &id );
       // using id in first parameter may or may not work
-      CExecution exec( nId, pOrderFrontOfQueue->GetOrderId(), dblPrice, quanAvail, orderSide, "SIMMkt", id );
+      Execution exec( nId, pOrderFrontOfQueue->GetOrderId(), dblPrice, quanAvail, orderSide, "SIMMkt", id );
       OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
     }
     else {
@@ -174,7 +174,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       if ( 0 != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
-        CExecution exec( quote.Bid(), quanAvail, OrderSide::Sell, "SIMLmtSell", id );
+        Execution exec( quote.Bid(), quanAvail, OrderSide::Sell, "SIMLmtSell", id );
         OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
         nOrderQuanRemaining -= quanAvail;
         if ( 0 == nOrderQuanRemaining ) {
@@ -194,7 +194,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       if ( 0 != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
-        CExecution exec( quote.Ask(), quanAvail, OrderSide::Buy, "SIMLmtBuy", id );
+        Execution exec( quote.Ask(), quanAvail, OrderSide::Buy, "SIMLmtBuy", id );
         OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
         nOrderQuanRemaining -= quanAvail;
         if ( 0 == nOrderQuanRemaining ) {

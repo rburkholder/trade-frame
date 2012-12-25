@@ -23,7 +23,7 @@ using namespace boost::assign;
 #include "ModelPortfolio.h"
 
 ModelPortfolio::ModelPortfolio(void) 
-  : ModelBase(), m_mgrPortfolio( ou::tf::CPortfolioManager::Instance() )
+  : ModelBase(), m_mgrPortfolio( ou::tf::PortfolioManager::Instance() )
 {
   m_vColumnNames += "Name", "Rlzd PL", "Comm.", "Net";
   m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
@@ -40,7 +40,7 @@ namespace ProcessPortolios {
   template<class F>
   struct structProcessPortfolioIds {
     structProcessPortfolioIds( ItemPortfolio& parent,
-      ModelPortfolio& model, CPortfolioManager& manager )
+      ModelPortfolio& model, PortfolioManager& manager )
       : m_parent( parent ), m_model( model ), m_manager( manager ) {};
     void operator()( ou::tf::keytypes::idPortfolio_t& id ) {
       mapItems_iter_t iter = m_mapItems.find( id );
@@ -56,7 +56,7 @@ namespace ProcessPortolios {
   private:
     ItemPortfolio& m_parent;
     ModelPortfolio& m_model;
-    CPortfolioManager& m_manager;
+    PortfolioManager& m_manager;
   };
 
 } // ns ProcessPortfolios

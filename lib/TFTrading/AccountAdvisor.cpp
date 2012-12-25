@@ -18,15 +18,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CAccountAdvisor::CAccountAdvisor( const idAccountAdvisor_t& sAdvisorId, 
+AccountAdvisor::AccountAdvisor( const idAccountAdvisor_t& sAdvisorId, 
   const std::string& sAdvisorName, const std::string& sCompanyName ) 
 : m_row( sAdvisorId, sAdvisorName, sCompanyName )
 {
 }
 
-CAccountAdvisor::CAccountAdvisor( const TableRowDef& row ) : m_row( row ) {};
+AccountAdvisor::AccountAdvisor( const TableRowDef& row ) : m_row( row ) {};
 
-CAccountAdvisor::~CAccountAdvisor(void) {
+AccountAdvisor::~AccountAdvisor(void) {
 }
 
 } // namespace tf

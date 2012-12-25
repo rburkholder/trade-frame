@@ -46,7 +46,7 @@
 class Strategy {
 public:
 
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider );
   ~Strategy(void);

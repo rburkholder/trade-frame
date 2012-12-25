@@ -43,7 +43,7 @@ void RunSequence::Run( void ) {
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
   pProviderSim_t m_pProvider;
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::LocalCommonInstance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::LocalCommonInstance() );
 //  m_pInstrument = mgr.Exists( "TEST" ) ? mgr.Get( "TEST" ) : mgr.ConstructInstrument( "TEST", "SMART", ou::tf::InstrumentType::Stock );
   m_pInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 8 );
   m_pInstrument->SetMultiplier( 100 );

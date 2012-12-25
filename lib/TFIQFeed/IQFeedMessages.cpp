@@ -28,108 +28,108 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-//**** CIQFBaseMessage
+//**** IQFBaseMessage
 
 // templated
 
-//**** CIQFSystemMessage
+//**** IQFSystemMessage
 
-CIQFSystemMessage::CIQFSystemMessage( void ) 
-: CIQFBaseMessage<CIQFSystemMessage>()
+IQFSystemMessage::IQFSystemMessage( void ) 
+: IQFBaseMessage<IQFSystemMessage>()
 {
 }
 
-CIQFSystemMessage::CIQFSystemMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFSystemMessage>( current, end )
+IQFSystemMessage::IQFSystemMessage( iterator_t& current, iterator_t& end ) 
+: IQFBaseMessage<IQFSystemMessage>( current, end )
 {
 }
 
-CIQFSystemMessage::~CIQFSystemMessage() {
+IQFSystemMessage::~IQFSystemMessage() {
 }
 
-//**** CIQFNewsMessage
+//**** IQFNewsMessage
 
-CIQFNewsMessage::CIQFNewsMessage( void ) 
-: CIQFBaseMessage<CIQFNewsMessage>()
+IQFNewsMessage::IQFNewsMessage( void ) 
+: IQFBaseMessage<IQFNewsMessage>()
 {
 }
 
-CIQFNewsMessage::CIQFNewsMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFNewsMessage>()
+IQFNewsMessage::IQFNewsMessage( iterator_t& current, iterator_t& end ) 
+: IQFBaseMessage<IQFNewsMessage>()
 {
 }
 
-CIQFNewsMessage::~CIQFNewsMessage() {
+IQFNewsMessage::~IQFNewsMessage() {
 }
 
-//**** CIQFFundamentalMessage
+//**** IQFFundamentalMessage
 // resize the vector to accept with out resizing so often?
 
-CIQFFundamentalMessage::CIQFFundamentalMessage( void ) 
-: CIQFBaseMessage<CIQFFundamentalMessage>()
+IQFFundamentalMessage::IQFFundamentalMessage( void ) 
+: IQFBaseMessage<IQFFundamentalMessage>()
 {
 }
 
-CIQFFundamentalMessage::CIQFFundamentalMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFFundamentalMessage>( current, end )
+IQFFundamentalMessage::IQFFundamentalMessage( iterator_t& current, iterator_t& end ) 
+: IQFBaseMessage<IQFFundamentalMessage>( current, end )
 {
 }
 
-CIQFFundamentalMessage::~CIQFFundamentalMessage() {
+IQFFundamentalMessage::~IQFFundamentalMessage() {
 }
 
-//**** CIQFUpdateMessage
+//**** IQFUpdateMessage
 
-CIQFUpdateMessage::CIQFUpdateMessage( void )
-: CIQFPricingMessage<CIQFUpdateMessage>()
+IQFUpdateMessage::IQFUpdateMessage( void )
+: IQFPricingMessage<IQFUpdateMessage>()
 {
 }
 
-CIQFUpdateMessage::CIQFUpdateMessage( iterator_t& current, iterator_t& end ) 
-: CIQFPricingMessage<CIQFUpdateMessage>( current, end )
+IQFUpdateMessage::IQFUpdateMessage( iterator_t& current, iterator_t& end ) 
+: IQFPricingMessage<IQFUpdateMessage>( current, end )
 {
 }
 
-CIQFUpdateMessage::~CIQFUpdateMessage() {
+IQFUpdateMessage::~IQFUpdateMessage() {
 }
 
-//**** CIQFSummaryMessage
+//**** IQFSummaryMessage
 
-CIQFSummaryMessage::CIQFSummaryMessage( void ) 
-: CIQFPricingMessage<CIQFSummaryMessage>()
+IQFSummaryMessage::IQFSummaryMessage( void ) 
+: IQFPricingMessage<IQFSummaryMessage>()
 {
 }
 
-CIQFSummaryMessage::CIQFSummaryMessage( iterator_t& current, iterator_t& end ) 
-: CIQFPricingMessage<CIQFSummaryMessage>( current, end )
+IQFSummaryMessage::IQFSummaryMessage( iterator_t& current, iterator_t& end ) 
+: IQFPricingMessage<IQFSummaryMessage>( current, end )
 {
 }
 
-CIQFSummaryMessage::~CIQFSummaryMessage() {
+IQFSummaryMessage::~IQFSummaryMessage() {
 }
 
-//**** CIQFTimeMessage
+//**** IQFTimeMessage
 
-CIQFTimeMessage::CIQFTimeMessage( void )
-: CIQFBaseMessage<CIQFTimeMessage>(),
+IQFTimeMessage::IQFTimeMessage( void )
+: IQFBaseMessage<IQFTimeMessage>(),
   m_bMarketIsOpen( false ), 
   m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
 {
 }
 
-CIQFTimeMessage::CIQFTimeMessage( iterator_t& current, iterator_t& end ) 
-: CIQFBaseMessage<CIQFTimeMessage>(),
+IQFTimeMessage::IQFTimeMessage( iterator_t& current, iterator_t& end ) 
+: IQFBaseMessage<IQFTimeMessage>(),
   m_bMarketIsOpen( false ), 
   m_timeMarketOpen( time_duration( 9, 30, 0 ) ), m_timeMarketClose( time_duration( 16, 0, 0 ) )
 {
   Assign( current, end );
 }
 
-CIQFTimeMessage::~CIQFTimeMessage() {
+IQFTimeMessage::~IQFTimeMessage() {
 }
 
-void CIQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
-  CIQFBaseMessage<CIQFTimeMessage>::Assign( current, end );
+void IQFTimeMessage::Assign(iterator_t &current, iterator_t &end) {
+  IQFBaseMessage<IQFTimeMessage>::Assign( current, end );
   std::stringstream ss( Field( 2 ) );
   time_input_facet *input_facet;
   input_facet = new boost::posix_time::time_input_facet();  // input facet stuff needs to be with ss.imbue, can't be reused

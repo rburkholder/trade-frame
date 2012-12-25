@@ -31,7 +31,7 @@ class Option {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   Option( const Option& rhs );

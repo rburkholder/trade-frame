@@ -37,39 +37,39 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 template <typename T>
-class CIQFeed: public ou::CNetwork<CIQFeed<T> > {
-  friend ou::CNetwork<CIQFeed<T> >;
+class IQFeed: public ou::CNetwork<IQFeed<T> > {
+  friend ou::CNetwork<IQFeed<T> >;
 public:
 
-  typedef typename ou::CNetwork<CIQFeed<T> > inherited_t;
+  typedef typename ou::CNetwork<IQFeed<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
-  CIQFeed(void);
-  ~CIQFeed(void);
+  IQFeed(void);
+  ~IQFeed(void);
 
   // used for returning message buffer
   // linebuffer_t needs to be kept with msg as there are dynamic accesses from it
-  void inline UpdateDone( linebuffer_t* p, CIQFUpdateMessage* msg ) {
+  void inline UpdateDone( linebuffer_t* p, IQFUpdateMessage* msg ) {
     GiveBackBuffer( p );
     m_reposUpdateMessages.CheckInL( msg );
   }
-  void inline SummaryDone( linebuffer_t* p, CIQFSummaryMessage* msg ) {
+  void inline SummaryDone( linebuffer_t* p, IQFSummaryMessage* msg ) {
     GiveBackBuffer( p );
     m_reposSummaryMessages.CheckInL( msg );
   }
-  void inline NewsDone( linebuffer_t* p, CIQFNewsMessage* msg ) {
+  void inline NewsDone( linebuffer_t* p, IQFNewsMessage* msg ) {
     GiveBackBuffer( p );
     m_reposNewsMessages.CheckInL( msg );
   }
-  void inline FundamentalDone( linebuffer_t* p, CIQFFundamentalMessage* msg ) {
+  void inline FundamentalDone( linebuffer_t* p, IQFFundamentalMessage* msg ) {
     GiveBackBuffer( p );
     m_reposFundamentalMessages.CheckInL( msg );
   }
-  void inline TimeDone( linebuffer_t* p, CIQFTimeMessage* msg ) {
+  void inline TimeDone( linebuffer_t* p, IQFTimeMessage* msg ) {
     GiveBackBuffer( p );
     m_reposTimeMessages.CheckInL( msg );
   }
-  void inline SystemDone( linebuffer_t* p, CIQFSystemMessage* msg ) {
+  void inline SystemDone( linebuffer_t* p, IQFSystemMessage* msg ) {
     GiveBackBuffer( p );
     m_reposSystemMessages.CheckInL( msg );
   }
@@ -86,22 +86,22 @@ protected:
 
   // called by CNetwork via CRTP
   void OnNetworkConnected(void) {
-    if ( &CIQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
+    if ( &IQFeed<T>::OnIQFeedConnected != &T::OnIQFeedConnected ) {
       static_cast<T*>( this )->OnIQFeedConnected();
     }
   };
   void OnNetworkDisconnected(void) {
-    if ( &CIQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
+    if ( &IQFeed<T>::OnIQFeedDisConnected != &T::OnIQFeedDisConnected ) {
       static_cast<T*>( this )->OnIQFeedDisConnected();
     }
   };
   void OnNetworkError( size_t e ) {
-    if ( &CIQFeed<T>::OnIQFeedError != &T::OnIQFeedError ) {
+    if ( &IQFeed<T>::OnIQFeedError != &T::OnIQFeedError ) {
       static_cast<T*>( this )->OnIQFeedError(e);
     }
   };
   void OnNetworkSendDone(void) {
-    if ( &CIQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
+    if ( &IQFeed<T>::OnIQFeedSendDone != &T::OnIQFeedSendDone ) {
       static_cast<T*>( this )->OnIQFeedSendDone();
     }
   };
@@ -112,37 +112,37 @@ protected:
   void OnIQFeedConnected( void ) {};
   void OnIQFeedDisConnected( void ) {};
   void OnIQFeedSendDone( void ) {};
-  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage* msg) {};
-  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage* msg) {};
-  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {};
-  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage* msg) {};
-  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage* msg) {};
-  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage* msg) {};
+  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage* msg) {};
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage* msg) {};
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage* msg) {};
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage* msg) {};
+  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage* msg) {};
+  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage* msg) {};
 
 private:
 
-  typename ou::CBufferRepository<CIQFUpdateMessage> m_reposUpdateMessages;
-  typename ou::CBufferRepository<CIQFSummaryMessage> m_reposSummaryMessages;
-  typename ou::CBufferRepository<CIQFNewsMessage> m_reposNewsMessages;
-  typename ou::CBufferRepository<CIQFFundamentalMessage> m_reposFundamentalMessages;
-  typename ou::CBufferRepository<CIQFTimeMessage> m_reposTimeMessages;
-  typename ou::CBufferRepository<CIQFSystemMessage> m_reposSystemMessages;
+  typename ou::CBufferRepository<IQFUpdateMessage> m_reposUpdateMessages;
+  typename ou::CBufferRepository<IQFSummaryMessage> m_reposSummaryMessages;
+  typename ou::CBufferRepository<IQFNewsMessage> m_reposNewsMessages;
+  typename ou::CBufferRepository<IQFFundamentalMessage> m_reposFundamentalMessages;
+  typename ou::CBufferRepository<IQFTimeMessage> m_reposTimeMessages;
+  typename ou::CBufferRepository<IQFSystemMessage> m_reposSystemMessages;
 
 };
 
 template <typename T>
-CIQFeed<T>::CIQFeed( void ) 
-: ou::CNetwork<CIQFeed<T> >( "127.0.0.1", 5009 ),
+IQFeed<T>::IQFeed( void ) 
+: ou::CNetwork<IQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF )
 {
 }
 
 template <typename T>
-CIQFeed<T>::~CIQFeed(void) {
+IQFeed<T>::~IQFeed(void) {
 }
 
 template <typename T>
-void CIQFeed<T>::SetNewsOn( void ) {
+void IQFeed<T>::SetNewsOn( void ) {
   if ( NEWSISOFF == m_stateNews ) {
     m_stateNews = NEWSISON;
     std::stringstream ss;
@@ -152,7 +152,7 @@ void CIQFeed<T>::SetNewsOn( void ) {
 }
 
 template <typename T>
-void CIQFeed<T>::SetNewsOff( void ) {
+void IQFeed<T>::SetNewsOff( void ) {
   if ( NEWSISON == m_stateNews ) {
     m_stateNews = NEWSISOFF;
     std::stringstream ss;
@@ -162,7 +162,7 @@ void CIQFeed<T>::SetNewsOff( void ) {
 }
 
 template <typename T>
-void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
+void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
   linebuffer_t::iterator iter = (*pBuffer).begin();
   linebuffer_t::iterator end = (*pBuffer).end();
@@ -179,9 +179,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   switch ( *iter ) {
     case 'Q': 
       {
-        CIQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
+        IQFUpdateMessage* msg = m_reposUpdateMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( &CIQFeed<T>::OnIQFeedUpdateMessage != &T::OnIQFeedUpdateMessage ) {
+        if ( &IQFeed<T>::OnIQFeedUpdateMessage != &T::OnIQFeedUpdateMessage ) {
           static_cast<T*>( this )->OnIQFeedUpdateMessage( pBuffer, msg);
         }
         else {
@@ -191,9 +191,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'P': 
       {
-        CIQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
+        IQFSummaryMessage* msg = m_reposSummaryMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( &CIQFeed<T>::OnIQFeedSummaryMessage != &T::OnIQFeedSummaryMessage ) {
+        if ( &IQFeed<T>::OnIQFeedSummaryMessage != &T::OnIQFeedSummaryMessage ) {
           static_cast<T*>( this )->OnIQFeedSummaryMessage( pBuffer, msg);
         }
         else {
@@ -203,9 +203,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'N': 
       {
-        CIQFNewsMessage* msg = m_reposNewsMessages.CheckOutL();
+        IQFNewsMessage* msg = m_reposNewsMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( &CIQFeed<T>::OnIQFeedNewsMessage != &T::OnIQFeedNewsMessage ) {
+        if ( &IQFeed<T>::OnIQFeedNewsMessage != &T::OnIQFeedNewsMessage ) {
           static_cast<T*>( this )->OnIQFeedNewsMessage( pBuffer, msg);
         }
         else {
@@ -215,9 +215,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'F': 
       {
-        CIQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOutL();
+        IQFFundamentalMessage* msg = m_reposFundamentalMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( &CIQFeed<T>::OnIQFeedFundamentalMessage != &T::OnIQFeedFundamentalMessage ) {
+        if ( &IQFeed<T>::OnIQFeedFundamentalMessage != &T::OnIQFeedFundamentalMessage ) {
           static_cast<T*>( this )->OnIQFeedFundamentalMessage( pBuffer, msg);
         }
         else {
@@ -227,9 +227,9 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'T': 
       {
-        CIQFTimeMessage* msg = m_reposTimeMessages.CheckOutL();
+        IQFTimeMessage* msg = m_reposTimeMessages.CheckOutL();
         msg->Assign( iter, end );
-        if ( &CIQFeed<T>::OnIQFeedTimeMessage != &T::OnIQFeedTimeMessage ) {
+        if ( &IQFeed<T>::OnIQFeedTimeMessage != &T::OnIQFeedTimeMessage ) {
           static_cast<T*>( this )->OnIQFeedTimeMessage( pBuffer, msg);
         }
         else {
@@ -239,7 +239,7 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'S': 
       {
-        CIQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
+        IQFSystemMessage* msg = m_reposSystemMessages.CheckOutL();
         msg->Assign( iter, end );
         if ( "KEY" == msg->Field( 2 ) ) {
           std::stringstream ss;
@@ -252,7 +252,7 @@ void CIQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
             //throw s;  // can't throw exception, just accept it, as we are getting '2.5.3' as a return
           }
         }
-        if ( &CIQFeed<T>::OnIQFeedSystemMessage != &T::OnIQFeedSystemMessage ) {
+        if ( &IQFeed<T>::OnIQFeedSystemMessage != &T::OnIQFeedSystemMessage ) {
           static_cast<T*>( this )->OnIQFeedSystemMessage( pBuffer, msg);
         }
         else {

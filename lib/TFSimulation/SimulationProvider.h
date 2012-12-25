@@ -43,12 +43,12 @@ namespace tf { // TradeFrame
 //    subsequent times through, scan a vector
 
 class SimulationProvider
-: public CProviderInterface<SimulationProvider,SimulationSymbol>
+: public ProviderInterface<SimulationProvider,SimulationSymbol>
 {
 public:
 
   typedef boost::shared_ptr<SimulationProvider> pProvider_t;
-  typedef CProviderInterface<SimulationProvider,SimulationSymbol> inherited_t;
+  typedef ProviderInterface<SimulationProvider,SimulationSymbol> inherited_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef Instrument::pInstrument_cref pInstrument_cref;
   typedef Order::pOrder_t pOrder_t;
@@ -110,7 +110,7 @@ protected:
 
   void Merge( void );  // the background thread
 
-  void HandleExecution( Order::idOrder_t orderId, const CExecution &exec );
+  void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
   void HandleCommission( Order::idOrder_t orderId, double commission );
   void HandleCancellation( Order::idOrder_t orderId );
 

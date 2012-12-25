@@ -24,22 +24,22 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CIQFeedProvider :
-  public CProviderInterface<CIQFeedProvider,CIQFeedSymbol>, 
-  public CIQFeed<CIQFeedProvider> 
+class IQFeedProvider :
+  public ProviderInterface<IQFeedProvider,IQFeedSymbol>, 
+  public IQFeed<IQFeedProvider> 
 {
-  friend CIQFeed<CIQFeedProvider>;
+  friend IQFeed<IQFeedProvider>;
 public:
 
-  typedef boost::shared_ptr<CIQFeedProvider> pProvider_t;
-  typedef CProviderInterface<CIQFeedProvider,CIQFeedSymbol> inherited_t;
+  typedef boost::shared_ptr<IQFeedProvider> pProvider_t;
+  typedef ProviderInterface<IQFeedProvider,IQFeedSymbol> inherited_t;
   typedef inherited_t::symbol_id_t symbol_id_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
-  typedef CIQFeed<CIQFeedProvider> IQFeed_t;
+  typedef IQFeed<IQFeedProvider> IQFeed_t;
 
-  CIQFeedProvider( void );
-  ~CIQFeedProvider( void );
+  IQFeedProvider( void );
+  ~IQFeedProvider( void );
 
   // do these need to be virtual?  use crtp?
   virtual void Connect( void );
@@ -49,8 +49,8 @@ public:
 
 protected:
 
-  void StartQuoteTradeWatch( CIQFeedSymbol *pSymbol );
-  void StopQuoteTradeWatch( CIQFeedSymbol *pSymbol );
+  void StartQuoteTradeWatch( IQFeedSymbol *pSymbol );
+  void StopQuoteTradeWatch( IQFeedSymbol *pSymbol );
 
   // overridden from ProviderInterface, called when application adds/removes watches
   virtual void StartQuoteWatch( pSymbol_t pSymbol ) ;
@@ -64,12 +64,12 @@ protected:
 
   pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
-  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage *pMsg );
-  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, CIQFSummaryMessage *pMsg );
-  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, CIQFFundamentalMessage *pMsg );
-  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, CIQFNewsMessage *pMsg );
-  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, CIQFTimeMessage *pMsg );
-  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, CIQFSystemMessage *pMsg );
+  void OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg );
+  void OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg );
+  void OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg );
+  void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg );
+  void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg );
+  void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg );
 
   void OnIQFeedDisConnected( void );  // CRTP on IQFeed
   void OnIQFeedConnected( void ); // CRTP on IQFeed

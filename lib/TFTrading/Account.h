@@ -22,12 +22,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAccount {
+class Account {
 public:
 
   typedef keytypes::idAccount_t idAccount_t;
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
-  typedef boost::shared_ptr<CAccount> pAccount_t;
+  typedef boost::shared_ptr<Account> pAccount_t;
 
   struct TableRowDef {
     template<class A>
@@ -75,7 +75,7 @@ public:
     }
   };
 
-  CAccount(
+  Account(
     const idAccount_t& idAccount,
     const idAccountOwner_t& idAccountOwner,
     const std::string& sAccountName,
@@ -86,8 +86,8 @@ public:
     const std::string& sPassword, 
     const std::string& sPort = "" 
     );
-  CAccount( const TableRowDef& row ) : m_row( row ) {};
-  ~CAccount(void);
+  Account( const TableRowDef& row ) : m_row( row ) {};
+  ~Account(void);
 
   void SetPort( const std::string& sPort ) { m_row.sPort = sPort; };
 

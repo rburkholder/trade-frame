@@ -71,7 +71,7 @@ StrategyTradeOptions::StrategyTradeOptions( pProvider_t pExecutionProvider, pPro
     m_stoch4( m_quotes, seconds( 4 * 14 * 60 ) )
 {
   if ( ou::tf::keytypes::EProviderIQF == m_pData1Provider->ID() ) {
-    m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::CIQFeedProvider>( m_pData1Provider );
+    m_pData1ProviderIQFeed = boost::shared_dynamic_cast<ou::tf::IQFeedProvider>( m_pData1Provider );
   }
   if ( ou::tf::keytypes::EProviderIB == m_pData2Provider->ID() ) {
     m_pData2ProviderIB = boost::shared_dynamic_cast<ou::tf::IBTWS>( m_pData2Provider );
@@ -106,7 +106,7 @@ void StrategyTradeOptions::Start( const std::string& sUnderlying, boost::gregori
   m_dateOptionFarDate = dateOptionFarDate;
   m_sUnderlying = sUnderlying;
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
 
   if ( 0 != m_pData1ProviderIQFeed.get() ) {  // risk free rate for IV calcs
     pInstrument_t p10YT;
@@ -156,7 +156,7 @@ void StrategyTradeOptions::Stop( void ) {
 }
 
 void StrategyTradeOptions::HandleUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails& cd, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   mgr.Register( pInstrument );
 //  m_pUnderlying = new ou::tf::InstrumentData( pInstrument );
 }
@@ -182,7 +182,7 @@ void StrategyTradeOptions::HandleUnderlyingContractDetailsDone( void ) {
 }
 
 void StrategyTradeOptions::HandleNearDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   if ( 0 != m_pData1ProviderIQFeed.get() ) {
     m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );
   }
@@ -205,7 +205,7 @@ void StrategyTradeOptions::HandleNearDateContractDetailsDone( void ) {
 }
 
 void StrategyTradeOptions::HandleFarDateContractDetails( const ou::tf::IBTWS::ContractDetails&, ou::tf::IBTWS::pInstrument_t& pInstrument ) {
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   if ( 0 != m_pData1ProviderIQFeed.get() ) {
     m_pData1ProviderIQFeed->SetAlternateInstrumentName( pInstrument );
   }
@@ -222,7 +222,7 @@ void StrategyTradeOptions::LoadExistingInstrumentsAndPortfolios( const std::stri
   ss << ou::TimeSource::Instance().External();
   m_sTimeStampWatchStarted = "/app/strategy/options/" + ss.str();  // will need to make this generic if need some for multiple providers.
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   m_pUnderlying = mgr.Get( sUnderlying );
   mgr.ScanOptions( 
     boost::phoenix::bind( &StrategyTradeOptions::HandleNearOptionsLoad, this, boost::phoenix::arg_names::arg1 ), 
@@ -238,7 +238,7 @@ void StrategyTradeOptions::LoadExistingInstrumentsAndPortfolios( const std::stri
   m_pData1Provider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &StrategyTradeOptions::HandleTrade ) );
 
   // Load the portfolios, if any
-  ou::tf::CPortfolioManager& mgrPortfolios( ou::tf::CPortfolioManager::Instance() );
+  ou::tf::PortfolioManager& mgrPortfolios( ou::tf::PortfolioManager::Instance() );
   m_pPortfolio = mgrPortfolios.GetPortfolio( StrategyTradeOptionsConstants::sPortfolioName );  // from StrategyRunner::HandlePopulateDatabase
   mgrPortfolios.ScanPositions( 
     StrategyTradeOptionsConstants::sPortfolioName, 
@@ -407,7 +407,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
         if ( 0 == m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition.get() ) {
           // create the position
           m_iterMapOptionsMiddle->second.optionFarDateCall.pPosition =  
-            ou::tf::CPortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
+            ou::tf::PortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
             "callfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far call buy",
             m_pExecutionProvider->GetName(), m_pData1Provider->GetName(), 
             m_pExecutionProvider, m_pData1Provider,
@@ -434,7 +434,7 @@ void StrategyTradeOptions::AdjustTheOptions( const ou::tf::Quote& quote ) {
         if ( 0 == m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition.get() ) {
           // create the position
           m_iterMapOptionsMiddle->second.optionFarDatePut.pPosition =  
-            ou::tf::CPortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
+            ou::tf::PortfolioManager::Instance().ConstructPosition( StrategyTradeOptionsConstants::sPortfolioName, 
             "putfar" + boost::lexical_cast<std::string>( m_iterMapOptionsMiddle->first ), "far put buy",
             m_pExecutionProvider->GetName(), m_pData1Provider->GetName(), 
             m_pExecutionProvider, m_pData1Provider,

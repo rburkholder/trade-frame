@@ -23,9 +23,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CIQFeedSymbol::CIQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument) 
+IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument) 
 : 
-  CSymbol<CIQFeedSymbol>( pInstrument, sSymbol ),
+  Symbol<IQFeedSymbol>( pInstrument, sSymbol ),
   m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
   m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
   m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), 
@@ -34,24 +34,24 @@ CIQFeedSymbol::CIQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrume
 {
 }
 
-CIQFeedSymbol::~CIQFeedSymbol(void) {
+IQFeedSymbol::~IQFeedSymbol(void) {
 }
 
-void CIQFeedSymbol::HandleFundamentalMessage( CIQFFundamentalMessage *pMsg ) {
-  m_sOptionRoots = pMsg->Field( CIQFFundamentalMessage::FRootOptionSymbols );
-  m_AverageVolume = pMsg->Integer( CIQFFundamentalMessage::FAveVolume );
-  m_sCompanyName = pMsg->Field( CIQFFundamentalMessage::FName );
-  m_Precision = pMsg->Integer( CIQFFundamentalMessage::FPrecision );
-  m_dblHistoricalVolatility = pMsg->Double( CIQFFundamentalMessage::FVolatility );
-  m_dblStrikePrice = pMsg->Double( CIQFFundamentalMessage::FStrikePrice );
+void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
+  m_sOptionRoots = pMsg->Field( IQFFundamentalMessage::FRootOptionSymbols );
+  m_AverageVolume = pMsg->Integer( IQFFundamentalMessage::FAveVolume );
+  m_sCompanyName = pMsg->Field( IQFFundamentalMessage::FName );
+  m_Precision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
+  m_dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
+  m_dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
 
   OnFundamentalMessage( this );
 }
 
 template <typename T>
-void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage<T> *pMsg ) {
+void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
   m_bNewTrade = m_bNewQuote = m_bNewOpen = false;
-  std::string sLastTradeTime = pMsg->Field( CIQFPricingMessage<T>::QPLastTradeTime );
+  std::string sLastTradeTime = pMsg->Field( IQFPricingMessage<T>::QPLastTradeTime );
   if ( sLastTradeTime.length() > 0 ) {  // can we do 'assume' anything if it is 0?
     ptime dtLastTrade;
     double dblOpen, dblBid, dblAsk;
@@ -61,17 +61,17 @@ void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage<T> *pMsg ) {
     switch ( chType ) {
     case 't':
     case 'T':
-      m_dblTrade = pMsg->Double( CIQFPricingMessage<T>::QPLast );
-      m_dblChange = pMsg->Double( CIQFPricingMessage<T>::QPChange );
-      m_nTotalVolume = pMsg->Integer( CIQFPricingMessage<T>::QPTtlVol );
-      m_nTradeSize = pMsg->Integer( CIQFPricingMessage<T>::QPLastVol );
-      m_dblHigh = pMsg->Double( CIQFPricingMessage<T>::QPHigh );
-      m_dblLow = pMsg->Double( CIQFPricingMessage<T>::QPLow );
-      m_dblClose = pMsg->Double( CIQFPricingMessage<T>::QPClose );
-      m_cntTrades = pMsg->Integer( CIQFPricingMessage<T>::QPNumTrades );
+      m_dblTrade = pMsg->Double( IQFPricingMessage<T>::QPLast );
+      m_dblChange = pMsg->Double( IQFPricingMessage<T>::QPChange );
+      m_nTotalVolume = pMsg->Integer( IQFPricingMessage<T>::QPTtlVol );
+      m_nTradeSize = pMsg->Integer( IQFPricingMessage<T>::QPLastVol );
+      m_dblHigh = pMsg->Double( IQFPricingMessage<T>::QPHigh );
+      m_dblLow = pMsg->Double( IQFPricingMessage<T>::QPLow );
+      m_dblClose = pMsg->Double( IQFPricingMessage<T>::QPClose );
+      m_cntTrades = pMsg->Integer( IQFPricingMessage<T>::QPNumTrades );
       m_bNewTrade = true;
 
-      dblOpen = pMsg->Double( CIQFPricingMessage<T>::QPOpen );
+      dblOpen = pMsg->Double( IQFPricingMessage<T>::QPOpen );
       if ( ( m_dblOpen != dblOpen ) && ( 0 != dblOpen ) ) { 
         m_dblOpen = dblOpen; 
         m_bNewOpen = true; 
@@ -81,20 +81,20 @@ void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage<T> *pMsg ) {
       // fall through to processing bid / ask
     case 'b':
     case 'a':
-      dblBid = pMsg->Double( CIQFPricingMessage<T>::QPBid );
+      dblBid = pMsg->Double( IQFPricingMessage<T>::QPBid );
       if ( m_dblBid != dblBid ) { m_dblBid = dblBid; m_bNewQuote = true; }
-      nBidSize = pMsg->Integer( CIQFPricingMessage<T>::QPBidSize );
+      nBidSize = pMsg->Integer( IQFPricingMessage<T>::QPBidSize );
       if ( m_nBidSize != nBidSize ) { m_nBidSize = nBidSize; m_bNewQuote = true; }
-      dblAsk = pMsg->Double( CIQFPricingMessage<T>::QPAsk );
+      dblAsk = pMsg->Double( IQFPricingMessage<T>::QPAsk );
       if ( m_dblAsk != dblAsk ) { m_dblAsk = dblAsk; m_bNewQuote = true; }
-      nAskSize = pMsg->Integer( CIQFPricingMessage<T>::QPAskSize );
+      nAskSize = pMsg->Integer( IQFPricingMessage<T>::QPAskSize );
       if ( m_nAskSize != nAskSize ) { m_nAskSize = nAskSize; m_bNewQuote = true; }
       break;
     case 'o':
       break;
     }
   }
-  //OpenInterest = pMsg->Integer( CIQFPricingMessage::QPOpenInterest );
+  //OpenInterest = pMsg->Integer( IQFPricingMessage::QPOpenInterest );
 
   //CString s;
   //s.Format( "%s: %c %0.2f@%d b=%0.2f@%d a=%0.2f@%d #=%d", 
@@ -102,40 +102,40 @@ void CIQFeedSymbol::DecodePricingMessage( CIQFPricingMessage<T> *pMsg ) {
   //theApp.pConsoleMessages->WriteLine( s ); 
 }
 
-void CIQFeedSymbol::HandleSummaryMessage( CIQFSummaryMessage *pMsg ) {
-  DecodePricingMessage<CIQFSummaryMessage>( pMsg );
+void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage *pMsg ) {
+  DecodePricingMessage<IQFSummaryMessage>( pMsg );
   OnSummaryMessage( this );
 }
 
-void CIQFeedSymbol::HandleUpdateMessage( CIQFUpdateMessage *pMsg ) {
+void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
 
   if ( qUnknown == m_QStatus ) {
-    m_QStatus = ( "Not Found" == pMsg->Field( CIQFPricingMessage<CIQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
+    m_QStatus = ( "Not Found" == pMsg->Field( IQFPricingMessage<IQFUpdateMessage>::QPLast ) ) ? qNotFound : qFound;
     if ( qNotFound == m_QStatus ) {
       std::cout << GetId() << " not found" << std::endl;
     }
   }
   if ( qFound == m_QStatus ) {
-    DecodePricingMessage<CIQFUpdateMessage>( pMsg );
+    DecodePricingMessage<IQFUpdateMessage>( pMsg );
     OnUpdateMessage( this );
     //ptime dt( microsec_clock::local_time() );
     ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade
     if ( m_bNewQuote ) {
       Quote quote( dt, m_dblBid, m_nBidSize, m_dblAsk, m_nAskSize );
-      CSymbol::m_OnQuote( quote );
+      Symbol::m_OnQuote( quote );
     }
     if ( m_bNewTrade ) {
       Trade trade( dt, m_dblTrade, m_nTradeSize );
-      CSymbol::m_OnTrade( trade );
+      Symbol::m_OnTrade( trade );
       if ( m_bNewOpen ) {
-        CSymbol::m_OnOpen( trade );
+        Symbol::m_OnOpen( trade );
       }
     }
   }
 }
 
-void CIQFeedSymbol::HandleNewsMessage( CIQFNewsMessage *pMsg ) {
+void IQFeedSymbol::HandleNewsMessage( IQFNewsMessage *pMsg ) {
 }
 
 } // namespace tf

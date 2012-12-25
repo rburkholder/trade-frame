@@ -22,7 +22,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CExecution::CExecution( 
+Execution::Execution( 
   idExecution_t idExecution, idOrder_t idOrder,
   double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
@@ -34,7 +34,7 @@ CExecution::CExecution(
   m_row.dtExecutionTimeStamp = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-CExecution::CExecution( 
+Execution::Execution( 
 /*  idExecution_t idExecution, idOrder_t idOrder, */
   double dblPrice, boost::uint32_t nQuantity, OrderSide::enumOrderSide eOrderSide,
   const std::string& sExchange, const std::string& sExchangeExecutionId )
@@ -46,7 +46,7 @@ CExecution::CExecution(
   m_row.dtExecutionTimeStamp = ou::TimeSource::LocalCommonInstance().Internal();
 }
 
-CExecution::~CExecution(void) {
+Execution::~Execution(void) {
 }
 
 } // namespace tf

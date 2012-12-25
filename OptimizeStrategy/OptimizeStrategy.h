@@ -37,7 +37,7 @@ protected:
 private:
 
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef ou::gp::Population::vGeneration_t vGeneration_t;
 
   FrameMain* m_pFrameMain;

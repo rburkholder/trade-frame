@@ -37,11 +37,11 @@ protected:
 
 private:
 
-  typedef ou::tf::CProviderManager::pProvider_t pProvider_t;
-  typedef ou::tf::CInstrumentManager::pInstrument_t pInstrument_t;
+  typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
+  typedef ou::tf::InstrumentManager::pInstrument_t pInstrument_t;
 
   ou::tf::IBTWS::pProvider_t m_ptws;
-  ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
+  ou::tf::IQFeedProvider::pProvider_t m_piqfeed;
 
   boost::thread m_asioThread;
   boost::asio::io_service m_io;
@@ -52,7 +52,7 @@ private:
   double m_dblPortfolioCashToTrade;
   double m_dblPortfolioMargin;
 
-  ou::tf::CInstrumentManager& m_mgrInstrument;
+  ou::tf::InstrumentManager& m_mgrInstrument;
 
   typedef boost::shared_ptr<Operation> pOperation_t;
   typedef std::vector<pOperation_t> vOperation_t;

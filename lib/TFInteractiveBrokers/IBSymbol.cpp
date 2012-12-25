@@ -23,7 +23,7 @@ namespace tf { // TradeFrame
 
 IBSymbol::IBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<IBSymbol>( pInstrument, idSym ), 
+  Symbol<IBSymbol>( pInstrument, idSym ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),
@@ -40,7 +40,7 @@ IBSymbol::IBSymbol( inherited_t::symbol_id_t idSym, pInstrument_t pInstrument, T
 
 IBSymbol::IBSymbol( pInstrument_t pInstrument, TickerId idTicker )
 : 
-  CSymbol<IBSymbol>( pInstrument ), 
+  Symbol<IBSymbol>( pInstrument ), 
     m_TickerId( idTicker ), m_conId( 0 ),
     m_bAskFound( false ), m_bAskSizeFound( false ), 
     m_bBidFound( false ), m_bBidSizeFound( false ),

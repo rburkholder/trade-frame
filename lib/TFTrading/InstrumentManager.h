@@ -28,8 +28,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CInstrumentManager
-  : public ManagerBase<CInstrumentManager> {
+class InstrumentManager
+  : public ManagerBase<InstrumentManager> {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
@@ -37,8 +37,8 @@ public:
   typedef Instrument::idInstrument_t idInstrument_t;
   typedef Instrument::idInstrument_cref idInstrument_cref;
 
-  CInstrumentManager(void);
-  ~CInstrumentManager(void);
+  InstrumentManager(void);
+  ~InstrumentManager(void);
 
   pInstrument_t ConstructInstrument( 
     idInstrument_cref sInstrumentName, const std::string& sExchangeName, // generic
@@ -137,7 +137,7 @@ namespace InstrumentManagerQueries {
 }
 
 template<typename F> 
-void CInstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+void InstrumentManager::ScanOptions( F f, idInstrument_cref id, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
   InstrumentManagerQueries::OptionSelection idInstrument( id, nYear, nMonth, nDay );
   ou::db::QueryFields<InstrumentManagerQueries::OptionSelection>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
     = m_pSession->SQL<InstrumentManagerQueries::OptionSelection>( 

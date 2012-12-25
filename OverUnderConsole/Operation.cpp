@@ -22,7 +22,7 @@
 
 //================= Operation ========================
   
-Operation::Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t piqfeed, ou::tf::IBTWS::pProvider_t ptws ) 
+Operation::Operation( const structSymbolInfo& si, ou::tf::IQFeedProvider::pProvider_t piqfeed, ou::tf::IBTWS::pProvider_t ptws ) 
   : m_si( si ), m_piqfeed( piqfeed ), m_ptws( ptws )
 {
 }

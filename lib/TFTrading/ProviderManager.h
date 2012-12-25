@@ -31,14 +31,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CProviderManager: public ManagerBase<CProviderManager> {
+class ProviderManager: public ManagerBase<ProviderManager> {
 public:
 
   typedef keytypes::idProvider_t idProvider_t;
-  typedef CProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  CProviderManager(void) {};
-  ~CProviderManager(void) {};
+  ProviderManager(void) {};
+  ~ProviderManager(void) {};
 
   // when to use Construct and when to use Get?
   pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
@@ -59,7 +59,7 @@ private:
 
 };
 
-template<class P> CProviderManager::pProvider_t CProviderManager::Construct( const idProvider_t& key ) {
+template<class P> ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key ) {
   // need to perform some construction asssertions to ensure P is of a valid type
   pProvider_t pProvider;
   pProvider.reset( new P() );

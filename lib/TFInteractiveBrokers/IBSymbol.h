@@ -28,11 +28,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class IBSymbol : public CSymbol<IBSymbol> {
+class IBSymbol : public Symbol<IBSymbol> {
   friend class IBTWS;
 public:
 
-  typedef CSymbol<IBSymbol> inherited_t;
+  typedef Symbol<IBSymbol> inherited_t;
   typedef inherited_t::pInstrument_t pInstrument_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
 

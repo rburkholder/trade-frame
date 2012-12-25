@@ -183,8 +183,8 @@ LRESULT CNewsReaderView::OnIQFeedError( UINT, WPARAM, LPARAM, BOOL& bHandled ) {
 */
 LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
 
-  ou::tf::CIQFNewsMessage* msg = reinterpret_cast<ou::tf::CIQFNewsMessage*>( lParam );
-  ou::tf::CIQFNewsMessage::fielddelimiter_t fd;
+  ou::tf::IQFNewsMessage* msg = reinterpret_cast<ou::tf::IQFNewsMessage*>( lParam );
+  ou::tf::IQFNewsMessage::fielddelimiter_t fd;
 
   structNewsItem item;
   m_NewsItems.push_back( item );
@@ -224,7 +224,7 @@ LRESULT CNewsReaderView::OnIQFeedNews( UINT, WPARAM wParam, LPARAM lParam, BOOL&
 LRESULT CNewsReaderView::OnIQFeedNewsDone( UINT, WPARAM wParam, LPARAM lParam, BOOL& bHandled ) {
   // for when another module has processed the message and is passing it along back
 
-  ou::tf::CIQFNewsMessage* msg = reinterpret_cast<ou::tf::CIQFNewsMessage*>( lParam );
+  ou::tf::IQFNewsMessage* msg = reinterpret_cast<ou::tf::IQFNewsMessage*>( lParam );
 
   m_pIQFeed->NewsDone( reinterpret_cast<linebuffer_t*>( wParam ), msg );
 

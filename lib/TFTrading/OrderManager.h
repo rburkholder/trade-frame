@@ -36,13 +36,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 //
-// COrderManager
+// OrderManager
 //
 
-class CProviderInterfaceBase;
+class ProviderInterfaceBase;
 
 // this is a singleton so use the Instance() call from all users
-class COrderManager: public ManagerBase<COrderManager> {
+class OrderManager: public ManagerBase<OrderManager> {
 public:
 
   typedef keytypes::idInstrument_t idInstrument_t;
@@ -54,10 +54,10 @@ public:
   typedef Order::pOrder_t pOrder_t;
 
   typedef keytypes::idExecution_t idExecution_t;
-  typedef CExecution::pExecution_t pExecution_t;
+  typedef Execution::pExecution_t pExecution_t;
 
-  COrderManager(void);
-  ~COrderManager(void);
+  OrderManager(void);
+  ~OrderManager(void);
   pOrder_t ConstructOrder( // market order
     Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
@@ -76,10 +76,10 @@ public:
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition = 0
     );
-  void PlaceOrder( CProviderInterfaceBase* pProvider, Order::pOrder_t pOrder );
+  void PlaceOrder( ProviderInterfaceBase* pProvider, Order::pOrder_t pOrder );
   void CancelOrder( idOrder_t nOrderId );
   void ReportCancellation( idOrder_t nOrderId );  // feedback from provider
-  void ReportExecution( idOrder_t orderId, const CExecution& exec );  // feedback from provider
+  void ReportExecution( idOrder_t orderId, const Execution& exec );  // feedback from provider
   void ReportCommission( idOrder_t nOrderId, double dblCommission );  // feedback from provider
   void ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError );  // feedback from provider
 //  ou::Delegate<const Order &> OnOrderCompleted;
@@ -105,11 +105,11 @@ protected:
 
   struct structOrderState {
     pOrder_t pOrder;
-    CProviderInterfaceBase* pProvider;
+    ProviderInterfaceBase* pProvider;
     pmapExecutions_t pmapExecutions;
     structOrderState( pOrder_t& pOrder_ )
       : pOrder( pOrder_ ), pProvider( 0 ), pmapExecutions( new mapExecutions_t ) {};
-    structOrderState( pOrder_t& pOrder_, CProviderInterfaceBase* pProvider_ )
+    structOrderState( pOrder_t& pOrder_, ProviderInterfaceBase* pProvider_ )
       : pOrder( pOrder_ ), pProvider( pProvider_ ), pmapExecutions( new mapExecutions_t ) {};
     ~structOrderState( void ) {
 //      delete pmapExecutions;  // check that executions have been committed to db?

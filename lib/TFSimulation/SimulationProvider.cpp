@@ -26,7 +26,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 SimulationProvider::SimulationProvider(void)
-: CProviderInterface<SimulationProvider,SimulationSymbol>(), 
+: ProviderInterface<SimulationProvider,SimulationSymbol>(), 
   m_pMerge( 0 )
 {
   m_sName = "Simulator";
@@ -64,7 +64,7 @@ void SimulationProvider::Connect() {
   if ( !m_bConnected ) {
     OnConnecting( 0 );
     m_bConnected = true;
-    CProviderInterface::Connect();
+    ProviderInterface::Connect();
     OnConnected( 0 );
   }
 }
@@ -73,7 +73,7 @@ void SimulationProvider::Disconnect() {
   if ( m_bConnected ) {
     OnDisconnecting( 0 );
     m_bConnected = false;
-    CProviderInterface::Disconnect();
+    ProviderInterface::Disconnect();
     OnDisconnected( 0 );
   }
 }
@@ -285,16 +285,16 @@ void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
   }
 }
 
-void SimulationProvider::HandleExecution( Order::idOrder_t orderId, const CExecution &exec ) {
-  COrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
+void SimulationProvider::HandleExecution( Order::idOrder_t orderId, const Execution &exec ) {
+  OrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
 }
 
 void SimulationProvider::HandleCommission( Order::idOrder_t orderId, double commission ) {
-  COrderManager::LocalCommonInstance().ReportCommission( orderId, commission );
+  OrderManager::LocalCommonInstance().ReportCommission( orderId, commission );
 }
 
 void SimulationProvider::HandleCancellation( Order::idOrder_t orderId ) {
-  COrderManager::LocalCommonInstance().ReportCancellation( orderId );
+  OrderManager::LocalCommonInstance().ReportCancellation( orderId );
 }
 
 

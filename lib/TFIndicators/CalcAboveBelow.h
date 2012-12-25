@@ -26,15 +26,15 @@
 
 using namespace ou::tf;
 
-class CAboveBelowInstrument {
+class AboveBelowInstrument {
 public:
-  CAboveBelowInstrument( void ) {}; 
-  ~CAboveBelowInstrument( void ) {}; 
+  AboveBelowInstrument( void ) {}; 
+  ~AboveBelowInstrument( void ) {}; 
 protected:
 private:
 };
 
-class CAboveBelowUnderlying : public CAboveBelowInstrument {
+class CAboveBelowUnderlying : public AboveBelowInstrument {
 public:
   CAboveBelowUnderlying( void ) {};
   ~CAboveBelowUnderlying( void ) {};
@@ -42,7 +42,7 @@ protected:
 private:
 };
 
-class CAboveBelowOption : public CAboveBelowInstrument {
+class CAboveBelowOption : public AboveBelowInstrument {
 public:
   CAboveBelowOption( void ) {};
   ~CAboveBelowOption( void ) {};
@@ -50,25 +50,25 @@ protected:
 private:
 };
 
-class CCalcAboveBelow {
+class CalcAboveBelow {
 public:
-  CCalcAboveBelow( Instrument::pInstrument_t pInstrument, CProviderInterfaceBase* pDataProvider, CProviderInterfaceBase* pExecutionProvider );
-  ~CCalcAboveBelow(void);
+  CalcAboveBelow( Instrument::pInstrument_t pInstrument, ProviderInterfaceBase* pDataProvider, ProviderInterfaceBase* pExecutionProvider );
+  ~CalcAboveBelow(void);
   void Start( void );
   void Stop( void );
 protected:
 //  void HandleUpdatePortfolioRecord( CPortfolio::UpdatePortfolioRecord_t );
-  void HandleTrade( const CTrade &trade );
+  void HandleTrade( const ou::tf::Trade &trade );
 private:
   Instrument::pInstrument_t m_pInstrument;
-  CProviderInterfaceBase* m_pDataProvider;
-  CProviderInterfaceBase* m_pExecutionProvider;
+  ProviderInterfaceBase* m_pDataProvider;
+  ProviderInterfaceBase* m_pExecutionProvider;
 
   //std::string m_sSymbolName;
 
   double m_dblLast;
 
-  typedef std::map<std::string, CAboveBelowInstrument*> map_instruments_t;
+  typedef std::map<std::string, AboveBelowInstrument*> map_instruments_t;
   map_instruments_t m_mapInstruments;
 
 };

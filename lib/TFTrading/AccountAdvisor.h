@@ -22,14 +22,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAccountAdvisor
+class AccountAdvisor
 {
 //  friend class CAccountManager;
 
 public:
 
   typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;
-  typedef boost::shared_ptr<CAccountAdvisor> pAccountAdvisor_t;
+  typedef boost::shared_ptr<AccountAdvisor> pAccountAdvisor_t;
   typedef pAccountAdvisor_t sharedptr_t;
 
   struct TableRowDef {
@@ -60,11 +60,11 @@ public:
 
   const static std::string m_sTableName;
 
-  CAccountAdvisor( 
+  AccountAdvisor( 
     const idAccountAdvisor_t& sAdvisorId, 
     const std::string& sAdvisorName, const std::string& sCompanyName );
-  CAccountAdvisor( const TableRowDef& row );
-  ~CAccountAdvisor(void);
+  AccountAdvisor( const TableRowDef& row );
+  ~AccountAdvisor(void);
 
   const idAccountAdvisor_t& GetId( void ) const { 
     return m_row.idAccountAdvisor; 
@@ -86,7 +86,7 @@ private:
 
   TableRowDef m_row;
 
-  CAccountAdvisor( void );  // no default constructor
+  AccountAdvisor( void );  // no default constructor
 };
 
 } // namespace tf

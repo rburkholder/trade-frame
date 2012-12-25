@@ -32,7 +32,7 @@ public:
     double dblClose;
   };
 
-  Operation( const structSymbolInfo& si, ou::tf::CIQFeedProvider::pProvider_t, ou::tf::IBTWS::pProvider_t );
+  Operation( const structSymbolInfo& si, ou::tf::IQFeedProvider::pProvider_t, ou::tf::IBTWS::pProvider_t );
   ~Operation(void);
 
   unsigned int CalcShareCount( double dblFunds );
@@ -49,7 +49,7 @@ private:
 
   structSymbolInfo m_si;
   ou::tf::IBTWS::pProvider_t m_ptws;
-  ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
+  ou::tf::IQFeedProvider::pProvider_t m_piqfeed;
 
   ou::tf::Instrument::pInstrument_t m_pInstrument;
 

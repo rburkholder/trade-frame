@@ -80,14 +80,14 @@ private:
 
   IBTWS* m_pIB;
   CIQFeedProviderSingleton* m_pIQFeedSingleton;
-  CIQFeedProvider* m_pIQFeed;
+  IQFeedProvider* m_pIQFeed;
   SimulationProvider* m_pSimulation;
   void HandleSymbolForBasketContainer( const std::string &sSymbolName, const std::string &sPath, const std::string &sStrategy );
 
   CConsoleCoutMessages* pConsoleMessages;
 
-  CProviderInterface* m_pExecutionProvider;
-  CProviderInterface* m_pDataProvider;
+  ProviderInterface* m_pExecutionProvider;
+  ProviderInterface* m_pDataProvider;
 
 //  COrderManager m_OrderManager;  // keeps at least one instance alive
 
@@ -95,8 +95,8 @@ private:
 
   bool m_bOutsideRTH;  // m_cbOutsideRTH
 
-  std::vector<CCalcAboveBelow*> m_vCalcAB;
-  //CCalcAboveBelow *m_pCalcAboveBelow;
+  std::vector<CalcAboveBelow*> m_vCalcAB;
+  //CalcAboveBelow *m_pCalcAboveBelow;
   CPositionOptionDeltasWnd* m_pwndOptiondDeltas;
 
   void CloseEverything( void );
@@ -104,8 +104,8 @@ private:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
-  CProviderInterface* GetExecutionProvider( void );
-  CProviderInterface* GetDataProvider( void );
+  ProviderInterface* GetExecutionProvider( void );
+  ProviderInterface* GetDataProvider( void );
 
 // Implementation
 protected:
@@ -143,7 +143,7 @@ public:
   CListBox m_lbLvl2Port;
   afx_msg void OnBnClickedBtnpendord();
   afx_msg void OnBnClickedBtnOptions();
-  void OnNewsMessage( CIQFNewsMessage *pMsg );
+  void OnNewsMessage( IQFNewsMessage *pMsg );
   afx_msg void OnBnClickedBtnhistory();
   afx_msg void OnBnClickedVuarms();
   afx_msg void OnBnClickedLive();

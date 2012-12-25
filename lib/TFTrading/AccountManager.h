@@ -28,20 +28,20 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CAccountManager: public ManagerBase<CAccountManager> {
+class AccountManager: public ManagerBase<AccountManager> {
 public:
 
   typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;
-  typedef CAccountAdvisor::pAccountAdvisor_t pAccountAdvisor_t;
+  typedef AccountAdvisor::pAccountAdvisor_t pAccountAdvisor_t;
 
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
-  typedef CAccountOwner::pAccountOwner_t pAccountOwner_t;
+  typedef AccountOwner::pAccountOwner_t pAccountOwner_t;
 
   typedef keytypes::idAccount_t idAccount_t;
-  typedef CAccount::pAccount_t pAccount_t;
+  typedef Account::pAccount_t pAccount_t;
 
-  CAccountManager( void );
-  ~CAccountManager(void);
+  AccountManager( void );
+  ~AccountManager(void);
 
   pAccountAdvisor_t ConstructAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor, const std::string& sAdvisorName, const std::string& sCompanyName = "" );
   pAccountAdvisor_t GetAccountAdvisor( const idAccountAdvisor_t& idAccountAdvisor );

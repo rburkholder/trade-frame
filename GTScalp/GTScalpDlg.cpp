@@ -438,7 +438,7 @@ afx_msg void CGTScalpDlg::OnOK() {  // with OK button
 
 void CGTScalpDlg::CloseEverything( void ) {
 
-  std::vector<CCalcAboveBelow *>::iterator iterAB;
+  std::vector<CalcAboveBelow *>::iterator iterAB;
   for ( iterAB = m_vCalcAB.begin(); m_vCalcAB.end() != iterAB; ++iterAB ) {
     (*iterAB)->Stop();
     delete *iterAB;
@@ -634,7 +634,7 @@ void CGTScalpDlg::OnBnClickedBtnOptions() {
   options->ShowWindow(1);
 }
 
-void CGTScalpDlg::OnNewsMessage( CIQFNewsMessage *pMsg ) {
+void CGTScalpDlg::OnNewsMessage( IQFNewsMessage *pMsg ) {
   
   CString s;
   s.Format( "%s %s", pMsg->m_sDistributor.c_str(), pMsg->m_sHeadline.c_str() );
@@ -1014,8 +1014,8 @@ void CGTScalpDlg::OnBnClickedRtchart() {
   }
 }
 
-CProviderInterface *CGTScalpDlg::GetExecutionProvider() {
-  CProviderInterface *pExec = NULL;
+ProviderInterface *CGTScalpDlg::GetExecutionProvider() {
+  ProviderInterface *pExec = NULL;
   if ( NoExec == m_eExecutionType ) {
     std::cout << "No Execution Destination selected" << std::endl;
   }
@@ -1048,8 +1048,8 @@ CProviderInterface *CGTScalpDlg::GetExecutionProvider() {
   return pExec;
 }
 
-CProviderInterface *CGTScalpDlg::GetDataProvider() {
-  CProviderInterface *pData = NULL;
+ProviderInterface *CGTScalpDlg::GetDataProvider() {
+  ProviderInterface *pData = NULL;
   if ( NoDS == m_eDataSourceType ) {
     std::cout << "No Data Source selected" << std::endl;
   }
@@ -1096,8 +1096,8 @@ void CGTScalpDlg::OnBnClickedBasket() {
     std::cout << "Basket already started" << std::endl;
   }
   else {
-    CProviderInterface *pExec = GetExecutionProvider();
-    CProviderInterface *pData = GetDataProvider();
+    ProviderInterface *pExec = GetExecutionProvider();
+    ProviderInterface *pData = GetDataProvider();
     if ( ( NULL == pExec ) || ( NULL == pData ) ) {
       std::cout  << "A provider was not found" << std::endl;
     }
@@ -1295,7 +1295,7 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
     assert( NULL != pOrder );
     pOrder->SetOutsideRTH( m_bOutsideRTH );
     //m_pExecutionProvider->PlaceOrder( pOrder );
-    COrderManager::Instance().PlaceOrder( m_pExecutionProvider, pOrder );
+    OrderManager::Instance().PlaceOrder( m_pExecutionProvider, pOrder );
     std::cout << "Order was submitted" << std::endl;
 
   }
@@ -1500,14 +1500,14 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
   }
   else {
     std::string sSymbol( szSymbol );
-    CProviderInterface* pExec = GetExecutionProvider();
-    CProviderInterface* pData = GetDataProvider();
+    ProviderInterface* pExec = GetExecutionProvider();
+    ProviderInterface* pData = GetDataProvider();
     if ( ( NULL == pExec ) || ( NULL == pData ) ) {
       std::cout  << "A provider was not found" << std::endl;
     }
     else {
-      Instrument::pInstrument_t pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
-      CCalcAboveBelow *pCalc = new CCalcAboveBelow( pInstrument, pData, pExec );
+      Instrument::pInstrument_t pInstrument = InstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
+      CalcAboveBelow *pCalc = new CalcAboveBelow( pInstrument, pData, pExec );
       m_vCalcAB.push_back( pCalc );
       pCalc->Start();
 

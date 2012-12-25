@@ -60,27 +60,27 @@ void InstrumentData::HandleGreek( const Greek& greek ) {
   m_greeks.Append( greek );
 }
 
-void InstrumentData::AddQuoteHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::AddQuoteHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->AddQuoteHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleQuote ) );
 }
 
-void InstrumentData::RemoveQuoteHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::RemoveQuoteHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->RemoveQuoteHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleQuote ) );
 }
 
-void InstrumentData::AddTradeHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::AddTradeHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->AddTradeHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleTrade ) );
 }
 
-void InstrumentData::RemoveTradeHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::RemoveTradeHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->RemoveTradeHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleTrade ) );
 }
 
-void InstrumentData::AddGreekHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::AddGreekHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->AddGreekHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleGreek ) );
 }
 
-void InstrumentData::RemoveGreekHandler( CProviderManager::pProvider_t pProvider ) {
+void InstrumentData::RemoveGreekHandler( ProviderManager::pProvider_t pProvider ) {
   pProvider->RemoveGreekHandler(m_pInstrument, MakeDelegate( this, &InstrumentData::HandleGreek ) );
 }
 

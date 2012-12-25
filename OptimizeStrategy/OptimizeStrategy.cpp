@@ -78,9 +78,9 @@ void AppOptimizeStrategy::Optimizer( void ) {
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
 //  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
 
-  ou::tf::CInstrumentManager::SetLocalCommonInstance( new ou::tf::CInstrumentManager );
+  ou::tf::InstrumentManager::SetLocalCommonInstance( new ou::tf::InstrumentManager );
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::LocalCommonInstance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::LocalCommonInstance() );
   m_pInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 8 );
   m_pInstrument->SetMultiplier( 100 );
   m_pInstrument->SetMinTick( 0.1 );
@@ -243,24 +243,24 @@ int AppOptimizeStrategy::OnExit(  void ) {
 
 void AppOptimizeStrategy::HandlePopulateDatabase( void ) {
 
-  ou::tf::CAccountManager::pAccountAdvisor_t pAccountAdvisor 
-    = ou::tf::CAccountManager::LocalCommonInstance().ConstructAccountAdvisor( 
+  ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
+    = ou::tf::AccountManager::LocalCommonInstance().ConstructAccountAdvisor( 
     "aaRay", "Raymond Burkholder", "One Unified" );
 
-  ou::tf::CAccountManager::pAccountOwner_t pAccountOwner
-    = ou::tf::CAccountManager::LocalCommonInstance().ConstructAccountOwner( 
+  ou::tf::AccountManager::pAccountOwner_t pAccountOwner
+    = ou::tf::AccountManager::LocalCommonInstance().ConstructAccountOwner( 
     "aoRay", "aaRay", "Raymond", "Burkholder" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIB
-    = ou::tf::CAccountManager::LocalCommonInstance().ConstructAccount( 
+  ou::tf::AccountManager::pAccount_t pAccountIB
+    = ou::tf::AccountManager::LocalCommonInstance().ConstructAccount( 
     "ib01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIB, "Interactive Brokers", "acctid", "login", "password" );
 
-  ou::tf::CAccountManager::pAccount_t pAccountIQFeed
-    = ou::tf::CAccountManager::LocalCommonInstance().ConstructAccount( 
+  ou::tf::AccountManager::pAccount_t pAccountIQFeed
+    = ou::tf::AccountManager::LocalCommonInstance().ConstructAccount( 
     "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-  ou::tf::CPortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::CPortfolioManager::LocalCommonInstance().ConstructPortfolio( 
+  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
+    = ou::tf::PortfolioManager::LocalCommonInstance().ConstructPortfolio( 
     "pflioGold", "aoRay", "options" );
 
 }

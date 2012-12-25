@@ -21,8 +21,8 @@
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
 App::App(void) 
-  : m_mgrInstrument( ou::tf::CInstrumentManager::Instance() ),
-  m_ptws( new ou::tf::IBTWS ), m_piqfeed( new ou::tf::CIQFeedProvider ),
+  : m_mgrInstrument( ou::tf::InstrumentManager::Instance() ),
+  m_ptws( new ou::tf::IBTWS ), m_piqfeed( new ou::tf::IQFeedProvider ),
   m_dblPortfolioCashToTrade( 110000.0 ), m_dblPortfolioMargin( 0.15 )
 {
 }
@@ -34,8 +34,8 @@ App::~App(void) {
 
 void App::Run( void ) {
 
-  ou::tf::CProviderManager::Instance().Register( "ib01", static_cast<ou::tf::CProviderManager::pProvider_t>( m_ptws ) );
-  ou::tf::CProviderManager::Instance().Register( "iq01", static_cast<ou::tf::CProviderManager::pProvider_t>( m_piqfeed ) );
+  ou::tf::ProviderManager::Instance().Register( "ib01", static_cast<ou::tf::ProviderManager::pProvider_t>( m_ptws ) );
+  ou::tf::ProviderManager::Instance().Register( "iq01", static_cast<ou::tf::ProviderManager::pProvider_t>( m_piqfeed ) );
 
   m_ptws->OnConnected.Add( MakeDelegate( this, &App::Connected ) );
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &App::Connected ) );
@@ -90,8 +90,8 @@ void App::Run( void ) {
 //  delete m_pwork;  // stop the asio service (let it run out of work, which at this point should be none)
   m_asioThread.join();  // wait for i/o thread to cleanup and terminate
 
-  ou::tf::CProviderManager::Instance().Release( "ib01" );
-  ou::tf::CProviderManager::Instance().Release( "iq01" );
+  ou::tf::ProviderManager::Instance().Release( "ib01" );
+  ou::tf::ProviderManager::Instance().Release( "iq01" );
 
 }
 

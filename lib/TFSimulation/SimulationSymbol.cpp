@@ -28,7 +28,7 @@ SimulationSymbol::SimulationSymbol(
   pInstrument_cref pInstrument, 
   const std::string &sGroup
   ) 
-: CSymbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
+: Symbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
 {
   // this is dealt with in the SimulationProvider, but we don't have a .Remove
   //m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );

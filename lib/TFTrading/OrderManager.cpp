@@ -21,19 +21,19 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 //
-// COrderManager
+// OrderManager
 //
 
-COrderManager::COrderManager(void) 
+OrderManager::OrderManager(void) 
 //: 
 //   m_orderIds( Trading::DbFileName, "OrderId" )  // need to remove dependency on DB4 and migrate to sql
 {
 }
 
-COrderManager::~COrderManager(void) {
+OrderManager::~OrderManager(void) {
 }
 
-Order::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
+Order::idOrder_t OrderManager::CheckOrderId( idOrder_t id ) {
   idOrder_t oldId = m_orderIds.GetCurrentId();
   if ( id > oldId ) {
     m_orderIds.SetNextId( id );
@@ -41,7 +41,7 @@ Order::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
   return oldId;
 }
 
-COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
+OrderManager::pOrder_t OrderManager::ConstructOrder( // market order
     Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, 
@@ -53,7 +53,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
   return pOrder;
 }
 
-COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
+OrderManager::pOrder_t OrderManager::ConstructOrder( // limit or stop
     Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1,  
@@ -66,7 +66,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
   return pOrder;
 }
 
-COrderManager::pOrder_t COrderManager::ConstructOrder( // limit and stop
+OrderManager::pOrder_t OrderManager::ConstructOrder( // limit and stop
     Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
@@ -80,7 +80,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // limit and stop
   return pOrder;
 }
 
-void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
+void OrderManager::ConstructOrder( pOrder_t& pOrder ) {
   // obtain an order id, then insert into maps, may need to change how this happens later in order to get rid of db4
   idOrder_t id = m_orderIds.GetNextId();
   pOrder->SetOrderId( id );
@@ -88,7 +88,7 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
   try {
     iterOrders_t iter;
     if ( LocateOrder( id, iter ) ) {
-      std::cout << "COrderManager::ConstructOrder:  OrderId Already Exists" << std::endl;
+      std::cout << "OrderManager::ConstructOrder:  OrderId Already Exists" << std::endl;
     }
     else {
       pairOrderState_t pair( id, structOrderState( pOrder ) );
@@ -103,7 +103,7 @@ void COrderManager::ConstructOrder( pOrder_t& pOrder ) {
     }
   }
   catch (...) {
-    std::cout << "COrderManager::ConstructOrder:  Major Problems" << std::endl;
+    std::cout << "OrderManager::ConstructOrder:  Major Problems" << std::endl;
   }
   
 }
@@ -124,7 +124,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrder) {
+void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder) {
 
   try {
     iterOrders_t iter;
@@ -142,11 +142,11 @@ void COrderManager::PlaceOrder(CProviderInterfaceBase *pProvider, pOrder_t pOrde
       }
     }
     else {
-      std::cout << "COrderManager::PlaceOrder:  OrderId Not Found" << std::endl;
+      std::cout << "OrderManager::PlaceOrder:  OrderId Not Found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::PlaceOrder:  Major Problems" << std::endl;
+    std::cout << "OrderManager::PlaceOrder:  Major Problems" << std::endl;
   }
 }
 
@@ -170,7 +170,7 @@ namespace OrderManagerQueries {
   };
 }
 
-bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
+bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
   // if not in memory, the load order and executions from disk
   bool bFound = false;
 //  iterOrders_t iter = m_mapOrders.find( nOrderId );
@@ -191,7 +191,7 @@ bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         Order::TableRowDef rowOrder;
         m_pSession->Columns<OrderManagerQueries::OrderKey, Order::TableRowDef>( pOrderExistsQuery, rowOrder );
         if ( 0 == OnOrderNeedsDetails ) {
-          throw std::runtime_error( "COrderManager::LocateOrder: needs Order Details Callback" );
+          throw std::runtime_error( "OrderManager::LocateOrder: needs Order Details Callback" );
         }
         pInstrument_t pInstrument;
         OnOrderNeedsDetails( rowOrder.idInstrument, pInstrument );
@@ -199,7 +199,7 @@ bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         std::pair<iterOrders_t, bool> response;
         response = m_mapOrders.insert( pairOrderState_t(rowOrder.idOrder, structOrderState( pOrder ) ) );
         if ( false == response.second ) {
-          throw std::runtime_error( "COrderManager::LocateOrder:  couldn't insert order into map" );
+          throw std::runtime_error( "OrderManager::LocateOrder:  couldn't insert order into map" );
         }
         iter = response.first;
 
@@ -207,16 +207,16 @@ bool COrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         ou::db::QueryFields<OrderManagerQueries::OrderKey>::pQueryFields_t pExecutionQuery
           = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from executions", keyOrder ).Where( "orderid=?" ).NoExecute();
         while ( m_pSession->Execute( pExecutionQuery ) ) {
-          CExecution::TableRowDef rowExecution;
-          m_pSession->Columns<OrderManagerQueries::OrderKey, CExecution::TableRowDef>( pExecutionQuery, rowExecution );
-          pExecution_t pExecution( new CExecution( rowExecution ) );
+          Execution::TableRowDef rowExecution;
+          m_pSession->Columns<OrderManagerQueries::OrderKey, Execution::TableRowDef>( pExecutionQuery, rowExecution );
+          pExecution_t pExecution( new Execution( rowExecution ) );
           iter->second.pmapExecutions->insert( pairExecution_t( rowExecution.idExecution, pExecution ) );
         }
       }
     }
   }
 //  if ( !bFound ) {
-//    std::cout << "COrderManager::LocateOrder order not found:  " << nOrderId << std::endl;
+//    std::cout << "OrderManager::LocateOrder order not found:  " << nOrderId << std::endl;
 //    throw std::out_of_range( "OrderId not found" );
 //  }
 //  return iter;
@@ -239,7 +239,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in conjunction with ReportCancellation, database update maybe premature
+void OrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in conjunction with ReportCancellation, database update maybe premature
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
@@ -247,15 +247,15 @@ void COrderManager::CancelOrder( idOrder_t nOrderId) {  // this needs to work in
       iter->second.pProvider->CancelOrder( pOrder );  // check which fields have changed for the db
     }
     else {
-      std::cout << "COrderManager::CancelOrder:  OrderId Not Found" << std::endl;
+      std::cout << "OrderManager::CancelOrder:  OrderId Not Found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::CancelOrder:  Major Problems" << std::endl;
+    std::cout << "OrderManager::CancelOrder:  Major Problems" << std::endl;
   }
 }
 
-void COrderManager::ReportCancellation( idOrder_t nOrderId ) {
+void OrderManager::ReportCancellation( idOrder_t nOrderId ) {
   try {
     iterOrders_t iter;
     if ( LocateOrder( nOrderId, iter ) ) {
@@ -270,11 +270,11 @@ void COrderManager::ReportCancellation( idOrder_t nOrderId ) {
       }
     }
     else {
-      std::cout << "COrderManager::ReportCancellation:  OrderId Not Found" << std::endl;
+      std::cout << "OrderManager::ReportCancellation:  OrderId Not Found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::ReportCancellation:  Major Problems" << std::endl;
+    std::cout << "OrderManager::ReportCancellation:  Major Problems" << std::endl;
   }
 }
 
@@ -305,7 +305,7 @@ namespace OrderManagerQueries {
   std::string sUpdateOrderQuery( "update orders set orderstatus=?, quantityremaining=?, quantityfilled=?, averagefillprice=?, datetimeclosed=?" );
 }
 
-void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec) { 
+void OrderManager::ReportExecution( idOrder_t nOrderId, const Execution& exec) { 
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
@@ -335,11 +335,11 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
           break;
         }
         // add execution record
-        pExecution_t pExecution( new CExecution( exec ) );
+        pExecution_t pExecution( new Execution( exec ) );
         pExecution->SetOrderId( nOrderId );
-        ou::db::QueryFields<CExecution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
-          = m_pSession->Insert<CExecution::TableRowDefNoKey>( 
-            const_cast<CExecution::TableRowDefNoKey&>( dynamic_cast<const CExecution::TableRowDefNoKey&>( pExecution->GetRow() ) ) );
+        ou::db::QueryFields<Execution::TableRowDefNoKey>::pQueryFields_t pQueryExecutionWrite
+          = m_pSession->Insert<Execution::TableRowDefNoKey>( 
+            const_cast<Execution::TableRowDefNoKey&>( dynamic_cast<const Execution::TableRowDefNoKey&>( pExecution->GetRow() ) ) );
         idExecution_t idExecution = m_pSession->GetLastRowId();
         pairExecution_t pair( idExecution, pExecution );
         iter->second.pmapExecutions->insert( pair );
@@ -351,11 +351,11 @@ void COrderManager::ReportExecution( idOrder_t nOrderId, const CExecution& exec)
   //    }
     }
     else {
-      std::cout << "COrderManager::ReportExecution:  OrderId not found" << std::endl;
+      std::cout << "OrderManager::ReportExecution:  OrderId not found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::ReportExecution:  Major Problems" << std::endl;
+    std::cout << "OrderManager::ReportExecution:  Major Problems" << std::endl;
   }
 }
 
@@ -373,7 +373,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) {
+void OrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission ) {
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
@@ -389,11 +389,11 @@ void COrderManager::ReportCommission( idOrder_t nOrderId, double dblCommission )
       // as a result, may need to set delegates here so database is updated before order calls delegates.
     }
     else {
-      std::cout << "COrderManager::ReportCommission:  Can't locate order id" << std::endl;
+      std::cout << "OrderManager::ReportCommission:  Can't locate order id" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::ReportCommission:  Major Problems" << std::endl;
+    std::cout << "OrderManager::ReportCommission:  Major Problems" << std::endl;
   }
 }
 
@@ -413,7 +413,7 @@ namespace OrderManagerQueries {
   };
 }
 
-void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError) {
+void OrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErrors eError) {
   try {
     mapOrders_t::iterator iter;
     if ( LocateOrder( nOrderId, iter ) ) {
@@ -429,41 +429,41 @@ void COrderManager::ReportErrors( idOrder_t nOrderId, OrderErrors::enumOrderErro
       }
     }
     else {
-      std::cout << "COrderManager::ReportErrors:  OrderId not found" << std::endl;
+      std::cout << "OrderManager::ReportErrors:  OrderId not found" << std::endl;
     }
   }
   catch (...) {
-    std::cout << "COrderManager::ReportErrors:  Major Problems" << std::endl;
+    std::cout << "OrderManager::ReportErrors:  Major Problems" << std::endl;
   }
 }
 
-void COrderManager::HandleRegisterTables( ou::db::Session& session ) {
+void OrderManager::HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<Order::TableCreateDef>( tablenames::sOrder );
-  session.RegisterTable<CExecution::TableCreateDef>( tablenames::sExecution );
+  session.RegisterTable<Execution::TableCreateDef>( tablenames::sExecution );
 }
 
-void COrderManager::HandleRegisterRows( ou::db::Session& session ) {
+void OrderManager::HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<Order::TableRowDef>( tablenames::sOrder );
-  session.MapRowDefToTableName<CExecution::TableRowDef>( tablenames::sExecution );
-  session.MapRowDefToTableName<CExecution::TableRowDefNoKey>( tablenames::sExecution );
+  session.MapRowDefToTableName<Execution::TableRowDef>( tablenames::sExecution );
+  session.MapRowDefToTableName<Execution::TableRowDefNoKey>( tablenames::sExecution );
 }
 
-void COrderManager::HandlePopulateTables( ou::db::Session& session ) {
+void OrderManager::HandlePopulateTables( ou::db::Session& session ) {
 }
 
 // this stuff could probably be rolled into Session with a template
-void COrderManager::AttachToSession( ou::db::Session* pSession ) {
+void OrderManager::AttachToSession( ou::db::Session* pSession ) {
   ManagerBase::AttachToSession( pSession );
-  pSession->OnRegisterTables.Add( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Add( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Add( MakeDelegate( this, &COrderManager::HandlePopulateTables ) );
+  pSession->OnRegisterTables.Add( MakeDelegate( this, &OrderManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Add( MakeDelegate( this, &OrderManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Add( MakeDelegate( this, &OrderManager::HandlePopulateTables ) );
 
 }
 
-void COrderManager::DetachFromSession( ou::db::Session* pSession ) {
-  pSession->OnRegisterTables.Remove( MakeDelegate( this, &COrderManager::HandleRegisterTables ) );
-  pSession->OnRegisterRows.Remove( MakeDelegate( this, &COrderManager::HandleRegisterRows ) );
-  pSession->OnPopulate.Remove( MakeDelegate( this, &COrderManager::HandlePopulateTables ) );
+void OrderManager::DetachFromSession( ou::db::Session* pSession ) {
+  pSession->OnRegisterTables.Remove( MakeDelegate( this, &OrderManager::HandleRegisterTables ) );
+  pSession->OnRegisterRows.Remove( MakeDelegate( this, &OrderManager::HandleRegisterRows ) );
+  pSession->OnPopulate.Remove( MakeDelegate( this, &OrderManager::HandlePopulateTables ) );
   ManagerBase::DetachFromSession( pSession );
 }
 

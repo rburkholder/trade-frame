@@ -217,7 +217,7 @@ Strategy::Strategy( pProvider_t pDataProvider, pProvider_t pExecutionProvider )
   m_bfBuys.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionBuys ) );
   m_bfSells.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionSells ) );
 
-  ou::tf::CInstrumentManager& mgr( ou::tf::CInstrumentManager::Instance() );
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   m_pTestInstrument = mgr.Exists( "+GCQ12" ) ? mgr.Get( "+GCQ12" ) : mgr.ConstructFuture( "+GCQ12", "SMART", 2012, 7 );
   m_pTestInstrument->SetMultiplier( 100 );
   m_pTestInstrument->SetMinTick( 0.1 );

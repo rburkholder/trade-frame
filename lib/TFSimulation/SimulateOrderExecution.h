@@ -48,7 +48,7 @@ public:
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
     OnOrderCancelled = function;
   }
-  typedef FastDelegate2<Order::idOrder_t, const CExecution&> OnOrderFillHandler;
+  typedef FastDelegate2<Order::idOrder_t, const Execution&> OnOrderFillHandler;
   void SetOnOrderFill( OnOrderFillHandler function ) {
     OnOrderFill = function;
   }

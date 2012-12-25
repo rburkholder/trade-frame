@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CAccount::CAccount(
+Account::Account(
     const idAccount_t& idAccount,
     const idAccountOwner_t& idAccountOwner,
     const std::string& sAccountName,
@@ -34,7 +34,7 @@ CAccount::CAccount(
 {
 }
 
-CAccount::~CAccount(void) {
+Account::~Account(void) {
 }
 
 } // namespace tf

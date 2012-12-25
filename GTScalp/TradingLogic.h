@@ -81,6 +81,6 @@ protected:
 
   CGeneratePeriodicRefresh m_refresh;
 private:
-  void OnIQFeedTimeMessage( CIQFTimeMessage* pMsg );
+  void OnIQFeedTimeMessage( IQFTimeMessage* pMsg );
   void OnPeriodicRefresh( CGeneratePeriodicRefresh* pMsg );
 };

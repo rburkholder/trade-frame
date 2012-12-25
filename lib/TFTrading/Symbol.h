@@ -28,7 +28,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CSymbolBase {
+class SymbolBase {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
@@ -37,9 +37,9 @@ public:
   //   may need to use provider specific name in alternate instrument name in Instrument
 
   // class should only be constructed with valid instrument, which already has general name as well as provider specific names
-  CSymbolBase( pInstrument_t pInstrument );  // instrument supplied name
-  CSymbolBase( pInstrument_t pInstrument, const std::string& sName );  // provider specific name
-  virtual ~CSymbolBase(void);
+  SymbolBase( pInstrument_t pInstrument );  // instrument supplied name
+  SymbolBase( pInstrument_t pInstrument, const std::string& sName );  // provider specific name
+  virtual ~SymbolBase(void);
 
   const symbol_id_t& GetId( void ) { return m_id; };  // used for mapping and indexing
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
@@ -100,12 +100,12 @@ private:
 };
 
 template <typename S>  // S for Provider specific CRTP Symbol type
-class CSymbol: public CSymbolBase {
+class Symbol: public SymbolBase {
 public:
   typedef boost::shared_ptr<S> pSymbol_t;
-  CSymbol( pInstrument_t pInstrument ) : CSymbolBase( pInstrument ) {};
-  CSymbol( pInstrument_t pInstrument, const std::string& sName ) : CSymbolBase( pInstrument, sName ) {};
-  ~CSymbol( void ) {};
+  Symbol( pInstrument_t pInstrument ) : SymbolBase( pInstrument ) {};
+  Symbol( pInstrument_t pInstrument, const std::string& sName ) : SymbolBase( pInstrument, sName ) {};
+  ~Symbol( void ) {};
 protected:
 private:
 

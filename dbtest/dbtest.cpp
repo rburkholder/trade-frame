@@ -18,10 +18,10 @@
 //using namespace boost::phoenix;
 //using namespace boost::phoenix::arg_names;
 
-#include <LibSQL/Session.h>
+#include <OUSQlite/Session.h>
 
-#include <LibTrading/TradingDb.h>
-#include <LibTrading/AccountManager.h>
+#include <TFTrading/TradingDb.h>
+#include <TFTrading/AccountManager.h>
 
 template <typename K, typename F, typename T> // C class with shared ptr, F is function type, K is type of key
 void constructClass( 
@@ -77,7 +77,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
   //sqlite3_stmt* pStmt;
   //std::string key( "rpb001" );
-  CAccountAdvisor::sharedptr_t p;
+  AccountAdvisor::sharedptr_t p;
 //  create_class c;
   //p = c( "key", &pStmt );
   //constructClass( "this is an error", "select me from you", key, &pStmt, &p, create_class() );
@@ -86,17 +86,17 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
   CTradingDb db( sDbFileName.c_str() );
 
-  CAccountManager am( db.GetDb() );
+  AccountManager am( db.GetDb() );
 
   //am.CreateDbTables();
-//  CAccountAdvisor aa( db.GetDb(), "ourpb001", "Raymond Burkholder" );
+//  AccountAdvisor aa( db.GetDb(), "ourpb001", "Raymond Burkholder" );
 
-  //std::map<std::string,CAccountAdvisor::pAccountAdvisor_t> map;
-  //CAccountAdvisor::sharedptr_t p;
+  //std::map<std::string,AccountAdvisor::pAccountAdvisor_t> map;
+  //AccountAdvisor::sharedptr_t p;
 
   //sqlite3_stmt* pStmt( NULL );
   std::string key( "ourpb001" );
-  //am.LoadObject( "AccountAdvisor", CAccountAdvisor::GetSelect(), key, &pStmt, map, p, bind_key(), create_class() );
+  //am.LoadObject( "AccountAdvisor", AccountAdvisor::GetSelect(), key, &pStmt, map, p, bind_key(), create_class() );
 
   p = am.GetAccountAdvisor( key );
 

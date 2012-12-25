@@ -174,7 +174,7 @@ Order::pOrder_t CPosition::PlaceOrder( // market
   assert( OrderType::Market == eOrderType );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -190,7 +190,7 @@ Order::pOrder_t CPosition::PlaceOrder( // limit or stop
   assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -207,7 +207,7 @@ Order::pOrder_t CPosition::PlaceOrder( // limit and stop
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
-   = COrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -228,7 +228,7 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
   pOrder->OnCommission.Add( MakeDelegate( this, &CPosition::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &CPosition::HandleCancellation ) );
-  COrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
+  OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
 void CPosition::CancelOrders( void ) {
@@ -269,7 +269,7 @@ void CPosition::HandleCancellation( const Order& order ) {
 }
 
 void CPosition::CancelOrder( vOrders_iter_t iter ) {
-  COrderManager::LocalCommonInstance().CancelOrder( iter->get()->GetOrderId() );
+  OrderManager::LocalCommonInstance().CancelOrder( iter->get()->GetOrderId() );
 }
 
 void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
@@ -377,14 +377,14 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
-void CPosition::HandleExecution( const std::pair<const Order&, const CExecution&>& status ) {
+void CPosition::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
 
   // should be able to calculate profit/loss & position cost as exections are encountered
   // should be able to calculate position cost basis as position is updated (with and without commissions)
   // will need market feed in order to calculate profit/loss
 
   const Order& order = status.first;
-  const CExecution& exec = status.second;
+  const Execution& exec = status.second;
   Order::idOrder_t orderId = order.GetOrderId();
 
   // update position, regardless of whether we see order open or closed

@@ -14,9 +14,9 @@ public:
   CRowKeyValues( int ix, CListCtrl *pListCtrl, const string &name );
   virtual ~CRowKeyValues(void);
 
-  void HandleSymbolFundamental( CIQFeedSymbol * );
-  void HandleSymbolSummary( CIQFeedSymbol * );
-  void HandleSymbolUpdate( CIQFeedSymbol * );
+  void HandleSymbolFundamental( IQFeedSymbol * );
+  void HandleSymbolSummary( IQFeedSymbol * );
+  void HandleSymbolUpdate( IQFeedSymbol * );
 
   const char* GetFullName() { return m_sFullName.c_str(); };
   CDeltaMarkerBase *GetMarker( int ix ) {

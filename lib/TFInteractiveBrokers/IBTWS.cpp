@@ -54,7 +54,7 @@ DecodeStatusWord dsw;
 
 
 IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned int port ): 
-  CProviderInterface<IBTWS,IBSymbol>(), 
+  ProviderInterface<IBTWS,IBSymbol>(), 
   EWrapper(),
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
@@ -150,7 +150,7 @@ IBTWS::pSymbol_t IBTWS::NewCSymbol( IBSymbol::pInstrument_t pInstrument ) {
   TickerId ticker = ++m_curTickerId;
   pSymbol_t pSymbol( new IBSymbol( pInstrument, ticker ) );  // is there someplace with the IB specific symbol name, or is it set already?
   // todo:  do an existance check on the instrument/symbol
-  CProviderInterface<IBTWS,IBSymbol>::AddCSymbol( pSymbol );
+  ProviderInterface<IBTWS,IBSymbol>::AddCSymbol( pSymbol );
   m_vTickerToSymbol.push_back( pSymbol );
   m_mapContractToSymbol.insert( pair_mapContractToSymbol_t( pInstrument->GetContract(), pSymbol ) );
   return pSymbol;
@@ -279,12 +279,12 @@ void IBTWS::PlaceOrder( pOrder_t pOrder ) {
   twsorder.outsideRth = pOrder->GetOutsideRTH();
   //twsorder.whatIf = true;
 
-  CProviderInterface<IBTWS,IBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
+  ProviderInterface<IBTWS,IBSymbol>::PlaceOrder( pOrder ); // any underlying initialization
   pTWS->placeOrder( twsorder.orderId, contract, twsorder );
 }
 
 void IBTWS::CancelOrder( pOrder_t pOrder ) {
-  CProviderInterface<IBTWS,IBSymbol>::CancelOrder( pOrder );
+  ProviderInterface<IBTWS,IBSymbol>::CancelOrder( pOrder );
   pTWS->cancelOrder( pOrder->GetOrderId() );
 }
 
@@ -382,7 +382,7 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
       // reports total commission for order rather than increment
-      COrderManager::Instance().ReportCommission( orderId, state.commission ); 
+      OrderManager::Instance().ReportCommission( orderId, state.commission ); 
     // use spirit to do this to make it faster with a trie, or use keyword match
     DecodeStatusWord::enumStatus status = dsw.Match( state.status );
     switch ( status ) {
@@ -391,7 +391,7 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
     case DecodeStatusWord::Filled:
       break;
     case DecodeStatusWord::Cancelled:
-      COrderManager::Instance().ReportCancellation( order.orderId );
+      OrderManager::Instance().ReportCancellation( order.orderId );
       break;
     case DecodeStatusWord::Inactive:
       break;
@@ -433,7 +433,7 @@ void IBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
   }
 }
 
-void IBTWS::execDetails( int reqId, const Contract& contract, const Execution& execution ) {
+void IBTWS::execDetails( int reqId, const Contract& contract, const ::Execution& execution ) {
   m_ss.str("");
   m_ss  
     << "execDetails: " 
@@ -463,8 +463,8 @@ void IBTWS::execDetails( int reqId, const Contract& contract, const Execution& e
 //    OutputDebugString( m_ss.str().c_str() );
   }
   else {
-    CExecution exec( execution.price, execution.shares, side, execution.exchange, execution.execId );
-    COrderManager::Instance().ReportExecution( execution.orderId, exec );
+    Execution exec( execution.price, execution.shares, side, execution.exchange, execution.execId );
+    OrderManager::Instance().ReportExecution( execution.orderId, exec );
   }
 }
 
@@ -711,7 +711,7 @@ void IBTWS::bondContractDetails( int reqId, const ContractDetails& contractDetai
 void IBTWS::nextValidId( OrderId orderId) {
   // todo: put in a flag to prevent orders until we've passed through this code
   m_ss.str("");
-  Order::idOrder_t id = COrderManager::Instance().CheckOrderId( orderId );
+  Order::idOrder_t id = OrderManager::Instance().CheckOrderId( orderId );
   if ( orderId > id ) {
     m_ss << "old order id (" << id << "), new order id (" << orderId << ")" << std::endl;
   }

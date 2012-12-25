@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CAccountOwner::CAccountOwner( 
+AccountOwner::AccountOwner( 
     const idAccountOwner_t& idAccountOwner, 
     const idAccountAdvisor_t& idAccountAdvisor,
     const std::string& sFirstName, const std::string& sLastName ) 
@@ -26,9 +26,9 @@ CAccountOwner::CAccountOwner(
 {
 }
 
-CAccountOwner::CAccountOwner( const TableRowDef& row ) : m_row( row ) {};
+AccountOwner::AccountOwner( const TableRowDef& row ) : m_row( row ) {};
 
-CAccountOwner::~CAccountOwner(void) {
+AccountOwner::~AccountOwner(void) {
 }
 
 } // namespace tf
