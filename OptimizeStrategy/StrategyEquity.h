@@ -47,7 +47,7 @@ class StrategyEquity {
 public:
 
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef fastdelegate::FastDelegate0<bool> fdEvaluate_t;
   typedef boost::fusion::set<
       ou::gp::TimeSeriesRegistration<ou::tf::Quotes>,
@@ -84,7 +84,7 @@ private:
 
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   enum enumTimeFrames { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
   enum enumTradeState { ENeutral, ELong, EShort };

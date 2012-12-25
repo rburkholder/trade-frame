@@ -16,6 +16,8 @@
 
 // Started 2012/12/22
 
+#include <string>
+
 #include <wx/panel.h>
 
 #define SYMBOL_PANELPORTFOLIOSTATS_STYLE wxTAB_TRAVERSAL
@@ -40,6 +42,7 @@ public:
     const wxSize& size = SYMBOL_PANELPORTFOLIOSTATS_SIZE, 
     long style = SYMBOL_PANELPORTFOLIOSTATS_STYLE );
   ~PanelPortfolioStats(void);
+  void SetStats( const std::string& sMin, const std::string& sCurrent, const std::string& sMax );
 protected:
 private:
   enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELPORTFOLIOSTATS_IDNAME,

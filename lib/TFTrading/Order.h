@@ -43,7 +43,7 @@ public:
 
   typedef keytypes::idOrder_t idOrder_t;
   typedef keytypes::idPosition_t idPosition_t;
-  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_t pInstrument_t;
   typedef keytypes::idInstrument_t idInstrument_t;
   typedef boost::shared_ptr<Order> pOrder_t;
   typedef const pOrder_t& pOrder_ref;
@@ -149,7 +149,7 @@ public:
   };
 
   Order(  // market 
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity,
@@ -157,7 +157,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   Order(  // limit or stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity,
@@ -166,7 +166,7 @@ public:
     ptime dtOrderSubmitted = not_a_date_time
     );
   Order(  // limit and stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity,
@@ -180,7 +180,7 @@ public:
 
   void SetOutsideRTH( bool bOutsideRTH ) { m_bOutsideRTH = bOutsideRTH; };  // not persisted yet
   bool GetOutsideRTH( void ) const { return m_bOutsideRTH; };
-  void SetInstrument( CInstrument::pInstrument_cref pInstrument ) {  // used only when class created from database
+  void SetInstrument( Instrument::pInstrument_cref pInstrument ) {  // used only when class created from database
     if ( NULL != m_pInstrument.get() ) {
       throw std::runtime_error( "Corder::SetInstrument: instrument already assigned" );
     }
@@ -189,7 +189,7 @@ public:
     }
     m_pInstrument = pInstrument;
   }
-  CInstrument::pInstrument_t GetInstrument( void ) const { 
+  Instrument::pInstrument_t GetInstrument( void ) const { 
     if ( NULL == m_pInstrument.get() ) {
       throw std::runtime_error( "Order::GetInstrument:  no instrument defined" );
     }
@@ -234,7 +234,7 @@ public:
 
 protected:
 
-  CInstrument::pInstrument_t m_pInstrument;
+  Instrument::pInstrument_t m_pInstrument;
   idInstrument_t m_idInstrument;  // used temporarily in order to get instrument_t in place
 
   bool m_bOutsideRTH;

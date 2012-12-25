@@ -49,8 +49,8 @@ public:
 
   typedef boost::shared_ptr<SimulationProvider> pProvider_t;
   typedef CProviderInterface<SimulationProvider,SimulationSymbol> inherited_t;
-  typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_cref pInstrument_cref;
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_cref pInstrument_cref;
   typedef Order::pOrder_t pOrder_t;
   typedef inherited_t::pSymbol_t pSymbol_t;
 

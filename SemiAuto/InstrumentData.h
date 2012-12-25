@@ -33,8 +33,8 @@ public:
   enum enumIndex { Low = 0, Price, High, Roc, Stochastic, _Count };
   typedef double var_t;
 
-  InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits = 2 );
-  InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits = 2 );
+  InstrumentData( const Instrument::pInstrument_t& pInstrument, unsigned int nSigDigits = 2 );
+  InstrumentData( Instrument* pInstrument, unsigned int nSigDigits = 2 );
   InstrumentData( const InstrumentData& data );
   ~InstrumentData(void);
 
@@ -43,7 +43,7 @@ public:
   void AddTradeHandler( CProviderManager::pProvider_t pProvider );
   void RemoveTradeHandler( CProviderManager::pProvider_t pProvider );
 
-  CInstrument::pInstrument_t GetInstrument( void ) { return m_pInstrument; };
+  Instrument::pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
   void SaveSeries( const std::string& sPrefix );
   var_t& Var( enumIndex ix ) { return m_rSummary[ ix ]; };
@@ -58,7 +58,7 @@ private:
 
   var_t m_rSummary[ _Count ];
 
-  CInstrument::pInstrument_t m_pInstrument;
+  Instrument::pInstrument_t m_pInstrument;
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
 

@@ -35,7 +35,7 @@ namespace tf { // TradeFrame
   //static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
   static const ptime dtDefault( boost::posix_time::not_a_date_time );
 
-CInstrument::CInstrument( const TableRowDef& row ) 
+Instrument::Instrument( const TableRowDef& row ) 
   : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
@@ -43,7 +43,7 @@ CInstrument::CInstrument( const TableRowDef& row )
   assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
 }
 
-CInstrument::CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
+Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
   : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
@@ -52,7 +52,7 @@ CInstrument::CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying )
 }
 
 // equity / generic creation
-CInstrument::CInstrument(
+Instrument::Instrument(
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType,
   const idExchange_t &idExchange
                          )
@@ -64,7 +64,7 @@ CInstrument::CInstrument(
 }
 
  // future
-CInstrument::CInstrument( 
+Instrument::Instrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month ) 
@@ -78,7 +78,7 @@ CInstrument::CInstrument(
 }
 
  // option yymm
-CInstrument::CInstrument( 
+Instrument::Instrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
@@ -99,7 +99,7 @@ CInstrument::CInstrument(
 }
 
  // option yymmdd
-CInstrument::CInstrument( 
+Instrument::Instrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
@@ -120,7 +120,7 @@ CInstrument::CInstrument(
 }
 
 // currency
-CInstrument::CInstrument(
+Instrument::Instrument(
   const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
   InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
   Currency::enumCurrency base, Currency::enumCurrency counter
@@ -140,18 +140,18 @@ CInstrument::CInstrument(
   if ( InstrumentType::Currency == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
   if ( InstrumentType::FuturesOption == m_InstrumentType ) m_eUnderlyingStatus = EUnderlyingSet;
   if ( EUnderlyingNotSet == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "CInstrument::CInstrument: underlying not accepted" );
+    throw std::runtime_error( "Instrument::Instrument: underlying not accepted" );
   }
   if ( NULL == pUnderlying.get() ) {
-    throw std::runtime_error( "CInstrument::CInstrument: non null underlying required" );
+    throw std::runtime_error( "Instrument::Instrument: non null underlying required" );
   }
   if ( m_sUnderlying != pUnderlying->GetInstrumentName() ) {
-    throw std::runtime_error( "CInstrument::CInstrument: underlying name does not match expected name" );
+    throw std::runtime_error( "Instrument::Instrument: underlying name does not match expected name" );
   }
 }
 */
 
-CInstrument::CInstrument(const CInstrument& instrument) 
+Instrument::Instrument(const Instrument& instrument) 
 :
   m_row( instrument.m_row ),
   m_pUnderlying( instrument.m_pUnderlying ),
@@ -165,10 +165,10 @@ CInstrument::CInstrument(const CInstrument& instrument)
   }
 }
 
-CInstrument::~CInstrument(void) {
+Instrument::~Instrument(void) {
 }
 
-void CInstrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
+void Instrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() == iter ) {
     m_mapAlternateNames.insert( mapAlternateNames_pair_t( id, name ) );
@@ -183,30 +183,30 @@ void CInstrument::SetAlternateName( eidProvider_t id, idInstrument_cref name ) {
   }
 }
 
-CInstrument::idInstrument_cref CInstrument::GetInstrumentName( eidProvider_t id ) {
+Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) {
   mapAlternateNames_t::iterator iter = m_mapAlternateNames.find( id );
   if ( m_mapAlternateNames.end() != iter ) {
-    //throw std::runtime_error( "CInstrument::GetAlternateName no alternate name" );
+    //throw std::runtime_error( "Instrument::GetAlternateName no alternate name" );
     return iter->second;
   }
   return m_row.idInstrument;
 }
 
-CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( void ) {
+Instrument::idInstrument_cref Instrument::GetUnderlyingName( void ) {
   if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-    throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
+    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName();
 }
 
-CInstrument::idInstrument_cref CInstrument::GetUnderlyingName( eidProvider_t id ) {
+Instrument::idInstrument_cref Instrument::GetUnderlyingName( eidProvider_t id ) {
   if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-    throw std::runtime_error( "CInstrument::GetUnderlyingName: underlying not set" );
+    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
   }
   return m_pUnderlying->GetInstrumentName(id);
 }
 
-bool CInstrument::operator==( const CInstrument& rhs ) const {
+bool Instrument::operator==( const Instrument& rhs ) const {
   return (
     ( m_row.idInstrument == rhs.m_row.idInstrument ) 
     && ( m_row.idExchange == rhs.m_row.idExchange )
@@ -217,7 +217,7 @@ bool CInstrument::operator==( const CInstrument& rhs ) const {
     );
 }
 
-double CInstrument::NormalizeOrderPrice( double price ) const {
+double Instrument::NormalizeOrderPrice( double price ) const {
   // works for 0.1, 0.01, may not work for others
   assert( 0.0 <= price );
   assert( 0.0 < m_row.dblMinTick );
@@ -232,15 +232,15 @@ double CInstrument::NormalizeOrderPrice( double price ) const {
 
 
 /*
-void CInstrument::SetUnderlying( pInstrument_t pUnderlying ) {
+void Instrument::SetUnderlying( pInstrument_t pUnderlying ) {
   if ( EUnderlyingNotSettable == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "CInstrument::SetUnderlying: can not set underlying" );
+    throw std::runtime_error( "Instrument::SetUnderlying: can not set underlying" );
   }
   if ( EUnderlyingSet == m_eUnderlyingStatus ) {
-    throw std::runtime_error( "CInstrument::SetUnderlying: underlying already set" );
+    throw std::runtime_error( "Instrument::SetUnderlying: underlying already set" );
   }
   if ( m_row.idUnderlying != pUnderlying->GetInstrumentName() ) {
-    throw std::runtime_error( "CInstrument::SetUnderlying: underlying name does not match expected name" );
+    throw std::runtime_error( "Instrument::SetUnderlying: underlying name does not match expected name" );
   }
   m_pUnderlying = pUnderlying;
   m_eUnderlyingStatus = EUnderlyingSet;

@@ -6301,7 +6301,7 @@
               <string name="proxy-AlignH">"Centre"</string>
               <string name="proxy-AlignV">"Centre"</string>
               <long name="proxy-Stretch factor">0</long>
-              <long name="proxy-Border">5</long>
+              <long name="proxy-Border">2</long>
               <bool name="proxy-wxLEFT">1</bool>
               <bool name="proxy-wxRIGHT">1</bool>
               <bool name="proxy-wxTOP">1</bool>
@@ -6364,7 +6364,7 @@
                 <string name="proxy-AlignH">"Centre"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Stretch factor">0</long>
-                <long name="proxy-Border">5</long>
+                <long name="proxy-Border">2</long>
                 <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxRIGHT">1</bool>
                 <bool name="proxy-wxTOP">1</bool>
@@ -6391,7 +6391,7 @@
               <string name="proxy-AlignH">"Centre"</string>
               <string name="proxy-AlignV">"Centre"</string>
               <long name="proxy-Stretch factor">0</long>
-              <long name="proxy-Border">5</long>
+              <long name="proxy-Border">2</long>
               <bool name="proxy-wxLEFT">1</bool>
               <bool name="proxy-wxRIGHT">1</bool>
               <bool name="proxy-wxTOP">1</bool>
@@ -6401,7 +6401,7 @@
               <bool name="proxy-wxFIXED_MINSIZE">0</bool>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
               <document>
-                <string name="title">"wxButton: ID_BtnExitPosition"</string>
+                <string name="title">"wxButton: ID_BtnExitPositions"</string>
                 <string name="type">"dialog-control-document"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"dialogcontrol"</string>
@@ -6410,7 +6410,7 @@
                 <long name="title-mode">0</long>
                 <long name="locked">0</long>
                 <string name="proxy-type">"wbButtonProxy"</string>
-                <string name="proxy-Id name">"ID_BtnExitPosition"</string>
+                <string name="proxy-Id name">"ID_BtnExitPositions"</string>
                 <long name="proxy-Id value">10068</long>
                 <string name="proxy-Name">""</string>
                 <string name="proxy-Class">"wxButton"</string>
@@ -6419,8 +6419,8 @@
                 <bool name="proxy-Separate files">0</bool>
                 <string name="proxy-Implementation filename">""</string>
                 <string name="proxy-Header filename">""</string>
-                <string name="proxy-Member variable name">"m_btnExitPosition"</string>
-                <string name="proxy-Label">"Exit Position"</string>
+                <string name="proxy-Member variable name">"m_btnExitPositions"</string>
+                <string name="proxy-Label">"Exit Positions"</string>
                 <bool name="proxy-Default">0</bool>
                 <string name="proxy-Help text">""</string>
                 <string name="proxy-Tooltip text">""</string>
@@ -6454,7 +6454,7 @@
                 <string name="proxy-AlignH">"Centre"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Stretch factor">0</long>
-                <long name="proxy-Border">5</long>
+                <long name="proxy-Border">2</long>
                 <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxRIGHT">1</bool>
                 <bool name="proxy-wxTOP">1</bool>
@@ -6481,7 +6481,7 @@
               <string name="proxy-AlignH">"Centre"</string>
               <string name="proxy-AlignV">"Centre"</string>
               <long name="proxy-Stretch factor">0</long>
-              <long name="proxy-Border">5</long>
+              <long name="proxy-Border">2</long>
               <bool name="proxy-wxLEFT">1</bool>
               <bool name="proxy-wxRIGHT">1</bool>
               <bool name="proxy-wxTOP">1</bool>
@@ -6544,7 +6544,7 @@
                 <string name="proxy-AlignH">"Centre"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Stretch factor">0</long>
-                <long name="proxy-Border">5</long>
+                <long name="proxy-Border">2</long>
                 <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxRIGHT">1</bool>
                 <bool name="proxy-wxTOP">1</bool>
@@ -6571,7 +6571,7 @@
               <string name="proxy-AlignH">"Centre"</string>
               <string name="proxy-AlignV">"Centre"</string>
               <long name="proxy-Stretch factor">0</long>
-              <long name="proxy-Border">5</long>
+              <long name="proxy-Border">2</long>
               <bool name="proxy-wxLEFT">1</bool>
               <bool name="proxy-wxRIGHT">1</bool>
               <bool name="proxy-wxTOP">1</bool>
@@ -6634,7 +6634,7 @@
                 <string name="proxy-AlignH">"Centre"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Stretch factor">0</long>
-                <long name="proxy-Border">5</long>
+                <long name="proxy-Border">2</long>
                 <bool name="proxy-wxLEFT">1</bool>
                 <bool name="proxy-wxRIGHT">1</bool>
                 <bool name="proxy-wxTOP">1</bool>

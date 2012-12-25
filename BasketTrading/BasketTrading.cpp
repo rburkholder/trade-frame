@@ -22,6 +22,7 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -93,6 +94,8 @@ bool AppBasketTrading::OnInit() {
   m_bData1Connected = false;
   m_bExecConnected = false;
 
+  m_dblMinPL = m_dblMaxPL = 0.0;
+
   m_timerGuiRefresh.SetOwner( this );
 
   Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
@@ -114,6 +117,18 @@ bool AppBasketTrading::OnInit() {
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   // update portfolio results and tracker timeseries for portfolio value
+  double dblUnRealized;
+  double dblRealized;
+  double dblCommissionsPaid;
+  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid );
+  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
+  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+  m_pPanelPortfolioStats->SetStats( 
+    boost::lexical_cast<std::string>( m_dblMinPL ),
+    boost::lexical_cast<std::string>( dblCurrent ),
+    boost::lexical_cast<std::string>( m_dblMaxPL )
+    );
 }
 
 void AppBasketTrading::HandleStartButton(void) {

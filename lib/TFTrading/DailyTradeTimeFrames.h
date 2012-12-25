@@ -110,6 +110,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::Cancel;
       static_cast<T*>(this)->HandleCancel();  // one shot
       m_stateTimeFrame = TimeFrame::Cancelling;
+      static_cast<T*>(this)->HandleCancelling( dd );
     }
     else {
       static_cast<T*>(this)->HandleRHTrading( dd );
@@ -129,6 +130,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::GoNeutral;
       static_cast<T*>(this)->HandleGoNeutral();  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
+      static_cast<T*>(this)->HandleGoingNeutral( dd );
     }
     else {
       static_cast<T*>(this)->HandleCancelling( dd );
@@ -166,6 +168,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::BellHeard;
       static_cast<T*>(this)->HandleBellHeard();  // one shot
       m_stateTimeFrame = TimeFrame::PauseForQuotes;
+      static_cast<T*>(this)->HandlePauseForQuotes( dd );
     }
     else {
       static_cast<T*>(this)->HandlePreOpen( dd );

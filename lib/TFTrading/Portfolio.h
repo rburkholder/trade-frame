@@ -109,6 +109,11 @@ public:
   pPosition_t GetPosition( const std::string& sName );
 
   void EmitStats( std::stringstream& ss );
+  void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid ) const {
+    dblUnRealized = m_plCurrent.dblUnRealized;
+    dblRealized = m_plCurrent.dblRealized;
+    dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
+  }
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

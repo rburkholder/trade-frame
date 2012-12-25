@@ -36,13 +36,14 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 struct DecodeStatusWord {
-  enum enumStatus{ Unknown, PreSubmitted, Submitted, Cancelled, Filled, Inactive };
+  enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, Submitted, Cancelled, Filled, Inactive };
   DecodeStatusWord( void ): kwm( Unknown, 50 ) {
     kwm.AddPattern( "Cancelled", Cancelled );
     kwm.AddPattern( "Filled", Filled );
     kwm.AddPattern( "Inactive", Inactive );
     kwm.AddPattern( "PreSubmitted", PreSubmitted );
     kwm.AddPattern( "Submitted", Submitted );
+    kwm.AddPattern( "PendingSubmit", PendingSubmit );
   }
   enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
 private:
@@ -395,6 +396,8 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
     case DecodeStatusWord::Inactive:
       break;
     case DecodeStatusWord::PreSubmitted:
+      break;
+    case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours
       break;
     case DecodeStatusWord::Unknown:
       assert( false );
@@ -767,7 +770,7 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
 
   switch ( it ) {
     case InstrumentType::Stock: 
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange ) );
+      pInstrument = Instrument::pInstrument_t( new Instrument( sUnderlying, it, sExchange ) );
       break;
     case InstrumentType::FuturesOption:
     case InstrumentType::Option:
@@ -777,14 +780,14 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
       if ( m_mapSymbols.end() == iterSymbol ) {
         throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying not found" );
       }
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( 
+      pInstrument = Instrument::pInstrument_t( new Instrument( 
         sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
         iterSymbol->second->GetInstrument(), 
         os, contract.strike ) );
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sUnderlying, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
+      pInstrument = Instrument::pInstrument_t( new Instrument( sUnderlying, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Currency: {
@@ -820,11 +823,11 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
 
         if ( "" == sExchange ) sExchange = "IDEALPRO";
 
-        pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
+        pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
       }
       break;
     case InstrumentType::Index:
-      pInstrument = CInstrument::pInstrument_t( new CInstrument( sLocalSymbol, it, sExchange ) );
+      pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange ) );
       break;
   }
   if ( NULL == pInstrument ) 

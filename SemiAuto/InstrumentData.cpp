@@ -20,14 +20,14 @@
 
 #include "InstrumentData.h"
 
-InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
+InstrumentData::InstrumentData( const Instrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
     m_stats( m_quotes, time_duration( 0, 14, 0 ) ), m_stoch( m_quotes, time_duration( 0, 9, 0 ) ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
-InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
+InstrumentData::InstrumentData( Instrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), 
     m_stats( m_quotes, time_duration( 0, 14, 0 ) ), m_stoch( m_quotes, time_duration( 0, 9, 0 ) ), m_nSignificantDigits( nSigDigits )
 {

@@ -78,10 +78,10 @@ private:
 
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
-  typedef ou::tf::CInstrument::pInstrument_t m_pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t m_pInstrument_t;
   pInstrument_t m_pShortInstrument;
   pInstrument_t m_pLongInstrument;
   pInstrument_t m_pTestInstrument;

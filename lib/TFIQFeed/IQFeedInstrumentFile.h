@@ -101,10 +101,10 @@ public:
   structSymbolRecord* RetrieveSymbolRecordByExchange( u_int32_t flags );
   structSymbolRecord* RetrieveSymbolRecordByUnderlying( u_int32_t flags );
   void EndSearch( void ) {};
-  CInstrument::pInstrument_t // basic call
+  Instrument::pInstrument_t // basic call
     CreateInstrumentFromIQFeed( const std::string& sIQFeedSymbolName );
-  CInstrument::pInstrument_t // builds an underlying when basic call is with an option
-    CreateInstrumentFromIQFeed( const std::string& sIQFeedSymbolName, CInstrument::pInstrument_t pUnderlying );
+  Instrument::pInstrument_t // builds an underlying when basic call is with an option
+    CreateInstrumentFromIQFeed( const std::string& sIQFeedSymbolName, Instrument::pInstrument_t pUnderlying );
 
 protected:
 

@@ -27,13 +27,13 @@ namespace tf { // TradeFrame
 // providers need to have been opened elsewhere, as this is a lookup into the provider map only
 void HandlePositionDetails( CPosition::pPosition_t& pPosition ) {
   const CPosition::TableRowDef& row( pPosition->GetRow() );
-  CInstrument::pInstrument_t pInstrument = CInstrumentManager::Instance().Get( row.idInstrument );
+  Instrument::pInstrument_t pInstrument = CInstrumentManager::Instance().Get( row.idInstrument );
   CPosition::pProvider_t pExecutionProvider = CProviderManager::Instance().Get( row.idExecutionAccount );
   CPosition::pProvider_t pDataProvider = CProviderManager::Instance().Get( row.idDataAccount );
   pPosition->Set( pInstrument, pExecutionProvider, pDataProvider ); 
 }
 
-void HandleOrderDetails( CInstrument::idInstrument_t idInstrument, CInstrument::pInstrument_t& pInstrument ) {
+void HandleOrderDetails( Instrument::idInstrument_t idInstrument, Instrument::pInstrument_t& pInstrument ) {
   pInstrument = CInstrumentManager::Instance().Get( idInstrument );
 }
 

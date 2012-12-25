@@ -31,10 +31,10 @@ namespace tf { // TradeFrame
 class CSymbolBase {
 public:
 
-  typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_cref pInstrument_cref;
-  typedef CInstrument::idInstrument_t symbol_id_t;
-  //   may need to use provider specific name in alternate instrument name in CInstrument
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_cref pInstrument_cref;
+  typedef Instrument::idInstrument_t symbol_id_t;
+  //   may need to use provider specific name in alternate instrument name in Instrument
 
   // class should only be constructed with valid instrument, which already has general name as well as provider specific names
   CSymbolBase( pInstrument_t pInstrument );  // instrument supplied name

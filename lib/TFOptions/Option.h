@@ -30,7 +30,7 @@ namespace option { // options
 class Option {
 public:
 
-  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CProviderInterfaceBase::pProvider_t pProvider_t;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );

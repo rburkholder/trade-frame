@@ -43,7 +43,7 @@ struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?
   UnderlyingQueryParameter( const ou::tf::keytypes::idInstrument_t& idInstrument_ ) : idInstrument( idInstrument_ ) {};
 };
 
-void DB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::CInstrument::pInstrument_t& pInstrument ) {
+void DB::LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::Instrument::pInstrument_t& pInstrument ) {
   pInstrument = ou::tf::CInstrumentManager::Instance().Get( id );
 }
 
@@ -72,15 +72,15 @@ bool DB::LoadOptions( ou::tf::CInstrumentManager::pInstrument_t& pUnderlying, bo
     = SQL<OptionsQueryParameters>( 
       "select * from instruments", query ).Where( "underlyingid=? and type=? and year=? and month=? and day=?" ).OrderBy( "strike, optionside" ).NoExecute();
 
-  ou::tf::CInstrument::TableRowDef instrument;  // can we put stuff directly into object?
-  ou::tf::CInstrument::pInstrument_t pInstrument;
+  ou::tf::Instrument::TableRowDef instrument;  // can we put stuff directly into object?
+  ou::tf::Instrument::pInstrument_t pInstrument;
   Bind<OptionsQueryParameters>( pQuery );
   if ( Execute( pQuery ) ) {
     bFound = true;
     if ( NULL != OnNewInstrument ) {
       do {
-        Columns<OptionsQueryParameters, ou::tf::CInstrument::TableRowDef>( pQuery, instrument );
-        pInstrument.reset( new ou::tf::CInstrument( instrument, pUnderlying ) );
+        Columns<OptionsQueryParameters, ou::tf::Instrument::TableRowDef>( pQuery, instrument );
+        pInstrument.reset( new ou::tf::Instrument( instrument, pUnderlying ) );
         OnNewInstrument( pInstrument );
       }
       while ( Execute( pQuery ) );

@@ -51,7 +51,7 @@ private:
   ou::tf::IBTWS::pProvider_t m_ptws;
   ou::tf::CIQFeedProvider::pProvider_t m_piqfeed;
 
-  ou::tf::CInstrument::pInstrument_t m_pInstrument;
+  ou::tf::Instrument::pInstrument_t m_pInstrument;
 
   MachineMarketStates m_md;  // market data state chart
 

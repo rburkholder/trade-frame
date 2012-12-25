@@ -47,7 +47,7 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::CPortfolioManager::pPortfolio_t pPortfolio_t;
   typedef ou::tf::CPortfolioManager::pPosition_t pPosition_t;
 

@@ -26,8 +26,8 @@ namespace tf { // TradeFrame
 class InstrumentData {
 public:
 
-  InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits = 2 );
-  InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits = 2 );
+  InstrumentData( const Instrument::pInstrument_t& pInstrument, unsigned int nSigDigits = 2 );
+  InstrumentData( Instrument* pInstrument, unsigned int nSigDigits = 2 );
   InstrumentData( const InstrumentData& data );
   virtual ~InstrumentData(void);
 
@@ -38,7 +38,7 @@ public:
   void AddGreekHandler( CProviderManager::pProvider_t pProvider );
   void RemoveGreekHandler( CProviderManager::pProvider_t pProvider );
 
-  CInstrument::pInstrument_t GetInstrument( void ) { return m_pInstrument; };
+  Instrument::pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
   void SaveSeries( const std::string& sPrefix );
   unsigned int SigDigits( void ) { return m_nSignificantDigits; };
@@ -55,7 +55,7 @@ private:
 
   unsigned int m_nSignificantDigits;
 
-  CInstrument::pInstrument_t m_pInstrument;
+  Instrument::pInstrument_t m_pInstrument;
 
   void Init( void );
 

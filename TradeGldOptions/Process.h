@@ -104,7 +104,7 @@ private:
   typedef CPosition::pPosition_t pPosition_t;
 
   typedef ou::tf::keytypes::idInstrument_t idInstrument_t;
-  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_t pInstrument_t;
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 

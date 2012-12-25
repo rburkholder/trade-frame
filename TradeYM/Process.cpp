@@ -53,12 +53,12 @@ void CProcess::IBDisconnect( void ) {
 }
 
 void CProcess::PlaceBuyOrder( void ) {
-  Order::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
+  Order::pInstrument_t instrument( new Instrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
 }
 
 void CProcess::PlaceSellOrder( void ) {
-  Order::pInstrument_t instrument( new CInstrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
+  Order::pInstrument_t instrument( new Instrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
 }
 

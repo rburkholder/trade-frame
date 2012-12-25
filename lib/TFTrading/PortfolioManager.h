@@ -49,7 +49,7 @@ public:
 
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
-  typedef CInstrument::pInstrument_cref pInstrument_cref;
+  typedef Instrument::pInstrument_cref pInstrument_cref;
   typedef CPosition::pProvider_t pProvider_t;
 
   typedef std::pair<const CPosition&, const CExecution&> execution_pair_t;

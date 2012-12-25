@@ -63,14 +63,16 @@ private:
   };
   size_t m_nAttempts;  // how many times entered - try a position up to three times?
   enumTradingState m_stateTrading;
-  double m_dblOpen;
   double m_dblStop;
+  double m_dblStopDifference;  // used for trailing stop
+
+  bool m_bSetOpen;
+  double m_dblOpen;
 
   pPosition_t m_pPosition;
 
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
-  void HandleOpen( const ou::tf::Trade& trade );
   void HandleBar( const ou::tf::Bar& bar );
 
   // one shot inherited states:

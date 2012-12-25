@@ -28,6 +28,7 @@ ManagePosition::ManagePosition( const std::string& sName, const ou::tf::Bar& bar
   m_bToBeTraded( false ), m_barInfo( bar ), 
   m_dblFundsToTrade( 0 ), m_bfTrades( 60 ),
   m_bCountBars( false ), m_nRHBars( 0 ),
+  m_bSetOpen( false ), m_dblOpen( 0.0 ),
   m_stateTrading( TSWaitForEntry ), m_nAttempts( 0 )
 {
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ManagePosition::HandleBar ) );
@@ -70,11 +71,13 @@ void ManagePosition::HandleBar( const ou::tf::Bar& bar ) {
 }
 
 void ManagePosition::HandleTrade( const ou::tf::Trade& trade ) {
+  if ( m_bSetOpen ) { 
+    m_dblOpen = trade.Price();
+    m_bSetOpen = false;
+    std::cout << trade.DateTime() << ": Open " << m_pPosition->GetInstrument()->GetInstrumentName() << "@" << trade.Price() << std::endl;
+  }
   m_trades.Append( trade );
   m_bfTrades.Add( trade );
-}
-
-void ManagePosition::HandleOpen( const ou::tf::Trade& trade ) {
 }
 
 void ManagePosition::SaveSeries( const std::string& sPrefix ) {
@@ -85,7 +88,7 @@ void ManagePosition::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pPosition->GetInstrument()->GetInstrumentName();
-    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm, true, true );
     wtsQuotes.Write( sPathName, &m_quotes );
     ou::tf::HDF5Attributes attrQuotes( dm, sPathName, ou::tf::InstrumentType::Stock );
     attrQuotes.SetProviderType( m_pPosition->GetDataProvider()->ID() );
@@ -93,7 +96,7 @@ void ManagePosition::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_trades.Size() ) {
     sPathName = sPrefix + "/trades/" + m_pPosition->GetInstrument()->GetInstrumentName();
-    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
+    ou::tf::HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm, true, true );
     wtsTrades.Write( sPathName, &m_trades );
     ou::tf::HDF5Attributes attrTrades( dm, sPathName, ou::tf::InstrumentType::Stock );
     attrTrades.SetProviderType( m_pPosition->GetDataProvider()->ID() );
@@ -108,40 +111,43 @@ ou::tf::DatedDatum::volume_t ManagePosition::CalcShareCount( double dblFunds ) {
 }
 
 void ManagePosition::HandleBellHeard( void ) {
+  m_bSetOpen = true;
   m_bCountBars = true;
 }
 
 void ManagePosition::HandleCancel( void ) {
+  std::cout << "EOD Cancel " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   m_pPosition->CancelOrders();
 }
 
 void ManagePosition::HandleGoNeutral( void ) {
+  std::cout << "EOD Close " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   m_pPosition->ClosePosition();
 }
 
 void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
   // use stop of open, or bottom of first bar of series?
-  if ( 1 == m_nRHBars ) {
-    m_dblOpen = bar.Open();
-  }
   switch ( m_stateTrading ) {
   case TSWaitForEntry:
-    if ( 3 <= m_nRHBars ) {
+    if ( 5 <= m_nRHBars ) { // skip the two bars surrounding the open
       ou::tf::Bars::const_reference bar1( m_bars.Ago( 2 ) );
       ou::tf::Bars::const_reference bar2( m_bars.Ago( 1 ) );
       ou::tf::Bars::const_reference bar3( m_bars.Ago( 0 ) );
       if ( m_dblOpen < bar.Open() ) { // test for rising from open
         if ( 
-          ( bar1.Open() < bar2.Open() ) && 
-          ( bar2.Open() < bar3.Open() ) && 
+//          ( bar1.Open() < bar2.Open() ) && 
+//          ( bar2.Open() < bar3.Open() ) && 
           ( bar1.High() < bar2.High() ) && 
           ( bar2.High() < bar3.High() ) && 
           ( bar1.Low() < bar2.Low() ) && 
           ( bar2.Low() < bar3.Low() ) && 
-          ( bar1.Close() < bar3.Close() ) ) { 
+          ( bar1.Close() < bar3.Close() ) 
+          ) { 
             // open a long position
             m_nAttempts++;
             m_dblStop = bar1.Low();
+            m_dblStopDifference = bar3.High() - bar1.Low();
+            std::cout << bar.DateTime() << ": Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
             m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
             m_stateTrading = TSMonitorLong;
         }
@@ -149,16 +155,19 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
       else {
         if ( m_dblOpen > bar.Open() ) { // test for falling from open
           if ( 
-            ( bar1.Open() > bar2.Open() ) && 
-            ( bar2.Open() > bar3.Open() ) && 
+//            ( bar1.Open() > bar2.Open() ) && 
+//            ( bar2.Open() > bar3.Open() ) && 
             ( bar1.High() > bar2.High() ) && 
             ( bar2.High() > bar3.High() ) && 
             ( bar1.Low() > bar2.Low() ) && 
             ( bar2.Low() > bar3.Low() ) && 
-            ( bar1.Close() > bar3.Close() ) ) { 
+            ( bar1.Close() > bar3.Close() ) 
+            ) { 
               // open a short position
               m_nAttempts++;
               m_dblStop = bar1.High();
+              m_dblStopDifference = bar1.High() - bar3.Low();
+              std::cout << bar.DateTime() << ": Short " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
               m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
               m_stateTrading = TSMonitorShort;
           }
@@ -170,25 +179,31 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
 }
 
 void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
-  // need parabolic stop
+  // need parabolic stop, use trailing stop for now
   // also need over all risk management of 3% loss of total investment
   switch ( m_stateTrading ) {
   case TSMonitorLong:
     if ( quote.Ask() < m_dblStop ) {
+      std::cout << quote.DateTime() << ": Long Stop (" << m_nAttempts << ") " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+      m_pPosition->CancelOrders();
       m_pPosition->ClosePosition();
-      m_stateTrading = TSNoMore;
-      if ( 3 > m_nAttempts ) {
-        m_stateTrading = TSWaitForEntry;
-      }
+      m_nRHBars = 3;
+      m_stateTrading = ( 3 > m_nAttempts ) ? TSWaitForEntry : TSNoMore;
+    }
+    else {
+      m_dblStop = std::max<double>( m_dblStop, quote.Ask() - m_dblStopDifference );
     }
     break;
   case TSMonitorShort:
     if ( quote.Bid() > m_dblStop ) {
+      std::cout << quote.DateTime() << ": Short Stop (" << m_nAttempts << ") " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+      m_pPosition->CancelOrders();
       m_pPosition->ClosePosition();
-      m_stateTrading = TSNoMore;
-      if ( 3 > m_nAttempts ) {
-        m_stateTrading = TSWaitForEntry;
-      }
+      m_nRHBars = 3;
+      m_stateTrading = ( 3 > m_nAttempts ) ? TSWaitForEntry : TSNoMore;
+    }
+    else {
+      m_dblStop = std::min<double>( m_dblStop, quote.Bid() + m_dblStopDifference );
     }
     break;
   }

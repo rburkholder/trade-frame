@@ -23,13 +23,13 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-InstrumentData::InstrumentData( const CInstrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
+InstrumentData::InstrumentData( const Instrument::pInstrument_t& pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), m_nSignificantDigits( nSigDigits )
 {
   Init();
 }
 
-InstrumentData::InstrumentData( CInstrument* pInstrument, unsigned int nSigDigits ) 
+InstrumentData::InstrumentData( Instrument* pInstrument, unsigned int nSigDigits ) 
   : m_pInstrument( pInstrument ), m_nSignificantDigits( nSigDigits )
 {
   Init();

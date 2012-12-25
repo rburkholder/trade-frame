@@ -1239,10 +1239,10 @@ void CGTScalpDlg::OnBnClickedBtnorder() {
     m_pExecutionProvider->GetAlternateInstrumentName( sOriginalSymbolName, &sAlternateSymbolName );
     if ( 0 == sAlternateSymbolName.size() ) throw std::invalid_argument( "Couldn't find alternate name" );
 
-//    CInstrument *pInstrument = NULL;
+//    Instrument *pInstrument = NULL;
     CInstrumentFile file;
     file.OpenIQFSymbols();
-    CInstrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sAlternateSymbolName ) );
+    Instrument::pInstrument_t pInstrument( file.CreateInstrumentFromIQFeed( sOriginalSymbolName, sAlternateSymbolName ) );
     file.CloseIQFSymbols();
 
     if ( OrderSide::Unknown == m_eOrderSide ) throw std::invalid_argument( "No Order Side" );
@@ -1506,7 +1506,7 @@ void CGTScalpDlg::OnBnClickedBtnskunk() {
       std::cout  << "A provider was not found" << std::endl;
     }
     else {
-      CInstrument::pInstrument_t pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
+      Instrument::pInstrument_t pInstrument = CInstrumentManager::Instance().GetIQFeedInstrument( sSymbol );
       CCalcAboveBelow *pCalc = new CCalcAboveBelow( pInstrument, pData, pExec );
       m_vCalcAB.push_back( pCalc );
       pCalc->Start();

@@ -46,7 +46,7 @@ private:
 
   typedef ou::tf::CPosition::pOrder_t pOrder_t;
   typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   pInstrument_t m_pInstrument;
   ou::tf::CPortfolio m_portfolio;
   pPosition_t m_pPosition;

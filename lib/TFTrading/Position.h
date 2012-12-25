@@ -52,8 +52,8 @@ public:
 
   typedef CProviderInterfaceBase::pProvider_t pProvider_t;
 
-  typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_cref pInstrument_cref;
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_cref pInstrument_cref;
 
   typedef Order::idOrder_t idOrder_t;
   typedef Order::pOrder_t pOrder_t;

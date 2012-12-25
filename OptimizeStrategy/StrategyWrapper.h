@@ -26,7 +26,7 @@
 class StrategyWrapper {
 public:
 
-  typedef ou::tf::CInstrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef StrategyEquity::fdEvaluate_t fdEvaluate_t;
 
   StrategyWrapper(void);

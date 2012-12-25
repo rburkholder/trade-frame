@@ -70,6 +70,9 @@ private:
 
   wxTimer m_timerGuiRefresh;
 
+  double m_dblMaxPL;
+  double m_dblMinPL;
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );

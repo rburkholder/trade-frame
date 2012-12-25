@@ -104,10 +104,12 @@ void ManagePortfolio::AddSymbol( const std::string& sName, const ou::tf::Bar& ba
 }
 
 void ManagePortfolio::SaveSeries( const std::string& sPrefix ) {
+  std::cout << "Saving ... ";
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
   BOOST_FOREACH( mapPositions_pair_t pair, m_mapPositions ) {
     pair.second->SaveSeries( sPath );
   }
+  std::cout << "done." << std::endl;
 }
 
 // comes in on a different thread, so no gui operations

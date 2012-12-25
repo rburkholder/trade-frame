@@ -88,3 +88,8 @@ void PanelPortfolioStats::CreateControls() {
 
 }
 
+void PanelPortfolioStats::SetStats( const std::string& sMin, const std::string& sCurrent, const std::string& sMax ) {
+  m_txtPortfolioLow->SetValue( sMin );
+  m_txtPortfolioCurrent->SetValue( sCurrent );
+  m_txtPortfolioHigh->SetValue( sMax );
+}

@@ -567,7 +567,7 @@ void StrategyTradeOptions::HandlePositionsLoad( pPosition_t pPosition ) {
 
 //  if ( 0 == pPosition->GetRow().nPositionActive ) return; // ignore zero size positions
 
-  ou::tf::CInstrument::pInstrument_cref pInstrument( pPosition->GetInstrument() );
+  ou::tf::Instrument::pInstrument_cref pInstrument( pPosition->GetInstrument() );
   assert( pInstrument->IsOption() );  // ensure everything is an option, underlying is being tracked but not traded, yet
 
   double strike = pInstrument->GetStrike();

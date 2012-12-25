@@ -55,7 +55,7 @@ private:
 
   unsigned int m_cntInstruments;
 
-  CInstrument::TableRowDef m_rowInstrument;
+  Instrument::TableRowDef m_rowInstrument;
 
   OnPopulateCompleteHandler_t OnPopulateComplete;
 
@@ -131,8 +131,8 @@ void PopulateOptions::HandleOptionContractNotFound( void ) {
 template<class DB>
 void PopulateOptions::HandleOptionContractDetails( const ContractDetails& details ) {
   IBTWS::pInstrument_t pInstrument = m_tws->BuildInstrumentFromContract( details.summary );
-  ou::db::QueryFields<CInstrument::TableRowDef>::pQueryFields_t pInsert 
-    = session.Insert<CInstrument::TableRowDef>( pInstrument->GetRow() );
+  ou::db::QueryFields<Instrument::TableRowDef>::pQueryFields_t pInsert 
+    = session.Insert<Instrument::TableRowDef>( pInstrument->GetRow() );
   ++m_cntInstruments;
 }
 

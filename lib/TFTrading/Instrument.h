@@ -33,14 +33,14 @@ using namespace boost::posix_time;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CInstrument {
+class Instrument {
 public:
 
   typedef keytypes::eidProvider_t eidProvider_t;  // from CProviderInterfaceBase in ProviderInterface.h
   typedef keytypes::idExchange_t idExchange_t;
   typedef keytypes::idInstrument_t idInstrument_t;
   typedef const idInstrument_t& idInstrument_cref;
-  typedef boost::shared_ptr<CInstrument> pInstrument_t;
+  typedef boost::shared_ptr<Instrument> pInstrument_t;
   typedef const pInstrument_t& pInstrument_cref;
 
   struct TableRowDef {
@@ -165,36 +165,36 @@ public:
     }
   };
 
-  CInstrument( const TableRowDef& row );  // regular instruments
-  CInstrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
-  CInstrument( // equity / generic creation
+  Instrument( const TableRowDef& row );  // regular instruments
+  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
+  Instrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName 
      );
-  CInstrument(   // future
+  Instrument(   // future
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month );
-  CInstrument(   // option with yymm
+  Instrument(   // option with yymm
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument(   // option with yymmdd
+  Instrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
     pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
-  CInstrument(  // currency
+  Instrument(  // currency
     const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
     InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
-  virtual ~CInstrument(void);
+  virtual ~Instrument(void);
 
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
   idInstrument_cref GetUnderlyingName( void );
@@ -260,7 +260,7 @@ public:
   void SetTimeTrading( const ptime& dtOpen, const ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
   const dtrMarketOpenClose_t& GetTimeTrading( void ) const { return m_dtrTimeTrading; };
 
-  bool operator==( const CInstrument& rhs ) const;
+  bool operator==( const Instrument& rhs ) const;
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
@@ -287,8 +287,8 @@ private:
   dtrMarketOpenClose_t m_dtrTimeLiquid;
   dtrMarketOpenClose_t m_dtrTimeTrading;
 
-  CInstrument( const CInstrument& );  // copy ctor
-  CInstrument& operator=( const CInstrument& ); // assignement
+  Instrument( const Instrument& );  // copy ctor
+  Instrument& operator=( const Instrument& ); // assignement
 };
 
 } // namespace tf

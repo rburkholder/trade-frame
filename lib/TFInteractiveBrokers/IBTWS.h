@@ -61,7 +61,7 @@ public:
   typedef boost::shared_ptr<IBTWS> pProvider_t;
   typedef CProviderInterface<IBTWS, IBSymbol> ProviderInterface_t;
   typedef IBSymbol::pSymbol_t pSymbol_t;
-  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_t pInstrument_t;
   typedef Order::pOrder_t pOrder_t;
   typedef int reqId_t;  // request id type
   typedef ::Contract Contract;

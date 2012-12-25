@@ -27,7 +27,7 @@ Order::Order(void) {
 }
 
 Order::Order( // market order
-  CInstrument::pInstrument_cref pInstrument,
+  Instrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,
@@ -45,7 +45,7 @@ Order::Order( // market order
 }
 
 Order::Order( // limit or stop
-  CInstrument::pInstrument_cref pInstrument,
+  Instrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,
@@ -64,7 +64,7 @@ Order::Order( // limit or stop
 }
 
 Order::Order( // limit and stop
-  CInstrument::pInstrument_cref pInstrument,
+  Instrument::pInstrument_cref pInstrument,
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide, 
   boost::uint32_t nOrderQuantity,

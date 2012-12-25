@@ -46,7 +46,7 @@ class COrderManager: public ManagerBase<COrderManager> {
 public:
 
   typedef keytypes::idInstrument_t idInstrument_t;
-  typedef CInstrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_t pInstrument_t;
 
   typedef keytypes::idPosition_t idPosition_t;
 
@@ -59,19 +59,19 @@ public:
   COrderManager(void);
   ~COrderManager(void);
   pOrder_t ConstructOrder( // market order
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, 
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit or stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1,  
     idPosition_t idPosition = 0
     );
   pOrder_t ConstructOrder( // limit and stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition = 0

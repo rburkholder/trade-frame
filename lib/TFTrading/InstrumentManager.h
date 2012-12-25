@@ -32,10 +32,10 @@ class CInstrumentManager
   : public ManagerBase<CInstrumentManager> {
 public:
 
-  typedef CInstrument::pInstrument_t pInstrument_t;
-  typedef CInstrument::pInstrument_cref pInstrument_cref;
-  typedef CInstrument::idInstrument_t idInstrument_t;
-  typedef CInstrument::idInstrument_cref idInstrument_cref;
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef Instrument::pInstrument_cref pInstrument_cref;
+  typedef Instrument::idInstrument_t idInstrument_t;
+  typedef Instrument::idInstrument_cref idInstrument_cref;
 
   CInstrumentManager(void);
   ~CInstrumentManager(void);
@@ -105,8 +105,8 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
   void HandlePopulateTables( ou::db::Session& session );
 
-  void HandleAlternateNameAdded( const CInstrument::AlternateNameChangeInfo_t& );
-  void HandleAlternateNameChanged( const CInstrument::AlternateNameChangeInfo_t& );
+  void HandleAlternateNameAdded( const Instrument::AlternateNameChangeInfo_t& );
+  void HandleAlternateNameChanged( const Instrument::AlternateNameChangeInfo_t& );
 };
 
 namespace InstrumentManagerQueries {

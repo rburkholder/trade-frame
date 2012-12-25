@@ -42,7 +42,7 @@ Order::idOrder_t COrderManager::CheckOrderId( idOrder_t id ) {
 }
 
 COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, 
     idPosition_t idPosition
@@ -54,7 +54,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // market order
 }
 
 COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1,  
     idPosition_t idPosition
@@ -67,7 +67,7 @@ COrderManager::pOrder_t COrderManager::ConstructOrder( // limit or stop
 }
 
 COrderManager::pOrder_t COrderManager::ConstructOrder( // limit and stop
-    CInstrument::pInstrument_cref instrument, 
+    Instrument::pInstrument_cref instrument, 
     OrderType::enumOrderType eOrderType, OrderSide::enumOrderSide eOrderSide, 
     boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2,
     idPosition_t idPosition
