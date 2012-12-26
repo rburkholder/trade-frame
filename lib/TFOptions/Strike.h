@@ -23,6 +23,8 @@ namespace option { // options
 class Strike {
 public:
 
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+
   Strike( void );  // for construction in std::Map
   Strike( double dblStrike );
   Strike( const Strike& rhs );
@@ -35,8 +37,14 @@ public:
 
   double GetStrike( void ) const { return m_dblStrike; };
 
-  void AssignCall( Instrument::pInstrument_t pInstrument ) { assert( 0 == m_call.use_count() ); m_call.reset( new ou::tf::option::Call( pInstrument ) ); };
-  void AssignPut( Instrument::pInstrument_t pInstrument )  { assert( 0 == m_put.use_count() );  m_put.reset( new ou::tf::option::Put( pInstrument ) ); };
+  void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) { 
+    assert( 0 == m_call.use_count() ); 
+    m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider, pGreekProvider ) ); 
+  };
+  void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )  { 
+    assert( 0 == m_put.use_count() );  
+    m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider, pGreekProvider ) ); 
+  };
 
   Call* Call( void ) { return m_call.get(); };
   Put*  Put( void )  { return m_put.get(); };

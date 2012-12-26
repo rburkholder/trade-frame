@@ -32,7 +32,7 @@ ThreadMain::ThreadMain(enumMode eMode)
   }
 
   m_db.Open( sDbName );
-  m_pProcess = new CProcess( eMode, m_db );
+  m_pProcess = new Process( eMode, m_db );
 
 }
 

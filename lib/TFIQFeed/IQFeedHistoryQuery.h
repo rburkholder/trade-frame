@@ -250,11 +250,11 @@ namespace HistoryStructs {
 
 // T: CRTP inheriting class, U: type passed in for reference by inheriting class
 template <typename T>
-class HistoryQuery: public ou::CNetwork<HistoryQuery<T> > {
-  friend ou::CNetwork<HistoryQuery<T> >;
+class HistoryQuery: public ou::Network<HistoryQuery<T> > {
+  friend ou::Network<HistoryQuery<T> >;
 public:
 
-  typedef typename ou::CNetwork<HistoryQuery<T> > inherited_t;
+  typedef typename ou::Network<HistoryQuery<T> > inherited_t;
 
   typedef typename ou::tf::iqfeed::HistoryStructs::structTickDataPoint structTickDataPoint;
   typedef typename ou::tf::iqfeed::HistoryStructs::structInterval structInterval;
@@ -347,7 +347,7 @@ private:
 
 template <typename T>
 HistoryQuery<T>::HistoryQuery( void ) 
-: CNetwork<HistoryQuery<T> >( "127.0.0.1", 9100 ),
+: Network<HistoryQuery<T> >( "127.0.0.1", 9100 ),
   m_stateRetrieval( RETRIEVE_IDLE )
 {
   m_ruleEndMsg = qi::lit( "!ENDMSG!" );

@@ -75,7 +75,7 @@ till next multiple to ensure a ways above average price
 
 #define testing
 
-CProcess::CProcess(enumMode eMode, DB& db)
+Process::Process(enumMode eMode, DB& db)
 :
   m_bIBConnected( false ), m_bIQFeedConnected( false ), m_bSimConnected( false ),
   m_contractidUnderlying( 0 ),
@@ -122,7 +122,7 @@ CProcess::CProcess(enumMode eMode, DB& db)
 
   m_contract.expiry = boost::gregorian::to_iso_string( m_dExpiry );
 
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &CProcess::HandlePopulateDatabase ) );
+  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &Process::HandlePopulateDatabase ) );
 
   m_idPortfolio = "dn01-" + m_sSymbolName + "-" + m_contract.expiry;  // needs to come before database open
 
@@ -152,49 +152,49 @@ CProcess::CProcess(enumMode eMode, DB& db)
 
 //  m_db.Open( sDbName );
 
-  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
+  m_pExecutionProvider->OnConnected.Add( MakeDelegate( this, &Process::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Add( MakeDelegate( this, &Process::HandleOnExecDisconnected ) );
 
-  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnDataConnected ) );
-  m_pDataProvider->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnDataDisconnected ) );
+  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Process::HandleOnDataConnected ) );
+  m_pDataProvider->OnDisconnected.Add( MakeDelegate( this, &Process::HandleOnDataDisconnected ) );
 
-  m_iqfeed->OnConnected.Add( MakeDelegate( this, &CProcess::HandleOnData2Connected ) );
-  m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
+  m_iqfeed->OnConnected.Add( MakeDelegate( this, &Process::HandleOnData2Connected ) );
+  m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &Process::HandleOnData2Disconnected ) );
 }
 
-CProcess::~CProcess(void) {
+Process::~Process(void) {
 
   m_posUnderlying.reset();
   m_posPut.reset();
 
   m_pPortfolio.reset();
 
-  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnExecConnected ) );
-  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnExecDisconnected ) );
+  m_pExecutionProvider->OnConnected.Remove( MakeDelegate( this, &Process::HandleOnExecConnected ) );
+  m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &Process::HandleOnExecDisconnected ) );
 
-  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnDataConnected ) );
-  m_pDataProvider->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnDataDisconnected ) );
+  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Process::HandleOnDataConnected ) );
+  m_pDataProvider->OnDisconnected.Remove( MakeDelegate( this, &Process::HandleOnDataDisconnected ) );
 
-  m_iqfeed->OnConnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Connected ) );
-  m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &CProcess::HandleOnData2Disconnected ) );
+  m_iqfeed->OnConnected.Remove( MakeDelegate( this, &Process::HandleOnData2Connected ) );
+  m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &Process::HandleOnData2Disconnected ) );
 
 //  m_db.Close();
 }
 
-void CProcess::EnterTrade( const std::string& sSymbol ) {
+void Process::EnterTrade( const std::string& sSymbol ) {
 }
 
-void CProcess::PauseTrade( void ) {
+void Process::PauseTrade( void ) {
 }
 
-void CProcess::ExitTrade( void ) {
+void Process::ExitTrade( void ) {
 }
 
-void CProcess::SetDataConnection( enumDataConnection dc ) {
+void Process::SetDataConnection( enumDataConnection dc ) {
 }
 
 // Simulation Engine Connect/Disconnect
-void CProcess::SimConnect( void ) {
+void Process::SimConnect( void ) {
   if ( !m_bSimConnected ) {
     
     m_sim->Connect();
@@ -204,15 +204,15 @@ void CProcess::SimConnect( void ) {
   }
 }
 
-void CProcess::SimStart( void ) {
+void Process::SimStart( void ) {
   m_sim->Run();
 }
 
-void CProcess::SimStop( void ) {
+void Process::SimStop( void ) {
   m_sim->Stop();
 }
 
-void CProcess::SimDisconnect( void ) {
+void Process::SimDisconnect( void ) {
   if ( m_bSimConnected ) {
     m_sim->Disconnect();
     m_bSimConnected = false;
@@ -220,7 +220,7 @@ void CProcess::SimDisconnect( void ) {
 }
 
 // Interactive Brokers Connect/Disconnect
-void CProcess::IBConnect( void ) {
+void Process::IBConnect( void ) {
   if ( !m_bIBConnected ) {
     
     m_tws->Connect();
@@ -228,7 +228,7 @@ void CProcess::IBConnect( void ) {
   }
 }
 
-void CProcess::IBDisconnect( void ) {
+void Process::IBDisconnect( void ) {
   if ( m_bIBConnected ) {
     m_tws->Disconnect();
     m_bIBConnected = false;
@@ -236,7 +236,7 @@ void CProcess::IBDisconnect( void ) {
 }
 
 // IQFeed Connect/Disconnect
-void CProcess::IQFeedConnect( void ) {
+void Process::IQFeedConnect( void ) {
   if ( !m_bIQFeedConnected ) {
     
     m_iqfeed->Connect();
@@ -244,40 +244,40 @@ void CProcess::IQFeedConnect( void ) {
   }
 }
 
-void CProcess::IQFeedDisconnect( void ) {
+void Process::IQFeedDisconnect( void ) {
   if ( m_bIQFeedConnected ) {
     m_iqfeed->Disconnect();
     m_bIQFeedConnected = false;
   }
 }
 
-void CProcess::HandleOnDataConnected(int e) {
+void Process::HandleOnDataConnected(int e) {
   m_bDataConnected = true;
   HandleOnConnected(e);
-//  HistoryQuery<CProcess>::Connect();  
+//  HistoryQuery<Process>::Connect();  
 }
 
-void CProcess::HandleOnDataDisconnected(int e) {
+void Process::HandleOnDataDisconnected(int e) {
   m_bDataConnected = false;
   HandleOnConnected(e);
 }
 
-void CProcess::HandleOnData2Connected(int e) {
-  HistoryQuery<CProcess>::Connect();  
+void Process::HandleOnData2Connected(int e) {
+  HistoryQuery<Process>::Connect();  
   m_bData2Connected = true;
   HandleOnConnected( e );
 }
 
-void CProcess::HandleOnData2Disconnected(int e) {
+void Process::HandleOnData2Disconnected(int e) {
   m_bData2Connected = false;
   HandleOnConnected( e );
 }
 
-void CProcess::OnHistoryConnected( void ) {
-  HistoryQuery<CProcess>::RetrieveNEndOfDays( m_sSymbolName, 1 );
+void Process::OnHistoryConnected( void ) {
+  HistoryQuery<Process>::RetrieveNEndOfDays( m_sSymbolName, 1 );
 }
 
-void CProcess::HandleOnExecConnected(int e) {
+void Process::HandleOnExecConnected(int e) {
   // is this called only from program, or does a port reconnect also call this?  if so, some logic in connect/disconnect needs to be fixed
 
   if ( m_bExecConnected ) {
@@ -302,13 +302,13 @@ void CProcess::HandleOnExecConnected(int e) {
         catch (...) {
           // otherwise request the contract information
           m_contract.secType = "STK";
-          //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListing ) );
-          //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
+          //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &Process::HandleUnderlyingListing ) );
+          //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &Process::HandleUnderlyingListingDone ) );
           //m_tws->RequestContractDetails( m_contract );
           m_tws->RequestContractDetails( 
             m_contract, 
-            MakeDelegate( this, &CProcess::HandleUnderlyingListing ), 
-            MakeDelegate( this, &CProcess::HandleUnderlyingListingDone ) );
+            MakeDelegate( this, &Process::HandleUnderlyingListing ), 
+            MakeDelegate( this, &Process::HandleUnderlyingListingDone ) );
         }
         break;
     }
@@ -318,16 +318,16 @@ void CProcess::HandleOnExecConnected(int e) {
   }
 }
 
-void CProcess::HandleOnExecDisconnected(int e) {
+void Process::HandleOnExecDisconnected(int e) {
   // what happens when a port disconnects?  will this be called?  If so, the logic needs to be changed to turn off only certain things
   m_bExecConnected = false;
   HandleOnConnected(e);
   m_ss.str( "" );
   m_ss << "Exec disconnected." << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleOnConnected( int e ) {
+void Process::HandleOnConnected( int e ) {
 
   if ( m_bConnectDone ) {
   }
@@ -374,41 +374,41 @@ void CProcess::HandleOnConnected( int e ) {
   }
 }
 
-void CProcess::AcquireSimulationSymbols( void ) {
+void Process::AcquireSimulationSymbols( void ) {
   HDF5IterateGroups scan;
-  scan.SetOnHandleObject( MakeDelegate( this, &CProcess::HandleHDF5Object ) );
-  scan.SetOnHandleGroup( MakeDelegate( this, &CProcess::HandleHDF5Group ) );
+  scan.SetOnHandleObject( MakeDelegate( this, &Process::HandleHDF5Object ) );
+  scan.SetOnHandleGroup( MakeDelegate( this, &Process::HandleHDF5Group ) );
   scan.Start( m_sPathForSeries );
 
   if ( 0 != m_mapStrikeInfo.size() ) 
-    throw std::runtime_error( "CProcess::AcquireSimulationSymbols strikes already set" );
+    throw std::runtime_error( "Process::AcquireSimulationSymbols strikes already set" );
   for ( strikes_iterator_t iter = m_mapStrikes.begin(); iter != m_mapStrikes.end(); ++ iter ) {
 
-    CStrikeInfo oi( iter->first );
+    StrikeInfo oi( iter->first );
     m_mapStrikeInfo[ iter->first ] = oi;
-    CStrikeInfo& poi = m_mapStrikeInfo.find( iter->first )->second;
+    StrikeInfo& poi = m_mapStrikeInfo.find( iter->first )->second;
 
-    poi.AssignCall( iter->second.first );
+    poi.AssignCall( iter->second.first, m_sim, m_sim );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleGreek ) );
+//    m_sim->AddQuoteHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleQuote ) );
+//    m_sim->AddTradeHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleTrade ) );
+//    m_sim->AddGreekHandler( iter->second.first, MakeDelegate( poi.Call(), &ou::tf::option::Call::HandleGreek ) );
 
-    poi.AssignPut( iter->second.second );
+    poi.AssignPut( iter->second.second, m_sim, m_sim );
     // change simulator sometime to accept these mid run
-    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleQuote ) );
-    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleTrade ) );
-    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleGreek ) );
+//    m_sim->AddQuoteHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleQuote ) );
+//    m_sim->AddTradeHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleTrade ) );
+//    m_sim->AddGreekHandler( iter->second.second, MakeDelegate( poi.Put(), &ou::tf::option::Put::HandleGreek ) );
 
     m_vCrossOverPoints.push_back( iter->first );
   }
 
   m_ss.str( "" );
   m_ss << "Simulation Symbols Acquired." << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
+void Process::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
 
   if ( m_bProcessSimTradingDayGroup ) {
     std::string underlying;
@@ -420,7 +420,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
     
     m_ss.str( "" );
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
     if ( 6 >= sName.size() ) {  // process as stock
       if ( !InstrumentManager::Instance().Exists( sName ) ) {
         m_pUnderlying = InstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
@@ -467,7 +467,7 @@ void CProcess::HandleHDF5Object( const std::string& sPath, const std::string& sN
   }
 }
 
-void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
+void Process::HandleHDF5Group( const std::string& sPath, const std::string& sName) {
   
   if ( 18 < sName.length() ) {
     m_sim->SetGroupDirectory( sPath );   // may need to do this conditionally on the following flag
@@ -479,12 +479,12 @@ void CProcess::HandleHDF5Group( const std::string& sPath, const std::string& sNa
   if ( m_bProcessSimTradingDayGroup ) 
     m_ss << "*";
   m_ss << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
 // --- listing 1 -- Underlying Contract
 
-void CProcess::HandleUnderlyingListing( const ContractDetails& details, const pInstrument_t& pInstrument ) {
+void Process::HandleUnderlyingListing( const ContractDetails& details, pInstrument_t& pInstrument ) {
 //  m_contractidUnderlying = details.summary.conId;
 //  try {
 //    m_pUnderlying = m_tws->GetSymbol( m_contractidUnderlying )->GetInstrument();
@@ -495,16 +495,16 @@ void CProcess::HandleUnderlyingListing( const ContractDetails& details, const pI
 //  }
   // need to check if it exists first, might already be in database
   m_pUnderlying = pInstrument;
-  ou::tf::InstrumentManager::Instance().Construct( m_pUnderlying );
+  ou::tf::InstrumentManager::Instance().Register( m_pUnderlying );
 }
 
-void CProcess::HandleUnderlyingListingDone(  ) {
+void Process::HandleUnderlyingListingDone(  ) {
 
   m_ss.str( "" );
   m_ss << "Underlying Contract Done" << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
-  m_db.SetOnNewInstrumentHandler( MakeDelegate( this, &CProcess::HandleStrikeFromDb ) );
+  m_db.SetOnNewInstrumentHandler( MakeDelegate( this, &Process::HandleStrikeFromDb ) );
   if ( m_db.LoadOptions( m_pUnderlying, m_dExpiry.year(), m_dExpiry.month(), m_dExpiry.day() ) ) {
     // options have been loaded through HandleStrikeFromDb
     HandleStrikeListingDone();
@@ -513,13 +513,13 @@ void CProcess::HandleUnderlyingListingDone(  ) {
     // request contract info for strike listing 
     m_contract.secType = "OPT";
     //m_contract.right = "CALL";  // get all calls and puts together
-    //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &CProcess::HandleStrikeFromIB ) );
-    //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+    //m_tws->SetOnContractDetailsHandler( MakeDelegate( this, &Process::HandleStrikeFromIB ) );
+    //m_tws->SetOnContractDetailsDoneHandler( MakeDelegate( this, &Process::HandleStrikeListingDone ) );
     //m_tws->RequestContractDetails( m_contract );
     m_tws->RequestContractDetails( 
       m_contract, 
-      MakeDelegate( this, &CProcess::HandleStrikeFromIB ), 
-      MakeDelegate( this, &CProcess::HandleStrikeListingDone ) );
+      MakeDelegate( this, &Process::HandleStrikeFromIB ), 
+      MakeDelegate( this, &Process::HandleStrikeListingDone ) );
   }
   m_db.SetOnNewInstrumentHandler( 0 );
   
@@ -527,7 +527,7 @@ void CProcess::HandleUnderlyingListingDone(  ) {
 
 // --- listing of strikes, listing of calls
 
-void CProcess::HandleStrikeFromIB( const ContractDetails& details, const pInstrument_t& ) {
+void Process::HandleStrikeFromIB( const ContractDetails& details, pInstrument_t& ) {
 
   // create strike entries
   IBSymbol::pSymbol_t pSymbol;
@@ -542,58 +542,58 @@ void CProcess::HandleStrikeFromIB( const ContractDetails& details, const pInstru
 //    pSymbol = m_tws->GetSymbol( pInstrument );  // creates symbol in provider map
   }
 
-  ou::tf::InstrumentManager::Instance().Construct( pInstrument );
+  ou::tf::InstrumentManager::Instance().Register( pInstrument );
   AddOptionToStrikeInfo( pInstrument );
 
 }
 
-void CProcess::HandleStrikeFromDb( pInstrument_t pInstrument ) {
+void Process::HandleStrikeFromDb( pInstrument_t pInstrument ) {
   m_tws->GetSymbol( pInstrument );  // preload symbol
   AddOptionToStrikeInfo( pInstrument );
 }
 
-void CProcess::AddOptionToStrikeInfo( pInstrument_t pInstrument ) {
+void Process::AddOptionToStrikeInfo( pInstrument_t pInstrument ) {
 
   double dblStrike = pInstrument->GetStrike();
 
   mapStrikeInfo_iter_t iter = m_mapStrikeInfo.find( dblStrike );
   if ( m_mapStrikeInfo.end() == iter ) {
-    CStrikeInfo oi( dblStrike );
+    StrikeInfo oi( dblStrike );
     m_mapStrikeInfo[ dblStrike ] = oi;
     m_vCrossOverPoints.push_back( dblStrike );
   }
   
   switch ( pInstrument->GetOptionSide() ) {
     case ou::tf::OptionSide::Call:
-      m_mapStrikeInfo[ dblStrike ].AssignCall( pInstrument );
+      m_mapStrikeInfo[ dblStrike ].AssignCall( pInstrument, m_pDataProvider, m_pDataProvider );
       break;
     case ou::tf::OptionSide::Put:
-      m_mapStrikeInfo[ dblStrike ].AssignPut( pInstrument );
+      m_mapStrikeInfo[ dblStrike ].AssignPut( pInstrument, m_pDataProvider, m_pDataProvider );
       break;
   }
 
   m_ss.str("");
   m_ss << "Option " << pInstrument->GetInstrumentName() << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleStrikeListingDone(  ) {
+void Process::HandleStrikeListingDone(  ) {
 
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
   // strike listing is complete
   m_ss.str( "" );
   m_ss << "#strikes: " << m_mapStrikeInfo.size() << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   // all done
   m_ss.str( "" );
   m_ss << "Option Acquisition Complete" << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
 }
 
-void CProcess::OnHistorySummaryData( structSummary* pDP ) {
+void Process::OnHistorySummaryData( structSummary* pDP ) {
   m_Bar.Open( pDP->Open );
   m_Bar.Close( pDP->Close );
   m_Bar.High( pDP->High );
@@ -603,8 +603,8 @@ void CProcess::OnHistorySummaryData( structSummary* pDP ) {
   ReQueueSummary( pDP );
 }
 
-void CProcess::OnHistoryRequestDone( void ) {
-  HistoryQuery<CProcess>::Disconnect();  
+void Process::OnHistoryRequestDone( void ) {
+  HistoryQuery<Process>::Disconnect();  
   CPivotSet pivots;
   pivots.CalcPivots( m_sSymbolName, m_Bar.High(), m_Bar.Low(), m_Bar.Close() );
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::R3 ) );
@@ -616,41 +616,41 @@ void CProcess::OnHistoryRequestDone( void ) {
   m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S3 ) );
 }
 
-void CProcess::StartWatch( void ) {
+void Process::StartWatch( void ) {
 
   std::sort( m_vCrossOverPoints.begin(), m_vCrossOverPoints.end() );
 
   m_iterOILatestGammaSelectCall = m_mapStrikeInfo.end();  // initialized for beginning of trading
   m_iterOILatestGammaSelectPut = m_mapStrikeInfo.end();  // initialized for beginning of trading
 
-  m_pDataProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-  m_pDataProvider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+  m_pDataProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &Process::HandleUnderlyingQuote ) );
+  m_pDataProvider->AddTradeHandler( m_pUnderlying, MakeDelegate( this, &Process::HandleUnderlyingTrade ) );
 
 }
 
-void CProcess::StopWatch( void ) {
+void Process::StopWatch( void ) {
 
-  m_pDataProvider->RemoveQuoteHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingQuote ) );
-  m_pDataProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &CProcess::HandleUnderlyingTrade ) );
+  m_pDataProvider->RemoveQuoteHandler( m_pUnderlying, MakeDelegate( this, &Process::HandleUnderlyingQuote ) );
+  m_pDataProvider->RemoveTradeHandler( m_pUnderlying, MakeDelegate( this, &Process::HandleUnderlyingTrade ) );
 
   if ( m_bWatchingOptions ) {
     m_bWatchingOptions = false;
     for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      CStrikeInfo& si = iter->second;
+      StrikeInfo& si = iter->second;
 
-      m_pDataProvider->RemoveQuoteHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleGreek ) );
+//      m_pDataProvider->RemoveQuoteHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleQuote ) );
+//      m_pDataProvider->RemoveTradeHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleTrade ) );
+//      m_pDataProvider->RemoveGreekHandler( si.Call()->GetInstrument(), MakeDelegate( si.Call(), &ou::tf::option::Call::HandleGreek ) );
 
-      m_pDataProvider->RemoveQuoteHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleQuote ) );
-      m_pDataProvider->RemoveTradeHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleTrade ) );
-      m_pDataProvider->RemoveGreekHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleGreek ) );
+//      m_pDataProvider->RemoveQuoteHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleQuote ) );
+//      m_pDataProvider->RemoveTradeHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleTrade ) );
+//      m_pDataProvider->RemoveGreekHandler( si.Put()->GetInstrument(),  MakeDelegate( si.Put(),  &ou::tf::option::Put::HandleGreek ) );
     }
   }
 }
 
-CProcess::mapStrikeInfo_iter_t CProcess::LocateOptionStrikeInfo( const pInstrument_t& pInstrument ) {
+Process::mapStrikeInfo_iter_t Process::LocateOptionStrikeInfo( const pInstrument_t& pInstrument ) {
 
   assert( 0 != m_mapStrikeInfo.size() );
   assert( ou::tf::InstrumentType::Option == pInstrument->GetInstrumentType() );
@@ -663,12 +663,12 @@ CProcess::mapStrikeInfo_iter_t CProcess::LocateOptionStrikeInfo( const pInstrume
     ++iter;
   }
   if ( iter == m_mapStrikeInfo.end() ) {
-    throw std::runtime_error( "CProcess::LocateOptionStrikeInfo: couldn't find StrikeInfo" );
+    throw std::runtime_error( "Process::LocateOptionStrikeInfo: couldn't find StrikeInfo" );
   }
   return iter;
 }
 
-void CProcess::CalculateHighGammaOption( void ) {
+void Process::CalculateHighGammaOption( void ) {
 
   double gammaCall = 0;
   double gammaPut = 0;
@@ -692,7 +692,7 @@ void CProcess::CalculateHighGammaOption( void ) {
 
 }
 
-void CProcess::OpenPositions( void ) {
+void Process::OpenPositions( void ) {
 
   int nPuts;
   int nLong;
@@ -720,7 +720,7 @@ void CProcess::OpenPositions( void ) {
     // don't buy anything if either side is zero
     m_ss.str( "" );
     m_ss << "count of puts are zero" << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
 //      m_nCalls = m_nPuts = 0;
   }
   else {
@@ -728,11 +728,11 @@ void CProcess::OpenPositions( void ) {
     try {
       // orders for normal delta neutral
       m_posUnderlying = PortfolioManager::Instance().ConstructPosition( m_idPortfolio, "U", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_pUnderlying );
-      m_posUnderlying->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+      m_posUnderlying->OnExecution.Add( MakeDelegate( this, &Process::HandlePositionExecution ) );
       m_posUnderlying->PlaceOrder( OrderType::Market, OrderSide::Buy, nLong );
 
       m_posPut = PortfolioManager::Instance().ConstructPosition( m_idPortfolio, "O", "same", "ib01", "ib01", m_pExecutionProvider, m_pDataProvider, m_iterOILatestGammaSelectPut->second.Put()->GetInstrument() );
-      m_posPut->OnExecution.Add( MakeDelegate( this, &CProcess::HandlePositionExecution ) );
+      m_posPut->OnExecution.Add( MakeDelegate( this, &Process::HandlePositionExecution ) );
       m_posPut->PlaceOrder( OrderType::Market, OrderSide::Buy, nPuts );
 
       m_bPositionsOpened = true;
@@ -741,10 +741,10 @@ void CProcess::OpenPositions( void ) {
       m_ss << "Opening Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
                             << ", P" << nPuts << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                             << std::endl;
-      OutputDebugString( m_ss.str().c_str() );
+//      OutputDebugString( m_ss.str().c_str() );
     }
     catch (...) {
-      throw std::runtime_error( "CProcess::OpenPositions error" );
+      throw std::runtime_error( "Process::OpenPositions error" );
     }
   }
 
@@ -752,15 +752,15 @@ void CProcess::OpenPositions( void ) {
   PrintGreeks();
 }
 
-void CProcess::StartTrading( void ) {
+void Process::StartTrading( void ) {
 
 }
 
-void CProcess::StopTrading( void ) {
+void Process::StopTrading( void ) {
 
 }
 
-void CProcess::HandleUnderlyingQuote( const Quote& quote ) {
+void Process::HandleUnderlyingQuote( const Quote& quote ) {
 //  m_ss.str( "" );
 //  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
@@ -789,41 +789,41 @@ void CProcess::HandleUnderlyingQuote( const Quote& quote ) {
       HandleAfterMarket( quote );
       break;
     default:
-      throw std::out_of_range( "CProcess::HandleUnderlyingQuote" );
+      throw std::out_of_range( "Process::HandleUnderlyingQuote" );
       break;
   };
 
 }
 
-void CProcess::HandleUnderlyingTrade( const Trade& trade ) {
+void Process::HandleUnderlyingTrade( const Trade& trade ) {
 
-  m_dblUnderlyingPrice = trade.Trade();
+  m_dblUnderlyingPrice = trade.Price();
   m_trades.Append( trade );
 
 }
 
-void CProcess::HandleTSFirstPass( const Quote& quote ) {
+void Process::HandleTSFirstPass( const Quote& quote ) {
   // may need to open portfoloio and evaluate existing positions here
   m_ss.str( "" );
   m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
   m_TradingState = ETSPreMarket;
 }
 
-void CProcess::HandleTSPreMarket( const Quote& quote ) {
+void Process::HandleTSPreMarket( const Quote& quote ) {
   ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpen ) {
     m_ss.str( "" );
     m_ss << dt;
     m_ss << " State:  Market Opened." << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
     m_TradingState = ETSMarketOpened;
     HandleTSMarketOpened( quote );
   }
 }
 
-void CProcess::HandleTSMarketOpened( const Quote& quote ) {
+void Process::HandleTSMarketOpened( const Quote& quote ) {
 
   double dblOpenValue = ( quote.Bid() + quote.Ask() ) / 2.0;
 
@@ -831,7 +831,7 @@ void CProcess::HandleTSMarketOpened( const Quote& quote ) {
   m_ss.str( "" );
   m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " Opening mid quote: " << dblOpenValue << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   // set iterators for center of the pack (crossovers are above and below trade):
   m_iterAboveCrossOver = m_vCrossOverPoints.begin();
@@ -846,7 +846,7 @@ void CProcess::HandleTSMarketOpened( const Quote& quote ) {
   // comment our crossover points
   m_ss.str( "" );
   m_ss << "Trade start " << *m_iterBelowCrossOver << ", " << dblOpenValue << ", " << *m_iterAboveCrossOver << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 
   // calculate where to have put/call option watches,
   //   have a range of strikes above and below current trade (have maximum 100 watches available)
@@ -870,29 +870,29 @@ void CProcess::HandleTSMarketOpened( const Quote& quote ) {
   if ( keytypes::EProviderSimulator != m_pDataProvider->ID() ) {
     for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-      CStrikeInfo& oi = iter->second;
+      StrikeInfo& oi = iter->second;
 
-      m_pDataProvider->AddQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleGreek ) );
+//      m_pDataProvider->AddQuoteHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleQuote ) );
+//      m_pDataProvider->AddTradeHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleTrade ) );
+//      m_pDataProvider->AddGreekHandler( oi.Call()->GetInstrument(), MakeDelegate( oi.Call(), &ou::tf::option::Call::HandleGreek ) );
 
-      m_pDataProvider->AddQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleQuote ) );
-      m_pDataProvider->AddTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleTrade ) );
-      m_pDataProvider->AddGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleGreek ) );
+//      m_pDataProvider->AddQuoteHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleQuote ) );
+//      m_pDataProvider->AddTradeHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleTrade ) );
+//      m_pDataProvider->AddGreekHandler( oi.Put()->GetInstrument(),  MakeDelegate( oi.Put(),  &ou::tf::option::Put::HandleGreek ) );
     }
   }
 
   m_TradingState = ETSFirstTrade;
 }
 
-void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
+void Process::HandleTSActiveMarketStart( const Quote& quote ) {
 
   ptime dt = ou::TimeSource::Instance().Internal();
   if ( dt.time_of_day() >= m_dtMarketOpeningOrder ) {
     m_ss.str( "" );
     m_ss << ou::TimeSource::Instance().Internal();
     m_ss << " State:  Opening Order." << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
 
     m_bTrading = true;
     if ( m_bPositionsOpened ) {
@@ -906,7 +906,7 @@ void CProcess::HandleTSActiveMarketStart( const Quote& quote ) {
   }
 }
 
-void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
+void Process::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
   m_ss.str( "" );
   ptime dt = ou::TimeSource::Instance().Internal();
   m_ss << dt;
@@ -914,10 +914,10 @@ void CProcess::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
     << OrderSide::Name[ pair.second.GetOrderSide() ] << " " 
     << pair.second.GetSize() << "@" << pair.second.GetPrice()
     << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandleTSTrading( const Quote& quote ) {
+void Process::HandleTSTrading( const Quote& quote ) {
 
 //  m_dblCallPrice = m_iterOILatestGammaSelectCall->Call()->Ask();
   m_dblPutPrice = m_iterOILatestGammaSelectPut->second.Put()->Ask();
@@ -927,7 +927,7 @@ void CProcess::HandleTSTrading( const Quote& quote ) {
     m_ss.str( "" );
     m_ss << dt;
     m_ss << " State:  Close Orders." << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
 
     m_TradingState = ETSCloseOrders;
   }
@@ -961,7 +961,7 @@ void CProcess::HandleTSTrading( const Quote& quote ) {
             m_ss.str( "" );
             m_ss << dt;
             m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
-            OutputDebugString( m_ss.str().c_str() );
+//            OutputDebugString( m_ss.str().c_str() );
         }
         else {
           if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
@@ -971,7 +971,7 @@ void CProcess::HandleTSTrading( const Quote& quote ) {
               m_ss.str( "" );
               m_ss << dt;
               m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
-              OutputDebugString( m_ss.str().c_str() );
+//              OutputDebugString( m_ss.str().c_str() );
           }
         }
 
@@ -987,7 +987,7 @@ void CProcess::HandleTSTrading( const Quote& quote ) {
   }
 }
 
-void CProcess::HandleTSCloseOrders( const Quote& quote ) {
+void Process::HandleTSCloseOrders( const Quote& quote ) {
 
   if ( m_bTrading ) {
 
@@ -998,7 +998,7 @@ void CProcess::HandleTSCloseOrders( const Quote& quote ) {
     m_ss << "Closing Delta N:  U" << nLong << "@" << m_dblUnderlyingPrice << " for " << 100 * nLong * m_dblUnderlyingPrice
                          << ", P" << nPuts             << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                           << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
 
     // orders for normal delta neutral
     m_posUnderlying->CancelOrders();
@@ -1017,15 +1017,15 @@ void CProcess::HandleTSCloseOrders( const Quote& quote ) {
     m_ss.str( "" );
     m_ss << dt;
     m_ss << " State:  After Market." << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
     m_TradingState = ETSAfterMarket;
   }
 }
 
-void CProcess::HandleAfterMarket( const Quote& quote ) {
+void Process::HandleAfterMarket( const Quote& quote ) {
 }
 
-void CProcess::PrintGreeks( void ) {
+void Process::PrintGreeks( void ) {
   m_ss.str( "" );
   m_ss << "Greeks: " 
     << ou::TimeSource::Instance().Internal()
@@ -1040,17 +1040,17 @@ void CProcess::PrintGreeks( void ) {
     << " Delta " << m_iterOILatestGammaSelectPut->second.Put()->Delta()
     << " Gamma " << m_iterOILatestGammaSelectPut->second.Put()->Gamma() 
     << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::SaveSeries( void ) {
+void Process::SaveSeries( void ) {
 
   m_ss.str( "" );
   m_ss << ou::TimeSource::Instance().Internal();
 
   if ( keytypes::EProviderSimulator == m_pDataProvider->ID() ) {
     m_ss << " simulator stores nothing." << std::endl;
-    OutputDebugString( m_ss.str().c_str() );
+//    OutputDebugString( m_ss.str().c_str() );
     return;
   }
 
@@ -1058,9 +1058,9 @@ void CProcess::SaveSeries( void ) {
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
-  HDF5WriteTimeSeries<Quotes, Quote> wtsQuotes( dm );
-  HDF5WriteTimeSeries<Trades, Trade> wtsTrades( dm );
-  HDF5WriteTimeSeries<Greeks, Greek> wtsGreeks( dm );
+  HDF5WriteTimeSeries<Quotes> wtsQuotes( dm );
+  HDF5WriteTimeSeries<Trades> wtsTrades( dm );
+  HDF5WriteTimeSeries<Greeks> wtsGreeks( dm );
 
   try {
     if ( 0 != m_quotes.Size() ) {
@@ -1086,68 +1086,12 @@ void CProcess::SaveSeries( void ) {
 
   for ( mapStrikeInfo_iter_t iter = m_iterOILowestWatch; iter != m_iterOIHighestWatch; ++iter ) {
 
-    CStrikeInfo& oi = iter->second;
+    StrikeInfo& oi = iter->second;
 
     try {
-      if ( 0 != oi.Call()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Call()->GetInstrument()->GetInstrumentName();
-        wtsQuotes.Write( sPathName, oi.Call()->Quotes() );
-        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
-          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
-          oi.Call()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
-
-      if ( 0 != oi.Call()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Call()->GetInstrument()->GetInstrumentName();
-        wtsTrades.Write( sPathName, oi.Call()->Trades() );
-        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
-          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
-          oi.Call()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
-
-      if ( 0 != oi.Call()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Call()->GetInstrument()->GetInstrumentName();
-        wtsGreeks.Write( sPathName, oi.Call()->Greeks() );
-        HDF5Attributes::structOption option( oi.Call()->GetInstrument()->GetStrike(), 
-          oi.Call()->GetInstrument()->GetExpiryYear(), oi.Call()->GetInstrument()->GetExpiryMonth(), oi.Call()->GetInstrument()->GetExpiryDay(),
-          oi.Call()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
-
-      if ( 0 != oi.Put()->Quotes()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/quotes/" + oi.Put()->GetInstrument()->GetInstrumentName();
-        wtsQuotes.Write( sPathName, oi.Put()->Quotes() );
-        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
-          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
-          oi.Put()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
-
-      if ( 0 != oi.Put()->Trades()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/trades/" + oi.Put()->GetInstrument()->GetInstrumentName();
-        wtsTrades.Write( sPathName, oi.Put()->Trades() );
-        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
-          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
-          oi.Put()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
-
-      if ( 0 != oi.Put()->Greeks()->Size() ) {
-        sPathName = m_sPathForSeries + "/" + m_ss.str() + "/greeks/" + oi.Put()->GetInstrument()->GetInstrumentName();
-        wtsGreeks.Write( sPathName, oi.Put()->Greeks() );
-        HDF5Attributes::structOption option( oi.Put()->GetInstrument()->GetStrike(), 
-          oi.Put()->GetInstrument()->GetExpiryYear(), oi.Put()->GetInstrument()->GetExpiryMonth(), oi.Put()->GetInstrument()->GetExpiryDay(),
-          oi.Put()->GetInstrument()->GetOptionSide() );
-        HDF5Attributes attributes( dm, sPathName, option );
-        attributes.SetProviderType( m_pDataProvider->ID() );
-      }
+      sPathName = m_sPathForSeries + "/" + m_ss.str();
+      oi.Call()->SaveSeries( sPathName );
+      oi.Put()->SaveSeries( sPathName );
     }
     catch (...) {
     }
@@ -1155,10 +1099,10 @@ void CProcess::SaveSeries( void ) {
   }
 
   m_ss << " done writing." << std::endl;
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::EmitStats( void ) {
+void Process::EmitStats( void ) {
 
   m_ss.str( "" );
   m_ss << ou::TimeSource::Instance().Internal();
@@ -1169,10 +1113,10 @@ void CProcess::EmitStats( void ) {
   }
   m_ss << std::endl;
 
-  OutputDebugString( m_ss.str().c_str() );
+//  OutputDebugString( m_ss.str().c_str() );
 }
 
-void CProcess::HandlePopulateDatabase( void ) {
+void Process::HandlePopulateDatabase( void ) {
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );

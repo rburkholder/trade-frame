@@ -27,6 +27,6 @@ protected:
 private:
   enumMode m_eMode;
   DB m_db;
-  CProcess* m_pProcess;
+  Process* m_pProcess;
 };
 

@@ -18,6 +18,7 @@
 #include "ThreadMain.h"
 
 class AppHedge : public wxApp {
+public:
   virtual bool OnInit();
   virtual int OnExit();
 protected:

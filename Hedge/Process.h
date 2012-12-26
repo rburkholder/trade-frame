@@ -46,10 +46,10 @@ using namespace ou::tf;
 // ==================
 //
 
-class CProcess: 
-  public HistoryQuery<CProcess>
+class Process: 
+  public ou::tf::iqfeed::HistoryQuery<Process>
 {
-  friend HistoryQuery<CProcess>;
+  friend ou::tf::iqfeed::HistoryQuery<Process>;
 public:
 
   enum enumDataConnection {
@@ -59,8 +59,8 @@ public:
   } m_eDataConn;
 
 
-  CProcess(enumMode eMode, DB& db);
-  ~CProcess(void);
+  Process(enumMode eMode, DB& db);
+  ~Process(void);
 
   void SetDataConnection( enumDataConnection );
 
@@ -91,7 +91,7 @@ public:
 protected:
 
   void OnHistoryConnected( void );
-  void OnHistorySummaryData( structSummary* pDP );
+  void OnHistorySummaryData( ou::tf::iqfeed::HistoryStructs::structSummary* pDP );
   void OnHistoryRequestDone( void );
   void OnHistoryDisconnected( void ) {};
 
@@ -109,7 +109,7 @@ private:
   typedef IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef SimulationProvider::pProvider_t pProviderSim_t;
 
-  typedef ou::tf::option::Strike CStrikeInfo;
+  typedef ou::tf::option::Strike StrikeInfo;
 
   typedef double strike_t;
 
@@ -182,8 +182,8 @@ private:
   std::vector<double>::iterator m_iterAboveCrossOver;
   std::vector<double>::iterator m_iterBelowCrossOver;
 
-  typedef std::map<double,CStrikeInfo> mapStrikeInfo_t;
-  typedef std::pair<double,CStrikeInfo> mapStrikeinfo_pair_t;
+  typedef std::map<double,StrikeInfo> mapStrikeInfo_t;
+  typedef std::pair<double,StrikeInfo> mapStrikeinfo_pair_t;
   typedef mapStrikeInfo_t::iterator mapStrikeInfo_iter_t;
   mapStrikeInfo_t m_mapStrikeInfo;
 
@@ -224,9 +224,9 @@ private:
   void HandleHDF5Object( const std::string& sPath, const std::string& sName);
   void HandleHDF5Group( const std::string& sPath, const std::string& sName );
 
-  void HandleUnderlyingListing( const ContractDetails&, const pInstrument_t& );  // underlying
+  void HandleUnderlyingListing( const ContractDetails&, pInstrument_t& );  // underlying
   void HandleUnderlyingListingDone( void );
-  void HandleStrikeFromIB( const ContractDetails& details, const pInstrument_t& );  // symbols for options
+  void HandleStrikeFromIB( const ContractDetails& details, pInstrument_t& );  // symbols for options
   void HandleStrikeFromDb( pInstrument_t );
   void HandleStrikeListingDone( void );
 

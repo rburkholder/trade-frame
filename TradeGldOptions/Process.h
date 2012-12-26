@@ -43,10 +43,10 @@
 
 using namespace ou::tf;
 
-class CProcess: 
-  public HistoryQuery<CProcess>
+class Process: 
+  public HistoryQuery<Process>
 {
-  friend HistoryQuery<CProcess>;
+  friend HistoryQuery<Process>;
 public:
 
   enum enumMode {
@@ -61,8 +61,8 @@ public:
   } m_eDataConn;
 
 
-  CProcess(void);
-  ~CProcess(void);
+  Process(void);
+  ~Process(void);
 
   void SetMode( enumMode );
   void SetDataConnection( enumDataConnection );

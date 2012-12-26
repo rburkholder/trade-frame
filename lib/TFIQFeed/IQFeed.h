@@ -37,11 +37,11 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 template <typename T>
-class IQFeed: public ou::CNetwork<IQFeed<T> > {
-  friend ou::CNetwork<IQFeed<T> >;
+class IQFeed: public ou::Network<IQFeed<T> > {
+  friend ou::Network<IQFeed<T> >;
 public:
 
-  typedef typename ou::CNetwork<IQFeed<T> > inherited_t;
+  typedef typename ou::Network<IQFeed<T> > inherited_t;
   typedef typename inherited_t::linebuffer_t linebuffer_t;
 
   IQFeed(void);
@@ -132,7 +132,7 @@ private:
 
 template <typename T>
 IQFeed<T>::IQFeed( void ) 
-: ou::CNetwork<IQFeed<T> >( "127.0.0.1", 5009 ),
+: ou::Network<IQFeed<T> >( "127.0.0.1", 5009 ),
   m_stateNews( NEWSISOFF )
 {
 }

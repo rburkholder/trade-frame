@@ -24,9 +24,9 @@
 
 #include "Process.h"
 
-CProcess::CProcess(void)
+Process::Process(void)
 : 
-//  CIQFeed<CProcess>(),
+//  CIQFeed<Process>(),
   m_tws( "U215226" ),
   m_bIBConnected( false ),
   m_pSymbol( NULL )
@@ -34,35 +34,35 @@ CProcess::CProcess(void)
   m_sSymbolName = "ICE";
 }
 
-CProcess::~CProcess(void)
+Process::~Process(void)
 {
 }
 
-void CProcess::IBConnect( void ) {
+void Process::IBConnect( void ) {
   if ( !m_bIBConnected ) {
     m_tws.Connect();
     m_bIBConnected = true;
   }
 }
 
-void CProcess::IBDisconnect( void ) {
+void Process::IBDisconnect( void ) {
   if ( m_bIBConnected ) {
     m_tws.Disconnect();
     m_bIBConnected = false;
   }
 }
 
-void CProcess::PlaceBuyOrder( void ) {
+void Process::PlaceBuyOrder( void ) {
   Order::pInstrument_t instrument( new Instrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Buy, 100 ) );
 }
 
-void CProcess::PlaceSellOrder( void ) {
+void Process::PlaceSellOrder( void ) {
   Order::pInstrument_t instrument( new Instrument( m_sSymbolName, "SMART", InstrumentType::Stock ) );
   m_tws.PlaceOrder( new Order( instrument, OrderType::Market, OrderSide::Sell, 100 ) );
 }
 
-void CProcess::OnIQFeedConnected( void ) {
+void Process::OnIQFeedConnected( void ) {
   std::vector<std::string> vs;
   vs.push_back( "@YM#" );
   vs.push_back( "INDU" );
@@ -70,24 +70,24 @@ void CProcess::OnIQFeedConnected( void ) {
   vs.push_back( "TRIN" );
 }
 
-void CProcess::OnIQFeedDisConnected( void ) {
+void Process::OnIQFeedDisConnected( void ) {
 }
 
-//void CProcess::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {
+//void Process::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, CIQFUpdateMessage* msg) {
 //}
 
-void CProcess::StartWatch( void ) {
+void Process::StartWatch( void ) {
   if ( ( NULL == m_pSymbol ) && ( m_bIBConnected ) ) {
     m_pSymbol = m_tws.GetSymbol( m_sSymbolName );
-    m_tws.AddQuoteHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnQuote ) );
-    m_tws.AddTradeHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnTrade ) );
+    m_tws.AddQuoteHandler( m_sSymbolName, MakeDelegate( this, &Process::HandleOnQuote ) );
+    m_tws.AddTradeHandler( m_sSymbolName, MakeDelegate( this, &Process::HandleOnTrade ) );
   }
 }
 
-void CProcess::StopWatch( void ) {
+void Process::StopWatch( void ) {
   if ( NULL != m_pSymbol ) {
-    m_tws.RemoveQuoteHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnQuote ) );
-    m_tws.RemoveTradeHandler( m_sSymbolName, MakeDelegate( this, &CProcess::HandleOnTrade ) );
+    m_tws.RemoveQuoteHandler( m_sSymbolName, MakeDelegate( this, &Process::HandleOnQuote ) );
+    m_tws.RemoveTradeHandler( m_sSymbolName, MakeDelegate( this, &Process::HandleOnTrade ) );
     m_pSymbol = NULL;
 
     std::stringstream ss;
@@ -112,14 +112,14 @@ void CProcess::StopWatch( void ) {
   }
 }
 
-void CProcess::HandleOnQuote(IBSymbol::quote_t quote) {
+void Process::HandleOnQuote(IBSymbol::quote_t quote) {
 //  std::stringstream ss;
 //  ss << "Q: " << quote.DateTime() << "," << quote.Bid() << "," << quote.Ask() << std::endl;
 //  OutputDebugString( ss.str().c_str() );
   m_vQuotes.Append( quote );
 }
 
-void CProcess::HandleOnTrade(IBSymbol::trade_t trade ) {
+void Process::HandleOnTrade(IBSymbol::trade_t trade ) {
 //  std::stringstream ss;
 //  ss << "T: " << trade.DateTime() << "," << trade.Volume() << "@" << trade.Trade() << std::endl;
 //  OutputDebugString( ss.str().c_str() );

@@ -20,14 +20,14 @@
 #include <LibInteractiveBrokers/IBTWS.h>
 //#include <LibIQFeed/IQFeed.h>
 
-class CProcess
+class Process
 //  : 
-//  public CIQFeed<CProcess>
+//  public CIQFeed<Process>
 {
-//  friend CIQFeed<CProcess>;
+//  friend CIQFeed<Process>;
 public:
-  CProcess( void );
-  ~CProcess( void );
+  Process( void );
+  ~Process( void );
   void IBConnect( void );
   void PlaceBuyOrder( void );
   void PlaceSellOrder( void );
