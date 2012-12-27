@@ -48,7 +48,7 @@
 
 // uses a stack to optimize some re-use speed
 
-// CBufferRepository
+// BufferRepository
 
 // can the mutex be made compile-time conditional?
 // most usage may be single thread mode now, as buffers are being returned to the original
@@ -57,11 +57,11 @@
 namespace ou {
 
 template<typename bufferT> 
-class CBufferRepository {
+class BufferRepository {
 public:
   typedef typename bufferT* buffer_t;
-  CBufferRepository(void);
-  ~CBufferRepository(void);
+  BufferRepository(void);
+  ~BufferRepository(void);
   inline void CheckIn( buffer_t Buffer );
   inline buffer_t CheckOut();  
   void CheckInL( buffer_t Buffer );  // locked version
@@ -81,7 +81,7 @@ private:
 };
 
 
-template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void) 
+template<typename bufferT> BufferRepository<bufferT>::BufferRepository(void) 
 : cntCheckins( 0 ), cntCheckouts( 0 )
 #ifdef _DEBUG
   , cntCreated( 0 ), cntDestroyed( 0 ), maxQsize( 0 ),
@@ -93,7 +93,7 @@ template<typename bufferT> CBufferRepository<bufferT>::CBufferRepository(void)
 #endif
 }
 
-template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) {
+template<typename bufferT> BufferRepository<bufferT>::~BufferRepository(void) {
   bufferT* pBuffer;
   boost::mutex::scoped_lock lock(m_mutex);  // for the methods requiring a lock
   while ( !m_vStack.empty() ) {
@@ -124,12 +124,12 @@ template<typename bufferT> CBufferRepository<bufferT>::~CBufferRepository(void) 
 #endif
 }
 
-template<typename bufferT> inline void CBufferRepository<bufferT>::CheckInL(bufferT* pBuffer) {
+template<typename bufferT> inline void BufferRepository<bufferT>::CheckInL(bufferT* pBuffer) {
   boost::mutex::scoped_lock lock(m_mutex);
   CheckIn( pBuffer );
 }
 
-template<typename bufferT> inline void CBufferRepository<bufferT>::CheckIn(bufferT* pBuffer) {
+template<typename bufferT> inline void BufferRepository<bufferT>::CheckIn(bufferT* pBuffer) {
 #ifdef _DEBUG
   assert( !m_bCheckingIn && !m_bCheckingOut );
   m_bCheckingIn = true;
@@ -142,12 +142,12 @@ template<typename bufferT> inline void CBufferRepository<bufferT>::CheckIn(buffe
 #endif
 }
 
-template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOutL() {
+template<typename bufferT> inline bufferT* BufferRepository<bufferT>::CheckOutL() {
   boost::mutex::scoped_lock lock(m_mutex);
   return CheckOut();
 }
 
-template<typename bufferT> inline bufferT* CBufferRepository<bufferT>::CheckOut() {
+template<typename bufferT> inline bufferT* BufferRepository<bufferT>::CheckOut() {
   bufferT* pBuffer;
 #ifdef _DEBUG
   assert( !m_bCheckingIn && !m_bCheckingOut );

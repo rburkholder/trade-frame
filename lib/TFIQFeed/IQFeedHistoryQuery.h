@@ -329,9 +329,9 @@ private:
   static const size_t m_nMillisecondsToSleep = 75;
 
   // used for containing parsed data and passing it on
-  ou::CBufferRepository<structTickDataPoint> m_reposTickDataPoint;
-  ou::CBufferRepository<structInterval> m_reposInterval;
-  ou::CBufferRepository<structSummary> m_reposSummary;
+  ou::BufferRepository<structTickDataPoint> m_reposTickDataPoint;
+  ou::BufferRepository<structInterval> m_reposInterval;
+  ou::BufferRepository<structSummary> m_reposSummary;
 
   ou::tf::iqfeed::HistoryStructs::DataPointParser<const_iterator_t> m_grammarDataPoint;
   ou::tf::iqfeed::HistoryStructs::IntervalParser<const_iterator_t> m_grammarInterval;

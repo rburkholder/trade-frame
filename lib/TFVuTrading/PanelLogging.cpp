@@ -17,6 +17,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+wxDEFINE_EVENT( EVT_ConsoleString, ConsoleStringEvent );
+
 PanelLogging::PanelLogging(void) {
   Init();
 }
@@ -61,8 +63,11 @@ void PanelLogging::CreateControls() {
     itemBoxSizer2->Add(m_txtLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 5);
 
     m_pOldStreamBuf = std::cout.rdbuf();
-    std::cout.rdbuf(m_txtLogging);
+    //std::cout.rdbuf(m_txtLogging);
+    std::cout.rdbuf( &m_csb );
 
+    Bind( EVT_ConsoleString, &PanelLogging::HandleConsoleLine1, this );
+    m_csb.SetOnEmitString( MakeDelegate( this, &PanelLogging::HandleConsoleLine0 ) );
 }
 
 
@@ -74,6 +79,17 @@ wxBitmap PanelLogging::GetBitmapResource( const wxString& name ) {
 wxIcon PanelLogging::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
+}
+
+void PanelLogging::HandleConsoleLine0( csb_t::Buf* pBuf ) {
+  this->QueueEvent( new ConsoleStringEvent( EVT_ConsoleString, pBuf ) );
+}
+
+void PanelLogging::HandleConsoleLine1( ConsoleStringEvent& event ) {
+  std::string s( event.GetBuf()->buf, event.GetBuf()->n );
+  //m_txtLogging->SetValue( s );
+  m_txtLogging->AppendText( s );
+  m_csb.ReturnBuffer( event.GetBuf() );
 }
 
 } // namespace tf

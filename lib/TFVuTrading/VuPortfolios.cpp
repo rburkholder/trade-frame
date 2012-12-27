@@ -43,7 +43,7 @@ void VuPortfolios::Construct( void ) {
   m_pdvmdlPortfolios.get()->IterateColumnNames( f );
 
   wxAny any = "test data";
-  m_pdvmdlPortfolios.get()->ChangeValue( any, item1, 0 );
-  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
+//  m_pdvmdlPortfolios.get()->ChangeValue( any, item1, 0 );
+//  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
 
 }

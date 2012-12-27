@@ -121,12 +121,12 @@ protected:
 
 private:
 
-  typename ou::CBufferRepository<IQFUpdateMessage> m_reposUpdateMessages;
-  typename ou::CBufferRepository<IQFSummaryMessage> m_reposSummaryMessages;
-  typename ou::CBufferRepository<IQFNewsMessage> m_reposNewsMessages;
-  typename ou::CBufferRepository<IQFFundamentalMessage> m_reposFundamentalMessages;
-  typename ou::CBufferRepository<IQFTimeMessage> m_reposTimeMessages;
-  typename ou::CBufferRepository<IQFSystemMessage> m_reposSystemMessages;
+  typename ou::BufferRepository<IQFUpdateMessage> m_reposUpdateMessages;
+  typename ou::BufferRepository<IQFSummaryMessage> m_reposSummaryMessages;
+  typename ou::BufferRepository<IQFNewsMessage> m_reposNewsMessages;
+  typename ou::BufferRepository<IQFFundamentalMessage> m_reposFundamentalMessages;
+  typename ou::BufferRepository<IQFTimeMessage> m_reposTimeMessages;
+  typename ou::BufferRepository<IQFSystemMessage> m_reposSystemMessages;
 
 };
 

@@ -76,7 +76,7 @@ public:
 protected:
 private:
 
-  CBufferRepository<SimulationContext> m_contexts;
+  BufferRepository<SimulationContext> m_contexts;
 
   SimulationContext m_contextCommon;
   ptime m_dtLastRetrievedExternalTime;

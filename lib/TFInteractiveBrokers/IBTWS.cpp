@@ -36,7 +36,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 struct DecodeStatusWord {
-  enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, Submitted, Cancelled, Filled, Inactive };
+  enum enumStatus{ Unknown, PreSubmitted, PendingSubmit, PendingCancel, Submitted, Cancelled, Filled, Inactive };
   DecodeStatusWord( void ): kwm( Unknown, 50 ) {
     kwm.AddPattern( "Cancelled", Cancelled );
     kwm.AddPattern( "Filled", Filled );
@@ -44,6 +44,7 @@ struct DecodeStatusWord {
     kwm.AddPattern( "PreSubmitted", PreSubmitted );
     kwm.AddPattern( "Submitted", Submitted );
     kwm.AddPattern( "PendingSubmit", PendingSubmit );
+    kwm.AddPattern( "PendingCancel", PendingCancel );
   }
   enumStatus Match( const std::string& status ) { return kwm.FindMatch( status ); };
 private:
@@ -398,6 +399,8 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
     case DecodeStatusWord::PreSubmitted:
       break;
     case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours
+      break;
+    case DecodeStatusWord::PendingCancel:
       break;
     case DecodeStatusWord::Unknown:
       assert( false );

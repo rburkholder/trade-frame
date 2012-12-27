@@ -13,16 +13,25 @@
 
 #pragma once
 
-#include <wx/wx.h>
+#include <TFBitsNPieces/FrameWork01.h>
+
+#include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelLogging.h>
 
 #include "ThreadMain.h"
 
-class AppHedge : public wxApp {
+class AppHedge : public wxApp, public ou::tf::FrameWork01<AppHedge> {
+  friend ou::tf::FrameWork01<AppHedge>;
 public:
   virtual bool OnInit();
   virtual int OnExit();
 protected:
 private:
+
+  FrameMain* m_pFrameMain;
+//  PanelOptionsParameters* m_pPanelOptionsParameters;
+  ou::tf::PanelLogging* m_pPanelLogging;
+
   ThreadMain* m_pThreadMain;
 };
  

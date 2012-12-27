@@ -218,14 +218,14 @@ private:
   symbol_list_t m_listSymbols;
   size_t m_n;  // number of data points to retrieve
 
-  ou::CBufferRepository<structResultBar> m_reposBars;
-  ou::CBufferRepository<structResultTicks> m_reposTicks;
+  ou::BufferRepository<structResultBar> m_reposBars;
+  ou::BufferRepository<structResultTicks> m_reposTicks;
 
   LONG m_nMaxSimultaneousQueries;
   volatile LONG m_nCurSimultaneousQueries;
   symbol_list_t::iterator m_iterSymbols;
 
-  ou::CBufferRepository<structQueryState> m_reposQueryStates;
+  ou::BufferRepository<structQueryState> m_reposQueryStates;
 
   boost::mutex m_mutexHistoryBulkQueryCompletion;
   boost::mutex m_mutexProcessSymbolListScopeLock;

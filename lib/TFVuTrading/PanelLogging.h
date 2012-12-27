@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+#include <OUCommon/ConsoleStream.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -23,6 +25,21 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELLOGGING_IDNAME ID_PANELLOGGING
 #define SYMBOL_PANELLOGGING_SIZE wxSize(400, 300)
 #define SYMBOL_PANELLOGGING_POSITION wxDefaultPosition
+
+typedef ou::ConsoleStreamBuf<char> csb_t;
+
+class ConsoleStringEvent: public wxEvent {
+public:
+  ConsoleStringEvent( wxEventType eventType, csb_t::Buf* p ): wxEvent( 0, eventType ), m_pBuf( p ) {};
+  ConsoleStringEvent( const ConsoleStringEvent& event): wxEvent( event ), m_pBuf( event.m_pBuf ) {};
+  ~ConsoleStringEvent( void ) { m_pBuf = 0; };
+  ConsoleStringEvent* Clone( void ) const { return new ConsoleStringEvent( *this ); };
+  csb_t::Buf* GetBuf( void ) { return m_pBuf; };
+private:
+  csb_t::Buf* m_pBuf;
+};
+
+wxDECLARE_EVENT( EVT_ConsoleString, ConsoleStringEvent );
 
 class PanelLogging: public wxPanel {
 public:
@@ -49,9 +66,14 @@ public:
 
 protected:
 private:
+  
   enum { ID_Null=wxID_HIGHEST, ID_PANELLOGGING, ID_TEXTLOGGING };
   wxTextCtrl* m_txtLogging;
   std::streambuf* m_pOldStreamBuf;
+  csb_t m_csb;
+
+  void HandleConsoleLine0( csb_t::Buf* pBuf );
+  void HandleConsoleLine1( ConsoleStringEvent& event );
 };
 
 } // namespace tf

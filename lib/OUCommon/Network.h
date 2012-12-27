@@ -97,9 +97,9 @@ public:
   // factor a couple of these out as traits for here and for IQFeedMessages.
   typedef charT bufferelement_t;
   typedef boost::array<bufferelement_t, NETWORK_INPUT_BUF_SIZE> inputbuffer_t; // bulk input buffer via asio
-  typedef CBufferRepository<inputbuffer_t> inputrepository_t;
+  typedef BufferRepository<inputbuffer_t> inputrepository_t;
   typedef std::vector<bufferelement_t> linebuffer_t;  // used for composing lines of data for processing
-  typedef CBufferRepository<linebuffer_t> linerepository_t;
+  typedef BufferRepository<linebuffer_t> linerepository_t;
 
   Network( void );
   Network( const structConnection& connection );
