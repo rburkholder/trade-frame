@@ -398,9 +398,9 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
       break;
     case DecodeStatusWord::PreSubmitted:
       break;
-    case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours
+    case DecodeStatusWord::PendingSubmit:  // coincides with popup in TWS, can't remember what the message was, probably trading outside of regular hours, or due to something similar as described in next comment
       break;
-    case DecodeStatusWord::PendingCancel:
+    case DecodeStatusWord::PendingCancel:  // pendingsubmit, pendingcancel happened for order to short, but IB didn't have anything to loan for shorting
       break;
     case DecodeStatusWord::Unknown:
       assert( false );

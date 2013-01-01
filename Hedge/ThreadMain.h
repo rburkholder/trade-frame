@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include "HedgeCommon.h"
-
 #include "DB.h"
 
 #include "Process.h"

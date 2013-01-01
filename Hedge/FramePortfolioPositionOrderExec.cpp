@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
+
 #include "FramePortfolioPositionOrderExec.h"
 
 FramePortfolioPositionOrderExec::FramePortfolioPositionOrderExec(const wxString& title, const wxPoint& pos, const wxSize& size)

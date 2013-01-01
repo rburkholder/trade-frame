@@ -11,6 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
+
 #include "ThreadMain.h"
 
 ThreadMain::ThreadMain(enumMode eMode)
@@ -35,7 +37,6 @@ ThreadMain::ThreadMain(enumMode eMode)
   m_pProcess = new Process( eMode, m_db );
 
 }
-
 
 ThreadMain::~ThreadMain(void) {
   delete m_pProcess;

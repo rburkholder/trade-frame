@@ -16,36 +16,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="Notes.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CalcExpiry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PopulateWithIBOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Option.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Strike.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Formula.h">
+    <ClInclude Include="InterestRates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CalcExpiry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Option.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Strike.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Formula.cpp">
+    <ClCompile Include="InterestRates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

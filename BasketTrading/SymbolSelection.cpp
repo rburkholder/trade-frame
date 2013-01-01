@@ -17,6 +17,7 @@
 #include <iostream>
 #include <set>
 #include <vector>
+#include <math.h>
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
@@ -107,7 +108,7 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
       ou::tf::Bars::const_iterator iterVolume = bars.end() - 20;
       ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
       if ( ( 1000000 < volAverage ) 
-        && ( 10.0 <= bars.Last()->Close() )
+        && ( 12.0 <= bars.Last()->Close() )
         && ( 75.0 >= bars.Last()->Close() ) ) {
           InstrumentInfo ii( sObjectName, *bars.Last() );
           if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
@@ -281,21 +282,40 @@ void SymbolSelection::WrapUp10Percent( setInstrumentInfo_t& selected ) {
   m_mapMaxNegatives.clear();
 }
 
-class AverageVolatility {
+class AverageVolatility {  
+  // volatility is a misnomer, in actual fact, looking for measure highest returns in period of time
+  // therefore may want to maximize the mean, and minimize the standard deviation
+  // therefore normalize based upon pg  86 of Black Scholes and Beyond, 
+  // then choose the one with 
 private:
-  double m_dblVolatility;
+  double m_dblSumReturns;
   size_t m_nNumberOfValues;
+//  std::vector<double> m_returns;
 protected:
 public:
-  AverageVolatility() : m_dblVolatility( 0 ), m_nNumberOfValues( 0 ) {};
+  AverageVolatility() : m_dblSumReturns( 0 ), m_nNumberOfValues( 0 ) {};
   void operator() ( const ou::tf::Bar& bar ) {
     //m_dblVolatility += ( bar.High() - bar.Low() ) / bar.Close;
     //m_dblVolatility += ( bar.High() - bar.Low() ) / bar.Low();
-    m_dblVolatility += ( bar.Open() - bar.Close() ) / bar.Close();
+    //m_dblVolatility += ( bar.Open() - bar.Close() ) / bar.Close();
     //m_dblVolatility += ( bar.m_dblHigh - bar.m_dblLow ) ;
+    double return_ = log( bar.Close() / bar.Open() );
+//    m_returns.push_back( return_ );
+    m_dblSumReturns += return_;
     ++m_nNumberOfValues;
   }
-  operator double() { return m_dblVolatility / m_nNumberOfValues; };
+  operator double() { 
+    double mean = m_dblSumReturns / ( m_nNumberOfValues - 1 );
+//    double dblDiffsSquared = 0;
+//    double diff;
+//    for ( std::vector<double>::const_iterator iter = m_returns.begin(); iter != m_returns.end(); iter++ ) {
+//      diff = *iter - mean;
+//      dblDiffsSquared += mean * mean;
+//    }
+//    double volatility = sqrt( dblDiffsSquared / m_nNumberOfValues );
+//    return mean * volatility; // a measure of best trading range
+    return mean;
+  };
 };
 
 void SymbolSelection::CheckForVolatility( const InstrumentInfo& ii, citer begin, citer end ) {

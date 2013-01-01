@@ -1,0 +1,12 @@
+2012/12/29
+
+Black Scholes And Beyond
+
+pg 16 Dividends:  ex-dividend date The date on which buyers of a stock are no longer elibigble to recieve the next dividend payment.
+pg 23 Riskless Zero Coupon Bond interest rate calculation.  
+  interest rate goes up, bond value goes down; 
+  interest rates go down, bond value goes up
+  http://iris.nyit.edu/appack/pdf/FINC201_5.pdf calculating values of zero coupon bond
+
+pg 47 The only dates on which it will ever be 
+       optimal to exercise an American option are those dates immediately prior to ex-dividend dates

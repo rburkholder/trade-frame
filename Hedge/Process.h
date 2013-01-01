@@ -37,7 +37,6 @@
 
 #include <TFSimulation/SimulationProvider.h>
 
-#include "HedgeCommon.h"
 #include "DB.h"
 
 using namespace ou::tf;

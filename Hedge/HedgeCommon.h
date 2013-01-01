@@ -13,7 +13,9 @@
 
 #pragma once
 
-enum enumMode {
+// not needed, enumeration supplied in the db package
+
+enum enumHedgeMode {
   EModeSimulation,
   EModeLive
 };

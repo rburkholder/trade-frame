@@ -191,7 +191,7 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
       m_stateTrading = ( 3 > m_nAttempts ) ? TSWaitForEntry : TSNoMore;
     }
     else {
-      m_dblStop = std::max<double>( m_dblStop, quote.Ask() - m_dblStopDifference );
+//      m_dblStop = std::max<double>( m_dblStop, quote.Ask() - m_dblStopDifference );
     }
     break;
   case TSMonitorShort:
@@ -203,7 +203,7 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
       m_stateTrading = ( 3 > m_nAttempts ) ? TSWaitForEntry : TSNoMore;
     }
     else {
-      m_dblStop = std::min<double>( m_dblStop, quote.Bid() + m_dblStopDifference );
+//      m_dblStop = std::min<double>( m_dblStop, quote.Bid() + m_dblStopDifference );
     }
     break;
   }

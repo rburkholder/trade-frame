@@ -11,6 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include "StdAfx.h"
 
 #include <algorithm>
 #include <cassert>
@@ -325,6 +326,7 @@ void Process::HandleOnExecDisconnected(int e) {
   m_ss.str( "" );
   m_ss << "Exec disconnected." << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::HandleOnConnected( int e ) {
@@ -406,6 +408,7 @@ void Process::AcquireSimulationSymbols( void ) {
   m_ss.str( "" );
   m_ss << "Simulation Symbols Acquired." << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::HandleHDF5Object( const std::string& sPath, const std::string& sName) {
@@ -421,6 +424,7 @@ void Process::HandleHDF5Object( const std::string& sPath, const std::string& sNa
     m_ss.str( "" );
     m_ss << "Object: \"" << sPath << "\"" << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
     if ( 6 >= sName.size() ) {  // process as stock
       if ( !InstrumentManager::Instance().Exists( sName ) ) {
         m_pUnderlying = InstrumentManager::Instance().ConstructInstrument( sName, "Sim", InstrumentType::Stock );
@@ -480,6 +484,7 @@ void Process::HandleHDF5Group( const std::string& sPath, const std::string& sNam
     m_ss << "*";
   m_ss << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 // --- listing 1 -- Underlying Contract
@@ -503,6 +508,7 @@ void Process::HandleUnderlyingListingDone(  ) {
   m_ss.str( "" );
   m_ss << "Underlying Contract Done" << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 
   m_db.SetOnNewInstrumentHandler( MakeDelegate( this, &Process::HandleStrikeFromDb ) );
   if ( m_db.LoadOptions( m_pUnderlying, m_dExpiry.year(), m_dExpiry.month(), m_dExpiry.day() ) ) {
@@ -575,6 +581,7 @@ void Process::AddOptionToStrikeInfo( pInstrument_t pInstrument ) {
   m_ss.str("");
   m_ss << "Option " << pInstrument->GetInstrumentName() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::HandleStrikeListingDone(  ) {
@@ -585,11 +592,13 @@ void Process::HandleStrikeListingDone(  ) {
   m_ss.str( "" );
   m_ss << "#strikes: " << m_mapStrikeInfo.size() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 
   // all done
   m_ss.str( "" );
   m_ss << "Option Acquisition Complete" << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 
 }
 
@@ -721,6 +730,7 @@ void Process::OpenPositions( void ) {
     m_ss.str( "" );
     m_ss << "count of puts are zero" << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
 //      m_nCalls = m_nPuts = 0;
   }
   else {
@@ -742,6 +752,7 @@ void Process::OpenPositions( void ) {
                             << ", P" << nPuts << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                             << std::endl;
 //      OutputDebugString( m_ss.str().c_str() );
+      std::cout << m_ss;
     }
     catch (...) {
       throw std::runtime_error( "Process::OpenPositions error" );
@@ -764,6 +775,7 @@ void Process::HandleUnderlyingQuote( const Quote& quote ) {
 //  m_ss.str( "" );
 //  m_ss << "Quote: " << quote.Bid() << "/" << quote.Ask() << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+//  std::cout << m_ss;
   m_quotes.Append( quote );
 
   switch ( m_TradingState ) {
@@ -808,6 +820,7 @@ void Process::HandleTSFirstPass( const Quote& quote ) {
   m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " State:  First Pass -> Pre Market." << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
   m_TradingState = ETSPreMarket;
 }
 
@@ -818,6 +831,7 @@ void Process::HandleTSPreMarket( const Quote& quote ) {
     m_ss << dt;
     m_ss << " State:  Market Opened." << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
     m_TradingState = ETSMarketOpened;
     HandleTSMarketOpened( quote );
   }
@@ -832,6 +846,7 @@ void Process::HandleTSMarketOpened( const Quote& quote ) {
   m_ss << ou::TimeSource::Instance().Internal();
   m_ss << " Opening mid quote: " << dblOpenValue << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 
   // set iterators for center of the pack (crossovers are above and below trade):
   m_iterAboveCrossOver = m_vCrossOverPoints.begin();
@@ -847,6 +862,7 @@ void Process::HandleTSMarketOpened( const Quote& quote ) {
   m_ss.str( "" );
   m_ss << "Trade start " << *m_iterBelowCrossOver << ", " << dblOpenValue << ", " << *m_iterAboveCrossOver << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 
   // calculate where to have put/call option watches,
   //   have a range of strikes above and below current trade (have maximum 100 watches available)
@@ -893,6 +909,7 @@ void Process::HandleTSActiveMarketStart( const Quote& quote ) {
     m_ss << ou::TimeSource::Instance().Internal();
     m_ss << " State:  Opening Order." << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
 
     m_bTrading = true;
     if ( m_bPositionsOpened ) {
@@ -915,6 +932,7 @@ void Process::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
     << pair.second.GetSize() << "@" << pair.second.GetPrice()
     << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::HandleTSTrading( const Quote& quote ) {
@@ -928,6 +946,7 @@ void Process::HandleTSTrading( const Quote& quote ) {
     m_ss << dt;
     m_ss << " State:  Close Orders." << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
 
     m_TradingState = ETSCloseOrders;
   }
@@ -962,6 +981,7 @@ void Process::HandleTSTrading( const Quote& quote ) {
             m_ss << dt;
             m_ss << " Underlying Sell " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
 //            OutputDebugString( m_ss.str().c_str() );
+            std::cout << m_ss;
         }
         else {
           if ( dblDeltaDif < -m_dblBaseDeltaIncrement ) { // buy underlying to get closer to put delta
@@ -972,6 +992,7 @@ void Process::HandleTSTrading( const Quote& quote ) {
               m_ss << dt;
               m_ss << " Underlying Buy " << m_dblBaseDeltaIncrement << ", trigger @" << dblMidQuote << std::endl;
 //              OutputDebugString( m_ss.str().c_str() );
+              std::cout << m_ss;
           }
         }
 
@@ -999,6 +1020,7 @@ void Process::HandleTSCloseOrders( const Quote& quote ) {
                          << ", P" << nPuts             << "@" << m_dblPutPrice        << " for " << 100 * nPuts * m_dblPutPrice 
                           << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
 
     // orders for normal delta neutral
     m_posUnderlying->CancelOrders();
@@ -1018,6 +1040,7 @@ void Process::HandleTSCloseOrders( const Quote& quote ) {
     m_ss << dt;
     m_ss << " State:  After Market." << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
     m_TradingState = ETSAfterMarket;
   }
 }
@@ -1041,6 +1064,7 @@ void Process::PrintGreeks( void ) {
     << " Gamma " << m_iterOILatestGammaSelectPut->second.Put()->Gamma() 
     << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::SaveSeries( void ) {
@@ -1051,6 +1075,7 @@ void Process::SaveSeries( void ) {
   if ( keytypes::EProviderSimulator == m_pDataProvider->ID() ) {
     m_ss << " simulator stores nothing." << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
+    std::cout << m_ss;
     return;
   }
 
@@ -1100,6 +1125,7 @@ void Process::SaveSeries( void ) {
 
   m_ss << " done writing." << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::EmitStats( void ) {
@@ -1114,6 +1140,7 @@ void Process::EmitStats( void ) {
   m_ss << std::endl;
 
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << m_ss;
 }
 
 void Process::HandlePopulateDatabase( void ) {

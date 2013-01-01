@@ -22,8 +22,7 @@ using namespace fastdelegate;
 
 #include <TFTrading/InstrumentManager.h>
 
-class DB: public ou::db::Session
-{
+class DB: public ou::db::Session {
 public:
 
   DB(void);
