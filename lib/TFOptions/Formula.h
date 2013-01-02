@@ -32,34 +32,55 @@ inline double CallFromPut( double Put, double Stock, double InterestRate, double
 // pg 152 Black Scholes, vanilla options on non-dividend paying stock
 // pg 160 has method for dealing with stocks paying lumpy dividends
 // pg 161 has formula changes for  stock with annual continous dividend yield
+// pg 180 has formula for greeks for BSM with continuous dividends
 
-double BSM_Euro_NonDiv_Call( double S, double K, double r, double vol, double tue );
-double BSM_Euro_NonDiv_Put( double S, double K, double r, double vol, double tue );
+// delta: the rate of change of the value of the option with respect ot changes in the stock price
+// gamma: the rate of change of the delta with respect to changes in the stock price
+// theta: the rate of change of the value of an option with respect to time
+// rho:   the rate of change of the value of an option with respect ot the risk-free rate of interest
+// vega:  the reate of chagne of the value of an option with respect to volatility
 
-class BSM_Euro_NonDiv {
+double BSM_Euro_Call( double S, double K, double r, double vol, double tue );
+double BSM_Euro_Put( double S, double K, double r, double vol, double tue );
+
+class BSM_Euro {
 public:
-  BSM_Euro_NonDiv( double r, double vol, double tue );
-  ~BSM_Euro_NonDiv( void ) {};
+  BSM_Euro( double r, double vol, double tue );
+  BSM_Euro( double r, double vol, double tue, double q );
+  ~BSM_Euro( void ) {};
   void Set( double S, double K );
   double Call( void );
   double Call( double S, double K );
   double Put( void );
   double Put( double S, double K );
+  double CallDelta( void );
+  double PutDelta( void );
+  double Gamma( void );
+  double Vega( void );
+  double CallTheta( void );
+  double PutTheta( void );
+  double CallRho( void );
+  double PutRho( void );
 protected:
 private:
-  double m_S;  // stock price
-  double m_K;  // strike price
-  double m_r;  // risk-free rate of interest per annum
-  double m_vol; // volatility of stock undergeometric Brownian motion model
-  double m_tue; // time until expiration, some fraction of a year
-  double m_lsk;  // log( S / K )
-  double m_VolXVolBy2; // vol * vol / 2
+  double m_vol; // volatility
+  double m_r;
+  double m_q;
+  double m_EToRateAndTime;
+  double m_EToQAndTime;
   double m_SqrtTUE; // sqrt( tue )
   double m_VolSqrtTUE; // vol * sqrt( tue )
-  double m_d1; 
-  double m_d2;
-  double m_EToRateAndTime;
+  double m_a;  
+  double m_b; // recip of sqrt two pi
+  double m_S;  // stock price
+  double m_K;  // strike price
+  double m_Nd1C; // probability call option expires in the money pg 114
+  double m_Nd1P; // probability put option expires in the money
+  double m_Nd2C;
+  double m_Nd2P;
+  double m_NPd1;  // NPrime of d1
   boost::math::normal norm; //RealType mean = 0, RealType sd = 1
+  double NPrime( double x );
 };
 
 } // namespace option

@@ -14,6 +14,8 @@
 
 #include <math.h>
 
+#include <boost/math/constants/constants.hpp>
+
 #include "Formula.h"
 
 namespace ou { // One Unified
@@ -70,47 +72,100 @@ double BSM_Euro_NonDiv_Put( double S, double K, double r, double vol, double tue
   return -Nd1 * S + exp( -r * tue ) * K * Nd2;
 }
 
-BSM_Euro_NonDiv::BSM_Euro_NonDiv( double r, double vol, double tue )
-  : m_r( r ), m_vol( vol ), m_tue( tue ), 
-  m_VolXVolBy2( vol * vol * 0.5 ),
-  m_SqrtTUE( sqrt( tue ) ), m_EToRateAndTime( exp( -r * tue ) )
+BSM_Euro::BSM_Euro( double r, double vol, double tue )
+  : m_vol( vol ), m_r( r ), m_q( 0.0 ),
+  m_SqrtTUE( sqrt( tue ) ), m_EToRateAndTime( exp( -r * tue ) ),
+  m_EToQAndTime( 1.0 /* exp( 0.0 ) */ ),
+  m_b( 1.0 / sqrt( 2.0 * boost::math::double_constants::pi ) )
 {
-  m_VolSqrtTUE = m_vol * m_SqrtTUE;
+  m_VolSqrtTUE = vol * m_SqrtTUE;
+  double VolXVolBy2( vol * vol * 0.5 ),
+  m_a = ( r + VolXVolBy2 ) * tue;
 }
 
-void BSM_Euro_NonDiv::Set( double S, double K ) {
+BSM_Euro::BSM_Euro( double r, double vol, double tue, double q )
+  : m_vol( vol ), m_r( r ), m_q( q ),
+  m_SqrtTUE( sqrt( tue ) ), m_EToRateAndTime( exp( -r * tue ) ),
+  m_EToQAndTime( exp( -q * tue ) ),
+  m_b( 1.0 / sqrt( 2.0 * boost::math::double_constants::pi ) )
+{
+  m_VolSqrtTUE = vol * m_SqrtTUE;
+  double VolXVolBy2( vol * vol * 0.5 ),
+  m_a = ( r - q + VolXVolBy2 ) * tue;
+}
+
+void BSM_Euro::Set( double S, double K ) {
   m_S = S;
   m_K = K;
-  m_lsk = log( S / K );
-  double d1 = ( m_lsk + ( m_r + m_VolXVolBy2 ) * m_tue ) / m_VolSqrtTUE;
+  double lsk = log( S / K );
+  double d1 = ( lsk + m_a ) / m_VolSqrtTUE;
   //double d2 = ( m_lsk + ( m_r - m_VolXVolBy2 ) * m_tue ) / m_VolSqrtTUE;
   double d2 = d1 - m_VolSqrtTUE;
+  m_Nd1C = boost::math::cdf( norm, d1 );
+  m_Nd2C = boost::math::cdf( norm, d2 );
+  m_Nd1P = boost::math::cdf( norm, -d1 );
+  m_Nd2P = boost::math::cdf( norm, -d2 );
+  m_NPd1 = NPrime( d1 );
 }
 
-double BSM_Euro_NonDiv::Call( void ) {
-  double Nd1 = boost::math::cdf( norm, m_d1 );
-  double Nd2 = boost::math::cdf( norm, m_d2 );
-  return Nd1 * m_S - m_EToRateAndTime * m_K * Nd2;
+double BSM_Euro::Call( void ) {
+  return m_Nd1C * m_EToQAndTime * m_S - m_EToRateAndTime * m_K * m_Nd2C;
 }
 
-double BSM_Euro_NonDiv::Put( void ) {
-  double Nd1 = boost::math::cdf( norm, -m_d1 );
-  double Nd2 = boost::math::cdf( norm, -m_d2 );
-  return Nd1 * m_S + m_EToRateAndTime * m_K * Nd2;
+double BSM_Euro::Put( void ) {
+  return -m_Nd1P * m_EToQAndTime * m_S + m_EToRateAndTime * m_K * m_Nd2P;
 }
 
-double BSM_Euro_NonDiv::Call( double S, double K ) {
+double BSM_Euro::Call( double S, double K ) {
   Set( S, K );
-  double Nd1 = boost::math::cdf( norm, m_d1 );
-  double Nd2 = boost::math::cdf( norm, m_d2 );
-  return Nd1 * m_S - m_EToRateAndTime * m_K * Nd2;
+  return Put();
 }
 
-double BSM_Euro_NonDiv::Put( double S, double K ) {
+double BSM_Euro::Put( double S, double K ) {
   Set( S, K );
-  double Nd1 = boost::math::cdf( norm, -m_d1 );
-  double Nd2 = boost::math::cdf( norm, -m_d2 );
-  return Nd1 * m_S + m_EToRateAndTime * m_K * Nd2;
+  return Put();
+}
+
+double BSM_Euro::NPrime( double x ) {
+  return m_b * exp( -0.5 * ( x * x ) );
+}
+
+double BSM_Euro::CallDelta( void ) {
+  return m_EToQAndTime * m_Nd1C;
+}
+
+double BSM_Euro::PutDelta( void ) {
+  return m_EToQAndTime * ( m_Nd1C - 1.0 );
+}
+
+double BSM_Euro::Gamma( void )  {
+  return m_NPd1 * m_EToQAndTime / ( m_S * m_VolSqrtTUE );
+}
+
+double BSM_Euro::Vega( void ) {
+  return m_S * m_SqrtTUE * m_NPd1 * m_EToQAndTime;
+}
+
+double BSM_Euro::CallTheta( void ) {
+  double a = m_S * m_NPd1 * m_vol * m_EToQAndTime / ( 2.0 * m_SqrtTUE );
+  double b = m_r * m_K * m_EToRateAndTime * m_Nd2C;
+  double c = m_q * m_S * m_Nd1C * m_EToQAndTime;
+  return -a - b + c;
+}
+
+double BSM_Euro::PutTheta( void ) {
+  double a = m_S * m_NPd1 * m_vol * m_EToQAndTime / ( 2.0 * m_SqrtTUE );
+  double b = m_r * m_K * m_EToRateAndTime * m_Nd2P;
+  double c = m_q * m_S * m_Nd1P * m_EToQAndTime;
+  return -a + b - c;
+}
+
+double BSM_Euro::CallRho( void ) {
+  return m_K * m_SqrtTUE * m_SqrtTUE * m_EToRateAndTime * m_Nd2C;
+}
+
+double BSM_Euro::PutRho( void ) {
+  return -m_K * m_SqrtTUE * m_SqrtTUE * m_EToRateAndTime * m_Nd2P;
 }
 
 

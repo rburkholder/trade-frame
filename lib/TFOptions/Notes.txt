@@ -10,3 +10,24 @@ pg 23 Riskless Zero Coupon Bond interest rate calculation.
 
 pg 47 The only dates on which it will ever be 
        optimal to exercise an American option are those dates immediately prior to ex-dividend dates
+
+pg 163 raises the question of how to forecast the volatility, forecast volatility direction?
+
+pg 224 has a lead into on how some option price forecasting.  Volatility can change based upon trending price patterns.  
+  Elsewhere there is a statement that high volatility leads to low volatility, and low volatility leads to high volatility
+  With transition probabilites, is it possible to forecast stock movements?
+
+pg 227 flexible trees all changes in volatility to be modelled
+
+pg 228 discusses probabilistic model of stock returns, where as discussions of BSM indicated returns are not part of the model
+  * start with this idea:  next price is probability of up move plus 1-p probability of down move
+
+pg 231 local volatility
+
+pg 247 review forward interest rates, something isn't making sense
+
+pg 265 Arrow-Debreu price of a node
+
+pg 271 Arrow-Debreu prices and butterfly spreads
+
+pg 403 direction forecasting?
