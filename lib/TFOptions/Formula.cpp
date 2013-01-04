@@ -13,6 +13,7 @@
  ************************************************************************/
 
 #include <math.h>
+#include <stdexcept>
 
 #include <boost/math/constants/constants.hpp>
 
@@ -73,31 +74,33 @@ double BSM_Euro_NonDiv_Put( double S, double K, double r, double vol, double tue
 }
 
 BSM_Euro::BSM_Euro( double r, double vol, double tue )
-  : m_vol( vol ), m_r( r ), m_q( 0.0 ),
+  : m_vol( vol ), m_r( r ), m_q( 0.0 ), m_tue( tue ),
+  m_K( 1.0 ), m_S( 1.0 ),
   m_SqrtTUE( sqrt( tue ) ), m_EToRateAndTime( exp( -r * tue ) ),
   m_EToQAndTime( 1.0 /* exp( 0.0 ) */ ),
   m_b( 1.0 / sqrt( 2.0 * boost::math::double_constants::pi ) )
 {
-  m_VolSqrtTUE = vol * m_SqrtTUE;
-  double VolXVolBy2( vol * vol * 0.5 ),
-  m_a = ( r + VolXVolBy2 ) * tue;
+  CalcVolStuff();
 }
 
 BSM_Euro::BSM_Euro( double r, double vol, double tue, double q )
-  : m_vol( vol ), m_r( r ), m_q( q ),
+  : m_vol( vol ), m_r( r ), m_q( q ), m_tue( tue ),
+  m_K( 1.0 ), m_S( 1.0 ),
   m_SqrtTUE( sqrt( tue ) ), m_EToRateAndTime( exp( -r * tue ) ),
   m_EToQAndTime( exp( -q * tue ) ),
   m_b( 1.0 / sqrt( 2.0 * boost::math::double_constants::pi ) )
 {
-  m_VolSqrtTUE = vol * m_SqrtTUE;
-  double VolXVolBy2( vol * vol * 0.5 ),
-  m_a = ( r - q + VolXVolBy2 ) * tue;
+  CalcVolStuff();
 }
 
-void BSM_Euro::Set( double S, double K ) {
-  m_S = S;
-  m_K = K;
-  double lsk = log( S / K );
+void BSM_Euro::CalcVolStuff( void ) {
+  m_VolSqrtTUE = m_vol * m_SqrtTUE;
+  double VolXVolBy2( m_vol * m_vol * 0.5 ),
+  m_a = ( m_r + VolXVolBy2 ) * m_tue;
+}
+
+void BSM_Euro::Calc( void ) {
+  double lsk = log( m_S / m_K );
   double d1 = ( lsk + m_a ) / m_VolSqrtTUE;
   //double d2 = ( m_lsk + ( m_r - m_VolXVolBy2 ) * m_tue ) / m_VolSqrtTUE;
   double d2 = d1 - m_VolSqrtTUE;
@@ -106,6 +109,26 @@ void BSM_Euro::Set( double S, double K ) {
   m_Nd1P = boost::math::cdf( norm, -d1 );
   m_Nd2P = boost::math::cdf( norm, -d2 );
   m_NPd1 = NPrime( d1 );
+}
+
+void BSM_Euro::Set( double vol ) {
+  m_vol = vol;
+  CalcVolStuff();
+  Calc();
+}
+
+void BSM_Euro::Set( double S, double K ) {
+  if ( 0.0 == S ) throw std::runtime_error( "S can't be 0.0" );
+  if ( 0.0 == K ) throw std::runtime_error( "K can't be 0.0" );
+  m_S = S;
+  m_K = K;
+  Calc();
+}
+
+void BSM_Euro::Set( double S, double K, double vol ) {
+  m_vol = vol;
+  CalcVolStuff();
+  Set( S, K );
 }
 
 double BSM_Euro::Call( void ) {
@@ -168,6 +191,28 @@ double BSM_Euro::PutRho( void ) {
   return -m_K * m_SqrtTUE * m_SqrtTUE * m_EToRateAndTime * m_Nd2P;
 }
 
+double BSM_Euro::ImpliedVolatility( double C, double epsilon ) {
+  // pg 339 Black Scholes and beyond
+  size_t cnt = 20;  // maximum iterations
+  double diff = abs( Call() - C );
+  while ( epsilon < diff ) {
+    Set( m_vol - ( diff / Vega() ) );
+    diff = abs( Call() - C );
+    cnt--;
+    if ( 0 == cnt ) 
+      throw std::runtime_error( "Implied Volatility calc did not converge" );
+  }
+}
+
+double BSM_Euro::SeedForRegular( void ) {
+  // pg 454 Option Pricing Formulas
+  return sqrt( abs( log( m_S / m_K ) + m_r * m_tue ) * 2.0 / m_tue );
+}
+
+double BSM_Euro::SeedForFutures( void ) {
+  // pg 454 Option Pricing Formulas
+  return sqrt( abs( log( m_S / m_K ) ) * 2.0 / m_tue );
+}
 
 } // namespace option
 } // namespace tf

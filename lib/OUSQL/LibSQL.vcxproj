@@ -134,9 +134,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Actions.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="GKV.h" />

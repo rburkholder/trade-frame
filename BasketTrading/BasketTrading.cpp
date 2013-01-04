@@ -53,6 +53,7 @@ bool AppBasketTrading::OnInit() {
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
 
+  // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
@@ -98,9 +99,10 @@ bool AppBasketTrading::OnInit() {
 
   m_timerGuiRefresh.SetOwner( this );
 
-  Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
   Bind( EVT_WorkerDone, &AppBasketTrading::HandleWorkerCompletion1, this );
   Bind( wxEVT_TIMER, &AppBasketTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBasketTrading::OnClose, this );  // start close of windows and controls
 
   // maybe set scenario with database and with in memory data structure
   m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
@@ -162,7 +164,7 @@ void AppBasketTrading::HandleSaveButton(void) {
 int AppBasketTrading::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
-  m_timerGuiRefresh.Stop();
+  //m_timerGuiRefresh.Stop();
   if ( 0 != m_pWorker ) {
     delete m_pWorker;
     m_pWorker = 0; 
@@ -215,6 +217,8 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
 }
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+  m_timerGuiRefresh.Stop();
+  DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 

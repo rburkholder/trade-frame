@@ -31,6 +31,9 @@
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="StatementState.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="notes.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{842E7A61-5316-4028-9569-1468AEC45D1F}</ProjectGuid>
     <ProjectName>OUSqlite</ProjectName>

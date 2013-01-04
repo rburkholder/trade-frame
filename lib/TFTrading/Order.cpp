@@ -199,7 +199,7 @@ void Order::ActOnError(OrderErrors::enumOrderErrors eError) {
 
 void Order::SetCommission( double dblCommission ) { 
   m_row.dblCommission = dblCommission; 
-   OnCommission( *this );  // run on order completion
+  OnCommission( *this );  // run on order completion
 }
 
 void Order::SetOrderId( idOrder_t id ) {

@@ -48,7 +48,9 @@ public:
   BSM_Euro( double r, double vol, double tue );
   BSM_Euro( double r, double vol, double tue, double q );
   ~BSM_Euro( void ) {};
+  void Set( double vol );
   void Set( double S, double K );
+  void Set( double S, double K, double vol );
   double Call( void );
   double Call( double S, double K );
   double Put( void );
@@ -61,11 +63,15 @@ public:
   double PutTheta( void );
   double CallRho( void );
   double PutRho( void );
+  double ImpliedVolatility( double C, double epsilon = 0.0001 );  // market price for Call
+  double SeedForRegular( void );
+  double SeedForFutures( void );
 protected:
 private:
   double m_vol; // volatility
   double m_r;
   double m_q;
+  double m_tue;
   double m_EToRateAndTime;
   double m_EToQAndTime;
   double m_SqrtTUE; // sqrt( tue )
@@ -80,6 +86,8 @@ private:
   double m_Nd2P;
   double m_NPd1;  // NPrime of d1
   boost::math::normal norm; //RealType mean = 0, RealType sd = 1
+  void Calc( void );
+  void CalcVolStuff( void );
   double NPrime( double x );
 };
 

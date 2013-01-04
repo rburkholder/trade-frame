@@ -324,6 +324,7 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
           if ( 0 == m_row.nPositionActive ) {
             m_row.eOrderSideActive = OrderSide::Unknown;
             m_row.dblUnRealizedPL = 0.0;
+            dblAvgConstructedCost = 0.0;
           }
           if ( bTwoStep ) {
             UpdateRowValues( price, nRemaining, side );
@@ -352,6 +353,7 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
           if ( 0 == m_row.nPositionActive ) {
             m_row.eOrderSideActive = OrderSide::Unknown;
             m_row.dblUnRealizedPL = 0.0;
+            dblAvgConstructedCost = 0.0;
           }
           if ( bTwoStep ) {
             UpdateRowValues( price, nRemaining, side );
