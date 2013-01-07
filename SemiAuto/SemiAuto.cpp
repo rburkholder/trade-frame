@@ -429,7 +429,7 @@ void AppSemiAuto::HandleCheckSymbolNameAgainstIB( const std::string& sSymbol ) {
   contract.secType = "STK";
   contract.symbol = sSymbol;
   // IB responds only when symbol is found, bad symbols will not illicit a response
-  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->QueueEvent( new UpdateInstrumentNameEvent( EVT_UpdateInstrumentName, "" ) );
+  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->SetInstrumentDescription( "" );
   m_tws->RequestContractDetails( contract, MakeDelegate( this, &AppSemiAuto::HandleIBContractDetails ), MakeDelegate( this, &AppSemiAuto::HandleIBContractDetailsDone ) );
 }
 
@@ -441,7 +441,7 @@ void AppSemiAuto::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&
   assert( m_curDialogManualOrder < m_vManualOrders.size() );
   m_vManualOrders[ m_curDialogManualOrder ].details = details;
   m_vManualOrders[ m_curDialogManualOrder ].pInstrument = pInstrument;
-  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->QueueEvent( new UpdateInstrumentNameEvent( EVT_UpdateInstrumentName, details.longName ) );
+  m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->SetInstrumentDescription( details.longName );
 }
 
 void AppSemiAuto::HandleIBContractDetailsDone( void ) {  // called only on successful contract found, need to handle cross thread

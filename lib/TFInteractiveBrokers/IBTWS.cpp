@@ -379,6 +379,7 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
       //<< ", ord.ref=" << order.orderRef 
       //<< ", state.warning=" << state.warningText 
       << std::endl; 
+//    std::cout << m_ss.str();  // ****
     //OutputDebugString( m_ss.str().c_str() );
     //if ( std::numeric_limits<double>::max(0) != state.commission ) 
     if ( 1e308 > state.commission ) 
@@ -432,6 +433,7 @@ void IBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
       //<< ", clid=" << clientId 
       //<< ", yh=" << whyHeld 
       << std::endl;
+//    std::cout << m_ss.str();  // ****
 //    OutputDebugString( m_ss.str().c_str() );
   }
 }
@@ -455,6 +457,7 @@ void IBTWS::execDetails( int reqId, const Contract& contract, const ::Execution&
     //<< ", ex.clid=" << execution.clientId
     << ", ex.xid=" << execution.execId
     << std::endl;
+//  std::cout << m_ss.str();  // ****
 //  OutputDebugString( m_ss.str().c_str() );
 
   OrderSide::enumOrderSide side = OrderSide::Unknown;
@@ -666,7 +669,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
   }
   else {
-    pInstrument.reset( iter->second->GetInstrument().get() );
+    pInstrument = iter->second->GetInstrument();
   }
 
   OnContractDetailsHandler_t handler = 0;

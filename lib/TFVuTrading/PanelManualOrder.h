@@ -26,19 +26,19 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class UpdateInstrumentNameEvent: public wxEvent {
+class UpdateInstrumentDescEvent: public wxEvent {
 public:
-  UpdateInstrumentNameEvent( wxEventType eventType, const std::string& s ): wxEvent( 0, eventType ), m_sName( s ) {};
-  UpdateInstrumentNameEvent( const UpdateInstrumentNameEvent& event ): wxEvent( *this ), m_sName( event.m_sName ) {};
-  ~UpdateInstrumentNameEvent( void ) {};
-  UpdateInstrumentNameEvent* Clone( void ) const { return new UpdateInstrumentNameEvent( *this ); }
+  UpdateInstrumentDescEvent( wxEventType eventType, const std::string& s ): wxEvent( 0, eventType ), m_sName( s ) {};
+  UpdateInstrumentDescEvent( const UpdateInstrumentDescEvent& event ): wxEvent( *this ), m_sName( event.m_sName ) {};
+  ~UpdateInstrumentDescEvent( void ) {};
+  UpdateInstrumentDescEvent* Clone( void ) const { return new UpdateInstrumentDescEvent( *this ); }
   const std::string& InstrumentName( void ) { return m_sName; };
 protected:
 private:
   std::string m_sName;
 };
 
-wxDECLARE_EVENT( EVT_UpdateInstrumentName, UpdateInstrumentNameEvent );
+wxDECLARE_EVENT( EVT_UpdateInstrumentDesc, UpdateInstrumentDescEvent );
 
 #define SYMBOL_PANELMANUALORDER_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELMANUALORDER_TITLE _("Manual Order")
@@ -92,10 +92,10 @@ public:
    long style = SYMBOL_PANELMANUALORDER_STYLE
    );
 
-  //void SetInstrumentName( const std::string& sName );
-  void SetIxStruct( unsigned int ix ) { m_ixStruct = ix; };
+  void SetInstrumentDescription( const std::string& sDescription );
+  void SetIxStruct( unsigned int ix ) { m_ixStruct = ix; };  // an index for when there are multiple ManualOrder Panels in use
 
-  void QueueEvent( wxEvent* event ) { wxEvtHandler::QueueEvent( event ); };
+  //void QueueEvent( wxEvent* event ) { wxEvtHandler::QueueEvent( event ); };
 
 protected:
 private:
@@ -143,7 +143,7 @@ private:
   void OnInstrumentSymbolTextUpdated( wxCommandEvent& event );
   void OnInstrumentSymbolTextEnter( wxCommandEvent& event );
 
-  void OnUpdateInstrumentName( UpdateInstrumentNameEvent& event );
+  void OnUpdateInstrumentDesc( UpdateInstrumentDescEvent& event );
 };
 
 } // namespace tf

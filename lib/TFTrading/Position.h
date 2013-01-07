@@ -72,6 +72,7 @@ public:
     void Fields( A& a ) {
       
       ou::db::Field( a, "portfolioid", idPortfolio );
+      ou::db::Field( a, "ownerid", idOwner );  // position of positions for classifying and grouping position legs
       ou::db::Field( a, "name", sName );
       ou::db::Field( a, "notes", sNotes );
       ou::db::Field( a, "executionaccountid", idExecutionAccount );
@@ -90,6 +91,7 @@ public:
     }
 
     idPortfolio_t idPortfolio;
+    idPosition_t idOwner;
     std::string sName;
     std::string sNotes;
     ou::tf::keytypes::idAccount_t idExecutionAccount;
@@ -115,11 +117,11 @@ public:
 
     // account and instrument objects need to be manually asssigned in a second step
     TableRowDefNoKey( void ) 
-      : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+      : idOwner( 0 ), eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
     TableRowDefNoKey( const TableRowDefNoKey& row ) 
-      : idPortfolio( row.idPortfolio ), sName( row.sName ), sNotes( row.sNotes ), 
+      : idPortfolio( row.idPortfolio ), idOwner( row.idOwner ), sName( row.sName ), sNotes( row.sNotes ), 
       idExecutionAccount( row.idExecutionAccount ), idDataAccount( row.idDataAccount ), idInstrument( row.idInstrument ),
       sAlgorithm( row.sAlgorithm ), eOrderSidePending( row.eOrderSidePending ), nPositionPending( row.nPositionPending ), 
       eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ), 
@@ -128,6 +130,13 @@ public:
     TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
       const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
       : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), sAlgorithm( sAlgorithm_ ),
+      idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
+      eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
+      dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
+    TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const idPosition_t idOwner_, const std::string& sName_, const idInstrument_t& idInstrument_,
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
+      : idPortfolio( idPortfolio_ ), idOwner( idOwner_ ), sName( sName_ ), idInstrument( idInstrument_ ), sAlgorithm( sAlgorithm_ ),
       idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
       eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
       nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
@@ -148,6 +157,10 @@ public:
       const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
       : idPosition( 0 ), 
         TableRowDefNoKey( idPortfolio_, sName_, idInstrument_, idExecutionAccount_, idDataAccount_, sAlgorithm_ ) {};
+    TableRowDef( const idPortfolio_t& idPortfolio_, const idPosition_t& idOwner_, const std::string& sName_, const idInstrument_t& idInstrument_,
+      const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
+      : idPosition( 0 ), 
+        TableRowDefNoKey( idPortfolio_, idOwner_, sName_, idInstrument_, idExecutionAccount_, idDataAccount_, sAlgorithm_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {

@@ -28,9 +28,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-wxDEFINE_EVENT( EVT_UpdateInstrumentName, UpdateInstrumentNameEvent );
+wxDEFINE_EVENT( EVT_UpdateInstrumentDesc, UpdateInstrumentDescEvent );
 
-PanelManualOrder::PanelManualOrder( void ) {
+PanelManualOrder::PanelManualOrder( void ): m_ixStruct( 0 ) {
   Init();
 };
   
@@ -189,7 +189,7 @@ void PanelManualOrder::CreateControls( void ) {
   Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelManualOrder::OnInstrumentSymbolTextUpdated, this, ID_TxtInstrumentSymbol );
   Bind( wxEVT_COMMAND_TEXT_ENTER, &PanelManualOrder::OnInstrumentSymbolTextEnter, this, ID_TxtInstrumentSymbol );
 
-  Bind( EVT_UpdateInstrumentName, &PanelManualOrder::OnUpdateInstrumentName, this );
+  Bind( EVT_UpdateInstrumentDesc, &PanelManualOrder::OnUpdateInstrumentDesc, this );
 }
 
 void PanelManualOrder::OnClose( wxCloseEvent& event ) {
@@ -262,7 +262,7 @@ void PanelManualOrder::EmitOrder( void ) {
 
 }
 
-void PanelManualOrder::OnUpdateInstrumentName( UpdateInstrumentNameEvent& event ) {
+void PanelManualOrder::OnUpdateInstrumentDesc( UpdateInstrumentDescEvent& event ) {
   m_txtInstrumentName->SetLabelText( event.InstrumentName() );
   0 == event.InstrumentName().size() ? DisableButtons() : EnableButtons();
 }
@@ -275,6 +275,12 @@ void PanelManualOrder::EnableButtons( void ) {
 void PanelManualOrder::DisableButtons( void ) {
   m_btnBuy->Enable(false);
   m_btnSell->Enable(false);
+}
+
+void PanelManualOrder::SetInstrumentDescription( const std::string& sDescription ) {
+  //wxQueueEvent( this, new WorkerDoneEvent( EVT_WorkerDone ) ); 
+  QueueEvent( new UpdateInstrumentDescEvent( EVT_UpdateInstrumentDesc, sDescription ) );
+  //wxQueueEvent( this, new UpdateInstrumentDescEvent( EVT_UpdateInstrumentDesc, sDescription ) );
 }
 
 } // namespace tf

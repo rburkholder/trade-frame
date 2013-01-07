@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -14,14 +14,8 @@
 
 #pragma once
 
-// Started 2012/10/15
-// 2013/01/06:
-// Auto selects and trades a basket of equities, enters at market start, exits prior to end of regular trading hours
-// Once heding and option calculations are complete, can run auto hedging on basket and see if that works
-// Current trading rules are too variable, big gains on one day when in directional market, 
-//   big losses on another when market moves sideways
-// Data has been saved for both types of days, perhaps running GP routines on the data will 
-//  yield more consistently positive results.  Could try for better money management as well.
+// Started 2013/01/06
+// This is manual based trading strategy, hence the name stick shift, for manual trading
 
 #include <string>
 
@@ -31,46 +25,37 @@
 
 // may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
+#include <TFTrading/PortfolioManager.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
+#include <TFVuTrading/PanelManualOrder.h>
 
-#include "Worker.h"
-#include "ManagePortfolio.h"
-#include "PanelBasketTradingMain.h"
-#include "PanelPortfolioStats.h"
-
-class WorkerDoneEvent: public wxEvent {
-public:
-  WorkerDoneEvent( wxEventType eventType ): wxEvent( 0, eventType ) {};
-  WorkerDoneEvent( const WorkerDoneEvent& event): wxEvent( event ) {};
-  ~WorkerDoneEvent( void ) {};
-  WorkerDoneEvent* Clone( void ) const { return new WorkerDoneEvent( *this ); };
-};
-
-wxDECLARE_EVENT( EVT_WorkerDone, WorkerDoneEvent );
-
-class AppBasketTrading:
-  public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
-    friend ou::tf::FrameWork01<AppBasketTrading>;
+class AppStickShift:
+  public wxApp, public ou::tf::FrameWork01<AppStickShift> {
+    friend ou::tf::FrameWork01<AppStickShift>;
 public:
 protected:
 private:
 
-  std::string m_sDbPortfolioName;
+  typedef ou::tf::CPortfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+
+  //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+
+  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
+
+  //std::string m_sDbPortfolioName;
+
+  pPortfolio_t m_pPortfolio;
+  pPosition_t m_pPosition;
 
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-  PanelBasketTradingMain* m_pPanelBasketTradingMain;
-  PanelPortfolioStats* m_pPanelPortfolioStats;
-
-  Worker* m_pWorker;
-
+  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   DBOps m_db;
-
-  ManagePortfolio m_ManagePortfolio;
-  ou::tf::PortfolioManager::pPortfolio_t m_pPortfolio;
 
   bool m_bData1Connected;
   bool m_bExecConnected;
@@ -84,6 +69,19 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
+  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
+  void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
+  void HandlePanelFocusPropogate( unsigned int ix );
+
+  struct structManualOrder {
+//    ou::tf::PanelManualOrder* pDialogManualOrder;
+    ou::tf::IBTWS::ContractDetails details;
+    pInstrument_t pInstrument;
+  } m_IBInstrumentInfo;
+
+  void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& pInstrument );
+  void HandleIBContractDetailsDone( void );
+
   void OnData1Connected( int );
 //  void OnData2Connected( int ) {};
   void OnExecConnected( int );
@@ -91,9 +89,6 @@ private:
 //  void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int );
 
-  void HandleStartButton( void );
-  void HandleExitPositionsButton( void );
-  void HandleStopButton( void );
   void HandleSaveButton( void );
 
   void HandlePopulateDatabase( void );
@@ -101,13 +96,10 @@ private:
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
 
-  void HandleWorkerCompletion0( void ); // for direct execution by worker thread
-  void HandleWorkerCompletion1( wxEvent& event ); // cross thread migration
-
   void HandleGuiRefresh( wxTimerEvent& event );
 
 };
 
 // Implements MyApp& wxGetApp()
-DECLARE_APP(AppBasketTrading)
+DECLARE_APP(AppStickShift)
 

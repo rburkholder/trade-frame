@@ -289,12 +289,6 @@ void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
   }
 }
 
-void CPosition::HandleCommission( const Order& order ) {
-  //m_row.dblCommissionPaid += order.GetCommission();
-  m_row.dblCommissionPaid += order.GetCommission();
-  OnCommission( this );
-}
-
 void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
 
   double dblAvgConstructedCost = 0;
@@ -378,6 +372,14 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
 
 }
 
+void CPosition::HandleCommission( const Order& order ) {
+  //m_row.dblCommissionPaid += order.GetCommission();
+  std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
+  m_row.dblCommissionPaid += order.GetIncrementalCommission();
+  std::cout << "," << m_row.dblCommissionPaid << std::endl;
+  OnCommission( this );
+}
+
 // before entry to this method, sanity check:  side on execution is same as side on order
 void CPosition::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
 
@@ -388,6 +390,8 @@ void CPosition::HandleExecution( const std::pair<const Order&, const Execution&>
   const Order& order = status.first;
   const Execution& exec = status.second;
   Order::idOrder_t orderId = order.GetOrderId();
+
+  std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
 
   // update position, regardless of whether we see order open or closed
   UpdateRowValues( exec.GetPrice(), exec.GetSize(), exec.GetOrderSide() );

@@ -38,7 +38,7 @@ Order::Order( // market order
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dtOrderSubmitted ),
   m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ), 
+  m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 ),
   m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
@@ -57,7 +57,7 @@ Order::Order( // limit or stop
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dtOrderSubmitted ),
   m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ),
+  m_dblPriceXQuantity( 0 ), m_dblIncrementalCommission( 0.0 ),
   m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
@@ -76,7 +76,7 @@ Order::Order( // limit and stop
   m_row( idPosition, pInstrument->GetInstrumentName(), eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, dtOrderSubmitted ),
   m_pInstrument( pInstrument ), 
   m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ), 
+  m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 ),
   m_nNextExecutionId ( 0 )
 {
   ConstructOrder();
@@ -85,7 +85,7 @@ Order::Order( // limit and stop
 Order::Order( const TableRowDef& row, pInstrument_t& pInstrument  ) 
 : m_row( row ), m_pInstrument( pInstrument ),
   m_bOutsideRTH( false ),
-  m_dblPriceXQuantity( 0 ), 
+  m_dblPriceXQuantity( 0 ),  m_dblIncrementalCommission( 0.0 ),
   m_nNextExecutionId ( 0 )
 {
 }
@@ -135,7 +135,7 @@ OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) {
     std:: cout << "Order " << m_row.idOrder << " overfilled with +" << exec.GetSize() << std::endl;
     bOverDone = true;
   }
-  if ( !bOverDone ) {
+//  if ( !bOverDone ) {  // position should actually reflect overages so things can be seen and handled
     m_dblPriceXQuantity += exec.GetPrice() * exec.GetSize();
     m_row.dblAverageFillPrice = m_dblPriceXQuantity / m_row.nQuantityFilled;
     if ( 0 == m_row.nQuantityRemaining ) {
@@ -178,7 +178,7 @@ OrderStatus::enumOrderStatus Order::ReportExecution(const Execution &exec) {
       }
       OnPartialFill( *this );
     }
-  }
+//  }
   OnExecution( std::pair<const Order&, const Execution&>( *this, exec ) );
   return m_row.eOrderStatus;
 }
@@ -197,9 +197,10 @@ void Order::ActOnError(OrderErrors::enumOrderErrors eError) {
   }
 }
 
-void Order::SetCommission( double dblCommission ) { 
+void Order::SetCommission( double dblCommission ) {  // total accumulated commission to this point
+  m_dblIncrementalCommission = dblCommission - m_row.dblCommission;
   m_row.dblCommission = dblCommission; 
-  OnCommission( *this );  // run on order completion
+  OnCommission( *this );  // run on order completion   
 }
 
 void Order::SetOrderId( idOrder_t id ) {

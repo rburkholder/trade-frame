@@ -222,6 +222,7 @@ public:
     assert( not_a_date_time != m_row.dtOrderClosed ); // is this a valid test?
     return m_row.dtOrderClosed; 
   };
+  double GetIncrementalCommission( void ) const { return m_dblIncrementalCommission; };
   void MarkAsCancelled( void );  // called from OrderManager
 
   ou::Delegate<const std::pair<const Order&, const Execution&>& > OnExecution;
@@ -250,6 +251,8 @@ protected:
 private:
 
   TableRowDef m_row;
+
+  double m_dblIncrementalCommission; // Something for the Position Manager as commission is updated for the order.
 
   Order(void);  // no default constructor
 

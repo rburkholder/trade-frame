@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{05364235-802E-4D0C-95A0-7647558C633E}</ProjectGuid>
+    <ProjectGuid>{0B437E17-F0D1-4445-A2EF-F0160963E66A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SemiAuto</RootNamespace>
+    <RootNamespace>StickShift</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -64,9 +64,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -76,36 +80,37 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0501;WIN32;_DEBUG;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\lib;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0502;WINVER=0x0502;WIN32;_DEBUG;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\;..\lib;C:\Data\Projects\VSC++\hdf5\compress64\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x32\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w32\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w32\lib;C:\Data\Projects\VSC++\hdf5\compress32\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;;$(OutDir)OUCommon.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)TFOptions.lib;$(OutDir)TFVuTrading.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib;$(OutDir)libdb48.lib;$(OutDir)szlib.lib;$(OutDir)zlib.lib;$(OutDir)zlib1.lib;$(OutDir)IQ32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0502;WINVER=0x0502;WIN32;_DEBUG;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;..\lib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\lib</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -142,36 +147,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="SemiAuto.ico" />
     <None Include="small.ico" />
+    <None Include="StickShift.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FrameGrid.h" />
-    <ClInclude Include="FrameInstrumentStatus.h" />
-    <ClInclude Include="FrameMain.h" />
-    <ClInclude Include="FrameProviderControl.h" />
-    <ClInclude Include="InstrumentData.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SemiAuto.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StickShift.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FrameGrid.cpp" />
-    <ClCompile Include="FrameInstrumentStatus.cpp" />
-    <ClCompile Include="FrameMain.cpp" />
-    <ClCompile Include="FrameProviderControl.cpp" />
-    <ClCompile Include="InstrumentData.cpp" />
-    <ClCompile Include="SemiAuto.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StickShift.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SemiAuto.rc" />
+    <ResourceCompile Include="StickShift.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
