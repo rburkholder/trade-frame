@@ -25,11 +25,11 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // providers need to have been opened elsewhere, as this is a lookup into the provider map only
-void HandlePositionDetails( CPosition::pPosition_t& pPosition ) {
-  const CPosition::TableRowDef& row( pPosition->GetRow() );
+void HandlePositionDetails( Position::pPosition_t& pPosition ) {
+  const Position::TableRowDef& row( pPosition->GetRow() );
   Instrument::pInstrument_t pInstrument = InstrumentManager::Instance().Get( row.idInstrument );
-  CPosition::pProvider_t pExecutionProvider = ProviderManager::Instance().Get( row.idExecutionAccount );
-  CPosition::pProvider_t pDataProvider = ProviderManager::Instance().Get( row.idDataAccount );
+  Position::pProvider_t pExecutionProvider = ProviderManager::Instance().Get( row.idExecutionAccount );
+  Position::pProvider_t pDataProvider = ProviderManager::Instance().Get( row.idDataAccount );
   pPosition->Set( pInstrument, pExecutionProvider, pDataProvider ); 
 }
 

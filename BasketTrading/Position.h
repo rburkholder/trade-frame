@@ -25,7 +25,7 @@ class ManagePosition: public ou::tf::DailyTradeTimeFrame<ManagePosition> {
   friend ou::tf::DailyTradeTimeFrame<ManagePosition>;
 public:
 
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
 
   ManagePosition( const std::string& sName, const ou::tf::Bar& bar );
   ~ManagePosition(void);

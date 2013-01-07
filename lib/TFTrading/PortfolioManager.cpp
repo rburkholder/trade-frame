@@ -33,11 +33,11 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
     throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
   else {
-    pPortfolio.reset( new CPortfolio( idPortfolio, idAccountOwner, sDescription ) );
+    pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, sDescription ) );
     m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
     if ( 0 != m_pSession ) {
-      ou::db::QueryFields<CPortfolio::TableRowDef>::pQueryFields_t pQuery
-        = m_pSession->Insert<CPortfolio::TableRowDef>( const_cast<CPortfolio::TableRowDef&>( pPortfolio->GetRow() ) );
+      ou::db::QueryFields<Portfolio::TableRowDef>::pQueryFields_t pQuery
+        = m_pSession->Insert<Portfolio::TableRowDef>( const_cast<Portfolio::TableRowDef&>( pPortfolio->GetRow() ) );
     }
     pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
@@ -89,7 +89,7 @@ namespace PortfolioManagerQueries {
 
 void PortfolioManager::HandlePositionOnExecution( execution_delegate_t exec ) {
   if ( 0 != m_pSession ) {
-    const CPosition::TableRowDef& row( exec.first.GetRow() );
+    const Position::TableRowDef& row( exec.first.GetRow() );
     PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
       row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblMarketValue, row.dblUnRealizedPL, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionData>::pQueryFields_t pQuery
@@ -114,9 +114,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePositionOnCommission( const CPosition* pPosition ) {
+void PortfolioManager::HandlePositionOnCommission( const Position* pPosition ) {
   if ( 0 != m_pSession ) {
-    const CPosition::TableRowDef& row( pPosition->GetRow() );
+    const Position::TableRowDef& row( pPosition->GetRow() );
     PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commission=?", update ).Where( "positionid=?" );
@@ -140,9 +140,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePortfolioOnExecution( const CPortfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnExecution( const Portfolio* pPortfolio ) {
   if ( 0 != m_pSession ) {
-    const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
+    const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "portfolioid=?" );
@@ -165,9 +165,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePortfolioOnCommission( const CPortfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnCommission( const Portfolio* pPortfolio ) {
   if ( 0 != m_pSession ) {
-    const CPortfolio::TableRowDef& row( pPortfolio->GetRow() );
+    const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commission=?", update ).Where( "portfolioid=?" );
@@ -203,9 +203,9 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
       = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select * from portfolios", key ).Where( "portfolioid = ?" ).NoExecute();
     m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pExistsQuery );
     if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
-      CPortfolio::TableRowDef rowPortfolio;
-      m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, CPortfolio::TableRowDef>( pExistsQuery, rowPortfolio );
-      pPortfolio.reset( new CPortfolio( rowPortfolio ) );
+      Portfolio::TableRowDef rowPortfolio;
+      m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, Portfolio::TableRowDef>( pExistsQuery, rowPortfolio );
+      pPortfolio.reset( new Portfolio( rowPortfolio ) );
 
       std::pair<mapPortfolios_iter_t, bool> response;
       response = m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, structPortfolio( pPortfolio ) ) );
@@ -241,8 +241,8 @@ namespace PortfolioManagerQueries {
       ou::db::Field( a, "portfolioid", idPortfolio );
     }
     const ou::tf::keytypes::idPortfolio_t& idPortfolio;
-    CPortfolio::TableRowDef& row;
-    PortfolioUpdate( CPortfolio::TableRowDef& row_, const ou::tf::keytypes::idPortfolio_t& idPortfolio_ )
+    Portfolio::TableRowDef& row;
+    PortfolioUpdate( Portfolio::TableRowDef& row_, const ou::tf::keytypes::idPortfolio_t& idPortfolio_ )
       : row( row_ ), idPortfolio( idPortfolio_ ) {};
   };
 }
@@ -251,7 +251,7 @@ void PortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
 
   pPortfolio_t p( GetPortfolio( idPortfolio ) );  // has exception if does not exist
 
-  UpdateRecord<idPortfolio_t, CPortfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
+  UpdateRecord<idPortfolio_t, Portfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
     idPortfolio, p->GetRow(), m_mapPortfolios, "portfolioid = ?" );
 
 }
@@ -288,9 +288,9 @@ void PortfolioManager::LoadActivePortfolios( void ) {
     pPortfolio_t pPortfolio;
 
     // following portfolio / position code is shared with GetPortfolio and could be factored out
-    CPortfolio::TableRowDef rowPortfolio;
-    m_pSession->Columns<PortfolioManagerQueries::ActivePortfolios, CPortfolio::TableRowDef>( pQuery, rowPortfolio );
-    pPortfolio.reset( new CPortfolio( rowPortfolio ) );
+    Portfolio::TableRowDef rowPortfolio;
+    m_pSession->Columns<PortfolioManagerQueries::ActivePortfolios, Portfolio::TableRowDef>( pQuery, rowPortfolio );
+    pPortfolio.reset( new Portfolio( rowPortfolio ) );
 
     std::pair<mapPortfolios_iter_t, bool> response;
     response = m_mapPortfolios.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
@@ -323,9 +323,9 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
       .NoExecute();
   m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pPositionQuery );
   while ( m_pSession->Execute( pPositionQuery ) ) {
-    CPosition::TableRowDef rowPosition;
-    m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, CPosition::TableRowDef>( pPositionQuery, rowPosition );
-    pPosition_t pPosition( new CPosition( rowPosition ) );
+    Position::TableRowDef rowPosition;
+    m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, Position::TableRowDef>( pPositionQuery, rowPosition );
+    pPosition_t pPosition( new Position( rowPosition ) );
     if ( 0 == OnPositionNeedsDetails ) {  // fill in instrument, execution, data 
       throw std::runtime_error( "PortfolioManager::LoadPositions has no Details Callback" );
     }
@@ -381,14 +381,14 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
     throw std::runtime_error( "ConstructPosition:  sName already exists" );
   }
 
-  pPosition.reset( new CPosition( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+  pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
   if ( 0 == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
   }
 
-  ou::db::QueryFields<CPosition::TableRowDefNoKey>::pQueryFields_t pQuery
-    = m_pSession->Insert<CPosition::TableRowDefNoKey>( 
-    const_cast<CPosition::TableRowDefNoKey&>( dynamic_cast<const CPosition::TableRowDefNoKey&>( pPosition->GetRow() ) ) );
+  ou::db::QueryFields<Position::TableRowDefNoKey>::pQueryFields_t pQuery
+    = m_pSession->Insert<Position::TableRowDefNoKey>( 
+    const_cast<Position::TableRowDefNoKey&>( dynamic_cast<const Position::TableRowDefNoKey&>( pPosition->GetRow() ) ) );
   idPosition_t idPosition( m_pSession->GetLastRowId() );
   pPosition->Set( idPosition );
 
@@ -424,16 +424,16 @@ namespace PortfolioManagerQueries {
       ou::db::Field( a, "positionid", idPosition );
     }
     const ou::tf::keytypes::idPosition_t& idPosition;
-    CPosition::TableRowDefNoKey& row;
-    PositionUpdate( CPosition::TableRowDefNoKey& row_, const ou::tf::keytypes::idPosition_t& idPosition_ )
+    Position::TableRowDefNoKey& row;
+    PositionUpdate( Position::TableRowDefNoKey& row_, const ou::tf::keytypes::idPosition_t& idPosition_ )
       : row( row_ ), idPosition( idPosition_ ) {};
   };
 }
 
 void PortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
-  UpdateRecord<idPosition_t, CPosition::TableRowDefNoKey, PortfolioManagerQueries::PositionUpdate>(
-    pPosition->GetRow().idPosition, dynamic_cast<const CPosition::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
+  UpdateRecord<idPosition_t, Position::TableRowDefNoKey, PortfolioManagerQueries::PositionUpdate>(
+    pPosition->GetRow().idPosition, dynamic_cast<const Position::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
 }
 
 namespace PortfolioManagerQueries {
@@ -471,14 +471,14 @@ void PortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const s
 //
 
 void PortfolioManager::HandleRegisterTables( ou::db::Session& session ) {
-  session.RegisterTable<CPortfolio::TableCreateDef>( tablenames::sPortfolio );
-  session.RegisterTable<CPosition::TableCreateDef>( tablenames::sPosition );
+  session.RegisterTable<Portfolio::TableCreateDef>( tablenames::sPortfolio );
+  session.RegisterTable<Position::TableCreateDef>( tablenames::sPosition );
 }
 
 void PortfolioManager::HandleRegisterRows( ou::db::Session& session ) {
-  session.MapRowDefToTableName<CPortfolio::TableRowDef>( tablenames::sPortfolio );
-  session.MapRowDefToTableName<CPosition::TableRowDef>( tablenames::sPosition );
-  session.MapRowDefToTableName<CPosition::TableRowDefNoKey>( tablenames::sPosition );
+  session.MapRowDefToTableName<Portfolio::TableRowDef>( tablenames::sPortfolio );
+  session.MapRowDefToTableName<Position::TableRowDef>( tablenames::sPosition );
+  session.MapRowDefToTableName<Position::TableRowDefNoKey>( tablenames::sPosition );
 }
 
 void PortfolioManager::HandlePopulateTables( ou::db::Session& session ) {

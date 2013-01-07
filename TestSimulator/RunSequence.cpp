@@ -62,7 +62,7 @@ void RunSequence::Run( void ) {
 
   m_pProvider->SetOnSimulationComplete( MakeDelegate( this, &RunSequence::HandleSimulationComplete ) );
 
-  m_pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_pProvider, m_pProvider ) );
+  m_pPosition.reset( new ou::tf::Position( m_pInstrument, m_pProvider, m_pProvider ) );
   m_portfolio.AddPosition( "pos", m_pPosition );
 
   m_portfolio.OnExecution.Add( MakeDelegate( this, &RunSequence::HandlePortfolioExecution ) );
@@ -246,22 +246,22 @@ void RunSequence::Trade( void ) {
 
 
 
-void RunSequence::HandlePortfolioExecution( const ou::tf::CPortfolio*  ) { 
+void RunSequence::HandlePortfolioExecution( const ou::tf::Portfolio*  ) { 
   std::cout << "Porfolio Execution: " 
     << m_portfolio.GetRow().dblRealizedPL << "," 
     << m_portfolio.GetRow().dblCommissionsPaid 
     << std::endl; 
 }
-void RunSequence::HandlePortfolioCommission( const ou::tf::CPortfolio*  ) { 
+void RunSequence::HandlePortfolioCommission( const ou::tf::Portfolio*  ) { 
   std::cout << "Porfolio Commission: "     
     << m_portfolio.GetRow().dblRealizedPL << "," 
     << m_portfolio.GetRow().dblCommissionsPaid 
     << std::endl; 
 }
 
-void RunSequence::HandlePositionExecution( const ou::tf::CPosition::execution_delegate_t delegate ) {
+void RunSequence::HandlePositionExecution( const ou::tf::Position::execution_delegate_t delegate ) {
   std::cout << "  execute:  " << delegate.second.GetSize() << "@" << delegate.second.GetPrice() << std::endl;
 }
 
-void RunSequence::HandlePositionCommission( const ou::tf::CPosition* pPosition ) {
+void RunSequence::HandlePositionCommission( const ou::tf::Position* pPosition ) {
 }

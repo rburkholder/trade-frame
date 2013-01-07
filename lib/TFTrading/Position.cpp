@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
   const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
   const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
@@ -32,7 +32,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   Construction();
 }
 
-CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
+Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
@@ -41,7 +41,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   Construction();
 }
 
-CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
+Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes ) 
 : m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
   m_pInstrument( pInstrument ), 
   m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
@@ -51,7 +51,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   Construction();
 }
 
-CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
+Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, 
   const TableRowDef& row ) 
 : m_row( row ),
   m_pExecutionProvider( pExecutionProvider ), m_pDataProvider( pDataProvider ), 
@@ -62,7 +62,7 @@ CPosition::CPosition( pInstrument_cref pInstrument, pProvider_t pExecutionProvid
   Construction();
 }
 
-CPosition::CPosition( const TableRowDef& row ) 
+Position::Position( const TableRowDef& row ) 
 : m_row( row ),
   m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
@@ -70,29 +70,29 @@ CPosition::CPosition( const TableRowDef& row )
   // need flags to wait for execution, data, instrument variables to be set
 }
 
-CPosition::CPosition( void ) 
+Position::Position( void ) 
 : m_dblMultiplier( 1 ), m_bConnectedToDataProvider( false ),
   m_bInstrumentAssigned ( false ), m_bExecutionAccountAssigned( false ), m_bDataAccountAssigned( false )
 {
   // need flags to wait for execution, data, instrument variables to be set
 }
 
-void CPosition::Construction( void ) {
+void Position::Construction( void ) {
   m_dblMultiplier = m_pInstrument->GetMultiplier();
   if ( m_pDataProvider->ProvidesQuotes() ) {
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
+    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Position::HandleQuote ) );
   }
   if ( m_pDataProvider->ProvidesTrades() ) {
-    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleTrade ) );
+    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
   if ( m_pDataProvider->ProvidesGreeks() ) {
-    m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
+    m_pDataProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
   }
-  m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &CPosition::DisconnectFromDataProvider ) );
+  m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
   m_bConnectedToDataProvider = true;
 }
 
-void CPosition::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
+void Position::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
 
   m_pInstrument = pInstrument;
   m_bInstrumentAssigned = true;
@@ -107,34 +107,34 @@ void CPosition::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvid
 
 }
 
-CPosition::~CPosition(void) {
+Position::~Position(void) {
   if ( m_bConnectedToDataProvider ) {
     DisconnectFromDataProvider( 0 );
   }
   for ( std::vector<pOrder_t>::iterator iter = m_AllOrders.begin(); iter != m_AllOrders.end(); ++iter ) {
-    iter->get()->OnCommission.Remove( MakeDelegate( this, &CPosition::HandleCommission ) );
-    iter->get()->OnExecution.Remove( MakeDelegate( this, &CPosition::HandleExecution ) );
+    iter->get()->OnCommission.Remove( MakeDelegate( this, &Position::HandleCommission ) );
+    iter->get()->OnExecution.Remove( MakeDelegate( this, &Position::HandleExecution ) );
   }
   m_OpenOrders.clear();
   m_ClosedOrders.clear();
   m_AllOrders.clear();
 }
 
-void CPosition::DisconnectFromDataProvider( int ) {
-  m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &CPosition::DisconnectFromDataProvider ) );
+void Position::DisconnectFromDataProvider( int ) {
+  m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &Position::DisconnectFromDataProvider ) );
   if ( m_pDataProvider->ProvidesQuotes() ) {
-    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleQuote ) );
+    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Position::HandleQuote ) );
   }
   if ( m_pDataProvider->ProvidesTrades() ) {
-    m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleTrade ) );
+    m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Position::HandleTrade ) );
   }
   if ( m_pDataProvider->ProvidesGreeks() ) {
-    m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &CPosition::HandleGreek ) );
+    m_pDataProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Position::HandleGreek ) );
   }
   m_bConnectedToDataProvider = false;
 }
 
-void CPosition::HandleQuote( quote_t quote ) {
+void Position::HandleQuote( quote_t quote ) {
 
   if ( ( 0 == quote.Ask() ) || ( 0 == quote.Bid() ) ) return;
 
@@ -157,14 +157,14 @@ void CPosition::HandleQuote( quote_t quote ) {
   }
 }
 
-void CPosition::HandleTrade( trade_t trade ) {
+void Position::HandleTrade( trade_t trade ) {
   OnTrade( this );
 }
 
-void CPosition::HandleGreek( greek_t greek ) {
+void Position::HandleGreek( greek_t greek ) {
 }
 
-Order::pOrder_t CPosition::PlaceOrder( // market
+Order::pOrder_t Position::PlaceOrder( // market
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity
@@ -179,7 +179,7 @@ Order::pOrder_t CPosition::PlaceOrder( // market
   return pOrder;
 }
 
-Order::pOrder_t CPosition::PlaceOrder( // limit or stop
+Order::pOrder_t Position::PlaceOrder( // limit or stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
@@ -195,7 +195,7 @@ Order::pOrder_t CPosition::PlaceOrder( // limit or stop
   return pOrder;
 }
 
-Order::pOrder_t CPosition::PlaceOrder( // limit and stop
+Order::pOrder_t Position::PlaceOrder( // limit and stop
   OrderType::enumOrderType eOrderType,
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity,
@@ -212,11 +212,11 @@ Order::pOrder_t CPosition::PlaceOrder( // limit and stop
   return pOrder;
 }
 
-void CPosition::PlaceOrder( pOrder_t pOrder ) {
+void Position::PlaceOrder( pOrder_t pOrder ) {
 
 //  if ( OrderSide::Unknown != m_row.eOrderSidePending ) { // ensure new order matches existing orders
 //    if ( ( m_row.eOrderSidePending != pOrder->GetOrderSide() ) && ( OrderType::Market == pOrder->GetOrderType() ) ) {  // check only for market orders, not limit orders?
-//      throw std::runtime_error( "CPosition::PlaceOrder, new order does not match pending order type" );
+//      throw std::runtime_error( "Position::PlaceOrder, new order does not match pending order type" );
 //    }
 //  }
 
@@ -225,13 +225,13 @@ void CPosition::PlaceOrder( pOrder_t pOrder ) {
   m_row.nPositionPending += pOrder->GetQuantity();
   m_AllOrders.push_back( pOrder );
   m_OpenOrders.push_back( pOrder );
-  pOrder->OnExecution.Add( MakeDelegate( this, &CPosition::HandleExecution ) ); 
-  pOrder->OnCommission.Add( MakeDelegate( this, &CPosition::HandleCommission ) );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &CPosition::HandleCancellation ) );
+  pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) ); 
+  pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
   OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
 }
 
-void CPosition::CancelOrders( void ) {
+void Position::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
   for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
@@ -239,7 +239,7 @@ void CPosition::CancelOrders( void ) {
   //m_OpenOrders.clear();
 }
 
-void CPosition::CancelOrder( idOrder_t idOrder ) {
+void Position::CancelOrder( idOrder_t idOrder ) {
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       CancelOrder( iter );
@@ -249,7 +249,7 @@ void CPosition::CancelOrder( idOrder_t idOrder ) {
   }
 }
 
-void CPosition::HandleCancellation( const Order& order ) {
+void Position::HandleCancellation( const Order& order ) {
   Order::idOrder_t idOrder = order.GetOrderId();
   for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
@@ -268,11 +268,11 @@ void CPosition::HandleCancellation( const Order& order ) {
   }
 }
 
-void CPosition::CancelOrder( vOrders_iter_t iter ) {
+void Position::CancelOrder( vOrders_iter_t iter ) {
   OrderManager::LocalCommonInstance().CancelOrder( iter->get()->GetOrderId() );
 }
 
-void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
+void Position::ClosePosition( OrderType::enumOrderType eOrderType ) {
   // should outstanding orders be auto cancelled?
   // position is closed with a market order, can try to do limit in the future, but need active market data
   if ( 0 != m_row.nPositionActive ) {
@@ -289,7 +289,7 @@ void CPosition::ClosePosition( OrderType::enumOrderType eOrderType ) {
   }
 }
 
-void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
+void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
 
   double dblAvgConstructedCost = 0;
   double dblRealizedPL = 0;
@@ -372,16 +372,16 @@ void CPosition::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::
 
 }
 
-void CPosition::HandleCommission( const Order& order ) {
+void Position::HandleCommission( const Order& order ) {
   //m_row.dblCommissionPaid += order.GetCommission();
-  std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
+  //std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
   m_row.dblCommissionPaid += order.GetIncrementalCommission();
   std::cout << "," << m_row.dblCommissionPaid << std::endl;
   OnCommission( this );
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
-void CPosition::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
+void Position::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
 
   // should be able to calculate profit/loss & position cost as exections are encountered
   // should be able to calculate position cost basis as position is updated (with and without commissions)
@@ -421,14 +421,14 @@ void CPosition::HandleExecution( const std::pair<const Order&, const Execution&>
   }
   if ( !bOrderFound ) {
     // need to handle the case where order was cancelled, but not in time to prevent execution
-    throw std::runtime_error( "CPosition::HandleExecution doesn't have an Open Order" );
+    throw std::runtime_error( "Position::HandleExecution doesn't have an Open Order" );
   }
 
   OnExecution( execution_pair_t( *this, exec ) );
   
 }
 
-void CPosition::EmitStatus( std::stringstream& ssStatus ) const {
+void Position::EmitStatus( std::stringstream& ssStatus ) const {
   ssStatus 
     << "Position " << m_pInstrument->GetInstrumentName() << ": "
     << "Active " << m_row.nPositionActive

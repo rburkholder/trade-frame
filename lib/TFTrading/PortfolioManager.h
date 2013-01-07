@@ -38,11 +38,11 @@ namespace tf { // TradeFrame
 class PortfolioManager: public ManagerBase<PortfolioManager> {
 public:
 
-  typedef CPortfolio::pPortfolio_t pPortfolio_t;
+  typedef Portfolio::pPortfolio_t pPortfolio_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
   typedef std::set<idPortfolio_t> setPortfolioId_t;
 
-  typedef CPosition::pPosition_t pPosition_t;
+  typedef Position::pPosition_t pPosition_t;
   typedef keytypes::idPosition_t idPosition_t;
   typedef keytypes::idAccount_t idAccount_t;
   typedef keytypes::idInstrument_t idInstrument_t;
@@ -50,9 +50,9 @@ public:
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
   typedef Instrument::pInstrument_cref pInstrument_cref;
-  typedef CPosition::pProvider_t pProvider_t;
+  typedef Position::pProvider_t pProvider_t;
 
-  typedef std::pair<const CPosition&, const Execution&> execution_pair_t;
+  typedef std::pair<const Position&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
   typedef std::pair<std::string, pPosition_t> mapPosition_pair_t;
@@ -128,10 +128,10 @@ private:
   void HandlePopulateTables( ou::db::Session& session );
 
   void HandlePositionOnExecution( execution_delegate_t );
-  void HandlePositionOnCommission( const CPosition* );
+  void HandlePositionOnCommission( const Position* );
 
-  void HandlePortfolioOnExecution( const CPortfolio* );
-  void HandlePortfolioOnCommission( const CPortfolio* );
+  void HandlePortfolioOnExecution( const Portfolio* );
+  void HandlePortfolioOnCommission( const Portfolio* );
 
   void LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition );
 

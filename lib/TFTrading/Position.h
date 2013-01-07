@@ -45,10 +45,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CPosition {
+class Position {
 public:
 
-  typedef boost::shared_ptr<CPosition> pPosition_t;
+  typedef boost::shared_ptr<Position> pPosition_t;
 
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
 
@@ -59,7 +59,7 @@ public:
   typedef Order::pOrder_t pOrder_t;
   typedef Order::pOrder_ref pOrder_ref;
 
-  typedef std::pair<const CPosition&, const Execution&> execution_pair_t;
+  typedef std::pair<const Position&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
   typedef keytypes::idPosition_t idPosition_t;
@@ -176,15 +176,15 @@ public:
     }
   };
 
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount, 
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
-  CPosition( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
-  CPosition( const TableRowDef& row );
-  CPosition( void );
-  ~CPosition(void);
+  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
+  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
+  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
+  Position( const TableRowDef& row );
+  Position( void );
+  ~Position(void);
 
   const std::string& Notes( void ) const { return m_row.sNotes; };
   void Append( std::string& sNotes ) { m_row.sNotes += sNotes; };
@@ -220,10 +220,10 @@ public:
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
-  ou::Delegate<const CPosition*> OnQuote;
-  ou::Delegate<const CPosition*> OnTrade;  // nothing useful currently
+  ou::Delegate<const Position*> OnQuote;
+  ou::Delegate<const Position*> OnTrade;  // nothing useful currently
   ou::Delegate<execution_delegate_t> OnExecution;
-  ou::Delegate<const CPosition*> OnCommission;
+  ou::Delegate<const Position*> OnCommission;
 
   void EmitStatus( std::stringstream& ssStatus ) const;
 

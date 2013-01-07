@@ -57,7 +57,7 @@ struct InstrumentState {
 
   ptime dtPreTradingStop;
 
-  ou::tf::CPosition::pPosition_t pPosition;
+  ou::tf::Position::pPosition_t pPosition;
 
   bool bMarketHoursCrossMidnight;
   bool bDaySession;

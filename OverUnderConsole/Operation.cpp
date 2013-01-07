@@ -74,7 +74,7 @@ void Operation::Stop( void ) {
 void Operation::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
   m_pInstrument = pInstrument;
   //m_pInstrument->SetAlternateName( m_piqfeed->ID(), "+GCZ11" );
-  m_md.data.pPosition.reset( new ou::tf::CPosition( m_pInstrument, m_ptws, m_piqfeed ) );
+  m_md.data.pPosition.reset( new ou::tf::Position( m_pInstrument, m_ptws, m_piqfeed ) );
   m_md.data.tdMarketOpen = m_pInstrument->GetTimeTrading().begin().time_of_day();
   m_md.data.tdMarketClosed = m_pInstrument->GetTimeTrading().end().time_of_day();
 }

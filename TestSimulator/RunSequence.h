@@ -44,11 +44,11 @@ private:
 
 
 
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   pInstrument_t m_pInstrument;
-  ou::tf::CPortfolio m_portfolio;
+  ou::tf::Portfolio m_portfolio;
   pPosition_t m_pPosition;
   pOrder_t m_pOrder;  // active order
 
@@ -65,9 +65,9 @@ private:
   void HandleQuote2( const ou::tf::Quote& );  // for testing OptimizeStrategy code
   void Trade( void ); // used with HandleQuote2
   void HandleTrade( const ou::tf::Trade& );
-  void HandlePortfolioExecution( const ou::tf::CPortfolio*  );
-  void HandlePortfolioCommission( const ou::tf::CPortfolio*  );
-  void HandlePositionExecution( const ou::tf::CPosition::execution_delegate_t );
-  void HandlePositionCommission( const ou::tf::CPosition* );
+  void HandlePortfolioExecution( const ou::tf::Portfolio*  );
+  void HandlePortfolioCommission( const ou::tf::Portfolio*  );
+  void HandlePositionExecution( const ou::tf::Position::execution_delegate_t );
+  void HandlePositionCommission( const ou::tf::Position* );
 };
 

@@ -257,13 +257,13 @@ void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
 void Strategy::Activate( void ) {
 
   // all this needs to run together, as the group directory from above required for symbol access
-  m_pPositionLong.reset( new ou::tf::CPosition( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
+  m_pPositionLong.reset( new ou::tf::Position( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
   m_pPositionLong->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pPositionLong->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
   m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLong );
 
-  m_pPositionShort.reset( new ou::tf::CPosition( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
+  m_pPositionShort.reset( new ou::tf::Position( m_pTestInstrument, m_pExecutionProvider, m_pDataProvider ) );
   m_pPositionShort->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pPositionShort->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
@@ -773,7 +773,7 @@ void Strategy::HandleSimulationComplete( void ) {
 
 }
 
-void Strategy::HandleExecution( ou::tf::CPosition::execution_delegate_t del ) {
+void Strategy::HandleExecution( ou::tf::Position::execution_delegate_t del ) {
   m_ss << "Exec: " << del.second.GetTimeStamp() << ": ";
   m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";
@@ -781,7 +781,7 @@ void Strategy::HandleExecution( ou::tf::CPosition::execution_delegate_t del ) {
   std::cout << m_ss << std::endl;
 }
 
-void Strategy::HandleCommission( const ou::tf::CPosition* pPosition ) {
+void Strategy::HandleCommission( const ou::tf::Position* pPosition ) {
   m_ss.str( "" );
   m_pPositionLong->EmitStatus( m_ss );
   m_ss << ", ";

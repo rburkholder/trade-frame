@@ -112,7 +112,7 @@ void StrategyEquity::Init( StrategyEquity::registrations_t& registrations, fdEva
   Register( registrations, &m_Ema2Dif2 );
   Register( registrations, &m_Ema3Dif2 );
 
-  m_pPosition.reset( new ou::tf::CPosition( m_pUnderlying, m_pProvider, m_pProvider ) );
+  m_pPosition.reset( new ou::tf::Position( m_pUnderlying, m_pProvider, m_pProvider ) );
   m_portfolio.AddPosition( "pos", m_pPosition );
 
   m_pProvider->AddQuoteHandler( m_pUnderlying, MakeDelegate( this, &StrategyEquity::HandleQuote ) );

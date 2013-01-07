@@ -38,8 +38,8 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CPortfolio::pPortfolio_t pPortfolio_t;
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
 
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;

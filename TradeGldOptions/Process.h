@@ -30,7 +30,7 @@
 #include <TFTrading/DBOps.h>
 
 #include <TFIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
-#include <TFIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
+#include <TFIQFeed/IQFeedProvider.h>  // includes Portfolio and Position
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
@@ -100,8 +100,8 @@ protected:
 
 private:
 
-  typedef CPortfolio::pPortfolio_t pPortfolio_t;
-  typedef CPosition::pPosition_t pPosition_t;
+  typedef Portfolio::pPortfolio_t pPortfolio_t;
+  typedef Position::pPosition_t pPosition_t;
 
   typedef ou::tf::keytypes::idInstrument_t idInstrument_t;
   typedef Instrument::pInstrument_t pInstrument_t;
@@ -240,7 +240,7 @@ private:
   void HandleTSCloseOrders( const Quote& quote );
   void HandleAfterMarket( const Quote& quote );
 
-  void HandlePositionExecution( CPosition::execution_delegate_t pair );
+  void HandlePositionExecution( Position::execution_delegate_t pair );
 
   void HandlePopulateDatabase( void ) ;
 

@@ -76,8 +76,8 @@ private:
 
   std::stringstream m_ss;
 
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
@@ -256,8 +256,8 @@ private:
 
   void HandleOrderFilled( const ou::tf::Order& );
 
-  void HandleExecution( ou::tf::CPosition::execution_delegate_t del );
-  void HandleCommission( const ou::tf::CPosition* pPosition );
+  void HandleExecution( ou::tf::Position::execution_delegate_t del );
+  void HandleCommission( const ou::tf::Position* pPosition );
 
   void HandleBarCompletionTrades( const ou::tf::Bar& );
   void HandleBarCompletionBuys( const ou::tf::Bar& );

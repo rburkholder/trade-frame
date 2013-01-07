@@ -21,8 +21,8 @@ class OrdersOutstanding {
 public:
 
   typedef ou::tf::Order::idOrder_t idOrder_t;
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
 
   enum enumState {
     EStateOpenWaitingFill, EStateOpenCancelling, EStateOpen, 
@@ -119,8 +119,8 @@ private:
 
 class OrdersOutstandingLongs: public OrdersOutstanding {
 public:
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
   OrdersOutstandingLongs( pPosition_t pPosition ): OrdersOutstanding( pPosition ) {};
   ~OrdersOutstandingLongs( void ) {};
   void HandleQuote( const ou::tf::Quote& quote );  // set from external
@@ -130,8 +130,8 @@ private:
 
 class OrdersOutstandingShorts: public OrdersOutstanding {
 public:
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
   OrdersOutstandingShorts( pPosition_t pPosition ): OrdersOutstanding( pPosition ) {};
   ~OrdersOutstandingShorts( void ) {};
   void HandleQuote( const ou::tf::Quote& quote );  // set from external

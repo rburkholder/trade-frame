@@ -241,7 +241,7 @@ template<class Option>
 void StrategyTradeOptions::ProcessOptions( greeks_t& greeks, statsOptions& stats, Option& option ) {
   if ( 0 != option.pPosition.get() ) {
     if ( 0 != option.pPosition->GetRow().nPositionActive ) {
-      const ou::tf::CPosition::TableRowDef& row( option.pPosition->GetRow() );
+      const ou::tf::Position::TableRowDef& row( option.pPosition->GetRow() );
       if ( ( m_iterMapOptionsMiddle->first == option.pOption->GetStrike() )  // don't sell what we'll just buy back
         || ( 0 >= ( option.pPosition->GetUnRealizedPL() - ( 1.00 /*minprofit*/ + ( 2.0 * 0.75 /*commission*/ * row.nPositionActive ) ) ) ) // some basic profit minimum plus in + out * average option contract price
         ) {

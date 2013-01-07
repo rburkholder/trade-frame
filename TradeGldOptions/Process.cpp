@@ -902,7 +902,7 @@ void Process::HandleTSActiveMarketStart( const Quote& quote ) {
   } 
 }
 
-void Process::HandlePositionExecution( CPosition::execution_delegate_t pair ) {
+void Process::HandlePositionExecution( Position::execution_delegate_t pair ) {
   m_ss.str( "" );
   ptime dt = ou::TimeSource::Instance().Internal();
   m_ss << dt;

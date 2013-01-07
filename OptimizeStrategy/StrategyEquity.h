@@ -82,8 +82,8 @@ public:
 protected:
 private:
 
-  typedef ou::tf::CPosition::pOrder_t pOrder_t;
-  typedef ou::tf::CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pOrder_t pOrder_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   enum enumTimeFrames { EPreOpen, EBellHeard, EPauseForQuotes, EAfterBell, ETrading, ECancelling, EGoingNeutral, EClosing, EAfterHours };
@@ -106,7 +106,7 @@ private:
 
   pProviderSim_t m_pProvider;
 
-  ou::tf::CPortfolio m_portfolio;
+  ou::tf::Portfolio m_portfolio;
 
   pPosition_t m_pPosition;
 

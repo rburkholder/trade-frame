@@ -25,20 +25,20 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// has series of positions, CPosition
+// has series of positions, Position
 
 // what about PositionCombos?
 
 // set up timer to scan and report on portfolio once a second, or on significant events
 
-class CPortfolio {
+class Portfolio {
 public:
 
-  typedef CPosition::pPosition_t pPosition_t;
+  typedef Position::pPosition_t pPosition_t;
 
-  typedef boost::shared_ptr<CPortfolio> pPortfolio_t;
+  typedef boost::shared_ptr<Portfolio> pPortfolio_t;
 
-  typedef CPosition::execution_delegate_t execution_delegate_t;
+  typedef Position::execution_delegate_t execution_delegate_t;
 
   typedef keytypes::idPortfolio_t idPortfolio_t;
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
@@ -91,15 +91,15 @@ public:
     }
   };
 
-  CPortfolio( // for use in memory only
+  Portfolio( // for use in memory only
     const idPortfolio_t& idPortfolio, 
     const std::string& sDescription = "" );
-  CPortfolio( // can be stored to disk
+  Portfolio( // can be stored to disk
     const idPortfolio_t& idPortfolio, 
     const idAccountOwner_t& idAccountOwner, 
     const std::string& sDescription );
-  CPortfolio( const TableRowDef& row );
-  ~CPortfolio(void);
+  Portfolio( const TableRowDef& row );
+  ~Portfolio(void);
 
   const idPortfolio_t& Id( void ) { return m_row.idPortfolio; };
 
@@ -117,10 +117,10 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
-  ou::Delegate<const CPortfolio*> OnQuote;
-  ou::Delegate<const CPortfolio*> OnTrade;  // nothing useful currently
-  ou::Delegate<const CPortfolio*> OnExecution;
-  ou::Delegate<const CPortfolio*> OnCommission;
+  ou::Delegate<const Portfolio*> OnQuote;
+  ou::Delegate<const Portfolio*> OnTrade;  // nothing useful currently
+  ou::Delegate<const Portfolio*> OnExecution;
+  ou::Delegate<const Portfolio*> OnCommission;
 
 protected:
   
@@ -154,10 +154,10 @@ private:
 
   void ReCalc( void );
 
-  void HandleQuote( const CPosition* );
-  void HandleTrade( const CPosition* );
+  void HandleQuote( const Position* );
+  void HandleTrade( const Position* );
   void HandleExecution( execution_delegate_t );
-  void HandleCommission( const CPosition* );
+  void HandleCommission( const Position* );
 
 };
 

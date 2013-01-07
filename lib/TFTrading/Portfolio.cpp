@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CPortfolio::CPortfolio( 
+Portfolio::Portfolio( 
   const idPortfolio_t& idPortfolio, 
   const std::string& sDescription ) 
 : m_row( idPortfolio, "", sDescription ),
@@ -28,7 +28,7 @@ CPortfolio::CPortfolio(
 {
 }
 
-CPortfolio::CPortfolio( 
+Portfolio::Portfolio( 
   const idPortfolio_t& idPortfolio, 
   const idAccountOwner_t& idAccountOwner, 
   const std::string& sDescription ) 
@@ -37,20 +37,20 @@ CPortfolio::CPortfolio(
 {
 }
 
-CPortfolio::CPortfolio( const TableRowDef& row ) 
+Portfolio::Portfolio( const TableRowDef& row ) 
   : m_row( row ), m_bCanUseDb( true )
 {
 }
 
-CPortfolio::~CPortfolio(void) {
+Portfolio::~Portfolio(void) {
 }
 
-CPortfolio::pPosition_t CPortfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) {
+Portfolio::pPosition_t Portfolio::AddPosition( const std::string &sName, pPosition_t pPosition ) {
 
   // prepare to add position to user named map
   iterator iterUser = m_mapPositionsViaUserName.find( sName );
   if ( m_mapPositionsViaUserName.end() != iterUser ) {
-    throw std::runtime_error( "CPortfolio::Add1 position already exists" );
+    throw std::runtime_error( "Portfolio::Add1 position already exists" );
   }
 
   // prepare to add position to instrument named map
@@ -58,52 +58,52 @@ CPortfolio::pPosition_t CPortfolio::AddPosition( const std::string &sName, pPosi
   const std::string& sInstrumentName( pPosition->GetInstrument()->GetInstrumentName() );
   iterator iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
   if ( m_mapPositionsViaInstrumentName.end() != iterInst ) {
-    throw std::runtime_error( "CPortfolio::Add2 position already exists" );
+    throw std::runtime_error( "Portfolio::Add2 position already exists" );
   }
 
   m_mapPositionsViaUserName.insert( map_t_pair( sName, pPosition ) );
   m_mapPositionsViaInstrumentName.insert( map_t_pair( sInstrumentName, pPosition ) );
 
-  pPosition->OnQuote.Add( MakeDelegate( this, &CPortfolio::HandleQuote ) );
-  pPosition->OnExecution.Add( MakeDelegate( this, &CPortfolio::HandleExecution ) );
-  pPosition->OnCommission.Add( MakeDelegate( this, &CPortfolio::HandleCommission ) );
+  pPosition->OnQuote.Add( MakeDelegate( this, &Portfolio::HandleQuote ) );
+  pPosition->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
+  pPosition->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
 
   return pPosition;
 }
 
-void CPortfolio::DeletePosition( const std::string& sName ) {
+void Portfolio::DeletePosition( const std::string& sName ) {
 
   iterator iterUser = m_mapPositionsViaUserName.find( sName );
   if ( m_mapPositionsViaUserName.end() == iterUser ) {
-    throw std::runtime_error( "CPortfolio::Delete1 position does not exist" );
+    throw std::runtime_error( "Portfolio::Delete1 position does not exist" );
   }
 
   const std::string& sInstrumentName( iterUser->second->GetInstrument()->GetInstrumentName() );
   iterator iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
   if ( m_mapPositionsViaInstrumentName.end() == iterInst ) {
-    throw std::runtime_error( "CPortfolio::Delete2 position does not exist" );
+    throw std::runtime_error( "Portfolio::Delete2 position does not exist" );
   }
 
-  iterUser->second->OnCommission.Remove( MakeDelegate( this, &CPortfolio::HandleCommission ) );
-  iterUser->second->OnExecution.Remove( MakeDelegate( this, &CPortfolio::HandleExecution ) );
-  iterUser->second->OnQuote.Remove( MakeDelegate( this, &CPortfolio::HandleQuote ) );
+  iterUser->second->OnCommission.Remove( MakeDelegate( this, &Portfolio::HandleCommission ) );
+  iterUser->second->OnExecution.Remove( MakeDelegate( this, &Portfolio::HandleExecution ) );
+  iterUser->second->OnQuote.Remove( MakeDelegate( this, &Portfolio::HandleQuote ) );
 
   m_mapPositionsViaUserName.erase( iterUser );
   m_mapPositionsViaInstrumentName.erase( iterInst );
 
 }
 
-void CPortfolio::RenamePosition( const std::string& sOld, const std::string& sNew ) {
+void Portfolio::RenamePosition( const std::string& sOld, const std::string& sNew ) {
 
   iterator iter;
 
   iter = m_mapPositionsViaUserName.find( sNew );
   if ( m_mapPositionsViaUserName.end() == iter ) {
-    throw std::runtime_error( "CPortfolio::Rename New position already exists" );
+    throw std::runtime_error( "Portfolio::Rename New position already exists" );
   }
   iter = m_mapPositionsViaUserName.find( sOld );
   if ( m_mapPositionsViaUserName.end() == iter ) {
-    throw std::runtime_error( "CPortfolio::Rename Old position does not exist" );
+    throw std::runtime_error( "Portfolio::Rename Old position does not exist" );
   }
 
   pPosition_t pPosition( iter->second );
@@ -111,18 +111,18 @@ void CPortfolio::RenamePosition( const std::string& sOld, const std::string& sNe
   m_mapPositionsViaUserName.insert( map_t_pair( sNew, pPosition ) );
 }
 
-CPortfolio::pPosition_t CPortfolio::GetPosition( const std::string& sName ) {
+Portfolio::pPosition_t Portfolio::GetPosition( const std::string& sName ) {
 
   iterator iter = m_mapPositionsViaUserName.find( sName );
 
   if ( m_mapPositionsViaUserName.end() == iter ) {
-    throw std::runtime_error( "CPortfolio::GetPosition position does not exist" );
+    throw std::runtime_error( "Portfolio::GetPosition position does not exist" );
   }
 
   return iter->second;
 }
 
-void CPortfolio::ReCalc( void ) {
+void Portfolio::ReCalc( void ) {
   m_plCurrent.Zero();
 
   for ( iterator iter = m_mapPositionsViaUserName.begin(); iter != m_mapPositionsViaUserName.end(); ++iter ) {
@@ -138,26 +138,26 @@ void CPortfolio::ReCalc( void ) {
   m_row.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
 }
 
-void CPortfolio::HandleQuote( const CPosition* pPosition ) {
+void Portfolio::HandleQuote( const Position* pPosition ) {
   ReCalc();
   OnQuote( this );
 }
 
-void CPortfolio::HandleTrade( const CPosition* pPosition ) {
+void Portfolio::HandleTrade( const Position* pPosition ) {
   OnTrade( this );
 }
 
-void CPortfolio::HandleExecution( execution_delegate_t ) {
+void Portfolio::HandleExecution( execution_delegate_t ) {
   ReCalc();
   OnExecution( this );
 }
 
-void CPortfolio::HandleCommission( const CPosition* pPosition ) {
+void Portfolio::HandleCommission( const Position* pPosition ) {
   ReCalc();
   OnCommission( this );
 }
 
-void CPortfolio::EmitStats( std::stringstream& ss ) {
+void Portfolio::EmitStats( std::stringstream& ss ) {
   for ( iterator iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
     iter->second->EmitStatus( ss );
   }

@@ -24,7 +24,7 @@
 #include <TFVuTrading/PanelManualOrder.h>  // need to put this is a frame for local use
 
 #include <TFIQFeed/IQFeedHistoryQuery.h>  // seems to be a header ordering dependancy
-#include <TFIQFeed/IQFeedProvider.h>  // includes CPortfolio and CPosition
+#include <TFIQFeed/IQFeedProvider.h>  // includes Portfolio and Position
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
@@ -79,8 +79,8 @@ private:
     EWriteData, EResetStructures, EWaitToStartLogging, EQuiescent
   } m_stateAcquisition;
 
-  typedef CPortfolio::pPortfolio_t pPortfolio_t;
-  typedef CPosition::pPosition_t pPosition_t;
+  typedef Portfolio::pPortfolio_t pPortfolio_t;
+  typedef Position::pPosition_t pPosition_t;
 
   typedef ou::tf::keytypes::idInstrument_t idInstrument_t;
   typedef Instrument::pInstrument_t pInstrument_t;
