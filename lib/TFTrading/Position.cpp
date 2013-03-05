@@ -376,7 +376,7 @@ void Position::HandleCommission( const Order& order ) {
   //m_row.dblCommissionPaid += order.GetCommission();
   //std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
   m_row.dblCommissionPaid += order.GetIncrementalCommission();
-  std::cout << "," << m_row.dblCommissionPaid << std::endl;
+  //std::cout << "," << m_row.dblCommissionPaid << std::endl;
   OnCommission( this );
 }
 
@@ -391,7 +391,7 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
   const Execution& exec = status.second;
   Order::idOrder_t orderId = order.GetOrderId();
 
-  std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
+  //std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
 
   // update position, regardless of whether we see order open or closed
   UpdateRowValues( exec.GetPrice(), exec.GetSize(), exec.GetOrderSide() );

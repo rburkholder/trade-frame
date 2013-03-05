@@ -21,18 +21,18 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 Portfolio::Portfolio( 
-  const idPortfolio_t& idPortfolio, 
+  const idPortfolio_t& idPortfolio, currency_t eCurrency,
   const std::string& sDescription ) 
-: m_row( idPortfolio, "", sDescription ),
+: m_row( idPortfolio, "", eCurrency, sDescription ),
   m_bCanUseDb( false )
 {
 }
 
 Portfolio::Portfolio( 
   const idPortfolio_t& idPortfolio, 
-  const idAccountOwner_t& idAccountOwner, 
+  const idAccountOwner_t& idAccountOwner, currency_t eCurrency,
   const std::string& sDescription ) 
-: m_row( idPortfolio, idAccountOwner, sDescription ),
+: m_row( idPortfolio, idAccountOwner, eCurrency, sDescription ),
   m_bCanUseDb( true )
 {
 }
