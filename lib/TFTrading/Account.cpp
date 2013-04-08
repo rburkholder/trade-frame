@@ -27,10 +27,12 @@ Account::Account(
     const std::string& sBrokerAccountId,
     const std::string& sLogin, 
     const std::string& sPassword, 
-    const std::string& sPort
+    const std::string& sPort,
+    const currency_t& idBaseCurrency,
+    double dblMargin
     ) 
 : m_row( idAccount, idAccountOwner, sAccountName,
-  idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword, sPort )
+  idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword, sPort, idBaseCurrency, dblMargin )
 {
 }
 

@@ -49,9 +49,6 @@
     <ClCompile Include="Managers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CashAccount.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AccountManager.cpp">
       <Filter>Source Files\Managers</Filter>
     </ClCompile>
@@ -81,6 +78,21 @@
     </ClCompile>
     <ClCompile Include="DailyTradeTimeFrames.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CashTransaction.cpp">
+      <Filter>Source Files\Cash</Filter>
+    </ClCompile>
+    <ClCompile Include="Currency.cpp">
+      <Filter>Source Files\Cash</Filter>
+    </ClCompile>
+    <ClCompile Include="CashAccount.cpp">
+      <Filter>Source Files\Cash</Filter>
+    </ClCompile>
+    <ClCompile Include="CashManager.cpp">
+      <Filter>Source Files\Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="RiskManager.cpp">
+      <Filter>Source Files\Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,9 +153,6 @@
     <ClInclude Include="Database.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CashAccount.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ProviderManager.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
@@ -174,6 +183,21 @@
     <ClInclude Include="DailyTradeTimeFrames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CashAccount.h">
+      <Filter>Header Files\Cash</Filter>
+    </ClInclude>
+    <ClInclude Include="CashTransaction.h">
+      <Filter>Header Files\Cash</Filter>
+    </ClInclude>
+    <ClInclude Include="Currency.h">
+      <Filter>Header Files\Cash</Filter>
+    </ClInclude>
+    <ClInclude Include="RiskManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CashManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -190,6 +214,12 @@
     </Filter>
     <Filter Include="Source Files\Managers">
       <UniqueIdentifier>{da884b62-8081-4432-8128-8f25989ea5cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Cash">
+      <UniqueIdentifier>{23db06db-ec16-49b2-ae53-201e1b804cf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cash">
+      <UniqueIdentifier>{fe33e62a-34bc-485c-a7bf-1835a889d760}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

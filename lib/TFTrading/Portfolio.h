@@ -51,7 +51,8 @@ public:
   typedef keytypes::idPortfolio_t idPortfolio_t;
   typedef keytypes::idAccountOwner_t idAccountOwner_t;
 
-  typedef ou::tf::Currency::enumCurrency currency_t;
+  //typedef ou::tf::Currency::enumCurrency currency_t;
+  typedef Currency::type currency_t;
 
   struct TableRowDef {
     template<class A>
@@ -60,7 +61,7 @@ public:
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "ownerid", idOwner );  // portfolio of portfolios for classifying and grouping positions
       ou::db::Field( a, "active", bActive );
-      ou::db::Field( a, "currency", eCurrency );
+      ou::db::Field( a, "currency", sCurrency );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commission", dblCommissionsPaid );
@@ -70,26 +71,26 @@ public:
     idAccountOwner_t idAccountOwner;
     idPortfolio_t idOwner;
     bool bActive;
-    currency_t eCurrency;
+    currency_t sCurrency;
     std::string sDescription;
     double dblRealizedPL;
     double dblCommissionsPaid;
 
-    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ), eCurrency( currency_t::USD ) {};
+    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ), sCurrency( Currency::Name[ Currency::USD ] ) {};
     TableRowDef ( const TableRowDef& row ) 
-      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), bActive( true ), eCurrency( row.eCurrency ), sDescription( row.sDescription ),
+      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), bActive( true ), sCurrency( row.sCurrency ), sDescription( row.sDescription ),
       dblRealizedPL( row.dblRealizedPL ), dblCommissionsPaid( row.dblCommissionsPaid ) {};
     TableRowDef(
-      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t eCurrency_,
+      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_,
       const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), eCurrency( eCurrency_ ),
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
         sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
-    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t eCurrency_, const std::string& sDescription_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), eCurrency( eCurrency_ ),
+    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_, const std::string& sDescription_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
         sDescription( sDescription_ ),
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
-    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t eCurrency_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), eCurrency( eCurrency_ ),
+    TableRowDef( const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
         dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
   };
 
@@ -104,7 +105,7 @@ public:
   };
 
   Portfolio( // for use in memory only
-    const idPortfolio_t& idPortfolio, currency_t eCurrency = currency_t::USD,
+    const idPortfolio_t& idPortfolio, currency_t sCurrency = Currency::Name[ Currency::USD ],
     const std::string& sDescription = "" );
   Portfolio( // can be stored to disk
     const idPortfolio_t& idPortfolio, 

@@ -99,8 +99,7 @@ struct InMemoryMktSymbolList {
     oa<<boost::serialization::make_nvp("symbols",*this);
   }
 
-  void LoadFromFile(const std::string& sFilename)
-  {
+  void LoadFromFile(const std::string& sFilename) {
     std::ifstream ifs(sFilename, std::ios::binary);
     if(ifs){
       boost::archive::binary_iarchive ia(ifs);

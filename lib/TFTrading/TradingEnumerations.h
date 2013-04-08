@@ -56,7 +56,9 @@ namespace TimeInForce {
 namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_4217
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-  enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CYP, CZK, DKK, EEK, NZD, HUF, ILS, _Count };
+  typedef std::string type;
+  // enumeration is subject to change, so do not use enumeration in persistent storage
+  enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
   const char* Name[];
 }
 

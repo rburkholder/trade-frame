@@ -129,6 +129,9 @@
     <ClCompile Include="AccountOwner.cpp" />
     <ClCompile Include="AlternateInstrumentNames.cpp" />
     <ClCompile Include="CashAccount.cpp" />
+    <ClCompile Include="CashManager.cpp" />
+    <ClCompile Include="CashTransaction.cpp" />
+    <ClCompile Include="Currency.cpp" />
     <ClCompile Include="DailyTradeTimeFrames.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="DBOps.cpp" />
@@ -148,6 +151,7 @@
     <ClCompile Include="PortfolioManager.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="ProviderManager.cpp" />
+    <ClCompile Include="RiskManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -163,6 +167,9 @@
     <ClInclude Include="AccountOwner.h" />
     <ClInclude Include="AlternateInstrumentNames.h" />
     <ClInclude Include="CashAccount.h" />
+    <ClInclude Include="CashManager.h" />
+    <ClInclude Include="CashTransaction.h" />
+    <ClInclude Include="Currency.h" />
     <ClInclude Include="DailyTradeTimeFrames.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="DBOps.h" />
@@ -184,6 +191,7 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="ProviderInterface.h" />
     <ClInclude Include="ProviderManager.h" />
+    <ClInclude Include="RiskManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="targetver.h" />

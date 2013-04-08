@@ -15,7 +15,7 @@
 
 namespace ou {
 
-// this  thing may be obsolete as CCharBuffer can be a vector<>, 
+// this thing may be obsolete as CCharBuffer can be a vector<>, 
 //   and CReusableCharBuffers is only need when running with multiple threads
 
 class CCharBuffer {

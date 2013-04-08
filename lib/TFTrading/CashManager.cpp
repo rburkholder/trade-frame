@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,27 +11,20 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Started 20130407
+
 #include "StdAfx.h"
 
-#include "KeyTypes.h"
+#include "CashManager.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace tablenames { // tablenames
 
-const std::string sAccountAdvisor( "accountadvisors" );
-const std::string sAccountOwner( "accountowners" );
-const std::string sAccount( "accounts" );
-const std::string sCashAccount( "cashaccounts" );
-const std::string sCashTransactions( "cashtransactions" );
-const std::string sPortfolio( "portfolios" );
-const std::string sPosition( "positions" );
-const std::string sOrder( "orders" );
-const std::string sExecution( "executions" );
-const std::string sExchange( "exchanges" );
-const std::string sInstrument( "instruments" );
-const std::string sAltInstrumentName( "altinstrumentnames" );
+CashManager::CashManager(void): ManagerBase<CashManager>() {
+}
 
-} // namespace tablenames
+CashManager::~CashManager(void) {
+}
+
 } // namespace tf
 } // namespace ou

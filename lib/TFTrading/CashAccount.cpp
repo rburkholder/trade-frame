@@ -11,13 +11,27 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// started 2013-04-06
+
 #include "StdAfx.h"
 
 #include "CashAccount.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
-CCashAccount::CCashAccount(void) {
+CashAccount::CashAccount( idCashAccount_t idCashAccount, const idAccount_t& idAccount, money_t mnyBalance, const currency_t& sCurrency ) 
+  : m_row( idCashAccount, idAccount, mnyBalance, sCurrency )
+{
 }
 
-CCashAccount::~CCashAccount(void) {
+CashAccount::CashAccount( money_t mnyBalance, const currency_t& sCurrency ) 
+  : m_row( 0, "", mnyBalance, sCurrency )
+{
 }
+
+CashAccount::~CashAccount(void) {
+}
+
+} // namespace tf
+} // namespace ou

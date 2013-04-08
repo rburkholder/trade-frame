@@ -28,6 +28,10 @@ typedef std::string idExchange_t;
 typedef std::string idAccountAdvisor_t;
 typedef std::string idAccountOwner_t;
 typedef std::string idAccount_t;
+// CashManager
+typedef boost::int64_t idCashAccount_t;
+typedef boost::int64_t idCashTransaction_t;
+// typedef std::string idCurrency_t;  // table not present yet
 // ProviderManager
 //typedef boost::uint16_t idProvider_t;  // identifies instance of a provider
 typedef idAccount_t idProvider_t;
@@ -45,6 +49,8 @@ namespace tablenames { // tablenames
 
 extern const std::string sAccountAdvisor;
 extern const std::string sAccountOwner;
+extern const std::string sCashAccount;
+extern const std::string sCashTransaction;
 extern const std::string sAccount;
 extern const std::string sPortfolio;
 extern const std::string sPosition;

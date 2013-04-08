@@ -156,6 +156,7 @@
     <ClInclude Include="ConsoleStream.h" />
     <ClInclude Include="CountryCode.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="Decimal.h" />
     <ClInclude Include="Delegate.h" />
     <ClInclude Include="FastDelegate.h" />
     <ClInclude Include="KeyWordMatch.h" />

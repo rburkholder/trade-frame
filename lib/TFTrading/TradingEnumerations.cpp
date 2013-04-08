@@ -29,7 +29,7 @@ namespace OptionSide {
 }
 
 namespace Currency {
-  const char* Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CYP", "CZK", "DKK", "EEK", "NZD", "HUF", "ILS" };
+  const char* Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CZK", "DKK", "NZD", "HUF", "ILS" };
 }
 
 namespace OrderSide {
