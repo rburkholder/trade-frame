@@ -20,13 +20,13 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CashAccount::CashAccount( idCashAccount_t idCashAccount, const idAccount_t& idAccount, money_t mnyBalance, const currency_t& sCurrency ) 
-  : m_row( idCashAccount, idAccount, mnyBalance, sCurrency )
+CashAccount::CashAccount( const idAccount_t& idAccount, idCurrency_t idCurrency, money_t mnyBalance ) 
+  : m_row( idAccount, idCurrency, mnyBalance )
 {
 }
 
-CashAccount::CashAccount( money_t mnyBalance, const currency_t& sCurrency ) 
-  : m_row( 0, "", mnyBalance, sCurrency )
+CashAccount::CashAccount( idCurrency_t idCurrency, money_t mnyBalance ) 
+  : m_row( "", idCurrency, mnyBalance )
 {
 }
 

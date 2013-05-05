@@ -307,6 +307,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StickShift", "StickShift\St
 		{E7A1EFEB-AEEE-44BE-A0D1-F793B5175C87} = {E7A1EFEB-AEEE-44BE-A0D1-F793B5175C87}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IsoCurrencyXmlToCpp", "IsoCurrencyXmlToCpp\IsoCurrencyXmlToCpp.vcxproj", "{753D4AA8-E235-43C6-885D-B6A466A22751}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -849,6 +851,15 @@ Global
 		{0B437E17-F0D1-4445-A2EF-F0160963E66A}.Release|x64.ActiveCfg = Release|x64
 		{0B437E17-F0D1-4445-A2EF-F0160963E66A}.Release|x64.Build.0 = Release|x64
 		{0B437E17-F0D1-4445-A2EF-F0160963E66A}.Release|x64old.ActiveCfg = Release|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Debug|Win32.ActiveCfg = Debug|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Debug|Win32.Build.0 = Debug|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Debug|x64.ActiveCfg = Debug|x64
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Debug|x64.Build.0 = Debug|x64
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Debug|x64old.ActiveCfg = Debug|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Release|Win32.ActiveCfg = Release|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Release|Win32.Build.0 = Release|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Release|x64.ActiveCfg = Release|Win32
+		{753D4AA8-E235-43C6-885D-B6A466A22751}.Release|x64old.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

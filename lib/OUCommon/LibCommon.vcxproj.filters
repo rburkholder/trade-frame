@@ -28,6 +28,12 @@
     <ClCompile Include="Singleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CurrencyCode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IsoCurrency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CharBuffer.h">
@@ -90,10 +96,19 @@
     <ClInclude Include="Decimal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MultiKeyCompare.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CurrencyCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="notes.txt" />
     <None Include="ReadMe.txt" />
+    <None Include="IsoCurrency.xml">
+      <Filter>XML</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -101,6 +116,9 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{e9cb8deb-8fc2-43df-b9da-751924e669ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML">
+      <UniqueIdentifier>{ac86d033-867b-4371-b3b7-87959b4f112d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

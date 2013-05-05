@@ -12,23 +12,27 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-04-06
+// started 2013-05-05
 
-#include "StdAfx.h"
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
 
-#include "CashTransaction.h"
+#include <boost/property_tree/xml_parser.hpp>
+
+#include "CurrencyCode.h"
 
 namespace ou { // One Unified
-namespace tf { // TradeFrame
 
-CashTransaction::CashTransaction(
-    idCashTransaction_t idCashTransaction, const idAccount_t& idAccount, const idCurrency_t& idCurrency,
-    const ptime& dtTimeStamp,
-    const money_t& mnyCredit, const money_t& mnyDebit,
-    const std::string& sCode, const std::string& sDescription ) 
-    : m_row( idCashTransaction, idAccount, idCurrency, dtTimeStamp, mnyCredit, mnyDebit, sCode, sDescription )
-{
+CurrencyCode::CurrencyCode(void) {
 }
 
-} // namespace tf
+CurrencyCode::~CurrencyCode(void) {
+}
+
+namespace detail {
+
+
+
+} // namespace detail
+
 } // namespace ou

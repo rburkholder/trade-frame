@@ -15,9 +15,15 @@
 
 #pragma once
 
+#include <string>
+#include <map>
+
+#include <OUCommon/MultiKeyCompare.h>
+
 #include "KeyTypes.h"
 
 #include "ManagerBase.h"
+#include "Account.h"
 #include "CashAccount.h"
 #include "CashTransaction.h"
 
@@ -26,10 +32,37 @@ namespace tf { // TradeFrame
 
 class CashManager: public ManagerBase<CashManager> {
 public:
+
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef Account::pAccount_t pAccount_t;
+
+  typedef keytypes::idCurrency_t idCurrency_t;
+
+  typedef CashAccount::pCashAccount_t pCashAccount_t;
+
   CashManager(void);
   ~CashManager(void);
+
+  pCashAccount_t ConstructCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
+  pCashAccount_t GetCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
+  void DeleteAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
+
+  void AttachToSession( ou::db::Session* pSession );
+  void DetachFromSession( ou::db::Session* pSession );
+
 protected:
 private:
+
+  typedef ou::MultiKeyCompare<idAccount_t, idCurrency_t> key_t;
+  typedef std::pair<key_t, pCashAccount_t> pairCashAccount_t;
+  typedef std::map<key_t, pCashAccount_t> mapCashAccount_t;
+  typedef mapCashAccount_t::iterator iterCashAccount_t;
+  mapCashAccount_t mapCashAccount;
+
+  void HandleRegisterTables( ou::db::Session& session );
+  void HandleRegisterRows( ou::db::Session& session );
+  void HandlePopulateTables( ou::db::Session& session );
+
 };
 
 } // namespace tf

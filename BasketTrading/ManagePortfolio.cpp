@@ -27,7 +27,8 @@ ManagePortfolio::ManagePortfolio( void )
   std::stringstream ss;
   ss.str( "" );
   ss << ou::TimeSource::Instance().External();
-  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  // will need to make this generic if need some for multiple providers.
+  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  
+  // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
 }

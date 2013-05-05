@@ -1,6 +1,5 @@
 /************************************************************************
  * Copyright(c) 2013, One Unified. All rights reserved.                 *
- * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -12,23 +11,22 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-04-06
+// Started 20130407
 
-#include "StdAfx.h"
+#pragma once
 
-#include "CashTransaction.h"
+#include "ManagerBase.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CashTransaction::CashTransaction(
-    idCashTransaction_t idCashTransaction, const idAccount_t& idAccount, const idCurrency_t& idCurrency,
-    const ptime& dtTimeStamp,
-    const money_t& mnyCredit, const money_t& mnyDebit,
-    const std::string& sCode, const std::string& sDescription ) 
-    : m_row( idCashTransaction, idAccount, idCurrency, dtTimeStamp, mnyCredit, mnyDebit, sCode, sDescription )
-{
-}
+class RiskManager: public ManagerBase<RiskManager> {
+public:
+  RiskManager(void);
+  ~RiskManager(void);
+protected:
+private:
+};
 
 } // namespace tf
 } // namespace ou

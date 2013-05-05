@@ -23,6 +23,8 @@
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_signed.hpp>
 
+#include <OUCommon/Decimal.h>
+
 #include <OUSQL/Actions.h>
 
 #include "StatementState.h"
@@ -30,6 +32,8 @@
 namespace ou {
 namespace db {
 namespace sqlite {
+
+typedef dec::decimal6 money_t;
 
 namespace typeselect {
   template<int size, bool signed_> struct chooser{};  // default is empty
@@ -67,6 +71,7 @@ template<> const char* FieldType<std::string>( void );
 template<> const char* FieldType<double>( void );
 // don't use julian as ptime has no representation earlier than 1400 AD
 template<> const char* FieldType<boost::posix_time::ptime>( void );
+template<> const char* FieldType<money_t>( void );
 
 } // namespace dispatch
 
@@ -123,6 +128,7 @@ public:
   int Bind( const std::string& var );
   int Bind( double var );
   int Bind( const boost::posix_time::ptime& var );
+  int Bind( money_t var );
 
   template<typename T>
   void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {
@@ -165,6 +171,7 @@ public:
   void Column( std::string& var );
   void Column( double& var );
   void Column( boost::posix_time::ptime& var );
+  void Column( money_t& var );
 
   template<typename T>
   void Field( const std::string& sFieldName, T& var, const std::string& sFieldType = "" ) {

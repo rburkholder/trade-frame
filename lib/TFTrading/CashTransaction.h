@@ -17,6 +17,9 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 #include <OUCommon/Decimal.h>
 
@@ -42,8 +45,10 @@ namespace tf { // TradeFrame
 class CashTransaction {
 public:
 
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::idCurrency_t idCurrency_t;
+
   typedef keytypes::idCashTransaction_t idCashTransaction_t;
-  typedef keytypes::idCashAccount_t idCashAccount_t;
   typedef dec::decimal6 money_t;
   typedef boost::shared_ptr<CashTransaction> pCashTransaction_t;
 
@@ -51,28 +56,39 @@ public:
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "cashtransactionid", idCashTransaction );
-      ou::db::Field( a, "cashaccountid", idCashAccount );
+      ou::db::Field( a, "accountid", idAccount );
+      ou::db::Field( a, "currencyid", idCurrency );
+      ou::db::Field( a, "timestamp", dtTimeStamp );
       ou::db::Field( a, "credit", mnyCredit );
       ou::db::Field( a, "debit", mnyDebit );
+      ou::db::Field( a, "code", sCode );
       ou::db::Field( a, "description", sDescription );
     }
 
     idCashTransaction_t idCashTransaction;
-    idCashAccount_t idCashAccount;
+    idAccount_t idAccount;
+    idCurrency_t idCurrency;
+    ptime dtTimeStamp;
     money_t mnyCredit;
     money_t mnyDebit;
+    std::string sCode;
     std::string sDescription;
 
-    TableRowDef( void ): idCashTransaction( 0 ), idCashAccount( 0 ), 
+    TableRowDef( void ): idCashTransaction( 0 ), idCurrency( Currency::Name[ Currency::USD ] ), 
       mnyCredit( money_t( 0 ) ), mnyDebit( money_t( 0 ) ) {};
     TableRowDef( const TableRowDef& row ) 
-      : idCashTransaction( row.idCashTransaction ), idCashAccount( row.idCashAccount ),
+      : idCashTransaction( row.idCashTransaction ), idAccount( row.idAccount ), idCurrency( row.idCurrency ),
+        dtTimeStamp( row.dtTimeStamp ), 
         mnyCredit( row.mnyCredit ), mnyDebit( row.mnyDebit ),
-        sDescription( row.sDescription ) {};
-    TableRowDef( idCashTransaction_t idCashTransaction_, idCashAccount_t idCashAccount_, 
-      const money_t& mnyCredit_, const money_t& mnyDebit_, const std::string& sDescription_ ) 
-      : idCashTransaction( idCashTransaction_ ), idCashAccount( idCashAccount_ ),
-        mnyCredit( mnyCredit_ ), mnyDebit( mnyDebit_ ), sDescription( sDescription_ ) {};
+        sCode( row.sCode ), sDescription( row.sDescription ) {};
+    TableRowDef( idCashTransaction_t idCashTransaction_, idAccount_t idAccount_, idCurrency_t idCurrency_, 
+      ptime dtTimeStamp_,
+      const money_t& mnyCredit_, const money_t& mnyDebit_, 
+      const std::string& sCode_, const std::string& sDescription_ ) 
+      : idCashTransaction( idCashTransaction_ ), idAccount( idAccount_ ), idCurrency( idCurrency_ ),
+        dtTimeStamp( dtTimeStamp_ ),
+        mnyCredit( mnyCredit_ ), mnyDebit( mnyDebit_ ), 
+        sCode( sCode_ ), sDescription( sDescription_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {
@@ -80,20 +96,18 @@ public:
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "cashtransactionid" );
-      ou::db::Constraint( a, "cashaccountid", tablenames::sCashTransaction, "cashaccountid" );
+      ou::db::Constraint( a, "accountid", tablenames::sAccount, "accountid" );
+      // build constraint based upon combo of idAccount, idCashAccount?
     }
   };
 
-  CashTransaction( // db version
-    idCashTransaction_t idCashTransaction, idCashAccount_t idCashAccount,
+  CashTransaction(
+    idCashTransaction_t idCashTransaction, const idAccount_t& idAccount, const idCurrency_t& idCurrency,
+    const ptime& dtTimeStamp,
     const money_t& mnyCredit, const money_t& mnyDebit,
-    const std::string& sDescription 
+    const std::string& sCode, const std::string& sDescription 
     );
-  CashTransaction( // non db version
-    idCashTransaction_t idCashTransaction,
-    const money_t& mnyCredit, const money_t& mnyDebit,
-    const std::string& sDescription 
-    );
+  CashTransaction( const TableRowDef& row ) : m_row( row ) {};
   ~CashTransaction(void) {};
 
   const TableRowDef& GetRow( void ) const { return m_row; };

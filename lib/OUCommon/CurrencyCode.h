@@ -12,23 +12,32 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-04-06
+// started 2013-05-05
 
-#include "StdAfx.h"
+// put the stuff into a database table at some point in time.
 
-#include "CashTransaction.h"
+// sources:
+// http://www.currency-iso.org/en/home/tables/table-a1.html
+
+#pragma once
+
+#include <string>
 
 namespace ou { // One Unified
-namespace tf { // TradeFrame
 
-CashTransaction::CashTransaction(
-    idCashTransaction_t idCashTransaction, const idAccount_t& idAccount, const idCurrency_t& idCurrency,
-    const ptime& dtTimeStamp,
-    const money_t& mnyCredit, const money_t& mnyDebit,
-    const std::string& sCode, const std::string& sDescription ) 
-    : m_row( idCashTransaction, idAccount, idCurrency, dtTimeStamp, mnyCredit, mnyDebit, sCode, sDescription )
-{
-}
+class CurrencyCode {
+public:
+  CurrencyCode(void);
+  ~CurrencyCode(void);
+protected:
+private:
+  struct structCodeList {
+    std::string sEntity;
+    std::string sCurrency;
+    std::string sAlphabeticCode;
+    unsigned int nNumericCode;
+    unsigned int nMinorUnits;
+  };
+};
 
-} // namespace tf
 } // namespace ou

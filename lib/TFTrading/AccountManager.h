@@ -16,8 +16,6 @@
 #include <string>
 #include <map>
 
-#include <sstream>
-
 #include "KeyTypes.h"
 
 #include "ManagerBase.h"

@@ -133,6 +133,8 @@
     <ClCompile Include="CharBuffer.cpp" />
     <ClCompile Include="ConsoleStream.cpp" />
     <ClCompile Include="CountryCode.cpp" />
+    <ClCompile Include="CurrencyCode.cpp" />
+    <ClCompile Include="IsoCurrency.cpp" />
     <ClCompile Include="Log.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -155,6 +157,7 @@
     <ClInclude Include="Colour.h" />
     <ClInclude Include="ConsoleStream.h" />
     <ClInclude Include="CountryCode.h" />
+    <ClInclude Include="CurrencyCode.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Decimal.h" />
     <ClInclude Include="Delegate.h" />
@@ -166,6 +169,7 @@
     </ClInclude>
     <ClInclude Include="MinHeap.h" />
     <ClInclude Include="MSWindows.h" />
+    <ClInclude Include="MultiKeyCompare.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="ReusableBuffers.h" />
     <ClInclude Include="Singleton.h" />
@@ -176,6 +180,7 @@
     <ClInclude Include="WuManber.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="IsoCurrency.xml" />
     <None Include="notes.txt" />
     <None Include="ReadMe.txt" />
   </ItemGroup>

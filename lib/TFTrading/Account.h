@@ -53,6 +53,7 @@ public:
       ou::db::Field( a, "password", sPassword );
       ou::db::Field( a, "port", sPort );
       ou::db::Field( a, "basecurrency", idBaseCurrency );
+      ou::db::Field( a, "multiplecurrency", bMultipleCurrency );  // multiple currencies allowed if true
       ou::db::Field( a, "margin", dblMargin );
     }
 
@@ -66,6 +67,7 @@ public:
     std::string sPassword;
     std::string sPort;
     currency_t idBaseCurrency;
+    bool bMultipleCurrency;
     double dblMargin;  // % from 0 to 100
 
     TableRowDef( void ) {};
@@ -80,7 +82,7 @@ public:
         sAccountName( sAccountName_ ), idProvider( idProvider_ ), 
         sBrokerName( sBrokerName_ ), sBrokerAccountId( sBrokerAccountId_ ),
         sLogin( sLogin_ ), sPassword( sPassword_ ), sPort( sPort_ ),
-        idBaseCurrency( idBaseCurrency_ ), dblMargin( dblMargin_ ) {};
+        idBaseCurrency( idBaseCurrency_ ), bMultipleCurrency( true ), dblMargin( dblMargin_ ) {};
   };
 
   struct TableCreateDef: TableRowDef {

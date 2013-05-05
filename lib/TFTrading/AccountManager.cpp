@@ -184,7 +184,7 @@ AccountManager::pAccount_t AccountManager::ConstructAccount(
 
   pAccount_t p( new Account( idAccount, idAccountOwner, sAccountName, idProvider, sBrokerName, sBrokerAccountId, sLogin, sPassword ) );
 
-  iterAccount_t iter = m_mapAccount.find( idAccountOwner );
+  iterAccount_t iter = m_mapAccount.find( idAccount );
   if ( m_mapAccount.end() != iter ) {
     throw std::runtime_error( "Account already exists" );
   }
