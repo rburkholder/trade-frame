@@ -14,28 +14,22 @@
 
 // started 2013-05-05
 
-// put the stuff into a database table at some point in time.
-
-// sources:
-// http://www.currency-iso.org/en/home/tables/table-a1.html
-
-// get common currency lists from IB or IQFeed.
-
 #pragma once
 
-#include <string>
-#include <map>
+#include <boost/shared_ptr.hpp>
+
+#include <OUCommon/Decimal.h>
 
 namespace ou { // One Unified
+namespace dea { // double entry accounting
 
-class CurrencyCode {
+class GeneralJournal {
 public:
-  CurrencyCode(void);
-  ~CurrencyCode(void);
+  GeneralJournal(void);
+  ~GeneralJournal(void);
 protected:
 private:
-  typedef std::map<std::string,std::string> m_mapCurrencies_t;
-  m_mapCurrencies_t m_mapCurrencies;  // currency code, currency name
 };
 
+} // namespace dea
 } // namespace ou

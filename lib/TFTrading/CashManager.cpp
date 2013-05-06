@@ -106,6 +106,10 @@ void CashManager::DeleteAccount( const idAccount_t& idAccount, const idCurrency_
 
 }
 
+CashManager::pCashTransaction_t CashManager::AddCashTransaction( 
+    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription ) {
+}
+
 //
 // Table Management
 //

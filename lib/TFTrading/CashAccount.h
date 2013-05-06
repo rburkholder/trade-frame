@@ -47,7 +47,7 @@ public:
     void Fields( A& a ) {
       ou::db::Field( a, "accountid", idAccount );
       ou::db::Field( a, "currencyid", idCurrency );  // currency
-      ou::db::Field( a, "balance", mnyBalance );
+      ou::db::Field( a, "balance", mnyBalance );  // used for period end totals
     }
 
     idAccount_t idAccount;

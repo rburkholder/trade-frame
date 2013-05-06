@@ -14,6 +14,10 @@
 
 // started 2013-05-05
 
+#include "stdafx.h"
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
@@ -21,18 +25,27 @@ using namespace boost::assign;
 
 #include "CurrencyCode.h"
 
+namespace detail {
+#include "IsoCurrency.cpp"
+} // namespace detail
+
 namespace ou { // One Unified
 
 CurrencyCode::CurrencyCode(void) {
+  for ( detail::vCurrencyCodes_t::iterator iter = detail::vCurrencyCodes.begin(); 
+        iter != detail::vCurrencyCodes.end(); iter++ ) {
+    m_mapCurrencies[ iter->get<2>() ] = iter->get<1>();
+  }
+  for ( m_mapCurrencies_t::iterator iter = m_mapCurrencies.begin(); iter != m_mapCurrencies.end(); iter++ ) {
+    std::cout << iter->first << ":" << iter->second << std::endl;
+  }
 }
 
 CurrencyCode::~CurrencyCode(void) {
 }
 
-namespace detail {
 
 
 
-} // namespace detail
 
 } // namespace ou

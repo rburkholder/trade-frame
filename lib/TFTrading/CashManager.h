@@ -38,7 +38,10 @@ public:
 
   typedef keytypes::idCurrency_t idCurrency_t;
 
+  typedef CashTransaction::money_t money_t;
+
   typedef CashAccount::pCashAccount_t pCashAccount_t;
+  typedef CashTransaction::pCashTransaction_t pCashTransaction_t;
 
   CashManager(void);
   ~CashManager(void);
@@ -46,6 +49,9 @@ public:
   pCashAccount_t ConstructCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
   pCashAccount_t GetCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
   void DeleteAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
+
+  pCashTransaction_t AddCashTransaction( 
+    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription );
 
   void AttachToSession( ou::db::Session* pSession );
   void DetachFromSession( ou::db::Session* pSession );

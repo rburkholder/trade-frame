@@ -1,5 +1,6 @@
-typedef boost::tuple<std::string, std::string, std::string, unsigned int, unsigned int> tuple;
-std::vector<tuple> vCurrencyCodes = tuple_list_of 
+typedef boost::tuple<std::string, std::string, std::string, unsigned int, unsigned int> tupleCurrencyCodes;
+typedef std::vector<tupleCurrencyCodes> vCurrencyCodes_t;
+static vCurrencyCodes_t vCurrencyCodes = tuple_list_of 
 ("AFGHANISTAN","Afghani","AFN",971,2)
 ("ÅLAND ISLANDS","Euro","EUR",978,2)
 ("ALBANIA","Lek","ALL",8,2)
