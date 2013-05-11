@@ -17,6 +17,7 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/cstdint.hpp>
 
 #include <OUCommon/Decimal.h>
 
@@ -25,6 +26,31 @@ namespace dea { // double entry accounting
 
 class GeneralJournal {
 public:
+
+  typedef boost::int64_t idGeneralJournal_t;
+  typedef boost::shared_ptr<GeneralJournal> pGeneralJournal_t;
+
+  struct TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "transactionid", idTransaction );  // unique key
+      ou::db::Field( a, "referenceid", idReference );  // ties related entries together
+      ou::db::Field( a, "accountid", idAccount );
+      ou::db::Field( a, "debit", mnyDebit );
+      ou::db::Field( a, "credit", mnyCredit );
+      ou::db::Field( a, "description", sDescription );
+    }
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<class A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "transactionid" );
+      ou::db::Constraint( a, "accountid", "chartofaccounts", "accountid" );
+    }
+  };
+
   GeneralJournal(void);
   ~GeneralJournal(void);
 protected:
