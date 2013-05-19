@@ -131,10 +131,16 @@
   <ItemGroup>
     <ClInclude Include="ChartOfAccounts.h" />
     <ClInclude Include="GeneralJournal.h" />
+    <ClInclude Include="KeyTypes.h" />
+    <ClInclude Include="Privilege.h" />
+    <ClInclude Include="User.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChartOfAccounts.cpp" />
     <ClCompile Include="GeneralJournal.cpp" />
+    <ClCompile Include="KeyTypes.cpp" />
+    <ClCompile Include="Privilege.cpp" />
+    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

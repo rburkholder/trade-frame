@@ -12,68 +12,51 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-05-05
+// started 2013-05-18
 
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 #include "KeyTypes.h"
-
-//#include "KeyTypes.h"
-
-/*  Wiley Accounting Reference
-1xxx Assets
-11xx - 1499  Current
-1500 - 1899  Fixed
-1900 - Other 
-2xxx Liabilities
-21xx - 2499  Current
-2500 - 2999  Long Term
-3000 - Equity
-4000 - Retained Earnings
-5000 - Revenue
-6000 -
-7000 - Expenses
-7100 -   Administrative
-7200 -   General
-7300 -   Selling
-7500 -   Cost of Goods Sold
-8000 - Income Taxes
-9000 - Extraordinary Items
-*/
 
 namespace ou { // One Unified
 namespace dea { // double entry accounting
 
-class ChartOfAccounts {
+class User {
 public:
 
-  typedef boost::shared_ptr<ChartOfAccounts> pChartOfAccounts_t;
+  typedef keytypes::idUser_t idUser_t;
+
+  typedef boost::shared_ptr<User> pUser_t;
 
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "accountid", idAccount );
-      ou::db::Field( a, "currencyid", idCurrency );  // different account id per currency
-      ou::db::Field( a, "location", sLocation );
-      ou::db::Field( a, "department", sDepartment );
-      ou::db::Field( a, "category", sCategory );
-      ou::db::Field( a, "subcategory", sSubCategory );
-      ou::db::Field( a, "description", sDescription );
+      ou::db::Field( a, "userid", idUser );  // numeric value for key
+      ou::db::Field( a, "login", sLogin );
+      ou::db::Field( a, "password", sPassword );
+      ou::db::Field( a, "fname" sFirstName );
+      ou::db::Field( a, "lname", sLastName );
+      ou::db::Field( a, "email", sEmail );
+      ou::db::Field( a, "created", dtCreated );
     }
+
+    idUser_t idUser;
+    std::string sLogin;
+    std::string sPassword;
+    std::string sFirstName;
+    std::string sLastName;
+    std::string sEmail;
+    ptime dtCreated;
+
   };
 
-  struct TableCreateDef: TableRowDef {
-    template<class A>
-    void Fields( A& a ) {
-      TableRowDef::Fields( a );
-      ou::db::Key( a, "accountid" );
-    }
-  };
-
-  ChartOfAccounts(void);
-  ~ChartOfAccounts(void);
+  User(void);
+  ~User(void);
 protected:
 private:
 };

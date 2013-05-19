@@ -24,12 +24,30 @@
     <ClInclude Include="GeneralJournal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KeyTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Privilege.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChartOfAccounts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneralJournal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Privilege.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

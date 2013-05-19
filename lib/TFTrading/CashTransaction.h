@@ -69,8 +69,8 @@ public:
     idAccount_t idAccount;
     idCurrency_t idCurrency;
     ptime dtTimeStamp;
-    money_t mnyCredit;
     money_t mnyDebit;
+    money_t mnyCredit;
     std::string sCode;
     std::string sDescription;
 

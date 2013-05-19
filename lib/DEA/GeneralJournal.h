@@ -18,8 +18,11 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
-#include <OUCommon/Decimal.h>
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
 namespace dea { // double entry accounting
@@ -27,7 +30,11 @@ namespace dea { // double entry accounting
 class GeneralJournal {
 public:
 
-  typedef boost::int64_t idGeneralJournal_t;
+  typedef keytypes::idTransaction_t idTransaction_t;
+  typedef keytypes::idReference_t idReference_t;
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::money_t money_t;
+
   typedef boost::shared_ptr<GeneralJournal> pGeneralJournal_t;
 
   struct TableRowDef {
@@ -38,8 +45,28 @@ public:
       ou::db::Field( a, "accountid", idAccount );
       ou::db::Field( a, "debit", mnyDebit );
       ou::db::Field( a, "credit", mnyCredit );
+      ou::db::Field( a, "code", sCode );
+      ou::db::Field( a, "timestamp", dtTimeStamp );
       ou::db::Field( a, "description", sDescription );
     }
+
+    idTransaction_t idTransaction;
+    idReference_t idReference;
+    idAccount_t idAccount;
+    money_t mnyDebit;
+    money_t mnyCredit;
+    std::string sCode;
+    ptime dtTimeStamp;
+    std::string sDescription;
+
+    TableRowDef( void ): idTransaction( 0 ), idReference( 0 ), mnyDebit( 0 ), mnyCredit( 0 ), 
+      dtTimeStamp( boost::date_time::special_values::not_a_date_time ) {};
+    TableRowDef( const TableRowDef& row ): 
+      idTransaction( row.idTransaction ), idReference( row.idReference ), idAccount( row.idAccount),
+      sCode( row.sCode ), dtTimeStamp( row.dtTimeStamp ),
+      mnyDebit( row.mnyDebit ), mnyCredit( row.mnyCredit ), 
+      sDescription( row.sDescription ) {};
+
   };
 
   struct TableCreateDef: TableRowDef {
