@@ -12,18 +12,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-05-18
+// started 2013-05-19
 
-#include "User.h"
+#include "KeyTypes.h"
 
 namespace ou { // One Unified
-namespace dea { // double entry accounting
+namespace auth { // double entry accounting
+namespace keytypes { // KeyTypes
 
-User::User(void) {
-}
+std::string sUser( "users" );
+std::string sPrivilege( "privileges" );
 
-User::~User(void) {
-}
+} // keytypes
+} // auth
+} // ou
 
-} // namespace dea
-} // namespace ou

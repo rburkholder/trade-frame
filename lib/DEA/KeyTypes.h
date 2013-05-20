@@ -26,12 +26,6 @@ namespace keytypes { // KeyTypes
 
 typedef dec::decimal6 money_t;
 
-// User
-typedef boost::uint32_t idUser_t;
-
-// Privilege
-typedef boost::uint32_t idPrivilege_t;
-
 // ChartOfAccounts
 typedef std::string idAccount_t;
 typedef std::string idCurrency_t;
@@ -44,8 +38,6 @@ typedef boost::uint64_t idReference_t;
 
 namespace tablenames { // tablenames
 
-extern const std::string sUser;
-extern const std::string sPrivilege;
 extern const std::string sChartOfAccounts;
 extern const std::string sGeneralJournal;
 

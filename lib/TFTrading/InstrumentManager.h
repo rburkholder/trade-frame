@@ -18,18 +18,19 @@
 #include <map>
 #include <string>
 
+#include <OUCommon/ManagerBase.h>
+
 #include "KeyTypes.h"
 
 #include "Instrument.h"
 #include "AlternateInstrumentNames.h"
 #include "Exchange.h"
-#include "ManagerBase.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class InstrumentManager
-  : public ManagerBase<InstrumentManager> {
+  : public ou::db::ManagerBase<InstrumentManager> {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;

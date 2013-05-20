@@ -28,10 +28,11 @@
 
 #include <OUCommon/Singleton.h>
 
-#include "Database.h"
+//#include "Database.h"
+#include <OUSqlite/Session.h>
 
 namespace ou {
-namespace tf { // TradeFrame
+namespace db { // Database
 
 // T: CRTP base
 template<class T> 
@@ -125,7 +126,5 @@ void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhe
 
 }
 
-
-
-} // namespace tf
+} // namespace db
 } // ou

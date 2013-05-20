@@ -18,24 +18,30 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChartOfAccounts.h">
+    <ClInclude Include="Privilege.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneralJournal.h">
+    <ClInclude Include="User.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AuthManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ChartOfAccounts.cpp">
+    <ClCompile Include="Privilege.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneralJournal.cpp">
+    <ClCompile Include="User.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AuthManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

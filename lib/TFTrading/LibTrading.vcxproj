@@ -181,7 +181,6 @@
     <ClInclude Include="InstrumentInformation.h" />
     <ClInclude Include="InstrumentManager.h" />
     <ClInclude Include="KeyTypes.h" />
-    <ClInclude Include="ManagerBase.h" />
     <ClInclude Include="Managers.h" />
     <ClInclude Include="MarketStates.h" />
     <ClInclude Include="Order.h" />

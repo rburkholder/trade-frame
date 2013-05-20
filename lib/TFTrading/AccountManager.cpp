@@ -24,7 +24,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 AccountManager::AccountManager( void ) 
-: ManagerBase<AccountManager>()//, 
+: ou::db::ManagerBase<AccountManager>()//, 
   //m_session( 0 )
 {
 }

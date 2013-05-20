@@ -80,8 +80,10 @@ public:
 
   GeneralJournal(void);
   ~GeneralJournal(void);
+
 protected:
 private:
+  TableRowDef m_row;
 };
 
 } // namespace dea

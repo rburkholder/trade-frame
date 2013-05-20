@@ -14,10 +14,20 @@
 
 // started 2013-05-18
 
-#include "Privilege.h"
+#pragma once
 
-Privilege::Privilege(void) {
-}
+#include "KeyTypes.h"
 
-Privilege::~Privilege(void) {
-}
+namespace ou { // One Unified
+namespace auth { // auth
+
+class Privilege {
+public:
+  Privilege(void);
+  ~Privilege(void);
+protected:
+private:
+};
+
+} // namespace auth
+} // namespace ou

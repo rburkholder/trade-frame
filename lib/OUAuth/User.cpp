@@ -14,52 +14,19 @@
 
 // started 2013-05-18
 
-#pragma once
-
-#include <boost/shared_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
-#include "KeyTypes.h"
+#include "User.h"
 
 namespace ou { // One Unified
-namespace dea { // double entry accounting
+namespace auth { // authentication
 
-class User {
-public:
+User::User(const std::string& sLogin, const std::string& sPassword,
+  const std::string& sFirstName, const std::string& sLastName, const std::string& sEmail ) 
+  : m_row( false, sLogin, sPassword, sFirstName, sLastName, sEmail )
+{
+}
 
-  typedef keytypes::idUser_t idUser_t;
+User::~User(void) {
+}
 
-  typedef boost::shared_ptr<User> pUser_t;
-
-  struct TableRowDef {
-    template<class A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "userid", idUser );  // numeric value for key
-      ou::db::Field( a, "login", sLogin );
-      ou::db::Field( a, "password", sPassword );
-      ou::db::Field( a, "fname" sFirstName );
-      ou::db::Field( a, "lname", sLastName );
-      ou::db::Field( a, "email", sEmail );
-      ou::db::Field( a, "created", dtCreated );
-    }
-
-    idUser_t idUser;
-    std::string sLogin;
-    std::string sPassword;
-    std::string sFirstName;
-    std::string sLastName;
-    std::string sEmail;
-    ptime dtCreated;
-
-  };
-
-  User(void);
-  ~User(void);
-protected:
-private:
-};
-
-} // namespace dea
+} // namespace auth
 } // namespace ou

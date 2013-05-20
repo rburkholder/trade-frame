@@ -186,7 +186,7 @@ bool OrderManager::LocateOrder( idOrder_t nOrderId, iterOrders_t& iter ) {
         = m_pSession->SQL<OrderManagerQueries::OrderKey>( "select * from orders", keyOrder ).Where( "orderid=?" ).NoExecute();
       m_pSession->Bind<OrderManagerQueries::OrderKey>( pOrderExistsQuery );
       if ( m_pSession->Execute( pOrderExistsQuery ) ) {
-        bool bFound = true;
+        bFound = true;
         // load order as well as associated executions
         Order::TableRowDef rowOrder;
         m_pSession->Columns<OrderManagerQueries::OrderKey, Order::TableRowDef>( pOrderExistsQuery, rowOrder );

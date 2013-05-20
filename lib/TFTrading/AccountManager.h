@@ -16,9 +16,10 @@
 #include <string>
 #include <map>
 
+#include <OUCommon/ManagerBase.h>
+
 #include "KeyTypes.h"
 
-#include "ManagerBase.h"
 #include "AccountAdvisor.h"
 #include "AccountOwner.h"
 #include "Account.h"
@@ -26,7 +27,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class AccountManager: public ManagerBase<AccountManager> {
+class AccountManager: public ou::db::ManagerBase<AccountManager> {
 public:
 
   typedef keytypes::idAccountAdvisor_t idAccountAdvisor_t;

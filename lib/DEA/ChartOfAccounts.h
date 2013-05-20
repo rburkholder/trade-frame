@@ -76,6 +76,7 @@ public:
   ~ChartOfAccounts(void);
 protected:
 private:
+  TableRowDef m_row;
 };
 
 } // namespace dea

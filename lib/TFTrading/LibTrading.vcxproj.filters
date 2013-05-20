@@ -162,9 +162,6 @@
     <ClInclude Include="OrderManager.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
-    <ClInclude Include="ManagerBase.h">
-      <Filter>Header Files\Managers</Filter>
-    </ClInclude>
     <ClInclude Include="InstrumentManager.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>

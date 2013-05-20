@@ -102,6 +102,9 @@
     <ClInclude Include="CurrencyCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ManagerBase.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="notes.txt" />

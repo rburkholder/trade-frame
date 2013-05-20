@@ -12,15 +12,33 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2013-05-18
+// started 2013-05-19
 
 #pragma once
 
-class Privilege {
-public:
-  Privilege(void);
-  ~Privilege(void);
-protected:
-private:
-};
+#include <string>
+
+#include <boost/cstdint.hpp>
+
+namespace ou { // One Unified
+namespace auth { // double entry accounting
+namespace keytypes { // KeyTypes
+
+// User
+typedef boost::uint64_t idUser_t;
+
+// Privilege
+typedef boost::uint64_t idPrivilege_t;
+
+} // keytypes
+
+namespace tablenames { // tablenames
+
+extern const std::string sUser;
+extern const std::string sPrivilege;
+
+} // tablenames
+
+} // auth
+} // ou
 

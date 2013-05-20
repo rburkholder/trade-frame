@@ -167,6 +167,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="ManagerBase.h" />
     <ClInclude Include="MinHeap.h" />
     <ClInclude Include="MSWindows.h" />
     <ClInclude Include="MultiKeyCompare.h" />

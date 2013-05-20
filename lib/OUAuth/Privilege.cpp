@@ -1,5 +1,6 @@
 /************************************************************************
  * Copyright(c) 2013, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,17 +12,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// Started 20130518
+// started 2013-05-18
 
-#include "KeyTypes.h"
+#include "Privilege.h"
 
 namespace ou { // One Unified
-namespace dea { // double entry accounting
-namespace tablenames { // KeyTypes
+namespace auth { // double entry accounting
 
-std::string sChartOfAccounts( "chartofaccounts" );
-std::string sGeneralJournal( "generaljournal" );
+Privilege::Privilege(void) {
+}
 
-} // tablenames
-} // dea
-} // ou
+Privilege::~Privilege(void) {
+}
+
+} // namespace auth
+} // namespace ou

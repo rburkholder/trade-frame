@@ -21,14 +21,12 @@
 #include <stdexcept>
 
 #include <OUCommon/Delegate.h>
-
-//#include <OUBerkeleyDb/AutoIncKeys.h>
+#include <OUCommon/ManagerBase.h>
 
 #include "KeyTypes.h"
 
 #include "ProviderInterface.h"
 #include "TradingEnumerations.h"
-#include "ManagerBase.h"
 #include "Order.h"
 #include "Execution.h"
 
@@ -42,7 +40,7 @@ namespace tf { // TradeFrame
 class ProviderInterfaceBase;
 
 // this is a singleton so use the Instance() call from all users
-class OrderManager: public ManagerBase<OrderManager> {
+class OrderManager: public ou::db::ManagerBase<OrderManager> {
 public:
 
   typedef keytypes::idInstrument_t idInstrument_t;

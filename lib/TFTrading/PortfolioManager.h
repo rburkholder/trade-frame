@@ -25,17 +25,17 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 #include <OUCommon/Delegate.h>
+#include <OUCommon/ManagerBase.h>
 
 #include "KeyTypes.h"
 
-#include "ManagerBase.h"
 #include "Portfolio.h"
 #include "Position.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class PortfolioManager: public ManagerBase<PortfolioManager> {
+class PortfolioManager: public ou::db::ManagerBase<PortfolioManager> {
 public:
 
   typedef Portfolio::pPortfolio_t pPortfolio_t;
