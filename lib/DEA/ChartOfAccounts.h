@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
 #include "KeyTypes.h"
@@ -49,6 +51,8 @@ namespace dea { // double entry accounting
 class ChartOfAccounts {
 public:
 
+  typedef keytypes::idAccount_t idAccount_t;
+  typedef keytypes::idCurrency_t idCurrency_t;
   typedef boost::shared_ptr<ChartOfAccounts> pChartOfAccounts_t;
 
   struct TableRowDef {
@@ -62,6 +66,14 @@ public:
       ou::db::Field( a, "subcategory", sSubCategory );
       ou::db::Field( a, "description", sDescription );
     }
+
+    idAccount_t idAccount;
+    idCurrency_t idCurrency;
+    std::string sLocation;
+    std::string sDepartment;
+    std::string sCategory;
+    std::string sSubCategory;
+    std::string sDescription;
   };
 
   struct TableCreateDef: TableRowDef {
@@ -74,6 +86,7 @@ public:
 
   ChartOfAccounts(void);
   ~ChartOfAccounts(void);
+
 protected:
 private:
   TableRowDef m_row;

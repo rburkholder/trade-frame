@@ -27,6 +27,9 @@
     <ClInclude Include="KeyTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AccountsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChartOfAccounts.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AccountsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

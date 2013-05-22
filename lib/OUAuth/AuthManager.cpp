@@ -79,14 +79,20 @@ bool AuthManager::LocateLogin( const std::string& sLogin, miUsersByLogin_t::iter
 
 AuthManager::pUser_t AuthManager::ConstructUser( const std::string& sLogin, const std::string& sPassword,
     const std::string& sFirstName, const std::string& sLastName, const std::string& sEmail ) {
-  // additional checks:  need to confirm sLogin does not already exist
-  pUser_t pUser( new User( sLogin, sPassword, sFirstName, sLastName, sEmail ) );
-  pUser->SetCreationTime( ou::TimeSource::LocalCommonInstance().Internal() );
-  ou::db::QueryFields<User::TableRowDefNoKey>::pQueryFields_t pQueryUserWrite
-    = m_pSession->Insert<User::TableRowDefNoKey>(
-    const_cast<User::TableRowDefNoKey&>( dynamic_cast<const User::TableRowDefNoKey&>( pUser->GetRow() ) ) );
-  idUser_t idUser = m_pSession->GetLastRowId();
-  m_miUsers.insert( UserRecord( idUser, pUser->GetRow().sLogin, pUser ) );  // should throw if non-unique
+  miUsersByLogin_t::iterator iter;
+  pUser_t pUser;
+  if ( LocateLogin( sLogin, iter ) ) {
+//    throw std::runtime_error( "Login already created" );
+  }
+  else {
+    pUser.reset( new User( sLogin, sPassword, sFirstName, sLastName, sEmail ) );
+    pUser->SetCreationTime( ou::TimeSource::LocalCommonInstance().Internal() );
+    ou::db::QueryFields<User::TableRowDefNoKey>::pQueryFields_t pQueryUserWrite
+      = m_pSession->Insert<User::TableRowDefNoKey>(
+      const_cast<User::TableRowDefNoKey&>( dynamic_cast<const User::TableRowDefNoKey&>( pUser->GetRow() ) ) );
+    idUser_t idUser = m_pSession->GetLastRowId();
+    m_miUsers.insert( UserRecord( idUser, pUser->GetRow().sLogin, pUser ) );  // should throw if non-unique
+  }
   return pUser; 
 }
 

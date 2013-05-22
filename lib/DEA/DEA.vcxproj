@@ -129,11 +129,13 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AccountsManager.h" />
     <ClInclude Include="ChartOfAccounts.h" />
     <ClInclude Include="GeneralJournal.h" />
     <ClInclude Include="KeyTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AccountsManager.cpp" />
     <ClCompile Include="ChartOfAccounts.cpp" />
     <ClCompile Include="GeneralJournal.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
