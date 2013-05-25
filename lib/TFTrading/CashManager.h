@@ -19,10 +19,10 @@
 #include <map>
 
 #include <OUCommon/MultiKeyCompare.h>
+#include <OUCommon/ManagerBase.h>
 
 #include "KeyTypes.h"
 
-#include "ManagerBase.h"
 #include "Account.h"
 #include "CashAccount.h"
 #include "CashTransaction.h"
@@ -30,7 +30,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CashManager: public ManagerBase<CashManager> {
+class CashManager: public ou::db::ManagerBase<CashManager> {
 public:
 
   typedef keytypes::idAccount_t idAccount_t;

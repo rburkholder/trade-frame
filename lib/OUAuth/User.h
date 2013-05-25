@@ -95,7 +95,7 @@ public:
   ~User(void);
 
   void SetCreationTime( const ptime& dt ) { m_row.dtCreated = dt; };
-  void SetKey( idUser_t idUser ) { m_row.idUser = idUser; };
+  void SetKey( const idUser_t& idUser ) { m_row.idUser = idUser; };
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 

@@ -18,9 +18,10 @@
 #include <string>
 #include <map>
 
+#include <OUCommon/ManagerBase.h>
+
 #include "KeyTypes.h"
 
-#include "ManagerBase.h"
 #include "ProviderInterface.h"
 
 // key might be account or other similar globally known identifier
@@ -31,7 +32,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ProviderManager: public ManagerBase<ProviderManager> {
+class ProviderManager: public ou::db::ManagerBase<ProviderManager> {
 public:
 
   typedef keytypes::idProvider_t idProvider_t;

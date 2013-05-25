@@ -28,7 +28,7 @@ typedef dec::decimal6 money_t;
 
 // ChartOfAccounts
 typedef std::string idAccount_t;
-typedef std::string idCurrency_t;
+//typedef std::string idCurrency_t;  // obtained directly from oucommon/currencycode
 
 // GeneralJournal
 typedef boost::uint64_t idTransaction_t;

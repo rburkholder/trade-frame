@@ -14,9 +14,9 @@
 
 // started 2013-05-19
 
-#include "AuthManager.h"
-
 #include <OUCommon/TimeSource.h>
+
+#include "AuthManager.h"
 
 namespace ou { // One Unified
 namespace auth { // double entry accounting

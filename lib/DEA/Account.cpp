@@ -14,15 +14,12 @@
 
 // started 2013-05-05
 
-#include "GeneralJournal.h"
+#include "Account.h"
 
 namespace ou { // One Unified
 namespace dea { // double entry accounting
 
-GeneralJournal::GeneralJournal(void) {
-}
-
-GeneralJournal::~GeneralJournal(void) {
+Account::~Account(void) {
 }
 
 } // namespace dea

@@ -14,15 +14,12 @@
 
 // started 2013-05-05
 
-#include "ChartOfAccounts.h"
+#include "GeneralJournalEntry.h"
 
 namespace ou { // One Unified
 namespace dea { // double entry accounting
 
-ChartOfAccounts::ChartOfAccounts(void) {
-}
-
-ChartOfAccounts::~ChartOfAccounts(void) {
+GeneralJournalEntry::~GeneralJournalEntry(void) {
 }
 
 } // namespace dea

@@ -21,31 +21,45 @@
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include <boost/property_tree/xml_parser.hpp>
-
 #include "CurrencyCode.h"
 
-namespace detail {
-#include "IsoCurrency.cpp"
-} // namespace detail
-
 namespace ou { // One Unified
+namespace tables { // Currency
+namespace CurrencyCode {
+namespace detail {
 
-CurrencyCode::CurrencyCode(void) {
+#include "IsoCurrency.cpp"
+
+  const mapCurrencies_t& getMap( void ) {
+    static initializer_t initializer;
+    return initializer.m_mapCurrencies;
+  }
+
+  struct initializer_t {
+    mapCurrencies_t m_mapCurrencies;  // currency code, currency name
+    initializer_t( void );
+  };
+
+  // private initialization in structure, and static the structure
+  // http://stackoverflow.com/questions/1197106/static-constructors-in-c-need-to-initialize-private-static-objects
+
+
+initializer_t::initializer_t( void ) {
   for ( detail::vCurrencyCodes_t::iterator iter = detail::vCurrencyCodes.begin(); 
         iter != detail::vCurrencyCodes.end(); iter++ ) {
-    m_mapCurrencies[ iter->get<2>() ] = iter->get<1>();
+    m_mapCurrencies[ iter->get<2>() ] = iter->get<1>();  // 0 based offset into 5 element tuple
   }
-  for ( m_mapCurrencies_t::iterator iter = m_mapCurrencies.begin(); iter != m_mapCurrencies.end(); iter++ ) {
+  for ( mapCurrencies_t::iterator iter = m_mapCurrencies.begin(); iter != m_mapCurrencies.end(); iter++ ) {
     std::cout << iter->first << ":" << iter->second << std::endl;
   }
 }
 
-CurrencyCode::~CurrencyCode(void) {
+} // namespace detail
+
+bool IsValid( const idCurrency_t& idCurrency ) {
+  return ( detail::getMap().end() != detail::getMap().find( idCurrency ) );
 }
 
-
-
-
-
+} // namespace CurrencyCode
+} // namespace tables
 } // namespace ou

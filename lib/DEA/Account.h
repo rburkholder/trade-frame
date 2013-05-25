@@ -20,9 +20,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "KeyTypes.h"
+#include <OUCommon/CurrencyCode.h>
 
-//#include "KeyTypes.h"
+#include "KeyTypes.h"
 
 /*  Wiley Accounting Reference
 1xxx Assets
@@ -45,15 +45,18 @@
 9000 - Extraordinary Items
 */
 
+// 20130524  make a user settable account code mask for idAccount validation
+// 20130524 make TLV table for (location), (department), (category, subcategory)
+
 namespace ou { // One Unified
 namespace dea { // double entry accounting
 
-class ChartOfAccounts {
+class Account{
 public:
 
   typedef keytypes::idAccount_t idAccount_t;
-  typedef keytypes::idCurrency_t idCurrency_t;
-  typedef boost::shared_ptr<ChartOfAccounts> pChartOfAccounts_t;
+  typedef ou::tables::CurrencyCode::idCurrency_t idCurrency_t;
+  typedef boost::shared_ptr<Account> pAccount_t;
 
   struct TableRowDef {
     template<class A>
@@ -74,6 +77,18 @@ public:
     std::string sCategory;
     std::string sSubCategory;
     std::string sDescription;
+
+    TableRowDef( void ) {};
+    TableRowDef( const TableRowDef& row ) 
+      : idAccount( row.idAccount ), idCurrency( row.idCurrency ), sLocation( row.sLocation ),
+      sDepartment( row.sDepartment ), sCategory( row.sCategory ), sSubCategory( row.sSubCategory ), 
+      sDescription( row.sDescription ) {};
+    TableRowDef( idAccount_t idAccount_,  idCurrency_t idCurrency_, std::string sLocation_, std::string sDepartment_,
+      std::string sCategory_, std::string sSubCategory_, std::string sDescription_ ) 
+      : idAccount( idAccount_ ), idCurrency( idCurrency_ ), sLocation( sLocation_ ), sDepartment( sDepartment_ ), 
+      sCategory( sCategory_ ), sSubCategory( sSubCategory_ ), sDescription( sDescription_ ) {
+        if ( !ou::tables::CurrencyCode::IsValid( idCurrency_ ) ) throw std::runtime_error( "bad currency id" );
+    };
   };
 
   struct TableCreateDef: TableRowDef {
@@ -84,8 +99,10 @@ public:
     }
   };
 
-  ChartOfAccounts(void);
-  ~ChartOfAccounts(void);
+  Account( const TableRowDef& row ): m_row( row ) {};
+  ~Account(void);
+
+  const TableRowDef& GetRow( void ) const { return m_row; };
 
 protected:
 private:

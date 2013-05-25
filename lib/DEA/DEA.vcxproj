@@ -130,14 +130,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccountsManager.h" />
-    <ClInclude Include="ChartOfAccounts.h" />
-    <ClInclude Include="GeneralJournal.h" />
+    <ClInclude Include="Account.h" />
+    <ClInclude Include="GeneralJournalEntry.h" />
     <ClInclude Include="KeyTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AccountsManager.cpp" />
-    <ClCompile Include="ChartOfAccounts.cpp" />
-    <ClCompile Include="GeneralJournal.cpp" />
+    <ClCompile Include="Account.cpp" />
+    <ClCompile Include="GeneralJournalEntry.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

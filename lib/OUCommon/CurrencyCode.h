@@ -26,16 +26,31 @@
 #include <string>
 #include <map>
 
+#include <boost/range.hpp>
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/adaptor/map.hpp>
+
 namespace ou { // One Unified
+namespace tables { // tables
+namespace CurrencyCode { // currency code
 
-class CurrencyCode {
-public:
-  CurrencyCode(void);
-  ~CurrencyCode(void);
-protected:
-private:
-  typedef std::map<std::string,std::string> m_mapCurrencies_t;
-  m_mapCurrencies_t m_mapCurrencies;  // currency code, currency name
-};
+  typedef std::string idCurrency_t;
 
+  bool IsValid( const idCurrency_t& );
+
+namespace detail {
+
+  typedef std::map<std::string,std::string> mapCurrencies_t;
+  const mapCurrencies_t& getMap( void );
+
+} // namespace detail
+
+
+template<class F>
+void ScanCurrencyCodes( F f ) {
+  boost::for_each( detail::getMap() | boost::adaptors::map_keys, f );
+}
+
+} // namespace currency code
+} // namespace tables
 } // namespace ou

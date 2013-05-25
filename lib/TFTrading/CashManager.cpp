@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CashManager::CashManager(void): ManagerBase<CashManager>() {
+CashManager::CashManager(void): ou::db::ManagerBase<CashManager>() {
 }
 
 CashManager::~CashManager(void) {

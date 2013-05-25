@@ -19,8 +19,8 @@ namespace ou { // One Unified
 namespace dea { // double entry accounting
 namespace tablenames { // KeyTypes
 
-std::string sChartOfAccounts( "chartofaccounts" );
-std::string sGeneralJournal( "generaljournal" );
+const std::string sChartOfAccounts( "chartofaccounts" );
+const std::string sGeneralJournal( "generaljournal" );
 
 } // tablenames
 } // dea
