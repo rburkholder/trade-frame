@@ -18,6 +18,9 @@
 
 #include "Margin.h"
 
+// https://www.interactivebrokers.com/en/index.php?f=marginnew&p=opt
+// http://www.cboe.com/LearnCenter/pdf/margin2-00.pdf
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
@@ -160,31 +163,43 @@ void Calc( RegTIra& mr, const LongPut& longp, const ShortPut& shortp ) {
   mr.margin = longp.quantity * std::max<double>( shortp.pInstrument->GetStrike() - longp.pInstrument->GetStrike(), 0.0 );
 }
 
-// ===== Collar
+// ===== Collar, Conversion
 // Long put and long underlying with short call. 
 // Put and call must have same expiration date, same underlying (and same multiplier), 
 // and put exercise price must be lower than call exercise price.
+// For conversion, call and put with same strike
 
 void Calc( RegTInitial& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ) {
   RegTInitial initial;
   Calc( initial, under );
-  double itm1 = under.price - call.pInstrument->GetStrike();
-  double itm2 = ( itm1 > 0.0 ) ? itm1 : 0.0;
-  mr.margin = initial.margin + call.quantity * itm2;
+  mr.margin = initial.margin;
+  if ( call.pInstrument->GetStrike() != put.pInstrument->GetStrike() ) { // if collar, not conversion
+    double itm1 = under.price - call.pInstrument->GetStrike();
+    double itm2 = ( itm1 > 0.0 ) ? itm1 : 0.0;
+    mr.margin += call.quantity * itm2;
+  }
 }
 
 void Calc( RegTEndOfDay& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ) {
   RegTInitial initial;
   Calc( initial, under );
-  double itm1 = under.price - call.pInstrument->GetStrike();
-  double itm2 = ( itm1 > 0.0 ) ? itm1 : 0.0;
-  mr.margin = initial.margin + call.quantity * itm2;
+  mr.margin = initial.margin;
+  if ( call.pInstrument->GetStrike() != put.pInstrument->GetStrike() ) { // if collar, not conversion
+    double itm1 = under.price - call.pInstrument->GetStrike();
+    double itm2 = ( itm1 > 0.0 ) ? itm1 : 0.0;
+    mr.margin += call.quantity * itm2;
+  }
 }
 
 void Calc( RegTMaintenance& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ) {
-  double otm1 = under.price - put.pInstrument->GetStrike();
-  double otm2 = ( otm1 > 0.0 ) ? otm1 : 0.0;
-  mr.margin = under.quantity * std::min<double>( 0.10 * put.pInstrument->GetStrike() + otm2, 0.25 * call.pInstrument->GetStrike() );
+  if ( call.pInstrument->GetStrike() == put.pInstrument->GetStrike() ) { // if collar
+    mr.margin = under.quantity * 0.10 * call.pInstrument->GetStrike();
+  }
+  else {
+    double otm1 = under.price - put.pInstrument->GetStrike();
+    double otm2 = ( otm1 > 0.0 ) ? otm1 : 0.0;
+    mr.margin = under.quantity * std::min<double>( 0.10 * put.pInstrument->GetStrike() + otm2, 0.25 * call.pInstrument->GetStrike() );
+  }
 }
 
 void Calc( CashOrRegTIra& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ) {
@@ -262,7 +277,7 @@ void Calc( RegT& mr, const ShortCall& call1, const LongCall& call2, const ShortC
   mr.margin = ( hi - mid ) + ( mid - lo );
 }
 
-void Calc( CashOrRegTIra& mr, const ShortPut& put1, const LongPut& put2, const ShortPut& put3 ) {
+void Calc( CashOrRegTIra& mr, const ShortCall& call1, const LongCall& call2, const ShortCall& call3 ) {
     // 0
 }
 
@@ -312,6 +327,106 @@ void Calc( RegTIra& mr, const LongPut& lput, const ShortCall& scall, const Short
   double calc = lput.price + lcall.price - scall.price - sput.price;
   assert( 0 < calc );
   mr.margin = lput.quantity * std::max<double>( 1.02 * calc, lcall.pInstrument->GetStrike() - scall.pInstrument->GetStrike() );
+}
+
+// === Reverse Conversion
+// Long call and short underlying with short put. Put and call must have same expiration date, underlying (multiplier), and exercise price.
+
+void Calc( RegTInitial& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put ) {
+  double itm1 = put.pInstrument->GetStrike() - under.price;
+  double itm2 =  0.0 < itm1 ? itm1 : 0.0;
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin + put.quantity * itm2;
+}
+
+void Calc( RegTEndOfDay& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put ) {
+  double itm1 = put.pInstrument->GetStrike() - under.price;
+  double itm2 =  0.0 < itm1 ? itm1 : 0.0;
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin + put.quantity * itm2;
+}
+
+void Calc( RegTMaintenance& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put ) {
+  double itm1 = put.pInstrument->GetStrike() - under.price;
+  double itm2 =  0.0 < itm1 ? itm1 : 0.0;
+  mr.margin = call.quantity * 0.10 * call.pInstrument->GetStrike()  + put.quantity * itm2;
+}
+
+void Calc( CashOrRegTIra& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put ) {
+    // 0
+}
+
+// === Protective Put
+// Long Put and Long Underlying.
+
+void Calc( RegTInitial& mr, const LongUnderlying& under, const LongPut& put ) {
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin;
+}
+
+void Calc( RegTMaintenance& mr, const LongUnderlying& under, const LongPut& put ) {
+  double otm1 = under.price - put.pInstrument->GetStrike();
+  double otm2 = 0.0 < otm1 ? otm1 : 0.0;
+  double t = put.quantity * ( 0.10 * put.pInstrument->GetStrike() + otm2 );
+  RegTMaintenance rti;
+  Calc( rti, under );
+  mr.margin = std::min<double>( t, rti.margin );
+}
+
+void Calc( RegTEndOfDay& mr, const LongUnderlying& under, const LongPut& put ) {
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin;
+}
+
+void Calc( CashOrRegTIra& mr, const LongUnderlying& under, const LongPut& put ) {
+    // 0
+}
+
+// === Protective Call
+// Long Call and Short Underlying.
+
+void Calc( RegTInitial& mr, const ShortUnderlying& under, const LongCall& call ) {
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin;
+}
+
+void Calc( RegTMaintenance& mr, const ShortUnderlying& under, const LongCall& call ) {
+  double otm1 = call.pInstrument->GetStrike() - under.price;
+  double otm2 = 0.0 < otm1 ? otm1 : 0.0;
+  double t = call.quantity * ( 0.10 * call.pInstrument->GetStrike() + otm2 );
+  RegTMaintenance rti;
+  Calc( rti, under );
+  mr.margin = std::min<double>( t, rti.margin );
+}
+
+void Calc( RegTEndOfDay& mr, const ShortUnderlying& under, const LongCall& call ) {
+  RegTInitial rti;
+  Calc( rti, under );
+  mr.margin = rti.margin;
+}
+
+void Calc( CashOrRegTIra& mr, const ShortUnderlying& under, const LongCall& call ) {
+    // 0
+}
+
+// === Iron Condor
+// Sell a put, buy put, sell a call, buy a call.
+
+void Calc( RegT& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall ) {
+  mr.margin = sput.quantity * sput.pInstrument->GetStrike() - lput.quantity * lput.pInstrument->GetStrike();
+}
+
+void Calc( Cash& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall ) {
+    // 0
+}
+
+void Calc( RegTIra& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall ) {
+  mr.margin = sput.quantity * sput.pInstrument->GetStrike() - lput.quantity * lput.pInstrument->GetStrike();
 }
 
 

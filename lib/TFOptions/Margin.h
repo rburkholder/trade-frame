@@ -95,10 +95,10 @@ void Calc( RegT& mr, const LongPut& longp, const ShortPut& shortp ); // put spre
 void Calc( Cash& mr, const LongPut& longp, const ShortPut& shortp );
 void Calc( RegTIra& mr, const LongPut& longp, const ShortPut& shortp );
 
-void Calc( RegTInitial& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar
-void Calc( RegTMaintenance& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar
-void Calc( RegTEndOfDay& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar
-void Calc( CashOrRegTIra& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar
+void Calc( RegTInitial& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar, conversion
+void Calc( RegTMaintenance& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar, conversion
+void Calc( RegTEndOfDay& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar, conversion
+void Calc( CashOrRegTIra& mr, const LongUnderlying& under, const ShortCall& call, const LongPut& put ); // collar, conversion
 
 void Calc( MarginRequirement& mr, const LongCall& call, const LongPut& put );  // long call and long put
 
@@ -122,6 +122,25 @@ void Calc( RegTIra& mr, const LongCall& call1, const ShortPut& put1, const LongP
 void Calc( RegT& mr, const LongPut& lput, const ShortCall& scall, const ShortPut& sput, const LongCall& lcall );  // short box spread
 void Calc( Cash& mr, const LongPut& lput, const ShortCall& scall, const ShortPut& sput, const LongCall& lcall );
 void Calc( RegTIra& mr, const LongPut& lput, const ShortCall& scall, const ShortPut& sput, const LongCall& lcall );
+
+void Calc( RegTInitial& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put );  // reverse conversion
+void Calc( RegTMaintenance& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put );  // reverse conversion
+void Calc( RegTEndOfDay& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put );  // reverse conversion
+void Calc( CashOrRegTIra& mr, const ShortUnderlying& under, const LongCall& call, const ShortPut& put );
+
+void Calc( RegTInitial& mr, const LongUnderlying& under, const LongPut& put );  // protective put
+void Calc( RegTMaintenance& mr, const LongUnderlying& under, const LongPut& put );  // protective put
+void Calc( RegTEndOfDay& mr, const LongUnderlying& under, const LongPut& put );  // protective put
+void Calc( CashOrRegTIra& mr, const LongUnderlying& under, const LongPut& put );  // protective put
+
+void Calc( RegTInitial& mr, const ShortUnderlying& under, const LongCall& call );  // protective call
+void Calc( RegTMaintenance& mr, const ShortUnderlying& under, const LongCall& call );  // protective call
+void Calc( RegTEndOfDay& mr, const ShortUnderlying& under, const LongCall& call );  // protective call
+void Calc( CashOrRegTIra& mr, const ShortUnderlying& under, const LongCall& call );  // protective call
+
+void Calc( RegT& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall );  // iron condor
+void Calc( Cash& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall );  // iron condor
+void Calc( RegTIra& mr, const ShortPut& sput, const LongPut& lput, const ShortCall& scall, const LongCall& lcall );  // iron condor
 
 } // namespace margin
 } // namespace option
