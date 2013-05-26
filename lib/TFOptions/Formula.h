@@ -21,7 +21,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-// Put-Call Parity forEuropean Options
+// Put-Call Parity for European Options
 
 // pg 40, Black Scholes and Beyond
 

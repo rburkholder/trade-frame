@@ -103,8 +103,7 @@ private:
 // ==================
 //
 
-class Call: public Option
-{
+class Call: public Option {
 public:
   Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   virtual ~Call( void ) {};
@@ -116,8 +115,7 @@ private:
 // ==================
 //
 
-class Put: public Option
-{
+class Put: public Option {
 public:
   Put( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   virtual ~Put( void ) {};

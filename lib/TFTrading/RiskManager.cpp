@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-RiskManager::RiskManager(void): ManagerBase<RiskManager>() {
+RiskManager::RiskManager(void): ou::db::ManagerBase<RiskManager>() {
 }
 
 RiskManager::~RiskManager(void) {

@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="CalcExpiry.h" />
     <ClInclude Include="Formula.h" />
+    <ClInclude Include="Margin.h" />
     <ClInclude Include="Option.h" />
     <ClInclude Include="PopulateWithIBOptions.h" />
     <ClInclude Include="Strike.h">
@@ -147,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp" />
     <ClCompile Include="Formula.cpp" />
+    <ClCompile Include="Margin.cpp" />
     <ClCompile Include="Option.cpp" />
     <ClCompile Include="Strike.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

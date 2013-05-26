@@ -50,8 +50,8 @@ public:
   pCashAccount_t GetCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
   void DeleteAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
 
-  pCashTransaction_t AddCashTransaction( 
-    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription );
+//  pCashTransaction_t AddCashTransaction( 
+//    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription );
 
   void AttachToSession( ou::db::Session* pSession );
   void DetachFromSession( ou::db::Session* pSession );

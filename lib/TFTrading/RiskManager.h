@@ -15,12 +15,12 @@
 
 #pragma once
 
-#include "ManagerBase.h"
+#include <OUCommon/ManagerBase.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class RiskManager: public ManagerBase<RiskManager> {
+class RiskManager: public ou::db::ManagerBase<RiskManager> {
 public:
   RiskManager(void);
   ~RiskManager(void);

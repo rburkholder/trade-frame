@@ -20,7 +20,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
 #include <OUCommon/CurrencyCode.h>
+#include <OUCommon/Decimal.h>
 
 #include "KeyTypes.h"
 
@@ -57,6 +62,7 @@ public:
   typedef keytypes::idAccount_t idAccount_t;
   typedef ou::tables::CurrencyCode::idCurrency_t idCurrency_t;
   typedef boost::shared_ptr<Account> pAccount_t;
+  typedef keytypes::money_t money_t;
 
   struct TableRowDef {
     template<class A>
@@ -68,6 +74,8 @@ public:
       ou::db::Field( a, "category", sCategory );
       ou::db::Field( a, "subcategory", sSubCategory );
       ou::db::Field( a, "description", sDescription );
+      ou::db::Field( a, "periodendtimestamp", dtPeriodEnd );
+      ou::db::Field( a, "periodendtotal", mnyPeriodEnd );
     }
 
     idAccount_t idAccount;
@@ -77,16 +85,19 @@ public:
     std::string sCategory;
     std::string sSubCategory;
     std::string sDescription;
+    ptime dtPeriodEnd;
+    money_t mnyPeriodEnd;
 
-    TableRowDef( void ) {};
+    TableRowDef( void ): dtPeriodEnd( boost::date_time::special_values::not_a_date_time ), mnyPeriodEnd( 0 ) {};
     TableRowDef( const TableRowDef& row ) 
       : idAccount( row.idAccount ), idCurrency( row.idCurrency ), sLocation( row.sLocation ),
       sDepartment( row.sDepartment ), sCategory( row.sCategory ), sSubCategory( row.sSubCategory ), 
-      sDescription( row.sDescription ) {};
+      sDescription( row.sDescription ), dtPeriodEnd( row.dtPeriodEnd ), mnyPeriodEnd( row.mnyPeriodEnd ) {};
     TableRowDef( idAccount_t idAccount_,  idCurrency_t idCurrency_, std::string sLocation_, std::string sDepartment_,
       std::string sCategory_, std::string sSubCategory_, std::string sDescription_ ) 
       : idAccount( idAccount_ ), idCurrency( idCurrency_ ), sLocation( sLocation_ ), sDepartment( sDepartment_ ), 
-      sCategory( sCategory_ ), sSubCategory( sSubCategory_ ), sDescription( sDescription_ ) {
+      sCategory( sCategory_ ), sSubCategory( sSubCategory_ ), sDescription( sDescription_ ),
+      dtPeriodEnd( boost::date_time::special_values::not_a_date_time ), mnyPeriodEnd( 0 ) {
         if ( !ou::tables::CurrencyCode::IsValid( idCurrency_ ) ) throw std::runtime_error( "bad currency id" );
     };
   };
