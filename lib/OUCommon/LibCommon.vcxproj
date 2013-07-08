@@ -134,7 +134,9 @@
     <ClCompile Include="ConsoleStream.cpp" />
     <ClCompile Include="CountryCode.cpp" />
     <ClCompile Include="CurrencyCode.cpp" />
-    <ClCompile Include="IsoCurrency.cpp" />
+    <ClCompile Include="IsoCurrency.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Log.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

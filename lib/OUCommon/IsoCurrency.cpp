@@ -1,3 +1,4 @@
+// included in CurrencyCode.cpp
 typedef boost::tuple<std::string, std::string, std::string, unsigned int, unsigned int> tupleCurrencyCodes;
 typedef std::vector<tupleCurrencyCodes> vCurrencyCodes_t;
 static vCurrencyCodes_t vCurrencyCodes = tuple_list_of 

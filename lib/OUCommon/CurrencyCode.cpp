@@ -30,15 +30,15 @@ namespace detail {
 
 #include "IsoCurrency.cpp"
 
-  const mapCurrencies_t& getMap( void ) {
-    static initializer_t initializer;
-    return initializer.m_mapCurrencies;
-  }
-
   struct initializer_t {
     mapCurrencies_t m_mapCurrencies;  // currency code, currency name
     initializer_t( void );
   };
+
+  const mapCurrencies_t& getMap( void ) {
+    static initializer_t initializer;
+    return initializer.m_mapCurrencies;
+  }
 
   // private initialization in structure, and static the structure
   // http://stackoverflow.com/questions/1197106/static-constructors-in-c-need-to-initialize-private-static-objects

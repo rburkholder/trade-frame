@@ -313,6 +313,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DEA", "lib\DEA\DEA.vcxproj"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OUAuth", "lib\OUAuth\OUAuth.vcxproj", "{F6F22CD0-9A46-46EA-A819-A2119744A1C2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Phi2", "Phi2\Phi2.vcxproj", "{3619E931-F4D0-470C-A860-1B4D714FA07D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -880,6 +882,15 @@ Global
 		{F6F22CD0-9A46-46EA-A819-A2119744A1C2}.Release|Win32.Build.0 = Release|Win32
 		{F6F22CD0-9A46-46EA-A819-A2119744A1C2}.Release|x64.ActiveCfg = Release|Win32
 		{F6F22CD0-9A46-46EA-A819-A2119744A1C2}.Release|x64old.ActiveCfg = Release|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Debug|Win32.Build.0 = Debug|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Debug|x64.ActiveCfg = Debug|x64
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Debug|x64.Build.0 = Debug|x64
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Debug|x64old.ActiveCfg = Debug|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Release|Win32.ActiveCfg = Release|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Release|Win32.Build.0 = Release|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Release|x64.ActiveCfg = Release|Win32
+		{3619E931-F4D0-470C-A860-1B4D714FA07D}.Release|x64old.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
