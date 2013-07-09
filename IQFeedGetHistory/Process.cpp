@@ -30,10 +30,13 @@
 // CProcess
 //
 
+#pragma message( "** Note:  compile in release mode, buffer checks make it slow in debug" )
+
 Process::Process( const std::string& sPrefixPath )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
   m_sPrefixPath( sPrefixPath ),
-  m_cntBars( 25 )
+//  m_cntBars( 25 )
+  m_cntBars( 220 )
 {
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );

@@ -65,15 +65,15 @@ private:
     }
   };
 
-  typedef std::multimap<double, InstrumentInfo> m_mapRankingPos_t;
-  typedef std::multimap<double, InstrumentInfo, MaxNegativesCompare> m_mapRankingNeg_t;
-  typedef std::pair<double,InstrumentInfo> m_pairRanking_t;
+  typedef std::multimap<double, InstrumentInfo> mapRankingPos_t;
+  typedef std::multimap<double, InstrumentInfo, MaxNegativesCompare> mapRankingNeg_t;
+  typedef std::pair<double,InstrumentInfo> pairRanking_t;
 
   static const unsigned short m_nMaxInList = 10;  // maximum of 10 items in each list
-  m_mapRankingPos_t m_mapMaxPositives;
-  m_mapRankingNeg_t m_mapMaxNegatives;
+  mapRankingPos_t m_mapMaxPositives;
+  mapRankingNeg_t m_mapMaxNegatives;
 
-  m_mapRankingPos_t m_mapMaxVolatility;
+  mapRankingPos_t m_mapMaxVolatility;
   
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 

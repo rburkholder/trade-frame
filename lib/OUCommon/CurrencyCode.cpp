@@ -16,6 +16,8 @@
 
 #include "stdafx.h"
 
+#include <iostream>
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>

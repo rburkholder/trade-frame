@@ -28,7 +28,7 @@
 
 // 2012/11/18 Look for symbols which regularily hit their pivots
 
-SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ),  m_dm( ou::tf::HDF5DataManager::RO ) {
+SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ), m_dm( ou::tf::HDF5DataManager::RO ) {
 
   m_dtEnd = m_dtLast + date_duration( 1 );
   m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
