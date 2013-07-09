@@ -19,7 +19,6 @@
 
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFIQFeed/LoadMktSymbols.h>
-//#include <TFIQFeed/ParseMktSymbolDiskFile.h>
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>

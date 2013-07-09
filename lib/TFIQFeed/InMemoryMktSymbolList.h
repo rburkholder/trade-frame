@@ -50,15 +50,15 @@ struct InMemoryMktSymbolList {
       boost::multi_index::ordered_unique<
         boost::multi_index::tag<ixSymbol>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sSymbol)>,
       boost::multi_index::ordered_non_unique<
-        boost::multi_index::tag<ixExchange>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sExchange)>
+        boost::multi_index::tag<ixExchange>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sExchange)>,
 //      boost::multi_index::ordered_non_unique<
 //        boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::enumSymbolClassifier,sc)>,
 //      boost::multi_index::ordered_non_unique<
 //        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
 //      boost::multi_index::ordered_non_unique<
 //        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
-//      boost::multi_index::ordered_non_unique<
-//        boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
     >
   > symbols_t;
   typedef symbols_t::iterator iterator;

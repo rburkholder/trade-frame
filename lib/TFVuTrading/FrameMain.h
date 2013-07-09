@@ -48,8 +48,6 @@ public:
   void Init();
   void CreateControls();
 
-//  wxPanel* MainPanel( void ) { return m_panelMain; };
-
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -60,8 +58,10 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN
   };
 
+  wxMenuBar* m_menuBar;
   wxStatusBar* m_statusBar;
-//  wxPanel* m_panelMain;
 
+  void OnMenuExitClick( wxCommandEvent& event );
+  void OnClose( wxCloseEvent& event );
 };
 

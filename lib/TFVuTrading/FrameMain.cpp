@@ -40,6 +40,7 @@ bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption
 }
 
 void FrameMain::Init() {
+  m_menuBar = NULL;
   m_statusBar = NULL;
 }
 
@@ -47,18 +48,29 @@ void FrameMain::CreateControls( void ) {
 
     FrameMain* itemFrame1 = this;
 
-    wxMenuBar* menuBar = new wxMenuBar;
-    wxMenu* itemMenu3 = new wxMenu;
-    itemMenu3->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
-    menuBar->Append(itemMenu3, _("Menu"));
-    itemFrame1->SetMenuBar(menuBar);
-
-    //m_panelMain = new wxPanel( itemFrame1, ID_PANELMAIN, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL );
+    m_menuBar = new wxMenuBar;
+    wxMenu* itemMenuExit = new wxMenu;
+    itemMenuExit->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
+    m_menuBar->Append(itemMenuExit, _("Menu"));
+    itemFrame1->SetMenuBar(m_menuBar);
 
     m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
     m_statusBar->SetFieldsCount(2);
     itemFrame1->SetStatusBar(m_statusBar);
-    
+   
+    Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );
+    Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
+}
+
+void FrameMain::OnMenuExitClick( wxCommandEvent& event ) {
+  this->Close();
+}
+
+void FrameMain::OnClose( wxCloseEvent& event ) {
+  Unbind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
+//  Unbind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );  // causes crash
+  // http://docs.wxwidgets.org/trunk/classwx_close_event.html
+  event.Skip();  // continue with base class stuff
 }
 
 wxBitmap FrameMain::GetBitmapResource( const wxString& name ) {
