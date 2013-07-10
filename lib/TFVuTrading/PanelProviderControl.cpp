@@ -143,7 +143,7 @@ void PanelProviderControl::CreateControls( void ) {
     itemBoxSizer15->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
   // Connect events and objects
 
-  Bind( wxEVT_CLOSE_WINDOW, &PanelProviderControl::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
+//  Bind( wxEVT_CLOSE_WINDOW, &PanelProviderControl::OnClose, this );  // doesn't get called, as is not frame, need to do in frame
 
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelProviderControl::OnBtnIQFeed, this, ID_BtnIQFeed );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelProviderControl::OnBtnIB, this, ID_BtnInteractiveBrokers );

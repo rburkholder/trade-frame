@@ -160,6 +160,7 @@
     </ClCompile>
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="TradingEnumerations.cpp" />
+    <ClCompile Include="Watch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TradingEnumerations.h" />
+    <ClInclude Include="Watch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

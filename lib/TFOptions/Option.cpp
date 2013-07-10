@@ -24,81 +24,55 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )
-: m_pInstrument( pInstrument ), 
-  m_pDataProvider( pDataProvider ), m_pGreekProvider( pGreekProvider ),
-  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
+: Watch( pInstrument, pDataProvider ),
+  m_pGreekProvider( pGreekProvider ),
   m_dblStrike( pInstrument->GetStrike() ),
-  m_cntWatching( 0 ),
   m_sSide( "-" )
 {
   Initialize();
 }
 
-Option::Option( const Option& rhs ) 
-: m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblTrade( rhs.m_dblTrade ),
+Option::Option( const Option& rhs ) :
+  Watch( rhs ),
   m_dblStrike( rhs.m_dblStrike ),
   m_greek( rhs.m_greek ),
-  m_cntWatching( 0 ),
   m_sSide( rhs.m_sSide ),
-  m_pInstrument( rhs.m_pInstrument ),
-  m_pDataProvider( rhs.m_pDataProvider ), m_pGreekProvider( rhs.m_pGreekProvider )
+  m_pGreekProvider( rhs.m_pGreekProvider )
 {
-  assert( 0 == rhs.m_cntWatching );
   Initialize();
 }
 
 Option::~Option( void ) {
-  StopWatch();
+//  StopWatch();  // issues here
 }
 
 Option& Option::operator=( const Option& rhs ) {
-  assert( 0 == rhs.m_cntWatching );
-  assert( 0 == m_cntWatching );
+  Watch::operator=( rhs );
   m_dblStrike = rhs.m_dblStrike;
   m_greek = rhs.m_greek;
   m_sSide = rhs.m_sSide;
-  m_pInstrument = rhs.m_pInstrument;
-  m_pDataProvider = rhs.m_pDataProvider;
   m_pGreekProvider = rhs.m_pGreekProvider;
-  m_cntWatching = 0;
   Initialize();
   return *this;
 }
 
 void Option::Initialize( void ) {
-  assert( m_pDataProvider->ProvidesQuotes() );
-  assert( m_pDataProvider->ProvidesTrades() );
   assert( m_pGreekProvider->ProvidesGreeks() );
 }
 
 void Option::StartWatch( void ) {
   if ( 0 == m_cntWatching ) {
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
+    Watch::StartWatch();
     m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
-  ++m_cntWatching;
 }
 
-void Option::StopWatch( void ) {
-  assert( 0 != m_cntWatching );
-  --m_cntWatching;
-  if ( 0 == m_cntWatching ) {
-    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Option::HandleQuote ) );
-    m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Option::HandleTrade ) );
+bool Option::StopWatch( void ) {
+  bool b = Watch::StopWatch();
+  if ( b ) {
     m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
-}
-
-void Option::HandleQuote( const Quote& quote ) {
-  m_dblBid = quote.Bid();
-  m_dblAsk = quote.Ask();
-  m_quotes.Append( quote );
-}
-
-void Option::HandleTrade( const Trade& trade ) {
-  m_dblTrade = trade.Price();
-  m_trades.Append( trade );
+  return b;
 }
 
 void Option::HandleGreek( const Greek& greek ) {
@@ -108,32 +82,14 @@ void Option::HandleGreek( const Greek& greek ) {
 
 void Option::SaveSeries( const std::string& sPrefix ) {
 
+  Watch::SaveSeries( sPrefix );
+
   std::string sPathName;
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   HDF5Attributes::structOption option( 
     m_dblStrike, m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay(), m_pInstrument->GetOptionSide() );
-
-  if ( 0 != m_quotes.Size() ) {
-    sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
-    wtsQuotes.Write( sPathName, &m_quotes );
-    HDF5Attributes attrQuotes( dm, sPathName, option );
-    attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
-    attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
-    attrQuotes.SetProviderType( m_pDataProvider->ID() );
-  }
-
-  if ( 0 != m_trades.Size() ) {
-    sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
-    wtsTrades.Write( sPathName, &m_trades );
-    HDF5Attributes attrTrades( dm, sPathName, option );
-    attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
-    attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-    attrTrades.SetProviderType( m_pDataProvider->ID() );
-  }
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();

@@ -28,7 +28,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-  // handle mor than one request simultaneously?  if not, then set flag to capture
+  // handle more than one request simultaneously?  if not, then set flag to capture
 
 // returns number of options retrieved
 template<class DB>

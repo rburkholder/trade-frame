@@ -18,16 +18,13 @@
 // 2012/03/31 be aware that some options do not expire on friday.  Some like, next week, 
 //            expire on thursday due to good friday being a holiday
 
-#include <TFTimeSeries/TimeSeries.h>
-
-#include <TFTrading/Instrument.h>
-#include <TFTrading/ProviderInterface.h>
+#include <TFTrading/Watch.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class Option {
+class Option: public ou::tf::Watch {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
@@ -39,14 +36,10 @@ public:
 
   Option& operator=( const Option& rhs );
 
-  bool operator< ( const Option& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
-  bool operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
+  bool virtual operator< ( const Option& rhs ) const { return m_dblStrike <  rhs.m_dblStrike; };
+  bool virtual operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double GetStrike( void ) const { return m_dblStrike; };
-  pInstrument_t GetInstrument( void ) { return m_pInstrument; };
-
-  double Bid( void ) const { return m_dblBid; };
-  double Ask( void ) const { return m_dblAsk; };
 
   double ImpliedVolatility( void ) const { return m_greek.ImpliedVolatility(); };
   double Delta( void ) const { return m_greek.Delta(); };
@@ -54,12 +47,10 @@ public:
   double Theta( void ) const { return m_greek.Theta(); };
   double Vega( void ) const { return m_greek.Vega(); };
 
-  Quotes* Quotes( void ) { return &m_quotes; };
-  Trades* Trades( void ) { return &m_trades; };
   Greeks* Greeks( void ) { return &m_greeks; };
 
   void StartWatch( void );
-  void StopWatch( void );
+  bool StopWatch( void );
 
   void SaveSeries( const std::string& sPrefix );
 
@@ -67,34 +58,17 @@ protected:
 
   std::string m_sSide;
 
-  // use an interator instead?  or keep as is as it facilitates multithread append and access operations
-  // or will the stuff in TBB help with this type of access?
-  double m_dblBid;
-  double m_dblAsk;
-  double m_dblTrade;
-
   double m_dblStrike;
   Greek m_greek;
 
-  ou::tf::Quotes m_quotes;
-  ou::tf::Trades m_trades;
   ou::tf::Greeks m_greeks;
 
-  pInstrument_t m_pInstrument;
-
-  pProvider_t m_pDataProvider;
   pProvider_t m_pGreekProvider;
-
-  std::stringstream m_ss;
 
 private:
 
-  unsigned int m_cntWatching;  // maybe implement counter at some point to allow multiple calls
-
   void Initialize( void );
 
-  void HandleQuote( const Quote& quote );
-  void HandleTrade( const Trade& trade );
   void HandleGreek( const Greek& greek );
 
 };
