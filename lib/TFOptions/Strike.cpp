@@ -51,6 +51,28 @@ Strike& Strike::operator=( const Strike& rhs ) {
   return *this;
 };
 
+void Strike::SaveSeries( const std::string& sPrefix ) {
+  if ( 0 != m_call.get() ) m_call->SaveSeries( sPrefix );
+  if ( 0 != m_put.get()  ) m_put->SaveSeries( sPrefix );
+}
+
+void Strike::SetWatchOn( void ) {
+  if ( !m_bWatching ) {
+    m_bWatching = true;
+    if ( 0 != m_call.get() ) m_call->StartWatch();
+    if ( 0 != m_put.get() ) m_put->StartWatch();
+  }
+}
+
+void Strike::SetWatchOff( void ) {
+  if ( m_bWatching ) {
+    m_bWatching = false;
+    if ( 0 != m_call.get() ) m_call->StopWatch();
+    if ( 0 != m_put.get() ) m_put->StopWatch();
+  }
+}
+
+
 } // namespace option
 } // namespace tf
 } // namespace ou

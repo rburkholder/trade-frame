@@ -37,6 +37,9 @@
     <ClInclude Include="Margin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bundle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp">
@@ -52,6 +55,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Margin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bundle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

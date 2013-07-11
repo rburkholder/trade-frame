@@ -39,15 +39,24 @@ public:
 
   void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) { 
     assert( 0 == m_call.use_count() ); 
+    assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
     m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider, pGreekProvider ) ); 
+    if ( m_bWatching ) m_call->StartWatch();
   };
   void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )  { 
     assert( 0 == m_put.use_count() );  
+    assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
     m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider, pGreekProvider ) ); 
+    if ( m_bWatching ) m_put->StartWatch();
   };
 
   Call* Call( void ) { return m_call.get(); };
   Put*  Put( void )  { return m_put.get(); };
+
+  void SetWatchOn( void );
+  void SetWatchOff( void );
+
+  void SaveSeries( const std::string& sPrefix );
 
 protected:
 
@@ -55,8 +64,8 @@ protected:
   boost::shared_ptr<ou::tf::option::Put>  m_put;
 
 private:
-//  std::stringstream m_ss;
-  bool m_bWatching;  // this needs to be implemented.
+
+  bool m_bWatching;  // single thradable only
   double m_dblStrike;
 };
 

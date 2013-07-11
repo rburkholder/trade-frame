@@ -29,6 +29,7 @@ IQFeedSymbol::IQFeedSymbol(const symbol_id_t& sSymbol, pInstrument_t pInstrument
   m_cnt( 0 ), m_dblTrade( 0 ), m_dblChange( 0 ), m_nTradeSize( 0 ), m_nTotalVolume( ),
   m_dblBid( 0 ), m_dblAsk( 0 ), m_nBidSize( 0 ), m_nAskSize( 0 ), 
   m_dblOpen( 0 ), m_dblClose( 0 ), m_cntTrades( 0 ), m_dblHigh( 0 ), m_dblLow( 0 ), 
+  m_nShortInterest( 0 ), m_dblPriceEarnings( 0 ), m_dbl52WkHi( 0 ), m_dbl52WkLo( 0 ), m_dblDividendYield( 0.0 ),
   m_nOpenInterest( 0 ), m_QStatus( qUnknown ),
   m_bQuoteTradeWatchInProgress( false ), m_bDepthWatchInProgress( false )
 {
@@ -44,8 +45,13 @@ void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
   m_Precision = pMsg->Integer( IQFFundamentalMessage::FPrecision );
   m_dblHistoricalVolatility = pMsg->Double( IQFFundamentalMessage::FVolatility );
   m_dblStrikePrice = pMsg->Double( IQFFundamentalMessage::FStrikePrice );
+  m_nShortInterest = pMsg->Integer( IQFFundamentalMessage::FShortInterest );
+  m_dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPE );
+  m_dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
+  m_dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
+  m_dblDividendYield = pMsg->Double( IQFFundamentalMessage::FDivYld );
 
-  OnFundamentalMessage( this );
+  OnFundamentalMessage( *this );
 }
 
 template <typename T>
@@ -77,6 +83,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
         m_bNewOpen = true; 
         std::cout << "IQF new open: " << GetId() << "=" << m_dblOpen << std::endl;
       };
+      m_nOpenInterest = pMsg->Integer( IQFPricingMessage<T>::QPOpenInterest );
 
       // fall through to processing bid / ask
     case 'b':
@@ -94,7 +101,6 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
       break;
     }
   }
-  //OpenInterest = pMsg->Integer( IQFPricingMessage::QPOpenInterest );
 
   //CString s;
   //s.Format( "%s: %c %0.2f@%d b=%0.2f@%d a=%0.2f@%d #=%d", 
@@ -104,7 +110,7 @@ void IQFeedSymbol::DecodePricingMessage( IQFPricingMessage<T> *pMsg ) {
 
 void IQFeedSymbol::HandleSummaryMessage( IQFSummaryMessage *pMsg ) {
   DecodePricingMessage<IQFSummaryMessage>( pMsg );
-  OnSummaryMessage( this );
+  OnSummaryMessage( *this );
 }
 
 void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
@@ -117,7 +123,7 @@ void IQFeedSymbol::HandleUpdateMessage( IQFUpdateMessage *pMsg ) {
   }
   if ( qFound == m_QStatus ) {
     DecodePricingMessage<IQFUpdateMessage>( pMsg );
-    OnUpdateMessage( this );
+    OnUpdateMessage( *this );
     //ptime dt( microsec_clock::local_time() );
     ptime dt( ou::TimeSource::Instance().External() );
     // quote needs to be sent before the trade

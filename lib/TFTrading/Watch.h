@@ -14,10 +14,14 @@
 
 #pragma once
 
+#include <boost/smart_ptr.hpp>
+
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <TFTrading/Instrument.h>
 #include <TFTrading/ProviderInterface.h>
+
+#include <TFIQFeed/IQFeedSymbol.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -25,8 +29,24 @@ namespace tf { // TradeFrame
 class Watch {
 public:
 
+  typedef boost::shared_ptr<Watch> pWatch_t;
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+
+  struct Fundamentals_t {
+    double dblHistoricalVolatility;
+    int nShortInterest;
+    double dblPriceEarnings;
+    double dbl52WkHi;
+    double dbl52WkLo;
+    double dblDividendYield;
+  };
+
+  struct Summary_t {
+    int nOpenInterest;
+    int nTotalVolume;
+    double dblOpen;
+  };
 
   Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );
   Watch( const Watch& rhs );
@@ -41,6 +61,7 @@ public:
 
   double Bid( void ) const { return m_dblBid; };
   double Ask( void ) const { return m_dblAsk; };
+  double Price( void ) const { return m_dblPrice; };
 
   Quotes* Quotes( void ) { return &m_quotes; };
   Trades* Trades( void ) { return &m_trades; };
@@ -56,7 +77,7 @@ protected:
   // or will the stuff in TBB help with this type of access?
   double m_dblBid;
   double m_dblAsk;
-  double m_dblTrade;
+  double m_dblPrice;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;
@@ -71,10 +92,16 @@ protected:
 
 private:
 
+  Fundamentals_t m_fundamentals;
+  Summary_t m_summary;
+
   void Initialize( void );
 
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );
+
+  void HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol );
+  void HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol );
 
 };
 

@@ -19,6 +19,9 @@
 #include <wx/frame.h>
 #include <wx/statusbr.h>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #define SYMBOL_FRAMEGENERIC_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
 #define SYMBOL_FRAMEGENERIC_TITLE _("Strategy Runner")
 #define SYMBOL_FRAMEGENERIC_IDNAME ID_FRAMEGENERIC
@@ -48,6 +51,11 @@ public:
   void Init();
   void CreateControls();
 
+  typedef FastDelegate0<> OnAction1Handler;
+  void SetOnAction1Handler( OnAction1Handler function ) {
+    OnAction1 = function;
+  }
+
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -55,13 +63,17 @@ public:
 protected:
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN
+  enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN,
+    ID_MENUACTION1
   };
 
   wxMenuBar* m_menuBar;
   wxStatusBar* m_statusBar;
 
+  OnAction1Handler OnAction1;
+
   void OnMenuExitClick( wxCommandEvent& event );
+  void OnMenuAction1Click( wxCommandEvent& event );
   void OnClose( wxCloseEvent& event );
 };
 

@@ -44,6 +44,12 @@ public:
   int m_Precision;
   double m_dblHistoricalVolatility;
   double m_dblStrikePrice;
+  int m_nShortInterest;
+  double m_dblPriceEarnings;
+  double m_dbl52WkHi;
+  double m_dbl52WkLo;
+  double m_dblDividendYield;
+
 
   // Update/Summary
   ptime m_dtLastTrade;
@@ -68,10 +74,10 @@ public:
   IQFeedSymbol(const std::string &symbol, pInstrument_t pInstrument);
   ~IQFeedSymbol(void);
 
-  ou::Delegate<IQFeedSymbol*> OnFundamentalMessage;
-  ou::Delegate<IQFeedSymbol*> OnUpdateMessage;
-  ou::Delegate<IQFeedSymbol*> OnSummaryMessage;
-  ou::Delegate<IQFeedSymbol*> OnNewsMessage;
+  ou::Delegate<IQFeedSymbol&> OnFundamentalMessage;
+  ou::Delegate<IQFeedSymbol&> OnUpdateMessage;
+  ou::Delegate<IQFeedSymbol&> OnSummaryMessage;
+  ou::Delegate<IQFeedSymbol&> OnNewsMessage;
 
 protected:
 

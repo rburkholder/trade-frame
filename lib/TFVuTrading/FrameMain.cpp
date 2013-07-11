@@ -49,24 +49,35 @@ void FrameMain::CreateControls( void ) {
     FrameMain* itemFrame1 = this;
 
     m_menuBar = new wxMenuBar;
-    wxMenu* itemMenuExit = new wxMenu;
-    itemMenuExit->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
-    m_menuBar->Append(itemMenuExit, _("Menu"));
     itemFrame1->SetMenuBar(m_menuBar);
+
+    wxMenu* itemMenuFile = new wxMenu;
+    itemMenuFile->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
+    m_menuBar->Append(itemMenuFile, _("File"));
+
+    wxMenu* itemMenuAction = new wxMenu;
+    itemMenuAction->Append(ID_MENUACTION1, _("Action1"), wxEmptyString, wxITEM_NORMAL);
+    m_menuBar->Append(itemMenuAction, _("Actions"));
 
     m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
     m_statusBar->SetFieldsCount(2);
     itemFrame1->SetStatusBar(m_statusBar);
    
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuAction1Click, this, ID_MENUACTION1 );
     Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
 }
 
 void FrameMain::OnMenuExitClick( wxCommandEvent& event ) {
+  // Exit Steps:  #1 -> Appxxx::OnClose
   this->Close();
 }
 
+void FrameMain::OnMenuAction1Click( wxCommandEvent& event ) {
+}
+
 void FrameMain::OnClose( wxCloseEvent& event ) {
+  // Exit Steps: #3 -> Appxxx::OnExit
   Unbind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );
 //  Unbind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );  // causes crash
   // http://docs.wxwidgets.org/trunk/classwx_close_event.html

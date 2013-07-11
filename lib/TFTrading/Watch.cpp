@@ -19,6 +19,8 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
+#include <TFIQFeed/IQFeedProvider.h>
+
 #include "Watch.h"
 
 namespace ou { // One Unified
@@ -27,7 +29,7 @@ namespace tf { // TradeFrame
 Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ), 
   m_pDataProvider( pDataProvider ), 
-  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblTrade( 0 ),
+  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblPrice( 0 ),
   m_cntWatching( 0 )
 {
   Initialize();
@@ -36,7 +38,7 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
 Watch::Watch( const Watch& rhs ) :
   m_pInstrument( rhs.m_pInstrument ),
   m_pDataProvider( rhs.m_pDataProvider ),
-  m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblTrade( rhs.m_dblTrade ),
+  m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblPrice( rhs.m_dblPrice ),
   m_cntWatching( 0 )
 {
   assert( 0 == rhs.m_cntWatching );
@@ -64,6 +66,14 @@ void Watch::Initialize( void ) {
 
 void Watch::StartWatch( void ) {
   if ( 0 == m_cntWatching ) {
+    if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
+      ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
+      pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
+      ou::tf::IQFeedProvider::pSymbol_t pSymbol
+        = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
+      pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
+      pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
+    }
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
   }
@@ -78,6 +88,14 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
     b = true;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
+    if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
+      ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
+      pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
+      ou::tf::IQFeedProvider::pSymbol_t pSymbol
+        = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
+      pSymbol->OnSummaryMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
+      pSymbol->OnFundamentalMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
+    }
   }
   return b;
 }
@@ -89,8 +107,26 @@ void Watch::HandleQuote( const Quote& quote ) {
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
-  m_dblTrade = trade.Price();
+  m_dblPrice = trade.Price();
   m_trades.Append( trade );
+}
+
+void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
+  m_fundamentals.dblHistoricalVolatility = symbol.m_dblHistoricalVolatility;
+  m_fundamentals.nShortInterest = symbol.m_nShortInterest;
+  m_fundamentals.dblPriceEarnings = symbol.m_dblPriceEarnings;
+  m_fundamentals.dbl52WkHi = symbol.m_dbl52WkHi;
+  m_fundamentals.dbl52WkLo = symbol.m_dbl52WkLo;
+  m_fundamentals.dblDividendYield = symbol.m_dblDividendYield;
+}
+
+void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
+  m_summary.nOpenInterest = symbol.m_nOpenInterest;
+  m_summary.nTotalVolume = symbol.m_nTotalVolume;
+  m_summary.dblOpen = symbol.m_dblOpen;
+  m_dblBid = symbol.m_dblBid;
+  m_dblAsk = symbol.m_dblAsk;
+  m_dblPrice = symbol.m_dblTrade;
 }
 
 void Watch::SaveSeries( const std::string& sPrefix ) {

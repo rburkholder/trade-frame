@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFTrading/ProviderManager.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
@@ -49,6 +51,8 @@ protected:
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
   typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
+
+  std::string m_sTSDataStreamStarted;
 
   Mode_t m_mode;
 
@@ -134,6 +138,14 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   m_bExecConnected( false ), m_bData1Connected( false ), m_bData2Connected( false )
 
 {
+
+  std::stringstream ss;
+  ss.str( "" );
+  ss << ou::TimeSource::Instance().External();
+  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  
+  // will need to make this generic if need some for multiple providers.
+  m_sTSDataStreamStarted = ss.str();
+
   // this is where we select which provider we will be working with on this run
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
