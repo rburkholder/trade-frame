@@ -26,6 +26,7 @@ using namespace fastdelegate;
 
 #include "ParseMktSymbolLine.h"
 #include "ParseOptionDescription.h"
+#include "ParseOptionSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -94,6 +95,8 @@ private:
 
   ou::tf::iqfeed::MktSymbolLineParser<const char*> parserFullLine;
   ou::tf::iqfeed::OptionDescriptionParser<std::string::const_iterator> parserOptionDescription;
+  ou::tf::iqfeed::OptionSymbolParser1<std::string::const_iterator> parserOptionSymbol1;
+  ou::tf::iqfeed::OptionSymbolParser2<std::string::const_iterator> parserOptionSymbol2;
   std::vector<size_t> vSymbolTypeStats;  // number of symbols of this SymbolType
 
   std::vector<std::string> m_vSuffixesToTest;
@@ -205,6 +208,42 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
             mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
           }
           nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
+          structParsedOptionSymbol1 pos1;
+          b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserOptionSymbol1, pos1 );
+          if ( b ) {
+            if ( 4 > pos1.sDigits.length() ) {
+              std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
+            }
+            else {
+              if ( 4 < pos1.sDigits.length() ) {
+//                std::cout << "Option Symbol mashup: " << trd.sSymbol << std::endl;
+                std::string tmp = pos1.sText + pos1.sDigits.substr( 0, pos1.sDigits.length() - 4 );
+                mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = tmp;
+              }
+              std::string::const_iterator iter2 = pos1.sDigits.end();
+              if ( 5 < pos1.sDigits.length() ) {
+                std::cout << "Option Symbol mashup2: " << trd.sSymbol << std::endl;
+              }
+              std::string::const_iterator iter1 = iter2 - 4;
+              structParsedOptionSymbol2 pos2;
+              b = parse( iter1, iter2, parserOptionSymbol2, pos2 );
+              if ( b ) {
+                assert( ( 2000 + pos2.nYear ) == structOption.nYear );
+                trd.nDay = pos2.nDay;
+              }
+              else {
+                std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
+              }
+            }
+            
+            if ( pos1.sText != structOption.sUnderlying ) {
+//              std::cout << "Option Symbol Decode:  different underlying, " << trd.sSymbol << " vs " << structOption.sUnderlying << std::endl;
+            }
+            assert( pos1.dblStrike == structOption.dblStrike );
+          }
+          else {
+            std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;
+          }
         }
         else {
           std::cout  << "Option Decode:  Incomplete, " << trd.sSymbol << ", " << trd.sDescription << std::endl;

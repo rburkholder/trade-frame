@@ -57,7 +57,7 @@ struct InMemoryMktSymbolList {
 //        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
 //      boost::multi_index::ordered_non_unique<
 //        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
-      boost::multi_index::ordered_non_unique<
+      boost::multi_index::ordered_non_unique<  // IQFeed file doesn't provide good info, and option symbology sucks
         boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
     >
   > symbols_t;
@@ -100,6 +100,7 @@ struct InMemoryMktSymbolList {
   }
 
   void LoadFromFile(const std::string& sFilename) {
+    m_symbols.clear();
     std::ifstream ifs(sFilename, std::ios::binary);
     if(ifs){
       boost::archive::binary_iarchive ia(ifs);
@@ -107,8 +108,8 @@ struct InMemoryMktSymbolList {
     }
   }
 
-  template<typename ExchangeInterator, typename Function>
-  void SelectSymbolsByExchange( ExchangeInterator beginExchange, ExchangeInterator endExchange, Function f ) {
+  template<typename ExchangeIterator, typename Function>
+  void SelectSymbolsByExchange( ExchangeIterator beginExchange, ExchangeIterator endExchange, Function f ) {
     typedef symbols_t::index<ixExchange>::type SymbolsByExchange_t;
     SymbolsByExchange_t::const_iterator endSymbols = m_symbols.get<ixExchange>().end();
     while ( beginExchange != endExchange ) {

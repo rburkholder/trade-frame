@@ -135,6 +135,9 @@
     <ClInclude Include="IQFeedHistoryCollector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParseOptionSymbol.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

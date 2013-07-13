@@ -181,6 +181,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TimeSource.h" />
+    <ClInclude Include="Worker.h" />
     <ClInclude Include="WuManber.h" />
   </ItemGroup>
   <ItemGroup>

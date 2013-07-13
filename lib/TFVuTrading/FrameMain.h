@@ -51,9 +51,23 @@ public:
   void Init();
   void CreateControls();
 
-  typedef FastDelegate0<> OnAction1Handler;
-  void SetOnAction1Handler( OnAction1Handler function ) {
+  // re-arrange this so when events added/removed, menu updated with text as well, 
+  // ie, pass in structure to build menu
+  typedef FastDelegate0<> OnActionHandler;
+  void SetOnAction1Handler( OnActionHandler function ) {
     OnAction1 = function;
+  }
+  void SetOnAction2Handler( OnActionHandler function ) {
+    OnAction2 = function;
+  }
+  void SetOnAction3Handler( OnActionHandler function ) {
+    OnAction3 = function;
+  }
+  void SetOnAction4Handler( OnActionHandler function ) {
+    OnAction4 = function;
+  }
+  void SetOnAction5Handler( OnActionHandler function ) {
+    OnAction5 = function;
   }
 
   static bool ShowToolTips() { return true; };
@@ -64,16 +78,24 @@ protected:
 private:
 
   enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN,
-    ID_MENUACTION1
+    ID_MENUACTION1, ID_MENUACTION2, ID_MENUACTION3, ID_MENUACTION4, ID_MENUACTION5
   };
 
   wxMenuBar* m_menuBar;
   wxStatusBar* m_statusBar;
 
-  OnAction1Handler OnAction1;
+  OnActionHandler OnAction1;
+  OnActionHandler OnAction2;
+  OnActionHandler OnAction3;
+  OnActionHandler OnAction4;
+  OnActionHandler OnAction5;
 
   void OnMenuExitClick( wxCommandEvent& event );
   void OnMenuAction1Click( wxCommandEvent& event );
+  void OnMenuAction2Click( wxCommandEvent& event );
+  void OnMenuAction3Click( wxCommandEvent& event );
+  void OnMenuAction4Click( wxCommandEvent& event );
+  void OnMenuAction5Click( wxCommandEvent& event );
   void OnClose( wxCloseEvent& event );
 };
 

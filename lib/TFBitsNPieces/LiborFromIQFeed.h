@@ -14,6 +14,10 @@
 
 // Started 2013/07/11
 
+// code could be optimized to be calculated at specific intervals such as 1 second
+// value could then be used for all options expirying on same date
+// rather than calculating each and every time a request is made.
+
 #pragma once
 
 #include <vector>
