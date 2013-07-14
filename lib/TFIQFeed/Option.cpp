@@ -42,7 +42,7 @@ void ComposeOptionName(
 void SetAlternateName( const pInstrument_t& pInstrument ) {
   assert( ou::tf::InstrumentType::Option == pInstrument->GetInstrumentType() );
   boost::gregorian::date dateExpiry = pInstrument->GetExpiry();
-  boost::gregorian::date::day_type day = dateExpiry.day();
+  boost::gregorian::date::day_type day = dateExpiry.day() + 1;  // IQFeed dates are the saturday after expiry
   char chMonth;
   switch ( pInstrument->GetOptionSide() ) {
   case ou::tf::OptionSide::Call: 

@@ -22,6 +22,9 @@ using namespace fastdelegate;
 
 #include <TFTrading/InstrumentManager.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class DBOps: public ou::db::Session {
 public:
 
@@ -49,3 +52,6 @@ private:
 
   void HandlePopulateTables( ou::db::Session& session );
 };
+
+} // namespace tf
+} // namespace ou

@@ -21,6 +21,9 @@
 
 #include "Database.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 DBOps::DBOps(void): ou::db::Session() {
   OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
   OnPopulate.Add( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
@@ -94,4 +97,7 @@ bool DBOps::LoadOptions( ou::tf::InstrumentManager::pInstrument_t& pUnderlying, 
   return bFound;
 
 }
+
+} // namespace tf
+} // namespace ou
 

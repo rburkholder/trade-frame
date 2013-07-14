@@ -60,5 +60,8 @@
     <ClCompile Include="Bundle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PopulateWithIBOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
