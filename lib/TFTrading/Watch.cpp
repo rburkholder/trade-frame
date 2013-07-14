@@ -66,6 +66,9 @@ void Watch::Initialize( void ) {
 
 void Watch::StartWatch( void ) {
   if ( 0 == m_cntWatching ) {
+    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
+    // these two message types come second so tht the symbol gets registered in previous statements
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::IQFeedProvider::pProvider_t pIQFeedProvider;
       pIQFeedProvider = boost::dynamic_pointer_cast<IQFeedProvider>( m_pDataProvider );
@@ -74,8 +77,6 @@ void Watch::StartWatch( void ) {
       pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
     }
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
-    m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
   }
   ++m_cntWatching;
 }

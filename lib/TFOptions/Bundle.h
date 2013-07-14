@@ -39,8 +39,16 @@ public:
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
-  void SetWatchOn( void );
-  void SetWatchOff( void );
+  void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );
+
+  void SetWatchableOn( double dblStrike );
+  void SetWatchableOff( double dblStrike );
+
+  void SetWatchOn( void ); // watch all options
+  void SetWatchOff( void ); 
+
+  void SetWatchOn( double dblStrike ); // watch only selected option
+  void SetWatchOff( double dblStrike );
 
   void SaveSeries( const std::string& sPrefix );
 
@@ -56,6 +64,7 @@ private:
   mapStrikes_t m_mapStrikes;
 
   mapStrikes_t::iterator FindStrike( double strike );
+  mapStrikes_t::iterator FindStrikeAuto( double strike ); // Auto insert new strike
 
 };
 

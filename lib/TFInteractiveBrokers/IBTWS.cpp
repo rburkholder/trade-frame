@@ -532,17 +532,19 @@ void IBTWS::error(const int id, const int errorCode, const IBString errorString)
       if ( 0 != OnSecurityDefinitionNotFound ) OnSecurityDefinitionNotFound();
       break;
     default:
-      m_ss.str("");
-      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
+//      m_ss.str("");
+//      m_ss << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
 //      OutputDebugString( m_ss.str().c_str() );
+      std::cout << "error " << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
   }
 }
 
 void IBTWS::winError( const IBString &str, int lastError) {
-  m_ss.str("");
-  m_ss << "winerror " << str << ", " << lastError << std::endl;
+  //m_ss.str("");
+  //m_ss << "winerror " << str << ", " << lastError << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+  std::cout << "winerror " << str << ", " << lastError << std::endl;
 }
 
 void IBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {

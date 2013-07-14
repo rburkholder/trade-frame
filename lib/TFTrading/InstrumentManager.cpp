@@ -171,6 +171,17 @@ bool InstrumentManager::Exists( pInstrument_cref pInstrument ) {
   return Exists( pInstrument->GetInstrumentName() );
 }
 
+bool InstrumentManager::Exists( idInstrument_cref id, pInstrument_t& pInstrument ) {
+  bool bFound = ( m_map.end() != m_map.find( id ) );
+  if ( !bFound ) {
+    if ( 0 != m_pSession ) {
+//      Instrument::pInstrument_t pInstrument;
+      bFound = LoadInstrument( id, pInstrument );
+    }
+  }
+  return bFound;
+}
+
 namespace InstrumentManagerQueries {
   struct InstrumentKey {
     template<class A>

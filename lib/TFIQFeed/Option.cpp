@@ -32,7 +32,7 @@ void ComposeOptionName(
   const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike ) {
   std::string sDay;
   boost::gregorian::date::day_type day = dtExpiry.date().day();
-  sDay = ( 9 < day ) ? "" : '0'  + boost::lexical_cast<std::string>( day );
+  sDay = ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
   std::string sYear = boost::lexical_cast<std::string>( dtExpiry.date().year() );
   std::string sStrike = boost::lexical_cast<std::string>( dblStrike );
   sCall = sUnderlying + sYear.substr( 2, 2 ) + sDay + rchCallMonth[ dtExpiry.date().month() - 1 ] + sStrike;
@@ -57,7 +57,7 @@ void SetAlternateName( const pInstrument_t& pInstrument ) {
   pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, 
       pInstrument->GetUnderlyingName() 
     + boost::lexical_cast<std::string>( dateExpiry.year() ).substr( 2, 2 ) 
-    + ( ( 9 < day ) ? "" : '0'  + boost::lexical_cast<std::string>( day ) )
+    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
     + chMonth
     + boost::lexical_cast<std::string>( pInstrument->GetStrike() ) );
 }

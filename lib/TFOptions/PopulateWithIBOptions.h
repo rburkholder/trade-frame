@@ -13,6 +13,10 @@
  ************************************************************************/
 
 #pragma once
+
+//
+// Ensure that the underlying contract has been built with IB first.
+//
  
 #include <string>
 #include <sstream>
@@ -42,7 +46,7 @@ public:
   PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider );
   ~PopulateOptions( void );
 
-  typedef FastDelegate1<const pInstrument_t&> OnInstrumentBuilt_t;
+  typedef FastDelegate1<pInstrument_t&> OnInstrumentBuilt_t;
   void SetOnInstrumentBuiltHandler( OnInstrumentBuilt_t function ) {
     OnInstrumentBuilt = function;
   }
@@ -60,13 +64,10 @@ private:
   Contract m_contract; // re-usable, persistant contract scratchpad
   ou::tf::DBOps& m_session;
   pProvider_t m_pProvider;
-  //IBTWS& m_tws;
 
   bool m_bActive;
 
   unsigned int m_cntInstruments;
-
-  Instrument::TableRowDef m_rowInstrument;
 
   OnPopulateCompleteHandler_t OnPopulateComplete;
   OnInstrumentBuilt_t OnInstrumentBuilt;

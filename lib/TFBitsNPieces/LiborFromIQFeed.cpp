@@ -47,10 +47,15 @@ void Initialize( pProvider_t pProvider ) {
   vLibor.push_back( structLibor( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ) ); // 11 month
   vLibor.push_back( structLibor( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ) ); //  1 year 
 
+  ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
+  ou::tf::Instrument::pInstrument_t pInstrument;
   for ( vLibor_t::iterator iter = vLibor.begin(); vLibor.end() != iter; ++iter ) {
-    ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
-    ou::tf::Instrument::pInstrument_t pInstrument;
-    pInstrument = mgr.ConstructInstrument( iter->Symbol, "INDEX", ou::tf::InstrumentType::Index );
+    // need to check if it already exists
+    if ( mgr.Exists( iter->Symbol, pInstrument ) ) {
+    }
+    else {
+      pInstrument = mgr.ConstructInstrument( iter->Symbol, "INDEX", ou::tf::InstrumentType::Index );
+    }
     iter->pWatch.reset( new Watch( pInstrument, pProvider ) );
   }
 }

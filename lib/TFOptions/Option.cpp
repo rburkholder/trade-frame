@@ -57,20 +57,23 @@ Option& Option::operator=( const Option& rhs ) {
 }
 
 void Option::Initialize( void ) {
-  assert( m_pGreekProvider->ProvidesGreeks() );
+  if ( 0 != m_pGreekProvider.get() ) 
+    assert( m_pGreekProvider->ProvidesGreeks() );
 }
 
 void Option::StartWatch( void ) {
   if ( 0 == m_cntWatching ) {
     Watch::StartWatch();
-    m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
+    if ( 0 != m_pGreekProvider.get() ) 
+      m_pGreekProvider->AddGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
 }
 
 bool Option::StopWatch( void ) {
   bool b = Watch::StopWatch();
   if ( b ) {
-    m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
+    if ( 0 != m_pGreekProvider.get() ) 
+      m_pGreekProvider->RemoveGreekHandler( m_pInstrument, MakeDelegate( this, &Option::HandleGreek ) );
   }
   return b;
 }

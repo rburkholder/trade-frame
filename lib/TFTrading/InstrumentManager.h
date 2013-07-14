@@ -69,6 +69,7 @@ public:
   void Register( pInstrument_t& pInstrument );
 
   bool Exists( idInstrument_cref );
+  bool Exists( idInstrument_cref, pInstrument_t& );
   bool Exists( pInstrument_cref );
   pInstrument_t Get( idInstrument_cref ); // for getting existing associated with id
   void Delete( idInstrument_cref );

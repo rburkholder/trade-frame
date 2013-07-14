@@ -35,7 +35,7 @@ void ComposeOptionName(
   std::string& sCall, std::string& sPut, 
   const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike );
 
-void AddAlternateName( const pInstrument_t& pInstrument );
+void SetAlternateName( const pInstrument_t& pInstrument );
 
 } // namespace iqfeed
 } // namespace TradeFrame

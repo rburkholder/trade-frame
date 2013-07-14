@@ -30,8 +30,6 @@ PopulateOptions::PopulateOptions( ou::tf::DBOps& session, pProvider_t pProvider 
   m_contract.exchange = "SMART";
   m_contract.secType = "OPT";
 
-  m_rowInstrument.idExchange = "SMART";
-
   m_pProvider->SetOnSecurityDefinitionNotFoundHandler( MakeDelegate( this, &PopulateOptions::HandleOptionContractNotFound ) );
 
 }
@@ -40,7 +38,7 @@ PopulateOptions::~PopulateOptions( void ) {
   m_pProvider->SetOnSecurityDefinitionNotFoundHandler( NULL );
 }
   
-void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date dExpiry, bool bCall, bool bPut ) {
+void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian::date dateExpiry, bool bCall, bool bPut ) {
 
   if ( m_bActive ) {
     throw std::runtime_error( "already in process" );
@@ -59,12 +57,7 @@ void PopulateOptions::Populate( const std::string& sUnderlying, boost::gregorian
     if ( bCall ) m_contract.right = "CALL";
     if ( bPut  ) m_contract.right = "PUT";
   }
-
-  m_rowInstrument.eType = InstrumentType::Option;  // need to handle futuresoption as well?
-  m_rowInstrument.idUnderlying = sUnderlying;
-  m_rowInstrument.nYear = dExpiry.year();
-  m_rowInstrument.nMonth = dExpiry.month();
-  m_rowInstrument.nDay = dExpiry.day();
+  m_contract.expiry = boost::gregorian::to_iso_string( dateExpiry );
 
   // delete any pre-existing first?
   m_pProvider->RequestContractDetails( 
