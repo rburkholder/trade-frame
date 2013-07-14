@@ -55,6 +55,9 @@
     <ClCompile Include="LoadMktSymbols.cpp">
       <Filter>Source Files\MarketSymbols</Filter>
     </ClCompile>
+    <ClCompile Include="Option.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IQFeed.h">
@@ -137,6 +140,12 @@
     </ClInclude>
     <ClInclude Include="ParseOptionSymbol.h">
       <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
+    <ClInclude Include="Option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IQFeedOptions.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

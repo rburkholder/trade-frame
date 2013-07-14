@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -13,31 +14,30 @@
 
 #pragma once
 
-#include <vector>
+// started 2013/07/13
+// Calculate an option symbol, given basic information
+
 #include <string>
 
-#include <OUCommon//FastDelegate.h>
-using namespace fastdelegate;
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
 
-#include "IQFeedRetrieval.h"
+#include <TFTrading/TradingEnumerations.h>
+#include <TFTrading/Instrument.h>
 
-class CIQFeedOptions :
-  public CIQFeedRetrieval {
-public:
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
-  CIQFeedOptions(CIQFeedProvider *pProvider, const char *);
-  virtual ~CIQFeedOptions(void);
+typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  typedef FastDelegate0<void> OnSymbolListReceivedHandler;
-  void SetOnSymbolListRecieved( OnSymbolListReceivedHandler function ) {
-    OnSymbolListReceived = function;
-  }
+void ComposeOptionName( 
+  std::string& sCall, std::string& sPut, 
+  const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike );
 
-  std::vector<std::string *> m_vOptionSymbols;
+void AddAlternateName( const pInstrument_t& pInstrument );
 
-protected:
-  virtual void OnNewResponse( const char *szLine );
-  void AddOptionSymbol( const char *s, unsigned short cnt );
-private:
-  OnSymbolListReceivedHandler OnSymbolListReceived;
-};
+} // namespace iqfeed
+} // namespace TradeFrame
+} // namespace ou
+

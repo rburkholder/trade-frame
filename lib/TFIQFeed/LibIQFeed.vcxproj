@@ -157,6 +157,7 @@
     <ClCompile Include="IQFeedSymbol.cpp" />
     <ClCompile Include="IQFeedSymbolFile.cpp" />
     <ClCompile Include="LoadMktSymbols.cpp" />
+    <ClCompile Include="Option.cpp" />
     <ClCompile Include="UnzipMktSymbols.cpp" />
     <ClCompile Include="MarketSymbol.cpp" />
     <ClCompile Include="MarketSymbols.cpp" />
@@ -198,10 +199,14 @@
     </CustomBuildStep>
     <CustomBuildStep Include="IQFeedProvider.h" />
     <CustomBuildStep Include="IQFeedSymbol.h" />
+    <ClInclude Include="IQFeedOptions.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="IQFeedProvider.h" />
     <ClInclude Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedSymbolFile.h" />
     <ClInclude Include="LoadMktSymbols.h" />
+    <ClInclude Include="Option.h" />
     <ClInclude Include="ParseOptionSymbol.h" />
     <ClInclude Include="UnzipMktSymbols.h" />
     <ClInclude Include="MarketSymbol.h" />
