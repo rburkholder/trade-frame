@@ -76,6 +76,7 @@ void Watch::StartWatch( void ) {
         = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
       pSymbol->OnFundamentalMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
+      std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     }
   }
   ++m_cntWatching;
@@ -96,9 +97,16 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
         = pIQFeedProvider->GetSymbol( m_pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
       pSymbol->OnSummaryMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
       pSymbol->OnFundamentalMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
+      std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     }
   }
   return b;
+}
+
+void Watch::EmitValues( void ) {
+  std::cout << m_pInstrument->GetInstrumentName() << ": " 
+    << m_dblPrice 
+    << std::endl;
 }
 
 void Watch::HandleQuote( const Quote& quote ) {

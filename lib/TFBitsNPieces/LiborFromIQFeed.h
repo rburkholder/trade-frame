@@ -69,6 +69,8 @@ void SetWatchOff( void );
 
 double Value( time_duration td );  // index to determine appropriate interest rate
 
+void EmitYieldCurve( void );
+
 } // namespace libor
 } // namespace tf
 } // namespace ou

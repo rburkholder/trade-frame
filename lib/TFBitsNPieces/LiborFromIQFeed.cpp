@@ -115,6 +115,12 @@ double Value( time_duration td ) {
   return rate;
 }
 
+void EmitYieldCurve( void ) {
+  for ( local::vLibor_t::iterator iter = local::vLibor.begin(); local::vLibor.end() != iter; ++ iter ) {
+    std::cout << iter->Symbol << " " << iter->pWatch->Price() << std::endl;
+  }
+}
+
 } // namespace libor
 } // namespace tf
 } // namespace ou

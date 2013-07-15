@@ -78,6 +78,17 @@ bool Option::StopWatch( void ) {
   return b;
 }
 
+void Option::EmitValues( void ) {
+  Watch::EmitValues();
+  std::cout << m_pInstrument->GetInstrumentName() << ": " 
+    << "IV:" << m_greek.ImpliedVolatility() << "," 
+    << "D:" << m_greek.Delta() << "," 
+    << "G:" << m_greek.Gamma() << "," 
+    << "T:" << m_greek.Theta() << "," 
+    << "V:" << m_greek.Vega() 
+    << std::endl;
+}
+
 void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
   m_greeks.Append( greek );

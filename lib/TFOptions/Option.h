@@ -52,6 +52,8 @@ public:
   void StartWatch( void );
   bool StopWatch( void );
 
+  virtual void EmitValues( void );
+
   void SaveSeries( const std::string& sPrefix );
 
 protected:
