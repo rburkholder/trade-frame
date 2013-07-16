@@ -34,7 +34,7 @@ inline double CallFromPut( double Put, double Stock, double InterestRate, double
 // pg 161 has formula changes for  stock with annual continous dividend yield
 // pg 180 has formula for greeks for BSM with continuous dividends
 
-// delta: the rate of change of the value of the option with respect ot changes in the stock price
+// delta: the rate of change of the value of the option with respect to changes in the stock price
 // gamma: the rate of change of the delta with respect to changes in the stock price
 // theta: the rate of change of the value of an option with respect to time
 // rho:   the rate of change of the value of an option with respect ot the risk-free rate of interest
@@ -46,7 +46,7 @@ double BSM_Euro_Put( double S, double K, double r, double vol, double tue );
 class BSM_Euro {
 public:
   BSM_Euro( double r, double vol, double tue );
-  BSM_Euro( double r, double vol, double tue, double q );
+  BSM_Euro( double r, double vol, double tue, double q );  // pg 180, q is continuous dividend yield
   ~BSM_Euro( void ) {};
   void Set( double vol );
   void Set( double S, double K );
@@ -63,7 +63,8 @@ public:
   double PutTheta( void );
   double CallRho( void );
   double PutRho( void );
-  double ImpliedVolatility( double C, double epsilon = 0.0001 );  // market price for Call
+  double ImpliedVolatilityCall( double C, double epsilon = 0.0001 );  // C is market price for Call
+  double ImpliedVolatilityPut( double P, double epsilon = 0.0001 );  // P is market price for Put
   double SeedForRegular( void );
   double SeedForFutures( void );
 protected:

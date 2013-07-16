@@ -13,6 +13,8 @@ pg 47 The only dates on which it will ever be
 
 pg 163 raises the question of how to forecast the volatility, forecast volatility direction?
 
+pg 180 formula summaries
+
 pg 224 has a lead into on how some option price forecasting.  Volatility can change based upon trending price patterns.  
   Elsewhere there is a statement that high volatility leads to low volatility, and low volatility leads to high volatility
   With transition probabilites, is it possible to forecast stock movements?

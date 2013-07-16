@@ -19,6 +19,8 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFIQFeed/IQFeedProvider.h>
 
 #include "Watch.h"
@@ -29,7 +31,6 @@ namespace tf { // TradeFrame
 Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ), 
   m_pDataProvider( pDataProvider ), 
-  m_dblBid( 0 ), m_dblAsk( 0 ), m_dblPrice( 0 ),
   m_cntWatching( 0 )
 {
   Initialize();
@@ -38,7 +39,7 @@ Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
 Watch::Watch( const Watch& rhs ) :
   m_pInstrument( rhs.m_pInstrument ),
   m_pDataProvider( rhs.m_pDataProvider ),
-  m_dblBid( rhs.m_dblBid ), m_dblAsk( rhs.m_dblAsk ), m_dblPrice( rhs.m_dblPrice ),
+  m_quote( rhs.m_quote ), m_trade( rhs.m_trade ), 
   m_cntWatching( 0 )
 {
   assert( 0 == rhs.m_cntWatching );
@@ -105,18 +106,17 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
 
 void Watch::EmitValues( void ) {
   std::cout << m_pInstrument->GetInstrumentName() << ": " 
-    << m_dblPrice 
+    << m_trade.Price()
     << std::endl;
 }
 
 void Watch::HandleQuote( const Quote& quote ) {
-  m_dblBid = quote.Bid();
-  m_dblAsk = quote.Ask();
+  m_quote = quote;
   m_quotes.Append( quote );
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
-  m_dblPrice = trade.Price();
+  m_trade = trade;
   m_trades.Append( trade );
 }
 
@@ -133,9 +133,8 @@ void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
   m_summary.nOpenInterest = symbol.m_nOpenInterest;
   m_summary.nTotalVolume = symbol.m_nTotalVolume;
   m_summary.dblOpen = symbol.m_dblOpen;
-  m_dblBid = symbol.m_dblBid;
-  m_dblAsk = symbol.m_dblAsk;
-  m_dblPrice = symbol.m_dblTrade;
+  m_quote = ou::tf::Quote( ou::TimeSource::Instance().External(), symbol.m_dblBid, 0, symbol.m_dblAsk, 0 );
+  m_trade = ou::tf::Trade( ou::TimeSource::Instance().External(), symbol.m_dblTrade, 0 );
 }
 
 void Watch::SaveSeries( const std::string& sPrefix ) {

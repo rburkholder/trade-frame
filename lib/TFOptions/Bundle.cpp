@@ -42,6 +42,13 @@ void Bundle::SaveSeries( const std::string& sPrefix ) {
   }
 }
 
+void Bundle::EmitValues( void ) {
+  m_pwatchUnderlying->EmitValues();
+    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+      iter->second.EmitValues();
+    }
+}
+
 void Bundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
   mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
   iter->second.AssignCall( pInstrument, pDataProvider, pGreekProvider );
@@ -50,6 +57,16 @@ void Bundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pPro
 void Bundle::SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
   mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
   iter->second.AssignPut( pInstrument, pDataProvider, pGreekProvider );
+}
+
+Call* Bundle::GetCall( double dblStrike ) {
+  mapStrikes_t::iterator iter = FindStrike( dblStrike );
+  return iter->second.Call();
+}
+
+Put* Bundle::GetPut( double dblStrike ) {
+  mapStrikes_t::iterator iter = FindStrike( dblStrike );
+  return iter->second.Put();
 }
 
 void Bundle::SetWatchOn( void ) {

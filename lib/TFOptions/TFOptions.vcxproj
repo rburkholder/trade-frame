@@ -136,6 +136,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Binomial.h" />
     <ClInclude Include="Bundle.h" />
     <ClInclude Include="CalcExpiry.h" />
     <ClInclude Include="Formula.h" />
@@ -147,6 +148,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Binomial.cpp" />
     <ClCompile Include="Bundle.cpp" />
     <ClCompile Include="CalcExpiry.cpp" />
     <ClCompile Include="Formula.cpp" />

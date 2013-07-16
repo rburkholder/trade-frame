@@ -57,6 +57,7 @@ public:
   void SetWatchOff( void );
 
   void SaveSeries( const std::string& sPrefix );
+  void EmitValues( void );
 
 protected:
 

@@ -31,6 +31,7 @@ public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::Watch* pWatch_t;
 
   Bundle(void);
   ~Bundle(void);
@@ -39,7 +40,12 @@ public:
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
+  Call* GetCall( double dblStrike );
+  Put* GetPut( double dblStrike );
+
   void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );
+
+  pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying.get(); };
 
   void SetWatchableOn( double dblStrike );
   void SetWatchableOff( double dblStrike );
@@ -51,6 +57,7 @@ public:
   void SetWatchOff( double dblStrike );
 
   void SaveSeries( const std::string& sPrefix );
+  void EmitValues( void );
 
 protected:
 private:

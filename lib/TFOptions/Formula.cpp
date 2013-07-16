@@ -43,6 +43,7 @@ r: annual risk free rate of interest
 vol: volatility of stock under geometric Brownian motion model
 tue: T - t, time until expiration
 rtue: sqrt( tue )
+q: continuous dividend yield pg 180
 */
 
 double BSM_Euro_NonDiv_Call( double S, double K, double r, double vol, double tue ) {
@@ -95,15 +96,15 @@ BSM_Euro::BSM_Euro( double r, double vol, double tue, double q )
 
 void BSM_Euro::CalcVolStuff( void ) {
   m_VolSqrtTUE = m_vol * m_SqrtTUE;
-  double VolXVolBy2( m_vol * m_vol * 0.5 ),
+  double VolXVolBy2( m_vol * m_vol * 0.5 );
   m_a = ( m_r + VolXVolBy2 ) * m_tue;
 }
 
 void BSM_Euro::Calc( void ) {
-  double lsk = log( m_S / m_K );
-  double d1 = ( lsk + m_a ) / m_VolSqrtTUE;
+  double lsk( log( m_S / m_K ) );
+  double d1( ( lsk + m_a ) / m_VolSqrtTUE );
   //double d2 = ( m_lsk + ( m_r - m_VolXVolBy2 ) * m_tue ) / m_VolSqrtTUE;
-  double d2 = d1 - m_VolSqrtTUE;
+  double d2( d1 - m_VolSqrtTUE );
   m_Nd1C = boost::math::cdf( norm, d1 );
   m_Nd2C = boost::math::cdf( norm, d2 );
   m_Nd1P = boost::math::cdf( norm, -d1 );
@@ -141,7 +142,7 @@ double BSM_Euro::Put( void ) {
 
 double BSM_Euro::Call( double S, double K ) {
   Set( S, K );
-  return Put();
+  return Call();
 }
 
 double BSM_Euro::Put( double S, double K ) {
@@ -191,17 +192,38 @@ double BSM_Euro::PutRho( void ) {
   return -m_K * m_SqrtTUE * m_SqrtTUE * m_EToRateAndTime * m_Nd2P;
 }
 
-double BSM_Euro::ImpliedVolatility( double C, double epsilon ) {
+double BSM_Euro::ImpliedVolatilityCall( double C, double epsilon ) {
   // pg 339 Black Scholes and beyond
   size_t cnt = 20;  // maximum iterations
-  double diff = abs( Call() - C );
+  double diff( abs( Call() - C ) );
   while ( epsilon < diff ) {
     Set( m_vol - ( diff / Vega() ) );
     diff = abs( Call() - C );
     cnt--;
-    if ( 0 == cnt ) 
-      throw std::runtime_error( "Implied Volatility calc did not converge" );
+    if ( 0 == cnt ) {
+      std::cout <<  "Implied Volatility calc did not converge" << std::endl;
+      //throw std::runtime_error( "Implied Volatility calc did not converge" );
+      break;
+    }
   }
+  return m_vol;
+}
+
+double BSM_Euro::ImpliedVolatilityPut( double P, double epsilon ) {
+  // pg 339 Black Scholes and beyond
+  size_t cnt = 20;  // maximum iterations
+  double diff( abs( Put() - P ) );
+  while ( epsilon < diff ) {
+    Set( m_vol - ( diff / Vega() ) );
+    diff = abs( Put() - P );
+    cnt--;
+    if ( 0 == cnt ) {
+      std::cout <<  "Implied Volatility calc did not converge" << std::endl;
+      //throw std::runtime_error( "Implied Volatility calc did not converge" );
+      break;
+    }
+  }
+  return m_vol;
 }
 
 double BSM_Euro::SeedForRegular( void ) {

@@ -70,7 +70,7 @@ void SetWatchOn( pProvider_t pProvider ) {
     local::Initialize( pProvider );
   }
   if ( !local::bWatching ) {
-    local::bWatching == true;
+    local::bWatching = true;
     for ( local::vLibor_t::iterator iter = local::vLibor.begin(); local::vLibor.end() != iter; ++ iter ) {
       iter->pWatch->StartWatch();
     }
@@ -79,7 +79,7 @@ void SetWatchOn( pProvider_t pProvider ) {
 
 void SetWatchOff( void ) {
   if ( local::bWatching ) {
-    local::bWatching == false;
+    local::bWatching = false;
     for ( local::vLibor_t::iterator iter = local::vLibor.begin(); local::vLibor.end() != iter; ++ iter ) {
       iter->pWatch->StopWatch();
     }
@@ -101,7 +101,7 @@ double Value( time_duration td ) {
   else {
     if ( iter1->td == td ) {
       // use the assigned value
-      return iter1->pWatch->Price();
+      return iter1->pWatch->LastTrade().Price();
     }
     else {
       // interpolate
@@ -109,15 +109,15 @@ double Value( time_duration td ) {
       --iter1;
     }
   }
-  double rate = iter1->pWatch->Price() + 
-    ( ( iter2->pWatch->Price() - iter1->pWatch->Price() ) * 
+  double rate = iter1->pWatch->LastTrade().Price() + 
+    ( ( iter2->pWatch->LastTrade().Price() - iter1->pWatch->LastTrade().Price() ) * 
     ( ( (double)( td - iter1->td ).total_seconds() ) / ( (double) ( iter2->td - iter1->td ).total_seconds() ) ) );
   return rate;
 }
 
 void EmitYieldCurve( void ) {
   for ( local::vLibor_t::iterator iter = local::vLibor.begin(); local::vLibor.end() != iter; ++ iter ) {
-    std::cout << iter->Symbol << " " << iter->pWatch->Price() << std::endl;
+    std::cout << iter->Symbol << " " << iter->pWatch->LastTrade().Price() << std::endl;
   }
 }
 

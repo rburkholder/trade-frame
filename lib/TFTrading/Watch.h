@@ -59,9 +59,11 @@ public:
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
-  double Bid( void ) const { return m_dblBid; };
-  double Ask( void ) const { return m_dblAsk; };
-  double Price( void ) const { return m_dblPrice; };
+  const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
+  const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
+
+  const Fundamentals_t& Fundamentals( void ) const { return m_fundamentals; };
+  const Summary_t& Summary( void ) const { return m_summary; };
 
   Quotes* Quotes( void ) { return &m_quotes; };
   Trades* Trades( void ) { return &m_trades; };
@@ -77,9 +79,9 @@ protected:
 
   // use an interator instead?  or keep as is as it facilitates multithread append and access operations
   // or will the stuff in TBB help with this type of access?
-  double m_dblBid;
-  double m_dblAsk;
-  double m_dblPrice;
+
+  ou::tf::Quote m_quote;
+  ou::tf::Trade m_trade;
 
   ou::tf::Quotes m_quotes;
   ou::tf::Trades m_trades;

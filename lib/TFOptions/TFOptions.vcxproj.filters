@@ -40,6 +40,9 @@
     <ClInclude Include="Bundle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Binomial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CalcExpiry.cpp">
@@ -61,6 +64,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PopulateWithIBOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Binomial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -51,6 +51,11 @@ Strike& Strike::operator=( const Strike& rhs ) {
   return *this;
 };
 
+void Strike::EmitValues( void ) {
+  if ( 0 != m_call.get() ) m_call->EmitValues();
+  if ( 0 != m_put.get()  ) m_put->EmitValues();
+}
+
 void Strike::SaveSeries( const std::string& sPrefix ) {
   if ( 0 != m_call.get() ) m_call->SaveSeries( sPrefix );
   if ( 0 != m_put.get()  ) m_put->SaveSeries( sPrefix );
