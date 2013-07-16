@@ -41,6 +41,10 @@ namespace OptionSide {
   const char* ShortName[];
 }
 
+namespace OptionStyle {
+  enum enumOptionStyle { American, European, _Count };
+}
+
 namespace OrderType { // ib szOrderType depends upon order
   enum enumOrderType { Unknown=0, Market, Limit, Stop, StopLimit, MarketIfTouched, Trail, TrailLimit, MarketClose, LimitClose, Scale, _Count  };
 }

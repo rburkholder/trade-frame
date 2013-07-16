@@ -106,7 +106,9 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
 
 void Watch::EmitValues( void ) {
   std::cout << m_pInstrument->GetInstrumentName() << ": " 
-    << m_trade.Price()
+    << "P=" << m_trade.Price()
+    << ",B=" << m_quote.Bid() 
+    << ",A=" << m_quote.Ask()
     << std::endl;
 }
 

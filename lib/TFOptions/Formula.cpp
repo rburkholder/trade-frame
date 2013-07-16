@@ -197,7 +197,8 @@ double BSM_Euro::ImpliedVolatilityCall( double C, double epsilon ) {
   size_t cnt = 20;  // maximum iterations
   double diff( abs( Call() - C ) );
   while ( epsilon < diff ) {
-    Set( m_vol - ( diff / Vega() ) );
+    double slope = diff / Vega();
+    Set( m_vol - slope );
     diff = abs( Call() - C );
     cnt--;
     if ( 0 == cnt ) {
@@ -214,7 +215,8 @@ double BSM_Euro::ImpliedVolatilityPut( double P, double epsilon ) {
   size_t cnt = 20;  // maximum iterations
   double diff( abs( Put() - P ) );
   while ( epsilon < diff ) {
-    Set( m_vol - ( diff / Vega() ) );
+    double slope = diff / Vega();
+    Set( m_vol + slope );
     diff = abs( Put() - P );
     cnt--;
     if ( 0 == cnt ) {
