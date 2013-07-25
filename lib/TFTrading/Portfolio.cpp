@@ -17,33 +17,48 @@
 
 #include "Portfolio.h"
 
+// 2013/07/25
+// * position currency must match portfolio currency
+// * currency ratio between from sub-portfolio and portfolio needs to be maintained
+// * top level portfolio is always raio 1
+// * first level of sub-portfolios can be alternate currency, and have non one ratio
+// * also portfolio type as 'multi-legged position'
+// * no further level sub-portfolios can have different currency
+// * so.. master portfolio, sub-currency portfolio, regular portfolio
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Portfolio::Portfolio( // in memory
-  const idPortfolio_t& idPortfolio, currency_t sCurrency,
-  const std::string& sDescription ) 
-: m_row( idPortfolio, "", "", sCurrency, sDescription ),
-  m_bCanUseDb( false )
-{
-}
 
-Portfolio::Portfolio( // master portfolio currency record
-  const idPortfolio_t& idPortfolio, 
-  const idAccountOwner_t& idAccountOwner, currency_t sCurrency,
-  const std::string& sDescription ) 
-: m_row( idPortfolio, idAccountOwner, "", sCurrency, sDescription ), 
-  m_bCanUseDb( true )
-{
-}
+//Portfolio::Portfolio( // in memory
+//  const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
+//: m_row( idPortfolio, "", "", ePortfolioType, sCurrency, sDescription ),
+//  m_bCanUseDb( false )
+//{
+//}
 
-Portfolio::Portfolio( // sub-portfolio record
+//Portfolio::Portfolio( // master portfolio currency record
+//  const idPortfolio_t& idPortfolio, 
+//  const idAccountOwner_t& idAccountOwner, currency_t sCurrency,
+//  const std::string& sDescription ) 
+//: m_row( idPortfolio, idAccountOwner, "", Master, sCurrency, sDescription ), 
+//  m_bCanUseDb( true )
+//{
+//}
+
+Portfolio::Portfolio( // portfolio record
   const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
-  currency_t sCurrency,
-  const std::string& sDescription ) 
-: m_row( idPortfolio, idAccountOwner, idOwner, sCurrency, sDescription ),
+   EPortfolioType ePortfolioType, currency_t sCurrency, const std::string& sDescription ) 
+: m_row( idPortfolio, idAccountOwner, idOwner, ePortfolioType, sCurrency, sDescription ),
   m_bCanUseDb( true )
 {
+  bool bOk = true;
+  if ( "" == idPortfolio ) bOk = false;
+  if ( ( Master == ePortfolioType ) && ( "" != idOwner ) ) bOk = false;
+  if ( ( "" != idAccountOwner ) && ( Master != ePortfolioType ) && ( "" == idOwner ) ) bOk = false;
+  if ( !bOk ) {
+    throw std::runtime_error( "Portfolio::Portfolio parameter problems" );
+  }
 }
 
 Portfolio::Portfolio( const TableRowDef& row ) 
@@ -135,44 +150,9 @@ Portfolio::pPosition_t Portfolio::GetPosition( const std::string& sName ) {
   return iter->second;
 }
 
-void Portfolio::AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio ) {
-
-  mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idPortfolio );
-
-  if ( m_mapSubPortfolios.end() != iter ) {
-    throw std::runtime_error( "Portfolio::AddSubPortfolio portfolio already exists: " + idPortfolio );
-  }
-
-  m_mapSubPortfolios[ idPortfolio ] = pPortfolio;
-}
-
-void Portfolio::RemoveSubPortfolio( const idPortfolio_t& idPortfolio ) {
-
-  mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idPortfolio );
-
-  if ( m_mapSubPortfolios.end() != iter ) {
-    throw std::runtime_error( "Portfolio::RemoveSubPortfolio portfolio does not exist: " + idPortfolio );
-  }
-
-  m_mapSubPortfolios.erase( iter );
-}
-
-void Portfolio::SetOwnerPortfolio( const idPortfolio_t& idOwner, pPortfolio_t& pPortfolio ) {
-  if ( idOwner != m_row.idOwner ) {
-    throw std::runtime_error( "Portfolio::SetOwnerPortfoio " + idOwner + " does not match " + m_row.idOwner );
-  }
-  m_pOwnerPortfolio = pPortfolio;
-}
-
-// as positions and portfolios get attached, they should perform an initial update of 
-//   unrealized, realized, & commission (if non-zero)
-
 void Portfolio::ReCalc( void ) {
 
   m_plCurrent.Zero();
-
-  for ( mapPortfolios_iter_t iter = m_mapSubPortfolios.begin(); iter != m_mapSubPortfolios.end(); ++iter ) {
-  }
 
   for ( mapPositions_iter_t iter = m_mapPositionsViaUserName.begin(); iter != m_mapPositionsViaUserName.end(); ++iter ) {
     m_plCurrent.dblUnRealized += iter->second->GetUnRealizedPL();
@@ -184,8 +164,60 @@ void Portfolio::ReCalc( void ) {
   if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
 
   m_row.dblRealizedPL = m_plCurrent.dblRealized;
-  m_row.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
 }
+
+void Portfolio::AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio ) {
+
+  if ( Master == pPortfolio->GetRow().ePortfolioType ) {
+    throw std::runtime_error( "Portfolio::AddSubPortfolio: sub-portfolio cannot be a master portfolio" );
+  }
+  if ( Master == m_row.ePortfolioType ) {
+  }
+  else { // this isn't a master portfolio
+    if ( AlternateCurrency == pPortfolio->GetRow().ePortfolioType ) {
+      throw std::runtime_error( "Portfolio::AddSubPortfolio: alternate currency portfolio only attachable to master portfolio" );
+    }
+  }
+
+  mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idPortfolio );
+
+  if ( m_mapSubPortfolios.end() != iter ) {
+    throw std::runtime_error( "Portfolio::AddSubPortfolio portfolio already exists: " + idPortfolio );
+  }
+
+  m_mapSubPortfolios[ idPortfolio ] = pPortfolio;
+
+  pPortfolio->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
+  pPortfolio->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
+  pPortfolio->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
+}
+
+void Portfolio::RemoveSubPortfolio( const idPortfolio_t& idPortfolio ) {
+
+  mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idPortfolio );
+
+  if ( m_mapSubPortfolios.end() != iter ) {
+    throw std::runtime_error( "Portfolio::RemoveSubPortfolio portfolio does not exist: " + idPortfolio );
+  }
+
+  Portfolio* pPortfolio = iter->second.get();
+
+  pPortfolio->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
+  pPortfolio->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
+  pPortfolio->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
+
+  m_mapSubPortfolios.erase( iter );
+}
+/*
+void Portfolio::SetOwnerPortfolio( const idPortfolio_t& idOwner, pPortfolio_t& pPortfolio ) {
+  if ( idOwner != m_row.idOwner ) {
+    throw std::runtime_error( "Portfolio::SetOwnerPortfoio " + idOwner + " does not match " + m_row.idOwner );
+  }
+  m_pOwnerPortfolio = pPortfolio;
+}
+*/
+// as positions and portfolios get attached, they should perform an initial update of 
+//   unrealized, realized, & commission (if non-zero)
 
 void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
 
@@ -194,11 +226,11 @@ void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
   m_row.dblRealizedPL = m_plCurrent.dblRealized;
 
   m_plCurrent.Sum();
-  if ( m_plCurrent > m_plMax ) m_plMax = m_plCurrent;
-  if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
-
+  if ( m_plCurrent > m_plMax ) m_plMax.dblUnRealized = m_plCurrent.dblUnRealized;
+  if ( m_plCurrent < m_plMin ) m_plMin.dblUnRealized = m_plCurrent.dblUnRealized;
 
   // need to propogate up portfolios yet
+  OnUnRealizedPL( position );
 
 }
 
@@ -206,14 +238,15 @@ void Portfolio::HandleExecution( const PositionDelta_delegate_t& position ) {
 
   m_plCurrent.dblRealized += ( -position.get<1>() + position.get<2>() );
 
-  m_row.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
+  m_row.dblRealizedPL = m_plCurrent.dblRealized;
 
   m_plCurrent.Sum();
-  if ( m_plCurrent > m_plMax ) m_plMax = m_plCurrent;
-  if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
+  if ( m_plCurrent > m_plMax ) m_plMax.dblRealized = m_plCurrent.dblRealized;
+  if ( m_plCurrent < m_plMin ) m_plMin.dblRealized = m_plCurrent.dblRealized;
 
   // need to propogate up portfolios yet
-
+  OnExecution( position );
+  OnExecutionUpdate( *this );
 }
 
 void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
@@ -221,21 +254,22 @@ void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
   m_plCurrent.dblCommissionsPaid += ( -position.get<1>() + position.get<2>() );
 
   m_plCurrent.Sum();
-  if ( m_plCurrent > m_plMax ) m_plMax = m_plCurrent;
-  if ( m_plCurrent < m_plMin ) m_plMin = m_plCurrent;
+  if ( m_plCurrent > m_plMax ) m_plMax.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
+  if ( m_plCurrent < m_plMin ) m_plMin.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
 
   // need to propogate up portfolios yet
+  OnCommission( position );
+  OnCommissionUpdate( *this );
 
 }
 
-void Portfolio::HandleQuote( const Position* pPosition ) {
-//  ReCalc();
-  OnQuote( this );
-}
+//void Portfolio::HandleQuote( const Position* pPosition ) {
+//  OnQuote( this );
+//}
 
-void Portfolio::HandleTrade( const Position* pPosition ) {
-  OnTrade( this );
-}
+//void Portfolio::HandleTrade( const Position* pPosition ) {
+//  OnTrade( this );
+//}
 
 void Portfolio::EmitStats( std::stringstream& ss ) {
   for ( mapPositions_iter_t iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {

@@ -207,9 +207,13 @@ public:
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
   ou::Delegate<const Position*> OnTrade;  // nothing useful currently
-  ou::Delegate<const Position*> OnQuote;  // < - use by portfolio - to be deprecated
+  ou::Delegate<const Position*> OnQuote;  // updates UnRealizedPL
 
-  ou::Delegate<execution_delegate_t> OnExecution;
+  ou::Delegate<execution_delegate_t> OnExecutionRaw;
+
+  // could probably change these to fast delegate
+  ou::Delegate<const Position&> OnUpdateExecutionForPortfolioManager;
+  ou::Delegate<const Position&> OnUpdateCommissionForPortfolioManager;
 
   ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio

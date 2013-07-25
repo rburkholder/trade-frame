@@ -159,8 +159,8 @@ void Position::HandleQuote( quote_t quote ) {
     if ( dblPreviousUnRealizedPL != m_row.dblUnRealizedPL ) {
       OnUnRealizedPL( PositionDelta_delegate_t( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) );
     }
-    
   }
+
 }
 
 void Position::HandleTrade( trade_t trade ) {
@@ -297,6 +297,8 @@ void Position::ClosePosition( OrderType::enumOrderType eOrderType ) {
 
 void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side ) {
 
+  // can only be called by HandleExecution as HandleExecution uses the before and after values of RealizedPL
+
   double dblAvgConstructedCost = 0;
   double dblRealizedPL = 0;
   bool bTwoStep = false;
@@ -379,11 +381,16 @@ void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::e
 }
 
 void Position::HandleCommission( const Order& order ) {
-  //m_row.dblCommissionPaid += order.GetCommission();
   //std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
-  m_row.dblCommissionPaid += order.GetIncrementalCommission();
-  //std::cout << "," << m_row.dblCommissionPaid << std::endl;
-  OnCommission( this );
+
+  double dblNewCommissionPaid = order.GetIncrementalCommission();
+  //std::cout << "," << dblNewCommissionPaid << std::endl;
+
+  if ( 0 != dblNewCommissionPaid ) {
+    m_row.dblCommissionPaid += dblNewCommissionPaid;
+    OnUpdateCommissionForPortfolioManager( *this );
+    OnCommission( PositionDelta_delegate_t( *this, 0, dblNewCommissionPaid ) );
+  }
 }
 
 // before entry to this method, sanity check:  side on execution is same as side on order
@@ -391,11 +398,13 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
 
   // should be able to calculate profit/loss & position cost as exections are encountered
   // should be able to calculate position cost basis as position is updated (with and without commissions)
-  // will need market feed in order to calculate profit/loss
+  // will need market feed in order to calculate profit/loss  -- handled in the OnQuote method
 
   const Order& order = status.first;
   const Execution& exec = status.second;
   Order::idOrder_t orderId = order.GetOrderId();
+
+  double dblOldRealizedPL = m_row.dblRealizedPL;
 
   //std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
 
@@ -430,7 +439,12 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
     throw std::runtime_error( "Position::HandleExecution doesn't have an Open Order" );
   }
 
-  OnExecution( execution_pair_t( *this, exec ) );
+  OnExecutionRaw( execution_pair_t( *this, exec ) );
+
+  if ( dblOldRealizedPL != m_row.dblRealizedPL ) {
+    OnUpdateExecutionForPortfolioManager( *this );
+    OnExecution( PositionDelta_delegate_t( *this, dblOldRealizedPL, m_row.dblRealizedPL ) );
+  }
   
 }
 

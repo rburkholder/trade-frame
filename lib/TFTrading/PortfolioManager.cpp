@@ -25,7 +25,8 @@ namespace tf { // TradeFrame
 //
 
 PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio( 
-  const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription 
+  const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, idPortfolio_t& idOwner, 
+  EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription 
   ) {
   pPortfolio_t pPortfolio;
   mapPortfolios_iter_t iter = m_mapPortfolios.find( idPortfolio );
@@ -33,14 +34,14 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
     throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
   else {
-    pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, sDescription ) );
+    pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, idOwner, ePortfolioType, eCurrency, sDescription ) );
     m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
     if ( 0 != m_pSession ) {
       ou::db::QueryFields<Portfolio::TableRowDef>::pQueryFields_t pQuery
         = m_pSession->Insert<Portfolio::TableRowDef>( const_cast<Portfolio::TableRowDef&>( pPortfolio->GetRow() ) );
     }
-    pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+    pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
   }
 
   OnPortfolioAdded( idPortfolio );
@@ -87,9 +88,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePositionOnExecution( execution_delegate_t exec ) {
+void PortfolioManager::HandlePositionOnExecution( const Position& position ) {
   if ( 0 != m_pSession ) {
-    const Position::TableRowDef& row( exec.first.GetRow() );
+    const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
       row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblMarketValue, row.dblUnRealizedPL, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionData>::pQueryFields_t pQuery
@@ -114,9 +115,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePositionOnCommission( const Position* pPosition ) {
+void PortfolioManager::HandlePositionOnCommission( const Position& position ) {
   if ( 0 != m_pSession ) {
-    const Position::TableRowDef& row( pPosition->GetRow() );
+    const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionCommission update( row.idPosition, row.dblCommissionPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionCommission>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionCommission>( "update positions set commission=?", update ).Where( "positionid=?" );
@@ -140,9 +141,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePortfolioOnExecution( const Portfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnExecution( const Portfolio& portfolio ) {
   if ( 0 != m_pSession ) {
-    const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
+    const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioRealizedPL update( row.idPortfolio, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioRealizedPL>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioRealizedPL>( "update portfolios set realizedpl=?", update ).Where( "portfolioid=?" );
@@ -165,9 +166,9 @@ namespace PortfolioManagerQueries {
   };
 }
 
-void PortfolioManager::HandlePortfolioOnCommission( const Portfolio* pPortfolio ) {
+void PortfolioManager::HandlePortfolioOnCommission( const Portfolio& portfolio ) {
   if ( 0 != m_pSession ) {
-    const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
+    const Portfolio::TableRowDef& row( portfolio.GetRow() );
     PortfolioManagerQueries::UpdatePortfolioCommission update( row.idPortfolio, row.dblCommissionsPaid );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePortfolioCommission>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePortfolioCommission>( "update portfolios set commission=?", update ).Where( "portfolioid=?" );
@@ -217,8 +218,8 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
         UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 //      }
 
-      pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-      pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+      pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+      pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
       OnPortfolioAdded( idPortfolio );
 
@@ -302,8 +303,8 @@ void PortfolioManager::LoadActivePortfolios( void ) {
       UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 //    }
 
-    pPortfolio->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+    pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+    pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
     OnPortfolioAdded( rowPortfolio.idPortfolio );
 
@@ -331,8 +332,8 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
     }
     OnPositionNeedsDetails( pPosition );
     mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
-    pPosition->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
-    pPosition->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
+    pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
+    pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
   }
 }
 
@@ -392,8 +393,8 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
   idPosition_t idPosition( m_pSession->GetLastRowId() );
   pPosition->Set( idPosition );
 
-  pPosition->OnCommission.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
-  pPosition->OnExecution.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
+  pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
+  pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
 
   iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
 

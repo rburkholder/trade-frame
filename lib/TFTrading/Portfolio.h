@@ -56,12 +56,20 @@ public:
   //typedef ou::tf::Currency::enumCurrency currency_t;
   typedef Currency::type currency_t;
 
+  enum EPortfolioType { Master=1, AlternateCurrency, Standard, MultiLeggedPosition, Basket };
+  // only one Master
+  // AlternateCurrency only at level below Master
+  // Standard can have variety of position types
+  // MultiLeggedPosition, typically all positions hvae same underlying
+  // Basket, multiple symbol types, typically traded in batch
+
   struct TableRowDef {
     template<class A>
     void Fields( A& a ) {
       ou::db::Field( a, "portfolioid", idPortfolio );
       ou::db::Field( a, "accountownerid", idAccountOwner );
       ou::db::Field( a, "ownerid", idOwner );  // portfolio of portfolios for classifying and grouping positions
+      ou::db::Field( a, "portfoliotypetype", ePortfolioType );
       ou::db::Field( a, "active", bActive );
       ou::db::Field( a, "currency", sCurrency );
       ou::db::Field( a, "description", sDescription );
@@ -73,32 +81,33 @@ public:
     idAccountOwner_t idAccountOwner;
     idPortfolio_t idOwner;
     bool bActive;
+    EPortfolioType ePortfolioType;
     currency_t sCurrency;
     std::string sDescription;
     double dblRealizedPL; // does not include commissions paid
     double dblCommissionsPaid;
 
-    TableRowDef( void ) : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ), sCurrency( Currency::Name[ Currency::USD ] ) {};
+    TableRowDef( void ) 
+      : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ), ePortfolioType( Standard ), sCurrency( Currency::Name[ Currency::USD ] ) {};
     TableRowDef ( const TableRowDef& row ) 
-      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), idOwner( row.idOwner ),
+      : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), idOwner( row.idOwner ), ePortfolioType( row.ePortfolioType ),
       bActive( true ), sCurrency( row.sCurrency ), sDescription( row.sDescription ),
       dblRealizedPL( row.dblRealizedPL ), dblCommissionsPaid( row.dblCommissionsPaid ) {};
-    TableRowDef(  // initializaton of top level portfolio record (portfolio currency master record)
-      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_,
-      const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
-        sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
-    TableRowDef( // initialization of sub-portfolio records, each required portfolio owner id
-      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const idPortfolio_t& idOwner_, currency_t sCurrency_,
-      const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), idOwner( idOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
-        sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
-    TableRowDef( // in memory structure
-      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const idPortfolio_t& idOwner_, 
+//    TableRowDef(  // initializaton of top level portfolio record (portfolio currency master record)
+//      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_,
+//      const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
+//      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), bActive( true ), sCurrency( sCurrency_ ), ePortfolioType( Master ),
+//        sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
+    TableRowDef( // initialization of portfolio records, each required portfolio owner id, empty if master portfolio record
+      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const idPortfolio_t& idOwner_, EPortfolioType ePortfolioType_, 
+      currency_t sCurrency_, const std::string& sDescription_, double dblRealizedPL_, double dblCommissionsPaid_ )
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), idOwner( idOwner_ ), bActive( true ), ePortfolioType( ePortfolioType_ ),
+        sCurrency( sCurrency_ ), sDescription( sDescription_ ), dblRealizedPL( dblRealizedPL_ ), dblCommissionsPaid( dblCommissionsPaid_ ) {};
+    TableRowDef( // sub-portfolio with zero'd realized, commission
+      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, const idPortfolio_t& idOwner_, EPortfolioType ePortfolioType_, 
         currency_t sCurrency_, const std::string& sDescription_ = "" )
-      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), idOwner( idOwner_ ), bActive( true ), sCurrency( sCurrency_ ),
-        sDescription( sDescription_ ),
-        dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
+      : idPortfolio( idPortfolio_ ), idAccountOwner( idAccountOwner_ ), idOwner( idOwner_ ), bActive( true ), ePortfolioType( ePortfolioType_ ),
+        sCurrency( sCurrency_ ), sDescription( sDescription_ ), dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ) {};
   };
 
   struct TableCreateDef: TableRowDef {
@@ -111,17 +120,17 @@ public:
     }
   };
 
-  Portfolio( // for use in memory only
-    const idPortfolio_t& idPortfolio, currency_t sCurrency = Currency::Name[ Currency::USD ],
-    const std::string& sDescription = "" );
-  Portfolio( // can be stored to disk, master portfolio currency record
-    const idPortfolio_t& idPortfolio, 
-    const idAccountOwner_t& idAccountOwner, currency_t eCurrency,
-    const std::string& sDescription );
+//  Portfolio( // for use in memory only
+//    const idPortfolio_t& idPortfolio, EPortfolioType ePortfolioType, 
+//    currency_t sCurrency = Currency::Name[ Currency::USD ],
+//    const std::string& sDescription = "" );
+//  Portfolio( // can be stored to disk, master portfolio currency record
+//    const idPortfolio_t& idPortfolio, 
+//    const idAccountOwner_t& idAccountOwner, currency_t eCurrency,
+//    const std::string& sDescription );
   Portfolio( // can be stored to disk, sub-portfolio records
-    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
-    currency_t eCurrency,
-    const std::string& sDescription );
+    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, EPortfolioType ePortfolioType_, 
+    currency_t eCurrency, const std::string& sDescription );
   Portfolio( const TableRowDef& row );
   ~Portfolio(void);
 
@@ -135,7 +144,7 @@ public:
   // are std::map references only in order to perform in-memory recalcs
   void AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
   void RemoveSubPortfolio( const idPortfolio_t& idPortfolio );
-  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
+//  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
 
   void EmitStats( std::stringstream& ss );
   void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid ) const {
@@ -151,10 +160,15 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
-  ou::Delegate<const Portfolio*> OnQuote;
-  ou::Delegate<const Portfolio*> OnTrade;
-  ou::Delegate<const Portfolio*> OnExecution;
-  ou::Delegate<const Portfolio*> OnCommission;
+//  ou::Delegate<const Portfolio*> OnQuote;
+//  ou::Delegate<const Portfolio*> OnTrade;
+
+  ou::Delegate<const Portfolio&> OnExecutionUpdate;
+  ou::Delegate<const Portfolio&> OnCommissionUpdate;
+
+  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
 
 protected:
   
@@ -171,7 +185,7 @@ private:
   typedef mapPortfolios_t::iterator mapPortfolios_iter_t;
   mapPortfolios_t m_mapSubPortfolios;
 
-  pPortfolio_t m_pOwnerPortfolio;
+//  pPortfolio_t m_pOwnerPortfolio;
 
   bool m_bCanUseDb;
 
@@ -193,11 +207,11 @@ private:
   structPL m_plMax;
   structPL m_plMin;
 
-  void ReCalc( void );  // called when quote, execution, commission changes, need to propogate upwards 
-  void ReCalc( structPL& pl ); // for recursing 
+  void ReCalc( void );  // not used at the moment, may require tuning
 
-  void HandleQuote( const Position* );
-  void HandleTrade( const Position* );
+//  void HandleQuote( const Position* );
+//  void HandleTrade( const Position* );
+
   void HandleExecution( const PositionDelta_delegate_t& );
   void HandleCommission( const PositionDelta_delegate_t& );
   void HandleUnRealizedPL( const PositionDelta_delegate_t& );

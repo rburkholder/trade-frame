@@ -159,8 +159,11 @@ void AppStickShift::HandlePopulateDatabase( void ) {
   ou::tf::AccountManager::pAccount_t pAccountSimulator
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
+  std::string sNull;
+
   m_pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "StickShift" );
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+      m_idPortfolio, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "StickShift" );
 
 }
 

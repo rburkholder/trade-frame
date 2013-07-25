@@ -55,7 +55,7 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
-  DBOps m_db;
+  ou::tf::DBOps m_db;
 
   bool m_bData1Connected;
   bool m_bExecConnected;

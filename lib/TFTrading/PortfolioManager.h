@@ -42,6 +42,9 @@ public:
   typedef keytypes::idPortfolio_t idPortfolio_t;
   typedef std::set<idPortfolio_t> setPortfolioId_t;
 
+  typedef Portfolio::EPortfolioType EPortfolioType;
+  typedef Portfolio::currency_t currency_t;
+
   typedef Position::pPosition_t pPosition_t;
   typedef keytypes::idPosition_t idPosition_t;
   typedef keytypes::idAccount_t idAccount_t;
@@ -69,7 +72,8 @@ public:
   ~PortfolioManager(void) {};
 
   pPortfolio_t ConstructPortfolio( 
-    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const std::string& sDescription = "" );
+    const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, idPortfolio_t& idOwner, 
+    EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription = "" );
   pPortfolio_t GetPortfolio( const idPortfolio_t& idPortfolio );
   void UpdatePortfolio( const idPortfolio_t& idPortfolio );
   void DeletePortfolio( const idPortfolio_t& idPortfolio );
@@ -127,11 +131,11 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
   void HandlePopulateTables( ou::db::Session& session );
 
-  void HandlePositionOnExecution( execution_delegate_t );
-  void HandlePositionOnCommission( const Position* );
+  void HandlePositionOnExecution( const Position& );
+  void HandlePositionOnCommission( const Position& );
 
-  void HandlePortfolioOnExecution( const Portfolio* );
-  void HandlePortfolioOnCommission( const Portfolio* );
+  void HandlePortfolioOnExecution( const Portfolio& );
+  void HandlePortfolioOnCommission( const Portfolio& );
 
   void LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition );
 
