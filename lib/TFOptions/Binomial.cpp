@@ -76,6 +76,37 @@ void CRR( const structInput& input, structOutput& output ) {
   output.option = v[ 0 ];
 }
 
+double ImpliedVolatility( const structInput& input_, double option, structOutput& output, double epsilon ) {
+  size_t cnt = 10;
+  structInput input( input_ );  // copy rather than reference to keep local copy of parameters
+  input.optionSide = ou::tf::OptionSide::Put;
+  ou::tf::option::binomial::CRR( input, output );
+//  std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
+  double diff = abs( output.option - option );
+  while ( epsilon < diff ) { // epsilon
+    double deltaVol = 0.01;
+    double vol = input.v;
+    input.v = vol + deltaVol;
+    ou::tf::option::binomial::CRR( input, output );
+    double option1 = output.option;
+    input.v = vol - deltaVol;
+    ou::tf::option::binomial::CRR( input, output );
+    double option2 = output.option;
+    double vega = ( option1 - option2 ) / ( 2 * deltaVol );
+    input.v = vol - ( diff / vega );  
+    ou::tf::option::binomial::CRR( input, output );
+    diff = abs( output.option - option );
+    --cnt;
+    if ( 0 == cnt ) {
+//      std::cout << "problems with IVp in CRR" << std::endl;
+      throw std::runtime_error( "problems with IVp in CRR" );
+      break;
+    }
+  }
+//  std::cout << "CRR IVp: " << input.v << ",P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << "," << cnt << std::endl;
+  return input.v;
+}
+
 } // namespace binomial
 } // namespace option
 } // namespace tf

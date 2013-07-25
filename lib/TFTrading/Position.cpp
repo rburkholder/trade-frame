@@ -111,13 +111,13 @@ Position::~Position(void) {
   if ( m_bConnectedToDataProvider ) {
     DisconnectFromDataProvider( 0 );
   }
-  for ( std::vector<pOrder_t>::iterator iter = m_AllOrders.begin(); iter != m_AllOrders.end(); ++iter ) {
+  for ( std::vector<pOrder_t>::iterator iter = m_vAllOrders.begin(); iter != m_vAllOrders.end(); ++iter ) {
     iter->get()->OnCommission.Remove( MakeDelegate( this, &Position::HandleCommission ) );
     iter->get()->OnExecution.Remove( MakeDelegate( this, &Position::HandleExecution ) );
   }
-  m_OpenOrders.clear();
-  m_ClosedOrders.clear();
-  m_AllOrders.clear();
+  m_vOpenOrders.clear();
+  m_vClosedOrders.clear();
+  m_vAllOrders.clear();
 }
 
 void Position::DisconnectFromDataProvider( int ) {
@@ -138,6 +138,8 @@ void Position::HandleQuote( quote_t quote ) {
 
   if ( ( 0 == quote.Ask() ) || ( 0 == quote.Bid() ) ) return;
 
+  double dblPreviousUnRealizedPL = m_row.dblUnRealizedPL;
+
   bool bProcessed(false);
   switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
@@ -154,6 +156,10 @@ void Position::HandleQuote( quote_t quote ) {
 
   if ( bProcessed ) {
     OnQuote( this );
+    if ( dblPreviousUnRealizedPL != m_row.dblUnRealizedPL ) {
+      OnUnRealizedPL( PositionDelta_delegate_t( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) );
+    }
+    
   }
 }
 
@@ -223,8 +229,8 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
   if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
 
   m_row.nPositionPending += pOrder->GetQuantity();
-  m_AllOrders.push_back( pOrder );
-  m_OpenOrders.push_back( pOrder );
+  m_vAllOrders.push_back( pOrder );
+  m_vOpenOrders.push_back( pOrder );
   pOrder->OnExecution.Add( MakeDelegate( this, &Position::HandleExecution ) ); 
   pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
@@ -233,14 +239,14 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
 
 void Position::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
-  for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+  for ( std::vector<pOrder_t>::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
   }
   //m_OpenOrders.clear();
 }
 
 void Position::CancelOrder( idOrder_t idOrder ) {
-  for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+  for ( vOrders_t::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       CancelOrder( iter );
       //m_OpenOrders.erase( iter );
@@ -251,14 +257,14 @@ void Position::CancelOrder( idOrder_t idOrder ) {
 
 void Position::HandleCancellation( const Order& order ) {
   Order::idOrder_t idOrder = order.GetOrderId();
-  for ( vOrders_t::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+  for ( vOrders_t::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     if ( idOrder == iter->get()->GetOrderId() ) {
       if ( m_row.nPositionPending >= iter->get()->GetQuanRemaining() ) {
         m_row.nPositionPending -= iter->get()->GetQuanRemaining(); 
         if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
         //CancelOrder( iter );
-        m_ClosedOrders.push_back( *iter );
-        m_OpenOrders.erase( iter );
+        m_vClosedOrders.push_back( *iter );
+        m_vOpenOrders.erase( iter );
         break;
       }
       else {
@@ -402,7 +408,7 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
   
   // check that we think that the order is still active
   bool bOrderFound = false;
-  for ( std::vector<pOrder_t>::iterator iter = m_OpenOrders.begin(); iter != m_OpenOrders.end(); ++iter ) {
+  for ( std::vector<pOrder_t>::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     if ( orderId == iter->get()->GetOrderId() ) {
       // update position based upon current position and what is executing
       //   decrease position when execution is opposite position
@@ -411,8 +417,8 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
       if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = OrderSide::Unknown;
 
       if ( 0 == order.GetQuanRemaining() ) {  // move from open to closed on order filled
-        m_ClosedOrders.push_back( *iter );
-        m_OpenOrders.erase( iter );
+        m_vClosedOrders.push_back( *iter );
+        m_vOpenOrders.erase( iter );
       }
       
       bOrderFound = true;

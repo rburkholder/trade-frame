@@ -66,9 +66,9 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\</OutDir>
@@ -93,7 +93,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;..\lib;..\lib\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\lib;..\lib\wtl;C:\Data\Projects\VSC++\hdf5\compress32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_STRICT;STRICT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -110,12 +110,13 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)IQ32.LIB;$(OutDir)TFIQFeed.lib;$(OutDir)libboost_system-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_thread-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_regex-vc100-mt-sgd-1_47.lib;$(OutDir)libboost_date_time-vc100-mt-sgd-1_47.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)IQ32.LIB;$(OutDir)TFIQFeed.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\hdf5\compress32\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w32\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -153,6 +154,7 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_50_0\stage\w64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -245,20 +247,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TapeReader.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibCommon\LibCommon.vcxproj">
-      <Project>{f03f73ea-df5f-48da-abae-a860bcee54d4}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibIQFeed\LibIQFeed.vcxproj">
-      <Project>{23192e89-c17f-4c84-b35c-3677927d64a6}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibWtlCommon\LibWtlCommon.vcxproj">
-      <Project>{df7c1ff7-075f-4dcc-8e43-0c704ad54163}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

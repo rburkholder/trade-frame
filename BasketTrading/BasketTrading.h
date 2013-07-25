@@ -67,7 +67,7 @@ private:
 
   Worker* m_pWorker;
 
-  DBOps m_db;
+  ou::tf::DBOps m_db;
 
   ManagePortfolio m_ManagePortfolio;
   ou::tf::PortfolioManager::pPortfolio_t m_pPortfolio;

@@ -8,6 +8,7 @@
  *                                                                      *
  * This software may not be used nor distributed without proper license *
  * agreement.                                                           *
+
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
@@ -38,7 +39,7 @@ Worker::~Worker(void) {
 void Worker::operator()( void ) {
 
   // last day of available data
-  SymbolSelection selector( ptime( date( 2013, 1, 7 ), time_duration( 0, 0, 0 ) ) );
+  SymbolSelection selector( ptime( date( 2013, 7, 16 ), time_duration( 0, 0, 0 ) ) );
   selector.Process( m_setInstrumentInfo );
 
 //  std::cout << "Symbol List: " << std::endl;

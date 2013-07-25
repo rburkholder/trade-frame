@@ -35,7 +35,7 @@ Process::Process( const std::string& sPrefixPath )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
   m_sPrefixPath( sPrefixPath ),
 //  m_cntBars( 25 )
-  m_cntBars( 220 )
+  m_cntBars( 20 )
 {
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );

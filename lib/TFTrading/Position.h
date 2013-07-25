@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <OUCommon/Delegate.h>
 
@@ -57,6 +58,8 @@ public:
 
   typedef std::pair<const Position&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
+
+  typedef boost::tuple<const Position&, double, double> PositionDelta_delegate_t;  // position, old value, new value
 
   typedef keytypes::idPosition_t idPosition_t;
   typedef keytypes::idPortfolio_t idPortfolio_t;
@@ -203,10 +206,14 @@ public:
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
-  ou::Delegate<const Position*> OnQuote;
   ou::Delegate<const Position*> OnTrade;  // nothing useful currently
+  ou::Delegate<const Position*> OnQuote;  // < - use by portfolio - to be deprecated
+
   ou::Delegate<execution_delegate_t> OnExecution;
-  ou::Delegate<const Position*> OnCommission;
+
+  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
 
   void EmitStatus( std::stringstream& ssStatus ) const;
 
@@ -231,9 +238,9 @@ protected:
 
   typedef std::vector<pOrder_t> vOrders_t;
   typedef vOrders_t::iterator vOrders_iter_t;
-  vOrders_t m_OpenOrders;  // active orders waiting to be executed or cancelled
-  vOrders_t m_ClosedOrders;  // orders that have executed or have cancelled
-  vOrders_t m_AllOrders;  // keeps track of all orders in case we have to search both lists
+  vOrders_t m_vOpenOrders;  // active orders waiting to be executed or cancelled
+  vOrders_t m_vClosedOrders;  // orders that have executed or have cancelled
+  vOrders_t m_vAllOrders;  // keeps track of all orders in case we have to search both lists
 
 private:
 
