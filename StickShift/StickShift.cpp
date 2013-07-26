@@ -106,6 +106,9 @@ bool AppStickShift::OnInit() {
 //  m_idPortfolio = "test";
   m_db.Open( "StickShift.db" );
 
+//  ou::tf::PanelPortfolioPositionOrderExecution* pPanel = new ou::tf::PanelPortfolioPositionOrderExecution(m_pFrameMain);
+//  pTree->Show();
+
   return 1;
 
 }

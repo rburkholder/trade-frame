@@ -144,6 +144,7 @@
     <ClInclude Include="PanelProviderControl.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TreePortfolioPositionOrder.h" />
     <ClInclude Include="ValidatorInstrumentName.h" />
     <ClInclude Include="VuBase.h" />
     <ClInclude Include="VuExecutions.h" />
@@ -169,6 +170,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TreePortfolioPositionOrder.cpp" />
     <ClCompile Include="ValidatorInstrumentName.cpp" />
     <ClCompile Include="VuBase.cpp" />
     <ClCompile Include="VuExecutions.cpp" />

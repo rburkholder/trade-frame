@@ -54,7 +54,7 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   pSplitTreeAndTables->SplitVertically( pPanelTree, pPanelTables );
 
   // add tree to left panel, redo the object at some point
-  wxTreeCtrl* pTree = new wxTreeCtrl( pPanelTree, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_ROW_LINES , wxDefaultValidator, "Test Tree" );
+  TreePortfolioPositionOrder* pTree = new TreePortfolioPositionOrder( pPanelTree, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_ROW_LINES , wxDefaultValidator, "Test Tree" );
   wxBoxSizer* pSizerTree = new wxBoxSizer( wxHORIZONTAL );
   pTree->SetSizer( pSizerTree );
 

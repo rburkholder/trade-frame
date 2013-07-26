@@ -30,6 +30,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 
 class AppStickShift:
   public wxApp, public ou::tf::FrameWork01<AppStickShift> {

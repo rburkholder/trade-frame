@@ -17,6 +17,7 @@
 #include "VuPositions.h"
 #include "VuOrders.h"
 #include "VuExecutions.h"
+#include "TreePortfolioPositionOrder.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
