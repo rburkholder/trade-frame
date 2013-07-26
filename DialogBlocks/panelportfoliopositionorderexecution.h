@@ -19,6 +19,7 @@
 
 ////@begin includes
 #include "wx/splitter.h"
+#include "wx/treectrl.h"
 ////@end includes
 
 /*!
@@ -35,6 +36,7 @@
 ////@begin control identifiers
 #define ID_PANELPORTFOLIOPOSITIONORDEREXECUTION 10029
 #define ID_SPLITTERWINDOW 10030
+#define ID_TREECTRL 10075
 #define ID_PANEL 10031
 #define SYMBOL_PANELPORTFOLIOPOSITIONORDEREXECUTION_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELPORTFOLIOPOSITIONORDEREXECUTION_TITLE _("PanelPortfolioPositionOrderExecution")

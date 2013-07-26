@@ -69,9 +69,6 @@ public:
     const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE, 
     long style = SYMBOL_FRAMEGENERIC_STYLE );
 
-  void Init();
-  void CreateControls();
-
   // re-arrange this so when events added/removed, menu updated with text as well, 
   // ie, pass in structure to build menu
 
@@ -93,6 +90,9 @@ private:
 
 //  typedef std::vector<structMenuItem*> vPtrItems_t;  // wxWidgets take ownership of object
   vpItems_t m_vPtrItems;
+
+  void Init();
+  void CreateControls();
 
   void OnMenuExitClick( wxCommandEvent& event );
   void OnDynamicActionClick( wxCommandEvent& event );

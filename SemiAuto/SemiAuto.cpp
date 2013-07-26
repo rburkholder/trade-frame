@@ -562,8 +562,8 @@ void AppSemiAuto::HandlePopulateDatabase( void ) {
   ou::tf::AccountManager::pAccount_t pAccountIQFeed
     = ou::tf::AccountManager::Instance().ConstructAccount( "iq01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderIQF, "IQFeed", "acctid", "login", "password" );
 
-  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
+//  ou::tf::PortfolioManager::pPortfolio_t pPortfolio
+//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_idPortfolio, "aoRay", "SemiAuto" );
 
 }
 

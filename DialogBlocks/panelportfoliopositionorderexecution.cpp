@@ -21,6 +21,7 @@
 #endif
 
 ////@begin includes
+#include "wx/imaglist.h"
 ////@end includes
 
 #include "panelportfoliopositionorderexecution.h"
@@ -121,9 +122,19 @@ void PanelPortfolioPositionOrderExecution::CreateControls()
     wxSplitterWindow* itemSplitterWindow3 = new wxSplitterWindow( itemPanel1, ID_SPLITTERWINDOW, wxDefaultPosition, wxSize(100, 100), wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
     itemSplitterWindow3->SetMinimumPaneSize(0);
 
-    wxPanel* itemPanel4 = new wxPanel( itemSplitterWindow3, ID_PANEL, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    wxTreeCtrl* itemTreeCtrl4 = new wxTreeCtrl( itemSplitterWindow3, ID_TREECTRL, wxDefaultPosition, wxSize(100, 100), wxTR_SINGLE );
 
-    itemSplitterWindow3->Initialize(itemPanel4);
+    wxPanel* itemPanel5 = new wxPanel( itemSplitterWindow3, ID_PANEL, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxVERTICAL);
+    itemPanel5->SetSizer(itemBoxSizer6);
+
+    wxBoxSizer* itemBoxSizer7 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer6->Add(itemBoxSizer7, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+    wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer6->Add(itemBoxSizer8, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+    itemSplitterWindow3->SplitHorizontally(itemTreeCtrl4, itemPanel5, 50);
     itemBoxSizer2->Add(itemSplitterWindow3, 1, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
 ////@end PanelPortfolioPositionOrderExecution content construction

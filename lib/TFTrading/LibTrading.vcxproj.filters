@@ -97,6 +97,9 @@
     <ClCompile Include="Watch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NoRiskInterestRateSeries.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h">
@@ -199,6 +202,9 @@
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Watch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NoRiskInterestRateSeries.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

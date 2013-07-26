@@ -141,6 +141,7 @@ void PanelProviderControl::CreateControls( void ) {
 
     wxStaticText* itemStaticText20 = new wxStaticText( itemFrame1, wxID_LblSimulation, _("Sim"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer15->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
   // Connect events and objects
 
 //  Bind( wxEVT_CLOSE_WINDOW, &PanelProviderControl::OnClose, this );  // doesn't get called, as is not frame, need to do in frame

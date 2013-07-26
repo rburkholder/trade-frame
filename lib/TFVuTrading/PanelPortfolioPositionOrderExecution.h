@@ -22,17 +22,47 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class PanelPortfolioPositionOrderExecution :
-  public wxPanel {
+#define SYMBOL_PANELPPOE_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_PANELPPOE_TITLE _("Portfolio Status")
+#define SYMBOL_PANELPPOE_IDNAME ID_PANELPPOE
+#define SYMBOL_PANELPPOE_SIZE wxSize(400, 300)
+#define SYMBOL_PANELPPOE_POSITION wxDefaultPosition
+
+class PanelPortfolioPositionOrderExecution: public wxPanel {
 public:
+
   PanelPortfolioPositionOrderExecution(void);
+  PanelPortfolioPositionOrderExecution(
+   wxWindow* parent, 
+   wxWindowID id = SYMBOL_PANELPPOE_IDNAME, 
+   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION, 
+   const wxSize& size = SYMBOL_PANELPPOE_SIZE, 
+   long style = SYMBOL_PANELPPOE_STYLE 
+   );
   ~PanelPortfolioPositionOrderExecution(void);
+
+  bool Create(
+   wxWindow* parent, 
+   wxWindowID id = SYMBOL_PANELPPOE_IDNAME, 
+   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION, 
+   const wxSize& size = SYMBOL_PANELPPOE_SIZE, 
+   long style = SYMBOL_PANELPPOE_STYLE
+   );
+
+protected:
+private:
+
+  enum { ID_Null=wxID_HIGHEST, ID_PANELPPOE
+  };
 
   void Init( void );
   void CreateControls( void );
-protected:
-private:
+  bool ShowToolTips( void ) { return true; };
   
+  void OnFocusChange( wxFocusEvent& event );
+  void OnClose( wxCloseEvent& event );
+
+
 };
 
 } // namespace tf

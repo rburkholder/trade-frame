@@ -145,6 +145,7 @@
     <ClCompile Include="KeyTypes.cpp" />
     <ClCompile Include="Managers.cpp" />
     <ClCompile Include="MarketStates.cpp" />
+    <ClCompile Include="NoRiskInterestRateSeries.cpp" />
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="OrderManager.cpp" />
     <ClCompile Include="Portfolio.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="KeyTypes.h" />
     <ClInclude Include="Managers.h" />
     <ClInclude Include="MarketStates.h" />
+    <ClInclude Include="NoRiskInterestRateSeries.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderManager.h" />
     <ClInclude Include="Portfolio.h" />
