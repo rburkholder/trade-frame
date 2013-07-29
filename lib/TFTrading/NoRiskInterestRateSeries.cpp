@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include <boost/assign/std/vector.hpp>
+
 #include <TFTrading/InstrumentManager.h>
 
 #include "NoRiskInterestRateSeries.h"
@@ -23,9 +25,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-NoRiskInterestRateSeries::NoRiskInterestRateSeries( const vSymbol_t& vSymbol ) 
+NoRiskInterestRateSeries::NoRiskInterestRateSeries( void ) 
   : m_bInitialized( false ), m_bWatching( false )
 {
+}
+
+NoRiskInterestRateSeries::~NoRiskInterestRateSeries(void) {
+}
+
+void NoRiskInterestRateSeries::Initialize( const vSymbol_t& vSymbol ) {
+
   for ( vSymbol_t::const_iterator iter = vSymbol.begin(); vSymbol.end() != iter; ++ iter ) {
     m_vInterestRate.push_back( *iter );
   }
@@ -41,9 +50,6 @@ NoRiskInterestRateSeries::NoRiskInterestRateSeries( const vSymbol_t& vSymbol )
     }
     iter->pWatch.reset( new Watch( pInstrument, m_pProvider ) );
   }
-}
-
-NoRiskInterestRateSeries::~NoRiskInterestRateSeries(void) {
 }
 
 void NoRiskInterestRateSeries::SetWatchOn( pProvider_t pProvider ) {
@@ -99,10 +105,58 @@ double NoRiskInterestRateSeries::ValueAt( time_duration td ) {
   return rate;
 }
 
-void NoRiskInterestRateSeries::EmitYieldCurve( void ) {
-  for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++ iter ) {
-    std::cout << iter->Symbol << " " << iter->pWatch->LastTrade().Price() << std::endl;
+//void NoRiskInterestRateSeries::EmitYieldCurve( void ) {
+//  for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++ iter ) {
+//    std::cout << iter->Symbol << " " << iter->pWatch->LastTrade().Price() << std::endl;
+//  }
+//}
+
+std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrirs ) {
+  for ( NoRiskInterestRateSeries::vInterestRate_t::const_iterator iter = nrirs.m_vInterestRate.begin(); nrirs.m_vInterestRate.end() != iter; ++iter ) {
+    os << iter->Symbol << " " << iter->pWatch->LastTrade().Price() << std::endl;
   }
+  return os;
+}
+
+using namespace boost::assign;
+
+LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
+  m_vLibor += 
+    structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
+    structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week
+    structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
+    structSymbol( time_duration( hours(  30 * 24 ) ),  "1MLIB.X" ), //  1 month
+    structSymbol( time_duration( hours(  60 * 24 ) ),  "2MLIB.X" ), //  2 month
+    structSymbol( time_duration( hours(  90 * 24 ) ),  "3MLIB.X" ), //  3 month
+    structSymbol( time_duration( hours( 120 * 24 ) ),  "4MLIB.X" ), //  4 month
+    structSymbol( time_duration( hours( 150 * 24 ) ),  "5MLIB.X" ), //  5 month
+    structSymbol( time_duration( hours( 180 * 24 ) ),  "6MLIB.X" ), //  6 month
+    structSymbol( time_duration( hours( 210 * 24 ) ),  "7MLIB.X" ), //  7 month
+    structSymbol( time_duration( hours( 240 * 24 ) ),  "8MLIB.X" ), //  8 month
+    structSymbol( time_duration( hours( 270 * 24 ) ),  "9MLIB.X" ), //  9 month
+    structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
+    structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
+    structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year 
+  NoRiskInterestRateSeries::Initialize( m_vLibor );
+}
+
+LiborFromIQFeed::~LiborFromIQFeed( void ) {
+}
+
+FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
+  m_vFedRate +=
+    structSymbol( time_duration( hours(   0 * 24 ) ),  "TB30.X" ), // overnight
+    structSymbol( time_duration( hours(  30 * 24 ) ),  "TB30.X" ), //  30 day
+    structSymbol( time_duration( hours(  90 * 24 ) ),  "TB90.X" ), //  90 day
+    structSymbol( time_duration( hours( 180 * 24 ) ),  "TB180.X" ), //  180 day
+    structSymbol( time_duration( hours( 365 * 24 ) ),  "1YCMY.X" ); //  1 year
+  // these have are 10x actual value:
+//TNX.XO	CBOE TREASURY YIELD 10 YEAR	CBOE	CBOE	INDEX	/ 1000
+//TYX.XO	CBOE 30 YEAR TREASURY YIELD INDEX	CBOE	CBOE	INDEX	/ 1000							
+
+}
+
+FedRateFromIQFeed::~FedRateFromIQFeed( void ) {
 }
 
 } // namespace tf

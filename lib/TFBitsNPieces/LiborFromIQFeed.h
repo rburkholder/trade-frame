@@ -18,6 +18,8 @@
 // value could then be used for all options expirying on same date
 // rather than calculating each and every time a request is made.
 
+// 20130728 Deprecated for TFTrading/LiborFromIQFeed.
+
 #pragma once
 
 #include <vector>
