@@ -21,6 +21,9 @@
 
 #include <wx/dataview.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class ModelBase: public wxDataViewModel {
 public:
 
@@ -52,3 +55,6 @@ private:
 template<class F> void ModelBase::IterateColumnNames( F f ) {
   boost::for_each( m_vColumnNames, f );
 }
+
+} // namespace tf
+} // namespace ou

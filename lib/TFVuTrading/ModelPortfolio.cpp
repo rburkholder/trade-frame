@@ -22,6 +22,9 @@ using namespace boost::assign;
 
 #include "ModelPortfolio.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 ModelPortfolio::ModelPortfolio(void) 
   : ModelBase(), m_mgrPortfolio( ou::tf::PortfolioManager::Instance() )
 {
@@ -78,3 +81,6 @@ void ModelPortfolio::AddPortfolioToModel( const idPortfolio_t& idPortfolio ) {
 
 void ModelPortfolio::ProcessUpdatedItemDetails( ItemPortfolio& item ) {
 }
+
+} // namespace tf
+} // namespace ou

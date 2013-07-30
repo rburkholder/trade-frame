@@ -15,6 +15,9 @@
 
 #include "VuBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 VuBase::VuBase(void) {
 }
 
@@ -25,3 +28,6 @@ VuBase::VuBase( wxWindow *parent, wxWindowID id,
 
 VuBase::~VuBase(void) {
 }
+
+} // namespace tf
+} // namespace ou

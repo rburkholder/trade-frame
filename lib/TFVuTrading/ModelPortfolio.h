@@ -19,6 +19,9 @@
 
 #include "ModelBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class ModelPortfolio: public ModelBase {
 public:
 
@@ -55,3 +58,6 @@ private:
   void ProcessUpdatedItemDetails( ItemPortfolio& item );
 
 };
+
+} // namespace tf
+} // namespace ou

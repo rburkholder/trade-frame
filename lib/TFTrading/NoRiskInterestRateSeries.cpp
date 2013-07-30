@@ -121,7 +121,9 @@ std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrir
 using namespace boost::assign;
 
 LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
-  m_vLibor += 
+  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
+  NoRiskInterestRateSeries::vSymbol_t vLibor;
+  vLibor += 
     structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
     structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week
     structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
@@ -137,22 +139,25 @@ LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
     structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
     structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
     structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year 
-  NoRiskInterestRateSeries::Initialize( m_vLibor );
+  NoRiskInterestRateSeries::Initialize( vLibor );
 }
 
 LiborFromIQFeed::~LiborFromIQFeed( void ) {
 }
 
 FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
-  m_vFedRate +=
-    structSymbol( time_duration( hours(   0 * 24 ) ),  "TB30.X" ), // overnight
+  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
+  NoRiskInterestRateSeries::vSymbol_t vFedRate;
+  vFedRate +=
+    structSymbol( time_duration( hours(   0 * 24 ) ),  "TB30.X" ), // overnight, base at 0 days needed for algorithm
     structSymbol( time_duration( hours(  30 * 24 ) ),  "TB30.X" ), //  30 day
     structSymbol( time_duration( hours(  90 * 24 ) ),  "TB90.X" ), //  90 day
     structSymbol( time_duration( hours( 180 * 24 ) ),  "TB180.X" ), //  180 day
     structSymbol( time_duration( hours( 365 * 24 ) ),  "1YCMY.X" ); //  1 year
-  // these have are 10x actual value:
+  // these are 10x actual value:
 //TNX.XO	CBOE TREASURY YIELD 10 YEAR	CBOE	CBOE	INDEX	/ 1000
 //TYX.XO	CBOE 30 YEAR TREASURY YIELD INDEX	CBOE	CBOE	INDEX	/ 1000							
+  NoRiskInterestRateSeries::Initialize( vFedRate );
 
 }
 

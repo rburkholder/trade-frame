@@ -15,9 +15,16 @@
 
 #include "ModelBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class ModelOrder: public ModelBase {
 public:
   ModelOrder(void);
   ~ModelOrder(void);
+protected:
+private:
 };
 
+} // namespace tf
+} // namespace ou

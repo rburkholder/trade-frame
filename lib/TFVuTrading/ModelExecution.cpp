@@ -18,9 +18,15 @@ using namespace boost::assign;
 
 #include "ModelExecution.h"
 
-ModelExecution::ModelExecution(void) {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+ModelExecution::ModelExecution(void): ModelBase() {
   m_vColumnNames += "Quan", "Price", "Side";
 }
 
 ModelExecution::~ModelExecution(void) {
 }
+
+} // namespace tf
+} // namespace ou

@@ -17,6 +17,9 @@
 
 #include "ModelPortfolio.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class VuPortfolios: public VuBase {
 public:
   VuPortfolios(void);
@@ -38,3 +41,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

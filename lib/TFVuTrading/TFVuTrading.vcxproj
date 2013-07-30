@@ -131,6 +131,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ControllerPortfolioPositionOrderExecution.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelExecution.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="VuPositions.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControllerPortfolioPositionOrderExecution.cpp" />
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="ModelExecution.cpp" />

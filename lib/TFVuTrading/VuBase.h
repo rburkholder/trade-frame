@@ -15,6 +15,9 @@
 
 #include <wx/dataview.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class VuBase: public wxDataViewCtrl {
 public:
   VuBase(void);
@@ -41,3 +44,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

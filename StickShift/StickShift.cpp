@@ -108,9 +108,8 @@ bool AppStickShift::OnInit() {
 
   wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio" );
 
-  ou::tf::PanelPortfolioPositionOrderExecution* pPanel = 
-    new ou::tf::PanelPortfolioPositionOrderExecution( p );
-  pPanel->Show();
+  m_pPanelPortfolioPositionOrderExecution = new ou::tf::PanelPortfolioPositionOrderExecution( p );
+  m_pPanelPortfolioPositionOrderExecution->Show();
   
   p->Show();
 

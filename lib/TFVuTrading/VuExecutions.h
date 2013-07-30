@@ -17,6 +17,9 @@
 
 #include "ModelExecution.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class VuExecutions: public VuBase {
 public:
   VuExecutions(void);
@@ -35,3 +38,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

@@ -15,6 +15,9 @@
 
 #include "VuOrders.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 VuOrders::VuOrders(void): VuBase() {
   Construct();
 }
@@ -37,3 +40,6 @@ void VuOrders::Construct( void ) {
   m_pdvmdlOrders.get()->IterateColumnNames( f );
 
 }
+
+} // namespace tf
+} // namespace ou

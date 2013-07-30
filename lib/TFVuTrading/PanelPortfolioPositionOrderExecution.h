@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <OUCommon/Delegate.h>
+
 #include "VuPortfolios.h"
 #include "VuPositions.h"
 #include "VuOrders.h"
@@ -48,6 +50,8 @@ public:
    const wxSize& size = SYMBOL_PANELPPOE_SIZE, 
    long style = SYMBOL_PANELPPOE_STYLE
    );
+
+  ou::Delegate<PanelPortfolioPositionOrderExecution*> OnClose;
 
 protected:
 private:

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,32 +11,26 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
+#include "StdAfx.h"
 
-#include "VuBase.h"
-
-#include "ModelOrder.h"
+#include "ControllerPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class VuOrders: public VuBase {
-public:
-  VuOrders(void);
-  VuOrders(wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
-    long style=0, const wxValidator &validator=wxDefaultValidator);
-  ~VuOrders(void);
-protected:
-private:
+ControllerPortfolioPositionOrderExecution::ControllerPortfolioPositionOrderExecution( PanelPortfolioPositionOrderExecution* pppoe ) 
+  : m_ppppoe( pppoe )
+{
+}
 
-  typedef ModelOrder dvmdlOrders_t;
+ControllerPortfolioPositionOrderExecution::~ControllerPortfolioPositionOrderExecution(void) {
+}
 
-  wxObjectDataPtr<dvmdlOrders_t> m_pdvmdlOrders;
-
-  void Construct( void );
-
-};
+void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {
+  m_ppppoe = 0;
+  // also maybe set a flag for runtime issue checking
+  // but not much more can happen with out event stimulus from the panel
+}
 
 } // namespace tf
 } // namespace ou

@@ -17,6 +17,9 @@
 
 #include "ModelPosition.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class VuPositions: public VuBase {
 public:
   VuPositions(void);
@@ -35,3 +38,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

@@ -15,6 +15,8 @@
 
 #include "VuExecutions.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 VuExecutions::VuExecutions(void): VuBase() {
   Construct();
@@ -38,3 +40,6 @@ void VuExecutions::Construct( void ) {
   m_pdvmdlExecutions.get()->IterateColumnNames( f );
 
 }
+
+} // namespace tf
+} // namespace ou

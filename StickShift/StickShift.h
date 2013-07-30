@@ -31,6 +31,7 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
+#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
 
 class AppStickShift:
   public wxApp, public ou::tf::FrameWork01<AppStickShift> {
@@ -45,26 +46,35 @@ private:
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
-
-  //std::string m_sDbPortfolioName;
-
-  pPortfolio_t m_pPortfolio;
-  pPosition_t m_pPosition;
-
-  FrameMain* m_pFrameMain;
-//  PanelOptionsParameters* m_pPanelOptionsParameters;
-  ou::tf::PanelLogging* m_pPanelLogging;
-  ou::tf::PanelManualOrder* m_pPanelManualOrder;
-  ou::tf::DBOps m_db;
+  struct structManualOrder {
+//    ou::tf::PanelManualOrder* pDialogManualOrder;
+    ou::tf::IBTWS::ContractDetails details;
+    pInstrument_t pInstrument;
+  } m_IBInstrumentInfo;
 
   bool m_bData1Connected;
   bool m_bExecConnected;
 
   wxTimer m_timerGuiRefresh;
 
-  double m_dblMaxPL;
-  double m_dblMinPL;
+//  double m_dblMaxPL;
+//  double m_dblMinPL;
+
+//  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
+
+  //std::string m_sDbPortfolioName;
+
+//  pPortfolio_t m_pPortfolio;
+//  pPosition_t m_pPosition;
+
+  FrameMain* m_pFrameMain;
+//  PanelOptionsParameters* m_pPanelOptionsParameters;
+  ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::PanelManualOrder* m_pPanelManualOrder;
+  ou::tf::PanelPortfolioPositionOrderExecution* m_pPanelPortfolioPositionOrderExecution;
+  ou::tf::ControllerPortfolioPositionOrderExecution* m_pControllerPortfolioPositionOrderExecution;
+
+  ou::tf::DBOps m_db;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -73,12 +83,6 @@ private:
   void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
   void HandlePanelFocusPropogate( unsigned int ix );
-
-  struct structManualOrder {
-//    ou::tf::PanelManualOrder* pDialogManualOrder;
-    ou::tf::IBTWS::ContractDetails details;
-    pInstrument_t pInstrument;
-  } m_IBInstrumentInfo;
 
   void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );

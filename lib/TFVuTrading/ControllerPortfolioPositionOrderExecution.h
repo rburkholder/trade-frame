@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,30 +11,25 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Started 2013/07/29
+
 #pragma once
 
-#include "VuBase.h"
-
-#include "ModelOrder.h"
+#include "PanelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class VuOrders: public VuBase {
+class ControllerPortfolioPositionOrderExecution {
 public:
-  VuOrders(void);
-  VuOrders(wxWindow *parent, wxWindowID id, 
-    const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
-    long style=0, const wxValidator &validator=wxDefaultValidator);
-  ~VuOrders(void);
+  ControllerPortfolioPositionOrderExecution( PanelPortfolioPositionOrderExecution* );
+  ~ControllerPortfolioPositionOrderExecution(void);
 protected:
 private:
 
-  typedef ModelOrder dvmdlOrders_t;
+  PanelPortfolioPositionOrderExecution* m_ppppoe;
 
-  wxObjectDataPtr<dvmdlOrders_t> m_pdvmdlOrders;
-
-  void Construct( void );
+  void HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* );
 
 };
 

@@ -15,6 +15,9 @@
 
 #include "ModelBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 ModelBase::ModelBase(void): wxDataViewModel() {
 }
 
@@ -54,3 +57,6 @@ bool ModelBase::SetValue( const wxVariant& variant, const wxDataViewItem& item, 
   //this->
   return true;
 }
+
+} // namespace tf
+} // namespace ou

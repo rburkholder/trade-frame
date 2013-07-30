@@ -15,9 +15,14 @@
 
 #include "ModelBase.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 class ModelExecution: public ModelBase {
 public:
   ModelExecution(void);
   ~ModelExecution(void);
 };
 
+} // namespace tf
+} // namespace ou

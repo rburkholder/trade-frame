@@ -15,6 +15,9 @@
 
 #include "VuPositions.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 VuPositions::VuPositions(void): VuBase() {
   Construct();
 }
@@ -37,3 +40,6 @@ void VuPositions::Construct( void ) {
   m_dvmdlPositions.get()->IterateColumnNames( f );
 
 }
+
+} // namespace tf
+} // namespace ou

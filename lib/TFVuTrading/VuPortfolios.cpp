@@ -17,6 +17,9 @@
 
 #include "VuPortfolios.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 VuPortfolios::VuPortfolios(void)
   : VuBase()
 {
@@ -47,3 +50,6 @@ void VuPortfolios::Construct( void ) {
 //  m_pdvmdlPortfolios.get()->ItemAdded( item0, item1 );
 
 }
+
+} // namespace tf
+} // namespace ou

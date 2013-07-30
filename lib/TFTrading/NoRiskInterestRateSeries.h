@@ -102,8 +102,6 @@ public:
   ~LiborFromIQFeed( void );
 protected:
 private:
-  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
-  NoRiskInterestRateSeries::vSymbol_t m_vLibor;
 };
 
 // http://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data=yield
@@ -115,8 +113,6 @@ public:
   ~FedRateFromIQFeed( void );
 protected:
 private:
-  typedef NoRiskInterestRateSeries::structSymbol structSymbol;
-  NoRiskInterestRateSeries::vSymbol_t m_vFedRate;
 };
 
 } // namespace tf
