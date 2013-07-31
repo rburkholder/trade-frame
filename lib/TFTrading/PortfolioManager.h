@@ -117,7 +117,7 @@ private:
   mapPortfolios_t m_mapPortfolios;
 
   // method for getting at child portfolios
-  // porfolio id "" is root where all top level portfolios are linked
+  // portfolio id "" is root where all top level portfolios are linked
   typedef std::map<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_t;
   typedef std::pair<idPortfolio_t,setPortfolioId_t> mapReportingPortfolios_pair_t;
   mapReportingPortfolios_t m_mapReportingPortfolios;

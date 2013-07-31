@@ -448,16 +448,18 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
   
 }
 
-void Position::EmitStatus( std::stringstream& ssStatus ) const {
-  ssStatus 
-    << "Position " << m_pInstrument->GetInstrumentName() << ": "
-    << "Active " << m_row.nPositionActive
-    << ", unRPL " << m_row.dblUnRealizedPL 
-    << ", RPL " << m_row.dblRealizedPL
-    << ", Cmsn " << m_row.dblCommissionPaid
-    << ", PL-C " << m_row.dblRealizedPL - m_row.dblCommissionPaid
+//void Position::EmitStatus( std::stringstream& ssStatus ) const {
+std::ostream& operator<<( std::ostream& os, const Position& position ) {
+  os 
+    << "Position " << position.m_pInstrument->GetInstrumentName() << ": "
+    << "Active " << position.m_row.nPositionActive
+    << ", unRPL " << position.m_row.dblUnRealizedPL 
+    << ", RPL " << position.m_row.dblRealizedPL
+    << ", Cmsn " << position.m_row.dblCommissionPaid
+    << ", PL-C " << position.m_row.dblRealizedPL - position.m_row.dblCommissionPaid
     << std::endl
     ;
+  return os;
 }
 
 // process execution to convert Pending to Active

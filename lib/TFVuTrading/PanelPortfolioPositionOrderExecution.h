@@ -20,6 +20,7 @@
 #include "VuOrders.h"
 #include "VuExecutions.h"
 #include "TreePortfolioPositionOrder.h"
+#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -33,8 +34,11 @@ namespace tf { // TradeFrame
 class PanelPortfolioPositionOrderExecution: public wxPanel {
 public:
 
-  PanelPortfolioPositionOrderExecution(void);
+  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
+
+  PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE );
   PanelPortfolioPositionOrderExecution(
+   MPPOE_t* pMPPOE,
    wxWindow* parent, 
    wxWindowID id = SYMBOL_PANELPPOE_IDNAME, 
    const wxPoint& pos = SYMBOL_PANELPPOE_POSITION, 
@@ -51,13 +55,15 @@ public:
    long style = SYMBOL_PANELPPOE_STYLE
    );
 
-  ou::Delegate<PanelPortfolioPositionOrderExecution*> OnClose;
+  ou::Delegate<PanelPortfolioPositionOrderExecution*> NotifyClose;
 
 protected:
 private:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELPPOE
   };
+
+  ou::tf::ModelPortfolioPositionOrderExecution* m_pModelPortfolioPositionOrderExecution;
 
   void Init( void );
   void CreateControls( void );

@@ -11,28 +11,35 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+// Started 2013/07/30
 
-#include "ControllerPortfolioPositionOrderExecution.h"
+#pragma once
+
+#include <TFTrading/PortfolioManager.h>
+#include <TFTrading/OrderManager.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ControllerPortfolioPositionOrderExecution::ControllerPortfolioPositionOrderExecution( MPPOE_t* pMPPOE, PPPOE_t* pPPPOE  ) 
-  : m_pMPPOE( pMPPOE ), m_pPPPOE( pPPPOE )
-{
-  m_pMPPOE->LoadMasterPortfolio();
-}
+class ModelPortfolioPositionOrderExecution {
+public:
 
-ControllerPortfolioPositionOrderExecution::~ControllerPortfolioPositionOrderExecution(void) {
-}
+  ModelPortfolioPositionOrderExecution(void);
+  ~ModelPortfolioPositionOrderExecution(void);
 
-void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {
-  m_pMPPOE = 0;
-  m_pPPPOE = 0;
-  // also maybe set a flag for runtime issue checking
-  // but not much more can happen with out event stimulus from the panel
-}
+  void LoadMasterPortfolio( void );
+
+protected:
+private:
+
+  typedef Portfolio::idPortfolio_t idPortfolio_t;
+
+  ou::tf::PortfolioManager& m_PortfolioManager;
+  ou::tf::OrderManager& m_OrderManager;
+
+  void ScanMasterPortfolioResults( const idPortfolio_t& );
+
+};
 
 } // namespace tf
 } // namespace ou

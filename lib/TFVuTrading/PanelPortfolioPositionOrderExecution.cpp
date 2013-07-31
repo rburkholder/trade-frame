@@ -22,13 +22,17 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // need to fix this constructor for proper use of wxPanel inherit
-PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution(void) {
+PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE ) 
+  : m_pModelPortfolioPositionOrderExecution( pMPPOE )
+{
   Init();
 }
 
 PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
+  MPPOE_t* pMPPOE,
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
   )
+  : m_pModelPortfolioPositionOrderExecution( pMPPOE )
 {
   Init();
   Create(parent, id, pos, size, style);

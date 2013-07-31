@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "ModelPortfolioPositionOrderExecution.h"
 #include "PanelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
@@ -22,14 +23,19 @@ namespace tf { // TradeFrame
 
 class ControllerPortfolioPositionOrderExecution {
 public:
-  ControllerPortfolioPositionOrderExecution( PanelPortfolioPositionOrderExecution* );
+
+  typedef ModelPortfolioPositionOrderExecution MPPOE_t;
+  typedef PanelPortfolioPositionOrderExecution PPPOE_t;
+
+  ControllerPortfolioPositionOrderExecution( MPPOE_t*, PPPOE_t* );
   ~ControllerPortfolioPositionOrderExecution(void);
 protected:
 private:
 
-  PanelPortfolioPositionOrderExecution* m_ppppoe;
+  MPPOE_t* m_pMPPOE;
+  PPPOE_t* m_pPPPOE;
 
-  void HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* );
+  void HandlePanelPortfolioPositionOrderExecutionClose( PPPOE_t* );
 
 };
 

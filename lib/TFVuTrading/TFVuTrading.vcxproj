@@ -137,6 +137,7 @@
     <ClInclude Include="ModelExecution.h" />
     <ClInclude Include="ModelOrder.h" />
     <ClInclude Include="ModelPortfolio.h" />
+    <ClInclude Include="ModelPortfolioPositionOrderExecution.h" />
     <ClInclude Include="ModelPosition.h" />
     <ClInclude Include="PanelFinancialChart.h" />
     <ClInclude Include="PanelLogging.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="ModelExecution.cpp" />
     <ClCompile Include="ModelOrder.cpp" />
     <ClCompile Include="ModelPortfolio.cpp" />
+    <ClCompile Include="ModelPortfolioPositionOrderExecution.cpp" />
     <ClCompile Include="ModelPosition.cpp" />
     <ClCompile Include="PanelFinancialChart.cpp" />
     <ClCompile Include="PanelLogging.cpp" />

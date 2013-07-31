@@ -108,8 +108,12 @@ bool AppStickShift::OnInit() {
 
   wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio" );
 
-  m_pPanelPortfolioPositionOrderExecution = new ou::tf::PanelPortfolioPositionOrderExecution( p );
-  m_pPanelPortfolioPositionOrderExecution->Show();
+  m_pMPPOE = new MPPOE_t;
+
+  m_pPPPOE = new PPPOE_t( m_pMPPOE, p );
+  m_pPPPOE->Show();
+
+  m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
   
   p->Show();
 
@@ -139,6 +143,9 @@ int AppStickShift::OnExit() {
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
   if ( m_db.IsOpen() ) m_db.Close();
+
+  delete m_pCPPOE;
+  m_pCPPOE = 0;
 
   return 0;
 }

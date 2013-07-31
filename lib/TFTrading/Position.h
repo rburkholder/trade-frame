@@ -45,6 +45,8 @@ namespace tf { // TradeFrame
 class Position {
 public:
 
+  friend std::ostream& operator<<( std::ostream& os, const Position& );
+
   typedef boost::shared_ptr<Position> pPosition_t;
 
   typedef ProviderInterfaceBase::pProvider_t pProvider_t;
@@ -219,7 +221,7 @@ public:
   ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
 
-  void EmitStatus( std::stringstream& ssStatus ) const;
+//  void EmitStatus( std::stringstream& ssStatus ) const;
 
   void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
@@ -274,6 +276,8 @@ private:
   void UpdateRowValues( double price, boost::uint32_t quan, OrderSide::enumOrderSide side );
 
 };
+
+std::ostream& operator<<( std::ostream& os, const Position& );
 
 } // namespace tf
 } // namespace ou

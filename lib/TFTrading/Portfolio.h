@@ -42,6 +42,8 @@ namespace tf { // TradeFrame
 class Portfolio {
 public:
 
+  friend std::ostream& operator<<( std::ostream& os, const Portfolio& );
+
   typedef Position::pPosition_t pPosition_t;
 
   typedef boost::shared_ptr<Portfolio> pPortfolio_t;
@@ -56,9 +58,9 @@ public:
   //typedef ou::tf::Currency::enumCurrency currency_t;
   typedef Currency::type currency_t;
 
-  enum EPortfolioType { Master=1, AlternateCurrency, Standard, MultiLeggedPosition, Basket };
-  // only one Master
-  // AlternateCurrency only at level below Master
+  enum EPortfolioType { Master=1, AlternateCurrency=2, Standard=10, MultiLeggedPosition, Basket };
+  // only one Master, can only have AlternateCurrency at next level below
+  // AlternateCurrency only at level below Master, can have any combination of lower three Portfolio types
   // Standard can have variety of position types
   // MultiLeggedPosition, typically all positions hvae same underlying
   // Basket, multiple symbol types, typically traded in batch
@@ -146,7 +148,7 @@ public:
   void RemoveSubPortfolio( const idPortfolio_t& idPortfolio );
 //  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
 
-  void EmitStats( std::stringstream& ss );
+//  void EmitStats( std::stringstream& ss );
   void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid ) const {
     dblUnRealized = m_plCurrent.dblUnRealized;
     dblRealized = m_plCurrent.dblRealized;
@@ -217,6 +219,8 @@ private:
   void HandleUnRealizedPL( const PositionDelta_delegate_t& );
 
 };
+
+std::ostream& operator<<( std::ostream& os, const Portfolio& );
 
 } // namespace tf
 } // namespace ou

@@ -30,7 +30,7 @@ ModelPortfolio::ModelPortfolio(void)
 {
   m_vColumnNames += "Name", "Rlzd PL", "Comm.", "Net";
   m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
-  PopulateWithRootPortfolios();
+//  PopulateWithRootPortfolios();
 }
 
 ModelPortfolio::~ModelPortfolio(void) {

@@ -271,19 +271,25 @@ void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
 //  OnTrade( this );
 //}
 
-void Portfolio::EmitStats( std::stringstream& ss ) {
-  for ( mapPositions_iter_t iter = m_mapPositionsViaUserName.begin(); m_mapPositionsViaUserName.end() != iter; ++iter ) {
-    iter->second->EmitStatus( ss );
+
+//void Portfolio::EmitStats( std::stringstream& ss ) {
+std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {
+  for ( Portfolio::mapPositions_t::const_iterator iter = portfolio.m_mapPositionsViaUserName.begin(); 
+    portfolio.m_mapPositionsViaUserName.end() != iter; 
+    ++iter ) {
+      os << iter->second;
+//    iter->second->EmitStatus( ss );
   }
-  ss << "Portfolio URPL=" << m_plCurrent.dblUnRealized
-    << ", RPL=" << m_plCurrent.dblRealized 
-    << ", Comm=" << m_plCurrent.dblCommissionsPaid
-    << "=> PL-C=" << m_plCurrent.dblRealized - m_plCurrent.dblCommissionsPaid
-    << ": Min=" << m_plMin.dblNet
-    << ", Net=" << m_plCurrent.dblNet
-    << ", Max=" << m_plMax.dblNet
+  os << "Portfolio URPL=" << portfolio.m_plCurrent.dblUnRealized
+    << ", RPL=" << portfolio.m_plCurrent.dblRealized 
+    << ", Comm=" << portfolio.m_plCurrent.dblCommissionsPaid
+    << "=> PL-C=" << portfolio.m_plCurrent.dblRealized - portfolio.m_plCurrent.dblCommissionsPaid
+    << ": Min=" << portfolio.m_plMin.dblNet
+    << ", Net=" << portfolio.m_plCurrent.dblNet
+    << ", Max=" << portfolio.m_plMax.dblNet
     << std::endl
     ;
+  return os;
 }
 
 } // namespace tf

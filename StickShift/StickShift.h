@@ -30,6 +30,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 #include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 #include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
 
@@ -42,6 +43,10 @@ private:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
+
+  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
+  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
+  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
@@ -57,22 +62,23 @@ private:
 
   wxTimer m_timerGuiRefresh;
 
-//  double m_dblMaxPL;
-//  double m_dblMinPL;
+  double m_dblMaxPL;
+  double m_dblMinPL;
 
-//  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
+  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
 
   //std::string m_sDbPortfolioName;
 
-//  pPortfolio_t m_pPortfolio;
-//  pPosition_t m_pPosition;
+  pPortfolio_t m_pPortfolio;
+  pPosition_t m_pPosition;
 
   FrameMain* m_pFrameMain;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
-  ou::tf::PanelPortfolioPositionOrderExecution* m_pPanelPortfolioPositionOrderExecution;
-  ou::tf::ControllerPortfolioPositionOrderExecution* m_pControllerPortfolioPositionOrderExecution;
+  MPPOE_t* m_pMPPOE;
+  PPPOE_t* m_pPPPOE;
+  CPPOE_t* m_pCPPOE;
 
   ou::tf::DBOps m_db;
 

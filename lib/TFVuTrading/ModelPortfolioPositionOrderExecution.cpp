@@ -13,25 +13,31 @@
 
 #include "StdAfx.h"
 
-#include "ControllerPortfolioPositionOrderExecution.h"
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/home/phoenix/bind.hpp> 
+#include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
+
+#include "ModelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ControllerPortfolioPositionOrderExecution::ControllerPortfolioPositionOrderExecution( MPPOE_t* pMPPOE, PPPOE_t* pPPPOE  ) 
-  : m_pMPPOE( pMPPOE ), m_pPPPOE( pPPPOE )
+ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void) 
+  : m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() )
 {
-  m_pMPPOE->LoadMasterPortfolio();
+  m_PortfolioManager.LoadActivePortfolios();
 }
 
-ControllerPortfolioPositionOrderExecution::~ControllerPortfolioPositionOrderExecution(void) {
+ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
 }
 
-void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {
-  m_pMPPOE = 0;
-  m_pPPPOE = 0;
-  // also maybe set a flag for runtime issue checking
-  // but not much more can happen with out event stimulus from the panel
+void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
+  // load the portfolio with "" as id
+  m_PortfolioManager.ScanPortfolios( 
+    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::ScanMasterPortfolioResults, this, boost::phoenix::arg_names::arg1 ) );
+}
+
+void ModelPortfolioPositionOrderExecution::ScanMasterPortfolioResults( const idPortfolio_t& portfolio ) {
 }
 
 } // namespace tf
