@@ -22,8 +22,8 @@ namespace tf { // TradeFrame
 
 class VuPortfolios: public VuBase {
 public:
-  VuPortfolios(void);
-  VuPortfolios(wxWindow *parent, wxWindowID id, 
+  VuPortfolios( ModelPortfolio* );
+  VuPortfolios( ModelPortfolio*, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
     long style=0, const wxValidator &validator=wxDefaultValidator);
   ~VuPortfolios(void);
@@ -32,8 +32,8 @@ private:
 
   typedef ModelPortfolio dvmdlPorfolios_t;
 
-  wxDataViewItem item0;
-  wxDataViewItem item1;
+//  wxDataViewItem item0;
+//  wxDataViewItem item1;
 
   wxObjectDataPtr<dvmdlPorfolios_t> m_pdvmdlPortfolios;
 

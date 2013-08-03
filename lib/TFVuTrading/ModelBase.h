@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include <boost/range.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 
@@ -32,12 +34,23 @@ public:
 
   template<class F> void IterateColumnNames( F );
 
+  template<class T> struct DataViewItem: public wxDataViewItem {
+    typedef boost::shared_ptr<T> shared_ptr;
+    DataViewItem( shared_ptr& ptr )
+      : m_ptr( ptr ), wxDataViewItem( reinterpret_cast<void*>( ptr.get() ) ) {}; // use object directly as ptrs come and go
+    DataViewItem( const DataViewItem& item ): m_ptr( item.m_ptr ), wxDataViewItem( item ) {};
+    ~DataViewItem( void ) {};
+    T* Value( void ) const { return reinterpret_cast<T*>( wxDataViewItem::GetID() ); };
+    shared_ptr Get() { return m_ptr; };
+    shared_ptr m_ptr;  // this is required for reference counting to the original shared item
+  };
+
   bool IsContainer(	const wxDataViewItem&	item ) const;
   wxDataViewItem GetParent( const wxDataViewItem&	item ) const;
-  unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
+  virtual unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
   unsigned int GetColumnCount( void ) const;
   wxString GetColumnType( unsigned int	col ) const;
-  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
+  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
   bool SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	);
 
 protected:

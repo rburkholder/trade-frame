@@ -22,8 +22,8 @@ namespace tf { // TradeFrame
 
 class VuOrders: public VuBase {
 public:
-  VuOrders(void);
-  VuOrders(wxWindow *parent, wxWindowID id, 
+  VuOrders( ModelOrder* );
+  VuOrders( ModelOrder*, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
     long style=0, const wxValidator &validator=wxDefaultValidator);
   ~VuOrders(void);

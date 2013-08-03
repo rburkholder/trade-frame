@@ -18,13 +18,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-VuExecutions::VuExecutions(void): VuBase() {
+VuExecutions::VuExecutions( ModelExecution* pme )
+  : VuBase(), m_pdvmdlExecutions( pme )
+{
   Construct();
 }
 
-VuExecutions::VuExecutions( wxWindow *parent, wxWindowID id, 
+VuExecutions::VuExecutions( ModelExecution* pme, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ), m_pdvmdlExecutions( pme )
+{
     Construct();
 }
 
@@ -33,7 +36,7 @@ VuExecutions::~VuExecutions(void) {
 
 void VuExecutions::Construct( void ) {
         
-  m_pdvmdlExecutions = new dvmdlExecutions_t;
+//  m_pdvmdlExecutions = new dvmdlExecutions_t;
   AssociateModel( m_pdvmdlExecutions.get() );
 
   structPopulateColumns f( this );

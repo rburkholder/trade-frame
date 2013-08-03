@@ -25,19 +25,26 @@ namespace tf { // TradeFrame
 ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void) 
   : m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() )
 {
+
+  m_pModelPortfolio = new ModelPortfolio;
+  m_pModelPosition = new ModelPosition;
+  m_pModelOrder = new ModelOrder;
+  m_pModelExecution = new ModelExecution;
+
   m_PortfolioManager.LoadActivePortfolios();
 }
 
 ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
+  delete m_pModelPortfolio;
+  delete m_pModelPosition;
+  delete m_pModelOrder;
+  delete m_pModelExecution;
 }
 
 void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
   // load the portfolio with "" as id
   m_PortfolioManager.ScanPortfolios( 
-    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::ScanMasterPortfolioResults, this, boost::phoenix::arg_names::arg1 ) );
-}
-
-void ModelPortfolioPositionOrderExecution::ScanMasterPortfolioResults( const idPortfolio_t& portfolio ) {
+    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
 }
 
 } // namespace tf

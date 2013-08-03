@@ -18,13 +18,17 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-VuPositions::VuPositions(void): VuBase() {
+VuPositions::VuPositions( ModelPosition* pmp )
+  : VuBase(), m_dvmdlPositions( pmp )
+{
   Construct();
 }
 
-VuPositions::VuPositions( wxWindow *parent, wxWindowID id, 
+VuPositions::VuPositions( ModelPosition* pmp, 
+  wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ), m_dvmdlPositions( pmp )
+{
     Construct();
 }
 
@@ -33,7 +37,7 @@ VuPositions::~VuPositions(void) {
 
 void VuPositions::Construct( void ) {
         
-  m_dvmdlPositions = new dvmdlPositions_t;
+//  m_dvmdlPositions = new dvmdlPositions_t;
   AssociateModel( m_dvmdlPositions.get() );
 
   structPopulateColumns f( this );

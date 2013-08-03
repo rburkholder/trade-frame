@@ -23,7 +23,7 @@ namespace tf { // TradeFrame
 
 // need to fix this constructor for proper use of wxPanel inherit
 PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE ) 
-  : m_pModelPortfolioPositionOrderExecution( pMPPOE )
+  : m_pMPPOE( pMPPOE )
 {
   Init();
 }
@@ -32,7 +32,7 @@ PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( /*wx
   MPPOE_t* pMPPOE,
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
   )
-  : m_pModelPortfolioPositionOrderExecution( pMPPOE )
+  : m_pMPPOE( pMPPOE )
 {
   Init();
   Create(parent, id, pos, size, style);
@@ -126,17 +126,19 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   pSplitOrderExecution->SetSashGravity( 0.5 );
   pSizerPanelOrderExecution->Add( pSplitOrderExecution, 1, wxEXPAND | wxALL, 1 );
 
+  unsigned int commonStyle( wxDV_SINGLE | wxDV_ROW_LINES );
+
   // Portfolios & Positions
-  VuPortfolios* pDVPortfolios = new VuPortfolios( pSplitPortfolioPosition, wxID_ANY );
-  VuPositions* pDVPositions = new VuPositions( pSplitPortfolioPosition, wxID_ANY );
+  VuPortfolios* pDVPortfolios = new VuPortfolios( m_pMPPOE->GetModelPortfolio(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  VuPositions* pDVPositions = new VuPositions( m_pMPPOE->GetModelPosition(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
   
   pSplitPortfolioPosition->Initialize( pDVPortfolios );
   pSplitPortfolioPosition->SplitHorizontally( pDVPortfolios, pDVPositions );
   pPanelPortfolioPosition->Show( true );
 
   // Orders & Executions
-  VuOrders* pDVOrders = new VuOrders( pSplitOrderExecution, wxID_ANY );
-  VuExecutions* pDVExecutions = new VuExecutions( pSplitOrderExecution, wxID_ANY );
+  VuOrders* pDVOrders = new VuOrders( m_pMPPOE->GetModelOrder(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  VuExecutions* pDVExecutions = new VuExecutions( m_pMPPOE->GetModelExecution(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
 
   pSplitOrderExecution->Initialize( pDVOrders );
   pSplitOrderExecution->SplitHorizontally( pDVOrders, pDVExecutions );

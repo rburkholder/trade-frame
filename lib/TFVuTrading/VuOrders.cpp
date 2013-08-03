@@ -18,13 +18,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-VuOrders::VuOrders(void): VuBase() {
+VuOrders::VuOrders( ModelOrder* pmo )
+  : VuBase(), m_pdvmdlOrders( pmo )
+{
   Construct();
 }
 
-VuOrders::VuOrders( wxWindow *parent, wxWindowID id, 
+VuOrders::VuOrders( ModelOrder* pmo, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ) {
+  : VuBase( parent, id, pos, size, style, validator ), m_pdvmdlOrders( pmo ) 
+{
     Construct();
 }
 
@@ -33,7 +36,7 @@ VuOrders::~VuOrders(void) {
 
 void VuOrders::Construct( void ) {
         
-  m_pdvmdlOrders = new dvmdlOrders_t;
+//  m_pdvmdlOrders = new dvmdlOrders_t;
   AssociateModel( m_pdvmdlOrders.get() );
 
   structPopulateColumns f( this );

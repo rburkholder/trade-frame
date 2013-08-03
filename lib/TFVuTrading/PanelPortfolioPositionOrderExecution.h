@@ -63,7 +63,7 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_PANELPPOE
   };
 
-  ou::tf::ModelPortfolioPositionOrderExecution* m_pModelPortfolioPositionOrderExecution;
+  ou::tf::ModelPortfolioPositionOrderExecution* m_pMPPOE;
 
   void Init( void );
   void CreateControls( void );

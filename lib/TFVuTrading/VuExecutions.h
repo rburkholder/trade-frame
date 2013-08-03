@@ -22,8 +22,8 @@ namespace tf { // TradeFrame
 
 class VuExecutions: public VuBase {
 public:
-  VuExecutions(void);
-  VuExecutions(wxWindow *parent, wxWindowID id, 
+  VuExecutions( ModelExecution* );
+  VuExecutions( ModelExecution*, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
     long style=0, const wxValidator &validator=wxDefaultValidator);
   ~VuExecutions(void);

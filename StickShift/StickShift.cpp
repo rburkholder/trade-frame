@@ -103,7 +103,7 @@ bool AppStickShift::OnInit() {
 
   // maybe set scenario with database and with in memory data structure
   m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
-//  m_idPortfolio = "test";
+
   m_db.Open( "StickShift.db" );
 
   wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio" );

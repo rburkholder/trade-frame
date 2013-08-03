@@ -25,37 +25,34 @@ namespace tf { // TradeFrame
 class ModelPortfolio: public ModelBase {
 public:
 
+  typedef PortfolioManager::idPortfolio_t idPortfolio_t;
+
   ModelPortfolio(void);
   ~ModelPortfolio(void);
+
+  void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
 
 protected:
 private:
 
   typedef ou::tf::PortfolioManager PortfolioManager;
   typedef PortfolioManager::pPortfolio_t pPortfolio_t;
-  typedef PortfolioManager::idPortfolio_t idPortfolio_t;
 
-  struct ItemPortfolio: public wxDataViewItem {
-    ItemPortfolio( pPortfolio_t& pPortfolio )
-    : m_pPortfolio( pPortfolio ), 
-      wxDataViewItem( reinterpret_cast<void*>( 1 ) ) {  };
-    ItemPortfolio( const ItemPortfolio& item ) 
-      : m_pPortfolio( item.m_pPortfolio ), wxDataViewItem( *this ) {};
-    ~ItemPortfolio( void ) {  };
-    pPortfolio_t m_pPortfolio;
-  };
+  typedef ModelBase::DataViewItem<pPortfolio_t::element_type> DataViewItemPortfolio;
 
-  typedef std::pair<idPortfolio_t, ItemPortfolio> mapItem_pair_t;
-  typedef std::map<idPortfolio_t, ItemPortfolio> mapItems_t;
+  typedef std::pair<idPortfolio_t, DataViewItemPortfolio> mapItem_pair_t;
+  typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
   typedef mapItems_t::const_iterator mapItems_iter_t;
   mapItems_t m_mapItems;
 
+  unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
+  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
+
   PortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
 
-  void PopulateWithRootPortfolios( void );
+//  void PopulateWithRootPortfolios( void );
 
-  void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
-  void ProcessUpdatedItemDetails( ItemPortfolio& item );
+  void ProcessUpdatedItemDetails( DataViewItemPortfolio& item );
 
 };
 

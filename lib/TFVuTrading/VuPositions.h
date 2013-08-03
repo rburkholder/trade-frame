@@ -22,8 +22,8 @@ namespace tf { // TradeFrame
 
 class VuPositions: public VuBase {
 public:
-  VuPositions(void);
-  VuPositions(wxWindow *parent, wxWindowID id, 
+  VuPositions( ModelPosition* );
+  VuPositions( ModelPosition*, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, 
     long style=0, const wxValidator &validator=wxDefaultValidator);
   ~VuPositions(void);

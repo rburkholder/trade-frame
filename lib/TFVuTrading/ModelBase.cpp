@@ -25,18 +25,20 @@ ModelBase::~ModelBase(void) {
 }
 
 bool ModelBase::IsContainer(	const wxDataViewItem&	item ) const {
-  return item.IsOk();
+//  return item.IsOk();
+  return false;
 }
 
 wxDataViewItem ModelBase::GetParent( const wxDataViewItem&	item ) const {
   //return wxDataViewItem(NULL);
-  return itemNull;
+  return itemNull;// will need to generate something better than this once we get rolling  (good enough for list, but not for tree)
 }
 
 unsigned int ModelBase::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
   // called when clicking on plus
-  //children.
-  return 0;
+  // needs over-ride
+  assert( 0 );
+  return 0;  // returns number of items, need to be able to search by item
 }
 
 unsigned int ModelBase::GetColumnCount( void ) const {
@@ -49,8 +51,9 @@ wxString ModelBase::GetColumnType( unsigned int	col ) const {
 
 void ModelBase::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
   //wxVariant v(_asString(item));
-  wxString s( "test" );
-  variant = s;
+//  wxString s( "test" );
+//  variant = s;
+  assert( 0 );
 }
 
 bool ModelBase::SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	) {

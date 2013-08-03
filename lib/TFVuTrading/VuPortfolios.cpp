@@ -20,16 +20,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-VuPortfolios::VuPortfolios(void)
-  : VuBase()
+VuPortfolios::VuPortfolios( ModelPortfolio* pmp )
+  : VuBase(), m_pdvmdlPortfolios( pmp )
 {
   Construct();
 }
 
-VuPortfolios::VuPortfolios( wxWindow *parent, wxWindowID id, 
+VuPortfolios::VuPortfolios( ModelPortfolio* pmp, wxWindow *parent, wxWindowID id, 
     const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator )
-  : VuBase( parent, id, pos, size, style, validator ),
-    item1( reinterpret_cast<void*>( 1 ) )
+  : VuBase( parent, id, pos, size, style, validator ), m_pdvmdlPortfolios( pmp )
+//    item1( reinterpret_cast<void*>( 1 ) )
 {
   Construct();
 }
@@ -39,7 +39,7 @@ VuPortfolios::~VuPortfolios(void) {
 
 void VuPortfolios::Construct( void ) {
         
-  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
+//  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
   AssociateModel( m_pdvmdlPortfolios.get() );
 
   structPopulateColumns f( this );
