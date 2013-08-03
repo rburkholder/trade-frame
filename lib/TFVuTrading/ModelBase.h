@@ -57,7 +57,7 @@ protected:
 
   typedef std::vector<std::string> vString_t;
 
-  wxDataViewItem itemNull;
+  static wxDataViewItem m_itemNull;
 
   vString_t m_vColumnNames;
 

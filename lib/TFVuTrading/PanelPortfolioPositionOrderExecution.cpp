@@ -14,7 +14,6 @@
 #include "StdAfx.h"
 
 #include <wx/splitter.h>
-#include <wx/treectrl.h>
 
 #include "PanelPortfolioPositionOrderExecution.h"
 
@@ -82,8 +81,8 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   pPanelTree->SetSizer( pSizerPanelTree );
 
   // add tree to left panel, redo the object at some point
-  TreePortfolioPositionOrder* pTree = new TreePortfolioPositionOrder( pSplitTreeAndTables, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_ROW_LINES , wxDefaultValidator, "Test Tree" );
-  pSizerPanelTree->Add( pTree, 1, wxEXPAND | wxALL, 1 );
+  m_pDVPPOE = new TreePortfolioPositionOrder( m_pMPPOE, pSplitTreeAndTables, wxID_ANY );
+  pSizerPanelTree->Add( m_pDVPPOE, 1, wxEXPAND | wxALL, 1 );
 
   // panel for tables
   wxPanel* pPanelTables = new wxPanel( pSplitTreeAndTables, wxID_ANY );
@@ -129,19 +128,19 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   unsigned int commonStyle( wxDV_SINGLE | wxDV_ROW_LINES );
 
   // Portfolios & Positions
-  VuPortfolios* pDVPortfolios = new VuPortfolios( m_pMPPOE->GetModelPortfolio(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
-  VuPositions* pDVPositions = new VuPositions( m_pMPPOE->GetModelPosition(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  m_pDVPortfolios = new VuPortfolios( m_pMPPOE->GetModelPortfolio(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  m_pDVPositions = new VuPositions( m_pMPPOE->GetModelPosition(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
   
-  pSplitPortfolioPosition->Initialize( pDVPortfolios );
-  pSplitPortfolioPosition->SplitHorizontally( pDVPortfolios, pDVPositions );
+  pSplitPortfolioPosition->Initialize( m_pDVPortfolios );
+  pSplitPortfolioPosition->SplitHorizontally( m_pDVPortfolios, m_pDVPositions );
   pPanelPortfolioPosition->Show( true );
 
   // Orders & Executions
-  VuOrders* pDVOrders = new VuOrders( m_pMPPOE->GetModelOrder(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
-  VuExecutions* pDVExecutions = new VuExecutions( m_pMPPOE->GetModelExecution(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  m_pDVOrders = new VuOrders( m_pMPPOE->GetModelOrder(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
+  m_pDVExecutions = new VuExecutions( m_pMPPOE->GetModelExecution(), pSplitOrderExecution, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
 
-  pSplitOrderExecution->Initialize( pDVOrders );
-  pSplitOrderExecution->SplitHorizontally( pDVOrders, pDVExecutions );
+  pSplitOrderExecution->Initialize( m_pDVOrders );
+  pSplitOrderExecution->SplitHorizontally( m_pDVOrders, m_pDVExecutions );
   pPanelOrderExecution->Show( true );
 
   Show( true );

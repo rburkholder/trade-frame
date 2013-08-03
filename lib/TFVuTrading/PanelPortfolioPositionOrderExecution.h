@@ -20,7 +20,8 @@
 #include "VuOrders.h"
 #include "VuExecutions.h"
 #include "TreePortfolioPositionOrder.h"
-#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
+
+#include "ModelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -62,6 +63,13 @@ private:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELPPOE
   };
+
+  VuPortfolios* m_pDVPortfolios;
+  VuPositions* m_pDVPositions;
+  VuOrders* m_pDVOrders;
+  VuExecutions* m_pDVExecutions;
+
+  TreePortfolioPositionOrder* m_pDVPPOE;
 
   ou::tf::ModelPortfolioPositionOrderExecution* m_pMPPOE;
 

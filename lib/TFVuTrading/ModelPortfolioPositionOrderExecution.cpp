@@ -47,5 +47,16 @@ void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
     boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
 }
 
+unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
+  return 0;
+}
+
+void ModelPortfolioPositionOrderExecution::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
+}
+
+void ModelPortfolioPositionOrderExecution::HandleAddMasterPortfolio( const idPortfolio_t& idPortfolio ) {
+}
+
+
 } // namespace tf
 } // namespace ou

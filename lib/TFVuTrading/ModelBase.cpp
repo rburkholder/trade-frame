@@ -18,20 +18,22 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+wxDataViewItem ModelBase::m_itemNull;
+
 ModelBase::ModelBase(void): wxDataViewModel() {
 }
 
 ModelBase::~ModelBase(void) {
 }
 
-bool ModelBase::IsContainer(	const wxDataViewItem&	item ) const {
+bool ModelBase::IsContainer(	const wxDataViewItem&	item ) const {  // makes as tree container, or regular field
 //  return item.IsOk();
   return false;
 }
 
 wxDataViewItem ModelBase::GetParent( const wxDataViewItem&	item ) const {
   //return wxDataViewItem(NULL);
-  return itemNull;// will need to generate something better than this once we get rolling  (good enough for list, but not for tree)
+  return m_itemNull;// will need to generate something better than this once we get rolling  (good enough for list, but not for tree)
 }
 
 unsigned int ModelBase::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
@@ -57,7 +59,6 @@ void ModelBase::GetValue( wxVariant& variant, const wxDataViewItem& item, unsign
 }
 
 bool ModelBase::SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	) {
-  //this->
   return true;
 }
 

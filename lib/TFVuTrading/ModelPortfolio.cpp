@@ -74,7 +74,7 @@ void ModelPortfolio::AddPortfolioToModel( const idPortfolio_t& idPortfolio ) {
   if ( m_mapItems.end() == iter ) {
     DataViewItemPortfolio item( m_mgrPortfolio.GetPortfolio( idPortfolio ) );
     iter = m_mapItems.insert( m_mapItems.begin(), mapItem_pair_t( idPortfolio, item ) );
-    ItemAdded( itemNull, item );
+    ItemAdded( m_itemNull, item );
     ItemChanged( item );
   }
   // may desire to use boost::fusion to work on variable types

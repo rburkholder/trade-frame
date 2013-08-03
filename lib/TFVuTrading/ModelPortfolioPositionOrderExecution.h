@@ -18,6 +18,8 @@
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include "ModelBase.h"
+
 #include "ModelPortfolio.h"
 #include "ModelPosition.h"
 #include "ModelOrder.h"
@@ -26,7 +28,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ModelPortfolioPositionOrderExecution {
+class ModelPortfolioPositionOrderExecution: public ModelBase { // model for tree of portfolio, position, order, execution
 public:
 
   ModelPortfolioPositionOrderExecution(void);
@@ -38,6 +40,9 @@ public:
   ModelPosition* GetModelPosition( void ) { return m_pModelPosition; };
   ModelOrder* GetModelOrder( void ) { return m_pModelOrder; };
   ModelExecution* GetModelExecution( void ) { return m_pModelExecution; };
+
+  unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
+  void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
 
 protected:
 private:

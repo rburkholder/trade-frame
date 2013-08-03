@@ -18,21 +18,30 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-TreePortfolioPositionOrder::TreePortfolioPositionOrder(void): wxTreeCtrl() {
+TreePortfolioPositionOrder::TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* pMPPOE )
+  : VuBase(), m_pdvmdlPPOE( pMPPOE ) {
 }
 
 TreePortfolioPositionOrder::TreePortfolioPositionOrder(
-              wxWindow *parent, wxWindowID id,
-              const wxPoint& pos,
-              const wxSize& size,
-              long style,
-              const wxValidator& validator,
-              const wxString& name ) 
-  : wxTreeCtrl( parent, id, pos, size, style, validator, name )             
+  ModelPortfolioPositionOrderExecution* pMPPOE,
+  wxWindow *parent, wxWindowID id,
+  const wxPoint& pos,
+  const wxSize& size,
+  long style,
+  const wxValidator& validator ) 
+  : VuBase( parent, id, pos, size, style, validator ), m_pdvmdlPPOE( pMPPOE )          
 {
 }
 
 TreePortfolioPositionOrder::~TreePortfolioPositionOrder(void) {
+}
+
+void TreePortfolioPositionOrder::Construct( void ) {
+//  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
+  AssociateModel( m_pdvmdlPPOE.get() );
+
+//  structPopulateColumns f( this );
+//  m_pdvmdlPortfolios.get()->IterateColumnNames( f );
 }
 
 } // namespace tf

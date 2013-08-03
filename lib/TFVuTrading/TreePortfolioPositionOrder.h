@@ -15,23 +15,34 @@
 
 #pragma once
 
-#include <wx/treectrl.h>
+//#include <wx/treectrl.h>
+
+#include "VuBase.h"
+
+#include "ModelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class TreePortfolioPositionOrder: public wxTreeCtrl {
+class TreePortfolioPositionOrder: public VuBase {
 public:
-  TreePortfolioPositionOrder(void);
-  TreePortfolioPositionOrder(wxWindow *parent, wxWindowID id = wxID_ANY,
+  TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* );
+  TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution*,
+              wxWindow *parent, wxWindowID id = wxID_ANY,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
-               long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
-               const wxValidator& validator = wxDefaultValidator,
-               const wxString& name = wxTreeCtrlNameStr);
+               long style = wxDV_SINGLE | wxDV_NO_HEADER,
+               const wxValidator& validator = wxDefaultValidator );
   ~TreePortfolioPositionOrder(void);
 protected:
 private:
+
+  typedef ModelPortfolioPositionOrderExecution dvmdlPPOE_t;
+
+  wxObjectDataPtr<dvmdlPPOE_t> m_pdvmdlPPOE;
+
+  void Construct( void );
+
 };
 
 } // namespace tf
