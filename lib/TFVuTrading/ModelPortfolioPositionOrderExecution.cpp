@@ -17,14 +17,20 @@
 #include <boost/spirit/home/phoenix/bind.hpp> 
 #include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
 
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
+
 #include "ModelPortfolioPositionOrderExecution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void) 
-  : m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() )
+  : ModelBase(), m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() ),
+  m_pItemPortfolioMaster( 0 )
 {
+
+  m_vColumnNames += "Tree";
 
   m_pModelPortfolio = new ModelPortfolio;
   m_pModelPosition = new ModelPosition;
@@ -35,28 +41,48 @@ ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
 }
 
 ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
-  delete m_pModelPortfolio;
-  delete m_pModelPosition;
-  delete m_pModelOrder;
-  delete m_pModelExecution;
+//  delete m_pModelPortfolio;
+//  delete m_pModelPosition;
+//  delete m_pModelOrder;
+//  delete m_pModelExecution;
 }
 
 void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
   // load the portfolio with "" as id
+//  ItemChanged( m_itemNull );  // if this works, then the scan can happen during the resulting event of GetChildren/GetValue
+//  m_PortfolioManager.ScanPortfolios( 
+//    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
+//  Cleared();
   m_PortfolioManager.ScanPortfolios( 
-    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
+    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio, this, boost::phoenix::arg_names::arg1 ) );
+}
+
+void ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio( const idPortfolio_t& idPortfolio ) {
+  m_pItemPortfolioMaster = new ItemPortfolioMaster( m_PortfolioManager.GetPortfolio( idPortfolio ) );
+  m_mapItems.insert( mapItems_t::value_type( m_pItemPortfolioMaster->GetID(), m_pItemPortfolioMaster ) );
+  ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
+  ItemChanged( *m_pItemPortfolioMaster );
 }
 
 unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
-  return 0;
+  // with columns this gets called without having to scan
+  unsigned int count( 0 );
+  if ( 0 == item.GetID() ) {
+    if ( 0 != m_pItemPortfolioMaster ) {
+      children.Add( *m_pItemPortfolioMaster );
+      count = 1;
+    }
+  }
+  else {
+  }
+  return count;
 }
 
 void ModelPortfolioPositionOrderExecution::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
+  mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
+  assert( iter != m_mapItems.end() );
+  iter->second->GetFirstColumn( variant );
 }
-
-void ModelPortfolioPositionOrderExecution::HandleAddMasterPortfolio( const idPortfolio_t& idPortfolio ) {
-}
-
 
 } // namespace tf
 } // namespace ou

@@ -44,7 +44,7 @@ bool PanelPortfolioPositionOrderExecution::Create( /*wxWindow* parent, const wxS
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style
   ) {
 
-    SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
+//    SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
     wxPanel::Create( parent, id, pos, size, style );
 
     CreateControls();
@@ -73,16 +73,13 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   // splitter for Left Tree and Right Tables
   wxSplitterWindow* pSplitTreeAndTables = new wxSplitterWindow( pPanelOuter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );
   pSplitTreeAndTables->SetMinimumPaneSize( 20 );
+  pSplitTreeAndTables->SetSashGravity( 0.2 );
+
   pSizerPanelOuter->Add( pSplitTreeAndTables, 1, wxEXPAND | wxALL, 5 );
 
-  // panel for tree
-  wxPanel* pPanelTree = new wxPanel( pSplitTreeAndTables, wxID_ANY );
-  wxBoxSizer* pSizerPanelTree = new wxBoxSizer( wxVERTICAL );
-  pPanelTree->SetSizer( pSizerPanelTree );
-
   // add tree to left panel, redo the object at some point
-  m_pDVPPOE = new TreePortfolioPositionOrder( m_pMPPOE, pSplitTreeAndTables, wxID_ANY );
-  pSizerPanelTree->Add( m_pDVPPOE, 1, wxEXPAND | wxALL, 1 );
+  m_pDVPPOE = new VuTreePortfolioPositionOrder( m_pMPPOE, pSplitTreeAndTables, wxID_ANY );
+  m_pDVPPOE->Show( true );
 
   // panel for tables
   wxPanel* pPanelTables = new wxPanel( pSplitTreeAndTables, wxID_ANY );
@@ -90,8 +87,8 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   pPanelTables->SetSizer( pSizerPanelTables );
 
   // add panels to splitter
-  pSplitTreeAndTables->Initialize( pPanelTree );
-  pSplitTreeAndTables->SplitVertically( pPanelTree, pPanelTables );
+  pSplitTreeAndTables->Initialize( m_pDVPPOE );
+  pSplitTreeAndTables->SplitVertically( m_pDVPPOE, pPanelTables );
 
   // splitter for Portfolio/Position & Order/Execution Regions
   wxSplitterWindow* pSplitTablesOuter = new wxSplitterWindow( pPanelTables, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER );

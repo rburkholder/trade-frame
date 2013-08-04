@@ -106,7 +106,7 @@ bool AppStickShift::OnInit() {
 
   m_db.Open( "StickShift.db" );
 
-  wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio" );
+  wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management" );
 
   m_pMPPOE = new MPPOE_t;
 

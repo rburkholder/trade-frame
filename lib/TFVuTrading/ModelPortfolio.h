@@ -14,6 +14,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 
 #include <TFTrading/PortfolioManager.h>
 
@@ -25,7 +26,17 @@ namespace tf { // TradeFrame
 class ModelPortfolio: public ModelBase {
 public:
 
+  typedef ou::tf::PortfolioManager PortfolioManager;
   typedef PortfolioManager::idPortfolio_t idPortfolio_t;
+  typedef PortfolioManager::pPortfolio_t pPortfolio_t;
+
+  struct DataViewItemPortfolio: public ModelBase::DataViewItem<pPortfolio_t::element_type> {
+    DataViewItemPortfolio( shared_ptr& ptr )
+      : ModelBase::DataViewItem<pPortfolio_t::element_type>( ptr ) {};
+    void GetFirstColumn( wxVariant& variant ) const {
+      variant = m_ptr->GetRow().idPortfolio;
+    }
+  };
 
   ModelPortfolio(void);
   ~ModelPortfolio(void);
@@ -34,11 +45,6 @@ public:
 
 protected:
 private:
-
-  typedef ou::tf::PortfolioManager PortfolioManager;
-  typedef PortfolioManager::pPortfolio_t pPortfolio_t;
-
-  typedef ModelBase::DataViewItem<pPortfolio_t::element_type> DataViewItemPortfolio;
 
   typedef std::pair<idPortfolio_t, DataViewItemPortfolio> mapItem_pair_t;
   typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
@@ -49,8 +55,6 @@ private:
   void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
 
   PortfolioManager& m_mgrPortfolio;  // database must be open before processing portfolios
-
-//  void PopulateWithRootPortfolios( void );
 
   void ProcessUpdatedItemDetails( DataViewItemPortfolio& item );
 

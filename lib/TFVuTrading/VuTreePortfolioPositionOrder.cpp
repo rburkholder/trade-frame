@@ -13,16 +13,17 @@
 
 #include "StdAfx.h"
 
-#include "TreePortfolioPositionOrder.h"
+#include "VuTreePortfolioPositionOrder.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-TreePortfolioPositionOrder::TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* pMPPOE )
+VuTreePortfolioPositionOrder::VuTreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* pMPPOE )
   : VuBase(), m_pdvmdlPPOE( pMPPOE ) {
+    Construct();
 }
 
-TreePortfolioPositionOrder::TreePortfolioPositionOrder(
+VuTreePortfolioPositionOrder::VuTreePortfolioPositionOrder(
   ModelPortfolioPositionOrderExecution* pMPPOE,
   wxWindow *parent, wxWindowID id,
   const wxPoint& pos,
@@ -31,17 +32,23 @@ TreePortfolioPositionOrder::TreePortfolioPositionOrder(
   const wxValidator& validator ) 
   : VuBase( parent, id, pos, size, style, validator ), m_pdvmdlPPOE( pMPPOE )          
 {
+    Construct();
 }
 
-TreePortfolioPositionOrder::~TreePortfolioPositionOrder(void) {
+VuTreePortfolioPositionOrder::~VuTreePortfolioPositionOrder(void) {
 }
 
-void TreePortfolioPositionOrder::Construct( void ) {
-//  m_pdvmdlPortfolios = new dvmdlPorfolios_t;
+void VuTreePortfolioPositionOrder::Construct( void ) {
+
   AssociateModel( m_pdvmdlPPOE.get() );
 
 //  structPopulateColumns f( this );
-//  m_pdvmdlPortfolios.get()->IterateColumnNames( f );
+//  m_pdvmdlPPOE.get()->IterateColumnNames( f );
+  wxDataViewColumn* col = new wxDataViewColumn( "Portfolios", new wxDataViewTextRenderer(), 0 );
+  col->SetAlignment( wxAlignment::wxALIGN_LEFT );
+  this->AppendColumn( col );
+
+  // need to work on auto-width setting to match width of space available for tree
 }
 
 } // namespace tf

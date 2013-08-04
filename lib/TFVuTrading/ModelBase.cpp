@@ -28,7 +28,7 @@ ModelBase::~ModelBase(void) {
 
 bool ModelBase::IsContainer(	const wxDataViewItem&	item ) const {  // makes as tree container, or regular field
 //  return item.IsOk();
-  return false;
+  return false;  // what we want for default, override for something else
 }
 
 wxDataViewItem ModelBase::GetParent( const wxDataViewItem&	item ) const {

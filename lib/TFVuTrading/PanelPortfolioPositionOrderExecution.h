@@ -19,7 +19,7 @@
 #include "VuPositions.h"
 #include "VuOrders.h"
 #include "VuExecutions.h"
-#include "TreePortfolioPositionOrder.h"
+#include "VuTreePortfolioPositionOrder.h"
 
 #include "ModelPortfolioPositionOrderExecution.h"
 
@@ -69,7 +69,7 @@ private:
   VuOrders* m_pDVOrders;
   VuExecutions* m_pDVExecutions;
 
-  TreePortfolioPositionOrder* m_pDVPPOE;
+  VuTreePortfolioPositionOrder* m_pDVPPOE;
 
   ou::tf::ModelPortfolioPositionOrderExecution* m_pMPPOE;
 

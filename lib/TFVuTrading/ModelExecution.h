@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <TFTrading/OrderManager.h>
+
 #include "ModelBase.h"
 
 namespace ou { // One Unified
@@ -20,8 +22,20 @@ namespace tf { // TradeFrame
 
 class ModelExecution: public ModelBase {
 public:
+
+  typedef ou::tf::OrderManager OrderManager;
+  typedef OrderManager::idExecution_t idExecution_t;
+  typedef OrderManager::pExecution_t pExecution_t;
+
+  struct DataViewItemExecution: public ModelBase::DataViewItem<pExecution_t::element_type> {
+    void GetFirstColumn( wxVariant& variant ) const {
+      variant = (std::string&) m_ptr->GetRow().idExecution;
+    }
+  };
+
   ModelExecution(void);
   ~ModelExecution(void);
+
 };
 
 } // namespace tf

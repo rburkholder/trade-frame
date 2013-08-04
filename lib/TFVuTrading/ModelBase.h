@@ -34,18 +34,25 @@ public:
 
   template<class F> void IterateColumnNames( F );
 
-  template<class T> struct DataViewItem: public wxDataViewItem {
+  struct DataViewItemBase: public wxDataViewItem {
+    DataViewItemBase( void* p ): wxDataViewItem( p ) {};
+    ~DataViewItemBase( void ) {};
+    virtual void GetFirstColumn( wxVariant& variant ) const {};  // for getting polymorphic stuff for the tree
+  };
+
+  template<class T> struct DataViewItem: public DataViewItemBase {
     typedef boost::shared_ptr<T> shared_ptr;
     DataViewItem( shared_ptr& ptr )
-      : m_ptr( ptr ), wxDataViewItem( reinterpret_cast<void*>( ptr.get() ) ) {}; // use object directly as ptrs come and go
-    DataViewItem( const DataViewItem& item ): m_ptr( item.m_ptr ), wxDataViewItem( item ) {};
+      : m_ptr( ptr ), DataViewItemBase( reinterpret_cast<void*>( ptr.get() ) ) {}; // use object directly as ptrs come and go
+    DataViewItem( const DataViewItem& item ): m_ptr( item.m_ptr ), DataViewItemBase( item ) {};
     ~DataViewItem( void ) {};
+    virtual void GetFirstColumn( wxVariant& variant ) const {};
     T* Value( void ) const { return reinterpret_cast<T*>( wxDataViewItem::GetID() ); };
     shared_ptr Get() { return m_ptr; };
     shared_ptr m_ptr;  // this is required for reference counting to the original shared item
   };
 
-  bool IsContainer(	const wxDataViewItem&	item ) const;
+  virtual bool IsContainer(	const wxDataViewItem&	item ) const;
   wxDataViewItem GetParent( const wxDataViewItem&	item ) const;
   virtual unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
   unsigned int GetColumnCount( void ) const;

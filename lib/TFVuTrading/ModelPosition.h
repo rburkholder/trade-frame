@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <TFTrading/PortfolioManager.h>
+
 #include "ModelBase.h"
 
 namespace ou { // One Unified
@@ -20,8 +22,20 @@ namespace tf { // TradeFrame
 
 class ModelPosition: public ModelBase {
 public:
+
+  typedef ou::tf::PortfolioManager PortfolioManager;
+  typedef PortfolioManager::idPosition_t idPosition_t;
+  typedef PortfolioManager::pPosition_t pPosition_t;
+
+  struct DataViewItemPosition: public ModelBase::DataViewItem<pPosition_t::element_type> {
+    void GetFirstColumn( wxVariant& variant ) const {
+      variant = (std::string&) m_ptr->GetRow().idPosition;
+    }
+  };
+
   ModelPosition(void);
   ~ModelPosition(void);
+
 protected:
 private:
 };

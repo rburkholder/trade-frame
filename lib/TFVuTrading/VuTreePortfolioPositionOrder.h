@@ -24,16 +24,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class TreePortfolioPositionOrder: public VuBase {
+class VuTreePortfolioPositionOrder: public VuBase {
 public:
-  TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* );
-  TreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution*,
-              wxWindow *parent, wxWindowID id = wxID_ANY,
+  VuTreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution* );
+  VuTreePortfolioPositionOrder( ModelPortfolioPositionOrderExecution*,
+              wxWindow *parent, wxWindowID id,
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
-               long style = wxDV_SINGLE | wxDV_NO_HEADER,
+//               const wxSize& size = wxDefaultSize,
+//               long style = wxDV_SINGLE | wxDV_NO_HEADER,
+               long style = 0,
                const wxValidator& validator = wxDefaultValidator );
-  ~TreePortfolioPositionOrder(void);
+  ~VuTreePortfolioPositionOrder(void);
 protected:
 private:
 

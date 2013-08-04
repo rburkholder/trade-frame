@@ -36,37 +36,6 @@ ModelPortfolio::ModelPortfolio(void)
 ModelPortfolio::~ModelPortfolio(void) {
 //  m_mgrPortfolio.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
 }
-/*
-// may not need this any more.  old style of processing?
-namespace ProcessPortolios {
-
-  template<class F>
-  struct structProcessPortfolioIds {
-    structProcessPortfolioIds( DataViewItemPortfolio& parent,
-      ModelPortfolio& model, PortfolioManager& manager )
-      : m_parent( parent ), m_model( model ), m_manager( manager ) {};
-    void operator()( ou::tf::keytypes::idPortfolio_t& id ) {
-      mapItems_iter_t iter = m_mapItems.find( id );
-      if ( m_mapItems.end() == iter ) {
-      }
-      DataViewItemPortfolio item( m_manager.GetPortfolio( id ) );
-      //m_model.ItemAdded( parent, 
-      wxAny anyId = id;
-      // may desire to use boost::fusion to work on variable types
-      // assign a wxDataViewItem
-      // process fields to 
-    };
-  private:
-    DataViewItemPortfolio& m_parent;
-    ModelPortfolio& m_model;
-    PortfolioManager& m_manager;
-  };
-
-} // ns ProcessPortfolios
-*/
-//void ModelPortfolio::PopulateWithRootPortfolios( void ) { 
-//  m_mgrPortfolio.ScanPortfolios( boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, this, boost::phoenix::arg_names::arg1 ) );
-//}
 
 // part of the process of the initial sync, can be used for adding additional portfolios
 void ModelPortfolio::AddPortfolioToModel( const idPortfolio_t& idPortfolio ) {
@@ -91,7 +60,6 @@ unsigned int ModelPortfolio::GetChildren(	const wxDataViewItem& item, wxDataView
   if ( 0 == item.GetID() ) {
     for ( mapItems_iter_t iter = m_mapItems.begin(); m_mapItems.end() != iter; ++iter ) {
       children.Add( iter->second );
-      //iter->second.Get()->GetRow().idPortfolio
     }
     count = m_mapItems.size();
   }
@@ -99,9 +67,10 @@ unsigned int ModelPortfolio::GetChildren(	const wxDataViewItem& item, wxDataView
 }
 
 void ModelPortfolio::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
+  // use fusion to create array of type calls?
   switch ( col ) {
   case 0:
-    variant = reinterpret_cast<const DataViewItemPortfolio&>( item ).Value()->GetRow().idPortfolio;
+    reinterpret_cast<const DataViewItemPortfolio&>( item ).GetFirstColumn( variant );
     break;
   case 1:
     variant = reinterpret_cast<const DataViewItemPortfolio&>( item ).Value()->GetRow().dblRealizedPL;

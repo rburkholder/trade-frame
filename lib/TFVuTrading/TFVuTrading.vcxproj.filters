@@ -75,13 +75,13 @@
     <ClInclude Include="FrameMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TreePortfolioPositionOrder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ControllerPortfolioPositionOrderExecution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModelPortfolioPositionOrderExecution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VuTreePortfolioPositionOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -140,13 +140,13 @@
     <ClCompile Include="FrameMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TreePortfolioPositionOrder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ControllerPortfolioPositionOrderExecution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ModelPortfolioPositionOrderExecution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VuTreePortfolioPositionOrder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
