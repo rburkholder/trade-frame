@@ -21,7 +21,7 @@ using namespace boost::assign;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ModelOrder::ModelOrder(void): ModelBase() {
+ModelOrder::ModelOrder(void): ModelBase<ModelOrder>() {
   m_vColumnNames += "Status", "Type", "Side", "Price1", "Price2", 
     "Ordered", "Remaining", "Filled", "Fill Price", "Comm";
 }

@@ -26,7 +26,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void) 
-  : ModelBase(), m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() ),
+  : ModelBase<ModelPortfolioPositionOrderExecution>(), 
+  m_PortfolioManager( ou::tf::PortfolioManager::Instance() ), m_OrderManager( ou::tf::OrderManager::Instance() ),
   m_pItemPortfolioMaster( 0 )
 {
 
@@ -111,6 +112,11 @@ void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( void* pItem ) {
   assert( iter != m_mapItems.end() );
   switch (iter->second->ixTypes) {
     case ePortfolioMaster:
+      m_pModelExecution->ClearItems();
+      m_pModelOrder->ClearItems();
+      m_pModelPosition->ClearItems();
+      m_pModelPortfolio->ClearItems();
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
       break;
     case ePortfolioCurrency:
       break;

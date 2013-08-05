@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+
 #include <wx/dataview.h>
 
 namespace ou { // One Unified

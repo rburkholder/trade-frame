@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ModelPosition: public ModelBase {
+class ModelPosition: public ModelBase<ModelPosition> {
 public:
 
   typedef ou::tf::PortfolioManager PortfolioManager;
@@ -34,6 +34,8 @@ public:
       variant = (std::string&) m_ptr->GetRow().idPosition;
     }
   };
+
+  typedef std::map<idPosition_t, DataViewItemPosition> mapItems_t;
 
   ModelPosition(void);
   ~ModelPosition(void);

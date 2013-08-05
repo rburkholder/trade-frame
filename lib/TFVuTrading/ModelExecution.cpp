@@ -21,7 +21,7 @@ using namespace boost::assign;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ModelExecution::ModelExecution(void): ModelBase() {
+ModelExecution::ModelExecution(void): ModelBase<ModelExecution>() {
   m_vColumnNames += "Quan", "Price", "Side";
 }
 

@@ -23,7 +23,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ModelPortfolio: public ModelBase {
+class ModelPortfolio: public ModelBase<ModelPortfolio> {
 public:
 
   typedef ou::tf::PortfolioManager PortfolioManager;
@@ -38,16 +38,19 @@ public:
     }
   };
 
+  typedef std::map<void*,DataViewItemPortfolio*> mapItems_t;
+
   ModelPortfolio(void);
   ~ModelPortfolio(void);
 
-  void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
+  //void AddPortfolioToModel( const idPortfolio_t& idPortfolio );
+  void AddPortfolioToModel( DataViewItemPortfolio* );
+  void ClearItems( void );
 
 protected:
 private:
 
-//  typedef std::pair<idPortfolio_t, DataViewItemPortfolio> mapItem_pair_t;
-  typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
+//  typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
   typedef mapItems_t::const_iterator mapItems_citer_t;
   mapItems_t m_mapItems;
 

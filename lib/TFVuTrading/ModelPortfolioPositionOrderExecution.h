@@ -30,7 +30,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ModelPortfolioPositionOrderExecution: public ModelBase { // model for tree of portfolio, position, order, execution
+class ModelPortfolioPositionOrderExecution: public ModelBase<ModelPortfolioPositionOrderExecution> { // model for tree of portfolio, position, order, execution
 public:
 
   ModelPortfolioPositionOrderExecution(void);
@@ -62,10 +62,15 @@ private:
 
   typedef std::map<void*,DataViewItemBase*> mapItems_t;
 
-  typedef std::map<void*,DataViewItemPortfolio*> mapItemsPortfolio_t;
-  typedef std::map<void*,DataViewItemPosition*> mapItemsPosition_t;
-  typedef std::map<void*,DataViewItemOrder*> mapItemsOrder_t;
-  typedef std::map<void*,DataViewItemExecution*> mapItemsExecution_t;
+//  typedef std::map<void*,DataViewItemPortfolio*> mapItemsPortfolio_t;
+//  typedef std::map<void*,DataViewItemPosition*> mapItemsPosition_t;
+//  typedef std::map<void*,DataViewItemOrder*> mapItemsOrder_t;
+//  typedef std::map<void*,DataViewItemExecution*> mapItemsExecution_t;
+
+  typedef ModelPortfolio::mapItems_t mapItemsPortfolio_t;
+  typedef ModelPosition::mapItems_t mapItemsPosition_t;
+  typedef ModelOrder::mapItems_t mapItemsOrder_t;
+  typedef ModelExecution::mapItems_t mapItemsExecution_t;
 
   struct ItemExecution: public DataViewItemExecution {  // not in tree, is place holder of items
     ItemExecution( DataViewItemExecution::shared_ptr ptr ): DataViewItemExecution( ptr ) { };

@@ -20,7 +20,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class ModelOrder: public ModelBase {
+class ModelOrder: public ModelBase<ModelOrder> {
 public:
 
   typedef ou::tf::OrderManager OrderManager;
@@ -34,6 +34,8 @@ public:
       variant = (std::string&) m_ptr->GetRow().idOrder;
     }
   };
+
+  typedef std::map<idOrder_t, DataViewItemOrder> mapItems_t;
 
   ModelOrder(void);
   ~ModelOrder(void);

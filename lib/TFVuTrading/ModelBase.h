@@ -16,8 +16,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <boost/range.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 
@@ -28,24 +26,29 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// migrate to CRTP concept
+template<class T> // T inheriting class, M is map type
 class ModelBase: public wxDataViewModel {
 public:
 
-  ModelBase(void);
-  ~ModelBase(void);
+  ModelBase(void): wxDataViewModel() {};
+  ~ModelBase(void) {};
 
   template<class F> 
   void IterateColumnNames( F f ) {
     boost::for_each( m_vColumnNames, f );
   }
 
-  virtual bool IsContainer(	const wxDataViewItem&	item ) const;
-  virtual wxDataViewItem GetParent( const wxDataViewItem&	item ) const;
-  virtual unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
-  virtual unsigned int GetColumnCount( void ) const;
-  virtual wxString GetColumnType( unsigned int	col ) const;
-  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
-  virtual bool SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	);
+  // can convert from virtual to CRTP type calls.
+  virtual bool IsContainer(	const wxDataViewItem&	item ) const { return false; };
+  virtual wxDataViewItem GetParent( const wxDataViewItem&	item ) const { return m_itemNull; };
+  virtual unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const { assert( 0 ); return 0; };// called when clicking on plus
+  virtual unsigned int GetColumnCount( void ) const { return m_vColumnNames.size(); };
+  virtual wxString GetColumnType( unsigned int	col ) const { return "string"; };
+  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const { assert( 0 ); };
+  virtual bool SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	) { return false; };
+
+  virtual void ClearItems( void ) {};
 
 protected:
 
@@ -58,6 +61,9 @@ protected:
 private:
   
 };
+
+template<class T>
+wxDataViewItem ModelBase<T>::m_itemNull;
 
 } // namespace tf
 } // namespace ou
