@@ -36,8 +36,6 @@ public:
   ModelPortfolioPositionOrderExecution(void);
   ~ModelPortfolioPositionOrderExecution(void);
 
-  bool IsContainer(	const wxDataViewItem&	item ) const { return true; };  // true for being tree
-
   void LoadMasterPortfolio( void );
 
   ModelPortfolio* GetModelPortfolio( void ) { return m_pModelPortfolio; };
@@ -45,39 +43,65 @@ public:
   ModelOrder* GetModelOrder( void ) { return m_pModelOrder; };
   ModelExecution* GetModelExecution( void ) { return m_pModelExecution; };
 
-  typedef ModelPortfolio::DataViewItemPortfolio DataViewItemPortfolio;
-  typedef ModelPosition::DataViewItemPosition DataViewItemPosition;
-  typedef ModelOrder::DataViewItemOrder DataViewItemOrder;
-  typedef ModelExecution::DataViewItemExecution DataViewItemExecution;
-
+  bool IsContainer(	const wxDataViewItem&	item ) const;
+  wxDataViewItem GetParent( const wxDataViewItem&	item ) const;
   unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;
   void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const;
 
-  struct ItemExecution: public DataViewItemExecution {  // not in tree, is place holder of items
-  };
-  struct ItemOrder: public DataViewItemOrder {
-    std::set<ItemExecution> setItemExecution;
-  };
-  struct ItemPosition: public DataViewItemPosition {
-    std::set<ItemOrder> setItemOrder;
-  };
-  struct ItemPortfolio: public DataViewItemPortfolio {
-    std::set<ItemPortfolio> setItemPortfolio;
-    std::set<ItemPosition> setItemPosition;
-  };
-  struct ItemPortfolioCurrencySummary: public DataViewItemPortfolio {
-    std::set<ItemPortfolio> setItemPortfolio;
-    std::set<ItemPosition> setItemPosition;
-  };
-  struct ItemPortfolioMaster: public DataViewItemPortfolio {
-    ItemPortfolioMaster( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( ptr ) {};
-    std::set<ItemPortfolio> ItemPortfolioCurrencySummary;
-  };
+  void ClickedOnTreeItem( void* pItem );
 
 protected:
 private:
 
   typedef Portfolio::idPortfolio_t idPortfolio_t;
+
+  typedef ModelPortfolio::DataViewItemPortfolio DataViewItemPortfolio;
+  typedef ModelPosition::DataViewItemPosition DataViewItemPosition;
+  typedef ModelOrder::DataViewItemOrder DataViewItemOrder;
+  typedef ModelExecution::DataViewItemExecution DataViewItemExecution;
+
+  typedef std::map<void*,DataViewItemBase*> mapItems_t;
+
+  typedef std::map<void*,DataViewItemPortfolio*> mapItemsPortfolio_t;
+  typedef std::map<void*,DataViewItemPosition*> mapItemsPosition_t;
+  typedef std::map<void*,DataViewItemOrder*> mapItemsOrder_t;
+  typedef std::map<void*,DataViewItemExecution*> mapItemsExecution_t;
+
+  struct ItemExecution: public DataViewItemExecution {  // not in tree, is place holder of items
+    ItemExecution( DataViewItemExecution::shared_ptr ptr ): DataViewItemExecution( ptr ) { };
+  };
+  struct ItemOrder: public DataViewItemOrder {
+    ItemOrder( DataViewItemOrder::shared_ptr ptr ): DataViewItemOrder( ptr ) { };
+    mapItemsExecution_t mapItemExecution;
+    virtual bool IsContainer( void ) { return ( 0 != mapItemExecution.size() ); };
+  };
+  struct ItemPosition: public DataViewItemPosition {
+    ItemPosition( DataViewItemPosition::shared_ptr ptr ): DataViewItemPosition( ptr ) { };
+    mapItemsOrder_t mapItemOrder;
+    virtual bool IsContainer( void ) { return ( 0 != mapItemOrder.size() ); };
+};
+  struct ItemPortfolio: public DataViewItemPortfolio {
+    ItemPortfolio( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( ptr ) { };
+    mapItemsPortfolio_t mapItemPortfolio;
+    mapItemsPosition_t mapItemPosition;
+    virtual bool IsContainer( void ) { 
+      return ( ( 0 != mapItemPortfolio.size() ) || ( 0 != mapItemPosition.size() ) ); };
+  };
+  struct ItemPortfolioCurrencySummary: public DataViewItemPortfolio {
+    ItemPortfolioCurrencySummary( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( ptr ) { ixTypes = ePortfolioCurrency; };
+    mapItemsPortfolio_t mapItemPortfolio;
+    mapItemsPosition_t mapItemPosition;
+    virtual bool IsContainer( void ) { 
+      return ( ( 0 != mapItemPortfolio.size() ) || ( 0 != mapItemPosition.size() ) ); };
+  };
+  struct ItemPortfolioMaster: public DataViewItemPortfolio {
+    ItemPortfolioMaster( DataViewItemPortfolio::shared_ptr ptr ): DataViewItemPortfolio( ptr ) { ixTypes = ePortfolioMaster; };
+    mapItemsPortfolio_t mapItemPortfolioCurrencySummary;
+    virtual bool IsContainer( void ) { return ( 0 != mapItemPortfolioCurrencySummary.size() ); };
+  };
+
+  ItemPortfolioMaster* m_pItemPortfolioMaster;
+  mapItems_t m_mapItems;  // collection of all items in tree
 
   ModelPortfolio* m_pModelPortfolio;
   ModelPosition* m_pModelPosition;
@@ -86,10 +110,6 @@ private:
 
   ou::tf::PortfolioManager& m_PortfolioManager;
   ou::tf::OrderManager& m_OrderManager;
-
-  typedef std::map<void*,ModelBase::DataViewItemBase*> mapItems_t;
-  mapItems_t m_mapItems;
-  ItemPortfolioMaster* m_pItemPortfolioMaster;
 
   void HandleLoadMasterPortfolio( const idPortfolio_t& idPortfolio );
 

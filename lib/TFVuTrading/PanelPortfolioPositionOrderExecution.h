@@ -58,6 +58,8 @@ public:
 
   ou::Delegate<PanelPortfolioPositionOrderExecution*> NotifyClose;
 
+  VuTreePortfolioPositionOrder* GetTree( void ) { return m_pDVPPOE; };
+
 protected:
 private:
 

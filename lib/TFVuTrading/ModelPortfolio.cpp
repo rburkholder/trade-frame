@@ -39,10 +39,10 @@ ModelPortfolio::~ModelPortfolio(void) {
 
 // part of the process of the initial sync, can be used for adding additional portfolios
 void ModelPortfolio::AddPortfolioToModel( const idPortfolio_t& idPortfolio ) {
-  mapItems_iter_t iter = m_mapItems.find( idPortfolio );
+  mapItems_citer_t iter = m_mapItems.find( idPortfolio );
   if ( m_mapItems.end() == iter ) {
     DataViewItemPortfolio item( m_mgrPortfolio.GetPortfolio( idPortfolio ) );
-    iter = m_mapItems.insert( m_mapItems.begin(), mapItem_pair_t( idPortfolio, item ) );
+    iter = m_mapItems.insert( m_mapItems.begin(), mapItems_t::value_type( idPortfolio, item ) );
     ItemAdded( m_itemNull, item );
     ItemChanged( item );
   }
@@ -58,7 +58,7 @@ unsigned int ModelPortfolio::GetChildren(	const wxDataViewItem& item, wxDataView
   // may need refinement to make use of item properly in a tree environment
   unsigned int count = 0;
   if ( 0 == item.GetID() ) {
-    for ( mapItems_iter_t iter = m_mapItems.begin(); m_mapItems.end() != iter; ++iter ) {
+    for ( mapItems_citer_t iter = m_mapItems.begin(); m_mapItems.end() != iter; ++iter ) {
       children.Add( iter->second );
     }
     count = m_mapItems.size();
@@ -70,7 +70,7 @@ void ModelPortfolio::GetValue( wxVariant& variant, const wxDataViewItem& item, u
   // use fusion to create array of type calls?
   switch ( col ) {
   case 0:
-    reinterpret_cast<const DataViewItemPortfolio&>( item ).GetFirstColumn( variant );
+    reinterpret_cast<const DataViewItemPortfolio&>( item ).AssignFirstColumn( variant );
     break;
   case 1:
     variant = reinterpret_cast<const DataViewItemPortfolio&>( item ).Value()->GetRow().dblRealizedPL;

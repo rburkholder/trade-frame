@@ -27,8 +27,10 @@ public:
   typedef OrderManager::idExecution_t idExecution_t;
   typedef OrderManager::pExecution_t pExecution_t;
 
-  struct DataViewItemExecution: public ModelBase::DataViewItem<pExecution_t::element_type> {
-    void GetFirstColumn( wxVariant& variant ) const {
+  struct DataViewItemExecution: public DataViewItem<pExecution_t::element_type> {
+    DataViewItemExecution( shared_ptr& ptr )
+      : DataViewItem<pExecution_t::element_type>( ptr ) { ixTypes = eExecution; };
+    void AssignFirstColumn( wxVariant& variant ) const {
       variant = (std::string&) m_ptr->GetRow().idExecution;
     }
   };

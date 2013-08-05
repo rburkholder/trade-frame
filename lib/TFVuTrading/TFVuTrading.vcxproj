@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ControllerPortfolioPositionOrderExecution.h" />
+    <ClInclude Include="DataViewItem.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelExecution.h" />

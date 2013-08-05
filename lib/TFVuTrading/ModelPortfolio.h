@@ -30,10 +30,10 @@ public:
   typedef PortfolioManager::idPortfolio_t idPortfolio_t;
   typedef PortfolioManager::pPortfolio_t pPortfolio_t;
 
-  struct DataViewItemPortfolio: public ModelBase::DataViewItem<pPortfolio_t::element_type> {
+  struct DataViewItemPortfolio: public DataViewItem<pPortfolio_t::element_type> {
     DataViewItemPortfolio( shared_ptr& ptr )
-      : ModelBase::DataViewItem<pPortfolio_t::element_type>( ptr ) {};
-    void GetFirstColumn( wxVariant& variant ) const {
+      : DataViewItem<pPortfolio_t::element_type>( ptr ) { ixTypes = ePortfolio; };
+    void AssignFirstColumn( wxVariant& variant ) const {
       variant = m_ptr->GetRow().idPortfolio;
     }
   };
@@ -46,9 +46,9 @@ public:
 protected:
 private:
 
-  typedef std::pair<idPortfolio_t, DataViewItemPortfolio> mapItem_pair_t;
+//  typedef std::pair<idPortfolio_t, DataViewItemPortfolio> mapItem_pair_t;
   typedef std::map<idPortfolio_t, DataViewItemPortfolio> mapItems_t;
-  typedef mapItems_t::const_iterator mapItems_iter_t;
+  typedef mapItems_t::const_iterator mapItems_citer_t;
   mapItems_t m_mapItems;
 
   unsigned int GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const;

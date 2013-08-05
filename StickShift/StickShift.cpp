@@ -106,16 +106,16 @@ bool AppStickShift::OnInit() {
 
   m_db.Open( "StickShift.db" );
 
-  wxFrame* p = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management" );
+  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management" );
 
   m_pMPPOE = new MPPOE_t;
 
-  m_pPPPOE = new PPPOE_t( m_pMPPOE, p );
+  m_pPPPOE = new PPPOE_t( m_pMPPOE, m_pFPPOE );
   m_pPPPOE->Show();
 
   m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
   
-  p->Show();
+  m_pFPPOE->Show();
 
   return 1;
 

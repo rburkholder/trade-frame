@@ -27,8 +27,10 @@ public:
   typedef PortfolioManager::idPosition_t idPosition_t;
   typedef PortfolioManager::pPosition_t pPosition_t;
 
-  struct DataViewItemPosition: public ModelBase::DataViewItem<pPosition_t::element_type> {
-    void GetFirstColumn( wxVariant& variant ) const {
+  struct DataViewItemPosition: public DataViewItem<pPosition_t::element_type> {
+    DataViewItemPosition( shared_ptr& ptr )
+      : DataViewItem<pPosition_t::element_type>( ptr ) { ixTypes = ePosition; };
+    void AssignFirstColumn( wxVariant& variant ) const {
       variant = (std::string&) m_ptr->GetRow().idPosition;
     }
   };

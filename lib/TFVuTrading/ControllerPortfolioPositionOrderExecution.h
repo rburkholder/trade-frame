@@ -37,6 +37,13 @@ private:
 
   void HandlePanelPortfolioPositionOrderExecutionClose( PPPOE_t* );
 
+  void HandleDVSelectionChanged( wxDataViewEvent& event );
+  void HandleDVItemCollapsed( wxDataViewEvent& event );
+  void HandleDVItemExpanded( wxDataViewEvent& event );
+  void HandleDVCollapsing( wxDataViewEvent& event );
+  void HandleDVExpanding( wxDataViewEvent& event );
+  void HandleDVContextMenu( wxDataViewEvent& event );
+
 };
 
 } // namespace tf

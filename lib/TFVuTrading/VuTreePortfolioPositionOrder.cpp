@@ -44,7 +44,7 @@ void VuTreePortfolioPositionOrder::Construct( void ) {
 
 //  structPopulateColumns f( this );
 //  m_pdvmdlPPOE.get()->IterateColumnNames( f );
-  wxDataViewColumn* col = new wxDataViewColumn( "Portfolios", new wxDataViewTextRenderer(), 0 );
+  wxDataViewColumn* col = new wxDataViewColumn( "Portfolio Manager", new wxDataViewTextRenderer(), 0 );
   col->SetAlignment( wxAlignment::wxALIGN_LEFT );
   this->AppendColumn( col );
 

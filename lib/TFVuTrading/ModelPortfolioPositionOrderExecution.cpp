@@ -64,6 +64,28 @@ void ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio( const idPo
   ItemChanged( *m_pItemPortfolioMaster );
 }
 
+bool ModelPortfolioPositionOrderExecution::IsContainer(	const wxDataViewItem&	item ) const {
+  bool bReturn = false;
+  if ( 0 == item.GetID() ) {
+    bReturn = true;
+  }
+  else {
+    mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
+    assert( m_mapItems.end() != iter );
+    bReturn = iter->second->IsContainer();
+  }
+  return bReturn;
+}
+
+wxDataViewItem ModelPortfolioPositionOrderExecution::GetParent( const wxDataViewItem&	item ) const {
+  if ( 0 == item.GetID() ) {
+    assert( 0 );
+  }
+  mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
+  assert( m_mapItems.end() != iter );
+  return ( *iter->second->pParent );
+}
+
 unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataViewItem& item, wxDataViewItemArray& children	) const {
   // with columns this gets called without having to scan
   unsigned int count( 0 );
@@ -81,7 +103,29 @@ unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataView
 void ModelPortfolioPositionOrderExecution::GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col	) const {
   mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
   assert( iter != m_mapItems.end() );
-  iter->second->GetFirstColumn( variant );
+  iter->second->AssignFirstColumn( variant );
+}
+
+void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( void* pItem ) {
+  mapItems_t::const_iterator iter = m_mapItems.find( pItem );
+  assert( iter != m_mapItems.end() );
+  switch (iter->second->ixTypes) {
+    case ePortfolioMaster:
+      break;
+    case ePortfolioCurrency:
+      break;
+    case ePortfolio:
+      break;
+    case ePosition:
+      break;
+    case eOrder:
+      break;
+    case eExecution:
+      break;
+    case eUnknown:
+      assert( 0 );
+      break;
+  }
 }
 
 } // namespace tf

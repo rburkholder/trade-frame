@@ -73,6 +73,7 @@ private:
   pPosition_t m_pPosition;
 
   FrameMain* m_pFrameMain;
+  FrameMain* m_pFPPOE;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::PanelManualOrder* m_pPanelManualOrder;
