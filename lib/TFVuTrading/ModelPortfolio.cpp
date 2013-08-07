@@ -47,7 +47,7 @@ void ModelPortfolio::AddPortfolioToModel( DataViewItemPortfolio* pItem ) {
 //    iter = m_mapItems.insert( m_mapItems.begin(), mapItems_t::value_type( pItem->GetID(), pItem ) );
     iter = m_mapItems.insert( m_mapItems.begin(), mapItems_t::value_type( pItem->GetID(), pItem ) );
     ItemAdded( m_itemNull, *pItem );
-    //ItemChanged( item );
+    //ItemChanged( *pItem );
   }
   // may desire to use boost::fusion to work on variable types
 }
@@ -94,11 +94,12 @@ void ModelPortfolio::GetValue( wxVariant& variant, const wxDataViewItem& item, u
 }
 
 // maybe add to base class
+// need to track point of last click, if last click was same place, don't do the same thing
 void ModelPortfolio::ClearItems( void ) {
   for ( mapItems_t::iterator iter = m_mapItems.begin(); m_mapItems.end() != iter; ++iter ) {
     ItemDeleted( m_itemNull, *iter->second );
-    m_mapItems.erase( iter );
   }
+  m_mapItems.clear();
 }
 
 } // namespace tf

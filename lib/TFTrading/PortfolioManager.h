@@ -84,6 +84,7 @@ public:
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_cref pInstrument
     );
+
   pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName );
   void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
   void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
@@ -96,6 +97,10 @@ public:
   ou::Delegate<const idPortfolio_t&> OnPortfolioAdded;
   ou::Delegate<const idPortfolio_t&> OnPortfolioUpdated;
   ou::Delegate<const idPortfolio_t&> OnPortfolioDeleted;
+
+  ou::Delegate<const idPosition_t&> OnPositionAdded;
+  ou::Delegate<const idPosition_t&> OnPositionUpdated;
+  ou::Delegate<const idPosition_t&> OnPositionDeleted;
 
   template<class F> void ScanPortfolios( F, const idPortfolio_t& id = "" );
   template<class F> void ScanPositions( mapPosition_t&, F );

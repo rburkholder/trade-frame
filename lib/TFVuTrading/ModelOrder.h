@@ -29,7 +29,7 @@ public:
 
   struct DataViewItemOrder: public DataViewItem<pOrder_t::element_type> {
     DataViewItemOrder( shared_ptr& ptr )
-      : DataViewItem<pOrder_t::element_type>( ptr ) { ixTypes = eOrder; };
+      : DataViewItem<pOrder_t::element_type>( ptr ) { ixType = eOrder; };
     void AssignFirstColumn( wxVariant& variant ) const {
       variant = (std::string&) m_ptr->GetRow().idOrder;
     }

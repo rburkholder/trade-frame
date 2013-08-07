@@ -57,6 +57,32 @@ bool PanelPortfolioPositionOrderExecution::Create( /*wxWindow* parent, const wxS
 }
 
 void PanelPortfolioPositionOrderExecution::Init( void ) {
+  m_vContextMenu.resize( eModelTypeCount );
+  wxMenu* pMenu;
+  pMenu = new wxMenu;
+//  pMenu->Append( 1, "Add Position" );
+  pMenu->Append( eTreeCMPortfolioMasterAddCurrencySummary, "Place Holder" );
+  m_vContextMenu[ ePortfolioMaster ].reset( pMenu );
+
+  pMenu = new wxMenu;
+  pMenu->Append( eTreeCMPortfolioCurrencyAddPosition, "Add Position" );
+  pMenu->Append( eTreeCMPortfolioCurrencyAddPortfolio, "Add Portfolio" );
+  m_vContextMenu[ ePortfolioCurrency ].reset( pMenu );
+
+  pMenu = new wxMenu;
+  pMenu->Append( eTreeCMPortfolioAddPosition, "Add Position" );
+  pMenu->Append( eTreeCMPortfolioAddPortfolio, "Add Portfolio" );
+  m_vContextMenu[ ePortfolio ].reset( pMenu );
+
+  pMenu = new wxMenu;
+  pMenu->Append( eTreeCMPositionCreateOrder, "Create Order" );
+  pMenu->Append( eTreeCMPositionClosePosition, "Close Position" ); // show only if position is non-zero
+  m_vContextMenu[ ePosition ].reset( pMenu );
+
+  pMenu = new wxMenu;
+  pMenu->Append( eTreeCMOrderCancelOrder, "Cancel Order" );
+  m_vContextMenu[ eOrder ].reset( pMenu );
+
 }
 
 void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
@@ -154,7 +180,9 @@ void PanelPortfolioPositionOrderExecution::OnFocusChange( wxFocusEvent& event ) 
 //  if ( 0 != OnFocusPropogate ) OnFocusPropogate( m_ixStruct );
 }
 
-
+void PanelPortfolioPositionOrderExecution::ClickedOnTreeContextMenu( EModelType mt ) {
+  m_pDVPPOE->PopupMenu( m_vContextMenu[ mt ].get() );
+}
 
 } // namespace tf
 } // namespace ou

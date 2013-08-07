@@ -32,7 +32,7 @@ public:
 
   struct DataViewItemPortfolio: public DataViewItem<pPortfolio_t::element_type> {
     DataViewItemPortfolio( shared_ptr& ptr )
-      : DataViewItem<pPortfolio_t::element_type>( ptr ) { ixTypes = ePortfolio; };
+      : DataViewItem<pPortfolio_t::element_type>( ptr ) { ixType = ePortfolio; };
     void AssignFirstColumn( wxVariant& variant ) const {
       variant = m_ptr->GetRow().idPortfolio;
     }

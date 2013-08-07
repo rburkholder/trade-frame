@@ -58,7 +58,7 @@ public:
   //typedef ou::tf::Currency::enumCurrency currency_t;
   typedef Currency::type currency_t;
 
-  enum EPortfolioType { Master=1, AlternateCurrency=2, Standard=10, MultiLeggedPosition, Basket };
+  enum EPortfolioType { Master=1, CurrencySummary=2, Standard=10, MultiLeggedPosition, Basket };
   // only one Master, can only have AlternateCurrency at next level below
   // AlternateCurrency only at level below Master, can have any combination of lower three Portfolio types
   // Standard can have variety of position types
@@ -75,8 +75,9 @@ public:
       ou::db::Field( a, "active", bActive );
       ou::db::Field( a, "currency", sCurrency );
       ou::db::Field( a, "description", sDescription );
-      ou::db::Field( a, "realizedpl", dblRealizedPL );  // unrealized is not here as it is a dynamic value, realized is non-dynamic
+      ou::db::Field( a, "realizedpl", dblRealizedPL );  
       ou::db::Field( a, "commission", dblCommissionsPaid );
+      // unrealized is not here as it is a dynamic value, realized is non-dynamic
     }
 
     idPortfolio_t idPortfolio;
@@ -162,9 +163,6 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
-//  ou::Delegate<const Portfolio*> OnQuote;
-//  ou::Delegate<const Portfolio*> OnTrade;
-
   ou::Delegate<const Portfolio&> OnExecutionUpdate;
   ou::Delegate<const Portfolio&> OnCommissionUpdate;
 
@@ -187,8 +185,6 @@ private:
   typedef mapPortfolios_t::iterator mapPortfolios_iter_t;
   mapPortfolios_t m_mapSubPortfolios;
 
-//  pPortfolio_t m_pOwnerPortfolio;
-
   bool m_bCanUseDb;
 
   TableRowDef m_row;
@@ -210,9 +206,6 @@ private:
   structPL m_plMin;
 
   void ReCalc( void );  // not used at the moment, may require tuning
-
-//  void HandleQuote( const Position* );
-//  void HandleTrade( const Position* );
 
   void HandleExecution( const PositionDelta_delegate_t& );
   void HandleCommission( const PositionDelta_delegate_t& );

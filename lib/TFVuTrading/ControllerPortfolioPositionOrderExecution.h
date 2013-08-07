@@ -29,11 +29,17 @@ public:
 
   ControllerPortfolioPositionOrderExecution( MPPOE_t*, PPPOE_t* );
   ~ControllerPortfolioPositionOrderExecution(void);
+
+  void LoadInitialData( void );
+
 protected:
 private:
 
   MPPOE_t* m_pMPPOE;
   PPPOE_t* m_pPPPOE;
+
+  wxDataViewItem m_dvLastClickedItem;  // used to maintain state for menu bar originated commands
+  wxDataViewItem m_dvItem;
 
   void HandlePanelPortfolioPositionOrderExecutionClose( PPPOE_t* );
 
@@ -42,7 +48,15 @@ private:
   void HandleDVItemExpanded( wxDataViewEvent& event );
   void HandleDVCollapsing( wxDataViewEvent& event );
   void HandleDVExpanding( wxDataViewEvent& event );
-  void HandleDVContextMenu( wxDataViewEvent& event );
+  void HandleDVContextMenuCreate( wxDataViewEvent& event );
+  void HandleDVContextMenuClickPortfolioMasterAddPortfolioCurrencySummary( wxCommandEvent& event );
+  void HandleDVContextMenuClickPortfolioCurrencyAddPortfolio( wxCommandEvent& event );
+  void HandleDVContextMenuClickPortfolioCurrencyAddPosition( wxCommandEvent& event );
+  void HandleDVContextMenuClickPortfolioAddPortfolio( wxCommandEvent& event );
+  void HandleDVContextMenuClickPortfolioAddPosition( wxCommandEvent& event );
+  void HandleDVContextMenuClickPositionCreateOrder( wxCommandEvent& event );
+  void HandleDVContextMenuClickPositionClosePosition( wxCommandEvent& event );
+  void HandleDVContextMenuClickOrderCancelOrder( wxCommandEvent& event );
 
 };
 

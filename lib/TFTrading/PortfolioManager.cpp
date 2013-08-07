@@ -255,6 +255,8 @@ void PortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
   UpdateRecord<idPortfolio_t, Portfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
     idPortfolio, p->GetRow(), m_mapPortfolios, "portfolioid = ?" );
 
+  OnPortfolioUpdated( idPortfolio );
+
 }
 
 namespace PortfolioManagerQueries {
@@ -296,12 +298,16 @@ void PortfolioManager::LoadActivePortfolios( void ) {
     std::pair<mapPortfolios_iter_t, bool> response;
     response = m_mapPortfolios.insert( mapPortfolio_pair_t( rowPortfolio.idPortfolio, structPortfolio( pPortfolio ) ) );
     if ( false == response.second ) {
-      throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
+      // 2013/08/06 need a different way of handling reloads.
+      // will need to totally invalidate the cache, this record as well as all records dependent upon this key
+      // need a way to compare new / old records to see if there is a problem?^
+      // may also need to implement events where records are updated (not too difficult) and deleted (more involved)
+      // this issue results when creating the database, and preloading db with records, and then reloading records
+      // or high level routines don't call this during the same run as when the db has been created
+//      throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
     }
 
-//    if ( !rowPortfolio.idOwner.empty() ) {
-      UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
-//    }
+    UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 
     pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
@@ -334,6 +340,7 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
     mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
     pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
     pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
+    OnPositionAdded( pPosition->GetRow().idPosition );
   }
 }
 
@@ -375,7 +382,9 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
     throw std::runtime_error( "ConstructPosition:  idPortfolio does not exist" );
   }
 
-  assert( "" != sName );
+  if ( "" == sName ) {
+    throw std::runtime_error( "ConstructPosition: name is empty" );
+  }
 
   mapPosition_iter_t iterPosition = iterPortfolio->second.mapPosition.find( sName );
   if ( iterPortfolio->second.mapPosition.end() != iterPosition ) {
@@ -397,6 +406,8 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
   pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
 
   iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
+
+  OnPositionAdded( idPosition );
 
   return pPosition;
 }
@@ -433,8 +444,10 @@ namespace PortfolioManagerQueries {
 
 void PortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
+  idPosition_t idPosition( pPosition->GetRow().idPosition );
   UpdateRecord<idPosition_t, Position::TableRowDefNoKey, PortfolioManagerQueries::PositionUpdate>(
-    pPosition->GetRow().idPosition, dynamic_cast<const Position::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
+    idPosition, dynamic_cast<const Position::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
+  OnPositionUpdated( idPosition );
 }
 
 namespace PortfolioManagerQueries {
@@ -450,6 +463,7 @@ namespace PortfolioManagerQueries {
 
 void PortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
   pPosition_t pPosition( GetPosition( idPortfolio, sName ) );
+  idPosition_t idPosition( pPosition->GetRow().idPosition );
   if ( pPosition->OrdersPending() ) {
     throw std::runtime_error( "PortfolioManager::DeletePosition has orders pending" );
   }
@@ -464,6 +478,7 @@ void PortfolioManager::DeletePosition( const idPortfolio_t& idPortfolio, const s
       throw std::runtime_error( "PortfolioManager::DeletePosition position has dependencies" );
     }
   }
+  OnPositionDeleted( idPosition );
 }
 
 

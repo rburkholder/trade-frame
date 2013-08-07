@@ -22,14 +22,14 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-enum ETypes { eUnknown=0, ePortfolioMaster, ePortfolioCurrency, ePortfolio, ePosition, eOrder, eExecution };
+enum EModelType { eUnknown=0, ePortfolioMaster, ePortfolioCurrency, ePortfolio, ePosition, eOrder, eExecution, eModelTypeCount };
 
 struct DataViewItemBase: public wxDataViewItem {
   DataViewItemBase( void* p, DataViewItemBase* pParent_ = 0 ): wxDataViewItem( p ), pParent( pParent_ ) {};
   ~DataViewItemBase( void ) {};
   virtual void AssignFirstColumn( wxVariant& variant ) const {};  // for getting polymorphic stuff for the tree
   virtual bool IsContainer( void ) { return false; };
-  ETypes ixTypes;
+  EModelType ixType;
   DataViewItemBase* pParent;
 };
 

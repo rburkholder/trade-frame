@@ -29,7 +29,7 @@ public:
 
   struct DataViewItemPosition: public DataViewItem<pPosition_t::element_type> {
     DataViewItemPosition( shared_ptr& ptr )
-      : DataViewItem<pPosition_t::element_type>( ptr ) { ixTypes = ePosition; };
+      : DataViewItem<pPosition_t::element_type>( ptr ) { ixType = ePosition; };
     void AssignFirstColumn( wxVariant& variant ) const {
       variant = (std::string&) m_ptr->GetRow().idPosition;
     }

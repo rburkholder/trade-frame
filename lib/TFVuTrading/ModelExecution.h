@@ -29,7 +29,7 @@ public:
 
   struct DataViewItemExecution: public DataViewItem<pExecution_t::element_type> {
     DataViewItemExecution( shared_ptr& ptr )
-      : DataViewItem<pExecution_t::element_type>( ptr ) { ixTypes = eExecution; };
+      : DataViewItem<pExecution_t::element_type>( ptr ) { ixType = eExecution; };
     void AssignFirstColumn( wxVariant& variant ) const {
       variant = (std::string&) m_ptr->GetRow().idExecution;
     }

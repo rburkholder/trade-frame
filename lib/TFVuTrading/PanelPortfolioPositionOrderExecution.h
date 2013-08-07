@@ -13,6 +13,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include <OUCommon/Delegate.h>
 
 #include "VuPortfolios.h"
@@ -34,6 +38,18 @@ namespace tf { // TradeFrame
 
 class PanelPortfolioPositionOrderExecution: public wxPanel {
 public:
+
+  enum ETreeContextMenuTypes {
+    eTreeCMPortfolioMasterAddCurrencySummary,
+    eTreeCMPortfolioCurrencyAddPortfolio,
+    eTreeCMPortfolioCurrencyAddPosition,
+    eTreeCMPortfolioAddPortfolio,
+    eTreeCMPortfolioAddPosition,
+    eTreeCMPositionCreateOrder,
+    eTreeCMPositionClosePosition,
+    eTreeCMOrderCancelOrder,
+    eTreeCMCount_
+  };
 
   typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
 
@@ -60,11 +76,22 @@ public:
 
   VuTreePortfolioPositionOrder* GetTree( void ) { return m_pDVPPOE; };
 
+  void ClickedOnTreeContextMenu( EModelType );
+
 protected:
 private:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELPPOE
   };
+
+  typedef boost::shared_ptr<wxMenu> pwxMenu_t;
+  typedef std::vector<pwxMenu_t> vContextMenu_t;
+  vContextMenu_t m_vContextMenu;
+//  pwxMenu_t m_pMenuTreeContextPortfolioMaster;
+//  pwxMenu_t m_pMenuTreeContextPortfolioCurrency;
+//  pwxMenu_t m_pMenuTreeContextPortfolio;
+//  pwxMenu_t m_pMenuTreeContextPosition;
+//  pwxMenu_t m_pMenuTreeContextOrder;
 
   VuPortfolios* m_pDVPortfolios;
   VuPositions* m_pDVPositions;

@@ -29,10 +29,48 @@ ControllerPortfolioPositionOrderExecution::ControllerPortfolioPositionOrderExecu
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDED, &ControllerPortfolioPositionOrderExecution::HandleDVItemExpanded, this );
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_COLLAPSING, &ControllerPortfolioPositionOrderExecution::HandleDVCollapsing, this );
   m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_EXPANDING, &ControllerPortfolioPositionOrderExecution::HandleDVExpanding, this );
-  m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &ControllerPortfolioPositionOrderExecution::HandleDVContextMenu, this );
+  m_pPPPOE->GetTree()->Bind( wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuCreate, this );
+  // wxEVT_CONTEXT_MENU, wxContextMenuEvent
+  //  wxEVT_COMMAND_MENU_SELECTED, wxCommandEvent
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioMasterAddPortfolioCurrencySummary, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPortfolioMasterAddCurrencySummary );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioCurrencyAddPortfolio, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPortfolioCurrencyAddPortfolio );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioCurrencyAddPosition, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPortfolioCurrencyAddPosition );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioAddPortfolio, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPortfolioAddPortfolio );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioAddPosition, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPortfolioAddPosition );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPositionCreateOrder, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPositionCreateOrder );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPositionClosePosition, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMPositionClosePosition );
+  m_pPPPOE->GetTree()->Bind( 
+    wxEVT_COMMAND_MENU_SELECTED, 
+    &ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickOrderCancelOrder, this, 
+    PanelPortfolioPositionOrderExecution::eTreeCMOrderCancelOrder );
 }
 
 ControllerPortfolioPositionOrderExecution::~ControllerPortfolioPositionOrderExecution(void) {
+}
+
+void ControllerPortfolioPositionOrderExecution::LoadInitialData( void ) {
+  ou::tf::PortfolioManager::Instance().LoadActivePortfolios();
 }
 
 void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrderExecutionClose( PanelPortfolioPositionOrderExecution* ) {
@@ -43,11 +81,8 @@ void ControllerPortfolioPositionOrderExecution::HandlePanelPortfolioPositionOrde
 }
 
 void ControllerPortfolioPositionOrderExecution::HandleDVSelectionChanged( wxDataViewEvent& event ) {
-  //ModelBase::DataViewItemBase* 
-  //event.GetItem()
-  //switch 
-  //;
-  m_pMPPOE->ClickedOnTreeItem( event.GetItem().GetID() );
+  m_dvLastClickedItem = event.GetItem();
+  m_pMPPOE->ClickedOnTreeItem( m_dvLastClickedItem.GetID() );
 }
 
 void ControllerPortfolioPositionOrderExecution::HandleDVItemCollapsed( wxDataViewEvent& event ) {
@@ -62,7 +97,35 @@ void ControllerPortfolioPositionOrderExecution::HandleDVCollapsing( wxDataViewEv
 void ControllerPortfolioPositionOrderExecution::HandleDVExpanding( wxDataViewEvent& event ) {
 }
 
-void ControllerPortfolioPositionOrderExecution::HandleDVContextMenu( wxDataViewEvent& event ) {
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuCreate( wxDataViewEvent& event ) {
+  m_dvItem = event.GetItem();  // used when the context menu item is clicked
+  m_pPPPOE->ClickedOnTreeContextMenu( m_pMPPOE->GetModelType( m_dvItem ) );
+}
+
+// ==============
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioMasterAddPortfolioCurrencySummary( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioCurrencyAddPortfolio( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioCurrencyAddPosition( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioAddPortfolio( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPortfolioAddPosition( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPositionCreateOrder( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickPositionClosePosition( wxCommandEvent& event ) {
+}
+
+void ControllerPortfolioPositionOrderExecution::HandleDVContextMenuClickOrderCancelOrder( wxCommandEvent& event ) {
 }
 
 

@@ -88,8 +88,6 @@ Portfolio::pPosition_t Portfolio::AddPosition( const std::string &sName, pPositi
   m_mapPositionsViaUserName.insert( mapPositions_pair_t( sName, pPosition ) );
   m_mapPositionsViaInstrumentName.insert( mapPositions_pair_t( sInstrumentName, pPosition ) );
 
-//  pPosition->OnQuote.Add( MakeDelegate( this, &Portfolio::HandleQuote ) );
-//  pPosition->OnTrade.Add( MakeDelegate( this, &Portfolio::HandleTrade ) );
   pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
   pPosition->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
   pPosition->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
@@ -113,8 +111,6 @@ void Portfolio::DeletePosition( const std::string& sName ) {
   iterUser->second->OnCommission.Remove( MakeDelegate( this, &Portfolio::HandleCommission ) );
   iterUser->second->OnExecution.Remove( MakeDelegate( this, &Portfolio::HandleExecution ) );
   iterUser->second->OnUnRealizedPL.Remove( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
-//  iterUser->second->OnTrade.Remove( MakeDelegate( this, &Portfolio::HandleTrade ) );
-//  iterUser->second->OnQuote.Remove( MakeDelegate( this, &Portfolio::HandleQuote ) );
 
   m_mapPositionsViaUserName.erase( iterUser );
   m_mapPositionsViaInstrumentName.erase( iterInst );
@@ -174,7 +170,7 @@ void Portfolio::AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t&
   if ( Master == m_row.ePortfolioType ) {
   }
   else { // this isn't a master portfolio
-    if ( AlternateCurrency == pPortfolio->GetRow().ePortfolioType ) {
+    if ( CurrencySummary == pPortfolio->GetRow().ePortfolioType ) {
       throw std::runtime_error( "Portfolio::AddSubPortfolio: alternate currency portfolio only attachable to master portfolio" );
     }
   }
@@ -262,15 +258,6 @@ void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
   OnCommissionUpdate( *this );
 
 }
-
-//void Portfolio::HandleQuote( const Position* pPosition ) {
-//  OnQuote( this );
-//}
-
-//void Portfolio::HandleTrade( const Position* pPosition ) {
-//  OnTrade( this );
-//}
-
 
 //void Portfolio::EmitStats( std::stringstream& ss ) {
 std::ostream& operator<<( std::ostream& os, const Portfolio& portfolio ) {

@@ -114,6 +114,7 @@ bool AppStickShift::OnInit() {
   m_pPPPOE->Show();
 
   m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
+  m_pCPPOE->LoadInitialData();
   
   m_pFPPOE->Show();
 
@@ -179,6 +180,17 @@ void AppStickShift::HandlePopulateDatabase( void ) {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
       m_idPortfolio, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "StickShift" );
 
+  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
+  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "Currency Monitor" );
+  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "Currency Monitor" );
+  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "Currency Monitor" );
+  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
+    
 }
 
 void AppStickShift::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order ) {
