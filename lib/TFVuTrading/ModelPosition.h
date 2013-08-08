@@ -35,7 +35,7 @@ public:
     }
   };
 
-  typedef std::map<idPosition_t, DataViewItemPosition> mapItems_t;
+  typedef std::map<void*, DataViewItemPosition*> mapItems_t;
 
   ModelPosition(void);
   ~ModelPosition(void);

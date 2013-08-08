@@ -30,7 +30,7 @@ struct DataViewItemBase: public wxDataViewItem {
   virtual void AssignFirstColumn( wxVariant& variant ) const {};  // for getting polymorphic stuff for the tree
   virtual bool IsContainer( void ) { return false; };
   EModelType ixType;
-  DataViewItemBase* pParent;
+  wxDataViewItem* pParent;
 };
 
 template<class T> 

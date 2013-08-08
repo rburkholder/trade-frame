@@ -79,17 +79,18 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortf
   switch ( pPortfolio->GetRow().ePortfolioType ) {
   case Portfolio::Master: {
     m_pItemPortfolioMaster = new ItemPortfolioMaster( pPortfolio );
+    m_pItemPortfolioMaster->pParent = &m_itemNull;
     m_mapItems.insert( mapItems_t::value_type( m_pItemPortfolioMaster->GetID(), m_pItemPortfolioMaster ) );
     ItemAdded( m_itemNull, *m_pItemPortfolioMaster );
-    ItemChanged( *m_pItemPortfolioMaster );
+//    ItemChanged( *m_pItemPortfolioMaster );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, m_pItemPortfolioMaster ) );
                           }
     break;
   case Portfolio::CurrencySummary: {
     ItemPortfolioCurrencySummary* p( new ItemPortfolioCurrencySummary( pPortfolio ) );
     m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
-    ItemAdded( m_itemNull, *p );
-    ItemChanged( *p );
+//    ItemAdded( m_itemNull, *p );
+//    ItemChanged( *p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
     m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
     BuildTreeFromUnattachedTreeItems();
@@ -100,8 +101,8 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortf
   case Portfolio::MultiLeggedPosition: {
     ItemPortfolio* p( new ItemPortfolio( pPortfolio ) );
     m_mapItems.insert( mapItems_t::value_type( p->GetID(), p ) );
-    ItemAdded( m_itemNull, *p );
-    ItemChanged( *p );
+//    ItemAdded( m_itemNull, *p );
+//    ItemChanged( *p );
     m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, p ) );
     m_mapUnattachedTreeItems.insert( mapUnattachedTreeItems_t::value_type( p->GetID(), p ) );
     BuildTreeFromUnattachedTreeItems();
@@ -112,8 +113,9 @@ void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortf
 }
 
 void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( void ) {
-  bool bTreeUpdated( false );
+  bool bTreeUpdated;
   do {
+    bTreeUpdated = false;
     for ( mapUnattachedTreeItems_t::iterator iter1 = m_mapUnattachedTreeItems.begin(); m_mapUnattachedTreeItems.end() != iter1; ++iter1 ) {
       idPortfolio_t idOwner = iter1->second->Value()->GetRow().idOwner;
       assert( "" != idOwner );
@@ -121,16 +123,24 @@ void ModelPortfolioPositionOrderExecution::BuildTreeFromUnattachedTreeItems( voi
       if ( m_mapPortfolios.end() != iter2 ) {
         switch ( iter2->second->ixType ) {
         case ePortfolioMaster:
+          iter1->second->pParent = iter2->second;
           dynamic_cast<ItemPortfolioMaster*>( iter2->second )->mapItemPortfolioCurrencySummary.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+          ItemAdded( *iter2->second, *iter1->second );
           break;
         case ePortfolioCurrency:
+          iter1->second->pParent = iter2->second;
           dynamic_cast<ItemPortfolioCurrencySummary*>( iter2->second )->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+          ItemAdded( *iter2->second, *iter1->second );
           break;
         case ePortfolio:
+          iter1->second->pParent = iter2->second;
           dynamic_cast<ItemPortfolio*>( iter2->second )->mapItemPortfolio.insert( mapItemsPortfolio_t::value_type( iter1->first, iter1->second ) );
+          ItemAdded( *iter2->second, *iter1->second );
           break;
+        default: throw std::runtime_error( "BuildTreeFromUnattachedTreeItems has no enumeration" );
         }
         m_mapUnattachedTreeItems.erase( iter1 );
+        bTreeUpdated = true;
         break;
       }
     }
@@ -192,6 +202,63 @@ unsigned int ModelPortfolioPositionOrderExecution::GetChildren(	const wxDataView
     }
   }
   else {
+    mapItems_t::const_iterator iter = m_mapItems.find( item.GetID() );
+    assert( m_mapItems.end() != iter );
+    switch (iter->second->ixType) {
+    case ePortfolioMaster: {
+      mapItemsPortfolio_t& map( dynamic_cast<ItemPortfolioMaster*>( iter->second )->mapItemPortfolioCurrencySummary );
+      for ( mapItemsPortfolio_t::const_iterator iter = map.begin(); map.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+                           }
+      break;
+    case ePortfolioCurrency: {
+      mapItemsPortfolio_t& map1( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPortfolio );
+      for ( mapItemsPortfolio_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+      mapItemsPosition_t& map2( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPosition );
+      for ( mapItemsPosition_t::const_iterator iter = map2.begin(); map2.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+                           }
+      break;
+    case ePortfolio: {
+      mapItemsPortfolio_t& map1( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPortfolio );
+      for ( mapItemsPortfolio_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+      mapItemsPosition_t& map2( dynamic_cast<ItemPortfolioCurrencySummary*>( iter->second )->mapItemPosition );
+      for ( mapItemsPosition_t::const_iterator iter = map2.begin(); map2.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+                           }
+      break;
+    case ePosition: {
+      mapItemsOrder_t& map1( dynamic_cast<ItemPosition*>( iter->second )->mapItemOrder );
+      for ( mapItemsOrder_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+                    }
+      break;
+    case eOrder: {
+      mapItemsExecution_t& map1( dynamic_cast<ItemOrder*>( iter->second )->mapItemExecution );
+      for ( mapItemsExecution_t::const_iterator iter = map1.begin(); map1.end() != iter; ++iter ) {
+        children.Add( *iter->second );
+        ++count;
+      }
+                    }
+      break;
+    case eExecution:
+      throw std::runtime_error( "eExecution found, shouldn't be" );
+      break;
+    }
   }
   return count;
 }

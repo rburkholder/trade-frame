@@ -35,7 +35,7 @@ public:
     }
   };
 
-  typedef std::map<idOrder_t, DataViewItemOrder> mapItems_t;
+  typedef std::map<void*, DataViewItemOrder*> mapItems_t;
 
   ModelOrder(void);
   ~ModelOrder(void);

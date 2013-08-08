@@ -35,7 +35,7 @@ public:
     }
   };
 
-  typedef std::map<idExecution_t, DataViewItemExecution> mapItems_t;
+  typedef std::map<void*, DataViewItemExecution*> mapItems_t;
 
   ModelExecution(void);
   ~ModelExecution(void);
