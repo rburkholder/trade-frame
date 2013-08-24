@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 //
 
 PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio( 
-  const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, idPortfolio_t& idOwner, 
+  const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, 
   EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription 
   ) {
   pPortfolio_t pPortfolio;

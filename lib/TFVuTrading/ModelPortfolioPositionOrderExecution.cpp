@@ -279,16 +279,37 @@ void ModelPortfolioPositionOrderExecution::ClickedOnTreeItem( void* pItem ) {
       m_pModelPosition->ClearItems();
       m_pModelPortfolio->ClearItems();
       m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      // add the currency summary portfolios as well?
       break;
     case ePortfolioCurrency:
+      m_pModelExecution->ClearItems();
+      m_pModelOrder->ClearItems();
+      m_pModelPosition->ClearItems();
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      // show all sub portfolios and positions?  or just in tree?
       break;
     case ePortfolio:
+      m_pModelExecution->ClearItems();
+      m_pModelOrder->ClearItems();
+      m_pModelPosition->ClearItems();
+      m_pModelPortfolio->ClearItems();
+      m_pModelPortfolio->AddPortfolioToModel( dynamic_cast<DataViewItemPortfolio*>( iter->second ) );
+      // show sub portfolios and positions?  how to show sub portfolios as members?
       break;
     case ePosition:
+      m_pModelExecution->ClearItems();
+      m_pModelOrder->ClearItems();
+      m_pModelPosition->ClearItems();
+      // show orders?
       break;
     case eOrder:
+      m_pModelExecution->ClearItems();
+      m_pModelOrder->ClearItems();
+      // show executions?
       break;
     case eExecution:
+      m_pModelExecution->ClearItems();
+      // not sure if we get here or not
       break;
     case eUnknown:
       assert( 0 );
