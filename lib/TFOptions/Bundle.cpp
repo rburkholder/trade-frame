@@ -36,17 +36,19 @@ void Bundle::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
 void Bundle::SaveSeries( const std::string& sPrefix ) {
   if ( 0 != m_pwatchUnderlying.get() ) {
     m_pwatchUnderlying->SaveSeries( sPrefix );
-    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-      iter->second.SaveSeries( sPrefix );
-    }
+  }
+  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+    iter->second.SaveSeries( sPrefix );
   }
 }
 
 void Bundle::EmitValues( void ) {
-  m_pwatchUnderlying->EmitValues();
-    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-      iter->second.EmitValues();
-    }
+  if ( 0 != m_pwatchUnderlying.get() ) {
+    m_pwatchUnderlying->EmitValues();
+  }
+  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+    iter->second.EmitValues();
+  }
 }
 
 void Bundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
@@ -91,12 +93,17 @@ void Bundle::SetWatchOff( void ) {
 
 void Bundle::SetWatchableOn( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
-  iter->second.SetWatchableOn();
+  if ( m_mapStrikes.end() != iter ) {
+    iter->second.SetWatchableOn();
+  }
+  
 }
 
 void Bundle::SetWatchableOff( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
-  iter->second.SetWatchableOff();
+  if ( m_mapStrikes.end() != iter ) {
+    iter->second.SetWatchableOff();
+  }
 }
 
 void Bundle::SetWatchOn( double dblStrike ) {

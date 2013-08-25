@@ -26,12 +26,16 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// don't assign underlying if more than one bundle used for the underlying, 
+//   eg when using one bundle per expiry, then use separate watch for underlying
+
 class Bundle {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  typedef ou::tf::Watch* pWatch_t;
+  //typedef ou::tf::Watch* pWatch_t;
+  typedef Watch::pWatch_t pWatch_t;
 
   Bundle(void);
   ~Bundle(void);
@@ -45,15 +49,15 @@ public:
 
   void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );
 
-  pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying.get(); };
+  pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying; };
 
   void SetWatchableOn( double dblStrike );
   void SetWatchableOff( double dblStrike );
 
-  void SetWatchOn( void ); // watch all options
+  void SetWatchOn( void ); // watch underlying plus all options
   void SetWatchOff( void ); 
 
-  void SetWatchOn( double dblStrike ); // watch only selected option
+  void SetWatchOn( double dblStrike ); // watch only selected call/put at strike
   void SetWatchOff( double dblStrike );
 
   void SaveSeries( const std::string& sPrefix );
@@ -63,11 +67,10 @@ protected:
 private:
 
   typedef std::map<double,Strike> mapStrikes_t;
-  typedef std::pair<double,Strike> mapStrikes_pair_t;
 
   bool m_bWatching;  // single threadable only
 
-  boost::shared_ptr<ou::tf::Watch> m_pwatchUnderlying;
+  pWatch_t m_pwatchUnderlying;
   mapStrikes_t m_mapStrikes;
 
   mapStrikes_t::iterator FindStrike( double strike );

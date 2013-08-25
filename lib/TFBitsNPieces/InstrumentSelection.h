@@ -16,6 +16,14 @@
 // 2013/08/24, started in Phi2, moved here, can be further expaned with code 
 //  located in other projects, generalized with additional criteria,
 //  perhaps use boost::fusion characteristics to use additional selection criteria
+// How to Use:
+/*
+  InstrumentSelection::setInfo_t set;
+  InstrumentSelection is;
+  ptime dtTarget( boost::gregorian::date( 2013, 7, 9 ) );
+  is.Process( dtTarget, set );
+*/
+
 
 #include <set>
 #include <map>
@@ -26,6 +34,9 @@ using namespace boost::gregorian;
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
 class InstrumentSelection {
 public:
@@ -68,3 +79,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

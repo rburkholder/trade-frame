@@ -18,6 +18,9 @@
 
 #include "InstrumentSelection.h"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
 InstrumentSelection::InstrumentSelection(void): m_dm( ou::tf::HDF5DataManager::RO ) {
 }
 
@@ -89,3 +92,6 @@ void InstrumentSelection::ProcessGroupItem( const std::string& sObjectPath, cons
     }
   }
 }
+
+} // namespace tf
+} // namespace ou
