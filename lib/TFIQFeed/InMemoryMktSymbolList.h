@@ -108,6 +108,16 @@ struct InMemoryMktSymbolList {
     }
   }
 
+  template<typename Function>
+  void SelectOptionsByUnderlying( const std::string& sUnderlying, Function f ) {
+    typedef symbols_t::index<ixUnderlying>::type SymbolsByUnderlying_t;
+    SymbolsByUnderlying_t::const_iterator endSymbols = m_symbols.get<ixUnderlying>().end();
+    for ( SymbolsByUnderlying_t::const_iterator iter = m_symbols.get<ixUnderlying().find( sUnderlying ); endSymbols != iter; ++iter ) {
+      if ( iter->sUnderlying != sUnderlying ) break;
+      f( *iter );
+    }
+  }
+
   template<typename ExchangeIterator, typename Function>
   void SelectSymbolsByExchange( ExchangeIterator beginExchange, ExchangeIterator endExchange, Function f ) {
     typedef symbols_t::index<ixExchange>::type SymbolsByExchange_t;

@@ -140,7 +140,9 @@
     <ClCompile Include="AccountManager.cpp" />
     <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="InstrumentData.cpp" />
-    <ClCompile Include="InstrumentInformation.cpp" />
+    <ClCompile Include="InstrumentInformation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="InstrumentManager.cpp" />
     <ClCompile Include="KeyTypes.cpp" />
     <ClCompile Include="Managers.cpp" />
@@ -180,7 +182,9 @@
     <ClInclude Include="AccountManager.h" />
     <ClInclude Include="Instrument.h" />
     <ClInclude Include="InstrumentData.h" />
-    <ClInclude Include="InstrumentInformation.h" />
+    <ClInclude Include="InstrumentInformation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="InstrumentManager.h" />
     <ClInclude Include="KeyTypes.h" />
     <ClInclude Include="Managers.h" />

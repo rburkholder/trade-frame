@@ -216,7 +216,7 @@ private:
 
   reqId_t m_nxtReqId; 
   std::vector<structRequest_t*> m_vInActiveRequestId;
-  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
+//  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
   typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
   mapActiveRequestId_t m_mapActiveRequestId;
   boost::mutex m_mutexContractRequest;
