@@ -24,7 +24,6 @@
 using namespace fastdelegate;
 
 namespace ou {
-
 namespace action {
 
 class Worker {
@@ -32,13 +31,15 @@ public:
 
   typedef FastDelegate0<> OnActionHandler;
 
-  Worker( void ) : m_bRunning( false ), m_pThread( 0 ) {};
-  Worker( OnActionHandler f ) : m_bRunning( true ), m_pThread( 0 ) {
+  Worker( void ) : m_bRunning( false ), m_pThread( 0 ) {};  // start later
+  Worker( OnActionHandler f ) : m_bRunning( true ), m_pThread( 0 ) {  // start immediately
     m_OnAction = f;
     m_pThread = new boost::thread( boost::ref( *this ) );
   }
-  ~Worker(void) {
-    delete m_pThread; 
+  ~Worker(void) {  // need to check if thread has exited
+    if ( 0 != m_pThread ) {
+      delete m_pThread; 
+    }
   }
 
   void Run( OnActionHandler f ) {
@@ -72,6 +73,7 @@ private:
 namespace function {
 
 // having problems make this work
+// try closer to CRTP mechanism
 
 //1>Phi2.cpp(333): warning C4930: 'ou::function::Worker<Function> worker(AppPhi::HandleMenuAction1LoadIQFeedSymbolList::Run)': prototyped function not called (was a variable definition intended?)
 //1>          with
@@ -107,5 +109,4 @@ private:
 };
 
 } // namespace function
-
 } // namespace ou
