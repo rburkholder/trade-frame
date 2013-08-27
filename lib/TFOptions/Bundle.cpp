@@ -134,17 +134,24 @@ Bundle::mapStrikes_t::iterator Bundle::FindStrikeAuto( double strike ) {
   return iter;
 }
 
+// lower_bound: key value = or > than query
+// upper_bound: key value > than query
 void Bundle::AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper ) {
-  mapStrikes_t::iterator iter = m_mapStrikes.upper_bound( dblStrike );
+  mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblStrike ); 
   if ( m_mapStrikes.end() == iter ) {
     throw std::runtime_error( "Bundle::AdjacentStrikes: no upper strike available" );
   }
   dblUpper = iter->first;
-  if ( m_mapStrikes.begin() == iter ) {
-    throw std::runtime_error( "Bundle::AdjacentStrikes: already at lower lower end of strkes" );
+  if ( dblStrike == dblUpper ) {
+    dblLower = dblUpper;
   }
-  --iter;
-  dblLower = iter->first;
+  else {
+    if ( m_mapStrikes.begin() == iter ) {
+      throw std::runtime_error( "Bundle::AdjacentStrikes: already at lower lower end of strkes" );
+    }
+    --iter;
+    dblLower = iter->first;
+  }
 }
 
 } // namespace option

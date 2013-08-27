@@ -33,7 +33,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-struct InMemoryMktSymbolList {
+class InMemoryMktSymbolList {
+public:
 
   struct ixSymbol{};
   struct ixExchange{};
@@ -61,17 +62,11 @@ struct InMemoryMktSymbolList {
         boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
     >
   > symbols_t;
+
   typedef symbols_t::iterator iterator;
 
-  symbols_t m_symbols;
   iterator begin(){return m_symbols.begin();}
   iterator end(){return m_symbols.end();}
-
-  void insert( trd_t& trd ) { m_symbols.insert( trd ); };
-
-  void HandleParsedStructure( trd_t& trd ) {
-    m_symbols.insert( trd );
-  }
 
   bool HandleSymbolHasOption( const std::string& s ) {
     typedef symbols_t::index<ixSymbol>::type SymbolsByName_t;
@@ -109,6 +104,19 @@ struct InMemoryMktSymbolList {
   }
 
   template<typename Function>
+  void SelectOptionsBySymbol( const std::string& sUnderlying, Function& f ) {
+    typedef symbols_t::index<ixSymbol>::type ixSymbol_t;
+    ixSymbol_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
+    for ( ixSymbol_t::const_iterator iter = m_symbols.get<ixSymbol>().find( sUnderlying ); endSymbols != iter; ++iter ) {
+      if ( ou::tf::iqfeed::MarketSymbol::IEOption == iter->sc ) {
+        if ( iter->sUnderlying != sUnderlying ) break;
+        f( *iter );
+      }
+    }
+  }
+
+    // requires index by underlying, which may be taking up mucho room
+  template<typename Function>
   void SelectOptionsByUnderlying( const std::string& sUnderlying, Function& f ) {
     typedef symbols_t::index<ixUnderlying>::type SymbolsByUnderlying_t;
     SymbolsByUnderlying_t::const_iterator endSymbols = m_symbols.get<ixUnderlying>().end();
@@ -117,7 +125,7 @@ struct InMemoryMktSymbolList {
       f( *iter );
     }
   }
-
+  
   template<typename ExchangeIterator, typename Function>
   void SelectSymbolsByExchange( ExchangeIterator beginExchange, ExchangeIterator endExchange, Function& f ) {
     typedef symbols_t::index<ixExchange>::type SymbolsByExchange_t;
@@ -133,7 +141,18 @@ struct InMemoryMktSymbolList {
     }
   }
 
+  void HandleParsedStructure( trd_t& trd ) {
+    m_symbols.insert( trd );
+  }
+
+  void Clear( void ) { m_symbols.clear(); };
+
+protected:
 private:
+
+  symbols_t m_symbols;
+
+  void insert( trd_t& trd ) { m_symbols.insert( trd ); };
 
   /* serialization support */
 

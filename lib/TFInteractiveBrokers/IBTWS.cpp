@@ -548,8 +548,8 @@ void IBTWS::winError( const IBString &str, int lastError) {
 }
 
 void IBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
-  m_ss.str("");
-  m_ss << "news bulletin " << msgId << ", " << msgType << ", " << newsMessage << ", " << originExch << std::endl;
+  //m_ss.str("");
+  std::cout << "news bulletin " << msgId << "-" << msgType << "-" << originExch << ": " << newsMessage  << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
 }
 

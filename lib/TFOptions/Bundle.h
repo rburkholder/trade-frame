@@ -47,7 +47,7 @@ public:
   Call* GetCall( double dblStrike );
   Put* GetPut( double dblStrike );
 
-  void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );
+  void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
 
   pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying; };
 

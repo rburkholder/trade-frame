@@ -47,7 +47,7 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
     throw std::runtime_error( "illegal option combination" );
   }
 
-  symbols.m_symbols.clear();
+  symbols.Clear();
 
   ValidateMktSymbolLine validator;
   validator.SetOnProcessLine( MakeDelegate( &symbols, &InMemoryMktSymbolList::HandleParsedStructure ) );

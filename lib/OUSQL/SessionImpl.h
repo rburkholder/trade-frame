@@ -453,7 +453,11 @@ private:
 
   typedef std::vector<pQueryBase_t> vQuery_t;
   typedef vQuery_t::iterator vQuery_iter_t;
-  vQuery_t m_vQuery;
+  vQuery_t m_vQuery;  // 2013/08/26
+  // this is a bad thing to have around, statements should be closed after use.
+  // don't worry about re-use, cross that bridge later.
+  // in one application there are 32,000 queries, and none are closed,
+  // resulting in very long times to reclaim space at the end
 
   typedef std::map<std::string, std::string> mapFieldsToTable_t;
   typedef mapFieldsToTable_t::iterator mapFieldsToTable_iter_t;
@@ -493,10 +497,13 @@ void SessionImpl<IDatabase>::ImplClose( void ) {
     m_mapTableDefs.clear();
     for ( vQuery_iter_t iter = m_vQuery.begin(); iter != m_vQuery.end(); ++iter ) {
       m_db.CloseStatement( *dynamic_cast<typename IDatabase::structStatementState*>( iter->get() ) );
+      iter->reset();
     }
     m_vQuery.clear();
     m_db.SessionClose();
     m_bOpened = false;
+    // 2013/08/26 process memory doesn't appear to be relaimed after this
+    //   trying again with addition of reset();
   }
 }
 
