@@ -36,7 +36,7 @@ class ValidateMktSymbolLine {
 public:
 
   typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
-  typedef FastDelegate1<trd_t&> OnProcessLine_t;
+  typedef FastDelegate1<const trd_t&> OnProcessLine_t;
   typedef FastDelegate1<const std::string&,bool> OnProcessHasOption_t;
   typedef FastDelegate2<const std::string&,const std::string&> OnUpdateOptionUnderlying_t; // option name, underlying name
 

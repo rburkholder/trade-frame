@@ -107,7 +107,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks( dm );
+    HDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks( dm, true, true, 5, 256 );
     wtsGreeks.Write( sPathName, &m_greeks );
     HDF5Attributes attrGreeks( dm, sPathName, option );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );

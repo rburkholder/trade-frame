@@ -51,7 +51,7 @@ public:
   Call* Call( void ) { return m_call.get(); };
   Put*  Put( void )  { return m_put.get(); };
 
-  void SetWatchableOn( void );
+  void SetWatchableOn( void );  // watchable defaults to off at time of construction
   void SetWatchableOff( void );
   void SetWatchOn( void );
   void SetWatchOff( void );

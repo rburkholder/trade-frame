@@ -16,6 +16,9 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include <TFTimeSeries/TimeSeries.h>
 
 #include <TFTrading/Instrument.h>
@@ -59,6 +62,8 @@ public:
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
+  bool Watching( void ) { return 0 != m_cntWatching; };
+
   const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
   const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
 
@@ -67,6 +72,16 @@ public:
 
   Quotes* Quotes( void ) { return &m_quotes; };
   Trades* Trades( void ) { return &m_trades; };
+
+  typedef FastDelegate1<const Quote&> OnQuote_t;
+  void SetOnQuote( OnQuote_t function ) {
+    m_OnQuote = function;
+  }
+
+  typedef FastDelegate1<const Trade&> OnTrade_t;
+  void SetOnTrade( OnTrade_t function ) {
+    m_OnTrade = function;
+  }
 
   virtual void StartWatch( void );
   virtual bool StopWatch( void );
@@ -100,6 +115,9 @@ private:
   Summary_t m_summary;
 
   void Initialize( void );
+
+  OnQuote_t m_OnQuote;
+  OnTrade_t m_OnTrade;
 
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );

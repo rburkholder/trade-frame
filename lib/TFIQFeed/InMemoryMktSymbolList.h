@@ -89,21 +89,31 @@ public:
   }
 
   void SaveToFile(const std::string& sFilename) const {
-    std::ofstream ofs(sFilename, std::ios::binary);
-    boost::archive::binary_oarchive oa(ofs);
-    oa<<boost::serialization::make_nvp("symbols",*this);
+    std::ofstream ofs( sFilename, std::ios::binary );
+    boost::archive::binary_oarchive oa( ofs );
+    oa << boost::serialization::make_nvp( "symbols", *this );
   }
 
-  void LoadFromFile(const std::string& sFilename) {
+  void LoadFromFile( const std::string& sFilename ) {
     m_symbols.clear();
-    std::ifstream ifs(sFilename, std::ios::binary);
-    if(ifs){
+    std::ifstream ifs( sFilename, std::ios::binary );
+    if ( ifs ) {
       boost::archive::binary_iarchive ia(ifs);
-      ia>>boost::serialization::make_nvp("symbols",*this);
+      ia >> boost::serialization::make_nvp( "symbols", *this );
     }
   }
 
-  template<typename Function>
+  const trd_t& GetTrd( const std::string& sName ) {
+    typedef symbols_t::index<ixSymbol>::type ixSymbol_t;
+    ixSymbol_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
+    ixSymbol_t::const_iterator iter = m_symbols.get<ixSymbol>().find( sName );
+    if ( endSymbols == iter ) {
+      throw std::runtime_error( "GetTrd can't find " + sName );
+    }
+    return *iter;
+  }
+
+  template<typename Function>  // not sure if functions correctly, particularily if option list has other symbols interspersed
   void SelectOptionsBySymbol( const std::string& sUnderlying, Function& f ) {
     typedef symbols_t::index<ixSymbol>::type ixSymbol_t;
     ixSymbol_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
@@ -115,7 +125,7 @@ public:
     }
   }
 
-    // requires index by underlying, which may be taking up mucho room
+  // requires index by underlying, which may be taking up mucho room, actually doesn't
   template<typename Function>
   void SelectOptionsByUnderlying( const std::string& sUnderlying, Function& f ) {
     typedef symbols_t::index<ixUnderlying>::type SymbolsByUnderlying_t;
@@ -141,7 +151,7 @@ public:
     }
   }
 
-  void HandleParsedStructure( trd_t& trd ) {
+  void HandleParsedStructure( const trd_t& trd ) {
     m_symbols.insert( trd );
   }
 

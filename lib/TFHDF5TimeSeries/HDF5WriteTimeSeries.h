@@ -87,10 +87,12 @@ template<class TS> void HDF5WriteTimeSeries<TS>::Write(const std::string &sPathN
       H5::CompType *pdt = DD::DefineDataType();
       pdt->pack();
 
-      H5::DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
       hsize_t curSize = 0;
-      hsize_t maxSize = H5S_UNLIMITED; 
-      pds->setExtentSimple( 1, &curSize, &maxSize ); 
+      hsize_t maxSize = H5S_UNLIMITED;
+      H5::DataSpace *pds = new H5::DataSpace( 1, &curSize, &maxSize );
+      //H5::DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
+//      hsize_t maxSize = 4000000000;  // probably will get us into trouble, but good enough till we get a good number for above.
+//      pds->setExtentSimple( 1, &curSize, &maxSize ); 
 
       H5::DSetCreatPropList pl;
       //hsize_t sizeChunk = HDF5DataManager::H5ChunkSize();

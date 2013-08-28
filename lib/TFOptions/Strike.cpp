@@ -77,7 +77,6 @@ void Strike::SetWatchableOff( void ) {
   }
 }
 
-
 void Strike::SetWatchOn( void ) {
   if ( m_bWatchable ) {
     if ( !m_bWatching ) {

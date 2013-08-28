@@ -115,11 +115,13 @@ void Watch::EmitValues( void ) {
 void Watch::HandleQuote( const Quote& quote ) {
   m_quote = quote;
   m_quotes.Append( quote );
+  if ( 0 != m_OnQuote ) m_OnQuote( quote );
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
   m_trade = trade;
   m_trades.Append( trade );
+  if ( 0 != m_OnTrade ) m_OnTrade( trade );
 }
 
 void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
@@ -145,24 +147,31 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
-  if ( 0 != m_quotes.Size() ) {
-    sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm );
-    wtsQuotes.Write( sPathName, &m_quotes );
-    HDF5Attributes attrQuotes( dm, sPathName );
-    attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
-    attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
-    attrQuotes.SetProviderType( m_pDataProvider->ID() );
-  }
+  try {
 
-  if ( 0 != m_trades.Size() ) {
-    sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm );
-    wtsTrades.Write( sPathName, &m_trades );
-    HDF5Attributes attrTrades( dm, sPathName );
-    attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
-    attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-    attrTrades.SetProviderType( m_pDataProvider->ID() );
+    if ( 0 != m_quotes.Size() ) {
+      sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm, true, true, 5, 256 );
+      wtsQuotes.Write( sPathName, &m_quotes );
+      HDF5Attributes attrQuotes( dm, sPathName );
+      attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
+      attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
+      attrQuotes.SetProviderType( m_pDataProvider->ID() );
+    }
+
+    if ( 0 != m_trades.Size() ) {
+      sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
+      HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm, true, true, 5, 256 );
+      wtsTrades.Write( sPathName, &m_trades );
+      HDF5Attributes attrTrades( dm, sPathName );
+      attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
+      attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+      attrTrades.SetProviderType( m_pDataProvider->ID() );
+    }
+
+  }
+  catch (...) {
+    std::cout << "Watch::SaveSeries error: " << sPrefix << std::endl;
   }
 
 }

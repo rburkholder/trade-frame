@@ -47,18 +47,23 @@ public:
   Call* GetCall( double dblStrike );
   Put* GetPut( double dblStrike );
 
-  void AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
+  void AdjacentStrikes( double dblValue, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
+
+  void UpdateATMWatch( double dblValue );
 
   pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying; };
 
-  void SetWatchableOn( double dblStrike );
+  void SetWatchableOn( double dblStrike );  // each strike is not watcheable by default
   void SetWatchableOff( double dblStrike );
 
-  void SetWatchOn( void ); // watch underlying plus all options
-  void SetWatchOff( void ); 
+  //void SetWatchUnderlyingOn( void );
+  //void SetWatchUnderlyingOff( void );
 
-  void SetWatchOn( double dblStrike ); // watch only selected call/put at strike
+  void SetWatchOn( double dblStrike ); // watch only selected call/put at strike, if watcheable
   void SetWatchOff( double dblStrike );
+
+  void SetWatchOn( void ); // watch underlying plus all watcheable options
+  void SetWatchOff( void ); 
 
   void SaveSeries( const std::string& sPrefix );
   void EmitValues( void );

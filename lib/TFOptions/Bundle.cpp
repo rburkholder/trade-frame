@@ -91,6 +91,12 @@ void Bundle::SetWatchOff( void ) {
   }
 }
 
+//void Bundle::SetWatchUnderlyingOn( void ) {
+//}
+
+//void Bundle::SetWatchUnderlyingOff( void ) {
+//}
+
 void Bundle::SetWatchableOn( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   if ( m_mapStrikes.end() != iter ) {
@@ -134,15 +140,16 @@ Bundle::mapStrikes_t::iterator Bundle::FindStrikeAuto( double strike ) {
   return iter;
 }
 
-// lower_bound: key value = or > than query
-// upper_bound: key value > than query
-void Bundle::AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpper ) {
-  mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblStrike ); 
+// lower_bound: key value eq or gt than query
+// upper_bound: key value ft than query
+void Bundle::AdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
+
+  mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblValue ); 
   if ( m_mapStrikes.end() == iter ) {
     throw std::runtime_error( "Bundle::AdjacentStrikes: no upper strike available" );
   }
   dblUpper = iter->first;
-  if ( dblStrike == dblUpper ) {
+  if ( dblValue == dblUpper ) {
     dblLower = dblUpper;
   }
   else {
@@ -152,6 +159,9 @@ void Bundle::AdjacentStrikes( double dblStrike, double& dblLower, double& dblUpp
     --iter;
     dblLower = iter->first;
   }
+}
+
+void Bundle::UpdateATMWatch( double dblValue ) {
 }
 
 } // namespace option
