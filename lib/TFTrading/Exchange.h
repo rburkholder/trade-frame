@@ -20,7 +20,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CExchange
+// 2013/08/30need to add in time zone reference into database record
+
+class Exchange
 {
 public:
 
@@ -51,8 +53,8 @@ public:
     }
   };
 
-  CExchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
-  ~CExchange(void);
+  Exchange( const idExchange_t& sExchangeId, const std::string& sName, const std::string& sCountryId );
+  ~Exchange(void);
 
 protected:
 private:

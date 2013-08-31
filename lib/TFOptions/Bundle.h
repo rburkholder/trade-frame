@@ -19,6 +19,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
 #include "Strike.h"
 
@@ -34,7 +35,6 @@ public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  //typedef ou::tf::Watch* pWatch_t;
   typedef Watch::pWatch_t pWatch_t;
 
   Bundle(void);
@@ -59,8 +59,8 @@ public:
   //void SetWatchUnderlyingOn( void );
   //void SetWatchUnderlyingOff( void );
 
-  void SetWatchOn( double dblStrike ); // watch only selected call/put at strike, if watcheable
-  void SetWatchOff( double dblStrike );
+  void SetWatchOn( double dblStrike, bool bForce = false ); // watch only selected call/put at strike, force watchable on
+  void SetWatchOff( double dblStrike, bool bForce = false ); // forces watchable off when true
 
   void SetWatchOn( void ); // watch underlying plus all watcheable options
   void SetWatchOff( void ); 
@@ -68,18 +68,34 @@ public:
   void SaveSeries( const std::string& sPrefix );
   void EmitValues( void );
 
+  void SetExpiry( ptime dt ); // utc
+
 protected:
 private:
 
   typedef std::map<double,Strike> mapStrikes_t;
+  typedef mapStrikes_t::iterator mapStrikes_iter_t;
+
+  enum EOptionWatchState { EOWSNoWatch, EOWSWatching } m_stateOptionWatch;
 
   bool m_bWatching;  // single threadable only
+
+  ptime m_dtExpiry;  // eg, 4pm EST third Fri of month for normal US equity options, in utc
 
   pWatch_t m_pwatchUnderlying;
   mapStrikes_t m_mapStrikes;
 
+  mapStrikes_iter_t m_iterUpper;
+  mapStrikes_iter_t m_iterMid;
+  mapStrikes_iter_t m_iterLower;
+
+  double m_dblUpperTrigger;
+  double m_dblLowerTrigger;
+
   mapStrikes_t::iterator FindStrike( double strike );
   mapStrikes_t::iterator FindStrikeAuto( double strike ); // Auto insert new strike
+
+  void RecalcATMWatch( double dblValue );
 
 };
 

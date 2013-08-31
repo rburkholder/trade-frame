@@ -19,7 +19,8 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 Bundle::Bundle(void)
-  : m_bWatching( false )
+  : m_bWatching( false ), m_stateOptionWatch( EOWSNoWatch ), 
+  m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 )
 {
 }
 
@@ -112,14 +113,20 @@ void Bundle::SetWatchableOff( double dblStrike ) {
   }
 }
 
-void Bundle::SetWatchOn( double dblStrike ) {
+void Bundle::SetWatchOn( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
+  if ( bForce ) {
+    iter->second.SetWatchableOn();
+  }
   iter->second.SetWatchOn();
 }
 
-void Bundle::SetWatchOff( double dblStrike ) {
+void Bundle::SetWatchOff( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   iter->second.SetWatchOff();
+  if ( bForce ) {
+    iter->second.SetWatchableOff();
+  }
 }
 
 
@@ -161,7 +168,87 @@ void Bundle::AdjacentStrikes( double dblValue, double& dblLower, double& dblUppe
   }
 }
 
+void Bundle::RecalcATMWatch( double dblValue ) {
+  mapStrikes_iter_t iterUpper;
+  mapStrikes_iter_t iterLower;
+  iterUpper = m_mapStrikes.lower_bound( dblValue ); 
+  if ( m_mapStrikes.end() == iterUpper ) {
+    std::cout << "Bundle::UpdateATMWatch: no upper strike available" << std::endl; // stay in no watch state
+    m_stateOptionWatch = EOWSNoWatch;
+  }
+  else {
+    iterLower = iterUpper;
+    if ( m_mapStrikes.begin() == iterLower ) {
+      std::cout << "Bundle::UpdateATMWatch: no lower strike available" << std::endl;  // stay in no watch state
+      m_stateOptionWatch = EOWSNoWatch;
+    }
+    else {
+      --iterLower;
+      double dblMidPoint = ( iterUpper->first + iterLower->first ) * 0.5;
+      if ( dblValue >= dblMidPoint ) { // third strike is above
+        m_iterUpper = iterUpper;
+        ++m_iterUpper;
+        if ( m_mapStrikes.end() == m_iterUpper ) {
+          std::cout << "Bundle::UpdateATMWatch: no upper upper strike available" << std::endl;  // stay in no watch state
+          m_stateOptionWatch = EOWSNoWatch;
+        }
+        else {
+          m_iterMid = iterUpper;
+          m_iterLower = iterLower;
+          m_stateOptionWatch = EOWSWatching;
+        }
+      }
+      else { // third strike is below
+        m_iterLower = iterLower;
+        if ( m_mapStrikes.begin() == m_iterLower ) {
+          std::cout << "Bundle::UpdateATMWatch: no lower lower strike available" << std::endl;  // stay in no watch state
+          m_stateOptionWatch = EOWSNoWatch;
+        }
+        else {
+          --m_iterLower;
+          m_iterMid = iterLower;
+          m_iterUpper = iterUpper;
+          m_stateOptionWatch = EOWSWatching;
+        }
+      }
+      if ( EOWSWatching == m_stateOptionWatch ) {
+        m_dblUpperTrigger = m_iterUpper->first - ( m_iterUpper->first - m_iterMid->first ) * 0.25;
+        m_dblLowerTrigger = m_iterLower->first + ( m_iterMid->first - m_iterLower->first ) * 0.25;
+        std::cout << m_dblLowerTrigger << " < " << dblValue << " < " << m_dblUpperTrigger << std::endl;
+      }
+    }
+  }
+}
+
 void Bundle::UpdateATMWatch( double dblValue ) {
+  switch ( m_stateOptionWatch ) {
+  case EOWSNoWatch:
+    RecalcATMWatch( dblValue );
+    SetWatchOn( m_iterUpper->first, true );
+    SetWatchOn( m_iterMid->first, true );
+    SetWatchOn( m_iterLower->first, true );
+    break;
+  case EOWSWatching:
+    if ( ( dblValue > m_dblUpperTrigger ) || ( dblValue < m_dblLowerTrigger ) ) {
+      mapStrikes_iter_t iterUpper( m_iterUpper );
+      mapStrikes_iter_t iterMid( m_iterMid );
+      mapStrikes_iter_t iterLower( m_iterLower );
+      RecalcATMWatch( dblValue );
+      if ( EOWSWatching == m_stateOptionWatch ) { // by setting on before off allows continuity of capture
+        SetWatchOn( m_iterUpper->first, true );
+        SetWatchOn( m_iterMid->first, true );
+        SetWatchOn( m_iterLower->first, true );
+      }
+      SetWatchOff( iterUpper->first );
+      SetWatchOff( iterMid->first );
+      SetWatchOff( iterLower->first );
+    }
+    break;
+  }
+}
+
+void Bundle::SetExpiry( ptime dt ) {
+  m_dtExpiry = dt;
 }
 
 } // namespace option

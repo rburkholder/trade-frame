@@ -18,12 +18,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CExchange::CExchange( const idExchange_t& idExchange, const std::string& sName, const std::string& idCountry )
+Exchange::Exchange( const idExchange_t& idExchange, const std::string& sName, const std::string& idCountry )
 : m_row( idExchange, sName, idCountry )
 {
 }
 
-CExchange::~CExchange(void)
+Exchange::~Exchange(void)
 {
 }
 

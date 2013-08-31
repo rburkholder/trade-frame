@@ -33,11 +33,7 @@ NoRiskInterestRateSeries::NoRiskInterestRateSeries( void )
 NoRiskInterestRateSeries::~NoRiskInterestRateSeries(void) {
 }
 
-void NoRiskInterestRateSeries::Initialize( const vSymbol_t& vSymbol ) {
-
-  for ( vSymbol_t::const_iterator iter = vSymbol.begin(); vSymbol.end() != iter; ++ iter ) {
-    m_vInterestRate.push_back( *iter );
-  }
+void NoRiskInterestRateSeries::Initialize( void ) {
 
   ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
   ou::tf::Instrument::pInstrument_t pInstrument;
@@ -55,9 +51,9 @@ void NoRiskInterestRateSeries::Initialize( const vSymbol_t& vSymbol ) {
 void NoRiskInterestRateSeries::SetWatchOn( pProvider_t pProvider ) {
   assert( ou::tf::keytypes::EProviderIQF == pProvider->ID() );
   if ( !m_bInitialized) {
-    m_bInitialized = true;
     m_pProvider = pProvider;
-//    local::Initialize( pProvider );
+    Initialize();
+    m_bInitialized = true;
   }
   if ( !m_bWatching ) {
     m_bWatching = true;
@@ -118,6 +114,14 @@ std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrir
   return os;
 }
 
+void NoRiskInterestRateSeries::AssignSymbols( const vSymbol_t& vSymbol ) {
+
+  for ( vSymbol_t::const_iterator iter = vSymbol.begin(); vSymbol.end() != iter; ++ iter ) {
+    m_vInterestRate.push_back( *iter );
+  }
+
+}
+
 using namespace boost::assign;
 
 LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
@@ -139,7 +143,7 @@ LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
     structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
     structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
     structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year 
-  NoRiskInterestRateSeries::Initialize( vLibor );
+  NoRiskInterestRateSeries::AssignSymbols( vLibor );
 }
 
 LiborFromIQFeed::~LiborFromIQFeed( void ) {
@@ -157,7 +161,7 @@ FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
   // these are 10x actual value:
 //TNX.XO	CBOE TREASURY YIELD 10 YEAR	CBOE	CBOE	INDEX	/ 1000
 //TYX.XO	CBOE 30 YEAR TREASURY YIELD INDEX	CBOE	CBOE	INDEX	/ 1000							
-  NoRiskInterestRateSeries::Initialize( vFedRate );
+  NoRiskInterestRateSeries::AssignSymbols( vFedRate );
 
 }
 

@@ -20,6 +20,8 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+#include "boost/date_time/local_time/local_time.hpp"
+
 #include <boost/thread/mutex.hpp>
 
 #include "Singleton.h"
@@ -73,6 +75,29 @@ public:
   SimulationContext* AcquireSimulationContext( void );
   void ReleaseSimulationContext( SimulationContext* );
 
+  ptime ConvertEasternToUtc( ptime dt ) {
+    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), m_tzNewYork, false );
+    return lt.utc_time();
+  }
+
+  ptime ConvertRegionalToUtc( ptime dt, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
+    boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
+    boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), tz, bDst );
+    return lt.utc_time();
+  }
+  ptime ConvertRegionalToUtc( boost::gregorian::date date, time_duration time, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
+    boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
+    try {
+      boost::local_time::local_date_time lt( date, time, tz, bDst );
+      return lt.utc_time();
+    }
+    catch (...) {
+      boost::local_time::local_date_time lt( date, time, tz, !bDst );
+      return lt.utc_time();
+    }
+    
+  }
+
 protected:
 private:
 
@@ -80,6 +105,10 @@ private:
 
   SimulationContext m_contextCommon;
   ptime m_dtLastRetrievedExternalTime;
+
+  static bool m_bTzLoaded;
+  static boost::local_time::tz_database m_tzDb;
+  static boost::local_time::time_zone_ptr m_tzNewYork;
 
   boost::mutex m_mutex;
 };

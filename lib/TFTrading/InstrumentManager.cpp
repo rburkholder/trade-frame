@@ -282,13 +282,13 @@ void InstrumentManager::HandleAlternateNameChanged( const Instrument::AlternateN
 }
 
 void InstrumentManager::HandleRegisterTables( ou::db::Session& session ) {
-  session.RegisterTable<CExchange::TableCreateDef>( tablenames::sExchange );
+  session.RegisterTable<Exchange::TableCreateDef>( tablenames::sExchange );
   session.RegisterTable<Instrument::TableCreateDef>( tablenames::sInstrument );
   session.RegisterTable<AlternateInstrumentName::TableCreateDef>( tablenames::sAltInstrumentName );
 }
 
 void InstrumentManager::HandleRegisterRows( ou::db::Session& session ) {
-  session.MapRowDefToTableName<CExchange::TableRowDef>( tablenames::sExchange );
+  session.MapRowDefToTableName<Exchange::TableRowDef>( tablenames::sExchange );
   session.MapRowDefToTableName<Instrument::TableRowDef>( tablenames::sInstrument );
   session.MapRowDefToTableName<AlternateInstrumentName::TableRowDef>( tablenames::sAltInstrumentName );
 }
@@ -309,18 +309,18 @@ void InstrumentManager::HandlePopulateTables( ou::db::Session& session ) {
   assert( 0 < vsExchangesPreload.size() );
   assert( 0 == ( vsExchangesPreload.size() % 2 ) );
 
-  CExchange::TableRowDef exchange;
+  Exchange::TableRowDef exchange;
   exchange.idCountry = "US";
 
   std::vector<std::string>::iterator iter = vsExchangesPreload.begin();
 
-  ou::db::QueryFields<CExchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<CExchange::TableRowDef>( exchange ).NoExecute();
+  ou::db::QueryFields<Exchange::TableRowDef>::pQueryFields_t pExchange = session.Insert<Exchange::TableRowDef>( exchange ).NoExecute();
 
   while ( vsExchangesPreload.end() != iter ) {
     exchange.idExchange = *(iter++);
     exchange.sName = *(iter++);
     session.Reset( pExchange );
-    session.Bind<CExchange::TableRowDef>( pExchange );
+    session.Bind<Exchange::TableRowDef>( pExchange );
     session.Execute( pExchange );
   }
 

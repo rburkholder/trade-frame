@@ -50,8 +50,6 @@ public:
       : td( td_ ), Symbol( Symbol_ ) {};
   };
 
-  typedef std::vector<structSymbol> vSymbol_t;
-
   NoRiskInterestRateSeries( void );
   virtual ~NoRiskInterestRateSeries( void );
 
@@ -63,7 +61,11 @@ public:
 //  void EmitYieldCurve( void );
 
 protected:
-  void Initialize( const vSymbol_t& vSymbol );  // called from inheritor's constructor
+
+  typedef std::vector<structSymbol> vSymbol_t;
+
+  void AssignSymbols( const vSymbol_t& vSymbol );  // called from inheritor's constructor
+
 private:
 
   typedef ou::tf::Watch::pWatch_t pWatch_t;
@@ -91,6 +93,8 @@ private:
   bool m_bWatching;
 
   pProvider_t m_pProvider;
+
+  void Initialize( void );
 
 };
 

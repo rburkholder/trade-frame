@@ -17,15 +17,36 @@
 
 namespace ou {
 
+bool TimeSource::m_bTzLoaded( false );
+boost::local_time::tz_database TimeSource::m_tzDb;
+boost::local_time::time_zone_ptr TimeSource::m_tzNewYork;
+
 TimeSource::TimeSource(void)
-: m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) {
+: m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) 
+{
+  // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/examples.html#date_time.examples.local_utc_conversion
+  try {
+    if ( !m_bTzLoaded ) {
+      m_bTzLoaded = true;
+  //    m_tzDb.load_from_file( "../../boost/libs/date_time/data/date_time_zonespec.csv" );
+  //    m_tzDb.load_from_file( "..\\..\\boost\\libs\\date_time\\data\\date_time_zonespec.csv" );
+      m_tzDb.load_from_file( "date_time_zonespec.csv" );
+      m_tzNewYork = m_tzDb.time_zone_from_region( "America/New_York");
+    }
+  }
+  catch (std::exception) {
+    // this may not make it to the gui console if this is called prior to gui setup
+    std::cout << "TimeSource::TimeSource: can't load date_time_zonespec.csv" << std::endl;
+  }
+ 
 }
 
 ptime TimeSource::External( ptime* dt ) { 
-  // this ensures we always have a monotonically increasing time (for use in simulations)
+  // this ensures we always have a monotonically increasing time (for use in simulations and time time stamping )
   boost::mutex::scoped_lock lock( m_mutex );
   ptime& dt_ = *dt;  // create reference to existing location for ease of use
-  dt_ = boost::posix_time::microsec_clock::local_time();
+//  dt_ = boost::posix_time::microsec_clock::local_time();
+  dt_ = boost::posix_time::microsec_clock::universal_time(); // changed 2013/08/29
   if ( m_dtLastRetrievedExternalTime >= dt_ ) {  
     m_dtLastRetrievedExternalTime += boost::posix_time::microsec( 1 );
     dt_ = m_dtLastRetrievedExternalTime;
