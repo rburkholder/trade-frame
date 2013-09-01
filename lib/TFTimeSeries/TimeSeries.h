@@ -424,5 +424,19 @@ protected:
 private:
 };
 
+// PriceIVs
+
+class PriceIVs: public TimeSeries<PriceIV> {
+public:
+  typedef PriceIV datum_t;
+  PriceIVs( void ) {};
+  PriceIVs( size_t size ): TimeSeries<datum_t>( size ) {};
+  ~PriceIVs( void ) {};
+  PriceIVs* Subset( ptime time ) const { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVs* Subset( ptime time, unsigned int n ) const { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
+protected:
+private:
+};
+
 } // namespace tf
 } // namespace ou

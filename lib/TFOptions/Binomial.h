@@ -42,6 +42,8 @@ struct structOutput {
   double delta;
   double gamma;
   double theta;
+  double vega;  // should be available as it was used for obtaining IV
+  double iv;
 };
 
 // Cox Ross Rubinstein American Binomial Tree

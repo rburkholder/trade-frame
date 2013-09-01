@@ -77,12 +77,17 @@ void CRR( const structInput& input, structOutput& output ) {
 }
 
 double ImpliedVolatility( const structInput& input_, double option, structOutput& output, double epsilon ) {
+  // Black Scholes and Beyond, page 336  -- not sure if this is correct model used.  I didn't document model used
+  // Option Pricing Formulas, page 453  -- or might have been this one
+  // New vega portion taken from top of page 288 (Option Pricing Formulas) , 
+  // and uses the 1% description from pg 166 of Black Scholes and Beyond
   size_t cnt = 10;
   structInput input( input_ );  // copy rather than reference to keep local copy of parameters
-  input.optionSide = ou::tf::OptionSide::Put;
+//  input.optionSide = ou::tf::OptionSide::Put;  // is 2013/08/31 was set, commented out, should it have been here?
   ou::tf::option::binomial::CRR( input, output );
 //  std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
   double diff = abs( output.option - option );
+  // may be able to speed algorithm by doing a +0.1 or a -0.1 rather than both.
   while ( epsilon < diff ) { // epsilon
     double deltaVol = 0.01;
     double vol = input.v;
@@ -92,8 +97,8 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
     input.v = vol - deltaVol;
     ou::tf::option::binomial::CRR( input, output );
     double option2 = output.option;
-    double vega = ( option1 - option2 ) / ( 2 * deltaVol );
-    input.v = vol - ( diff / vega );  
+    output.vega = ( option1 - option2 ) / ( 2 * deltaVol );
+    output.iv = input.v = vol - ( diff / output.vega );  
     ou::tf::option::binomial::CRR( input, output );
     diff = abs( output.option - option );
     --cnt;
@@ -104,7 +109,7 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
     }
   }
 //  std::cout << "CRR IVp: " << input.v << ",P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << "," << cnt << std::endl;
-  return input.v;
+  return output.iv;
 }
 
 } // namespace binomial

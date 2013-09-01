@@ -20,6 +20,7 @@
 #include <boost/smart_ptr.hpp>
 
 #include <TFTrading/NoRiskInterestRateSeries.h>
+#include <TFOptions/Binomial.h>
 #include <TFTrading/Watch.h>
 #include "Strike.h"
 
@@ -70,6 +71,8 @@ public:
 
   void SetExpiry( ptime dt ); // utc
 
+  void CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor );
+
 protected:
 private:
 
@@ -96,6 +99,11 @@ private:
   mapStrikes_t::iterator FindStrikeAuto( double strike ); // Auto insert new strike
 
   void RecalcATMWatch( double dblValue );
+  void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
+  void CalcGreekForOption( 
+    double dblPrice, 
+    ou::tf::option::binomial::structInput& input, 
+    ou::tf::option::binomial::structOutput& output );
 
 };
 

@@ -54,6 +54,8 @@ public:
 
   virtual void EmitValues( void );
 
+  void AppendGreek( const ou::tf::Greek& greek );
+
   void SaveSeries( const std::string& sPrefix );
 
 protected:

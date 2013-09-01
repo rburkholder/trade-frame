@@ -169,6 +169,10 @@ void Bundle::AdjacentStrikes( double dblValue, double& dblLower, double& dblUppe
 }
 
 void Bundle::RecalcATMWatch( double dblValue ) {
+  // uses a 25% edge hysterisis level to force recalc of three containing options 
+  //   ie when underlying is within 25% of upper strike or within 25% of lower strike
+  // uses a 50% hysterisis level to select new set of three containing options
+  //   ie underlying has to be within +/- 50% of mid strike to choose midstrike and corresponding upper/lower strikes
   mapStrikes_iter_t iterUpper;
   mapStrikes_iter_t iterLower;
   iterUpper = m_mapStrikes.lower_bound( dblValue ); 
@@ -249,6 +253,67 @@ void Bundle::UpdateATMWatch( double dblValue ) {
 
 void Bundle::SetExpiry( ptime dt ) {
   m_dtExpiry = dt;
+}
+
+void Bundle::CalcGreekForOption( 
+  double dblPrice, 
+  ou::tf::option::binomial::structInput& input, 
+  ou::tf::option::binomial::structOutput& output ) 
+{
+  ou::tf::option::binomial::ImpliedVolatility( input, dblPrice, output );
+}
+
+void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
+  ou::tf::option::binomial::structOutput output;
+  input.X = iter->first;
+  if ( 0 != iter->second.Call() ) {
+    input.optionSide = ou::tf::OptionSide::Call;
+    CalcGreekForOption( iter->second.Call()->LastQuote().Midpoint(), input, output );
+    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
+    iter->second.Call()->AppendGreek( greek );
+  }
+  if ( 0 != iter->second.Put() ) {
+    input.optionSide = ou::tf::OptionSide::Put;
+    CalcGreekForOption( iter->second.Put()->LastQuote().Midpoint(), input, output );
+    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
+    iter->second.Put()->AppendGreek( greek );
+  }
+}
+
+void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor ) {
+
+  static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
+//    time_duration tdurOneYear( 360 * 24, 0, 0 );  // https://www.interactivebrokers.com/en/index.php?f=interest&p=schedule
+//    time_duration tdurOneYear( 250 * 24, 0, 0 );  
+  static long lSecForOneYear = tdurOneYear.total_seconds();
+  long lSecToExpiry = ( m_dtExpiry - now ).total_seconds();
+  double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
+  double rate = libor.ValueAt( m_dtExpiry - now ) / 100.0;
+  double dblVolatilityGuess = dblVolHistorical / 100.0;
+
+//  ou::tf::option::binomial::structOutput output;
+  ou::tf::option::binomial::structInput input;
+  input.optionStyle = ou::tf::OptionStyle::American;
+  input.S = dblUnderlying;
+  input.T = ratioToExpiry;
+  input.r = rate;
+  input.b = rate; // is this correct?
+  input.n = 91;  // binomial steps
+  input.v = dblVolatilityGuess;
+
+  CalcGreeksAtStrike( now, m_iterUpper, input );
+  CalcGreeksAtStrike( now, m_iterMid, input );
+  CalcGreeksAtStrike( now, m_iterLower, input );
+
+  if ( dblUnderlying == m_iterMid->first ) {
+  }
+  else {
+    if ( dblUnderlying > m_iterMid->first ) {
+    }
+    else {
+    }
+  }
+
 }
 
 } // namespace option

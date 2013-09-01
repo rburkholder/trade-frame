@@ -85,6 +85,7 @@ public:
     boost::local_time::local_date_time lt( dt.date(), dt.time_of_day(), tz, bDst );
     return lt.utc_time();
   }
+
   ptime ConvertRegionalToUtc( boost::gregorian::date date, time_duration time, const std::string& sRegion, bool bDst = false ) {  // meant to be called infrequently
     boost::local_time::time_zone_ptr tz = m_tzDb.time_zone_from_region( sRegion );
     try {
@@ -95,7 +96,6 @@ public:
       boost::local_time::local_date_time lt( date, time, tz, !bDst );
       return lt.utc_time();
     }
-    
   }
 
 protected:

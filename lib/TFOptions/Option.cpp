@@ -94,6 +94,10 @@ void Option::HandleGreek( const Greek& greek ) {
   m_greeks.Append( greek );
 }
 
+void Option::AppendGreek( const ou::tf::Greek& greek ) {
+  HandleGreek( greek );
+}
+
 void Option::SaveSeries( const std::string& sPrefix ) {
 
   Watch::SaveSeries( sPrefix );

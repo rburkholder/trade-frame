@@ -133,7 +133,7 @@ private:
 };
 
 //
-// CBar
+// Bar
 //
 
 class Bar: public DatedDatum {
@@ -292,6 +292,32 @@ public:
 protected:
 private:
   price_t m_dblPrice;
+};
+
+//
+// PriceIV
+// pg 458 Option Pricing Formulas suggests this structure can be used with 12.2.4 Implied Forward Volatility
+//
+
+class PriceIV: public Price {
+public:
+  PriceIV( void );
+  PriceIV( const ptime& dt );
+  PriceIV( const PriceIV& rhs );
+  PriceIV( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut );
+  ~PriceIV( void ) {};
+
+  double IVCall( void ) { return m_dblIVCall; };
+  double IVPut( void ) { return m_dblIVPut; };
+  ptime Expiry( void ) { return m_dtExpiry; };
+
+  static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+
+protected:
+private:
+  ptime m_dtExpiry;
+  double m_dblIVCall;
+  double m_dblIVPut;
 };
 
 } // namespace tf
