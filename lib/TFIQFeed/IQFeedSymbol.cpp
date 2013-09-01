@@ -49,7 +49,10 @@ void IQFeedSymbol::HandleFundamentalMessage( IQFFundamentalMessage *pMsg ) {
   m_dblPriceEarnings = pMsg->Double( IQFFundamentalMessage::FPE );
   m_dbl52WkHi = pMsg->Double( IQFFundamentalMessage::F52WkHi );
   m_dbl52WkLo = pMsg->Double( IQFFundamentalMessage::F52WkLo );
+  m_dblDividendAmount = pMsg->Double( IQFFundamentalMessage::FDivAmt );
+  m_dblDividendRate = pMsg->Double( IQFFundamentalMessage::FDivRate );
   m_dblDividendYield = pMsg->Double( IQFFundamentalMessage::FDivYld );
+  m_dateExDividend = pMsg->Date( IQFFundamentalMessage::FDivExDate );
 
   OnFundamentalMessage( *this );
 }

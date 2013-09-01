@@ -98,6 +98,8 @@ private:
   mapStrikes_t::iterator FindStrike( double strike );
   mapStrikes_t::iterator FindStrikeAuto( double strike ); // Auto insert new strike
 
+  ou::tf::PriceIVs m_tsAtmIv;
+
   void RecalcATMWatch( double dblValue );
   void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
   void CalcGreekForOption( 
@@ -105,6 +107,7 @@ private:
     ou::tf::option::binomial::structInput& input, 
     ou::tf::option::binomial::structOutput& output );
 
+  void SaveAtmIv( const std::string& sPrefix );
 };
 
 } // namespace option

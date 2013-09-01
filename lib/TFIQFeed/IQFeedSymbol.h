@@ -48,8 +48,10 @@ public:
   double m_dblPriceEarnings;
   double m_dbl52WkHi;
   double m_dbl52WkLo;
+  double m_dblDividendAmount;
+  double m_dblDividendRate;
   double m_dblDividendYield;
-
+  date m_dateExDividend;
 
   // Update/Summary
   ptime m_dtLastTrade;

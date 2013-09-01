@@ -42,7 +42,10 @@ public:
     double dblPriceEarnings;
     double dbl52WkHi;
     double dbl52WkLo;
+    double dblDividendAmount;
+    double dblDividendRate;
     double dblDividendYield;
+    date dateExDividend;
   };
 
   struct Summary_t {

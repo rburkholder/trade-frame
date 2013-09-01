@@ -12,6 +12,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+
 #include "Bundle.h"
 
 namespace ou { // One Unified
@@ -282,6 +285,8 @@ void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::opti
 
 void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor ) {
 
+  if ( EOWSNoWatch == m_stateOptionWatch ) return;  // not watching so no active data
+
   static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
 //    time_duration tdurOneYear( 360 * 24, 0, 0 );  // https://www.interactivebrokers.com/en/index.php?f=interest&p=schedule
 //    time_duration tdurOneYear( 250 * 24, 0, 0 );  
@@ -305,15 +310,55 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
   CalcGreeksAtStrike( now, m_iterMid, input );
   CalcGreeksAtStrike( now, m_iterLower, input );
 
+  double dblIvCall( 0.0 );
+  double dblIvPut( 0.0 );
+
   if ( dblUnderlying == m_iterMid->first ) {
+    dblIvCall = m_iterMid->second.Call()->ImpliedVolatility();
+    dblIvPut = m_iterMid->second.Put()->ImpliedVolatility();
   }
   else {
-    if ( dblUnderlying > m_iterMid->first ) {
+    if ( dblUnderlying > m_iterMid->first ) { // linear interpolation
+      double ratio = ( dblUnderlying - m_iterMid->first ) / ( m_iterUpper->first - m_iterMid->first );
+
+      double iv1, iv2;
+      iv1 = m_iterMid->second.Call()->ImpliedVolatility();
+      iv2 = m_iterUpper->second.Call()->ImpliedVolatility();
+      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+
+      iv1 = m_iterMid->second.Put()->ImpliedVolatility();
+      iv2 = m_iterUpper->second.Put()->ImpliedVolatility();
+      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
     }
-    else {
+    else { // linear interpolation
+      double ratio = ( dblUnderlying - m_iterLower->first ) / ( m_iterMid->first - m_iterLower->first );
+
+      double iv1, iv2;
+      iv1 = m_iterLower->second.Call()->ImpliedVolatility();
+      iv2 = m_iterMid->second.Call()->ImpliedVolatility();
+      dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+
+      iv1 = m_iterLower->second.Put()->ImpliedVolatility();
+      iv2 = m_iterMid->second.Put()->ImpliedVolatility();
+      dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
     }
   }
+  m_tsAtmIv.Append( PriceIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut) );
 
+}
+
+void Bundle::SaveAtmIv( const std::string& sPrefix ) {
+
+  std::string sPathName;
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  if ( 0 != m_tsAtmIv.Size() ) {
+    sPathName = sPrefix + "/atmiv/" + m_pwatchUnderlying->GetInstrument()->GetInstrumentName();
+    HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
+    wtsAtmIv.Write( sPathName, &m_tsAtmIv );
+  }
+  
 }
 
 } // namespace option

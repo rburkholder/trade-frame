@@ -18,8 +18,7 @@
 #include <vector>
 #include <utility>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
@@ -47,7 +46,7 @@ public:
   typedef typename std::vector<bufferelement_t> linebuffer_t;
   typedef typename linebuffer_t::iterator iterator_t;
   typedef std::pair<iterator_t, iterator_t> fielddelimiter_t;
-  typedef typename linebuffer_t::size_type vector_size_type;
+  typedef typename linebuffer_t::size_type ixFields_t;
 
   IQFBaseMessage( void );
   IQFBaseMessage( iterator_t& current, iterator_t& end );
@@ -56,12 +55,13 @@ public:
   void Assign( iterator_t& current, iterator_t& end );
 
   // change to return a fielddelimiter_t
-  const std::string& Field( vector_size_type ); // returns reference to a field (will be sNull or sField );
-  double Double( vector_size_type );  // use boost::spirit?
-  int Integer( vector_size_type );  // use boost::spirit?
+  const std::string& Field( ixFields_t ); // returns reference to a field (will be sNull or sField );
+  double Double( ixFields_t );  // use boost::spirit?
+  int Integer( ixFields_t );  // use boost::spirit?
+  date Date( ixFields_t );
 
-  iterator_t FieldBegin( vector_size_type );
-  iterator_t FieldEnd( vector_size_type );
+  iterator_t FieldBegin( ixFields_t );
+  iterator_t FieldEnd( ixFields_t );
 
 protected:
 
@@ -355,7 +355,7 @@ void IQFBaseMessage<T, charT>::Tokenize( iterator_t& current, iterator_t& end ) 
 }
 
 template <class T, class charT>
-const std::string& IQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
+const std::string& IQFBaseMessage<T, charT>::Field( ixFields_t fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
@@ -365,7 +365,7 @@ const std::string& IQFBaseMessage<T, charT>::Field( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-double IQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
+double IQFBaseMessage<T, charT>::Double( ixFields_t fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -386,7 +386,7 @@ double IQFBaseMessage<T, charT>::Double( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-int IQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
+int IQFBaseMessage<T, charT>::Integer( ixFields_t fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
 
@@ -407,14 +407,50 @@ int IQFBaseMessage<T, charT>::Integer( vector_size_type fld ) {
 }
 
 template <class T, class charT>
-typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldBegin( vector_size_type fld ) {
+date IQFBaseMessage<T, charT>::Date( ixFields_t fld ) {
+  BOOST_ASSERT( 0 != fld );
+  BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
+  int nYear, nMonth, nDay;
+  date d(not_a_date_time);
+  fielddelimiter_t fielddelimiter = m_vFieldDelimiters[ fld ];
+  if ( fielddelimiter.first != fielddelimiter.second ) {
+    if ( 10 == ( fielddelimiter.second - fielddelimiter.first ) ) {
+      namespace qi = boost::spirit::qi;
+	    using namespace boost::phoenix::arg_names;
+      using boost::spirit::qi::_1;
+      using boost::spirit::qi::lit;
+	    using boost::phoenix::ref;
+	    using namespace boost::spirit::qi;
+
+      bool b;
+      b = qi::parse( fielddelimiter.first + 0, fielddelimiter.first +  2, int_[ref(nMonth) = _1] );
+      b = qi::parse( fielddelimiter.first + 3, fielddelimiter.first +  5, int_[ref(nDay)   = _1] );
+      b = qi::parse( fielddelimiter.first + 6, fielddelimiter.first + 10, int_[ref(nYear)  = _1] );
+      if ( ( 99 == nDay ) || ( 99 == nMonth ) || ( 9999 == nYear ) ) {
+      }
+      else {
+        try {
+          if ( b ) d = date( nYear, nMonth, nDay );
+        }
+        catch (...) {
+          std::string s( fielddelimiter.first, fielddelimiter.second );
+          std::cout << "IQFBaseMessage<T, charT>::Date ill formed date" + s << std::endl;
+        }
+      }
+    }
+  }
+  return d;
+}
+
+template <class T, class charT>
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldBegin( ixFields_t fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].first;
 }
 
 template <class T, class charT>
-typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd( vector_size_type fld ) {
+typename IQFBaseMessage<T, charT>::iterator_t IQFBaseMessage<T, charT>::FieldEnd( ixFields_t fld ) {
   BOOST_ASSERT( 0 != fld );
   BOOST_ASSERT( fld <= m_vFieldDelimiters.size() - 1 );
   return m_vFieldDelimiters[ fld ].second;

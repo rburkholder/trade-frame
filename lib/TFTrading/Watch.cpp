@@ -130,7 +130,10 @@ void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
   m_fundamentals.dblPriceEarnings = symbol.m_dblPriceEarnings;
   m_fundamentals.dbl52WkHi = symbol.m_dbl52WkHi;
   m_fundamentals.dbl52WkLo = symbol.m_dbl52WkLo;
+  m_fundamentals.dblDividendAmount = symbol.m_dblDividendAmount;
+  m_fundamentals.dblDividendRate = symbol.m_dblDividendRate;
   m_fundamentals.dblDividendYield = symbol.m_dblDividendYield;
+  m_fundamentals.dateExDividend = symbol.m_dateExDividend;
 }
 
 void Watch::HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol ) {
