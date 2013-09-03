@@ -231,9 +231,11 @@ void Bundle::UpdateATMWatch( double dblValue ) {
   switch ( m_stateOptionWatch ) {
   case EOWSNoWatch:
     RecalcATMWatch( dblValue );
-    SetWatchOn( m_iterUpper->first, true );
-    SetWatchOn( m_iterMid->first, true );
-    SetWatchOn( m_iterLower->first, true );
+    if ( EOWSWatching == m_stateOptionWatch ) {
+      SetWatchOn( m_iterUpper->first, true );
+      SetWatchOn( m_iterMid->first, true );
+      SetWatchOn( m_iterLower->first, true );
+    }
     break;
   case EOWSWatching:
     if ( ( dblValue > m_dblUpperTrigger ) || ( dblValue < m_dblLowerTrigger ) ) {

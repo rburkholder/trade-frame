@@ -93,10 +93,10 @@ struct OptionSymbolParser1: qi::grammar<Iterator, pos1_t()> {
     start %= ruleText >> ruleDigits >> ruleCode >> ruleStrike;
   }
 
-  qi::rule<Iterator, std::string()> ruleText;
-  qi::rule<Iterator, std::string()> ruleDigits;
-  qi::rule<Iterator, std::string()> ruleCode;
-  qi::rule<Iterator, double()> ruleStrike;
+  qi::rule<Iterator, std::string()> ruleText;  // symbol
+  qi::rule<Iterator, std::string()> ruleDigits;  // yydd
+  qi::rule<Iterator, std::string()> ruleCode;  // month and call/put
+  qi::rule<Iterator, double()> ruleStrike; // strike
 
   qi::rule<Iterator, pos1_t()> start;
 

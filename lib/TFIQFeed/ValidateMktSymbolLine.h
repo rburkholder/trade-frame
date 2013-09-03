@@ -196,7 +196,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
       // parse out option contract information
       if ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc ) {
-        ou::tf::iqfeed::structParsedOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );
+        ou::tf::iqfeed::structParsedOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
         std::string::const_iterator sb( trd.sDescription.begin() );
         std::string::const_iterator se( trd.sDescription.end() );
         bool b = parse( sb, se, parserOptionDescription, structOption );
@@ -205,26 +205,49 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
             std::cout << "Option Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
           }
           else {
+            std::string::size_type ixSlash = structOption.sUnderlying.find( "/" );
+            if ( std::string::npos != ixSlash ) {
+              structOption.sUnderlying.replace( ixSlash, 1, "." );
+            }
             mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
           }
           nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
           structParsedOptionSymbol1 pos1;
           b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserOptionSymbol1, pos1 );
           if ( b ) {
-            if ( 4 > pos1.sDigits.length() ) {
+            if ( 4 > pos1.sDigits.length() ) {  // looking for yydd
               std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
             }
             else {
-              if ( 4 < pos1.sDigits.length() ) {
-//                std::cout << "Option Symbol mashup: " << trd.sSymbol << std::endl;
-                std::string tmp = pos1.sText + pos1.sDigits.substr( 0, pos1.sDigits.length() - 4 );
-                mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = tmp;
-              }
-              std::string::const_iterator iter2 = pos1.sDigits.end();
               if ( 5 < pos1.sDigits.length() ) {
-                std::cout << "Option Symbol mashup2: " << trd.sSymbol << std::endl;
+                // should not have this condition
+                std::cout << "Option Symbol Decode:  garbage prefix yydd, ignoring" << trd.sSymbol << std::endl;
+                pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
               }
-              std::string::const_iterator iter1 = iter2 - 4;
+              if ( 5 == pos1.sDigits.length() ) {
+                // has one extra preceding digit, could be '1', '7'
+                char ch = pos1.sDigits[ 0 ];
+                std::string sSpareChar = pos1.sDigits.substr( 0, 1 );
+                pos1.sDigits.erase( 0, 1 );
+                //pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
+                // spyj could be jumbo options: 1000 vs 100 multiplier
+                switch ( ch ) {
+                case '1':  // don't know what this is
+                case '2':  // don't know what this is
+                case '3':  // don't know what this is
+                case '4':  // don't know what this is
+                case '7':  // mini option, 10x multiplier rather than normal 100x
+                  pos1.sText += ch;
+                  mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = pos1.sText;
+                  // do further massage on 7 later so can be tradeable
+                  break;
+                default:
+                  std::cout << "Option Symbol Decode:  " << pos1.sText << " has unknown suffix " << ch << std::endl;
+                }
+              }
+              assert( 4 == pos1.sDigits.length() );
+              std::string::const_iterator iter1 = pos1.sDigits.begin();
+              std::string::const_iterator iter2 = pos1.sDigits.end();
               structParsedOptionSymbol2 pos2;
               b = parse( iter1, iter2, parserOptionSymbol2, pos2 );
               if ( b ) {
@@ -236,8 +259,18 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
               }
             }
             
-            if ( pos1.sText != structOption.sUnderlying ) {
-//              std::cout << "Option Symbol Decode:  different underlying, " << trd.sSymbol << " vs " << structOption.sUnderlying << std::endl;
+            std::string sTmp = structOption.sUnderlying;
+            std::string::size_type ixDot = sTmp.find( "." );
+            if ( std::string::npos != ixDot ) {  // remove dot as option symbol does not have '.' in it
+              sTmp.erase( ixDot, 1 );
+            }
+            if ( pos1.sText != sTmp ) {  // check against modified underlying
+              std::cout 
+                << "Option Symbol Decode: changing underlying on " 
+                << trd.sSymbol << " from "
+                << structOption.sUnderlying << " to " << pos1.sText << std::endl;
+              trd.sUnderlying = pos1.sText;
+              mapUnderlying[ trd.sSymbol ] = pos1.sText;
             }
             assert( pos1.dblStrike == structOption.dblStrike );
           }
