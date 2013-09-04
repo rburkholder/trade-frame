@@ -22,7 +22,7 @@ boost::local_time::tz_database TimeSource::m_tzDb;
 boost::local_time::time_zone_ptr TimeSource::m_tzNewYork;
 
 TimeSource::TimeSource(void)
-: m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::local_time() ) 
+: m_dtLastRetrievedExternalTime( boost::posix_time::microsec_clock::universal_time() ) 
 {
   // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/examples.html#date_time.examples.local_utc_conversion
   try {
@@ -55,6 +55,10 @@ ptime TimeSource::External( ptime* dt ) {
     m_dtLastRetrievedExternalTime = dt_;
   }
   return dt_;
+}
+
+ptime TimeSource::Local( void ) {
+  return boost::posix_time::microsec_clock::local_time();
 }
 
 TimeSource::SimulationContext* TimeSource::AcquireSimulationContext( void ) {

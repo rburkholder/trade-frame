@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <sstream>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 
@@ -44,6 +46,23 @@ void Bundle::SaveSeries( const std::string& sPrefix ) {
   for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
     iter->second.SaveSeries( sPrefix );
   }
+  SaveAtmIv( sPrefix );
+}
+
+void Bundle::SaveAtmIv( const std::string& sPrefix ) {
+
+  std::string sPathName;
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  if ( 0 != m_tsAtmIv.Size() ) {
+    std::stringstream ss;
+    ss << m_dtExpiry.date();
+    sPathName = sPrefix + "/atmiv/" + ss.str().c_str();
+    HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
+    wtsAtmIv.Write( sPathName, &m_tsAtmIv );
+  }
+  
 }
 
 void Bundle::EmitValues( void ) {
@@ -269,15 +288,25 @@ void Bundle::CalcGreekForOption(
 }
 
 void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
+
   ou::tf::option::binomial::structOutput output;
   input.X = iter->first;
+
+  // Manaster and Koehler Start Value, Option Pricing Formulas, pg 454
+  double dblVolatilityGuess = std::sqrt( std::abs( std::log( input.S / input.X ) + input.r * input.T ) * 2.0 / input.T );
+  input.v = dblVolatilityGuess;
+
+//  std::cout << "Guess " << input.v << std::endl;
+
   if ( 0 != iter->second.Call() ) {
+//    std::cout << "Call @" << input.X << ": ";
     input.optionSide = ou::tf::OptionSide::Call;
     CalcGreekForOption( iter->second.Call()->LastQuote().Midpoint(), input, output );
     ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
     iter->second.Call()->AppendGreek( greek );
   }
   if ( 0 != iter->second.Put() ) {
+//    std::cout << "Put  @" << input.X << ": ";
     input.optionSide = ou::tf::OptionSide::Put;
     CalcGreekForOption( iter->second.Put()->LastQuote().Midpoint(), input, output );
     ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
@@ -296,7 +325,6 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
   long lSecToExpiry = ( m_dtExpiry - now ).total_seconds();
   double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
   double rate = libor.ValueAt( m_dtExpiry - now ) / 100.0;
-  double dblVolatilityGuess = dblVolHistorical / 100.0;
 
 //  ou::tf::option::binomial::structOutput output;
   ou::tf::option::binomial::structInput input;
@@ -306,6 +334,8 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
   input.r = rate;
   input.b = rate; // is this correct?
   input.n = 91;  // binomial steps
+
+  double dblVolatilityGuess = dblVolHistorical / 100.0;
   input.v = dblVolatilityGuess;
 
   CalcGreeksAtStrike( now, m_iterUpper, input );
@@ -346,21 +376,8 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
     }
   }
   m_tsAtmIv.Append( PriceIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut) );
+//  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
 
-}
-
-void Bundle::SaveAtmIv( const std::string& sPrefix ) {
-
-  std::string sPathName;
-
-  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
-
-  if ( 0 != m_tsAtmIv.Size() ) {
-    sPathName = sPrefix + "/atmiv/" + m_pwatchUnderlying->GetInstrument()->GetInstrumentName();
-    HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
-    wtsAtmIv.Write( sPathName, &m_tsAtmIv );
-  }
-  
 }
 
 } // namespace option

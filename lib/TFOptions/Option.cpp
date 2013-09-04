@@ -100,14 +100,24 @@ void Option::AppendGreek( const ou::tf::Greek& greek ) {
 
 void Option::SaveSeries( const std::string& sPrefix ) {
 
-  Watch::SaveSeries( sPrefix );
-
   std::string sPathName;
-
-  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   HDF5Attributes::structOption option( 
     m_dblStrike, m_pInstrument->GetExpiryYear(), m_pInstrument->GetExpiryMonth(), m_pInstrument->GetExpiryDay(), m_pInstrument->GetOptionSide() );
+
+  Watch::SaveSeries( sPrefix );
+
+  ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+
+  if ( 0 != m_quotes.Size() ) {
+    sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
+    HDF5Attributes attrGreeks( dm, sPathName, option );
+  }
+
+  if ( 0 != m_trades.Size() ) {
+    sPathName = sPrefix + "/trades/" + m_pInstrument->GetInstrumentName();
+    HDF5Attributes attrGreeks( dm, sPathName, option );
+  }
 
   if ( 0 != m_greeks.Size() ) {
     sPathName = sPrefix + "/greeks/" + m_pInstrument->GetInstrumentName();
@@ -116,14 +126,19 @@ void Option::SaveSeries( const std::string& sPrefix ) {
     HDF5Attributes attrGreeks( dm, sPathName, option );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrGreeks.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-    attrGreeks.SetProviderType( m_pGreekProvider->ID() );
+    if ( 0 != m_pGreekProvider.get() ) {
+      attrGreeks.SetProviderType( m_pGreekProvider->ID() );
+    }
+    else {
+      attrGreeks.SetProviderType( ou::tf::keytypes::EProviderCalc );
+    }
   }
 
 }
 
 
 //
-// ==================
+// ==================^
 //
 
 Call::Call( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )

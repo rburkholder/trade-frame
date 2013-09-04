@@ -333,8 +333,8 @@ H5::CompType* PriceIV::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( PriceIV ) );
   Price::DefineDataType( pComp ); // include inherited structures
   pComp->insertMember( "Expiry", HOFFSET( PriceIV, m_dtExpiry ),  H5::PredType::NATIVE_LLONG );
-  pComp->insertMember( "Call",   HOFFSET( PriceIV, m_dblIVCall ), H5::PredType::NATIVE_DOUBLE );
-  pComp->insertMember( "Put",    HOFFSET( PriceIV, m_dblIVPut ),  H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "CallIV",   HOFFSET( PriceIV, m_dblIVCall ), H5::PredType::NATIVE_DOUBLE );
+  pComp->insertMember( "PutIV",    HOFFSET( PriceIV, m_dblIVPut ),  H5::PredType::NATIVE_DOUBLE );
   return pComp;
 }
 

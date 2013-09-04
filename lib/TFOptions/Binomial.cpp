@@ -14,6 +14,7 @@
 
 #include <math.h>
 #include <vector>
+#include <iostream>
 
 #include "Binomial.h"
 
@@ -81,34 +82,48 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
   // Option Pricing Formulas, page 453  -- or might have been this one
   // New vega portion taken from top of page 288 (Option Pricing Formulas) , 
   // and uses the 1% description from pg 166 of Black Scholes and Beyond
+
+  // page 163 - 164 provides vega calc
+  // page 337 provides newton-raphson method of iv calc
   size_t cnt = 10;
   structInput input( input_ );  // copy rather than reference to keep local copy of parameters
-//  input.optionSide = ou::tf::OptionSide::Put;  // is 2013/08/31 was set, commented out, should it have been here?
+
   ou::tf::option::binomial::CRR( input, output );
+  double option1 = output.option;
+
 //  std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
-  double diff = abs( output.option - option );
-  // may be able to speed algorithm by doing a +0.1 or a -0.1 rather than both.
+
+  double diff = 2 * epsilon; // set > epsilon
   while ( epsilon < diff ) { // epsilon
-    double deltaVol = 0.01;
+
+    static double pct = 0.01;  // 1% change in volatility
+
     double vol = input.v;
-    input.v = vol + deltaVol;
-    ou::tf::option::binomial::CRR( input, output );
-    double option1 = output.option;
-    input.v = vol - deltaVol;
+    double deltaVol = pct * vol;
+    input.v = vol + deltaVol;  // adjust by 1% to calc vega
+
     ou::tf::option::binomial::CRR( input, output );
     double option2 = output.option;
-    output.vega = ( option1 - option2 ) / ( 2 * deltaVol );
-    output.iv = input.v = vol - ( diff / output.vega );  
-    ou::tf::option::binomial::CRR( input, output );
-    diff = abs( output.option - option );
+
+    output.vega = ( option2 - option1 ) / ( deltaVol );
+    output.iv = input.v = vol - ( ( option1 - option ) / output.vega ); // new volatility value
+
+    ou::tf::option::binomial::CRR( input, output );  // calc new option values with new IV
+    option1 = output.option;  // keep for next go around if needed
+    diff = std::abs( output.option - option );
+
     --cnt;
     if ( 0 == cnt ) {
-//      std::cout << "problems with IVp in CRR" << std::endl;
-      throw std::runtime_error( "problems with IVp in CRR" );
+      std::cout << "<IV problems>";
+//      throw std::runtime_error( "problems with IVp in CRR" );
       break;
     }
   }
-//  std::cout << "CRR IVp: " << input.v << ",P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << "," << cnt << std::endl;
+
+  // may need to calculate CRR once more with deltaVol to obtain new vega, as calculated vega is for interation n-1.
+  // also need one more calc to do rho.  formulas on page 313 of black scholes and beyond
+
+//  std::cout << "IV=" << output.iv << ",O=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << ",V=" << output.vega << "," << cnt << std::endl;
   return output.iv;
 }
 

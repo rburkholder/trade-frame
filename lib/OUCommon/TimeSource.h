@@ -43,6 +43,8 @@ public:
 
   ptime External( ptime* dt );
 
+  ptime Local( void );
+
   inline ptime External( void ) {
     ptime dt;
     return External( &dt );

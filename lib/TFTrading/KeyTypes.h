@@ -37,7 +37,9 @@ typedef std::string idCurrency_t;  // three character designation
 // ProviderManager
 //typedef boost::uint16_t idProvider_t;  // identifies instance of a provider
 typedef idAccount_t idProvider_t;
-enum eidProvider_t {EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderUserBase=900/*, _EProviderCount*/ };
+enum eidProvider_t {
+  EProviderUnknown=0, EProviderSimulator=100, EProviderIQF, EProviderIB, EProviderGNDT, EProviderCalc,
+  EProviderUserBase=900/*, _EProviderCount*/ };
 // PortfolioManager
 typedef std::string idPortfolio_t;
 typedef boost::int64_t idPosition_t;  // auto increment
