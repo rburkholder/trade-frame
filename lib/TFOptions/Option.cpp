@@ -109,6 +109,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
 
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
+  // add in option attributes to the already written quotes and trades.
   if ( 0 != m_quotes.Size() ) {
     sPathName = sPrefix + "/quotes/" + m_pInstrument->GetInstrumentName();
     HDF5Attributes attrGreeks( dm, sPathName, option );

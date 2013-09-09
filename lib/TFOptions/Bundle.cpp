@@ -25,7 +25,7 @@ namespace option { // options
 
 Bundle::Bundle(void)
   : m_bWatching( false ), m_stateOptionWatch( EOWSNoWatch ), 
-  m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 )
+  m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 ), m_bfIVUnderlyingCall( 86400 ), m_bfIVUnderlyingPut( 86400 )
 {
 }
 
@@ -39,17 +39,17 @@ void Bundle::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
   }
 }
 
-void Bundle::SaveSeries( const std::string& sPrefix ) {
+void Bundle::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
   if ( 0 != m_pwatchUnderlying.get() ) {
-    m_pwatchUnderlying->SaveSeries( sPrefix );
+    m_pwatchUnderlying->SaveSeries( sPrefix60sec );
   }
   for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-    iter->second.SaveSeries( sPrefix );
+    iter->second.SaveSeries( sPrefix60sec );
   }
-  SaveAtmIv( sPrefix );
+  SaveAtmIv( sPrefix60sec, sPrefix86400sec );
 }
 
-void Bundle::SaveAtmIv( const std::string& sPrefix ) {
+void Bundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
 
   std::string sPathName;
 
@@ -58,9 +58,25 @@ void Bundle::SaveAtmIv( const std::string& sPrefix ) {
   if ( 0 != m_tsAtmIv.Size() ) {
     std::stringstream ss;
     ss << m_dtExpiry.date();
-    sPathName = sPrefix + "/atmiv/" + ss.str().c_str();
+    sPathName = sPrefix60sec + "/atmiv/" + ss.str().c_str();
     HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsAtmIv );
+  }
+
+  {
+    sPathName = sPrefix86400sec + "/call";
+    ou::tf::Bars bars( 1 );
+    bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
+    HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+    wtsBar.Write( sPathName, &bars );
+  }
+  
+  {
+    sPathName = sPrefix86400sec + "/put";
+    ou::tf::Bars bars( 1 );
+    bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
+    HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+    wtsBar.Write( sPathName, &bars );
   }
   
 }
@@ -301,15 +317,17 @@ void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::opti
   if ( 0 != iter->second.Call() ) {
 //    std::cout << "Call @" << input.X << ": ";
     input.optionSide = ou::tf::OptionSide::Call;
-    CalcGreekForOption( iter->second.Call()->LastQuote().Midpoint(), input, output );
-    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
+    //CalcGreekForOption( iter->second.Call()->LastQuote().Midpoint(), input, output );
+    ou::tf::option::binomial::ImpliedVolatility( input, iter->second.Call()->LastQuote().Midpoint(), output );
+    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
     iter->second.Call()->AppendGreek( greek );
   }
   if ( 0 != iter->second.Put() ) {
 //    std::cout << "Put  @" << input.X << ": ";
     input.optionSide = ou::tf::OptionSide::Put;
-    CalcGreekForOption( iter->second.Put()->LastQuote().Midpoint(), input, output );
-    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, 0.0 );
+    //CalcGreekForOption( iter->second.Put()->LastQuote().Midpoint(), input, output );
+    ou::tf::option::binomial::ImpliedVolatility( input, iter->second.Put()->LastQuote().Midpoint(), output );
+    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
     iter->second.Put()->AppendGreek( greek );
   }
 }
@@ -376,6 +394,8 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
     }
   }
   m_tsAtmIv.Append( PriceIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut) );
+  m_bfIVUnderlyingCall.Add( now, dblIvCall, 0 );
+  m_bfIVUnderlyingPut.Add( now, dblIvPut, 0 );
 //  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
 
 }

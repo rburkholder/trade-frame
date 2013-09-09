@@ -1,3 +1,23 @@
+2013/09/05
+
+https://www.interactivebrokers.com/en/software/tws/usersguidebook/technicalanalytics/market_scanner_types.htm
+
+*30-day (V30) Implied Volatilities:
+
+Implied volatility is calculated using a 100-step binary tree for American style options, 
+and a Black-Scholes model for European style options. Interest rates are calculated 
+using the settlement prices from the day’s Eurodollar futures contracts, and dividends are based on historical payouts.
+
+The 30-day volatility is the at-market volatility estimated for a maturity thirty calendar days 
+forward of the current trading day. It is based on option prices from two consecutive expiration months. 
+The first expiration month is that which has at least eight calendar days to run. The implied volatility 
+is estimated for the eight options on the four closest to market strikes in each expiry. The implied 
+volatilities are fit to a parabola as a function of the strike price for each expiry. The at-the-market 
+implied volatility for an expiry is then taken to be the value of the fit parabola at the expected future 
+price for the expiry. A linear interpolation (or extrapolation, as required) of the 30-day variance based 
+on the squares of the at-market volatilities is performed. V30 is then the square root of the estimated 
+variance. If there is no first expiration month with less than sixty calendar days to run, we do not calculate a V30.
+
 2012/12/29
 
 Black Scholes And Beyond

@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 class BarFactory {
 public:
 
-  typedef unsigned long duration_t;
+  typedef unsigned long duration_t;  // seconds
   typedef Bar::volume_t volume_t;
   typedef Bar::price_t price_t;
 
@@ -33,7 +33,7 @@ public:
   virtual ~BarFactory(void);
   void Add( const ptime &, price_t, volume_t);
   void Add( const Trade &trade ) { Add( trade.DateTime(), trade.Price(), trade.Volume() ); };
-  const Bar getCurrentBar() const { return m_bar; };
+  Bar getCurrentBar() const { return m_bar; };
   void SetBarWidth( duration_t seconds ) { m_nBarWidthSeconds = seconds; };
   duration_t GetBarWidth( void ) const { return m_nBarWidthSeconds; };
 
@@ -63,6 +63,7 @@ protected:
   OnNewBarStartedHandler OnNewBarStarted;
   OnBarUpdatedHandler OnBarUpdated;
   OnBarCompleteHandler OnBarComplete;
+
 private:
 };
 

@@ -39,11 +39,13 @@ struct structInput {
 
 struct structOutput {
   double option;
+  double iv;
   double delta;
   double gamma;
   double theta;
-  double vega;  // should be available as it was used for obtaining IV
-  double iv;
+  double vega;
+  double rho;
+  structOutput( void ) : option( 0 ), iv( 0 ), delta( 0 ), gamma( 0 ), theta( 0 ), vega( 0 ), rho( 0 ) {};
 };
 
 // Cox Ross Rubinstein American Binomial Tree

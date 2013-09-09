@@ -22,6 +22,8 @@
 #include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFOptions/Binomial.h>
 #include <TFTrading/Watch.h>
+#include <TFTimeSeries/BarFactory.h>
+
 #include "Strike.h"
 
 namespace ou { // One Unified
@@ -66,7 +68,7 @@ public:
   void SetWatchOn( void ); // watch underlying plus all watcheable options
   void SetWatchOff( void ); 
 
-  void SaveSeries( const std::string& sPrefix );
+  void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
   void EmitValues( void );
 
   void SetExpiry( ptime dt ); // utc
@@ -100,6 +102,9 @@ private:
 
   ou::tf::PriceIVs m_tsAtmIv;
 
+  ou::tf::BarFactory m_bfIVUnderlyingCall;
+  ou::tf::BarFactory m_bfIVUnderlyingPut;
+
   void RecalcATMWatch( double dblValue );
   void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
   void CalcGreekForOption( 
@@ -107,7 +112,7 @@ private:
     ou::tf::option::binomial::structInput& input, 
     ou::tf::option::binomial::structOutput& output );
 
-  void SaveAtmIv( const std::string& sPrefix );
+  void SaveAtmIv( const std::string& sPrefix, const std::string& sPrefix86400Min );
 };
 
 } // namespace option

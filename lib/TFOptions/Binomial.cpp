@@ -93,24 +93,26 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
 
 //  std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
 
+  static double pct = 0.01;  // 1% change in volatility
+
   double diff = 2 * epsilon; // set > epsilon
   while ( epsilon < diff ) { // epsilon
 
-    static double pct = 0.01;  // 1% change in volatility
-
     double vol = input.v;
-    double deltaVol = pct * vol;
-    input.v = vol + deltaVol;  // adjust by 1% to calc vega
+    double deltaVol = pct * vol;  // do we use pct * vol or just pct?
+    double volInput1 = input.v = vol + deltaVol;  // adjust by 1% to calc vega
 
     ou::tf::option::binomial::CRR( input, output );
     double option2 = output.option;
 
     output.vega = ( option2 - option1 ) / ( deltaVol );
-    output.iv = input.v = vol - ( ( option1 - option ) / output.vega ); // new volatility value
+    double volInput2 = output.iv = input.v = vol - ( ( option1 - option ) / output.vega ); // new volatility value
 
     ou::tf::option::binomial::CRR( input, output );  // calc new option values with new IV
     option1 = output.option;  // keep for next go around if needed
     diff = std::abs( output.option - option );
+
+    output.vega = ( ( output.option - option2 ) / ( volInput2 - volInput1 ) ) * 0.01;  // see if this works, if so then can remove one CRR calc below (not sure why need the 1/100 factor (maybe to undo pct variable)
 
     --cnt;
     if ( 0 == cnt ) {
@@ -120,10 +122,27 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
     }
   }
 
-  // may need to calculate CRR once more with deltaVol to obtain new vega, as calculated vega is for interation n-1.
-  // also need one more calc to do rho.  formulas on page 313 of black scholes and beyond
+//  std::cout << "IV1=" << output.iv << ",O=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << ",V=" << output.vega << "," << cnt << std::endl;
 
-//  std::cout << "IV=" << output.iv << ",O=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << ",V=" << output.vega << "," << cnt << std::endl;
+  // calculate CRR deltaVol to obtain new vega, as current calculated vega is for iteration n-1.
+  // close enough so don't bother
+  structOutput outputTmp;
+//  double vol = input.v;  // keep old value
+//  input.v += pct * vol;  // add a delta
+//  ou::tf::option::binomial::CRR( input, outputTmp );
+//  output.vega = ( outputTmp.option - output.option ) / ( pct * vol );
+
+//  std::cout << "IV2=" << output.iv << ",O=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << ",V=" << output.vega << "," << cnt << std::endl;
+
+  // need one more calc to do rho.  formulas on page 313 of black scholes and beyond
+//  input.v = vol;  // reset vol
+  double r = input.r; // keep old r
+  input.r += pct * r;  // add a delta
+  ou::tf::option::binomial::CRR( input, outputTmp );
+  output.rho = ( outputTmp.option - output.option ) / ( pct * r );
+
+//  std::cout << "IV3=" << output.iv << ",O=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << ",V=" << output.vega << "," << output.rho << "," << cnt << std::endl;
+
   return output.iv;
 }
 
