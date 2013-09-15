@@ -51,7 +51,7 @@ struct structOutput {
 // Cox Ross Rubinstein American Binomial Tree
 // pg 284 Option Pricing Formulas, 2e
 void CRR( const structInput& input, structOutput& output );
-double ImpliedVolatility( const structInput& input, double option, structOutput& output, double epsilon = 0.0001 );
+double CalcImpliedVolatility( const structInput& input, double option, structOutput& output, double epsilon = 0.0001 );
 
 } // namespace binomial
 } // namespace option

@@ -24,7 +24,7 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 Bundle::Bundle(void)
-  : m_bWatching( false ), m_stateOptionWatch( EOWSNoWatch ), 
+  : m_stateOptionWatch( EOWSNoWatch ), //m_bWatching( false ), 
   m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 ), m_bfIVUnderlyingCall( 86400 ), m_bfIVUnderlyingPut( 86400 )
 {
 }
@@ -34,9 +34,9 @@ Bundle::~Bundle(void) {
 
 void Bundle::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
   m_pwatchUnderlying.reset( new ou::tf::Watch( pInstrument, pProvider ) );
-  if ( m_bWatching ) {
-    m_pwatchUnderlying->StartWatch();
-  }
+//  if ( m_bWatching ) {
+//    m_pwatchUnderlying->StartWatch();
+//  }
 }
 
 void Bundle::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
@@ -111,23 +111,23 @@ Put* Bundle::GetPut( double dblStrike ) {
 }
 
 void Bundle::SetWatchOn( void ) {
-  if ( !m_bWatching ) {
-    m_bWatching = true;
+//  if ( !m_bWatching ) {
+//    m_bWatching = true;
     if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
       iter->second.SetWatchOn();
     }
-  }
+//  }
 }
 
 void Bundle::SetWatchOff( void ) {
-  if ( m_bWatching ) {
-    m_bWatching = false;
+//  if ( m_bWatching ) {
+//    m_bWatching = false;
     if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
       iter->second.SetWatchOff();
     }
-  }
+//  }
 }
 
 //void Bundle::SetWatchUnderlyingOn( void ) {
@@ -187,11 +187,12 @@ Bundle::mapStrikes_t::iterator Bundle::FindStrikeAuto( double strike ) {
 
 // lower_bound: key value eq or gt than query
 // upper_bound: key value ft than query
-void Bundle::AdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
+// 2013/09/09 doesn't appear to be called from anywhere
+void Bundle::FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
 
   mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblValue ); 
   if ( m_mapStrikes.end() == iter ) {
-    throw std::runtime_error( "Bundle::AdjacentStrikes: no upper strike available" );
+    throw std::runtime_error( "Bundle::FindAdjacentStrikes: no upper strike available" );
   }
   dblUpper = iter->first;
   if ( dblValue == dblUpper ) {
@@ -199,7 +200,7 @@ void Bundle::AdjacentStrikes( double dblValue, double& dblLower, double& dblUppe
   }
   else {
     if ( m_mapStrikes.begin() == iter ) {
-      throw std::runtime_error( "Bundle::AdjacentStrikes: already at lower lower end of strkes" );
+      throw std::runtime_error( "Bundle::FindAdjacentStrikes: already at lower lower end of strkes" );
     }
     --iter;
     dblLower = iter->first;
@@ -295,14 +296,6 @@ void Bundle::SetExpiry( ptime dt ) {
   m_dtExpiry = dt;
 }
 
-void Bundle::CalcGreekForOption( 
-  double dblPrice, 
-  ou::tf::option::binomial::structInput& input, 
-  ou::tf::option::binomial::structOutput& output ) 
-{
-  ou::tf::option::binomial::ImpliedVolatility( input, dblPrice, output );
-}
-
 void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
 
   ou::tf::option::binomial::structOutput output;
@@ -316,19 +309,27 @@ void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::opti
 
   if ( 0 != iter->second.Call() ) {
 //    std::cout << "Call @" << input.X << ": ";
-    input.optionSide = ou::tf::OptionSide::Call;
-    //CalcGreekForOption( iter->second.Call()->LastQuote().Midpoint(), input, output );
-    ou::tf::option::binomial::ImpliedVolatility( input, iter->second.Call()->LastQuote().Midpoint(), output );
-    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
-    iter->second.Call()->AppendGreek( greek );
+    try {
+      input.optionSide = ou::tf::OptionSide::Call;
+      ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Call()->LastQuote().Midpoint(), output );
+      ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
+      iter->second.Call()->AppendGreek( greek );
+    }
+    catch (...) {
+      std::cout << iter->second.Call()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+    }
   }
   if ( 0 != iter->second.Put() ) {
 //    std::cout << "Put  @" << input.X << ": ";
-    input.optionSide = ou::tf::OptionSide::Put;
-    //CalcGreekForOption( iter->second.Put()->LastQuote().Midpoint(), input, output );
-    ou::tf::option::binomial::ImpliedVolatility( input, iter->second.Put()->LastQuote().Midpoint(), output );
-    ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
-    iter->second.Put()->AppendGreek( greek );
+    try {
+      input.optionSide = ou::tf::OptionSide::Put;
+      ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Put()->LastQuote().Midpoint(), output );
+      ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
+      iter->second.Put()->AppendGreek( greek );
+    }
+    catch (...) {
+      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+    }
   }
 }
 

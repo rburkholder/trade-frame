@@ -50,7 +50,7 @@ public:
   Call* GetCall( double dblStrike );
   Put* GetPut( double dblStrike );
 
-  void AdjacentStrikes( double dblValue, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
+  void FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
 
   void UpdateATMWatch( double dblValue );
 
@@ -83,7 +83,7 @@ private:
 
   enum EOptionWatchState { EOWSNoWatch, EOWSWatching } m_stateOptionWatch;
 
-  bool m_bWatching;  // single threadable only
+//  bool m_bWatching;  // single threadable only
 
   ptime m_dtExpiry;  // eg, 4pm EST third Fri of month for normal US equity options, in utc
 
@@ -107,10 +107,6 @@ private:
 
   void RecalcATMWatch( double dblValue );
   void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
-  void CalcGreekForOption( 
-    double dblPrice, 
-    ou::tf::option::binomial::structInput& input, 
-    ou::tf::option::binomial::structOutput& output );
 
   void SaveAtmIv( const std::string& sPrefix, const std::string& sPrefix86400Min );
 };

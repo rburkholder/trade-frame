@@ -77,7 +77,7 @@ void CRR( const structInput& input, structOutput& output ) {
   output.option = v[ 0 ];
 }
 
-double ImpliedVolatility( const structInput& input_, double option, structOutput& output, double epsilon ) {
+double CalcImpliedVolatility( const structInput& input_, double option, structOutput& output, double epsilon ) {
   // Black Scholes and Beyond, page 336  -- not sure if this is correct model used.  I didn't document model used
   // Option Pricing Formulas, page 453  -- or might have been this one
   // New vega portion taken from top of page 288 (Option Pricing Formulas) , 
@@ -116,9 +116,9 @@ double ImpliedVolatility( const structInput& input_, double option, structOutput
 
     --cnt;
     if ( 0 == cnt ) {
-      std::cout << "<IV problems>";
-//      throw std::runtime_error( "problems with IVp in CRR" );
-      break;
+//      std::cout << "<IV problems>";
+      throw std::runtime_error( "problems with IVp in CRR" );
+//      break;
     }
   }
 
