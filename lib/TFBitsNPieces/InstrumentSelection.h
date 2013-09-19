@@ -13,7 +13,7 @@
 
 #pragma once
 
-// 2013/08/24, started in Phi2, moved here, can be further expaned with code 
+// 2013/08/24, started in Phi2, moved here, can be further expanded with code 
 //  located in other projects, generalized with additional criteria,
 //  perhaps use boost::fusion characteristics to use additional selection criteria
 // How to Use:
@@ -57,6 +57,8 @@ public:
   ~InstrumentSelection(void);
 
   void Process( const ptime& eod, setInfo_t& selected );
+  template<typename F>
+  void Process( const std::string& sPath, const ptime& dtStart, const ptime& dtEnd, F f );
 
 protected:
 private:
@@ -78,6 +80,27 @@ private:
   void ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName );
 
 };
+
+template<typename F>
+void InstrumentSelection::Process( const std::string& sPath, const ptime& dtStart, const ptime& dtEnd, F f ) {
+
+  //struct GroupItem
+
+  std::cout << "Running" << std::endl;
+
+  ou::tf::HDF5IterateGroups groups;
+  groups.SetOnHandleObject( MakeDelegate( this, &InstrumentSelection::ProcessGroupItem ) );
+  try {
+    int result = groups.Start( "/bar/86400/" );
+  }
+  catch (...) {
+    std::cout << "ouch" << std::endl;
+  }
+
+  std::cout << "History Scanned." << std::endl;
+
+}
+
 
 } // namespace tf
 } // namespace ou

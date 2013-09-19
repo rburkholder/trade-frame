@@ -34,8 +34,8 @@
 Process::Process( const std::string& sPrefixPath )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
   m_sPrefixPath( sPrefixPath ),
-//  m_cntBars( 25 )
-  m_cntBars( 200 ) // 2013/09/12
+  m_cntBars( 25 )
+//  m_cntBars( 0 ) // 2013/09/17
 {
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );
@@ -55,8 +55,8 @@ void Process::Start( void ) {
 
   ou::tf::iqfeed::InMemoryMktSymbolList list;
 
-//  if (true) {
-  if (false) {
+  if (true) {
+//  if (false) {
     std::cout << "Downloading File ... ";
     ou::tf::iqfeed::LoadMktSymbols( list, ou::tf::iqfeed::MktSymbolLoadType::Download, true );  // put this into a thread
   //  ou::tf::iqfeed::LoadMktSymbols( m_list, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );  // put this into a thread

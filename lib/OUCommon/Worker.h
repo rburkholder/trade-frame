@@ -19,6 +19,7 @@
 // Uses code from BaskeTrading class
 
 #include <boost/thread/thread.hpp>
+#include <boost/function.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -71,6 +72,26 @@ private:
 } // namespace action
 
 namespace function {
+//template<typename T>
+class Worker {
+public:
+  typedef boost::function<void (void )> worker_t;
+  explicit Worker( worker_t worker ): m_worker( worker ), m_pThread( 0 ) {
+    m_pThread = new boost::thread( boost::ref( *this ) );
+  }
+  ~Worker( void ) {};
+  void operator()( void ) {  // runs in alternate thread, won't work peoperly if object goes away before thread is called
+    m_worker();
+  }
+  void Join( void ) { if ( 0 != m_pThread ) m_pThread->join(); };
+protected:
+private:
+  worker_t m_worker;
+  boost::thread* m_pThread;
+};
+}
+
+namespace function2 {
 
 // having problems make this work
 // try closer to CRTP mechanism
