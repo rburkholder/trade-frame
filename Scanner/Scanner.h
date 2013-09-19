@@ -22,6 +22,8 @@
 
 #include <TFTrading/DBOps.h>
 
+#include <TFTimeSeries/DatedDatum.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
@@ -50,8 +52,18 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
+  struct s_t {
+    ou::tf::Bar::volume_t nAverageVolume;
+    size_t nEnteredFilter;
+    size_t nPassedFilter;
+    s_t( void ): nAverageVolume( 0 ), nEnteredFilter( 0 ), nPassedFilter( 0 ) {};
+  };
+
   void HandleMenuActionScan( void );
   void ScanBars( void );
+  bool HandleCallBackUseGroup( s_t&, const std::string& sPath, const std::string& sGroup );
+  bool HandleCallBackFilter( s_t&, const std::string& sObject, ou::tf::Bars& bars );
+  void HandleCallBackResults( s_t&, const std::string& sObject, ou::tf::Bars& bars );
 
 };
 

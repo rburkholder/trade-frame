@@ -39,6 +39,9 @@
     <ClInclude Include="InstrumentSelection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InstrumentFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

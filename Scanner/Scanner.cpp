@@ -14,9 +14,10 @@
 
 #include "stdafx.h"
 
-#include <boost/phoenix/bind/bind_member_function.hpp>
+//#include <boost/phoenix/bind/bind_member_function.hpp>
 
-#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFTimeSeries/TimeSeries.h>
+#include <TFBitsNPieces/InstrumentFilter.h>
 
 #include "Scanner.h"
 
@@ -92,22 +93,59 @@ bool AppScanner::OnInit() {
 
 }
 
-template<typename T>
-struct ScanBars {
-  ScanBars( T* p ): m_p( p ) {};
-  void operator()( void ) {
+struct AverageVolume {
+private:
+  ou::tf::Bar::volume_t m_nTotalVolume;
+  unsigned long m_nNumberOfValues;
+protected:
+public:
+  AverageVolume() : m_nTotalVolume( 0 ), m_nNumberOfValues( 0 ) {};
+  void operator() ( const ou::tf::Bar& bar ) {
+    m_nTotalVolume += bar.Volume();
+    ++m_nNumberOfValues;
   }
-  T* m_p;
+  operator ou::tf::Bar::volume_t() { return m_nTotalVolume / m_nNumberOfValues; };
 };
 
+bool AppScanner::HandleCallBackUseGroup( s_t&, const std::string& sPath, const std::string& sGroup ) {
+  return true;
+}
+
+bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+  bool b( false );
+  ++data.nEnteredFilter;
+  ou::tf::Bars::const_iterator iterVolume = bars.begin();
+  data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
+  if ( ( 1000000 < data.nAverageVolume ) 
+    && ( 12.0 <= bars.Last()->Close() )
+    && ( 80.0 >= bars.Last()->Close() ) ) {
+//      Info info( sObjectName, *bars.Last() );
+//      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
+      //std::cout << sObject << " vol=" << volAverage << std::endl;
+      ++data.nPassedFilter;
+      b = true;
+  }
+  return b;
+}
+
+
+void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+  std::cout << sObject << ": " << data.nAverageVolume << "," << data.nEnteredFilter << "," << data.nPassedFilter << std::endl;
+}
+
 void AppScanner::ScanBars( void ) {
+  namespace args = boost::phoenix::placeholders;
+  ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter( 
+    "/bar/86400", 
+    ptime( date( 2013, 9, 4 ), time_duration( 0, 0, 0 ) ), 
+    ptime( date( 2013, 9, 19 ), time_duration( 0, 0, 0 ) ), 
+    10,
+    boost::phoenix::bind( &AppScanner::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
+    boost::phoenix::bind( &AppScanner::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
+    boost::phoenix::bind( &AppScanner::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
+    );
   try {
-    namespace args = boost::phoenix::placeholders;
-    ou::tf::hdf5::IterateGroups ig( 
-      "/bar/86400", 
-      boost::phoenix::bind( &AppScanner::HandleHdf5Group, this, args::arg1, args::arg2 ), 
-      boost::phoenix::bind( &AppScanner::HandleHdf5Object, this, args::arg1, args::arg2 ) 
-      );
+    filter.Run();
   }
   catch( ... ) {
     std::cout << "Scan Problems" << std::endl;
@@ -118,9 +156,9 @@ void AppScanner::HandleMenuActionScan( void ) {
   m_worker.Run( MakeDelegate( this, &AppScanner::ScanBars ) );
 }
 
-void AppScanner::HandleHdf5Object( const std::string& sPath, const std::string& sObject ) {
-  std::cout << sObject << std::endl;
-}
+//void AppScanner::HandleHdf5Object( const std::string& sPath, const std::string& sObject ) {
+//  std::cout << sObject << std::endl;
+//}
 
 int AppScanner::OnExit() {
   // Exit Steps: #4
