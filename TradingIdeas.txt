@@ -1,0 +1,12 @@
+2012/11/20
+http://stockgumshoe.com/reviews/macro-trader/silvers-historic-price-glitch-will-it-jump-to-208-in-six-months/
+I follow about 75 gold/silver producers. Calculate a couple of ratios to find better values. In my opinion, the articles Hamilton of Zeal research wrote about the gold/silver ratios are FAR better than what the folks have written. He says to buy silver when the ratio gets above 55 and to sell when it drops to less than 45. Easy enough.
+
+2012/10/22
+Get historical open interest.  Look at symbols with significant changes.  Use as indicator as how to trade.  
+On equities, I believe it means borrowed securities for shorts.
+On options, means how many have been written.
+
+See GTSCalp notes for more stuff
+Also see there for Intra Day Arms charts
+Also see there for MarketProfile, DeltaMarker

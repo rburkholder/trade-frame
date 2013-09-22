@@ -38,7 +38,7 @@ public:
 
   typedef ou::tf::iqfeed::HistoryBulkQuery<Process> inherited_t;
 
-  explicit Process( const std::string& sPrefixPath );
+  explicit Process( const std::string& sPrefixPath, size_t nDatums );
   ~Process(void);
   void Start( void );
 
@@ -59,13 +59,14 @@ private:
   boost::mutex m_mutexProcessResults;
 
   std::string m_sPrefixPath;
+  const size_t m_nDatums;
 
   std::set<std::string> m_vExchanges;  // list of exchanges to be scanned to create: 
   std::set<std::string> m_vSymbols;  // list of symbols to be scanned
 
   static const size_t m_BarWindow = 20;  // number of bars to examine
 
-  const size_t m_cntBars;
+  //const size_t m_cntBars;
 
 };
 

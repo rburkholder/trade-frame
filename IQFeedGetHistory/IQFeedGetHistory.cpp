@@ -80,7 +80,18 @@ bool AppIQFeedGetHistory::OnInit() {
   // maybe set scenario with database and with in memory data structure
 //  m_db.Open( "cav.db" );
 
-  m_pWorker = new Worker( "" );
+  FrameMain::vpItems_t vItems;
+  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "10 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays10 ) ) );
+  vItems.push_back( new mi( "30 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays30 ) ) );
+  vItems.push_back( new mi( "100 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays100 ) ) );
+  vItems.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+
+  // test that iqfeed is connected.
+
+
 
   return 1;
 
@@ -95,3 +106,18 @@ int AppIQFeedGetHistory::OnExit() {
   return 0;
 }
 
+void AppIQFeedGetHistory::HandleMenuActionDays10( void ) {
+  m_pWorker = new Worker( "", 10 );
+}
+
+void AppIQFeedGetHistory::HandleMenuActionDays30( void ) {
+  m_pWorker = new Worker( "", 30 );
+}
+
+void AppIQFeedGetHistory::HandleMenuActionDays100( void ) {
+  m_pWorker = new Worker( "", 100 );
+}
+
+void AppIQFeedGetHistory::HandleMenuActionDays0( void ) {
+  m_pWorker = new Worker( "", 0 );
+}

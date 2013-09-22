@@ -1,0 +1,2 @@
+http://www.codeproject.com/Articles/13852/BasicExcel-A-Class-to-Read-and-Write-to-Microsoft
+http://www.codeproject.com/Articles/42504/ExcelFormat-Library

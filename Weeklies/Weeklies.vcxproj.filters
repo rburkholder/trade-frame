@@ -24,42 +24,12 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HistoryDailyTick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameWork01.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IQFeedSymbolFileToSqlite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LiborFromIQFeed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstrumentSelection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstrumentFilter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReadCboeWeeklyOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HistoryDailyTick.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LiborFromIQFeed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InstrumentSelection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReadCboeWeeklyOptions.cpp">
+    <ClCompile Include="Weeklies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

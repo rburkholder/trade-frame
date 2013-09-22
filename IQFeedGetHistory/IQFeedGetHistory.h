@@ -45,6 +45,12 @@ private:
   virtual bool OnInit();
   virtual int OnExit();
 
+  void HandleMenuActionDays10( void );
+  void HandleMenuActionDays30( void );
+  void HandleMenuActionDays100( void );
+  void HandleMenuActionDays0( void );
+
+
 };
 
 // Implements MyApp& wxGetApp()

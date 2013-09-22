@@ -31,10 +31,10 @@
 
 #pragma message( "** Note:  compile in release mode, buffer checks make it slow in debug" )
 
-Process::Process( const std::string& sPrefixPath )
+Process::Process( const std::string& sPrefixPath, size_t nDatums )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 
-  m_sPrefixPath( sPrefixPath ),
-  m_cntBars( 25 )
+  m_sPrefixPath( sPrefixPath ), m_nDatums( nDatums )
+  //m_cntBars( 25 )
 //  m_cntBars( 0 ) // 2013/09/17
 {
   m_vExchanges.insert( "NYSE" );
@@ -89,7 +89,7 @@ void Process::Start( void ) {
 
   SetMaxSimultaneousQueries( 15 );
   SetSymbols( setSelected.begin(), setSelected.end() );
-  DailyBars( m_cntBars );
+  DailyBars( m_nDatums );
   Block();
 
   std::cout << "Process complete." << std::endl;
