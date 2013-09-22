@@ -347,7 +347,7 @@ BOOL CGTScalpDlg::OnInitDialog() {
   m_lbLvl1Port.SetCurSel( 0 );
   m_lbLvl2Port.SetCurSel( 1 );
 
-  m_eDayCalc = CSymbolSelectionFilter::NoDayCalc;
+  m_eDayCalc = SymbolSelectionFilter::NoDayCalc;
   m_eScanType = NoScanType;
   m_bUseDayStart = false;
   m_bUseDayEnd = false;
@@ -735,7 +735,7 @@ void CGTScalpDlg::OnBnClickedEnddayselect() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYSELECT );
   m_dtStartDate.EnableWindow( 1 );
   m_dtStartTime.EnableWindow( 1 );
-  m_eDayCalc = CSymbolSelectionFilter::DaySelect;
+  m_eDayCalc = SymbolSelectionFilter::DaySelect;
 }
 
 void CGTScalpDlg::OnBnClickedEndbarcount() {
@@ -743,7 +743,7 @@ void CGTScalpDlg::OnBnClickedEndbarcount() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDBARCOUNT );
   m_dtStartDate.EnableWindow( 0 );
   m_dtStartTime.EnableWindow( 0 );
-  m_eDayCalc = CSymbolSelectionFilter::BarCount;
+  m_eDayCalc = SymbolSelectionFilter::BarCount;
 }
 
 void CGTScalpDlg::OnBnClickedEnddaycount() {
@@ -751,7 +751,7 @@ void CGTScalpDlg::OnBnClickedEnddaycount() {
   m_grpEndDay.CheckRadioButton( IDC_ENDDAYCOUNT, IDC_ENDDAYSELECT, IDC_ENDDAYCOUNT );
   m_dtStartDate.EnableWindow( 0 );
   m_dtStartTime.EnableWindow( 0 );
-  m_eDayCalc = CSymbolSelectionFilter::DayCount;
+  m_eDayCalc = SymbolSelectionFilter::DayCount;
 }
 
 void CGTScalpDlg::OnBnClickedBtnscan() {
@@ -759,7 +759,7 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
   int count = 0;
   ptime dtStart;
   ptime dtEnd;
-  bool bValidValues = ( ( CSymbolSelectionFilter::NoDayCalc != m_eDayCalc ) && ( NoScanType != m_eScanType ) );
+  bool bValidValues = ( ( SymbolSelectionFilter::NoDayCalc != m_eDayCalc ) && ( NoScanType != m_eScanType ) );
   if ( bValidValues ) {
     SYSTEMTIME dtLastDate, dtLastTime, dtStartDate, dtStartTime;
     m_dtLastDate.GetTime( &dtLastDate );
@@ -772,7 +772,7 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
     dtEnd = ptime( 
       boost::gregorian::date( dtLastDate.wYear, dtLastDate.wMonth, dtLastDate.wDay ),
       boost::posix_time::time_duration( dtLastTime.wHour, dtLastTime.wMinute, dtLastTime.wSecond, dtLastTime.wMilliseconds ) );
-    if ( ( CSymbolSelectionFilter::BarCount == m_eDayCalc  ) || ( CSymbolSelectionFilter::DayCount == m_eDayCalc ) ) {
+    if ( ( SymbolSelectionFilter::BarCount == m_eDayCalc  ) || ( SymbolSelectionFilter::DayCount == m_eDayCalc ) ) {
       char szDays[ 30 ];
       m_edtDaysAgo.GetWindowTextA( szDays, 30 );
       count = atoi( szDays );
@@ -781,22 +781,22 @@ void CGTScalpDlg::OnBnClickedBtnscan() {
   }
   if ( bValidValues ) {
     //CScripts *scripts = new CScripts();
-    CSymbolSelectionFilter *pFilter;
+    SymbolSelectionFilter *pFilter;
     switch ( m_eScanType ) {
       case Darvas:
-        pFilter = new CSelectSymbolWithDarvas( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        pFilter = new SelectSymbolWithDarvas( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case Bollinger:
-        pFilter = new CSelectSymbolWithBollinger( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        pFilter = new SelectSymbolWithBollinger( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case Breakout:
-        pFilter = new CSelectSymbolWithBreakout( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        pFilter = new SelectSymbolWithBreakout( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case Volatility:
-        pFilter = new CSelectSymbolWithVolatility( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        pFilter = new SelectSymbolWithVolatility( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
       case TenPercent:
-        pFilter = new CSelectSymbolWith10Percent( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
+        pFilter = new SelectSymbolWith10Percent( m_eDayCalc, count, m_bUseDayStart, dtStart, m_bUseDayEnd, dtEnd );
         break;
     }
     if ( pFilter->Validate() ) {
@@ -983,7 +983,7 @@ void CGTScalpDlg::OnBnClickedChartsymbol() {
         pChartIntraDay->ShowWindow( 1 );
         m_pIB->AddTradeHandler( 
           sSymbol, 
-          MakeDelegate( &pChartIntraDay->m_chart, &CChartDatedDatum::AddTrade ) 
+          MakeDelegate( &pChartIntraDay->m_chart, &ChartDatedDatum::AddTrade ) 
           );
       }
     }

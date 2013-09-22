@@ -21,7 +21,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CRunningStats::CRunningStats(void) : 
+RunningStats::RunningStats(void) : 
   /*b2( 0 ),*/ b1( 0 ), b0( 0 ), 
   SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
   rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
@@ -29,7 +29,7 @@ CRunningStats::CRunningStats(void) :
 {
 }
 
-CRunningStats::CRunningStats( double BBMultiplier ) : 
+RunningStats::RunningStats( double BBMultiplier ) : 
   /*b2( 0 ),*/ b1( 0 ), b0( 0 ), 
   SumXX( 0 ), SumX( 0 ), SumXY( 0 ), SumY( 0 ), SumYY( 0 ),
   rr( 0 ), r( 0 ), meanY( 0 ), sd( 0 ),
@@ -37,10 +37,10 @@ CRunningStats::CRunningStats( double BBMultiplier ) :
 {
 }
 
-CRunningStats::~CRunningStats(void) {
+RunningStats::~RunningStats(void) {
 }
 
-void CRunningStats::Reset( void ) {
+void RunningStats::Reset( void ) {
   /*b2 = */ b1 = b0 
     = meanY 
     = rr = r 
@@ -49,7 +49,7 @@ void CRunningStats::Reset( void ) {
     = SumXX = SumX = SumXY = SumY = SumYY = 0;
 }
 
-void CRunningStats::Add(double x, double y) {
+void RunningStats::Add(double x, double y) {
   SumXX += x * x;
   SumX += x;
   SumXY += x * y;
@@ -58,7 +58,7 @@ void CRunningStats::Add(double x, double y) {
   nX++;
 }
 
-void CRunningStats::Remove(double x, double y) {
+void RunningStats::Remove(double x, double y) {
   SumXX -= x * x;
   SumX -= x;
   SumXY -= x * y;
@@ -67,7 +67,7 @@ void CRunningStats::Remove(double x, double y) {
   nX--;
 }
 
-void CRunningStats::CalcStats() {
+void RunningStats::CalcStats() {
 
   if ( nX > 1 ) {
 

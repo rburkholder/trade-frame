@@ -1,3 +1,6 @@
+2013/09/22
+Installer Software:  http://www.jrsoftware.org/isinfo.php
+
 2012/09/01
 Source of unzip files:  https://github.com/nmoinvaz/minizip, but don't use it
 This is a new flavour but is incompatible with zlib-1.2.7 used with hdf5

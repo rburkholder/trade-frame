@@ -12,24 +12,24 @@ static char THIS_FILE[] = __FILE__;
 // as new values are received.
 // generate bars 
 
-CChartDatedDatum::CChartDatedDatum(void) : CChartViewerShim() {
-  m_pWindowBars = new CSlidingWindowBars();
+ChartDatedDatum::ChartDatedDatum(void) : CChartViewerShim() {
+  m_pWindowBars = new SlidingWindowBars();
   m_bUpdateChart = true;
   chart = NULL;
   m_majorTickInc = 0;
   m_minorTickInc = 0;
-  m_factory.SetOnBarComplete( MakeDelegate( this, &CChartDatedDatum::HandleOnNewBar ) );
-  m_factory.SetOnBarUpdated( MakeDelegate( this, &CChartDatedDatum::HandleOnBarUpdated ) );
+  m_factory.SetOnBarComplete( MakeDelegate( this, &ChartDatedDatum::HandleOnNewBar ) );
+  m_factory.SetOnBarUpdated( MakeDelegate( this, &ChartDatedDatum::HandleOnBarUpdated ) );
 }
 
-CChartDatedDatum::~CChartDatedDatum(void) {
+ChartDatedDatum::~ChartDatedDatum(void) {
 }
 
-BEGIN_MESSAGE_MAP(CChartDatedDatum, CChartViewerShim)
+BEGIN_MESSAGE_MAP(ChartDatedDatum, CChartViewerShim)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
-void CChartDatedDatum::OnDestroy()  {
+void ChartDatedDatum::OnDestroy()  {
 
   if ( NULL != chart ) delete chart;
   delete m_pWindowBars;
@@ -37,17 +37,17 @@ void CChartDatedDatum::OnDestroy()  {
 	CChartViewerShim::OnDestroy();
 }
 
-void CChartDatedDatum::SetWindowWidthSeconds( long seconds ) {
+void ChartDatedDatum::SetWindowWidthSeconds( long seconds ) {
   m_pWindowBars -> SetSlidingWindowSeconds( seconds );
 }
 
-void CChartDatedDatum::HandleOnNewBar( const CBar &bar) {
+void ChartDatedDatum::HandleOnNewBar( const CBar &bar) {
   m_pWindowBars->Add( bar.m_dt, new CBar( bar ) );   // TODO: need to do garbage collection after
   m_pWindowBars->UpdateWindow();
   UpdateChart();
 }
 
-void CChartDatedDatum::HandleOnBarUpdated( const CBar &bar) {
+void ChartDatedDatum::HandleOnBarUpdated( const CBar &bar) {
   m_pWindowBars->Add( bar.m_dt, new CBar( bar ) );   // TODO: need to do garbage collection after
   m_pWindowBars->UpdateWindow();
   UpdateChart();
@@ -58,20 +58,20 @@ void CChartDatedDatum::HandleOnBarUpdated( const CBar &bar) {
   //delete pBar;
 }
 
-void CChartDatedDatum::Add(const CBar &bar) {
+void ChartDatedDatum::Add(const CBar &bar) {
   m_pWindowBars->Add( bar.m_dt, new CBar( bar ) );   // TODO: need to do garbage collection after
   m_pWindowBars->UpdateWindow();
   UpdateChart();
 }
 
-void CChartDatedDatum::Add( const Trade &trade ) {
+void ChartDatedDatum::Add( const Trade &trade ) {
   m_factory.Add( trade.m_dt, trade.m_dblTrade, trade.m_nTradeSize );
 }
 
-void CChartDatedDatum::ClearChart() {
+void ChartDatedDatum::ClearChart() {
 }
 
-void CChartDatedDatum::UpdateChart() {
+void ChartDatedDatum::UpdateChart() {
   if ( m_bUpdateChart ) {
     // draw chart
     CBar *pBar;

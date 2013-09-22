@@ -23,9 +23,9 @@ public:
   void StartCharts( bool bLive, unsigned int nDaysAgo );
 
   CChartArmsIntraDay m_ChartArmsIntraDay;
-  CChartDatedDatum m_ChartIndu;
-  CChartDatedDatum m_ChartTrin;
-  CChartDatedDatum m_ChartTick;
+  ChartDatedDatum m_ChartIndu;
+  ChartDatedDatum m_ChartTrin;
+  ChartDatedDatum m_ChartTick;
 
   void OnInduHistoryDone( IQFeedHistory* pHistory );
   void OnTickHistoryDone( IQFeedHistory* pHistory );

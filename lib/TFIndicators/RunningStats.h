@@ -17,11 +17,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CRunningStats {
+class RunningStats {
 public:
-  CRunningStats(void);
-  CRunningStats(double BBMultiplier);
-  virtual ~CRunningStats(void);
+  RunningStats(void);
+  RunningStats(double BBMultiplier);
+  virtual ~RunningStats(void);
   void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
   double GetBBMultiplier( void ) const { return m_BBMultiplier; };
 

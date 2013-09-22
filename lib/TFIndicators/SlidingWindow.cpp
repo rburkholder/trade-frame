@@ -19,11 +19,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CSlidingWindowBars::CSlidingWindowBars(unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) : 
-  CSlidingWindow<Bar>( WindowSizeSeconds, WindowSizeCount ) {
+SlidingWindowBars::SlidingWindowBars(unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) : 
+  SlidingWindow<Bar>( WindowSizeSeconds, WindowSizeCount ) {
 }
 
-CSlidingWindowBars::~CSlidingWindowBars() {
+SlidingWindowBars::~SlidingWindowBars() {
   // replicate the code from the base class just to be sure the objects get cleared out.
   while ( !m_qT.empty() ) {
     //delete m_qT.front();
@@ -32,9 +32,9 @@ CSlidingWindowBars::~CSlidingWindowBars() {
   }
 }
 
-Bar *CSlidingWindowBars::Remove( void ) {
+Bar* SlidingWindowBars::Remove( void ) {
   // default deleter so it doesn't end up no where
-  Bar *pBar = CSlidingWindow::Remove();
+  Bar *pBar = SlidingWindow::Remove();
   delete pBar;
   return NULL;
 }

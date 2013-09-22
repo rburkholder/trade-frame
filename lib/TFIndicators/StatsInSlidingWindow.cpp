@@ -19,23 +19,23 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CTradeStats::CTradeStats( std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount ): 
-  CStatsInSlidingWindow( sName, WindowSizeSeconds, WindowSizeCount  ) {
+TradeStats::TradeStats( std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount ): 
+  StatsInSlidingWindow( sName, WindowSizeSeconds, WindowSizeCount  ) {
 }
 
-CTradeStats::~CTradeStats() {
+TradeStats::~TradeStats() {
 }
 
-Trade* CTradeStats::Add(boost::posix_time::ptime dt, Trade *trade) {
-  CStatsInSlidingWindow::Add( dt, trade->Price() );
-  CSlidingWindow::Add( dt, trade );
+Trade* TradeStats::Add(boost::posix_time::ptime dt, Trade *trade) {
+  StatsInSlidingWindow::Add( dt, trade->Price() );
+  SlidingWindow::Add( dt, trade );
   return trade;
 }
 
-Trade* CTradeStats::Remove() {
-  Trade* trade = CSlidingWindow::Remove();
+Trade* TradeStats::Remove() {
+  Trade* trade = SlidingWindow::Remove();
   // what is stored in the removal, does dt need to come from trade?
-  CStatsInSlidingWindow::Remove( trade->DateTime(), trade->Price() );
+  StatsInSlidingWindow::Remove( trade->DateTime(), trade->Price() );
   return trade;
 }
 

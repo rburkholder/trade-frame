@@ -21,35 +21,35 @@ using namespace ou::tf;
 // implement boost 1_35_0 soon for the boost::bind
 
 //
-// CSymbolSelectionFilter ( base class for filters )
+// SymbolSelectionFilter ( base class for filters )
 //
-CSymbolSelectionFilter::CSymbolSelectionFilter( 
+SymbolSelectionFilter::SymbolSelectionFilter( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
   m_DayStartType( dstype) , m_nCount( count ), 
     m_bUseStart( bUseStart ), m_dtStart( dtStart ), m_bUseLast( bUseEnd ), m_dtLast( dtEnd ) {
 }
 
-CSymbolSelectionFilter::~CSymbolSelectionFilter(void) {
+SymbolSelectionFilter::~SymbolSelectionFilter(void) {
   m_bars.Clear();
 }
 
-void CSymbolSelectionFilter::Start( void ) {
+void SymbolSelectionFilter::Start( void ) {
   string sBaseGroup = "/bar/86400/";
-  HDF5IterateGroups<CSymbolSelectionFilter> control;
+  HDF5IterateGroups<SymbolSelectionFilter> control;
   int result = control.Start( sBaseGroup, this );
   cout << "iteration returned " << result << endl;
 }
 
 //
-// CSelectSymbolWithDarvas
+// SelectSymbolWithDarvas
 //
 class CalcMaxDate: public std::unary_function<Bar &, void> {
 public:
   CalcMaxDate( void ) : dtMax( boost::date_time::special_values::min_date_time ), dblMax( 0 ) { };
   void operator() ( Bar &bar ) {
-    if ( bar.m_dblClose >= dblMax ) {
-      dblMax = bar.m_dblClose;
-      dtMax = bar.m_dt;
+    if ( bar.Close() >= dblMax ) {
+      dblMax = bar.Close();
+      dtMax = bar.DateTime();
     }
   }
   operator ptime() { return dtMax; };
@@ -61,7 +61,7 @@ private:
 
 class CalcSixMonMeans {
 private:
-  CRunningStats rsUpper, rsLower;
+  RunningStats rsUpper, rsLower;
   int cnt;
 protected:
 public:
@@ -69,14 +69,14 @@ public:
   ~CalcSixMonMeans( void ) {
     rsUpper.CalcStats();
     rsLower.CalcStats();
-    cout << endl << "  upper mean=" << rsUpper.meanY << ", SD=" << rsUpper.SD;
-    cout << endl << "  lower mean=" << rsLower.meanY << ", SD=" << rsLower.SD;
+    cout << endl << "  upper mean=" << rsUpper.MeanY() << ", SD=" << rsUpper.SD();
+    cout << endl << "  lower mean=" << rsLower.MeanY() << ", SD=" << rsLower.SD();
   }
   void operator() ( const Bar &bar ) {
     ++cnt;
     double t = cnt;
-    rsUpper.Add( t, bar.m_dblHigh - bar.m_dblOpen );
-    rsLower.Add( t, bar.m_dblOpen - bar.m_dblLow );
+    rsUpper.Add( t, bar.High() - bar.Open() );
+    rsLower.Add( t, bar.Open() - bar.Low() );
   }
 };
 
@@ -88,7 +88,7 @@ protected:
 public:
   CalcAverageVolume() : m_nTotalVolume( 0 ), m_nNumberOfValues( 0 ) {};
   void operator() ( const Bar &bar ) {
-    m_nTotalVolume += bar.m_nVolume;
+    m_nTotalVolume += bar.Volume();
     ++m_nNumberOfValues;
   }
   operator unsigned long() { return m_nTotalVolume / m_nNumberOfValues; };
@@ -102,25 +102,25 @@ protected:
 public:
   CalcAveragePrice() : m_dblSumOfPrices( 0 ), m_nNumberOfValues( 0 ) {};
   void operator() ( const Bar &bar ) {
-    m_dblSumOfPrices += bar.m_dblClose;
+    m_dblSumOfPrices += bar.Close();
     ++m_nNumberOfValues;
   }
   operator double() { return m_dblSumOfPrices / m_nNumberOfValues; };
 };
 
-CSelectSymbolWithDarvas::CSelectSymbolWithDarvas( 
+SelectSymbolWithDarvas::SelectSymbolWithDarvas( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
-CSelectSymbolWithDarvas::~CSelectSymbolWithDarvas(void) {
+SelectSymbolWithDarvas::~SelectSymbolWithDarvas(void) {
 }
 
-bool CSelectSymbolWithDarvas::Validate( void ) {
-  return ( CSymbolSelectionFilter::Validate() && m_bUseStart && m_bUseLast );
+bool SelectSymbolWithDarvas::Validate( void ) {
+  return ( SymbolSelectionFilter::Validate() && m_bUseStart && m_bUseLast );
 }
 
-void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPath ) {
+void SelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPath ) {
   //cout << "Darvas for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   HDF5TimeSeriesContainer<Bar> barRepository( sPath );
   HDF5TimeSeriesContainer<Bar>::iterator begin, end;
@@ -145,8 +145,8 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
 
         if ( 
           ( 1000000 < nAverageVolume )
-          && ( m_bars.Last()->m_dblClose >= 20.0 ) 
-          && ( m_bars.Last()->m_dblClose  < 80.0 ) 
+          && ( m_bars.Last()->Close() >= 20.0 ) 
+          && ( m_bars.Last()->Close()  < 80.0 ) 
           ) {  // need certain amount of liquidity before entering trade (20 bars worth)
 
             ptime dtDayOfMax = std::for_each( m_bars.begin(), m_bars.end(), CalcMaxDate() );
@@ -154,7 +154,7 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
               cout << 
                 "Darvas max for " << sSymbol << 
                 " on " << dtDayOfMax << 
-                ", close=" << m_bars.Last()->m_dblClose <<
+                ", close=" << m_bars.Last()->Close() <<
                 ", volume=" << m_bars.Last()->m_nVolume;
               vector<Bar>::iterator iter = m_bars.iterAtOrAfter( dtPt2 - date_duration( 20 ) ); // take 20 days to run trigger
               DarvasResults results = for_each( iter, m_bars.end(), CDarvas() );
@@ -172,21 +172,21 @@ void CSelectSymbolWithDarvas::Process( const string &sSymbol, const string &sPat
 }
 
 //
-// CSelectSymbolWith10Percent
+// SelectSymbolWith10Percent
 //
-CSelectSymbolWith10Percent::CSelectSymbolWith10Percent( 
+SelectSymbolWith10Percent::SelectSymbolWith10Percent( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
-CSelectSymbolWith10Percent::~CSelectSymbolWith10Percent(void) {
+SelectSymbolWith10Percent::~SelectSymbolWith10Percent(void) {
 }
 
-bool CSelectSymbolWith10Percent::Validate( void ) {
-  return ( CSymbolSelectionFilter::Validate() && m_bUseLast );
+bool SelectSymbolWith10Percent::Validate( void ) {
+  return ( SymbolSelectionFilter::Validate() && m_bUseLast );
 }
 
-void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &sPath ) {
+void SelectSymbolWith10Percent::Process( const string &sSymbol, const string &sPath ) {
   //cout << "10 Percent for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   m_sPath = sPath;
   HDF5TimeSeriesContainer<Bar> barRepository( sPath );
@@ -198,15 +198,15 @@ void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &s
       begin = end - 20;
       m_bars.Resize( 20 );
       barRepository.Read( begin, end, &m_bars );
-      if ( ( m_bars.Last()->m_dblClose < 80.0 ) 
-        && ( m_bars.Last()->m_dblClose > 20.0 ) 
-        && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
+      if ( ( m_bars.Last()->Close() < 80.0 ) 
+        && ( m_bars.Last()->Close() > 20.0 ) 
+        && ( m_bars.Last()->DateTime() == ( dtPt2 - date_duration( 1 ) ) ) ) {
         unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
         double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
         if ( ( 1000000 < nAverageVolume ) && ( 25 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)
           multimap<double, string>::iterator iterPos;
           std::multimap<double, string, MaxNegativesCompare>::iterator iterNeg;
-          double dblReturn = ( m_bars.Last()->m_dblClose - m_bars.Last()->m_dblOpen ) / m_bars.Last()->m_dblClose;
+          double dblReturn = ( m_bars.Last()->Close() - m_bars.Last()->Open() ) / m_bars.Last()->Close();
           if ( nMaxInList > mapMaxPositives.size() ) {
             mapMaxPositives.insert( pair<double, string>( dblReturn, sPath ) );
           }
@@ -233,7 +233,7 @@ void CSelectSymbolWith10Percent::Process( const string &sSymbol, const string &s
   //}
 }
 
-void CSelectSymbolWith10Percent::WrapUp( void ) {
+void SelectSymbolWith10Percent::WrapUp( void ) {
   cout << "Positives: " << endl;
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxPositives.begin(); iterPos != mapMaxPositives.end(); ++iterPos ) {
@@ -255,19 +255,19 @@ void CSelectSymbolWith10Percent::WrapUp( void ) {
 }
 
 //
-// CSelectSymbolWithVolatility
+// SelectSymbolWithVolatility
 //
 
-CSelectSymbolWithVolatility::CSelectSymbolWithVolatility( 
+SelectSymbolWithVolatility::SelectSymbolWithVolatility( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd ) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
-CSelectSymbolWithVolatility::~CSelectSymbolWithVolatility(void) {
+SelectSymbolWithVolatility::~SelectSymbolWithVolatility(void) {
 }
 
-bool CSelectSymbolWithVolatility::Validate( void ) {
-  return ( CSymbolSelectionFilter::Validate() && m_bUseLast );
+bool SelectSymbolWithVolatility::Validate( void ) {
+  return ( SymbolSelectionFilter::Validate() && m_bUseLast );
 }
 
 class CalcAverageVolatility {
@@ -279,13 +279,13 @@ public:
   CalcAverageVolatility() : m_dblVolatility( 0 ), m_nNumberOfValues( 0 ) {};
   void operator() ( const Bar &bar ) {
     //m_dblVolatility += ( bar.m_dblHigh - bar.m_dblLow ) / bar.m_dblClose;
-    m_dblVolatility += ( bar.m_dblHigh - bar.m_dblLow ) ;
+    m_dblVolatility += ( bar.High() - bar.Low() ) ;
     ++m_nNumberOfValues;
   }
   operator double() { return m_dblVolatility / m_nNumberOfValues; };
 };
 
-void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
+void SelectSymbolWithVolatility::Process( const string &sSymbol, const string &sPath ) {
   try {
   m_sPath = sPath;
   //cout << "Volatility for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
@@ -297,9 +297,9 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
     begin = end - 20;
     m_bars.Resize( 20 );
     barRepository.Read( begin, end, &m_bars );
-    if ( ( m_bars.Last()->m_dblClose < 50.0 ) 
-      && ( m_bars.Last()->m_dblClose > 20.0 ) 
-      && ( m_bars.Last()->m_dt == ( dtPt2 - date_duration( 1 ) ) ) ) {
+    if ( ( m_bars.Last()->Close() < 50.0 ) 
+      && ( m_bars.Last()->Close() > 20.0 ) 
+      && ( m_bars.Last()->DateTime() == ( dtPt2 - date_duration( 1 ) ) ) ) {
       unsigned long nAverageVolume = std::for_each( m_bars.begin(), m_bars.end(), CalcAverageVolume() );
       double dblAveragePrice = std::for_each( m_bars.begin(), m_bars.end(), CalcAveragePrice() );
       if ( ( 1000000 < nAverageVolume ) && ( 25.0 < dblAveragePrice ) ) {  // need certain amount of liquidity before entering trade (20 bars worth)
@@ -325,7 +325,7 @@ void CSelectSymbolWithVolatility::Process( const string &sSymbol, const string &
   }
 }
 
-void CSelectSymbolWithVolatility::WrapUp( void ) {
+void SelectSymbolWithVolatility::WrapUp( void ) {
   cout << "Volatiles: " << endl;
   multimap<double, string>::iterator iterPos;
   for ( iterPos = mapMaxVolatility.begin(); iterPos != mapMaxVolatility.end(); ++iterPos ) {
@@ -338,18 +338,18 @@ void CSelectSymbolWithVolatility::WrapUp( void ) {
 }
 
 //
-// CSelectSymbolWithBreakout
+// SelectSymbolWithBreakout
 //
 
-CSelectSymbolWithBreakout::CSelectSymbolWithBreakout( 
+SelectSymbolWithBreakout::SelectSymbolWithBreakout( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
-CSelectSymbolWithBreakout::~CSelectSymbolWithBreakout(void) {
+SelectSymbolWithBreakout::~SelectSymbolWithBreakout(void) {
 }
 
-void CSelectSymbolWithBreakout::Process( const string &sSymbol, const string &sPath ) {
+void SelectSymbolWithBreakout::Process( const string &sSymbol, const string &sPath ) {
   cout << "Breakout for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
 }
 
@@ -359,7 +359,7 @@ void CSelectSymbolWithBreakout::Process( const string &sSymbol, const string &sP
 //
 CSelectSymbolWithXWeekHigh::CSelectSymbolWithXWeekHigh( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
 CSelectSymbolWithXWeekHigh::~CSelectSymbolWithXWeekHigh(void) {
@@ -388,18 +388,18 @@ void CSelectSymbolWithXWeekHigh::Process( const string &sSymbol, const string &s
 
 
 //
-// CSelectSymbolWithBollinger
+// SelectSymbolWithBollinger
 //
 
-CSelectSymbolWithBollinger::CSelectSymbolWithBollinger( 
+SelectSymbolWithBollinger::SelectSymbolWithBollinger( 
   enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd) :
-  CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
+  SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) {
 }
 
-CSelectSymbolWithBollinger::~CSelectSymbolWithBollinger(void) {
+SelectSymbolWithBollinger::~SelectSymbolWithBollinger(void) {
 }
 
-void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &sPath ) {
+void SelectSymbolWithBollinger::Process( const string &sSymbol, const string &sPath ) {
   cout << "Bollinger for " << sSymbol << ", " << m_bars.Count() << " bars." << endl;
   HDF5TimeSeriesContainer<Bar> barRepository( sPath );
   HDF5TimeSeriesContainer<Bar>::iterator begin, end;
@@ -427,18 +427,18 @@ void CSelectSymbolWithBollinger::Process( const string &sSymbol, const string &s
 
 
 //
-// CSelectSymbolWithStrikeCoverage
+// SelectSymbolWithStrikeCoverage
 //
 
-CSelectSymbolWithStrikeCoverage::CSelectSymbolWithStrikeCoverage(
-  CSymbolSelectionFilter::enumDayCalc dstype, int count, 
+SelectSymbolWithStrikeCoverage::SelectSymbolWithStrikeCoverage(
+  SymbolSelectionFilter::enumDayCalc dstype, int count, 
   bool bUseStart, boost::posix_time::ptime dtStart, bool bUseEnd, boost::posix_time::ptime dtEnd) 
-  : CSymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) 
+  : SymbolSelectionFilter( dstype, count, bUseStart, dtStart, bUseEnd, dtEnd ) 
 {
 }
 
-CSelectSymbolWithStrikeCoverage::~CSelectSymbolWithStrikeCoverage() {
+SelectSymbolWithStrikeCoverage::~SelectSymbolWithStrikeCoverage() {
 }
 
-void CSelectSymbolWithStrikeCoverage::Process(const std::string &sSymbol, const std::string &sPath) {
+void SelectSymbolWithStrikeCoverage::Process(const std::string &sSymbol, const std::string &sPath) {
 }

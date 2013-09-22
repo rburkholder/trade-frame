@@ -5,10 +5,10 @@
 #include "BarFactory.h"
 #include "ChartDirector\FinanceChart.h"
 
-class CChartDatedDatum : public CChartViewerShim {
+class ChartDatedDatum : public CChartViewerShim {
 public:
-  CChartDatedDatum(void);
-  virtual ~CChartDatedDatum(void);
+  ChartDatedDatum(void);
+  virtual ~ChartDatedDatum(void);
   void Add( const CBar &bar );
   void Add( const Trade &trade );
   void AddTrade( const Trade &trade ) { Add( trade ); };
@@ -24,7 +24,7 @@ public:
 protected:
   FinanceChart *chart;
   //long m_nWindowWidthSeconds;
-  CSlidingWindowBars *m_pWindowBars;  // this list of bars are the ones visible in the chart
+  SlidingWindowBars *m_pWindowBars;  // this list of bars are the ones visible in the chart
   BarFactory m_factory;
   void HandleOnNewBar( const CBar &bar );
   void HandleOnBarUpdated( const CBar &bar );

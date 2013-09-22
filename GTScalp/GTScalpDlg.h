@@ -64,7 +64,7 @@ private:
 
   enum enumScanType { NoScanType, Darvas, Bollinger, Breakout, Volatility, TenPercent };
   enumScanType m_eScanType;
-  CSymbolSelectionFilter::enumDayCalc m_eDayCalc;
+  SymbolSelectionFilter::enumDayCalc m_eDayCalc;
   bool m_bUseDayStart;
   bool m_bUseDayEnd;
   enum enumDataSourceType { NoDS, DSIQFeed, DSIB, DSGenesis1, DSGenesis2, DSSimulation };

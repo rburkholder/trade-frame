@@ -28,13 +28,13 @@ bool CompoundFile::Create(const wchar_t* filename)
 	return SUCCEEDED(hr);
 }
 
-bool CompoundFile::Open(const wchar_t* filename, ios_base::openmode mode/*=ios_base::in|ios_base::out*/)
+bool CompoundFile::Open(const wchar_t* filename, std::ios_base::openmode mode/*=ios_base::in|ios_base::out*/)
 {
 	int stgm_mode;
 
-	if ((mode & (ios_base::in|ios_base::out)) == (ios_base::in|ios_base::out))
+	if ((mode & (std::ios_base::in|std::ios_base::out)) == (std::ios_base::in|std::ios_base::out))
 		stgm_mode = STGM_READWRITE | STGM_SHARE_EXCLUSIVE;
-	else if (mode & ios_base::out)
+	else if (mode & std::ios_base::out)
 		stgm_mode = STGM_WRITE | STGM_SHARE_EXCLUSIVE;
 	else
 		stgm_mode = STGM_READ | STGM_SHARE_EXCLUSIVE;
@@ -110,7 +110,7 @@ CF_RESULT CompoundFile::ReadFile(const wchar_t* path, char* data, ULONG size)
 	return SUCCEEDED(hr)? SUCCESS: INVALID_PATH;
 }
 
-CF_RESULT CompoundFile::ReadFile(const wchar_t* path, vector<char>&data)
+CF_RESULT CompoundFile::ReadFile(const wchar_t* path, std::vector<char>&data)
 {
 	data.clear();
 
@@ -149,7 +149,7 @@ CF_RESULT CompoundFile::WriteFile(const wchar_t* path, const char* data, ULONG s
 	return SUCCEEDED(hr)? SUCCESS: INVALID_PATH;
 }
 
-CF_RESULT CompoundFile::WriteFile(const wchar_t* path, const vector<char>&data, ULONG size)
+CF_RESULT CompoundFile::WriteFile(const wchar_t* path, const std::vector<char>&data, ULONG size)
 {
 	IStream* pStream = NULL;
 
@@ -173,7 +173,7 @@ bool CompoundFile::Create(const char* filename)
 	return Create(widen_string(filename).c_str());
 }
 
-bool CompoundFile::Open(const char* filename, ios_base::openmode mode/*=ios_base::in|ios_base::out*/)
+bool CompoundFile::Open(const char* filename, std::ios_base::openmode mode/*=ios_base::in|ios_base::out*/)
 {
 	return Open(widen_string(filename).c_str(), mode);
 }
@@ -193,7 +193,7 @@ CF_RESULT CompoundFile::ReadFile(const char* path, char* data, ULONG size)
 	return ReadFile(widen_string(path).c_str(), data, size);
 }
 
-CF_RESULT CompoundFile::ReadFile(const char* path, vector<char>& data)
+CF_RESULT CompoundFile::ReadFile(const char* path, std::vector<char>& data)
 {
 	return ReadFile(widen_string(path).c_str(), data);
 }
@@ -203,7 +203,7 @@ CF_RESULT CompoundFile::WriteFile(const char* path, const char* data, ULONG size
 	return WriteFile(widen_string(path).c_str(), data, size);
 }
 
-CF_RESULT CompoundFile::WriteFile(const char* path, const vector<char>& data, ULONG size)
+CF_RESULT CompoundFile::WriteFile(const char* path, const std::vector<char>& data, ULONG size)
 {
 	return WriteFile(widen_string(path).c_str(), data, size);
 }
@@ -2721,7 +2721,7 @@ ULONG LargeString::ContinueRead(const char* data, int size)
 			npos += size * SIZEOFWCHAR_T;
 		} else {
 			// String to be read is in ANSI
-			vector<char> name(size);
+			std::vector<char> name(size);
 			LittleEndian::ReadString(data, &*(name.begin()), npos, size);
 			mbstowcs(&*(wname_.begin())+strpos, &*(name.begin()), size);
 			npos += size;
@@ -2748,7 +2748,7 @@ ULONG LargeString::ContinueRead(const char* data, int size)
 		name_.resize(strpos+size, 0);
 		if (unicode & 1) {
 			// String to be read is in unicode
-			vector<wchar_t> name(size);
+			std::vector<wchar_t> name(size);
 			LittleEndian::ReadString(data, &*(name.begin()), npos, size);
 			wcstombs(&*(name_.begin())+strpos, &*(name.begin()), size);
 			npos += size * SIZEOFWCHAR_T;
@@ -4930,7 +4930,7 @@ Worksheet::MergedCells::MergedCell::MergedCell()
 
 ULONG Worksheet::MergedCells::MergedCell::Read(const char* data)
 {
-	vector<char> data_;
+	std::vector<char> data_;
 	data_.assign(data, data+DataSize());
 
 	// read REF record
@@ -5053,7 +5053,7 @@ bool BasicExcel::Load(const char* filename)
 		workbook_ = Workbook();
 		worksheets_.clear();
 
-		vector<char> data;
+		std::vector<char> data;
 		file_.ReadFile("Workbook", data);
 		Read(&*(data.begin()), data.size());
 
@@ -5074,7 +5074,7 @@ bool BasicExcel::Load(const wchar_t* filename)
 		workbook_ = Workbook();
 		worksheets_.clear();
 
-		vector<char> data;
+		std::vector<char> data;
 		file_.ReadFile("Workbook", data);
 		Read(&*(data.begin()), data.size());
 
@@ -5102,7 +5102,7 @@ bool BasicExcel::Save()
 			minBytes += worksheets_[i].RecordSize();
 
 		// Create new workbook.
-		vector<char> data(minBytes, 0);
+		std::vector<char> data(minBytes, 0);
 		Write(&*(data).begin());
 
 		if (file_.WriteFile("Workbook", data, (ULONG)data.size()) != SUCCESS)
@@ -5725,10 +5725,10 @@ void BasicExcel::UpdateWorksheets()
 	LargeString largeString;
 	Worksheet::ColInfo oneCol;
 
-	map<vector<char>, size_t> stringMap;
-	map<vector<char>, size_t>::iterator stringMapIt;
-	map<vector<wchar_t>, size_t> wstringMap;
-	map<vector<wchar_t>, size_t>::iterator wstringMapIt;
+	std::map<std::vector<char>, size_t> stringMap;
+	std::map<std::vector<char>, size_t>::iterator stringMapIt;
+	std::map<std::vector<wchar_t>, size_t> wstringMap;
+	std::map<std::vector<wchar_t>, size_t>::iterator wstringMapIt;
 
 	// Reset worksheets and string table.
 	worksheets_.clear();
@@ -5762,8 +5762,8 @@ void BasicExcel::UpdateWorksheets()
 		if (s > 0) rawSheet.window2_.options_ &= ~0x200;
 
 		// References and pointers to shorten code
-		vector<Worksheet::CellTable::RowBlock>& rRowBlocks = rawSheet.cellTable_.rowBlocks_;
-		vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >* pCellBlocks;
+		std::vector<Worksheet::CellTable::RowBlock>& rRowBlocks = rawSheet.cellTable_.rowBlocks_;
+		std::vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >* pCellBlocks;
 		Worksheet::CellTable::RowBlock::CellBlock* pCell;
 		rRowBlocks.resize(maxRows/32 + (maxRows%32 ? 1 : 0));
 		for(int r=0, curRowBlock=0; r<maxRows; ++r) {
@@ -5903,7 +5903,7 @@ void BasicExcel::UpdateWorksheets()
 							pCell->_union.labelsst_->colIndex_ = c;
 
 							// Get cell string
-							vector<char> str(cell->GetStringLength()+1);
+							std::vector<char> str(cell->GetStringLength()+1);
 							cell->Get(&*(str.begin()));
 							str.pop_back(); // Remove null character because LargeString does not store null character.
 
@@ -5940,7 +5940,7 @@ void BasicExcel::UpdateWorksheets()
 							pCell->_union.labelsst_->colIndex_ = c;
 
 							// Get cell string
-							vector<wchar_t> str(cell->GetStringLength()+1);
+							std::vector<wchar_t> str(cell->GetStringLength()+1);
 							cell->Get(&*(str.begin()));
 							str.pop_back(); // Remove null character because LargeString does not store null character.
 
@@ -6120,7 +6120,7 @@ bool BasicExcelWorksheet::Rename(const wchar_t* to)
 
 ///< Print entire worksheet to an output stream, separating each column with the defined delimiter and enclosing text using the defined textQualifier.
 ///< Leave out the textQualifier argument if do not wish to have any text qualifiers.
-void BasicExcelWorksheet::Print(ostream& os, char delimiter, char textQualifier) const
+void BasicExcelWorksheet::Print(std::ostream& os, char delimiter, char textQualifier) const
 {
 	for(int r=0; r<maxRows_; ++r)
 	{
@@ -6137,7 +6137,7 @@ void BasicExcelWorksheet::Print(ostream& os, char delimiter, char textQualifier)
 					break;
 
 				case BasicExcelCell::DOUBLE:
-					os << setprecision(15) << cell->GetDouble();
+					os << std::setprecision(15) << cell->GetDouble();
 					break;
 
 				case BasicExcelCell::STRING:
@@ -6146,12 +6146,12 @@ void BasicExcelWorksheet::Print(ostream& os, char delimiter, char textQualifier)
 						{
 						// Get string.
 						size_t maxLength = cell->GetStringLength();
-						vector<char> cellString(maxLength+1);
+						std::vector<char> cellString(maxLength+1);
 						cell->Get(&*(cellString.begin()));
 
 						// Duplicate textQualifier if found in string.
 						ULONG npos = 0;
-						vector<char>::iterator it;
+						std::vector<char>::iterator it;
 						while((it=find(cellString.begin()+npos, cellString.end(), textQualifier)) != cellString.end())
 							npos = (ULONG) distance(cellString.begin(), cellString.insert(it, textQualifier)) + 2;
 
@@ -6172,7 +6172,7 @@ void BasicExcelWorksheet::Print(ostream& os, char delimiter, char textQualifier)
 			if (c < maxCols_-1)
 				os << delimiter;
 		}
-		os << endl;
+		os << std::endl;
 	}
 }
 
@@ -6207,7 +6207,7 @@ BasicExcelCell* BasicExcelWorksheet::Cell(int row, int col)
 	if (row >= maxRows_) {
 		// Increase the number of rows.
 		maxRows_ = row + 1;
-		cells_.resize(maxRows_, vector<BasicExcelCell>(maxCols_));
+		cells_.resize(maxRows_, std::vector<BasicExcelCell>(maxCols_));
 	}
 
 	return &(cells_[row][col]);
@@ -6242,13 +6242,13 @@ bool BasicExcelWorksheet::EraseCell(int row, int col)
 }
 
 //MF: calculate sheet dimension from row blocks, only looking at non-empty cells
-static void calculate_dimension(vector<Worksheet::CellTable::RowBlock>& rRowBlocks, int& maxRows_, int& maxCols_)
+static void calculate_dimension(std::vector<Worksheet::CellTable::RowBlock>& rRowBlocks, int& maxRows_, int& maxCols_)
 {
 	int maxRow = 0;
 	int maxCol = 0;
 
 	for(size_t i=0; i<rRowBlocks.size(); ++i) {
-		vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >& rCellBlocks = rRowBlocks[i].cellBlocks_;
+		std::vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >& rCellBlocks = rRowBlocks[i].cellBlocks_;
 
 		for(size_t j=0; j<rCellBlocks.size(); ++j) {
 			int row = rCellBlocks[j]->RowIndex();
@@ -6302,11 +6302,11 @@ USHORT BasicExcelWorksheet::GetColWidth(const int colindex)
 void BasicExcelWorksheet::UpdateCells()
 {
 	// Define some references
-	vector<Worksheet::CellTable::RowBlock>& rRowBlocks = excel_->worksheets_[sheetIndex_].cellTable_.rowBlocks_;
-	const vector<YExcel::Worksheet::MergedCells::MergedCell>& mergedCells = excel_->worksheets_[sheetIndex_].mergedCells_.mergedCellsVector_;
+	std::vector<Worksheet::CellTable::RowBlock>& rRowBlocks = excel_->worksheets_[sheetIndex_].cellTable_.rowBlocks_;
+	const std::vector<YExcel::Worksheet::MergedCells::MergedCell>& mergedCells = excel_->worksheets_[sheetIndex_].mergedCells_.mergedCellsVector_;
 
-	vector<wchar_t> wstr;
-	vector<char> str;
+	std::vector<wchar_t> wstr;
+	std::vector<char> str;
 
 	//MF calculate sheet dimension independent from the DIMENSIONS record
 	calculate_dimension(rRowBlocks, maxRows_, maxCols_);
@@ -6316,12 +6316,12 @@ void BasicExcelWorksheet::UpdateCells()
 //	maxCols_ = dimension.lastUsedColIndexPlusOne_;
 
 	// Resize the cells to the size of the worksheet
-	vector<BasicExcelCell> cellCol(maxCols_);
+	std::vector<BasicExcelCell> cellCol(maxCols_);
 	cells_.resize(maxRows_, cellCol);
 
 	size_t maxRowBlocks = rRowBlocks.size();
 	for(size_t i=0; i<maxRowBlocks; ++i) {
-		vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >& rCellBlocks = rRowBlocks[i].cellBlocks_;
+		std::vector<SmartPtr<Worksheet::CellTable::RowBlock::CellBlock> >& rCellBlocks = rRowBlocks[i].cellBlocks_;
 		size_t maxCells = rCellBlocks.size();
 
 		for(size_t j=0; j<maxCells; ++j) {
@@ -6371,7 +6371,7 @@ void BasicExcelWorksheet::UpdateCells()
 					break;
 
 				case CODE::LABELSST: {
-					vector<LargeString>& ss = excel_->workbook_.sst_.strings_;
+					std::vector<LargeString>& ss = excel_->workbook_.sst_.strings_;
 					if (ss[rCellBlocks[j]->_union.labelsst_->SSTRecordIndex_].unicode_ & 1) {
 						wstr = ss[rCellBlocks[j]->_union.labelsst_->SSTRecordIndex_].wname_;
 						wstr.resize(wstr.size()+1);
@@ -6594,7 +6594,7 @@ double BasicExcelCell::GetDouble() const
 // Returns NULL if cell does not contain an ANSI string.
 const char* BasicExcelCell::GetString() const
 {
-	vector<char> str(str_.size());
+	std::vector<char> str(str_.size());
 
 	if (type_ == STRING) {
 		if (!str.empty() && Get(&*(str.begin())))
@@ -6610,7 +6610,7 @@ const char* BasicExcelCell::GetString() const
 // Returns NULL if cell does not contain an Unicode string.
 const wchar_t* BasicExcelCell::GetWString() const
 {
-	vector<wchar_t> wstr(wstr_.size());
+	std::vector<wchar_t> wstr(wstr_.size());
 
 	if (type_ == WSTRING) {
 		if (!wstr.empty() && Get(&*(wstr.begin())))
@@ -6701,7 +6701,7 @@ void BasicExcelCell::SetString(const char* str)
 	size_t length = strlen(str);
 	if (length > 0)	{
 		type_ = STRING;
-		str_ = vector<char>(length+1);
+		str_ = std::vector<char>(length+1);
 		strcpy(&*(str_.begin()), str);
 		wstr_.clear();
 	} else
@@ -6714,7 +6714,7 @@ void BasicExcelCell::SetWString(const wchar_t* str)
 	size_t length = wcslen(str);
 	if (length > 0)	{
 		type_ = WSTRING;
-		wstr_ = vector<wchar_t>(length+1);
+		wstr_ = std::vector<wchar_t>(length+1);
 		wcscpy(&*(wstr_.begin()), str);
 		str_.clear();
 	} else
@@ -6807,7 +6807,7 @@ void BasicExcelCell::EraseContents()
 
 ///< Print cell to output stream.
 ///< Print a null character if cell is undefined.
-ostream& operator<<(ostream& os, const BasicExcelCell& cell)
+std::ostream& operator<<(std::ostream& os, const BasicExcelCell& cell)
 {
 	switch(cell.Type())
 	{

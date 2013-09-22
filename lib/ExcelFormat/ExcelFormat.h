@@ -103,7 +103,7 @@ struct ExcelFont
 	{
 	}
 
-	wstring	_name;
+	std::wstring	_name;
 	short	_height;			// font height in twips (1/20 of a point)
 	short	_weight;			// FW_NORMAL, FW_BOLD, ...
 	short	_options;			// see EXCEL_FONT_OPTIONS
@@ -197,11 +197,11 @@ struct XLSFormatManager
 	XLSFormatManager(BasicExcel& xls);
 
 	const Workbook::Font& get_font(const CellFormat& fmt) const;
-	wstring get_format_string(const CellFormat& fmt) const;
+	std::wstring get_format_string(const CellFormat& fmt) const;
 	const Workbook::XF& get_XF(int xf_idx) const {return _xls.workbook_.XFs_[xf_idx];}
 
 	int get_font_idx(const ExcelFont& font);
-	int get_format_idx(const wstring& fmt_str);
+	int get_format_idx(const std::wstring& fmt_str);
 	int get_xf_idx(const CellFormat& fmt);
 
 private:
@@ -209,8 +209,8 @@ private:
 
 	int _next_fmt_idx;
 
-	typedef map<int, wstring> FormatMap;
-	typedef map<wstring, int> FormatRevMap;
+	typedef std::map<int, std::wstring> FormatMap;
+	typedef std::map<std::wstring, int> FormatRevMap;
 	FormatMap _formats;
 	FormatRevMap _formats_rev;
 };
@@ -455,7 +455,7 @@ struct CellFormat
 		return *this;
 	}
 
-	wstring get_format_string() const
+	std::wstring get_format_string() const
 	{
 		return _mgr.get_format_string(*this);
 	}
@@ -463,7 +463,7 @@ struct CellFormat
 	{
 		return set_format_string(widen_string(fmt_str));
 	}
-	CellFormat& set_format_string(const wstring& fmt_str)
+	CellFormat& set_format_string(const std::wstring& fmt_str)
 	{
 		_fmt_idx = _mgr.get_format_idx(fmt_str);
 		flush();

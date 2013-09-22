@@ -24,12 +24,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T> class CStatsInSlidingWindow :  public CSlidingWindow<T> {
+template<class T> class StatsInSlidingWindow :  public SlidingWindow<T> {
 public:
-  CStatsInSlidingWindow<T>(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
-  virtual ~CStatsInSlidingWindow<T>(void);
+  StatsInSlidingWindow<T>(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
+  virtual ~StatsInSlidingWindow<T>(void);
   void CalcStats( void );
-  CRunningStats m_stats;
+  RunningStats m_stats;
 protected:
   virtual void Add( ptime dt, double val );
   virtual void Remove( ptime dt, double val );
@@ -38,18 +38,18 @@ protected:
 private:
 };
 
-template<class T> CStatsInSlidingWindow<T>::CStatsInSlidingWindow(
+template<class T> StatsInSlidingWindow<T>::StatsInSlidingWindow(
   std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0) :
-    CSlidingWindow( WindowSizeSeconds, WindowSizeCount ) {
+    SlidingWindow( WindowSizeSeconds, WindowSizeCount ) {
   m_sName = sName;
 }
 
-template<class T> CStatsInSlidingWindow<T>::~CStatsInSlidingWindow(void) {
-  CSlidingWindow::~CSlidingWindow();
+template<class T> StatsInSlidingWindow<T>::~StatsInSlidingWindow(void) {
+  SlidingWindow::~SlidingWindow();
 }
 
-template<class T> void CStatsInSlidingWindow<T>::Add(boost::posix_time::ptime dt, double val) {
-  if ( CSlidingWindow::m_qT.empty() ) {
+template<class T> void StatsInSlidingWindow<T>::Add(boost::posix_time::ptime dt, double val) {
+  if ( SlidingWindow::m_qT.empty() ) {
     m_dtFirstTime = dt;
   }
   time_duration dur = dt - m_dtFirstTime;
@@ -57,23 +57,23 @@ template<class T> void CStatsInSlidingWindow<T>::Add(boost::posix_time::ptime dt
   m_stats.Add( dif, val );
 }
 
-template<class T> void CStatsInSlidingWindow<T>::Remove( ptime dt, double val ) {
+template<class T> void StatsInSlidingWindow<T>::Remove( ptime dt, double val ) {
   time_duration dur = dt - m_dtFirstTime;
   double dif = (double) dur.total_seconds();
   m_stats.Remove( dif, val );
 }
 
-template<class T> void CStatsInSlidingWindow<T>::CalcStats() {
-  CSlidingWindow::UpdateWindow();
+template<class T> void StatsInSlidingWindow<T>::CalcStats() {
+  SlidingWindow::UpdateWindow();
   m_stats.CalcStats();
 }
 
-// CTradeStats
+// TradeStats
 
-class CTradeStats: CStatsInSlidingWindow<Trade> {
+class TradeStats: StatsInSlidingWindow<Trade> {
 public:
-  CTradeStats(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
-  virtual ~CTradeStats(void);
+  TradeStats(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
+  virtual ~TradeStats(void);
   Trade* Add( ptime dt, Trade *trade );
   Trade* Remove();
 protected:

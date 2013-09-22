@@ -7,11 +7,11 @@ using namespace std;
 
 #include <OUCommon/FastDelegate.h>
 
-class CSymbolSelectionFilter {
+class SymbolSelectionFilter {
 public:
   enum enumDayCalc { NoDayCalc, DaySelect, BarCount, DayCount };
-  CSymbolSelectionFilter( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd );
-  virtual ~CSymbolSelectionFilter(void);
+  SymbolSelectionFilter( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd );
+  virtual ~SymbolSelectionFilter(void);
   const ou::tf::Bars& Bars( void ) { return m_bars; };
   virtual bool Validate( void ) { return true; };
   typedef fastdelegate::FastDelegate3<const string &, const string &,const string &> OnAddSymbolHandler;
@@ -41,35 +41,35 @@ private:
 //   compare with others in same SIC code to see if all are moving or just the one
 
 
-class CSelectSymbolWithDarvas: public CSymbolSelectionFilter {
+class SelectSymbolWithDarvas: public SymbolSelectionFilter {
 public:
-  CSelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWithDarvas(void );
+  SelectSymbolWithDarvas( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWithDarvas(void );
   bool Validate( void );
   void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };
 
-class CSelectSymbolWithBollinger: public CSymbolSelectionFilter {
+class SelectSymbolWithBollinger: public SymbolSelectionFilter {
 public:
-  CSelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWithBollinger(void );
+  SelectSymbolWithBollinger( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWithBollinger(void );
   void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };
 
-class CSelectSymbolWithBreakout: public CSymbolSelectionFilter {
+class SelectSymbolWithBreakout: public SymbolSelectionFilter {
 public:
-  CSelectSymbolWithBreakout( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWithBreakout(void );
+  SelectSymbolWithBreakout( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWithBreakout(void );
   void Process( const string &sSymbol, const string &sPath );
 protected:
 private:
 };
 
-class CSelectSymbolWithXWeekHigh: public CSymbolSelectionFilter {
+class CSelectSymbolWithXWeekHigh: public SymbolSelectionFilter {
 public:
   CSelectSymbolWithXWeekHigh( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
   virtual ~CSelectSymbolWithXWeekHigh(void );
@@ -84,10 +84,10 @@ struct MaxNegativesCompare {
   }
 };
 
-class CSelectSymbolWith10Percent: public CSymbolSelectionFilter {
+class SelectSymbolWith10Percent: public SymbolSelectionFilter {
 public:
-  CSelectSymbolWith10Percent( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWith10Percent(void );
+  SelectSymbolWith10Percent( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWith10Percent(void );
   bool Validate( void );
   void Process( const string &sSymbol, const string &sPath );
   void WrapUp( void );
@@ -98,10 +98,10 @@ protected:
 private:
 };
 
-class CSelectSymbolWithVolatility: public CSymbolSelectionFilter {
+class SelectSymbolWithVolatility public SymbolSelectionFilter {
 public:
-  CSelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWithVolatility(void );
+  SelectSymbolWithVolatility( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWithVolatility(void );
   bool Validate( void );
   void Process( const string &sSymbol, const string &sPath );
   void WrapUp( void );
@@ -111,10 +111,10 @@ protected:
 private:
 };
 
-class CSelectSymbolWithStrikeCoverage: public CSymbolSelectionFilter {
+class SelectSymbolWithStrikeCoverage: public SymbolSelectionFilter {
 public:
-  CSelectSymbolWithStrikeCoverage( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
-  virtual ~CSelectSymbolWithStrikeCoverage(void );
+  SelectSymbolWithStrikeCoverage( enumDayCalc dstype, int count, bool bUseStart, ptime dtStart, bool bUseEnd, ptime dtEnd);
+  virtual ~SelectSymbolWithStrikeCoverage(void );
 //  bool Validate( void );
   void Process( const string &sSymbol, const string &sPath );
 //  void WrapUp( void );

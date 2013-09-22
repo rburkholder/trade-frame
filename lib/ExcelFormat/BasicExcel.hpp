@@ -178,7 +178,7 @@ enum DECOLOR {
 #include <map>
 #include <vector>
 #include <string>	//MF
-using namespace std;
+//using namespace std;
 
  // get facet from locale for GCC
 #ifndef _USE
@@ -262,7 +262,7 @@ struct CompoundFile
 
 	// Compound File functions
 	bool Create(const wchar_t* filename);
-	bool Open(const wchar_t* filename, ios_base::openmode mode=ios_base::in|ios_base::out);
+	bool Open(const wchar_t* filename, std::ios_base::openmode mode=std::ios_base::in|std::ios_base::out);
 	bool Close();
 	bool IsOpen();
 
@@ -270,20 +270,20 @@ struct CompoundFile
 	CF_RESULT MakeFile(const wchar_t* path);
 	CF_RESULT FileSize(const wchar_t* path, ULONGLONG& size);
 	CF_RESULT ReadFile(const wchar_t* path, char* data, ULONG size);
-	CF_RESULT ReadFile(const wchar_t* path, vector<char>&data);
+	CF_RESULT ReadFile(const wchar_t* path, std::vector<char>&data);
 	CF_RESULT WriteFile(const wchar_t* path, const char* data, ULONG size);
-	CF_RESULT WriteFile(const wchar_t* path, const vector<char>&data, ULONG size);
+	CF_RESULT WriteFile(const wchar_t* path, const std::vector<char>&data, ULONG size);
 
 	// ANSI char functions
 	bool Create(const char* filename);
-	bool Open(const char* filename, ios_base::openmode mode=ios_base::in|ios_base::out);
+	bool Open(const char* filename, std::ios_base::openmode mode=std::ios_base::in|std::ios_base::out);
 
 	CF_RESULT MakeFile(const char* path);
 	CF_RESULT FileSize(const char* path, ULONGLONG& size);
 	CF_RESULT ReadFile(const char* path, char* data, ULONG size);
-	CF_RESULT ReadFile(const char* path, vector<char>& data);
+	CF_RESULT ReadFile(const char* path, std::vector<char>& data);
 	CF_RESULT WriteFile(const char* path, const char* data, ULONG size);
-	CF_RESULT WriteFile(const char* path, const vector<char>& data, ULONG size);
+	CF_RESULT WriteFile(const char* path, const std::vector<char>& data, ULONG size);
 
 private:
 	IStorage*	_pStg;
@@ -472,7 +472,7 @@ struct LittleEndian
 	}
 
 	template<typename Type>
-	static void Read(const vector<char>& buffer, Type& retVal, size_t pos=0, int bytes=0)
+	static void Read(const std::vector<char>& buffer, Type& retVal, size_t pos=0, int bytes=0)
 	{
 		retVal = Type(0);
 
@@ -484,14 +484,14 @@ struct LittleEndian
 	}
 
 	template<typename Type>
-	static void ReadString(const vector<char>& buffer, Type* str, size_t pos=0, int bytes=0)
+	static void ReadString(const std::vector<char>& buffer, Type* str, size_t pos=0, int bytes=0)
 	{
 		for (int i=0; i<bytes; ++i)
 			Read(buffer, str[i], pos+i*sizeof(Type));
 	}
 
 	template<typename Type>
-	static void Write(vector<char>& buffer, Type val, size_t pos=0, int bytes=0)
+	static void Write(std::vector<char>& buffer, Type val, size_t pos=0, int bytes=0)
 	{
 		if (bytes == 0)
 			bytes = sizeof(Type);
@@ -503,7 +503,7 @@ struct LittleEndian
 	}
 
 	template<typename Type>
-	static void WriteString(vector<char>& buffer, Type* str, size_t pos=0, int bytes=0)
+	static void WriteString(std::vector<char>& buffer, Type* str, size_t pos=0, int bytes=0)
 	{
 		for (int i=0; i<bytes; ++i) Write(buffer, str[i], pos+i*sizeof(Type));
 	}
@@ -541,7 +541,7 @@ struct LittleEndian
 		for (int i=0; i<bytes; ++i) Write(buffer, str[i], pos+i*SIZEOFWCHAR_T);
 	}
 
-	static void Read(const vector<char>& buffer, wchar_t& retVal, size_t pos=0, int bytes=0)
+	static void Read(const std::vector<char>& buffer, wchar_t& retVal, size_t pos=0, int bytes=0)
 	{
 		retVal = wchar_t(0);
 
@@ -554,12 +554,12 @@ struct LittleEndian
 		}
 	}
 
-	static void ReadString(const vector<char>& buffer, wchar_t* str, size_t pos=0, int bytes=0)
+	static void ReadString(const std::vector<char>& buffer, wchar_t* str, size_t pos=0, int bytes=0)
 	{
 		for (int i=0; i<bytes; ++i) Read(buffer, str[i], pos+i*SIZEOFWCHAR_T);
 	}
 
-	static void Write(vector<char>& buffer, wchar_t val, size_t pos=0, int bytes=0)
+	static void Write(std::vector<char>& buffer, wchar_t val, size_t pos=0, int bytes=0)
 	{
 		if (bytes == 0)
 			bytes = SIZEOFWCHAR_T;
@@ -570,7 +570,7 @@ struct LittleEndian
 		}
 	}
 
-	static void WriteString(vector<char>& buffer, wchar_t* str, size_t pos=0, int bytes=0)
+	static void WriteString(std::vector<char>& buffer, wchar_t* str, size_t pos=0, int bytes=0)
 	{
 		for (int i=0; i<bytes; ++i)
 			Write(buffer, str[i], pos+i*SIZEOFWCHAR_T);
@@ -1017,10 +1017,10 @@ public:
 	virtual ULONG DataSize();
 	virtual ULONG RecordSize();
 	USHORT code_;
-	vector<char> data_;
+	std::vector<char> data_;
 	ULONG	dataSize_;
 	ULONG	recordSize_;
-	vector<ULONG> continueIndices_;
+	std::vector<ULONG> continueIndices_;
 };
 
 struct BOF : public Record
@@ -1083,8 +1083,8 @@ struct LargeString
 	ULONG RecordSize();
 	ULONG StringSize();
 
-	vector<wchar_t> wname_;
-	vector<char> name_;
+	std::vector<wchar_t> wname_;
+	std::vector<char> name_;
 	char unicode_;
 	USHORT richtext_;
 	ULONG phonetic_;
@@ -1093,17 +1093,17 @@ struct LargeString
 
 	//MF string conversion functions
 
-inline std::string narrow_string(const vector<wchar_t>& wstr)
+inline std::string narrow_string(const std::vector<wchar_t>& wstr)
 {
-	return ::narrow_string(wstring(&*wstr.begin(), wstr.size()));
+	return ::narrow_string(std::wstring(&*wstr.begin(), wstr.size()));
 }
 
-inline std::wstring widen_string(const vector<char>& wstr)
+inline std::wstring widen_string(const std::vector<char>& wstr)
 {
-	return ::widen_string(string(&*wstr.begin(), wstr.size()));
+	return ::widen_string(std::string(&*wstr.begin(), wstr.size()));
 }
 
-inline string stringFromSmallString(const SmallString& ss)
+inline std::string stringFromSmallString(const SmallString& ss)
 {
 	if (ss.unicode_)
 		return ::narrow_string(ss.wname_);
@@ -1111,16 +1111,16 @@ inline string stringFromSmallString(const SmallString& ss)
 		return ss.name_;
 }
 
-inline string stringFromLargeString(const LargeString& ls)
+inline std::string stringFromLargeString(const LargeString& ls)
 {
 	if (ls.unicode_)
 		return narrow_string(ls.wname_);
 	else
-		return string(&*ls.name_.begin(), ls.name_.size());
+		return std::string(&*ls.name_.begin(), ls.name_.size());
 }
 
 
-inline wstring wstringFromSmallString(const SmallString& ss)
+inline std::wstring wstringFromSmallString(const SmallString& ss)
 {
 	if (ss.unicode_)
 		return ss.wname_;
@@ -1128,10 +1128,10 @@ inline wstring wstringFromSmallString(const SmallString& ss)
 		return ::widen_string(ss.name_);
 }
 
-inline wstring wstringFromLargeString(const LargeString& ls)
+inline std::wstring wstringFromLargeString(const LargeString& ls)
 {
 	if (ls.unicode_)
-		return wstring(&*ls.wname_.begin(), ls.wname_.size());
+		return std::wstring(&*ls.wname_.begin(), ls.wname_.size());
 	else
 		return widen_string(ls.name_);
 }
@@ -1254,7 +1254,7 @@ public:
 		virtual ULONG RecordSize();
 		ULONG stringsTotal_;
 		ULONG uniqueStringsTotal_;
-		vector<LargeString> strings_;
+		std::vector<LargeString> strings_;
 	};
 	struct ExtSST : public Record
 	{
@@ -1264,9 +1264,9 @@ public:
 		virtual ULONG DataSize();
 		virtual ULONG RecordSize();
 		USHORT stringsTotal_;
-		vector<ULONG> streamPos_;
-		vector<USHORT> firstStringPos_;
-		vector<USHORT> unused_;
+		std::vector<ULONG> streamPos_;
+		std::vector<USHORT> firstStringPos_;
+		std::vector<USHORT> unused_;
 	};
 	ULONG Read(const char* data);
 	ULONG Write(char* data);
@@ -1275,11 +1275,11 @@ public:
 
 	BOF bof_;
 	Window1 window1_;
-	vector<Font> fonts_;
-	vector<XF> XFs_;
-	vector<Style> styles_;
-	vector<Format> formats_;	//MF
-	vector<BoundSheet> boundSheets_;
+	std::vector<Font> fonts_;
+	std::vector<XF> XFs_;
+	std::vector<Style> styles_;
+	std::vector<Format> formats_;	//MF
+	std::vector<BoundSheet> boundSheets_;
 	SharedStringTable sst_; // shared string table
 	ExtSST extSST_;
 	YEOF eof_;
@@ -1317,7 +1317,7 @@ public:
 		size_t firstUsedRowIndex_;
 		size_t firstUnusedRowIndex_;
 		ULONG unused2_;
-		vector<ULONG> DBCellPos_;
+		std::vector<ULONG> DBCellPos_;
 	};
 	struct CalculationSettings
 	{
@@ -1367,7 +1367,7 @@ public:
 		virtual ULONG Read(const char* data);
 		virtual ULONG Write(char* data);
 		virtual ULONG RecordSize();
-		vector<ColInfo> colinfo_;
+		std::vector<ColInfo> colinfo_;
 	};
 	struct Dimensions : public Record
 	{
@@ -1439,7 +1439,7 @@ public:
 					virtual ULONG RecordSize();
 					USHORT rowIndex_;
 					USHORT firstColIndex_;
-					vector<USHORT> XFRecordIndices_;
+					std::vector<USHORT> XFRecordIndices_;
 					USHORT lastColIndex_;
 				};
 				struct MulRK : public Record
@@ -1459,7 +1459,7 @@ public:
 					};
 					USHORT rowIndex_;
 					USHORT firstColIndex_;
-					vector<XFRK> XFRK_;
+					std::vector<XFRK> XFRK_;
 					USHORT lastColIndex_;
 				};
 				struct Number : public Record
@@ -1505,7 +1505,7 @@ public:
 						BYTE lastColIndex_;
 						USHORT options_;
 						ULONG unused_;
-						vector<char> formula_;
+						std::vector<char> formula_;
 					};
 					struct ShrFmla : public Record
 					{
@@ -1519,7 +1519,7 @@ public:
 						BYTE firstColIndex_;
 						BYTE lastColIndex_;
 						USHORT unused_;
-						vector<char> formula_;
+						std::vector<char> formula_;
 					};
 					struct ShrFmla1 : public Record
 					{
@@ -1533,7 +1533,7 @@ public:
 						BYTE firstColIndex_;
 						BYTE lastColIndex_;
 						USHORT unused_;
-						vector<char> formula_;
+						std::vector<char> formula_;
 					};
 					struct Table : public Record
 					{
@@ -1576,7 +1576,7 @@ public:
 					BYTE result_[8];			// formula result (IEEE 754 floating-point value, 64-bit double precision or other special values)
 					USHORT options_; 			// 1 = Recalculate always  2 = Calculate on open  8 = Part of a shared formula
 					ULONG unused_;				// chn field
-					vector<char> RPNtoken_;		// 2 length bytes, followed by a variable length structure
+					std::vector<char> RPNtoken_;		// 2 length bytes, followed by a variable length structure
 					USHORT type_;
 
 					Array array_;
@@ -1622,7 +1622,7 @@ public:
 				virtual ULONG DataSize();
 				virtual ULONG RecordSize();
 				ULONG firstRowOffset_;
-				vector<USHORT> offsets_;
+				std::vector<USHORT> offsets_;
 			};
 
 			ULONG Read(const char* data);
@@ -1630,8 +1630,8 @@ public:
 			ULONG DataSize();
 			ULONG RecordSize();
 
-			vector<Row> rows_;
-			vector<SmartPtr<CellBlock> > cellBlocks_;
+			std::vector<Row> rows_;
+			std::vector<SmartPtr<CellBlock> > cellBlocks_;
 			DBCell dbcell_;
 		};
 		ULONG Read(const char* data);
@@ -1639,7 +1639,7 @@ public:
 		ULONG DataSize();
 		ULONG RecordSize();
 
-		vector<RowBlock> rowBlocks_;
+		std::vector<RowBlock> rowBlocks_;
 	};
 	struct Window2 : public Record
 	{
@@ -1678,7 +1678,7 @@ public:
 		ULONG DataSize();
 		ULONG RecordSize();
 
-		vector<MergedCell> mergedCellsVector_;
+		std::vector<MergedCell> mergedCellsVector_;
 	};
 	struct LabelRanges;
 	struct ConditionalFormattingTable;
@@ -1775,8 +1775,8 @@ private: // Internal functions
 public:
 	CompoundFile file_; 					///< Compound file handler.
 	Workbook workbook_; 					///< Raw Workbook.
-	vector<Worksheet> worksheets_;			///< Raw Worksheets.
-	vector<SmartPtr<BasicExcelWorksheet> > yesheets_;	///< Parsed Worksheets.
+	std::vector<Worksheet> worksheets_;			///< Raw Worksheets.
+	std::vector<SmartPtr<BasicExcelWorksheet> > yesheets_;	///< Parsed Worksheets.
 };
 
 class BasicExcelWorksheet : public RefCount::RefCnt
@@ -1793,7 +1793,7 @@ public: // Worksheet functions
 	bool GetSheetName(wchar_t* name);	///< Get the current worksheet name. Returns false if name is in Ansi format.
 	bool Rename(const char* to);		///< Rename current Excel worksheet to another ANSI name. Returns true if successful, false if otherwise.
 	bool Rename(const wchar_t* to);		///< Rename current Excel worksheet to another Unicode name. Returns true if successful, false if otherwise.
-	void Print(ostream& os, char delimiter=',', char textQualifier='\0')  const; ///< Print entire worksheet to an output stream, separating each column with the defined delimiter and enclosing text using the defined textQualifier. Leave out the textQualifier argument if do not wish to have any text qualifiers.
+	void Print(std::ostream& os, char delimiter=',', char textQualifier='\0')  const; ///< Print entire worksheet to an output stream, separating each column with the defined delimiter and enclosing text using the defined textQualifier. Leave out the textQualifier argument if do not wish to have any text qualifiers.
 
 public: // Cell functions
 	int GetTotalRows() const;		///< Total number of rows in current Excel worksheet.
@@ -1816,7 +1816,7 @@ private:
 	int sheetIndex_; 					///< Index of worksheet in workbook.
 	int	maxRows_;						///< Total number of rows in worksheet.
 	int	maxCols_;						///< Total number of columns in worksheet.
-	vector<vector<BasicExcelCell> > cells_; ///< Cells matrix.
+	std::vector<std::vector<BasicExcelCell> > cells_; ///< Cells matrix.
 	Worksheet::ColInfos colInfos_;		/// used to record column info
 };
 
@@ -1837,7 +1837,7 @@ public:
 	const char* GetString() const;		///< Get an ANSI string. Returns 0 if cell does not contain an ANSI string.
 	const wchar_t* GetWString() const;	///< Get an Unicode string. Returns 0 if cell does not contain an Unicode string.
 
-	friend ostream& operator<<(ostream& os, const BasicExcelCell& cell);	///< Print cell to output stream. Print a null character if cell is undefined.
+	friend std::ostream& operator<<(std::ostream& os, const BasicExcelCell& cell);	///< Print cell to output stream. Print a null character if cell is undefined.
 
 	void Set(int val);					///< Set content of current Excel cell to an integer.
 	void Set(double val);				///< Set content of current Excel cell to a double.
@@ -1868,8 +1868,8 @@ private:
 	int type_;							///< Type of value stored in current Excel cell. Contains one of the above enums.
 	int ival_;							///< Integer value stored in current Excel cell.
 	double dval_;						///< Double value stored in current Excel cell.
-	vector<char> str_;					///< ANSI string stored in current Excel cell. Include null character.
-	vector<wchar_t> wstr_;				///< Unicode string stored in current Excel cell. Include null character.
+	std::vector<char> str_;					///< ANSI string stored in current Excel cell. Include null character.
+	std::vector<wchar_t> wstr_;				///< Unicode string stored in current Excel cell. Include null character.
 										
 	USHORT mergedRows_;					///< Number of rows merged to this cell. 1 means only itself.
 	USHORT mergedColumns_;				///< Number of columns merged to this cell. 1 means only itself.
@@ -1889,7 +1889,7 @@ private:
 		Formula(const Worksheet::CellTable::RowBlock::CellBlock::Formula& f);
 
 		int _formula_type;
-		vector<char> _formula;
+		std::vector<char> _formula;
 		unsigned char _result[8];	// formula result (IEEE 754 floating-point value, 64-bit double precision or other special values)
 		std::wstring wstr_;			// formula result in case of strings, stored as UTF-16LE string
 		std::string str_;			// formula result in case of strings, stored as ANSI string
@@ -1900,7 +1900,7 @@ private:
 		char	firstColIndex_;
 		char	lastColIndex_;
 		USHORT	unused_;
-		vector<char> shrformula_;
+		std::vector<char> shrformula_;
 	};
 
 	SmartPtr<Formula> _pFormula;

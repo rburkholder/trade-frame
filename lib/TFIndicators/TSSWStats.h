@@ -49,7 +49,7 @@ protected:
 //  void Add( const T &datum ) {}; // override to process elements passing into window scope
 //  void Expire( const T &datum ) {};  // override to process elements passing out of window scope 
   void PostUpdate( void ) { m_stats.CalcStats(); };  // CRTP based call
-  CRunningStats m_stats;
+  RunningStats m_stats;
 private:
 };
 

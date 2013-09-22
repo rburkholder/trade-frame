@@ -82,7 +82,7 @@ XLSFormatManager::XLSFormatManager(BasicExcel& xls)
 int XLSFormatManager::get_font_idx(const ExcelFont& font)
 {
 	int i = 0;
-	for(vector<Workbook::Font>::const_iterator it=_xls.workbook_.fonts_.begin(); it!=_xls.workbook_.fonts_.end(); ++it,++i)
+	for(std::vector<Workbook::Font>::const_iterator it=_xls.workbook_.fonts_.begin(); it!=_xls.workbook_.fonts_.end(); ++it,++i)
 		if (font.matches(*it))
 			return i;
 
@@ -124,7 +124,7 @@ const Workbook::Font& XLSFormatManager::get_font(const CellFormat& fmt) const
 	}
 }
 
-wstring XLSFormatManager::get_format_string(const CellFormat& fmt) const
+std::wstring XLSFormatManager::get_format_string(const CellFormat& fmt) const
 {
 	int fmt_idx = fmt.get_fmt_idx();
 
@@ -136,7 +136,7 @@ wstring XLSFormatManager::get_format_string(const CellFormat& fmt) const
 		return XLS_FORMAT_GENERAL;
 }
 
-int XLSFormatManager::get_format_idx(const wstring& fmt_str)
+int XLSFormatManager::get_format_idx(const std::wstring& fmt_str)
 {
 	FormatRevMap::const_iterator found = _formats_rev.find(fmt_str);
 
@@ -161,7 +161,7 @@ int XLSFormatManager::get_format_idx(const wstring& fmt_str)
 int XLSFormatManager::get_xf_idx(const CellFormat& fmt)
 {
 	int i = 0;
-	for(vector<Workbook::XF>::const_iterator it=_xls.workbook_.XFs_.begin(); it!=_xls.workbook_.XFs_.end(); ++it,++i)
+	for(std::vector<Workbook::XF>::const_iterator it=_xls.workbook_.XFs_.begin(); it!=_xls.workbook_.XFs_.end(); ++it,++i)
 		if (fmt.matches(*it))
 			return i;
 

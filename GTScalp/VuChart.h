@@ -22,6 +22,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-  CChartDatedDatum m_chart;
+  ChartDatedDatum m_chart;
   afx_msg void OnStnClickedChart();
 };
