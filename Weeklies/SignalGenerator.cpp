@@ -22,7 +22,9 @@
 
 #include "SignalGenerator.h"
 
-SignalGenerator::SignalGenerator(void) {
+SignalGenerator::SignalGenerator(void) 
+  : m_fmt_mgr( m_xls)
+{
 }
 
 SignalGenerator::~SignalGenerator(void) {
@@ -42,10 +44,12 @@ void SignalGenerator::Run( void ) {
   typedef ou::tf::cboe::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
 
   for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
-    if ( "Equity" == iter->sProductType ) { 
+//    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) { 
       //ScanBars( iter->sSymbol );
-      m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, BarSummary() ) );
-    }
+      BarSummary bs;
+      bs.sType = iter->sProductType;
+      m_mapSymbol.insert( mapSymbol_t::value_type( iter->sSymbol, bs ) );
+//    }
   }
 
   if ( 0 != m_mapSymbol.size() ) {
@@ -65,11 +69,50 @@ void SignalGenerator::ScanBars( void ) {
     boost::phoenix::bind( &SignalGenerator::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
     );
   try {
+
     m_xls.New( 1 );
     m_sheet = m_xls.GetWorksheet( 0 );
+    ExcelFormat::BasicExcelCell* cell;
+    ExcelFormat::CellFormat fmt(m_fmt_mgr);
+    fmt.set_format_string( XLS_FORMAT_DECIMAL );
+    fmt.set_alignment( ExcelFormat::EXCEL_HALIGN_CENTRED );
+    int ix( 0 );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "Type" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "Symbol" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "Price" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "BolRange" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "SMA Sig" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "BolUpr" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "BolLwr" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "SMA1" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "SMA2" );
+    cell = m_sheet->Cell( 0, ix++ );
+    cell->SetFormat( fmt );
+    cell->SetString( "SMA3" );
+
     filter.Run();
+
     m_xls.SaveAs( "weeklies.xls" );
     m_xls.Close();  }
+
   catch( ... ) {
     std::cout << "Scan Problems" << std::endl;
   }
@@ -96,9 +139,18 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   }
   //iter->second.pricesBollinger20.Update();
 
+  ExcelFormat::CellFormat fmtNum(m_fmt_mgr);
+  fmtNum.set_format_string( XLS_FORMAT_DECIMAL );
+
+  ExcelFormat::CellFormat fmtCenterTxt(m_fmt_mgr);
+  fmtCenterTxt.set_alignment( ExcelFormat::EXCEL_HALIGN_CENTRED );
+
   int iy = m_sheet->GetTotalRows();
   ExcelFormat::BasicExcelCell* cell;
   int ix( 0 );
+
+  cell = m_sheet->Cell( iy, ix++ );
+  cell->SetString( iter->second.sType.c_str() );
 
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetString( sObject.c_str() );
@@ -106,8 +158,10 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   double last = bars.Last()->Close();
   cell = m_sheet->Cell( iy, ix++ );
   cell->SetDouble( last );
+  cell->SetFormat( fmtNum );
 
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtCenterTxt );
   double upper = iter->second.pricesBollinger20.BBUpper();
   double lower = iter->second.pricesBollinger20.BBLower();
   double third = ( upper - lower ) / 3.0;
@@ -127,6 +181,7 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
   }
 
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtCenterTxt );
   double sma1 = iter->second.pricesSMA1.MeanY();
   double sma2 = iter->second.pricesSMA2.MeanY();
   double sma3 = iter->second.pricesSMA3.MeanY();
@@ -148,15 +203,20 @@ void SignalGenerator::HandleCallBackResults( mapSymbol_t::iterator& iter, const 
     << std::endl;
 
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( upper );
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( lower );
 
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( sma1 );
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( sma2 );
   cell = m_sheet->Cell( iy, ix++ );
+  cell->SetFormat( fmtNum );
   cell->SetDouble( sma3 );
   
 }

@@ -34,8 +34,10 @@ private:
 
   ExcelFormat::BasicExcel m_xls;
   ExcelFormat::BasicExcelWorksheet* m_sheet;
+  ExcelFormat::XLSFormatManager m_fmt_mgr;
 
   struct BarSummary {
+    std::string sType;
     ou::tf::Prices prices;
     ou::tf::TSSWStatsPrice pricesBollinger20;
     ou::tf::TSSWStatsPrice pricesSMA1;
@@ -51,7 +53,8 @@ private:
       : pricesBollinger20( prices, time_duration( 0, 0, 0 ), 20 ),
         pricesSMA1( prices, time_duration( 0, 0, 0 ), 10 ),
         pricesSMA2( prices, time_duration( 0, 0, 0 ), 25 ),
-        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 )
+        pricesSMA3( prices, time_duration( 0, 0, 0 ), 50 ),
+        sType( rhs.sType )
     { /* need to copy data over, but shouldn't be anything to copy */ }
   };
 
