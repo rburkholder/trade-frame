@@ -19,6 +19,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFOptions/Binomial.h>
 #include <TFTrading/Watch.h>
@@ -30,18 +31,15 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-// don't assign underlying if more than one bundle used for the underlying, 
-//   eg when using one bundle per expiry, then use separate watch for underlying
-
-class Bundle {
+class ExpiryBundle {
 public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef Watch::pWatch_t pWatch_t;
 
-  Bundle(void);
-  ~Bundle(void);
+  ExpiryBundle(void);
+  virtual ~ExpiryBundle(void);
 
   void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
@@ -53,8 +51,6 @@ public:
   void FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper );  // uses <= and >= logic around dblStrike, therefore possibility of dblLower = dblUpper
 
   void UpdateATMWatch( double dblValue );
-
-  pWatch_t GetUnderlying( void ) { return m_pwatchUnderlying; };
 
   void SetWatchableOn( double dblStrike );  // each strike is not watcheable by default
   void SetWatchableOff( double dblStrike );
@@ -83,32 +79,100 @@ private:
 
   enum EOptionWatchState { EOWSNoWatch, EOWSWatching } m_stateOptionWatch;
 
-//  bool m_bWatching;  // single threadable only
-
   ptime m_dtExpiry;  // eg, 4pm EST third Fri of month for normal US equity options, in utc
 
-  pWatch_t m_pwatchUnderlying;
-  mapStrikes_t m_mapStrikes;
+  double m_dblUpperTrigger;
+  double m_dblLowerTrigger;
+
+  ou::tf::PriceIVs m_tsAtmIv; // composite of all expiries, or only front expiry?
+  ou::tf::BarFactory m_bfIVUnderlyingCall; // ditto
+  ou::tf::BarFactory m_bfIVUnderlyingPut;  // ditto
 
   mapStrikes_iter_t m_iterUpper;
   mapStrikes_iter_t m_iterMid;
   mapStrikes_iter_t m_iterLower;
 
-  double m_dblUpperTrigger;
-  double m_dblLowerTrigger;
+  mapStrikes_t m_mapStrikes;
 
-  mapStrikes_t::iterator FindStrike( double strike );
-  mapStrikes_t::iterator FindStrikeAuto( double strike ); // Auto insert new strike
+  mapStrikes_iter_t FindStrike( double strike );
+  mapStrikes_iter_t FindStrikeAuto( double strike ); // Auto insert new strike
 
-  ou::tf::PriceIVs m_tsAtmIv;
-
-  ou::tf::BarFactory m_bfIVUnderlyingCall;
-  ou::tf::BarFactory m_bfIVUnderlyingPut;
-
-  void RecalcATMWatch( double dblValue );
+  void RecalcATMWatch( double dblValue );  
   void CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input );
 
   void SaveAtmIv( const std::string& sPrefix, const std::string& sPrefix86400Min );
+};
+
+// =======================================================
+
+class ExpiryBundleWithUnderlying: public ExpiryBundle {
+public:
+
+  typedef Instrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef Watch::pWatch_t pWatch_t;
+
+  void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
+
+  void SetWatchOn( void );
+  void SetWatchOff( void );
+  void EmitValues( void );
+
+  void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
+
+protected:
+private:
+  pWatch_t m_pwatchUnderlying;
+};
+
+// =======================================================
+
+class MultiExpiryBundle {
+public:
+
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef Watch::pWatch_t pWatch_t;
+
+  explicit MultiExpiryBundle( const std::string& sName ): m_sName( sName ) {};
+  virtual ~MultiExpiryBundle( void );
+
+  const std::string& Name( void ) { return m_sName; };
+
+  void SetWatchUnderlying( pInstrument_t& pInstrument, pProvider_t& pProvider );
+  pWatch_t GetWatchUnderlying( void ) { return m_pWatchUnderlying; };
+
+  // the references are void when the map has insertions or deletions
+  bool ExpiryBundleExists( boost::gregorian::date );
+  ExpiryBundle& GetExpiryBundle( boost::gregorian::date );
+  ExpiryBundle& CreateExpiryBundle( boost::gregorian::date );
+
+  void SetWatchOn( void );
+  void SetWatchOff( void );
+  void CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor );
+  void SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec );
+  void AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+
+protected:
+
+private:
+
+  typedef std::map<boost::gregorian::date,ExpiryBundle> mapExpiryBundles_t;
+
+  std::string m_sName;
+
+  pPortfolio_t pPortfolio;  // summary portfolio for all things related to symbols in this Bundle
+
+  pWatch_t m_pWatchUnderlying;
+  pPosition_t pPositionUnderlying;
+
+  mapExpiryBundles_t m_mapExpiryBundles;
+
+  void HandleUnderlyingQuote( const ou::tf::Quote& quote );
+  void HandleUnderlyingTrade( const ou::tf::Trade& trade ) {};
+
 };
 
 } // namespace option

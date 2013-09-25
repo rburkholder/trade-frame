@@ -23,33 +23,26 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Bundle::Bundle(void)
+ExpiryBundle::ExpiryBundle(void)
   : m_stateOptionWatch( EOWSNoWatch ), //m_bWatching( false ), 
   m_dblUpperTrigger( 0.0 ), m_dblLowerTrigger( 0.0 ), m_bfIVUnderlyingCall( 86400 ), m_bfIVUnderlyingPut( 86400 )
 {
 }
 
-Bundle::~Bundle(void) {
+ExpiryBundle::~ExpiryBundle(void) {
 }
 
-void Bundle::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
-  m_pwatchUnderlying.reset( new ou::tf::Watch( pInstrument, pProvider ) );
-//  if ( m_bWatching ) {
-//    m_pwatchUnderlying->StartWatch();
+void ExpiryBundle::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
+//  if ( 0 != m_pwatchUnderlying.get() ) {
+//    m_pwatchUnderlying->SaveSeries( sPrefix60sec );
 //  }
-}
-
-void Bundle::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
-  if ( 0 != m_pwatchUnderlying.get() ) {
-    m_pwatchUnderlying->SaveSeries( sPrefix60sec );
-  }
   for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
     iter->second.SaveSeries( sPrefix60sec );
   }
   SaveAtmIv( sPrefix60sec, sPrefix86400sec );
 }
 
-void Bundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
+void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
 
   std::string sPathName;
 
@@ -81,49 +74,49 @@ void Bundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string& sPre
   
 }
 
-void Bundle::EmitValues( void ) {
-  if ( 0 != m_pwatchUnderlying.get() ) {
-    m_pwatchUnderlying->EmitValues();
-  }
+void ExpiryBundle::EmitValues( void ) {
+//  if ( 0 != m_pwatchUnderlying.get() ) {
+//    m_pwatchUnderlying->EmitValues();
+//  }
   for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
     iter->second.EmitValues();
   }
 }
 
-void Bundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
+void ExpiryBundle::SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
   mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
   iter->second.AssignCall( pInstrument, pDataProvider, pGreekProvider );
 }
 
-void Bundle::SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
+void ExpiryBundle::SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
   mapStrikes_t::iterator iter = FindStrikeAuto( pInstrument->GetStrike() );
   iter->second.AssignPut( pInstrument, pDataProvider, pGreekProvider );
 }
 
-Call* Bundle::GetCall( double dblStrike ) {
+Call* ExpiryBundle::GetCall( double dblStrike ) {
   mapStrikes_t::iterator iter = FindStrike( dblStrike );
   return iter->second.Call();
 }
 
-Put* Bundle::GetPut( double dblStrike ) {
+Put* ExpiryBundle::GetPut( double dblStrike ) {
   mapStrikes_t::iterator iter = FindStrike( dblStrike );
   return iter->second.Put();
 }
 
-void Bundle::SetWatchOn( void ) {
+void ExpiryBundle::SetWatchOn( void ) {
 //  if ( !m_bWatching ) {
 //    m_bWatching = true;
-    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
+//    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
       iter->second.SetWatchOn();
     }
 //  }
 }
 
-void Bundle::SetWatchOff( void ) {
+void ExpiryBundle::SetWatchOff( void ) {
 //  if ( m_bWatching ) {
 //    m_bWatching = false;
-    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
+//    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
       iter->second.SetWatchOff();
     }
@@ -136,7 +129,7 @@ void Bundle::SetWatchOff( void ) {
 //void Bundle::SetWatchUnderlyingOff( void ) {
 //}
 
-void Bundle::SetWatchableOn( double dblStrike ) {
+void ExpiryBundle::SetWatchableOn( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   if ( m_mapStrikes.end() != iter ) {
     iter->second.SetWatchableOn();
@@ -144,14 +137,14 @@ void Bundle::SetWatchableOn( double dblStrike ) {
   
 }
 
-void Bundle::SetWatchableOff( double dblStrike ) {
+void ExpiryBundle::SetWatchableOff( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   if ( m_mapStrikes.end() != iter ) {
     iter->second.SetWatchableOff();
   }
 }
 
-void Bundle::SetWatchOn( double dblStrike, bool bForce ) {
+void ExpiryBundle::SetWatchOn( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   if ( bForce ) {
     iter->second.SetWatchableOn();
@@ -159,7 +152,7 @@ void Bundle::SetWatchOn( double dblStrike, bool bForce ) {
   iter->second.SetWatchOn();
 }
 
-void Bundle::SetWatchOff( double dblStrike, bool bForce ) {
+void ExpiryBundle::SetWatchOff( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   iter->second.SetWatchOff();
   if ( bForce ) {
@@ -167,17 +160,16 @@ void Bundle::SetWatchOff( double dblStrike, bool bForce ) {
   }
 }
 
-
-Bundle::mapStrikes_t::iterator Bundle::FindStrike( double strike ) {
-  mapStrikes_t::iterator iter = m_mapStrikes.find( strike );
+ExpiryBundle::mapStrikes_iter_t ExpiryBundle::FindStrike( double strike ) {
+  mapStrikes_iter_t iter = m_mapStrikes.find( strike );
   if ( m_mapStrikes.end() == iter ) {
     throw std::runtime_error( "Bundle::FindStrike: can't find strike" );
   }
   return iter;
 }
 
-Bundle::mapStrikes_t::iterator Bundle::FindStrikeAuto( double strike ) {
-  mapStrikes_t::iterator iter = m_mapStrikes.find( strike );
+ExpiryBundle::mapStrikes_iter_t ExpiryBundle::FindStrikeAuto( double strike ) {
+  mapStrikes_iter_t iter = m_mapStrikes.find( strike );
   if ( m_mapStrikes.end() == iter ) {
     m_mapStrikes[ strike ] = Strike( strike );
     iter = m_mapStrikes.find( strike );
@@ -188,7 +180,7 @@ Bundle::mapStrikes_t::iterator Bundle::FindStrikeAuto( double strike ) {
 // lower_bound: key value eq or gt than query
 // upper_bound: key value ft than query
 // 2013/09/09 doesn't appear to be called from anywhere
-void Bundle::FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
+void ExpiryBundle::FindAdjacentStrikes( double dblValue, double& dblLower, double& dblUpper ) {
 
   mapStrikes_t::iterator iter = m_mapStrikes.lower_bound( dblValue ); 
   if ( m_mapStrikes.end() == iter ) {
@@ -207,7 +199,7 @@ void Bundle::FindAdjacentStrikes( double dblValue, double& dblLower, double& dbl
   }
 }
 
-void Bundle::RecalcATMWatch( double dblValue ) {
+void ExpiryBundle::RecalcATMWatch( double dblValue ) {
   // uses a 25% edge hysterisis level to force recalc of three containing options 
   //   ie when underlying is within 25% of upper strike or within 25% of lower strike
   // uses a 50% hysterisis level to select new set of three containing options
@@ -263,7 +255,7 @@ void Bundle::RecalcATMWatch( double dblValue ) {
   }
 }
 
-void Bundle::UpdateATMWatch( double dblValue ) {
+void ExpiryBundle::UpdateATMWatch( double dblValue ) {
   switch ( m_stateOptionWatch ) {
   case EOWSNoWatch:
     RecalcATMWatch( dblValue );
@@ -292,11 +284,11 @@ void Bundle::UpdateATMWatch( double dblValue ) {
   }
 }
 
-void Bundle::SetExpiry( ptime dt ) {
+void ExpiryBundle::SetExpiry( ptime dt ) {
   m_dtExpiry = dt;
 }
 
-void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
+void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
 
   ou::tf::option::binomial::structOutput output;
   input.X = iter->first;
@@ -333,7 +325,7 @@ void Bundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::opti
   }
 }
 
-void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor ) {
+void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor ) {
 
   if ( EOWSNoWatch == m_stateOptionWatch ) return;  // not watching so no active data
 
@@ -400,6 +392,162 @@ void Bundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime no
 //  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
 
 }
+
+//=====================================
+
+void ExpiryBundleWithUnderlying::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
+
+  // todo:  check if already something present, and if something present, should stop the watch, if running
+  m_pwatchUnderlying.reset( new ou::tf::Watch( pInstrument, pProvider ) );
+//  if ( m_bWatching ) {
+    m_pwatchUnderlying->StartWatch();
+//  }
+}
+
+void ExpiryBundleWithUnderlying::SetWatchOn( void ) {
+//  if ( !m_bWatching ) {
+//    m_bWatching = true;
+    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
+    ExpiryBundle::SetWatchOn();
+//    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+//      iter->second.SetWatchOn();
+//    }
+//  }
+}
+
+void ExpiryBundleWithUnderlying::SetWatchOff( void ) {
+//  if ( m_bWatching ) {
+//    m_bWatching = false;
+    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
+    ExpiryBundle::SetWatchOff();
+//    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+//      iter->second.SetWatchOff();
+//    }
+//  }
+}
+
+void ExpiryBundleWithUnderlying::EmitValues( void ) {
+  if ( 0 != m_pwatchUnderlying.get() ) {
+    m_pwatchUnderlying->EmitValues();
+  }
+  ExpiryBundle::EmitValues();
+//  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+//    iter->second.EmitValues();
+//  }
+}
+
+void ExpiryBundleWithUnderlying::SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec ) {
+  if ( 0 != m_pwatchUnderlying.get() ) {
+    m_pwatchUnderlying->SaveSeries( sPrefix60sec );
+  }
+  ExpiryBundle::SaveSeries( sPrefix60sec, sPrefix86400sec );
+//  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
+//    iter->second.SaveSeries( sPrefix60sec );
+//  }
+//  SaveAtmIv( sPrefix60sec, sPrefix86400sec );
+}
+
+//=====================================
+
+MultiExpiryBundle::~MultiExpiryBundle( void ) {
+  if ( 0 != m_pWatchUnderlying.get() ) {
+    SetWatchOff();
+    m_pWatchUnderlying->SetOnQuote( 0 );
+    m_pWatchUnderlying.reset();
+  }
+}
+
+bool MultiExpiryBundle::ExpiryBundleExists( boost::gregorian::date date ) {
+  mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.find( date );
+  return ( m_mapExpiryBundles.end() != iter );
+}
+
+ExpiryBundle& MultiExpiryBundle::GetExpiryBundle( boost::gregorian::date date ) {
+  mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.find( date );
+  if ( m_mapExpiryBundles.end() == iter ) {
+    throw std::runtime_error( "MultiExpiryBundle::GetExpiryBundle no expiry" );
+  }
+  return iter->second;
+}
+
+ExpiryBundle& MultiExpiryBundle::CreateExpiryBundle( boost::gregorian::date date ) {
+  std::pair<mapExpiryBundles_t::iterator, bool> pair
+    = m_mapExpiryBundles.insert( mapExpiryBundles_t::value_type( date, ExpiryBundle() ) );
+  if ( pair.second ) {
+    return pair.first->second;
+  }
+  else {
+    throw std::runtime_error( "MultiExpiryBundle::CreateExpiryBundle expiry exists" );
+  }
+}
+
+void MultiExpiryBundle::SetWatchUnderlying( pInstrument_t& pInstrument, pProvider_t& pProvider ) {
+  if ( 0 != m_pWatchUnderlying.get() ) {
+    //m_pWatchUnderlying->SetOnQuote( 0 );
+    throw std::runtime_error( "MultiExpiryBundle::SetWatchUnderlying underlying already exists" );
+  }
+  m_pWatchUnderlying.reset( new ou::tf::Watch( pInstrument, pProvider ) );
+  m_pWatchUnderlying->SetOnQuote( MakeDelegate( this, &MultiExpiryBundle::HandleUnderlyingQuote ) );
+}
+
+void MultiExpiryBundle::HandleUnderlyingQuote( const ou::tf::Quote& quote ) {
+  // on quote mid point change of underlying, re-calculate which options to watch
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.UpdateATMWatch( quote.Midpoint() );
+  }
+};
+
+void MultiExpiryBundle::SetWatchOn( void ) {
+  if ( !m_pWatchUnderlying->Watching() ) {
+    m_pWatchUnderlying->StartWatch();
+  }
+  // don't start option watch as that is handled via HandleQuote
+}
+
+void MultiExpiryBundle::SetWatchOff( void ) {
+  if ( m_pWatchUnderlying->Watching() ) {
+    m_pWatchUnderlying->StopWatch();
+  }
+  // are there issues with quotes arriving after underlying turned off?
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.SetWatchOff();
+  }
+}
+
+void MultiExpiryBundle::CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.CalcGreeks( 
+      m_pWatchUnderlying->LastQuote().Midpoint(), 
+      m_pWatchUnderlying->Fundamentals().dblHistoricalVolatility,
+      dtNow, libor );
+  }
+}
+
+void MultiExpiryBundle::SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    m_pWatchUnderlying->SaveSeries( sPrefixSession );
+    iter->second.SaveSeries( sPrefixSession, sPrefix86400sec );
+  }
+}
+
+void MultiExpiryBundle::AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) {
+//      std::stringstream ss;
+//      ss << (*iter).dateExpiry << "," << pInstrument->GetExpiry();
+  ExpiryBundle& eb( GetExpiryBundle( pInstrument->GetExpiry() ) );
+  switch ( pInstrument->GetOptionSide() ) {
+  case ou::tf::OptionSide::Call:
+    eb.SetCall( pInstrument, pDataProvider, pGreekProvider );
+    break;
+  case ou::tf::OptionSide::Put:
+    eb.SetPut( pInstrument, pDataProvider, pGreekProvider );
+    break;
+  default: { 
+    assert( 1 == 0 );
+    }
+  }
+  // should check that at least one of the entries was used.
+}
+
 
 } // namespace option
 } // namespace tf

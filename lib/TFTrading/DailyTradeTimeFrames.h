@@ -18,6 +18,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <OUCommon/TimeSource.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -36,7 +38,8 @@ template<class T> // CRTP type call for the overrides
 class DailyTradeTimeFrame {
 public:
 
-  DailyTradeTimeFrame(void);
+  DailyTradeTimeFrame(void); // uses today's date
+  DailyTradeTimeFrame( boost::gregorian::date );  // simluation date
   virtual ~DailyTradeTimeFrame(void) {};
 
   template<typename DD>  // DD is DatedDatum construct
@@ -78,23 +81,40 @@ private:
 
   TimeFrame::enumTimeFrame m_stateTimeFrame;
 
+  void Init( boost::gregorian::date );
+  ptime Normalize( boost::gregorian::date date, time_duration time, const std::string& zone ) {
+    return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
+  }
+
 };
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame( void ) 
-  :
+  : m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
-  m_tdMarketOpen( time_duration( 8, 0, 0 ) ),
-  m_tdRHOpen( time_duration( 10, 30, 0 ) ),
-  m_tdStartTrading( time_duration( 10, 30, 30 ) ),
-  m_tdTimeForCancellation( time_duration( 16, 57, 0 ) ), 
-  m_tdGoNeutral( time_duration( 16, 57, 15 ) ),
-  m_tdWaitForRHClose( time_duration( 16, 58, 0 ) ),
-  m_tdRHClose( time_duration( 17, 0, 0 ) ),
-  m_tdMarketClose( time_duration( 18, 30, 0 ) ), 
-  m_stateTimeFrame( TimeFrame::Closed )
 {
+  Init( ou::TimeSource::Instance().External().date() );
 };
+
+template<class T>
+DailyTradeTimeFrame<T>::DailyTradeTimeFrame( boost::gregorian::date date ) 
+  : m_stateTimeFrame( TimeFrame::Closed )
+  // turn these into traits:  equities, futures, currencies
+{
+  Init( date );
+};
+
+template<class T>
+void DailyTradeTimeFrame<T>::Init( boost::gregorian::date date ) {
+  m_tdMarketOpen          = Normalize( date, time_duration(  7,  0,  0 ), "America/New_York" ).time_of_day();
+  m_tdRHOpen              = Normalize( date, time_duration(  9, 30,  0 ), "America/New_York" ).time_of_day();
+  m_tdStartTrading        = Normalize( date, time_duration(  9, 30, 30 ), "America/New_York" ).time_of_day();
+  m_tdTimeForCancellation = Normalize( date, time_duration( 15, 57,  0 ), "America/New_York" ).time_of_day();
+  m_tdGoNeutral           = Normalize( date, time_duration( 15, 57, 15 ), "America/New_York" ).time_of_day();
+  m_tdWaitForRHClose      = Normalize( date, time_duration( 15, 58,  0 ), "America/New_York" ).time_of_day();
+  m_tdRHClose             = Normalize( date, time_duration( 16,  0,  0 ), "America/New_York" ).time_of_day();
+  m_tdMarketClose         = Normalize( date, time_duration( 17, 30,  0 ), "America/New_York" ).time_of_day();
+}
 
 template<class T>
 template<typename DD>

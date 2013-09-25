@@ -23,14 +23,6 @@
 
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>
 
-
-
-
-
-
-
-
-
 int _tmain(int argc, _TCHAR* argv[]) {
 
   ou::tf::cboe::vExpiries_t vExpiries;
