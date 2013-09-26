@@ -24,6 +24,7 @@
 #include <TFOptions/Binomial.h>
 #include <TFTrading/Watch.h>
 #include <TFTimeSeries/BarFactory.h>
+#include <TFIQFeed/MarketSymbol.h>
 
 #include "Strike.h"
 
@@ -141,6 +142,8 @@ public:
 
   const std::string& Name( void ) { return m_sName; };
 
+  pPortfolio_t& Portfolio( void ) { return m_pPortfolio; };
+
   void SetWatchUnderlying( pInstrument_t& pInstrument, pProvider_t& pProvider );
   pWatch_t GetWatchUnderlying( void ) { return m_pWatchUnderlying; };
 
@@ -163,10 +166,9 @@ private:
 
   std::string m_sName;
 
-  pPortfolio_t pPortfolio;  // summary portfolio for all things related to symbols in this Bundle
+  pPortfolio_t m_pPortfolio;  // summary portfolio for all things related to symbols in this Bundle
 
   pWatch_t m_pWatchUnderlying;
-  pPosition_t pPositionUnderlying;
 
   mapExpiryBundles_t m_mapExpiryBundles;
 
@@ -174,6 +176,46 @@ private:
   void HandleUnderlyingTrade( const ou::tf::Trade& trade ) {};
 
 };
+
+// used like:
+// m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+
+struct PopulateMultiExpiryBundle {
+
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+
+  PopulateMultiExpiryBundle( 
+    ou::tf::option::MultiExpiryBundle& bundle, pProvider_t pDataProvider_, pProvider_t pGreekProvider_ )
+    : meb( bundle ), pDataProvider( pDataProvider_ ), pGreekProvider( pGreekProvider_ )
+  {}
+
+  void operator()( const ou::tf::iqfeed::MarketSymbol::TableRowDef& trd ) {
+    assert( trd.sUnderlying == meb.Name() );
+    assert( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc  );
+    boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay - 1 );  // IQFeed dates are on Saturday
+    if ( meb.ExpiryBundleExists( dateTrdExpiry ) ) {
+      pInstrument_t pInstrument;
+      std::string side;
+      side = trd.eOptionSide;
+      std::stringstream ss;
+      ss << trd.sUnderlying << " " << dateTrdExpiry << " " << side << " " << trd.dblStrike;
+      pInstrument.reset( 
+        new ou::tf::Instrument( 
+          ss.str(), ou::tf::InstrumentType::Option, "SMART", 
+          dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
+          meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+      pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
+      meb.AssignOption( pInstrument, pDataProvider, pGreekProvider );
+    }
+  }
+
+  ou::tf::option::MultiExpiryBundle& meb;
+  pProvider_t pDataProvider;
+  pProvider_t pGreekProvider;
+};
+
+
 
 } // namespace option
 } // namespace tf

@@ -524,8 +524,8 @@ void MultiExpiryBundle::CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& li
 }
 
 void MultiExpiryBundle::SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec ) {
+  m_pWatchUnderlying->SaveSeries( sPrefixSession );
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
-    m_pWatchUnderlying->SaveSeries( sPrefixSession );
     iter->second.SaveSeries( sPrefixSession, sPrefix86400sec );
   }
 }

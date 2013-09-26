@@ -26,6 +26,7 @@
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
+#include <TFOptions/Bundle.h>
 
 #include <TFIQFeed/LoadMktSymbols.h>
 
@@ -46,6 +47,9 @@ public:
 protected:
 private:
 
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+
   ou::action::Worker m_worker;
 
   FrameMain* m_pFrameMain;
@@ -54,9 +58,19 @@ private:
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   ou::tf::DBOps m_db;
 
+  pPortfolio_t m_pPortfolioMaster;
+  pPortfolio_t m_pPortfolioCurrencyUSD;
+
   wxTimer m_timerGuiRefresh;
+  ptime m_dtTopOfMinute;
+  bool m_bIVCalcActive;
+
+  boost::thread* m_pIVCalc;
+  ou::tf::LiborFromIQFeed m_libor;
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
+
+  ou::tf::option::MultiExpiryBundle* m_pBundle;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -64,13 +78,11 @@ private:
 
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
+  void HandlePopulateDatabase( void );
 
   void HandleGuiRefresh( wxTimerEvent& event );
     
-  void AutoStartCollection( void );
-
-  void HandlePopulateDatabase( void );
-
+  //void AutoStartCollection( void );
 
   void OnData1Connected( int );
   void OnData2Connected( int );
@@ -79,13 +91,21 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
+  void CalcIV( ptime dt );
+
   void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
   void HandleMenuAction2LoadIQFeedSymbolList( void );
+  void HandleMenuActionInitializeSymbolSet( void );
+  void HandleMenuActionStartWatch( void );
+  void HandleMenuActionStopWatch( void );
+  void HandleMenuActionSaveValues( void );
+  void HandleMenuActionEmitYieldCurve( void );
 
   void HandleObtainNewIQFeedSymbolListRemote( void );
   void HandleObtainNewIQFeedSymbolListLocal( void );
   void HandleLoadIQFeedSymbolList( void );
+  void HandleSaveValues( void );
 
 
 };

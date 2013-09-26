@@ -36,6 +36,7 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include <TFOptions/CalcExpiry.h>
 
 #include "HedgedBollinger.h"
 
@@ -45,7 +46,7 @@ size_t atm = 125;
 
 bool AppHedgedBollinger::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Weeklies" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hedged Bollinger" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -101,7 +102,9 @@ bool AppHedgedBollinger::OnInit() {
   m_bData2Connected = false;
   m_bExecConnected = false;
 
-//  m_timerGuiRefresh.SetOwner( this );
+  m_pBundle = 0;
+
+  m_timerGuiRefresh.SetOwner( this );
 
 //  Bind( wxEVT_TIMER, &AppPhi::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
@@ -120,22 +123,128 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
   
-  std::string sDbName( "hedgedbollinger.db" );
+  std::string sDbName( "HedgedBollinger.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
   }
-  m_db.Open( sDbName );
 
+
+  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
+  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
+  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppHedgedBollinger::HandlePopulateDatabase ) );
+
+  m_db.Open( sDbName );
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
   vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote ) ) );
   vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
   vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList ) ) );
+  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionInitializeSymbolSet ) ) );
+  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartWatch ) ) );
+  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopWatch ) ) );
+  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   return 1;
 
+}
+
+void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
+  m_pBundle->SetWatchOn();
+
+  m_bIVCalcActive = false;
+  ptime dt;
+  ou::TimeSource::Instance().Internal( &dt );
+  m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds() );
+  m_timerGuiRefresh.Start( 250 );
+
+}
+
+void AppHedgedBollinger::HandleMenuActionStopWatch( void ) {
+
+  m_timerGuiRefresh.Stop();
+
+  m_pBundle->SetWatchOff();
+
+}
+
+void AppHedgedBollinger::HandleMenuActionSaveValues( void ) {
+  m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleSaveValues ) );
+}
+
+void AppHedgedBollinger::HandleSaveValues( void ) {
+  std::cout << "Saving collected values ... " << std::endl;
+  try {
+    std::string sPrefixSession( "/app/HedgedBollinger/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
+    //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
+    std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
+    m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
+  }
+  catch(...) {
+    std::cout << " ... issues with saving ... " << std::endl;
+  }
+  std::cout << "  ... Done " << std::endl;
+}
+
+void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
+  if ( m_listIQFeedSymbols.begin() == m_listIQFeedSymbols.end() ) {
+    std::cout << "Need to load symbols first" << std::endl;
+  }
+  else {
+    if ( 0 != m_pBundle ) {
+      std::cout << "Bundle Already set" << std::endl;
+    }
+    else {
+
+      // work out current expiry and next expiry
+      ptime now = ou::TimeSource::Instance().External();
+      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
+      boost::gregorian::date dateSecondMonth = ou::tf::option::Next3rdFriday( dateFrontMonth );
+
+      // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
+//      ptime dtFrontMonthExpiryUtc( 
+//        ou::TimeSource::Instance().ConvertRegionalToUtc( dateFrontMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
+//      ptime dtSecondMonthExpiryUtc( 
+//        ou::TimeSource::Instance().ConvertRegionalToUtc( dateSecondMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
+
+    // http://www.cboe.com/products/EquityOptionSpecs.aspx
+    //Expiration Date:
+    //Saturday immediately following the third Friday of the expiration month until February 15, 2015. 
+    //  On and after February 15, 2015, the expiration date will be the third Friday of the expiration month.
+
+    //Expiration Months:
+    //Two near-term months plus two additional months from the January, February or March quarterly cycles.
+
+      // **** All program calculations should normailze everything to the Friday.
+
+      //std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
+      std::cout << "Expiry strings: " << dateFrontMonth << ", " << dateSecondMonth << std::endl;
+
+      std::string sName( "GLD" );
+
+      m_pBundle = new ou::tf::option::MultiExpiryBundle( sName );
+      m_pBundle->CreateExpiryBundle( dateFrontMonth );
+      m_pBundle->CreateExpiryBundle( dateSecondMonth );
+
+      pInstrument_t pInstrumentUnderlying;
+      pInstrumentUnderlying.reset( 
+        new ou::tf::Instrument( sName, ou::tf::InstrumentType::Stock, "SMART" ) );  // need to register this with InstrumentManager before trading
+      m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
+
+      m_pBundle->Portfolio()
+        = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+          sName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sName + " Hedge" );
+
+      pProvider_t pNull;
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+
+      std::cout << "Initialized." << std::endl;
+
+    }
+  }
+  
 }
 
 void AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
@@ -191,6 +300,43 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
     boost::lexical_cast<std::string>( m_dblMaxPL )
     );
     */
+  // Process IV Calc once a minute
+  ptime dt;
+  // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
+  ou::TimeSource::Instance().Internal( &dt );
+  if ( dt > m_dtTopOfMinute ) {
+    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
+    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
+    if ( !m_bIVCalcActive ) {
+      if ( 0 != m_pIVCalc ) delete m_pIVCalc;
+      m_bIVCalcActive = true;
+      m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, dt ) );
+    }
+  }
+}
+
+// runs in thread
+void AppHedgedBollinger::CalcIV( ptime dt ) {
+  static time_duration tdMarketOpen( 9, 30, 0, 30 );  // eastern time, plus time to settle
+  static time_duration tdMarketClose( 16, 0, 0 );  // eastern time
+  ptime dtMarketOpen( 
+    ou::TimeSource::Instance().ConvertRegionalToUtc( dt.date(), tdMarketOpen, "America/New_York", true ) );
+  ptime dtMarketClose( 
+    ou::TimeSource::Instance().ConvertRegionalToUtc( dt.date(), tdMarketClose, "America/New_York", true ) );
+  if ( ( dtMarketOpen < dt ) && ( dt < dtMarketClose ) ) {
+    boost::timer::auto_cpu_timer t;
+    m_pBundle->CalcIV( dt, m_libor );
+    //for ( mapInstrumentCombo_t::iterator iter = m_mapInstrumentCombo.begin(); m_mapInstrumentCombo.end() != iter; ++iter ) {
+//      iter->second.CalcIV( dt, m_libor );
+    //}
+  }
+  m_bIVCalcActive = false;
+}
+
+void AppHedgedBollinger::HandleMenuActionEmitYieldCurve( void ) {
+  //ou::tf::libor::EmitYieldCurve();
+  //m_libor.EmitYieldCurve();
+  std::cout << m_libor;
 }
 
 int AppHedgedBollinger::OnExit() {
@@ -220,7 +366,7 @@ void AppHedgedBollinger::OnClose( wxCloseEvent& event ) {
 void AppHedgedBollinger::OnData1Connected( int ) {
   m_bData1Connected = true;
   //ou::tf::libor::SetWatchOn( m_pData1Provider );
-//  m_libor.SetWatchOn( m_pData1Provider );
+  m_libor.SetWatchOn( m_pData1Provider );
 //  AutoStartCollection();
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
@@ -242,8 +388,8 @@ void AppHedgedBollinger::OnExecConnected( int ) {
   }
 }
 
-
 void AppHedgedBollinger::OnData1Disconnected( int ) {
+  m_libor.SetWatchOff();
   m_bData1Connected = false;
 }
 
@@ -262,7 +408,6 @@ void AppHedgedBollinger::HandleRegisterRows(  ou::db::Session& session ) {
 }
 
 void AppHedgedBollinger::HandlePopulateDatabase( void ) {
-/*
 
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
@@ -279,14 +424,14 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
   ou::tf::AccountManager::pAccount_t pAccountSimulator
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
-  m_pPortfolio
+  m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "phi" );
+    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
-  m_pPortfolio
+  m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    m_idPortfolio, "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "phi" );
+    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
-*/
+
 }
 
