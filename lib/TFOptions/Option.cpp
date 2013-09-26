@@ -125,6 +125,7 @@ void Option::SaveSeries( const std::string& sPrefix ) {
     HDF5WriteTimeSeries<ou::tf::Greeks> wtsGreeks( dm, true, true, 5, 256 );
     wtsGreeks.Write( sPathName, &m_greeks );
     HDF5Attributes attrGreeks( dm, sPathName, option );
+    attrGreeks.SetSignature( ou::tf::Greek::Signature() );
     attrGreeks.SetMultiplier( m_pInstrument->GetMultiplier() );
     attrGreeks.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
     if ( 0 != m_pGreekProvider.get() ) {

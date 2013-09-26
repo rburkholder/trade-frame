@@ -22,6 +22,7 @@
 
 #include <HDF5/H5Cpp.h>
 
+#include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -60,6 +61,7 @@ public:
   void DateTime( const ptime& dt ) { m_dt = dt; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );  // create new one if null
+  static boost::uint64_t Signature( void ) { return 9; };
 
 protected:
   ptime m_dt;
@@ -98,6 +100,7 @@ public:
   price_t LogarithmicMidPointB( void ) const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 10000 + 1133; };
 
 protected:
 private:
@@ -125,6 +128,7 @@ public:
   volume_t Volume( void ) const { return m_nTradeSize; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 100 + 13; };
 
 protected:
 private:
@@ -160,6 +164,7 @@ public:
   void Volume( volume_t vol ) { m_nVolume = vol; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 100000 + 11113; };
 
 protected:
 private:
@@ -196,6 +201,7 @@ public:
   const char& MMIDStr( void ) const { return *m_uMMID.rch; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 10000000 + 3188888; };
 
 protected:
   union unionMMID {
@@ -258,6 +264,7 @@ public:
   };
 
   static H5::CompType* DefineDataType( H5::CompType *pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 1000000 + 111111; };
 
 protected:
 
@@ -288,6 +295,7 @@ public:
   price_t Value( void ) const { return m_dblPrice; };  // 20120715 was Price, is going to cause some problems in some code somewhere as is now class name
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return DatedDatum::Signature() * 10 + 1; };
 
 protected:
 private:
@@ -312,6 +320,7 @@ public:
   ptime Expiry( void ) { return m_dtExpiry; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
+  static boost::uint64_t Signature( void ) { return Price::Signature() * 1000 + 411; };
 
 protected:
 private:

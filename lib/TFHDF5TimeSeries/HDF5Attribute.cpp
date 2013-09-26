@@ -29,6 +29,7 @@ const char szMonth[] = "Month";
 const char szDay[] = "Day";
 const char szMultiplier[] = "Multiplier";
 const char szSignificantDigits[] = "SignificantDigits";
+const char szSignature[] = "Signature";
 
  HDF5Attributes::HDF5Attributes( HDF5DataManager& dm ) 
  : m_pDataSet( NULL ), m_dm( dm )
@@ -82,6 +83,21 @@ InstrumentType::enumInstrumentTypes HDF5Attributes::GetInstrumentType( void ) {
   attribute.read(H5::PredType::NATIVE_INT8, &typeInstrument );
   attribute.close();
   return typeInstrument;
+}
+
+void HDF5Attributes::SetSignature( boost::uint64_t sig ) {
+  H5::DataSpace dspace;
+  H5::Attribute attribute( m_pDataSet->createAttribute( szSignature, H5::PredType::NATIVE_UINT64, dspace ) );
+  attribute.write( H5::PredType::NATIVE_UINT64, &sig );
+  attribute.close();
+}
+
+boost::uint64_t HDF5Attributes::GetSignature( void ) {
+  boost::uint64_t sig;
+  H5::Attribute attribute( m_pDataSet->openAttribute( szSignature ) );
+  attribute.read(H5::PredType::NATIVE_UINT64, &sig );
+  attribute.close();
+  return sig;
 }
 
 void HDF5Attributes::SetProviderType( keytypes::eidProvider_t id ) {

@@ -157,6 +157,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       HDF5WriteTimeSeries<ou::tf::Quotes> wtsQuotes( dm, true, true, 5, 256 );
       wtsQuotes.Write( sPathName, &m_quotes );
       HDF5Attributes attrQuotes( dm, sPathName );
+      attrQuotes.SetSignature( ou::tf::Quote::Signature() );
       attrQuotes.SetMultiplier( m_pInstrument->GetMultiplier() );
       attrQuotes.SetSignificantDigits( m_pInstrument->GetSignificantDigits() ); 
       attrQuotes.SetProviderType( m_pDataProvider->ID() );
@@ -167,6 +168,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm, true, true, 5, 256 );
       wtsTrades.Write( sPathName, &m_trades );
       HDF5Attributes attrTrades( dm, sPathName );
+      attrTrades.SetSignature( ou::tf::Trade::Signature() );
       attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
       attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
       attrTrades.SetProviderType( m_pDataProvider->ID() );

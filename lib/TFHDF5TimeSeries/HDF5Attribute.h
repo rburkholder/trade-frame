@@ -16,6 +16,8 @@
 
 #include <string>
 
+#include <boost/cstdint.hpp>
+
 #include "HDF5DataManager.h"
 #include <TFTrading/TradingEnumerations.h>
 #include <TFTrading/KeyTypes.h>
@@ -53,6 +55,9 @@ public:
   HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structOption& );
   HDF5Attributes( HDF5DataManager& dm, const std::string& sPath, const structFuture& );
   ~HDF5Attributes(void);
+
+  void SetSignature( boost::uint64_t ); // left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
+  boost::uint64_t GetSignature( void );
 
   void SetInstrumentType( InstrumentType::enumInstrumentTypes );
   InstrumentType::enumInstrumentTypes GetInstrumentType( void );

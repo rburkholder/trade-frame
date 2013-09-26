@@ -22,7 +22,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-// may need to inherit and add more functionality to the class:
+#include <OUCharting/ChartMaster.h>
+
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
@@ -38,7 +39,6 @@
 
 //#include "DataStructures.h"
 #include <OUCommon/Worker.h>
-
 
 class AppHedgedBollinger:
   public wxApp, public ou::tf::FrameWork01<AppHedgedBollinger> {
@@ -56,6 +56,11 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
+
+  wxWindow* m_winChart;
+  bool m_bReadyToDrawChart;
+  ou::ChartMaster m_chart;
+
   ou::tf::DBOps m_db;
 
   pPortfolio_t m_pPortfolioMaster;
@@ -107,6 +112,9 @@ private:
   void HandleLoadIQFeedSymbolList( void );
   void HandleSaveValues( void );
 
+  void HandleDrawChart( const MemBlock& );
+  void HandlePaint( wxPaintEvent& event );
+  void HandleSize( wxSizeEvent& event );
 
 };
 

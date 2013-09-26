@@ -16,7 +16,7 @@
 #include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
-#include <TFVuTrading/PanelFinancialChart.h>
+//#include <TFVuTrading/PanelFinancialChart.h>
 
 #include "FrameMain.h"
 #include "PanelSimulationControl.h"
@@ -41,7 +41,7 @@ private:
 
   FrameMain* m_pFrameMain;
   PanelSimulationControl* m_pPanelSimulationControl;
-  ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
+  //ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   wxWindow* m_winChart;
 

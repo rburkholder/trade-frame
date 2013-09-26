@@ -22,6 +22,7 @@
     <None Include="HedgedBollinger.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\..\..\..\Users\Ray\Desktop\AdvisorError.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

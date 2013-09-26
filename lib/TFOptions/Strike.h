@@ -37,24 +37,18 @@ public:
 
   double GetStrike( void ) const { return m_dblStrike; };
 
-  void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider ) { 
-    assert( 0 == m_call.use_count() ); 
-    assert( ou::tf::OptionSide::Call == pInstrument->GetOptionSide() );
-    m_call.reset( new ou::tf::option::Call( pInstrument, pDataProvider, pGreekProvider ) ); 
-  };
-  void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )  { 
-    assert( 0 == m_put.use_count() );  
-    assert( ou::tf::OptionSide::Put == pInstrument->GetOptionSide() );
-    m_put.reset( new ou::tf::option::Put( pInstrument, pDataProvider, pGreekProvider ) ); 
-  };
+  void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
   Call* Call( void ) { return m_call.get(); };
   Put*  Put( void )  { return m_put.get(); };
 
   void SetWatchableOn( void );  // watchable defaults to off at time of construction
   void SetWatchableOff( void );
-  void SetWatchOn( void );
-  void SetWatchOff( void );
+
+  void WatchStart( void );
+  void WatchStop( void );
+  bool IsWatching( void ) { return 0 != m_nWatching; };
 
   void SaveSeries( const std::string& sPrefix );
   void EmitValues( void );
@@ -67,7 +61,8 @@ protected:
 private:
 
   bool m_bWatchable;  // for when large number of strikes, but only a few to watch and collect
-  bool m_bWatching;  // single thradable only
+  //bool m_bWatching;  // single thradable only
+  unsigned int m_nWatching;  // 0 = no watch, > 0 watching, < 0 illegal
   double m_dblStrike;
 };
 

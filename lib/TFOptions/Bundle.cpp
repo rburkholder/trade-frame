@@ -16,6 +16,7 @@
 
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
 
 #include "Bundle.h"
 
@@ -49,27 +50,34 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   if ( 0 != m_tsAtmIv.Size() ) {
+
     std::stringstream ss;
     ss << m_dtExpiry.date();
     sPathName = sPrefix60sec + "/atmiv/" + ss.str().c_str();
     HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsAtmIv );
-  }
+    HDF5Attributes attrAtmIv( dm, sPathName );
+    attrAtmIv.SetSignature( ou::tf::PriceIV::Signature() );
 
-  {
-    sPathName = sPrefix86400sec + "/call";
-    ou::tf::Bars bars( 1 );
-    bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
-    HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
-    wtsBar.Write( sPathName, &bars );
-  }
+    {
+      sPathName = sPrefix86400sec + "/call";
+      ou::tf::Bars bars( 1 );
+      bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
+      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+      wtsBar.Write( sPathName, &bars );
+      HDF5Attributes attrBar( dm, sPathName );
+      attrBar.SetSignature( ou::tf::Bar::Signature() );
+    }
   
-  {
-    sPathName = sPrefix86400sec + "/put";
-    ou::tf::Bars bars( 1 );
-    bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
-    HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
-    wtsBar.Write( sPathName, &bars );
+    {
+      sPathName = sPrefix86400sec + "/put";
+      ou::tf::Bars bars( 1 );
+      bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
+      HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
+      wtsBar.Write( sPathName, &bars );
+      HDF5Attributes attrBar( dm, sPathName );
+      attrBar.SetSignature( ou::tf::Bar::Signature() );
+    }
   }
   
 }
@@ -103,22 +111,23 @@ Put* ExpiryBundle::GetPut( double dblStrike ) {
   return iter->second.Put();
 }
 
-void ExpiryBundle::SetWatchOn( void ) {
+void ExpiryBundle::StartWatch( void ) {
 //  if ( !m_bWatching ) {
 //    m_bWatching = true;
 //    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-      iter->second.SetWatchOn();
+      iter->second.WatchStart();
     }
 //  }
 }
 
-void ExpiryBundle::SetWatchOff( void ) {
+void ExpiryBundle::StopWatch( void ) {
 //  if ( m_bWatching ) {
 //    m_bWatching = false;
 //    if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
     for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-      iter->second.SetWatchOff();
+      if ( iter->second.IsWatching() )
+        iter->second.WatchStop();
     }
 //  }
 }
@@ -149,12 +158,12 @@ void ExpiryBundle::SetWatchOn( double dblStrike, bool bForce ) {
   if ( bForce ) {
     iter->second.SetWatchableOn();
   }
-  iter->second.SetWatchOn();
+  iter->second.WatchStart();
 }
 
 void ExpiryBundle::SetWatchOff( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
-  iter->second.SetWatchOff();
+  iter->second.WatchStop();
   if ( bForce ) {
     iter->second.SetWatchableOff();
   }
@@ -404,22 +413,22 @@ void ExpiryBundleWithUnderlying::SetUnderlying( pInstrument_t pInstrument, pProv
 //  }
 }
 
-void ExpiryBundleWithUnderlying::SetWatchOn( void ) {
+void ExpiryBundleWithUnderlying::StartWatch( void ) {
 //  if ( !m_bWatching ) {
 //    m_bWatching = true;
     if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StartWatch();
-    ExpiryBundle::SetWatchOn();
+    ExpiryBundle::StartWatch();
 //    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
 //      iter->second.SetWatchOn();
 //    }
 //  }
 }
 
-void ExpiryBundleWithUnderlying::SetWatchOff( void ) {
+void ExpiryBundleWithUnderlying::StopWatch( void ) {
 //  if ( m_bWatching ) {
 //    m_bWatching = false;
     if ( 0 != m_pwatchUnderlying.get() ) m_pwatchUnderlying->StopWatch();
-    ExpiryBundle::SetWatchOff();
+    ExpiryBundle::StopWatch();
 //    for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
 //      iter->second.SetWatchOff();
 //    }
@@ -451,7 +460,7 @@ void ExpiryBundleWithUnderlying::SaveSeries( const std::string& sPrefix60sec, co
 
 MultiExpiryBundle::~MultiExpiryBundle( void ) {
   if ( 0 != m_pWatchUnderlying.get() ) {
-    SetWatchOff();
+    StopWatch();
     m_pWatchUnderlying->SetOnQuote( 0 );
     m_pWatchUnderlying.reset();
   }
@@ -497,20 +506,20 @@ void MultiExpiryBundle::HandleUnderlyingQuote( const ou::tf::Quote& quote ) {
   }
 };
 
-void MultiExpiryBundle::SetWatchOn( void ) {
+void MultiExpiryBundle::StartWatch( void ) {
   if ( !m_pWatchUnderlying->Watching() ) {
     m_pWatchUnderlying->StartWatch();
   }
   // don't start option watch as that is handled via HandleQuote
 }
 
-void MultiExpiryBundle::SetWatchOff( void ) {
+void MultiExpiryBundle::StopWatch( void ) {
   if ( m_pWatchUnderlying->Watching() ) {
     m_pWatchUnderlying->StopWatch();
   }
   // are there issues with quotes arriving after underlying turned off?
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
-    iter->second.SetWatchOff();
+    iter->second.StopWatch();
   }
 }
 

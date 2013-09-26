@@ -17,11 +17,7 @@
 #include "TimeSeriesSlidingWindow.h"
 #include "RunningStats.h"
 
-// batch mode time series processing
-// used for processing a time series and obtaining the results at the end
-// Construct then run Update to process the time series
-
-// at some point, redo Add, Expire, PostUpdate as CRTP mechanism
+// continuously updated series based upon attachment to an underlying time series.
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -74,7 +70,7 @@ class TSSWStatsTrade: public TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>;
   friend TimeSeriesSlidingWindow<TSSWStatsTrade, Trade>;
 public:
-  TSSWStatsTrade( TimeSeries<Trade>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsTrade( TimeSeries<Trade>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   ~TSSWStatsTrade( void );
 protected:
   void Add( const Trade &trade ); // override to process elements passing into window scope
@@ -90,7 +86,7 @@ class TSSWStatsQuote: public TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>;
   friend TimeSeriesSlidingWindow<TSSWStatsQuote, Quote>;
 public:
-  TSSWStatsQuote( TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsQuote( TimeSeries<Quote>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   ~TSSWStatsQuote( void );
 protected:
   void Add( const Quote &quote ); // override to process elements passing into window scope
@@ -106,7 +102,7 @@ class TSSWStatsMidQuote: public TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, 
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>;
   friend TimeSeriesSlidingWindow<TSSWStatsMidQuote, Quote>;
 public:
-  TSSWStatsMidQuote( Quotes& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsMidQuote( Quotes& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   ~TSSWStatsMidQuote( void );
 protected:
   void Add( const Quote &quote ); // override to process elements passing into window scope
@@ -122,7 +118,7 @@ class TSSWStatsPrice: public TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>
 //  friend TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>;
   friend TimeSeriesSlidingWindow<TSSWStatsPrice, Price>;
 public:
-  TSSWStatsPrice( TimeSeries<Price>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TSSWStatsPrice( TimeSeries<Price>& series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
   ~TSSWStatsPrice( void );
 protected:
   void Add( const Price &price ); // override to process elements passing into window scope

@@ -62,8 +62,8 @@ public:
   void SetWatchOn( double dblStrike, bool bForce = false ); // watch only selected call/put at strike, force watchable on
   void SetWatchOff( double dblStrike, bool bForce = false ); // forces watchable off when true
 
-  void SetWatchOn( void ); // watch underlying plus all watcheable options
-  void SetWatchOff( void ); 
+  void StartWatch( void ); // watch underlying plus all watcheable options
+  void StopWatch( void ); 
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
   void EmitValues( void );
@@ -115,8 +115,8 @@ public:
 
   void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
 
-  void SetWatchOn( void );
-  void SetWatchOff( void );
+  void StartWatch( void );
+  void StopWatch( void );
   void EmitValues( void );
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
@@ -152,8 +152,8 @@ public:
   ExpiryBundle& GetExpiryBundle( boost::gregorian::date );
   ExpiryBundle& CreateExpiryBundle( boost::gregorian::date );
 
-  void SetWatchOn( void );
-  void SetWatchOff( void );
+  void StartWatch( void );
+  void StopWatch( void );
   void CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor );
   void SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec );
   void AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
@@ -177,7 +177,7 @@ private:
 
 };
 
-// used like:
+// PopulateMultiExpiryBundle used like:
 // m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
 struct PopulateMultiExpiryBundle {

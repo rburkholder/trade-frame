@@ -30,6 +30,9 @@ using namespace boost::gregorian;
 
 #include <boost/foreach.hpp>
 
+#include <wx/mstream.h>
+#include <wx/bitmap.h>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -94,6 +97,13 @@ bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain->Show( true );
 
+  m_bReadyToDrawChart = false;
+  m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
+  m_sizerMain->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
+  wxWindowID idChart = m_winChart->GetId();
+  m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
+  m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );
+
   m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppHedgedBollinger::HandlePopulateDatabase ) );
@@ -123,7 +133,7 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
   
-  std::string sDbName( "HedgedBollinger.db" );
+  std::string sDbName( "HedgedBollingerX.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
   }
@@ -151,8 +161,34 @@ bool AppHedgedBollinger::OnInit() {
 
 }
 
+void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
+  if ( m_bReadyToDrawChart ) {
+    try {
+      wxSize size = m_winChart->GetClientSize();
+      m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+      //m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
+      m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::HandleDrawChart ) );
+      m_chart.DrawChart( );
+    }
+    catch (...) {
+    }
+  }
+}
+
+void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+}
+
+void AppHedgedBollinger::HandleDrawChart( const MemBlock& m ) {
+  wxMemoryInputStream in( m.data, m.len );
+  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
+  wxPaintDC cdc( m_winChart );
+  cdc.DrawBitmap(bmp, 0, 0);
+}
+
 void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
-  m_pBundle->SetWatchOn();
+
+  m_pBundle->StartWatch();
 
   m_bIVCalcActive = false;
   ptime dt;
@@ -166,7 +202,7 @@ void AppHedgedBollinger::HandleMenuActionStopWatch( void ) {
 
   m_timerGuiRefresh.Stop();
 
-  m_pBundle->SetWatchOff();
+  m_pBundle->StopWatch();
 
 }
 
