@@ -760,9 +760,9 @@ void Strategy::HandleSimulationComplete( void ) {
   m_ss.str( "" );
   m_ss << m_nUpTransitions << " up changes, ";
   m_ss << m_nDnTransitions << " dn changes, ";
-  m_pPositionLong->EmitStatus( m_ss );
+  m_ss << *m_pPositionLong;
   m_ss << ", ";
-  m_pPositionShort->EmitStatus( m_ss );
+  m_ss << m_pPositionShort;
   m_ss << ". ";
   m_sim->EmitStats( m_ss );
   std::cout << m_ss << std::endl;
@@ -775,17 +775,17 @@ void Strategy::HandleSimulationComplete( void ) {
 
 void Strategy::HandleExecution( ou::tf::Position::execution_delegate_t del ) {
   m_ss << "Exec: " << del.second.GetTimeStamp() << ": ";
-  m_pPositionLong->EmitStatus( m_ss );
+  m_ss << *m_pPositionLong;
   m_ss << ", ";
-  m_pPositionShort->EmitStatus( m_ss );
+  m_ss << m_pPositionShort;
   std::cout << m_ss << std::endl;
 }
 
 void Strategy::HandleCommission( const ou::tf::Position* pPosition ) {
   m_ss.str( "" );
-  m_pPositionLong->EmitStatus( m_ss );
+  m_ss << *m_pPositionLong;
   m_ss << ", ";
-  m_pPositionShort->EmitStatus( m_ss );
+  m_ss << m_pPositionShort;
   std::cout << m_ss << std::endl;
 }
 

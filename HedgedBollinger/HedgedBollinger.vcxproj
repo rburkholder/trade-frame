@@ -146,8 +146,8 @@
     <ClInclude Include="HedgedBollinger.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Strategy1.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Trader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HedgedBollinger.cpp" />
@@ -157,7 +157,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Trader.cpp" />
+    <ClCompile Include="Strategy1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HedgedBollinger.rc" />

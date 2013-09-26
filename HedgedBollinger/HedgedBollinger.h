@@ -35,10 +35,9 @@
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
 
-//#include <TFOptions/Bundle.h>
-
-//#include "DataStructures.h"
 #include <OUCommon/Worker.h>
+
+#include "Strategy1.h"
 
 class AppHedgedBollinger:
   public wxApp, public ou::tf::FrameWork01<AppHedgedBollinger> {
@@ -60,6 +59,8 @@ private:
   wxWindow* m_winChart;
   bool m_bReadyToDrawChart;
   ou::ChartMaster m_chart;
+
+  Strategy* m_pStrategy;
 
   ou::tf::DBOps m_db;
 
@@ -106,6 +107,7 @@ private:
   void HandleMenuActionStopWatch( void );
   void HandleMenuActionSaveValues( void );
   void HandleMenuActionEmitYieldCurve( void );
+  void HandleMenuActionStartChart( void );
 
   void HandleObtainNewIQFeedSymbolListRemote( void );
   void HandleObtainNewIQFeedSymbolListLocal( void );

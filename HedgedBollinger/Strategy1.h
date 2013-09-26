@@ -19,19 +19,47 @@
 // started after MultiExpiryBundle has been populated
 
 #include <TFTimeSeries/TimeSeries.h>
-#include <TFTrading/DailyTradeTimeFrames.h>
-#include <TFOptions/Bundle.h>
-#include <TFIndicators/TSSWStats.h>
+#include <TFTimeSeries/BarFactory.h>
 
-class Trader: public ou::tf::DailyTradeTimeFrame<Trader> {
-  friend ou::tf::DailyTradeTimeFrame<Trader>; 
+#include <TFTrading/DailyTradeTimeFrames.h>
+
+#include <TFOptions/Bundle.h>
+
+#include <TFIndicators/TSSWStats.h>
+#include <TFIndicators/TSEMA.h>
+
+#include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+#include <OUCharting/ChartEntryShape.h>
+
+class Strategy: public ou::tf::DailyTradeTimeFrame<Strategy> {
+  friend ou::tf::DailyTradeTimeFrame<Strategy>; 
 public:
-  Trader( ou::tf::option::MultiExpiryBundle* meb );
-  ~Trader(void);
+  Strategy( ou::tf::option::MultiExpiryBundle* meb );
+  ~Strategy(void);
+  ou::ChartDataView& GetChartDataView( void ) {return m_dvChart; };
 protected:
 private:
 
-  ou::tf::option::MultiExpiryBundle* m_pBundle;
+  ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
+
+  ou::ChartDataView m_dvChart;
+
+  ou::ChartEntryBars m_ceBars;
+
+  ou::tf::BarFactory m_bfTrades;
+  ou::tf::BarFactory m_bfBuys;
+  ou::tf::BarFactory m_bfSells;
+
+  ou::ChartEntryIndicator m_ceEma1;
+  ou::ChartEntryIndicator m_ceEma2;
+  ou::ChartEntryIndicator m_ceEma3;
+
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema1;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
   ou::tf::TSSWStatsMidQuote* m_pIndStats1;
   ou::tf::TSSWStatsMidQuote* m_pIndStats2;
@@ -40,7 +68,16 @@ private:
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
 
+  void HandleCommon( const ou::tf::Quote& quote );
   void HandleRHTrading( const ou::tf::Quote& quote );
+
+  void HandleCommon( const ou::tf::Trade& trade );
+  void HandleRHTrading( const ou::tf::Trade& trade ) {};
+
+  void HandleBarCompletionTrades( const ou::tf::Bar& );
+  void HandleBarCompletionBuys( const ou::tf::Bar& );
+  void HandleBarCompletionSells( const ou::tf::Bar& );
+
 
 };
 

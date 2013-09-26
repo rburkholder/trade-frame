@@ -37,7 +37,7 @@
     <ClInclude Include="HedgedBollinger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Trader.h">
+    <ClInclude Include="Strategy1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -48,7 +48,7 @@
     <ClCompile Include="HedgedBollinger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Trader.cpp">
+    <ClCompile Include="Strategy1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

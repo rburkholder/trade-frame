@@ -113,6 +113,7 @@ bool AppHedgedBollinger::OnInit() {
   m_bExecConnected = false;
 
   m_pBundle = 0;
+  m_pStrategy = 0;
 
   m_timerGuiRefresh.SetOwner( this );
 
@@ -155,10 +156,16 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopWatch ) ) );
   vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
+  vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   return 1;
 
+}
+
+void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
+  m_bReadyToDrawChart = true;
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
@@ -166,7 +173,7 @@ void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
     try {
       wxSize size = m_winChart->GetClientSize();
       m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      //m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
+      m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
       m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::HandleDrawChart ) );
       m_chart.DrawChart( );
     }
@@ -275,6 +282,8 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
       pProvider_t pNull;
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+
+      m_pStrategy = new Strategy( m_pBundle );
 
       std::cout << "Initialized." << std::endl;
 
