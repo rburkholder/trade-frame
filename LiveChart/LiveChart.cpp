@@ -41,15 +41,15 @@ using namespace boost::gregorian;
 
 #include <TFOptions/CalcExpiry.h>
 
-#include "HedgedBollinger.h"
+#include "LiveChart.h"
 
-IMPLEMENT_APP(AppHedgedBollinger)
+IMPLEMENT_APP(AppLiveChart)
 
 size_t atm = 125;
 
-bool AppHedgedBollinger::OnInit() {
+bool AppLiveChart::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hedged Bollinger" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "LiveChart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -101,21 +101,21 @@ bool AppHedgedBollinger::OnInit() {
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerMain->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
   wxWindowID idChart = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
-  m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );
+  m_winChart->Bind( wxEVT_PAINT, &AppLiveChart::HandlePaint, this, idChart );
+  m_winChart->Bind( wxEVT_SIZE, &AppLiveChart::HandleSize, this, idChart );
 
   m_bData1Connected = false;
   m_bData2Connected = false;
   m_bExecConnected = false;
 
   m_pBundle = 0;
-  m_pStrategy = 0;
+//  m_pStrategy = 0;
 
   m_timerGuiRefresh.SetOwner( this );
 
-//  Bind( wxEVT_TIMER, &AppPhi::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  Bind( wxEVT_TIMER, &AppLiveChart::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
-  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHedgedBollinger::OnClose, this );  // start close of windows and controls
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppLiveChart::OnClose, this );  // start close of windows and controls
 
 //  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppPhi::HandlePanelNewOrder ) );
 //  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppPhi::HandlePanelSymbolText ) );
@@ -130,90 +130,114 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
   
-  std::string sDbName( "HedgedBollingerX.db" );
-  if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
-  }
+//  std::string sDbName( "HedgedBollingerX.db" );
+//  if ( boost::filesystem::exists( sDbName ) ) {
+//    boost::filesystem::remove( sDbName );
+//  }
 
 
-  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppHedgedBollinger::HandlePopulateDatabase ) );
+//  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppLiveChart::HandleRegisterTables ) );
+//  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppLiveChart::HandleRegisterRows ) );
+//  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppLiveChart::HandlePopulateDatabase ) );
 
-  m_db.Open( sDbName );
+//  m_db.Open( sDbName );
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote ) ) );
-  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
-  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionInitializeSymbolSet ) ) );
-  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartWatch ) ) );
-  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopWatch ) ) );
-  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
-  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
-  vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
+//  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( this, &AppLiveChart::HandleMenuAction0ObtainNewIQFeedSymbolListRemote ) ) );
+//  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppLiveChart::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
+//  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppLiveChart::HandleMenuAction2LoadIQFeedSymbolList ) ) );
+//  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppLiveChart::HandleMenuActionInitializeSymbolSet ) ) );
+  vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartWatch ) ) );
+  vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStopWatch ) ) );
+//  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppLiveChart::HandleMenuActionSaveValues ) ) );
+//  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppLiveChart::HandleMenuActionEmitYieldCurve ) ) );
+  vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+  this->m_pData1Provider->Connect();
 
   return 1;
 
 }
 
-void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
+void AppLiveChart::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
+  m_pChart = new ChartTest( m_pData1Provider );
+
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
-void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
+void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
   if ( m_bReadyToDrawChart ) {
     try {
       wxSize size = m_winChart->GetClientSize();
-      m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
-      m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::HandleDrawChart ) );
-      m_chart.DrawChart( );
+      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+      m_chartMaster.SetChartDataView( &m_pChart->GetChartDataView() );
+      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &AppLiveChart::HandleDrawChart ) );
+      m_chartMaster.DrawChart( );
     }
     catch (...) {
     }
   }
 }
 
-void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
+void AppLiveChart::HandleSize( wxSizeEvent& event ) { 
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
-void AppHedgedBollinger::HandleDrawChart( const MemBlock& m ) {
+void AppLiveChart::HandleDrawChart( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );
   wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
   wxPaintDC cdc( m_winChart );
   cdc.DrawBitmap(bmp, 0, 0);
 }
 
-void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
+void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 
+  // Process IV Calc once a minute
+/*
+  ptime dt;
+  // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
+  ou::TimeSource::Instance().Internal( &dt );
+  if ( dt > m_dtTopOfMinute ) {
+    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
+    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
+    if ( !m_bIVCalcActive ) {
+      if ( 0 != m_pIVCalc ) delete m_pIVCalc;
+      m_bIVCalcActive = true;
+      m_pIVCalc = new boost::thread( boost::bind( &AppLiveChart::CalcIV, this, dt ) );
+    }
+  }
+  */
+}
+
+void AppLiveChart::HandleMenuActionStartWatch( void ) {
+/*
   m_pBundle->StartWatch();
 
   m_bIVCalcActive = false;
   ptime dt;
   ou::TimeSource::Instance().Internal( &dt );
   m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds() );
+  */
   m_timerGuiRefresh.Start( 250 );
-
 }
 
-void AppHedgedBollinger::HandleMenuActionStopWatch( void ) {
+void AppLiveChart::HandleMenuActionStopWatch( void ) {
 
   m_timerGuiRefresh.Stop();
 
-  m_pBundle->StopWatch();
+//  m_pBundle->StopWatch();
 
 }
 
-void AppHedgedBollinger::HandleMenuActionSaveValues( void ) {
-  m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleSaveValues ) );
+void AppLiveChart::HandleMenuActionSaveValues( void ) {
+  m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleSaveValues ) );
 }
 
-void AppHedgedBollinger::HandleSaveValues( void ) {
+void AppLiveChart::HandleSaveValues( void ) {
   std::cout << "Saving collected values ... " << std::endl;
   try {
     std::string sPrefixSession( "/app/HedgedBollinger/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
@@ -227,7 +251,7 @@ void AppHedgedBollinger::HandleSaveValues( void ) {
   std::cout << "  ... Done " << std::endl;
 }
 
-void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
+void AppLiveChart::HandleMenuActionInitializeSymbolSet( void ) {
   if ( m_listIQFeedSymbols.begin() == m_listIQFeedSymbols.end() ) {
     std::cout << "Need to load symbols first" << std::endl;
   }
@@ -279,7 +303,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       pProvider_t pNull;
       m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
-      m_pStrategy = new Strategy( m_pBundle );
+//      m_pStrategy = new Strategy( m_pBundle );
 
       std::cout << "Initialized." << std::endl;
 
@@ -288,12 +312,12 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
   
 }
 
-void AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
+void AppLiveChart::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote ) );
+  m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleObtainNewIQFeedSymbolListRemote ) );
 }
 
-void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote( void ) {
+void AppLiveChart::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
   std::cout << "Saving Binary File ... " << std::endl;
@@ -301,12 +325,12 @@ void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << " ... done." << std::endl;
 }
 
-void AppHedgedBollinger::HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void ) {
+void AppLiveChart::HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void ) {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleObtainNewIQFeedSymbolListLocal ) );
+  m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleObtainNewIQFeedSymbolListLocal ) );
 }
 
-void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListLocal( void ) {
+void AppLiveChart::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << "Loading From Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
   std::cout << "Saving Binary File ... " << std::endl;
@@ -314,50 +338,20 @@ void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << " ... done." << std::endl;
 }
 
-void AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList( void ) {
+void AppLiveChart::HandleMenuAction2LoadIQFeedSymbolList( void ) {
   // need to lock out from running HandleObtainNewIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleLoadIQFeedSymbolList ) );
+  m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleLoadIQFeedSymbolList ) );
 }
 
-void AppHedgedBollinger::HandleLoadIQFeedSymbolList( void ) {
+void AppLiveChart::HandleLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
   m_listIQFeedSymbols.LoadFromFile( "phisymbols.ser" );
   std::cout << " ... completed." << std::endl;
 }
 
 
-void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
-  // update portfolio results and tracker timeseries for portfolio value
-//  double dblUnRealized;
-//  double dblRealized;
-//  double dblCommissionsPaid;
-/*  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid );
-  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
-  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
-  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
-  m_pPanelPortfolioStats->SetStats( 
-    boost::lexical_cast<std::string>( m_dblMinPL ),
-    boost::lexical_cast<std::string>( dblCurrent ),
-    boost::lexical_cast<std::string>( m_dblMaxPL )
-    );
-    */
-  // Process IV Calc once a minute
-  ptime dt;
-  // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-  ou::TimeSource::Instance().Internal( &dt );
-  if ( dt > m_dtTopOfMinute ) {
-    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
-    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
-    if ( !m_bIVCalcActive ) {
-      if ( 0 != m_pIVCalc ) delete m_pIVCalc;
-      m_bIVCalcActive = true;
-      m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, dt ) );
-    }
-  }
-}
-
 // runs in thread
-void AppHedgedBollinger::CalcIV( ptime dt ) {
+void AppLiveChart::CalcIV( ptime dt ) {
   static time_duration tdMarketOpen( 9, 30, 0, 30 );  // eastern time, plus time to settle
   static time_duration tdMarketClose( 16, 0, 0 );  // eastern time
   ptime dtMarketOpen( 
@@ -374,16 +368,17 @@ void AppHedgedBollinger::CalcIV( ptime dt ) {
   m_bIVCalcActive = false;
 }
 
-void AppHedgedBollinger::HandleMenuActionEmitYieldCurve( void ) {
+void AppLiveChart::HandleMenuActionEmitYieldCurve( void ) {
   //ou::tf::libor::EmitYieldCurve();
   //m_libor.EmitYieldCurve();
   std::cout << m_libor;
 }
 
-int AppHedgedBollinger::OnExit() {
+int AppLiveChart::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
+  this->m_pData1Provider->Disconnect();
   m_listIQFeedSymbols.Clear();
   if ( m_db.IsOpen() ) m_db.Close();
 
@@ -394,7 +389,7 @@ int AppHedgedBollinger::OnExit() {
 //}
 
 
-void AppHedgedBollinger::OnClose( wxCloseEvent& event ) {
+void AppLiveChart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
@@ -404,17 +399,17 @@ void AppHedgedBollinger::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void AppHedgedBollinger::OnData1Connected( int ) {
+void AppLiveChart::OnData1Connected( int ) {
   m_bData1Connected = true;
   //ou::tf::libor::SetWatchOn( m_pData1Provider );
-  m_libor.SetWatchOn( m_pData1Provider );
+//  m_libor.SetWatchOn( m_pData1Provider );
 //  AutoStartCollection();
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
   }
 }
 
-void AppHedgedBollinger::OnData2Connected( int ) {
+void AppLiveChart::OnData2Connected( int ) {
   m_bData2Connected = true;
 //  AutoStartCollection();
   if ( m_bData2Connected & m_bExecConnected ) {
@@ -422,34 +417,34 @@ void AppHedgedBollinger::OnData2Connected( int ) {
   }
 }
 
-void AppHedgedBollinger::OnExecConnected( int ) {
+void AppLiveChart::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
   }
 }
 
-void AppHedgedBollinger::OnData1Disconnected( int ) {
-  m_libor.SetWatchOff();
+void AppLiveChart::OnData1Disconnected( int ) {
+//  m_libor.SetWatchOff();
   m_bData1Connected = false;
 }
 
-void AppHedgedBollinger::OnData2Disconnected( int ) {
+void AppLiveChart::OnData2Disconnected( int ) {
   m_bData2Connected = false;
 }
 
-void AppHedgedBollinger::OnExecDisconnected( int ) {
+void AppLiveChart::OnExecDisconnected( int ) {
   m_bExecConnected = false;
 }
 
-void AppHedgedBollinger::HandleRegisterTables(  ou::db::Session& session ) {
+void AppLiveChart::HandleRegisterTables(  ou::db::Session& session ) {
 }
 
-void AppHedgedBollinger::HandleRegisterRows(  ou::db::Session& session ) {
+void AppLiveChart::HandleRegisterRows(  ou::db::Session& session ) {
 }
 
-void AppHedgedBollinger::HandlePopulateDatabase( void ) {
-
+void AppLiveChart::HandlePopulateDatabase( void ) {
+/*
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
@@ -472,7 +467,6 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
-
-
+*/
 }
 
