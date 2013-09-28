@@ -16,8 +16,10 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
+//#include <OUCommon/FastDelegate.h>
+//using namespace fastdelegate;
+
+#include <OUCommon/Delegate.h>
 
 #include <TFTimeSeries/TimeSeries.h>
 
@@ -76,15 +78,18 @@ public:
   Quotes* Quotes( void ) { return &m_quotes; };
   Trades* Trades( void ) { return &m_trades; };
 
-  typedef FastDelegate1<const Quote&> OnQuote_t;
-  void SetOnQuote( OnQuote_t function ) {
-    m_OnQuote = function;
-  }
+  ou::Delegate<const Quote&> OnQuote;
+  ou::Delegate<const Trade&> OnTrade;
 
-  typedef FastDelegate1<const Trade&> OnTrade_t;
-  void SetOnTrade( OnTrade_t function ) {
-    m_OnTrade = function;
-  }
+//  typedef FastDelegate1<const Quote&> OnQuote_t;
+//  void SetOnQuote( OnQuote_t function ) {
+//    m_OnQuote = function;
+//  }
+
+//  typedef FastDelegate1<const Trade&> OnTrade_t;
+//  void SetOnTrade( OnTrade_t function ) {
+//    m_OnTrade = function;
+//  }
 
   virtual void StartWatch( void );
   virtual bool StopWatch( void );
@@ -119,8 +124,8 @@ private:
 
   void Initialize( void );
 
-  OnQuote_t m_OnQuote;
-  OnTrade_t m_OnTrade;
+//  OnQuote_t m_OnQuote;
+//  OnTrade_t m_OnTrade;
 
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );

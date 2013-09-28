@@ -207,6 +207,7 @@
     <ClInclude Include="IQFeedSymbolFile.h" />
     <ClInclude Include="LoadMktSymbols.h" />
     <ClInclude Include="Option.h" />
+    <ClInclude Include="ParseFOptionDescription.h" />
     <ClInclude Include="ParseOptionSymbol.h" />
     <ClInclude Include="UnzipMktSymbols.h" />
     <ClInclude Include="MarketSymbol.h" />

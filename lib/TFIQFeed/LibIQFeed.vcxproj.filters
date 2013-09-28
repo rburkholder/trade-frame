@@ -147,6 +147,9 @@
     <ClInclude Include="IQFeedOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParseFOptionDescription.h">
+      <Filter>Header Files\MarketSymbols</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

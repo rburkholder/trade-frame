@@ -16,6 +16,8 @@
 
 // Started 2013/07/12
 
+// This parser is used for OPTION and FOPTION symbol parsing
+
 #define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/spirit/include/qi.hpp>
@@ -120,6 +122,31 @@ struct OptionSymbolParser2: qi::grammar<Iterator, pos2_t()> {
   qi::rule<Iterator, pos2_t()> start;
 
 };
+
+template<typename Iterator>
+struct FOptionSymbolParser1: qi::grammar<Iterator, pos1_t()> {
+
+  FOptionSymbolParser1( void ): FOptionSymbolParser1::base_type(start) {
+
+    // define option processing rules
+    ruleText %= +qi::char_( "@A-Z" );
+    ruleDigits %= +qi::char_( "0-9" );
+    ruleCode %= qi::char_( "A-X" );
+    ruleStrike %= qi::float_;
+
+    start %= ruleText >> ruleDigits >> ruleCode >> ruleStrike;
+  }
+
+  qi::rule<Iterator, std::string()> ruleText;  // symbol
+  qi::rule<Iterator, std::string()> ruleDigits;  // yydd
+  qi::rule<Iterator, std::string()> ruleCode;  // month and call/put
+  qi::rule<Iterator, double()> ruleStrike; // strike
+
+  qi::rule<Iterator, pos1_t()> start;
+
+};
+
+
 
 } // namespace iqfeed
 } // namespace tf

@@ -264,20 +264,22 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       std::string sName( "GLD" );
 
       m_pBundle = new ou::tf::option::MultiExpiryBundle( sName );
-      m_pBundle->CreateExpiryBundle( dateFrontMonth );
-      m_pBundle->CreateExpiryBundle( dateSecondMonth );
 
       pInstrument_t pInstrumentUnderlying;
       pInstrumentUnderlying.reset( 
         new ou::tf::Instrument( sName, ou::tf::InstrumentType::Stock, "SMART" ) );  // need to register this with InstrumentManager before trading
+
       m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
+
+      m_pBundle->CreateExpiryBundle( dateFrontMonth );
+      m_pBundle->CreateExpiryBundle( dateSecondMonth );
+
+      pProvider_t pNull;
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
       m_pBundle->Portfolio()
         = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
           sName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sName + " Hedge" );
-
-      pProvider_t pNull;
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
       m_pStrategy = new Strategy( m_pBundle );
 

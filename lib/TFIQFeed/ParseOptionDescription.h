@@ -49,10 +49,10 @@ struct structParsedOptionDescription {
 } // namespace tf
 } // namespace ou
 
-typedef ou::tf::iqfeed::structParsedOptionDescription pod_t;
+typedef ou::tf::iqfeed::structParsedOptionDescription adapted_option_t;
 
 BOOST_FUSION_ADAPT_STRUCT(
-  pod_t,
+  adapted_option_t,
   (std::string, sUnderlying)
   (boost::uint8_t&, nMonth)
   (boost::uint16_t&, nYear)
@@ -69,7 +69,7 @@ namespace phoenix = boost::phoenix;
 namespace ascii = boost::spirit::ascii;
 
 template<typename Iterator>
-struct OptionDescriptionParser: qi::grammar<Iterator, pod_t()> {
+struct OptionDescriptionParser: qi::grammar<Iterator, adapted_option_t()> {
 
   OptionDescriptionParser( void ): OptionDescriptionParser::base_type(start) {
 
@@ -118,7 +118,7 @@ struct OptionDescriptionParser: qi::grammar<Iterator, pod_t()> {
   qi::rule<Iterator, boost::uint16_t()> ruleYear;
   qi::rule<Iterator, double()> ruleStrike;
   qi::rule<Iterator, ou::tf::OptionSide::enumOptionSide()> ruleOptionSide;
-  qi::rule<Iterator, pod_t()> start;
+  qi::rule<Iterator, adapted_option_t()> start;
 
 };
 

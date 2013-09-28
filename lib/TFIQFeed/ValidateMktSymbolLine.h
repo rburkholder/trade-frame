@@ -26,6 +26,7 @@ using namespace fastdelegate;
 
 #include "ParseMktSymbolLine.h"
 #include "ParseOptionDescription.h"
+#include "ParseFOptionDescription.h"
 #include "ParseOptionSymbol.h"
 
 namespace ou { // One Unified
@@ -70,6 +71,7 @@ protected:
 private:
 
   typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc_t;
+  typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
 
   OnProcessLine_t m_OnProcessLine;
   OnProcessHasOption_t m_OnProcessHasOption;
@@ -95,12 +97,18 @@ private:
 
   ou::tf::iqfeed::MktSymbolLineParser<const char*> parserFullLine;
   ou::tf::iqfeed::OptionDescriptionParser<std::string::const_iterator> parserOptionDescription;
+  ou::tf::iqfeed::FOptionDescriptionParser<std::string::const_iterator> parserFOptionDescription;
   ou::tf::iqfeed::OptionSymbolParser1<std::string::const_iterator> parserOptionSymbol1;
+  ou::tf::iqfeed::FOptionSymbolParser1<std::string::const_iterator> parserFOptionSymbol1;
   ou::tf::iqfeed::OptionSymbolParser2<std::string::const_iterator> parserOptionSymbol2;
   std::vector<size_t> vSymbolTypeStats;  // number of symbols of this SymbolType
 
   std::vector<std::string> m_vSuffixesToTest;
   std::set<std::string> m_setNoUnderlying;
+
+  void ParseOptionContractInformation( trd_t& trd );
+  void ParseFOptionContractInformation( trd_t& trd );
+
 };
 
 extern boost::uint8_t rFutureMonth[];
@@ -161,19 +169,20 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
         }
       }
 
-      if ( ou::tf::iqfeed::MarketSymbol::Equity == trd.sc ) {
+      bool bDecode( true );
+      switch ( trd.sc ) {
+      case ou::tf::iqfeed::MarketSymbol::Equity:
         if ( 0 != trd.nSIC ) cntSIC++;
         if ( 0 != trd.nNAICS ) cntNAICS++;
-      }
-
-      // parse out contract expiry information
-      // · For combined session symbols, the first character is "+".
-      //· For Night/Electronic sessions, the first character is "@".
-      // · Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
-      // · NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
-      // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
-      if ( ou::tf::iqfeed::MarketSymbol::Future == trd.sc ) {
-        bool bDecode = true;
+        break;
+      case ou::tf::iqfeed::MarketSymbol::Future:
+        // parse out contract expiry information
+        // · For combined session symbols, the first character is "+".
+        //· For Night/Electronic sessions, the first character is "@".
+        // · Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
+        // · NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
+        // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
+        bDecode = true;
   //          if ( '+' == sSymbol[0] ) {
   //          }
   //          if ( '@' == sSymbol[0] ) {
@@ -192,96 +201,15 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
             trd.nYear = 2000 + atoi( sYear.c_str() );
           }
         }
-      }
+        break;
+      case ou::tf::iqfeed::MarketSymbol::FOption:
+        ParseFOptionContractInformation( trd );
+        break;
+      case ou::tf::iqfeed::MarketSymbol::IEOption:
+        ParseOptionContractInformation( trd );
+        break;
+      } // switch( trd.sc )
 
-      // parse out option contract information
-      if ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc ) {
-        ou::tf::iqfeed::structParsedOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
-        std::string::const_iterator sb( trd.sDescription.begin() );
-        std::string::const_iterator se( trd.sDescription.end() );
-        bool b = parse( sb, se, parserOptionDescription, structOption );
-        if ( b && ( sb == se ) ) {
-          if ( 0 == trd.sUnderlying.length() ) {
-            std::cout << "Option Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
-          }
-          else {
-            std::string::size_type ixSlash = structOption.sUnderlying.find( "/" );
-            if ( std::string::npos != ixSlash ) {
-              structOption.sUnderlying.replace( ixSlash, 1, "." );
-            }
-            mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
-          }
-          nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
-          structParsedOptionSymbol1 pos1;
-          b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserOptionSymbol1, pos1 );
-          if ( b ) {
-            if ( 4 > pos1.sDigits.length() ) {  // looking for yydd
-              std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
-            }
-            else {
-              if ( 5 < pos1.sDigits.length() ) {
-                // should not have this condition
-                std::cout << "Option Symbol Decode:  garbage prefix yydd, ignoring" << trd.sSymbol << std::endl;
-                pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
-              }
-              if ( 5 == pos1.sDigits.length() ) {
-                // has one extra preceding digit, could be '1', '7'
-                char ch = pos1.sDigits[ 0 ];
-                std::string sSpareChar = pos1.sDigits.substr( 0, 1 );
-                pos1.sDigits.erase( 0, 1 );
-                //pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
-                // spyj could be jumbo options: 1000 vs 100 multiplier
-                switch ( ch ) {
-                case '1':  // adjusted option (usually due to a split/merger of the company)
-                case '2':  // numbers themselves are irrelevant 
-                case '3':  // option is adjusted "in some way"
-                case '4':  // 2013/09/03 dtniq forum response
-                case '7':  // mini option, 10x multiplier rather than normal 100x
-                  pos1.sText += ch;
-                  mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = pos1.sText;
-                  // do further massage on 7 later so can be tradeable
-                  break;
-                default:
-                  std::cout << "Option Symbol Decode:  " << pos1.sText << " has unknown suffix " << ch << std::endl;
-                }
-              }
-              assert( 4 == pos1.sDigits.length() );
-              std::string::const_iterator iter1 = pos1.sDigits.begin();
-              std::string::const_iterator iter2 = pos1.sDigits.end();
-              structParsedOptionSymbol2 pos2;
-              b = parse( iter1, iter2, parserOptionSymbol2, pos2 );
-              if ( b ) {
-                assert( ( 2000 + pos2.nYear ) == structOption.nYear );
-                trd.nDay = pos2.nDay;
-              }
-              else {
-                std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
-              }
-            }
-            
-            std::string sTmp = structOption.sUnderlying;
-            std::string::size_type ixDot = sTmp.find( "." );
-            if ( std::string::npos != ixDot ) {  // remove dot as option symbol does not have '.' in it
-              sTmp.erase( ixDot, 1 );
-            }
-            if ( pos1.sText != sTmp ) {  // check against modified underlying
-              std::cout 
-                << "Option Symbol Decode: changing underlying on " 
-                << trd.sSymbol << " from "
-                << structOption.sUnderlying << " to " << pos1.sText << std::endl;
-              trd.sUnderlying = pos1.sText;
-              mapUnderlying[ trd.sSymbol ] = pos1.sText;
-            }
-            assert( pos1.dblStrike == structOption.dblStrike );
-          }
-          else {
-            std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;
-          }
-        }
-        else {
-          std::cout  << "Option Decode:  Incomplete, " << trd.sSymbol << ", " << trd.sDescription << std::endl;
-        }
-      }
 
       if ( 0 == trd.sDescription.length() ) {
         std::cout << trd.sSymbol << ": missing description" << std::endl;
@@ -294,10 +222,12 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
     }
   }
   catch (...) {
-    std::cout << "parserFullLine broken" << std::endl;
+//    std::cout << "parserFullLine broken" << std::endl;  // commented out with too much crap from futures parsing
   }
 
 }
+
+
 
 } // namespace iqfeed
 } // namespace tf

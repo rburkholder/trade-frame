@@ -33,8 +33,8 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb )
   //m_pIndStats2 = new ou::tf::TSSWStatsMidQuote( *m_pBundle->GetWatchUnderlying()->Quotes(), time_duration( 0, 0,  233 ), 0 );
   //m_pIndStats3 = new ou::tf::TSSWStatsMidQuote( *m_pBundle->GetWatchUnderlying()->Quotes(), time_duration( 0, 0, 1597 ), 0 );
 
-  m_pBundle->GetWatchUnderlying()->SetOnQuote( MakeDelegate( this, &Strategy::HandleQuoteUnderlying ) );
-  m_pBundle->GetWatchUnderlying()->SetOnTrade( MakeDelegate( this, &Strategy::HandleTradeUnderlying ) );
+  m_pBundle->GetWatchUnderlying()->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuoteUnderlying ) );
+  m_pBundle->GetWatchUnderlying()->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTradeUnderlying ) );
 
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionTrades ) );
   //m_bfBuys.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionBuys ) );
@@ -48,8 +48,8 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb )
 }
 
 Strategy::~Strategy(void) {
-  m_pBundle->GetWatchUnderlying()->SetOnQuote( 0 );
-  m_pBundle->GetWatchUnderlying()->SetOnTrade( 0 );
+  m_pBundle->GetWatchUnderlying()->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuoteUnderlying ) );
+  m_pBundle->GetWatchUnderlying()->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTradeUnderlying ) );
 }
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {

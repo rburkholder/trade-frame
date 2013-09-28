@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <OUCommon/Debug.h>
 
 #include "ValidateMktSymbolLine.h"
@@ -133,6 +135,150 @@ void ValidateMktSymbolLine::Summary( void ) {
   "#kwmExchanges nodes " << kwmExchanges.GetNodeCount() << std::endl 
   )
 #endif
+}
+
+void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
+  ou::tf::iqfeed::structParsedOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
+  std::string::const_iterator sb( trd.sDescription.begin() );
+  std::string::const_iterator se( trd.sDescription.end() );
+  bool b = parse( sb, se, parserOptionDescription, structOption );
+  if ( b && ( sb == se ) ) {
+    if ( 0 == trd.sUnderlying.length() ) {
+      std::cout << "Option Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
+    }
+    else {
+      std::string::size_type ixSlash = structOption.sUnderlying.find( "/" );
+      if ( std::string::npos != ixSlash ) {
+        structOption.sUnderlying.replace( ixSlash, 1, "." );
+      }
+      mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
+    }
+    nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
+    structParsedOptionSymbol1 pos1;
+    b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserOptionSymbol1, pos1 );
+    if ( b ) {
+      if ( 4 > pos1.sDigits.length() ) {  // looking for yydd
+        std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
+      }
+      else {
+        if ( 5 < pos1.sDigits.length() ) {
+          // should not have this condition
+          std::cout << "Option Symbol Decode:  garbage prefix yydd, ignoring" << trd.sSymbol << std::endl;
+          pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
+        }
+        if ( 5 == pos1.sDigits.length() ) {
+          // has one extra preceding digit, could be '1', '7'
+          char ch = pos1.sDigits[ 0 ];
+          std::string sSpareChar = pos1.sDigits.substr( 0, 1 );
+          pos1.sDigits.erase( 0, 1 );
+          //pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
+          // spyj could be jumbo options: 1000 vs 100 multiplier
+          switch ( ch ) {
+          case '1':  // adjusted option (usually due to a split/merger of the company)
+          case '2':  // numbers themselves are irrelevant 
+          case '3':  // option is adjusted "in some way"
+          case '4':  // 2013/09/03 dtniq forum response
+          case '7':  // mini option, 10x multiplier rather than normal 100x
+            pos1.sText += ch;
+            mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = pos1.sText;
+            // do further massage on 7 later so can be tradeable
+            break;
+          default:
+            std::cout << "Option Symbol Decode:  " << pos1.sText << " has unknown suffix " << ch << std::endl;
+          }
+        }
+        assert( 4 == pos1.sDigits.length() );
+        std::string::const_iterator iter1 = pos1.sDigits.begin();
+        std::string::const_iterator iter2 = pos1.sDigits.end();
+        structParsedOptionSymbol2 pos2;
+        b = parse( iter1, iter2, parserOptionSymbol2, pos2 );
+        if ( b ) {
+          assert( ( 2000 + pos2.nYear ) == structOption.nYear );
+          trd.nDay = pos2.nDay;
+        }
+        else {
+          std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
+        }
+      }
+            
+      std::string sTmp = structOption.sUnderlying;
+      std::string::size_type ixDot = sTmp.find( "." );
+      if ( std::string::npos != ixDot ) {  // remove dot as option symbol does not have '.' in it
+        sTmp.erase( ixDot, 1 );
+      }
+      if ( pos1.sText != sTmp ) {  // check against modified underlying
+        std::cout 
+          << "Option Symbol Decode: changing underlying on " 
+          << trd.sSymbol << " from "
+          << structOption.sUnderlying << " to " << pos1.sText << std::endl;
+        trd.sUnderlying = pos1.sText;
+        mapUnderlying[ trd.sSymbol ] = pos1.sText;
+      }
+      assert( pos1.dblStrike == structOption.dblStrike );
+    }
+    else {
+      std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;
+    }
+  }
+  else {
+    std::cout  << "Option Decode:  Incomplete, " << trd.sSymbol << ", " << trd.sDescription << std::endl;
+  }
+}
+
+void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
+  ou::tf::iqfeed::structParsedFOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
+  std::string::const_iterator sb( trd.sDescription.begin() );
+  std::string::const_iterator se( trd.sDescription.end() );
+  bool b = parse( sb, se, parserFOptionDescription, structOption );
+  if ( b && ( sb == se ) ) {
+    if ( 0 == trd.sUnderlying.length() ) {
+      std::cout << "FOption Decode:  Zero length underlying for " << trd.sSymbol << std::endl;
+    }
+    else {
+      std::string::size_type ixSlash = structOption.sUnderlying.find( "/" );
+      if ( std::string::npos != ixSlash ) {
+        structOption.sUnderlying.replace( ixSlash, 1, "." );
+      }
+      mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
+    }
+    nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
+    structParsedOptionSymbol1 pos1;
+    b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserFOptionSymbol1, pos1 );
+    if ( b ) {
+      if ( 2 != pos1.sDigits.length() ) {  // looking for yy
+        std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
+      }
+      else {
+
+        trd.nDay = 0;
+        trd.nYear = 2000 + boost::lexical_cast<uint16_t>( pos1.sDigits );
+            
+        char c = pos1.sText.back();
+        assert( ( 'F' <= c ) && ( c <= 'Z' ) );
+        trd.nMonth = rFutureMonth[ c - 'A' ];
+
+        pos1.sText = pos1.sText.substr( 0, pos1.sText.length() - 1 );
+
+        std::string sTmp = structOption.sUnderlying;
+
+        if ( pos1.sText != sTmp ) {  // check against modified underlying
+//          std::cout 
+//            << "Option Symbol Decode: changing underlying on " 
+//            << trd.sSymbol << " from "
+//            << structOption.sUnderlying << " to " << pos1.sText << std::endl;
+          trd.sUnderlying = pos1.sText;
+          mapUnderlying[ trd.sSymbol ] = pos1.sText;
+        }
+        assert( pos1.dblStrike == structOption.dblStrike );
+      }
+    }
+    else {
+      std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;
+    }
+  }
+  else {
+    std::cout  << "Option Decode:  Incomplete, " << trd.sSymbol << ", " << trd.sDescription << std::endl;
+  }
 }
 
 } // namespace iqfeed

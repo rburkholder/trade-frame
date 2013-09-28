@@ -461,7 +461,7 @@ void ExpiryBundleWithUnderlying::SaveSeries( const std::string& sPrefix60sec, co
 MultiExpiryBundle::~MultiExpiryBundle( void ) {
   if ( 0 != m_pWatchUnderlying.get() ) {
     StopWatch();
-    m_pWatchUnderlying->SetOnQuote( 0 );
+    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &MultiExpiryBundle::HandleUnderlyingQuote ) );
     m_pWatchUnderlying.reset();
   }
 }
@@ -496,7 +496,7 @@ void MultiExpiryBundle::SetWatchUnderlying( pInstrument_t& pInstrument, pProvide
     throw std::runtime_error( "MultiExpiryBundle::SetWatchUnderlying underlying already exists" );
   }
   m_pWatchUnderlying.reset( new ou::tf::Watch( pInstrument, pProvider ) );
-  m_pWatchUnderlying->SetOnQuote( MakeDelegate( this, &MultiExpiryBundle::HandleUnderlyingQuote ) );
+  m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &MultiExpiryBundle::HandleUnderlyingQuote ) );
 }
 
 void MultiExpiryBundle::HandleUnderlyingQuote( const ou::tf::Quote& quote ) {

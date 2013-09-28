@@ -115,13 +115,15 @@ void Watch::EmitValues( void ) {
 void Watch::HandleQuote( const Quote& quote ) {
   m_quote = quote;
   m_quotes.Append( quote );
-  if ( 0 != m_OnQuote ) m_OnQuote( quote );
+  //if ( 0 != m_OnQuote ) m_OnQuote( quote );
+  OnQuote( quote );
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
   m_trade = trade;
   m_trades.Append( trade );
-  if ( 0 != m_OnTrade ) m_OnTrade( trade );
+  //if ( 0 != m_OnTrade ) m_OnTrade( trade );
+  OnTrade( trade );
 }
 
 void Watch::HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol ) {
