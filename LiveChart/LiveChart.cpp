@@ -32,6 +32,9 @@ using namespace boost::gregorian;
 
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
+#include <wx/splitter.h>
+#include <wx/treectrl.h>
+#include <wx/panel.h>
 
 #include <OUCommon/TimeSource.h>
 
@@ -58,20 +61,55 @@ bool AppLiveChart::OnInit() {
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
+  // Sizer for FrameMain
   wxBoxSizer* m_sizerMain;
   m_sizerMain = new wxBoxSizer(wxVERTICAL);
   m_pFrameMain->SetSizer(m_sizerMain);
 
+  // splitter
+  wxSplitterWindow* splitter;
+  splitter = new wxSplitterWindow( m_pFrameMain );
+  splitter->SetMinimumPaneSize(10);
+  splitter->SetSashGravity(0.2);
+
+  // tree
+  wxTreeCtrl* tree;
+  tree = new wxTreeCtrl( splitter );
+  wxTreeItemId idRoot = tree->AddRoot( "root" );
+  tree->AppendItem( idRoot, "second" );
+  tree->AppendItem( idRoot, "third" );
+
+  // panel for right side of splitter
+  wxPanel* panelSplitterRightPanel;
+  panelSplitterRightPanel = new wxPanel( splitter );
+
+  // sizer for right side of splitter
+  wxBoxSizer* sizerRight;
+  sizerRight = new wxBoxSizer( wxVERTICAL );
+  panelSplitterRightPanel->SetSizer( sizerRight );
+
+  // Sizer for Controls
   wxBoxSizer* m_sizerControls;
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+  //m_sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
+  //panelSplitterRight->SetSizer( m_sizerControls );
+  sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   // populate variable in FrameWork01
-  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelProviderControl->Show( true );
+  m_pPanelProviderControl = new ou::tf::PanelProviderControl( panelSplitterRightPanel, wxID_ANY );
+  m_sizerControls->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT|wxRIGHT, 5);
+//  m_pPanelProviderControl->Show( true );
 
   LinkToPanelProviderControl();
+
+  m_pPanelLogging = new ou::tf::PanelLogging( panelSplitterRightPanel, wxID_ANY );
+  m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+//  m_pPanelLogging->Show( true );
+
+  splitter->SplitVertically( tree, panelSplitterRightPanel, 0 );
+  m_sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
+
+
 
 //  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
 //  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
@@ -88,21 +126,17 @@ bool AppLiveChart::OnInit() {
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
 
-  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
-
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-  m_pPanelLogging->Show( true );
-
   m_pFrameMain->Show( true );
 
   m_bReadyToDrawChart = false;
-  m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  m_sizerMain->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
+  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
+  sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &AppLiveChart::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &AppLiveChart::HandleSize, this, idChart );
+
+  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_bData1Connected = false;
   m_bData2Connected = false;

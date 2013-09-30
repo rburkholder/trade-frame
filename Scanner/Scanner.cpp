@@ -25,7 +25,7 @@ IMPLEMENT_APP(AppScanner)
 
 bool AppScanner::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Phi v2" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Scanner" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );

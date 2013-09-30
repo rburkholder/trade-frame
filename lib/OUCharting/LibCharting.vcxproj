@@ -132,6 +132,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChartDataBase.h" />
     <ClInclude Include="ChartDataView.h" />
     <ClInclude Include="ChartDirector64\bchartdir.h" />
     <ClInclude Include="ChartDirector64\chartdir.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChartDataBase.cpp" />
     <ClCompile Include="ChartDataView.cpp" />
     <ClCompile Include="ChartEntryBars.cpp" />
     <ClCompile Include="ChartEntryBase.cpp" />

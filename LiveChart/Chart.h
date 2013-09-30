@@ -16,40 +16,19 @@
 
 // Started 2013/09/26
 
-#include <OUCharting/ChartDataView.h>
-#include <OUCharting/ChartEntryBars.h>
-#include <OUCharting/ChartEntryVolume.h>
-#include <OUCharting/ChartEntryIndicator.h>
-#include <OUCharting/ChartEntryShape.h>
-
-#include <TFIndicators/TSEMA.h>
-
-#include <TFTimeSeries/BarFactory.h>
+#include <OUCharting/ChartDataBase.h>
 
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
-class ChartTest {
+class ChartTest: public ou::ChartDataBase {
 public:
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   ChartTest( pProvider_t );
   ~ChartTest(void);
-  ou::ChartDataView& GetChartDataView( void ) {return m_dvChart; };
 protected:
 private:
   ou::tf::Watch* m_pWatch;
 
-  ou::tf::Quotes m_quotes;
-  ou::tf::Trades m_trades;
-
-  ou::tf::BarFactory m_bfTrades;
-
-  ou::ChartDataView m_dvChart;
-  ou::ChartEntryBars m_ceBars;
-
-  void HandleQuote( const ou::tf::Quote& quote );
-  void HandleTrade( const ou::tf::Trade& trade );
-
-  void HandleBarCompletionTrades( const ou::tf::Bar& bar );
 };
 
