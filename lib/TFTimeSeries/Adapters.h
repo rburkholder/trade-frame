@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2012, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -12,34 +12,34 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// Started 2013/10/01
+
 #pragma once
 
-#include <vector>
-
-#include "TSEMA.h"
+#include "TimeSeries.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace hf { // high frequency
 
-class TSMA: public Prices {
+template<typename TS> // TS -> TimeSeries
+class PriceAdapter: public Prices {
 public:
-  TSMA( Prices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( Prices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61, n typically 2, 3, 4
-  ~TSMA(void);
-  double GetMA( void ) { return m_dblRecentMA; };
+  PriceAdapter( TS& ts ) : m_ts( ts ) { 
+    m_ts.OnAppend.Add( MakeDelegate( this, &PriceAdapter::HandleUpdate ) );
+  }
+  ~PriceAdapter( void ) {
+    m_ts.OnAppend.Remove( MakeDelegate( this, &PriceAdapter::HandleUpdate ) );
+  }
 protected:
 private:
-  time_duration m_dtTimeRange;
-  unsigned int m_nInf;
-  unsigned int m_nSup;
-  Prices& m_seriesSource;
-  std::vector<TSEMA<Price>*> m_vEMA;
-  double m_dblRecentMA;
-  void Init( void );
-  void HandleUpdate( const Price& );
+  TS& m_ts;
+  void HandleUpdate( const typename TS::datum_t& datum ) {
+    Prices::Append( Price( datum.DateTime(), GetPrice( datum ) ) );
+  }
+  double GetPrice( const Quote& quote ) const { return quote.Midpoint(); };
+  double GetPrice( const Trade& trade ) const { return trade.Price(); };
 };
 
-} // namespace hf
+
 } // namespace tf
 } // namespace ou

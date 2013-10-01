@@ -43,7 +43,7 @@ ChartEntryShape::~ChartEntryShape(void) {
   }
 }
 
-void ChartEntryShape::AddLabel(const ptime &dt, double price, const std::string &sText ) {
+void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price, const std::string &sText ) {
   ChartEntryBaseWithTime::Add( dt, price );
   char *pszLabel = new char[ sText.size() + 1 ];
   strcpy( pszLabel, sText.c_str() );

@@ -20,13 +20,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-// p1 = power
-// p2 = 1 / p2 for Standard Deviation
+// p1 => power
+// p2 => 1 / p for Standard Deviation
 
 class TSVariance: public Prices {
 public:
   TSVariance( Prices& series, time_duration dt, unsigned int n, double p1, double p2 = 1.0 );
-  ~TSVariance(void);
+  virtual ~TSVariance( void );
 protected:
 private:
   time_duration m_dtTimeRange;
@@ -34,8 +34,8 @@ private:
   double m_p1;
   double m_p2;
   double m_z;
-  Prices m_dummy;
   Prices& m_seriesSource;
+  Prices m_dummy;
   TSMA m_ma1;
   TSMA m_ma2;
   void HandleUpdate( const Price& );

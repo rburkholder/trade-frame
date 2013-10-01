@@ -45,6 +45,9 @@
     <ClInclude Include="TSMicrostructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Adapters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

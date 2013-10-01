@@ -21,10 +21,12 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
+#include <TFTimeSeries/Adapters.h>
 
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
-#include <TFIndicators/TSDifferential.h>
+//#include <TFIndicators/TSDifferential.h>
+#include <TFIndicators/TSVariance.h>
 #include <TFIndicators/TSSWRunningTally.h>
 #include <TFIndicators/TSSWRateOfChange.h>
 
@@ -91,6 +93,12 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
+  ou::tf::PriceAdapter<ou::tf::Trades> m_paTrades;
+
+  ou::tf::hf::TSVariance m_variance1;
+  ou::tf::hf::TSVariance m_variance2;
+  ou::tf::hf::TSVariance m_variance3;
+
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
   ou::ChartEntryIndicator m_ceEma3;
@@ -99,6 +107,29 @@ protected:
   ou::ChartEntryIndicator m_ceTickDiffsRoc;
 
   ou::ChartEntryIndicator m_ceZigZag;
+
+  ou::ChartEntryIndicator m_ceUpperBollinger1;
+  ou::ChartEntryIndicator m_ceLowerBollinger1;
+//  ou::ChartEntryIndicator m_ceBollinger1Offset;
+
+//  ou::ChartEntryIndicator m_ceSMA2;
+//  ou::ChartEntryIndicator m_ceSlopeOfSMA2;
+//  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA2;
+  ou::ChartEntryIndicator m_ceUpperBollinger2;
+  ou::ChartEntryIndicator m_ceLowerBollinger2;
+//  ou::ChartEntryIndicator m_ceBollinger2Offset;
+//  ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
+  //ou::ChartEntryIndicator m_ceBollinger2Ratio;
+//  ou::ChartEntryIndicator m_ceSMA2RR;
+
+//  ou::ChartEntryIndicator m_ceSMA3;
+//  ou::ChartEntryIndicator m_ceSlopeOfSMA3;
+  ou::ChartEntryIndicator m_ceUpperBollinger3;
+  ou::ChartEntryIndicator m_ceLowerBollinger3;
+//  ou::ChartEntryIndicator m_ceBollinger3Offset;
+  //ou::ChartEntryIndicator m_ceBollinger3Ratio;
+//  ou::ChartEntryIndicator m_ceSMA3RR;
+
 
 
 private:

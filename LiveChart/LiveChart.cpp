@@ -126,10 +126,8 @@ bool AppLiveChart::OnInit() {
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
 
-  m_pFrameMain->Show( true );
-
   m_bReadyToDrawChart = false;
-  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
+  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &AppLiveChart::HandlePaint, this, idChart );
@@ -137,6 +135,8 @@ bool AppLiveChart::OnInit() {
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
+
+  m_pFrameMain->Show( true );
 
   m_bData1Connected = false;
   m_bData2Connected = false;
@@ -220,6 +220,7 @@ void AppLiveChart::HandleSize( wxSizeEvent& event ) {
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
+// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
 void AppLiveChart::HandleDrawChart( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );
   wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );

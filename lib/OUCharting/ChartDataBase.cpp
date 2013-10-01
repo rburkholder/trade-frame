@@ -18,9 +18,13 @@ namespace ou { // One Unified
 
 ChartDataBase::ChartDataBase(void) 
   : m_dvChart( "ChartDataBase", "Symbol" ),
-  m_ema1( m_quotes, boost::posix_time::seconds(   55 ) ),
-  m_ema2( m_quotes, boost::posix_time::seconds(  233 ) ),
-  m_ema3( m_quotes, boost::posix_time::seconds( 1597 ) ),
+  m_paTrades( m_trades ),
+  m_ema1( m_quotes, boost::posix_time::seconds(   55 ) ), // < 1 min
+  m_ema2( m_quotes, boost::posix_time::seconds(  233 ) ), // < 4 min
+  m_ema3( m_quotes, boost::posix_time::seconds( 1597 ) ), // ~ 26 min
+  m_variance1( m_paTrades, boost::posix_time::seconds(   55 ), 3, 2.0, 2.0 ), // bollinger 1
+  m_variance2( m_paTrades, boost::posix_time::seconds(  233 ), 3, 2.0, 2.0 ), // bollinger 2
+  m_variance3( m_paTrades, boost::posix_time::seconds(  1597 ), 3, 2.0, 2.0 ), // bollinger 3
   m_bfTrades( 10 ),
   m_bfBuys( 10 ),
   m_bfSells( 10 ),
@@ -31,7 +35,6 @@ ChartDataBase::ChartDataBase(void)
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
   
-
   m_dvChart.Add( 0, m_ceBars );
 
   m_dvChart.Add( 0, m_ceEma1 );
@@ -45,6 +48,13 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeNeutral );
   m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeDn );
 
+  m_dvChart.Add( 1, m_ceUpperBollinger1 );
+  m_dvChart.Add( 1, m_ceLowerBollinger1 );
+  m_dvChart.Add( 1, m_ceUpperBollinger2 );
+  m_dvChart.Add( 1, m_ceLowerBollinger2 );
+  m_dvChart.Add( 1, m_ceUpperBollinger3 );
+  m_dvChart.Add( 1, m_ceLowerBollinger3 );
+
   m_ceEma1.SetColour( ou::Colour::MediumVioletRed );
   m_ceEma2.SetColour( ou::Colour::RoyalBlue );
   m_ceEma3.SetColour( ou::Colour::MediumSpringGreen );
@@ -56,9 +66,28 @@ ChartDataBase::ChartDataBase(void)
   m_rVolumes[ VDn ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
   m_rVolumes[ VDn ].ceVolumeDn.SetColour( ou::Colour::Red );
 
+  m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceUpperBollinger2.SetColour( ou::Colour::Turquoise );
+  m_ceLowerBollinger2.SetColour( ou::Colour::Turquoise );
+  m_ceUpperBollinger3.SetColour( ou::Colour::GreenYellow );
+  m_ceLowerBollinger3.SetColour( ou::Colour::GreenYellow );
+
+//  m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
+//  m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );
+//  m_ceBollinger3Offset.SetColour( ou::Colour::GreenYellow );
+
+//  m_ceSlopeOfBollinger2Offset.SetColour( ou::Colour::DarkMagenta );
+
+  m_ceZigZag.SetColour( ou::Colour::DarkBlue );
+
   m_bfTrades.SetOnBarComplete( MakeDelegate( this, &ChartDataBase::HandleBarCompletionTrades ) );
   m_bfBuys.SetOnBarComplete( MakeDelegate( this, &ChartDataBase::HandleBarCompletionBuys ) );
   m_bfSells.SetOnBarComplete( MakeDelegate( this, &ChartDataBase::HandleBarCompletionSells ) );
+
+  m_zigzagPrice.SetOnPeakFound( MakeDelegate( this, &ChartDataBase::HandleZigZagPeak ) );
+  m_zigzagPrice.SetUpDecisionPointFound( MakeDelegate( this, &ChartDataBase::HandleZigZagUpDp ) );
+  m_zigzagPrice.SetDnDecisionPointFound( MakeDelegate( this, &ChartDataBase::HandleZigZagDnDp ) );
 }
 
 ChartDataBase::~ChartDataBase(void) { 
@@ -199,6 +228,19 @@ void ChartDataBase::HandleTrade( const ou::tf::Trade& trade ) {
   if (  45 < dif ) dif = 45;
   if ( -45 > dif ) dif = -45;
   m_ceTickDiffsRoc.Add( dt, dif );
+
+  double lastEma;
+  lastEma = m_ema1.Ago( 0 ).Value();
+  m_ceUpperBollinger1.Add( dt, lastEma + m_variance1.Ago( 0 ).Value() );
+  m_ceLowerBollinger1.Add( dt, lastEma - m_variance1.Ago( 0 ).Value() );
+
+  lastEma = m_ema2.Ago( 0 ).Value();
+  m_ceUpperBollinger2.Add( dt, lastEma + m_variance2.Ago( 0 ).Value() );
+  m_ceLowerBollinger2.Add( dt, lastEma - m_variance2.Ago( 0 ).Value() );
+
+  lastEma = m_ema3.Ago( 0 ).Value();
+  m_ceUpperBollinger3.Add( dt, lastEma + m_variance3.Ago( 0 ).Value() );
+  m_ceLowerBollinger3.Add( dt, lastEma - m_variance3.Ago( 0 ).Value() );
 }
 
 void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {

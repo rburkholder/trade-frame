@@ -36,8 +36,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+class TimeSeriesBase { // used for dynamic_cast capability
+public:
+  virtual ~TimeSeriesBase( void ) {};
+protected:
+private:
+};
+
 template<typename T> 
-class TimeSeries {
+class TimeSeries: public TimeSeriesBase {
 public:
 
   typedef typename T datum_t;

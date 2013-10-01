@@ -19,7 +19,7 @@
 #include "Chart.h"
 
 ChartTest::ChartTest( pProvider_t pProvider ) 
-
+  : ou::ChartDataBase()
 {
   ou::tf::Instrument::pInstrument_t pInstrument
     = ou::tf::InstrumentManager::Instance().ConstructInstrument( "+GC#", "SMART", ou::tf::InstrumentType::Future );

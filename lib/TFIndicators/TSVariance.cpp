@@ -9,8 +9,8 @@ TSVariance::TSVariance( Prices& series, time_duration dt, unsigned int n, double
   : m_seriesSource( series ), m_dtTimeRange( dt ), m_n( n ), m_p1( p1 ), m_p2( p2 ),
     m_ma1( series, dt, n ), m_ma2( m_dummy, dt, n )
 {
-  assert( 0 < n );
-  assert( 0.0 < p2 );
+  assert( 0 < m_n );
+  assert( 0.0 < m_p2 );
   series.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleUpdate ) );
   m_ma1.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
   m_ma2.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );

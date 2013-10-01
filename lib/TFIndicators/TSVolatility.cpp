@@ -20,8 +20,15 @@ namespace tf { // TradeFrame
 namespace hf { // high frequency
 
 TSVolatility::TSVolatility( Prices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n ) 
-  : m_seriesSource( series ), m_dtTau( dtTau ), m_dtTauPrime( microseconds( dtTauPrime.total_microseconds() / 2 ) ), m_p( p ), m_n( n ),
-    m_tsDif( series, dtTauPrime ), m_tsNorm( m_tsDif, dtTau, n, p )
+  : m_seriesSource( series ), 
+    m_dtTau( dtTau ), 
+    m_dtTauByTwo( microseconds( dtTau.total_microseconds() / 2 ) ),
+//    m_dtTauPrime( microseconds( dtTauPrime.total_microseconds() / 2 ) ), 
+    m_dtTauPrime( dtTauPrime ),
+    m_p( p ), 
+    m_n( n ),
+    m_tsDif( series, dtTauPrime ), 
+    m_tsNorm( m_tsDif, m_dtTauByTwo, n, p )
 {
 }
 

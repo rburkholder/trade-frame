@@ -28,8 +28,7 @@ namespace ou { // One Unified
   m_dblXMin( 0 ), m_dblXMax( 0 ),
   m_bCreated( false )
 {
-  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
-  assert( b );
+  Initialize();
 }
 
 ChartMaster::ChartMaster( unsigned int width, unsigned int height ) 
@@ -39,9 +38,15 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
   m_dblXMin( 0 ), m_dblXMax( 0 ),
   m_bCreated( false )
 {
+  Initialize();
 }
 
 ChartMaster::~ChartMaster(void) {
+}
+
+void ChartMaster::Initialize( void ) {
+  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  assert( b );
 }
 
 void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {

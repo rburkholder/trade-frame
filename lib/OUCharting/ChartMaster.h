@@ -58,9 +58,10 @@ protected:
 
   bool m_bCreated;
 
-  void Initialize( void );
 
 private:
+
+  void Initialize( void );
 
 };
 

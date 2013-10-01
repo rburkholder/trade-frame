@@ -21,6 +21,12 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
+// page 69
+// tauprime - return interval
+// tau - length of moving sample
+// z - irregular time series
+// equation 3.68
+
 class TSVolatility: public Prices {
 public:
   TSVolatility( Prices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n = 4 );
@@ -28,6 +34,7 @@ public:
 protected:
 private:
   time_duration m_dtTau;
+  time_duration m_dtTauByTwo;
   time_duration m_dtTauPrime;
   double m_p;
   unsigned int m_n;

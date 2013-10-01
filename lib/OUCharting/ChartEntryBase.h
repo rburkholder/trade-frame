@@ -26,8 +26,8 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
 
 #include <boost/shared_ptr.hpp>
 
@@ -45,19 +45,8 @@ namespace ou { // One Unified
 class ChartEntryBase {  // maintains chart information for a set of prices
 public:
 
-  ChartEntryBase( void );
-  ChartEntryBase( unsigned int nSize );
-  virtual ~ChartEntryBase( void );
-
   typedef boost::shared_ptr<ChartEntryBase> pChartEntryBase_t;
-
-  ou::Colour::enumColour GetColour( void ) const { return m_eColour; };
-  virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
-  void SetName( std::string name ) { m_sName = name; };
-  const std::string &GetName( void ) const { return m_sName; };
-  void Add( double price );
   typedef std::vector<double> vdouble_t;
-  virtual size_t Size( void ) const { return m_vPrice.size(); };
 
   struct structChartAttributes {
     double dblXMin;
@@ -66,6 +55,17 @@ public:
     double dblYMax;
     structChartAttributes( void ) : dblXMin( 0 ), dblXMax( 0 ), dblYMin( 0 ), dblYMax( 0 ) {};
   };
+
+  ChartEntryBase( void );
+  ChartEntryBase( unsigned int nSize );
+  virtual ~ChartEntryBase( void );
+
+  ou::Colour::enumColour GetColour( void ) const { return m_eColour; };
+  virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
+  void SetName( std::string name ) { m_sName = name; };
+  const std::string &GetName( void ) const { return m_sName; };
+  void Add( double price );
+  virtual size_t Size( void ) const { return m_vPrice.size(); };
 
   virtual void AddDataToChart( XYChart *pXY, structChartAttributes* pAttributes ) const {};
 
@@ -90,12 +90,12 @@ public:
   ChartEntryBaseWithTime( unsigned int nSize );
   virtual ~ChartEntryBaseWithTime( void );
 
-  void Add( const ptime &dt, double price );
-  void Add( const ptime &dt );
+  void Add( const boost::posix_time::ptime &dt, double price );
+  void Add( const boost::posix_time::ptime &dt );
 
 protected:
 
-  std::vector<ptime> m_vDateTime;
+  std::vector<boost::posix_time::ptime> m_vDateTime;
   std::vector<double> m_vChartTime;  // used by ChartDir
   virtual void Reserve( unsigned int );
   DoubleArray GetDateTimes( void ) const {

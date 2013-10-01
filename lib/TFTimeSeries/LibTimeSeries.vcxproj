@@ -135,6 +135,7 @@
     <ClCompile Include="TSMicrostructure.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Adapters.h" />
     <ClInclude Include="BarFactory.h" />
     <ClInclude Include="DatedDatum.h" />
     <ClInclude Include="MergeDatedDatumCarrier.h" />

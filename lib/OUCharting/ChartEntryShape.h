@@ -31,7 +31,7 @@ public:
   void SetShape( enumShape shape ) { m_eShape = shape; };
   enumShape GetShape( void ) const { return m_eShape; };
   virtual ~ChartEntryShape(void);
-  void AddLabel( const ptime &dt, double price, const std::string &sLabel );
+  void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
   virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
   static int m_rShapes[];
