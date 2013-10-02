@@ -93,7 +93,7 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
-  ou::tf::PriceAdapter<ou::tf::Trades> m_paTrades;
+  ou::tf::PriceAdapter<ou::tf::Trades> m_paTrades;  // comes before m_varianceX
 
   ou::tf::hf::TSVariance m_variance1;
   ou::tf::hf::TSVariance m_variance2;

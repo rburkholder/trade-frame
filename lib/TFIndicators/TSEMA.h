@@ -98,8 +98,9 @@ TSEMA<D>::~TSEMA( void ) {
 template<class D>
 double TSEMA<D>::EMA( ptime t, double XatT ) {
   static const time_duration tdOne( microseconds( 1 ) );
-  double ema( XatT );
   if ( 0 == Prices::Size() ) {
+    m_dblRecentEMA = XatT;
+    m_XatTminus1 = XatT;
     Prices::Append( Price( t, XatT ) );  // initialize first element of series
   }
   else { 
@@ -112,12 +113,11 @@ double TSEMA<D>::EMA( ptime t, double XatT ) {
     //double v = 1.0;  // previous point 
     //double v = std::exp( -alpha / 2.0 ); // or std::sqrt( mu );  // nearest value
     //double v = mu;  // next point
-    ema = mu * prvEMA.Value() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
-    Prices::Append( Price( t, ema ) );
+    m_dblRecentEMA = mu * prvEMA.Value() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
+    m_XatTminus1 = XatT;
+    Prices::Append( Price( t, m_dblRecentEMA ) );
   }
-  m_XatTminus1 = XatT;
-  m_dblRecentEMA = ema;
-  return ema;
+  return m_dblRecentEMA;
 
 }
 

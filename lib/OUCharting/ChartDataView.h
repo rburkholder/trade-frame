@@ -23,10 +23,10 @@
 
 namespace ou { // One Unified
 
-// CChartDataView contains the CChartEntries and related sub-chart 
+// ChartDataView contains the CChartEntries and related sub-chart 
 //   to be viewed in a master chart viewport 
 
-class ChartDataViewCarrier { // used by CChartViewPort objects to chart data
+class ChartDataViewCarrier { // used by ChartViewPort objects to chart data
 public:
   //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
   ChartDataViewCarrier( void );
@@ -51,14 +51,13 @@ private:
 class ChartDataView {
 public:
 
+  typedef std::vector<ChartDataViewCarrier>::const_iterator const_iterator;
+  typedef std::vector<ChartDataViewCarrier>::iterator iterator;
+
   ChartDataView( const std::string &sStrategy, const std::string &sName );
   ~ChartDataView(void);
 
-  //typedef ChartEntryBase::pChartEntryBase_t pChartEntryBase_t;
-
   void Add( size_t nChart, const ChartEntryBase& entry );  // could try boost::fusion here?  some crtp stuff?
-  typedef std::vector<ChartDataViewCarrier>::const_iterator const_iterator;
-  typedef std::vector<ChartDataViewCarrier>::iterator iterator;
   iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
   iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) const { return m_sStrategy; };
@@ -69,7 +68,7 @@ public:
   void SetChanged(void) { m_bChanged = true; };
   bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
 protected:
-  std::vector<ChartDataViewCarrier> m_vChartDataViewEntry;
+
   struct structChartMapping {
     size_t ixActualChartId;  // actual chart index
     size_t nCharts;  // number of charts at this index
@@ -79,12 +78,18 @@ protected:
     structChartMapping &operator=( const structChartMapping &obj ) { 
       ixActualChartId = obj.ixActualChartId; nCharts = obj.nCharts; return *this; };
   };
+
   typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
-  mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
+
+  bool m_bChanged;
   bool m_bClosed;
   std::string m_sStrategy;
   std::string m_sName;
-  bool m_bChanged;
+
+  mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
+
+  std::vector<ChartDataViewCarrier> m_vChartDataViewEntry;
+
 private:
 };
 

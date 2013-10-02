@@ -36,7 +36,7 @@ private:
   Prices& m_seriesSource;
   std::vector<TSEMA<Price>*> m_vEMA;
   double m_dblRecentMA;
-  void Init( void );
+  void Initialize( void );
   void HandleUpdate( const Price& );
 };
 

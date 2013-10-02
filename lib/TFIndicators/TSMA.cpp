@@ -36,6 +36,7 @@ TSMA::TSMA( Prices& series, time_duration dt, unsigned int n )
 {
   // uses tau prime with 2 tau / ( n + 1 )
   assert( 1 <= n );
+  Initialize();
 }
 
 TSMA::~TSMA(void) {
@@ -48,7 +49,7 @@ TSMA::~TSMA(void) {
   }
 }
 
-void TSMA::Init( void ) {
+void TSMA::Initialize( void ) {
   m_vEMA.resize( m_nSup + 1 ); // first vector element unused
   m_vEMA[ 0 ] = 0;
   m_vEMA[ 1 ] = new TSEMA<Price>( m_seriesSource, m_dtTimeRange ); 

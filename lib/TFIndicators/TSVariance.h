@@ -36,7 +36,7 @@ private:
   double m_z;
   Prices& m_seriesSource;
   Prices m_dummy;
-  TSMA m_ma1;
+  TSMA* m_pma1; // this way in order to get events in proper order
   TSMA m_ma2;
   void HandleUpdate( const Price& );
   void HandleMA1Update( const Price& );

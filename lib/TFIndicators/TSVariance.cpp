@@ -7,19 +7,21 @@ namespace hf { // high frequency
 
 TSVariance::TSVariance( Prices& series, time_duration dt, unsigned int n, double p1, double p2 ) 
   : m_seriesSource( series ), m_dtTimeRange( dt ), m_n( n ), m_p1( p1 ), m_p2( p2 ),
-    m_ma1( series, dt, n ), m_ma2( m_dummy, dt, n )
+    m_ma2( m_dummy, dt, n )
 {
   assert( 0 < m_n );
   assert( 0.0 < m_p2 );
   series.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleUpdate ) );
-  m_ma1.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
-  m_ma2.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
+  m_pma1 = new TSMA( series, dt, n );
+  m_pma1->OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
+  m_dummy.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
 }
 
 TSVariance::~TSVariance(void) {
   m_seriesSource.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleUpdate ) );
-  m_ma1.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
-  m_ma2.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
+  m_pma1->OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
+  m_dummy.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
+  delete m_pma1;
 }
 
 void TSVariance::HandleUpdate( const Price& price ) {
@@ -33,7 +35,6 @@ void TSVariance::HandleMA1Update( const Price& price ) {
   }
   else {
     if ( 2.0 == m_p1 ) {
-      double t = m_z - price.Value();
       m_dummy.Append( Price( price.DateTime(), t * t ) );
     }
     else {

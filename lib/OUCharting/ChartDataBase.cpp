@@ -22,9 +22,9 @@ ChartDataBase::ChartDataBase(void)
   m_ema1( m_quotes, boost::posix_time::seconds(   55 ) ), // < 1 min
   m_ema2( m_quotes, boost::posix_time::seconds(  233 ) ), // < 4 min
   m_ema3( m_quotes, boost::posix_time::seconds( 1597 ) ), // ~ 26 min
-  m_variance1( m_paTrades, boost::posix_time::seconds(   55 ), 3, 2.0, 2.0 ), // bollinger 1
-  m_variance2( m_paTrades, boost::posix_time::seconds(  233 ), 3, 2.0, 2.0 ), // bollinger 2
-  m_variance3( m_paTrades, boost::posix_time::seconds(  1597 ), 3, 2.0, 2.0 ), // bollinger 3
+  m_variance1( m_paTrades, boost::posix_time::seconds(   55 ), 4, 2.0, 2.0 ), // bollinger 1
+  m_variance2( m_paTrades, boost::posix_time::seconds(  233 ), 4, 2.0, 2.0 ), // bollinger 2
+  m_variance3( m_paTrades, boost::posix_time::seconds(  1597 ), 4, 2.0, 2.0 ), // bollinger 3
   m_bfTrades( 10 ),
   m_bfBuys( 10 ),
   m_bfSells( 10 ),
@@ -48,12 +48,12 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeNeutral );
   m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeDn );
 
-  m_dvChart.Add( 1, m_ceUpperBollinger1 );
-  m_dvChart.Add( 1, m_ceLowerBollinger1 );
-  m_dvChart.Add( 1, m_ceUpperBollinger2 );
-  m_dvChart.Add( 1, m_ceLowerBollinger2 );
-  m_dvChart.Add( 1, m_ceUpperBollinger3 );
-  m_dvChart.Add( 1, m_ceLowerBollinger3 );
+  m_dvChart.Add( 0, m_ceUpperBollinger1 );
+  m_dvChart.Add( 0, m_ceLowerBollinger1 );
+  m_dvChart.Add( 0, m_ceUpperBollinger2 );
+  m_dvChart.Add( 0, m_ceLowerBollinger2 );
+  m_dvChart.Add( 0, m_ceUpperBollinger3 );
+  m_dvChart.Add( 0, m_ceLowerBollinger3 );
 
   m_ceEma1.SetColour( ou::Colour::MediumVioletRed );
   m_ceEma2.SetColour( ou::Colour::RoyalBlue );
@@ -241,6 +241,7 @@ void ChartDataBase::HandleTrade( const ou::tf::Trade& trade ) {
   lastEma = m_ema3.Ago( 0 ).Value();
   m_ceUpperBollinger3.Add( dt, lastEma + m_variance3.Ago( 0 ).Value() );
   m_ceLowerBollinger3.Add( dt, lastEma - m_variance3.Ago( 0 ).Value() );
+  
 }
 
 void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {

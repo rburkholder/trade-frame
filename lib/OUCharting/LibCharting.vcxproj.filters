@@ -31,7 +31,9 @@
     <ClCompile Include="ChartEntryVolume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChartDataBase.cpp" />
+    <ClCompile Include="ChartDataBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChartDataView.h">
@@ -91,7 +93,9 @@
     <ClInclude Include="ChartDirector64\memblock.h">
       <Filter>ChartDir64</Filter>
     </ClInclude>
-    <ClInclude Include="ChartDataBase.h" />
+    <ClInclude Include="ChartDataBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
