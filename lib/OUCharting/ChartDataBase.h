@@ -26,9 +26,10 @@
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
 //#include <TFIndicators/TSDifferential.h>
-#include <TFIndicators/TSVariance.h>
+//#include <TFIndicators/TSVariance.h>
 #include <TFIndicators/TSSWRunningTally.h>
 #include <TFIndicators/TSSWRateOfChange.h>
+#include <TFIndicators/TSSWStats.h>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
@@ -93,27 +94,27 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
-  ou::tf::PriceAdapter<ou::tf::Trades> m_paTrades;  // comes before m_varianceX
-  //ou::tf::PriceAdapter<ou::tf::Quotes> m_paQuotes;
+  ou::tf::TSSWStatsMidQuote m_stats1;
+  ou::tf::TSSWStatsMidQuote m_stats2;
+  ou::tf::TSSWStatsMidQuote m_stats3;
 
-  ou::tf::hf::TSVariance m_variance1;
-  ou::tf::hf::TSVariance m_variance2;
-  ou::tf::hf::TSVariance m_variance3;
+  ou::ChartEntryIndicator m_ceQuoteUpper;
+  ou::ChartEntryIndicator m_ceQuoteLower;
+  ou::ChartEntryIndicator m_ceTrade;
 
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
   ou::ChartEntryIndicator m_ceEma3;
 
-  ou::ChartEntryIndicator m_ce11;
-  ou::ChartEntryIndicator m_ce12;
-  ou::ChartEntryIndicator m_ce13;
-  ou::ChartEntryIndicator m_ce14;
-  ou::ChartEntryIndicator m_ce21;
-  ou::ChartEntryIndicator m_ce22;
-  ou::ChartEntryIndicator m_ce23;
-  ou::ChartEntryIndicator m_ce24;
-  ou::ChartEntryIndicator m_ce31;
-
+//  ou::ChartEntryIndicator m_ce11;
+//  ou::ChartEntryIndicator m_ce12;
+//  ou::ChartEntryIndicator m_ce13;
+//  ou::ChartEntryIndicator m_ce14;
+//  ou::ChartEntryIndicator m_ce21;
+//  ou::ChartEntryIndicator m_ce22;
+//  ou::ChartEntryIndicator m_ce23;
+//  ou::ChartEntryIndicator m_ce24;
+//  ou::ChartEntryIndicator m_ce31;
 
   ou::ChartEntryIndicator m_ceTickDiffs;
   ou::ChartEntryIndicator m_ceTickDiffsRoc;

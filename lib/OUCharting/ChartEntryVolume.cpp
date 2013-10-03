@@ -44,6 +44,7 @@ void ChartEntryVolume::Append(const boost::posix_time::ptime &dt, int volume) {
 
 void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const {
   if ( 0 != this->m_vDateTime.size() ) {
+
     BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
 
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
@@ -52,7 +53,7 @@ void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
 
     DataSet *pds = bl->getDataSet(0);
-    pds->setDataColor( m_eColour );
+    pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
   }
 }
 

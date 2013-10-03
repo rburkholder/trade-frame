@@ -13,6 +13,8 @@
 
 //#include "StdAfx.h"
 
+#include <algorithm>
+
 #include "ChartEntryBase.h"
 
 namespace ou { // One Unified
@@ -21,7 +23,7 @@ namespace ou { // One Unified
 // CChartEntryBase
 //
 
-ChartEntryBase::ChartEntryBase() {
+ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ) {
 }
 
 ChartEntryBase::ChartEntryBase( unsigned int nSize ) 
@@ -52,7 +54,7 @@ void ChartEntryBase::Append(double price) {
 //
 
 ChartEntryBaseWithTime::ChartEntryBaseWithTime() : 
-  ChartEntryBase(), 
+  ChartEntryBase(),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
 }
@@ -78,9 +80,28 @@ void ChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
 }
 
 void ChartEntryBaseWithTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  // record the viewport
   m_dtViewPortBegin = dtBegin;
   m_dtViewPortEnd = dtEnd;
-  // rebuild arrays:
+  // initialize viewport values
+  m_ixStart = 0;
+  m_nElements = 0;
+  // calculate new viewport values
+  if ( 0 != m_vDateTime.size() ) {
+    vDateTime_t::iterator iterBegin( m_vDateTime.begin() );
+    vDateTime_t::iterator iterEnd( m_vDateTime.end() );
+
+    if ( boost::posix_time::not_a_date_time != dtBegin ) {
+      iterBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), dtBegin );
+    }
+    if ( m_vDateTime.end() != iterBegin ) {
+      if ( boost::posix_time::not_a_date_time != dtEnd ) {
+        iterEnd = std::upper_bound( iterBegin, m_vDateTime.end(), dtEnd );
+      }
+    }
+    m_ixStart = iterBegin - m_vDateTime.begin();
+    m_nElements = iterEnd - iterBegin;
+  }
 }
 
 void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
@@ -96,6 +117,13 @@ void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
     Chart::chartTime( 
       dt.date().year(), dt.date().month(), dt.date().day(),
       dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
+
+  if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt >= m_dtViewPortEnd ) ) {
+    // don't append any more values to visible area
+  }
+  else {
+    ++m_nElements;
+  }
 }
 
 void ChartEntryBaseWithTime::Append( const boost::posix_time::ptime &dt, double price) {

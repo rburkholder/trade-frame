@@ -60,6 +60,12 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
 void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   m_dtViewPortBegin = dtBegin;
   m_dtViewPortEnd = dtEnd;
+  
+}
+
+void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
+  m_tdBarWidth = tdBarWidth;
+  //m_pCdv-
 }
 
 void ChartMaster::DrawChart( bool bViewPortChanged ) {
@@ -74,6 +80,9 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
     if ( true ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
+
+      std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetStrategy() );
+      multi.addTitle( sTitle.c_str() );
 
       // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
       // calc assumes chart 0 and chart 1 are always present
@@ -136,7 +145,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       // determine XAxis min/max while adding chart data
       m_dblXMin = 0;
       m_dblXMax = 0;
-      for ( ChartDataView::const_iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
+      for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
         iter->GetChartEntry().AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );

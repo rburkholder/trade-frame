@@ -126,6 +126,7 @@ bool AppLiveChart::OnInit() {
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
 
+  m_bPaintingChart = false;
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
@@ -184,7 +185,7 @@ bool AppLiveChart::OnInit() {
 //  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppLiveChart::HandleMenuActionInitializeSymbolSet ) ) );
   vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartWatch ) ) );
   vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppLiveChart::HandleMenuActionStopWatch ) ) );
-//  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppLiveChart::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppLiveChart::HandleMenuActionSaveValues ) ) );
 //  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppLiveChart::HandleMenuActionEmitYieldCurve ) ) );
   vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppLiveChart::HandleMenuActionStartChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
@@ -203,8 +204,9 @@ void AppLiveChart::HandleMenuActionStartChart( void ) {
 }
 
 void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
-  if ( m_bReadyToDrawChart ) {
+  if ( m_bReadyToDrawChart && !m_bPaintingChart ) {
     try {
+      m_bPaintingChart = true;
       wxSize size = m_winChart->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
       m_chartMaster.SetChartDataView( &m_pChart->GetChartDataView() );
@@ -214,6 +216,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
     catch (...) {
     }
   }
+  m_bPaintingChart = false;
 }
 
 void AppLiveChart::HandleSize( wxSizeEvent& event ) { 
@@ -275,10 +278,13 @@ void AppLiveChart::HandleMenuActionSaveValues( void ) {
 void AppLiveChart::HandleSaveValues( void ) {
   std::cout << "Saving collected values ... " << std::endl;
   try {
-    std::string sPrefixSession( "/app/HedgedBollinger/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
+    //std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
-    std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
-    m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
+    //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
+    //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
+    std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/" 
+      + m_pChart->GetWatch()->GetInstrument()->GetInstrumentName() );
+    m_pChart->GetWatch()->SaveSeries( sPrefixSession );
   }
   catch(...) {
     std::cout << " ... issues with saving ... " << std::endl;

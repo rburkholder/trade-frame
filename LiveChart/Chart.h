@@ -23,11 +23,17 @@
 
 class ChartTest: public ou::ChartDataBase {
 public:
+
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+
   ChartTest( pProvider_t );
   ~ChartTest(void);
+
+  ou::tf::Watch* GetWatch( void ) { return m_pWatch; };
+
 protected:
 private:
+
   ou::tf::Watch* m_pWatch;
 
 };

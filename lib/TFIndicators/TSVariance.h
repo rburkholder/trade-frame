@@ -23,6 +23,9 @@ namespace hf { // high frequency
 // p1 => power
 // p2 => 1 / p for Standard Deviation
 
+// 2013/10/03  Variance appears workable, but doesn't seem to be as 'tight' as the regular 
+//   statistics case.  Could still be a bug somewhere.
+
 class TSVariance: public Prices {
 public:
   TSVariance( Prices& series, time_duration td, unsigned int n, double p1, double p2 = 1.0 );

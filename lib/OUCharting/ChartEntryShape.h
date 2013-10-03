@@ -19,6 +19,7 @@
 #include "ChartEntryBase.h"
 
 // need to add in std::string for commenting the shape
+// vectors need to be time ordered
 
 namespace ou { // One Unified
 
@@ -39,8 +40,9 @@ protected:
   //std::vector<std::string> m_vLabel;
   std::vector<const char *> m_vpChar;
   StringArray GetLabels( void ) const {
-    std::vector<const char *>::const_iterator iter = m_vpChar.begin();
-    return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );
+    //std::vector<const char *>::const_iterator iter = m_vpChar.begin();
+    //return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );
+    return StringArray( &m_vpChar[ m_ixStart ],  m_nElements );
   }
 private:
 };

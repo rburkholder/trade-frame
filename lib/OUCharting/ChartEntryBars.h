@@ -34,20 +34,24 @@ protected:
   std::vector<double> m_vLow;
   std::vector<double> m_vClose;
   DoubleArray GetOpen( void ) const {
-    vdouble_t::const_iterator iter = m_vOpen.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
+//    vdouble_t::const_iterator iter = m_vOpen.begin();
+//    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
+    return DoubleArray( &m_vOpen[ m_ixStart ], m_nElements );
   }
   DoubleArray GetHigh( void ) const {
-    vdouble_t::const_iterator iter = m_vHigh.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vHigh.size() ) );
+    //vdouble_t::const_iterator iter = m_vHigh.begin();
+    //return DoubleArray( &(*iter), static_cast<int>( m_vHigh.size() ) );
+    return DoubleArray( &m_vHigh[ m_ixStart ], m_nElements );
   }
   DoubleArray GetLow( void ) const {
-    vdouble_t::const_iterator iter = m_vLow.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vLow.size() ) );
+    //vdouble_t::const_iterator iter = m_vLow.begin();
+    //return DoubleArray( &(*iter), static_cast<int>( m_vLow.size() ) );
+    return DoubleArray( &m_vLow[ m_ixStart ], m_nElements );
   }
   DoubleArray GetClose( void ) const {
-    vdouble_t::const_iterator iter = m_vClose.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
+    //vdouble_t::const_iterator iter = m_vClose.begin();
+    //return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
+    return DoubleArray( &m_vClose[ m_ixStart ], m_nElements );
   }
 private:
 };

@@ -60,6 +60,7 @@ private:
   bool m_bReadyToDrawChart;
   ou::ChartMaster m_chartMaster;
   ChartTest* m_pChart;
+  bool m_bPaintingChart;
 
 //  Strategy* m_pStrategy;
 

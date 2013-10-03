@@ -70,7 +70,7 @@ void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
       this->GetLow(),
       this->GetOpen(),
       this->GetClose(),
-      0x00ff00, 0xff0000
+      0x0000ff00, 0x00ff0000, 0xff000000
       );
     //candle->setDataGap( 0 );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();

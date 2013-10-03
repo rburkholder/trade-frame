@@ -30,17 +30,17 @@ class ChartDataViewCarrier { // used by ChartViewPort objects to chart data
 public:
   //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
   ChartDataViewCarrier( void );
-  ChartDataViewCarrier( size_t nChart, const ChartEntryBase& entry );
-  ChartDataViewCarrier( const ChartDataViewCarrier& carrier );
+  ChartDataViewCarrier( size_t nChart, ChartEntryBase& entry );
+//  ChartDataViewCarrier( ChartDataViewCarrier& carrier );
   ~ChartDataViewCarrier( void );
   size_t GetLogicalChartId( void ) { return m_nLogicalChart; };
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
   size_t GetActualChartId( void ) const { return m_nActualChart; };
-  const ChartEntryBase& GetChartEntry( void ) const { return *m_pChartEntry; };
+  ChartEntryBase& GetChartEntry( void ) { return *m_pChartEntry; };
 protected:
   size_t m_nLogicalChart;  // as supplied by trading rules
   size_t m_nActualChart;   // as supplied by CChartDataView management
-  const ChartEntryBase* m_pChartEntry;
+  ChartEntryBase* m_pChartEntry;
 private:
 };
 
@@ -57,7 +57,7 @@ public:
   ChartDataView( const std::string &sStrategy, const std::string &sName );
   ~ChartDataView(void);
 
-  void Add( size_t nChart, const ChartEntryBase& entry );  // could try boost::fusion here?  some crtp stuff?
+  void Add( size_t nChart, ChartEntryBase& entry );  // could try boost::fusion here?  some crtp stuff?
   iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
   iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) const { return m_sStrategy; };
@@ -67,7 +67,13 @@ public:
   size_t GetChartCount( void ) const{ return m_mapCntChartIndexes.size(); };
   void SetChanged(void) { m_bChanged = true; };
   bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
+
+  // can use not_a_date_time for one, the other, or both
+  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+
 protected:
+
+private:
 
   struct structChartMapping {
     size_t ixActualChartId;  // actual chart index
@@ -81,16 +87,20 @@ protected:
 
   typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
 
+  typedef std::vector<ChartDataViewCarrier> vChartDataViewEntry_t;
+
   bool m_bChanged;
   bool m_bClosed;
   std::string m_sStrategy;
   std::string m_sName;
 
+  boost::posix_time::ptime m_dtViewPortBegin;
+  boost::posix_time::ptime m_dtViewPortEnd;
+
   mapCntChartIndexes_t m_mapCntChartIndexes;  // how many of each carrier::m_nchart we have
 
-  std::vector<ChartDataViewCarrier> m_vChartDataViewEntry;
+  vChartDataViewEntry_t m_vChartDataViewEntry;
 
-private:
 };
 
 } // namespace ou

@@ -47,6 +47,7 @@ public:
 
   typedef boost::shared_ptr<ChartEntryBase> pChartEntryBase_t;
   typedef std::vector<double> vdouble_t;
+  typedef vdouble_t::size_type size_type;
 
   struct structChartAttributes {
     double dblXMin;
@@ -71,14 +72,21 @@ public:
 
 protected:
 
-  virtual void Reserve( unsigned int );
+  size_type m_ixStart; // starting point into viewport
+  size_type m_nElements;  // number of elements in the viewport
+
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
+
   std::vector<double> m_vPrice;  // full vector of raw prices
+
   DoubleArray GetPrices( void ) const {  // prices which are visible in viewport
-    vdouble_t::const_iterator iter = m_vPrice.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vPrice.size() ) );
+//    vdouble_t::const_iterator iter = m_vPrice.begin();
+//    return DoubleArray( &(*iter), static_cast<int>( m_vPrice.size() ) );
+    return DoubleArray( &m_vPrice[ m_ixStart ], m_nElements );
   }
+
+  virtual void Reserve( unsigned int );
 
 private:
 };
@@ -100,11 +108,13 @@ protected:
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;
 
-  std::vector<boost::posix_time::ptime> m_vDateTime;
-  std::vector<double> m_vChartTime;  // used by ChartDir
+  typedef std::vector<boost::posix_time::ptime> vDateTime_t;
+
+  vDateTime_t m_vDateTime;
+  vdouble_t m_vChartTime;  // used by ChartDir, double version of m_vDateTime
+
   DoubleArray GetDateTimes( void ) const {
-    vdouble_t::const_iterator iter = m_vChartTime.begin();
-    return DoubleArray( &(*iter), static_cast<int>( m_vChartTime.size() ) );
+    return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
   }
 
   virtual void Reserve( unsigned int );

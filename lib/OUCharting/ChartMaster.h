@@ -36,6 +36,7 @@ public:
 
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+  void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
   double GetXMin( void ) const { return m_dblXMin; };
   double GetXMax( void ) const { return m_dblXMax; };
@@ -62,6 +63,8 @@ protected:
 
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;
+
+  boost::posix_time::time_duration m_tdBarWidth;
 
   OnDrawChart_t m_OnDrawChart;
 
