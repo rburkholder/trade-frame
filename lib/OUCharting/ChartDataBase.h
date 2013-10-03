@@ -94,6 +94,7 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
 
   ou::tf::PriceAdapter<ou::tf::Trades> m_paTrades;  // comes before m_varianceX
+  //ou::tf::PriceAdapter<ou::tf::Quotes> m_paQuotes;
 
   ou::tf::hf::TSVariance m_variance1;
   ou::tf::hf::TSVariance m_variance2;
@@ -102,6 +103,17 @@ protected:
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
   ou::ChartEntryIndicator m_ceEma3;
+
+  ou::ChartEntryIndicator m_ce11;
+  ou::ChartEntryIndicator m_ce12;
+  ou::ChartEntryIndicator m_ce13;
+  ou::ChartEntryIndicator m_ce14;
+  ou::ChartEntryIndicator m_ce21;
+  ou::ChartEntryIndicator m_ce22;
+  ou::ChartEntryIndicator m_ce23;
+  ou::ChartEntryIndicator m_ce24;
+  ou::ChartEntryIndicator m_ce31;
+
 
   ou::ChartEntryIndicator m_ceTickDiffs;
   ou::ChartEntryIndicator m_ceTickDiffsRoc;

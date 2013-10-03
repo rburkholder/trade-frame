@@ -26,7 +26,8 @@ namespace ou { // One Unified
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
-  m_bCreated( false )
+  m_bCreated( false ),
+  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -36,7 +37,8 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
   m_nChartWidth( width ), m_nChartHeight( height ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
-  m_bCreated( false )
+  m_bCreated( false ),
+  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -55,6 +57,10 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
+void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  m_dtViewPortBegin = dtBegin;
+  m_dtViewPortEnd = dtEnd;
+}
 
 void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
@@ -133,7 +139,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       for ( ChartDataView::const_iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
-        iter->GetChartEntry().AddDataToChart( vCharts[ ixChart ].xy, &Attributes );
+        iter->GetChartEntry().AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
         m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : std::min<double>( m_dblXMin, Attributes.dblXMin );
         m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : std::max<double>( m_dblXMax, Attributes.dblXMax );
       }

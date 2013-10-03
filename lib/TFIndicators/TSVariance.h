@@ -25,11 +25,12 @@ namespace hf { // high frequency
 
 class TSVariance: public Prices {
 public:
-  TSVariance( Prices& series, time_duration dt, unsigned int n, double p1, double p2 = 1.0 );
+  TSVariance( Prices& series, time_duration td, unsigned int n, double p1, double p2 = 1.0 );
   virtual ~TSVariance( void );
+
 protected:
 private:
-  time_duration m_dtTimeRange;
+  time_duration m_tdTimeRange;
   unsigned int m_n;
   double m_p1;
   double m_p2;

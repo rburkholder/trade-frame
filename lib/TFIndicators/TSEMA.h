@@ -27,12 +27,12 @@ namespace hf { // high frequency
 template<class D> // D => type derived from DatedDatum
 class TSEMA: public Prices {  // new time series built up from linked time series
 public:
-  TSEMA( TimeSeries<D>& series, time_duration dt );
+  TSEMA( TimeSeries<D>& series, time_duration td );
   virtual ~TSEMA(void);
   double GetEMA( void ) { return m_dblRecentEMA; };
 protected:
 private:
-  time_duration m_dtTimeRange;
+  time_duration m_tdTimeRange;
   double m_dblTimeRange;
   TimeSeries<D>& m_seriesSource;
   double m_XatTminus1;
@@ -80,11 +80,11 @@ private:
 };
 
 template<class D>
-TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration dt )
-  : m_seriesSource( series ), m_dtTimeRange( dt ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
+  : m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
-  assert( 0 < dt.total_seconds() );
-  m_dblTimeRange = (double) dt.total_microseconds();
+  assert( 0 < td.total_seconds() );
+  m_dblTimeRange = (double) td.total_microseconds();
   series.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 

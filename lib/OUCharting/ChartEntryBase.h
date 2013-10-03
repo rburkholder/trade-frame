@@ -64,18 +64,18 @@ public:
   virtual void SetColour( ou::Colour::enumColour colour ) { m_eColour = colour; };
   void SetName( std::string name ) { m_sName = name; };
   const std::string &GetName( void ) const { return m_sName; };
-  void Add( double price );
+  void Append( double price );
   virtual size_t Size( void ) const { return m_vPrice.size(); };
 
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes* pAttributes ) const {};
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes* pAttributes ) const {};
 
 protected:
 
   virtual void Reserve( unsigned int );
-  std::vector<double> m_vPrice;
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
-  DoubleArray GetPrices( void ) const {
+  std::vector<double> m_vPrice;  // full vector of raw prices
+  DoubleArray GetPrices( void ) const {  // prices which are visible in viewport
     vdouble_t::const_iterator iter = m_vPrice.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vPrice.size() ) );
   }
@@ -90,18 +90,24 @@ public:
   ChartEntryBaseWithTime( unsigned int nSize );
   virtual ~ChartEntryBaseWithTime( void );
 
-  void Add( const boost::posix_time::ptime &dt, double price );
-  void Add( const boost::posix_time::ptime &dt );
+  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+
+  void Append( const boost::posix_time::ptime &dt, double price );
+  void Append( const boost::posix_time::ptime &dt );
 
 protected:
 
+  boost::posix_time::ptime m_dtViewPortBegin;
+  boost::posix_time::ptime m_dtViewPortEnd;
+
   std::vector<boost::posix_time::ptime> m_vDateTime;
   std::vector<double> m_vChartTime;  // used by ChartDir
-  virtual void Reserve( unsigned int );
   DoubleArray GetDateTimes( void ) const {
     vdouble_t::const_iterator iter = m_vChartTime.begin();
     return DoubleArray( &(*iter), static_cast<int>( m_vChartTime.size() ) );
   }
+
+  virtual void Reserve( unsigned int );
 
 private:
 };

@@ -26,8 +26,8 @@ public:
   ChartEntryBars(unsigned int nSize);
   virtual ~ChartEntryBars(void);
   virtual void Reserve( unsigned int );
-  void AddBar( const ou::tf::Bar& bar );
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  void AppendBar( const ou::tf::Bar& bar );
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
   std::vector<double> m_vOpen;
   std::vector<double> m_vHigh;

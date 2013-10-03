@@ -34,7 +34,7 @@ void ChartEntryIndicator::Reserve( unsigned int nSize ) {
   ChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void ChartEntryIndicator::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 != this->m_vDateTime.size() ) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();

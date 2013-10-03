@@ -44,7 +44,7 @@ ChartEntryShape::~ChartEntryShape(void) {
 }
 
 void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price, const std::string &sText ) {
-  ChartEntryBaseWithTime::Add( dt, price );
+  ChartEntryBaseWithTime::Append( dt, price );
   char *pszLabel = new char[ sText.size() + 1 ];
   strcpy( pszLabel, sText.c_str() );
   //m_vLabel.push_back( sText );
@@ -52,7 +52,7 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   m_vpChar.push_back( pszLabel );
 }
 
-void ChartEntryShape::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 

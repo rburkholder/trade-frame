@@ -25,7 +25,7 @@ ChartEntrySegments::ChartEntrySegments(void)
 ChartEntrySegments::~ChartEntrySegments(void) {
 }
 
-void ChartEntrySegments::AddDataToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntrySegments::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
   if ( 0 < m_vPrice.size() ) {
     LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();

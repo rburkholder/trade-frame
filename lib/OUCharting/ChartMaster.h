@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -30,7 +32,11 @@ public:
   void SetChartDimensions( unsigned int width, unsigned int height);
   //void SetChartTitle( std::string sChartTitle ) { m_sChartTitle = sChartTitle; };
   void SetChartDataView( ChartDataView* pcdv ) { m_pCdv = pcdv; if ( NULL != pcdv ) m_pCdv->SetChanged(); };
-  ChartDataView *GetChartDataView( void ) { return m_pCdv; };
+  ChartDataView* GetChartDataView( void ) { return m_pCdv; };
+
+  // can use not_a_date_time for one, the other, or both
+  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+
   double GetXMin( void ) const { return m_dblXMin; };
   double GetXMax( void ) const { return m_dblXMax; };
   bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
@@ -53,6 +59,9 @@ protected:
 
   double m_dblXMin;  // initial data time stamp
   double m_dblXMax;  // last data time stamp
+
+  boost::posix_time::ptime m_dtViewPortBegin;
+  boost::posix_time::ptime m_dtViewPortEnd;
 
   OnDrawChart_t m_OnDrawChart;
 

@@ -22,8 +22,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace hf { // high frequency
 
-TSMA::TSMA( Prices& series, time_duration dt, unsigned int nInf, unsigned int nSup )
-  : m_seriesSource( series ), m_dtTimeRange( dt ), m_nInf( nInf ), m_nSup( nSup ), m_dblRecentMA( 0.0 )
+TSMA::TSMA( Prices& series, time_duration td, unsigned int nInf, unsigned int nSup )
+  : m_seriesSource( series ), m_tdTimeRange( td ), m_nInf( nInf ), m_nSup( nSup ), m_dblRecentMA( 0.0 )
 {
   // uses tau prime with 2 tau / ( nsup + ninf )
   assert( 1 <= nInf );
@@ -31,8 +31,8 @@ TSMA::TSMA( Prices& series, time_duration dt, unsigned int nInf, unsigned int nS
   throw std::runtime_error( "not implemented" );
 }
 
-TSMA::TSMA( Prices& series, time_duration dt, unsigned int n )
-  : m_seriesSource( series ), m_dtTimeRange( dt ), m_nInf( 1 ), m_nSup( n ), m_dblRecentMA( 0.0 )
+TSMA::TSMA( Prices& series, time_duration td, unsigned int n )
+  : m_seriesSource( series ), m_tdTimeRange( td ), m_nInf( 1 ), m_nSup( n ), m_dblRecentMA( 0.0 )
 {
   // uses tau prime with 2 tau / ( n + 1 )
   assert( 1 <= n );
@@ -50,12 +50,20 @@ TSMA::~TSMA(void) {
 }
 
 void TSMA::Initialize( void ) {
+  boost::posix_time::time_duration td( microseconds( ( 2 * m_tdTimeRange.total_microseconds() ) / ( m_nSup + 1 ) ) );
   m_vEMA.resize( m_nSup + 1 ); // first vector element unused
   m_vEMA[ 0 ] = 0;
-  m_vEMA[ 1 ] = new TSEMA<Price>( m_seriesSource, m_dtTimeRange ); 
+  //m_vEMA[ 1 ] = new TSEMA<Price>( m_seriesSource, m_dtTimeRange ); 
+  m_vEMA[ 1 ] = new TSEMA<Price>( m_seriesSource, td ); 
   for ( unsigned int ix = 2; ix <= m_nSup; ++ix ) {
-    m_vEMA[ ix ] = new TSEMA<Price>( *m_vEMA[ ix - 1 ], microseconds( 2 * m_dtTimeRange.total_microseconds() / ( ix + 1 ) ) );
+    //m_vEMA[ ix ] = new TSEMA<Price>( *m_vEMA[ ix - 1 ], microseconds( ( 2 * m_tdTimeRange.total_microseconds() ) / ( ix + 1 ) ) );
+    m_vEMA[ ix ] = new TSEMA<Price>( *m_vEMA[ ix - 1 ], td );
+    //m_vEMA[ ix ] = new TSEMA<Price>( m_seriesSource, microseconds( ( 2 * m_dtTimeRange.total_microseconds() ) / ( ix + 1 ) ) );
   }
+  for ( unsigned int ix = 1; ix <= m_nSup; ++ix ) {
+    m_vEMA[ ix ]->AppendEnabled() = false;
+  }
+  Prices::AppendEnabled() = false;
   m_vEMA[ m_nSup ]->OnAppend.Add( MakeDelegate( this, &TSMA::HandleUpdate ) );
 }
 
@@ -64,7 +72,8 @@ void TSMA::HandleUpdate( const Price& price ) {
   for ( unsigned int ix = 1; ix <= m_nSup; ++ix ) {
     ma += m_vEMA[ ix ]->GetEMA();
   }
-  Prices::Append( Price( price.DateTime(), ma / m_nSup ) );
+  m_dblRecentMA = ma / m_nSup;
+  Prices::Append( Price( price.DateTime(), m_dblRecentMA ) );
 }
 
 } // namespace hf

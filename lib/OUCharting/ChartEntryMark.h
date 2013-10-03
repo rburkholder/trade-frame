@@ -28,7 +28,7 @@ public:
   ChartEntryMark(void);
   virtual ~ChartEntryMark(void);
   void AddMark( double price, ou::Colour::enumColour colour, const std::string &name );
-  virtual void AddDataToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
 protected:
   std::vector<ou::Colour::enumColour> m_vColour;
   std::vector<std::string> m_vName;

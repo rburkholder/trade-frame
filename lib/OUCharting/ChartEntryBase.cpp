@@ -38,7 +38,7 @@ void ChartEntryBase::Reserve(unsigned int nSize ) {
   m_vPrice.reserve( nSize );
 }
 
-void ChartEntryBase::Add(double price) {
+void ChartEntryBase::Append(double price) {
   /*
   if ( m_vPrice.capacity() == m_vPrice.size() ) {
     m_vPrice.reserve( m_vPrice.size() + ( m_vPrice.size() / 5 ) ); // expand by 20%
@@ -51,14 +51,19 @@ void ChartEntryBase::Add(double price) {
 // CChartEntryBaseWithTime
 //
 
-ChartEntryBaseWithTime::ChartEntryBaseWithTime() : ChartEntryBase() {
+ChartEntryBaseWithTime::ChartEntryBaseWithTime() : 
+  ChartEntryBase(), 
+    m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+{
 }
 
 ChartEntryBaseWithTime::ChartEntryBaseWithTime( unsigned int nSize )
-: ChartEntryBase( nSize ) 
+: ChartEntryBase( nSize ), 
+    m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
+  ChartEntryBase::Reserve( nSize );
 }
 
 ChartEntryBaseWithTime::~ChartEntryBaseWithTime() {
@@ -72,7 +77,13 @@ void ChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
   m_vChartTime.reserve( nSize );
 }
 
-void ChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
+void ChartEntryBaseWithTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  m_dtViewPortBegin = dtBegin;
+  m_dtViewPortEnd = dtEnd;
+  // rebuild arrays:
+}
+
+void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
   // some Chart Entries don't use the built in vector
   /*
   if ( m_vDateTime.capacity() == m_vDateTime.size() ) {
@@ -87,9 +98,9 @@ void ChartEntryBaseWithTime::Add(const boost::posix_time::ptime &dt) {
       dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 }
 
-void ChartEntryBaseWithTime::Add( const boost::posix_time::ptime &dt, double price) {
-  ChartEntryBase::Add( price );
-  Add( dt );
+void ChartEntryBaseWithTime::Append( const boost::posix_time::ptime &dt, double price) {
+  ChartEntryBase::Append( price );
+  Append( dt );
 }
 
 } // namespace ou

@@ -24,18 +24,19 @@ namespace hf { // high frequency
 
 class TSMA: public Prices {
 public:
-  TSMA( Prices& series, time_duration dt, unsigned int nInf, unsigned int nSup ); // pg 63
-  TSMA( Prices& series, time_duration dt, unsigned int n );  // eq 3.56, pg 61, n typically 2, 3, 4
+  TSMA( Prices& series, time_duration td, unsigned int nInf, unsigned int nSup ); // pg 63
+  TSMA( Prices& series, time_duration td, unsigned int n );  // eq 3.56, pg 61, n typically 2, 3, 4
   ~TSMA(void);
   double GetMA( void ) { return m_dblRecentMA; };
+
 protected:
 private:
-  time_duration m_dtTimeRange;
+  time_duration m_tdTimeRange;
   unsigned int m_nInf;
   unsigned int m_nSup;
+  double m_dblRecentMA;
   Prices& m_seriesSource;
   std::vector<TSEMA<Price>*> m_vEMA;
-  double m_dblRecentMA;
   void Initialize( void );
   void HandleUpdate( const Price& );
 };

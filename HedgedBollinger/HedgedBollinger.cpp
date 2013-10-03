@@ -294,7 +294,6 @@ void AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void 
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
   m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote ) );
 }
-
 void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 

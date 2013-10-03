@@ -105,39 +105,41 @@ public:
 
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
 
+  bool& AppendEnabled( void ) { return m_bAppendToVector; };  // affects Append(...) only
+
   template<typename Functor>
   typename Functor::return_type ForEach( Functor f ) const {
     return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
-//    for ( std::vector<T>::const_iterator iter = m_vSeries.begin(); iter != m_vSeries.end(); iter++ ) {
-//      f( *iter );
-//    }
-//    return (f);
   }
 
 protected:
 private:
+  bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
   std::vector<T> m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
 };
 
 template<typename T> 
-TimeSeries<T>::TimeSeries(void): m_vIterator( m_vSeries.end() ) {
+TimeSeries<T>::TimeSeries(void)
+  : m_vIterator( m_vSeries.end() ), m_bAppendToVector( true ) {
 }
 
 template<typename T> 
 TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
-  : m_vIterator( m_vSeries.end() ), m_sName( sName ) {
-  if ( 0 != nSize ) m_vSeries.reserve( size );
+  : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ) {
+  if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( size );
 }
 
 template<typename T> 
-TimeSeries<T>::TimeSeries( size_type size ): m_vIterator( m_vSeries.end() ) {
+TimeSeries<T>::TimeSeries( size_type size )
+  : m_vIterator( m_vSeries.end() ), m_bAppendToVector( true ) {
   m_vSeries.reserve( size );
 }
 
 template<typename T>
-TimeSeries<T>::TimeSeries( const TimeSeries<T>& series ) {
+TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
+  : m_bAppendToVector( series.m_bAppendToVector ) {
   m_vSeries = series.m_vSeries;
   m_vIterator = m_vSeries.end();
 }
@@ -149,7 +151,17 @@ TimeSeries<T>::~TimeSeries(void) {
 
 template<typename T> 
 void TimeSeries<T>::Append(const T& datum) {
-  m_vSeries.push_back( datum );
+  if ( m_bAppendToVector ) {
+    m_vSeries.push_back( datum );
+  }
+  else { // provide for .ago(0) capability
+    if ( 0 == m_vSeries.size() ) {
+      m_vSeries.push_back( datum );
+    }
+    else {
+      m_vSeries.back() = datum;
+    }
+  }
   OnAppend( datum );
 }
 
