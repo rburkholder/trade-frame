@@ -22,6 +22,7 @@
 #include "ChartEntryBase.h"
 
 namespace ou { // One Unified
+namespace local {
 
 // ChartDataView contains the CChartEntries and related sub-chart 
 //   to be viewed in a master chart viewport 
@@ -44,6 +45,8 @@ protected:
 private:
 };
 
+} // local
+
 // nChart:  0, 1 reserved:
 //   0: main price chart
 //   1: main volume chart
@@ -51,8 +54,8 @@ private:
 class ChartDataView {
 public:
 
-  typedef std::vector<ChartDataViewCarrier>::const_iterator const_iterator;
-  typedef std::vector<ChartDataViewCarrier>::iterator iterator;
+  typedef std::vector<local::ChartDataViewCarrier>::const_iterator const_iterator;
+  typedef std::vector<local::ChartDataViewCarrier>::iterator iterator;
 
   ChartDataView( const std::string &sStrategy, const std::string &sName );
   ~ChartDataView(void);
@@ -87,7 +90,7 @@ private:
 
   typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
 
-  typedef std::vector<ChartDataViewCarrier> vChartDataViewEntry_t;
+  typedef std::vector<local::ChartDataViewCarrier> vChartDataViewEntry_t;
 
   bool m_bChanged;
   bool m_bClosed;

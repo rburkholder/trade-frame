@@ -43,17 +43,17 @@
 
 #include <TFOptions/CalcExpiry.h>
 
-#include "LiveChart.h"
+#include "Hdf5Chart.h"
 
-IMPLEMENT_APP(AppLiveChart)
+IMPLEMENT_APP(AppHdf5Chart)
 
 size_t atm = 125;
 
-bool AppLiveChart::OnInit() {
+bool AppHdf5Chart::OnInit() {
 
   m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "LiveChart" );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hdf5 Chart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -205,7 +205,7 @@ bool AppLiveChart::OnInit() {
 
 }
 
-void AppLiveChart::HandleMenuActionLoadTree( void ) {
+void AppHdf5Chart::HandleMenuActionLoadTree( void ) {
 
   m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
@@ -219,7 +219,7 @@ void AppLiveChart::HandleMenuActionLoadTree( void ) {
     );
 }
 
-void AppLiveChart::HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 ) {
+void AppHdf5Chart::HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 ) {
   if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData::Quotes;
   if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData::Trades;
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
@@ -229,12 +229,12 @@ void AppLiveChart::HandleLoadTreeHdf5Group( const std::string& s1, const std::st
   m_pdm->IteratePathParts( s1, boost::phoenix::bind( &AppLiveChart::HandleBuildTreePathParts, this, args::arg1 ) );
 }
 
-void AppLiveChart::HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 ) {
+void AppHdf5Chart::HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 ) {
   // assume group has us in the correct place, just add in the object now
   m_pHdf5Root->AppendItem( m_curTreeItem, s2, -1, -1, new CustomItemData( CustomItemData::Object, m_eLatestDatumType ) );
 }
 
-void AppLiveChart::HandleBuildTreePathParts( const std::string& sPathPart ) {
+void AppHdf5Chart::HandleBuildTreePathParts( const std::string& sPathPart ) {
   wxTreeItemIdValue tiv;
   wxTreeItemId ti = m_pHdf5Root->GetFirstChild( m_curTreeItem, tiv );
   bool bItemFound( false );
@@ -254,7 +254,7 @@ void AppLiveChart::HandleBuildTreePathParts( const std::string& sPathPart ) {
 
 }
 
-void AppLiveChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
+void AppHdf5Chart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
   wxTreeItemId id = event.GetItem();
 
@@ -285,14 +285,14 @@ void AppLiveChart::HandleTreeEventItemActivated( wxTreeEvent& event ) {
   
 }
 
-void AppLiveChart::HandleMenuActionStartChart( void ) {
+void AppHdf5Chart::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
   m_pChart = new ChartTest( m_pData1Provider );
 
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
-void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
+void AppHdf5Chart::HandlePaint( wxPaintEvent& event ) {
   if ( m_bReadyToDrawChart && !m_bPaintingChart ) {
     try {
       m_bPaintingChart = true;
@@ -308,7 +308,7 @@ void AppLiveChart::HandlePaint( wxPaintEvent& event ) {
   m_bPaintingChart = false;
 }
 
-void AppLiveChart::HandleSize( wxSizeEvent& event ) { 
+void AppHdf5Chart::HandleSize( wxSizeEvent& event ) { 
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
@@ -320,7 +320,7 @@ void AppLiveChart::HandleDrawChart( const MemBlock& m ) {
   cdc.DrawBitmap(bmp, 0, 0);
 }
 
-void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
+void AppHdf5Chart::HandleGuiRefresh( wxTimerEvent& event ) {
   m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 
   // Process IV Calc once a minute
@@ -340,7 +340,7 @@ void AppLiveChart::HandleGuiRefresh( wxTimerEvent& event ) {
   */
 }
 
-void AppLiveChart::HandleMenuActionStartWatch( void ) {
+void AppHdf5Chart::HandleMenuActionStartWatch( void ) {
 /*
   m_pBundle->StartWatch();
 
@@ -352,7 +352,7 @@ void AppLiveChart::HandleMenuActionStartWatch( void ) {
   m_timerGuiRefresh.Start( 250 );
 }
 
-void AppLiveChart::HandleMenuActionStopWatch( void ) {
+void AppHdf5Chart::HandleMenuActionStopWatch( void ) {
 
   m_timerGuiRefresh.Stop();
 
@@ -364,7 +364,7 @@ void AppLiveChart::HandleMenuActionSaveValues( void ) {
   m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleSaveValues ) );
 }
 
-void AppLiveChart::HandleSaveValues( void ) {
+void AppHdf5Chart::HandleSaveValues( void ) {
   std::cout << "Saving collected values ... " << std::endl;
   try {
     //std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
@@ -381,7 +381,7 @@ void AppLiveChart::HandleSaveValues( void ) {
   std::cout << "  ... Done " << std::endl;
 }
 
-void AppLiveChart::HandleMenuActionInitializeSymbolSet( void ) {
+void AppHdf5Chart::HandleMenuActionInitializeSymbolSet( void ) {
   if ( m_listIQFeedSymbols.begin() == m_listIQFeedSymbols.end() ) {
     std::cout << "Need to load symbols first" << std::endl;
   }
@@ -442,12 +442,12 @@ void AppLiveChart::HandleMenuActionInitializeSymbolSet( void ) {
   
 }
 
-void AppLiveChart::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
+void AppHdf5Chart::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
   m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleObtainNewIQFeedSymbolListRemote ) );
 }
 
-void AppLiveChart::HandleObtainNewIQFeedSymbolListRemote( void ) {
+void AppHdf5Chart::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
   std::cout << "Saving Binary File ... " << std::endl;
@@ -455,12 +455,12 @@ void AppLiveChart::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << " ... done." << std::endl;
 }
 
-void AppLiveChart::HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void ) {
+void AppHdf5Chart::HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void ) {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
   m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleObtainNewIQFeedSymbolListLocal ) );
 }
 
-void AppLiveChart::HandleObtainNewIQFeedSymbolListLocal( void ) {
+void AppHdf5Chart::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << "Loading From Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
   std::cout << "Saving Binary File ... " << std::endl;
@@ -468,12 +468,12 @@ void AppLiveChart::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << " ... done." << std::endl;
 }
 
-void AppLiveChart::HandleMenuAction2LoadIQFeedSymbolList( void ) {
+void AppHdf5Chart::HandleMenuAction2LoadIQFeedSymbolList( void ) {
   // need to lock out from running HandleObtainNewIQFeedSymbolList at the same time
   m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleLoadIQFeedSymbolList ) );
 }
 
-void AppLiveChart::HandleLoadIQFeedSymbolList( void ) {
+void AppHdf5Chart::HandleLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
   m_listIQFeedSymbols.LoadFromFile( "phisymbols.ser" );
   std::cout << " ... completed." << std::endl;
@@ -481,7 +481,7 @@ void AppLiveChart::HandleLoadIQFeedSymbolList( void ) {
 
 
 // runs in thread
-void AppLiveChart::CalcIV( ptime dt ) {
+void AppHdf5Chart::CalcIV( ptime dt ) {
   static time_duration tdMarketOpen( 9, 30, 0, 30 );  // eastern time, plus time to settle
   static time_duration tdMarketClose( 16, 0, 0 );  // eastern time
   ptime dtMarketOpen( 
@@ -498,13 +498,13 @@ void AppLiveChart::CalcIV( ptime dt ) {
   m_bIVCalcActive = false;
 }
 
-void AppLiveChart::HandleMenuActionEmitYieldCurve( void ) {
+void AppHdf5Chart::HandleMenuActionEmitYieldCurve( void ) {
   //ou::tf::libor::EmitYieldCurve();
   //m_libor.EmitYieldCurve();
   std::cout << m_libor;
 }
 
-int AppLiveChart::OnExit() {
+int AppHdf5Chart::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
@@ -522,7 +522,7 @@ int AppLiveChart::OnExit() {
 //}
 
 
-void AppLiveChart::OnClose( wxCloseEvent& event ) {
+void AppHdf5Chart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
@@ -532,7 +532,7 @@ void AppLiveChart::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void AppLiveChart::OnData1Connected( int ) {
+void AppHdf5Chart::OnData1Connected( int ) {
   m_bData1Connected = true;
   //ou::tf::libor::SetWatchOn( m_pData1Provider );
 //  m_libor.SetWatchOn( m_pData1Provider );
@@ -542,7 +542,7 @@ void AppLiveChart::OnData1Connected( int ) {
   }
 }
 
-void AppLiveChart::OnData2Connected( int ) {
+void AppHdf5Chart::OnData2Connected( int ) {
   m_bData2Connected = true;
 //  AutoStartCollection();
   if ( m_bData2Connected & m_bExecConnected ) {
@@ -550,33 +550,33 @@ void AppLiveChart::OnData2Connected( int ) {
   }
 }
 
-void AppLiveChart::OnExecConnected( int ) {
+void AppHdf5Chart::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
   }
 }
 
-void AppLiveChart::OnData1Disconnected( int ) {
+void AppHdf5Chart::OnData1Disconnected( int ) {
 //  m_libor.SetWatchOff();
   m_bData1Connected = false;
 }
 
-void AppLiveChart::OnData2Disconnected( int ) {
+void AppHdf5Chart::OnData2Disconnected( int ) {
   m_bData2Connected = false;
 }
 
-void AppLiveChart::OnExecDisconnected( int ) {
+void AppHdf5Chart::OnExecDisconnected( int ) {
   m_bExecConnected = false;
 }
 
-void AppLiveChart::HandleRegisterTables(  ou::db::Session& session ) {
+void AppHdf5Chart::HandleRegisterTables(  ou::db::Session& session ) {
 }
 
-void AppLiveChart::HandleRegisterRows(  ou::db::Session& session ) {
+void AppHdf5Chart::HandleRegisterRows(  ou::db::Session& session ) {
 }
 
-void AppLiveChart::HandlePopulateDatabase( void ) {
+void AppHdf5Chart::HandlePopulateDatabase( void ) {
 /*
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor 
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );

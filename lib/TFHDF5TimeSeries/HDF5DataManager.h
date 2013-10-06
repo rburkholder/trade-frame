@@ -16,6 +16,8 @@
 
 #include <HDF5/H5Cpp.h>
 
+#include <boost/function.hpp>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -33,6 +35,9 @@ public:
 //  static hsize_t H5ChunkSize( void ) { return 32; };  // # elements to be shuffled/compressed in one block,  was 64
   static void DailyBarPath( const std::string &sSymbol, std::string &sPath );
   void Flush( void );
+
+  typedef boost::function<void (const std::string& )> callbackIteratePath_t;
+  void IteratePathParts( const std::string& sPath, callbackIteratePath_t object );
 protected:
   static const char m_H5FileName[];
 //  static unsigned int m_RefCount;

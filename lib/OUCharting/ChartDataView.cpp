@@ -16,6 +16,7 @@
 #include "ChartDataView.h"
 
 namespace ou { // One Unified
+namespace local {
 
 //
 // CChartDataViewCarrier
@@ -43,6 +44,9 @@ ChartDataViewCarrier::~ChartDataViewCarrier() {
   m_pChartEntry = 0;
 }
 
+} // local
+
+
 // 
 // CChartDataView
 //
@@ -59,7 +63,7 @@ ChartDataView::~ChartDataView(void) {
 }
 
 void ChartDataView::Add(size_t nChart, ChartEntryBase& entry ) {
-  ChartDataViewCarrier carrier( nChart, entry );
+  local::ChartDataViewCarrier carrier( nChart, entry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;
   iter1 = m_mapCntChartIndexes.find( nChart );
@@ -74,7 +78,7 @@ void ChartDataView::Add(size_t nChart, ChartEntryBase& entry ) {
       iter3->second.ixActualChartId = ix++;
     }
     // need to update actualchartid's in all the carriers.
-    for ( std::vector<ChartDataViewCarrier>::iterator iter2 = m_vChartDataViewEntry.begin();
+    for ( std::vector<local::ChartDataViewCarrier>::iterator iter2 = m_vChartDataViewEntry.begin();
       m_vChartDataViewEntry.end() != iter2; ++iter2 ) {
         iter3 = m_mapCntChartIndexes.find( (*iter2).GetLogicalChartId() );
         (*iter2).SetActualChartId( iter3->second.ixActualChartId );

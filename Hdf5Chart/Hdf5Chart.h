@@ -39,11 +39,11 @@
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
 
-#include "Chart.h"
+#include "ChartControl.h"
 
-class AppLiveChart:
-  public wxApp, public ou::tf::FrameWork01<AppLiveChart> {
-    friend ou::tf::FrameWork01<AppLiveChart>;
+class AppHdf5Chart:
+  public wxApp, public ou::tf::FrameWork01<AppHdf5Chart> {
+    friend ou::tf::FrameWork01<AppHdf5Chart>;
 public:
 protected:
 private:
@@ -147,5 +147,5 @@ private:
 };
 
 // Implements MyApp& wxGetApp()
-DECLARE_APP(AppLiveChart)
+DECLARE_APP(AppHdf5Chart)
 

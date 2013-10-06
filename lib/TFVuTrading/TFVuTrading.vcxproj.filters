@@ -87,6 +87,9 @@
     <ClInclude Include="DataViewItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PanelChartHdf5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -150,6 +153,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VuTreePortfolioPositionOrder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelChartHdf5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
