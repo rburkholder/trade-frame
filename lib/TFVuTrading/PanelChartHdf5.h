@@ -16,6 +16,12 @@
 
 // Started 2013/10/06
 
+#include <wx/treectrl.h>
+
+#include <OUCharting/ChartMaster.h>
+
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -41,16 +47,57 @@ public:
     const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION, 
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE, 
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
-  void Init();
-  void CreateControls();
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
 protected:
+
+  void Init();
+  void CreateControls();
+
 private:
+
   enum { ID_Null=wxID_HIGHEST, ID_PANEL_CHARTHDF5 };
+
+  class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
+  public:
+    enum enumNodeType { Root, Group, Object } m_eNodeType;
+    enum enumDatumType { Quotes, Trades, Bars, NoDatum } m_eDatumType;
+    CustomItemData( enumNodeType eNodeType, enumDatumType eDatumType )
+      : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
+  };
+
+  ou::tf::HDF5DataManager* m_pdm;
+
+  wxWindow* m_winChart;
+  bool m_bReadyToDrawChart;
+  ou::ChartMaster m_chartMaster;
+//  ChartTest* m_pChart;
+  //bool m_bPaintingChart;
+
+ std::string m_sCurrentPath;  // used while traversing and building tree
+  wxTreeItemId m_curTreeItem; // used while traversing and building tree
+  CustomItemData::enumDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
+
+  wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
+
+  void OnClose( wxCloseEvent& event );
+
+  void LoadDataAndGenerateChart( void );
+
+  void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
+  void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
+
+  void HandleDrawChart( const MemBlock& );
+  void HandlePaint( wxPaintEvent& event );
+  void HandleSize( wxSizeEvent& event );
+
+  void HandleBuildTreePathParts( const std::string& sPath );
+
+  void HandleTreeEventItemActivated( wxTreeEvent& event );
+
 };
 
 } // namespace tf
