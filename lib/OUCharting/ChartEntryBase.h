@@ -68,6 +68,8 @@ public:
 
   virtual void AddEntryToChart( XYChart *pXY, structChartAttributes* pAttributes ) const {};
 
+  virtual void Clear( void );
+
 protected:
 
   size_type m_ixStart; // starting point into viewport
@@ -100,6 +102,8 @@ public:
 
   void Append( const boost::posix_time::ptime &dt, double price );
   void Append( const boost::posix_time::ptime &dt );
+
+  virtual void Clear( void );
 
 protected:
 

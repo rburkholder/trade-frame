@@ -37,7 +37,7 @@ ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colou
 
 ChartEntryShape::~ChartEntryShape(void) {
   if ( !m_vpChar.empty() ) {
-    for ( std::vector<const char *>::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
+    for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;
     }
   }
@@ -70,6 +70,15 @@ void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttr
     textbox->setAlignment(Chart::Left);
     //textbox->setPos(4, 0);
   }
+}
+
+void ChartEntryShape::Clear( void ) {
+  if ( !m_vpChar.empty() ) {
+    for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
+      delete [] *iter;
+    }
+  }
+  ChartEntryBaseWithTime::Clear();
 }
 
 } // namespace ou

@@ -34,11 +34,14 @@ public:
   virtual ~ChartEntryShape(void);
   void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
   virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void Clear( void );
 protected:
-  static int m_rShapes[];
+
+  typedef std::vector<const char*> vpChar_t;
+
+  static int m_rShapes[];  // constants
   enumShape m_eShape;
-  //std::vector<std::string> m_vLabel;
-  std::vector<const char *> m_vpChar;
+  vpChar_t m_vpChar;
   StringArray GetLabels( void ) const {
     //std::vector<const char *>::const_iterator iter = m_vpChar.begin();
     //return StringArray( &(*iter), static_cast<int>( m_vpChar.size() ) );

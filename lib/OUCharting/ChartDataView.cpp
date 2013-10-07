@@ -52,13 +52,13 @@ ChartDataViewCarrier::~ChartDataViewCarrier() {
 //
 
 ChartDataView::ChartDataView( const std::string &sStrategy, const std::string &sName )
-: m_bClosed( false ), m_sStrategy( sStrategy ), m_sName( sName ), m_bChanged( false )
+: m_sStrategy( sStrategy ), m_sName( sName ), m_bChanged( false ) //, m_bClosed( false )
 {
   m_vChartDataViewEntry.reserve( 10 );
 }
 
 ChartDataView::~ChartDataView(void) {
-  assert( m_bClosed );
+//  assert( m_bClosed );
   m_vChartDataViewEntry.clear();
 }
 
@@ -96,11 +96,11 @@ void ChartDataView::Clear( void ) {
   m_vChartDataViewEntry.clear();
 }
 
-void ChartDataView::Close() {
-  assert( !m_bClosed );
-  OnClosing( this );
-  m_bClosed = true;
-}
+//void ChartDataView::Close() {
+//  assert( !m_bClosed );
+//  OnClosing( this );
+//  m_bClosed = true;
+//}
 
 void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   m_dtViewPortBegin = dtBegin;

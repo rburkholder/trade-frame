@@ -28,6 +28,7 @@ public:
   virtual void Reserve( unsigned int );
   void AppendBar( const ou::tf::Bar& bar );
   virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void Clear( void );
 protected:
   std::vector<double> m_vOpen;
   std::vector<double> m_vHigh;

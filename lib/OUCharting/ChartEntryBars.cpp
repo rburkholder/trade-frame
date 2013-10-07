@@ -80,4 +80,12 @@ void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
   }
 }
 
+void ChartEntryBars::Clear( void ) {
+  m_vOpen.clear();
+  m_vHigh.clear();
+  m_vLow.clear();
+  m_vClose.clear();
+  ChartEntryBaseWithTime::Clear();
+}
+
 } // namespace ou

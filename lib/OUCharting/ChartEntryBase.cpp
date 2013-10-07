@@ -49,6 +49,12 @@ void ChartEntryBase::Append(double price) {
   m_vPrice.push_back( price );
 }
 
+void ChartEntryBase::Clear( void ) {
+  m_vPrice.clear();
+  m_ixStart = 0;
+  m_nElements = 0;
+}
+
 //
 // CChartEntryBaseWithTime
 //
@@ -129,6 +135,12 @@ void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
 void ChartEntryBaseWithTime::Append( const boost::posix_time::ptime &dt, double price) {
   ChartEntryBase::Append( price );
   Append( dt );
+}
+
+void ChartEntryBaseWithTime::Clear( void ) {
+  m_vDateTime.clear();
+  m_vChartTime.clear();
+  ChartEntryBase::Clear();
 }
 
 } // namespace ou

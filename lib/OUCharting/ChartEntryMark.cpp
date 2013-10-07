@@ -44,4 +44,10 @@ void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
   
 }
 
+void ChartEntryMark::Clear( void ) {
+  m_vColour.clear();
+  m_vName.clear();
+  ChartEntryBase::Clear();
+}
+
 } // namespace ou

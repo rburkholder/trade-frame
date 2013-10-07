@@ -83,7 +83,8 @@ private:
   ou::ChartEntryIndicator m_ceQuoteLower;
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryBars m_ceBars;
-  ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryVolume m_ceVolumeUpper;
+  ou::ChartEntryVolume m_ceVolumeLower;
 
   std::string m_sCurrentPath;  // used while traversing and building tree
   wxTreeItemId m_curTreeItem; // used while traversing and building tree

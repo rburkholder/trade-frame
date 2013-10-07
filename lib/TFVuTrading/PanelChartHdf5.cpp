@@ -252,25 +252,88 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
     ou::tf::Bars bars;
     bars.Resize( cnt );
     tsRepository.Read( begin, end, &bars );
-    //m_ceBars.cl
+    m_ceBars.Clear();
+    m_ceVolumeUpper.Clear();
     for ( ou::tf::Bars::const_iterator iter = bars.begin(); bars.end() != iter; ++iter ) {
       m_ceBars.AppendBar( *iter );
-      m_ceVolume.Append( iter->DateTime(), iter->Volume() );
+      m_ceVolumeUpper.Append( iter->DateTime(), iter->Volume() );
     }
     if ( 0 != m_pChartDataView ) {
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
     m_pChartDataView = new ou::ChartDataView( "View Bars", sPath );
+    m_ceVolumeUpper.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceBars );
-    m_pChartDataView->Add( 1, &m_ceVolume );
+    m_pChartDataView->Add( 1, &m_ceVolumeUpper );
     m_chartMaster.SetChartDataView( m_pChartDataView );
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
                              }
     break;
   case CustomItemData::Quotes: {
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote> tsRepository( *m_pdm, sPath );
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote>::iterator begin, end;
+    begin = tsRepository.begin();
+    end = tsRepository.end();
+    hsize_t cnt = end - begin;
+    ou::tf::Quotes quotes;
+    quotes.Resize( cnt );
+    tsRepository.Read( begin, end, &quotes );
+    m_ceQuoteUpper.Clear();
+    m_ceVolumeUpper.Clear();
+    m_ceQuoteLower.Clear();
+    m_ceVolumeLower.Clear();
+    for ( ou::tf::Quotes::const_iterator iter = quotes.begin(); quotes.end() != iter; ++iter ) {
+      m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
+      m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
+      m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
+      m_ceVolumeLower.Append( iter->DateTime(), -iter->BidSize() );
+    }
+    if ( 0 != m_pChartDataView ) {
+      m_chartMaster.SetChartDataView( 0 );
+      delete m_pChartDataView;
+      m_pChartDataView = 0;
+    }
+    m_pChartDataView = new ou::ChartDataView( "View Quotes", sPath );
+    m_ceQuoteUpper.SetColour( ou::Colour::Red );
+    m_ceVolumeUpper.SetColour( ou::Colour::Red );
+    m_ceQuoteLower.SetColour( ou::Colour::Blue );
+    m_ceVolumeLower.SetColour( ou::Colour::Blue );
+    m_pChartDataView->Add( 0, &m_ceQuoteUpper );
+    m_pChartDataView->Add( 1, &m_ceVolumeUpper );
+    m_pChartDataView->Add( 0, &m_ceQuoteLower );
+    m_pChartDataView->Add( 1, &m_ceVolumeLower );
+    m_chartMaster.SetChartDataView( m_pChartDataView );
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
                                }
     break;
   case CustomItemData::Trades: {
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade> tsRepository( *m_pdm, sPath );
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade>::iterator begin, end;
+    begin = tsRepository.begin();
+    end = tsRepository.end();
+    hsize_t cnt = end - begin;
+    ou::tf::Trades trades;
+    trades.Resize( cnt );
+    tsRepository.Read( begin, end, &trades );
+    m_ceTrade.Clear();
+    m_ceVolumeUpper.Clear();
+    for ( ou::tf::Trades::const_iterator iter = trades.begin(); trades.end() != iter; ++iter ) {
+      m_ceTrade.Append( iter->DateTime(), iter->Price() );
+      m_ceVolumeUpper.Append( iter->DateTime(), iter->Volume() );
+    }
+    if ( 0 != m_pChartDataView ) {
+      m_chartMaster.SetChartDataView( 0 );
+      delete m_pChartDataView;
+      m_pChartDataView = 0;
+    }
+    m_pChartDataView = new ou::ChartDataView( "View Trades", sPath );
+    m_ceTrade.SetColour( ou::Colour::Green );
+    m_ceVolumeUpper.SetColour( ou::Colour::Black );
+    m_pChartDataView->Add( 0, &m_ceTrade );
+    m_pChartDataView->Add( 1, &m_ceVolumeUpper );
+    m_chartMaster.SetChartDataView( m_pChartDataView );
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
                                }
     break;
   case CustomItemData::NoDatum: {
