@@ -29,15 +29,14 @@ namespace local {
 
 class ChartDataViewCarrier { // used by ChartViewPort objects to chart data
 public:
-  //enum enumChartDrawingType { Unknown, Indicator, Volume, Bar, Mark, Segment, Shape, _cntChartDrawingTypes };
-  ChartDataViewCarrier( void );
-  ChartDataViewCarrier( size_t nChart, ChartEntryBase& entry );
+  //ChartDataViewCarrier( void );
+  ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry );
 //  ChartDataViewCarrier( ChartDataViewCarrier& carrier );
   ~ChartDataViewCarrier( void );
   size_t GetLogicalChartId( void ) { return m_nLogicalChart; };
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
   size_t GetActualChartId( void ) const { return m_nActualChart; };
-  ChartEntryBase& GetChartEntry( void ) { return *m_pChartEntry; };
+  ChartEntryBase* GetChartEntry( void ) { return m_pChartEntry; };
 protected:
   size_t m_nLogicalChart;  // as supplied by trading rules
   size_t m_nActualChart;   // as supplied by CChartDataView management
@@ -60,13 +59,14 @@ public:
   ChartDataView( const std::string &sStrategy, const std::string &sName );
   ~ChartDataView(void);
 
-  void Add( size_t nChart, ChartEntryBase& entry );  // could try boost::fusion here?  some crtp stuff?
+  void Add( size_t nChart, ChartEntryBase* pEntry );  // could try boost::fusion here?  some crtp stuff?
   iterator begin( void ) { return m_vChartDataViewEntry.begin(); };
   iterator end( void ) { return m_vChartDataViewEntry.end(); };
   const std::string &GetStrategy( void ) const { return m_sStrategy; };
   const std::string &GetName( void ) const { return m_sName; };
   ou::Delegate<ChartDataView*> OnClosing;
   void Close( void ); // call before destruction so can be removed from tree view and view port properly
+  void Clear( void );  // remove stuff in order to reuse.
   size_t GetChartCount( void ) const{ return m_mapCntChartIndexes.size(); };
   void SetChanged(void) { m_bChanged = true; };
   bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };

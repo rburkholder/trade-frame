@@ -22,13 +22,13 @@ namespace local {
 // CChartDataViewCarrier
 //
 
-ChartDataViewCarrier::ChartDataViewCarrier( void ) 
-: m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( 0 )
-{
-}
+//ChartDataViewCarrier::ChartDataViewCarrier( void ) 
+//: m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( 0 )
+//{
+//}
 
-ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, ChartEntryBase& entry ) 
-: m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( &entry )
+ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry ) 
+: m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
 {
 }
 
@@ -62,8 +62,8 @@ ChartDataView::~ChartDataView(void) {
   m_vChartDataViewEntry.clear();
 }
 
-void ChartDataView::Add(size_t nChart, ChartEntryBase& entry ) {
-  local::ChartDataViewCarrier carrier( nChart, entry );
+void ChartDataView::Add(size_t nChart, ChartEntryBase* pEntry ) {
+  local::ChartDataViewCarrier carrier( nChart, pEntry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;
   iter1 = m_mapCntChartIndexes.find( nChart );
@@ -78,7 +78,7 @@ void ChartDataView::Add(size_t nChart, ChartEntryBase& entry ) {
       iter3->second.ixActualChartId = ix++;
     }
     // need to update actualchartid's in all the carriers.
-    for ( std::vector<local::ChartDataViewCarrier>::iterator iter2 = m_vChartDataViewEntry.begin();
+    for ( vChartDataViewEntry_t::iterator iter2 = m_vChartDataViewEntry.begin();
       m_vChartDataViewEntry.end() != iter2; ++iter2 ) {
         iter3 = m_mapCntChartIndexes.find( (*iter2).GetLogicalChartId() );
         (*iter2).SetActualChartId( iter3->second.ixActualChartId );
@@ -89,6 +89,11 @@ void ChartDataView::Add(size_t nChart, ChartEntryBase& entry ) {
     m_vChartDataViewEntry.back().SetActualChartId( iter1->second.ixActualChartId );
   }
   
+}
+
+void ChartDataView::Clear( void ) {
+  m_mapCntChartIndexes.clear();
+  m_vChartDataViewEntry.clear();
 }
 
 void ChartDataView::Close() {
@@ -102,7 +107,7 @@ void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_
   m_dtViewPortEnd = dtEnd;
   // need to change DataArrays in each entry
   for ( vChartDataViewEntry_t::iterator iter = m_vChartDataViewEntry.begin(); m_vChartDataViewEntry.end() != iter; ++iter ) {
-    dynamic_cast<ChartEntryBaseWithTime&>( iter->GetChartEntry() ).SetViewPort( dtBegin, dtEnd );
+    dynamic_cast<ChartEntryBaseWithTime*>( iter->GetChartEntry() )->SetViewPort( dtBegin, dtEnd );
   }
 }
 

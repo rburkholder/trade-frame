@@ -36,29 +36,29 @@ ChartDataBase::ChartDataBase(void)
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
   
-  m_dvChart.Add( 0, m_ceQuoteUpper );
-  m_dvChart.Add( 0, m_ceQuoteLower );
-  m_dvChart.Add( 0, m_ceTrade );
+  m_dvChart.Add( 0, &m_ceQuoteUpper );
+  m_dvChart.Add( 0, &m_ceQuoteLower );
+  m_dvChart.Add( 0, &m_ceTrade );
 
-  m_dvChart.Add( 0, m_ceEma1 );
-  m_dvChart.Add( 0, m_ceEma2 );
-  m_dvChart.Add( 0, m_ceEma3 );
+  m_dvChart.Add( 0, &m_ceEma1 );
+  m_dvChart.Add( 0, &m_ceEma2 );
+  m_dvChart.Add( 0, &m_ceEma3 );
 
-  m_dvChart.Add( 0, m_ceBars );
+  m_dvChart.Add( 0, &m_ceBars );
 
-  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeUp );
-  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeNeutral );
-  m_dvChart.Add( 1, m_rVolumes[ VUp ].ceVolumeDn );
-  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeUp );
-  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeNeutral );
-  m_dvChart.Add( 1, m_rVolumes[ VDn ].ceVolumeDn );
+  m_dvChart.Add( 1, &m_rVolumes[ VUp ].ceVolumeUp );
+  m_dvChart.Add( 1, &m_rVolumes[ VUp ].ceVolumeNeutral );
+  m_dvChart.Add( 1, &m_rVolumes[ VUp ].ceVolumeDn );
+  m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeUp );
+  m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeNeutral );
+  m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeDn );
 
-  m_dvChart.Add( 0, m_ceUpperBollinger1 );
-  m_dvChart.Add( 0, m_ceLowerBollinger1 );
-  m_dvChart.Add( 0, m_ceUpperBollinger2 );
-  m_dvChart.Add( 0, m_ceLowerBollinger2 );
-  m_dvChart.Add( 0, m_ceUpperBollinger3 );
-  m_dvChart.Add( 0, m_ceLowerBollinger3 );
+  m_dvChart.Add( 0, &m_ceUpperBollinger1 );
+  m_dvChart.Add( 0, &m_ceLowerBollinger1 );
+  m_dvChart.Add( 0, &m_ceUpperBollinger2 );
+  m_dvChart.Add( 0, &m_ceLowerBollinger2 );
+  m_dvChart.Add( 0, &m_ceUpperBollinger3 );
+  m_dvChart.Add( 0, &m_ceLowerBollinger3 );
   /*
   m_dvChart.Add( 2, m_ce11 );
   m_dvChart.Add( 2, m_ce12 );

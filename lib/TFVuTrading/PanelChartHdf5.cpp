@@ -23,17 +23,18 @@
 #include <wx/splitter.h>
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
 #include "PanelChartHdf5.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelChartHdf5::PanelChartHdf5(void) {
+PanelChartHdf5::PanelChartHdf5(void): m_pChartDataView( 0 ) {
   Init();
 }
 
-PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ): m_pChartDataView( 0 ) {
   Init();
   Create(parent, id, pos, size, style);
 }
@@ -100,7 +101,7 @@ void PanelChartHdf5::CreateControls() {
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
   //m_bPaintingChart = false;
-  m_bReadyToDrawChart = false;
+  //m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
   wxWindowID idChart = m_winChart->GetId();
@@ -188,7 +189,9 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
     }
   }
 
-  switch ( dynamic_cast<CustomItemData*>( m_pHdf5Root->GetItemData( id ) )->m_eNodeType ) {
+  CustomItemData* pdata = dynamic_cast<CustomItemData*>( m_pHdf5Root->GetItemData( id ) );
+
+  switch ( pdata->m_eNodeType ) {
   case CustomItemData::Root:
     break;
   case CustomItemData::Group:
@@ -196,7 +199,7 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
     break;
   case CustomItemData::Object:
     // load and view time series here
-    LoadDataAndGenerateChart();
+    LoadDataAndGenerateChart( pdata->m_eDatumType, sPath );
     break;
   }
 
@@ -212,12 +215,11 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 //}
 
 void PanelChartHdf5::HandlePaint( wxPaintEvent& event ) {
-  if ( m_bReadyToDrawChart ) {
+  if ( 0 != m_pChartDataView ) {
     try {
       //m_bPaintingChart = true;
       wxSize size = m_winChart->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-//      m_chartMaster.SetChartDataView( &m_pChart->GetChartDataView() );
       m_chartMaster.SetOnDrawChart( MakeDelegate( this, &PanelChartHdf5::HandleDrawChart ) );
       m_chartMaster.DrawChart( );
     }
@@ -239,7 +241,42 @@ void PanelChartHdf5::HandleDrawChart( const MemBlock& m ) {
   cdc.DrawBitmap(bmp, 0, 0);
 }
 
-void PanelChartHdf5::LoadDataAndGenerateChart( void ) {
+void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
+  switch ( edt ) {
+  case CustomItemData::Bars: {
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> tsRepository( *m_pdm, sPath );
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
+    begin = tsRepository.begin();
+    end = tsRepository.end();
+    hsize_t cnt = end - begin;
+    ou::tf::Bars bars;
+    bars.Resize( cnt );
+    tsRepository.Read( begin, end, &bars );
+    //m_ceBars.cl
+    for ( ou::tf::Bars::const_iterator iter = bars.begin(); bars.end() != iter; ++iter ) {
+      m_ceBars.AppendBar( *iter );
+      m_ceVolume.Append( iter->DateTime(), iter->Volume() );
+    }
+    if ( 0 != m_pChartDataView ) {
+      delete m_pChartDataView;
+      m_pChartDataView = 0;
+    }
+    m_pChartDataView = new ou::ChartDataView( "View Bars", sPath );
+    m_pChartDataView->Add( 0, &m_ceBars );
+    m_pChartDataView->Add( 1, &m_ceVolume );
+    m_chartMaster.SetChartDataView( m_pChartDataView );
+                             }
+    break;
+  case CustomItemData::Quotes: {
+                               }
+    break;
+  case CustomItemData::Trades: {
+                               }
+    break;
+  case CustomItemData::NoDatum: {
+                                }
+    break;
+  }
 }
 
 wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {

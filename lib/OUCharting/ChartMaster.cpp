@@ -148,7 +148,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
-        iter->GetChartEntry().AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
+        iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
         m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : std::min<double>( m_dblXMin, Attributes.dblXMin );
         m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : std::max<double>( m_dblXMax, Attributes.dblXMax );
       }

@@ -20,6 +20,10 @@
 
 #include <OUCharting/ChartMaster.h>
 
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 
 namespace ou { // One Unified
@@ -72,12 +76,16 @@ private:
   ou::tf::HDF5DataManager* m_pdm;
 
   wxWindow* m_winChart;
-  bool m_bReadyToDrawChart;
+  ou::ChartDataView* m_pChartDataView;
   ou::ChartMaster m_chartMaster;
-//  ChartTest* m_pChart;
-  //bool m_bPaintingChart;
 
- std::string m_sCurrentPath;  // used while traversing and building tree
+  ou::ChartEntryIndicator m_ceQuoteUpper;
+  ou::ChartEntryIndicator m_ceQuoteLower;
+  ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryBars m_ceBars;
+  ou::ChartEntryVolume m_ceVolume;
+
+  std::string m_sCurrentPath;  // used while traversing and building tree
   wxTreeItemId m_curTreeItem; // used while traversing and building tree
   CustomItemData::enumDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
 
@@ -85,7 +93,7 @@ private:
 
   void OnClose( wxCloseEvent& event );
 
-  void LoadDataAndGenerateChart( void );
+  void LoadDataAndGenerateChart( CustomItemData::enumDatumType, const std::string& sPath );
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
