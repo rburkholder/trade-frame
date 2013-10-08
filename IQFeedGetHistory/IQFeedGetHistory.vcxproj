@@ -136,7 +136,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libcurl.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <AdditionalDependencies>libcurl.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>

@@ -19,6 +19,7 @@
     <ClCompile Include="TSMicrostructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ExchangeHolidays.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BarFactory.h">
@@ -48,6 +49,7 @@
     <ClInclude Include="Adapters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ExchangeHolidays.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

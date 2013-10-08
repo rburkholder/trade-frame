@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <TFTimeSeries/ExchangeHolidays.h>
+
 #include "CalcExpiry.h"
 
 namespace ou { // One Unified
@@ -58,6 +60,37 @@ boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
     dExpiry = domExpiry2.get_date( date.year() );
   }
   return dExpiry;
+}
+
+boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
+  boost::gregorian::day_iterator iterDay( boost::gregorian::date( date.year(), date.month(), 1 ), 1 );
+  //--iterDay; // move to last day of previous month
+  unsigned int cnt( 0 ); // need to move back four business days
+  while ( 4 != cnt ) { // move to fourth last business day
+    --iterDay;
+    unsigned int dow = iterDay->day_of_week();
+    if ( ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow ) ) {
+    }
+    else {
+      --cnt; // decrement when business day encountered
+    }
+  }
+  bool bOk( false );
+  do {
+    using namespace ou::tf::holidays::exchange;
+    setDates_t::iterator iter = setUSDates.find( *iter );
+    unsigned int dow = iterDay->day_of_week();
+    if ( ( boost::gregorian::Friday == dow )
+      || ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow )
+      || ( setUSDates.end() != iter ) 
+      ) {
+        --iterDay;
+    }
+    else {
+      bOk = true;
+    }
+  } while ( !bOk );
+  return *iterDay;
 }
 
 } // namespace option

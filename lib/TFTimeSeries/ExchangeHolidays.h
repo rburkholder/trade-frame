@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2011, One Unified. All rights reserved.                 *
+ * Copyright(c) 2013, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -11,23 +11,24 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
- 
+
+// Started 2013/10/08
+
 #pragma once
 
-// http://www.theoptionsguide.com/expiration-date.aspx
-// http://www.cboe.com/TradTool/strikepricecode.aspx
+#include <set>
 
-#include <boost/date_time/gregorian/gregorian.hpp>
+#include "boost/date_time/gregorian/gregorian_types.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace option { // options
+namespace holidays {
+namespace exchange {
 
-boost::gregorian::date CurrentFrontMonthExpiry( boost::gregorian::date date );
-boost::gregorian::date Next3rdFriday( boost::gregorian::date date );
-boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date );
+typedef std::set<boost::gregorian::date> setDates_t;
+extern setDates_t setUSDates;
 
-} // namespace option
+} // namespace exchange
+} // namespace holidays
 } // namespace tf
 } // namespace ou
-

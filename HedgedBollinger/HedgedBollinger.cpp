@@ -257,6 +257,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 //        ou::TimeSource::Instance().ConvertRegionalToUtc( dateFrontMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
 //      ptime dtSecondMonthExpiryUtc( 
 //        ou::TimeSource::Instance().ConvertRegionalToUtc( dateSecondMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
+      // use 16:00 est as time of expiry, as that is when they cease trading.
 
     // http://www.cboe.com/products/EquityOptionSpecs.aspx
     //Expiration Date:

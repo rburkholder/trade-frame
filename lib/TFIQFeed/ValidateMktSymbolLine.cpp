@@ -18,6 +18,8 @@
 
 #include <OUCommon/Debug.h>
 
+#include <TFOptions/CalcExpiry.h>
+
 #include "ValidateMktSymbolLine.h"
 
 namespace ou { // One Unified
@@ -196,6 +198,15 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           assert( ( 2000 + pos2.nYear ) == structOption.nYear );
           trd.nDay = pos2.nDay;
         }
+        boost::gregorian::date date( trd.nYear, trd.nMonth, trd.nDay );
+        if ( 6 /* saturday */ == date.day_of_week() ) {
+          static boost::gregorian::date_duration dur( 1 );
+          date = date - dur;
+          boost::gregorian::date::ymd_type ymd = date.year_month_day();
+          trd.nYear = ymd.year;
+          trd.nMonth = ymd.month;
+          trd.nDay = ymd.day;
+        }
         else {
           std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
         }
@@ -256,6 +267,13 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
         char c = pos1.sText.back();
         assert( ( 'F' <= c ) && ( c <= 'Z' ) );
         trd.nMonth = rFutureMonth[ c - 'A' ];
+
+        boost::gregorian::date date( trd.nYear, trd.nMonth, 1 );
+        date = ou::tf::option::FuturesOptionExpiry( date );
+        boost::gregorian::date::ymd_type ymd = date.year_month_day();
+        trd.nYear = ymd.year;
+        trd.nMonth = ymd.month;
+        trd.nDay = ymd.day;
 
         pos1.sText = pos1.sText.substr( 0, pos1.sText.length() - 1 );
 

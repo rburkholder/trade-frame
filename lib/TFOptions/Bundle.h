@@ -191,9 +191,12 @@ struct PopulateMultiExpiryBundle {
   {}
 
   void operator()( const ou::tf::iqfeed::MarketSymbol::TableRowDef& trd ) {
-    assert( trd.sUnderlying == meb.Name() );
-    assert( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc  );
-    boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay - 1 );  // IQFeed dates are on Saturday
+    //assert( trd.sUnderlying == meb.Name() );
+    assert( ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc )
+         || ( ou::tf::iqfeed::MarketSymbol::FOption == trd.sc )
+      );
+    //boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay - 1 );  // IQFeed dates are on Saturday
+    boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay ); // fix IQFeed dates elsewhere
     if ( meb.ExpiryBundleExists( dateTrdExpiry ) ) {
       pInstrument_t pInstrument;
       std::string side;

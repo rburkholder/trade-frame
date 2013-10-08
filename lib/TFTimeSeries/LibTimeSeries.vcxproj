@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClCompile Include="BarFactory.cpp" />
     <ClCompile Include="DatedDatum.cpp" />
+    <ClCompile Include="ExchangeHolidays.cpp" />
     <ClCompile Include="MergeDatedDatums.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -138,22 +139,13 @@
     <ClInclude Include="Adapters.h" />
     <ClInclude Include="BarFactory.h" />
     <ClInclude Include="DatedDatum.h" />
+    <ClInclude Include="ExchangeHolidays.h" />
     <ClInclude Include="MergeDatedDatumCarrier.h" />
     <ClInclude Include="MergeDatedDatums.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TimeSeries.h" />
     <ClInclude Include="TSMicrostructure.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibCommon\LibCommon.vcxproj">
-      <Project>{f03f73ea-df5f-48da-abae-a860bcee54d4}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\LibHDF5TimeSeries\LibHDF5TimeSeries.vcxproj">
-      <Project>{12cc3456-56cb-4ac1-979f-b6b73bb47929}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
