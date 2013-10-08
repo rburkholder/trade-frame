@@ -148,8 +148,8 @@ void CTradingLogic::OnPeriodicRefresh( CGeneratePeriodicRefresh *pMsg ) {
 void CTradingLogic::OnDailyBarHistoryDone( IQFeedHistory *pHistory ) {
   if ( pBars->Count() > 0 ) {
 
-    CPivotGroup group( pBars );
-    for ( CPivotGroup::const_iterator iter = group.begin(); iter != group.end(); ++iter ) {
+    PivotGroup group( pBars );
+    for ( PivotGroup::const_iterator iter = group.begin(); iter != group.end(); ++iter ) {
       pTradeFrame->AppendStaticIndicator( iter->first, iter->second.sName.c_str() );
     }
   }

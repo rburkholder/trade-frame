@@ -19,6 +19,8 @@
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 
+#include <TFIndicators/Pivots.h>
+
 #include "Scanner.h"
 
 IMPLEMENT_APP(AppScanner)
@@ -118,10 +120,35 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
   data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
   if ( ( 1000000 < data.nAverageVolume ) 
     && ( 12.0 <= bars.Last()->Close() )
-    && ( 80.0 >= bars.Last()->Close() ) ) {
+    && ( 90.0 >= bars.Last()->Close() ) ) {
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
       //std::cout << sObject << " vol=" << volAverage << std::endl;
+      ou::tf::Bars::const_iterator iter1, iter2;
+      iter2 = bars.end();
+      iter1 = iter2 - 101;
+      iter2 = iter1;
+      ++iter2;
+      data.nPVCrossings = 0;
+      data.nUpAndR1Crossings = 0;
+      data.nDnAndS1Crossings = 0;
+      while ( bars.end() != iter2 ) {
+        ou::tf::PivotSet pivot( "pv", *iter1 );
+        double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
+        if ( ( pv <= iter2->High() ) && ( pv >= iter2->Low() ) ) {
+          ++(data.nPVCrossings);
+        }
+        if ( iter2->Open() > pv ) {
+          double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
+          if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(data.nUpAndR1Crossings);
+        }
+        if ( iter2->Open() < pv ) {
+          double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
+          if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(data.nDnAndS1Crossings);
+        }
+        ++iter1;
+        ++iter2;
+      }
       ++data.nPassedFilter;
       b = true;
   }
@@ -130,16 +157,24 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
 
 
 void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
-  std::cout << sObject << ": " << data.nAverageVolume << "," << data.nEnteredFilter << "," << data.nPassedFilter << std::endl;
+  std::cout 
+    << sObject << "," 
+    << data.nAverageVolume << "," 
+    << data.nEnteredFilter << "," 
+    << data.nPassedFilter << ","
+    << data.nUpAndR1Crossings << ","
+    << data.nPVCrossings << ","
+    << data.nDnAndS1Crossings 
+    << std::endl;
 }
 
 void AppScanner::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
   ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter( 
     "/bar/86400", 
-    ptime( date( 2013, 9, 4 ), time_duration( 0, 0, 0 ) ), 
-    ptime( date( 2013, 9, 19 ), time_duration( 0, 0, 0 ) ), 
-    10,
+    ptime( date( 2012, 10, 31 ), time_duration( 0, 0, 0 ) ), 
+    ptime( date( 2013, 10, 31 ), time_duration( 0, 0, 0 ) ), 
+    100,
     boost::phoenix::bind( &AppScanner::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &AppScanner::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &AppScanner::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )

@@ -83,23 +83,23 @@ void ScanHistory::OnHistoryRequestDone( structQueryState* pqs ) {
       unsigned int cnt = 0;
       ou::tf::Bars::const_iterator iter = pqs->bars->bars.begin();
       for ( int ix = 0; ix < ( m_nRequestedBars - 1 ); ix++ ) { // n - 1 bars, extra bar is pivot calc
-        ou::tf::CPivotSet pivot( "", *iter );
+        ou::tf::PivotSet pivot( "", *iter );
         iter++;
-        double pv = pivot.GetPivotValue( ou::tf::CPivotSet::PV );
+        double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
         if ( iter->Open() > pv ) if ( iter->Low() <= pv ) info.cntPV++;
         if ( iter->Open() < pv ) if ( iter->High() >= pv ) info.cntPV++;
-        if ( iter->High() >= pivot.GetPivotValue( ou::tf::CPivotSet::R1 ) ) info.cntR1++;
-        if ( iter->Low() <= pivot.GetPivotValue( ou::tf::CPivotSet::S1 ) ) info.cntS1++;
+        if ( iter->High() >= pivot.GetPivotValue( ou::tf::PivotSet::R1 ) ) info.cntR1++;
+        if ( iter->Low() <= pivot.GetPivotValue( ou::tf::PivotSet::S1 ) ) info.cntS1++;
       }
       //iter++;
-      ou::tf::CPivotSet pivot( "", *iter );  // generate pivot for final bar
-      info.S3 = pivot.GetPivotValue( ou::tf::CPivotSet::S3 );
-      info.S2 = pivot.GetPivotValue( ou::tf::CPivotSet::S2 );
-      info.S1 = pivot.GetPivotValue( ou::tf::CPivotSet::S1 );
-      info.PV = pivot.GetPivotValue( ou::tf::CPivotSet::PV );
-      info.R1 = pivot.GetPivotValue( ou::tf::CPivotSet::R1 );
-      info.R2 = pivot.GetPivotValue( ou::tf::CPivotSet::R2 );
-      info.R3 = pivot.GetPivotValue( ou::tf::CPivotSet::R3 );
+      ou::tf::PivotSet pivot( "", *iter );  // generate pivot for final bar
+      info.S3 = pivot.GetPivotValue( ou::tf::PivotSet::S3 );
+      info.S2 = pivot.GetPivotValue( ou::tf::PivotSet::S2 );
+      info.S1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
+      info.PV = pivot.GetPivotValue( ou::tf::PivotSet::PV );
+      info.R1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
+      info.R2 = pivot.GetPivotValue( ou::tf::PivotSet::R2 );
+      info.R3 = pivot.GetPivotValue( ou::tf::PivotSet::R3 );
       info.dblClose = iter->Close();
       unsigned int metric = info.cntR1 + info.cntS1;
       if ( m_nRequestedBars <= metric ) {

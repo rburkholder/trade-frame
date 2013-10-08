@@ -21,25 +21,25 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-CPivotGroup::CPivotGroup(void) 
+PivotGroup::PivotGroup(void) 
  {
 }
 
-CPivotGroup::CPivotGroup( Bars* pBars ) {
+PivotGroup::PivotGroup( Bars* pBars ) {
   CalculatePivotSets( pBars );
 }
 
-CPivotGroup::~CPivotGroup(void) {
+PivotGroup::~PivotGroup(void) {
   m_mmPivots.clear();
 }
 
-void CPivotGroup::AddToMap( CPivotSet &set ) {
-  for ( unsigned short ix = 0; ix < CPivotSet::PivotCount; ++ix ) {
+void PivotGroup::AddToMap( PivotSet &set ) {
+  for ( unsigned short ix = 0; ix < PivotSet::PivotCount; ++ix ) {
     m_mmPivots.insert( set[ ix ] );
   }
 }
 
-void CPivotGroup::CalculatePivotSets(Bars* pBars) {
+void PivotGroup::CalculatePivotSets(Bars* pBars) {
 
   const Bar& bar0( *pBars->Last() );
 
@@ -66,7 +66,7 @@ void CPivotGroup::CalculatePivotSets(Bars* pBars) {
   date dt200BarsAgo = dtThisDay - days( ( ( 200 /*bars wanted*/ / 5 /*days/wk*=#wks*/ ) * 7 /*days/wk*/ ) + 10 /*trade holidays*/ ); // ensures 200 bars is within reasonable time frame
   //ss << ", 200 Days ago: " << dt200DaysAgo;
 
-  CPivotSet Pivot1Day( "pv1Dy", bar0.High(), bar0.Low(), bar0.Close() );
+  PivotSet Pivot1Day( "pv1Dy", bar0.High(), bar0.Low(), bar0.Close() );
   AddToMap( Pivot1Day );
 
   double day3hi = bar0.High();
@@ -83,7 +83,7 @@ void CPivotGroup::CalculatePivotSets(Bars* pBars) {
     day3hi = std::max<double>( day3hi, bar2.High() );
     day3lo = std::min<double>( day3lo, bar2.Low() );
 
-    CPivotSet Pivot3Day( "pv3Dy", day3hi, day3lo, day3cl );
+    PivotSet Pivot3Day( "pv3Dy", day3hi, day3lo, day3cl );
     AddToMap( Pivot3Day );
   }
 
@@ -91,25 +91,25 @@ void CPivotGroup::CalculatePivotSets(Bars* pBars) {
 
   if ( pBars->Size() >= 10 ) {
     pBarsForPeriod = pBars->Subset( ptime( dtPrevMonday ), 5 );
-    CPivotSet PivotWeek( "pvWk", pBarsForPeriod );
+    PivotSet PivotWeek( "pvWk", pBarsForPeriod );
     AddToMap( PivotWeek );
     delete pBarsForPeriod;
   }
   if ( pBars->Size() >= 20 ) {
     pBarsForPeriod = pBars->Subset( ptime( dtMonthAgo ), 20 );
-    CPivotSet Pivot20Bars( "pv20B", pBarsForPeriod );
+    PivotSet Pivot20Bars( "pv20B", pBarsForPeriod );
     AddToMap( Pivot20Bars );
     delete pBarsForPeriod;
   }
   if ( pBars->Size() >= 42 ) {
     pBarsForPeriod = pBars->Subset( ptime( dtPrevMonth ), 20 ); 
-    CPivotSet PivotMonth( "pvMn", pBarsForPeriod );
+    PivotSet PivotMonth( "pvMn", pBarsForPeriod );
     AddToMap( PivotMonth );
     delete pBarsForPeriod;
   }
   if ( pBars->Size() >= 200 ) {
     pBarsForPeriod = pBars->Subset( ptime( dt200BarsAgo ), 200 );
-    CPivotSet Pivot200Bars( "pv200B", pBarsForPeriod );
+    PivotSet Pivot200Bars( "pv200B", pBarsForPeriod );
     AddToMap( Pivot200Bars );
     delete pBarsForPeriod;
   }

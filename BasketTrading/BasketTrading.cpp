@@ -211,8 +211,17 @@ void AppBasketTrading::HandlePopulateDatabase( void ) {
   ou::tf::AccountManager::pAccount_t pAccountSimulator
     = ou::tf::AccountManager::Instance().ConstructAccount( "sim01", "aoRay", "Raymond Burkholder", ou::tf::keytypes::EProviderSimulator, "Sim", "acctid", "login", "password" );
 
+  m_pPortfolioMaster
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
+
+  m_pPortfolioCurrencyUSD
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
+
   m_pPortfolio
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( m_sDbPortfolioName, "aoRay", "Basket of Equities" );
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    m_sDbPortfolioName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Basket of Equities" );
 
 }
 

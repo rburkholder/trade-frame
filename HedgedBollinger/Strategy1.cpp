@@ -40,11 +40,11 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb )
   //m_bfBuys.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionBuys ) );
   //m_bfSells.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarCompletionSells ) );
 
-  m_dvChart.Add( 0, m_ceBars );
+  m_dvChart.Add( 0, &m_ceBars );
 
-  m_dvChart.Add( 0, m_ceEma1 );
-  m_dvChart.Add( 0, m_ceEma2 );
-  m_dvChart.Add( 0, m_ceEma3 );
+  m_dvChart.Add( 0, &m_ceEma1 );
+  m_dvChart.Add( 0, &m_ceEma2 );
+  m_dvChart.Add( 0, &m_ceEma3 );
 }
 
 Strategy::~Strategy(void) {
@@ -67,14 +67,14 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 }
 
 void Strategy::HandleBarCompletionTrades( const ou::tf::Bar& bar ) {
-  m_ceBars.AddBar( bar );
+  m_ceBars.AppendBar( bar );
 }
 
 void Strategy::HandleCommon( const ou::tf::Quote& quote ) {
   ptime dt( quote.DateTime() );
-  m_ceEma1.Add( dt, m_ema1.Ago( 0 ).Value() );
-  m_ceEma2.Add( dt, m_ema2.Ago( 0 ).Value() );
-  m_ceEma3.Add( dt, m_ema3.Ago( 0 ).Value() );
+  m_ceEma1.Append( dt, m_ema1.Ago( 0 ).Value() );
+  m_ceEma2.Append( dt, m_ema2.Ago( 0 ).Value() );
+  m_ceEma3.Append( dt, m_ema3.Ago( 0 ).Value() );
 }
 
 void Strategy::HandleCommon( const ou::tf::Trade& trade ) {

@@ -57,6 +57,8 @@ public:
 protected:
 private:
 
+  typedef ou::tf::PortfolioManager::pPortfolio_t pPortfolio_t;
+
   std::string m_sDbPortfolioName;
 
   FrameMain* m_pFrameMain;
@@ -70,7 +72,9 @@ private:
   ou::tf::DBOps m_db;
 
   ManagePortfolio m_ManagePortfolio;
-  ou::tf::PortfolioManager::pPortfolio_t m_pPortfolio;
+  pPortfolio_t m_pPortfolioMaster;
+  pPortfolio_t m_pPortfolioCurrencyUSD;
+  pPortfolio_t m_pPortfolio;
 
   bool m_bData1Connected;
   bool m_bExecConnected;

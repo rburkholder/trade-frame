@@ -601,15 +601,15 @@ void Process::OnHistorySummaryData( structSummary* pDP ) {
 
 void Process::OnHistoryRequestDone( void ) {
   HistoryQuery<Process>::Disconnect();  
-  CPivotSet pivots;
+  PivotSet pivots;
   pivots.CalcPivots( m_sSymbolName, m_Bar.High(), m_Bar.Low(), m_Bar.Close() );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::R3 ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::R2 ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::R1 ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::PV ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S1 ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S2 ) );
-  m_vCrossOverPoints.push_back( pivots.GetPivotValue( CPivotSet::S3 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::R3 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::R2 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::R1 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::PV ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::S1 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::S2 ) );
+  m_vCrossOverPoints.push_back( pivots.GetPivotValue( PivotSet::S3 ) );
 }
 
 void Process::StartWatch( void ) {

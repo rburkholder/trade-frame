@@ -17,14 +17,6 @@
 #include <string>
 #include <utility>
 
-#ifdef RGB
-#undef RGB
-#endif
-
-// windows COLORREF is backwards from what ChartDir is expecting
-// use bgr instead of rgb order as provided by windows define
-#define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
-
 #include <OUCommon/Colour.h>
 
 #include <TFTimeSeries/TimeSeries.h>
@@ -32,7 +24,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CPivotSet {
+class PivotSet {
 public:
 
   enum enumPivots { R3, R23, R2, R12, R1, PVR1, PV, PVS1, S1, S12, S2, S23, S3, PivotCount };
@@ -45,13 +37,14 @@ public:
       : sName( sName_ ), colour( colour_ ) {};
   };
 
-  CPivotSet(void);
-  CPivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
-  CPivotSet( const std::string &sName, double Hi, double Lo, double Close );
-  CPivotSet( const std::string &sName, const Bar& bar );
-  CPivotSet( const std::string &sName, Bars* bars );
+  PivotSet(void);
+  PivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
+  PivotSet( const std::string &sName, double Hi, double Lo, double Close );
+  PivotSet( const std::string &sName, const Bar& bar );
+  PivotSet( const std::string &sName, Bars* bars );
+  // add in  a constructor with bar iterators, can then do pivot for weekly bar set or monthly bar set, etc
 
-  virtual ~CPivotSet(void);
+  virtual ~PivotSet(void);
 
   void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
   void CalcPivots( double Hi, double Lo, double Close );

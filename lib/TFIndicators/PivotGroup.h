@@ -21,23 +21,23 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CPivotGroup {
+class PivotGroup {
 public:
-  CPivotGroup(void);
-  CPivotGroup( Bars* pBars );
-  virtual ~CPivotGroup(void);
+  PivotGroup(void);
+  PivotGroup( Bars* pBars );
+  virtual ~PivotGroup(void);
 
   void CalculatePivotSets( Bars* pBars );
-  //CPivotSet *operator[]( unsigned short ix ) { return m_vPivotSetGroup[ ix ]; }; 
+  //PivotSet *operator[]( unsigned short ix ) { return m_vPivotSetGroup[ ix ]; }; 
   void Clear( void ) { m_mmPivots.clear(); };
 
-  typedef std::multimap<double, CPivotSet::structPivotInfo>::const_iterator const_iterator;
+  typedef std::multimap<double, PivotSet::structPivotInfo>::const_iterator const_iterator;
   const_iterator begin() { return m_mmPivots.begin(); };
   const_iterator end() { return m_mmPivots.end(); };
 
 protected:
-  std::multimap<double, CPivotSet::structPivotInfo> m_mmPivots; // sorted list of all pivots, along with name assignments
-  void AddToMap( CPivotSet &set );
+  std::multimap<double, PivotSet::structPivotInfo> m_mmPivots; // sorted list of all pivots, along with name assignments
+  void AddToMap( PivotSet &set );
 private:
 };
 

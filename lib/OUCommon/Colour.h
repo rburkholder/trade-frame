@@ -15,14 +15,12 @@
 
 namespace ou {
 
-
 // http://en.wikipedia.org/wiki/Color#cite_note-0
 
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
 typedef DWORD COLORREF;
-
  
 #ifdef RGB
 #undef RGB
@@ -34,8 +32,8 @@ typedef DWORD COLORREF;
 // from WinGDI.h:
 //#define RGB(r,g,b)          ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
 
-
 // we may get into problems if this file is used for windows colours as well as ChartDir colours
+// or template it or type traits it or use some sort of define
 
 namespace Colour {
   enum enumColour {

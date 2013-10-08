@@ -21,22 +21,22 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const std::string CPivotSet::m_sPivotNames[ CPivotSet::PivotCount ] 
+const std::string PivotSet::m_sPivotNames[ PivotSet::PivotCount ] 
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
-const ou::Colour::enumColour CPivotSet::m_rPivotColours[ CPivotSet::PivotCount ] 
+const ou::Colour::enumColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ] 
   = { ou::Colour::Tomato, ou::Colour::OrangeRed, ou::Colour::Orange, ou::Colour::RosyBrown, ou::Colour::Red, ou::Colour::Pink, 
       ou::Colour::DarkRed, 
       ou::Colour::BlueViolet, ou::Colour::Blue, ou::Colour::RoyalBlue, ou::Colour::Purple, ou::Colour::SkyBlue, ou::Colour::Violet };
 
-CPivotSet::CPivotSet(void) 
+PivotSet::PivotSet(void) 
  {
    for ( unsigned short ix = 0; ix < PivotCount; ++ix ) {
      m_rPivots[ ix ] = 0;
    }
 }
 
-CPivotSet::CPivotSet( const std::string &sName, double _S3, double _S2, double _S1, double _PV, double _R1, double _R2, double _R3 ) :
+PivotSet::PivotSet( const std::string &sName, double _S3, double _S2, double _S1, double _PV, double _R1, double _R2, double _R3 ) :
   m_sName( sName )
 {
   m_rPivots[ R3 ] = _R3;
@@ -49,11 +49,11 @@ CPivotSet::CPivotSet( const std::string &sName, double _S3, double _S2, double _
   CalcHalfPivots();
 }
 
-CPivotSet::CPivotSet( const std::string &sName, const Bar& bar ) {
+PivotSet::PivotSet( const std::string &sName, const Bar& bar ) {
   CalcPivots( sName, bar.High(), bar.Low(), bar.Close() );
 }
 
-CPivotSet::CPivotSet( const std::string &sName, Bars* bars ) {
+PivotSet::PivotSet( const std::string &sName, Bars* bars ) {
   double hi = 0;
   double lo = 0;
   double cl = 0;
@@ -74,19 +74,19 @@ CPivotSet::CPivotSet( const std::string &sName, Bars* bars ) {
   CalcPivots( sName, hi, lo, cl );
 }
 
-CPivotSet::CPivotSet( const std::string &sName, double Hi, double Lo, double Close ) {
+PivotSet::PivotSet( const std::string &sName, double Hi, double Lo, double Close ) {
   CalcPivots( sName, Hi, Lo, Close );
 }
 
-CPivotSet::~CPivotSet() {
+PivotSet::~PivotSet() {
 }
 
-void CPivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, double Close ) {
+void PivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, double Close ) {
   m_sName = sName;
   CalcPivots( Hi, Lo, Close );
 }
 
-void CPivotSet::CalcPivots( double Hi, double Lo, double Close ) {
+void PivotSet::CalcPivots( double Hi, double Lo, double Close ) {
   double dif = Hi - Lo;
   m_rPivots[ PV ] = ( Hi + Lo + Close ) / 3;
   m_rPivots[ R1 ] = 2 * m_rPivots[ PV ] - Lo;
@@ -98,7 +98,7 @@ void CPivotSet::CalcPivots( double Hi, double Lo, double Close ) {
 //  CalcHalfPivots();  // removed 2011/10/23
 }
 
-void CPivotSet::CalcHalfPivots() {
+void PivotSet::CalcHalfPivots() {
   m_rPivots[ R23  ] = ( m_rPivots[ R3 ] + m_rPivots[ R2 ] ) / 2;
   m_rPivots[ R12  ] = ( m_rPivots[ R1 ] + m_rPivots[ R2 ] ) / 2;
   m_rPivots[ PVR1 ] = ( m_rPivots[ PV ] + m_rPivots[ R1 ] ) / 2;

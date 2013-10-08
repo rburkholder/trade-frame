@@ -239,8 +239,18 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
       // work out current expiry and next expiry
       ptime now = ou::TimeSource::Instance().External();
-      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
-      boost::gregorian::date dateSecondMonth = ou::tf::option::Next3rdFriday( dateFrontMonth );
+      // opra equity calc
+//      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
+//      boost::gregorian::date dateSecondMonth = ou::tf::option::Next3rdFriday( dateFrontMonth );
+      // gold future calc:
+      // http://www.cmegroup.com/trading/metals/files/pm264-fact-card-gold-options.pdf
+      // expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, excercise 20:00
+      // trading: sunday - friday 18:00 - 17:15 et
+      // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
+      // in trading state machine, indicate when 8 days prior to expiry of front month in order to
+      //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
+      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 29 ) );
+      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2013, 11, 26 ) );
 
       // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
 //      ptime dtFrontMonthExpiryUtc( 
@@ -261,13 +271,13 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       //std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
       std::cout << "Expiry strings: " << dateFrontMonth << ", " << dateSecondMonth << std::endl;
 
-      std::string sName( "GLD" );
+      std::string sNameUnderlyingWatch( "+GC#" );
 
-      m_pBundle = new ou::tf::option::MultiExpiryBundle( sName );
+      m_pBundle = new ou::tf::option::MultiExpiryBundle( sNameUnderlyingWatch );
 
       pInstrument_t pInstrumentUnderlying;
       pInstrumentUnderlying.reset( 
-        new ou::tf::Instrument( sName, ou::tf::InstrumentType::Stock, "SMART" ) );  // need to register this with InstrumentManager before trading
+        new ou::tf::Instrument( sNameUnderlyingWatch, ou::tf::InstrumentType::Future, "SMART" ) );  // need to register this with InstrumentManager before trading
 
       m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
 
@@ -275,11 +285,12 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       m_pBundle->CreateExpiryBundle( dateSecondMonth );
 
       pProvider_t pNull;
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+      std::string sNameUnderlying( "GC" );
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( sNameUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
       m_pBundle->Portfolio()
         = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-          sName, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sName + " Hedge" );
+          sNameUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sNameUnderlying + " Hedge" );
 
       m_pStrategy = new Strategy( m_pBundle );
 
@@ -322,7 +333,7 @@ void AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList( void ) {
 
 void AppHedgedBollinger::HandleLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( "phisymbols.ser" );
+  m_listIQFeedSymbols.LoadFromFile( "symbols.ser" );
   std::cout << " ... completed." << std::endl;
 }
 
