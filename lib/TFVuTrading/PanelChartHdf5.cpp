@@ -142,6 +142,9 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData::Quotes;
   if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData::Trades;
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
+  //if ( "AtmIV" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
+  if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
+  if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
   namespace args = boost::phoenix::placeholders;
   m_sCurrentPath = s1;
   m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
@@ -262,7 +265,7 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "View Bars", sPath );
+    m_pChartDataView = new ou::ChartDataView( "Bars", sPath );
     m_ceVolumeUpper.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceBars );
     m_pChartDataView->Add( 1, &m_ceVolumeUpper );
@@ -283,26 +286,30 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
     m_ceVolumeUpper.Clear();
     m_ceQuoteLower.Clear();
     m_ceVolumeLower.Clear();
+    m_ceQuoteSpread.Clear();
     for ( ou::tf::Quotes::const_iterator iter = quotes.begin(); quotes.end() != iter; ++iter ) {
       m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
       m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
       m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
       m_ceVolumeLower.Append( iter->DateTime(), -iter->BidSize() );
+      m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
     }
     if ( 0 != m_pChartDataView ) {
       m_chartMaster.SetChartDataView( 0 );
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "View Quotes", sPath );
+    m_pChartDataView = new ou::ChartDataView( "Quotes", sPath );
     m_ceQuoteUpper.SetColour( ou::Colour::Red );
     m_ceVolumeUpper.SetColour( ou::Colour::Red );
     m_ceQuoteLower.SetColour( ou::Colour::Blue );
     m_ceVolumeLower.SetColour( ou::Colour::Blue );
+    m_ceQuoteSpread.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceQuoteUpper );
     m_pChartDataView->Add( 1, &m_ceVolumeUpper );
     m_pChartDataView->Add( 0, &m_ceQuoteLower );
     m_pChartDataView->Add( 1, &m_ceVolumeLower );
+    m_pChartDataView->Add( 2, &m_ceQuoteSpread );
     m_chartMaster.SetChartDataView( m_pChartDataView );
     m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
                                }
@@ -327,11 +334,89 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "View Trades", sPath );
+    m_pChartDataView = new ou::ChartDataView( "Trades", sPath );
     m_ceTrade.SetColour( ou::Colour::Green );
     m_ceVolumeUpper.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceTrade );
     m_pChartDataView->Add( 1, &m_ceVolumeUpper );
+    m_chartMaster.SetChartDataView( m_pChartDataView );
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+                               }
+    break;
+  case CustomItemData::AtmIV: {
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::PriceIV> tsRepository( *m_pdm, sPath );
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::PriceIV>::iterator begin, end;
+    begin = tsRepository.begin();
+    end = tsRepository.end();
+    hsize_t cnt = end - begin;
+    ou::tf::PriceIVs ivs;
+    ivs.Resize( cnt );
+    tsRepository.Read( begin, end, &ivs );
+    m_ceTrade.Clear();
+    m_ceCallIV.Clear();
+    m_cePutIV.Clear();
+    for ( ou::tf::PriceIVs::const_iterator iter = ivs.begin(); ivs.end() != iter; ++iter ) {
+      m_ceTrade.Append( iter->DateTime(), iter->Value() );
+      m_ceCallIV.Append( iter->DateTime(), iter->IVCall() );
+      m_cePutIV.Append( iter->DateTime(), iter->IVPut() );
+    }
+    if ( 0 != m_pChartDataView ) {
+      m_chartMaster.SetChartDataView( 0 );
+      delete m_pChartDataView;
+      m_pChartDataView = 0;
+    }
+    m_pChartDataView = new ou::ChartDataView( "Price IV", sPath );
+    m_ceTrade.SetColour( ou::Colour::Green );
+    m_cePutIV.SetColour( ou::Colour::Red );
+    m_ceCallIV.SetColour( ou::Colour::Blue );
+    m_pChartDataView->Add( 0, &m_ceTrade );
+    m_pChartDataView->Add( 2, &m_ceCallIV );
+    m_pChartDataView->Add( 2, &m_cePutIV );
+    m_chartMaster.SetChartDataView( m_pChartDataView );
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+                               }
+    break;
+  case CustomItemData::Greeks: {
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Greek> tsRepository( *m_pdm, sPath );
+    ou::tf::HDF5TimeSeriesContainer<ou::tf::Greek>::iterator begin, end;
+    begin = tsRepository.begin();
+    end = tsRepository.end();
+    hsize_t cnt = end - begin;
+    ou::tf::Greeks greeks;
+    greeks.Resize( cnt );
+    tsRepository.Read( begin, end, &greeks );
+    m_ceImpVol.Clear();
+    m_ceDelta.Clear();
+    m_ceGamma.Clear();
+    m_ceTheta.Clear();
+    m_ceVega.Clear();
+    m_ceRho.Clear();
+    for ( ou::tf::Greeks::const_iterator iter = greeks.begin(); greeks.end() != iter; ++iter ) {
+      m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
+      m_ceDelta.Append( iter->DateTime(), iter->Delta() );
+      m_ceGamma.Append( iter->DateTime(), iter->Gamma() );
+      m_ceTheta.Append( iter->DateTime(), iter->Theta() );
+      m_ceVega.Append( iter->DateTime(), iter->Vega() );
+      m_ceRho.Append( iter->DateTime(), iter->Rho() );
+    }
+    if ( 0 != m_pChartDataView ) {
+      m_chartMaster.SetChartDataView( 0 );
+      delete m_pChartDataView;
+      m_pChartDataView = 0;
+    }
+    m_pChartDataView = new ou::ChartDataView( "IV", sPath );
+    m_ceImpVol.SetColour( ou::Colour::Black );
+    m_ceDelta.SetColour( ou::Colour::Black );
+    m_ceGamma.SetColour( ou::Colour::Black );
+    m_ceTheta.SetColour( ou::Colour::Black );
+    m_ceVega.SetColour( ou::Colour::Black );
+    m_ceRho.SetColour( ou::Colour::Black );
+    m_pChartDataView->Add( 0, &m_ceImpVol );
+    m_pChartDataView->Add( 2, &m_ceDelta );
+    m_pChartDataView->Add( 3, &m_ceGamma );
+    m_pChartDataView->Add( 4, &m_ceTheta );
+    m_pChartDataView->Add( 5, &m_ceVega );
+    m_pChartDataView->Add( 6, &m_ceRho );
     m_chartMaster.SetChartDataView( m_pChartDataView );
     m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
                                }

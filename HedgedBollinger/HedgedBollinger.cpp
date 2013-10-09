@@ -113,7 +113,7 @@ bool AppHedgedBollinger::OnInit() {
 
   m_timerGuiRefresh.SetOwner( this );
 
-//  Bind( wxEVT_TIMER, &AppPhi::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  Bind( wxEVT_TIMER, &AppHedgedBollinger::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHedgedBollinger::OnClose, this );  // start close of windows and controls
 
@@ -130,11 +130,10 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
   
-  std::string sDbName( "HedgedBollingerX.db" );
+  std::string sDbName( "HedgedBollinger.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
   }
-
 
   m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
@@ -193,7 +192,9 @@ void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
 
   m_pBundle->StartWatch();
 
+  m_pIVCalc = 0;
   m_bIVCalcActive = false;
+
   ptime dt;
   ou::TimeSource::Instance().Internal( &dt );
   m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds() );
@@ -249,15 +250,17 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
       // in trading state machine, indicate when 8 days prior to expiry of front month in order to
       //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
-      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 29 ) );
+      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
       boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2013, 11, 26 ) );
 
+      // GC Futures:
+      ptime dtFrontMonthExpiryUtc( 
+        ou::TimeSource::Instance().ConvertRegionalToUtc( dateFrontMonth, time_duration( 13, 30 , 0 ), "America/New_York", true ) );
+      ptime dtSecondMonthExpiryUtc( 
+        ou::TimeSource::Instance().ConvertRegionalToUtc( dateSecondMonth, time_duration( 13, 30 , 0 ), "America/New_York", true ) );
+
+      // use 16:00 est as time of expiry, as that is when they cease trading (for OPRA equities)
       // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
-//      ptime dtFrontMonthExpiryUtc( 
-//        ou::TimeSource::Instance().ConvertRegionalToUtc( dateFrontMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
-//      ptime dtSecondMonthExpiryUtc( 
-//        ou::TimeSource::Instance().ConvertRegionalToUtc( dateSecondMonth, time_duration( 18, 30 , 0 ), "America/New_York", true ) );
-      // use 16:00 est as time of expiry, as that is when they cease trading.
 
     // http://www.cboe.com/products/EquityOptionSpecs.aspx
     //Expiration Date:
@@ -267,9 +270,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
     //Expiration Months:
     //Two near-term months plus two additional months from the January, February or March quarterly cycles.
 
-      // **** All program calculations should normailze everything to the Friday.
-
-      //std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
+      std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
       std::cout << "Expiry strings: " << dateFrontMonth << ", " << dateSecondMonth << std::endl;
 
       std::string sNameUnderlyingWatch( "+GC#" );
@@ -282,16 +283,16 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
       m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
 
-      m_pBundle->CreateExpiryBundle( dateFrontMonth );
-      m_pBundle->CreateExpiryBundle( dateSecondMonth );
+      m_pBundle->CreateExpiryBundle( dtFrontMonthExpiryUtc );
+      m_pBundle->CreateExpiryBundle( dtSecondMonthExpiryUtc );
 
       pProvider_t pNull;
-      std::string sNameUnderlying( "GC" );
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( sNameUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+      std::string sNameOptionUnderlying( "QGC" );  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
       m_pBundle->Portfolio()
         = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-          sNameUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sNameUnderlying + " Hedge" );
+          sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sNameUnderlyingWatch + " Hedge" );
 
       m_pStrategy = new Strategy( m_pBundle );
 
@@ -306,6 +307,7 @@ void AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void 
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
   m_worker.Run( MakeDelegate( this, &AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote ) );
 }
+
 void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
@@ -358,19 +360,20 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
   ptime dt;
   // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
   ou::TimeSource::Instance().Internal( &dt );
-  if ( dt > m_dtTopOfMinute ) {
-    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
-    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
+//  if ( dt > m_dtTopOfMinute ) {
+//    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
+//    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
     if ( !m_bIVCalcActive ) {
       if ( 0 != m_pIVCalc ) delete m_pIVCalc;
       m_bIVCalcActive = true;
       m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, dt ) );
     }
-  }
+  //}
 }
 
 // runs in thread
 void AppHedgedBollinger::CalcIV( ptime dt ) {
+  /*
   static time_duration tdMarketOpen( 9, 30, 0, 30 );  // eastern time, plus time to settle
   static time_duration tdMarketClose( 16, 0, 0 );  // eastern time
   ptime dtMarketOpen( 
@@ -378,12 +381,13 @@ void AppHedgedBollinger::CalcIV( ptime dt ) {
   ptime dtMarketClose( 
     ou::TimeSource::Instance().ConvertRegionalToUtc( dt.date(), tdMarketClose, "America/New_York", true ) );
   if ( ( dtMarketOpen < dt ) && ( dt < dtMarketClose ) ) {
-    boost::timer::auto_cpu_timer t;
+  */
+//    boost::timer::auto_cpu_timer t;
     m_pBundle->CalcIV( dt, m_libor );
     //for ( mapInstrumentCombo_t::iterator iter = m_mapInstrumentCombo.begin(); m_mapInstrumentCombo.end() != iter; ++iter ) {
 //      iter->second.CalcIV( dt, m_libor );
     //}
-  }
+//  }
   m_bIVCalcActive = false;
 }
 

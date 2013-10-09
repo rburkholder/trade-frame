@@ -68,7 +68,7 @@ private:
   class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:
     enum enumNodeType { Root, Group, Object } m_eNodeType;
-    enum enumDatumType { Quotes, Trades, Bars, NoDatum } m_eDatumType;
+    enum enumDatumType { Quotes, Trades, Bars, Greeks, AtmIV, NoDatum } m_eDatumType;
     CustomItemData( enumNodeType eNodeType, enumDatumType eDatumType )
       : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };
@@ -81,7 +81,16 @@ private:
 
   ou::ChartEntryIndicator m_ceQuoteUpper;
   ou::ChartEntryIndicator m_ceQuoteLower;
+  ou::ChartEntryIndicator m_ceQuoteSpread;
   ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryIndicator m_ceCallIV;
+  ou::ChartEntryIndicator m_cePutIV;
+  ou::ChartEntryIndicator m_ceImpVol;
+  ou::ChartEntryIndicator m_ceDelta;
+  ou::ChartEntryIndicator m_ceGamma;
+  ou::ChartEntryIndicator m_ceTheta;
+  ou::ChartEntryIndicator m_ceVega;
+  ou::ChartEntryIndicator m_ceRho;
   ou::ChartEntryBars m_ceBars;
   ou::ChartEntryVolume m_ceVolumeUpper;
   ou::ChartEntryVolume m_ceVolumeLower;

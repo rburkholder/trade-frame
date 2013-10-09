@@ -69,7 +69,7 @@ private:
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
-  bool m_bIVCalcActive;
+  volatile bool m_bIVCalcActive;
 
   boost::thread* m_pIVCalc;
   ou::tf::LiborFromIQFeed m_libor;

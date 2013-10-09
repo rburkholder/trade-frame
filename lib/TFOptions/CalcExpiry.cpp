@@ -64,9 +64,8 @@ boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
 
 boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
   boost::gregorian::day_iterator iterDay( boost::gregorian::date( date.year(), date.month(), 1 ), 1 );
-  //--iterDay; // move to last day of previous month
-  unsigned int cnt( 0 ); // need to move back four business days
-  while ( 4 != cnt ) { // move to fourth last business day
+  unsigned int cnt( 4 ); // need to move back four business days
+  while ( 0 != cnt ) { // move to fourth last business day
     --iterDay;
     unsigned int dow = iterDay->day_of_week();
     if ( ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow ) ) {
@@ -78,7 +77,7 @@ boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
   bool bOk( false );
   do {
     using namespace ou::tf::holidays::exchange;
-    setDates_t::iterator iter = setUSDates.find( *iter );
+    setDates_t::iterator iter = setUSDates.find( *iterDay );
     unsigned int dow = iterDay->day_of_week();
     if ( ( boost::gregorian::Friday == dow )
       || ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow )

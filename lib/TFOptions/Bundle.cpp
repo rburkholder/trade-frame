@@ -336,6 +336,9 @@ void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf
 
 void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, ptime now, ou::tf::LiborFromIQFeed& libor ) {
 
+  assert( boost::posix_time::not_a_date_time != now );
+  assert( boost::posix_time::not_a_date_time != m_dtExpiry );
+
   if ( EOWSNoWatch == m_stateOptionWatch ) return;  // not watching so no active data
 
   static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
@@ -479,10 +482,12 @@ ExpiryBundle& MultiExpiryBundle::GetExpiryBundle( boost::gregorian::date date ) 
   return iter->second;
 }
 
-ExpiryBundle& MultiExpiryBundle::CreateExpiryBundle( boost::gregorian::date date ) {
+//ExpiryBundle& MultiExpiryBundle::CreateExpiryBundle( boost::gregorian::date date ) {
+ExpiryBundle& MultiExpiryBundle::CreateExpiryBundle( boost::posix_time::ptime dt ) {
   std::pair<mapExpiryBundles_t::iterator, bool> pair
-    = m_mapExpiryBundles.insert( mapExpiryBundles_t::value_type( date, ExpiryBundle() ) );
+    = m_mapExpiryBundles.insert( mapExpiryBundles_t::value_type( dt.date(), ExpiryBundle() ) );
   if ( pair.second ) {
+    pair.first->second.SetExpiry( dt );
     return pair.first->second;
   }
   else {

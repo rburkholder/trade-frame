@@ -199,7 +199,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           trd.nDay = pos2.nDay;
         }
         boost::gregorian::date date( trd.nYear, trd.nMonth, trd.nDay );
-        if ( 6 /* saturday */ == date.day_of_week() ) {
+        if ( 6 /* saturday */ == date.day_of_week() ) {  // force to friday for downstream code consistency, as saturday will be converted by the exchanges later on
           static boost::gregorian::date_duration dur( 1 );
           date = date - dur;
           boost::gregorian::date::ymd_type ymd = date.year_month_day();
@@ -208,7 +208,13 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           trd.nDay = ymd.day;
         }
         else {
-          std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
+          if ( 5 /* friday */ == date.day_of_week() ) { 
+            // expected for weeklies and soon to be converted older ones
+          }
+          else {
+            // some options expire on other days of the week
+            //std::cout << "Option Decode problems on date, " << trd.sSymbol << std::endl;
+          }
         }
       }
             

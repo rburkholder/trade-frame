@@ -150,7 +150,8 @@ public:
   // the references are void when the map has insertions or deletions
   bool ExpiryBundleExists( boost::gregorian::date );
   ExpiryBundle& GetExpiryBundle( boost::gregorian::date );
-  ExpiryBundle& CreateExpiryBundle( boost::gregorian::date );
+  //ExpiryBundle& CreateExpiryBundle( boost::gregorian::date );
+  ExpiryBundle& CreateExpiryBundle( boost::posix_time::ptime dt ); // date portion used for map, full ptime for expiry calcs
 
   void StartWatch( void );
   void StopWatch( void );
@@ -195,19 +196,32 @@ struct PopulateMultiExpiryBundle {
     assert( ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc )
          || ( ou::tf::iqfeed::MarketSymbol::FOption == trd.sc )
       );
+
     //boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay - 1 );  // IQFeed dates are on Saturday
     boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay ); // fix IQFeed dates elsewhere
+
     if ( meb.ExpiryBundleExists( dateTrdExpiry ) ) {
       pInstrument_t pInstrument;
       std::string side;
       side = trd.eOptionSide;
       std::stringstream ss;
       ss << trd.sUnderlying << " " << dateTrdExpiry << " " << side << " " << trd.dblStrike;
-      pInstrument.reset( 
-        new ou::tf::Instrument( 
-          ss.str(), ou::tf::InstrumentType::Option, "SMART", 
-          dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
-          meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+      switch ( trd.sc ) {
+      case ou::tf::iqfeed::MarketSymbol::IEOption:
+        pInstrument.reset( 
+          new ou::tf::Instrument( 
+            ss.str(), ou::tf::InstrumentType::Option, "SMART", 
+            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
+            meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+        break;
+      case ou::tf::iqfeed::MarketSymbol::FOption:
+        pInstrument.reset( 
+          new ou::tf::Instrument( 
+            ss.str(), ou::tf::InstrumentType::FuturesOption, "SMART", 
+            dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
+            meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+        break;
+      }
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
       meb.AssignOption( pInstrument, pDataProvider, pGreekProvider );
     }

@@ -315,9 +315,9 @@ public:
   PriceIV( const ptime& dtSampled, price_t dblPrice, const ptime& dtExpiry, double dblIVCall, double dblIVPut );
   ~PriceIV( void ) {};
 
-  double IVCall( void ) { return m_dblIVCall; };
-  double IVPut( void ) { return m_dblIVPut; };
-  ptime Expiry( void ) { return m_dtExpiry; };
+  double IVCall( void ) const { return m_dblIVCall; };
+  double IVPut( void ) const { return m_dblIVPut; };
+  ptime Expiry( void ) const { return m_dtExpiry; };
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static boost::uint64_t Signature( void ) { return Price::Signature() * 1000 + 411; };

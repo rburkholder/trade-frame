@@ -73,6 +73,7 @@ void NoRiskInterestRateSeries::SetWatchOff( void ) {
 }
 
 double NoRiskInterestRateSeries::ValueAt( time_duration td ) {
+  assert( boost::posix_time::not_a_date_time != td );
   assert( m_bWatching );
   assert( td >= m_vInterestRate[ 0 ].td );
   structInterestRate tmp( td, "" );

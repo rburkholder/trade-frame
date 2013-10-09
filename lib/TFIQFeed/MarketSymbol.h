@@ -30,6 +30,7 @@ namespace iqfeed { // IQFeed
 
 // Coding for writing to a sqlite database was stopped as it appeared to take about four to five hours to update
 // about a million records.  A bit too long for instant gratification.
+// 2013/10/09 Will need to try it in release mode.
 
 class MarketSymbol {
 public:
