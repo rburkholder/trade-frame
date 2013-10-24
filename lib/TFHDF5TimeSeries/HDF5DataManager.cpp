@@ -66,7 +66,7 @@ HDF5DataManager::HDF5DataManager( enumFileOptionType fot ) {
 
     }
     catch (...) {
-      printf( "problems with HDF5 system\n" );
+      std::cout << "problems with HDF5 system" << std::endl;
     }
 //    std::cout << "DataManager opened" << std::endl;
 //  }
@@ -132,10 +132,13 @@ void HDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to ha
         H5::Group g = GetH5File()->openGroup( sSubPath );
         g.close();
       }  // one of these when doesn't exist
-      catch ( H5::Exception e ) {  // what is the specific exception here?
-        //std::cout << "CDataManager::AddGroup H5::Exception for '" << sGroup << "', " << e.getDetailMsg() << std::endl;
+      catch ( H5::FileIException e ) {  
+        // what is the specific exception here?  -- look for specific text string
         H5::Group g = GetH5File()->createGroup( sSubPath );
         g.close();
+      }
+      catch ( H5::Exception e ) {  // what is the specific exception here?
+        std::cout << "HDF5DataManager::AddGroup H5::Exception for '" << sGroupPath << "', " << e.getDetailMsg() << std::endl;
       }
     }
     catch (...) {

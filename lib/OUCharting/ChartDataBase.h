@@ -58,6 +58,8 @@ protected:
 
   bool m_bFirstTrade;
 
+  ou::ChartDataView m_dvChart;
+
   double m_dblUpTicks, m_dblMdTicks, m_dblDnTicks;
   double m_dblUpVolume, m_dblMdVolume, m_dblDnVolume;
 
@@ -66,8 +68,6 @@ protected:
 
   ou::tf::Prices m_pricesTickDiffsROC;
   ou::tf::TSSWRateOfChange m_rocTickDiffs;
-
-  ou::ChartDataView m_dvChart;
 
   ou::tf::Quote m_quoteLast;  // used for classifying the current trade direction
 
@@ -93,10 +93,12 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema1;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema4;
 
   ou::tf::TSSWStatsMidQuote m_stats1;
   ou::tf::TSSWStatsMidQuote m_stats2;
   ou::tf::TSSWStatsMidQuote m_stats3;
+  ou::tf::TSSWStatsMidQuote m_stats4;
 
   ou::ChartEntryIndicator m_ceQuoteUpper;
   ou::ChartEntryIndicator m_ceQuoteLower;
@@ -105,6 +107,7 @@ protected:
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;
   ou::ChartEntryIndicator m_ceEma3;
+  ou::ChartEntryIndicator m_ceEma4;
 
 //  ou::ChartEntryIndicator m_ce11;
 //  ou::ChartEntryIndicator m_ce12;
@@ -143,6 +146,8 @@ protected:
   //ou::ChartEntryIndicator m_ceBollinger3Ratio;
 //  ou::ChartEntryIndicator m_ceSMA3RR;
 
+  ou::ChartEntryIndicator m_ceUpperBollinger4;
+  ou::ChartEntryIndicator m_ceLowerBollinger4;
 
 
 private:

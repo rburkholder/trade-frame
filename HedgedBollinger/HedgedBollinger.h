@@ -17,6 +17,7 @@
 // Started 2013/09/23
 
 #include <wx/timer.h>
+#include <wx/treectrl.h>
 
 #include <OUCommon/Worker.h>
 
@@ -70,6 +71,8 @@ private:
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
   volatile bool m_bIVCalcActive;
+
+  wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   boost::thread* m_pIVCalc;
   ou::tf::LiborFromIQFeed m_libor;

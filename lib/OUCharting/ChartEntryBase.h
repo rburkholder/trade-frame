@@ -115,6 +115,7 @@ protected:
   vDateTime_t m_vDateTime;
   vdouble_t m_vChartTime;  // used by ChartDir, double version of m_vDateTime
 
+  // need to get to top of call hierarchy and only call when m_nElements is non-zero
   DoubleArray GetDateTimes( void ) const {
     return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
   }

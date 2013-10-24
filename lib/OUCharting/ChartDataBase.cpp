@@ -20,14 +20,16 @@ namespace ou { // One Unified
 
 ChartDataBase::ChartDataBase(void) 
   : m_dvChart( "LiveChart", "+GC#" ),
-  m_ema1( m_quotes, boost::posix_time::seconds(  89 ) ),
+  m_ema1( m_quotes, boost::posix_time::seconds(  144 ) ),
   m_ema2( m_quotes, boost::posix_time::seconds(  377 ) ),
   m_ema3( m_quotes, boost::posix_time::seconds(  987 ) ),
-  m_stats1( m_quotes, boost::posix_time::seconds(  89 ) ),
+  m_ema4( m_quotes, boost::posix_time::seconds(  2584 ) ),
+  m_stats1( m_quotes, boost::posix_time::seconds(  144 ) ),
   m_stats2( m_quotes, boost::posix_time::seconds(  377 ) ),
   m_stats3( m_quotes, boost::posix_time::seconds(  987 ) ),
+  m_stats4( m_quotes, boost::posix_time::seconds(  2584 ) ),
   m_bfTrades( 10 ),
-  m_bfBuys( 10),
+  m_bfBuys( 10 ),
   m_bfSells( 10 ),
   m_bFirstTrade( true ),
   m_rtTickDiffs( m_pricesTickDiffs, seconds( 120 ) ),
@@ -43,6 +45,7 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 0, &m_ceEma1 );
   m_dvChart.Add( 0, &m_ceEma2 );
   m_dvChart.Add( 0, &m_ceEma3 );
+  m_dvChart.Add( 0, &m_ceEma4 );
 
   m_dvChart.Add( 0, &m_ceBars );
 
@@ -59,6 +62,8 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 0, &m_ceLowerBollinger2 );
   m_dvChart.Add( 0, &m_ceUpperBollinger3 );
   m_dvChart.Add( 0, &m_ceLowerBollinger3 );
+  m_dvChart.Add( 0, &m_ceUpperBollinger4 );
+  m_dvChart.Add( 0, &m_ceLowerBollinger4 );
   /*
   m_dvChart.Add( 2, m_ce11 );
   m_dvChart.Add( 2, m_ce12 );
@@ -106,6 +111,10 @@ ChartDataBase::ChartDataBase(void)
   m_ceEma3.SetColour( ou::Colour::GreenYellow );
   m_ceUpperBollinger3.SetColour( ou::Colour::GreenYellow );
   m_ceLowerBollinger3.SetColour( ou::Colour::GreenYellow );
+
+  m_ceEma4.SetColour( ou::Colour::ForestGreen );
+  m_ceUpperBollinger4.SetColour( ou::Colour::ForestGreen );
+  m_ceLowerBollinger4.SetColour( ou::Colour::ForestGreen );
 
 //  m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
 //  m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );
@@ -308,8 +317,10 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceEma1.Append( dt, m_ema1.Ago( 0 ).Value() );
   m_ceEma2.Append( dt, m_ema2.Ago( 0 ).Value() );
   m_ceEma3.Append( dt, m_ema3.Ago( 0 ).Value() );
+  m_ceEma4.Append( dt, m_ema4.Ago( 0 ).Value() );
 
     double lastEma, sd;
+
     lastEma = m_ema1.Ago( 0 ).Value();
     sd = 2.0 * m_stats1.SD();
     m_ceUpperBollinger1.Append( dt, lastEma + sd );
@@ -324,6 +335,12 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     sd = 2.0 * m_stats3.SD();
     m_ceUpperBollinger3.Append( dt, lastEma + sd );
     m_ceLowerBollinger3.Append( dt, lastEma - sd );
+
+    lastEma = m_ema4.Ago( 0 ).Value();
+    sd = 2.0 * m_stats4.SD();
+    m_ceUpperBollinger4.Append( dt, lastEma + sd );
+    m_ceLowerBollinger4.Append( dt, lastEma - sd );
+
     /*
     m_ce11.Append( dt, m_variance1.m_pma1->m_vEMA[1]->GetEMA() );
     m_ce12.Append( dt, m_variance1.m_pma1->m_vEMA[5]->GetEMA() );

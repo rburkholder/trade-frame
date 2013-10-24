@@ -26,18 +26,9 @@
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFTrading/DBOps.h>
-#include <TFTrading/PortfolioManager.h>
-#include <TFTrading/NoRiskInterestRateSeries.h>
-
-#include <TFOptions/Bundle.h>
-
-#include <TFIQFeed/LoadMktSymbols.h>
-
-#include <TFHDF5TimeSeries/HDF5DataManager.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-//#include <TFVuTrading/PanelManualOrder.h>
 
 #include "Chart.h"
 
@@ -48,17 +39,10 @@ public:
 protected:
 private:
 
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
-
   ou::action::Worker m_worker;
 
-  ou::tf::HDF5DataManager* m_pdm;
-
   FrameMain* m_pFrameMain;
-//  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-//  ou::tf::PanelManualOrder* m_pPanelManualOrder;
 
   wxWindow* m_winChart;
   bool m_bReadyToDrawChart;
@@ -66,23 +50,11 @@ private:
   ChartTest* m_pChart;
   bool m_bPaintingChart;
 
-//  Strategy* m_pStrategy;
-
   ou::tf::DBOps m_db;
-
-  pPortfolio_t m_pPortfolioMaster;
-  pPortfolio_t m_pPortfolioCurrencyUSD;
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
   bool m_bIVCalcActive;
-
-  boost::thread* m_pIVCalc;
-  ou::tf::LiborFromIQFeed m_libor;
-
-  ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
-
-  ou::tf::option::MultiExpiryBundle* m_pBundle;
 
   class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:

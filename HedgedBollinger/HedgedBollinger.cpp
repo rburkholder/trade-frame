@@ -32,6 +32,8 @@ using namespace boost::gregorian;
 
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
+#include <wx/splitter.h>
+#include <wx/panel.h>
 
 #include <OUCommon/TimeSource.h>
 
@@ -58,18 +60,44 @@ bool AppHedgedBollinger::OnInit() {
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
-  wxBoxSizer* m_sizerMain;
-  m_sizerMain = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(m_sizerMain);
+  wxBoxSizer* m_sizerFrame;
+  m_sizerFrame = new wxBoxSizer(wxVERTICAL);
+  m_pFrameMain->SetSizer(m_sizerFrame);
 
-  wxBoxSizer* m_sizerControls;
-  m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 5 );
+  wxBoxSizer* m_sizerFrameRow1;
+  m_sizerFrameRow1 = new wxBoxSizer( wxHORIZONTAL );
+  m_sizerFrame->Add(m_sizerFrameRow1, 0, wxGROW|wxALL, 2 );
 
-  // populate variable in FrameWork01
-  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelProviderControl->Show( true );
+  // splitter
+  wxSplitterWindow* m_splitterRow1;
+  m_splitterRow1 = new wxSplitterWindow( m_pFrameMain );
+  m_splitterRow1->SetMinimumPaneSize(10);
+  m_splitterRow1->SetSashGravity(0.2);
+
+  // tree for viewed symbols
+  m_ptreeChartables = new wxTreeCtrl( m_splitterRow1 );
+  wxTreeItemId idRoot = m_ptreeChartables->AddRoot( "/", -1, -1, 0 );
+
+  // panel for right side of splitter
+  wxPanel* m_panelSplitterRight;
+  m_panelSplitterRight = new wxPanel( m_splitterRow1 );
+
+  // sizer for right side of splitter
+  wxBoxSizer* m_sizerSplitterRight;
+  m_sizerSplitterRight = new wxBoxSizer( wxHORIZONTAL );
+  m_panelSplitterRight->SetSizer( m_sizerSplitterRight );
+
+  // m_pPanelProviderControl
+  m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_panelSplitterRight, wxID_ANY );
+  m_sizerSplitterRight->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 1);
+
+  // m_pPanelLogging
+  m_pPanelLogging = new ou::tf::PanelLogging( m_panelSplitterRight, wxID_ANY );
+  m_sizerSplitterRight->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 1);
+
+  // startup splitter
+  m_splitterRow1->SplitVertically(m_ptreeChartables, m_panelSplitterRight, 10);
+  m_sizerFrameRow1->Add(m_splitterRow1, 1, wxEXPAND|wxALL, 1);
 
   LinkToPanelProviderControl();
 
@@ -88,18 +116,14 @@ bool AppHedgedBollinger::OnInit() {
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
 
-  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
-
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
-  m_pPanelLogging->Show( true );
+//  wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
+//  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pFrameMain->Show( true );
 
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  m_sizerMain->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
+  m_sizerFrame->Add( m_winChart, 1, wxALL|wxEXPAND, 3);
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );

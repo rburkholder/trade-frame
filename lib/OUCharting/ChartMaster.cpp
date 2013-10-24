@@ -26,8 +26,8 @@ namespace ou { // One Unified
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
-  m_bCreated( false ),
-  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+  m_bCreated( false )
+//  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -37,8 +37,8 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
   m_nChartWidth( width ), m_nChartHeight( height ),
   m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
   m_dblXMin( 0 ), m_dblXMax( 0 ),
-  m_bCreated( false ),
-  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+  m_bCreated( false )
+//  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -57,11 +57,10 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
-void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
-  m_dtViewPortBegin = dtBegin;
-  m_dtViewPortEnd = dtEnd;
-  
-}
+//void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+//  m_dtViewPortBegin = dtBegin;
+//  m_dtViewPortEnd = dtEnd;
+//}
 
 void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
   m_tdBarWidth = tdBarWidth;
