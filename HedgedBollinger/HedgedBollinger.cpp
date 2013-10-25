@@ -121,6 +121,11 @@ bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain->Show( true );
 
+  m_sNameUnderlying = "+GC#";
+  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+
+  m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
+
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerFrame->Add( m_winChart, 1, wxALL|wxEXPAND, 3);
@@ -170,7 +175,9 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote ) ) );
   vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
   vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList ) ) );
-  vItems.push_back( new mi( "b1 Initialize Symbols", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionInitializeSymbolSet ) ) );
+  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionLoadSymbolSubset ) ) );
+  vItems.push_back( new mi( "b1 Initialize Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionInitializeSymbolSet ) ) );
   vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartWatch ) ) );
   vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopWatch ) ) );
   vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
@@ -184,7 +191,7 @@ bool AppHedgedBollinger::OnInit() {
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
@@ -297,13 +304,11 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
       std::cout << "Expiry strings: " << dateFrontMonth << ", " << dateSecondMonth << std::endl;
 
-      std::string sNameUnderlyingWatch( "+GC#" );
-
-      m_pBundle = new ou::tf::option::MultiExpiryBundle( sNameUnderlyingWatch );
+      m_pBundle = new ou::tf::option::MultiExpiryBundle( m_sNameUnderlying );
 
       pInstrument_t pInstrumentUnderlying;
       pInstrumentUnderlying.reset( 
-        new ou::tf::Instrument( sNameUnderlyingWatch, ou::tf::InstrumentType::Future, "SMART" ) );  // need to register this with InstrumentManager before trading
+        new ou::tf::Instrument( m_sNameUnderlying, ou::tf::InstrumentType::Future, "SMART" ) );  // need to register this with InstrumentManager before trading
 
       m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
 
@@ -311,12 +316,11 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       m_pBundle->CreateExpiryBundle( dtSecondMonthExpiryUtc );
 
       pProvider_t pNull;
-      std::string sNameOptionUnderlying( "QGC" );  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+      m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
       m_pBundle->Portfolio()
         = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-          sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], sNameUnderlyingWatch + " Hedge" );
+          m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
       m_pStrategy = new Strategy( m_pBundle );
 
@@ -324,7 +328,20 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
     }
   }
-  
+}
+
+void AppHedgedBollinger::HandleMenuActionSaveSymbolSubset( void ) {
+  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
+  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
+  listIQFeedSymbols.SaveToFile( "HedgedBollinger.ser" );
+  std::cout << "Symbols saved." << std::endl;
+}
+
+void AppHedgedBollinger::HandleMenuActionLoadSymbolSubset( void ) {
+  std::cout << "Loading From Binary File ..." << std::endl;
+  m_listIQFeedSymbols.LoadFromFile( "HedgedBollinger.ser" );
+  std::cout << " ... completed." << std::endl;
 }
 
 void AppHedgedBollinger::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
@@ -380,17 +397,25 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
     boost::lexical_cast<std::string>( m_dblMaxPL )
     );
     */
-  // Process IV Calc once a minute
-  ptime dt;
   // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-  ou::TimeSource::Instance().Internal( &dt );
+  ptime now = ou::TimeSource::Instance().External();
+
+  static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+  boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+  ptime dtEnd = now + td; 
+  static boost::posix_time::time_duration tdLength( 0, 10, 0 );
+  ptime dtBegin = dtEnd - tdLength;
+  m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
+
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+
 //  if ( dt > m_dtTopOfMinute ) {
 //    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
 //    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
     if ( !m_bIVCalcActive ) {
       if ( 0 != m_pIVCalc ) delete m_pIVCalc;
       m_bIVCalcActive = true;
-      m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, dt ) );
+      m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, now ) );
     }
   //}
 }

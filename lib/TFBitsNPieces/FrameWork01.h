@@ -141,9 +141,10 @@ FrameWork01<CRTP>::FrameWork01( void ) :
 
   std::stringstream ss;
   ss.str( "" );
+  // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/date_time_io.html
+  boost::posix_time::time_facet* pFacet( new boost::posix_time::time_facet( "%Y-%m-%d %H:%M:%S%F" ) );
+  ss.imbue( std::locale( ss.getloc(), pFacet ) );
   ss << ou::TimeSource::Instance().External();
-  //m_sTSDataStreamStarted = "/app/BasketTrading/" + ss.str();  
-  // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();
 
   // this is where we select which provider we will be working with on this run

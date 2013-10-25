@@ -155,6 +155,10 @@ public:
     m_symbols.insert( trd );
   }
 
+  void operator()( const trd_t& trd ) {
+    m_symbols.insert( trd );
+  }
+
   void Clear( void ) { m_symbols.clear(); };
 
 protected:

@@ -19,7 +19,7 @@ namespace ou { // One Unified
 // 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765
 
 ChartDataBase::ChartDataBase(void) 
-  : m_dvChart( "LiveChart", "+GC#" ),
+  : m_dvChart(),
   m_ema1( m_quotes, boost::posix_time::seconds(  144 ) ),
   m_ema2( m_quotes, boost::posix_time::seconds(  377 ) ),
   m_ema3( m_quotes, boost::posix_time::seconds(  987 ) ),
@@ -41,6 +41,7 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 0, &m_ceQuoteUpper );
   m_dvChart.Add( 0, &m_ceQuoteLower );
   m_dvChart.Add( 0, &m_ceTrade );
+  m_dvChart.Add( 2, &m_ceQuoteSpread );
 
   m_dvChart.Add( 0, &m_ceEma1 );
   m_dvChart.Add( 0, &m_ceEma2 );
@@ -89,6 +90,7 @@ ChartDataBase::ChartDataBase(void)
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
+  m_ceQuoteSpread.SetColour( ou::Colour::Black );
 
   m_rVolumes[ VUp ].ceVolumeUp.SetColour( ou::Colour::Green );
   m_rVolumes[ VUp ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
@@ -313,6 +315,7 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
 
   m_ceQuoteUpper.Append( dt, quote.Ask() );
   m_ceQuoteLower.Append( dt, quote.Bid() );
+  m_ceQuoteSpread.Append( dt, quote.Ask() - quote.Bid() );
 
   m_ceEma1.Append( dt, m_ema1.Ago( 0 ).Value() );
   m_ceEma2.Append( dt, m_ema2.Ago( 0 ).Value() );

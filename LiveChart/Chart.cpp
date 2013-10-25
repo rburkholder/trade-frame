@@ -21,6 +21,7 @@
 ChartTest::ChartTest( pProvider_t pProvider ) 
   : ou::ChartDataBase()
 {
+  this->GetChartDataView().SetNames( "LiveChart", "+GC#" );
   ou::tf::Instrument::pInstrument_t pInstrument
     = ou::tf::InstrumentManager::Instance().ConstructInstrument( "+GC#", "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
@@ -34,5 +35,6 @@ ChartTest::~ChartTest(void) {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDataBase::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDataBase::HandleTrade ) );
+  delete m_pWatch;
 }
 

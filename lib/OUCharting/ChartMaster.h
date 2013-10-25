@@ -35,11 +35,9 @@ public:
   ChartDataView* GetChartDataView( void ) { return m_pCdv; };
 
   // can use not_a_date_time for one, the other, or both
-//  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
+  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
-  double GetXMin( void ) const { return m_dblXMin; };
-  double GetXMax( void ) const { return m_dblXMax; };
   bool GetChartDataViewChanged( void ) { return ( NULL == m_pCdv ) ? false : m_pCdv->GetChanged(); };  // flag is reset during call
   void DrawChart( bool bViewPortChanged = false );  // recalc viewport zoom effects when true
   bool isCreated( void ) const { return m_bCreated; };
@@ -55,14 +53,8 @@ protected:
   unsigned int m_nChartHeight;
   ChartDataView* m_pCdv;
 
-  double m_dblMinDuration;  // minimum viewport width in seconds
-  double m_dblCurDuration;  // current viewport width in seconds
-
-  double m_dblXMin;  // initial data time stamp
-  double m_dblXMax;  // last data time stamp
-
-//  boost::posix_time::ptime m_dtViewPortBegin;
-//  boost::posix_time::ptime m_dtViewPortEnd;
+  double m_dblViewPortXBegin;  // initial data time stamp
+  double m_dblViewPortXEnd;  // last data time stamp
 
   boost::posix_time::time_duration m_tdBarWidth;
 

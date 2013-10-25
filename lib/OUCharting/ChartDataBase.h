@@ -100,9 +100,10 @@ protected:
   ou::tf::TSSWStatsMidQuote m_stats3;
   ou::tf::TSSWStatsMidQuote m_stats4;
 
+  ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryIndicator m_ceQuoteUpper;
   ou::ChartEntryIndicator m_ceQuoteLower;
-  ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryIndicator m_ceQuoteSpread;
 
   ou::ChartEntryIndicator m_ceEma1;
   ou::ChartEntryIndicator m_ceEma2;

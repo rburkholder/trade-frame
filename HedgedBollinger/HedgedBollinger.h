@@ -50,6 +50,9 @@ private:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
 
+  std::string m_sNameUnderlying;
+  std::string m_sNameOptionUnderlying;
+
   ou::action::Worker m_worker;
 
   FrameMain* m_pFrameMain;
@@ -106,6 +109,8 @@ private:
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
   void HandleMenuAction2LoadIQFeedSymbolList( void );
   void HandleMenuActionInitializeSymbolSet( void );
+  void HandleMenuActionSaveSymbolSubset( void );
+  void HandleMenuActionLoadSymbolSubset( void );
   void HandleMenuActionStartWatch( void );
   void HandleMenuActionStopWatch( void );
   void HandleMenuActionSaveValues( void );

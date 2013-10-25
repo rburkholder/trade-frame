@@ -51,13 +51,14 @@ ChartDataViewCarrier::~ChartDataViewCarrier() {
 // CChartDataView
 //
 
-ChartDataView::ChartDataView( const std::string &sStrategy, const std::string &sName )
-: m_sStrategy( sStrategy ), m_sName( sName ), m_bChanged( false ) //, m_bClosed( false )
+ChartDataView::ChartDataView( void ) 
+  : m_bChanged( false ), 
+    m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
+    m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
-  m_vChartDataViewEntry.reserve( 10 );
 }
 
-ChartDataView::~ChartDataView(void) {
+ChartDataView::~ChartDataView( void ) {
 //  assert( m_bClosed );
   m_vChartDataViewEntry.clear();
 }

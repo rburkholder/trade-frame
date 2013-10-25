@@ -24,10 +24,8 @@ namespace ou { // One Unified
   ChartMaster::ChartMaster(void) 
 : m_pCdv( NULL),
   m_nChartWidth( 600 ), m_nChartHeight( 900 ),
-  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
-  m_dblXMin( 0 ), m_dblXMax( 0 ),
+  m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
   m_bCreated( false )
-//  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -35,10 +33,8 @@ namespace ou { // One Unified
 ChartMaster::ChartMaster( unsigned int width, unsigned int height ) 
 : m_pCdv( NULL),
   m_nChartWidth( width ), m_nChartHeight( height ),
-  m_dblMinDuration( 60 * 1 ), m_dblCurDuration( 60 * 1 ), // 1 minute width, 1 minute width
-  m_dblXMin( 0 ), m_dblXMax( 0 ),
+  m_dblViewPortXBegin( 0 ), m_dblViewPortXEnd( 0 ),
   m_bCreated( false )
-//  m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
   Initialize();
 }
@@ -57,10 +53,24 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   if ( NULL != m_pCdv ) m_pCdv->SetChanged();
 }
 
-//void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
-//  m_dtViewPortBegin = dtBegin;
-//  m_dtViewPortEnd = dtEnd;
-//}
+void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  m_dblViewPortXBegin = 
+    ( boost::posix_time::not_a_date_time != dtBegin ) 
+    ? 
+    Chart::chartTime( 
+      dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
+      dtBegin.time_of_day().hours(), dtBegin.time_of_day().minutes(), dtBegin.time_of_day().seconds() )
+    : 
+    0;
+  m_dblViewPortXEnd = 
+    ( boost::posix_time::not_a_date_time != dtEnd ) 
+    ?
+    Chart::chartTime( 
+      dtEnd.date().year(), dtEnd.date().month(), dtEnd.date().day(),
+      dtEnd.time_of_day().hours(), dtEnd.time_of_day().minutes(), dtEnd.time_of_day().seconds() )
+    : 
+    0;
+}
 
 void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
   m_tdBarWidth = tdBarWidth;
@@ -79,8 +89,8 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
     if ( true ) {
       //MultiChart multi( m_nChartWidth, m_nChartHeight, Chart::goldColor );
       MultiChart multi( m_nChartWidth, m_nChartHeight );
-
-      std::string sTitle( m_pCdv->GetName() + " - " + m_pCdv->GetStrategy() );
+      
+      std::string sTitle( m_pCdv->GetStrategy() + " - " + m_pCdv->GetName() );
       multi.addTitle( sTitle.c_str() );
 
       // chart 0 (main chart) is x, chrt 1 (volume chart) is 1/4x, ChartN (indicator charts) are 1/3x
@@ -142,35 +152,26 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       }
 
       // determine XAxis min/max while adding chart data
-      m_dblXMin = 0;
-      m_dblXMax = 0;
+      double dblXBegin = m_dblViewPortXBegin;
+      double dblXEnd = m_dblViewPortXEnd;
       for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
         iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
-        m_dblXMin = ( 0 == m_dblXMin ) ? Attributes.dblXMin : std::min<double>( m_dblXMin, Attributes.dblXMin );
-        m_dblXMax = ( 0 == m_dblXMax ) ? Attributes.dblXMax : std::max<double>( m_dblXMax, Attributes.dblXMax );
+        // following assumes values are always > 0
+        if( 0 == m_dblViewPortXBegin ) {
+          dblXBegin = ( 0 == dblXBegin ) ? Attributes.dblXMin : std::min<double>( dblXBegin, Attributes.dblXMin );
+        }
+        if( 0 == m_dblViewPortXEnd ) {
+          dblXEnd   = ( 0 == dblXEnd   ) ? Attributes.dblXMax : std::max<double>( dblXEnd,   Attributes.dblXMax );
+        }
       }
 
       // time axis scales
-      double dblLower;
-      double dblUpper;
-      if ( m_dblXMin != m_dblXMax ) {
-//*        if ( ( m_dblXMax - m_dblXMin ) < m_dblMinDuration ) {  // minimum time window
-          dblUpper = m_dblXMax;
-          dblLower = dblUpper - m_dblMinDuration;
-//*        }
-//*        else {
-          // fracional viewport calculation, for when mfc was used
-//*          dblLower = m_dblXMin + (m_dblXMax - m_dblXMin) *  this->getViewPortLeft();
-//*          dblUpper = m_dblXMin + (m_dblXMax - m_dblXMin) * (this->getViewPortLeft() + this->getViewPortWidth());
-          //dblUpper = m_dblXMax;
-          //dblLower = m_dblXMin;
-//*        }
-//        pXY0->xAxis()->setDateScale( dblLower, dblUpper, 0, 0 );
+      if ( dblXBegin != dblXEnd ) {
+        pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
       }
 
-//*      setChart( &multi );
       MemBlock m = multi.makeChart( BMP );
       if ( 0 != m_OnDrawChart ) m_OnDrawChart( m );
 

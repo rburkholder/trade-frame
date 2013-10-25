@@ -265,7 +265,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "Bars", sPath );
+    m_pChartDataView = new ou::ChartDataView;
+    m_pChartDataView->SetNames( "Bars", sPath );
     m_ceVolumeUpper.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceBars );
     m_pChartDataView->Add( 1, &m_ceVolumeUpper );
@@ -299,7 +300,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "Quotes", sPath );
+    m_pChartDataView = new ou::ChartDataView;
+    m_pChartDataView->SetNames( "Quotes", sPath );
     m_ceQuoteUpper.SetColour( ou::Colour::Red );
     m_ceVolumeUpper.SetColour( ou::Colour::Red );
     m_ceQuoteLower.SetColour( ou::Colour::Blue );
@@ -334,7 +336,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "Trades", sPath );
+    m_pChartDataView = new ou::ChartDataView;
+    m_pChartDataView->SetNames( "Trades", sPath );
     m_ceTrade.SetColour( ou::Colour::Green );
     m_ceVolumeUpper.SetColour( ou::Colour::Black );
     m_pChartDataView->Add( 0, &m_ceTrade );
@@ -365,7 +368,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "Price IV", sPath );
+    m_pChartDataView = new ou::ChartDataView;
+    m_pChartDataView->SetNames( "Price IV", sPath );
     m_ceTrade.SetColour( ou::Colour::Green );
     m_cePutIV.SetColour( ou::Colour::Red );
     m_ceCallIV.SetColour( ou::Colour::Blue );
@@ -404,7 +408,8 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
       delete m_pChartDataView;
       m_pChartDataView = 0;
     }
-    m_pChartDataView = new ou::ChartDataView( "IV", sPath );
+    m_pChartDataView = new ou::ChartDataView;
+    m_pChartDataView->SetNames( "IV", sPath );
     m_ceImpVol.SetColour( ou::Colour::Black );
     m_ceDelta.SetColour( ou::Colour::Black );
     m_ceGamma.SetColour( ou::Colour::Black );
