@@ -20,11 +20,7 @@
 
 #include <OUCharting/ChartMaster.h>
 
-#include <OUCharting/ChartEntryBars.h>
-#include <OUCharting/ChartEntryVolume.h>
-#include <OUCharting/ChartEntryIndicator.h>
-
-#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include "ModelChartHdf5.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -76,24 +72,10 @@ private:
   ou::tf::HDF5DataManager* m_pdm;
 
   wxWindow* m_winChart;
-  ou::ChartDataView* m_pChartDataView;
   ou::ChartMaster m_chartMaster;
+  ou::ChartDataView* m_pChartDataView;
 
-  ou::ChartEntryIndicator m_ceQuoteUpper;
-  ou::ChartEntryIndicator m_ceQuoteLower;
-  ou::ChartEntryIndicator m_ceQuoteSpread;
-  ou::ChartEntryIndicator m_ceTrade;
-  ou::ChartEntryIndicator m_ceCallIV;
-  ou::ChartEntryIndicator m_cePutIV;
-  ou::ChartEntryIndicator m_ceImpVol;
-  ou::ChartEntryIndicator m_ceDelta;
-  ou::ChartEntryIndicator m_ceGamma;
-  ou::ChartEntryIndicator m_ceTheta;
-  ou::ChartEntryIndicator m_ceVega;
-  ou::ChartEntryIndicator m_ceRho;
-  ou::ChartEntryBars m_ceBars;
-  ou::ChartEntryVolume m_ceVolumeUpper;
-  ou::ChartEntryVolume m_ceVolumeLower;
+  ModelChartHdf5 m_ModelChartHdf5;
 
   std::string m_sCurrentPath;  // used while traversing and building tree
   wxTreeItemId m_curTreeItem; // used while traversing and building tree

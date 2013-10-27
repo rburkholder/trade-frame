@@ -22,7 +22,6 @@ Strike::Strike( void )
 : m_dblStrike( 0 ),
   m_bWatchable( false ), m_nWatching( 0 )
 {
-  //assert( false );  // see if it actaully gets called
 }
 
 Strike::Strike( double dblStrike ) 

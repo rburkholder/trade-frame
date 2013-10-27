@@ -135,6 +135,7 @@
     <ClInclude Include="DataViewItem.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
+    <ClInclude Include="ModelChartHdf5.h" />
     <ClInclude Include="ModelExecution.h" />
     <ClInclude Include="ModelOrder.h" />
     <ClInclude Include="ModelPortfolio.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="ControllerPortfolioPositionOrderExecution.cpp" />
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="ModelBase.cpp" />
+    <ClCompile Include="ModelChartHdf5.cpp" />
     <ClCompile Include="ModelExecution.cpp" />
     <ClCompile Include="ModelOrder.cpp" />
     <ClCompile Include="ModelPortfolio.cpp" />

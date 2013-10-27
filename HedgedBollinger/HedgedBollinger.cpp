@@ -124,8 +124,6 @@ bool AppHedgedBollinger::OnInit() {
   m_sNameUnderlying = "+GC#";
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
-  m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
-
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerFrame->Add( m_winChart, 1, wxALL|wxEXPAND, 3);
@@ -323,6 +321,9 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
           m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
       m_pStrategy = new Strategy( m_pBundle );
+      m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
+
+      m_pBundle->AddOnStrikeWatch( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
 
       std::cout << "Initialized." << std::endl;
 
@@ -422,21 +423,8 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
 
 // runs in thread
 void AppHedgedBollinger::CalcIV( ptime dt ) {
-  /*
-  static time_duration tdMarketOpen( 9, 30, 0, 30 );  // eastern time, plus time to settle
-  static time_duration tdMarketClose( 16, 0, 0 );  // eastern time
-  ptime dtMarketOpen( 
-    ou::TimeSource::Instance().ConvertRegionalToUtc( dt.date(), tdMarketOpen, "America/New_York", true ) );
-  ptime dtMarketClose( 
-    ou::TimeSource::Instance().ConvertRegionalToUtc( dt.date(), tdMarketClose, "America/New_York", true ) );
-  if ( ( dtMarketOpen < dt ) && ( dt < dtMarketClose ) ) {
-  */
 //    boost::timer::auto_cpu_timer t;
     m_pBundle->CalcIV( dt, m_libor );
-    //for ( mapInstrumentCombo_t::iterator iter = m_mapInstrumentCombo.begin(); m_mapInstrumentCombo.end() != iter; ++iter ) {
-//      iter->second.CalcIV( dt, m_libor );
-    //}
-//  }
   m_bIVCalcActive = false;
 }
 
@@ -444,6 +432,35 @@ void AppHedgedBollinger::HandleMenuActionEmitYieldCurve( void ) {
   //ou::tf::libor::EmitYieldCurve();
   //m_libor.EmitYieldCurve();
   std::cout << m_libor;
+}
+
+void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatching ) {
+  wxTreeItemIdValue idCookie;
+  const std::string& sName( pOption->GetInstrument()->GetInstrumentName() );
+  wxTreeItemId idRoot = m_ptreeChartables->GetRootItem();
+  wxTreeItemId idChild = m_ptreeChartables->GetFirstChild( idRoot, idCookie );
+  bool bFound( false );
+  while ( idChild.IsOk() ) {
+    if ( sName == reinterpret_cast<ou::tf::option::Option*>( idChild.GetID() )->GetInstrument()->GetInstrumentName() ) {
+      m_ptreeChartables->SetItemBold( idChild, bWatching );
+      bFound = true;
+      break;
+    }
+    idChild = m_ptreeChartables->GetNextChild( idChild, idCookie );
+  }
+  if ( !bFound ) {
+    m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, reinterpret_cast<wxTreeItemData*>( pOption ) );
+  }
+}
+
+void AppHedgedBollinger::HandleStrikeWatchOn( ou::tf::option::Strike& strike ) {
+  UpdateTree( strike.Call(), true );
+  UpdateTree( strike.Put(), true );
+}
+
+void AppHedgedBollinger::HandleStrikeWatchOff( ou::tf::option::Strike& strike ) {
+  UpdateTree( strike.Call(), false );
+  UpdateTree( strike.Put(), false );
 }
 
 int AppHedgedBollinger::OnExit() {

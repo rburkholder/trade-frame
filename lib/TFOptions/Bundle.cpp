@@ -132,12 +132,6 @@ void ExpiryBundle::StopWatch( void ) {
 //  }
 }
 
-//void Bundle::SetWatchUnderlyingOn( void ) {
-//}
-
-//void Bundle::SetWatchUnderlyingOff( void ) {
-//}
-
 void ExpiryBundle::SetWatchableOn( double dblStrike ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
   if ( m_mapStrikes.end() != iter ) {
@@ -155,14 +149,18 @@ void ExpiryBundle::SetWatchableOff( double dblStrike ) {
 
 void ExpiryBundle::SetWatchOn( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
+  assert( m_mapStrikes.end() != iter );
   if ( bForce ) {
     iter->second.SetWatchableOn();
   }
   iter->second.WatchStart();
+  OnStrikeWatchOn( iter->second );
 }
 
 void ExpiryBundle::SetWatchOff( double dblStrike, bool bForce ) {
   mapStrikes_t::iterator iter = m_mapStrikes.find( dblStrike );
+  assert( m_mapStrikes.end() != iter );
+  OnStrikeWatchOff( iter->second );
   iter->second.WatchStop();
   if ( bForce ) {
     iter->second.SetWatchableOff();
@@ -560,6 +558,18 @@ void MultiExpiryBundle::AssignOption( pInstrument_t pInstrument, pProvider_t pDa
     }
   }
   // should check that at least one of the entries was used.
+}
+
+void MultiExpiryBundle::AddOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t on ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnStrikeWatchOn.Add( on );
+  }
+}
+
+void MultiExpiryBundle::RemoveOnStrikeWatch(ExpiryBundle:: OnStrikeWatch_t off ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnStrikeWatchOn.Remove( off );
+  }
 }
 
 

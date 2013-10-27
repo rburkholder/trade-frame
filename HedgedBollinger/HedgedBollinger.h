@@ -93,6 +93,8 @@ private:
   void HandlePopulateDatabase( void );
 
   void HandleGuiRefresh( wxTimerEvent& event );
+
+  void UpdateTree( ou::tf::option::Option*, bool bWatching );
     
   //void AutoStartCollection( void );
 
@@ -125,6 +127,9 @@ private:
   void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
+
+  void HandleStrikeWatchOn( ou::tf::option::Strike& );
+  void HandleStrikeWatchOff( ou::tf::option::Strike& );
 
 };
 

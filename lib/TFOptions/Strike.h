@@ -61,7 +61,6 @@ protected:
 private:
 
   bool m_bWatchable;  // for when large number of strikes, but only a few to watch and collect
-  //bool m_bWatching;  // single thradable only
   unsigned int m_nWatching;  // 0 = no watch, > 0 watching, < 0 illegal
   double m_dblStrike;
 };

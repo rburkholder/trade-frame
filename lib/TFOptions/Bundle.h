@@ -19,13 +19,17 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <OUCommon/Delegate.h>
+
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
-#include <TFOptions/Binomial.h>
 #include <TFTrading/Watch.h>
+
 #include <TFTimeSeries/BarFactory.h>
+
 #include <TFIQFeed/MarketSymbol.h>
 
+#include "Binomial.h"
 #include "Strike.h"
 
 namespace ou { // One Unified
@@ -42,7 +46,11 @@ public:
   ExpiryBundle(void);
   virtual ~ExpiryBundle(void);
 
-  void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
+  typedef FastDelegate1<ou::tf::option::Strike&> OnStrikeWatch_t; // used from the MultiBundle level
+  ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOn;
+  ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOff;
+
+//  void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
@@ -55,9 +63,6 @@ public:
 
   void SetWatchableOn( double dblStrike );  // each strike is not watcheable by default
   void SetWatchableOff( double dblStrike );
-
-  //void SetWatchUnderlyingOn( void );
-  //void SetWatchUnderlyingOff( void );
 
   void SetWatchOn( double dblStrike, bool bForce = false ); // watch only selected call/put at strike, force watchable on
   void SetWatchOff( double dblStrike, bool bForce = false ); // forces watchable off when true
@@ -158,6 +163,9 @@ public:
   void CalcIV( ptime dtNow /*utc*/, ou::tf::LiborFromIQFeed& libor );
   void SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec );
   void AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  
+  void AddOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t );
+  void RemoveOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t );
 
 protected:
 
