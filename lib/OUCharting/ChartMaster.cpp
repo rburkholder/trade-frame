@@ -118,6 +118,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY->setXAxisOnTop( true );
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
+            pXY->addLegend( x, xAxisHeight, true, 0, 9.0 );
             multi.addChart( 0, y, pXY );
             multi.setMainChart( pXY );
             y += heightChart0; 
@@ -131,6 +132,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
+            pXY->addLegend( x, 0, true, 0, 9.0 );
             multi.addChart( 0, y, pXY );
             y += heightChart1;
             break;
@@ -143,6 +145,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
             pXY->xAxis()->copyAxis( pXY0->xAxis() ); // use settings from main subchart
             pXY->xAxis()->setWidth( 2 );
             pXY->yAxis()->setWidth( 2 );
+            pXY->addLegend( x, 0, true, 0, 9.0 );
             multi.addChart( 0, y, pXY );
             y += heightChartN;
             break;

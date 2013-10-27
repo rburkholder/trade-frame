@@ -52,3 +52,20 @@ void Strategy::HandleCommon( const ou::tf::Quote& quote ) {
 
 void Strategy::HandleCommon( const ou::tf::Trade& trade ) {
 }
+
+void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
+  mapAtmIv_t::iterator iter = m_mapAtmIv.find( iv.Expiry() );
+  if ( m_mapAtmIv.end() == iter ) {
+    BundleAtmIv bai;
+    bai.m_pceCallIV->SetColour( ou::Colour::RosyBrown );
+    bai.m_pcePutIV->SetColour( ou::Colour::MediumOrchid );
+    m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
+    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+  }
+  else {
+    iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );
+    iter->second.m_pcePutIV->Append( iv.DateTime(), iv.IVPut() );
+  }
+}
+

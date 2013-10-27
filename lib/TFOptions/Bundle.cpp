@@ -396,9 +396,12 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
       dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
     }
   }
-  m_tsAtmIv.Append( PriceIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut) );
+  PriceIV atmIV( now, dblUnderlying, m_dtExpiry, dblIvCall, dblIvPut);
+  m_tsAtmIv.Append( atmIV );
   m_bfIVUnderlyingCall.Add( now, dblIvCall, 0 );
   m_bfIVUnderlyingPut.Add( now, dblIvPut, 0 );
+  OnAtmIvCalc( atmIV );
+
 //  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
 
 }
@@ -560,15 +563,39 @@ void MultiExpiryBundle::AssignOption( pInstrument_t pInstrument, pProvider_t pDa
   // should check that at least one of the entries was used.
 }
 
-void MultiExpiryBundle::AddOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t on ) {
+void MultiExpiryBundle::AddOnStrikeWatchOn( ExpiryBundle::OnStrikeWatch_t function ) {
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
-    iter->second.OnStrikeWatchOn.Add( on );
+    iter->second.OnStrikeWatchOn.Add( function );
   }
 }
 
-void MultiExpiryBundle::RemoveOnStrikeWatch(ExpiryBundle:: OnStrikeWatch_t off ) {
+void MultiExpiryBundle::RemoveOnStrikeWatchOn(ExpiryBundle:: OnStrikeWatch_t function ) {
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
-    iter->second.OnStrikeWatchOn.Remove( off );
+    iter->second.OnStrikeWatchOn.Remove( function );
+  }
+}
+
+void MultiExpiryBundle::AddOnStrikeWatchOff( ExpiryBundle::OnStrikeWatch_t function ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnStrikeWatchOff.Add( function );
+  }
+}
+
+void MultiExpiryBundle::RemoveOnStrikeWatchOff(ExpiryBundle:: OnStrikeWatch_t function ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnStrikeWatchOff.Remove( function );
+  }
+}
+
+void MultiExpiryBundle::AddOnAtmIv( ExpiryBundle::OnAtmIvCalc_t function ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnAtmIvCalc.Add( function );
+  }
+}
+
+void MultiExpiryBundle::RemoveOnAtmIv( ExpiryBundle::OnAtmIvCalc_t function ) {
+  for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
+    iter->second.OnAtmIvCalc.Remove( function );
   }
 }
 

@@ -53,6 +53,25 @@ public:
 //    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   }
 
+  template<typename TS> // TS=timeseries
+  void ChartTimeSeries( const TS& series, const std::string& sName, const std::string& sDescription ) {
+
+    pChartDataView->SetNames( sName, sDescription );
+
+//    ou::tf::HDF5TimeSeriesContainer<TS::datum_t> tsRepository( *pdm, sPath );
+//    ou::tf::HDF5TimeSeriesContainer<TS::datum_t>::iterator begin, end;
+//    begin = tsRepository.begin();
+//    end = tsRepository.end();
+//    hsize_t cnt = end - begin;
+//    TS series;
+//    series.Resize( cnt );
+//    tsRepository.Read( begin, end, &series );
+
+    AddChartEntries( pChartDataView, series );
+
+//    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+  }
+
 protected:
 private:
 

@@ -18,8 +18,14 @@
 
 // started after MultiExpiryBundle has been populated
 
+#include <map>
+
+#include <boost/smart_ptr.hpp>
+
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
+
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/DailyTradeTimeFrames.h>
 
@@ -40,6 +46,21 @@ private:
 
   ou::ChartDataBase m_ChartDataUnderlying;
 
+  struct BundleAtmIv {
+    boost::shared_ptr<ou::ChartEntryIndicator> m_pceCallIV;
+    boost::shared_ptr<ou::ChartEntryIndicator> m_pcePutIV;
+    BundleAtmIv( void ) {
+      m_pceCallIV.reset( new ou::ChartEntryIndicator );
+      m_pcePutIV.reset( new ou::ChartEntryIndicator );
+    }
+    BundleAtmIv( const BundleAtmIv& rhs )
+      : m_pceCallIV( rhs.m_pceCallIV ), m_pcePutIV( rhs.m_pcePutIV )
+    {}
+  };
+
+  typedef std::map<boost::posix_time::ptime,BundleAtmIv> mapAtmIv_t;
+  mapAtmIv_t m_mapAtmIv;
+
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
 
@@ -48,6 +69,8 @@ private:
 
   void HandleCommon( const ou::tf::Trade& trade );
   void HandleRHTrading( const ou::tf::Trade& trade ) {};
+
+  void HandleCalcIv( const ou::tf::PriceIV& );
 
 };
 

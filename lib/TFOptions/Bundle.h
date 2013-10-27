@@ -50,6 +50,9 @@ public:
   ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOn;
   ou::Delegate<ou::tf::option::Strike&> OnStrikeWatchOff;
 
+  typedef FastDelegate1<const ou::tf::PriceIV&> OnAtmIvCalc_t;
+  ou::Delegate<const ou::tf::PriceIV&> OnAtmIvCalc;
+
 //  void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
   void SetCall( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void SetPut( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
@@ -90,9 +93,9 @@ private:
   double m_dblUpperTrigger;
   double m_dblLowerTrigger;
 
-  ou::tf::PriceIVs m_tsAtmIv; // composite of all expiries, or only front expiry?
-  ou::tf::BarFactory m_bfIVUnderlyingCall; // ditto
-  ou::tf::BarFactory m_bfIVUnderlyingPut;  // ditto
+  ou::tf::PriceIVs m_tsAtmIv;
+  ou::tf::BarFactory m_bfIVUnderlyingCall;
+  ou::tf::BarFactory m_bfIVUnderlyingPut;
 
   mapStrikes_iter_t m_iterUpper;
   mapStrikes_iter_t m_iterMid;
@@ -164,8 +167,13 @@ public:
   void SaveData( const std::string& sPrefixSession, const std::string& sPrefix86400sec );
   void AssignOption( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   
-  void AddOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t );
-  void RemoveOnStrikeWatch( ExpiryBundle::OnStrikeWatch_t );
+  void AddOnStrikeWatchOn( ExpiryBundle::OnStrikeWatch_t );
+  void RemoveOnStrikeWatchOn( ExpiryBundle::OnStrikeWatch_t );
+  void AddOnStrikeWatchOff( ExpiryBundle::OnStrikeWatch_t );
+  void RemoveOnStrikeWatchOff( ExpiryBundle::OnStrikeWatch_t );
+
+  void AddOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
+  void RemoveOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
 
 protected:
 

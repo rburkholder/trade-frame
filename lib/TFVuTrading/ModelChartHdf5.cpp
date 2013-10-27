@@ -20,6 +20,20 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 ModelChartHdf5::ModelChartHdf5( void ) {
+  m_ceQuoteUpper.SetName( "Ask" );
+  m_ceQuoteLower.SetName( "Bid" );
+  m_ceQuoteSpread.SetName( "Spread" );
+  m_ceTrade.SetName( "Ticks" );
+  m_ceCallIV.SetName( "Call IV" );
+  m_cePutIV.SetName( "Put IV" );
+  m_ceImpVol.SetName( "Implied Volatility" );
+  m_ceDelta.SetName( "Delta" );
+  m_ceGamma.SetName( "Gamma" );
+  m_ceTheta.SetName( "Theta" );
+  m_ceVega.SetName( "Vega" );
+  m_ceRho.SetName( "Rho" );
+  m_ceVolumeUpper.SetName( "Long" );
+  m_ceVolumeLower.SetName( "Short" );
 }
 
 ModelChartHdf5::~ModelChartHdf5(void) {
@@ -47,7 +61,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
       m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
       m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
       m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
-      m_ceVolumeLower.Append( iter->DateTime(), iter->BidSize() );
+      m_ceVolumeLower.Append( iter->DateTime(), -iter->BidSize() );
       m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
     }
     m_ceQuoteUpper.SetColour( ou::Colour::Red );
@@ -88,8 +102,8 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_cePutIV.SetColour( ou::Colour::Red );
     m_ceCallIV.SetColour( ou::Colour::Blue );
     pChartDataView->Add( 0, &m_ceTrade );
-    pChartDataView->Add( 2, &m_ceCallIV );
-    pChartDataView->Add( 2, &m_cePutIV );
+    pChartDataView->Add( 1, &m_ceCallIV );
+    pChartDataView->Add( 1, &m_cePutIV );
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks ) {
@@ -114,11 +128,11 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
     m_ceVega.SetColour( ou::Colour::Black );
     m_ceRho.SetColour( ou::Colour::Black );
     pChartDataView->Add( 0, &m_ceImpVol );
-    pChartDataView->Add( 2, &m_ceDelta );
-    pChartDataView->Add( 3, &m_ceGamma );
-    pChartDataView->Add( 4, &m_ceTheta );
-    pChartDataView->Add( 5, &m_ceVega );
-    pChartDataView->Add( 6, &m_ceRho );
+    pChartDataView->Add( 1, &m_ceDelta );
+    pChartDataView->Add( 2, &m_ceGamma );
+    pChartDataView->Add( 3, &m_ceTheta );
+    pChartDataView->Add( 4, &m_ceVega );
+    pChartDataView->Add( 5, &m_ceRho );
 }
 
 } // namespace tf

@@ -49,6 +49,8 @@ IMPLEMENT_APP(AppHedgedBollinger)
 
 size_t atm = 125;
 
+unsigned int AppHedgedBollinger::m_nthIVCalc( 4 );
+
 bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hedged Bollinger" );
@@ -138,8 +140,8 @@ bool AppHedgedBollinger::OnInit() {
   m_pBundle = 0;
   m_pStrategy = 0;
 
+  m_cntIVCalc = m_nthIVCalc;
   m_timerGuiRefresh.SetOwner( this );
-
   Bind( wxEVT_TIMER, &AppHedgedBollinger::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHedgedBollinger::OnClose, this );  // start close of windows and controls
@@ -323,7 +325,10 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       m_pStrategy = new Strategy( m_pBundle );
       m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
 
-      m_pBundle->AddOnStrikeWatch( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
+      m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
+      m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );
+
+      m_pBundle->AddOnAtmIv( MakeDelegate( m_pStrategy, &Strategy::HandleCalcIv ) );
 
       std::cout << "Initialized." << std::endl;
 
@@ -414,9 +419,13 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
 //    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
 //    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
     if ( !m_bIVCalcActive ) {
-      if ( 0 != m_pIVCalc ) delete m_pIVCalc;
-      m_bIVCalcActive = true;
-      m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, now ) );
+      --m_cntIVCalc;
+      if ( 0 == m_cntIVCalc ) {
+        m_cntIVCalc = m_nthIVCalc;
+        if ( 0 != m_pIVCalc ) delete m_pIVCalc;
+        m_bIVCalcActive = true;
+        m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, now ) );
+      }
     }
   //}
 }

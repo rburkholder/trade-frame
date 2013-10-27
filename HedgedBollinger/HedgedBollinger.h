@@ -73,6 +73,8 @@ private:
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
+  unsigned int m_cntIVCalc;  // calc IV every nth gui refresh
+  static unsigned int m_nthIVCalc;
   volatile bool m_bIVCalcActive;
 
   wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
