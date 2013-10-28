@@ -281,8 +281,9 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
       // in trading state machine, indicate when 8 days prior to expiry of front month in order to
       //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
-      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
-      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2013, 11, 26 ) );
+      //boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
+      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 11, 26 ) );
+      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2013, 12, 26 ) );
 
       // GC Futures:
       ptime dtFrontMonthExpiryUtc( 
@@ -327,8 +328,6 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
       m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
       m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );
-
-      m_pBundle->AddOnAtmIv( MakeDelegate( m_pStrategy, &Strategy::HandleCalcIv ) );
 
       std::cout << "Initialized." << std::endl;
 
@@ -447,10 +446,10 @@ void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatc
   wxTreeItemIdValue idCookie;
   const std::string& sName( pOption->GetInstrument()->GetInstrumentName() );
   wxTreeItemId idRoot = m_ptreeChartables->GetRootItem();
-  wxTreeItemId idChild = m_ptreeChartables->GetFirstChild( idRoot, idCookie );
+  wxTreeItemId idChild = m_ptreeChartables->GetFirstChild( idRoot, idCookie ); 
   bool bFound( false );
   while ( idChild.IsOk() ) {
-    if ( sName == reinterpret_cast<ou::tf::option::Option*>( idChild.GetID() )->GetInstrument()->GetInstrumentName() ) {
+    if ( sName == reinterpret_cast<ou::tf::option::Option*>( m_ptreeChartables->GetItemData( idChild ) )->GetInstrument()->GetInstrumentName() ) {
       m_ptreeChartables->SetItemBold( idChild, bWatching );
       bFound = true;
       break;

@@ -43,7 +43,7 @@ private:
   std::vector<OnMessageHandler> rOnFD;
   std::vector<OnMessageHandler> rToBeRemoved;
   std::vector<OnMessageHandler> rToBeAdded;
-  bool m_bIterating;
+  volatile bool m_bIterating;
   typename std::vector<OnMessageHandler>::size_type m_size;
   typedef typename std::vector<OnMessageHandler>::iterator iterator;
 };
@@ -73,6 +73,7 @@ template<class RO> void Delegate<RO>::operator()( RO ro ) {
   }
   m_bIterating = false;
 
+  // this code isn't multi-thread protected properly.
   if ( !rToBeAdded.empty() ) {
     iter = rToBeAdded.begin();
     while ( rToBeAdded.end() != iter ) {
@@ -82,6 +83,7 @@ template<class RO> void Delegate<RO>::operator()( RO ro ) {
     rToBeAdded.clear();
   }
 
+  // this code isn't multi-thread protected properly.
   if ( !rToBeRemoved.empty() ) {
     iter = rToBeRemoved.begin();
     while ( rToBeRemoved.end() != iter ) {
