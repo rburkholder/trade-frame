@@ -39,6 +39,8 @@ namespace option { // options
 class ExpiryBundle {
 public:
 
+  friend std::ostream& operator<<( std::ostream& os, const ExpiryBundle& );
+
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef Watch::pWatch_t pWatch_t;
@@ -112,6 +114,8 @@ private:
   void SaveAtmIv( const std::string& sPrefix, const std::string& sPrefix86400Min );
 };
 
+std::ostream& operator<<( std::ostream& os, const ExpiryBundle& );
+
 // =======================================================
 
 class ExpiryBundleWithUnderlying: public ExpiryBundle {
@@ -137,6 +141,7 @@ private:
 // =======================================================
 
 class MultiExpiryBundle {
+  friend std::ostream& operator<<( std::ostream& os, const MultiExpiryBundle& );
 public:
 
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
@@ -175,6 +180,8 @@ public:
   void AddOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
   void RemoveOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
 
+
+
 protected:
 
 private:
@@ -193,6 +200,8 @@ private:
   void HandleUnderlyingTrade( const ou::tf::Trade& trade ) {};
 
 };
+
+std::ostream& operator<<( std::ostream& os, const MultiExpiryBundle& );
 
 // PopulateMultiExpiryBundle used like:
 // m_listIQFeedSymbols.SelectOptionsByUnderlying( sName, PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );

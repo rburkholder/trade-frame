@@ -319,6 +319,8 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       pProvider_t pNull;
       m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
 
+      std::cout << *m_pBundle;
+
       m_pBundle->Portfolio()
         = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
           m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );

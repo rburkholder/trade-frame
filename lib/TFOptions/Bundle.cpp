@@ -406,6 +406,11 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
 
 }
 
+std::ostream& operator<<( std::ostream& os, const ExpiryBundle& eb ) {
+  os << eb.m_dtExpiry << ": #strikes=" << eb.m_mapStrikes.size();
+  return os;
+}
+
 //=====================================
 
 void ExpiryBundleWithUnderlying::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
@@ -597,6 +602,13 @@ void MultiExpiryBundle::RemoveOnAtmIv( ExpiryBundle::OnAtmIvCalc_t function ) {
   for ( mapExpiryBundles_t::iterator iter = m_mapExpiryBundles.begin(); m_mapExpiryBundles.end() != iter; ++iter ) {
     iter->second.OnAtmIvCalc.Remove( function );
   }
+}
+
+std::ostream& operator<<( std::ostream& os, const MultiExpiryBundle& meb ) {
+  for ( MultiExpiryBundle::mapExpiryBundles_t::const_iterator iter = meb.m_mapExpiryBundles.begin(); meb.m_mapExpiryBundles.end() != iter; ++iter ) {
+    os << iter->second << std::endl;
+  }
+  return os;
 }
 
 

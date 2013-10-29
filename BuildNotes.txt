@@ -1,3 +1,8 @@
+2013/10/28
+http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
+b2 --layout=versioned toolset=msvc-10.0 variant=debug link=static threading=multi runtime-link=static address-model=64 -j4  --stagedir=stage\x64 stage
+
+
 2013/09/22
 Installer Software:  http://www.jrsoftware.org/isinfo.php
 
