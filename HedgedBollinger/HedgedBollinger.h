@@ -16,6 +16,10 @@
 
 // Started 2013/09/23
 
+#include <boost/thread/thread_only.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
+
 #include <wx/timer.h>
 #include <wx/treectrl.h>
 
@@ -38,6 +42,8 @@
 
 #include <OUCommon/Worker.h>
 
+#include "EventUpdateOptionTree.h"
+#include "EventDrawChart.h"
 #include "Strategy1.h"
 
 class AppHedgedBollinger:
@@ -62,7 +68,9 @@ private:
 
   wxWindow* m_winChart;
   bool m_bReadyToDrawChart;
+  bool m_bInDrawChart;
   ou::ChartMaster m_chart;
+  wxBitmap* m_pChartBitmap;
 
   Strategy* m_pStrategy;
 
@@ -76,6 +84,11 @@ private:
   unsigned int m_cntIVCalc;  // calc IV every nth gui refresh
   static unsigned int m_nthIVCalc;
   volatile bool m_bIVCalcActive;
+
+  boost::mutex m_mutexThreadDrawChart;
+  boost::condition_variable m_cvThreadDrawChart;
+  bool m_bThreadDrawChartActive;
+  boost::thread* m_pThreadDrawChart;
 
   wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
@@ -109,6 +122,10 @@ private:
 
   void CalcIV( ptime dt );
 
+  void StartDrawChart( void );
+  void ThreadDrawChart1( void );  // thread starts here
+  void ThreadDrawChart2( const MemBlock& m );  // a callback here to perform bitmap
+
   void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
   void HandleMenuAction2LoadIQFeedSymbolList( void );
@@ -126,12 +143,15 @@ private:
   void HandleLoadIQFeedSymbolList( void );
   void HandleSaveValues( void );
 
-  void HandleDrawChart( const MemBlock& );
+//  void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
 
   void HandleStrikeWatchOn( ou::tf::option::Strike& );
   void HandleStrikeWatchOff( ou::tf::option::Strike& );
+
+  void HandleGuiUpdateOptionTree( EventUpdateOptionTree& event );
+  void HandleGuiDrawChart( EventDrawChart& event );
 
 };
 

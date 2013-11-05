@@ -107,7 +107,7 @@ void Delegate<RO>::operator()( RO ro ) {
 
   m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
 
-  if ( 0 != m_cntChanges.load( boost::memory_order_relaxed ) ) {
+  if ( 0 != m_cntChanges.load( boost::memory_order_acquire ) ) {
     VectorReplace();
   }
 
@@ -120,7 +120,7 @@ void Delegate<RO>::Add( OnMessageHandler function ) {
 
   m_vDispatchMaster.push_back( function );
 
-  m_cntChanges.fetch_add( 1, boost::memory_order_relaxed );
+  m_cntChanges.fetch_add( 1, boost::memory_order_release );
 
   m_spinlockVectorUpdate.unlock();
 
@@ -142,7 +142,7 @@ void Delegate<RO>::Remove( OnMessageHandler function ) {
     ++iter;
   }
 
-  m_cntChanges.fetch_add( 1, boost::memory_order_relaxed );
+  m_cntChanges.fetch_add( 1, boost::memory_order_release );
 
   m_spinlockVectorUpdate.unlock();
 
@@ -153,17 +153,17 @@ void Delegate<RO>::Remove( OnMessageHandler function ) {
 template<class RO>
 void Delegate<RO>::VectorReplace( void ) {
 
-  if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_relaxed ) ) {
+  if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
     m_spinlockVectorReplace.lock();
     m_spinlockVectorUpdate.lock(); 
 
     // ensure we are not in process
-    if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_relaxed ) ) {
+    if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
       m_vDispatch.clear();
       m_vDispatch = m_vDispatchMaster;
     }
 
-    m_cntChanges.fetch_sub( m_cntChanges.load( boost::memory_order_relaxed ), boost::memory_order_relaxed );
+    m_cntChanges.store( 0, boost::memory_order_release );
 
     m_spinlockVectorUpdate.unlock();
     m_spinlockVectorReplace.unlock();

@@ -37,6 +37,28 @@ ChartDataBase::ChartDataBase(void)
   m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
+
+  m_quotes.Reserve( 500000 );
+  m_trades.Reserve( 200000 );
+  m_ceBars.Reserve( 50000 );
+  m_rVolumes[ VDn ].Reserve( 50000 );
+  m_rVolumes[ VUp ].Reserve( 50000 );
+  m_ceTrade.Reserve( 200000 );
+  m_ceQuoteUpper.Reserve( 500000 );
+  m_ceQuoteLower.Reserve( 500000 );
+  m_ceQuoteSpread.Reserve( 500000 );
+  m_ceEma1.Reserve( 200000 );
+  m_ceEma2.Reserve( 200000 );
+  m_ceEma3.Reserve( 200000 );
+  m_ceEma4.Reserve( 200000 );
+  m_ceUpperBollinger1.Reserve( 200000 );
+  m_ceLowerBollinger1.Reserve( 200000 );
+  m_ceUpperBollinger2.Reserve( 200000 );
+  m_ceLowerBollinger2.Reserve( 200000 );
+  m_ceUpperBollinger3.Reserve( 200000 );
+  m_ceLowerBollinger3.Reserve( 200000 );
+  m_ceUpperBollinger4.Reserve( 200000 );
+  m_ceLowerBollinger4.Reserve( 200000 );
   
   m_dvChart.Add( 0, &m_ceQuoteUpper );
   m_dvChart.Add( 0, &m_ceQuoteLower );
@@ -92,6 +114,8 @@ ChartDataBase::ChartDataBase(void)
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteSpread.SetColour( ou::Colour::Black );
 
+  m_ceQuoteSpread.SetName( "Spread" );
+
   m_rVolumes[ VUp ].ceVolumeUp.SetColour( ou::Colour::Green );
   m_rVolumes[ VUp ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
   m_rVolumes[ VUp ].ceVolumeDn.SetColour( ou::Colour::Red );
@@ -103,20 +127,24 @@ ChartDataBase::ChartDataBase(void)
   m_ceEma1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
+  m_ceEma1.SetName( "Bollinger1" );
 
   //m_ceEma2.SetColour( ou::Colour::RoyalBlue );
   m_ceEma2.SetColour( ou::Colour::Turquoise );
   m_ceUpperBollinger2.SetColour( ou::Colour::Turquoise );
   m_ceLowerBollinger2.SetColour( ou::Colour::Turquoise );
+  m_ceEma2.SetName( "Bollinger2" );
 
   //m_ceEma3.SetColour( ou::Colour::MediumSpringGreen );
   m_ceEma3.SetColour( ou::Colour::GreenYellow );
   m_ceUpperBollinger3.SetColour( ou::Colour::GreenYellow );
   m_ceLowerBollinger3.SetColour( ou::Colour::GreenYellow );
+  m_ceEma3.SetName( "Bollinger3" );
 
-  m_ceEma4.SetColour( ou::Colour::ForestGreen );
-  m_ceUpperBollinger4.SetColour( ou::Colour::ForestGreen );
-  m_ceLowerBollinger4.SetColour( ou::Colour::ForestGreen );
+  m_ceEma4.SetColour( ou::Colour::MediumSlateBlue );
+  m_ceUpperBollinger4.SetColour( ou::Colour::MediumSlateBlue );
+  m_ceLowerBollinger4.SetColour( ou::Colour::MediumSlateBlue );
+  m_ceEma4.SetName( "Bollinger4" );
 
 //  m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
 //  m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );

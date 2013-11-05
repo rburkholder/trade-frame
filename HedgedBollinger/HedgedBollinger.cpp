@@ -43,6 +43,7 @@ using namespace boost::gregorian;
 
 #include <TFOptions/CalcExpiry.h>
 
+//#include "EventUpdateOptionTree.h"
 #include "HedgedBollinger.h"
 
 IMPLEMENT_APP(AppHedgedBollinger)
@@ -126,6 +127,8 @@ bool AppHedgedBollinger::OnInit() {
   m_sNameUnderlying = "+GC#";
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
+  m_pChartBitmap = 0;
+  m_bInDrawChart = false;
   m_bReadyToDrawChart = false;
   m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
   m_sizerFrame->Add( m_winChart, 1, wxALL|wxEXPAND, 3);
@@ -185,6 +188,9 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  m_bThreadDrawChartActive = true;
+  m_pThreadDrawChart = new boost::thread( &AppHedgedBollinger::ThreadDrawChart1, this );
+
   return 1;
 
 }
@@ -194,31 +200,66 @@ void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
 //  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
+void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
+  //m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+  StartDrawChart();
+}
+
+// put relevant contents of HandlePaint into thread.  always have a memblock read to paint.
+// HandleDrawChart will always paint whatever is in the current memblock
+
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
+  wxPaintDC cdc( m_winChart );
+  cdc.DrawBitmap( *m_pChartBitmap, 0, 0);
+  m_bInDrawChart = false;
+//  delete m_pBitmap;
+//  m_pBitmap = 0;
+}
+
+void AppHedgedBollinger::StartDrawChart( void ) {
   if ( m_bReadyToDrawChart ) {
     try {
-      wxSize size = m_winChart->GetClientSize();
-      m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
-      m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::HandleDrawChart ) );
-      m_chart.DrawChart( );
+      if ( !m_bInDrawChart ) {
+        m_bInDrawChart = true;
+        m_cvThreadDrawChart.notify_one();
+      }
     }
     catch (...) {
     }
   }
 }
 
-void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+void AppHedgedBollinger::ThreadDrawChart1( void ) {
+  boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
+  while ( m_bThreadDrawChartActive ) {
+    m_cvThreadDrawChart.wait( lock );
+    wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
+    m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+    m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
+    m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::ThreadDrawChart2 ) );  // this line could be factored out?
+    m_chart.DrawChart( );
+  }
 }
 
+void AppHedgedBollinger::ThreadDrawChart2( const MemBlock& m ) {
+  wxMemoryInputStream in( m.data, m.len );  // need this
+  wxBitmap* p = new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
+  QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) );
+}
+
+void AppHedgedBollinger::HandleGuiDrawChart( EventDrawChart& event ) {
+  if ( 0 != m_pChartBitmap ) delete m_pChartBitmap;
+  m_pChartBitmap = event.GetBitmap();
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );  // generate a paint event
+}
+/*
 void AppHedgedBollinger::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
+  wxMemoryInputStream in( m.data, m.len );  // need this
+  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
   wxPaintDC cdc( m_winChart );
   cdc.DrawBitmap(bmp, 0, 0);
 }
-
+*/
 void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
 
   m_pBundle->StartWatch();
@@ -282,7 +323,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       // in trading state machine, indicate when 8 days prior to expiry of front month in order to
       //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
       //boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
-      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 11, 26 ) );
+      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 11, 25 ) );
       boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2013, 12, 26 ) );
 
       // GC Futures:
@@ -328,6 +369,11 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       m_pStrategy = new Strategy( m_pBundle );
       m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
 
+      Bind( EVENT_UPDATE_OPTION_TREE, &AppHedgedBollinger::HandleGuiUpdateOptionTree, this );
+      Bind( EVENT_DRAW_CHART, &AppHedgedBollinger::HandleGuiDrawChart, this );
+
+
+
       m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
       m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );
 
@@ -335,6 +381,11 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
 
     }
   }
+}
+
+void AppHedgedBollinger::HandleGuiUpdateOptionTree( EventUpdateOptionTree& event ) {
+  UpdateTree( event.GetStrike().Call(), event.GetWatch() );
+  UpdateTree( event.GetStrike().Put(),  event.GetWatch() );
 }
 
 void AppHedgedBollinger::HandleMenuActionSaveSymbolSubset( void ) {
@@ -410,11 +461,12 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
   static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
   boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
   ptime dtEnd = now + td; 
-  static boost::posix_time::time_duration tdLength( 0, 10, 0 );
+  static boost::posix_time::time_duration tdLength( 0, 10, 0 );  // viewport width is 10 minutes
   ptime dtBegin = dtEnd - tdLength;
   m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
 
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+  StartDrawChart();
 
 //  if ( dt > m_dtTopOfMinute ) {
 //    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
@@ -445,6 +497,7 @@ void AppHedgedBollinger::HandleMenuActionEmitYieldCurve( void ) {
 }
 
 void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatching ) {
+  // don't do this in worker thread, needs to be performed in gui thread
   wxTreeItemIdValue idCookie;
   const std::string& sName( pOption->GetInstrument()->GetInstrumentName() );
   wxTreeItemId idRoot = m_ptreeChartables->GetRootItem();
@@ -459,24 +512,37 @@ void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatc
     idChild = m_ptreeChartables->GetNextChild( idChild, idCookie );
   }
   if ( !bFound ) {
-    m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, reinterpret_cast<wxTreeItemData*>( pOption ) );
+    wxTreeItemId idNewChild = m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, reinterpret_cast<wxTreeItemData*>( pOption ) );
+    m_ptreeChartables->SetItemBold( idNewChild, bWatching );
   }
 }
 
 void AppHedgedBollinger::HandleStrikeWatchOn( ou::tf::option::Strike& strike ) {
-  UpdateTree( strike.Call(), true );
-  UpdateTree( strike.Put(), true );
+  QueueEvent( new EventUpdateOptionTree( EVENT_UPDATE_OPTION_TREE, -1, strike, true ) );
+//  UpdateTree( strike.Call(), true );
+//  UpdateTree( strike.Put(), true );
 }
 
 void AppHedgedBollinger::HandleStrikeWatchOff( ou::tf::option::Strike& strike ) {
-  UpdateTree( strike.Call(), false );
-  UpdateTree( strike.Put(), false );
+  QueueEvent( new EventUpdateOptionTree( EVENT_UPDATE_OPTION_TREE, -1, strike, false ) );
+//  UpdateTree( strike.Call(), false );
+//  UpdateTree( strike.Put(), false );
 }
 
 int AppHedgedBollinger::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
+
+  if ( 0 != m_pChartBitmap ) {
+    delete m_pChartBitmap;
+    m_pChartBitmap = 0;
+  }
+
+  m_bThreadDrawChartActive = false;
+  m_cvThreadDrawChart.notify_one();
+  m_pThreadDrawChart->join();
+
   m_listIQFeedSymbols.Clear();
   if ( m_db.IsOpen() ) m_db.Close();
 

@@ -66,9 +66,14 @@ boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
   boost::gregorian::day_iterator iterDay( boost::gregorian::date( date.year(), date.month(), 1 ), 1 );
   unsigned int cnt( 4 ); // need to move back four business days
   while ( 0 != cnt ) { // move to fourth last business day
+    using namespace ou::tf::holidays::exchange;
     --iterDay;
     unsigned int dow = iterDay->day_of_week();
-    if ( ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow ) ) {
+    setDates_t::iterator iter = setUSDates.find( *iterDay );
+    if ( ( boost::gregorian::Sunday == dow ) 
+      || ( boost::gregorian::Saturday == dow ) 
+      || ( setUSDates.end() != iter ) 
+      ) {
     }
     else {
       --cnt; // decrement when business day encountered
@@ -80,7 +85,8 @@ boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
     setDates_t::iterator iter = setUSDates.find( *iterDay );
     unsigned int dow = iterDay->day_of_week();
     if ( ( boost::gregorian::Friday == dow )
-      || ( boost::gregorian::Sunday == dow ) || ( boost::gregorian::Saturday == dow )
+      || ( boost::gregorian::Sunday == dow ) 
+      || ( boost::gregorian::Saturday == dow )
       || ( setUSDates.end() != iter ) 
       ) {
         --iterDay;

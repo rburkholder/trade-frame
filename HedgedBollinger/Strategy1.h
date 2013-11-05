@@ -21,6 +21,10 @@
 #include <map>
 
 #include <boost/smart_ptr.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/thread_only.hpp>
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
@@ -61,8 +65,25 @@ private:
   typedef std::map<boost::posix_time::ptime,BundleAtmIv> mapAtmIv_t;
   mapAtmIv_t m_mapAtmIv;
 
+  bool m_bThreadPopDatumsActive;
+  enum EDatumType { EDatumQuote, EDatumTrade };  // keep track of inbound datum ordering
+  // a union of Quote/trade would not work as there is a copy constructor, which a union does not like
+
+  boost::condition_variable m_cvCrossThreadDatums;
+  boost::mutex m_mutexCrossThreadDatums;
+  boost::thread* m_pThreadPopDatums;
+
+  boost::lockfree::spsc_queue<EDatumType, boost::lockfree::capacity<1024> > m_lfDatumType;
+  boost::lockfree::spsc_queue<ou::tf::Quote, boost::lockfree::capacity<512> > m_lfQuote;
+  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTrade;
+
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );
+
+  void ThreadPopDatums( void );
+
+  void HandleInboundQuoteUnderlying( const ou::tf::Quote& quote );
+  void HandleInboundTradeUnderlying( const ou::tf::Trade& trade );
 
   void HandleCommon( const ou::tf::Quote& quote );
   void HandleRHTrading( const ou::tf::Quote& quote );

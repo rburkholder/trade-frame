@@ -86,6 +86,11 @@ protected:
     ou::ChartEntryVolume ceVolumeUp;
     ou::ChartEntryVolume ceVolumeNeutral;
     ou::ChartEntryVolume ceVolumeDn;
+    void Reserve( ou::ChartEntryVolume::size_type n ) {
+      ceVolumeUp.Reserve( n );
+      ceVolumeNeutral.Reserve( n );
+      ceVolumeDn.Reserve( n );
+    }
   };
   enum EVolumes_t { VDn, VUp, VCnt_ };
   ceVolumes_t m_rVolumes[ VCnt_ ];
