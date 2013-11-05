@@ -26,7 +26,7 @@ ChartEntryBars::ChartEntryBars(void)
 {
 }
 
-ChartEntryBars::ChartEntryBars(unsigned int nSize) 
+ChartEntryBars::ChartEntryBars(size_type nSize) 
 : ChartEntryBaseWithTime(nSize)
 {
 }
@@ -38,7 +38,7 @@ ChartEntryBars::~ChartEntryBars(void) {
   m_vClose.clear();
 }
 
-void ChartEntryBars::Reserve( unsigned int nSize ) {
+void ChartEntryBars::Reserve( size_type nSize ) {
   ChartEntryBaseWithTime::Reserve( nSize );
   m_vOpen.reserve( nSize );
   m_vHigh.reserve( nSize );
@@ -46,24 +46,21 @@ void ChartEntryBars::Reserve( unsigned int nSize ) {
   m_vClose.reserve( nSize );
 }
 
-void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {/*
-  if ( m_vOpen.capacity() == m_vOpen.size() ) {
-    int sz = m_vOpen.size() + ( m_vOpen.size() / 5 ); // expand by 20%
-    //CChartEntryBaseWithTime::Reserve( sz );
-    m_vOpen.reserve( sz ); 
-    m_vHigh.reserve( sz ); 
-    m_vLow.reserve( sz ); 
-    m_vClose.reserve( sz ); 
-  }
-  */
-  ChartEntryBaseWithTime::Append( bar.DateTime() );
-  m_vOpen.push_back( bar.Open() );
-  m_vHigh.push_back( bar.High() );
-  m_vLow.push_back( bar.Low() );
-  m_vClose.push_back( bar.Close() );
+void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
+  m_lfBar.push( bar );
 }
 
-void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+
+  ou::tf::Bar bar;
+  while ( m_lfBar.pop( bar ) ) {
+    ChartEntryBaseWithTime::Append( bar.DateTime() );
+    m_vOpen.push_back( bar.Open() );
+    m_vHigh.push_back( bar.High() );
+    m_vLow.push_back( bar.Low() );
+    m_vClose.push_back( bar.Close() );
+  }
+
   if ( 0 != this->m_vDateTime.size() ) {
     CandleStickLayer *candle = pXY->addCandleStickLayer( 
       this->GetHigh(),

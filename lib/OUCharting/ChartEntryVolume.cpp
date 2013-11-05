@@ -26,7 +26,7 @@ ChartEntryVolume::ChartEntryVolume(void)
 {
 }
 
-ChartEntryVolume::ChartEntryVolume(unsigned int nSize) 
+ChartEntryVolume::ChartEntryVolume(size_type nSize) 
 : ChartEntryBaseWithTime(nSize)
 {
 }
@@ -34,15 +34,16 @@ ChartEntryVolume::ChartEntryVolume(unsigned int nSize)
 ChartEntryVolume::~ChartEntryVolume(void) {
 }
 
-void ChartEntryVolume::Reserve(unsigned int nSize ) {
+void ChartEntryVolume::Reserve(size_type nSize ) {
   ChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void ChartEntryVolume::Append(const boost::posix_time::ptime &dt, int volume) {
+void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume) {
   ChartEntryBaseWithTime::Append( dt, (double) volume );
 }
 
-void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const {
+void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+  ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
 
     BarLayer *bl = pXY->addBarLayer( this->GetPrices() );

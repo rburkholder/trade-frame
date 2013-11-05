@@ -21,10 +21,10 @@ class ChartEntryIndicator :
   public ChartEntryBaseWithTime {
 public:
   ChartEntryIndicator(void);
-  ChartEntryIndicator( unsigned int nSize );
+  ChartEntryIndicator( size_type nSize );
   virtual ~ChartEntryIndicator(void);
-  virtual void Reserve( unsigned int );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void Reserve( size_type );
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };

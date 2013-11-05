@@ -23,11 +23,11 @@ class ChartEntryBars :
   public ChartEntryBaseWithTime {  
 public:
   ChartEntryBars(void);
-  ChartEntryBars(unsigned int nSize);
+  ChartEntryBars(size_type nSize);
   virtual ~ChartEntryBars(void);
-  virtual void Reserve( unsigned int );
+  virtual void Reserve( size_type );
   void AppendBar( const ou::tf::Bar& bar );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
   virtual void Clear( void );
 protected:
   std::vector<double> m_vOpen;
@@ -55,6 +55,7 @@ protected:
     return DoubleArray( &m_vClose[ m_ixStart ], m_nElements );
   }
 private:
+  boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
 };
 
 } // namespace ou

@@ -71,6 +71,7 @@ private:
   bool m_bInDrawChart;
   ou::ChartMaster m_chart;
   wxBitmap* m_pChartBitmap;
+  boost::posix_time::time_duration m_tdViewPortWidth;
 
   Strategy* m_pStrategy;
 

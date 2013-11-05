@@ -52,7 +52,7 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   m_vpChar.push_back( pszLabel );
 }
 
-void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 

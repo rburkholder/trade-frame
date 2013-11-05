@@ -22,7 +22,7 @@ ChartEntryIndicator::ChartEntryIndicator(void)
 {
 }
 
-ChartEntryIndicator::ChartEntryIndicator( unsigned int nSize ) 
+ChartEntryIndicator::ChartEntryIndicator( size_type nSize ) 
 : ChartEntryBaseWithTime( nSize )
 {
 }
@@ -30,11 +30,12 @@ ChartEntryIndicator::ChartEntryIndicator( unsigned int nSize )
 ChartEntryIndicator::~ChartEntryIndicator(void) {
 }
 
-void ChartEntryIndicator::Reserve( unsigned int nSize ) {
+void ChartEntryIndicator::Reserve( size_type nSize ) {
   ChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) const {
+void ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes)  {
+  ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();

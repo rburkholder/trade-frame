@@ -31,7 +31,7 @@ void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const 
   m_vName.push_back( name );
 }
 
-void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const {
+void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {

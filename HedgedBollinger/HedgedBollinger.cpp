@@ -136,6 +136,8 @@ bool AppHedgedBollinger::OnInit() {
   m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );
 
+  m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
+
   m_bData1Connected = false;
   m_bData2Connected = false;
   m_bExecConnected = false;
@@ -197,35 +199,25 @@ bool AppHedgedBollinger::OnInit() {
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
-//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
 void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
-  //m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   StartDrawChart();
 }
 
-// put relevant contents of HandlePaint into thread.  always have a memblock read to paint.
-// HandleDrawChart will always paint whatever is in the current memblock
-
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
-  wxPaintDC cdc( m_winChart );
-  cdc.DrawBitmap( *m_pChartBitmap, 0, 0);
-  m_bInDrawChart = false;
-//  delete m_pBitmap;
-//  m_pBitmap = 0;
+  if ( event.GetId() == m_winChart->GetId() ) {
+    wxPaintDC dc( m_winChart );
+//    dc.DrawBitmap( *m_pChartBitmap, 0, 0);
+//    m_bInDrawChart = false;
+  }
+  else event.Skip();
 }
 
 void AppHedgedBollinger::StartDrawChart( void ) {
   if ( m_bReadyToDrawChart ) {
-    try {
-      if ( !m_bInDrawChart ) {
-        m_bInDrawChart = true;
-        m_cvThreadDrawChart.notify_one();
-      }
-    }
-    catch (...) {
-    }
+    m_bInDrawChart = true;
+    m_cvThreadDrawChart.notify_one();
   }
 }
 
@@ -233,6 +225,17 @@ void AppHedgedBollinger::ThreadDrawChart1( void ) {
   boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
   while ( m_bThreadDrawChartActive ) {
     m_cvThreadDrawChart.wait( lock );
+
+    // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
+    ptime now = ou::TimeSource::Instance().External();
+
+    static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+    boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+    ptime dtEnd = now + td; 
+
+    ptime dtBegin = dtEnd - m_tdViewPortWidth;
+    m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
+
     wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
     m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
     m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
@@ -250,16 +253,11 @@ void AppHedgedBollinger::ThreadDrawChart2( const MemBlock& m ) {
 void AppHedgedBollinger::HandleGuiDrawChart( EventDrawChart& event ) {
   if ( 0 != m_pChartBitmap ) delete m_pChartBitmap;
   m_pChartBitmap = event.GetBitmap();
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );  // generate a paint event
+  wxClientDC dc( m_winChart );
+  dc.DrawBitmap( *m_pChartBitmap, 0, 0);
+  m_bInDrawChart = false;
 }
-/*
-void AppHedgedBollinger::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );  // need this
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
-  wxPaintDC cdc( m_winChart );
-  cdc.DrawBitmap(bmp, 0, 0);
-}
-*/
+
 void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
 
   m_pBundle->StartWatch();
@@ -455,17 +453,7 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
     boost::lexical_cast<std::string>( m_dblMaxPL )
     );
     */
-  // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-  ptime now = ou::TimeSource::Instance().External();
 
-  static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-  boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-  ptime dtEnd = now + td; 
-  static boost::posix_time::time_duration tdLength( 0, 10, 0 );  // viewport width is 10 minutes
-  ptime dtBegin = dtEnd - tdLength;
-  m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
-
-//  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   StartDrawChart();
 
 //  if ( dt > m_dtTopOfMinute ) {
@@ -477,7 +465,7 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
         m_cntIVCalc = m_nthIVCalc;
         if ( 0 != m_pIVCalc ) delete m_pIVCalc;
         m_bIVCalcActive = true;
-        m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, now ) );
+        m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, ou::TimeSource::Instance().External() ) );
       }
     }
   //}
@@ -519,14 +507,10 @@ void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatc
 
 void AppHedgedBollinger::HandleStrikeWatchOn( ou::tf::option::Strike& strike ) {
   QueueEvent( new EventUpdateOptionTree( EVENT_UPDATE_OPTION_TREE, -1, strike, true ) );
-//  UpdateTree( strike.Call(), true );
-//  UpdateTree( strike.Put(), true );
 }
 
 void AppHedgedBollinger::HandleStrikeWatchOff( ou::tf::option::Strike& strike ) {
   QueueEvent( new EventUpdateOptionTree( EVENT_UPDATE_OPTION_TREE, -1, strike, false ) );
-//  UpdateTree( strike.Call(), false );
-//  UpdateTree( strike.Put(), false );
 }
 
 int AppHedgedBollinger::OnExit() {

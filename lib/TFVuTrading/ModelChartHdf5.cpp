@@ -61,7 +61,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
       m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
       m_ceVolumeUpper.Append( iter->DateTime(), iter->AskSize() );
       m_ceQuoteLower.Append( iter->DateTime(), iter->Bid() );
-      m_ceVolumeLower.Append( iter->DateTime(), -iter->BidSize() );
+      m_ceVolumeLower.Append( iter->DateTime(), - (int) iter->BidSize() );
       m_ceQuoteSpread.Append( iter->DateTime(), iter->Ask() - iter->Bid() );
     }
     m_ceQuoteUpper.SetColour( ou::Colour::Red );

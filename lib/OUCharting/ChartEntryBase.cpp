@@ -26,7 +26,7 @@ namespace ou { // One Unified
 ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ) {
 }
 
-ChartEntryBase::ChartEntryBase( unsigned int nSize ) 
+ChartEntryBase::ChartEntryBase( size_type nSize ) 
 : m_eColour( ou::Colour::Black )
 {
   m_vPrice.reserve( nSize );
@@ -36,16 +36,11 @@ ChartEntryBase::~ChartEntryBase() {
   m_vPrice.clear();
 }
 
-void ChartEntryBase::Reserve(unsigned int nSize ) {
+void ChartEntryBase::Reserve( size_type nSize ) {
   m_vPrice.reserve( nSize );
 }
 
 void ChartEntryBase::Append(double price) {
-  /*
-  if ( m_vPrice.capacity() == m_vPrice.size() ) {
-    m_vPrice.reserve( m_vPrice.size() + ( m_vPrice.size() / 5 ) ); // expand by 20%
-  }
-  */
   m_vPrice.push_back( price );
 }
 
@@ -65,7 +60,7 @@ ChartEntryBaseWithTime::ChartEntryBaseWithTime() :
 {
 }
 
-ChartEntryBaseWithTime::ChartEntryBaseWithTime( unsigned int nSize )
+ChartEntryBaseWithTime::ChartEntryBaseWithTime( size_type nSize )
 : ChartEntryBase( nSize ), 
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
@@ -79,7 +74,7 @@ ChartEntryBaseWithTime::~ChartEntryBaseWithTime() {
   m_vChartTime.clear();
 }
 
-void ChartEntryBaseWithTime::Reserve( unsigned int nSize ) {
+void ChartEntryBaseWithTime::Reserve( size_type nSize ) {
   ChartEntryBase::Reserve( nSize );
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
@@ -110,14 +105,8 @@ void ChartEntryBaseWithTime::SetViewPort( boost::posix_time::ptime dtBegin, boos
   }
 }
 
-void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
+void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
   // some Chart Entries don't use the built in vector
-  /*
-  if ( m_vDateTime.capacity() == m_vDateTime.size() ) {
-    m_vDateTime.reserve( m_vDateTime.size() + ( m_vDateTime.size() / 5 ) ); // expand by 20%
-    m_vChartTime.reserve( m_vChartTime.size() + ( m_vChartTime.size() / 5 ) ); // expand by 20%
-  }
-  */
   m_vDateTime.push_back( dt );
   m_vChartTime.push_back( 
     Chart::chartTime( 
@@ -132,9 +121,16 @@ void ChartEntryBaseWithTime::Append(const boost::posix_time::ptime &dt) {
   }
 }
 
-void ChartEntryBaseWithTime::Append( const boost::posix_time::ptime &dt, double price) {
-  ChartEntryBase::Append( price );
-  Append( dt );
+void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
+  while ( m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
+}
+
+void ChartEntryBaseWithTime::ClearQueue( void ) {  
+  TimeDouble_t td;
+  while ( m_lfTimeDouble.pop( td ) ) {
+    ChartEntryBase::Append( td.m_price );
+    Append( td.m_dt );
+  };
 }
 
 void ChartEntryBaseWithTime::Clear( void ) {

@@ -22,11 +22,11 @@ namespace ou { // One Unified
 class ChartEntryVolume: public ChartEntryBaseWithTime {
 public:
   ChartEntryVolume(void);
-  ChartEntryVolume(unsigned int nSize);
+  ChartEntryVolume(size_type nSize);
   virtual ~ChartEntryVolume(void);
-  virtual void Reserve( unsigned int );
-  void Append( const ptime &dt, int volume );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) const;
+  virtual void Reserve( size_type );
+  void Append( ptime dt, int volume );
+  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };
