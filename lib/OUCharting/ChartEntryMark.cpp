@@ -26,12 +26,25 @@ ChartEntryMark::~ChartEntryMark(void) {
 }
 
 void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
-  m_vPrice.push_back( price );
-  m_vColour.push_back( colour );
-  m_vName.push_back( name );
+  if ( m_bThreadSafe ) {
+    Mark_t mark( price, colour, name );
+    while ( !m_lfMark.push( mark ) ) {};
+  }
+  else {
+    m_vPrice.push_back( price );
+    m_vColour.push_back( colour );
+    m_vName.push_back( name );
+  }
 }
 
 void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+  Mark_t mark;
+  while ( m_lfMark.pop( mark ) ) {
+    m_vPrice.push_back( mark.m_dblPrice );
+    m_vColour.push_back( mark.m_colour );
+    m_vName.push_back( mark.m_sName );
+  }
+
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {

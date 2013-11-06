@@ -48,6 +48,7 @@ protected:
     return StringArray( &m_vpChar[ m_ixStart ],  m_nElements );
   }
 private:
+  boost::lockfree::spsc_queue<char*, boost::lockfree::capacity<lockfreesize> > m_lfShape;
 };
 
 } // namespace ou

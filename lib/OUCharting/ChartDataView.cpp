@@ -52,7 +52,7 @@ ChartDataViewCarrier::~ChartDataViewCarrier() {
 //
 
 ChartDataView::ChartDataView( void ) 
-  : m_bChanged( false ), 
+  : m_bChanged( false ), m_bThreadSafe( false ),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
     m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
@@ -63,7 +63,15 @@ ChartDataView::~ChartDataView( void ) {
   m_vChartDataViewEntry.clear();
 }
 
+void ChartDataView::SetThreadSafe( bool bThreadSafe ) { 
+  m_bThreadSafe = bThreadSafe; 
+  for ( vChartDataViewEntry_t::iterator iter = m_vChartDataViewEntry.begin(); m_vChartDataViewEntry.end() != iter; ++iter ) {
+    iter->GetChartEntry()->SetThreadSafe( bThreadSafe );
+  }
+}
+
 void ChartDataView::Add(size_t nChart, ChartEntryBase* pEntry ) {
+  pEntry->SetThreadSafe( m_bThreadSafe );
   local::ChartDataViewCarrier carrier( nChart, pEntry );
   m_vChartDataViewEntry.push_back( carrier );
   mapCntChartIndexes_t::iterator iter1, iter3;

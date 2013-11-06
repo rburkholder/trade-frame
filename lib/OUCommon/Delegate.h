@@ -14,9 +14,6 @@
 #pragma once
 
 #include <vector>
-#include <algorithm>
-
-#include <assert.h>
 
 #include <boost/atomic.hpp>
 
@@ -28,13 +25,17 @@ using namespace fastdelegate;
 
 namespace ou {
 
-template<class RO> 
+template<class RO>  // RO: Return Object in operator()
 class Delegate {
-// RO: Return Object in call
-// example:  m_mgrPortfolio.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
+// example:  
+//  Delegate<ClassA> OnPortfolioAdded;
+//  OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
+// for some object portfolio_model of type RO:
+//  OnPortfolioAdded( portfolio_model );
+//  OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
 public:
 
-  typedef FastDelegate1<RO> OnMessageHandler;
+  typedef fastdelegate::FastDelegate1<RO> OnMessageHandler;
   typedef std::vector<OnMessageHandler> vDispatch_t;
   typedef typename vDispatch_t::size_type vsize_t;
 
@@ -58,13 +59,13 @@ private:
 
   boost::atomic<int> m_cntDispatchProcesses;
   boost::atomic<int> m_cntChanges;
-  ou::SpinLock m_spinlockVectorUpdate;
-  ou::SpinLock m_spinlockVectorReplace;
+  ou::SpinLock m_spinlockVectorUpdate;   // lock against Add/Remove
+  ou::SpinLock m_spinlockVectorReplace;  // lock against operator()
 
-  vDispatch_t m_vDispatchMaster;
-  vDispatch_t m_vDispatch;
+  vDispatch_t m_vDispatchMaster;  // master vector used for Add/Remove   
+  vDispatch_t m_vDispatch;  // used by operator() for dispatch, copied from m_vDispatchMaster
 
-  void VectorReplace( void );
+  void VectorReplace( void );  // handles the copy of m_vDispatchMaster to m_vDispatch
 
 };
 
@@ -78,7 +79,7 @@ template<class RO>
 Delegate<RO>::Delegate( const Delegate& rhs ) 
   : m_cntDispatchProcesses( 0 ), m_cntChanges( 0 )
   // don't carry over any of the stuff, just re-initialize it.
-  // boost::atomic has private members which are non-copyable
+  // boost::atomic is non-copyable
 //  : m_cntDispatchProcesses( rhs.m_cntDispatchProcesses ), m_cntChanges( rhs.m_cntChanges ),
 //  m_spinlockVectorUpdate( rhs.m_spinlockVectorUpdate ), m_spinlockVectorReplace( rhs.m_spinlockVectorReplace ),
 //  m_vDispatchMaster( rhs.m_vDispatchMaster ), m_vDispatch( rhs.m_vDispatch )
@@ -97,7 +98,7 @@ void Delegate<RO>::operator()( RO ro ) {
   const_iterator iter;
 
   m_cntDispatchProcesses.fetch_add( 1, boost::memory_order_acquire );
-  m_spinlockVectorReplace.wait();  // wait for any in process replacement to finish
+  m_spinlockVectorReplace.wait();  // wait for any running replacement to finish
 
   iter = m_vDispatch.begin();  // start dispatching
   while ( m_vDispatch.end() != iter ) {
@@ -107,6 +108,7 @@ void Delegate<RO>::operator()( RO ro ) {
 
   m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
 
+  // update dispatch with queued changes
   if ( 0 != m_cntChanges.load( boost::memory_order_acquire ) ) {
     VectorReplace();
   }
@@ -116,13 +118,13 @@ void Delegate<RO>::operator()( RO ro ) {
 template<class RO> 
 void Delegate<RO>::Add( OnMessageHandler function ) {
 
-  m_spinlockVectorUpdate.lock();
+  m_spinlockVectorUpdate.lock(); 
 
   m_vDispatchMaster.push_back( function );
 
   m_cntChanges.fetch_add( 1, boost::memory_order_release );
 
-  m_spinlockVectorUpdate.unlock();
+  m_spinlockVectorUpdate.unlock(); 
 
   VectorReplace();
 
@@ -153,9 +155,10 @@ void Delegate<RO>::Remove( OnMessageHandler function ) {
 template<class RO>
 void Delegate<RO>::VectorReplace( void ) {
 
+  // perform VectorReplace only outside of operator() method influence
   if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
     m_spinlockVectorReplace.lock();
-    m_spinlockVectorUpdate.lock(); 
+    m_spinlockVectorUpdate.lock();
 
     // ensure we are not in process
     if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
@@ -167,6 +170,7 @@ void Delegate<RO>::VectorReplace( void ) {
 
     m_spinlockVectorUpdate.unlock();
     m_spinlockVectorReplace.unlock();
+
   }
 
 }

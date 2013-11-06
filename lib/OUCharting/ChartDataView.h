@@ -70,6 +70,10 @@ public:
   void SetChanged(void) { m_bChanged = true; };
   bool GetChanged(void) { bool b = m_bChanged; if ( b ) m_bChanged = false; return b; };
 
+  // should reprocess m_vChartDataViewEntry when these are called
+  void SetThreadSafe( bool bThreadSafe );
+  bool GetThreadSafe( void ) const  { return m_bThreadSafe; }
+
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetNames( const std::string &sStrategy, const std::string &sName ) {
@@ -96,7 +100,7 @@ private:
   typedef std::vector<local::ChartDataViewCarrier> vChartDataViewEntry_t;
 
   bool m_bChanged;
-//  bool m_bClosed;
+  bool m_bThreadSafe;   // propogated into ChartEntries for value append operations across thread boundaries
   std::string m_sStrategy;
   std::string m_sName;
 

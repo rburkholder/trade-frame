@@ -65,6 +65,9 @@ public:
   void SetName( const std::string& name ) { m_sName = name; };
   const std::string& GetName( void ) const { return m_sName; };
 
+  void SetThreadSafe( bool bThreadSafe ) { m_bThreadSafe = bThreadSafe; };
+  bool GetThreadSafe( void ) const  { return m_bThreadSafe; }
+
   void Append( double price );
   virtual size_type Size( void ) const { return m_vPrice.size(); };
   virtual void Clear( void );
@@ -76,6 +79,9 @@ protected:
 
   size_type m_ixStart; // starting point into viewport
   int m_nElements;  // number of elements in the viewport
+
+  bool m_bThreadSafe;
+  static const unsigned int lockfreesize = 4096;
 
   ou::Colour::enumColour m_eColour;
   std::string m_sName;
@@ -109,8 +115,6 @@ public:
 protected:
 
   typedef std::vector<boost::posix_time::ptime> vDateTime_t;
-
-  static const unsigned int lockfreesize = 4096;
 
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;

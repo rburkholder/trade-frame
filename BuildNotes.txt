@@ -14,7 +14,7 @@ Installer Software:  http://www.jrsoftware.org/isinfo.php
 Source of unzip files:  https://github.com/nmoinvaz/minizip, but don't use it
 This is a new flavour but is incompatible with zlib-1.2.7 used with hdf5
 Therefore, have added ioapi.h, ioapi_mem.h, unzip.h to hdf5\compress64\include from contrib/minizip
-And added ioapi_mem.c to contrib/minizip with a few 64 bit changes and added into vc10 project
+And added unzip.c, ioapi_mem.c to contrib/minizip with a few 64 bit changes and added into vc10 project
 zlib is described at:  http://zlib.net/
 Found about ioapi_mem_c at http://www.winimage.com/zLibDll/minizip.html
 

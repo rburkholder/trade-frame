@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include "ChartEntryShape.h"
 
 namespace ou { // One Unified
@@ -35,6 +33,7 @@ ChartEntryShape::ChartEntryShape( enumShape eShape, ou::Colour::enumColour colou
   ChartEntryBase::SetColour( colour );
 }
 
+// destructor needs to clear out queue first
 ChartEntryShape::~ChartEntryShape(void) {
   if ( !m_vpChar.empty() ) {
     for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
@@ -49,10 +48,22 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   strcpy( pszLabel, sText.c_str() );
   //m_vLabel.push_back( sText );
   //const std::string &s = m_vLabel.back();
-  m_vpChar.push_back( pszLabel );
+  if ( m_bThreadSafe ) {
+    while ( !m_lfShape.push( pszLabel ) ) {};
+  }
+  else {
+    m_vpChar.push_back( pszLabel );
+  }
 }
 
 void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+
+  ChartEntryBaseWithTime::ClearQueue();
+  char* pszLabel;
+  while ( m_lfShape.pop( pszLabel ) ) {
+    m_vpChar.push_back( pszLabel );
+  }
+
   if ( 0 < m_vPrice.size() ) {
     ScatterLayer *layer 
       = pXY->addScatterLayer( 

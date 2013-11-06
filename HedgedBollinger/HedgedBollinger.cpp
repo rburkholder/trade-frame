@@ -188,7 +188,7 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
   vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
-  vItems.push_back( new mi( "f1 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "f2 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_bThreadDrawChartActive = true;
@@ -241,6 +241,7 @@ void AppHedgedBollinger::ThreadDrawChart1( void ) {
 
       ptime dtBegin = dtEnd - m_tdViewPortWidth;
       m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
+      m_pStrategy->GetChartDataView().SetThreadSafe( true );
 
       wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
       m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );

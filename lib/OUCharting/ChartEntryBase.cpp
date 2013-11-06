@@ -23,7 +23,7 @@ namespace ou { // One Unified
 // CChartEntryBase
 //
 
-ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ) {
+ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ), m_bThreadSafe( false ) {
 }
 
 ChartEntryBase::ChartEntryBase( size_type nSize ) 
@@ -99,9 +99,9 @@ void ChartEntryBaseWithTime::SetViewPort( boost::posix_time::ptime dtBegin, boos
       if ( boost::posix_time::not_a_date_time != dtEnd ) {
         iterEnd = std::upper_bound( iterBegin, m_vDateTime.end(), dtEnd );
       }
+      m_ixStart = iterBegin - m_vDateTime.begin();
+      m_nElements = iterEnd - iterBegin;
     }
-    m_ixStart = iterBegin - m_vDateTime.begin();
-    m_nElements = iterEnd - iterBegin;
   }
 }
 
@@ -113,7 +113,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
       dt.date().year(), dt.date().month(), dt.date().day(),
       dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 
-  if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt >= m_dtViewPortEnd ) ) {
+  if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt > m_dtViewPortEnd ) ) {
     // don't append any more values to visible area
   }
   else {
@@ -122,9 +122,16 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
 }
 
 void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
-  while ( !m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
+  if ( m_bThreadSafe ) {
+    while ( !m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
+  }
+  else {
+    ChartEntryBase::Append( price );
+    Append( dt );
+  }
 }
 
+// there are out-of-order issues or loss-of-data issues if m_bThreadSafe is changed while something is in the Queue
 void ChartEntryBaseWithTime::ClearQueue( void ) {  
   TimeDouble_t td;
   while ( m_lfTimeDouble.pop( td ) ) {

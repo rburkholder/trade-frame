@@ -15,6 +15,7 @@
 
 #pragma once
 
+// code follows:
 // http://www.boost.org/doc/libs/1_54_0/doc/html/atomic/usage_examples.html
 
 #include <boost/atomic.hpp>
@@ -29,7 +30,8 @@ private:
 
 public:
 
-  SpinLock(): m_state(Unlocked) {}
+  SpinLock() { unlock(); }
+  ~SpinLock() { unlock(); }  // locks on same item need to release before item on stack disappears
 
   void wait() {
     while (m_state.exchange(Locked, boost::memory_order_acquire) == Locked) {
