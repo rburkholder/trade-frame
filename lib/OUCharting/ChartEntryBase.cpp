@@ -122,7 +122,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
 }
 
 void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
-  while ( m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
+  while ( !m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
 }
 
 void ChartEntryBaseWithTime::ClearQueue( void ) {  

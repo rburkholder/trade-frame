@@ -188,6 +188,7 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
   vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
+  vItems.push_back( new mi( "f1 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_bThreadDrawChartActive = true;
@@ -199,6 +200,10 @@ bool AppHedgedBollinger::OnInit() {
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
   m_bReadyToDrawChart = true;
+}
+
+void AppHedgedBollinger::HandleMenuActionStopChart( void ) {
+  m_bReadyToDrawChart = false;
 }
 
 void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
@@ -226,21 +231,23 @@ void AppHedgedBollinger::ThreadDrawChart1( void ) {
   while ( m_bThreadDrawChartActive ) {
     m_cvThreadDrawChart.wait( lock );
 
-    // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-    ptime now = ou::TimeSource::Instance().External();
+    if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
+      // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
+      ptime now = ou::TimeSource::Instance().External();
 
-    static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-    boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-    ptime dtEnd = now + td; 
+      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
+      ptime dtEnd = now + td; 
 
-    ptime dtBegin = dtEnd - m_tdViewPortWidth;
-    m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
+      ptime dtBegin = dtEnd - m_tdViewPortWidth;
+      m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
 
-    wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
-    m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-    m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
-    m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::ThreadDrawChart2 ) );  // this line could be factored out?
-    m_chart.DrawChart( );
+      wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
+      m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+      m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
+      m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::ThreadDrawChart2 ) );  // this line could be factored out?
+      m_chart.DrawChart( );
+    }
   }
 }
 
@@ -518,14 +525,19 @@ int AppHedgedBollinger::OnExit() {
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
 
+  m_bThreadDrawChartActive = false;
+  m_cvThreadDrawChart.notify_one();
+  m_pThreadDrawChart->join();
+  delete m_pThreadDrawChart;
+  m_pThreadDrawChart = 0;
+
   if ( 0 != m_pChartBitmap ) {
     delete m_pChartBitmap;
     m_pChartBitmap = 0;
   }
 
-  m_bThreadDrawChartActive = false;
-  m_cvThreadDrawChart.notify_one();
-  m_pThreadDrawChart->join();
+  delete m_pStrategy;
+  m_pStrategy = 0;
 
   m_listIQFeedSymbols.Clear();
   if ( m_db.IsOpen() ) m_db.Close();

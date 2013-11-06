@@ -37,7 +37,7 @@ ChartDataBase::ChartDataBase(void)
   m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
   m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
 {
-
+/*
   m_quotes.Reserve( 500000 );
   m_trades.Reserve( 200000 );
   m_ceBars.Reserve( 50000 );
@@ -59,7 +59,7 @@ ChartDataBase::ChartDataBase(void)
   m_ceLowerBollinger3.Reserve( 200000 );
   m_ceUpperBollinger4.Reserve( 200000 );
   m_ceLowerBollinger4.Reserve( 200000 );
-  
+  */
   m_dvChart.Add( 0, &m_ceQuoteUpper );
   m_dvChart.Add( 0, &m_ceQuoteLower );
   m_dvChart.Add( 0, &m_ceTrade );

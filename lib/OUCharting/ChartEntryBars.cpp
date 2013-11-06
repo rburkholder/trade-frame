@@ -47,7 +47,7 @@ void ChartEntryBars::Reserve( size_type nSize ) {
 }
 
 void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
-  m_lfBar.push( bar );
+  while ( !m_lfBar.push( bar ) ) {};
 }
 
 void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {

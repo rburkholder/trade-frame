@@ -80,7 +80,7 @@ void ChartMaster::SetBarWidth( boost::posix_time::time_duration tdBarWidth ) {
 void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
   struct structSubChart {
-    XYChart *xy; // xy chart at this position
+    XYChart* xy; // xy chart at this position
     structSubChart( void ) : xy( 0 ) {};
   };
 
@@ -102,6 +102,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
 
       std::vector<structSubChart> vCharts;
       vCharts.resize( n );  // this is the number of sub-charts we are working with (move to class def so not redone all the time?)
+
       size_t ix = 0;
       int y = 15;  // was 25
       int x = 50;

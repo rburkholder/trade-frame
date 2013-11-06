@@ -138,6 +138,7 @@ private:
   void HandleMenuActionSaveValues( void );
   void HandleMenuActionEmitYieldCurve( void );
   void HandleMenuActionStartChart( void );
+  void HandleMenuActionStopChart( void );
 
   void HandleObtainNewIQFeedSymbolListRemote( void );
   void HandleObtainNewIQFeedSymbolListLocal( void );
