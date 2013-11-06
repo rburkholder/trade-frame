@@ -1,3 +1,9 @@
+2013/11/05
+http://www.stroustrup.com/lock-free-vector.pdf
+
+A Brief Introduction to Rvalue References
+http://www.artima.com/cppsource/rvalue.html
+
 2013/11/01
 Custom Allocator
 http://blogs.msdn.com/b/vcblog/archive/2008/08/28/the-mallocator.aspx
