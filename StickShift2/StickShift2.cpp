@@ -25,7 +25,7 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
-#include "StickShift.h"
+#include "StickShift2.h"
 
 IMPLEMENT_APP(AppStickShift)
 
@@ -101,17 +101,17 @@ bool AppStickShift::OnInit() {
   // maybe set scenario with database and with in memory data structure
   m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
 
-  m_db.Open( "StickShift.db" );
+  m_db.Open( "StickShift2.db" );
 
   m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management" );
 
-  m_pMPPOE = new MPPOE_t;
+//  m_pMPPOE = new MPPOE_t;
 
-  m_pPPPOE = new PPPOE_t( m_pMPPOE, m_pFPPOE );
-  m_pPPPOE->Show();
+//  m_pPPPOE = new PPPOE_t( m_pMPPOE, m_pFPPOE );
+//  m_pPPPOE->Show();
 
-  m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
-  m_pCPPOE->LoadInitialData();
+//  m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
+//  m_pCPPOE->LoadInitialData();
   
   m_pFPPOE->Show();
 
@@ -142,8 +142,8 @@ int AppStickShift::OnExit() {
   //m_timerGuiRefresh.Stop();
   if ( m_db.IsOpen() ) m_db.Close();
 
-  delete m_pCPPOE;
-  m_pCPPOE = 0;
+//  delete m_pCPPOE;
+//  m_pCPPOE = 0;
 
   return 0;
 }

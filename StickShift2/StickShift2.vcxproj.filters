@@ -19,7 +19,7 @@
     <None Include="small.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="HedgedBollinger.ico">
+    <None Include="StickShift2.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -33,16 +33,10 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HedgedBollinger.h">
+    <ClInclude Include="StickShift2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Strategy1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EventUpdateOptionTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EventDrawChart.h">
+    <ClInclude Include="PanelPortfolioPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,21 +44,15 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HedgedBollinger.cpp">
+    <ClCompile Include="StickShift2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Strategy1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EventUpdateOptionTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EventDrawChart.cpp">
+    <ClCompile Include="PanelPortfolioPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="HedgedBollinger.rc">
+    <ResourceCompile Include="StickShift2.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
