@@ -94,15 +94,17 @@ public:
     OnPositionNeedsDetails = function;
   }
 
+  ou::Delegate<const idPortfolio_t&> OnPortfolioLoaded;
   ou::Delegate<const idPortfolio_t&> OnPortfolioAdded;
   ou::Delegate<const idPortfolio_t&> OnPortfolioUpdated;
   ou::Delegate<const idPortfolio_t&> OnPortfolioDeleted;
 
+  ou::Delegate<const idPosition_t&> OnPositionLoaded;
   ou::Delegate<const idPosition_t&> OnPositionAdded;
   ou::Delegate<const idPosition_t&> OnPositionUpdated;
   ou::Delegate<const idPosition_t&> OnPositionDeleted;
 
-  template<class F> void ScanPortfolios( F, const idPortfolio_t& id = "" );
+  template<class F> void ScanPortfolios( const idPortfolio_t& id, F );
   template<class F> void ScanPositions( mapPosition_t&, F );
   template<class F> void ScanPositions( const idPortfolio_t&, F );
 
@@ -146,7 +148,7 @@ private:
 
 };
 
-template<class F> void PortfolioManager::ScanPortfolios( F f, const idPortfolio_t& id ) {
+template<class F> void PortfolioManager::ScanPortfolios( const idPortfolio_t& id,  F f ) {
   using namespace boost::adaptors;
   iterReportingPortfolios_t iter = m_mapReportingPortfolios.find( id );
   if ( m_mapReportingPortfolios.end() != iter ) {

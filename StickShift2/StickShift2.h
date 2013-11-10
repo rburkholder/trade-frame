@@ -26,9 +26,9 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
-#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
-#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
-#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
+//#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
+//#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
+//#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
 
 class AppStickShift:
   public wxApp, public ou::tf::FrameWork01<AppStickShift> {
@@ -37,12 +37,14 @@ public:
 protected:
 private:
 
+  typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
+
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
 
-  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
-  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
-  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
+//  typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
+//  typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
+//  typedef ou::tf::ControllerPortfolioPositionOrderExecution CPPOE_t;
 
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
@@ -77,6 +79,10 @@ private:
 //  PPPOE_t* m_pPPPOE;
 //  CPPOE_t* m_pCPPOE;
 
+  wxBoxSizer* m_sizerPM;
+  wxScrolledWindow* m_scrollPM;
+  wxBoxSizer* m_sizerScrollPM;
+
   ou::tf::DBOps m_db;
 
   virtual bool OnInit();
@@ -105,6 +111,8 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
 
   void HandleGuiRefresh( wxTimerEvent& event );
+
+  void HandlePortfolioLoad( const idPortfolio_t& idPortfolio );
 
 };
 

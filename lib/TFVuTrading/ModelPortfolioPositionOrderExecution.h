@@ -124,10 +124,12 @@ private:
   typedef std::map<idPortfolio_t,DataViewItemPortfolio*> mapPortfolios_t;
   mapPortfolios_t m_mapPortfolios;
 
+  void HandleOnPortfolioLoaded( const idPortfolio_t& ) {};  // 2013/11/09 details to be determined
   void HandleOnPortfolioAdded( const idPortfolio_t& );
   void HandleOnPortfolioUpdated( const idPortfolio_t& );
   void HandleOnPortfolioDeleted( const idPortfolio_t& );
 
+  void HandleOnPositionLoaded( const idPosition_t& ) {};  // 2013/11/09 details to be determined
   void HandleOnPositionAdded( const idPosition_t& );
   void HandleOnPositionUpdated( const idPosition_t& );
   void HandleOnPositionDeleted( const idPosition_t& );

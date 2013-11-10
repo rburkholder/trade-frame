@@ -25,6 +25,7 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include "PanelPortfolioPosition.h"
 #include "StickShift2.h"
 
 IMPLEMENT_APP(AppStickShift)
@@ -83,6 +84,17 @@ bool AppStickShift::OnInit() {
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppStickShift::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppStickShift::HandlePopulateDatabase ) );
 
+  // maybe set scenario with database and with in memory data structure
+//  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
+  m_idPortfolio = "StickShift";  // keeps name constant over multiple days
+
+  std::string sDbName( "StickShift2.db" );
+  if ( boost::filesystem::exists( sDbName ) ) {
+    boost::filesystem::remove( sDbName );
+  }
+
+  m_db.Open( sDbName );
+
   m_bData1Connected = false;
   m_bExecConnected = false;
 
@@ -98,25 +110,37 @@ bool AppStickShift::OnInit() {
   m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppStickShift::HandlePanelSymbolText ) );
   m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppStickShift::HandlePanelFocusPropogate ) );
 
-  // maybe set scenario with database and with in memory data structure
-  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
+  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxDefaultSize,  
+    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+    );
 
-  m_db.Open( "StickShift2.db" );
+  m_sizerPM = new wxBoxSizer(wxVERTICAL);
+  m_pFPPOE->SetSizer(m_sizerPM);
 
-  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management" );
+  m_scrollPM = new wxScrolledWindow( m_pFPPOE, -1, wxDefaultPosition, wxSize(200, 400), wxVSCROLL );
+  m_sizerPM->Add(m_scrollPM, 1, wxGROW|wxALL, 5);
+  m_scrollPM->SetScrollbars(1, 1, 0, 0);
 
-//  m_pMPPOE = new MPPOE_t;
+  m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
+  m_scrollPM->SetSizer( m_sizerScrollPM );
 
-//  m_pPPPOE = new PPPOE_t( m_pMPPOE, m_pFPPOE );
-//  m_pPPPOE->Show();
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
+  pm.LoadActivePortfolios();
 
-//  m_pCPPOE = new CPPOE_t( m_pMPPOE, m_pPPPOE );
-//  m_pCPPOE->LoadInitialData();
-  
   m_pFPPOE->Show();
+
+
 
   return 1;
 
+}
+
+void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  ou::tf::PanelPortfolioPosition* pPPP( new ou::tf::PanelPortfolioPosition( m_scrollPM ) );
+  m_sizerScrollPM->Add( pPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
+  pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
 }
 
 void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -137,6 +161,9 @@ void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
 }
 
 int AppStickShift::OnExit() {
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
@@ -179,14 +206,14 @@ void AppStickShift::HandlePopulateDatabase( void ) {
 
   ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
-  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "Currency Monitor" );
-  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "Currency Monitor" );
-  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "Currency Monitor" );
-  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
+//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "Currency Monitor" );
+//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::EUR ], "Currency Monitor" );
+//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::AUD ], "Currency Monitor" );
+//  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
+//    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
     
 }
 

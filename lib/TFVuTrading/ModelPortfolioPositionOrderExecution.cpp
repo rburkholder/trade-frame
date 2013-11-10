@@ -38,10 +38,12 @@ ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
   m_pModelOrder = new ModelOrder;
   m_pModelExecution = new ModelExecution;
 
+  m_PortfolioManager.OnPortfolioLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
   m_PortfolioManager.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
   m_PortfolioManager.OnPortfolioUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
   m_PortfolioManager.OnPortfolioDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
+  m_PortfolioManager.OnPositionLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
   m_PortfolioManager.OnPositionAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
   m_PortfolioManager.OnPositionUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
   m_PortfolioManager.OnPositionDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
@@ -50,24 +52,27 @@ ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
 
 ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
 
+  m_PortfolioManager.OnPortfolioLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
   m_PortfolioManager.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
   m_PortfolioManager.OnPortfolioUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
   m_PortfolioManager.OnPortfolioDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
+  m_PortfolioManager.OnPositionLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
   m_PortfolioManager.OnPositionAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
   m_PortfolioManager.OnPositionUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
   m_PortfolioManager.OnPositionDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
 
 }
 
+// this doesn't work as there is no arg1
 void ModelPortfolioPositionOrderExecution::LoadMasterPortfolio( void ) {
   // load the portfolio with "" as id
 //  ItemChanged( m_itemNull );  // if this works, then the scan can happen during the resulting event of GetChildren/GetValue
 //  m_PortfolioManager.ScanPortfolios( 
 //    boost::phoenix::bind( &ModelPortfolio::AddPortfolioToModel, m_pModelPortfolio, boost::phoenix::arg_names::arg1 ) );
 //  Cleared();
-  m_PortfolioManager.ScanPortfolios( 
-    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio, this, boost::phoenix::arg_names::arg1 ) );
+//  m_PortfolioManager.ScanPortfolios( 
+//    boost::phoenix::bind( &ModelPortfolioPositionOrderExecution::HandleLoadMasterPortfolio, this, boost::phoenix::arg_names::arg1 ) );
 }
 
 void ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded( const idPortfolio_t& idPortfolio ) {
