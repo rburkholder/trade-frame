@@ -1,0 +1,3 @@
+ select instrumentid, sum(quantityordered), sum(commission) from orders group by instrumentid;
+ select instrumentid, orderside,sum(quantityordered), sum(commission), sum(averagefillprice * quantityordered) from orders group by instrumentid, orderside;
+ select instrumentid,constructedvalue, marketvalue,commission,realizedpl from positions order by instrumentid;

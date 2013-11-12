@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="ControllerPortfolioPositionOrderExecution.h" />
     <ClInclude Include="DataViewItem.h" />
+    <ClInclude Include="DialogInstrumentSelect.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelChartHdf5.h" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ControllerPortfolioPositionOrderExecution.cpp" />
+    <ClCompile Include="DialogInstrumentSelect.cpp" />
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="ModelChartHdf5.cpp" />

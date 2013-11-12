@@ -29,9 +29,12 @@ PanelPortfolioPosition::PanelPortfolioPosition( wxWindow* parent, wxWindowID id,
 }
 
 PanelPortfolioPosition::~PanelPortfolioPosition(void) {
+  std::cout << "PanelPortfolioPosition deleted" << std::endl;
 }
 
 void PanelPortfolioPosition::Init() {
+
+  m_bDialogActive = false;
 
     m_sizerMain = NULL;
     m_sizerPortfolio = NULL;
@@ -47,6 +50,8 @@ void PanelPortfolioPosition::Init() {
 
     m_menuGridLabelPositionPopUp = NULL;
     m_menuGridCellPositionPopUp = NULL;
+
+    m_pdialogInstrumentSelect = 0;
 
 }
 
@@ -139,15 +144,17 @@ void PanelPortfolioPosition::CreateControls() {
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
-    m_gridPositions->CreateGrid(0, 7, wxGrid::wxGridSelectCells);
+    m_gridPositions->CreateGrid(0, 9, wxGrid::wxGridSelectCells);
 
     m_gridPositions->SetColLabelValue( 0, "Position" );
-    m_gridPositions->SetColLabelValue( 1, "Quan" );
-    m_gridPositions->SetColLabelValue( 2, "ConsValue" );
-    m_gridPositions->SetColLabelValue( 3, "MktValue" );
-    m_gridPositions->SetColLabelValue( 4, "UnRealPL" );
-    m_gridPositions->SetColLabelValue( 5, "RealPL" );
-    m_gridPositions->SetColLabelValue( 6, "Comm." );
+    m_gridPositions->SetColLabelValue( 1, "Side" );
+    m_gridPositions->SetColLabelValue( 2, "QuanPend" );
+    m_gridPositions->SetColLabelValue( 3, "QuanActive" );
+    m_gridPositions->SetColLabelValue( 4, "ConsValue" );
+    m_gridPositions->SetColLabelValue( 5, "MktValue" );
+    m_gridPositions->SetColLabelValue( 6, "UnRealPL" );
+    m_gridPositions->SetColLabelValue( 7, "RealPL" );
+    m_gridPositions->SetColLabelValue( 8, "Comm." );
 
     m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 
@@ -155,18 +162,22 @@ void PanelPortfolioPosition::CreateControls() {
 
   m_menuGridLabelPositionPopUp = new wxMenu;
   m_menuGridLabelPositionPopUp->Append( ID_MenuAddPosition, "Add Position" );
-  m_menuGridLabelPositionPopUp->Append( ID_MenuAddPosition, "Add Portfolio" );
+  m_menuGridLabelPositionPopUp->Append( ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridLabelPositionPopUp->Append( ID_MenuClosePortfolio, "Close Portfolio" );
 
   m_menuGridCellPositionPopUp = new wxMenu;
   m_menuGridCellPositionPopUp->Append( ID_MenuAddPosition, "Add Position" );
+  m_menuGridCellPositionPopUp->Append( ID_MenuAddOrder, "Add Order" );
+  m_menuGridCellPositionPopUp->Append( ID_MenuCancelOrders, "Cancel Orders" );
   m_menuGridCellPositionPopUp->Append( ID_MenuClosePosition, "Close Position" );
-  m_menuGridCellPositionPopUp->Append( ID_MenuAddPosition, "Add Portfolio" );
+  m_menuGridCellPositionPopUp->Append( ID_MenuAddPortfolio, "Add Portfolio" );
   m_menuGridCellPositionPopUp->Append( ID_MenuClosePortfolio, "Close Portfolio" );
   
   Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelPortfolioPosition::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   Bind( wxEVT_GRID_CELL_RIGHT_CLICK, &PanelPortfolioPosition::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpAddPosition, this, ID_MenuAddPosition, -1, 0 );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpAddOrder, this, ID_MenuAddOrder, -1, 0 );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpCancelOrders, this, ID_MenuCancelOrders, -1, 0 );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpClosePosition, this, ID_MenuClosePosition, -1, 0 );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpAddPortfolio, this, ID_MenuAddPortfolio, -1, 0 );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpClosePortfolio, this, ID_MenuClosePortfolio, -1, 0 );
@@ -183,6 +194,21 @@ void PanelPortfolioPosition::OnRightClickGridCell( wxGridEvent& event ) {
 
 void PanelPortfolioPosition::OnPositionPopUpAddPosition( wxCommandEvent& event ) {
   std::cout << "add position" << std::endl;
+  if ( !m_bDialogActive ) {
+    m_bDialogActive = true;
+    m_pdialogInstrumentSelect = new ou::tf::DialogInstrumentSelect( this );
+    m_pdialogInstrumentSelect->SetDataExchange( &m_DialogInstrumentSelect_DataExchange );
+    m_pdialogInstrumentSelect->SetOnDoneHandler( MakeDelegate( this, &PanelPortfolioPosition::OnDialogInstrumentSelectDone ) );
+    m_pdialogInstrumentSelect->Show( true );
+  }
+}
+
+void PanelPortfolioPosition::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
+  std::cout << "add order" << std::endl;
+}
+
+void PanelPortfolioPosition::OnPositionPopUpCancelOrders( wxCommandEvent& event ) {
+  std::cout << "cancel orders" << std::endl;
 }
 
 void PanelPortfolioPosition::OnPositionPopUpClosePosition( wxCommandEvent& event ) {
@@ -195,6 +221,17 @@ void PanelPortfolioPosition::OnPositionPopUpAddPortfolio( wxCommandEvent& event 
 
 void PanelPortfolioPosition::OnPositionPopUpClosePortfolio( wxCommandEvent& event ) {
   std::cout << "close portfoio" << std::endl;
+}
+
+void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogInstrumentSelect::DataExchange* ) {
+  m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
+  m_pdialogInstrumentSelect->SetDataExchange( 0 );
+  delete m_pdialogInstrumentSelect;  // this may get us into problems as it is called while still processing dialog code
+  m_pdialogInstrumentSelect = 0;
+  m_bDialogActive = false;
+  if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
+    std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
+  }
 }
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {

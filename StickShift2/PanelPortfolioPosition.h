@@ -19,13 +19,15 @@
 
 #include <TFTrading/Portfolio.h>
 
+#include <TFVuTrading/DialogInstrumentSelect.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_TITLE _("Panel Portfolio Position")
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_IDNAME ID_PANEL_PORTFOLIOPOSITION
-#define SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE wxSize(400, 300)
+#define SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE wxSize(-1, -1)
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_POSITION wxDefaultPosition
 
 class PanelPortfolioPosition: public wxPanel {
@@ -64,9 +66,12 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_PANEL_PORTFOLIOPOSITION, 
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
-    ID_MenuAddPosition, ID_MenuClosePosition, ID_MenuAddPortfolio, ID_MenuClosePortfolio,
+    ID_MenuAddPosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
+    ID_MenuAddPortfolio, ID_MenuClosePortfolio,
     ID_GridPositions
   };
+
+  bool m_bDialogActive;
 
     wxBoxSizer* m_sizerMain;
     wxBoxSizer* m_sizerPortfolio;
@@ -85,14 +90,21 @@ private:
 
   pPortfolio_t m_pPortfolio;
 
+  ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
+  ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
+
   void OnClose( wxCloseEvent& event );
 
   void OnRightClickGridLabel( wxGridEvent& event );
   void OnRightClickGridCell( wxGridEvent& event );
   void OnPositionPopUpAddPosition( wxCommandEvent& event );
+  void OnPositionPopUpAddOrder( wxCommandEvent& event );
+  void OnPositionPopUpCancelOrders( wxCommandEvent& event );
   void OnPositionPopUpClosePosition( wxCommandEvent& event );
   void OnPositionPopUpAddPortfolio( wxCommandEvent& event );
   void OnPositionPopUpClosePortfolio( wxCommandEvent& event );
+
+  void OnDialogInstrumentSelectDone( ou::tf::DialogInstrumentSelect::DataExchange* );
 
 };
 

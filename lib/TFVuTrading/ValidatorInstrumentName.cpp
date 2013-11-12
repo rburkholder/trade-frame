@@ -21,30 +21,23 @@ namespace tf { // TradeFrame
 bool InstrumentNameValidator::TransferFromWindow( void ) {
 //  wxWindow* pWin = GetWindow();
 //  if ( pWin->IsKindOf(CLASSINFO(wxTextCtrl))) {
-  if ( m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl))) {
-    wxTextCtrl& winText( dynamic_cast<wxTextCtrl&>( *m_validatorWindow ) );
+//  if ( m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl))) {
+    wxTextEntry& winText( dynamic_cast<wxTextEntry&>( *m_validatorWindow ) );
     *m_pString = winText.GetValue();
-  }
-  else {
-    throw std::runtime_error( "can't find wxTextCtrl" );
-  }
+//  }
   return true;
 }
 
 bool InstrumentNameValidator::TransferToWindow( void ) {
   wxWindow* pWin = GetWindow();
-  if ( pWin->IsKindOf(CLASSINFO(wxTextCtrl))) {
-    wxTextCtrl& winText( dynamic_cast<wxTextCtrl&>( *pWin ) );
-    winText.SetValue( *m_pString );
-  }
-  else {
-    throw std::runtime_error( "can't find wxTextCtrl" );
-  }
+  wxTextEntry& winText( dynamic_cast<wxTextEntry&>( *pWin ) );
+  winText.SetValue( *m_pString );
   return true;
 }
 
 bool InstrumentNameValidator::Validate( wxWindow* parent ) {
-  return true;
+  wxTextEntry& winText( dynamic_cast<wxTextEntry&>( *m_validatorWindow ) );
+  return ( 0 != winText.GetValue().size() );
 }
 
 } // namespace tf
