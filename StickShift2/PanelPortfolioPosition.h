@@ -104,7 +104,7 @@ private:
   void OnPositionPopUpAddPortfolio( wxCommandEvent& event );
   void OnPositionPopUpClosePortfolio( wxCommandEvent& event );
 
-  void OnDialogInstrumentSelectDone( ou::tf::DialogInstrumentSelect::DataExchange* );
+  void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
 
 };
 

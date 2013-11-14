@@ -15,29 +15,25 @@
 
 #pragma once
 
-#include <wx/dialog.h>
 #include <wx/combobox.h>
 
-#include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
+#include "DialogBase.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 #define SYMBOL_DIALOGINSTRUMENTSELECT_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
-#define SYMBOL_DIALOGINSTRUMENTSELECT_TITLE _("DialogInstrumentSelect")
+#define SYMBOL_DIALOGINSTRUMENTSELECT_TITLE _("Select An Instrument")
 #define SYMBOL_DIALOGINSTRUMENTSELECT_IDNAME ID_DIALOG_INSTRUMENTSELECT
 #define SYMBOL_DIALOGINSTRUMENTSELECT_SIZE wxSize(400, 300)
 #define SYMBOL_DIALOGINSTRUMENTSELECT_POSITION wxDefaultPosition
 
-class DialogInstrumentSelect: public wxDialog {
+class DialogInstrumentSelect: public DialogBase {
   DECLARE_DYNAMIC_CLASS( DialogInstrumentSelect )
 public:
 
-  struct DataExchange {
-    bool bOk;
+  struct DataExchange: DialogBase::DataExchange {
     wxString sSymbolName;
-    DataExchange( void ): bOk( false ) {};
     // todo:  pass in sorted array of pre-existing instruments
   };
 
@@ -48,7 +44,6 @@ public:
     const wxPoint& pos = SYMBOL_DIALOGINSTRUMENTSELECT_POSITION, 
     const wxSize& size = SYMBOL_DIALOGINSTRUMENTSELECT_SIZE, 
     long style = SYMBOL_DIALOGINSTRUMENTSELECT_STYLE );
-  
   ~DialogInstrumentSelect(void);
 
   bool Create( wxWindow* parent, 
@@ -58,16 +53,7 @@ public:
     const wxSize& size = SYMBOL_DIALOGINSTRUMENTSELECT_SIZE, 
     long style = SYMBOL_DIALOGINSTRUMENTSELECT_STYLE );
 
-  void SetDataExchange( DataExchange* pde );
-
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
-
-  typedef fastdelegate::FastDelegate1<DataExchange*,void> OnDoneHandler_t;
-  void SetOnDoneHandler( OnDoneHandler_t function ) {
-    m_OnDoneHandler = function;
-  }
+  virtual void SetDataExchange( DataExchange* pde );
 
 protected:
 
@@ -75,21 +61,14 @@ protected:
   void CreateControls();
 
 private:
+
   enum { ID_Null=wxID_HIGHEST, ID_DIALOG_INSTRUMENTSELECT,
-    ID_CBSymbol, ID_LblDescription, ID_BTNOK, ID_BTNCancel };
-
-  OnDoneHandler_t m_OnDoneHandler;
-
-  DataExchange* m_pDataExchange;
+    ID_CBSymbol, ID_LblDescription };
 
     wxComboBox* m_cbSymbol;
     wxStaticText* m_lblDescription;
     wxButton* m_btnOk;
     wxButton* m_btnCancel;
-
-  void OnClose( wxCloseEvent& event );
-  void OnOk( wxCommandEvent& event );
-  void OnCancel( wxCommandEvent& event );
 
   };
 

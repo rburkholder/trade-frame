@@ -133,7 +133,10 @@
   <ItemGroup>
     <ClInclude Include="ControllerPortfolioPositionOrderExecution.h" />
     <ClInclude Include="DataViewItem.h" />
+    <ClInclude Include="DialogBase.h" />
     <ClInclude Include="DialogInstrumentSelect.h" />
+    <ClInclude Include="DialogNewPortfolio.h" />
+    <ClInclude Include="DialogSimpleOneLineOrder.h" />
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelChartHdf5.h" />
@@ -160,7 +163,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ControllerPortfolioPositionOrderExecution.cpp" />
+    <ClCompile Include="DialogBase.cpp" />
     <ClCompile Include="DialogInstrumentSelect.cpp" />
+    <ClCompile Include="DialogNewPortfolio.cpp" />
+    <ClCompile Include="DialogSimpleOneLineOrder.cpp" />
     <ClCompile Include="FrameMain.cpp" />
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="ModelChartHdf5.cpp" />

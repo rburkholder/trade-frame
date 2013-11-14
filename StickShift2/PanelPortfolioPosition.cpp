@@ -223,7 +223,7 @@ void PanelPortfolioPosition::OnPositionPopUpClosePortfolio( wxCommandEvent& even
   std::cout << "close portfoio" << std::endl;
 }
 
-void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogInstrumentSelect::DataExchange* ) {
+void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
   m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
   m_pdialogInstrumentSelect->SetDataExchange( 0 );
   delete m_pdialogInstrumentSelect;  // this may get us into problems as it is called while still processing dialog code

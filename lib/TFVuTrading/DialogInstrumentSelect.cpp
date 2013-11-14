@@ -14,9 +14,6 @@
 
 #include "StdAfx.h"
 
-//#include <wx/validate.h>
-//#include <wx/valtext.h>
-
 #include <TFVuTrading/ValidatorInstrumentName.h>
 
 #include "DialogInstrumentSelect.h"
@@ -36,7 +33,6 @@ DialogInstrumentSelect::DialogInstrumentSelect( wxWindow* parent, wxWindowID id,
 }
 
 DialogInstrumentSelect::~DialogInstrumentSelect(void) {
-  std::cout << "DialogInstrumentSelect deleted" << std::endl;
 }
 
 void DialogInstrumentSelect::Init() {
@@ -46,14 +42,11 @@ void DialogInstrumentSelect::Init() {
     m_btnOk = NULL;
     m_btnCancel = NULL;
 
-    m_pDataExchange = 0;
-
 }
 
 void DialogInstrumentSelect::SetDataExchange( DataExchange* pde ) {
-  m_pDataExchange = pde;
+  DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-    //m_cbSymbol->SetValidator( wxTextValidator( wxFILTER_ALPHANUMERIC, &pde->sSymbolName ) );
     m_cbSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
   }
   else {
@@ -64,7 +57,7 @@ void DialogInstrumentSelect::SetDataExchange( DataExchange* pde ) {
 bool DialogInstrumentSelect::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
 
     SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
-    wxDialog::Create( parent, id, caption, pos, size, style );
+    DialogBase::Create( parent, id, caption, pos, size, style );
 
     CreateControls();
     if (GetSizer()) {
@@ -95,74 +88,13 @@ void DialogInstrumentSelect::CreateControls() {
     wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer6, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
-    m_btnOk = new wxButton( itemDialog1, ID_BTNOK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnOk = new wxButton( itemDialog1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer6->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_btnCancel = new wxButton( itemDialog1, ID_BTNCancel, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnCancel = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer6->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    itemDialog1->SetAffirmativeId( ID_BTNOK );  // wxID_OK
-    itemDialog1->SetEscapeId( ID_BTNCancel );  // wxID_CANCEL
-
-    // http://docs.wxwidgets.org/2.8/wx_wxdialog.html#wxdialogsetescapeid
-    Bind( wxEVT_CLOSE_WINDOW, &DialogInstrumentSelect::OnClose, this );
-    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &DialogInstrumentSelect::OnOk, this, ID_BTNOK );
-    Bind( wxEVT_COMMAND_BUTTON_CLICKED, &DialogInstrumentSelect::OnCancel, this, ID_BTNCancel );
-
 }
-
-// http://docs.wxwidgets.org/trunk/overview_validator.html
-void DialogInstrumentSelect::OnOk( wxCommandEvent& event ) {
-  // ok button
-  if ( Validate() && TransferDataFromWindow() ) {
-    if ( IsModal() )
-      EndModal(wxID_OK);
-    else {
-      SetReturnCode(wxID_OK);
-      m_pDataExchange->bOk = true;
-      this->Show(false);
-      if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
-    }
-  }
-}
-
-void DialogInstrumentSelect::OnCancel( wxCommandEvent& event ) {
-  // cancel or escape
-  // could be merged with OnClose
-  if ( IsModal() )
-    EndModal(wxID_CANCEL);
-  else {
-    SetReturnCode(wxID_CANCEL);
-    m_pDataExchange->bOk = false;
-    this->Show(false);
-    if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
-  }
-}
-
-void DialogInstrumentSelect::OnClose( wxCloseEvent& event ) {
-  // close button
-  if ( IsModal() )
-    EndModal(wxID_CANCEL);
-  else {
-    SetReturnCode(wxID_CANCEL);
-    m_pDataExchange->bOk = false;
-    this->Show(false);
-    if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
-  }
-  event.Skip();
-}
-
-
-wxBitmap DialogInstrumentSelect::GetBitmapResource( const wxString& name ) {
-  wxUnusedVar(name);
-  return wxNullBitmap;
-}
-
-wxIcon DialogInstrumentSelect::GetIconResource( const wxString& name ) {
-  wxUnusedVar(name);
-  return wxNullIcon;
-}
-
 
 } // namespace tf
 } // namespace ou

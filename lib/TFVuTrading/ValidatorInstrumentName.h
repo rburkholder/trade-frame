@@ -47,6 +47,7 @@ protected:
         event.Skip();  // allow everything 
       }
       else {
+        // todo:  can cursor to front of line and install numeric, so test in post processing
         if ( ( 0 < winText.GetValue().size() ) && ( '0' <= ch ) && ( '9' >= ch ) ) winText.WriteText( wxChar( ch ) );
         if ( ( 8 /* bs */ == ch ) || ( 127 /* del */ == ch ) || ( 128 <= ch ) ) event.Skip();
         // ignore all other characters
