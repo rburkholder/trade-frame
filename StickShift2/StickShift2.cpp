@@ -100,6 +100,18 @@ bool AppStickShift::OnInit() {
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
+  m_pIQFeedSymbolListOps = new ou::tf::IQFeedSymbolListOps( m_listIQFeedSymbols ); 
+
+  FrameMain::vpItems_t vItems;
+  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
+  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal ) ) );
+  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
+//  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::SaveSymbolSubset ) ) );
+//  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadSymbolSubset ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+
   m_timerGuiRefresh.SetOwner( this );
 
   Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );

@@ -18,6 +18,7 @@
 // This is manual based trading strategy, hence the name stick shift, for manual trading
 
 #include <TFBitsNPieces/FrameWork01.h>
+#include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
 // may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
@@ -85,6 +86,9 @@ private:
 
   ou::tf::DBOps m_db;
 
+  ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
+  ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
@@ -113,6 +117,14 @@ private:
   void HandleGuiRefresh( wxTimerEvent& event );
 
   void HandlePortfolioLoad( const idPortfolio_t& idPortfolio );
+
+  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
+  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
+  void HandleMenuAction2LoadIQFeedSymbolList( void );
+  void HandleMenuActionInitializeSymbolSet( void );
+  void HandleMenuActionSaveSymbolSubset( void );
+  void HandleMenuActionLoadSymbolSubset( void );
+
 
 };
 

@@ -141,6 +141,7 @@
     <ClInclude Include="IQFeedSymbolFileToSqlite.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="IQFeedSymbolListOps.h" />
     <ClInclude Include="LiborFromIQFeed.h" />
     <ClInclude Include="ReadCboeWeeklyOptions.h" />
     <ClInclude Include="stdafx.h" />
@@ -154,6 +155,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="InstrumentSelection.cpp" />
+    <ClCompile Include="IQFeedSymbolListOps.cpp" />
     <ClCompile Include="LiborFromIQFeed.cpp" />
     <ClCompile Include="ReadCboeWeeklyOptions.cpp" />
     <ClCompile Include="stdafx.cpp">
