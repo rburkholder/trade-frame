@@ -94,6 +94,19 @@ void DialogInstrumentSelect::CreateControls() {
     m_btnCancel = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer6->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogInstrumentSelect::HandleTextChange, this, ID_CBSymbol );
+
+}
+
+void DialogInstrumentSelect::HandleTextChange( wxCommandEvent& event ) {
+  wxString text( m_cbSymbol->GetStringSelection() );
+  std::string sText( text.c_str() );
+  DataExchange* pde = reinterpret_cast<DialogInstrumentSelect::DataExchange*>( m_pDataExchange );
+  if ( 0 != pde->lookup ) {
+    std::string sDescription = pde->lookup( sText );
+    m_lblDescription->SetLabel( sDescription );
+  }
+  
 }
 
 } // namespace tf

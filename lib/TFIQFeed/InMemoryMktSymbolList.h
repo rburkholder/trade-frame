@@ -68,6 +68,8 @@ public:
   iterator begin(){return m_symbols.begin();}
   iterator end(){return m_symbols.end();}
 
+  symbols_t::size_type Size( void ) const { return m_symbols.size(); }
+
   bool HandleSymbolHasOption( const std::string& s ) {
     typedef symbols_t::index<ixSymbol>::type SymbolsByName_t;
     SymbolsByName_t::iterator iter = m_symbols.get<ixSymbol>().find( s );

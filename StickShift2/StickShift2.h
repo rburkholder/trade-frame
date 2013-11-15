@@ -88,6 +88,8 @@ private:
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
+  ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
+  ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -118,13 +120,9 @@ private:
 
   void HandlePortfolioLoad( const idPortfolio_t& idPortfolio );
 
-  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
-  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
-  void HandleMenuAction2LoadIQFeedSymbolList( void );
-  void HandleMenuActionInitializeSymbolSet( void );
+//  void HandleMenuActionInitializeSymbolSet( void );
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
-
 
 };
 

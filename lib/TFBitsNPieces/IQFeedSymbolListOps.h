@@ -15,6 +15,9 @@
 
 #pragma once
 
+#include <set>
+#include <string>
+
 #include <boost/atomic.hpp>
 
 #include <OUCommon/Worker.h>
@@ -27,8 +30,43 @@ namespace tf { // TradeFrame
 class IQFeedSymbolListOps {
 public:
 
+  typedef std::set<std::string> vExchanges_t;
+  typedef std::set<std::string> vSymbolList_t;
+  typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier classifier_t;
+  typedef std::set<classifier_t> vClassifiers_t;
+  typedef ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd_t;
+
+  // used in conjuction with  InMemoryMktSymbolList::SelectSymbolsByExchange
+  // should this structure be here or in InMemoryMktSymbolList?
+  struct SelectSymbols {
+    bool m_bSelectWithOptions;
+    const vClassifiers_t& m_classifiers;
+    ou::tf::iqfeed::InMemoryMktSymbolList& m_selected;
+
+    SelectSymbols( const vClassifiers_t& classifiers, ou::tf::iqfeed::InMemoryMktSymbolList& selected, bool bSelectWithOptions = false )
+      : m_selected( selected ), m_classifiers( classifiers ), m_bSelectWithOptions( bSelectWithOptions )  {  };
+
+    void operator() ( const trd_t& trd ) {
+      if ( m_classifiers.end() != m_classifiers.find( trd.sc ) ) {
+        if ( m_bSelectWithOptions ) {
+          if ( trd.bHasOptions ) {
+            m_selected( trd );
+          }
+          else {
+            // skip symbol if it has no options
+          }
+        }
+        else {
+          m_selected( trd );
+        }
+      }
+    }
+  };
+
   IQFeedSymbolListOps( ou::tf::iqfeed::InMemoryMktSymbolList& );
   ~IQFeedSymbolListOps(void);
+
+  bool Exists( const std::string& sName );
 
   void ObtainNewIQFeedSymbolListRemote( void );
   void ObtainNewIQFeedSymbolListLocal( void );

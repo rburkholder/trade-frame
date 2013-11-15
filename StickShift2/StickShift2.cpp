@@ -107,8 +107,8 @@ bool AppStickShift::OnInit() {
   vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
   vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal ) ) );
   vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-//  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::SaveSymbolSubset ) ) );
-//  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadSymbolSubset ) ) );
+  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppStickShift::HandleMenuActionSaveSymbolSubset ) ) );
+  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppStickShift::HandleMenuActionLoadSymbolSubset ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
 
@@ -147,6 +147,43 @@ bool AppStickShift::OnInit() {
 
   return 1;
 
+}
+
+void AppStickShift::HandleMenuActionSaveSymbolSubset( void ) {
+
+  m_vExchanges.clear();
+  m_vExchanges.insert( "NYSE" );
+  //m_vExchanges.push_back( "NYSE_AMEX" );
+  //m_vExchanges.push_back( "NYSE,ARCA" );
+  m_vExchanges.insert( "NGSM" );
+  //m_vExchanges.push_back( "NASDAQ,NMS" );
+  //m_vExchanges.push_back( "NASDAQ,SMCAP" );
+  //m_vExchanges.push_back( "NASDAQ,OTCBB" );
+  //m_vExchanges.push_back( "NASDAQ,OTC" );
+  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
+
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
+
+  std::cout << "Subsetting symbols ... " << std::endl;
+  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), ou::tf::IQFeedSymbolListOps::SelectSymbols( m_vClassifiers, listIQFeedSymbols ) );
+  std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
+
+  std::string sFileName( "stickshift.ser" );
+  std::cout << "Saving subset to " << sFileName << " ..." << std::endl;
+//  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
+//  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
+  listIQFeedSymbols.SaveToFile( sFileName );  // __.ser
+  std::cout << " ... done." << std::endl;
+
+  // next step will be to add in the options for the underlyings selected.
+}
+
+void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
+  std::string sFileName( "stickshift.ser" );
+  std::cout << "Loading From " << sFileName << " ..." << std::endl;
+  m_listIQFeedSymbols.LoadFromFile( sFileName );  // __.ser
+  std::cout << " ... done." << std::endl;
 }
 
 void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {

@@ -26,6 +26,17 @@ IQFeedSymbolListOps::IQFeedSymbolListOps( ou::tf::iqfeed::InMemoryMktSymbolList&
 IQFeedSymbolListOps::~IQFeedSymbolListOps(void) {
 }
 
+bool IQFeedSymbolListOps::Exists( const std::string& sName ) {
+  bool bFound( false );
+  try {
+    const trd_t& trd = m_listIQFeedSymbols.GetTrd( sName );
+    bFound = true;
+  }
+  catch ( std::runtime_error& e ) {
+  }
+  return bFound;
+}
+
 void IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote( void ) {
   if ( 0 == m_fenceWorker.fetch_add( 1, boost::memory_order_acquire ) ) {
     m_worker.Run( MakeDelegate( this, &IQFeedSymbolListOps::WorkerObtainNewIQFeedSymbolListRemote ) );

@@ -17,6 +17,9 @@
 
 #include <wx/combobox.h>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include "DialogBase.h"
 
 namespace ou { // One Unified
@@ -32,8 +35,12 @@ class DialogInstrumentSelect: public DialogBase {
   DECLARE_DYNAMIC_CLASS( DialogInstrumentSelect )
 public:
 
+  typedef FastDelegate1<const std::string&,const std::string&> NameLookup_t; // in=name, out=description
+
   struct DataExchange: DialogBase::DataExchange {
+    NameLookup_t lookup;
     wxString sSymbolName;
+    DataExchange( void ): lookup( 0 ) {};
     // todo:  pass in sorted array of pre-existing instruments
   };
 
@@ -69,6 +76,9 @@ private:
     wxStaticText* m_lblDescription;
     wxButton* m_btnOk;
     wxButton* m_btnCancel;
+
+  void HandleTextChange( wxCommandEvent& event );
+
 
   };
 
