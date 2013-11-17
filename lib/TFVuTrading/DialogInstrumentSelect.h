@@ -35,11 +35,11 @@ class DialogInstrumentSelect: public DialogBase {
   DECLARE_DYNAMIC_CLASS( DialogInstrumentSelect )
 public:
 
-  typedef FastDelegate1<const std::string&,const std::string&> NameLookup_t; // in=name, out=description
+  typedef FastDelegate2<const std::string&,std::string&,void> DelegateNameLookup_t; // in=name, out=description
 
   struct DataExchange: DialogBase::DataExchange {
-    NameLookup_t lookup;
-    wxString sSymbolName;
+    DelegateNameLookup_t lookup;
+    wxString sSymbolName;  // can't be std::string, needs to handle native DataExchange
     DataExchange( void ): lookup( 0 ) {};
     // todo:  pass in sorted array of pre-existing instruments
   };

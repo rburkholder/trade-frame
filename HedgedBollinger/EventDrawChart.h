@@ -22,7 +22,7 @@ public:
 
   wxBitmap* GetBitmap( void ) { return m_pBitmap; }
 
-  virtual wxEvent* Clone( void ) const { return new EventDrawChart( *this ); }
+  virtual EventDrawChart* Clone( void ) const { return new EventDrawChart( *this ); }
 protected:
 private:
   wxBitmap* m_pBitmap;

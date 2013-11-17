@@ -89,6 +89,7 @@ void DialogInstrumentSelect::CreateControls() {
     itemBoxSizer2->Add(itemBoxSizer6, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
     m_btnOk = new wxButton( itemDialog1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnOk->Enable( false );
     itemBoxSizer6->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_btnCancel = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -99,14 +100,25 @@ void DialogInstrumentSelect::CreateControls() {
 }
 
 void DialogInstrumentSelect::HandleTextChange( wxCommandEvent& event ) {
-  wxString text( m_cbSymbol->GetStringSelection() );
+  wxString text( m_cbSymbol->GetValue() );
   std::string sText( text.c_str() );
-  DataExchange* pde = reinterpret_cast<DialogInstrumentSelect::DataExchange*>( m_pDataExchange );
-  if ( 0 != pde->lookup ) {
-    std::string sDescription = pde->lookup( sText );
-    m_lblDescription->SetLabel( sDescription );
+  if ( 0 == sText.length() ) {
+    m_lblDescription->SetLabel( "" );
+    if ( 0 != m_btnOk ) {
+      m_btnOk->Enable( false );
+    }
   }
-  
+  else {
+    DataExchange* pde = reinterpret_cast<DialogInstrumentSelect::DataExchange*>( m_pDataExchange );
+    if ( 0 != pde->lookup ) {
+      std::string sDescription;
+      pde->lookup( sText, sDescription );
+      m_lblDescription->SetLabel( sDescription );
+      if ( 0 != m_btnOk ) {
+        m_btnOk->Enable( 0 != sDescription.length() );
+      }
+    }
+  }
 }
 
 } // namespace tf

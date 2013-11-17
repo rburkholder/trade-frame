@@ -231,7 +231,16 @@ void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::D
   m_bDialogActive = false;
   if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
     std::cout << "Requested symbol: " << m_DialogInstrumentSelect_DataExchange.sSymbolName << std::endl;
+    std::string s( m_DialogInstrumentSelect_DataExchange.sSymbolName );
+    if ( 0 != m_delegateConstructPosition ) {
+      m_delegateConstructPosition( s, m_pPortfolio, MakeDelegate( this, &PanelPortfolioPosition::AddPosition ) ); 
+    }
   }
+}
+
+void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {
+  // position should already be associated with portfolio, now add to gui
+  // need structure to relate row and pPosition_t 
 }
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {

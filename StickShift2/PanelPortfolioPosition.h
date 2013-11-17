@@ -17,6 +17,9 @@
 
 #include <wx/grid.h>
 
+#include <OUCommon/FastDelegate.h>
+using namespace fastdelegate;
+
 #include <TFTrading/Portfolio.h>
 
 #include <TFVuTrading/DialogInstrumentSelect.h>
@@ -35,6 +38,11 @@ public:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
+  typedef ou::tf::Portfolio::pPosition_t pPosition_t;
+  typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
+
+  typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
+  typedef FastDelegate3<const std::string&,pPortfolio_t,DelegateAddPosition_t,void> DelegateConstructPosition_t;
 
   PanelPortfolioPosition(void);
   PanelPortfolioPosition( 
@@ -51,6 +59,8 @@ public:
     long style = SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE );
 
   void SetPortfolio( pPortfolio_t pPortfolio );
+  void SetNameLookup( DelegateNameLookup_t function ) { m_DialogInstrumentSelect_DataExchange.lookup = function; };
+  void SetConstructPosition( DelegateConstructPosition_t function ) { m_delegateConstructPosition = function; };
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -89,9 +99,12 @@ private:
     wxMenu* m_menuGridCellPositionPopUp;
 
   pPortfolio_t m_pPortfolio;
+  DelegateConstructPosition_t m_delegateConstructPosition;
 
   ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
   ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
+
+  void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 
   void OnClose( wxCloseEvent& event );
 

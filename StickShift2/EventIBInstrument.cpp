@@ -11,31 +11,17 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started 2013/10/30
 
-#pragma once
+#include "StdAfx.h"
 
-#include <TFOptions/Strike.h>
+#include "EventIBInstrument.h"
 
-class EventUpdateOptionTree: public wxEvent {
-public:
+wxDEFINE_EVENT(EVENT_IB_INSTRUMENT, EventIBInstrument);
 
-  EventUpdateOptionTree( wxEventType eventType, int winid, ou::tf::option::Strike&, bool );
-  ~EventUpdateOptionTree(void);
+EventIBInstrument::EventIBInstrument( wxEventType eventType, int winid, pInstrument_t pInstrument )
+  : wxEvent( winid, eventType ), m_pInstrument( pInstrument )
+{
+}
 
-  ou::tf::option::Strike& GetStrike( void ) { return m_strike; }
-  bool GetWatch( void ) const { return m_bOn; }
-
-  virtual EventUpdateOptionTree* Clone( void ) const { return new EventUpdateOptionTree( *this ); }
-
-protected:
-private:
-
-  ou::tf::option::Strike& m_strike;
-  bool m_bOn;  // true = watch on, false = watch off
-
-};
-
-wxDECLARE_EVENT(EVENT_UPDATE_OPTION_TREE, EventUpdateOptionTree);
-
-
+EventIBInstrument::~EventIBInstrument(void) {
+}

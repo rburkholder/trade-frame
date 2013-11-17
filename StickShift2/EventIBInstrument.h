@@ -11,31 +11,28 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started 2013/10/30
+// Started 2013/11/16
 
 #pragma once
 
-#include <TFOptions/Strike.h>
+#include <TFTrading/Instrument.h>
 
-class EventUpdateOptionTree: public wxEvent {
+class EventIBInstrument: public wxEvent {
 public:
 
-  EventUpdateOptionTree( wxEventType eventType, int winid, ou::tf::option::Strike&, bool );
-  ~EventUpdateOptionTree(void);
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
-  ou::tf::option::Strike& GetStrike( void ) { return m_strike; }
-  bool GetWatch( void ) const { return m_bOn; }
+  EventIBInstrument( wxEventType eventType, int winid, pInstrument_t pInstrument );
+  ~EventIBInstrument(void);
 
-  virtual EventUpdateOptionTree* Clone( void ) const { return new EventUpdateOptionTree( *this ); }
+  pInstrument_t& GetInstrument( void ) { return m_pInstrument; };
+
+  virtual EventIBInstrument* Clone( void ) const { return new EventIBInstrument( *this ); }
 
 protected:
 private:
-
-  ou::tf::option::Strike& m_strike;
-  bool m_bOn;  // true = watch on, false = watch off
-
+  pInstrument_t m_pInstrument;
 };
 
-wxDECLARE_EVENT(EVENT_UPDATE_OPTION_TREE, EventUpdateOptionTree);
-
+wxDECLARE_EVENT(EVENT_IB_INSTRUMENT, EventIBInstrument);
 

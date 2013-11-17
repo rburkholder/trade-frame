@@ -25,7 +25,6 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
-#include "PanelPortfolioPosition.h"
 #include "StickShift2.h"
 
 IMPLEMENT_APP(AppStickShift)
@@ -143,7 +142,7 @@ bool AppStickShift::OnInit() {
 
   m_pFPPOE->Show();
 
-
+  Bind( EVENT_IB_INSTRUMENT, &AppStickShift::HandleIBInstrument, this );
 
   return 1;
 
@@ -183,7 +182,7 @@ void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
   std::string sFileName( "stickshift.ser" );
   std::cout << "Loading From " << sFileName << " ..." << std::endl;
   m_listIQFeedSymbols.LoadFromFile( sFileName );  // __.ser
-  std::cout << " ... done." << std::endl;
+  std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
 }
 
 void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {
@@ -191,6 +190,8 @@ void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {
   ou::tf::PanelPortfolioPosition* pPPP( new ou::tf::PanelPortfolioPosition( m_scrollPM ) );
   m_sizerScrollPM->Add( pPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
   pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
+  pPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
+  pPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
 }
 
 void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -223,6 +224,53 @@ int AppStickShift::OnExit() {
 //  m_pCPPOE = 0;
 
   return 0;
+}
+
+void AppStickShift::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {
+  sDescription = "";
+  try {
+    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sSymbolName ) );
+    sDescription = trd.sDescription;
+  }
+  catch ( std::runtime_error& e ) {
+  }
+}
+
+void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfolio_t pPortfolio, DelegateAddPosition_t function ) {
+
+  m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
+  m_EquityPositionCallbackInfo.function = function;
+
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  ou::tf::Instrument::pInstrument_t pInstrument;
+
+  if ( im.Exists( sName, pInstrument ) ) {
+    ConstructEquityPosition1( pInstrument );
+  }
+  else {
+    ou::tf::IBTWS::Contract contract;
+    contract.currency = "USD";
+    contract.exchange = "SMART";
+    contract.secType = "STK";
+    contract.symbol = sName;
+    m_tws->RequestContractDetails( 
+      contract, 
+      MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
+  }
+}
+
+void AppStickShift::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
+  pPosition_t pPosition( pm.ConstructPosition( 
+    m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
+    pInstrument->GetInstrumentName(),
+    "",
+    "ib01", "iq01", this->m_pExecutionProvider, this->m_pData1Provider,
+    pInstrument ) 
+    );
+  if ( 0 != m_EquityPositionCallbackInfo.function ) {
+    m_EquityPositionCallbackInfo.function( pPosition );
+  }
 }
 
 void AppStickShift::HandleRegisterTables(  ou::db::Session& session ) {
@@ -317,16 +365,17 @@ void AppStickShift::HandlePanelSymbolText( const std::string& sName ) {
 }
 
 void AppStickShift::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
-  //assert( m_curDialogManualOrder < m_vManualOrders.size() );
-  //m_vManualOrders[ m_curDialogManualOrder ].details = details;
-  //m_vManualOrders[ m_curDialogManualOrder ].pInstrument = pInstrument;
-  //m_vManualOrders[ m_curDialogManualOrder ].pDialogManualOrder->SetInstrumentDescription( details.longName );
-  m_IBInstrumentInfo.details = details;
-  m_IBInstrumentInfo.pInstrument = pInstrument;
-  m_pPanelManualOrder->SetInstrumentDescription( details.longName );
+  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
+  // this is in another thread, and should be handled in a thread safe manner.
 }
 
 void AppStickShift::HandleIBContractDetailsDone( void ) {
+}
+
+void AppStickShift::HandleIBInstrument( EventIBInstrument& event ) {
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable
+  ConstructEquityPosition1( event.GetInstrument() );
 }
 
 void AppStickShift::HandlePanelFocusPropogate( unsigned int ix ) {

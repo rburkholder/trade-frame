@@ -27,6 +27,10 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
+
+#include "PanelPortfolioPosition.h"
+#include "EventIBInstrument.h"
+
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
@@ -50,11 +54,18 @@ private:
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
+  typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
     ou::tf::IBTWS::ContractDetails details;
     pInstrument_t pInstrument;
   } m_IBInstrumentInfo;
+
+  struct structConstructEquityPosition {
+    pPortfolio_t pPortfolio;
+    DelegateAddPosition_t function;
+  } m_EquityPositionCallbackInfo;
 
   bool m_bData1Connected;
   bool m_bExecConnected;
@@ -90,6 +101,10 @@ private:
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
+  void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
+
+  void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, DelegateAddPosition_t);  // step 1
+  void ConstructEquityPosition1( pInstrument_t& pInstrument ); // step 2
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -117,6 +132,8 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
 
   void HandleGuiRefresh( wxTimerEvent& event );
+
+  void HandleIBInstrument( EventIBInstrument& event );
 
   void HandlePortfolioLoad( const idPortfolio_t& idPortfolio );
 
