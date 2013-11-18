@@ -144,17 +144,22 @@ void PanelPortfolioPosition::CreateControls() {
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
-    m_gridPositions->CreateGrid(0, 9, wxGrid::wxGridSelectCells);
 
-    m_gridPositions->SetColLabelValue( 0, "Position" );
-    m_gridPositions->SetColLabelValue( 1, "Side" );
-    m_gridPositions->SetColLabelValue( 2, "QuanPend" );
-    m_gridPositions->SetColLabelValue( 3, "QuanActive" );
-    m_gridPositions->SetColLabelValue( 4, "ConsValue" );
-    m_gridPositions->SetColLabelValue( 5, "MktValue" );
-    m_gridPositions->SetColLabelValue( 6, "UnRealPL" );
-    m_gridPositions->SetColLabelValue( 7, "RealPL" );
-    m_gridPositions->SetColLabelValue( 8, "Comm." );
+    int ix( 0 );
+    m_gridPositions->SetColLabelValue( ix++, "Position" );
+    m_gridPositions->SetColLabelValue( ix++, "Side" );
+    m_gridPositions->SetColLabelValue( ix++, "QuanPend" );
+    m_gridPositions->SetColLabelValue( ix++, "QuanActive" );
+    m_gridPositions->SetColLabelValue( ix++, "ConsValue" );
+    m_gridPositions->SetColLabelValue( ix++, "MktValue" );
+    m_gridPositions->SetColLabelValue( ix++, "UnRealPL" );
+    m_gridPositions->SetColLabelValue( ix++, "RealPL" );
+    m_gridPositions->SetColLabelValue( ix++, "Comm." );
+    m_gridPositions->SetColLabelValue( ix++, "Bid" );
+    m_gridPositions->SetColLabelValue( ix++, "Last" );
+    m_gridPositions->SetColLabelValue( ix++, "Ask" );
+
+    m_gridPositions->CreateGrid(0, ix, wxGrid::wxGridSelectCells);
 
     m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 
@@ -241,6 +246,12 @@ void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::D
 void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {
   // position should already be associated with portfolio, now add to gui
   // need structure to relate row and pPosition_t 
+  m_vPositions.push_back( structPosition( pPosition ) );
+  m_gridPositions->AppendRows( 1 );
+  UpdateGui();
+}
+
+void PanelPortfolioPosition::UpdateGui( void ) {
 }
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {

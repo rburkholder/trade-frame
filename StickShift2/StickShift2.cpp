@@ -85,7 +85,7 @@ bool AppStickShift::OnInit() {
 
   // maybe set scenario with database and with in memory data structure
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
-  m_idPortfolio = "StickShift";  // keeps name constant over multiple days
+  m_idPortfolioMaster = "StickShift";  // keeps name constant over multiple days
 
   std::string sDbName( "StickShift2.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
@@ -192,6 +192,7 @@ void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {
   pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   pPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
   pPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
+  m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, structPortfolio( pPPP ) ) );
 }
 
 void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
@@ -209,6 +210,9 @@ void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
     boost::lexical_cast<std::string>( m_dblMaxPL )
     );
     */
+  for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
+    iter->second.pPPP->UpdateGui();
+  }
 }
 
 int AppStickShift::OnExit() {
@@ -298,12 +302,12 @@ void AppStickShift::HandlePopulateDatabase( void ) {
 
   std::string sNull;
 
-  m_pPortfolio
+  m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-      m_idPortfolio, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "StickShift" );
+      m_idPortfolioMaster, "aoRay", sNull, ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "StickShift" );
 
   ou::tf::PortfolioManager::Instance().ConstructPortfolio(
-    ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
+    ou::tf::Currency::Name[ ou::tf::Currency::USD ], "aoRay", m_idPortfolioMaster, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Currency Monitor" );
 //  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::CAD ], "Currency Monitor" );
 //  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
@@ -323,24 +327,24 @@ void AppStickShift::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t
     if ( !mgr.Exists( pInstrument ) ) {
       mgr.Register( pInstrument );
     }
-    if ( 0 == m_pPosition.get() ) {
-      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
-        m_idPortfolio, pInstrument->GetInstrumentName(), "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
-    }
+//    if ( 0 == m_pPosition.get() ) {
+//      m_pPosition = ou::tf::PortfolioManager::Instance().ConstructPosition( 
+//        m_idPortfolioMaster, pInstrument->GetInstrumentName(), "manual", "ib01", "ib01", m_pExecutionProvider, m_pData1Provider, pInstrument );
+//    }
     ou::tf::OrderManager& om( ou::tf::OrderManager::Instance() );
     ou::tf::OrderManager::pOrder_t pOrder;
     switch ( order.eOrderType ) {
     case ou::tf::OrderType::Market: 
       //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity );
-      m_pPosition->PlaceOrder( ou::tf::OrderType::Market, order.eOrderSide, order.nQuantity );
+//      m_pPosition->PlaceOrder( ou::tf::OrderType::Market, order.eOrderSide, order.nQuantity );
       break;
     case ou::tf::OrderType::Limit:
       //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
-      m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+//      m_pPosition->PlaceOrder( ou::tf::OrderType::Limit, order.eOrderSide, order.nQuantity, order.dblPrice1 );
       break;
     case ou::tf::OrderType::Stop:
       //pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1 );
-      m_pPosition->PlaceOrder( ou::tf::OrderType::Stop, order.eOrderSide, order.nQuantity, order.dblPrice1 );
+//      m_pPosition->PlaceOrder( ou::tf::OrderType::Stop, order.eOrderSide, order.nQuantity, order.dblPrice1 );
       break;
     }
     //ou::tf::OrderManager::pOrder_t pOrder = om.ConstructOrder( pInstrument, order.eOrderType, order.eOrderSide, order.nQuantity, order.dblPrice1, order.dblPrice2 );

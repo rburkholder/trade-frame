@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <wx/grid.h>
 
 #include <OUCommon/FastDelegate.h>
@@ -62,6 +64,8 @@ public:
   void SetNameLookup( DelegateNameLookup_t function ) { m_DialogInstrumentSelect_DataExchange.lookup = function; };
   void SetConstructPosition( DelegateConstructPosition_t function ) { m_delegateConstructPosition = function; };
 
+  void UpdateGui( void );
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
@@ -80,6 +84,14 @@ private:
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
     ID_GridPositions
   };
+
+  struct structPosition {
+    pPosition_t pPosition;
+    structPosition( pPosition_t pPosition_ ): pPosition( pPosition_ ) {};
+  };
+  typedef std::vector<structPosition> vPositions_t;
+
+  vPositions_t m_vPositions;  // one to one match on rows in grid
 
   bool m_bDialogActive;
 

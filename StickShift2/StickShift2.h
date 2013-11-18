@@ -17,6 +17,8 @@
 // Started 2013/11/06
 // This is manual based trading strategy, hence the name stick shift, for manual trading
 
+#include <map>
+
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
@@ -67,6 +69,14 @@ private:
     DelegateAddPosition_t function;
   } m_EquityPositionCallbackInfo;
 
+  struct structPortfolio {
+    ou::tf::PanelPortfolioPosition* pPPP;
+    structPortfolio( void ): pPPP( 0 ) {};
+    structPortfolio( ou::tf::PanelPortfolioPosition* pPPP_ ): pPPP( pPPP_ ) {}
+  };
+
+  typedef std::map<std::string,structPortfolio> mapPortfolios_t;
+
   bool m_bData1Connected;
   bool m_bExecConnected;
 
@@ -75,12 +85,9 @@ private:
   double m_dblMaxPL;
   double m_dblMinPL;
 
-  ou::tf::keytypes::idPortfolio_t m_idPortfolio;
-
-  //std::string m_sDbPortfolioName;
-
-  pPortfolio_t m_pPortfolio;
-  pPosition_t m_pPosition;
+  ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
+  pPortfolio_t m_pPortfolioMaster;
+  mapPortfolios_t m_mapPortfolios;
 
   FrameMain* m_pFrameMain;
   FrameMain* m_pFPPOE;
