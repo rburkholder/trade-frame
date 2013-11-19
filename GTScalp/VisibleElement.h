@@ -2,7 +2,7 @@
 
 // CVisibleElement
 
-#include "FastDelegate.h"
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 class CVisibleElement : public CWnd {
@@ -59,6 +59,7 @@ private:
 
 
 protected:
+
   afx_msg void OnPaint( );
   afx_msg HBRUSH OnCtlColor( CDC*, CWnd*, UINT );
   afx_msg BOOL OnEraseBkgnd( CDC * );
@@ -69,8 +70,6 @@ protected:
   afx_msg void OnKeyDown( UINT, UINT, UINT );
   afx_msg void OnKeyUp( UINT, UINT, UINT );
 
-
-  
   DECLARE_MESSAGE_MAP()
 };
 

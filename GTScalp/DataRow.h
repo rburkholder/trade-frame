@@ -5,7 +5,7 @@
 #include "DataRowElement.h"
 #include "VisibleRow.h"
 
-#include "FastDelegate.h"
+#include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 class CDataRow {

@@ -26,14 +26,19 @@ typedef DWORD COLORREF;
 #undef RGB
 #endif
 
+#ifndef WINRGB
 // windows COLORREF is backwards from what ChartDir is expecting
 // ChartDir:
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+#else
 // from WinGDI.h:
-//#define RGB(r,g,b)          ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
+#define RGB(r,g,b)          ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
+#endif
 
 // we may get into problems if this file is used for windows colours as well as ChartDir colours
 // or template it or type traits it or use some sort of define
+
+// may need to create two color namespaces if used in the same include hiearchy
 
 namespace Colour {
   enum enumColour {
