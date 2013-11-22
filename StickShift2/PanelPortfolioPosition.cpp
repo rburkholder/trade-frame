@@ -145,21 +145,10 @@ void PanelPortfolioPosition::CreateControls() {
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
 
-    int ix( 0 );
-    m_gridPositions->SetColLabelValue( ix++, "Position" );
-    m_gridPositions->SetColLabelValue( ix++, "Side" );
-    m_gridPositions->SetColLabelValue( ix++, "QuanPend" );
-    m_gridPositions->SetColLabelValue( ix++, "QuanActive" );
-    m_gridPositions->SetColLabelValue( ix++, "ConsValue" );
-    m_gridPositions->SetColLabelValue( ix++, "MktValue" );
-    m_gridPositions->SetColLabelValue( ix++, "UnRealPL" );
-    m_gridPositions->SetColLabelValue( ix++, "RealPL" );
-    m_gridPositions->SetColLabelValue( ix++, "Comm." );
-    m_gridPositions->SetColLabelValue( ix++, "Bid" );
-    m_gridPositions->SetColLabelValue( ix++, "Last" );
-    m_gridPositions->SetColLabelValue( ix++, "Ask" );
+    m_gridPositions->CreateGrid(0, COLHDR_POSITION_ARRAY_ROW_COUNT, wxGrid::wxGridSelectCells);
 
-    m_gridPositions->CreateGrid(0, ix, wxGrid::wxGridSelectCells);
+    int ix( 0 );
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_POSITION_ARRAY ), COLHDR_POSITION_EMIT_SetColSettings, ix )
 
     m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 

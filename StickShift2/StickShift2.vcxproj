@@ -159,7 +159,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EventIBInstrument.cpp" />
-    <ClCompile Include="PanelPortfolioPosition.cpp" />
+    <ClCompile Include="PanelPortfolioPosition.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

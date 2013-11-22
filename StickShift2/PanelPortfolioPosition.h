@@ -19,12 +19,26 @@
 
 #include <wx/grid.h>
 
+#define FUSION_MAX_VECTOR_SIZE 12
+//#include <boost/fusion/container/vector.hpp>
+//#include <boost/fusion/include/vector.hpp>
+#include <boost/fusion/container/vector/vector20.hpp>
+#include <boost/fusion/include/vector20.hpp>
+
+#include <boost/preprocessor/tuple/elem.hpp>
+#include <boost/preprocessor/array/elem.hpp>
+#include <boost/preprocessor/array/size.hpp>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
+#include <boost/preprocessor/cat.hpp>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
 #include <TFTrading/Portfolio.h>
 
 #include <TFVuTrading/DialogInstrumentSelect.h>
+#include <TFVuTrading/ModelCell.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -85,8 +99,51 @@ private:
     ID_GridPositions
   };
 
+// wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
+#define COLHDR_POSITION_ARRAY_COL_COUNT 5
+#define COLHDR_POSITION_ARRAY_ROW_COUNT 12
+#define COLHDR_POSITION_ARRAY \
+  (COLHDR_POSITION_ARRAY_ROW_COUNT,  \
+    ( /* Col 0,                       1,            2,              3,  4,             */ \
+      (COLHDR_POSITION_COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
+      (COLHDR_POSITION_COL_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (COLHDR_POSITION_COL_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (COLHDR_POSITION_COL_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (COLHDR_POSITION_COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_MktVlu   , "MktValue",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_RPL      , "RealPL",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COLHDR_POSITION_COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      ) \
+    ) \
+  /**/
+
+#define COLHDR_POSITION_EXTRACT_COL_DETAILS(z, row, col) \
+  BOOST_PP_TUPLE_ELEM( \
+    COLHDR_POSITION_ARRAY_COL_COUNT, col, \
+      BOOST_PP_ARRAY_ELEM( row, COLHDR_POSITION_ARRAY ) \
+    )
+
+// if n is 0, then no comma, ie, prepends comma except on first element, col is column number to extract
+#define COLHDR_POSITION_EXTRACT_ENUM_LIST(z, n, col) \
+  BOOST_PP_COMMA_IF(n) \
+  COLHDR_POSITION_EXTRACT_COL_DETAILS( z, n, col )
+
+#define COLHDR_POSITION_EMIT_SetColSettings( z, n, VAR ) \
+  m_gridPositions->SetColLabelValue( VAR, _T(COLHDR_POSITION_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_gridPositions->SetColSize( VAR++, COLHDR_POSITION_EXTRACT_COL_DETAILS(z, n, 3) );
+
+#define VECTOR_DEF BOOST_PP_CAT( vector, COLHDR_POSITION_ARRAY_ROW_COUNT )
+  typedef boost::fusion::VECTOR_DEF<
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_POSITION_ARRAY), COLHDR_POSITION_EXTRACT_ENUM_LIST, 4 )
+  > vModelCells_t;
+
   struct structPosition {
     pPosition_t pPosition;
+    vModelCells_t vModelCells;
     structPosition( pPosition_t pPosition_ ): pPosition( pPosition_ ) {};
   };
   typedef std::vector<structPosition> vPositions_t;

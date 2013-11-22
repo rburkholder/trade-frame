@@ -26,7 +26,6 @@ using namespace fastdelegate;
 #define WINRGB
 #include <OUCommon/Colour.h>
 
-
 // when ready for owner draw
 // depends upon amount of flicker
 // gtscalp/datarow (composition of elements), datarowelements(data change management), visibleelement (draw onto graphics area) for 
