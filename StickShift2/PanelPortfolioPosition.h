@@ -25,6 +25,19 @@
 #include <boost/fusion/container/vector/vector20.hpp>
 #include <boost/fusion/include/vector20.hpp>
 
+#include <boost/fusion/algorithm/iteration/for_each.hpp>
+#include <boost/fusion/include/for_each.hpp>
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/operator/arithmetic.hpp> 
+//#include <boost/phoenix/scope/let.hpp>
+#include <boost/phoenix/scope/lambda.hpp>
+#include <boost/phoenix/scope/local_variable.hpp>
+//#include <boost/phoenix/bind/bind_member_function.hpp>
+//#include <boost/phoenix/fusion.hpp>
+#include <boost/phoenix/function.hpp>
+
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/array/elem.hpp>
 #include <boost/preprocessor/array/size.hpp>
@@ -49,11 +62,36 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_SIZE wxSize(-1, -1)
 #define SYMBOL_PANEL_PORTFOLIOPOSITION_POSITION wxDefaultPosition
 
+namespace PanelPortfolioPosition_detail {
+
+  struct UpdateGui {
+    wxGrid* m_pGrid;
+    int m_row;
+    UpdateGui( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) {};
+    template<typename T>
+    void operator()( T& t ) const {
+      m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
+    }
+  };
+
+  struct SetCol_impl {
+    typedef void result_type;
+    template<typename F, typename T>
+    void operator()( F& f, T& t ) const {
+      f.SetCol( t );
+    }
+  };
+
+  boost::phoenix::function<SetCol_impl> const SetCol = SetCol_impl();
+
+}
+
 class PanelPortfolioPosition: public wxPanel {
 public:
 
-  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::Portfolio::idPosition_t idPosition_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
   typedef ou::tf::DialogInstrumentSelect::DelegateNameLookup_t DelegateNameLookup_t;
 
@@ -100,51 +138,80 @@ private:
   };
 
 // wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
-#define COLHDR_POSITION_ARRAY_COL_COUNT 5
-#define COLHDR_POSITION_ARRAY_ROW_COUNT 12
-#define COLHDR_POSITION_ARRAY \
-  (COLHDR_POSITION_ARRAY_ROW_COUNT,  \
+#define GRID_POSITION_ARRAY_PARAM_COUNT 5
+#define GRID_POSITION_ARRAY_COL_COUNT 12
+#define GRID_POSITION_ARRAY \
+  (GRID_POSITION_ARRAY_COL_COUNT,  \
     ( /* Col 0,                       1,            2,              3,  4,             */ \
-      (COLHDR_POSITION_COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (COLHDR_POSITION_COL_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (COLHDR_POSITION_COL_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (COLHDR_POSITION_COL_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (COLHDR_POSITION_COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_MktVlu   , "MktValue",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_RPL      , "RealPL",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COLHDR_POSITION_COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
+      (GRID_POSITION_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (GRID_POSITION_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (GRID_POSITION_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (GRID_POSITION_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_MktVlu   , "MktValue",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_URPL     , "UnRealPL",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_RPL      , "RealPL",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/
 
-#define COLHDR_POSITION_EXTRACT_COL_DETAILS(z, row, col) \
+#define GRID_POSITION_EXTRACT_COL_DETAILS(z, row, col) \
   BOOST_PP_TUPLE_ELEM( \
-    COLHDR_POSITION_ARRAY_COL_COUNT, col, \
-      BOOST_PP_ARRAY_ELEM( row, COLHDR_POSITION_ARRAY ) \
+    GRID_POSITION_ARRAY_PARAM_COUNT, col, \
+      BOOST_PP_ARRAY_ELEM( row, GRID_POSITION_ARRAY ) \
     )
 
 // if n is 0, then no comma, ie, prepends comma except on first element, col is column number to extract
-#define COLHDR_POSITION_EXTRACT_ENUM_LIST(z, n, col) \
+#define GRID_POSITION_EXTRACT_ENUM_LIST(z, n, col) \
   BOOST_PP_COMMA_IF(n) \
-  COLHDR_POSITION_EXTRACT_COL_DETAILS( z, n, col )
+  GRID_POSITION_EXTRACT_COL_DETAILS( z, n, col )
 
-#define COLHDR_POSITION_EMIT_SetColSettings( z, n, VAR ) \
-  m_gridPositions->SetColLabelValue( VAR, _T(COLHDR_POSITION_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_gridPositions->SetColSize( VAR++, COLHDR_POSITION_EXTRACT_COL_DETAILS(z, n, 3) );
+#define GRID_POSITION_EMIT_SetColSettings( z, n, VAR ) \
+  m_gridPositions->SetColLabelValue( VAR, _T(GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_gridPositions->SetColSize( VAR++, GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 3) );
 
-#define VECTOR_DEF BOOST_PP_CAT( vector, COLHDR_POSITION_ARRAY_ROW_COUNT )
+  template<typename ModelCell>
+  class CellInfo_t: public ModelCell {
+  public:
+    CellInfo_t( void ): m_col( 0 ) {};
+    CellInfo_t( int col ): m_col( col ) {};
+    ~CellInfo_t( void ) {  }
+    void SetCol( int col ) { m_col = col; }
+    int GetCol( void ) const { return m_col; }
+  private:
+    int m_col;
+  };
+
+#define COMPOSE_MODEL_CELL(z,n,col)\
+  BOOST_PP_COMMA_IF(n)\
+  CellInfo_t<GRID_POSITION_EXTRACT_COL_DETAILS(z,n,col)>
+
+#define VECTOR_DEF BOOST_PP_CAT( vector, GRID_POSITION_ARRAY_COL_COUNT )
   typedef boost::fusion::VECTOR_DEF<
-    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_POSITION_ARRAY), COLHDR_POSITION_EXTRACT_ENUM_LIST, 4 )
+    BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
 
-  struct structPosition {
-    pPosition_t pPosition;
-    vModelCells_t vModelCells;
-    structPosition( pPosition_t pPosition_ ): pPosition( pPosition_ ) {};
+  class structPosition {
+  public:
+    structPosition( pPosition_t pPosition_, wxGrid* pGrid, int row )
+      : m_pPosition( pPosition_ ), m_pGrid( pGrid ), m_row( row ) {
+        namespace phx = boost::phoenix;
+        using boost::phoenix::arg_names::arg1;
+        boost::fusion::for_each( m_vModelCells, phx::lambda( phx::local_names::_a = 0)[PanelPortfolioPosition_detail::SetCol(arg1,phx::local_names::_a++)]);
+    // todo:  manage attachment into pPosition within this structure
+    }
+    void UpdateGui( void ) {
+      boost::fusion::for_each( m_vModelCells, PanelPortfolioPosition_detail::UpdateGui( m_pGrid, m_row ) );
+    }
+  private:
+    int m_row;
+    wxGrid* m_pGrid;
+    pPosition_t m_pPosition;
+    vModelCells_t m_vModelCells;
   };
   typedef std::vector<structPosition> vPositions_t;
 

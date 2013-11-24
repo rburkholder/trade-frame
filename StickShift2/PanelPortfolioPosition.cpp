@@ -14,6 +14,12 @@
 
 #include "StdAfx.h"
 
+//#include <boost/fusion/sequence/intrinsic/at_c.hpp>
+//#include <boost/fusion/include/at_c.hpp>
+//#include <boost/fusion/sequence/intrinsic/at.hpp>
+//#include <boost/fusion/include/at.hpp>
+//#include <boost/fusion/sequence/intrinsic/value_at.hpp>
+//#include <boost/fusion/include/value_at.hpp>
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
@@ -145,10 +151,10 @@ void PanelPortfolioPosition::CreateControls() {
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
 
-    m_gridPositions->CreateGrid(0, COLHDR_POSITION_ARRAY_ROW_COUNT, wxGrid::wxGridSelectCells);
+    m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
     int ix( 0 );
-    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( COLHDR_POSITION_ARRAY ), COLHDR_POSITION_EMIT_SetColSettings, ix )
+    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_POSITION_ARRAY ), GRID_POSITION_EMIT_SetColSettings, ix )
 
     m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 
@@ -235,12 +241,27 @@ void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::D
 void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {
   // position should already be associated with portfolio, now add to gui
   // need structure to relate row and pPosition_t 
-  m_vPositions.push_back( structPosition( pPosition ) );
+  // 1 link up data source for each field
+  // 2 link up data destination for each field
+
   m_gridPositions->AppendRows( 1 );
+
+  int row( m_vPositions.size() );
+
+  m_vPositions.push_back( structPosition( pPosition, m_gridPositions, row ) );
+//  structPosition& info( m_vPositions.back() );
+
+
+  //boost::fusion::for_each( info.vModelCells, PanelPortfolioPosition_detail::InitVectorModelCells( row, m_gridPositions ) );
+//  at_c<0>( info.vModelCells ).SetFunctionSetText( MakeDelegate( &at_c<0>( info.vModelCells ), &result_of::value_at_c<vModelCells_t,0>::type::HandleUpdate ) );
+
   UpdateGui();
 }
 
 void PanelPortfolioPosition::UpdateGui( void ) {
+  for ( vPositions_t::iterator iter = m_vPositions.begin(); m_vPositions.end() != iter; ++iter ) {
+    iter->UpdateGui();
+  }
 }
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {

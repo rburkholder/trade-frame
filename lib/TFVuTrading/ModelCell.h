@@ -44,11 +44,11 @@ class ModelCell {
 public:
 
   typedef typename ModelCell_traits<CRTP>::value_type value_type;
-  typedef FastDelegate1<const std::string&> FunctionSetText_t;
+  typedef FastDelegate1<const wxString&> FunctionSetText_t;
 
   ModelCell(void);
   ModelCell(FunctionSetText_t);
-  ~ModelCell(void);
+  virtual ~ModelCell(void);
 
   void SetValue( const value_type& val );
   const value_type GetValue( void ) const { return m_val; };
@@ -57,7 +57,25 @@ public:
     m_functionSetText = function;
   }
 
+  const wxString& GetText( void ) { 
+    if ( m_bChanged ) {
+      Val2String();
+      m_bChanged = false;
+    }
+    return m_sCellText;
+  }
+
   void UpdateGui( void );
+
+  template<typename F>
+  void UpdateGui( F f ) {
+    typedef void type;
+    if ( m_bChanged ) {
+      Val2String();
+      f( m_sCellText );
+      m_bChanged = false;
+    }
+  }
 
 protected:
   bool m_bChanged;  // may need a spinlock for this variable to handle background thread updates
@@ -166,6 +184,7 @@ void ModelCell<CRTP>::SetValue( const value_type& val ) {
 template<typename CRTP>
 void ModelCell<CRTP>::UpdateGui( void ) {
   if ( m_bChanged && ( 0 != m_functionSetText ) ) {
+    Val2String();
     m_functionSetText( m_sCellText );
     m_bChanged = false;
   }
@@ -177,7 +196,8 @@ void ModelCell<CRTP>::Val2String( void ) {
     static_cast<CRTP*>(this)->Val2String();
   }
   else {
-    m_sCellText = boost::lexical_cast<wxString>( m_val );
+    std::string s( boost::lexical_cast<std::string>( m_val ) ); 
+    m_sCellText = s.c_str();
   }
 }
 
