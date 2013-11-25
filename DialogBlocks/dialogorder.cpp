@@ -143,9 +143,9 @@ void DialogOrder::CreateControls()
     itemBoxSizer2->Add(m_choiceDayGtc, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxArrayString m_choiceLmtMktStpStrings;
-    m_choiceLmtMktStpStrings.Add(_("LIMIT"));
-    m_choiceLmtMktStpStrings.Add(_("MARKET"));
-    m_choiceLmtMktStpStrings.Add(_("STOP"));
+    m_choiceLmtMktStpStrings.Add(_("LMT"));
+    m_choiceLmtMktStpStrings.Add(_("MKT"));
+    m_choiceLmtMktStpStrings.Add(_("STP"));
     m_choiceLmtMktStp = new wxChoice( itemDialog1, ID_ChcLmtMktStp, wxDefaultPosition, wxDefaultSize, m_choiceLmtMktStpStrings, 0 );
     m_choiceLmtMktStp->SetStringSelection(_("LIMIT"));
     itemBoxSizer2->Add(m_choiceLmtMktStp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);

@@ -18,6 +18,8 @@
 #include <vector>
 
 #include <wx/grid.h>
+#include <wx/stattext.h>
+#include <wx/sizer.h>
 
 #define FUSION_MAX_VECTOR_SIZE 12
 //#include <boost/fusion/container/vector.hpp>
@@ -27,16 +29,17 @@
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
+#include <boost/fusion/algorithm/iteration/accumulate.hpp>
+#include <boost/fusion/include/accumulate.hpp>
+#include <boost/fusion/sequence/intrinsic/at_c.hpp>
+#include <boost/fusion/include/at_c.hpp>
 
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/operator.hpp>
-#include <boost/phoenix/operator/arithmetic.hpp> 
-//#include <boost/phoenix/scope/let.hpp>
-#include <boost/phoenix/scope/lambda.hpp>
-#include <boost/phoenix/scope/local_variable.hpp>
-//#include <boost/phoenix/bind/bind_member_function.hpp>
-//#include <boost/phoenix/fusion.hpp>
-#include <boost/phoenix/function.hpp>
+//#include <boost/phoenix/core.hpp>
+//#include <boost/phoenix/operator.hpp>
+//#include <boost/phoenix/operator/arithmetic.hpp> 
+//#include <boost/phoenix/scope/lambda.hpp>
+//#include <boost/phoenix/scope/local_variable.hpp>
+//#include <boost/phoenix/function.hpp>
 
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/array/elem.hpp>
@@ -51,6 +54,7 @@ using namespace fastdelegate;
 #include <TFTrading/Portfolio.h>
 
 #include <TFVuTrading/DialogInstrumentSelect.h>
+#include <TFVuTrading/DialogSimpleOneLineOrder.h>
 #include <TFVuTrading/ModelCell.h>
 
 namespace ou { // One Unified
@@ -70,19 +74,19 @@ namespace PanelPortfolioPosition_detail {
     UpdateGui( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) {};
     template<typename T>
     void operator()( T& t ) const {
+      // todo:  doesn't make use of m_changed
       m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
     }
   };
 
-  struct SetCol_impl {
-    typedef void result_type;
+  struct SetCol {
+    typedef int result_type;
+    SetCol( void ) {};
     template<typename F, typename T>
-    void operator()( F& f, T& t ) const {
-      f.SetCol( t );
+    int operator()( F& f, T& t ) const {
+      return 1 + t.SetCol( f );
     }
   };
-
-  boost::phoenix::function<SetCol_impl> const SetCol = SetCol_impl();
 
 }
 
@@ -137,20 +141,21 @@ private:
     ID_GridPositions
   };
 
-// wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
+// for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_POSITION_ARRAY_PARAM_COUNT 5
-#define GRID_POSITION_ARRAY_COL_COUNT 12
+#define GRID_POSITION_ARRAY_COL_COUNT 13
 #define GRID_POSITION_ARRAY \
   (GRID_POSITION_ARRAY_COL_COUNT,  \
     ( /* Col 0,                       1,            2,              3,  4,             */ \
       (GRID_POSITION_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (GRID_POSITION_Side     , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
       (GRID_POSITION_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (GRID_POSITION_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
       (GRID_POSITION_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (GRID_POSITION_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_MktVlu   , "MktValue",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_URPL     , "UnRealPL",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_RPL      , "RealPL",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (GRID_POSITION_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (GRID_POSITION_MktVlu   , "MktValue",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (GRID_POSITION_URPL     , "UnRealPL",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (GRID_POSITION_RPL      , "RealPL",     wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (GRID_POSITION_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (GRID_POSITION_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (GRID_POSITION_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
@@ -174,13 +179,20 @@ private:
   m_gridPositions->SetColLabelValue( VAR, _T(GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
   m_gridPositions->SetColSize( VAR++, GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 3) );
 
+#define GRID_POSITION_CELL_ALIGNMENT( z, n, VAR ) \
+  m_pGrid->SetCellAlignment( VAR, GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 0), GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
+
+  enum {
+    BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_EXTRACT_ENUM_LIST,0)
+  };
+
   template<typename ModelCell>
   class CellInfo_t: public ModelCell {
   public:
     CellInfo_t( void ): m_col( 0 ) {};
     CellInfo_t( int col ): m_col( col ) {};
-    ~CellInfo_t( void ) {  }
-    void SetCol( int col ) { m_col = col; }
+    virtual ~CellInfo_t( void ) {  }
+    int SetCol( int col ) { m_col = col; return m_col; }
     int GetCol( void ) const { return m_col; }
   private:
     int m_col;
@@ -191,6 +203,7 @@ private:
   CellInfo_t<GRID_POSITION_EXTRACT_COL_DETAILS(z,n,col)>
 
 #define VECTOR_DEF BOOST_PP_CAT( vector, GRID_POSITION_ARRAY_COL_COUNT )
+
   typedef boost::fusion::VECTOR_DEF<
     BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
@@ -199,10 +212,21 @@ private:
   public:
     structPosition( pPosition_t pPosition_, wxGrid* pGrid, int row )
       : m_pPosition( pPosition_ ), m_pGrid( pGrid ), m_row( row ) {
-        namespace phx = boost::phoenix;
-        using boost::phoenix::arg_names::arg1;
-        boost::fusion::for_each( m_vModelCells, phx::lambda( phx::local_names::_a = 0)[PanelPortfolioPosition_detail::SetCol(arg1,phx::local_names::_a++)]);
-    // todo:  manage attachment into pPosition within this structure
+        boost::fusion::fold( m_vModelCells, 0, PanelPortfolioPosition_detail::SetCol() );
+        boost::fusion::at_c<GRID_POSITION_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
+        m_pPosition->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+        m_pPosition->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+        m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+        m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+        m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+        BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_CELL_ALIGNMENT,m_row)
+    }
+    ~structPosition( void ) {
+        m_pPosition->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+        m_pPosition->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+        m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+        m_pPosition->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+        m_pPosition->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
     }
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, PanelPortfolioPosition_detail::UpdateGui( m_pGrid, m_row ) );
@@ -212,7 +236,29 @@ private:
     wxGrid* m_pGrid;
     pPosition_t m_pPosition;
     vModelCells_t m_vModelCells;
+    void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
+      boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
+      boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
+      boost::fusion::at_c<GRID_POSITION_QuanActv>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionActive );
+      boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
+      boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
+      boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
+    }
+    void HandleOnCommission( const Position::PositionDelta_delegate_t& tuple ) {
+      boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblCommissionPaid );
+    }
+    void HandleOnUnRealizedPL( const Position::PositionDelta_delegate_t& tuple ) {
+      boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
+    }
+    void HandleOnTrade( const Position::trade_pair_t& pair ) {
+      boost::fusion::at_c<GRID_POSITION_Last>( m_vModelCells ).SetValue( pair.second.Price() );
+    }
+    void HandleOnQuote( const Position::quote_pair_t& pair ) {
+      boost::fusion::at_c<GRID_POSITION_Bid>( m_vModelCells ).SetValue( pair.second.Bid() );
+      boost::fusion::at_c<GRID_POSITION_Ask>( m_vModelCells ).SetValue( pair.second.Ask() );
+    }
   };
+
   typedef std::vector<structPosition> vPositions_t;
 
   vPositions_t m_vPositions;  // one to one match on rows in grid
@@ -235,10 +281,12 @@ private:
     wxMenu* m_menuGridCellPositionPopUp;
 
   pPortfolio_t m_pPortfolio;
-  DelegateConstructPosition_t m_delegateConstructPosition;
+  DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
 
   ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
   ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
+
+  ou::tf::DialogSimpleOneLineOrder* m_pdialogSimpleOneLineOrder;
 
   void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 

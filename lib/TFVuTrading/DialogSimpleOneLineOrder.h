@@ -32,8 +32,11 @@ class DialogSimpleOneLineOrder: public DialogBase {
 public:
 
   struct DataExchange: DialogBase::DataExchange {
-    wxString sSymbolName;
-    // todo:  pass in sorted array of pre-existing instruments
+    wxString sBuySell;
+    unsigned int nQuantity;
+    wxString sDayGtc;
+    wxString sLmtMktStp;
+    double dblPrice1;
   };
 
   DialogSimpleOneLineOrder(void);

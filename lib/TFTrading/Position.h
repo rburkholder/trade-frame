@@ -61,6 +61,9 @@ public:
   typedef std::pair<const Position&, const Execution&> execution_pair_t;
   typedef const execution_pair_t& execution_delegate_t;
 
+  typedef std::pair<const Position&, const Quote&> quote_pair_t;
+  typedef std::pair<const Position&, const Trade&> trade_pair_t;
+
   typedef boost::tuple<const Position&, double, double> PositionDelta_delegate_t;  // position, old value, new value
 
   typedef keytypes::idPosition_t idPosition_t;
@@ -208,8 +211,8 @@ public:
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
-  ou::Delegate<const Position*> OnTrade;  // nothing useful currently
-  ou::Delegate<const Position*> OnQuote;  // updates UnRealizedPL
+  ou::Delegate<const trade_pair_t&> OnTrade;  // nothing useful currently
+  ou::Delegate<const quote_pair_t&> OnQuote;  // updates UnRealizedPL
 
   ou::Delegate<execution_delegate_t> OnExecutionRaw;
 

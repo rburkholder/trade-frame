@@ -14,7 +14,8 @@
 
 #include "StdAfx.h"
 
-#include "wx/statline.h"
+#include <wx/statline.h>
+#include <wx/valnum.h>
 
 #include "DialogSimpleOneLineOrder.h"
 
@@ -49,7 +50,29 @@ void DialogSimpleOneLineOrder::Init() {
 void DialogSimpleOneLineOrder::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-//    m_cbSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+
+    wxArrayString asBuySell;
+    asBuySell.Add( "BUY" );  asBuySell.Add( "SELL" );
+    wxTextValidator tvBuySell( wxFILTER_INCLUDE_LIST, &pde->sBuySell );
+    tvBuySell.SetIncludes( asBuySell );
+    m_choiceBuySell->SetValidator( tvBuySell );
+
+    m_txtQuantity->SetValidator( wxIntegerValidator<unsigned int>( &pde->nQuantity, wxNUM_VAL_DEFAULT ) );
+
+    wxArrayString asDayGtc;
+    asDayGtc.Add( "DAY" ); asDayGtc.Add( "GTC" );
+    wxTextValidator tvDayGtc( wxFILTER_INCLUDE_LIST, &pde->sDayGtc );
+    tvDayGtc.SetIncludes( asDayGtc );
+    m_choiceDayGtc->SetValidator( tvDayGtc );
+
+    wxArrayString asLMS;
+    asLMS.Add( "LMT" );  asLMS.Add( "MKT" ); asLMS.Add( "STP" );
+    wxTextValidator tvLMS( wxFILTER_INCLUDE_LIST, &pde->sLmtMktStp );
+    tvLMS.SetIncludes( asLMS );
+    m_choiceLmtMktStp->SetValidator( tvLMS );
+
+    m_txtPrice1->SetValidator( wxFloatingPointValidator<double>( 4, &pde->dblPrice1, wxNUM_VAL_DEFAULT  ) );
+
   }
   else {
 //    m_cbSymbol->SetValidator( wxDefaultValidator );
@@ -95,11 +118,11 @@ void DialogSimpleOneLineOrder::CreateControls() {
     itemBoxSizer2->Add(m_choiceDayGtc, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxArrayString m_choiceLmtMktStpStrings;
-    m_choiceLmtMktStpStrings.Add(_("LIMIT"));
-    m_choiceLmtMktStpStrings.Add(_("MARKET"));
-    m_choiceLmtMktStpStrings.Add(_("STOP"));
+    m_choiceLmtMktStpStrings.Add(_("LMT"));
+    m_choiceLmtMktStpStrings.Add(_("MKT"));
+    m_choiceLmtMktStpStrings.Add(_("STP"));
     m_choiceLmtMktStp = new wxChoice( itemDialog1, ID_ChcLmtMktStp, wxDefaultPosition, wxDefaultSize, m_choiceLmtMktStpStrings, 0 );
-    m_choiceLmtMktStp->SetStringSelection(_("LIMIT"));
+    m_choiceLmtMktStp->SetStringSelection(_("LMT"));
     itemBoxSizer2->Add(m_choiceLmtMktStp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtPrice1 = new wxTextCtrl( itemDialog1, ID_TxtPrice1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );

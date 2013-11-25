@@ -155,7 +155,7 @@ void Position::HandleQuote( quote_t quote ) {
   }
 
   if ( bProcessed ) {
-    OnQuote( this );
+    OnQuote( quote_pair_t( *this, quote ) );
     if ( dblPreviousUnRealizedPL != m_row.dblUnRealizedPL ) {
       OnUnRealizedPL( PositionDelta_delegate_t( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) );
     }
@@ -164,7 +164,7 @@ void Position::HandleQuote( quote_t quote ) {
 }
 
 void Position::HandleTrade( trade_t trade ) {
-  OnTrade( this );
+  OnTrade( trade_pair_t( *this, trade ) );
 }
 
 void Position::HandleGreek( greek_t greek ) {

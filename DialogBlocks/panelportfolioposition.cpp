@@ -181,6 +181,7 @@ void PanelPortfolioPosition::CreateControls()
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
+    m_gridPositions->CreateGrid(2, 6, wxGrid::wxGridSelectCells);
     m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 
 ////@end PanelPortfolioPosition content construction

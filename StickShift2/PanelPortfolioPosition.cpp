@@ -58,6 +58,7 @@ void PanelPortfolioPosition::Init() {
     m_menuGridCellPositionPopUp = NULL;
 
     m_pdialogInstrumentSelect = 0;
+    m_pdialogSimpleOneLineOrder = 0;
 
 }
 
@@ -145,7 +146,7 @@ void PanelPortfolioPosition::CreateControls() {
 
     m_gridPortfolioStats->AddGrowableCol(1);
 
-    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, -1), wxSUNKEN_BORDER|wxHSCROLL|wxVSCROLL );
+    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
     m_gridPositions->SetDefaultColSize(75);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
@@ -205,6 +206,8 @@ void PanelPortfolioPosition::OnPositionPopUpAddPosition( wxCommandEvent& event )
 
 void PanelPortfolioPosition::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
   std::cout << "add order" << std::endl;
+  if ( !m_bDialogActive ) {
+  }
 }
 
 void PanelPortfolioPosition::OnPositionPopUpCancelOrders( wxCommandEvent& event ) {
@@ -265,6 +268,8 @@ void PanelPortfolioPosition::UpdateGui( void ) {
 }
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {
+
+  // don't close if dialog is still open.
 
   if ( 0 != m_menuGridLabelPositionPopUp ) {
     delete m_menuGridLabelPositionPopUp;
