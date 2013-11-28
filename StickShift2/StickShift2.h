@@ -79,6 +79,7 @@ private:
 
   bool m_bData1Connected;
   bool m_bExecConnected;
+  bool m_bStarted;
 
   wxTimer m_timerGuiRefresh;
 
@@ -88,6 +89,8 @@ private:
   ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
   pPortfolio_t m_pPortfolioMaster;
   mapPortfolios_t m_mapPortfolios;
+
+  ou::tf::PanelPortfolioPosition* m_pLastPPP;  // helps getting new positions to correct window
 
   FrameMain* m_pFrameMain;
   FrameMain* m_pFPPOE;
@@ -117,6 +120,8 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
+  void Start( void );
+
   void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
   void HandlePanelFocusPropogate( unsigned int ix );
@@ -142,7 +147,8 @@ private:
 
   void HandleIBInstrument( EventIBInstrument& event );
 
-  void HandlePortfolioLoad( const idPortfolio_t& idPortfolio );
+  void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
+  void HandlePositionLoad( pPosition_t& pPosition );
 
 //  void HandleMenuActionInitializeSymbolSet( void );
   void HandleMenuActionSaveSymbolSubset( void );

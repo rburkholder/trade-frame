@@ -94,14 +94,26 @@ public:
     OnPositionNeedsDetails = function;
   }
 
-  ou::Delegate<const idPortfolio_t&> OnPortfolioLoaded;
-  ou::Delegate<const idPortfolio_t&> OnPortfolioAdded;
-  ou::Delegate<const idPortfolio_t&> OnPortfolioUpdated;
+//  ou::Delegate<const idPortfolio_t&> OnPortfolioLoaded;
+//  ou::Delegate<const idPortfolio_t&> OnPortfolioAdded;
+//  ou::Delegate<const idPortfolio_t&> OnPortfolioUpdated;
+//  ou::Delegate<const idPortfolio_t&> OnPortfolioDeleted;
+
+//  ou::Delegate<const idPosition_t&> OnPositionLoaded;
+//  ou::Delegate<const idPosition_t&> OnPositionAdded;
+//  ou::Delegate<const idPosition_t&> OnPositionUpdated;
+//  ou::Delegate<const idPosition_t&> OnPositionDeleted;
+
+  ou::Delegate<pPortfolio_t&> OnPortfolioLoaded;
+  ou::Delegate<pPortfolio_t&> OnPortfolioAdded;
+  ou::Delegate<pPortfolio_t&> OnPortfolioUpdated;
+  ou::Delegate<pPortfolio_t&> OnPortfolioDeleting;
   ou::Delegate<const idPortfolio_t&> OnPortfolioDeleted;
 
-  ou::Delegate<const idPosition_t&> OnPositionLoaded;
-  ou::Delegate<const idPosition_t&> OnPositionAdded;
-  ou::Delegate<const idPosition_t&> OnPositionUpdated;
+  ou::Delegate<pPosition_t&> OnPositionLoaded;
+  ou::Delegate<pPosition_t&> OnPositionAdded;
+  ou::Delegate<pPosition_t&> OnPositionUpdated;
+  ou::Delegate<pPosition_t&> OnPositionDeleting;
   ou::Delegate<const idPosition_t&> OnPositionDeleted;
 
   template<class F> void ScanPortfolios( const idPortfolio_t& id, F );

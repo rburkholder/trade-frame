@@ -38,29 +38,29 @@ ModelPortfolioPositionOrderExecution::ModelPortfolioPositionOrderExecution(void)
   m_pModelOrder = new ModelOrder;
   m_pModelExecution = new ModelExecution;
 
-  m_PortfolioManager.OnPortfolioLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-  m_PortfolioManager.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-  m_PortfolioManager.OnPortfolioUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
-  m_PortfolioManager.OnPortfolioDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
+//  m_PortfolioManager.OnPortfolioLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+//  m_PortfolioManager.OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+//  m_PortfolioManager.OnPortfolioUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
+//  m_PortfolioManager.OnPortfolioDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
-  m_PortfolioManager.OnPositionLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-  m_PortfolioManager.OnPositionAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-  m_PortfolioManager.OnPositionUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
-  m_PortfolioManager.OnPositionDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
+//  m_PortfolioManager.OnPositionLoaded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+//  m_PortfolioManager.OnPositionAdded.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+//  m_PortfolioManager.OnPositionUpdated.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
+//  m_PortfolioManager.OnPositionDeleted.Add( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
 
 }
 
 ModelPortfolioPositionOrderExecution::~ModelPortfolioPositionOrderExecution(void) {
 
-  m_PortfolioManager.OnPortfolioLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-  m_PortfolioManager.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
-  m_PortfolioManager.OnPortfolioUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
-  m_PortfolioManager.OnPortfolioDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
+//  m_PortfolioManager.OnPortfolioLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+//  m_PortfolioManager.OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioAdded ) );
+//  m_PortfolioManager.OnPortfolioUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioUpdated ) );
+//  m_PortfolioManager.OnPortfolioDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPortfolioDeleted ) );
 
-  m_PortfolioManager.OnPositionLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-  m_PortfolioManager.OnPositionAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
-  m_PortfolioManager.OnPositionUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
-  m_PortfolioManager.OnPositionDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
+//  m_PortfolioManager.OnPositionLoaded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+//  m_PortfolioManager.OnPositionAdded.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionAdded ) );
+//  m_PortfolioManager.OnPositionUpdated.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionUpdated ) );
+//  m_PortfolioManager.OnPositionDeleted.Remove( MakeDelegate( this, &ModelPortfolioPositionOrderExecution::HandleOnPositionDeleted ) );
 
 }
 

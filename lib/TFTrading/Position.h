@@ -211,8 +211,11 @@ public:
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
 
-  ou::Delegate<const trade_pair_t&> OnTrade;  // nothing useful currently
-  ou::Delegate<const quote_pair_t&> OnQuote;  // updates UnRealizedPL
+  ou::Delegate<const ou::tf::Trade&> OnTrade; 
+  ou::Delegate<const ou::tf::Quote&> OnQuote;
+  ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL
+
+  ou::Delegate<const Position&> OnPositionChanged;  // on various stages of order submission and execution
 
   ou::Delegate<execution_delegate_t> OnExecutionRaw;
 

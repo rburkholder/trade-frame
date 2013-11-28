@@ -16,6 +16,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -66,6 +67,8 @@ public:
   }
 
   void UpdateGui( void );
+
+  bool Changed( void ) const { return m_bChanged; }
 
   template<typename F>
   void UpdateGui( F f ) {
@@ -118,6 +121,7 @@ struct ModelCell_traits<ModelCellDouble> {
 };
 
 class ModelCellDouble: public ModelCell<ModelCellDouble> {
+  friend class ModelCell<ModelCellDouble>;
 public:
 
   ModelCellDouble( void ): m_nPrecision( 2 ) {};
@@ -129,7 +133,14 @@ public:
   void SetPrecision( unsigned int n ) { m_nPrecision = n; };
 protected:
 private:
-  unsigned int m_nPrecision;  // not use yet
+  unsigned int m_nPrecision;
+  void Val2String( void ) {
+    std::stringstream ss;
+    ss.precision( m_nPrecision );
+    ss.setf( std::ios::fixed, std:: ios::floatfield );
+    ss << m_val;
+    m_sCellText = ss.str();
+  }
 };
 
 // ======================

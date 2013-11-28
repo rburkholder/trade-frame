@@ -89,13 +89,14 @@ bool AppStickShift::OnInit() {
 
   std::string sDbName( "StickShift2.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
+//    boost::filesystem::remove( sDbName );
   }
 
   m_db.Open( sDbName );
 
   m_bData1Connected = false;
   m_bExecConnected = false;
+  m_bStarted = false;
 
   m_dblMinPL = m_dblMaxPL = 0.0;
 
@@ -114,6 +115,7 @@ bool AppStickShift::OnInit() {
   m_timerGuiRefresh.SetOwner( this );
 
   Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppStickShift::OnClose, this );  // start close of windows and controls
 
@@ -136,16 +138,23 @@ bool AppStickShift::OnInit() {
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
 
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
-  pm.LoadActivePortfolios();
-
   m_pFPPOE->Show();
 
   Bind( EVENT_IB_INSTRUMENT, &AppStickShift::HandleIBInstrument, this );
 
   return 1;
 
+}
+
+void AppStickShift::Start( void ) {
+  if ( !m_bStarted ) {
+    m_bStarted = true;
+    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+    pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
+    pm.OnPositionLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePositionLoad ) );
+    pm.LoadActivePortfolios();
+
+  }
 }
 
 void AppStickShift::HandleMenuActionSaveSymbolSubset( void ) {
@@ -185,31 +194,22 @@ void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
   std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
 }
 
-void AppStickShift::HandlePortfolioLoad( const idPortfolio_t& idPortfolio ) {
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  ou::tf::PanelPortfolioPosition* pPPP( new ou::tf::PanelPortfolioPosition( m_scrollPM ) );
-  m_sizerScrollPM->Add( pPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
-  pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
-  pPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
-  pPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
-  m_mapPortfolios.insert( mapPortfolios_t::value_type( idPortfolio, structPortfolio( pPPP ) ) );
+void AppStickShift::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
+  //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
+  m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
+  //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
+  m_pLastPPP->SetPortfolio( pPortfolio );
+  m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
+  m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
+  m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
+}
+
+void AppStickShift::HandlePositionLoad( pPosition_t& pPosition ) {
+  m_pLastPPP->AddPosition( pPosition );
 }
 
 void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
-  // update portfolio results and tracker timeseries for portfolio value
-  double dblUnRealized;
-  double dblRealized;
-  double dblCommissionsPaid;
-/*  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid );
-  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
-  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
-  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
-  m_pPanelPortfolioStats->SetStats( 
-    boost::lexical_cast<std::string>( m_dblMinPL ),
-    boost::lexical_cast<std::string>( dblCurrent ),
-    boost::lexical_cast<std::string>( m_dblMaxPL )
-    );
-    */
   for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
     iter->second.pPPP->UpdateGui();
   }
@@ -386,6 +386,8 @@ void AppStickShift::HandlePanelFocusPropogate( unsigned int ix ) {
 }
 
 void AppStickShift::OnClose( wxCloseEvent& event ) {
+//  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
+//  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePositionLoaded ) );
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
@@ -398,6 +400,7 @@ void AppStickShift::OnData1Connected( int ) {
   m_bData1Connected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
+    Start();
   }
 }
 
@@ -405,6 +408,7 @@ void AppStickShift::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
+    Start();
   }
 }
 

@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <boost/atomic.hpp>
+//#include <boost/scope_exit.hpp>
 
 #include <OUCommon/SpinLock.h>
 
@@ -25,28 +26,31 @@ using namespace fastdelegate;
 
 namespace ou {
 
-template<class RO>  // RO: Return Object in operator()
+template<typename T>  // T: object used in operator(), normally const& 
 class Delegate {
-// example:  
-//  Delegate<ClassA> OnPortfolioAdded;
-//  OnPortfolioAdded.Add( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
-// for some object portfolio_model of type RO:
-//  OnPortfolioAdded( portfolio_model );
-//  OnPortfolioAdded.Remove( MakeDelegate( this, &ModelPortfolio::AddPortfolioToModel ) );
+// Example:  
+//   Declaration:
+//     Delegate<double> OnValueChanged;
+//   Add delegate:
+//     OnValueChanged.Add( MakeDelegate( this, &MyClass::HandleValueChanged ) );
+//   Make use of delegate:
+//     OnValueChanged( 3.14 );
+//   Remove Delegate:
+//    OnValueChanged.Remove( MakeDelegate( this, &MyClass::HandleValueChanged ) );
 public:
 
-  typedef fastdelegate::FastDelegate1<RO> OnMessageHandler;
-  typedef std::vector<OnMessageHandler> vDispatch_t;
+  typedef fastdelegate::FastDelegate1<T> OnDispatchHandler;
+  typedef std::vector<OnDispatchHandler> vDispatch_t;
   typedef typename vDispatch_t::size_type vsize_t;
 
   Delegate( void );
   Delegate( const Delegate& );
   ~Delegate( void );
 
-  void operator()( RO );
+  void operator()( T );
 
-  void Add( OnMessageHandler function );
-  void Remove( OnMessageHandler function );
+  void Add( OnDispatchHandler function );
+  void Remove( OnDispatchHandler function );
 
   bool IsEmpty() const { return ( 0 == m_vDispatchMaster.size() ); };
   vsize_t Size( void ) const { return m_vDispatchMaster.size(); };
@@ -55,7 +59,6 @@ protected:
 private:
 
   typedef typename vDispatch_t::const_iterator const_iterator;
-  typedef typename vDispatch_t::iterator iterator;
 
   boost::atomic<int> m_cntDispatchProcesses;
   boost::atomic<int> m_cntChanges;
@@ -69,14 +72,14 @@ private:
 
 };
 
-template<class RO> 
-Delegate<RO>::Delegate(void) 
+template<class T> 
+Delegate<T>::Delegate(void) 
   : m_cntDispatchProcesses( 0 ), m_cntChanges( 0 )
 {
 }
 
-template<class RO>
-Delegate<RO>::Delegate( const Delegate& rhs ) 
+template<class T>
+Delegate<T>::Delegate( const Delegate& rhs ) 
   : m_cntDispatchProcesses( 0 ), m_cntChanges( 0 )
   // don't carry over any of the stuff, just re-initialize it.
   // boost::atomic is non-copyable
@@ -86,25 +89,33 @@ Delegate<RO>::Delegate( const Delegate& rhs )
 {
 }
 
-template<class RO>
-Delegate<RO>::~Delegate(void) {
+template<class T>
+Delegate<T>::~Delegate(void) {
+  // this object should be deleted in same thread in which it was created
+  while (m_cntDispatchProcesses.load( boost::memory_order_acquire ) != 0 ); // wait for dispatch to finish
   m_vDispatch.clear();
   m_vDispatchMaster.clear();
 }
 
-template<class RO> 
-void Delegate<RO>::operator()( RO ro ) {
+template<class T> 
+void Delegate<T>::operator()( T t ) {
 
   const_iterator iter;
 
   m_cntDispatchProcesses.fetch_add( 1, boost::memory_order_acquire );
   m_spinlockVectorReplace.wait();  // wait for any running replacement to finish
 
-  iter = m_vDispatch.begin();  // start dispatching
-  while ( m_vDispatch.end() != iter ) {
-    (*iter)( ro );
-    ++iter;
-  }
+  { // ensure things get cleared up in the case of exception in delegated function
+//    BOOST_SCOPE_EXIT(&m_cntDispatchProcesses) {
+//      m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
+//    }
+
+    iter = m_vDispatch.begin();  // start dispatching
+    while ( m_vDispatch.end() != iter ) {
+      (*iter)( t );
+      ++iter;
+    }
+  } // end scope
 
   m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
 
@@ -115,8 +126,8 @@ void Delegate<RO>::operator()( RO ro ) {
 
 }
 
-template<class RO> 
-void Delegate<RO>::Add( OnMessageHandler function ) {
+template<class T> 
+void Delegate<T>::Add( OnDispatchHandler function ) {
 
   m_spinlockVectorUpdate.lock(); 
 
@@ -130,12 +141,12 @@ void Delegate<RO>::Add( OnMessageHandler function ) {
 
 }
 
-template<class RO> 
-void Delegate<RO>::Remove( OnMessageHandler function ) {
+template<class T> 
+void Delegate<T>::Remove( OnDispatchHandler function ) {
 
   m_spinlockVectorUpdate.lock();
 
-  iterator iter = m_vDispatchMaster.begin();
+  const_iterator iter = m_vDispatchMaster.begin();
   while ( m_vDispatchMaster.end() != iter ) {
     if ( function == *iter ) {
       m_vDispatchMaster.erase( iter );
@@ -152,8 +163,8 @@ void Delegate<RO>::Remove( OnMessageHandler function ) {
 
 }
 
-template<class RO>
-void Delegate<RO>::VectorReplace( void ) {
+template<class T>
+void Delegate<T>::VectorReplace( void ) {
 
   // perform VectorReplace only outside of operator() method influence
   if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {

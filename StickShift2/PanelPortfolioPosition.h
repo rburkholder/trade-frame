@@ -29,17 +29,12 @@
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
-#include <boost/fusion/algorithm/iteration/accumulate.hpp>
-#include <boost/fusion/include/accumulate.hpp>
+#include <boost/fusion/algorithm/iteration/fold.hpp>
+#include <boost/fusion/include/fold.hpp>
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 #include <boost/fusion/include/at_c.hpp>
-
-//#include <boost/phoenix/core.hpp>
-//#include <boost/phoenix/operator.hpp>
-//#include <boost/phoenix/operator/arithmetic.hpp> 
-//#include <boost/phoenix/scope/lambda.hpp>
-//#include <boost/phoenix/scope/local_variable.hpp>
-//#include <boost/phoenix/function.hpp>
+#include <boost/fusion/algorithm/transformation/filter.hpp>
+#include <boost/fusion/include/filter.hpp>
 
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/array/elem.hpp>
@@ -74,8 +69,10 @@ namespace PanelPortfolioPosition_detail {
     UpdateGui( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) {};
     template<typename T>
     void operator()( T& t ) const {
-      // todo:  doesn't make use of m_changed
-      m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
+      // todo:  deal with flicker by double-buffering?
+      if ( t.Changed() ) {
+        m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
+      }
     }
   };
 
@@ -85,6 +82,15 @@ namespace PanelPortfolioPosition_detail {
     template<typename F, typename T>
     int operator()( F& f, T& t ) const {
       return 1 + t.SetCol( f );
+    }
+  };
+
+  struct SetPrecision {
+    unsigned int m_nPrecision;
+    SetPrecision( unsigned int val ): m_nPrecision( val ) {};
+    template<typename T>
+    void operator()( T& t ) const {
+      t.SetPrecision( m_val );
     }
   };
 
@@ -119,6 +125,8 @@ public:
   void SetPortfolio( pPortfolio_t pPortfolio );
   void SetNameLookup( DelegateNameLookup_t function ) { m_DialogInstrumentSelect_DataExchange.lookup = function; };
   void SetConstructPosition( DelegateConstructPosition_t function ) { m_delegateConstructPosition = function; };
+
+  void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 
   void UpdateGui( void );
 
@@ -210,38 +218,58 @@ private:
 
   class structPosition {
   public:
-    structPosition( pPosition_t pPosition_, wxGrid* pGrid, int row )
-      : m_pPosition( pPosition_ ), m_pGrid( pGrid ), m_row( row ) {
-        boost::fusion::fold( m_vModelCells, 0, PanelPortfolioPosition_detail::SetCol() );
-        boost::fusion::at_c<GRID_POSITION_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
-        m_pPosition->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
-        m_pPosition->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
-        m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-        m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
-        m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
-        BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_CELL_ALIGNMENT,m_row)
+    structPosition( pPosition_t pPosition, wxGrid* pGrid, int row )
+      : m_pPosition( pPosition ), m_pGrid( pGrid ), m_row( row ) {
+        Init();
+    }
+    structPosition( const structPosition& rhs )
+      : m_pPosition( rhs.m_pPosition ), m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) {
+      Init();
     }
     ~structPosition( void ) {
-        m_pPosition->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
-        m_pPosition->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
-        m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
-        m_pPosition->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
-        m_pPosition->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
+      m_pPosition->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+      m_pPosition->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+      m_pPosition->OnUnRealizedPL.Remove( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+      m_pPosition->OnQuote.Remove( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPosition->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
     }
     void UpdateGui( void ) {
+      //m_pGrid->BeginBatch();
+      //m_pGrid->Freeze();
       boost::fusion::for_each( m_vModelCells, PanelPortfolioPosition_detail::UpdateGui( m_pGrid, m_row ) );
+      //m_pGrid->Thaw();
+      //m_pGrid->EndBatch();
+    }
+    pPosition_t GetPosition( void ) { return m_pPosition; }
+    void SetPrecision( double dbl ) {
+      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), PanelPortfolioPosition_detail::SetPrecision( 2 ) );
+      
     }
   private:
     int m_row;
     wxGrid* m_pGrid;
     pPosition_t m_pPosition;
     vModelCells_t m_vModelCells;
-    void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
+    void Init( void ) {
+      boost::fusion::fold( m_vModelCells, 0, PanelPortfolioPosition_detail::SetCol() );
+      boost::fusion::at_c<GRID_POSITION_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
+      m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
+      m_pPosition->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
+      m_pPosition->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
+      m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
+      m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
+      m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
+      BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_CELL_ALIGNMENT,m_row)
+    }
+    void HandleOnPositionChanged( const Position& position ) {
       boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
       boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
       boost::fusion::at_c<GRID_POSITION_QuanActv>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionActive );
       boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
       boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
+    }
+    void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
       boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
     }
     void HandleOnCommission( const Position::PositionDelta_delegate_t& tuple ) {
@@ -250,20 +278,20 @@ private:
     void HandleOnUnRealizedPL( const Position::PositionDelta_delegate_t& tuple ) {
       boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
     }
-    void HandleOnTrade( const Position::trade_pair_t& pair ) {
-      boost::fusion::at_c<GRID_POSITION_Last>( m_vModelCells ).SetValue( pair.second.Price() );
+    void HandleOnTrade( const ou::tf::Trade& trade ) {
+      boost::fusion::at_c<GRID_POSITION_Last>( m_vModelCells ).SetValue( trade.Price() );
     }
-    void HandleOnQuote( const Position::quote_pair_t& pair ) {
-      boost::fusion::at_c<GRID_POSITION_Bid>( m_vModelCells ).SetValue( pair.second.Bid() );
-      boost::fusion::at_c<GRID_POSITION_Ask>( m_vModelCells ).SetValue( pair.second.Ask() );
+    void HandleOnQuote( const ou::tf::Quote& quote ) {
+      boost::fusion::at_c<GRID_POSITION_Bid>( m_vModelCells ).SetValue( quote.Bid() );
+      boost::fusion::at_c<GRID_POSITION_Ask>( m_vModelCells ).SetValue( quote.Ask() );
     }
   };
 
   typedef std::vector<structPosition> vPositions_t;
-
   vPositions_t m_vPositions;  // one to one match on rows in grid
 
   bool m_bDialogActive;
+  int m_nRowRightClick;  // row on which right click occurred
 
     wxBoxSizer* m_sizerMain;
     wxBoxSizer* m_sizerPortfolio;
@@ -283,12 +311,15 @@ private:
   pPortfolio_t m_pPortfolio;
   DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
 
+  //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
+  typedef std::vector<ModelCellDouble> vPortfolioValues_t;
+  vPortfolioValues_t m_vPortfolioValues;
+
   ou::tf::DialogInstrumentSelect::DataExchange m_DialogInstrumentSelect_DataExchange;
   ou::tf::DialogInstrumentSelect* m_pdialogInstrumentSelect;
 
+  ou::tf::DialogSimpleOneLineOrder::DataExchange m_DialogSimpleOneLineOrder_DataExchange;
   ou::tf::DialogSimpleOneLineOrder* m_pdialogSimpleOneLineOrder;
-
-  void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 
   void OnClose( wxCloseEvent& event );
 
@@ -302,6 +333,11 @@ private:
   void OnPositionPopUpClosePortfolio( wxCommandEvent& event );
 
   void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
+  void OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* );
+
+  void HandleOnUnRealizedPLUpdate( const Portfolio& );
+  void HandleOnExecutionUpdate( const Portfolio& );
+  void HandleOnCommissionUpdate( const Portfolio& );
 
 };
 

@@ -45,16 +45,16 @@ public:
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
 
   typedef const Quote& quote_t;
-  typedef ou::Delegate<quote_t>::OnMessageHandler quotehandler_t;
+  typedef ou::Delegate<quote_t>::OnDispatchHandler quotehandler_t;
 
   typedef const Trade& trade_t;
-  typedef ou::Delegate<trade_t>::OnMessageHandler tradehandler_t;
+  typedef ou::Delegate<trade_t>::OnDispatchHandler tradehandler_t;
 
   typedef const MarketDepth& depth_t;
-  typedef ou::Delegate<depth_t>::OnMessageHandler depthhandler_t;
+  typedef ou::Delegate<depth_t>::OnDispatchHandler depthhandler_t;
 
   typedef const Greek& greek_t;
-  typedef ou::Delegate<greek_t>::OnMessageHandler greekhandler_t;
+  typedef ou::Delegate<greek_t>::OnDispatchHandler greekhandler_t;
 
   // these handlers are typically updated through the provider, rather than through client code
   bool AddQuoteHandler( quotehandler_t );

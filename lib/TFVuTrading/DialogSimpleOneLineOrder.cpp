@@ -16,6 +16,7 @@
 
 #include <wx/statline.h>
 #include <wx/valnum.h>
+#include <wx/valgen.h>
 
 #include "DialogSimpleOneLineOrder.h"
 
@@ -51,25 +52,28 @@ void DialogSimpleOneLineOrder::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
 
-    wxArrayString asBuySell;
-    asBuySell.Add( "BUY" );  asBuySell.Add( "SELL" );
-    wxTextValidator tvBuySell( wxFILTER_INCLUDE_LIST, &pde->sBuySell );
-    tvBuySell.SetIncludes( asBuySell );
-    m_choiceBuySell->SetValidator( tvBuySell );
+    //wxArrayString asBuySell;
+    //asBuySell.Add( "BUY" );  asBuySell.Add( "SELL" );
+    //wxTextValidator tvBuySell( wxFILTER_INCLUDE_LIST, &pde->sBuySell );
+    wxGenericValidator gvBuySell( &pde->sBuySell );
+    //tvBuySell.SetIncludes( asBuySell );
+    m_choiceBuySell->SetValidator( gvBuySell );
 
     m_txtQuantity->SetValidator( wxIntegerValidator<unsigned int>( &pde->nQuantity, wxNUM_VAL_DEFAULT ) );
 
-    wxArrayString asDayGtc;
-    asDayGtc.Add( "DAY" ); asDayGtc.Add( "GTC" );
-    wxTextValidator tvDayGtc( wxFILTER_INCLUDE_LIST, &pde->sDayGtc );
-    tvDayGtc.SetIncludes( asDayGtc );
-    m_choiceDayGtc->SetValidator( tvDayGtc );
+    //wxArrayString asDayGtc;
+    //asDayGtc.Add( "DAY" ); asDayGtc.Add( "GTC" );
+    //wxTextValidator tvDayGtc( wxFILTER_INCLUDE_LIST, &pde->sDayGtc );
+    wxGenericValidator gvDayGtc( &pde->sDayGtc );
+    //tvDayGtc.SetIncludes( asDayGtc );
+    m_choiceDayGtc->SetValidator( gvDayGtc );
 
-    wxArrayString asLMS;
-    asLMS.Add( "LMT" );  asLMS.Add( "MKT" ); asLMS.Add( "STP" );
-    wxTextValidator tvLMS( wxFILTER_INCLUDE_LIST, &pde->sLmtMktStp );
-    tvLMS.SetIncludes( asLMS );
-    m_choiceLmtMktStp->SetValidator( tvLMS );
+    //wxArrayString asLMS;
+    //asLMS.Add( "LMT" );  asLMS.Add( "MKT" ); asLMS.Add( "STP" );
+    //wxTextValidator tvLMS( wxFILTER_INCLUDE_LIST, &pde->sLmtMktStp );
+    wxGenericValidator gvLMS( &pde->sLmtMktStp );
+    //tvLMS.SetIncludes( asLMS );
+    m_choiceLmtMktStp->SetValidator( gvLMS );
 
     m_txtPrice1->SetValidator( wxFloatingPointValidator<double>( 4, &pde->dblPrice1, wxNUM_VAL_DEFAULT  ) );
 
@@ -126,7 +130,7 @@ void DialogSimpleOneLineOrder::CreateControls() {
     itemBoxSizer2->Add(m_choiceLmtMktStp, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtPrice1 = new wxTextCtrl( itemDialog1, ID_TxtPrice1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_txtPrice1->Enable(false);
+    //m_txtPrice1->Enable(false);  // do this differently, enable for limit, stop; disable for market
     itemBoxSizer2->Add(m_txtPrice1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxStaticLine* itemStaticLine8 = new wxStaticLine( itemDialog1, wxID_STATIC, wxDefaultPosition, wxSize(-1, 8), wxLI_VERTICAL );

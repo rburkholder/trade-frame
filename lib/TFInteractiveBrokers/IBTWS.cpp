@@ -433,8 +433,19 @@ void IBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
       //<< ", clid=" << clientId 
       //<< ", yh=" << whyHeld 
       << std::endl;
-//    std::cout << m_ss.str();  // ****
+    //std::cout << m_ss.str();  // ****
 //    OutputDebugString( m_ss.str().c_str() );
+  }
+  DecodeStatusWord::enumStatus status_ = dsw.Match( status );
+  switch ( status_ ) {
+    case DecodeStatusWord::Cancelled:
+      OrderManager::Instance().ReportCancellation( orderId );
+      break;
+    case DecodeStatusWord::Submitted:
+    case DecodeStatusWord::Filled:
+      break;
+    default:
+      std::cout << "IBTWS::orderStatus: " << orderId << "," << status << std::endl;
   }
 }
 

@@ -227,6 +227,7 @@ void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
 
   // need to propogate up portfolios yet
   OnUnRealizedPL( position );
+  OnUnRealizedPLUpdate( *this );
 
 }
 

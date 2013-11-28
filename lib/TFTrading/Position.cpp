@@ -138,6 +138,8 @@ void Position::HandleQuote( quote_t quote ) {
 
   if ( ( 0 == quote.Ask() ) || ( 0 == quote.Bid() ) ) return;
 
+  OnQuote( quote );
+
   double dblPreviousUnRealizedPL = m_row.dblUnRealizedPL;
 
   bool bProcessed(false);
@@ -155,7 +157,7 @@ void Position::HandleQuote( quote_t quote ) {
   }
 
   if ( bProcessed ) {
-    OnQuote( quote_pair_t( *this, quote ) );
+    OnQuotePostProcess( quote_pair_t( *this, quote ) );
     if ( dblPreviousUnRealizedPL != m_row.dblUnRealizedPL ) {
       OnUnRealizedPL( PositionDelta_delegate_t( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) );
     }
@@ -164,7 +166,7 @@ void Position::HandleQuote( quote_t quote ) {
 }
 
 void Position::HandleTrade( trade_t trade ) {
-  OnTrade( trade_pair_t( *this, trade ) );
+  OnTrade( trade );
 }
 
 void Position::HandleGreek( greek_t greek ) {
@@ -235,10 +237,13 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
   pOrder->OnCommission.Add( MakeDelegate( this, &Position::HandleCommission ) );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Position::HandleCancellation ) );
   OrderManager::LocalCommonInstance().PlaceOrder( &(*m_pExecutionProvider), pOrder );
+
+  OnPositionChanged( *this );
 }
 
 void Position::CancelOrders( void ) {
   // may have a problem getting out of sync with broker if orders are cancelled by broker
+  // todo:  on power up, need to relink these active orders back in with the position
   for ( std::vector<pOrder_t>::iterator iter = m_vOpenOrders.begin(); iter != m_vOpenOrders.end(); ++iter ) {
     CancelOrder( iter );  // this won't work as the iterator is invalidated with each order removal
   }
@@ -272,6 +277,7 @@ void Position::HandleCancellation( const Order& order ) {
       }
     }
   }
+  OnPositionChanged( *this );
 }
 
 void Position::CancelOrder( vOrders_iter_t iter ) {
@@ -445,6 +451,8 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
     OnUpdateExecutionForPortfolioManager( *this );
     OnExecution( PositionDelta_delegate_t( *this, dblOldRealizedPL, m_row.dblRealizedPL ) );
   }
+
+  OnPositionChanged( *this );
   
 }
 

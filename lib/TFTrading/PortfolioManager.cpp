@@ -44,7 +44,8 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
     pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
   }
 
-  OnPortfolioAdded( idPortfolio );
+  //OnPortfolioAdded( idPortfolio );
+  OnPortfolioAdded( pPortfolio );
 
   return pPortfolio;
 }
@@ -221,7 +222,8 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
       pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
       pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
-      OnPortfolioLoaded( idPortfolio );
+      //OnPortfolioLoaded( idPortfolio );
+      OnPortfolioLoaded( pPortfolio );
 
       LoadPositions( idPortfolio, response.first->second.mapPosition );
 
@@ -255,7 +257,8 @@ void PortfolioManager::UpdatePortfolio( const idPortfolio_t& idPortfolio ) {
   UpdateRecord<idPortfolio_t, Portfolio::TableRowDef, mapPortfolios_t, PortfolioManagerQueries::PortfolioUpdate>(
     idPortfolio, p->GetRow(), m_mapPortfolios, "portfolioid = ?" );
 
-  OnPortfolioUpdated( idPortfolio );
+  //OnPortfolioUpdated( idPortfolio );
+  OnPortfolioUpdated( p );
 
 }
 
@@ -312,7 +315,8 @@ void PortfolioManager::LoadActivePortfolios( void ) {
     pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
     pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
-    OnPortfolioLoaded( rowPortfolio.idPortfolio );
+    //OnPortfolioLoaded( rowPortfolio.idPortfolio );
+    OnPortfolioLoaded( pPortfolio );
 
     LoadPositions( rowPortfolio.idPortfolio, response.first->second.mapPosition );
 
@@ -340,7 +344,8 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
     mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
     pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
     pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
-    OnPositionLoaded( pPosition->GetRow().idPosition );
+    //OnPositionLoaded( pPosition->GetRow().idPosition );
+    OnPositionLoaded( pPosition );
   }
 }
 
@@ -407,7 +412,8 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
 
   iterPortfolio->second.pPortfolio->AddPosition( sName, pPosition );
 
-  OnPositionAdded( idPosition );
+  //OnPositionAdded( idPosition );
+  OnPositionAdded( pPosition );
 
   return pPosition;
 }
@@ -447,7 +453,8 @@ void PortfolioManager::UpdatePosition( const idPortfolio_t& idPortfolio, const s
   idPosition_t idPosition( pPosition->GetRow().idPosition );
   UpdateRecord<idPosition_t, Position::TableRowDefNoKey, PortfolioManagerQueries::PositionUpdate>(
     idPosition, dynamic_cast<const Position::TableRowDefNoKey&>( pPosition->GetRow() ), "positionid = ?" );
-  OnPositionUpdated( idPosition );
+  //OnPositionUpdated( idPosition );
+  OnPositionUpdated( pPosition );
 }
 
 namespace PortfolioManagerQueries {

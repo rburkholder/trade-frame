@@ -150,10 +150,10 @@ public:
 //  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
 
 //  void EmitStats( std::stringstream& ss );
-  void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid ) const {
-    dblUnRealized = m_plCurrent.dblUnRealized;
-    dblRealized = m_plCurrent.dblRealized;
-    dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;
+  void QueryStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid, double& dblTotal ) const {
+    dblTotal  = ( dblUnRealized = m_plCurrent.dblUnRealized );
+    dblTotal += ( dblRealized = m_plCurrent.dblRealized );
+    dblTotal -= ( dblCommissionsPaid = m_plCurrent.dblCommissionsPaid );
   }
   void AddStats( double& dblUnRealized, double& dblRealized, double& dblCommissionsPaid ) const {
     dblUnRealized += m_plCurrent.dblUnRealized;
@@ -163,11 +163,12 @@ public:
 
   const TableRowDef& GetRow( void ) const { return m_row; };
 
+  ou::Delegate<const Portfolio&> OnUnRealizedPLUpdate;
   ou::Delegate<const Portfolio&> OnExecutionUpdate;
   ou::Delegate<const Portfolio&> OnCommissionUpdate;
 
-  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by portfolio
-  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by owning portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by owning portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
 
 protected:

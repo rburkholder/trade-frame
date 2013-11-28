@@ -14,12 +14,8 @@
 
 #include "StdAfx.h"
 
-//#include <boost/fusion/sequence/intrinsic/at_c.hpp>
-//#include <boost/fusion/include/at_c.hpp>
-//#include <boost/fusion/sequence/intrinsic/at.hpp>
-//#include <boost/fusion/include/at.hpp>
-//#include <boost/fusion/sequence/intrinsic/value_at.hpp>
-//#include <boost/fusion/include/value_at.hpp>
+//#include <TFTrading/OrderManager.h>
+
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
@@ -60,6 +56,8 @@ void PanelPortfolioPosition::Init() {
     m_pdialogInstrumentSelect = 0;
     m_pdialogSimpleOneLineOrder = 0;
 
+    m_nRowRightClick = -1;
+
 }
 
 void PanelPortfolioPosition::SetPortfolio( pPortfolio_t pPortfolio ) {
@@ -67,6 +65,9 @@ void PanelPortfolioPosition::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_lblIdPortfolio->SetLabelText( pPortfolio->GetRow().idPortfolio );
   m_lblCurrency->SetLabelText( pPortfolio->GetRow().sCurrency );
   m_lblDescription->SetLabelText( pPortfolio->GetRow().sDescription );
+  pPortfolio->OnUnRealizedPLUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnUnRealizedPLUpdate ) );
+  pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnExecutionUpdate ) );
+  pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnCommissionUpdate ) );
   if ( ou::tf::Portfolio::Master == pPortfolio->GetRow().ePortfolioType ) {
     //m_gridPositions->Hide();
     //m_sizerMain->Detach( m_gridPositions );
@@ -78,6 +79,15 @@ void PanelPortfolioPosition::SetPortfolio( pPortfolio_t pPortfolio ) {
 //    m_sizerMain->Layout();
     //m_gridPositions->Destroy();
   }
+}
+
+void PanelPortfolioPosition::HandleOnUnRealizedPLUpdate( const Portfolio& ) {
+}
+
+void PanelPortfolioPosition::HandleOnExecutionUpdate( const Portfolio& ) {
+}
+
+void PanelPortfolioPosition::HandleOnCommissionUpdate( const Portfolio& ) {
 }
 
 bool PanelPortfolioPosition::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -123,25 +133,25 @@ void PanelPortfolioPosition::CreateControls() {
     wxStaticText* itemStaticText10 = new wxStaticText( itemPanel1, ID_LblUnrealizedPL, _("UnRealized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
     m_gridPortfolioStats->Add(itemStaticText10, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    m_txtUnRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtUnRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtUnRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtUnRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtUnRealizedPL, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxStaticText* itemStaticText12 = new wxStaticText( itemPanel1, ID_LblCommission, _("Commission:"), wxDefaultPosition, wxDefaultSize, 0 );
     m_gridPortfolioStats->Add(itemStaticText12, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    m_txtCommission = new wxTextCtrl( itemPanel1, ID_TxtCommission, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtCommission = new wxTextCtrl( itemPanel1, ID_TxtCommission, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtCommission, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxStaticText* itemStaticText14 = new wxStaticText( itemPanel1, ID_LblRealizedPL, _("Realized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
     m_gridPortfolioStats->Add(itemStaticText14, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    m_txtRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtRealizedPL, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxStaticText* itemStaticText16 = new wxStaticText( itemPanel1, ID_LblTotal, _("Total:"), wxDefaultPosition, wxDefaultSize, 0 );
     m_gridPortfolioStats->Add(itemStaticText16, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    m_txtTotal = new wxTextCtrl( itemPanel1, ID_TxtTotal, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_txtTotal = new wxTextCtrl( itemPanel1, ID_TxtTotal, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtTotal, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_gridPortfolioStats->AddGrowableCol(1);
@@ -183,6 +193,8 @@ void PanelPortfolioPosition::CreateControls() {
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpAddPortfolio, this, ID_MenuAddPortfolio, -1, 0 );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelPortfolioPosition::OnPositionPopUpClosePortfolio, this, ID_MenuClosePortfolio, -1, 0 );
 
+  m_vPortfolioValues.resize( 4 );
+
 }
 
 void PanelPortfolioPosition::OnRightClickGridLabel( wxGridEvent& event ) {
@@ -190,6 +202,7 @@ void PanelPortfolioPosition::OnRightClickGridLabel( wxGridEvent& event ) {
 }
 
 void PanelPortfolioPosition::OnRightClickGridCell( wxGridEvent& event ) {
+  m_nRowRightClick = event.GetRow();
   this->PopupMenu( m_menuGridCellPositionPopUp );
 }
 
@@ -207,14 +220,21 @@ void PanelPortfolioPosition::OnPositionPopUpAddPosition( wxCommandEvent& event )
 void PanelPortfolioPosition::OnPositionPopUpAddOrder( wxCommandEvent& event ) {
   std::cout << "add order" << std::endl;
   if ( !m_bDialogActive ) {
+    m_bDialogActive = true;
+    m_pdialogSimpleOneLineOrder = new ou::tf::DialogSimpleOneLineOrder( this );
+    m_pdialogSimpleOneLineOrder->SetDataExchange( &m_DialogSimpleOneLineOrder_DataExchange );
+    m_pdialogSimpleOneLineOrder->SetOnDoneHandler( MakeDelegate( this, &PanelPortfolioPosition::OnDialogSimpleOneLineOrderDone ) );
+    m_pdialogSimpleOneLineOrder->Show( true );
   }
 }
 
 void PanelPortfolioPosition::OnPositionPopUpCancelOrders( wxCommandEvent& event ) {
+  m_vPositions[ m_nRowRightClick ].GetPosition()->CancelOrders();
   std::cout << "cancel orders" << std::endl;
 }
 
 void PanelPortfolioPosition::OnPositionPopUpClosePosition( wxCommandEvent& event ) {
+  m_vPositions[ m_nRowRightClick ].GetPosition()->ClosePosition();
   std::cout << "close position"  << std::endl;
 }
 
@@ -241,35 +261,109 @@ void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::D
   }
 }
 
+void PanelPortfolioPosition::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* ) {
+  m_pdialogSimpleOneLineOrder->SetOnDoneHandler( 0 );
+  m_pdialogSimpleOneLineOrder->SetDataExchange( 0 );
+  delete m_pdialogSimpleOneLineOrder;  // this may get us into problems as it is called while still processing dialog code
+  m_pdialogSimpleOneLineOrder = 0;
+  m_bDialogActive = false;
+  if ( m_DialogSimpleOneLineOrder_DataExchange.bOk ) {
+    // compose order and send it off
+    // need to know for which position the order is meant
+    ou::tf::OrderSide::enumOrderSide eOrderSide;
+//    ou::tf::OrderType::enumOrderType eOrderType;
+    pPosition_t pPosition( m_vPositions[ m_nRowRightClick ].GetPosition() );
+    bool bOk( true );
+    bOk = m_nRowRightClick < m_vPositions.size();
+    if ( bOk ) {
+      if ( "BUY" == m_DialogSimpleOneLineOrder_DataExchange.sBuySell ) {
+        eOrderSide = ou::tf::OrderSide::Buy;
+      }
+      else {
+        if ( "SELL" == m_DialogSimpleOneLineOrder_DataExchange.sBuySell ) {
+          eOrderSide = ou::tf::OrderSide::Sell;
+        }
+        else {
+          std::cout << "Unknown buy/sell type" << std::endl;
+          bOk = false;
+        }
+      }
+    }
+    if ( bOk ) {
+      bOk = ( 0 < m_DialogSimpleOneLineOrder_DataExchange.nQuantity );
+    }
+    if ( bOk ) {
+      if ( "MKT" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
+        pPosition->PlaceOrder( OrderType::Market, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity );
+      }
+      else {
+        if ( 0.0 >= m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 ) {
+          std::cout << "Price1 not greater than 0.0" << std::endl;
+          bOk = false;
+        }
+        else {
+          if ( "LMT" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
+              pPosition->PlaceOrder( OrderType::Limit, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
+          }
+          else {
+            if ( "STP" == m_DialogSimpleOneLineOrder_DataExchange.sLmtMktStp ) {
+              pPosition->PlaceOrder( OrderType::Stop, eOrderSide, m_DialogSimpleOneLineOrder_DataExchange.nQuantity, m_DialogSimpleOneLineOrder_DataExchange.dblPrice1 );
+            }
+            else {
+              std::cout << "Unknown order type" << std::endl;
+              bOk = false;
+            } // unknown order type
+          } // not limit
+        }
+      }
+    }
+  }
+}
+
 void PanelPortfolioPosition::AddPosition( pPosition_t pPosition ) {
-  // position should already be associated with portfolio, now add to gui
-  // need structure to relate row and pPosition_t 
-  // 1 link up data source for each field
-  // 2 link up data destination for each field
 
   m_gridPositions->AppendRows( 1 );
 
   int row( m_vPositions.size() );
 
   m_vPositions.push_back( structPosition( pPosition, m_gridPositions, row ) );
-//  structPosition& info( m_vPositions.back() );
-
-
-  //boost::fusion::for_each( info.vModelCells, PanelPortfolioPosition_detail::InitVectorModelCells( row, m_gridPositions ) );
-//  at_c<0>( info.vModelCells ).SetFunctionSetText( MakeDelegate( &at_c<0>( info.vModelCells ), &result_of::value_at_c<vModelCells_t,0>::type::HandleUpdate ) );
 
   UpdateGui();
 }
 
 void PanelPortfolioPosition::UpdateGui( void ) {
   for ( vPositions_t::iterator iter = m_vPositions.begin(); m_vPositions.end() != iter; ++iter ) {
+    // todo maybe use BeginBatch/EndBatch on grid?  Creates even more flicker.  Things are good for now.
     iter->UpdateGui();
   }
+
+  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
+  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_vPortfolioValues[ 0 ].SetValue( dblUnRealized );
+  m_vPortfolioValues[ 1 ].SetValue( dblRealized );
+  m_vPortfolioValues[ 2 ].SetValue( dblCommissionsPaid );
+  m_vPortfolioValues[ 3 ].SetValue( dblTotal );
+  if ( m_vPortfolioValues[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioValues[ 0 ].GetText() );
+  if ( m_vPortfolioValues[ 1 ].Changed() ) m_txtRealizedPL  ->SetValue( m_vPortfolioValues[ 1 ].GetText() );
+  if ( m_vPortfolioValues[ 2 ].Changed() ) m_txtCommission  ->SetValue( m_vPortfolioValues[ 2 ].GetText() );
+  if ( m_vPortfolioValues[ 3 ].Changed() ) m_txtTotal       ->SetValue( m_vPortfolioValues[ 3 ].GetText() );
+  /*
+  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
+  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
+  m_pPanelPortfolioStats->SetStats( 
+    boost::lexical_cast<std::string>( m_dblMinPL ),
+    boost::lexical_cast<std::string>( dblCurrent ),
+    boost::lexical_cast<std::string>( m_dblMaxPL )
+    );
+    */
 }
+
+
 
 void PanelPortfolioPosition::OnClose( wxCloseEvent& event ) {
 
-  // don't close if dialog is still open.
+  // todo:  don't close if dialog is still open.
 
   if ( 0 != m_menuGridLabelPositionPopUp ) {
     delete m_menuGridLabelPositionPopUp;

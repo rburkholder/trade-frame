@@ -37,6 +37,7 @@ public:
     wxString sDayGtc;
     wxString sLmtMktStp;
     double dblPrice1;
+    DataExchange( void ): nQuantity( 100 ), dblPrice1( 0.0 ), sBuySell( "BUY" ), sDayGtc( "DAY" ), sLmtMktStp( "LMT" ) {};
   };
 
   DialogSimpleOneLineOrder(void);
