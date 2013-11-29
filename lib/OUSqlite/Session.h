@@ -46,12 +46,14 @@ public:
   ou::Delegate<Session&> OnRegisterTables;  // get callbacks to register their tables
   ou::Delegate<Session&> OnRegisterRows;  // get callbacks to register their rows
   ou::Delegate<Session&> OnPopulate;  // get callbacks to populate their tables
+  ou::Delegate<Session&> OnLoad;  // Either populate (database initialization) or Load (subseqent startups)
   ou::Delegate<Session&> OnDenitializeManagers; //
   
   void InitializeManagers( void );  // called by inherited SessionBase.h
   void RegisterRowDefinitions( void );  // called by inherited SessionBase.h
   void RegisterTablesForCreation( void );  // called by inherited SessionBase.h
   void PopulateTables( void );  // called by inherited SessionBase.h
+  void LoadTables( void );      // called by inherited SessionBase.h
   void DenitializeManagers( void );  // called by inherieted SessionBase.h
 
 protected:

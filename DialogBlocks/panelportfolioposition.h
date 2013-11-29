@@ -39,7 +39,6 @@ class wxGrid;
 #define ID_PANELPORTFOLIOPOSITION 10090
 #define ID_LblIdPortfolio 10091
 #define ID_LblCurrency 10092
-#define ID_LblDescription 10093
 #define ID_LblUnrealizedPL 10101
 #define ID_TxtUnRealizedPL 10094
 #define ID_LblCommission 10099
@@ -48,11 +47,13 @@ class wxGrid;
 #define ID_TxtRealizedPL 10095
 #define ID_LblTotal 10100
 #define ID_TxtTotal 10097
+#define ID_LblDescription 10093
+#define ID_TxtDescription 10107
 #define ID_GridPositions 10098
 #define SYMBOL_PANELPORTFOLIOPOSITION_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELPORTFOLIOPOSITION_TITLE _("PanelPortfolioPosition")
 #define SYMBOL_PANELPORTFOLIOPOSITION_IDNAME ID_PANELPORTFOLIOPOSITION
-#define SYMBOL_PANELPORTFOLIOPOSITION_SIZE wxSize(400, 300)
+#define SYMBOL_PANELPORTFOLIOPOSITION_SIZE wxDefaultSize
 #define SYMBOL_PANELPORTFOLIOPOSITION_POSITION wxDefaultPosition
 ////@end control identifiers
 
@@ -104,12 +105,13 @@ public:
     wxBoxSizer* m_sizerPortfolio;
     wxStaticText* m_lblIdPortfolio;
     wxStaticText* m_lblCurrency;
-    wxStaticText* m_lblDescription;
     wxFlexGridSizer* m_gridPortfolioStats;
     wxTextCtrl* m_txtUnRealizedPL;
     wxTextCtrl* m_txtCommission;
     wxTextCtrl* m_txtRealizedPL;
     wxTextCtrl* m_txtTotal;
+    wxStaticText* m_lblDescription;
+    wxTextCtrl* m_txtDescription;
     wxGrid* m_gridPositions;
 ////@end PanelPortfolioPosition member variables
 };

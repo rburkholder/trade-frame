@@ -64,6 +64,10 @@ Portfolio::Portfolio( // portfolio record
 Portfolio::Portfolio( const TableRowDef& row ) 
   : m_row( row ), m_bCanUseDb( true )
 {
+  m_plCurrent.dblCommissionsPaid = m_row.dblCommissionsPaid;
+  m_plCurrent.dblRealized = m_row.dblRealizedPL;
+  m_plCurrent.Sum();
+  m_plMax = m_plMin = m_plCurrent;
 }
 
 Portfolio::~Portfolio(void) {
@@ -146,6 +150,7 @@ Portfolio::pPosition_t Portfolio::GetPosition( const std::string& sName ) {
   return iter->second;
 }
 
+// not used
 void Portfolio::ReCalc( void ) {
 
   m_plCurrent.Zero();
@@ -162,30 +167,36 @@ void Portfolio::ReCalc( void ) {
   m_row.dblRealizedPL = m_plCurrent.dblRealized;
 }
 
-void Portfolio::AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio ) {
+void Portfolio::AddSubPortfolio( pPortfolio_t& pPortfolio ) {
 
   if ( Master == pPortfolio->GetRow().ePortfolioType ) {
-    throw std::runtime_error( "Portfolio::AddSubPortfolio: sub-portfolio cannot be a master portfolio" );
+    //throw std::runtime_error( "Portfolio::AddSubPortfolio: sub-portfolio cannot be a master portfolio" );
+    std::cout << "Master portfolio found" << std::endl;
   }
-  if ( Master == m_row.ePortfolioType ) {
-  }
-  else { // this isn't a master portfolio
-    if ( CurrencySummary == pPortfolio->GetRow().ePortfolioType ) {
-      throw std::runtime_error( "Portfolio::AddSubPortfolio: alternate currency portfolio only attachable to master portfolio" );
+  else {
+    if ( Master == m_row.ePortfolioType ) {
+      // if this portfolio is master, no problem
     }
+    else { 
+      // if sub portfolio is currency summary portfolio, and this isn't master, then this needs to be master portfolio
+      if ( CurrencySummary == pPortfolio->GetRow().ePortfolioType ) {
+        throw std::runtime_error( "Portfolio::AddSubPortfolio: alternate currency portfolio only attachable to master portfolio" );
+      }
+    }
+
+    const idPortfolio_t& idSubPortfolio( pPortfolio->GetRow().idPortfolio );
+    mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idSubPortfolio );
+
+    if ( m_mapSubPortfolios.end() != iter ) {
+      throw std::runtime_error( "Portfolio::AddSubPortfolio portfolio already exists: " + idSubPortfolio );
+    }
+
+    m_mapSubPortfolios[ idSubPortfolio ] = pPortfolio;
+
+    pPortfolio->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
+    pPortfolio->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
+    pPortfolio->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
   }
-
-  mapPortfolios_iter_t iter = m_mapSubPortfolios.find( idPortfolio );
-
-  if ( m_mapSubPortfolios.end() != iter ) {
-    throw std::runtime_error( "Portfolio::AddSubPortfolio portfolio already exists: " + idPortfolio );
-  }
-
-  m_mapSubPortfolios[ idPortfolio ] = pPortfolio;
-
-  pPortfolio->OnCommission.Add( MakeDelegate( this, &Portfolio::HandleCommission ) );
-  pPortfolio->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
-  pPortfolio->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
 }
 
 void Portfolio::RemoveSubPortfolio( const idPortfolio_t& idPortfolio ) {
@@ -219,7 +230,7 @@ void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
 
   m_plCurrent.dblUnRealized += ( -position.get<1>() + position.get<2>() );
 
-  m_row.dblRealizedPL = m_plCurrent.dblRealized;
+//  m_row.db.dblUnRealized = m_plCurrent.dblUnRealized;
 
   m_plCurrent.Sum();
   if ( m_plCurrent > m_plMax ) m_plMax.dblUnRealized = m_plCurrent.dblUnRealized;
@@ -233,9 +244,9 @@ void Portfolio::HandleUnRealizedPL( const PositionDelta_delegate_t& position ) {
 
 void Portfolio::HandleExecution( const PositionDelta_delegate_t& position ) {
 
-  m_plCurrent.dblRealized += ( -position.get<1>() + position.get<2>() );
+  m_row.dblRealizedPL += ( -position.get<1>() + position.get<2>() );
 
-  m_row.dblRealizedPL = m_plCurrent.dblRealized;
+  m_plCurrent.dblRealized = m_row.dblRealizedPL;
 
   m_plCurrent.Sum();
   if ( m_plCurrent > m_plMax ) m_plMax.dblRealized = m_plCurrent.dblRealized;
@@ -248,7 +259,9 @@ void Portfolio::HandleExecution( const PositionDelta_delegate_t& position ) {
 
 void Portfolio::HandleCommission( const PositionDelta_delegate_t& position ) {
 
-  m_plCurrent.dblCommissionsPaid += ( -position.get<1>() + position.get<2>() );
+  m_row.dblCommissionsPaid += ( -position.get<1>() + position.get<2>() );
+
+  m_plCurrent.dblCommissionsPaid = m_row.dblCommissionsPaid;
 
   m_plCurrent.Sum();
   if ( m_plCurrent > m_plMax ) m_plMax.dblCommissionsPaid = m_plCurrent.dblCommissionsPaid;

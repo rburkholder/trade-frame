@@ -143,6 +143,7 @@ private:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANEL_PORTFOLIOPOSITION, 
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
+    ID_TxtDescription,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
     ID_MenuAddPosition, ID_MenuClosePosition, ID_MenuCancelOrders, ID_MenuAddOrder,
     ID_MenuAddPortfolio, ID_MenuClosePortfolio,
@@ -151,7 +152,7 @@ private:
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_POSITION_ARRAY_PARAM_COUNT 5
-#define GRID_POSITION_ARRAY_COL_COUNT 13
+#define GRID_POSITION_ARRAY_COL_COUNT 12
 #define GRID_POSITION_ARRAY \
   (GRID_POSITION_ARRAY_COL_COUNT,  \
     ( /* Col 0,                       1,            2,              3,  4,             */ \
@@ -161,7 +162,6 @@ private:
       (GRID_POSITION_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
       (GRID_POSITION_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
       (GRID_POSITION_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (GRID_POSITION_MktVlu   , "MktValue",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (GRID_POSITION_URPL     , "UnRealPL",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (GRID_POSITION_RPL      , "RealPL",     wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (GRID_POSITION_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
@@ -261,6 +261,17 @@ private:
       m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
       m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
       BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_CELL_ALIGNMENT,m_row)
+
+      // initialize row of values.
+      const Position::TableRowDef& row( m_pPosition->GetRow() );
+      boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
+      boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
+      boost::fusion::at_c<GRID_POSITION_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
+      boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
+      boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( row.dblConstructedValue );
+      boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
+      boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
+      boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
     }
     void HandleOnPositionChanged( const Position& position ) {
       boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
@@ -303,6 +314,7 @@ private:
     wxTextCtrl* m_txtCommission;
     wxTextCtrl* m_txtRealizedPL;
     wxTextCtrl* m_txtTotal;
+    wxTextCtrl* m_txtDescription;
     wxGrid* m_gridPositions;
 
     wxMenu* m_menuGridLabelPositionPopUp;

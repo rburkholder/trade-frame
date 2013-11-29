@@ -87,7 +87,6 @@ public:
       ou::db::Field( a, "ordersideactive", eOrderSideActive );
       ou::db::Field( a, "quantityactive", nPositionActive );
       ou::db::Field( a, "constructedvalue", dblConstructedValue );
-      ou::db::Field( a, "marketvalue", dblMarketValue );
       ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commission", dblCommissionPaid );
@@ -110,7 +109,6 @@ public:
     boost::uint32_t nPositionActive;
   // following value markers exclude commission
     double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
-    double dblMarketValue;  // based upon market quotes
   // following value markers exclude commission
     double dblUnRealizedPL;  // based upon market quotes
     double dblRealizedPL;  // based upon position trades
@@ -120,21 +118,21 @@ public:
     // account and instrument objects need to be manually asssigned in a second step
     TableRowDefNoKey( void ) 
       : eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
-      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), 
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
     TableRowDefNoKey( const TableRowDefNoKey& row ) 
       : idPortfolio( row.idPortfolio ), sName( row.sName ), sNotes( row.sNotes ), 
       idExecutionAccount( row.idExecutionAccount ), idDataAccount( row.idDataAccount ), idInstrument( row.idInstrument ),
       sAlgorithm( row.sAlgorithm ), eOrderSidePending( row.eOrderSidePending ), nPositionPending( row.nPositionPending ), 
       eOrderSideActive( row.eOrderSideActive ), nPositionActive( row.nPositionActive ), 
-      dblConstructedValue( row.dblConstructedValue ), dblMarketValue( row.dblMarketValue ), 
+      dblConstructedValue( row.dblConstructedValue ), 
       dblUnRealizedPL( row.dblUnRealizedPL ), dblRealizedPL( row.dblRealizedPL ), dblCommissionPaid( row.dblCommissionPaid ) {};
     TableRowDefNoKey( const idPortfolio_t& idPortfolio_, const std::string& sName_, const idInstrument_t& idInstrument_,
       const idAccount_t& idExecutionAccount_, const idAccount_t& idDataAccount_, const std::string& sAlgorithm_ ) 
       : idPortfolio( idPortfolio_ ), sName( sName_ ), idInstrument( idInstrument_ ), sAlgorithm( sAlgorithm_ ),
       idExecutionAccount( idExecutionAccount_ ), idDataAccount( idDataAccount_ ),
       eOrderSidePending( OrderSide::Unknown ), eOrderSideActive( OrderSide::Unknown ), 
-      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), dblMarketValue( 0.0 ),
+      nPositionPending( 0 ), nPositionActive( 0 ), dblConstructedValue( 0.0 ), 
       dblUnRealizedPL( 0.0 ), dblRealizedPL( 0.0 ), dblCommissionPaid( 0.0 ) {};
 
   };
@@ -223,8 +221,8 @@ public:
   ou::Delegate<const Position&> OnUpdateExecutionForPortfolioManager;
   ou::Delegate<const Position&> OnUpdateCommissionForPortfolioManager;
 
-  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;  // < - use by portfolio
-  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - use by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnExecution;   // < - used by portfolio
+  ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - used by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;/* ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL ) */  // < - use by portfolio
 
 //  void EmitStatus( std::stringstream& ssStatus ) const;

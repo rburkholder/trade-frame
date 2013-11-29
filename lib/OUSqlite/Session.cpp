@@ -41,6 +41,10 @@ void Session::PopulateTables( void ) {
   OnPopulate( *this );
 }
 
+void Session::LoadTables( void ) {
+  OnLoad( *this );
+}
+
 void Session::DenitializeManagers( void ) {
   OnDenitializeManagers( *this );
 }

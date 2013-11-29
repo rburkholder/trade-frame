@@ -145,7 +145,7 @@ public:
   pPosition_t GetPosition( const std::string& sName );
 
   // are std::map references only in order to perform in-memory recalcs
-  void AddSubPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
+  void AddSubPortfolio( pPortfolio_t& pPortfolio );
   void RemoveSubPortfolio( const idPortfolio_t& idPortfolio );
 //  void SetOwnerPortfolio( const idPortfolio_t& idPortfolio, pPortfolio_t& pPortfolio );
 

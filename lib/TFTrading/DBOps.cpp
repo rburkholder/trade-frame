@@ -26,18 +26,24 @@ namespace tf { // TradeFrame
 
 DBOps::DBOps(void): ou::db::Session() {
   OnInitializeManagers.Add( &ou::tf::HandleInitializeManagers );
-  OnPopulate.Add( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
   OnDenitializeManagers.Add( &ou::tf::HandleDenitializeManagers );
+  OnPopulate.Add( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
+  OnLoad.Add( MakeDelegate( this, &DBOps::HandleLoadTables ) );
 }
 
 DBOps::~DBOps(void) {
-  this->OnPopulate.Remove( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
+  OnLoad.Remove( MakeDelegate( this, &DBOps::HandleLoadTables ) );
+  OnPopulate.Remove( MakeDelegate( this, &DBOps::HandlePopulateTables ) );
   OnInitializeManagers.Remove( &ou::tf::HandleInitializeManagers );
   OnDenitializeManagers.Remove( &ou::tf::HandleDenitializeManagers );
 }
 
 void DBOps::HandlePopulateTables( ou::db::Session& session ) {
   if ( 0 != OnPopulateDatabaseHandler ) OnPopulateDatabaseHandler();
+}
+
+void DBOps::HandleLoadTables( ou::db::Session& session ) {
+  if ( 0 != OnLoadDatabaseHandler ) OnLoadDatabaseHandler();
 }
 
 struct UnderlyingQueryParameter {  // can this be simplified like PorfolioQuery?

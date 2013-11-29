@@ -81,6 +81,8 @@ private:
   bool m_bExecConnected;
   bool m_bStarted;
 
+  std::string m_sDbName;
+
   wxTimer m_timerGuiRefresh;
 
   double m_dblMaxPL;
@@ -139,6 +141,7 @@ private:
   void HandleSaveButton( void );
 
   void HandlePopulateDatabase( void );
+  void HandleLoadDatabase( void );
 
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );

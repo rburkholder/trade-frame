@@ -39,6 +39,11 @@ public:
     OnPopulateDatabaseHandler = function;
   }
 
+  typedef FastDelegate0<> OnLoadDatabaseHandler_t;
+  void SetOnLoadDatabaseHandler( OnLoadDatabaseHandler_t function ) {
+    OnLoadDatabaseHandler = function;
+  }
+
   typedef FastDelegate1<ou::tf::InstrumentManager::pInstrument_t> OnNewInstrumentHandler_t;
   void SetOnNewInstrumentHandler( OnNewInstrumentHandler_t function ) {
     OnNewInstrument = function;
@@ -48,9 +53,11 @@ protected:
 private:
 
   OnPopulateDatabaseHandler_t OnPopulateDatabaseHandler;
+  OnLoadDatabaseHandler_t OnLoadDatabaseHandler;
   OnNewInstrumentHandler_t OnNewInstrument;
 
   void HandlePopulateTables( ou::db::Session& session );
+  void HandleLoadTables( ou::db::Session& session );
 };
 
 } // namespace tf

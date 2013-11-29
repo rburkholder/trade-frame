@@ -33,19 +33,15 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
   if ( m_mapPortfolios.end() != iter ) {
     throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
-  else {
-    pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, idOwner, ePortfolioType, eCurrency, sDescription ) );
-    m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
-    if ( 0 != m_pSession ) {
-      ou::db::QueryFields<Portfolio::TableRowDef>::pQueryFields_t pQuery
-        = m_pSession->Insert<Portfolio::TableRowDef>( const_cast<Portfolio::TableRowDef&>( pPortfolio->GetRow() ) );
-    }
-    pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+
+  pPortfolio.reset( new Portfolio( idPortfolio, idAccountOwner, idOwner, ePortfolioType, eCurrency, sDescription ) );
+  m_mapPortfolios.insert( mapPortfolio_pair_t( idPortfolio, pPortfolio ) );
+  if ( 0 != m_pSession ) {
+    ou::db::QueryFields<Portfolio::TableRowDef>::pQueryFields_t pQuery
+      = m_pSession->Insert<Portfolio::TableRowDef>( const_cast<Portfolio::TableRowDef&>( pPortfolio->GetRow() ) );
   }
 
-  //OnPortfolioAdded( idPortfolio );
-  OnPortfolioAdded( pPortfolio );
+  PortfolioCommon( pPortfolio );
 
   return pPortfolio;
 }
@@ -61,7 +57,6 @@ namespace PortfolioManagerQueries {
       ou::db::Field( a, "ordersideactive", eOrderSideActive );
       ou::db::Field( a, "quantityactive", nPositionActive );
       ou::db::Field( a, "constructedvalue", dblConstructedValue );
-      ou::db::Field( a, "marketvalue", dblMarketValue );
       ou::db::Field( a, "unrealizedpl", dblUnRealizedPL );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "positionid", idPosition );
@@ -72,19 +67,18 @@ namespace PortfolioManagerQueries {
     OrderSide::enumOrderSide eOrderSideActive;
     boost::uint32_t nPositionActive;
     double dblConstructedValue;
-    double dblMarketValue; 
     double dblUnRealizedPL;
     double dblRealizedPL; 
     UpdatePositionData( 
       const ou::tf::keytypes::idPosition_t idPosition_, 
       OrderSide::enumOrderSide eOrderSidePending_, boost::uint32_t nPositionPending_, 
       OrderSide::enumOrderSide eOrderSideActive_,  boost::uint32_t nPositionActive_, 
-      double dblConstructedValue_, double dblMarketValue_,
+      double dblConstructedValue_, 
       double dblUnRealizedPL_, double dblRealizedPL_ ) 
       : idPosition( idPosition_ ), 
         eOrderSidePending( eOrderSidePending_ ), nPositionPending( nPositionPending_ ),
         eOrderSideActive( eOrderSideActive_ ), nPositionActive( nPositionActive_ ), 
-        dblConstructedValue( dblConstructedValue_ ), dblMarketValue( dblMarketValue_ ),
+        dblConstructedValue( dblConstructedValue_ ), 
         dblUnRealizedPL( dblUnRealizedPL_ ), dblRealizedPL( dblRealizedPL_ ) {};
   };
 }
@@ -93,10 +87,10 @@ void PortfolioManager::HandlePositionOnExecution( const Position& position ) {
   if ( 0 != m_pSession ) {
     const Position::TableRowDef& row( position.GetRow() );
     PortfolioManagerQueries::UpdatePositionData update( row.idPosition, row.eOrderSidePending, row.nPositionPending,
-      row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblMarketValue, row.dblUnRealizedPL, row.dblRealizedPL );
+      row.eOrderSideActive, row.nPositionActive, row.dblConstructedValue, row.dblUnRealizedPL, row.dblRealizedPL );
     ou::db::QueryFields<PortfolioManagerQueries::UpdatePositionData>::pQueryFields_t pQuery
       = m_pSession->SQL<PortfolioManagerQueries::UpdatePositionData>( 
-        "update positions set ordersidepending=?, quantitypending=?, ordersideactive=?, quantityactive=?, constructedvalue=?, marketvalue=?, unrealizedpl=?, realizedpl=?", update ).Where( "positionid=?" );
+        "update positions set ordersidepending=?, quantitypending=?, ordersideactive=?, quantityactive=?, constructedvalue=?, unrealizedpl=?, realizedpl=?", update ).Where( "positionid=?" );
   }
 }
 
@@ -216,14 +210,16 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
       }
 
 //      if ( !rowPortfolio.idOwner.empty() ) {
-        UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
+//        UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
 //      }
 
-      pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-      pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+//      pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+//      pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
 
       //OnPortfolioLoaded( idPortfolio );
-      OnPortfolioLoaded( pPortfolio );
+//      OnPortfolioLoaded( pPortfolio );
+
+      PortfolioCommon( pPortfolio );
 
       LoadPositions( idPortfolio, response.first->second.mapPosition );
 
@@ -280,10 +276,12 @@ void PortfolioManager::UpdateReportingPortfolio( idPortfolio_t idOwner, idPortfo
     iter = m_mapReportingPortfolios.insert( m_mapReportingPortfolios.begin(), 
       mapReportingPortfolios_pair_t( idOwner, setPortfolioId ) );
   }
+  // add idReporting to idOwner as a reporting portfolio.
   iter->second.insert( iter->second.begin(), idReporting );
 }
 
 void PortfolioManager::LoadActivePortfolios( void ) {
+  // todo:  work with sub-portfolios, and get them attached properly
 
   PortfolioManagerQueries::ActivePortfolios parameter( true );
   ou::db::QueryFields<PortfolioManagerQueries::ActivePortfolios>::pQueryFields_t pQuery
@@ -307,20 +305,37 @@ void PortfolioManager::LoadActivePortfolios( void ) {
       // may also need to implement events where records are updated (not too difficult) and deleted (more involved)
       // this issue results when creating the database, and preloading db with records, and then reloading records
       // or high level routines don't call this during the same run as when the db has been created
+      // 2013/11/28 all active portfolios are kept in memory.  database is persistent repository across 
+      //  restarts.  In memory structures neeed to be kept in sync with database structures.
 //      throw std::runtime_error( "LoadActivePortfolios:  couldn't insert portfolio into map" );
     }
 
-    UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
+//    UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
+//    if ( "" != rowPortfolio.idOwner ) {
+//      GetPortfolio( rowPortfolio.idOwner )->AddSubPortfolio( pPortfolio );
+//    }
 
-    pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-    pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
-
-    //OnPortfolioLoaded( rowPortfolio.idPortfolio );
-    OnPortfolioLoaded( pPortfolio );
+    PortfolioCommon( pPortfolio );
 
     LoadPositions( rowPortfolio.idPortfolio, response.first->second.mapPosition );
 
   }
+}
+
+void PortfolioManager::PortfolioCommon( pPortfolio_t& pPortfolio ) {
+
+  const Portfolio::TableRowDef& row( pPortfolio->GetRow() );
+  UpdateReportingPortfolio( row.idOwner, row.idPortfolio );
+  if ( "" != row.idOwner ) {
+    GetPortfolio( row.idOwner )->AddSubPortfolio( pPortfolio );
+  }
+
+  pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
+  pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
+
+  //OnPortfolioLoaded( rowPortfolio.idPortfolio );
+  OnPortfolioLoaded( pPortfolio );
+
 }
 
 void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosition_t& mapPosition ) {
@@ -342,6 +357,9 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
     }
     OnPositionNeedsDetails( pPosition );
     mapPosition.insert( mapPosition_pair_t( rowPosition.sName, pPosition ) );
+
+    this->GetPortfolio( idPortfolio )->AddPosition( pPosition->GetInstrument()->GetInstrumentName(), pPosition );
+
     pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
     pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
     //OnPositionLoaded( pPosition->GetRow().idPosition );
@@ -505,6 +523,11 @@ void PortfolioManager::HandleRegisterRows( ou::db::Session& session ) {
 }
 
 void PortfolioManager::HandlePopulateTables( ou::db::Session& session ) {
+  // todo:  this should come before client stuff
+}
+
+void PortfolioManager::HandleLoadTables( ou::db::Session& session ) {
+  // todo:  this should come before client stuff
 }
 
 // this stuff could probably be rolled into Session with a template
@@ -513,12 +536,14 @@ void PortfolioManager::AttachToSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Add( MakeDelegate( this, &PortfolioManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Add( MakeDelegate( this, &PortfolioManager::HandleRegisterRows ) );
   pSession->OnPopulate.Add( MakeDelegate( this, &PortfolioManager::HandlePopulateTables ) );
+  pSession->OnLoad.Add( MakeDelegate( this, &PortfolioManager::HandleLoadTables ) );
 }
 
 void PortfolioManager::DetachFromSession( ou::db::Session* pSession ) {
   pSession->OnRegisterTables.Remove( MakeDelegate( this, &PortfolioManager::HandleRegisterTables ) );
   pSession->OnRegisterRows.Remove( MakeDelegate( this, &PortfolioManager::HandleRegisterRows ) );
   pSession->OnPopulate.Remove( MakeDelegate( this, &PortfolioManager::HandlePopulateTables ) );
+  pSession->OnLoad.Remove( MakeDelegate( this, &PortfolioManager::HandleLoadTables ) );
   ManagerBase::DetachFromSession( pSession );
 }
 

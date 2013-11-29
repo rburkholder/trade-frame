@@ -74,6 +74,7 @@ void SessionBase<S,T>::Open( const std::string& sDbFileName, enumOpenFlags flags
       dynamic_cast<S*>( this )->ImplOpen( sDbFileName, flags );
       static_cast<T*>( this )->InitializeManagers();
       static_cast<T*>( this )->RegisterRowDefinitions();
+      static_cast<T*>( this )->LoadTables();
     }
     else {
       // create and build new database

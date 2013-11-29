@@ -64,7 +64,7 @@ void PanelPortfolioPosition::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
   m_lblIdPortfolio->SetLabelText( pPortfolio->GetRow().idPortfolio );
   m_lblCurrency->SetLabelText( pPortfolio->GetRow().sCurrency );
-  m_lblDescription->SetLabelText( pPortfolio->GetRow().sDescription );
+  m_txtDescription->SetValue( pPortfolio->GetRow().sDescription );
   pPortfolio->OnUnRealizedPLUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnUnRealizedPLUpdate ) );
   pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnExecutionUpdate ) );
   pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PanelPortfolioPosition::HandleOnCommissionUpdate ) );
@@ -110,64 +110,69 @@ void PanelPortfolioPosition::CreateControls() {
     itemPanel1->SetSizer(m_sizerMain);
 
     m_sizerPortfolio = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(m_sizerPortfolio, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    m_sizerMain->Add(m_sizerPortfolio, 0, wxALIGN_LEFT|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxVERTICAL);
-    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxALL, 5);
+    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer4->Add(itemBoxSizer5, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
 
-    m_lblIdPortfolio = new wxStaticText( itemPanel1, ID_LblIdPortfolio, _("portfolio"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_lblIdPortfolio = new wxStaticText( itemPanel1, ID_LblIdPortfolio, _("portfolio:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer5->Add(m_lblIdPortfolio, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_lblCurrency = new wxStaticText( itemPanel1, ID_LblCurrency, _("currency"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer5->Add(m_lblCurrency, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-    m_lblDescription = new wxStaticText( itemPanel1, ID_LblDescription, _("description"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
-    itemBoxSizer4->Add(m_lblDescription, 1, wxALIGN_LEFT|wxALL, 5);
-
     m_gridPortfolioStats = new wxFlexGridSizer(2, 4, 0, 0);
-    m_sizerPortfolio->Add(m_gridPortfolioStats, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_sizerPortfolio->Add(m_gridPortfolioStats, 1, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText10 = new wxStaticText( itemPanel1, ID_LblUnrealizedPL, _("UnRealized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_gridPortfolioStats->Add(itemStaticText10, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText9 = new wxStaticText( itemPanel1, ID_LblUnrealizedPL, _("UnRealized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_gridPortfolioStats->Add(itemStaticText9, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtUnRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtUnRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtUnRealizedPL, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText12 = new wxStaticText( itemPanel1, ID_LblCommission, _("Commission:"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_gridPortfolioStats->Add(itemStaticText12, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel1, ID_LblCommission, _("Commission:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_gridPortfolioStats->Add(itemStaticText11, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtCommission = new wxTextCtrl( itemPanel1, ID_TxtCommission, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtCommission, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText14 = new wxStaticText( itemPanel1, ID_LblRealizedPL, _("Realized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_gridPortfolioStats->Add(itemStaticText14, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText13 = new wxStaticText( itemPanel1, ID_LblRealizedPL, _("Realized PL:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_gridPortfolioStats->Add(itemStaticText13, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtRealizedPL = new wxTextCtrl( itemPanel1, ID_TxtRealizedPL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtRealizedPL, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxStaticText* itemStaticText16 = new wxStaticText( itemPanel1, ID_LblTotal, _("Total:"), wxDefaultPosition, wxDefaultSize, 0 );
-    m_gridPortfolioStats->Add(itemStaticText16, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    wxStaticText* itemStaticText15 = new wxStaticText( itemPanel1, ID_LblTotal, _("Total:"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_gridPortfolioStats->Add(itemStaticText15, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_txtTotal = new wxTextCtrl( itemPanel1, ID_TxtTotal, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
     m_gridPortfolioStats->Add(m_txtTotal, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_gridPortfolioStats->AddGrowableCol(1);
 
-    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
+    wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
+    m_sizerMain->Add(itemBoxSizer17, 0, wxGROW|wxALL, 5);
+
+    m_lblDescription = new wxStaticText( itemPanel1, ID_LblDescription, _("Desc:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
+    itemBoxSizer17->Add(m_lblDescription, 0, wxALIGN_TOP|wxALL, 2);
+
+    m_txtDescription = new wxTextCtrl( itemPanel1, ID_TxtDescription, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+    itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxALL, 1);
+
+    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
     m_gridPositions->SetDefaultColSize(75);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
 
     m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxALIGN_LEFT|wxALL|wxEXPAND, 2);
 
     int ix( 0 );
     BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_POSITION_ARRAY ), GRID_POSITION_EMIT_SetColSettings, ix )
-
-    m_sizerMain->Add(m_gridPositions, 1, wxALIGN_LEFT|wxALL, 5);
 
   Bind( wxEVT_CLOSE_WINDOW, &PanelPortfolioPosition::OnClose, this );  // start close of windows and controls
 
@@ -339,18 +344,19 @@ void PanelPortfolioPosition::UpdateGui( void ) {
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+
   m_vPortfolioValues[ 0 ].SetValue( dblUnRealized );
-  m_vPortfolioValues[ 1 ].SetValue( dblRealized );
-  m_vPortfolioValues[ 2 ].SetValue( dblCommissionsPaid );
-  m_vPortfolioValues[ 3 ].SetValue( dblTotal );
   if ( m_vPortfolioValues[ 0 ].Changed() ) m_txtUnRealizedPL->SetValue( m_vPortfolioValues[ 0 ].GetText() );
+
+  m_vPortfolioValues[ 1 ].SetValue( dblRealized );
   if ( m_vPortfolioValues[ 1 ].Changed() ) m_txtRealizedPL  ->SetValue( m_vPortfolioValues[ 1 ].GetText() );
+
+  m_vPortfolioValues[ 2 ].SetValue( dblCommissionsPaid );
   if ( m_vPortfolioValues[ 2 ].Changed() ) m_txtCommission  ->SetValue( m_vPortfolioValues[ 2 ].GetText() );
+
+  m_vPortfolioValues[ 3 ].SetValue( dblTotal );
   if ( m_vPortfolioValues[ 3 ].Changed() ) m_txtTotal       ->SetValue( m_vPortfolioValues[ 3 ].GetText() );
   /*
-  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
-  m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
-  m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
   m_pPanelPortfolioStats->SetStats( 
     boost::lexical_cast<std::string>( m_dblMinPL ),
     boost::lexical_cast<std::string>( dblCurrent ),

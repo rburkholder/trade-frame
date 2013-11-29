@@ -143,15 +143,16 @@ void Position::HandleQuote( quote_t quote ) {
   double dblPreviousUnRealizedPL = m_row.dblUnRealizedPL;
 
   bool bProcessed(false);
+  double dblMarketValue;
   switch ( m_row.eOrderSideActive ) {
     case OrderSide::Buy:
-      m_row.dblMarketValue = m_row.nPositionActive * quote.Bid() * m_dblMultiplier;
-      m_row.dblUnRealizedPL = m_row.dblMarketValue - m_row.dblConstructedValue;
+      dblMarketValue = m_row.nPositionActive * quote.Bid() * m_dblMultiplier;
+      m_row.dblUnRealizedPL = dblMarketValue - m_row.dblConstructedValue;
       bProcessed = true;
       break;
     case OrderSide::Sell:
-      m_row.dblMarketValue = - ( m_row.nPositionActive * quote.Ask() ) * m_dblMultiplier;
-      m_row.dblUnRealizedPL = m_row.dblMarketValue - m_row.dblConstructedValue;
+      dblMarketValue = - ( m_row.nPositionActive * quote.Ask() ) * m_dblMultiplier;
+      m_row.dblUnRealizedPL = dblMarketValue - m_row.dblConstructedValue;
       bProcessed = true;
       break;
   }
@@ -386,19 +387,6 @@ void Position::UpdateRowValues( double price, boost::uint32_t quan, OrderSide::e
 
 }
 
-void Position::HandleCommission( const Order& order ) {
-  //std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
-
-  double dblNewCommissionPaid = order.GetIncrementalCommission();
-  //std::cout << "," << dblNewCommissionPaid << std::endl;
-
-  if ( 0 != dblNewCommissionPaid ) {
-    m_row.dblCommissionPaid += dblNewCommissionPaid;
-    OnUpdateCommissionForPortfolioManager( *this );
-    OnCommission( PositionDelta_delegate_t( *this, 0, dblNewCommissionPaid ) );
-  }
-}
-
 // before entry to this method, sanity check:  side on execution is same as side on order
 void Position::HandleExecution( const std::pair<const Order&, const Execution&>& status ) {
 
@@ -411,6 +399,7 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
   Order::idOrder_t orderId = order.GetOrderId();
 
   double dblOldRealizedPL = m_row.dblRealizedPL;
+  double dblOldUnRealizedPL = m_row.dblUnRealizedPL;
 
   //std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
 
@@ -445,15 +434,28 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
     throw std::runtime_error( "Position::HandleExecution doesn't have an Open Order" );
   }
 
-  OnExecutionRaw( execution_pair_t( *this, exec ) );
+  OnUnRealizedPL( PositionDelta_delegate_t( *this, dblOldUnRealizedPL, m_row.dblUnRealizedPL ) );  // used by portfolio updates
 
-  if ( dblOldRealizedPL != m_row.dblRealizedPL ) {
-    OnUpdateExecutionForPortfolioManager( *this );
-    OnExecution( PositionDelta_delegate_t( *this, dblOldRealizedPL, m_row.dblRealizedPL ) );
-  }
+  OnExecutionRaw( execution_pair_t( *this, exec ) );
+  OnUpdateExecutionForPortfolioManager( *this );
+
+  OnExecution( PositionDelta_delegate_t( *this, dblOldRealizedPL, m_row.dblRealizedPL ) );  // used by portfolio updates
 
   OnPositionChanged( *this );
   
+}
+
+void Position::HandleCommission( const Order& order ) {
+  //std::cout << "Position Comm: " << m_row.dblCommissionPaid << "," << order.GetCommission();
+
+  double dblNewCommissionPaid = order.GetIncrementalCommission();
+  //std::cout << "," << dblNewCommissionPaid << std::endl;
+
+  if ( 0 != dblNewCommissionPaid ) {
+    m_row.dblCommissionPaid += dblNewCommissionPaid;
+    OnUpdateCommissionForPortfolioManager( *this );
+    OnCommission( PositionDelta_delegate_t( *this, 0, dblNewCommissionPaid ) );
+  }
 }
 
 //void Position::EmitStatus( std::stringstream& ssStatus ) const {

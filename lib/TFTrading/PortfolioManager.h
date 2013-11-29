@@ -146,9 +146,12 @@ private:
 
   OnPositionNeedsDetailsHandler OnPositionNeedsDetails;
 
+  void PortfolioCommon( pPortfolio_t& );
+
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );
   void HandlePopulateTables( ou::db::Session& session );
+  void HandleLoadTables( ou::db::Session& sesion );
 
   void HandlePositionOnExecution( const Position& );
   void HandlePositionOnCommission( const Position& );

@@ -82,17 +82,16 @@ bool AppStickShift::OnInit() {
   m_db.OnRegisterTables.Add( MakeDelegate( this, &AppStickShift::HandleRegisterTables ) );
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppStickShift::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppStickShift::HandlePopulateDatabase ) );
+  m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppStickShift::HandleLoadDatabase ) );
 
   // maybe set scenario with database and with in memory data structure
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
-  m_idPortfolioMaster = "StickShift";  // keeps name constant over multiple days
+  m_idPortfolioMaster = "master";  // keeps name constant over multiple days
 
-  std::string sDbName( "StickShift2.db" );
-  if ( boost::filesystem::exists( sDbName ) ) {
+  m_sDbName = "StickShift2.db";
+  if ( boost::filesystem::exists( m_sDbName ) ) {
 //    boost::filesystem::remove( sDbName );
   }
-
-  m_db.Open( sDbName );
 
   m_bData1Connected = false;
   m_bExecConnected = false;
@@ -152,8 +151,9 @@ void AppStickShift::Start( void ) {
     ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
     pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
     pm.OnPositionLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePositionLoad ) );
-    pm.LoadActivePortfolios();
-
+    m_db.Open( m_sDbName );
+    m_pFPPOE->Update();
+    m_pFPPOE->Refresh();
   }
 }
 
@@ -197,7 +197,7 @@ void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
 void AppStickShift::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   //ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   m_pLastPPP = new ou::tf::PanelPortfolioPosition( m_scrollPM );
-  m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
+  m_sizerScrollPM->Add( m_pLastPPP, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND, 0);
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   m_pLastPPP->SetPortfolio( pPortfolio );
   m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
@@ -269,7 +269,10 @@ void AppStickShift::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
     m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
     pInstrument->GetInstrumentName(),
     "",
-    "ib01", "iq01", this->m_pExecutionProvider, this->m_pData1Provider,
+    this->m_pExecutionProvider->GetName(),
+    this->m_pData1Provider->GetName(),
+    //"ib01", "iq01", 
+    this->m_pExecutionProvider, this->m_pData1Provider,
     pInstrument ) 
     );
   if ( 0 != m_EquityPositionCallbackInfo.function ) {
@@ -317,6 +320,11 @@ void AppStickShift::HandlePopulateDatabase( void ) {
 //  ou::tf::PortfolioManager::Instance().ConstructPortfolio(
 //    ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "aoRay", m_idPortfolio, ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::GBP ], "Currency Monitor" );
     
+}
+
+void AppStickShift::HandleLoadDatabase( void ) {
+    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+    pm.LoadActivePortfolios();
 }
 
 void AppStickShift::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order ) {
