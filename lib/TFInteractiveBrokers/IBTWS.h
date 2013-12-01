@@ -221,6 +221,8 @@ private:
   mapActiveRequestId_t m_mapActiveRequestId;
   boost::mutex m_mutexContractRequest;
 
+  void DisconnectCommon( bool bSignalEnd );
+
 };
 
 } // namespace tf

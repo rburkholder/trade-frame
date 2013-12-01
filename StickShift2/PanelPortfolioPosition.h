@@ -50,6 +50,7 @@ using namespace fastdelegate;
 
 #include <TFVuTrading/DialogInstrumentSelect.h>
 #include <TFVuTrading/DialogSimpleOneLineOrder.h>
+#include <TFVuTrading/DialogNewPortfolio.h>
 #include <TFVuTrading/ModelCell.h>
 
 namespace ou { // One Unified
@@ -107,6 +108,7 @@ public:
 
   typedef FastDelegate1<pPosition_t,void> DelegateAddPosition_t;
   typedef FastDelegate3<const std::string&,pPortfolio_t,DelegateAddPosition_t,void> DelegateConstructPosition_t;
+  typedef FastDelegate3<PanelPortfolioPosition&,const std::string&, const std::string&> DelegateConstructPortfolio_t;
 
   PanelPortfolioPosition(void);
   PanelPortfolioPosition( 
@@ -123,8 +125,11 @@ public:
     long style = SYMBOL_PANEL_PORTFOLIOPOSITION_STYLE );
 
   void SetPortfolio( pPortfolio_t pPortfolio );
+  pPortfolio_t& GetPortfolio( void ) { return m_pPortfolio; }
+
   void SetNameLookup( DelegateNameLookup_t function ) { m_DialogInstrumentSelect_DataExchange.lookup = function; };
   void SetConstructPosition( DelegateConstructPosition_t function ) { m_delegateConstructPosition = function; };
+  void SetConstructPortfolio( DelegateConstructPortfolio_t function ) { m_delegateConstructPortfolio = function; };
 
   void AddPosition( pPosition_t pPosition ); // constructed from supplied symbol name
 
@@ -322,6 +327,7 @@ private:
 
   pPortfolio_t m_pPortfolio;
   DelegateConstructPosition_t m_delegateConstructPosition;  // used to construct the Position
+  DelegateConstructPortfolio_t m_delegateConstructPortfolio;  // used to construct the Portfolio
 
   //typedef boost::fusion::vector4<ModelCellDouble,ModelCellDouble,ModelCellDouble,ModelCellDouble> vPortfolioValues_t;
   typedef std::vector<ModelCellDouble> vPortfolioValues_t;
@@ -332,6 +338,9 @@ private:
 
   ou::tf::DialogSimpleOneLineOrder::DataExchange m_DialogSimpleOneLineOrder_DataExchange;
   ou::tf::DialogSimpleOneLineOrder* m_pdialogSimpleOneLineOrder;
+
+  ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
+  ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
 
   void OnClose( wxCloseEvent& event );
 
@@ -346,6 +355,7 @@ private:
 
   void OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* );
   void OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* );
+  void OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* );
 
   void HandleOnUnRealizedPLUpdate( const Portfolio& );
   void HandleOnExecutionUpdate( const Portfolio& );

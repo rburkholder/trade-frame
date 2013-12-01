@@ -83,33 +83,44 @@ void IBTWS::Connect() {
     OnConnecting( 0 );
     pTWS = new EPosixClientSocket( this );
     bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
-    assert( bReturn );
-    m_bConnected = true;
-    m_thrdIBMessages = boost::thread( boost::bind( &IBTWS::ProcessMessages, this ) );
-    pTWS->reqCurrentTime();
-    pTWS->reqNewsBulletins( true );
-    pTWS->reqOpenOrders();
-    //ExecutionFilter filter;
-    //pTWS->reqExecutions( filter );
-    pTWS->reqAccountUpdates( true, "" );
-    OnConnected( 0 );
+    if ( bReturn ) {
+      m_bConnected = true;
+      m_thrdIBMessages = boost::thread( boost::bind( &IBTWS::ProcessMessages, this ) );
+      pTWS->reqCurrentTime();
+      pTWS->reqNewsBulletins( true );
+      pTWS->reqOpenOrders();
+      //ExecutionFilter filter;
+      //pTWS->reqExecutions( filter );
+      pTWS->reqAccountUpdates( true, "" );
+      OnConnected( 0 );
+    }
+    else {
+      // need to integrate common stuff from Disconnect, most everything but the thread bit
+      DisconnectCommon( false );
+    }
   }
 }
 
 void IBTWS::Disconnect() {
   // check to see if there are any watches happening, and get them disconnected
   if ( NULL != pTWS ) {
+    DisconnectCommon( true );
+  }
+}
+
+void IBTWS::DisconnectCommon( bool bSignalEnd ){
     OnDisconnecting( 0 );
     m_bConnected = false;
-    pTWS->eDisconnect();
-    m_thrdIBMessages.join();  // wait for message processing to exit
+    if ( bSignalEnd ) {
+      pTWS->eDisconnect();
+      m_thrdIBMessages.join();  // wait for message processing to exit
+    }
     delete pTWS;
     pTWS = NULL;
     OnDisconnected( 0 );
     m_ss.str("");
     m_ss << "IB Disconnected " << std::endl;
 //    OutputDebugString( m_ss.str().c_str() );
-  }
 }
 
 // this is executed in non-main thread, and the events below will be called from the processing here

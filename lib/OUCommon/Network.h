@@ -45,6 +45,10 @@
 //#include <crtdbg.h>
 // custom off
 
+// example timeout code
+// http://www.boost.org/doc/libs/1_43_0/doc/html/boost_asio/example/timeouts/connect_timeout.cpp
+// http://www.boost.org/doc/libs/1_54_0/doc/html/boost_asio/example/cpp03/timeouts/async_tcp_client.cpp
+
 using boost::asio::ip::tcp;
 
 // http://www.codeproject.com/KB/wtl/WTLIntellisense.aspx
@@ -142,6 +146,7 @@ private:
   boost::asio::io_service m_io;
   boost::asio::io_service::work* m_pwork;
   boost::asio::ip::tcp::socket* m_psocket;
+  boost::asio::deadline_timer m_timer;
 
   // variables used to sync for thread ending
   volatile boost::uint32_t m_cntActiveSends;  // number of active sends
@@ -171,6 +176,7 @@ private:
   void AsioThread( void );
 
   void CommonConstruction( void );
+  void OnTimeOut( void );
 
 };
 
@@ -186,7 +192,8 @@ Network<ownerT,charT>::Network( void )
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
-  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
+  m_timer( m_io )
 {
   CommonConstruction();
 }
@@ -204,7 +211,8 @@ Network<ownerT,charT>::Network( const structConnection& connection )
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
-  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
+  m_timer( m_io )
 
 {
   CommonConstruction();
@@ -223,8 +231,8 @@ Network<ownerT,charT>::Network( const ipaddress_t& sAddress, port_t nPort )
   m_cntBytesTransferred_input( 0 ), m_cntAsyncReads( 0 ),
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
-  m_cntActiveSends( 0 ), m_lReadProgress( 0 )
-
+  m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
+  m_timer( m_io )
 {
   CommonConstruction();
 }
@@ -334,6 +342,15 @@ void Network<ownerT,charT>::Connect( void ) {
     endpoint, 
     boost::bind<void>( &Network::OnConnectDone, this, boost::asio::placeholders::error ) 
     );
+  m_timer.expires_from_now( boost::posix_time::seconds( 2 ) );
+  m_timer.async_wait( boost::bind<void>( &Network::OnTimeOut, this ) );
+}
+
+template <typename ownerT, typename charT>
+void Network<ownerT,charT>::OnTimeOut( void ) {
+  if ( NS_CONNECTING == m_stateNetwork ) {
+    Network::Disconnect();
+  }
 }
 
 //
@@ -379,12 +396,18 @@ void Network<ownerT,charT>::Disconnect( void ) {
 
   if ( NS_DISCONNECTED != m_stateNetwork ) {
     //m_psocket->cancel();  //  boost::asio::error::operation_aborted, boost::asio::error::operation_not_supported on xp
-    if ( NS_CONNECTED == m_stateNetwork ) {
+    switch ( m_stateNetwork ) {
+    case NS_CONNECTED:
       m_stateNetwork = NS_DISCONNECTING;
       m_psocket->shutdown( boost::asio::ip::tcp::socket::shutdown_both );
       OnDisconnecting();
-    }
-    else {
+      break;
+    case NS_CONNECTING:
+      m_stateNetwork = NS_DISCONNECTING;
+      //m_psocket->close();
+      OnDisconnecting();
+      break;
+    default:
       assert( NS_DISCONNECTING == m_stateNetwork );
     }
   }

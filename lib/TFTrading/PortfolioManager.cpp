@@ -29,8 +29,7 @@ PortfolioManager::pPortfolio_t PortfolioManager::ConstructPortfolio(
   EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription 
   ) {
   pPortfolio_t pPortfolio;
-  mapPortfolios_iter_t iter = m_mapPortfolios.find( idPortfolio );
-  if ( m_mapPortfolios.end() != iter ) {
+  if ( PortfolioExists( idPortfolio ) ) {
     throw std::runtime_error( "PortfolioManager::Create, portfolio already exists" );
   }
 
@@ -209,16 +208,6 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
         throw std::runtime_error( "GetPortfolio:  couldn't insert portfolio into map" );
       }
 
-//      if ( !rowPortfolio.idOwner.empty() ) {
-//        UpdateReportingPortfolio( rowPortfolio.idOwner, rowPortfolio.idPortfolio );
-//      }
-
-//      pPortfolio->OnCommissionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnCommission ) );
-//      pPortfolio->OnExecutionUpdate.Add( MakeDelegate( this, &PortfolioManager::HandlePortfolioOnExecution ) );
-
-      //OnPortfolioLoaded( idPortfolio );
-//      OnPortfolioLoaded( pPortfolio );
-
       PortfolioCommon( pPortfolio );
 
       LoadPositions( idPortfolio, response.first->second.mapPosition );
@@ -230,6 +219,29 @@ PortfolioManager::pPortfolio_t PortfolioManager::GetPortfolio( const idPortfolio
   }
   
   return pPortfolio;
+}
+
+bool PortfolioManager::PortfolioExists( const idPortfolio_t& idPortfolio ) {
+
+  assert( "" != idPortfolio );  // todo:  add this check in other handlers
+
+  bool bExists( false );
+  pPortfolio_t pPortfolio;
+  mapPortfolios_iter_t iter = m_mapPortfolios.find( idPortfolio );
+  if ( m_mapPortfolios.end() != iter ) {
+    bExists = true;
+  }
+  else {
+    // following portfolio / position code is shared with LoadActivePortfolios and could be factored out
+    PortfolioManagerQueries::PortfolioKey key( idPortfolio );
+    ou::db::QueryFields<PortfolioManagerQueries::PortfolioKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+      = m_pSession->SQL<PortfolioManagerQueries::PortfolioKey>( "select portfolioid from portfolios", key ).Where( "portfolioid = ?" ).NoExecute();
+    m_pSession->Bind<PortfolioManagerQueries::PortfolioKey>( pExistsQuery );
+    if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+      bExists = true;
+    }
+  }
+  return bExists;
 }
 
 namespace PortfolioManagerQueries {

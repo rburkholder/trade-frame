@@ -71,6 +71,8 @@ public:
   PortfolioManager(void) {};
   ~PortfolioManager(void) {};
 
+  bool PortfolioExists( const idPortfolio_t& idPortfolio );
+
   pPortfolio_t ConstructPortfolio( 
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner, 
     EPortfolioType ePortfolioType, currency_t eCurrency, const std::string& sDescription = "" );

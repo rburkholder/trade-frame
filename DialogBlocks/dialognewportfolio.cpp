@@ -124,19 +124,19 @@ void DialogNewPortfolio::CreateControls()
     itemDialog1->SetSizer(itemBoxSizer2);
 
     wxFlexGridSizer* itemFlexGridSizer3 = new wxFlexGridSizer(0, 2, 0, 0);
-    itemBoxSizer2->Add(itemFlexGridSizer3, 1, wxGROW|wxALL, 5);
+    itemBoxSizer2->Add(itemFlexGridSizer3, 1, wxGROW|wxALL, 2);
 
     wxStaticText* itemStaticText4 = new wxStaticText( itemDialog1, ID_LblPortfolioId, _("Portfolio Name:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemFlexGridSizer3->Add(itemStaticText4, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     m_txtPortfolioId = new wxTextCtrl( itemDialog1, ID_TxtPortfolioId, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer3->Add(m_txtPortfolioId, 1, wxALIGN_LEFT|wxGROW|wxALL, 5);
+    itemFlexGridSizer3->Add(m_txtPortfolioId, 1, wxALIGN_LEFT|wxGROW|wxALL, 2);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, ID_LblDescription, _("Description:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
     itemFlexGridSizer3->Add(itemStaticText6, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL, 5);
 
     m_txtDescription = new wxTextCtrl( itemDialog1, ID_TxtDescription, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_MULTILINE );
-    itemFlexGridSizer3->Add(m_txtDescription, 1, wxGROW|wxGROW|wxALL, 5);
+    itemFlexGridSizer3->Add(m_txtDescription, 1, wxGROW|wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 2);
 
     itemFlexGridSizer3->AddGrowableRow(1);
     itemFlexGridSizer3->AddGrowableCol(1);

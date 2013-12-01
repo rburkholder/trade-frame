@@ -202,6 +202,7 @@ void AppStickShift::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   m_pLastPPP->SetPortfolio( pPortfolio );
   m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppStickShift::LookupDescription ) );
   m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppStickShift::ConstructEquityPosition0 ) );
+  m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppStickShift::HandleConstructPortfolio ) );
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
 }
 
@@ -277,6 +278,17 @@ void AppStickShift::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
     );
   if ( 0 != m_EquityPositionCallbackInfo.function ) {
     m_EquityPositionCallbackInfo.function( pPosition );
+  }
+}
+
+void AppStickShift::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& ppp,const std::string& sPortfolioId, const std::string& sDescription ) {
+  // check if portfolio exists
+  if ( ou::tf::PortfolioManager::Instance().PortfolioExists( sPortfolioId ) ) {
+    std::cout << "PortfolioId " << sPortfolioId << " already exists." << std::endl;
+  }
+  else {
+    ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+      sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
   }
 }
 

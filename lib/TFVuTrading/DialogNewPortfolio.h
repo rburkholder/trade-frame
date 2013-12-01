@@ -32,7 +32,8 @@ class DialogNewPortfolio: public DialogBase {
 public:
 
   struct DataExchange: DialogBase::DataExchange {
-    wxString sSymbolName;
+    wxString sPortfolioId;
+    wxString sDescription;
     // todo:  pass in sorted array of pre-existing instruments
   };
 

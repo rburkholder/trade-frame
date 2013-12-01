@@ -14,8 +14,6 @@
 
 #include "StdAfx.h"
 
-//#include <TFTrading/OrderManager.h>
-
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
@@ -113,16 +111,16 @@ void PanelPortfolioPosition::CreateControls() {
     m_sizerMain->Add(m_sizerPortfolio, 0, wxALIGN_LEFT|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxVERTICAL);
-    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxALL, 2);
+    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
-    wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer4->Add(itemBoxSizer5, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
+    wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer4->Add(itemBoxSizer5, 0, wxALIGN_LEFT|wxALL, 0);
 
-    m_lblIdPortfolio = new wxStaticText( itemPanel1, ID_LblIdPortfolio, _("portfolio:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(m_lblIdPortfolio, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    m_lblIdPortfolio = new wxStaticText( itemPanel1, ID_LblIdPortfolio, _("portfolio"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer5->Add(m_lblIdPortfolio, 0, wxALIGN_LEFT|wxALL, 5);
 
     m_lblCurrency = new wxStaticText( itemPanel1, ID_LblCurrency, _("currency"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(m_lblCurrency, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer5->Add(m_lblCurrency, 0, wxALIGN_LEFT|wxALL, 5);
 
     m_gridPortfolioStats = new wxFlexGridSizer(2, 4, 0, 0);
     m_sizerPortfolio->Add(m_gridPortfolioStats, 1, wxALIGN_CENTER_VERTICAL|wxALL, 1);
@@ -154,22 +152,26 @@ void PanelPortfolioPosition::CreateControls() {
     m_gridPortfolioStats->AddGrowableCol(1);
 
     wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(itemBoxSizer17, 0, wxGROW|wxALL, 5);
+    m_sizerMain->Add(itemBoxSizer17, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 2);
 
     m_lblDescription = new wxStaticText( itemPanel1, ID_LblDescription, _("Desc:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
     itemBoxSizer17->Add(m_lblDescription, 0, wxALIGN_TOP|wxALL, 2);
 
     m_txtDescription = new wxTextCtrl( itemPanel1, ID_TxtDescription, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-    itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxALL, 1);
+    itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxLEFT|wxRIGHT, 1);
 
-    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
+    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(75);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
+    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM|wxADJUST_MINSIZE, 2);
 
-    m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
-    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxALIGN_LEFT|wxALL|wxEXPAND, 2);
+  m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+
+    //m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxALIGN_LEFT|wxALL|wxEXPAND, 2);
+    //m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+    //m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
 
     int ix( 0 );
     BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_POSITION_ARRAY ), GRID_POSITION_EMIT_SetColSettings, ix )
@@ -245,16 +247,38 @@ void PanelPortfolioPosition::OnPositionPopUpClosePosition( wxCommandEvent& event
 
 void PanelPortfolioPosition::OnPositionPopUpAddPortfolio( wxCommandEvent& event ) {
   std::cout << "add portfoio" << std::endl;
+  if ( !m_bDialogActive ) {
+    m_bDialogActive = true;
+    m_pdialogNewPortfolio = new ou::tf::DialogNewPortfolio( this );
+    m_pdialogNewPortfolio->SetDataExchange( &m_DialogNewPortfolio_DataExchange );
+    m_pdialogNewPortfolio->SetOnDoneHandler( MakeDelegate( this, &PanelPortfolioPosition::OnDialogNewPortfolioDone ) );
+    m_pdialogNewPortfolio->Show( true );
+  }
 }
 
 void PanelPortfolioPosition::OnPositionPopUpClosePortfolio( wxCommandEvent& event ) {
   std::cout << "close portfoio" << std::endl;
 }
 
+void PanelPortfolioPosition::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* ) {
+  m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
+  m_pdialogNewPortfolio->SetDataExchange( 0 );
+  delete m_pdialogNewPortfolio;
+  m_pdialogNewPortfolio = 0;
+  m_bDialogActive = false;
+  if ( m_DialogNewPortfolio_DataExchange.bOk ) {
+    if ( 0 != m_delegateConstructPortfolio ) {
+      std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
+      std::string sDescription( m_DialogNewPortfolio_DataExchange.sDescription );
+      m_delegateConstructPortfolio( *this, sPortfolioId, sDescription );
+    }
+  }
+}
+
 void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::DataExchange* ) {
   m_pdialogInstrumentSelect->SetOnDoneHandler( 0 );
   m_pdialogInstrumentSelect->SetDataExchange( 0 );
-  delete m_pdialogInstrumentSelect;  // this may get us into problems as it is called while still processing dialog code
+  delete m_pdialogInstrumentSelect;
   m_pdialogInstrumentSelect = 0;
   m_bDialogActive = false;
   if ( m_DialogInstrumentSelect_DataExchange.bOk ) {
@@ -269,7 +293,7 @@ void PanelPortfolioPosition::OnDialogInstrumentSelectDone( ou::tf::DialogBase::D
 void PanelPortfolioPosition::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::DataExchange* ) {
   m_pdialogSimpleOneLineOrder->SetOnDoneHandler( 0 );
   m_pdialogSimpleOneLineOrder->SetDataExchange( 0 );
-  delete m_pdialogSimpleOneLineOrder;  // this may get us into problems as it is called while still processing dialog code
+  delete m_pdialogSimpleOneLineOrder;
   m_pdialogSimpleOneLineOrder = 0;
   m_bDialogActive = false;
   if ( m_DialogSimpleOneLineOrder_DataExchange.bOk ) {

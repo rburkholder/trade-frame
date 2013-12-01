@@ -157,6 +157,8 @@ private:
   void HandleMenuActionSaveSymbolSubset( void );
   void HandleMenuActionLoadSymbolSubset( void );
 
+  void HandleConstructPortfolio( ou::tf::PanelPortfolioPosition&,const std::string&, const std::string& ); // portfolioid, description
+
 };
 
 // Implements MyApp& wxGetApp()

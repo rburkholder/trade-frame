@@ -172,8 +172,13 @@ bool InstrumentManager::Exists( pInstrument_cref pInstrument ) {
 }
 
 bool InstrumentManager::Exists( idInstrument_cref id, pInstrument_t& pInstrument ) {
-  bool bFound = ( m_map.end() != m_map.find( id ) );
-  if ( !bFound ) {
+  bool bFound( false );
+  map_t::const_iterator iter( m_map.find( id ) );
+  if ( m_map.end() != iter ) {
+    pInstrument = iter->second;
+    bFound = true;
+  }
+  else {
     if ( 0 != m_pSession ) {
 //      Instrument::pInstrument_t pInstrument;
       bFound = LoadInstrument( id, pInstrument );

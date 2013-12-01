@@ -134,7 +134,7 @@ void PanelPortfolioPosition::CreateControls()
     m_sizerMain->Add(m_sizerPortfolio, 0, wxALIGN_LEFT|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxVERTICAL);
-    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxALL, 2);
+    m_sizerPortfolio->Add(itemBoxSizer4, 0, wxALIGN_TOP|wxLEFT|wxRIGHT|wxBOTTOM, 1);
 
     wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer4->Add(itemBoxSizer5, 0, wxALIGN_LEFT|wxALL, 0);
@@ -175,21 +175,20 @@ void PanelPortfolioPosition::CreateControls()
     m_gridPortfolioStats->AddGrowableCol(1);
 
     wxBoxSizer* itemBoxSizer17 = new wxBoxSizer(wxHORIZONTAL);
-    m_sizerMain->Add(itemBoxSizer17, 0, wxGROW|wxALL, 5);
+    m_sizerMain->Add(itemBoxSizer17, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 2);
 
     m_lblDescription = new wxStaticText( itemPanel1, ID_LblDescription, _("Desc:"), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
     itemBoxSizer17->Add(m_lblDescription, 0, wxALIGN_TOP|wxALL, 2);
 
     m_txtDescription = new wxTextCtrl( itemPanel1, ID_TxtDescription, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-    itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxALL, 1);
+    itemBoxSizer17->Add(m_txtDescription, 1, wxGROW|wxLEFT|wxRIGHT, 1);
 
-    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );
+    m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );
     m_gridPositions->SetDefaultColSize(75);
     m_gridPositions->SetDefaultRowSize(22);
     m_gridPositions->SetColLabelSize(22);
     m_gridPositions->SetRowLabelSize(0);
-    m_gridPositions->CreateGrid(2, 6, wxGrid::wxGridSelectCells);
-    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxALL|wxADJUST_MINSIZE, 2);
+    m_sizerMain->Add(m_gridPositions, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM|wxADJUST_MINSIZE, 2);
 
 ////@end PanelPortfolioPosition content construction
 }

@@ -24,7 +24,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_DIALOGORDER_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
 #define SYMBOL_DIALOGORDER_TITLE _("Order Creation")
 #define SYMBOL_DIALOGORDER_IDNAME ID_DIALOGORDER
-#define SYMBOL_DIALOGORDER_SIZE wxSize(399, 299)
+#define SYMBOL_DIALOGORDER_SIZE wxSize(400, 300)
 #define SYMBOL_DIALOGORDER_POSITION wxDefaultPosition
 
 class DialogSimpleOneLineOrder: public DialogBase {

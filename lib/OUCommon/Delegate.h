@@ -16,7 +16,7 @@
 #include <vector>
 
 #include <boost/atomic.hpp>
-//#include <boost/scope_exit.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <OUCommon/SpinLock.h>
 
@@ -106,9 +106,9 @@ void Delegate<T>::operator()( T t ) {
   m_spinlockVectorReplace.wait();  // wait for any running replacement to finish
 
   { // ensure things get cleared up in the case of exception in delegated function
-//    BOOST_SCOPE_EXIT(&m_cntDispatchProcesses) {
-//      m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
-//    }
+    BOOST_SCOPE_EXIT_TPL(&m_cntDispatchProcesses) {
+      m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
+    } BOOST_SCOPE_EXIT_END
 
     iter = m_vDispatch.begin();  // start dispatching
     while ( m_vDispatch.end() != iter ) {
@@ -116,8 +116,6 @@ void Delegate<T>::operator()( T t ) {
       ++iter;
     }
   } // end scope
-
-  m_cntDispatchProcesses.fetch_sub( 1, boost::memory_order_release );
 
   // update dispatch with queued changes
   if ( 0 != m_cntChanges.load( boost::memory_order_acquire ) ) {
