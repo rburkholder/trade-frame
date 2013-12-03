@@ -24,6 +24,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "PanelArmsIndex.h"
+
 class AppArmsIndex:
   public wxApp, public ou::tf::FrameWork01<AppArmsIndex> {
     friend ou::tf::FrameWork01<AppArmsIndex>;
@@ -32,7 +34,7 @@ protected:
 private:
 
   //typedef ou::tf::IBTWS::pInstrument_t pInstrument_t;
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  //typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   bool m_bData1Connected;
   bool m_bExecConnected;
@@ -46,6 +48,7 @@ private:
   FrameMain* m_pFPPOE;
 
   ou::tf::PanelLogging* m_pPanelLogging;
+  ou::tf::PanelArmsIndex* m_pPanelArmsIndex;
 
   ou::tf::DBOps m_db;
 
@@ -54,6 +57,8 @@ private:
   void OnClose( wxCloseEvent& event );
 
   void Start( void );
+
+  void OnIQFeedConnected( int );
 
   void OnData1Connected( int );
 //  void OnData2Connected( int ) {};

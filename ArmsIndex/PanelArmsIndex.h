@@ -20,6 +20,11 @@
 #include <string>
 
 #include <wx/splitter.h>
+#include <wx/panel.h>
+#include <wx/sizer.h>
+#include <wx/listbox.h>
+
+#include "IndicatorPackage.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -32,6 +37,8 @@ namespace tf { // TradeFrame
 
 class PanelArmsIndex: public wxPanel {
 public:
+
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   PanelArmsIndex(void);
   PanelArmsIndex( 
@@ -47,6 +54,10 @@ public:
     const wxSize& size = SYMBOL_PANELARMSINDEX_SIZE, 
     long style = SYMBOL_PANELARMSINDEX_STYLE );
 
+  void SetProvider( pProvider_t pProvider );  // set once provider is connected
+
+  void UpdateGUI( void );
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
@@ -57,8 +68,11 @@ protected:
   void CreateControls();
 
 private:
+
+  typedef ou::tf::ProviderInterfaceBase::pInstrument_t pInstrument_t;
+
   enum { ID_Null=wxID_HIGHEST, ID_PANELARMSINDEX, ID_SplitterArmsIndex, ID_LbArmsIndex,
-    ID_PanelArmsVsIndex, ID_PanelTick, ID_PANEL8, ID_PANEL9
+    ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PANEL8, ID_PANEL9
   };
 
   typedef std::vector<std::string> vSymbols_t;
@@ -70,15 +84,23 @@ private:
 
   typedef std::vector<collection_t> vCollections_t;
 
+  pProvider_t m_pProvider;
+
   vCollections_t m_vCollections;
 
   static std::vector<std::string> m_vDowSymbols;
 
   struct Collection {
-    std::string sSymbolTrin;
-    std::string sSymbolTick;
     std::string sSymbolIndex;
+    std::string sSymbolTick;
+    std::string sSymbolTrin;
   };
+
+  IndicatorPackage* m_pip;
+  void DrawChartIndex( const MemBlock& m );
+  void DrawChartTick( const MemBlock& m );
+  void DrawChartArms( const MemBlock& m );
+  void DrawChart( const MemBlock& m, wxPanel* pPanel );
 
     wxBoxSizer* m_sizerPanelArmsIndex;
     wxSplitterWindow* m_splitterArmsIndex;
@@ -86,6 +108,7 @@ private:
     wxBoxSizer* m_sizerCharts;
     wxPanel* m_panelArmsVsIndex;
     wxPanel* m_panelTick;
+    wxPanel* m_panelIndex;
 
   void OnClose( wxCloseEvent& event );
 };

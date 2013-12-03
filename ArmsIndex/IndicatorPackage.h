@@ -38,8 +38,8 @@ public:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   IndicatorPackage( 
-     pInstrument_t pInstTrin, pInstrument_t pInstTick, pInstrument_t pInstIndex,
-     pProvider_t pDataProvider
+     pProvider_t pDataProvider,
+     pInstrument_t pInstIndex, pInstrument_t pInstTick, pInstrument_t pInstTrin
     );
   ~IndicatorPackage(void);
 
@@ -47,9 +47,9 @@ public:
   void DrawCharts( void );
 
   typedef FastDelegate1<const MemBlock&> OnDrawChart_t;
-  void SetOnDrawChartIndex( OnDrawChart_t function ) { m_OnDrawChartIndex = function; }
+  void SetOnDrawChartIndex( OnDrawChart_t function ) { m_bdIndex.m_cb = function; }
+  void SetOnDrawChartTick( OnDrawChart_t function ) { m_bdTicks.m_cb = function; }
   void SetOnDrawChartArms( OnDrawChart_t function ) { m_OnDrawChartArms = function; }
-  void SetOnDrawChartTick( OnDrawChart_t function ) { m_OnDrawChartTick = function; }
 
   //void Start( void );
 protected:
@@ -84,22 +84,62 @@ private:
   vDouble_t m_vOfsIdx;
 
   vDouble_t m_vTick;
-  vDouble_t m_vBarHigh;
-  vDouble_t m_vBarOpen;
-  vDouble_t m_vBarClose;
-  vDouble_t m_vBarLow;
+
+  struct BarDoubles {
+    vDouble_t m_vBarHigh;
+    vDouble_t m_vBarOpen;
+    vDouble_t m_vBarClose;
+    vDouble_t m_vBarLow;
+    vDouble_t m_vTime;
+    ou::tf::Bar m_barWorking;
+    OnDrawChart_t m_cb;
+    void PushBack( const ou::tf::Bar& bar ) {
+      m_vBarHigh.push_back( bar.High() );
+      m_vBarOpen.push_back( bar.Open() );
+      m_vBarClose.push_back( bar.Close() );
+      m_vBarLow.push_back( bar.Low() );
+      boost::posix_time::ptime dt( bar.DateTime() );
+      m_vTime.push_back( 
+        Chart::chartTime( 
+          dt.date().year(), dt.date().month(), dt.date().day(),
+          dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
+    }
+    void PopBack( void ) {
+      m_vBarHigh.pop_back();
+      m_vBarOpen.pop_back();
+      m_vBarClose.pop_back();
+      m_vBarLow.pop_back();
+    }
+    void WorkingBar( const ou::tf::Bar& bar ) {
+      m_barWorking = bar;
+    }
+    void PushWorkingBar( void ) {
+      PushBack( m_barWorking );
+    }
+    DoubleArray High(void) { return DoubleArray( &m_vBarHigh.front(), m_vBarHigh.size() ); };
+    DoubleArray Open(void) { return DoubleArray( &m_vBarOpen.front(), m_vBarOpen.size() ); };
+    DoubleArray Close(void) { return DoubleArray( &m_vBarClose.front(), m_vBarClose.size() ); };
+    DoubleArray Low(void) { return DoubleArray( &m_vBarLow.front(), m_vBarLow.size() ); };
+    DoubleArray Time(void) { return DoubleArray( &m_vTime.front(), m_vTime.size() ); };
+  };
+
+  BarDoubles m_bdIndex;
+  BarDoubles m_bdTicks;
 
   unsigned int m_nPixelsX;
   unsigned int m_nPixelsY;
 
+  ou::tf::BarFactory m_bfTick;
   ou::tf::BarFactory m_bfIndex;
 
-  OnDrawChart_t m_OnDrawChartIndex;
+  //OnDrawChart_t m_OnDrawChartIndex;
   OnDrawChart_t m_OnDrawChartArms;
-  OnDrawChart_t m_OnDrawChartTick;
+  //OnDrawChart_t m_OnDrawChartTick;
 
-  void DrawChartArms( void );
+  void DrawChart( BarDoubles& bd, const std::string& sName );
   void DrawChartIndex( void );
+  void DrawChartTick( void );
+  void DrawChartArms( void );
 
   void HandleOnTrin( const ou::tf::Trade& trade );
   void HandleOnTick( const ou::tf::Trade& trade );
@@ -108,7 +148,5 @@ private:
   void HandleOnZZTrinPeakFound( const ou::tf::ZigZag&, ptime, double, ou::tf::ZigZag::EDirection );
   void HandleOnZZIndexPeakFound( const ou::tf::ZigZag&, ptime, double, ou::tf::ZigZag::EDirection );
 
-  void HandleOnBFIndexUpdated( const ou::tf::Bar& );
-  void HandleOnBFIndexComplete( const ou::tf::Bar& );
 };
 

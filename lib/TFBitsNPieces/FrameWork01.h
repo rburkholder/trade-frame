@@ -198,13 +198,15 @@ void FrameWork01<CRTP>::LinkToPanelProviderControl( void ) {
 
 template<typename CRTP>
 void FrameWork01<CRTP>::DelinkFromPanelProviderControl( void ) {
-  m_pPanelProviderControl->SetOnProviderSelectD1Handler( 0 );
-  m_pPanelProviderControl->SetOnProviderSelectD2Handler( 0 );
-  m_pPanelProviderControl->SetOnProviderSelectXHandler( 0 );
+  if ( 0 != m_pPanelProviderControl ) {
+    m_pPanelProviderControl->SetOnProviderSelectD1Handler( 0 );
+    m_pPanelProviderControl->SetOnProviderSelectD2Handler( 0 );
+    m_pPanelProviderControl->SetOnProviderSelectXHandler( 0 );
 
-  m_pPanelProviderControl->SetOnIQFeedStateChangeHandler( 0 );
-  m_pPanelProviderControl->SetOnIBStateChangeHandler( 0 );
-  m_pPanelProviderControl->SetOnSimulatorStateChangeHandler( 0 );
+    m_pPanelProviderControl->SetOnIQFeedStateChangeHandler( 0 );
+    m_pPanelProviderControl->SetOnIBStateChangeHandler( 0 );
+    m_pPanelProviderControl->SetOnSimulatorStateChangeHandler( 0 );
+  }
 }
 
 template<typename CRTP>
