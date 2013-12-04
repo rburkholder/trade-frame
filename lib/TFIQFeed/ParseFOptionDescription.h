@@ -97,15 +97,16 @@ struct FOptionDescriptionParser: qi::grammar<Iterator, adapted_foption_t()> {
       ;
     
     // define option processing rules
-    ruleString %= +(qi::char_ - qi::char_(' '));
-    ruleUnderlyingSymbol %= ruleString;
+    //ruleString %= +(qi::char_ - qi::char_(' '));
+    //ruleUnderlyingSymbol %= ruleString;
     ruleMonth %= symMonths;
+    ruleUnderlyingSymbol %= +(-qi::lit(' ') >> ((+(qi::char_ - qi::char_(' '))) - symMonths));
     ruleYear %= qi::uint_;
     ruleStrike %= qi::float_;
     ruleOptionSide %= symOptionSide;
     start %= 
            ruleUnderlyingSymbol
-         > qi::lit( ' ' ) > ruleMonth
+        >> qi::lit( ' ' ) > ruleMonth
          > qi::lit( ' ' ) > ruleYear
          > qi::lit( ' ' ) > ruleOptionSide
          > qi::lit( ' ' ) > ruleStrike

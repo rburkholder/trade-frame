@@ -73,6 +73,14 @@ void PanelArmsIndex::Init() {
 
 void PanelArmsIndex::OnClose( wxCloseEvent& event ) {
 
+  if ( 0 != m_pip ) {
+    m_pip->SetOnDrawChartIndex( 0 );
+    m_pip->SetOnDrawChartTick( 0 );
+    m_pip->SetOnDrawChartArms( 0 );
+    delete m_pip;
+    m_pip = 0;
+  }
+
   // todo:  don't close if dialog is still open.
 
   // Exit Steps: #2 -> FrameMain::OnClose
@@ -118,10 +126,13 @@ void PanelArmsIndex::CreateControls() {
 
 void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
   m_pProvider = pProvider; 
-  pInstrument_t pIndex( new ou::tf::Instrument( "AI1T.Z", ou::tf::InstrumentType::Stock, "SMART" ) );
+  pInstrument_t pIndex( new ou::tf::Instrument( "@YM#", ou::tf::InstrumentType::Stock, "SMART" ) );
   pInstrument_t pTick( new ou::tf::Instrument( "JT1T.Z", ou::tf::InstrumentType::Stock, "SMART" ) );
   pInstrument_t pTrin( new ou::tf::Instrument( "RI1T.Z", ou::tf::InstrumentType::Stock, "SMART" ) );
   m_pip = new IndicatorPackage( pProvider, pIndex, pTick, pTrin );
+  m_pip->SetOnDrawChartIndex( MakeDelegate( this, &PanelArmsIndex::DrawChartIndex ) );
+  m_pip->SetOnDrawChartTick( MakeDelegate( this, &PanelArmsIndex::DrawChartTick ) );
+  m_pip->SetOnDrawChartArms( MakeDelegate( this, &PanelArmsIndex::DrawChartArms ) );
 };
 
 void PanelArmsIndex::UpdateGUI( void ) {

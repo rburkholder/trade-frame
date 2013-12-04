@@ -51,18 +51,16 @@ IndicatorPackage::~IndicatorPackage(void) {
 //}
 
 void IndicatorPackage::HandleOnIndex( const ou::tf::Trade& trade ) {
-  //m_tradesIndex.Append( trade );
   if ( !m_bFirstIndexFound ) {
     m_bFirstIndexFound = true;
     m_dblFirstIndex = trade.Price();
   }
   m_dblOfsIdx = trade.Price() - m_dblFirstIndex;
-  m_zzIndex.Check( trade.DateTime(), m_dblOfsIdx );
   m_bfIndex.Add( trade );
+  m_zzIndex.Check( trade.DateTime(), m_dblOfsIdx );
 }
 
 void IndicatorPackage::HandleOnTrin( const ou::tf::Trade& trade ) {
-  //m_tradesTrin.Append( trade );
   m_dblTrin = trade.Price();
   m_zzTrin.Check( trade.DateTime(), m_dblTrin );
 }
@@ -93,13 +91,13 @@ void IndicatorPackage::DrawCharts( void ) {
 }
 
 void IndicatorPackage::DrawChart( BarDoubles& bd, const std::string& sName ) {
-  if ( 1 < bd.m_vBarHigh.size() ) {
+  if ( 0 < bd.m_vBarHigh.size() ) {
     bd.PushWorkingBar();
     XYChart chart( m_nPixelsX, m_nPixelsY );
     chart.addTitle( sName.c_str() );
     chart.setPlotArea( 30, 10, 550, 130, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
     CandleStickLayer *candle = chart.addCandleStickLayer( 
-      bd.High(), bd.Low(), bd.Open(), bd.Close(), 0x0000ff00, 0x00ff0000, 0xff000000 );
+      bd.High(), bd.Low(), bd.Open(), bd.Close(), 0x0000ff00, 0x00ff0000, 0xFFFF0001 );  // 0xff000000
     candle->setXData( bd.Time() );
     MemBlock m = chart.makeChart( BMP );
     if ( 0 != bd.m_cb ) bd.m_cb( m );

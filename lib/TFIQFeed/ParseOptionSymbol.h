@@ -48,6 +48,15 @@ struct structParsedOptionSymbol2 {
   structParsedOptionSymbol2( void ) : nYear( 0 ), nDay( 0 ) {};
 };
 
+struct structParsedOptionSymbol3 {
+  std::string sText;
+  std::string sMonth;
+  boost::uint16_t nYear;
+  std::string sCode;
+  double dblStrike;
+  structParsedOptionSymbol3( void ) : dblStrike( 0.0 ), nYear( 0 ) {};
+};
+
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou
@@ -68,6 +77,17 @@ BOOST_FUSION_ADAPT_STRUCT(
   pos2_t,
   (boost::uint16_t, nYear)
   (boost::uint8_t, nDay)
+  )
+
+typedef ou::tf::iqfeed::structParsedOptionSymbol3 pos3_t;
+
+BOOST_FUSION_ADAPT_STRUCT(
+  pos3_t,
+  (std::string, sText)
+  (std::string, sMonth)
+  (boost::uint16_t, nYear)
+  (std::string, sCode)
+  (double, dblStrike)
   )
 
 
@@ -131,7 +151,7 @@ struct FOptionSymbolParser1: qi::grammar<Iterator, pos1_t()> {
     // define option processing rules
     ruleText %= +qi::char_( "@A-Z" );
     ruleDigits %= +qi::char_( "0-9" );
-    ruleCode %= qi::char_( "A-X" );
+    ruleCode %= qi::char_( "CP" );
     ruleStrike %= qi::float_;
 
     start %= ruleText >> ruleDigits >> ruleCode >> ruleStrike;
@@ -143,6 +163,57 @@ struct FOptionSymbolParser1: qi::grammar<Iterator, pos1_t()> {
   qi::rule<Iterator, double()> ruleStrike; // strike
 
   qi::rule<Iterator, pos1_t()> start;
+
+};
+
+template<typename Iterator>
+struct FOptionSymbolParser3: qi::grammar<Iterator, pos3_t()> {
+
+  FOptionSymbolParser3( void ): FOptionSymbolParser3::base_type(start) {
+
+    // define option processing rules
+    ruleMonth %= qi::char_( "FGHJKMNQUVXZ" );
+
+    ruleSymbol0 %= qi::char_( "0-9A-Z" );
+    ruleSymbol4 %= ruleSymbol0 >> ruleSymbol0 >> ruleSymbol0 >> ruleSymbol0;
+    ruleSymbol3 %= ruleSymbol0 >> ruleSymbol0 >> ruleSymbol0;
+    ruleSymbol2 %= ruleSymbol0 >> ruleSymbol0;
+    ruleSymbol1 %= ruleSymbol0;
+    ruleSymbol7 %= qi::char_( "@" ) >> ruleSymbol0 >> ruleSymbol0 >> ruleSymbol0;
+    ruleSymbol6 %= qi::char_( "@" ) >> ruleSymbol0 >> ruleSymbol0;
+    ruleSymbol5 %= qi::char_( "@" ) >> ruleSymbol0;
+
+    ruleYear %= uint2_p();
+    ruleOption %= qi::char_( "CP" );
+    ruleStrike %= qi::float_;
+
+    start %= (
+             qi::hold[ ( ruleSymbol1 >> &( ruleMonth >> ruleYear ) ) ] // & is non-consuming lookahead
+           | qi::hold[ ( ruleSymbol2 >> &( ruleMonth >> ruleYear ) ) ]
+           | qi::hold[ ( ruleSymbol3 >> &( ruleMonth >> ruleYear ) ) ]
+           | qi::hold[ ( ruleSymbol4 >> &( ruleMonth >> ruleYear ) ) ]
+           | qi::hold[ ( ruleSymbol5 >> &( ruleMonth >> ruleYear ) ) ]
+           | qi::hold[ ( ruleSymbol6 >> &( ruleMonth >> ruleYear ) ) ]
+           | qi::hold[ ( ruleSymbol7 >> &( ruleMonth >> ruleYear ) ) ]
+           )
+      >> ruleMonth >> ruleYear>> ruleOption >> ruleStrike;
+  }
+
+  qi::rule<Iterator, std::string()> ruleSymbol0;
+  qi::rule<Iterator, std::string()> ruleSymbol1;
+  qi::rule<Iterator, std::string()> ruleSymbol2;
+  qi::rule<Iterator, std::string()> ruleSymbol3;
+  qi::rule<Iterator, std::string()> ruleSymbol4;
+  qi::rule<Iterator, std::string()> ruleSymbol5;
+  qi::rule<Iterator, std::string()> ruleSymbol6;
+  qi::rule<Iterator, std::string()> ruleSymbol7;
+
+  qi::rule<Iterator, std::string()> ruleMonth;  // month
+  qi::rule<Iterator, boost::uint16_t()> ruleYear;  // yy
+  qi::rule<Iterator, std::string()> ruleOption;  // call/put
+  qi::rule<Iterator, double()> ruleStrike; // strike
+
+  qi::rule<Iterator, pos3_t()> start;
 
 };
 

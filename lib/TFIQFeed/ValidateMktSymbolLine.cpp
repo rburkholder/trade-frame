@@ -71,6 +71,7 @@ ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
     m_vSuffixesToTest.push_back( ".X" );
     m_vSuffixesToTest.push_back( ".XI" );
     m_vSuffixesToTest.push_back( ".XO" );
+    m_vSuffixesToTest.push_back( "#" );
 }
 
 void ValidateMktSymbolLine::PostProcess( void ) {
@@ -259,20 +260,26 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
       mapUnderlying[ trd.sSymbol ] = structOption.sUnderlying;  // simply create an entry for later use
     }
     nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
-    structParsedOptionSymbol1 pos1;
-    b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserFOptionSymbol1, pos1 );
+    //structParsedOptionSymbol1 pos1;
+    structParsedOptionSymbol3 pos3;
+    std::string::const_iterator ixb( trd.sSymbol.begin() );
+    std::string::const_iterator ixe( trd.sSymbol.end() );
+    //b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserFOptionSymbol1, pos1 );
+    b = parse( ixb, ixe, parserFOptionSymbol3, pos3 );
     if ( b ) {
-      if ( 2 != pos1.sDigits.length() ) {  // looking for yy
-        std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
-      }
-      else {
+//      if ( 2 != pos1.sDigits.length() ) {  // looking for yy
+//        std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;
+//      }
+//      else {
 
         trd.nDay = 0;
-        trd.nYear = 2000 + boost::lexical_cast<uint16_t>( pos1.sDigits );
+//        trd.nYear = 2000 + boost::lexical_cast<uint16_t>( pos1.sDigits );
+        trd.nYear = 2000 + pos3.nYear;
             
-        char c = pos1.sText.back();
-        assert( ( 'F' <= c ) && ( c <= 'Z' ) );
-        trd.nMonth = rFutureMonth[ c - 'A' ];
+//        char c = pos1.sText.back();
+//        assert( ( 'F' <= c ) && ( c <= 'Z' ) );
+//        trd.nMonth = rFutureMonth[ c - 'A' ];
+        trd.nMonth = rFutureMonth[ pos3.sMonth.front() - 'A' ];
 
         boost::gregorian::date date( trd.nYear, trd.nMonth, 1 );
         date = ou::tf::option::FuturesOptionExpiry( date );
@@ -281,20 +288,33 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
         trd.nMonth = ymd.month;
         trd.nDay = ymd.day;
 
-        pos1.sText = pos1.sText.substr( 0, pos1.sText.length() - 1 );
+//        pos1.sText = pos1.sText.substr( 0, pos1.sText.length() - 1 );
 
         std::string sTmp = structOption.sUnderlying;
 
-        if ( pos1.sText != sTmp ) {  // check against modified underlying
+//        if ( pos1.sText != sTmp ) {  // check against modified underlying
+        if ( pos3.sText != sTmp ) {  // check against modified underlying
 //          std::cout 
 //            << "Option Symbol Decode: changing underlying on " 
 //            << trd.sSymbol << " from "
 //            << structOption.sUnderlying << " to " << pos1.sText << std::endl;
-          trd.sUnderlying = pos1.sText;
-          mapUnderlying[ trd.sSymbol ] = pos1.sText;
+//          trd.sUnderlying = pos1.sText;
+//          mapUnderlying[ trd.sSymbol ] = pos1.sText;
+          trd.sUnderlying = pos3.sText;
+          mapUnderlying[ trd.sSymbol ] = pos3.sText;
         }
-        assert( pos1.dblStrike == structOption.dblStrike );
-      }
+        if ( pos3.dblStrike == structOption.dblStrike ) {
+          // ok
+        }
+        else {
+          if ( pos3.dblStrike == -structOption.dblStrike ) {
+            // ok for now
+          }
+          else {
+//            std::cout << trd.sSymbol << " strike issue: " << pos3.dblStrike << " vs " << structOption.dblStrike << std::endl;
+          }
+        }
+//      }
     }
     else {
       std::cout << "Option Symbol Decode:  some sort of error, " << trd.sSymbol << std::endl;

@@ -124,8 +124,11 @@ bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  m_sNameUnderlying = "+GC#";
-  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+//  m_sNameUnderlying = "+GC#";
+//  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+
+  m_sNameUnderlying = "@YM#";
+  m_sNameOptionUnderlying = "@YM";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;

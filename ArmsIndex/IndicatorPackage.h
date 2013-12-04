@@ -109,6 +109,7 @@ private:
       m_vBarOpen.pop_back();
       m_vBarClose.pop_back();
       m_vBarLow.pop_back();
+      m_vTime.pop_back();
     }
     void WorkingBar( const ou::tf::Bar& bar ) {
       m_barWorking = bar;

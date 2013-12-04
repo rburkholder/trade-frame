@@ -101,6 +101,7 @@ private:
   ou::tf::iqfeed::OptionSymbolParser1<std::string::const_iterator> parserOptionSymbol1;
   ou::tf::iqfeed::FOptionSymbolParser1<std::string::const_iterator> parserFOptionSymbol1;
   ou::tf::iqfeed::OptionSymbolParser2<std::string::const_iterator> parserOptionSymbol2;
+  ou::tf::iqfeed::FOptionSymbolParser3<std::string::const_iterator> parserFOptionSymbol3;
   std::vector<size_t> vSymbolTypeStats;  // number of symbols of this SymbolType
 
   std::vector<std::string> m_vSuffixesToTest;
