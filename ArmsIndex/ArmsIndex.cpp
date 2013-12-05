@@ -44,13 +44,13 @@ bool AppArmsIndex::OnInit() {
 
 //  LinkToPanelProviderControl();
 
-  m_pPanelArmsIndex = new ou::tf::PanelArmsIndex( m_pFrameMain, wxID_ANY );
-  m_sizerMain->Add( m_pPanelArmsIndex, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP, 2);
-  m_pPanelArmsIndex->Show( true );
+  m_pPanelArmsIndex = new ou::tf::PanelArmsIndex( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(600, 200) );
+  m_sizerMain->Add( m_pPanelArmsIndex, 1, wxALL | wxEXPAND, 2);
+//  m_pPanelArmsIndex->Show( true );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize( -1, 125 ) );
   m_sizerMain->Add( m_pPanelLogging, 0, wxALL| wxALIGN_LEFT|wxALIGN_BOTTOM|wxEXPAND, 2 );
-  m_pPanelLogging->Show( true );
+//  m_pPanelLogging->Show( true );
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
@@ -67,10 +67,6 @@ bool AppArmsIndex::OnInit() {
 //    boost::filesystem::remove( sDbName );
   }
 
-  m_bData1Connected = false;
-  m_bExecConnected = false;
-  m_bStarted = false;
-
 //  FrameMain::vpItems_t vItems;
 //  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
 //  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
@@ -84,9 +80,15 @@ bool AppArmsIndex::OnInit() {
   m_timerGuiRefresh.SetOwner( this );
 
   Bind( wxEVT_TIMER, &AppArmsIndex::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start();
+  //m_timerGuiRefresh.Start();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppArmsIndex::OnClose, this );  // start close of windows and controls
+
+  Bind( EVENT_PROVIDER_CONNECTED, &AppArmsIndex::HandleProviderConnected, this );
+
+  m_bData1Connected = false;
+  m_bExecConnected = false;
+  m_bStarted = false;
 
   //this->m_pData1Provider->Connect();
   this->m_iqfeed->Connect();
@@ -99,19 +101,12 @@ void AppArmsIndex::Start( void ) {
   if ( !m_bStarted ) {
     m_bStarted = true;
     m_pPanelArmsIndex->SetProvider( m_iqfeed );
+    m_timerGuiRefresh.Start();
   }
 }
 
 void AppArmsIndex::HandleGuiRefresh( wxTimerEvent& event ) {
-//  for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
-//    iter->second.pPPP->UpdateGui();
-//  }
-  try {
-    m_pPanelArmsIndex->UpdateGUI();
-  }
-  catch (...) {
-    std::cout << "error" << std::endl;
-  }
+  m_pPanelArmsIndex->UpdateGUI();
 }
 
 int AppArmsIndex::OnExit() {
@@ -151,15 +146,22 @@ void AppArmsIndex::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
-void AppArmsIndex::OnIQFeedConnected( int ) {
+void AppArmsIndex::HandleProviderConnected( EventProviderConnected& event ) {
+  // In foreground thread
   Start();
+}
+
+void AppArmsIndex::OnIQFeedConnected( int ) {  // crosses thread
+//  Start();
+  // In background thread
+  QueueEvent( new EventProviderConnected( EVENT_PROVIDER_CONNECTED, -1, m_iqfeed ) );
 }
 
 void AppArmsIndex::OnData1Connected( int ) {
   m_bData1Connected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
-    Start();
+    //Start();
   }
 }
 
@@ -167,7 +169,7 @@ void AppArmsIndex::OnExecConnected( int ) {
   m_bExecConnected = true;
   if ( m_bData1Connected & m_bExecConnected ) {
     // set start to enabled
-    Start();
+    //Start();
   }
 }
 

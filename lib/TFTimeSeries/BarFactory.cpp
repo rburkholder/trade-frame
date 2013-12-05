@@ -22,7 +22,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 BarFactory::BarFactory(duration_t nSeconds) : 
-  m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) )
+  m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) ), m_curInterval( 0 ) 
 {
 }
 

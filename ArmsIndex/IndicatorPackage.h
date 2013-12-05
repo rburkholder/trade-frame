@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include <boost/lockfree/spsc_queue.hpp>
+
 #ifdef _M_X64
 #include <OUCharting/ChartDirector64/chartdir.h>
 #else
@@ -85,6 +87,9 @@ private:
 
   vDouble_t m_vTick;
 
+  double m_ctBegin;
+  double m_ctEnd;
+
   struct BarDoubles {
     vDouble_t m_vBarHigh;
     vDouble_t m_vBarOpen;
@@ -93,6 +98,7 @@ private:
     vDouble_t m_vTime;
     ou::tf::Bar m_barWorking;
     OnDrawChart_t m_cb;
+
     void PushBack( const ou::tf::Bar& bar ) {
       m_vBarHigh.push_back( bar.High() );
       m_vBarOpen.push_back( bar.Open() );
@@ -133,9 +139,11 @@ private:
   ou::tf::BarFactory m_bfTick;
   ou::tf::BarFactory m_bfIndex;
 
-  //OnDrawChart_t m_OnDrawChartIndex;
+  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfIndex;
+  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTick;
+  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTrin;
+
   OnDrawChart_t m_OnDrawChartArms;
-  //OnDrawChart_t m_OnDrawChartTick;
 
   void DrawChart( BarDoubles& bd, const std::string& sName );
   void DrawChartIndex( void );

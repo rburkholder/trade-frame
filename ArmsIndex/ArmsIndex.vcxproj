@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="ArmsChart.h" />
     <ClInclude Include="ArmsIndex.h" />
+    <ClInclude Include="EventProviderConnected.h" />
     <ClInclude Include="IndicatorPackage.h" />
     <ClInclude Include="PanelArmsIndex.h" />
     <ClInclude Include="Resource.h" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="ArmsChart.cpp" />
     <ClCompile Include="ArmsIndex.cpp" />
+    <ClCompile Include="EventProviderConnected.cpp" />
     <ClCompile Include="IndicatorPackage.cpp" />
     <ClCompile Include="PanelArmsIndex.cpp" />
     <ClCompile Include="stdafx.cpp">

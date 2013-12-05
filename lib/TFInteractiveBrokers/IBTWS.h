@@ -74,6 +74,8 @@ public:
   void Connect( void );
   void Disconnect( void );
 
+  void SetClientId( int idClient ) { m_idClient = idClient; }
+
   // From ProviderInterface Execution Section
   void PlaceOrder( pOrder_t order );
   void CancelOrder( pOrder_t order );
@@ -179,6 +181,7 @@ protected:
 private:
   EPosixClientSocket *pTWS;
   long m_time;
+  int m_idClient; // for session uniqueness when multiple applications are connected to TWS
 
   std::stringstream m_ss;  // for OutputDebugStrings in background thread
 

@@ -55,13 +55,15 @@ void PanelArmsIndex::Init() {
     m_splitterArmsIndex = NULL;
     m_lbArmsIndex = NULL;
     m_sizerCharts = NULL;
-    m_panelArmsVsIndex = NULL;
-    m_panelTick = NULL;
     m_panelIndex = NULL;
+    m_panelTick = NULL;
+    m_panelArmsVsIndex = NULL;
 
-    m_pip = 0;
+  m_ixActiveChart = 0;
 
-    m_vCollections.push_back( collection_t( "DOW" ) );
+    
+
+/*    m_vCollections.push_back( collection_t( "DOW" ) );
     collection_t& c( m_vCollections.back() );
     c.vSymbols +=  // http://www.djindexes.com/averages/
       "MMM", "AXP", "T", "BA", "CAT", "CVX", "CSCO",
@@ -69,16 +71,22 @@ void PanelArmsIndex::Init() {
       "IBM", "JNJ", "JPM", "MCD", "MRK", "MSFT",
       "NKE", "PFE", "PG", "TRV", "UTX",
       "UNH", "VZ", "V", "WMT", "DIS";
+*/
+  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  assert( b );
+
 }
 
 void PanelArmsIndex::OnClose( wxCloseEvent& event ) {
 
-  if ( 0 != m_pip ) {
-    m_pip->SetOnDrawChartIndex( 0 );
-    m_pip->SetOnDrawChartTick( 0 );
-    m_pip->SetOnDrawChartArms( 0 );
-    delete m_pip;
-    m_pip = 0;
+  for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
+    if ( 0 != iter->pip ) {
+      iter->pip->SetOnDrawChartIndex( 0 );
+      iter->pip->SetOnDrawChartTick( 0 );
+      iter->pip->SetOnDrawChartArms( 0 );
+//      delete m_pip;
+//      m_pip = 0;
+    }
   }
 
   // todo:  don't close if dialog is still open.
@@ -98,13 +106,12 @@ void PanelArmsIndex::CreateControls() {
     m_sizerPanelArmsIndex = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(m_sizerPanelArmsIndex);
 
-    m_splitterArmsIndex = new wxSplitterWindow( itemPanel1, ID_SplitterArmsIndex, wxDefaultPosition, wxDefaultSize, wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
-    m_splitterArmsIndex->SetMinimumPaneSize(20);
+    m_splitterArmsIndex = new wxSplitterWindow( itemPanel1, ID_SplitterArmsIndex, wxDefaultPosition, wxDefaultSize, wxSP_3DBORDER|wxSP_3DSASH );
+    m_splitterArmsIndex->SetMinimumPaneSize(100);
 
     wxPanel* itemPanel4 = new wxPanel( m_splitterArmsIndex, ID_PANEL8, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     wxArrayString m_lbArmsIndexStrings;
-    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxDefaultSize, m_lbArmsIndexStrings, wxLB_SINGLE );
-    m_lbArmsIndex->SetStringSelection(_("INDU"));
+    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxSize(90, 50), m_lbArmsIndexStrings, wxLB_SINGLE );
 
     wxPanel* itemPanel6 = new wxPanel( m_splitterArmsIndex, ID_PANEL9, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_sizerCharts = new wxBoxSizer(wxVERTICAL);
@@ -119,24 +126,55 @@ void PanelArmsIndex::CreateControls() {
     m_panelArmsVsIndex = new wxPanel( itemPanel6, ID_PanelArmsVsIndex, wxDefaultPosition, wxSize(600, 200), wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelArmsVsIndex, 1, wxGROW|wxALL, 2);
 
-    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel6, 50);
+    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel6, 110);
     m_sizerPanelArmsIndex->Add(m_splitterArmsIndex, 1, wxGROW|wxALL, 2);
+
+  Bind( wxEVT_SIZE, &PanelArmsIndex::HandleOnSize, this, this->GetId() );
+  Bind( wxEVT_COMMAND_LISTBOX_SELECTED, &PanelArmsIndex::HandleListBoxSelection, this, this->GetId() );
 
 }
 
+void PanelArmsIndex::HandleOnSize( wxSizeEvent& event ) {
+  for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
+    iter->pip->SetChartDimensions( m_panelArmsVsIndex->GetSize().GetWidth(), m_panelArmsVsIndex->GetSize().GetHeight() );
+    //iter->pip->SetChartDimensions( 600, 200 );
+  }
+  event.Skip();
+}
+
+void PanelArmsIndex::HandleListBoxSelection( wxCommandEvent& event ) {
+  int nSelection = m_lbArmsIndex->GetSelection();
+  if ( wxNOT_FOUND != nSelection ) {
+    m_ixActiveChart = nSelection;
+  }
+  
+}
+
 void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
-  m_pProvider = pProvider; 
-  pInstrument_t pIndex( new ou::tf::Instrument( "@YM#", ou::tf::InstrumentType::Stock, "SMART" ) );
-  pInstrument_t pTick( new ou::tf::Instrument( "JT1T.Z", ou::tf::InstrumentType::Stock, "SMART" ) );
-  pInstrument_t pTrin( new ou::tf::Instrument( "RI1T.Z", ou::tf::InstrumentType::Stock, "SMART" ) );
-  m_pip = new IndicatorPackage( pProvider, pIndex, pTick, pTrin );
-  m_pip->SetOnDrawChartIndex( MakeDelegate( this, &PanelArmsIndex::DrawChartIndex ) );
-  m_pip->SetOnDrawChartTick( MakeDelegate( this, &PanelArmsIndex::DrawChartTick ) );
-  m_pip->SetOnDrawChartArms( MakeDelegate( this, &PanelArmsIndex::DrawChartArms ) );
+
+  if ( 0 != m_vCollections.size() ) {
+    throw std::runtime_error( "provider already set" );
+  }
+  else {
+    m_pProvider = pProvider; 
+
+    m_vCollections.push_back( collection_t( pProvider, "Dow INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
+
+    int ix( 0 );
+    for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
+      iter->pip->SetOnDrawChartIndex( MakeDelegate( this, &PanelArmsIndex::DrawChartIndex ) );
+      iter->pip->SetOnDrawChartTick( MakeDelegate( this, &PanelArmsIndex::DrawChartTick ) );
+      iter->pip->SetOnDrawChartArms( MakeDelegate( this, &PanelArmsIndex::DrawChartArms ) );
+      m_lbArmsIndex->Insert( iter->sName, ix );
+      ++ix;
+    }
+  }
 };
 
 void PanelArmsIndex::UpdateGUI( void ) {
-  m_pip->DrawCharts();
+  if ( 0 != m_vCollections.size() ) {
+    m_vCollections[ m_ixActiveChart ].pip->DrawCharts();
+  }
 }
 
 void PanelArmsIndex::DrawChartIndex( const MemBlock& m ) {
@@ -144,7 +182,7 @@ void PanelArmsIndex::DrawChartIndex( const MemBlock& m ) {
 }
 
 void PanelArmsIndex::DrawChartTick( const MemBlock& m ) {
-  DrawChart( m, m_panelTick );
+  DrawChart( m, m_panelTick );  
 }
 
 void PanelArmsIndex::DrawChartArms( const MemBlock& m ) {

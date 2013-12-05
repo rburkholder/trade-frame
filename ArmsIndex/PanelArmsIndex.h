@@ -19,6 +19,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <wx/splitter.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
@@ -75,28 +77,47 @@ private:
     ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PANEL8, ID_PANEL9
   };
 
-  typedef std::vector<std::string> vSymbols_t;
+  //typedef std::vector<std::string> vSymbols_t;
+
+  struct instrument_t {
+    std::string sName;
+    pInstrument_t pInst;
+    instrument_t( const std::string& sName_ ) {
+      pInst.reset( new ou::tf::Instrument( sName_, ou::tf::InstrumentType::Stock, "SMART" ) );
+    }
+  };
   struct collection_t {
     std::string sName;
-    vSymbols_t vSymbols;
-    collection_t( const std::string& sName_ ): sName( sName_ ) {};
+    instrument_t instIndex;
+    instrument_t instTick;
+    instrument_t instTrin;
+    boost::shared_ptr<IndicatorPackage> pip;
+    collection_t( pProvider_t pProvider_,
+                  const std::string& sName_, const std::string& sIndex_, const std::string& sTick_, const std::string& sTrin_ )
+      : sName( sName_ ), instIndex( sIndex_ ), instTick( sTick_ ), instTrin( sTrin_ ), pip( 0 ) {
+        pip.reset( new IndicatorPackage( pProvider_, instIndex.pInst, instTick.pInst, instTrin.pInst ) );
+    };
+    ~collection_t( void ) {};
   };
 
   typedef std::vector<collection_t> vCollections_t;
+  vCollections_t m_vCollections;
+
+  vCollections_t::size_type m_ixActiveChart;
+
 
   pProvider_t m_pProvider;
 
-  vCollections_t m_vCollections;
 
   static std::vector<std::string> m_vDowSymbols;
 
-  struct Collection {
-    std::string sSymbolIndex;
-    std::string sSymbolTick;
-    std::string sSymbolTrin;
-  };
+//  struct Collection {
+//    std::string sSymbolIndex;
+//    std::string sSymbolTick;
+//    std::string sSymbolTrin;
+//  };
 
-  IndicatorPackage* m_pip;
+//  IndicatorPackage* m_pip;
   void DrawChartIndex( const MemBlock& m );
   void DrawChartTick( const MemBlock& m );
   void DrawChartArms( const MemBlock& m );
@@ -111,6 +132,9 @@ private:
     wxPanel* m_panelIndex;
 
   void OnClose( wxCloseEvent& event );
+
+  void HandleOnSize( wxSizeEvent& event );
+  void HandleListBoxSelection( wxCommandEvent& event );
 };
 
 } // namespace tf

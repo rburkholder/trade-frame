@@ -102,6 +102,8 @@ bool AppHedgedBollinger::OnInit() {
   m_splitterRow1->SplitVertically(m_ptreeChartables, m_panelSplitterRight, 10);
   m_sizerFrameRow1->Add(m_splitterRow1, 1, wxEXPAND|wxALL, 1);
 
+  m_tws->SetClientid( 2 );
+
   LinkToPanelProviderControl();
 
 //  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
@@ -128,7 +130,7 @@ bool AppHedgedBollinger::OnInit() {
 //  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
   m_sNameUnderlying = "@YM#";
-  m_sNameOptionUnderlying = "@YM";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+  m_sNameOptionUnderlying = "@YM";  
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;

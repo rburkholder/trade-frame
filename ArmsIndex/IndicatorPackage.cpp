@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+#include <OUCommon/TimeSource.h>
+
 #include "IndicatorPackage.h"
 
 IndicatorPackage::IndicatorPackage( 
@@ -23,7 +25,10 @@ IndicatorPackage::IndicatorPackage(
    : m_bStarted( false ), m_pTrin( pInstTrin ), m_pTick( pInstTick ), m_pIndex( pInstIndex ), m_pProvider( pDataProvider ),
      m_zzTrin( 0.15), m_zzIndex( 5.0 ),
      m_bFirstIndexFound( false ), m_dblFirstIndex( 0.0 ),
-     m_nPixelsX( 600 ), m_nPixelsY( 200 )
+     m_nPixelsX( 600 ), m_nPixelsY( 200 ), 
+     m_dblTrin( 0 ), m_dblOfsIdx( 0 ), 
+     m_bIndexOfZZPairReady( false ), m_bTrinOfZZPairReady( false ), 
+     m_dblZZTrin( 0.0 ), m_dblZZIndex( 0.0 )
 
 {
   m_bfIndex.SetOnBarUpdated( MakeDelegate( &m_bdIndex, &BarDoubles::WorkingBar ) );
@@ -35,6 +40,19 @@ IndicatorPackage::IndicatorPackage(
   m_pProvider->AddTradeHandler( m_pTrin, MakeDelegate( this, &IndicatorPackage::HandleOnTrin ) );
   m_pProvider->AddTradeHandler( m_pTick, MakeDelegate( this, &IndicatorPackage::HandleOnTick ) );
   m_pProvider->AddTradeHandler( m_pIndex, MakeDelegate( this, &IndicatorPackage::HandleOnIndex ) );
+
+  ptime now = ou::TimeSource::Instance().External();
+  ptime dtBegin( 
+        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York", true ) );
+  ptime dtEnd( 
+        ou::TimeSource::Instance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York", true ) );
+
+  m_ctBegin = Chart::chartTime( dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
+                                     dtBegin.time_of_day().hours(), dtBegin.time_of_day().minutes(), dtBegin.time_of_day().seconds() );
+
+  m_ctEnd   = Chart::chartTime( dtEnd.date().year(), dtEnd.date().month(), dtEnd.date().day(),
+                                     dtEnd.time_of_day().hours(), dtEnd.time_of_day().minutes(), dtEnd.time_of_day().seconds() );
+
 }
 
 IndicatorPackage::~IndicatorPackage(void) {
@@ -51,22 +69,27 @@ IndicatorPackage::~IndicatorPackage(void) {
 //}
 
 void IndicatorPackage::HandleOnIndex( const ou::tf::Trade& trade ) {
-  if ( !m_bFirstIndexFound ) {
-    m_bFirstIndexFound = true;
-    m_dblFirstIndex = trade.Price();
+  if ( m_lfIndex.push( trade ) ) {
   }
-  m_dblOfsIdx = trade.Price() - m_dblFirstIndex;
-  m_bfIndex.Add( trade );
-  m_zzIndex.Check( trade.DateTime(), m_dblOfsIdx );
-}
-
-void IndicatorPackage::HandleOnTrin( const ou::tf::Trade& trade ) {
-  m_dblTrin = trade.Price();
-  m_zzTrin.Check( trade.DateTime(), m_dblTrin );
+  else {
+    std::cout << "HandleOnIndex push problems" << std::endl;
+  }
 }
 
 void IndicatorPackage::HandleOnTick( const ou::tf::Trade& trade ) {
-  m_bfTick.Add( trade );
+  if ( m_lfTick.push( trade ) ) {
+  }
+  else {
+    std::cout << "HandleOnTick push problems" << std::endl;
+  }
+}
+
+void IndicatorPackage::HandleOnTrin( const ou::tf::Trade& trade ) {
+  if ( m_lfTrin.push( trade ) ) {
+  }
+  else {
+    std::cout << "HandleOnTrin push problems" << std::endl;
+  }
 }
 
 void IndicatorPackage::HandleOnZZTrinPeakFound( const ou::tf::ZigZag&, ptime, double pt, ou::tf::ZigZag::EDirection ) {
@@ -85,6 +108,28 @@ void IndicatorPackage::SetChartDimensions( unsigned int x, unsigned int y ) {
 }
 
 void IndicatorPackage::DrawCharts( void ) {
+
+  ou::tf::Trade trade;
+
+  while ( m_lfIndex.pop( trade ) ) {
+    if ( !m_bFirstIndexFound ) {
+      m_bFirstIndexFound = true;
+      m_dblFirstIndex = trade.Price();
+    }
+    m_dblOfsIdx = trade.Price() - m_dblFirstIndex;
+    m_bfIndex.Add( trade );
+    m_zzIndex.Check( trade.DateTime(), m_dblOfsIdx );
+  }
+
+  while ( m_lfTick.pop( trade ) ) {
+    m_bfTick.Add( trade );
+  }
+
+  while ( m_lfTrin.pop( trade ) ) {
+    m_dblTrin = trade.Price();
+    m_zzTrin.Check( trade.DateTime(), m_dblTrin );
+  }
+
   DrawChartIndex();
   DrawChartArms();
   DrawChartTick();
@@ -95,10 +140,11 @@ void IndicatorPackage::DrawChart( BarDoubles& bd, const std::string& sName ) {
     bd.PushWorkingBar();
     XYChart chart( m_nPixelsX, m_nPixelsY );
     chart.addTitle( sName.c_str() );
-    chart.setPlotArea( 30, 10, 550, 130, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
+    chart.setPlotArea( 40, 10, m_nPixelsX - 20, m_nPixelsY -10, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
     CandleStickLayer *candle = chart.addCandleStickLayer( 
       bd.High(), bd.Low(), bd.Open(), bd.Close(), 0x0000ff00, 0x00ff0000, 0xFFFF0001 );  // 0xff000000
     candle->setXData( bd.Time() );
+    chart.xAxis()->setDateScale( m_ctBegin, m_ctEnd, 0, 0 );
     MemBlock m = chart.makeChart( BMP );
     if ( 0 != bd.m_cb ) bd.m_cb( m );
     bd.PopBack();
@@ -116,8 +162,8 @@ void IndicatorPackage::DrawChartTick( void ) {
 void IndicatorPackage::DrawChartArms( void ) {
 
   if ( m_bTrinOfZZPairReady && m_bIndexOfZZPairReady ) {
-    m_vTrin.push_back( m_dblZZTrin );
     m_vOfsIdx.push_back( m_dblZZIndex );
+    m_vTrin.push_back( m_dblZZTrin );
     m_bTrinOfZZPairReady = m_bIndexOfZZPairReady = false;
   }
 
@@ -128,16 +174,16 @@ void IndicatorPackage::DrawChartArms( void ) {
 
   // do an overlay for the leading line, so can get a different color on it
   chart.addTitle( "Trin vs Delta Index" );
-  chart.setPlotArea( 30, 10, 550, 130, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
+  chart.setPlotArea( 40, 10, m_nPixelsX - 20, m_nPixelsY -10, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
   chart.yAxis()->setLogScale( true );
   chart.addText(  30,  15, "NormDecl" );
-  chart.addText(  30,  60, "WeakDecl" );
-  chart.addText(  30, 105, "UpSoon" );
-  chart.addText( 250, 105, "UpSn!!" );
-  chart.addText( 460, 105, "NormAdv" );
-  chart.addText( 460,  60, "WeakAdv" );
-  chart.addText( 470,  15, "DnSoon" );
-  chart.addText( 250,  15, "DnSn!!" );
+  chart.addText(  30, m_nPixelsY / 2, "WeakDecl" );
+  chart.addText(  30, m_nPixelsY - 50, "UpSoon" );
+  chart.addText( m_nPixelsX / 2, m_nPixelsY - 50, "UpSn!!" );
+  chart.addText( m_nPixelsX - 75, m_nPixelsY - 50, "NormAdv" );
+  chart.addText( m_nPixelsX - 75,  m_nPixelsY / 2, "WeakAdv" );
+  chart.addText( m_nPixelsX - 75,  15, "DnSoon" );
+  chart.addText( m_nPixelsX / 2,  15, "DnSn!!" );
 
   DoubleArray daTrin( &m_vTrin.front(), m_vTrin.size() );
   DoubleArray daIndu( &m_vOfsIdx.front(), m_vOfsIdx.size() );

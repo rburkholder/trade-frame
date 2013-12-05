@@ -60,6 +60,7 @@ IBTWS::IBTWS( const std::string &acctCode, const std::string &address, unsigned 
   pTWS( NULL ),
   m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 ),
 //  m_dblPortfolioDelta( 0 ),
+  m_idClient( 0 ),
   m_nxtReqId( 0 )
 {
   m_sName = "IB";
@@ -82,7 +83,7 @@ void IBTWS::Connect() {
   if ( NULL == pTWS ) {
     OnConnecting( 0 );
     pTWS = new EPosixClientSocket( this );
-    bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort );
+    bool bReturn = pTWS->eConnect( m_sIPAddress.c_str(), m_nPort, m_idClient );
     if ( bReturn ) {
       m_bConnected = true;
       m_thrdIBMessages = boost::thread( boost::bind( &IBTWS::ProcessMessages, this ) );
@@ -669,7 +670,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     typedef boost::date_time::local_adjustor<ptime, -4, us_dst> tzATL_t;
 
     if ( "EST" != contractDetails.timeZoneId ) {
-      std::runtime_error( "different time zone to deal with" );
+      std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
     }
 
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;

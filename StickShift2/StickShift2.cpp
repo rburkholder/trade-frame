@@ -53,6 +53,8 @@ bool AppStickShift::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
+  m_tws->SetClientid( 1 );
+
   LinkToPanelProviderControl();
 
   m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );

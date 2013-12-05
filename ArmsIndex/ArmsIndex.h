@@ -24,6 +24,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
+#include "EventProviderConnected.h"
 #include "PanelArmsIndex.h"
 
 class AppArmsIndex:
@@ -74,6 +75,7 @@ private:
   void HandleRegisterRows( ou::db::Session& session );
 
   void HandleGuiRefresh( wxTimerEvent& event );
+  void HandleProviderConnected( EventProviderConnected& );
 
 };
 
