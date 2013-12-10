@@ -110,34 +110,47 @@ void PanelArmsIndex::CreateControls() {
     m_splitterArmsIndex->SetMinimumPaneSize(100);
 
     wxPanel* itemPanel4 = new wxPanel( m_splitterArmsIndex, ID_PANEL8, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    wxBoxSizer* itemBoxSizer5 = new wxBoxSizer(wxVERTICAL);
+    itemPanel4->SetSizer(itemBoxSizer5);
+
     wxArrayString m_lbArmsIndexStrings;
-    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxSize(90, 50), m_lbArmsIndexStrings, wxLB_SINGLE );
+    m_lbArmsIndex = new wxListBox( itemPanel4, ID_LbArmsIndex, wxDefaultPosition, wxSize(90, 80), m_lbArmsIndexStrings, wxLB_SINGLE );
+    itemBoxSizer5->Add(m_lbArmsIndex, 0, wxGROW|wxALL, 2);
 
-    wxPanel* itemPanel6 = new wxPanel( m_splitterArmsIndex, ID_PANEL9, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_btnToggleView = new wxButton( itemPanel4, ID_BtnToggleView, _("Toggle View"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer5->Add(m_btnToggleView, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+
+    wxPanel* itemPanel8 = new wxPanel( m_splitterArmsIndex, ID_PANEL9, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_sizerCharts = new wxBoxSizer(wxVERTICAL);
-    itemPanel6->SetSizer(m_sizerCharts);
+    itemPanel8->SetSizer(m_sizerCharts);
 
-    m_panelIndex = new wxPanel( itemPanel6, ID_PanelIndex, wxDefaultPosition, wxSize(600, 200), wxSIMPLE_BORDER );
+    m_panelIndex = new wxPanel( itemPanel8, ID_PanelIndex, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelIndex, 1, wxGROW|wxALL, 2);
 
-    m_panelTick = new wxPanel( itemPanel6, ID_PanelTick, wxDefaultPosition, wxSize(600, 200), wxSIMPLE_BORDER );
+    m_panelTick = new wxPanel( itemPanel8, ID_PanelTick, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelTick, 1, wxGROW|wxALL, 2);
 
-    m_panelArmsVsIndex = new wxPanel( itemPanel6, ID_PanelArmsVsIndex, wxDefaultPosition, wxSize(600, 200), wxSIMPLE_BORDER );
+    m_panelArmsVsIndex = new wxPanel( itemPanel8, ID_PanelArmsVsIndex, wxDefaultPosition, wxSize(200, 75), wxSIMPLE_BORDER );
     m_sizerCharts->Add(m_panelArmsVsIndex, 1, wxGROW|wxALL, 2);
 
-    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel6, 110);
+    m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel8, 110);
     m_sizerPanelArmsIndex->Add(m_splitterArmsIndex, 1, wxGROW|wxALL, 2);
 
-  Bind( wxEVT_SIZE, &PanelArmsIndex::HandleOnSize, this, this->GetId() );
-  Bind( wxEVT_COMMAND_LISTBOX_SELECTED, &PanelArmsIndex::HandleListBoxSelection, this, this->GetId() );
+//  Bind( wxEVT_SIZE, &PanelArmsIndex::HandleOnSize, this, this->GetId() );
+  Bind( wxEVT_COMMAND_LISTBOX_SELECTED, &PanelArmsIndex::HandleListBoxSelection, this, m_lbArmsIndex->GetId() );
+  Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelArmsIndex::HandleBtnToggleView, this, m_btnToggleView->GetId() );
 
+}
+
+void PanelArmsIndex::HandleBtnToggleView( wxCommandEvent& event ) {
+  for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
+    iter->pip->ToggleView();
+  }
 }
 
 void PanelArmsIndex::HandleOnSize( wxSizeEvent& event ) {
   for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
     iter->pip->SetChartDimensions( m_panelArmsVsIndex->GetSize().GetWidth(), m_panelArmsVsIndex->GetSize().GetHeight() );
-    //iter->pip->SetChartDimensions( 600, 200 );
   }
   event.Skip();
 }
@@ -159,6 +172,9 @@ void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
     m_pProvider = pProvider; 
 
     m_vCollections.push_back( collection_t( pProvider, "Dow INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
+    m_vCollections.push_back( collection_t( pProvider, "NAS 100", "NDX.X", "JT5T.Z", "RI5T.Z" ) );
+    //m_vCollections.push_back( collection_t( pProvider, "S&P 100", "OEX.XO", "JT8T.Z", "RI8T.Z" ) ); // on delay so not useful at the moment
+    //m_vCollections.push_back( collection_t( pProvider, "SPX 500", "SPX.XO", "JT6T.Z", "RI6T.Z" ) ); // on delay so not useful at the moment
 
     int ix( 0 );
     for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
@@ -168,11 +184,16 @@ void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
       m_lbArmsIndex->Insert( iter->sName, ix );
       ++ix;
     }
+    m_lbArmsIndex->SetSelection( 0 );
   }
 };
 
 void PanelArmsIndex::UpdateGUI( void ) {
   if ( 0 != m_vCollections.size() ) {
+      for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
+        iter->pip->PopData();
+      }
+    m_vCollections[ m_ixActiveChart ].pip->SetChartDimensions( m_panelArmsVsIndex->GetSize().GetWidth(), m_panelArmsVsIndex->GetSize().GetHeight() );
     m_vCollections[ m_ixActiveChart ].pip->DrawCharts();
   }
 }

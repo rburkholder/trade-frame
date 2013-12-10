@@ -45,7 +45,10 @@ public:
     );
   ~IndicatorPackage(void);
 
+  void ToggleView( void );
+
   void SetChartDimensions( unsigned int x, unsigned int y );
+  void PopData( void );
   void DrawCharts( void );
 
   typedef FastDelegate1<const MemBlock&> OnDrawChart_t;
@@ -63,6 +66,7 @@ private:
   bool m_bFirstIndexFound;
   bool m_bTrinOfZZPairReady;
   bool m_bIndexOfZZPairReady;
+  bool m_bDayView;
 
   double m_dblFirstIndex;
   double m_dblTrin;  // track value as it changes
@@ -87,8 +91,19 @@ private:
 
   vDouble_t m_vTick;
 
-  double m_ctBegin;
-  double m_ctEnd;
+  double m_ctDayBegin;
+  double m_ctDayEnd;
+
+  double m_ctViewBegin;
+  double m_ctViewEnd;
+
+  struct ZZPair {
+    double dblOfsIndx;
+    double dblTrin;
+    ZZPair( void ): dblOfsIndx( 0.0 ), dblTrin( 0.0 ) {};
+    ZZPair( double dblOfsIndx_, double dblTrin_ ): dblOfsIndx( dblOfsIndx_ ), dblTrin( dblTrin_ ) {};
+    ZZPair( const ZZPair& rhs ): dblOfsIndx( rhs.dblOfsIndx ), dblTrin( rhs.dblTrin ) {};
+  };
 
   struct BarDoubles {
     vDouble_t m_vBarHigh;
@@ -141,9 +156,12 @@ private:
 
   boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfIndex;
   boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTick;
-  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTrin;
+//  boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTrin;
+  boost::lockfree::spsc_queue<ZZPair, boost::lockfree::capacity<512> > m_lfIndexTrinPair;
 
   OnDrawChart_t m_OnDrawChartArms;
+
+  void PushZZPair( void );
 
   void DrawChart( BarDoubles& bd, const std::string& sName );
   void DrawChartIndex( void );

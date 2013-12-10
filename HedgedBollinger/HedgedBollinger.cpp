@@ -102,7 +102,7 @@ bool AppHedgedBollinger::OnInit() {
   m_splitterRow1->SplitVertically(m_ptreeChartables, m_panelSplitterRight, 10);
   m_sizerFrameRow1->Add(m_splitterRow1, 1, wxEXPAND|wxALL, 1);
 
-  m_tws->SetClientid( 2 );
+  m_tws->SetClientId( 2 );
 
   LinkToPanelProviderControl();
 

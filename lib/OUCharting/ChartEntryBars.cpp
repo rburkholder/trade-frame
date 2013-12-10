@@ -47,6 +47,7 @@ void ChartEntryBars::Reserve( size_type nSize ) {
 }
 
 void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
+  // may have a problem with > 4096 bars
   while ( !m_lfBar.push( bar ) ) {};
 }
 

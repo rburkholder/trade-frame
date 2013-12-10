@@ -53,7 +53,7 @@ bool AppStickShift::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
-  m_tws->SetClientid( 1 );
+  m_tws->SetClientId( 1 );
 
   LinkToPanelProviderControl();
 

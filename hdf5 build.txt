@@ -1,0 +1,63 @@
+http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/hdf5/snapshots/v19/
+
+http://www.hdfgroup.org/ftp/lib-external/szip/2.1/src/szip-2.1.tar.gz
+use the project files in the windows directory
+change dll to static
+
+http://zlib.net/zlib-1.2.8.tar.gz
+project directory:
+D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio\vc11
+builds to:
+D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug\zl
+ibstat.lib
+download
+http://download.microsoft.com/download/9/0/f/90f019ac-8243-48d3-91cf-81fc4
+093ecfd/1830_usa_ddk.iso
+to obtain ml64.exe which is in:
+D:\Data\WINDDK\3790.1830\bin\win64\x86\amd64
+after installation
+
+
+
+SZIP_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\szip-2.1\src
+SZIP_LIBRARY:FILEPATH=D:\Data\Projects\VC++\szip-2.1\windows\static\lib\x6
+4\Release\libszip.lib
+
+ZLIB_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\zlib-1.2.8
+ZLIB_LIBRARY:FILEPATH=D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio\vc1
+1\x64\ZlibStatRelease\zlibstat.lib
+
+cmake -G "Visual Studio 11 Win64" -DBUILD_TESTING:BOOL=ON
+-DHDF5_BUILD_TOOLS:BOOL=ON
+-D"ZLIB_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\zlib-1.2.8"
+-D"ZLIB_LIBRARY:FILEPATH="D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio
+\vc11\x64\ZlibStatRelease\zlibstat.lib"
+-D"SZIP_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\szip-2.1\src"
+-D"SZIP_LIBRARY:FILEPATH=D:\Data\Projects\VC++\szip-2.1\windows\static\lib
+\x64\Release\libszip.lib" ..
+
+cmake -C cacheinit.cmake                 ..
+-D"ZLIB_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\zlib-1.2.8"
+-D"ZLIB_LIBRARY:FILEPATH="D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio
+\vc11\x64\ZlibStatRelease\zlibstat.lib"
+-D"SZIP_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\szip-2.1\src"
+-D"SZIP_LIBRARY:FILEPATH=D:\Data\Projects\VC++\szip-2.1\windows\static\lib
+\x64\Release\libszip.lib" 
+
+-C is cachinit file
+-G does all the slow inspection crap
+cmake -C cacheinit.cmake -G "Visual Studio 11 Win64" ..
+-D"ZLIB_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\zlib-1.2.8"
+-D"ZLIB_LIBRARY:FILEPATH="D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio
+\vc11\x64\ZlibStatRelease\zlibstat.lib"
+-D"SZIP_INCLUDE_DIR:PATH=D:\Data\Projects\VC++\szip-2.1\src"
+-D"SZIP_LIBRARY:FILEPATH=D:\Data\Projects\VC++\szip-2.1\windows\static\lib
+\x64\Debug\libszipd.lib" 
+
+cmake --build . --config {Debug | Release}     
+cmake --build . --config Debug
+
+-----
+No virus found in this message.
+Checked by AVG - www.avg.com
+Version: 2014.0.4259 / Virus Database: 3658/6902 - Release Date: 12/08/13

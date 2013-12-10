@@ -297,6 +297,8 @@ void ExpiryBundle::SetExpiry( ptime dt ) {
 
 void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
 
+  // use the haskell book to get an estimator
+
   ou::tf::option::binomial::structOutput output;
   input.X = iter->first;
 
@@ -315,7 +317,7 @@ void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf
       iter->second.Call()->AppendGreek( greek );
     }
     catch (...) {
-      std::cout << iter->second.Call()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+//      std::cout << iter->second.Call()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
     }
   }
   if ( 0 != iter->second.Put() ) {
@@ -327,7 +329,7 @@ void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf
       iter->second.Put()->AppendGreek( greek );
     }
     catch (...) {
-      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+//      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
     }
   }
 }

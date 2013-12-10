@@ -85,6 +85,7 @@ bool AppIQFeedGetHistory::OnInit() {
   vItems.push_back( new mi( "10 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays10 ) ) );
   vItems.push_back( new mi( "30 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays30 ) ) );
   vItems.push_back( new mi( "100 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays100 ) ) );
+  vItems.push_back( new mi( "150 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays150 ) ) );
   vItems.push_back( new mi( "0 days", MakeDelegate( this, &AppIQFeedGetHistory::HandleMenuActionDays0 ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
@@ -116,6 +117,10 @@ void AppIQFeedGetHistory::HandleMenuActionDays30( void ) {
 
 void AppIQFeedGetHistory::HandleMenuActionDays100( void ) {
   m_pWorker = new Worker( "", 100 );
+}
+
+void AppIQFeedGetHistory::HandleMenuActionDays150( void ) {
+  m_pWorker = new Worker( "", 150 );
 }
 
 void AppIQFeedGetHistory::HandleMenuActionDays0( void ) {

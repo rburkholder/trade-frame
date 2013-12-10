@@ -74,7 +74,7 @@ private:
   typedef ou::tf::ProviderInterfaceBase::pInstrument_t pInstrument_t;
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELARMSINDEX, ID_SplitterArmsIndex, ID_LbArmsIndex,
-    ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PANEL8, ID_PANEL9
+    ID_PanelArmsVsIndex, ID_PanelTick, ID_PanelIndex, ID_PANEL8, ID_PANEL9, ID_BtnToggleView
   };
 
   //typedef std::vector<std::string> vSymbols_t;
@@ -126,15 +126,17 @@ private:
     wxBoxSizer* m_sizerPanelArmsIndex;
     wxSplitterWindow* m_splitterArmsIndex;
     wxListBox* m_lbArmsIndex;
+    wxButton* m_btnToggleView;
     wxBoxSizer* m_sizerCharts;
-    wxPanel* m_panelArmsVsIndex;
-    wxPanel* m_panelTick;
     wxPanel* m_panelIndex;
+    wxPanel* m_panelTick;
+    wxPanel* m_panelArmsVsIndex;
 
   void OnClose( wxCloseEvent& event );
 
   void HandleOnSize( wxSizeEvent& event );
   void HandleListBoxSelection( wxCommandEvent& event );
+  void HandleBtnToggleView( wxCommandEvent& event );
 };
 
 } // namespace tf

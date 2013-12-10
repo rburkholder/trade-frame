@@ -1,3 +1,12 @@
+2013/12/09
+view -> other windows -> property manager
+
+IQFeedGetHistory
+removed ;%(AdditionalDependencies)
+may need this in some places:  C:\Data\Projects\VSC++\hdf5\compress64\lib
+removed from defaults: zlib.lib
+removed from defaults: szlib.lib
+
 2013/11/05
 szip-2.1
 zlib-1.2.7
