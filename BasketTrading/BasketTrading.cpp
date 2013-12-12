@@ -122,8 +122,9 @@ void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   double dblUnRealized;
   double dblRealized;
   double dblCommissionsPaid;
-  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid );
-  double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
+  double dblCurrent;
+  m_pPortfolio->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblCurrent );
+  //double dblCurrent = dblUnRealized + dblRealized - dblCommissionsPaid;
   m_dblMaxPL = std::max<double>( m_dblMaxPL, dblCurrent );
   m_dblMinPL = std::min<double>( m_dblMinPL, dblCurrent );
   m_pPanelPortfolioStats->SetStats( 

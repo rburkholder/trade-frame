@@ -35,6 +35,12 @@ public:
   void HandleHdf5Object( const std::string&, const std::string& );
 protected:
 private:
+
+  ou::tf::Bars::size_type m_nMinBarCount;
+  ptime m_dtBegin;
+  ptime m_dtLast;
+  ptime m_dtEnd;
+
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::DBOps m_db;
@@ -58,6 +64,8 @@ private:
     size_t nPassedFilter;
     size_t nPVCrossings;
     size_t nUpAndR1Crossings;
+    size_t nPVAndR1Crossings;
+    size_t nPVAndS1Crossings;
     size_t nDnAndS1Crossings;
     s_t( void ): nAverageVolume( 0 ), nEnteredFilter( 0 ), nPassedFilter( 0 ), nPVCrossings( 0 ) {};
   };

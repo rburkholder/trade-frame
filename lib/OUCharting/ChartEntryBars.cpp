@@ -46,20 +46,29 @@ void ChartEntryBars::Reserve( size_type nSize ) {
   m_vClose.reserve( nSize );
 }
 
+void ChartEntryBars::AppendBarPrivate( const ou::tf::Bar& bar ) {
+  ChartEntryBaseWithTime::Append( bar.DateTime() );
+  m_vOpen.push_back( bar.Open() );
+  m_vHigh.push_back( bar.High() );
+  m_vLow.push_back( bar.Low() );
+  m_vClose.push_back( bar.Close() );
+}
+
 void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
-  // may have a problem with > 4096 bars
-  while ( !m_lfBar.push( bar ) ) {};
+  if ( m_bThreadSafe ) {
+    while ( !m_lfBar.push( bar ) ) {};
+  }
+  else {
+    AppendBarPrivate( bar );
+  }
+  
 }
 
 void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
 
   ou::tf::Bar bar;
   while ( m_lfBar.pop( bar ) ) {
-    ChartEntryBaseWithTime::Append( bar.DateTime() );
-    m_vOpen.push_back( bar.Open() );
-    m_vHigh.push_back( bar.High() );
-    m_vLow.push_back( bar.Low() );
-    m_vClose.push_back( bar.Close() );
+    AppendBarPrivate( bar );
   }
 
   if ( 0 != this->m_vDateTime.size() ) {

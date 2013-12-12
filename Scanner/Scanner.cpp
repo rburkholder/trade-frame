@@ -114,30 +114,46 @@ bool AppScanner::HandleCallBackUseGroup( s_t&, const std::string& sPath, const s
 }
 
 bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou::tf::Bars& bars ) {
+
   bool b( false );
   ++data.nEnteredFilter;
-  ou::tf::Bars::const_iterator iterVolume = bars.begin();
-  data.nAverageVolume = std::for_each( iterVolume, bars.end(), AverageVolume() );
+  data.nAverageVolume = std::for_each( bars.begin(), bars.end(), AverageVolume() );
+//  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
   if ( ( 1000000 < data.nAverageVolume ) 
     && ( 12.0 <= bars.Last()->Close() )
-    && ( 90.0 >= bars.Last()->Close() ) ) {
+    && ( 90.0 >= bars.Last()->Close() ) 
+    && ( m_nMinBarCount <= bars.Size() )
+    && ( m_dtLast.date() == bars.Last()->DateTime().date() )
+    ) {
 //      Info info( sObjectName, *bars.Last() );
 //      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
       //std::cout << sObject << " vol=" << volAverage << std::endl;
       ou::tf::Bars::const_iterator iter1, iter2;
       iter2 = bars.end();
-      iter1 = iter2 - 101;
+      iter1 = iter2 - m_nMinBarCount;
       iter2 = iter1;
       ++iter2;
       data.nPVCrossings = 0;
       data.nUpAndR1Crossings = 0;
       data.nDnAndS1Crossings = 0;
+      data.nPVAndR1Crossings = 0;
+      data.nPVAndS1Crossings = 0;
       while ( bars.end() != iter2 ) {
         ou::tf::PivotSet pivot( "pv", *iter1 );
         double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
         if ( ( pv <= iter2->High() ) && ( pv >= iter2->Low() ) ) {
           ++(data.nPVCrossings);
         }
+
+        if ( iter2->Open() < pv ) {
+          double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
+          if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(data.nPVAndR1Crossings);
+        }
+        if ( iter2->Open() > pv ) {
+          double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
+          if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(data.nPVAndS1Crossings);
+        }
+
         if ( iter2->Open() > pv ) {
           double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
           if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(data.nUpAndR1Crossings);
@@ -146,6 +162,7 @@ bool AppScanner::HandleCallBackFilter( s_t& data, const std::string& sObject, ou
           double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
           if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(data.nDnAndS1Crossings);
         }
+
         ++iter1;
         ++iter2;
       }
@@ -163,18 +180,28 @@ void AppScanner::HandleCallBackResults( s_t& data, const std::string& sObject, o
     << data.nEnteredFilter << "," 
     << data.nPassedFilter << ","
     << data.nUpAndR1Crossings << ","
+    << data.nPVAndR1Crossings << ","
     << data.nPVCrossings << ","
-    << data.nDnAndS1Crossings 
+    << data.nPVAndS1Crossings << ","
+    << data.nDnAndS1Crossings << ","
+    << data.nUpAndR1Crossings + data.nDnAndS1Crossings << ","
+    << data.nPVAndR1Crossings + data.nPVAndS1Crossings << ","
+    << data.nUpAndR1Crossings + data.nDnAndS1Crossings +
+       data.nPVAndR1Crossings + data.nPVAndS1Crossings
     << std::endl;
 }
 
 void AppScanner::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
+  m_nMinBarCount = 20;  // tie this approx to the date range below
+  m_dtBegin = ptime( date( 2013, 10, 1 ), time_duration( 0, 0, 0 ) );
+  m_dtLast = ptime( date( 2013, 12, 10 ), time_duration( 0, 0, 0 ) );
+  m_dtEnd = ptime( date( 2013, 12, 11 ), time_duration( 0, 0, 0 ) );  // make one day beyond m_dtLast
   ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter( 
     "/bar/86400", 
-    ptime( date( 2012, 10, 31 ), time_duration( 0, 0, 0 ) ), 
-    ptime( date( 2013, 10, 31 ), time_duration( 0, 0, 0 ) ), 
-    100,
+    m_dtBegin, 
+    m_dtEnd, 
+    20,
     boost::phoenix::bind( &AppScanner::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &AppScanner::HandleCallBackFilter, this, args::arg1, args::arg2, args::arg3 ),
     boost::phoenix::bind( &AppScanner::HandleCallBackResults, this, args::arg1, args::arg2, args::arg3 )
@@ -185,6 +212,7 @@ void AppScanner::ScanBars( void ) {
   catch( ... ) {
     std::cout << "Scan Problems" << std::endl;
   }
+  std::cout << "Scan Complete" << std::endl;
 }
 
 void AppScanner::HandleMenuActionScan( void ) {
