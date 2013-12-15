@@ -173,8 +173,8 @@ void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
 
     m_vCollections.push_back( collection_t( pProvider, "Dow INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
     m_vCollections.push_back( collection_t( pProvider, "NAS 100", "NDX.X", "JT5T.Z", "RI5T.Z" ) );
-    //m_vCollections.push_back( collection_t( pProvider, "S&P 100", "OEX.XO", "JT8T.Z", "RI8T.Z" ) ); // on delay so not useful at the moment
-    //m_vCollections.push_back( collection_t( pProvider, "SPX 500", "SPX.XO", "JT6T.Z", "RI6T.Z" ) ); // on delay so not useful at the moment
+    m_vCollections.push_back( collection_t( pProvider, "S&P 100", "OEX.XO", "JT8T.Z", "RI8T.Z" ) ); // on delay so not useful at the moment
+    m_vCollections.push_back( collection_t( pProvider, "SPX 500", "SPX.XO", "JT6T.Z", "RI6T.Z" ) ); // on delay so not useful at the moment
 
     int ix( 0 );
     for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {

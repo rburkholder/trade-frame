@@ -126,7 +126,7 @@ bool AppHdf5Chart::OnInit() {
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-//  vItems.push_back( new mi( "e1 Load Tree", MakeDelegate( this, &AppHdf5Chart::HandleMenuActionLoadTree ) ) );
+//  vItems.push_back( new mi( "test", MakeDelegate( m_pPanelChartHdf5, &ou::tf::PanelChartHdf5::TestChart ) ) );
 //  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
 //  this->m_pData1Provider->Connect();

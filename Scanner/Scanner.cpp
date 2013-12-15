@@ -195,8 +195,8 @@ void AppScanner::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
   m_nMinBarCount = 20;  // tie this approx to the date range below
   m_dtBegin = ptime( date( 2013, 10, 1 ), time_duration( 0, 0, 0 ) );
-  m_dtLast = ptime( date( 2013, 12, 10 ), time_duration( 0, 0, 0 ) );
-  m_dtEnd = ptime( date( 2013, 12, 11 ), time_duration( 0, 0, 0 ) );  // make one day beyond m_dtLast
+  m_dtLast = ptime( date( 2013, 12, 13 ), time_duration( 0, 0, 0 ) );
+  m_dtEnd = ptime( date( 2013, 12, 14 ), time_duration( 0, 0, 0 ) );  // make one day beyond m_dtLast
   ou::tf::InstrumentFilter<s_t,ou::tf::Bars> filter( 
     "/bar/86400", 
     m_dtBegin, 

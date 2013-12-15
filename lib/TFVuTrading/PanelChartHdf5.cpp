@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+#include <vector>
+
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 

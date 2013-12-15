@@ -74,6 +74,9 @@ private:
   double m_dblZZTrin;
   double m_dblZZIndex;
 
+  typedef std::vector<int> vColours_t;
+  vColours_t m_vColours;
+
   pInstrument_t m_pTrin;
   pInstrument_t m_pTick;
   pInstrument_t m_pIndex;

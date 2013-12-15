@@ -578,7 +578,11 @@ void Network<ownerT,charT>::OnSendDoneCommon(
   assert( ( NS_CONNECTED == m_stateNetwork ) || ( NS_DISCONNECTING == m_stateNetwork) );
 
   m_reposSendBuffers.CheckInL( pbuffer );
-  assert( bytes_transferred == pbuffer->size() );
+  //assert( bytes_transferred == pbuffer->size() );
+  if ( bytes_transferred != pbuffer->size() ) {
+    std::cout << "network.h::OnSendDoneCommon bt=" << bytes_transferred << ", size=" << pbuffer->size() << std::endl;
+    //std::cout << "network.h::OnSendDoneCommon lb=" << pbuffer->
+  }
   m_cntBytesTransferred_send += bytes_transferred;
 
 //  InterlockedDecrement( &m_cntActiveSends );

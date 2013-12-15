@@ -31,6 +31,16 @@ IndicatorPackage::IndicatorPackage(
      m_dblZZTrin( 0.0 ), m_dblZZIndex( 0.0 ), m_bDayView( true )
 
 {
+
+  // http://krazydad.com/tutorials/makecolors.php
+  double freq = 0.1;
+  for ( int i = 0.0; i < 32.0; ++i ) {
+    int red = std::sin( i * freq + 0.0 ) * 127 + 128;
+    int grn = std::sin( i * freq + 2.0 ) * 127 + 128;
+    int blu = std::sin( i * freq + 4.0 ) * 127 + 128;
+    m_vColours.push_back( ( ( ( red << 8 ) + grn ) << 8 ) + blu );
+  }
+
   m_bfIndex.SetOnBarUpdated( MakeDelegate( &m_bdIndex, &BarDoubles::WorkingBar ) );
   m_bfIndex.SetOnBarComplete( MakeDelegate( &m_bdIndex, &BarDoubles::PushBack ) );
   m_bfTick.SetOnBarUpdated( MakeDelegate( &m_bdTicks, &BarDoubles::WorkingBar ) );
@@ -172,7 +182,7 @@ void IndicatorPackage::DrawCharts( void ) {
                                       t.time_of_day().hours(), t.time_of_day().minutes() + 1, t.time_of_day().seconds() );
 
     m_ctViewBegin = Chart::chartTime( t.date().year(), t.date().month(), t.date().day(),
-                                      t.time_of_day().hours(), t.time_of_day().minutes() - 10, t.time_of_day().seconds() );
+                                      t.time_of_day().hours(), t.time_of_day().minutes() - 60, t.time_of_day().seconds() );
   }
 
   DrawChartIndex();
@@ -224,12 +234,33 @@ void IndicatorPackage::DrawChartArms( void ) {
   chart.addText( m_nPixelsX - 70,  20, "DnSoon" );
   chart.addText( m_nPixelsX / 2,  20, "DnSn!!" );
 
-  DoubleArray daTrin( &m_vTrin.front(), m_vTrin.size() );
+  vColours_t::const_iterator iterc( m_vColours.begin() );
+
+/*  DoubleArray daTrin( &m_vTrin.front(), m_vTrin.size() );
   DoubleArray daIndu( &m_vOfsIdx.front(), m_vOfsIdx.size() );
 
   LineLayer* pLLIndu = chart.addLineLayer( daTrin, 0x33ff33, "Indu" );
   pLLIndu->setXData( daIndu );
   pLLIndu->setLineWidth( 3 );
+  */
+
+  typedef vDouble_t::const_reverse_iterator iterDoubles;
+  iterDoubles iterx1( m_vOfsIdx.rbegin() );
+  iterDoubles iterx2( iterx1 ); ++iterx2;
+  iterDoubles itery1( m_vTrin.rbegin() );
+  iterDoubles itery2( itery1 ); ++itery2;
+  while ( m_vOfsIdx.rend() != iterx2 ) {
+    DoubleArray dax( &(*iterx2), 2 );
+    DoubleArray day( &(*itery2), 2 );
+    LineLayer* pLLIndu = chart.addLineLayer( day, *iterc, "Trin" );
+    pLLIndu->setXData( dax );
+    pLLIndu->setLineWidth( 2 );
+    pLLIndu->setBorderColor( 0xff000000 );
+    //pLLIndu->moveFront();
+    ++iterx1; ++iterx2; ++itery1; ++itery2;
+    ++iterc;  
+    if ( m_vColours.end() == iterc ) --iterc;
+  }
 
   MemBlock m = chart.makeChart( BMP );
   if ( 0 != m_OnDrawChartArms ) m_OnDrawChartArms( m );

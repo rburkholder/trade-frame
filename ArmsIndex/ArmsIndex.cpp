@@ -52,6 +52,8 @@ bool AppArmsIndex::OnInit() {
   m_sizerMain->Add( m_pPanelLogging, 0, wxALL| wxALIGN_LEFT|wxALIGN_BOTTOM|wxEXPAND, 2 );
 //  m_pPanelLogging->Show( true );
 
+  std::cout << "(c) 2013/12/13 One Unified Ltd.  All Rights Reserved.  info@oneunified.net" << std::endl;
+
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
