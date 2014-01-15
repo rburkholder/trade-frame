@@ -37,18 +37,25 @@
 
 #include <OUCharting/ChartDataBase.h>
 
-class Strategy: public ou::tf::DailyTradeTimeFrame<Strategy> {
+class Strategy: 
+  public ou::tf::DailyTradeTimeFrame<Strategy>,
+  public ou::ChartDataBase
+{
   friend ou::tf::DailyTradeTimeFrame<Strategy>; 
 public:
   Strategy( ou::tf::option::MultiExpiryBundle* meb );
   ~Strategy(void);
-  ou::ChartDataView& GetChartDataView( void ) {return m_ChartDataUnderlying.GetChartDataView(); };
+  //ou::ChartDataView& GetChartDataView( void ) { return m_ChartDataUnderlying.GetChartDataView(); };
+  ou::ChartDataView& GetChartDataView( void ) { return GetChartDataView(); };
 protected:
 private:
 
+  enum EBollingerState { eBollingerUnknown, eBollingerLow, eBollingerHigh, eBollingerMid };
+  std::vector<EBollingerState> m_vBollingerState;
+
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
 
-  ou::ChartDataBase m_ChartDataUnderlying;
+//  ou::ChartDataBase m_ChartDataUnderlying;
 
   struct BundleAtmIv {
     boost::shared_ptr<ou::ChartEntryIndicator> m_pceCallIV;

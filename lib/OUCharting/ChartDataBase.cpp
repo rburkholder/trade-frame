@@ -17,6 +17,7 @@
 namespace ou { // One Unified
 
 // 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765
+// .91 1.5 2.4  3.9, 6.3, 10.2 16.5 26.6  54.0  69.7  112.8
 
 ChartDataBase::ChartDataBase(void) 
   : m_dvChart(),
@@ -127,24 +128,24 @@ ChartDataBase::ChartDataBase(void)
   m_ceEma1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceUpperBollinger1.SetColour( ou::Colour::DarkOliveGreen );
   m_ceLowerBollinger1.SetColour( ou::Colour::DarkOliveGreen );
-  m_ceEma1.SetName( "Bollinger1" );
+  m_ceEma1.SetName( "Bollinger1 - 2.4" );
 
   //m_ceEma2.SetColour( ou::Colour::RoyalBlue );
   m_ceEma2.SetColour( ou::Colour::Turquoise );
   m_ceUpperBollinger2.SetColour( ou::Colour::Turquoise );
   m_ceLowerBollinger2.SetColour( ou::Colour::Turquoise );
-  m_ceEma2.SetName( "Bollinger2" );
+  m_ceEma2.SetName( "Bollinger2 - 6.3" );
 
   //m_ceEma3.SetColour( ou::Colour::MediumSpringGreen );
   m_ceEma3.SetColour( ou::Colour::GreenYellow );
   m_ceUpperBollinger3.SetColour( ou::Colour::GreenYellow );
   m_ceLowerBollinger3.SetColour( ou::Colour::GreenYellow );
-  m_ceEma3.SetName( "Bollinger3" );
+  m_ceEma3.SetName( "Bollinger3 - 16.5" );
 
   m_ceEma4.SetColour( ou::Colour::MediumSlateBlue );
   m_ceUpperBollinger4.SetColour( ou::Colour::MediumSlateBlue );
   m_ceLowerBollinger4.SetColour( ou::Colour::MediumSlateBlue );
-  m_ceEma4.SetName( "Bollinger4" );
+  m_ceEma4.SetName( "Bollinger4 - 54.0" );
 
 //  m_ceBollinger1Offset.SetColour( ou::Colour::DarkOliveGreen );
 //  m_ceBollinger2Offset.SetColour( ou::Colour::Turquoise );

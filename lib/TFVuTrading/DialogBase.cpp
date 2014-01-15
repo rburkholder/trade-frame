@@ -43,6 +43,7 @@ bool DialogBase::Create( wxWindow* parent, wxWindowID id, const wxString& captio
   Bind( wxEVT_CLOSE_WINDOW, &DialogBase::OnCloseWindow, this );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &DialogBase::OnOk, this, wxID_OK );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &DialogBase::OnCancel, this, wxID_CANCEL );
+  //Bind( wxEVT_COMMAND_BUTTON_CLICKED, &DialogBase::OnCloseWindow, this, wxID_CANCEL );
 
   return true;
 
@@ -70,19 +71,17 @@ void DialogBase::OnOk( wxCommandEvent& event ) {
 void DialogBase::OnCancel( wxCommandEvent& event ) {
   // cancel or escape
   // could be merged with OnClose
-  if ( IsModal() )
-    EndModal(wxID_CANCEL);
-  else {
-    SetReturnCode(wxID_CANCEL);
-    m_pDataExchange->bOk = false;
-    this->Show(false);
-    if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
-  }
+  OnCancelOrClose();
 }
 
 void DialogBase::OnCloseWindow( wxCloseEvent& event ) {
   // close button
-  if ( IsModal() )
+  OnCancelOrClose();
+  event.Skip();
+}
+
+void DialogBase::OnCancelOrClose( void ) {
+  if ( IsModal() ) // this condition may not be correct modal endings.
     EndModal(wxID_CANCEL);
   else {
     SetReturnCode(wxID_CANCEL);
@@ -90,7 +89,6 @@ void DialogBase::OnCloseWindow( wxCloseEvent& event ) {
     this->Show(false);
     if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
   }
-  event.Skip();
 }
 
 wxBitmap DialogBase::GetBitmapResource( const wxString& name ) {

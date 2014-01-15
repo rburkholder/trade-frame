@@ -44,26 +44,26 @@ void PivotGroup::CalculatePivotSets(Bars* pBars) {
   const Bar& bar0( *pBars->Last() );
 
   //stringstream ss;
-  date dtThisDay = bar0.DateTime().date();
+  boost::gregorian::date dtThisDay = bar0.DateTime().date();
   //ss << "This Day: " << dtThisDay;
-  date dtPrevDay = ( boost::date_time::Monday == dtThisDay.day_of_week() ) 
-    ? dtThisDay - days( 3 )
-    : dtThisDay - days( 1 );
+  boost::gregorian::date dtPrevDay = ( boost::date_time::Monday == dtThisDay.day_of_week() ) 
+    ? dtThisDay - boost::gregorian::days( 3 )
+    : dtThisDay - boost::gregorian::days( 1 );
   //ss << ", Prev Day: " << dtPrevDay;
-  date dtPrevMonday = dtThisDay + days( boost::date_time::Monday - dtThisDay.day_of_week() ) - days( 7 );
+  boost::gregorian::date dtPrevMonday = dtThisDay + boost::gregorian::days( boost::date_time::Monday - dtThisDay.day_of_week() ) - boost::gregorian::days( 7 );
   //ss << ", Prev Monday: " << dtPrevMonday;
-  date dtPrevWeekFriday = dtPrevMonday + days( 4 );
+  boost::gregorian::date dtPrevWeekFriday = dtPrevMonday + boost::gregorian::days( 4 );
   //ss << ", Prev Friday: " << dtPrevWeekFriday;
-  date dtPrevMonthEnd = dtThisDay - days( dtThisDay.day().as_number() );
+  boost::gregorian::date dtPrevMonthEnd = dtThisDay - boost::gregorian::days( dtThisDay.day().as_number() );
   //ss << ", Prev Month End: " << dtPrevMonthEnd;
-  date dtPrevMonth = dtPrevMonthEnd - days( dtPrevMonthEnd.day().as_number() - 1 );
+  boost::gregorian::date dtPrevMonth = dtPrevMonthEnd - boost::gregorian::days( dtPrevMonthEnd.day().as_number() - 1 );
   //ss << ", Prev Month: " << dtPrevMonth;
-  date dtMonthAgo = dtThisDay - days( 30 );
+  boost::gregorian::date dtMonthAgo = dtThisDay - boost::gregorian::days( 30 );
   //ss << ", Month ago: " << dtMonthAgo;
-  date dtSixMonthsAgo = dtThisDay - months( 6 );
+  boost::gregorian::date dtSixMonthsAgo = dtThisDay - boost::gregorian::months( 6 );
   //ss << ", Six Months ago: " << dtSixMonthsAgo;
   //date dt200DaysAgo = dtThisDay - days( 42 * 7 - 2 );
-  date dt200BarsAgo = dtThisDay - days( ( ( 200 /*bars wanted*/ / 5 /*days/wk*=#wks*/ ) * 7 /*days/wk*/ ) + 10 /*trade holidays*/ ); // ensures 200 bars is within reasonable time frame
+  boost::gregorian::date dt200BarsAgo = dtThisDay - boost::gregorian::days( ( ( 200 /*bars wanted*/ / 5 /*days/wk*=#wks*/ ) * 7 /*days/wk*/ ) + 10 /*trade holidays*/ ); // ensures 200 bars is within reasonable time frame
   //ss << ", 200 Days ago: " << dt200DaysAgo;
 
   PivotSet Pivot1Day( "pv1Dy", bar0.High(), bar0.Low(), bar0.Close() );

@@ -64,6 +64,7 @@ private:
   void OnCloseWindow( wxCloseEvent& event );
   void OnOk( wxCommandEvent& event );
   void OnCancel( wxCommandEvent& event );
+  void OnCancelOrClose( void );
 
 };
 

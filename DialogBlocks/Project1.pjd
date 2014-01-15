@@ -12555,8 +12555,8 @@
                     <bool name="proxy-Fit to content">0</bool>
                     <long name="proxy-X">-1</long>
                     <long name="proxy-Y">-1</long>
-                    <long name="proxy-Width">600</long>
-                    <long name="proxy-Height">200</long>
+                    <long name="proxy-Width">200</long>
+                    <long name="proxy-Height">75</long>
                     <string name="proxy-AlignH">"Expand"</string>
                     <string name="proxy-AlignV">"Centre"</string>
                     <long name="proxy-Stretch factor">1</long>
@@ -12629,8 +12629,8 @@
                     <bool name="proxy-Fit to content">0</bool>
                     <long name="proxy-X">-1</long>
                     <long name="proxy-Y">-1</long>
-                    <long name="proxy-Width">600</long>
-                    <long name="proxy-Height">200</long>
+                    <long name="proxy-Width">200</long>
+                    <long name="proxy-Height">75</long>
                     <string name="proxy-AlignH">"Expand"</string>
                     <string name="proxy-AlignV">"Centre"</string>
                     <long name="proxy-Stretch factor">1</long>
@@ -12703,8 +12703,8 @@
                     <bool name="proxy-Fit to content">0</bool>
                     <long name="proxy-X">-1</long>
                     <long name="proxy-Y">-1</long>
-                    <long name="proxy-Width">600</long>
-                    <long name="proxy-Height">200</long>
+                    <long name="proxy-Width">200</long>
+                    <long name="proxy-Height">75</long>
                     <string name="proxy-AlignH">"Expand"</string>
                     <string name="proxy-AlignV">"Centre"</string>
                     <long name="proxy-Stretch factor">1</long>

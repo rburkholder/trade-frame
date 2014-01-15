@@ -16,7 +16,6 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 #include <OUCommon/TimeSource.h>
 
@@ -39,19 +38,21 @@ class DailyTradeTimeFrame {
 public:
 
   DailyTradeTimeFrame(void); // uses today's date
-  DailyTradeTimeFrame( boost::gregorian::date );  // simluation date
+  DailyTradeTimeFrame( boost::gregorian::date );  // simulation date
   virtual ~DailyTradeTimeFrame(void) {};
 
   template<typename DD>  // DD is DatedDatum construct
   void TimeTick( DD& dd );
 
-  void SetMarketOpen( time_duration tdMarketOpen ) { m_tdMarketOpen = tdMarketOpen; };
-  void SetRegularHoursOpen( time_duration tdRHOpen ) { m_tdRHOpen = tdRHOpen; };
-  void SetStartTrading( time_duration tdStartTrading ) { m_tdStartTrading = tdStartTrading; };
-  void SetCancellation( time_duration tdTimeForCancellation ) { m_tdTimeForCancellation = tdTimeForCancellation; };
-  void SetGoNeutral( time_duration tdGoNeutral ) { m_tdGoNeutral = tdGoNeutral; };
-  void SetRegularHoursClose( time_duration tdRHClose ) { m_tdRHClose = tdRHClose; };
-  void SetMarketClose( time_duration tdMarketClose ) { m_tdMarketClose = tdMarketClose; };
+  void InitForUS24HourFutures( boost::gregorian::date );
+
+  void SetMarketOpen( ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; };
+  void SetRegularHoursOpen( ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; };
+  void SetStartTrading( ptime dtStartTrading ) { m_dtStartTrading = dtStartTrading; };
+  void SetCancellation( ptime dtTimeForCancellation ) { m_dtTimeForCancellation = dtTimeForCancellation; };
+  void SetGoNeutral( ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; };
+  void SetRegularHoursClose( ptime dtRHClose ) { m_dtRHClose = dtRHClose; };
+  void SetMarketClose( ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };
 
 protected:
   // per type
@@ -70,18 +71,18 @@ protected:
   void HandleCancel( void ) {};
   void HandleGoNeutral( void ) {};
 private:
-  time_duration m_tdMarketOpen;
-  time_duration m_tdRHOpen;
-  time_duration m_tdStartTrading;
-  time_duration m_tdTimeForCancellation;
-  time_duration m_tdGoNeutral;
-  time_duration m_tdWaitForRHClose;
-  time_duration m_tdRHClose;
-  time_duration m_tdMarketClose;
+  ptime m_dtMarketOpen;
+  ptime m_dtRHOpen;
+  ptime m_dtStartTrading;
+  ptime m_dtTimeForCancellation;
+  ptime m_dtGoNeutral;
+  ptime m_dtWaitForRHClose;
+  ptime m_dtRHClose;
+  ptime m_dtMarketClose;
 
   TimeFrame::enumTimeFrame m_stateTimeFrame;
 
-  void Init( boost::gregorian::date );
+  void InitForUSEquityExchanges( boost::gregorian::date );
   ptime Normalize( boost::gregorian::date date, time_duration time, const std::string& zone ) {
     return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
   }
@@ -93,7 +94,7 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame( void )
   : m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {
-  Init( ou::TimeSource::Instance().External().date() );
+  InitForUSEquityExchanges( ou::TimeSource::Instance().External().date() );
 };
 
 template<class T>
@@ -101,32 +102,45 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame( boost::gregorian::date date )
   : m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {
-  Init( date );
+  InitForUSEquityExchanges( date );
 };
 
 template<class T>
-void DailyTradeTimeFrame<T>::Init( boost::gregorian::date date ) {
-  m_tdMarketOpen          = Normalize( date, time_duration(  7,  0,  0 ), "America/New_York" ).time_of_day();
-  m_tdRHOpen              = Normalize( date, time_duration(  9, 30,  0 ), "America/New_York" ).time_of_day();
-  m_tdStartTrading        = Normalize( date, time_duration(  9, 30, 30 ), "America/New_York" ).time_of_day();
-  m_tdTimeForCancellation = Normalize( date, time_duration( 15, 57,  0 ), "America/New_York" ).time_of_day();
-  m_tdGoNeutral           = Normalize( date, time_duration( 15, 57, 15 ), "America/New_York" ).time_of_day();
-  m_tdWaitForRHClose      = Normalize( date, time_duration( 15, 58,  0 ), "America/New_York" ).time_of_day();
-  m_tdRHClose             = Normalize( date, time_duration( 16,  0,  0 ), "America/New_York" ).time_of_day();
-  m_tdMarketClose         = Normalize( date, time_duration( 17, 30,  0 ), "America/New_York" ).time_of_day();
+void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date date ) {
+  m_dtMarketOpen          = Normalize( date, time_duration(  7,  0,  0 ), "America/New_York" );
+  m_dtRHOpen              = Normalize( date, time_duration(  9, 30,  0 ), "America/New_York" );
+  m_dtStartTrading        = Normalize( date, time_duration(  9, 30, 30 ), "America/New_York" );
+  m_dtTimeForCancellation = Normalize( date, time_duration( 15, 57,  0 ), "America/New_York" );
+  m_dtGoNeutral           = Normalize( date, time_duration( 15, 57, 15 ), "America/New_York" );
+  m_dtWaitForRHClose      = Normalize( date, time_duration( 15, 58,  0 ), "America/New_York" );
+  m_dtRHClose             = Normalize( date, time_duration( 16,  0,  0 ), "America/New_York" );
+  m_dtMarketClose         = Normalize( date, time_duration( 17, 30,  0 ), "America/New_York" );
+}
+
+template<class T>
+void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) {
+  m_dtMarketOpen          = Normalize( date                   , time_duration( 17, 45,  0 ), "America/New_York" );
+  m_dtRHOpen              = Normalize( date                   , time_duration( 18,  0,  0 ), "America/New_York" );
+  m_dtStartTrading        = Normalize( date                   , time_duration( 18,  0, 30 ), "America/New_York" );
+  m_dtTimeForCancellation = Normalize( date + date_duration(1), time_duration( 15, 57,  0 ), "America/New_York" );
+  m_dtGoNeutral           = Normalize( date + date_duration(1), time_duration( 15, 57, 15 ), "America/New_York" );
+  m_dtWaitForRHClose      = Normalize( date + date_duration(1), time_duration( 15, 58,  0 ), "America/New_York" );
+  m_dtRHClose             = Normalize( date + date_duration(1), time_duration( 16,  0,  0 ), "America/New_York" );
+  m_dtMarketClose         = Normalize( date + date_duration(1), time_duration( 17, 15,  0 ), "America/New_York" );
 }
 
 template<class T>
 template<typename DD>
 void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
 
-  time_duration td( dd.DateTime().time_of_day() );
+  //time_duration td( dd.DateTime().time_of_day() );
+  ptime dt( dd.DateTime() );
 
   static_cast<T*>(this)->HandleCommon( dd );
 
   switch ( m_stateTimeFrame ) {
   case TimeFrame::RHTrading:
-    if ( td >= m_tdTimeForCancellation ) {  // any problems crossing midnight for futures type trading?
+    if ( dt >= m_dtTimeForCancellation ) {  // any problems crossing midnight for futures type trading?
       m_stateTimeFrame = TimeFrame::Cancel;
       static_cast<T*>(this)->HandleCancel();  // one shot
       m_stateTimeFrame = TimeFrame::Cancelling;
@@ -137,7 +151,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::PauseForQuotes:
-    if ( td >= m_tdStartTrading ) {
+    if ( dt >= m_dtStartTrading ) {
       m_stateTimeFrame = TimeFrame::RHTrading;
       static_cast<T*>(this)->HandleRHTrading( dd );
     }
@@ -146,7 +160,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::Cancelling:
-    if ( td >= m_tdGoNeutral ) {
+    if ( dt >= m_dtGoNeutral ) {
       m_stateTimeFrame = TimeFrame::GoNeutral;
       static_cast<T*>(this)->HandleGoNeutral();  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
@@ -157,7 +171,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::GoingNeutral:
-    if ( td >= m_tdWaitForRHClose ) {
+    if ( dt >= m_dtWaitForRHClose ) {
       m_stateTimeFrame = TimeFrame::WaitForRHClose;
       static_cast<T*>(this)->HandleWaitForRHClose( dd );
     }
@@ -166,7 +180,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::WaitForRHClose:
-    if ( td >= m_tdRHClose ) {
+    if ( dt >= m_dtRHClose ) {
       m_stateTimeFrame = TimeFrame::AfterRH;
       static_cast<T*>(this)->HandleAfterRH( dd );
     }
@@ -175,7 +189,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::AfterRH:
-    if ( td >= m_tdMarketClose ) {
+    if ( dt >= m_dtMarketClose ) {
       m_stateTimeFrame = TimeFrame::Closed;
       static_cast<T*>(this)->HandleEndOfMarket( dd );
     }
@@ -184,7 +198,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::PreRH:
-    if ( td >= m_tdRHOpen ) {
+    if ( dt >= m_dtRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
       static_cast<T*>(this)->HandleBellHeard();  // one shot
       m_stateTimeFrame = TimeFrame::PauseForQuotes;
@@ -195,8 +209,8 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::Closed:
-    if ( ( ( m_tdMarketClose > m_tdMarketOpen ) && ( td >= m_tdMarketOpen ) && ( td < m_tdMarketClose ) ) // same day window
-      || ( ( m_tdMarketClose < m_tdMarketOpen ) && ( td >= m_tdMarketOpen ) && ( td > m_tdMarketClose ) ) // crosses a day
+    if ( ( ( m_dtMarketClose > m_dtMarketOpen ) && ( dt >= m_dtMarketOpen ) && ( dt < m_dtMarketClose ) ) // same day window
+      || ( ( m_dtMarketClose < m_dtMarketOpen ) && ( dt >= m_dtMarketOpen ) && ( dt > m_dtMarketClose ) ) // crosses a day
       ) {
         m_stateTimeFrame = TimeFrame::PreRH;
         static_cast<T*>(this)->HandlePreOpen( dd );

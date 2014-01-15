@@ -141,7 +141,7 @@
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_54_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-3.0.0\lib\vc_x64_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_54_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

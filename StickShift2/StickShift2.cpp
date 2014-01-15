@@ -255,6 +255,7 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
     ConstructEquityPosition1( pInstrument );
   }
   else {
+    std::cout << "Requesting IB " << sName << std::endl;
     ou::tf::IBTWS::Contract contract;
     contract.currency = "USD";
     contract.exchange = "SMART";

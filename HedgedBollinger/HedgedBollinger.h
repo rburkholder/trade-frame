@@ -80,6 +80,9 @@ private:
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
 
+  pPortfolio_t m_pPortfolioLongs;
+  pPortfolio_t m_pPortfolioShorts;
+
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
   unsigned int m_cntIVCalc;  // calc IV every nth gui refresh

@@ -16,10 +16,38 @@
 
 #include "Strategy1.h"
 
+// ideas
+/*
+* run puts on the high side, and calls on the low side
+* bollinger bands need to be 2.5 x spread wide
+* then on big moves, can close out pairs as profitable strangles
+
+* count number of band hits
+* enumeration of which side was last
+
+* portfolio long
+* portfolio short
+
+* close positions when profitable
+* track number of open positions
+
+* need slope generator, so can tell if moving average is going up versuus going down
+* then trade with the trend, starting on the band
+
+* pick up three on each side then start pruning back when possible
+*/
 
 Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb ) 
   : m_pBundle( meb )
 {
+
+  boost::gregorian::date date( ou::TimeSource::Instance().External().date() );
+  InitForUS24HourFutures( date );
+  SetStartTrading( ptime( date, time_duration( 18, 30, 0 ) ) );
+
+  for ( int ix = 0; ix <= 3; ++ix ) {
+    m_vBollingerState[ix] = eBollingerUnknown;
+  }
 
   m_bThreadPopDatumsActive = true;
   m_pThreadPopDatums = new boost::thread( &Strategy::ThreadPopDatums, this );
@@ -51,19 +79,17 @@ Strategy::~Strategy(void) {
 
 }
 
-// for these events, need to queue the values.
-// need a work thread to be started 
-// two threads needed:
+// two threads used:
 //  * thread to update vectors and calculate the trade signals
 //  * thread to use data from updated vectors and draw charts (a long lived process)
 // biggest issue is that vectors can not be re-allocated during charting process.
 // put vectors into a visitor process, which can be locked?  
-// pre-allocate with 100k elements. At 80%, start expanding.  This process needs to 
-//   lock the trade-signals thread and the charting thread
+// lock the trade-signals thread and the charting thread
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   // need to queue this from the originating thread.
-  m_ChartDataUnderlying.HandleTrade( trade );
+  //m_ChartDataUnderlying.HandleTrade( trade );
+  ou::ChartDataBase::HandleTrade( trade );
   TimeTick( trade );
 }
 
@@ -72,7 +98,8 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
-  m_ChartDataUnderlying.HandleQuote( quote );
+  //m_ChartDataUnderlying.HandleQuote( quote );
+  ou::ChartDataBase::HandleQuote( quote );
   TimeTick( quote );
 }
 
@@ -127,6 +154,12 @@ void Strategy::HandleInboundTradeUnderlying( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
+  if ( quote.IsValid() ) {
+    double mid = quote.Midpoint();
+
+    for ( int ix = 0; ix <=3; ++ix ) {
+    }
+  }
 }
 
 void Strategy::HandleCommon( const ou::tf::Quote& quote ) {
@@ -154,8 +187,10 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     bai.m_pceCallIV->SetName( ss.str() + " call" );
     bai.m_pcePutIV->SetName( ss.str() + " put" );
     m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
-    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    //m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    //m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
   }
   else {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );

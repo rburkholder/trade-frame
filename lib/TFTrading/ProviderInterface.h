@@ -244,7 +244,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( p
     assert( m_mapSymbols.end() != iter );
   }
   else {
-    throw std::runtime_error( "AddCSymbol symbol already exists in provider" );
+    throw std::runtime_error( "AddCSymbol " + pSymbol->GetId() + " symbol already exists in provider" );
   }
   return iter->second;
 }
@@ -254,7 +254,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( co
   m_mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
-    throw std::runtime_error( "GetSymbol did not find symbol" );
+    throw std::runtime_error( "GetSymbol did not find symbol " + id );
   }
   return iter->second;
 }

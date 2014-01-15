@@ -23,12 +23,13 @@
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
 #include <TFIndicators/Darvas.h>
+#include <TFIndicators/Pivots.h>
 
 #include "SymbolSelection.h"
 
-// 2012/11/18 Look for symbols which regularily hit their pivots
-
-SymbolSelection::SymbolSelection( ptime dtLast ): m_dtLast( dtLast ), m_dm( ou::tf::HDF5DataManager::RO ) {
+SymbolSelection::SymbolSelection( ptime dtLast )
+  : m_dtLast( dtLast ), m_dm( ou::tf::HDF5DataManager::RO ), m_nMinPivotBars( 20 )
+{
 
   m_dtEnd = m_dtLast + date_duration( 1 );
   m_dtOneYearAgo = m_dtLast - date_duration( 52 * 7 );
@@ -57,8 +58,9 @@ void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
     std::cout << "ouch" << std::endl;
   }
 
-  WrapUp10Percent(selected);
-  WrapUpVolatility(selected);
+//  WrapUp10Percent(selected);
+//  WrapUpVolatility(selected);
+  WrapUpPivots(selected);
 
   std::cout << "History Scanned." << std::endl;
 
@@ -99,23 +101,26 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
   begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDateOfFirstBar );
   end = lower_bound( begin, barRepository.end(), m_dtEnd ); 
   hsize_t cnt = end - begin;
-  if ( 20 <= cnt ) {
+  if ( m_nMinPivotBars <= cnt ) {
     ptime dttmp = (*(end-1)).DateTime();
 //    std::cout << sObjectName << m_dtLast << ", " << dttmp << std::endl;
       ou::tf::Bars bars;
       bars.Resize( cnt );
       barRepository.Read( begin, end, &bars );
-      ou::tf::Bars::const_iterator iterVolume = bars.end() - 20;
+      ou::tf::Bars::const_iterator iterVolume = bars.end() - m_nMinPivotBars;
       ou::tf::Bar::volume_t volAverage = std::for_each( iterVolume, bars.end(), AverageVolume() );
       if ( ( 1000000 < volAverage ) 
-        && ( 12.0 <= bars.Last()->Close() )
-        && ( 75.0 >= bars.Last()->Close() ) ) {
+        && ( 15.0 <= bars.Last()->Close() )
+        && ( 90.0 >= bars.Last()->Close() ) 
+        && ( m_dtLast.date() == bars.Last()->DateTime().date() )
+        ) {
           InstrumentInfo ii( sObjectName, *bars.Last() );
-          if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
-            CheckForDarvas( ii, bars.begin(), bars.end() );
-          }
-          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
-          CheckForVolatility( ii, bars.end() - 20, bars.end() );
+//          if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
+//            CheckForDarvas( ii, bars.begin(), bars.end() );
+//          }
+//          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
+//          CheckForVolatility( ii, bars.end() - 20, bars.end() );
+          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
       }
   }
 }
@@ -134,6 +139,78 @@ private:
   ptime dtMax;
   double dblMax;
 };
+
+//
+// ProcessPivots
+//
+
+// taken from scanner
+
+void SymbolSelection::CheckForPivots( const InstrumentInfo& ii, citer begin, citer end ) {
+  ou::tf::Bar::volume_t nAverageVolume = std::for_each( begin, end, AverageVolume() );
+//  std::cout << sObject << ": " << bars.Last()->DateTime() << " - " << m_dtLast << std::endl;
+//      Info info( sObjectName, *bars.Last() );
+//      m_mapInfoRankedByVolume.insert( pairInfoRankedByVolume_t( volAverage, info ) );
+      //std::cout << sObject << " vol=" << volAverage << std::endl;
+  citer iter1, iter2;
+  iter2 = end;
+  iter1 = iter2 - m_nMinPivotBars;
+  iter2 = iter1;
+  ++iter2;
+
+  size_t nPVCrossings( 0 );
+  size_t nUpAndR1Crossings( 0 );
+  size_t nDnAndS1Crossings( 0 );
+  size_t nPVAndR1Crossings( 0 );
+  size_t nPVAndS1Crossings( 0 );
+
+  while ( end != iter2 ) {
+    ou::tf::PivotSet pivot( "pv", *iter1 );
+    double pv = pivot.GetPivotValue( ou::tf::PivotSet::PV );
+    if ( ( pv <= iter2->High() ) && ( pv >= iter2->Low() ) ) {
+      ++(nPVCrossings);
+    }
+
+    if ( iter2->Open() < pv ) {
+      double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
+      if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(nPVAndR1Crossings);
+    }
+    if ( iter2->Open() > pv ) {
+      double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
+      if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(nPVAndS1Crossings);
+    }
+
+    if ( iter2->Open() > pv ) {
+      double r1 = pivot.GetPivotValue( ou::tf::PivotSet::R1 );
+      if ( ( r1 <= iter2->High() ) && ( r1 >= iter2->Low() ) ) ++(nUpAndR1Crossings);
+    }
+    if ( iter2->Open() < pv ) {
+      double s1 = pivot.GetPivotValue( ou::tf::PivotSet::S1 );
+      if ( ( s1 <= iter2->High() ) && ( s1 >= iter2->Low() ) ) ++(nDnAndS1Crossings);
+    }
+
+    ++iter1;
+    ++iter2;
+  }
+
+  boost::uint32_t ttlR1S1 = nUpAndR1Crossings + nDnAndS1Crossings;
+  boost::uint32_t ttlR1PvS1 = nPVAndR1Crossings + nPVAndS1Crossings;
+  boost::uint32_t ttlOutside = ttlR1S1 + ttlR1PvS1;
+  boost::uint32_t rank = ( 100 * ( ( 100 * ttlOutside ) + ttlR1S1 ) ) + ttlR1PvS1;
+
+  m_mapPivotRanking.insert( mapPivotRanking_t::value_type( rank, ii ) );
+
+}
+
+void SymbolSelection::WrapUpPivots( setInstrumentInfo_t& selected ) {
+  int cnt( 35 );  // select 35 symbols ( => < 3% weighting by symbol )
+  for ( mapPivotRanking_t::const_reverse_iterator iter = m_mapPivotRanking.rbegin(); iter!= m_mapPivotRanking.rend(); ++iter ) {
+    selected.insert( iter->second );
+    --cnt;
+    if ( 0 == cnt ) break;
+  }
+  m_mapPivotRanking.clear();
+}
 
 // 
 // CProcessDarvas

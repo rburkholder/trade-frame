@@ -334,8 +334,10 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
       // in trading state machine, indicate when 8 days prior to expiry of front month in order to
       //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
       //boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
-      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 12, 26 ) );
-      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2014, 1, 28 ) );
+      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2014, 1, 28 ) );
+      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2014, 2, 25 ) );
+
+      assert( dateFrontMonth > now.date() );
 
       // GC Futures:
       ptime dtFrontMonthExpiryUtc( 
@@ -633,6 +635,14 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+
+  m_pPortfolioLongs
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "Longs", "aoRay", "USD", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+
+  m_pPortfolioShorts
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "Shorts", "aoRay", "USD", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
 
 }

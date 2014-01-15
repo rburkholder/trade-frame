@@ -95,6 +95,18 @@ protected:
   enum EVolumes_t { VDn, VUp, VCnt_ };
   ceVolumes_t m_rVolumes[ VCnt_ ];
 
+  struct infoBollinger {
+    ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
+    ou::tf::TSSWStatsMidQuote m_stats;
+    ou::ChartEntryIndicator m_ceEma;
+    ou::ChartEntryIndicator m_ceUpperBollinger1;
+    ou::ChartEntryIndicator m_ceLowerBollinger1;
+    infoBollinger( ou::tf::Quotes& quotes, time_duration td )
+      : m_ema( quotes, td ), m_stats( quotes, td ) {};
+  };
+
+
+
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema1;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;

@@ -46,7 +46,10 @@ public:
 
 protected:
 private:
+
   ou::tf::HDF5DataManager m_dm;
+
+  ou::tf::Bars::size_type m_nMinPivotBars;
 
   ptime m_dtLast;  // last available eod
 
@@ -58,6 +61,9 @@ private:
   ptime m_dtDateOfFirstBar;
 
   setInstrumentInfo_t* m_psetSymbols;
+
+  typedef std::multimap<boost::uint32_t,InstrumentInfo> mapPivotRanking_t;
+  mapPivotRanking_t m_mapPivotRanking;
 
   struct MaxNegativesCompare {
     bool operator() ( double dbl1, double dbl2 ) {
@@ -81,9 +87,11 @@ private:
   void CheckForDarvas( const InstrumentInfo& sSymbol, citer begin, citer end );
   void CheckFor10Percent( const InstrumentInfo& sSymbol, citer begin, citer end );
   void CheckForVolatility( const InstrumentInfo& sSymbol, citer begin, citer end );
+  void CheckForPivots( const InstrumentInfo& sSymbol, citer begin, citer end );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );
   void WrapUpVolatility( setInstrumentInfo_t& selected );
+  void WrapUpPivots( setInstrumentInfo_t& selected );
 
 };
 

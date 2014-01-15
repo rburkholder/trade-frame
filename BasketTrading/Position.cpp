@@ -126,7 +126,7 @@ void ManagePosition::HandleGoNeutral( void ) {
 }
 
 void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
-  // use stop of open, or bottom of first bar of series?
+  /*
   switch ( m_stateTrading ) {
   case TSWaitForEntry:
     if ( 5 <= m_nRHBars ) { // skip the two bars surrounding the open
@@ -176,9 +176,70 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
     }
     break;
   }
+  */
 }
 
 void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
+  // todo: calculate pivot. when pivot reached, put in stop.
+  if ( !m_bSetOpen ) {  // wait for opening trade
+    switch ( m_stateTrading ) {
+      case TSWaitForEntry:
+        if ( ( quote.Bid() > m_dblOpen ) && ( quote.Ask() > m_dblOpen ) ) {
+          std::cout << quote.DateTime() << ": Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+          m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+          ++m_nAttempts;
+          m_stateTrading = TSMonitorLong;
+        }
+        else {
+          if ( ( quote.Bid() < m_dblOpen ) && ( quote.Ask() < m_dblOpen ) ) {
+            std::cout << quote.DateTime() << ": Short " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+            m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+            ++m_nAttempts;
+            m_stateTrading = TSMonitorShort;
+          }
+        }
+        break;
+      case TSMonitorLong:
+          if ( ( quote.Bid() < m_dblOpen ) && ( quote.Ask() < m_dblOpen ) ) {
+            if ( 10 < m_nAttempts ) {
+              std::cout << quote.DateTime() << ": too many attempts for " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+              m_pPosition->CancelOrders();
+              m_pPosition->ClosePosition();
+              m_stateTrading = TSNoMore;
+            }
+            else {
+              std::cout << quote.DateTime() << ": Rvs To Short " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << ", attempt " << m_nAttempts << std::endl;
+              m_pPosition->CancelOrders();
+              m_pPosition->ClosePosition();
+              m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_nSharesToTrade );
+              ++m_nAttempts;
+              m_stateTrading = TSMonitorShort;
+            }
+          }
+        break;
+      case TSMonitorShort:
+        if ( ( quote.Bid() > m_dblOpen ) && ( quote.Ask() > m_dblOpen ) ) {
+            if ( 10 < m_nAttempts ) {
+              std::cout << quote.DateTime() << ": too many attempts for " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+              m_pPosition->CancelOrders();
+              m_pPosition->ClosePosition();
+              m_stateTrading = TSNoMore;
+            }
+            else {
+              std::cout << quote.DateTime() << ": Rvs To Long " << m_nSharesToTrade << " " << m_pPosition->GetInstrument()->GetInstrumentName() << ", attempt " << m_nAttempts << std::endl;
+              m_pPosition->CancelOrders();
+              m_pPosition->ClosePosition();
+              m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_nSharesToTrade );
+              ++m_nAttempts;
+              m_stateTrading = TSMonitorLong;
+            }
+        }
+        break;
+      case TSNoMore:
+        break;
+    }
+  }
+  /*
   // need parabolic stop, use trailing stop for now
   // also need over all risk management of 3% loss of total investment
   switch ( m_stateTrading ) {
@@ -207,4 +268,5 @@ void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
     break;
   }
+  */
 }
