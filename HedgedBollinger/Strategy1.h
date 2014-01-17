@@ -46,7 +46,6 @@ public:
   Strategy( ou::tf::option::MultiExpiryBundle* meb );
   ~Strategy(void);
   //ou::ChartDataView& GetChartDataView( void ) { return m_ChartDataUnderlying.GetChartDataView(); };
-  ou::ChartDataView& GetChartDataView( void ) { return GetChartDataView(); };
 protected:
 private:
 

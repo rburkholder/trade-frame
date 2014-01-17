@@ -32,6 +32,13 @@ TSVolatility::TSVolatility( Prices& series, time_duration dtTau, time_duration d
 {
 }
 
+TSVolatility::TSVolatility( const TSVolatility& rhs ) 
+  : m_dtTau( rhs.m_dtTau ), m_dtTauByTwo( rhs.m_dtTauByTwo ), m_dtTauPrime( rhs.m_dtTauPrime ),
+  m_p( rhs.m_p ), m_n( rhs.m_n ), m_seriesSource( rhs.m_seriesSource ),
+  m_tsDif( m_seriesSource, m_dtTauPrime ), m_tsNorm( m_tsDif, m_dtTauByTwo, m_n, m_p )
+{
+}
+
 TSVolatility::~TSVolatility(void) {
 }
 

@@ -39,6 +39,17 @@ TSDifferential::TSDifferential( Prices& series, time_duration dt, double dblGamm
   Init();
 }
 
+TSDifferential::TSDifferential( const TSDifferential& rhs ) 
+  : m_dtTimeRange( rhs.m_dtTimeRange ), m_dtAlphaTau( rhs.m_dtAlphaTau ), 
+  //m_dtAlphaBetaTau( rhs.m_dtAlphaBetaTau ),  // calculated below
+  m_dblTerm1( rhs.m_dblTerm1 ), m_dblTerm2( rhs.m_dblTerm2 ),
+  m_bDerivative( rhs.m_bDerivative ), m_dtNormalization( rhs.m_dtNormalization ), m_dblNormalization( rhs.m_dblNormalization ),
+  m_dblGammaDerivative( rhs.m_dblGammaDerivative ), m_seriesSource( rhs.m_seriesSource )
+  // m_pemax aren't copied.
+{
+  Init();
+}
+
 TSDifferential::~TSDifferential(void) {
   m_pema6->OnAppend.Remove( MakeDelegate( this, &TSDifferential::HandleTerm3Update ) );
   m_pema2->OnAppend.Remove( MakeDelegate( this, &TSDifferential::HandleTerm2Update ) );

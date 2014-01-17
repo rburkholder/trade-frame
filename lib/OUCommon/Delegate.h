@@ -92,7 +92,14 @@ Delegate<T>::Delegate( const Delegate& rhs )
 template<class T>
 Delegate<T>::~Delegate(void) {
   // this object should be deleted in same thread in which it was created
-  while (m_cntDispatchProcesses.load( boost::memory_order_acquire ) != 0 ); // wait for dispatch to finish
+//  int n = m_cntDispatchProcesses.load( boost::memory_order_acquire );
+//  if ( 10 < n ) {
+//    std::cerr << "~Delegate=" << n << std::endl;
+//  }
+//  else {
+    while (m_cntDispatchProcesses.load( boost::memory_order_acquire ) != 0 ); // wait for dispatch to finish
+//  }
+  
   m_vDispatch.clear();
   m_vDispatchMaster.clear();
 }

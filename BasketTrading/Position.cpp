@@ -179,6 +179,8 @@ void ManagePosition::HandleRHTrading( const ou::tf::Bar& bar ) {
   */
 }
 
+// 2014/01/16 possible mechanism:  high volatility, low volatility, on rising enter, trade on ema slow/fast crossing
+
 void ManagePosition::HandleRHTrading( const ou::tf::Quote& quote ) {
   // todo: calculate pivot. when pivot reached, put in stop.
   if ( !m_bSetOpen ) {  // wait for opening trade

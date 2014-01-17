@@ -52,31 +52,45 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
   if ( 0 != m_tsAtmIv.Size() ) {
 
     std::stringstream ss;
+    //ss.str( "" );
+    // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/date_time_io.html
+    //boost::posix_time::time_facet* pFacet( new boost::posix_time::time_facet( "%Y-%m-%d" ) );
+    boost::gregorian::date_facet* pFacet( new boost::gregorian::date_facet( "%Y-%m-%d" ) );
+    ss.imbue( std::locale( ss.getloc(), pFacet ) );
     ss << m_dtExpiry.date();
-    sPathName = sPrefix60sec + "/atmiv/" + ss.str().c_str();
+  
+    sPathName = sPrefix60sec + "/atmiv/" + ss.str();
     HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsAtmIv );
     HDF5Attributes attrAtmIv( dm, sPathName );
     attrAtmIv.SetSignature( ou::tf::PriceIV::Signature() );
 
     {
-      sPathName = sPrefix86400sec + "/call";
+      sPathName = sPrefix86400sec + "/" + ss.str() + "/call";
       ou::tf::Bars bars( 1 );
       bars.Append( m_bfIVUnderlyingCall.getCurrentBar() );
       HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
       wtsBar.Write( sPathName, &bars );
       HDF5Attributes attrBar( dm, sPathName );
-      attrBar.SetSignature( ou::tf::Bar::Signature() );
+      try {
+        attrBar.SetSignature( ou::tf::Bar::Signature() );
+      }
+        catch (...) {  // may already exist
+      }
     }
   
     {
-      sPathName = sPrefix86400sec + "/put";
+      sPathName = sPrefix86400sec + "/" + ss.str() + "/put";
       ou::tf::Bars bars( 1 );
       bars.Append( m_bfIVUnderlyingPut.getCurrentBar() );
       HDF5WriteTimeSeries<ou::tf::Bars> wtsBar( dm, true, true, 5, 16 );
       wtsBar.Write( sPathName, &bars );
       HDF5Attributes attrBar( dm, sPathName );
-      attrBar.SetSignature( ou::tf::Bar::Signature() );
+      try {
+        attrBar.SetSignature( ou::tf::Bar::Signature() );
+      }
+      catch (...) {  // may already exist
+      }
     }
   }
   

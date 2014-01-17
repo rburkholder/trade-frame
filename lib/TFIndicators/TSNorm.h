@@ -23,6 +23,7 @@ namespace hf { // high frequency
 class TSNorm: public Prices {
 public:
   TSNorm( Prices& series, time_duration dt, unsigned int n, double p );
+  TSNorm( const TSNorm& rhs );
   ~TSNorm(void);
 protected:
 private:
@@ -30,7 +31,7 @@ private:
   unsigned int m_n;
   double m_p;
   Prices& m_seriesSource;
-  TSMA m_ma;
+  TSMA m_ma;  // this needs to be at end of list for proper initialization
   void HandleUpdate( const Price& );
   void HandleMAUpdate( const Price& );
 };

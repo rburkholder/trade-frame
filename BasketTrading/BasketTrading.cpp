@@ -108,6 +108,12 @@ bool AppBasketTrading::OnInit() {
   m_sDbPortfolioName = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "Basket";
   m_db.Open( "BasketTrading.db" );
 
+  FrameMain::vpItems_t vItems;
+  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "Test Selection", MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelection ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+
   m_pPanelBasketTradingMain->SetOnButtonPressedStart( MakeDelegate( this, &AppBasketTrading::HandleStartButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedExitPositions( MakeDelegate( this, &AppBasketTrading::HandleExitPositionsButton ) );
   m_pPanelBasketTradingMain->SetOnButtonPressedStop( MakeDelegate( this, &AppBasketTrading::HandleStopButton ) );
@@ -148,6 +154,15 @@ void AppBasketTrading::HandleStartButton(void) {
     std::cout << "Starting Symbol Evaluation ... " << std::endl;
     m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion0 ) );
   }
+}
+
+void AppBasketTrading::HandleMenuActionTestSelection( void ) {
+  std::cout << "Starting Symbol Test ... " << std::endl;
+  m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleMenuActionTestSelectionDone ) );
+}
+
+void AppBasketTrading::HandleMenuActionTestSelectionDone( void ) {
+  std::cout << "Selection Test Done" << std::endl;
 }
 
 void AppBasketTrading::HandleStopButton(void) {

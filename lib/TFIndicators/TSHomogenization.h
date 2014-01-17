@@ -31,6 +31,7 @@ public:
   enum interpolation_t { eNone, ePreviousTick, eLinear };
 
   TSHomogenization<T>( TimeSeries<T>&, time_duration interval = m_zeroDuration, interpolation_t interpolation = eNone );
+  TSHomogenization<T>( const TSHomogenization<T>& rhs );
   virtual ~TSHomogenization<T>(void);
 
   ou::Delegate<const T&> OnAppend;
@@ -42,6 +43,9 @@ private:
   time_duration m_tdHomogenizingInterval;  // 0 if no homoginization
   ptime m_dtMarker;
   T m_datum;  // this is Tau at j
+
+  void Init( void );
+
   void HandleFirstDatum( const T& );
   void HandleDatum( const T& ); // this is Tau at j+1, need to handle Price, Trade, CBar
   void FlowThrough( const T& ) { OnAppend( datum ); };
@@ -60,15 +64,15 @@ TSHomogenization<T>::TSHomogenization( TimeSeries<T>& ts, time_duration interval
 {
   if ( m_zeroDuration == interval ) assert( eNone == m_interpolation );
   if ( m_zeroDuration != interval ) assert( eNone != m_interpolation );
-  switch ( m_interpolation ) {
-  case eNone:
-    ts.OnAppend.Add( MakeDelegate( this, &TSHomogenization<T>::FlowThrough ) );
-    break
-  case ePreviousTick:
-  case eLinear:
-    ts.OnAppend.Add( MakeDelegate( this, &TSHomogenization<T>::HandleFirstDatum ) );
-    break;
-  }
+  Init();
+}
+
+template<typename T>
+TSHomogenization<T>::TSHomogenization( const TSHomogenization<T>& rhs ) 
+  : m_interpolation( rhs.m_interpolation ), m_ts( rhs.m_ts ), m_datum( rhs.m_datum ),
+  m_tdHomogenizingInterval( rhs.m_tdHomogenizingInterval ), m_dtMarker( rhs.m_dtMarker ),
+{
+  Init();
 }
 
 template<typename T>
@@ -85,6 +89,19 @@ TSHomogenization<T>::~TSHomogenization( void ) {
     else {
       m_ts.OnAppend.Remove( MakeDelegate( this, &TSHomogenization<T>::HandleDatum ) );
     }
+    break;
+  }
+}
+
+template<typename T>
+void TSHomogenization<T>::Init( void ) {
+  switch ( m_interpolation ) {
+  case eNone:
+    ts.OnAppend.Add( MakeDelegate( this, &TSHomogenization<T>::FlowThrough ) );
+    break
+  case ePreviousTick:
+  case eLinear:
+    ts.OnAppend.Add( MakeDelegate( this, &TSHomogenization<T>::HandleFirstDatum ) );
     break;
   }
 }

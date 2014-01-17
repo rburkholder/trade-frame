@@ -60,7 +60,7 @@ void SymbolSelection::Process( setInstrumentInfo_t& selected ) {
 
 //  WrapUp10Percent(selected);
 //  WrapUpVolatility(selected);
-  WrapUpPivots(selected);
+//  WrapUpPivots(selected);
 
   std::cout << "History Scanned." << std::endl;
 
@@ -118,11 +118,56 @@ void SymbolSelection::ProcessGroupItem( const std::string& sObjectPath, const st
 //          if ( ( 120 < cnt ) && ( dttmp.date() == m_dtLast.date() ) ) {
 //            CheckForDarvas( ii, bars.begin(), bars.end() );
 //          }
-//          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
+          CheckFor10Percent( ii, bars.end() - 20, bars.end() );
 //          CheckForVolatility( ii, bars.end() - 20, bars.end() );
-          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
+//          CheckForPivots( ii, bars.end() - m_nMinPivotBars, bars.end() );
+//          CheckForRange( ii, bars.end() - m_nMinPivotBars, bars.end() );
       }
   }
+}
+
+void SymbolSelection::CheckForRange( const InstrumentInfo& ii, citer begin, citer end ) {
+  citer iter1( begin );
+  int cnt( 0 );
+  int cntAbove( 0 );
+  int cntBelow( 0 );
+  int cntRising( 0 );
+  int cntFalling( 0 );
+  double dblAbove( 0 );
+  double dblBelow( 0 );
+  double dblRange( 0 );
+  while ( iter1 != end ) {
+    dblRange += ( iter1->High() - iter1->Low() );
+    if ( iter1->High() > iter1->Open() ) {
+      ++cntAbove;
+      dblAbove += ( iter1->High() - iter1->Open() );
+    }
+    if ( iter1->Low() < iter1->Open() ) {
+      ++cntBelow;
+      dblBelow += ( iter1->Open() - iter1->Low() );
+    }
+    if ( iter1->Open() > iter1->Close() ) ++cntFalling;
+    if ( iter1->Open() < iter1->Close() ) ++cntRising;
+    ++cnt;
+    ++iter1;
+  }
+
+  double avgAbove = dblAbove / cntAbove;
+  double avgBelow = dblBelow / cntBelow;
+
+  int diffCnt = cntAbove - cntBelow;  // minimize this
+  double dblRatioAboveBelow = 0.5 - ( avgAbove / ( avgAbove + avgBelow ) ); // minimize this
+
+  //m_mapRangeRanking.insert( mapRangeRanking_t::value_type( diffCnt, ii ) );
+  std::cout 
+    << ii.sName << ","
+    << diffCnt << ","
+    << dblRatioAboveBelow << ","
+    << avgAbove << ","
+    << avgBelow << ","
+//    << avgAbove + avgBelow << ","
+    << dblRange
+    << std::endl;
 }
 
 struct CalcMaxDate: public std::unary_function<ou::tf::Bar&, void> {
@@ -213,7 +258,7 @@ void SymbolSelection::WrapUpPivots( setInstrumentInfo_t& selected ) {
 }
 
 // 
-// CProcessDarvas
+// ProcessDarvas
 //
 
 class ProcessDarvas: public ou::tf::Darvas<ProcessDarvas> {

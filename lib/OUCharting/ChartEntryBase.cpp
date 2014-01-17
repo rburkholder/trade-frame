@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include <algorithm>
 
 #include "ChartEntryBase.h"
@@ -20,7 +18,7 @@
 namespace ou { // One Unified
 
 //
-// CChartEntryBase
+// ChartEntryBase
 //
 
 ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ), m_bThreadSafe( false ) {
@@ -51,7 +49,7 @@ void ChartEntryBase::Clear( void ) {
 }
 
 //
-// CChartEntryBaseWithTime
+// ChartEntryBaseWithTime
 //
 
 ChartEntryBaseWithTime::ChartEntryBaseWithTime() : 
@@ -67,6 +65,13 @@ ChartEntryBaseWithTime::ChartEntryBaseWithTime( size_type nSize )
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
   ChartEntryBase::Reserve( nSize );
+}
+
+ChartEntryBaseWithTime::ChartEntryBaseWithTime( const ChartEntryBaseWithTime& rhs ) : 
+  ChartEntryBase( rhs ),
+    m_dtViewPortBegin( rhs.m_dtViewPortBegin ), m_dtViewPortEnd( rhs.m_dtViewPortEnd ),
+    m_vDateTime( rhs.m_vDateTime ), m_vChartTime( rhs.m_vChartTime )
+{
 }
 
 ChartEntryBaseWithTime::~ChartEntryBaseWithTime() {

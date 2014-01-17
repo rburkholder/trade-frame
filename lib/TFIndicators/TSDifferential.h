@@ -28,6 +28,7 @@ class TSDifferential: public Prices { // page 65 Intro to HF Finance
 public:
   TSDifferential( Prices& series, time_duration dt );
   TSDifferential( Prices& series, time_duration dt, double dblGammaDerivative, time_duration dtNormalization = hours( 365 * 24 ) );
+  TSDifferential( const TSDifferential& rhs );
   ~TSDifferential(void);
 protected:
 private:

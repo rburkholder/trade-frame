@@ -99,33 +99,19 @@ protected:
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
     ou::tf::TSSWStatsMidQuote m_stats;
     ou::ChartEntryIndicator m_ceEma;
-    ou::ChartEntryIndicator m_ceUpperBollinger1;
-    ou::ChartEntryIndicator m_ceLowerBollinger1;
+    ou::ChartEntryIndicator m_ceUpperBollinger;
+    ou::ChartEntryIndicator m_ceLowerBollinger;
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )
       : m_ema( quotes, td ), m_stats( quotes, td ) {};
   };
 
-
-
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema1;
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema2;
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema3;
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema4;
-
-  ou::tf::TSSWStatsMidQuote m_stats1;
-  ou::tf::TSSWStatsMidQuote m_stats2;
-  ou::tf::TSSWStatsMidQuote m_stats3;
-  ou::tf::TSSWStatsMidQuote m_stats4;
+  typedef std::vector<infoBollinger> vInfoBollinger_t;
+  vInfoBollinger_t m_vInfoBollinger;
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryIndicator m_ceQuoteUpper;
   ou::ChartEntryIndicator m_ceQuoteLower;
   ou::ChartEntryIndicator m_ceQuoteSpread;
-
-  ou::ChartEntryIndicator m_ceEma1;
-  ou::ChartEntryIndicator m_ceEma2;
-  ou::ChartEntryIndicator m_ceEma3;
-  ou::ChartEntryIndicator m_ceEma4;
 
 //  ou::ChartEntryIndicator m_ce11;
 //  ou::ChartEntryIndicator m_ce12;
@@ -142,31 +128,15 @@ protected:
 
   ou::ChartEntryIndicator m_ceZigZag;
 
-  ou::ChartEntryIndicator m_ceUpperBollinger1;
-  ou::ChartEntryIndicator m_ceLowerBollinger1;
-//  ou::ChartEntryIndicator m_ceBollinger1Offset;
-
 //  ou::ChartEntryIndicator m_ceSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA2;
-  ou::ChartEntryIndicator m_ceUpperBollinger2;
-  ou::ChartEntryIndicator m_ceLowerBollinger2;
+//  ou::ChartEntryIndicator m_ceUpperBollinger2;
+//  ou::ChartEntryIndicator m_ceLowerBollinger2;
 //  ou::ChartEntryIndicator m_ceBollinger2Offset;
 //  ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
   //ou::ChartEntryIndicator m_ceBollinger2Ratio;
 //  ou::ChartEntryIndicator m_ceSMA2RR;
-
-//  ou::ChartEntryIndicator m_ceSMA3;
-//  ou::ChartEntryIndicator m_ceSlopeOfSMA3;
-  ou::ChartEntryIndicator m_ceUpperBollinger3;
-  ou::ChartEntryIndicator m_ceLowerBollinger3;
-//  ou::ChartEntryIndicator m_ceBollinger3Offset;
-  //ou::ChartEntryIndicator m_ceBollinger3Ratio;
-//  ou::ChartEntryIndicator m_ceSMA3RR;
-
-  ou::ChartEntryIndicator m_ceUpperBollinger4;
-  ou::ChartEntryIndicator m_ceLowerBollinger4;
-
 
 private:
 

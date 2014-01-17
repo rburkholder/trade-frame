@@ -110,6 +110,9 @@ private:
 
   void HandleGuiRefresh( wxTimerEvent& event );
 
+  void HandleMenuActionTestSelection( void );
+  void HandleMenuActionTestSelectionDone( void );
+
 };
 
 // Implements MyApp& wxGetApp()

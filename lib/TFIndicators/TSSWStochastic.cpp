@@ -25,10 +25,10 @@ TSSWStochastic::TSSWStochastic( Quotes& quotes, time_duration tdWindowWidth )
 {
 }
 
-TSSWStochastic::TSSWStochastic( const TSSWStochastic& stoch) 
-  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( stoch ),
-  m_lastAdd( stoch.m_lastAdd ), m_lastExpire( stoch.m_lastExpire ), m_k( stoch.m_k ),
-  m_minmax( stoch.m_minmax )
+TSSWStochastic::TSSWStochastic( const TSSWStochastic& rhs) 
+  : TimeSeriesSlidingWindow<TSSWStochastic, Quote>( rhs ),
+  m_lastAdd( rhs.m_lastAdd ), m_lastExpire( rhs.m_lastExpire ), m_k( rhs.m_k ),
+  m_minmax( rhs.m_minmax )
 {
 }
 

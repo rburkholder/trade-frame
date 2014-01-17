@@ -28,6 +28,7 @@ template<class D> // D => type derived from DatedDatum
 class TSEMA: public Prices {  // new time series built up from linked time series
 public:
   TSEMA( TimeSeries<D>& series, time_duration td );
+  TSEMA( const TSEMA& rhs );
   virtual ~TSEMA(void);
   double GetEMA( void ) { return m_dblRecentEMA; };
 protected:
@@ -36,8 +37,9 @@ private:
   double m_dblTimeRange;
   TimeSeries<D>& m_seriesSource;
   double m_XatTminus1;
-  double EMA( ptime t, double XatT );
   double m_dblRecentEMA;
+
+  double EMA( ptime t, double XatT );
 
   void HandleAppend( const D& datum ) { 
     EMA( datum.DateTime(), GetPrice( datum ) ); 
@@ -81,11 +83,19 @@ private:
 
 template<class D>
 TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
-  : m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+  : Prices(), m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
   assert( 0 < td.total_seconds() );
   m_dblTimeRange = (double) td.total_microseconds();
-  series.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
+}
+
+template<class D>
+TSEMA<D>::TSEMA( const TSEMA<D>& rhs ) 
+  : Prices(), m_tdTimeRange( rhs.m_tdTimeRange ), m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
+  m_XatTminus1( rhs.m_XatTminus1 ), m_dblRecentEMA( rhs.m_dblRecentEMA )
+{
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
 template<class D>

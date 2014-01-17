@@ -39,6 +39,13 @@ TSMA::TSMA( Prices& series, time_duration td, unsigned int n )
   Initialize();
 }
 
+TSMA::TSMA( const TSMA& rhs ) 
+  : m_tdTimeRange( rhs.m_tdTimeRange ), m_nInf( rhs.m_nInf ), m_nSup( rhs.m_nSup ),
+  m_dblRecentMA( rhs.m_dblRecentMA ), m_seriesSource( rhs.m_seriesSource )
+{
+  Initialize();
+}
+
 TSMA::~TSMA(void) {
   if ( 0 < m_vEMA.size() ) {
     m_vEMA[ m_nSup ]->OnAppend.Remove( MakeDelegate( this, &TSMA::HandleUpdate ) );

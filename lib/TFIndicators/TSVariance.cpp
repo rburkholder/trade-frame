@@ -26,21 +26,33 @@ TSVariance::TSVariance( Prices& series, time_duration td, unsigned int n, double
 {
   assert( 0 < m_n );
   assert( 0.0 < m_p2 );
-  Prices::AppendEnabled() = false;
-  series.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleUpdate ) );
-  m_pma1 = new TSMA( series, td, n );
-  m_pma1->AppendEnabled() = false;
-  m_pma1->OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
-  m_dummy.AppendEnabled() = false;
-  m_ma2.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
-  m_ma2.AppendEnabled() = false;
+  Init();
 }
+
+TSVariance::TSVariance( const TSVariance& rhs ) 
+  : m_tdTimeRange( rhs.m_tdTimeRange ), m_n( rhs.m_n ), m_p1( rhs.m_p1 ), m_p2( rhs.m_p2 ), m_z( rhs.m_z ),
+  m_seriesSource( rhs.m_seriesSource ), m_ma2( m_dummy, m_tdTimeRange, m_n )
+{
+  Init();
+}
+
 
 TSVariance::~TSVariance(void) {
   m_seriesSource.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleUpdate ) );
   m_pma1->OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
   m_ma2.OnAppend.Remove( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
   delete m_pma1;
+}
+
+void TSVariance::Init( void ) {
+  Prices::AppendEnabled() = false;
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleUpdate ) );
+  m_pma1 = new TSMA( m_seriesSource, m_tdTimeRange, m_n );
+  m_pma1->AppendEnabled() = false;
+  m_pma1->OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
+  m_dummy.AppendEnabled() = false;
+  m_ma2.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
+  m_ma2.AppendEnabled() = false;
 }
 
 void TSVariance::HandleUpdate( const Price& price ) {

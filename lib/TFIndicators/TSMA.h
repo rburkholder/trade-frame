@@ -26,6 +26,7 @@ class TSMA: public Prices {
 public:
   TSMA( Prices& series, time_duration td, unsigned int nInf, unsigned int nSup ); // pg 63
   TSMA( Prices& series, time_duration td, unsigned int n );  // eq 3.56, pg 61, n typically 2, 3, 4
+  TSMA( const TSMA& rhs );
   ~TSMA(void);
   double GetMA( void ) { return m_dblRecentMA; };
 

@@ -46,7 +46,7 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb )
   SetStartTrading( ptime( date, time_duration( 18, 30, 0 ) ) );
 
   for ( int ix = 0; ix <= 3; ++ix ) {
-    m_vBollingerState[ix] = eBollingerUnknown;
+    m_vBollingerState.push_back( eBollingerUnknown );
   }
 
   m_bThreadPopDatumsActive = true;

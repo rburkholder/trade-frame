@@ -126,11 +126,11 @@ bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain->Show( true );
 
-//  m_sNameUnderlying = "+GC#";
-//  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+  m_sNameUnderlying = "+GC#";
+  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
-  m_sNameUnderlying = "@YM#";
-  m_sNameOptionUnderlying = "@YM";  
+//  m_sNameUnderlying = "@YM#";
+//  m_sNameOptionUnderlying = "@YM";  
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;
@@ -302,7 +302,7 @@ void AppHedgedBollinger::HandleSaveValues( void ) {
   try {
     std::string sPrefixSession( "/app/HedgedBollinger/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
-    std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
+    std::string sPrefix86400sec( "/app/HedgedBollinger/AtmIV/" + m_pBundle->Name() );
     m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
   }
   catch(...) {
@@ -501,13 +501,17 @@ void AppHedgedBollinger::HandleMenuActionEmitYieldCurve( void ) {
 
 void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatching ) {
   // don't do this in worker thread, needs to be performed in gui thread
+    struct container: public wxTreeItemData {
+       ou::tf::option::Option* pOption;  // this way so on destruction of wxTreeItemData, doesn't also destory the enclosed pointer
+    };
+
   wxTreeItemIdValue idCookie;
   const std::string& sName( pOption->GetInstrument()->GetInstrumentName() );
   wxTreeItemId idRoot = m_ptreeChartables->GetRootItem();
   wxTreeItemId idChild = m_ptreeChartables->GetFirstChild( idRoot, idCookie ); 
   bool bFound( false );
   while ( idChild.IsOk() ) {
-    if ( sName == reinterpret_cast<ou::tf::option::Option*>( m_ptreeChartables->GetItemData( idChild ) )->GetInstrument()->GetInstrumentName() ) {
+    if ( sName == reinterpret_cast<container*>( m_ptreeChartables->GetItemData( idChild ) )->pOption->GetInstrument()->GetInstrumentName() ) {
       m_ptreeChartables->SetItemBold( idChild, bWatching );
       bFound = true;
       break;
@@ -515,7 +519,10 @@ void AppHedgedBollinger::UpdateTree( ou::tf::option::Option* pOption, bool bWatc
     idChild = m_ptreeChartables->GetNextChild( idChild, idCookie );
   }
   if ( !bFound ) {
-    wxTreeItemId idNewChild = m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, reinterpret_cast<wxTreeItemData*>( pOption ) );
+    container* p = new container;
+    p->pOption = pOption;
+    wxTreeItemId idNewChild = m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, p );
+    //wxTreeItemId idNewChild = m_ptreeChartables->AppendItem( idRoot, sName, -1, -1, 0 );  // wants to delete the item
     m_ptreeChartables->SetItemBold( idNewChild, bWatching );
   }
 }
@@ -638,11 +645,11 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
 
   m_pPortfolioLongs
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Longs", "aoRay", "USD", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+    "Longs", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
   m_pPortfolioShorts
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Shorts", "aoRay", "USD", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+    "Shorts", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
 
 }

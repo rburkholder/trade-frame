@@ -27,6 +27,14 @@ TSNorm::TSNorm( Prices& series, time_duration dt, unsigned int n, double p )
   m_ma.OnAppend.Add( MakeDelegate( this, &TSNorm::HandleMAUpdate ) );
 }
 
+TSNorm::TSNorm( const TSNorm& rhs ) 
+  : m_dtTimeRange( rhs.m_dtTimeRange ), m_n( rhs.m_n ), m_p( rhs.m_p ), m_seriesSource( rhs.m_seriesSource ), 
+  m_ma( *this, rhs.m_dtTimeRange, rhs.m_n )
+{
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSNorm::HandleUpdate ) );
+  m_ma.OnAppend.Add( MakeDelegate( this, &TSNorm::HandleMAUpdate ) );
+}
+
 TSNorm::~TSNorm(void) {
   m_seriesSource.OnAppend.Remove( MakeDelegate( this, &TSNorm::HandleUpdate ) );
   m_ma.OnAppend.Remove( MakeDelegate( this, &TSNorm::HandleMAUpdate ) );

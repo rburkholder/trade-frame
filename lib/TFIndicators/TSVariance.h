@@ -29,6 +29,7 @@ namespace hf { // high frequency
 class TSVariance: public Prices {
 public:
   TSVariance( Prices& series, time_duration td, unsigned int n, double p1, double p2 = 1.0 );
+  TSVariance( const TSVariance& );
   virtual ~TSVariance( void );
 
 protected:
@@ -42,6 +43,7 @@ private:
   Prices m_dummy;
   TSMA* m_pma1; // this way in order to get events in proper order
   TSMA m_ma2;
+  void Init( void );
   void HandleUpdate( const Price& );
   void HandleMA1Update( const Price& );
   void HandleMA2Update( const Price& );

@@ -29,17 +29,18 @@ class TimeSeriesSlidingWindow { // T=CRTP class for Add, Expire, PostUpdate; D=D
 public:
   typedef typename TimeSeries<D>::size_type size_type;
   TimeSeriesSlidingWindow<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_type WindowSizeCount = 0 );
-  //TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );  // hard to do with the Delegate
+  TimeSeriesSlidingWindow<T,D>( const TimeSeriesSlidingWindow<T,D>& );  // Delegate is not copied, other values may need some tuning
   virtual ~TimeSeriesSlidingWindow<T,D>(void);
   void Update( void );
   virtual void Reset( void );
   ou::Delegate<const D&> OnAppend;
 protected:
+  ptime m_dtZero;  // datetime of first element, used as offset
+  time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
+
   void Add( const D& datum ) {}; // CRTP override to process elements passing into window scope
   void Expire( const D& datum ) {};  // CRTP override to process elements passing out of window scope 
   void PostUpdate( void ) {};  // CRTP override to do final calcs
-  ptime m_dtZero;  // datetime of first element, used as offset
-  time_duration WindowWidth( void ) const { return m_tdWindowWidth; };
 private:
   TimeSeries<D>& m_Series;
   time_duration m_tdWindowWidth;
@@ -49,6 +50,7 @@ private:
   ptime m_dtLeading;
   bool m_bFirstDatumFound;
   bool m_bAutoUpdate; // use the OnAppend event to update stuff, else ue the Update method to process
+
   void Init( void );  // called in constructors
   void HandleDatum( const D& );
 };
@@ -66,18 +68,18 @@ TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow(
   Init();
 }
 
-/*
+
 template<class T, class D> 
-TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( const TimeSeriesSlidingWindow<T,D>& sw ) 
-  : m_Series( sw.m_Series ), m_nWindowSizeSeconds( sw.m_nWindowSizeSeconds ),
-  m_nWindowSizeCount( sw.m_nWindowSizeCount ), m_tdWindowWidth( sw.m_tdWindowWidth ),
-  m_ixTrailing( sw.m_ixTrailing ), m_ixLeading( sw.m_ixLeading ), m_dtLeading( sw.m_dtLeading ),
-  m_bFirstDatumFound( sw.m_bFirstDatumFound ), m_dtZero( sw.m_dtZero ), m_bAutoUpdate( true )
+TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( const TimeSeriesSlidingWindow<T,D>& rhs ) 
+  : m_Series( rhs.m_Series ), 
+  m_tdWindowWidth( rhs.m_tdWindowWidth ), m_nWindowSizeCount( rhs.m_nWindowSizeCount ),
+  m_ixTrailing( rhs.m_ixTrailing ), m_ixLeading( rhs.m_ixLeading ), m_dtLeading( rhs.m_dtLeading ),
+  m_bFirstDatumFound( rhs.m_bFirstDatumFound ), m_dtZero( rhs.m_dtZero ), m_bAutoUpdate( true )
 {
+  // best used when origininating timeseries is empty
   Init();
 }
 
-*/
 template<class T, class D> 
 TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow(void) {
   m_Series.OnAppend.Remove( MakeDelegate( this, &TimeSeriesSlidingWindow<T,D>::HandleDatum ) );

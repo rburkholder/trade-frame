@@ -65,6 +65,9 @@ private:
   typedef std::multimap<boost::uint32_t,InstrumentInfo> mapPivotRanking_t;
   mapPivotRanking_t m_mapPivotRanking;
 
+  typedef std::multimap<int,InstrumentInfo> mapRangeRanking_t;
+  mapRangeRanking_t m_mapRangeRanking;
+
   struct MaxNegativesCompare {
     bool operator() ( double dbl1, double dbl2 ) {
       return dbl2 < dbl1; // reverse form of operator so most negative at end of list
@@ -88,6 +91,7 @@ private:
   void CheckFor10Percent( const InstrumentInfo& sSymbol, citer begin, citer end );
   void CheckForVolatility( const InstrumentInfo& sSymbol, citer begin, citer end );
   void CheckForPivots( const InstrumentInfo& sSymbol, citer begin, citer end );
+  void CheckForRange( const InstrumentInfo& sSymbol, citer begin, citer end );
 
   void WrapUp10Percent( setInstrumentInfo_t& selected );
   void WrapUpVolatility( setInstrumentInfo_t& selected );

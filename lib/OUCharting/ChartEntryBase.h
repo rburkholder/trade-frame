@@ -107,6 +107,7 @@ public:
 
   ChartEntryBaseWithTime( void );
   ChartEntryBaseWithTime( size_type nSize );
+  ChartEntryBaseWithTime( const ChartEntryBaseWithTime& rhs );
   virtual ~ChartEntryBaseWithTime( void );
 
   void Append( boost::posix_time::ptime dt, double price );  // protected with lockfree

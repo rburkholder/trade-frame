@@ -27,6 +27,7 @@ class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
 public:
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
+  TimeSeriesSlidingWindowStats<T,D>( const TimeSeriesSlidingWindowStats<T,D>& rhs );
   virtual ~TimeSeriesSlidingWindowStats<T,D>( void );
 //  double Accel( void ) const { return m_stats.B2(); };
   double Slope( void ) const { return m_stats.B1(); };
@@ -55,6 +56,13 @@ template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingW
 : TimeSeriesSlidingWindow<T,D>( Series, tdWindowWidth, WindowSizeCount )
 {
   m_stats.SetBBMultiplier( 2.0 );
+}
+
+template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::TimeSeriesSlidingWindowStats( 
+  const TimeSeriesSlidingWindowStats<T,D>& rhs ) 
+  : TimeSeriesSlidingWindow<T,D>( rhs ), m_stats( rhs.m_stats )
+{
+  
 }
 
 template<class T, class D> TimeSeriesSlidingWindowStats<T,D>::~TimeSeriesSlidingWindowStats(void) {

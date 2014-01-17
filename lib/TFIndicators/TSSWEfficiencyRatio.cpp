@@ -27,8 +27,8 @@ TSSWEfficiencyRatio::TSSWEfficiencyRatio( Trades& trades, time_duration tdWindow
 {
 }
 
-TSSWEfficiencyRatio::TSSWEfficiencyRatio( const TSSWEfficiencyRatio& ratio ) 
-  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade>( ratio ),
+TSSWEfficiencyRatio::TSSWEfficiencyRatio( const TSSWEfficiencyRatio& rhs ) 
+  : TimeSeriesSlidingWindow<TSSWEfficiencyRatio, Trade>( rhs ),
     m_lastAdd( 0.0 ), m_lastExpire( 0.0 ), m_sum( 0.0 ), m_ratio( 0.0 ), m_total( 0.0 )
 {
 }

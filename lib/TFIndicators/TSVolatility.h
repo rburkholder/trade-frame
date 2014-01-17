@@ -30,6 +30,7 @@ namespace hf { // high frequency
 class TSVolatility: public Prices {
 public:
   TSVolatility( Prices& series, time_duration dtTau, time_duration dtTauPrime, double p, unsigned int n = 4 );
+  TSVolatility( const TSVolatility& );
   ~TSVolatility(void);
 protected:
 private:
