@@ -38,7 +38,8 @@
 */
 
 Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb ) 
-  : m_pBundle( meb )
+  //: ou::ChartDataBase(), m_pBundle( meb )
+  :m_pBundle( meb )
 {
 
   boost::gregorian::date date( ou::TimeSource::Instance().External().date() );
@@ -88,8 +89,8 @@ Strategy::~Strategy(void) {
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   // need to queue this from the originating thread.
-  //m_ChartDataUnderlying.HandleTrade( trade );
-  ou::ChartDataBase::HandleTrade( trade );
+  m_ChartDataUnderlying.HandleTrade( trade );
+  //ou::ChartDataBase::HandleTrade( trade );
   TimeTick( trade );
 }
 
@@ -98,8 +99,8 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
-  //m_ChartDataUnderlying.HandleQuote( quote );
-  ou::ChartDataBase::HandleQuote( quote );
+  m_ChartDataUnderlying.HandleQuote( quote );
+  //ou::ChartDataBase::HandleQuote( quote );
   TimeTick( quote );
 }
 
@@ -187,10 +188,10 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     bai.m_pceCallIV->SetName( ss.str() + " call" );
     bai.m_pcePutIV->SetName( ss.str() + " put" );
     m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
-    //m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    //m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
-    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    //ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    //ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
   }
   else {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );

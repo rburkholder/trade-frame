@@ -36,38 +36,23 @@ ChartDataBase::ChartDataBase(void)
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(  987 ) ) );
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds( 2584 ) ) );
 
-/*
-  m_quotes.Reserve( 500000 );
-  m_trades.Reserve( 200000 );
-  m_ceBars.Reserve( 50000 );
-  m_rVolumes[ VDn ].Reserve( 50000 );
-  m_rVolumes[ VUp ].Reserve( 50000 );
-  m_ceTrade.Reserve( 200000 );
-  m_ceQuoteUpper.Reserve( 500000 );
-  m_ceQuoteLower.Reserve( 500000 );
-  m_ceQuoteSpread.Reserve( 500000 );
-  m_ceEma1.Reserve( 200000 );
-  m_ceEma2.Reserve( 200000 );
-  m_ceEma3.Reserve( 200000 );
-  m_ceEma4.Reserve( 200000 );
-  m_ceUpperBollinger1.Reserve( 200000 );
-  m_ceLowerBollinger1.Reserve( 200000 );
-  m_ceUpperBollinger2.Reserve( 200000 );
-  m_ceLowerBollinger2.Reserve( 200000 );
-  m_ceUpperBollinger3.Reserve( 200000 );
-  m_ceLowerBollinger3.Reserve( 200000 );
-  m_ceUpperBollinger4.Reserve( 200000 );
-  m_ceLowerBollinger4.Reserve( 200000 );
-  */
+  m_vInfoBollinger[0].SetProperties( ou::Colour::DarkOliveGreen, "Bollinger1 - 2.4" );
+  m_vInfoBollinger[1].SetProperties( ou::Colour::Turquoise, "Bollinger2 - 6.3" );
+  m_vInfoBollinger[2].SetProperties( ou::Colour::GreenYellow, "Bollinger3 - 16.5" );
+  m_vInfoBollinger[3].SetProperties( ou::Colour::MediumSlateBlue, "Bollinger4 - 54.0" );
+
   m_dvChart.Add( 0, &m_ceQuoteUpper );
   m_dvChart.Add( 0, &m_ceQuoteLower );
   m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
   for ( int ix = 0; ix <= 3; ++ix ) {
-    m_dvChart.Add( 0, &m_vInfoBollinger[ix].m_ceEma );
-    m_dvChart.Add( 0, &m_vInfoBollinger[ix].m_ceUpperBollinger );
-    m_dvChart.Add( 0, &m_vInfoBollinger[ix].m_ceLowerBollinger );
+    infoBollinger& ib( m_vInfoBollinger[ix] );
+    m_dvChart.Add( 0, &ib.m_ceEma );
+    m_dvChart.Add( 0, &ib.m_ceUpperBollinger );
+    m_dvChart.Add( 0, &ib.m_ceLowerBollinger );
+    m_dvChart.Add( 5, &ib.m_ceSD );
+    m_dvChart.Add( 6, &ib.m_ceSlope );
   }
 
   m_dvChart.Add( 0, &m_ceBars );
@@ -78,28 +63,6 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeUp );
   m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeNeutral );
   m_dvChart.Add( 1, &m_rVolumes[ VDn ].ceVolumeDn );
-
-  /*
-  m_dvChart.Add( 2, m_ce11 );
-  m_dvChart.Add( 2, m_ce12 );
-  m_dvChart.Add( 2, m_ce13 );
-  m_dvChart.Add( 2, m_ce14 );
-  m_dvChart.Add( 3, m_ce21 );
-  m_dvChart.Add( 3, m_ce22 );
-  m_dvChart.Add( 3, m_ce23 );
-  m_dvChart.Add( 3, m_ce24 );
-
-  m_dvChart.Add( 4, m_ce31 );
-  
-  m_ce11.SetColour( ou::Colour::Red );
-  m_ce12.SetColour( ou::Colour::Orange );
-  m_ce13.SetColour( ou::Colour::Yellow );
-  m_ce14.SetColour( ou::Colour::Green );
-  m_ce21.SetColour( ou::Colour::Red );
-  m_ce22.SetColour( ou::Colour::Orange );
-  m_ce23.SetColour( ou::Colour::Yellow );
-  m_ce24.SetColour( ou::Colour::Green );
-  */
 
   m_ceQuoteUpper.SetColour( ou::Colour::Red );
   m_ceQuoteLower.SetColour( ou::Colour::Blue );
@@ -114,38 +77,6 @@ ChartDataBase::ChartDataBase(void)
   m_rVolumes[ VDn ].ceVolumeUp.SetColour( ou::Colour::Green );
   m_rVolumes[ VDn ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );
   m_rVolumes[ VDn ].ceVolumeDn.SetColour( ou::Colour::Red );
-
-  {
-    infoBollinger& ib( m_vInfoBollinger[0] );
-    ib.m_ceEma.SetColour( ou::Colour::DarkOliveGreen );
-    ib.m_ceUpperBollinger.SetColour( ou::Colour::DarkOliveGreen );
-    ib.m_ceLowerBollinger.SetColour( ou::Colour::DarkOliveGreen );
-    ib.m_ceEma.SetName( "Bollinger1 - 2.4" );
-  }
-
-  {
-    infoBollinger& ib( m_vInfoBollinger[1] );
-    ib.m_ceEma.SetColour( ou::Colour::Turquoise );
-    ib.m_ceUpperBollinger.SetColour( ou::Colour::Turquoise );
-    ib.m_ceLowerBollinger.SetColour( ou::Colour::Turquoise );
-    ib.m_ceEma.SetName( "Bollinger2 - 6.3" );
-  }
-
-  {
-    infoBollinger& ib( m_vInfoBollinger[2] );
-    ib.m_ceEma.SetColour( ou::Colour::GreenYellow );
-    ib.m_ceUpperBollinger.SetColour( ou::Colour::GreenYellow );
-    ib.m_ceLowerBollinger.SetColour( ou::Colour::GreenYellow );
-    ib.m_ceEma.SetName( "Bollinger3 - 16.5" );
-  }
-
-  {
-    infoBollinger& ib( m_vInfoBollinger[3] );
-    ib.m_ceEma.SetColour( ou::Colour::MediumSlateBlue );
-    ib.m_ceUpperBollinger.SetColour( ou::Colour::MediumSlateBlue );
-    ib.m_ceLowerBollinger.SetColour( ou::Colour::MediumSlateBlue );
-    ib.m_ceEma.SetName( "Bollinger4 - 54.0" );
-  }
 
   m_ceZigZag.SetColour( ou::Colour::DarkBlue );
 
@@ -299,23 +230,6 @@ void ChartDataBase::HandleTrade( const ou::tf::Trade& trade ) {
     if (  45 < dif ) dif = 45;
     if ( -45 > dif ) dif = -45;
     m_ceTickDiffsRoc.Append( dt, dif );
-    /*
-    double lastEma, sd;
-    lastEma = m_ema1.Ago( 0 ).Value();
-    sd = 2.0 * m_variance1.Ago( 0 ).Value();
-    m_ceUpperBollinger1.Append( dt, lastEma + sd );
-    m_ceLowerBollinger1.Append( dt, lastEma - sd );
-    
-    lastEma = m_ema2.Ago( 0 ).Value();
-    sd = 2.0 * m_variance2.Ago( 0 ).Value();
-    m_ceUpperBollinger2.Append( dt, lastEma + sd );
-    m_ceLowerBollinger2.Append( dt, lastEma - sd );
-
-    lastEma = m_ema3.Ago( 0 ).Value();
-    sd = 2.0 * m_variance3.Ago( 0 ).Value();
-    m_ceUpperBollinger3.Append( dt, lastEma + sd );
-    m_ceLowerBollinger3.Append( dt, lastEma - sd );
-    */
   }
 
   
@@ -348,20 +262,10 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     sd = 2.0 * ib.m_stats.SD();
     ib.m_ceUpperBollinger.Append( dt, lastEma + sd );
     ib.m_ceLowerBollinger.Append( dt, lastEma - sd );
+    ib.m_ceSD.Append( dt, sd );
+    ib.m_ceSlope.Append( dt, ib.m_slope.Slope() );
   }
 
-    /*
-    m_ce11.Append( dt, m_variance1.m_pma1->m_vEMA[1]->GetEMA() );
-    m_ce12.Append( dt, m_variance1.m_pma1->m_vEMA[5]->GetEMA() );
-    m_ce13.Append( dt, m_variance1.m_pma1->m_vEMA[9]->GetEMA() );
-    m_ce14.Append( dt, m_variance1.m_pma1->GetMA() );
-    m_ce21.Append( dt, m_variance1.m_ma2.m_vEMA[1]->GetEMA() );
-    m_ce22.Append( dt, m_variance1.m_ma2.m_vEMA[5]->GetEMA() );
-    m_ce23.Append( dt, m_variance1.m_ma2.m_vEMA[9]->GetEMA() );
-    m_ce24.Append( dt, m_variance1.m_ma2.GetMA() );
-
-    m_ce31.Append( dt, m_variance1.Ago( 0 ).Value() );
-    */
   if ( 500 < m_quotes.Size() ) {
   }
 

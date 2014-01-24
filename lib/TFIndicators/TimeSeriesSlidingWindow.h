@@ -76,7 +76,7 @@ TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( const TimeSeriesSlidingWi
   m_ixTrailing( rhs.m_ixTrailing ), m_ixLeading( rhs.m_ixLeading ), m_dtLeading( rhs.m_dtLeading ),
   m_bFirstDatumFound( rhs.m_bFirstDatumFound ), m_dtZero( rhs.m_dtZero ), m_bAutoUpdate( true )
 {
-  // best used when origininating timeseries is empty
+  // best used when originating timeseries is empty
   Init();
 }
 

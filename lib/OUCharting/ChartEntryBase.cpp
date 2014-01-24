@@ -56,12 +56,14 @@ ChartEntryBaseWithTime::ChartEntryBaseWithTime() :
   ChartEntryBase(),
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
+  m_plfTimeDouble = new lfTimeDouble_t;
 }
 
 ChartEntryBaseWithTime::ChartEntryBaseWithTime( size_type nSize )
 : ChartEntryBase( nSize ), 
     m_dtViewPortBegin( boost::posix_time::not_a_date_time ), m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
+  m_plfTimeDouble = new lfTimeDouble_t;
   m_vDateTime.reserve( nSize );
   m_vChartTime.reserve( nSize );
   ChartEntryBase::Reserve( nSize );
@@ -72,9 +74,11 @@ ChartEntryBaseWithTime::ChartEntryBaseWithTime( const ChartEntryBaseWithTime& rh
     m_dtViewPortBegin( rhs.m_dtViewPortBegin ), m_dtViewPortEnd( rhs.m_dtViewPortEnd ),
     m_vDateTime( rhs.m_vDateTime ), m_vChartTime( rhs.m_vChartTime )
 {
+  m_plfTimeDouble = new lfTimeDouble_t;
 }
 
 ChartEntryBaseWithTime::~ChartEntryBaseWithTime() {
+  delete m_plfTimeDouble;
   m_vDateTime.clear();
   m_vChartTime.clear();
 }
@@ -128,7 +132,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
 
 void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
   if ( m_bThreadSafe ) {
-    while ( !m_lfTimeDouble.push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
+    while ( !m_plfTimeDouble->push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
   }
   else {
     ChartEntryBase::Append( price );
@@ -139,7 +143,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) 
 // there are out-of-order issues or loss-of-data issues if m_bThreadSafe is changed while something is in the Queue
 void ChartEntryBaseWithTime::ClearQueue( void ) {  
   TimeDouble_t td;
-  while ( m_lfTimeDouble.pop( td ) ) {
+  while ( m_plfTimeDouble->pop( td ) ) {
     ChartEntryBase::Append( td.m_price );
     Append( td.m_dt );
   };

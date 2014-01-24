@@ -24,6 +24,7 @@ class TSSWRateOfChange: public TimeSeriesSlidingWindow<TSSWRateOfChange, Price> 
 public:
 
   TSSWRateOfChange( Prices&, time_duration tdWindowWidth );
+  TSSWRateOfChange( const TSSWRateOfChange& rhs );
   ~TSSWRateOfChange(void);
 
   double RateOfChange( void ) const { return m_head - m_tail; };

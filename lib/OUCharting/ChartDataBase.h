@@ -21,7 +21,7 @@
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
-#include <TFTimeSeries/Adapters.h>
+//#include <TFTimeSeries/Adapters.h>
 
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
@@ -54,7 +54,7 @@ public:
 
 protected:
 
-  enum enumTradeDirection { ETradeDirUnkn, ETradeDirUp, ETradeDirDn } m_TradeDirection;
+  enum enumTradeDirection { ETradeDirUnkn=0, ETradeDirUp, ETradeDirDn } m_TradeDirection;
 
   bool m_bFirstTrade;
 
@@ -92,17 +92,41 @@ protected:
       ceVolumeDn.Reserve( n );
     }
   };
-  enum EVolumes_t { VDn, VUp, VCnt_ };
+  enum EVolumes_t { VDn=0, VUp, VCnt_ };
   ceVolumes_t m_rVolumes[ VCnt_ ];
 
   struct infoBollinger {
+    time_duration m_td;
+    ou::tf::Quotes& m_quotes;
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
     ou::tf::TSSWStatsMidQuote m_stats;
     ou::ChartEntryIndicator m_ceEma;
     ou::ChartEntryIndicator m_ceUpperBollinger;
     ou::ChartEntryIndicator m_ceLowerBollinger;
+    ou::ChartEntryIndicator m_ceSD;
+    ou::tf::TSSWStatsPrice m_slope;
+    ou::ChartEntryIndicator m_ceSlope;
+    void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
+      m_ceEma.SetName( sName );
+      m_ceEma.SetColour( colour );
+      m_ceUpperBollinger.SetColour( colour );
+      m_ceLowerBollinger.SetColour( colour );
+      m_ceSD.SetColour( colour );
+      m_ceSlope.SetColour( colour );
+    }
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )
-      : m_ema( quotes, td ), m_stats( quotes, td ) {};
+      : m_td( td ), m_quotes( quotes ), 
+        m_ema( quotes, td ), m_stats( quotes, td ),
+        m_slope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ) 
+    {
+    }
+    infoBollinger( const infoBollinger& rhs ) 
+      : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ),
+      m_ema( m_quotes, m_td ), m_stats( m_quotes, m_td ),
+      m_slope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ) 
+    {
+    }
+    ~infoBollinger( void ) {};
   };
 
   typedef std::vector<infoBollinger> vInfoBollinger_t;
@@ -113,16 +137,6 @@ protected:
   ou::ChartEntryIndicator m_ceQuoteLower;
   ou::ChartEntryIndicator m_ceQuoteSpread;
 
-//  ou::ChartEntryIndicator m_ce11;
-//  ou::ChartEntryIndicator m_ce12;
-//  ou::ChartEntryIndicator m_ce13;
-//  ou::ChartEntryIndicator m_ce14;
-//  ou::ChartEntryIndicator m_ce21;
-//  ou::ChartEntryIndicator m_ce22;
-//  ou::ChartEntryIndicator m_ce23;
-//  ou::ChartEntryIndicator m_ce24;
-//  ou::ChartEntryIndicator m_ce31;
-
   ou::ChartEntryIndicator m_ceTickDiffs;
   ou::ChartEntryIndicator m_ceTickDiffsRoc;
 
@@ -131,8 +145,6 @@ protected:
 //  ou::ChartEntryIndicator m_ceSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSlopeOfSMA2;
-//  ou::ChartEntryIndicator m_ceUpperBollinger2;
-//  ou::ChartEntryIndicator m_ceLowerBollinger2;
 //  ou::ChartEntryIndicator m_ceBollinger2Offset;
 //  ou::ChartEntryIndicator m_ceSlopeOfBollinger2Offset;
   //ou::ChartEntryIndicator m_ceBollinger2Ratio;

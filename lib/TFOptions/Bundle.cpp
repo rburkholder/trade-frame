@@ -429,6 +429,12 @@ std::ostream& operator<<( std::ostream& os, const ExpiryBundle& eb ) {
 
 //=====================================
 
+ExpiryBundleWithUnderlying::ExpiryBundleWithUnderlying( void ) {
+}
+
+ExpiryBundleWithUnderlying::~ExpiryBundleWithUnderlying( void ) {
+}
+
 void ExpiryBundleWithUnderlying::SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider ) {
 
   // todo:  check if already something present, and if something present, should stop the watch, if running

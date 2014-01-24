@@ -25,6 +25,12 @@ TSSWRateOfChange::TSSWRateOfChange( Prices& prices, time_duration tdWindowWidth 
 {
 }
 
+TSSWRateOfChange::TSSWRateOfChange( const TSSWRateOfChange& rhs )
+  : TimeSeriesSlidingWindow<TSSWRateOfChange, Price>( rhs ), 
+  m_tail( rhs.m_tail ), m_head( rhs.m_head )
+{
+}
+
 TSSWRateOfChange::~TSSWRateOfChange(void) {
 }
 

@@ -79,7 +79,7 @@ Delegate<T>::Delegate(void)
 }
 
 template<class T>
-Delegate<T>::Delegate( const Delegate& rhs ) 
+Delegate<T>::Delegate( const Delegate<T>& rhs ) 
   : m_cntDispatchProcesses( 0 ), m_cntChanges( 0 )
   // don't carry over any of the stuff, just re-initialize it.
   // boost::atomic is non-copyable
@@ -87,6 +87,8 @@ Delegate<T>::Delegate( const Delegate& rhs )
 //  m_spinlockVectorUpdate( rhs.m_spinlockVectorUpdate ), m_spinlockVectorReplace( rhs.m_spinlockVectorReplace ),
 //  m_vDispatchMaster( rhs.m_vDispatchMaster ), m_vDispatch( rhs.m_vDispatch )
 {
+//  m_vDispatchMaster.clear();
+//  m_vDispatch.clear();
 }
 
 template<class T>
@@ -126,7 +128,9 @@ void Delegate<T>::operator()( T t ) {
 
   // update dispatch with queued changes
   if ( 0 != m_cntChanges.load( boost::memory_order_acquire ) ) {
+    m_spinlockVectorUpdate.lock();
     VectorReplace();
+    m_spinlockVectorUpdate.unlock(); 
   }
 
 }
@@ -140,9 +144,9 @@ void Delegate<T>::Add( OnDispatchHandler function ) {
 
   m_cntChanges.fetch_add( 1, boost::memory_order_release );
 
-  m_spinlockVectorUpdate.unlock(); 
-
   VectorReplace();
+
+  m_spinlockVectorUpdate.unlock(); 
 
 }
 
@@ -162,9 +166,9 @@ void Delegate<T>::Remove( OnDispatchHandler function ) {
 
   m_cntChanges.fetch_add( 1, boost::memory_order_release );
 
-  m_spinlockVectorUpdate.unlock();
-
   VectorReplace();
+
+  m_spinlockVectorUpdate.unlock();
 
 }
 
@@ -174,17 +178,25 @@ void Delegate<T>::VectorReplace( void ) {
   // perform VectorReplace only outside of operator() method influence
   if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
     m_spinlockVectorReplace.lock();
-    m_spinlockVectorUpdate.lock();
+//    m_spinlockVectorUpdate.lock();
 
     // ensure we are not in process
     if ( 0 == m_cntDispatchProcesses.load( boost::memory_order_acquire ) ) {
-      m_vDispatch.clear();
-      m_vDispatch = m_vDispatchMaster;
+      m_vDispatch.resize( m_vDispatchMaster.size() );
+      typedef typename vDispatch_t::iterator iterator;
+      const_iterator ixSrc = m_vDispatchMaster.begin();
+      iterator ixDst = m_vDispatch.begin();
+      for ( 
+        ;
+        ixSrc != m_vDispatchMaster.end();
+        ++ixSrc, ++ixDst ) {
+          *ixDst = *ixSrc;
+      }
     }
 
     m_cntChanges.store( 0, boost::memory_order_release );
 
-    m_spinlockVectorUpdate.unlock();
+//    m_spinlockVectorUpdate.unlock();
     m_spinlockVectorReplace.unlock();
 
   }

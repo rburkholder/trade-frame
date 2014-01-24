@@ -24,7 +24,7 @@ class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, Price> 
 public:
 
   TSSWRunningTally( Prices&, time_duration tdWindowWidth );
-//  TSSWRunningTally( const TSSWRunningTally& );
+  TSSWRunningTally( const TSSWRunningTally& );
   ~TSSWRunningTally( void );
 
   double Net( void ) const { return m_net; };

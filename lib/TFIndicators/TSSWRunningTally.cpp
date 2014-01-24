@@ -25,8 +25,11 @@ TSSWRunningTally::TSSWRunningTally( Prices& prices, time_duration tdWindowWidth 
 {
 }
 
-//TSSWRunningTally::TSSWRunningTally( const TSSWRunningTally& ) {
-//}
+TSSWRunningTally::TSSWRunningTally( const TSSWRunningTally& rhs ) 
+  : TimeSeriesSlidingWindow<TSSWRunningTally, Price>( rhs ),
+  m_net( rhs.m_net )
+{
+}
 
 TSSWRunningTally::~TSSWRunningTally(void) {
 }

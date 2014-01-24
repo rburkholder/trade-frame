@@ -121,6 +121,9 @@ std::ostream& operator<<( std::ostream& os, const ExpiryBundle& );
 class ExpiryBundleWithUnderlying: public ExpiryBundle {
 public:
 
+  ExpiryBundleWithUnderlying( void );
+  ~ExpiryBundleWithUnderlying( void );
+
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
   typedef Watch::pWatch_t pWatch_t;
@@ -150,7 +153,7 @@ public:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef Watch::pWatch_t pWatch_t;
 
-  explicit MultiExpiryBundle( const std::string& sName ): m_sName( sName ) {};
+  MultiExpiryBundle( const std::string& sName ): m_sName( sName ) {};
   virtual ~MultiExpiryBundle( void );
 
   const std::string& Name( void ) { return m_sName; };

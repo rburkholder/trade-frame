@@ -28,6 +28,11 @@ TSSWStatsTrade::TSSWStatsTrade(TimeSeries<Trade>& Series, time_duration tdWindow
 {
 }
 
+TSSWStatsTrade::TSSWStatsTrade( const TSSWStatsTrade& rhs )
+  : TimeSeriesSlidingWindowStats<TSSWStatsTrade, Trade>( rhs )
+{
+}
+
 TSSWStatsTrade::~TSSWStatsTrade( void ) {
 }
 
@@ -49,6 +54,11 @@ void TSSWStatsTrade::Expire( const Trade &trade ) {
 
 TSSWStatsQuote::TSSWStatsQuote(TimeSeries<Quote>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>( Series, tdWindowWidth, WindowSizeCount )
+{
+}
+
+TSSWStatsQuote::TSSWStatsQuote( const TSSWStatsQuote& rhs )
+  : TimeSeriesSlidingWindowStats<TSSWStatsQuote, Quote>( rhs )
 {
 }
 
@@ -78,6 +88,11 @@ TSSWStatsMidQuote::TSSWStatsMidQuote(Quotes& Series, time_duration tdWindowWidth
 {
 }
 
+TSSWStatsMidQuote::TSSWStatsMidQuote( const TSSWStatsMidQuote& rhs )
+  : TimeSeriesSlidingWindowStats<TSSWStatsMidQuote, Quote>( rhs )
+{
+}
+
 TSSWStatsMidQuote::~TSSWStatsMidQuote( void ) {
 }
 
@@ -99,6 +114,11 @@ void TSSWStatsMidQuote::Expire( const Quote &quote ) {
 
 TSSWStatsPrice::TSSWStatsPrice(TimeSeries<Price>& Series, time_duration tdWindowWidth, size_t WindowSizeCount ) 
 : TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>( Series, tdWindowWidth, WindowSizeCount )
+{
+}
+
+TSSWStatsPrice::TSSWStatsPrice( const TSSWStatsPrice& rhs )
+  : TimeSeriesSlidingWindowStats<TSSWStatsPrice, Price>( rhs )
 {
 }
 
