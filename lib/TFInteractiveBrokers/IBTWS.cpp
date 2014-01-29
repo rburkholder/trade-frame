@@ -79,6 +79,22 @@ IBTWS::~IBTWS(void) {
   m_mapContractToSymbol.clear();
 }
 
+void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth ) {
+  std::string month( boost::lexical_cast<std::string,boost::uint16_t>( nMonth ) );
+  contract.expiry 
+    = boost::lexical_cast<std::string,boost::uint16_t>( nYear ) 
+    + ( ( 1 == month.size() ) ? "0" : "" ) 
+    + month
+    ; 
+}
+
+void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
+  ContractExpiryField( contract, nYear, nMonth );
+  contract.expiry 
+    += boost::lexical_cast<std::string,boost::uint16_t>( nDay )  // always two digits on third week
+    ; 
+}
+
 void IBTWS::Connect() {
   if ( NULL == pTWS ) {
     OnConnecting( 0 );
@@ -140,6 +156,7 @@ void IBTWS::ProcessMessages( void ) {
 void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
   // requires secType in addition to symbol name
   // needs to be thread protected:
+  // results supplied at contractDetails()
   boost::mutex::scoped_lock lock(m_mutexContractRequest);
   structRequest_t* pRequest;
   pRequest = 0;
@@ -152,6 +169,31 @@ void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsH
     pRequest->id = m_nxtReqId++;
     pRequest->fProcess = fProcess;
     pRequest->fDone = fDone;
+  }
+  m_mapActiveRequestId[ pRequest->id ] = pRequest;
+  pTWS->reqContractDetails( pRequest->id, contract );
+}
+
+void IBTWS::RequestContractDetails( 
+  const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
+  // 2014/01/28not complete yet, BuildInstrumentFromContract not converted over
+
+  // requires secType in addition to symbol name
+  // needs to be thread protected:
+  // results supplied at contractDetails()
+  boost::mutex::scoped_lock lock(m_mutexContractRequest);
+  structRequest_t* pRequest;
+  pRequest = 0;
+  if ( 0 == m_vInActiveRequestId.size() ) {
+    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone, pInstrument );
+  }
+  else {
+    pRequest = m_vInActiveRequestId.back();
+    m_vInActiveRequestId.pop_back();
+    pRequest->id = m_nxtReqId++;
+    pRequest->fProcess = fProcess;
+    pRequest->fDone = fDone;
+    pRequest->pInstrument = pInstrument;
   }
   m_mapActiveRequestId[ pRequest->id ] = pRequest;
   pTWS->reqContractDetails( pRequest->id, contract );
@@ -658,7 +700,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   assert( 0 < contractDetails.summary.conId );
 
-  pInstrument_t pInstrument;
+  pInstrument_t pInstrument;  // needs to be redone to handle existing instrument from structure
   mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
   if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
     pInstrument = BuildInstrumentFromContract( contractDetails.summary );
@@ -862,7 +904,7 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
       break;
   }
   if ( NULL == pInstrument ) 
-    throw std::out_of_range( "instrument type not accounted for" );
+    throw std::out_of_range( "unknown instrument type" );
   pInstrument->SetContract( contract.conId );
   if ( 0 < contract.multiplier.length() ) {
     pInstrument->SetMultiplier( boost::lexical_cast<unsigned long>( contract.multiplier ) );

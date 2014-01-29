@@ -63,6 +63,7 @@ public:
   bool operator<=( const Watch& rhs ) const { return m_pInstrument->GetInstrumentName() <= rhs.m_pInstrument->GetInstrumentName(); };
 
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
+  pProvider_t GetProvider( void ) { return m_pDataProvider; };
 
   bool Watching( void ) { return 0 != m_cntWatching; };
 

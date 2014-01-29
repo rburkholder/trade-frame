@@ -80,6 +80,9 @@ public:
   void PlaceOrder( pOrder_t order );
   void CancelOrder( pOrder_t order );
 
+  static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );
+  static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay );
+
   // TWS Function Calls
   //  need to make a container of re-usable request ids to be looked up in order to return data to appropriate caller
   //   therefore, currently, caller needs to appropriately serialize the calls to keep requests one at a time
@@ -87,6 +90,7 @@ public:
   typedef FastDelegate2<const ContractDetails&, pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
+  void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
 
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
@@ -211,14 +215,17 @@ private:
 
   struct structRequest_t {
     reqId_t id;
+    pInstrument_t pInstrument;  // add info to existing pInstrument
     OnContractDetailsHandler_t fProcess;
     OnContractDetailsDoneHandler_t fDone;
     structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
       : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
+    structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ ) 
+      : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
   };
 
   reqId_t m_nxtReqId; 
-  std::vector<structRequest_t*> m_vInActiveRequestId;
+  std::vector<structRequest_t*> m_vInActiveRequestId;  // can this be re-written with lockless structure?
 //  typedef std::pair<reqId_t, structRequest_t*> mapActiveRequestId_pair_t;
   typedef std::map<reqId_t, structRequest_t*> mapActiveRequestId_t;
   mapActiveRequestId_t m_mapActiveRequestId;

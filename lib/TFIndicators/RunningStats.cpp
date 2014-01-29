@@ -69,7 +69,14 @@ void RunningStats::Remove(double x, double y) {
 
 void RunningStats::CalcStats() {
 
-  if ( nX > 1 ) {
+  if ( 0 == nX ) {
+    SumXX = SumX = 0;
+    SumXY = 0;
+    SumY = SumYY = 0;
+    r = rr = 0;
+    sd = meanY = b1 = b0 = 0;
+  }
+  else {
 
     double Sxx, Sxy, Syy;
     double SST, SSR, SSE;

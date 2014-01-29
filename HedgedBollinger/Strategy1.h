@@ -38,18 +38,24 @@
 #include <OUCharting/ChartDataBase.h>
 
 class Strategy: 
-//  public ou::ChartDataBase,
+  public ou::ChartDataBase,
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
   friend ou::tf::DailyTradeTimeFrame<Strategy>; 
 public:
-  Strategy( ou::tf::option::MultiExpiryBundle* meb );
+
+  typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+
+  Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider );
   ~Strategy(void);
-  ou::ChartDataView& GetChartDataView( void ) { return m_ChartDataUnderlying.GetChartDataView(); };
+//  ou::ChartDataView& GetChartDataView( void ) { return m_ChartDataUnderlying.GetChartDataView(); };
 protected:
 private:
 
   enum EBollingerState { eBollingerUnknown, eBollingerLow, eBollingerHigh, eBollingerMid };
+  enum ESlope { eSlopeUnknown, eSlopeNeg, eSlopePos };
 
   struct BundleAtmIv {
     boost::shared_ptr<ou::ChartEntryIndicator> m_pceCallIV;
@@ -64,9 +70,13 @@ private:
   };
 
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
+  pPortfolio_t m_pPortfolio;
+  pPosition_t m_pPosition;
+  pProvider_t m_pExecutionProvider;
 
   ou::ChartDataBase m_ChartDataUnderlying;
 
+  ESlope m_eBollinger1EmaSlope;
   std::vector<EBollingerState> m_vBollingerState;
 
   typedef std::map<boost::posix_time::ptime,BundleAtmIv> mapAtmIv_t;
@@ -80,9 +90,12 @@ private:
   boost::mutex m_mutexCrossThreadDatums;
   boost::thread* m_pThreadPopDatums;
 
-  boost::lockfree::spsc_queue<EDatumType, boost::lockfree::capacity<1024> > m_lfDatumType;
+  boost::lockfree::spsc_queue<EDatumType, boost::lockfree::capacity<1024> > m_lfDatumType;  // needs to be sum of quote, trade capacity
   boost::lockfree::spsc_queue<ou::tf::Quote, boost::lockfree::capacity<512> > m_lfQuote;
   boost::lockfree::spsc_queue<ou::tf::Trade, boost::lockfree::capacity<512> > m_lfTrade;
+
+  void GoLong( void );
+  void GoShort( void );
 
   void HandleQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleTradeUnderlying( const ou::tf::Trade& trade );

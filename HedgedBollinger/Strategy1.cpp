@@ -37,18 +37,29 @@
 * pick up three on each side then start pruning back when possible
 */
 
-Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb ) 
-  //: ou::ChartDataBase(), m_pBundle( meb )
-  :m_pBundle( meb )
+Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider ) 
+  : ou::ChartDataBase(), m_pBundle( meb ), 
+    m_pPortfolio( pPortfolio ), 
+    m_pExecutionProvider( pExecutionProvider ),
+    m_eBollinger1EmaSlope( eSlopeUnknown )
 {
 
-  boost::gregorian::date date( ou::TimeSource::Instance().External().date() );
+  ptime dt( ou::TimeSource::Instance().External() );  // provided in utc
+  boost::gregorian::date date( NormalizeDate( dt ) );
   InitForUS24HourFutures( date );
-  SetStartTrading( ptime( date, time_duration( 18, 30, 0 ) ) );
+  // this may be offset incorrectly.
+  SetStartTrading( Normalize( date, time_duration( 18, 30, 0 ), "America/New_York" ) );  // collect some data first
 
   for ( int ix = 0; ix <= 3; ++ix ) {
     m_vBollingerState.push_back( eBollingerUnknown );
   }
+
+  m_pPosition.reset( new ou::tf::Position( 
+    m_pBundle->GetWatchUnderlying()->GetInstrument(),
+    m_pExecutionProvider, 
+    m_pBundle->GetWatchUnderlying()->GetProvider()
+    ) );
+
 
   m_bThreadPopDatumsActive = true;
   m_pThreadPopDatums = new boost::thread( &Strategy::ThreadPopDatums, this );
@@ -89,8 +100,8 @@ Strategy::~Strategy(void) {
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   // need to queue this from the originating thread.
-  m_ChartDataUnderlying.HandleTrade( trade );
-  //ou::ChartDataBase::HandleTrade( trade );
+  //m_ChartDataUnderlying.HandleTrade( trade );
+  ou::ChartDataBase::HandleTrade( trade );
   TimeTick( trade );
 }
 
@@ -99,8 +110,8 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
-  m_ChartDataUnderlying.HandleQuote( quote );
-  //ou::ChartDataBase::HandleQuote( quote );
+  //m_ChartDataUnderlying.HandleQuote( quote );
+  ou::ChartDataBase::HandleQuote( quote );
   TimeTick( quote );
 }
 
@@ -154,12 +165,62 @@ void Strategy::HandleInboundTradeUnderlying( const ou::tf::Trade& trade ) {
   m_cvCrossThreadDatums.notify_one();
 }
 
+void Strategy::GoShort( void ) {
+}
+
+void Strategy::GoLong( void ) {
+}
+
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
+
+  // add trades to chart
+  // add based upon confirmed price
+
   if ( quote.IsValid() ) {
+
     double mid = quote.Midpoint();
 
-    for ( int ix = 0; ix <=3; ++ix ) {
+    infoBollinger& info( m_vInfoBollinger[ 0 ] );
+
+    // since slope is delayed, check that data confirms slope before initiating actual trade
+    // need to determine what data looks like when slope is not being drawn.
+    // also, width of bollinger can limit when trades occur
+    // track maximum, minimum, average width?
+
+    switch ( m_eBollinger1EmaSlope ) {
+    case eSlopeUnknown:
+      if ( 0.0 < info.m_slope.Slope() ) {
+        std::cout << "Starting with a long" << std::endl;
+        GoLong();
+        m_eBollinger1EmaSlope = eSlopePos;
+      }
+      else {
+        if ( 0.0 > info.m_slope.Slope() ) {
+          std::cout << "Starting with a short" << std::endl;
+          GoShort();
+          m_eBollinger1EmaSlope = eSlopeNeg;
+        }
+      }
+      break;
+    case eSlopeNeg:
+      if ( 0.0 < info.m_slope.Slope() ) {
+        std::cout << "Reversing Short to Long" << std::endl;
+        m_pPosition->ClosePosition();
+        GoLong();
+        m_eBollinger1EmaSlope = eSlopePos;
+      }
+      break;
+    case eSlopePos:
+      if ( 0.0 > info.m_slope.Slope() ) {
+        std::cout << "Reversing Long to Short" << std::endl;
+        m_pPosition->ClosePosition();
+        GoShort();
+        m_eBollinger1EmaSlope = eSlopeNeg;
+      }
+      
+      break;
     }
+
   }
 }
 
@@ -188,10 +249,10 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     bai.m_pceCallIV->SetName( ss.str() + " call" );
     bai.m_pcePutIV->SetName( ss.str() + " put" );
     m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
-    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
-    //ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    //ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+//    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+//    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
   }
   else {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );

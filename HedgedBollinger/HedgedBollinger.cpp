@@ -57,6 +57,8 @@ unsigned int AppHedgedBollinger::m_nthIVCalc( 4 );
 
 bool AppHedgedBollinger::OnInit() {
 
+  m_eProviderUsage = EProviderUsageUnknown;
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hedged Bollinger" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
@@ -129,8 +131,37 @@ bool AppHedgedBollinger::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  m_sNameUnderlying = "+GC#";
+  //m_sNameUnderlying = "+GC#";
+  m_sNameUnderlying = "GC";
+  m_sNameUnderlyingIQFeed = "+GCG14";
+
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+
+  // opra equity calc
+  //      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
+  //      boost::gregorian::date dateSecondMonth = ou::tf::option::Next3rdFriday( dateFrontMonth );
+  // gold future calc:
+  // http://www.cmegroup.com/trading/metals/files/pm264-fact-card-gold-options.pdf
+  // expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, excercise 20:00
+  // trading: sunday - friday 18:00 - 17:15 et
+  // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
+  // in trading state machine, indicate when 8 days prior to expiry of front month in order to
+  //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
+
+  // http://www.cboe.com/products/EquityOptionSpecs.aspx
+  //Expiration Date:
+  //Saturday immediately following the third Friday of the expiration month until February 15, 2015. 
+  //  On and after February 15, 2015, the expiration date will be the third Friday of the expiration month.
+
+  //Expiration Months:
+  //Two near-term months plus two additional months from the January, February or March quarterly cycles.
+  //Futures appear to expire one day later than options
+
+  //m_dateFrontMonthFuture = boost::gregorian::date( 2014, 2, 26 );
+  //m_dateSecondMonthFuture = boost::gregorian::date( 2014, 3, 27 );
+
+  m_dateFrontMonthOption = boost::gregorian::date( 2014, 2, 25 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2014, 3, 26 );
 
 //  m_sNameUnderlying = "@YM#";
 //  m_sNameOptionUnderlying = "@YM";  
@@ -146,9 +177,10 @@ bool AppHedgedBollinger::OnInit() {
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
 
-  m_bData1Connected = false;
-  m_bData2Connected = false;
-  m_bExecConnected = false;
+  // should already be initialized in the framework
+  //m_bData1Connected = false;
+  //m_bData2Connected = false;
+  //m_bExecConnected = false;
 
   m_pBundle = 0;
   m_pStrategy = 0;
@@ -193,10 +225,10 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "b1 Initialize Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionInitializeSymbolSet ) ) );
   vItems.push_back( new mi( "c1 Start Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartWatch ) ) );
   vItems.push_back( new mi( "c2 Stop Watch", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopWatch ) ) );
-  vItems.push_back( new mi( "d1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
-  vItems.push_back( new mi( "e1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
-  vItems.push_back( new mi( "f1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
-  vItems.push_back( new mi( "f2 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "d1 Start Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStartChart ) ) );
+  vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "f1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_bThreadDrawChartActive = true;
@@ -315,6 +347,7 @@ void AppHedgedBollinger::HandleSaveValues( void ) {
 }
 
 void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
+
   if ( m_listIQFeedSymbols.begin() == m_listIQFeedSymbols.end() ) {
     std::cout << "Need to load symbols first" << std::endl;
   }
@@ -324,79 +357,110 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
     }
     else {
 
-      // work out current expiry and next expiry
-      ptime now = ou::TimeSource::Instance().External();
-      // opra equity calc
-//      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
-//      boost::gregorian::date dateSecondMonth = ou::tf::option::Next3rdFriday( dateFrontMonth );
-      // gold future calc:
-      // http://www.cmegroup.com/trading/metals/files/pm264-fact-card-gold-options.pdf
-      // expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, excercise 20:00
-      // trading: sunday - friday 18:00 - 17:15 et
-      // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
-      // in trading state machine, indicate when 8 days prior to expiry of front month in order to
-      //   liquidate remaining positions, possibly make use of Augen's book on option expiry trading to do so
-      //boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2013, 10, 28 ) );
-      boost::gregorian::date dateFrontMonth( boost::gregorian::date( 2014, 1, 28 ) );
-      boost::gregorian::date dateSecondMonth( boost::gregorian::date( 2014, 2, 25 ) );
+      // step 1: confirm iqfeed for data-source, set to read-only mode, else fail
+      // step 2: confirm ib for trading source, if so, then upgrade to read-trade mode.
+      // step 3: obtain IB symbol if any
+      // step 4: finish initalization of data structures
 
-      assert( dateFrontMonth > now.date() );
-
-      // GC Futures:
-      ptime dtFrontMonthExpiryUtc( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( dateFrontMonth, time_duration( 13, 30 , 0 ), "America/New_York", true ) );
-      ptime dtSecondMonthExpiryUtc( 
-        ou::TimeSource::Instance().ConvertRegionalToUtc( dateSecondMonth, time_duration( 13, 30 , 0 ), "America/New_York", true ) );
-
-      // use 16:00 est as time of expiry, as that is when they cease trading (for OPRA equities)
-      // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
-
-    // http://www.cboe.com/products/EquityOptionSpecs.aspx
-    //Expiration Date:
-    //Saturday immediately following the third Friday of the expiration month until February 15, 2015. 
-    //  On and after February 15, 2015, the expiration date will be the third Friday of the expiration month.
-
-    //Expiration Months:
-    //Two near-term months plus two additional months from the January, February or March quarterly cycles.
-
-      std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
-      std::cout << "Expiry strings: " << dateFrontMonth << ", " << dateSecondMonth << std::endl;
-
-      m_pBundle = new ou::tf::option::MultiExpiryBundle( m_sNameUnderlying );
+      if ( !m_bIQFeedConnected ) {
+        std::cout << "IQFeed not connected.  Initialization halted." << std::endl;
+      }
+      else {
+        m_eProviderUsage = EProviderUsageRead;
+        if ( m_bIBConnected ) {
+          m_eProviderUsage = EProviderUsageReadTrade;
+        }
+      }
 
       pInstrument_t pInstrumentUnderlying;
-      pInstrumentUnderlying.reset( 
-        new ou::tf::Instrument( m_sNameUnderlying, ou::tf::InstrumentType::Future, "SMART" ) );  // need to register this with InstrumentManager before trading
 
-      m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
+      if ( EProviderUsageUnknown != m_eProviderUsage ) {
+        switch ( m_eProviderUsage ) {
+        case EProviderUsageRead:
+          pInstrumentUnderlying.reset( new ou::tf::Instrument( m_sNameUnderlying, ou::tf::InstrumentType::Future, "SMART" ) );
+          pInstrumentUnderlying->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, m_sNameUnderlyingIQFeed );
+          FinishStrategyInitialization( pInstrumentUnderlying );
+          break;
+        case EProviderUsageReadTrade: 
+          ou::tf::IBTWS::Contract contract;
+          contract.symbol = m_sNameUnderlying;
+          //contract.exchange = "SMART";
+          contract.exchange = "NYMEX";
+          contract.currency = "USD";
+          contract.secType = "FUT";
+          //m_tws->ContractExpiryField( contract, m_dateFrontMonthFuture.year(), m_dateFrontMonthFuture.month(), m_dateFrontMonthFuture.day() );
+          m_tws->ContractExpiryField( contract, m_dateFrontMonthOption.year(), m_dateFrontMonthOption.month() );
+          //contract.secType = "OPT";
+          //contract.secType = "FOP";
+          m_tws->RequestContractDetails( 
+            contract, 
+            MakeDelegate( this, &AppHedgedBollinger::HandleIBUnderlyingContractDetails ), 
+            MakeDelegate( this, &AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone ) );
+          break;
+        }
 
-      m_pBundle->CreateExpiryBundle( dtFrontMonthExpiryUtc );
-      m_pBundle->CreateExpiryBundle( dtSecondMonthExpiryUtc );
+        Bind( EVENT_UPDATE_OPTION_TREE, &AppHedgedBollinger::HandleGuiUpdateOptionTree, this );
+        Bind( EVENT_DRAW_CHART, &AppHedgedBollinger::HandleGuiDrawChart, this );
 
-      pProvider_t pNull;
-      m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
-
-      std::cout << *m_pBundle;
-
-      m_pBundle->Portfolio()
-        = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-          m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
-
-      m_pStrategy = new Strategy( m_pBundle );
-      m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", "+GC#" );
-
-      Bind( EVENT_UPDATE_OPTION_TREE, &AppHedgedBollinger::HandleGuiUpdateOptionTree, this );
-      Bind( EVENT_DRAW_CHART, &AppHedgedBollinger::HandleGuiDrawChart, this );
-
-
-
-      m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
-      m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );
-
-      std::cout << "Initialized." << std::endl;
+      }
 
     }
   }
+}
+
+void AppHedgedBollinger::HandleIBUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrumentUnderlying ) {
+  // should only be one symbol arriving
+  pInstrumentUnderlying->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, m_sNameUnderlyingIQFeed );
+  FinishStrategyInitialization( pInstrumentUnderlying );
+}
+
+void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( void ) {
+}
+
+void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying ) {
+
+  // instrument needs to be registered with InstrumentManager
+
+  // work out current expiry and next expiry
+  ptime now = ou::TimeSource::Instance().External();
+
+  assert( m_dateFrontMonthOption > now.date() );
+
+  // use 16:00 est as time of expiry, as that is when they cease trading (for OPRA equities)
+  // 18:30 deals with after hours trading and settlements on the underlying.  the options cease trading at 16:00.
+
+  ptime dtFrontMonthExpiryUtc( 
+    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateFrontMonthOption, time_duration( 13, 30, 0 ), "America/New_York", true ) );
+  ptime dtSecondMonthExpiryUtc( 
+    ou::TimeSource::Instance().ConvertRegionalToUtc( m_dateSecondMonthOption, time_duration( 13, 30, 0 ), "America/New_York", true ) );
+
+  std::cout << "Expiry strings: " << dtFrontMonthExpiryUtc << ", " << dtSecondMonthExpiryUtc << std::endl;
+  std::cout << "Expiry strings: " << m_dateFrontMonthOption << ", " << m_dateSecondMonthOption << std::endl;
+
+  m_pBundle = new ou::tf::option::MultiExpiryBundle( m_sNameUnderlying );
+
+  m_pBundle->SetWatchUnderlying( pInstrumentUnderlying, m_pData1Provider );
+
+  m_pBundle->CreateExpiryBundle( dtFrontMonthExpiryUtc );
+  m_pBundle->CreateExpiryBundle( dtSecondMonthExpiryUtc );
+
+  pProvider_t pNull;
+  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, ou::tf::option::PopulateMultiExpiryBundle( *m_pBundle, m_pData1Provider, pNull ) );
+
+  std::cout << *m_pBundle;
+
+  m_pBundle->Portfolio() = m_pPortfolioGC;
+//  m_pBundle->Portfolio()
+//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+//      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
+
+  m_pStrategy = new Strategy( m_pBundle, m_pPortfolioGC, m_pExecutionProvider );
+  m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", m_sNameUnderlying );
+
+  m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );
+  m_pBundle->AddOnStrikeWatchOff( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOff ) );
+
+  std::cout << "Initialized." << std::endl;
 }
 
 void AppHedgedBollinger::HandleGuiUpdateOptionTree( EventUpdateOptionTree& event ) {
@@ -646,13 +710,13 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
-  m_pPortfolioLongs
+  m_pPortfolioGC
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Longs", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+    "GC", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
-  m_pPortfolioShorts
-    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Shorts", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+//  m_pPortfolioShorts
+//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+//    "Shorts", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
 
 
 }

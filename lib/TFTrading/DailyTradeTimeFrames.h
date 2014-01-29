@@ -44,7 +44,12 @@ public:
   template<typename DD>  // DD is DatedDatum construct
   void TimeTick( DD& dd );
 
-  void InitForUS24HourFutures( boost::gregorian::date );
+  boost::gregorian::date NormalizeDate( ptime dt );
+  ptime Normalize( boost::gregorian::date date, time_duration time, const std::string& zone ) {
+    return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
+  }
+
+  void InitForUS24HourFutures( boost::gregorian::date date );
 
   void SetMarketOpen( ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; };
   void SetRegularHoursOpen( ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; };
@@ -83,9 +88,6 @@ private:
   TimeFrame::enumTimeFrame m_stateTimeFrame;
 
   void InitForUSEquityExchanges( boost::gregorian::date );
-  ptime Normalize( boost::gregorian::date date, time_duration time, const std::string& zone ) {
-    return ou::TimeSource::Instance().ConvertRegionalToUtc( date, time, zone, true );
-  }
 
 };
 
@@ -118,10 +120,23 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
 }
 
 template<class T>
-void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) {
+boost::gregorian::date DailyTradeTimeFrame<T>:: NormalizeDate( ptime dt ) {
+  ptime dtTransition = Normalize( dt.date(), time_duration( 17, 30,  0 ), "America/New_York" );  // market transition time
+  boost::gregorian::date date;
+  if ( dt.time_of_day() < dtTransition.time_of_day() ) {  // morning side
+    date = dt.date() - date_duration(1);
+  }
+  else {  // evening side
+    date = dt.date();
+  }
+  return date;
+}
+
+template<class T>
+void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
   m_dtMarketOpen          = Normalize( date                   , time_duration( 17, 45,  0 ), "America/New_York" );
-  m_dtRHOpen              = Normalize( date                   , time_duration( 18,  0,  0 ), "America/New_York" );
-  m_dtStartTrading        = Normalize( date                   , time_duration( 18,  0, 30 ), "America/New_York" );
+  m_dtRHOpen              = Normalize( date + date_duration(1), time_duration(  9, 30,  0 ), "America/New_York" );
+  m_dtStartTrading        = Normalize( date + date_duration(1), time_duration(  9, 30, 30 ), "America/New_York" );
   m_dtTimeForCancellation = Normalize( date + date_duration(1), time_duration( 15, 57,  0 ), "America/New_York" );
   m_dtGoNeutral           = Normalize( date + date_duration(1), time_duration( 15, 57, 15 ), "America/New_York" );
   m_dtWaitForRHClose      = Normalize( date + date_duration(1), time_duration( 15, 58,  0 ), "America/New_York" );
@@ -132,6 +147,8 @@ void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date
 template<class T>
 template<typename DD>
 void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
+
+  std::stringstream ss;
 
   //time_duration td( dd.DateTime().time_of_day() );
   ptime dt( dd.DateTime() );
@@ -209,8 +226,8 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::Closed:
-    if ( ( ( m_dtMarketClose > m_dtMarketOpen ) && ( dt >= m_dtMarketOpen ) && ( dt < m_dtMarketClose ) ) // same day window
-      || ( ( m_dtMarketClose < m_dtMarketOpen ) && ( dt >= m_dtMarketOpen ) && ( dt > m_dtMarketClose ) ) // crosses a day
+    ss << dt << "," << m_dtMarketOpen;
+    if ( (  dt >= m_dtMarketOpen ) 
       ) {
         m_stateTimeFrame = TimeFrame::PreRH;
         static_cast<T*>(this)->HandlePreOpen( dd );

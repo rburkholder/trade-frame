@@ -53,11 +53,19 @@ public:
 protected:
 private:
 
+  enum EProviderUsage { EProviderUsageUnknown, EProviderUsageRead, EProviderUsageReadTrade };
+
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
 
   std::string m_sNameUnderlying;
+  std::string m_sNameUnderlyingIQFeed;
   std::string m_sNameOptionUnderlying;
+
+  //boost::gregorian::date m_dateFrontMonthFuture;
+  //boost::gregorian::date m_dateSecondMonthFuture;
+  boost::gregorian::date m_dateFrontMonthOption;
+  boost::gregorian::date m_dateSecondMonthOption;
 
   ou::action::Worker m_worker;
 
@@ -80,8 +88,9 @@ private:
   pPortfolio_t m_pPortfolioMaster;
   pPortfolio_t m_pPortfolioCurrencyUSD;
 
-  pPortfolio_t m_pPortfolioLongs;
-  pPortfolio_t m_pPortfolioShorts;
+  pPortfolio_t m_pPortfolioGC;
+  //pPortfolio_t m_pPortfolioLongs;
+  //pPortfolio_t m_pPortfolioShorts;
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;
@@ -101,6 +110,7 @@ private:
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
 
+  EProviderUsage m_eProviderUsage;
   ou::tf::option::MultiExpiryBundle* m_pBundle;
 
   virtual bool OnInit();
@@ -142,6 +152,10 @@ private:
   void HandleMenuActionEmitYieldCurve( void );
   void HandleMenuActionStartChart( void );
   void HandleMenuActionStopChart( void );
+
+  void HandleIBUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& );
+  void HandleIBUnderlyingContractDetailsDone( void );
+  void FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying );
 
   void HandleObtainNewIQFeedSymbolListRemote( void );
   void HandleObtainNewIQFeedSymbolListLocal( void );
