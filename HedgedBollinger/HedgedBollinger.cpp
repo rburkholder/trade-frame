@@ -133,7 +133,8 @@ bool AppHedgedBollinger::OnInit() {
 
   //m_sNameUnderlying = "+GC#";
   m_sNameUnderlying = "GC";
-  m_sNameUnderlyingIQFeed = "+GCG14";
+  //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
+  m_sNameUnderlyingIQFeed = "+GCH14";  // March 2014  IB won't allow trading within 30 days of expiration.
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
@@ -174,6 +175,10 @@ bool AppHedgedBollinger::OnInit() {
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );
+  m_winChart->Bind( wxEVT_MOUSEWHEEL, &AppHedgedBollinger::HandleMouse, this, idChart );
+  m_winChart->Bind( wxEVT_MOTION, &AppHedgedBollinger::HandleMouse, this, idChart );
+  m_winChart->Bind( wxEVT_LEAVE_WINDOW, &AppHedgedBollinger::HandleMouse, this, idChart );
+  m_winChart->Bind( wxEVT_ENTER_WINDOW, &AppHedgedBollinger::HandleMouse, this, idChart );
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
 
@@ -250,6 +255,19 @@ void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) {
   StartDrawChart();
 }
 
+void AppHedgedBollinger::HandleMouse( wxMouseEvent& event ) { 
+//  if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
+//  if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
+//  if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
+//  wxCoord x, y;
+//  event.GetPosition( &x, &y );
+//  std::cout << x << "," << y << std::endl;
+//  std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
+//  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
+  // 0,120,-120
+  event.Skip();
+}
+
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
   if ( event.GetId() == m_winChart->GetId() ) {
     wxPaintDC dc( m_winChart );
@@ -280,6 +298,10 @@ void AppHedgedBollinger::ThreadDrawChart1( void ) {
       ptime dtEnd = now + td; 
 
       ptime dtBegin = dtEnd - m_tdViewPortWidth;
+
+      std::stringstream ss;
+      ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+
       m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
       m_pStrategy->GetChartDataView().SetThreadSafe( true );
 
@@ -292,12 +314,14 @@ void AppHedgedBollinger::ThreadDrawChart1( void ) {
   }
 }
 
+// background thread to draw composed chart into memory, and send to gui thread 
 void AppHedgedBollinger::ThreadDrawChart2( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );  // need this
   wxBitmap* p = new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
   QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) );
 }
 
+// event in gui thread to draw on display from memory
 void AppHedgedBollinger::HandleGuiDrawChart( EventDrawChart& event ) {
   if ( 0 != m_pChartBitmap ) delete m_pChartBitmap;
   m_pChartBitmap = event.GetBitmap();
@@ -389,7 +413,8 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
           contract.currency = "USD";
           contract.secType = "FUT";
           //m_tws->ContractExpiryField( contract, m_dateFrontMonthFuture.year(), m_dateFrontMonthFuture.month(), m_dateFrontMonthFuture.day() );
-          m_tws->ContractExpiryField( contract, m_dateFrontMonthOption.year(), m_dateFrontMonthOption.month() );
+          //m_tws->ContractExpiryField( contract, m_dateFrontMonthOption.year(), m_dateFrontMonthOption.month() ); // can't trade in final 30 days
+          m_tws->ContractExpiryField( contract, m_dateSecondMonthOption.year(), m_dateSecondMonthOption.month() );  
           //contract.secType = "OPT";
           //contract.secType = "FOP";
           m_tws->RequestContractDetails( 
@@ -420,6 +445,10 @@ void AppHedgedBollinger::HandleIBUnderlyingContractDetailsDone( void ) {
 void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrumentUnderlying ) {
 
   // instrument needs to be registered with InstrumentManager
+  ou::tf::InstrumentManager::Instance().Register( pInstrumentUnderlying );
+
+  // tradeable options will need to be registered with the InstrumentManager
+  // suitable portfolios and positions need to be managed with PortfolioManager
 
   // work out current expiry and next expiry
   ptime now = ou::TimeSource::Instance().External();

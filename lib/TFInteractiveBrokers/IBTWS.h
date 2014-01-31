@@ -96,6 +96,7 @@ public:
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
   pInstrument_t BuildInstrumentFromContract( const Contract& contract );
+  //pInstrument_t BuildInstrumentFromContract( pInstrument_t pInstrument, const Contract& contract ); // unregistered pre-existing instrument
 
   // TWS Specific events
   // From TWS Wrapper:
@@ -215,7 +216,7 @@ private:
 
   struct structRequest_t {
     reqId_t id;
-    pInstrument_t pInstrument;  // add info to existing pInstrument
+    pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
     OnContractDetailsHandler_t fProcess;
     OnContractDetailsDoneHandler_t fDone;
     structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 

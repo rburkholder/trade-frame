@@ -165,6 +165,7 @@ private:
 //  void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
+  void HandleMouse( wxMouseEvent& event );
 
   void HandleStrikeWatchOn( ou::tf::option::Strike& );
   void HandleStrikeWatchOff( ou::tf::option::Strike& );

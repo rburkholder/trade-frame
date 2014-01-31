@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <cfloat>
+
 #include "ChartDataBase.h"
 
 namespace ou { // One Unified
@@ -51,7 +53,7 @@ ChartDataBase::ChartDataBase(void)
     m_dvChart.Add( 0, &ib.m_ceEma );
     m_dvChart.Add( 0, &ib.m_ceUpperBollinger );
     m_dvChart.Add( 0, &ib.m_ceLowerBollinger );
-    m_dvChart.Add( 5, &ib.m_ceSD );
+    m_dvChart.Add( 5, &ib.m_ceRatio );
     m_dvChart.Add( 6, &ib.m_ceSlope );
   }
 
@@ -262,8 +264,17 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     sd = 2.0 * ib.m_stats.SD();
     ib.m_ceUpperBollinger.Append( dt, lastEma + sd );
     ib.m_ceLowerBollinger.Append( dt, lastEma - sd );
-    ib.m_ceSD.Append( dt, sd );
-    ib.m_ceSlope.Append( dt, ib.m_slope.Slope() );
+    if ( 0.0 < sd ) {
+      ib.m_ceRatio.Append( dt, ( midpoint - lastEma ) / ( sd ) );
+    }
+    double slope = ib.m_slope.Slope();
+    if ( 100.0 < std::abs( ib.m_slope.Slope() ) ) {
+      std::stringstream ss;
+      ss << slope;
+    }
+    else {
+      ib.m_ceSlope.Append( dt, slope );
+    }
   }
 
   if ( 500 < m_quotes.Size() ) {

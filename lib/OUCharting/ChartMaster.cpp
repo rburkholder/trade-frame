@@ -167,10 +167,14 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
         iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
         // following assumes values are always > 0
         if( 0 == m_dblViewPortXBegin ) {
-          dblXBegin = ( 0 == dblXBegin ) ? Attributes.dblXMin : std::min<double>( dblXBegin, Attributes.dblXMin );
+          dblXBegin = ( 0 == dblXBegin ) 
+            ? Attributes.dblXMin 
+            : std::min<double>( dblXBegin, Attributes.dblXMin );
         }
         if( 0 == m_dblViewPortXEnd ) {
-          dblXEnd   = ( 0 == dblXEnd   ) ? Attributes.dblXMax : std::max<double>( dblXEnd,   Attributes.dblXMax );
+          dblXEnd   = ( 0 == dblXEnd   ) 
+            ? Attributes.dblXMax 
+            : std::max<double>( dblXEnd,   Attributes.dblXMax );
         }
       }
 

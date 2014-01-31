@@ -176,7 +176,7 @@ void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsH
 
 void IBTWS::RequestContractDetails( 
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
-  // 2014/01/28not complete yet, BuildInstrumentFromContract not converted over
+  // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
 
   // requires secType in addition to symbol name
   // needs to be thread protected:
@@ -827,6 +827,7 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
 
   InstrumentType::enumInstrumentTypes it;
   bool bFound = false;
+  // could use keyword loopup here
   for ( int ix = InstrumentType::Unknown; ix < InstrumentType::_Count; ++ix ) {
     if ( 0 == strcmp( szSecurityType[ ix ], contract.secType.c_str() ) ) {
       it = static_cast<InstrumentType::enumInstrumentTypes>( ix );

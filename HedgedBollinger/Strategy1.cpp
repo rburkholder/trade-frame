@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+#include <TFTrading/PortfolioManager.h>
+
 #include "Strategy1.h"
 
 // ideas
@@ -41,25 +43,44 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
   : ou::ChartDataBase(), m_pBundle( meb ), 
     m_pPortfolio( pPortfolio ), 
     m_pExecutionProvider( pExecutionProvider ),
-    m_eBollinger1EmaSlope( eSlopeUnknown )
+    m_eBollinger1EmaSlope( eSlopeUnknown ),
+    m_eTradingState( eTSUnknown ),
+    m_bTrade( false )
 {
+
+  std::stringstream ss;
 
   ptime dt( ou::TimeSource::Instance().External() );  // provided in utc
   boost::gregorian::date date( NormalizeDate( dt ) );
   InitForUS24HourFutures( date );
   // this may be offset incorrectly.
-  SetStartTrading( Normalize( date, time_duration( 18, 30, 0 ), "America/New_York" ) );  // collect some data first
+  SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
+  // change later to 10 to collect enough data to start trading:
+  SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
 
   for ( int ix = 0; ix <= 3; ++ix ) {
     m_vBollingerState.push_back( eBollingerUnknown );
   }
 
-  m_pPosition.reset( new ou::tf::Position( 
-    m_pBundle->GetWatchUnderlying()->GetInstrument(),
-    m_pExecutionProvider, 
-    m_pBundle->GetWatchUnderlying()->GetProvider()
-    ) );
+  if ( m_pExecutionProvider->Connected() ) { 
+    m_bTrade = true;
+    m_pPosition =  
+      ou::tf::PortfolioManager::Instance().ConstructPosition( 
+        pPortfolio->Id(),
+        "gc",
+        "auto",
+        "ib01",
+        "iq01",
+        m_pExecutionProvider,
+        m_pBundle->GetWatchUnderlying()->GetProvider(),
+        m_pBundle->GetWatchUnderlying()->GetInstrument()
+        )
+        ;
+  }
 
+//  m_pBundle->Portfolio()
+//    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+//      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
   m_bThreadPopDatumsActive = true;
   m_pThreadPopDatums = new boost::thread( &Strategy::ThreadPopDatums, this );
@@ -166,9 +187,11 @@ void Strategy::HandleInboundTradeUnderlying( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::GoShort( void ) {
+  m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
 }
 
 void Strategy::GoLong( void ) {
+  m_pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -176,27 +199,61 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // add trades to chart
   // add based upon confirmed price
 
-  if ( quote.IsValid() ) {
+  if ( m_bTrade && quote.IsValid() ) {
 
     double mid = quote.Midpoint();
+    ptime dt( quote.DateTime() );
 
     infoBollinger& info( m_vInfoBollinger[ 0 ] );
 
     // since slope is delayed, check that data confirms slope before initiating actual trade
-    // need to determine what data looks like when slope is not being drawn.
     // also, width of bollinger can limit when trades occur
     // track maximum, minimum, average width?
 
+    switch ( m_eTradingState ) {
+    case eTSUnknown:
+      if ( 0.0 < info.m_slope.Slope() ) {
+        if ( mid > info.m_ema.Ago( 0 ).Value() ) {
+          m_eTradingState = eTSSlopeRisingAboveMean;
+        }
+        else {
+          m_eTradingState = eTSSlopeRisingBelowMean;
+        }
+      }
+      else {
+        if ( 0.0 > info.m_slope.Slope() ) {
+          if ( mid < info.m_ema.Ago( 0 ).Value() ) {
+            m_eTradingState = eTSSlopeFallingBelowMean;
+          }
+          else {
+            m_eTradingState = eTSSlopeFallingAboveMean;
+          }
+        }
+      }
+      break;
+    case eTSSlopeRisingAboveMean:
+      if ( mid < info.m_ema.Ago( 0 ).Value() ) { // fell below mean
+      }
+      break;
+    case eTSSlopeRisingBelowMean:
+      break;
+    case eTSSlopeFallingAboveMean:
+      break;
+    case eTSSlopeFallingBelowMean:
+      break;
+    }
+
+/*
     switch ( m_eBollinger1EmaSlope ) {
     case eSlopeUnknown:
       if ( 0.0 < info.m_slope.Slope() ) {
-        std::cout << "Starting with a long" << std::endl;
+        std::cout << dt << "Starting with a long" << std::endl;
         GoLong();
         m_eBollinger1EmaSlope = eSlopePos;
       }
       else {
         if ( 0.0 > info.m_slope.Slope() ) {
-          std::cout << "Starting with a short" << std::endl;
+          std::cout << dt << "Starting with a short" << std::endl;
           GoShort();
           m_eBollinger1EmaSlope = eSlopeNeg;
         }
@@ -204,7 +261,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case eSlopeNeg:
       if ( 0.0 < info.m_slope.Slope() ) {
-        std::cout << "Reversing Short to Long" << std::endl;
+        std::cout << dt << "Reversing Short to Long" << std::endl;
         m_pPosition->ClosePosition();
         GoLong();
         m_eBollinger1EmaSlope = eSlopePos;
@@ -212,7 +269,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case eSlopePos:
       if ( 0.0 > info.m_slope.Slope() ) {
-        std::cout << "Reversing Long to Short" << std::endl;
+        std::cout << dt << "Reversing Long to Short" << std::endl;
         m_pPosition->ClosePosition();
         GoShort();
         m_eBollinger1EmaSlope = eSlopeNeg;
@@ -220,7 +277,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       
       break;
     }
-
+    */
   }
 }
 

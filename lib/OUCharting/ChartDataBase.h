@@ -103,7 +103,7 @@ protected:
     ou::ChartEntryIndicator m_ceEma;
     ou::ChartEntryIndicator m_ceUpperBollinger;
     ou::ChartEntryIndicator m_ceLowerBollinger;
-    ou::ChartEntryIndicator m_ceSD;
+    ou::ChartEntryIndicator m_ceRatio;
     ou::tf::TSSWStatsPrice m_slope;
     ou::ChartEntryIndicator m_ceSlope;
     void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
@@ -111,7 +111,7 @@ protected:
       m_ceEma.SetColour( colour );
       m_ceUpperBollinger.SetColour( colour );
       m_ceLowerBollinger.SetColour( colour );
-      m_ceSD.SetColour( colour );
+      m_ceRatio.SetColour( colour );
       m_ceSlope.SetColour( colour );
     }
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )

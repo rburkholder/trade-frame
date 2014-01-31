@@ -17,7 +17,7 @@
 
 class EventDrawChart: public wxEvent {
 public:
-  EventDrawChart( wxEventType eventType, int winid, wxBitmap* pBitmap ); // bitmap goes away with event destruction
+  EventDrawChart( wxEventType eventType, int winid, wxBitmap* pBitmap ); // bitmap destroyed in event consumer
   ~EventDrawChart(void);
 
   wxBitmap* GetBitmap( void ) { return m_pBitmap; }

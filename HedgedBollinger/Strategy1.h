@@ -54,6 +54,11 @@ public:
 protected:
 private:
 
+  enum ETradingState { 
+    eTSUnknown, 
+    eTSSlopeRisingAboveMean,eTSSlopeRisingBelowMean,
+    eTSSlopeFallingAboveMean, eTSSlopeFallingBelowMean
+  };
   enum EBollingerState { eBollingerUnknown, eBollingerLow, eBollingerHigh, eBollingerMid };
   enum ESlope { eSlopeUnknown, eSlopeNeg, eSlopePos };
 
@@ -69,13 +74,27 @@ private:
     {}
   };
 
+  bool m_bTrade;  // if execution provider available, then trade
+
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
   pPortfolio_t m_pPortfolio;
   pPosition_t m_pPosition;
   pProvider_t m_pExecutionProvider;
 
+  struct PositionManagement {
+    double stop;
+    double target;
+    pPosition_t pPosition;
+  };
+
+  typedef std::vector<PositionManagement> vPosition_t;
+  vPosition_t m_vPositionEmpties;
+  vPosition_t m_vPositionLongs;
+  vPosition_t m_vPositionShorts;
+
   ou::ChartDataBase m_ChartDataUnderlying;
 
+  ETradingState m_eTradingState;
   ESlope m_eBollinger1EmaSlope;
   std::vector<EBollingerState> m_vBollingerState;
 
