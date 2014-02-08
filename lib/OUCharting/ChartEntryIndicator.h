@@ -24,7 +24,7 @@ public:
   ChartEntryIndicator( size_type nSize );
   virtual ~ChartEntryIndicator(void);
   virtual void Reserve( size_type );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };

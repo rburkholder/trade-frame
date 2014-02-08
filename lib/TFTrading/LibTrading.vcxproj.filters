@@ -100,6 +100,9 @@
     <ClCompile Include="NoRiskInterestRateSeries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OrdersOutstanding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h">
@@ -205,6 +208,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NoRiskInterestRateSeries.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OrdersOutstanding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

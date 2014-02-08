@@ -41,7 +41,7 @@
 #include <OUCharting/ChartEntryIndicator.h>
 #include <OUCharting/ChartEntryShape.h>
 
-#include "OrdersOutstanding.h"
+#include <TFTrading/OrdersOutstanding.h>
 
 class Strategy {
 public:

@@ -64,7 +64,9 @@ void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
   
 }
 
-void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+
+  bool bAdded( false );
 
   ou::tf::Bar bar;
   while ( m_lfBar.pop( bar ) ) {
@@ -85,7 +87,9 @@ void ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
     candle->setXData( daXData );
     pAttributes->dblXMin = daXData[0];
     pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+    bAdded = true;
   }
+  return bAdded;
 }
 
 void ChartEntryBars::Clear( void ) {

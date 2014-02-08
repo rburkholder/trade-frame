@@ -42,7 +42,8 @@ void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume) {
   ChartEntryBaseWithTime::Append( dt, (double) volume );
 }
 
-void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+  bool bAdded( false );
   ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
 
@@ -55,7 +56,10 @@ void ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
 
     DataSet *pds = bl->getDataSet(0);
     pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
+
+    bAdded = true;
   }
+  return bAdded;
 }
 
 } // ou namespace

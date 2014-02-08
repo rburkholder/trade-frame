@@ -73,8 +73,8 @@ public:
   void SetGlobalStop( double stop ) { m_dblGlobalStop = stop; };
   void ResetGlobalStop( void ) { m_dblGlobalStop = 0.0; };
 
-  unsigned int GetCountOfOutstandingEntries( void ) const { return m_mapEntryOrdersFilling.size(); };
-  unsigned int GetCountOfOutstandingMatches( void ) const { return m_mapOrdersToMatch.size(); };
+  size_t GetCountOfOutstandingEntries( void ) const { return m_mapEntryOrdersFilling.size(); };
+  size_t GetCountOfOutstandingMatches( void ) const { return m_mapOrdersToMatch.size(); };
 
   // should be protected but doesn't work there
   void HandleMatchingOrderFilled( const ou::tf::Order& order );

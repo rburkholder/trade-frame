@@ -37,7 +37,8 @@ void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const 
   }
 }
 
-void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+  bool bAdded( false );
   Mark_t mark;
   while ( m_lfMark.pop( mark ) ) {
     m_vPrice.push_back( mark.m_dblPrice );
@@ -53,8 +54,9 @@ void ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
       pmk->setAlignment( TopCenter );
       pmk->setDrawOnTop( false );
     }
+    bAdded = true;
   }
-  
+  return bAdded;
 }
 
 void ChartEntryMark::Clear( void ) {

@@ -95,6 +95,7 @@ public:
   bool IsValid( void ) const { return ( ( 0 != m_dblBid ) && ( 0 != m_dblAsk ) && ( 0 != m_nBidSize ) && ( 0 != m_nAskSize ) ); };
   bool CrossedQuote( void ) const { return ( m_dblBid >= m_dblAsk ); };
   price_t Midpoint( void ) const { return ( m_dblBid + m_dblAsk ) / 2.0; };
+  price_t Spread( void ) const { return m_dblAsk - m_dblBid; };
   price_t GeometricMidPoint( void ) const { return std::sqrt( m_dblBid * m_dblAsk ); };  // pg 53, Intro HF Finance
   price_t LogarithmicMidPointA( void ) const { return ( std::log( m_dblBid ) + std::log( m_dblAsk ) ) / 2.0; }; // eq 3.4 pg 39, Intro HF Finance
   price_t LogarithmicMidPointB( void ) const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); }; // eq 3.4 pg 39, Intro HF Finance

@@ -27,7 +27,7 @@ public:
   virtual ~ChartEntryBars(void);
   virtual void Reserve( size_type );
   void AppendBar( const ou::tf::Bar& bar ); // uses thread crossing buffer
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
   virtual void Clear( void );
 
   template<typename Iterator>

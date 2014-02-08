@@ -148,7 +148,7 @@ template<class T>
 template<typename DD>
 void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
 
-  //std::stringstream ss;
+  std::stringstream ss;
 
   //time_duration td( dd.DateTime().time_of_day() );
   ptime dt( dd.DateTime() );
@@ -215,7 +215,7 @@ void DailyTradeTimeFrame<T>::TimeTick( DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::PreRH:
-    //ss << dt << "," << m_dtMarketOpen;
+    ss << dt << "," << m_dtRHOpen;
     if ( dt >= m_dtRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
       static_cast<T*>(this)->HandleBellHeard();  // one shot

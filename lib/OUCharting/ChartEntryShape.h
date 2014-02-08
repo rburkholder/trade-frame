@@ -33,7 +33,7 @@ public:
   enumShape GetShape( void ) const { return m_eShape; };
   virtual ~ChartEntryShape(void);
   void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
   virtual void Clear( void );
 protected:
 

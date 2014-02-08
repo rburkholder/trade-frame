@@ -85,7 +85,7 @@ void OrdersOutstanding::CheckBaseOrder( const ou::tf::Quote& quote ) { // cancel
 }
 
 void OrdersOutstanding::CancelAllButNEntryOrders( unsigned int n ) {
-  unsigned m = m_mapEntryOrdersFilling.size();
+  size_t m = m_mapEntryOrdersFilling.size();
   mapOrdersFilling_iter_t iter = m_mapEntryOrdersFilling.begin();
   while ( m > n ) {
     if ( EStateOpenWaitingFill == iter->second->eState ) {
@@ -107,7 +107,7 @@ void OrdersOutstanding::CancelAllMatchingOrders( void ) {
   if ( 0 == m_cntRoundTrips ) {
   }
   else {
-    unsigned long ave = m_durRoundTripTime.total_milliseconds() / m_cntRoundTrips;
+    boost::uint64_t ave = m_durRoundTripTime.total_milliseconds() / m_cntRoundTrips;
   }
 }
 
@@ -314,10 +314,10 @@ void OrdersOutstanding::PostMortemReport( void ) {
     vtd.push_back( lt );
   }
   if ( 0 != m_vCompletedRoundTrips.size() ) {
-    long mn( td / m_vCompletedRoundTrips.size() );
+    size_t mn( td / m_vCompletedRoundTrips.size() );
     long long sum( 0 );
     for ( std::vector<long>::iterator iter = vtd.begin(); vtd.end() != iter; ++iter ) {
-      long num( mn - *iter );
+      size_t num( mn - *iter );
       sum += ( num * num );
     }
     double sq = sqrt( (double) sum );

@@ -155,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrameMain.h" />
-    <ClInclude Include="OrdersOutstanding.h" />
     <ClInclude Include="PanelSimulationControl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -165,7 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FrameMain.cpp" />
-    <ClCompile Include="OrdersOutstanding.cpp" />
     <ClCompile Include="PanelSimulationControl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

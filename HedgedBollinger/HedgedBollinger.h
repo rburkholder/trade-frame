@@ -152,6 +152,7 @@ private:
   void HandleMenuActionEmitYieldCurve( void );
   void HandleMenuActionStartChart( void );
   void HandleMenuActionStopChart( void );
+  void HandleMenuActionEmitStrategyValues( void );
 
   void HandleIBUnderlyingContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& );
   void HandleIBUnderlyingContractDetailsDone( void );

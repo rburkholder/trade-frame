@@ -150,6 +150,7 @@
     <ClCompile Include="NoRiskInterestRateSeries.cpp" />
     <ClCompile Include="Order.cpp" />
     <ClCompile Include="OrderManager.cpp" />
+    <ClCompile Include="OrdersOutstanding.cpp" />
     <ClCompile Include="Portfolio.cpp" />
     <ClCompile Include="PortfolioManager.cpp" />
     <ClCompile Include="Position.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="NoRiskInterestRateSeries.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderManager.h" />
+    <ClInclude Include="OrdersOutstanding.h" />
     <ClInclude Include="Portfolio.h" />
     <ClInclude Include="PortfolioManager.h" />
     <ClInclude Include="Position.h" />

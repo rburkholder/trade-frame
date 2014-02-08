@@ -56,7 +56,9 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   }
 }
 
-void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+bool ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+
+  bool bAdded( false );
 
   ChartEntryBaseWithTime::ClearQueue();
   char* pszLabel;
@@ -80,7 +82,9 @@ void ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttr
     //textbox->setBackground(0xcc99ff, Chart::Transparent, 1);
     textbox->setAlignment(Chart::Left);
     //textbox->setPos(4, 0);
+    bAdded = true;
   }
+  return bAdded;
 }
 
 void ChartEntryShape::Clear( void ) {

@@ -26,7 +26,7 @@ class ChartEntrySegments :
 public:
   ChartEntrySegments(void);
   virtual ~ChartEntrySegments(void);
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
   
 private:

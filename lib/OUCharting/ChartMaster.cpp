@@ -164,23 +164,35 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
       for ( ChartDataView::iterator iter = m_pCdv->begin(); m_pCdv->end() != iter; ++iter ) {
         size_t ixChart = iter->GetActualChartId();
         ChartEntryBase::structChartAttributes Attributes;
-        iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes );
-        // following assumes values are always > 0
-        if( 0 == m_dblViewPortXBegin ) {
-          dblXBegin = ( 0 == dblXBegin ) 
-            ? Attributes.dblXMin 
-            : std::min<double>( dblXBegin, Attributes.dblXMin );
-        }
-        if( 0 == m_dblViewPortXEnd ) {
-          dblXEnd   = ( 0 == dblXEnd   ) 
-            ? Attributes.dblXMax 
-            : std::max<double>( dblXEnd,   Attributes.dblXMax );
+        if ( iter->GetChartEntry()->AddEntryToChart( vCharts[ ixChart ].xy, &Attributes ) ) {
+          // following assumes values are always > 0
+          if( 0 == m_dblViewPortXBegin ) {
+            dblXBegin = ( 0 == dblXBegin ) 
+              ? Attributes.dblXMin 
+              : std::min<double>( dblXBegin, Attributes.dblXMin );
+          }
+          if( 0 == m_dblViewPortXEnd ) {
+            dblXEnd   = ( 0 == dblXEnd   ) 
+              ? Attributes.dblXMax 
+              : std::max<double>( dblXEnd,   Attributes.dblXMax );
+          }
+          if ( 610.0 < ( dblXEnd - dblXBegin ) ) {
+            double dif = dblXEnd - dblXBegin;
+            static double change( 0 );
+            if ( dif > change ) {
+              change = dif;
+              //std::cout << "diff " << dif << std::endl;
+            }
+          }
         }
       }
 
       // time axis scales
       if ( dblXBegin != dblXEnd ) {
         pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
+      }
+      else {
+        std::cout << "Time Scales match" << std::endl;
       }
 
       MemBlock m = multi.makeChart( BMP );

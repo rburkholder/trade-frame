@@ -234,6 +234,7 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "d2 Stop Chart", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionStopChart ) ) );
   vItems.push_back( new mi( "e1 Save Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "f1 Libor Yield Curve", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitYieldCurve ) ) );
+  vItems.push_back( new mi( "f2 Strategy1 Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitStrategyValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_bThreadDrawChartActive = true;
@@ -241,6 +242,10 @@ bool AppHedgedBollinger::OnInit() {
 
   return 1;
 
+}
+
+void AppHedgedBollinger::HandleMenuActionEmitStrategyValues( void ) {
+  m_pStrategy->EmitStats();
 }
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {

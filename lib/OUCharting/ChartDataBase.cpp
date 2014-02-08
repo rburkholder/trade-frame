@@ -72,6 +72,9 @@ ChartDataBase::ChartDataBase(void)
   m_ceQuoteSpread.SetColour( ou::Colour::Black );
 
   m_ceQuoteSpread.SetName( "Spread" );
+  m_ceQuoteUpper.SetName( "QuoteUpper" );
+  m_ceQuoteLower.SetName( "QuoteLower" );
+  m_ceTrade.SetName( "Trade" );
 
   m_rVolumes[ VUp ].ceVolumeUp.SetColour( ou::Colour::Green );
   m_rVolumes[ VUp ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );

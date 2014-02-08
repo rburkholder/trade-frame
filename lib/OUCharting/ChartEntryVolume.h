@@ -26,7 +26,7 @@ public:
   virtual ~ChartEntryVolume(void);
   virtual void Reserve( size_type );
   void Append( ptime dt, int volume );
-  virtual void AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };

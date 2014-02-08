@@ -34,7 +34,8 @@ void ChartEntryIndicator::Reserve( size_type nSize ) {
   ChartEntryBaseWithTime::Reserve( nSize );
 }
 
-void ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes)  {
+bool ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes)  {
+  bool bAdded( false );
   ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
     LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
@@ -45,7 +46,9 @@ void ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *p
     DataSet *pds = ll->getDataSet(0);
     pds->setDataColor( m_eColour );
     pds->setDataName( GetName().c_str() );
+    bAdded = true;
   }
+  return bAdded;
 }
 
 } // namespace ou
