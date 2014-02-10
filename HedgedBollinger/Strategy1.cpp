@@ -37,6 +37,11 @@
 * then trade with the trend, starting on the band
 
 * pick up three on each side then start pruning back when possible
+
+* Books for reference:  
+*  TradingTheMeasuredMove: fibo series useage (.pdf)
+*  Trading With The Odds: some fibo stuff (paper)
+*  ProfessionalAutomatedTrading: regime change (.pdf)
 */
 
 Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider ) 
@@ -45,10 +50,18 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
     m_pExecutionProvider( pExecutionProvider ),
     m_eBollinger1EmaSlope( eSlopeUnknown ),
     m_eTradingState( eTSUnknown ),
-    m_bTrade( false )
+    m_bTrade( false ), m_nLongs( 0 ), m_nShorts( 0 )
 {
 
-  std::stringstream ss;
+  m_ceCountLongs.SetColour( ou::Colour::Red );
+  m_ceCountShorts.SetColour( ou::Colour::Blue );
+  m_cePL.SetColour( ou::Colour::Black );
+
+  m_ceCountLongs.SetName( "Longs" );
+  m_ceCountShorts.SetName( "Shorts" );
+  m_cePL.SetName( "PL" );
+
+  //std::stringstream ss;
 
   ptime dt( ou::TimeSource::Instance().External() );  // provided in utc
   boost::gregorian::date date( NormalizeDate( dt ) );
@@ -66,19 +79,12 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
 
   if ( m_pExecutionProvider->Connected() ) { 
     m_bTrade = true;
-/*    m_pPosition =  
-      ou::tf::PortfolioManager::Instance().ConstructPosition( 
-        pPortfolio->Id(),
-        "gc",
-        "auto",
-        "ib01",
-        "iq01",
-        m_pExecutionProvider,
-        m_pBundle->GetWatchUnderlying()->GetProvider(),
-        m_pBundle->GetWatchUnderlying()->GetInstrument()
-        )
-        ;
-        */
+
+    m_dvChart.Add( 7, &m_ceCountLongs );
+    m_dvChart.Add( 7, &m_ceCountShorts );
+
+    m_dvChart.Add( 8, &m_cePL );
+
   }
 
 //  m_pBundle->Portfolio()
@@ -124,7 +130,6 @@ Strategy::~Strategy(void) {
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   // need to queue this from the originating thread.
-  //m_ChartDataUnderlying.HandleTrade( trade );
   ou::ChartDataBase::HandleTrade( trade );
   TimeTick( trade );
 }
@@ -134,7 +139,6 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
-  //m_ChartDataUnderlying.HandleQuote( quote );
   ou::ChartDataBase::HandleQuote( quote );
   TimeTick( quote );
 }
@@ -194,10 +198,11 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // add trades to chart
   // add based upon confirmed price
 
-  if ( m_bTrade && quote.IsValid() ) {
+  if ( quote.IsValid() ) {
+
+    m_dtQuote = quote.DateTime();
 
     double mid = quote.Midpoint();
-    ptime dt( quote.DateTime() );
 
     infoBollinger& info( m_vInfoBollinger[ 0 ] );
 
@@ -257,29 +262,39 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
     }
 
-    switch ( m_eTradingState ) {
-    case eTSUnknown:
-      break;
-    case eTSSlopeRisingAboveMean:
-      switch ( eTradingState ) {
+    if ( m_bTrade ) {
+      switch ( m_eTradingState ) {
+      case eTSUnknown:
+        break;
+      case eTSSlopeRisingAboveMean:
+        switch ( eTradingState ) {
+        case eTSSlopeRisingBelowMean:
+          TakeLongProfits();
+          GoShort();
+          break;
+        }
+        break;
       case eTSSlopeRisingBelowMean:
-        TakeLongProfits();
-        GoShort();
         break;
-      }
-      break;
-    case eTSSlopeRisingBelowMean:
-      break;
-    case eTSSlopeFallingAboveMean:
-      break;
-    case eTSSlopeFallingBelowMean:
-      switch ( eTradingState ) {
       case eTSSlopeFallingAboveMean:
-        TakeShortProfits();
-        GoLong();
+        break;
+      case eTSSlopeFallingBelowMean:
+        switch ( eTradingState ) {
+        case eTSSlopeFallingAboveMean:
+          TakeShortProfits();
+          GoLong();
+          break;
+        }
         break;
       }
-      break;
+
+      double dblUnrealized;
+      double dblRealized;
+      double dblCommission;
+      double dblTotal;
+      m_pPortfolio->QueryStats( dblUnrealized, dblRealized, dblCommission, dblTotal );
+      m_cePL.Append( m_dtQuote, dblTotal );
+
     }
 
     m_eTradingState = eTradingState;
@@ -319,29 +334,44 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     }
     */
+
   }
 }
 
 void Strategy::TakeLongProfits( void ) {
   for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
-//    if ( iter->Position()->GetRow().
-
+    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
+    if ( ou::tf::OrderSide::Buy == row.eOrderSideActive ) {
+      iter->get()->ExitLong();
+    }
   }
 }
 
 void Strategy::TakeShortProfits( void ) {
+  for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
+    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
+    if ( ou::tf::OrderSide::Sell == row.eOrderSideActive ) {
+      iter->get()->ExitShort();
+    }
+  }
 }
 
 void Strategy::GoShort( void ) {
-  pPositionState_t pPositionState( GetAPositionState() );
-  pPosition_t pPosition( pPositionState->Position() );
+  PositionState& ps( GetAPositionState() );
+  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateShort );
+  pPosition_t pPosition( ps.Position() );
   pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  ++m_nShorts;
+  m_ceCountShorts.Append( m_dtQuote, -m_nShorts );
 }
 
 void Strategy::GoLong( void ) {
-  pPositionState_t pPositionState( GetAPositionState() );
-  pPosition_t pPosition( pPositionState->Position() );
+  PositionState& ps( GetAPositionState() );
+  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateLong );
+  pPosition_t pPosition( ps.Position() );
   pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  ++m_nLongs;
+  m_ceCountLongs.Append( m_dtQuote, m_nLongs );
 }
 
 void Strategy::EmitStats( void ) const {
@@ -416,7 +446,7 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
   }
 }
 
-Strategy::pPositionState_t Strategy::GetAPositionState( void ) {
+PositionState& Strategy::GetAPositionState( void ) {
   if ( 0 == m_vPositionStateEmpties.size() ) {
     pPosition_t pPosition(  
       ou::tf::PortfolioManager::Instance().ConstructPosition( 
@@ -431,21 +461,35 @@ Strategy::pPositionState_t Strategy::GetAPositionState( void ) {
         )
       );
     size_t ix( m_vPositionAll.size() );
-    m_vPositionAll.push_back( pPositionState_t( new PositionState( ix, pPosition ) ) );
+    pPositionState_t p( new PositionState( ix, pPosition ) );
+    p->OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionState );
+    m_vPositionAll.push_back( p );
     m_vPositionStateEmpties.push_back( m_vPositionAll.size() - 1 );
   }
 
   size_t ix( m_vPositionStateEmpties.back() );
   m_vPositionStateEmpties.pop_back();
 
-  return m_vPositionAll[ ix ];
+  return *(m_vPositionAll[ ix ].get());
 
 }
 
-void Strategy::ReturnAPositionState( pPositionState_t pPositionState ) {
-  size_t ix( pPositionState->Index() );
+void Strategy::ReturnAPositionState( const PositionState& ps ) {  // thread safe?
+  size_t ix( ps.Index() );
   for ( std::vector<size_t>::iterator iter = m_vPositionStateEmpties.begin(); m_vPositionStateEmpties.end() != iter; ++iter ) {
     assert( ix != *iter );
   }
   m_vPositionStateEmpties.push_back( ix );
+}
+
+void Strategy::ReturnAPositionStateLong( const PositionState& ps ) {  // thread safe?
+  --m_nLongs;
+  m_ceCountLongs.Append( m_dtQuote, m_nLongs );
+  ReturnAPositionState( ps );
+}
+
+void Strategy::ReturnAPositionStateShort( const PositionState& ps ) {  // thread safe?
+  --m_nShorts;
+  m_ceCountShorts.Append( m_dtQuote, -m_nShorts );
+  ReturnAPositionState( ps );
 }

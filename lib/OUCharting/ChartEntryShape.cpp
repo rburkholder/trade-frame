@@ -67,22 +67,25 @@ bool ChartEntryShape::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttr
   }
 
   if ( 0 < m_vPrice.size() ) {
-    ScatterLayer *layer 
-      = pXY->addScatterLayer( 
-        GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
-
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    layer->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+    if ( 0 != daXData.len ) {
+      ScatterLayer *layer 
+        = pXY->addScatterLayer( 
+          GetDateTimes(), GetPrices(), NULL, m_rShapes[ m_eShape ], 15, m_eColour, m_eColour );
 
-    layer->addExtraField( GetLabels() );
-    layer->setDataLabelFormat("{field0}");
-    TextBox *textbox = layer->setDataLabelStyle("arialbd.ttf", 8);
-    //textbox->setBackground(0xcc99ff, Chart::Transparent, 1);
-    textbox->setAlignment(Chart::Left);
-    //textbox->setPos(4, 0);
-    bAdded = true;
+    
+      layer->setXData( daXData );
+      pAttributes->dblXMin = daXData[0];
+      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+
+      layer->addExtraField( GetLabels() );
+      layer->setDataLabelFormat("{field0}");
+      TextBox *textbox = layer->setDataLabelStyle("arialbd.ttf", 8);
+      //textbox->setBackground(0xcc99ff, Chart::Transparent, 1);
+      textbox->setAlignment(Chart::Left);
+      //textbox->setPos(4, 0);
+      bAdded = true;
+    }
   }
   return bAdded;
 }

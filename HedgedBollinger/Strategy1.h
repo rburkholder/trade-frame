@@ -82,23 +82,31 @@ private:
 
   bool m_bTrade;  // if execution provider available, then trade
 
+  ptime m_dtQuote;
+
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
   pPortfolio_t m_pPortfolio;
   //pPosition_t m_pPosition;
   pProvider_t m_pExecutionProvider;
 
   typedef boost::shared_ptr<PositionState> pPositionState_t;
-  typedef std::vector<pPositionState_t> vPosition_t;
+  typedef std::vector<pPositionState_t> vPosition_t;  // use ReusableBuffers instead?
   vPosition_t m_vPositionAll;  // contains all positions, active or not
   std::vector<size_t> m_vPositionStateEmpties;
-  //vPosition_t m_vPositionEmpties; // contains inactive positions
-  //vPosition_t m_vPositionLongs;  // contains long positions
-  //vPosition_t m_vPositionShorts;  // contains short positions
 
-  pPositionState_t GetAPositionState( void );
-  void ReturnAPositionState( pPositionState_t pPositionState );
+  PositionState& GetAPositionState( void );
+  void ReturnAPositionState( const PositionState& );
+  void ReturnAPositionStateLong( const PositionState& );
+  void ReturnAPositionStateShort( const PositionState& );
 
   ou::ChartDataBase m_ChartDataUnderlying;
+
+  int m_nLongs;
+  int m_nShorts;
+
+  ou::ChartEntryIndicator m_ceCountLongs;
+  ou::ChartEntryIndicator m_ceCountShorts;
+  ou::ChartEntryIndicator m_cePL;
 
   ETradingState m_eTradingState;
   ESlope m_eBollinger1EmaSlope;

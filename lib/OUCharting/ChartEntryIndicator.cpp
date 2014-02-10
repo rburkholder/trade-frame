@@ -38,15 +38,17 @@ bool ChartEntryIndicator::AddEntryToChart(XYChart *pXY, structChartAttributes *p
   bool bAdded( false );
   ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
-    LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    ll->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
-    DataSet *pds = ll->getDataSet(0);
-    pds->setDataColor( m_eColour );
-    pds->setDataName( GetName().c_str() );
-    bAdded = true;
+    if ( 0 != daXData.len ) {
+      LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
+      ll->setXData( daXData );
+      pAttributes->dblXMin = daXData[0];
+      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      DataSet *pds = ll->getDataSet(0);
+      pds->setDataColor( m_eColour );
+      pds->setDataName( GetName().c_str() );
+      bAdded = true;
+    }
   }
   return bAdded;
 }

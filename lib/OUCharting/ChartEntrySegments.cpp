@@ -28,12 +28,15 @@ ChartEntrySegments::~ChartEntrySegments(void) {
 bool ChartEntrySegments::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
   bool bAdded( false );
   if ( 0 < m_vPrice.size() ) {
-    LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    layer->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
-    bAdded = true;
+    if ( 0 != daXData.len ) {
+      LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
+    
+      layer->setXData( daXData );
+      pAttributes->dblXMin = daXData[0];
+      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      bAdded = true;
+    }
   }
   return bAdded;
 }

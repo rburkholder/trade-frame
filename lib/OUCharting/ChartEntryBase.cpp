@@ -97,6 +97,7 @@ void ChartEntryBaseWithTime::SetViewPort( boost::posix_time::ptime dtBegin, boos
   m_ixStart = 0;
   m_nElements = 0;
   // calculate new viewport values
+  // todo: what happens when nothing is within the range, should hae zero elements listed
   if ( 0 != m_vDateTime.size() ) {
     vDateTime_t::iterator iterBegin( m_vDateTime.begin() );
     vDateTime_t::iterator iterEnd( m_vDateTime.end() );

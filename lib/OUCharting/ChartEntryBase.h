@@ -132,11 +132,13 @@ protected:
 
   // need to get to top of call hierarchy and only call when m_nElements is non-zero
   DoubleArray GetDateTimes( void ) const {
-    double diff = m_vChartTime[ m_ixStart + m_nElements - 1 ] - m_vChartTime[ m_ixStart ];
-    if ( 610.0 < diff ) {
-      static double change( 0 );
-      change = diff;
-    }
+//    if ( ( 2 <= m_vChartTime.size() ) && ( 2 <= m_nElements ) ) {
+//      double diff = m_vChartTime[ m_ixStart + m_nElements - 1 ] - m_vChartTime[ m_ixStart ];
+//      if ( 610.0 < diff ) {
+//        static double change( 0 );
+//        change = diff;
+//      }
+//    }
     return DoubleArray( &m_vChartTime[ m_ixStart ], m_nElements );
   }
 

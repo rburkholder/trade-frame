@@ -51,7 +51,7 @@ bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {
       int i = m_vColour[ ix ];
       Mark *pmk = pXY->yAxis()->addMark( m_vPrice[ ix ], m_vColour[ ix ], m_vName[ ix ].c_str() );
-      pmk->setAlignment( TopCenter );
+      pmk->setAlignment( Left );
       pmk->setDrawOnTop( false );
     }
     bAdded = true;

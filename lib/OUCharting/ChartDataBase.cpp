@@ -57,6 +57,14 @@ ChartDataBase::ChartDataBase(void)
     m_dvChart.Add( 6, &ib.m_ceSlope );
   }
 
+  m_cemRatio.AddMark(  2.0, ou::Colour::Black, "+2sd" );
+  m_cemRatio.AddMark(  0.0, ou::Colour::Black, "" );//"zero" );
+  m_cemRatio.AddMark( -2.0, ou::Colour::Black, "-2sd" );
+  m_dvChart.Add( 5, &m_cemRatio );
+
+  m_cemSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
+  m_dvChart.Add( 6, &m_cemSlope );
+
   m_dvChart.Add( 0, &m_ceBars );
 
   m_dvChart.Add( 1, &m_rVolumes[ VUp ].ceVolumeUp );
@@ -72,9 +80,9 @@ ChartDataBase::ChartDataBase(void)
   m_ceQuoteSpread.SetColour( ou::Colour::Black );
 
   m_ceQuoteSpread.SetName( "Spread" );
-  m_ceQuoteUpper.SetName( "QuoteUpper" );
-  m_ceQuoteLower.SetName( "QuoteLower" );
-  m_ceTrade.SetName( "Trade" );
+  //m_ceQuoteUpper.SetName( "QuoteUpper" );
+  //m_ceQuoteLower.SetName( "QuoteLower" );
+  //m_ceTrade.SetName( "Trade" );
 
   m_rVolumes[ VUp ].ceVolumeUp.SetColour( ou::Colour::Green );
   m_rVolumes[ VUp ].ceVolumeNeutral.SetColour( ou::Colour::Yellow );

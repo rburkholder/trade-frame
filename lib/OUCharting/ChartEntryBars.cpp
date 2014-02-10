@@ -74,20 +74,24 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
   }
 
   if ( 0 != this->m_vDateTime.size() ) {
-    CandleStickLayer *candle = pXY->addCandleStickLayer( 
-      this->GetHigh(),
-      this->GetLow(),
-      this->GetOpen(),
-      this->GetClose(),
-//      0x0000ff00, 0x00ff0000, 0xff000000
-      0x0000ff00, 0x00ff0000, 0xFFFF0001
-      );
-    //candle->setDataGap( 0 );
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    candle->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
-    bAdded = true;
+    // this should be replicated to the other Entry Types.
+    if ( 0 != daXData.len ) {
+      CandleStickLayer *candle = pXY->addCandleStickLayer( 
+        this->GetHigh(),
+        this->GetLow(),
+        this->GetOpen(),
+        this->GetClose(),
+  //      0x0000ff00, 0x00ff0000, 0xff000000
+        0x0000ff00, 0x00ff0000, 0xFFFF0001
+        );
+      //candle->setDataGap( 0 );
+    
+      candle->setXData( daXData );
+      pAttributes->dblXMin = daXData[0];
+      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      bAdded = true;
+    }
   }
   return bAdded;
 }

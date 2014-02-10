@@ -46,18 +46,19 @@ bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
   bool bAdded( false );
   ChartEntryBaseWithTime::ClearQueue();
   if ( 0 != this->m_vDateTime.size() ) {
-
-    BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
-
     DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
-    bl->setXData( daXData );
-    pAttributes->dblXMin = daXData[0];
-    pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+    if ( 0 != daXData.len ) {
+      BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
+    
+      bl->setXData( daXData );
+      pAttributes->dblXMin = daXData[0];
+      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
 
-    DataSet *pds = bl->getDataSet(0);
-    pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
+      DataSet *pds = bl->getDataSet(0);
+      pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );
 
-    bAdded = true;
+      bAdded = true;
+    }
   }
   return bAdded;
 }

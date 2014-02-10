@@ -176,14 +176,14 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
               ? Attributes.dblXMax 
               : std::max<double>( dblXEnd,   Attributes.dblXMax );
           }
-          if ( 610.0 < ( dblXEnd - dblXBegin ) ) {
-            double dif = dblXEnd - dblXBegin;
-            static double change( 0 );
-            if ( dif > change ) {
-              change = dif;
+//          if ( 610.0 < ( dblXEnd - dblXBegin ) ) {
+//            double dif = dblXEnd - dblXBegin;
+//            static double change( 0 );
+//            if ( dif > change ) {
+//              change = dif;
               //std::cout << "diff " << dif << std::endl;
-            }
-          }
+//            }
+//          }
         }
       }
 

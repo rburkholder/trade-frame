@@ -103,17 +103,15 @@ public:
   // pending orders need to cancelled in order to change sides
   // use an opposing position if playing both sides of the market
     OrderSide::enumOrderSide eOrderSidePending;  
-    boost::uint32_t nPositionPending;
-  // indicates whether we are in a long or short position
+    boost::uint32_t nPositionPending; // indicates whether we are in a long or short position
     OrderSide::enumOrderSide eOrderSideActive;
     boost::uint32_t nPositionActive;
   // following value markers exclude commission
-    double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accrueing
+    double dblConstructedValue;  // based upon position trades  used for RealizedPL calcs, keeps accruing
   // following value markers exclude commission
     double dblUnRealizedPL;  // based upon market quotes
     double dblRealizedPL;  // based upon position trades
-  // contains total commissions
-    double dblCommissionPaid;
+    double dblCommissionPaid; // contains total commissions
 
     // account and instrument objects need to be manually asssigned in a second step
     TableRowDefNoKey( void ) 
@@ -213,7 +211,7 @@ public:
   ou::Delegate<const ou::tf::Quote&> OnQuote;
   ou::Delegate<const quote_pair_t&> OnQuotePostProcess;  // updates UnRealizedPL
 
-  ou::Delegate<const Position&> OnPositionChanged;  // on various stages of order submission and execution
+  ou::Delegate<const Position&> OnPositionChanged;  // after order placement, order cancelled, order execution
 
   ou::Delegate<execution_delegate_t> OnExecutionRaw;
 

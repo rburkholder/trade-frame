@@ -36,6 +36,7 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 #include <OUCharting/ChartEntryShape.h>
+#include <OUCharting/ChartEntryMark.h>
 
 namespace ou { // One Unified
 
@@ -141,6 +142,10 @@ protected:
   ou::ChartEntryIndicator m_ceTickDiffsRoc;
 
   ou::ChartEntryIndicator m_ceZigZag;
+
+  ou::ChartEntryMark m_cemRatio;
+  ou::ChartEntryMark m_cemSlope;
+
 
 //  ou::ChartEntryIndicator m_ceSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA2;
