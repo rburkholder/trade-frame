@@ -24,7 +24,9 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-template<class T, class D> 
+template<class T, class D>   // 
+//class TimeSeriesSlidingWindow: public TimeSeries<D> { // T=CRTP class for Add, Expire, PostUpdate; D=DatedDatum
+  // the TimeSeries<D> isn't actually used, could use it, I suppose, but is there in order to recurse additional indicators
 class TimeSeriesSlidingWindow { // T=CRTP class for Add, Expire, PostUpdate; D=DatedDatum
 public:
   typedef typename TimeSeries<D>::size_type size_type;

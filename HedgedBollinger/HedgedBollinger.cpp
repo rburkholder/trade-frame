@@ -134,7 +134,7 @@ bool AppHedgedBollinger::OnInit() {
   //m_sNameUnderlying = "+GC#";
   m_sNameUnderlying = "GC";
   //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
-  m_sNameUnderlyingIQFeed = "+GCH14";  // March 2014  IB won't allow trading within 30 days of expiration.
+  m_sNameUnderlyingIQFeed = "+GCJ14";  // April 2014  IB won't allow trading within 30 days of expiration.
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
@@ -208,10 +208,15 @@ bool AppHedgedBollinger::OnInit() {
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
-  
+
   std::string sDbName( "HedgedBollinger.db" );
-  if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
+  try {
+    if ( boost::filesystem::exists( sDbName ) ) {
+      boost::filesystem::remove( sDbName );
+    }
+  }
+  catch(...) {
+    std::cout << "database fault" << std::endl;
   }
 
   m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );

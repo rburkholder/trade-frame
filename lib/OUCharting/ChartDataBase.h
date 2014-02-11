@@ -104,27 +104,33 @@ protected:
     ou::ChartEntryIndicator m_ceEma;
     ou::ChartEntryIndicator m_ceUpperBollinger;
     ou::ChartEntryIndicator m_ceLowerBollinger;
-    ou::ChartEntryIndicator m_ceRatio;
-    ou::tf::TSSWStatsPrice m_slope;
+    //ou::ChartEntryIndicator m_ceRatio;
+    ou::tf::TSSWStatsPrice m_statsSlope;
     ou::ChartEntryIndicator m_ceSlope;
+    ou::tf::Prices m_tsStatsSlope;
+    ou::tf::TSSWStatsPrice m_statsSlopeOfSlope;
+    ou::ChartEntryIndicator m_ceSlopeOfSlope;
     void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
       m_ceEma.SetName( sName );
       m_ceEma.SetColour( colour );
       m_ceUpperBollinger.SetColour( colour );
       m_ceLowerBollinger.SetColour( colour );
-      m_ceRatio.SetColour( colour );
+      //m_ceRatio.SetColour( colour );
       m_ceSlope.SetColour( colour );
+      m_ceSlopeOfSlope.SetColour( colour );
     }
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )
       : m_td( td ), m_quotes( quotes ), 
         m_ema( quotes, td ), m_stats( quotes, td ),
-        m_slope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ) 
+        m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
+        m_statsSlopeOfSlope( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) )
     {
     }
     infoBollinger( const infoBollinger& rhs ) 
       : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ),
       m_ema( m_quotes, m_td ), m_stats( m_quotes, m_td ),
-      m_slope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ) 
+      m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
+      m_statsSlopeOfSlope( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) )
     {
     }
     ~infoBollinger( void ) {};
@@ -143,9 +149,9 @@ protected:
 
   ou::ChartEntryIndicator m_ceZigZag;
 
-  ou::ChartEntryMark m_cemRatio;
+//  ou::ChartEntryMark m_cemRatio;
   ou::ChartEntryMark m_cemSlope;
-
+  ou::ChartEntryMark m_cemSlopeOfSlope;
 
 //  ou::ChartEntryIndicator m_ceSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA2;

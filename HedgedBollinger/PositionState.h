@@ -12,30 +12,46 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+// started 2014/02/6
 
-#include <TFTrading/InstrumentManager.h>
+#pragma once
 
-#include "Chart.h"
+#include <OUCommon/FastDelegate.h>
 
-ChartTest::ChartTest( pProvider_t pProvider ) 
-  : ou::ChartDataBase()
-{
-  this->GetChartDataView().SetNames( "LiveChart", "+GC#" );
-  ou::tf::Instrument::pInstrument_t pInstrument
-    = ou::tf::InstrumentManager::Instance().ConstructInstrument( "+GC#", "SMART", ou::tf::InstrumentType::Future );
-  m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
-  m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDataBase::HandleQuote ) );
-  m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDataBase::HandleTrade ) );
-  m_pWatch->StartWatch();
+#include <TFTrading/Position.h>
 
-}
- 
-ChartTest::~ChartTest(void) {
-  m_pWatch->StopWatch();
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDataBase::HandleQuote ) );
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDataBase::HandleTrade ) );
-  delete m_pWatch;
-}
+class PositionState {
+public:
 
-// C:\Data\Projects\VSC++\TradeFrame\LiveChart\Chart.cpp
+  typedef ou::tf::Position::pPosition_t pPosition_t;
+
+  PositionState( void );
+  PositionState( size_t ix, pPosition_t pPosition );
+  PositionState( const PositionState& rhs );
+  virtual ~PositionState(void);
+
+  typedef fastdelegate::FastDelegate1<const PositionState&> OnPositionClosed_t;
+  OnPositionClosed_t OnPositionClosed;
+
+  void Buy( uint32_t quan );
+  void Sell( uint32_t quan );
+
+  void ExitLong( void );
+  void ExitShort( void );
+
+  pPosition_t Position( void ) { return m_pPosition; }
+  size_t Index( void ) const { return m_ix; }
+
+protected:
+  pPosition_t m_pPosition;
+private:
+
+  size_t m_ix;  // index to use during callbacks
+
+  double m_dblStop;
+  double m_dblTarget;
+
+  void HandlePositionChanged( const ou::tf::Position& position );
+  
+};
+

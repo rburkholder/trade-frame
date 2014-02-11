@@ -14,6 +14,8 @@
 
 #include "StdAfx.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <TFTrading/PortfolioManager.h>
 
 #include "Strategy1.h"
@@ -50,7 +52,8 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
     m_pExecutionProvider( pExecutionProvider ),
     m_eBollinger1EmaSlope( eSlopeUnknown ),
     m_eTradingState( eTSUnknown ),
-    m_bTrade( false ), m_nLongs( 0 ), m_nShorts( 0 )
+    m_bTrade( false ), m_nLongs( 0 ), m_nShorts( 0 ),
+    m_nPositions( 0 )
 {
 
   m_ceCountLongs.SetColour( ou::Colour::Red );
@@ -80,10 +83,10 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
   if ( m_pExecutionProvider->Connected() ) { 
     m_bTrade = true;
 
-    m_dvChart.Add( 7, &m_ceCountLongs );
-    m_dvChart.Add( 7, &m_ceCountShorts );
+    m_dvChart.Add( 8, &m_ceCountLongs );
+    m_dvChart.Add( 8, &m_ceCountShorts );
 
-    m_dvChart.Add( 8, &m_cePL );
+    m_dvChart.Add( 9, &m_cePL );
 
   }
 
@@ -211,7 +214,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     // track maximum, minimum, average width?
 
     ETradingState eTradingState( eTSUnknown );
-    if ( 0.0 < info.m_slope.Slope() ) {
+    if ( 0.0 < info.m_statsSlope.Slope() ) {
       if ( mid > info.m_ema.Ago( 0 ).Value() ) {
         eTradingState = eTSSlopeRisingAboveMean;
       }
@@ -222,7 +225,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
     }
     else {
-      if ( 0.0 > info.m_slope.Slope() ) {
+      if ( 0.0 > info.m_statsSlope.Slope() ) {
         if ( mid < info.m_ema.Ago( 0 ).Value() ) {
           eTradingState = eTSSlopeFallingBelowMean;
         }
@@ -237,7 +240,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     if ( m_eTradingState != eTradingState ) {
       std::cout << "Trading state " << eTradingState << std::endl;
       m_vTradeStateHistory.push_back( TradeStateHistory( eTradingState, quote ) );
-      m_eTradingState = eTradingState;
+      //m_eTradingState = eTradingState;
 
       size_t ix( m_vTradeStateHistory.size() );
       if ( 3 <= ix ) {
@@ -302,13 +305,13 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 /*
     switch ( m_eBollinger1EmaSlope ) {
     case eSlopeUnknown:
-      if ( 0.0 < info.m_slope.Slope() ) {
+      if ( 0.0 < info.m_statsSlope.Slope() ) {
         std::cout << dt << "Starting with a long" << std::endl;
         GoLong();
         m_eBollinger1EmaSlope = eSlopePos;
       }
       else {
-        if ( 0.0 > info.m_slope.Slope() ) {
+        if ( 0.0 > info.m_statsSlope.Slope() ) {
           std::cout << dt << "Starting with a short" << std::endl;
           GoShort();
           m_eBollinger1EmaSlope = eSlopeNeg;
@@ -316,7 +319,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       break;
     case eSlopeNeg:
-      if ( 0.0 < info.m_slope.Slope() ) {
+      if ( 0.0 < info.m_statsSlope.Slope() ) {
         std::cout << dt << "Reversing Short to Long" << std::endl;
         m_pPosition->ClosePosition();
         GoLong();
@@ -324,7 +327,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       break;
     case eSlopePos:
-      if ( 0.0 > info.m_slope.Slope() ) {
+      if ( 0.0 > info.m_statsSlope.Slope() ) {
         std::cout << dt << "Reversing Long to Short" << std::endl;
         m_pPosition->ClosePosition();
         GoShort();
@@ -448,10 +451,12 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
 
 PositionState& Strategy::GetAPositionState( void ) {
   if ( 0 == m_vPositionStateEmpties.size() ) {
+    std::string seq( boost::lexical_cast<std::string>( ++m_nPositions ) );
+    while ( 3 > seq.length() ) seq = '0' + seq;
     pPosition_t pPosition(  
       ou::tf::PortfolioManager::Instance().ConstructPosition( 
         m_pPortfolio->Id(),
-        "gc",
+        "gc" + seq,
         "auto",
         "ib01",
         "iq01",

@@ -81,6 +81,7 @@ private:
   };
 
   bool m_bTrade;  // if execution provider available, then trade
+  unsigned int m_nPositions; // used for creating unique position keys
 
   ptime m_dtQuote;
 

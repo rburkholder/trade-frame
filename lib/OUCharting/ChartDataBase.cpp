@@ -53,17 +53,21 @@ ChartDataBase::ChartDataBase(void)
     m_dvChart.Add( 0, &ib.m_ceEma );
     m_dvChart.Add( 0, &ib.m_ceUpperBollinger );
     m_dvChart.Add( 0, &ib.m_ceLowerBollinger );
-    m_dvChart.Add( 5, &ib.m_ceRatio );
+    //m_dvChart.Add( 5, &ib.m_ceRatio );
     m_dvChart.Add( 6, &ib.m_ceSlope );
+    m_dvChart.Add( 7, &ib.m_ceSlopeOfSlope );
   }
 
-  m_cemRatio.AddMark(  2.0, ou::Colour::Black, "+2sd" );
-  m_cemRatio.AddMark(  0.0, ou::Colour::Black, "" );//"zero" );
-  m_cemRatio.AddMark( -2.0, ou::Colour::Black, "-2sd" );
-  m_dvChart.Add( 5, &m_cemRatio );
+//  m_cemRatio.AddMark(  2.0, ou::Colour::Black, "+2sd" );
+//  m_cemRatio.AddMark(  0.0, ou::Colour::Black, "" );//"zero" );
+//  m_cemRatio.AddMark( -2.0, ou::Colour::Black, "-2sd" );
+//  m_dvChart.Add( 5, &m_cemRatio );
 
   m_cemSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
   m_dvChart.Add( 6, &m_cemSlope );
+
+  m_cemSlopeOfSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
+  m_dvChart.Add( 7, &m_cemSlopeOfSlope );
 
   m_dvChart.Add( 0, &m_ceBars );
 
@@ -275,21 +279,35 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     sd = 2.0 * ib.m_stats.SD();
     ib.m_ceUpperBollinger.Append( dt, lastEma + sd );
     ib.m_ceLowerBollinger.Append( dt, lastEma - sd );
-    if ( 0.0 < sd ) {
-      ib.m_ceRatio.Append( dt, ( midpoint - lastEma ) / ( sd ) );
-    }
-    double slope = ib.m_slope.Slope();
-    if ( 100.0 < std::abs( ib.m_slope.Slope() ) ) {
-      std::stringstream ss;
-      ss << slope;
+//    if ( 0.0 < sd ) {
+//      ib.m_ceRatio.Append( dt, ( midpoint - lastEma ) / ( sd ) );
+//    }
+    double slope = ib.m_statsSlope.Slope();
+    if ( 100.0 < std::abs( slope ) ) {
+//      std::stringstream ss;
+//      ss << slope;
     }
     else {
-      ib.m_ceSlope.Append( dt, slope );
+      if ( slope <= DBL_MAX && slope >= -DBL_MAX ) {
+        ib.m_ceSlope.Append( dt, slope );
+
+        ib.m_tsStatsSlope.Append( ou::tf::Price( dt, slope ) );
+        double slopeofslope = ib.m_statsSlopeOfSlope.Slope();
+        if ( 100.0 < std::abs( slopeofslope ) ) {
+    //      std::stringstream ss;
+    //      ss << slope;
+        }
+        else {
+
+          ib.m_ceSlopeOfSlope.Append( dt, slopeofslope );
+        }
+      }
     }
+
   }
 
-  if ( 500 < m_quotes.Size() ) {
-  }
+//  if ( 500 < m_quotes.Size() ) {
+//  }
 
 }
 

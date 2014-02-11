@@ -27,10 +27,10 @@ class TSSWTickFrequency:
   public Prices
 {
 public:
-  typedef typename TimeSeries<datum_t>::size_type size_type;
+  typedef typename TimeSeries<typename TS::datum_t>::size_type size_type;
   TSSWTickFrequency( TS& series, time_duration tdWindowWidth, size_type stWindowSize = 0 );
   virtual ~TSSWTickFrequency(void);
-  ou::Delegate<const datum_t&> OnAppend;
+  ou::Delegate<const typename TS::datum_t&> OnAppend;
 protected:
   typedef typename TS::datum_t datum_t;
   void Add( const datum_t& datum );
