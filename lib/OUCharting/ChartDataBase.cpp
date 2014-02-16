@@ -288,9 +288,8 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
 //      ss << slope;
     }
     else {
-      if ( slope <= DBL_MAX && slope >= -DBL_MAX ) {
+      if ( ( slope <= DBL_MAX ) && ( slope >= -DBL_MAX ) ) {
         ib.m_ceSlope.Append( dt, slope );
-
         ib.m_tsStatsSlope.Append( ou::tf::Price( dt, slope ) );
         double slopeofslope = ib.m_statsSlopeOfSlope.Slope();
         if ( 100.0 < std::abs( slopeofslope ) ) {
@@ -298,7 +297,6 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     //      ss << slope;
         }
         else {
-
           ib.m_ceSlopeOfSlope.Append( dt, slopeofslope );
         }
       }

@@ -89,8 +89,8 @@ private:
   pPortfolio_t m_pPortfolioCurrencyUSD;
 
   pPortfolio_t m_pPortfolioGC;
-  //pPortfolio_t m_pPortfolioLongs;
-  //pPortfolio_t m_pPortfolioShorts;
+  pPortfolio_t m_pPortfolioGCLongs;
+  pPortfolio_t m_pPortfolioGCShorts;
 
   wxTimer m_timerGuiRefresh;
   ptime m_dtTopOfMinute;

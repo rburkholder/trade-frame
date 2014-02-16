@@ -71,10 +71,17 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
   InitForUS24HourFutures( date );
   // this may be offset incorrectly.
   //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
-  SetRegularHoursOpen( dt );  // collect some data first
-  // change later to 10 to collect enough data to start trading:
-  //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
-  SetStartTrading( dt + boost::posix_time::minutes( 2 ) );  // collect some data first
+  ptime dtMo( GetMarketOpen() );
+  if ( dt > dtMo ) {
+    SetRegularHoursOpen( dt );  // collect some data first
+    // change later to 10 to collect enough data to start trading:
+    //SetStartTrading( Normalize( dt.date(), dt.time_of_day() + boost::posix_time::minutes( 2 ), "America/New_York" ) );  // collect some data first
+    SetStartTrading( dt + boost::posix_time::minutes( 2 ) );  // collect some data first
+  }
+  else {
+    SetRegularHoursOpen( dtMo + boost::posix_time::minutes( 10 ) );  // collect some data first
+    SetStartTrading( dtMo + boost::posix_time::minutes( 12 ) );  // collect some data first
+  }
 
   for ( int ix = 0; ix <= 3; ++ix ) {
     m_vBollingerState.push_back( eBollingerUnknown );
@@ -93,6 +100,38 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
 //  m_pBundle->Portfolio()
 //    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
 //      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
+
+  m_pPositionLongs = 
+      ou::tf::PortfolioManager::Instance().ConstructPosition( 
+        m_pPortfolio->Id(),
+        "gclongs",
+        "auto",
+        "ib01",
+        "iq01",
+        m_pExecutionProvider,
+        m_pBundle->GetWatchUnderlying()->GetProvider(),
+        m_pBundle->GetWatchUnderlying()->GetInstrument()
+      );
+  m_pPositionLongs->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionLongs->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+
+  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLongs );
+
+  m_pPositionShorts = 
+      ou::tf::PortfolioManager::Instance().ConstructPosition( 
+        m_pPortfolio->Id(),
+        "gcshorts",
+        "auto",
+        "ib01",
+        "iq01",
+        m_pExecutionProvider,
+        m_pBundle->GetWatchUnderlying()->GetProvider(),
+        m_pBundle->GetWatchUnderlying()->GetInstrument()
+      );
+  m_pPositionShorts->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
+  m_pPositionShorts->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
+
+  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShorts );
 
   m_bThreadPopDatumsActive = true;
   m_pThreadPopDatums = new boost::thread( &Strategy::ThreadPopDatums, this );
@@ -206,6 +245,18 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     m_dtQuote = quote.DateTime();
 
     double mid = quote.Midpoint();
+
+    m_pOrdersOutstandingLongs->HandleQuote( quote );
+    m_pOrdersOutstandingShorts->HandleQuote( quote );
+
+    unsigned int cntLongs = m_pOrdersOutstandingLongs->GetCountOfOutstandingMatches();
+    m_ceCountLongs.Append( m_dtQuote, cntLongs );
+    unsigned int cntShorts = m_pOrdersOutstandingShorts->GetCountOfOutstandingMatches();
+    m_ceCountShorts.Append( m_dtQuote, cntShorts );
+    unsigned int dif = ( cntLongs > cntShorts ) ? cntLongs - cntShorts : cntShorts - cntLongs;
+
+//    m_ceOutstandingExitsLong.Add( dt, cntLongs + m_pOrdersOutstandingLongs->GetCountOfOutstandingEntries() );
+//    m_ceOutstandingExitsShort.Add( dt, cntShorts + m_pOrdersOutstandingShorts->GetCountOfOutstandingEntries() );
 
     infoBollinger& info( m_vInfoBollinger[ 0 ] );
 
@@ -342,37 +393,37 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 }
 
 void Strategy::TakeLongProfits( void ) {
-  for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
-    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
-    if ( ou::tf::OrderSide::Buy == row.eOrderSideActive ) {
-      iter->get()->ExitLong();
-    }
-  }
+//  for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
+//    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
+//    if ( ou::tf::OrderSide::Buy == row.eOrderSideActive ) {
+//      iter->get()->ExitLong();
+//    }
+//  }
 }
 
 void Strategy::TakeShortProfits( void ) {
-  for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
-    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
-    if ( ou::tf::OrderSide::Sell == row.eOrderSideActive ) {
-      iter->get()->ExitShort();
-    }
-  }
+//  for ( vPosition_t::iterator iter = m_vPositionAll.begin(); m_vPositionAll.end() != iter; ++iter ) {
+//    const ou::tf::Position::TableRowDef& row( iter->get()->Position()->GetRow() );
+//    if ( ou::tf::OrderSide::Sell == row.eOrderSideActive ) {
+//      iter->get()->ExitShort();
+//    }
+//  }
 }
 
 void Strategy::GoShort( void ) {
-  PositionState& ps( GetAPositionState() );
-  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateShort );
-  pPosition_t pPosition( ps.Position() );
-  pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+//  PositionState& ps( GetAPositionState() );
+//  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateShort );
+//  pPosition_t pPosition( ps.Position() );
+//  pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   ++m_nShorts;
   m_ceCountShorts.Append( m_dtQuote, -m_nShorts );
 }
 
 void Strategy::GoLong( void ) {
-  PositionState& ps( GetAPositionState() );
-  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateLong );
-  pPosition_t pPosition( ps.Position() );
-  pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+//  PositionState& ps( GetAPositionState() );
+//  ps.OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionStateLong );
+//  pPosition_t pPosition( ps.Position() );
+//  pPosition->PlaceOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   ++m_nLongs;
   m_ceCountLongs.Append( m_dtQuote, m_nLongs );
 }
@@ -449,8 +500,25 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
   }
 }
 
+void Strategy::HandleExecution( const PositionDelta_delegate_t& del ) {
+//  m_ss << "Exec: " << del.second.GetTimeStamp() << ": ";
+//  m_ss << *m_pPositionLongs;
+//  m_ss << ", ";
+//  m_ss << *m_pPositionShorts;
+//  std::cout << m_ss << std::endl;
+}
+
+void Strategy::HandleCommission( const PositionDelta_delegate_t& del ) {
+//  m_ss.str( "  " );
+//  m_ss << *m_pPositionLongs;
+//  m_ss << ", ";
+//  m_ss << *m_pPositionShorts;
+//  std::cout << m_ss << std::endl;
+}
+
+/*
 PositionState& Strategy::GetAPositionState( void ) {
-  if ( 0 == m_vPositionStateEmpties.size() ) {
+//  if ( 0 == m_vPositionStateEmpties.size() ) {
     std::string seq( boost::lexical_cast<std::string>( ++m_nPositions ) );
     while ( 3 > seq.length() ) seq = '0' + seq;
     pPosition_t pPosition(  
@@ -469,22 +537,23 @@ PositionState& Strategy::GetAPositionState( void ) {
     pPositionState_t p( new PositionState( ix, pPosition ) );
     p->OnPositionClosed = MakeDelegate( this, &Strategy::ReturnAPositionState );
     m_vPositionAll.push_back( p );
-    m_vPositionStateEmpties.push_back( m_vPositionAll.size() - 1 );
-  }
+//    m_vPositionStateEmpties.push_back( m_vPositionAll.size() - 1 );
+//  }
 
-  size_t ix( m_vPositionStateEmpties.back() );
-  m_vPositionStateEmpties.pop_back();
+//  size_t ix( m_vPositionStateEmpties.back() );
+//  m_vPositionStateEmpties.pop_back();
 
   return *(m_vPositionAll[ ix ].get());
 
 }
-
+*/
+/*
 void Strategy::ReturnAPositionState( const PositionState& ps ) {  // thread safe?
   size_t ix( ps.Index() );
-  for ( std::vector<size_t>::iterator iter = m_vPositionStateEmpties.begin(); m_vPositionStateEmpties.end() != iter; ++iter ) {
-    assert( ix != *iter );
-  }
-  m_vPositionStateEmpties.push_back( ix );
+//  for ( std::vector<size_t>::iterator iter = m_vPositionStateEmpties.begin(); m_vPositionStateEmpties.end() != iter; ++iter ) {
+//    assert( ix != *iter );
+//  }
+//  m_vPositionStateEmpties.push_back( ix );
 }
 
 void Strategy::ReturnAPositionStateLong( const PositionState& ps ) {  // thread safe?
@@ -498,3 +567,4 @@ void Strategy::ReturnAPositionStateShort( const PositionState& ps ) {  // thread
   m_ceCountShorts.Append( m_dtQuote, -m_nShorts );
   ReturnAPositionState( ps );
 }
+*/

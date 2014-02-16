@@ -59,6 +59,14 @@ public:
   void SetRegularHoursClose( ptime dtRHClose ) { m_dtRHClose = dtRHClose; };
   void SetMarketClose( ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };
 
+  ptime GetMarketOpen( void ) { return m_dtMarketOpen; };
+  ptime GetRegularHoursOpen( void ) { return m_dtRHOpen; };
+  ptime GetStartTrading( void ) { return m_dtStartTrading; };
+  ptime GetCancellation( void ) { return m_dtTimeForCancellation; };
+  ptime GetGoNeutral( void ) { return m_dtGoNeutral; };
+  ptime GetRegularHoursClose( void ) { return m_dtRHClose; };
+  ptime GetMarketClose( void ) { return m_dtMarketClose; };
+
 protected:
   // per type
   template<typename DD> void HandleCommon( const DD& dd ) {};

@@ -192,7 +192,7 @@ void ChartMaster::DrawChart( bool bViewPortChanged ) {
         pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
       }
       else {
-        std::cout << "Time Scales match" << std::endl;
+        //std::cout << "Time Scales match" << std::endl;
       }
 
       MemBlock m = multi.makeChart( BMP );

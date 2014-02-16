@@ -209,7 +209,7 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  std::string sDbName( "HedgedBollinger.db" );
+  std::string sDbName( "HedgedBollinger1.db" );
   try {
     if ( boost::filesystem::exists( sDbName ) ) {
       boost::filesystem::remove( sDbName );
@@ -743,15 +743,23 @@ void AppHedgedBollinger::HandlePopulateDatabase( void ) {
 
   m_pPortfolioMaster
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+    "Master", "aoRay", "", ou::tf::Portfolio::Master, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Master Summary" );
 
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
-    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+    "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "USD Master" );
 
   m_pPortfolioGC
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
     "GC", "aoRay", "USD", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
+
+  m_pPortfolioGCLongs
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "GCLong", "aoRay", "GC", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Longs" );
+
+  m_pPortfolioGCShorts
+    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
+    "GCShort", "aoRay", "GC", ou::tf::Portfolio::Standard, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Shorts" );
 
 //  m_pPortfolioShorts
 //    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 

@@ -32,12 +32,11 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/DailyTradeTimeFrames.h>
+#include <TFTrading/OrdersOutstanding.h>
 
 #include <TFOptions/Bundle.h>
 
 #include <OUCharting/ChartDataBase.h>
-
-#include "PositionState.h"
 
 class Strategy: 
   public ou::ChartDataBase,
@@ -52,7 +51,6 @@ public:
 
   Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider );
   ~Strategy(void);
-//  ou::ChartDataView& GetChartDataView( void ) { return m_ChartDataUnderlying.GetChartDataView(); };
 
   void EmitStats( void ) const;
 
@@ -87,18 +85,13 @@ private:
 
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
   pPortfolio_t m_pPortfolio;
-  //pPosition_t m_pPosition;
   pProvider_t m_pExecutionProvider;
 
-  typedef boost::shared_ptr<PositionState> pPositionState_t;
-  typedef std::vector<pPositionState_t> vPosition_t;  // use ReusableBuffers instead?
-  vPosition_t m_vPositionAll;  // contains all positions, active or not
-  std::vector<size_t> m_vPositionStateEmpties;
+  pPosition_t m_pPositionLongs;
+  pPosition_t m_pPositionShorts;
 
-  PositionState& GetAPositionState( void );
-  void ReturnAPositionState( const PositionState& );
-  void ReturnAPositionStateLong( const PositionState& );
-  void ReturnAPositionStateShort( const PositionState& );
+  OrdersOutstandingLongs* m_pOrdersOutstandingLongs;
+  OrdersOutstandingShorts* m_pOrdersOutstandingShorts;
 
   ou::ChartDataBase m_ChartDataUnderlying;
 
@@ -108,6 +101,8 @@ private:
   ou::ChartEntryIndicator m_ceCountLongs;
   ou::ChartEntryIndicator m_ceCountShorts;
   ou::ChartEntryIndicator m_cePL;
+  //ou::ChartEntryIndicator m_cePLLongs;
+  //ou::ChartEntryIndicator m_cePLShorts;
 
   ETradingState m_eTradingState;
   ESlope m_eBollinger1EmaSlope;
@@ -170,6 +165,10 @@ private:
   void HandleRHTrading( const ou::tf::Trade& trade ) {};
 
   void HandleCalcIv( const ou::tf::PriceIV& );
+
+  typedef ou::tf::Position::PositionDelta_delegate_t PositionDelta_delegate_t;
+  void HandleExecution( const PositionDelta_delegate_t& del );
+  void HandleCommission( const PositionDelta_delegate_t& del );
 
 };
 
