@@ -344,13 +344,13 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 //    m_ceSpread.Add( dt, m_tsswSpreads.MeanY() );
 
     unsigned int cntLongs = m_pOrdersOutstandingLongs->GetCountOfOutstandingMatches();
-    m_ceOutstandingEntriesLong.Add( dt, cntLongs );
+    m_ceOutstandingEntriesLong.Append( dt, cntLongs );
     unsigned int cntShorts = m_pOrdersOutstandingShorts->GetCountOfOutstandingMatches();
-    m_ceOutstandingEntriesShort.Add( dt, cntShorts );
+    m_ceOutstandingEntriesShort.Append( dt, cntShorts );
     unsigned int dif = ( cntLongs > cntShorts ) ? cntLongs - cntShorts : cntShorts - cntLongs;
 
-    m_ceOutstandingExitsLong.Add( dt, cntLongs + m_pOrdersOutstandingLongs->GetCountOfOutstandingEntries() );
-    m_ceOutstandingExitsShort.Add( dt, cntShorts + m_pOrdersOutstandingShorts->GetCountOfOutstandingEntries() );
+    m_ceOutstandingExitsLong.Append( dt, cntLongs + m_pOrdersOutstandingLongs->GetCountOfOutstandingEntries() );
+    m_ceOutstandingExitsShort.Append( dt, cntShorts + m_pOrdersOutstandingShorts->GetCountOfOutstandingEntries() );
 
 //    m_ceSMA1.Add( dt, sma1.MeanY() );
 
@@ -396,9 +396,9 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     //m_ceRR.Add( quote.DateTime(), m_sma5min.RR() );
     double dblPLLong = m_pPositionLong->GetRealizedPL() + m_pPositionLong->GetUnRealizedPL() - m_pPositionLong->GetCommissionPaid();
     double dblPLShort = m_pPositionShort->GetRealizedPL() + m_pPositionShort->GetUnRealizedPL() - m_pPositionShort->GetCommissionPaid();
-    m_cePLLong.Add( dt, dblPLLong );
-    m_cePLShort.Add( dt, dblPLShort );
-    m_cePLNet.Add( dt, dblPLLong + dblPLShort );
+    m_cePLLong.Append( dt, dblPLLong );
+    m_cePLShort.Append( dt, dblPLShort );
+    m_cePLNet.Append( dt, dblPLLong + dblPLShort );
 
 //    double /* val1,*/ val2, val3;
 //    val1 = ( midpoint - sma1.MeanY() ) / ( sma1.BBOffset() );

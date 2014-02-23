@@ -26,7 +26,7 @@ namespace ou { // One Unified
 class ChartEntryShape :
   public ChartEntryBaseWithTime {
 public:
-  enum enumShape { EDefault, EBuy, ESell, EFillLong, EFillShort, EBuyStop, ESellStop };
+  enum enumShape { EDefault, ELong, EShort, EFillLong, EFillShort, ELongStop, EShortStop };
   ChartEntryShape( void );
   ChartEntryShape( enumShape eShape, ou::Colour::enumColour colour );
   void SetShape( enumShape shape ) { m_eShape = shape; };

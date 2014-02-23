@@ -73,6 +73,9 @@
     <ClCompile Include="TSVolatility.cpp">
       <Filter>Source Files\HF</Filter>
     </ClCompile>
+    <ClCompile Include="Crossing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Darvas.h">
@@ -155,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="TSVolatility.h">
       <Filter>Header Files\HF</Filter>
+    </ClInclude>
+    <ClInclude Include="Crossing.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -30,7 +30,14 @@ ChartDataBase::ChartDataBase(void)
   m_rtTickDiffs( m_pricesTickDiffs, seconds( 120 ) ),
   m_rocTickDiffs( m_pricesTickDiffsROC, seconds( 30 ) ),
   m_dblUpTicks( 0.0 ), m_dblMdTicks( 0.0 ), m_dblDnTicks( 0.0 ),
-  m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 )
+  m_dblUpVolume( 0.0 ), m_dblMdVolume( 0.0 ), m_dblDnVolume( 0.0 ),
+  m_ceShortEntries( ou::ChartEntryShape::EShort, ou::Colour::Red ),
+  m_ceLongEntries( ou::ChartEntryShape::ELong, ou::Colour::Blue ),
+  m_ceShortFills( ou::ChartEntryShape::EFillShort, ou::Colour::Red ),
+  m_ceLongFills( ou::ChartEntryShape::EFillLong, ou::Colour::Blue ),
+  m_ceShortExits( ou::ChartEntryShape::EShortStop, ou::Colour::Red ),
+  m_ceLongExits( ou::ChartEntryShape::ELongStop, ou::Colour::Blue )
+
 {
 
   m_vInfoBollinger.push_back( infoBollinger( m_quotes, boost::posix_time::seconds(  144 ) ) );
@@ -48,6 +55,13 @@ ChartDataBase::ChartDataBase(void)
   m_dvChart.Add( 0, &m_ceTrade );
   m_dvChart.Add( 2, &m_ceQuoteSpread );
 
+  m_dvChart.Add( 0, &m_ceShortEntries );
+  m_dvChart.Add( 0, &m_ceLongEntries );
+  m_dvChart.Add( 0, &m_ceShortFills );
+  m_dvChart.Add( 0, &m_ceLongFills );
+  m_dvChart.Add( 0, &m_ceShortExits );
+  m_dvChart.Add( 0, &m_ceLongExits );
+
   for ( int ix = 0; ix <= 3; ++ix ) {
     infoBollinger& ib( m_vInfoBollinger[ix] );
     m_dvChart.Add( 0, &ib.m_ceEma );
@@ -55,7 +69,8 @@ ChartDataBase::ChartDataBase(void)
     m_dvChart.Add( 0, &ib.m_ceLowerBollinger );
     //m_dvChart.Add( 5, &ib.m_ceRatio );
     m_dvChart.Add( 6, &ib.m_ceSlope );
-    m_dvChart.Add( 7, &ib.m_ceSlopeOfSlope );
+    m_dvChart.Add( 7, &ib.m_ceSlopeBy2 );
+    m_dvChart.Add( 8, &ib.m_ceSlopeBy3 );
   }
 
 //  m_cemRatio.AddMark(  2.0, ou::Colour::Black, "+2sd" );
@@ -66,8 +81,11 @@ ChartDataBase::ChartDataBase(void)
   m_cemSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
   m_dvChart.Add( 6, &m_cemSlope );
 
-  m_cemSlopeOfSlope.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
-  m_dvChart.Add( 7, &m_cemSlopeOfSlope );
+  m_cemSlopeBy2.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
+  m_dvChart.Add( 7, &m_cemSlopeBy2 );
+
+  m_cemSlopeBy3.AddMark( 0.0, ou::Colour::Black, "" ); //"zero" );
+  m_dvChart.Add( 8, &m_cemSlopeBy3 );
 
   m_dvChart.Add( 0, &m_ceBars );
 
@@ -284,20 +302,32 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
 //    }
     double slope = ib.m_statsSlope.Slope();
     if ( 100.0 < std::abs( slope ) ) {
-//      std::stringstream ss;
-//      ss << slope;
     }
     else {
       if ( ( slope <= DBL_MAX ) && ( slope >= -DBL_MAX ) ) {
         ib.m_ceSlope.Append( dt, slope );
         ib.m_tsStatsSlope.Append( ou::tf::Price( dt, slope ) );
-        double slopeofslope = ib.m_statsSlopeOfSlope.Slope();
-        if ( 100.0 < std::abs( slopeofslope ) ) {
-    //      std::stringstream ss;
-    //      ss << slope;
+        double slopeby2 = ib.m_statsSlopeBy2.Slope();
+        if ( 100.0 < std::abs( slopeby2 ) ) {
         }
         else {
-          ib.m_ceSlopeOfSlope.Append( dt, slopeofslope );
+          ib.m_ceSlopeBy2.Append( dt, slopeby2 );
+
+          ib.m_tsStatsSlopeBy2.Append( ou::tf::Price( dt, slopeby2 ) );
+          double slopeby3 = ib.m_statsSlopeBy3.Slope();
+          if ( 100.0 < std::abs( slopeby3 ) ) {
+          }
+          else {
+            ib.m_ceSlopeBy3.Append( dt, slopeby3 );
+//            if ( 0 == ix ) { // only on shortest time frame
+//              switch ( ib.m_stateAccel.State( slopeby3 ) ) {
+//              case ou::tf::Crossing<double>::EGTX: 
+//                break;
+//              case ou::tf::Crossing<double>::ELTX: 
+//                break;
+//              }
+//            }
+          }
         }
       }
     }

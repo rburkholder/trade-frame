@@ -209,7 +209,7 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  std::string sDbName( "HedgedBollinger1.db" );
+  std::string sDbName( "HedgedBollinger.db" );
   try {
     if ( boost::filesystem::exists( sDbName ) ) {
       boost::filesystem::remove( sDbName );
@@ -493,7 +493,7 @@ void AppHedgedBollinger::FinishStrategyInitialization( pInstrument_t pInstrument
 //    = ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
 //      m_sNameOptionUnderlying, "aoRay", "USD", ou::tf::Portfolio::MultiLeggedPosition, ou::tf::Currency::Name[ ou::tf::Currency::USD ], m_sNameUnderlying + " Hedge" );
 
-  m_pStrategy = new Strategy( m_pBundle, m_pPortfolioGC, m_pExecutionProvider );
+  m_pStrategy = new Strategy( m_pBundle, m_pPortfolioGCLongs, m_pPortfolioGCShorts, m_pExecutionProvider );
   m_pStrategy->GetChartDataView().SetNames( "HedgedBollinger", m_sNameUnderlying );
 
   m_pBundle->AddOnStrikeWatchOn( MakeDelegate( this, &AppHedgedBollinger::HandleStrikeWatchOn ) );

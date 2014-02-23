@@ -19,10 +19,12 @@
 
 #pragma once
 
+
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 //#include <TFTimeSeries/Adapters.h>
 
+#include <TFIndicators/Crossing.h>
 #include <TFIndicators/ZigZag.h>
 #include <TFIndicators/TSEMA.h>
 //#include <TFIndicators/TSDifferential.h>
@@ -97,6 +99,7 @@ protected:
   ceVolumes_t m_rVolumes[ VCnt_ ];
 
   struct infoBollinger {
+    ou::tf::Crossing<double> m_stateAccel;
     time_duration m_td;
     ou::tf::Quotes& m_quotes;
     ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
@@ -108,8 +111,13 @@ protected:
     ou::tf::TSSWStatsPrice m_statsSlope;
     ou::ChartEntryIndicator m_ceSlope;
     ou::tf::Prices m_tsStatsSlope;
-    ou::tf::TSSWStatsPrice m_statsSlopeOfSlope;
-    ou::ChartEntryIndicator m_ceSlopeOfSlope;
+
+    ou::tf::TSSWStatsPrice m_statsSlopeBy2;
+    ou::ChartEntryIndicator m_ceSlopeBy2;
+    ou::tf::Prices m_tsStatsSlopeBy2;
+
+    ou::tf::TSSWStatsPrice m_statsSlopeBy3;
+    ou::ChartEntryIndicator m_ceSlopeBy3;
     void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
       m_ceEma.SetName( sName );
       m_ceEma.SetColour( colour );
@@ -117,20 +125,23 @@ protected:
       m_ceLowerBollinger.SetColour( colour );
       //m_ceRatio.SetColour( colour );
       m_ceSlope.SetColour( colour );
-      m_ceSlopeOfSlope.SetColour( colour );
+      m_ceSlopeBy2.SetColour( colour );
+      m_ceSlopeBy3.SetColour( colour );
     }
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )
-      : m_td( td ), m_quotes( quotes ), 
+      : m_td( td ), m_quotes( quotes ),
         m_ema( quotes, td ), m_stats( quotes, td ),
         m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
-        m_statsSlopeOfSlope( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) )
+        m_statsSlopeBy2( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) ),
+        m_statsSlopeBy3( m_tsStatsSlopeBy2, boost::posix_time::time_duration( 0, 0, 15 ) )
     {
     }
     infoBollinger( const infoBollinger& rhs ) 
       : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ),
       m_ema( m_quotes, m_td ), m_stats( m_quotes, m_td ),
       m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
-      m_statsSlopeOfSlope( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) )
+      m_statsSlopeBy2( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) ),
+      m_statsSlopeBy3( m_tsStatsSlopeBy2, boost::posix_time::time_duration( 0, 0, 15 ) )
     {
     }
     ~infoBollinger( void ) {};
@@ -151,7 +162,15 @@ protected:
 
 //  ou::ChartEntryMark m_cemRatio;
   ou::ChartEntryMark m_cemSlope;
-  ou::ChartEntryMark m_cemSlopeOfSlope;
+  ou::ChartEntryMark m_cemSlopeBy2;
+  ou::ChartEntryMark m_cemSlopeBy3;
+
+  ou::ChartEntryShape m_ceShortEntries;
+  ou::ChartEntryShape m_ceLongEntries;
+  ou::ChartEntryShape m_ceShortFills;
+  ou::ChartEntryShape m_ceLongFills;
+  ou::ChartEntryShape m_ceShortExits;
+  ou::ChartEntryShape m_ceLongExits;
 
 //  ou::ChartEntryIndicator m_ceSMA2;
 //  ou::ChartEntryIndicator m_ceSlopeOfSMA2;

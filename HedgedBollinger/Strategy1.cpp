@@ -46,9 +46,13 @@
 *  ProfessionalAutomatedTrading: regime change (.pdf)
 */
 
-Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider ) 
+Strategy::Strategy( 
+  ou::tf::option::MultiExpiryBundle* meb, 
+  pPortfolio_t pPortfolioLongs, pPortfolio_t pPortfolioShorts, 
+  pProvider_t pExecutionProvider ) 
   : ou::ChartDataBase(), m_pBundle( meb ), 
-    m_pPortfolio( pPortfolio ), 
+    m_pPortfolioLongs( pPortfolioLongs ), 
+    m_pPortfolioShorts( pPortfolioShorts ), 
     m_pExecutionProvider( pExecutionProvider ),
     m_eBollinger1EmaSlope( eSlopeUnknown ),
     m_eTradingState( eTSUnknown ),
@@ -103,7 +107,7 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
 
   m_pPositionLongs = 
       ou::tf::PortfolioManager::Instance().ConstructPosition( 
-        m_pPortfolio->Id(),
+        m_pPortfolioLongs->Id(),
         "gclongs",
         "auto",
         "ib01",
@@ -119,7 +123,7 @@ Strategy::Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfo
 
   m_pPositionShorts = 
       ou::tf::PortfolioManager::Instance().ConstructPosition( 
-        m_pPortfolio->Id(),
+        m_pPortfolioShorts->Id(),
         "gcshorts",
         "auto",
         "ib01",
@@ -316,6 +320,29 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
     }
 
+    // todo:
+    // 
+
+    if ( m_bTrade ) {
+      switch ( info.m_stateAccel.State() ) {
+      case ou::tf::Crossing<double>::EGTX: 
+        break;
+      case ou::tf::Crossing<double>::ELTX: 
+        break;
+      }
+    
+
+      double dblUnrealized;
+      double dblRealized;
+      double dblCommission;
+      double dblTotal;
+//      m_pPortfolio->QueryStats( dblUnrealized, dblRealized, dblCommission, dblTotal );
+//      m_cePL.Append( m_dtQuote, dblTotal );
+
+    }
+
+    m_eTradingState = eTradingState;
+/*
     if ( m_bTrade ) {
       switch ( m_eTradingState ) {
       case eTSUnknown:
@@ -341,18 +368,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         }
         break;
       }
-
-      double dblUnrealized;
-      double dblRealized;
-      double dblCommission;
-      double dblTotal;
-      m_pPortfolio->QueryStats( dblUnrealized, dblRealized, dblCommission, dblTotal );
-      m_cePL.Append( m_dtQuote, dblTotal );
-
-    }
-
-    m_eTradingState = eTradingState;
-
+*/
 /*
     switch ( m_eBollinger1EmaSlope ) {
     case eSlopeUnknown:

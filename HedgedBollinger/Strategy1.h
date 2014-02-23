@@ -49,7 +49,8 @@ public:
   typedef ou::tf::Position::pPosition_t pPosition_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  Strategy( ou::tf::option::MultiExpiryBundle* meb, pPortfolio_t pPortfolio, pProvider_t pExecutionProvider );
+  Strategy( ou::tf::option::MultiExpiryBundle* meb, 
+    pPortfolio_t pPortfolioLongs, pPortfolio_t pPortfolioShorts, pProvider_t pExecutionProvider );
   ~Strategy(void);
 
   void EmitStats( void ) const;
@@ -84,8 +85,10 @@ private:
   ptime m_dtQuote;
 
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
-  pPortfolio_t m_pPortfolio;
   pProvider_t m_pExecutionProvider;
+
+  pPortfolio_t m_pPortfolioLongs;
+  pPortfolio_t m_pPortfolioShorts;
 
   pPosition_t m_pPositionLongs;
   pPosition_t m_pPositionShorts;
