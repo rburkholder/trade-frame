@@ -214,6 +214,8 @@ public:
   boost::uint32_t GetQuanFilled( void ) const { return m_row.nQuantityFilled; };
   void SetSignalPrice( double dblSignalPrice ) { m_row.dblSignalPrice = dblSignalPrice; };
   double GetSignalPrice( void ) const { return m_row.dblSignalPrice; };
+  void SetDescription( const std::string& sDescription ) { m_row.sDescription = sDescription; }
+  const std::string& GetDescription( void ) const { return m_row.sDescription; }
   const ptime &GetDateTimeOrderSubmitted( void ) const { 
     assert( not_a_date_time != m_row.dtOrderSubmitted ); // is this a valid test?
     return m_row.dtOrderSubmitted; 

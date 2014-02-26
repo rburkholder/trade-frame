@@ -178,12 +178,7 @@ Order::pOrder_t Position::PlaceOrder( // market
   OrderSide::enumOrderSide eOrderSide,
   boost::uint32_t nOrderQuantity
 ) {
-
-  assert( OrderSide::Unknown != eOrderSide );
-  assert( OrderType::Market == eOrderType );
-  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
-  pOrder_t pOrder
-   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
+  pOrder_t pOrder = ConstructOrder( eOrderType, eOrderSide, nOrderQuantity );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -194,12 +189,7 @@ Order::pOrder_t Position::PlaceOrder( // limit or stop
   boost::uint32_t nOrderQuantity,
   double dblPrice1
 ) {
-
-  assert( OrderSide::Unknown != eOrderSide );
-  assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
-  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
-  pOrder_t pOrder
-   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
+  pOrder_t pOrder = ConstructOrder( eOrderType, eOrderSide, nOrderQuantity, dblPrice1 );
   PlaceOrder( pOrder );
   return pOrder;
 }
@@ -211,13 +201,53 @@ Order::pOrder_t Position::PlaceOrder( // limit and stop
   double dblPrice1,  
   double dblPrice2
 ) {
+  pOrder_t pOrder = ConstructOrder( eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2 );
+  PlaceOrder( pOrder );
+  return pOrder;
+}
 
+Order::pOrder_t Position::ConstructOrder( // market
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide,
+  boost::uint32_t nOrderQuantity
+) {
+  assert( OrderSide::Unknown != eOrderSide );
+  assert( OrderType::Market == eOrderType );
+  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition ) );
+  pOrder_t pOrder
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, m_row.idPosition );
+  //PlaceOrder( pOrder );
+  return pOrder;
+}
+
+Order::pOrder_t Position::ConstructOrder( // limit or stop
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide,
+  boost::uint32_t nOrderQuantity,
+  double dblPrice1
+) {
+  assert( OrderSide::Unknown != eOrderSide );
+  assert( ( OrderType::Limit == eOrderType) || ( OrderType::Stop == eOrderType ) || ( OrderType::Trail == eOrderType ) );
+  //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition ) );
+  pOrder_t pOrder
+   = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, m_row.idPosition );
+  //PlaceOrder( pOrder );
+  return pOrder;
+}
+
+Order::pOrder_t Position::ConstructOrder( // limit and stop
+  OrderType::enumOrderType eOrderType,
+  OrderSide::enumOrderSide eOrderSide,
+  boost::uint32_t nOrderQuantity,
+  double dblPrice1,  
+  double dblPrice2
+) {
   assert( OrderSide::Unknown != eOrderSide );
   assert( ( OrderType::StopLimit == eOrderType) || ( OrderType::TrailLimit == eOrderType ) );
   //pOrder_t pOrder( new Order( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition ) );
   pOrder_t pOrder
    = OrderManager::LocalCommonInstance().ConstructOrder( m_pInstrument, eOrderType, eOrderSide, nOrderQuantity, dblPrice1, dblPrice2, m_row.idPosition );
-  PlaceOrder( pOrder );
+  //PlaceOrder( pOrder );
   return pOrder;
 }
 

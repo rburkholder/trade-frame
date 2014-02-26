@@ -57,7 +57,7 @@ public:
   void SetCancellation( ptime dtTimeForCancellation ) { m_dtTimeForCancellation = dtTimeForCancellation; };
   void SetGoNeutral( ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; };
   void SetRegularHoursClose( ptime dtRHClose ) { m_dtRHClose = dtRHClose; };
-  void SetMarketClose( ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };
+  void SetMarketClose( ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; };  
 
   ptime GetMarketOpen( void ) { return m_dtMarketOpen; };
   ptime GetRegularHoursOpen( void ) { return m_dtRHOpen; };
@@ -79,7 +79,7 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {};
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {};
   template<typename DD> void HandleMarketClosed( const DD& dd ) {};
-  // event change one shots
+  // event change one shots, but may be called more than once, once for each data type
   void HandleBellHeard( void ) {};
   void HandleCancel( void ) {};
   void HandleGoNeutral( void ) {};

@@ -66,6 +66,7 @@ private:
   };
   enum EBollingerState { eBollingerUnknown, eBollingerLow, eBollingerHigh, eBollingerMid };
   enum ESlope { eSlopeUnknown, eSlopeNeg, eSlopePos };
+  enum EInd1 { eInd1WaitForEntry, eInd1InRising, eInd1InFalling, eInd1FollowLongStop, eINd1FollowShortStop };
 
   struct BundleAtmIv {
     boost::shared_ptr<ou::ChartEntryIndicator> m_pceCallIV;
@@ -83,6 +84,8 @@ private:
   unsigned int m_nPositions; // used for creating unique position keys
 
   ptime m_dtQuote;
+  ou::tf::Order::pOrder_t m_pOrderTrending;
+  double m_dblStop;
 
   ou::tf::option::MultiExpiryBundle* m_pBundle;  // keep towards top of variable section
   pProvider_t m_pExecutionProvider;
@@ -93,8 +96,8 @@ private:
   pPosition_t m_pPositionLongs;
   pPosition_t m_pPositionShorts;
 
-  OrdersOutstandingLongs* m_pOrdersOutstandingLongs;
-  OrdersOutstandingShorts* m_pOrdersOutstandingShorts;
+  ou::tf::OrdersOutstandingLongs* m_pOrdersOutstandingLongs;
+  ou::tf::OrdersOutstandingShorts* m_pOrdersOutstandingShorts;
 
   ou::ChartDataBase m_ChartDataUnderlying;
 
@@ -107,6 +110,7 @@ private:
   //ou::ChartEntryIndicator m_cePLLongs;
   //ou::ChartEntryIndicator m_cePLShorts;
 
+  EInd1 m_eInd1;
   ETradingState m_eTradingState;
   ESlope m_eBollinger1EmaSlope;
   std::vector<EBollingerState> m_vBollingerState;
@@ -161,6 +165,8 @@ private:
   void HandleInboundQuoteUnderlying( const ou::tf::Quote& quote );
   void HandleInboundTradeUnderlying( const ou::tf::Trade& trade );
 
+  void HandleCancel( void );  // called with trade and quote
+
   void HandleCommon( const ou::tf::Quote& quote );
   void HandleRHTrading( const ou::tf::Quote& quote );
 
@@ -168,6 +174,8 @@ private:
   void HandleRHTrading( const ou::tf::Trade& trade ) {};
 
   void HandleCalcIv( const ou::tf::PriceIV& );
+
+  void HandleOrderFilled( const ou::tf::Order& order );
 
   typedef ou::tf::Position::PositionDelta_delegate_t PositionDelta_delegate_t;
   void HandleExecution( const PositionDelta_delegate_t& del );

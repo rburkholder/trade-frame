@@ -118,6 +118,9 @@ protected:
 
     ou::tf::TSSWStatsPrice m_statsSlopeBy3;
     ou::ChartEntryIndicator m_ceSlopeBy3;
+
+    double m_dblBollingerWidth;
+
     void SetProperties( ou::Colour::enumColour colour, const std::string& sName ) {
       m_ceEma.SetName( sName );
       m_ceEma.SetColour( colour );
@@ -129,7 +132,7 @@ protected:
       m_ceSlopeBy3.SetColour( colour );
     }
     infoBollinger( ou::tf::Quotes& quotes, time_duration td )
-      : m_td( td ), m_quotes( quotes ),
+      : m_td( td ), m_quotes( quotes ), m_dblBollingerWidth( 0.0 ),
         m_ema( quotes, td ), m_stats( quotes, td ),
         m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
         m_statsSlopeBy2( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) ),
@@ -137,7 +140,7 @@ protected:
     {
     }
     infoBollinger( const infoBollinger& rhs ) 
-      : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ),
+      : m_td( rhs.m_td ), m_quotes( rhs.m_quotes ), m_dblBollingerWidth( rhs.m_dblBollingerWidth ),
       m_ema( m_quotes, m_td ), m_stats( m_quotes, m_td ),
       m_statsSlope( m_ema, boost::posix_time::time_duration( 0, 0, 30 ) ),
       m_statsSlopeBy2( m_tsStatsSlope, boost::posix_time::time_duration( 0, 0, 30 ) ),

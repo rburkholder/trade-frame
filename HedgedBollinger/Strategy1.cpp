@@ -57,7 +57,7 @@ Strategy::Strategy(
     m_eBollinger1EmaSlope( eSlopeUnknown ),
     m_eTradingState( eTSUnknown ),
     m_bTrade( false ), m_nLongs( 0 ), m_nShorts( 0 ),
-    m_nPositions( 0 )
+    m_nPositions( 0 ), m_eInd1( eInd1WaitForEntry )
 {
 
   m_ceCountLongs.SetColour( ou::Colour::Red );
@@ -119,7 +119,7 @@ Strategy::Strategy(
   m_pPositionLongs->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pPositionLongs->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
-  m_pOrdersOutstandingLongs = new OrdersOutstandingLongs( m_pPositionLongs );
+  m_pOrdersOutstandingLongs = new ou::tf::OrdersOutstandingLongs( m_pPositionLongs );
 
   m_pPositionShorts = 
       ou::tf::PortfolioManager::Instance().ConstructPosition( 
@@ -135,7 +135,7 @@ Strategy::Strategy(
   m_pPositionShorts->OnExecution.Add( MakeDelegate( this, &Strategy::HandleExecution ) );
   m_pPositionShorts->OnCommission.Add( MakeDelegate( this, &Strategy::HandleCommission ) );
 
-  m_pOrdersOutstandingShorts = new OrdersOutstandingShorts( m_pPositionShorts );
+  m_pOrdersOutstandingShorts = new ou::tf::OrdersOutstandingShorts( m_pPositionShorts );
 
   m_bThreadPopDatumsActive = true;
   m_pThreadPopDatums = new boost::thread( &Strategy::ThreadPopDatums, this );
@@ -321,16 +321,122 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
 
     // todo:
+    // C:\Data\Resources\Books\Moving_Averages Kennedy
+    // style 1: moving average compression - search for it, then use it set up option 
+    // style 2: sma1 > sma2 > sma3 > sma4
     // 
 
     if ( m_bTrade ) {
+      // scalping based upon acceleration crossing
+      double dblNormalizedPrice;
+      ou::tf::Order::pOrder_t pOrder;
+      ou::tf::Instrument::pInstrument_t pInstrument;
       switch ( info.m_stateAccel.State() ) {
       case ou::tf::Crossing<double>::EGTX: 
+        m_pOrdersOutstandingLongs->CancelAllButNEntryOrders( 2 );
+        pInstrument = m_pPositionLongs->GetInstrument();
+        dblNormalizedPrice = pInstrument->NormalizeOrderPrice( quote.Midpoint() );  // -0.10? +0.10?
+        pOrder = m_pPositionLongs->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, dblNormalizedPrice );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+        pOrder->SetDescription( "Info[0].Long" );
+        m_pOrdersOutstandingLongs->AddOrderFilling( 
+          new ou::tf::OrdersOutstanding::structRoundTrip( 
+            pOrder, 
+            dblNormalizedPrice + info.m_dblBollingerWidth, // profit point, but let it accumulate with trailing stop
+            dblNormalizedPrice - 0.5 * info.m_dblBollingerWidth )  // stop  ... between the two, trail while in progress, parabolic while not in progress
+          );
+        m_pPositionLongs->PlaceOrder( pOrder );
+        //++m_nUpTransitions;
         break;
       case ou::tf::Crossing<double>::ELTX: 
+        m_pOrdersOutstandingShorts->CancelAllButNEntryOrders( 2 );
+        pInstrument = m_pPositionShorts->GetInstrument();
+        dblNormalizedPrice = pInstrument->NormalizeOrderPrice( quote.Midpoint() );  // -0.10? +0.10?
+        pOrder = m_pPositionShorts->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, dblNormalizedPrice );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+        pOrder->SetDescription( "Info[0].Short" );
+        m_pOrdersOutstandingShorts->AddOrderFilling( 
+          new ou::tf::OrdersOutstanding::structRoundTrip( 
+            pOrder, 
+            dblNormalizedPrice - info.m_dblBollingerWidth, // profit point, but let it accumulate with trailing stop
+            dblNormalizedPrice + 0.5 * info.m_dblBollingerWidth )  // stop  ... between the two, trail while in progress, parabolic while not in progress
+          );
+        m_pPositionShorts->PlaceOrder( pOrder );
+        //++m_nDnTransitions;
         break;
       }
+
+      // strong rising indicator
+      bool bRising = 
+           ( m_vInfoBollinger[0].m_statsSlope.MeanY() > m_vInfoBollinger[1].m_statsSlope.MeanY() ) // various slopes are greater than the next longer term
+        && ( m_vInfoBollinger[1].m_statsSlope.MeanY() > m_vInfoBollinger[2].m_statsSlope.MeanY() )
+        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() > m_vInfoBollinger[3].m_statsSlope.MeanY() );
     
+      bool bFalling = 
+           ( m_vInfoBollinger[0].m_statsSlope.MeanY() < m_vInfoBollinger[1].m_statsSlope.MeanY() ) // various slopes are greater than the next longer term
+        && ( m_vInfoBollinger[1].m_statsSlope.MeanY() < m_vInfoBollinger[2].m_statsSlope.MeanY() )
+        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() < m_vInfoBollinger[3].m_statsSlope.MeanY() );
+
+      switch ( m_eInd1 ) {
+      case eInd1WaitForEntry:
+        if ( bRising ) {
+          m_pOrderTrending = m_pPositionLongs->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+          m_pOrderTrending->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+          m_pOrderTrending->SetDescription( "Ind1 Long" );
+          m_pPositionLongs->PlaceOrder( m_pOrderTrending );
+          m_eInd1 = eInd1InRising;
+        }
+        else {
+          if ( bFalling ) {
+            m_pOrderTrending = m_pPositionShorts->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+            m_pOrderTrending->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrderTrending->SetDescription( "Ind1 Short" );
+            m_pPositionShorts->PlaceOrder( m_pOrderTrending );
+            m_eInd1 = eInd1InFalling;
+          }
+        }
+        break;
+      case eInd1InRising:
+        if ( !bRising ) {
+          m_dblStop = ( mid - m_pOrderTrending->GetAverageFillPrice() ) / 2.0;
+          m_eInd1 = eInd1FollowLongStop;
+        }
+        break;
+      case eInd1InFalling:
+        if ( !bFalling ) {
+          m_dblStop = ( m_pOrderTrending->GetAverageFillPrice() - mid ) / 2.0;
+          m_eInd1 = eINd1FollowShortStop;
+        }
+        break;
+      case eInd1FollowLongStop:
+        if ( bRising ) {
+          m_eInd1 = eInd1InRising;
+        }
+        else {
+          if ( mid < m_dblStop ) {
+            m_pOrderTrending = m_pPositionLongs->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+            m_pOrderTrending->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrderTrending->SetDescription( "Ind1 Long Exit" );
+            m_pPositionLongs->PlaceOrder( m_pOrderTrending );
+            m_eInd1 = eInd1WaitForEntry;
+          }
+        }
+        break;
+      case eINd1FollowShortStop:
+        if ( bFalling ) {
+          m_eInd1 = eInd1InFalling;
+        }
+        else {
+          if ( mid > m_dblStop ) {
+            m_pOrderTrending = m_pPositionShorts->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+            m_pOrderTrending->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+            m_pOrderTrending->SetDescription( "Ind1 Short Exit" );
+            m_pPositionShorts->PlaceOrder( m_pOrderTrending );
+            m_eInd1 = eInd1InFalling;
+          }
+        }
+        break;
+      }
 
       double dblUnrealized;
       double dblRealized;
@@ -405,6 +511,15 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
     */
 
+  }
+}
+
+void Strategy::HandleCancel( void ) {
+  static unsigned int n( 0 );
+  if ( 0 == n ) {
+    m_pOrdersOutstandingLongs->CancelAndCloseAllOrders();
+    m_pOrdersOutstandingShorts->CancelAndCloseAllOrders();
+    ++n;
   }
 }
 
@@ -514,6 +629,18 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );
     iter->second.m_pcePutIV->Append( iv.DateTime(), iv.IVPut() );
   }
+}
+
+void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
+  switch ( order.GetOrderSide() ) {
+  case ou::tf::OrderSide::Sell:
+    m_ceShortFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
+    break;
+  case ou::tf::OrderSide::Buy:
+    m_ceLongFills.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "" );
+    break;
+  }
+  const_cast<ou::tf::Order&>( order ).OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
 }
 
 void Strategy::HandleExecution( const PositionDelta_delegate_t& del ) {

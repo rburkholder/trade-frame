@@ -161,8 +161,8 @@ bool AppHedgedBollinger::OnInit() {
   //m_dateFrontMonthFuture = boost::gregorian::date( 2014, 2, 26 );
   //m_dateSecondMonthFuture = boost::gregorian::date( 2014, 3, 27 );
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2014, 2, 25 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2014, 3, 26 );
+  m_dateFrontMonthOption = boost::gregorian::date( 2014, 3, 26 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2014, 4, 24 );
 
 //  m_sNameUnderlying = "@YM#";
 //  m_sNameOptionUnderlying = "@YM";  
@@ -209,7 +209,7 @@ bool AppHedgedBollinger::OnInit() {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  std::string sDbName( "HedgedBollinger.db" );
+  std::string sDbName( "HedgedBollinger1.db" );
   try {
     if ( boost::filesystem::exists( sDbName ) ) {
       boost::filesystem::remove( sDbName );

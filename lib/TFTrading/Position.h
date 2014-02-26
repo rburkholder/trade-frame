@@ -185,6 +185,25 @@ public:
   bool BuyOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Buy == m_row.eOrderSidePending ) ); };
   bool SellOrdersPending( void ) const { return ( OrdersPending() && ( OrderSide::Sell == m_row.eOrderSidePending ) ); };
 
+  Order::pOrder_t ConstructOrder( // market
+    OrderType::enumOrderType eOrderType,
+    OrderSide::enumOrderSide eOrderSide,
+    boost::uint32_t nOrderQuantity
+    );
+  Order::pOrder_t ConstructOrder( // limit or stop
+    OrderType::enumOrderType eOrderType,
+    OrderSide::enumOrderSide eOrderSide,
+    boost::uint32_t nOrderQuantity,
+    double dblPrice1
+    );
+  Order::pOrder_t ConstructOrder( // limit and stop
+    OrderType::enumOrderType eOrderType,
+    OrderSide::enumOrderSide eOrderSide,
+    boost::uint32_t nOrderQuantity,
+    double dblPrice1,  
+    double dblPrice2
+    );
+
   Order::pOrder_t PlaceOrder( // market
     OrderType::enumOrderType eOrderType,
     OrderSide::enumOrderSide eOrderSide,
@@ -203,6 +222,9 @@ public:
     double dblPrice1,  
     double dblPrice2
     );
+
+  void PlaceOrder( pOrder_t pOrder );
+
   void CancelOrder( idOrder_t idOrder );
   void CancelOrders( void );
   void ClosePosition( OrderType::enumOrderType eOrderType = OrderType::Market );
@@ -268,7 +290,6 @@ private:
   void HandleCommission( const Order& );
   void HandleCancellation( const Order& );
 
-  void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( vOrders_iter_t iter );
 
   void HandleQuote( quote_t );

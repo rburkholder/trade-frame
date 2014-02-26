@@ -297,6 +297,7 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     sd = 2.0 * ib.m_stats.SD();
     ib.m_ceUpperBollinger.Append( dt, lastEma + sd );
     ib.m_ceLowerBollinger.Append( dt, lastEma - sd );
+    ib.m_dblBollingerWidth = 2.0 * sd;
 //    if ( 0.0 < sd ) {
 //      ib.m_ceRatio.Append( dt, ( midpoint - lastEma ) / ( sd ) );
 //    }

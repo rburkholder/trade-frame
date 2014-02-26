@@ -419,7 +419,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
       if ( -1.1 > val3 ) val3 = -1.1;
     m_ceBollinger3Ratio.Add( dt, val3 );
 */
-    typedef OrdersOutstanding::structRoundTrip structRoundTrip;
+    typedef ou::tf::OrdersOutstanding::structRoundTrip structRoundTrip;
 
     if ( dt > m_dtEnd ) {
       m_stateTrade = ETradeCancel;

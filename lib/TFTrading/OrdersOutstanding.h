@@ -17,7 +17,10 @@
 
 #include <TFTrading/Position.h>
 
-class OrdersOutstanding {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+  class OrdersOutstanding {
 public:
 
   typedef ou::tf::Order::idOrder_t idOrder_t;
@@ -98,10 +101,10 @@ protected:
   void CheckBaseOrder( const ou::tf::Quote& quote );
   bool CancelAndCloseInProgress( void );
 
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1 );
+  void PlaceOrder( pOrder_t& pOrder, const std::string& sDescription, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
   void PlaceOrder( pOrder_t& pOrder );
-  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity );
-  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1 );
-  void PlaceOrder( pOrder_t& pOrder, ou::tf::OrderType::enumOrderType, ou::tf::OrderSide::enumOrderSide, boost::uint32_t nOrderQuantity, double dblPrice1, double dblPrice2 );
   
 private:
 
@@ -139,3 +142,5 @@ protected:
 private:
 };
 
+} // namespace tf
+} // namespace ou
