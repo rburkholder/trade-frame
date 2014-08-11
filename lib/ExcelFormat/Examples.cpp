@@ -197,7 +197,7 @@ static void example3(const char* path)
 
 static void example_read_write(const char* from, const char* to)
 {
-	cout << "read " << from << endl;
+	std::cout << "read " << from << std::endl;
 	BasicExcel xls(from);
 
 	XLSFormatManager fmt_mgr(xls);
@@ -209,7 +209,7 @@ static void example_read_write(const char* from, const char* to)
 
 	for(int y=0; y<2; ++y) {
 		for(int x=0; x<2; ++x) {
-			cout << y << "/" << x;
+			std::cout << y << "/" << x;
 
 			BasicExcelCell* cell = sheet->Cell(y, x);
 
@@ -218,19 +218,19 @@ static void example_read_write(const char* from, const char* to)
 //			cout << " - xf_idx=" << cell->GetXFormatIdx();
 
 			const Workbook::Font& font = fmt_mgr.get_font(fmt);
-			string font_name = stringFromSmallString(font.name_);
-			cout << "  font name: " << font_name;
+			std::string font_name = stringFromSmallString(font.name_);
+			std::cout << "  font name: " << font_name;
 
-			const wstring& fmt_string = fmt.get_format_string();
-			cout << "  format: " << narrow_string(fmt_string);
+			const std::wstring& fmt_string = fmt.get_format_string();
+			std::cout << "  format: " << narrow_string(fmt_string);
 
 			cell->SetFormat(fmt_general);
 
-			cout << endl;
+			std::cout << std::endl;
 		}
 	}
 
-	cout << "write: " << from << endl;
+	std::cout << "write: " << from << std::endl;
 	xls.SaveAs(to);
 }
 

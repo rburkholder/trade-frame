@@ -8,12 +8,16 @@
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+// Windows Header Files:
+#include <windows.h>
 
-// Change these values to use different versions
-//#define WINVER		0x0500
-#define WINVER		0x0502
-//#define _WIN32_WINNT	0x0502
-#define _WIN32_IE	0x0502
-#define _RICHEDIT_VER	0x0200
+// C RunTime Header Files
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include <tchar.h>
 
 
+// TODO: reference additional headers your program requires here
+
+#include <wx/wx.h>

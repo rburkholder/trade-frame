@@ -293,7 +293,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
 
     if ( m_eTradingState != eTradingState ) {
-      std::cout << "Trading state " << eTradingState << std::endl;
+      //std::cout << "Trading state " << eTradingState << std::endl;
       m_vTradeStateHistory.push_back( TradeStateHistory( eTradingState, quote ) );
       //m_eTradingState = eTradingState;
 
@@ -327,6 +327,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     // 
 
     if ( m_bTrade ) {
+      /*
       // scalping based upon acceleration crossing
       double dblNormalizedPrice;
       ou::tf::Order::pOrder_t pOrder;
@@ -365,17 +366,22 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         //++m_nDnTransitions;
         break;
       }
+      */
 
       // strong rising indicator
       bool bRising = 
            ( m_vInfoBollinger[0].m_statsSlope.MeanY() > m_vInfoBollinger[1].m_statsSlope.MeanY() ) // various slopes are greater than the next longer term
         && ( m_vInfoBollinger[1].m_statsSlope.MeanY() > m_vInfoBollinger[2].m_statsSlope.MeanY() )
-        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() > m_vInfoBollinger[3].m_statsSlope.MeanY() );
+        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() > m_vInfoBollinger[3].m_statsSlope.MeanY() )
+        && ( 0 < m_vInfoBollinger[3].m_statsSlope.MeanY() )
+        ;
     
       bool bFalling = 
            ( m_vInfoBollinger[0].m_statsSlope.MeanY() < m_vInfoBollinger[1].m_statsSlope.MeanY() ) // various slopes are greater than the next longer term
         && ( m_vInfoBollinger[1].m_statsSlope.MeanY() < m_vInfoBollinger[2].m_statsSlope.MeanY() )
-        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() < m_vInfoBollinger[3].m_statsSlope.MeanY() );
+        && ( m_vInfoBollinger[2].m_statsSlope.MeanY() < m_vInfoBollinger[3].m_statsSlope.MeanY() )
+        && ( 0 > m_vInfoBollinger[3].m_statsSlope.MeanY() )
+        ;
 
       switch ( m_eInd1 ) {
       case eInd1WaitForEntry:

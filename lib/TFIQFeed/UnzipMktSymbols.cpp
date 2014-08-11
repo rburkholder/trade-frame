@@ -16,9 +16,9 @@
 
 //#include <boost/scope_exit.hpp>
 
-#include <ioapi.h>
-#include <ioapi_mem.h>
-#include <unzip.h>
+#include <zlib/contrib/minizip/ioapi.h>
+#include <zlib/ioapi_mem.h>
+#include <zlib/contrib/minizip/unzip.h>
 
 #include <stdexcept>
 

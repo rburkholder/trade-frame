@@ -14,9 +14,6 @@
 
 #include "stdafx.h"
 
-// put in 
-
-
 #include <iostream>
 
 #include <math.h>
@@ -134,7 +131,7 @@ bool AppHedgedBollinger::OnInit() {
   //m_sNameUnderlying = "+GC#";
   m_sNameUnderlying = "GC";
   //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
-  m_sNameUnderlyingIQFeed = "+GCJ14";  // April 2014  IB won't allow trading within 30 days of expiration.
+  m_sNameUnderlyingIQFeed = "+GCU14";  // April 2014  IB won't allow trading within 30 days of expiration.
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
@@ -161,8 +158,8 @@ bool AppHedgedBollinger::OnInit() {
   //m_dateFrontMonthFuture = boost::gregorian::date( 2014, 2, 26 );
   //m_dateSecondMonthFuture = boost::gregorian::date( 2014, 3, 27 );
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2014, 3, 26 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2014, 4, 24 );
+  m_dateFrontMonthOption = boost::gregorian::date( 2014, 8, 26 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2014, 9, 25 );
 
 //  m_sNameUnderlying = "@YM#";
 //  m_sNameOptionUnderlying = "@YM";  
@@ -508,11 +505,17 @@ void AppHedgedBollinger::HandleGuiUpdateOptionTree( EventUpdateOptionTree& event
 }
 
 void AppHedgedBollinger::HandleMenuActionSaveSymbolSubset( void ) {
-  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
-  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
-  listIQFeedSymbols.SaveToFile( "HedgedBollinger.ser" );
-  std::cout << "Symbols saved." << std::endl;
+  try {
+    ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+    //listIQFeedSymbols.InsertParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
+    listIQFeedSymbols.InsertParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlyingIQFeed ) );
+    m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
+    listIQFeedSymbols.SaveToFile( "HedgedBollinger.ser" );
+    std::cout << "Symbols saved." << std::endl;
+  }
+  catch (...) {
+    std::cout << "broken" << std::endl;
+  }
 }
 
 void AppHedgedBollinger::HandleMenuActionLoadSymbolSubset( void ) {

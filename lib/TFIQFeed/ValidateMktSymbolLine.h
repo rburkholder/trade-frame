@@ -65,7 +65,7 @@ public:
   void Summary( void );
 
   size_t LinesProcessed( void ) const { return cntLinesTotal; };
-  void HandleParsedStructure( trd_t& trd ) {};  // override by inheriting class
+  void InsertParsedStructure( trd_t& trd ) {};  // override by inheriting class
   bool HandleUpdateHasOption( const std::string& ) {}; // override by inheriting class
 protected:
 private:
@@ -217,8 +217,8 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
       }
 
       if ( 0 != m_OnProcessLine ) m_OnProcessLine( trd );
-//      if ( &ValidateMktSymbolLine<CRTP,IteratorLines>::HandleParsedStructure != &CRTP::HandleParsedStructure ) {
-//        static_cast<CRTP*>( this )->HandleParsedStructure( trd );
+//      if ( &ValidateMktSymbolLine<CRTP,IteratorLines>::InsertParsedStructure != &CRTP::InsertParsedStructure ) {
+//        static_cast<CRTP*>( this )->InsertParsedStructure( trd );
 //      }
     }
   }

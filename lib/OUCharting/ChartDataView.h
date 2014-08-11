@@ -89,13 +89,16 @@ private:
     size_t ixActualChartId;  // actual chart index
     size_t nCharts;  // number of charts at this index
     explicit structChartMapping( void ) : ixActualChartId( 0 ), nCharts( 0 ) {};
-    explicit structChartMapping( const structChartMapping &obj ) 
+    explicit structChartMapping( const structChartMapping& obj ) 
       : ixActualChartId( obj.ixActualChartId ), nCharts( obj.nCharts ) {};
-    structChartMapping &operator=( const structChartMapping &obj ) { 
-      ixActualChartId = obj.ixActualChartId; nCharts = obj.nCharts; return *this; };
+    structChartMapping& operator=( const structChartMapping &obj ) { 
+      ixActualChartId = obj.ixActualChartId; 
+      nCharts = obj.nCharts; 
+      return *this; 
+    };
   };
 
-  typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
+  typedef std::map<const size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
 
   typedef std::vector<local::ChartDataViewCarrier> vChartDataViewEntry_t;
 

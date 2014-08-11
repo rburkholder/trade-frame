@@ -50,7 +50,7 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
   symbols.Clear();
 
   ValidateMktSymbolLine validator;
-  validator.SetOnProcessLine( MakeDelegate( &symbols, &InMemoryMktSymbolList::HandleParsedStructure ) );
+  validator.SetOnProcessLine( MakeDelegate( &symbols, &InMemoryMktSymbolList::InsertParsedStructure ) );
 
   switch ( e ) {
   case MktSymbolLoadType::Download:

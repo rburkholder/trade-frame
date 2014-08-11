@@ -1,3 +1,43 @@
+2014/08/08
+www.naics.com/naicsfiles/SIC_to_NAICS_Cross_Reference.xls
+www.naics.com/naicsfiles/NAICS_to_SIC_Cross_Reference.xls
+www.naics.com/censusfiles/SIC%20Codes%20List.xls
+http://www.census.gov/cgi-bin/sssd/naics/naicsrch?chart=2012
+
+2014/08/03 
+
+=====
+Build notes for zlib 1.2.8
+
+http://blog.raymond.burkholder.net/index.php?/archives/598-Build-zlib-v1.2.8-with-Visual-Studio-2012.html
+
+download
+http://download.microsoft.com/download/9/0/f/90f019ac-8243-48d3-91cf-81fc4093ecfd/1830_usa_ddk.iso
+to obtain ml64.exe which will be installed to after setup.exe:
+D:\Data\WINDDK\3790.1830\bin\win64\x86\amd64
+
+edit %zipbase%\zlib-1.2.8\contrib\masmx64\bld_ml64.bat:
+
+%asmbase%\WINDDK\3790.1830\bin\win64\x86\amd64\ml64.exe /Flinffasx64 /c /Zi inffasx64.asm
+%asmbase%\WINDDK\3790.1830\bin\win64\x86\amd64\ml64.exe /Flgvmat64   /c /Zi gvmat64.asm
+
+run:
+bld_ml64.bat
+
+http://zlib.net/zlib-1.2.8.tar.gz
+
+copy ioapi_mem.c, ioapi_mem.h to zlib-1.2.8
+
+project directory:
+D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio\vc11
+builds to:
+D:\Data\Projects\VC++\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug\zlibstat.lib
+
+select:  release,x64
+add ioapi_mem.c to zlibstat
+
+=====
+
 2013/12/09
 view -> other windows -> property manager
 
@@ -13,8 +53,11 @@ zlib-1.2.7
 
 2013/10/28
 http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
+without zlib:
 b2 --layout=versioned toolset=msvc-10.0 variant=debug link=static threading=multi runtime-link=static address-model=64 -j4  --stagedir=stage\x64 stage
-
+with zlib (not sure what this provides):
+b2 --layout=versioned toolset=msvc-10.0 variant=debug link=static threading=multi runtime-link=static address-model=64 -j4 -sZLIB_SOURCE="c:\data\projects\vsc++\zlib\zlib-1.2.8" --stagedir=stage\x64 stage
+looks like it does something for iostreams, adds a libboost-zlib... file, which may conflict with the pre-existing zlib library
 
 2013/09/22
 Installer Software:  http://www.jrsoftware.org/isinfo.php
@@ -30,7 +73,9 @@ Found about ioapi_mem_c at http://www.winimage.com/zLibDll/minizip.html
 2012/09/03
 curl:  retrieving URLs
 http://curl.haxx.se/, http://curl.haxx.se/libcurl/c/libcurl-tutorial.html
+use the supplied vc6curl.dsw
 CURL_DISABLE_LDAP used when building curl
+project properties->librarian->all options->additional options-> remove /machine:i386
 
 2012/08/20
 This looks suspiciously like you're not using a recent enough value for WINVER. From memory, Win64 requires 0x502 or later (i.e. Windows Server 2003). 

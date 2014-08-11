@@ -52,12 +52,12 @@ public:
         boost::multi_index::tag<ixSymbol>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sSymbol)>,
       boost::multi_index::ordered_non_unique<
         boost::multi_index::tag<ixExchange>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sExchange)>,
-//      boost::multi_index::ordered_non_unique<
-//        boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::enumSymbolClassifier,sc)>,
-//      boost::multi_index::ordered_non_unique<
-//        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
-//      boost::multi_index::ordered_non_unique<
-//        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixSymbolClass>, BOOST_MULTI_INDEX_MEMBER(trd_t,MarketSymbol::enumSymbolClassifier,sc)>,
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixSic>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nSIC)>,
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixNaics>, BOOST_MULTI_INDEX_MEMBER(trd_t,boost::uint32_t,nNAICS)>,
       boost::multi_index::ordered_non_unique<  // IQFeed file doesn't provide good info, and option symbology sucks
         boost::multi_index::tag<ixUnderlying>, BOOST_MULTI_INDEX_MEMBER(trd_t,std::string,sUnderlying)> 
     >
@@ -153,7 +153,16 @@ public:
     }
   }
 
-  void HandleParsedStructure( const trd_t& trd ) {
+  template<typename Function>
+  void ScanSymbols( Function& f ) {
+    typedef symbols_t::index<ixSymbol>::type Symbols_t;
+    Symbols_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
+    for ( Symbols_t::const_iterator iterSymbols = m_symbols.get<ixSymbol>().begin(); endSymbols != iterSymbols; iterSymbols++ ) {
+      f( *iterSymbols );
+    }
+  }
+
+  void InsertParsedStructure( const trd_t& trd ) {
     m_symbols.insert( trd );
   }
 
