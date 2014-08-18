@@ -11,7 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+//#include "stdafx.h"
+
 #include "ConsoleStream.h"
 
 namespace ou {

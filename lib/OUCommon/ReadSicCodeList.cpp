@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
-
 #include <boost/lexical_cast.hpp>
 
 #include <ExcelFormat/ExcelFormat.h>
@@ -39,16 +37,16 @@ SicCodeList::SicCodeList( const std::string& sFileName ) {
     // skip title, skip column headers, skip first column
 
     bool bProcess( true );
-    int iy = 2;
+    int ixRox = 2;
 
     std::string sKey, sDesc;
 
     while ( bProcess ) {
-      cell = sheet->Cell( iy, 1 );
+      cell = sheet->Cell( ixRox, 1 );
       switch( cell->Type() ) {
       case ExcelFormat::BasicExcelCell::STRING:
         sKey = cell->GetString();
-        cell = sheet->Cell( iy, 2 );
+        cell = sheet->Cell( ixRox, 2 );
         sDesc = cell->GetString();
         m_mapSic.insert( std::pair<boost::uint32_t, std::string>( boost::lexical_cast<boost::uint32_t>( sKey ), sDesc ) );
         break;
@@ -57,11 +55,11 @@ SicCodeList::SicCodeList( const std::string& sFileName ) {
         bProcess = false;
         break;
       }
-      iy++;
+      ixRox++;
     }
   }
 
-  std::cout << "map size " << m_mapSic.size() << std::endl;
+  std::cout << "done, map size " << m_mapSic.size() << std::endl;
 
 }
 

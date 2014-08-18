@@ -26,7 +26,8 @@ using namespace boost::gregorian;
 
 #include <wx/panel.h>
 
-#include <TFBitsNPieces/ReadSicCodeList.h>
+#include <OUCommon/ReadSicCodeList.h>
+#include <OUCommon/ReadNaicsToSicCodeList.h>
 
 #include "IQFeedMarketSymbols.h"
 
@@ -64,7 +65,7 @@ bool AppIQFeedMarketSymbols::OnInit() {
   vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( this, &AppIQFeedMarketSymbols::HandleMenuAction1ObtainNewIQFeedSymbolListLocal ) ) );
   vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( this, &AppIQFeedMarketSymbols::HandleMenuAction2LoadIQFeedSymbolList ) ) );
   vItems.push_back( new mi( "b1 Scan Symbols", MakeDelegate( this, &AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList ) ) );
-  vItems.push_back( new mi( "c1 Load SIC Codes", MakeDelegate( this, &AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes ) ) );
+  //vItems.push_back( new mi( "c1 Load SIC Codes", MakeDelegate( this, &AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   return 1;
@@ -78,6 +79,7 @@ void AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes( void ) {
 void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList( void ) {
 
   ou::SicCodeList sic( "..\\SIC Codes List.xls" );
+  ou::ReadNaicsToSicCodeList naics( "..\\NAICS_to_SIC_Cross_Reference.xls" );
 
   struct structFillMaps {
 
@@ -118,14 +120,14 @@ void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList( void ) {
 
   std::cout << "SIC (" << m_mapSIC.size() << "):" << std::endl;
   for ( citerMapCounts_t iter = m_mapSIC.begin(); iter != m_mapSIC.end(); iter++ ) {
-    std::cout << iter->second << " " << iter->first << " " << sic.LookupCode( iter->first ) << std::endl;
+    std::cout << iter->second << " " << iter->first << " " << naics.LookupSIC( iter->first ) << std::endl;
   }
 
   std::cout << "================" << std::endl;
 
   std::cout << "NAICS (" << m_mapNAICS.size() << "):" << std::endl;
   for ( citerMapCounts_t iter = m_mapNAICS.begin(); iter != m_mapNAICS.end(); iter++ ) {
-    std::cout << iter->second << " " << iter->first << std::endl;
+    std::cout << iter->second << " " << iter->first << " " << naics.LookupNAICS( iter->first ) << std::endl;
   }
 
   std::cout << "Scan done." << std::endl;

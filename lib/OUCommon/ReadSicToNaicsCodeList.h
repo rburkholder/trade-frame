@@ -1,5 +1,6 @@
 /************************************************************************
- * Copyright(c) 2009, One Unified. All rights reserved.                 *
+ * Copyright(c) 2014, One Unified. All rights reserved.                 *
+ * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
  *  without even the implied warranty of                                *
@@ -11,27 +12,23 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "stdafx.h"
+#pragma once
 
-#include "SmartVar.h"
+// started 2014/09/16
 
-namespace ou {
-/*
-template<> SmartVar<int>::SmartVar( void ) 
-  : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( 0 ), m_tItem( 0 ) {
-}
+#include "ReadCodeListCommon.h"
 
-template<> SmartVar<unsigned int>::SmartVar( void ) 
-  : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( 0 ), m_tItem( 0 ) {
-}
+namespace ou { // One Unified
 
-template<> SmartVar<double>::SmartVar( void ) 
-  : m_bValueUpdated( false ), m_bEventCleared( true ), m_tBlank( 0.0 ), m_tItem( 0.0 ) {
-}
-*/
+class ReadSicToNaicsCodeList: public ReadCodeListCommon {
+public:
 
-template<> void SmartVar<double>::Init( void ) {
-  m_tItem = 0.0;
-}
+  ReadSicToNaicsCodeList( const std::string& sFileName );
+  ~ReadSicToNaicsCodeList(void);
 
-} // ou
+protected:
+private:
+
+};
+
+} // namespace ou

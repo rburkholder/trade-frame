@@ -12,3 +12,4 @@
 #define _WIN32_WINNT 0x0502     // XP SP2
 #endif
 
+#include <SDKDDKVer.h>

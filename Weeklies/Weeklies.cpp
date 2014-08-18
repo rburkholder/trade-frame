@@ -116,7 +116,7 @@ bool AppWeeklies::OnInit() {
 //  m_idPortfolio = "weeklies";  // makes it easy for swing trading
 
   
-  std::string sDbName( "phi.db" );
+  std::string sDbName( "weeklies.db" );
   if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
   }

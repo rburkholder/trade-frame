@@ -16,7 +16,7 @@
 // Copyright (2008) One Unified
 // For use without restriction but one:  this copyright notice must be preserved.
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #include "WuManber.h"
 

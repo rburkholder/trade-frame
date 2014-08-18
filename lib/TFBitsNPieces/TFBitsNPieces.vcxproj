@@ -146,7 +146,6 @@
     <ClInclude Include="IQFeedSymbolListOps.h" />
     <ClInclude Include="LiborFromIQFeed.h" />
     <ClInclude Include="ReadCboeWeeklyOptions.h" />
-    <ClInclude Include="ReadSicCodeList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -161,7 +160,6 @@
     <ClCompile Include="IQFeedSymbolListOps.cpp" />
     <ClCompile Include="LiborFromIQFeed.cpp" />
     <ClCompile Include="ReadCboeWeeklyOptions.cpp" />
-    <ClCompile Include="ReadSicCodeList.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
