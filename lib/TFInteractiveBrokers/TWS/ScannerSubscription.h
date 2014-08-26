@@ -1,10 +1,11 @@
+/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+ * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+#pragma once
 #ifndef scanner_def
 #define scanner_def
 
 #include <float.h>
 #include <limits.h>
-
-#include "IBString.h"
 
 #define UNSET_DOUBLE DBL_MAX
 #define UNSET_INTEGER INT_MAX
@@ -24,26 +25,26 @@ struct ScannerSubscription {
 		averageOptionVolumeAbove = 0;
 	}
     int numberOfRows;
-    IBString instrument;
-    IBString locationCode;
-    IBString scanCode;
+    std::string instrument;
+    std::string locationCode;
+    std::string scanCode;
     double abovePrice;
     double belowPrice;
     int aboveVolume;
     double marketCapAbove;
     double marketCapBelow;
-    IBString moodyRatingAbove;
-    IBString moodyRatingBelow;
-    IBString spRatingAbove;
-    IBString spRatingBelow;
-    IBString maturityDateAbove;
-    IBString maturityDateBelow;
+    std::string moodyRatingAbove;
+    std::string moodyRatingBelow;
+    std::string spRatingAbove;
+    std::string spRatingBelow;
+    std::string maturityDateAbove;
+    std::string maturityDateBelow;
     double couponRateAbove;
     double couponRateBelow;
     int excludeConvertible;
 	int averageOptionVolumeAbove;
-	IBString scannerSettingPairs;
-	IBString stockTypeFilter;
+	std::string scannerSettingPairs;
+	std::string stockTypeFilter;
 };
 
 #endif

@@ -73,6 +73,7 @@ protected:
 
   void OnIQFeedDisConnected( void );  // CRTP on IQFeed
   void OnIQFeedConnected( void ); // CRTP on IQFeed
+  void OnIQFeedError( size_t );
 
 private:
 

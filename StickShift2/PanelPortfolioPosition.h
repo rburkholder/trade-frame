@@ -160,7 +160,7 @@ private:
 #define GRID_POSITION_ARRAY_COL_COUNT 12
 #define GRID_POSITION_ARRAY \
   (GRID_POSITION_ARRAY_COL_COUNT,  \
-    ( /* Col 0,                       1,            2,              3,  4,             */ \
+    ( /* Col 0,                       1,            2,         3,      4,             */ \
       (GRID_POSITION_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
       (GRID_POSITION_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
       (GRID_POSITION_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \

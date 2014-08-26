@@ -132,7 +132,7 @@ void IBSymbol::AcceptTickSize(TickType tickType, int size) {
   }
 }
 
-void IBSymbol::AcceptTickString(TickType tickType, const IBString &value) {
+void IBSymbol::AcceptTickString(TickType tickType, const std::string& value) {
   switch ( tickType ) {
     case TickType::LAST_TIMESTAMP:
       m_bLastTimeStampFound = true;

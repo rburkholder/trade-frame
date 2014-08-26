@@ -62,6 +62,10 @@ void IQFeedProvider::OnIQFeedDisConnected( void ) {
   OnDisconnected( 0 );
 }
 
+void IQFeedProvider::OnIQFeedError( size_t e ) {
+  OnError( e );
+}
+
 IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );

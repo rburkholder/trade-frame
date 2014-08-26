@@ -1,3 +1,37 @@
+2014/08/25
+
+
+C:\Data\Projects\VSC++\TradeFrame\lib\TFInteractiveBrokers\TWS\EClientSocketBase.h
+#include <boost/thread/mutex.hpp>
+  // addition 2011/09/05
+  boost::mutex mutexSend;
+
+C:\Data\Projects\VSC++\TradeFrame\lib\TFInteractiveBrokers\TWS\EClientSocketBaseImpl.h
+int EClientSocketBase::bufferedSend(const char* buf, size_t sz)
+{
+  boost::mutex::scoped_lock lock(mutexSend);
+
+	if( sz <= 0)
+		return 0;
+
+	if( !m_outBuffer.empty()) {
+		m_outBuffer.insert( m_outBuffer.end(), buf, buf + sz);
+		return sendBufferedData();
+	}
+
+	int nResult = send(buf, sz);
+
+	if( nResult < (int)sz) {
+		int sent = (std::max)( nResult, 0);
+		m_outBuffer.insert( m_outBuffer.end(), buf + sent, buf + sz);
+	}
+
+	return nResult;
+}
+
+
+
+
 2014/08/08
 www.naics.com/naicsfiles/SIC_to_NAICS_Cross_Reference.xls
 www.naics.com/naicsfiles/NAICS_to_SIC_Cross_Reference.xls

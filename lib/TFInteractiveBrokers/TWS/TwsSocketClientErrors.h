@@ -1,3 +1,6 @@
+/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+ * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+#pragma once
 #ifndef tswsocketclienterrors_def
 #define tswsocketclienterrors_def
 
@@ -7,14 +10,14 @@ static const int SYSTEM_ERROR = 600;
 
 class CodeMsgPair {
 public:
-	CodeMsgPair(int code, IBString msg) : m_errorCode(code), m_errorMsg(msg) {
+	CodeMsgPair(int code, std::string msg) : m_errorCode(code), m_errorMsg(msg) {
 	}
 private:
 	int m_errorCode;
-	IBString m_errorMsg;
+	std::string m_errorMsg;
 public:
 	int	  code() const			        { return m_errorCode; }
-	const IBString& msg() const			{ return m_errorMsg;  }
+	const std::string& msg() const			{ return m_errorMsg;  }
 };
 
 static const CodeMsgPair ALREADY_CONNECTED(501,	"Already connected.");

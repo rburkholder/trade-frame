@@ -30,6 +30,8 @@
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
+#include "TWS/CommissionReport.h"
+
 #include "IBTWS.h"
 
 namespace ou { // One Unified
@@ -244,7 +246,8 @@ void IBTWS::StartQuoteTradeWatch( pSymbol_t pIBSymbol ) {
     contract.currency = pIBSymbol->GetInstrument()->GetCurrencyName();
     pIBSymbol->SetQuoteTradeWatchInProgress();
     //pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "100,101,104,165,221,225,236", false );
-    pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false );
+    TagValueListSPtr pMktDataOptions;
+    pTWS->reqMktData( pIBSymbol->GetTickerId(), contract, "", false, pMktDataOptions );
   }
 }
 
@@ -290,7 +293,7 @@ void IBTWS::PlaceOrder( pOrder_t pOrder ) {
   contract.exchange = pOrder->GetInstrument()->GetExchangeName();
   contract.currency = pOrder->GetInstrument()->GetCurrencyName();
 
-  IBString s;
+  std::string s;
   switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
     case InstrumentType::Stock:
       contract.exchange = "SMART";
@@ -386,7 +389,7 @@ void IBTWS::tickGeneric(TickerId tickerId, TickType tickType, double value) {
 //  std::cout << "tickGeneric " << m_vTickerToSymbol[ tickerId ]->Name() << ", " << TickTypeStrings[tickType] << ", " << value << std::endl;
 }
 
-void IBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& value) {
+void IBTWS::tickString(TickerId tickerId, TickType tickType, const std::string& value) {
   // we seem to get ticks even though we havn't requested them, so ensure we only accept 
   //   when a valid symbol has been defined
   if ( ( tickerId > 0 ) && ( tickerId <= m_curTickerId ) ) {
@@ -398,8 +401,8 @@ void IBTWS::tickString(TickerId tickerId, TickType tickType, const IBString& val
   }
 }
 
-void IBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
-  double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry ) {
+void IBTWS::tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const std::string& formattedBasisPoints,
+  double totalDividends, int holdDays, const std::string& futureExpiry, double dividendImpact, double dividendsToExpiry ) {
   m_ss.str("");
   m_ss << "tickEFP" << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
@@ -469,9 +472,9 @@ void IBTWS::openOrder( OrderId orderId, const Contract& contract, const ::Order&
   }
 }
 
-void IBTWS::orderStatus( OrderId orderId, const IBString &status, int filled,
+void IBTWS::orderStatus( OrderId orderId, const std::string& status, int filled,
                          int remaining, double avgFillPrice, int permId, int parentId,
-                         double lastFillPrice, int clientId, const IBString& whyHeld) 
+                         double lastFillPrice, int clientId, const std::string& whyHeld) 
 {
   if ( true ) {
     m_ss.str("");
@@ -586,7 +589,7 @@ IBTWS::pSymbol_t IBTWS::GetSymbol( pInstrument_t instrument ) {
   return pSymbol;
 }
 
-void IBTWS::error(const int id, const int errorCode, const IBString errorString) {
+void IBTWS::error(const int id, const int errorCode, const std::string errorString) {
   switch ( errorCode ) {
     case 1102: // Connectivity has been restored
       pTWS->reqAccountUpdates( true, "" );
@@ -605,14 +608,14 @@ void IBTWS::error(const int id, const int errorCode, const IBString errorString)
   }
 }
 
-void IBTWS::winError( const IBString &str, int lastError) {
+void IBTWS::winError( const std::string& str, int lastError) {
   //m_ss.str("");
   //m_ss << "winerror " << str << ", " << lastError << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
   std::cout << "winerror " << str << ", " << lastError << std::endl;
 }
 
-void IBTWS::updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch) {
+void IBTWS::updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch) {
   //m_ss.str("");
   std::cout << "news bulletin " << msgId << "-" << msgType << "-" << originExch << ": " << newsMessage  << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
@@ -625,7 +628,32 @@ void IBTWS::currentTime(long time) {
   m_time = time;
 }
 
-void IBTWS::updateAccountTime(const IBString& timeStamp) {
+void IBTWS::updateAccountTime (const std::string& timeStamp) {
+}
+
+void IBTWS::position( const std::string& s, const Contract & c, int, double d) {
+}
+
+void IBTWS::positionEnd(void) {
+}
+
+void IBTWS::accountSummary( int i, const std::string& s1, const std::string& s2, const std::string& s3, const std::string& s4 ) {
+}
+
+void IBTWS::accountSummaryEnd( int i ) {
+}
+
+void IBTWS::verifyMessageAPI( const std::string& s ) {
+}
+
+void IBTWS::verifyCompleted( bool b, const std::string& s ) {
+}
+
+void IBTWS::marketDataType( TickerId id , int i ) {
+}
+
+void IBTWS::commissionReport( const CommissionReport& cr ) { 
+  std::cout << "commissionReport " << cr.execId << ", " << cr.commission << ", " << cr.currency << ", " << cr.realizedPNL << std::endl;
 }
 
 // convert to boost::spirit?
@@ -917,7 +945,7 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
 
 void IBTWS::updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
-      double unrealizedPNL, double realizedPNL, const IBString& accountName) {
+      double unrealizedPNL, double realizedPNL, const std::string& accountName) {
 
 //  pInstrument_t pInstrument;
 //  IBSymbol* pSymbol;
@@ -1011,8 +1039,8 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
 
 // todo: use the keyword lookup to make this faster
 //   key, bool, double, string
-void IBTWS::updateAccountValue(const IBString& key, const IBString& val,
-                                const IBString& currency, const IBString& accountName) {
+void IBTWS::updateAccountValue(const std::string& key, const std::string& val,
+                                const std::string& currency, const std::string& accountName) {
   bool bEmit = false;
   if ( "AccountCode" == key ) bEmit = true;
   if ( "AccountReady" == key ) bEmit = true;
@@ -1048,26 +1076,26 @@ void IBTWS::updateMktDepth(TickerId id, int position, int operation, int side,
                             double price, int size) {
 }
 
-void IBTWS::updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
+void IBTWS::updateMktDepthL2(TickerId id, int position, std::string marketMaker, int operation,
                               int side, double price, int size) {
 }
 
-void IBTWS::managedAccounts( const IBString& accountsList) {
+void IBTWS::managedAccounts( const std::string& accountsList) {
 }
 
-void IBTWS::receiveFA(faDataType pFaDataType, const IBString& cxml) {
+void IBTWS::receiveFA(faDataType pFaDataType, const std::string& cxml) {
 }
 
-void IBTWS::historicalData(TickerId reqId, const IBString& date, double open, double high, 
+void IBTWS::historicalData(TickerId reqId, const std::string& date, double open, double high, 
                             double low, double close, int volume, int barCount, double WAP, int hasGaps) {
 }
 
-void IBTWS::scannerParameters(const IBString &xml) {
+void IBTWS::scannerParameters(const std::string &xml) {
 }
 
 void IBTWS::scannerData(int reqId, int rank, const ContractDetails &contractDetails,
-                         const IBString &distance, const IBString &benchmark, const IBString &projection,
-                         const IBString &legsStr) {
+                         const std::string& distance, const std::string& benchmark, const std::string& projection,
+                         const std::string& legsStr) {
 }
 
 void IBTWS::scannerDataEnd(int reqId) {

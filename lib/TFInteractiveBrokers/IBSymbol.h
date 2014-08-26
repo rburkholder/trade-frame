@@ -90,7 +90,7 @@ protected:
 
   void AcceptTickPrice( TickType tickType, double price );
   void AcceptTickSize( TickType tickType, int size );
-  void AcceptTickString( TickType tickType, const IBString &value );
+  void AcceptTickString( TickType tickType, const std::string& value );
 
   void BuildQuote( void );
   void BuildTrade( void );

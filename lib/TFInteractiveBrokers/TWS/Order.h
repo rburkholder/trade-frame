@@ -1,13 +1,13 @@
+/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+ * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+#pragma once
 #ifndef order_def
 #define order_def
 
-#include "shared_ptr.h"
-#include "IBString.h"
+#include "TagValue.h"
 
 #include <float.h>
 #include <limits.h>
-
-#include <vector>
 
 #define UNSET_DOUBLE DBL_MAX
 #define UNSET_INTEGER INT_MAX
@@ -21,18 +21,22 @@ enum AuctionStrategy { AUCTION_UNSET = 0,
                        AUCTION_IMPROVEMENT = 2,
                        AUCTION_TRANSPARENT = 3 };
 
-struct TagValue
+struct OrderComboLeg
 {
-	TagValue() {}
-	TagValue(const IBString& p_tag, const IBString& p_value)
-		: tag(p_tag), value(p_value)
-	{}
+	OrderComboLeg()
+	{
+		price = UNSET_DOUBLE;
+	}
 
-	IBString tag;
-	IBString value;
+	double price;
+
+	bool operator==( const OrderComboLeg &other) const
+	{
+		return (price == other.price);
+	}
 };
 
-typedef shared_ptr<TagValue> TagValueSPtr;
+typedef shared_ptr<OrderComboLeg> OrderComboLegSPtr;
 
 struct Order
 {
@@ -45,10 +49,12 @@ struct Order
 
 		// main order fields
 		totalQuantity = 0;
-		lmtPrice      = 0;
-		auxPrice      = 0;
+		lmtPrice      = UNSET_DOUBLE;
+		auxPrice      = UNSET_DOUBLE;
 
 		// extended order fields
+		activeStartTime = "";
+		activeStopTime = "";
 		ocaType        = 0;
 		transmit       = true;
 		parentId       = 0;
@@ -63,17 +69,20 @@ struct Order
 		percentOffset  = UNSET_DOUBLE;
 		overridePercentageConstraints = false;
 		trailStopPrice = UNSET_DOUBLE;
+		trailingPercent = UNSET_DOUBLE;
 
 		// institutional (ie non-cleared) only
 		openClose     = "O";
 		origin        = CUSTOMER;
 		shortSaleSlot = 0;
+		exemptCode    = -1;
 
 		// SMART routing only
 		discretionaryAmt = 0;
 		eTradeOnly       = true;
 		firmQuoteOnly    = true;
 		nbboPriceCap     = UNSET_DOUBLE;
+		optOutSmartRouting = false;
 
 		// BOX exchange orders only
 		auctionStrategy = AUCTION_UNSET;
@@ -90,6 +99,14 @@ struct Order
 		volatilityType        = UNSET_INTEGER;     // 1=daily, 2=annual
 		deltaNeutralOrderType = "";
 		deltaNeutralAuxPrice  = UNSET_DOUBLE;
+		deltaNeutralConId     = 0;
+		deltaNeutralSettlingFirm = "";
+		deltaNeutralClearingAccount = "";
+		deltaNeutralClearingIntent = "";
+		deltaNeutralOpenClose = "";
+		deltaNeutralShortSale = false;
+		deltaNeutralShortSaleSlot = 0;
+		deltaNeutralDesignatedLocation = "";
 		continuousUpdate      = false;
 		referencePriceType    = UNSET_INTEGER; // 1=Average, 2 = BidOrAsk
 
@@ -101,12 +118,21 @@ struct Order
 		scaleInitLevelSize  = UNSET_INTEGER;
 		scaleSubsLevelSize  = UNSET_INTEGER;
 		scalePriceIncrement = UNSET_DOUBLE;
+		scalePriceAdjustValue = UNSET_DOUBLE;
+		scalePriceAdjustInterval = UNSET_INTEGER;
+		scaleProfitOffset = UNSET_DOUBLE;
+		scaleAutoReset = false;
+		scaleInitPosition = UNSET_INTEGER;
+		scaleInitFillQty = UNSET_INTEGER;
+		scaleRandomPercent = false;
+		scaleTable = "";
 
 		// What-if
 		whatIf = false;
 
 		// Not Held
 		notHeld = false;
+		orderSolicited = false;
 	}
 
 	// order identifier
@@ -115,17 +141,19 @@ struct Order
 	long     permId;
 
 	// main order fields
-	IBString action;
+	std::string action;
 	long     totalQuantity;
-	IBString orderType;
+	std::string orderType;
 	double   lmtPrice;
 	double   auxPrice;
 
 	// extended order fields
-	IBString tif;           // "Time in Force" - DAY, GTC, etc.
-	IBString ocaGroup;      // one cancels all group name
+	std::string tif;           // "Time in Force" - DAY, GTC, etc.
+	std::string activeStartTime;	// for GTC orders
+	std::string activeStopTime;	// for GTC orders
+	std::string ocaGroup;      // one cancels all group name
 	int      ocaType;       // 1 = CANCEL_WITH_BLOCK, 2 = REDUCE_WITH_BLOCK, 3 = REDUCE_NON_BLOCK
-	IBString orderRef;      // order reference
+	std::string orderRef;      // order reference
 	bool     transmit;      // if false, order will be created but not transmited
 	long     parentId;      // Parent order Id, to associate Auto STP or TRAIL orders with the original order.
 	bool     blockOrder;
@@ -134,32 +162,35 @@ struct Order
 	int      triggerMethod; // 0=Default, 1=Double_Bid_Ask, 2=Last, 3=Double_Last, 4=Bid_Ask, 7=Last_or_Bid_Ask, 8=Mid-point
 	bool     outsideRth;
 	bool     hidden;
-	IBString goodAfterTime;    // Format: 20060505 08:00:00 {time zone}
-	IBString goodTillDate;     // Format: 20060505 08:00:00 {time zone}
-	IBString rule80A; // Individual = 'I', Agency = 'A', AgentOtherMember = 'W', IndividualPTIA = 'J', AgencyPTIA = 'U', AgentOtherMemberPTIA = 'M', IndividualPT = 'K', AgencyPT = 'Y', AgentOtherMemberPT = 'N'
+	std::string goodAfterTime;    // Format: 20060505 08:00:00 {time zone}
+	std::string goodTillDate;     // Format: 20060505 08:00:00 {time zone}
+	std::string rule80A; // Individual = 'I', Agency = 'A', AgentOtherMember = 'W', IndividualPTIA = 'J', AgencyPTIA = 'U', AgentOtherMemberPTIA = 'M', IndividualPT = 'K', AgencyPT = 'Y', AgentOtherMemberPT = 'N'
 	bool     allOrNone;
 	int      minQty;
 	double   percentOffset; // REL orders only
 	bool     overridePercentageConstraints;
 	double   trailStopPrice; // TRAILLIMIT orders only
+	double   trailingPercent;
 
 	// financial advisors only
-	IBString faGroup;
-	IBString faProfile;
-	IBString faMethod;
-	IBString faPercentage;
+	std::string faGroup;
+	std::string faProfile;
+	std::string faMethod;
+	std::string faPercentage;
 
 	// institutional (ie non-cleared) only
-	IBString openClose; // O=Open, C=Close
+	std::string openClose; // O=Open, C=Close
 	Origin   origin;    // 0=Customer, 1=Firm
 	int      shortSaleSlot; // 1 if you hold the shares, 2 if they will be delivered from elsewhere.  Only for Action="SSHORT
-	IBString designatedLocation; // set when slot=2 only.
+	std::string designatedLocation; // set when slot=2 only.
+	int      exemptCode;
 
 	// SMART routing only
 	double   discretionaryAmt;
 	bool     eTradeOnly;
 	bool     firmQuoteOnly;
 	double   nbboPriceCap;
+	bool     optOutSmartRouting;
 
 	// BOX exchange orders only
 	int      auctionStrategy; // AUCTION_MATCH, AUCTION_IMPROVEMENT, AUCTION_TRANSPARENT
@@ -174,8 +205,16 @@ struct Order
 	// VOLATILITY ORDERS ONLY
 	double   volatility;
 	int      volatilityType;     // 1=daily, 2=annual
-	IBString deltaNeutralOrderType;
+	std::string deltaNeutralOrderType;
 	double   deltaNeutralAuxPrice;
+	long     deltaNeutralConId;
+	std::string deltaNeutralSettlingFirm;
+	std::string deltaNeutralClearingAccount;
+	std::string deltaNeutralClearingIntent;
+	std::string deltaNeutralOpenClose;
+	bool     deltaNeutralShortSale;
+	int      deltaNeutralShortSaleSlot;
+	std::string deltaNeutralDesignatedLocation;
 	bool     continuousUpdate;
 	int      referencePriceType; // 1=Average, 2 = BidOrAsk
 
@@ -187,26 +226,71 @@ struct Order
 	int      scaleInitLevelSize;
 	int      scaleSubsLevelSize;
 	double   scalePriceIncrement;
+	double   scalePriceAdjustValue;
+	int      scalePriceAdjustInterval;
+	double   scaleProfitOffset;
+	bool     scaleAutoReset;
+	int      scaleInitPosition;
+	int      scaleInitFillQty;
+	bool     scaleRandomPercent;
+	std::string scaleTable;
+
+	// HEDGE ORDERS
+	std::string hedgeType;  // 'D' - delta, 'B' - beta, 'F' - FX, 'P' - pair
+	std::string hedgeParam; // 'beta=X' value for beta hedge, 'ratio=Y' for pair hedge
 
 	// Clearing info
-	IBString account; // IB account
-	IBString settlingFirm;
-	IBString clearingAccount; // True beneficiary of the order
-	IBString clearingIntent; // "" (Default), "IB", "Away", "PTA" (PostTrade)
+	std::string account; // IB account
+	std::string settlingFirm;
+	std::string clearingAccount; // True beneficiary of the order
+	std::string clearingIntent; // "" (Default), "IB", "Away", "PTA" (PostTrade)
 
 	// ALGO ORDERS ONLY
-	IBString algoStrategy;
-
-	typedef std::vector<TagValueSPtr> TagValueList;
-	typedef shared_ptr<TagValueList> TagValueListSPtr;
+	std::string algoStrategy;
 
 	TagValueListSPtr algoParams;
+	TagValueListSPtr smartComboRoutingParams;
+
+	std::string algoId;
 
 	// What-if
 	bool     whatIf;
 
 	// Not Held
 	bool     notHeld;
+	bool     orderSolicited;
+
+	// order combo legs
+	typedef std::vector<OrderComboLegSPtr> OrderComboLegList;
+	typedef shared_ptr<OrderComboLegList> OrderComboLegListSPtr;
+
+	OrderComboLegListSPtr orderComboLegs;
+
+	TagValueListSPtr orderMiscOptions;
+
+public:
+
+	// Helpers
+	static void CloneOrderComboLegs(OrderComboLegListSPtr& dst, const OrderComboLegListSPtr& src);
 };
+
+inline void
+Order::CloneOrderComboLegs(OrderComboLegListSPtr& dst, const OrderComboLegListSPtr& src)
+{
+	if (!src.get())
+		return;
+
+	dst->reserve(src->size());
+
+	OrderComboLegList::const_iterator iter = src->begin();
+	const OrderComboLegList::const_iterator iterEnd = src->end();
+
+	for (; iter != iterEnd; ++iter) {
+		const OrderComboLeg* leg = iter->get();
+		if (!leg)
+			continue;
+		dst->push_back(OrderComboLegSPtr(new OrderComboLeg(*leg)));
+	}
+}
 
 #endif

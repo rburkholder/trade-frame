@@ -95,6 +95,10 @@ private:
   void HandleIQFeedDisConnected( int );
   void HandleSimulatorDisConnected( int );
 
+  void HandleIBError( size_t );
+  void HandleIQFeedError( size_t );
+  void HandleSimulatorError( size_t );
+
   void HandleOnData1Connected( int );
   void HandleOnData1Disconnected( int );
 
@@ -157,12 +161,15 @@ FrameWork01<CRTP>::FrameWork01( void ) :
 
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisConnected ) );
+  m_iqfeed->OnError.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedError ) );
 
   m_tws->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIBConnected ) );
   m_tws->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIBDisConnected ) );
+  m_tws->OnError.Add( MakeDelegate( this, &FrameWork01::HandleIBError ) );
 
   m_sim->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorDisConnected ) );
+  m_sim->OnError.Add( MakeDelegate( this, &FrameWork01::HandleSimulatorError ) );
 }
 
 template<typename CRTP>
@@ -170,12 +177,15 @@ FrameWork01<CRTP>::~FrameWork01( void ) {
 
   m_iqfeed->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedDisConnected ) );
+  m_iqfeed->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleIQFeedError ) );
 
   m_tws->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleIBConnected ) );
   m_tws->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleIBDisConnected ) );
+  m_tws->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleIBError ) );
 
   m_sim->OnConnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorConnected ) );
   m_sim->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorDisConnected ) );
+  m_sim->OnError.Remove( MakeDelegate( this, &FrameWork01::HandleSimulatorError ) );
 
   ou::tf::ProviderManager::LocalCommonInstance().Release( "iq01" );
   ou::tf::ProviderManager::LocalCommonInstance().Release( "ib01" );
@@ -310,6 +320,23 @@ void FrameWork01<CRTP>::HandleSimulatorDisConnected( int e ) {  // cross thread 
     m_pPanelProviderControl->QueueEvent( new UpdateProviderStatusEvent( EVT_ProviderSimulator, eProviderState_t::ProviderOff ) );
   static_cast<CRTP*>(this)->OnSimulatorDisconnected( e );
 }
+
+template<typename CRTP>
+void FrameWork01<CRTP>::HandleIBError( size_t e ) {
+  std::cout << "HandleIBError: " << e << std::endl;
+}
+
+template<typename CRTP>
+void FrameWork01<CRTP>::HandleIQFeedError( size_t e ) {
+  std::cout << "HandleIQFeedError: " << e << std::endl;
+}
+
+template<typename CRTP>
+void FrameWork01<CRTP>::HandleSimulatorError( size_t e ) {
+  std::cout << "HandleSimulatorError: " << e << std::endl;
+}
+
+
 
 template<typename CRTP>
 void FrameWork01<CRTP>::HandleOnData1Connected(int e) {

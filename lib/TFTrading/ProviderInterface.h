@@ -82,6 +82,8 @@ public:
   ou::Delegate<int> OnDisconnecting;
   ou::Delegate<int> OnDisconnected;  // could be in another thread
 
+  ou::Delegate<size_t> OnError;
+
   bool Connected( void ) const { return m_bConnected; };
 
   bool ProvidesBrokerInterface( void ) const { return m_pProvidesBrokerInterface; };

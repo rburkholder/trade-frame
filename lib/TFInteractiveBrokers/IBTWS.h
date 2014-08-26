@@ -33,6 +33,7 @@ using namespace boost::gregorian;
 
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
+#include <OUCommon/MSWindows.h>
 
 #include <TFTrading/TradingEnumerations.h>
 #include <TFTrading/Instrument.h>
@@ -106,19 +107,19 @@ public:
   void tickOptionComputation( TickerId tickerId, TickType tickType, double impliedVol, double delta,
 	   double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice);
   void tickGeneric(TickerId tickerId, TickType tickType, double value);
-  void tickString(TickerId tickerId, TickType tickType, const IBString& value);
-  void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const IBString& formattedBasisPoints,
-	   double totalDividends, int holdDays, const IBString& futureExpiry, double dividendImpact, double dividendsToExpiry);
-  void orderStatus( OrderId orderId, const IBString &status, int filled,
+  void tickString(TickerId tickerId, TickType tickType, const std::string& value);
+  void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const std::string& formattedBasisPoints,
+	   double totalDividends, int holdDays, const std::string& futureExpiry, double dividendImpact, double dividendsToExpiry);
+  void orderStatus( OrderId orderId, const std::string &status, int filled,
 	   int remaining, double avgFillPrice, int permId, int parentId,
-	   double lastFillPrice, int clientId, const IBString& whyHeld);
+	   double lastFillPrice, int clientId, const std::string& whyHeld);
   void openOrder( OrderId orderId, const Contract&, const ::Order&, const OrderState&);
   void openOrderEnd() {};  // **
   void execDetails( int reqId, const Contract& contract, const ::Execution& execution );
   void execDetailsEnd( int reqId) {};  // **
-  void error(const int id, const int errorCode, const IBString errorString);
-  void winError( const IBString &str, int lastError);
-  void updateNewsBulletin(int msgId, int msgType, const IBString& newsMessage, const IBString& originExch);
+  void error(const int id, const int errorCode, const std::string errorString);
+  void winError( const std::string& str, int lastError);
+  void updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch);
   void currentTime(long time);
   void contractDetails( int reqId, const ContractDetails& contractDetails );
   void contractDetailsEnd( int reqId );
@@ -126,29 +127,40 @@ public:
   void nextValidId( OrderId orderId);
   void updatePortfolio( const Contract& contract, int position,
       double marketPrice, double marketValue, double averageCost,
-      double unrealizedPNL, double realizedPNL, const IBString& accountName);
-  void updateAccountValue(const IBString& key, const IBString& val,
-   const IBString& currency, const IBString& accountName);
-  void updateAccountTime(const IBString& timeStamp);
-  void accountDownloadEnd(const IBString& accountName) {};  // **
+      double unrealizedPNL, double realizedPNL, const std::string& accountName);
+  void updateAccountValue(const std::string& key, const std::string& val,
+   const std::string& currency, const std::string& accountName);
+  void updateAccountTime(const std::string& timeStamp);
+  void accountDownloadEnd(const std::string& accountName) {};  // **
   void updateMktDepth(TickerId id, int position, int operation, int side,
       double price, int size);
-  void updateMktDepthL2(TickerId id, int position, IBString marketMaker, int operation,
+  void updateMktDepthL2(TickerId id, int position, std::string marketMaker, int operation,
       int side, double price, int size);
-  void managedAccounts( const IBString& accountsList);
-     virtual void receiveFA(faDataType pFaDataType, const IBString& cxml);
-  void historicalData(TickerId reqId, const IBString& date, double open, double high, 
+  void managedAccounts( const std::string& accountsList);
+     virtual void receiveFA(faDataType pFaDataType, const std::string& cxml);
+  void historicalData(TickerId reqId, const std::string& date, double open, double high, 
 	   double low, double close, int volume, int barCount, double WAP, int hasGaps);
-  void scannerParameters(const IBString &xml);
+  void scannerParameters(const std::string& xml);
   void scannerData(int reqId, int rank, const ContractDetails &contractDetails,
-	   const IBString &distance, const IBString &benchmark, const IBString &projection,
-	   const IBString &legsStr);
+	   const std::string& distance, const std::string& benchmark, const std::string& projection,
+	   const std::string& legsStr);
   void scannerDataEnd(int reqId);
   void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
 	   long volume, double wap, int count);
-  void fundamentalData(TickerId reqId, const IBString& data) {};  // **
+  void fundamentalData(TickerId reqId, const std::string& data) {};  // **
   void deltaNeutralValidation(int reqId, const UnderComp& underComp) {};  // **
   void tickSnapshotEnd( int reqId) {};  // **
+
+  void marketDataType(TickerId,int);
+  void commissionReport(const CommissionReport &);
+  void position(const std::string &,const Contract &,int,double);
+  void positionEnd(void);
+  void accountSummary(int,const std::string &,const std::string &,const std::string &,const std::string &);
+  void accountSummaryEnd(int);
+  void verifyMessageAPI(const std::string &);
+  void verifyCompleted(bool,const std::string &);
+  void displayGroupList(int,const std::string &) {};
+  void displayGroupUpdated(int,const std::string &) {};
 
 protected:
 

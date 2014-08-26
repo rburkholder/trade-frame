@@ -36,11 +36,26 @@ typedef long far            *LPLONG;
 typedef DWORD near          *PDWORD;
 typedef DWORD far           *LPDWORD;
 typedef void far            *LPVOID;
-typedef CONST void far      *LPCVOID;
+//typedef CONST void far      *LPCVOID;
 
 typedef int                 INT;
 typedef unsigned int        UINT;
 typedef unsigned int        *PUINT;
+
+// c:\Program Files (x86)\Windows Kits\8.0\Include\shared\wtypes.h
+typedef char CHAR;
+typedef const CHAR          *LPCSTR;
+//typedef void*               HWND;
+
+// c:\Program Files (x86)\Windows Kits\8.0\Include\shared\basetsd.h
+typedef __int64 INT_PTR, *PINT_PTR;
+typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
+typedef __int64 LONG_PTR, *PLONG_PTR;
+typedef unsigned __int64 ULONG_PTR, *PULONG_PTR;
+
+// c:\Program Files (x86)\Windows Kits\8.0\Include\shared\minwindef.h
+#define WINAPI      __stdcall
+#define CALLBACK    __stdcall
 
 #ifndef FALSE
 #define FALSE               0

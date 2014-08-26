@@ -1,69 +1,77 @@
+/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+ * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+
 #ifndef ibstring_h__INCLUDED
 #define ibstring_h__INCLUDED
 
-#ifdef IB_USE_STD_STRING
-#include <string>
-typedef std::string IBString;
-#else
-#include <afxstr.h>
-typedef CString IBString;
-#endif
-
 #include <stdlib.h>
 
-inline bool IsEmpty(const IBString& str)
+// added 2014/08/24
+typedef std::string IBString;
+
+inline bool IsEmpty(const std::string& str)
 {
-#ifdef IB_USE_STD_STRING
 	return str.empty();
-#else
-	return str.IsEmpty();
-#endif
 };
 
-inline void Empty(IBString& str)
+inline void Empty(std::string& str)
 {
-#ifdef IB_USE_STD_STRING
 	str.erase();
-#else
-	str.Empty();
-#endif
 };
 
-inline bool Compare(IBString str, const char* strToCompare)
+inline bool Compare(std::string str, const char* strToCompare)
 {
-#ifdef IB_USE_STD_STRING
-	return str.compare(strToCompare);  // *** 2012/04/15 changed
-#else
-	return str.CompareNoCase(strToCompare);
-#endif
+	return str.compare(strToCompare);
 };
 
-inline bool Compare(IBString str, IBString strToCompare)
+inline bool Compare(std::string str, std::string strToCompare)
 {
-#ifdef IB_USE_STD_STRING
-	return str.compare(strToCompare);    // *** 2012/04/15 changed
-#else
-	return str.CompareNoCase(strToCompare);
-#endif
+	return str.compare(strToCompare);
 };
 
-inline double Atof(IBString str)
+inline double Atof(std::string str)
 {
-#ifdef IB_USE_STD_STRING
 	return atof(str.c_str());
-#else
-	return atof(str);
-#endif
 };
 
-inline int Atoi(IBString str)
+inline int Atoi(std::string str)
 {
-#ifdef IB_USE_STD_STRING
 	return atoi(str.c_str());
-#else
-	return atoi(str);
-#endif
 };
+
+#ifdef  __AFXSTR_H__
+
+inline bool IsEmpty(const CString& str)
+{
+	return str.IsEmpty();
+};
+
+inline void Empty(CString& str)
+{
+	str.Empty();
+};
+
+inline bool Compare(CString str, const char* strToCompare)
+{
+	return str.CompareNoCase(strToCompare);
+};
+
+inline bool Compare(CString str, CString strToCompare)
+{
+	return str.CompareNoCase(strToCompare);
+};
+
+inline double Atof(CString str)
+{
+	return atof(str);
+};
+
+inline int Atoi(CString str)
+{
+	return atoi(str);
+};  
+#endif //  __AFXSTR_H__
+
 
 #endif
 

@@ -78,14 +78,10 @@ ReadNaicsToSicCodeList::ReadNaicsToSicCodeList( const std::string& sFileName ) {
         b = Extract( dbl, sheet, ixRow, 2 );
         if ( !b ) throw( ErrLoc2() );
         id = boost::lexical_cast<boost::uint32_t>( dbl );
-        if ( 2311 == id ) {
-          int n = 3;
-        }
         b = Extract( sDesc, sheet, ixRow, 3 );
         if ( !b ) throw( ErrLoc3() );
 
         m_mapSic.insert( pairItem_t( dbl, sDesc ) );
-
 
       }
 
