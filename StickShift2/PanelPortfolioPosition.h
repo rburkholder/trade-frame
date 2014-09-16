@@ -21,7 +21,13 @@
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 
-#define FUSION_MAX_VECTOR_SIZE 12
+// may need to hide this away, there are other panels with other field counts to be loaded
+#ifdef FUSION_MAX_VECTOR_SIZE
+#undef FUSION_MAX_VECTOR_SIZE
+#endif
+
+#define FUSION_MAX_VECTOR_SIZE 15
+
 //#include <boost/fusion/container/vector.hpp>
 //#include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/container/vector/vector20.hpp>
@@ -157,7 +163,7 @@ private:
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_POSITION_ARRAY_PARAM_COUNT 5
-#define GRID_POSITION_ARRAY_COL_COUNT 12
+#define GRID_POSITION_ARRAY_COL_COUNT 15
 #define GRID_POSITION_ARRAY \
   (GRID_POSITION_ARRAY_COL_COUNT,  \
     ( /* Col 0,                       1,            2,         3,      4,             */ \
@@ -173,6 +179,9 @@ private:
       (GRID_POSITION_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (GRID_POSITION_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (GRID_POSITION_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (GRID_POSITION_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/
@@ -278,6 +287,7 @@ private:
       boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
       boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
     }
+
     void HandleOnPositionChanged( const Position& position ) {
       boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
       boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
@@ -285,18 +295,24 @@ private:
       boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
       boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
     }
+
     void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
       boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
     }
+
     void HandleOnCommission( const Position::PositionDelta_delegate_t& tuple ) {
       boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblCommissionPaid );
     }
+
+
     void HandleOnUnRealizedPL( const Position::PositionDelta_delegate_t& tuple ) {
       boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
     }
+
     void HandleOnTrade( const ou::tf::Trade& trade ) {
       boost::fusion::at_c<GRID_POSITION_Last>( m_vModelCells ).SetValue( trade.Price() );
     }
+
     void HandleOnQuote( const ou::tf::Quote& quote ) {
       boost::fusion::at_c<GRID_POSITION_Bid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<GRID_POSITION_Ask>( m_vModelCells ).SetValue( quote.Ask() );

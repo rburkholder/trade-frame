@@ -36,7 +36,7 @@ public:
   typedef std::set<classifier_t> vClassifiers_t;
   typedef ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd_t;
 
-  // used in conjuction with  InMemoryMktSymbolList::SelectSymbolsByExchange
+  // used in conjuction with InMemoryMktSymbolList::SelectSymbolsByExchange
   // should this structure be here or in InMemoryMktSymbolList?
   struct SelectSymbols {
     bool m_bSelectWithOptions;

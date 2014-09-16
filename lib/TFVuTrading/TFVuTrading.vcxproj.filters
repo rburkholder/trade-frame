@@ -108,6 +108,9 @@
     <ClInclude Include="ModelCell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PanelOptionList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -192,6 +195,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ModelCell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelOptionList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

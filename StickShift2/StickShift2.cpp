@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+// 2014/08/26  database opened on data connection, so add field to select database, switch between databases, ....
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
