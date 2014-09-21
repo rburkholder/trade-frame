@@ -36,9 +36,6 @@
     <ClInclude Include="StickShift2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PanelPortfolioPosition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EventIBInstrument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StickShift2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PanelPortfolioPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EventIBInstrument.cpp">

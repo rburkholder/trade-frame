@@ -152,8 +152,11 @@
     <ClInclude Include="PanelFinancialChart.h" />
     <ClInclude Include="PanelLogging.h" />
     <ClInclude Include="PanelManualOrder.h" />
-    <ClInclude Include="PanelOptionList.h" />
+    <ClInclude Include="PanelOptionDetails_impl.h" />
+    <ClInclude Include="PanelOptionDetails.h" />
+    <ClInclude Include="PanelPortfolioPosition.h" />
     <ClInclude Include="PanelPortfolioPositionOrderExecution.h" />
+    <ClInclude Include="PanelPortfolioPosition_impl.h" />
     <ClInclude Include="PanelProviderControl.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -184,8 +187,11 @@
     <ClCompile Include="PanelFinancialChart.cpp" />
     <ClCompile Include="PanelLogging.cpp" />
     <ClCompile Include="PanelManualOrder.cpp" />
-    <ClCompile Include="PanelOptionList.cpp" />
+    <ClCompile Include="PanelOptionDetails_impl.cpp" />
+    <ClCompile Include="PanelOptionDetails.cpp" />
+    <ClCompile Include="PanelPortfolioPosition.cpp" />
     <ClCompile Include="PanelPortfolioPositionOrderExecution.cpp" />
+    <ClCompile Include="PanelPortfolioPosition_impl.cpp" />
     <ClCompile Include="PanelProviderControl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

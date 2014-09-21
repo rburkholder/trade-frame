@@ -108,7 +108,16 @@
     <ClInclude Include="ModelCell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PanelOptionList.h">
+    <ClInclude Include="PanelPortfolioPosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelPortfolioPosition_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelOptionDetails_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelOptionDetails.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -197,7 +206,16 @@
     <ClCompile Include="ModelCell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PanelOptionList.cpp">
+    <ClCompile Include="PanelPortfolioPosition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelPortfolioPosition_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelOptionDetails_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelOptionDetails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

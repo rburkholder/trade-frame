@@ -29,8 +29,8 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/PanelPortfolioPosition.h>
 
-#include "PanelPortfolioPosition.h"
 #include "EventIBInstrument.h"
 
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
