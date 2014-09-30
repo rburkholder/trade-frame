@@ -123,6 +123,7 @@ template<typename Iterator>
 void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
   ++cntLinesTotal;  // number data lines processed
+  Iterator b( begin );  // keep in case of exception
 
   try {
 
@@ -133,6 +134,8 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
       std::cout << "problems parsing" << std::endl;
     }
     else {
+
+      //std::cout << "* " << trd.sSymbol << std::endl;
 
       cntLinesParsed++;
 
@@ -223,7 +226,12 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
     }
   }
   catch (...) {
-//    std::cout << "parserFullLine broken" << std::endl;  // commented out with too much crap from futures parsing
+    //std::cout << "parserFullLine broken" << std::endl;  // commented out with too much crap from futures parsing
+    if ( b == begin ) { // nothing was processed, so skip over crap
+      std::cout << "parserFullLine serious fail" << std::endl;
+      while ( ( end != begin ) && ( '\n' != *begin )  && ( 0 != *begin ) ) ++begin;
+      if ( '\n' == *begin ) ++begin; // one last character which should be the \n
+    }
   }
 
 }

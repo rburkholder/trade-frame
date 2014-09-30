@@ -31,9 +31,15 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+namespace detail {
+  // shared between debug and release
+  const std::string sFileNameMarketSymbolsText( "..\\mktsymbols_v2.txt" );
+  const std::string sFileNameMarketSymbolsBinary( "..\\symbols.ser" );
+}
+
 typedef MarketSymbol::TableRowDef trd_t;
 
-void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk ) {
+void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk, const std::string& sName ) {
   // valid combinations:
   // bDownload            t t f
   // bLoadTextFromDisk    f f t 
@@ -63,9 +69,9 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
 
       if ( bSaveTextToDisk ) {
         std::ofstream file;
-        char* name = "mktsymbols_v2.txt";
+        //char* name = "mktsymbols_v2.txt";
         std::cout << "Writing Symbol File " << std::endl;
-        file.open( name, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
+        file.open( sName.c_str(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
         if ( file.bad() ) {
           throw std::runtime_error( "can't open output file" );
         }
@@ -95,7 +101,7 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
       diskfile_t diskfile;
       diskfile.SetOnProcessLine( MakeDelegate( &validator, &ValidateMktSymbolLine::Parse<diskfile_t::iterator_t> ) );
 
-      diskfile.Run();
+      diskfile.Run( detail::sFileNameMarketSymbolsText );
     }
     catch (...) {
       std::cout << "Some sort of failure on disk read" << std::endl;

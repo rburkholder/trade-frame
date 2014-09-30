@@ -22,11 +22,17 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+namespace detail {
+  // shared between debug and release
+  extern const std::string sFileNameMarketSymbolsText;
+  extern const std::string sFileNameMarketSymbolsBinary;
+}
+
 namespace MktSymbolLoadType {
   enum Enum { Download, LoadTextFromDisk };
 }
 
-void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk );
+void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum, bool bSaveTextToDisk, const std::string& sName = detail::sFileNameMarketSymbolsText );
 
 } // namespace iqfeed
 } // namespace tf

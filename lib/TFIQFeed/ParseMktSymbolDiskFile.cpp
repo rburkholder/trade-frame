@@ -28,14 +28,14 @@ ParseMktSymbolDiskFile::ParseMktSymbolDiskFile( void ) {
 
 // try http://stackoverflow.com/questions/2291802/is-there-a-c-iterator-that-can-iterate-over-a-file-line-by-line
 
-void ParseMktSymbolDiskFile::Run( void ) {
+void ParseMktSymbolDiskFile::Run( const std::string& sName ) {
 
   std::ifstream file;
-  char* name = "mktsymbols_v2.txt";
+  //char* name = "mktsymbols_v2.txt";
   std::cout << "Opening Input Symbol File ";
-  std::cout << name;
+  std::cout << sName;
   std::cout << " ... ";
-  file.open( name );
+  file.open( sName.c_str() );
   if ( file.bad() ) {
     throw  std::runtime_error( "Can't open input file" );
   }
@@ -62,6 +62,8 @@ void ParseMktSymbolDiskFile::Run( void ) {
 //    if ( 1000 < cntLines ) break;
 
   }
+
+  std::cout << cntLines << " lines written" << std::endl;
 
   file.close();
 

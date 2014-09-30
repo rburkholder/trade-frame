@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -34,7 +36,7 @@ public:
   ParseMktSymbolDiskFile( void );
   ~ParseMktSymbolDiskFile( void ) {};
 
-  void Run( void );
+  void Run( const std::string& );  // "mktsymbols_v2.txt"
 
 protected:
 private:

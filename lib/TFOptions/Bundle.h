@@ -37,9 +37,8 @@ namespace tf { // TradeFrame
 namespace option { // options
 
 class ExpiryBundle {
-public:
-
   friend std::ostream& operator<<( std::ostream& os, const ExpiryBundle& );
+public:
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;

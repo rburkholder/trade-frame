@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2013, One Unified. All rights reserved.                 *
+ * Copyright(c) 2014, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -19,8 +19,6 @@
 
 #define FUSION_MAX_VECTOR_SIZE 15
 
-//#include <boost/fusion/container/vector.hpp>
-//#include <boost/fusion/include/vector.hpp>
 #include <boost/fusion/container/vector/vector20.hpp>
 #include <boost/fusion/include/vector20.hpp>
 
@@ -33,60 +31,21 @@
 #include <boost/fusion/algorithm/transformation/filter.hpp>
 #include <boost/fusion/include/filter.hpp>
 
-#include <boost/preprocessor/tuple/elem.hpp>
-#include <boost/preprocessor/array/elem.hpp>
-#include <boost/preprocessor/array/size.hpp>
-#include <boost/preprocessor/punctuation/comma_if.hpp>
-#include <boost/preprocessor/repetition/repeat.hpp>
-#include <boost/preprocessor/cat.hpp>
-
-#include <wx/grid.h>
 #include <wx/stattext.h>
 #include <wx/sizer.h>
+#include <wx/grid.h>
 
 #include <TFVuTrading/DialogSimpleOneLineOrder.h>
 #include <TFVuTrading/DialogNewPortfolio.h>
+
 #include <TFVuTrading/ModelCell.h>
+#include <TFVuTrading/ModelCell_ops.h>
+#include <TFVuTrading/ModelCell_macros.h>
 
 #include "PanelPortfolioPosition.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
-namespace PanelPortfolioPosition_detail {
-
-  struct UpdateGui {
-    wxGrid* m_pGrid;
-    int m_row;
-    UpdateGui( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) {};
-    template<typename T>
-    void operator()( T& t ) const {
-      // todo:  deal with flicker by double-buffering?
-      if ( t.Changed() ) {
-        m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
-      }
-    }
-  };
-
-  struct SetCol {
-    typedef int result_type;
-    SetCol( void ) {};
-    template<typename F, typename T>
-    int operator()( F& f, T& t ) const {
-      return 1 + t.SetCol( f );
-    }
-  };
-
-  struct SetPrecision {
-    unsigned int m_nPrecision;
-    SetPrecision( unsigned int val ): m_nPrecision( val ) {};
-    template<typename T>
-    void operator()( T& t ) const {
-      t.SetPrecision( m_val );
-    }
-  };
-
-}
 
 struct PanelPortfolioPosition_impl {
 //public:
@@ -104,72 +63,36 @@ struct PanelPortfolioPosition_impl {
   void AddPosition( pPosition_t pPosition );
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
-#define GRID_POSITION_ARRAY_PARAM_COUNT 5
-#define GRID_POSITION_ARRAY_COL_COUNT 15
-#define GRID_POSITION_ARRAY \
-  (GRID_POSITION_ARRAY_COL_COUNT,  \
-    ( /* Col 0,                       1,            2,         3,      4,             */ \
-      (GRID_POSITION_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (GRID_POSITION_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (GRID_POSITION_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (GRID_POSITION_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
-      (GRID_POSITION_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
-      (GRID_POSITION_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (GRID_POSITION_URPL     , "UnRealPL",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (GRID_POSITION_RPL      , "RealPL",     wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (GRID_POSITION_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (GRID_POSITION_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
+#define GRID_ARRAY_PARAM_COUNT 5
+#define GRID_ARRAY_COL_COUNT 15
+#define GRID_ARRAY \
+  (GRID_ARRAY_COL_COUNT,  \
+    ( /* Col 0,            1,            2,         3,      4,             */ \
+      (COL_Pos      , "Position",   wxALIGN_LEFT,  100, ModelCellString ), \
+      (COL_QuanPend , "#Pend",      wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (COL_SidePend , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (COL_QuanActv , "#Active",    wxALIGN_RIGHT,  50, ModelCellInt ), \
+      (COL_SideActv , "Side",       wxALIGN_LEFT,   50, ModelCellString ), \
+      (COL_ConsVlu  , "ConsValue",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_URPL     , "UnRealPL",   wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_RPL      , "RealPL",     wxALIGN_RIGHT,  60, ModelCellDouble ), \
+      (COL_Comm     , "Comm",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Bid      , "Bid",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Last     , "Last",       wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Ask      , "Ask",        wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_ImpVol   , "ImpVol",     wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Delta    , "Delta",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_Gamma    , "Gamma",      wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/
 
-#define GRID_POSITION_EXTRACT_COL_DETAILS(z, row, col) \
-  BOOST_PP_TUPLE_ELEM( \
-    GRID_POSITION_ARRAY_PARAM_COUNT, col, \
-      BOOST_PP_ARRAY_ELEM( row, GRID_POSITION_ARRAY ) \
-    )
-
-// if n is 0, then no comma, ie, prepends comma except on first element, col is column number to extract
-#define GRID_POSITION_EXTRACT_ENUM_LIST(z, n, col) \
-  BOOST_PP_COMMA_IF(n) \
-  GRID_POSITION_EXTRACT_COL_DETAILS( z, n, col )
-
-#define GRID_POSITION_EMIT_SetColSettings( z, n, VAR ) \
-  m_gridPositions->SetColLabelValue( VAR, _T(GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_gridPositions->SetColSize( VAR++, GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 3) );
-
-#define GRID_POSITION_CELL_ALIGNMENT( z, n, VAR ) \
-  m_pGrid->SetCellAlignment( VAR, GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 0), GRID_POSITION_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
-
   enum {
-    BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_EXTRACT_ENUM_LIST,0)
+    BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,0)
   };
-
-  template<typename ModelCell>
-  class CellInfo_t: public ModelCell {
-  public:
-    CellInfo_t( void ): m_col( 0 ) {};
-    CellInfo_t( int col ): m_col( col ) {};
-    virtual ~CellInfo_t( void ) {  }
-    int SetCol( int col ) { m_col = col; return m_col; }
-    int GetCol( void ) const { return m_col; }
-  private:
-    int m_col;
-  };
-
-#define COMPOSE_MODEL_CELL(z,n,col)\
-  BOOST_PP_COMMA_IF(n)\
-  CellInfo_t<GRID_POSITION_EXTRACT_COL_DETAILS(z,n,col)>
-
-#define VECTOR_DEF BOOST_PP_CAT( vector, GRID_POSITION_ARRAY_COL_COUNT )
 
   typedef boost::fusion::VECTOR_DEF<
-    BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
+    BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
 
   class structPosition {
@@ -193,13 +116,13 @@ struct PanelPortfolioPosition_impl {
     void UpdateGui( void ) {
       //m_pGrid->BeginBatch();
       //m_pGrid->Freeze();
-      boost::fusion::for_each( m_vModelCells, PanelPortfolioPosition_detail::UpdateGui( m_pGrid, m_row ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_row ) );
       //m_pGrid->Thaw();
       //m_pGrid->EndBatch();
     }
     pPosition_t GetPosition( void ) { return m_pPosition; }
     void SetPrecision( double dbl ) {
-      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), PanelPortfolioPosition_detail::SetPrecision( 2 ) );
+      boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
       
     }
   private:
@@ -208,56 +131,56 @@ struct PanelPortfolioPosition_impl {
     pPosition_t m_pPosition;
     vModelCells_t m_vModelCells;
     void Init( void ) {
-      boost::fusion::fold( m_vModelCells, 0, PanelPortfolioPosition_detail::SetCol() );
-      boost::fusion::at_c<GRID_POSITION_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
+      boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
+      boost::fusion::at_c<COL_Pos>( m_vModelCells ).SetValue( m_pPosition->GetRow().sName );
       m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
       m_pPosition->OnExecutionRaw.Add( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
       m_pPosition->OnCommission.Add( MakeDelegate( this, &structPosition::HandleOnCommission ) );
       m_pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &structPosition::HandleOnUnRealizedPL ) );
       m_pPosition->OnQuote.Add( MakeDelegate( this, & structPosition::HandleOnQuote ) );
       m_pPosition->OnTrade.Add( MakeDelegate( this, &structPosition::HandleOnTrade ) );
-      BOOST_PP_REPEAT(GRID_POSITION_ARRAY_COL_COUNT,GRID_POSITION_CELL_ALIGNMENT,m_row)
+      BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
 
       // initialize row of values.
       const Position::TableRowDef& row( m_pPosition->GetRow() );
-      boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
-      boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
-      boost::fusion::at_c<GRID_POSITION_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
-      boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
-      boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( row.dblConstructedValue );
-      boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
-      boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
-      boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
+      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( row.nPositionPending );
+      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSidePending ] );
+      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( row.nPositionActive );
+      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ row.eOrderSideActive ] );
+      boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( row.dblConstructedValue );
+      boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
+      boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
+      boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
     }
 
     void HandleOnPositionChanged( const Position& position ) {
-      boost::fusion::at_c<GRID_POSITION_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
-      boost::fusion::at_c<GRID_POSITION_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
-      boost::fusion::at_c<GRID_POSITION_QuanActv>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionActive );
-      boost::fusion::at_c<GRID_POSITION_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
-      boost::fusion::at_c<GRID_POSITION_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
+      boost::fusion::at_c<COL_QuanPend>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionPending );
+      boost::fusion::at_c<COL_SidePend>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSidePending ] );
+      boost::fusion::at_c<COL_QuanActv>( m_vModelCells ).SetValue( m_pPosition->GetRow().nPositionActive );
+      boost::fusion::at_c<COL_SideActv>( m_vModelCells ).SetValue( OrderSide::Name[ m_pPosition->GetRow().eOrderSideActive ] );
+      boost::fusion::at_c<COL_ConsVlu>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblConstructedValue );
     }
 
     void HandleOnExecutionRaw( const Position::execution_pair_t& pair ) {
-      boost::fusion::at_c<GRID_POSITION_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
+      boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblRealizedPL );
     }
 
     void HandleOnCommission( const Position::PositionDelta_delegate_t& tuple ) {
-      boost::fusion::at_c<GRID_POSITION_Comm>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblCommissionPaid );
+      boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( m_pPosition->GetRow().dblCommissionPaid );
     }
 
 
     void HandleOnUnRealizedPL( const Position::PositionDelta_delegate_t& tuple ) {
-      boost::fusion::at_c<GRID_POSITION_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
+      boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( boost::tuples::get<2>( tuple ) );
     }
 
     void HandleOnTrade( const ou::tf::Trade& trade ) {
-      boost::fusion::at_c<GRID_POSITION_Last>( m_vModelCells ).SetValue( trade.Price() );
+      boost::fusion::at_c<COL_Last>( m_vModelCells ).SetValue( trade.Price() );
     }
 
     void HandleOnQuote( const ou::tf::Quote& quote ) {
-      boost::fusion::at_c<GRID_POSITION_Bid>( m_vModelCells ).SetValue( quote.Bid() );
-      boost::fusion::at_c<GRID_POSITION_Ask>( m_vModelCells ).SetValue( quote.Ask() );
+      boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
+      boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
     }
   };
 

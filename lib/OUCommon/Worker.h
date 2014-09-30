@@ -16,7 +16,7 @@
 
 // Started 2013/07/12
 // Thread encapsulation, generates event upon completion
-// Uses code from BaskeTrading class
+// Uses code from BasketTrading class
 
 #include <boost/thread/thread.hpp>
 #include <boost/function.hpp>

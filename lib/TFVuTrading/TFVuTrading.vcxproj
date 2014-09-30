@@ -142,6 +142,8 @@
     <ClInclude Include="FrameMain.h" />
     <ClInclude Include="ModelBase.h" />
     <ClInclude Include="ModelCell.h" />
+    <ClInclude Include="ModelCell_macros.h" />
+    <ClInclude Include="ModelCell_ops.h" />
     <ClInclude Include="ModelChartHdf5.h" />
     <ClInclude Include="ModelExecution.h" />
     <ClInclude Include="ModelOrder.h" />

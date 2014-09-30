@@ -49,9 +49,9 @@ void IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote( void ) {
 
 void IQFeedSymbolListOps::WorkerObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
-  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
+  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true, iqfeed::detail::sFileNameMarketSymbolsText ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
@@ -68,9 +68,9 @@ void IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal( void ) {
 
 void IQFeedSymbolListOps::WorkerObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << "Loading From Text File ... " << std::endl;
-  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
+  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false, iqfeed::detail::sFileNameMarketSymbolsText ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }
@@ -87,7 +87,7 @@ void IQFeedSymbolListOps::LoadIQFeedSymbolList( void ) {
 
 void IQFeedSymbolListOps::WorkerLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( "symbols.ser" );
+  m_listIQFeedSymbols.LoadFromFile( iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
   m_fenceWorker.fetch_sub( 1, boost::memory_order_release );
 }

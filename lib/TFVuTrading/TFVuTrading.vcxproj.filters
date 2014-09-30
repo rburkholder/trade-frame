@@ -120,6 +120,12 @@
     <ClInclude Include="PanelOptionDetails.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ModelCell_ops.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelCell_macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

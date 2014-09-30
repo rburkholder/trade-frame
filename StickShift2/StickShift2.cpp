@@ -31,6 +31,8 @@ using namespace boost::gregorian;
 
 IMPLEMENT_APP(AppStickShift)
 
+const std::string sFileNameMarketSymbolSubset( "..\\stickshift.ser" );
+
 bool AppStickShift::OnInit() {
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Manual Trading" );
@@ -166,35 +168,40 @@ void AppStickShift::HandleMenuActionSaveSymbolSubset( void ) {
   m_vExchanges.clear();
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );
-  //m_vExchanges.push_back( "NYSE,ARCA" );
-  m_vExchanges.insert( "NGSM" );
+  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
+  m_vExchanges.insert( "NASDAQ,NGSM" );
+  m_vExchanges.insert( "NASDAQ,NGM" );
+  m_vExchanges.insert( "OPRA" );
+  m_vExchanges.insert( "TSE" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );
   //m_vExchanges.push_back( "NASDAQ,OTC" );
   //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
 
+  m_vClassifiers.clear();
   m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
 
   std::cout << "Subsetting symbols ... " << std::endl;
   ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
   m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), ou::tf::IQFeedSymbolListOps::SelectSymbols( m_vClassifiers, listIQFeedSymbols ) );
   std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
 
-  std::string sFileName( "stickshift.ser" );
-  std::cout << "Saving subset to " << sFileName << " ..." << std::endl;
+  //std::string sFileName( sFileNameMarketSymbolSubset );
+  std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
 //  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
 //  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
-  listIQFeedSymbols.SaveToFile( sFileName );  // __.ser
+  listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
   std::cout << " ... done." << std::endl;
 
   // next step will be to add in the options for the underlyings selected.
 }
 
 void AppStickShift::HandleMenuActionLoadSymbolSubset( void ) {
-  std::string sFileName( "stickshift.ser" );
-  std::cout << "Loading From " << sFileName << " ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( sFileName );  // __.ser
+  //std::string sFileName( sFileNameMarketSymbolSubset );
+  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+  m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
   std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
 }
 
@@ -253,10 +260,13 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   ou::tf::Instrument::pInstrument_t pInstrument;
 
-  if ( im.Exists( sName, pInstrument ) ) {
+  // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
+  if ( im.Exists( sName, pInstrument ) ) {  
     ConstructEquityPosition1( pInstrument );
   }
   else {
+    // this is going to have to be changed to reflect various symbols types recovered from the IQF Market Symbols file
+    // which might be simplified if IB already has the code for interpreting a pInstrument_t
     std::cout << "Requesting IB " << sName << std::endl;
     ou::tf::IBTWS::Contract contract;
     contract.currency = "USD";
@@ -265,6 +275,7 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
     contract.symbol = sName;
     m_tws->RequestContractDetails( 
       contract, 
+      // HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
       MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
   }
 }
@@ -381,6 +392,7 @@ void AppStickShift::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t
 }
 
 void AppStickShift::HandlePanelSymbolText( const std::string& sName ) {
+  // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
   ou::tf::IBTWS::Contract contract;
   contract.currency = "USD";
   contract.exchange = "SMART";
