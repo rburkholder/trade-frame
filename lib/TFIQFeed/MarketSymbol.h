@@ -48,6 +48,7 @@ public:
     std::string sExchange;
     std::string sListedMarket;
     enumSymbolClassifier sc;
+    boost::uint16_t nMultiplier;
     boost::uint32_t nSIC;
     boost::uint32_t nNAICS;
     std::string sUnderlying;
@@ -66,6 +67,7 @@ public:
       ou::db::Field( a, "exchange", sExchange );
       ou::db::Field( a, "market", sListedMarket );
       ou::db::Field( a, "symbolclass", sc );
+      ou::db::Field( a, "multiplier", nMultiplier );  // 2014/10/11 new field, parsers need to be changed to update this field
       ou::db::Field( a, "sic", nSIC );
       ou::db::Field( a, "naics", nNAICS );
       ou::db::Field( a, "underlying", sUnderlying );
@@ -79,7 +81,7 @@ public:
     }
 
     TableRowDef(void): dblStrike( 0 ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), 
-      sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ),
+      sc( Unknown ), bFrontMonth( false ), bHasOptions( false ), nSIC( 0 ), nNAICS( 0 ), nMultiplier( 1 ),
       eOptionSide( ou::tf::OptionSide::Unknown ) {};
 
   private:

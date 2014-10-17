@@ -393,6 +393,7 @@ void AppStickShift::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t
 
 void AppStickShift::HandlePanelSymbolText( const std::string& sName ) {
   // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
+  // 2014/09/30 maybe need to disable this panel, as the order doesn't land in an appropriate portfolio or position.
   ou::tf::IBTWS::Contract contract;
   contract.currency = "USD";
   contract.exchange = "SMART";

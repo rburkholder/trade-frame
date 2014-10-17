@@ -240,7 +240,7 @@ public:
   boost::gregorian::date GetCommonCalcExpiry( void ) const { return m_dateCommonCalc; };
   std::string GetCommonCalcExpiryAsIsoString( void ) const { return boost::gregorian::to_iso_string( m_dateCommonCalc ); };
 
-  void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };
+  void SetContract( boost::int32_t id ) { m_row.nIBContract = id; };  // for Interactive Brokers contract identification
   boost::int32_t GetContract( void ) const { return m_row.nIBContract; };
 
   void SetMultiplier( boost::uint32_t nMultiplier ) { m_row.nMultiplier = nMultiplier; };

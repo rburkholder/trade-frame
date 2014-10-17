@@ -136,6 +136,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BuildInstrument.cpp" />
     <ClCompile Include="CurlGetMktSymbols.cpp" />
     <ClCompile Include="InMemoryMktSymbolList.cpp" />
     <ClCompile Include="IQFeedInstrumentFile.cpp">
@@ -178,13 +179,16 @@
     <ClCompile Include="ValidateMktSymbolLine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BuildInstrument.h" />
     <ClInclude Include="CurlGetMktSymbols.h" />
     <ClInclude Include="InMemoryMktSymbolList.h" />
     <ClInclude Include="IQFeedHistoryCollector.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="IQFeedInstrumentFile.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="IQFeed.h" />
     <ClInclude Include="IQFeedHistoryBulkQuery.h" />
@@ -207,11 +211,13 @@
     <CustomBuildStep Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedOptions.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="IQFeedProvider.h" />
     <ClInclude Include="IQFeedSymbol.h" />
     <ClInclude Include="IQFeedSymbolFile.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="LoadMktSymbols.h" />
     <ClInclude Include="Option.h" />

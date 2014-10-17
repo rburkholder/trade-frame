@@ -58,6 +58,7 @@
     <ClCompile Include="Option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BuildInstrument.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IQFeed.h">
@@ -150,6 +151,7 @@
     <ClInclude Include="ParseFOptionDescription.h">
       <Filter>Header Files\MarketSymbols</Filter>
     </ClInclude>
+    <ClInclude Include="BuildInstrument.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

@@ -189,6 +189,7 @@ void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMess
   SystemDone( pBuffer, pMsg );
 }
 
+// 2014/09/30: some similar code in IQFeed/Option.cpp
 //http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
 void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   // need to check if it already set or not

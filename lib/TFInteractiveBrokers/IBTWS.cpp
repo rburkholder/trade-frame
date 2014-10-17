@@ -155,37 +155,14 @@ void IBTWS::ProcessMessages( void ) {
   // maybe a state machine would keep track
 }
 
-void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
-  // requires secType in addition to symbol name
-  // needs to be thread protected:
-  // results supplied at contractDetails()
-  boost::mutex::scoped_lock lock(m_mutexContractRequest);
-  structRequest_t* pRequest;
-  pRequest = 0;
-  if ( 0 == m_vInActiveRequestId.size() ) {
-    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone );
-  }
-  else {
-    pRequest = m_vInActiveRequestId.back();
-    m_vInActiveRequestId.pop_back();
-    pRequest->id = m_nxtReqId++;
-    pRequest->fProcess = fProcess;
-    pRequest->fDone = fDone;
-  }
-  m_mapActiveRequestId[ pRequest->id ] = pRequest;
-  pTWS->reqContractDetails( pRequest->id, contract );
-}
-
 void IBTWS::RequestContractDetails( 
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
-
-  // requires secType in addition to symbol name
-  // needs to be thread protected:
   // results supplied at contractDetails()
-  boost::mutex::scoped_lock lock(m_mutexContractRequest);
   structRequest_t* pRequest;
   pRequest = 0;
+  // needs to be thread protected:
+  boost::mutex::scoped_lock lock(m_mutexContractRequest);
   if ( 0 == m_vInActiveRequestId.size() ) {
     pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone, pInstrument );
   }
@@ -200,6 +177,48 @@ void IBTWS::RequestContractDetails(
   m_mapActiveRequestId[ pRequest->id ] = pRequest;
   pTWS->reqContractDetails( pRequest->id, contract );
 }
+
+void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // results supplied at contractDetails()
+  pInstrument_t pInstrument;  // just allocate, and pass as empty
+  RequestContractDetails( contract, fProcess, fDone, pInstrument );
+}
+
+// ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
+
+void IBTWS::RequestContractDetails( 
+  pInstrument_t pInstrument, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over
+  // requires secType in addition to symbol name
+  Contract contract;
+  contract.currency = pInstrument->GetCurrencyName(); // check if these match
+  contract.exchange = "SMART";
+  contract.symbol = pInstrument->GetInstrumentName();
+  contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
+  switch ( pInstrument->GetInstrumentType() ) {
+  case InstrumentType::Option:
+    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
+    contract.strike = pInstrument->GetStrike();
+    contract.symbol = pInstrument->GetUnderlyingName();
+    contract.right = pInstrument->GetOptionSide();
+    contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );
+    break;
+  case InstrumentType::Future:
+    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth() );
+    //contract.exchange = "NYMEX";
+    contract.exchange = pInstrument->GetExchangeName();
+    contract.symbol = pInstrument->GetUnderlyingName();
+    break;
+  case InstrumentType::FuturesOption:
+    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth() );
+    contract.exchange = pInstrument->GetExchangeName();
+    contract.symbol = pInstrument->GetUnderlyingName();
+    contract.right = pInstrument->GetOptionSide();
+    break;
+  }
+  RequestContractDetails( contract, fProcess, fDone, pInstrument );
+}
+
 
 //IBSymbol *IBTWS::NewCSymbol( const std::string &sSymbolName ) {
 IBTWS::pSymbol_t IBTWS::NewCSymbol( IBSymbol::pInstrument_t pInstrument ) {
@@ -279,9 +298,11 @@ void IBTWS::StopDepthWatch( pSymbol_t pIBSymbol) {  // overridden from base clas
 }
 
 // indexed with InstrumentType::enumInstrumentTypes
-const char *IBTWS::szSecurityType[] = { "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
-const char *IBTWS::szOrderType[] = { "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
-                   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
+const char *IBTWS::szSecurityType[] = { 
+  "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::enumInstrumentType
+const char *IBTWS::szOrderType[] = { 
+  "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
+  "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void IBTWS::PlaceOrder( pOrder_t pOrder ) {
 
@@ -772,7 +793,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
     mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
     if ( m_mapActiveRequestId.end() == iterRequest ) {
-      throw std::runtime_error( "contractDetails out of sync" );
+      throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
     }
     handler = iterRequest->second->fProcess;
   }
@@ -848,9 +869,9 @@ IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contrac
     }
   }
   catch ( std::exception e ) {
-      m_ss.str("");
-      m_ss << "contract expiry is funny: " << e.what() << std::endl;
-//      OutputDebugString( m_ss.str().c_str() );
+    //m_ss.str("");
+    std::cout << "IB contract expiry is funny: " << e.what() << std::endl;
+    //OutputDebugString( m_ss.str().c_str() );
   }
 
   InstrumentType::enumInstrumentTypes it;

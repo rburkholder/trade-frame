@@ -39,6 +39,7 @@ void ComposeOptionName(
   sPut  = sUnderlying + sYear.substr( 2, 2 ) + sDay + rchPutMonth[  dtExpiry.date().month() - 1 ] + sStrike;
 }
 
+// 2014/09/30 some similar code in IQFeed/IQFeedProvider.cpp
 void SetAlternateName( const pInstrument_t& pInstrument ) {
   assert( ou::tf::InstrumentType::Option == pInstrument->GetInstrumentType() );
   boost::gregorian::date dateExpiry = pInstrument->GetExpiry();

@@ -20,6 +20,9 @@
 
 #include <OUCommon/SpinLock.h>
 
+// 2014/09/30 something to verify with existing code
+// http://preshing.com/20140709/the-purpose-of-memory_order_consume-in-cpp11/
+
 #include "FastDelegate.h"
 // http://www.codeproject.com/cpp/FastDelegate.asp
 using namespace fastdelegate;

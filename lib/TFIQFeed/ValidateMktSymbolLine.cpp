@@ -144,6 +144,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
   ou::tf::iqfeed::structParsedOptionDescription structOption( trd.sUnderlying, trd.nMonth, trd.nYear, trd.eOptionSide, trd.dblStrike );  // pass in references to final variables
   std::string::const_iterator sb( trd.sDescription.begin() );
   std::string::const_iterator se( trd.sDescription.end() );
+  trd.nMultiplier = 100;  // default for options
   bool b = parse( sb, se, parserOptionDescription, structOption );
   if ( b && ( sb == se ) ) {
     if ( 0 == trd.sUnderlying.length() ) {
@@ -177,11 +178,13 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
           //pos1.sDigits = pos1.sDigits.substr( pos1.sDigits.length() - 4 );
           // spyj could be jumbo options: 1000 vs 100 multiplier
           switch ( ch ) {
+          case '7':  // mini option, 10x multiplier rather than normal 100x
+            trd.nMultiplier = 10;
+            // fall through next stuff
           case '1':  // adjusted option (usually due to a split/merger of the company)
           case '2':  // numbers themselves are irrelevant 
           case '3':  // option is adjusted "in some way"
           case '4':  // 2013/09/03 dtniq forum response
-          case '7':  // mini option, 10x multiplier rather than normal 100x
             pos1.sText += ch;
             mapUnderlying[ trd.sSymbol ] = trd.sUnderlying = pos1.sText;
             // do further massage on 7 later so can be tradeable

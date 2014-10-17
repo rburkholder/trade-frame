@@ -92,6 +92,7 @@ public:
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
+  void RequestContractDetails( pInstrument_t, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
 
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
@@ -231,8 +232,8 @@ private:
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
     OnContractDetailsHandler_t fProcess;
     OnContractDetailsDoneHandler_t fDone;
-    structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
-      : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
+    //structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_ ) 
+    //  : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ) {};
     structRequest_t( reqId_t id_, OnContractDetailsHandler_t fProcess_, OnContractDetailsDoneHandler_t fDone_, pInstrument_t pInstrument_ ) 
       : id( id_ ), fProcess( fProcess_ ), fDone( fDone_ ), pInstrument( pInstrument_ ) {};
   };
