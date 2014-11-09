@@ -749,10 +749,22 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   assert( 0 < contractDetails.summary.conId );
 
-  pInstrument_t pInstrument;  // needs to be redone to handle existing instrument from structure
+  OnContractDetailsHandler_t handler = 0;
+  mapActiveRequestId_t::iterator iterRequest;
+  {
+    boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
+    iterRequest = m_mapActiveRequestId.find( reqId );  // entry removed with contractDetailsEnd
+    if ( m_mapActiveRequestId.end() == iterRequest ) {
+      throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
+    }
+  }
+
+  handler = iterRequest->second->fProcess;
+  pInstrument_t pInstrument = iterRequest->second->pInstrument;  // might be null
+
   mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
   if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
-    pInstrument = BuildInstrumentFromContract( contractDetails.summary );
+    BuildInstrumentFromContract( contractDetails.summary, pInstrument );  // 
     pInstrument->SetMinTick( contractDetails.minTick );
 
     ptime dtOpen;
@@ -788,15 +800,6 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     pInstrument = iter->second->GetInstrument();
   }
 
-  OnContractDetailsHandler_t handler = 0;
-  {
-    boost::mutex::scoped_lock lock(m_mutexContractRequest);  // locks map updates
-    mapActiveRequestId_t::iterator iterRequest = m_mapActiveRequestId.find( reqId );
-    if ( m_mapActiveRequestId.end() == iterRequest ) {
-      throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
-    }
-    handler = iterRequest->second->fProcess;
-  }
   if ( 0 != handler ) 
     handler( contractDetails, pInstrument );
 
@@ -844,9 +847,7 @@ void IBTWS::nextValidId( OrderId orderId) {
 //  OutputDebugString( m_ss.str().c_str() );
 }
 
-IBTWS::pInstrument_t IBTWS::BuildInstrumentFromContract( const Contract& contract ) {
-
-  pInstrument_t pInstrument;
+void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t pInstrument ) {
 
   std::string sUnderlying( contract.symbol );
   std::string sLocalSymbol( contract.localSymbol );

@@ -97,7 +97,8 @@ public:
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 
-  pInstrument_t BuildInstrumentFromContract( const Contract& contract );
+  void BuildInstrumentFromContract( const Contract& contract, pInstrument_t pInstrument );
+  //pInstrument_t BuildInstrumentFromContract( const Contract& contract );
   //pInstrument_t BuildInstrumentFromContract( pInstrument_t pInstrument, const Contract& contract ); // unregistered pre-existing instrument
 
   // TWS Specific events
