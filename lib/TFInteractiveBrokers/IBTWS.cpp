@@ -158,6 +158,7 @@ void IBTWS::ProcessMessages( void ) {
 void IBTWS::RequestContractDetails( 
   const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
   // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
+  // pInstrument can be empty, or can have an instrument
   // results supplied at contractDetails()
   structRequest_t* pRequest;
   pRequest = 0;
@@ -189,11 +190,11 @@ void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsH
 void IBTWS::RequestContractDetails( 
   pInstrument_t pInstrument, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
   // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over
-  // requires secType in addition to symbol name
+  assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
   contract.exchange = "SMART";
-  contract.symbol = pInstrument->GetInstrumentName();
+  contract.symbol = pInstrument->GetInstrumentName();  // for options, this needs to be underlying, which is adjusted below
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
   case InstrumentType::Option:
@@ -201,7 +202,7 @@ void IBTWS::RequestContractDetails(
     contract.strike = pInstrument->GetStrike();
     contract.symbol = pInstrument->GetUnderlyingName();
     contract.right = pInstrument->GetOptionSide();
-    contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );
+    contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );  // needed for small options
     break;
   case InstrumentType::Future:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth() );
@@ -732,7 +733,9 @@ void IBTWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtCl
 }
 
 void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
+
   // instrument is constructed, but is not registered with InstrumentManager
+#if DEBUG
   m_ss.str("");
   m_ss << "contract Details "
     << contractDetails.marketName << ", "
@@ -746,6 +749,7 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
     << contractDetails.summary.expiry 
     << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
+#endif
 
   assert( 0 < contractDetails.summary.conId );
 
@@ -760,11 +764,30 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   }
 
   handler = iterRequest->second->fProcess;
-  pInstrument_t pInstrument = iterRequest->second->pInstrument;  // might be null
+  pInstrument_t pInstrument = iterRequest->second->pInstrument;  // might be empty
+
+  // need some logic here:
+  // * if instrument is supplied, only supplement some existing information
+  // * if instrument not supplied, then go through whole building instrument exercise, or will BuildInstrument supply additional information
+  // * also, need to logic to determine if we have the symbol, or not
+  // * build instrument doesn't build the symbol, is performed later in the logic here, so can skip the assignment.
+  // * need a truth table for what to do with instrument (present or not), and symbol(present or not)
+
+  //  instrument *  symbol => illegal operation, would yield non unique instrument and symbol
+  // !instrument *  symbol => assign from existing contract
+  //  instrument * !symbol => build
+  // !instrument * !symbol => build
+
+  // what happens if instrument/contract already built, then in another incarnation of application, what happens?  should be ok, as contract id is in instrument.
 
   mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
+
+  assert( !( (0 != pInstrument.get()) && (m_mapContractToSymbol.end() != iter) ) );  // illegal call:  instrument and contract already exist, and should have been mated
+
   if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
+
     BuildInstrumentFromContract( contractDetails.summary, pInstrument );  // 
+
     pInstrument->SetMinTick( contractDetails.minTick );
 
     ptime dtOpen;
@@ -961,7 +984,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
     pInstrument->SetMultiplier( boost::lexical_cast<unsigned long>( contract.multiplier ) );
   }
 
-  return pInstrument;
+  //return pInstrument;  //legacy
 
 }
 

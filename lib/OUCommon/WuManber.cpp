@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 

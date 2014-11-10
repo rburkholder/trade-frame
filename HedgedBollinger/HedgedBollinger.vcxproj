@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -28,25 +28,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -101,9 +103,12 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-3.0.1\lib\vc_x64_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_55_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\szip-2.1\szip.win\all\lib\Debug;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Debug;C:\Data\Projects\VSC++\zlib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurld.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Data\Projects\VC++\3rdparty\wxwidgets\wxwidgets-3.0.2\lib\vc_x64_lib;D:\Data\Projects\VC++\3rdparty\hdf5\hdf5-1.9.80\hdf5lib\debug\lib;D:\Data\Projects\VC++\3rdparty\boost\boost_1_57_0\stage\x64\lib;D:\Data\Projects\VC++\3rdparty\szip-2.1\windows\static\lib\x64\Debug;D:\Data\Projects\VC++\3rdparty\curl\curl-7.39.0\build\Win64\VC12\LIB Debug;D:\Data\Projects\VC++\3rdparty\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxmsw30ud_media.lib;wxmsw30ud_gl.lib;wxmsw30ud_webview.lib;wxscintillad.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxregexud.lib;wxzlibd.lib;wxmsw30ud_qa.lib;wxmsw30ud_html.lib;wxmsw30ud_adv.lib;wxmsw30ud_ribbon.lib;wxmsw30ud_propgrid.lib;wxmsw30ud_richtext.lib;wxmsw30ud_xrc.lib;wxmsw30ud_stc.lib;wxbase30ud_net.lib;wxbase30ud_xml.lib;wxpngd.lib;wxmsw30ud_core.lib;wxbase30ud.lib;libcurld.lib;zlibstat.lib;libszipd.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib;winmm.lib;rpcrt4.lib;wininet.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <LinkStatus>
+      </LinkStatus>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

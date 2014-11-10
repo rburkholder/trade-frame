@@ -14,8 +14,8 @@
 #include "StdAfx.h"
 
 #include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/home/phoenix/bind.hpp> 
-#include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
+#include <boost/phoenix/bind.hpp> 
+#include <boost/phoenix/bind/bind_member_function.hpp>
 
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
