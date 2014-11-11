@@ -201,7 +201,7 @@ bool AppHedgedBollinger::OnInit() {
   //m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "phi";
 //  m_idPortfolio = "weeklies";  // makes it easy for swing trading
 
-  std::string sTimeZoneSpec( "date_time_zonespec.csv" );
+  std::string sTimeZoneSpec( "..\\date_time_zonespec.csv" );
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }

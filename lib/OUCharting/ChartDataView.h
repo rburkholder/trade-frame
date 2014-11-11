@@ -98,7 +98,8 @@ private:
     };
   };
 
-  typedef std::map<const size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
+  //typedef std::map<size_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
+  typedef std::map<boost::uint64_t /* carrier nChart */, structChartMapping> mapCntChartIndexes_t;
 
   typedef std::vector<local::ChartDataViewCarrier> vChartDataViewEntry_t;
 

@@ -69,6 +69,8 @@ bool AppTestWx::OnInit() {
   vItems.push_back( new mi( "test", MakeDelegate( this, &AppTestWx::TestChart ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  //std::cout << wxSETUPH_PATH_STR << std::endl;
+
   return 1;
 
 }

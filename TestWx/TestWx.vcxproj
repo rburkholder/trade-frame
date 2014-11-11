@@ -33,6 +33,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -98,9 +99,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\lib\x64\vc_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_54_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\compress64\lib;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurl.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFBitsNPieces.lib;$(OutDir)TFOptions.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>D:\Data\Projects\VC++\TradeFrame\x64\Debug;D:\Data\Projects\VC++\3rdparty\wxwidgets\wxwidgets-3.0.2\lib\vc_x64_lib;D:\Data\Projects\VC++\3rdparty\boost\boost_1_57_0\stage\x64\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(OutDir)TFVuTrading.lib;$(OutDir)OUCommon.lib;$(OutDir)chartdir51.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -158,6 +161,17 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TestWx.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\OUCharting\LibCharting.vcxproj">
+      <Project>{bd8a7d5e-fd36-487f-88e9-8f3851ecf214}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\OUCommon\LibCommon.vcxproj">
+      <Project>{f03f73ea-df5f-48da-abae-a860bcee54d4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\TFVuTrading\TFVuTrading.vcxproj">
+      <Project>{3eb6f41c-a83f-4874-b7f7-20cda2db2eb6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
