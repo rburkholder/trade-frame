@@ -1,0 +1,49 @@
+copy 
+C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.3\include\msvc\wx\setup.h
+to 
+C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.3\include\wx
+
+use project file C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.3\build\msw\wx.dsw for static build
+and go through each library set for non dll build.
+
+build solution.
+
+libraries are in C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.3\lib\vc_lib
+In target solution, set this directory as Linker->General->Additional Library Directories
+
+C:\Data\Projects\VSC++\ShoutCast\include>..\..\junction.exe  wx C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.4\include\wx
+
+
+In Linker->Input->Additional Dependencies, will need:
+winmm.lib
+comctl32.lib
+rpcrt4.lib
+wsock32.lib
+wininet.lib
+
+In C/C++->Preprocessor->Preprocessor Definitions will need:
+wxUSE_GUI=1
+__WXMSW__
+
+Maybe:
+_WIN32_WINNT=0x0501
+WIN32
+_DEBUG
+WINVER=0x0400
+_WINDOWS
+
+in 
+C:\Data\Projects\VSC++\wxWidgets\wxWidgets-2.9.3\include\wx\setup.h:
+#define wxSETUPH_PATH_STR "..\lib\wx\mswud\wx\setup.h"
+//#define wxSETUPH_PATH_STR "..\..\wxWidgets\wxWidgets-2.9.2\lib\vc_lib\mswd\wx\setup.h"
+//#define wxSETUPH_PATH_STR wxSTRINGIZE(wxSETUPH_PATH)
+
+for 3.0.0:
+#ifdef wxSUFFIX
+    #define wxSETUPH_PATH \
+        wxCONCAT6(C:/Data/Projects/VSC++/wxWidgets/wxWidgets-3.0.0/lib/, wxLIB_SUBDIR, /, wxTOOLKIT_PREFIX, wxSUFFIX, /wx/setup.h)
+#else // suffix is empty
+    #define wxSETUPH_PATH \
+        wxCONCAT5(../../../lib/, wxLIB_SUBDIR, /, wxTOOLKIT_PREFIX, /wx/setup.h)
+#endif
+
