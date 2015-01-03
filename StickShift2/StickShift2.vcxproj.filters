@@ -50,6 +50,9 @@
     <ClCompile Include="EventIBInstrument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DiscreteProbabilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StickShift2.rc">

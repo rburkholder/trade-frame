@@ -135,14 +135,19 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0502;WINVER=0x0502;WIN32;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\;..\lib</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\Data\Projects\VC++\3rdparty\wxwidgets\wxwidgets-3.0.2\lib\vc_x64_lib;D:\Data\Projects\VC++\3rdparty\hdf5\hdf5-1.9.80\hdf5lib\release\lib;D:\Data\Projects\VC++\3rdparty\boost\boost_1_57_0\stage\x64\lib;D:\Data\Projects\VC++\3rdparty\szip-2.1\windows\static\lib\x64\Release;D:\Data\Projects\VC++\3rdparty\curl\curl-7.39.0\build\Win64\VC12\LIB Release;D:\Data\Projects\VC++\3rdparty\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease;%(AdditionalDependencies)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.lib;zlibstat.lib;libszip.lib;hdf5_cpp.lib;hdf5.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -111,8 +111,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-3.0.1\lib\vc_x64_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\debug\lib;C:\Data\Projects\VSC++\boost\boost_1_55_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\szip-2.1\szip.win\all\lib\Debug;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Debug;C:\Data\Projects\VSC++\zlib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurld.lib;zlibstatd.lib;szlib.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)ExcelFormat.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Data\Projects\VC++\3rdparty\wxwidgets\wxwidgets-3.0.2\lib\vc_x64_lib;D:\Data\Projects\VC++\3rdparty\hdf5\hdf5-1.9.80\hdf5lib\debug\lib;D:\Data\Projects\VC++\3rdparty\boost\boost_1_57_0\stage\x64\lib;D:\Data\Projects\VC++\3rdparty\szip-2.1\windows\static\lib\x64\Debug;D:\Data\Projects\VC++\3rdparty\curl\curl-7.39.0\build\Win64\VC12\LIB Debug;D:\Data\Projects\VC++\3rdparty\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatDebug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurld.lib;zlibstat.lib;libszipd.lib;hdf5_cppd.lib;hdf5d.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -142,14 +142,17 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0502;WINVER=0x0502;WIN32;__WXMSW__;_WINDOWS;wxUSE_GUI=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\;..\lib</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Data\Projects\VSC++\wxWidgets\wxWidgets-3.0.1\lib\vc_x64_lib;C:\Data\Projects\VSC++\hdf5\hdf5-1.9.80\hdf5lib\w64\release\lib;C:\Data\Projects\VSC++\boost\boost_1_55_0\stage\x64\lib;C:\Data\Projects\VSC++\hdf5\szip-2.1\szip.win\all\lib\Release;C:\Data\Projects\VSC++\curl\curl-7.27.0\lib\LIB-Release;C:\Data\Projects\VSC++\zlib\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcurl.lib;zlibstat.lib;szlib.lib;hdf5_cpp.lib;hdf5.lib;$(OutDir)ExcelFormat.lib;$(OutDir)TFBitsNPieces.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;winmm.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;wininet.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Data\Projects\VC++\3rdparty\wxwidgets\wxwidgets-3.0.2\lib\vc_x64_lib;D:\Data\Projects\VC++\3rdparty\hdf5\hdf5-1.9.80\hdf5lib\release\lib;D:\Data\Projects\VC++\3rdparty\boost\boost_1_57_0\stage\x64\lib;D:\Data\Projects\VC++\3rdparty\szip-2.1\windows\static\lib\x64\Release;D:\Data\Projects\VC++\3rdparty\curl\curl-7.39.0\build\Win64\VC12\LIB Release;D:\Data\Projects\VC++\3rdparty\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibStatRelease;%(AdditionalDependencies)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl.lib;zlibstat.lib;libszip.lib;hdf5_cpp.lib;hdf5.lib;$(OutDir)OUSQL.lib;$(OutDir)OUSqlite.lib;$(OutDir)TFIQFeed.lib;$(OutDir)TFInteractiveBrokers.lib;$(OutDir)OUCharting.lib;$(OutDir)chartdir51.lib;$(OutDir)OUCommon.lib;$(OutDir)TFTrading.lib;$(OutDir)TFTimeSeries.lib;$(OutDir)TFSimulation.lib;$(OutDir)TFHDF5TimeSeries.lib;$(OutDir)TFIndicators.lib;$(OutDir)TFVuTrading.lib;$(OutDir)TFOptions.lib;$(OutDir)TFBitsNPieces.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -165,6 +168,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DiscreteProbabilities.cpp" />
     <ClCompile Include="EventIBInstrument.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

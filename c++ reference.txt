@@ -1,3 +1,10 @@
+2014/11/11
+
+pimpl
+http://herbsutter.com/gotw/_100/
+http://www.gotw.ca/publications/mill05.htm
+
+
 2013/11/05
 http://www.stroustrup.com/lock-free-vector.pdf
 
