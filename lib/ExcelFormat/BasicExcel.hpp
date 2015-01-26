@@ -589,7 +589,7 @@ public:
 
 // File handling functions
 	bool Create(const wchar_t* filename);
-	bool Open(const wchar_t* filename, ios_base::openmode mode=ios_base::in | ios_base::out);
+	bool Open(const wchar_t* filename, std::ios_base::openmode mode=std::ios_base::in | std::ios_base::out);
 	bool Close();
 	bool IsOpen();
 
@@ -600,7 +600,7 @@ public:
 	bool Move(SECT from, SECT to);
 	bool Insert(SECT index, const char* block);
 	bool Erase(SECT index);
-	bool Erase(vector<SECT>& indices);
+	bool Erase(std::vector<SECT>& indices);
 
 // Misc functions
 	ULONG GetBlockSize() const {return blockSize_;}
@@ -612,9 +612,9 @@ public:
 	}
 
 protected:
-	vector<char> filename_;
-	ios_base::openmode mode_;
-	fstream	file_;
+	std::vector<char> filename_;
+	std::ios_base::openmode mode_;
+	std::fstream	file_;
 	ULONG	blockSize_;
 	SECT	indexEnd_;
 	ULONG	fileSize_;
@@ -638,7 +638,7 @@ public:
 public:
 	// Compound File functions
 	bool Create(const wchar_t* filename);
-	bool Open(const wchar_t* filename, ios_base::openmode mode=ios_base::in | ios_base::out);
+	bool Open(const wchar_t* filename, std::ios_base::openmode mode=std::ios_base::in | std::ios_base::out);
 	bool Close();
 	bool IsOpen();
 
@@ -650,29 +650,29 @@ public:
 	int MakeFile(const wchar_t* path);
 	int FileSize(const wchar_t* path, ULONG& size);
 	int ReadFile(const wchar_t* path, char* data);
-	int ReadFile(const wchar_t* path, vector<char>&data);
+	int ReadFile(const wchar_t* path, std::vector<char>&data);
 	int WriteFile(const wchar_t* path, const char* data, ULONG size);
-	int WriteFile(const wchar_t* path, const vector<char>&data, ULONG size);
+	int WriteFile(const wchar_t* path, const std::vector<char>&data, ULONG size);
 
 	// ANSI char functions
 	bool Create(const char* filename);
-	bool Open(const char* filename, ios_base::openmode mode=ios_base::in | ios_base::out);
+	bool Open(const char* filename, std::ios_base::openmode mode=std::ios_base::in | std::ios_base::out);
 	int ChangeDirectory(const char* path);
 	int MakeDirectory(const char* path);
 	int MakeFile(const char* path);
 	int FileSize(const char* path, ULONG& size);
 	int ReadFile(const char* path, char* data);
-	int ReadFile(const char* path, vector<char>& data);
+	int ReadFile(const char* path, std::vector<char>& data);
 	int WriteFile(const char* path, const char* data, ULONG size);
-	int WriteFile(const char* path, const vector<char>& data, ULONG size);
+	int WriteFile(const char* path, const std::vector<char>& data, ULONG size);
 
 // Protected functions and data members
 protected:
 	// General functions and data members
-	void IncreaseLocationReferences(vector<SECT> indices);
-	void DecreaseLocationReferences(vector<SECT> indices);
+	void IncreaseLocationReferences(std::vector<SECT> indices);
+	void DecreaseLocationReferences(std::vector<SECT> indices);
 	void SplitPath(const wchar_t* path, wchar_t*& parentpath, wchar_t*& propertyname);
-	vector<char> block_;
+	std::vector<char> block_;
 	Block file_;
 
 	// Header related functions and data members
@@ -719,13 +719,13 @@ protected:
 	ULONG DataSize(SECT startIndex, bool isBig);
 	ULONG ReadData(SECT startIndex, char* data, bool isBig);
 	SECT WriteData(const char* data, ULONG size, SECT startIndex, bool isBig);
-	void GetBlockIndices(SECT startIndex, vector<SECT>& indices, bool isBig);
+	void GetBlockIndices(SECT startIndex, std::vector<SECT>& indices, bool isBig);
 	SECT GetFreeBlockIndex(bool isBig);
 	void ExpandBATArray(bool isBig);
 	void LinkBlocks(SECT from, SECT to, bool isBig);
-	void FreeBlocks(vector<SECT>& indices, bool isBig);
-	vector<SECT> blocksIndices_;
-	vector<SECT> sblocksIndices_;
+	void FreeBlocks(std::vector<SECT>& indices, bool isBig);
+	std::vector<SECT> blocksIndices_;
+	std::vector<SECT> sblocksIndices_;
 
 	// Properties related functions and data members
 	class DirectoryEntry // struct StructuredStorageDirectoryEntry
@@ -779,7 +779,7 @@ protected:
 		PropertyTree* parent_;
 		DirectoryEntry* self_;
 		SECT index_;
-		vector<PropertyTree*> children_;
+		std::vector<PropertyTree*> children_;
 	};
 	void LoadProperties();
 	void SaveProperties();
@@ -794,8 +794,8 @@ protected:
 	void DecreasePropertyReferences(PropertyTree* parentTree, SECT index);
 	PropertyTree* propertyTrees_;
 	PropertyTree* currentDirectory_;
-	vector<DirectoryEntry*> dirEntries_;
-	vector<PropertyTree*> previousDirectories_;
+	std::vector<DirectoryEntry*> dirEntries_;
+	std::vector<PropertyTree*> previousDirectories_;
 };
 
 #endif // _WIN32
