@@ -28,12 +28,12 @@ public:
   ~WuManber( void );
   void Initialize( const std::vector<const char *> &patterns, 
                    bool bCaseSensitive = false, bool bIncludeSpecialCharacters = false, bool bIncludeExtendedAscii = false );
-  void Search( size_t TextLength, const char *Text, const std::vector<const char *> &patterns );
+  void Search( std::size_t TextLength, const char *Text, const std::vector<const char *> &patterns );
 protected:
 private:
-  size_t m_k;  // number of patterns;
-  size_t m_lcpl;  // largest common pattern length, 'm' in the reference materials
-  static const size_t B = 3;  // Wu Manber paper suggests B is 2 or 3 
+  std::size_t m_k;  // number of patterns;
+  std::size_t m_lcpl;  // largest common pattern length, 'm' in the reference materials
+  static const std::size_t B = 3;  // Wu Manber paper suggests B is 2 or 3 
     // small number of patterns, use B=2, use an exact table
     // for large number of patterns, use B=3 use compressed table (their code uses 400 as a cross over )
     // this class needs to be adjusted for B=2 (in the build shift table portion)
@@ -48,11 +48,11 @@ private:
   } m_lu[256]; // defines our alphabet for matching purposes, is LookUp table of letters for pattern/text matching
   unsigned char m_nSizeOfAlphabet;
   unsigned short m_nBitsInShift; // used for hashing blocks of B characters
-  size_t m_nTableSize;  // size for SHIFT and HASH tables
-  size_t *m_ShiftTable;  // SHIFT table
+  std::size_t m_nTableSize;  // size for SHIFT and HASH tables
+  std::size_t *m_ShiftTable;  // SHIFT table
   struct structPatternMap { // one struct per pattern for this hash
-    size_t PrefixHash;  // hash of first two characters of the pattern
-    size_t ix;  // index into patterns for final comparison
+    std::size_t PrefixHash;  // hash of first two characters of the pattern
+    std::size_t ix;  // index into patterns for final comparison
   } m_PatternMapElement;  // termporary area for element storage
   std::vector<structPatternMap> *m_vPatternMap;
     // this is a combination of HASH and PREFIX table

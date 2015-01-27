@@ -16,7 +16,7 @@
 
 #include <vector>
 #include <sstream>
-#include <typeinfo.h>
+//#include <typeinfo.h>
 #include <cassert>
 
 #include <boost/thread/mutex.hpp>
@@ -59,7 +59,8 @@ namespace ou {
 template<typename bufferT> 
 class BufferRepository {
 public:
-  typedef typename bufferT* buffer_t;
+  //typedef typename bufferT* buffer_t;
+  typedef bufferT* buffer_t;
   BufferRepository(void);
   ~BufferRepository(void);
   inline void CheckIn( buffer_t Buffer );
@@ -71,9 +72,9 @@ protected:
   boost::mutex m_mutex;
   std::vector<buffer_t> m_vStack;
 private:
-  size_t cntCheckins, cntCheckouts;
+  std::size_t cntCheckins, cntCheckouts;
 #ifdef _DEBUG
-  size_t cntCreated, cntDestroyed, maxQsize;
+  std::size_t cntCreated, cntDestroyed, maxQsize;
   bool m_bCheckingOut;
   bool m_bCheckingIn;
   std::string m_sType;
@@ -137,7 +138,7 @@ template<typename bufferT> inline void BufferRepository<bufferT>::CheckIn(buffer
   m_vStack.push_back( pBuffer );
   ++cntCheckins;
 #ifdef _DEBUG
-  maxQsize = std::max<size_t>( maxQsize, m_vStack.size() );
+  maxQsize = std::max<std::size_t>( maxQsize, m_vStack.size() );
   m_bCheckingIn = false;
 #endif
 }

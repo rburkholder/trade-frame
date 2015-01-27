@@ -31,6 +31,9 @@ bool ReadCodeListCommon::Extract( std::string& s, ExcelFormat::BasicExcelWorkshe
   switch( cell->Type() ) {
   case ExcelFormat::BasicExcelCell::WSTRING:
     {
+#ifndef _MSC_VER        
+    assert(false);  /* issues with WideCharToMultiByte on Linux, how to do the conversion?
+#endif    
     char DefChar = ' ';
     int nStringLength;
     nStringLength = cell->GetStringLength();
@@ -41,6 +44,9 @@ bool ReadCodeListCommon::Extract( std::string& s, ExcelFormat::BasicExcelWorkshe
     delete[] ch;
     ch = 0;
     s = ss;
+#ifndef _MSC_VER        
+     */
+#endif    
     }
     break;
   case ExcelFormat::BasicExcelCell::STRING: 

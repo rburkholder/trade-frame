@@ -56,9 +56,9 @@ void WuManber::Initialize( const std::vector<const char *>& patterns,
   m_k = patterns.size();
   m_lcpl = 0; // start with 0 and grow from there
   for ( unsigned int i = 0; i < m_k; ++i ) {
-    size_t lenPattern = strlen( patterns[ i ] );
+    std::size_t lenPattern = strlen( patterns[ i ] );
     if ( B > lenPattern ) throw std::runtime_error( "found pattern less than B in length" );
-    m_lcpl = ( 0 == m_lcpl ) ? lenPattern : std::min<size_t>( m_lcpl, lenPattern );
+    m_lcpl = ( 0 == m_lcpl ) ? lenPattern : std::min<std::size_t>( m_lcpl, lenPattern );
   }
 
   m_nSizeOfAlphabet = 1; // at minimum we have a white space character
@@ -104,26 +104,26 @@ void WuManber::Initialize( const std::vector<const char *>& patterns,
   m_nBitsInShift = (unsigned short) ceil( log( (double) m_nSizeOfAlphabet ) / log( (double) 2 ) );
   // can use fewer bits in shift to turn it into a hash
 
-  m_nTableSize = (size_t) pow( pow( (double) 2, m_nBitsInShift ), (int) B );
+  m_nTableSize = (std::size_t) pow( pow( (double) 2, m_nBitsInShift ), (int) B );
     // 2 ** bits ** B, will be some unused space when not hashed
-  m_ShiftTable = new size_t[ m_nTableSize ];
+  m_ShiftTable = new std::size_t[ m_nTableSize ];
 
-  for ( size_t i = 0; i < m_nTableSize; ++i ) {
+  for ( std::size_t i = 0; i < m_nTableSize; ++i ) {
     m_ShiftTable[ i ] = m_lcpl - B + 1; // default to m-B+1 for shift
   }
 
   m_vPatternMap = new std::vector<structPatternMap>[ m_nTableSize ];
 
-  for ( size_t j = 0; j < m_k; ++j ) {  // loop through patterns
-    for ( size_t q = m_lcpl; q >= B; --q ) {
+  for ( std::size_t j = 0; j < m_k; ++j ) {  // loop through patterns
+    for ( std::size_t q = m_lcpl; q >= B; --q ) {
       unsigned int hash;
       hash  = m_lu[patterns[j][q - 2 - 1]].offset; // bring in offsets of X in pattern j
       hash <<= m_nBitsInShift;
       hash += m_lu[patterns[j][q - 1 - 1]].offset;
       hash <<= m_nBitsInShift;
       hash += m_lu[patterns[j][q     - 1]].offset;
-      size_t shiftlen = m_lcpl - q;
-      m_ShiftTable[ hash ] = std::min<size_t>( m_ShiftTable[ hash ], shiftlen );
+      std::size_t shiftlen = m_lcpl - q;
+      m_ShiftTable[ hash ] = std::min<std::size_t>( m_ShiftTable[ hash ], shiftlen );
       if ( 0 == shiftlen ) {
         m_PatternMapElement.ix = j;
         m_PatternMapElement.PrefixHash = m_lu[patterns[j][0]].offset;
@@ -136,12 +136,12 @@ void WuManber::Initialize( const std::vector<const char *>& patterns,
   m_bInitialized = true;
 }
 
-void WuManber::Search( size_t TextLength, const char *Text, const std::vector<const char *> &patterns ) {
+void WuManber::Search( std::size_t TextLength, const char *Text, const std::vector<const char *> &patterns ) {
 
   assert( m_k == patterns.size() );
   assert( m_lcpl < TextLength );
   assert( m_bInitialized );
-  size_t ix = m_lcpl - 1; // start off by matching end of largest common pattern
+  std::size_t ix = m_lcpl - 1; // start off by matching end of largest common pattern
   while ( ix < TextLength ) {
     unsigned int hash1;
     hash1 = m_lu[Text[ix-2]].offset;
@@ -149,7 +149,7 @@ void WuManber::Search( size_t TextLength, const char *Text, const std::vector<co
     hash1 += m_lu[Text[ix-1]].offset;
     hash1 <<= m_nBitsInShift;
     hash1 += m_lu[Text[ix]].offset;
-    size_t shift = m_ShiftTable[ hash1 ];
+    std::size_t shift = m_ShiftTable[ hash1 ];
     if ( shift > 0 ) {
       ix += shift;
     }

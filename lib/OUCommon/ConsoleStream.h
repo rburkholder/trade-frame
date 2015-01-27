@@ -105,7 +105,7 @@ ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, trait
       *iend++ = traits_type::to_char_type( meta );
   }
 
-  m_pBuf->n = iend - pbase();
+  m_pBuf->n = iend - this->pbase();
   //if ( NULL != OnNewString ) OnNewString( pbase(), (int) ( pptr() - pbase() - 1 ) ); // assumes CR at end
   if ( NULL != OnEmitString ) OnEmitString( m_pBuf ); 
   //if ( NULL != OnFlushString ) OnFlushString();
@@ -115,7 +115,7 @@ ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, trait
 //  if ( NULL != OnFlushString ) OnFlushString();
 
   return traits_type::not_eof( meta );
-
+  
 }
 
 } // ou

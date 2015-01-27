@@ -30,7 +30,7 @@ namespace tables { // Currency
 namespace CurrencyCode {
 namespace detail {
 
-#include "IsoCurrency.cpp"
+#include "IsoCurrency.txt"
 
   struct initializer_t {
     mapCurrencies_t m_mapCurrencies;  // currency code, currency name

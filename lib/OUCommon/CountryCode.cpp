@@ -22,35 +22,7 @@ namespace ou {
 namespace tables {
 namespace CountryCode {
 
-const char* m_pszCodes[];
-
-typedef std::map<std::string,const char*> codes_t;
-codes_t codes;
-
-const char* LuNameFromCode( const std::string& code ) {
-  if ( 0 == codes.size() ) {
-    const char* psz1;
-    const char* psz2;
-
-    psz1 = m_pszCodes[0];
-    psz2 = psz1 + 1;
-
-    while ( 0 != *psz2 ) {
-      std::string key( psz2 );
-      codes[ key ] = psz1;
-      ++psz1;
-      ++psz2;
-    }
-  }
-  codes_t::iterator iter = codes.find( code );
-  if ( codes.end() == iter ) {
-    throw std::runtime_error( "no code" );
-  }
-  return iter->second;
-}
-
-
-
+//const char* m_pszCodes[];
 // http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm
 // http://en.wikipedia.org/wiki/ISO_3166-1
 
@@ -59,7 +31,7 @@ const char* LuNameFromCode( const std::string& code ) {
 const char* m_pszCodes[] = {
 
   "AFGHANISTAN", "AF",
-  "ÅLAND ISLANDS", "AX",
+  "ï¿½LAND ISLANDS", "AX",
   "ALBANIA", "AL",
   "ALGERIA", "DZ",
   "AMERICAN SAMOA", "AS",
@@ -111,7 +83,7 @@ const char* m_pszCodes[] = {
   "CONGO, THE DEMOCRATIC REPUBLIC OF THE", "CD",
   "COOK ISLANDS", "CK",
   "COSTA RICA", "CR",
-  "CÔTE D'IVOIRE", "CI",
+  "Cï¿½TE D'IVOIRE", "CI",
   "CROATIA", "HR",
   "CUBA", "CU",
   "CYPRUS", "CY",
@@ -237,11 +209,11 @@ const char* m_pszCodes[] = {
   "PORTUGAL", "PT",
   "PUERTO RICO", "PR",
   "QATAR", "QA",
-  "RÉUNION", "RE",
+  "Rï¿½UNION", "RE",
   "ROMANIA", "RO",
   "RUSSIAN FEDERATION", "RU",
   "RWANDA", "RW",
-  "SAINT BARTHÉLEMY", "BL",
+  "SAINT BARTHï¿½LEMY", "BL",
   "SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA", "SH",
   "SAINT KITTS AND NEVIS", "KN",
   "SAINT LUCIA", "LC",
@@ -306,6 +278,35 @@ const char* m_pszCodes[] = {
   "ZIMBABWE", "ZW",
   "", "" 
   };
+    
+
+typedef std::map<std::string,const char*> codes_t;
+codes_t codes;
+
+const char* LuNameFromCode( const std::string& code ) {
+  if ( 0 == codes.size() ) {
+    const char* psz1;
+    const char* psz2;
+
+    psz1 = m_pszCodes[0];
+    psz2 = psz1 + 1;
+
+    while ( 0 != *psz2 ) {
+      std::string key( psz2 );
+      codes[ key ] = psz1;
+      ++psz1;
+      ++psz2;
+    }
+  }
+  codes_t::iterator iter = codes.find( code );
+  if ( codes.end() == iter ) {
+    throw std::runtime_error( "no code" );
+  }
+  return iter->second;
+}
+
+
+
 
 } // countrycode
 } // tables
