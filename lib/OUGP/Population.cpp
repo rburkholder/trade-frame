@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <ctime>
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/operator.hpp>

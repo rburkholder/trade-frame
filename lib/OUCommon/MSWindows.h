@@ -48,10 +48,12 @@ typedef const CHAR          *LPCSTR;
 //typedef void*               HWND;
 
 // c:\Program Files (x86)\Windows Kits\8.0\Include\shared\basetsd.h
+#ifdef _WIN32
 typedef __int64 INT_PTR, *PINT_PTR;
 typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
 typedef __int64 LONG_PTR, *PLONG_PTR;
 typedef unsigned __int64 ULONG_PTR, *PULONG_PTR;
+#endif
 
 // c:\Program Files (x86)\Windows Kits\8.0\Include\shared\minwindef.h
 #define WINAPI      __stdcall

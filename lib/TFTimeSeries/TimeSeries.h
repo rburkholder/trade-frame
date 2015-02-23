@@ -47,7 +47,7 @@ template<typename T>
 class TimeSeries: public TimeSeriesBase {
 public:
 
-  typedef typename T datum_t;
+  typedef T datum_t;
 
   typedef typename std::vector<T>::size_type size_type;
 
@@ -128,7 +128,7 @@ TimeSeries<T>::TimeSeries(void)
 template<typename T> 
 TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
   : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ) {
-  if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( size );
+  if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( nSize );
 }
 
 template<typename T> 

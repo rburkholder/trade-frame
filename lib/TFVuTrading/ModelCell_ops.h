@@ -47,11 +47,11 @@ struct SetPrecision {
   SetPrecision( unsigned int val ): m_nPrecision( val ) {};
   template<typename T>
   void operator()( T& t ) const {
-    t.SetPrecision( m_val );
+    t.SetPrecision( m_nPrecision );
   }
 };
 
-}
+} // ModelCell_ops
 
-}
-}
+} // tf
+} // ou

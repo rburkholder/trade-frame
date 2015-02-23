@@ -71,7 +71,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const std::string
 
   if ( 0 != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
-    ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
   }
 
 }
@@ -80,7 +80,7 @@ template<class T>
 template<class K, class R, class M, class Q>
 void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, const std::string& sWhere ) {
 
-  M::const_iterator iter = map.find( key );
+  typename M::const_iterator iter = map.find( key );
   if ( map.end() == iter ) {
     std::string s(  typeid(T).name() );
     s += "::UpdateRecord: could not find key ";
@@ -90,7 +90,7 @@ void ManagerBase<T>::UpdateRecord( const K& key, const R& row, const M& map, con
 
   if ( 0 != m_pSession ) {
     Q q( const_cast<R&>( row ), key );
-    ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryUpdate = m_pSession->Update<Q>( q ).Where( sWhere );
   }
 
 }
@@ -101,7 +101,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, const std::string& sWhere ) {
      
   if ( 0 != m_pSession ) {
     Q q( key );
-    ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
   }
 
 }
@@ -110,7 +110,7 @@ template<class T>
 template<class K, class M, class Q> // K:key, M:map, Q:query
 void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhere ) {
      
-  M::const_iterator iter = map.find( key );
+  typename M::const_iterator iter = map.find( key );
   if ( map.end() == iter ) {
     std::string s(  typeid(T).name() );
     s += "::DeleteRecord: could not find key ";
@@ -120,7 +120,7 @@ void ManagerBase<T>::DeleteRecord( const K& key, M& map, const std::string& sWhe
 
   if ( 0 != m_pSession ) {
     Q q( key );
-    ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
+    typename ou::db::QueryFields<Q>::pQueryFields_t pQueryDelete = m_pSession->Delete<Q>( q ).Where( sWhere );
   }
   map.erase( iter );
 

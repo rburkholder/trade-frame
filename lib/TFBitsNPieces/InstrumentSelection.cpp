@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>

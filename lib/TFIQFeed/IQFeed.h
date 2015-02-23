@@ -50,27 +50,27 @@ public:
   // used for returning message buffer
   // linebuffer_t needs to be kept with msg as there are dynamic accesses from it
   void inline UpdateDone( linebuffer_t* p, IQFUpdateMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposUpdateMessages.CheckInL( msg );
   }
   void inline SummaryDone( linebuffer_t* p, IQFSummaryMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposSummaryMessages.CheckInL( msg );
   }
   void inline NewsDone( linebuffer_t* p, IQFNewsMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposNewsMessages.CheckInL( msg );
   }
   void inline FundamentalDone( linebuffer_t* p, IQFFundamentalMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposFundamentalMessages.CheckInL( msg );
   }
   void inline TimeDone( linebuffer_t* p, IQFTimeMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposTimeMessages.CheckInL( msg );
   }
   void inline SystemDone( linebuffer_t* p, IQFSystemMessage* msg ) {
-    GiveBackBuffer( p );
+    this->GiveBackBuffer( p );
     m_reposSystemMessages.CheckInL( msg );
   }
 
@@ -147,7 +147,7 @@ void IQFeed<T>::SetNewsOn( void ) {
     m_stateNews = NEWSISON;
     std::stringstream ss;
     ss << "S,NEWSON" << std::endl;
-    Send( ss.str() );
+    ou::Network<IQFeed<T> >::Send( ss.str() );
   }
 }
 
@@ -157,15 +157,15 @@ void IQFeed<T>::SetNewsOff( void ) {
     m_stateNews = NEWSISOFF;
     std::stringstream ss;
     ss << "S,NEWSOFF" << std::endl;
-    Send( ss.str() );
+    ou::Network<IQFeed<T> >::Send( ss.str() );
   }
 }
 
 template <typename T>
 void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
 
-  linebuffer_t::iterator iter = (*pBuffer).begin();
-  linebuffer_t::iterator end = (*pBuffer).end();
+  typename linebuffer_t::iterator iter = (*pBuffer).begin();
+  typename linebuffer_t::iterator end = (*pBuffer).end();
 
 #if defined _DEBUG
 
@@ -244,7 +244,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         if ( "KEY" == msg->Field( 2 ) ) {
           std::stringstream ss;
           ss << "S,KEY," << msg->Field( 3 ) << std::endl;
-          Send( ss.str() );
+          ou::Network<IQFeed<T> >::Send( ss.str() );
         }
         if ( "CUST" == msg->Field( 2 ) ) {
           if ( "4.3.0.3" > msg->Field( 7 ) ) {

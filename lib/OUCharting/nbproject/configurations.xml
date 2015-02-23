@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="f1" displayName="ChartDirector64" projectFiles="true">
+        <itemPath>ChartDirector64/FinanceChart.h</itemPath>
+        <itemPath>ChartDirector64/bchartdir.h</itemPath>
+        <itemPath>ChartDirector64/chartdir.h</itemPath>
+        <itemPath>ChartDirector64/memblock.h</itemPath>
+      </logicalFolder>
+      <itemPath>ChartDataBase.h</itemPath>
+      <itemPath>ChartDataView.h</itemPath>
+      <itemPath>ChartEntryBars.h</itemPath>
+      <itemPath>ChartEntryBase.h</itemPath>
+      <itemPath>ChartEntryIndicator.h</itemPath>
+      <itemPath>ChartEntryMark.h</itemPath>
+      <itemPath>ChartEntrySegments.h</itemPath>
+      <itemPath>ChartEntryShape.h</itemPath>
+      <itemPath>ChartEntryVolume.h</itemPath>
+      <itemPath>ChartMaster.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>ChartDataBase.cpp</itemPath>
+      <itemPath>ChartDataView.cpp</itemPath>
+      <itemPath>ChartEntryBars.cpp</itemPath>
+      <itemPath>ChartEntryBase.cpp</itemPath>
+      <itemPath>ChartEntryIndicator.cpp</itemPath>
+      <itemPath>ChartEntryMark.cpp</itemPath>
+      <itemPath>ChartEntrySegments.cpp</itemPath>
+      <itemPath>ChartEntryShape.cpp</itemPath>
+      <itemPath>ChartEntryVolume.cpp</itemPath>
+      <itemPath>ChartMaster.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="ChartDataBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartDataBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDataView.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartDataView.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/FinanceChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/bchartdir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/chartdir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/memblock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryBars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryBars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryIndicator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryIndicator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryMark.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryMark.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntrySegments.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntrySegments.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryShape.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryShape.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryVolume.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryVolume.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartMaster.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartMaster.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="ChartDataBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartDataBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDataView.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartDataView.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/FinanceChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/bchartdir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/chartdir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartDirector64/memblock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryBars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryBars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryIndicator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryIndicator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryMark.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryMark.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntrySegments.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntrySegments.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryShape.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryShape.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryVolume.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryVolume.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartMaster.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartMaster.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

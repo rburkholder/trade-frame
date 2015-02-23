@@ -40,8 +40,8 @@ public:
   void AssignCall( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
   void AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
 
-  Call* Call( void ) { return m_call.get(); };
-  Put*  Put( void )  { return m_put.get(); };
+  ou::tf::option::Call* Call( void ) { return m_call.get(); };
+  ou::tf::option::Put*  Put( void )  { return m_put.get(); };
 
   void SetWatchableOn( void );  // watchable defaults to off at time of construction
   void SetWatchableOff( void );

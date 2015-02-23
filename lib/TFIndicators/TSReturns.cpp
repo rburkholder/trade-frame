@@ -12,9 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#pragma once
-
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include "TSReturns.h"
 

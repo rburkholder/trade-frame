@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <vector>
 
@@ -186,7 +186,7 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
   wxTreeItemId id = event.GetItem();
 
   wxTreeItemId id2 = id;
-  std::string sPath = m_pHdf5Root->GetItemText( id2 ); // start here and prefix the path
+  std::string sPath = std::string( m_pHdf5Root->GetItemText( id2 ).ToStdString() ); // start here and prefix the path
   while ( true ) {
     id2 = m_pHdf5Root->GetItemParent( id2 );
     if ( !id2.IsOk() ) break;

@@ -74,7 +74,7 @@ private:
 template <typename charT, typename traits>
 ConsoleStreamBuf<charT,traits>::ConsoleStreamBuf( void ): std::basic_streambuf<charT, traits>() {
   m_pBuf = m_buffers.CheckOutL();
-  setp( m_pBuf->buf, m_pBuf->buf + nCharT - 1 );  // allow for one of our own terminating characters
+  this->setp( m_pBuf->buf, m_pBuf->buf + nCharT - 1 );  // allow for one of our own terminating characters
 }
 
 template <typename charT, typename traits>
@@ -111,7 +111,7 @@ ConsoleStreamBuf<charT,traits>::overflow( typename ConsoleStreamBuf<charT, trait
   //if ( NULL != OnFlushString ) OnFlushString();
   //setp( pbase(), epptr() );  // had this first but following line just resets everything.  better?  does the same thing?
   m_pBuf = m_buffers.CheckOutL();
-  setp( m_pBuf->buf, m_pBuf->buf + nCharT - 1 );  // allow for one of our own terminating characters
+  this->setp( m_pBuf->buf, m_pBuf->buf + nCharT - 1 );  // allow for one of our own terminating characters
 //  if ( NULL != OnFlushString ) OnFlushString();
 
   return traits_type::not_eof( meta );

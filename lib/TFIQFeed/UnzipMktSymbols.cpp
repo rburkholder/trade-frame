@@ -12,13 +12,16 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+//#include "StdAfx.h"
 
 //#include <boost/scope_exit.hpp>
 
-#include <zlib/contrib/minizip/ioapi.h>
+// http://blog.raymond.burkholder.net/index.php?/archives/598-Build-zlib-v1.2.8-with-Visual-Studio-2012.html
+
+//#include <zlib/contrib/minizip/ioapi.h>
+//#include <zlib/contrib/minizip/unzip.h>
+#include <zlib/unzip.h>
 #include <zlib/ioapi_mem.h>
-#include <zlib/contrib/minizip/unzip.h>
 
 #include <stdexcept>
 
@@ -33,8 +36,8 @@ UnZipMktSymbolsFile::pUnZippedFile_t UnZipMktSymbolsFile::UnZip( char* pchSource
 
 //  CurlGetMktSymbols cgms;
 
-  char* sZipFile( "**inmem**" );
-  char* sSourceName( "mktsymbols_v2.txt" );
+  static const char* sZipFile( "**inmem**" );
+  static const char* sSourceName( "mktsymbols_v2.txt" );
 
   unzFile uf=NULL;
   int err=UNZ_OK;

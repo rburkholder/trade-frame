@@ -14,6 +14,8 @@
 
 //#include "stdafx.h"
 
+#include <cstdlib>
+
 #include "ReadCodeListCommon.h"
 
 ReadCodeListCommon::ReadCodeListCommon(void) {
@@ -31,12 +33,11 @@ bool ReadCodeListCommon::Extract( std::string& s, ExcelFormat::BasicExcelWorkshe
   switch( cell->Type() ) {
   case ExcelFormat::BasicExcelCell::WSTRING:
     {
-#ifndef _MSC_VER        
-    assert(false);  /* issues with WideCharToMultiByte on Linux, how to do the conversion?
-#endif    
-    char DefChar = ' ';
     int nStringLength;
     nStringLength = cell->GetStringLength();
+//#ifdef _MSC_VER
+#if 0
+    char DefChar = ' ';
     int cnt = WideCharToMultiByte( CP_ACP, 0, cell->GetWString(), nStringLength, 0, 0, &DefChar, NULL );
     char* ch = new char[ cnt + 1 ];
     WideCharToMultiByte( CP_ACP, 0, cell->GetWString(), nStringLength, ch, cnt + 1, &DefChar, NULL );
@@ -44,9 +45,11 @@ bool ReadCodeListCommon::Extract( std::string& s, ExcelFormat::BasicExcelWorkshe
     delete[] ch;
     ch = 0;
     s = ss;
-#ifndef _MSC_VER        
-     */
 #endif    
+    // should handle MS as well as Posix
+    std::wstring w( cell->GetWString() );
+    std::string ss( w.begin(), w.end() );
+    s = ss;
     }
     break;
   case ExcelFormat::BasicExcelCell::STRING: 

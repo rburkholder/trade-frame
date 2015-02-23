@@ -13,7 +13,7 @@
 
 // Started 20130407
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include "CashManager.h"
 

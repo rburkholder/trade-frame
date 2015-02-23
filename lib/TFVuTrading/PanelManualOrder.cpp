@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #pragma warning( disable: 4996 4482 )
 

@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <cstdlib>  // used for size_t
+
 #include "InterestRates.h"
 
 namespace ou { // One Unified

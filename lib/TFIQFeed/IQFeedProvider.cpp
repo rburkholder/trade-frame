@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+//#include "StdAfx.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -114,7 +114,7 @@ void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMess
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleUpdateMessage( pMsg );
   }
-  UpdateDone( pBuffer, pMsg );
+  this->UpdateDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg ) {
@@ -125,7 +125,7 @@ void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMe
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleSummaryMessage( pMsg );
   }
-  SummaryDone( pBuffer, pMsg );
+  this->SummaryDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg ) {
@@ -136,7 +136,7 @@ void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFunda
     pSym = m_mapSymbols_Iter -> second;
     pSym ->HandleFundamentalMessage( pMsg );
   }
-  FundamentalDone( pBuffer, pMsg );
+  this->FundamentalDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg ) {
@@ -176,17 +176,17 @@ void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage 
     } while ( 0 != *ixLstColon );
   }
   */
-  NewsDone( pBuffer, pMsg );
+  this->NewsDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
-  TimeDone( pBuffer, pMsg );
+  this->TimeDone( pBuffer, pMsg );
 }
 
 void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
-  SystemDone( pBuffer, pMsg );
+  this->SystemDone( pBuffer, pMsg );
 }
 
 // 2014/09/30: some similar code in IQFeed/Option.cpp

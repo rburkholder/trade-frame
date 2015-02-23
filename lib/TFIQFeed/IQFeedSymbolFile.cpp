@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+//#include "StdAfx.h"
 
 #include <fstream>
 #include <sstream>
@@ -400,10 +400,10 @@ bool CIQFeedSymbolFile::Load( const std::string& sTxtFileName, const std::string
         }
         
         // parse out contract expiry information
-        // · For combined session symbols, the first character is "+".
-        //· For Night/Electronic sessions, the first character is "@".
-        // · Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
-        // · NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
+        // ï¿½ For combined session symbols, the first character is "+".
+        //ï¿½ For Night/Electronic sessions, the first character is "@".
+        // ï¿½ Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
+        // ï¿½ NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
         // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
         if ( structSymbolRecord::Future == dbRecord.eInstrumentType ) {
           if ( 'Y' == *(dbRecord.line + offset[structSymbolRecord::IXFrontMonth]) ) {

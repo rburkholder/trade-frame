@@ -23,7 +23,7 @@
 #define IB_USE_STD_STRING
 #endif
 
-#include "TWS/EWrapper.h"
+#include "Shared/EWrapper.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

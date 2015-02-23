@@ -21,12 +21,12 @@ namespace tf { // TradeFrame
 
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
   enum enumInstrumentTypes { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
-  const char* Name[];
+  extern const char* Name[];
 }
 
 namespace OrderSide {
   enum enumOrderSide { Unknown=0, Buy, Sell, SellShort, BuyMinus, SellPlus, BuyStop, SellStop, _Count };
-  const char* Name[];
+  extern const char* Name[];
 }
 
 namespace OrderStatus {
@@ -36,9 +36,9 @@ namespace OrderStatus {
 
 namespace OptionSide {
   enum enumOptionSide { Unknown=0, Put = 'P', Call = 'C', _Count = 2 };
-  const char* Name[];
-  const char* LongName[];
-  const char* ShortName[];
+  extern const char* Name[];
+  extern const char* LongName[];
+  extern const char* ShortName[];
 }
 
 namespace OptionStyle {
@@ -63,7 +63,7 @@ namespace Currency {
   typedef std::string type;
   // enumeration is subject to change, so do not use enumeration in persistent storage
   enum enumCurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
-  const char* Name[];
+  extern const char* Name[];
 }
 
 namespace Trading {

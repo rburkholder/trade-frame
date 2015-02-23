@@ -17,6 +17,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <OUSQL/Functions.h>
+
 #include "KeyTypes.h"
 
 namespace ou { // One Unified

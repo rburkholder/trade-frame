@@ -31,7 +31,7 @@ public:
   NodeTimeSeries( const NodeTimeSeries& rhs );
   ~NodeTimeSeries( void );
   virtual void PreProcess( void ) {
-    TimeSeriesRegistration<TS>::SetTimeSeries( &m_pTimeSeries, m_ixTimeSeries );
+    TimeSeriesRegistration<TS>::SetTimeSeries( &this->m_pTimeSeries, this->m_ixTimeSeries );
   }
 protected:
 private:
@@ -113,7 +113,7 @@ template<typename Node, size_t ixTimeSeries>
 class IndexedNode: public Node {
 public:
   IndexedNode( void ) {
-    m_ixTimeSeries = ixTimeSeries;
+    this->m_ixTimeSeries = ixTimeSeries;
   };
   ~IndexedNode( void ) {};
   

@@ -14,7 +14,7 @@
 
 // Started 2012/10/14
 
-#include "StdAfx.h"
+//#include "StdAfx.h"
 
 #include <stdexcept>
 
@@ -33,8 +33,8 @@ namespace iqfeed { // IQFeed
 
 namespace detail {
   // shared between debug and release
-  const std::string sFileNameMarketSymbolsText( "..\\mktsymbols_v2.txt" );
-  const std::string sFileNameMarketSymbolsBinary( "..\\symbols.ser" );
+  const std::string sFileNameMarketSymbolsText( "../mktsymbols_v2.txt" );
+  const std::string sFileNameMarketSymbolsBinary( "../symbols.ser" );
 }
 
 typedef MarketSymbol::TableRowDef trd_t;

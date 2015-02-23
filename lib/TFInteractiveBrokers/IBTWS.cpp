@@ -12,7 +12,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#ifdef _WIN32
 #include "StdAfx.h"
+#else
+#include "linux/StdAfx.h"
+#endif
 
 #include <iostream>
 #include <stdexcept>
@@ -22,6 +26,7 @@
 #include <boost/regex.hpp> 
 #include <boost/lexical_cast.hpp>
 //#include <boost/thread/locks.hpp>
+#include <boost/date_time.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 
 #include <OUCommon/KeyWordMatch.h>
@@ -30,7 +35,7 @@
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
-#include "TWS/CommissionReport.h"
+#include "Shared/CommissionReport.h"
 
 #include "IBTWS.h"
 

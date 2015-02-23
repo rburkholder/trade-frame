@@ -30,7 +30,7 @@ TimeSource::TimeSource(void)
       m_bTzLoaded = true;
   //    m_tzDb.load_from_file( "../../boost/libs/date_time/data/date_time_zonespec.csv" );
   //    m_tzDb.load_from_file( "..\\..\\boost\\libs\\date_time\\data\\date_time_zonespec.csv" );
-      m_tzDb.load_from_file( "date_time_zonespec.csv" );
+      m_tzDb.load_from_file( "../date_time_zonespec.csv" );
       m_tzNewYork = m_tzDb.time_zone_from_region( "America/New_York");
     }
   }

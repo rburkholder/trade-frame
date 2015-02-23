@@ -33,7 +33,7 @@ using namespace boost::gregorian;
 
 #include <OUCommon/FastDelegate.h>
 #include <OUCommon/Delegate.h>
-#include <OUCommon/MSWindows.h>
+//#include <OUCommon/MSWindows.h>   // commented out 2015/02/22 not needed in linux, required in msw?
 
 #include <TFTrading/TradingEnumerations.h>
 #include <TFTrading/Instrument.h>
@@ -42,13 +42,21 @@ using namespace boost::gregorian;
 
 #include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
 
-#include "TWS/EPosixClientSocket.h"
-#include "TWS/EWrapper.h"
+#ifndef TWSAPIDLLEXP
+#define TWSAPIDLLEXP
+#endif
 
-#include "TWS/Contract.h"
-#include "TWS/Order.h"
-#include "TWS/OrderState.h"
-#include "TWS/Execution.h"
+#ifdef _WIN32
+#include "win/EPosixClientSocket.h"
+#else
+#include "linux/EPosixClientSocket.h"
+#endif
+#include "Shared/EWrapper.h"
+
+#include "Shared/Contract.h"
+#include "Shared/Order.h"
+#include "Shared/OrderState.h"
+#include "Shared/Execution.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -163,6 +171,8 @@ public:
   void verifyCompleted(bool,const std::string &);
   void displayGroupList(int,const std::string &) {};
   void displayGroupUpdated(int,const std::string &) {};
+  void verifyAndAuthMessageAPI(const std::string&, const std::string&) {};
+  void verifyAndAuthCompleted(bool, const std::string&) {};
 
 protected:
 

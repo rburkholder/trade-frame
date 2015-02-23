@@ -73,8 +73,8 @@ public:
   const Fundamentals_t& Fundamentals( void ) const { return m_fundamentals; };
   const Summary_t& Summary( void ) const { return m_summary; };
 
-  Quotes* Quotes( void ) { return &m_quotes; };
-  Trades* Trades( void ) { return &m_trades; };
+  Quotes* GetQuotes( void ) { return &m_quotes; };
+  Trades* GetTrades( void ) { return &m_trades; };
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;

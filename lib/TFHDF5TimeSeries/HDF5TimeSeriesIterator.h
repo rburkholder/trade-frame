@@ -38,6 +38,7 @@ public:
   //typedef HDF5TimeSeriesIterator self_type;
   //typedef self_type& self_reference;
   typedef std::random_access_iterator_tag iterator_category;
+  typedef std::iterator<std::random_access_iterator_tag, DD, hsize_t> base_iterator;
 
   explicit HDF5TimeSeriesIterator<DD>( void );
   explicit HDF5TimeSeriesIterator<DD>( HDF5TimeSeriesAccessor<DD> *pAccessor, hsize_t Index );  // begin() or later init
@@ -54,7 +55,7 @@ public:
   bool operator==( const HDF5TimeSeriesIterator<DD>& other ) const;
   bool operator!=( const HDF5TimeSeriesIterator<DD>& other ) const;
   //HDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index ); 
-  reference operator*();
+  typename base_iterator::reference operator*();
   //reference operator->();
 protected:
   bool m_bValidIndex;  // m_ItemIndex is valid ie, is something from .begin() to .end()
@@ -188,7 +189,7 @@ bool HDF5TimeSeriesIterator<DD>::operator!=( const HDF5TimeSeriesIterator<DD>& o
 }
 
 template<class DD> 
-typename HDF5TimeSeriesIterator<DD>::reference HDF5TimeSeriesIterator<DD>::operator*() {
+typename HDF5TimeSeriesIterator<DD>::base_iterator::reference HDF5TimeSeriesIterator<DD>::operator*() {
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   m_pAccessor->Read( m_ItemIndex, &m_DD );

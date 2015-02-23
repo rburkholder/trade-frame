@@ -37,6 +37,8 @@ using namespace boost::gregorian;
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
+#include <boost/thread/thread.hpp>
+
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
@@ -280,6 +282,8 @@ public:
 
 protected:
 
+  typedef typename inherited_t::linebuffer_t linebuffer_t;
+  
   enum enumRetrievalState {  // activity in progress on this port
     RETRIEVE_IDLE = 0,  // no retrievals in progress
     RETRIEVE_HISTORY_DATAPOINTS,  // RequestID='D', data points are arriving
@@ -323,7 +327,6 @@ protected:
 
 private:
 
-  typedef typename inherited_t::linebuffer_t linebuffer_t;
   typedef typename inherited_t::linebuffer_t::const_iterator const_iterator_t;
 
   static const size_t m_nMillisecondsToSleep = 75;
@@ -363,8 +366,8 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
 
 #if defined _DEBUG
   {
-    linebuffer_t::const_iterator bgn = (*buf).begin();
-    linebuffer_t::const_iterator end = (*buf).end();
+    typename linebuffer_t::const_iterator bgn = (*buf).begin();
+    typename linebuffer_t::const_iterator end = (*buf).end();
 
 //    std::string str( bgn, end );
 //    str += "\n";
@@ -404,9 +407,9 @@ void HistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned 
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     std::stringstream ss;
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HTX," << sSymbol << "," << n << ",1,D\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
@@ -418,9 +421,9 @@ void HistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, uns
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_DATAPOINTS;
     std::stringstream ss;
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
@@ -442,10 +445,10 @@ void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol
     ss.imbue( special_locale );
     (*facet).format( "%Y%m%d %H%M%S" );
 
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
 
     ss << "HTT," << sSymbol << "," << dtStart << "," << dtEnd << ",,,,1,D\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
@@ -457,9 +460,9 @@ void HistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned i
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     std::stringstream ss;
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
@@ -471,9 +474,9 @@ void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsi
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_INTERVALS;
     std::stringstream ss;
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
@@ -485,23 +488,23 @@ void HistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned i
   else {
     m_stateRetrieval = RETRIEVE_HISTORY_SUMMARY;
     std::stringstream ss;
-    Sleep( m_nMillisecondsToSleep );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
     ss << "HDX," << sSymbol << "," << n << ",1,E\n";
-    Send( ss.str().c_str() );
+    this->Send( ss.str().c_str() );
   }
 }
 
 template <typename T>
 void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
-  linebuffer_t::const_iterator bgn = (*buf).begin();
-  linebuffer_t::const_iterator end = (*buf).end();
+  typename linebuffer_t::const_iterator bgn = (*buf).begin();
+  typename linebuffer_t::const_iterator end = (*buf).end();
 
   assert( ( end - bgn ) > 2 );
   char chRequestID = *bgn;
   bgn++;
   bgn++;
-  linebuffer_t::const_iterator bgn2 = bgn;  // used for error handling
+  typename linebuffer_t::const_iterator bgn2 = bgn;  // used for error handling
 
   bool b = false;
   switch ( chRequestID ) {

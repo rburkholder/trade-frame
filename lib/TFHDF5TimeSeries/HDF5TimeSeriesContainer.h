@@ -35,10 +35,11 @@ public:
   virtual ~HDF5TimeSeriesContainer<DD>( void );
   //typedef HDF5TimeSeriesIterator<T> const_iterator;
   typedef HDF5TimeSeriesIterator<DD> iterator;
+  typedef typename HDF5TimeSeriesAccessor<DD>::size_type size_type;
   iterator begin();
   const iterator &end();
   //void Read( const iterator &_begin, const iterator &_end, T* _dest ); 
-  void Read( iterator &_begin, iterator &_end, typename TimeSeries<DD>* _dest ); 
+  void Read( iterator &_begin, iterator &_end, typename ou::tf::TimeSeries<DD>* _dest ); 
   void Write( const DD* _begin, const DD* _end );
 protected:
   iterator* m_end;
@@ -48,7 +49,7 @@ private:
 
 template<class DD> HDF5TimeSeriesContainer<DD>::HDF5TimeSeriesContainer( HDF5DataManager& dm, const std::string& sPathName ):
   HDF5TimeSeriesAccessor<DD>( dm, sPathName ) {
-    m_end = new iterator( this, size() );
+    m_end = new iterator( this, this->size() );
 }
 
 template<class DD> HDF5TimeSeriesContainer<DD>::~HDF5TimeSeriesContainer(void) {
@@ -74,7 +75,7 @@ template<class DD> void HDF5TimeSeriesContainer<DD>::SetNewSize( size_type newsi
   m_end = new iterator( this, newsize );
 }
 
-template<class DD> void HDF5TimeSeriesContainer<DD>::Read( iterator& _begin, iterator& _end, typename TimeSeries<DD>* _dest ) {
+template<class DD> void HDF5TimeSeriesContainer<DD>::Read( iterator& _begin, iterator& _end, typename ou::tf::TimeSeries<DD>* _dest ) {
   hsize_t cnt = _end - _begin;
   H5::DataSpace* pDs = _dest->DefineDataSpace();
   if ( cnt > 0 ) {

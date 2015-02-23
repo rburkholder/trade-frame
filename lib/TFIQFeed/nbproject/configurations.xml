@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>BuildInstrument.h</itemPath>
+      <itemPath>CurlGetMktSymbols.h</itemPath>
+      <itemPath>IQFeed.h</itemPath>
+      <itemPath>IQFeedHistoryBulkQuery.h</itemPath>
+      <itemPath>IQFeedHistoryBulkQueryMsgShim.h</itemPath>
+      <itemPath>IQFeedHistoryCollector.h</itemPath>
+      <itemPath>IQFeedHistoryQuery.h</itemPath>
+      <itemPath>IQFeedHistoryQueryMsgShim.h</itemPath>
+      <itemPath>IQFeedInstrumentFile.h</itemPath>
+      <itemPath>IQFeedMessages.h</itemPath>
+      <itemPath>IQFeedMsgShim.h</itemPath>
+      <itemPath>IQFeedNewsQuery.h</itemPath>
+      <itemPath>IQFeedNewsQueryMsgShim.h</itemPath>
+      <itemPath>IQFeedProvider.h</itemPath>
+      <itemPath>IQFeedSymbol.h</itemPath>
+      <itemPath>InMemoryMktSymbolList.h</itemPath>
+      <itemPath>LoadMktSymbols.h</itemPath>
+      <itemPath>MarketSymbol.h</itemPath>
+      <itemPath>MarketSymbols.h</itemPath>
+      <itemPath>Option.h</itemPath>
+      <itemPath>ParseFOptionDescription.h</itemPath>
+      <itemPath>ParseMktSymbolDiskFile.h</itemPath>
+      <itemPath>ParseMktSymbolLine.h</itemPath>
+      <itemPath>ParseOptionDescription.h</itemPath>
+      <itemPath>ParseOptionSymbol.h</itemPath>
+      <itemPath>UnzipMktSymbols.h</itemPath>
+      <itemPath>ValidateMktSymbolLine.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>BuildInstrument.cpp</itemPath>
+      <itemPath>CurlGetMktSymbols.cpp</itemPath>
+      <itemPath>IQFeed.cpp</itemPath>
+      <itemPath>IQFeedMessages.cpp</itemPath>
+      <itemPath>IQFeedProvider.cpp</itemPath>
+      <itemPath>IQFeedSymbol.cpp</itemPath>
+      <itemPath>InMemoryMktSymbolList.cpp</itemPath>
+      <itemPath>LoadMktSymbols.cpp</itemPath>
+      <itemPath>MarketSymbol.cpp</itemPath>
+      <itemPath>MarketSymbols.cpp</itemPath>
+      <itemPath>Option.cpp</itemPath>
+      <itemPath>ParseMktSymbolDiskFile.cpp</itemPath>
+      <itemPath>ParseMktSymbolLine.cpp</itemPath>
+      <itemPath>UnzipMktSymbols.cpp</itemPath>
+      <itemPath>ValidateMktSymbolLine.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="BuildInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BuildInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="CurlGetMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CurlGetMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeed.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeed.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryBulkQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryBulkQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryCollector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedInstrumentFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedMessages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedMessages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedNewsQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedNewsQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedProvider.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedProvider.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InMemoryMktSymbolList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InMemoryMktSymbolList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LoadMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="LoadMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MarketSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MarketSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MarketSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MarketSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Option.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Option.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseFOptionDescription.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolDiskFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolDiskFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolLine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseOptionDescription.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseOptionSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="UnzipMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="UnzipMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ValidateMktSymbolLine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ValidateMktSymbolLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="BuildInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BuildInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="CurlGetMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CurlGetMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeed.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeed.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryBulkQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryBulkQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryCollector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedHistoryQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedInstrumentFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedMessages.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedMessages.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedNewsQuery.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedNewsQueryMsgShim.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedProvider.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedProvider.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IQFeedSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IQFeedSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InMemoryMktSymbolList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InMemoryMktSymbolList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LoadMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="LoadMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MarketSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MarketSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MarketSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MarketSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Option.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Option.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseFOptionDescription.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolDiskFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolDiskFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolLine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ParseMktSymbolLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseOptionDescription.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ParseOptionSymbol.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="UnzipMktSymbols.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="UnzipMktSymbols.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ValidateMktSymbolLine.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ValidateMktSymbolLine.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

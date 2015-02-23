@@ -13,6 +13,7 @@
  ************************************************************************/
 
 #include <algorithm>
+#include <ctime>
 
 #include "TreeBuilder.h"
 

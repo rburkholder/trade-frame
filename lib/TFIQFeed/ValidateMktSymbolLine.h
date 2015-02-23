@@ -22,7 +22,7 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <OUCommon/KeywordMatch.h>
+#include <OUCommon/KeyWordMatch.h>
 
 #include "ParseMktSymbolLine.h"
 #include "ParseOptionDescription.h"
@@ -71,7 +71,6 @@ protected:
 private:
 
   typedef ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier sc_t;
-  typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
 
   OnProcessLine_t m_OnProcessLine;
   OnProcessHasOption_t m_OnProcessHasOption;
@@ -181,10 +180,10 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
         break;
       case ou::tf::iqfeed::MarketSymbol::Future:
         // parse out contract expiry information
-        // · For combined session symbols, the first character is "+".
-        //· For Night/Electronic sessions, the first character is "@".
-        // · Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
-        // · NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
+        // ï¿½ For combined session symbols, the first character is "+".
+        //ï¿½ For Night/Electronic sessions, the first character is "@".
+        // ï¿½ Replace the Month and Year code with "#" for Front Month (ie. @ES# instead of @ESU10).
+        // ï¿½ NEW!-Replace the Month and Year code with "#C" for Front Month back-adjusted history (ie. @ES#C instead of @ESU10). 
         // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=commod&web=IQFeed&symbolguide=guide&displayaction=support&section=guide&type=comex&type2=comex_gbx
         bDecode = true;
   //          if ( '+' == sSymbol[0] ) {

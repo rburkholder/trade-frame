@@ -81,6 +81,9 @@
           <incDir>
             <pElem>../</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
         </ccTool>
         <archiverTool>
         </archiverTool>

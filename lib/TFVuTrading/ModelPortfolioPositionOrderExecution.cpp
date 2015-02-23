@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/phoenix/bind.hpp> 

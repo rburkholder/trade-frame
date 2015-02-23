@@ -44,7 +44,7 @@ public:
   // when to use Construct and when to use Get?
   pProvider_t Construct( const idProvider_t& key, keytypes::eidProvider_t type ); // construct given an enum
   template<class P> pProvider_t Construct( const idProvider_t& key ); // construct given a provider 'P' type
-  void Register( const idProvider_t& key,  pProvider_t& pProvider );
+  void Register( const idProvider_t& key,  pProvider_t pProvider );
   void Release( const idProvider_t& key );  // should we check for close or anything?  need to keep a lock count.
   pProvider_t Get( const idProvider_t& key );
 

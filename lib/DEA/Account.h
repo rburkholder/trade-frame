@@ -27,6 +27,8 @@ using namespace boost::gregorian;
 #include <OUCommon/CurrencyCode.h>
 #include <OUCommon/Decimal.h>
 
+#include <OUSQL/Functions.h>
+
 #include "KeyTypes.h"
 
 /*  Wiley Accounting Reference

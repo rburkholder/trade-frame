@@ -19,13 +19,16 @@
 
 // used for tracking profit/loss across a combo of positions
 
-class CPositionCombo {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+class PositionCombo {
 public:
 
-  typedef CPosition::pPosition_t pPosition_t;
+  typedef ou::tf::Position::pPosition_t pPosition_t;
 
-  CPositionCombo(void);
-  ~CPositionCombo(void);
+  PositionCombo(void);
+  ~PositionCombo(void);
 
   void Add( pPosition_t );
 
@@ -37,3 +40,5 @@ private:
 
 };
 
+} // namespace tf
+} // namespace ou

@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -159,7 +159,7 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
     }
     nUnderlyingSize = std::max<unsigned short>( nUnderlyingSize, structOption.sUnderlying.size() );
     structParsedOptionSymbol1 pos1;
-    b = parse( trd.sSymbol.begin(), trd.sSymbol.end(), parserOptionSymbol1, pos1 );
+    b = parse( trd.sSymbol.cbegin(), trd.sSymbol.cend(), parserOptionSymbol1, pos1 );
     if ( b ) {
       if ( 4 > pos1.sDigits.length() ) {  // looking for yydd
         std::cout << "Option Symbol Decode: not enough digits, " << trd.sSymbol << std::endl;

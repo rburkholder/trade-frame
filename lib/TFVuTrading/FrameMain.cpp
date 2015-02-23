@@ -14,7 +14,7 @@
 
 // Generic frame for wx based applications
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include "FrameMain.h"
 

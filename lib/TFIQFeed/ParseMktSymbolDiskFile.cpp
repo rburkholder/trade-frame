@@ -12,10 +12,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 
 #include "ParseMktSymbolDiskFile.h"
 

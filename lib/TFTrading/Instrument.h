@@ -27,6 +27,8 @@ using namespace boost::posix_time;
 
 #include <OUCommon/Delegate.h>
 
+#include <OUSQL/Functions.h>
+
 #include "TradingEnumerations.h"
 #include "KeyTypes.h"
 

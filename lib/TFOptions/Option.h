@@ -47,7 +47,7 @@ public:
   double Theta( void ) const { return m_greek.Theta(); };
   double Vega( void ) const { return m_greek.Vega(); };
 
-  Greeks* Greeks( void ) { return &m_greeks; };
+  ou::tf::Greeks* Greeks( void ) { return &m_greeks; };
 
   void StartWatch( void );
   bool StopWatch( void );

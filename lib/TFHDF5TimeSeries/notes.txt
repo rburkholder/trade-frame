@@ -1,3 +1,12 @@
+2015/02/08
+
+Retrieved from:
+http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/hdf5/snapshots/v19/hdf5-1.9.213.tar.gz
+
+debug mode:
+/configure --prefix=/usr/local --enable-cxx --enable-threadsafe --enable-debug=all --with-szlib=/usr/local --enable-unsupported --includedir=/usr/local/include/hdf5
+
+
 2010/01/01
 
 h5include.h has:

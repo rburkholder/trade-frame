@@ -28,7 +28,7 @@ namespace ou {
 template<class T, class C> // T is type for heap, C is comparison operator for lt
 class CMinHeap {
 public:
-  CMinHeap<T,C>( size_t size );
+  CMinHeap<T,C>( std::size_t size );
   CMinHeap<T,C>( void );
   virtual ~CMinHeap( void );
   void Append( T );  // automatic sift up
@@ -37,25 +37,25 @@ public:
   void ArchiveRoot( void ); // root item of no further use, swap to end and sift down
   void SiftDown( void ) { SiftDown( 0 ); }; // reorder new root after use and change
   bool Empty( void ) { return m_vT.empty(); };
-  size_t Size( void ) { return m_vT.size(); };
+  std::size_t Size( void ) { return m_vT.size(); };
 protected:
-  inline size_t Parent( size_t ix ) { return ( ix - 1 ) / 2; };
-  inline size_t RightChild( size_t ix ) { return 2 * ( ix + 1 ); };
-  inline size_t LeftChild( size_t ix ) { return ( 2 * ix ) + 1; };
-  inline bool isLeaf( size_t ix ) { return LeftChild( ix ) >= m_cntActiveItems; };
-  inline bool hasOneLeaf( size_t ix ) { return m_cntActiveItems == RightChild( ix ); };
-  inline size_t ixLastItem( void );
-  void SiftDown( size_t ix ); // from ix downwards, reordering item
-  void SiftUp( size_t ix );   // from ix upwards towards root, when appending new items
-  inline void Swap( size_t ix, size_t iy );
+  inline std::size_t Parent( std::size_t ix ) { return ( ix - 1 ) / 2; };
+  inline std::size_t RightChild( std::size_t ix ) { return 2 * ( ix + 1 ); };
+  inline std::size_t LeftChild( std::size_t ix ) { return ( 2 * ix ) + 1; };
+  inline bool isLeaf( std::size_t ix ) { return LeftChild( ix ) >= m_cntActiveItems; };
+  inline bool hasOneLeaf( std::size_t ix ) { return m_cntActiveItems == RightChild( ix ); };
+  inline std::size_t ixLastItem( void );
+  void SiftDown( std::size_t ix ); // from ix downwards, reordering item
+  void SiftUp( std::size_t ix );   // from ix upwards towards root, when appending new items
+  inline void Swap( std::size_t ix, std::size_t iy );
 private:
   std::vector<T> m_vT;
-  size_t m_cntActiveItems;
+  std::size_t m_cntActiveItems;
   bool m_bArchivalStarted; // prevents further Appends
 };
 
 template<class T, class C> 
-CMinHeap<T,C>::CMinHeap(size_t size) 
+CMinHeap<T,C>::CMinHeap(std::size_t size) 
 : m_cntActiveItems( 0 ), m_bArchivalStarted( false )
 {
   m_vT.reserve( size );
@@ -72,7 +72,7 @@ CMinHeap<T,C>::~CMinHeap() {
 }
 
 template<class T, class C> 
-size_t CMinHeap<T,C>::ixLastItem() {
+std::size_t CMinHeap<T,C>::ixLastItem() {
   assert( 0 < m_cntActiveItems );
   return m_cntActiveItems - 1;
 }
@@ -106,7 +106,7 @@ void CMinHeap<T,C>::ArchiveRoot() {
 }
 
 template<class T, class C> 
-void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
+void CMinHeap<T,C>::Swap( std::size_t ix, std::size_t iy ) {
   assert( ix < m_cntActiveItems );
   assert( iy < m_cntActiveItems );
   T tmp = m_vT.at( ix );
@@ -115,9 +115,9 @@ void CMinHeap<T,C>::Swap( size_t ix, size_t iy ) {
 }
 
 template<class T, class C> 
-void CMinHeap<T,C>::SiftUp( size_t ix ) {
-  size_t cur = ix;
-  size_t parent;
+void CMinHeap<T,C>::SiftUp( std::size_t ix ) {
+  std::size_t cur = ix;
+  std::size_t parent;
   while ( 0 != cur ) {
     parent = Parent( cur );
     if ( C::lt( m_vT.at( parent ), m_vT.at( cur ) ) ) {
@@ -131,11 +131,11 @@ void CMinHeap<T,C>::SiftUp( size_t ix ) {
 }
 
 template<class T, class C> 
-void CMinHeap<T,C>::SiftDown( size_t ix ) {
-  size_t cur = ix;
+void CMinHeap<T,C>::SiftDown( std::size_t ix ) {
+  std::size_t cur = ix;
   while ( !isLeaf( cur ) ) {
     if ( hasOneLeaf( cur ) ) {
-      size_t left = LeftChild( cur );
+      std::size_t left = LeftChild( cur );
       if ( C::lt( m_vT.at( left ), m_vT.at( cur ) ) ) {
         Swap( left, cur );
         cur = left;
@@ -145,8 +145,8 @@ void CMinHeap<T,C>::SiftDown( size_t ix ) {
       }
     }
     else { // has two leaves
-      size_t right = RightChild( cur );
-      size_t left = LeftChild( cur );
+      std::size_t right = RightChild( cur );
+      std::size_t left = LeftChild( cur );
       // right side has shorter distance by default for same or greater
       bool bGoRight = !( C::lt( m_vT.at( left ), m_vT.at( right ) ) );
       if ( bGoRight ) {

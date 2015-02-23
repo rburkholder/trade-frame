@@ -16,7 +16,7 @@
 
 #include <boost/fusion/container/vector.hpp>
 
-#include "node.h"
+#include "Node.h"
 
 namespace ou { // One Unified
 namespace gp { // genetic programming

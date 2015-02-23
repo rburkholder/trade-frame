@@ -275,6 +275,9 @@ public:
     QPSettleDate = 62,
     _QPLastEntry
   };
+  
+  typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::iterator_t iterator_t;
+  typedef typename IQFBaseMessage<IQFPricingMessage<T, charT> >::fielddelimiter_t fielddelimiter_t;
 
   IQFPricingMessage( void );
   IQFPricingMessage( iterator_t& current, iterator_t& end );
@@ -477,9 +480,9 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 
 template <class T, class charT>
 ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) {
-
-  fielddelimiter_t date = m_vFieldDelimiters[ QPLastTradeDate ];
-  fielddelimiter_t time = m_vFieldDelimiters[ QPLastTradeTime ];
+    
+  fielddelimiter_t date = this->m_vFieldDelimiters[ QPLastTradeDate ];
+  fielddelimiter_t time = this->m_vFieldDelimiters[ QPLastTradeTime ];
 
   if ( ( ( date.second - date.first ) == 10 ) && ( ( time.second - time.first ) >= 8 ) ) {
     char szDateTime[ 20 ];

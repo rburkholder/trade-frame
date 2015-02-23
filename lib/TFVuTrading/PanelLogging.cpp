@@ -11,7 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
+
 #include "PanelLogging.h"
 
 namespace ou { // One Unified

@@ -40,7 +40,7 @@ public:
   double BBUpper( void ) const { return m_stats.BBUpper(); };
   double BBLower( void ) const { return m_stats.BBLower(); };
   void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); };
-  double GetBBMultiplier( void ) const { return m_stats.SetBBMultiplier(); };
+  double GetBBMultiplier( void ) const { return m_stats.GetBBMultiplier(); };
   void Reset( void ) { TimeSeriesSlidingWindow<T,D>::Reset(); m_stats.Reset(); };
 protected:
 //  void Add( const T &datum ) {}; // override to process elements passing into window scope

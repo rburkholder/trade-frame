@@ -11,16 +11,24 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+// 2015/02/15code is not ready, probably deprecated
+
+#include "stdafx.h"
 
 #include "PositionCombo.h"
 
-CPositionCombo::CPositionCombo(void) {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+
+PositionCombo::PositionCombo(void) {
 }
 
-CPositionCombo::~CPositionCombo(void) {
+PositionCombo::~PositionCombo(void) {
 }
 
-void CPositionCombo::Add( pPosition_t pPosition ) {
+void PositionCombo::Add( pPosition_t pPosition ) {
   m_vPositions.push_back( pPosition );
 }
+
+} // namespace tf
+} // namespace ou

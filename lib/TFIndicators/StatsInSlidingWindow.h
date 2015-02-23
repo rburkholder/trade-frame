@@ -39,17 +39,17 @@ private:
 };
 
 template<class T> StatsInSlidingWindow<T>::StatsInSlidingWindow(
-  std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0) :
-    SlidingWindow( WindowSizeSeconds, WindowSizeCount ) {
+  std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) :
+    SlidingWindow<T>( WindowSizeSeconds, WindowSizeCount ) {
   m_sName = sName;
 }
 
 template<class T> StatsInSlidingWindow<T>::~StatsInSlidingWindow(void) {
-  SlidingWindow::~SlidingWindow();
+  SlidingWindow<T>::~SlidingWindow();
 }
 
 template<class T> void StatsInSlidingWindow<T>::Add(boost::posix_time::ptime dt, double val) {
-  if ( SlidingWindow::m_qT.empty() ) {
+  if ( SlidingWindow<T>::m_qT.empty() ) {
     m_dtFirstTime = dt;
   }
   time_duration dur = dt - m_dtFirstTime;
@@ -64,7 +64,7 @@ template<class T> void StatsInSlidingWindow<T>::Remove( ptime dt, double val ) {
 }
 
 template<class T> void StatsInSlidingWindow<T>::CalcStats() {
-  SlidingWindow::UpdateWindow();
+  SlidingWindow<T>::UpdateWindow();
   m_stats.CalcStats();
 }
 

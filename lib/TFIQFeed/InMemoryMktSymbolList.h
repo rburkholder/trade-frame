@@ -154,7 +154,7 @@ public:
   }
 
   template<typename Function>
-  void ScanSymbols( Function& f ) {
+  void ScanSymbols( Function f ) {  // 2015/02/22 was Function& f
     typedef symbols_t::index<ixSymbol>::type Symbols_t;
     Symbols_t::const_iterator endSymbols = m_symbols.get<ixSymbol>().end();
     for ( Symbols_t::const_iterator iterSymbols = m_symbols.get<ixSymbol>().begin(); endSymbols != iterSymbols; iterSymbols++ ) {

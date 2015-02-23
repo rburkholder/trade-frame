@@ -11,7 +11,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
+
 #include "FrameWork01.h"
 
 // Common Framework for creating a strategy
@@ -19,11 +20,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   
-FrameWork01::FrameWork01(void) {
-}
+//FrameWork01::FrameWork01(void) {
+//}
 
-FrameWork01::~FrameWork01(void) {
-}
+//FrameWork01::~FrameWork01(void) {
+//}
 
 } // namespace tf
 } // namespace ou

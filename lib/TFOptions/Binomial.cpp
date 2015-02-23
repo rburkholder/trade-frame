@@ -16,6 +16,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 #include "Binomial.h"
 

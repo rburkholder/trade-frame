@@ -1,5 +1,92 @@
-2014/08/25
+2015/02/22
+Pre-defined C/C++ Compiler Macros:
+http://sourceforge.net/p/predef/wiki/Home/
 
+interesting string types:
+===
+#include <string>
+namespace magic {
+typedef std::basic_string<TCHAR> string;
+}
+=====
+
+2015/02/21
+Time calcs:
+http://stackoverflow.com/questions/4103707/need-a-better-wait-solution/4103842#4103842
+http://stackoverflow.com/questions/4184468/sleep-for-milliseconds
+
+HistoryDailyTicks may need to be recoded and put into production.
+CalcAboveBelow ditto
+
+note TFTrading/InstrumentInformation is old file, removed
+
+
+2015/02/15
+maybe install with libwxgtk3.0-dev instead of libwxbase3.0-dev  [https://wiki.debian.org/Teams/WxWidgets/Transition2.8to3.0]
+ln -s /usr/include/wx-3.0/wx /usr/include/wx
+apt-get install libwxbase3.0-dev for /usr/lib/x86_64-linux-gnu/wx/include/base-unicode-3.0/wx/setup.h
+ln -s /usr/lib/x86_64-linux-gnu/wx/include/base-unicode-3.0/wx/setup.h /usr/include/wx-3.0/wx/setup.h
+
+fixing:
+apt-get remove wx-common wx3.0-headers libwxbase3.0-0 libwxbase3.0-dev
+apt-get install libwxgtk3.0-dev
+https://wiki.wxwidgets.org/Netbeans'
+
+wx-config --libs
+
+
+2015/02/15
+TFInteractiveBrokers/TWS directory can be removed after merging in Windows code.
+The files, for the most part, have been migrated to ./Shared and ./.linux
+EPosixClientSocket.cpp & EClientSocketBase.cpp from the base directory can be removed
+are instead located in win or linux, depending upon the platform
+
+2015/02/08
+for linux:
+libcurl4-openssl-dev 
+
+http://www.hdfgroup.uiuc.edu/ftp/pub/outgoing/hdf5/snapshots/v19/hdf5-1.9.213.tar.gz
+/configure --prefix=/usr/local --enable-cxx --enable-threadsafe --enable-debug=all --with-szlib=/usr/local --enable-unsupported --includedir=/usr/local/include/hdf5
+
+zlib
+http://blog.raymond.burkholder.net/index.php?/archives/598-Build-zlib-v1.2.8-with-Visual-Studio-2012.html
+
+
+====
+root@z800:/usr/src/zlib-1.2.8# diff Makefile.in.old Makefile.in
+57c57
+< OBJZ = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o
+---
+> OBJZ = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o ioapi.o ioapi_mem.o trees.o unzip.o zutil.o
+61c61
+< PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo
+---
+> PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo ioapi.o ioapi_mem.lo trees.lo unzip.lo zutil.lo
+=====
+
+ln -s contrib/minizip/unzip.c unzip.c
+ln -s contrib/minizip/unzip.h unzip.h
+ln -s contrib/minizip/ioapi.c ioapi.c
+ln -s contrib/minizip/ioapi.h ioapi.h
+
+./configure --64 --static --prefix=/usr/local --includedir=/usr/local/include/zlib
+# problem with PIC, so can't do shared:
+#./configure --64 --prefix=/usr/local --includedir=/usr/local/include/zlib --sharedlibdir=/usr/local/lib
+
+root@z800:/usr/src/zlib-1.2.8# ls -alt io*
+-rw-r--r-- 1 root root 3272 Feb  8 23:23 ioapi_mem.lo
+-rw-r--r-- 1 root root 3176 Feb  8 23:22 ioapi_mem.o
+-rw-r--r-- 1 rpb  rpb  5284 Feb  8 19:20 ioapi_mem.c
+-rw-r--r-- 1 rpb  rpb  2273 Feb  8 19:19 ioapi_mem.h
+root@z800:/usr/src/zlib-1.2.8# ls uncompr.
+uncompr.c   uncompr.lo  uncompr.o   
+root@z800:/usr/src/zlib-1.2.8# find . -name unz*
+./contrib/minizip/unzip.c
+./contrib/minizip/unzip.h
+
+
+
+2014/08/25
 
 C:\Data\Projects\VSC++\TradeFrame\lib\TFInteractiveBrokers\TWS\EClientSocketBase.h
 #include <boost/thread/mutex.hpp>

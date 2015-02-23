@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <assert.h>
 
@@ -214,7 +214,12 @@ DatedDatum( dt ) {
   if ( 'B' == chSide ) m_eSide = Bid;
   m_nShares = atoi( shares.c_str() );
   m_dblPrice = strtod( price.c_str(), &stopchar );
-  strcpy_s( m_uMMID.rch, 5, mmid.c_str());
+  //strcpy_s( m_uMMID.rch, 5, mmid.c_str());
+  const char* p = mmid.c_str();
+  m_uMMID.rch[ 0 ] = p[ 0 ];
+  m_uMMID.rch[ 1 ] = p[ 1 ];
+  m_uMMID.rch[ 2 ] = p[ 2 ];
+  m_uMMID.rch[ 3 ] = p[ 3 ];
   //m_mmid = mmid.c_str();
 }
 

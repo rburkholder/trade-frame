@@ -39,8 +39,8 @@ public:
 
     pChartDataView->SetNames( sName, sPath );
 
-    ou::tf::HDF5TimeSeriesContainer<TS::datum_t> tsRepository( *pdm, sPath );
-    ou::tf::HDF5TimeSeriesContainer<TS::datum_t>::iterator begin, end;
+    ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t> tsRepository( *pdm, sPath );
+    typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t>::iterator begin, end;
     begin = tsRepository.begin();
     end = tsRepository.end();
     hsize_t cnt = end - begin;
@@ -54,7 +54,7 @@ public:
   }
 
   template<typename TS> // TS=timeseries
-  void ChartTimeSeries( const TS& series, const std::string& sName, const std::string& sDescription ) {
+  void ChartTimeSeries( ou::ChartDataView* pChartDataView, const TS& series, const std::string& sName, const std::string& sDescription ) {
 
     pChartDataView->SetNames( sName, sDescription );
 

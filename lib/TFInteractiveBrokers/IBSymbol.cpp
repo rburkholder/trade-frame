@@ -12,7 +12,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#ifdef _WIN32
 #include "StdAfx.h"
+#else
+#include "linux/StdAfx.h"
+#endif
 
 #include <OUCommon/TimeSource.h>
 

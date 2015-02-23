@@ -24,6 +24,8 @@
 
 #include <TFTrading/TradingEnumerations.h>
 
+#include <OUSQL/Functions.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed

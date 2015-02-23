@@ -22,7 +22,7 @@
 #include <vector>
 #include <cassert>
 
-#include <typeinfo.h>
+#include <typeinfo>
 #include <sstream>
 
 #include <boost/thread.hpp>  // separate thread for asio run processing
@@ -492,7 +492,7 @@ void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, 
     // process the buffer:
     // need current linebuffer, need stats on how often it waits for subsequent bulk data
     bufferelement_t ch;
-    inputbuffer_t::const_iterator input = pbuffer->begin();
+    typename inputbuffer_t::const_iterator input = pbuffer->begin();
     while ( 0 != bytes_transferred ) {
       ch = *input;
       ++input;
@@ -538,7 +538,7 @@ void Network<ownerT,charT>::Send( const std::string& send, bool bNotifyOnDone ) 
     //InterlockedIncrement( &m_cntActiveSends );
     boost::interprocess::ipcdetail::atomic_inc32( &m_cntActiveSends );
 
-    linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
+    typename linerepository_t::buffer_t pbuffer = m_reposSendBuffers.CheckOutL();
     pbuffer->clear();
     BOOST_FOREACH( char ch, send ) {
       (*pbuffer).push_back( ch );

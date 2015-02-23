@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <stdexcept>
 
@@ -43,7 +43,7 @@ ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key
   return pProvider;
 }
 
-void ProviderManager::Register( const idProvider_t& key, pProvider_t& pProvider ) {
+void ProviderManager::Register( const idProvider_t& key, pProvider_t pProvider ) {
 
   if ( m_mapProviders.end() != m_mapProviders.find( key ) ) {
     throw std::runtime_error( "ProviderManager::Register, provider already exists" );

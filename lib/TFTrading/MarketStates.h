@@ -62,7 +62,7 @@ struct StateInitialization: sc::simple_state<StateInitialization<S,O,P>, O> {
   typedef sc::custom_reaction<EvInitialize> reactions;
   sc::result react( const EvInitialize& event ) { return static_cast<S*>( this )->Handle( event ); }; 
 protected:
-  sc::result Handle( const EvInitialize& event ) { return transit<P>(); }; 
+  sc::result Handle( const EvInitialize& event ) { return this->transit(); };  //this->transit<P>(); }; 
 };
 
 template<typename O, typename S, typename InnerInitial=mpl::list<> > // O = Outer State, S = State
@@ -76,9 +76,9 @@ struct StateBase: sc::simple_state<StateBase<O,S,InnerInitial>, O, InnerInitial 
 
 
 //protected:
-  sc::result Handle( const EvQuote& ) { return discard_event(); }
-  sc::result Handle( const EvTrade& ) { return discard_event(); };
-  sc::result Handle( const EvScheduled& ) { return discard_event(); };
+  sc::result Handle( const EvQuote& ) { return this->discard_event(); }
+  sc::result Handle( const EvTrade& ) { return this->discard_event(); };
+  sc::result Handle( const EvScheduled& ) { return this->discard_event(); };
 
   template<typename E>
   sc::result react( const E& event ) { return static_cast<S*>( this )->Handle( event ); };

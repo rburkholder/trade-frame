@@ -14,7 +14,7 @@
 
 // Started 2013/09/21
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <ExcelFormat/ExcelFormat.h>
 

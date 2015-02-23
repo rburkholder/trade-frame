@@ -17,8 +17,9 @@
 #include <vector>
 #include <string>
 
-#include "OUCommon\Delegate.h"
-#include "TFTrading\Symbol.h"
+#include <OUCommon/Delegate.h>
+
+#include <TFTrading/Symbol.h>
 
 #include "IQFeedMessages.h"
 

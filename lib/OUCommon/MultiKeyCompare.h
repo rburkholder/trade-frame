@@ -27,7 +27,7 @@ struct MultiKeyCompare {
   MultiKeyCompare( const Key1& key1_, const Key2& key2_ )
     : key1( key1_ ), key2( key2 ) {};
 
-  bool operator<( const MultiKeyCompare& rhs ) const {
+  bool operator<( const MultiKeyCompare<Key1, Key2>& rhs ) const {
     if ( key1 == rhs.key1 ) {
       return key2 < rhs.key2;
     }
@@ -35,7 +35,7 @@ struct MultiKeyCompare {
       return key1 < rhs.key1;
     }
   }
-  bool operator==( const MultiKeyCompare& rhs ) const {
+  bool operator==( const MultiKeyCompare<Key1, Key2>& rhs ) const {
     return ( !(this < rhs) && !(rhs < this) );
   }
 
@@ -43,7 +43,7 @@ struct MultiKeyCompare {
   const Key2& GetKey2( void ) const { return key2; };
 
 private:
-  friend std::ostream& operator<<( std::ostream&, const MultiKeyCompare& );
+  friend std::ostream& operator<<( std::ostream&, const MultiKeyCompare<Key1, Key2>& );  // 2015/02/21 rebuild and notice warning here
   Key1 key1;
   Key2 key2;
 };

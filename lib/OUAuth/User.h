@@ -21,6 +21,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#include <OUSQL/Functions.h>
+
 #include "KeyTypes.h"
 
 namespace ou { // One Unified

@@ -155,9 +155,19 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   // providers need to be registered in order for portfolio/position loading to function properly
   // key needs to match to account
   // ensure providers have been initialized above first
-  ProviderManager::LocalCommonInstance().Register( "iq01", static_cast<pProvider_t>( m_iqfeed ) );
-  ProviderManager::LocalCommonInstance().Register( "ib01", static_cast<pProvider_t>( m_tws ) );
-  ProviderManager::LocalCommonInstance().Register( "sim01", static_cast<pProvider_t>( m_sim ) );
+  pProvider_t p;
+  
+  p = m_iqfeed;
+  //p = boost::static_pointer_cast<pProvider_t>( m_iqfeed );
+  ProviderManager::LocalCommonInstance().Register(  "iq01", p );
+  
+  p = m_iqfeed;
+  //p = boost::static_pointer_cast<pProvider_t>( m_tws );
+  ProviderManager::LocalCommonInstance().Register(  "ib01", p );
+  
+  p = m_sim;
+  //p = boost::static_pointer_cast<pProvider_t>( m_sim );
+  ProviderManager::LocalCommonInstance().Register( "sim01", p );
 
   m_iqfeed->OnConnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedConnected ) );
   m_iqfeed->OnDisconnected.Add( MakeDelegate( this, &FrameWork01::HandleIQFeedDisConnected ) );

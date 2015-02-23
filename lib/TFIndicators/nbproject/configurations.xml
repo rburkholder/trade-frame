@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="95">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Crossing.h</itemPath>
+      <itemPath>Darvas.h</itemPath>
+      <itemPath>PivotGroup.h</itemPath>
+      <itemPath>Pivots.h</itemPath>
+      <itemPath>RunningMinMax.h</itemPath>
+      <itemPath>RunningStats.h</itemPath>
+      <itemPath>SlidingWindow.h</itemPath>
+      <itemPath>StatsInSlidingWindow.h</itemPath>
+      <itemPath>TSDifferential.h</itemPath>
+      <itemPath>TSEMA.h</itemPath>
+      <itemPath>TSHomogenization.h</itemPath>
+      <itemPath>TSMA.h</itemPath>
+      <itemPath>TSNorm.h</itemPath>
+      <itemPath>TSReturns.h</itemPath>
+      <itemPath>TSSWEfficiencyRatio.h</itemPath>
+      <itemPath>TSSWRateOfChange.h</itemPath>
+      <itemPath>TSSWRealizedVolatility.h</itemPath>
+      <itemPath>TSSWRunningTally.h</itemPath>
+      <itemPath>TSSWStats.h</itemPath>
+      <itemPath>TSSWStochastic.h</itemPath>
+      <itemPath>TSSWTickFrequency.h</itemPath>
+      <itemPath>TSVariance.h</itemPath>
+      <itemPath>TSVolatility.h</itemPath>
+      <itemPath>TimeSeriesSlidingWindow.h</itemPath>
+      <itemPath>ZigZag.h</itemPath>
+      <itemPath>stdafx.h</itemPath>
+      <itemPath>targetver.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>Crossing.cpp</itemPath>
+      <itemPath>PivotGroup.cpp</itemPath>
+      <itemPath>Pivots.cpp</itemPath>
+      <itemPath>RunningMinMax.cpp</itemPath>
+      <itemPath>RunningStats.cpp</itemPath>
+      <itemPath>SlidingWindow.cpp</itemPath>
+      <itemPath>StatsInSlidingWindow.cpp</itemPath>
+      <itemPath>TSDifferential.cpp</itemPath>
+      <itemPath>TSEMA.cpp</itemPath>
+      <itemPath>TSHomogenization.cpp</itemPath>
+      <itemPath>TSMA.cpp</itemPath>
+      <itemPath>TSNorm.cpp</itemPath>
+      <itemPath>TSReturns.cpp</itemPath>
+      <itemPath>TSSWEfficiencyRatio.cpp</itemPath>
+      <itemPath>TSSWRateOfChange.cpp</itemPath>
+      <itemPath>TSSWRealizedVolatility.cpp</itemPath>
+      <itemPath>TSSWRunningTally.cpp</itemPath>
+      <itemPath>TSSWStats.cpp</itemPath>
+      <itemPath>TSSWStochastic.cpp</itemPath>
+      <itemPath>TSSWTickFrequency.cpp</itemPath>
+      <itemPath>TSVariance.cpp</itemPath>
+      <itemPath>TSVolatility.cpp</itemPath>
+      <itemPath>ZigZag.cpp</itemPath>
+      <itemPath>stdafx.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>_DEBUG</Elem>
+          </preprocessorList>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="Crossing.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Crossing.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Darvas.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PivotGroup.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PivotGroup.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Pivots.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Pivots.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="RunningMinMax.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="RunningMinMax.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="RunningStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="RunningStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SlidingWindow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StatsInSlidingWindow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StatsInSlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSDifferential.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSDifferential.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSEMA.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSEMA.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSHomogenization.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSHomogenization.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSMA.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSMA.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSNorm.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSNorm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSReturns.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSReturns.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWEfficiencyRatio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWEfficiencyRatio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRateOfChange.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRateOfChange.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRealizedVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRealizedVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRunningTally.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRunningTally.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWStochastic.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWStochastic.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWTickFrequency.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWTickFrequency.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSVariance.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSVariance.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TimeSeriesSlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ZigZag.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ZigZag.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="targetver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="Crossing.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Crossing.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Darvas.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PivotGroup.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PivotGroup.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Pivots.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Pivots.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="RunningMinMax.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="RunningMinMax.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="RunningStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="RunningStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SlidingWindow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StatsInSlidingWindow.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="StatsInSlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSDifferential.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSDifferential.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSEMA.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSEMA.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSHomogenization.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSHomogenization.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSMA.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSMA.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSNorm.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSNorm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSReturns.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSReturns.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWEfficiencyRatio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWEfficiencyRatio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRateOfChange.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRateOfChange.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRealizedVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRealizedVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWRunningTally.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWRunningTally.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWStats.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWStats.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWStochastic.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWStochastic.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSSWTickFrequency.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSSWTickFrequency.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSVariance.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSVariance.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSVolatility.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSVolatility.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TimeSeriesSlidingWindow.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ZigZag.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ZigZag.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="stdafx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="targetver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

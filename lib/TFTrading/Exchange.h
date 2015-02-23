@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <OUSQL/Functions.h>
+
 #include "KeyTypes.h"
 
 namespace ou { // One Unified

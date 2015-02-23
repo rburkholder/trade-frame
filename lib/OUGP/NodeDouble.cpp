@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <math.h>
+#include <ctime>
 
 #include <boost/random.hpp>
 #include <boost/random/uniform_real_distribution.hpp>

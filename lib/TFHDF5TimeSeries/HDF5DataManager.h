@@ -14,7 +14,8 @@
 
 #pragma once
 
-#include <HDF5/H5Cpp.h>
+// changed to lower case 2015/02/08
+#include <hdf5/H5Cpp.h>
 
 #include <boost/function.hpp>
 

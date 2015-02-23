@@ -20,7 +20,7 @@
 
 #include <math.h>
 
-#include <HDF5/H5Cpp.h>
+#include <hdf5/H5Cpp.h>
 
 #include <boost/cstdint.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>

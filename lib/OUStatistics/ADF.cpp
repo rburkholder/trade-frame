@@ -1,6 +1,7 @@
 #include "ADF.h"
 
 #include <fstream>
+#include <math.h>
 
 #include "NewMat/newmat.h"
 #include "NewMat/newmatio.h"

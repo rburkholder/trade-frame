@@ -11,11 +11,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <stdexcept>
 
-#include "OUCommon\TimeSource.h"
+#include <OUCommon/TimeSource.h>
 
 #include "Execution.h"
 
