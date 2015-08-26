@@ -129,9 +129,9 @@ bool AppHedgedBollinger::OnInit() {
   m_pFrameMain->Show( true );
 
   //m_sNameUnderlying = "+GC#";
-  m_sNameUnderlying = "GC";
+  m_sNameUnderlying = "QGC";
   //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
-  m_sNameUnderlyingIQFeed = "+GCZ14";  // Dec 2014  IB won't allow trading within 30 days of expiration.
+  m_sNameUnderlyingIQFeed = "QGCZ15";  // Dec 2014  IB won't allow trading within 30 days of expiration.
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
@@ -158,8 +158,8 @@ bool AppHedgedBollinger::OnInit() {
   //m_dateFrontMonthFuture = boost::gregorian::date( 2014, 2, 26 );
   //m_dateSecondMonthFuture = boost::gregorian::date( 2014, 3, 27 );
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2014, 8, 26 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2014, 9, 25 );
+  m_dateFrontMonthOption = boost::gregorian::date( 2015, 8, 26 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2015, 9, 24 );
 
 //  m_sNameUnderlying = "@YM#";
 //  m_sNameOptionUnderlying = "@YM";  
@@ -201,12 +201,12 @@ bool AppHedgedBollinger::OnInit() {
   //m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "phi";
 //  m_idPortfolio = "weeklies";  // makes it easy for swing trading
 
-  std::string sTimeZoneSpec( "..\\date_time_zonespec.csv" );
+  std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }
 
-  std::string sDbName( "HedgedBollinger.db" );
+  std::string sDbName( "../HedgedBollinger.db" );
   try {
     if ( boost::filesystem::exists( sDbName ) ) {
       boost::filesystem::remove( sDbName );
@@ -510,7 +510,7 @@ void AppHedgedBollinger::HandleMenuActionSaveSymbolSubset( void ) {
     //listIQFeedSymbols.InsertParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
     listIQFeedSymbols.InsertParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlyingIQFeed ) );
     m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
-    listIQFeedSymbols.SaveToFile( "HedgedBollinger.ser" );
+    listIQFeedSymbols.SaveToFile( "../HedgedBollinger.ser" );
     std::cout << "Symbols saved." << std::endl;
   }
   catch (...) {
@@ -520,7 +520,7 @@ void AppHedgedBollinger::HandleMenuActionSaveSymbolSubset( void ) {
 
 void AppHedgedBollinger::HandleMenuActionLoadSymbolSubset( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( "HedgedBollinger.ser" );
+  m_listIQFeedSymbols.LoadFromFile( "../HedgedBollinger.ser" );
   std::cout << " ... completed." << std::endl;
 }
 
@@ -533,7 +533,7 @@ void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( "../symbols.ser" );
   std::cout << " ... done." << std::endl;
 }
 
@@ -546,7 +546,7 @@ void AppHedgedBollinger::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << "Loading From Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( "../symbols.ser" );
   std::cout << " ... done." << std::endl;
 }
 
@@ -557,7 +557,7 @@ void AppHedgedBollinger::HandleMenuAction2LoadIQFeedSymbolList( void ) {
 
 void AppHedgedBollinger::HandleLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( "symbols.ser" );
+  m_listIQFeedSymbols.LoadFromFile( "../symbols.ser" );
   std::cout << " ... completed." << std::endl;
 }
 

@@ -30,8 +30,8 @@ public:
   TimeSeriesSlidingWindowStats<T,D>( const TimeSeriesSlidingWindowStats<T,D>& rhs );
   virtual ~TimeSeriesSlidingWindowStats<T,D>( void );
 //  double Accel( void ) const { return m_stats.B2(); };
-  double Slope( void ) const { return m_stats.B1(); };
-  double Offset( void ) const { return m_stats.B0(); };
+  double Slope( void ) const { return m_stats.Slope(); };
+  double Offset( void ) const { return m_stats.Offset(); };
   double MeanY( void ) const { return m_stats.MeanY(); };
   double RR( void ) const { return m_stats.RR(); };
   double R( void ) const { return m_stats.R(); };

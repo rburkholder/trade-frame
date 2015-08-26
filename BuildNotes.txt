@@ -1,3 +1,7 @@
+2015/02/28
+apt-get install libwxgtk-media3.0
+
+
 2015/02/22
 Pre-defined C/C++ Compiler Macros:
 http://sourceforge.net/p/predef/wiki/Home/

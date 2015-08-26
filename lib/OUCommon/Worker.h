@@ -80,7 +80,7 @@ public:
     m_pThread = new boost::thread( boost::ref( *this ) );
   }
   ~Worker( void ) {};
-  void operator()( void ) {  // runs in alternate thread, won't work peoperly if object goes away before thread is called
+  void operator()( void ) {  // runs in alternate thread, won't work properly if object goes away before thread is called
     m_worker();
   }
   void Join( void ) { if ( 0 != m_pThread ) m_pThread->join(); };

@@ -199,7 +199,10 @@ void ValidateMktSymbolLine::ParseOptionContractInformation( trd_t& trd ) {
         structParsedOptionSymbol2 pos2;
         b = parse( iter1, iter2, parserOptionSymbol2, pos2 );
         if ( b ) {
-          assert( ( 2000 + pos2.nYear ) == structOption.nYear );
+          if ( ( 2000 + pos2.nYear ) != structOption.nYear ) {
+            //assert( false );
+            std::cout << "Option Symbol Decode: " << pos1.sText << " mismatch year " << 2000 + pos2.nYear << "," << structOption.nYear << std::endl;
+          }
           trd.nDay = pos2.nDay;
         }
         boost::gregorian::date date( trd.nYear, trd.nMonth, trd.nDay );

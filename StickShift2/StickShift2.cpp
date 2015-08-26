@@ -31,7 +31,7 @@ using namespace boost::gregorian;
 
 IMPLEMENT_APP(AppStickShift)
 
-const std::string sFileNameMarketSymbolSubset( "..\\stickshift.ser" );
+const std::string sFileNameMarketSymbolSubset( "../stickshift.ser" );
 
 bool AppStickShift::OnInit() {
 
@@ -119,8 +119,9 @@ bool AppStickShift::OnInit() {
 
   m_timerGuiRefresh.SetOwner( this );
 
-  Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start();
+  // need to fix this, seems to lock up program
+  //Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  //m_timerGuiRefresh.Start();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppStickShift::OnClose, this );  // start close of windows and controls
 
@@ -146,6 +147,9 @@ bool AppStickShift::OnInit() {
   m_pFPPOE->Show();
 
   Bind( EVENT_IB_INSTRUMENT, &AppStickShift::HandleIBInstrument, this );
+  
+  m_pFrameMain->Layout();
+  m_pFPPOE->Layout();
 
   return 1;
 
@@ -185,7 +189,8 @@ void AppStickShift::HandleMenuActionSaveSymbolSubset( void ) {
 
   std::cout << "Subsetting symbols ... " << std::endl;
   ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), ou::tf::IQFeedSymbolListOps::SelectSymbols( m_vClassifiers, listIQFeedSymbols ) );
+  ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
+  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
   std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
 
   //std::string sFileName( sFileNameMarketSymbolSubset );

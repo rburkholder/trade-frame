@@ -141,7 +141,7 @@ bool AppLiveChart::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppLiveChart::OnClose, this );  // start close of windows and controls
 
-  std::string sTimeZoneSpec( "date_time_zonespec.csv" );
+  std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
   if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
   }

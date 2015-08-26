@@ -31,19 +31,19 @@ public:
   void Reset( void );
 
 //  double B2() const { return b2; }; // acceleration
-  double B1() const { return b1; }; // slope
-  double B0() const { return b0; }; // offset
+  double Slope( void ) const { return b1; }; // slope  B1  termios.h has this as #define
+  double Offset( void ) const { return b0; }; // offset B0
 
-  double MeanY() const { return meanY; };
+  double MeanY( void ) const { return meanY; };
 
-  double RR() const { return rr; };
-  double R() const { return r; };
+  double RR( void ) const { return rr; };
+  double R( void ) const { return r; };
 
-  double SD() const { return sd; };
+  double SD( void ) const { return sd; };
 
-  double BBOffset() const { return sd * m_BBMultiplier; };
-  double BBUpper() const { return meanY + sd * m_BBMultiplier; };
-  double BBLower() const { return  meanY - sd * m_BBMultiplier; };
+  double BBOffset( void ) const { return sd * m_BBMultiplier; };
+  double BBUpper( void ) const { return meanY + sd * m_BBMultiplier; };
+  double BBLower( void ) const { return  meanY - sd * m_BBMultiplier; };
 
 protected:
 

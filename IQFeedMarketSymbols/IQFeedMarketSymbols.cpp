@@ -16,6 +16,7 @@
 #include "stdafx.h"
 
 #include <boost/cstdint.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
@@ -73,13 +74,13 @@ bool AppIQFeedMarketSymbols::OnInit() {
 }
 
 void AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes( void ) {
-  ou::SicCodeList( "..\\SIC Codes List.xls" );
+  ou::SicCodeList( "../SIC Codes List.xls" );
 }
 
 void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList( void ) {
 
-  ou::SicCodeList sic( "..\\SIC Codes List.xls" );
-  ou::ReadNaicsToSicCodeList naics( "..\\NAICS_to_SIC_Cross_Reference.xls" );
+  ou::SicCodeList sic( "../SIC Codes List.xls" );
+  ou::ReadNaicsToSicCodeList naics( "../NAICS_to_SIC_Cross_Reference.xls" );
 
   struct structFillMaps {
 
@@ -143,7 +144,7 @@ void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListRemote( void ) {
   std::cout << "Downloading Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
 }
 
@@ -156,7 +157,7 @@ void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListLocal( void ) {
   std::cout << "Loading From Text File ... " << std::endl;
   ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
   std::cout << "Saving Binary File ... " << std::endl;
-  m_listIQFeedSymbols.SaveToFile( "symbols.ser" );
+  m_listIQFeedSymbols.SaveToFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
 }
 
@@ -167,7 +168,7 @@ void AppIQFeedMarketSymbols::HandleMenuAction2LoadIQFeedSymbolList( void ) {
 
 void AppIQFeedMarketSymbols::HandleLoadIQFeedSymbolList( void ) {
   std::cout << "Loading From Binary File ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( "symbols.ser" );
+  m_listIQFeedSymbols.LoadFromFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... completed." << std::endl;
 }
 

@@ -109,11 +109,10 @@
           <standard>8</standard>
           <incDir>
             <pElem>../</pElem>
-            <pElem>/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0</pElem>
           </incDir>
+          <commandLine>`/usr/local/bin/wx-config --cxxflags`</commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
-            <Elem>__WXGTK__</Elem>
             <Elem>wxUSE_GUI</Elem>
           </preprocessorList>
         </ccTool>

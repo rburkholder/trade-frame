@@ -28,7 +28,7 @@ struct UpdateGui {
   void operator()( T& t ) const {
     // todo:  deal with flicker by double-buffering?
     if ( t.Changed() ) {
-      m_pGrid->SetCellValue( t.GetText(), m_row, t.GetCol() );
+      m_pGrid->SetCellValue( m_row, t.GetCol(), wxString( t.GetText() ) );
     }
   }
 };

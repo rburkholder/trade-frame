@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <TFTrading/InstrumentManager.h>
 
@@ -21,9 +21,9 @@
 ChartTest::ChartTest( pProvider_t pProvider ) 
   : ou::ChartDataBase()
 {
-  this->GetChartDataView().SetNames( "LiveChart", "+GC#" );
+  this->GetChartDataView().SetNames( "LiveChart", "QGC#" );
   ou::tf::Instrument::pInstrument_t pInstrument
-    = ou::tf::InstrumentManager::Instance().ConstructInstrument( "+GC#", "SMART", ou::tf::InstrumentType::Future );
+    = ou::tf::InstrumentManager::Instance().ConstructInstrument( "QGC#", "SMART", ou::tf::InstrumentType::Future );
   m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDataBase::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDataBase::HandleTrade ) );
