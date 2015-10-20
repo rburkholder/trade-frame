@@ -19,7 +19,7 @@
 //
 
 // inheriting classes need to be aware of how Size is calculated, as it 
-//   will be used by the charting application for determinig if 
+//   will be used by the charting application for determining if 
 //   it will be calculating the DoubleArray parameter for the charting library
 
 #include <vector>
@@ -36,7 +36,9 @@
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 #include <OUCommon/Colour.h>
 
-#ifdef _M_X64
+#if defined(__x86_64__)
+#include "ChartDirector64/chartdir.h"
+#elif defined(_M_X64)
 #include "ChartDirector64/chartdir.h"
 #else
 #include "ChartDirector/chartdir.h"

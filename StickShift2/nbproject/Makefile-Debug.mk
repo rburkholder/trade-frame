@@ -54,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,/usr/local/lib ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a -lboost_system -lboost_date_time -lboost_filesystem -lboost_serialization -lboost_thread -lboost_regex -lhdf5_cpp -lhdf5 -lsz -lcurl -lpthread -ldl /usr/local/lib/libz.rpb.a /usr/local/lib/libz.so -lz
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,/usr/local/lib ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lboost_system-gcc52-mt-d-1_59 -lboost_date_time-gcc52-mt-d-1_59 -lboost_filesystem-gcc52-mt-d-1_59 -lboost_serialization-gcc52-mt-d-1_59 -lboost_thread-gcc52-mt-d-1_59 -lboost_regex-gcc52-mt-d-1_59 -lcurl
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -83,10 +83,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/OUCommon/dist/Deb
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: /usr/local/lib/libz.rpb.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: /usr/local/lib/libz.so
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}

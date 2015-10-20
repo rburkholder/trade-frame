@@ -83,7 +83,7 @@ private:
 
   std::string m_sDbName;
 
-  wxTimer m_timerGuiRefresh;
+//  wxTimer m_timerGuiRefresh;
 
   double m_dblMaxPL;
   double m_dblMinPL;

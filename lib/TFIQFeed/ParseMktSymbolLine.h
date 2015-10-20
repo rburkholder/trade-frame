@@ -91,7 +91,8 @@ struct MktSymbolLineParser: qi::grammar<Iterator, trd_t()> {
     rListedMarket %= rNotATab;
     rSymbolClassifier %= ( symTypes | rDefaultSymType ); 
     rSic          %= qi::lexeme[ qi::uint_ ];
-    rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = qi::true_ ] | qi::eps );
+    //rFrontMonth   %= ( qi::char_( 'Y' )[ qi::_val = qi::true_ ] | qi::eps );
+    rFrontMonth   %= ( qi::matches[ qi::char_( 'Y' ) ] | qi::eps );
     rNaics        %= qi::lexeme[ qi::uint_ ];
 
     start %=               rSymbol

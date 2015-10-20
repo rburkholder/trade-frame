@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Advanced Software Engineering Limited.
+ * Copyright (C) 2013 Advanced Software Engineering Limited.
  *
  * This file is part of the ChartDirector software. Usage of this file is
  * subjected to the ChartDirector license agreement. See the LICENSE.TXT
@@ -18,7 +18,7 @@ public :
 	int len;
 	const char *data;
 	MemBlock() : len(0), data(0) {}
-	MemBlock(const char *data, int len) : len(len), data(data) {}
+	MemBlock(const char *_data, int _len) : len(_len), data(_data) {}
 	char operator[](int i) const { return data[i]; }
 };
 
@@ -28,7 +28,7 @@ public :
 	int len;
 	const char * const *data;
 	StringArray() : len(0), data(0) {}
-	StringArray(const char * const *data, int len) : len(len), data(data) {}
+	StringArray(const char * const *_data, int _len) : len(_len), data(_data) {}
 	const char *operator[](int i) const { return data[i]; }
 };
 
@@ -38,7 +38,7 @@ public :
 	int len;
 	const double *data;
 	DoubleArray() : len(0), data(0) {}
-	DoubleArray(const double *data, int len) : len(len), data(data) {}
+	DoubleArray(const double *_data, int _len) : len(_len), data(_data) {}
 	double operator[](int i) const { return data[i]; }
 };
 
@@ -48,7 +48,7 @@ public :
 	int len;
 	const int *data;
 	IntArray() : len(0), data(0) {}
-	IntArray(const int *data, int len) : len(len), data(data) {}
+	IntArray(const int *_data, int _len) : len(_len), data(_data) {}
 	int operator[](int i) const { return data[i]; }
 };
 

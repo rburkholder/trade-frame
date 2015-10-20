@@ -155,7 +155,7 @@ namespace Chart
 		-1
 	};
 
-	static const int transparentPalette[] =
+	static const long transparentPalette[] =
 	{
 		0xffffff, 0x000000, 0x000000, 0x808080,
 		0x808080, 0x808080, 0x808080, 0x808080,
@@ -2772,7 +2772,7 @@ enum ImgFormat {PNG, GIF, JPG, WMP, BMP};
 static const int *oldDefaultPalette = Chart::oldDefaultPalette;
 static const int *defaultPalette = Chart::defaultPalette;
 static const int *whiteOnBlackPalette = Chart::whiteOnBlackPalette;
-static const int *transparentPalette = Chart::transparentPalette;
+static const long *transparentPalette = Chart::transparentPalette;
 
 enum {SideLayout, CircleLayout};
 

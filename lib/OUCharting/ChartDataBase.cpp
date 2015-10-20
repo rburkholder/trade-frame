@@ -14,6 +14,8 @@
 
 #include <cfloat>
 
+#include <OUCommon/Colour.h>
+
 #include "ChartDataBase.h"
 
 namespace ou { // One Unified

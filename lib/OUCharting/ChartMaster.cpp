@@ -43,7 +43,11 @@ ChartMaster::~ChartMaster(void) {
 }
 
 void ChartMaster::Initialize( void ) {
-  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  char code[2048];
+  //bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1", &code );
+  //bool b = Chart::setLicenseCode( "UDEV-23FP-5DWS-X22U-BBBD-FBD8", &code );
+  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1 UDEV-23FP-5DWS-X22U-BBBD-FBD8", code );
+  //Chart::getLicenseAttr()
   assert( b );
 }
 

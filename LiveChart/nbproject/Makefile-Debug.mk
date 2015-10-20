@@ -54,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a ../lib/OUCharting/dist/Debug/GNU-Linux-x86/liboucharting.a ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a ../lib/TFIndicators/dist/Debug/GNU-Linux-x86/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a -lboost_system -lboost_date_time -lboost_filesystem -lboost_serialization -lboost_thread -lboost_regex -lhdf5_cpp -lhdf5 -lz -lsz -lcurl -lpthread -ldl -lchartdir
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,/usr/local/lib ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a ../lib/OUCharting/dist/Debug/GNU-Linux-x86/liboucharting.a ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a ../lib/TFIndicators/dist/Debug/GNU-Linux-x86/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a -lboost_system-gcc52-mt-d-1_59 -lboost_date_time-gcc52-mt-d-1_59 -lboost_filesystem-gcc52-mt-d-1_59 -lboost_serialization-gcc52-mt-d-1_59 -lboost_thread-gcc52-mt-d-1_59 -lboost_regex-gcc52-mt-d-1_59 -lhdf5_cpp -lhdf5 -lz -lsz -lcurl -lpthread -ldl -lchartdir
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -123,6 +123,19 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -145,6 +158,19 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug clean
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Debug clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

@@ -27,11 +27,11 @@ TimeSource::TimeSource(void)
   // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/examples.html#date_time.examples.local_utc_conversion
   try {
     if ( !m_bTzLoaded ) {
-      m_bTzLoaded = true;
   //    m_tzDb.load_from_file( "../../boost/libs/date_time/data/date_time_zonespec.csv" );
   //    m_tzDb.load_from_file( "..\\..\\boost\\libs\\date_time\\data\\date_time_zonespec.csv" );
       m_tzDb.load_from_file( "../date_time_zonespec.csv" );
       m_tzNewYork = m_tzDb.time_zone_from_region( "America/New_York");
+      m_bTzLoaded = true;
     }
   }
   catch (std::exception) {

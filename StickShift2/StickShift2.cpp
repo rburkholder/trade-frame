@@ -35,6 +35,9 @@ const std::string sFileNameMarketSymbolSubset( "../stickshift.ser" );
 
 bool AppStickShift::OnInit() {
 
+  //bool bExit = GetExitOnFrameDelete();
+  //SetExitOnFrameDelete( true );
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Manual Trading" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
@@ -80,7 +83,8 @@ bool AppStickShift::OnInit() {
   m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
-  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  //m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM, 0);
+  m_sizerStatus->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
   m_pPanelLogging->Show( true );
 
   m_pFrameMain->Show( true );
@@ -117,7 +121,7 @@ bool AppStickShift::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
 
-  m_timerGuiRefresh.SetOwner( this );
+//  m_timerGuiRefresh.SetOwner( this );
 
   // need to fix this, seems to lock up program
   //Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
@@ -150,7 +154,7 @@ bool AppStickShift::OnInit() {
   
   m_pFrameMain->Layout();
   m_pFPPOE->Layout();
-
+  
   return 1;
 
 }
@@ -230,21 +234,6 @@ void AppStickShift::HandleGuiRefresh( wxTimerEvent& event ) {
   for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
     iter->second.pPPP->UpdateGui();
   }
-}
-
-int AppStickShift::OnExit() {
-
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
-
-//  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
-  if ( m_db.IsOpen() ) m_db.Close();
-
-//  delete m_pCPPOE;
-//  m_pCPPOE = 0;
-
-  return 0;
 }
 
 void AppStickShift::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {
@@ -431,12 +420,29 @@ void AppStickShift::HandlePanelFocusPropogate( unsigned int ix ) {
 void AppStickShift::OnClose( wxCloseEvent& event ) {
 //  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 //  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePositionLoaded ) );
-  m_timerGuiRefresh.Stop();
+//  m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
   event.Skip();  // auto followed by Destroy();
+}
+
+int AppStickShift::OnExit() {
+    
+  // called after destroying all application windows
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
+
+//  DelinkFromPanelProviderControl();  generates stack errors
+  //m_timerGuiRefresh.Stop();
+  if ( m_db.IsOpen() ) m_db.Close();
+
+//  delete m_pCPPOE;
+//  m_pCPPOE = 0;
+
+  return wxApp::OnExit();
 }
 
 void AppStickShift::OnData1Connected( int ) {

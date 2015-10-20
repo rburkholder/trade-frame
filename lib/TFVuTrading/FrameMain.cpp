@@ -55,9 +55,9 @@ void FrameMain::CreateControls( void ) {
     itemMenuFile->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
     m_menuBar->Append(itemMenuFile, _("File"));
 
-    m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
-    m_statusBar->SetFieldsCount(2);
-    itemFrame1->SetStatusBar(m_statusBar);
+//    m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
+//    m_statusBar->SetFieldsCount(2);
+//    itemFrame1->SetStatusBar(m_statusBar);
    
     Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnMenuExitClick, this, ID_MENUEXIT );
     Bind( wxEVT_CLOSE_WINDOW, &FrameMain::OnClose, this );

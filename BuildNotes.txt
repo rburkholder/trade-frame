@@ -1,3 +1,67 @@
+2015/10/19
+
+how to detect 64 bit:
+
+#if defined(__x86_64__)
+#include "ChartDirector64/chartdir.h"
+#else
+#include "ChartDirector/chartdir.h"
+#endif
+
+2015/10/11
+
+szip
+
+wget http://www.hdfgroup.org/ftp/lib-external/szip/2.1/src/szip-2.1.tar.gz
+tar zxvf szip-2.1.tar.gz
+cd szip-2.1
+./configure  --prefix=/usr/local --enable-production
+make
+sudo make install
+
+
+
+2015/10/11
+
+zlib
+
+wget http://zlib.net/zlib-1.2.8.tar.gz
+tar zxvf zlib-1.2.8.tar.gz 5
+cd zlib-1.2.8
+
+get code at https://github.com/rburkholder/ioapi_mem
+add the files # added ioapi_mem.c, ioapi_mem.h
+
+ln -s contrib/minizip/unzip.c unzip.c
+ln -s contrib/minizip/unzip.h unzip.h
+ln -s contrib/minizip/ioapi.c ioapi.c
+ln -s contrib/minizip/ioapi.h ioapi.h
+
+mv Makefile.in Makefile.in.orginal
+cat Makefile.in.original | sed "s/zutil.o$/zutil.o ioapi.o ioapi_mem.o unzip.o/" > Makefile.in
+
+./configure --64 --static --prefix=/usr/local --includedir=/usr/local/include/zlib
+
+make
+sudo make install
+sudo cp ioapi.h /usr/local/include/zlib
+sudo cp ioapi_mem.h /usr/local/include/zlib
+sudo cp unzip.h /usr/local/include/zlib
+
+2015/10/11
+
+chardir.h 
+line 158, 2775: change int to long?
+
+2015/10/11
+mkdir build
+cd build
+../configure --prefix=/usr/local --enable-cxx --enable-threadsafe --enable-debug=all --with-szlib=/usr/local --enable-unsupported --includedir=/usr/local/include/hdf5
+../configure --prefix=/usr/local --enable-cxx --enable-threadsafe --enable-production --with-szlib=/usr/local --enable-unsupported --includedir=/usr/local/include/hdf5
+make
+sudo make install
+
+
 2015/02/28
 apt-get install libwxgtk-media3.0
 

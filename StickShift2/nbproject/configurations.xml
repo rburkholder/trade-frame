@@ -205,24 +205,154 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>sz</linkerLibLibItem>
-            <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
-            <linkerLibFileItem>/usr/local/lib/libz.rpb.a</linkerLibFileItem>
-            <linkerLibFileItem>/usr/local/lib/libz.so</linkerLibFileItem>
             <linkerLibLibItem>z</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>curl</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
+        <requiredProjects>
+          <makeArtifact PL="../lib/OUSqlite"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/OUSqlite"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFVuTrading"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFVuTrading"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFInteractiveBrokers"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFInteractiveBrokers"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFIQFeed"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFIQFeed"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFSimulation"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFSimulation"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFTrading"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFTrading"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFTimeSeries"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFTimeSeries"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFHDF5TimeSeries"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/OUCommon"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/OUCommon"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucommon.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/OUSQL"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/OUSQL"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousql.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFBitsNPieces"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFBitsNPieces"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfbitsnpieces.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFIndicators"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFIndicators"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
+          </makeArtifact>
+          <makeArtifact PL="../lib/TFOptions"
+                        CT="3"
+                        CN="Debug"
+                        AC="true"
+                        BL="false"
+                        WD="../lib/TFOptions"
+                        BC="${MAKE}  -f Makefile CONF=Debug"
+                        CC="${MAKE}  -f Makefile CONF=Debug clean"
+                        OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+          </makeArtifact>
+        </requiredProjects>
       </compileType>
       <item path="EventIBInstrument.cpp" ex="false" tool="1" flavor2="0">
       </item>

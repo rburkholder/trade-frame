@@ -232,19 +232,19 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>sz</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
-            <linkerLibLibItem>z.rpb</linkerLibLibItem>
+            <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
