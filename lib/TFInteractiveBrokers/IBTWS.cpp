@@ -152,7 +152,10 @@ void IBTWS::DisconnectCommon( bool bSignalEnd ){
 void IBTWS::ProcessMessages( void ) {
   bool bOK = true;
   while ( bOK && m_bConnected ) {
-    bOK = pTWS->checkMessages();
+  // maybe only activate while messages are queued up
+  //   but will lose something when receiving market data
+  //while ( m_bConnected ) {
+    bOK = pTWS->checkMessages();  // code in EClientSocketBaseImpl.h has code change on linux for select()
   }
   m_bConnected = false;  // placeholder for debug
 
@@ -875,7 +878,7 @@ void IBTWS::nextValidId( OrderId orderId) {
 //  OutputDebugString( m_ss.str().c_str() );
 }
 
-void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t pInstrument ) {
+void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument ) {
 
   std::string sUnderlying( contract.symbol );
   std::string sLocalSymbol( contract.localSymbol );

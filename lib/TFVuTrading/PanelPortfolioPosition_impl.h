@@ -123,7 +123,6 @@ struct PanelPortfolioPosition_impl {
     pPosition_t GetPosition( void ) { return m_pPosition; }
     void SetPrecision( double dbl ) {
       boost::fusion::for_each( boost::fusion::filter<ModelCellDouble>( m_vModelCells ), ModelCell_ops::SetPrecision( 2 ) );
-      
     }
   private:
     int m_row;
@@ -182,7 +181,7 @@ struct PanelPortfolioPosition_impl {
       boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
     }
-  };
+  };  // structPosition
 
   typedef std::vector<structPosition> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid

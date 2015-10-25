@@ -161,7 +161,7 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   //p = boost::static_pointer_cast<pProvider_t>( m_iqfeed );
   ProviderManager::LocalCommonInstance().Register(  "iq01", p );
   
-  p = m_iqfeed;
+  p = m_tws;
   //p = boost::static_pointer_cast<pProvider_t>( m_tws );
   ProviderManager::LocalCommonInstance().Register(  "ib01", p );
   

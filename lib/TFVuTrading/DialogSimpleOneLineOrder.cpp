@@ -136,10 +136,10 @@ void DialogSimpleOneLineOrder::CreateControls() {
     wxStaticLine* itemStaticLine8 = new wxStaticLine( itemDialog1, wxID_STATIC, wxDefaultPosition, wxSize(-1, 8), wxLI_VERTICAL );
     itemBoxSizer2->Add(itemStaticLine8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    m_btnSubmit = new wxButton( itemDialog1, wxID_OK, _("OK"), wxDefaultPosition, wxSize(30, -1), 0 );
+    m_btnSubmit = new wxButton( itemDialog1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer2->Add(m_btnSubmit, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxButton* itemButton10 = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxSize(30, -1), 0 );
+    wxButton* itemButton10 = new wxButton( itemDialog1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer2->Add(itemButton10, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
 }

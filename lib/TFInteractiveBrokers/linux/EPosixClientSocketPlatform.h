@@ -2,8 +2,6 @@
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 #pragma once
-#ifndef eposixclientsocketcommon_def
-#define eposixclientsocketcommon_def
 
 #ifdef _WIN32
 
@@ -59,7 +57,5 @@
 		// set non-blocking mode
 		return ( fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == 0);
 	};
-
-#endif
 
 #endif

@@ -16,6 +16,11 @@
 #include "ScannerSubscription.h"
 #include "CommissionReport.h"
 
+#ifndef _WIN32
+#include <sys/select.h>
+#endif
+
+
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
@@ -2933,9 +2938,19 @@ bool EClientSocketBase::checkMessages()
 	if( !isSocketOK())
 		return false;
 
-	if( bufferedRead() <= 0) {;
-		return false;
-	}
+#ifndef _WIN32
+        if ( isReadBytesReady() ) {
+#endif
+            if( bufferedRead() <= 0) {;
+                    return false;
+            }
+#ifndef _WIN32
+        }
+        else {
+            return true;
+        }
+#endif
+    
 
 	const char*	beginPtr = &m_inBuffer[0];
 	const char*	ptr = beginPtr;

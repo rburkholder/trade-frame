@@ -66,6 +66,7 @@ bool AppStickShift::OnInit() {
 
   m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
   m_pPanelManualOrder->Show( true );
 
 /*
@@ -121,11 +122,11 @@ bool AppStickShift::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
 
-//  m_timerGuiRefresh.SetOwner( this );
+  m_timerGuiRefresh.SetOwner( this );
 
   // need to fix this, seems to lock up program
-  //Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  //m_timerGuiRefresh.Start();
+  Bind( wxEVT_TIMER, &AppStickShift::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppStickShift::OnClose, this );  // start close of windows and controls
 
@@ -133,7 +134,7 @@ bool AppStickShift::OnInit() {
   m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppStickShift::HandlePanelSymbolText ) );
   m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppStickShift::HandlePanelFocusPropogate ) );
 
-  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 800, 400 ),  
+  m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
     wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
     );
 
@@ -148,12 +149,18 @@ bool AppStickShift::OnInit() {
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
 
-  m_pFPPOE->Show();
-
   Bind( EVENT_IB_INSTRUMENT, &AppStickShift::HandleIBInstrument, this );
   
+  m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
+  
+  m_pFPPOE->SetAutoLayout( true );
   m_pFPPOE->Layout();
+  wxPoint point = m_pFPPOE->GetPosition();
+  point.x += 500;
+  m_pFPPOE->SetPosition( point );
+  m_pFPPOE->Show();
+
   
   return 1;
 
@@ -161,13 +168,20 @@ bool AppStickShift::OnInit() {
 
 void AppStickShift::Start( void ) {
   if ( !m_bStarted ) {
-    m_bStarted = true;
-    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-    pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
-    pm.OnPositionLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePositionLoad ) );
-    m_db.Open( m_sDbName );
-    m_pFPPOE->Update();
-    m_pFPPOE->Refresh();
+    try {
+      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+      pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
+      pm.OnPositionLoaded.Add( MakeDelegate( this, &AppStickShift::HandlePositionLoad ) );
+      m_db.Open( m_sDbName );
+      m_pFPPOE->Update();
+      //m_pFPPOE->Refresh();
+      //m_pFPPOE->SetAutoLayout( true );
+      m_pFPPOE->Layout();  
+      m_bStarted = true;
+    }
+    catch (...) {
+      std::cout << "problems with AppStickShift::Start" << std::endl;
+    }
   }
 }
 
@@ -274,20 +288,26 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
   }
 }
 
+// 20151025 problem with portfolio is 0 in m_EquityPositionCallbackInfo
 void AppStickShift::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
-  pPosition_t pPosition( pm.ConstructPosition( 
-    m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
-    pInstrument->GetInstrumentName(),
-    "",
-    this->m_pExecutionProvider->GetName(),
-    this->m_pData1Provider->GetName(),
-    //"ib01", "iq01", 
-    this->m_pExecutionProvider, this->m_pData1Provider,
-    pInstrument ) 
-    );
-  if ( 0 != m_EquityPositionCallbackInfo.function ) {
-    m_EquityPositionCallbackInfo.function( pPosition );
+  try {
+    pPosition_t pPosition( pm.ConstructPosition( 
+      m_EquityPositionCallbackInfo.pPortfolio->GetRow().idPortfolio,
+      pInstrument->GetInstrumentName(),
+      "",
+      this->m_pExecutionProvider->GetName(),
+      this->m_pData1Provider->GetName(),
+      //"ib01", "iq01", 
+      this->m_pExecutionProvider, this->m_pData1Provider,
+      pInstrument ) 
+      );
+    if ( 0 != m_EquityPositionCallbackInfo.function ) {
+      m_EquityPositionCallbackInfo.function( pPosition );
+    }
+  }
+  catch ( std::runtime_error& e ) {
+    std::cout << "Position Construction Error:  " << e.what() << std::endl;
   }
 }
 
@@ -420,7 +440,7 @@ void AppStickShift::HandlePanelFocusPropogate( unsigned int ix ) {
 void AppStickShift::OnClose( wxCloseEvent& event ) {
 //  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 //  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePositionLoaded ) );
-//  m_timerGuiRefresh.Stop();
+  m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
@@ -436,7 +456,7 @@ int AppStickShift::OnExit() {
   pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 
 //  DelinkFromPanelProviderControl();  generates stack errors
-  //m_timerGuiRefresh.Stop();
+  m_timerGuiRefresh.Stop();
   if ( m_db.IsOpen() ) m_db.Close();
 
 //  delete m_pCPPOE;

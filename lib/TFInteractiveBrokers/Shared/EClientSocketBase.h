@@ -1,9 +1,7 @@
-﻿/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 #pragma once
-#ifndef eclientsocketbase_h__INCLUDED
-#define eclientsocketbase_h__INCLUDED
 
 #include "EClient.h"
 
@@ -185,6 +183,7 @@ private:
 
 	// socket state
 	virtual bool isSocketOK() const = 0;
+        virtual bool isReadBytesReady() const = 0;
 
 protected:
 
@@ -225,5 +224,3 @@ private:
 
 template<> void EClientSocketBase::EncodeField<bool>(std::ostream& os, bool);
 template<> void EClientSocketBase::EncodeField<double>(std::ostream& os, double);
-
-#endif

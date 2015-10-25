@@ -2,8 +2,6 @@
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 #pragma once
-#ifndef eposixclientsocket_def
-#define eposixclientsocket_def
 
 #include "../Shared/EClientSocketBase.h"
 
@@ -22,6 +20,7 @@ public:
 
 	bool isSocketOK() const;
 	int fd() const;
+        bool isReadBytesReady() const;
 
 private:
 
@@ -51,5 +50,3 @@ private:
 
 	int m_fd;
 };
-
-#endif

@@ -10,6 +10,8 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/IQFeedSymbolListOps.h</file>
         </group>
         <group name="lib"/>
-        <group name="TradeFrame"/>
+        <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/FrameWork01.h</file>
+        </group>
     </open-files>
 </project-private>

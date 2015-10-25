@@ -427,6 +427,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
   }
 
   pPosition.reset( new Position( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm ) );
+  
   if ( 0 == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
   }

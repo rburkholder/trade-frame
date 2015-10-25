@@ -171,6 +171,12 @@ void PanelPortfolioPosition_impl::SetPortfolio( pPortfolio_t pPortfolio ) {
     m_gridPositions->Enable( false );
 //    m_sizerMain->Layout();
     //m_gridPositions->Destroy();
+    
+//  m_ppp.SetAutoLayout( true );
+//  m_ppp.Layout();
+//  wxSize size = m_ppp.GetSize();
+//  size.x += 10;
+//  m_ppp.SetSize( size );
   }
 }
 

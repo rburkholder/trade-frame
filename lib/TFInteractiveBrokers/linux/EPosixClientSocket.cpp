@@ -157,6 +157,45 @@ int EPosixClientSocket::fd() const
 	return m_fd;
 }
 
+// 20151023 pause to wait for something on port without running up cpu
+bool EPosixClientSocket::isReadBytesReady() const {
+#ifndef _WIN32
+    int result( 0 );
+    if ( 0 <= m_fd ) {
+        fd_set setRead, setWrite, setError;
+        FD_ZERO( &setRead );
+        setWrite = setError = setRead;
+        FD_SET( m_fd, &setRead );
+        
+        timeval time;
+        time.tv_sec = 0;
+        time.tv_usec = 10000;
+        result = select( m_fd + 1, &setRead, 0, 0, &time );
+        //int result = select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+	//if ( 0 == result ) { // timeout
+	//if ( 0 > result ) { // error)
+//			m_pClient->onReceive();
+//		}
+// suggested code from PosixTestClient.cpp:	
+	if ( 0 < result ) {
+	  if( FD_ISSET( m_fd, &setRead)) {
+		  // socket is ready for reading
+	    return true;
+	  }
+	  else {
+	    return false;  // this might be an error and/or unreachable
+	  }
+	}
+    }
+    else {
+      return false;
+    }
+	
+#else
+    return true;  // no op for windows
+#endif
+}
+
 int EPosixClientSocket::send(const char* buf, size_t sz)
 {
 	if( sz <= 0)
