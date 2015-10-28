@@ -9,18 +9,9 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/InstrumentManager.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/ProviderManager.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Managers.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/ProviderInterface.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Portfolio.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Position.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Order.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/OrderManager.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/DBOps.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/ProviderManager.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Managers.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.h</file>
         </group>
     </open-files>

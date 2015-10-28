@@ -163,41 +163,11 @@ void IBTWS::ProcessMessages( void ) {
   // maybe a state machine would keep track
 }
 
-void IBTWS::RequestContractDetails( 
-  const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
-  // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
-  // pInstrument can be empty, or can have an instrument
-  // results supplied at contractDetails()
-  structRequest_t* pRequest;
-  pRequest = 0;
-  // needs to be thread protected:
-  boost::mutex::scoped_lock lock(m_mutexContractRequest);
-  if ( 0 == m_vInActiveRequestId.size() ) {
-    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone, pInstrument );
-  }
-  else {
-    pRequest = m_vInActiveRequestId.back();
-    m_vInActiveRequestId.pop_back();
-    pRequest->id = m_nxtReqId++;
-    pRequest->fProcess = fProcess;
-    pRequest->fDone = fDone;
-    pRequest->pInstrument = pInstrument;
-  }
-  m_mapActiveRequestId[ pRequest->id ] = pRequest;
-  pTWS->reqContractDetails( pRequest->id, contract );
-}
-
-void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
-  // results supplied at contractDetails()
-  pInstrument_t pInstrument;  // just allocate, and pass as empty
-  RequestContractDetails( contract, fProcess, fDone, pInstrument );
-}
-
 // ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
 
 void IBTWS::RequestContractDetails( 
   pInstrument_t pInstrument, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
-  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over
+  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over <== is this a true statement anymore
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
@@ -205,6 +175,9 @@ void IBTWS::RequestContractDetails(
   contract.symbol = pInstrument->GetInstrumentName();  // for options, this needs to be underlying, which is adjusted below
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
+  case InstrumentType::Stock:
+    // nothing to do?
+    break;
   case InstrumentType::Option:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
@@ -228,6 +201,35 @@ void IBTWS::RequestContractDetails(
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
 }
 
+void IBTWS::RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+  // results supplied at contractDetails()
+  pInstrument_t pInstrument;  // just allocate, and pass as empty
+  RequestContractDetails( contract, fProcess, fDone, pInstrument );
+}
+
+void IBTWS::RequestContractDetails( 
+  const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t pInstrument ) {
+  // 2014/01/28 not complete yet, BuildInstrumentFromContract not converted over
+  // pInstrument can be empty, or can have an instrument
+  // results supplied at contractDetails()
+  structRequest_t* pRequest;
+  pRequest = 0;
+  // needs to be thread protected:
+  boost::mutex::scoped_lock lock(m_mutexContractRequest);
+  if ( 0 == m_vInActiveRequestId.size() ) {
+    pRequest = new structRequest_t( m_nxtReqId++, fProcess, fDone, pInstrument );
+  }
+  else {
+    pRequest = m_vInActiveRequestId.back();
+    m_vInActiveRequestId.pop_back();
+    pRequest->id = m_nxtReqId++;
+    pRequest->fProcess = fProcess;
+    pRequest->fDone = fDone;
+    pRequest->pInstrument = pInstrument;
+  }
+  m_mapActiveRequestId[ pRequest->id ] = pRequest;
+  pTWS->reqContractDetails( pRequest->id, contract );
+}
 
 //IBSymbol *IBTWS::NewCSymbol( const std::string &sSymbolName ) {
 IBTWS::pSymbol_t IBTWS::NewCSymbol( IBSymbol::pInstrument_t pInstrument ) {

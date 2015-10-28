@@ -27,6 +27,8 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include <TFIQFeed/BuildInstrument.h>
+
 #include "StickShift2.h"
 
 IMPLEMENT_APP(AppStickShift)
@@ -264,28 +266,97 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.function = function;
+  
+  // test symbol:  QGCZ15P1200
+  // test symbol:  GLD1531X120
 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  ou::tf::Instrument::pInstrument_t pInstrument;
+  ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
+  
+  // 20151025
+  // can pull equity, future, option out of iqfeed marketsymbols file
+  // construct basic instrument based upon iqfeed info 
+  // then redo the following to obtain the contract info from ib and add to the instrument
+  
+  // 20151026 
+  // maybe get rid of the whole underlying instrument requirement in an option symbol (similar to fact that futures option doesn't have underlying tie in )
+  // requires a bunch of rewrite, but probably worth it
 
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
-  if ( im.Exists( sName, pInstrument ) ) {  
+  if ( im.Exists( sName, pInstrument ) ) {  // the call will supply instrument if it exists
     ConstructEquityPosition1( pInstrument );
   }
   else {
     // this is going to have to be changed to reflect various symbols types recovered from the IQF Market Symbols file
     // which might be simplified if IB already has the code for interpreting a pInstrument_t
-    std::cout << "Requesting IB " << sName << std::endl;
-    ou::tf::IBTWS::Contract contract;
-    contract.currency = "USD";
-    contract.exchange = "SMART";
-    contract.secType = "STK";
-    contract.symbol = sName;
-    m_tws->RequestContractDetails( 
-      contract, 
-      // HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
-      MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
+
+    bool bConstructed( false );
+    try {
+      const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sName ) );
+      
+      switch ( trd.sc ) {
+	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
+	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
+	  break;
+	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
+	{
+	  ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
+	  if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) {
+	  }
+	  else {
+	    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
+	    switch (trdUnderlying.sc ) {
+	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
+		im.Register( pInstrumentUnderlying );
+		break;
+	      default:
+		throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
+	    }
+	  }
+          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
+	}
+	  break;
+	default:
+          throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type" );
+      }
+      //im.Register( pInstrument ); // register once info returned from IB
+      bConstructed = true;
+    }
+    catch ( std::runtime_error& e ) {
+      std::cout << "Couldn't find symbol: " + sName << std::endl;
+    }
+    if ( bConstructed ) {
+      std::cout << "Requesting IB: " << sName << std::endl;
+      // rewrite:  TWS should have mechanism to convert instrument to request
+      //ou::tf::IBTWS::Contract contract;
+      //contract.currency = "USD";
+      //contract.exchange = "SMART";
+      //contract.secType = "STK";
+      //contract.symbol = sName;
+      m_tws->RequestContractDetails( 
+	pInstrument,
+	//contract, 
+	// HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
+	MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
+    }
   }
+}
+
+void AppStickShift::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
+  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
+  // this is in another thread, and should be handled in a thread safe manner.
+}
+
+void AppStickShift::HandleIBContractDetailsDone( void ) {
+}
+
+void AppStickShift::HandleIBInstrument( EventIBInstrument& event ) {
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable
+  ConstructEquityPosition1( event.GetInstrument() );
 }
 
 // 20151025 problem with portfolio is 0 in m_EquityPositionCallbackInfo
@@ -418,20 +489,6 @@ void AppStickShift::HandlePanelSymbolText( const std::string& sName ) {
   m_tws->RequestContractDetails( 
     contract, 
     MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
-}
-
-void AppStickShift::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
-  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
-  // this is in another thread, and should be handled in a thread safe manner.
-}
-
-void AppStickShift::HandleIBContractDetailsDone( void ) {
-}
-
-void AppStickShift::HandleIBInstrument( EventIBInstrument& event ) {
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable
-  ConstructEquityPosition1( event.GetInstrument() );
 }
 
 void AppStickShift::HandlePanelFocusPropogate( unsigned int ix ) {
