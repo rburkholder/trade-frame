@@ -225,7 +225,9 @@ public:
   bool IsOption( void ) const { return ( InstrumentType::Option == m_row.eType ); };
   bool IsFuture( void ) const { return ( InstrumentType::Future == m_row.eType ); };
 
+  void SetExchangeName( const std::string& sExchangeName ) { m_row.idExchange = sExchangeName; }
   const std::string& GetExchangeName( void ) const { return m_row.idExchange; };
+  
   void SetCurrency( Currency::enumCurrency eCurrency ) { m_row.eCurrency = eCurrency; };
   const char *GetCurrencyName( void ) const { return Currency::Name[ m_row.eCurrency ]; };
 

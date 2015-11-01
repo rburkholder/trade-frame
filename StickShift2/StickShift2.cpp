@@ -322,7 +322,7 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
 	default:
           throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type" );
       }
-      //im.Register( pInstrument ); // register once info returned from IB
+      //im.Register( pInstrument ); // register once info returned from IB instead
       bConstructed = true;
     }
     catch ( std::runtime_error& e ) {
@@ -355,7 +355,7 @@ void AppStickShift::HandleIBContractDetailsDone( void ) {
 
 void AppStickShift::HandleIBInstrument( EventIBInstrument& event ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable
+  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable (not true, as IB info might be added to iqfeed info)
   ConstructEquityPosition1( event.GetInstrument() );
 }
 

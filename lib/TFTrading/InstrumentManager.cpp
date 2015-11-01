@@ -201,7 +201,7 @@ namespace InstrumentManagerQueries {
 bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstrument ) {
       // ** as an aside, need transaction when writing instrument, underlying, and alternate names to database to ensure correctness
   assert( 0 != m_pSession );
-  assert( m_map.end() == m_map.find( id ) );
+  assert( m_map.end() == m_map.find( id ) );  // ensures we havn't already loaded an instrument
 
   bool bFound = false;
   InstrumentManagerQueries::InstrumentKey idInstrument( id );

@@ -221,13 +221,15 @@ ProviderInterface<P,S>::~ProviderInterface(void) {
 template <typename P, typename S>
 bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument ) {
   typename m_mapSymbols_t::iterator iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  return ( m_mapSymbols.end() != iter );
+  bool b( m_mapSymbols.end() != iter );
+  return b;
 }
 
 template <typename P, typename S>
 bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument, typename m_mapSymbols_t::iterator& iter ) {
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  return ( m_mapSymbols.end() != iter );
+  bool b( m_mapSymbols.end() != iter );
+  return b;
 }
 
 template <typename P, typename S>
