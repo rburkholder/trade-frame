@@ -95,9 +95,9 @@ void InstrumentFilter<S,TS>::HandleGroup( const std::string& sPath, const std::s
 template<typename S, typename TS>
 void InstrumentFilter<S,TS>::HandleObject( const std::string& sPath, const std::string& sObject ) {
   if ( m_bSendThroughFilter ) {
-    ou::tf::HDF5TimeSeriesContainer<TS::datum_t> tsRepository( m_dm, sPath );
-    ou::tf::HDF5TimeSeriesContainer<TS::datum_t>::iterator begin, end;
-    begin = lower_bound( tsRepository.begin(), tsRepository.end(), m_dtDate1 );
+    typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t> tsRepository( m_dm, sPath );
+    typename ou::tf::HDF5TimeSeriesContainer<typename TS::datum_t>::iterator begin, end;
+    begin = std::lower_bound( tsRepository.begin(), tsRepository.end(), m_dtDate1 );
     end = lower_bound( begin, tsRepository.end(), m_dtDate2 ); 
     hsize_t cnt = end - begin;
     if ( m_nRequiredDays <= cnt ) {

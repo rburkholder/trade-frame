@@ -9,16 +9,8 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/InstrumentManager.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Symbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/ProviderInterface.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Symbol.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Portfolio.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Position.cpp</file>
         </group>
     </open-files>
 </project-private>

@@ -465,6 +465,10 @@ struct CellFormat
 	}
 	CellFormat& set_format_string(const std::wstring& fmt_str)
 	{
+		//std::wstring w( cell->GetWString() );
+		//const std::string ss( fmt_str.begin(), fmt_str.end() );
+		//s = ss;
+		//_fmt_idx = _mgr.get_format_idx(ss);
 		_fmt_idx = _mgr.get_format_idx(fmt_str);
 		flush();
 		return *this;
