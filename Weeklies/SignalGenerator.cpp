@@ -32,11 +32,11 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  ou::tf::cboe::vExpiries_t vExpiries;
+  ou::tf::cboe::Expiries_t Expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
   try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( vExpiries, vui );
+    ou::tf::cboe::ReadCboeWeeklyOptions( Expiries, vui );
   }
   catch(...) {
   }

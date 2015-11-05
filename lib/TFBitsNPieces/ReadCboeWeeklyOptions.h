@@ -36,10 +36,11 @@ namespace cboe {
     
     struct UnderlyingInfo {
       std::string sSymbol;
+      bool bAdded;
       std::string sDescription;
       std::string sProductType;
       //boost::gregorian::date dateInitialList;
-      boost::gregorian::date dateListDate;
+      boost::gregorian::date dateListed;
       //bool rbExpires[6];
       bool bStandardWeekly;
       bool bExpandedWeekly;
