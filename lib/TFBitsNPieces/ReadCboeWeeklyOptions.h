@@ -26,19 +26,31 @@ namespace cboe {
 
     typedef std::vector<boost::gregorian::date> vExpiries_t;
 
+    struct Expiries_t {
+      vExpiries_t vExpiriesStandardWeeklies;
+      vExpiries_t vExpiriesExpandedWeeklies;
+      vExpiries_t vExpiriesEndOfWeek;
+      vExpiries_t vExpiriesSpxwXsp;
+      vExpiries_t vExpiriesVixWeeklies;
+    };
+    
     struct UnderlyingInfo {
       std::string sSymbol;
       std::string sDescription;
       std::string sProductType;
-      boost::gregorian::date dateInitialList;
-      bool rbExpires[6];
-      UnderlyingInfo( void ) { for ( int ix = 0; ix < 6; ++ix ) rbExpires[ ix ] = false; };
+      //boost::gregorian::date dateInitialList;
+      boost::gregorian::date dateListDate;
+      //bool rbExpires[6];
+      bool bStandardWeekly;
+      bool bExpandedWeekly;
+      bool bEOW;
+      UnderlyingInfo( void ) {  };
     };
     typedef std::vector<UnderlyingInfo> vUnderlyinginfo_t;
 
     //std::vector<UnderlyingInfo> vui;
 
-void ReadCboeWeeklyOptions( vExpiries_t& vExpiries, vUnderlyinginfo_t& vui );
+void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui );
 
 } // namespace cboe  
 } // namespace tf

@@ -63,10 +63,28 @@ boost::gregorian::date ConvertDate( int intDate ) {
   return boost::gregorian::date( year, month, day );
 }
 
-bool confirm( const std::string& s, ExcelFormat::BasicExcelCell* cell ) {
+bool Confirm( const std::string& s, ExcelFormat::BasicExcelCell* cell ) {
   if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not confirmed 1" );
   std::string ss( cell->GetString() );
   if ( s != ss ) throw std::runtime_error( "not confirmed 2" );
+}
+
+void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vExpiries_t& v ) {
+  assert( 0 != sheet );
+  assert( 0 == v.size() );
+  ExcelFormat::BasicExcelCell* cell;
+  bool bProcess( true );
+  while ( bProcess ) {
+    cell = sheet->Cell( row, col );
+    if ( ExcelFormat::BasicExcelCell::INT != cell->Type() ) {
+      bProcess = false;
+    }
+    else {
+      v.push_back( ConvertDate( cell->GetInteger() ) );
+    }
+    ++col;
+  }
+  assert( 0 < v.size() );
 }
 
 /*  xls2csv .... beginning of file
@@ -82,7 +100,7 @@ bool confirm( const std::string& s, ExcelFormat::BasicExcelCell* cell ) {
 "OEX",,"S&P 100 Index (American style)","Index, pm-settled, cash","20151029",,,"X",
  */
 
-void ReadCboeWeeklyOptions( vExpiries_t& vExpiries, vUnderlyinginfo_t& vui ) {
+void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
   ExcelFormat::BasicExcel xls;
   if ( !xls.Load( "../weeklysmf.xls" ) ) {
     throw std::runtime_error( "file read issue" );
@@ -99,75 +117,96 @@ void ReadCboeWeeklyOptions( vExpiries_t& vExpiries, vUnderlyinginfo_t& vui ) {
     cell = sheet->Cell( 0, 0 );  // LIST OF AVAILABLE WEEKLY OPTIONS
     if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not found 1" );
     
-    confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
-    confirm( "Expanded Weeklys Available Expirations:",          sheet->Cell( 2, 2 ) );
-    confirm( "End of Week (EOW) Options Available Expirations:", sheet->Cell( 3, 2 ) );
-    confirm( "SPXW & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
-    confirm( "VIX Weekly Options",                               sheet->Cell( 5, 2 ) );
-    confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 6, 2 ) );
-    confirm( "Ticker ",                                          sheet->Cell( 7, 0 ) );
+    Confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
+    ExtractDates( sheet, 1, 3, Expiries.vExpiriesStandardWeeklies );
+    
+    Confirm( "Expanded Weeklys Available Expirations:",          sheet->Cell( 2, 2 ) );
+    ExtractDates( sheet, 2, 3, Expiries.vExpiriesExpandedWeeklies );
+    
+    Confirm( "End of Week (EOW) Options Available Expirations:", sheet->Cell( 3, 2 ) );
+    ExtractDates( sheet, 2, 3, Expiries.vExpiriesEndOfWeek );
+    
+    Confirm( "SPXW & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
+    ExtractDates( sheet, 2, 3, Expiries.vExpiriesSpxwXsp );
+    
+    Confirm( "VIX Weekly Options",                               sheet->Cell( 5, 2 ) );
+    ExtractDates( sheet, 2, 3, Expiries.vExpiriesVixWeeklies );
+    
+    Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 6, 2 ) );
+    
+    Confirm( "Ticker ",                                          sheet->Cell( 8, 0 ) );
     
     int ixRow( 9 );
     int ixCol( 0 );
     
-    std::string s( sheet->Cell( 2, 0 )->GetString() );
-    if ( "Ticker Symbol" == s ) {
-      for ( int ix = 4; ix <= 9; ++ix ) {
-	cell = sheet->Cell( 2, ix );
-	if ( ExcelFormat::BasicExcelCell::INT == cell->Type() ) {
-	  vExpiries.push_back( ConvertDate( cell->GetInteger() ) );
-	}
-      }
-      int iy = 3; // beginning row of info.
-      bool bProcess( true );
-      while ( bProcess ) {
-	UnderlyingInfo ui;
-	cell = sheet->Cell( iy, 0 );
-	switch( cell->Type() ) {
-	  case ExcelFormat::BasicExcelCell::STRING:
-	    ui.sSymbol = cell->GetString();
-	    for ( int ix = 1; ix <= 9; ++ix ) {
-	      cell = sheet->Cell( iy, ix );
-	      switch ( ix ) {
-	      case 1: bProcess = AssignCellContent( cell, ui.sDescription );
-		break;
-	      case 2: bProcess = AssignCellContent( cell, ui.sProductType );
-		break;
-	      case 3: 
-		  if ( ExcelFormat::BasicExcelCell::UNDEFINED == cell->Type() ) {
+    bool bProcess( true );
+    while ( bProcess ) {
+      UnderlyingInfo ui;
+      cell = sheet->Cell( ixRow, 0 );
+      switch( cell->Type() ) {
+	case ExcelFormat::BasicExcelCell::STRING:
+	  ui.sSymbol = cell->GetString();
+	  for ( int ixCol = 1; ixCol <= 6; ++ixCol ) {
+	    cell = sheet->Cell( ixRow, ixCol );
+	    switch ( ixCol ) {
+	    case 1: bProcess = AssignCellContent( cell, ui.sDescription );
+	      break;
+	    case 2: bProcess = AssignCellContent( cell, ui.sProductType );
+	      break;
+	    case 3: 
+		if ( ExcelFormat::BasicExcelCell::UNDEFINED == cell->Type() ) {
+		  bProcess = false;
+		} 
+		else {
+		  if ( ExcelFormat::BasicExcelCell::INT != cell->Type() ) {
 		    bProcess = false;
-		  } 
-		  else {
-		    if ( ExcelFormat::BasicExcelCell::INT != cell->Type() ) {
-		      bProcess = false;
-		    }
-		    else {
-		      ui.dateInitialList = ConvertDate( cell->GetInteger() );
-		    }
 		  }
-		break;
-	      case 4:
-	      case 5:
-	      case 6:
-	      case 7:
-	      case 8:
-	      case 9:
-		bProcess = AssignCellContent( cell, ui.rbExpires[ ix - 4 ] );
-		break;
+		  else {
+		    ui.dateListDate = ConvertDate( cell->GetInteger() );
+		  }
+		}
+	      break;
+	    case 4:
+	      if ( ExcelFormat::BasicExcelCell::STRING == cell->Type() ) {
+		ui.bStandardWeekly = "X" == cell->GetString();
 	      }
+	      else {
+		bProcess = false;
+		std::cout << "weird cell" << std::endl;
+	      }
+	      break;
+	    case 5:
+	      if ( ExcelFormat::BasicExcelCell::STRING == cell->Type() ) {
+		ui.bExpandedWeekly = "X" == cell->GetString();
+	      }
+	      else {
+		bProcess = false;
+		std::cout << "weird cell" << std::endl;
+	      }
+	      break;
+	    case 6:
+	      if ( ExcelFormat::BasicExcelCell::STRING == cell->Type() ) {
+		ui.bEOW = "X" == cell->GetString();
+	      }
+	      else {
+		bProcess = false;
+		std::cout << "weird cell" << std::endl;
+	      }
+	      break;
 	    }
-	    break;
-	  case ExcelFormat::BasicExcelCell::UNDEFINED:
-	    bProcess = false;
-	    break;
-	  default:
-	    bProcess = false;
-	    break;
-	}
-	if ( bProcess ) vui.push_back( ui );  // push only if successfully parsed.
-	++iy;
+	  }
+	  break;
+	case ExcelFormat::BasicExcelCell::UNDEFINED:
+	  bProcess = false;
+	  break;
+	default:
+	  bProcess = false;
+	  break;
       }
+      if ( bProcess ) vui.push_back( ui );  // push only if successfully parsed.
+      ++ixRow;
     }
+  } // else
 
 /*    
     for ( int iy = 0; iy < y; ++iy ) {
@@ -201,7 +240,6 @@ void ReadCboeWeeklyOptions( vExpiries_t& vExpiries, vUnderlyinginfo_t& vui ) {
     */
     
     xls.Close();
-  }
 }
 
 } // namespace cboe  
