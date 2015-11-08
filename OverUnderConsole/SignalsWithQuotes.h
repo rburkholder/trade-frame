@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "InstrumentState.h"
+#include <TFBitsNPieces/InstrumentState.h>
 
 class SignalsWithQuotes {
 public:

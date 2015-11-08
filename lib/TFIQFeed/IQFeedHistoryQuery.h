@@ -294,24 +294,24 @@ protected:
 
   // called by CNetwork via CRTP
   void OnNetworkConnected(void) {
-    if ( &HistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
+    //if ( &HistoryQuery<T>::OnHistoryConnected != static_cast<T*>( this )->OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
-    }
+    //}
   };
   void OnNetworkDisconnected(void) {
-    if ( &HistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
+    //if ( &HistoryQuery<T>::OnHistoryDisconnected != &T::OnHistoryDisconnected ) {
       static_cast<T*>( this )->OnHistoryDisconnected();
-    }
+    //}
   };
   void OnNetworkError( size_t e ) {
-    if ( &HistoryQuery<T>::OnHistoryError != &T::OnHistoryError ) {
+    //if ( &HistoryQuery<T>::OnHistoryError != &T::OnHistoryError ) {
       static_cast<T*>( this )->OnHistoryError(e);
-    }
+    //}
   };
   void OnNetworkSendDone(void) {
-    if ( &HistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
+    //if ( &HistoryQuery<T>::OnHistorySendDone != &T::OnHistorySendDone ) {
       static_cast<T*>( this )->OnHistorySendDone();
-    }
+    //}
   };
   void OnNetworkLineBuffer( linebuffer_t* );  // new line available for processing
 
@@ -396,7 +396,7 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
   }
 
-  GiveBackBuffer( buf );
+  this->GiveBackBuffer( buf );
 }
 
 template <typename T>

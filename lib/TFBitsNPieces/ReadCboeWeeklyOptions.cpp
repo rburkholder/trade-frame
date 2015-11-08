@@ -176,7 +176,7 @@ void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
       switch( cell->Type() ) {
 	case ExcelFormat::BasicExcelCell::STRING:
 	  ui.sSymbol = cell->GetString();
-	  std::cout << ixRow << ": " << ui.sSymbol << std::endl;
+	  //std::cout << ixRow << ": " << ui.sSymbol << std::endl;
 	  for ( int ixCol = 1; ixCol <= 7; ++ixCol ) {
 	    cell = sheet->Cell( ixRow, ixCol );
 	    switch ( ixCol ) {
@@ -212,7 +212,8 @@ void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
 	    case 5:
 	      switch ( cell->Type() ) {
 		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bStandardWeekly = "X" == cell->GetString();
+		  ui.bStandardWeekly = 0 == strcmp( "X", cell->GetString() );
+		  //ui.bStandardWeekly = "X" == cell->GetString();
 		  break;
 		case ExcelFormat::BasicExcelCell::UNDEFINED:
 		  break;
@@ -223,7 +224,8 @@ void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
 	    case 6:
 	      switch ( cell->Type() ) {
 		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bExpandedWeekly = "X" == cell->GetString();
+		  ui.bExpandedWeekly = 0 == strcmp( "X", cell->GetString() );
+		  //ui.bExpandedWeekly = "X" == cell->GetString();
 		  break;
 		case ExcelFormat::BasicExcelCell::UNDEFINED:
 		  break;
@@ -234,7 +236,8 @@ void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
 	    case 7:
 	      switch ( cell->Type() ) {
 		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bEOW = "X" == cell->GetString();
+		  ui.bEOW = 0 == strcmp( "X", cell->GetString() );
+		  //ui.bEOW = "X" == cell->GetString();
 		  break;
 		case ExcelFormat::BasicExcelCell::UNDEFINED:
 		  break;

@@ -11,7 +11,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <algorithm>
 
@@ -26,10 +26,12 @@
 #include "Process.h"
 
 //
-// CProcess
+// Process
 //
 
-#pragma message( "** Note:  compile in release mode, buffer checks make it slow in debug" )
+#ifdef _MSC_VER
+#pragma message( "** Note:  for msvc, compile in release mode, buffer checks make it slow in debug" )
+#endif
 
 Process::Process( const std::string& sPrefixPath, size_t nDatums )
 : ou::tf::iqfeed::HistoryBulkQuery<Process>(), 

@@ -12,9 +12,7 @@
         </group>
         <group name="simulant"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/StickShift2/stdafx.h</file>
             <file>file:/home/rpb/projects/TradeFrame/StickShift2/StickShift2.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/StickShift2/targetver.h</file>
             <file>file:/home/rpb/projects/TradeFrame/StickShift2/StickShift2.h</file>
         </group>
     </open-files>

@@ -54,7 +54,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/InstrumentManager.o \
 	${OBJECTDIR}/KeyTypes.o \
 	${OBJECTDIR}/Managers.o \
-	${OBJECTDIR}/MarketStates.o \
 	${OBJECTDIR}/NoRiskInterestRateSeries.o \
 	${OBJECTDIR}/Order.o \
 	${OBJECTDIR}/OrderManager.o \
@@ -191,11 +190,6 @@ ${OBJECTDIR}/Managers.o: Managers.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Managers.o Managers.cpp
-
-${OBJECTDIR}/MarketStates.o: MarketStates.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketStates.o MarketStates.cpp
 
 ${OBJECTDIR}/NoRiskInterestRateSeries.o: NoRiskInterestRateSeries.cpp 
 	${MKDIR} -p ${OBJECTDIR}

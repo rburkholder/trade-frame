@@ -13,6 +13,10 @@
 
 #pragma once
 
+// 2015/11/08 needs substantial rebuilding as it relies on the old berkeley db code
+//  which is no longer actively used.  
+// The berkelydb stuff has been replaced by the sql and sqlite modules.
+
 #include <vector>
 #include <string>
 

@@ -23,7 +23,6 @@
       <itemPath>InstrumentManager.h</itemPath>
       <itemPath>KeyTypes.h</itemPath>
       <itemPath>Managers.h</itemPath>
-      <itemPath>MarketStates.h</itemPath>
       <itemPath>NoRiskInterestRateSeries.h</itemPath>
       <itemPath>Order.h</itemPath>
       <itemPath>OrderManager.h</itemPath>
@@ -67,7 +66,6 @@
       <itemPath>InstrumentManager.cpp</itemPath>
       <itemPath>KeyTypes.cpp</itemPath>
       <itemPath>Managers.cpp</itemPath>
-      <itemPath>MarketStates.cpp</itemPath>
       <itemPath>NoRiskInterestRateSeries.cpp</itemPath>
       <itemPath>Order.cpp</itemPath>
       <itemPath>OrderManager.cpp</itemPath>
@@ -192,10 +190,6 @@
       <item path="Managers.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Managers.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="MarketStates.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="MarketStates.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -355,10 +349,6 @@
       <item path="Managers.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Managers.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="MarketStates.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="MarketStates.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="NoRiskInterestRateSeries.cpp" ex="false" tool="1" flavor2="0">
       </item>

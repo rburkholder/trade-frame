@@ -22,7 +22,15 @@
 struct InstrumentState {
 
   InstrumentState( void );
-  ~InstrumentState( void ) {};
+  InstrumentState( 
+    time_duration tdMarketOpen, 
+    time_duration tdMarketOpenIdle, 
+    time_duration tdCancelOrders,
+    time_duration tdClosePositions,
+    time_duration tdAfterMarket,
+    time_duration tdMarketClosed
+    );
+  virtual ~InstrumentState( void ) {};
 
   double dblAmountToTrade;
   unsigned int nSharesToTrade;
@@ -67,6 +75,14 @@ struct InstrumentState {
   vZeroMark_t vZeroMarks;
   vZeroMark_iter_t iterZeroMark;
   vZeroMark_iter_t iterNextMark; // relative to the zero mark, if long, higher mark, if short, lower mark
+};
+
+struct InstrumentStateFuturesGold: InstrumentState {
+  InstrumentStateFuturesGold( void );
+};
+
+struct InstrumentStateEquitiesUS: InstrumentState {
+  InstrumentStateEquitiesUS( void );
 };
 
 

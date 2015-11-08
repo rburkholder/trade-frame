@@ -19,7 +19,7 @@
 
 #include <boost/thread/barrier.hpp>
 
-#include <TFIQFeed/IQFeedInstrumentFile.h>
+//#include <TFIQFeed/IQFeedInstrumentFile.h>
 #include <TFIQFeed/IQFeedHistoryBulkQuery.h>
 #include <TFTimeSeries/TimeSeries.h>
 

@@ -32,18 +32,21 @@ namespace tf { // TradeFrame
 
 // Events
 struct EvInitialize: sc::event<EvInitialize> {};
+
 struct EvQuote: sc::event<EvQuote> {
   EvQuote( const ou::tf::Quote& quote ): sc::event<EvQuote>(), m_quote( quote ) {};
   const ou::tf::Quote& Quote( void ) const { return m_quote; };
 private:
   const ou::tf::Quote& m_quote;
 };
+
 struct EvTrade: sc::event<EvTrade> {
   EvTrade( const ou::tf::Trade& trade ): sc::event<EvTrade>(), m_trade( trade ) {};
   const ou::tf::Trade& Trade( void ) const { return m_trade; };
 private:
   const ou::tf::Trade& m_trade;
 };
+
 struct EvScheduled: sc::event<EvScheduled> {};
 
 // Machine
@@ -60,9 +63,12 @@ struct MachineMarketStates:
 template<typename S, typename O, typename P> // S = CRTP State, O = Outer State, P = StatePreMarket
 struct StateInitialization: sc::simple_state<StateInitialization<S,O,P>, O> {
   typedef sc::custom_reaction<EvInitialize> reactions;
-  sc::result react( const EvInitialize& event ) { return static_cast<S*>( this )->Handle( event ); }; 
+  sc::result react( const EvInitialize& event ) { return static_cast<S*>( this )->Handle( event ); }
 protected:
-  sc::result Handle( const EvInitialize& event ) { return this->transit(); };  //this->transit<P>(); }; 
+  sc::result Handle( const EvInitialize& event ) { 
+    //this->transit<P>();  // 2015/11/08 won't compile, need to fix
+    return this->discard_event();  // this is substitute until above statement can be fixed
+  } 
 };
 
 template<typename O, typename S, typename InnerInitial=mpl::list<> > // O = Outer State, S = State

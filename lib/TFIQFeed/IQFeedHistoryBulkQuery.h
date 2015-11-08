@@ -23,6 +23,8 @@
 
 #include <algorithm>
 
+#include <boost/atomic.hpp>
+
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -40,7 +42,9 @@ template <typename T, typename U>  // T=CRTP caller, U=internal use for marking 
 class HistoryQueryTag: public HistoryQuery<HistoryQueryTag<T,U> > {
   friend HistoryQuery<HistoryQueryTag<T,U> >;
 public:
-  typedef typename HistoryQuery<HistoryQueryTag<T,U> > inherited_t;
+  // 2015/11/07 possibly a msvc version?
+  //typedef typename HistoryQuery<HistoryQueryTag<T,U> > inherited_t;
+  typedef HistoryQuery<HistoryQueryTag<T,U> > inherited_t;
   HistoryQueryTag( T* t = NULL ) : m_t( t ), m_bActivated( false ) {
   };
 
@@ -62,14 +66,14 @@ public:
 protected:
 
   // CRTP prototypes
-  void OnHistoryConnected( U ) {};
-  void OnHistoryDisconnected( U ) {};
-  void OnHistoryError( U, size_t ) {};
-  void OnHistorySendDone( U ) {};
-  void OnHistoryTickDataPoint( U, structTickDataPoint* ) {};
-  void OnHistoryIntervalData( U, structInterval* ) {};
-  void OnHistorySummaryData( U, structSummary ) {};
-  void OnHistoryRequestDone( U ) {};
+//  void OnHistoryConnected( U ) {};
+//  void OnHistoryDisconnected( U ) {};
+//  void OnHistoryError( U, size_t ) {};
+//  void OnHistorySendDone( U ) {};
+//  void OnHistoryTickDataPoint( U, HistoryStructs::structTickDataPoint* ) {};
+//  void OnHistoryIntervalData( U, HistoryStructs::structInterval* ) {};
+//  void OnHistorySummaryData( U, HistoryStructs::structSummary ) {};
+//  void OnHistoryRequestDone( U ) {};
 
   // CRTP based callbacks;
   void OnHistoryConnected( void ) {
@@ -92,17 +96,17 @@ protected:
     static_cast<T*>( m_t )->OnHistorySendDone( m_tagUser );
   };
 
-  void OnHistoryTickDataPoint( structTickDataPoint* pDP ) {
+  void OnHistoryTickDataPoint( HistoryStructs::structTickDataPoint* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistoryTickDataPoint( m_tagUser, pDP );
   };
 
-  void OnHistoryIntervalData( structInterval* pDP ) {
+  void OnHistoryIntervalData( HistoryStructs::structInterval* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistoryIntervalData( m_tagUser, pDP );
   };
 
-  void OnHistorySummaryData( structSummary* pDP ) {
+  void OnHistorySummaryData( HistoryStructs::structSummary* pDP ) {
     assert( NULL != m_t );
     static_cast<T*>( m_t )->OnHistorySummaryData( m_tagUser, pDP );
   };
@@ -166,7 +170,8 @@ public:
   void ReQueueTicks( structResultTicks* ticks ) { ticks->Clear(); m_reposTicks.CheckInL( ticks ); };
 
   struct structQueryState;  // empty declaration for circular reference
-  typedef typename HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
+  //typedef typename HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
+  typedef HistoryQueryTag<HistoryBulkQuery<T>, structQueryState*> query_t;
 
   struct structQueryState {
     bool b;
@@ -221,8 +226,8 @@ private:
   ou::BufferRepository<structResultBar> m_reposBars;
   ou::BufferRepository<structResultTicks> m_reposTicks;
 
-  LONG m_nMaxSimultaneousQueries;
-  volatile LONG m_nCurSimultaneousQueries;
+  int m_nMaxSimultaneousQueries;
+  boost::atomic<int> m_nCurSimultaneousQueries;
   symbol_list_t::iterator m_iterSymbols;
 
   ou::BufferRepository<structQueryState> m_reposQueryStates;
@@ -288,9 +293,9 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
   boost::mutex::scoped_lock lock( m_mutexProcessSymbolListScopeLock );  // lock for the scope
   structQueryState* pqs;
   m_stateBulkQuery = ERetrievingWithMoreInQ;  
-  while ( ( m_nCurSimultaneousQueries < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
+  while ( ( m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) < m_nMaxSimultaneousQueries ) && ( m_listSymbols.end() != m_iterSymbols ) ) {
     // generate another query
-    InterlockedIncrement( &m_nCurSimultaneousQueries );
+    m_nCurSimultaneousQueries.fetch_add( 1, boost::memory_order_acquire );
     // obtain a query state structure
     pqs = m_reposQueryStates.CheckOutL();
     if ( !pqs->query.Activated() ) {
@@ -320,7 +325,7 @@ void HistoryBulkQuery<T>::ProcessSymbolList( void ) {
     m_stateBulkQuery = ERetrievingWithQEmpty; 
   }
 
-  if ( 0 == m_nCurSimultaneousQueries ) { // no more queries outstanding so finish up
+  if ( 0 == m_nCurSimultaneousQueries.load( boost::memory_order_acquire ) ) { // no more queries outstanding so finish up
     m_stateBulkQuery = EQuiescent; // can now initiate another round of queries
     m_listSymbols.clear();
     static_cast<T*>( this )->OnCompletion();  // indicate total completion
@@ -406,7 +411,7 @@ void HistoryBulkQuery<T>::OnHistoryRequestDone( structQueryState* pqs ) {
 
   pqs->b = false;
   m_reposQueryStates.CheckInL( pqs );
-  InterlockedDecrement( &m_nCurSimultaneousQueries );
+  m_nCurSimultaneousQueries.fetch_sub( 1, boost::memory_order_release );
   ProcessSymbolList();
 }
 

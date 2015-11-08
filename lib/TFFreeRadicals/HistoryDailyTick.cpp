@@ -14,6 +14,7 @@
 
 #include "stdafx.h"
 
+#include "InstrumentState.h"
 #include "HistoryDailyTick.h"
 
 // code sliced out of OverUnderConsole::App

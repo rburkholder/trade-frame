@@ -15,7 +15,7 @@
 
 #include <TFTrading/MarketStates.h>
 
-#include "InstrumentState.h"
+#include <TFBitsNPieces/InstrumentState.h>
 #include "SignalsWithQuotes.h"
 
 typedef ou::tf::EvQuote EvQuote;

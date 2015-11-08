@@ -20,9 +20,9 @@
 
 int _tmain(int argc, _TCHAR* argv[]) {
 
-  App app;
-  app.Run();
+App app;
+app.Run();
 
-	return 0;
+return 0;
 }
 

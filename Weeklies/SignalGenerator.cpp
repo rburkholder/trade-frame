@@ -32,11 +32,11 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  ou::tf::cboe::Expiries_t Expiries;
+  ou::tf::cboe::Expiries_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
   try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( Expiries, vui );
+    ou::tf::cboe::ReadCboeWeeklyOptions( expiries, vui );
   }
   catch(...) {
   }
@@ -44,6 +44,16 @@ void SignalGenerator::Run( void ) {
   typedef ou::tf::cboe::vUnderlyinginfo_t::const_iterator vUnderlyinginfo_citer_t;
 
   for ( vUnderlyinginfo_citer_t iter = vui.begin(); vui.end() != iter; ++iter ) {
+//    std::cout << 
+//	    iter->sSymbol
+//	    << "," << iter->bAdded
+//	    << "," << iter->bStandardWeekly
+//	    << "," << iter->bExpandedWeekly
+//	    << "," << iter->bEOW
+//	    << "," << iter->sProductType
+//	    << "," << iter->sDescription
+//	    << std::endl;
+	    
 //    if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) { 
       //ScanBars( iter->sSymbol );
       BarSummary bs;
