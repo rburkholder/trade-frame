@@ -11,11 +11,8 @@
         </group>
         <group name="lib"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeed.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/MarketSymbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/ValidateMktSymbolLine.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryQuery.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryBulkQuery.h</file>
         </group>

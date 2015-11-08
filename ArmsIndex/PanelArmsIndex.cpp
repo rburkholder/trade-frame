@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
@@ -72,7 +72,10 @@ void PanelArmsIndex::Init() {
       "NKE", "PFE", "PG", "TRV", "UTX",
       "UNH", "VZ", "V", "WMT", "DIS";
 */
-  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  // this should be set via OUCharting/ChartMaster
+  //bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
+  char code[2048];
+  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1 UDEV-23FP-5DWS-X22U-BBBD-FBD8", code );
   assert( b );
 
 }
