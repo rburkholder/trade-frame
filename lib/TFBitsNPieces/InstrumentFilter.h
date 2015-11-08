@@ -16,6 +16,7 @@
 // started 2013/09/19
 
 #include <boost/function.hpp>
+#include <boost/phoenix/core/argument.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
