@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/EventIBInstrument.o \
 	${OBJECTDIR}/IBSymbol.o \
 	${OBJECTDIR}/IBTWS.o \
 	${OBJECTDIR}/linux/EClientSocketBase.o \
@@ -46,8 +47,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-m64
-CXXFLAGS=-m64
+CCFLAGS=-m64 `/usr/local/bin/wx-config --cxxflags`  
+CXXFLAGS=-m64 `/usr/local/bin/wx-config --cxxflags`  
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -67,6 +68,11 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a: ${OBJECTFI
 	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a
+
+${OBJECTDIR}/EventIBInstrument.o: EventIBInstrument.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventIBInstrument.o EventIBInstrument.cpp
 
 ${OBJECTDIR}/IBSymbol.o: IBSymbol.cpp 
 	${MKDIR} -p ${OBJECTDIR}

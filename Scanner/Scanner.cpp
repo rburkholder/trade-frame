@@ -14,8 +14,6 @@
 
 #include "stdafx.h"
 
-//#include <boost/phoenix/bind/bind_member_function.hpp>
-
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFBitsNPieces/InstrumentFilter.h>
 

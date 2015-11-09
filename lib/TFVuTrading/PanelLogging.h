@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+#include <wx/textctrl.h>
+
 #include <OUCommon/ConsoleStream.h>
 
 namespace ou { // One Unified

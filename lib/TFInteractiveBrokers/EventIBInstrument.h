@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <wx/wx.h>
+
 #include <TFTrading/Instrument.h>
 
 class EventIBInstrument: public wxEvent {

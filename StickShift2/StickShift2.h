@@ -31,7 +31,7 @@
 #include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
 
-#include "EventIBInstrument.h"
+#include <TFInteractiveBrokers/EventIBInstrument.h>
 
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>

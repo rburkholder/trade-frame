@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/EventIBInstrument.o \
 	${OBJECTDIR}/StickShift2.o \
 	${OBJECTDIR}/stdafx.o
 
@@ -87,11 +86,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ../lib/OUSqlite/dist/Deb
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/stickshift2 ${OBJECTFILES} ${LDLIBSOPTIONS} `/usr/local/bin/wx-config --libs`
-
-${OBJECTDIR}/EventIBInstrument.o: EventIBInstrument.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventIBInstrument.o EventIBInstrument.cpp
 
 ${OBJECTDIR}/StickShift2.o: StickShift2.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -26,6 +26,7 @@
         <itemPath>Shared/TwsSocketClientErrors.h</itemPath>
         <itemPath>Shared/shared_ptr.h</itemPath>
       </logicalFolder>
+      <itemPath>EventIBInstrument.h</itemPath>
       <itemPath>IBSymbol.h</itemPath>
       <itemPath>IBTWS.h</itemPath>
     </logicalFolder>
@@ -41,6 +42,7 @@
         <itemPath>linux/EPosixClientSocket.cpp</itemPath>
         <itemPath>linux/StdAfx.cpp</itemPath>
       </logicalFolder>
+      <itemPath>EventIBInstrument.cpp</itemPath>
       <itemPath>IBSymbol.cpp</itemPath>
       <itemPath>IBTWS.cpp</itemPath>
     </logicalFolder>
@@ -71,6 +73,7 @@
           <incDir>
             <pElem>../</pElem>
           </incDir>
+          <commandLine>`/usr/local/bin/wx-config --cxxflags` </commandLine>
           <preprocessorList>
             <Elem>_DEBUG</Elem>
           </preprocessorList>
@@ -78,6 +81,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="EventIBInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="EventIBInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="IBSymbol.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="IBSymbol.h" ex="false" tool="3" flavor2="0">
@@ -151,6 +158,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="EventIBInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="EventIBInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="IBSymbol.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="IBSymbol.h" ex="false" tool="3" flavor2="0">
