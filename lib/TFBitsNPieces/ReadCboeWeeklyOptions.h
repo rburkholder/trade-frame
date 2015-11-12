@@ -16,6 +16,8 @@
 
 // Started 2013/09/21
 
+// http://www.cboe.com/micro/weeklys/availableweeklys.aspx
+
 #include <vector>
 
 #include <boost/date_time/gregorian/gregorian_types.hpp>
@@ -41,11 +43,15 @@ namespace cboe {
       std::string sProductType;
       //boost::gregorian::date dateInitialList;
       boost::gregorian::date dateListed;
-      //bool rbExpires[6];
       bool bStandardWeekly;
       bool bExpandedWeekly;
       bool bEOW;
-      UnderlyingInfo( void ) {  };
+      UnderlyingInfo( void ):
+        bAdded(false), bStandardWeekly(false), bExpandedWeekly(false), bEOW(false)
+        {  };
+      bool operator<( const UnderlyingInfo& rhs ) {
+	return sSymbol < rhs.sSymbol;
+      }
     };
     typedef std::vector<UnderlyingInfo> vUnderlyinginfo_t;
 

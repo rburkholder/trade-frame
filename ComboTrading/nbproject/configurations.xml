@@ -5,6 +5,8 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>ComboTrading.h</itemPath>
+      <itemPath>Process.h</itemPath>
+      <itemPath>UnderlyingSelection.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -14,6 +16,8 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>ComboTrading.cpp</itemPath>
+      <itemPath>Process.cpp</itemPath>
+      <itemPath>UnderlyingSelection.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -293,6 +297,14 @@
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Process.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Process.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="UnderlyingSelection.h" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -317,6 +329,14 @@
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Process.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Process.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="UnderlyingSelection.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

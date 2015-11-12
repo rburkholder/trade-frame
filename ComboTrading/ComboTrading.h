@@ -34,6 +34,8 @@
 
 #include <TFInteractiveBrokers/EventIBInstrument.h>
 
+#include "Process.h"
+
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
@@ -88,6 +90,8 @@ private:
 
   double m_dblMaxPL;
   double m_dblMinPL;
+  
+  Process m_process;  // single position
 
   ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
   pPortfolio_t m_pPortfolioMaster;

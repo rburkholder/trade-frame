@@ -29,6 +29,22 @@ using namespace boost::gregorian;
 
 #include "ComboTrading.h"
 
+/*
+ * 20151109 To Do:
+ *   based upon Day Trading Options by Jeff Augen
+ *   read cboe file and sort symbols
+ *   run the pivot scanner, filter by volume and volatility (install in library of scanners)
+ *   sort top and pick 10 symbols (watch daily while building remaining code)
+ *   watch with underlying plus 2 or 3 strike call/puts around at the money (option management)
+ *   select combo and trade/watch the options watched from open (position/portfolio)
+ *   track p/l over the day (portfolio)
+ *   exit at day end, or some minimum profit level with trailing parabolic stop
+ *   build up the volatility indicators mentioned in the boot 
+ *   live chart for each symbol and associated combo 
+ *   save the values at session end
+ *   
+ */
+
 IMPLEMENT_APP(AppComboTrading)
 
 const std::string sFileNameMarketSymbolSubset( "../combotrading.ser" );
@@ -99,7 +115,7 @@ bool AppComboTrading::OnInit() {
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
   m_idPortfolioMaster = "master";  // keeps name constant over multiple days
 
-  m_sDbName = "StickShift2.db";
+  m_sDbName = "ComboTrading.db";
   if ( boost::filesystem::exists( m_sDbName ) ) {
 //    boost::filesystem::remove( sDbName );
   }
@@ -119,7 +135,11 @@ bool AppComboTrading::OnInit() {
   vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
   vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSymbolSubset ) ) );
   vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppComboTrading::HandleMenuActionLoadSymbolSubset ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  m_pFrameMain->AddDynamicMenu( "Symbol List", vItems );
+  
+  vItems.clear();
+  vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
+  m_pFrameMain->AddDynamicMenu( "Process", vItems );
 
 
   m_timerGuiRefresh.SetOwner( this );

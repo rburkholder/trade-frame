@@ -35,7 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/ComboTrading.o
+	${OBJECTDIR}/ComboTrading.o \
+	${OBJECTDIR}/Process.o \
+	${OBJECTDIR}/UnderlyingSelection.o
 
 
 # C Compiler Flags
@@ -66,6 +68,16 @@ ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
+
+${OBJECTDIR}/Process.o: Process.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
+
+${OBJECTDIR}/UnderlyingSelection.o: UnderlyingSelection.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/UnderlyingSelection.o UnderlyingSelection.cpp
 
 # Subprojects
 .build-subprojects:

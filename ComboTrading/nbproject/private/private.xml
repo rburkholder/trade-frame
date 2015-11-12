@@ -9,7 +9,9 @@
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Makefile</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.h</file>
         </group>
     </open-files>
 </project-private>
