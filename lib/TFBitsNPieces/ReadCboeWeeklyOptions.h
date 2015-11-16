@@ -26,14 +26,14 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace cboe {
 
-    typedef std::vector<boost::gregorian::date> vExpiries_t;
+    typedef std::vector<boost::gregorian::date> vOptionExpiryDates_t;
 
-    struct Expiries_t {
-      vExpiries_t vExpiriesStandardWeeklies;
-      vExpiries_t vExpiriesExpandedWeeklies;
-      vExpiries_t vExpiriesEndOfWeek;
-      vExpiries_t vExpiriesSpxwXsp;
-      vExpiries_t vExpiriesVixWeeklies;
+    struct OptionExpiryDates_t {
+      vOptionExpiryDates_t vExpiriesStandardWeeklies;
+      vOptionExpiryDates_t vExpiriesExpandedWeeklies;
+      vOptionExpiryDates_t vExpiriesEndOfWeek;
+      vOptionExpiryDates_t vExpiriesSpxwXsp;
+      vOptionExpiryDates_t vExpiriesVixWeeklies;
     };
     
     struct UnderlyingInfo {
@@ -57,7 +57,7 @@ namespace cboe {
 
     //std::vector<UnderlyingInfo> vui;
 
-void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui );
+void ReadCboeWeeklyOptions( OptionExpiryDates_t&, vUnderlyinginfo_t& );
 
 } // namespace cboe  
 } // namespace tf

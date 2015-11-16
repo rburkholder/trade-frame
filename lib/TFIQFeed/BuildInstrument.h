@@ -28,8 +28,8 @@ namespace iqfeed { // IQFeed
 typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
 
-pInstrument_t BuildInstrument( const trd_t& trd );  // equities and futures
-pInstrument_t BuildInstrument( const trd_t& trd, pInstrument_t pUnderlying ); // options and futuresoptions
+pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd );  // equities and futures
+pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, pInstrument_t pUnderlying ); // options and futuresoptions
 
 } // namespace iqfeed
 } // namespace TradeFrame

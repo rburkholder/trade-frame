@@ -65,13 +65,13 @@ public:
 
   void UpdateATMWatch( double dblValue );
 
-  void SetWatchableOn( double dblStrike );  // each strike is not watcheable by default
+  void SetWatchableOn( double dblStrike );  // each strike is not watchable by default
   void SetWatchableOff( double dblStrike );
 
   void SetWatchOn( double dblStrike, bool bForce = false ); // watch only selected call/put at strike, force watchable on
   void SetWatchOff( double dblStrike, bool bForce = false ); // forces watchable off when true
 
-  void StartWatch( void ); // watch underlying plus all watcheable options
+  void StartWatch( void ); // watch underlying plus all watchable options
   void StopWatch( void ); 
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
@@ -182,8 +182,6 @@ public:
   void AddOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
   void RemoveOnAtmIv( ExpiryBundle::OnAtmIvCalc_t );
 
-
-
 protected:
 
 private:
@@ -223,6 +221,9 @@ struct PopulateMultiExpiryBundle {
     assert( ( ou::tf::iqfeed::MarketSymbol::IEOption == trd.sc )
          || ( ou::tf::iqfeed::MarketSymbol::FOption == trd.sc )
       );
+    
+    // to trade, when is the IB contract number acquired?
+    // and when does the symbol get registered, so it can be traded?
 
     //boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay - 1 );  // IQFeed dates are on Saturday
     boost::gregorian::date dateTrdExpiry( trd.nYear, trd.nMonth, trd.nDay ); // fix IQFeed dates elsewhere

@@ -27,17 +27,31 @@ namespace exchange {
 using namespace boost::assign;
 
 setDates_t setUSDates = list_of
-  ( boost::gregorian::date( 2013, 11, 28 ) ) // Thanksgiving
-  ( boost::gregorian::date( 2013, 12, 25 ) ) // Christmas
-  ( boost::gregorian::date( 2014,  1,  1 ) ) // New Years
-  ( boost::gregorian::date( 2014,  1, 20 ) ) // Martin Luther
-  ( boost::gregorian::date( 2014,  2, 17 ) ) // Presidents  Day
-  ( boost::gregorian::date( 2014,  4, 18 ) ) // Good Friday
-  ( boost::gregorian::date( 2014,  5, 26 ) ) // Memorial
-  ( boost::gregorian::date( 2014,  7,  4 ) ) // Independence
-  ( boost::gregorian::date( 2014,  9,  1 ) ) // Labor
-  ( boost::gregorian::date( 2014, 11, 28 ) ) // Thanksgiving
-  ( boost::gregorian::date( 2014, 12, 25 ) ) // Christmas
+//  ( boost::gregorian::date( 2013, 11, 28 ) ) // Thanksgiving
+//  ( boost::gregorian::date( 2013, 12, 25 ) ) // Christmas
+	
+//  ( boost::gregorian::date( 2014,  1,  1 ) ) // New Years
+//  ( boost::gregorian::date( 2014,  1, 20 ) ) // Martin Luther
+//  ( boost::gregorian::date( 2014,  2, 17 ) ) // Presidents  Day
+//  ( boost::gregorian::date( 2014,  4, 18 ) ) // Good Friday
+//  ( boost::gregorian::date( 2014,  5, 26 ) ) // Memorial
+//  ( boost::gregorian::date( 2014,  7,  4 ) ) // Independence
+//  ( boost::gregorian::date( 2014,  9,  1 ) ) // Labor
+//  ( boost::gregorian::date( 2014, 11, 28 ) ) // Thanksgiving
+//  ( boost::gregorian::date( 2014, 12, 25 ) ) // Christmas
+	
+  ( boost::gregorian::date( 2015, 11, 26 ) ) // Thanksgiving, 13:00 est closing on 27
+  ( boost::gregorian::date( 2015, 12, 25 ) ) // Christmas, 13:00 est closing on 24
+	
+  ( boost::gregorian::date( 2016,  1,  1 ) ) // New Years
+  ( boost::gregorian::date( 2016,  1, 18 ) ) // Martin Luther
+  ( boost::gregorian::date( 2016,  2, 15 ) ) // Presidents  Day
+  ( boost::gregorian::date( 2016,  3, 25 ) ) // Good Friday
+  ( boost::gregorian::date( 2016,  5, 30 ) ) // Memorial
+  ( boost::gregorian::date( 2016,  7,  4 ) ) // Independence
+  ( boost::gregorian::date( 2016,  9,  5 ) ) // Labor
+  ( boost::gregorian::date( 2016, 11, 24 ) ) // Thanksgiving, 13:00 est closing on 25
+  ( boost::gregorian::date( 2016, 12, 26 ) ) // Christmas
   ;
 
 

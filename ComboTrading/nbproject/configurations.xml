@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>BundleTracking.h</itemPath>
       <itemPath>ComboTrading.h</itemPath>
       <itemPath>Process.h</itemPath>
       <itemPath>UnderlyingSelection.h</itemPath>
@@ -15,6 +16,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>BundleTracking.cpp</itemPath>
       <itemPath>ComboTrading.cpp</itemPath>
       <itemPath>Process.cpp</itemPath>
       <itemPath>UnderlyingSelection.cpp</itemPath>
@@ -121,6 +123,18 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFTrading"
                             CT="3"
                             CN="Debug"
@@ -142,18 +156,6 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFOptions"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFOptions"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -293,6 +295,10 @@
           <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
         </linkerTool>
       </compileType>
+      <item path="BundleTracking.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BundleTracking.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">
@@ -326,6 +332,10 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="BundleTracking.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="BundleTracking.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">

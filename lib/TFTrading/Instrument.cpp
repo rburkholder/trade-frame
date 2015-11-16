@@ -33,7 +33,7 @@ namespace tf { // TradeFrame
 */
 
   //static const boost::gregorian::date dayDefault( boost::gregorian::not_a_date_time );
-  static const ptime dtDefault( boost::posix_time::not_a_date_time );
+  static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
 
 Instrument::Instrument( const TableRowDef& row ) 
   : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable ), 

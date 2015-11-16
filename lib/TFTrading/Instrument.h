@@ -23,7 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian_calendar.hpp>
-using namespace boost::posix_time;
+//using namespace boost::posix_time;
 
 #include <OUCommon/Delegate.h>
 
@@ -258,10 +258,10 @@ public:
   boost::uint8_t GetSignificantDigits( void ) const { return m_row.nSignificantDigits; };
 
   typedef boost::posix_time::time_period dtrMarketOpenClose_t;
-  void SetTimeLiquid( const ptime& dtOpen, const ptime& dtClose ) { m_dtrTimeLiquid = dtrMarketOpenClose_t( dtOpen, dtClose ); };
+  void SetTimeLiquid( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeLiquid = dtrMarketOpenClose_t( dtOpen, dtClose ); };
   const dtrMarketOpenClose_t& GetTimeLiquid( void ) const { return m_dtrTimeLiquid; };
 
-  void SetTimeTrading( const ptime& dtOpen, const ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
+  void SetTimeTrading( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
   const dtrMarketOpenClose_t& GetTimeTrading( void ) const { return m_dtrTimeTrading; };
 
   bool operator==( const Instrument& rhs ) const;
@@ -270,7 +270,7 @@ public:
 
 protected:
 
-  pInstrument_t m_pUnderlying;
+  pInstrument_t m_pUnderlying;  // for the time being only used for obtaining underlying instrument alternate name
 
 private:
 

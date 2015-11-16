@@ -91,7 +91,7 @@ bool Confirm( const std::string& s, ExcelFormat::BasicExcelCell* cell ) {
   if ( s != ss ) throw std::runtime_error( "not confirmed 2" );
 }
 
-void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vExpiries_t& v ) {
+void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vOptionExpiryDates_t& v ) {
   assert( 0 != sheet );
   assert( 0 == v.size() );
   ExcelFormat::BasicExcelCell* cell;
@@ -130,7 +130,7 @@ void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vE
 "OEX",,"S&P 100 Index (American style)","Index, pm-settled, cash","20151029",,,"X",
  */
 
-void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
+void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vui ) {
   ExcelFormat::BasicExcel xls;
   if ( !xls.Load( "../weeklysmf.xls" ) ) {
     throw std::runtime_error( "file read issue" );
@@ -148,19 +148,19 @@ void ReadCboeWeeklyOptions( Expiries_t& Expiries, vUnderlyinginfo_t& vui ) {
     if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not found 1" );
     
     Confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
-    ExtractDates( sheet, 1, 3, Expiries.vExpiriesStandardWeeklies );
+    ExtractDates( sheet, 1, 3, expiries.vExpiriesStandardWeeklies );
     
     Confirm( "Expanded Weeklys Available Expirations:",          sheet->Cell( 2, 2 ) );
-    ExtractDates( sheet, 2, 3, Expiries.vExpiriesExpandedWeeklies );
+    ExtractDates( sheet, 2, 3, expiries.vExpiriesExpandedWeeklies );
     
     Confirm( "End of Week (EOW) Options Available Expirations:", sheet->Cell( 3, 2 ) );
-    ExtractDates( sheet, 2, 3, Expiries.vExpiriesEndOfWeek );
+    ExtractDates( sheet, 2, 3, expiries.vExpiriesEndOfWeek );
     
     Confirm( "SPXW & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
-    ExtractDates( sheet, 2, 3, Expiries.vExpiriesSpxwXsp );
+    ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxwXsp );
     
     Confirm( "VIX Weekly Options",                               sheet->Cell( 5, 2 ) );
-    ExtractDates( sheet, 2, 3, Expiries.vExpiriesVixWeeklies );
+    ExtractDates( sheet, 2, 3, expiries.vExpiriesVixWeeklies );
     
     Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 6, 2 ) );
     

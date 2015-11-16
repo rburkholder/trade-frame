@@ -8,7 +8,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Process.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Process.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Makefile</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.h</file>

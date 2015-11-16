@@ -12,45 +12,22 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2015/11/11
+// started 2015/11/15
 
-#include <iostream>
-#include <algorithm>
+#pragma once
 
-#include "Process.h"
+#include <string>
 
-Process::Process() {
-}
+#include <TFTrading/TradingEnumerations.h>
 
-Process::~Process() {
-}
-
-void Process::LoadWeeklies( void ) {
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
   
-  bool bOk( true );
-  try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( m_cboeExpiries, m_cboeVui );
-  }
-  catch(...) {
-    bOk = false;
-    std::cout << "error loading weeklies" << std::endl;
-  }
-  
-  std::cout << "LoadWeeklies done." << std::endl;
+const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month, boost::uint8_t day, double strike, ou::tf::OptionSide::enumOptionSide side );
+const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month );
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month, double strike, ou::tf::OptionSide::enumOptionSide side );
 
-  if ( bOk ) {
-    std::sort( m_cboeVui.begin(), m_cboeVui.end() );
-    for ( ou::tf::cboe::vUnderlyinginfo_t::const_iterator iter = m_cboeVui.begin(); m_cboeVui.end() != iter; ++iter ) {
-      if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
-	std::cout 
-		<< iter->sSymbol 
-		<< "," << iter->sProductType // "Equity", "ETF"
-		<< "," << iter->sDescription
-		<< "," << iter->bStandardWeekly
-		<< "," << iter->bExpandedWeekly
-		<< std::endl;
-      }
-    }
-  }
-  
-}
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

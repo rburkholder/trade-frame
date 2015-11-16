@@ -19,8 +19,8 @@
 #include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>

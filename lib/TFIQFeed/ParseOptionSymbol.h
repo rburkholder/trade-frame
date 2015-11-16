@@ -217,8 +217,6 @@ struct FOptionSymbolParser3: qi::grammar<Iterator, pos3_t()> {
 
 };
 
-
-
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou

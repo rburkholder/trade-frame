@@ -32,7 +32,7 @@ SignalGenerator::~SignalGenerator(void) {
 
 void SignalGenerator::Run( void ) {
 
-  ou::tf::cboe::Expiries_t expiries;
+  ou::tf::cboe::OptionExpiryDates_t expiries;
   ou::tf::cboe::vUnderlyinginfo_t vui;
 
   try {
@@ -70,8 +70,8 @@ void SignalGenerator::Run( void ) {
 void SignalGenerator::ScanBars( void ) {
   namespace args = boost::phoenix::placeholders;
   ou::tf::InstrumentFilter<mapSymbol_t::iterator,ou::tf::Bars> filter( 
-    "/bar/86400", 
-    ptime( date( 2014, 10, 1 ), time_duration( 0, 0, 0 ) ), 
+    "/bar/86400",  // at least a year's worth of bars
+    ptime( date( 2014, 10, 1 ), time_duration( 0, 0, 0 ) ),
     ptime( date( 2015, 11, 8 ), time_duration( 0, 0, 0 ) ), 
     200,
     boost::phoenix::bind( &SignalGenerator::HandleCallBackUseGroup, this, args::arg1, args::arg2, args::arg3 ),

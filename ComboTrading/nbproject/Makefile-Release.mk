@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/BundleTracking.o \
 	${OBJECTDIR}/ComboTrading.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/UnderlyingSelection.o
@@ -63,6 +64,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
 
 ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp 
 	${MKDIR} -p ${OBJECTDIR}

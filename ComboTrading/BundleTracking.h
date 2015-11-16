@@ -12,45 +12,37 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started 2015/11/11
+// started 2015/11/13
 
-#include <iostream>
-#include <algorithm>
+#pragma once
 
-#include "Process.h"
+#include <vector>
 
-Process::Process() {
-}
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-Process::~Process() {
-}
+#include <TFOptions/Bundle.h>
 
-void Process::LoadWeeklies( void ) {
+// pass in vector of ptime for option expiry dates
+
+class BundleTracking {
+public:
   
-  bool bOk( true );
-  try {
-    ou::tf::cboe::ReadCboeWeeklyOptions( m_cboeExpiries, m_cboeVui );
-  }
-  catch(...) {
-    bOk = false;
-    std::cout << "error loading weeklies" << std::endl;
-  }
+  // need to be able to detect futures vs equities (pull from iqfeed?)
+  struct BundleDetails {
+    // 20151115 this isn't going to work, will need the instrument instead
+    //   will also requre the UTC expiry times for the options required
+    std::string sIBUnderlyingName;  // eg, IB is gc
+    std::string sIQUnderlyingName;  // eg, IQ is qgc
+    std::vector<boost::gregorian::date> vOptionExpiryDay;
+    BundleDetails( const std::string& sIb, const std::string& sIq ): 
+      sIBUnderlyingName( sIb ), sIQUnderlyingName( sIq ) {}
+  };
   
-  std::cout << "LoadWeeklies done." << std::endl;
-
-  if ( bOk ) {
-    std::sort( m_cboeVui.begin(), m_cboeVui.end() );
-    for ( ou::tf::cboe::vUnderlyinginfo_t::const_iterator iter = m_cboeVui.begin(); m_cboeVui.end() != iter; ++iter ) {
-      if ( ( "Equity" == iter->sProductType ) || ( "ETF" == iter->sProductType ) ) {
-	std::cout 
-		<< iter->sSymbol 
-		<< "," << iter->sProductType // "Equity", "ETF"
-		<< "," << iter->sDescription
-		<< "," << iter->bStandardWeekly
-		<< "," << iter->bExpandedWeekly
-		<< std::endl;
-      }
-    }
-  }
+  BundleTracking( const std::string& sName );
+  virtual ~BundleTracking();
   
-}
+  void SetBundleParameters( const BundleDetails& bd );
+  
+private:
+  ou::tf::option::MultiExpiryBundle m_bundle;
+};

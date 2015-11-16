@@ -287,6 +287,7 @@ void ValidateMktSymbolLine::ParseFOptionContractInformation( trd_t& trd ) {
 //        trd.nMonth = rFutureMonth[ c - 'A' ];
         trd.nMonth = rFutureMonth[ pos3.sMonth.front() - 'A' ];
 
+	// check that the date calculation is correct... expiry day for current month
         boost::gregorian::date date( trd.nYear, trd.nMonth, 1 );
         date = ou::tf::option::FuturesOptionExpiry( date );
         boost::gregorian::date::ymd_type ymd = date.year_month_day();

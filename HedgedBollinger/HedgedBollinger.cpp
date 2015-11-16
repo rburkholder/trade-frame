@@ -19,8 +19,8 @@
 #include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -43,7 +43,6 @@ using namespace boost::gregorian;
 
 #include <TFOptions/CalcExpiry.h>
 
-//#include "EventUpdateOptionTree.h"
 #include "HedgedBollinger.h"
 
 IMPLEMENT_APP(AppHedgedBollinger)
@@ -211,16 +210,17 @@ bool AppHedgedBollinger::OnInit() {
     if ( boost::filesystem::exists( sDbName ) ) {
       boost::filesystem::remove( sDbName );
     }
+    
+    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
+    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
+    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppHedgedBollinger::HandlePopulateDatabase ) );
+
+    m_db.Open( sDbName );
+
   }
   catch(...) {
     std::cout << "database fault" << std::endl;
   }
-
-  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppHedgedBollinger::HandleRegisterRows ) );
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppHedgedBollinger::HandlePopulateDatabase ) );
-
-  m_db.Open( sDbName );
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects

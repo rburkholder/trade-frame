@@ -28,7 +28,7 @@ public:
 protected:
 private:
 
-  ou::tf::cboe::Expiries_t m_cboeExpiries;
+  ou::tf::cboe::OptionExpiryDates_t m_cboeExpiries;
   ou::tf::cboe::vUnderlyinginfo_t m_cboeVui;
 
 };

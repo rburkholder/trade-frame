@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BuildInstrument.o \
+	${OBJECTDIR}/BuildSymbolName.o \
 	${OBJECTDIR}/CurlGetMktSymbols.o \
 	${OBJECTDIR}/IQFeed.o \
 	${OBJECTDIR}/IQFeedMessages.o \
@@ -82,6 +83,11 @@ ${OBJECTDIR}/BuildInstrument.o: BuildInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildInstrument.o BuildInstrument.cpp
+
+${OBJECTDIR}/BuildSymbolName.o: BuildSymbolName.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BuildSymbolName.o BuildSymbolName.cpp
 
 ${OBJECTDIR}/CurlGetMktSymbols.o: CurlGetMktSymbols.cpp 
 	${MKDIR} -p ${OBJECTDIR}

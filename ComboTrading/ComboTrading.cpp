@@ -15,8 +15,8 @@
 // started 2015/11/08
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+//using namespace boost::posix_time;
+//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -25,6 +25,7 @@ using namespace boost::gregorian;
 #include <TFTrading/AccountManager.h>
 #include <TFTrading/OrderManager.h>
 
+#include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 
 #include "ComboTrading.h"
@@ -32,8 +33,9 @@ using namespace boost::gregorian;
 /*
  * 20151109 To Do:
  *   based upon Day Trading Options by Jeff Augen
- *   read cboe file and sort symbols
+ *   read cboe file and sort symbols - done
  *   run the pivot scanner, filter by volume and volatility (install in library of scanners)
+ *     or select based upon the c-c, o-c, c-o profiles and volatility surfaces
  *   sort top and pick 10 symbols (watch daily while building remaining code)
  *   watch with underlying plus 2 or 3 strike call/puts around at the money (option management)
  *   select combo and trade/watch the options watched from open (position/portfolio)
@@ -42,7 +44,35 @@ using namespace boost::gregorian;
  *   build up the volatility indicators mentioned in the boot 
  *   live chart for each symbol and associated combo 
  *   save the values at session end
+ * 
+ *  implied volatility surface: pg 84
+ *  historical volatility calcs:  pg 91
+ *  c-c, c-o, o-c hist. vol. calcs: pg 94
+ *  calcs by weekday: pg 99
+ *  strangles better than straddles: pg 108
+ * 
+ * then chapter 4 working with price spike charts
+ * 
+ * 20151112 - important steps:
+ *  historical volatility
+ *  track stocks at 20:00 'this all has a familiar ring to it'
+ *  underlying and three strikes at atm.  trade them on opening
+ *  track profit over day and exit same day or next day?
+ *   es, gc, 
+ *  hard code for now, build up infrastructure, and automate over time
+ *  manually pick the symbols, 
+ *  run a process for each and watch
+ *  save at end of day
+ *  wait for flag to exit.
+ * 
+ * 20151113 most important thing:
+ *  track atm for a series of instruments
+ *  keep a series of trades prepared
+ *  show the intraday price spike charts
  *   
+ * 20151115 other stuff to do:
+ *  use iqfeed market symbol file, 
+ *  build gui for selecting symbols given name, type, yr, mn, day, strike, exch, desc, ...
  */
 
 IMPLEMENT_APP(AppComboTrading)
@@ -80,10 +110,10 @@ bool AppComboTrading::OnInit() {
 
   LinkToPanelProviderControl();
 
-  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
-  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
-  m_pPanelManualOrder->Show( true );
+//  m_pPanelManualOrder = new ou::tf::PanelManualOrder( m_pFrameMain, wxID_ANY );
+//  m_sizerControls->Add( m_pPanelManualOrder, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+//  m_pPanelManualOrder->Enable( false );  // portfolio isn't working properly with manual order instrument field
+//  m_pPanelManualOrder->Show( true );
 
 /*
   m_pPanelOptionsParameters = new PanelOptionsParameters( m_pFrameMain, wxID_ANY );
@@ -141,18 +171,16 @@ bool AppComboTrading::OnInit() {
   vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
   m_pFrameMain->AddDynamicMenu( "Process", vItems );
 
-
   m_timerGuiRefresh.SetOwner( this );
 
-  // need to fix this, seems to lock up program
   Bind( wxEVT_TIMER, &AppComboTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   m_timerGuiRefresh.Start( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppComboTrading::OnClose, this );  // start close of windows and controls
 
-  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppComboTrading::HandlePanelNewOrder ) );
-  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppComboTrading::HandlePanelSymbolText ) );
-  m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppComboTrading::HandlePanelFocusPropogate ) );
+//  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppComboTrading::HandlePanelNewOrder ) );
+//  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppComboTrading::HandlePanelSymbolText ) );
+//  m_pPanelManualOrder->SetOnFocusPropogate( MakeDelegate( this, &AppComboTrading::HandlePanelFocusPropogate ) );
 
   m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio Management", wxDefaultPosition, wxSize( 900, 500 ),  
     wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
@@ -173,14 +201,13 @@ bool AppComboTrading::OnInit() {
   
   m_pFrameMain->SetAutoLayout( true );
   m_pFrameMain->Layout();
-  
+
   m_pFPPOE->SetAutoLayout( true );
   m_pFPPOE->Layout();
   wxPoint point = m_pFPPOE->GetPosition();
   point.x += 500;
   m_pFPPOE->SetPosition( point );
   m_pFPPOE->Show();
-
   
   return 1;
 
@@ -189,6 +216,82 @@ bool AppComboTrading::OnInit() {
 void AppComboTrading::Start( void ) {
   if ( !m_bStarted ) {
     try {
+      // new stuff
+      
+      // build instruments.. futures and equities, then pass to the bundle to fill in the options
+      
+      // create generic symbol: futures and equities, and possibly from weeklies
+      struct Future {
+	std::string sName;
+	std::string sIqBaseName;
+	boost::uint16_t nYear;
+	boost::uint8_t nMonth;
+	std::string sIbBaseName;
+	Future( 
+	  const std::string& sName_, const std::string& sIqBaseName_, 
+	  boost::uint16_t nYear_, boost::uint8_t nMonth_, 
+	  const std::string& sIbBaseName_ ):
+		sName( sName_ ), sIqBaseName( sIqBaseName_ ), 
+		nYear( nYear_ ), nMonth( nMonth_ ), 
+		sIbBaseName( sIbBaseName_ ) 
+	{}
+      };
+      
+      typedef std::vector<Future> vFuture_t;
+      vFuture_t vFuture;
+      
+      vFuture.push_back( Future( "GC-2015-12", "QGC", 2015, 12, "GC" ) );
+      
+      struct Underlying {
+	std::string sName;
+	std::string sIq;
+	std::string sIb;
+	Underlying( const std::string& sName_, const std::string& sIq_, const std::string& sIb_ ):
+	sName( sName_ ), sIq( sIq_ ), sIb( sIb_ ) {};
+      };
+      
+      typedef std::vector<Underlying> vUnderlying_t;
+      vUnderlying_t vUnderlying;
+      
+      // add equities to vUnderlying;
+      // might as well bypass this and do the instrument directly and get it going through the cycle
+      // the cycle being: 
+      //  build the iqfeed instrument
+      //  send it off to ib to get the contract
+      //  then get it into multi-expiry 
+      //  then start building the options
+      vUnderlying.push_back( Underlying( "GLD", "GLD", "GLD" ) );
+      
+      
+      // build futures and add to vUnderlying
+      for ( vFuture_t::const_iterator iter = vFuture.begin(); vFuture.end() != iter; ++iter ) {
+	std::string sName = ou::tf::iqfeed::BuildFuturesName( iter->sIqBaseName, iter->nYear, iter->nMonth );
+      }
+      
+      
+      // create iqfeed symbol
+      // build the iqfeed instrument
+      // add in ib contract settings
+      // add to baseline bundle
+      // calculate expiry and flesh out bundle
+      
+      //pInstrument_t 
+      
+      BundleTracking::BundleDetails details( "GC", "QGC" );
+      // need to figure out proper expiry time
+      // also need to figure if more options can be watched in order to provide volatility surfaces
+      // I think I have a day calculator (which doesn't know holidays though )
+      // and will need to convert to utc
+      // if there are many symbols, strikes, and expiries, may need to run a different thread for calculating the greeks and IV
+      boost::gregorian::date expiry2( boost::gregorian::date( 2015, 12, 28 ) );
+      details.vOptionExpiryDay.push_back( expiry2 );
+      boost::gregorian::date expiry3( boost::gregorian::date( 2016,  1, 26 ) );
+      details.vOptionExpiryDay.push_back( expiry3 );
+      
+      m_vBundleTracking.push_back( BundleTracking( "GC" ) );  // can I do some sort of move semantics here?
+      m_vBundleTracking.back().SetBundleParameters( details );
+      
+      // old stuff
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
       pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
@@ -285,6 +388,7 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;
   m_EquityPositionCallbackInfo.function = function;
   
+  // QGC# for quote monitor
   // test symbol:  QGCZ15P1200
   // test symbol:  GLD1531X120
 
@@ -299,6 +403,15 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
   // 20151026 
   // maybe get rid of the whole underlying instrument requirement in an option symbol (similar to fact that futures option doesn't have underlying tie in )
   // requires a bunch of rewrite, but probably worth it
+  //  20151115: maybe not, it provides a mechanism for getting at underlying's alternate names
+  
+  // 20151115 
+  // need to build state builder to get contracts for a series of underlying symbols, then run through 
+  //  associated options, and obtain their ib contract numbers
+  // and feed the results into the multiexpirybundle
+  // then stuff into a library for re-use
+  
+  // 
 
   // sName is going to be an IQFeed name from the MarketSymbols file, so needs to be in main as well as alternatesymbolsnames list
   if ( im.Exists( sName, pInstrument ) ) {  // the call will supply instrument if it exists
@@ -316,52 +429,50 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
 	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
 	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
 	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
-	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
+//	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
 	  break;
 	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
 	{
 	  ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
-	  if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) {
+	  if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) { // change called name to IfExistsSupplyInstrument
 	  }
 	  else {
+	    // otherwise build instrument
 	    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
 	    switch (trdUnderlying.sc ) {
 	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
+//		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
 		im.Register( pInstrumentUnderlying );
+		// 20151115 this instrument should also obtain ib contract details, as it will land in multi-expiry bundle and be used in various option delta scenarios
 		break;
 	      default:
 		throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
 	    }
 	  }
-          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
-	}
+//          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
+	}  // end case
 	  break;
 	default:
           throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type" );
-      }
-      //im.Register( pInstrument ); // register once info returned from IB instead
+      } // end switch
       bConstructed = true;
-    }
+    } // end try
     catch ( std::runtime_error& e ) {
       std::cout << "Couldn't find symbol: " + sName << std::endl;
     }
     if ( bConstructed ) {
       std::cout << "Requesting IB: " << sName << std::endl;
-      // rewrite:  TWS should have mechanism to convert instrument to request
-      //ou::tf::IBTWS::Contract contract;
-      //contract.currency = "USD";
-      //contract.exchange = "SMART";
-      //contract.secType = "STK";
-      //contract.symbol = sName;
       m_tws->RequestContractDetails( 
 	pInstrument,
-	//contract, 
-	// HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
 	MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
     }
   }
 }
+
+// futures expire:  17:15 est
+// foption expire: 13:30 est
+// option expire: 16:00 est
+// holiday expire: 13:00 est 2015/11/27 - weekly option
 
 void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
   QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
@@ -458,6 +569,7 @@ void AppComboTrading::HandleLoadDatabase( void ) {
     pm.LoadActivePortfolios();
 }
 
+/*
 void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order ) {
   try {
     ou::tf::InstrumentManager& mgr( ou::tf::InstrumentManager::Instance() );
@@ -493,6 +605,7 @@ void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order
     int i = 1;
   }
 }
+*/
 
 void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
   // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
@@ -503,7 +616,7 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
   contract.secType = "STK";
   contract.symbol = sName;
   // IB responds only when symbol is found, bad symbols will not illicit a response
-  m_pPanelManualOrder->SetInstrumentDescription( "" );
+//  m_pPanelManualOrder->SetInstrumentDescription( "" );
   m_tws->RequestContractDetails( 
     contract, 
     MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );

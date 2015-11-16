@@ -16,6 +16,7 @@
 #pragma once
 
 #include <wx/combobox.h>
+#include <wx/stattext.h>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;

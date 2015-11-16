@@ -19,6 +19,7 @@
 //   DAy Trading Options by Jeff Augen
 
 #include <map>
+#include <vector>
 
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
@@ -29,12 +30,13 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-#include <TFVuTrading/PanelManualOrder.h>
+//#include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
 
 #include <TFInteractiveBrokers/EventIBInstrument.h>
 
 #include "Process.h"
+#include "BundleTracking.h"
 
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
@@ -60,6 +62,8 @@ private:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
+  
+  typedef std::vector<BundleTracking> vBundleTracking_t;
 
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
@@ -92,6 +96,8 @@ private:
   double m_dblMinPL;
   
   Process m_process;  // single position
+  
+  vBundleTracking_t m_vBundleTracking; // one per underlying and related options to track
 
   ou::tf::keytypes::idPortfolio_t m_idPortfolioMaster;
   pPortfolio_t m_pPortfolioMaster;
@@ -103,7 +109,7 @@ private:
   FrameMain* m_pFPPOE;
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
-  ou::tf::PanelManualOrder* m_pPanelManualOrder;
+//  ou::tf::PanelManualOrder* m_pPanelManualOrder;
 //  MPPOE_t* m_pMPPOE;
 //  PPPOE_t* m_pPPPOE;
 //  CPPOE_t* m_pCPPOE;
@@ -129,7 +135,7 @@ private:
 
   void Start( void );
 
-  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
+//  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
   void HandlePanelFocusPropogate( unsigned int ix );
 

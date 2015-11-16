@@ -22,9 +22,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
-
+  
 boost::gregorian::date CurrentFrontMonthExpiry( boost::gregorian::date date );
 boost::gregorian::date Next3rdFriday( boost::gregorian::date date );
+boost::gregorian::date FuturesExpiry( boost::gregorian::date date );
 boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date );
 
 } // namespace option

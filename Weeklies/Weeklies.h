@@ -74,7 +74,6 @@ private:
 
   void HandlePopulateDatabase( void );
 
-
   void OnData1Connected( int );
   void OnData2Connected( int );
   void OnExecConnected( int );

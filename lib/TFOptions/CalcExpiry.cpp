@@ -23,6 +23,9 @@ namespace option { // options
 // 2013/08/24 changed < to <= so can tell today is expiry
 // be aware IQFeed has expiry on one day (Saturday I think)
 //    Interactive Brokers uses Friday, I think, will need to confirm
+// 20151115 as of 2015/feb, things should be consistent to friday now
+//   futures calc was changed to reflect current month last trading day
+//     could cache dates into a lookup
 
 boost::gregorian::months onemonth( 1 );
 
@@ -62,9 +65,24 @@ boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
   return dExpiry;
 }
 
-boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
-  boost::gregorian::day_iterator iterDay( boost::gregorian::date( date.year(), date.month(), 1 ), 1 );
-  unsigned int cnt( 4 ); // need to move back four business days
+// gold future calc:
+// http://www.cmegroup.com/trading/metals/files/pm264-fact-card-gold-options.pdf
+// options expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, excercise 20:00
+// trading: sunday - friday 18:00 - 17:15 et
+// http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
+
+// can't find specific reference, but the futures are probably the same but 3 days back
+
+// setUSDates is in TFTimeSeries/ExchangeHolidays.cpp
+
+// want the year/month combination
+namespace local {
+  
+boost::gregorian::date CalcNBusinessDaysBack( boost::gregorian::date date, unsigned int cnt, bool bAllowFriday ) {
+  boost::gregorian::date dateTemp( date.year(), date.month(), 1 );
+  dateTemp += boost::gregorian::months( 1 );  // add one month, go to first of month, and step backwards
+  boost::gregorian::day_iterator iterDay( boost::gregorian::date( dateTemp.year(), dateTemp.month(), 1 ), 1 );
+  //unsigned int cnt( 4 ); // need to move back four business days
   while ( 0 != cnt ) { // move to fourth last business day
     using namespace ou::tf::holidays::exchange;
     --iterDay;
@@ -80,11 +98,12 @@ boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
     }
   }
   bool bOk( false );
-  do {
+  do {  // fixup for found day
     using namespace ou::tf::holidays::exchange;
     setDates_t::iterator iter = setUSDates.find( *iterDay );
     unsigned int dow = iterDay->day_of_week();
-    if ( ( boost::gregorian::Friday == dow )
+    if ( 
+     ( ( ( boost::gregorian::Friday == dow ) && !bAllowFriday ) ) // future option uses this
       || ( boost::gregorian::Sunday == dow ) 
       || ( boost::gregorian::Saturday == dow )
       || ( setUSDates.end() != iter ) 
@@ -96,7 +115,19 @@ boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
     }
   } while ( !bOk );
   return *iterDay;
+}  
+
+} // namespace local
+
+boost::gregorian::date FuturesExpiry( boost::gregorian::date date ) {
+  return local::CalcNBusinessDaysBack( date, 3, true );
 }
+
+boost::gregorian::date FuturesOptionExpiry( boost::gregorian::date date ) {
+  return local::CalcNBusinessDaysBack( date, 4, false );
+}
+
+
 
 } // namespace option
 } // namespace tf
