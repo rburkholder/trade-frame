@@ -14,9 +14,9 @@
 
 // started 2015/11/08
 
+#include <algorithm>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -214,11 +214,27 @@ bool AppComboTrading::OnInit() {
 }
 
 void AppComboTrading::Start( void ) {
+  // need iqfeed marketsymbols to be loaded before this can start
+  if ( 0 == m_listIQFeedSymbols.Size() )
+    throw std::runtime_error( "iqfeed market symbols need to be loaded first" );
   if ( !m_bStarted ) {
     try {
       // new stuff
       
-      // build instruments.. futures and equities, then pass to the bundle to fill in the options
+      struct Underlying {
+	std::string sName;
+	std::string sIq;
+	std::string sIb;
+	Underlying( const std::string& sName_ ): sName( sName_ ), sIq( sName_ ), sIb( sName_ ) {};
+	Underlying( const std::string& sName_, const std::string& sIq_, const std::string& sIb_ ):
+	sName( sName_ ), sIq( sIq_ ), sIb( sIb_ ) {};
+      };
+      
+      typedef std::vector<Underlying> vUnderlying_t;
+      vUnderlying_t vUnderlying;
+      
+      // list of equities to monitor
+      vUnderlying.push_back( Underlying( "GLD" ) );
       
       // create generic symbol: futures and equities, and possibly from weeklies
       struct Future {
@@ -240,42 +256,51 @@ void AppComboTrading::Start( void ) {
       typedef std::vector<Future> vFuture_t;
       vFuture_t vFuture;
       
+      // list of futures to monitor
       vFuture.push_back( Future( "GC-2015-12", "QGC", 2015, 12, "GC" ) );
       
-      struct Underlying {
-	std::string sName;
-	std::string sIq;
-	std::string sIb;
-	Underlying( const std::string& sName_, const std::string& sIq_, const std::string& sIb_ ):
-	sName( sName_ ), sIq( sIq_ ), sIb( sIb_ ) {};
+      // build futures and add to vUnderlying
+      // ie, create the iqfeed name for the future, then pass off the name for instrument building
+      for ( vFuture_t::const_iterator iter = vFuture.begin(); vFuture.end() != iter; ++iter ) {
+	std::string sName = ou::tf::iqfeed::BuildFuturesName( iter->sIqBaseName, iter->nYear, iter->nMonth );
+	vUnderlying.push_back( Underlying( iter->sName, sName, iter->sIqBaseName ) );
+      }
+      
+      struct BuildInstrument {
+	typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+	typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
+	typedef list_t::trd_t trd_t;
+	const list_t& list;
+	BuildInstrument( const list_t& list_ ): list( list_ ) {};
+	void operator()( const Underlying& underlying ) {
+	  pInstrument_t pInstrument;
+	  const trd_t& trd( list.GetTrd( underlying.sIq ) );
+	  switch ( trd.sc ) {
+	    case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+	    case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
+	      pInstrument = ou::tf::iqfeed::BuildInstrument( underlying.sName, trd );
+	      // now hand it off to the IB for contract insertion
+	      break;
+	    default:
+	      throw std::runtime_error( "can't process the buildinstrument" );
+	  }
+	}
       };
       
-      typedef std::vector<Underlying> vUnderlying_t;
-      vUnderlying_t vUnderlying;
+      // build instruments.. equities and futures, then pass to the bundle to fill in the options
       
-      // add equities to vUnderlying;
+      std::for_each( vUnderlying.begin(), vUnderlying.end(), BuildInstrument( m_listIQFeedSymbols ) );
+      
       // might as well bypass this and do the instrument directly and get it going through the cycle
       // the cycle being: 
       //  build the iqfeed instrument
       //  send it off to ib to get the contract
       //  then get it into multi-expiry 
       //  then start building the options
-      vUnderlying.push_back( Underlying( "GLD", "GLD", "GLD" ) );
-      
-      
-      // build futures and add to vUnderlying
-      for ( vFuture_t::const_iterator iter = vFuture.begin(); vFuture.end() != iter; ++iter ) {
-	std::string sName = ou::tf::iqfeed::BuildFuturesName( iter->sIqBaseName, iter->nYear, iter->nMonth );
-      }
-      
-      
-      // create iqfeed symbol
-      // build the iqfeed instrument
-      // add in ib contract settings
-      // add to baseline bundle
       // calculate expiry and flesh out bundle
       
-      //pInstrument_t 
+      
+      
       
       BundleTracking::BundleDetails details( "GC", "QGC" );
       // need to figure out proper expiry time
