@@ -267,6 +267,21 @@ void AppComboTrading::Start( void ) {
 	{}
       };
       
+      struct Option {
+	std::string sName;
+	std::string sIqBaseName;
+	boost::uint16_t nYear;
+	boost::uint8_t nMonth;
+	boost::uint8_t nDay;
+	std::string sIbBaseName;
+      };
+      
+      // 20151122 build list of options to monitor as well
+      // then can mix and match into positions and portfolios
+      // which implies ...
+      //   need some structures here to assign the code seeded/generated portfolio and position combinations
+      // then can generify stuff and get into a separate compilation unit
+      
       typedef std::vector<Future> vFuture_t;
       vFuture_t vFuture;
       
@@ -283,6 +298,9 @@ void AppComboTrading::Start( void ) {
       // 20151122 at this point, we have our own instrument names, the names to be used for 
       //   registering, so at this point, we can perform a retrieval, or build new ones.
       //   some may need some building, some may need retrieval
+      
+      // 2015/11/22 take this code and put into module as it will be re-used not only in startup 
+      //    but in other real time locations
 
       {
 	namespace args = boost::phoenix::placeholders;
@@ -306,8 +324,15 @@ void AppComboTrading::Start( void ) {
 		// now hand it off to the IB for contract insertion
 		f( pInstrument );
 		break;
+	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
+		// will need to check that underlying is registered and available in order to build
+		throw std::runtime_error( "can't process the BuildInstrument IEOption" );
+		break;
+	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+	        throw std::runtime_error( "can't process the BuildInstrument FOption" );
+	        break;
 	      default:
-		throw std::runtime_error( "can't process the buildinstrument" );
+		throw std::runtime_error( "can't process the BuildInstrument default" );
 	    }
 	  }
 	};
@@ -379,6 +404,7 @@ void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDeta
 void AppComboTrading::HandleIBContractDetailsDone( void ) {
 }
 
+// gui thread via HandleIBContractDetails
 void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   im.Register( event.GetInstrument() ); 
@@ -388,6 +414,7 @@ void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
   LoadUpBundle( event.GetInstrument() );
 }
 
+// this may need to steal code from ConstructEquityPosition0, and ConstructEquityPosition1
 void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument ) {
   
   // 2015/11/22 need to fix this code up
@@ -415,7 +442,7 @@ void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
   //pPPP->SetPortfolio( pm.GetPortfolio( idPortfolio ) );
   m_pLastPPP->SetPortfolio( pPortfolio );
   m_pLastPPP->SetNameLookup( MakeDelegate( this, &AppComboTrading::LookupDescription ) );
-  m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition0 ) );
+  m_pLastPPP->SetConstructPosition( MakeDelegate( this, &AppComboTrading::ConstructEquityPosition0 ) );  // *** this needs to be fixed
   m_pLastPPP->SetConstructPortfolio( MakeDelegate( this, &AppComboTrading::HandleConstructPortfolio ) );
   m_mapPortfolios.insert( mapPortfolios_t::value_type( pPortfolio->Id(), structPortfolio( m_pLastPPP ) ) );
 }
@@ -440,6 +467,9 @@ void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::st
   }
 }
 
+// 20151122 Most of this is now obsolete.  Handled mostly in startup code.  Need to deal with option building though.
+//  the line with  ConstructEquityPosition1( pInstrument );  remains to be refactored elsewhere
+//   also ConstructEquityPosition1 needs to be fixed to match, as it has some callbacks set from here
 void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortfolio_t pPortfolio, DelegateAddPosition_t function ) {
 
   m_EquityPositionCallbackInfo.pPortfolio = pPortfolio;

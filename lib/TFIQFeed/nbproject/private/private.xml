@@ -19,9 +19,9 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryQuery.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryBulkQuery.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryBulkQuery.h</file>
         </group>
     </open-files>
 </project-private>
