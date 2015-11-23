@@ -126,6 +126,9 @@ private:
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
 
+  void GetContractFor( pInstrument_t pInstrument );
+  void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );
+  
   void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, DelegateAddPosition_t);  // step 1
   void ConstructEquityPosition1( pInstrument_t& pInstrument ); // step 2
 

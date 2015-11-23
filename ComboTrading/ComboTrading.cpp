@@ -16,10 +16,14 @@
 
 #include <algorithm>
 
+#include <boost/lexical_cast.hpp>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <boost/function.hpp>
+
+#include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -149,6 +153,7 @@ bool AppComboTrading::OnInit() {
   if ( boost::filesystem::exists( m_sDbName ) ) {
 //    boost::filesystem::remove( sDbName );
   }
+  m_db.Open( m_sDbName );
 
   m_bData1Connected = false;
   m_bExecConnected = false;
@@ -221,10 +226,19 @@ void AppComboTrading::Start( void ) {
     try {
       // new stuff
       
+      // the cycle being: 
+      //  build the iqfeed instrument
+      //  send it off to ib to get the contract
+      //  then get it into multi-expiry 
+      //  then start building the options
+      // calculate expiry and flesh out bundle
+      
       struct Underlying {
+	//typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 	std::string sName;
 	std::string sIq;
 	std::string sIb;
+	//pInstrument_t pInstrument;  // filled in from a BuildInstrument or loaded from database
 	Underlying( const std::string& sName_ ): sName( sName_ ), sIq( sName_ ), sIb( sName_ ) {};
 	Underlying( const std::string& sName_, const std::string& sIq_, const std::string& sIb_ ):
 	sName( sName_ ), sIq( sIq_ ), sIb( sIb_ ) {};
@@ -259,49 +273,125 @@ void AppComboTrading::Start( void ) {
       // list of futures to monitor
       vFuture.push_back( Future( "GC-2015-12", "QGC", 2015, 12, "GC" ) );
       
-      // build futures and add to vUnderlying
+      // build futures name and add to vUnderlying
       // ie, create the iqfeed name for the future, then pass off the name for instrument building
       for ( vFuture_t::const_iterator iter = vFuture.begin(); vFuture.end() != iter; ++iter ) {
 	std::string sName = ou::tf::iqfeed::BuildFuturesName( iter->sIqBaseName, iter->nYear, iter->nMonth );
 	vUnderlying.push_back( Underlying( iter->sName, sName, iter->sIqBaseName ) );
       }
       
-      struct BuildInstrument {
-	typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-	typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
-	typedef list_t::trd_t trd_t;
-	const list_t& list;
-	BuildInstrument( const list_t& list_ ): list( list_ ) {};
-	void operator()( const Underlying& underlying ) {
-	  pInstrument_t pInstrument;
-	  const trd_t& trd( list.GetTrd( underlying.sIq ) );
-	  switch ( trd.sc ) {
-	    case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-	    case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
-	      pInstrument = ou::tf::iqfeed::BuildInstrument( underlying.sName, trd );
-	      // now hand it off to the IB for contract insertion
-	      break;
-	    default:
-	      throw std::runtime_error( "can't process the buildinstrument" );
+      // 20151122 at this point, we have our own instrument names, the names to be used for 
+      //   registering, so at this point, we can perform a retrieval, or build new ones.
+      //   some may need some building, some may need retrieval
+
+      {
+	namespace args = boost::phoenix::placeholders;
+        typedef boost::function<void ( pInstrument_t)> cbInstrument_t;
+	
+	// function object for building instruments from a list
+	struct BuildInstrument {
+	  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+	  typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
+	  typedef list_t::trd_t trd_t;
+	  const list_t& list;
+	  cbInstrument_t f;
+	  BuildInstrument( const list_t& list_, cbInstrument_t f_ ): list( list_ ), f( f_ ) {};
+	  void operator()( const Underlying& u ) {
+	    pInstrument_t pInstrument;
+	    const trd_t& trd( list.GetTrd( u.sIq ) );
+	    switch ( trd.sc ) {
+	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
+		pInstrument = ou::tf::iqfeed::BuildInstrument( u.sName, trd );
+		// now hand it off to the IB for contract insertion
+		f( pInstrument );
+		break;
+	      default:
+		throw std::runtime_error( "can't process the buildinstrument" );
+	    }
 	  }
-	}
-      };
+	};
       
       // build instruments.. equities and futures, then pass to the bundle to fill in the options
+      // in GetContractFor, need to see if the instrument already exists, or is this done up above somewhere?
+
+	struct GetInstrument {
+	  typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
+          BuildInstrument build;
+	  cbInstrument_t cbBundle;
+	  GetInstrument( const list_t& list_, cbInstrument_t cbContract, cbInstrument_t cbBundle_ ): build( list_, cbContract ), cbBundle( cbBundle_ ) {}
+	  void operator()( const Underlying& u ) {
+	    // see if the instrument already exists,
+	    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+	    ou::tf::Instrument::pInstrument_t pInstrument;  //empty instrument
+	    if ( im.Exists( u.sName, pInstrument ) ) {  // the call will supply instrument if it exists
+	      cbBundle( pInstrument );
+	    }
+	    else {
+	      build( u );
+	    }
+	  }
+	};
+
+	std::for_each( vUnderlying.begin(), vUnderlying.end(), 
+	  GetInstrument( m_listIQFeedSymbols, 
+	    boost::phoenix::bind( &AppComboTrading::GetContractFor, this, args::arg1 ),
+	    boost::phoenix::bind( &AppComboTrading::LoadUpBundle, this, args::arg1 )
+		) 
+		);
+
+      }
       
-      std::for_each( vUnderlying.begin(), vUnderlying.end(), BuildInstrument( m_listIQFeedSymbols ) );
+      // old stuff
+      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+      pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
+      pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
       
-      // might as well bypass this and do the instrument directly and get it going through the cycle
-      // the cycle being: 
-      //  build the iqfeed instrument
-      //  send it off to ib to get the contract
-      //  then get it into multi-expiry 
-      //  then start building the options
-      // calculate expiry and flesh out bundle
+      m_pFPPOE->Update();
+      //m_pFPPOE->Refresh();
+      //m_pFPPOE->SetAutoLayout( true );
+      m_pFPPOE->Layout();  
       
-      
-      
-      
+      m_bStarted = true;
+    }
+    catch (...) {
+      std::cout << "problems with AppStickShift::Start" << std::endl;
+    }
+  }
+}
+
+void AppComboTrading::GetContractFor( pInstrument_t pInstrument ) {
+  m_tws->RequestContractDetails( 
+    pInstrument,
+    MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+}
+
+// futures expire:  17:15 est
+// foption expire: 13:30 est
+// option expire: 16:00 est
+// holiday expire: 13:00 est 2015/11/27 - weekly option
+
+void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
+  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
+  // this is in another thread, and should be handled in a thread safe manner.
+}
+
+void AppComboTrading::HandleIBContractDetailsDone( void ) {
+}
+
+void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  im.Register( event.GetInstrument() ); 
+  // by stint of being here, instrument is new (iqfeed constructed then ib completed), and therefore registerable 
+  // comment the following temporarily while testing flow through
+  //ConstructEquityPosition1( event.GetInstrument() );
+  LoadUpBundle( event.GetInstrument() );
+}
+
+void AppComboTrading::LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument ) {
+  
+  // 2015/11/22 need to fix this code up
+  
       BundleTracking::BundleDetails details( "GC", "QGC" );
       // need to figure out proper expiry time
       // also need to figure if more options can be watched in order to provide volatility surfaces
@@ -316,64 +406,6 @@ void AppComboTrading::Start( void ) {
       m_vBundleTracking.push_back( BundleTracking( "GC" ) );  // can I do some sort of move semantics here?
       m_vBundleTracking.back().SetBundleParameters( details );
       
-      // old stuff
-      ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-      pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
-      pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
-      m_db.Open( m_sDbName );
-      m_pFPPOE->Update();
-      //m_pFPPOE->Refresh();
-      //m_pFPPOE->SetAutoLayout( true );
-      m_pFPPOE->Layout();  
-      m_bStarted = true;
-    }
-    catch (...) {
-      std::cout << "problems with AppStickShift::Start" << std::endl;
-    }
-  }
-}
-
-void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
-
-  m_vExchanges.clear();
-  m_vExchanges.insert( "NYSE" );
-  //m_vExchanges.push_back( "NYSE_AMEX" );
-  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
-  m_vExchanges.insert( "NASDAQ,NGSM" );
-  m_vExchanges.insert( "NASDAQ,NGM" );
-  m_vExchanges.insert( "OPRA" );
-  m_vExchanges.insert( "TSE" );
-  //m_vExchanges.push_back( "NASDAQ,NMS" );
-  //m_vExchanges.push_back( "NASDAQ,SMCAP" );
-  //m_vExchanges.push_back( "NASDAQ,OTCBB" );
-  //m_vExchanges.push_back( "NASDAQ,OTC" );
-  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
-
-  m_vClassifiers.clear();
-  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
-  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
-
-  std::cout << "Subsetting symbols ... " << std::endl;
-  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
-  ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
-  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
-  std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
-
-  //std::string sFileName( sFileNameMarketSymbolSubset );
-  std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-//  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
-//  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
-  listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
-  std::cout << " ... done." << std::endl;
-
-  // next step will be to add in the options for the underlyings selected.
-}
-
-void AppComboTrading::HandleMenuActionLoadSymbolSubset( void ) {
-  //std::string sFileName( sFileNameMarketSymbolSubset );
-  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
-  m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
-  std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
 }
 
 void AppComboTrading::HandlePortfolioLoad( pPortfolio_t& pPortfolio ) {
@@ -494,25 +526,6 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
   }
 }
 
-// futures expire:  17:15 est
-// foption expire: 13:30 est
-// option expire: 16:00 est
-// holiday expire: 13:00 est 2015/11/27 - weekly option
-
-void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
-  QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
-  // this is in another thread, and should be handled in a thread safe manner.
-}
-
-void AppComboTrading::HandleIBContractDetailsDone( void ) {
-}
-
-void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  im.Register( event.GetInstrument() ); // by stint of being here, should be new, and therefore registerable (not true, as IB info might be added to iqfeed info)
-  ConstructEquityPosition1( event.GetInstrument() );
-}
-
 // 20151025 problem with portfolio is 0 in m_EquityPositionCallbackInfo
 void AppComboTrading::ConstructEquityPosition1( pInstrument_t& pInstrument ) {
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance().Instance() );
@@ -545,6 +558,49 @@ void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& 
     ou::tf::PortfolioManager::Instance().ConstructPortfolio( 
       sPortfolioId, "aoRay", ppp.GetPortfolio()->Id(),ou::tf::Portfolio::Standard, ppp.GetPortfolio()->GetRow().sCurrency, sDescription );
   }
+}
+
+void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
+
+  m_vExchanges.clear();
+  m_vExchanges.insert( "NYSE" );
+  //m_vExchanges.push_back( "NYSE_AMEX" );
+  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
+  m_vExchanges.insert( "NASDAQ,NGSM" );
+  m_vExchanges.insert( "NASDAQ,NGM" );
+  m_vExchanges.insert( "OPRA" );
+  m_vExchanges.insert( "TSE" );
+  //m_vExchanges.push_back( "NASDAQ,NMS" );
+  //m_vExchanges.push_back( "NASDAQ,SMCAP" );
+  //m_vExchanges.push_back( "NASDAQ,OTCBB" );
+  //m_vExchanges.push_back( "NASDAQ,OTC" );
+  //m_vExchanges.insert( "CANADIAN,TSE" );  // don't do yet, simplifies contract creation for IB
+
+  m_vClassifiers.clear();
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::Equity );
+  m_vClassifiers.insert( ou::tf::IQFeedSymbolListOps::classifier_t::IEOption );
+
+  std::cout << "Subsetting symbols ... " << std::endl;
+  ou::tf::iqfeed::InMemoryMktSymbolList listIQFeedSymbols;
+  ou::tf::IQFeedSymbolListOps::SelectSymbols selection( m_vClassifiers, listIQFeedSymbols );
+  m_listIQFeedSymbols.SelectSymbolsByExchange( m_vExchanges.begin(), m_vExchanges.end(), selection );
+  std::cout << "  " << listIQFeedSymbols.Size() << " symbols in subset." << std::endl;
+
+  //std::string sFileName( sFileNameMarketSymbolSubset );
+  std::cout << "Saving subset to " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+//  listIQFeedSymbols.HandleParsedStructure( m_listIQFeedSymbols.GetTrd( m_sNameUnderlying ) );
+//  m_listIQFeedSymbols.SelectOptionsByUnderlying( m_sNameOptionUnderlying, listIQFeedSymbols );
+  listIQFeedSymbols.SaveToFile( sFileNameMarketSymbolSubset );  // __.ser
+  std::cout << " ... done." << std::endl;
+
+  // next step will be to add in the options for the underlyings selected.
+}
+
+void AppComboTrading::HandleMenuActionLoadSymbolSubset( void ) {
+  //std::string sFileName( sFileNameMarketSymbolSubset );
+  std::cout << "Loading From " << sFileNameMarketSymbolSubset << " ..." << std::endl;
+  m_listIQFeedSymbols.LoadFromFile( sFileNameMarketSymbolSubset );  // __.ser
+  std::cout << "  " << m_listIQFeedSymbols.Size() << " symbols loaded." << std::endl;
 }
 
 void AppComboTrading::HandleRegisterTables(  ou::db::Session& session ) {
