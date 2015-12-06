@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
 	${OBJECTDIR}/ComboTrading.o \
+	${OBJECTDIR}/PanelCharts.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/UnderlyingSelection.o
 
@@ -74,6 +75,11 @@ ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
+
+${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
 
 ${OBJECTDIR}/Process.o: Process.cpp 
 	${MKDIR} -p ${OBJECTDIR}

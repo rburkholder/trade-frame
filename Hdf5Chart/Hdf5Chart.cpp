@@ -29,8 +29,6 @@
 
 IMPLEMENT_APP(AppHdf5Chart)
 
-size_t atm = 125;
-
 bool AppHdf5Chart::OnInit() {
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hdf5 Chart" );

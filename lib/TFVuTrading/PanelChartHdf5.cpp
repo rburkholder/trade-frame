@@ -52,14 +52,14 @@ void PanelChartHdf5::Init() {
 
 bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
 
-    wxPanel::Create( parent, id, pos, size, style );
+  wxPanel::Create( parent, id, pos, size, style );
 
-    CreateControls();
-    if (GetSizer())     {
-        GetSizer()->SetSizeHints(this);
-    }
-    Centre();
-    return true;
+  CreateControls();
+  if (GetSizer())     {
+      GetSizer()->SetSizeHints(this);
+  }
+  Centre();
+  return true;
 }
 
 void PanelChartHdf5::CreateControls() {    
@@ -96,7 +96,6 @@ void PanelChartHdf5::CreateControls() {
   splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
   sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
 
-
   // sizer for right side of splitter
   wxBoxSizer* sizerRight;
   sizerRight = new wxBoxSizer( wxVERTICAL );
@@ -112,8 +111,6 @@ void PanelChartHdf5::CreateControls() {
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &PanelChartHdf5::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &PanelChartHdf5::HandleSize, this, idChart );
-
-
 
   m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
 

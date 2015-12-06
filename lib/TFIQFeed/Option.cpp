@@ -27,6 +27,7 @@ namespace iqfeed { // IQFeed
 const char rchCallMonth[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L' };
 const char rchPutMonth[] =  { 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X' };
 
+// something similar in BuildSymbolName.cpp
 void ComposeOptionName( 
   std::string& sCall, std::string& sPut, 
   const std::string& sUnderlying, ou::tf::OptionSide::enumOptionSide option, ptime dtExpiry, double dblStrike ) {

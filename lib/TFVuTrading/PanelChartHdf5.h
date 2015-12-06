@@ -40,7 +40,7 @@ public:
     const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION, 
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE, 
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
-  ~PanelChartHdf5(void);
+  virtual ~PanelChartHdf5(void);
 
   bool Create( wxWindow* parent, 
     wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME, 

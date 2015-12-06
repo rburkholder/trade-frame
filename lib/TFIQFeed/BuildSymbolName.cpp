@@ -22,6 +22,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
+// something similar in Option.cpp  
 // need to deal with x10 type options
 // http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
 const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month, boost::uint8_t day, ou::tf::OptionSide::enumOptionSide side, double strike ) {

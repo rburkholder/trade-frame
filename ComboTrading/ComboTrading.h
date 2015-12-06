@@ -14,10 +14,6 @@
 
 #pragma once
 
-// started 2015/11/08
-// Option Combo Trading
-//   DAy Trading Options by Jeff Augen
-
 #include <map>
 #include <vector>
 
@@ -37,10 +33,15 @@
 
 #include "Process.h"
 #include "BundleTracking.h"
+#include "PanelCharts.h"
 
 //#include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 //#include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
+
+/// \brief Option Combo Trading, code started 2015/11/08
+///
+/// Based upon the book 'Day Trading Options' by Jeff Augen
 
 class AppComboTrading:
   public wxApp, public ou::tf::FrameWork01<AppComboTrading> {
@@ -107,6 +108,10 @@ private:
 
   FrameMain* m_pFrameMain;
   FrameMain* m_pFPPOE;
+  FrameMain* m_pFCharts;
+  
+  ou::tf::PanelCharts* m_pPanelCharts;
+  
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
@@ -137,6 +142,10 @@ private:
   void OnClose( wxCloseEvent& event );
 
   void Start( void );
+  void TestSymbols( void );
+  
+  void BuildFrameCharts( void );
+  void BuildFramePortfolioPosition( void );
 
 //  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
@@ -175,6 +184,5 @@ private:
 
 };
 
-// Implements MyApp& wxGetApp()
 DECLARE_APP(AppComboTrading)
 
