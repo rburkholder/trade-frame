@@ -12,6 +12,7 @@
       <itemPath>LiborFromIQFeed.h</itemPath>
       <itemPath>ReadCboeWeeklyOptions.h</itemPath>
       <itemPath>TreeOps.h</itemPath>
+      <itemPath>TreeOpsItems.h</itemPath>
       <itemPath>stdafx.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -27,6 +28,7 @@
       <itemPath>LiborFromIQFeed.cpp</itemPath>
       <itemPath>ReadCboeWeeklyOptions.cpp</itemPath>
       <itemPath>TreeOps.cpp</itemPath>
+      <itemPath>TreeOpsItems.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -93,6 +95,10 @@
       </item>
       <item path="TreeOps.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="TreeOpsItems.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeOpsItems.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="stdafx.h" ex="false" tool="3" flavor2="0">
@@ -147,6 +153,10 @@
       <item path="TreeOps.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="TreeOps.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeOpsItems.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeOpsItems.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>

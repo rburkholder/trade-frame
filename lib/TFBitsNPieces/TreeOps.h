@@ -17,25 +17,22 @@
 #pragma once
 
 
-// 20151207  Need to generalize this, so can be used elsewhere, 
-//   considering we are stealing the code from simulant
+// 20151207  code originated in simulant
 
 #include <map>
-
-#include <boost/shared_ptr.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-//#include <boost/phoenix/bind/bind_member_function.hpp>
-//#include <boost/phoenix/core/argument.hpp>
-
 //#include <wx/wx.h>
+#include <wx/defs.h>
 #include <wx/treectrl.h>
-//#include <wx/panel.h>
-#include <wx/event.h>
+//#include <wx/event.h>
 #include <wx/bitmap.h>
 #include <wx/icon.h>
+#include <wx/string.h>
+
+#include "TreeOpsItems.h"
 
 #define SYMBOL_TREEOPS_STYLE wxTR_HAS_BUTTONS | wxTR_SINGLE
 #define SYMBOL_TREEOPS_TITLE _("Tree Ops")
@@ -45,17 +42,14 @@
 
 namespace ou {
 namespace tf {  
-
-class TreeItemBase;  // base class for different items for populating the tree
-class TreeItemResources;  // common set of resources throughout the tree items
-
-typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
-typedef boost::shared_ptr<TreeItemResources> pTreeItemResources_t;
-
+  
 class TreeOps: public wxTreeCtrl {
-  DECLARE_DYNAMIC_CLASS( TreeOps )
+  //DECLARE_DYNAMIC_CLASS( TreeOps )
   friend class boost::serialization::access;
 public:
+  
+  typedef TreeItemBase::pTreeItemBase_t pTreeItemBase_t;
+  typedef TreeItemRoot::pTreeItemRoot_t pTreeItemRoot_t;
   
   TreeOps();
   TreeOps( 
@@ -74,11 +68,15 @@ public:
 
   ~TreeOps();
   
+  void SetRoot( pTreeItemRoot_t pTreeItemRoot ) { m_pTreeItemRoot = pTreeItemRoot; }
+  
   void Add( const wxTreeItemId& id, pTreeItemBase_t pTreeItemBase );
   void Delete( wxTreeItemId id );
   
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
+  
+  wxString GetInput( const wxString& sPrompt, const wxString& sDefault );
   
 protected:
 private:
@@ -90,8 +88,7 @@ private:
 
   wxTreeItemId m_idOld;
   
-  pTreeItemBase_t m_pTreeItemRoot; // root item tracked here for serialization root
-  pTreeItemResources_t m_pResources;
+  pTreeItemRoot_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
   
   typedef std::map<void*,pTreeItemBase_t> mapDecoder_t;  // void* is from wxTreeItemId
   mapDecoder_t m_mapDecoder;

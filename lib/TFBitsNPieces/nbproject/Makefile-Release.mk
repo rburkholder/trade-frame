@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/LiborFromIQFeed.o \
 	${OBJECTDIR}/ReadCboeWeeklyOptions.o \
 	${OBJECTDIR}/TreeOps.o \
+	${OBJECTDIR}/TreeOpsItems.o \
 	${OBJECTDIR}/stdafx.o
 
 
@@ -99,6 +100,11 @@ ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
+
+${OBJECTDIR}/TreeOpsItems.o: TreeOpsItems.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOpsItems.o TreeOpsItems.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp 
 	${MKDIR} -p ${OBJECTDIR}
