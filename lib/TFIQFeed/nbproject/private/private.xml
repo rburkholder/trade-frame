@@ -10,18 +10,6 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.h</file>
         </group>
         <group name="lib"/>
-        <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/MarketSymbols.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/ParseMktSymbolLine.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/MarketSymbol.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryQuery.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedHistoryBulkQuery.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.cpp</file>
-        </group>
+        <group name="TradeFrame"/>
     </open-files>
 </project-private>

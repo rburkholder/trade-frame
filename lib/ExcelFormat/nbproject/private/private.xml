@@ -8,10 +8,6 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group/>
         <group name="lib"/>
-        <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/ExcelFormat/BasicExcel.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/ExcelFormat/ExcelFormat.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/ExcelFormat/BasicExcel.hpp</file>
-        </group>
+        <group name="TradeFrame"/>
     </open-files>
 </project-private>

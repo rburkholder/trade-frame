@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/InstrumentSelection.o \
 	${OBJECTDIR}/LiborFromIQFeed.o \
 	${OBJECTDIR}/ReadCboeWeeklyOptions.o \
+	${OBJECTDIR}/TreeOps.o \
 	${OBJECTDIR}/stdafx.o
 
 
@@ -93,6 +94,11 @@ ${OBJECTDIR}/ReadCboeWeeklyOptions.o: ReadCboeWeeklyOptions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCboeWeeklyOptions.o ReadCboeWeeklyOptions.cpp
+
+${OBJECTDIR}/TreeOps.o: TreeOps.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp 
 	${MKDIR} -p ${OBJECTDIR}

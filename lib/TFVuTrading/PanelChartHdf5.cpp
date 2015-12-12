@@ -123,7 +123,6 @@ void PanelChartHdf5::CreateControls() {
     boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 ) 
     );
 
-
   Bind( wxEVT_CLOSE_WINDOW, &PanelChartHdf5::OnClose, this );  // start close of windows and controls
 
 }
@@ -147,9 +146,9 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   //if ( "AtmIV" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
   if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
-  namespace args = boost::phoenix::placeholders;
   m_sCurrentPath = s1;
   m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
+  namespace args = boost::phoenix::placeholders;
   m_pdm->IteratePathParts( s1, boost::phoenix::bind( &PanelChartHdf5::HandleBuildTreePathParts, this, args::arg1 ) );
 }
 
