@@ -46,7 +46,6 @@ class TreeItemBase;
   
 // can be inherited 
 struct TreeItemResources {  // used by inheritors of TreeItemBase
-  typedef boost::shared_ptr<TreeItemResources> pTreeItemResources_t;
   typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
   
   typedef boost::signals2::signal<void (wxTreeItemId, const std::string&)> signalSetItemText_t;
@@ -72,6 +71,14 @@ struct TreeItemResources {  // used by inheritors of TreeItemBase
   typedef boost::signals2::signal<void (wxMenu*)> signalPopupMenu_t;
   typedef signalPopupMenu_t::slot_type slotPopupMenu_t;
   signalPopupMenu_t signalPopupMenu;
+  
+  typedef boost::signals2::signal<wxTreeItemId (const wxTreeItemId&, const std::string&), FirstOrDefault<wxTreeItemId> > signalAppendItem_t;
+  typedef signalAppendItem_t::slot_type slotAppendItem_t;
+  signalAppendItem_t signalAppendItem;
+  
+  typedef boost::signals2::signal<void (wxTreeItemId&)> signalEnsureVisible_t;
+  typedef signalEnsureVisible_t::slot_type slotEnsureVisible_t;
+  signalEnsureVisible_t signalEnsureVisible;
 };
 
 // ===========
@@ -81,9 +88,8 @@ class TreeItemBase {
 public:
   
   typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
-  typedef TreeItemResources::pTreeItemResources_t pTreeItemResources_t;
   
-  TreeItemBase( wxTreeItemId id, pTreeItemResources_t pResources ): m_id( id ), m_pResources( pResources ) {}
+  TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): m_id( id ), m_resources( resources ) {}
   virtual ~TreeItemBase( void ) {}
   
   virtual void ShowContextMenu( void ) {}
@@ -101,7 +107,7 @@ protected:
   
   wxTreeItemId m_id;  // identifier of this part of the tree control
   
-  pTreeItemResources_t m_pResources;
+  TreeItemResources& m_resources;
   
   typedef std::map<void*,pTreeItemBase_t> mapMembers_t;  // void* from wxTreeItemId, tracks owned items for access
   mapMembers_t m_mapMembers; 
@@ -126,7 +132,7 @@ protected:
   template<typename TreeItem, typename id_t>  
   TreeItem* AddTreeItem( const std::string& sLabel, id_t idType ) { 
     wxTreeItemId id = AppendSubItem( sLabel );
-    TreeItem* p = new TreeItem( id, m_pResources );
+    TreeItem* p = new TreeItem( id, m_resources );
     assert( 0 != p );
     pTreeItemBase_t pTreeItemBase = AppendSubItem( id, p );
     assert( 0 != pTreeItemBase.get() );
@@ -140,7 +146,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     //wxString s = m_pResources->signalGetItemText( m_id );
     //std::string sLabel( m_pResources->tree.GetItemText( m_id ) );
-    std::string sLabel( m_pResources->signalGetItemText( m_id ) );
+    std::string sLabel( m_resources.signalGetItemText( m_id ) );
     ar & sLabel;
   }
   
@@ -149,7 +155,7 @@ private:
     std::string sLabel;
     ar & sLabel;
     //m_pResources->tree.SetItemText( m_id, sLabel );
-    m_pResources->signalSetItemText( m_id, sLabel );
+    m_resources.signalSetItemText( m_id, sLabel );
   }
   
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -161,7 +167,7 @@ class TreeItemGroup: public TreeItemBase {
 public:
 
   // deals with organizing groups of branches, eg:  master - act - scene
-  TreeItemGroup( wxTreeItemId id, pTreeItemResources_t pResources ): TreeItemBase( id, pResources ) {}
+  TreeItemGroup( wxTreeItemId id, TreeItemResources& resources ): TreeItemBase( id, resources ) {}
   virtual ~TreeItemGroup( void ) {};
 
   virtual void ShowContextMenu( void );
@@ -240,7 +246,7 @@ public:
   
   typedef boost::shared_ptr<TreeItemRoot> pTreeItemRoot_t;
 
-  TreeItemRoot( wxTreeItemId id, pTreeItemResources_t pResources ): TreeItemGroup( id, pResources ) {}
+  TreeItemRoot( wxTreeItemId id, TreeItemResources& resources ): TreeItemGroup( id, resources ) {}
   virtual ~TreeItemRoot( void ) {}
 
   virtual void ShowContextMenu( void );

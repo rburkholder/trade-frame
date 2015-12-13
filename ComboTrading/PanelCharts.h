@@ -22,6 +22,8 @@
 
 //#include <wx/scrolwin.h>
 
+#include <TFBitsNPieces/TreeOps.h>
+
 #include <OUCharting/ChartMaster.h>
 
 namespace ou { // One Unified
@@ -62,6 +64,9 @@ private:
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
   
+  ou::tf::TreeItemResources m_resources;
+  ou::tf::TreeOps* m_pTreeOps;
+  
   // 20151206  convert all this to TreeItem derivations, so everything is self contained
   
   struct CustomItemBase: public wxTreeItemData {
@@ -90,7 +95,7 @@ private:
     CustomItemPosition( void ): CustomItemBase( Position ) {};
   };
   
-  wxTreeCtrl* m_pTreeSymbols;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
+  //wxTreeCtrl* m_pTreeSymbols;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   wxWindow* m_winChart;
   ou::ChartMaster m_chartMaster;

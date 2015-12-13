@@ -103,26 +103,34 @@ void PanelCharts::CreateControls() {
 
   // tree
   //wxTreeCtrl* tree;
-  m_pTreeSymbols = new wxTreeCtrl( splitter );
+//  m_pTreeSymbols = new wxTreeCtrl( splitter );
   //wxTreeItemId idRoot = m_pTreeSymbols->AddRoot( "/", -1, -1, new CustomItemData( CustomItemData::Root, m_eLatestDatumType ) );
-  wxTreeItemId idRoot = m_pTreeSymbols->AddRoot( "Collections", -1, -1, new CustomItemBase );
-  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelCharts::HandleTreeSelChanged, this, m_pTreeSymbols->GetId() );
+//  wxTreeItemId idRoot = m_pTreeSymbols->AddRoot( "Collections", -1, -1, new CustomItemBase );
+//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelCharts::HandleTreeSelChanged, this, m_pTreeSymbols->GetId() );
   //m_pHdf5Root->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &PanelCharts::HandleTreeItemActivated, this, m_pTreeSymbols->GetId() );
+//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &PanelCharts::HandleTreeItemActivated, this, m_pTreeSymbols->GetId() );
 //  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
 //  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, &PanelCharts::HandleTreeItemRightClick, this, m_pTreeSymbols->GetId() );
+//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, &PanelCharts::HandleTreeItemRightClick, this, m_pTreeSymbols->GetId() );
   //m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_MENU, &PanelCharts::HandleTreeItemMenu, this, m_pTreeSymbols->GetId()  );
   //m_pTreeSymbols->AppendItem( idRoot, "equities" );
   //m_pTreeSymbols->AppendItem( idRoot, "futures" );
   //m_pTreeSymbols->AppendItem( idRoot, "foptions" );
   //m_pTreeSymbols->AppendItem( idRoot, "portfolios" );
+  
+  m_pTreeOps = new ou::tf::TreeOps( splitter );
+  m_pTreeOps->PopulateResources( m_resources );
+  wxTreeItemId id = m_pTreeOps->AddRoot( "Root" );  // can be renamed
+  ou::tf::TreeOps::pTreeItemRoot_t p( new ou::tf::TreeItemRoot( id, m_resources ) );
+  m_pTreeOps->SetRoot( p );
+  //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
+  //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
 
   // panel for right side of splitter
   wxPanel* panelSplitterRightPanel;
   panelSplitterRightPanel = new wxPanel( splitter );
 
-  splitter->SplitVertically( m_pTreeSymbols, panelSplitterRightPanel, 0 );
+  splitter->SplitVertically( m_pTreeOps, panelSplitterRightPanel, 0 );
   sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
 
   // sizer for right side of splitter
@@ -178,19 +186,19 @@ void PanelCharts::ShowContextMenuRoot( void ) {
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddPortfolio, this, MIPortfolio );
   pMenu->Append( MIPosition, "Append Pos&ition" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddPosition, this, MIPosition );
-  m_pTreeSymbols->PopupMenu( pMenu );
+//  m_pTreeSymbols->PopupMenu( pMenu );
 }
 
 void PanelCharts::HandleAddGroup( wxCommandEvent& event ) {
   std::cout << "HandleAddGroup" << std::endl;
-  wxTreeItemId idParent = m_pTreeSymbols->GetItemParent( event. );
-  if ( !idParent.IsOk() ) {
+//  wxTreeItemId idParent = m_pTreeSymbols->GetItemParent( event. );
+//  if ( !idParent.IsOk() ) {
     // on root so just add something
-  }
-  else {
+//  }
+//  else {
     // try an insert at some point
-  }
-  wxTreeItemId id = m_pTreeSymbols->AppendItem( event.GetId(), "Group", -1, -1, new CustomItemGroup );
+//  }
+//  wxTreeItemId id = m_pTreeSymbols->AppendItem( event.GetId(), "Group", -1, -1, new CustomItemGroup );
 }
 
 void PanelCharts::HandleAddInstrument( wxCommandEvent& event ) {

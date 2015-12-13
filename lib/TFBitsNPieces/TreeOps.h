@@ -68,7 +68,12 @@ public:
 
   ~TreeOps();
   
-  void SetRoot( pTreeItemRoot_t pTreeItemRoot ) { m_pTreeItemRoot = pTreeItemRoot; }
+  void PopulateResources( TreeItemResources& resources );
+  void SetRoot( pTreeItemRoot_t pTreeItemRoot ) { 
+    // need to check root not already set
+    m_pTreeItemRoot = pTreeItemRoot; 
+    m_mapDecoder.insert( mapDecoder_t::value_type( pTreeItemRoot->GetTreeItemId(), m_pTreeItemRoot ) );
+  }
   
   void Add( const wxTreeItemId& id, pTreeItemBase_t pTreeItemBase );
   void Delete( wxTreeItemId id );
