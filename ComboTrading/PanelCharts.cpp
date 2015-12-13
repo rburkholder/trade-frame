@@ -119,9 +119,10 @@ void PanelCharts::CreateControls() {
   //m_pTreeSymbols->AppendItem( idRoot, "portfolios" );
   
   m_pTreeOps = new ou::tf::TreeOps( splitter );
-  m_pTreeOps->PopulateResources( m_resources );
+  m_pTreeOps->PopulateResources( m_baseResources );
+  
   wxTreeItemId id = m_pTreeOps->AddRoot( "Root" );  // can be renamed
-  ou::tf::TreeOps::pTreeItemRoot_t p( new ou::tf::TreeItemRoot( id, m_resources ) );
+  boost::shared_ptr<TreeItemRoot> p( new TreeItemRoot( id, m_baseResources, m_resources ) );
   m_pTreeOps->SetRoot( p );
   //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
   //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
@@ -143,11 +144,14 @@ void PanelCharts::CreateControls() {
 
   //m_bPaintingChart = false;
   //m_bReadyToDrawChart = false;
+  // 20151213 should this be a window or a panel?
   m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
   wxWindowID idChart = m_winChart->GetId();
   m_winChart->Bind( wxEVT_PAINT, &PanelCharts::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &PanelCharts::HandleSize, this, idChart );
+  
+  m_resources.m_pWin = m_winChart;
 
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
 

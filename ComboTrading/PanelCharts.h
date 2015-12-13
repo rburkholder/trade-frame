@@ -23,6 +23,7 @@
 //#include <wx/scrolwin.h>
 
 #include <TFBitsNPieces/TreeOps.h>
+#include "PanelChartsOps.h"
 
 #include <OUCharting/ChartMaster.h>
 
@@ -64,7 +65,8 @@ private:
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
   
-  ou::tf::TreeItemResources m_resources;
+  ou::tf::TreeItemResources m_baseResources;
+  Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
   
   // 20151206  convert all this to TreeItem derivations, so everything is self contained
@@ -79,6 +81,7 @@ private:
     // put link to instrument here, once regurgitated
     CustomItemGroup( void ): CustomItemBase( Group ) {};
   };
+  
   
   struct CustomItemInstrument: public CustomItemBase {
     // put link to instrument here, once regurgitated

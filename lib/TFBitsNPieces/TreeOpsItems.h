@@ -44,9 +44,7 @@ struct FirstOrDefault {  // a combiner used for signals with return values
 
 class TreeItemBase;
   
-// can be inherited 
 struct TreeItemResources {  // used by inheritors of TreeItemBase
-  typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
   
   typedef boost::signals2::signal<void (wxTreeItemId, const std::string&)> signalSetItemText_t;
   typedef signalSetItemText_t::slot_type slotSetItemText_t;
@@ -60,6 +58,7 @@ struct TreeItemResources {  // used by inheritors of TreeItemBase
   typedef signalGetInput_t::slot_type slotGetInput_t;
   signalGetInput_t signalGetInput;
   
+  typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
   typedef boost::signals2::signal<void (const wxTreeItemId&, pTreeItemBase_t)> signalAdd_t;
   typedef signalAdd_t::slot_type slotAdd_t;
   signalAdd_t signalAdd;
@@ -89,7 +88,8 @@ public:
   
   typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
   
-  TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): m_id( id ), m_resources( resources ) {}
+  TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): m_id( id ), m_baseResources( resources ) {}
+  //TreeItemBase( wxTreeItemId id ): m_id( id ) {}
   virtual ~TreeItemBase( void ) {}
   
   virtual void ShowContextMenu( void ) {}
@@ -107,7 +107,7 @@ protected:
   
   wxTreeItemId m_id;  // identifier of this part of the tree control
   
-  TreeItemResources& m_resources;
+  TreeItemResources& m_baseResources;
   
   typedef std::map<void*,pTreeItemBase_t> mapMembers_t;  // void* from wxTreeItemId, tracks owned items for access
   mapMembers_t m_mapMembers; 
@@ -132,146 +132,47 @@ protected:
   template<typename TreeItem, typename id_t>  
   TreeItem* AddTreeItem( const std::string& sLabel, id_t idType ) { 
     wxTreeItemId id = AppendSubItem( sLabel );
-    TreeItem* p = new TreeItem( id, m_resources );
+    TreeItem* p = new TreeItem( id, m_baseResources );
     assert( 0 != p );
     pTreeItemBase_t pTreeItemBase = AppendSubItem( id, p );
     assert( 0 != pTreeItemBase.get() );
     AddMember( idType, id, pTreeItemBase );
     return p;
   }
-
+  
+  template<typename TreeItem, typename id_t, typename Resources>  
+  TreeItem* AddTreeItem( const std::string& sLabel, id_t idType, Resources& resources ) { 
+    wxTreeItemId id = AppendSubItem( sLabel );
+    TreeItem* p = new TreeItem( id, m_baseResources, resources );
+    assert( 0 != p );
+    pTreeItemBase_t pTreeItemBase = AppendSubItem( id, p );
+    assert( 0 != pTreeItemBase.get() );
+    AddMember( idType, id, pTreeItemBase );
+    return p;
+  }
+  
 private:
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    //ar & boost::serialization::base_object<const TreeItemBase>(*this);
     //wxString s = m_pResources->signalGetItemText( m_id );
     //std::string sLabel( m_pResources->tree.GetItemText( m_id ) );
-    std::string sLabel( m_resources.signalGetItemText( m_id ) );
+    std::string sLabel( m_baseResources.signalGetItemText( m_id ) );
     ar & sLabel;
   }
   
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    //ar & boost::serialization::base_object<TreeItemBase>(*this);
     std::string sLabel;
     ar & sLabel;
     //m_pResources->tree.SetItemText( m_id, sLabel );
-    m_resources.signalSetItemText( m_id, sLabel );
+    m_baseResources.signalSetItemText( m_id, sLabel );
   }
   
   BOOST_SERIALIZATION_SPLIT_MEMBER()
   
-};
-  
-class TreeItemGroup: public TreeItemBase {
-  friend class boost::serialization::access;
-public:
-
-  // deals with organizing groups of branches, eg:  master - act - scene
-  TreeItemGroup( wxTreeItemId id, TreeItemResources& resources ): TreeItemBase( id, resources ) {}
-  virtual ~TreeItemGroup( void ) {};
-
-  virtual void ShowContextMenu( void );
-
-protected:
-
-  enum IdTreeItemType {
-    IdGroup = 201, IdScene
-  };
-
-  TreeItemGroup* AddGroup( void );  // for TreeItemRoot
-
-private:
-
-  enum {
-    ID_Null = wxID_HIGHEST,
-    MIAddSubGroup, MIAddMusic, MIAddScene,
-    MIDelete, MIRename
-  };
-
-  void HandleAddGroup( wxCommandEvent& event );
-  //void HandleAddMusic( wxCommandEvent& event );
-  //TreeItemMusic* AddMusic( void );
-
-  //void HandleAddScene( wxCommandEvent& event );
-  //TreeItemScene* AddScene( void );
-
-  void HandleDelete( wxCommandEvent& event );
-
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar << boost::serialization::base_object<const TreeItemBase>(*this);
-    const vMembers_t::size_type n = m_vMembers.size();
-    ar << n;
-    for ( vMembers_t::const_iterator iter = m_vMembers.begin(); iter != m_vMembers.end(); ++iter ) {
-      ar << ( iter->m_type );
-      switch ( iter->m_type ) {
-        case IdGroup:
-        {
-          const TreeItemGroup* pGroup = dynamic_cast<TreeItemGroup*>( iter->m_pTreeItemBase.get() );
-          ar & *pGroup;
-        }
-        break;
-      }
-    }
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<TreeItemBase>(*this);
-    vMembers_t::size_type n;
-    ar & n;
-    for ( vMembers_t::size_type ix = 0; ix < n; ++ix ) {
-      unsigned int type;
-      ar & type;
-      switch ( type ) {
-        case IdGroup:
-        {
-          TreeItemGroup* pGroup = AddTreeItem<TreeItemGroup,IdTreeItemType>( "Group", IdGroup );
-          ar & *pGroup;
-        }
-        break;
-      }
-    }
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-};
-
-// ================
-
-class TreeItemRoot: public TreeItemGroup {
-  friend class boost::serialization::access;
-public:
-  
-  typedef boost::shared_ptr<TreeItemRoot> pTreeItemRoot_t;
-
-  TreeItemRoot( wxTreeItemId id, TreeItemResources& resources ): TreeItemGroup( id, resources ) {}
-  virtual ~TreeItemRoot( void ) {}
-
-  virtual void ShowContextMenu( void );
-
-protected:
-private:
-  enum {
-    ID_Null = wxID_HIGHEST,
-    MIAddGroup
-  };
-
-  void HandleAddGroup( wxCommandEvent& event );
-
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & boost::serialization::base_object<const TreeItemGroup>(*this);
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<TreeItemGroup>(*this);
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
 };
 
 } // namespace tf

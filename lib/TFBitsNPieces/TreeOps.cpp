@@ -154,7 +154,7 @@ void TreeOps::Save( boost::archive::text_oarchive& oa ) {
 
   //TreeItemBase* pBase = m_pTreeItemRoot.get();
   //const TreeItemRoot* p = dynamic_cast<TreeItemRoot*>( pBase );
-  oa & *m_pTreeItemRoot;
+  //oa & *m_pTreeItemRoot;
 }
 
 void TreeOps::Load( boost::archive::text_iarchive& ia ) {
@@ -164,7 +164,7 @@ void TreeOps::Load( boost::archive::text_iarchive& ia ) {
 
   //TreeItemBase* pBase = m_pTreeItemRoot.get();
   //TreeItemRoot* p = dynamic_cast<TreeItemRoot*>( pBase );
-  ia & *m_pTreeItemRoot;
+  //ia & *m_pTreeItemRoot;
 }
 
 wxString TreeOps::GetInput( const wxString& sPrompt, const wxString& sDefault ) {

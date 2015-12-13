@@ -49,7 +49,7 @@ class TreeOps: public wxTreeCtrl {
 public:
   
   typedef TreeItemBase::pTreeItemBase_t pTreeItemBase_t;
-  typedef TreeItemRoot::pTreeItemRoot_t pTreeItemRoot_t;
+  //typedef TreeItemRoot::pTreeItemRoot_t pTreeItemRoot_t;
   
   TreeOps();
   TreeOps( 
@@ -69,15 +69,16 @@ public:
   ~TreeOps();
   
   void PopulateResources( TreeItemResources& resources );
-  void SetRoot( pTreeItemRoot_t pTreeItemRoot ) { 
-    // need to check root not already set
-    m_pTreeItemRoot = pTreeItemRoot; 
-    m_mapDecoder.insert( mapDecoder_t::value_type( pTreeItemRoot->GetTreeItemId(), m_pTreeItemRoot ) );
+  void SetRoot( pTreeItemBase_t pTreeItemRoot ) { 
+//    m_pTreeItemRoot = pTreeItemRoot; 
+    assert( 0 == m_mapDecoder.size() );
+    m_mapDecoder.insert( mapDecoder_t::value_type( pTreeItemRoot->GetTreeItemId(), pTreeItemRoot ) );
   }
   
   void Add( const wxTreeItemId& id, pTreeItemBase_t pTreeItemBase );
   void Delete( wxTreeItemId id );
   
+  // no functionality at present
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
   
@@ -93,7 +94,7 @@ private:
 
   wxTreeItemId m_idOld;
   
-  pTreeItemRoot_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
+  //pTreeItemBase_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
   
   typedef std::map<void*,pTreeItemBase_t> mapDecoder_t;  // void* is from wxTreeItemId
   mapDecoder_t m_mapDecoder;

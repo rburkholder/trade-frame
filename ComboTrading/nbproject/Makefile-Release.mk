@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
 	${OBJECTDIR}/ComboTrading.o \
 	${OBJECTDIR}/PanelCharts.o \
+	${OBJECTDIR}/PanelChartsOps.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/UnderlyingSelection.o
 
@@ -80,6 +81,11 @@ ${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
+
+${OBJECTDIR}/PanelChartsOps.o: PanelChartsOps.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelChartsOps.o PanelChartsOps.cpp
 
 ${OBJECTDIR}/Process.o: Process.cpp 
 	${MKDIR} -p ${OBJECTDIR}
