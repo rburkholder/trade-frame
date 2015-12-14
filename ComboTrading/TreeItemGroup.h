@@ -12,46 +12,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started December 13, 2015, 2:13 PM
+// started December 13, 2015, 8:16 PM
 
 #pragma once
 
-#include <wx/panel.h>
-
-#include <TFBitsNPieces/TreeOpsItems.h>
-
-struct Resources {
-  //wxPanel* m_pPanel;  // re-usable for charts and stuff
-  wxWindow* m_pWin;
-  Resources( void ): m_pWin( 0 ) {}
-};
-
-// ================
-
-class TreeItemResources: public ou::tf::TreeItemBase {
-public:
-  TreeItemResources( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-    ou::tf::TreeItemBase( id, baseResources ), m_resources( resources ) {}
-  virtual ~TreeItemResources( void ) {};
-protected:
-  Resources& m_resources;
-private:
-  
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & boost::serialization::base_object<const ou::tf::TreeItemBase>(*this);
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<ou::tf::TreeItemBase>(*this);
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-};
-
-// ================
+#include "TreeItem.h"
 
 class TreeItemGroup;
 
@@ -186,94 +151,3 @@ private:
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
-
-// ================
-
-class TreeItemInstrument: public TreeItemResources {
-  friend class boost::serialization::access;
-public:
-  TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
-    TreeItemResources( id, baseResources, resources ) {}
-  virtual ~TreeItemInstrument( void ) {}
-  
-  //virtual void ShowContextMenu( void );
-  
-protected:
-private:
-  
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & boost::serialization::base_object<const TreeItemResources>(*this);
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<TreeItemResources>(*this);
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-};
-
-// ================
-
-class TreeItemPortfolio: public TreeItemResources {
-  friend class boost::serialization::access;
-public:
-  TreeItemPortfolio( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
-    TreeItemResources( id, baseResources, resources ) {}
-  virtual ~TreeItemPortfolio( void ) {}
-  
-  //virtual void ShowContextMenu( void );
-  
-protected:
-private:
-  
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & boost::serialization::base_object<const TreeItemResources>(*this);
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<TreeItemResources>(*this);
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-};
-
-// ================
-
-class TreeItemPosition: public TreeItemResources {
-  friend class boost::serialization::access;
-public:
-  TreeItemPosition( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
-    TreeItemResources( id, baseResources, resources ) {}
-  virtual ~TreeItemPosition( void ) {}
-  
-  //virtual void ShowContextMenu( void );
-  
-protected:
-private:
-//  enum {
-//    ID_Null = wxID_HIGHEST,
-//    MIAddGroup
-//  };
-  
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & boost::serialization::base_object<const TreeItemResources>(*this);
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & boost::serialization::base_object<TreeItemResources>(*this);
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-};
-
-// ================
-

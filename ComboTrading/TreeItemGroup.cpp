@@ -12,9 +12,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-// started December 13, 2015, 2:13 PM
+// started December 13, 2015, 8:16 PM
 
-#include "PanelChartsOps.h"
+#include "TreeItemGroup.h"
+
+#include "TreeItemInstrument.h"
+#include "TreeItemPortfolio.h"
+#include "TreeItemPosition.h"
 
 void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
@@ -53,23 +57,27 @@ void TreeItemGroupCommon::HandleAddGroup( wxCommandEvent& event ) {
 // ================
 
 void TreeItemRoot::ShowContextMenu( void ) {
-  wxMenu* pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
-  TreeItemGroupCommon::BuildContextMenu( pMenu );
-  m_baseResources.signalPopupMenu( pMenu );
+  if ( 0 == m_pMenu ) {
+    m_pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
+    TreeItemGroupCommon::BuildContextMenu( m_pMenu );
+  }
+  m_baseResources.signalPopupMenu( m_pMenu );
 }
 
 // ================
 
 void TreeItemGroup::ShowContextMenu( void ) {
-  wxMenu* pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
-  TreeItemGroupCommon::BuildContextMenu( pMenu );
-  pMenu->Append( MIDelete, "Delete" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemGroup::HandleDelete, this, MIDelete );
-  m_baseResources.signalPopupMenu( pMenu );
+  if ( 0 == m_pMenu ) {
+    m_pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
+    TreeItemGroupCommon::BuildContextMenu( m_pMenu );
+    m_pMenu->Append( MIDelete, "Delete" );
+    m_pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemGroup::HandleDelete, this, MIDelete );
+  }
+  m_baseResources.signalPopupMenu( m_pMenu );
 }
 
 void TreeItemGroup::HandleDelete( wxCommandEvent& event ) {
-  std::cout << "TreeItemGroup Delete" << std::endl;
+  std::cout << "Delete: TreeItemGroup" << std::endl;
   m_baseResources.signalDelete( this->m_id );
 }
 

@@ -88,9 +88,13 @@ public:
   
   typedef boost::shared_ptr<TreeItemBase> pTreeItemBase_t;
   
-  TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): m_id( id ), m_baseResources( resources ) {}
+  TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): 
+    m_id( id ), m_baseResources( resources ), m_pMenu( 0 )
+    {}
   //TreeItemBase( wxTreeItemId id ): m_id( id ) {}
-  virtual ~TreeItemBase( void ) {}
+  virtual ~TreeItemBase( void ) {
+    if ( 0 != m_pMenu ) delete m_pMenu;
+  }
   
   virtual void ShowContextMenu( void ) {}
 //  virtual void SetSelected( CommonGuiElements& ) {}
@@ -118,6 +122,8 @@ protected:
     pTreeItemBase_t m_pTreeItemBase;
     member_t( unsigned int type, void* void_, pTreeItemBase_t p ): m_type( type ), m_void( void_ ), m_pTreeItemBase( p ) {};
   };
+  
+  wxMenu* m_pMenu;  // context menu
 
   typedef std::vector<member_t> vMembers_t; // tracks ordered list for serialization
   vMembers_t m_vMembers;

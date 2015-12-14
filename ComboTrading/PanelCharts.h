@@ -23,7 +23,7 @@
 //#include <wx/scrolwin.h>
 
 #include <TFBitsNPieces/TreeOps.h>
-#include "PanelChartsOps.h"
+#include "TreeItem.h"
 
 #include <OUCharting/ChartMaster.h>
 

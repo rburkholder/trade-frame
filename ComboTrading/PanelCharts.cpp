@@ -24,6 +24,7 @@
 #include <wx/menu.h>
 
 #include "PanelCharts.h"
+#include "TreeItemGroup.h"
 
 // 20151206 need to think about serialization of what is in the tree so it can be 
 //   retrieved for next time

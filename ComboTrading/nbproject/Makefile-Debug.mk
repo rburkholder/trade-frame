@@ -38,8 +38,12 @@ OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
 	${OBJECTDIR}/ComboTrading.o \
 	${OBJECTDIR}/PanelCharts.o \
-	${OBJECTDIR}/PanelChartsOps.o \
 	${OBJECTDIR}/Process.o \
+	${OBJECTDIR}/TreeItem.o \
+	${OBJECTDIR}/TreeItemGroup.o \
+	${OBJECTDIR}/TreeItemInstrument.o \
+	${OBJECTDIR}/TreeItemPortfolio.o \
+	${OBJECTDIR}/TreeItemPosition.o \
 	${OBJECTDIR}/UnderlyingSelection.o
 
 
@@ -118,15 +122,35 @@ ${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
 
-${OBJECTDIR}/PanelChartsOps.o: PanelChartsOps.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelChartsOps.o PanelChartsOps.cpp
-
 ${OBJECTDIR}/Process.o: Process.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
+
+${OBJECTDIR}/TreeItem.o: TreeItem.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
+
+${OBJECTDIR}/TreeItemGroup.o: TreeItemGroup.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
+
+${OBJECTDIR}/TreeItemInstrument.o: TreeItemInstrument.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
+
+${OBJECTDIR}/TreeItemPortfolio.o: TreeItemPortfolio.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
+
+${OBJECTDIR}/TreeItemPosition.o: TreeItemPosition.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
 
 ${OBJECTDIR}/UnderlyingSelection.o: UnderlyingSelection.cpp 
 	${MKDIR} -p ${OBJECTDIR}

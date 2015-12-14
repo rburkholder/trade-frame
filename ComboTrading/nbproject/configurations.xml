@@ -7,8 +7,12 @@
       <itemPath>BundleTracking.h</itemPath>
       <itemPath>ComboTrading.h</itemPath>
       <itemPath>PanelCharts.h</itemPath>
-      <itemPath>PanelChartsOps.h</itemPath>
       <itemPath>Process.h</itemPath>
+      <itemPath>TreeItem.h</itemPath>
+      <itemPath>TreeItemGroup.h</itemPath>
+      <itemPath>TreeItemInstrument.h</itemPath>
+      <itemPath>TreeItemPortfolio.h</itemPath>
+      <itemPath>TreeItemPosition.h</itemPath>
       <itemPath>UnderlyingSelection.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -21,8 +25,12 @@
       <itemPath>BundleTracking.cpp</itemPath>
       <itemPath>ComboTrading.cpp</itemPath>
       <itemPath>PanelCharts.cpp</itemPath>
-      <itemPath>PanelChartsOps.cpp</itemPath>
       <itemPath>Process.cpp</itemPath>
+      <itemPath>TreeItem.cpp</itemPath>
+      <itemPath>TreeItemGroup.cpp</itemPath>
+      <itemPath>TreeItemInstrument.cpp</itemPath>
+      <itemPath>TreeItemPortfolio.cpp</itemPath>
+      <itemPath>TreeItemPosition.cpp</itemPath>
       <itemPath>UnderlyingSelection.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -312,13 +320,29 @@
       </item>
       <item path="PanelCharts.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="PanelChartsOps.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelChartsOps.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Process.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemGroup.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemGroup.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemPortfolio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemPortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemPosition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemPosition.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -357,13 +381,29 @@
       </item>
       <item path="PanelCharts.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="PanelChartsOps.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelChartsOps.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Process.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemGroup.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemGroup.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemInstrument.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemInstrument.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemPortfolio.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemPortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeItemPosition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeItemPosition.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
