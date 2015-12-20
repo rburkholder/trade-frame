@@ -367,7 +367,7 @@ void AppComboTrading::TestSymbols( void ) {
       typedef std::vector<Option> vOption_t;
       vOption_t vOption;
       
-      vOption.push_back( Option( "GLD-P-2015-12-11-112", ou::tf::OptionSide::Call, "GLD", "GLD", 2015, 12, 11, 112.0 ) );
+      vOption.push_back( Option( "GLD-P-2015-12-11-112.0", ou::tf::OptionSide::Call, "GLD", "GLD", 2015, 12, 11, 112.0 ) );
       
       for ( vOption_t::const_iterator iter = vOption.begin(); vOption.end() != iter; ++iter ) {
         std::string sName = 

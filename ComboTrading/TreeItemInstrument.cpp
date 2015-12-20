@@ -22,7 +22,7 @@ void TreeItemInstrument::Init() {
    * confirm that subsets can be saved and loaded
    * 
    * need instrument list
-   * pop up to ask for input for symbol, for now just get name, then slowly work on parallel lookups
+   * pop up to ask for input for symbol, for now just get name, then incrementally work on parallel lookups
    * then build instrument with iqfeed, ib
    * send off for ib contract
    * need to look in instrument table first

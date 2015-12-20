@@ -71,33 +71,6 @@ private:
   
   // 20151206  convert all this to TreeItem derivations, so everything is self contained
   
-  struct CustomItemBase: public wxTreeItemData {
-    enum enumNodeType { Root, Group, Instrument, Portfolio, Position } m_eNodeType;
-    CustomItemBase( void ): m_eNodeType( Root ) {};
-    CustomItemBase( enumNodeType type ): m_eNodeType( type ) {};
-  };
-  
-  struct CustomItemGroup: public CustomItemBase {
-    // put link to instrument here, once regurgitated
-    CustomItemGroup( void ): CustomItemBase( Group ) {};
-  };
-  
-  
-  struct CustomItemInstrument: public CustomItemBase {
-    // put link to instrument here, once regurgitated
-    CustomItemInstrument( void ): CustomItemBase( Instrument ) {};
-  };
-  
-  struct CustomItemPortfolio: public CustomItemBase {
-    // put link to portfolio here, once regurgitated
-    CustomItemPortfolio( void ): CustomItemBase( Portfolio ) {};
-  };
-  
-  struct CustomItemPosition: public CustomItemBase {
-    // put link to position here, once regurgitated
-    CustomItemPosition( void ): CustomItemBase( Position ) {};
-  };
-  
   //wxTreeCtrl* m_pTreeSymbols;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
   wxWindow* m_winChart;
@@ -106,22 +79,10 @@ private:
 
   void OnClose( wxCloseEvent& event );
   
-  void ShowContextMenuRoot( void );
-  
-  void HandleAddGroup( wxCommandEvent& event );
-  void HandleAddInstrument( wxCommandEvent& event );
-  void HandleAddPortfolio( wxCommandEvent& event );
-  void HandleAddPosition( wxCommandEvent& event );
-
   void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
   
-  void HandleTreeSelChanged( wxTreeEvent& event );
-  void HandleTreeItemRightClick( wxTreeEvent& event );
-  //void HandleTreeItemMenu( wxTreeEvent& event );
-  void HandleTreeItemActivated( wxTreeEvent& event );
-
 };
 
 } // namespace tf

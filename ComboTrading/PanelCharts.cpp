@@ -107,12 +107,9 @@ void PanelCharts::CreateControls() {
 //  m_pTreeSymbols = new wxTreeCtrl( splitter );
   //wxTreeItemId idRoot = m_pTreeSymbols->AddRoot( "/", -1, -1, new CustomItemData( CustomItemData::Root, m_eLatestDatumType ) );
 //  wxTreeItemId idRoot = m_pTreeSymbols->AddRoot( "Collections", -1, -1, new CustomItemBase );
-//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelCharts::HandleTreeSelChanged, this, m_pTreeSymbols->GetId() );
   //m_pHdf5Root->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &PanelCharts::HandleTreeItemActivated, this, m_pTreeSymbols->GetId() );
 //  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
 //  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, &PanelCharts::HandleTreeItemRightClick, this, m_pTreeSymbols->GetId() );
   //m_pTreeSymbols->Bind( wxEVT_COMMAND_TREE_ITEM_MENU, &PanelCharts::HandleTreeItemMenu, this, m_pTreeSymbols->GetId()  );
   //m_pTreeSymbols->AppendItem( idRoot, "equities" );
   //m_pTreeSymbols->AppendItem( idRoot, "futures" );
@@ -158,78 +155,7 @@ void PanelCharts::CreateControls() {
 
 }
 
-void PanelCharts::HandleTreeSelChanged( wxTreeEvent& event ) {
-  std::cout << "HandleTreeSelChanged" << std::endl;
-}
-
-void PanelCharts::HandleTreeItemRightClick( wxTreeEvent& event ) {
-  std::cout << "HandleTreeItemRightClick" << std::endl;
-  CustomItemBase* p = reinterpret_cast<CustomItemBase*>( event.GetClientObject() );
-  assert( 0 != p );
-  switch ( p->m_eNodeType ) {
-    case CustomItemBase::Root:
-      ShowContextMenuRoot();
-      break;
-    case CustomItemBase::Group:
-      break;
-    case CustomItemBase::Instrument:
-      break;
-    case CustomItemBase::Portfolio:
-      break;
-    case CustomItemBase::Position:
-      break;
-  }
-}
-
-void PanelCharts::ShowContextMenuRoot( void ) {
-  wxMenu* pMenu = new wxMenu();
-  pMenu->Append( MIGroup, "Append &Group" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddGroup, this, MIGroup );
-  pMenu->Append( MIInstrument, "Append &Instrument" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddInstrument, this, MIInstrument );
-  pMenu->Append( MIPortfolio, "Append P&ortfolio" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddPortfolio, this, MIPortfolio );
-  pMenu->Append( MIPosition, "Append Pos&ition" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &PanelCharts::HandleAddPosition, this, MIPosition );
-//  m_pTreeSymbols->PopupMenu( pMenu );
-}
-
-void PanelCharts::HandleAddGroup( wxCommandEvent& event ) {
-  std::cout << "HandleAddGroup" << std::endl;
-//  wxTreeItemId idParent = m_pTreeSymbols->GetItemParent( event. );
-//  if ( !idParent.IsOk() ) {
-    // on root so just add something
-//  }
-//  else {
-    // try an insert at some point
-//  }
-//  wxTreeItemId id = m_pTreeSymbols->AppendItem( event.GetId(), "Group", -1, -1, new CustomItemGroup );
-}
-
-void PanelCharts::HandleAddInstrument( wxCommandEvent& event ) {
-  std::cout << "HandleAddInstrument" << std::endl;
-}
-
-void PanelCharts::HandleAddPortfolio( wxCommandEvent& event ) {
-  std::cout << "HandleAddPortfolio" << std::endl;
-}
-
-void PanelCharts::HandleAddPosition( wxCommandEvent& event ) {
-  std::cout << "HandleAddPosition" << std::endl;
-}
-
-//void PanelCharts::HandleTreeItemMenu( wxTreeEvent& event ) {
-//  std::cout << "HandleTreeItemMenu" << std::endl;
-//}
-
-void PanelCharts::HandleTreeItemActivated( wxTreeEvent& event ) {
-  std::cout << "HandleTreeItemActivated" << std::endl;
-}
-
-
 void PanelCharts::OnClose( wxCloseEvent& event ) {
-
-
   // Exit Steps: #2 -> FrameMain::OnClose
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
