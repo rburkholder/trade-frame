@@ -22,10 +22,10 @@
 
 //#include <wx/scrolwin.h>
 
+#include <OUCharting/ChartMaster.h>
+
 #include <TFBitsNPieces/TreeOps.h>
 #include "TreeItem.h"
-
-#include <OUCharting/ChartMaster.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -60,6 +60,8 @@ protected:
   void CreateControls();
 private:
   
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
   enum { 
     ID_Null=wxID_HIGHEST, ID_PANEL_CHARTS, 
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
@@ -69,13 +71,11 @@ private:
   Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
   
-  // 20151206  convert all this to TreeItem derivations, so everything is self contained
-  
-  //wxTreeCtrl* m_pTreeSymbols;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
-
   wxWindow* m_winChart;
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
+  
+  pInstrument_t HandleNewInstrumentRequest( void );
 
   void OnClose( wxCloseEvent& event );
   

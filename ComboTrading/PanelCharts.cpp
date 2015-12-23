@@ -14,6 +14,9 @@
 
 // started December 6, 2015, 1:26 PM
 
+#include <boost/phoenix/bind/bind_member_function.hpp>
+#include <boost/phoenix/core/argument.hpp>
+
 #include <wx/mstream.h>
 #include <wx/bitmap.h>
 #include <wx/splitter.h>
@@ -25,6 +28,7 @@
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
+#include <TFVuTrading/DialogPickSymbol.h>
 
 // 20151206 need to think about serialization of what is in the tree so it can be 
 //   retrieved for next time
@@ -150,9 +154,21 @@ void PanelCharts::CreateControls() {
   m_winChart->Bind( wxEVT_SIZE, &PanelCharts::HandleSize, this, idChart );
   
   m_resources.m_pWin = m_winChart;
-
+  
+  namespace args = boost::phoenix::arg_names;
+  m_resources.signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
+  
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
 
+}
+
+PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
+  pInstrument_t pInstrument;
+  DialogPickSymbol::DataExchange pde;
+  auto dialog = new ou::tf::DialogPickSymbol( this );
+  dialog->SetDataExchange( &pde );
+  dialog->Show( true );
+  return pInstrument;
 }
 
 void PanelCharts::OnClose( wxCloseEvent& event ) {

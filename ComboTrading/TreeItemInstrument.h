@@ -16,11 +16,15 @@
 
 #pragma once
 
+#include <TFTrading/Instrument.h>
+
 #include "TreeItem.h"
 
 class TreeItemInstrument: public TreeItemResources {
   friend class boost::serialization::access;
 public:
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
     TreeItemResources( id, baseResources, resources ) {
       Init();
@@ -31,6 +35,8 @@ public:
   
 protected:
 private:
+  
+  pInstrument_t m_pInstrument;
   
   void Init( void );
   

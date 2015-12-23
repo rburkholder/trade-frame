@@ -126,7 +126,8 @@ public:
 protected:
 private:
 
-  enum { ID_NULL=wxID_HIGHEST, SYMBOL_PANELPROVIDERCONTROL_IDNAME,
+  enum { 
+    ID_NULL=wxID_HIGHEST, ID_PANELPROVIDERCONTROL,
     wxID_BitmapIQfeed, ID_BtnIQFeed, wxID_LblIQFeed,
     wxID_BitmapInteractiveBrokers,ID_BtnInteractiveBrokers, wxID_LblInteractiveBrokers,
     ID_CB_IQF_D1, ID_CB_IQF_D2, ID_CB_IQF_X, 

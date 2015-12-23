@@ -36,7 +36,7 @@ void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
 
 void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) { 
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( "Instrument", IdInstrument, m_resources );
-  p->Rename();
+  //p->Rename();
 }
 
 void TreeItemGroupCommon::HandleAddPortfolio( wxCommandEvent& event ) { 

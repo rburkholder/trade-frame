@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DialogBase.o \
 	${OBJECTDIR}/DialogInstrumentSelect.o \
 	${OBJECTDIR}/DialogNewPortfolio.o \
+	${OBJECTDIR}/DialogPickSymbol.o \
 	${OBJECTDIR}/DialogSimpleOneLineOrder.o \
 	${OBJECTDIR}/FrameMain.o \
 	${OBJECTDIR}/ModelBase.o \
@@ -114,6 +115,11 @@ ${OBJECTDIR}/DialogNewPortfolio.o: DialogNewPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogNewPortfolio.o DialogNewPortfolio.cpp
+
+${OBJECTDIR}/DialogPickSymbol.o: DialogPickSymbol.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogPickSymbol.o DialogPickSymbol.cpp
 
 ${OBJECTDIR}/DialogSimpleOneLineOrder.o: DialogSimpleOneLineOrder.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -7,19 +7,28 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeOps.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemInstrument.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/PanelCharts.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Process.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPosition.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItem.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPosition.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItem.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemGroup.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemGroup.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItem.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/PanelCharts.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemInstrument.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPortfolio.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Process.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPortfolio.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeOps.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.h</file>
         </group>
     </open-files>
 </project-private>

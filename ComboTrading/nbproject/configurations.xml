@@ -13,6 +13,7 @@
       <itemPath>TreeItemInstrument.h</itemPath>
       <itemPath>TreeItemPortfolio.h</itemPath>
       <itemPath>TreeItemPosition.h</itemPath>
+      <itemPath>TreeOps.h</itemPath>
       <itemPath>UnderlyingSelection.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -31,6 +32,7 @@
       <itemPath>TreeItemInstrument.cpp</itemPath>
       <itemPath>TreeItemPortfolio.cpp</itemPath>
       <itemPath>TreeItemPosition.cpp</itemPath>
+      <itemPath>TreeOps.cpp</itemPath>
       <itemPath>UnderlyingSelection.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -344,6 +346,10 @@
       </item>
       <item path="TreeItemPosition.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="TreeOps.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeOps.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="UnderlyingSelection.h" ex="false" tool="3" flavor2="0">
@@ -404,6 +410,10 @@
       <item path="TreeItemPosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="TreeItemPosition.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TreeOps.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TreeOps.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="UnderlyingSelection.cpp" ex="false" tool="1" flavor2="0">
       </item>

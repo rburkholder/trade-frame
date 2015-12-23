@@ -64,6 +64,7 @@ void DialogBase::OnOk( wxCommandEvent& event ) {
       m_pDataExchange->bOk = true;
       this->Show(false);
       if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
+      signalDoneHandler( m_pDataExchange );
     }
   }
 }
@@ -88,6 +89,7 @@ void DialogBase::OnCancelOrClose( void ) {
     m_pDataExchange->bOk = false;
     this->Show(false);
     if ( 0 != m_OnDoneHandler ) m_OnDoneHandler( m_pDataExchange );
+    signalDoneHandler( m_pDataExchange );
   }
 }
 

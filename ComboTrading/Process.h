@@ -14,7 +14,6 @@
 
 // started 2015/11/11
 
-
 #pragma once
 
 #include <TFBitsNPieces/ReadCboeWeeklyOptions.h>

@@ -9,6 +9,7 @@
       <itemPath>DialogBase.h</itemPath>
       <itemPath>DialogInstrumentSelect.h</itemPath>
       <itemPath>DialogNewPortfolio.h</itemPath>
+      <itemPath>DialogPickSymbol.h</itemPath>
       <itemPath>DialogSimpleOneLineOrder.h</itemPath>
       <itemPath>FrameMain.h</itemPath>
       <itemPath>ModelBase.h</itemPath>
@@ -54,6 +55,7 @@
       <itemPath>DialogBase.cpp</itemPath>
       <itemPath>DialogInstrumentSelect.cpp</itemPath>
       <itemPath>DialogNewPortfolio.cpp</itemPath>
+      <itemPath>DialogPickSymbol.cpp</itemPath>
       <itemPath>DialogSimpleOneLineOrder.cpp</itemPath>
       <itemPath>FrameMain.cpp</itemPath>
       <itemPath>ModelBase.cpp</itemPath>
@@ -142,6 +144,10 @@
       <item path="DialogNewPortfolio.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DialogNewPortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DialogPickSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DialogPickSymbol.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DialogSimpleOneLineOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -323,6 +329,10 @@
       <item path="DialogNewPortfolio.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DialogNewPortfolio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DialogPickSymbol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DialogPickSymbol.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DialogSimpleOneLineOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>

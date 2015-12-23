@@ -27,4 +27,8 @@ void TreeItemInstrument::Init() {
    * send off for ib contract
    * need to look in instrument table first
    */
+  m_pInstrument = m_resources.signalNewInstrument(); 
+  if ( 0 != m_pInstrument.get() ) {
+    m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
+  }
 }

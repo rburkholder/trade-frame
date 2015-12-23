@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <boost/signals2.hpp>
+
 #include <wx/dialog.h>
 
 #include <OUCommon/FastDelegate.h>
@@ -37,12 +39,14 @@ public:
 //    wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style );
   ~DialogBase(void);
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
-
   virtual void SetDataExchange( DataExchange* pde );
+  
+  // new way of handling signals
+  typedef boost::signals2::signal<void (DataExchange*)> signalDoneHandler_t;
+  typedef signalDoneHandler_t::slot_type slotDoneHandler_t;
+  signalDoneHandler_t signalDoneHandler;
 
+  // to be deprecated
   typedef fastdelegate::FastDelegate1<DataExchange*,void> OnDoneHandler_t;
   void SetOnDoneHandler( OnDoneHandler_t function ) {
     m_OnDoneHandler = function;
@@ -65,6 +69,10 @@ private:
   void OnOk( wxCommandEvent& event );
   void OnCancel( wxCommandEvent& event );
   void OnCancelOrClose( void );
+
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
 
 };
 

@@ -400,19 +400,19 @@ void AppComboTrading::TestSymbols( void ) {
             switch ( trd.sc ) {
               case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
               case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
-          pInstrument = ou::tf::iqfeed::BuildInstrument( u.sName, trd );
-          // now hand it off to the IB for contract insertion
-          f( pInstrument );
-          break;
+                pInstrument = ou::tf::iqfeed::BuildInstrument( u.sName, trd );
+                // now hand it off to the IB for contract insertion
+                f( pInstrument );
+                break;
               case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
-          // will need to check that Symbol is registered and available in order to build
-          throw std::runtime_error( "can't process the BuildInstrument IEOption" );
-          break;
+                // will need to check that Symbol is registered and available in order to build
+                throw std::runtime_error( "can't process the BuildInstrument IEOption" );
+                break;
               case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
                 throw std::runtime_error( "can't process the BuildInstrument FOption" );
                 break;
               default:
-          throw std::runtime_error( "can't process the BuildInstrument default" );
+                throw std::runtime_error( "can't process the BuildInstrument default" );
             }
           }
         };

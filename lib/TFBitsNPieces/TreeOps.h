@@ -43,7 +43,7 @@
 namespace ou {
 namespace tf {  
   
-class TreeOps: public wxTreeCtrl {
+class TreeOps: public wxTreeCtrl {    // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
   //DECLARE_DYNAMIC_CLASS( TreeOps )
   friend class boost::serialization::access;
 public:
@@ -85,13 +85,14 @@ public:
   wxString GetInput( const wxString& sPrompt, const wxString& sDefault );
   
 protected:
-private:
-  
+
   enum {
     ID_Null = wxID_HIGHEST,
     ID_TREEOPS
   };
 
+private:
+  
   wxTreeItemId m_idOld;
   
   //pTreeItemBase_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
