@@ -21,6 +21,7 @@
 #include <wx/button.h>
 #include <wx/radiobut.h>
 #include <wx/stattext.h>
+#include <wx/textctrl.h>
 //#include <wx/srchctrl.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
@@ -56,14 +57,20 @@ struct FirstOrDefault {  // a combiner used for signals with return values
 class DialogPickSymbol: public DialogBase {
 public:
   
-  typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUp_t;
-  typedef signalLookUp_t::slot_type slotLookUp_t;
   
   struct DataExchange: DialogBase::DataExchange {
-    signalLookUp_t lookup; // // (1)in=name, (2)out=description
+    
+    typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpDescription_t;
+    typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
+    signalLookUpDescription_t signalLookupDescription; // // (1)in=name, (2)out=description
+
+    typedef boost::signals2::signal<void (DataExchange*)> signalComposeComposite_t;
+    typedef signalComposeComposite_t::slot_type slotComposeComposite_t;
+    signalComposeComposite_t signalComposeComposite;
+
     wxString sUnderlyingSymbolName;  // can't be std::string, needs to handle native DataExchange
     std::string sCompositeName;
-    std::string sComponsiteDescription;
+    std::string sCompositeDescription;
     double dblStrike;
     InstrumentType::enumInstrumentTypes it;
     OptionSide::enumOptionSide os;
@@ -94,10 +101,6 @@ public:
   
   virtual void SetDataExchange( DataExchange* pde );
 
-  typedef boost::signals2::signal<bool (DataExchange*), DialogPickSymbol_local::FirstOrDefault<bool> > signalComposeComposite_t;
-  typedef signalComposeComposite_t::slot_type slotComposeComposite_t;
-  signalComposeComposite_t signalComposeComposite;
-  
 protected:
   
 private:

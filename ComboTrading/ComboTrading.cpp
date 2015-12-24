@@ -32,6 +32,7 @@
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 #include <wx-3.0/wx/wx/window.h>
+#include <boost/phoenix/stl/algorithm/querying.hpp>
 
 #include "ComboTrading.h"
 
@@ -221,6 +222,9 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts = new ou::tf::PanelCharts( m_pFCharts, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   psizer->Add(m_pPanelCharts, 1, wxGROW|wxALL, 2);
 
+  namespace args = boost::phoenix::placeholders;
+  m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
+
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
 
@@ -371,7 +375,7 @@ void AppComboTrading::TestSymbols( void ) {
       
       for ( vOption_t::const_iterator iter = vOption.begin(); vOption.end() != iter; ++iter ) {
         std::string sName = 
-          ou::tf::iqfeed::BuildOptionName( iter->sIqBaseName, iter->nYear, iter->nMonth, iter->nDay, iter->side, iter->dblStrike );
+          ou::tf::iqfeed::BuildOptionName( iter->sIqBaseName, iter->nYear, iter->nMonth, iter->nDay, iter->dblStrike, iter->side );
         vSymbol.push_back( Symbol( iter->sName, sName, iter->sIbBaseName ) );
       }
       
@@ -384,7 +388,7 @@ void AppComboTrading::TestSymbols( void ) {
 
       {
         namespace args = boost::phoenix::placeholders;
-              typedef boost::function<void ( pInstrument_t)> cbInstrument_t;
+        typedef boost::function<void ( pInstrument_t)> cbInstrument_t;
 
         // function object for building instruments from a list
         struct BuildInstrument {
@@ -528,11 +532,13 @@ void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 
 void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {
   sDescription = "";
-  try {
-    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sSymbolName ) );
-    sDescription = trd.sDescription;
-  }
-  catch ( std::runtime_error& e ) {
+  if ( 0 != m_listIQFeedSymbols.Size() ) {
+    try {
+      const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sSymbolName ) );
+      sDescription = trd.sDescription;
+    }
+    catch ( std::runtime_error& e ) {
+    }
   }
 }
 

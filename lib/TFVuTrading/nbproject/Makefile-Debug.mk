@@ -67,7 +67,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPortfolios.o \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
-	${OBJECTDIR}/stdafx.o
+	${OBJECTDIR}/stdafx.o \
+	${OBJECTDIR}/wxETKBaseValidator.o
 
 
 # C Compiler Flags
@@ -260,6 +261,11 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
+
+${OBJECTDIR}/wxETKBaseValidator.o: wxETKBaseValidator.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/wxETKBaseValidator.o wxETKBaseValidator.cpp
 
 # Subprojects
 .build-subprojects:

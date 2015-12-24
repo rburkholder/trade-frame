@@ -24,9 +24,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
   
-const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month, boost::uint8_t day, ou::tf::OptionSide::enumOptionSide side, double strike );
-const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month );
-const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint8_t month, double strike, ou::tf::OptionSide::enumOptionSide side );
+const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side );
+const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month );
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side );
+const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side );
 
 } // namespace iqfeed
 } // namespace tf

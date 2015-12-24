@@ -10,6 +10,11 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.h</file>
         </group>
         <group name="lib"/>
-        <group name="TradeFrame"/>
+        <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/ValidateMktSymbolLine.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.h</file>
+        </group>
     </open-files>
 </project-private>

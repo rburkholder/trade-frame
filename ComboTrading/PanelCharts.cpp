@@ -26,9 +26,11 @@
 #include <wx/icon.h>
 #include <wx/menu.h>
 
+#include <TFVuTrading/DialogPickSymbol.h>
+#include <TFIQFeed/BuildSymbolName.h>
+
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
-#include <TFVuTrading/DialogPickSymbol.h>
 
 // 20151206 need to think about serialization of what is in the tree so it can be 
 //   retrieved for next time
@@ -163,12 +165,47 @@ void PanelCharts::CreateControls() {
 }
 
 PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
+  namespace args = boost::phoenix::arg_names;
   pInstrument_t pInstrument;
   DialogPickSymbol::DataExchange pde;
+  pde.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
+  pde.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
   auto dialog = new ou::tf::DialogPickSymbol( this );
   dialog->SetDataExchange( &pde );
-  dialog->Show( true );
+  dialog->ShowModal();
   return pInstrument;
+}
+
+void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {
+  signalLookUpDescription( sSymbol, sDescription );
+}
+
+void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) {
+  pde->sCompositeName = "";
+  switch ( pde->it ) {
+    case ou::tf::InstrumentType::Stock:
+      pde->sCompositeName = pde->sUnderlyingSymbolName;
+      break;
+    case ou::tf::InstrumentType::Option:
+      pde->sCompositeName 
+        = ou::tf::iqfeed::BuildOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->dblStrike, pde->os );
+      break;
+    case ou::tf::InstrumentType::Future:
+      pde->sCompositeName
+        = ou::tf::iqfeed::BuildFuturesName( pde->sUnderlyingSymbolName, pde->year, pde->month );
+      break;
+    case ou::tf::InstrumentType::FuturesOption:
+      pde->sCompositeName 
+        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->dblStrike, pde->os );
+        //= ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->os, pde->dblStrike );
+      break;
+    default: 
+      throw std::runtime_error( "PanelCharts::HandleComposeComposite: unknown instrument type" );
+      break;
+  }
+  if ( "" != pde->sCompositeName ) {
+    signalLookUpDescription( pde->sCompositeName, pde->sCompositeDescription );
+  }
 }
 
 void PanelCharts::OnClose( wxCloseEvent& event ) {

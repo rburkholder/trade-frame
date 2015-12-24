@@ -23,6 +23,9 @@
 #include <wx/valgen.h>
 
 #include <TFVuTrading/ValidatorInstrumentName.h>
+#include <wx-3.0/wx/textctrl.h>
+#include <boost/lexical_cast.hpp>
+//#include <TFVuTrading/wxETKBaseValidator.h>
 
 #include "DialogPickSymbol.h"
 
@@ -88,24 +91,29 @@ void DialogPickSymbol::CreateControls() {
 
     m_radioEquity = new wxRadioButton( itemPanel1, ID_RADIO_EQUITY, _("Equity"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioEquity->SetValue(true);
+    m_radioEquity->Enable(false);
     itemBoxSizer3->Add(m_radioEquity, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_radioOption = new wxRadioButton( itemPanel1, ID_RADIO_OPTION, _("Option"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioOption->SetValue(false);
+    m_radioOption->Enable(false);
     itemBoxSizer3->Add(m_radioOption, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_radioFuture = new wxRadioButton( itemPanel1, ID_RADIO_FUTURE, _("Future"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioFuture->SetValue(false);
+    m_radioFuture->Enable(false);
     itemBoxSizer3->Add(m_radioFuture, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_radioFOption = new wxRadioButton( itemPanel1, ID_RADIO_FOPTION, _("FOption"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioFOption->SetValue(false);
+    m_radioFOption->Enable(false);
     itemBoxSizer3->Add(m_radioFOption, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer8, 0, wxGROW|wxALL, 5);
 
     m_textSymbol = new wxTextCtrl( itemPanel1, ID_TEXT_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_textSymbol->Enable(false);
     itemBoxSizer8->Add(m_textSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_txtSymbolDescription = new wxStaticText( itemPanel1, ID_STATIC_SYMBOL_DESCRIPTION, _("Symbol Description"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -181,13 +189,14 @@ void DialogPickSymbol::CreateControls() {
 
     itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxButton* itemButton31 = new wxButton( itemPanel1, ID_BTN_SAVE, _("Save"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer29->Add(itemButton31, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
+    m_btnOk = new wxButton( itemPanel1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    m_btnOk->Enable(false);
+    itemBoxSizer29->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
 
     itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxButton* itemButton33 = new wxButton( itemPanel1, ID_BTN_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer29->Add(itemButton33, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_btnCancel = new wxButton( itemPanel1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer29->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
     
@@ -223,10 +232,10 @@ void DialogPickSymbol::HandleSymbolChange( wxCommandEvent& event ) {
   }
   else {
     DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-    if ( !pde->lookup.empty() ) {
+    if ( !pde->signalLookupDescription.empty() ) {
       m_txtSymbolDescription->SetLabel( "" );  // temporary blank out while obtaining new description
       std::string sDescription;
-      pde->lookup( sText, sDescription );
+      pde->signalLookupDescription( sText, sDescription );
       //sDescription = pde->lookup( sText );
       m_txtSymbolDescription->SetLabel( sDescription );
       if ( 0 != m_btnOk ) {
@@ -241,6 +250,7 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
   DisableOptionFields();
   pde->it = InstrumentType::Stock;
   UpdateComposite();
+  m_textStrike->SetFocus();
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
@@ -251,6 +261,7 @@ void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
   m_dateExpiry->Enable();
   m_textStrike->Enable();
   UpdateComposite();
+  m_textStrike->SetFocus();
 }
 
 void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
@@ -259,6 +270,7 @@ void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
   DisableOptionFields();
   m_dateExpiry->Enable();
   UpdateComposite();
+  m_textStrike->SetFocus();
 }
  
 void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
@@ -269,6 +281,7 @@ void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
   m_dateExpiry->Enable();
   m_textStrike->Enable();
   UpdateComposite();
+  m_textStrike->SetFocus();
 }
   
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {
@@ -294,22 +307,26 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 
 void DialogPickSymbol::UpdateComposite( void ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  bool b = signalComposeComposite( pde );
-  if ( b ) {
-    m_txtCompositeDescription->SetLabel( pde->sComponsiteDescription );
-  }
+  pde->sUnderlyingSymbolName = this->m_textSymbol->GetValue();
+  pde->dblStrike = boost::lexical_cast<double>( this->m_textStrike->GetValue() );
+  pde->signalComposeComposite( pde );
+  m_textComposite->SetValue( pde->sCompositeName );
+  m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
 }
 
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
+    m_btnOk->Enable();
+    m_textSymbol->Enable();
     m_textSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sUnderlyingSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+    //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
     m_textStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
     m_radioEquity->Enable();
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    m_textSymbol->Enable();
+    m_textStrike->SetFocus();
   }
   else {
     //m_textSymbol->SetValidator( wxDefaultValidator );

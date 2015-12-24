@@ -25,6 +25,7 @@
 #include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/TreeOps.h>
+#include <TFVuTrading/DialogPickSymbol.h>
 #include "TreeItem.h"
 
 namespace ou { // One Unified
@@ -50,6 +51,10 @@ public:
     const wxPoint& pos = SYMBOL_PANEL_CHARTS_POSITION, 
     const wxSize& size = SYMBOL_PANEL_CHARTS_SIZE, 
     long style = SYMBOL_PANEL_CHARTS_STYLE );
+  
+  typedef boost::signals2::signal<void(const std::string&, std::string&)> signalLookUpDescription_t;
+  typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
+  signalLookUpDescription_t signalLookUpDescription;
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -75,7 +80,10 @@ private:
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
   
+  void HandleLookUpDescription( const std::string&, std::string& );
+  
   pInstrument_t HandleNewInstrumentRequest( void );
+  void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
 
   void OnClose( wxCloseEvent& event );
   
