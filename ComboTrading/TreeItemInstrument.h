@@ -31,6 +31,8 @@ public:
     }
   virtual ~TreeItemInstrument( void ) {}
   
+  pInstrument_t GetInstrument( void ) { return m_pInstrument; }
+  
   //virtual void ShowContextMenu( void );
   
 protected:

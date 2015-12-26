@@ -28,6 +28,7 @@
 
 #include <TFVuTrading/DialogPickSymbol.h>
 #include <TFIQFeed/BuildSymbolName.h>
+#include <wx-3.0/wx/wx/wx/toplevel.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
@@ -172,7 +173,14 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   pde.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
   auto dialog = new ou::tf::DialogPickSymbol( this );
   dialog->SetDataExchange( &pde );
-  dialog->ShowModal();
+  int status = dialog->ShowModal();
+  switch ( status ) {
+    case wxID_CANCEL:
+      break;
+    case wxID_OK:
+      break;
+  }
+  dialog->Destroy();
   return pInstrument;
 }
 
@@ -188,15 +196,15 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
       break;
     case ou::tf::InstrumentType::Option:
       pde->sCompositeName 
-        = ou::tf::iqfeed::BuildOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->dblStrike, pde->os );
+        = ou::tf::iqfeed::BuildOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os );
       break;
     case ou::tf::InstrumentType::Future:
       pde->sCompositeName
-        = ou::tf::iqfeed::BuildFuturesName( pde->sUnderlyingSymbolName, pde->year, pde->month );
+        = ou::tf::iqfeed::BuildFuturesName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1 );
       break;
     case ou::tf::InstrumentType::FuturesOption:
       pde->sCompositeName 
-        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->dblStrike, pde->os );
+        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
         //= ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->os, pde->dblStrike );
       break;
     default: 

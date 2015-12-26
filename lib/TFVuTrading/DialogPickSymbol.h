@@ -78,7 +78,7 @@ public:
     std::uint8_t month;
     std::uint8_t day;
     DataExchange( void ): DialogBase::DataExchange(), 
-      dblStrike( 0.0 ), it( InstrumentType::Stock ), os( OptionSide::Put ) {}
+      dblStrike( 0.0 ), it( InstrumentType::Stock ), os( OptionSide::Put ), year( 0 ), month( 0 ), day( 0 ) {}
   };
   
   DialogPickSymbol();
@@ -149,8 +149,8 @@ private:
   void HandleRadioCall( wxCommandEvent& event );
   
   void HandleExpiryChanged( wxDateEvent& event );
-  
-  void HandleSymbolChange( wxCommandEvent& event );
+  void HandleStrikeChanged( wxCommandEvent& event );
+  void HandleSymbolChanged( wxCommandEvent& event );
   
   void UpdateComposite( void );
   

@@ -12859,7 +12859,7 @@
           <string name="proxy-Background colour">""</string>
           <string name="proxy-Base class">"wxPanel"</string>
           <bool name="proxy-Centre">1</bool>
-          <string name="proxy-Class">"PanelPickSymbol"</string>
+          <string name="proxy-Class">"DialogPickSymbol"</string>
           <string name="proxy-Custom styles">""</string>
           <string name="proxy-Data class header filename">""</string>
           <string name="proxy-Data class implementation filename">""</string>
@@ -12872,18 +12872,18 @@
           <bool name="proxy-Fit to content">1</bool>
           <string name="proxy-Font">""</string>
           <string name="proxy-Foreground colour">""</string>
-          <string name="proxy-Header filename">"panelpicksymbol.h"</string>
+          <string name="proxy-Header filename">"dialogpicksymbol.h"</string>
           <long name="proxy-Height">300</long>
           <string name="proxy-Help text">""</string>
           <bool name="proxy-Hidden">0</bool>
           <string name="proxy-Icon">""</string>
           <string name="proxy-Id name">"ID_PANELPICKSYMBOL"</string>
           <long name="proxy-Id value">10000</long>
-          <string name="proxy-Implementation filename">"panelpicksymbol.cpp"</string>
+          <string name="proxy-Implementation filename">"dialogpicksymbol.cpp"</string>
           <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
           <string name="proxy-Texture">""</string>
           <string name="proxy-Texture style">"Tiled"</string>
-          <string name="proxy-Title">"PanelPickSymbol"</string>
+          <string name="proxy-Title">"DialogPickSymbol"</string>
           <string name="proxy-Tooltip text">""</string>
           <long name="proxy-Width">400</long>
           <string name="proxy-Window kind">"wxPanel"</string>
@@ -12916,7 +12916,7 @@
           <long name="proxy-X">-1</long>
           <string name="proxy-XRC filename">""</string>
           <long name="proxy-Y">-1</long>
-          <string name="title">"PanelPickSymbol"</string>
+          <string name="title">"DialogPickSymbol"</string>
           <long name="title-mode">0</long>
           <string name="type">"dialog-document"</string>
           <bool name="use-id-prefix">0</bool>
@@ -12988,7 +12988,7 @@
                 <string name="proxy-Data source">""</string>
                 <string name="proxy-Data validator">""</string>
                 <string name="proxy-Data variable">""</string>
-                <bool name="proxy-Enabled">1</bool>
+                <bool name="proxy-Enabled">0</bool>
                 <bool name="proxy-External implementation">1</bool>
                 <string name="proxy-Font">""</string>
                 <string name="proxy-Foreground colour">""</string>
@@ -13050,7 +13050,7 @@
                 <string name="proxy-Data source">""</string>
                 <string name="proxy-Data validator">""</string>
                 <string name="proxy-Data variable">""</string>
-                <bool name="proxy-Enabled">1</bool>
+                <bool name="proxy-Enabled">0</bool>
                 <bool name="proxy-External implementation">1</bool>
                 <string name="proxy-Font">""</string>
                 <string name="proxy-Foreground colour">""</string>
@@ -13112,7 +13112,7 @@
                 <string name="proxy-Data source">""</string>
                 <string name="proxy-Data validator">""</string>
                 <string name="proxy-Data variable">""</string>
-                <bool name="proxy-Enabled">1</bool>
+                <bool name="proxy-Enabled">0</bool>
                 <bool name="proxy-External implementation">1</bool>
                 <string name="proxy-Font">""</string>
                 <string name="proxy-Foreground colour">""</string>
@@ -13174,7 +13174,7 @@
                 <string name="proxy-Data source">""</string>
                 <string name="proxy-Data validator">""</string>
                 <string name="proxy-Data variable">""</string>
-                <bool name="proxy-Enabled">1</bool>
+                <bool name="proxy-Enabled">0</bool>
                 <bool name="proxy-External implementation">1</bool>
                 <string name="proxy-Font">""</string>
                 <string name="proxy-Foreground colour">""</string>
@@ -13262,7 +13262,7 @@
                 <string name="proxy-Data source">""</string>
                 <string name="proxy-Data validator">""</string>
                 <string name="proxy-Data variable">""</string>
-                <bool name="proxy-Enabled">1</bool>
+                <bool name="proxy-Enabled">0</bool>
                 <bool name="proxy-External implementation">1</bool>
                 <string name="proxy-Font">""</string>
                 <string name="proxy-Foreground colour">""</string>
@@ -13401,13 +13401,13 @@
               <long name="is-transient">0</long>
               <long name="locked">0</long>
               <long name="owns-file">1</long>
-              <string name="proxy-AlignH">"Left"</string>
+              <string name="proxy-AlignH">"Expand"</string>
               <string name="proxy-AlignV">"Centre"</string>
               <long name="proxy-Border">5</long>
               <string name="proxy-Member variable name">""</string>
-              <string name="proxy-Orientation">"Horizontal"</string>
+              <string name="proxy-Orientation">"Vertical"</string>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
-              <long name="proxy-Stretch factor">0</long>
+              <long name="proxy-Stretch factor">1</long>
               <bool name="proxy-wxADJUST_MINSIZE">0</bool>
               <bool name="proxy-wxBOTTOM">1</bool>
               <bool name="proxy-wxFIXED_MINSIZE">0</bool>
@@ -13416,7 +13416,7 @@
               <bool name="proxy-wxRIGHT">1</bool>
               <bool name="proxy-wxSHAPED">0</bool>
               <bool name="proxy-wxTOP">1</bool>
-              <string name="title">"wxBoxSizer H"</string>
+              <string name="title">"wxBoxSizer V"</string>
               <long name="title-mode">0</long>
               <string name="type">"dialog-control-document"</string>
               <document>
@@ -13426,7 +13426,7 @@
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
-                <string name="proxy-AlignH">"Centre"</string>
+                <string name="proxy-AlignH">"Left"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <string name="proxy-Background colour">""</string>
                 <string name="proxy-Base class">"wxTextCtrl"</string>
@@ -13461,7 +13461,7 @@
                 <bool name="proxy-Separate files">0</bool>
                 <long name="proxy-Stretch factor">0</long>
                 <string name="proxy-Tooltip text">""</string>
-                <long name="proxy-Width">-1</long>
+                <long name="proxy-Width">120</long>
                 <bool name="proxy-wxADJUST_MINSIZE">0</bool>
                 <bool name="proxy-wxBORDER_THEME">0</bool>
                 <bool name="proxy-wxBOTTOM">1</bool>
@@ -13509,7 +13509,7 @@
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
-                <string name="proxy-AlignH">"Centre"</string>
+                <string name="proxy-AlignH">"Left"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <string name="proxy-Background colour">""</string>
                 <string name="proxy-Base class">"wxStaticText"</string>
@@ -13541,7 +13541,7 @@
                 <string name="proxy-Name">""</string>
                 <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                 <bool name="proxy-Separate files">0</bool>
-                <long name="proxy-Stretch factor">0</long>
+                <long name="proxy-Stretch factor">1</long>
                 <string name="proxy-Tooltip text">""</string>
                 <long name="proxy-Width">-1</long>
                 <long name="proxy-Wrapping width">-1</long>
@@ -13763,7 +13763,7 @@
                     <bool name="proxy-Separate files">0</bool>
                     <long name="proxy-Stretch factor">0</long>
                     <string name="proxy-Tooltip text">""</string>
-                    <long name="proxy-Width">-1</long>
+                    <long name="proxy-Width">120</long>
                     <bool name="proxy-wxADJUST_MINSIZE">0</bool>
                     <bool name="proxy-wxBORDER_THEME">0</bool>
                     <bool name="proxy-wxBOTTOM">1</bool>
@@ -14313,12 +14313,12 @@
                   <long name="proxy-Height">-1</long>
                   <string name="proxy-Help text">""</string>
                   <bool name="proxy-Hidden">0</bool>
-                  <string name="proxy-Id name">"ID_RADIO_CDN"</string>
+                  <string name="proxy-Id name">"ID_RADIO_CAD"</string>
                   <long name="proxy-Id value">10007</long>
                   <string name="proxy-Implementation filename">""</string>
                   <bool name="proxy-Initial value">0</bool>
-                  <string name="proxy-Label">"CDN"</string>
-                  <string name="proxy-Member variable name">"m_radioCurrencyCDN"</string>
+                  <string name="proxy-Label">"CAD"</string>
+                  <string name="proxy-Member variable name">"m_radioCurrencyCAD"</string>
                   <string name="proxy-Name">""</string>
                   <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                   <bool name="proxy-Separate files">0</bool>
@@ -14340,7 +14340,7 @@
                   <bool name="proxy-wxWANTS_CHARS">0</bool>
                   <long name="proxy-X">-1</long>
                   <long name="proxy-Y">-1</long>
-                  <string name="title">"wxRadioButton: ID_RADIO_CDN"</string>
+                  <string name="title">"wxRadioButton: ID_RADIO_CAD"</string>
                   <long name="title-mode">0</long>
                   <string name="type">"dialog-control-document"</string>
                 </document>

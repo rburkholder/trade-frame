@@ -24,6 +24,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
   
+// months are 1 .. 12
 const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, boost::uint16_t day, double strike, ou::tf::OptionSide::enumOptionSide side );
 const std::string BuildFuturesName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month );
 const std::string BuildFuturesOptionName( const std::string& sUnderlying, boost::uint16_t year, boost::uint16_t month, double strike, ou::tf::OptionSide::enumOptionSide side );

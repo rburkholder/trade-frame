@@ -119,14 +119,14 @@ void DialogPickSymbol::CreateControls() {
     m_txtSymbolDescription = new wxStaticText( itemPanel1, ID_STATIC_SYMBOL_DESCRIPTION, _("Symbol Description"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer8->Add(m_txtSymbolDescription, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer11, 0, wxALIGN_LEFT|wxALL, 5);
+    wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer2->Add(itemBoxSizer11, 1, wxGROW|wxALL, 5);
 
-    m_textComposite = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
-    itemBoxSizer11->Add(m_textComposite, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    m_textComposite = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxSize(120, -1), wxTE_READONLY );
+    itemBoxSizer11->Add(m_textComposite, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
     m_txtCompositeDescription = new wxStaticText( itemPanel1, ID_STATIC_COMPOSITE_DESCRIPTION, _("Composite Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer11->Add(m_txtCompositeDescription, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer11->Add(m_txtCompositeDescription, 1, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer14 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer14, 0, wxGROW|wxALL, 5);
@@ -200,7 +200,9 @@ void DialogPickSymbol::CreateControls() {
 
     itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
     
-    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleSymbolChange, this, ID_TEXT_SYMBOL );
+    
+    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleSymbolChanged, this, ID_TEXT_SYMBOL );
+    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleStrikeChanged, this, ID_TEXT_STRIKE );
 
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioEquity, this, ID_RADIO_EQUITY );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioOption, this, ID_RADIO_OPTION );
@@ -221,28 +223,39 @@ void DialogPickSymbol::CreateControls() {
 
 }
 
-void DialogPickSymbol::HandleSymbolChange( wxCommandEvent& event ) {
+void DialogPickSymbol::HandleSymbolChanged( wxCommandEvent& event ) {
+  
+  m_txtSymbolDescription->SetLabel( "" );
+  m_btnOk->Enable( false );
+  
   wxString text( m_textSymbol->GetValue() );
   std::string sText( text.c_str() );
-  if ( 0 == sText.length() ) {
-    m_txtSymbolDescription->SetLabel( "" );
-    if ( 0 != m_btnOk ) {
-      m_btnOk->Enable( false );
-    }
+  
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  std::string sDescription;
+  pde->signalLookupDescription( sText, sDescription );
+  if ( 0 != sDescription.length() ) {
+    m_txtSymbolDescription->SetLabel( sDescription );
   }
-  else {
-    DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-    if ( !pde->signalLookupDescription.empty() ) {
-      m_txtSymbolDescription->SetLabel( "" );  // temporary blank out while obtaining new description
-      std::string sDescription;
-      pde->signalLookupDescription( sText, sDescription );
-      //sDescription = pde->lookup( sText );
-      m_txtSymbolDescription->SetLabel( sDescription );
-      if ( 0 != m_btnOk ) {
-        m_btnOk->Enable( 0 != sDescription.length() );
+  UpdateComposite();
+}
+
+void DialogPickSymbol::HandleStrikeChanged(wxCommandEvent& event) {
+  m_btnOk->Enable( false );
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  std::string sStrike( m_textStrike->GetValue() );
+  switch ( pde->it ) {
+    case InstrumentType::Option:
+    case InstrumentType::FuturesOption:
+      if ( 0 != sStrike.length() ) {
+        pde->dblStrike = boost::lexical_cast<double>( sStrike );
       }
-    }
+      else {
+        pde->dblStrike = 0.0;
+      }
+      break;
   }
+  UpdateComposite();
 }
 
 void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
@@ -254,6 +267,7 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->it = InstrumentType::Option;
   m_radioOptionPut->Enable();
@@ -265,6 +279,7 @@ void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
 }
 
 void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->it = InstrumentType::Future;
   DisableOptionFields();
@@ -274,6 +289,7 @@ void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
 }
  
 void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->it = InstrumentType::FuturesOption;
   m_radioOptionPut->Enable();
@@ -285,18 +301,21 @@ void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
 }
   
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->os = OptionSide::Put;
   UpdateComposite();
 }
 
 void DialogPickSymbol::HandleRadioCall( wxCommandEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->os = OptionSide::Call;
   UpdateComposite();
 }
   
 void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
+  m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   const wxDateTime& dt( event.GetDate() );
   pde->year = dt.GetYear();
@@ -306,18 +325,19 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 }
 
 void DialogPickSymbol::UpdateComposite( void ) {
+  //std::cout << "UpdateComposite" << std::endl;
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->sUnderlyingSymbolName = this->m_textSymbol->GetValue();
-  pde->dblStrike = boost::lexical_cast<double>( this->m_textStrike->GetValue() );
+  pde->sCompositeDescription = "";
   pde->signalComposeComposite( pde );
   m_textComposite->SetValue( pde->sCompositeName );
   m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
+  m_btnOk->Enable( 0 != pde->sCompositeDescription.length() );
 }
 
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-    m_btnOk->Enable();
     m_textSymbol->Enable();
     m_textSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sUnderlyingSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
     //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
