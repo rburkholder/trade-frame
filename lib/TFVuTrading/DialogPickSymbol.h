@@ -33,6 +33,20 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+class SetFocusEvent: public wxEvent {
+public:
+  SetFocusEvent( wxEventType eventType, wxWindow* win ): wxEvent( 0, eventType ), m_win( win ) {}
+  SetFocusEvent( const SetFocusEvent& event ): wxEvent( event ), m_win( event.m_win ) {}
+  ~SetFocusEvent( void ) {}
+  SetFocusEvent* Clone( void ) const { return new SetFocusEvent( *this ); }
+  wxWindow* GetWindow( void ) const { return m_win; }
+protected:
+private:
+  wxWindow* m_win;
+};
+
+wxDECLARE_EVENT( EVT_SetFocus, SetFocusEvent );
+
 //#define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX|wxTAB_TRAVERSAL
 #define SYMBOL_PANELPICKSYMBOL_STYLE wxCAPTION|wxCLOSE_BOX|wxTAB_TRAVERSAL
 #define SYMBOL_PANELPICKSYMBOL_TITLE _("Dialog Pick Symbol")
@@ -40,23 +54,8 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANELPICKSYMBOL_SIZE wxSize(400, 300)
 #define SYMBOL_PANELPICKSYMBOL_POSITION wxDefaultPosition
 
-namespace DialogPickSymbol_local {
-
-template<typename T>
-struct FirstOrDefault {  // a combiner used for signals with return values
-  typedef T result_type;
-  template<typename InputIterator>
-  T operator()( InputIterator first, InputIterator last ) const {
-    if (first==last) return T();
-    return *first;
-  }
-};
-
-}
-
 class DialogPickSymbol: public DialogBase {
 public:
-  
   
   struct DataExchange: DialogBase::DataExchange {
     
@@ -151,6 +150,8 @@ private:
   void HandleExpiryChanged( wxDateEvent& event );
   void HandleStrikeChanged( wxCommandEvent& event );
   void HandleSymbolChanged( wxCommandEvent& event );
+  
+  void HandleSetFocus( SetFocusEvent& event );
   
   void UpdateComposite( void );
   

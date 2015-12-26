@@ -21,6 +21,21 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+class SetCursorEvent: public wxEvent {
+public:
+  SetCursorEvent( wxEventType eventType, long lInsertionPoint )
+    : wxEvent( 0, eventType ), m_lInsertionPoint( lInsertionPoint ) {}
+  SetCursorEvent( const SetCursorEvent& event ): wxEvent( event ), m_lInsertionPoint( event.m_lInsertionPoint ) {}
+  ~SetCursorEvent( void ) {}
+  SetCursorEvent* Clone( void ) const { return new SetCursorEvent( *this ); }
+  long GetInsertionPoint( void ) const { return m_lInsertionPoint; }
+protected:
+private:
+  long m_lInsertionPoint;
+};
+
+wxDECLARE_EVENT( EVT_SetCursorEvent, SetCursorEvent );
+
 class InstrumentNameValidator: public wxTextValidator {
 public:
   enum EValidationType{ eCapsOnly, eCapsAlphaNum };
@@ -42,15 +57,11 @@ protected:
 private:
   EValidationType m_vt;
   wxString* m_pString;
-  bool m_bInProcess;  // prevents re-entry via WriteText
-  bool m_bSetInsertionPoint; // need to set insertion point outside of handler (or create custom event to update stuff)
-  long m_lInsertionPoint;
-  void Init( void ) {
-    m_bSetInsertionPoint = false;
-    m_lInsertionPoint = 0;
-    Bind( wxEVT_CHAR, &InstrumentNameValidator::OnChar, this );
-    Bind( wxEVT_IDLE, &InstrumentNameValidator::OnIdle, this );
-  }
+  bool m_bInProcess;  // prevents re-entry via WriteText (todo: convert to event, or not, due to the recursion?)
+  //bool m_bSetInsertionPoint; // need to set insertion point outside of handler (or create custom event to update stuff)
+  //long m_lInsertionPoint;
+  void Init( void );
+  void OnSetCursor( SetCursorEvent& event );
   
 };
 

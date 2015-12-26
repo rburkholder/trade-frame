@@ -27,6 +27,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+wxDEFINE_EVENT( EVT_SetCursorEvent, SetCursorEvent );
+
+void InstrumentNameValidator::Init( void ) {
+  //m_bSetInsertionPoint = false;
+  //m_lInsertionPoint = 0;
+  Bind( wxEVT_CHAR, &InstrumentNameValidator::OnChar, this );
+  //Bind( wxEVT_IDLE, &InstrumentNameValidator::OnIdle, this );
+  Bind( EVT_SetCursorEvent, &InstrumentNameValidator::OnSetCursor, this );
+}
+
 void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
   
   if ( m_bInProcess ) {
@@ -70,8 +80,9 @@ void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
     //winText->SetInsertionPoint( ip + 1 );
     //winText->SetInsertionPointEnd();
     //winText->SetInsertionPoint( winText->GetLastPosition() );
-    m_lInsertionPoint = ip + 1;
-    m_bSetInsertionPoint = true;
+    //m_lInsertionPoint = ip + 1;
+    //m_bSetInsertionPoint = true;
+    QueueEvent( new SetCursorEvent( EVT_SetCursorEvent, ip + 1 ) );
     event.Skip(false);  // end of the line for processing
   }
   else {
@@ -83,8 +94,9 @@ void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
       if ( ( 0 < winText->GetValue().size() ) && ( '0' <= kc ) && ( '9' >= kc ) ) {
         int ip = winText->GetInsertionPoint();
         winText->WriteText( wxChar( kc ) );
-        m_lInsertionPoint = ip + 1;
-        m_bSetInsertionPoint = true;
+        //m_lInsertionPoint = ip + 1;
+        //m_bSetInsertionPoint = true;
+        QueueEvent( new SetCursorEvent( EVT_SetCursorEvent, ip + 1 ) );
         event.Skip(false);  // end of the line for processing
       }
 //      if ( ( 8  == kc ) || ( 127 == kc ) || ( 128 <= kc ) )  // 8=bs, 127=del
@@ -99,11 +111,16 @@ void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
 // https://groups.google.com/forum/#!msg/wx-users/uTshhOwLfwY/lL7FC0YvqJMJ
 // SetInsertionPoint doesn't happen within wxGTK handler
 void InstrumentNameValidator::OnIdle( wxIdleEvent& event ) {
-  if ( m_bSetInsertionPoint ) {
-    m_bSetInsertionPoint = false;
-    wxTextEntry* winText( dynamic_cast<wxTextEntry*>( GetWindow() ) );
-    winText->SetInsertionPoint( m_lInsertionPoint );
-  }
+//  if ( m_bSetInsertionPoint ) {
+//    m_bSetInsertionPoint = false;
+//    wxTextEntry* winText( dynamic_cast<wxTextEntry*>( GetWindow() ) );
+//    winText->SetInsertionPoint( m_lInsertionPoint );
+//  }
+}
+
+void InstrumentNameValidator::OnSetCursor( SetCursorEvent& event ) {
+  wxTextEntry* winText( dynamic_cast<wxTextEntry*>( GetWindow() ) );
+  winText->SetInsertionPoint( event.GetInsertionPoint() );
 }
 
 bool InstrumentNameValidator::TransferFromWindow( void ) {

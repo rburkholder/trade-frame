@@ -25,12 +25,13 @@
 #include <TFVuTrading/ValidatorInstrumentName.h>
 #include <wx-3.0/wx/textctrl.h>
 #include <boost/lexical_cast.hpp>
-//#include <TFVuTrading/wxETKBaseValidator.h>
 
 #include "DialogPickSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+wxDEFINE_EVENT( EVT_SetFocus, SetFocusEvent );
 
 DialogPickSymbol::DialogPickSymbol() {
   Init();
@@ -123,10 +124,10 @@ void DialogPickSymbol::CreateControls() {
     itemBoxSizer2->Add(itemBoxSizer11, 1, wxGROW|wxALL, 5);
 
     m_textComposite = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxSize(120, -1), wxTE_READONLY );
-    itemBoxSizer11->Add(m_textComposite, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
+    itemBoxSizer11->Add(m_textComposite, 0, wxALIGN_LEFT|wxALL, 2);
 
     m_txtCompositeDescription = new wxStaticText( itemPanel1, ID_STATIC_COMPOSITE_DESCRIPTION, _("Composite Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer11->Add(m_txtCompositeDescription, 1, wxALIGN_CENTER_HORIZONTAL|wxALL, 2);
+    itemBoxSizer11->Add(m_txtCompositeDescription, 1, wxALIGN_LEFT|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer14 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer14, 0, wxGROW|wxALL, 5);
@@ -140,7 +141,7 @@ void DialogPickSymbol::CreateControls() {
     wxStaticText* itemStaticText17 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer16->Add(itemStaticText17, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT|wxDP_SHOWCENTURY );
+    m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxSize(120, -1), wxDP_DEFAULT|wxDP_SHOWCENTURY );
     m_dateExpiry->Enable(false);
     itemBoxSizer16->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
@@ -213,6 +214,8 @@ void DialogPickSymbol::CreateControls() {
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioCall, this, ID_RADIO_CALL );
   
   Bind( wxEVT_DATE_CHANGED, &DialogPickSymbol::HandleExpiryChanged, this, ID_DATE_EXPIRY );
+  
+  Bind( EVT_SetFocus, &DialogPickSymbol::HandleSetFocus, this );
 
   //Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelManualOrder::OnBtnBuy, this, ID_BtnBuy );
   //Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelManualOrder::OnBtnSell, this, ID_BtnSell );
@@ -263,7 +266,7 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
   DisableOptionFields();
   pde->it = InstrumentType::Stock;
   UpdateComposite();
-  m_textStrike->SetFocus();
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textSymbol ) );
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
@@ -275,7 +278,8 @@ void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
   m_dateExpiry->Enable();
   m_textStrike->Enable();
   UpdateComposite();
-  m_textStrike->SetFocus();
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
+
 }
 
 void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
@@ -285,7 +289,7 @@ void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
   DisableOptionFields();
   m_dateExpiry->Enable();
   UpdateComposite();
-  m_textStrike->SetFocus();
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_dateExpiry ) );
 }
  
 void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
@@ -297,7 +301,8 @@ void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
   m_dateExpiry->Enable();
   m_textStrike->Enable();
   UpdateComposite();
-  m_textStrike->SetFocus();
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
+
 }
   
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {
@@ -346,7 +351,11 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    m_textStrike->SetFocus();
+    m_textSymbol->SetFocus();
+    wxDateTime dt = m_dateExpiry->GetValue();
+    pde->year = dt.GetYear();
+    pde->month = dt.GetMonth();
+    pde->day = dt.GetDay();
   }
   else {
     //m_textSymbol->SetValidator( wxDefaultValidator );
@@ -364,6 +373,10 @@ void DialogPickSymbol::DisableOptionFields( void ) {
     m_radioOptionCall->Disable();
     m_dateExpiry->Disable();
     m_textStrike->Disable();
+}
+
+void DialogPickSymbol::HandleSetFocus( SetFocusEvent& event ) {
+  event.GetWindow()->SetFocus();
 }
 
 wxBitmap DialogPickSymbol::GetBitmapResource( const wxString& name ) {
