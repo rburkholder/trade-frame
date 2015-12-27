@@ -9,7 +9,7 @@
             <url>ComboTrading.cpp</url>
             <bookmark id="1">
                 <name/>
-                <line>226</line>
+                <line>227</line>
                 <key/>
             </bookmark>
         </file>
@@ -29,10 +29,10 @@
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItem.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/UnderlyingSelection.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/PanelCharts.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemInstrument.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPortfolio.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/Process.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeItemPortfolio.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/TreeOps.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.h</file>

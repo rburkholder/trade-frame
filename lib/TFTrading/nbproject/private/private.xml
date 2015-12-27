@@ -8,6 +8,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group/>
         <group name="lib"/>
-        <group name="TradeFrame"/>
+        <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/TradingEnumerations.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/TradingEnumerations.cpp</file>
+        </group>
     </open-files>
 </project-private>

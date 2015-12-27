@@ -66,7 +66,8 @@ void DialogPickSymbol::Init() {
     m_radioOption = NULL;
     m_radioFuture = NULL;
     m_radioFOption = NULL;
-    m_textSymbol = NULL;
+    m_textIQFName = NULL;
+    m_textIBName = NULL;
     m_txtSymbolDescription = NULL;
     m_textComposite = NULL;
     m_txtCompositeDescription = NULL;
@@ -110,100 +111,115 @@ void DialogPickSymbol::CreateControls() {
     m_radioFOption->Enable(false);
     itemBoxSizer3->Add(m_radioFOption, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* itemBoxSizer8 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer2->Add(itemBoxSizer8, 0, wxGROW|wxALL, 5);
 
-    m_textSymbol = new wxTextCtrl( itemPanel1, ID_TEXT_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    m_textSymbol->Enable(false);
-    itemBoxSizer8->Add(m_textSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxBoxSizer* itemBoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer8->Add(itemBoxSizer9, 1, wxALIGN_LEFT|wxALL, 2);
+
+    wxStaticText* itemStaticText10 = new wxStaticText( itemPanel1, wxID_STATIC, _("IQFeed:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(itemStaticText10, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_textIQFName = new wxTextCtrl( itemPanel1, ID_TEXT_IQF_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    m_textIQFName->Enable(false);
+    itemBoxSizer9->Add(m_textIQFName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
+    itemBoxSizer9->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    wxStaticText* itemStaticText13 = new wxStaticText( itemPanel1, wxID_STATIC, _("IB:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(itemStaticText13, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+    m_textIBName = new wxTextCtrl( itemPanel1, ID_TEXT_IB_SYMBOL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer9->Add(m_textIBName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_txtSymbolDescription = new wxStaticText( itemPanel1, ID_STATIC_SYMBOL_DESCRIPTION, _("Symbol Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer8->Add(m_txtSymbolDescription, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer8->Add(m_txtSymbolDescription, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer2->Add(itemBoxSizer11, 1, wxGROW|wxALL, 5);
+    wxBoxSizer* itemBoxSizer16 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer2->Add(itemBoxSizer16, 1, wxGROW|wxALL, 5);
 
     m_textComposite = new wxTextCtrl( itemPanel1, ID_TEXT_COMPOSITE, wxEmptyString, wxDefaultPosition, wxSize(120, -1), wxTE_READONLY );
-    itemBoxSizer11->Add(m_textComposite, 0, wxALIGN_LEFT|wxALL, 2);
+    itemBoxSizer16->Add(m_textComposite, 0, wxALIGN_LEFT|wxALL, 2);
 
     m_txtCompositeDescription = new wxStaticText( itemPanel1, ID_STATIC_COMPOSITE_DESCRIPTION, _("Composite Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer11->Add(m_txtCompositeDescription, 1, wxALIGN_LEFT|wxALL, 2);
+    itemBoxSizer16->Add(m_txtCompositeDescription, 1, wxALIGN_LEFT|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer14 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer14, 0, wxGROW|wxALL, 5);
+    wxBoxSizer* itemBoxSizer19 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer19, 0, wxGROW|wxALL, 5);
 
-    wxBoxSizer* itemBoxSizer15 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer14->Add(itemBoxSizer15, 0, wxALIGN_TOP|wxALL, 5);
+    wxBoxSizer* itemBoxSizer20 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer19->Add(itemBoxSizer20, 0, wxALIGN_TOP|wxALL, 5);
 
-    wxBoxSizer* itemBoxSizer16 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer15->Add(itemBoxSizer16, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer21 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer20->Add(itemBoxSizer21, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxStaticText* itemStaticText17 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer16->Add(itemStaticText17, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxStaticText* itemStaticText22 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer21->Add(itemStaticText22, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxSize(120, -1), wxDP_DEFAULT|wxDP_SHOWCENTURY );
     m_dateExpiry->Enable(false);
-    itemBoxSizer16->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer21->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer19 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer15->Add(itemBoxSizer19, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer24 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer20->Add(itemBoxSizer24, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxStaticText* itemStaticText20 = new wxStaticText( itemPanel1, wxID_STATIC, _("Strike:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer19->Add(itemStaticText20, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel1, wxID_STATIC, _("Strike:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer24->Add(itemStaticText25, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_textStrike = new wxTextCtrl( itemPanel1, ID_TEXT_STRIKE, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     m_textStrike->SetMaxLength(20);
     m_textStrike->Enable(false);
-    itemBoxSizer19->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer24->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer22 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer15->Add(itemBoxSizer22, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer20->Add(itemBoxSizer27, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxStaticText* itemStaticText23 = new wxStaticText( itemPanel1, wxID_STATIC, _("Option Side:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer22->Add(itemStaticText23, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxStaticText* itemStaticText28 = new wxStaticText( itemPanel1, wxID_STATIC, _("Option Side:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer27->Add(itemStaticText28, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_radioOptionPut = new wxRadioButton( itemPanel1, ID_RADIO_PUT, _("Put"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioOptionPut->SetValue(false);
     m_radioOptionPut->Enable(false);
-    itemBoxSizer22->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer27->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_radioOptionCall = new wxRadioButton( itemPanel1, ID_RADIO_CALL, _("Call"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioOptionCall->SetValue(false);
     m_radioOptionCall->Enable(false);
-    itemBoxSizer22->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer27->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer26 = new wxBoxSizer(wxVERTICAL);
-    itemBoxSizer14->Add(itemBoxSizer26, 0, wxALIGN_TOP|wxALL, 2);
+    wxBoxSizer* itemBoxSizer31 = new wxBoxSizer(wxVERTICAL);
+    itemBoxSizer19->Add(itemBoxSizer31, 0, wxALIGN_TOP|wxALL, 2);
 
     m_radioCurrencyUSD = new wxRadioButton( itemPanel1, ID_RADIO_USD, _("USD"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioCurrencyUSD->SetValue(true);
     m_radioCurrencyUSD->Enable(false);
-    itemBoxSizer26->Add(m_radioCurrencyUSD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    itemBoxSizer31->Add(m_radioCurrencyUSD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
     m_radioCurrencyCAD = new wxRadioButton( itemPanel1, ID_RADIO_CAD, _("CAD"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioCurrencyCAD->SetValue(false);
     m_radioCurrencyCAD->Enable(false);
-    itemBoxSizer26->Add(m_radioCurrencyCAD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
+    itemBoxSizer31->Add(m_radioCurrencyCAD, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 1);
 
-    wxBoxSizer* itemBoxSizer29 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer29, 0, wxGROW|wxALL, 2);
+    wxBoxSizer* itemBoxSizer34 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer2->Add(itemBoxSizer34, 0, wxGROW|wxALL, 2);
 
-    itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer34->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_btnOk = new wxButton( itemPanel1, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     m_btnOk->Enable(false);
-    itemBoxSizer29->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
+    itemBoxSizer34->Add(m_btnOk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 4);
 
-    itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer34->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_btnCancel = new wxButton( itemPanel1, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer29->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer34->Add(m_btnCancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    itemBoxSizer29->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer34->Add(5, 5, 1, wxALIGN_CENTER_VERTICAL|wxALL, 2);
     
     
-    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleSymbolChanged, this, ID_TEXT_SYMBOL );
-    Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleStrikeChanged, this, ID_TEXT_STRIKE );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIQFSymbolChanged, this, ID_TEXT_IQF_SYMBOL );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleIBSymbolChanged, this, ID_TEXT_IB_SYMBOL );
+  Bind( wxEVT_COMMAND_TEXT_UPDATED, &DialogPickSymbol::HandleStrikeChanged, this, ID_TEXT_STRIKE );
 
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioEquity, this, ID_RADIO_EQUITY );
   Bind( wxEVT_COMMAND_RADIOBUTTON_SELECTED, &DialogPickSymbol::HandleRadioOption, this, ID_RADIO_OPTION );
@@ -217,30 +233,40 @@ void DialogPickSymbol::CreateControls() {
   
   Bind( EVT_SetFocus, &DialogPickSymbol::HandleSetFocus, this );
 
+  // examples:
   //Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelManualOrder::OnBtnBuy, this, ID_BtnBuy );
-  //Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelManualOrder::OnBtnSell, this, ID_BtnSell );
-
   //Bind( wxEVT_IDLE, &PanelManualOrder::OnInstrumentSymbolTextIdle, this, ID_TxtInstrumentSymbol );
-  //Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelManualOrder::OnInstrumentSymbolTextUpdated, this, ID_TxtInstrumentSymbol );
   //Bind( wxEVT_COMMAND_TEXT_ENTER, &PanelManualOrder::OnInstrumentSymbolTextEnter, this, ID_TxtInstrumentSymbol );
 
 }
 
-void DialogPickSymbol::HandleSymbolChanged( wxCommandEvent& event ) {
+void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   
   m_txtSymbolDescription->SetLabel( "" );
   m_btnOk->Enable( false );
   
-  wxString text( m_textSymbol->GetValue() );
+  wxString text( m_textIQFName->GetValue() );
   std::string sText( text.c_str() );
+
+  m_bIBSymbolChanging = true;
+  m_textIBName->SetValue( text );
+  m_bIBSymbolChanging = false;
   
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  pde->sIBSymbolName = pde->sIQFSymbolName;
   std::string sDescription;
   pde->signalLookupDescription( sText, sDescription );
   if ( 0 != sDescription.length() ) {
     m_txtSymbolDescription->SetLabel( sDescription );
   }
   UpdateComposite();
+}
+
+void DialogPickSymbol::HandleIBSymbolChanged( wxCommandEvent& event ) {
+  if ( !m_bIBSymbolChanging ) {
+    DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+    pde->sIBSymbolName = m_textIBName->GetValue();
+  }
 }
 
 void DialogPickSymbol::HandleStrikeChanged(wxCommandEvent& event) {
@@ -266,7 +292,7 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
   DisableOptionFields();
   pde->it = InstrumentType::Stock;
   UpdateComposite();
-  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textSymbol ) );
+  QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textIQFName ) );
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
@@ -279,7 +305,6 @@ void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
   m_textStrike->Enable();
   UpdateComposite();
   QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
-
 }
 
 void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
@@ -332,7 +357,7 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 void DialogPickSymbol::UpdateComposite( void ) {
   //std::cout << "UpdateComposite" << std::endl;
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  pde->sUnderlyingSymbolName = this->m_textSymbol->GetValue();
+  pde->sIQFSymbolName = this->m_textIQFName->GetValue();
   pde->sCompositeDescription = "";
   pde->signalComposeComposite( pde );
   m_textComposite->SetValue( pde->sCompositeName );
@@ -343,15 +368,15 @@ void DialogPickSymbol::UpdateComposite( void ) {
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-    m_textSymbol->Enable();
-    m_textSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sUnderlyingSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+    m_textIQFName->Enable();
+    m_textIQFName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
     //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
     m_textStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
     m_radioEquity->Enable();
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    m_textSymbol->SetFocus();
+    m_textIQFName->SetFocus();
     wxDateTime dt = m_dateExpiry->GetValue();
     pde->year = dt.GetYear();
     pde->month = dt.GetMonth();
@@ -363,7 +388,7 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Disable();
     m_radioFuture->Disable();
     m_radioFOption->Disable();
-    m_textSymbol->Disable();
+    m_textIQFName->Disable();
     DisableOptionFields();
   }
 }

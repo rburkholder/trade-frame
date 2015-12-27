@@ -178,10 +178,42 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
     case wxID_CANCEL:
       break;
     case wxID_OK:
+      BuildInstrument( pde, pInstrument );
       break;
   }
   dialog->Destroy();
   return pInstrument;
+}
+
+void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument ) {
+  std::string sKey( pde.sIQFSymbolName );
+  switch ( pde.it ) {
+    case InstrumentType::Stock:
+      break;
+    case InstrumentType::Option:
+    case InstrumentType::FuturesOption:
+    {
+      std::string sMonth( boost::lexical_cast<std::string>( pde.month ) );
+      std::string sDay( boost::lexical_cast<std::string>( pde.day ) );
+      sKey += "-";
+      sKey += pde.os;
+      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
+        + ( "0" + sMonth ).substr( sMonth.length() - 2, 2 )
+        + ( "0" + sDay ).substr( sDay.length() - 2, 2 )
+        + "-" + boost::lexical_cast<std::string>( pde.dblStrike )
+        ;
+    }
+      break;
+    case InstrumentType::Future:
+    {
+      std::string sMonth( boost::lexical_cast<std::string>( pde.month ) );
+      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
+        + ( "0" + sMonth ).substr( sMonth.length() - 2, 2 )
+        ;
+    }
+      break;
+  }
+  signalBuildInstrument( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument );
 }
 
 void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {
@@ -192,19 +224,19 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
   pde->sCompositeName = "";
   switch ( pde->it ) {
     case ou::tf::InstrumentType::Stock:
-      pde->sCompositeName = pde->sUnderlyingSymbolName;
+      pde->sCompositeName = pde->sIQFSymbolName;
       break;
     case ou::tf::InstrumentType::Option:
       pde->sCompositeName 
-        = ou::tf::iqfeed::BuildOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os );
+        = ou::tf::iqfeed::BuildOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->day, pde->dblStrike, pde->os );
       break;
     case ou::tf::InstrumentType::Future:
       pde->sCompositeName
-        = ou::tf::iqfeed::BuildFuturesName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1 );
+        = ou::tf::iqfeed::BuildFuturesName( pde->sIQFSymbolName, pde->year, pde->month + 1 );
       break;
     case ou::tf::InstrumentType::FuturesOption:
       pde->sCompositeName 
-        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
+        = ou::tf::iqfeed::BuildFuturesOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
         //= ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->os, pde->dblStrike );
       break;
     default: 

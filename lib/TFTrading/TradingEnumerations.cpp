@@ -22,7 +22,7 @@ namespace InstrumentType {
     "FuturesOption", "Currency", "Index", "ETF", "Bond", "Commodity", "Metal",  };
 }
 
-namespace OptionSide {
+namespace OptionSide {  // this doesn't work well with the existing enumerations
   const char* Name[] = { "Unknown", "Put", "Call" };
   const char* LongName[] = { "Unknown", "Put", "Call" };
   const char* ShortName[] = { "U", "P", "C" };

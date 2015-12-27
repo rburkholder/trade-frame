@@ -67,7 +67,8 @@ public:
     typedef signalComposeComposite_t::slot_type slotComposeComposite_t;
     signalComposeComposite_t signalComposeComposite;
 
-    wxString sUnderlyingSymbolName;  // can't be std::string, needs to handle native DataExchange
+    wxString sIQFSymbolName;  // can't be std::string, needs to handle native DataExchange
+    wxString sIBSymbolName;
     std::string sCompositeName;
     std::string sCompositeDescription;
     double dblStrike;
@@ -106,7 +107,8 @@ private:
   
   enum { ID_NULL=wxID_HIGHEST, ID_PANELPICKSYMBOL,
     ID_RADIO_EQUITY, ID_RADIO_OPTION, ID_RADIO_FUTURE, ID_RADIO_FOPTION,
-    ID_TEXT_SYMBOL, ID_STATIC_SYMBOL_DESCRIPTION, 
+    ID_TEXT_IQF_SYMBOL, ID_STATIC_SYMBOL_DESCRIPTION, 
+    ID_TEXT_IB_SYMBOL, 
     ID_TEXT_COMPOSITE, ID_STATIC_COMPOSITE_DESCRIPTION, 
     ID_DATE_EXPIRY, 
     ID_TEXT_STRIKE,
@@ -121,7 +123,8 @@ private:
     wxRadioButton* m_radioOption;
     wxRadioButton* m_radioFuture;
     wxRadioButton* m_radioFOption;
-    wxTextCtrl* m_textSymbol;
+    wxTextCtrl* m_textIQFName;
+    wxTextCtrl* m_textIBName;
     wxStaticText* m_txtSymbolDescription;
     wxTextCtrl* m_textComposite;
     wxStaticText* m_txtCompositeDescription;
@@ -133,6 +136,8 @@ private:
     wxRadioButton* m_radioCurrencyCAD;
     wxButton* m_btnOk;
     wxButton* m_btnCancel;
+    
+  bool m_bIBSymbolChanging;
 
   void Init( void );
   void CreateControls( void );
@@ -149,7 +154,8 @@ private:
   
   void HandleExpiryChanged( wxDateEvent& event );
   void HandleStrikeChanged( wxCommandEvent& event );
-  void HandleSymbolChanged( wxCommandEvent& event );
+  void HandleIQFSymbolChanged( wxCommandEvent& event );
+  void HandleIBSymbolChanged( wxCommandEvent& event );
   
   void HandleSetFocus( SetFocusEvent& event );
   

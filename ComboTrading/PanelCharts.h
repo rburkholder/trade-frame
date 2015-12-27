@@ -39,6 +39,9 @@ namespace tf { // TradeFrame
 
 class PanelCharts: public wxPanel {
 public:
+  
+  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
   PanelCharts( void );
   PanelCharts( wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTS_IDNAME, 
     const wxPoint& pos = SYMBOL_PANEL_CHARTS_POSITION, 
@@ -55,6 +58,11 @@ public:
   typedef boost::signals2::signal<void(const std::string&, std::string&)> signalLookUpDescription_t;
   typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
   signalLookUpDescription_t signalLookUpDescription;
+  
+  typedef boost::signals2::signal<
+    void (const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& )> signalBuildInstrument_t;
+  typedef signalBuildInstrument_t::slot_type slotBuildInstrument_t;
+  signalBuildInstrument_t signalBuildInstrument;
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -64,8 +72,6 @@ protected:
   void Init();
   void CreateControls();
 private:
-  
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   
   enum { 
     ID_Null=wxID_HIGHEST, ID_PANEL_CHARTS, 
@@ -84,6 +90,8 @@ private:
   
   pInstrument_t HandleNewInstrumentRequest( void );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
+  
+  void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
 
   void OnClose( wxCloseEvent& event );
   

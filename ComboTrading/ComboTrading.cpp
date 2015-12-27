@@ -224,6 +224,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 
   namespace args = boost::phoenix::placeholders;
   m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
+  m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1, args::arg2, args::arg3, args::arg4 ) );
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
@@ -234,6 +235,40 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pFCharts->SetPosition( point );
   m_pFCharts->Show();
   
+}
+
+// ** for options, needs an underlying symbol when creating the underlying
+//  if this is to be bypassed, then then need the instrument already.
+void AppComboTrading::BuildInstrument( const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& ) {
+  // on return, a null pInstrument indicates invalid instrument
+  // this method is recursive for one level when IEOption inbound
+  
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  if ( im.Exists( sKey, pInstrument ) ) {  // the call will supply instrument if it exists
+  }
+  else {  // build
+    if ( 0 != m_listIQFeedSymbols.Size() ) {
+      typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
+      typedef list_t::trd_t trd_t;
+      const trd_t& trd( m_listIQFeedSymbols.GetTrd( sIQF ) );
+      switch ( trd.sc ) {
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
+          pInstrument = ou::tf::iqfeed::BuildInstrument( sSymbolName, trd );
+          break;
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
+          // will need to check that Symbol is registered and available in order to build
+          throw std::runtime_error( "can't process the BuildInstrument IEOption" );
+          break;
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+          throw std::runtime_error( "can't process the BuildInstrument FOption" );
+          break;
+        default:
+          throw std::runtime_error( "can't process the BuildInstrument default" );
+      }
+      GetContractFor( pInstrument );
+    }
+  }
 }
 
 void AppComboTrading::BuildFramePortfolioPosition( void ) {
@@ -479,12 +514,15 @@ void AppComboTrading::HandleIBContractDetailsDone( void ) {
 
 // gui thread via HandleIBContractDetails
 void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
+  // what happens if there is an error, with no return of a contract?
+  // Errors will be caught in the submission phase, but need some notification/time-out if no contract received
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   im.Register( event.GetInstrument() ); 
+  std::cout << "Instrument/Contract registered" << std::endl;
   // by stint of being here, instrument is new (iqfeed constructed then ib completed), and therefore registerable 
   // comment the following temporarily while testing flow through
   //ConstructEquityPosition1( event.GetInstrument() );
-  LoadUpBundle( event.GetInstrument() );
+//  LoadUpBundle( event.GetInstrument() );   // will need to queue this up as another event
 }
 
 // this may need to steal code from ConstructEquityPosition0, and ConstructEquityPosition1

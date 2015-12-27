@@ -130,6 +130,7 @@ private:
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
+  void BuildInstrument( const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& );
 
   void GetContractFor( pInstrument_t pInstrument );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );

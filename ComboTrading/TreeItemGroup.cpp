@@ -40,7 +40,9 @@ void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) {
     this->m_baseResources.signalDelete( p->GetTreeItemId() );
     //DeleteMember( p->GetTreeItemId() );
   }
-  //p->Rename();
+  else {
+    
+  }
 }
 
 void TreeItemGroupCommon::HandleAddPortfolio( wxCommandEvent& event ) { 
