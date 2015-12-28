@@ -73,6 +73,7 @@ public:
     wxString sIBSymbolName;
     std::string sCompositeName;
     std::string sCompositeDescription;
+    int32_t nContractId;
     double dblStrike;
     InstrumentType::enumInstrumentTypes it;
     OptionSide::enumOptionSide os;
@@ -102,6 +103,8 @@ public:
     long style = SYMBOL_PANELPICKSYMBOL_STYLE );
   
   virtual void SetDataExchange( DataExchange* pde );
+  
+  void UpdateContractId( int32_t );
 
 protected:
   
@@ -112,6 +115,7 @@ private:
     ID_TEXT_IQF_SYMBOL, ID_STATIC_SYMBOL_DESCRIPTION, 
     ID_TEXT_IB_SYMBOL, 
     ID_TEXT_COMPOSITE, ID_STATIC_COMPOSITE_DESCRIPTION, 
+    ID_STATIC_CONTRACTID,
     ID_DATE_EXPIRY, 
     ID_TEXT_STRIKE,
     ID_RADIO_PUT, ID_RADIO_CALL, 
@@ -129,6 +133,7 @@ private:
     wxTextCtrl* m_textIBName;
     wxStaticText* m_txtSymbolDescription;
     wxTextCtrl* m_textComposite;
+    wxStaticText* m_txtContractId;
     wxStaticText* m_txtCompositeDescription;
     wxDatePickerCtrl* m_dateExpiry;
     wxTextCtrl* m_textStrike;

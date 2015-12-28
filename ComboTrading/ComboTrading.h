@@ -65,6 +65,10 @@ private:
   typedef ou::tf::PanelPortfolioPosition::DelegateAddPosition_t DelegateAddPosition_t;
   
   typedef std::vector<BundleTracking> vBundleTracking_t;
+  
+  typedef boost::signals2::signal<void (pInstrument_t)> signalInstrumentFromIB_t;
+  typedef signalInstrumentFromIB_t::slot_type slotInstrumentFromIB_t;
+  signalInstrumentFromIB_t signalInstrumentFromIB;
 
   struct structManualOrder {
 //    ou::tf::PanelManualOrder* pDialogManualOrder;
@@ -131,6 +135,7 @@ private:
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
   void BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& );
+  void RegisterInstrument( pInstrument_t );
 
   void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );

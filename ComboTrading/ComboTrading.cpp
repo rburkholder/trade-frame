@@ -225,6 +225,8 @@ void AppComboTrading::BuildFrameCharts( void ) {
   namespace args = boost::phoenix::placeholders;
   m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
   m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
+  m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
+  signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
@@ -240,6 +242,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 void AppComboTrading::BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& values ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
+    signalInstrumentFromIB( values.pInstrument );
   }
   else {  // build
     if ( 0 != m_listIQFeedSymbols.Size() ) {
@@ -511,14 +514,22 @@ void AppComboTrading::HandleIBContractDetailsDone( void ) {
 void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
   // what happens if there is an error, with no return of a contract?
   // Errors will be caught in the submission phase, but need some notification/time-out if no contract received
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  pInstrument_t pInstrument = event.GetInstrument();
-  im.Register( pInstrument ); 
-  std::cout << "Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
   // by stint of being here, instrument is new (iqfeed constructed then ib completed), and therefore registerable 
   // comment the following temporarily while testing flow through
   //ConstructEquityPosition1( event.GetInstrument() );
 //  LoadUpBundle( event.GetInstrument() );   // will need to queue this up as another event
+  signalInstrumentFromIB( event.GetInstrument() );
+}
+
+void AppComboTrading::RegisterInstrument( pInstrument_t pInstrument ) {
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  if ( !im.Exists( pInstrument ) ) {
+    im.Register( pInstrument ); 
+    std::cout << "Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
+  }
+  else {
+    std::cout << "Instrument already registered: " << pInstrument->GetInstrumentName() << std::endl;
+  }
 }
 
 // this may need to steal code from ConstructEquityPosition0, and ConstructEquityPosition1

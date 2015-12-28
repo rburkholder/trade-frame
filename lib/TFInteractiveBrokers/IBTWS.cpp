@@ -171,7 +171,7 @@ void IBTWS::RequestContractDetails(
                                    const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
                                    OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone 
 ) {
-  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over <== is this a true statement anymore
+  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over <== is this a true statement anymore?
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
   contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others
@@ -788,54 +788,54 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
   // * build instrument doesn't build the symbol, is performed later in the logic here, so can skip the assignment.
   // * need a truth table for what to do with instrument (present or not), and symbol(present or not)
 
-  //  instrument *  symbol => illegal operation, would yield non unique instrument and symbol
-  // !instrument *  symbol => assign from existing contract
-  //  instrument * !symbol => build
-  // !instrument * !symbol => build
+  //  instrument *  symbol => don't build new symbol, fill new instrument with settings
+  // !instrument *  symbol => assign from existing symbol, fill in... when would this happen?
+  //  instrument * !symbol => build symbol, fill in and return passed in instrument
+  // !instrument * !symbol => build symbol, fill in and return new instrument
 
   // what happens if instrument/contract already built, then in another incarnation of application, what happens?  should be ok, as contract id is in instrument.
 
-  mapContractToSymbol_t::iterator iter = m_mapContractToSymbol.find( contractDetails.summary.conId );
+  mapContractToSymbol_t::iterator iterMap = m_mapContractToSymbol.find( contractDetails.summary.conId );
 
-  assert( !( (0 != pInstrument.get()) && (m_mapContractToSymbol.end() != iter) ) );  // illegal call:  instrument and contract already exist, and should have been mated
+  //assert( !( (0 != pInstrument.get()) && (m_mapContractToSymbol.end() != iter) ) );  // illegal call:  instrument and contract already exist, and should have been mated
 
-  if ( m_mapContractToSymbol.end() == iter ) {  // create new symbol from contract
+  if ( ( 0 == pInstrument.get() ) && ( m_mapContractToSymbol.end() != iterMap ) ) {
+    pInstrument = iterMap->second->GetInstrument();
+  }
+  
+  BuildInstrumentFromContract( contractDetails.summary, pInstrument );  // creates new contract, or uses existing one
 
-    BuildInstrumentFromContract( contractDetails.summary, pInstrument );  // 
+  pInstrument->SetMinTick( contractDetails.minTick );
 
-    pInstrument->SetMinTick( contractDetails.minTick );
+  ptime dtOpen;
+  ptime dtClose;
+  typedef boost::date_time::local_adjustor<ptime, -5, us_dst> tzEST_t;
+  typedef boost::date_time::local_adjustor<ptime, -4, us_dst> tzATL_t;
 
-    ptime dtOpen;
-    ptime dtClose;
-    typedef boost::date_time::local_adjustor<ptime, -5, us_dst> tzEST_t;
-    typedef boost::date_time::local_adjustor<ptime, -4, us_dst> tzATL_t;
-
-    if ( "EST" != contractDetails.timeZoneId ) {
-      std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
-    }
+  if ( "EST" != contractDetails.timeZoneId ) {
+    std::cout << contractDetails.longName << " differing timezones, EST vs " << contractDetails.timeZoneId << std::endl;
+  }
 
 //    std::cout << "IB: " << contractDetails.tradingHours << ", " << contractDetails.liquidHours << std::endl;
 
-    DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
-    pInstrument->SetTimeTrading( 
-      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
-      );
+  DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
+  pInstrument->SetTimeTrading( 
+    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    );
 
 //    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
 
-    DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
-    pInstrument->SetTimeLiquid( 
-      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-      tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
-      );
+  DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
+  pInstrument->SetTimeLiquid( 
+    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    );
 
 //    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
 
+  if ( m_mapContractToSymbol.end() == iterMap ) {  // create new symbol from contract
     pSymbol_t pSymbol = NewCSymbol( pInstrument );
-  }
-  else {
-    pInstrument = iter->second->GetInstrument();
   }
 
   if ( 0 != handler ) 
@@ -894,10 +894,10 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
 
   OptionSide::enumOptionSide os( OptionSide::Unknown );
 
-  // calculate expiry, used with FuturesOption, Option, Future   "GLD   120210C00159000"
+  // calculate expiry, used with FuturesOption, Option   "GLD   120210C00159000"
   boost::gregorian::date dtExpiryRequested( boost::gregorian::not_a_date_time );
   boost::gregorian::date dtExpiryInSymbol( boost::gregorian::not_a_date_time );
-  try {  // is this only calculated on futures and options?
+  try {
     if ( 0 != contract.expiry.length() ) {
       // save actual date in instrument, as last-day-to-trade and expiry-date  in symbol naming varies between Fri and Sat
       dtExpiryRequested = boost::gregorian::from_undelimited_string( contract.expiry );
@@ -947,14 +947,9 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
     case InstrumentType::Option:
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
-//      iterSymbol = m_mapSymbols.find( sUnderlying );
-//      if ( m_mapSymbols.end() == iterSymbol ) {
-//        throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying not found" );
-//      }
       if ( 0 == pInstrument.get() ) {
 	      pInstrument = Instrument::pInstrument_t( new Instrument( 
 	        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
-//	        iterSymbol->second->GetInstrument(), 
 	        os, contract.strike ) );
       }
       else {
@@ -1027,7 +1022,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
       pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange ) );
       break;
   }
-  if ( NULL == pInstrument ) 
+  if ( 0 == pInstrument ) 
     throw std::out_of_range( "unknown instrument type" );
   pInstrument->SetContract( contract.conId );
   //pInstrument->SetCurrency( );  // need to figure this out, use the currency calcs above

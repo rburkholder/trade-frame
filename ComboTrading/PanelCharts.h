@@ -73,10 +73,12 @@ public:
   typedef boost::signals2::signal<void(ValuesForBuildInstrument&)> signalBuildInstrument_t;
   typedef signalBuildInstrument_t::slot_type slotBuildInstrument_t;
   signalBuildInstrument_t signalBuildInstrument;
+  
+  typedef boost::signals2::signal<void(pInstrument_t)> signalRegisterInstrument_t;
+  typedef signalRegisterInstrument_t::slot_type slotRegisterInstrument_t;
+  signalRegisterInstrument_t signalRegisterInstrument;
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
+  void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
 
 protected: 
   void Init();
@@ -96,6 +98,10 @@ private:
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
   
+  ou::tf::DialogPickSymbol* m_pDialogPickSymbol;
+  pInstrument_t m_pInstrumentForDialog;
+  DialogPickSymbol::DataExchange m_de;
+  
   void HandleLookUpDescription( const std::string&, std::string& );
   
   pInstrument_t HandleNewInstrumentRequest( void );
@@ -109,6 +115,10 @@ private:
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
   
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
+
 };
 
 } // namespace tf

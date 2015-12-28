@@ -59,7 +59,7 @@ PanelCharts::~PanelCharts() {
 }
 
 void PanelCharts::Init( void ) {
-  
+  m_pDialogPickSymbol = 0;
 }
 
 bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -166,22 +166,26 @@ void PanelCharts::CreateControls() {
 }
 
 PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
+  assert( 0 == m_pDialogPickSymbol );
   namespace args = boost::phoenix::arg_names;
-  pInstrument_t pInstrument;
-  DialogPickSymbol::DataExchange pde;
-  pde.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
-  pde.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
-  auto dialog = new ou::tf::DialogPickSymbol( this );
-  dialog->SetDataExchange( &pde );
-  int status = dialog->ShowModal();
+  m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
+  m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
+  m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
+  m_pDialogPickSymbol->SetDataExchange( &m_de );
+  int status = m_pDialogPickSymbol->ShowModal();
   switch ( status ) {
     case wxID_CANCEL:
       break;
     case wxID_OK:
-      BuildInstrument( pde, pInstrument );
+      if ( 0 != m_pInstrumentForDialog.get() ) {
+        signalRegisterInstrument( m_pInstrumentForDialog );
+      }
       break;
   }
-  dialog->Destroy();
+  m_pDialogPickSymbol->Destroy();
+  m_pDialogPickSymbol = 0;
+  pInstrument_t pInstrument( m_pInstrumentForDialog );
+  m_pInstrumentForDialog.reset();
   return pInstrument;
 }
 
@@ -232,6 +236,7 @@ void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::stri
 
 void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) {
   pde->sCompositeName = "";
+  pde->sCompositeDescription = "";
   switch ( pde->it ) {
     case ou::tf::InstrumentType::Stock:
       pde->sCompositeName = pde->sIQFSymbolName;
@@ -254,6 +259,17 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
   }
   if ( "" != pde->sCompositeName ) {
     signalLookUpDescription( pde->sCompositeName, pde->sCompositeDescription );
+    if ( "" != pde->sCompositeDescription ) { // means we have a satisfactory iqfeed symbol
+      BuildInstrument( m_de, m_pInstrumentForDialog );
+    }
+  }
+}
+
+void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
+  if ( 0 != m_pDialogPickSymbol ) {
+    if ( pInstrument.get() == m_pInstrumentForDialog.get() ) {
+      m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
+    }
   }
 }
 
