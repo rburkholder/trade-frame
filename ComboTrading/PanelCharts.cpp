@@ -247,7 +247,6 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
     case ou::tf::InstrumentType::FuturesOption:
       pde->sCompositeName 
         = ou::tf::iqfeed::BuildFuturesOptionName( pde->sIQFSymbolName, pde->year, pde->month + 1, pde->dblStrike, pde->os );
-        //= ou::tf::iqfeed::BuildFuturesOptionName( pde->sUnderlyingSymbolName, pde->year, pde->month, pde->day, pde->os, pde->dblStrike );
       break;
     default: 
       throw std::runtime_error( "PanelCharts::HandleComposeComposite: unknown instrument type" );

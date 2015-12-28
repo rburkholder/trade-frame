@@ -177,7 +177,7 @@ void IBTWS::RequestContractDetails(
   contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
   contract.exchange = "SMART";
-  //contract.symbol = pInstrument->GetInstrumentName();  // for options, this needs to be underlying, which is adjusted below
+  std::cout << "Exchange supplied to IBTWS: " << pInstrument->GetExchangeName() << std::endl;
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
@@ -187,22 +187,19 @@ void IBTWS::RequestContractDetails(
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
-    //contract.symbol = pInstrument->GetUnderlyingName();
     //contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );  // needed for small options
     break;
   case InstrumentType::Future:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
-    contract.exchange = "NYMEX";
-    //contract.exchange = pInstrument->GetExchangeName();  // not sure what this is
-    //contract.symbol = pInstrument->GetUnderlyingName();
+    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options
+    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options
     break;
   case InstrumentType::FuturesOption:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
-    //contract.exchange = pInstrument->GetExchangeName();
-    contract.exchange = "NYMEX";
-    //contract.symbol = pInstrument->GetUnderlyingName();
+    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC
+    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?
     break;
   }
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
@@ -904,11 +901,6 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
     if ( 0 != contract.expiry.length() ) {
       // save actual date in instrument, as last-day-to-trade and expiry-date  in symbol naming varies between Fri and Sat
       dtExpiryRequested = boost::gregorian::from_undelimited_string( contract.expiry );
-      dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date( 
-        boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
-        boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
-        boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
-        ) ); 
     }
   }
   catch ( std::exception e ) {
@@ -971,6 +963,16 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
         if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
         if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
       }
+      try {
+        dtExpiryInSymbol = boost::gregorian::date( boost::gregorian::date( 
+          boost::lexical_cast<int>( contract.localSymbol.substr(  6, 2 ) ) + 2000,
+          boost::lexical_cast<int>( contract.localSymbol.substr(  8, 2 ) ),
+          boost::lexical_cast<int>( contract.localSymbol.substr( 10, 2 ) )
+          ) ); 
+      }
+      catch ( std::exception e ) {
+        std::cout << "IB option contract expiry is funny: " << e.what() << std::endl;
+      }
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
@@ -979,7 +981,6 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
       }
       else {
       }
-      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Currency: {
       // 20151227 will need to step this to see if it works, with no sUnderlying
@@ -1125,6 +1126,7 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
       << ", rPL=" << realizedPNL // double
       //<< ", " << accountName 
       << std::endl;
+    std::cout << m_ss.str();
 //    OutputDebugString( m_ss.str().c_str() );
   }
 
@@ -1160,7 +1162,7 @@ void IBTWS::updateAccountValue(const std::string& key, const std::string& val,
   if ( "MaintMarginReq" == key ) bEmit = true;
   if ( "InitMarginReq" == key ) bEmit = true;
   if ( bEmit ) {
-    //std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
+    std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
   }
 }
 

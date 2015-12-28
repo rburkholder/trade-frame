@@ -47,7 +47,7 @@ void DialogInstrumentSelect::Init() {
 void DialogInstrumentSelect::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
-    m_cbSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+    m_cbSymbol->SetValidator( ou::tf::InstrumentNameValidator( &pde->sSymbolName ) );  // caps, alpha, numeric, @
   }
   else {
     m_cbSymbol->SetValidator( wxDefaultValidator );

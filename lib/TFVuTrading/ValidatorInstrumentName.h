@@ -38,12 +38,12 @@ wxDECLARE_EVENT( EVT_SetCursorEvent, SetCursorEvent );
 
 class InstrumentNameValidator: public wxTextValidator {
 public:
-  enum EValidationType{ eCapsOnly, eCapsAlphaNum };
+  enum EValidationType{ eAlpha=1, eNumeric=2, eCaps=4, eAt=8 }; 
   InstrumentNameValidator( const InstrumentNameValidator& validator )
-    : wxTextValidator( wxFILTER_ALPHANUMERIC ), 
+    : wxTextValidator( wxFILTER_NONE ), 
       m_vt( validator.m_vt ), m_pString( validator.m_pString ), m_bInProcess( false ) { Init(); };
-  InstrumentNameValidator( wxString* p = 0, EValidationType vt = eCapsOnly )
-    : wxTextValidator( wxFILTER_ALPHANUMERIC ), 
+  InstrumentNameValidator( wxString* p = 0, unsigned long vt = eAlpha | eCaps| eNumeric | eAt )
+    : wxTextValidator( wxFILTER_NONE ), 
       m_vt( vt ), m_pString( p ), m_bInProcess( false ) { Init(); };
   InstrumentNameValidator* Clone( void ) const {
     return new InstrumentNameValidator( *this );
@@ -55,11 +55,9 @@ protected:
   void OnChar( wxKeyEvent& event );
   void OnIdle( wxIdleEvent& event );
 private:
-  EValidationType m_vt;
+  unsigned long m_vt;
   wxString* m_pString;
   bool m_bInProcess;  // prevents re-entry via WriteText (todo: convert to event, or not, due to the recursion?)
-  //bool m_bSetInsertionPoint; // need to set insertion point outside of handler (or create custom event to update stuff)
-  //long m_lInsertionPoint;
   void Init( void );
   void OnSetCursor( SetCursorEvent& event );
   

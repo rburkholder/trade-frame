@@ -47,7 +47,6 @@ void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
   wxASSERT( m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl) ) );
   
   m_bInProcess = true;
-  //  this is all wrong, will need to change, see wxETKBaseValidator for proper mechansim, or just use that one
 
   // 2015/12/23 it doesn't appear as though an event.skip() processors will accept the changed codes
 //      event.m_keyCode = event.m_uniChar = event.m_rawCode = ch - 'a' + 'A';
@@ -58,53 +57,54 @@ void InstrumentNameValidator::OnChar( wxKeyEvent& event ) {
 #else // !wxUSE_UNICODE
   kc = event.GetKeyCode();
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE  
-  
-  //Allow default 'ctrl-C' manager
-  if ( WXK_CONTROL_C == kc ) return;
-  
-  //Allow standard 32-127 ASCII and also 128-255 ASCII extended characters
-  //if ( WXK_SPACE > kc || WXK_START <= kc ) return;
 
-  //wxTextEntry& winText( dynamic_cast<wxTextEntry&>( *m_validatorWindow ) );
+  event.Skip( false );  // default ignore characters unless allowed
+  bool bAllowChar( false ); // whether to display by caller
+  bool bWriteText( false ); // whether to display by WriteText
   wxTextEntry* winText( dynamic_cast<wxTextEntry*>( GetWindow() ) );
   
-  event.Skip( true );
+  if ( ( 32 > kc ) || ( 127 < kc ) ) { // allow stuff outside of ascii range
+    bAllowChar = true;
+  }
+  else {
+    // characters are ascii and process as such
+    if ( 0 != ( eAlpha & m_vt ) ) { // allow alpha
+      if ( ( _T('A') <= kc ) && ( _T('Z') >= kc ) ) {
+        bAllowChar = true;
+      }
+      if ( ( _T('a') <= kc ) && ( _T('z') >= kc ) ) {
+        if ( 0 != ( eCaps & m_vt ) ) {
+          kc += 'A' - 'a';  // always capitalize
+          bWriteText = true;
+        }
+        else {
+          bAllowChar = true;
+        }
+      }
+    }
+    if ( ( 0 != ( eNumeric & m_vt ) ) && ( _T('0') <= kc ) && ( _T('9') >= kc ) ) {
+      if ( 0 < winText->GetValue().size() ) {
+        bAllowChar = true;
+      }
+    }
+    if ( 0 != ( eAt & m_vt ) ) {
+      if ( _T('@') == kc ) {  // for iqfeed symbols, may do a test for position 0
+        bAllowChar = true;
+      }
+    }
+  }
   
-  if ( ( _T('a') <= kc ) && ( _T('z') >= kc ) ) {
-    kc += 'A' - 'a';  // always capitalize
+  assert ( ! ( bAllowChar && bWriteText ) );
+  if ( bWriteText ) {
     int ip = winText->GetInsertionPoint();
-    //wxString val = winText->GetValue();
-    //val.insert( ip, wxChar( kc ) );
-    //winText->SetValue( val );
     winText->WriteText( wxChar( kc ) );
-    //winText->SetInsertionPoint( ip + 1 );
-    //winText->SetInsertionPointEnd();
-    //winText->SetInsertionPoint( winText->GetLastPosition() );
-    //m_lInsertionPoint = ip + 1;
-    //m_bSetInsertionPoint = true;
     QueueEvent( new SetCursorEvent( EVT_SetCursorEvent, ip + 1 ) );
     event.Skip(false);  // end of the line for processing
   }
-  else {
-    if ( eCapsOnly == m_vt ) {
-      event.Skip();  // allow everything 
-    }
-    else {
-      // todo:  can cursor to front of line and install numeric, so test in post processing
-      if ( ( 0 < winText->GetValue().size() ) && ( '0' <= kc ) && ( '9' >= kc ) ) {
-        int ip = winText->GetInsertionPoint();
-        winText->WriteText( wxChar( kc ) );
-        //m_lInsertionPoint = ip + 1;
-        //m_bSetInsertionPoint = true;
-        QueueEvent( new SetCursorEvent( EVT_SetCursorEvent, ip + 1 ) );
-        event.Skip(false);  // end of the line for processing
-      }
-//      if ( ( 8  == kc ) || ( 127 == kc ) || ( 128 <= kc ) )  // 8=bs, 127=del
-//        event.Skip();  // allow control to process the characters
-      // ignore all other characters
-    }
+  if ( bAllowChar ) {
+    event.Skip(true);   // allow the character
   }
-    
+  
   m_bInProcess = false;
 }
 

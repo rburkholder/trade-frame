@@ -370,8 +370,8 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   DialogBase::SetDataExchange( pde );
   if ( 0 != pde ) {
     m_textIQFName->Enable();
-    m_textIQFName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
-    m_textIBName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIBSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+    m_textIQFName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName ) );   // caps, alpha, numeric, @
+    m_textIBName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIBSymbolName ) );   // caps, alpha, numeric, @
     //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
     m_textStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
     m_radioEquity->Enable();

@@ -59,10 +59,12 @@ public:
   
   struct DataExchange: DialogBase::DataExchange {
     
+    // Provides the description for the base name
     typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpDescription_t;
     typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
     signalLookUpDescription_t signalLookupDescription; // // (1)in=name, (2)out=description
 
+    // Base name contributes to a composite name for futures, options, futuresoptions
     typedef boost::signals2::signal<void (DataExchange*)> signalComposeComposite_t;
     typedef signalComposeComposite_t::slot_type slotComposeComposite_t;
     signalComposeComposite_t signalComposeComposite;

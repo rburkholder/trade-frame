@@ -512,8 +512,9 @@ void AppComboTrading::HandleIBInstrument( EventIBInstrument& event ) {
   // what happens if there is an error, with no return of a contract?
   // Errors will be caught in the submission phase, but need some notification/time-out if no contract received
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  im.Register( event.GetInstrument() ); 
-  std::cout << "Instrument/Contract registered" << std::endl;
+  pInstrument_t pInstrument = event.GetInstrument();
+  im.Register( pInstrument ); 
+  std::cout << "Instrument/Contract registered: " << pInstrument->GetInstrumentName() << std::endl;
   // by stint of being here, instrument is new (iqfeed constructed then ib completed), and therefore registerable 
   // comment the following temporarily while testing flow through
   //ConstructEquityPosition1( event.GetInstrument() );

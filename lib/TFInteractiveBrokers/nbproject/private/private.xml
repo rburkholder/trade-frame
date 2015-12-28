@@ -11,7 +11,6 @@
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/IBTWS.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/IBTWS.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/Shared/EClientSocketBaseImpl.h</file>
         </group>
     </open-files>
 </project-private>
