@@ -56,12 +56,16 @@ void SetAlternateName( const pInstrument_t& pInstrument ) {
   default: throw std::runtime_error( "ou::tf::iqfeed::option::AddAlternateName: no option side specified" );
   }
 
-  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, 
-      pInstrument->GetUnderlyingName() 
-    + boost::lexical_cast<std::string>( dateExpiry.year() ).substr( 2, 2 ) 
-    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
-    + chMonth
-    + boost::lexical_cast<std::string>( pInstrument->GetStrike() ) );
+  assert( 0 );  // 20151227 need to fix this, see IQFeedProvider.cpp file
+    // main option instrument name should be our own, and the iqfeed name set as the alternate name
+  // uncomment the following once fixed with standard and iqfeed specific names
+  // BuildSymbolName.h is the standard way to build the names now
+//  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, 
+//      pInstrument->GetUnderlyingName() 
+//    + boost::lexical_cast<std::string>( dateExpiry.year() ).substr( 2, 2 ) 
+//    + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day )
+//    + chMonth
+//    + boost::lexical_cast<std::string>( pInstrument->GetStrike() ) );
 }
 
 } // namespace iqfeed

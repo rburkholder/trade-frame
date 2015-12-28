@@ -12,7 +12,11 @@
         <group name="lib"/>
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/IQFeedProvider.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/InMemoryMktSymbolList.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/MarketSymbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/ValidateMktSymbolLine.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/Option.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildInstrument.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFIQFeed/BuildSymbolName.h</file>

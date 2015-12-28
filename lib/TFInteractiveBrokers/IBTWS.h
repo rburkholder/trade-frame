@@ -98,7 +98,8 @@ public:
   //   ie, may need an array of OnContractDetailsHandler_t
   typedef FastDelegate2<const ContractDetails&, pInstrument_t&> OnContractDetailsHandler_t;
   typedef FastDelegate0<void> OnContractDetailsDoneHandler_t;
-  void RequestContractDetails( pInstrument_t,            OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
+  void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t,            
+                                                         OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
 

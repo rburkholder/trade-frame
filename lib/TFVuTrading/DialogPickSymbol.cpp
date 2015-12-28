@@ -241,6 +241,8 @@ void DialogPickSymbol::CreateControls() {
 }
 
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
+
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   
   m_txtSymbolDescription->SetLabel( "" );
   m_btnOk->Enable( false );
@@ -251,9 +253,8 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   m_bIBSymbolChanging = true;
   m_textIBName->SetValue( text );
   m_bIBSymbolChanging = false;
+  pde->sIBSymbolName = text;
   
-  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  pde->sIBSymbolName = pde->sIQFSymbolName;
   std::string sDescription;
   pde->signalLookupDescription( sText, sDescription );
   if ( 0 != sDescription.length() ) {
@@ -370,6 +371,7 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
   if ( 0 != pde ) {
     m_textIQFName->Enable();
     m_textIQFName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIQFSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
+    m_textIBName->SetValidator( ou::tf::InstrumentNameValidator( &pde->sIBSymbolName, ou::tf::InstrumentNameValidator::eCapsAlphaNum ) );
     //m_textSymbol->SetValidator( wxETKTextValidator( wxFILTER_UPPERCASE, &pde->sUnderlyingSymbolName, m_textSymbol ) ); // wxFILTER_ALPHANUMERIC_STRICT
     m_textStrike->SetValidator( wxFloatingPointValidator<double>( 2, &pde->dblStrike, wxNUM_VAL_DEFAULT  ) );
     m_radioEquity->Enable();

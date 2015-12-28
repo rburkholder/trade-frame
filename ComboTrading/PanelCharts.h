@@ -59,8 +59,18 @@ public:
   typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
   signalLookUpDescription_t signalLookUpDescription;
   
-  typedef boost::signals2::signal<
-    void (const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& )> signalBuildInstrument_t;
+  struct ValuesForBuildInstrument {
+    const std::string& sKey;
+    const std::string& sIQF;
+    const std::string& sIB;
+    pInstrument_t& pInstrument;
+    boost::uint16_t day;
+    ValuesForBuildInstrument( const std::string& sKey_, const std::string& sIQF_, const std::string& sIB_, pInstrument_t& pInstrument_, boost::uint16_t day_) 
+      : sKey( sKey_ ), sIQF( sIQF_ ), sIB( sIB_ ), pInstrument( pInstrument_ ), day( day_ ) 
+      {}
+  };
+  
+  typedef boost::signals2::signal<void(ValuesForBuildInstrument&)> signalBuildInstrument_t;
   typedef signalBuildInstrument_t::slot_type slotBuildInstrument_t;
   signalBuildInstrument_t signalBuildInstrument;
 

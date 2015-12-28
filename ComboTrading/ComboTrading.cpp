@@ -224,7 +224,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
 
   namespace args = boost::phoenix::placeholders;
   m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
-  m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1, args::arg2, args::arg3, args::arg4 ) );
+  m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
@@ -237,36 +237,28 @@ void AppComboTrading::BuildFrameCharts( void ) {
   
 }
 
-// ** for options, needs an underlying symbol when creating the underlying
-//  if this is to be bypassed, then then need the instrument already.
-void AppComboTrading::BuildInstrument( const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& ) {
-  // on return, a null pInstrument indicates invalid instrument
-  // this method is recursive for one level when IEOption inbound
-  
+void AppComboTrading::BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& values ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
-  if ( im.Exists( sKey, pInstrument ) ) {  // the call will supply instrument if it exists
+  if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists
   }
   else {  // build
     if ( 0 != m_listIQFeedSymbols.Size() ) {
       typedef ou::tf::iqfeed::InMemoryMktSymbolList list_t;
       typedef list_t::trd_t trd_t;
-      const trd_t& trd( m_listIQFeedSymbols.GetTrd( sIQF ) );
+      const trd_t& trd( m_listIQFeedSymbols.GetTrd( values.sIQF ) );
       switch ( trd.sc ) {
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
-          pInstrument = ou::tf::iqfeed::BuildInstrument( sSymbolName, trd );
-          break;
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption:
-          // will need to check that Symbol is registered and available in order to build
-          throw std::runtime_error( "can't process the BuildInstrument IEOption" );
+          values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd );
           break;
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 	  
         case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
-          throw std::runtime_error( "can't process the BuildInstrument FOption" );
+          values.pInstrument = ou::tf::iqfeed::BuildInstrument( values.sKey, trd, values.day );  // for ib future/fo overrides not supplied by trd
           break;
         default:
           throw std::runtime_error( "can't process the BuildInstrument default" );
       }
-      GetContractFor( pInstrument );
+      GetContractFor( values.sIB, values.pInstrument );
     }
   }
 }
@@ -306,10 +298,12 @@ void AppComboTrading::Start( void ) {
     pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
     pm.OnPositionLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
 
-    m_pFPPOE->Update();
-    //m_pFPPOE->Refresh();
-    //m_pFPPOE->SetAutoLayout( true );
-    m_pFPPOE->Layout();  
+    if ( 0 != m_pFPPOE ) {
+      m_pFPPOE->Update();
+      //m_pFPPOE->Refresh();
+      //m_pFPPOE->SetAutoLayout( true );
+      m_pFPPOE->Layout();  
+    }
 
     m_bStarted = true;
   }
@@ -477,12 +471,13 @@ void AppComboTrading::TestSymbols( void ) {
           }
         };
 
-        std::for_each( vSymbol.begin(), vSymbol.end(), 
-          GetInstrument( m_listIQFeedSymbols, 
-            boost::phoenix::bind( &AppComboTrading::GetContractFor, this, args::arg1 ),
-            boost::phoenix::bind( &AppComboTrading::LoadUpBundle, this, args::arg1 )
-            )
-          );
+        // 20151227 broke this with IB symbol changes
+//        std::for_each( vSymbol.begin(), vSymbol.end(), 
+//          GetInstrument( m_listIQFeedSymbols, 
+//            boost::phoenix::bind( &AppComboTrading::GetContractFor, this, args::arg1 ),
+//            boost::phoenix::bind( &AppComboTrading::LoadUpBundle, this, args::arg1 )
+//            )
+//          );
 
       }
       
@@ -493,9 +488,9 @@ void AppComboTrading::TestSymbols( void ) {
   }
 }
 
-void AppComboTrading::GetContractFor( pInstrument_t pInstrument ) {
+void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument ) {
   m_tws->RequestContractDetails( 
-    pInstrument,
+    sBaseName, pInstrument,
     MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
 }
 
@@ -662,9 +657,10 @@ void AppComboTrading::ConstructEquityPosition0( const std::string& sName, pPortf
     }
     if ( bConstructed ) {
       std::cout << "Requesting IB: " << sName << std::endl;
-      m_tws->RequestContractDetails( 
-	pInstrument,
-	MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+      // 20151227 need to fix this as needs different name sent
+//      m_tws->RequestContractDetails( 
+//       	pInstrument,
+//	      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
     }
   }
 }

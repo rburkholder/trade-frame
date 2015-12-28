@@ -193,10 +193,13 @@ void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMess
 //http://www.iqfeed.net/symbolguide/index.cfm?symbolguide=guide&displayaction=support&section=guide&web=iqfeed&guide=options&web=IQFeed&type=stock
 void IQFeedProvider::SetAlternateInstrumentName( pInstrument_t pInstrument ) {
   // need to check if it already set or not
+  assert( 0 );  // 20151227 no longer has underlying name in Instrument, will need to look up in IQFeed Market Symbols File
+  // to build the name, use the BuildSymbolName.h file.
+  // iqfeed name is then set as an alternate name, with a name of our design used as the primary name
   std::string sName;
   switch ( pInstrument->GetInstrumentType() ) {
   case ou::tf::InstrumentType::Option:
-    sName += pInstrument->GetUnderlyingName();
+//    sName += pInstrument->GetUnderlyingName();
     std::string d = pInstrument->GetCommonCalcExpiryAsIsoString();
     sName += d.substr( 2, 2 );
     int month = boost::lexical_cast<int>( d.substr( 4, 2 ) );

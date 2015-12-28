@@ -9,19 +9,15 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogInstrumentSelect.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelManualOrder.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ValidatorInstrumentName.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelManualOrder.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelProviderControl.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ValidatorInstrumentName.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelManualOrder.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogSimpleOneLineOrder.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelManualOrder.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/FrameMain.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogInstrumentSelect.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogBase.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelProviderControl.cpp</file>
         </group>
     </open-files>
 </project-private>

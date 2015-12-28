@@ -87,18 +87,20 @@ IBTWS::~IBTWS(void) {
 }
 
 void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth ) {
-  std::string month( boost::lexical_cast<std::string,boost::uint16_t>( nMonth ) );
+  //std::string month( boost::lexical_cast<std::string,boost::uint16_t>( nMonth ) );
   contract.expiry 
     = boost::lexical_cast<std::string,boost::uint16_t>( nYear ) 
-    + ( ( 1 == month.size() ) ? "0" : "" ) 
-    + month
+    //+ ( ( 1 == month.size() ) ? "0" : "" ) 
+    //+ month
+    += ( ( 9 < nMonth ) ? "" : "0" ) + boost::lexical_cast<std::string>( nMonth );
     ; 
 }
 
 void IBTWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ) {
   ContractExpiryField( contract, nYear, nMonth );
   contract.expiry 
-    += boost::lexical_cast<std::string,boost::uint16_t>( nDay )  // always two digits on third week
+    //+= boost::lexical_cast<std::string,boost::uint16_t>( nDay ) 
+    += ( ( 9 < nDay ) ? "" : "0" ) + boost::lexical_cast<std::string>( nDay );
     ; 
 }
 
@@ -166,13 +168,16 @@ void IBTWS::ProcessMessages( void ) {
 // ** associate the instrument with the request structure.  buildinstrumentfrom contract then can fill/check/validate as needed
 
 void IBTWS::RequestContractDetails( 
-  pInstrument_t pInstrument, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone ) {
+                                   const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
+                                   OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone 
+) {
   // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over <== is this a true statement anymore
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
+  contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others
   contract.currency = pInstrument->GetCurrencyName(); // check if these match
   contract.exchange = "SMART";
-  contract.symbol = pInstrument->GetInstrumentName();  // for options, this needs to be underlying, which is adjusted below
+  //contract.symbol = pInstrument->GetInstrumentName();  // for options, this needs to be underlying, which is adjusted below
   contract.secType = szSecurityType[ pInstrument->GetInstrumentType() ];
   switch ( pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
@@ -181,21 +186,23 @@ void IBTWS::RequestContractDetails(
   case InstrumentType::Option:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.strike = pInstrument->GetStrike();
-    contract.symbol = pInstrument->GetUnderlyingName();
     contract.right = pInstrument->GetOptionSide();
-    contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );  // needed for small options
+    //contract.symbol = pInstrument->GetUnderlyingName();
+    //contract.multiplier = boost::lexical_cast<std::string>( pInstrument->GetMultiplier() );  // needed for small options
     break;
   case InstrumentType::Future:
-    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth() );
-    //contract.exchange = "NYMEX";
-    contract.exchange = pInstrument->GetExchangeName();
-    contract.symbol = pInstrument->GetUnderlyingName();
+    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
+    contract.exchange = "NYMEX";
+    //contract.exchange = pInstrument->GetExchangeName();  // not sure what this is
+    //contract.symbol = pInstrument->GetUnderlyingName();
     break;
   case InstrumentType::FuturesOption:
-    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth() );
-    contract.exchange = pInstrument->GetExchangeName();
-    contract.symbol = pInstrument->GetUnderlyingName();
+    ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
+    contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
+    //contract.exchange = pInstrument->GetExchangeName();
+    contract.exchange = "NYMEX";
+    //contract.symbol = pInstrument->GetUnderlyingName();
     break;
   }
   RequestContractDetails( contract, fProcess, fDone, pInstrument );
@@ -881,10 +888,11 @@ void IBTWS::nextValidId( OrderId orderId) {
 //  OutputDebugString( m_ss.str().c_str() );
 }
 
+// called from contractDetails, info comes from IB
 void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t& pInstrument ) {
 
-  std::string sUnderlying( contract.symbol );
-  std::string sLocalSymbol( contract.localSymbol );
+  std::string sBaseName( contract.symbol );  // need to look at this (was sUnderlying)
+  std::string sLocalSymbol( contract.localSymbol );  // and this to name them properly
   std::string sExchange( contract.exchange );
 
   OptionSide::enumOptionSide os( OptionSide::Unknown );
@@ -924,6 +932,7 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
 
   if ( "" == sExchange ) sExchange = "SMART";
 
+  // test if arriving instrument type matches expected instrument type
   if ( 0 != pInstrument.get() ) {
     if ( pInstrument->GetInstrumentType() != it ) 
       throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Instrument types don't match" );
@@ -935,78 +944,81 @@ void IBTWS::BuildInstrumentFromContract( const Contract& contract, pInstrument_t
   switch ( it ) {
     case InstrumentType::Stock: 
       if ( 0 == pInstrument.get() ) {
-	pInstrument = Instrument::pInstrument_t( new Instrument( sUnderlying, it, sExchange ) );
+	      pInstrument = Instrument::pInstrument_t( new Instrument( sBaseName, it, sExchange ) );
       }
       else {
-	if ( pInstrument->GetInstrumentName() !=  sUnderlying ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Stock, underlying no match" );
+	      if ( pInstrument->GetInstrumentName( Instrument::eidProvider_t::EProviderIB ) != sBaseName ) 
+          throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Stock, underlying no match" );
       }
       break;
     case InstrumentType::FuturesOption:
     case InstrumentType::Option:
       if ( "P" == contract.right ) os = OptionSide::Put;
       if ( "C" == contract.right ) os = OptionSide::Call;
-      iterSymbol = m_mapSymbols.find( sUnderlying );
-      if ( m_mapSymbols.end() == iterSymbol ) {
-        throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying not found" );
-      }
+//      iterSymbol = m_mapSymbols.find( sUnderlying );
+//      if ( m_mapSymbols.end() == iterSymbol ) {
+//        throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying not found" );
+//      }
       if ( 0 == pInstrument.get() ) {
-	pInstrument = Instrument::pInstrument_t( new Instrument( 
-	  sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
-	  iterSymbol->second->GetInstrument(), 
-	  os, contract.strike ) );
+	      pInstrument = Instrument::pInstrument_t( new Instrument( 
+	        sLocalSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month(), dtExpiryRequested.day(), 
+//	        iterSymbol->second->GetInstrument(), 
+	        os, contract.strike ) );
       }
       else {
-	if ( pInstrument->GetUnderlyingName() != sUnderlying ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying doesn't match" );
-	if ( pInstrument->GetOptionSide() != os ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract side doesn't match" );
-	if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
-	if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
+        //if ( pInstrument->GetUnderlyingName() != sUnderlying ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract underlying doesn't match" );
+        if ( pInstrument->GetOptionSide() != os ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract side doesn't match" );
+        if ( pInstrument->GetExpiry() != dtExpiryRequested ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract expiry doesn't match" );  // may also need to do an off by one error, futures may not match with out day
+        if ( pInstrument->GetStrike() != contract.strike ) throw std::runtime_error( "IBTWS::BuildInstrumentFromContract strike doesn't match" );  //may have rounding issues
       }
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
       if ( 0 == pInstrument.get() ) {
-	pInstrument = Instrument::pInstrument_t( new Instrument( sUnderlying, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
+	      pInstrument = Instrument::pInstrument_t( new Instrument( sBaseName, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
       }
       else {
       }
       pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Currency: {
-        bFound = false;
-        Currency::enumCurrency base = Currency::_Count;
-        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-          if ( 0 == strcmp( Currency::Name[ ix ], sUnderlying.c_str() ) ) {
-            bFound = true;
-            base = static_cast<Currency::enumCurrency>( ix );
-            break;
-          }
+      // 20151227 will need to step this to see if it works, with no sUnderlying
+      bFound = false;
+      Currency::enumCurrency base = Currency::_Count;
+      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], sBaseName.c_str() ) ) {
+          bFound = true;
+          base = static_cast<Currency::enumCurrency>( ix );
+          break;
         }
-        if ( !bFound ) 
-          throw std::out_of_range( "base currency lookup not found" );
+      }
+      if ( !bFound ) 
+        throw std::out_of_range( "base currency lookup not found" );
 
-        const char* szCounter = NULL;
-        szCounter = strchr( sLocalSymbol.c_str(), '.' );
-        if ( NULL == szCounter ) 
-          throw std::out_of_range( "counter currency not in LocalSymbol" );
-        ++szCounter;  // advance to character after '.'
+      const char* szCounter = NULL;
+      szCounter = strchr( sLocalSymbol.c_str(), '.' );
+      if ( NULL == szCounter ) 
+        throw std::out_of_range( "counter currency not in LocalSymbol" );
+      ++szCounter;  // advance to character after '.'
 
-        bFound = false;
-        Currency::enumCurrency counter = Currency::_Count;
-        for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-          if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
-            bFound = true;
-            counter = static_cast<Currency::enumCurrency>( ix );
-            break;
-          }
+      bFound = false;
+      Currency::enumCurrency counter = Currency::_Count;
+      for ( int ix = 0; ix < Currency::_Count; ++ix ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
+          bFound = true;
+          counter = static_cast<Currency::enumCurrency>( ix );
+          break;
         }
-        if ( !bFound ) 
-          throw std::out_of_range( "counter currency lookup not found" );
+      }
+      if ( !bFound ) 
+        throw std::out_of_range( "counter currency lookup not found" );
 
-        //if ( "" == sExchange )  // won't match because already set above
-	  sExchange = "IDEALPRO";
+      //if ( "" == sExchange )  // won't match because already set above
+     sExchange = "IDEALPRO";
 
-	assert( 0 == pInstrument.get() );  // maybe incorrect at some time in the future
-        pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
+     assert( 0 == pInstrument.get() );  // maybe incorrect at some time in the future
+      //pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
+      pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange, base, counter ) );
       }
       break;
     case InstrumentType::Index:

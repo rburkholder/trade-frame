@@ -185,35 +185,45 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   return pInstrument;
 }
 
+// extract this sometime because the string builder might be used elsewhere
 void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument ) {
   std::string sKey( pde.sIQFSymbolName );
   switch ( pde.it ) {
-    case InstrumentType::Stock:
+    case InstrumentType::Stock: {
+      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, 0 );
+      signalBuildInstrument( values );
+    }
       break;
     case InstrumentType::Option:
     case InstrumentType::FuturesOption:
     {
-      std::string sMonth( boost::lexical_cast<std::string>( pde.month ) );
-      std::string sDay( boost::lexical_cast<std::string>( pde.day ) );
+      boost::uint16_t month( pde.month + 1 ); // month is 0 based
+      boost::uint16_t day( pde.day ); // day is 1 based
+      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
+        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month ) 
+        + ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
       sKey += "-";
       sKey += pde.os;
-      sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( "0" + sMonth ).substr( sMonth.length() - 2, 2 )
-        + ( "0" + sDay ).substr( sDay.length() - 2, 2 )
-        + "-" + boost::lexical_cast<std::string>( pde.dblStrike )
+      sKey += "-" + boost::lexical_cast<std::string>( pde.dblStrike )
         ;
+      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, day );
+      signalBuildInstrument( values );
     }
       break;
     case InstrumentType::Future:
     {
-      std::string sMonth( boost::lexical_cast<std::string>( pde.month ) );
+      boost::uint16_t month( pde.month + 1 ); // month is 0 based
+      boost::uint16_t day( pde.day ); // day is 1 based
       sKey += "-" + boost::lexical_cast<std::string>( pde.year )
-        + ( "0" + sMonth ).substr( sMonth.length() - 2, 2 )
+        + ( ( 9 < month ) ? "" : "0" ) + boost::lexical_cast<std::string>( month )
+        + ( ( 0 == day ) ? "" : ( ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day ) ) );
         ;
+      ValuesForBuildInstrument values( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument, day );
+      signalBuildInstrument( values );
     }
       break;
   }
-  signalBuildInstrument( sKey, pde.sCompositeName, pde.sIBSymbolName, pInstrument );
+  
 }
 
 void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {

@@ -63,13 +63,13 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructFuture(
 InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm
   boost::uint16_t year, boost::uint16_t month,
-  pInstrument_t pUnderlying,
+//  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {
-    assert( 0 != pUnderlying.get() );
+//    assert( 0 != pUnderlying.get() );
   pInstrument_t pInstrument( 
     new Instrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
-    year, month, pUnderlying, side, strike ) );
+    year, month, /*pUnderlying,*/ side, strike ) );
   Register( pInstrument );
   return pInstrument;
 }
@@ -77,25 +77,25 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
 InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
   idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yy mm dd
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-  pInstrument_t pUnderlying,
+//  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide side, 
   double strike ) {
-    assert( 0 != pUnderlying.get() );
+//    assert( 0 != pUnderlying.get() );
   pInstrument_t pInstrument( 
     new Instrument( sInstrumentName, InstrumentType::Option, sExchangeName, 
-    year, month, day, pUnderlying, side, strike ) );
+    year, month, day, /*pUnderlying,*/ side, strike ) );
   Register( pInstrument );
   return pInstrument;
 }
 
 InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency( 
   idInstrument_cref idInstrumentName, 
-  idInstrument_cref idCounterInstrument,
+//  idInstrument_cref idCounterInstrument,
 //  pInstrument_t pUnderlying,
   const std::string& sExchangeName, 
   Currency::enumCurrency base, Currency::enumCurrency counter ) {
   pInstrument_t pInstrument(
-    new Instrument( idInstrumentName, idCounterInstrument, InstrumentType::Currency, sExchangeName, base, counter ) );
+    new Instrument( idInstrumentName, /*idCounterInstrument,*/ InstrumentType::Currency, sExchangeName, base, counter ) );
   Register( pInstrument );
   return pInstrument;
 }
@@ -211,33 +211,33 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     Instrument::TableRowDef instrument;
     m_pSession->Columns<InstrumentManagerQueries::InstrumentKey, Instrument::TableRowDef>( pExistsQuery, instrument );
-    assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
-         || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) ) 
-      );
-    if ( "" == instrument.idUnderlying ) {
+//    assert( ( ( "" != instrument.idUnderlying ) && ( ( InstrumentType::Option == instrument.eType ) || ( InstrumentType::FuturesOption == instrument.eType ) ) )
+//         || ( ( "" == instrument.idUnderlying ) && (   InstrumentType::Option != instrument.eType ) && ( InstrumentType::FuturesOption != instrument.eType ) ) 
+//      );
+//    if ( "" == instrument.idUnderlying ) {
       pInstrument.reset( new Instrument( instrument ) );
       Assign( pInstrument );
       LoadAlternateInstrumentNames( pInstrument );  // comes after assign
       bFound = true;
-    }
-    else {
-      pInstrument_t pUnderlying;
-      iterMap iter = m_map.find( instrument.idUnderlying );
-      if ( m_map.end() != iter ) {
-        pUnderlying = iter->second;
-        bFound = true;
-      }
-      else {
-        bFound = LoadInstrument( instrument.idUnderlying, pUnderlying );
-        if ( !bFound ) {
-          throw std::runtime_error( "LoadInstrument: underlying does not exist in database" );
-        }
-      }
-      assert( ( InstrumentType::Stock == pUnderlying->GetInstrumentType() ) || ( InstrumentType::Future == pUnderlying->GetInstrumentType() ) );
-      pInstrument.reset( new Instrument( instrument, pUnderlying ) );
-      Assign( pInstrument );
-      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
-    }
+//    }
+//    else {
+//      pInstrument_t pUnderlying;
+//      iterMap iter = m_map.find( instrument.idUnderlying );
+//      if ( m_map.end() != iter ) {
+//        pUnderlying = iter->second;
+//        bFound = true;
+//      }
+//      else {
+//        bFound = LoadInstrument( instrument.idUnderlying, pUnderlying );
+//        if ( !bFound ) {
+//          throw std::runtime_error( "LoadInstrument: underlying does not exist in database" );
+//        }
+//      }
+//      assert( ( InstrumentType::Stock == pUnderlying->GetInstrumentType() ) || ( InstrumentType::Future == pUnderlying->GetInstrumentType() ) );
+//      pInstrument.reset( new Instrument( instrument, pUnderlying ) );
+//      Assign( pInstrument );
+//      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
+//    }
   }
   return bFound;
 }

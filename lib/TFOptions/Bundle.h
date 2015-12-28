@@ -240,14 +240,16 @@ struct PopulateMultiExpiryBundle {
           new ou::tf::Instrument( 
             ss.str(), ou::tf::InstrumentType::Option, "SMART", 
             dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
-            meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+//            meb.GetWatchUnderlying()->GetInstrument(), 
+	    trd.eOptionSide, trd.dblStrike ) );
         break;
       case ou::tf::iqfeed::MarketSymbol::FOption:
         pInstrument.reset( 
           new ou::tf::Instrument( 
             ss.str(), ou::tf::InstrumentType::FuturesOption, "SMART", 
             dateTrdExpiry.year(), dateTrdExpiry.month(), dateTrdExpiry.day(), 
-            meb.GetWatchUnderlying()->GetInstrument(), trd.eOptionSide, trd.dblStrike ) );
+//            meb.GetWatchUnderlying()->GetInstrument(), 
+	    trd.eOptionSide, trd.dblStrike ) );
         break;
       }
       pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );

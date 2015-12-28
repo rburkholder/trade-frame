@@ -15,6 +15,9 @@
 // should a provider be included?  No, because this allows the same instrument
 //  to be used to supply details to any provider.
 
+// 20151227 removing references underlying in option instruments, option instruments should be able to stand by themselves
+//   can use the iqfeed market symbols list to find cross references between underlying and list of options
+
 #pragma once
 
 #include <string>
@@ -52,7 +55,7 @@ public:
       ou::db::Field( a, "type", eType );
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "exchangeid", idExchange );
-      ou::db::Field( a, "underlyingid", idUnderlying );
+//      ou::db::Field( a, "underlyingid", idUnderlying );
       ou::db::Field( a, "currency", eCurrency );
       ou::db::Field( a, "countercurrency", eCounterCurrency );
       ou::db::Field( a, "optionside", eOptionSide );
@@ -70,7 +73,7 @@ public:
     InstrumentType::enumInstrumentTypes eType;
     std::string sDescription;
     idExchange_t idExchange;
-    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
+//    idInstrument_t idUnderlying;  // used only for when loading from db and need to compare assigned underlying
     Currency::enumCurrency eCurrency;  // base currency - http://en.wikipedia.org/wiki/Currency_pair
     Currency::enumCurrency eCounterCurrency; // quote/counter currency -  - depicts how many units of the counter currency are needed to buy one unit of the base currency
     OptionSide::enumOptionSide eOptionSide;
@@ -105,20 +108,21 @@ public:
     };
     TableRowDef( // future
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-      boost::uint16_t nYear_, boost::uint16_t nMonth_ )
+      boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_ = 0 )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
-      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( 0.0 ), 
+      eOptionSide( OptionSide::Unknown ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( 0.0 ), 
       nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
         assert( eType == InstrumentType::Future  );
         assert( 0 < idInstrument.size() );   
     };
-    TableRowDef( // option with yymm
+    TableRowDef( // option/futuresoption with yymm
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-      idInstrument_t idUnderlying_, 
+//      idInstrument_t idUnderlying_, 
       boost::uint16_t nYear_, boost::uint16_t nMonth_, 
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+//      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( 0 ), dblStrike( dblStrike_ ), 
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
@@ -126,14 +130,15 @@ public:
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
         assert( 0 < idInstrument.size() );   
-        assert( 0 < idUnderlying.size() );
+//        assert( 0 < idUnderlying.size() );
     };
-    TableRowDef( // option with yymmdd
+    TableRowDef( // option/futuresoption with yymmdd
       idInstrument_t idInstrument_, InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
-      idInstrument_t idUnderlying_, 
+//      idInstrument_t idUnderlying_, 
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_,
       OptionSide::enumOptionSide eOptionSide_, double dblStrike_  )
-      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), idUnderlying( idUnderlying_ ),
+      : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
+//      idUnderlying( idUnderlying_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
       eOptionSide( eOptionSide_ ), nYear( nYear_ ), nMonth( nMonth_ ), nDay( nDay_ ), dblStrike( dblStrike_ ), 
       nIBContract( 0 ), nMultiplier( 100 ), dblMinTick( 0.01 ), nSignificantDigits( 2 ) {
@@ -141,19 +146,20 @@ public:
         assert( ( eType_ == InstrumentType::Option )
              || ( eType_ == InstrumentType::FuturesOption ) );
         assert( 0 < idInstrument.size() ); 
-        assert( 0 < idUnderlying.size() );
+//        assert( 0 < idUnderlying.size() );
     };
     TableRowDef( // currency
       const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
       InstrumentType::enumInstrumentTypes eType_, idExchange_t idExchange_,
       Currency::enumCurrency eCurrency_, Currency::enumCurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ), 
-        idUnderlying( idCounterInstrument_ ), eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
+//        idUnderlying( idCounterInstrument_ ), 
+	eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ), 
         eOptionSide( OptionSide::Unknown ), nYear( 0 ), nMonth( 0 ), nDay( 0 ), dblStrike( 0.0 ), 
         nIBContract( 0 ), nMultiplier( 1 ), dblMinTick( 0.00005 ), nSignificantDigits( 5 ) {
           assert( eType_ == InstrumentType::Currency );
           assert( 0 < idInstrument.size() );
-          assert( 0 < idUnderlying.size() );
+//          assert( 0 < idUnderlying.size() );
     };
   };
 
@@ -163,12 +169,12 @@ public:
       TableRowDef::Fields( a );
       ou::db::Key( a, "instrumentid" );
       ou::db::Constraint( a, "exchangeid", tablenames::sExchange, "exchangeid" );
-      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );  // what happens with empty string?
+//      ou::db::Constraint( a, "underlyingid", tablenames::sInstrument, "instrumentid" );  // what happens with empty string?
     }
   };
 
   Instrument( const TableRowDef& row );  // regular instruments
-  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
+//  Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ); // options, futuresoptions
   Instrument( // equity / generic creation
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type,
     const idExchange_t& sExchangeName 
@@ -176,33 +182,34 @@ public:
   Instrument(   // future
     idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
-    boost::uint16_t year, boost::uint16_t month );
-  Instrument(   // option with yymm
+    boost::uint16_t year, boost::uint16_t month, boost::uint16_t day = 0 );
+  Instrument(   // option with yymm  -- like what is done on the future, merge yymm and yymmdd together
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month,
-    pInstrument_t pUnderlying,
+//    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   Instrument(   // option with yymmdd
     idInstrument_cref sInstrumentName, InstrumentType::enumInstrumentTypes type, 
     const idExchange_t& sExchangeName,
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-    pInstrument_t pUnderlying,
+//    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   Instrument(  // currency
-    const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
+    const idInstrument_t& idInstrument, 
+//    const idInstrument_t& idCounterInstrument,
     InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
     Currency::enumCurrency base, Currency::enumCurrency counter );
     
   virtual ~Instrument(void);
 
   idInstrument_cref GetInstrumentName( void ) const { return m_row.idInstrument; };
-  idInstrument_cref GetUnderlyingName( void );
+//  idInstrument_cref GetUnderlyingName( void );
 
   idInstrument_cref GetInstrumentName( eidProvider_t id );
-  idInstrument_cref GetUnderlyingName( eidProvider_t id );
+//  idInstrument_cref GetUnderlyingName( eidProvider_t id );
 
   void SetAlternateName( eidProvider_t, idInstrument_cref );
 
@@ -270,7 +277,7 @@ public:
 
 protected:
 
-  pInstrument_t m_pUnderlying;  // for the time being only used for obtaining underlying instrument alternate name
+//  pInstrument_t m_pUnderlying;  // for the time being only used for obtaining underlying instrument alternate name
 
 private:
 
@@ -278,11 +285,11 @@ private:
   typedef std::pair<eidProvider_t, idInstrument_t> mapAlternateNames_pair_t;
   mapAlternateNames_t m_mapAlternateNames;
 
-  enum enunUnderlyingStatus { // when should each be used?
-    EUnderlyingNotSettable, // when instrument has no underlying?
-    EUnderlyingNotSet, // when instrument does have underlying, but hasn't been set
-    EUnderlyingSet // when instrument does have underlying, and has been set
-  } m_eUnderlyingStatus;
+//  enum enunUnderlyingStatus { // when should each be used?
+//    EUnderlyingNotSettable, // when instrument has no underlying?
+//    EUnderlyingNotSet, // when instrument does have underlying, but hasn't been set
+//    EUnderlyingSet // when instrument does have underlying, and has been set
+//  } m_eUnderlyingStatus;
 
   TableRowDef m_row;
 

@@ -28,8 +28,9 @@ namespace iqfeed { // IQFeed
 typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 typedef ou::tf::iqfeed::MarketSymbol::TableRowDef trd_t;
 
-pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd );  // equities and futures
-pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, pInstrument_t pUnderlying ); // options and futuresoptions
+// day is supplied because IQFeed Market Symbol File doesn't have the day in for futures and futures options
+pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost::uint16_t day = 0 );  // equities and futures
+//pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, pInstrument_t pUnderlying ); // options and futuresoptions
 
 } // namespace iqfeed
 } // namespace TradeFrame

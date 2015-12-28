@@ -30,9 +30,13 @@ public:
 
   DBOps(void);
   ~DBOps(void);
+  
+  typedef Instrument::idInstrument_cref idInstrument_cref;
+  //typedef Instrument::idInstrument_t idInstrument_t;
 
-  void LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::InstrumentManager::pInstrument_t& pInstrument );
-  bool LoadOptions( ou::tf::InstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
+  //void LoadUnderlying( const ou::tf::keytypes::idInstrument_t& id, ou::tf::InstrumentManager::pInstrument_t& pInstrument );
+  //bool LoadOptions( ou::tf::InstrumentManager::pInstrument_t& pUnderlying, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
+  bool LoadOptions( idInstrument_cref sInstrumentName, boost::uint16_t nYear, boost::uint16_t nMonth, boost::uint16_t nDay ); // uses OnNewInstrument
 
   typedef FastDelegate0<> OnPopulateDatabaseHandler_t;
   void SetOnPopulateDatabaseHandler( OnPopulateDatabaseHandler_t function ) {

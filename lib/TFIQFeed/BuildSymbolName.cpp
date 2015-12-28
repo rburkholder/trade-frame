@@ -29,8 +29,9 @@ const std::string BuildOptionName( const std::string& sUnderlying, boost::uint16
   std::string sName = sUnderlying;
   if ( 0 != year ) {
     sName += boost::lexical_cast<std::string>( year ).substr( 2, 2 );  // last two digits only
-    std::string sDay( '0' + boost::lexical_cast<std::string>( day ) );
-    sName += sDay.substr( sDay.length() - 2 , 2 ); // two digits
+    sName += ( ( 9 < day ) ? "" : "0" ) + boost::lexical_cast<std::string>( day );
+    //std::string sDay( '0' + boost::lexical_cast<std::string>( day ) );
+    //sName += sDay.substr( sDay.length() - 2 , 2 ); // two digits
     switch ( side ) {
       case 'C': 
         sName += 'A' - 1 + month;

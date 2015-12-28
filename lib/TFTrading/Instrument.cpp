@@ -36,20 +36,21 @@ namespace tf { // TradeFrame
   static const boost::posix_time::ptime dtDefault( boost::posix_time::not_a_date_time );
 
 Instrument::Instrument( const TableRowDef& row ) 
-  : m_row( row ), m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  : m_row( row ), 
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
 }
 
-Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
-  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
-  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
-  m_dateCommonCalc( boost::gregorian::not_a_date_time )
-{
-  assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
-}
+//Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 
+//  : m_row( row ), m_eUnderlyingStatus( EUnderlyingSet ), m_pUnderlying( pUnderlying ), 
+//  m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
+//  m_dateCommonCalc( boost::gregorian::not_a_date_time )
+//{
+//  assert( ( InstrumentType::Option == row.eType ) || ( InstrumentType::FuturesOption == row.eType ) );
+//}
 
 // equity / generic creation
 Instrument::Instrument(
@@ -57,7 +58,7 @@ Instrument::Instrument(
   const idExchange_t &idExchange
                          )
 : m_row( idInstrument, eType, idExchange ),
-  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -67,9 +68,9 @@ Instrument::Instrument(
 Instrument::Instrument( 
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
-  boost::uint16_t year, boost::uint16_t month ) 
-: m_row( idInstrument, eType, idExchange, year, month ),
-  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+  boost::uint16_t year, boost::uint16_t month, boost::uint16_t day ) 
+: m_row( idInstrument, eType, idExchange, year, month, day ),
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -82,52 +83,62 @@ Instrument::Instrument(
   idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month,
-  pInstrument_t pUnderlying,
+//  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide eOptionSide, 
   double dblStrike ) 
-  : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, eOptionSide, dblStrike ),
-  m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingSet ), 
+  : m_row( idInstrument, eType, idExchange, 
+//  pUnderlying->GetInstrumentName(), 
+  year, month, eOptionSide, dblStrike ),
+//  m_pUnderlying( pUnderlying ), 
+//  m_eUnderlyingStatus( EUnderlyingSet ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
-  assert( 0 != pUnderlying.get() );
-  assert( "" != pUnderlying->GetInstrumentName() );
+//  assert( 0 != pUnderlying.get() );
+//  assert( "" != pUnderlying->GetInstrumentName() );
   //m_eUnderlyingStatus = EUnderlyingSet;
   //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
 }
 
  // option yymmdd
 Instrument::Instrument( 
-  idInstrument_cref idInstrument, InstrumentType::enumInstrumentTypes eType, 
+  idInstrument_cref idInstrument, 
+  InstrumentType::enumInstrumentTypes eType, 
   const idExchange_t& idExchange,
   boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-  pInstrument_t pUnderlying,
+//  pInstrument_t pUnderlying,
   OptionSide::enumOptionSide eOptionSide, 
   double dblStrike ) 
-  : m_row( idInstrument, eType, idExchange, pUnderlying->GetInstrumentName(), year, month, day, eOptionSide, dblStrike ),
-  m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingSet ), 
+  : m_row( idInstrument, eType, idExchange, 
+//  pUnderlying->GetInstrumentName(), 
+  year, month, day, eOptionSide, dblStrike ),
+//  m_pUnderlying( pUnderlying ), 
+//  m_eUnderlyingStatus( EUnderlyingSet ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
   //assert( 0 < m_sExchange.size() );
-  assert( 0 != pUnderlying.get() );
-  assert( "" != pUnderlying->GetInstrumentName() );
+//  assert( 0 != pUnderlying.get() );
+//  assert( "" != pUnderlying->GetInstrumentName() );
   //m_eUnderlyingStatus = EUnderlyingSet;
   //m_eUnderlyingStatus = EUnderlyingNotSettable;  // not sure which to use
 }
 
 // currency
 Instrument::Instrument(
-  const idInstrument_t& idInstrument, const idInstrument_t& idCounterInstrument,
-  InstrumentType::enumInstrumentTypes eType, const idExchange_t& idExchange,
-  Currency::enumCurrency base, Currency::enumCurrency counter
+  const idInstrument_t& idInstrument, 
+//                       const idInstrument_t& idCounterInstrument,
+  InstrumentType::enumInstrumentTypes eType, 
+  const idExchange_t& idExchange,
+  Currency::enumCurrency base, 
+  Currency::enumCurrency counter
   ) 
-  : m_row( idInstrument, idCounterInstrument, eType, idExchange, base, counter ),
+  : m_row( idInstrument, 
+//  idCounterInstrument, 
+  eType, idExchange, base, counter ),
 //  m_pUnderlying( pUnderlying ), 
-  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
+//  m_eUnderlyingStatus( EUnderlyingNotSettable ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -154,8 +165,8 @@ Instrument::Instrument(
 Instrument::Instrument(const Instrument& instrument) 
 :
   m_row( instrument.m_row ),
-  m_pUnderlying( instrument.m_pUnderlying ),
-  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ), 
+//  m_pUnderlying( instrument.m_pUnderlying ),
+//  m_eUnderlyingStatus( instrument.m_eUnderlyingStatus ), 
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
@@ -192,26 +203,26 @@ Instrument::idInstrument_cref Instrument::GetInstrumentName( eidProvider_t id ) 
   return m_row.idInstrument;
 }
 
-Instrument::idInstrument_cref Instrument::GetUnderlyingName( void ) {
-  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
-  }
-  return m_pUnderlying->GetInstrumentName();
-}
+//Instrument::idInstrument_cref Instrument::GetUnderlyingName( void ) {
+//  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
+//    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
+//  }
+//  return m_pUnderlying->GetInstrumentName();
+//}
 
-Instrument::idInstrument_cref Instrument::GetUnderlyingName( eidProvider_t id ) {
-  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
-    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
-  }
-  return m_pUnderlying->GetInstrumentName(id);
-}
+//Instrument::idInstrument_cref Instrument::GetUnderlyingName( eidProvider_t id ) {
+//  if ( EUnderlyingSet != m_eUnderlyingStatus ) {
+//    throw std::runtime_error( "Instrument::GetUnderlyingName: underlying not set" );
+//  }
+//  return m_pUnderlying->GetInstrumentName(id);
+//}
 
 bool Instrument::operator==( const Instrument& rhs ) const {
   return (
     ( m_row.idInstrument == rhs.m_row.idInstrument ) 
     && ( m_row.idExchange == rhs.m_row.idExchange )
     && ( m_row.eType == rhs.m_row.eType )
-    && ( m_row.idUnderlying == rhs.m_row.idUnderlying )
+//    && ( m_row.idUnderlying == rhs.m_row.idUnderlying )
     && ( m_row.dblStrike == rhs.m_row.dblStrike )
     && ( m_row.eOptionSide == rhs.m_row.eOptionSide )
     );
@@ -229,7 +240,6 @@ double Instrument::NormalizeOrderPrice( double price ) const {
     : t * m_row.dblMinTick
     ;
 }
-
 
 /*
 void Instrument::SetUnderlying( pInstrument_t pUnderlying ) {

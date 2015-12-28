@@ -50,18 +50,18 @@ public:
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymm
     boost::uint16_t year, boost::uint16_t month,
-    pInstrument_t pUnderlying,
+//    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructOption(
     idInstrument_cref sInstrumentName, const std::string& sExchangeName,  // option with yymmdd
     boost::uint16_t year, boost::uint16_t month, boost::uint16_t day,
-    pInstrument_t pUnderlying,
+//    pInstrument_t pUnderlying,
     OptionSide::enumOptionSide side, 
     double strike ); 
   pInstrument_t ConstructCurrency( 
     idInstrument_cref idInstrumentName, 
-    idInstrument_cref idCounterInstrument,
+//    idInstrument_cref idCounterInstrument,
     //pInstrument_t pUnderlying,
     const std::string& sExchangeName, 
     Currency::enumCurrency base, Currency::enumCurrency counter );
@@ -115,7 +115,7 @@ namespace InstrumentManagerQueries {
   struct OptionSelection {
     template<class A>
     void Fields( A& a ) {
-      ou::db::Field( a, "underlyingid", idInstrument );
+      ou::db::Field( a, "underlyingid", idInstrument );  // 20151227 idUnderlying has been removed, is this variable still useful?
       ou::db::Field( a, "year", nYear );
       ou::db::Field( a, "month", nMonth );
       ou::db::Field( a, "day", nDay );

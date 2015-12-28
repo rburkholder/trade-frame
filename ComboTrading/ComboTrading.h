@@ -130,9 +130,9 @@ private:
   ou::tf::IQFeedSymbolListOps::vExchanges_t m_vExchanges;
   ou::tf::IQFeedSymbolListOps::vClassifiers_t m_vClassifiers;
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
-  void BuildInstrument( const std::string& sKey, const std::string& sIQF, const std::string& sIB, pInstrument_t& );
+  void BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& );
 
-  void GetContractFor( pInstrument_t pInstrument );
+  void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );
   
   void ConstructEquityPosition0( const std::string& sName, pPortfolio_t, DelegateAddPosition_t);  // step 1
