@@ -171,7 +171,6 @@ void IBTWS::RequestContractDetails(
                                    const std::string& sSymbolBaseName, pInstrument_t pInstrument, 
                                    OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone 
 ) {
-  // 2014/10/11 not complete yet, BuildInstrumentFromContract not converted over <== is this a true statement anymore?
   assert( 0 == pInstrument->GetContract() );  // handle this better, ie, return gently, or create exception
   Contract contract;
   contract.symbol = sSymbolBaseName;  // separately, as it may differ from IQFeed or others

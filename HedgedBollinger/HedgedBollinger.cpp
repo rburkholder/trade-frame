@@ -130,7 +130,7 @@ bool AppHedgedBollinger::OnInit() {
   //m_sNameUnderlying = "+GC#";
   m_sNameUnderlying = "QGC";
   //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
-  m_sNameUnderlyingIQFeed = "QGCZ15";  // IB won't allow trading within 30 days of expiration.
+  m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
@@ -154,14 +154,8 @@ bool AppHedgedBollinger::OnInit() {
   //Two near-term months plus two additional months from the January, February or March quarterly cycles.
   //Futures appear to expire one day later than options
 
-  //m_dateFrontMonthFuture = boost::gregorian::date( 2014, 2, 26 );
-  //m_dateSecondMonthFuture = boost::gregorian::date( 2014, 3, 27 );
-
-  m_dateFrontMonthOption = boost::gregorian::date( 2015, 10, 27 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2015, 11, 25 );
-
-//  m_sNameUnderlying = "@YM#";
-//  m_sNameOptionUnderlying = "@YM";  
+  m_dateFrontMonthOption = boost::gregorian::date( 2016, 1, 26 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2016, 2, 24 );
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;
@@ -199,11 +193,6 @@ bool AppHedgedBollinger::OnInit() {
   // maybe set scenario with database and with in memory data structure
   //m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "phi";
 //  m_idPortfolio = "weeklies";  // makes it easy for swing trading
-
-  std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
-  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
-    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
-  }
 
   std::string sDbName( "../HedgedBollinger.db" );
   try {

@@ -21,11 +21,11 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 // 20151115, different naming may mess things up in callers, need to check
+// 20151228, maybe use trd.sListedMarket instead of trd.sExchange (may help with some IB exchange translations)
 pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost::uint16_t day ){
   pInstrument_t pInstrument;
   switch ( trd.sc ) {
   case MarketSymbol::enumSymbolClassifier::Equity:
-    //pInstrument.reset( ( new ou::tf::Instrument( trd.sSymbol, ou::tf::InstrumentType::Stock, trd.sExchange ) ) );
     pInstrument.reset( new ou::tf::Instrument( sName, ou::tf::InstrumentType::Stock, trd.sExchange ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     if ( "TSE" == trd.sExchange ) {
@@ -39,8 +39,6 @@ pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost
     pInstrument->SetSignificantDigits( 2 );  // not sure about this one
     break;
   case MarketSymbol::enumSymbolClassifier::IEOption:
-    //pInstrument.reset( ( new ou::tf::Instrument( trd.sSymbol, ou::tf::InstrumentType::Option, trd.sExchange, trd.nYear, trd.nMonth, trd.nDay, pUnderlying, trd.eOptionSide, trd.dblStrike ) ) );
-    //pInstrument.reset( ( new ou::tf::Instrument( sName, ou::tf::InstrumentType::Option, trd.sExchange, trd.nYear, trd.nMonth, trd.nDay, pUnderlying, trd.eOptionSide, trd.dblStrike ) ) );
     pInstrument.reset( new ou::tf::Instrument( sName, ou::tf::InstrumentType::Option, trd.sExchange, trd.nYear, trd.nMonth, trd.nDay, trd.eOptionSide, trd.dblStrike ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -49,7 +47,6 @@ pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost
     pInstrument->SetSignificantDigits( 2 );  // not sure about this one
     break;
   case MarketSymbol::enumSymbolClassifier::Future:  // may need to pull out the prefix
-    //pInstrument.reset( ( new ou::tf::Instrument( trd.sUnderlying, ou::tf::InstrumentType::Future, trd.sExchange, trd.nYear, trd.nMonth ) ) );
     pInstrument.reset( new ou::tf::Instrument( sName, ou::tf::InstrumentType::Future, trd.sExchange, trd.nYear, trd.nMonth, 0 != day ? day : trd.nDay ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -58,7 +55,6 @@ pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost
     pInstrument->SetSignificantDigits( 2 );  // not sure about this one
     break;
   case MarketSymbol::enumSymbolClassifier::FOption:  // futures option doesn't require underlying?
-    //pInstrument.reset( ( new ou::tf::Instrument( trd.sUnderlying, ou::tf::InstrumentType::FuturesOption, trd.sExchange ) ) );
     pInstrument.reset( new ou::tf::Instrument( sName, ou::tf::InstrumentType::FuturesOption, trd.sExchange, trd.nYear, trd.nMonth, 0 != day ? day : trd.nDay, trd.eOptionSide, trd.dblStrike ) );
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, trd.sSymbol );
     pInstrument->SetCurrency( ou::tf::Currency::enumCurrency::USD );  // by default, but some are alternate
@@ -73,18 +69,6 @@ pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, boost
   }
   return pInstrument;
 }
-
-//pInstrument_t BuildInstrument( const std::string& sName, const trd_t& trd, pInstrument_t pUnderlying ){
-//  pInstrument_t pInstrument;
-//  switch ( trd.sc ) {
-//  case MarketSymbol::enumSymbolClassifier::Forex:
-//  case MarketSymbol::enumSymbolClassifier::FOption:  // need to check if this one is correctly placed, see other method
-//  default:
-//    throw std::runtime_error( "BuildInstrument2: no applicable instrument type" );
-//  }
-//  return pInstrument;
-//}
-
 
 } // namespace iqfeed
 } // namespace TradeFrame

@@ -143,6 +143,11 @@ FrameWork01<CRTP>::FrameWork01( void ) :
 
 {
 
+  std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
+    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
+  }
+
   std::stringstream ss;
   ss.str( "" );
   // http://www.boost.org/doc/libs/1_54_0/doc/html/date_time/date_time_io.html

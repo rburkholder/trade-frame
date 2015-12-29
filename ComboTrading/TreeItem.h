@@ -19,21 +19,21 @@
 #include <wx/panel.h>
 
 #include <TFTrading/Instrument.h>
+#include <TFTrading/ProviderManager.h>
 
 #include <TFBitsNPieces/TreeOpsItems.h>
 
 struct Resources {
-  // will need signal for obtaining iqfeed symbol list for use in validation
   //wxPanel* m_pPanel;  // re-usable for charts and stuff
   wxWindow* m_pWin;
   
-  enum InstrumentAction {
-    IANewInstrument
-  };
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef boost::signals2::signal<pInstrument_t (void), ou::tf::FirstOrDefault<pInstrument_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrument;
+  
+  typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
+  pProvider_t pData1Provider;
   
   Resources( void ): m_pWin( 0 ) {}
 };

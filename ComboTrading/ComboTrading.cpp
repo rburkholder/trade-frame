@@ -154,17 +154,21 @@ bool AppComboTrading::OnInit() {
   m_idPortfolioMaster = "master";  // keeps name constant over multiple days
 
   m_sDbName = "ComboTrading.db";
-  if ( boost::filesystem::exists( m_sDbName ) ) {
-//    boost::filesystem::remove( sDbName );
-  }
-  
-  m_db.OnRegisterTables.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
-  m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
-  m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
+  try {
+    if ( boost::filesystem::exists( m_sDbName ) ) {
+  //    boost::filesystem::remove( sDbName );
+    }
 
-  // maybe set scenario with database and with in memory data structure
-  m_db.Open( m_sDbName );
+    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
+    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
+    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
+    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
+
+    m_db.Open( m_sDbName );
+  }
+  catch(...) {
+    std::cout << "database fault on " << m_sDbName << std::endl;
+  }
 
   m_bData1Connected = false;
   m_bExecConnected = false;
@@ -239,6 +243,10 @@ void AppComboTrading::BuildFrameCharts( void ) {
   
 }
 
+// todo:  
+//   map of instruments prior to contract
+//   map of instruments with contract
+//   map of instruments from instrument manager
 void AppComboTrading::BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& values ) {
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
   if ( im.Exists( values.sKey, values.pInstrument ) ) {  // the call will supply instrument if it exists

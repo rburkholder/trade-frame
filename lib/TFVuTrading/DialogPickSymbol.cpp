@@ -162,39 +162,39 @@ void DialogPickSymbol::CreateControls() {
     wxBoxSizer* itemBoxSizer24 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer23->Add(itemBoxSizer24, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel1, wxID_STATIC, _("Strike:"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer24->Add(itemStaticText25, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
-
-    m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxSize(120, -1), wxDP_DEFAULT|wxDP_SHOWCENTURY );
-    m_dateExpiry->Enable(false);
-    itemBoxSizer24->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
-
-    wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer23->Add(itemBoxSizer27, 0, wxALIGN_LEFT|wxALL, 2);
-
-    wxStaticText* itemStaticText28 = new wxStaticText( itemPanel1, wxID_STATIC, _("Strike:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer27->Add(itemStaticText28, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_textStrike = new wxTextCtrl( itemPanel1, ID_TEXT_STRIKE, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     m_textStrike->SetMaxLength(20);
     m_textStrike->Enable(false);
-    itemBoxSizer27->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    itemBoxSizer24->Add(m_textStrike, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    wxBoxSizer* itemBoxSizer30 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer23->Add(itemBoxSizer30, 0, wxALIGN_LEFT|wxALL, 2);
+    wxBoxSizer* itemBoxSizer27 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer23->Add(itemBoxSizer27, 0, wxALIGN_LEFT|wxALL, 2);
 
-    wxStaticText* itemStaticText31 = new wxStaticText( itemPanel1, wxID_STATIC, _("Option Side:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer30->Add(itemStaticText31, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+    wxStaticText* itemStaticText28 = new wxStaticText( itemPanel1, wxID_STATIC, _("Option Side:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer27->Add(itemStaticText28, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     m_radioOptionPut = new wxRadioButton( itemPanel1, ID_RADIO_PUT, _("Put"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioOptionPut->SetValue(false);
     m_radioOptionPut->Enable(false);
-    itemBoxSizer30->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer27->Add(m_radioOptionPut, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
 
     m_radioOptionCall = new wxRadioButton( itemPanel1, ID_RADIO_CALL, _("Call"), wxDefaultPosition, wxDefaultSize, 0 );
     m_radioOptionCall->SetValue(false);
     m_radioOptionCall->Enable(false);
-    itemBoxSizer30->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+    itemBoxSizer27->Add(m_radioOptionCall, 0, wxALIGN_CENTER_VERTICAL|wxALL, 1);
+
+    wxBoxSizer* itemBoxSizer31 = new wxBoxSizer(wxHORIZONTAL);
+    itemBoxSizer23->Add(itemBoxSizer31, 0, wxALIGN_LEFT|wxALL, 2);
+
+    wxStaticText* itemStaticText32 = new wxStaticText( itemPanel1, wxID_STATIC, _("Expiry:"), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer31->Add(itemStaticText32, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
+
+    m_dateExpiry = new wxDatePickerCtrl( itemPanel1, ID_DATE_EXPIRY, wxDateTime(), wxDefaultPosition, wxSize(120, -1), wxDP_DEFAULT|wxDP_SHOWCENTURY );
+    m_dateExpiry->Enable(false);
+    itemBoxSizer31->Add(m_dateExpiry, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxBoxSizer* itemBoxSizer34 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer22->Add(itemBoxSizer34, 0, wxALIGN_TOP|wxALL, 2);

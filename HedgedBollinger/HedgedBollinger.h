@@ -62,8 +62,6 @@ private:
   std::string m_sNameUnderlyingIQFeed;
   std::string m_sNameOptionUnderlying;
 
-  //boost::gregorian::date m_dateFrontMonthFuture;
-  //boost::gregorian::date m_dateSecondMonthFuture;
   boost::gregorian::date m_dateFrontMonthOption;
   boost::gregorian::date m_dateSecondMonthOption;
 

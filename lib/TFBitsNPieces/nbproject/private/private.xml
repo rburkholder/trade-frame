@@ -12,6 +12,7 @@
         <group name="lib"/>
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/TreeOps.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/FrameWork01.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/TreeOpsItems.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/TreeOps.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/TreeOpsItems.cpp</file>

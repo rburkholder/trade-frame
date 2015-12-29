@@ -20,15 +20,34 @@ void TreeItemInstrument::Init() {
   /*
    * work on loading instrument list in background
    * confirm that subsets can be saved and loaded
-   * 
    * need instrument list
-   * pop up to ask for input for symbol, for now just get name, then incrementally work on parallel lookups
-   * then build instrument with iqfeed, ib
-   * send off for ib contract
-   * need to look in instrument table first
    */
   m_pInstrument = m_resources.signalNewInstrument(); 
   if ( 0 != m_pInstrument.get() ) {
     m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
+    // set watch
   }
+}
+
+void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
+  assert( 0 != pMenu );
+  pMenu->Append( MILiveChart, "Live Chart" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
+  pMenu->Append( MIDailyChart, "Daily Chart" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
+  pMenu->Append( MIDelete, "Delete" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
+}
+
+void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
+  std::cout << "Delete: TreeItemInstrument" << std::endl;
+  m_baseResources.signalDelete( this->m_id );
+}
+
+void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
+  
+}
+
+void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
+  
 }

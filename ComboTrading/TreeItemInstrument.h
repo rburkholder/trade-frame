@@ -36,6 +36,19 @@ public:
   //virtual void ShowContextMenu( void );
   
 protected:
+
+  enum {
+    ID_Null = wxID_HIGHEST,
+    MILiveChart, MIDailyChart,
+    MIDelete
+  };
+  
+    void BuildContextMenu( wxMenu* pMenu );
+    
+    void HandleLiveChart( wxCommandEvent& event );
+    void HandleDailyChart( wxCommandEvent& event );
+    void HandleDelete( wxCommandEvent& event );
+  
 private:
   
   pInstrument_t m_pInstrument;

@@ -175,6 +175,7 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   int status = m_pDialogPickSymbol->ShowModal();
   switch ( status ) {
     case wxID_CANCEL:
+      m_pInstrumentForDialog.reset();
       break;
     case wxID_OK:
       if ( 0 != m_pInstrumentForDialog.get() ) {

@@ -10,8 +10,6 @@
         <group name="lib"/>
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ValidatorInstrumentName.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelProviderControl.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ValidatorInstrumentName.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogBase.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogInstrumentSelect.cpp</file>
