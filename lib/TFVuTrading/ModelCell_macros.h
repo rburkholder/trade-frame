@@ -31,6 +31,8 @@
   BOOST_PP_COMMA_IF(n) \
   GRID_EXTRACT_COL_DETAILS( z, n, col )
 
+// 2015/12/30 change PanelPortfolioPosition_impl to m_grid, then can re-use this macro
+//   otherwise figure out how to pass in another define representing GRID instead of hardcoding m_gridPositions
 #define GRID_EMIT_SetColSettings( z, n, VAR ) \
   m_gridPositions->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
   m_gridPositions->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );

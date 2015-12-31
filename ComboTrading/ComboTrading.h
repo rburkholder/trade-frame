@@ -28,6 +28,7 @@
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
+#include <TFVuTrading/PanelAccountDetails.h>
 
 #include <TFInteractiveBrokers/EventIBInstrument.h>
 
@@ -122,6 +123,8 @@ private:
 //  MPPOE_t* m_pMPPOE;
 //  PPPOE_t* m_pPPPOE;
 //  CPPOE_t* m_pCPPOE;
+  
+  ou::tf::PanelAccountDetails* m_pPanelAccountDetails;
 
   wxBoxSizer* m_sizerPM;
   wxScrolledWindow* m_scrollPM;

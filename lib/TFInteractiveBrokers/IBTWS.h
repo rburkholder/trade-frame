@@ -103,6 +103,45 @@ public:
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone );
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
 
+  struct AccountDetails {
+    const std::string& sSymbol;
+    const std::string& sLocalSymbol;
+    long contract;
+    double strike;
+    const std::string& sExpiry;
+    const std::string& sMultiplier;
+    int position;
+    double marketPrice;
+    double marketValue;
+    double averageCost;
+    double unrealizedPNL;
+    double realizedPNL;
+    const std::string& sExchange;
+    const std::string& sCurrency;
+    AccountDetails(     
+      const std::string& sSymbol_,
+      const std::string& sLocalSymbol_,
+      long contract_,
+      double strike_,
+      const std::string& sExpiry_,
+      const std::string& sMultiplier_,
+      int position_,
+      double marketPrice_,
+      double marketValue_,
+      double averageCost_,
+      double unrealizedPNL_,
+      double realizedPNL_,
+      const std::string& sExchange_,
+      const std::string& sCurrency_
+      ): sSymbol( sSymbol_ ), sLocalSymbol( sLocalSymbol_ ), contract( contract_ ), strike( strike_ ),
+      sExpiry( sExpiry_ ), sMultiplier( sMultiplier_ ),
+      position( position_ ), marketPrice( marketPrice_ ), marketValue( marketValue_ ),
+      averageCost( averageCost_ ), unrealizedPNL( unrealizedPNL_ ), realizedPNL( realizedPNL_ ),
+      sExchange( sExchange_ ), sCurrency( sCurrency_ ) {}
+  };
+  typedef FastDelegate1<const AccountDetails&> OnAccountDetailsHandler_t;
+  OnAccountDetailsHandler_t OnAccountDetailsHandler;
+  
   pSymbol_t GetSymbol( long ContractId );  // query existance
   pSymbol_t GetSymbol( pInstrument_t instrument );  // query for and add if doesn't exist
 

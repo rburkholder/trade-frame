@@ -122,8 +122,8 @@ void PanelPortfolioPosition_impl::CreateControls() {
     //m_gridPositions->CreateGrid(0, GRID_POSITION_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
     //m_gridPositions = new wxGrid( itemPanel1, ID_GridPositions, wxDefaultPosition, wxSize(-1, 22 * 4), wxFULL_REPAINT_ON_RESIZE|wxHSCROLL|wxVSCROLL );  // wxSUNKEN_BORDER|
 
-    int ix( 0 );
-    BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+  int ix( 0 );
+  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
 
   m_ppp.Bind( wxEVT_CLOSE_WINDOW, &PanelPortfolioPosition_impl::OnClose, this );  // start close of windows and controls
 

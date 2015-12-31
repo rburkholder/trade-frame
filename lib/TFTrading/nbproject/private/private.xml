@@ -11,12 +11,14 @@
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/InstrumentManager.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/DBOps.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Watch.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Watch.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/DBOps.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/TradingEnumerations.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/TradingEnumerations.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/InstrumentManager.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/PortfolioManager.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFTrading/Instrument.h</file>
         </group>
     </open-files>

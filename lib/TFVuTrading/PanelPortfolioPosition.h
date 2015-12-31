@@ -75,10 +75,6 @@ public:
 
   void UpdateGui( void );
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
-
 protected:
 
   void Init();
@@ -95,6 +91,10 @@ private:
   };
 
   std::unique_ptr<PanelPortfolioPosition_impl> m_pimpl;
+
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
 
 };
 

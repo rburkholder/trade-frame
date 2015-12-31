@@ -25,6 +25,8 @@
 
 #include <TFIQFeed/IQFeedSymbol.h>
 
+// 20151228 convert the delegate to a signal?  a little slower maybe.
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -88,7 +90,7 @@ public:
 
 protected:
 
-  // use an interator instead?  or keep as is as it facilitates multithread append and access operations
+  // use an iterator instead?  or keep as is as it facilitates multithread append and access operations
   // or will the stuff in TBB help with this type of access?
 
   ou::tf::Quote m_quote;

@@ -1102,7 +1102,7 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
     }
   }
 
-  if ( true ) {
+  if ( false ) {
     m_ss.str("");
     m_ss << "portfolio item " 
       << contract.symbol
@@ -1123,9 +1123,34 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
     std::cout << m_ss.str();
 //    OutputDebugString( m_ss.str().c_str() );
   }
-
-//  CPortfolio::structUpdatePortfolioRecord record( pInstrument.get(), position, marketPrice, averageCost );
-//  OnUpdatePortfolioRecord( record );
+  if ( false ) {
+    std::cout 
+      <<        contract.symbol
+      << "," << contract.localSymbol
+//      << "," << contract.strike // double
+      << "," << contract.expiry
+      << "," << contract.primaryExchange
+//      << "," << contract.conId  // long - available but don't display for now
+//      << "," << contract.secId  // empty
+      << "," << contract.multiplier
+//      << ", type=" << InstrumentType::Name[ pInstrument->GetInstrumentType() ]
+      << "," << position // int
+      << "," << marketPrice // double
+      << "," << marketValue // double
+      << "," << averageCost // double
+      << "," << unrealizedPNL // double
+      << "," << realizedPNL // double
+      << "," << contract.currency
+      //<< ", " << accountName 
+      << std::endl;
+  }
+  
+  AccountDetails ad( contract.symbol, contract.localSymbol,
+    contract.conId, contract.strike, contract.expiry, contract.multiplier,
+    position, marketPrice, marketValue, averageCost,
+    unrealizedPNL, realizedPNL, contract.primaryExchange, contract.currency
+    );
+  if ( 0 != OnAccountDetailsHandler ) OnAccountDetailsHandler( ad );
 
 }
 
@@ -1155,7 +1180,8 @@ void IBTWS::updateAccountValue(const std::string& key, const std::string& val,
   }
   if ( "MaintMarginReq" == key ) bEmit = true;
   if ( "InitMarginReq" == key ) bEmit = true;
-  if ( bEmit ) {
+//  if ( bEmit ) {
+  if ( false ) {
     std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
   }
 }

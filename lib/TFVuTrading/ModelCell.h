@@ -23,7 +23,7 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-// this may cause problems or may result from problems if some other include hiearchy uses the file differently
+// this may cause problems or may result from problems if some other include hierarchy uses the file differently
 #define WINRGB
 #include <OUCommon/Colour.h>
 

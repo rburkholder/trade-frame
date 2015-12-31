@@ -50,6 +50,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/ModelPortfolio.o \
 	${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o \
 	${OBJECTDIR}/ModelPosition.o \
+	${OBJECTDIR}/PanelAccountDetails.o \
+	${OBJECTDIR}/PanelAccountDetails_impl.o \
 	${OBJECTDIR}/PanelChartHdf5.o \
 	${OBJECTDIR}/PanelFinancialChart.o \
 	${OBJECTDIR}/PanelLogging.o \
@@ -171,6 +173,16 @@ ${OBJECTDIR}/ModelPosition.o: ModelPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPosition.o ModelPosition.cpp
+
+${OBJECTDIR}/PanelAccountDetails.o: PanelAccountDetails.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelAccountDetails.o PanelAccountDetails.cpp
+
+${OBJECTDIR}/PanelAccountDetails_impl.o: PanelAccountDetails_impl.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelAccountDetails_impl.o PanelAccountDetails_impl.cpp
 
 ${OBJECTDIR}/PanelChartHdf5.o: PanelChartHdf5.cpp 
 	${MKDIR} -p ${OBJECTDIR}

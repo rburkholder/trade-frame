@@ -20,7 +20,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/function.hpp>
+//#include <boost/function.hpp>
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
@@ -104,7 +104,7 @@ bool AppComboTrading::OnInit() {
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
   //m_pFrameMain->Center();
 //  m_pFrameMain->Move( -2500, 50 );
-  m_pFrameMain->SetSize( 800, 500 );
+  m_pFrameMain->SetSize( 800, 1000 );
   SetTopWindow( m_pFrameMain );
 
   wxBoxSizer* psizerMain;
@@ -140,6 +140,16 @@ bool AppComboTrading::OnInit() {
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
 
+  
+  m_pPanelAccountDetails = new ou::tf::PanelAccountDetails( m_pFrameMain, wxID_ANY );
+  psizerMain->Add( m_pPanelAccountDetails, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  
+  if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
+    ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
+    pProviderIB->OnAccountDetailsHandler = MakeDelegate( m_pPanelAccountDetails, &ou::tf::PanelAccountDetails::UpdateAccountDetailRow );
+  }
+
+  
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   psizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -152,7 +162,7 @@ bool AppComboTrading::OnInit() {
 
 //  m_idPortfolio = boost::gregorian::to_iso_string( boost::gregorian::day_clock::local_day() ) + "StickShift";
   m_idPortfolioMaster = "master";  // keeps name constant over multiple days
-
+  
   m_sDbName = "ComboTrading.db";
   try {
     if ( boost::filesystem::exists( m_sDbName ) ) {

@@ -22,6 +22,8 @@
       <itemPath>ModelPortfolio.h</itemPath>
       <itemPath>ModelPortfolioPositionOrderExecution.h</itemPath>
       <itemPath>ModelPosition.h</itemPath>
+      <itemPath>PanelAccountDetails.h</itemPath>
+      <itemPath>PanelAccountDetails_impl.h</itemPath>
       <itemPath>PanelChartHdf5.h</itemPath>
       <itemPath>PanelFinancialChart.h</itemPath>
       <itemPath>PanelLogging.h</itemPath>
@@ -67,6 +69,8 @@
       <itemPath>ModelPortfolio.cpp</itemPath>
       <itemPath>ModelPortfolioPositionOrderExecution.cpp</itemPath>
       <itemPath>ModelPosition.cpp</itemPath>
+      <itemPath>PanelAccountDetails.cpp</itemPath>
+      <itemPath>PanelAccountDetails_impl.cpp</itemPath>
       <itemPath>PanelChartHdf5.cpp</itemPath>
       <itemPath>PanelFinancialChart.cpp</itemPath>
       <itemPath>PanelLogging.cpp</itemPath>
@@ -200,6 +204,14 @@
       <item path="ModelPosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ModelPosition.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelChartHdf5.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -389,6 +401,14 @@
       <item path="ModelPosition.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ModelPosition.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelAccountDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelChartHdf5.cpp" ex="false" tool="1" flavor2="0">
       </item>

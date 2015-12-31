@@ -79,6 +79,9 @@ void Watch::StartWatch( void ) {
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
       std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     }
+    else {
+      std::cout << "StartWatch currently requires IQFeed" << std::endl;
+    }
   }
   ++m_cntWatching;
 }
