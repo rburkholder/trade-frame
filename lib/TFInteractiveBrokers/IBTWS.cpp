@@ -1145,12 +1145,12 @@ void IBTWS::updatePortfolio( const Contract& contract, int position,
       << std::endl;
   }
   
-  AccountDetails ad( contract.symbol, contract.localSymbol,
+  PositionDetail pd( contract.symbol, contract.localSymbol,
     contract.conId, contract.strike, contract.expiry, contract.multiplier,
     position, marketPrice, marketValue, averageCost,
     unrealizedPNL, realizedPNL, contract.primaryExchange, contract.currency
     );
-  if ( 0 != OnAccountDetailsHandler ) OnAccountDetailsHandler( ad );
+  if ( 0 != OnPositionDetailHandler ) OnPositionDetailHandler( pd );
 
 }
 
@@ -1184,6 +1184,8 @@ void IBTWS::updateAccountValue(const std::string& key, const std::string& val,
   if ( false ) {
     std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
   }
+  AccountValue av( key, val, currency, accountName );
+  if ( 0 != OnAccountValueHandler ) OnAccountValueHandler( av );
 }
 
 void IBTWS::connectionClosed() {

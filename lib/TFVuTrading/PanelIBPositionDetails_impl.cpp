@@ -15,17 +15,17 @@
 
 #include <wx/sizer.h>
 
-#include "PanelAccountDetails_impl.h"
+#include "PanelIBPositionDetails_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelAccountDetails_impl::PanelAccountDetails_impl( PanelAccountDetails& pad ): m_pad( pad ) {
+PanelIBPositionDetails_impl::PanelIBPositionDetails_impl( PanelIBPositionDetails& pad ): m_pad( pad ) {
   m_pGrid = NULL;
 }
 
-void PanelAccountDetails_impl::CreateControls() {
-    PanelAccountDetails* itemPanel1 = &m_pad;
+void PanelIBPositionDetails_impl::CreateControls() {
+    PanelIBPositionDetails* itemPanel1 = &m_pad;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(itemBoxSizer2);
@@ -52,26 +52,26 @@ void PanelAccountDetails_impl::CreateControls() {
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_pad.Bind( wxEVT_CLOSE_WINDOW, &PanelAccountDetails_impl::OnClose, this );  // start close of windows and controls
+  m_pad.Bind( wxEVT_CLOSE_WINDOW, &PanelIBPositionDetails_impl::OnClose, this );  // start close of windows and controls
 }
 
-PanelAccountDetails_impl::~PanelAccountDetails_impl() {
+PanelIBPositionDetails_impl::~PanelIBPositionDetails_impl() {
 }
 
-void PanelAccountDetails_impl::UpdateAccountDetailRow( const ou::tf::IBTWS::AccountDetails& ad ) {
+void PanelIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad ) {
   
-  mapAccountDetailRow_t::iterator iter = m_mapAccountDetailRow.find( ad.sLocalSymbol );
-  if ( m_mapAccountDetailRow.end() == iter ) {
-    iter = m_mapAccountDetailRow.insert( m_mapAccountDetailRow.end(),
-      mapAccountDetailRow_t::value_type( ad.sLocalSymbol, AccountDetailRow( m_pGrid, m_mapAccountDetailRow.size() ) ) );
+  mapPositionDetailRow_t::iterator iter = m_mapPositionDetailRow.find( ad.sLocalSymbol );
+  if ( m_mapPositionDetailRow.end() == iter ) {
+    iter = m_mapPositionDetailRow.insert( m_mapPositionDetailRow.end(),
+      mapPositionDetailRow_t::value_type( ad.sLocalSymbol, PositionDetailRow( m_pGrid, m_mapPositionDetailRow.size() ) ) );
     m_pGrid->AppendRows( 1 );
   }
 
-  iter->second.UpdateAccountDetail( ad );
+  iter->second.UpdatePositionDetail( ad );
   iter->second.UpdateGui();
 }
 
-void PanelAccountDetails_impl::OnClose( wxCloseEvent& event ) {
+void PanelIBPositionDetails_impl::OnClose( wxCloseEvent& event ) {
 
   // todo:  don't close if dialog is still open.
 

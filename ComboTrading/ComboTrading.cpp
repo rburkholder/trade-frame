@@ -141,12 +141,12 @@ bool AppComboTrading::OnInit() {
 */
 
   
-  m_pPanelAccountDetails = new ou::tf::PanelAccountDetails( m_pFrameMain, wxID_ANY );
-  psizerMain->Add( m_pPanelAccountDetails, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
+  m_pPanelIBPositionDetails = new ou::tf::PanelIBPositionDetails( m_pFrameMain, wxID_ANY );
+  psizerMain->Add( m_pPanelIBPositionDetails, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   
   if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
     ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
-    pProviderIB->OnAccountDetailsHandler = MakeDelegate( m_pPanelAccountDetails, &ou::tf::PanelAccountDetails::UpdateAccountDetailRow );
+    pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::PanelIBPositionDetails::UpdatePositionDetailRow );
   }
 
   

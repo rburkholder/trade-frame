@@ -30,18 +30,18 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_AccountDetails_SIZE wxSize(400, 300)
 #define SYMBOL_PANEL_AccountDetails_POSITION wxDefaultPosition
 
-class PanelAccountDetails_impl;  // Forward declaration
+class PanelIBPositionDetails_impl;  // Forward declaration
 
-class PanelAccountDetails: public wxPanel {
-    friend class PanelAccountDetails_impl;
+class PanelIBPositionDetails: public wxPanel {
+    friend class PanelIBPositionDetails_impl;
 public:
-  PanelAccountDetails(void);
-  PanelAccountDetails( 
+  PanelIBPositionDetails(void);
+  PanelIBPositionDetails( 
     wxWindow* parent, wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
     const wxPoint& pos = SYMBOL_PANEL_AccountDetails_POSITION, 
     const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
     long style = SYMBOL_PANEL_AccountDetails_STYLE );
-  ~PanelAccountDetails(void);
+  ~PanelIBPositionDetails(void);
 
   bool Create( wxWindow* parent, 
     wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
@@ -49,7 +49,7 @@ public:
     const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
     long style = SYMBOL_PANEL_AccountDetails_STYLE );
   
-  void UpdateAccountDetailRow( const ou::tf::IBTWS::AccountDetails& ad );
+  void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
 
 protected:
     void Init();
@@ -59,7 +59,7 @@ private:
     ID_GRID_ACCOUNTDETAILS
   };
   
-  std::unique_ptr<PanelAccountDetails_impl> m_pimpl;
+  std::unique_ptr<PanelIBPositionDetails_impl> m_pimpl;
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

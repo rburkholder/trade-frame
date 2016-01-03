@@ -39,17 +39,17 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "PanelAccountDetails.h"
+#include "PanelIBPositionDetails.h"
 
 // modelled after "PanelPortfolioPosition_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct PanelAccountDetails_impl {
+struct PanelIBPositionDetails_impl {
 //public:
-  PanelAccountDetails_impl( PanelAccountDetails& );
-  virtual ~PanelAccountDetails_impl();
+  PanelIBPositionDetails_impl( PanelIBPositionDetails& );
+  virtual ~PanelIBPositionDetails_impl();
 //private:
   
 // for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
@@ -82,27 +82,27 @@ struct PanelAccountDetails_impl {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   > vModelCells_t;
 
-  class AccountDetailRow {
+  class PositionDetailRow {
   public:
-    AccountDetailRow( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) { Init(); }
-    AccountDetailRow( const AccountDetailRow& rhs ): m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) { Init(); }
-    ~AccountDetailRow( void ) {}
+    PositionDetailRow( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) { Init(); }
+    PositionDetailRow( const PositionDetailRow& rhs ): m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) { Init(); }
+    ~PositionDetailRow( void ) {}
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_row ) );
     }
-    void UpdateAccountDetail( const ou::tf::IBTWS::AccountDetails& ad ) {
-      boost::fusion::at_c<COL_Symbol1>( m_vModelCells ).SetValue( ad.sSymbol );
-      boost::fusion::at_c<COL_Symbol2>( m_vModelCells ).SetValue( ad.sLocalSymbol );
-      boost::fusion::at_c<COL_Expiry>( m_vModelCells ).SetValue( ad.sExpiry );
-      boost::fusion::at_c<COL_Exchange>( m_vModelCells ).SetValue( ad.sExchange );
-      boost::fusion::at_c<COL_Multiple>( m_vModelCells ).SetValue( ad.sMultiplier );
-      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( ad.position );
-      boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( ad.marketPrice );
-      boost::fusion::at_c<COL_Value>( m_vModelCells ).SetValue( ad.marketValue );
-      boost::fusion::at_c<COL_Cost>( m_vModelCells ).SetValue( ad.averageCost );
-      boost::fusion::at_c<COL_UPNL>( m_vModelCells ).SetValue( ad.unrealizedPNL );
-      boost::fusion::at_c<COL_RPNL>( m_vModelCells ).SetValue( ad.realizedPNL );
-      boost::fusion::at_c<COL_Currency>( m_vModelCells ).SetValue( ad.sCurrency );
+    void UpdatePositionDetail( const ou::tf::IBTWS::PositionDetail& pd ) {
+      boost::fusion::at_c<COL_Symbol1>( m_vModelCells ).SetValue( pd.sSymbol );
+      boost::fusion::at_c<COL_Symbol2>( m_vModelCells ).SetValue( pd.sLocalSymbol );
+      boost::fusion::at_c<COL_Expiry>( m_vModelCells ).SetValue( pd.sExpiry );
+      boost::fusion::at_c<COL_Exchange>( m_vModelCells ).SetValue( pd.sExchange );
+      boost::fusion::at_c<COL_Multiple>( m_vModelCells ).SetValue( pd.sMultiplier );
+      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( pd.position );
+      boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( pd.marketPrice );
+      boost::fusion::at_c<COL_Value>( m_vModelCells ).SetValue( pd.marketValue );
+      boost::fusion::at_c<COL_Cost>( m_vModelCells ).SetValue( pd.averageCost );
+      boost::fusion::at_c<COL_UPNL>( m_vModelCells ).SetValue( pd.unrealizedPNL );
+      boost::fusion::at_c<COL_RPNL>( m_vModelCells ).SetValue( pd.realizedPNL );
+      boost::fusion::at_c<COL_Currency>( m_vModelCells ).SetValue( pd.sCurrency );
     }
   protected:
   private:
@@ -119,14 +119,14 @@ struct PanelAccountDetails_impl {
   
   wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
   
-  PanelAccountDetails& m_pad; // passed in on construction 
+  PanelIBPositionDetails& m_pad; // passed in on construction 
   
-  typedef std::map<std::string,AccountDetailRow> mapAccountDetailRow_t;
-  mapAccountDetailRow_t m_mapAccountDetailRow;
+  typedef std::map<std::string,PositionDetailRow> mapPositionDetailRow_t;
+  mapPositionDetailRow_t m_mapPositionDetailRow;
 
   void CreateControls();
   
-  void UpdateAccountDetailRow( const ou::tf::IBTWS::AccountDetails& ad );
+  void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
   
   void OnClose( wxCloseEvent& event );
 };

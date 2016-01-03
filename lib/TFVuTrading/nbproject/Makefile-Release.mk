@@ -50,10 +50,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/ModelPortfolio.o \
 	${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o \
 	${OBJECTDIR}/ModelPosition.o \
-	${OBJECTDIR}/PanelAccountDetails.o \
-	${OBJECTDIR}/PanelAccountDetails_impl.o \
 	${OBJECTDIR}/PanelChartHdf5.o \
 	${OBJECTDIR}/PanelFinancialChart.o \
+	${OBJECTDIR}/PanelIBPositionDetails.o \
+	${OBJECTDIR}/PanelIBPositionDetails_impl.o \
 	${OBJECTDIR}/PanelLogging.o \
 	${OBJECTDIR}/PanelManualOrder.o \
 	${OBJECTDIR}/PanelOptionDetails.o \
@@ -174,16 +174,6 @@ ${OBJECTDIR}/ModelPosition.o: ModelPosition.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPosition.o ModelPosition.cpp
 
-${OBJECTDIR}/PanelAccountDetails.o: PanelAccountDetails.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelAccountDetails.o PanelAccountDetails.cpp
-
-${OBJECTDIR}/PanelAccountDetails_impl.o: PanelAccountDetails_impl.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelAccountDetails_impl.o PanelAccountDetails_impl.cpp
-
 ${OBJECTDIR}/PanelChartHdf5.o: PanelChartHdf5.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -193,6 +183,16 @@ ${OBJECTDIR}/PanelFinancialChart.o: PanelFinancialChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelFinancialChart.o PanelFinancialChart.cpp
+
+${OBJECTDIR}/PanelIBPositionDetails.o: PanelIBPositionDetails.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails.o PanelIBPositionDetails.cpp
+
+${OBJECTDIR}/PanelIBPositionDetails_impl.o: PanelIBPositionDetails_impl.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails_impl.o PanelIBPositionDetails_impl.cpp
 
 ${OBJECTDIR}/PanelLogging.o: PanelLogging.cpp 
 	${MKDIR} -p ${OBJECTDIR}

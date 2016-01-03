@@ -22,10 +22,10 @@
       <itemPath>ModelPortfolio.h</itemPath>
       <itemPath>ModelPortfolioPositionOrderExecution.h</itemPath>
       <itemPath>ModelPosition.h</itemPath>
-      <itemPath>PanelAccountDetails.h</itemPath>
-      <itemPath>PanelAccountDetails_impl.h</itemPath>
       <itemPath>PanelChartHdf5.h</itemPath>
       <itemPath>PanelFinancialChart.h</itemPath>
+      <itemPath>PanelIBPositionDetails.h</itemPath>
+      <itemPath>PanelIBPositionDetails_impl.h</itemPath>
       <itemPath>PanelLogging.h</itemPath>
       <itemPath>PanelManualOrder.h</itemPath>
       <itemPath>PanelOptionDetails.h</itemPath>
@@ -69,10 +69,10 @@
       <itemPath>ModelPortfolio.cpp</itemPath>
       <itemPath>ModelPortfolioPositionOrderExecution.cpp</itemPath>
       <itemPath>ModelPosition.cpp</itemPath>
-      <itemPath>PanelAccountDetails.cpp</itemPath>
-      <itemPath>PanelAccountDetails_impl.cpp</itemPath>
       <itemPath>PanelChartHdf5.cpp</itemPath>
       <itemPath>PanelFinancialChart.cpp</itemPath>
+      <itemPath>PanelIBPositionDetails.cpp</itemPath>
+      <itemPath>PanelIBPositionDetails_impl.cpp</itemPath>
       <itemPath>PanelLogging.cpp</itemPath>
       <itemPath>PanelManualOrder.cpp</itemPath>
       <itemPath>PanelOptionDetails.cpp</itemPath>
@@ -205,14 +205,6 @@
       </item>
       <item path="ModelPosition.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="PanelAccountDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="PanelChartHdf5.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelChartHdf5.h" ex="false" tool="3" flavor2="0">
@@ -220,6 +212,14 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelLogging.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -402,14 +402,6 @@
       </item>
       <item path="ModelPosition.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="PanelAccountDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelAccountDetails_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="PanelChartHdf5.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelChartHdf5.h" ex="false" tool="3" flavor2="0">
@@ -417,6 +409,14 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelLogging.cpp" ex="false" tool="1" flavor2="0">
       </item>
