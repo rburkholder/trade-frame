@@ -148,24 +148,24 @@ wxIcon TreeOps::GetIconResource( const wxString& name ) {
   return wxNullIcon;
 }
 
-void TreeOps::Save( boost::archive::text_oarchive& oa ) {
+//void TreeOps::Save( boost::archive::text_oarchive& oa ) {
   //size_t n( m_pResources->vpSceneManager.size() );
   //oa & n;
 
-  //TreeItemBase* pBase = m_pTreeItemRoot.get();
+//  TreeItemBase* pBase = m_pTreeItemRoot.get();
   //const TreeItemRoot* p = dynamic_cast<TreeItemRoot*>( pBase );
   //oa & *m_pTreeItemRoot;
-}
+//}
 
-void TreeOps::Load( boost::archive::text_iarchive& ia ) {
+//void TreeOps::Load( boost::archive::text_iarchive& ia ) {
   //size_t n;
   //ia & n;
   //assert( m_pResources->vpSceneManager.size() == n );
 
-  //TreeItemBase* pBase = m_pTreeItemRoot.get();
+//  TreeItemBase* pBase = m_pTreeItemRoot.get();
   //TreeItemRoot* p = dynamic_cast<TreeItemRoot*>( pBase );
   //ia & *m_pTreeItemRoot;
-}
+//}
 
 wxString TreeOps::GetInput( const wxString& sPrompt, const wxString& sDefault ) {
   wxString s( sDefault );

@@ -90,6 +90,7 @@ private:
 
   typedef std::map<std::string,structPortfolio> mapPortfolios_t;
 
+  // maybe serialize these settings?
   bool m_bData1Connected;
   bool m_bExecConnected;
   bool m_bStarted;
@@ -131,6 +132,8 @@ private:
   wxBoxSizer* m_sizerScrollPM;
 
   ou::tf::DBOps m_db;
+  std::string m_sWorkingDirectory;
+  std::string m_sfnState;
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;
   ou::tf::IQFeedSymbolListOps* m_pIQFeedSymbolListOps;
@@ -139,6 +142,9 @@ private:
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
   void BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& );
   void RegisterInstrument( pInstrument_t );
+  
+  void HandleSave( wxCommandEvent& event );
+  void HandleLoad( wxCommandEvent& event );
 
   void GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument );
   void LoadUpBundle( ou::tf::Instrument::pInstrument_t pInstrument );

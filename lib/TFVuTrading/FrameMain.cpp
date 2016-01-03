@@ -40,6 +40,8 @@ bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption
 }
 
 void FrameMain::Init() {
+  m_ixDynamicMenuItem = ID_DYNAMIC_MENU_ACTIONS;
+  m_menuFile = 0;
   m_menuBar = NULL;
   m_statusBar = NULL;
 }
@@ -51,9 +53,9 @@ void FrameMain::CreateControls( void ) {
     m_menuBar = new wxMenuBar;
     itemFrame1->SetMenuBar(m_menuBar);
 
-    wxMenu* itemMenuFile = new wxMenu;
-    itemMenuFile->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
-    m_menuBar->Append(itemMenuFile, _("File"));
+    m_menuFile = new wxMenu;
+    m_menuFile->Append(ID_MENUEXIT, _("Exit"), wxEmptyString, wxITEM_NORMAL);
+    m_menuBar->Append(m_menuFile, _("File"));
 
 //    m_statusBar = new wxStatusBar( itemFrame1, ID_STATUSBAR, wxST_SIZEGRIP|wxNO_BORDER );
 //    m_statusBar->SetFieldsCount(2);
@@ -68,6 +70,12 @@ void FrameMain::OnMenuExitClick( wxCommandEvent& event ) {
   this->Close();
 }
 
+int FrameMain::AddFileMenuItem( const wxString& sText ) {
+  m_ixDynamicMenuItem++;
+  m_menuFile->Prepend(m_ixDynamicMenuItem, sText, wxEmptyString, wxITEM_NORMAL );
+  return m_ixDynamicMenuItem;
+}
+
 void FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vItems ) {
   assert( 0 != vItems.size() );
   wxMenu* itemMenuAction = new wxMenu;
@@ -76,8 +84,10 @@ void FrameMain::AddDynamicMenu( const std::string& root, const vpItems_t& vItems
     structMenuItem* p = *iter;
     p->ix = m_vPtrItems.size();
     m_vPtrItems.push_back( p );
-    itemMenuAction->Append(ID_DYNAMIC_MENU_ACTIONS + p->ix, p->text, wxEmptyString, wxITEM_NORMAL);
-    Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnDynamicActionClick, this, ID_DYNAMIC_MENU_ACTIONS + p->ix,-1, p );
+    
+    m_ixDynamicMenuItem++;
+    itemMenuAction->Append(m_ixDynamicMenuItem, p->text, wxEmptyString, wxITEM_NORMAL);
+    Bind( wxEVT_COMMAND_MENU_SELECTED, &FrameMain::OnDynamicActionClick, this, m_ixDynamicMenuItem, -1, p );
   }
   m_menuBar->Append(itemMenuAction, root );
 }

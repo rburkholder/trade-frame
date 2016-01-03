@@ -9,7 +9,6 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/Shared/Contract.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/IBTWS.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/IBTWS.cpp</file>
         </group>

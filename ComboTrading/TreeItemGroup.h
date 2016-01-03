@@ -17,6 +17,7 @@
 #pragma once
 
 #include "TreeItem.h"
+#include "TreeItemInstrument.h"
 
 class TreeItemGroup;
 
@@ -59,10 +60,16 @@ private:
       switch ( iter->m_type ) {
         case IdGroup:
         {
-          const TreeItemGroup* pGroup = dynamic_cast<TreeItemGroup*>( iter->m_pTreeItemBase.get() );
-          ar & *pGroup;
+          const TreeItemGroup* p = dynamic_cast<TreeItemGroup*>( iter->m_pTreeItemBase.get() );
+          ar & *p;
         }
         break;
+	case IdInstrument:
+	{
+	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->m_pTreeItemBase.get() );
+          ar & *p;
+	}
+	break;
       }
     }
   }
@@ -78,10 +85,16 @@ private:
       switch ( type ) {
         case IdGroup:
         {
-          TreeItemGroup* pGroup = AddTreeItem<TreeItemGroup,IdTreeItemType>( "Group", IdGroup );
-          ar & *pGroup;
+          TreeItemGroup* p = AddTreeItem<TreeItemGroup,IdTreeItemType>( "Group", IdGroup, m_resources );
+          ar & *p;
         }
         break;
+	case IdInstrument:
+	{
+          TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
+          ar & *p;
+	}
+	break;
       }
     }
   }

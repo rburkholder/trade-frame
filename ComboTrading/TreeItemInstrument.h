@@ -29,11 +29,11 @@ public:
     TreeItemResources( id, baseResources, resources ) {
       Init();
     }
-  virtual ~TreeItemInstrument( void ) {}
+  virtual ~TreeItemInstrument( void );
   
   pInstrument_t GetInstrument( void ) { return m_pInstrument; }
   
-  //virtual void ShowContextMenu( void );
+  virtual void ShowContextMenu( void );
   
 protected:
 

@@ -16,7 +16,10 @@
 
 #pragma once
 
-#include <wx/panel.h>
+#include <boost/signals2.hpp>
+
+//#include <wx/panel.h>
+#include <wx/window.h>
 
 #include <TFTrading/Instrument.h>
 #include <TFTrading/ProviderManager.h>
@@ -24,7 +27,6 @@
 #include <TFBitsNPieces/TreeOpsItems.h>
 
 struct Resources {
-  //wxPanel* m_pPanel;  // re-usable for charts and stuff
   wxWindow* m_pWin;
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
@@ -34,6 +36,8 @@ struct Resources {
   
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   pProvider_t pData1Provider;
+  pProvider_t pData2Provider;
+  pProvider_t pExecutionProvider;
   
   Resources( void ): m_pWin( 0 ) {}
 };
@@ -41,6 +45,7 @@ struct Resources {
 // ================
 
 class TreeItemResources: public ou::tf::TreeItemBase {
+  friend class boost::serialization::access;
 public:
   TreeItemResources( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
     ou::tf::TreeItemBase( id, baseResources ), m_resources( resources ) {}

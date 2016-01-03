@@ -29,14 +29,7 @@ void TreeItemInstrument::Init() {
   }
 }
 
-void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
-  assert( 0 != pMenu );
-  pMenu->Append( MILiveChart, "Live Chart" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
-  pMenu->Append( MIDailyChart, "Daily Chart" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
-  pMenu->Append( MIDelete, "Delete" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
+TreeItemInstrument::~TreeItemInstrument( void ) {
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
@@ -50,4 +43,22 @@ void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
 
 void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
   
+}
+
+void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
+  assert( 0 != pMenu );
+  pMenu->Append( MILiveChart, "Live Chart" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
+  pMenu->Append( MIDailyChart, "Daily Chart" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
+  pMenu->Append( MIDelete, "Delete" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
+}
+
+void TreeItemInstrument::ShowContextMenu( void ) {
+  if ( 0 == m_pMenu ) {
+    m_pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
+    TreeItemInstrument::BuildContextMenu( m_pMenu );
+  }
+  m_baseResources.signalPopupMenu( m_pMenu );
 }

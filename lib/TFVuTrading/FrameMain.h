@@ -41,7 +41,7 @@ public:
   struct structMenuItem: wxObject {
     std::string text;
     OnActionHandler_t OnActionHandler;
-    unsigned long ix;
+    unsigned long ix;  // may no longer be required, replaced by m_ixDynamicMenuItem
     structMenuItem( void ): ix( 0 ) {};
     structMenuItem( const std::string& text_, OnActionHandler_t oah, unsigned long ix_ = 0 )
       : text( text_ ), OnActionHandler( oah ), ix( ix_ ) {};
@@ -69,9 +69,9 @@ public:
     const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE, 
     long style = SYMBOL_FRAMEGENERIC_STYLE );
 
-  // re-arrange this so when events added/removed, menu updated with text as well, 
-  // ie, pass in structure to build menu
 
+  int AddFileMenuItem( const wxString& );
+  
   void AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
   
   static bool ShowToolTips() { return true; };
@@ -82,8 +82,11 @@ protected:
 private:
 
   enum { ID_Null=wxID_HIGHEST, ID_FRAMEGENERIC, ID_MENUEXIT, ID_STATUSBAR, ID_PANELMAIN,
-    ID_MENUACTION1, ID_MENUACTION2, ID_MENUACTION3, ID_MENUACTION4, ID_MENUACTION5, ID_DYNAMIC_MENU_ACTIONS
+    ID_DYNAMIC_MENU_ACTIONS // must be last in line
   };
+  
+  int m_ixDynamicMenuItem;  // initialized to ID_DYNAMIC_MENU_ACTIONS and incremented with each new menu entry
+  wxMenu* m_menuFile;
 
   wxMenuBar* m_menuBar;
   wxStatusBar* m_statusBar;

@@ -16,11 +16,12 @@
 
 #pragma once
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
 #include <wx/treectrl.h>
 #include <wx/panel.h>
 #include <wx/event.h>
-
-//#include <wx/scrolwin.h>
 
 #include <OUCharting/ChartMaster.h>
 
@@ -79,10 +80,18 @@ public:
   signalRegisterInstrument_t signalRegisterInstrument;
 
   void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
+  
+  typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
+  void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
 
+  void Save( boost::archive::text_oarchive& oa);
+  void Load( boost::archive::text_iarchive& ia);
+  
 protected: 
+  
   void Init();
   void CreateControls();
+  
 private:
   
   enum { 

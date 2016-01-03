@@ -49,7 +49,6 @@ class TreeOps: public wxTreeCtrl {    // http://docs.wxwidgets.org/trunk/classwx
 public:
   
   typedef TreeItemBase::pTreeItemBase_t pTreeItemBase_t;
-  //typedef TreeItemRoot::pTreeItemRoot_t pTreeItemRoot_t;
   
   TreeOps();
   TreeOps( 
@@ -69,18 +68,33 @@ public:
   ~TreeOps();
   
   void PopulateResources( TreeItemResources& resources );
+  
   void SetRoot( pTreeItemBase_t pTreeItemRoot ) { 
-//    m_pTreeItemRoot = pTreeItemRoot; 
+    m_pTreeItemRoot = pTreeItemRoot; 
     assert( 0 == m_mapDecoder.size() );
     m_mapDecoder.insert( mapDecoder_t::value_type( pTreeItemRoot->GetTreeItemId(), pTreeItemRoot ) );
+  }
+  
+  pTreeItemBase_t GetRoot( void ) {
+    return m_pTreeItemRoot;
   }
   
   void Add( const wxTreeItemId& id, pTreeItemBase_t pTreeItemBase );
   void Delete( wxTreeItemId id );
   
-  // no functionality at present
-  void Save( boost::archive::text_oarchive& oa);
-  void Load( boost::archive::text_iarchive& ia);
+  template<typename RootItemType>
+  void Save( boost::archive::text_oarchive& oa) {
+    TreeItemBase* pBase = m_pTreeItemRoot.get();
+    const RootItemType* p = dynamic_cast<RootItemType*>( pBase );
+    oa & *p;
+  }
+  
+  template<typename RootItemType>
+  void Load( boost::archive::text_iarchive& ia) {
+    TreeItemBase* pBase = m_pTreeItemRoot.get();
+    RootItemType* p = dynamic_cast<RootItemType*>( pBase );
+    ia & *p;
+  }
   
   wxString GetInput( const wxString& sPrompt, const wxString& sDefault );
   
@@ -91,11 +105,11 @@ protected:
     ID_TREEOPS
   };
 
+  pTreeItemBase_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
+  
 private:
   
   wxTreeItemId m_idOld;
-  
-  //pTreeItemBase_t m_pTreeItemRoot; // root item tracked here for serialization starting at the root
   
   typedef std::map<void*,pTreeItemBase_t> mapDecoder_t;  // void* is from wxTreeItemId
   mapDecoder_t m_mapDecoder;

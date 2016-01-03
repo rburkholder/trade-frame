@@ -44,8 +44,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/TreeItemInstrument.o \
 	${OBJECTDIR}/TreeItemPortfolio.o \
 	${OBJECTDIR}/TreeItemPosition.o \
-	${OBJECTDIR}/TreeOps.o \
-	${OBJECTDIR}/UnderlyingSelection.o
+	${OBJECTDIR}/TreeOps.o
 
 
 # C Compiler Flags
@@ -121,11 +120,6 @@ ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
-
-${OBJECTDIR}/UnderlyingSelection.o: UnderlyingSelection.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/UnderlyingSelection.o UnderlyingSelection.cpp
 
 # Subprojects
 .build-subprojects:

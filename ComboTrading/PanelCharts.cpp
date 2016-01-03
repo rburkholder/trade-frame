@@ -165,6 +165,12 @@ void PanelCharts::CreateControls() {
 
 }
 
+void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
+  m_resources.pData1Provider = pData1Provider;
+  m_resources.pData2Provider = pData2Provider;
+  m_resources.pExecutionProvider = pExecutionProvider;
+}
+
 PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   assert( 0 == m_pDialogPickSymbol );
   namespace args = boost::phoenix::arg_names;
@@ -307,6 +313,18 @@ void PanelCharts::HandleDrawChart( const MemBlock& m ) {
   wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
   wxPaintDC cdc( m_winChart );
   cdc.DrawBitmap(bmp, 0, 0);
+}
+
+void PanelCharts::Save( boost::archive::text_oarchive& oa) {
+  //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
+  //oa & *p;
+  m_pTreeOps->Save<TreeItemRoot>( oa );
+}
+
+void PanelCharts::Load( boost::archive::text_iarchive& ia) {
+  //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
+  //ia & *p;
+  m_pTreeOps->Load<TreeItemRoot>( ia );
 }
 
 wxBitmap PanelCharts::GetBitmapResource( const wxString& name ) {

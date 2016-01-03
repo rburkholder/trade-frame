@@ -52,7 +52,7 @@ struct PanelAccountDetails_impl {
   virtual ~PanelAccountDetails_impl();
 //private:
   
-// for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
+// for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 12
 #define GRID_ARRAY \

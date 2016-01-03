@@ -16,7 +16,6 @@
 
 #include "TreeItemGroup.h"
 
-#include "TreeItemInstrument.h"
 #include "TreeItemPortfolio.h"
 #include "TreeItemPosition.h"
 

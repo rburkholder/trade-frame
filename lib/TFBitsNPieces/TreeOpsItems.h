@@ -93,7 +93,10 @@ public:
     {}
   //TreeItemBase( wxTreeItemId id ): m_id( id ) {}
   virtual ~TreeItemBase( void ) {
-    if ( 0 != m_pMenu ) delete m_pMenu;
+    if ( 0 != m_pMenu ) {
+      delete m_pMenu;
+      m_pMenu = 0;
+    }
   }
   
   virtual void ShowContextMenu( void ) {}

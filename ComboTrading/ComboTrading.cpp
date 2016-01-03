@@ -174,6 +174,9 @@ bool AppComboTrading::OnInit() {
     m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
     m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
 
+    m_sWorkingDirectory = "..";
+    m_sfnState = "ComboTrading.state";
+    
     m_db.Open( m_sDbName );
   }
   catch(...) {
@@ -241,10 +244,20 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
   signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
+  
+  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 
   m_pFCharts->SetAutoLayout( true );
   m_pFCharts->Layout();
 
+  int ixItem;
+  // prepended in reverse order
+  ixItem = m_pFrameMain->AddFileMenuItem( _( "Load Tree" ) );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleLoad, this, ixItem, -1 );
+  
+  ixItem = m_pFrameMain->AddFileMenuItem( _( "Save Tree" ) );
+  Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleSave, this, ixItem, -1 );
+  
   wxPoint point = m_pFCharts->GetPosition();
   point.x += 400;
   point.y += 200;
@@ -874,6 +887,30 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
 
 void AppComboTrading::HandlePanelFocusPropogate( unsigned int ix ) {
 }
+
+void AppComboTrading::HandleSave( wxCommandEvent& event ) {
+  std::cout << "Saving ..." << std::endl;
+  std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
+  boost::archive::text_oarchive oa(ofs);
+//  oa << *this;
+  m_pPanelCharts->Save( oa );
+  std::cout << "  done." << std::endl;
+}
+
+void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
+  try {
+    std::cout << "Loading ..." << std::endl;
+    std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
+    boost::archive::text_iarchive ia(ifs);
+//    ia >> *this;
+    m_pPanelCharts->Load( ia );
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
+}
+
 
 void AppComboTrading::OnClose( wxCloseEvent& event ) {
 //  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
