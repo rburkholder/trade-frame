@@ -96,6 +96,8 @@ bool AppComboTrading::OnInit() {
   m_sizerScrollPM = 0;
   
   m_pFCharts = 0;
+  m_pFInteractiveBrokers = 0;
+    
   m_pPanelCharts = 0;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading" );
@@ -139,16 +141,6 @@ bool AppComboTrading::OnInit() {
   m_pPanelOptionsParameters->SetOptionNearDate( boost::gregorian::date( 2012, 4, 20 ) );
   m_pPanelOptionsParameters->SetOptionFarDate( boost::gregorian::date( 2012, 6, 15 ) );
 */
-
-  
-  m_pPanelIBPositionDetails = new ou::tf::PanelIBPositionDetails( m_pFrameMain, wxID_ANY );
-  psizerMain->Add( m_pPanelIBPositionDetails, 1, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
-  
-  if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
-    ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
-    pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::PanelIBPositionDetails::UpdatePositionDetailRow );
-  }
-
   
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   psizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
@@ -221,15 +213,56 @@ bool AppComboTrading::OnInit() {
   m_pFrameMain->Layout();
   
   BuildFrameCharts();
+  BuildFrameInteractiveBrokers();
 
   return 1;
 
 }
 
+void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
+  
+  m_pFInteractiveBrokers = new FrameMain( m_pFrameMain, wxID_ANY, "Interactive Brokers", wxDefaultPosition, wxSize( 900, 500 ),
+    wxCAPTION|wxRESIZE_BORDER
+    );
+  
+  FrameMain* itemFrame1 = m_pFInteractiveBrokers;
+
+    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    itemFrame1->SetSizer(itemBoxSizer2);
+
+    m_splitPanels = new wxSplitterWindow( itemFrame1, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_LIVE_UPDATE );
+    m_splitPanels->SetMinimumPaneSize(20);
+
+    m_pPanelIBAccountValues = new ou::tf::PanelIBAccountValues( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelIBAccountValues->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
+    m_pPanelIBPositionDetails = new ou::tf::PanelIBPositionDetails( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelIBPositionDetails->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
+    m_splitPanels->SplitVertically(m_pPanelIBAccountValues, m_pPanelIBPositionDetails, 50);
+    itemBoxSizer2->Add(m_splitPanels, 1, wxGROW|wxALL, 2);
+
+  if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
+    ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
+    pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::PanelIBPositionDetails::UpdatePositionDetailRow );
+    pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::PanelIBAccountValues::UpdateAccountValueRow );
+  }
+
+  m_pFInteractiveBrokers->SetAutoLayout( true );
+  m_pFInteractiveBrokers->Layout();
+
+  wxPoint point = m_pFCharts->GetPosition();
+  point.x -= 400;
+  point.y -= 200;
+  m_pFInteractiveBrokers->SetPosition( point );
+  m_pFInteractiveBrokers->Show();
+}
+
 void AppComboTrading::BuildFrameCharts( void ) {
   
   m_pFCharts = new FrameMain( m_pFrameMain, wxID_ANY, "Instrument Management", wxDefaultPosition, wxSize( 900, 500 ),  
-    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+//    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
+        wxCAPTION|wxRESIZE_BORDER
     );
   
   wxBoxSizer* psizer;
@@ -252,10 +285,10 @@ void AppComboTrading::BuildFrameCharts( void ) {
 
   int ixItem;
   // prepended in reverse order
-  ixItem = m_pFrameMain->AddFileMenuItem( _( "Load Tree" ) );
+  ixItem = m_pFrameMain->AddFileMenuItem( _( "Load Config" ) );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleLoad, this, ixItem, -1 );
   
-  ixItem = m_pFrameMain->AddFileMenuItem( _( "Save Tree" ) );
+  ixItem = m_pFrameMain->AddFileMenuItem( _( "Save Config" ) );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleSave, this, ixItem, -1 );
   
   wxPoint point = m_pFCharts->GetPosition();
@@ -892,7 +925,7 @@ void AppComboTrading::HandleSave( wxCommandEvent& event ) {
   std::cout << "Saving ..." << std::endl;
   std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
   boost::archive::text_oarchive oa(ofs);
-//  oa << *this;
+  oa & *this;
   m_pPanelCharts->Save( oa );
   std::cout << "  done." << std::endl;
 }
@@ -902,7 +935,7 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
     std::cout << "Loading ..." << std::endl;
     std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
     boost::archive::text_iarchive ia(ifs);
-//    ia >> *this;
+    ia & * this;
     m_pPanelCharts->Load( ia );
     std::cout << "  done." << std::endl;
   }

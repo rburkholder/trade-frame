@@ -9,13 +9,17 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelAccountDetails.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBAccountValues.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ValidatorInstrumentName.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelAccountDetails_impl.h</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelAccountDetails.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBPositionDetails_impl.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBPositionDetails.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBAccountValues_impl.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBPositionDetails.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBPositionDetails_impl.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBAccountValues.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/ModelCell_macros.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogNewPortfolio.cpp</file>
-            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelAccountDetails_impl.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/PanelIBAccountValues_impl.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/FrameMain.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/FrameMain.h</file>

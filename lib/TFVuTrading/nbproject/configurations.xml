@@ -24,6 +24,8 @@
       <itemPath>ModelPosition.h</itemPath>
       <itemPath>PanelChartHdf5.h</itemPath>
       <itemPath>PanelFinancialChart.h</itemPath>
+      <itemPath>PanelIBAccountValues.h</itemPath>
+      <itemPath>PanelIBAccountValues_impl.h</itemPath>
       <itemPath>PanelIBPositionDetails.h</itemPath>
       <itemPath>PanelIBPositionDetails_impl.h</itemPath>
       <itemPath>PanelLogging.h</itemPath>
@@ -71,6 +73,8 @@
       <itemPath>ModelPosition.cpp</itemPath>
       <itemPath>PanelChartHdf5.cpp</itemPath>
       <itemPath>PanelFinancialChart.cpp</itemPath>
+      <itemPath>PanelIBAccountValues.cpp</itemPath>
+      <itemPath>PanelIBAccountValues_impl.cpp</itemPath>
       <itemPath>PanelIBPositionDetails.cpp</itemPath>
       <itemPath>PanelIBPositionDetails_impl.cpp</itemPath>
       <itemPath>PanelLogging.cpp</itemPath>
@@ -212,6 +216,14 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -409,6 +421,14 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PanelIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>

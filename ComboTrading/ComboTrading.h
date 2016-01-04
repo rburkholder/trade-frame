@@ -17,6 +17,11 @@
 #include <map>
 #include <vector>
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
+#include <wx/splitter.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
@@ -29,6 +34,7 @@
 //#include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
 #include <TFVuTrading/PanelIBPositionDetails.h>
+#include <TFVuTrading/PanelIBAccountValues.h>
 
 #include <TFInteractiveBrokers/EventIBInstrument.h>
 
@@ -46,6 +52,7 @@
 
 class AppComboTrading:
   public wxApp, public ou::tf::FrameWork01<AppComboTrading> {
+    friend class boost::serialization::access;
     friend ou::tf::FrameWork01<AppComboTrading>;
 public:
 protected:
@@ -115,6 +122,7 @@ private:
   FrameMain* m_pFrameMain;
   FrameMain* m_pFPPOE;
   FrameMain* m_pFCharts;
+  FrameMain* m_pFInteractiveBrokers;
   
   ou::tf::PanelCharts* m_pPanelCharts;
   
@@ -125,8 +133,10 @@ private:
 //  PPPOE_t* m_pPPPOE;
 //  CPPOE_t* m_pCPPOE;
   
-  ou::tf::PanelIBPositionDetails* m_pPanelIBPositionDetails;
-
+    wxSplitterWindow* m_splitPanels;
+    ou::tf::PanelIBAccountValues* m_pPanelIBAccountValues;
+    ou::tf::PanelIBPositionDetails* m_pPanelIBPositionDetails;  
+    
   wxBoxSizer* m_sizerPM;
   wxScrolledWindow* m_scrollPM;
   wxBoxSizer* m_sizerScrollPM;
@@ -161,6 +171,7 @@ private:
   
   void BuildFrameCharts( void );
   void BuildFramePortfolioPosition( void );
+  void BuildFrameInteractiveBrokers( void );
 
 //  void HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order_t& order );
   void HandlePanelSymbolText( const std::string& sName );  // use IB to start, use IQFeed symbol file later on
@@ -197,7 +208,34 @@ private:
 
   void HandleConstructPortfolio( ou::tf::PanelPortfolioPosition&,const std::string&, const std::string& ); // portfolioid, description
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //ar & boost::serialization::base_object<const TreeItemResources>(*this);
+    ar & *m_pFrameMain;
+    ar & *m_pFCharts;
+    ar & *m_pFInteractiveBrokers;
+    ar & m_splitPanels->GetSashPosition();
+    ar & *m_pPanelIBAccountValues;
+    ar & *m_pPanelIBPositionDetails;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //ar & boost::serialization::base_object<TreeItemResources>(*this);
+    ar & *m_pFrameMain;
+    ar & *m_pFCharts;
+    ar & *m_pFInteractiveBrokers;
+    int x;
+    ar & x;
+    m_splitPanels->SetSashPosition( x );
+    ar & *m_pPanelIBAccountValues;
+    ar & *m_pPanelIBPositionDetails;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+    
 };
 
+BOOST_CLASS_VERSION(AppComboTrading, 1)
 DECLARE_APP(AppComboTrading)
 

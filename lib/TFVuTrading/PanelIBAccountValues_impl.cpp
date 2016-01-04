@@ -11,26 +11,26 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started December 30, 2015, 4:51 PM
+// Started January 3, 2016, 3:31 PM
 
 #include <wx/sizer.h>
 
-#include "PanelIBPositionDetails_impl.h"
+#include "PanelIBAccountValues_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelIBPositionDetails_impl::PanelIBPositionDetails_impl( PanelIBPositionDetails& pad ): m_pad( pad ) {
+PanelIBAccountValues_impl::PanelIBAccountValues_impl( PanelIBAccountValues& pav ): m_pav( pav ) {
   m_pGrid = NULL;
 }
 
-void PanelIBPositionDetails_impl::CreateControls() {
-    PanelIBPositionDetails* itemPanel1 = &m_pad;
+void PanelIBAccountValues_impl::CreateControls() {
+    PanelIBAccountValues* itemPanel1 = &m_pav;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemPanel1->SetSizer(itemBoxSizer2);
 
-    m_pGrid = new wxGrid( itemPanel1, m_pad.ID_GRID_ACCOUNTDETAILS, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
+    m_pGrid = new wxGrid( itemPanel1, m_pav.ID_GRID_ACCOUNTVALUES, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
     m_pGrid->SetDefaultColSize(50);
     m_pGrid->SetDefaultRowSize(22);
     m_pGrid->SetColLabelSize(22);
@@ -52,26 +52,26 @@ void PanelIBPositionDetails_impl::CreateControls() {
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_pad.Bind( wxEVT_CLOSE_WINDOW, &PanelIBPositionDetails_impl::OnClose, this );  // start close of windows and controls
+  m_pav.Bind( wxEVT_CLOSE_WINDOW, &PanelIBAccountValues_impl::OnClose, this );  // start close of windows and controls
 }
 
-PanelIBPositionDetails_impl::~PanelIBPositionDetails_impl() {
+PanelIBAccountValues_impl::~PanelIBAccountValues_impl() {
 }
 
-void PanelIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& pd ) {
+void PanelIBAccountValues_impl::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av ) {
   
-  mapPositionDetailRow_t::iterator iter = m_mapPositionDetailRow.find( pd.sLocalSymbol );
-  if ( m_mapPositionDetailRow.end() == iter ) {
-    iter = m_mapPositionDetailRow.insert( m_mapPositionDetailRow.end(),
-      mapPositionDetailRow_t::value_type( pd.sLocalSymbol, PositionDetailRow( m_pGrid, m_mapPositionDetailRow.size() ) ) );
+  mapAccountValueRow_t::iterator iter = m_mapAccountValueRow.find( av.sKey );
+  if ( m_mapAccountValueRow.end() == iter ) {
+    iter = m_mapAccountValueRow.insert( m_mapAccountValueRow.end(),
+      mapAccountValueRow_t::value_type( av.sKey, AccountValueRow( m_pGrid, m_mapAccountValueRow.size() ) ) );
     m_pGrid->AppendRows( 1 );
   }
 
-  iter->second.UpdatePositionDetail( pd );
+  iter->second.UpdateAccountValue( av );
   iter->second.UpdateGui();
 }
 
-void PanelIBPositionDetails_impl::OnClose( wxCloseEvent& event ) {
+void PanelIBAccountValues_impl::OnClose( wxCloseEvent& event ) {
 
   // todo:  don't close if dialog is still open.
 

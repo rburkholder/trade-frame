@@ -20,6 +20,8 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include <wx/frame.h>
 #include <wx/statusbr.h>
@@ -34,6 +36,7 @@ using namespace fastdelegate;
 #define SYMBOL_FRAMEGENERIC_POSITION wxDefaultPosition
 
 class FrameMain: public wxFrame {
+  friend class boost::serialization::access;
 public:
 
   typedef FastDelegate0<> OnActionHandler_t;
@@ -100,5 +103,34 @@ private:
   void OnMenuExitClick( wxCommandEvent& event );
   void OnDynamicActionClick( wxCommandEvent& event );
   void OnClose( wxCloseEvent& event );
+  
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //ar & boost::serialization::base_object<const TreeItemResources>(*this);
+    wxPoint point = this->GetPosition();
+    ar & point.x;
+    ar & point.y;
+    wxSize size = this->GetSize();
+    ar & size.x;
+    ar & size.y;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //ar & boost::serialization::base_object<TreeItemResources>(*this);
+    int x, y;
+    ar & x;
+    ar & y;
+    wxPoint point( x, y );
+    this->SetPosition( point );
+    ar & x;
+    ar & y;
+    wxSize size( x, y );
+    this->SetSize( size );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
+
+BOOST_CLASS_VERSION(FrameMain, 1)
 

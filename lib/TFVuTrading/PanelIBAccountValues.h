@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2015, One Unified. All rights reserved.                 *
+ * Copyright(c) 2016, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -11,7 +11,7 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started December 30, 2015, 3:40 PM
+// Started January 3, 2016, 3:44 PM
 
 #pragma once
 
@@ -27,43 +27,43 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_AccountDetails_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_AccountDetails_TITLE _("Panel IB Account Details")
-#define SYMBOL_PANEL_AccountDetails_IDNAME ID_PANELACCOUNTDETAILS
-#define SYMBOL_PANEL_AccountDetails_SIZE wxSize(400, 300)
-#define SYMBOL_PANEL_AccountDetails_POSITION wxDefaultPosition
+#define SYMBOL_PANEL_AccountValues_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_PANEL_AccountValues_TITLE _("Panel IB Account Values")
+#define SYMBOL_PANEL_AccountValues_IDNAME ID_PANELACCOUNTVALUES
+#define SYMBOL_PANEL_AccountValues_SIZE wxSize(400, 300)
+#define SYMBOL_PANEL_AccountValues_POSITION wxDefaultPosition
 
-class PanelIBPositionDetails_impl;  // Forward declaration
+class PanelIBAccountValues_impl;  // Forward declaration
 
-class PanelIBPositionDetails: public wxPanel {
-    friend class PanelIBPositionDetails_impl;
+class PanelIBAccountValues: public wxPanel {
+    friend class PanelIBAccountValues_impl;
     friend class boost::serialization::access;
 public:
-  PanelIBPositionDetails(void);
-  PanelIBPositionDetails( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountDetails_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
-    long style = SYMBOL_PANEL_AccountDetails_STYLE );
-  ~PanelIBPositionDetails(void);
+  PanelIBAccountValues(void);
+  PanelIBAccountValues( 
+    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_AccountValues_IDNAME, 
+    const wxPoint& pos = SYMBOL_PANEL_AccountValues_POSITION, 
+    const wxSize& size = SYMBOL_PANEL_AccountValues_SIZE, 
+    long style = SYMBOL_PANEL_AccountValues_STYLE );
+  ~PanelIBAccountValues(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountDetails_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
-    long style = SYMBOL_PANEL_AccountDetails_STYLE );
+    wxWindowID id = SYMBOL_PANEL_AccountValues_IDNAME, 
+    const wxPoint& pos = SYMBOL_PANEL_AccountValues_POSITION, 
+    const wxSize& size = SYMBOL_PANEL_AccountValues_SIZE, 
+    long style = SYMBOL_PANEL_AccountValues_STYLE );
   
-  void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
+  void UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad );
 
 protected:
     void Init();
 private:
   
-  enum { ID_Null=wxID_HIGHEST, ID_PANELACCOUNTDETAILS, 
-    ID_GRID_ACCOUNTDETAILS
+  enum { ID_Null=wxID_HIGHEST, ID_PANELACCOUNTVALUES, 
+    ID_GRID_ACCOUNTVALUES
   };
   
-  std::unique_ptr<PanelIBPositionDetails_impl> m_pimpl;
+  std::unique_ptr<PanelIBAccountValues_impl> m_pimpl;
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

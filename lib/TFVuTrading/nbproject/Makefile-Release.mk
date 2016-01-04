@@ -52,6 +52,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/ModelPosition.o \
 	${OBJECTDIR}/PanelChartHdf5.o \
 	${OBJECTDIR}/PanelFinancialChart.o \
+	${OBJECTDIR}/PanelIBAccountValues.o \
+	${OBJECTDIR}/PanelIBAccountValues_impl.o \
 	${OBJECTDIR}/PanelIBPositionDetails.o \
 	${OBJECTDIR}/PanelIBPositionDetails_impl.o \
 	${OBJECTDIR}/PanelLogging.o \
@@ -183,6 +185,16 @@ ${OBJECTDIR}/PanelFinancialChart.o: PanelFinancialChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelFinancialChart.o PanelFinancialChart.cpp
+
+${OBJECTDIR}/PanelIBAccountValues.o: PanelIBAccountValues.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues.o PanelIBAccountValues.cpp
+
+${OBJECTDIR}/PanelIBAccountValues_impl.o: PanelIBAccountValues_impl.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues_impl.o PanelIBAccountValues_impl.cpp
 
 ${OBJECTDIR}/PanelIBPositionDetails.o: PanelIBPositionDetails.cpp 
 	${MKDIR} -p ${OBJECTDIR}
