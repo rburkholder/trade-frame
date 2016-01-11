@@ -105,7 +105,7 @@ protected:
 
   std::stringstream m_ss;
 
-  unsigned int m_cntWatching;  // maybe implement counter at some point to allow multiple calls
+  unsigned int m_cntWatching;
 
 private:
 

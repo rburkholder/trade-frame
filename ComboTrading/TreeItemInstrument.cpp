@@ -17,6 +17,9 @@
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::~TreeItemInstrument( void ) {
+  if ( 0 != m_pWatch ) {
+    delete m_pWatch;
+  }
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
@@ -33,13 +36,20 @@ void TreeItemInstrument::NewInstrumentViaDialog( void ) {
     m_pInstrument = m_resources.signalNewInstrumentViaDialog(); // call dialog
     if ( 0 != m_pInstrument.get() ) {
       m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
-      // set watch
+      Watch();
     }
   }
   else {
     std::cout << "instrument already assigned" << std::endl;
   }
   
+}
+
+void TreeItemInstrument::Watch( void ) {
+  if ( 0 == m_pWatch ) {
+    m_pWatch = new ou::tf::Watch( m_pInstrument, m_resources.pData1Provider );
+    m_pWatch->StartWatch();
+  }
 }
 
 void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
@@ -56,12 +66,20 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
     pMenu->Append( MINewInstrument, "New Instrument" );
     pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleNewInstrument, this, MINewInstrument );
   }
+  pMenu->Append( MIEmit, "Emit" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
   pMenu->Append( MILiveChart, "Live Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
   pMenu->Append( MIDelete, "Delete" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
+}
+
+void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
+  if ( 0 != m_pWatch ) {
+    m_pWatch->EmitValues();
+  }
 }
 
 void TreeItemInstrument::ShowContextMenu( void ) {

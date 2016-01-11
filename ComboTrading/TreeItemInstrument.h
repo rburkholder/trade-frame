@@ -17,6 +17,7 @@
 #pragma once
 
 #include <TFTrading/Instrument.h>
+#include <TFTrading/Watch.h>
 
 #include "TreeItem.h"
 
@@ -26,7 +27,7 @@ public:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
-    TreeItemResources( id, baseResources, resources ) {
+    TreeItemResources( id, baseResources, resources ), m_pWatch( 0 ) {
     }
   virtual ~TreeItemInstrument( void );
   
@@ -40,7 +41,7 @@ protected:
 
   enum {
     ID_Null = wxID_HIGHEST,
-    MINewInstrument, MILiveChart, MIDailyChart,
+    MINewInstrument, MILiveChart, MIDailyChart, MIEmit,
     MIDelete
   };
   
@@ -50,10 +51,15 @@ protected:
     void HandleLiveChart( wxCommandEvent& event );
     void HandleDailyChart( wxCommandEvent& event );
     void HandleDelete( wxCommandEvent& event );
+    void HandleEmit( wxCommandEvent& event );
   
 private:
   
   pInstrument_t m_pInstrument;
+  
+  ou::tf::Watch* m_pWatch;
+  
+  void Watch( void );  // will want to set signals on provider so watch/unwatch as provider transitions connection states
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -66,6 +72,7 @@ private:
     try {
       std::string s( m_baseResources.signalGetItemText( m_id ) );
       m_pInstrument = m_resources.signalLoadInstrument( s );
+      Watch();
     }
     catch (std::runtime_error& e) {
       std::cout << "TreeItemInstrument: couldn't load instrument" << std::endl;

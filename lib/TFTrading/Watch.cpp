@@ -47,7 +47,9 @@ Watch::Watch( const Watch& rhs ) :
 }
 
 Watch::~Watch(void) {
-//  StopWatch();  // issues here with inheriting class
+  while ( 0 != m_cntWatching ) {
+    StopWatch();
+  }
 }
 
 Watch& Watch::operator=( const Watch& rhs ) {
@@ -61,11 +63,14 @@ Watch& Watch::operator=( const Watch& rhs ) {
 }
 
 void Watch::Initialize( void ) {
+  assert( 0 != m_pInstrument.get() );
+  assert( 0 != m_pDataProvider.get() );
   assert( m_pDataProvider->ProvidesQuotes() );
   assert( m_pDataProvider->ProvidesTrades() );
 }
 
 void Watch::StartWatch( void ) {
+  // 20160110 - need to check if provider is connected
   if ( 0 == m_cntWatching ) {
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
