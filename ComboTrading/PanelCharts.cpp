@@ -159,7 +159,8 @@ void PanelCharts::CreateControls() {
   m_resources.m_pWin = m_winChart;
   
   namespace args = boost::phoenix::arg_names;
-  m_resources.signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
+  m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
+  m_resources.signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1 ) );
   
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
 
@@ -194,6 +195,10 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   pInstrument_t pInstrument( m_pInstrumentForDialog );
   m_pInstrumentForDialog.reset();
   return pInstrument;
+}
+
+PanelCharts::pInstrument_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
+  return signalLoadInstrument( name );
 }
 
 // extract this sometime because the string builder might be used elsewhere

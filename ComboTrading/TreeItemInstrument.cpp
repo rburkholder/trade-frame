@@ -16,25 +16,30 @@
 
 #include "TreeItemInstrument.h"
 
-void TreeItemInstrument::Init() {
-  /*
-   * work on loading instrument list in background
-   * confirm that subsets can be saved and loaded
-   * need instrument list
-   */
-  m_pInstrument = m_resources.signalNewInstrument(); 
-  if ( 0 != m_pInstrument.get() ) {
-    m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
-    // set watch
-  }
-}
-
 TreeItemInstrument::~TreeItemInstrument( void ) {
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   std::cout << "Delete: TreeItemInstrument" << std::endl;
   m_baseResources.signalDelete( this->m_id );
+}
+
+void TreeItemInstrument::HandleNewInstrument( wxCommandEvent& event ) {
+  NewInstrumentViaDialog();
+}
+
+void TreeItemInstrument::NewInstrumentViaDialog( void ) {
+  if ( 0 == m_pInstrument.use_count() ) {
+    m_pInstrument = m_resources.signalNewInstrumentViaDialog(); // call dialog
+    if ( 0 != m_pInstrument.get() ) {
+      m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
+      // set watch
+    }
+  }
+  else {
+    std::cout << "instrument already assigned" << std::endl;
+  }
+  
 }
 
 void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
@@ -47,6 +52,10 @@ void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
+  if ( 0 == m_pInstrument.use_count() ) {
+    pMenu->Append( MINewInstrument, "New Instrument" );
+    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleNewInstrument, this, MINewInstrument );
+  }
   pMenu->Append( MILiveChart, "Live Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
   pMenu->Append( MIDailyChart, "Daily Chart" );

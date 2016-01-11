@@ -64,7 +64,12 @@ void PanelIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::
   if ( m_mapPositionDetailRow.end() == iter ) {
     iter = m_mapPositionDetailRow.insert( m_mapPositionDetailRow.end(),
       mapPositionDetailRow_t::value_type( pd.sLocalSymbol, PositionDetailRow( m_pGrid, m_mapPositionDetailRow.size() ) ) );
-    m_pGrid->AppendRows( 1 );
+    try {
+      m_pGrid->AppendRows( 1 );
+    }
+    catch(...) {
+      std::cout << "UpdatePositionDetailRow caught something" << std::endl;
+    }
   }
 
   iter->second.UpdatePositionDetail( pd );

@@ -104,20 +104,20 @@ public:
   void RequestContractDetails( const Contract& contract, OnContractDetailsHandler_t fProcess, OnContractDetailsDoneHandler_t fDone, pInstrument_t );
 
   struct PositionDetail {
-    const std::string& sSymbol;
-    const std::string& sLocalSymbol;
+    std::string sSymbol;
+    std::string sLocalSymbol;
     long contract;
     double strike;
-    const std::string& sExpiry;
-    const std::string& sMultiplier;
+    std::string sExpiry;
+    std::string sMultiplier;
     int position;
     double marketPrice;
     double marketValue;
     double averageCost;
     double unrealizedPNL;
     double realizedPNL;
-    const std::string& sExchange;
-    const std::string& sCurrency;
+    std::string sExchange;
+    std::string sCurrency;
     PositionDetail(     
       const std::string& sSymbol_,
       const std::string& sLocalSymbol_,
@@ -143,10 +143,10 @@ public:
   OnPositionDetailHandler_t OnPositionDetailHandler;
   
   struct AccountValue {
-    const std::string& sKey;
-    const std::string& sVal;
-    const std::string& sCurrency;
-    const std::string& sAccountName;
+    std::string sKey;
+    std::string sVal;
+    std::string sCurrency;
+    std::string sAccountName;
     AccountValue(
       const std::string& sKey_, const std::string& sVal_, const std::string& sCurrency_, const std::string& sAccountName_
       ): sKey( sKey_ ), sVal( sVal_ ), sCurrency( sCurrency_ ), sAccountName( sAccountName_ ) {}

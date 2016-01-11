@@ -33,6 +33,19 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_AccountDetails_SIZE wxSize(400, 300)
 #define SYMBOL_PANEL_AccountDetails_POSITION wxDefaultPosition
 
+class IBPositionDetailEvent: public wxEvent {
+public:
+  IBPositionDetailEvent( wxEventType eventType, const ou::tf::IBTWS::PositionDetail& pd )
+  : wxEvent( 0, eventType ), m_pd( pd ) {}
+  IBPositionDetailEvent( const IBPositionDetailEvent& event ): wxEvent( event ), m_pd( event.m_pd ) {}
+  ~IBPositionDetailEvent( void ) {}
+  IBPositionDetailEvent* Clone( void ) const { return new IBPositionDetailEvent( *this ); }
+  const ou::tf::IBTWS::PositionDetail& GetIBPositionDetail( void ) const { return m_pd; }
+protected:
+private:
+  const ou::tf::IBTWS::PositionDetail m_pd;
+};
+
 class PanelIBPositionDetails_impl;  // Forward declaration
 
 class PanelIBPositionDetails: public wxPanel {
@@ -64,6 +77,8 @@ private:
   };
   
   std::unique_ptr<PanelIBPositionDetails_impl> m_pimpl;
+  
+  void HandleIBPositionDetail( IBPositionDetailEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

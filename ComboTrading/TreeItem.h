@@ -30,9 +30,15 @@ struct Resources {
   wxWindow* m_pWin;
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
   typedef boost::signals2::signal<pInstrument_t (void), ou::tf::FirstOrDefault<pInstrument_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
-  signalNewInstrument_t signalNewInstrument;
+  signalNewInstrument_t signalNewInstrumentViaDialog;
+//  signalNewInstrument_t signalNewInstrumentViaLoad;
+  
+  typedef boost::signals2::signal<pInstrument_t (const std::string&), ou::tf::FirstOrDefault<pInstrument_t> > signalLoadInstrument_t;
+  typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
+  signalLoadInstrument_t signalLoadInstrument;
   
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   pProvider_t pData1Provider;

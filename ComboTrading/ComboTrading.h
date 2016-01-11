@@ -152,6 +152,7 @@ private:
   void LookupDescription( const std::string& sSymbolName, std::string& sDescription );
   void BuildInstrument( ou::tf::PanelCharts::ValuesForBuildInstrument& );
   void RegisterInstrument( pInstrument_t );
+  pInstrument_t LoadInstrument( const std::string& );
   
   void HandleSave( wxCommandEvent& event );
   void HandleLoad( wxCommandEvent& event );

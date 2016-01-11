@@ -15,12 +15,15 @@
 
 #include <wx/sizer.h>
 #include <wx/icon.h>
+//#include <wx/event.h>
 
 #include "PanelIBAccountValues.h"
 #include "PanelIBAccountValues_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+wxDEFINE_EVENT( EVT_IBAccountValue, IBAccountValueEvent );
 
 PanelIBAccountValues::PanelIBAccountValues() {
   Init();
@@ -35,6 +38,7 @@ PanelIBAccountValues::~PanelIBAccountValues( void ) {
 }
 
 void PanelIBAccountValues::Init() {
+  Bind( EVT_IBAccountValue, &PanelIBAccountValues::HandleIBAccountValue, this );
   m_pimpl.reset( new PanelIBAccountValues_impl( *this ) ); 
 }
 
@@ -50,8 +54,14 @@ bool PanelIBAccountValues::Create( wxWindow* parent, wxWindowID id, const wxPoin
     return true;
 }
 
+// need to cross a thread boundary here
 void PanelIBAccountValues::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad ) {
-  m_pimpl->UpdateAccountValueRow( ad );
+  auto p( new IBAccountValueEvent( EVT_IBAccountValue, ad ) );
+  this->QueueEvent( p );
+}
+
+void PanelIBAccountValues::HandleIBAccountValue( IBAccountValueEvent& event ) {
+  m_pimpl->UpdateAccountValueRow( event.GetIBAccountValue() );
 }
 
 wxBitmap PanelIBAccountValues::GetBitmapResource( const wxString& name ) {

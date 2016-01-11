@@ -27,9 +27,10 @@ public:
   
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
     TreeItemResources( id, baseResources, resources ) {
-      Init();
     }
   virtual ~TreeItemInstrument( void );
+  
+  void NewInstrumentViaDialog( void ); // invocable only if no instrument already exists
   
   pInstrument_t GetInstrument( void ) { return m_pInstrument; }
   
@@ -39,12 +40,13 @@ protected:
 
   enum {
     ID_Null = wxID_HIGHEST,
-    MILiveChart, MIDailyChart,
+    MINewInstrument, MILiveChart, MIDailyChart,
     MIDelete
   };
   
     void BuildContextMenu( wxMenu* pMenu );
     
+    void HandleNewInstrument( wxCommandEvent& event );
     void HandleLiveChart( wxCommandEvent& event );
     void HandleDailyChart( wxCommandEvent& event );
     void HandleDelete( wxCommandEvent& event );
@@ -52,8 +54,6 @@ protected:
 private:
   
   pInstrument_t m_pInstrument;
-  
-  void Init( void );
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -63,6 +63,13 @@ private:
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & boost::serialization::base_object<TreeItemResources>(*this);
+    try {
+      std::string s( m_baseResources.signalGetItemText( m_id ) );
+      m_pInstrument = m_resources.signalLoadInstrument( s );
+    }
+    catch (std::runtime_error& e) {
+      std::cout << "TreeItemInstrument: couldn't load instrument" << std::endl;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

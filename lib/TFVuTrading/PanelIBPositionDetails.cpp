@@ -22,6 +22,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+wxDEFINE_EVENT( EVT_IBPositionDetail, IBPositionDetailEvent );
+
 PanelIBPositionDetails::PanelIBPositionDetails() {
   Init();
 }
@@ -36,6 +38,7 @@ PanelIBPositionDetails::~PanelIBPositionDetails( void ) {
 
 void PanelIBPositionDetails::Init() {
   m_pimpl.reset( new PanelIBPositionDetails_impl( *this ) ); 
+  Bind( EVT_IBPositionDetail, &PanelIBPositionDetails::HandleIBPositionDetail, this );
 }
 
 bool PanelIBPositionDetails::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -50,8 +53,13 @@ bool PanelIBPositionDetails::Create( wxWindow* parent, wxWindowID id, const wxPo
     return true;
 }
 
-void PanelIBPositionDetails::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad ) {
-  m_pimpl->UpdatePositionDetailRow( ad );
+void PanelIBPositionDetails::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& pd ) {
+  auto p( new IBPositionDetailEvent( EVT_IBPositionDetail, pd ) );
+  this->QueueEvent( p );
+}
+
+void PanelIBPositionDetails::HandleIBPositionDetail( IBPositionDetailEvent& event ) {
+  m_pimpl->UpdatePositionDetailRow( event.GetIBPositionDetail() );
 }
 
 wxBitmap PanelIBPositionDetails::GetBitmapResource( const wxString& name ) {

@@ -276,6 +276,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->signalLookUpDescription.connect( boost::phoenix::bind( &AppComboTrading::LookupDescription, this, args::arg1, args::arg2 ) );
   m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
+  m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
   signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
   
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
@@ -297,6 +298,15 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pFCharts->SetPosition( point );
   m_pFCharts->Show();
   
+}
+
+AppComboTrading::pInstrument_t AppComboTrading::LoadInstrument( const std::string& name ) {
+  pInstrument_t p;
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance().Instance() );
+  if ( !im.Exists( name, p ) ) {  // the call will supply instrument if it exists
+    throw std::runtime_error( "instrument does not exist" );
+  }
+  return p;
 }
 
 // todo:  

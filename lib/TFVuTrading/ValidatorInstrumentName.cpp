@@ -14,7 +14,7 @@
 #include "stdafx.h"
 
 #include <wx/textentry.h>
-#include <wx/event.h>
+////#include <wx/event.h>
 
 #include <iostream>
 

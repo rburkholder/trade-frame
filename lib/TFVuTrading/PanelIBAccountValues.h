@@ -33,6 +33,19 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_AccountValues_SIZE wxSize(400, 300)
 #define SYMBOL_PANEL_AccountValues_POSITION wxDefaultPosition
 
+class IBAccountValueEvent: public wxEvent {
+public:
+  IBAccountValueEvent( wxEventType eventType, const ou::tf::IBTWS::AccountValue& ad )
+  : wxEvent( 0, eventType ), m_ad( ad ) {}
+  IBAccountValueEvent( const IBAccountValueEvent& event ): wxEvent( event ), m_ad( event.m_ad ) {}
+  ~IBAccountValueEvent( void ) {}
+  IBAccountValueEvent* Clone( void ) const { return new IBAccountValueEvent( *this ); }
+  const ou::tf::IBTWS::AccountValue& GetIBAccountValue( void ) const { return m_ad; }
+protected:
+private:
+  const ou::tf::IBTWS::AccountValue m_ad;
+};
+
 class PanelIBAccountValues_impl;  // Forward declaration
 
 class PanelIBAccountValues: public wxPanel {
@@ -64,6 +77,8 @@ private:
   };
   
   std::unique_ptr<PanelIBAccountValues_impl> m_pimpl;
+  
+  void HandleIBAccountValue( IBAccountValueEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

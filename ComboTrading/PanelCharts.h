@@ -78,6 +78,10 @@ public:
   typedef boost::signals2::signal<void(pInstrument_t)> signalRegisterInstrument_t;
   typedef signalRegisterInstrument_t::slot_type slotRegisterInstrument_t;
   signalRegisterInstrument_t signalRegisterInstrument;
+  
+  typedef boost::signals2::signal<pInstrument_t(const std::string&), ou::tf::FirstOrDefault<pInstrument_t> > signalLoadInstrument_t;
+  typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
+  signalLoadInstrument_t signalLoadInstrument;
 
   void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
   
@@ -115,6 +119,8 @@ private:
   
   pInstrument_t HandleNewInstrumentRequest( void );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
+  
+  pInstrument_t HandleLoadInstrument( const std::string& );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
 

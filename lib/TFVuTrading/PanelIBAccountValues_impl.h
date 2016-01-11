@@ -59,10 +59,10 @@ struct PanelIBAccountValues_impl {
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,            1,            2,         3,      4,             */ \
-      (COL_Key      , "Key",     wxALIGN_LEFT,  100, ModelCellString ), \
-      (COL_Value    , "Value",   wxALIGN_LEFT,  100, ModelCellString ), \
-      (COL_Currency , "Crncy",   wxALIGN_LEFT,   75, ModelCellString ), \
-      (COL_Account  , "Account", wxALIGN_LEFT,   80, ModelCellString ), \
+      (COL_Key      , "Key",     wxALIGN_LEFT,   120, ModelCellString ), \
+      (COL_Value    , "Value",   wxALIGN_RIGHT,  100, ModelCellString ), \
+      (COL_Currency , "Crncy",   wxALIGN_LEFT,    75, ModelCellString ), \
+      (COL_Account  , "Account", wxALIGN_LEFT,    80, ModelCellString ), \
       ) \
     ) \
   /**/
