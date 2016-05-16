@@ -67,6 +67,7 @@
           </preprocessorList>
         </ccTool>
         <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading</output>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
           </linkerAddLib>

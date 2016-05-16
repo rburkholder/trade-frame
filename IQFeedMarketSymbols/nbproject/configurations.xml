@@ -72,30 +72,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFVuTrading"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFVuTrading"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFSimulation"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/TFSimulation"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFIQFeed"
                             CT="3"
                             CN="Debug"
@@ -120,15 +96,27 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFTrading"
+              <makeArtifact PL="../lib/TFSimulation"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../lib/TFTrading"
+                            WD="../lib/TFSimulation"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFVuTrading"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFVuTrading"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -144,15 +132,15 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+              <makeArtifact PL="../lib/TFTrading"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../lib/TFHDF5TimeSeries"
+                            WD="../lib/TFTrading"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -165,6 +153,18 @@
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/TFHDF5TimeSeries"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
@@ -215,23 +215,21 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>sz</linkerLibLibItem>
-            <linkerLibLibItem>wx_baseu-3.0</linkerLibLibItem>
-            <linkerLibLibItem>wx_gtk2u_adv-3.0</linkerLibLibItem>
-            <linkerLibLibItem>wx_gtk2u_core-3.0</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
           </linkerLibItems>
+          <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
         </linkerTool>
         <requiredProjects>
           <makeArtifact PL="../lib/ExcelFormat"

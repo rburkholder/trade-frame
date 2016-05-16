@@ -1,3 +1,23 @@
+2016/05/15
+
+rpb@z800:~/projects/wxWidgets-3.0.2$ 
+mkdir buildNormal
+cd buildNormal
+../configure --enable-threads --with-gtk=3 --enable-stl  --with-opengl --with-libpng   CXXFLAGS=-Ofast
+make clean
+make
+sudo make install
+sudo ldconfig
+find . -name setup.h -print
+less ./buildNormal/lib/wx/include/gtk3-unicode-3.0/wx/setup.h
+sudo cp  ./buildNormal/lib/wx/include/gtk3-unicode-3.0/wx/setup.h /usr/local/include/wx/
+
+
+
+
+
+  
+
 2015/10/19
 
 how to detect 64 bit:

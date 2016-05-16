@@ -12,7 +12,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <math.h>
+//#include <math.h>
+#include <cmath>
+#include <cstdlib>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -112,7 +114,7 @@ double CalcImpliedVolatility( const structInput& input_, double option, structOu
 
     ou::tf::option::binomial::CRR( input, output );  // calc new option values with new IV
     option1 = output.option;  // keep for next go around if needed
-    diff = std::abs( output.option - option );
+    diff = std::fabs( (double) ( output.option - option ) );
 
     output.vega = ( ( output.option - option2 ) / ( volInput2 - volInput1 ) ) * 0.01;  // see if this works, if so then can remove one CRR calc below (not sure why need the 1/100 factor (maybe to undo pct variable)
 
