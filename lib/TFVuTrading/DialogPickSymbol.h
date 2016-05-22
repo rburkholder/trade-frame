@@ -81,7 +81,7 @@ public:
     std::uint8_t month;
     std::uint8_t day;
     DataExchange( void ): DialogBase::DataExchange(), 
-      dblStrike( 0.0 ), it( InstrumentType::Stock ), os( OptionSide::Put ), year( 0 ), month( 0 ), day( 0 ) {}
+      dblStrike( 0.0 ), it( InstrumentType::Stock ), os( OptionSide::Put ), year( 0 ), month( 0 ), day( 0 ), nContractId( 0 ) {}
   };
   
   DialogPickSymbol();

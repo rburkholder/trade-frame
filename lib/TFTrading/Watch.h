@@ -67,7 +67,7 @@ public:
   pInstrument_t GetInstrument( void ) { return m_pInstrument; };
   pProvider_t GetProvider( void ) { return m_pDataProvider; };
 
-  bool Watching( void ) { return 0 != m_cntWatching; };
+  bool Watching( void ) const { return 0 != m_cntWatching; };
 
   const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
   const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
@@ -75,8 +75,8 @@ public:
   const Fundamentals_t& Fundamentals( void ) const { return m_fundamentals; };
   const Summary_t& Summary( void ) const { return m_summary; };
 
-  Quotes* GetQuotes( void ) { return &m_quotes; };
-  Trades* GetTrades( void ) { return &m_trades; };
+  const Quotes& GetQuotes( void ) const { return m_quotes; };
+  const Trades& GetTrades( void ) const { return m_trades; };
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
@@ -84,7 +84,7 @@ public:
   virtual void StartWatch( void );
   virtual bool StopWatch( void );
 
-  virtual void EmitValues( void );
+  virtual void EmitValues( void ) const;
 
   virtual void SaveSeries( const std::string& sPrefix );
 

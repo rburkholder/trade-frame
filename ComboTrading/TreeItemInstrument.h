@@ -41,7 +41,7 @@ protected:
 
   enum {
     ID_Null = wxID_HIGHEST,
-    MINewInstrument, MILiveChart, MIDailyChart, MIEmit,
+    MINewInstrument, MILiveChart, MIDailyChart, MISaveData, MIEmit,
     MIDelete
   };
   
@@ -50,6 +50,7 @@ protected:
     void HandleNewInstrument( wxCommandEvent& event );
     void HandleLiveChart( wxCommandEvent& event );
     void HandleDailyChart( wxCommandEvent& event );
+    void HandleSaveData( wxCommandEvent& event );
     void HandleDelete( wxCommandEvent& event );
     void HandleEmit( wxCommandEvent& event );
   

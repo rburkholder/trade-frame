@@ -18,6 +18,9 @@
 
 TreeItemInstrument::~TreeItemInstrument( void ) {
   if ( 0 != m_pWatch ) {
+    if ( m_pWatch->Watching() ) {
+      m_pWatch->StopWatch();
+    }
     delete m_pWatch;
   }
 }
@@ -60,6 +63,10 @@ void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
   
 }
 
+void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
+  
+}
+
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
   if ( 0 == m_pInstrument.use_count() ) {
@@ -72,6 +79,8 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
+  pMenu->Append( MISaveData, "Save Data" );
+  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
   pMenu->Append( MIDelete, "Delete" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
 }

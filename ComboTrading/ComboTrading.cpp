@@ -37,6 +37,15 @@
 #include "ComboTrading.h"
 
 /*
+ * 
+ * 20160522 Issues:
+ *   don't save without IB contract
+ *   need to watch implied volatility
+ *   LiveChart: 
+ *     future with implied volatility curve (pull from HedgedBollinger
+ *     futureoptions, options: track implied volatility
+ *   
+ * 
  * 20151109 To Do:
  *   based upon Day Trading Options by Jeff Augen
  *   read cboe file and sort symbols - done

@@ -80,6 +80,8 @@ void DialogPickSymbol::Init() {
     m_radioCurrencyCAD = NULL;
     m_btnOk = NULL;
     m_btnCancel = NULL;
+    
+  m_bIBSymbolChanging = false;
 }
 
 void DialogPickSymbol::CreateControls() {    
@@ -255,6 +257,7 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   
   m_txtSymbolDescription->SetLabel( "" );
   m_btnOk->Enable( false );
+  pde->nContractId = 0;
   
   wxString text( m_textIQFName->GetValue() );
   std::string sText( text.c_str() );
@@ -367,13 +370,19 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 void DialogPickSymbol::UpdateComposite( void ) {
   //std::cout << "UpdateComposite" << std::endl;
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  m_txtContractId->SetLabel( "" );
+  if ( 0 == pde->nContractId ) {
+    m_txtContractId->SetLabel( "-no contract id-" );
+  }
+  else {
+    m_txtContractId->SetLabel( boost::lexical_cast<std::string>( pde->nContractId ) );
+  }
+  
   pde->sIQFSymbolName = this->m_textIQFName->GetValue();
   pde->sCompositeDescription = "";
   pde->signalComposeComposite( pde );
   m_textComposite->SetValue( pde->sCompositeName );
   m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
-  m_btnOk->Enable( 0 != pde->sCompositeDescription.length() );
+  m_btnOk->Enable( ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId ) );
 }
 
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
@@ -408,7 +417,8 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
 void DialogPickSymbol::UpdateContractId( int32_t nContractId ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->nContractId = nContractId;
-  m_txtContractId->SetLabel( boost::lexical_cast<std::string>( nContractId ) );
+  //m_txtContractId->SetLabel( boost::lexical_cast<std::string>( nContractId ) );
+  UpdateComposite();
 }
 
 void DialogPickSymbol::DisableOptionFields( void ) {

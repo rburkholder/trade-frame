@@ -85,7 +85,7 @@ void Watch::StartWatch( void ) {
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
     }
     else {
-      std::cout << "Watch works best with IQFeed" << std::endl;
+      std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
     }
   }
   ++m_cntWatching;
@@ -112,7 +112,7 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
   return b;
 }
 
-void Watch::EmitValues( void ) {
+void Watch::EmitValues( void ) const {
   std::cout << m_pInstrument->GetInstrumentName() << ": " 
     << "P=" << m_trade.Price()
     << ",B=" << m_quote.Bid() 
