@@ -24,6 +24,7 @@
 
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
+#include <boost/phoenix/stl/algorithm/querying.hpp>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -31,8 +32,9 @@
 
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
+
 #include <wx-3.0/wx/wx/window.h>
-#include <boost/phoenix/stl/algorithm/querying.hpp>
+#include <wx/timer.h>
 
 #include "ComboTrading.h"
 
@@ -396,7 +398,7 @@ void AppComboTrading::Start( void ) {
 }
 
 // 20151124 priority:  get the symbols tracking, draw charts, and watch volatility on futures and equities
-// 20151128 use the code in start get the symbol info for populating the portfolio/position info
+// 20151128 use the code in start to obtain the symbol info for populating the portfolio/position info
 
 void AppComboTrading::TestSymbols( void ) {
   // need iqfeed marketsymbols to be loaded before this can start

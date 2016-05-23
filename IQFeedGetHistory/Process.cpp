@@ -41,8 +41,8 @@ Process::Process( const std::string& sPrefixPath, size_t nDatums )
 {
   m_vExchanges.insert( "NYSE" );
   //m_vExchanges.push_back( "NYSE_AMEX" );
-  //m_vExchanges.push_back( "NYSE,ARCA" );
-  m_vExchanges.insert( "NGSM" );
+  m_vExchanges.insert( "NYSE,NYSE_ARCA" );
+  m_vExchanges.insert( "NASDAQ,NGSM" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );

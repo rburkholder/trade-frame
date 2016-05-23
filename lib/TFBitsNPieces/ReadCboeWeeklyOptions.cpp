@@ -18,6 +18,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <ExcelFormat/ExcelFormat.h>
 
 #include "ReadCboeWeeklyOptions.h"
@@ -56,6 +58,14 @@ bool AssignCellContent( const ExcelFormat::BasicExcelCell* cell, bool& b ) {
     }
   }
   return bProcess;
+}
+
+// "yyyymmdd"
+boost::gregorian::date ConvertDate( const std::string& sDate ) {
+  boost::gregorian::date::year_type year = boost::lexical_cast<int>( sDate.substr( 0, 4 ) );
+  boost::gregorian::date::month_type month = boost::lexical_cast<int>( sDate.substr( 4, 2 ) );
+  boost::gregorian::date::day_type day = boost::lexical_cast<int>( sDate.substr( 6, 2 ) );
+  return boost::gregorian::date( year, month, day );
 }
 
 boost::gregorian::date ConvertDate( int intDate ) {
@@ -100,34 +110,36 @@ void ExtractDates( ExcelFormat::BasicExcelWorksheet* sheet, int row, int col, vO
     cell = sheet->Cell( row, col );
     switch ( cell->Type() ) {
       case ExcelFormat::BasicExcelCell::INT: 
-	v.push_back( ConvertDate( cell->GetInteger() ) );
-	break;
+        v.push_back( ConvertDate( cell->GetInteger() ) );
+        break;
       case ExcelFormat::BasicExcelCell::DOUBLE:
-	v.push_back( ConvertDate( cell->GetDouble() ) );
-	break;
+        v.push_back( ConvertDate( cell->GetDouble() ) );
+        break;
       case ExcelFormat::BasicExcelCell::STRING:
-	std::cout << "string: " << cell->GetString() << std::endl;
-	break;
+        std::cout << "string: " << cell->GetString() << std::endl;
+        break;
       default:
-	bProcess = false;
-	break;
+        bProcess = false;
+        break;
     }
     ++col;
   }
-  assert( 0 < v.size() );
+  //assert( 0 < v.size() );  // standard doesn't have dates
 }
 
 /*  xls2csv .... beginning of file
- "LIST OF AVAILABLE WEEKLY OPTIONS (updated 10-29-15)",,,,,,,,
-,,"Standard Weeklys Available Expirations:","42307","42314"
-,,"Expanded Weeklys Available Expirations:","42307","42314","42321","42335","42342","42349"
-,,"End of Week (EOW) Options Available Expirations:","42307","42314","42321","42335","42342","42349"
-,,"SPXW & XSP (EOW) Options Available Expirations:","42314","42321","42335","42342","42349","42362","42377","42391",,,,
-,,"VIX Weekly Options","42312","42319","42332",,,,,,,,,
+"LIST OF AVAILABLE WEEKLY OPTIONS (updated 05-18-16)",,,,,,,,
+,,"Standard Weeklys Available Expirations:",,
+,,"Expanded Weeklys Available Expirations:","42517","42524","42531","42545","42552"
+,,"End of Week (EOW) Options Available Expirations:","42517","42524","42531","42545","42552"
+,,"SPX & XSP (EOW) Options Available Expirations:","42517","42524","42531","42545","42552","42559","42573",,,
+,,"SPX Wednesday Weeklys (WW) Available Expirations:","42515","42522","42529",,,,,,,
+,,"VIX Weekly Options","42515","42522","42529","42543",,,,,,,
 ,,"Weeklys Deleted from the Program:",,,,,,,
 ,,,,,,,,
-"Ticker ","New?","Name ( * Indicates weekly also trades on C2)","Product Type","List Date","Standard Weekly","Expanded Weekly","EOW",
-"OEX",,"S&P 100 Index (American style)","Index, pm-settled, cash","20151029",,,"X",
+"Ticker ","New?","Name","Product Type","List Date","Standard Weekly","Expanded Weekly","EOW","WW","VIX"
+"OEX",,"S&P 100 Index (American style)","Index, pm-settled, cash","20160512",,,"X",,
+
  */
 
 void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vui ) {
@@ -147,119 +159,145 @@ void ReadCboeWeeklyOptions( OptionExpiryDates_t& expiries, vUnderlyinginfo_t& vu
     cell = sheet->Cell( 0, 0 );  // LIST OF AVAILABLE WEEKLY OPTIONS
     if ( ExcelFormat::BasicExcelCell::STRING != cell->Type() ) throw std::runtime_error( "not found 1" );
     
-    Confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
-    ExtractDates( sheet, 1, 3, expiries.vExpiriesStandardWeeklies );
+    try {
     
-    Confirm( "Expanded Weeklys Available Expirations:",          sheet->Cell( 2, 2 ) );
-    ExtractDates( sheet, 2, 3, expiries.vExpiriesExpandedWeeklies );
+      // doesn't have dates, maybe copy from expanded
+      Confirm( "Standard Weeklys Available Expirations:",          sheet->Cell( 1, 2 ) );
+      ExtractDates( sheet, 1, 3, expiries.vExpiriesStandardWeeklies );
+
+      Confirm( "Expanded Weeklys Available Expirations:",          sheet->Cell( 2, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesExpandedWeeklies );
+
+      Confirm( "End of Week (EOW) Options Available Expirations:", sheet->Cell( 3, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesEndOfWeek );
+
+      Confirm( "SPX & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxwXsp );
+
+      Confirm( "SPX Wednesday Weeklys (WW) Available Expirations:",  sheet->Cell( 5, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxWednesday );
+
+      Confirm( "VIX Weekly Options",                               sheet->Cell( 6, 2 ) );
+      ExtractDates( sheet, 2, 3, expiries.vExpiriesVixWeeklies );
+
+      Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 7, 2 ) );
+
+      Confirm( "Ticker ",                                          sheet->Cell( 9, 0 ) );
+
+    }
+    catch (...) {
+      std::cout << "confirm issue" << std::endl;
+    }
     
-    Confirm( "End of Week (EOW) Options Available Expirations:", sheet->Cell( 3, 2 ) );
-    ExtractDates( sheet, 2, 3, expiries.vExpiriesEndOfWeek );
     
-    Confirm( "SPXW & XSP (EOW) Options Available Expirations:",  sheet->Cell( 4, 2 ) );
-    ExtractDates( sheet, 2, 3, expiries.vExpiriesSpxwXsp );
+    if ( 0 == expiries.vExpiriesStandardWeeklies.size() ) {
+      expiries.vExpiriesStandardWeeklies = expiries.vExpiriesExpandedWeeklies;
+    }
     
-    Confirm( "VIX Weekly Options",                               sheet->Cell( 5, 2 ) );
-    ExtractDates( sheet, 2, 3, expiries.vExpiriesVixWeeklies );
-    
-    Confirm( "Weeklys Deleted from the Program:",                sheet->Cell( 6, 2 ) );
-    
-    Confirm( "Ticker ",                                          sheet->Cell( 8, 0 ) );
-    
-    int ixRow( 9 );
-    int ixCol( 0 );
+    int ixRow( 10 );
+    int ixCol(  0 );
     
     bool bProcess( true );
     while ( bProcess ) {
       UnderlyingInfo ui;
       cell = sheet->Cell( ixRow, 0 );
       switch( cell->Type() ) {
-	case ExcelFormat::BasicExcelCell::STRING:
-	  ui.sSymbol = cell->GetString();
-	  //std::cout << ixRow << ": " << ui.sSymbol << std::endl;
-	  for ( int ixCol = 1; ixCol <= 7; ++ixCol ) {
-	    cell = sheet->Cell( ixRow, ixCol );
-	    switch ( ixCol ) {
-	    case 1:
-	      switch ( cell->Type() ) {
-		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bAdded = "" != cell->GetString();
-		  break;
-		case ExcelFormat::BasicExcelCell::UNDEFINED:
-		  break;
-		default:
-		  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
-	      }
-	      break;
-	    case 2: bProcess = AssignCellContent( cell, ui.sDescription );
-	      break;
-	    case 3: 
-	      bProcess = AssignCellContent( cell, ui.sProductType );
-	      break;
-	    case 4: 
-		if ( ExcelFormat::BasicExcelCell::UNDEFINED == cell->Type() ) {
-		  bProcess = false;
-		} 
-		else {
-		  if ( ExcelFormat::BasicExcelCell::INT != cell->Type() ) {
-		    bProcess = false;
-		  }
-		  else {
-		    ui.dateListed = ConvertDate( cell->GetInteger() );
-		  }
-		}
-	      break;
-	    case 5:
-	      switch ( cell->Type() ) {
-		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bStandardWeekly = 0 == strcmp( "X", cell->GetString() );
-		  //ui.bStandardWeekly = "X" == cell->GetString();
-		  break;
-		case ExcelFormat::BasicExcelCell::UNDEFINED:
-		  break;
-		default:
-		  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
-	      }
-	      break;
-	    case 6:
-	      switch ( cell->Type() ) {
-		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bExpandedWeekly = 0 == strcmp( "X", cell->GetString() );
-		  //ui.bExpandedWeekly = "X" == cell->GetString();
-		  break;
-		case ExcelFormat::BasicExcelCell::UNDEFINED:
-		  break;
-		default:
-		  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
-	      }
-	      break;
-	    case 7:
-	      switch ( cell->Type() ) {
-		case ExcelFormat::BasicExcelCell::STRING:
-		  ui.bEOW = 0 == strcmp( "X", cell->GetString() );
-		  //ui.bEOW = "X" == cell->GetString();
-		  break;
-		case ExcelFormat::BasicExcelCell::UNDEFINED:
-		  break;
-		default:
-		  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
-	      }
-	    }
-	  }
-	  break;
-	case ExcelFormat::BasicExcelCell::UNDEFINED:
-	  bProcess = false;
-	  break;
-	default:
-	  bProcess = false;
-	  break;
+        case ExcelFormat::BasicExcelCell::STRING:
+          ui.sSymbol = cell->GetString();
+          //std::cout << ixRow << ": " << ui.sSymbol << std::endl;
+          for ( int ixCol = 1; ixCol <= 7; ++ixCol ) {
+            cell = sheet->Cell( ixRow, ixCol );
+            switch ( ixCol ) {
+            case 1:
+              switch ( cell->Type() ) {
+                case ExcelFormat::BasicExcelCell::STRING:
+                  ui.bAdded = "" != cell->GetString();
+                  break;
+                case ExcelFormat::BasicExcelCell::UNDEFINED:
+                  break;
+                default:
+                  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
+              }
+              break;
+            case 2: bProcess = AssignCellContent( cell, ui.sDescription );
+              break;
+            case 3: 
+              bProcess = AssignCellContent( cell, ui.sProductType );
+              break;
+            case 4: 
+              if ( ExcelFormat::BasicExcelCell::DOUBLE == cell->Type() ) {
+                ui.dateListed = ConvertDate( cell->GetDouble() );
+              }
+              else {
+                if ( ExcelFormat::BasicExcelCell::STRING == cell->Type() ) {
+                  ui.dateListed = ConvertDate( cell->GetString() );
+                }
+                else {
+                  if ( ExcelFormat::BasicExcelCell::INT == cell->Type() ) {
+                    ui.dateListed = ConvertDate( cell->GetInteger() );
+                  }
+                  else {
+                    bProcess = false;
+                  }
+                }
+              }
+              break;
+            case 5:
+              switch ( cell->Type() ) {
+                case ExcelFormat::BasicExcelCell::STRING:
+                  ui.bStandardWeekly = 0 == strcmp( "X", cell->GetString() );
+                  //ui.bStandardWeekly = "X" == cell->GetString();
+                  break;
+                case ExcelFormat::BasicExcelCell::UNDEFINED:
+                  break;
+                default:
+                  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
+              }
+              break;
+            case 6:
+              switch ( cell->Type() ) {
+                case ExcelFormat::BasicExcelCell::STRING:
+                  ui.bExpandedWeekly = 0 == strcmp( "X", cell->GetString() );
+                  //ui.bExpandedWeekly = "X" == cell->GetString();
+                  break;
+                case ExcelFormat::BasicExcelCell::UNDEFINED:
+                  break;
+                default:
+                  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
+              }
+              break;
+            case 7:
+              switch ( cell->Type() ) {
+                case ExcelFormat::BasicExcelCell::STRING:
+                  ui.bEOW = 0 == strcmp( "X", cell->GetString() );
+                  //ui.bEOW = "X" == cell->GetString();
+                  break;
+                case ExcelFormat::BasicExcelCell::UNDEFINED:
+                  break;
+                default:
+                  std::cout << "row: " << ixRow << ", col: " << ixCol << " - weird cell " << cell->Type() << std::endl;
+              }
+            }
+          }
+          break;
+        case ExcelFormat::BasicExcelCell::WSTRING:
+          std::cout << "row: " << ixRow << " is WSTRING" << std::endl;
+          break;
+        case ExcelFormat::BasicExcelCell::UNDEFINED:
+          bProcess = false;
+          break;
+        default:
+          bProcess = false;
+          break;
       }
       if ( bProcess ) vui.push_back( ui );  // push only if successfully parsed.
       ++ixRow;
     }
+    
+    std::cout << "Last Row: " << ixRow << std::endl;
   } // else
     
-    xls.Close();
+  xls.Close();
 }
 
 } // namespace cboe  

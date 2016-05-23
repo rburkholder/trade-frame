@@ -103,7 +103,7 @@ private:
 
   wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
-  boost::thread* m_pIVCalc;
+  boost::thread* m_pthreadIVCalc;
   ou::tf::LiborFromIQFeed m_libor;
 
   ou::tf::iqfeed::InMemoryMktSymbolList m_listIQFeedSymbols;

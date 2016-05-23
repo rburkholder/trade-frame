@@ -9,9 +9,13 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame">
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Bundle.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Bundle.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Binomial.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Option.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/PopulateWithIBOptions.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/CalcExpiry.cpp</file>
+            <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Strike.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Option.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Binomial.cpp</file>
         </group>

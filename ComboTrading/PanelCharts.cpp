@@ -60,6 +60,10 @@ PanelCharts::~PanelCharts() {
 
 void PanelCharts::Init( void ) {
   m_pDialogPickSymbol = 0;
+  m_pTreeOps = 0;
+  m_winChart = 0;
+  m_pChartDataView = 0;
+  m_pDialogPickSymbol = 0;
 }
 
 bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {

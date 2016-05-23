@@ -43,6 +43,8 @@
 
 #include <TFOptions/CalcExpiry.h>
 
+#include <TFIQFeed/BuildSymbolName.h>
+
 #include "HedgedBollinger.h"
 
 IMPLEMENT_APP(AppHedgedBollinger)
@@ -126,13 +128,14 @@ bool AppHedgedBollinger::OnInit() {
 //  m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
   m_pFrameMain->Show( true );
+  
+  // ** Note:  turn on iqfeed only, symbols not set for IB yet
 
-  //m_sNameUnderlying = "+GC#";
   m_sNameUnderlying = "QGC";
-  //m_sNameUnderlyingIQFeed = "+GCG14";  // Feb 2014
-  m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
-
-  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+  //m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
+  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2016, 6 );
+  
+  std::cout << "Underlying: " << m_sNameUnderlyingIQFeed << std::endl;
 
   // opra equity calc
   //      boost::gregorian::date dateFrontMonth = ou::tf::option::CurrentFrontMonthExpiry( now.date() );
@@ -154,8 +157,10 @@ bool AppHedgedBollinger::OnInit() {
   //Two near-term months plus two additional months from the January, February or March quarterly cycles.
   //Futures appear to expire one day later than options
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2016, 1, 26 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2016, 2, 24 );
+  m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
+
+  m_dateFrontMonthOption = boost::gregorian::date( 2016, 6, 27 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2016, 7, 26 );
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;
@@ -330,7 +335,7 @@ void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
 
   m_pBundle->StartWatch();
 
-  m_pIVCalc = 0;
+  m_pthreadIVCalc = 0;
   m_bIVCalcActive = false;
 
   ptime dt;
@@ -576,9 +581,9 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
       --m_cntIVCalc;
       if ( 0 == m_cntIVCalc ) {
         m_cntIVCalc = m_nthIVCalc;
-        if ( 0 != m_pIVCalc ) delete m_pIVCalc;
+        if ( 0 != m_pthreadIVCalc ) delete m_pthreadIVCalc;
         m_bIVCalcActive = true;
-        m_pIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, ou::TimeSource::Instance().External() ) );
+        m_pthreadIVCalc = new boost::thread( boost::bind( &AppHedgedBollinger::CalcIV, this, ou::TimeSource::Instance().External() ) );
       }
     }
   //}
