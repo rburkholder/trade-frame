@@ -26,9 +26,7 @@ class TreeItemInstrument: public TreeItemResources {
 public:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   
-  TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ): 
-    TreeItemResources( id, baseResources, resources ), m_pWatch( 0 ) {
-    }
+  TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources );
   virtual ~TreeItemInstrument( void );
   
   void NewInstrumentViaDialog( void ); // invocable only if no instrument already exists
@@ -39,15 +37,23 @@ public:
   
 protected:
 
+  enum IdTreeItemType {
+    IdGroup = 301, IdInstrument
+  };
+    
   enum {
     ID_Null = wxID_HIGHEST,
-    MINewInstrument, MILiveChart, MIDailyChart, MISaveData, MIEmit,
+    MINewInstrument, MINewOption, MINewFuturesOption,
+    MILiveChart, MIDailyChart, MISaveData, MIEmit,
     MIDelete
   };
   
     void BuildContextMenu( wxMenu* pMenu );
+    void InstrumentViaDialog( Resources::ENewInstrumentLock );
     
     void HandleNewInstrument( wxCommandEvent& event );
+    void HandleAddFuturesOption( wxCommandEvent& event );
+    void HandleAddOption( wxCommandEvent& event );
     void HandleLiveChart( wxCommandEvent& event );
     void HandleDailyChart( wxCommandEvent& event );
     void HandleSaveData( wxCommandEvent& event );

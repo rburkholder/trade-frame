@@ -229,8 +229,11 @@ public:
   };
 
   InstrumentType::enumInstrumentTypes GetInstrumentType( void ) const { return m_row.eType; };
-  bool IsOption( void ) const { return ( InstrumentType::Option == m_row.eType ); };
-  bool IsFuture( void ) const { return ( InstrumentType::Future == m_row.eType ); };
+  bool IsCurrency( void )      const { return ( InstrumentType::Currency == m_row.eType ); };
+  bool IsStock( void )         const { return ( InstrumentType::Stock == m_row.eType ); }; 
+  bool IsOption( void )        const { return ( InstrumentType::Option == m_row.eType ); };
+  bool IsFuture( void )        const { return ( InstrumentType::Future == m_row.eType ); };
+  bool IsFuturesOption( void ) const { return ( InstrumentType::FuturesOption == m_row.eType ); };
 
   void SetExchangeName( const std::string& sExchangeName ) { m_row.idExchange = sExchangeName; }
   const std::string& GetExchangeName( void ) const { return m_row.idExchange; };

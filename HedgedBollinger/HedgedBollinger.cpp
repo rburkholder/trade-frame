@@ -133,7 +133,7 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameUnderlying = "QGC";
   //m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
-  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2016, 6 );
+  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2016, 8 );
   
   std::cout << "Underlying: " << m_sNameUnderlyingIQFeed << std::endl;
 

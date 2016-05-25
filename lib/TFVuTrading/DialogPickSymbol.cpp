@@ -62,6 +62,11 @@ DialogPickSymbol::~DialogPickSymbol() {
 }
 
 void DialogPickSymbol::Init() {
+
+  m_bIBSymbolChanging = false;
+  m_bOptionOnly = false;
+  m_bFuturesOptionOnly = false;
+  
     m_radioEquity = NULL;
     m_radioOption = NULL;
     m_radioFuture = NULL;
@@ -80,8 +85,7 @@ void DialogPickSymbol::Init() {
     m_radioCurrencyCAD = NULL;
     m_btnOk = NULL;
     m_btnCancel = NULL;
-    
-  m_bIBSymbolChanging = false;
+   
 }
 
 void DialogPickSymbol::CreateControls() {    
@@ -251,6 +255,22 @@ void DialogPickSymbol::CreateControls() {
 
 }
 
+void DialogPickSymbol::SetOptionOnly( void ) {
+  m_bOptionOnly = true;
+  SetRadioOption();
+  m_radioEquity->Disable();
+  m_radioFuture->Disable();
+  m_radioFOption->Disable();
+}
+
+void DialogPickSymbol::SetFuturesOptionOnly( void ) {
+  m_bFuturesOptionOnly = true;
+  SetRadioFuturesOption();
+  m_radioEquity->Disable();
+  m_radioOption->Disable();
+  m_radioFuture->Disable();
+}
+
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
 
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
@@ -309,6 +329,10 @@ void DialogPickSymbol::HandleRadioEquity( wxCommandEvent& event ) {
 }
 
 void DialogPickSymbol::HandleRadioOption( wxCommandEvent& event ) {
+  SetRadioOption();
+}
+
+void DialogPickSymbol::SetRadioOption( void ) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->it = InstrumentType::Option;
@@ -331,6 +355,10 @@ void DialogPickSymbol::HandleRadioFuture( wxCommandEvent& event ) {
 }
  
 void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
+  SetRadioFuturesOption();
+}
+  
+void DialogPickSymbol::SetRadioFuturesOption( void ) {
   m_btnOk->Enable( false );
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   pde->it = InstrumentType::FuturesOption;
@@ -340,7 +368,6 @@ void DialogPickSymbol::HandleRadioFOption( wxCommandEvent& event ) {
   m_textStrike->Enable();
   UpdateComposite();
   QueueEvent( new SetFocusEvent( EVT_SetFocus, m_textStrike ) );
-
 }
   
 void DialogPickSymbol::HandleRadioPut( wxCommandEvent& event ) {

@@ -9,6 +9,7 @@
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/HedgedBollinger.h</file>
             <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/Strategy1.h</file>
+            <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/PositionState.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/HedgedBollinger.cpp</file>
             <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/Strategy1.cpp</file>
         </group>

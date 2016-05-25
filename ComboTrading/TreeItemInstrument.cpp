@@ -16,6 +16,10 @@
 
 #include "TreeItemInstrument.h"
 
+TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
+  TreeItemResources( id, baseResources, resources ), m_pWatch( 0 ) {
+}
+  
 TreeItemInstrument::~TreeItemInstrument( void ) {
   if ( 0 != m_pWatch ) {
     if ( m_pWatch->Watching() ) {
@@ -31,12 +35,12 @@ void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
 }
 
 void TreeItemInstrument::HandleNewInstrument( wxCommandEvent& event ) {
-  NewInstrumentViaDialog();
+  NewInstrumentViaDialog( Resources::NoLock );
 }
 
-void TreeItemInstrument::NewInstrumentViaDialog( void ) {
+void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
   if ( 0 == m_pInstrument.use_count() ) {
-    m_pInstrument = m_resources.signalNewInstrumentViaDialog(); // call dialog
+    m_pInstrument = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
     if ( 0 != m_pInstrument.get() ) {
       m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
       Watch();
@@ -73,6 +77,19 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
     pMenu->Append( MINewInstrument, "New Instrument" );
     pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleNewInstrument, this, MINewInstrument );
   }
+  else {
+    if ( m_pInstrument->IsFuture() ) {
+      // can then use underlying to calc implied volatility
+      pMenu->Append( MINewFuturesOption, "New Futures Option" );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleAddFuturesOption, this, MINewFuturesOption );
+    }
+    else {
+      if ( m_pInstrument->IsStock() ) {
+        pMenu->Append( MINewOption, "New Option" );
+        pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleAddOption, this, MINewOption );
+      }
+    }
+  }
   pMenu->Append( MIEmit, "Emit" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
   pMenu->Append( MILiveChart, "Live Chart" );
@@ -97,4 +114,29 @@ void TreeItemInstrument::ShowContextMenu( void ) {
     TreeItemInstrument::BuildContextMenu( m_pMenu );
   }
   m_baseResources.signalPopupMenu( m_pMenu );
+}
+
+/* todo:  
+ *   for following two handlers:
+ *   the dialog needs a lock for FuturesOption and Option
+ *   then need NewOptionViaDialog, NewFuturesOptionViaDialog to force that setting in the dialog
+ */
+
+void TreeItemInstrument::HandleAddOption( wxCommandEvent& event ) { 
+  InstrumentViaDialog( "Option", Resources::LockOption );
+}
+
+void TreeItemInstrument::HandleAddFuturesOption( wxCommandEvent& event ) { 
+  InstrumentViaDialog( "FuturesOption", Resources::LockFuturesOption );
+}
+
+void TreeItemInstrument::InstrumentViaDialog( const std::string& sPrompt, Resources::ENewInstrumentLock lock ) {
+  TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
+  p->NewInstrumentViaDialog( lock );
+  if ( 0 == p->GetInstrument().get() ) {
+    this->m_baseResources.signalDelete( p->GetTreeItemId() );
+    //DeleteMember( p->GetTreeItemId() );
+  }
+//  else {
+//  }
 }

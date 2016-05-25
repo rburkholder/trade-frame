@@ -58,7 +58,6 @@ class DialogPickSymbol: public DialogBase {
 public:
   
   struct DataExchange: DialogBase::DataExchange {
-    
     // Provides the description for the base name
     typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpDescription_t;
     typedef signalLookUpDescription_t::slot_type slotLookUpDescription_t;
@@ -104,6 +103,9 @@ public:
   
   virtual void SetDataExchange( DataExchange* pde );
   
+  void SetOptionOnly( void );
+  void SetFuturesOptionOnly( void );
+  
   void UpdateContractId( int32_t );
 
 protected:
@@ -145,6 +147,8 @@ private:
     wxButton* m_btnCancel;
     
   bool m_bIBSymbolChanging;
+  bool m_bOptionOnly;
+  bool m_bFuturesOptionOnly;
 
   void Init( void );
   void CreateControls( void );
@@ -155,6 +159,9 @@ private:
   void HandleRadioOption( wxCommandEvent& event );
   void HandleRadioFuture( wxCommandEvent& event );
   void HandleRadioFOption( wxCommandEvent& event );
+  
+  void SetRadioOption( void ); // from the force flag
+  void SetRadioFuturesOption( void );  // from the force flag
   
   void HandleRadioPut( wxCommandEvent& event );
   void HandleRadioCall( wxCommandEvent& event );

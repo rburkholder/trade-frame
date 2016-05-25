@@ -31,7 +31,8 @@ struct Resources {
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   
-  typedef boost::signals2::signal<pInstrument_t (void), ou::tf::FirstOrDefault<pInstrument_t> > signalNewInstrument_t;
+  enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
+  typedef boost::signals2::signal<pInstrument_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pInstrument_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrumentViaDialog;
 //  signalNewInstrument_t signalNewInstrumentViaLoad;
