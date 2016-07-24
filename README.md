@@ -55,3 +55,4 @@ These are some of the currently supported applications:
 * IQFeedGetHistory - load up with historical data for looking for trading ideas
 * LiveChart - view an instrument in real time
 * StickShift2 - some rough code for some options ideas
+* ComboTrading - basics of trading multiple securities, such as various options strategies
