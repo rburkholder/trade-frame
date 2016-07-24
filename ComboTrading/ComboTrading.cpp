@@ -33,7 +33,8 @@
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 
-#include <wx-3.0/wx/wx/window.h>
+//#include <wx-3.0/wx/wx/window.h>
+#include <wx/window.h>
 #include <wx/timer.h>
 
 #include "ComboTrading.h"

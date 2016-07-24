@@ -27,6 +27,7 @@
 #include <TFBitsNPieces/TreeOpsItems.h>
 
 struct Resources {
+
   wxWindow* m_pWin;
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;

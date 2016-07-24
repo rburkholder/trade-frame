@@ -35,7 +35,7 @@ void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
 
 void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) { 
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( "Instrument", IdInstrument, m_resources );
-  p->NewInstrumentViaDialog();
+  p->HandleMenuNewInstrument( event );
   if ( 0 == p->GetInstrument().get() ) {
     this->m_baseResources.signalDelete( p->GetTreeItemId() );
     //DeleteMember( p->GetTreeItemId() );

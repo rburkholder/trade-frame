@@ -29,7 +29,7 @@ public:
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources );
   virtual ~TreeItemInstrument( void );
   
-  void NewInstrumentViaDialog( void ); // invocable only if no instrument already exists
+    void HandleMenuNewInstrument( wxCommandEvent& event );
   
   pInstrument_t GetInstrument( void ) { return m_pInstrument; }
   
@@ -49,11 +49,12 @@ protected:
   };
   
     void BuildContextMenu( wxMenu* pMenu );
-    void InstrumentViaDialog( Resources::ENewInstrumentLock );
     
-    void HandleNewInstrument( wxCommandEvent& event );
-    void HandleAddFuturesOption( wxCommandEvent& event );
-    void HandleAddOption( wxCommandEvent& event );
+    void NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ); // invocable only if no instrument already exists
+    void InstrumentViaDialog( const std::string& sPrompt, Resources::ENewInstrumentLock lock );
+    
+    void HandleMenuAddFuturesOption( wxCommandEvent& event );
+    void HandleMenuAddOption( wxCommandEvent& event );
     void HandleLiveChart( wxCommandEvent& event );
     void HandleDailyChart( wxCommandEvent& event );
     void HandleSaveData( wxCommandEvent& event );

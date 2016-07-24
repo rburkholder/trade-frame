@@ -34,24 +34,6 @@ void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   m_baseResources.signalDelete( this->m_id );
 }
 
-void TreeItemInstrument::HandleNewInstrument( wxCommandEvent& event ) {
-  NewInstrumentViaDialog( Resources::NoLock );
-}
-
-void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
-  if ( 0 == m_pInstrument.use_count() ) {
-    m_pInstrument = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
-    if ( 0 != m_pInstrument.get() ) {
-      m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
-      Watch();
-    }
-  }
-  else {
-    std::cout << "instrument already assigned" << std::endl;
-  }
-  
-}
-
 void TreeItemInstrument::Watch( void ) {
   if ( 0 == m_pWatch ) {
     m_pWatch = new ou::tf::Watch( m_pInstrument, m_resources.pData1Provider );
@@ -75,18 +57,18 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
   if ( 0 == m_pInstrument.use_count() ) {
     pMenu->Append( MINewInstrument, "New Instrument" );
-    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleNewInstrument, this, MINewInstrument );
+    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
   }
   else {
     if ( m_pInstrument->IsFuture() ) {
       // can then use underlying to calc implied volatility
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
-      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleAddFuturesOption, this, MINewFuturesOption );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
     }
     else {
       if ( m_pInstrument->IsStock() ) {
         pMenu->Append( MINewOption, "New Option" );
-        pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleAddOption, this, MINewOption );
+        pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
       }
     }
   }
@@ -116,20 +98,6 @@ void TreeItemInstrument::ShowContextMenu( void ) {
   m_baseResources.signalPopupMenu( m_pMenu );
 }
 
-/* todo:  
- *   for following two handlers:
- *   the dialog needs a lock for FuturesOption and Option
- *   then need NewOptionViaDialog, NewFuturesOptionViaDialog to force that setting in the dialog
- */
-
-void TreeItemInstrument::HandleAddOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( "Option", Resources::LockOption );
-}
-
-void TreeItemInstrument::HandleAddFuturesOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( "FuturesOption", Resources::LockFuturesOption );
-}
-
 void TreeItemInstrument::InstrumentViaDialog( const std::string& sPrompt, Resources::ENewInstrumentLock lock ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
   p->NewInstrumentViaDialog( lock );
@@ -139,4 +107,37 @@ void TreeItemInstrument::InstrumentViaDialog( const std::string& sPrompt, Resour
   }
 //  else {
 //  }
+}void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
+  if ( 0 == m_pInstrument.use_count() ) {
+    m_pInstrument = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
+    if ( 0 != m_pInstrument.get() ) {
+      m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
+      Watch();
+    }
+  }
+  else {
+    std::cout << "instrument already assigned" << std::endl;
+  }
+  
 }
+
+void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
+  NewInstrumentViaDialog( Resources::NoLock );
+}
+
+/* todo:  
+ *   for following two handlers (what does the lock do?):
+ *   the dialog needs a lock for FuturesOption and Option
+ *   then need NewOptionViaDialog, NewFuturesOptionViaDialog to force that setting in the dialog
+ */
+
+// from tree menu popup
+void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) { 
+  InstrumentViaDialog( "Option", Resources::LockOption );
+}
+
+// from tree menu popup
+void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) { 
+  InstrumentViaDialog( "FuturesOption", Resources::LockFuturesOption );
+}
+

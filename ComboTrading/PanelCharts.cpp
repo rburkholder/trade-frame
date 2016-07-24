@@ -28,7 +28,8 @@
 
 #include <TFVuTrading/DialogPickSymbol.h>
 #include <TFIQFeed/BuildSymbolName.h>
-#include <wx-3.0/wx/wx/wx/toplevel.h>
+//#include <wx-3.0/wx/wx/wx/toplevel.h>
+#include <wx/toplevel.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
