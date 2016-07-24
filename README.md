@@ -5,6 +5,8 @@ C++ is used throughout for building high-capacity, low-latency trading applicati
 
 I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.
 
+2016/07/24 there might be some build errors as this repository was converted from svn to git, and I'm building the various pieces.
+
 Current Market Data Providers and Execution vendors:
 
 * IQFeed: real time market data and historical data
