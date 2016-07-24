@@ -56,3 +56,7 @@ These are some of the currently supported applications:
 * LiveChart - view an instrument in real time
 * StickShift2 - some rough code for some options ideas
 * ComboTrading - basics of trading multiple securities, such as various options strategies
+
+The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
+
+Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index.php?/categories/23-Trading
