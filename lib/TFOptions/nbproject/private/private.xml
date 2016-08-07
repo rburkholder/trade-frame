@@ -21,5 +21,6 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Option.h</file>
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Binomial.cpp</file>
         </group>
+        <group name="tf"/>
     </open-files>
 </project-private>

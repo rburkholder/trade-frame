@@ -21,7 +21,7 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
+CND_PLATFORM=GNU-Linux
 CND_DLIB_EXT=so
 CND_CONF=Debug
 CND_DISTDIR=dist
@@ -54,41 +54,41 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,/usr/local/lib ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a ../lib/OUStatistics/dist/Debug/GNU-Linux-x86/liboustatistics.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a ../lib/TFIndicators/dist/Debug/GNU-Linux-x86/libtfindicators.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a ../lib/ExcelFormat/dist/Debug/GNU-Linux-x86/libexcelformat.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lboost_system-gcc52-mt-d-1_59 -lboost_date_time-gcc52-mt-d-1_59 -lboost_filesystem-gcc52-mt-d-1_59 -lboost_serialization-gcc52-mt-d-1_59 -lboost_thread-gcc52-mt-d-1_59 -lboost_regex-gcc52-mt-d-1_59
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,/usr/local/lib ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lboost_system-gcc52-mt-d-1_59 -lboost_date_time-gcc52-mt-d-1_59 -lboost_filesystem-gcc52-mt-d-1_59 -lboost_serialization-gcc52-mt-d-1_59 -lboost_thread-gcc52-mt-d-1_59 -lboost_regex-gcc52-mt-d-1_59
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUCommon/dist/Debug/GNU-Linux-x86/liboucommon.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUStatistics/dist/Debug/GNU-Linux-x86/liboustatistics.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUStatistics/dist/Debug/GNU-Linux/liboustatistics.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFBitsNPieces/dist/Debug/GNU-Linux-x86/libtfbitsnpieces.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFBitsNPieces/dist/Debug/GNU-Linux/libtfbitsnpieces.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIndicators/dist/Debug/GNU-Linux-x86/libtfindicators.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIndicators/dist/Debug/GNU-Linux/libtfindicators.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux-x86/libtfinteractivebrokers.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFInteractiveBrokers/dist/Debug/GNU-Linux/libtfinteractivebrokers.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIQFeed/dist/Debug/GNU-Linux-x86/libtfiqfeed.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFIQFeed/dist/Debug/GNU-Linux/libtfiqfeed.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFOptions/dist/Debug/GNU-Linux-x86/libtfoptions.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFOptions/dist/Debug/GNU-Linux/libtfoptions.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFSimulation/dist/Debug/GNU-Linux-x86/libtfsimulation.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFSimulation/dist/Debug/GNU-Linux/libtfsimulation.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFTimeSeries/dist/Debug/GNU-Linux-x86/libtftimeseries.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFTimeSeries/dist/Debug/GNU-Linux/libtftimeseries.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFTrading/dist/Debug/GNU-Linux-x86/libtftrading.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFTrading/dist/Debug/GNU-Linux/libtftrading.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFVuTrading/dist/Debug/GNU-Linux-x86/libtfvutrading.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFVuTrading/dist/Debug/GNU-Linux/libtfvutrading.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux-x86/libtfhdf5timeseries.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/TFHDF5TimeSeries/dist/Debug/GNU-Linux/libtfhdf5timeseries.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSqlite/dist/Debug/GNU-Linux-x86/libousqlite.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSqlite/dist/Debug/GNU-Linux/libousqlite.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSQL/dist/Debug/GNU-Linux-x86/libousql.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/OUSQL/dist/Debug/GNU-Linux/libousql.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/ExcelFormat/dist/Debug/GNU-Linux-x86/libexcelformat.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ../lib/ExcelFormat/dist/Debug/GNU-Linux/libexcelformat.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}

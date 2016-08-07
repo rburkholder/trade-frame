@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU-Linux-x86
-CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
+CND_PLATFORM_Debug=GNU-Linux
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
 CND_ARTIFACT_NAME_Debug=libousql.a
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libousql.a
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/libousql.a
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=OUSQL.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/OUSQL.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/OUSQL.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux-x86
-CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
+CND_PLATFORM_Release=GNU-Linux
+CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
 CND_ARTIFACT_NAME_Release=libousql.a
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/libousql.a
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/libousql.a
+CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
 CND_PACKAGE_NAME_Release=OUSQL.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/OUSQL.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/OUSQL.tar
 #
 # include compiler specific variables
 #

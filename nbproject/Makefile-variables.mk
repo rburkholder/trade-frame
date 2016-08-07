@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU-Linux-x86
-CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=tradeframe
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/tradeframe
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=tradeframe.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/tradeframe.tar
+CND_PLATFORM_Debug=GNU-Linux
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
+CND_ARTIFACT_NAME_Debug=tf
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/tf
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
+CND_PACKAGE_NAME_Debug=tf.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/tf.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux-x86
-CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=tradeframe
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/tradeframe
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=tradeframe.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/tradeframe.tar
+CND_PLATFORM_Release=GNU-Linux
+CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
+CND_ARTIFACT_NAME_Release=tf
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/tf
+CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
+CND_PACKAGE_NAME_Release=tf.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/tf.tar
 #
 # include compiler specific variables
 #

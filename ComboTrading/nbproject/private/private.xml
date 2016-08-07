@@ -27,5 +27,8 @@
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.h</file>
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/ComboTrading.h</file>
         </group>
+        <group name="tf">
+            <file>file:/home/rpb/projects/tf-svn-to-git/tf/ComboTrading/ComboTrading.cpp</file>
+        </group>
     </open-files>
 </project-private>

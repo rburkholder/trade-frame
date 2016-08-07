@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU-Linux-x86
-CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
+CND_PLATFORM_Debug=GNU-Linux
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
 CND_ARTIFACT_NAME_Debug=libougp.a
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libougp.a
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/libougp.a
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=OUGP.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/OUGP.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/OUGP.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux-x86
-CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
+CND_PLATFORM_Release=GNU-Linux
+CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
 CND_ARTIFACT_NAME_Release=libougp.a
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/libougp.a
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/libougp.a
+CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
 CND_PACKAGE_NAME_Release=OUGP.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/OUGP.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/OUGP.tar
 #
 # include compiler specific variables
 #

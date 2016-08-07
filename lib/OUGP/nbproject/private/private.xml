@@ -9,5 +9,6 @@
         <group/>
         <group name="lib"/>
         <group name="TradeFrame"/>
+        <group name="tf"/>
     </open-files>
 </project-private>

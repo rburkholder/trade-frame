@@ -10,5 +10,6 @@
         <group/>
         <group name="Free Group"/>
         <group name="TradeFrame"/>
+        <group name="tf"/>
     </open-files>
 </project-private>
