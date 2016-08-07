@@ -50,12 +50,13 @@ re-written for current use.
 
 These are some of the currently supported applications:
 
-* Hdf5Chart - view the contents of the hdf5 data set
-* HedgedBollinger - some experiements in futures
+* IQFeedMarketSymbols - automatically download and decompress the latest mkt_symbol.txt file from dtn,iq
 * IQFeedGetHistory - load up with historical data for looking for trading ideas
+* Hdf5Chart - view the contents of the hdf5 data set
 * LiveChart - view an instrument in real time
-* StickShift2 - some rough code for some options ideas
 * ComboTrading - basics of trading multiple securities, such as various options strategies
+* StickShift2 - some rough code for some options ideas
+* HedgedBollinger - some experiements in futures
 
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 
