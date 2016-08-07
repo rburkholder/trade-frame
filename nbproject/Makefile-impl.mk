@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=tf
+PROJECTNAME=trade-frame
 
 # Active Configuration
 DEFAULTCONF=Debug
