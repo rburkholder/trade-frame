@@ -295,33 +295,33 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
       const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trd( m_listIQFeedSymbols.GetTrd( sName ) );
       
       switch ( trd.sc ) {
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
-	  pInstrument = ou::tf::iqfeed::BuildInstrument( trd );
-	  break;
-	case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
-	{
-	  ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
-	  if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) {
-	  }
-	  else {
-	    const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
-	    switch (trdUnderlying.sc ) {
-	      case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
-		pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( trdUnderlying );  // build the underlying in preparation for the option
-		im.Register( pInstrumentUnderlying );
-		break;
-	      default:
-		throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
-	    }
-	  }
-          pInstrument = ou::tf::iqfeed::BuildInstrument( trd, pInstrumentUnderlying );  // build an option
-	}
-	  break;
-	default:
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Future: 
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::FOption:
+          pInstrument = ou::tf::iqfeed::BuildInstrument( sName, trd );  // need to check that correct name is supplied
+          break;
+        case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::IEOption: 
+          {
+          ou::tf::Instrument::pInstrument_t pInstrumentUnderlying;
+          if ( im.Exists( trd.sUnderlying, pInstrumentUnderlying ) ) {
+            }
+          else {
+            const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t& trdUnderlying( m_listIQFeedSymbols.GetTrd( trd.sUnderlying ) );
+            switch (trdUnderlying.sc ) {
+              case ou::tf::iqfeed::MarketSymbol::enumSymbolClassifier::Equity:
+                pInstrumentUnderlying = ou::tf::iqfeed::BuildInstrument( sName, trdUnderlying );  // build the underlying in preparation for the option   // need to check that correct name is supplied
+                im.Register( pInstrumentUnderlying );
+                break;
+              default:
+                throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type for underlying" );
+              }
+            }
+          pInstrument = ou::tf::iqfeed::BuildInstrument( sName, trd  );  // build an option   // need to check that correct name is supplied
+          }
+          break;
+        default:
           throw std::runtime_error( "ConstructEquityPosition0: no applicable instrument type" );
-      }
+        }
       //im.Register( pInstrument ); // register once info returned from IB instead
       bConstructed = true;
     }
@@ -337,10 +337,12 @@ void AppStickShift::ConstructEquityPosition0( const std::string& sName, pPortfol
       //contract.secType = "STK";
       //contract.symbol = sName;
       m_tws->RequestContractDetails( 
-	pInstrument,
-	//contract, 
-	// HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
-	MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) );
+        sName, pInstrument,  // need to check that correct name is supplied
+        //contract, 
+        // HandleIBContractDetails will submit an event which ends up at ConstructEquityPosition1
+        MakeDelegate( this, &AppStickShift::HandleIBContractDetails ), 
+        MakeDelegate( this, &AppStickShift::HandleIBContractDetailsDone ) 
+        );
     }
   }
 }
