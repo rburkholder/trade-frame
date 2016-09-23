@@ -30,5 +30,12 @@
         <group name="tf">
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/ComboTrading/ComboTrading.cpp</file>
         </group>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/trade-frame/ComboTrading/PanelCharts.cpp</file>
+            <file>file:/home/rpb/projects/trade-frame/ComboTrading/ComboTrading.h</file>
+            <file>file:/home/rpb/projects/trade-frame/ComboTrading/BundleTracking.cpp</file>
+            <file>file:/home/rpb/projects/trade-frame/ComboTrading/PanelCharts.h</file>
+            <file>file:/home/rpb/projects/trade-frame/ComboTrading/ComboTrading.cpp</file>
+        </group>
     </open-files>
 </project-private>
