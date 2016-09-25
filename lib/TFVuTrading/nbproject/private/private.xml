@@ -23,9 +23,6 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFVuTrading/DialogPickSymbol.cpp</file>
         </group>
         <group name="tf"/>
-        <group name="trade-frame">
-            <file>file:/home/rpb/projects/trade-frame/lib/TFVuTrading/DialogPickSymbol.cpp</file>
-            <file>file:/home/rpb/projects/trade-frame/lib/TFVuTrading/DialogPickSymbol.h</file>
-        </group>
+        <group name="trade-frame"/>
     </open-files>
 </project-private>

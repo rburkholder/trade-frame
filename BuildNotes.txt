@@ -1,3 +1,8 @@
+2016/09/25
+
+sed -i 's/gcc52-mt-d-1_59/gcc61-mt-1_61/g' nbproject/configurations.xml
+sed -i 's/gcc52-mt-d-1_59/gcc61-mt-1_61/g' nbproject/Makefile-Debug.mk
+
 2016/05/15
 
 rpb@z800:~/projects/wxWidgets-3.0.2$ 
@@ -11,9 +16,6 @@ sudo ldconfig
 find . -name setup.h -print
 less ./buildNormal/lib/wx/include/gtk3-unicode-3.0/wx/setup.h
 sudo cp  ./buildNormal/lib/wx/include/gtk3-unicode-3.0/wx/setup.h /usr/local/include/wx/
-
-
-
 
 
   

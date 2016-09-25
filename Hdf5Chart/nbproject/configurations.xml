@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="95">
+<configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -215,12 +215,12 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc61-mt-1_61</linkerLibLibItem>
             <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
             <linkerLibLibItem>hdf5</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>

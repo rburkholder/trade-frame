@@ -1,9 +1,76 @@
 # trade-frame
 
+## Introduction
+
 This is an application I use for automated trading securities.  
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
 I use NetBeans as an IDE for development.  As such, all build and project files are NetBeans related.
+
+## Building
+
+Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
+I use the NVidia network card with the binary NVidia drivers (building wxWidgets needs this).
+Have about 10G free to build the project and related libraries and installs
+
+
+```
+mkdir rburkholder
+cd rburkholder
+sudo apt-get update && apt-get install git wine wget
+sudo dpkg --add-architecture i386 && apt-get install wine32
+wget http://www.iqfeed.net/iqfeed_client_5_2_5_0.exe
+wine iqfeed_client_5_2_5_0.exe
+wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
+sh tws-stable-linux-x64.sh
+http://download.netbeans.org/netbeans/8.1/final/bundles/netbeans-8.1-cpp-linux-x86.sh
+sh netbeans-8.1-cpp-linux-x86.sh
+git clone https://github.com/rburkholder/libs-build.git
+libs-build/build.sh tradeframe
+git clone https://github.com/rburkholder/trade-frame.git
+pushd trade-frame
+cd IQFeedMarketSymbols
+make
+cd ../IQFeedGetHistory
+make
+cd ../Hdf5Chart
+make
+cd ../LiveChart
+make
+cd ../ComboTrading
+make
+cd ../StickShift2
+make
+cd ../HedgedBollinger
+make
+popd
+
+```
+
+## Starting Up
+
+* Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> IQWatchQuote (may need to start twice, and then watch a symbol)
+* Start Interactive Brokers TWS and connect to a paper trading account 
+.* do not use an active account for testing
+.* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
+* Start NetBeans
+,* File -> Project Groups -> New Group -> Folder of Projects -> [browse to trade-frame]
+* IQFeedMarketSymbols project:
+.* run the app:
+..* Actions -> New Symbol List Remote
+..* the program will spend a few minutes downloading, parsing, and saving the latest IQFeed symbol list
+..* lots of messages will be generated, no need to evaluate them, other than the summary stats at the end
+..* File -> Exit
+* IQFeedGetHistory project:
+.* obtains daily ohlc values, used to refresh data
+.* repeats the symbol download, which was done with IQFeedMarketSymbols 
+.* run the app:
+..* ensure the iqfeed daemon is running (you should see active updates in the quote monitor)
+..* 'turn on' IQF
+..* Actions -> download n # of days (0 to download full history of symbol)
+..* File -> Exit 
+
+## Background
 
 Current Market Data Providers and Execution vendors:
 
