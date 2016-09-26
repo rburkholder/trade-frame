@@ -67,8 +67,16 @@ popd
   * run the app:
     * ensure the iqfeed daemon is running (you should see active updates in the quote monitor)
     * 'turn on' IQF
-    * Actions -> download n # of days (0 to download full history of symbol)
+    * Actions -> download n # of days:
+      * 0 to download full history of symbol, can take a while
+      * 10 to try a test
+      * a symbol download will commence
+      * there will be a couple of minutes of no activity while the symbol list is scanned
+      * data for a series of symbols will start
+      * once the message 'Process Complete' shows, the download is complete
+    * 'turn off' IQF
     * File -> Exit 
+* more apps to be described here ...
 
 ## Background
 
