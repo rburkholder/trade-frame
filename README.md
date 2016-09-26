@@ -36,8 +36,8 @@ http://download.netbeans.org/netbeans/8.1/final/bundles/netbeans-8.1-cpp-linux-x
 sh netbeans-8.1-cpp-linux-x86.sh
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
-# main trade-frame code
 libs-build/build.sh tradeframe
+# main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
 # pre-build some of the example apps
 pushd trade-frame
