@@ -10,8 +10,12 @@ I use NetBeans as an IDE for development.  As such, all build and project files 
 ## Building
 
 Scripts are library version specific. I use Debian Stretch/Testing x64.  Build notes are as of 2016/09/25.
-I use the NVidia network card with the binary NVidia drivers (building wxWidgets needs this).
+I use the NVidia video card with the binary NVidia drivers (building wxWidgets needs this).
 Have about 10G free to build the project and related libraries and installs
+
+Debian Stretch netinst (daily snapshot usually works): 
+https://www.debian.org/devel/debian-installer/
+http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/
 
 
 ```
