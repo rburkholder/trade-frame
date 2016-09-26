@@ -56,19 +56,19 @@ popd
 * Start NetBeans
 ,* File -> Project Groups -> New Group -> Folder of Projects -> [browse to trade-frame]
 * IQFeedMarketSymbols project:
-.* run the app:
-..* Actions -> New Symbol List Remote
-..* the program will spend a few minutes downloading, parsing, and saving the latest IQFeed symbol list
-..* lots of messages will be generated, no need to evaluate them, other than the summary stats at the end
-..* File -> Exit
+  * run the app:
+    * Actions -> New Symbol List Remote
+    * the program will spend a few minutes downloading, parsing, and saving the latest IQFeed symbol list
+    * lots of messages will be generated, no need to evaluate them, other than the summary stats at the end
+    * File -> Exit
 * IQFeedGetHistory project:
-.* obtains daily ohlc values, used to refresh data
-.* repeats the symbol download, which was done with IQFeedMarketSymbols 
-.* run the app:
-..* ensure the iqfeed daemon is running (you should see active updates in the quote monitor)
-..* 'turn on' IQF
-..* Actions -> download n # of days (0 to download full history of symbol)
-..* File -> Exit 
+  * obtains daily ohlc values, used to refresh data
+  * repeats the symbol download, which was done with IQFeedMarketSymbols 
+  * run the app:
+    * ensure the iqfeed daemon is running (you should see active updates in the quote monitor)
+    * 'turn on' IQF
+    * Actions -> download n # of days (0 to download full history of symbol)
+    * File -> Exit 
 
 ## Background
 
