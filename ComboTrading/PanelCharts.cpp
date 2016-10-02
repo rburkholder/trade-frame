@@ -295,7 +295,7 @@ void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
       m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
     }
     else {
-      std::cout << "error:  not expected instrument" << std::endl;
+      std::cout << "PanelCharts::InstrumentUpdated error:  not expected instrument" << std::endl;
     }
   }
 }

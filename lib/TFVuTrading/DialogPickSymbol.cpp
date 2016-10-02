@@ -273,7 +273,7 @@ void DialogPickSymbol::SetFuturesOptionOnly( void ) {
 
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   
-  std::cout << "DialogPickSymbol::HandleIQFSymbolChanged entered" << std::endl;
+  //std::cout << "DialogPickSymbol::HandleIQFSymbolChanged entered" << std::endl;
 
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   
@@ -285,7 +285,7 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   std::string sText( text.c_str() );
 
   m_bIBSymbolChanging = true;
-  m_textIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need the flag
+  m_textIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need m_bIBSymbolChanging
   m_bIBSymbolChanging = false;
   pde->sIBSymbolName = text;
   
@@ -398,7 +398,7 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 
 void DialogPickSymbol::UpdateComposite( void ) {
   
-  std::cout << "DialogPickSymbol::UpdateComposite" << std::endl;
+  //std::cout << "DialogPickSymbol::UpdateComposite" << std::endl;
   
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   

@@ -40,17 +40,9 @@
 #include "ComboTrading.h"
 
 /*
- * 20161001 Fix:
- *   break the loop when adding a symbol:
- *      Exchange supplied to IBTWS: NYSE
- *      SPDR GOLD SHARES differing timezones, EST vs EST5EDT
- *      Exchange supplied to IBTWS: NYSE
- *      SPDR GOLD SHARES differing timezones, EST vs EST5EDT
- * 
- *   crashes on second symbol selection attempt
  * 
  * 20160522 Issues:
- *   don't save without IB contract
+ *   don't save without IB contract - should be good now, but validate
  *   need to watch implied volatility
  *   LiveChart: 
  *     future with implied volatility curve (pull from HedgedBollinger
