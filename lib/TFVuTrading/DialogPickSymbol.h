@@ -173,7 +173,9 @@ private:
   
   void HandleSetFocus( SetFocusEvent& event );
   
+  void UpdateContractId( void );
   void UpdateComposite( void );
+  void UpdateBtnOk( void );
   
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

@@ -167,6 +167,9 @@ void PanelCharts::CreateControls() {
   m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
   m_resources.signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1 ) );
   
+  m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
+  m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
+  
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
 
 }
@@ -179,12 +182,12 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
 
 PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   assert( 0 == m_pDialogPickSymbol );
-  namespace args = boost::phoenix::arg_names;
-  m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
-  m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
+  
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
   m_pDialogPickSymbol->SetDataExchange( &m_de );
+  
   int status = m_pDialogPickSymbol->ShowModal();
+  
   switch ( status ) {
     case wxID_CANCEL:
       m_pInstrumentForDialog.reset();
@@ -195,11 +198,14 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
       }
       break;
   }
+  
   m_pDialogPickSymbol->Destroy();
   m_pDialogPickSymbol = 0;
-  pInstrument_t pInstrument( m_pInstrumentForDialog );
-  m_pInstrumentForDialog.reset();
-  return pInstrument;
+  
+  //pInstrument_t pInstrument( m_pInstrumentForDialog );
+  //m_pInstrumentForDialog.reset();
+  
+  return m_pInstrumentForDialog;
 }
 
 PanelCharts::pInstrument_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
@@ -285,7 +291,11 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
 void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
   if ( 0 != m_pDialogPickSymbol ) {
     if ( pInstrument.get() == m_pInstrumentForDialog.get() ) {
+      // expecting contract id to already exist in instrument
       m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
+    }
+    else {
+      std::cout << "error:  not expected instrument" << std::endl;
     }
   }
 }

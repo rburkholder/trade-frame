@@ -40,6 +40,14 @@
 #include "ComboTrading.h"
 
 /*
+ * 20161001 Fix:
+ *   break the loop when adding a symbol:
+ *      Exchange supplied to IBTWS: NYSE
+ *      SPDR GOLD SHARES differing timezones, EST vs EST5EDT
+ *      Exchange supplied to IBTWS: NYSE
+ *      SPDR GOLD SHARES differing timezones, EST vs EST5EDT
+ * 
+ *   crashes on second symbol selection attempt
  * 
  * 20160522 Issues:
  *   don't save without IB contract
@@ -88,9 +96,6 @@
  *  keep a series of trades prepared
  *  show the intraday price spike charts
  *   
- * 20151115 other stuff to do:
- *  use iqfeed market symbol file, 
- *  build gui for selecting symbols given name, type, yr, mn, day, strike, exch, desc, ...
  */
 
 IMPLEMENT_APP(AppComboTrading)
@@ -589,6 +594,7 @@ void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_
 // holiday expire: 13:00 est 2015/11/27 - weekly option
 
 void AppComboTrading::HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails& details, pInstrument_t& pInstrument ) {
+  // contract id should be in the instrument when we get here?
   QueueEvent( new EventIBInstrument( EVENT_IB_INSTRUMENT, -1, pInstrument ) );
   // this is in another thread, and should be handled in a thread safe manner.
 }
@@ -805,7 +811,7 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
-  m_vExchanges.insert( "OPRA" );
+  //m_vExchanges.insert( "OPRA" );
   m_vExchanges.insert( "TSE" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );

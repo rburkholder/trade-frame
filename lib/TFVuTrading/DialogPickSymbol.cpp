@@ -272,6 +272,8 @@ void DialogPickSymbol::SetFuturesOptionOnly( void ) {
 }
 
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
+  
+  std::cout << "DialogPickSymbol::HandleIQFSymbolChanged entered" << std::endl;
 
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   
@@ -283,7 +285,7 @@ void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
   std::string sText( text.c_str() );
 
   m_bIBSymbolChanging = true;
-  m_textIBName->SetValue( text );
+  m_textIBName->SetValue( text ); // this triggers HandleIBSymbolChanged, so need the flag
   m_bIBSymbolChanging = false;
   pde->sIBSymbolName = text;
   
@@ -395,7 +397,27 @@ void DialogPickSymbol::HandleExpiryChanged( wxDateEvent& event ) {
 }
 
 void DialogPickSymbol::UpdateComposite( void ) {
-  //std::cout << "UpdateComposite" << std::endl;
+  
+  std::cout << "DialogPickSymbol::UpdateComposite" << std::endl;
+  
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  
+  UpdateContractId();
+  
+  pde->sIQFSymbolName = this->m_textIQFName->GetValue();
+  pde->sCompositeDescription = "";
+  pde->signalComposeComposite( pde );
+  m_textComposite->SetValue( pde->sCompositeName );
+  m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
+  UpdateBtnOk();
+}
+
+void DialogPickSymbol::UpdateBtnOk( void ) {
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  m_btnOk->Enable( ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId ) );
+}
+
+void DialogPickSymbol::UpdateContractId( void ) {
   DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
   if ( 0 == pde->nContractId ) {
     m_txtContractId->SetLabel( "-no contract id-" );
@@ -403,13 +425,25 @@ void DialogPickSymbol::UpdateComposite( void ) {
   else {
     m_txtContractId->SetLabel( boost::lexical_cast<std::string>( pde->nContractId ) );
   }
-  
-  pde->sIQFSymbolName = this->m_textIQFName->GetValue();
-  pde->sCompositeDescription = "";
-  pde->signalComposeComposite( pde );
-  m_textComposite->SetValue( pde->sCompositeName );
-  m_txtCompositeDescription->SetLabel( pde->sCompositeDescription );
-  m_btnOk->Enable( ( 0 != pde->sCompositeDescription.length() ) && ( 0 != pde->nContractId ) );
+  UpdateBtnOk();
+}
+
+void DialogPickSymbol::UpdateContractId( int32_t nContractId ) {
+  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
+  pde->nContractId = nContractId;
+  //m_txtContractId->SetLabel( boost::lexical_cast<std::string>( nContractId ) );
+  UpdateContractId();
+}
+
+void DialogPickSymbol::DisableOptionFields( void ) {
+    m_radioOptionPut->Disable();
+    m_radioOptionCall->Disable();
+    m_dateExpiry->Disable();
+    m_textStrike->Disable();
+}
+
+void DialogPickSymbol::HandleSetFocus( SetFocusEvent& event ) {
+  event.GetWindow()->SetFocus();
 }
 
 void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
@@ -439,24 +473,6 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_textIQFName->Disable();
     DisableOptionFields();
   }
-}
-
-void DialogPickSymbol::UpdateContractId( int32_t nContractId ) {
-  DataExchange* pde = reinterpret_cast<DialogPickSymbol::DataExchange*>( m_pDataExchange );
-  pde->nContractId = nContractId;
-  //m_txtContractId->SetLabel( boost::lexical_cast<std::string>( nContractId ) );
-  UpdateComposite();
-}
-
-void DialogPickSymbol::DisableOptionFields( void ) {
-    m_radioOptionPut->Disable();
-    m_radioOptionCall->Disable();
-    m_dateExpiry->Disable();
-    m_textStrike->Disable();
-}
-
-void DialogPickSymbol::HandleSetFocus( SetFocusEvent& event ) {
-  event.GetWindow()->SetFocus();
 }
 
 wxBitmap DialogPickSymbol::GetBitmapResource( const wxString& name ) {

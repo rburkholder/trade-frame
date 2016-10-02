@@ -4,7 +4,34 @@
         <activeConfTypeElem>1</activeConfTypeElem>
         <activeConfIndexElem>0</activeConfIndexElem>
     </data>
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1"/>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="5">
+        <file>
+            <url>PanelCharts.cpp</url>
+            <bookmark id="4">
+                <name/>
+                <line>220</line>
+                <key/>
+            </bookmark>
+            <bookmark id="5">
+                <name/>
+                <line>259</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>ComboTrading.cpp</url>
+            <bookmark id="3">
+                <name/>
+                <line>354</line>
+                <key/>
+            </bookmark>
+            <bookmark id="2">
+                <name/>
+                <line>584</line>
+                <key/>
+            </bookmark>
+        </file>
+    </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="TradeFrame">
             <file>file:/home/rpb/projects/TradeFrame/ComboTrading/BundleTracking.cpp</file>
@@ -30,6 +57,13 @@
         <group name="tf">
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/ComboTrading/ComboTrading.cpp</file>
         </group>
-        <group name="trade-frame"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/BundleTracking.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ComboTrading.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ComboTrading.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemInstrument.cpp</file>
+        </group>
     </open-files>
 </project-private>

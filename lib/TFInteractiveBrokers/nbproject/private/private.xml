@@ -13,5 +13,8 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFInteractiveBrokers/IBTWS.cpp</file>
         </group>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFInteractiveBrokers/IBTWS.cpp</file>
+        </group>
     </open-files>
 </project-private>

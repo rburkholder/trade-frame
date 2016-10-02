@@ -13,11 +13,12 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
+        <gdb_signals>
+        </gdb_signals>
         <gdb_options>
           <DebugOptions>
             <option name="gdb_init_file" value="../.gdbinit"/>
             <option name="debug_command" value="${OUTPUT_PATH}"/>
-            <option name="debug_dir" value="../x64/debug"/>
           </DebugOptions>
         </gdb_options>
         <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
