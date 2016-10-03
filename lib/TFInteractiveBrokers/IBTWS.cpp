@@ -819,16 +819,22 @@ void IBTWS::contractDetails( int reqId, const ContractDetails& contractDetails )
 
   DecodeMarketHours( contractDetails.tradingHours, dtOpen, dtClose );
   pInstrument->SetTimeTrading( 
-    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    // store the values in utc
+    tzEST_t::local_to_utc( dtOpen ), 
+    tzEST_t::local_to_utc( dtClose ) 
     );
 
 //    std::cout << "TH: " << pInstrument->GetTimeTrading().begin() << ", " << pInstrument->GetTimeTrading().end() << std::endl;
 
   DecodeMarketHours( contractDetails.liquidHours, dtOpen, dtClose );
   pInstrument->SetTimeLiquid( 
-    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
-    tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtOpen ) ), 
+    //tzATL_t::utc_to_local( tzEST_t::local_to_utc( dtClose ) ) 
+    // store the values in utc
+    tzEST_t::local_to_utc( dtOpen ), 
+    tzEST_t::local_to_utc( dtClose )
     );
 
 //    std::cout << "LH: " << pInstrument->GetTimeLiquid().begin() << ", " << pInstrument->GetTimeLiquid().end() << std::endl;
