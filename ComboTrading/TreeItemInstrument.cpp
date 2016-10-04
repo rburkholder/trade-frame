@@ -14,6 +14,13 @@
 
 // started December 13, 2015, 8:16 PM
 
+// 20161003 
+//  manual control of watch/unwatch in menu at some point
+//  set colour on menu item for watch/unwatch mode
+//  then start the watch chart
+//  then provide shift/zoom capability on the chart
+
+
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
@@ -21,16 +28,12 @@ TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResourc
 }
   
 TreeItemInstrument::~TreeItemInstrument( void ) {
-  if ( 0 != m_pWatch ) {
-    if ( m_pWatch->Watching() ) {
-      m_pWatch->StopWatch();
-    }
-    delete m_pWatch;
-  }
+  UnWatch();
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   std::cout << "Delete: TreeItemInstrument" << std::endl;
+  UnWatch();
   m_baseResources.signalDelete( this->m_id );
 }
 
@@ -38,6 +41,16 @@ void TreeItemInstrument::Watch( void ) {
   if ( 0 == m_pWatch ) {
     m_pWatch = new ou::tf::Watch( m_pInstrument, m_resources.pData1Provider );
     m_pWatch->StartWatch();
+  }
+}
+
+void TreeItemInstrument::UnWatch( void ) {
+  if ( 0 != m_pWatch ) {
+    if ( m_pWatch->Watching() ) {
+      m_pWatch->StopWatch();
+    }
+    delete m_pWatch;
+    m_pWatch = 0;
   }
 }
 

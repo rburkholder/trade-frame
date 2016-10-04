@@ -57,6 +57,8 @@ wxDECLARE_EVENT( EVT_SetFocus, SetFocusEvent );
 class DialogPickSymbol: public DialogBase {
 public:
   
+  // 20161004 instead of signals, 
+  // maybe use boost::function or lambdas instead, might be more readable
   struct DataExchange: DialogBase::DataExchange {
     // Provides the description for the base name
     typedef boost::signals2::signal<void (const std::string&, std::string&)> signalLookUpDescription_t;

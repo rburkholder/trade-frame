@@ -68,6 +68,7 @@ private:
   ou::tf::Watch* m_pWatch;
   
   void Watch( void );  // will want to set signals on provider so watch/unwatch as provider transitions connection states
+  void UnWatch( void );
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
