@@ -16,22 +16,22 @@
 
 #pragma once
 
-#include <TFTrading/Instrument.h>
-#include <TFTrading/Watch.h>
+#include "InstrumentInfo.h"
 
 #include "TreeItem.h"
 
 class TreeItemInstrument: public TreeItemResources {
   friend class boost::serialization::access;
 public:
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  
+  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
   
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources );
   virtual ~TreeItemInstrument( void );
   
-    void HandleMenuNewInstrument( wxCommandEvent& event );
+  void HandleMenuNewInstrument( wxCommandEvent& event );
   
-  pInstrument_t GetInstrument( void ) { return m_pInstrument; }
+  pInstrumentInfo_t GetInstrumentInfo( void ) { return m_pInstrumentInfo; }
   
   virtual void ShowContextMenu( void );
   
@@ -51,7 +51,7 @@ protected:
     void BuildContextMenu( wxMenu* pMenu );
     
     void NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ); // invocable only if no instrument already exists
-    void InstrumentViaDialog( const std::string& sPrompt, Resources::ENewInstrumentLock lock );
+    void InstrumentViaDialog( Resources::ENewInstrumentLock lock, const std::string& sPrompt );
     
     void HandleMenuAddFuturesOption( wxCommandEvent& event );
     void HandleMenuAddOption( wxCommandEvent& event );
@@ -62,13 +62,8 @@ protected:
     void HandleEmit( wxCommandEvent& event );
   
 private:
-  
-  pInstrument_t m_pInstrument;
-  
-  ou::tf::Watch* m_pWatch;
-  
-  void Watch( void );  // will want to set signals on provider so watch/unwatch as provider transitions connection states
-  void UnWatch( void );
+
+  pInstrumentInfo_t m_pInstrumentInfo;
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -80,8 +75,8 @@ private:
     ar & boost::serialization::base_object<TreeItemResources>(*this);
     try {
       std::string s( m_baseResources.signalGetItemText( m_id ) );
-      m_pInstrument = m_resources.signalLoadInstrument( s );
-      Watch();
+      m_pInstrumentInfo = m_resources.signalLoadInstrument( s );
+      m_pInstrumentInfo->Watch();
     }
     catch (std::runtime_error& e) {
       std::cout << "TreeItemInstrument: couldn't load instrument" << std::endl;

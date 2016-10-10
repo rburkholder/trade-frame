@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -27,6 +29,10 @@
 
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
+
+#include <TFTrading/ProviderManager.h>
+
+#include "InstrumentInfo.h"
 #include "TreeItem.h"
 
 namespace ou { // One Unified
@@ -42,6 +48,7 @@ class PanelCharts: public wxPanel {
 public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
   
   PanelCharts( void );
   PanelCharts( wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTS_IDNAME, 
@@ -103,6 +110,13 @@ private:
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
   
+  typedef std::map<ou::tf::Instrument::idInstrument_t,pInstrumentInfo_t> mapInstrumentInfo_t;
+  mapInstrumentInfo_t m_mapInstrumentInfo;
+  
+  pProvider_t m_pData1Provider;
+  pProvider_t m_pData2Provider;
+  pProvider_t m_pExecutionProvider;
+  
   ou::tf::TreeItemResources m_baseResources;
   Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
@@ -112,15 +126,16 @@ private:
   ou::ChartDataView* m_pChartDataView;
   
   ou::tf::DialogPickSymbol* m_pDialogPickSymbol;
-  pInstrument_t m_pInstrumentForDialog;
   DialogPickSymbol::DataExchange m_de;
+  pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
-  pInstrument_t HandleNewInstrumentRequest( void );
+  pInstrumentInfo_t HandleNewInstrumentRequest( void );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
-  pInstrument_t HandleLoadInstrument( const std::string& );
+  pInstrumentInfo_t HandleLoadInstrument( const std::string& );
+  pInstrumentInfo_t LoadInstrument( pInstrument_t );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
 

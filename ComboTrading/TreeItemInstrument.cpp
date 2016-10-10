@@ -20,38 +20,22 @@
 //  then start the watch chart
 //  then provide shift/zoom capability on the chart
 
+// 20161009
+//   should override rename so it always has proper instrument name
+//   is rename actually in the menu, if not, then nothing to do
 
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-  TreeItemResources( id, baseResources, resources ), m_pWatch( 0 ) {
+  TreeItemResources( id, baseResources, resources ) {
 }
   
 TreeItemInstrument::~TreeItemInstrument( void ) {
-  UnWatch();
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   std::cout << "Delete: TreeItemInstrument" << std::endl;
-  UnWatch();
   m_baseResources.signalDelete( this->m_id );
-}
-
-void TreeItemInstrument::Watch( void ) {
-  if ( 0 == m_pWatch ) {
-    m_pWatch = new ou::tf::Watch( m_pInstrument, m_resources.pData1Provider );
-    m_pWatch->StartWatch();
-  }
-}
-
-void TreeItemInstrument::UnWatch( void ) {
-  if ( 0 != m_pWatch ) {
-    if ( m_pWatch->Watching() ) {
-      m_pWatch->StopWatch();
-    }
-    delete m_pWatch;
-    m_pWatch = 0;
-  }
 }
 
 void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
@@ -68,23 +52,25 @@ void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
-  if ( 0 == m_pInstrument.use_count() ) {
+  if ( 0 == m_pInstrumentInfo.use_count() ) {  // is this actually used?
     pMenu->Append( MINewInstrument, "New Instrument" );
     pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
   }
   else {
-    if ( m_pInstrument->IsFuture() ) {
+    if ( m_pInstrumentInfo->GetInstrument()->IsFuture() ) {
       // can then use underlying to calc implied volatility
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
     }
     else {
-      if ( m_pInstrument->IsStock() ) {
+      if ( m_pInstrumentInfo->GetInstrument()->IsStock() ) {
+      // can then use underlying to calc implied volatility
         pMenu->Append( MINewOption, "New Option" );
         pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
       }
     }
   }
+  // add watch/unwatch menu item?
   pMenu->Append( MIEmit, "Emit" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
   pMenu->Append( MILiveChart, "Live Chart" );
@@ -98,9 +84,7 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
 }
 
 void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
-  if ( 0 != m_pWatch ) {
-    m_pWatch->EmitValues();
-  }
+  m_pInstrumentInfo->Emit();
 }
 
 void TreeItemInstrument::ShowContextMenu( void ) {
@@ -111,27 +95,28 @@ void TreeItemInstrument::ShowContextMenu( void ) {
   m_baseResources.signalPopupMenu( m_pMenu );
 }
 
-void TreeItemInstrument::InstrumentViaDialog( const std::string& sPrompt, Resources::ENewInstrumentLock lock ) {
+void TreeItemInstrument::InstrumentViaDialog( Resources::ENewInstrumentLock lock, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
   p->NewInstrumentViaDialog( lock );
-  if ( 0 == p->GetInstrument().get() ) {
+  if ( 0 == p->GetInstrumentInfo().get() ) {
     this->m_baseResources.signalDelete( p->GetTreeItemId() );
     //DeleteMember( p->GetTreeItemId() );
   }
 //  else {
 //  }
-}void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
-  if ( 0 == m_pInstrument.use_count() ) {
-    m_pInstrument = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
-    if ( 0 != m_pInstrument.get() ) {
-      m_baseResources.signalSetItemText( m_id, m_pInstrument->GetInstrumentName() );
-      Watch();
+}
+
+void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
+  if ( 0 == m_pInstrumentInfo.use_count() ) {
+    m_pInstrumentInfo = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
+    if ( 0 != m_pInstrumentInfo.get() ) {
+      m_baseResources.signalSetItemText( m_id, m_pInstrumentInfo->GetInstrument()->GetInstrumentName() );
+      m_pInstrumentInfo->Watch();
     }
   }
   else {
-    std::cout << "instrument already assigned" << std::endl;
+    std::cout << "InstrumentInfo already assigned" << std::endl;
   }
-  
 }
 
 void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
@@ -146,11 +131,11 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( "Option", Resources::LockOption );
+  InstrumentViaDialog( Resources::LockOption, "Option" );
 }
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( "FuturesOption", Resources::LockFuturesOption );
+  InstrumentViaDialog( Resources::LockFuturesOption, "FuturesOption" );
 }
 

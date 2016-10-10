@@ -795,6 +795,7 @@ void AppComboTrading::HandleConstructPortfolio( ou::tf::PanelPortfolioPosition& 
   }
 }
 
+// maybe put this into background thread
 void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
 
   m_vExchanges.clear();
@@ -803,8 +804,8 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
-  //m_vExchanges.insert( "OPRA" );
-  m_vExchanges.insert( "TSE" );
+  m_vExchanges.insert( "OPRA" );
+  //m_vExchanges.insert( "TSE" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );
   //m_vExchanges.push_back( "NASDAQ,OTCBB" );

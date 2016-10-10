@@ -21,33 +21,29 @@
 //#include <wx/panel.h>
 #include <wx/window.h>
 
-#include <TFTrading/Instrument.h>
-#include <TFTrading/ProviderManager.h>
-
 #include <TFBitsNPieces/TreeOpsItems.h>
+
+#include "InstrumentInfo.h"
 
 struct Resources {
 
-  wxWindow* m_pWin;
+  //wxWindow* m_pWin;  // is this used somewhere?  maybe is the charting window, which is now in InstrumentInfo
   
-  typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  //typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
+  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
   
   enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
-  typedef boost::signals2::signal<pInstrument_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pInstrument_t> > signalNewInstrument_t;
-  typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
-  signalNewInstrument_t signalNewInstrumentViaDialog;
-//  signalNewInstrument_t signalNewInstrumentViaLoad;
   
-  typedef boost::signals2::signal<pInstrument_t (const std::string&), ou::tf::FirstOrDefault<pInstrument_t> > signalLoadInstrument_t;
-  typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
-  signalLoadInstrument_t signalLoadInstrument;
+  // used in TreeItemInstrument
+  typedef boost::signals2::signal<pInstrumentInfo_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pInstrumentInfo_t> > signalNewInstrumentInfo_t;
+  typedef signalNewInstrumentInfo_t::slot_type slotNewInstrumentInfo_t;
+  signalNewInstrumentInfo_t signalNewInstrumentViaDialog;
   
-  typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
-  pProvider_t pData1Provider;
-  pProvider_t pData2Provider;
-  pProvider_t pExecutionProvider;
+  typedef boost::signals2::signal<pInstrumentInfo_t (const std::string&), ou::tf::FirstOrDefault<pInstrumentInfo_t> > signalLoadInstrumentInfo_t;
+  typedef signalLoadInstrumentInfo_t::slot_type slotLoadInstrumentInfo_t;
+  signalLoadInstrumentInfo_t signalLoadInstrument;
   
-  Resources( void ): m_pWin( 0 ) {}
+  //Resources( void ): m_pWin( 0 ) {}
 };
 
 // ================

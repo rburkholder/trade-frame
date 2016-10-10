@@ -34,9 +34,6 @@
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
 
-// 20151206 need to think about serialization of what is in the tree so it can be 
-//   retrieved for next time
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -161,7 +158,7 @@ void PanelCharts::CreateControls() {
   m_winChart->Bind( wxEVT_PAINT, &PanelCharts::HandlePaint, this, idChart );
   m_winChart->Bind( wxEVT_SIZE, &PanelCharts::HandleSize, this, idChart );
   
-  m_resources.m_pWin = m_winChart;
+  //m_resources.m_pWin = m_winChart;  // this will go into the InstrumentInfo structure
   
   namespace args = boost::phoenix::arg_names;
   m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
@@ -175,12 +172,12 @@ void PanelCharts::CreateControls() {
 }
 
 void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
-  m_resources.pData1Provider = pData1Provider;
-  m_resources.pData2Provider = pData2Provider;
-  m_resources.pExecutionProvider = pExecutionProvider;
+  m_pData1Provider = pData1Provider;
+  m_pData2Provider = pData2Provider;
+  m_pExecutionProvider = pExecutionProvider;
 }
 
-PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
+PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {
   assert( 0 == m_pDialogPickSymbol );
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
@@ -188,13 +185,15 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   
   int status = m_pDialogPickSymbol->ShowModal();
   
+  InstrumentInfo::pInstrumentInfo_t pInstrumentInfo;
+  
   switch ( status ) {
     case wxID_CANCEL:
-      m_pInstrumentForDialog.reset();
+      //m_pDialogPickSymbolCreatedInstrument.reset();
       break;
     case wxID_OK:
-      if ( 0 != m_pInstrumentForDialog.get() ) {
-        signalRegisterInstrument( m_pInstrumentForDialog );
+      if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
+        pInstrumentInfo = LoadInstrument( m_pDialogPickSymbolCreatedInstrument );
       }
       break;
   }
@@ -202,14 +201,28 @@ PanelCharts::pInstrument_t PanelCharts::HandleNewInstrumentRequest( void ) {
   m_pDialogPickSymbol->Destroy();
   m_pDialogPickSymbol = 0;
   
-  //pInstrument_t pInstrument( m_pInstrumentForDialog );
-  //m_pInstrumentForDialog.reset();
+  m_pDialogPickSymbolCreatedInstrument.reset();
   
-  return m_pInstrumentForDialog;
+  return pInstrumentInfo;
 }
 
-PanelCharts::pInstrument_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
-  return signalLoadInstrument( name );
+PanelCharts::pInstrumentInfo_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
+  return LoadInstrument( signalLoadInstrument( name ) );
+}
+
+PanelCharts::pInstrumentInfo_t PanelCharts::LoadInstrument( pInstrument_t pInstrument ) {
+  pInstrumentInfo_t pInstrumentInfo;
+  const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
+  mapInstrumentInfo_t::iterator iter = m_mapInstrumentInfo.find( sInstrumentId );
+  if ( m_mapInstrumentInfo.end() == iter ) {
+    pInstrumentInfo.reset( new InstrumentInfo( pInstrument, m_pData1Provider ) );
+    m_mapInstrumentInfo.insert( mapInstrumentInfo_t::value_type( sInstrumentId, pInstrumentInfo ) );
+    signalRegisterInstrument( pInstrument );
+  }
+  else {
+    pInstrumentInfo = iter->second;
+  }
+  return pInstrumentInfo;
 }
 
 // extract this sometime because the string builder might be used elsewhere
@@ -283,15 +296,18 @@ void PanelCharts::HandleComposeComposite( DialogPickSymbol::DataExchange* pde ) 
   if ( "" != pde->sCompositeName ) {
     signalLookUpDescription( pde->sCompositeName, pde->sCompositeDescription );
     if ( "" != pde->sCompositeDescription ) { // means we have a satisfactory iqfeed symbol
-      BuildInstrument( m_de, m_pInstrumentForDialog );
+      BuildInstrument( m_de, m_pDialogPickSymbolCreatedInstrument );
     }
   }
 }
 
+// IB has populated instrument with ContractID
 void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
   if ( 0 != m_pDialogPickSymbol ) {
-    if ( pInstrument.get() == m_pInstrumentForDialog.get() ) {
+    if ( pInstrument.get() == m_pDialogPickSymbolCreatedInstrument.get() ) {
       // expecting contract id to already exist in instrument
+      // might put a lock on instrument changes until contract comes back
+      assert( 0 != pInstrument->GetContract() );
       m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
     }
     else {
