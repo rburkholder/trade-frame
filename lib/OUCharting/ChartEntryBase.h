@@ -102,6 +102,8 @@ protected:
 private:
 };
 
+// **********
+
 class ChartEntryBaseWithTime : public ChartEntryBase { // maintains chart information for a set of price@datetime points
 public:
 
@@ -153,7 +155,7 @@ private:
     TimeDouble_t( boost::posix_time::ptime dt, double price ): m_dt( dt ), m_price( price ) {};
   };
 
-  // 2this is a capacity hog on the stack:  lockfreesize=4096U
+  // this is a capacity hog on the stack:  lockfreesize=4096U
   typedef boost::lockfree::spsc_queue<TimeDouble_t, boost::lockfree::capacity<lockfreesize> > lfTimeDouble_t;
   lfTimeDouble_t* m_plfTimeDouble;
 

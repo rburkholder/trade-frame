@@ -17,18 +17,16 @@
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/core/argument.hpp>
 
-#include <wx/mstream.h>
-#include <wx/bitmap.h>
 #include <wx/splitter.h>
 #include <wx/sizer.h>
 //#include <wx/dc.h>
-#include <wx/dcclient.h>
 #include <wx/icon.h>
 #include <wx/menu.h>
 
 #include <TFVuTrading/DialogPickSymbol.h>
 #include <TFIQFeed/BuildSymbolName.h>
-//#include <wx-3.0/wx/wx/wx/toplevel.h>
+
+// need to check why this exists
 #include <wx/toplevel.h>
 
 #include "PanelCharts.h"
@@ -59,8 +57,8 @@ PanelCharts::~PanelCharts() {
 void PanelCharts::Init( void ) {
   m_pDialogPickSymbol = 0;
   m_pTreeOps = 0;
-  m_winChart = 0;
-  m_pChartDataView = 0;
+  //m_winChart = 0;
+  m_pChartInteractive = 0;
   m_pDialogPickSymbol = 0;
 }
 
@@ -149,17 +147,6 @@ void PanelCharts::CreateControls() {
   // initialize the tree
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
-  //m_bPaintingChart = false;
-  //m_bReadyToDrawChart = false;
-  // 20151213 should this be a window or a panel?
-  m_winChart = new wxWindow( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_winChart, 1, wxALL|wxEXPAND, 5);
-  wxWindowID idChart = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &PanelCharts::HandlePaint, this, idChart );
-  m_winChart->Bind( wxEVT_SIZE, &PanelCharts::HandleSize, this, idChart );
-  
-  //m_resources.m_pWin = m_winChart;  // this will go into the InstrumentInfo structure
-  
   namespace args = boost::phoenix::arg_names;
   m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
   m_resources.signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1 ) );
@@ -168,6 +155,13 @@ void PanelCharts::CreateControls() {
   m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
   
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
+  
+  //Bind( wxEVT_TIMER, &PanelCharts::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  //m_timerGuiRefresh.SetOwner( this );
+  
+  m_pChartInteractive = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+  sizerRight->Add( m_pChartInteractive, 1, wxALL|wxEXPAND, 5);
+
 
 }
 
@@ -321,34 +315,8 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
+  //m_timerGuiRefresh.Stop();
   event.Skip();  // auto followed by Destroy();
-}
-
-void PanelCharts::HandlePaint( wxPaintEvent& event ) {
-  if ( 0 != m_pChartDataView ) {
-    try {
-      //m_bPaintingChart = true;
-      wxSize size = m_winChart->GetClientSize();
-      m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chartMaster.SetOnDrawChart( MakeDelegate( this, &PanelCharts::HandleDrawChart ) );
-      m_chartMaster.DrawChart( );
-    }
-    catch (...) {
-    }
-  }
-  //m_bPaintingChart = false;
-}
-
-void PanelCharts::HandleSize( wxSizeEvent& event ) { 
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-}
-
-// http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
-void PanelCharts::HandleDrawChart( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );
-  wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
-  wxPaintDC cdc( m_winChart );
-  cdc.DrawBitmap(bmp, 0, 0);
 }
 
 void PanelCharts::Save( boost::archive::text_oarchive& oa) {

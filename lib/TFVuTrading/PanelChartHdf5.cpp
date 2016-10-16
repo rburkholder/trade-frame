@@ -233,16 +233,16 @@ void PanelChartHdf5::HandlePaint( wxPaintEvent& event ) {
   //m_bPaintingChart = false;
 }
 
-void PanelChartHdf5::HandleSize( wxSizeEvent& event ) { 
-  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-}
-
 // http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
 void PanelChartHdf5::HandleDrawChart( const MemBlock& m ) {
   wxMemoryInputStream in( m.data, m.len );
   wxBitmap bmp( wxImage( in, wxBITMAP_TYPE_BMP) );
   wxPaintDC cdc( m_winChart );
   cdc.DrawBitmap(bmp, 0, 0);
+}
+
+void PanelChartHdf5::HandleSize( wxSizeEvent& event ) { 
+  m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
 }
 
 void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt, const std::string& sPath ) {
@@ -255,30 +255,31 @@ void PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::enumDatumType edt
   m_pChartDataView = new ou::ChartDataView;
   m_chartMaster.SetChartDataView( m_pChartDataView );
 
-  switch ( edt ) {
-  case CustomItemData::Bars:
-    m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm, m_pChartDataView, "Bars", sPath );
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-    break;
-  case CustomItemData::Quotes:
-    m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm, m_pChartDataView, "Quotes", sPath );
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-    break;
-  case CustomItemData::Trades:
-    m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-    break;
-  case CustomItemData::AtmIV:
-    m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm, m_pChartDataView, "Price IV", sPath );
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-    break;
-  case CustomItemData::Greeks:
-    m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
-    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
-    break;
-  case CustomItemData::NoDatum:
+  if ( CustomItemData::NoDatum == edt ) {
     std::cout << "Can't do this chart type" << std::endl;
-    break;
+  }
+  else {
+    switch ( edt ) {
+    case CustomItemData::Bars:
+      m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm, m_pChartDataView, "Bars", sPath );
+      break;
+    case CustomItemData::Quotes:
+      m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm, m_pChartDataView, "Quotes", sPath );
+      break;
+    case CustomItemData::Trades:
+      m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
+      break;
+    case CustomItemData::AtmIV:
+      m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm, m_pChartDataView, "Price IV", sPath );
+      break;
+    case CustomItemData::Greeks:
+      m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );
+      break;
+    default:
+      throw std::runtime_error("unknown CustomItemData");
+    }
+    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
+
   }
 }
 

@@ -1,3 +1,10 @@
+.dep.inc
+Hdf5Chart/build/
+Hdf5Chart/dist/
+HedgedBollinger/build/
+HedgedBollinger/dist/
+LiveChart/build/
+LiveChart/dist/
 /lib/TFBitsNPieces/build/
 /lib/TFBitsNPieces/dist/
 /lib/TFIQFeed/build/

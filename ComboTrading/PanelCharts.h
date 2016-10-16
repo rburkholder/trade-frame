@@ -25,8 +25,6 @@
 #include <wx/panel.h>
 #include <wx/event.h>
 
-#include <OUCharting/ChartMaster.h>
-
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
 
@@ -34,6 +32,7 @@
 
 #include "InstrumentInfo.h"
 #include "TreeItem.h"
+#include "ChartInteractive.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -121,13 +120,11 @@ private:
   Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
   
-  wxWindow* m_winChart;
-  ou::ChartMaster m_chartMaster;
-  ou::ChartDataView* m_pChartDataView;
-  
   ou::tf::DialogPickSymbol* m_pDialogPickSymbol;
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
+  
+  ChartInteractive* m_pChartInteractive;
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
@@ -140,10 +137,6 @@ private:
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
 
   void OnClose( wxCloseEvent& event );
-  
-  void HandleDrawChart( const MemBlock& );
-  void HandlePaint( wxPaintEvent& event );
-  void HandleSize( wxSizeEvent& event );
   
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
