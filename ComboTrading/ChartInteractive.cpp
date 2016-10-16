@@ -55,14 +55,40 @@ bool ChartInteractive::Create( wxWindow* parent, wxWindowID id, const wxPoint& p
 }
 
 void ChartInteractive::CreateControls() {    
-  //wxWindowID idChart = m_winChart->GetId();
-  Bind( wxEVT_PAINT, &ChartInteractive::HandlePaint, this );
-  Bind( wxEVT_SIZE, &ChartInteractive::HandleSize, this );
   
   Bind( wxEVT_CLOSE_WINDOW, &ChartInteractive::OnClose, this );  // start close of windows and controls
   
+  Bind( wxEVT_PAINT, &ChartInteractive::HandlePaint, this );
+  Bind( wxEVT_SIZE, &ChartInteractive::HandleSize, this );
+  
+  Bind( wxEVT_MOUSEWHEEL, &ChartInteractive::HandleMouse, this );
+  Bind( wxEVT_MOTION, &ChartInteractive::HandleMouse, this );
+  Bind( wxEVT_LEAVE_WINDOW, &ChartInteractive::HandleMouse, this );
+  Bind( wxEVT_ENTER_WINDOW, &ChartInteractive::HandleMouse, this );  
+
+  // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &ChartInteractive::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 250 );
+
+}
+
+void ChartInteractive::HandleMouse( wxMouseEvent& event ) { 
+//  if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
+//  if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
+//  if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
+//  wxCoord x, y;
+//  event.GetPosition( &x, &y );
+//  std::cout << x << "," << y << std::endl;
+//  std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
+//  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
+  // 0,120,-120
+  event.Skip();
+}
+
+void ChartInteractive::HandleSize( wxSizeEvent& event ) { 
+  // let the timer do the refresh instead
+  //this->RefreshRect( this->GetClientRect(), false );
 }
 
 void ChartInteractive::HandlePaint( wxPaintEvent& event ) {
@@ -71,6 +97,7 @@ void ChartInteractive::HandlePaint( wxPaintEvent& event ) {
       //m_bPaintingChart = true;
       wxSize size = this->GetClientSize();
       m_chartMaster.SetChartDimensions( size.GetWidth(), size.GetHeight() );
+      // turn this into a lambda instead
       m_chartMaster.SetOnDrawChart( MakeDelegate( this, &ChartInteractive::HandleDrawChart ) );
       m_chartMaster.DrawChart( );
     }
@@ -78,10 +105,6 @@ void ChartInteractive::HandlePaint( wxPaintEvent& event ) {
     }
   }
   //m_bPaintingChart = false;
-}
-
-void ChartInteractive::HandleSize( wxSizeEvent& event ) { 
-  this->RefreshRect( this->GetClientRect(), false );
 }
 
 // http://www.chartdir.com/forum/download_thread.php?bn=chartdir_support&thread=1144757575#N1144760096
@@ -93,8 +116,9 @@ void ChartInteractive::HandleDrawChart( const MemBlock& m ) {
 }
 
 void ChartInteractive::HandleGuiRefresh( wxTimerEvent& event ) {
-  // generate paint event if chart exists
-  this->RefreshRect( this->GetClientRect(), false );
+  if ( 0 != m_pChartDataView ) {
+    this->RefreshRect( this->GetClientRect(), false );
+  }
 }
 
 void ChartInteractive::OnClose( wxCloseEvent& event ) {

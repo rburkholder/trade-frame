@@ -32,6 +32,13 @@
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
 
+// 2016/10/16 todo:
+//   check serialization of instruments
+//   save and retrieve data for charting
+//   load data for charting
+//   watch/unwatch live data on the charts
+//   implement zoom/pan ability on chart
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -161,7 +168,6 @@ void PanelCharts::CreateControls() {
   
   m_pChartInteractive = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_pChartInteractive, 1, wxALL|wxEXPAND, 5);
-
 
 }
 

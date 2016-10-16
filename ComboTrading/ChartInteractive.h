@@ -51,7 +51,6 @@ private:
     ID_Null=wxID_HIGHEST, ID_WINDOW_CHARTINTERACTIVE
   };
   
-  //wxWindow* m_winChart;
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
   wxTimer m_timerGuiRefresh;
@@ -59,6 +58,7 @@ private:
   void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
+  void HandleMouse( wxMouseEvent& event );
   void OnClose( wxCloseEvent& event );
   
   void HandleGuiRefresh( wxTimerEvent& event );
