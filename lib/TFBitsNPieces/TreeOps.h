@@ -67,6 +67,10 @@ public:
 
   ~TreeOps();
   
+  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalChanging_t;
+  typedef signalChanging_t::slot_type slotChanging_t;
+  signalChanging_t signalChanging;
+  
   void PopulateResources( TreeItemResources& resources );
   
   void SetRoot( pTreeItemBase_t pTreeItemRoot ) { 

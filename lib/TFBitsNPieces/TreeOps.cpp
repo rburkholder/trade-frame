@@ -113,13 +113,6 @@ void TreeOps::HandleContextMenu( wxTreeEvent& event ) {
   m_mapDecoder[ event.GetItem().GetID() ]->ShowContextMenu();
 }
 
-void TreeOps::HandleSelectionChanged( wxTreeEvent& event ) {
-//  std::cout << "HandleSelectionChanged " << event.GetItem().GetID() << std::endl;
-  m_idOld = event.GetItem();
-  //m_mapDecoder[ m_idOld.GetID() ]->SetSelected( m_guiElements );
-  
-}
-
 void TreeOps::RemoveSelectOld( void ) {
   //std::cout << "HandleSelectionChanging " << event.GetItem().GetID() << std::endl;
   //if ( m_idOld.IsOk() ) m_mapDecoder[ m_idOld ]->RemoveSelected( m_guiElements );
@@ -127,11 +120,21 @@ void TreeOps::RemoveSelectOld( void ) {
 }
 
 void TreeOps::HandleSelectionChanging( wxTreeEvent& event ) {
+  //std::cout << "HandleSelectionChanging " << event.GetItem().GetID() << std::endl; // triggered first (object b)
+  //std::cout << "HandleSelectionChanging " << event.GetId() << "," << event.GetItem().GetID() << std::endl; // triggered first (object b)
+  signalChanging( event.GetItem().GetID() );
   RemoveSelectOld();
 }
 
+void TreeOps::HandleSelectionChanged( wxTreeEvent& event ) {
+  //std::cout << "HandleSelectionChanged " << event.GetId() << "," << event.GetItem().GetID() << std::endl;  // triggered second (object b))
+  m_idOld = event.GetItem();
+  //m_mapDecoder[ m_idOld.GetID() ]->SetSelected( m_guiElements );
+  
+}
+
 void TreeOps::HandleItemActivated( wxTreeEvent& event ) {
-  //std::cout << "HandleItemActivated" << std::endl;
+  //std::cout << "HandleItemActivated" << std::endl; // doesn't appear to be triggered
 }
 
 void TreeOps::HandleItemDeleted( wxTreeEvent& event ) {

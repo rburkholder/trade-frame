@@ -46,11 +46,11 @@ class TreeItemBase;
   
 struct TreeItemResources {  // used by inheritors of TreeItemBase
   
-  typedef boost::signals2::signal<void (wxTreeItemId, const std::string&)> signalSetItemText_t;
+  typedef boost::signals2::signal<void (const wxTreeItemId&, const std::string&)> signalSetItemText_t;
   typedef signalSetItemText_t::slot_type slotSetItemText_t;
   signalSetItemText_t signalSetItemText;
   
-  typedef boost::signals2::signal<wxString (wxTreeItemId), FirstOrDefault<wxString> > signalGetItemText_t;
+  typedef boost::signals2::signal<wxString (const wxTreeItemId&), FirstOrDefault<wxString> > signalGetItemText_t;
   typedef signalGetItemText_t::slot_type slotGetItemText_t;
   signalGetItemText_t signalGetItemText;
   
@@ -75,9 +75,10 @@ struct TreeItemResources {  // used by inheritors of TreeItemBase
   typedef signalAppendItem_t::slot_type slotAppendItem_t;
   signalAppendItem_t signalAppendItem;
   
-  typedef boost::signals2::signal<void (wxTreeItemId&)> signalEnsureVisible_t;
+  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalEnsureVisible_t;
   typedef signalEnsureVisible_t::slot_type slotEnsureVisible_t;
   signalEnsureVisible_t signalEnsureVisible;
+  
 };
 
 // ===========

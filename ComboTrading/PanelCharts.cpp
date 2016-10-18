@@ -65,7 +65,7 @@ void PanelCharts::Init( void ) {
   m_pDialogPickSymbol = 0;
   m_pTreeOps = 0;
   //m_winChart = 0;
-  m_pChartInteractive = 0;
+  m_pwinDetail = 0;
   m_pDialogPickSymbol = 0;
 }
 
@@ -161,13 +161,15 @@ void PanelCharts::CreateControls() {
   m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
   m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
   
+  m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
+  
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   
   //Bind( wxEVT_TIMER, &PanelCharts::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   //m_timerGuiRefresh.SetOwner( this );
   
-  m_pChartInteractive = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_pChartInteractive, 1, wxALL|wxEXPAND, 5);
+  //m_pwinDetail = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+  //sizerRight->Add( m_pwinDetail, 1, wxALL|wxEXPAND, 5);
 
 }
 
@@ -175,6 +177,13 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   m_pData1Provider = pData1Provider;
   m_pData2Provider = pData2Provider;
   m_pExecutionProvider = pExecutionProvider;
+}
+
+void PanelCharts::HandleTreeOpsChanging( wxTreeItemId id ) {
+  if ( 0 != m_pwinDetail ) {
+    delete m_pwinDetail;
+    m_pwinDetail = 0;
+  }
 }
 
 PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {

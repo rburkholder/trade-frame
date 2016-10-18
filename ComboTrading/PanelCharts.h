@@ -124,7 +124,10 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
-  ChartInteractive* m_pChartInteractive;
+  //ChartInteractive* m_pwinDetail;
+  wxWindow* m_pwinDetail;
+  
+  void HandleTreeOpsChanging( wxTreeItemId id );
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
