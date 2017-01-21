@@ -43,8 +43,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m64
+CXXFLAGS=-m64
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -68,12 +68,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfgp.a: ${OBJECTFILES}
 ${OBJECTDIR}/NodeTimeSeries.o: NodeTimeSeries.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NodeTimeSeries.o NodeTimeSeries.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NodeTimeSeries.o NodeTimeSeries.cpp
 
 ${OBJECTDIR}/TimeSeriesRegistration.o: TimeSeriesRegistration.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSeriesRegistration.o TimeSeriesRegistration.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSeriesRegistration.o TimeSeriesRegistration.cpp
 
 # Subprojects
 .build-subprojects:

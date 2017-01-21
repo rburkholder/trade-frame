@@ -51,8 +51,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m64
+CXXFLAGS=-m64
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -76,52 +76,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a: ${OBJECTFILES}
 ${OBJECTDIR}/ChartDataBase.o: ChartDataBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataBase.o ChartDataBase.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataBase.o ChartDataBase.cpp
 
 ${OBJECTDIR}/ChartDataView.o: ChartDataView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataView.o ChartDataView.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataView.o ChartDataView.cpp
 
 ${OBJECTDIR}/ChartEntryBars.o: ChartEntryBars.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBars.o ChartEntryBars.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBars.o ChartEntryBars.cpp
 
 ${OBJECTDIR}/ChartEntryBase.o: ChartEntryBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBase.o ChartEntryBase.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBase.o ChartEntryBase.cpp
 
 ${OBJECTDIR}/ChartEntryIndicator.o: ChartEntryIndicator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryIndicator.o ChartEntryIndicator.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryIndicator.o ChartEntryIndicator.cpp
 
 ${OBJECTDIR}/ChartEntryMark.o: ChartEntryMark.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
 
 ${OBJECTDIR}/ChartEntrySegments.o: ChartEntrySegments.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntrySegments.o ChartEntrySegments.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntrySegments.o ChartEntrySegments.cpp
 
 ${OBJECTDIR}/ChartEntryShape.o: ChartEntryShape.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryShape.o ChartEntryShape.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryShape.o ChartEntryShape.cpp
 
 ${OBJECTDIR}/ChartEntryVolume.o: ChartEntryVolume.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryVolume.o ChartEntryVolume.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryVolume.o ChartEntryVolume.cpp
 
 ${OBJECTDIR}/ChartMaster.o: ChartMaster.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartMaster.o ChartMaster.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartMaster.o ChartMaster.cpp
 
 # Subprojects
 .build-subprojects:
