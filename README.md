@@ -32,8 +32,8 @@ wine iqfeed_client_5_2_5_0.exe
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
 # netbeans ide and build env
-http://download.netbeans.org/netbeans/8.1/final/bundles/netbeans-8.1-cpp-linux-x86.sh
-sh netbeans-8.1-cpp-linux-x86.sh
+wget http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
+sh netbeans-8.2-cpp-linux-x64.sh
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
 libs-build/build.sh tradeframe
