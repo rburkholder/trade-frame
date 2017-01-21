@@ -133,7 +133,7 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameUnderlying = "QGC";
   //m_sNameUnderlyingIQFeed = "QGCG16";  // IB won't allow trading within 30 days of expiration.
-  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2016, 8 );
+  m_sNameUnderlyingIQFeed = ou::tf::iqfeed::BuildFuturesName( "QGC", 2017, 2 );
   
   std::cout << "Underlying: " << m_sNameUnderlyingIQFeed << std::endl;
 
@@ -159,8 +159,8 @@ bool AppHedgedBollinger::OnInit() {
 
   m_sNameOptionUnderlying = "QGC";  // GC is regular open outcry symbol, QGC are options tradeable 24 hours
 
-  m_dateFrontMonthOption = boost::gregorian::date( 2016, 6, 27 );
-  m_dateSecondMonthOption = boost::gregorian::date( 2016, 7, 26 );
+  m_dateFrontMonthOption = boost::gregorian::date( 2017, 2, 23 );
+  m_dateSecondMonthOption = boost::gregorian::date( 2017, 3, 28 );
 
   m_pChartBitmap = 0;
   m_bInDrawChart = false;
