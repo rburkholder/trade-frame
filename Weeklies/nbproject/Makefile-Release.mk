@@ -64,17 +64,17 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/SignalGenerator.o: SignalGenerator.cpp 
+${OBJECTDIR}/SignalGenerator.o: SignalGenerator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SignalGenerator.o SignalGenerator.cpp
 
-${OBJECTDIR}/Weeklies.o: Weeklies.cpp 
+${OBJECTDIR}/Weeklies.o: Weeklies.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Weeklies.o Weeklies.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
@@ -85,7 +85,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/weeklies
 
 # Subprojects
 .clean-subprojects:

@@ -65,12 +65,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtffreeradicals.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtffreeradicals.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtffreeradicals.a
 
-${OBJECTDIR}/HistoryDailyTick.o: HistoryDailyTick.cpp 
+${OBJECTDIR}/HistoryDailyTick.o: HistoryDailyTick.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HistoryDailyTick.o HistoryDailyTick.cpp
 
-${OBJECTDIR}/MarketStates.o: MarketStates.cpp 
+${OBJECTDIR}/MarketStates.o: MarketStates.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MarketStates.o MarketStates.cpp
@@ -81,7 +81,6 @@ ${OBJECTDIR}/MarketStates.o: MarketStates.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtffreeradicals.a
 
 # Subprojects
 .clean-subprojects:

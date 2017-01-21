@@ -101,192 +101,192 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a
 
-${OBJECTDIR}/ControllerPortfolioPositionOrderExecution.o: ControllerPortfolioPositionOrderExecution.cpp 
+${OBJECTDIR}/ControllerPortfolioPositionOrderExecution.o: ControllerPortfolioPositionOrderExecution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ControllerPortfolioPositionOrderExecution.o ControllerPortfolioPositionOrderExecution.cpp
 
-${OBJECTDIR}/DialogBase.o: DialogBase.cpp 
+${OBJECTDIR}/DialogBase.o: DialogBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogBase.o DialogBase.cpp
 
-${OBJECTDIR}/DialogInstrumentSelect.o: DialogInstrumentSelect.cpp 
+${OBJECTDIR}/DialogInstrumentSelect.o: DialogInstrumentSelect.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogInstrumentSelect.o DialogInstrumentSelect.cpp
 
-${OBJECTDIR}/DialogNewPortfolio.o: DialogNewPortfolio.cpp 
+${OBJECTDIR}/DialogNewPortfolio.o: DialogNewPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogNewPortfolio.o DialogNewPortfolio.cpp
 
-${OBJECTDIR}/DialogPickSymbol.o: DialogPickSymbol.cpp 
+${OBJECTDIR}/DialogPickSymbol.o: DialogPickSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogPickSymbol.o DialogPickSymbol.cpp
 
-${OBJECTDIR}/DialogSimpleOneLineOrder.o: DialogSimpleOneLineOrder.cpp 
+${OBJECTDIR}/DialogSimpleOneLineOrder.o: DialogSimpleOneLineOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogSimpleOneLineOrder.o DialogSimpleOneLineOrder.cpp
 
-${OBJECTDIR}/FrameMain.o: FrameMain.cpp 
+${OBJECTDIR}/FrameMain.o: FrameMain.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameMain.o FrameMain.cpp
 
-${OBJECTDIR}/ModelBase.o: ModelBase.cpp 
+${OBJECTDIR}/ModelBase.o: ModelBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelBase.o ModelBase.cpp
 
-${OBJECTDIR}/ModelCell.o: ModelCell.cpp 
+${OBJECTDIR}/ModelCell.o: ModelCell.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelCell.o ModelCell.cpp
 
-${OBJECTDIR}/ModelChartHdf5.o: ModelChartHdf5.cpp 
+${OBJECTDIR}/ModelChartHdf5.o: ModelChartHdf5.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelChartHdf5.o ModelChartHdf5.cpp
 
-${OBJECTDIR}/ModelExecution.o: ModelExecution.cpp 
+${OBJECTDIR}/ModelExecution.o: ModelExecution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelExecution.o ModelExecution.cpp
 
-${OBJECTDIR}/ModelOrder.o: ModelOrder.cpp 
+${OBJECTDIR}/ModelOrder.o: ModelOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelOrder.o ModelOrder.cpp
 
-${OBJECTDIR}/ModelPortfolio.o: ModelPortfolio.cpp 
+${OBJECTDIR}/ModelPortfolio.o: ModelPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPortfolio.o ModelPortfolio.cpp
 
-${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o: ModelPortfolioPositionOrderExecution.cpp 
+${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o: ModelPortfolioPositionOrderExecution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o ModelPortfolioPositionOrderExecution.cpp
 
-${OBJECTDIR}/ModelPosition.o: ModelPosition.cpp 
+${OBJECTDIR}/ModelPosition.o: ModelPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPosition.o ModelPosition.cpp
 
-${OBJECTDIR}/PanelChartHdf5.o: PanelChartHdf5.cpp 
+${OBJECTDIR}/PanelChartHdf5.o: PanelChartHdf5.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelChartHdf5.o PanelChartHdf5.cpp
 
-${OBJECTDIR}/PanelFinancialChart.o: PanelFinancialChart.cpp 
+${OBJECTDIR}/PanelFinancialChart.o: PanelFinancialChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelFinancialChart.o PanelFinancialChart.cpp
 
-${OBJECTDIR}/PanelIBAccountValues.o: PanelIBAccountValues.cpp 
+${OBJECTDIR}/PanelIBAccountValues.o: PanelIBAccountValues.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues.o PanelIBAccountValues.cpp
 
-${OBJECTDIR}/PanelIBAccountValues_impl.o: PanelIBAccountValues_impl.cpp 
+${OBJECTDIR}/PanelIBAccountValues_impl.o: PanelIBAccountValues_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues_impl.o PanelIBAccountValues_impl.cpp
 
-${OBJECTDIR}/PanelIBPositionDetails.o: PanelIBPositionDetails.cpp 
+${OBJECTDIR}/PanelIBPositionDetails.o: PanelIBPositionDetails.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails.o PanelIBPositionDetails.cpp
 
-${OBJECTDIR}/PanelIBPositionDetails_impl.o: PanelIBPositionDetails_impl.cpp 
+${OBJECTDIR}/PanelIBPositionDetails_impl.o: PanelIBPositionDetails_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails_impl.o PanelIBPositionDetails_impl.cpp
 
-${OBJECTDIR}/PanelLogging.o: PanelLogging.cpp 
+${OBJECTDIR}/PanelLogging.o: PanelLogging.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelLogging.o PanelLogging.cpp
 
-${OBJECTDIR}/PanelManualOrder.o: PanelManualOrder.cpp 
+${OBJECTDIR}/PanelManualOrder.o: PanelManualOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelManualOrder.o PanelManualOrder.cpp
 
-${OBJECTDIR}/PanelOptionDetails.o: PanelOptionDetails.cpp 
+${OBJECTDIR}/PanelOptionDetails.o: PanelOptionDetails.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionDetails.o PanelOptionDetails.cpp
 
-${OBJECTDIR}/PanelOptionDetails_impl.o: PanelOptionDetails_impl.cpp 
+${OBJECTDIR}/PanelOptionDetails_impl.o: PanelOptionDetails_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionDetails_impl.o PanelOptionDetails_impl.cpp
 
-${OBJECTDIR}/PanelPortfolioPosition.o: PanelPortfolioPosition.cpp 
+${OBJECTDIR}/PanelPortfolioPosition.o: PanelPortfolioPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioPosition.o PanelPortfolioPosition.cpp
 
-${OBJECTDIR}/PanelPortfolioPositionOrderExecution.o: PanelPortfolioPositionOrderExecution.cpp 
+${OBJECTDIR}/PanelPortfolioPositionOrderExecution.o: PanelPortfolioPositionOrderExecution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioPositionOrderExecution.o PanelPortfolioPositionOrderExecution.cpp
 
-${OBJECTDIR}/PanelPortfolioPosition_impl.o: PanelPortfolioPosition_impl.cpp 
+${OBJECTDIR}/PanelPortfolioPosition_impl.o: PanelPortfolioPosition_impl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelPortfolioPosition_impl.o PanelPortfolioPosition_impl.cpp
 
-${OBJECTDIR}/PanelProviderControl.o: PanelProviderControl.cpp 
+${OBJECTDIR}/PanelProviderControl.o: PanelProviderControl.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelProviderControl.o PanelProviderControl.cpp
 
-${OBJECTDIR}/ValidatorInstrumentName.o: ValidatorInstrumentName.cpp 
+${OBJECTDIR}/ValidatorInstrumentName.o: ValidatorInstrumentName.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ValidatorInstrumentName.o ValidatorInstrumentName.cpp
 
-${OBJECTDIR}/VuBase.o: VuBase.cpp 
+${OBJECTDIR}/VuBase.o: VuBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuBase.o VuBase.cpp
 
-${OBJECTDIR}/VuExecutions.o: VuExecutions.cpp 
+${OBJECTDIR}/VuExecutions.o: VuExecutions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuExecutions.o VuExecutions.cpp
 
-${OBJECTDIR}/VuOrders.o: VuOrders.cpp 
+${OBJECTDIR}/VuOrders.o: VuOrders.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuOrders.o VuOrders.cpp
 
-${OBJECTDIR}/VuPortfolios.o: VuPortfolios.cpp 
+${OBJECTDIR}/VuPortfolios.o: VuPortfolios.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuPortfolios.o VuPortfolios.cpp
 
-${OBJECTDIR}/VuPositions.o: VuPositions.cpp 
+${OBJECTDIR}/VuPositions.o: VuPositions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuPositions.o VuPositions.cpp
 
-${OBJECTDIR}/VuTreePortfolioPositionOrder.o: VuTreePortfolioPositionOrder.cpp 
+${OBJECTDIR}/VuTreePortfolioPositionOrder.o: VuTreePortfolioPositionOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuTreePortfolioPositionOrder.o VuTreePortfolioPositionOrder.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
-${OBJECTDIR}/wxETKBaseValidator.o: wxETKBaseValidator.cpp 
+${OBJECTDIR}/wxETKBaseValidator.o: wxETKBaseValidator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/wxETKBaseValidator.o wxETKBaseValidator.cpp
@@ -297,7 +297,6 @@ ${OBJECTDIR}/wxETKBaseValidator.o: wxETKBaseValidator.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a
 
 # Subprojects
 .clean-subprojects:

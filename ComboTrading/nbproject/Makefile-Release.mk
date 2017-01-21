@@ -36,7 +36,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
+	${OBJECTDIR}/ChartInteractive.o \
 	${OBJECTDIR}/ComboTrading.o \
+	${OBJECTDIR}/InstrumentInfo.o \
 	${OBJECTDIR}/PanelCharts.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/TreeItem.o \
@@ -51,8 +53,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m64 `/usr/local/bin/wx-config --cxxflags` 
+CXXFLAGS=-m64 `/usr/local/bin/wx-config --cxxflags` 
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -61,76 +63,161 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Release/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFIndicators/dist/Release/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Release/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a ../lib/ExcelFormat/dist/Release/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Release/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc61-mt-1_61 -lboost_filesystem-gcc61-mt-1_61 -lboost_regex-gcc61-mt-1_61 -lboost_serialization-gcc61-mt-1_61 -lboost_system-gcc61-mt-1_61 -lboost_thread-gcc61-mt-1_61
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading
 
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFSimulation/dist/Release/GNU-Linux/libtfsimulation.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFIndicators/dist/Release/GNU-Linux/libtfindicators.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUStatistics/dist/Release/GNU-Linux/liboustatistics.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/ExcelFormat/dist/Release/GNU-Linux/libexcelformat.a
+
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUFormulas/dist/Release/GNU-Linux/libouformulas.a
+
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading ${OBJECTFILES} ${LDLIBSOPTIONS} `/usr/local/bin/wx-config --libs`
 
-${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp 
+${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
 
-${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp 
+${OBJECTDIR}/ChartInteractive.o: ChartInteractive.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartInteractive.o ChartInteractive.cpp
 
-${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp 
+${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
 
-${OBJECTDIR}/Process.o: Process.cpp 
+${OBJECTDIR}/InstrumentInfo.o: InstrumentInfo.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentInfo.o InstrumentInfo.cpp
 
-${OBJECTDIR}/TreeItem.o: TreeItem.cpp 
+${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelCharts.o PanelCharts.cpp
 
-${OBJECTDIR}/TreeItemGroup.o: TreeItemGroup.cpp 
+${OBJECTDIR}/Process.o: Process.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Process.o Process.cpp
 
-${OBJECTDIR}/TreeItemInstrument.o: TreeItemInstrument.cpp 
+${OBJECTDIR}/TreeItem.o: TreeItem.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItem.o TreeItem.cpp
 
-${OBJECTDIR}/TreeItemPortfolio.o: TreeItemPortfolio.cpp 
+${OBJECTDIR}/TreeItemGroup.o: TreeItemGroup.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemGroup.o TreeItemGroup.cpp
 
-${OBJECTDIR}/TreeItemPosition.o: TreeItemPosition.cpp 
+${OBJECTDIR}/TreeItemInstrument.o: TreeItemInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemInstrument.o TreeItemInstrument.cpp
 
-${OBJECTDIR}/TreeOps.o: TreeOps.cpp 
+${OBJECTDIR}/TreeItemPortfolio.o: TreeItemPortfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPortfolio.o TreeItemPortfolio.cpp
+
+${OBJECTDIR}/TreeItemPosition.o: TreeItemPosition.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeItemPosition.o TreeItemPosition.cpp
+
+${OBJECTDIR}/TreeOps.o: TreeOps.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TreeOps.o TreeOps.cpp
 
 # Subprojects
 .build-subprojects:
+	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Release
+	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Release
+	cd ../lib/OUFormulas && ${MAKE}  -f Makefile CONF=Release
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading
 
 # Subprojects
 .clean-subprojects:
+	cd ../lib/TFBitsNPieces && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFIQFeed && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFInteractiveBrokers && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFSimulation && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFVuTrading && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFOptions && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFTrading && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFIndicators && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFHDF5TimeSeries && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/TFTimeSeries && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Release clean
+	cd ../lib/OUFormulas && ${MAKE}  -f Makefile CONF=Release clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

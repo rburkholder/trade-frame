@@ -63,12 +63,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedmarketsymbols: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedmarketsymbols ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/IQFeedMarketSymbols.o: IQFeedMarketSymbols.cpp 
+${OBJECTDIR}/IQFeedMarketSymbols.o: IQFeedMarketSymbols.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeedMarketSymbols.o IQFeedMarketSymbols.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
@@ -79,7 +79,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/iqfeedmarketsymbols
 
 # Subprojects
 .clean-subprojects:

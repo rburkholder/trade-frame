@@ -96,167 +96,167 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a
 
-${OBJECTDIR}/Account.o: Account.cpp 
+${OBJECTDIR}/Account.o: Account.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Account.o Account.cpp
 
-${OBJECTDIR}/AccountAdvisor.o: AccountAdvisor.cpp 
+${OBJECTDIR}/AccountAdvisor.o: AccountAdvisor.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AccountAdvisor.o AccountAdvisor.cpp
 
-${OBJECTDIR}/AccountManager.o: AccountManager.cpp 
+${OBJECTDIR}/AccountManager.o: AccountManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AccountManager.o AccountManager.cpp
 
-${OBJECTDIR}/AccountOwner.o: AccountOwner.cpp 
+${OBJECTDIR}/AccountOwner.o: AccountOwner.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AccountOwner.o AccountOwner.cpp
 
-${OBJECTDIR}/AlternateInstrumentNames.o: AlternateInstrumentNames.cpp 
+${OBJECTDIR}/AlternateInstrumentNames.o: AlternateInstrumentNames.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AlternateInstrumentNames.o AlternateInstrumentNames.cpp
 
-${OBJECTDIR}/CashAccount.o: CashAccount.cpp 
+${OBJECTDIR}/CashAccount.o: CashAccount.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CashAccount.o CashAccount.cpp
 
-${OBJECTDIR}/CashManager.o: CashManager.cpp 
+${OBJECTDIR}/CashManager.o: CashManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CashManager.o CashManager.cpp
 
-${OBJECTDIR}/CashTransaction.o: CashTransaction.cpp 
+${OBJECTDIR}/CashTransaction.o: CashTransaction.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CashTransaction.o CashTransaction.cpp
 
-${OBJECTDIR}/Currency.o: Currency.cpp 
+${OBJECTDIR}/Currency.o: Currency.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Currency.o Currency.cpp
 
-${OBJECTDIR}/DBOps.o: DBOps.cpp 
+${OBJECTDIR}/DBOps.o: DBOps.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DBOps.o DBOps.cpp
 
-${OBJECTDIR}/DailyTradeTimeFrames.o: DailyTradeTimeFrames.cpp 
+${OBJECTDIR}/DailyTradeTimeFrames.o: DailyTradeTimeFrames.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DailyTradeTimeFrames.o DailyTradeTimeFrames.cpp
 
-${OBJECTDIR}/Database.o: Database.cpp 
+${OBJECTDIR}/Database.o: Database.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Database.o Database.cpp
 
-${OBJECTDIR}/Exchange.o: Exchange.cpp 
+${OBJECTDIR}/Exchange.o: Exchange.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Exchange.o Exchange.cpp
 
-${OBJECTDIR}/Execution.o: Execution.cpp 
+${OBJECTDIR}/Execution.o: Execution.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Execution.o Execution.cpp
 
-${OBJECTDIR}/Instrument.o: Instrument.cpp 
+${OBJECTDIR}/Instrument.o: Instrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Instrument.o Instrument.cpp
 
-${OBJECTDIR}/InstrumentData.o: InstrumentData.cpp 
+${OBJECTDIR}/InstrumentData.o: InstrumentData.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentData.o InstrumentData.cpp
 
-${OBJECTDIR}/InstrumentManager.o: InstrumentManager.cpp 
+${OBJECTDIR}/InstrumentManager.o: InstrumentManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentManager.o InstrumentManager.cpp
 
-${OBJECTDIR}/KeyTypes.o: KeyTypes.cpp 
+${OBJECTDIR}/KeyTypes.o: KeyTypes.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/KeyTypes.o KeyTypes.cpp
 
-${OBJECTDIR}/Managers.o: Managers.cpp 
+${OBJECTDIR}/Managers.o: Managers.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Managers.o Managers.cpp
 
-${OBJECTDIR}/NoRiskInterestRateSeries.o: NoRiskInterestRateSeries.cpp 
+${OBJECTDIR}/NoRiskInterestRateSeries.o: NoRiskInterestRateSeries.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NoRiskInterestRateSeries.o NoRiskInterestRateSeries.cpp
 
-${OBJECTDIR}/Order.o: Order.cpp 
+${OBJECTDIR}/Order.o: Order.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Order.o Order.cpp
 
-${OBJECTDIR}/OrderManager.o: OrderManager.cpp 
+${OBJECTDIR}/OrderManager.o: OrderManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OrderManager.o OrderManager.cpp
 
-${OBJECTDIR}/OrdersOutstanding.o: OrdersOutstanding.cpp 
+${OBJECTDIR}/OrdersOutstanding.o: OrdersOutstanding.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OrdersOutstanding.o OrdersOutstanding.cpp
 
-${OBJECTDIR}/Portfolio.o: Portfolio.cpp 
+${OBJECTDIR}/Portfolio.o: Portfolio.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Portfolio.o Portfolio.cpp
 
-${OBJECTDIR}/PortfolioManager.o: PortfolioManager.cpp 
+${OBJECTDIR}/PortfolioManager.o: PortfolioManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PortfolioManager.o PortfolioManager.cpp
 
-${OBJECTDIR}/Position.o: Position.cpp 
+${OBJECTDIR}/Position.o: Position.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Position.o Position.cpp
 
-${OBJECTDIR}/PositionCombo.o: PositionCombo.cpp 
+${OBJECTDIR}/PositionCombo.o: PositionCombo.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PositionCombo.o PositionCombo.cpp
 
-${OBJECTDIR}/ProviderManager.o: ProviderManager.cpp 
+${OBJECTDIR}/ProviderManager.o: ProviderManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ProviderManager.o ProviderManager.cpp
 
-${OBJECTDIR}/RiskManager.o: RiskManager.cpp 
+${OBJECTDIR}/RiskManager.o: RiskManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/RiskManager.o RiskManager.cpp
 
-${OBJECTDIR}/Symbol.o: Symbol.cpp 
+${OBJECTDIR}/Symbol.o: Symbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Symbol.o Symbol.cpp
 
-${OBJECTDIR}/TradingEnumerations.o: TradingEnumerations.cpp 
+${OBJECTDIR}/TradingEnumerations.o: TradingEnumerations.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TradingEnumerations.o TradingEnumerations.cpp
 
-${OBJECTDIR}/Watch.o: Watch.cpp 
+${OBJECTDIR}/Watch.o: Watch.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Watch.o Watch.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
@@ -267,7 +267,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a
 
 # Subprojects
 .clean-subprojects:

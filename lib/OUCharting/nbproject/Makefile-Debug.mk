@@ -73,52 +73,52 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a
 
-${OBJECTDIR}/ChartDataBase.o: ChartDataBase.cpp 
+${OBJECTDIR}/ChartDataBase.o: ChartDataBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataBase.o ChartDataBase.cpp
 
-${OBJECTDIR}/ChartDataView.o: ChartDataView.cpp 
+${OBJECTDIR}/ChartDataView.o: ChartDataView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataView.o ChartDataView.cpp
 
-${OBJECTDIR}/ChartEntryBars.o: ChartEntryBars.cpp 
+${OBJECTDIR}/ChartEntryBars.o: ChartEntryBars.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBars.o ChartEntryBars.cpp
 
-${OBJECTDIR}/ChartEntryBase.o: ChartEntryBase.cpp 
+${OBJECTDIR}/ChartEntryBase.o: ChartEntryBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryBase.o ChartEntryBase.cpp
 
-${OBJECTDIR}/ChartEntryIndicator.o: ChartEntryIndicator.cpp 
+${OBJECTDIR}/ChartEntryIndicator.o: ChartEntryIndicator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryIndicator.o ChartEntryIndicator.cpp
 
-${OBJECTDIR}/ChartEntryMark.o: ChartEntryMark.cpp 
+${OBJECTDIR}/ChartEntryMark.o: ChartEntryMark.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
 
-${OBJECTDIR}/ChartEntrySegments.o: ChartEntrySegments.cpp 
+${OBJECTDIR}/ChartEntrySegments.o: ChartEntrySegments.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntrySegments.o ChartEntrySegments.cpp
 
-${OBJECTDIR}/ChartEntryShape.o: ChartEntryShape.cpp 
+${OBJECTDIR}/ChartEntryShape.o: ChartEntryShape.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryShape.o ChartEntryShape.cpp
 
-${OBJECTDIR}/ChartEntryVolume.o: ChartEntryVolume.cpp 
+${OBJECTDIR}/ChartEntryVolume.o: ChartEntryVolume.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryVolume.o ChartEntryVolume.cpp
 
-${OBJECTDIR}/ChartMaster.o: ChartMaster.cpp 
+${OBJECTDIR}/ChartMaster.o: ChartMaster.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartMaster.o ChartMaster.cpp
@@ -129,7 +129,6 @@ ${OBJECTDIR}/ChartMaster.o: ChartMaster.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a
 
 # Subprojects
 .clean-subprojects:

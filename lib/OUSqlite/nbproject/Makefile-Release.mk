@@ -67,22 +67,22 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a
 
-${OBJECTDIR}/Actions.o: Actions.cpp 
+${OBJECTDIR}/Actions.o: Actions.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Actions.o Actions.cpp
 
-${OBJECTDIR}/ISqlite3.o: ISqlite3.cpp 
+${OBJECTDIR}/ISqlite3.o: ISqlite3.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ISqlite3.o ISqlite3.cpp
 
-${OBJECTDIR}/Session.o: Session.cpp 
+${OBJECTDIR}/Session.o: Session.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Session.o Session.cpp
 
-${OBJECTDIR}/sqlite3.o: sqlite3.c 
+${OBJECTDIR}/sqlite3.o: sqlite3.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/sqlite3.o sqlite3.c
@@ -93,7 +93,6 @@ ${OBJECTDIR}/sqlite3.o: sqlite3.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a
 
 # Subprojects
 .clean-subprojects:

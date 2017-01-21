@@ -64,7 +64,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a
 
-${OBJECTDIR}/InterestRates.o: InterestRates.cpp 
+${OBJECTDIR}/InterestRates.o: InterestRates.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InterestRates.o InterestRates.cpp
@@ -75,7 +75,6 @@ ${OBJECTDIR}/InterestRates.o: InterestRates.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libouformulas.a
 
 # Subprojects
 .clean-subprojects:

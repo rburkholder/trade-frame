@@ -68,37 +68,37 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/overunderconsole: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/overunderconsole ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/App.o: App.cpp 
+${OBJECTDIR}/App.o: App.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/App.o App.cpp
 
-${OBJECTDIR}/InstrumentState.o: InstrumentState.cpp 
+${OBJECTDIR}/InstrumentState.o: InstrumentState.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentState.o InstrumentState.cpp
 
-${OBJECTDIR}/Operation.o: Operation.cpp 
+${OBJECTDIR}/Operation.o: Operation.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Operation.o Operation.cpp
 
-${OBJECTDIR}/OverUnderConsole.o: OverUnderConsole.cpp 
+${OBJECTDIR}/OverUnderConsole.o: OverUnderConsole.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OverUnderConsole.o OverUnderConsole.cpp
 
-${OBJECTDIR}/ScanHistory.o: ScanHistory.cpp 
+${OBJECTDIR}/ScanHistory.o: ScanHistory.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ScanHistory.o ScanHistory.cpp
 
-${OBJECTDIR}/SignalsWithQuotes.o: SignalsWithQuotes.cpp 
+${OBJECTDIR}/SignalsWithQuotes.o: SignalsWithQuotes.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SignalsWithQuotes.o SignalsWithQuotes.cpp
 
-${OBJECTDIR}/StatesOfTrading.o: StatesOfTrading.cpp 
+${OBJECTDIR}/StatesOfTrading.o: StatesOfTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StatesOfTrading.o StatesOfTrading.cpp
@@ -109,7 +109,6 @@ ${OBJECTDIR}/StatesOfTrading.o: StatesOfTrading.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/overunderconsole
 
 # Subprojects
 .clean-subprojects:

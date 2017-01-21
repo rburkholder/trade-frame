@@ -53,8 +53,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-m64
+CXXFLAGS=-m64
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -73,65 +73,65 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/oucommon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/oucommon ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/CharBuffer.o: CharBuffer.cpp 
+${OBJECTDIR}/CharBuffer.o: CharBuffer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CharBuffer.o CharBuffer.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CharBuffer.o CharBuffer.cpp
 
-${OBJECTDIR}/ConsoleStream.o: ConsoleStream.cpp 
+${OBJECTDIR}/ConsoleStream.o: ConsoleStream.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConsoleStream.o ConsoleStream.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConsoleStream.o ConsoleStream.cpp
 
-${OBJECTDIR}/CountryCode.o: CountryCode.cpp 
+${OBJECTDIR}/CountryCode.o: CountryCode.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CountryCode.o CountryCode.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CountryCode.o CountryCode.cpp
 
-${OBJECTDIR}/CurrencyCode.o: CurrencyCode.cpp 
+${OBJECTDIR}/CurrencyCode.o: CurrencyCode.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurrencyCode.o CurrencyCode.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CurrencyCode.o CurrencyCode.cpp
 
-${OBJECTDIR}/ReadCodeListCommon.o: ReadCodeListCommon.cpp 
+${OBJECTDIR}/ReadCodeListCommon.o: ReadCodeListCommon.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCodeListCommon.o ReadCodeListCommon.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadCodeListCommon.o ReadCodeListCommon.cpp
 
-${OBJECTDIR}/ReadNaicsToSicCodeList.o: ReadNaicsToSicCodeList.cpp 
+${OBJECTDIR}/ReadNaicsToSicCodeList.o: ReadNaicsToSicCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadNaicsToSicCodeList.o ReadNaicsToSicCodeList.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadNaicsToSicCodeList.o ReadNaicsToSicCodeList.cpp
 
-${OBJECTDIR}/ReadSicCodeList.o: ReadSicCodeList.cpp 
+${OBJECTDIR}/ReadSicCodeList.o: ReadSicCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicCodeList.o ReadSicCodeList.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicCodeList.o ReadSicCodeList.cpp
 
-${OBJECTDIR}/ReadSicToNaicsCodeList.o: ReadSicToNaicsCodeList.cpp 
+${OBJECTDIR}/ReadSicToNaicsCodeList.o: ReadSicToNaicsCodeList.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicToNaicsCodeList.o ReadSicToNaicsCodeList.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ReadSicToNaicsCodeList.o ReadSicToNaicsCodeList.cpp
 
-${OBJECTDIR}/Singleton.o: Singleton.cpp 
+${OBJECTDIR}/Singleton.o: Singleton.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Singleton.o Singleton.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Singleton.o Singleton.cpp
 
-${OBJECTDIR}/SmartVar.o: SmartVar.cpp 
+${OBJECTDIR}/SmartVar.o: SmartVar.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SmartVar.o SmartVar.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SmartVar.o SmartVar.cpp
 
-${OBJECTDIR}/TimeSource.o: TimeSource.cpp 
+${OBJECTDIR}/TimeSource.o: TimeSource.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSource.o TimeSource.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSource.o TimeSource.cpp
 
-${OBJECTDIR}/WuManber.o: WuManber.cpp 
+${OBJECTDIR}/WuManber.o: WuManber.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WuManber.o WuManber.cpp
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WuManber.o WuManber.cpp
 
 # Subprojects
 .build-subprojects:
@@ -139,7 +139,6 @@ ${OBJECTDIR}/WuManber.o: WuManber.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/oucommon
 
 # Subprojects
 .clean-subprojects:

@@ -65,12 +65,12 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a
 
-${OBJECTDIR}/BasicExcel.o: BasicExcel.cpp 
+${OBJECTDIR}/BasicExcel.o: BasicExcel.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BasicExcel.o BasicExcel.cpp
 
-${OBJECTDIR}/ExcelFormat.o: ExcelFormat.cpp 
+${OBJECTDIR}/ExcelFormat.o: ExcelFormat.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ExcelFormat.o ExcelFormat.cpp
@@ -81,7 +81,6 @@ ${OBJECTDIR}/ExcelFormat.o: ExcelFormat.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libexcelformat.a
 
 # Subprojects
 .clean-subprojects:

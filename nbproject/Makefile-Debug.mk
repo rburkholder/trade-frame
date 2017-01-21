@@ -67,7 +67,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/trade-frame: ${OBJECTFILES}
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/trade-frame
 
 # Subprojects
 .clean-subprojects:

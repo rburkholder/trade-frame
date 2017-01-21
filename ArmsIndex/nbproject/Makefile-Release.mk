@@ -67,32 +67,32 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/armsindex: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/armsindex ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/ArmsChart.o: ArmsChart.cpp 
+${OBJECTDIR}/ArmsChart.o: ArmsChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsChart.o ArmsChart.cpp
 
-${OBJECTDIR}/ArmsIndex.o: ArmsIndex.cpp 
+${OBJECTDIR}/ArmsIndex.o: ArmsIndex.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ArmsIndex.o ArmsIndex.cpp
 
-${OBJECTDIR}/EventProviderConnected.o: EventProviderConnected.cpp 
+${OBJECTDIR}/EventProviderConnected.o: EventProviderConnected.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventProviderConnected.o EventProviderConnected.cpp
 
-${OBJECTDIR}/IndicatorPackage.o: IndicatorPackage.cpp 
+${OBJECTDIR}/IndicatorPackage.o: IndicatorPackage.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IndicatorPackage.o IndicatorPackage.cpp
 
-${OBJECTDIR}/PanelArmsIndex.o: PanelArmsIndex.cpp 
+${OBJECTDIR}/PanelArmsIndex.o: PanelArmsIndex.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelArmsIndex.o PanelArmsIndex.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
@@ -103,7 +103,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/armsindex
 
 # Subprojects
 .clean-subprojects:

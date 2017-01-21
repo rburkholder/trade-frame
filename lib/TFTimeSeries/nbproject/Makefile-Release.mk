@@ -70,37 +70,37 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a
 
-${OBJECTDIR}/BarFactory.o: BarFactory.cpp 
+${OBJECTDIR}/BarFactory.o: BarFactory.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BarFactory.o BarFactory.cpp
 
-${OBJECTDIR}/DatedDatum.o: DatedDatum.cpp 
+${OBJECTDIR}/DatedDatum.o: DatedDatum.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DatedDatum.o DatedDatum.cpp
 
-${OBJECTDIR}/ExchangeHolidays.o: ExchangeHolidays.cpp 
+${OBJECTDIR}/ExchangeHolidays.o: ExchangeHolidays.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ExchangeHolidays.o ExchangeHolidays.cpp
 
-${OBJECTDIR}/MergeDatedDatums.o: MergeDatedDatums.cpp 
+${OBJECTDIR}/MergeDatedDatums.o: MergeDatedDatums.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MergeDatedDatums.o MergeDatedDatums.cpp
 
-${OBJECTDIR}/TSMicrostructure.o: TSMicrostructure.cpp 
+${OBJECTDIR}/TSMicrostructure.o: TSMicrostructure.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSMicrostructure.o TSMicrostructure.cpp
 
-${OBJECTDIR}/TimeSeries.o: TimeSeries.cpp 
+${OBJECTDIR}/TimeSeries.o: TimeSeries.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TimeSeries.o TimeSeries.cpp
 
-${OBJECTDIR}/stdafx.o: stdafx.cpp 
+${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/stdafx.o stdafx.cpp
@@ -111,7 +111,6 @@ ${OBJECTDIR}/stdafx.o: stdafx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a
 
 # Subprojects
 .clean-subprojects:

@@ -64,7 +64,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed32.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed32.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed32.a
 
-${OBJECTDIR}/IQFeed32.o: IQFeed32.cpp 
+${OBJECTDIR}/IQFeed32.o: IQFeed32.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IQFeed32.o IQFeed32.cpp
@@ -75,7 +75,6 @@ ${OBJECTDIR}/IQFeed32.o: IQFeed32.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed32.a
 
 # Subprojects
 .clean-subprojects:

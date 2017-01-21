@@ -67,22 +67,22 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdea.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdea.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdea.a
 
-${OBJECTDIR}/Account.o: Account.cpp 
+${OBJECTDIR}/Account.o: Account.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Account.o Account.cpp
 
-${OBJECTDIR}/AccountsManager.o: AccountsManager.cpp 
+${OBJECTDIR}/AccountsManager.o: AccountsManager.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AccountsManager.o AccountsManager.cpp
 
-${OBJECTDIR}/GeneralJournalEntry.o: GeneralJournalEntry.cpp 
+${OBJECTDIR}/GeneralJournalEntry.o: GeneralJournalEntry.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GeneralJournalEntry.o GeneralJournalEntry.cpp
 
-${OBJECTDIR}/KeyTypes.o: KeyTypes.cpp 
+${OBJECTDIR}/KeyTypes.o: KeyTypes.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/KeyTypes.o KeyTypes.cpp
@@ -93,7 +93,6 @@ ${OBJECTDIR}/KeyTypes.o: KeyTypes.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdea.a
 
 # Subprojects
 .clean-subprojects:

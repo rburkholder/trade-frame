@@ -69,32 +69,32 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a: ${OBJECTFI
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a
 
-${OBJECTDIR}/EventIBInstrument.o: EventIBInstrument.cpp 
+${OBJECTDIR}/EventIBInstrument.o: EventIBInstrument.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventIBInstrument.o EventIBInstrument.cpp
 
-${OBJECTDIR}/IBSymbol.o: IBSymbol.cpp 
+${OBJECTDIR}/IBSymbol.o: IBSymbol.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBSymbol.o IBSymbol.cpp
 
-${OBJECTDIR}/IBTWS.o: IBTWS.cpp 
+${OBJECTDIR}/IBTWS.o: IBTWS.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IBTWS.o IBTWS.cpp
 
-${OBJECTDIR}/linux/EClientSocketBase.o: linux/EClientSocketBase.cpp 
+${OBJECTDIR}/linux/EClientSocketBase.o: linux/EClientSocketBase.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EClientSocketBase.o linux/EClientSocketBase.cpp
 
-${OBJECTDIR}/linux/EPosixClientSocket.o: linux/EPosixClientSocket.cpp 
+${OBJECTDIR}/linux/EPosixClientSocket.o: linux/EPosixClientSocket.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/EPosixClientSocket.o linux/EPosixClientSocket.cpp
 
-${OBJECTDIR}/linux/StdAfx.o: linux/StdAfx.cpp 
+${OBJECTDIR}/linux/StdAfx.o: linux/StdAfx.cpp
 	${MKDIR} -p ${OBJECTDIR}/linux
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/linux/StdAfx.o linux/StdAfx.cpp
@@ -105,7 +105,6 @@ ${OBJECTDIR}/linux/StdAfx.o: linux/StdAfx.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a
 
 # Subprojects
 .clean-subprojects:
