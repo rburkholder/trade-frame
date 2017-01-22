@@ -29,8 +29,8 @@
 #include <TFVuTrading/DialogPickSymbol.h>
 
 #include <TFTrading/ProviderManager.h>
+#include <TFTrading/Watch.h>
 
-#include "InstrumentInfo.h"
 #include "TreeItem.h"
 #include "ChartInteractive.h"
 
@@ -47,7 +47,7 @@ class PanelCharts: public wxPanel {
 public:
   
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   PanelCharts( void );
   PanelCharts( wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTS_IDNAME, 
@@ -109,8 +109,8 @@ private:
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
   
-  typedef std::map<ou::tf::Instrument::idInstrument_t,pInstrumentInfo_t> mapInstrumentInfo_t;
-  mapInstrumentInfo_t m_mapInstrumentInfo;
+  typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
+  mapInstrumentWatch_t m_mapInstrumentWatch;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -131,11 +131,11 @@ private:
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
-  pInstrumentInfo_t HandleNewInstrumentRequest( void );
+  pWatch_t HandleNewInstrumentRequest( void );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
-  pInstrumentInfo_t HandleLoadInstrument( const std::string& );
-  pInstrumentInfo_t LoadInstrument( pInstrument_t );
+  pWatch_t HandleLoadInstrument( const std::string& );
+  pWatch_t LoadInstrument( pInstrument_t );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
 

@@ -38,7 +38,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
 	${OBJECTDIR}/ChartInteractive.o \
 	${OBJECTDIR}/ComboTrading.o \
-	${OBJECTDIR}/InstrumentInfo.o \
 	${OBJECTDIR}/PanelCharts.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/TreeItem.o \
@@ -123,11 +122,6 @@ ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ComboTrading.o ComboTrading.cpp
-
-${OBJECTDIR}/InstrumentInfo.o: InstrumentInfo.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InstrumentInfo.o InstrumentInfo.cpp
 
 ${OBJECTDIR}/PanelCharts.o: PanelCharts.cpp
 	${MKDIR} -p ${OBJECTDIR}

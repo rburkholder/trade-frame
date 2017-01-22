@@ -16,6 +16,9 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
 #include <OUCommon/Delegate.h>
 
 #include <TFTimeSeries/TimeSeries.h>
@@ -26,6 +29,8 @@
 #include <TFIQFeed/IQFeedSymbol.h>
 
 // 20151228 convert the delegate to a signal?  a little slower maybe.
+
+// 20160122 will want to set signals on provider so watch/unwatch as provider transitions connection states
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -120,6 +125,17 @@ private:
   void HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol );
   void HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    //ar & boost::serialization::base_object<const InstrumentInfo>(*this);
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    //ar & boost::serialization::base_object<InstrumentInfo>(*this);
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 };
 
 } // namespace tf

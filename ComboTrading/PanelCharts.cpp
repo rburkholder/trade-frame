@@ -186,7 +186,8 @@ void PanelCharts::HandleTreeOpsChanging( wxTreeItemId id ) {
   }
 }
 
-PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {
+PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( void ) {
+  
   assert( 0 == m_pDialogPickSymbol );
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
@@ -194,7 +195,7 @@ PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {
   
   int status = m_pDialogPickSymbol->ShowModal();
   
-  InstrumentInfo::pInstrumentInfo_t pInstrumentInfo;
+  pWatch_t pInstrumentWatch;
   
   switch ( status ) {
     case wxID_CANCEL:
@@ -202,7 +203,7 @@ PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {
       break;
     case wxID_OK:
       if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
-        pInstrumentInfo = LoadInstrument( m_pDialogPickSymbolCreatedInstrument );
+        pInstrumentWatch = LoadInstrument( m_pDialogPickSymbolCreatedInstrument );
       }
       break;
   }
@@ -212,26 +213,28 @@ PanelCharts::pInstrumentInfo_t PanelCharts::HandleNewInstrumentRequest( void ) {
   
   m_pDialogPickSymbolCreatedInstrument.reset();
   
-  return pInstrumentInfo;
+  return pInstrumentWatch;
 }
 
-PanelCharts::pInstrumentInfo_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
+PanelCharts::pWatch_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
   return LoadInstrument( signalLoadInstrument( name ) );
 }
 
-PanelCharts::pInstrumentInfo_t PanelCharts::LoadInstrument( pInstrument_t pInstrument ) {
-  pInstrumentInfo_t pInstrumentInfo;
+PanelCharts::pWatch_t PanelCharts::LoadInstrument( pInstrument_t pInstrument ) {
+  
+  pWatch_t pInstrumentWatch;
+  
   const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
-  mapInstrumentInfo_t::iterator iter = m_mapInstrumentInfo.find( sInstrumentId );
-  if ( m_mapInstrumentInfo.end() == iter ) {
-    pInstrumentInfo.reset( new InstrumentInfo( pInstrument, m_pData1Provider ) );
-    m_mapInstrumentInfo.insert( mapInstrumentInfo_t::value_type( sInstrumentId, pInstrumentInfo ) );
+  mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.find( sInstrumentId );
+  if ( m_mapInstrumentWatch.end() == iter ) {
+    pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    m_mapInstrumentWatch.insert( mapInstrumentWatch_t::value_type( sInstrumentId, pInstrumentWatch ) );
     signalRegisterInstrument( pInstrument );
   }
   else {
-    pInstrumentInfo = iter->second;
+    pInstrumentWatch = iter->second;
   }
-  return pInstrumentInfo;
+  return pInstrumentWatch;
 }
 
 // extract this sometime because the string builder might be used elsewhere

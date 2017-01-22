@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "InstrumentInfo.h"
+#include <TFTrading/Watch.h>
 
 #include "TreeItem.h"
 
@@ -24,14 +24,14 @@ class TreeItemInstrument: public TreeItemResources {
   friend class boost::serialization::access;
 public:
   
-  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources );
   virtual ~TreeItemInstrument( void );
   
   void HandleMenuNewInstrument( wxCommandEvent& event );
   
-  pInstrumentInfo_t GetInstrumentInfo( void ) { return m_pInstrumentInfo; }
+  pWatch_t GetInstrumentWatch( void ) { return m_pInstrumentWatch; }
   
   virtual void ShowContextMenu( void );
   
@@ -63,7 +63,7 @@ protected:
   
 private:
 
-  pInstrumentInfo_t m_pInstrumentInfo;
+  pWatch_t m_pInstrumentWatch;
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -75,8 +75,8 @@ private:
     ar & boost::serialization::base_object<TreeItemResources>(*this);
     try {
       std::string s( m_baseResources.signalGetItemText( m_id ) );
-      m_pInstrumentInfo = m_resources.signalLoadInstrument( s );
-      m_pInstrumentInfo->Watch();
+      m_pInstrumentWatch = m_resources.signalLoadInstrument( s );
+      m_pInstrumentWatch->StartWatch();
     }
     catch (std::runtime_error& e) {
       std::cout << "TreeItemInstrument: couldn't load instrument" << std::endl;

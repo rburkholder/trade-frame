@@ -22,26 +22,23 @@
 #include <wx/window.h>
 
 #include <TFBitsNPieces/TreeOpsItems.h>
-
-#include "InstrumentInfo.h"
+#include <TFTrading/Watch.h>
 
 struct Resources {
 
-  //wxWindow* m_pWin;  // is this used somewhere?  maybe is the charting window, which is now in InstrumentInfo
-  
   //typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  typedef InstrumentInfo::pInstrumentInfo_t pInstrumentInfo_t;
+  typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
   
   // used in TreeItemInstrument
-  typedef boost::signals2::signal<pInstrumentInfo_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pInstrumentInfo_t> > signalNewInstrumentInfo_t;
-  typedef signalNewInstrumentInfo_t::slot_type slotNewInstrumentInfo_t;
-  signalNewInstrumentInfo_t signalNewInstrumentViaDialog;
+  typedef boost::signals2::signal<pWatch_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pWatch_t> > signalNewInstrumentWatch_t;
+  typedef signalNewInstrumentWatch_t::slot_type slotNewInstrumentWatch_t;
+  signalNewInstrumentWatch_t signalNewInstrumentViaDialog;
   
-  typedef boost::signals2::signal<pInstrumentInfo_t (const std::string&), ou::tf::FirstOrDefault<pInstrumentInfo_t> > signalLoadInstrumentInfo_t;
-  typedef signalLoadInstrumentInfo_t::slot_type slotLoadInstrumentInfo_t;
-  signalLoadInstrumentInfo_t signalLoadInstrument;
+  typedef boost::signals2::signal<pWatch_t (const std::string&), ou::tf::FirstOrDefault<pWatch_t> > signalLoadInstrumentWatch_t;
+  typedef signalLoadInstrumentWatch_t::slot_type slotLoadInstrumentWatch_t;
+  signalLoadInstrumentWatch_t signalLoadInstrument;
   
   //Resources( void ): m_pWin( 0 ) {}
 };
