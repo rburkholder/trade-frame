@@ -182,11 +182,14 @@ private:
   void HandleIBContractDetails( const ou::tf::IBTWS::ContractDetails&, pInstrument_t& pInstrument );
   void HandleIBContractDetailsDone( void );
 
+  void OnData1Connecting( int );
   void OnData1Connected( int );
-//  void OnData2Connected( int ) {};
-  void OnExecConnected( int );
+  void OnData1Disconnecting( int );
   void OnData1Disconnected( int );
-//  void OnData2Disconnteted( int ) {};
+
+  void OnExecConnecting( int );
+  void OnExecConnected( int );
+  void OnExecDisconnecting( int );
   void OnExecDisconnected( int );
 
   void HandleSaveButton( void );

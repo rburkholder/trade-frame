@@ -1011,10 +1011,28 @@ int AppComboTrading::OnExit() {
   return wxApp::OnExit();
 }
 
+void AppComboTrading::OnData1Connecting( int status ) {
+  
+}
+
 void AppComboTrading::OnData1Connected( int status ) {
   if ( m_bData1Connected & m_bExecConnected ) {
     Start();
   }
+}
+
+void AppComboTrading::OnData1Disconnecting( int status ) {
+  
+}
+
+void AppComboTrading::OnData1Disconnected( int status ) {
+  if ( !m_bData1Connected & !m_bExecConnected ) {
+    Stop();
+  }
+}
+
+void AppComboTrading::OnExecConnecting( int status ) {
+  
 }
 
 void AppComboTrading::OnExecConnected( int status ) {
@@ -1023,10 +1041,8 @@ void AppComboTrading::OnExecConnected( int status ) {
   }
 }
 
-void AppComboTrading::OnData1Disconnected( int status ) {
-  if ( !m_bData1Connected & !m_bExecConnected ) {
-    Stop();
-  }
+void AppComboTrading::OnExecDisconnecting( int status ) {
+  
 }
 
 void AppComboTrading::OnExecDisconnected( int status ) {

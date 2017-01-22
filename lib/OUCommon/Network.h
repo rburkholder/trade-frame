@@ -166,7 +166,7 @@ private:
   size_t m_cntBytesTransferred_send;
 
   void OnConnectDone( const boost::system::error_code& error );
-  void OnDisconnecting( void);
+  void OnNetDisconnecting( void);
   void OnSendDoneCommon( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDone( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
   void OnSendDoneNoNotify( const boost::system::error_code& error, std::size_t bytes_transferred, linebuffer_t* );
@@ -400,12 +400,12 @@ void Network<ownerT,charT>::Disconnect( void ) {
     case NS_CONNECTED:
       m_stateNetwork = NS_DISCONNECTING;
       m_psocket->shutdown( boost::asio::ip::tcp::socket::shutdown_both );
-      OnDisconnecting();
+      OnNetDisconnecting();
       break;
     case NS_CONNECTING:
       m_stateNetwork = NS_DISCONNECTING;
       //m_psocket->close();
-      OnDisconnecting();
+      OnNetDisconnecting();
       break;
     default:
       assert( NS_DISCONNECTING == m_stateNetwork );
@@ -419,7 +419,7 @@ void Network<ownerT,charT>::Disconnect( void ) {
 //
 
 template <typename ownerT, typename charT>
-void Network<ownerT,charT>::OnDisconnecting( void ) {
+void Network<ownerT,charT>::OnNetDisconnecting( void ) {
   if ( ( 0 == m_cntActiveSends ) // there are no active sends
     && ( 0 == m_lReadProgress )  // no reads in progress
 //    && ( !m_reposLineBuffers.Outstanding() )  // all clients buffers have been returned. [ can't as destroy doesn't clean up]
@@ -436,7 +436,7 @@ void Network<ownerT,charT>::OnDisconnecting( void ) {
   }
   else {
     // wait for operations to complete, by posting a message to the io processing queue
-    m_io.post( boost::bind( &Network::OnDisconnecting, this ) );
+    m_io.post( boost::bind( &Network::OnNetDisconnecting, this ) );
   }
 }
 
