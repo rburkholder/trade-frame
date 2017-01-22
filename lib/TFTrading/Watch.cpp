@@ -69,6 +69,10 @@ void Watch::Initialize( void ) {
   assert( m_pDataProvider->ProvidesTrades() );
 }
 
+void Watch::SetProvider( pProvider_t pDataProvider ) {
+  // stopwatch, disconnect old, connect new, startwatch
+}
+
 void Watch::StartWatch( void ) {
   // 20160110 - need to check if provider is connected
   if ( 0 == m_cntWatching ) {

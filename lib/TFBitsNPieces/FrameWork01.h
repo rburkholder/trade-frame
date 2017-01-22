@@ -74,6 +74,22 @@ protected:
 
   PanelProviderControl* m_pPanelProviderControl;
 
+  // for CRTP, these need to be called first from the super
+  void       OnIQFeedConnected( int ) {};
+  void           OnIBConnected( int ) {}; 
+  void    OnSimulatorConnected( int ) {};
+  void    OnIQFeedDisconnected( int ) {};
+  void        OnIBDisconnected( int ) {};
+  void OnSimulatorDisconnected( int ) {};
+
+  // for CRTP, these need to be called first from the super
+  void    OnData1Connected( int ) {};
+  void    OnData2Connected( int ) {};
+  void     OnExecConnected( int ) {};
+  void OnData1Disconnected( int ) {};
+  void OnData2Disconnected( int ) {};
+  void  OnExecDisconnected( int ) {};
+
   void LinkToPanelProviderControl( void );
   void DelinkFromPanelProviderControl( void );
 
@@ -112,22 +128,6 @@ private:
   void HandleProviderSelectD2( ou::tf::PanelProviderControl::Provider_t );
   void HandleProviderSelectX( ou::tf::PanelProviderControl::Provider_t );
 
-  // for CRTP
-  void OnIQFeedConnected( int ) {};
-  void OnIBConnected( int ) {}; 
-  void OnSimulatorConnected( int ) {};
-  void OnIQFeedDisconnected( int ) {};
-  void OnIBDisconnected( int ) {};
-  void OnSimulatorDisconnected( int ) {};
-
-  // for CRTP
-  void OnData1Connected( int ) {};
-  void OnData2Connected( int ) {};
-  void OnExecConnected( int ) {};
-  void OnData1Disconnected( int ) {};
-  void OnData2Disconnteted( int ) {};
-  void OnExecDisconnected( int ) {};
-
   void HandlePanelClosing( void );
 
 };
@@ -139,7 +139,7 @@ FrameWork01<CRTP>::FrameWork01( void ) :
   m_tws( new ou::tf::IBTWS( "U000000" ) ), m_bIBConnected( false ), 
   m_iqfeed( new ou::tf::IQFeedProvider() ), m_bIQFeedConnected( false ),
   m_sim( new ou::tf::SimulationProvider() ), m_bSimConnected( false ),
-  m_bExecConnected( false ), m_bData1Connected( false ), m_bData2Connected( false )
+  m_bData1Connected( false ), m_bData2Connected( false ), m_bExecConnected( false )
 
 {
 
@@ -380,7 +380,7 @@ template<typename CRTP>
 void FrameWork01<CRTP>::HandleOnData2Disconnected(int e) {
   m_bData2Connected = false;
 //  HandleOnConnected( e );
-  static_cast<CRTP*>(this)->OnData2Disconnteted( e );
+  static_cast<CRTP*>(this)->OnData2Disconnected( e );
 }
 
 template<typename CRTP>

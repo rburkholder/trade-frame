@@ -98,8 +98,8 @@ private:
   typedef std::map<std::string,structPortfolio> mapPortfolios_t;
 
   // maybe serialize these settings?
-  bool m_bData1Connected;
-  bool m_bExecConnected;
+  //bool m_bData1Connected;  // available in FrameWork01
+  //bool m_bExecConnected;  // available in FrameWork01
   bool m_bStarted;
 
   std::string m_sDbName;
@@ -168,6 +168,7 @@ private:
   void OnClose( wxCloseEvent& event );
 
   void Start( void );
+  void Stop( void );
   void TestSymbols( void );
   
   void BuildFrameCharts( void );
