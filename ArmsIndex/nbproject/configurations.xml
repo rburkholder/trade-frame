@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="95">
+<configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -242,12 +242,12 @@
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
             <linkerLibLibItem>curl</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc61-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc61-mt-1_61</linkerLibLibItem>
             <linkerLibLibItem>chartdir</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
@@ -292,6 +292,15 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../lib</pElem>
+          </incDir>
+          <commandLine>`/usr/local/bin/wx-config --cxxflags` </commandLine>
+          <preprocessorList>
+            <Elem>wxUSE_GUI</Elem>
+          </preprocessorList>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -299,6 +308,199 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+          </linkerAddLib>
+          <linkerDynSerch>
+            <pElem>/usr/local/lib</pElem>
+          </linkerDynSerch>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFBitsNPieces"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFBitsNPieces"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfbitsnpieces.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFSimulation"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFSimulation"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfsimulation.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFOptions"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFOptions"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfoptions.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIQFeed"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFIQFeed"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfiqfeed.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFInteractiveBrokers"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFInteractiveBrokers"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfinteractivebrokers.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFIndicators"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFIndicators"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfindicators.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFHDF5TimeSeries"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFHDF5TimeSeries"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfhdf5timeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTrading"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFTrading"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFTimeSeries"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFTimeSeries"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtftimeseries.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/TFVuTrading"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/TFVuTrading"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libtfvutrading.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUCommon"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/OUCommon"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucommon.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUSqlite"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/OUSqlite"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousqlite.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUSQL"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/OUSQL"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libousql.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUCharting"
+                            CT="3"
+                            CN="Release"
+                            AC="false"
+                            BL="true"
+                            WD="../lib/OUCharting"
+                            BC="${MAKE}  -f Makefile CONF=Release"
+                            CC="${MAKE}  -f Makefile CONF=Release clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibLibItem>hdf5_cpp</linkerLibLibItem>
+            <linkerLibLibItem>hdf5</linkerLibLibItem>
+            <linkerLibLibItem>sz</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>dl</linkerLibLibItem>
+            <linkerLibLibItem>z</linkerLibLibItem>
+            <linkerLibLibItem>curl</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc61-mt1_61</linkerLibLibItem>
+            <linkerLibLibItem>chartdir</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>`/usr/local/bin/wx-config --libs` </commandLine>
+        </linkerTool>
       </compileType>
       <item path="ArmsChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
