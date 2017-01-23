@@ -31,8 +31,10 @@ namespace tf { // TradeFrame
 Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ), 
   m_pDataProvider( pDataProvider ), 
-  m_cntWatching( 0 )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
 {
+  assert( 0 != pInstrument.get() );
+  assert( 0 != pDataProvider.get() );
   Initialize();
 }
 
@@ -40,9 +42,10 @@ Watch::Watch( const Watch& rhs ) :
   m_pInstrument( rhs.m_pInstrument ),
   m_pDataProvider( rhs.m_pDataProvider ),
   m_quote( rhs.m_quote ), m_trade( rhs.m_trade ), 
-  m_cntWatching( 0 )
+  m_cntWatching( 0 ), m_bWatching( false ), m_bWatchingEnabled( false )
 {
   assert( 0 == rhs.m_cntWatching );
+  assert( !rhs.m_bWatching );
   Initialize();
 }
 
@@ -55,6 +58,8 @@ Watch::~Watch(void) {
 Watch& Watch::operator=( const Watch& rhs ) {
   assert( 0 == rhs.m_cntWatching );
   assert( 0 == m_cntWatching );
+  assert( !rhs.m_bWatching );
+  assert( !m_bWatching );
   m_pInstrument = rhs.m_pInstrument;
   m_pDataProvider = rhs.m_pDataProvider;
   m_cntWatching = 0;
@@ -67,15 +72,51 @@ void Watch::Initialize( void ) {
   assert( 0 != m_pDataProvider.get() );
   assert( m_pDataProvider->ProvidesQuotes() );
   assert( m_pDataProvider->ProvidesTrades() );
+  AddEvents();
+}
+
+void Watch::AddEvents( void ) {
+  m_pDataProvider->OnConnected.Add( MakeDelegate( this, &Watch::HandleConnected ) );
+  m_pDataProvider->OnDisconnecting.Add( MakeDelegate( this, &Watch::HandleDisconnecting ) );
+}
+
+void Watch::RemoveEvents( void ) {
+  m_pDataProvider->OnConnected.Remove( MakeDelegate( this, &Watch::HandleConnected ) );
+  m_pDataProvider->OnDisconnecting.Remove( MakeDelegate( this, &Watch::HandleDisconnecting ) );
 }
 
 void Watch::SetProvider( pProvider_t pDataProvider ) {
-  // stopwatch, disconnect old, connect new, startwatch
+  if ( m_pDataProvider.get() != pDataProvider.get() ) {
+    DisableWatch();
+    RemoveEvents();
+  }
+  m_pDataProvider = pDataProvider;
+  AddEvents();
+  EnableWatch();
 }
 
-void Watch::StartWatch( void ) {
-  // 20160110 - need to check if provider is connected
-  if ( 0 == m_cntWatching ) {
+// non gui thread
+void Watch::HandleConnecting( int ) {
+}
+
+// non gui thread
+void Watch::HandleConnected( int ) {
+  EnableWatch();
+}
+
+// non gui thread
+void Watch::HandleDisconnecting( int ) {
+  DisableWatch();
+}
+
+// non gui thread
+void Watch::HandleDisconnected( int ) {
+  
+}
+
+void Watch::EnableWatch( void ) {
+  if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
+    m_bWatching = true;
     m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
@@ -92,15 +133,19 @@ void Watch::StartWatch( void ) {
       std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
     }
   }
+}
+
+void Watch::StartWatch( void ) {
+  if ( 0 == m_cntWatching ) {
+    m_bWatchingEnabled = true;
+    EnableWatch();
+  }
   ++m_cntWatching;
 }
 
-bool Watch::StopWatch( void ) {  // return true if actively stopped feed
-  bool b = false;
-  assert( 0 != m_cntWatching );
-  --m_cntWatching;
-  if ( 0 == m_cntWatching ) {
-    b = true;
+void Watch::DisableWatch( void ) {
+  if ( m_bWatching ) {
+    m_bWatching = false;
     m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
@@ -113,7 +158,16 @@ bool Watch::StopWatch( void ) {  // return true if actively stopped feed
       pSymbol->OnFundamentalMessage.Remove( MakeDelegate( this, &Watch::HandleIQFeedFundamentalMessage ) );
     }
   }
-  return b;
+}
+
+bool Watch::StopWatch( void ) {  // return true if actively stopped feed
+  assert( 0 != m_cntWatching );
+  --m_cntWatching;
+  if ( 0 == m_cntWatching ) {
+    m_bWatchingEnabled = false;
+    DisableWatch();
+  }
+  return 0 == m_cntWatching;
 }
 
 void Watch::EmitValues( void ) const {

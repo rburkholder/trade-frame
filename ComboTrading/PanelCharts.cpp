@@ -174,9 +174,15 @@ void PanelCharts::CreateControls() {
 }
 
 void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
+  bool b( m_pData1Provider.get() != pData1Provider.get() );
   m_pData1Provider = pData1Provider;
   m_pData2Provider = pData2Provider;
   m_pExecutionProvider = pExecutionProvider;
+  if ( b ) {
+    for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); m_mapInstrumentWatch.end() != iter; ++iter ) {
+      iter->second->SetProvider( m_pData1Provider );
+    }
+  }
 }
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId id ) {

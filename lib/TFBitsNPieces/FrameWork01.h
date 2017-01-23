@@ -299,7 +299,7 @@ void FrameWork01<CRTP>::HandleStateChangeRequest( eProviderState_t state, bool b
         ss << ou::TimeSource::LocalCommonInstance().Internal();
 //        m_sTSDataStreamOpened = "/app/semiauto/" + ss.str();  // will need to make this generic if need some for multiple providers.
       }
-      //p->Connect();
+      p->Connect();
     }
     break;
   case eProviderState_t::ProviderOn:

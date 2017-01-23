@@ -1011,40 +1011,48 @@ int AppComboTrading::OnExit() {
   return wxApp::OnExit();
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnData1Connecting( int status ) {
-  
+  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnData1Connected( int status ) {
   if ( m_bData1Connected & m_bExecConnected ) {
     Start();
   }
+  //m_pPanelCharts->StartWatch();
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnData1Disconnecting( int status ) {
-  
+  //m_pPanelCharts->StopWatch();
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnData1Disconnected( int status ) {
   if ( !m_bData1Connected & !m_bExecConnected ) {
     Stop();
   }
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnExecConnecting( int status ) {
-  
+  m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnExecConnected( int status ) {
   if ( m_bData1Connected & m_bExecConnected ) {
     Start();
   }
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnExecDisconnecting( int status ) {
-  
 }
 
+// this probably isn't in the gui thread
 void AppComboTrading::OnExecDisconnected( int status ) {
   if ( !m_bData1Connected & !m_bExecConnected ) {
     Stop();

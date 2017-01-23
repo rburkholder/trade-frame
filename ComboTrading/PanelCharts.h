@@ -91,8 +91,12 @@ public:
 
   void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
   
+  // providers may change, so what happens to providers already registered with an instrument?
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
+  
+  //void StartWatch( void );
+  //void StopWatch( void );
 
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);

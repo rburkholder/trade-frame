@@ -97,7 +97,7 @@ public:
 
 protected:
 
-  // use an iterator instead?  or keep as is as it facilitates multithread append and access operations
+  // use an iterator instead?  or keep as is as it facilitates multi-thread append and access operations
   // or will the stuff in TBB help with this type of access?
 
   ou::tf::Quote m_quote;
@@ -113,13 +113,28 @@ protected:
   std::stringstream m_ss;
 
   unsigned int m_cntWatching;
-
+  
 private:
+
+  bool m_bWatchingEnabled;
+  bool m_bWatching; // in/out of connected state
+  
 
   Fundamentals_t m_fundamentals;
   Summary_t m_summary;
 
   void Initialize( void );
+  
+  void AddEvents( void );
+  void RemoveEvents( void );
+  
+  void HandleConnecting( int );
+  void HandleConnected( int );
+  void HandleDisconnecting( int );
+  void HandleDisconnected( int );
+  
+  void EnableWatch();
+  void DisableWatch();
 
   void HandleQuote( const Quote& quote );
   void HandleTrade( const Trade& trade );
