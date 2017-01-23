@@ -62,7 +62,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Release/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFIndicators/dist/Release/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Release/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a ../lib/ExcelFormat/dist/Release/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Release/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc61-mt-1_61 -lboost_filesystem-gcc61-mt-1_61 -lboost_regex-gcc61-mt-1_61 -lboost_serialization-gcc61-mt-1_61 -lboost_system-gcc61-mt-1_61 -lboost_thread-gcc61-mt-1_61
+LDLIBSOPTIONS=-L/usr/local/lib -Wl,-rpath,'/usr/local/lib' ../lib/TFBitsNPieces/dist/Release/GNU-Linux/libtfbitsnpieces.a ../lib/TFIQFeed/dist/Release/GNU-Linux/libtfiqfeed.a ../lib/TFInteractiveBrokers/dist/Release/GNU-Linux/libtfinteractivebrokers.a ../lib/TFSimulation/dist/Release/GNU-Linux/libtfsimulation.a ../lib/TFVuTrading/dist/Release/GNU-Linux/libtfvutrading.a ../lib/TFOptions/dist/Release/GNU-Linux/libtfoptions.a ../lib/TFTrading/dist/Release/GNU-Linux/libtftrading.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/TFIndicators/dist/Release/GNU-Linux/libtfindicators.a ../lib/TFHDF5TimeSeries/dist/Release/GNU-Linux/libtfhdf5timeseries.a ../lib/TFTimeSeries/dist/Release/GNU-Linux/libtftimeseries.a ../lib/OUStatistics/dist/Release/GNU-Linux/liboustatistics.a ../lib/OUSqlite/dist/Release/GNU-Linux/libousqlite.a ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a ../lib/ExcelFormat/dist/Release/GNU-Linux/libexcelformat.a ../lib/OUFormulas/dist/Release/GNU-Linux/libouformulas.a -lhdf5_cpp -lhdf5 -lsz -lpthread -ldl -lz -lcurl -lchartdir -lboost_date_time-gcc61-mt-1_61 -lboost_filesystem-gcc61-mt-1_61 -lboost_regex-gcc61-mt-1_61 -lboost_serialization-gcc61-mt-1_61 -lboost_system-gcc61-mt-1_61 -lboost_thread-gcc61-mt-1_61
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -98,7 +98,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUSqlite/dist/Re
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUSQL/dist/Release/GNU-Linux/libousql.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUCommon/dist/Debug/GNU-Linux/liboucommon.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUCommon/dist/Release/GNU-Linux/liboucommon.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/combotrading: ../lib/OUCharting/dist/Release/GNU-Linux/liboucharting.a
 
@@ -182,7 +182,7 @@ ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Release
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Release
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Release
-	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Release
 	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Release
 	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Release
 	cd ../lib/OUFormulas && ${MAKE}  -f Makefile CONF=Release
@@ -208,7 +208,7 @@ ${OBJECTDIR}/TreeOps.o: TreeOps.cpp
 	cd ../lib/OUStatistics && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../lib/OUSqlite && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../lib/OUSQL && ${MAKE}  -f Makefile CONF=Release clean
-	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Debug clean
+	cd ../lib/OUCommon && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../lib/OUCharting && ${MAKE}  -f Makefile CONF=Release clean
 	cd ../lib/ExcelFormat && ${MAKE}  -f ExcelFormat-Makefile.mk CONF=Release clean
 	cd ../lib/OUFormulas && ${MAKE}  -f Makefile CONF=Release clean
