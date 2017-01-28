@@ -257,18 +257,22 @@ void DialogPickSymbol::CreateControls() {
 
 void DialogPickSymbol::SetOptionOnly( void ) {
   m_bOptionOnly = true;
-  SetRadioOption();
   m_radioEquity->Disable();
   m_radioFuture->Disable();
   m_radioFOption->Disable();
+  m_radioOption->Enable();
+  m_radioOption->SetValue( true );
+  SetRadioOption();
 }
 
 void DialogPickSymbol::SetFuturesOptionOnly( void ) {
   m_bFuturesOptionOnly = true;
-  SetRadioFuturesOption();
   m_radioEquity->Disable();
   m_radioOption->Disable();
   m_radioFuture->Disable();
+  m_radioFOption->Enable();
+  m_radioFOption->SetValue( true );
+  SetRadioFuturesOption();
 }
 
 void DialogPickSymbol::HandleIQFSymbolChanged( wxCommandEvent& event ) {
@@ -458,11 +462,11 @@ void DialogPickSymbol::SetDataExchange( DataExchange* pde ) {
     m_radioOption->Enable();
     m_radioFuture->Enable();
     m_radioFOption->Enable();
-    m_textIQFName->SetFocus();
     wxDateTime dt = m_dateExpiry->GetValue();
     pde->year = dt.GetYear();
     pde->month = dt.GetMonth();
     pde->day = dt.GetDay();
+    //m_textIQFName->SetFocus();
   }
   else {
     //m_textSymbol->SetValidator( wxDefaultValidator );

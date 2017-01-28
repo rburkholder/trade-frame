@@ -47,7 +47,7 @@ void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
 }
 
 void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
-  
+  //m_pInstrumentWatch->SaveSeries()
 }
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
@@ -124,7 +124,9 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
 }
 
 /* todo:  
- *   for following two handlers (what does the lock do?):
+ *   for following two handlers:
+ *   the lock should be forcing the gui to show options only for the underlying instrument
+ *     when adding sub-menus to the tree
  *   the dialog needs a lock for FuturesOption and Option
  *   then need NewOptionViaDialog, NewFuturesOptionViaDialog to force that setting in the dialog
  */

@@ -1,3 +1,8 @@
+2017/01/22
+
+us treasury yield curve - probably best no risk interest rates
+https://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data=yield
+
 2016/09/25
 
 sed -i 's/gcc52-mt-d-1_59/gcc61-mt-1_61/g' nbproject/configurations.xml

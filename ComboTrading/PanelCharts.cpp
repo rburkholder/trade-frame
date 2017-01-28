@@ -155,7 +155,7 @@ void PanelCharts::CreateControls() {
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
   namespace args = boost::phoenix::arg_names;
-  m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this /* ,args::arg1 */ ) );
+  m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1 ) );
   m_resources.signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1 ) );
   
   m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
@@ -192,12 +192,23 @@ void PanelCharts::HandleTreeOpsChanging( wxTreeItemId id ) {
   }
 }
 
-PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( void ) {
+PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( const Resources::ENewInstrumentLock lock ) {
   
   assert( 0 == m_pDialogPickSymbol );
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
   m_pDialogPickSymbol->SetDataExchange( &m_de );
+  
+  switch ( lock ) {
+    case Resources::ENewInstrumentLock::LockFuturesOption:
+      m_pDialogPickSymbol->SetFuturesOptionOnly();
+      break;
+    case Resources::ENewInstrumentLock::LockOption:
+      m_pDialogPickSymbol->SetOptionOnly();
+      break;
+    case Resources::ENewInstrumentLock::NoLock:
+      break;
+  }
   
   int status = m_pDialogPickSymbol->ShowModal();
   

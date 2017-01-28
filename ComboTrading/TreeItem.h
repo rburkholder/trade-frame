@@ -29,6 +29,7 @@ struct Resources {
   //typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   
+  // instrument dialog locks to option or futuresoption when adding sub-menu to underlying instrument
   enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
   
   // used in TreeItemInstrument

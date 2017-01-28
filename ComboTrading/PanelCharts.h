@@ -135,7 +135,7 @@ private:
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
-  pWatch_t HandleNewInstrumentRequest( void );
+  pWatch_t HandleNewInstrumentRequest( const Resources::ENewInstrumentLock );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
   pWatch_t HandleLoadInstrument( const std::string& );
