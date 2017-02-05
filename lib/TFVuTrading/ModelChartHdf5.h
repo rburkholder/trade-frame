@@ -88,6 +88,7 @@ private:
   ou::ChartEntryIndicator m_ceVega;
   ou::ChartEntryIndicator m_ceRho;
   ou::ChartEntryBars m_ceBars;
+  ou::ChartEntryVolume m_ceVolume;
   ou::ChartEntryVolume m_ceVolumeUpper;
   ou::ChartEntryVolume m_ceVolumeLower;
 

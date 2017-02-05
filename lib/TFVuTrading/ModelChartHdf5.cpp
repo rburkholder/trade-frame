@@ -32,6 +32,7 @@ ModelChartHdf5::ModelChartHdf5( void ) {
   m_ceTheta.SetName( "Theta" );
   m_ceVega.SetName( "Vega" );
   m_ceRho.SetName( "Rho" );
+  m_ceVolume.SetName( "Volume" );
   m_ceVolumeUpper.SetName( "Long" );
   m_ceVolumeLower.SetName( "Short" );
 }
@@ -41,14 +42,14 @@ ModelChartHdf5::~ModelChartHdf5(void) {
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Bars& bars ) {
     m_ceBars.Clear();
-    m_ceVolumeUpper.Clear();
+    m_ceVolume.Clear();
     for ( ou::tf::Bars::const_iterator iter = bars.begin(); bars.end() != iter; ++iter ) {
       m_ceBars.AppendBar( *iter );
-      m_ceVolumeUpper.Append( iter->DateTime(), iter->Volume() );
+      m_ceVolume.Append( iter->DateTime(), iter->Volume() );
     }
-    m_ceVolumeUpper.SetColour( ou::Colour::Black );
+    m_ceVolume.SetColour( ou::Colour::Black );
     pChartDataView->Add( 0, &m_ceBars );
-    pChartDataView->Add( 1, &m_ceVolumeUpper );
+    pChartDataView->Add( 1, &m_ceVolume );
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Quotes& quotes ) {
@@ -78,15 +79,15 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades ) {
     m_ceTrade.Clear();
-    m_ceVolumeUpper.Clear();
+    m_ceVolume.Clear();
     for ( ou::tf::Trades::const_iterator iter = trades.begin(); trades.end() != iter; ++iter ) {
       m_ceTrade.Append( iter->DateTime(), iter->Price() );
-      m_ceVolumeUpper.Append( iter->DateTime(), iter->Volume() );
+      m_ceVolume.Append( iter->DateTime(), iter->Volume() );
     }
     m_ceTrade.SetColour( ou::Colour::Green );
-    m_ceVolumeUpper.SetColour( ou::Colour::Black );
+    m_ceVolume.SetColour( ou::Colour::Black );
     pChartDataView->Add( 0, &m_ceTrade );
-    pChartDataView->Add( 1, &m_ceVolumeUpper );
+    pChartDataView->Add( 1, &m_ceVolume );
 }
 
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVs& ivs ) {
