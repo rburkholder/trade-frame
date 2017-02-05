@@ -235,7 +235,7 @@ void ChartDataBase::HandleTrade( const ou::tf::Trade& trade ) {
         m_dblUpVolume += trade.Volume();
       }
       else {
-        m_TradeDirection = ETradeDirDn;  // definitively dow
+        m_TradeDirection = ETradeDirDn;  // definitively down
         //--m_dblMdTicks;
         m_pricesTickDiffs.Append( ou::tf::Price( dt, -1.0 ) );
         ++m_dblDnTicks;
@@ -268,7 +268,6 @@ void ChartDataBase::HandleTrade( const ou::tf::Trade& trade ) {
     if ( -45 > dif ) dif = -45;
     m_ceTickDiffsRoc.Append( dt, dif );
   }
-
   
 }
 
@@ -336,10 +335,6 @@ void ChartDataBase::HandleQuote( const ou::tf::Quote& quote ) {
     }
 
   }
-
-//  if ( 500 < m_quotes.Size() ) {
-//  }
-
 }
 
 
