@@ -19,14 +19,13 @@
 #include <boost/signals2.hpp>
 
 //#include <wx/panel.h>
-#include <wx/window.h>
+//#include <wx/window.h>
 
 #include <TFBitsNPieces/TreeOpsItems.h>
 #include <TFTrading/Watch.h>
 
 struct Resources {
 
-  //typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   
   // instrument dialog locks to option or futuresoption when adding sub-menu to underlying instrument
@@ -41,7 +40,6 @@ struct Resources {
   typedef signalLoadInstrumentWatch_t::slot_type slotLoadInstrumentWatch_t;
   signalLoadInstrumentWatch_t signalLoadInstrument;
   
-  //Resources( void ): m_pWin( 0 ) {}
 };
 
 // ================
