@@ -22,6 +22,7 @@
 #include <OUCommon/Delegate.h>
 
 #include "DatedDatum.h"
+#include "TSAllocator.h"
 
 // 2012/04/01 use Intel Thread Building Blocks to use concurrent_vector?
 // not sure:  the time series here are typically just used for batch mode processing into and out of hdf5 files
@@ -48,13 +49,15 @@ class TimeSeries: public TimeSeriesBase {
 public:
 
   typedef T datum_t;
+  
+  typedef typename std::vector<T, allocator<T, heap<T> > > vTimeSeries_t;
 
-  typedef typename std::vector<T>::size_type size_type;
+  typedef typename vTimeSeries_t::size_type size_type;
 
-  typedef typename std::vector<T>::iterator iterator;
-  typedef typename std::vector<T>::const_iterator const_iterator;
-  typedef typename std::vector<T>::reference reference;
-  typedef typename std::vector<T>::const_reference const_reference;
+  typedef typename vTimeSeries_t::iterator iterator;
+  typedef typename vTimeSeries_t::const_iterator const_iterator;
+  typedef typename vTimeSeries_t::reference reference;
+  typedef typename vTimeSeries_t::const_reference const_reference;
 
   TimeSeries<T>( void );
   TimeSeries<T>( size_type nSize );
@@ -104,6 +107,7 @@ public:
   H5::DataSpace* DefineDataSpace( H5::DataSpace* pSpace = NULL );
 
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
+  size_type Capacity( void ) const { return m_vSeries.capacity(); }
 
   bool& AppendEnabled( void ) { return m_bAppendToVector; };  // affects Append(...) only
 
@@ -116,7 +120,7 @@ protected:
 private:
   bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
-  std::vector<T> m_vSeries;
+  vTimeSeries_t m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
 };
 
@@ -238,7 +242,7 @@ const T* TimeSeries<T>::Last() {
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
   assert( ix < m_vSeries.size() );
-  typename std::vector<T>::const_reverse_iterator iter( m_vSeries.rbegin() );
+  typename vTimeSeries_t::const_reverse_iterator iter( m_vSeries.rbegin() );
   iter += ix;
   return *iter;
 }
