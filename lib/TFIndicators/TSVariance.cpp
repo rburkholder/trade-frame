@@ -45,14 +45,14 @@ TSVariance::~TSVariance(void) {
 }
 
 void TSVariance::Init( void ) {
-  Prices::AppendEnabled() = false;
+  Prices::DisableAppend();
   m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleUpdate ) );
   m_pma1 = new TSMA( m_seriesSource, m_tdTimeRange, m_n );
-  m_pma1->AppendEnabled() = false;
+  m_pma1->DisableAppend();
   m_pma1->OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA1Update ) );
-  m_dummy.AppendEnabled() = false;
+  m_dummy.DisableAppend();
   m_ma2.OnAppend.Add( MakeDelegate( this, &TSVariance::HandleMA2Update ) );
-  m_ma2.AppendEnabled() = false;
+  m_ma2.DisableAppend();
 }
 
 void TSVariance::HandleUpdate( const Price& price ) {

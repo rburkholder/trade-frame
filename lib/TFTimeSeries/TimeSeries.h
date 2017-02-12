@@ -31,6 +31,11 @@
 //   there fore time series can be extended by back ground threads, so long as no access by other threads
 //   bottom line:  current implementation is not thread safe
 
+// 2017/02/11 has coarse level thread safety
+//  implemented thread lock call on allocate/deallocate.
+//  graphics calls will scan time series, so need some locking capability for preventing 
+//  allocates from appends in a background thread
+
 //#include <boost/serialization/vector.hpp>
 // http://www.boost.org/libs/serialization/doc/traits.html
 
@@ -50,7 +55,9 @@ public:
 
   typedef T datum_t;
   
-  typedef typename std::vector<T, allocator<T, heap<T> > > vTimeSeries_t;
+  typedef typename ou::allocator<T, heap<T> > allocator_t;
+  
+  typedef typename std::vector<T, allocator_t> vTimeSeries_t;
 
   typedef typename vTimeSeries_t::size_type size_type;
 
@@ -58,7 +65,7 @@ public:
   typedef typename vTimeSeries_t::const_iterator const_iterator;
   typedef typename vTimeSeries_t::reference reference;
   typedef typename vTimeSeries_t::const_reference const_reference;
-
+  
   TimeSeries<T>( void );
   TimeSeries<T>( size_type nSize );
   TimeSeries<T>( const std::string& sName, size_type nSize = 0 );
@@ -86,8 +93,8 @@ public:
   const_reference At( size_type ix );
 
   //const_reference At( const ptime& time );
-  const_iterator AtOrAfter( const ptime& time );
-  const_iterator After( const ptime& time );
+  const_iterator AtOrAfter( const ptime& time ) const;
+  const_iterator After( const ptime& time ) const;
 
   const_iterator begin() const { return m_vSeries.cbegin(); };
   const_iterator end() const { return m_vSeries.cend(); };
@@ -96,20 +103,28 @@ public:
     return m_vSeries.cbegin() + ix; 
   };
 
+  // allocate or deallocate about to happen, use for thread sync
+  fastdelegate::FastDelegate1<size_type> TimeSeriesLock; 
+  fastdelegate::FastDelegate0<void> TimeSeriesUnlock;
+  
   ou::Delegate<const T&> OnAppend;
 
   void SetName( const std::string& sName ) { m_sName = sName; };
-  const std::string& GetName( void ) { return m_sName; };
+  const std::string& GetName( void ) const { return m_sName; };
 
   virtual TimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
   virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
 
   H5::DataSpace* DefineDataSpace( H5::DataSpace* pSpace = NULL );
 
+  // should this be locked?
   void Reserve( size_type n ) { m_vSeries.reserve( n ); };
+  
   size_type Capacity( void ) const { return m_vSeries.capacity(); }
 
-  bool& AppendEnabled( void ) { return m_bAppendToVector; };  // affects Append(...) only
+  // TSVariance uses this, sets to false
+  void DisableAppend( void ) { m_bAppendToVector = false; };
+  bool AppendEnabled( void ) const { return m_bAppendToVector; };  // affects Append(...) only
 
   template<typename Functor>
   typename Functor::return_type ForEach( Functor f ) const {
@@ -118,38 +133,56 @@ public:
 
 protected:
 private:
+  bool m_bLock;
   bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
   vTimeSeries_t m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
+  
+  void SignalLock( size_type count ) {
+    assert( !m_bLock );
+    m_bLock = true;
+    if ( 0 != TimeSeriesLock ) TimeSeriesLock( count );
+  }
+  
+  void SignalUnlock( void ) {
+    if ( m_bLock ) {
+      m_bLock = false;
+      if ( 0 != TimeSeriesUnlock ) TimeSeriesUnlock();
+    }
+  }
+
 };
 
 template<typename T> 
 TimeSeries<T>::TimeSeries(void)
-  : m_vIterator( m_vSeries.end() ), m_bAppendToVector( true ) {
-}
-
-template<typename T> 
-TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
-  : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ) {
-  if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( nSize );
+  : TimeSeries( "", 0 ) {
 }
 
 template<typename T> 
 TimeSeries<T>::TimeSeries( size_type size )
-  : m_vIterator( m_vSeries.end() ), m_bAppendToVector( true ) {
-  m_vSeries.reserve( size );
+  : TimeSeries( "", size ) {
+}
+
+template<typename T>
+TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
+  : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ), m_bLock( false ) {
+  m_vSeries.get_allocator().OnAllocate = fastdelegate::MakeDelegate( this, &TimeSeries<T>::SignalLock );
+  if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( nSize );
 }
 
 template<typename T>
 TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
   : m_bAppendToVector( series.m_bAppendToVector ) {
   m_vSeries = series.m_vSeries;
+  assert( !m_bLock );
+  m_vSeries.get_allocator().OnAllocate = fastdelegate::MakeDelegate( this, &TimeSeries<T>::SignalLock );
   m_vIterator = m_vSeries.end();
 }
 
 template<typename T> 
 TimeSeries<T>::~TimeSeries(void) {
+  m_vSeries.get_allocator().OnAllocate = 0;
   Clear();
 }
 
@@ -166,6 +199,7 @@ void TimeSeries<T>::Append(const T& datum) {
       m_vSeries.back() = datum;
     }
   }
+  SignalUnlock();
   OnAppend( datum );
 }
 
@@ -180,6 +214,7 @@ void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
+  SignalUnlock();
 }
 
 template<typename T> 
@@ -192,11 +227,15 @@ void TimeSeries<T>::Insert( const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
+  SignalUnlock();
 }
 
 template<typename T> 
 void TimeSeries<T>::Clear( void ) {
+  assert( !m_bLock );
+  SignalLock( 0 );
   m_vSeries.clear();
+  SignalUnlock();
 }
 
 
@@ -277,7 +316,7 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::At( const ptime& dt ) {
 */
 
 template<typename T> 
-typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt ) {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -292,7 +331,7 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt
 }
 
 template<typename T> 
-typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) {
+typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) const {
   // assumes sorted vector
   // assumes valid access, else undefined
   // TODO: Check that this is correct
@@ -305,12 +344,13 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) {
 template<typename T> 
 void TimeSeries<T>::Sort( void ) {
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
+  SignalUnlock();  // not sure if this is required
 }
 
 template<typename T> 
 TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) const {
   T datum( dt );
-  TimeSeries<T>* series = NULL;
+  TimeSeries<T>* series = nullptr;
   const_iterator iter;
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {

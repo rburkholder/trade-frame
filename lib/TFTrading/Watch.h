@@ -16,6 +16,8 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include <boost/thread/mutex.hpp>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -87,6 +89,10 @@ public:
 
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
+  
+  //typedef std::pair<size_t,size_t> stateTimeSeries_t;
+  //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeBegin;
+  //ou::Delegate<const stateTimeSeries_t&> OnPossibleResizeEnd;
 
   virtual void StartWatch( void );
   virtual bool StopWatch( void );
@@ -122,6 +128,8 @@ private:
 
   Fundamentals_t m_fundamentals;
   Summary_t m_summary;
+  
+  boost::mutex m_mutexLockAppend;
 
   void Initialize( void );
   
@@ -141,6 +149,8 @@ private:
 
   void HandleIQFeedFundamentalMessage( ou::tf::IQFeedSymbol& symbol );
   void HandleIQFeedSummaryMessage( ou::tf::IQFeedSymbol& symbol );
+  
+  void HandleTimeSeriesAllocation( Trades::size_type count );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

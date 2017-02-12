@@ -22,9 +22,6 @@
 
 #include "TSAllocator.h"
 
-std::vector<int> v1;
+namespace ou { // One Unified
 
-template<typename T>
-struct test {
-  std::vector<T, allocator<T> > v2;
-};
+} // namespace ou

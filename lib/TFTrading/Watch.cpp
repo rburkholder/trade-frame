@@ -72,6 +72,8 @@ void Watch::Initialize( void ) {
   assert( 0 != m_pDataProvider.get() );
   assert( m_pDataProvider->ProvidesQuotes() );
   assert( m_pDataProvider->ProvidesTrades() );
+  m_quotes.Reserve( 1024 );  // reduce startup allocations
+  m_trades.Reserve( 1024 );  // reduce startup allocations
   AddEvents();
 }
 
@@ -180,14 +182,25 @@ void Watch::EmitValues( void ) const {
 
 void Watch::HandleQuote( const Quote& quote ) {
   m_quote = quote;
-  m_quotes.Append( quote );
+  //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+  {
+    //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+    m_quotes.Append( quote );
+  }
+  
+  //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
   //if ( 0 != m_OnQuote ) m_OnQuote( quote );
   OnQuote( quote );
 }
 
 void Watch::HandleTrade( const Trade& trade ) {
   m_trade = trade;
-  m_trades.Append( trade );
+  //OnPossibleResizeBegin( stateTimeSeries_t( m_trades.Capacity(), m_trades.Size() ) );
+  {
+    //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+    m_trades.Append( trade );
+  }
+  //OnPossibleResizeEnd( stateTimeSeries_t( m_trades.Capacity(), m_trades.Size() ) );
   //if ( 0 != m_OnTrade ) m_OnTrade( trade );
   OnTrade( trade );
 }
