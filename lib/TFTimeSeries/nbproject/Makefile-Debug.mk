@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DatedDatum.o \
 	${OBJECTDIR}/ExchangeHolidays.o \
 	${OBJECTDIR}/MergeDatedDatums.o \
+	${OBJECTDIR}/TSAllocator.o \
 	${OBJECTDIR}/TSMicrostructure.o \
 	${OBJECTDIR}/TimeSeries.o \
 	${OBJECTDIR}/stdafx.o
@@ -89,6 +90,11 @@ ${OBJECTDIR}/MergeDatedDatums.o: MergeDatedDatums.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MergeDatedDatums.o MergeDatedDatums.cpp
+
+${OBJECTDIR}/TSAllocator.o: TSAllocator.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TSAllocator.o TSAllocator.cpp
 
 ${OBJECTDIR}/TSMicrostructure.o: TSMicrostructure.cpp
 	${MKDIR} -p ${OBJECTDIR}

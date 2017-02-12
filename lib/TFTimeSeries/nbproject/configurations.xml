@@ -10,6 +10,7 @@
       <itemPath>ExchangeHolidays.h</itemPath>
       <itemPath>MergeDatedDatumCarrier.h</itemPath>
       <itemPath>MergeDatedDatums.h</itemPath>
+      <itemPath>TSAllocator.h</itemPath>
       <itemPath>TSMicrostructure.h</itemPath>
       <itemPath>TimeSeries.h</itemPath>
       <itemPath>stdafx.h</itemPath>
@@ -26,6 +27,7 @@
       <itemPath>DatedDatum.cpp</itemPath>
       <itemPath>ExchangeHolidays.cpp</itemPath>
       <itemPath>MergeDatedDatums.cpp</itemPath>
+      <itemPath>TSAllocator.cpp</itemPath>
       <itemPath>TSMicrostructure.cpp</itemPath>
       <itemPath>TimeSeries.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
@@ -83,6 +85,10 @@
       <item path="MergeDatedDatums.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="MergeDatedDatums.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSAllocator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSAllocator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="TSMicrostructure.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -145,6 +151,10 @@
       <item path="MergeDatedDatums.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="MergeDatedDatums.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TSAllocator.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="TSAllocator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="TSMicrostructure.cpp" ex="false" tool="1" flavor2="0">
       </item>
