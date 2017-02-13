@@ -16,8 +16,6 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include <boost/thread/mutex.hpp>
-
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -129,8 +127,6 @@ private:
   Fundamentals_t m_fundamentals;
   Summary_t m_summary;
   
-  boost::mutex m_mutexLockAppend;
-
   void Initialize( void );
   
   void AddEvents( void );

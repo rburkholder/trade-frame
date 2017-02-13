@@ -26,7 +26,7 @@
 // http://docs.roguewave.com/sourcepro/11.1/html/toolsug/11-6.html
 // http://jrruethe.github.io/blog/2015/11/22/allocators/
 
-#include <OUCommon/FastDelegate.h>
+//#include <OUCommon/FastDelegate.h>
 
 namespace ou { // One Unified
 
@@ -86,8 +86,8 @@ public:
 
   ALLOCATOR_TRAITS(T)
   
-  typedef fastdelegate::FastDelegate1<size_type> OnAllocate_t;
-  typedef fastdelegate::FastDelegate1<size_type> OnDeallocate_t;
+  //typedef fastdelegate::FastDelegate0<void> lockRequest_t;
+  //typedef fastdelegate::FastDelegate1<size_type> OnDeallocate_t;
 
   template<typename U>
   struct rebind {
@@ -101,20 +101,20 @@ public:
   template<typename U>
   heap(heap<U> const& other){}
   
-  OnAllocate_t OnAllocate;
+  //lockRequest_t lockRequest;
 
   // Allocate memory
   pointer allocate(size_type count, const_pointer /* hint */ = 0) {
-    if ( 0 != OnAllocate ) OnAllocate( count );  // allows external coarse lock
+    //if ( 0 != lockRequest ) lockRequest();  // allows external coarse lock
     if(count > max_size()){throw std::bad_alloc();}
     return static_cast<pointer>(::operator new(count * sizeof(type), ::std::nothrow));
   }
   
-  OnDeallocate_t OnDeallocate;
+  //OnDeallocate_t OnDeallocate;
 
   // Delete memory
   void deallocate(pointer ptr, size_type count ) {
-    if ( 0 != OnDeallocate ) OnDeallocate( count );  // allows external coarse lock
+    //if ( 0 != lockRequest ) lockRequest();  // allows external coarse lock
     ::operator delete(ptr);
   }
 

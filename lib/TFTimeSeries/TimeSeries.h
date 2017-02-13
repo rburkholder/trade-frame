@@ -19,6 +19,13 @@
 #include <algorithm>
 #include <string>
 
+#include <boost/thread/mutex.hpp>
+//#include <boost/thread/lockable_concepts.hpp> 
+//#include <boost/thread/locks.hpp> 
+#include <boost/thread/lock_types.hpp>
+//#include <boost/thread/lock_options.hpp>
+//#include <boost/thread/locks_options.hpp> 
+
 #include <OUCommon/Delegate.h>
 
 #include "DatedDatum.h"
@@ -42,6 +49,28 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+template <typename Lockable>
+class strict_lock  {
+public:
+    typedef Lockable lockable_type;
+
+    explicit strict_lock(lockable_type& obj) : obj_(obj) {
+        obj.lock(); // locks on construction
+    }
+    strict_lock() = delete;
+    strict_lock(strict_lock const&) = delete;
+    strict_lock& operator=(strict_lock const&) = delete;
+
+    ~strict_lock() { obj_.unlock(); } //  unlocks on destruction 
+
+    //bool owns_lock(mutex_type const* l) const noexcept // strict lockers specific function 
+    //{
+    //  return l == &obj_;
+    //}
+private:
+    lockable_type& obj_;
+};
+
 class TimeSeriesBase { // used for dynamic_cast capability
 public:
   virtual ~TimeSeriesBase( void ) {};
@@ -49,8 +78,19 @@ protected:
 private:
 };
 
+class Lockable {
+public:
+  void lock( void ) { m_mutex.lock(); }
+  void unlock( void ) { m_mutex.unlock(); }
+protected:
+private:
+  boost::mutex m_mutex;
+};
+
 template<typename T> 
-class TimeSeries: public TimeSeriesBase {
+class TimeSeries: 
+  public TimeSeriesBase,
+  public Lockable {
 public:
 
   typedef T datum_t;
@@ -112,8 +152,8 @@ public:
   void SetName( const std::string& sName ) { m_sName = sName; };
   const std::string& GetName( void ) const { return m_sName; };
 
-  virtual TimeSeries<T>* Subset( const ptime &time ) const; // from At or After to end
-  virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ) const; // from At or After for n T
+  virtual TimeSeries<T>* Subset( const ptime &time ); // from At or After to end
+  virtual TimeSeries<T>* Subset( const ptime &time, unsigned int n ); // from At or After for n T
 
   H5::DataSpace* DefineDataSpace( H5::DataSpace* pSpace = NULL );
 
@@ -128,35 +168,34 @@ public:
 
   template<typename Functor>
   typename Functor::return_type ForEach( Functor f ) const {
+    strict_lock<TimeSeries<T> > guard(*this);
     return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
   }
-
+  
 protected:
 private:
-  bool m_bLock;
+
+  boost::mutex m_mutex;
+  boost::unique_lock<boost::mutex> m_lock;
+  
   bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
   vTimeSeries_t m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
   
-  void SignalLock( size_type count ) {
-    assert( !m_bLock );
-    m_bLock = true;
-    if ( 0 != TimeSeriesLock ) TimeSeriesLock( count );
-  }
-  
-  void SignalUnlock( void ) {
-    if ( m_bLock ) {
-      m_bLock = false;
-      if ( 0 != TimeSeriesUnlock ) TimeSeriesUnlock();
-    }
-  }
+  //void lock( void ) {
+    //m_lock.lock(); 
+  //}
+  //void unlock( void ) {
+    //m_lock.unlock();
+  //}
 
 };
 
 template<typename T> 
 TimeSeries<T>::TimeSeries(void)
   : TimeSeries( "", 0 ) {
+  
 }
 
 template<typename T> 
@@ -166,28 +205,32 @@ TimeSeries<T>::TimeSeries( size_type size )
 
 template<typename T>
 TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
-  : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ), m_bLock( false ) {
-  m_vSeries.get_allocator().OnAllocate = fastdelegate::MakeDelegate( this, &TimeSeries<T>::SignalLock );
+  : m_vIterator( m_vSeries.end() ), m_sName( sName ), m_bAppendToVector( true ) {
+  //m_vSeries.get_allocator().lockRequest = fastdelegate::MakeDelegate( this, &TimeSeries<T>::lock );
+  //m_lock = boost::unique_lock<boost::mutex>( m_mutex, boost::defer_lock );
   if ( ( 0 != nSize ) && ( m_vSeries.size() < nSize ) ) m_vSeries.reserve( nSize );
 }
 
+// this probably isn't going to work as the mutex may make this non-copyable
 template<typename T>
 TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
   : m_bAppendToVector( series.m_bAppendToVector ) {
   m_vSeries = series.m_vSeries;
-  assert( !m_bLock );
-  m_vSeries.get_allocator().OnAllocate = fastdelegate::MakeDelegate( this, &TimeSeries<T>::SignalLock );
+  //assert( !m_bLock );
+  //m_vSeries.get_allocator().lockRequest = fastdelegate::MakeDelegate( this, &TimeSeries<T>::lock );
+  //m_lock = boost::unique_lock<boost::mutex>( m_mutex, boost::defer_lock );
   m_vIterator = m_vSeries.end();
 }
 
 template<typename T> 
 TimeSeries<T>::~TimeSeries(void) {
-  m_vSeries.get_allocator().OnAllocate = 0;
+  //m_vSeries.get_allocator().lockRequest = 0;
   Clear();
 }
 
 template<typename T> 
 void TimeSeries<T>::Append(const T& datum) {
+  strict_lock<TimeSeries<T> > guard(*this);
   if ( m_bAppendToVector ) {
     m_vSeries.push_back( datum );
   }
@@ -199,7 +242,7 @@ void TimeSeries<T>::Append(const T& datum) {
       m_vSeries.back() = datum;
     }
   }
-  SignalUnlock();
+  //unlock();
   OnAppend( datum );
 }
 
@@ -207,6 +250,7 @@ template<typename T>
 void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   T key( dt );
   std::pair<iterator, iterator> p;
+  strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -214,12 +258,13 @@ void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
-  SignalUnlock();
+  //unlock();
 }
 
 template<typename T> 
 void TimeSeries<T>::Insert( const T& datum ) {
   std::pair<iterator, iterator> p;
+  strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -227,20 +272,20 @@ void TimeSeries<T>::Insert( const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
-  SignalUnlock();
+  //unlock();
 }
 
 template<typename T> 
 void TimeSeries<T>::Clear( void ) {
-  assert( !m_bLock );
-  SignalLock( 0 );
+  strict_lock<TimeSeries<T> > guard(*this);
   m_vSeries.clear();
-  SignalUnlock();
+  //unlock();
 }
 
 
 template<typename T> 
 const T* TimeSeries<T>::First() {
+  strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.begin();
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
@@ -252,6 +297,7 @@ const T* TimeSeries<T>::First() {
 
 template<typename T> 
 const T* TimeSeries<T>::Next() {
+  strict_lock<TimeSeries<T> > guard(*this);
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
   }
@@ -268,6 +314,7 @@ const T* TimeSeries<T>::Next() {
 
 template<typename T> 
 const T* TimeSeries<T>::Last() {
+  strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.end();
   if ( 0 == m_vSeries.size() ) {
     return NULL;
@@ -280,6 +327,7 @@ const T* TimeSeries<T>::Last() {
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
+  strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   typename vTimeSeries_t::const_reverse_iterator iter( m_vSeries.rbegin() );
   iter += ix;
@@ -288,12 +336,14 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::operator []( size_type ix ) {
+  strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
+  strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
@@ -322,6 +372,7 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt
   // TODO: Check that this is correct
   T key( dt );
   std::pair<const_iterator, const_iterator> p;
+  strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
 //  if ( p.first != p.second ) {
 //    m_vIterator = p.first;
@@ -337,21 +388,24 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) c
   // TODO: Check that this is correct
   T key( dt );
   std::pair<const_iterator, const_iterator> p;
+  strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   return p.second;
 }
 
 template<typename T> 
 void TimeSeries<T>::Sort( void ) {
+  strict_lock<TimeSeries<T> > guard(*this);
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
-  SignalUnlock();  // not sure if this is required
+  //unlock();  // not sure if this is required
 }
 
 template<typename T> 
-TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) const {
+TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
   TimeSeries<T>* series = nullptr;
   const_iterator iter;
+  strict_lock<TimeSeries<T> > guard(*this);
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
     series = new TimeSeries<T>( (unsigned int) (m_vSeries.end() - iter) );
@@ -367,10 +421,11 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) const {
 }
 
 template<typename T> 
-TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) const { // n is max count
+TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n is max count
   T datum( dt );
   TimeSeries<T>* series = NULL;
   const_iterator iter;
+  strict_lock<TimeSeries<T> > guard(*this);
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
     unsigned int todo = std::min<unsigned int>( n, (unsigned int) ( m_vSeries.end() - iter ) );
@@ -410,8 +465,8 @@ public:
   Bars(void) {};
   Bars( size_type size ): TimeSeries<datum_t>( size ) {};
   virtual ~Bars(void) {};
-  Bars* Subset( ptime time ) const { return (Bars*) TimeSeries<datum_t>::Subset( time ); };
-  Bars* Subset( ptime time, unsigned int n ) const { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); };
+  Bars* Subset( ptime time ) { return (Bars*) TimeSeries<datum_t>::Subset( time ); };
+  Bars* Subset( ptime time, unsigned int n ) { return (Bars*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -424,8 +479,8 @@ public:
   Trades( void ) {};
   Trades( size_type size ): TimeSeries<datum_t>( size ) {};
   ~Trades( void ) {};
-  Trades* Subset( ptime time ) const { return (Trades*) TimeSeries<datum_t>::Subset( time ); };
-  Trades* Subset( ptime time, unsigned int n ) const { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); };
+  Trades* Subset( ptime time ) { return (Trades*) TimeSeries<datum_t>::Subset( time ); };
+  Trades* Subset( ptime time, unsigned int n ) { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -438,8 +493,8 @@ public:
   Quotes( void ) {};
   Quotes( size_type size ): TimeSeries<datum_t>( size ) {};
   ~Quotes( void ) {};
-  Quotes* Subset( ptime time ) const { return (Quotes*) TimeSeries<datum_t>::Subset( time ); };
-  Quotes* Subset( ptime time, unsigned int n ) const { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); };
+  Quotes* Subset( ptime time ) { return (Quotes*) TimeSeries<datum_t>::Subset( time ); };
+  Quotes* Subset( ptime time, unsigned int n ) { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -452,8 +507,8 @@ public:
   MarketDepths( void ) {};
   MarketDepths( size_type size ): TimeSeries<datum_t>( size ) {};
   ~MarketDepths( void ) {};
-  MarketDepths* Subset( ptime time ) const { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); };
-  MarketDepths* Subset( ptime time, unsigned int n ) const { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); };
+  MarketDepths* Subset( ptime time ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time ); };
+  MarketDepths* Subset( ptime time, unsigned int n ) { return (MarketDepths*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -466,8 +521,8 @@ public:
   Greeks( void ) {};
   Greeks( size_type size ): TimeSeries<datum_t>( size ) {};
   ~Greeks( void ) {};
-  Greeks* Subset( ptime time ) const { return (Greeks*) TimeSeries<datum_t>::Subset( time ); };
-  Greeks* Subset( ptime time, unsigned int n ) const { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); };
+  Greeks* Subset( ptime time ) { return (Greeks*) TimeSeries<datum_t>::Subset( time ); };
+  Greeks* Subset( ptime time, unsigned int n ) { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -481,8 +536,8 @@ public:
   Prices( void ) {};
   Prices( size_type size ): TimeSeries<datum_t>( size ) {};
   ~Prices( void ) {};
-  Prices* Subset( ptime time ) const { return (Prices*) TimeSeries<datum_t>::Subset( time ); };
-  Prices* Subset( ptime time, unsigned int n ) const { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); };
+  Prices* Subset( ptime time ) { return (Prices*) TimeSeries<datum_t>::Subset( time ); };
+  Prices* Subset( ptime time, unsigned int n ) { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
@@ -495,8 +550,8 @@ public:
   PriceIVs( void ) {};
   PriceIVs( size_type size ): TimeSeries<datum_t>( size ) {};
   ~PriceIVs( void ) {};
-  PriceIVs* Subset( ptime time ) const { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
-  PriceIVs* Subset( ptime time, unsigned int n ) const { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
+  PriceIVs* Subset( ptime time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); };
+  PriceIVs* Subset( ptime time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); };
 protected:
 private:
 };
