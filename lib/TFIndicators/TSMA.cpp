@@ -68,9 +68,9 @@ void TSMA::Initialize( void ) {
     //m_vEMA[ ix ] = new TSEMA<Price>( m_seriesSource, microseconds( ( 2 * m_dtTimeRange.total_microseconds() ) / ( ix + 1 ) ) );
   }
   for ( unsigned int ix = 1; ix <= m_nSup; ++ix ) {
-    m_vEMA[ ix ]->AppendEnabled() = false;
+    m_vEMA[ ix ]->DisableAppend();
   }
-  Prices::AppendEnabled() = false;
+  Prices::DisableAppend();
   m_vEMA[ m_nSup ]->OnAppend.Add( MakeDelegate( this, &TSMA::HandleUpdate ) );
 }
 

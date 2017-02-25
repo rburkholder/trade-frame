@@ -162,7 +162,7 @@ public:
   
   size_type Capacity( void ) const { return m_vSeries.capacity(); }
 
-  // TSVariance uses this, sets to false
+  // TSVariance, TSMA uses this, sets to false
   void DisableAppend( void ) { m_bAppendToVector = false; };
   bool AppendEnabled( void ) const { return m_bAppendToVector; };  // affects Append(...) only
 
