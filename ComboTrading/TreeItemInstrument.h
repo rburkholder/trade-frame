@@ -16,24 +16,21 @@
 
 #pragma once
 
-#include <TFTrading/Watch.h>
-
+#include "InstrumentActions.h"
 #include "TreeItem.h"
 
 class TreeItemInstrument: public TreeItemResources {
   friend class boost::serialization::access;
 public:
   
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
-  
   TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources );
   virtual ~TreeItemInstrument( void );
   
+  virtual void ShowContextMenu( void );
+  
   void HandleMenuNewInstrument( wxCommandEvent& event );
   
-  pWatch_t GetInstrumentWatch( void ) { return m_pInstrumentWatch; }
-  
-  virtual void ShowContextMenu( void );
+  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ); // test: invocable only if no instrument already exists
   
 protected:
 
@@ -48,39 +45,43 @@ protected:
     MIDelete
   };
   
-    void BuildContextMenu( wxMenu* pMenu );
-    
-    void NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ); // invocable only if no instrument already exists
-    void InstrumentViaDialog( Resources::ENewInstrumentLock lock, const std::string& sPrompt );
-    
-    void HandleMenuAddFuturesOption( wxCommandEvent& event );
-    void HandleMenuAddOption( wxCommandEvent& event );
-    void HandleLiveChart( wxCommandEvent& event );
-    void HandleDailyChart( wxCommandEvent& event );
-    void HandleSaveData( wxCommandEvent& event );
-    void HandleDelete( wxCommandEvent& event );
-    void HandleEmit( wxCommandEvent& event );
+  void BuildContextMenu( wxMenu* pMenu );
+
+  void HandleMenuAddFuturesOption( wxCommandEvent& event );
+  void HandleMenuAddOption( wxCommandEvent& event );
+  void HandleLiveChart( wxCommandEvent& event );
+  void HandleDailyChart( wxCommandEvent& event );
+  void HandleSaveData( wxCommandEvent& event );
+  void HandleDelete( wxCommandEvent& event );
+  void HandleEmit( wxCommandEvent& event );
   
 private:
-
-  pWatch_t m_pInstrumentWatch;
   
+  typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
+  
+  InstrumentActions::ENewInstrumentLock m_lockType;
+  
+  pInstrumentActions_t m_pInstrumentActions;
+    
+  void InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt );
+  
+  // need to keep track of (load, save)
+  //   * menu item text (as it can be changed)
+  //   * instrument code(s)
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const TreeItemResources>(*this);
+    ar & m_lockType;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & boost::serialization::base_object<TreeItemResources>(*this);
-    try {
-      std::string s( m_baseResources.signalGetItemText( m_id ) );
-      m_pInstrumentWatch = m_resources.signalLoadInstrument( s );
-      m_pInstrumentWatch->StartWatch();
-    }
-    catch (std::runtime_error& e) {
-      std::cout << "TreeItemInstrument: couldn't load instrument" << std::endl;
-    }
+    ar & m_lockType;
+    // this is going to cause problems if renamed, so prevent a rename, ... is rename even available?
+    m_pInstrumentActions->signalLoadInstrument( this->m_id, m_baseResources.signalGetItemText( m_id ) );
+    // call InstrumentActions::Startup here?
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

@@ -67,6 +67,7 @@ void PanelCharts::Init( void ) {
   //m_winChart = 0;
   m_pwinDetail = 0;
   m_pDialogPickSymbol = 0;
+  m_pInstrumentActions.reset( new InstrumentActions );
 }
 
 bool PanelCharts::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -133,8 +134,8 @@ void PanelCharts::CreateControls() {
   m_pTreeOps = new ou::tf::TreeOps( splitter );
   m_pTreeOps->PopulateResources( m_baseResources );
   
-  wxTreeItemId id = m_pTreeOps->AddRoot( "Root" );  // can be renamed
-  boost::shared_ptr<TreeItemRoot> p( new TreeItemRoot( id, m_baseResources, m_resources ) );
+  wxTreeItemId item = m_pTreeOps->AddRoot( "Root" );  // can be renamed
+  boost::shared_ptr<TreeItemRoot> p( new TreeItemRoot( item, m_baseResources, m_resources ) );
   m_pTreeOps->SetRoot( p );
   //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
   //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
@@ -155,8 +156,14 @@ void PanelCharts::CreateControls() {
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
   namespace args = boost::phoenix::arg_names;
-  m_resources.signalNewInstrumentViaDialog.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1 ) );
-  m_resources.signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1 ) );
+  
+  m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
+  
+  m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2 ) );
+  m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2 ) );
+  m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
+  m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
+  m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   
   m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
   m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
@@ -165,9 +172,11 @@ void PanelCharts::CreateControls() {
   
   Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
   
+  // no need for the gui refresh as that is handled in ChartInteractive
   //Bind( wxEVT_TIMER, &PanelCharts::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   //m_timerGuiRefresh.SetOwner( this );
   
+  // need to process in a dynamic fashion
   //m_pwinDetail = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   //sizerRight->Add( m_pwinDetail, 1, wxALL|wxEXPAND, 5);
 
@@ -185,28 +194,73 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   }
 }
 
-void PanelCharts::HandleTreeOpsChanging( wxTreeItemId id ) {
+void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
   if ( 0 != m_pwinDetail ) {
     delete m_pwinDetail;
     m_pwinDetail = 0;
   }
 }
 
-PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( const Resources::ENewInstrumentLock lock ) {
+PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  // create an entry for the menu item with its specific instrument and watch and indicators
+  if ( m_mapWatchInfo.end() == iter ) {
+    pWatchInfo_t pWatchInfo( new WatchInfo );
+    m_mapWatchInfo.insert( mapWatchInfo_t::value_type( item.GetID(), pWatchInfo ) );
+  }
+  else {
+    std::cout << "getting actions for menu item already in existence" << std::endl;
+  }
+  return m_pInstrumentActions;
+}
+
+// todo: fix: StopWatch causes an exception upon program end with provider stopped
+void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "couldn't find the menuitem to delete" << std::endl;
+  }
+  else {
+    iter->second->pWatch->StopWatch();
+    m_mapWatchInfo.erase( iter );
+  }
+}
+
+// use ChartInteractive to show watch data
+// need to maintain a date/time range
+// get subset of data and chart
+// need a regular update interval to rescan data
+void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& ) {
+  
+}
+
+void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "couldn't find the menuitem form HandleEmitValues" << std::endl;
+  }
+  else {
+    iter->second->pWatch->EmitValues();
+  }
+}
+
+InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTreeItemId& item, const InstrumentActions::ENewInstrumentLock lock ) {
   
   assert( 0 == m_pDialogPickSymbol );
+  
+  InstrumentActions::values_t values;
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
   m_pDialogPickSymbol->SetDataExchange( &m_de );
   
   switch ( lock ) {
-    case Resources::ENewInstrumentLock::LockFuturesOption:
+    case InstrumentActions::ENewInstrumentLock::LockFuturesOption:
       m_pDialogPickSymbol->SetFuturesOptionOnly();
       break;
-    case Resources::ENewInstrumentLock::LockOption:
+    case InstrumentActions::ENewInstrumentLock::LockOption:
       m_pDialogPickSymbol->SetOptionOnly();
       break;
-    case Resources::ENewInstrumentLock::NoLock:
+    case InstrumentActions::ENewInstrumentLock::NoLock:
       break;
   }
   
@@ -217,10 +271,26 @@ PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( const Resources::
   switch ( status ) {
     case wxID_CANCEL:
       //m_pDialogPickSymbolCreatedInstrument.reset();
+      // menu item should be deleting
       break;
     case wxID_OK:
       if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
         pInstrumentWatch = LoadInstrument( m_pDialogPickSymbolCreatedInstrument );
+        mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
+        if ( m_mapWatchInfo.end() == iter ) {
+          std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
+        }
+        else {
+          iter->second->pWatch = pInstrumentWatch;
+          iter->second->bActive = true;
+          values.name_ = pInstrumentWatch->GetInstrument()->GetInstrumentName();
+          if ( pInstrumentWatch->GetInstrument()->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
+          if ( pInstrumentWatch->GetInstrument()->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
+        }
+        pInstrumentWatch->StartWatch();
+      }
+      else {
+        std::cout << "PanelCharts::HandleNewInstrumentRequest is wxID_OK but no instrument" << std::endl;
       }
       break;
   }
@@ -230,11 +300,25 @@ PanelCharts::pWatch_t PanelCharts::HandleNewInstrumentRequest( const Resources::
   
   m_pDialogPickSymbolCreatedInstrument.reset();
   
-  return pInstrumentWatch;
+  return values;
 }
 
-PanelCharts::pWatch_t PanelCharts::HandleLoadInstrument( const std::string& name ) {
-  return LoadInstrument( signalLoadInstrument( name ) );
+// called by anything more than the serialization in TreeItemInstrument?
+void PanelCharts::HandleLoadInstrument( const wxTreeItemId& item, const std::string& name ) {
+  pWatch_t pInstrumentWatch = LoadInstrument( signalLoadInstrument( name ) );
+  // code shared from HandleNewInstrumentRequest, can it be refactored?
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
+  }
+  else {
+    if ( iter->second->bActive ) {
+      std::cout << "PanelCharts::HandleLoadInstrument menu item already activated" << std::endl;
+    }
+    iter->second->pWatch = pInstrumentWatch;
+    iter->second->bActive = true;
+  }
+  pInstrumentWatch->StartWatch();
 }
 
 PanelCharts::pWatch_t PanelCharts::LoadInstrument( pInstrument_t pInstrument ) {
@@ -292,7 +376,6 @@ void PanelCharts::BuildInstrument( const DialogPickSymbol::DataExchange& pde, pI
     }
       break;
   }
-  
 }
 
 void PanelCharts::HandleLookUpDescription( const std::string& sSymbol, std::string& sDescription ) {

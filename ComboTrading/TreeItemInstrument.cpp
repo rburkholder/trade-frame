@@ -27,46 +27,56 @@
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
-  TreeItemResources( id, baseResources, resources ) {
+  TreeItemResources( id, baseResources, resources ), m_lockType( InstrumentActions::ENewInstrumentLock::NoLock ) {
+  m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
+  assert( 0 != m_pInstrumentActions.use_count() );
 }
   
 TreeItemInstrument::~TreeItemInstrument( void ) {
+  m_pInstrumentActions->signalDelete( m_id );
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   std::cout << "Delete: TreeItemInstrument" << std::endl;
-  m_baseResources.signalDelete( this->m_id );
+  m_baseResources.signalDelete( m_id );
 }
 
 void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
-  
+  m_pInstrumentActions->signalLiveChart( m_id );
 }
 
 void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
-  
+  m_pInstrumentActions->signalDailyChart( m_id );
+}
+
+void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
+  m_pInstrumentActions->signalEmitValues( m_id );
 }
 
 void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
-  //m_pInstrumentWatch->SaveSeries()
+  m_pInstrumentActions->signalSaveData( m_id );
 }
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
-  if ( 0 == m_pInstrumentWatch.use_count() ) {  // is this actually used?
+  if ( InstrumentActions::ENewInstrumentLock::NoLock == m_lockType ) {  // is this actually used?
     pMenu->Append( MINewInstrument, "New Instrument" );
     pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
   }
   else {
-    if ( m_pInstrumentWatch->GetInstrument()->IsFuture() ) {
+    if ( InstrumentActions::ENewInstrumentLock::LockFuturesOption == m_lockType ) {
       // can then use underlying to calc implied volatility
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
     }
     else {
-      if ( m_pInstrumentWatch->GetInstrument()->IsStock() ) {
+      if ( InstrumentActions::ENewInstrumentLock::LockOption == m_lockType ) {
       // can then use underlying to calc implied volatility
         pMenu->Append( MINewOption, "New Option" );
         pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
+      }
+      else {
+        std::cout << "TreeItemInstrument::BuildContextMenu has unknown lockType: " << m_lockType << std::endl;
       }
     }
   }
@@ -83,10 +93,6 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
 }
 
-void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
-  m_pInstrumentWatch->EmitValues();
-}
-
 void TreeItemInstrument::ShowContextMenu( void ) {
   if ( 0 == m_pMenu ) {
     m_pMenu = new wxMenu();  // menu does not get deleted, so may need to reclaim afterwards.  put into a list somewhere?
@@ -95,32 +101,8 @@ void TreeItemInstrument::ShowContextMenu( void ) {
   m_baseResources.signalPopupMenu( m_pMenu );
 }
 
-void TreeItemInstrument::InstrumentViaDialog( Resources::ENewInstrumentLock lock, const std::string& sPrompt ) {
-  TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
-  p->NewInstrumentViaDialog( lock );
-  if ( 0 == p->m_pInstrumentWatch.get() ) {
-    this->m_baseResources.signalDelete( p->GetTreeItemId() );
-    //DeleteMember( p->GetTreeItemId() );
-  }
-//  else {
-//  }
-}
-
-void TreeItemInstrument::NewInstrumentViaDialog( Resources::ENewInstrumentLock lock ) {
-  if ( 0 == m_pInstrumentWatch.use_count() ) {
-    m_pInstrumentWatch = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
-    if ( 0 != m_pInstrumentWatch.get() ) {
-      m_baseResources.signalSetItemText( m_id, m_pInstrumentWatch->GetInstrument()->GetInstrumentName() );
-      m_pInstrumentWatch->StartWatch();
-    }
-  }
-  else {
-    std::cout << "InstrumentWatch already assigned" << std::endl;
-  }
-}
-
 void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
-  NewInstrumentViaDialog( Resources::NoLock );
+  NewInstrumentViaDialog( InstrumentActions::NoLock );
 }
 
 /* todo:  
@@ -133,11 +115,45 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( Resources::LockOption, "Option" );
+  InstrumentViaDialog( InstrumentActions::LockOption, "Option" );
 }
 
 // from tree menu popup
 void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) { 
-  InstrumentViaDialog( Resources::LockFuturesOption, "FuturesOption" );
+  InstrumentViaDialog( InstrumentActions::LockFuturesOption, "FuturesOption" );
 }
 
+void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt ) {
+  TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
+  if ( !p->NewInstrumentViaDialog( lock ) ) {
+    this->m_baseResources.signalDelete( p->GetTreeItemId() );
+  }
+//  else {
+//  }
+}
+
+bool TreeItemInstrument::NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ) {
+  // need to assume/assert that this is a new dialog?  or communicate it is a replacement?
+  bool bInstrumentNameAssigned( false );
+  InstrumentActions::values_t values( m_pInstrumentActions->signalNewInstrument( this->m_id, lock ) );
+  if ( "" != values.name_ ) {
+    m_baseResources.signalSetItemText( m_id, values.name_ );
+    m_lockType = values.lockType_;
+//    m_pInstrumentWatch->StartWatch();  //  needs to be processed elsewhere
+    bInstrumentNameAssigned = true;
+  }
+  else {
+    // when does the deletion signal get tripped? -- (from the caller)
+  }
+//  if ( 0 == m_pInstrumentWatch.use_count() ) {
+//    m_pInstrumentWatch = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
+//    if ( 0 != m_pInstrumentWatch.get() ) {
+//      m_baseResources.signalSetItemText( m_id, m_pInstrumentWatch->GetInstrument()->GetInstrumentName() );
+//      m_pInstrumentWatch->StartWatch();
+//    }
+//  }
+//  else {
+//    std::cout << "InstrumentWatch already assigned" << std::endl;
+//  }
+  return bInstrumentNameAssigned;
+}

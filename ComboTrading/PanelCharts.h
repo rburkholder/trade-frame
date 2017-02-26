@@ -31,7 +31,10 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
+#include <OUCharting/ChartDataBase.h>
+
 #include "TreeItem.h"
+#include "InstrumentActions.h"
 #include "ChartInteractive.h"
 
 namespace ou { // One Unified
@@ -113,6 +116,22 @@ private:
     MIRoot, MIGroup, MIInstrument, MIPortfolio, MIPosition
   };
   
+  typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
+  
+  pInstrumentActions_t m_pInstrumentActions;
+  
+  struct WatchInfo {
+    bool bActive;
+    pWatch_t pWatch;
+    //ou::tf::Instrument::idInstrument_t idInstrument;
+    ou::ChartDataBase cdb; // has indicators and dataview
+    WatchInfo(): bActive( false ) {}
+  };
+  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
+  
+  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
+  mapWatchInfo_t m_mapWatchInfo;
+  
   typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
   mapInstrumentWatch_t m_mapInstrumentWatch;
   
@@ -135,13 +154,20 @@ private:
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
-  pWatch_t HandleNewInstrumentRequest( const Resources::ENewInstrumentLock );
+  InstrumentActions::values_t HandleNewInstrumentRequest( const wxTreeItemId& item, const InstrumentActions::ENewInstrumentLock );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
-  pWatch_t HandleLoadInstrument( const std::string& );
+  void HandleLoadInstrument( const wxTreeItemId& item, const std::string& );
   pWatch_t LoadInstrument( pInstrument_t );
   
+  void HandleInstrumentLiveChart( const wxTreeItemId& );
+  void HandleEmitValues( const wxTreeItemId& );
+  
+  void HandleMenuItemDelete( const wxTreeItemId& id );
+  
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
+  
+  pInstrumentActions_t HandleGetInstrumentActions( const wxTreeItemId& );
 
   void OnClose( wxCloseEvent& event );
   

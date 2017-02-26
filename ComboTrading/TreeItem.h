@@ -18,28 +18,18 @@
 
 #include <boost/signals2.hpp>
 
-//#include <wx/panel.h>
-//#include <wx/window.h>
-
 #include <TFBitsNPieces/TreeOpsItems.h>
-#include <TFTrading/Watch.h>
+
+#include "InstrumentActions.h"
 
 struct Resources {
 
-  typedef ou::tf::Watch::pWatch_t pWatch_t;
+  typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   
-  // instrument dialog locks to option or futuresoption when adding sub-menu to underlying instrument
-  enum ENewInstrumentLock { NoLock, LockOption, LockFuturesOption };
-  
-  // used in TreeItemInstrument
-  typedef boost::signals2::signal<pWatch_t (ENewInstrumentLock), ou::tf::FirstOrDefault<pWatch_t> > signalNewInstrumentWatch_t;
-  typedef signalNewInstrumentWatch_t::slot_type slotNewInstrumentWatch_t;
-  signalNewInstrumentWatch_t signalNewInstrumentViaDialog;
-  
-  typedef boost::signals2::signal<pWatch_t (const std::string&), ou::tf::FirstOrDefault<pWatch_t> > signalLoadInstrumentWatch_t;
-  typedef signalLoadInstrumentWatch_t::slot_type slotLoadInstrumentWatch_t;
-  signalLoadInstrumentWatch_t signalLoadInstrument;
-  
+  typedef boost::signals2::signal<pInstrumentActions_t (const wxTreeItemId&), 
+                                     ou::tf::FirstOrDefault<pInstrumentActions_t> > signalGetInstrumentActions_t;
+  typedef signalGetInstrumentActions_t::slot_type slotInstrumentActions_t;
+  signalGetInstrumentActions_t signalGetInstrumentActions;
 };
 
 // ================

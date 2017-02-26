@@ -223,6 +223,7 @@ bool AppComboTrading::OnInit() {
   
   BuildFrameCharts();
   BuildFrameInteractiveBrokers();
+  //BuildFramePortfolioPosition();
 
   return 1;
 
@@ -592,9 +593,14 @@ void AppComboTrading::TestSymbols( void ) {
 }
 
 void AppComboTrading::GetContractFor( const std::string& sBaseName, pInstrument_t pInstrument ) {
-  m_tws->RequestContractDetails( 
-    sBaseName, pInstrument,
-    MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+  if ( m_bIBConnected ) {
+    m_tws->RequestContractDetails( 
+      sBaseName, pInstrument,
+      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+  }
+  else {
+    std::cout << "AppComboTrading::GetContractFor: IB Not Connected" << std::endl;
+  }
 }
 
 // futures expire: 17:15 est
@@ -944,16 +950,21 @@ void AppComboTrading::HandlePanelNewOrder( const ou::tf::PanelManualOrder::Order
 void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
   // need to fix to handle equity, option, future, etc.  merge with code from above so common code usage
   // 2014/09/30 maybe need to disable this panel, as the order doesn't land in an appropriate portfolio or position.
-  ou::tf::IBTWS::Contract contract;
-  contract.currency = "USD";
-  contract.exchange = "SMART";
-  contract.secType = "STK";
-  contract.symbol = sName;
-  // IB responds only when symbol is found, bad symbols will not illicit a response
-//  m_pPanelManualOrder->SetInstrumentDescription( "" );
-  m_tws->RequestContractDetails( 
-    contract, 
-    MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+  if ( m_bIBConnected ) {
+    ou::tf::IBTWS::Contract contract;
+    contract.currency = "USD";
+    contract.exchange = "SMART";
+    contract.secType = "STK";
+    contract.symbol = sName;
+    // IB responds only when symbol is found, bad symbols will not illicit a response
+    //  m_pPanelManualOrder->SetInstrumentDescription( "" );
+    m_tws->RequestContractDetails( 
+      contract, 
+      MakeDelegate( this, &AppComboTrading::HandleIBContractDetails ), MakeDelegate( this, &AppComboTrading::HandleIBContractDetailsDone ) );
+  }
+  else {
+    std::cout << "AppComboTrading::HandlePanelSymbolText: IB Not Connected" << std::endl;
+  }
 }
 
 void AppComboTrading::HandlePanelFocusPropogate( unsigned int ix ) {
