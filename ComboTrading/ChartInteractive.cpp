@@ -37,7 +37,7 @@ ChartInteractive::~ChartInteractive() {
 }
 
 void ChartInteractive::Init( void ) {
-  m_pChartDataView = 0;
+  m_pChartDataView = 0;   // start / stop refresh based upon this being non-zero
   //m_bPaintingChart = false;
   //m_bReadyToDrawChart = false;
 }

@@ -11,6 +11,9 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
+// includes own gui refresh function
+// needs to be supplied with a ou::ChartDataView
+
 #pragma once
 
 #include <wx/window.h>
