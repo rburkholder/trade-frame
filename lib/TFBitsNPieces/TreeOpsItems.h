@@ -29,19 +29,11 @@
 #include <wx/string.h>
 #include <wx/menu.h>
 
+#include "FirstOrDefaultCombiner.h"
+
 namespace ou {
 namespace tf { 
   
-template<typename T>
-struct FirstOrDefault {  // a combiner used for signals with return values
-  typedef T result_type;
-  template<typename InputIterator>
-  T operator()( InputIterator first, InputIterator last ) const {
-    if (first==last) return T();
-    return *first;
-  }
-};
-
 class TreeItemBase;
   
 struct TreeItemResources {  // used by inheritors of TreeItemBase
