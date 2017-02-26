@@ -55,7 +55,7 @@ void ChartEntryBars::AppendBarPrivate( const ou::tf::Bar& bar ) {
 }
 
 void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
-  if ( m_bThreadSafe ) {
+  if ( m_bUseThreadSafety ) {
     while ( !m_lfBar.push( bar ) ) {};
   }
   else {

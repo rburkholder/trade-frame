@@ -13,7 +13,7 @@
  ************************************************************************/
 
 // Started 2013/09/29
-// Taken from Strateg1/Strategy.h
+// Taken from Strategy1/Strategy.h
 
 // used as a base class for super-classes, which would add additional indicators to the existing ones.
 

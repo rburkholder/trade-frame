@@ -71,8 +71,8 @@ public:
   void SetName( const std::string& name ) { m_sName = name; };
   const std::string& GetName( void ) const { return m_sName; };
 
-  void SetThreadSafe( bool bThreadSafe ) { m_bThreadSafe = bThreadSafe; };
-  bool GetThreadSafe( void ) const  { return m_bThreadSafe; }
+  void SetThreadSafe( bool bThreadSafe ) { m_bUseThreadSafety = bThreadSafe; };
+  bool GetThreadSafe( void ) const  { return m_bUseThreadSafety; }
 
   void Append( double price );
   virtual size_type Size( void ) const { return m_vPrice.size(); };
@@ -86,7 +86,7 @@ protected:
   size_type m_ixStart; // starting point into viewport
   int m_nElements;  // number of elements in the viewport
 
-  bool m_bThreadSafe;
+  bool m_bUseThreadSafety;
   static const unsigned int lockfreesize = 4096;
 
   ou::Colour::enumColour m_eColour;

@@ -26,7 +26,7 @@ ChartEntryMark::~ChartEntryMark(void) {
 }
 
 void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
-  if ( m_bThreadSafe ) {
+  if ( m_bUseThreadSafety ) {
     Mark_t mark( price, colour, name );
     while ( !m_lfMark.push( mark ) ) {};
   }

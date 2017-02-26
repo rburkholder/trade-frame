@@ -48,7 +48,7 @@ void ChartEntryShape::AddLabel(const boost::posix_time::ptime &dt, double price,
   strcpy( pszLabel, sText.c_str() );
   //m_vLabel.push_back( sText );
   //const std::string &s = m_vLabel.back();
-  if ( m_bThreadSafe ) {
+  if ( m_bUseThreadSafety ) {
     while ( !m_lfShape.push( pszLabel ) ) {};
   }
   else {

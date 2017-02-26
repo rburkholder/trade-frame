@@ -21,7 +21,7 @@ namespace ou { // One Unified
 // ChartEntryBase
 //
 
-ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ), m_bThreadSafe( false ) {
+ChartEntryBase::ChartEntryBase(): m_ixStart( 0 ), m_nElements( 0 ), m_bUseThreadSafety( false ) {
 }
 
 ChartEntryBase::ChartEntryBase( size_type nSize ) 
@@ -132,7 +132,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
 }
 
 void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
-  if ( m_bThreadSafe ) {
+  if ( m_bUseThreadSafety ) {
     while ( !m_plfTimeDouble->push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here
   }
   else {
@@ -141,7 +141,7 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) 
   }
 }
 
-// there are out-of-order issues or loss-of-data issues if m_bThreadSafe is changed while something is in the Queue
+// there are out-of-order issues or loss-of-data issues if m_bUseThreadSafety is changed while something is in the Queue
 void ChartEntryBaseWithTime::ClearQueue( void ) {  
   TimeDouble_t td;
   while ( m_plfTimeDouble->pop( td ) ) {
