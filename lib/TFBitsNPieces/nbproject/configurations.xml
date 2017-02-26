@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>FirstOrDefaultCombiner.h</itemPath>
       <itemPath>FrameWork01.h</itemPath>
       <itemPath>IQFeedSymbolFileToSqlite.h</itemPath>
       <itemPath>IQFeedSymbolListOps.h</itemPath>
@@ -67,6 +68,8 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="FirstOrDefaultCombiner.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="FrameWork01.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FrameWork01.h" ex="false" tool="3" flavor2="0">
@@ -135,6 +138,8 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="FirstOrDefaultCombiner.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="FrameWork01.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FrameWork01.h" ex="false" tool="3" flavor2="0">

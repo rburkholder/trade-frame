@@ -7,6 +7,7 @@
       <itemPath>BundleTracking.h</itemPath>
       <itemPath>ChartInteractive.h</itemPath>
       <itemPath>ComboTrading.h</itemPath>
+      <itemPath>InstrumentActions.h</itemPath>
       <itemPath>PanelCharts.h</itemPath>
       <itemPath>Process.h</itemPath>
       <itemPath>TreeItem.h</itemPath>
@@ -26,6 +27,7 @@
       <itemPath>BundleTracking.cpp</itemPath>
       <itemPath>ChartInteractive.cpp</itemPath>
       <itemPath>ComboTrading.cpp</itemPath>
+      <itemPath>InstrumentActions.cpp</itemPath>
       <itemPath>PanelCharts.cpp</itemPath>
       <itemPath>Process.cpp</itemPath>
       <itemPath>TreeItem.cpp</itemPath>
@@ -174,6 +176,18 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
+              <makeArtifact PL="../lib/OUCharting"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../lib/OUCharting"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+            <linkerLibProjectItem>
               <makeArtifact PL="../lib/TFIndicators"
                             CT="3"
                             CN="Debug"
@@ -258,18 +272,6 @@
               </makeArtifact>
             </linkerLibProjectItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../lib/OUCharting"
-                            CT="3"
-                            CN="Debug"
-                            AC="true"
-                            BL="true"
-                            WD="../lib/OUCharting"
-                            BC="${MAKE}  -f Makefile CONF=Debug"
-                            CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a">
-              </makeArtifact>
-            </linkerLibProjectItem>
-            <linkerLibProjectItem>
               <makeArtifact PL="../lib/ExcelFormat"
                             CT="3"
                             CN="Debug"
@@ -322,6 +324,10 @@
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InstrumentActions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InstrumentActions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelCharts.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -649,6 +655,10 @@
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ComboTrading.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InstrumentActions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InstrumentActions.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelCharts.cpp" ex="false" tool="1" flavor2="0">
       </item>
