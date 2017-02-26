@@ -19,12 +19,8 @@
 #include <algorithm>
 #include <string>
 
-#include <boost/thread/mutex.hpp>
-//#include <boost/thread/lockable_concepts.hpp> 
-//#include <boost/thread/locks.hpp> 
-#include <boost/thread/lock_types.hpp>
-//#include <boost/thread/lock_options.hpp>
-//#include <boost/thread/locks_options.hpp> 
+//#include <boost/thread/mutex.hpp>
+//#include <boost/thread/lock_types.hpp>
 
 #include <OUCommon/Delegate.h>
 
@@ -43,12 +39,17 @@
 //  graphics calls will scan time series, so need some locking capability for preventing 
 //  allocates from appends in a background thread
 
+// 2017/02/26 locking was added as it was thought that there would be thread problems with 
+//   background indicator analysis.  Instead, indicators use only their own time series
+//   with their own locking, so ... no locking should be needed here.
+//   Maybe enable the now commented out locking code with a define.
+
 //#include <boost/serialization/vector.hpp>
 // http://www.boost.org/libs/serialization/doc/traits.html
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
+/*
 template <typename Lockable>
 class strict_lock  {
 public:
@@ -70,14 +71,14 @@ public:
 private:
     lockable_type& obj_;
 };
-
+*/
 class TimeSeriesBase { // used for dynamic_cast capability
 public:
   virtual ~TimeSeriesBase( void ) {};
 protected:
 private:
 };
-
+/*
 class Lockable {
 public:
   void lock( void ) { m_mutex.lock(); }
@@ -86,11 +87,12 @@ protected:
 private:
   boost::mutex m_mutex;
 };
-
+*/
 template<typename T> 
 class TimeSeries: 
-  public TimeSeriesBase,
-  public Lockable {
+  public TimeSeriesBase
+//  ,public Lockable 
+{
 public:
 
   typedef T datum_t;
@@ -144,8 +146,8 @@ public:
   };
 
   // allocate or deallocate about to happen, use for thread sync
-  fastdelegate::FastDelegate1<size_type> TimeSeriesLock; 
-  fastdelegate::FastDelegate0<void> TimeSeriesUnlock;
+  //fastdelegate::FastDelegate1<size_type> TimeSeriesLock; 
+  //fastdelegate::FastDelegate0<void> TimeSeriesUnlock;
   
   ou::Delegate<const T&> OnAppend;
 
@@ -168,28 +170,21 @@ public:
 
   template<typename Functor>
   typename Functor::return_type ForEach( Functor f ) const {
-    strict_lock<TimeSeries<T> > guard(*this);
+    //strict_lock<TimeSeries<T> > guard(*this);
     return std::for_each( m_vSeries.cbegin(), m_vSeries.cend(), f );
   }
   
 protected:
 private:
 
-  boost::mutex m_mutex;
-  boost::unique_lock<boost::mutex> m_lock;
+  //boost::mutex m_mutex;
+  //boost::unique_lock<boost::mutex> m_lock;
   
   bool m_bAppendToVector;  // hf stats use many time series, many not needed, so don't build up vector for those
   std::string m_sName;
   vTimeSeries_t m_vSeries;
   const_iterator m_vIterator;  // belongs after vector declaration
   
-  //void lock( void ) {
-    //m_lock.lock(); 
-  //}
-  //void unlock( void ) {
-    //m_lock.unlock();
-  //}
-
 };
 
 template<typename T> 
@@ -230,7 +225,7 @@ TimeSeries<T>::~TimeSeries(void) {
 
 template<typename T> 
 void TimeSeries<T>::Append(const T& datum) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   if ( m_bAppendToVector ) {
     m_vSeries.push_back( datum );
   }
@@ -242,7 +237,6 @@ void TimeSeries<T>::Append(const T& datum) {
       m_vSeries.back() = datum;
     }
   }
-  //unlock();
   OnAppend( datum );
 }
 
@@ -250,7 +244,7 @@ template<typename T>
 void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   T key( dt );
   std::pair<iterator, iterator> p;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -258,13 +252,12 @@ void TimeSeries<T>::Insert( const ptime& dt, const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
-  //unlock();
 }
 
 template<typename T> 
 void TimeSeries<T>::Insert( const T& datum ) {
   std::pair<iterator, iterator> p;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() == p.second ) {
     m_vSeries.push_back( datum );
@@ -272,20 +265,18 @@ void TimeSeries<T>::Insert( const T& datum ) {
   else {
     m_vSeries.insert( p.second, datum );
   }
-  //unlock();
 }
 
 template<typename T> 
 void TimeSeries<T>::Clear( void ) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   m_vSeries.clear();
-  //unlock();
 }
 
 
 template<typename T> 
 const T* TimeSeries<T>::First() {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.begin();
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
@@ -297,7 +288,7 @@ const T* TimeSeries<T>::First() {
 
 template<typename T> 
 const T* TimeSeries<T>::Next() {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   if ( m_vSeries.end() == m_vIterator ) {
     return NULL;
   }
@@ -314,7 +305,7 @@ const T* TimeSeries<T>::Next() {
 
 template<typename T> 
 const T* TimeSeries<T>::Last() {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   m_vIterator = m_vSeries.end();
   if ( 0 == m_vSeries.size() ) {
     return NULL;
@@ -327,7 +318,7 @@ const T* TimeSeries<T>::Last() {
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   typename vTimeSeries_t::const_reverse_iterator iter( m_vSeries.rbegin() );
   iter += ix;
@@ -336,14 +327,14 @@ typename TimeSeries<T>::const_reference TimeSeries<T>::Ago( size_type ix ) {
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::operator []( size_type ix ) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
 
 template<typename T> 
 typename TimeSeries<T>::const_reference TimeSeries<T>::At( size_type ix ) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   assert( ix < m_vSeries.size() );
   return m_vSeries.at( ix );
 }
@@ -372,7 +363,7 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::AtOrAfter( const ptime &dt
   // TODO: Check that this is correct
   T key( dt );
   std::pair<const_iterator, const_iterator> p;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
 //  if ( p.first != p.second ) {
 //    m_vIterator = p.first;
@@ -388,16 +379,15 @@ typename TimeSeries<T>::const_iterator TimeSeries<T>::After( const ptime &dt ) c
   // TODO: Check that this is correct
   T key( dt );
   std::pair<const_iterator, const_iterator> p;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   p = equal_range( m_vSeries.begin(), m_vSeries.end(), key );
   return p.second;
 }
 
 template<typename T> 
 void TimeSeries<T>::Sort( void ) {
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   sort( m_vSeries.begin(), m_vSeries.end() );  // may not keep time series with identical keys in acquired order (may not be an issue, as external clock is written to be monotonically increasing)
-  //unlock();  // not sure if this is required
 }
 
 template<typename T> 
@@ -405,7 +395,7 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt ) {
   T datum( dt );
   TimeSeries<T>* series = nullptr;
   const_iterator iter;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
     series = new TimeSeries<T>( (unsigned int) (m_vSeries.end() - iter) );
@@ -425,7 +415,7 @@ TimeSeries<T>* TimeSeries<T>::Subset( const ptime &dt, unsigned int n ) { // n i
   T datum( dt );
   TimeSeries<T>* series = NULL;
   const_iterator iter;
-  strict_lock<TimeSeries<T> > guard(*this);
+  //strict_lock<TimeSeries<T> > guard(*this);
   iter = lower_bound( m_vSeries.begin(), m_vSeries.end(), datum );
   if ( m_vSeries.end() != iter ) {
     unsigned int todo = std::min<unsigned int>( n, (unsigned int) ( m_vSeries.end() - iter ) );
