@@ -42,11 +42,11 @@
 
 namespace ou { // One Unified
 
-class ChartDataBase {
+class ChartDVBasics {
 public:
 
-  ChartDataBase(void);
-  virtual ~ChartDataBase(void);
+  ChartDVBasics(void);
+  virtual ~ChartDVBasics(void);
 
   ou::ChartDataView& GetChartDataView( void ) { return m_dvChart; };
 

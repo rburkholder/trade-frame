@@ -50,7 +50,7 @@ Strategy::Strategy(
   ou::tf::option::MultiExpiryBundle* meb, 
   pPortfolio_t pPortfolioLongs, pPortfolio_t pPortfolioShorts, 
   pProvider_t pExecutionProvider ) 
-  : ou::ChartDataBase(), m_pBundle( meb ), 
+  : ou::ChartDVBasics(), m_pBundle( meb ), 
     m_pPortfolioLongs( pPortfolioLongs ), 
     m_pPortfolioShorts( pPortfolioShorts ), 
     m_pExecutionProvider( pExecutionProvider ),
@@ -176,7 +176,7 @@ Strategy::~Strategy(void) {
 
 void Strategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
   // need to queue this from the originating thread.
-  ou::ChartDataBase::HandleTrade( trade );
+  ou::ChartDVBasics::HandleTrade( trade );
   TimeTick( trade );
 }
 
@@ -185,7 +185,7 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
-  ou::ChartDataBase::HandleQuote( quote );
+  ou::ChartDVBasics::HandleQuote( quote );
   TimeTick( quote );
 }
 
@@ -629,8 +629,8 @@ void Strategy::HandleCalcIv( const ou::tf::PriceIV& iv ) {
     m_mapAtmIv.insert( mapAtmIv_t::value_type( iv.Expiry(), bai ) );
 //    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
 //    m_ChartDataUnderlying.GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
-    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
-    ou::ChartDataBase::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
+    ou::ChartDVBasics::GetChartDataView().Add( 3, bai.m_pceCallIV.get() );
+    ou::ChartDVBasics::GetChartDataView().Add( 3, bai.m_pcePutIV.get() );
   }
   else {
     iter->second.m_pceCallIV->Append( iv.DateTime(), iv.IVCall() );

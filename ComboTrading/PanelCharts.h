@@ -124,7 +124,7 @@ private:
   private:
     bool m_bActive;
     pWatch_t m_pWatch;
-    ou::ChartDataBase m_cdb; // has indicators and dataview
+    ou::ChartDVBasics m_cdb; // has indicators and dataview
   public:
     WatchInfo( void ): m_bActive( false ) {}
     void Set( pWatch_t pWatch ) {
@@ -134,8 +134,8 @@ private:
       else {
 	m_bActive = true;
 	m_pWatch = pWatch;
-	m_pWatch->OnQuote.Add( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleQuote ) );
-	m_pWatch->OnTrade.Add( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleTrade ) );
+	m_pWatch->OnQuote.Add( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleQuote ) );
+	m_pWatch->OnTrade.Add( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleTrade ) );
 	m_pWatch->StartWatch();
       }
     }
@@ -145,8 +145,8 @@ private:
       if ( 0 != m_pWatch.use_count() ) {
 	if ( m_bActive ) {
 	  m_pWatch->StopWatch();
-	  m_pWatch->OnQuote.Remove( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleQuote ) );
-	  m_pWatch->OnTrade.Remove( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleTrade ) );
+	  m_pWatch->OnQuote.Remove( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleQuote ) );
+	  m_pWatch->OnTrade.Remove( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleTrade ) );
 	  m_bActive = false;
 	}
       }

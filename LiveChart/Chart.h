@@ -21,7 +21,7 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
-class ChartTest: public ou::ChartDataBase {
+class ChartTest: public ou::ChartDVBasics {
 public:
 
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;

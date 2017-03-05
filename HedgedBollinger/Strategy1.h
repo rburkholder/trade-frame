@@ -39,7 +39,7 @@
 #include <OUCharting/ChartDVBasics.h>
 
 class Strategy: 
-  public ou::ChartDataBase,
+  public ou::ChartDVBasics,
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
   friend ou::tf::DailyTradeTimeFrame<Strategy>; 
