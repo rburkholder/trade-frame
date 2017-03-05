@@ -35,7 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/ChartDataBase.o \
+	${OBJECTDIR}/ChartDVBasics.o \
 	${OBJECTDIR}/ChartDataView.o \
 	${OBJECTDIR}/ChartEntryBars.o \
 	${OBJECTDIR}/ChartEntryBase.o \
@@ -73,10 +73,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liboucharting.a
 
-${OBJECTDIR}/ChartDataBase.o: ChartDataBase.cpp
+${OBJECTDIR}/ChartDVBasics.o: ChartDVBasics.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDataBase.o ChartDataBase.cpp
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartDVBasics.o ChartDVBasics.cpp
 
 ${OBJECTDIR}/ChartDataView.o: ChartDataView.cpp
 	${MKDIR} -p ${OBJECTDIR}

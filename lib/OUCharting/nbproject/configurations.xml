@@ -10,7 +10,7 @@
         <itemPath>ChartDirector64/chartdir.h</itemPath>
         <itemPath>ChartDirector64/memblock.h</itemPath>
       </logicalFolder>
-      <itemPath>ChartDataBase.h</itemPath>
+      <itemPath>ChartDVBasics.h</itemPath>
       <itemPath>ChartDataView.h</itemPath>
       <itemPath>ChartEntryBars.h</itemPath>
       <itemPath>ChartEntryBase.h</itemPath>
@@ -28,7 +28,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>ChartDataBase.cpp</itemPath>
+      <itemPath>ChartDVBasics.cpp</itemPath>
       <itemPath>ChartDataView.cpp</itemPath>
       <itemPath>ChartEntryBars.cpp</itemPath>
       <itemPath>ChartEntryBase.cpp</itemPath>
@@ -73,9 +73,9 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="ChartDataBase.cpp" ex="false" tool="1" flavor2="0">
+      <item path="ChartDVBasics.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="ChartDataBase.h" ex="false" tool="3" flavor2="0">
+      <item path="ChartDVBasics.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ChartDataView.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -149,9 +149,9 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="ChartDataBase.cpp" ex="false" tool="1" flavor2="0">
+      <item path="ChartDVBasics.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="ChartDataBase.h" ex="false" tool="3" flavor2="0">
+      <item path="ChartDVBasics.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ChartDataView.cpp" ex="false" tool="1" flavor2="0">
       </item>

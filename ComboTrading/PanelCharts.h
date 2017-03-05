@@ -31,7 +31,7 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
-#include <OUCharting/ChartDataBase.h>
+#include <OUCharting/ChartDVBasics.h>
 
 #include "TreeItem.h"
 #include "InstrumentActions.h"

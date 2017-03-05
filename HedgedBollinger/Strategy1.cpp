@@ -189,6 +189,7 @@ void Strategy::HandleQuoteUnderlying( const ou::tf::Quote& quote ) {
   TimeTick( quote );
 }
 
+// thread started in constructor
 void Strategy::ThreadPopDatums( void ) {
   boost::unique_lock<boost::mutex> lock(m_mutexCrossThreadDatums);
   while ( m_bThreadPopDatumsActive ) {
