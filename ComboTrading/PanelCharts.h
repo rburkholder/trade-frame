@@ -121,12 +121,38 @@ private:
   pInstrumentActions_t m_pInstrumentActions;
   
   struct WatchInfo {
-    bool bActive;
-    pWatch_t pWatch;
-    //ou::tf::Instrument::idInstrument_t idInstrument;
-    ou::ChartDataBase cdb; // has indicators and dataview
-    WatchInfo(): bActive( false ) {}
+  private:
+    bool m_bActive;
+    pWatch_t m_pWatch;
+    ou::ChartDataBase m_cdb; // has indicators and dataview
+  public:
+    WatchInfo( void ): m_bActive( false ) {}
+    void Set( pWatch_t pWatch ) {
+      if ( m_bActive ) {
+	std::cout << "WatchInfo::Set menu item already activated" << std::endl;
+      }
+      else {
+	m_bActive = true;
+	m_pWatch = pWatch;
+	m_pWatch->OnQuote.Add( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleQuote ) );
+	m_pWatch->OnTrade.Add( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleTrade ) );
+	m_pWatch->StartWatch();
+      }
+    }
+    void EmitValues( void ) { m_pWatch->EmitValues(); }
+    ou::ChartDataView GetChartDataView( void ) { return m_cdb.GetChartDataView(); }
+    ~WatchInfo( void ) {
+      if ( 0 != m_pWatch.use_count() ) {
+	if ( m_bActive ) {
+	  m_pWatch->StopWatch();
+	  m_pWatch->OnQuote.Remove( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleQuote ) );
+	  m_pWatch->OnTrade.Remove( MakeDelegate( &m_cdb, &ou::ChartDataBase::HandleTrade ) );
+	  m_bActive = false;
+	}
+      }
+    }
   };
+  
   typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
   
   typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
@@ -158,7 +184,7 @@ private:
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
   void HandleLoadInstrument( const wxTreeItemId& item, const std::string& );
-  pWatch_t LoadInstrument( pInstrument_t );
+  pWatch_t ConstructWatch( pInstrument_t );
   
   void HandleInstrumentLiveChart( const wxTreeItemId& );
   void HandleEmitValues( const wxTreeItemId& );

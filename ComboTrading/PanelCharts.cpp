@@ -221,7 +221,6 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem to delete" << std::endl;
   }
   else {
-    iter->second->pWatch->StopWatch();
     m_mapWatchInfo.erase( iter );
   }
 }
@@ -240,7 +239,7 @@ void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem form HandleEmitValues" << std::endl;
   }
   else {
-    iter->second->pWatch->EmitValues();
+    iter->second->EmitValues();
   }
 }
 
@@ -275,19 +274,17 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTre
       break;
     case wxID_OK:
       if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
-        pInstrumentWatch = LoadInstrument( m_pDialogPickSymbolCreatedInstrument );
+        pInstrumentWatch = ConstructWatch( m_pDialogPickSymbolCreatedInstrument );
         mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
         if ( m_mapWatchInfo.end() == iter ) {
           std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
         }
         else {
-          iter->second->pWatch = pInstrumentWatch;
-          iter->second->bActive = true;
           values.name_ = pInstrumentWatch->GetInstrument()->GetInstrumentName();
           if ( pInstrumentWatch->GetInstrument()->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
           if ( pInstrumentWatch->GetInstrument()->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
+          iter->second->Set( pInstrumentWatch );
         }
-        pInstrumentWatch->StartWatch();
       }
       else {
         std::cout << "PanelCharts::HandleNewInstrumentRequest is wxID_OK but no instrument" << std::endl;
@@ -305,23 +302,18 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTre
 
 // called by anything more than the serialization in TreeItemInstrument?
 void PanelCharts::HandleLoadInstrument( const wxTreeItemId& item, const std::string& name ) {
-  pWatch_t pInstrumentWatch = LoadInstrument( signalLoadInstrument( name ) );
+  pWatch_t pInstrumentWatch = ConstructWatch( signalLoadInstrument( name ) );
   // code shared from HandleNewInstrumentRequest, can it be refactored?
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
     std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
   }
   else {
-    if ( iter->second->bActive ) {
-      std::cout << "PanelCharts::HandleLoadInstrument menu item already activated" << std::endl;
-    }
-    iter->second->pWatch = pInstrumentWatch;
-    iter->second->bActive = true;
+    iter->second->Set( pInstrumentWatch );
   }
-  pInstrumentWatch->StartWatch();
 }
 
-PanelCharts::pWatch_t PanelCharts::LoadInstrument( pInstrument_t pInstrument ) {
+PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
   
   pWatch_t pInstrumentWatch;
   
