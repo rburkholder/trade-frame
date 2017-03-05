@@ -30,8 +30,6 @@
 
 #include <boost/foreach.hpp>
 
-#include <wx/mstream.h>
-#include <wx/bitmap.h>
 #include <wx/splitter.h>
 #include <wx/panel.h>
 
@@ -162,21 +160,9 @@ bool AppHedgedBollinger::OnInit() {
   m_dateFrontMonthOption = boost::gregorian::date( 2017, 3, 28 );
   m_dateSecondMonthOption = boost::gregorian::date( 2017, 4, 25 );
 
-  m_pChartBitmap = 0;
-  m_bInDrawChart = false;
-  m_bReadyToDrawChart = false;
-  m_winChart = new wxWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
-  m_sizerFrame->Add( m_winChart, 1, wxALL|wxEXPAND, 3);
-  wxWindowID idChart = m_winChart->GetId();
-  m_winChart->Bind( wxEVT_PAINT, &AppHedgedBollinger::HandlePaint, this, idChart );
-  m_winChart->Bind( wxEVT_SIZE, &AppHedgedBollinger::HandleSize, this, idChart );
-  m_winChart->Bind( wxEVT_MOUSEWHEEL, &AppHedgedBollinger::HandleMouse, this, idChart );
-  m_winChart->Bind( wxEVT_MOTION, &AppHedgedBollinger::HandleMouse, this, idChart );
-  m_winChart->Bind( wxEVT_LEAVE_WINDOW, &AppHedgedBollinger::HandleMouse, this, idChart );
-  m_winChart->Bind( wxEVT_ENTER_WINDOW, &AppHedgedBollinger::HandleMouse, this, idChart );
-
-  m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
-
+  m_winChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(160, 90), wxNO_BORDER );
+  m_sizerFrame->Add( m_winChartView, 1, wxALL|wxEXPAND, 3);
+  
   // should already be initialized in the framework
   //m_bData1Connected = false;
   //m_bData2Connected = false;
@@ -185,11 +171,11 @@ bool AppHedgedBollinger::OnInit() {
   m_pBundle = 0;
   m_pStrategy = 0;
 
-  m_cntIVCalc = m_nthIVCalc;
-  m_timerGuiRefresh.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppHedgedBollinger::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHedgedBollinger::OnClose, this );  // start close of windows and controls
+
+  m_cntIVCalc = m_nthIVCalc;
+  m_timerGuiRefresh.SetOwner( this );  // generates worker thread for IV calcs
+  Bind( wxEVT_TIMER, &AppHedgedBollinger::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
 
 //  m_pPanelManualOrder->SetOnNewOrderHandler( MakeDelegate( this, &AppPhi::HandlePanelNewOrder ) );
 //  m_pPanelManualOrder->SetOnSymbolTextUpdated( MakeDelegate( this, &AppPhi::HandlePanelSymbolText ) );
@@ -233,9 +219,6 @@ bool AppHedgedBollinger::OnInit() {
   vItems.push_back( new mi( "f2 Strategy1 Values", MakeDelegate( this, &AppHedgedBollinger::HandleMenuActionEmitStrategyValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  m_bThreadDrawChartActive = true;
-  m_pThreadDrawChart = new boost::thread( &AppHedgedBollinger::ThreadDrawChart1, this );
-
   return 1;
 
 }
@@ -245,90 +228,32 @@ void AppHedgedBollinger::HandleMenuActionEmitStrategyValues( void ) {
 }
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
-  m_bReadyToDrawChart = true;
+  m_winChartView->ActivateChart( true );
+  //m_bReadyToDrawChart = true;
 }
 
-void AppHedgedBollinger::HandleMenuActionStopChart( void ) {
-  m_bReadyToDrawChart = false;
+void AppHedgedBollinger::HandleMenuA
+m_winChartView->ActivateChart( false );
+  //m_bReadyToDrawChart = false;
 }
 
 void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
-  StartDrawChart();
+  m_winChartView->DrawChart();
+  //StartDrawChart();
 }
 
 void AppHedgedBollinger::HandleMouse( wxMouseEvent& event ) { 
-//  if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
-//  if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
-//  if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
-//  wxCoord x, y;
-//  event.GetPosition( &x, &y );
-//  std::cout << x << "," << y << std::endl;
-//  std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
-//  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
-  // 0,120,-120
   event.Skip();
 }
 
 void AppHedgedBollinger::HandlePaint( wxPaintEvent& event ) {
-  if ( event.GetId() == m_winChart->GetId() ) {
-    wxPaintDC dc( m_winChart );
+//  if ( event.GetId() == m_winChart->GetId() ) {
+//    wxPaintDC dc( m_winChart );
 //    dc.DrawBitmap( *m_pChartBitmap, 0, 0);
 //    m_bInDrawChart = false;
-  }
-  else event.Skip();
-}
-
-void AppHedgedBollinger::StartDrawChart( void ) {
-  if ( m_bReadyToDrawChart ) {
-    m_bInDrawChart = true;
-    m_cvThreadDrawChart.notify_one();
-  }
-}
-
-void AppHedgedBollinger::ThreadDrawChart1( void ) {
-  boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
-  while ( m_bThreadDrawChartActive ) {
-    m_cvThreadDrawChart.wait( lock );
-
-    if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
-      // need to deal with market closing time frame on expiry friday, no further calcs after market close on that day
-      ptime now = ou::TimeSource::Instance().External();
-
-      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-      ptime dtEnd = now + td; 
-
-      ptime dtBegin = dtEnd - m_tdViewPortWidth;
-
-      std::stringstream ss;
-      ss << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
-
-      m_pStrategy->GetChartDataView().SetViewPort( dtBegin, dtEnd );
-      m_pStrategy->GetChartDataView().SetThreadSafe( true );
-
-      wxSize size = m_winChart->GetClientSize();  // may not be able to do this cross thread
-      m_chart.SetChartDimensions( size.GetWidth(), size.GetHeight() );
-      m_chart.SetChartDataView( &m_pStrategy->GetChartDataView() );
-      m_chart.SetOnDrawChart( MakeDelegate( this, &AppHedgedBollinger::ThreadDrawChart2 ) );  // this line could be factored out?
-      m_chart.DrawChart( );
-    }
-  }
-}
-
-// background thread to draw composed chart into memory, and send to gui thread 
-void AppHedgedBollinger::ThreadDrawChart2( const MemBlock& m ) {
-  wxMemoryInputStream in( m.data, m.len );  // need this
-  wxBitmap* p = new wxBitmap( wxImage( in, wxBITMAP_TYPE_BMP) ); // and need this to keep the drawn bitmap, then memblock can be reclaimed
-  QueueEvent( new EventDrawChart( EVENT_DRAW_CHART, -1, p ) );
-}
-
-// event in gui thread to draw on display from memory
-void AppHedgedBollinger::HandleGuiDrawChart( EventDrawChart& event ) {
-  if ( 0 != m_pChartBitmap ) delete m_pChartBitmap;
-  m_pChartBitmap = event.GetBitmap();
-  wxClientDC dc( m_winChart );
-  dc.DrawBitmap( *m_pChartBitmap, 0, 0);
-  m_bInDrawChart = false;
+//  }
+  //else 
+  event.Skip();
 }
 
 void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
@@ -347,9 +272,9 @@ void AppHedgedBollinger::HandleMenuActionStartWatch( void ) {
 
 void AppHedgedBollinger::HandleMenuActionStopWatch( void ) {
 
-  m_timerGuiRefresh.Stop();
-
   m_pBundle->StopWatch();
+
+  m_timerGuiRefresh.Stop();
 
 }
 
@@ -426,7 +351,7 @@ void AppHedgedBollinger::HandleMenuActionInitializeSymbolSet( void ) {
         }
 
         Bind( EVENT_UPDATE_OPTION_TREE, &AppHedgedBollinger::HandleGuiUpdateOptionTree, this );
-        Bind( EVENT_DRAW_CHART, &AppHedgedBollinger::HandleGuiDrawChart, this );
+        //Bind( EVENT_DRAW_CHART, &AppHedgedBollinger::HandleGuiDrawChart, this );
 
       }
 
@@ -572,8 +497,6 @@ void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
     );
     */
 
-  StartDrawChart();
-
 //  if ( dt > m_dtTopOfMinute ) {
 //    m_dtTopOfMinute = dt + time_duration( 0, 1, 0 ) - time_duration( 0, 0, dt.time_of_day().seconds(), dt.time_of_day().fractional_seconds() );
 //    std::cout << "Current: " << dt << " Next: " << m_dtTopOfMinute << std::endl;
@@ -642,17 +565,6 @@ int AppHedgedBollinger::OnExit() {
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
-
-  m_bThreadDrawChartActive = false;
-  m_cvThreadDrawChart.notify_one();
-  m_pThreadDrawChart->join();
-  delete m_pThreadDrawChart;
-  m_pThreadDrawChart = 0;
-
-  if ( 0 != m_pChartBitmap ) {
-    delete m_pChartBitmap;
-    m_pChartBitmap = 0;
-  }
 
   delete m_pStrategy;
   m_pStrategy = 0;

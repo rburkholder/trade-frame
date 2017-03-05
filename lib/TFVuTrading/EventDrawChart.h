@@ -11,19 +11,34 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
+// Started 2013/11/04
 
-#include "stdafx.h"
+#pragma once
 
-#include "EventDrawChart.h"
+#include <boost/shared_ptr.hpp>
 
-wxDEFINE_EVENT(EVENT_DRAW_CHART, EventDrawChart);
+#include <wx/bitmap.h>
 
-EventDrawChart::EventDrawChart( wxEventType eventType, int winid, wxBitmap* pBitmap )
-  : wxEvent( winid, eventType ), m_pBitmap( pBitmap )
-{
-}
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
-EventDrawChart::~EventDrawChart(void) {
-//  delete m_pBitmap;
-//  m_pBitmap = 0;
-}
+class EventDrawChart: public wxEvent {
+public:
+  
+  typedef boost::shared_ptr<wxBitmap> pwxBitmap_t;
+  
+  EventDrawChart( wxEventType eventType, int winid, pwxBitmap_t pBitmap ); // bitmap destroyed in event consumer
+  ~EventDrawChart(void);
+
+  pwxBitmap_t GetBitmap( void ) { return m_pBitmap; }
+
+  virtual EventDrawChart* Clone( void ) const { return new EventDrawChart( *this ); }
+protected:
+private:
+  pwxBitmap_t m_pBitmap;
+};
+
+} // namespace tf
+} // namespace ou
+
+wxDECLARE_EVENT(EVENT_DRAW_CHART, ou::tf::EventDrawChart);

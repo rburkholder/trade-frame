@@ -64,8 +64,7 @@ PanelCharts::~PanelCharts() {
 void PanelCharts::Init( void ) {
   m_pDialogPickSymbol = 0;
   m_pTreeOps = 0;
-  //m_winChart = 0;
-  m_pwinDetail = 0;
+  m_pWinChartView = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
@@ -177,8 +176,8 @@ void PanelCharts::CreateControls() {
   //m_timerGuiRefresh.SetOwner( this );
   
   // need to process in a dynamic fashion
-  //m_pwinDetail = new ChartInteractive( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  //sizerRight->Add( m_pwinDetail, 1, wxALL|wxEXPAND, 5);
+  m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+  sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 
 }
 
@@ -195,10 +194,10 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
 }
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
-  if ( 0 != m_pwinDetail ) {
-    delete m_pwinDetail;
-    m_pwinDetail = 0;
-  }
+  //if ( 0 != m_pWinChartView ) {
+  //  delete m_pWinChartView;
+//    m_pWinChartView = 0;
+  //}
 }
 
 PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
@@ -221,16 +220,22 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem to delete" << std::endl;
   }
   else {
+    m_pWinChartView->SetChartDataView( nullptr );
     m_mapWatchInfo.erase( iter );
   }
 }
 
-// use ChartInteractive to show watch data
 // need to maintain a date/time range
 // get subset of data and chart
-// need a regular update interval to rescan data
-void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& ) {
-  
+void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
+  // maybe turn this bit of code into a lamda and pass in the function to be run on success
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "couldn't find the menuitem form HandleInstrumentLiveChart" << std::endl;
+  }
+  else {
+    m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+  }
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {

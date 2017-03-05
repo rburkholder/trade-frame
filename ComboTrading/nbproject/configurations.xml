@@ -5,7 +5,6 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>BundleTracking.h</itemPath>
-      <itemPath>ChartInteractive.h</itemPath>
       <itemPath>ComboTrading.h</itemPath>
       <itemPath>InstrumentActions.h</itemPath>
       <itemPath>PanelCharts.h</itemPath>
@@ -25,7 +24,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>BundleTracking.cpp</itemPath>
-      <itemPath>ChartInteractive.cpp</itemPath>
       <itemPath>ComboTrading.cpp</itemPath>
       <itemPath>InstrumentActions.cpp</itemPath>
       <itemPath>PanelCharts.cpp</itemPath>
@@ -316,10 +314,6 @@
       <item path="BundleTracking.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="BundleTracking.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ChartInteractive.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="ChartInteractive.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -647,10 +641,6 @@
       <item path="BundleTracking.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="BundleTracking.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ChartInteractive.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="ChartInteractive.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ComboTrading.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -36,7 +36,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BundleTracking.o \
-	${OBJECTDIR}/ChartInteractive.o \
 	${OBJECTDIR}/ComboTrading.o \
 	${OBJECTDIR}/InstrumentActions.o \
 	${OBJECTDIR}/PanelCharts.o \
@@ -113,11 +112,6 @@ ${OBJECTDIR}/BundleTracking.o: BundleTracking.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/BundleTracking.o BundleTracking.cpp
-
-${OBJECTDIR}/ChartInteractive.o: ChartInteractive.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../lib -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartInteractive.o ChartInteractive.cpp
 
 ${OBJECTDIR}/ComboTrading.o: ComboTrading.cpp
 	${MKDIR} -p ${OBJECTDIR}

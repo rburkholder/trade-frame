@@ -4,7 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>EventDrawChart.h</itemPath>
       <itemPath>EventUpdateOptionTree.h</itemPath>
       <itemPath>HedgedBollinger.h</itemPath>
       <itemPath>PositionState.h</itemPath>
@@ -19,7 +18,6 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>EventDrawChart.cpp</itemPath>
       <itemPath>EventUpdateOptionTree.cpp</itemPath>
       <itemPath>HedgedBollinger.cpp</itemPath>
       <itemPath>PositionState.cpp</itemPath>
@@ -250,10 +248,6 @@
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
       </compileType>
-      <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="EventDrawChart.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="EventUpdateOptionTree.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="EventUpdateOptionTree.h" ex="false" tool="3" flavor2="0">
@@ -297,10 +291,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="EventDrawChart.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="EventUpdateOptionTree.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="EventUpdateOptionTree.h" ex="false" tool="3" flavor2="0">

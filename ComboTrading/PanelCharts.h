@@ -25,17 +25,18 @@
 #include <wx/panel.h>
 #include <wx/event.h>
 
+#include <OUCharting/ChartDVBasics.h>
+
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
 
-#include <OUCharting/ChartDVBasics.h>
-
 #include "TreeItem.h"
 #include "InstrumentActions.h"
-#include "ChartInteractive.h"
+
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -140,7 +141,7 @@ private:
       }
     }
     void EmitValues( void ) { m_pWatch->EmitValues(); }
-    ou::ChartDataView GetChartDataView( void ) { return m_cdb.GetChartDataView(); }
+    ou::ChartDataView& GetChartDataView( void ) { return m_cdb.GetChartDataView(); }
     ~WatchInfo( void ) {
       if ( 0 != m_pWatch.use_count() ) {
 	if ( m_bActive ) {
@@ -173,8 +174,7 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
-  //ChartInteractive* m_pwinDetail;
-  wxWindow* m_pwinDetail;
+  WinChartView* m_pWinChartView;
   
   void HandleTreeOpsChanging( wxTreeItemId id );
   

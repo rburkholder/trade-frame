@@ -16,14 +16,12 @@
 
 // Started 2013/09/23
 
-#include <boost/thread/thread_only.hpp>
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
-
 #include <wx/timer.h>
 #include <wx/treectrl.h>
 
 #include <OUCommon/Worker.h>
+
+#include <TFVuTrading/WinChartView.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
 
@@ -71,13 +69,10 @@ private:
 //  PanelOptionsParameters* m_pPanelOptionsParameters;
   ou::tf::PanelLogging* m_pPanelLogging;
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
+  
+  ou::tf::WinChartView m_winChartView;
 
-  wxWindow* m_winChart;
-  bool m_bReadyToDrawChart;
-  bool m_bInDrawChart;
   ou::ChartMaster m_chart;
-  wxBitmap* m_pChartBitmap;
-  boost::posix_time::time_duration m_tdViewPortWidth;
 
   Strategy* m_pStrategy;
 
@@ -95,11 +90,6 @@ private:
   unsigned int m_cntIVCalc;  // calc IV every nth gui refresh
   static unsigned int m_nthIVCalc;
   volatile bool m_bIVCalcActive;
-
-  boost::mutex m_mutexThreadDrawChart;
-  boost::condition_variable m_cvThreadDrawChart;
-  bool m_bThreadDrawChartActive;
-  boost::thread* m_pThreadDrawChart;
 
   wxTreeCtrl* m_ptreeChartables;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
 
@@ -134,10 +124,6 @@ private:
 
   void CalcIV( ptime dt );
 
-  void StartDrawChart( void );
-  void ThreadDrawChart1( void );  // thread starts here
-  void ThreadDrawChart2( const MemBlock& m );  // a callback here to perform bitmap
-
   void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
   void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
   void HandleMenuAction2LoadIQFeedSymbolList( void );
@@ -170,7 +156,6 @@ private:
   void HandleStrikeWatchOff( ou::tf::option::Strike& );
 
   void HandleGuiUpdateOptionTree( EventUpdateOptionTree& event );
-  void HandleGuiDrawChart( EventDrawChart& event );
 
 };
 

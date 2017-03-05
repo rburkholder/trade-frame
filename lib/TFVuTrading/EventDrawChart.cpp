@@ -11,21 +11,23 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-// Started 2013/11/04
 
-#pragma once
+#include "stdafx.h"
 
-class EventDrawChart: public wxEvent {
-public:
-  EventDrawChart( wxEventType eventType, int winid, wxBitmap* pBitmap ); // bitmap destroyed in event consumer
-  ~EventDrawChart(void);
+#include "EventDrawChart.h"
 
-  wxBitmap* GetBitmap( void ) { return m_pBitmap; }
+wxDEFINE_EVENT(EVENT_DRAW_CHART, ou::tf::EventDrawChart);
 
-  virtual EventDrawChart* Clone( void ) const { return new EventDrawChart( *this ); }
-protected:
-private:
-  wxBitmap* m_pBitmap;
-};
+namespace ou { // One Unified
+namespace tf { // TradeFrame
 
-wxDECLARE_EVENT(EVENT_DRAW_CHART, EventDrawChart);
+EventDrawChart::EventDrawChart( wxEventType eventType, int winid, pwxBitmap_t pBitmap )
+  : wxEvent( winid, eventType ), m_pBitmap( pBitmap )
+{
+}
+
+EventDrawChart::~EventDrawChart(void) {
+}
+
+} // namespace tf
+} // namespace ou

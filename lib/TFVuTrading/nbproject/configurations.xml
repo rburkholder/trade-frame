@@ -11,6 +11,7 @@
       <itemPath>DialogNewPortfolio.h</itemPath>
       <itemPath>DialogPickSymbol.h</itemPath>
       <itemPath>DialogSimpleOneLineOrder.h</itemPath>
+      <itemPath>EventDrawChart.h</itemPath>
       <itemPath>FrameMain.h</itemPath>
       <itemPath>ModelBase.h</itemPath>
       <itemPath>ModelCell.h</itemPath>
@@ -45,6 +46,7 @@
       <itemPath>VuPortfolios.h</itemPath>
       <itemPath>VuPositions.h</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.h</itemPath>
+      <itemPath>WinChartView.h</itemPath>
       <itemPath>stdafx.h</itemPath>
       <itemPath>targetver.h</itemPath>
       <itemPath>wxETKBaseValidator.h</itemPath>
@@ -62,6 +64,7 @@
       <itemPath>DialogNewPortfolio.cpp</itemPath>
       <itemPath>DialogPickSymbol.cpp</itemPath>
       <itemPath>DialogSimpleOneLineOrder.cpp</itemPath>
+      <itemPath>EventDrawChart.cpp</itemPath>
       <itemPath>FrameMain.cpp</itemPath>
       <itemPath>ModelBase.cpp</itemPath>
       <itemPath>ModelCell.cpp</itemPath>
@@ -92,6 +95,7 @@
       <itemPath>VuPortfolios.cpp</itemPath>
       <itemPath>VuPositions.cpp</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.cpp</itemPath>
+      <itemPath>WinChartView.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
       <itemPath>wxETKBaseValidator.cpp</itemPath>
     </logicalFolder>
@@ -162,6 +166,10 @@
       <item path="DialogSimpleOneLineOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DialogSimpleOneLineOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="EventDrawChart.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="FrameMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -302,6 +310,10 @@
       <item path="VuTreePortfolioPositionOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="VuTreePortfolioPositionOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -377,6 +389,10 @@
       </item>
       <item path="DialogSimpleOneLineOrder.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="EventDrawChart.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="EventDrawChart.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="FrameMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FrameMain.h" ex="false" tool="3" flavor2="0">
@@ -516,6 +532,10 @@
       <item path="VuTreePortfolioPositionOrder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="VuTreePortfolioPositionOrder.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>

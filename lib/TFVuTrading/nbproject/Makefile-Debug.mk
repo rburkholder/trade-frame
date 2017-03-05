@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DialogNewPortfolio.o \
 	${OBJECTDIR}/DialogPickSymbol.o \
 	${OBJECTDIR}/DialogSimpleOneLineOrder.o \
+	${OBJECTDIR}/EventDrawChart.o \
 	${OBJECTDIR}/FrameMain.o \
 	${OBJECTDIR}/ModelBase.o \
 	${OBJECTDIR}/ModelCell.o \
@@ -71,6 +72,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPortfolios.o \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
+	${OBJECTDIR}/WinChartView.o \
 	${OBJECTDIR}/stdafx.o \
 	${OBJECTDIR}/wxETKBaseValidator.o
 
@@ -130,6 +132,11 @@ ${OBJECTDIR}/DialogSimpleOneLineOrder.o: DialogSimpleOneLineOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DialogSimpleOneLineOrder.o DialogSimpleOneLineOrder.cpp
+
+${OBJECTDIR}/EventDrawChart.o: EventDrawChart.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/EventDrawChart.o EventDrawChart.cpp
 
 ${OBJECTDIR}/FrameMain.o: FrameMain.cpp
 	${MKDIR} -p ${OBJECTDIR}
@@ -280,6 +287,11 @@ ${OBJECTDIR}/VuTreePortfolioPositionOrder.o: VuTreePortfolioPositionOrder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/VuTreePortfolioPositionOrder.o VuTreePortfolioPositionOrder.cpp
+
+${OBJECTDIR}/WinChartView.o: WinChartView.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinChartView.o WinChartView.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
