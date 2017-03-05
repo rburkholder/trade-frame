@@ -9,5 +9,9 @@
         <group/>
         <group name="TradeFrame"/>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/Hdf5Chart/Hdf5Chart.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/Hdf5Chart/Hdf5Chart.h</file>
+        </group>
     </open-files>
 </project-private>

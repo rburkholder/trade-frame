@@ -22,5 +22,12 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFBitsNPieces/ReadCboeWeeklyOptions.cpp</file>
         </group>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFBitsNPieces/TreeOps.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFBitsNPieces/TreeOpsItems.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFBitsNPieces/FrameWork01.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFBitsNPieces/FirstOrDefaultCombiner.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFBitsNPieces/TreeOps.h</file>
+        </group>
     </open-files>
 </project-private>

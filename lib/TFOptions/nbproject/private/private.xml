@@ -22,5 +22,10 @@
             <file>file:/home/rpb/projects/TradeFrame/lib/TFOptions/Binomial.cpp</file>
         </group>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFOptions/Option.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFOptions/Bundle.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFOptions/Bundle.h</file>
+        </group>
     </open-files>
 </project-private>

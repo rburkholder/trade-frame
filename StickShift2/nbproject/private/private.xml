@@ -15,5 +15,8 @@
         <group name="tf">
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/StickShift2/StickShift2.cpp</file>
         </group>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/StickShift2/StickShift2.cpp</file>
+        </group>
     </open-files>
 </project-private>

@@ -4,17 +4,27 @@
         <activeConfTypeElem>1</activeConfTypeElem>
         <activeConfIndexElem>0</activeConfIndexElem>
     </data>
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="5">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="8">
         <file>
             <url>PanelCharts.cpp</url>
+            <bookmark id="7">
+                <name/>
+                <line>204</line>
+                <key/>
+            </bookmark>
+            <bookmark id="6">
+                <name/>
+                <line>278</line>
+                <key/>
+            </bookmark>
             <bookmark id="4">
                 <name/>
-                <line>220</line>
+                <line>338</line>
                 <key/>
             </bookmark>
             <bookmark id="5">
                 <name/>
-                <line>259</line>
+                <line>376</line>
                 <key/>
             </bookmark>
         </file>
@@ -22,12 +32,12 @@
             <url>ComboTrading.cpp</url>
             <bookmark id="3">
                 <name/>
-                <line>346</line>
+                <line>347</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>576</line>
+                <line>594</line>
                 <key/>
             </bookmark>
         </file>
@@ -58,11 +68,19 @@
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/ComboTrading/ComboTrading.cpp</file>
         </group>
         <group name="trade-frame">
-            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/BundleTracking.h</file>
-            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ComboTrading.h</file>
-            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.h</file>
-            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemGroup.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ChartInteractive.cpp</file>
             <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ComboTrading.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/BundleTracking.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemInstrument.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/InstrumentActions.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItem.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ComboTrading.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/InstrumentActions.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/ChartInteractive.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemGroup.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/PanelCharts.cpp</file>
             <file>file:/home/rpb/projects/t1/trade-frame/ComboTrading/TreeItemInstrument.cpp</file>
         </group>
     </open-files>

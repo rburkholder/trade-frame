@@ -14,5 +14,11 @@
             <file>file:/home/rpb/projects/TradeFrame/HedgedBollinger/Strategy1.cpp</file>
         </group>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/HedgedBollinger/Strategy1.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/HedgedBollinger/HedgedBollinger.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/HedgedBollinger/Strategy1.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/HedgedBollinger/HedgedBollinger.h</file>
+        </group>
     </open-files>
 </project-private>

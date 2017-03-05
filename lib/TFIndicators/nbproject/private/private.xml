@@ -10,5 +10,8 @@
         <group name="lib"/>
         <group name="TradeFrame"/>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFIndicators/TSMA.h</file>
+        </group>
     </open-files>
 </project-private>

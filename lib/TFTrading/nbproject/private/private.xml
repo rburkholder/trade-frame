@@ -21,7 +21,8 @@
         </group>
         <group name="tf"/>
         <group name="trade-frame">
-            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFTrading/Instrument.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFTrading/Watch.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFTrading/Watch.h</file>
         </group>
     </open-files>
 </project-private>

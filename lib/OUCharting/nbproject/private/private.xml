@@ -10,5 +10,18 @@
         <group name="lib"/>
         <group name="TradeFrame"/>
         <group name="tf"/>
+        <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryBars.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartDataBase.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryMark.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartDataView.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartDataBase.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryShape.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartMaster.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryBars.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartMaster.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryBase.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/OUCharting/ChartEntryBase.h</file>
+        </group>
     </open-files>
 </project-private>

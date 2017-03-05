@@ -20,5 +20,6 @@
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/lib/TFIQFeed/BuildInstrument.cpp</file>
             <file>file:/home/rpb/projects/tf-svn-to-git/tf/lib/TFIQFeed/BuildInstrument.h</file>
         </group>
+        <group name="trade-frame"/>
     </open-files>
 </project-private>

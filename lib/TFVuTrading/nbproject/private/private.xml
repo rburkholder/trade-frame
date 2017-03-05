@@ -9,7 +9,7 @@
             <url>DialogPickSymbol.cpp</url>
             <bookmark id="1">
                 <name/>
-                <line>273</line>
+                <line>277</line>
                 <key/>
             </bookmark>
         </file>
@@ -33,7 +33,13 @@
         </group>
         <group name="tf"/>
         <group name="trade-frame">
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/PanelProviderControl.h</file>
             <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/DialogPickSymbol.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/ModelChartHdf5.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/PanelChartHdf5.cpp</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/PanelChartHdf5.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/FrameMain.h</file>
+            <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/ModelChartHdf5.cpp</file>
             <file>file:/home/rpb/projects/t1/trade-frame/lib/TFVuTrading/DialogPickSymbol.cpp</file>
         </group>
     </open-files>
