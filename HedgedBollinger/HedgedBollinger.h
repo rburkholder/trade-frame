@@ -41,7 +41,7 @@
 #include <OUCommon/Worker.h>
 
 #include "EventUpdateOptionTree.h"
-#include "EventDrawChart.h"
+//#include "EventDrawChart.h"
 #include "Strategy1.h"
 
 class AppHedgedBollinger:
