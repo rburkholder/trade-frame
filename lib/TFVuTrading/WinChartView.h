@@ -104,7 +104,12 @@ private:
   void HandleDrawChart( const MemBlock& );
   void HandlePaint( wxPaintEvent& event );
   void HandleSize( wxSizeEvent& event );
+  
   void HandleMouse( wxMouseEvent& event );
+  void HandleMouseEnter( wxMouseEvent& event );
+  void HandleMouseLeave( wxMouseEvent& event );
+  void HandleMouseWheel( wxMouseEvent& event );
+  
   void OnClose( wxCloseEvent& event );
   
   void HandleGuiRefresh( wxTimerEvent& event );

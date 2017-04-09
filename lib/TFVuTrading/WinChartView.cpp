@@ -80,10 +80,10 @@ void WinChartView::CreateControls() {
   Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
   
-  Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouse, this );
   Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-  Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouse, this );
-  Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouse, this );  
+  Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
@@ -109,11 +109,41 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
   if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
   wxCoord x, y;
   event.GetPosition( &x, &y );
-  std::cout << x << "," << y << std::endl;
+  //std::cout << x << "," << y << std::endl;
 //  std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
 //  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
   // 0,120,-120
   //event.Skip();
+}
+
+void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
+  int delta = event.GetWheelDelta();
+  int rotation = event.GetWheelRotation(); // has positive, negative, use delta to normalize
+  bool bShift = event.ShiftDown();
+  bool bControl = event.ControlDown();
+  bool bAlt = event.AltDown();
+//  std::cout 
+//      << "Wheel: " << delta << "," << rotation << ",sca:" 
+//      << bShift << bControl << bAlt
+//      << std::endl;
+  if ( 0 > rotation ) {
+    m_tdViewPortWidth /= 1.4;
+  }
+  else {
+    m_tdViewPortWidth *= 1.4;
+  }
+  DrawChart();
+  //event.Skip();
+}
+
+void WinChartView::HandleMouseEnter( wxMouseEvent& event ) {
+//  std::cout << "mouse enter" << std::endl;
+  event.Skip();
+}
+
+void WinChartView::HandleMouseLeave( wxMouseEvent& event ) {
+//  std::cout << "mouse leave" << std::endl;
+  event.Skip();
 }
 
 void WinChartView::HandlePaint( wxPaintEvent& event ) {
