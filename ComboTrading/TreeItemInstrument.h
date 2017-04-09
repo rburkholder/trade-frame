@@ -72,7 +72,22 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & boost::serialization::base_object<const TreeItemResources>(*this);
+    
     ar & m_lockType;
+    
+    const vMembers_t::size_type n = m_vMembers.size();
+    ar << n;
+    for ( vMembers_t::const_iterator iter = m_vMembers.begin(); iter != m_vMembers.end(); ++iter ) {
+      ar << ( iter->m_type );
+      switch ( iter->m_type ) {
+	case IdInstrument:
+	{
+	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->m_pTreeItemBase.get() );
+          ar & *p;
+	}
+	break;
+      }
+    }
   }
 
   template<typename Archive>
@@ -82,6 +97,22 @@ private:
     // this is going to cause problems if renamed, so prevent a rename, ... is rename even available?
     m_pInstrumentActions->signalLoadInstrument( this->m_id, m_baseResources.signalGetItemText( m_id ) );
     // call InstrumentActions::Startup here?
+    
+    vMembers_t::size_type n;
+    ar & n;
+    for ( vMembers_t::size_type ix = 0; ix < n; ++ix ) {
+      unsigned int type;
+      ar & type;
+      switch ( type ) {
+	case IdInstrument:
+	{
+          TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
+          ar & *p;
+	}
+	break;
+      }
+    }
+    
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
