@@ -214,6 +214,7 @@ PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const
 }
 
 // todo: fix: StopWatch causes an exception upon program end with provider stopped
+// signalled in TreeItemInstrument::~TreeItemInstrument
 void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {

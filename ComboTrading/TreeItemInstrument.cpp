@@ -38,6 +38,7 @@ TreeItemInstrument::~TreeItemInstrument( void ) {
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
   std::cout << "Delete: TreeItemInstrument" << std::endl;
+  //ou::tf::TreeItemBase::DeleteMember( m_id );
   m_baseResources.signalDelete( m_id );
 }
 
@@ -101,10 +102,6 @@ void TreeItemInstrument::ShowContextMenu( void ) {
   m_baseResources.signalPopupMenu( m_pMenu );
 }
 
-void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
-  NewInstrumentViaDialog( InstrumentActions::NoLock );
-}
-
 /* todo:  
  *   for following two handlers:
  *   the lock should be forcing the gui to show options only for the underlying instrument
@@ -123,15 +120,22 @@ void TreeItemInstrument::HandleMenuAddFuturesOption( wxCommandEvent& event ) {
   InstrumentViaDialog( InstrumentActions::LockFuturesOption, "FuturesOption" );
 }
 
+void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
+  InstrumentViaDialog( InstrumentActions::NoLock, "Instrument Name" );
+}
+
 void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
   if ( !p->NewInstrumentViaDialog( lock ) ) {
-    this->m_baseResources.signalDelete( p->GetTreeItemId() );
+    wxTreeItemId id( p->GetTreeItemId() );
+    this->m_baseResources.signalDelete( id );
+    ou::tf::TreeItemBase::DeleteMember( id );
   }
 //  else {
 //  }
 }
 
+// called by TreeItemGroup::HandleAddInstrument
 bool TreeItemInstrument::NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ) {
   // need to assume/assert that this is a new dialog?  or communicate it is a replacement?
   bool bInstrumentNameAssigned( false );

@@ -22,26 +22,28 @@ namespace tf {
 void TreeItemBase::AddMember( unsigned int type, wxTreeItemId id, pTreeItemBase_t p ) {
   assert( 0 != id.GetID() );
   assert( 0 != p.get() );
-  m_vMembers.push_back( member_t( type, id.GetID(), p ) );
-  m_mapMembers.insert( mapMembers_t::value_type( id.GetID(), p ) );
+  //m_vMembers.push_back( member_t( type, id.GetID(), p ) );
+  m_mapMembers.insert( mapMembers_t::value_type( id.GetID(), member_t( type, p ) ) );
 }
 
 void TreeItemBase::DeleteMember( wxTreeItemId id ) {
   
-  struct matchId {
-    bool operator()( const TreeItemBase::member_t& member ) const { return member.m_void == m_v; }
-    matchId( void* v ): m_v( v ) {};
-    void* m_v;
-  };
+  //struct matchId {
+  //  bool operator()( const TreeItemBase::member_t& member ) const { return member.m_void == m_v; }
+  //  matchId( void* v ): m_v( v ) {};
+  //  void* m_v;
+  //};
   
   mapMembers_t::const_iterator iterMap = m_mapMembers.find( id.GetID() );
   if ( m_mapMembers.end() != iterMap ) {
     m_mapMembers.erase( iterMap );
   }
-  else assert( 0 );
-  vMembers_t::iterator iterVec = std::find_if( m_vMembers.begin(), m_vMembers.end(), matchId( id.GetID() ) );
-  assert( m_vMembers.end() != iterVec );
-  m_vMembers.erase( iterVec );
+  else 
+    assert( 0 );
+  
+//  vMembers_t::iterator iterVec = std::find_if( m_vMembers.begin(), m_vMembers.end(), matchId( id.GetID() ) );
+//  assert( m_vMembers.end() != iterVec );
+//  m_vMembers.erase( iterVec );
 }
 
 void TreeItemBase::HandleRename( wxCommandEvent& event ) { 

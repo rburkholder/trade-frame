@@ -30,7 +30,8 @@ public:
   
   void HandleMenuNewInstrument( wxCommandEvent& event );
   
-  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ); // test: invocable only if no instrument already exists
+  // todo: invocable only if no instrument already exists
+  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ); 
   
 protected:
 
@@ -75,14 +76,14 @@ private:
     
     ar & m_lockType;
     
-    const vMembers_t::size_type n = m_vMembers.size();
+    const mapMembers_t::size_type n = m_mapMembers.size();
     ar << n;
-    for ( vMembers_t::const_iterator iter = m_vMembers.begin(); iter != m_vMembers.end(); ++iter ) {
-      ar << ( iter->m_type );
-      switch ( iter->m_type ) {
+    for ( mapMembers_t::const_iterator iter = m_mapMembers.begin(); iter != m_mapMembers.end(); ++iter ) {
+      ar << ( iter->second.m_type );
+      switch ( iter->second.m_type ) {
 	case IdInstrument:
 	{
-	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->m_pTreeItemBase.get() );
+	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
           ar & *p;
 	}
 	break;
@@ -98,9 +99,9 @@ private:
     m_pInstrumentActions->signalLoadInstrument( this->m_id, m_baseResources.signalGetItemText( m_id ) );
     // call InstrumentActions::Startup here?
     
-    vMembers_t::size_type n;
+    mapMembers_t::size_type n;
     ar & n;
-    for ( vMembers_t::size_type ix = 0; ix < n; ++ix ) {
+    for ( mapMembers_t::size_type ix = 0; ix < n; ++ix ) {
       unsigned int type;
       ar & type;
       switch ( type ) {
