@@ -118,7 +118,6 @@ private:
   };
   
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
-  
   pInstrumentActions_t m_pInstrumentActions;
   
   struct WatchInfo {
@@ -170,6 +169,16 @@ private:
   Resources m_resources;
   ou::tf::TreeOps* m_pTreeOps;
   
+  boost::signals2::connection m_connGetInstrumentActions;
+  boost::signals2::connection m_connNewInstrument;
+  boost::signals2::connection m_connLoadInstrument;
+  boost::signals2::connection m_connEmitValues;
+  boost::signals2::connection m_connLiveChart;
+  boost::signals2::connection m_connDelete;
+  boost::signals2::connection m_connLookupDescription;
+  boost::signals2::connection m_connComposeComposite;
+  boost::signals2::connection m_connChanging;
+  
   ou::tf::DialogPickSymbol* m_pDialogPickSymbol;
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
@@ -196,6 +205,7 @@ private:
   pInstrumentActions_t HandleGetInstrumentActions( const wxTreeItemId& );
 
   void OnClose( wxCloseEvent& event );
+  void OnWindowDestroy( wxWindowDestroyEvent& );
   
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

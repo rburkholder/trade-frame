@@ -62,7 +62,6 @@ PanelCharts::~PanelCharts() {
 }
 
 void PanelCharts::Init( void ) {
-  m_pDialogPickSymbol = 0;
   m_pTreeOps = 0;
   m_pWinChartView = 0;
   m_pDialogPickSymbol = 0;
@@ -154,26 +153,23 @@ void PanelCharts::CreateControls() {
   // initialize the tree
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
 
+  Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
+  Bind( wxEVT_DESTROY, &PanelCharts::OnWindowDestroy, this );
+  
   namespace args = boost::phoenix::arg_names;
   
-  m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
+  m_connGetInstrumentActions = m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
   
-  m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2 ) );
-  m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2 ) );
-  m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
-  m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
-  m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
+  m_connNewInstrument = m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2 ) );
+  m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2 ) );
+  m_connEmitValues = m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
+  m_connLiveChart = m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
+  m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   
-  m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
-  m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
+  m_connLookupDescription = m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
+  m_connComposeComposite = m_de.signalComposeComposite.connect( boost::phoenix::bind( &PanelCharts::HandleComposeComposite, this, args::arg1 ) );
   
-  m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
-  
-  Bind( wxEVT_CLOSE_WINDOW, &PanelCharts::OnClose, this );  // start close of windows and controls
-  
-  // no need for the gui refresh as that is handled in ChartInteractive
-  //Bind( wxEVT_TIMER, &PanelCharts::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  //m_timerGuiRefresh.SetOwner( this );
+  m_connChanging = m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
   
   // need to process in a dynamic fashion
   m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
@@ -213,7 +209,6 @@ PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const
   return m_pInstrumentActions;
 }
 
-// todo: fix: StopWatch causes an exception upon program end with provider stopped
 // signalled in TreeItemInstrument::~TreeItemInstrument
 void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
@@ -426,12 +421,38 @@ void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
   }
 }
 
+void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
+  
+  //if ( 0 != m_pTreeOps ) {
+  //  delete m_pTreeOps;
+  //  m_pTreeOps = 0;
+  //}
+  
+  //m_pInstrumentActions.reset();
+  
+  m_connGetInstrumentActions.disconnect();
+  
+  m_connNewInstrument.disconnect();
+  m_connLoadInstrument.disconnect();
+  m_connEmitValues.disconnect();
+  m_connLiveChart.disconnect();
+  m_connDelete.disconnect();
+  
+  m_connLookupDescription.disconnect();
+  m_connComposeComposite.disconnect();
+  
+  m_connChanging.disconnect();
+  
+  event.Skip();  // auto followed by Destroy();
+
+}
+
 void PanelCharts::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
-  //m_timerGuiRefresh.Stop();
+  
   event.Skip();  // auto followed by Destroy();
 }
 
