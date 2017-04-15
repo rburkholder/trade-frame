@@ -28,7 +28,6 @@
 #include <ostream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
 
 #include <TFTrading/Watch.h>
 
@@ -46,7 +45,7 @@ public:
     time_duration td;
     std::string Symbol;
     structSymbol( void ) {};
-    structSymbol( const time_duration& td_, const std::string& Symbol_ )
+    structSymbol( const boost::posix_time::time_duration& td_, const std::string& Symbol_ )
       : td( td_ ), Symbol( Symbol_ ) {};
   };
 
@@ -56,9 +55,9 @@ public:
   void SetWatchOn( pProvider_t pProvider );
   void SetWatchOff( void );
 
-  double ValueAt( time_duration td );  // index to determine appropriate interest rate
-
-//  void EmitYieldCurve( void );
+  double ValueAt( boost::posix_time::time_duration td );  // index to determine appropriate interest rate
+  
+  bool Watching( void ) const { return m_bWatching; }
 
 protected:
 
@@ -71,11 +70,11 @@ private:
   typedef ou::tf::Watch::pWatch_t pWatch_t;
 
   struct structInterestRate {
-    time_duration td;
+    boost::posix_time::time_duration td;
     std::string Symbol;
     pWatch_t pWatch;
     structInterestRate( void ) {};
-    structInterestRate( const time_duration& td_, const std::string& Symbol_ )
+    structInterestRate( const boost::posix_time::time_duration& td_, const std::string& Symbol_ )
       : td( td_ ), Symbol( Symbol_ ) {};
     structInterestRate( const structSymbol& symbol )
       : td( symbol.td ), Symbol( symbol.Symbol ) {};

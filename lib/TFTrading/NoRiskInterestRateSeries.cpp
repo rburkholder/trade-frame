@@ -123,32 +123,39 @@ void NoRiskInterestRateSeries::AssignSymbols( const vSymbol_t& vSymbol ) {
 
 }
 
+// *** LiborFromIQFeed
+
 using namespace boost::assign;
 
 LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
   typedef NoRiskInterestRateSeries::structSymbol structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vLibor;
+  // http://www.global-rates.com/interest-rates/libor/american-dollar/american-dollar.aspx 
+  //   shows sum are not available
+  // also based upon that chart, the values here do correspond to USD libor
   vLibor += 
     structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
     structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week
-    structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
+    //structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
     structSymbol( time_duration( hours(  30 * 24 ) ),  "1MLIB.X" ), //  1 month
     structSymbol( time_duration( hours(  60 * 24 ) ),  "2MLIB.X" ), //  2 month
     structSymbol( time_duration( hours(  90 * 24 ) ),  "3MLIB.X" ), //  3 month
-    structSymbol( time_duration( hours( 120 * 24 ) ),  "4MLIB.X" ), //  4 month
-    structSymbol( time_duration( hours( 150 * 24 ) ),  "5MLIB.X" ), //  5 month
+    //structSymbol( time_duration( hours( 120 * 24 ) ),  "4MLIB.X" ), //  4 month
+    //structSymbol( time_duration( hours( 150 * 24 ) ),  "5MLIB.X" ), //  5 month
     structSymbol( time_duration( hours( 180 * 24 ) ),  "6MLIB.X" ), //  6 month
-    structSymbol( time_duration( hours( 210 * 24 ) ),  "7MLIB.X" ), //  7 month
-    structSymbol( time_duration( hours( 240 * 24 ) ),  "8MLIB.X" ), //  8 month
-    structSymbol( time_duration( hours( 270 * 24 ) ),  "9MLIB.X" ), //  9 month
-    structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
-    structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
+    //structSymbol( time_duration( hours( 210 * 24 ) ),  "7MLIB.X" ), //  7 month
+    //structSymbol( time_duration( hours( 240 * 24 ) ),  "8MLIB.X" ), //  8 month
+    //structSymbol( time_duration( hours( 270 * 24 ) ),  "9MLIB.X" ), //  9 month
+    //structSymbol( time_duration( hours( 300 * 24 ) ), "10MLIB.X" ), // 10 month
+    //structSymbol( time_duration( hours( 330 * 24 ) ), "11MLIB.X" ), // 11 month
     structSymbol( time_duration( hours( 365 * 24 ) ),  "1YLIB.X" ); //  1 year 
   NoRiskInterestRateSeries::AssignSymbols( vLibor );
 }
 
 LiborFromIQFeed::~LiborFromIQFeed( void ) {
 }
+
+// *** FedRateFromIQFeed
 
 FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
   typedef NoRiskInterestRateSeries::structSymbol structSymbol;
