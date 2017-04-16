@@ -309,11 +309,11 @@ void ExpiryBundle::SetExpiry( ptime dt ) {
   m_dtExpiry = dt;
 }
 
-void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
+void ExpiryBundle::CalcGreeksAtStrike( 
+  ptime now, mapStrikes_iter_t iter, ou::tf::option::binomial::structInput& input ) {
 
   // use the haskell book to get an estimator
 
-  ou::tf::option::binomial::structOutput output;
   input.X = iter->first;
 
   // Manaster and Koehler Start Value, Option Pricing Formulas, pg 454
@@ -321,14 +321,15 @@ void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf
   input.v = dblVolatilityGuess;
 
 //  std::cout << "Guess " << input.v << std::endl;
-
+  
   if ( 0 != iter->second.Call() ) {
 //    std::cout << "Call @" << input.X << ": ";
     try {
-      input.optionSide = ou::tf::OptionSide::Call;
-      ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Call()->LastQuote().Midpoint(), output );
-      ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
-      iter->second.Call()->AppendGreek( greek );
+      //input.optionSide = ou::tf::OptionSide::Call;
+      //ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Call()->LastQuote().Midpoint(), output );
+      //ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
+      //iter->second.Call()->AppendGreek( greek );
+      iter->second.Call()->CalcGreeks( input, now, false );
     }
     catch (...) {
 //      std::cout << iter->second.Call()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
@@ -337,10 +338,11 @@ void ExpiryBundle::CalcGreeksAtStrike( ptime now, mapStrikes_iter_t iter, ou::tf
   if ( 0 != iter->second.Put() ) {
 //    std::cout << "Put  @" << input.X << ": ";
     try {
-      input.optionSide = ou::tf::OptionSide::Put;
-      ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Put()->LastQuote().Midpoint(), output );
-      ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
-      iter->second.Put()->AppendGreek( greek );
+      //input.optionSide = ou::tf::OptionSide::Put;
+      //ou::tf::option::binomial::CalcImpliedVolatility( input, iter->second.Put()->LastQuote().Midpoint(), output );
+      //ou::tf::Greek greek( now, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
+      //iter->second.Put()->AppendGreek( greek );
+      iter->second.Put()->CalcGreeks( input, now, false );
     }
     catch (...) {
 //      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
@@ -355,22 +357,13 @@ void ExpiryBundle::CalcGreeks( double dblUnderlying, double dblVolHistorical, pt
 
   if ( EOWSNoWatch == m_stateOptionWatch ) return;  // not watching so no active data
 
-  static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
-//    time_duration tdurOneYear( 360 * 24, 0, 0 );  // https://www.interactivebrokers.com/en/index.php?f=interest&p=schedule
-//    time_duration tdurOneYear( 250 * 24, 0, 0 );  
-  static long lSecForOneYear = tdurOneYear.total_seconds();
-  long lSecToExpiry = ( m_dtExpiry - now ).total_seconds();
-  double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
-  double rate = libor.ValueAt( m_dtExpiry - now ) / 100.0;
+  ou::tf::option::binomial::structInput input;
+  
+  // todo: need to check if m_dtExpiry is utc.
+  Option::CalcRate( input, libor, now, m_dtExpiry );
 
 //  ou::tf::option::binomial::structOutput output;
-  ou::tf::option::binomial::structInput input;
-  input.optionStyle = ou::tf::OptionStyle::American;
   input.S = dblUnderlying;
-  input.T = ratioToExpiry;
-  input.r = rate;
-  input.b = rate; // is this correct?
-  input.n = 91;  // binomial steps
 
   double dblVolatilityGuess = dblVolHistorical / 100.0;
   input.v = dblVolatilityGuess;

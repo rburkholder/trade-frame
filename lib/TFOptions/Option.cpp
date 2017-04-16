@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -69,6 +71,82 @@ void Option::StartWatch( void ) {
   }
 }
 
+void Option::CalcRate( 
+  ou::tf::option::binomial::structInput& input,
+  const ou::tf::LiborFromIQFeed& libor,
+  boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry
+) {
+
+  assert( boost::posix_time::not_a_date_time != dtUtcNow );
+  assert( boost::posix_time::not_a_date_time != dtUtcExpiry );
+  assert( dtUtcNow < dtUtcExpiry );
+
+  static time_duration tdurOneYear( 365 * 24, 0, 0 );  // should generalize to calc for current year (leap year, etc)
+//    time_duration tdurOneYear( 360 * 24, 0, 0 );  // https://www.interactivebrokers.com/en/index.php?f=interest&p=schedule
+//    time_duration tdurOneYear( 250 * 24, 0, 0 );  
+  static long lSecForOneYear = tdurOneYear.total_seconds();
+  //long lSecToExpiry = ( m_dtExpiry - now ).total_seconds();
+  
+  boost::posix_time::time_duration durToExpiry = dtUtcExpiry - dtUtcNow;
+  int lSecToExpiry = durToExpiry.total_seconds();
+  double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
+  input.T = ratioToExpiry;
+
+  double rate = libor.ValueAt( durToExpiry ) / 100.0;
+  input.r = rate;
+  input.b = rate; // is this correct?
+}
+
+void Option::CalcRate( 
+  ou::tf::option::binomial::structInput& input,
+        boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
+
+  assert( boost::posix_time::not_a_date_time != dtUtcNow );
+  
+  // system time is already utc
+//  boost::posix_time::ptime dtUtcNow = 
+//          ou::TimeSource::Instance().
+//              ConvertRegionalToUtc( dtUtcNow.date(), dtUtcNow.time_of_day(), "America/New_York", true );  
+
+  ptime dtUtcExpiry( m_pInstrument->GetExpiryUtc() );
+  assert( dtUtcNow < dtUtcExpiry );
+
+  CalcRate( input, libor, dtUtcNow, dtUtcExpiry );
+}
+
+void Option::CalcGreeks( 
+  ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess ) {
+  // needs CalcRate before entering here
+  // needs input.S (underlying price)
+  
+  if ( !Watching() ) return;  // not watching so no active data
+  
+  input.X = m_dblStrike;
+  
+  // todo: use the haskell book to get an estimator
+  // Manaster and Koehler Start Value, Option Pricing Formulas, pg 454
+  if ( bNeedsGuess ) {
+//  double dblVolatilityGuess = dblVolHistorical / 100.0;
+//  input.v = dblVolatilityGuess;
+    double dblVolatilityGuess = std::sqrt( std::abs( std::log( input.S / input.X ) + input.r * input.T ) * 2.0 / input.T );
+    input.v = dblVolatilityGuess;
+  }
+  
+//  std::cout << "Guess " << input.v << std::endl;
+
+  try {
+    input.optionSide = m_pInstrument->GetOptionSide();
+    input.Check();
+    ou::tf::option::binomial::structOutput output;
+    ou::tf::option::binomial::CalcImpliedVolatility( input, LastQuote().Midpoint(), output );
+    ou::tf::Greek greek( dtUtcNow, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
+    AppendGreek( greek );
+  }
+  catch (...) {
+//      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+  }
+}
+
 bool Option::StopWatch( void ) {
   bool b = Watch::StopWatch();
   if ( b ) {
@@ -85,13 +163,15 @@ void Option::EmitValues( void ) {
     << "D:" << m_greek.Delta() << "," 
     << "G:" << m_greek.Gamma() << "," 
     << "T:" << m_greek.Theta() << "," 
-    << "V:" << m_greek.Vega() 
+    << "V:" << m_greek.Vega() << ","
+    << "R:" << m_greek.Rho()
     << std::endl;
 }
 
 void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
   m_greeks.Append( greek );
+  OnGreek( greek );
 }
 
 void Option::AppendGreek( const ou::tf::Greek& greek ) {

@@ -18,7 +18,10 @@
 // 2012/03/31 be aware that some options do not expire on friday.  Some like, next week, 
 //            expire on thursday due to good friday being a holiday
 
+#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
+
+#include "Binomial.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -40,12 +43,22 @@ public:
   bool virtual operator<=( const Option& rhs ) const { return m_dblStrike <= rhs.m_dblStrike; };
 
   double GetStrike( void ) const { return m_dblStrike; };
+  
+  static void CalcRate( // basic libor calcs
+    ou::tf::option::binomial::structInput& input, 
+    const ou::tf::LiborFromIQFeed& libor,
+    boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry );
+  // calls static CalcRate with specific expiry info
+  void CalcRate( ou::tf::option::binomial::structInput& input, ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor );
+  // caller needs to have updated input with CalcRate
+  void CalcGreeks( ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess = true ); // Calc and Append
 
   double ImpliedVolatility( void ) const { return m_greek.ImpliedVolatility(); };
-  double Delta( void ) const { return m_greek.Delta(); };
-  double Gamma( void ) const { return m_greek.Gamma(); };
-  double Theta( void ) const { return m_greek.Theta(); };
-  double Vega( void ) const { return m_greek.Vega(); };
+  double Delta( void ) const { return m_greek.Delta(); }
+  double Gamma( void ) const { return m_greek.Gamma(); }
+  double Theta( void ) const { return m_greek.Theta(); }
+  double Vega( void ) const { return m_greek.Vega(); }
+  double Rho( void ) const { return m_greek.Rho(); }
 
   ou::tf::Greeks* Greeks( void ) { return &m_greeks; };
 
@@ -54,7 +67,7 @@ public:
 
   virtual void EmitValues( void );
 
-  void AppendGreek( const ou::tf::Greek& greek );
+  ou::Delegate<const Greek&> OnGreek;
 
   void SaveSeries( const std::string& sPrefix );
 
@@ -74,6 +87,7 @@ private:
   void Initialize( void );
 
   void HandleGreek( const Greek& greek );
+  void AppendGreek( const ou::tf::Greek& greek );
 
 };
 
