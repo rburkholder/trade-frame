@@ -67,7 +67,7 @@ boost::gregorian::date Next3rdFriday( boost::gregorian::date date ) {
 
 // gold future calc:
 // http://www.cmegroup.com/trading/metals/files/pm264-fact-card-gold-options.pdf
-// options expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, excercise 20:00
+// options expiry: four business days prior to end of month, not on friday, 13:30pm, assignments notify 16:30, exercise 20:00
 // trading: sunday - friday 18:00 - 17:15 et
 // http://www.cmegroup.com/trading/metals/precious/gold_product_calendar_futures.html
 
