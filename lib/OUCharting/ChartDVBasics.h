@@ -19,7 +19,6 @@
 
 #pragma once
 
-
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 //#include <TFTimeSeries/Adapters.h>
