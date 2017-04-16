@@ -47,9 +47,9 @@
 
 IMPLEMENT_APP(AppHedgedBollinger)
 
-size_t atm = 125;
+const size_t atm = 125;
 
-unsigned int AppHedgedBollinger::m_nthIVCalc( 4 );
+const unsigned int AppHedgedBollinger::m_nthIVCalc( 4 );
 
 bool AppHedgedBollinger::OnInit() {
 
@@ -479,7 +479,6 @@ void AppHedgedBollinger::HandleLoadIQFeedSymbolList( void ) {
   m_listIQFeedSymbols.LoadFromFile( "../symbols.ser" );
   std::cout << " ... completed." << std::endl;
 }
-
 
 void AppHedgedBollinger::HandleGuiRefresh( wxTimerEvent& event ) {
   // update portfolio results and tracker timeseries for portfolio value
