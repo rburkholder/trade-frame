@@ -131,7 +131,7 @@ bool AppComboTrading::OnInit() {
   m_sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxALIGN_LEFT|wxRIGHT, 5);
   m_pPanelProviderControl->Show( true );
 
-  m_tws->SetClientId( 1 );
+  m_tws->SetClientId( 3 );
 
   LinkToPanelProviderControl();
 
@@ -202,12 +202,14 @@ bool AppComboTrading::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Symbol List", vItems );
   
   vItems.clear();
-  vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
-  m_pFrameMain->AddDynamicMenu( "Process", vItems );
+  vItems.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
+  //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_timerGuiRefresh.SetOwner( this );
 
   Bind( wxEVT_TIMER, &AppComboTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+
   m_timerGuiRefresh.Start( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppComboTrading::OnClose, this );  // start close of windows and controls
@@ -680,6 +682,19 @@ void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
   for ( mapPortfolios_t::iterator iter = m_mapPortfolios.begin(); m_mapPortfolios.end() != iter; ++iter ) {
     iter->second.pPPP->UpdateGui();
   }
+
+  if ( m_CalcIV.Invoke() ) {
+    m_CalcIV.m_pthread = new boost::thread( boost::bind( &AppComboTrading::CalcIV, this ) );
+  }  
+}
+
+// runs in thread, 
+// need to change this into thread pool to remove overhead of thread creation
+// then could move the struct m_CalcIV into the thread?
+void AppComboTrading::CalcIV( void ) {
+// //    boost::timer::auto_cpu_timer t;
+  m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
+  m_CalcIV.m_bActive = false;
 }
 
 void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {
@@ -1069,3 +1084,22 @@ void AppComboTrading::OnExecDisconnected( int status ) {
     Stop();
   }
 }
+
+void AppComboTrading::OnIQFeedConnected( int status ) {
+  m_libor.SetWatchOn( m_iqfeed );
+  m_fedrate.SetWatchOn( m_iqfeed );
+}
+
+void AppComboTrading::OnIQFeedDisconnecting( int status ) {
+  m_libor.SetWatchOff();
+  m_fedrate.SetWatchOff();
+}
+
+void AppComboTrading::HandleMenuActionEmitYieldCurve( void ) {
+  //ou::tf::libor::EmitYieldCurve();
+  //m_libor.EmitYieldCurve();
+  std::cout << "Libor: " << std::endl << m_libor;
+  std::cout << "FedRate: " << std::endl << m_fedrate;
+}
+
+

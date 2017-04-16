@@ -189,6 +189,17 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
   }
 }
 
+void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor ) {
+  for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); m_mapInstrumentWatch.end() != iter; ++iter ) {
+    if ( iter->second->GetInstrument()->IsOption() ) {
+      ou::tf::option::binomial::structInput input;
+      ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.get() );
+      pOption->CalcRate( input, dt, libor );
+      pOption->CalcGreeks( input, dt, true );
+    }
+  }
+}
+
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
   //if ( 0 != m_pWinChartView ) {
   //  delete m_pWinChartView;
@@ -230,7 +241,9 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem form HandleInstrumentLiveChart" << std::endl;
   }
   else {
-    m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+    m_ChartDataView.Clear();
+    iter->second->ApplyDataTo( &m_ChartDataView );
+    m_pWinChartView->SetChartDataView( &m_ChartDataView );
   }
 }
 

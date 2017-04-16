@@ -19,6 +19,7 @@
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/thread.hpp>
 
 #include <wx/splitter.h>
 
@@ -28,6 +29,7 @@
 // may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
+#include <TFTrading/NoRiskInterestRateSeries.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -105,9 +107,37 @@ private:
   std::string m_sDbName;
 
   wxTimer m_timerGuiRefresh;
+  
+  struct CalcIV {
+    unsigned int m_nthInvoke;
+    unsigned int m_cntInvoke;
+    volatile bool m_bActive;
+    boost::thread* m_pthread;
+    CalcIV( unsigned int nInterval = 4 )
+            : m_nthInvoke( nInterval ), m_cntInvoke( nInterval ), 
+            m_bActive( false ), m_pthread( 0 ) {}
+    bool Invoke( void ) {
+      bool bInvoke( false );
+      if ( !m_bActive ) {
+        assert( 0 < m_cntInvoke );
+        --m_cntInvoke;
+        if ( 0 == m_cntInvoke ) {
+          m_cntInvoke = m_nthInvoke;
+          if ( 0 != m_pthread ) delete m_pthread;
+          bInvoke = m_bActive = true;
+          //m_pthread = new boost::thread( boost::bind( &AppComboTrading::CalcIV, this ) );
+          }
+      }
+      return bInvoke;
+    }
+  } m_CalcIV;
+  void CalcIV( void );
 
   double m_dblMaxPL;
   double m_dblMinPL;
+  
+  ou::tf::LiborFromIQFeed m_libor;
+  ou::tf::FedRateFromIQFeed m_fedrate;
   
   Process m_process;  // single position
   
@@ -171,6 +201,8 @@ private:
   void Stop( void );
   void TestSymbols( void );
   
+  void HandleMenuActionEmitYieldCurve( void );
+  
   void BuildFrameCharts( void );
   void BuildFramePortfolioPosition( void );
   void BuildFrameInteractiveBrokers( void );
@@ -191,6 +223,9 @@ private:
   void OnExecConnected( int );
   void OnExecDisconnecting( int );
   void OnExecDisconnected( int );
+  
+  void OnIQFeedConnected( int );
+  void OnIQFeedDisconnecting( int );
 
   void HandleSaveButton( void );
 

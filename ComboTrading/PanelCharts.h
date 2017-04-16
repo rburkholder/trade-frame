@@ -25,14 +25,19 @@
 #include <wx/panel.h>
 #include <wx/event.h>
 
-#include <OUCharting/ChartDVBasics.h>
-
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
+
+#include <TFVuTrading/ModelChartHdf5.h>
 #include <TFVuTrading/WinChartView.h>
+//#include <OUCharting/ChartDVBasics.h>
+#include <OUCharting/ChartDataView.h>
 
 #include <TFTrading/ProviderManager.h>
+#include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
+
+#include <TFOptions/Option.h>
 
 #include "TreeItem.h"
 #include "InstrumentActions.h"
@@ -99,9 +104,8 @@ public:
   typedef ou::tf::ProviderManager::pProvider_t pProvider_t;
   void SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider );
   
-  //void StartWatch( void );
-  //void StopWatch( void );
-
+  void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor );
+  
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
   
@@ -120,46 +124,64 @@ private:
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
   pInstrumentActions_t m_pInstrumentActions;
   
+  // need to put a lock on the structure or the container for threaded greek calc
   struct WatchInfo {
   private:
     bool m_bActive;
     pWatch_t m_pWatch;
-    ou::ChartDVBasics m_cdb; // has indicators and dataview
+    ou::tf::ModelChartHdf5 m_chartData;
   public:
     WatchInfo( void ): m_bActive( false ) {}
     void Set( pWatch_t pWatch ) {
       if ( m_bActive ) {
-	std::cout << "WatchInfo::Set menu item already activated" << std::endl;
+        std::cout << "WatchInfo::Set menu item already activated" << std::endl;
       }
       else {
-	m_bActive = true;
-	m_pWatch = pWatch;
-	m_pWatch->OnQuote.Add( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleQuote ) );
-	m_pWatch->OnTrade.Add( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleTrade ) );
-	m_pWatch->StartWatch();
+	      m_bActive = true;
+	      m_pWatch = pWatch;
+        if ( m_pWatch->GetInstrument()->IsOption() || m_pWatch->GetInstrument()->IsFuturesOption() ) {
+          ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( m_pWatch.get() );
+          pOption->OnGreek.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleGreek ) );
+        }
+	      m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
+	      m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
+	      m_pWatch->StartWatch();
       }
     }
     void EmitValues( void ) { m_pWatch->EmitValues(); }
-    ou::ChartDataView& GetChartDataView( void ) { return m_cdb.GetChartDataView(); }
+    //ou::ChartDataView& GetChartDataView( void ) { return m_chartData.GetChartDataView(); }
+    void ApplyDataTo( ou::ChartDataView* view ) {
+      if ( m_pWatch->GetInstrument()->IsOption() || m_pWatch->GetInstrument()->IsFuturesOption() ) {
+        m_chartData.DefineChartOptions( view );
+      }
+      else {
+        m_chartData.DefineChartEquities( view );
+      }
+      
+    }
     ~WatchInfo( void ) {
       if ( 0 != m_pWatch.use_count() ) {
-	if ( m_bActive ) {
-	  m_pWatch->StopWatch();
-	  m_pWatch->OnQuote.Remove( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleQuote ) );
-	  m_pWatch->OnTrade.Remove( MakeDelegate( &m_cdb, &ou::ChartDVBasics::HandleTrade ) );
-	  m_bActive = false;
-	}
+        if ( m_bActive ) {
+          m_bActive = false;
+          m_pWatch->StopWatch();
+          if ( m_pWatch->GetInstrument()->IsOption() || m_pWatch->GetInstrument()->IsFuturesOption() ) {
+            ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( m_pWatch.get() );
+            pOption->OnGreek.Remove( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleGreek ) );
+          }
+          m_pWatch->OnQuote.Remove( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
+          m_pWatch->OnTrade.Remove( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
+        }
       }
     }
   };
   
-  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
-  
-  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
-  mapWatchInfo_t m_mapWatchInfo;
-  
+  // unique list of instrument/watches
   typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
   mapInstrumentWatch_t m_mapInstrumentWatch;
+  
+  typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
+  typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
+  mapWatchInfo_t m_mapWatchInfo;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -184,6 +206,7 @@ private:
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
   WinChartView* m_pWinChartView;
+  ou::ChartDataView m_ChartDataView;
   
   void HandleTreeOpsChanging( wxTreeItemId id );
   
