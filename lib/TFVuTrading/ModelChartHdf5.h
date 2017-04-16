@@ -16,6 +16,10 @@
 
 // Started 2013/10/26
 
+// 20170416 TODO: split into two modules or classes
+//   generic chart definitions
+//   hdf5 data retrieval for ChartHdf5
+
 #include <OUCharting/ChartDataView.h>
 
 #include <OUCharting/ChartEntryBars.h>
@@ -33,7 +37,29 @@ public:
 
   ModelChartHdf5( void );
   virtual ~ModelChartHdf5(void);
+  
+  struct Equities {
+    const ou::tf::Quotes& quotes;
+    const ou::tf::Trades& trades;
+    Equities( const ou::tf::Quotes& quotes_, const ou::tf::Trades& trades_ )
+      : quotes( quotes_ ), trades( trades_ ) {}
+  };
+  
+  struct Options: public Equities {
+    const ou::tf::Greeks& greeks;
+    Options( const ou::tf::Quotes& quotes_, const ou::tf::Trades& trades_, const ou::tf::Greeks& greeks_ )
+      : Equities( quotes_, trades_ ), greeks( greeks_ ) {}
+  };
+  
+  void DefineChartBars( ou::ChartDataView* pChartDataView );
+  void DefineChartQuotes( ou::ChartDataView* pChartDataView );
+  void DefineChartTrades( ou::ChartDataView* pChartDataView );
+  void DefineChartPriceIVs( ou::ChartDataView* pChartDataView );
+  void DefineChartGreeks( ou::ChartDataView* pChartDataView );
+  void DefineChartEquities( ou::ChartDataView* pChartDataView );
+  void DefineChartOptions( ou::ChartDataView* pChartDataView );
 
+  // only usual timeseries can be used here
   template<typename TS> // TS=timeseries
   void ChartTimeSeries( ou::tf::HDF5DataManager* pdm, ou::ChartDataView* pChartDataView, const std::string& sName, const std::string& sPath ) {
 
@@ -50,27 +76,20 @@ public:
 
     AddChartEntries( pChartDataView, series );
 
-//    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   }
 
+  // Normal timeseries plus equities/options structs can be used here:
   template<typename TS> // TS=timeseries
   void ChartTimeSeries( ou::ChartDataView* pChartDataView, const TS& series, const std::string& sName, const std::string& sDescription ) {
 
     pChartDataView->SetNames( sName, sDescription );
-
-//    ou::tf::HDF5TimeSeriesContainer<TS::datum_t> tsRepository( *pdm, sPath );
-//    ou::tf::HDF5TimeSeriesContainer<TS::datum_t>::iterator begin, end;
-//    begin = tsRepository.begin();
-//    end = tsRepository.end();
-//    hsize_t cnt = end - begin;
-//    TS series;
-//    series.Resize( cnt );
-//    tsRepository.Read( begin, end, &series );
-
     AddChartEntries( pChartDataView, series );
 
-//    m_winChart->RefreshRect( m_winChart->GetClientRect(), false );
   }
+  
+  void HandleQuote( const ou::tf::Quote& quote );
+  void HandleTrade( const ou::tf::Trade& trade );
+  void HandleGreek( const ou::tf::Greek& greek );
 
 protected:
 private:
@@ -97,6 +116,8 @@ private:
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVs& ivs );
   void AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks );
+  void AddChartEntries( ou::ChartDataView* pChartDataView, const Equities& equities );
+  void AddChartEntries( ou::ChartDataView* pChartDataView, const Options& options );
 
 };
 
