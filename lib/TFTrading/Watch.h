@@ -76,8 +76,8 @@ public:
 
   bool Watching( void ) const { return 0 != m_cntWatching; };
 
-  const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
-  const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
+  inline const Quote& LastQuote( void ) const { return m_quote; };  // may have thread sync issue
+  inline const Trade& LastTrade( void ) const { return m_trade; };  // may have thread sync issue
 
   const Fundamentals_t& Fundamentals( void ) const { return m_fundamentals; };
   const Summary_t& Summary( void ) const { return m_summary; };
