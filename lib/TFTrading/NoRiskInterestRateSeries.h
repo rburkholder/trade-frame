@@ -55,7 +55,7 @@ public:
   void SetWatchOn( pProvider_t pProvider );
   void SetWatchOff( void );
 
-  double ValueAt( boost::posix_time::time_duration td );  // index to determine appropriate interest rate
+  double ValueAt( boost::posix_time::time_duration td ) const;  // index to determine appropriate interest rate
   
   bool Watching( void ) const { return m_bWatching; }
 
@@ -82,6 +82,7 @@ private:
 
   typedef std::vector<structInterestRate> vInterestRate_t;
   typedef vInterestRate_t::iterator vInterestRate_iter_t;
+  typedef vInterestRate_t::const_iterator vInterestRate_citer_t;
   vInterestRate_t m_vInterestRate;
 
   struct compareInterestRate {

@@ -72,13 +72,13 @@ void NoRiskInterestRateSeries::SetWatchOff( void ) {
   }
 }
 
-double NoRiskInterestRateSeries::ValueAt( time_duration td ) {
+double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
   assert( boost::posix_time::not_a_date_time != td );
   assert( m_bWatching );
   assert( td >= m_vInterestRate[ 0 ].td );
   structInterestRate tmp( td, "" );
-  vInterestRate_iter_t iter1 = std::lower_bound( m_vInterestRate.begin(), m_vInterestRate.end(), tmp, compareInterestRate() );
-  vInterestRate_iter_t iter2;
+  vInterestRate_citer_t iter1 = std::lower_bound( m_vInterestRate.begin(), m_vInterestRate.end(), tmp, compareInterestRate() );
+  vInterestRate_citer_t iter2;
   if ( m_vInterestRate.end() == iter1 ) {
     // extrapolate beyond end
     --iter1;
