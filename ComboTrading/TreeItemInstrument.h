@@ -81,12 +81,12 @@ private:
     for ( mapMembers_t::const_iterator iter = m_mapMembers.begin(); iter != m_mapMembers.end(); ++iter ) {
       ar << ( iter->second.m_type );
       switch ( iter->second.m_type ) {
-	case IdInstrument:
-	{
-	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
-          ar & *p;
-	}
-	break;
+        case IdInstrument:
+        {
+          const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
+                ar & *p;
+        }
+        break;
       }
     }
   }
@@ -105,12 +105,12 @@ private:
       unsigned int type;
       ar & type;
       switch ( type ) {
-	case IdInstrument:
-	{
-          TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
-          ar & *p;
-	}
-	break;
+        case IdInstrument:
+        {
+                TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
+                ar & *p;
+        }
+        break;
       }
     }
     

@@ -34,6 +34,14 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
   Initialize();
 }
 
+Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider )
+: Watch( pInstrument, pDataProvider ),
+  m_dblStrike( pInstrument->GetStrike() ),
+  m_sSide( "-" )
+{
+  Initialize();
+}
+
 Option::Option( const Option& rhs ) :
   Watch( rhs ),
   m_dblStrike( rhs.m_dblStrike ),
@@ -122,6 +130,7 @@ void Option::CalcGreeks(
   if ( !Watching() ) return;  // not watching so no active data
   
   input.X = m_dblStrike;
+  //input.S = underlying  
   
   // todo: use the haskell book to get an estimator
   // Manaster and Koehler Start Value, Option Pricing Formulas, pg 454

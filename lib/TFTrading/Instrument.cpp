@@ -43,7 +43,20 @@ Instrument::Instrument( const TableRowDef& row )
   m_dtrTimeLiquid( dtDefault, dtDefault ),  m_dtrTimeTrading( dtDefault, dtDefault ),
   m_dateCommonCalc( boost::gregorian::not_a_date_time )
 {
-  assert( ( InstrumentType::Option != row.eType ) && ( InstrumentType::FuturesOption != row.eType ) );
+  switch ( row.eType ) {
+    case InstrumentType::Stock:
+      break;
+    case InstrumentType::Index:
+      break;
+    case InstrumentType::Option:
+      break;
+    case InstrumentType::FuturesOption:
+      break;
+    case InstrumentType::Future:
+      break;
+    default:
+      assert( 0 );
+  }
 }
 
 //Instrument::Instrument( const TableRowDef& row, pInstrument_t& pUnderlying ) 

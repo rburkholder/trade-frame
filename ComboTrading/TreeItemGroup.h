@@ -64,12 +64,12 @@ private:
           ar & *p;
         }
         break;
-	case IdInstrument:
-	{
-	  const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
-          ar & *p;
-	}
-	break;
+        case IdInstrument:
+        {
+          const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
+                ar & *p;
+        }
+        break;
       }
     }
   }
@@ -89,12 +89,12 @@ private:
           ar & *p;
         }
         break;
-	case IdInstrument:
-	{
-          TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
-          ar & *p;
-	}
-	break;
+        case IdInstrument:
+        {
+                TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
+                ar & *p;
+        }
+        break;
       }
     }
   }

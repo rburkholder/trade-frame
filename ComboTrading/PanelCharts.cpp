@@ -26,6 +26,8 @@
 #include <TFVuTrading/DialogPickSymbol.h>
 #include <TFIQFeed/BuildSymbolName.h>
 
+#include <TFOptions/Option.h>
+
 // need to check why this exists
 #include <wx/toplevel.h>
 
@@ -191,7 +193,8 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
 
 void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor ) {
   for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); m_mapInstrumentWatch.end() != iter; ++iter ) {
-    if ( iter->second->GetInstrument()->IsOption() ) {
+    pInstrument_t pInstrument = iter->second->GetInstrument();
+    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
       ou::tf::option::binomial::structInput input;
       ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.get() );
       pOption->CalcRate( input, dt, libor );
@@ -334,7 +337,14 @@ PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
   const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
   mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.find( sInstrumentId );
   if ( m_mapInstrumentWatch.end() == iter ) {
-    pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+      ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
+      pInstrumentWatch.reset( pOption );
+    }
+    else {
+      pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    }
+    
     m_mapInstrumentWatch.insert( mapInstrumentWatch_t::value_type( sInstrumentId, pInstrumentWatch ) );
     signalRegisterInstrument( pInstrument );
   }

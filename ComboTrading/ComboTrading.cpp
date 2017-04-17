@@ -693,7 +693,7 @@ void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 // then could move the struct m_CalcIV into the thread?
 void AppComboTrading::CalcIV( void ) {
 // //    boost::timer::auto_cpu_timer t;
-  m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
+  //m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
   m_CalcIV.m_bActive = false;
 }
 
@@ -842,7 +842,8 @@ void AppComboTrading::HandleMenuActionSaveSymbolSubset( void ) {
   m_vExchanges.insert( "NYSE,NYSE_ARCA" );
   m_vExchanges.insert( "NASDAQ,NGSM" );
   m_vExchanges.insert( "NASDAQ,NGM" );
-  m_vExchanges.insert( "OPRA" );
+  //m_vExchanges.insert( "OPRA" );
+  m_vExchanges.insert( "COMEX,COMEX_GBX" );
   //m_vExchanges.insert( "TSE" );
   //m_vExchanges.push_back( "NASDAQ,NMS" );
   //m_vExchanges.push_back( "NASDAQ,SMCAP" );

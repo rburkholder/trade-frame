@@ -34,6 +34,7 @@ public:
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
   Option( const Option& rhs );
   virtual ~Option( void );
 

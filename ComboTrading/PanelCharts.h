@@ -139,7 +139,8 @@ private:
       else {
 	      m_bActive = true;
 	      m_pWatch = pWatch;
-        if ( m_pWatch->GetInstrument()->IsOption() || m_pWatch->GetInstrument()->IsFuturesOption() ) {
+        pInstrument_t pInstrument = m_pWatch->GetInstrument();
+        if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
           ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( m_pWatch.get() );
           pOption->OnGreek.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleGreek ) );
         }
@@ -151,7 +152,8 @@ private:
     void EmitValues( void ) { m_pWatch->EmitValues(); }
     //ou::ChartDataView& GetChartDataView( void ) { return m_chartData.GetChartDataView(); }
     void ApplyDataTo( ou::ChartDataView* view ) {
-      if ( m_pWatch->GetInstrument()->IsOption() || m_pWatch->GetInstrument()->IsFuturesOption() ) {
+      pInstrument_t pInstrument = m_pWatch->GetInstrument();
+      if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
         m_chartData.DefineChartOptions( view );
       }
       else {
