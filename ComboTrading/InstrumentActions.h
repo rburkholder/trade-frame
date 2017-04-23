@@ -26,7 +26,8 @@
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
-// todo:  remove the references to pWatch_t.  a different class needs to handle the data, this structure is for messaging
+// todo:  remove the references to pWatch_t.  a different class needs to handle the data, 
+//    this structure is for messaging
 // which suggests this should be sent to worker queues, or futures or packages
 // which work in the background, and ultimately generate gui events
 

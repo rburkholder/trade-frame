@@ -143,21 +143,10 @@ bool TreeItemInstrument::NewInstrumentViaDialog( InstrumentActions::ENewInstrume
   if ( "" != values.name_ ) {
     m_baseResources.signalSetItemText( m_id, values.name_ );
     m_lockType = values.lockType_;
-//    m_pInstrumentWatch->StartWatch();  //  needs to be processed elsewhere
     bInstrumentNameAssigned = true;
   }
   else {
     // when does the deletion signal get tripped? -- (from the caller)
   }
-//  if ( 0 == m_pInstrumentWatch.use_count() ) {
-//    m_pInstrumentWatch = m_resources.signalNewInstrumentViaDialog( lock ); // call dialog
-//    if ( 0 != m_pInstrumentWatch.get() ) {
-//      m_baseResources.signalSetItemText( m_id, m_pInstrumentWatch->GetInstrument()->GetInstrumentName() );
-//      m_pInstrumentWatch->StartWatch();
-//    }
-//  }
-//  else {
-//    std::cout << "InstrumentWatch already assigned" << std::endl;
-//  }
   return bInstrumentNameAssigned;
 }
