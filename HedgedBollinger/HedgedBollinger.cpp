@@ -19,8 +19,6 @@
 #include <math.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-//using namespace boost::posix_time;
-//using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/lexical_cast.hpp>
@@ -228,17 +226,15 @@ void AppHedgedBollinger::HandleMenuActionEmitStrategyValues( void ) {
 }
 
 void AppHedgedBollinger::HandleMenuActionStartChart( void ) {
-  m_winChartView->ActivateChart( true );
-  //m_bReadyToDrawChart = true;
+  m_winChartView->SetChartDataView( m_pStrategy->GetChartDataView() );
 }
 
-void AppHedgedBollinger::HandleMenuA
-m_winChartView->ActivateChart( false );
-  //m_bReadyToDrawChart = false;
+void AppHedgedBollinger::HandleMenuActionStopChart( void ) {
+  m_winChartView->SetChartDataView( nullptr );
 }
 
 void AppHedgedBollinger::HandleSize( wxSizeEvent& event ) { 
-  m_winChartView->DrawChart();
+  //m_winChartView->DrawChart();
   //StartDrawChart();
 }
 

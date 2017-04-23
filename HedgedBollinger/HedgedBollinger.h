@@ -21,15 +21,15 @@
 
 #include <OUCommon/Worker.h>
 
-#include <TFVuTrading/WinChartView.h>
+//#include <TFVuTrading/WinChartView.h>
+#include <OUCharting/ChartMaster.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
-
-#include <OUCharting/ChartMaster.h>
 
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
+
 #include <TFOptions/Bundle.h>
 
 #include <TFIQFeed/LoadMktSymbols.h>
@@ -38,10 +38,7 @@
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
 
-#include <OUCommon/Worker.h>
-
 #include "EventUpdateOptionTree.h"
-//#include "EventDrawChart.h"
 #include "Strategy1.h"
 
 class AppHedgedBollinger:
@@ -70,9 +67,8 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 //  ou::tf::PanelManualOrder* m_pPanelManualOrder;
   
-  ou::tf::WinChartView m_winChartView;
-
   ou::ChartMaster m_chart;
+  ou::tf::WinChartView m_winChartView;
 
   Strategy* m_pStrategy;
 
