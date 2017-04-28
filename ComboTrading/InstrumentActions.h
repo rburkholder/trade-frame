@@ -23,6 +23,7 @@
 #include <boost/signals2.hpp>
 
 #include <wx/treebase.h>
+#include <wx/string.h>
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
@@ -49,12 +50,12 @@ public:
   };
   
   // used in TreeItemInstrument
-  typedef boost::signals2::signal<values_t (const wxTreeItemId&, ENewInstrumentLock), 
+  typedef boost::signals2::signal<values_t (const wxTreeItemId&, ENewInstrumentLock, const wxString&), 
                                   ou::tf::FirstOrDefault<values_t> > signalNewInstrument_t;
   typedef signalNewInstrument_t::slot_type slotNewInstrument_t;
   signalNewInstrument_t signalNewInstrument;
   
-  typedef boost::signals2::signal<void (const wxTreeItemId&, const std::string&)> signalLoadInstrument_t;
+  typedef boost::signals2::signal<void (const wxTreeItemId&, const std::string&, const std::string&)> signalLoadInstrument_t;
   typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
   signalLoadInstrument_t signalLoadInstrument;
   

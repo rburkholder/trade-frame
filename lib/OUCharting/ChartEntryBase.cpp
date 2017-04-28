@@ -131,6 +131,8 @@ void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt) {
   }
 }
 
+// this has problems during debugging when the other thread doesn't 
+//   empty m_plfTimeDouble
 void ChartEntryBaseWithTime::Append( boost::posix_time::ptime dt, double price) {
   if ( m_bUseThreadSafety ) {
     while ( !m_plfTimeDouble->push( TimeDouble_t( dt, price ) ) ) {};  // add error condition here

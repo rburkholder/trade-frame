@@ -16,6 +16,10 @@
 
 #pragma once
 
+#include <string>
+
+#include <wx/string.h>
+
 #include "InstrumentActions.h"
 #include "TreeItem.h"
 
@@ -28,10 +32,12 @@ public:
   
   virtual void ShowContextMenu( void );
   
+  const std::string& GetUnderlying( void ) const { return m_sUnderlying; }  // might be able to optimize away
+  
   void HandleMenuNewInstrument( wxCommandEvent& event );
   
   // todo: invocable only if no instrument already exists
-  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ); 
+  bool NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const wxString& wxsUnderlying = "" ); 
   
 protected:
 
@@ -59,10 +65,11 @@ protected:
 private:
   
   typedef InstrumentActions::pInstrumentActions_t pInstrumentActions_t;
+  pInstrumentActions_t m_pInstrumentActions;
   
   InstrumentActions::ENewInstrumentLock m_lockType;
-  
-  pInstrumentActions_t m_pInstrumentActions;
+
+  std::string m_sUnderlying;
     
   void InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt );
   
@@ -75,6 +82,7 @@ private:
     ar & boost::serialization::base_object<const TreeItemResources>(*this);
     
     ar & m_lockType;
+    ar & m_sUnderlying;
     
     const mapMembers_t::size_type n = m_mapMembers.size();
     ar << n;
@@ -84,7 +92,7 @@ private:
         case IdInstrument:
         {
           const TreeItemInstrument* p = dynamic_cast<TreeItemInstrument*>( iter->second.m_pTreeItemBase.get() );
-                ar & *p;
+          ar & *p;
         }
         break;
       }
@@ -93,10 +101,13 @@ private:
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    
     ar & boost::serialization::base_object<TreeItemResources>(*this);
     ar & m_lockType;
+    ar & m_sUnderlying;
+    
     // this is going to cause problems if renamed, so prevent a rename, ... is rename even available?
-    m_pInstrumentActions->signalLoadInstrument( this->m_id, m_baseResources.signalGetItemText( m_id ) );
+    m_pInstrumentActions->signalLoadInstrument( m_id, m_baseResources.signalGetItemText( m_id ), m_sUnderlying );
     // call InstrumentActions::Startup here?
     
     mapMembers_t::size_type n;
@@ -107,8 +118,8 @@ private:
       switch ( type ) {
         case IdInstrument:
         {
-                TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
-                ar & *p;
+          TreeItemInstrument* p = AddTreeItem<TreeItemInstrument,IdTreeItemType>( "Instrument", IdInstrument, m_resources );
+          ar & *p;
         }
         break;
       }

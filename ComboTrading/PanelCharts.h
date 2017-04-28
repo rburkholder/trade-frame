@@ -125,6 +125,7 @@ private:
   pInstrumentActions_t m_pInstrumentActions;
   
   // need to put a lock on the structure or the container for threaded greek calc
+  // or not, as m_mapInstrumentWatch is used for calcs
   struct WatchInfo {
   private:
     bool m_bActive;
@@ -176,6 +177,19 @@ private:
       }
     }
   };
+
+  // facilitates option greek calculations  
+  struct OptionWatch {
+    const static unsigned int m_cntDownStartingValue = 5 * 4; // five seconds
+    unsigned int m_cntDown;
+    ou::tf::Quote m_quoteLastUnderlying;
+    ou::tf::Quote m_quoteLastOption;
+    pWatch_t m_pWatchUnderlying;  // established from hierarchical menu items
+    pWatch_t m_pWatchOption;  // uses m_pWatchUnderlying for current value
+    OptionWatch( pWatch_t& pWatchUnderlying, pWatch_t& pWatchOption ):
+      m_cntDown( m_cntDownStartingValue ), 
+      m_pWatchUnderlying( pWatchUnderlying ), m_pWatchOption( pWatchOption ) {}
+  };
   
   // unique list of instrument/watches
   typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
@@ -184,6 +198,9 @@ private:
   typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
   typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
   mapWatchInfo_t m_mapWatchInfo;
+  
+  typedef std::map<ou::tf::Instrument::idInstrument_t, OptionWatch> mapOptionWatch_t;
+  mapOptionWatch_t m_mapOptionWatch;
   
   pProvider_t m_pData1Provider;
   pProvider_t m_pData2Provider;
@@ -210,14 +227,21 @@ private:
   WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
   
+  void UpdateOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
+  void UpdateInstrumentStructures( const std::string& name );
+  
   void HandleTreeOpsChanging( wxTreeItemId id );
   
   void HandleLookUpDescription( const std::string&, std::string& );
   
-  InstrumentActions::values_t HandleNewInstrumentRequest( const wxTreeItemId& item, const InstrumentActions::ENewInstrumentLock );
+  InstrumentActions::values_t HandleNewInstrumentRequest( 
+    const wxTreeItemId& item, 
+    const InstrumentActions::ENewInstrumentLock,
+    const wxString& sUnderlying
+  );
   void HandleComposeComposite( ou::tf::DialogPickSymbol::DataExchange* );
   
-  void HandleLoadInstrument( const wxTreeItemId& item, const std::string& );
+  void HandleLoadInstrument( const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying );
   pWatch_t ConstructWatch( pInstrument_t );
   
   void HandleInstrumentLiveChart( const wxTreeItemId& );

@@ -135,6 +135,7 @@ void TreeOps::HandleSelectionChanged( wxTreeEvent& event ) {
 
 void TreeOps::HandleItemActivated( wxTreeEvent& event ) {
   //std::cout << "HandleItemActivated" << std::endl; // doesn't appear to be triggered
+  //signalActivateItem( event.GetItem().GetID() );
 }
 
 void TreeOps::HandleItemDeleted( wxTreeEvent& event ) {
@@ -190,6 +191,7 @@ void TreeOps::PopulateResources( TreeItemResources& resources ) {
   resources.signalSetItemText.connect( boost::phoenix::bind( &TreeOps::SetItemText, this, args::arg1, args::arg2 ) );
   resources.signalAppendItem.connect( boost::phoenix::bind( &TreeOps::AppendItem, this, args::arg1, args::arg2, -1, -1, (wxTreeItemData*)0 ) );
   resources.signalEnsureVisible.connect( boost::phoenix::bind( &TreeOps::EnsureVisible, this, args::arg1 ) );
+  //resources.signalActivateItem.connect( boost::phoenix::bind( &TreeOps::ActivateItem, this, rags::arg1 ) );
 }
 
 } // namespace tf

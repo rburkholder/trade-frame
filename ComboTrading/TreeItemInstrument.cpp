@@ -102,7 +102,7 @@ void TreeItemInstrument::ShowContextMenu( void ) {
   m_baseResources.signalPopupMenu( m_pMenu );
 }
 
-/* todo:  
+/* todo:  20170428 mostly complete
  *   for following two handlers:
  *   the lock should be forcing the gui to show options only for the underlying instrument
  *     when adding sub-menus to the tree
@@ -126,29 +126,38 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
 
 void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
-  if ( p->NewInstrumentViaDialog( lock ) ) {
+  wxString wsx( m_baseResources.signalGetItemText( m_id ) );
+  if ( p->NewInstrumentViaDialog( lock, wsx ) ) {  // wsx is used as sUnderlying to new instrument, when needed
     // continue with processing
   }
   else {
     // delete the menuitem if nothing chosen
     wxTreeItemId id( p->GetTreeItemId() );
-    this->m_baseResources.signalDelete( id );
+    m_baseResources.signalDelete( id );
     ou::tf::TreeItemBase::DeleteMember( id );
   }
 }
 
-// called by TreeItemGroup::HandleAddInstrument
-bool TreeItemInstrument::NewInstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock ) {
+// called by: 
+//   InstrumentViaDialog (above)
+//   TreeItemGroup::HandleAddInstrument
+bool TreeItemInstrument::NewInstrumentViaDialog( 
+  InstrumentActions::ENewInstrumentLock lock, const wxString& wxsUnderlying 
+  ) {
+  // IQF underlying name, and IB underlying name will need to be provided for naming options during lock
   // need to assume/assert that this is a new dialog?  or communicate it is a replacement?
   bool bInstrumentNameAssigned( false );
-  InstrumentActions::values_t values( m_pInstrumentActions->signalNewInstrument( this->m_id, lock ) );
-  if ( "" != values.name_ ) {
-    m_baseResources.signalSetItemText( m_id, values.name_ );
-    m_lockType = values.lockType_;
-    bInstrumentNameAssigned = true;
+  InstrumentActions::values_t values( 
+    m_pInstrumentActions->signalNewInstrument( this->m_id, lock, wxsUnderlying ) );
+  if ( "" == values.name_ ) {
+    // caller takes care of the deletion
   }
   else {
-    // caller takes care of the deletion
+    m_baseResources.signalSetItemText( m_id, values.name_ );
+    if ( !wxsUnderlying.empty() ) 
+      m_sUnderlying = wxsUnderlying;
+    m_lockType = values.lockType_;
+    bInstrumentNameAssigned = true;
   }
   return bInstrumentNameAssigned;
 }

@@ -71,6 +71,10 @@ struct TreeItemResources {  // used by inheritors of TreeItemBase
   typedef signalEnsureVisible_t::slot_type slotEnsureVisible_t;
   signalEnsureVisible_t signalEnsureVisible;
   
+  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalActivateItem_t;
+  typedef signalActivateItem_t::slot_type slotActivateItem_t;
+  signalActivateItem_t signalActivateItem;
+  
 };
 
 // ===========

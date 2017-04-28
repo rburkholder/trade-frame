@@ -162,8 +162,8 @@ void PanelCharts::CreateControls() {
   
   m_connGetInstrumentActions = m_resources.signalGetInstrumentActions.connect( boost::phoenix::bind( &PanelCharts::HandleGetInstrumentActions, this, args::arg1 ) );
   
-  m_connNewInstrument = m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2 ) );
-  m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2 ) );
+  m_connNewInstrument = m_pInstrumentActions->signalNewInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleNewInstrumentRequest, this, args::arg1, args::arg2, args::arg3 ) );
+  m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2, args::arg3 ) );
   m_connEmitValues = m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
   m_connLiveChart = m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
@@ -192,12 +192,13 @@ void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Pr
 }
 
 void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor ) {
-  for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); m_mapInstrumentWatch.end() != iter; ++iter ) {
-    pInstrument_t pInstrument = iter->second->GetInstrument();
-    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-      ou::tf::option::binomial::structInput input;
-      ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.get() );
-      pOption->CalcRate( input, dt, libor );
+  for ( mapOptionWatch_t::iterator iter = m_mapOptionWatch.begin(); m_mapOptionWatch.end() != iter; ++iter ) {
+    ou::tf::option::binomial::structInput input;
+    ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.m_pWatchOption.get() );
+    ou::tf::Quote quoteUnderlying = iter->second.m_quoteLastUnderlying = iter->second.m_pWatchUnderlying->LastQuote();
+    if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
+      input.S = quoteUnderlying.Midpoint();
+      pOption->CalcRate( input, dt, libor );  // can this be moved out of the loop?
       pOption->CalcGreeks( input, dt, true );
     }
   }
@@ -260,16 +261,90 @@ void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
   }
 }
 
-InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTreeItemId& item, const InstrumentActions::ENewInstrumentLock lock ) {
+PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
+  
+  pWatch_t pInstrumentWatch;
+  
+  const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
+  mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.find( sInstrumentId );
+  if ( m_mapInstrumentWatch.end() == iter ) {
+    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
+      ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
+      pInstrumentWatch.reset( pOption );
+    }
+    else {
+      pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
+    }
+    
+    m_mapInstrumentWatch.insert( mapInstrumentWatch_t::value_type( sInstrumentId, pInstrumentWatch ) );
+    signalRegisterInstrument( pInstrument );
+  }
+  else {
+    pInstrumentWatch = iter->second;
+  }
+  return pInstrumentWatch;
+}
+
+void PanelCharts::UpdateOptionWatch( 
+  const std::string& sUnderlying, pWatch_t pInstrumentWatch ) {
+
+  if ( pInstrumentWatch->GetInstrument()->IsOption() || pInstrumentWatch->GetInstrument()->IsFuturesOption() ) {
+    mapInstrumentWatch_t::iterator iterUnderlying = m_mapInstrumentWatch.find( sUnderlying );
+    if ( m_mapInstrumentWatch.end() == iterUnderlying ) {
+      std::cout << "PanelCharts::UpdateOptionWatch: didn't find underlying (" << sUnderlying << ")" << std::endl;
+    }
+    else {
+      Instrument::idInstrument_cref idInstrument( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
+      mapOptionWatch_t::iterator iterOptionWatch = m_mapOptionWatch.find( idInstrument );
+      if ( m_mapOptionWatch.end() != iterOptionWatch ) {
+        std::cout << "PanelCharts::UpdateOptionWatch: OptionWatch already exists" << std::endl;
+      }
+      else {
+        m_mapOptionWatch.insert( 
+          mapOptionWatch_t::value_type(idInstrument, OptionWatch(iterUnderlying->second,pInstrumentWatch)));
+      }
+    }
+  }
+  
+}
+
+// called by anything more than the serialization in TreeItemInstrument?
+void PanelCharts::HandleLoadInstrument( 
+  const wxTreeItemId& item, const std::string& sName, const std::string& sUnderlying 
+) {
+  
+  pWatch_t pInstrumentWatch = ConstructWatch( signalLoadInstrument( sName ) );
+  
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "HandleLoadInstrument: couldn't find mapWatchInfo item" << std::endl;
+  }
+  else {
+    iter->second->Set( pInstrumentWatch );
+  }
+  
+  if ( !sUnderlying.empty() ) {
+    UpdateOptionWatch( sUnderlying, pInstrumentWatch );
+  }
+  
+}
+
+InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( 
+  const wxTreeItemId& item, 
+  const InstrumentActions::ENewInstrumentLock lock,
+  const wxString& wxsUnderlying // optional
+) {
   
   // the item coming in represents the existing menu item 
   //   which might be a group item, or an instrument item
-  //     if an instrument item, can use that to obtain the underlying instrument 
-  //       for the option calculations
-  
+
   assert( 0 == m_pDialogPickSymbol );
   
   InstrumentActions::values_t values;
+  
+  if ( !wxsUnderlying.empty() ) {
+    m_de.sIQFSymbolName = wxsUnderlying;
+  }
   
   m_pDialogPickSymbol = new ou::tf::DialogPickSymbol( this );
   m_pDialogPickSymbol->SetDataExchange( &m_de );
@@ -296,17 +371,29 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTre
       break;
     case wxID_OK:
       if ( 0 != m_pDialogPickSymbolCreatedInstrument.get() ) {
+        
         pInstrumentWatch = ConstructWatch( m_pDialogPickSymbolCreatedInstrument );
+        
+        Instrument::idInstrument_cref idInstrument( pInstrumentWatch->GetInstrument()->GetInstrumentName() );
+        
         mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
         if ( m_mapWatchInfo.end() == iter ) {
-          std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
+          std::cout << "PanelCharts::HandleNewInstrumentRequest: couldn't find mapWatchInfo item" << std::endl;
         }
         else {
-          values.name_ = pInstrumentWatch->GetInstrument()->GetInstrumentName();
+          values.name_ = idInstrument;
+          // are these lock types propogated properly?
+          //  ie, on load from file, are they set there?
           if ( pInstrumentWatch->GetInstrument()->IsStock() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockOption;
           if ( pInstrumentWatch->GetInstrument()->IsFuture() ) values.lockType_ = InstrumentActions::ENewInstrumentLock::LockFuturesOption;
           iter->second->Set( pInstrumentWatch );
         }
+
+        if ( !wxsUnderlying.empty() ) {
+          const std::string sUnderlying( wxsUnderlying );
+          UpdateOptionWatch( sUnderlying, pInstrumentWatch );
+        }
+        
       }
       else {
         std::cout << "PanelCharts::HandleNewInstrumentRequest is wxID_OK but no instrument" << std::endl;
@@ -320,43 +407,6 @@ InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTre
   m_pDialogPickSymbolCreatedInstrument.reset();
   
   return values;
-}
-
-// called by anything more than the serialization in TreeItemInstrument?
-void PanelCharts::HandleLoadInstrument( const wxTreeItemId& item, const std::string& name ) {
-  pWatch_t pInstrumentWatch = ConstructWatch( signalLoadInstrument( name ) );
-  // code shared from HandleNewInstrumentRequest, can it be refactored?
-  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find ( item.GetID() );
-  if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "LoadInstrument: couldn't find mapWatchInfo item" << std::endl;
-  }
-  else {
-    iter->second->Set( pInstrumentWatch );
-  }
-}
-
-PanelCharts::pWatch_t PanelCharts::ConstructWatch( pInstrument_t pInstrument ) {
-  
-  pWatch_t pInstrumentWatch;
-  
-  const ou::tf::Instrument::idInstrument_t sInstrumentId( pInstrument->GetInstrumentName() );
-  mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.find( sInstrumentId );
-  if ( m_mapInstrumentWatch.end() == iter ) {
-    if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
-      ou::tf::option::Option* pOption = new ou::tf::option::Option( pInstrument, m_pData1Provider );
-      pInstrumentWatch.reset( pOption );
-    }
-    else {
-      pInstrumentWatch.reset( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
-    }
-    
-    m_mapInstrumentWatch.insert( mapInstrumentWatch_t::value_type( sInstrumentId, pInstrumentWatch ) );
-    signalRegisterInstrument( pInstrument );
-  }
-  else {
-    pInstrumentWatch = iter->second;
-  }
-  return pInstrumentWatch;
 }
 
 // extract this sometime because the string builder might be used elsewhere
@@ -440,8 +490,14 @@ void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
     if ( pInstrument.get() == m_pDialogPickSymbolCreatedInstrument.get() ) {
       // expecting contract id to already exist in instrument
       // might put a lock on instrument changes until contract comes back
-      assert( 0 != pInstrument->GetContract() );
-      m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
+      //assert( 0 != pInstrument->GetContract() );
+      if ( 0 == pInstrument->GetContract() ) {
+        std::cout << "PanelCharts::InstrumentUpdated missing contract " << pInstrument->GetInstrumentName() << std::endl;
+      }
+      else {
+        m_pDialogPickSymbol->UpdateContractId( pInstrument->GetContract() );
+      }
+      
     }
     else {
       std::cout << "PanelCharts::InstrumentUpdated error:  not expected instrument" << std::endl;
