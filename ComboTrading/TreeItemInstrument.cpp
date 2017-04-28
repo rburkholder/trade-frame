@@ -126,13 +126,15 @@ void TreeItemInstrument::HandleMenuNewInstrument( wxCommandEvent& event ) {
 
 void TreeItemInstrument::InstrumentViaDialog( InstrumentActions::ENewInstrumentLock lock, const std::string& sPrompt ) {
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( sPrompt, IdInstrument, m_resources );
-  if ( !p->NewInstrumentViaDialog( lock ) ) {
+  if ( p->NewInstrumentViaDialog( lock ) ) {
+    // continue with processing
+  }
+  else {
+    // delete the menuitem if nothing chosen
     wxTreeItemId id( p->GetTreeItemId() );
     this->m_baseResources.signalDelete( id );
     ou::tf::TreeItemBase::DeleteMember( id );
   }
-//  else {
-//  }
 }
 
 // called by TreeItemGroup::HandleAddInstrument
@@ -146,7 +148,7 @@ bool TreeItemInstrument::NewInstrumentViaDialog( InstrumentActions::ENewInstrume
     bInstrumentNameAssigned = true;
   }
   else {
-    // when does the deletion signal get tripped? -- (from the caller)
+    // caller takes care of the deletion
   }
   return bInstrumentNameAssigned;
 }

@@ -42,10 +42,10 @@ public:
   struct values_t {
     std::string name_;
     ENewInstrumentLock lockType_;
+    values_t( void ): lockType_( ENewInstrumentLock::NoLock ) {}
+    values_t( const values_t& rhs ): name_( rhs.name_ ), lockType_( rhs.lockType_ ) {}
     values_t( const std::string& name, const ENewInstrumentLock lockType )
       : name_( name ), lockType_( lockType ) {}
-    values_t( const values_t& rhs ): name_( rhs.name_ ), lockType_( rhs.lockType_ ) {}
-    values_t( void ): lockType_( ENewInstrumentLock::NoLock ) {}
   };
   
   // used in TreeItemInstrument

@@ -35,7 +35,11 @@ void TreeItemGroupCommon::BuildContextMenu( wxMenu* pMenu ) {
 
 void TreeItemGroupCommon::HandleAddInstrument( wxCommandEvent& event ) { 
   TreeItemInstrument* p = AddTreeItem<TreeItemInstrument>( "Instrument", IdInstrument, m_resources );
-  if ( !p->NewInstrumentViaDialog( InstrumentActions::NoLock ) ) {
+  if ( p->NewInstrumentViaDialog( InstrumentActions::NoLock ) ) {
+    // continue processing
+  }
+  else {
+    // remove the place holder
     wxTreeItemId id( p->GetTreeItemId() );
     this->m_baseResources.signalDelete( id );
     ou::tf::TreeItemBase::DeleteMember( id );

@@ -262,6 +262,11 @@ void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
 
 InstrumentActions::values_t PanelCharts::HandleNewInstrumentRequest( const wxTreeItemId& item, const InstrumentActions::ENewInstrumentLock lock ) {
   
+  // the item coming in represents the existing menu item 
+  //   which might be a group item, or an instrument item
+  //     if an instrument item, can use that to obtain the underlying instrument 
+  //       for the option calculations
+  
   assert( 0 == m_pDialogPickSymbol );
   
   InstrumentActions::values_t values;

@@ -137,16 +137,16 @@ private:
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
       }
       else {
-	      m_bActive = true;
-	      m_pWatch = pWatch;
+	m_bActive = true;
+	m_pWatch = pWatch;
         pInstrument_t pInstrument = m_pWatch->GetInstrument();
         if ( pInstrument->IsOption() || pInstrument->IsFuturesOption() ) {
           ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( m_pWatch.get() );
           pOption->OnGreek.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleGreek ) );
         }
-	      m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
-	      m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
-	      m_pWatch->StartWatch();
+	m_pWatch->OnQuote.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleQuote ) );
+	m_pWatch->OnTrade.Add( MakeDelegate( &m_chartData, &ou::tf::ModelChartHdf5::HandleTrade ) );
+	m_pWatch->StartWatch();
       }
     }
     void EmitValues( void ) { m_pWatch->EmitValues(); }
