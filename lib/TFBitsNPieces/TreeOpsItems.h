@@ -96,6 +96,7 @@ public:
     }
   }
   
+  virtual void HandleOnClick( void ) {}
   virtual void ShowContextMenu( void ) {}
 //  virtual void SetSelected( CommonGuiElements& ) {}
 //  virtual void RemoveSelected( CommonGuiElements& ) {}

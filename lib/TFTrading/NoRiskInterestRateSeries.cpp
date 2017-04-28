@@ -74,7 +74,8 @@ void NoRiskInterestRateSeries::SetWatchOff( void ) {
 
 double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
   assert( boost::posix_time::not_a_date_time != td );
-  assert( m_bWatching );
+  
+  assert( m_bWatching );  // before disabling this, check the IsWatching, doesnt seem to turn off when providers are off
   assert( td >= m_vInterestRate[ 0 ].td );
   structInterestRate tmp( td, "" );
   vInterestRate_citer_t iter1 = std::lower_bound( m_vInterestRate.begin(), m_vInterestRate.end(), tmp, compareInterestRate() );

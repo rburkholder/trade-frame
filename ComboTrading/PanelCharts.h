@@ -24,6 +24,7 @@
 #include <wx/treectrl.h>
 #include <wx/panel.h>
 #include <wx/event.h>
+#include <wx/splitter.h>
 
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>
@@ -226,6 +227,8 @@ private:
   
   WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
+  
+  wxSplitterWindow* m_splitter;
   
   void UpdateOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
   void UpdateInstrumentStructures( const std::string& name );

@@ -36,6 +36,7 @@
 //#include <wx-3.0/wx/wx/window.h>
 #include <wx/window.h>
 #include <wx/timer.h>
+#include <wx-3.0/wx/app.h>
 
 #include "ComboTrading.h"
 
@@ -693,8 +694,13 @@ void AppComboTrading::HandleGuiRefresh( wxTimerEvent& event ) {
 // then could move the struct m_CalcIV into the thread?
 void AppComboTrading::CalcIV( void ) {
   //boost::timer::auto_cpu_timer t;
-  m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
-  m_CalcIV.m_bActive = false;
+  try {
+    m_pPanelCharts->CalcIV( ou::TimeSource::Instance().External(), m_libor );
+    m_CalcIV.m_bActive = false;  // need to pair up m_bActive better so is more obvious on setting
+  }
+  catch (...) {
+    std::cout << "AppComboTrading::CalcIV exception" << std::endl;
+  }
 }
 
 void AppComboTrading::LookupDescription( const std::string& sSymbolName, std::string& sDescription ) {

@@ -17,7 +17,6 @@
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/core/argument.hpp>
 
-#include <wx/splitter.h>
 #include <wx/sizer.h>
 //#include <wx/dc.h>
 #include <wx/icon.h>
@@ -112,10 +111,10 @@ void PanelCharts::CreateControls() {
     itemPanel1->SetSizer(sizerMain);
 
   // splitter
-  wxSplitterWindow* splitter;
-  splitter = new wxSplitterWindow( this );
-  splitter->SetMinimumPaneSize(10);
-  splitter->SetSashGravity(0.2);
+  //wxSplitterWindow* splitter;
+  m_splitter = new wxSplitterWindow( this );
+  m_splitter->SetMinimumPaneSize(10);
+  m_splitter->SetSashGravity(0.2);
 
   // tree
   //wxTreeCtrl* tree;
@@ -131,7 +130,7 @@ void PanelCharts::CreateControls() {
   //m_pTreeSymbols->AppendItem( idRoot, "foptions" );
   //m_pTreeSymbols->AppendItem( idRoot, "portfolios" );
   
-  m_pTreeOps = new ou::tf::TreeOps( splitter );
+  m_pTreeOps = new ou::tf::TreeOps( m_splitter );
   m_pTreeOps->PopulateResources( m_baseResources );
   
   wxTreeItemId item = m_pTreeOps->AddRoot( "Root" );  // can be renamed
@@ -140,14 +139,14 @@ void PanelCharts::CreateControls() {
   //m_pTreeItemRoot.reset( new TreeItemRoot( id, m_resources ) );
   //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
 
-  // panel for right side of splitter
+  // panel for right side of m_splitter
   wxPanel* panelSplitterRightPanel;
-  panelSplitterRightPanel = new wxPanel( splitter );
+  panelSplitterRightPanel = new wxPanel( m_splitter );
 
-  splitter->SplitVertically( m_pTreeOps, panelSplitterRightPanel, 0 );
-  sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
+  m_splitter->SplitVertically( m_pTreeOps, panelSplitterRightPanel, 0 );
+  sizerMain->Add( m_splitter, 1, wxGROW|wxALL, 5 );
 
-  // sizer for right side of splitter
+  // sizer for right side of m_splitter
   wxBoxSizer* sizerRight;
   sizerRight = new wxBoxSizer( wxVERTICAL );
   panelSplitterRightPanel->SetSizer( sizerRight );
@@ -195,11 +194,13 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
   for ( mapOptionWatch_t::iterator iter = m_mapOptionWatch.begin(); m_mapOptionWatch.end() != iter; ++iter ) {
     ou::tf::option::binomial::structInput input;
     ou::tf::option::Option* pOption = dynamic_cast<ou::tf::option::Option*>( iter->second.m_pWatchOption.get() );
-    ou::tf::Quote quoteUnderlying = iter->second.m_quoteLastUnderlying = iter->second.m_pWatchUnderlying->LastQuote();
-    if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
-      input.S = quoteUnderlying.Midpoint();
-      pOption->CalcRate( input, dt, libor );  // can this be moved out of the loop?
-      pOption->CalcGreeks( input, dt, true );
+    if ( pOption->Watching() ) {
+      ou::tf::Quote quoteUnderlying = iter->second.m_quoteLastUnderlying = iter->second.m_pWatchUnderlying->LastQuote();
+      if ( quoteUnderlying.IsValid() ) {  // should also check for a valid range
+        input.S = quoteUnderlying.Midpoint();
+        pOption->CalcRate( input, dt, libor );  // can this be moved out of the loop?
+        pOption->CalcGreeks( input, dt, true );
+      }
     }
   }
 }
@@ -543,12 +544,16 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
 void PanelCharts::Save( boost::archive::text_oarchive& oa) {
   //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
   //oa & *p;
+  oa & m_splitter->GetSashPosition();
   m_pTreeOps->Save<TreeItemRoot>( oa );
 }
 
 void PanelCharts::Load( boost::archive::text_iarchive& ia) {
   //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
   //ia & *p;
+  int pos;
+  ia & pos;
+  m_splitter->SetSashPosition( pos );
   m_pTreeOps->Load<TreeItemRoot>( ia );
 }
 

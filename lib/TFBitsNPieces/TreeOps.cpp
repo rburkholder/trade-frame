@@ -129,12 +129,14 @@ void TreeOps::HandleSelectionChanging( wxTreeEvent& event ) {
 void TreeOps::HandleSelectionChanged( wxTreeEvent& event ) {
   //std::cout << "HandleSelectionChanged " << event.GetId() << "," << event.GetItem().GetID() << std::endl;  // triggered second (object b))
   m_idOld = event.GetItem();
+  m_mapDecoder[ event.GetItem().GetID() ]->HandleOnClick();
   //m_mapDecoder[ m_idOld.GetID() ]->SetSelected( m_guiElements );
   
 }
 
 void TreeOps::HandleItemActivated( wxTreeEvent& event ) {
   //std::cout << "HandleItemActivated" << std::endl; // doesn't appear to be triggered
+  //m_mapDecoder[ event.GetItem().GetID() ]->HandleOnClick();
   //signalActivateItem( event.GetItem().GetID() );
 }
 

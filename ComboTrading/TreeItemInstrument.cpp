@@ -43,6 +43,10 @@ void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
 }
 
 void TreeItemInstrument::HandleLiveChart( wxCommandEvent& event ) {
+  HandleOnClick();
+}
+
+void TreeItemInstrument::HandleOnClick( void ) {
   m_pInstrumentActions->signalLiveChart( m_id );
 }
 

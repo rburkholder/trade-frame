@@ -31,6 +31,7 @@ public:
   virtual ~TreeItemInstrument( void );
   
   virtual void ShowContextMenu( void );
+  virtual void HandleOnClick( void );
   
   const std::string& GetUnderlying( void ) const { return m_sUnderlying; }  // might be able to optimize away
   
@@ -112,6 +113,11 @@ private:
     
     mapMembers_t::size_type n;
     ar & n;
+    std::cout 
+      << m_baseResources.signalGetItemText( m_id ) << "," 
+      << m_sUnderlying << "," << n << "," 
+      << m_lockType 
+      << std::endl;
     for ( mapMembers_t::size_type ix = 0; ix < n; ++ix ) {
       unsigned int type;
       ar & type;
