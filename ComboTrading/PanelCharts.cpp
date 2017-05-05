@@ -541,6 +541,12 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
   event.Skip();  // auto followed by Destroy();
 }
 
+void PanelCharts::SaveSeries( const std::string& sPrefix ) {
+  for ( mapInstrumentWatch_t::iterator iter = m_mapInstrumentWatch.begin(); iter != m_mapInstrumentWatch.end(); ++ iter ) {
+    iter->second->SaveSeries( sPrefix );
+  }
+}
+
 void PanelCharts::Save( boost::archive::text_oarchive& oa) {
   //auto p = dynamic_cast<TreeItemRoot*>( m_pTreeOps->GetRoot().get() );
   //oa & *p;

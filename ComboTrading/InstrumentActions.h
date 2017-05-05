@@ -76,9 +76,9 @@ public:
   typedef signalEmitValues_t::slot_type slotEmitValues_t;
   signalEmitValues_t signalEmitValues;
   
-  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalSaveData_t;
-  typedef signalSaveData_t::slot_type slotSaveData_t;
-  signalSaveData_t signalSaveData;
+//  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalSaveData_t;
+//  typedef signalSaveData_t::slot_type slotSaveData_t;
+//  signalSaveData_t signalSaveData;
   
   typedef boost::signals2::signal<void (const wxTreeItemId&)> signalDelete_t;
   typedef signalDelete_t::slot_type slotDelete_t;

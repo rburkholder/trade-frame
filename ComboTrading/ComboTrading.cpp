@@ -205,6 +205,7 @@ bool AppComboTrading::OnInit() {
   vItems.clear();
   vItems.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
+  vItems.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_timerGuiRefresh.SetOwner( this );
@@ -990,6 +991,28 @@ void AppComboTrading::HandlePanelSymbolText( const std::string& sName ) {
 }
 
 void AppComboTrading::HandlePanelFocusPropogate( unsigned int ix ) {
+}
+
+void AppComboTrading::HandleMenuActionSaveSeries( void ) {
+  m_worker.Run( MakeDelegate( this, &AppComboTrading::HandleSaveValues ) );
+}
+
+void AppComboTrading::HandleSaveValues( void ) {
+  std::cout << "Saving collected values ... " << std::endl;
+  try {
+    //std::string sPrefixSession( "/app/ComboTrading/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
+    //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
+    //std::string sPrefix86400sec( "/app/ComboTrading/AtmIV/" + m_pBundle->Name() );
+    //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
+    std::string sPrefixSession( "/app/ComboTrading/" + m_sTSDataStreamStarted );
+    m_pPanelCharts->SaveSeries( sPrefixSession );
+    this->m_libor.SaveSeries( sPrefixSession );
+  }
+  catch(...) {
+    // TODO: will occur when attempting over-write, may need to try a delete first in the code above
+    std::cout << " ... issues with saving ... " << std::endl;
+  }
+  std::cout << "  ... Done " << std::endl;
 }
 
 void AppComboTrading::HandleSave( wxCommandEvent& event ) {

@@ -26,7 +26,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 NoRiskInterestRateSeries::NoRiskInterestRateSeries( void ) 
-  : m_bInitialized( false ), m_bWatching( false )
+  : m_bInitialized( false ), m_bWatching( false ), m_sDescription( "rates")
 {
 }
 
@@ -69,6 +69,12 @@ void NoRiskInterestRateSeries::SetWatchOff( void ) {
     for ( vInterestRate_iter_t iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++ iter ) {
       iter->pWatch->StopWatch();
     }
+  }
+}
+
+void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
+  for ( vInterestRate_t::iterator iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++iter ) {
+    iter->pWatch->SaveSeries( sPrefix + "/" + m_sDescription );
   }
 }
 
@@ -129,6 +135,7 @@ void NoRiskInterestRateSeries::AssignSymbols( const vSymbol_t& vSymbol ) {
 using namespace boost::assign;
 
 LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
+  m_sDescription = "libor";
   typedef NoRiskInterestRateSeries::structSymbol structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vLibor;
   // http://www.global-rates.com/interest-rates/libor/american-dollar/american-dollar.aspx 
@@ -159,6 +166,7 @@ LiborFromIQFeed::~LiborFromIQFeed( void ) {
 // *** FedRateFromIQFeed
 
 FedRateFromIQFeed::FedRateFromIQFeed( void ): NoRiskInterestRateSeries() {
+  m_sDescription = "fedrate";
   typedef NoRiskInterestRateSeries::structSymbol structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vFedRate;
   vFedRate +=

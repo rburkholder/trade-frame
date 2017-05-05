@@ -59,7 +59,7 @@ protected:
   void HandleMenuAddOption( wxCommandEvent& event );
   void HandleLiveChart( wxCommandEvent& event );
   void HandleDailyChart( wxCommandEvent& event );
-  void HandleSaveData( wxCommandEvent& event );
+  //void HandleSaveData( wxCommandEvent& event );
   void HandleDelete( wxCommandEvent& event );
   void HandleEmit( wxCommandEvent& event );
   

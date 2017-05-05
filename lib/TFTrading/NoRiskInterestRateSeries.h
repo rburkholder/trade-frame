@@ -58,10 +58,14 @@ public:
   double ValueAt( boost::posix_time::time_duration td ) const;  // index to determine appropriate interest rate
   
   bool Watching( void ) const { return m_bWatching; }
+  
+  void SaveSeries( const std::string& sPrefix );
 
 protected:
 
   typedef std::vector<structSymbol> vSymbol_t;
+
+  std::string m_sDescription;
 
   void AssignSymbols( const vSymbol_t& vSymbol );  // called from inheritor's constructor
 
@@ -91,7 +95,7 @@ private:
 
   bool m_bInitialized;
   bool m_bWatching;
-
+  
   pProvider_t m_pProvider;
 
   void Initialize( void );

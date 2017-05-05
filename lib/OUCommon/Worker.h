@@ -18,6 +18,8 @@
 // Thread encapsulation, generates event upon completion
 // Uses code from BasketTrading class
 
+// 201705/05 TODO: turn this into an asio based worker solution
+
 #include <boost/thread/thread.hpp>
 #include <boost/function.hpp>
 

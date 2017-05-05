@@ -107,6 +107,8 @@ public:
   
   void CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed libor );
   
+  void SaveSeries( const std::string& sPrefix );
+  
   void Save( boost::archive::text_oarchive& oa);
   void Load( boost::archive::text_iarchive& ia);
   
@@ -196,6 +198,7 @@ private:
   typedef std::map<ou::tf::Instrument::idInstrument_t,pWatch_t> mapInstrumentWatch_t;
   mapInstrumentWatch_t m_mapInstrumentWatch;
   
+  // contains the watches as show in the gui
   typedef boost::shared_ptr<WatchInfo> pWatchInfo_t;
   typedef std::map<void*,pWatchInfo_t> mapWatchInfo_t; // void* is from wxTreeItemId.GetID()
   mapWatchInfo_t m_mapWatchInfo;

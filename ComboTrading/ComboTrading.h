@@ -23,6 +23,8 @@
 
 #include <wx/splitter.h>
 
+#include <OUCommon/Worker.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 
@@ -105,6 +107,8 @@ private:
   bool m_bStarted;
 
   std::string m_sDbName;
+  
+  ou::action::Worker m_worker;
 
   wxTimer m_timerGuiRefresh;
   
@@ -202,6 +206,9 @@ private:
   void TestSymbols( void );
   
   void HandleMenuActionEmitYieldCurve( void );
+  void HandleMenuActionSaveSeries( void );
+  
+  void HandleSaveValues( void );
   
   void BuildFrameCharts( void );
   void BuildFramePortfolioPosition( void );
@@ -226,7 +233,7 @@ private:
   
   void OnIQFeedConnected( int );
   void OnIQFeedDisconnecting( int );
-
+  
   void HandleSaveButton( void );
 
   void HandlePopulateDatabase( void );

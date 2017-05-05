@@ -58,9 +58,9 @@ void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
   m_pInstrumentActions->signalEmitValues( m_id );
 }
 
-void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
-  m_pInstrumentActions->signalSaveData( m_id );
-}
+//void TreeItemInstrument::HandleSaveData( wxCommandEvent& event ) {
+//  m_pInstrumentActions->signalSaveData( m_id );
+//}
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
@@ -92,8 +92,8 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
-  pMenu->Append( MISaveData, "Save Data" );
-  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
+//  pMenu->Append( MISaveData, "Save Data" );
+//  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
   pMenu->Append( MIDelete, "Delete" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
 }
