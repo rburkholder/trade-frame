@@ -52,6 +52,27 @@ setDates_t setUSDates = list_of
   ( boost::gregorian::date( 2016,  9,  5 ) ) // Labor
   ( boost::gregorian::date( 2016, 11, 24 ) ) // Thanksgiving, 13:00 est closing on 25
   ( boost::gregorian::date( 2016, 12, 26 ) ) // Christmas
+	
+  ( boost::gregorian::date( 2017,  1,  1 ) ) // New Years
+  ( boost::gregorian::date( 2017,  1, 16 ) ) // Martin Luther
+  ( boost::gregorian::date( 2017,  2, 20 ) ) // Presidents  Day
+  ( boost::gregorian::date( 2017,  4, 14 ) ) // Good Friday
+  ( boost::gregorian::date( 2017,  5, 29 ) ) // Memorial
+  ( boost::gregorian::date( 2017,  7,  4 ) ) // Independence
+  ( boost::gregorian::date( 2017,  9,  4 ) ) // Labor
+  ( boost::gregorian::date( 2017, 11, 23 ) ) // Thanksgiving, 13:00 est closing on 25
+  ( boost::gregorian::date( 2017, 12, 25 ) ) // Christmas
+
+	
+  ( boost::gregorian::date( 2018,  1,  1 ) ) // New Years
+  ( boost::gregorian::date( 2018,  1, 15 ) ) // Martin Luther
+  ( boost::gregorian::date( 2018,  2, 19 ) ) // Presidents  Day
+  ( boost::gregorian::date( 2018,  3, 30 ) ) // Good Friday
+  ( boost::gregorian::date( 2018,  5, 28 ) ) // Memorial
+  ( boost::gregorian::date( 2018,  7,  4 ) ) // Independence
+  ( boost::gregorian::date( 2018,  9,  3 ) ) // Labor
+  ( boost::gregorian::date( 2018, 11, 22 ) ) // Thanksgiving, 13:00 est closing on 25
+  ( boost::gregorian::date( 2018, 12, 25 ) ) // Christmas
   ;
 
 
