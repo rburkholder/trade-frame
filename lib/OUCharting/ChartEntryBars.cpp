@@ -13,6 +13,9 @@
 
 //#include "StdAfx.h"
 
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
+
 #include "ChartEntryBars.h"
 
 namespace ou { // One Unified
@@ -22,14 +25,14 @@ namespace ou { // One Unified
 //
 
 ChartEntryBars::ChartEntryBars(void) 
-: ChartEntryBaseWithTime()
+: ChartEntryTime()
 {
 }
 
-ChartEntryBars::ChartEntryBars(size_type nSize) 
-: ChartEntryBaseWithTime(nSize)
-{
-}
+//ChartEntryBars::ChartEntryBars(size_type nSize) 
+//: ChartEntryBaseWithTime(nSize)
+//{
+//}
 
 ChartEntryBars::~ChartEntryBars(void) {
   m_vOpen.clear();
@@ -39,42 +42,50 @@ ChartEntryBars::~ChartEntryBars(void) {
 }
 
 void ChartEntryBars::Reserve( size_type nSize ) {
-  ChartEntryBaseWithTime::Reserve( nSize );
+  ChartEntryTime::Reserve( nSize );
   m_vOpen.reserve( nSize );
   m_vHigh.reserve( nSize );
   m_vLow.reserve( nSize );
   m_vClose.reserve( nSize );
 }
 
-void ChartEntryBars::AppendBarPrivate( const ou::tf::Bar& bar ) {
-  ChartEntryBaseWithTime::Append( bar.DateTime() );
+
+void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
+//  if ( m_bUseThreadSafety ) {
+//    while ( !m_lfBar.push( bar ) ) {};
+//  }
+//  else {
+//    AppendBarPrivate( bar );
+//  }
+  m_queueBars.Append( bar );
+}
+
+void ChartEntryBars::ClearQueue( void ) {
+  namespace args = boost::phoenix::placeholders;
+  m_queueBars.Sync( boost::phoenix::bind( &ChartEntryBars::Pop, this, args::arg1 ) );
+}
+
+void ChartEntryBars::Pop( const ou::tf::Bar& bar ) {
+  ChartEntryTime::AppendFg( bar.DateTime() );
   m_vOpen.push_back( bar.Open() );
   m_vHigh.push_back( bar.High() );
   m_vLow.push_back( bar.Low() );
   m_vClose.push_back( bar.Close() );
 }
 
-void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
-  if ( m_bUseThreadSafety ) {
-    while ( !m_lfBar.push( bar ) ) {};
-  }
-  else {
-    AppendBarPrivate( bar );
-  }
-  
-}
-
 bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
 
   bool bAdded( false );
 
-  ou::tf::Bar bar;
-  while ( m_lfBar.pop( bar ) ) {
-    AppendBarPrivate( bar );
-  }
+  //ou::tf::Bar bar;
+  //while ( m_lfBar.pop( bar ) ) {
+//    AppendBarPrivate( bar );
+//  }
+  
+  ClearQueue();
 
-  if ( 0 != this->m_vDateTime.size() ) {
-    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
+  if ( 0 != ChartEntryTime::Size() ) {
+    DoubleArray daXData = ChartEntryTime::GetDateTimes();
     // this should be replicated to the other Entry Types.
     if ( 0 != daXData.len ) {
       CandleStickLayer *candle = pXY->addCandleStickLayer( 
@@ -97,11 +108,12 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
 }
 
 void ChartEntryBars::Clear( void ) {
+  ClearQueue();
+  ChartEntryTime::Clear();
   m_vOpen.clear();
   m_vHigh.clear();
   m_vLow.clear();
   m_vClose.clear();
-  ChartEntryBaseWithTime::Clear();
 }
 
 } // namespace ou

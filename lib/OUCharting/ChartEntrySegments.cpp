@@ -18,7 +18,7 @@
 namespace ou { // One Unified
 
 ChartEntrySegments::ChartEntrySegments(void) 
-: ChartEntryBaseWithTime()
+: ChartEntryPrice()
 {
 }
 
@@ -26,9 +26,12 @@ ChartEntrySegments::~ChartEntrySegments(void) {
 }
 
 bool ChartEntrySegments::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+  
+  ChartEntryPrice::ClearQueue();
+  
   bool bAdded( false );
-  if ( 0 < m_vPrice.size() ) {
-    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
+  if ( 0 < ChartEntryPrice::Size() ) {
+    DoubleArray daXData = ChartEntryTime::GetDateTimes();
     if ( 0 != daXData.len ) {
       LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
     

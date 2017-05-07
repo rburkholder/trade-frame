@@ -13,18 +13,16 @@
 
 #pragma once
 
-#include "ChartEntryBase.h"
+#include "ChartEntryPrice.h"
 
 namespace ou { // One Unified
 
 class ChartEntryIndicator :
-  public ChartEntryBaseWithTime {
+  public ChartEntryPrice {
 public:
   ChartEntryIndicator(void);
-  ChartEntryIndicator( size_type nSize );
+  //ChartEntryIndicator( size_type nSize );
   virtual ~ChartEntryIndicator(void);
-  virtual void Reserve( size_type );
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
 protected:
 private:
 };

@@ -17,12 +17,12 @@
 // also use for high and low indicators, keep redoing last segment so stretches to 
 //   right hand edge (optionally, perhaps in a super class)
 
-#include "ChartEntryBase.h"
+#include "ChartEntryPrice.h"
 
 namespace ou { // One Unified
 
 class ChartEntrySegments :
-  public ChartEntryBaseWithTime {
+  public ChartEntryPrice {
 public:
   ChartEntrySegments(void);
   virtual ~ChartEntrySegments(void);

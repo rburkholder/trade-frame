@@ -16,24 +16,17 @@
 #include <string>
 #include <vector>
 
+#include  <TFTimeSeries/DoubleBuffer.h>
+
 #include "ChartEntryBase.h"
 
 // level markers (horizontal lines at a price level)
 
 namespace ou { // One Unified
 
-class ChartEntryMark :
-  public ChartEntryBase {
+class ChartEntryMark: public ChartEntryBase {
 public:
-  ChartEntryMark(void);
-  virtual ~ChartEntryMark(void);
-  void AddMark( double price, ou::Colour::enumColour colour, const std::string &name );
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  virtual void Clear( void );
-protected:
-  std::vector<ou::Colour::enumColour> m_vColour;
-  std::vector<std::string> m_vName;
-private:
+  
   struct Mark_t {
     double m_dblPrice;
     ou::Colour::enumColour m_colour;
@@ -42,7 +35,22 @@ private:
     Mark_t( double price, ou::Colour::enumColour colour, const std::string &name )
       : m_dblPrice( price ), m_colour( colour ), m_sName( name ) {};
   };
-  boost::lockfree::spsc_queue<Mark_t, boost::lockfree::capacity<lockfreesize> > m_lfMark;
+
+  ChartEntryMark(void);
+  virtual ~ChartEntryMark(void);
+  void AddMark( double price, ou::Colour::enumColour colour, const std::string &name ); // bg thread
+  void AddMark( const Mark_t& mark ); // bg thread
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual void Clear( void );
+protected:
+  std::vector<double> m_vPrice;
+  std::vector<ou::Colour::enumColour> m_vColour;
+  std::vector<std::string> m_vName;
+private:
+  typedef ou::tf::Queue<Mark_t> queueMark_t;
+  queueMark_t m_queue;
+  void Pop( const Mark_t& );
+//  boost::lockfree::spsc_queue<Mark_t, boost::lockfree::capacity<lockfreesize> > m_lfMark;
 };
 
 } // namespace ou

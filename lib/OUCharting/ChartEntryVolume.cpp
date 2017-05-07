@@ -22,31 +22,31 @@ namespace ou { // One Unified
 //
 
 ChartEntryVolume::ChartEntryVolume(void)
-: ChartEntryBaseWithTime()
+: ChartEntryPrice()
 {
 }
 
-ChartEntryVolume::ChartEntryVolume(size_type nSize) 
-: ChartEntryBaseWithTime(nSize)
-{
-}
+//ChartEntryVolume::ChartEntryVolume(size_type nSize) 
+//: ChartEntryPrice(nSize)
+//{
+//}
 
 ChartEntryVolume::~ChartEntryVolume(void) {
 }
 
 void ChartEntryVolume::Reserve(size_type nSize ) {
-  ChartEntryBaseWithTime::Reserve( nSize );
+  ChartEntryPrice::Reserve( nSize );
 }
 
 void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume) {
-  ChartEntryBaseWithTime::Append( dt, (double) volume );
+  ChartEntryPrice::Append( dt, (double) volume );
 }
 
 bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
   bool bAdded( false );
-  ChartEntryBaseWithTime::ClearQueue();
-  if ( 0 != this->m_vDateTime.size() ) {
-    DoubleArray daXData = ChartEntryBaseWithTime::GetDateTimes();
+  ChartEntryPrice::ClearQueue();
+  if ( 0 != ChartEntryPrice::Size() ) {
+    DoubleArray daXData = ChartEntryTime::GetDateTimes();
     if ( 0 != daXData.len ) {
       BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
     

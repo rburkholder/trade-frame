@@ -20,24 +20,20 @@
 namespace ou { // One Unified
 
 class ChartEntryBars :
-  public ChartEntryBaseWithTime {  
+  public ChartEntryTime {  
 public:
   ChartEntryBars(void);
-  ChartEntryBars(size_type nSize);
+  //ChartEntryBars(size_type nSize);
   virtual ~ChartEntryBars(void);
   virtual void Reserve( size_type );
   void AppendBar( const ou::tf::Bar& bar ); // uses thread crossing buffer
   virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
   virtual void Clear( void );
 
-  template<typename Iterator>
-  void AppendBars( Iterator begin, Iterator end ); // no thread crossing buffer, not implemented yet
+//  template<typename Iterator>
+//  void AppendBars( Iterator begin, Iterator end ); // no thread crossing buffer, not implemented yet
 
 protected:
-  std::vector<double> m_vOpen;
-  std::vector<double> m_vHigh;
-  std::vector<double> m_vLow;
-  std::vector<double> m_vClose;
   DoubleArray GetOpen( void ) const {
 //    vdouble_t::const_iterator iter = m_vOpen.begin();
 //    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
@@ -59,17 +55,26 @@ protected:
     return DoubleArray( &m_vClose[ m_ixStart ], m_nElements );
   }
 private:
-  boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
-  void AppendBarPrivate( const ou::tf::Bar& bar );
+  //boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
+  
+  std::vector<double> m_vOpen;
+  std::vector<double> m_vHigh;
+  std::vector<double> m_vLow;
+  std::vector<double> m_vClose;
+  
+  ou::tf::Queue<ou::tf::Bar> m_queueBars;
+  
+  void ClearQueue( void );
+  void Pop( const ou::tf::Bar& bar );
 };
 
-template<typename Iterator>
-void ChartEntryBars::AppendBars( Iterator begin, Iterator end ) {
-  while ( begin != end ) {
-    // not implemented yet
-    ++begin;
-  }
-}
+//template<typename Iterator>
+//void ChartEntryBars::AppendBars( Iterator begin, Iterator end ) {
+//  while ( begin != end ) {
+//    // not implemented yet
+//    ++begin;
+//  }
+//}
 
 
 } // namespace ou

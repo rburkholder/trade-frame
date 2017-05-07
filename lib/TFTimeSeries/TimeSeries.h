@@ -44,6 +44,9 @@
 //   with their own locking, so ... no locking should be needed here.
 //   Maybe enable the now commented out locking code with a define.
 
+// 2017/05/06 see DoubleBuffer for a mechanism for locking and reusing data
+//   between threads
+
 //#include <boost/serialization/vector.hpp>
 // http://www.boost.org/libs/serialization/doc/traits.html
 

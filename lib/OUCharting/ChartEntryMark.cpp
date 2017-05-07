@@ -13,6 +13,9 @@
 
 //#include "StdAfx.h"
 
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
+
 #include "ChartEntryMark.h"
 
 namespace ou { // One Unified
@@ -25,27 +28,38 @@ ChartEntryMark::ChartEntryMark(void)
 ChartEntryMark::~ChartEntryMark(void) {
 }
 
+// used in background thread
 void ChartEntryMark::AddMark(double price, ou::Colour::enumColour colour, const std::string &name) {
-  if ( m_bUseThreadSafety ) {
-    Mark_t mark( price, colour, name );
-    while ( !m_lfMark.push( mark ) ) {};
-  }
-  else {
-    m_vPrice.push_back( price );
-    m_vColour.push_back( colour );
-    m_vName.push_back( name );
-  }
+  //if ( m_bUseThreadSafety ) {
+  //  Mark_t mark( price, colour, name );
+  //  while ( !m_lfMark.push( mark ) ) {};
+  //}
+  //else {
+  //  m_vPrice.push_back( price );
+  //  m_vColour.push_back( colour );
+  //  m_vName.push_back( name );
+  //}
+  AddMark( Mark_t( price, colour, name ) );
+}
+
+void ChartEntryMark::AddMark( const Mark_t& mark ) {
+  m_queue.Append( mark );
+}
+
+// from the queue in main thread
+void ChartEntryMark::Pop( const Mark_t& mark ) {
+  m_vPrice.push_back( mark.m_dblPrice );
+  m_vColour.push_back( mark.m_colour );
+  m_vName.push_back( mark.m_sName );
 }
 
 bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+  
   bool bAdded( false );
-  Mark_t mark;
-  while ( m_lfMark.pop( mark ) ) {
-    m_vPrice.push_back( mark.m_dblPrice );
-    m_vColour.push_back( mark.m_colour );
-    m_vName.push_back( mark.m_sName );
-  }
-
+  
+  namespace args = boost::phoenix::placeholders;
+  m_queue.Sync( boost::phoenix::bind( &ChartEntryMark::Pop, this, args::arg1 ) );
+  
   if ( 0 < m_vPrice.size() ) {
     // may need to make an adjustment for using only marks within a certain price range
     for ( size_t ix = 0; ix < m_vPrice.size(); ++ix ) {
@@ -60,9 +74,9 @@ bool ChartEntryMark::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
 }
 
 void ChartEntryMark::Clear( void ) {
+  m_vPrice.clear();
   m_vColour.clear();
   m_vName.clear();
-  ChartEntryBase::Clear();
 }
 
 } // namespace ou

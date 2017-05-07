@@ -7,6 +7,7 @@
       <itemPath>Adapters.h</itemPath>
       <itemPath>BarFactory.h</itemPath>
       <itemPath>DatedDatum.h</itemPath>
+      <itemPath>DoubleBuffer.h</itemPath>
       <itemPath>ExchangeHolidays.h</itemPath>
       <itemPath>MergeDatedDatumCarrier.h</itemPath>
       <itemPath>MergeDatedDatums.h</itemPath>
@@ -25,6 +26,7 @@
                    projectFiles="true">
       <itemPath>BarFactory.cpp</itemPath>
       <itemPath>DatedDatum.cpp</itemPath>
+      <itemPath>DoubleBuffer.cpp</itemPath>
       <itemPath>ExchangeHolidays.cpp</itemPath>
       <itemPath>MergeDatedDatums.cpp</itemPath>
       <itemPath>TSAllocator.cpp</itemPath>
@@ -75,6 +77,10 @@
       <item path="DatedDatum.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DatedDatum.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DoubleBuffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DoubleBuffer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ExchangeHolidays.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -141,6 +147,10 @@
       <item path="DatedDatum.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DatedDatum.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DoubleBuffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DoubleBuffer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ExchangeHolidays.cpp" ex="false" tool="1" flavor2="0">
       </item>

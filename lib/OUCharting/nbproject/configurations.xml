@@ -16,6 +16,7 @@
       <itemPath>ChartEntryBase.h</itemPath>
       <itemPath>ChartEntryIndicator.h</itemPath>
       <itemPath>ChartEntryMark.h</itemPath>
+      <itemPath>ChartEntryPrice.h</itemPath>
       <itemPath>ChartEntrySegments.h</itemPath>
       <itemPath>ChartEntryShape.h</itemPath>
       <itemPath>ChartEntryVolume.h</itemPath>
@@ -34,6 +35,7 @@
       <itemPath>ChartEntryBase.cpp</itemPath>
       <itemPath>ChartEntryIndicator.cpp</itemPath>
       <itemPath>ChartEntryMark.cpp</itemPath>
+      <itemPath>ChartEntryPrice.cpp</itemPath>
       <itemPath>ChartEntrySegments.cpp</itemPath>
       <itemPath>ChartEntryShape.cpp</itemPath>
       <itemPath>ChartEntryVolume.cpp</itemPath>
@@ -104,6 +106,10 @@
       <item path="ChartEntryMark.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ChartEntryMark.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryPrice.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryPrice.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ChartEntrySegments.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -180,6 +186,10 @@
       <item path="ChartEntryMark.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ChartEntryMark.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ChartEntryPrice.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ChartEntryPrice.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ChartEntrySegments.cpp" ex="false" tool="1" flavor2="0">
       </item>

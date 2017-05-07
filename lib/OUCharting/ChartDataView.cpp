@@ -116,7 +116,7 @@ void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_
   m_dtViewPortEnd = dtEnd;
   // need to change DataArrays in each entry
   for ( vChartDataViewEntry_t::iterator iter = m_vChartDataViewEntry.begin(); m_vChartDataViewEntry.end() != iter; ++iter ) {
-    ChartEntryBaseWithTime* p( dynamic_cast<ChartEntryBaseWithTime*>( iter->GetChartEntry() ) );
+    ChartEntryTime* p( dynamic_cast<ChartEntryTime*>( iter->GetChartEntry() ) );
     if ( 0 != p ) {
       p->SetViewPort( dtBegin, dtEnd );
     }
