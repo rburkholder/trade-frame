@@ -92,6 +92,7 @@ void WinChartView::CreateControls() {
 
 }
 
+// called from PanelCharts::HandleInstrumentLiveChart -> WinChartView::SetChartDataView
 void WinChartView::StartThread( void ) {
   m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart1, this );
 }

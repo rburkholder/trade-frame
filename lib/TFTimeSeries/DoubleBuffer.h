@@ -160,8 +160,10 @@ public:
   template<typename Function>
   void Sync( Function f ) {
     boost::lock_guard<boost::mutex> guard(m_mutex);
-    f( m_qDatum.front() );
-    m_qDatum.pop();
+    while ( !m_qDatum.empty() ) {
+      f( m_qDatum.front() );
+      m_qDatum.pop();
+    }
   }
   
 protected:

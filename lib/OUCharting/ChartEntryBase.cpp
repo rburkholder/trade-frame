@@ -76,19 +76,25 @@ void ChartEntryTime::AppendFg(boost::posix_time::ptime dt) {
   m_vDateTime.push_back( dt );
   
   // this is maybe done on the fly and not correct here.
-  m_vChartTime.push_back( 
-    Chart::chartTime( 
-      dt.date().year(), dt.date().month(), dt.date().day(),
-      dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
+  try {
+    m_vChartTime.push_back( 
+      Chart::chartTime( 
+        dt.date().year(), dt.date().month(), dt.date().day(),
+        dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
 
-  if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt > m_dtViewPortEnd ) ) {
-    // don't append any more values to visible area
+    if ( ( boost::posix_time::not_a_date_time != m_dtViewPortEnd ) && ( dt > m_dtViewPortEnd ) ) {
+      // don't append any more values to visible area
+    }
+    else {
+      ++m_nElements;
+    }
   }
-  else {
-    ++m_nElements;
+  catch(...) {
+    std::cout << "there is probably a memory issue" << std::endl;
   }
 }
 
+// called from WinChartView::ThreadDrawChart1 -> ChartDataView::SetViewPort
 void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   // record the viewport
   m_dtViewPortBegin = dtBegin;
@@ -101,7 +107,7 @@ void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix
   // todo: what happens when nothing is within the range, should have zero elements listed
   
   // should this be here or not?
-  ClearQueue();  // should this be here?
+  //ClearQueue();  // should this be here?
   
   if ( 0 != m_vDateTime.size() ) {
     vDateTime_t::const_iterator iterBegin( m_vDateTime.begin() );
