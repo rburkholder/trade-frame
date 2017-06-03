@@ -28,17 +28,22 @@ sudo apt-get update && apt-get install git wine wget
 sudo dpkg --add-architecture i386 && apt-get install wine32
 wget http://www.iqfeed.net/iqfeed_client_5_2_5_0.exe
 wine iqfeed_client_5_2_5_0.exe
+
 # interactive brokers Java for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
+
 # netbeans ide and build env
 wget http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-cpp-linux-x64.sh
 sh netbeans-8.2-cpp-linux-x64.sh
+
 # initial library install
 git clone https://github.com/rburkholder/libs-build.git
 libs-build/build.sh tradeframe
+
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
+
 # pre-build some of the example apps
 pushd trade-frame
 cd IQFeedMarketSymbols
@@ -53,8 +58,8 @@ cd ../ComboTrading
 make
 cd ../StickShift2
 make
-cd ../HedgedBollinger
-make
+#cd ../HedgedBollinger <-- does not currently build
+#make
 popd
 
 ```
