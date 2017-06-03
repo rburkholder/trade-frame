@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/BarFactory.o \
 	${OBJECTDIR}/DatedDatum.o \
+	${OBJECTDIR}/DoubleBuffer.o \
 	${OBJECTDIR}/ExchangeHolidays.o \
 	${OBJECTDIR}/MergeDatedDatums.o \
 	${OBJECTDIR}/TSAllocator.o \
@@ -80,6 +81,11 @@ ${OBJECTDIR}/DatedDatum.o: DatedDatum.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DatedDatum.o DatedDatum.cpp
+
+${OBJECTDIR}/DoubleBuffer.o: DoubleBuffer.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DoubleBuffer.o DoubleBuffer.cpp
 
 ${OBJECTDIR}/ExchangeHolidays.o: ExchangeHolidays.cpp
 	${MKDIR} -p ${OBJECTDIR}

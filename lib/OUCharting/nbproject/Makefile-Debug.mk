@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/ChartEntryBase.o \
 	${OBJECTDIR}/ChartEntryIndicator.o \
 	${OBJECTDIR}/ChartEntryMark.o \
+	${OBJECTDIR}/ChartEntryPrice.o \
 	${OBJECTDIR}/ChartEntrySegments.o \
 	${OBJECTDIR}/ChartEntryShape.o \
 	${OBJECTDIR}/ChartEntryVolume.o \
@@ -102,6 +103,11 @@ ${OBJECTDIR}/ChartEntryMark.o: ChartEntryMark.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryMark.o ChartEntryMark.cpp
+
+${OBJECTDIR}/ChartEntryPrice.o: ChartEntryPrice.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ChartEntryPrice.o ChartEntryPrice.cpp
 
 ${OBJECTDIR}/ChartEntrySegments.o: ChartEntrySegments.cpp
 	${MKDIR} -p ${OBJECTDIR}
