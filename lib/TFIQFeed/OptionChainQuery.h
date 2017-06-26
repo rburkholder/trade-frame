@@ -17,11 +17,19 @@
 #include <string>
 
 #include <OUCommon//FastDelegate.h>
-using namespace fastdelegate;
+//using namespace fastdelegate;
 
-#include "IQFeedRetrieval.h"
+//#include "IQFeedRetrieval.h"
 
-class CIQFeedOptions :
+#include <OUCommon/ReusableBuffers.h>
+#include <OUCommon/Network.h>
+
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
+
+
+class OptionChainQuery :
   public CIQFeedRetrieval {
 public:
 
@@ -41,3 +49,7 @@ protected:
 private:
   OnSymbolListReceivedHandler OnSymbolListReceived;
 };
+
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou

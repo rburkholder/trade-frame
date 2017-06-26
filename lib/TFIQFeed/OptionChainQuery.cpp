@@ -14,7 +14,7 @@
 
 //#include "StdAfx.h"
 
-#include "IQFeedOptions.h"
+#include "OptionChainQuery.h"
 
 // TODO:  convert OnNewResponse over to IQFeedRetrieval
 
