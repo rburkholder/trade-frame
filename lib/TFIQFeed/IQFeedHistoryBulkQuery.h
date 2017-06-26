@@ -188,7 +188,7 @@ public:
   void OnHistoryConnected( structQueryState* pqs );  // optional
   void OnHistoryDisconnected( structQueryState* pqs ); // optional
   void OnHistoryError( structQueryState* pqs, size_t e ); // optional
-  void OnHistorySendDone( structQueryState* pqs ); // otional
+  void OnHistorySendDone( structQueryState* pqs ); // optional
   void OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structTickDataPoint* pDP ); // for per tick processing
   void OnHistoryIntervalData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structInterval* pDP ); // for per bar processing
   void OnHistorySummaryData( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::structSummary* pDP ); // for per bar processing

@@ -22,21 +22,10 @@ namespace local {
 // CChartDataViewCarrier
 //
 
-//ChartDataViewCarrier::ChartDataViewCarrier( void ) 
-//: m_nLogicalChart( 0 ), m_nActualChart( 0 ), m_pChartEntry( 0 )
-//{
-//}
-
 ChartDataViewCarrier::ChartDataViewCarrier( size_t nChart, ChartEntryBase* pChartEntry ) 
 : m_nLogicalChart( nChart ), m_nActualChart( 0 ), m_pChartEntry( pChartEntry )
 {
 }
-
-//ChartDataViewCarrier::ChartDataViewCarrier( ChartDataViewCarrier &carrier ) 
-//: m_nLogicalChart( carrier.m_nLogicalChart ), m_nActualChart( carrier.m_nActualChart ), 
-//  m_pChartEntry( carrier.m_pChartEntry )
-//{
-//}
 
 ChartDataViewCarrier::~ChartDataViewCarrier() {
   m_nLogicalChart = 0;

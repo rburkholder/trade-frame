@@ -21,7 +21,6 @@
 #include <queue>
 
 #include <boost/thread/mutex.hpp>
-//#include <boost/thread/lock_types.hpp>
 #include <boost/thread/locks.hpp>
 
 namespace ou { // One Unified

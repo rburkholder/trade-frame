@@ -47,6 +47,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MarketSymbol.o \
 	${OBJECTDIR}/MarketSymbols.o \
 	${OBJECTDIR}/Option.o \
+	${OBJECTDIR}/OptionChainQuery.o \
 	${OBJECTDIR}/ParseMktSymbolDiskFile.o \
 	${OBJECTDIR}/ParseMktSymbolLine.o \
 	${OBJECTDIR}/UnzipMktSymbols.o \
@@ -138,6 +139,11 @@ ${OBJECTDIR}/Option.o: Option.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Option.o Option.cpp
+
+${OBJECTDIR}/OptionChainQuery.o: OptionChainQuery.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/OptionChainQuery.o OptionChainQuery.cpp
 
 ${OBJECTDIR}/ParseMktSymbolDiskFile.o: ParseMktSymbolDiskFile.cpp
 	${MKDIR} -p ${OBJECTDIR}

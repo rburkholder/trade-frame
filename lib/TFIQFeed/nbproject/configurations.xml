@@ -18,6 +18,7 @@
       <itemPath>IQFeedMsgShim.h</itemPath>
       <itemPath>IQFeedNewsQuery.h</itemPath>
       <itemPath>IQFeedNewsQueryMsgShim.h</itemPath>
+      <itemPath>IQFeedOptions.h</itemPath>
       <itemPath>IQFeedProvider.h</itemPath>
       <itemPath>IQFeedSymbol.h</itemPath>
       <itemPath>InMemoryMktSymbolList.h</itemPath>
@@ -52,6 +53,7 @@
       <itemPath>MarketSymbol.cpp</itemPath>
       <itemPath>MarketSymbols.cpp</itemPath>
       <itemPath>Option.cpp</itemPath>
+      <itemPath>OptionChainQuery.cpp</itemPath>
       <itemPath>ParseMktSymbolDiskFile.cpp</itemPath>
       <itemPath>ParseMktSymbolLine.cpp</itemPath>
       <itemPath>UnzipMktSymbols.cpp</itemPath>
@@ -129,6 +131,8 @@
       </item>
       <item path="IQFeedNewsQueryMsgShim.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="IQFeedOptions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="IQFeedProvider.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="IQFeedProvider.h" ex="false" tool="3" flavor2="0">
@@ -156,6 +160,8 @@
       <item path="Option.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Option.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="OptionChainQuery.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ParseFOptionDescription.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -245,6 +251,8 @@
       </item>
       <item path="IQFeedNewsQueryMsgShim.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="IQFeedOptions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="IQFeedProvider.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="IQFeedProvider.h" ex="false" tool="3" flavor2="0">
@@ -272,6 +280,8 @@
       <item path="Option.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Option.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="OptionChainQuery.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ParseFOptionDescription.h" ex="false" tool="3" flavor2="0">
       </item>
