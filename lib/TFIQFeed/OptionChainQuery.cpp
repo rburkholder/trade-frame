@@ -12,47 +12,46 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include "OptionChainQuery.h"
 
 // TODO:  convert OnNewResponse over to IQFeedRetrieval
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed { // IQFeed
 
-CIQFeedOptions::CIQFeedOptions(CIQFeedProvider *pProvider, const char *szSymbol) 
-: CIQFeedRetrieval( pProvider ) 
+OptionChainQuery::OptionChainQuery( const std::string& s ) 
+: Network<OptionChainQuery>( "127.0.0.1", 9100 ), m_sUnderlying( s )
 {
-  OpenPort();
+/*  OpenPort();
   std::string s;
   s = "OEA,";
   s += szSymbol;
   s += ";";
   m_bLookingForDetail = true;
-  m_pPort->SendToSocket( s.c_str() );
+  m_pPort->SendToSocket( s.c_str() );*/
 }
 
-CIQFeedOptions::~CIQFeedOptions(void) {
-
+OptionChainQuery::~OptionChainQuery(void) {
+/*
   typedef std::string* pString;
 
   while ( !m_vOptionSymbols.empty() ) {
     pString &s = m_vOptionSymbols.back();
     delete s;
     m_vOptionSymbols.pop_back();
-  }
+  }*/
 }
 
-void CIQFeedOptions::AddOptionSymbol( const char *s, unsigned short cnt ) {
+void OptionChainQuery::AddOptionSymbol( const char *s, unsigned short cnt ) {
   std::string *_s = new std::string( s, cnt );
   m_vOptionSymbols.push_back( _s );
 }
 
-void CIQFeedOptions::OnNewResponse( const char *szLine ) {
-  if ( !m_bLookingForDetail ) {
+void OptionChainQuery::OnNewResponse( const char *szLine ) {
+  if ( !true ) {
     if ( 0 == strcmp( szLine, "!ENDMSG!" ) ) {
-      ClosePort();
+      //ClosePort();
     }
   }
   else {
@@ -92,9 +91,10 @@ void CIQFeedOptions::OnNewResponse( const char *szLine ) {
       }
     }
     if ( NULL != OnSymbolListReceived ) OnSymbolListReceived();
-    m_bLookingForDetail = false;
+    //m_bLookingForDetail = false;
   }
 }
 
+} // namespace iqfeed
 } // namespace tf
 } // namespace ou

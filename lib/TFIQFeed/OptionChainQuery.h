@@ -17,7 +17,7 @@
 #include <string>
 
 #include <OUCommon//FastDelegate.h>
-//using namespace fastdelegate;
+using namespace fastdelegate;
 
 //#include "IQFeedRetrieval.h"
 
@@ -28,13 +28,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-
-class OptionChainQuery :
-  public CIQFeedRetrieval {
+class OptionChainQuery
+  : public ou::Network<OptionChainQuery> {
 public:
 
-  CIQFeedOptions(CIQFeedProvider *pProvider, const char *);
-  virtual ~CIQFeedOptions(void);
+  //OptionChainQuery(IQFeedProvider *pProvider, );
+  OptionChainQuery( const std::string& );
+  virtual ~OptionChainQuery(void);
 
   typedef FastDelegate0<void> OnSymbolListReceivedHandler;
   void SetOnSymbolListRecieved( OnSymbolListReceivedHandler function ) {
@@ -48,6 +48,7 @@ protected:
   void AddOptionSymbol( const char *s, unsigned short cnt );
 private:
   OnSymbolListReceivedHandler OnSymbolListReceived;
+  const std::string& m_sUnderlying;
 };
 
 } // namespace iqfeed
