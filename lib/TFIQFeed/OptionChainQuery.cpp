@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <sstream>
+
 #include "OptionChainQuery.h"
 
 // TODO:  convert OnNewResponse over to IQFeedRetrieval
@@ -20,28 +22,85 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-OptionChainQuery::OptionChainQuery( const std::string& s ) 
-: Network<OptionChainQuery>( "127.0.0.1", 9100 ), m_sUnderlying( s )
+// http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
+
+OptionChainQuery::OptionChainQuery() 
+: Network<OptionChainQuery>( "127.0.0.1", 9100 )
 {
-/*  OpenPort();
-  std::string s;
-  s = "OEA,";
-  s += szSymbol;
-  s += ";";
-  m_bLookingForDetail = true;
-  m_pPort->SendToSocket( s.c_str() );*/
 }
 
 OptionChainQuery::~OptionChainQuery(void) {
-/*
-  typedef std::string* pString;
-
-  while ( !m_vOptionSymbols.empty() ) {
-    pString &s = m_vOptionSymbols.back();
-    delete s;
-    m_vOptionSymbols.pop_back();
-  }*/
 }
+
+void OptionChainQuery::QueryFutureChain(
+    const std::string& sSymbol, 
+    const std::string& sMonthCodes,
+    const std::string& sYears,
+    const std::string& sNearMonths,
+    const std::string& sRequestId
+    ) {
+  std::stringstream ss;
+  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
+  ss 
+    << "CFU," 
+    << sSymbol << "," 
+    << sMonthCodes << ","
+    << sYears << ","
+    << sNearMonths << ","
+    << sRequestId
+    << "\n";
+  this->Send( ss.str().c_str() );
+}
+
+void OptionChainQuery::QueryFutureOptionChain(
+    const std::string& sSymbol, 
+    const std::string& sSide,
+    const std::string& sMonthCodes,
+    const std::string& sYears,
+    const std::string& sNearMonths,
+    const std::string& sRequestId
+    ) {
+  std::stringstream ss;
+  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
+  ss 
+    << "CFO," 
+    << sSymbol << "," 
+    << sSide << ","
+    << sMonthCodes << ","
+    << sYears << ","
+    << sNearMonths << ","
+    << sRequestId
+    << "\n";
+  this->Send( ss.str().c_str() );
+}
+
+void OptionChainQuery::QueryEquityOptionChain(
+    const std::string& sSymbol, 
+    const std::string& sSide,
+    const std::string& sMonthCodes,
+    const std::string& sNearMonths,
+    const std::string& sFilterType,
+    const std::string& sFilterOne,
+    const std::string& sFilterTwo,
+    const std::string& sRequestId
+    ) {
+  std::stringstream ss;
+  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
+  ss 
+    << "CEO," 
+    << sSymbol << "," 
+    << sSide << ","
+    << sMonthCodes << ","
+    << sNearMonths << ","
+    << "1" << "," // exclude binary
+    << sFilterType << ","
+    << sFilterOne << "," 
+    << sFilterTwo << "," 
+    << sRequestId
+    << "\n";
+  this->Send( ss.str().c_str() );
+}
+
 
 void OptionChainQuery::AddOptionSymbol( const char *s, unsigned short cnt ) {
   std::string *_s = new std::string( s, cnt );
