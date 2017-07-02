@@ -64,8 +64,13 @@ PanelCharts::~PanelCharts() {
 }
 
 void PanelCharts::Init( void ) {
+  m_panelSplitterRightPanel = 0;
+  m_splitter = 0;
+  m_sizerRight = 0;
+  
   m_pTreeOps = 0;
   m_pWinChartView = 0;
+  m_pWinOptionDetails = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
@@ -141,16 +146,14 @@ void PanelCharts::CreateControls() {
   //m_mapDecoder.insert( mapDecoder_t::value_type( id.GetID(), m_pTreeItemRoot ) );
 
   // panel for right side of m_splitter
-  wxPanel* panelSplitterRightPanel;
-  panelSplitterRightPanel = new wxPanel( m_splitter );
+  m_panelSplitterRightPanel = new wxPanel( m_splitter );
 
-  m_splitter->SplitVertically( m_pTreeOps, panelSplitterRightPanel, 0 );
+  m_splitter->SplitVertically( m_pTreeOps, m_panelSplitterRightPanel, 0 );
   sizerMain->Add( m_splitter, 1, wxGROW|wxALL, 5 );
 
   // sizer for right side of m_splitter
-  wxBoxSizer* sizerRight;
-  sizerRight = new wxBoxSizer( wxVERTICAL );
-  panelSplitterRightPanel->SetSizer( sizerRight );
+  m_sizerRight = new wxBoxSizer( wxVERTICAL );
+  m_panelSplitterRightPanel->SetSizer( m_sizerRight );
 
   // initialize the tree
   //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
@@ -174,10 +177,6 @@ void PanelCharts::CreateControls() {
   
   m_connChanging = m_pTreeOps->signalChanging.connect( boost::phoenix::bind( &PanelCharts::HandleTreeOpsChanging, this, args::arg1 ) );
   
-  // need to process in a dynamic fashion
-  m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
-
 }
 
 void PanelCharts::SetProviders( pProvider_t pData1Provider, pProvider_t pData2Provider, pProvider_t pExecutionProvider ) {
@@ -208,10 +207,13 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
 }
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
-  //if ( 0 != m_pWinChartView ) {
-  //  delete m_pWinChartView;
-//    m_pWinChartView = 0;
-  //}
+  if ( 0 != m_pWinChartView ) {
+    //delete m_pWinChartView;
+    m_pWinChartView->SetChartDataView( nullptr );
+    //m_pWinChartView->
+    m_panelSplitterRightPanel->DestroyChildren();
+    m_pWinChartView = 0;
+  }
 }
 
 PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
@@ -234,7 +236,12 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem to delete" << std::endl;
   }
   else {
-    m_pWinChartView->SetChartDataView( nullptr );
+    // shouldn't need this if HandleTreeOpsChanging comes before
+    if ( 0 != m_pWinChartView ) {
+      m_pWinChartView->SetChartDataView( nullptr );
+      m_pWinChartView->Close();
+      m_pWinChartView = 0;
+    }
     m_mapWatchInfo.erase( iter );
   }
 }
@@ -250,6 +257,11 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   else {
     m_ChartDataView.Clear();
     iter->second->ApplyDataTo( &m_ChartDataView );
+
+    assert( 0 == m_pWinChartView );
+    m_pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+    m_sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
+
     m_pWinChartView->SetChartDataView( &m_ChartDataView );
   }
 }
@@ -570,12 +582,15 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
   
-  m_pWinChartView->SetChartDataView( nullptr );
+  if ( 0 != m_pWinChartView ) {
+    m_pWinChartView->SetChartDataView( nullptr );
+  }
 
   event.Skip();  // auto followed by Destroy();
 }
 
 void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
+  // catches 'destroy' of any child window
   
   //if ( 0 != m_pTreeOps ) {
   //  delete m_pTreeOps;
@@ -584,18 +599,24 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
   
   //m_pInstrumentActions.reset();
   
-  m_connGetInstrumentActions.disconnect();
+  int id1 = event.GetId();
+  wxWindowID id2 = this->GetId();
   
-  m_connNewInstrument.disconnect();
-  m_connLoadInstrument.disconnect();
-  m_connEmitValues.disconnect();
-  m_connLiveChart.disconnect();
-  m_connDelete.disconnect();
+  if ( id1 == id2 ) {
+    m_connGetInstrumentActions.disconnect();
+
+    m_connNewInstrument.disconnect();
+    m_connLoadInstrument.disconnect();
+    m_connEmitValues.disconnect();
+    m_connLiveChart.disconnect();
+    m_connDelete.disconnect();
+
+    m_connLookupDescription.disconnect();
+    m_connComposeComposite.disconnect();
+
+    m_connChanging.disconnect();
+  }
   
-  m_connLookupDescription.disconnect();
-  m_connComposeComposite.disconnect();
-  
-  m_connChanging.disconnect();
   
   event.Skip();  // auto followed by Destroy();
 

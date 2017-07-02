@@ -58,8 +58,6 @@ void WinChartView::Init( void ) {
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // viewport width is 10 minutes, until we make it adjustable
   
-  Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
-
 }
 
 bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -75,7 +73,8 @@ bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
 
 void WinChartView::CreateControls() {    
   
-  Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // start close of windows and controls
+  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
+  Bind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
   
   Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
@@ -84,6 +83,8 @@ void WinChartView::CreateControls() {
   Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
   Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
   Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+  Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
@@ -98,9 +99,11 @@ void WinChartView::StartThread( void ) {
 }
 
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
-  if ( m_bThreadDrawChartActive ) StopThread();
+  if ( m_bThreadDrawChartActive ) 
+    StopThread();
   m_pChartDataView = pChartDataView;
-  if ( nullptr != m_pChartDataView ) StartThread();
+  if ( nullptr != m_pChartDataView ) 
+    StartThread();
 }
 
 void WinChartView::HandleMouse( wxMouseEvent& event ) { 
@@ -257,21 +260,32 @@ void WinChartView::StopThread( void ) {
   m_pThreadDrawChart = 0;
 }
 
-void WinChartView::OnClose( wxCloseEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
+  
+  SetChartDataView( nullptr );
+  //StopThread();
+  
+  Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
   
   m_timerGuiRefresh.Stop();
-  this->Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
+  Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   
-  StopThread();
+  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
+  Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
   
+  Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+  Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this );
+  
+  Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+  Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
   m_pChartBitmap.reset();
   
   event.Skip();  // auto followed by Destroy();
 }
+
 
 } // namespace tf
 } // namespace ou

@@ -35,6 +35,8 @@
 //#include <OUCharting/ChartDVBasics.h>
 #include <OUCharting/ChartDataView.h>
 
+#include <TFVuTrading/WinOptionDetails.h>
+
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
@@ -236,10 +238,13 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
+  WinOptionDetails* m_pWinOptionDetails;
   WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
   
+  wxPanel* m_panelSplitterRightPanel;
   wxSplitterWindow* m_splitter;
+  wxBoxSizer* m_sizerRight;
   
   void UpdateOptionWatch( const std::string& sUnderlying, pWatch_t pInstrumentWatch );
   void UpdateInstrumentStructures( const std::string& name );

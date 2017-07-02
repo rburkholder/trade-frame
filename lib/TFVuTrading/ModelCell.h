@@ -126,10 +126,14 @@ class ModelCellDouble: public ModelCell<ModelCellDouble> {
   friend class ModelCell<ModelCellDouble>;
 public:
 
-  ModelCellDouble( void ) {
+  ModelCellDouble( void ): m_nPrecision( 2 ) {
     Initialize();
   }
-  ModelCellDouble(FunctionSetText_t function): ModelCell<ModelCellDouble>( function ) {
+  ModelCellDouble( const ModelCellDouble& rhs )
+  : m_nPrecision( rhs.m_nPrecision ) {
+    Initialize();
+  }
+  ModelCellDouble(FunctionSetText_t function): ModelCell<ModelCellDouble>( function ), m_nPrecision( 2 ) {
     Initialize();
   }
   
@@ -146,7 +150,7 @@ private:
   std::stringstream ss;
   void Initialize() {
     // speed vs space optimization
-    ss.precision( 2 );
+    ss.precision( m_nPrecision );
     ss.setf( std::ios::fixed, std:: ios::floatfield );
   }
   void Val2String( void ) {

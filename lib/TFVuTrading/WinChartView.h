@@ -110,7 +110,8 @@ private:
   void HandleMouseLeave( wxMouseEvent& event );
   void HandleMouseWheel( wxMouseEvent& event );
   
-  void OnClose( wxCloseEvent& event );
+  //void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
   
   void HandleGuiRefresh( wxTimerEvent& event );
   

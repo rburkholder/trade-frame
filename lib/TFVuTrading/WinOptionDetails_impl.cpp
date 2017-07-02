@@ -24,6 +24,7 @@ WinOptionDetails_impl::WinOptionDetails_impl( WinOptionDetails& details )
 }
 
 void WinOptionDetails_impl::CreateControls() {
+  
     WinOptionDetails* itemPanel1 = &m_details;
 
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
