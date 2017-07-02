@@ -24,6 +24,7 @@
 
 #include <TFVuTrading/DialogPickSymbol.h>
 #include <TFIQFeed/BuildSymbolName.h>
+#include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Option.h>
 
@@ -165,6 +166,7 @@ void PanelCharts::CreateControls() {
   m_connLoadInstrument = m_pInstrumentActions->signalLoadInstrument.connect( boost::phoenix::bind( &PanelCharts::HandleLoadInstrument, this, args::arg1, args::arg2, args::arg3 ) );
   m_connEmitValues = m_pInstrumentActions->signalEmitValues.connect( boost::phoenix::bind( &PanelCharts::HandleEmitValues, this, args::arg1 ) );
   m_connLiveChart = m_pInstrumentActions->signalLiveChart.connect( boost::phoenix::bind( &PanelCharts::HandleInstrumentLiveChart, this, args::arg1 ) );
+  m_connOptionList = m_pInstrumentActions->signalOptionList.connect( boost::phoenix::bind( &PanelCharts::HandleOptionList, this, args::arg1 ) );
   m_connDelete = m_pInstrumentActions->signalDelete.connect( boost::phoenix::bind( &PanelCharts::HandleMenuItemDelete, this, args::arg1 ) );
   
   m_connLookupDescription = m_de.signalLookupDescription.connect( boost::phoenix::bind( &PanelCharts::HandleLookUpDescription, this, args::arg1, args::arg2 ) );
@@ -243,7 +245,7 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   // maybe turn this bit of code into a lamda and pass in the function to be run on success
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "couldn't find the menuitem form HandleInstrumentLiveChart" << std::endl;
+    std::cout << "couldn't find the menuitem for HandleInstrumentLiveChart" << std::endl;
   }
   else {
     m_ChartDataView.Clear();
@@ -252,10 +254,66 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
   }
 }
 
+void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
+  
+  struct OptionList {
+    typedef std::map<boost::gregorian::date,int> mapDate_t;
+    
+    OptionList(): cnt(0) {}
+    ~OptionList() {
+      std::for_each( map.begin(), map.end(), [](const mapDate_t::value_type& a){ 
+        std::cout << a.first << "," << a.second << std::endl; 
+      });
+      std::cout << cnt << std::endl;
+    }
+    
+    int cnt;
+    mapDate_t map;
+    void operator()( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
+      boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
+      mapDate_t::iterator iter = map.find( date );
+      if ( map.end() == iter ) {
+        map.insert( mapDate_t::value_type( date, 1 ) );
+      }
+      else {
+        iter->second++;
+      }
+      cnt++;
+    }
+  };
+  
+  // maybe turn this bit of code into a lamda and pass in the function to be run on success
+  mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
+  if ( m_mapWatchInfo.end() == iter ) {
+    std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
+  }
+  else {
+    OptionList list;
+    ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
+    std::string sSymbol;
+    switch ( p->GetInstrumentType() ) { 
+      case ou::tf::InstrumentType::Stock:
+        sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
+        break;
+      case ou::tf::InstrumentType::Future:
+        std::string sTemp = p->GetInstrumentName();
+        size_t pos = sTemp.find( '-' );
+        assert( 0 != pos );
+        sSymbol = sTemp.substr( 0, pos );
+        break;
+    }
+    assert( 0 != sSymbol.length() );
+    signalRetrieveOptionList( 
+      sSymbol, 
+      [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
+      );
+  }
+}
+
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
-    std::cout << "couldn't find the menuitem form HandleEmitValues" << std::endl;
+    std::cout << "couldn't find the menuitem for HandleEmitValues" << std::endl;
   }
   else {
     iter->second->EmitValues();
@@ -506,6 +564,17 @@ void PanelCharts::InstrumentUpdated( pInstrument_t pInstrument ) {
   }
 }
 
+void PanelCharts::OnClose( wxCloseEvent& event ) {
+  // Exit Steps: #2 -> FrameMain::OnClose
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a 
+  
+  m_pWinChartView->SetChartDataView( nullptr );
+
+  event.Skip();  // auto followed by Destroy();
+}
+
 void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
   
   //if ( 0 != m_pTreeOps ) {
@@ -530,15 +599,6 @@ void PanelCharts::OnWindowDestroy( wxWindowDestroyEvent& event ) {
   
   event.Skip();  // auto followed by Destroy();
 
-}
-
-void PanelCharts::OnClose( wxCloseEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  
-  event.Skip();  // auto followed by Destroy();
 }
 
 void PanelCharts::SaveSeries( const std::string& sPrefix ) {

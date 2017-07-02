@@ -98,7 +98,6 @@ void WinChartView::StartThread( void ) {
 }
 
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
-  // need to make this thread safe (drain the thread if this is assigning a new ChartDataView
   if ( m_bThreadDrawChartActive ) StopThread();
   m_pChartDataView = pChartDataView;
   if ( nullptr != m_pChartDataView ) StartThread();

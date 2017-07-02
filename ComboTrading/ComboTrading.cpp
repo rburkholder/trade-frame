@@ -33,10 +33,10 @@
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 
-//#include <wx-3.0/wx/wx/window.h>
 #include <wx/window.h>
 #include <wx/timer.h>
-#include <wx-3.0/wx/app.h>
+#include <wx/app.h>
+//#include <wx-3.0/wx/app.h>
 
 #include "ComboTrading.h"
 
@@ -233,6 +233,10 @@ bool AppComboTrading::OnInit() {
 
 }
 
+void AppComboTrading::ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t function ) {
+  m_listIQFeedSymbols.SelectOptionsByUnderlying( sSymbol, function );
+}
+
 void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
   
   m_pFInteractiveBrokers = new FrameMain( m_pFrameMain, wxID_ANY, "Interactive Brokers", wxDefaultPosition, wxSize( 900, 500 ),
@@ -291,6 +295,7 @@ void AppComboTrading::BuildFrameCharts( void ) {
   m_pPanelCharts->signalBuildInstrument.connect( boost::phoenix::bind( &AppComboTrading::BuildInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalRegisterInstrument.connect( boost::phoenix::bind( &AppComboTrading::RegisterInstrument, this, args::arg1 ) );
   m_pPanelCharts->signalLoadInstrument.connect( boost::phoenix::bind( &AppComboTrading::LoadInstrument, this, args::arg1 ) );
+  m_pPanelCharts->signalRetrieveOptionList.connect( boost::phoenix::bind( &AppComboTrading::ProvideOptionList, this, args::arg1, args::arg2 ) );
   signalInstrumentFromIB.connect( boost::phoenix::bind( &ou::tf::PanelCharts::InstrumentUpdated, m_pPanelCharts, args::arg1 ) );
   
   m_pPanelCharts->SetProviders( m_pData1Provider, m_pData2Provider, m_pExecutionProvider );

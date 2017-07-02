@@ -17,6 +17,7 @@
 #pragma once
 
 #include <map>
+#include <functional>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -98,6 +99,11 @@ public:
   typedef boost::signals2::signal<pInstrument_t(const std::string&), ou::tf::FirstOrDefault<pInstrument_t> > signalLoadInstrument_t;
   typedef signalLoadInstrument_t::slot_type slotLoadInstrument_t;
   signalLoadInstrument_t signalLoadInstrument;
+  
+  typedef std::function<void(const ou::tf::iqfeed::MarketSymbol::TableRowDef&)> fSymbol_t;
+  typedef boost::signals2::signal<void(const std::string&,fSymbol_t)> signalRetrieveOptionList_t;
+  typedef signalRetrieveOptionList_t::slot_type slotRetrieveOptionList_t;
+  signalRetrieveOptionList_t signalRetrieveOptionList;
 
   void InstrumentUpdated( pInstrument_t ); // typically:  the ib contract has arrived
   
@@ -136,6 +142,7 @@ private:
     ou::tf::ModelChartHdf5 m_chartData;
   public:
     WatchInfo( void ): m_bActive( false ) {}
+    pWatch_t GetWatch() { return m_pWatch; }
     void Set( pWatch_t pWatch ) {
       if ( m_bActive ) {
         std::cout << "WatchInfo::Set menu item already activated" << std::endl;
@@ -219,6 +226,7 @@ private:
   boost::signals2::connection m_connLoadInstrument;
   boost::signals2::connection m_connEmitValues;
   boost::signals2::connection m_connLiveChart;
+  boost::signals2::connection m_connOptionList;
   boost::signals2::connection m_connDelete;
   boost::signals2::connection m_connLookupDescription;
   boost::signals2::connection m_connComposeComposite;
@@ -251,7 +259,9 @@ private:
   pWatch_t ConstructWatch( pInstrument_t );
   
   void HandleInstrumentLiveChart( const wxTreeItemId& );
+
   void HandleEmitValues( const wxTreeItemId& );
+  void HandleOptionList( const wxTreeItemId& );
   
   void HandleMenuItemDelete( const wxTreeItemId& id );
   

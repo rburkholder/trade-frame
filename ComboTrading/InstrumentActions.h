@@ -72,6 +72,10 @@ public:
   typedef signalDailyChart_t::slot_type slotDailyChart_t;
   signalDailyChart_t signalDailyChart;
   
+  typedef boost::signals2::signal<void (const wxTreeItemId&)> signalOptionList_t;
+  typedef signalOptionList_t::slot_type slotOptionList_t;
+  signalOptionList_t signalOptionList;
+  
   typedef boost::signals2::signal<void (const wxTreeItemId&)> signalEmitValues_t;
   typedef signalEmitValues_t::slot_type slotEmitValues_t;
   signalEmitValues_t signalEmitValues;

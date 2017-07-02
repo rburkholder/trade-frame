@@ -116,8 +116,6 @@ protected:
 private:
 };
 
-
-
 } // namespace option
 } // namespace tf
 } // namespace ou

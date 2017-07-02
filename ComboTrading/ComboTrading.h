@@ -248,6 +248,8 @@ private:
 
   void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
   void HandlePositionLoad( pPosition_t& pPosition );
+  
+  void ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t );
 
 //  void HandleMenuActionInitializeSymbolSet( void );
   void HandleMenuActionSaveSymbolSubset( void );

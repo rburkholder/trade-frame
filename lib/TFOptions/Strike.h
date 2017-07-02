@@ -48,7 +48,7 @@ public:
 
   void WatchStart( void );
   void WatchStop( void );
-  bool IsWatching( void ) { return 0 != m_nWatching; };
+  bool IsWatching( void ) const { return 0 != m_nWatching; };
 
   void SaveSeries( const std::string& sPrefix );
   void EmitValues( void );

@@ -14,6 +14,7 @@
 
 #include <math.h>
 #include <stdexcept>
+#include <iostream>
 
 #include <boost/math/constants/constants.hpp>
 
@@ -202,7 +203,7 @@ double BSM_Euro::ImpliedVolatilityCall( double C, double epsilon ) {
     diff = abs( Call() - C );
     cnt--;
     if ( 0 == cnt ) {
-      std::cout <<  "Implied Volatility calc did not converge" << std::endl;
+      std::cout <<  "Implied Volatility on call calc did not converge" << std::endl;
       //throw std::runtime_error( "Implied Volatility calc did not converge" );
       break;
     }
@@ -220,7 +221,7 @@ double BSM_Euro::ImpliedVolatilityPut( double P, double epsilon ) {
     diff = abs( Put() - P );
     cnt--;
     if ( 0 == cnt ) {
-      std::cout <<  "Implied Volatility calc did not converge" << std::endl;
+      std::cout <<  "Implied Volatility put calc did not converge" << std::endl;
       //throw std::runtime_error( "Implied Volatility calc did not converge" );
       break;
     }

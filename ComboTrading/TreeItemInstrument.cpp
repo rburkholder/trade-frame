@@ -24,6 +24,8 @@
 //   should override rename so it always has proper instrument name
 //   is rename actually in the menu, if not, then nothing to do
 
+#include <wx-3.0/wx/menu.h>
+
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
@@ -50,6 +52,10 @@ void TreeItemInstrument::HandleOnClick( void ) {
   m_pInstrumentActions->signalLiveChart( m_id );
 }
 
+void TreeItemInstrument::HandleMenuOptionList( wxCommandEvent& event ) {
+  m_pInstrumentActions->signalOptionList( m_id );
+}
+
 void TreeItemInstrument::HandleDailyChart( wxCommandEvent& event ) {
   m_pInstrumentActions->signalDailyChart( m_id );
 }
@@ -69,6 +75,8 @@ void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
     pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
   }
   else {
+    pMenu->Append( MIOptionList, "Option List" );
+    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
     if ( InstrumentActions::ENewInstrumentLock::LockFuturesOption == m_lockType ) {
       // can then use underlying to calc implied volatility
       pMenu->Append( MINewFuturesOption, "New Futures Option" );

@@ -429,8 +429,6 @@ void Calc( RegTIra& mr, const ShortPut& sput, const LongPut& lput, const ShortCa
   mr.margin = sput.quantity * sput.pInstrument->GetStrike() - lput.quantity * lput.pInstrument->GetStrike();
 }
 
-
-
 } // namespace margin
 } // namespace option
 } // namespace tf
