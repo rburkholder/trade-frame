@@ -124,9 +124,13 @@ class ModelCellDouble: public ModelCell<ModelCellDouble> {
   friend class ModelCell<ModelCellDouble>;
 public:
 
-  ModelCellDouble( void ): m_nPrecision( 2 ) {};
+  ModelCellDouble( void ): m_nPrecision( 2 ) {
+    // speed vs space optimization
+    ss.precision( m_nPrecision );
+    ss.setf( std::ios::fixed, std:: ios::floatfield );
+  };
   ModelCellDouble(FunctionSetText_t function): ModelCell<ModelCellDouble>( function ), m_nPrecision( 2 ) {};
-  //~ModelCellDouble( void );
+  virtual ~ModelCellDouble( void ) {}
 
   void InitializeValue( void ) { m_val = 0.0; }
 
@@ -134,10 +138,9 @@ public:
 protected:
 private:
   unsigned int m_nPrecision;
+  std::stringstream ss;
   void Val2String( void ) {
-    std::stringstream ss;
-    ss.precision( m_nPrecision );
-    ss.setf( std::ios::fixed, std:: ios::floatfield );
+    std::stringstream().swap(ss);
     ss << m_val;
     m_sCellText = ss.str();
   }
