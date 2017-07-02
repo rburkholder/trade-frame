@@ -13,14 +13,12 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <functional>
 
-#include <OUCommon//FastDelegate.h>
-using namespace fastdelegate;
-
-#include <OUCommon/ReusableBuffers.h>
 #include <OUCommon/Network.h>
+
+// TODO:  convert to using already opened port 9100 object?
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -33,15 +31,13 @@ public:
   enum Month { jan='F', feb='G', mar='H', apr='J', may='K', jun='M', 
                jul='N', aug='Q', sep='U', oct='V', nov='X', dec='Z' };
   enum Side { put='p', call='c' };
-
-  OptionChainQuery();
-  virtual ~OptionChainQuery(void);
-
-  typedef FastDelegate0<void> OnSymbolListReceivedHandler;
-  void SetOnSymbolListRecieved( OnSymbolListReceivedHandler function ) {
-    OnSymbolListReceived = function;
-  }
   
+  // function will be called within alternate thread
+  typedef std::function<void(const std::string&)> fSymbol_t;
+
+  OptionChainQuery( fSymbol_t& );
+  virtual ~OptionChainQuery( void );
+
   void QueryFutureChain(
     const std::string& sSymbol, 
     const std::string& sMonthCodes,  // see above
@@ -68,13 +64,11 @@ public:
     const std::string& sRequestId
     );
 
-  std::vector<std::string *> m_vOptionSymbols;
-
 protected:
   virtual void OnNewResponse( const char *szLine );
   void AddOptionSymbol( const char *s, unsigned short cnt );
 private:
-  OnSymbolListReceivedHandler OnSymbolListReceived;
+  fSymbol_t& m_fSymbol;
 };
 
 } // namespace iqfeed

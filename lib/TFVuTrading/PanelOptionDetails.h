@@ -15,7 +15,12 @@
 
 #pragma once
 
-#include <memory>
+//#include <memory>
+
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
+#include <TFOptions/Option.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -26,7 +31,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_OPTIONDETAILS_SIZE wxSize(-1, -1)
 #define SYMBOL_PANEL_OPTIONDETAILS_POSITION wxDefaultPosition
 
-class PanelOptionDetails_impl;  // Forward Declaraion
+class PanelOptionDetails_impl;  // Forward Declaration
 
 class PanelOptionDetails: public wxPanel {
   friend PanelOptionDetails_impl;
@@ -45,10 +50,13 @@ public:
     const wxPoint& pos = SYMBOL_PANEL_OPTIONDETAILS_POSITION, 
     const wxSize& size = SYMBOL_PANEL_OPTIONDETAILS_SIZE, 
     long style = SYMBOL_PANEL_OPTIONDETAILS_STYLE );
-
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
+  
+  void UpdateCallGreeks( double strike, ou::tf::Greek& );
+  void UpdateCallQuote( double strike, ou::tf::Quote& );
+  void UpdateCallTrade( double strike, ou::tf::Trade& );  
+  void UpdatePutGreeks( double strike, ou::tf::Greek& );
+  void UpdatePutQuote( double strike, ou::tf::Quote& );
+  void UpdatePutTrade( double strike, ou::tf::Trade& );  
 
 protected:
 
@@ -56,10 +64,17 @@ protected:
 
 private:
   enum { 
-    ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONDETAILS
+    ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONDETAILS, ID_GRID_OPTIONVALUES
   };
 
   std::unique_ptr<PanelOptionDetails_impl> m_pimpl;
+  
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
+
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int file_version);
 };
 
 } // namespace tf

@@ -19,10 +19,98 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelOptionDetails_impl::PanelOptionDetails_impl( PanelOptionDetails& details ): m_details( details ) {
+PanelOptionDetails_impl::PanelOptionDetails_impl( PanelOptionDetails& details )
+: m_details( details ), m_pGrid( nullptr ) {
+}
+
+void PanelOptionDetails_impl::CreateControls() {
+    PanelOptionDetails* itemPanel1 = &m_details;
+
+    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    itemPanel1->SetSizer(itemBoxSizer2);
+
+    m_pGrid = new wxGrid( itemPanel1, m_details.ID_GRID_OPTIONVALUES, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
+    m_pGrid->SetDefaultColSize(50);
+    m_pGrid->SetDefaultRowSize(22);
+    m_pGrid->SetColLabelSize(22);
+    m_pGrid->SetRowLabelSize(50);
+    //m_pGrid->CreateGrid(5, 5, wxGrid::wxGridSelectCells);
+    itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
+    
+  m_pGrid->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+
+// found in ModelCell_macros.h  
+#ifdef GRID_EMIT_SetColSettings
+#undef GRID_EMIT_SetColSettings
+#endif
+  
+#define GRID_EMIT_SetColSettings( z, n, VAR ) \
+  m_pGrid->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_pGrid->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  
+  int ix( 0 );
+  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+      
+  m_details.Bind( wxEVT_CLOSE_WINDOW, &PanelOptionDetails_impl::OnClose, this );  // start close of windows and controls
 }
 
 PanelOptionDetails_impl::~PanelOptionDetails_impl( void ) {
+}
+
+PanelOptionDetails_impl::mapOptionValueRow_iter
+PanelOptionDetails_impl::FindOptionValueRow( double strike ) {
+  mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
+  if ( m_mapOptionValueRow.end() == iter ) {
+    iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.end(),
+      mapOptionValueRow_t::value_type( strike, OptionValueRow( m_pGrid, m_mapOptionValueRow.size() ) ) );
+    m_pGrid->AppendRows( 1 );
+  }
+  return iter;
+}
+
+void PanelOptionDetails_impl::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdateCallGreeks( greek );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdateCallQuote( quote );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdateCallTrade( trade );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdatePutGreeks( greek );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdatePutQuote( quote );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
+  mapOptionValueRow_iter iter = FindOptionValueRow( strike );
+  iter->second.UpdatePutTrade( trade );
+  iter->second.UpdateGui();  // TODO:  do a timed update
+}
+
+void PanelOptionDetails_impl::OnClose( wxCloseEvent& event ) {
+
+  // Exit Steps: #2 -> FrameMain::OnClose
+//  if ( 0 != OnPanelClosing ) OnPanelClosing();
+  // event.Veto();  // possible call, if needed
+  // event.CanVeto(); // if not a 
+  event.Skip();  // auto followed by Destroy();
 }
 
 } // namespace tf

@@ -24,8 +24,8 @@ namespace iqfeed { // IQFeed
 
 // http://www.iqfeed.net/dev/api/docs/OptionChainsviaTCPIP.cfm
 
-OptionChainQuery::OptionChainQuery() 
-: Network<OptionChainQuery>( "127.0.0.1", 9100 )
+OptionChainQuery::OptionChainQuery( fSymbol_t& fSymbol ) 
+: Network<OptionChainQuery>( "127.0.0.1", 9100 ), m_fSymbol( fSymbol )
 {
 }
 
@@ -40,7 +40,6 @@ void OptionChainQuery::QueryFutureChain(
     const std::string& sRequestId
     ) {
   std::stringstream ss;
-  //boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
   ss 
     << "CFU," 
     << sSymbol << "," 
@@ -101,16 +100,14 @@ void OptionChainQuery::QueryEquityOptionChain(
   this->Send( ss.str().c_str() );
 }
 
-
-void OptionChainQuery::AddOptionSymbol( const char *s, unsigned short cnt ) {
-  std::string *_s = new std::string( s, cnt );
-  m_vOptionSymbols.push_back( _s );
+void OptionChainQuery::AddOptionSymbol( const char* cs, unsigned short cnt ) {
+  const std::string s( cs, cnt );
+  m_fSymbol( s );
 }
 
-void OptionChainQuery::OnNewResponse( const char *szLine ) {
+void OptionChainQuery::OnNewResponse( const char* szLine ) {
   if ( !true ) {
     if ( 0 == strcmp( szLine, "!ENDMSG!" ) ) {
-      //ClosePort();
     }
   }
   else {
@@ -149,8 +146,6 @@ void OptionChainQuery::OnNewResponse( const char *szLine ) {
         cnt = 0;
       }
     }
-    if ( NULL != OnSymbolListReceived ) OnSymbolListReceived();
-    //m_bLookingForDetail = false;
   }
 }
 
