@@ -40,7 +40,7 @@
 
 #include "PanelIBAccountValues.h"
 
-// modelled after "PanelPortfolioPosition_impl.h"
+// modeled after "PanelPortfolioPosition_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

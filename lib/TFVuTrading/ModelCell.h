@@ -47,8 +47,10 @@ public:
   typedef typename ModelCell_traits<CRTP>::value_type value_type;
   typedef FastDelegate1<const wxString&> FunctionSetText_t;
 
-  ModelCell(void);
-  ModelCell(FunctionSetText_t);
+  ModelCell( void );
+  ModelCell( const ModelCell& rhs );
+  ModelCell( FunctionSetText_t );
+  
   virtual ~ModelCell(void);
 
   void SetValue( const value_type& val );
@@ -124,21 +126,29 @@ class ModelCellDouble: public ModelCell<ModelCellDouble> {
   friend class ModelCell<ModelCellDouble>;
 public:
 
-  ModelCellDouble( void ): m_nPrecision( 2 ) {
-    // speed vs space optimization
-    ss.precision( m_nPrecision );
-    ss.setf( std::ios::fixed, std:: ios::floatfield );
-  };
-  ModelCellDouble(FunctionSetText_t function): ModelCell<ModelCellDouble>( function ), m_nPrecision( 2 ) {};
+  ModelCellDouble( void ) {
+    Initialize();
+  }
+  ModelCellDouble(FunctionSetText_t function): ModelCell<ModelCellDouble>( function ) {
+    Initialize();
+  }
+  
   virtual ~ModelCellDouble( void ) {}
+  
+  void InitializeValue( void ) { m_val = {}; }
 
-  void InitializeValue( void ) { m_val = 0.0; }
-
-  void SetPrecision( unsigned int n ) { m_nPrecision = n; };
+  void SetPrecision( unsigned int n ) { 
+    ss.precision( n );
+  };
 protected:
 private:
   unsigned int m_nPrecision;
   std::stringstream ss;
+  void Initialize() {
+    // speed vs space optimization
+    ss.precision( 2 );
+    ss.setf( std::ios::fixed, std:: ios::floatfield );
+  }
   void Val2String( void ) {
     std::stringstream().swap(ss);
     ss << m_val;
@@ -173,6 +183,15 @@ template<typename CRTP>
 ModelCell<CRTP>::ModelCell( void )
 : m_bChanged( true ), m_functionSetText( 0 ) 
 { // gets initial value into gui
+  InitializeValue();
+}
+
+template<typename CRTP>
+ModelCell<CRTP>::ModelCell( const ModelCell<CRTP>& rhs )
+: m_bChanged( false ), m_val( rhs.m_val ), 
+  m_functionSetText( rhs.m_functionSetText ),
+  m_sCellText( rhs.m_sCellText ) 
+{
   InitializeValue();
 }
 
