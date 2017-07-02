@@ -14,8 +14,8 @@
 
 #include "stdafx.h"
 
-#include "PanelOptionDetails.h"
-#include "PanelOptionDetails_impl.h"
+#include "WinOptionDetails.h"
+#include "WinOptionDetails_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

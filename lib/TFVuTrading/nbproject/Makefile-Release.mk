@@ -59,8 +59,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/PanelIBPositionDetails_impl.o \
 	${OBJECTDIR}/PanelLogging.o \
 	${OBJECTDIR}/PanelManualOrder.o \
-	${OBJECTDIR}/PanelOptionDetails.o \
-	${OBJECTDIR}/PanelOptionDetails_impl.o \
 	${OBJECTDIR}/PanelPortfolioPosition.o \
 	${OBJECTDIR}/PanelPortfolioPositionOrderExecution.o \
 	${OBJECTDIR}/PanelPortfolioPosition_impl.o \
@@ -73,6 +71,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
 	${OBJECTDIR}/WinChartView.o \
+	${OBJECTDIR}/WinOptionDetails.o \
+	${OBJECTDIR}/WinOptionDetails_impl.o \
 	${OBJECTDIR}/stdafx.o \
 	${OBJECTDIR}/wxETKBaseValidator.o
 
@@ -223,16 +223,6 @@ ${OBJECTDIR}/PanelManualOrder.o: PanelManualOrder.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelManualOrder.o PanelManualOrder.cpp
 
-${OBJECTDIR}/PanelOptionDetails.o: PanelOptionDetails.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionDetails.o PanelOptionDetails.cpp
-
-${OBJECTDIR}/PanelOptionDetails_impl.o: PanelOptionDetails_impl.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelOptionDetails_impl.o PanelOptionDetails_impl.cpp
-
 ${OBJECTDIR}/PanelPortfolioPosition.o: PanelPortfolioPosition.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -292,6 +282,16 @@ ${OBJECTDIR}/WinChartView.o: WinChartView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinChartView.o WinChartView.cpp
+
+${OBJECTDIR}/WinOptionDetails.o: WinOptionDetails.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionDetails.o WinOptionDetails.cpp
+
+${OBJECTDIR}/WinOptionDetails_impl.o: WinOptionDetails_impl.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionDetails_impl.o WinOptionDetails_impl.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}
