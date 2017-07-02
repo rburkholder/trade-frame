@@ -15,8 +15,6 @@
 
 #pragma once
 
-//#include <memory>
-
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -25,31 +23,31 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_OPTIONDETAILS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_OPTIONDETAILS_TITLE _("Panel Option Details")
-#define SYMBOL_PANEL_OPTIONDETAILS_IDNAME ID_PANEL_OPTIONDETAILS
-#define SYMBOL_PANEL_OPTIONDETAILS_SIZE wxSize(-1, -1)
-#define SYMBOL_PANEL_OPTIONDETAILS_POSITION wxDefaultPosition
+#define SYMBOL_WIN_OPTIONDETAILS_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_WIN_OPTIONDETAILS_TITLE _("Panel Option Details")
+#define SYMBOL_WIN_OPTIONDETAILS_IDNAME ID_WIN_OPTIONDETAILS
+#define SYMBOL_WIN_OPTIONDETAILS_SIZE wxSize(-1, -1)
+#define SYMBOL_WIN_OPTIONDETAILS_POSITION wxDefaultPosition
 
-class PanelOptionDetails_impl;  // Forward Declaration
+class WinOptionDetails_impl;  // Forward Declaration
 
-class PanelOptionDetails: public wxPanel {
-  friend PanelOptionDetails_impl;
+class WinOptionDetails: public wxWindow {
+  friend WinOptionDetails_impl;
 public:
 
-  PanelOptionDetails(void);
-  PanelOptionDetails( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_OPTIONDETAILS_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_OPTIONDETAILS_SIZE, 
-    long style = SYMBOL_PANEL_OPTIONDETAILS_STYLE );
-  ~PanelOptionDetails(void);
+  WinOptionDetails(void);
+  WinOptionDetails( 
+    wxWindow* parent, wxWindowID id = SYMBOL_WIN_OPTIONDETAILS_IDNAME, 
+    const wxPoint& pos = SYMBOL_WIN_OPTIONDETAILS_POSITION, 
+    const wxSize& size = SYMBOL_WIN_OPTIONDETAILS_SIZE, 
+    long style = SYMBOL_WIN_OPTIONDETAILS_STYLE );
+  ~WinOptionDetails(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_OPTIONDETAILS_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_OPTIONDETAILS_SIZE, 
-    long style = SYMBOL_PANEL_OPTIONDETAILS_STYLE );
+    wxWindowID id = SYMBOL_WIN_OPTIONDETAILS_IDNAME, 
+    const wxPoint& pos = SYMBOL_WIN_OPTIONDETAILS_POSITION, 
+    const wxSize& size = SYMBOL_WIN_OPTIONDETAILS_SIZE, 
+    long style = SYMBOL_WIN_OPTIONDETAILS_STYLE );
   
   void UpdateCallGreeks( double strike, ou::tf::Greek& );
   void UpdateCallQuote( double strike, ou::tf::Quote& );
@@ -64,10 +62,10 @@ protected:
 
 private:
   enum { 
-    ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONDETAILS, ID_GRID_OPTIONVALUES
+    ID_Null=wxID_HIGHEST, ID_WIN_OPTIONDETAILS, ID_GRID_OPTIONDETAILS
   };
 
-  std::unique_ptr<PanelOptionDetails_impl> m_pimpl;
+  std::unique_ptr<WinOptionDetails_impl> m_pimpl;
   
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

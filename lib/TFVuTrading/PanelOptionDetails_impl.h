@@ -39,15 +39,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct PanelOptionDetails_impl {
+struct WinOptionDetails_impl {
 //public:
-  PanelOptionDetails_impl( PanelOptionDetails& );
-  ~PanelOptionDetails_impl( void );
+  WinOptionDetails_impl( WinOptionDetails& );
+  ~WinOptionDetails_impl( void );
 //protected:
 
 //private:
 
-  PanelOptionDetails& m_details;
+  WinOptionDetails& m_details;
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
@@ -168,7 +168,7 @@ struct PanelOptionDetails_impl {
 };
 
 template<class Archive>
-void PanelOptionDetails::serialize(Archive & ar, const unsigned int file_version){
+void WinOptionDetails::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
 }  
 
