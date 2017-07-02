@@ -20,8 +20,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelIBAccountValues_impl::PanelIBAccountValues_impl( PanelIBAccountValues& pav ): m_pav( pav ) {
-  m_pGrid = NULL;
+PanelIBAccountValues_impl::PanelIBAccountValues_impl( PanelIBAccountValues& pav )
+: m_pav( pav ), m_pGrid( nullptr ) {
 }
 
 void PanelIBAccountValues_impl::CreateControls() {
@@ -68,7 +68,7 @@ void PanelIBAccountValues_impl::UpdateAccountValueRow( const ou::tf::IBTWS::Acco
   }
 
   iter->second.UpdateAccountValue( av );
-  iter->second.UpdateGui();
+  iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
 void PanelIBAccountValues_impl::OnClose( wxCloseEvent& event ) {

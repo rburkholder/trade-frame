@@ -84,8 +84,8 @@ private:
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
   
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int file_version);
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int file_version);
 };
 
 } // namespace tf

@@ -32,8 +32,6 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-//#include <boost/signals2.hpp>
-
 #include <wx/grid.h>
 
 #include <TFVuTrading/ModelCell.h>
@@ -77,11 +75,11 @@ struct PanelIBAccountValues_impl {
 
   class AccountValueRow {
   public:
-    AccountValueRow( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) { Init(); }
-    AccountValueRow( const AccountValueRow& rhs ): m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) { Init(); }
+    AccountValueRow( wxGrid* pGrid, int nRow ): m_pGrid( pGrid ), m_nRow( nRow ) { Init(); }
+    AccountValueRow( const AccountValueRow& rhs ): m_pGrid( rhs.m_pGrid ), m_nRow( rhs.m_nRow ) { Init(); }
     ~AccountValueRow( void ) {}
     void UpdateGui( void ) {
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_row ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_nRow ) );
     }
     void UpdateAccountValue( const ou::tf::IBTWS::AccountValue& av ) {
       boost::fusion::at_c<COL_Key>( m_vModelCells ).SetValue( av.sKey );
@@ -92,13 +90,12 @@ struct PanelIBAccountValues_impl {
   protected:
   private:
     wxGrid* m_pGrid;
-    int m_row;
+    int m_nRow;
     vModelCells_t m_vModelCells;
     
     void Init( void ) {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
-      BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_row)
-      
+      BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
     }
   };
   
@@ -117,7 +114,6 @@ struct PanelIBAccountValues_impl {
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    //ar & boost::serialization::base_object<const TreeItemResources>(*this);
     int cnt = m_pGrid->GetCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
@@ -127,7 +123,6 @@ struct PanelIBAccountValues_impl {
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    //ar & boost::serialization::base_object<TreeItemResources>(*this);
     int cnt;
     ar & cnt;
     assert( cnt == m_pGrid->GetCols() ); 

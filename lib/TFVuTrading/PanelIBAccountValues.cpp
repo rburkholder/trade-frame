@@ -55,6 +55,7 @@ bool PanelIBAccountValues::Create( wxWindow* parent, wxWindowID id, const wxPoin
 }
 
 // need to cross a thread boundary here
+// TODO: need to check that ad is valid through the event transition
 void PanelIBAccountValues::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad ) {
   auto p( new IBAccountValueEvent( EVT_IBAccountValue, ad ) );
   this->QueueEvent( p );
