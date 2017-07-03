@@ -71,6 +71,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
 	${OBJECTDIR}/WinChartView.o \
+	${OBJECTDIR}/WinOptionChains.o \
 	${OBJECTDIR}/WinOptionDetails.o \
 	${OBJECTDIR}/WinOptionDetails_impl.o \
 	${OBJECTDIR}/stdafx.o \
@@ -282,6 +283,11 @@ ${OBJECTDIR}/WinChartView.o: WinChartView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinChartView.o WinChartView.cpp
+
+${OBJECTDIR}/WinOptionChains.o: WinOptionChains.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionChains.o WinOptionChains.cpp
 
 ${OBJECTDIR}/WinOptionDetails.o: WinOptionDetails.cpp
 	${MKDIR} -p ${OBJECTDIR}

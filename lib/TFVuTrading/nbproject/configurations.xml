@@ -45,6 +45,7 @@
       <itemPath>VuPositions.h</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.h</itemPath>
       <itemPath>WinChartView.h</itemPath>
+      <itemPath>WinOptionChains.h</itemPath>
       <itemPath>WinOptionDetails.h</itemPath>
       <itemPath>WinOptionDetails_impl.h</itemPath>
       <itemPath>stdafx.h</itemPath>
@@ -94,6 +95,7 @@
       <itemPath>VuPositions.cpp</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.cpp</itemPath>
       <itemPath>WinChartView.cpp</itemPath>
+      <itemPath>WinOptionChains.cpp</itemPath>
       <itemPath>WinOptionDetails.cpp</itemPath>
       <itemPath>WinOptionDetails_impl.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
@@ -306,6 +308,10 @@
       <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinOptionChains.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinOptionChains.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="WinOptionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -528,6 +534,10 @@
       <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="WinOptionChains.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="WinOptionChains.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="WinOptionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>
