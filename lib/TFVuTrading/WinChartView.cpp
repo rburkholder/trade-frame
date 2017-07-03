@@ -125,10 +125,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   bool bShift = event.ShiftDown();
   bool bControl = event.ControlDown();
   bool bAlt = event.AltDown();
-//  std::cout 
-//      << "Wheel: " << delta << "," << rotation << ",sca:" 
-//      << bShift << bControl << bAlt
-//      << std::endl;
+  std::cout 
+      << "Wheel: " << delta << "," << rotation << ",sca:" 
+      << bShift << bControl << bAlt
+      << std::endl;
   if ( 0 > rotation ) {
     m_tdViewPortWidth /= 1.4;
   }
@@ -140,12 +140,12 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 }
 
 void WinChartView::HandleMouseEnter( wxMouseEvent& event ) {
-//  std::cout << "mouse enter" << std::endl;
+  //std::cout << "mouse enter" << std::endl;
   event.Skip();
 }
 
 void WinChartView::HandleMouseLeave( wxMouseEvent& event ) {
-//  std::cout << "mouse leave" << std::endl;
+  //std::cout << "mouse leave" << std::endl;
   event.Skip();
 }
 

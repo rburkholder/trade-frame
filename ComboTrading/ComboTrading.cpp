@@ -209,9 +209,7 @@ bool AppComboTrading::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   m_timerGuiRefresh.SetOwner( this );
-
   Bind( wxEVT_TIMER, &AppComboTrading::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-
   m_timerGuiRefresh.Start( 250 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppComboTrading::OnClose, this );  // start close of windows and controls

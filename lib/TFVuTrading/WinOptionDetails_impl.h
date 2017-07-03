@@ -141,7 +141,10 @@ struct WinOptionDetails_impl {
   void UpdatePutTrade( double strike, ou::tf::Trade& );  
 
   void CreateControls();
-  void OnClose( wxCloseEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
+  
+  wxTimer m_timerGuiRefresh;
+  void HandleGuiRefresh( wxTimerEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

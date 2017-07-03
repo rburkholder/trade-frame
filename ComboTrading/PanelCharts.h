@@ -26,6 +26,7 @@
 #include <wx/panel.h>
 #include <wx/event.h>
 #include <wx/splitter.h>
+#include <wx/notebook.h>
 
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFVuTrading/DialogPickSymbol.h>

@@ -24,7 +24,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 #define SYMBOL_WIN_OPTIONDETAILS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_WIN_OPTIONDETAILS_TITLE _("Panel Option Details")
+#define SYMBOL_WIN_OPTIONDETAILS_TITLE _("Window Option Details")
 #define SYMBOL_WIN_OPTIONDETAILS_IDNAME ID_WIN_OPTIONDETAILS
 #define SYMBOL_WIN_OPTIONDETAILS_SIZE wxSize(-1, -1)
 #define SYMBOL_WIN_OPTIONDETAILS_POSITION wxDefaultPosition

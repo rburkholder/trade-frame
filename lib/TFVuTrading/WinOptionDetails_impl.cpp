@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 
+#include <functional>
+
 #include "WinOptionDetails_impl.h"
 
 namespace ou { // One Unified
@@ -52,7 +54,13 @@ void WinOptionDetails_impl::CreateControls() {
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_details.Bind( wxEVT_CLOSE_WINDOW, &WinOptionDetails_impl::OnClose, this );  // start close of windows and controls
+  m_details.Bind( wxEVT_DESTROY, &WinOptionDetails_impl::OnDestroy, this );
+
+  // this GuiRefresh initialization should come after all else
+  m_timerGuiRefresh.SetOwner( &m_details );
+  m_details.Bind( wxEVT_TIMER, &WinOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 250 );
+
 }
 
 WinOptionDetails_impl::~WinOptionDetails_impl( void ) {
@@ -105,13 +113,22 @@ void WinOptionDetails_impl::UpdatePutTrade( double strike, ou::tf::Trade& trade 
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::OnClose( wxCloseEvent& event ) {
+void WinOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+  std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
+    [](mapOptionValueRow_t::value_type& value) {
+      value.second.UpdateGui();
+    }
+    );
+}
 
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  event.Skip();  // auto followed by Destroy();
+void WinOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
+  
+  m_timerGuiRefresh.Stop();
+  m_details.Unbind( wxEVT_TIMER, &WinOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  m_details.Unbind( wxEVT_DESTROY, &WinOptionDetails_impl::OnDestroy, this );
+  
+  event.Skip();
 }
 
 } // namespace tf

@@ -30,6 +30,7 @@
 
 // need to check why this exists
 #include <wx/toplevel.h>
+#include <wx-3.0/wx/sizer.h>
 
 #include "PanelCharts.h"
 #include "TreeItemGroup.h"
@@ -208,9 +209,8 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
   if ( 0 != m_pWinChartView ) {
-    //delete m_pWinChartView;
     m_pWinChartView->SetChartDataView( nullptr );
-    //m_pWinChartView->
+    m_sizerRight->Detach( m_pWinChartView );
     m_panelSplitterRightPanel->DestroyChildren();
     m_pWinChartView = 0;
   }
@@ -261,6 +261,7 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
     assert( 0 == m_pWinChartView );
     m_pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
     m_sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
+    m_sizerRight->Layout();
 
     m_pWinChartView->SetChartDataView( &m_ChartDataView );
   }
