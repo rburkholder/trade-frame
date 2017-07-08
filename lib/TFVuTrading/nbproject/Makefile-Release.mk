@@ -51,6 +51,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/ModelPortfolio.o \
 	${OBJECTDIR}/ModelPortfolioPositionOrderExecution.o \
 	${OBJECTDIR}/ModelPosition.o \
+	${OBJECTDIR}/NotebookOptionChains.o \
 	${OBJECTDIR}/PanelChartHdf5.o \
 	${OBJECTDIR}/PanelFinancialChart.o \
 	${OBJECTDIR}/PanelIBAccountValues.o \
@@ -71,7 +72,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
 	${OBJECTDIR}/WinChartView.o \
-	${OBJECTDIR}/WinOptionChains.o \
 	${OBJECTDIR}/WinOptionDetails.o \
 	${OBJECTDIR}/WinOptionDetails_impl.o \
 	${OBJECTDIR}/stdafx.o \
@@ -184,6 +184,11 @@ ${OBJECTDIR}/ModelPosition.o: ModelPosition.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ModelPosition.o ModelPosition.cpp
 
+${OBJECTDIR}/NotebookOptionChains.o: NotebookOptionChains.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NotebookOptionChains.o NotebookOptionChains.cpp
+
 ${OBJECTDIR}/PanelChartHdf5.o: PanelChartHdf5.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -283,11 +288,6 @@ ${OBJECTDIR}/WinChartView.o: WinChartView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinChartView.o WinChartView.cpp
-
-${OBJECTDIR}/WinOptionChains.o: WinOptionChains.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionChains.o WinOptionChains.cpp
 
 ${OBJECTDIR}/WinOptionDetails.o: WinOptionDetails.cpp
 	${MKDIR} -p ${OBJECTDIR}
