@@ -22,7 +22,8 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+// https://github.com/boostorg/spirit/commit/c0537c8251d04773a24bafdab8363b1cba350d07
+//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
