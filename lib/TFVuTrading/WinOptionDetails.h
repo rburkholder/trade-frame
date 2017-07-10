@@ -18,36 +18,40 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <wx/grid.h>
+
 #include <TFOptions/Option.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_WIN_OPTIONDETAILS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_WIN_OPTIONDETAILS_TITLE _("Window Option Details")
-#define SYMBOL_WIN_OPTIONDETAILS_IDNAME ID_WIN_OPTIONDETAILS
-#define SYMBOL_WIN_OPTIONDETAILS_SIZE wxSize(-1, -1)
-#define SYMBOL_WIN_OPTIONDETAILS_POSITION wxDefaultPosition
+#define GRID_OPTIONDETAILS_STYLE wxWANTS_CHARS
+#define GRID_OPTIONDETAILS_TITLE _("Grid Option Details")
+#define GRID_OPTIONDETAILS_IDNAME ID_GRID_OPTIONDETAILS
+#define GRID_OPTIONDETAILS_SIZE wxSize(-1, -1)
+#define GRID_OPTIONDETAILS_POSITION wxDefaultPosition
 
-class WinOptionDetails_impl;  // Forward Declaration
+class GridOptionDetails_impl;  // Forward Declaration
 
-class WinOptionDetails: public wxWindow {
-  friend WinOptionDetails_impl;
+class GridOptionDetails: public wxGrid {
+  friend GridOptionDetails_impl;
 public:
 
-  WinOptionDetails(void);
-  WinOptionDetails( 
-    wxWindow* parent, wxWindowID id = SYMBOL_WIN_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = SYMBOL_WIN_OPTIONDETAILS_POSITION, 
-    const wxSize& size = SYMBOL_WIN_OPTIONDETAILS_SIZE, 
-    long style = SYMBOL_WIN_OPTIONDETAILS_STYLE );
-  ~WinOptionDetails(void);
+  GridOptionDetails(void);
+  GridOptionDetails( 
+    wxWindow* parent, wxWindowID id = GRID_OPTIONDETAILS_IDNAME, 
+    const wxPoint& pos = GRID_OPTIONDETAILS_POSITION, 
+    const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
+    long style = GRID_OPTIONDETAILS_STYLE,
+    const wxString& = GRID_OPTIONDETAILS_TITLE );
+  ~GridOptionDetails(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_WIN_OPTIONDETAILS_IDNAME, 
-    const wxPoint& pos = SYMBOL_WIN_OPTIONDETAILS_POSITION, 
-    const wxSize& size = SYMBOL_WIN_OPTIONDETAILS_SIZE, 
-    long style = SYMBOL_WIN_OPTIONDETAILS_STYLE );
+    wxWindowID id = GRID_OPTIONDETAILS_IDNAME, 
+    const wxPoint& pos = GRID_OPTIONDETAILS_POSITION, 
+    const wxSize& size = GRID_OPTIONDETAILS_SIZE, 
+    long style = GRID_OPTIONDETAILS_STYLE,
+    const wxString& = GRID_OPTIONDETAILS_TITLE );
   
   void UpdateCallGreeks( double strike, ou::tf::Greek& );
   void UpdateCallQuote( double strike, ou::tf::Quote& );
@@ -62,17 +66,18 @@ protected:
 
 private:
   enum { 
-    ID_Null=wxID_HIGHEST, ID_WIN_OPTIONDETAILS, ID_GRID_OPTIONDETAILS
+    ID_Null=wxID_HIGHEST, ID_GRID_OPTIONDETAILS
   };
 
-  std::unique_ptr<WinOptionDetails_impl> m_pimpl;
+  std::unique_ptr<GridOptionDetails_impl> m_pimpl;
   
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int file_version);
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
-  template<class Archive>
-  void serialize(Archive & ar, const unsigned int file_version);
 };
 
 } // namespace tf

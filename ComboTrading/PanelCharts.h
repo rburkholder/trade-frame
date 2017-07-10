@@ -28,21 +28,20 @@
 #include <wx/splitter.h>
 #include <wx/notebook.h>
 
-#include <TFBitsNPieces/TreeOps.h>
-#include <TFVuTrading/DialogPickSymbol.h>
-
-#include <TFVuTrading/ModelChartHdf5.h>
-#include <TFVuTrading/WinChartView.h>
-//#include <OUCharting/ChartDVBasics.h>
-#include <OUCharting/ChartDataView.h>
-
-#include <TFVuTrading/WinOptionDetails.h>
-
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/NoRiskInterestRateSeries.h>
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Option.h>
+
+#include <TFBitsNPieces/TreeOps.h>
+#include <TFVuTrading/DialogPickSymbol.h>
+
+#include <OUCharting/ChartDataView.h>
+#include <TFVuTrading/ModelChartHdf5.h>
+#include <TFVuTrading/WinChartView.h>
+
+#include <TFVuTrading/NotebookOptionChains.h>
 
 #include "TreeItem.h"
 #include "InstrumentActions.h"
@@ -239,7 +238,7 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
-  WinOptionDetails* m_pWinOptionDetails;
+  GridOptionDetails* m_pWinOptionDetails;
   WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
   
@@ -270,6 +269,8 @@ private:
   void HandleOptionList( const wxTreeItemId& );
   
   void HandleMenuItemDelete( const wxTreeItemId& id );
+  
+  void ReplacePanel( wxWindow* );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
   

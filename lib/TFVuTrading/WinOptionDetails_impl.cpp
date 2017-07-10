@@ -21,26 +21,26 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-WinOptionDetails_impl::WinOptionDetails_impl( WinOptionDetails& details )
-: m_details( details ), m_pGrid( nullptr ) {
+GridOptionDetails_impl::GridOptionDetails_impl( GridOptionDetails& details )
+: m_details( details ) {
 }
 
-void WinOptionDetails_impl::CreateControls() {
+void GridOptionDetails_impl::CreateControls() {
   
-    WinOptionDetails* itemPanel1 = &m_details;
+    //GridOptionDetails* itemPanel1 = &m_details;
 
-    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
-    itemPanel1->SetSizer(itemBoxSizer2);
+    //wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    //itemPanel1->SetSizer(itemBoxSizer2);
 
-    m_pGrid = new wxGrid( itemPanel1, m_details.ID_GRID_OPTIONDETAILS, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
-    m_pGrid->SetDefaultColSize(50);
-    m_pGrid->SetDefaultRowSize(22);
-    m_pGrid->SetColLabelSize(22);
-    m_pGrid->SetRowLabelSize(50);
+    //m_pGrid = new wxGrid( itemPanel1, m_details.ID_GRID_OPTIONDETAILS, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
+    m_details.SetDefaultColSize(50);
+    m_details.SetDefaultRowSize(22);
+    m_details.SetColLabelSize(22);
+    m_details.SetRowLabelSize(50);
     //m_pGrid->CreateGrid(5, 5, wxGrid::wxGridSelectCells);
-    itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
+    //itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
     
-  m_pGrid->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+  m_details.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
 // found in ModelCell_macros.h  
 #ifdef GRID_EMIT_SetColSettings
@@ -48,72 +48,72 @@ void WinOptionDetails_impl::CreateControls() {
 #endif
   
 #define GRID_EMIT_SetColSettings( z, n, VAR ) \
-  m_pGrid->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_pGrid->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  m_details.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_details.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
   
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_details.Bind( wxEVT_DESTROY, &WinOptionDetails_impl::OnDestroy, this );
+  m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( &m_details );
-  m_details.Bind( wxEVT_TIMER, &WinOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_details.Bind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   m_timerGuiRefresh.Start( 250 );
 
 }
 
-WinOptionDetails_impl::~WinOptionDetails_impl( void ) {
+GridOptionDetails_impl::~GridOptionDetails_impl( void ) {
 }
 
-WinOptionDetails_impl::mapOptionValueRow_iter
-WinOptionDetails_impl::FindOptionValueRow( double strike ) {
+GridOptionDetails_impl::mapOptionValueRow_iter
+GridOptionDetails_impl::FindOptionValueRow( double strike ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
     iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.end(),
-      mapOptionValueRow_t::value_type( strike, OptionValueRow( m_pGrid, m_mapOptionValueRow.size() ) ) );
-    m_pGrid->AppendRows( 1 );
+      mapOptionValueRow_t::value_type( strike, OptionValueRow( &m_details, m_mapOptionValueRow.size() ) ) );
+    m_details.AppendRows( 1 );
   }
   return iter;
 }
 
-void WinOptionDetails_impl::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
+void GridOptionDetails_impl::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdateCallGreeks( greek );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
+void GridOptionDetails_impl::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdateCallQuote( quote );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
+void GridOptionDetails_impl::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdateCallTrade( trade );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
+void GridOptionDetails_impl::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdatePutGreeks( greek );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
+void GridOptionDetails_impl::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdatePutQuote( quote );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
+void GridOptionDetails_impl::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
   mapOptionValueRow_iter iter = FindOptionValueRow( strike );
   iter->second.UpdatePutTrade( trade );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void WinOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+void GridOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
     [](mapOptionValueRow_t::value_type& value) {
       value.second.UpdateGui();
@@ -121,12 +121,12 @@ void WinOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
-void WinOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
+void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
   
   m_timerGuiRefresh.Stop();
-  m_details.Unbind( wxEVT_TIMER, &WinOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   
-  m_details.Unbind( wxEVT_DESTROY, &WinOptionDetails_impl::OnDestroy, this );
+  m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
   
   event.Skip();
 }

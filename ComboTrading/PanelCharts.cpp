@@ -260,11 +260,15 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
 
     assert( 0 == m_pWinChartView );
     m_pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-    m_sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
-    m_sizerRight->Layout();
+    ReplacePanel( m_pWinChartView );
 
     m_pWinChartView->SetChartDataView( &m_ChartDataView );
   }
+}
+
+void PanelCharts::ReplacePanel( wxWindow* pWindow ) {
+  m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
+  m_sizerRight->Layout();
 }
 
 void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
@@ -301,7 +305,7 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
     std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
   }
   else {
-    OptionList list;
+    // obtain instrument name (future requires special handling)
     ou::tf::Instrument::pInstrument_t p = iter->second->GetWatch()->GetInstrument();
     std::string sSymbol;
     switch ( p->GetInstrumentType() ) { 
@@ -316,6 +320,9 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
         break;
     }
     assert( 0 != sSymbol.length() );
+    
+    // obtain the option list
+    OptionList list;
     signalRetrieveOptionList( 
       sSymbol, 
       [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }

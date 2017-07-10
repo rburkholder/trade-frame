@@ -28,7 +28,6 @@
 
 #include <wx/stattext.h>
 #include <wx/sizer.h>
-#include <wx/grid.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -39,15 +38,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct WinOptionDetails_impl {
+struct GridOptionDetails_impl {
 //public:
-  WinOptionDetails_impl( WinOptionDetails& );
-  ~WinOptionDetails_impl( void );
+  GridOptionDetails_impl( GridOptionDetails& );
+  ~GridOptionDetails_impl( void );
 //protected:
 
 //private:
 
-  WinOptionDetails& m_details;
+  GridOptionDetails& m_details;
 
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
@@ -131,7 +130,7 @@ struct WinOptionDetails_impl {
 
   mapOptionValueRow_iter FindOptionValueRow( double );
   
-  wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
+  //wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
   
   void UpdateCallGreeks( double strike, ou::tf::Greek& );
   void UpdateCallQuote( double strike, ou::tf::Quote& );
@@ -148,10 +147,10 @@ struct WinOptionDetails_impl {
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    int cnt = m_pGrid->GetCols();
+    int cnt = m_details.GetCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_pGrid->GetColumnWidth( ix );
+      ar & m_details.GetColumnWidth( ix );
     }
   }
 
@@ -159,11 +158,11 @@ struct WinOptionDetails_impl {
   void load( Archive& ar, const unsigned int version ) {
     int cnt;
     ar & cnt;
-    assert( cnt == m_pGrid->GetCols() ); 
+    assert( cnt == m_details.GetCols() ); 
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
-      m_pGrid->SetColumnWidth( ix, width );
+      m_details.SetColumnWidth( ix, width );
     }
   }
 
@@ -171,7 +170,7 @@ struct WinOptionDetails_impl {
 };
 
 template<class Archive>
-void WinOptionDetails::serialize(Archive & ar, const unsigned int file_version){
+void GridOptionDetails::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
 }  
 

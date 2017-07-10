@@ -20,65 +20,76 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-WinOptionDetails::WinOptionDetails(void) {
+GridOptionDetails::GridOptionDetails(void) {
   Init();
 }
 
-WinOptionDetails::WinOptionDetails( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+GridOptionDetails::GridOptionDetails( 
+  wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
   Init();
-  Create(parent, id, pos, size, style);
+  Create(parent, id, pos, size, style, sTitle );
 }
 
-WinOptionDetails::~WinOptionDetails(void) {
+GridOptionDetails::~GridOptionDetails(void) {
 }
 
-void WinOptionDetails::Init( void ) {
-  m_pimpl.reset( new WinOptionDetails_impl( *this ) ); 
+void GridOptionDetails::Init( void ) {
+  m_pimpl.reset( new GridOptionDetails_impl( *this ) ); 
 }
 
-void WinOptionDetails::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
+bool GridOptionDetails::Create( 
+  wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
+  
+  Init();
+  
+  bool bReturn = Create(parent, id, pos, size, style, name );
+
+  return bReturn;
+}
+
+void GridOptionDetails::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
   m_pimpl->UpdateCallGreeks( strike, greek );
 }
 
-void WinOptionDetails::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
+void GridOptionDetails::UpdateCallQuote( double strike, ou::tf::Quote& quote ) {
   m_pimpl->UpdateCallQuote( strike, quote );
 }
 
-void WinOptionDetails::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
+void GridOptionDetails::UpdateCallTrade( double strike, ou::tf::Trade& trade ) {
   m_pimpl->UpdateCallTrade( strike, trade );
 }
 
-void WinOptionDetails::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
+void GridOptionDetails::UpdatePutGreeks( double strike, ou::tf::Greek& greek ) {
   m_pimpl->UpdatePutGreeks( strike, greek );
 }
 
-void WinOptionDetails::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
+void GridOptionDetails::UpdatePutQuote( double strike, ou::tf::Quote& quote ) {
   m_pimpl->UpdatePutQuote( strike, quote );
 }
 
-void WinOptionDetails::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
+void GridOptionDetails::UpdatePutTrade( double strike, ou::tf::Trade& trade ) {
   m_pimpl->UpdatePutTrade( strike, trade );
 }
 
-wxBitmap WinOptionDetails::GetBitmapResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullBitmap;
-}
-
-wxIcon WinOptionDetails::GetIconResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullIcon;
-}
-
-template void WinOptionDetails::serialize<boost::archive::text_iarchive>(
+template void GridOptionDetails::serialize<boost::archive::text_iarchive>(
     boost::archive::text_iarchive & ar, 
     const unsigned int file_version
 );
 
-template void WinOptionDetails::serialize<boost::archive::text_oarchive>(
+template void GridOptionDetails::serialize<boost::archive::text_oarchive>(
     boost::archive::text_oarchive & ar, 
     const unsigned int file_version
 );
+
+wxBitmap GridOptionDetails::GetBitmapResource( const wxString& name ) {
+    wxUnusedVar(name);
+    return wxNullBitmap;
+}
+
+wxIcon GridOptionDetails::GetIconResource( const wxString& name ) {
+    wxUnusedVar(name);
+    return wxNullIcon;
+}
 
 } // namespace tf
 } // namespace ou
