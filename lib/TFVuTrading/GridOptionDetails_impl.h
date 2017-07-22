@@ -33,7 +33,7 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "WinOptionDetails.h"
+#include "GridOptionDetails.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

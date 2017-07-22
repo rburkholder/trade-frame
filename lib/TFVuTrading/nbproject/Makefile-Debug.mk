@@ -43,6 +43,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/DialogSimpleOneLineOrder.o \
 	${OBJECTDIR}/EventDrawChart.o \
 	${OBJECTDIR}/FrameMain.o \
+	${OBJECTDIR}/GridOptionDetails.o \
+	${OBJECTDIR}/GridOptionDetails_impl.o \
 	${OBJECTDIR}/ModelBase.o \
 	${OBJECTDIR}/ModelCell.o \
 	${OBJECTDIR}/ModelChartHdf5.o \
@@ -72,8 +74,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/VuPositions.o \
 	${OBJECTDIR}/VuTreePortfolioPositionOrder.o \
 	${OBJECTDIR}/WinChartView.o \
-	${OBJECTDIR}/WinOptionDetails.o \
-	${OBJECTDIR}/WinOptionDetails_impl.o \
 	${OBJECTDIR}/stdafx.o \
 	${OBJECTDIR}/wxETKBaseValidator.o
 
@@ -143,6 +143,16 @@ ${OBJECTDIR}/FrameMain.o: FrameMain.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameMain.o FrameMain.cpp
+
+${OBJECTDIR}/GridOptionDetails.o: GridOptionDetails.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionDetails.o GridOptionDetails.cpp
+
+${OBJECTDIR}/GridOptionDetails_impl.o: GridOptionDetails_impl.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridOptionDetails_impl.o GridOptionDetails_impl.cpp
 
 ${OBJECTDIR}/ModelBase.o: ModelBase.cpp
 	${MKDIR} -p ${OBJECTDIR}
@@ -288,16 +298,6 @@ ${OBJECTDIR}/WinChartView.o: WinChartView.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinChartView.o WinChartView.cpp
-
-${OBJECTDIR}/WinOptionDetails.o: WinOptionDetails.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionDetails.o WinOptionDetails.cpp
-
-${OBJECTDIR}/WinOptionDetails_impl.o: WinOptionDetails_impl.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -D_DEBUG -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/WinOptionDetails_impl.o WinOptionDetails_impl.cpp
 
 ${OBJECTDIR}/stdafx.o: stdafx.cpp
 	${MKDIR} -p ${OBJECTDIR}

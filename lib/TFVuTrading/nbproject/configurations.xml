@@ -13,6 +13,8 @@
       <itemPath>DialogSimpleOneLineOrder.h</itemPath>
       <itemPath>EventDrawChart.h</itemPath>
       <itemPath>FrameMain.h</itemPath>
+      <itemPath>GridOptionDetails.h</itemPath>
+      <itemPath>GridOptionDetails_impl.h</itemPath>
       <itemPath>ModelBase.h</itemPath>
       <itemPath>ModelCell.h</itemPath>
       <itemPath>ModelCell_macros.h</itemPath>
@@ -46,8 +48,6 @@
       <itemPath>VuPositions.h</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.h</itemPath>
       <itemPath>WinChartView.h</itemPath>
-      <itemPath>WinOptionDetails.h</itemPath>
-      <itemPath>WinOptionDetails_impl.h</itemPath>
       <itemPath>stdafx.h</itemPath>
       <itemPath>targetver.h</itemPath>
       <itemPath>wxETKBaseValidator.h</itemPath>
@@ -67,6 +67,8 @@
       <itemPath>DialogSimpleOneLineOrder.cpp</itemPath>
       <itemPath>EventDrawChart.cpp</itemPath>
       <itemPath>FrameMain.cpp</itemPath>
+      <itemPath>GridOptionDetails.cpp</itemPath>
+      <itemPath>GridOptionDetails_impl.cpp</itemPath>
       <itemPath>ModelBase.cpp</itemPath>
       <itemPath>ModelCell.cpp</itemPath>
       <itemPath>ModelChartHdf5.cpp</itemPath>
@@ -96,8 +98,6 @@
       <itemPath>VuPositions.cpp</itemPath>
       <itemPath>VuTreePortfolioPositionOrder.cpp</itemPath>
       <itemPath>WinChartView.cpp</itemPath>
-      <itemPath>WinOptionDetails.cpp</itemPath>
-      <itemPath>WinOptionDetails_impl.cpp</itemPath>
       <itemPath>stdafx.cpp</itemPath>
       <itemPath>wxETKBaseValidator.cpp</itemPath>
     </logicalFolder>
@@ -176,6 +176,14 @@
       <item path="FrameMain.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FrameMain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ModelBase.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -312,14 +320,6 @@
       <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="WinOptionDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="WinOptionDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="WinOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="WinOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -403,6 +403,14 @@
       </item>
       <item path="FrameMain.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ModelBase.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ModelBase.h" ex="false" tool="3" flavor2="0">
@@ -538,14 +546,6 @@
       <item path="WinChartView.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="WinChartView.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="WinOptionDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="WinOptionDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="WinOptionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="WinOptionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>

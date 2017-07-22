@@ -33,7 +33,7 @@
 
 #include <TFTrading/TradingEnumerations.h>
 #include <TFOptions/Option.h>
-#include <TFVuTrading/WinOptionDetails.h>
+#include <TFVuTrading/GridOptionDetails.h>
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
 namespace ou { // One Unified
@@ -84,6 +84,7 @@ private:
     ID_Null=wxID_HIGHEST, ID_OPTIONCHAINS, ID_NOTEBOOK_OPTIONDETAILS
   };
   
+  // put/call at strike
   struct Row {
     int ixRow;
     std::string sCall;
@@ -91,6 +92,7 @@ private:
     explicit Row( int ix = 0 ): ixRow( ix ) {}
   };
   
+  // the strike list
   typedef std::map<double, Row> mapStrike_t;
   
   struct Tab {
