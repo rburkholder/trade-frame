@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="95">
+<configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -247,12 +247,12 @@
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
             <linkerLibLibItem>z</linkerLibLibItem>
-            <linkerLibLibItem>boost_system-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_date_time-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_filesystem-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_serialization-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_thread-gcc52-mt-d-1_59</linkerLibLibItem>
-            <linkerLibLibItem>boost_regex-gcc52-mt-d-1_59</linkerLibLibItem>
+            <linkerLibLibItem>boost_system-gcc63-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_date_time-gcc63-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem-gcc63-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_serialization-gcc63-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread-gcc63-mt-1_61</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-gcc63-mt-1_61</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>`/usr/local/bin/wx-config --libs`</commandLine>
         </linkerTool>
