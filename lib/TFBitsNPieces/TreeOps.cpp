@@ -20,7 +20,6 @@
 #include <boost/phoenix/core/argument.hpp>
 
 #include <wx/wx.h>
-//#include <wx-3.0/wx/window.h>
 
 #include "TreeOps.h"
 
@@ -96,10 +95,12 @@ void TreeOps::Delete( wxTreeItemId id ) {
     typename mapDecoder_t::iterator iterParent = m_mapDecoder.find( idParent.GetID() );
     assert( m_mapDecoder.end() != iterParent );
     iterParent->second->DeletingChild( id );
+    //iterParent->second->DeleteMember( id );
     
     typename mapDecoder_t::iterator iterChild = m_mapDecoder.find( id.GetID() );
     assert( m_mapDecoder.end() != iterChild );
     
+    // TODO: this isn't going to work for overloaded items
     wxTreeCtrl::Delete( id );
     m_idOld.Unset();
     m_mapDecoder.erase( iterChild );

@@ -24,23 +24,25 @@
 //   should override rename so it always has proper instrument name
 //   is rename actually in the menu, if not, then nothing to do
 
-#include <wx-3.0/wx/menu.h>
+#include <wx/menu.h>
 
 #include "TreeItemInstrument.h"
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
   TreeItemResources( id, baseResources, resources ), m_lockType( InstrumentActions::ENewInstrumentLock::NoLock ) {
+  std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
 }
   
+// TODO: This is not being called, on each instrument delete
 TreeItemInstrument::~TreeItemInstrument( void ) {
-  m_pInstrumentActions->signalDelete( m_id );
+  std::cout << "TreeItemInstrument::~TreeItemInstrument" << std::endl;
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
-  std::cout << "Delete: TreeItemInstrument" << std::endl;
-  //ou::tf::TreeItemBase::DeleteMember( m_id );
+  std::cout << "TreeItemInstrument::HandleDelete" << std::endl;
+  m_pInstrumentActions->signalDelete( m_id );
   m_baseResources.signalDelete( m_id );
 }
 

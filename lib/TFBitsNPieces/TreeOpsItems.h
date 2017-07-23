@@ -88,7 +88,7 @@ public:
   TreeItemBase( wxTreeItemId id, TreeItemResources& resources ): 
     m_id( id ), m_baseResources( resources ), m_pMenu( 0 )
     {}
-  //TreeItemBase( wxTreeItemId id ): m_id( id ) {}
+  
   virtual ~TreeItemBase( void ) {
     if ( 0 != m_pMenu ) {
       delete m_pMenu;
@@ -100,7 +100,7 @@ public:
   virtual void ShowContextMenu( void ) {}
 //  virtual void SetSelected( CommonGuiElements& ) {}
 //  virtual void RemoveSelected( CommonGuiElements& ) {}
-  virtual void DeletingChild( wxTreeItemId id ) {};
+  virtual void DeletingChild( wxTreeItemId id ) { DeleteMember( id ); }
   wxTreeItemId GetTreeItemId( void ) { return m_id; }
   
   void HandleRename( wxCommandEvent& event );
