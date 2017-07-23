@@ -31,20 +31,46 @@ GridOptionDetails::GridOptionDetails(
 }
 
 GridOptionDetails::~GridOptionDetails(void) {
+  // this destructor is called prior to window destruction
+  m_pimpl->DestroyControls();
 }
 
 void GridOptionDetails::Init( void ) {
-  m_pimpl.reset( new GridOptionDetails_impl( *this ) ); 
 }
 
 bool GridOptionDetails::Create( 
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
   
-  Init();
+  wxGrid::Create(parent, id, pos, size, style, name );
+  m_pimpl.reset( new GridOptionDetails_impl( *this ) ); 
   
-  bool bReturn = Create(parent, id, pos, size, style, name );
+  CreateControls();
+  
+  return true;
+}
 
-  return bReturn;
+void GridOptionDetails::CreateControls() {    
+  
+  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
+  Bind( wxEVT_DESTROY, &GridOptionDetails::OnDestroy, this );
+  
+  //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+  //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+  
+  //Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+  //Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  //Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  //Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+  //Bind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
+
+  // this GuiRefresh initialization should come after all else
+  //m_timerGuiRefresh.SetOwner( this );
+  //Bind( wxEVT_TIMER, &GridOptionDetails::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  //m_timerGuiRefresh.Start( 250 );
+
+  m_pimpl->CreateControls();
+  
 }
 
 void GridOptionDetails::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
@@ -81,6 +107,31 @@ template void GridOptionDetails::serialize<boost::archive::text_oarchive>(
     const unsigned int file_version
 );
 
+void GridOptionDetails::HandleSize( wxSizeEvent& event ) { 
+}
+
+void GridOptionDetails::HandleGuiRefresh( wxTimerEvent& event ) {
+  event.Skip();
+}
+
+void GridOptionDetails::OnDestroy( wxWindowDestroyEvent& event ) {
+  
+  //m_pimpl->DestroyControls();
+  //m_timerGuiRefresh.Stop();
+  //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  Unbind( wxEVT_DESTROY, &GridOptionDetails::OnDestroy, this );
+  
+  //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+  //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+  
+  //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+  //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+  event.Skip();  // auto followed by Destroy();
+}
 wxBitmap GridOptionDetails::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;

@@ -39,9 +39,6 @@
 
 #include <OUCharting/ChartDataView.h>
 #include <TFVuTrading/ModelChartHdf5.h>
-#include <TFVuTrading/WinChartView.h>
-
-#include <TFVuTrading/NotebookOptionChains.h>
 
 #include "TreeItem.h"
 #include "InstrumentActions.h"
@@ -238,7 +235,7 @@ private:
   DialogPickSymbol::DataExchange m_de;
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
-  GridOptionDetails* m_pWinOptionDetails;
+  //GridOptionDetails* m_pWinOptionDetails;
   //WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
   

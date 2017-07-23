@@ -140,7 +140,8 @@ struct GridOptionDetails_impl {
   void UpdatePutTrade( double strike, ou::tf::Trade& );  
 
   void CreateControls();
-  void OnDestroy( wxWindowDestroyEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
+  void DestroyControls();
   
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );

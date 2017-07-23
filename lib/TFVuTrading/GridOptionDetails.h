@@ -62,7 +62,8 @@ public:
 
 protected:
 
-  void Init( void );
+  void Init();
+  void CreateControls();
 
 private:
   enum { 
@@ -74,6 +75,10 @@ private:
   template<class Archive>
   void serialize(Archive & ar, const unsigned int file_version);
 
+  void HandleSize( wxSizeEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& event );
+  void HandleGuiRefresh( wxTimerEvent& event );
+  
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };

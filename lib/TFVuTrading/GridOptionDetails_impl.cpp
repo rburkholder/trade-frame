@@ -54,7 +54,7 @@ void GridOptionDetails_impl::CreateControls() {
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+  //m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( &m_details );
@@ -121,12 +121,15 @@ void GridOptionDetails_impl::HandleGuiRefresh( wxTimerEvent& event ) {
     );
 }
 
-void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
+void GridOptionDetails_impl::DestroyControls() { 
   
   m_timerGuiRefresh.Stop();
   m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   
-  m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+}
+
+void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
   
   event.Skip();
 }

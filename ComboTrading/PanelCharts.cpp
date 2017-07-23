@@ -28,6 +28,9 @@
 
 #include <TFOptions/Option.h>
 
+#include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/NotebookOptionChains.h>
+
 // need to check why this exists
 #include <wx/toplevel.h>
 #include <wx-3.0/wx/sizer.h>
@@ -53,7 +56,7 @@ PanelCharts::PanelCharts(
   wxWindow* parent, wxWindowID id, 
   const wxPoint& pos, 
   const wxSize& size, 
-  long style )
+  long style ): wxPanel()
 {
   
   Init();
@@ -71,7 +74,7 @@ void PanelCharts::Init( void ) {
   
   m_pTreeOps = 0;
   m_winRightDetail = 0;
-  m_pWinOptionDetails = 0;
+  //m_pWinOptionDetails = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
 }
@@ -209,11 +212,18 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
 
 void PanelCharts::RemoveRightDetail() {
   if ( 0 != m_winRightDetail ) {
-    //m_pWinChartView->SetChartDataView( nullptr );
     m_sizerRight->Detach( m_winRightDetail );
     m_panelSplitterRightPanel->DestroyChildren();
     m_winRightDetail = 0;
   }
+}
+
+void PanelCharts::ReplaceRightDetail( wxWindow* pWindow ) {
+  assert( 0 != pWindow );
+  //RemoveRightDetail();
+  m_winRightDetail = pWindow;
+  m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
+  m_sizerRight->Layout();
 }
 
 void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
@@ -252,33 +262,26 @@ void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
   }
 }
 
-// need to maintain a date/time range
-// get subset of data and chart
 void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
-  // maybe turn this bit of code into a lamda and pass in the function to be run on success
+  
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
     std::cout << "couldn't find the menuitem for HandleInstrumentLiveChart" << std::endl;
   }
   else {
+    
+    RemoveRightDetail();
+
     m_ChartDataView.Clear();
     iter->second->ApplyDataTo( &m_ChartDataView );
 
-    //assert( 0 == m_pWinChartView );
-    WinChartView* m_pWinChartView = nullptr;
-    m_pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-    m_pWinChartView->SetChartDataView( &m_ChartDataView );
+    WinChartView* pWinChartView = nullptr;
+    pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
+    pWinChartView->SetChartDataView( &m_ChartDataView );
     
-    ReplaceRightDetail( m_pWinChartView );
+    ReplaceRightDetail( pWinChartView );
 
   }
-}
-
-void PanelCharts::ReplaceRightDetail( wxWindow* pWindow ) {
-  RemoveRightDetail();
-  m_winRightDetail = pWindow;
-  m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
-  m_sizerRight->Layout();
 }
 
 void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
@@ -342,6 +345,10 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
       [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
       );
   }
+  
+  RemoveRightDetail();
+  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
+  ReplaceRightDetail( pNotebookOptionChains );
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {

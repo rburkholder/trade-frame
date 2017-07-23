@@ -78,6 +78,8 @@ public:
   void Load( boost::archive::text_iarchive& ia);
 
 protected:
+  void Init();
+  void CreateControls();
 private:
   
   enum { 
@@ -111,7 +113,6 @@ private:
   void OnPageChanged( wxBookCtrlEvent& event );
   void OnPageChanging( wxBookCtrlEvent& event );
   
-  void Init( void );
   void OnDestroy( wxWindowDestroyEvent& event );
   
   wxBitmap GetBitmapResource( const wxString& name );

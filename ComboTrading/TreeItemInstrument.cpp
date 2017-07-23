@@ -71,38 +71,44 @@ void TreeItemInstrument::HandleEmit( wxCommandEvent& event ) {
 
 void TreeItemInstrument::BuildContextMenu( wxMenu* pMenu ) {
   assert( 0 != pMenu );
-  if ( InstrumentActions::ENewInstrumentLock::NoLock == m_lockType ) {  // is this actually used?
-    pMenu->Append( MINewInstrument, "New Instrument" );
-    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
-  }
-  else {
-    pMenu->Append( MIOptionList, "Option List" );
-    pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
-    if ( InstrumentActions::ENewInstrumentLock::LockFuturesOption == m_lockType ) {
-      // can then use underlying to calc implied volatility
+  switch ( m_lockType ) {
+    case InstrumentActions::ENewInstrumentLock::NoLock:
+      pMenu->Append( MINewInstrument, "New Instrument" );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuNewInstrument, this, MINewInstrument );
+      break;
+    case InstrumentActions::ENewInstrumentLock::LockOption:
+      pMenu->Append( MINewOption, "New Option" );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
+      
+      pMenu->Append( MIOptionList, "Option List" );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
+      break;
+    case InstrumentActions::ENewInstrumentLock::LockFuturesOption:
       pMenu->Append( MINewFuturesOption, "New Futures Option" );
       pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddFuturesOption, this, MINewFuturesOption );
-    }
-    else {
-      if ( InstrumentActions::ENewInstrumentLock::LockOption == m_lockType ) {
-      // can then use underlying to calc implied volatility
-        pMenu->Append( MINewOption, "New Option" );
-        pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuAddOption, this, MINewOption );
-      }
-      else {
-        std::cout << "TreeItemInstrument::BuildContextMenu has unknown lockType: " << m_lockType << std::endl;
-      }
-    }
+      
+      pMenu->Append( MIOptionList, "Option List" );
+      pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleMenuOptionList, this, MIOptionList );
+      break;
+    default:
+      std::cout << "TreeItemInstrument::BuildContextMenu has unknown lockType: " << m_lockType << std::endl;
+      break;
   }
+
   // add watch/unwatch menu item?
+  
   pMenu->Append( MIEmit, "Emit" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleEmit, this, MIEmit );
+  
   pMenu->Append( MILiveChart, "Live Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleLiveChart, this, MILiveChart );
+  
   pMenu->Append( MIDailyChart, "Daily Chart" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDailyChart, this, MIDailyChart );
+  
 //  pMenu->Append( MISaveData, "Save Data" );
 //  pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleSaveData, this, MISaveData );
+  
   pMenu->Append( MIDelete, "Delete" );
   pMenu->Bind( wxEVT_COMMAND_MENU_SELECTED, &TreeItemInstrument::HandleDelete, this, MIDelete );
 }

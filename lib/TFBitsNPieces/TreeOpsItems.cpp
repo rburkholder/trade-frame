@@ -38,7 +38,8 @@ void TreeItemBase::DeleteMember( wxTreeItemId id ) {
     m_mapMembers.erase( iterMap );
   }
   else 
-    assert( 0 );
+    //assert( 0 );
+    std::cout << "TreeItemBase::DeleteMember: no member to delete" << std::endl;
   
 //  vMembers_t::iterator iterVec = std::find_if( m_vMembers.begin(), m_vMembers.end(), matchId( id.GetID() ) );
 //  assert( m_vMembers.end() != iterVec );
