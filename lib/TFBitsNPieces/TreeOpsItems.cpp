@@ -22,7 +22,6 @@ namespace tf {
 void TreeItemBase::AddMember( unsigned int type, wxTreeItemId id, pTreeItemBase_t p ) {
   assert( 0 != id.GetID() );
   assert( 0 != p.get() );
-  //m_vMembers.push_back( member_t( type, id.GetID(), p ) );
   m_mapMembers.insert( mapMembers_t::value_type( id.GetID(), member_t( type, p ) ) );
 }
 

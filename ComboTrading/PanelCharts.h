@@ -239,8 +239,10 @@ private:
   pInstrument_t m_pDialogPickSymbolCreatedInstrument;
   
   GridOptionDetails* m_pWinOptionDetails;
-  WinChartView* m_pWinChartView;
+  //WinChartView* m_pWinChartView;
   ou::ChartDataView m_ChartDataView;
+  
+  wxWindow* m_winRightDetail;
   
   wxPanel* m_panelSplitterRightPanel;
   wxSplitterWindow* m_splitter;
@@ -270,7 +272,8 @@ private:
   
   void HandleMenuItemDelete( const wxTreeItemId& id );
   
-  void ReplacePanel( wxWindow* );
+  void RemoveRightDetail();
+  void ReplaceRightDetail( wxWindow* );
   
   void BuildInstrument( const DialogPickSymbol::DataExchange& pde, pInstrument_t& pInstrument );
   

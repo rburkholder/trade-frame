@@ -93,11 +93,19 @@ void WinChartView::CreateControls() {
 
 }
 
-// called from PanelCharts::HandleInstrumentLiveChart -> WinChartView::SetChartDataView
 void WinChartView::StartThread( void ) {
   m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart1, this );
 }
 
+void WinChartView::StopThread( void ) {
+  m_bThreadDrawChartActive = false;
+  m_cvThreadDrawChart.notify_one();
+  m_pThreadDrawChart->join();
+  delete m_pThreadDrawChart;
+  m_pThreadDrawChart = 0;
+}
+
+// called from PanelCharts::HandleInstrumentLiveChart -> WinChartView::SetChartDataView
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   if ( m_bThreadDrawChartActive ) 
     StopThread();
@@ -252,25 +260,15 @@ void WinChartView::HandleDrawChart( const MemBlock& m ) {
   cdc.DrawBitmap(bmp, 0, 0);
 }
 
-void WinChartView::StopThread( void ) {
-  m_bThreadDrawChartActive = false;
-  m_cvThreadDrawChart.notify_one();
-  m_pThreadDrawChart->join();
-  delete m_pThreadDrawChart;
-  m_pThreadDrawChart = 0;
-}
-
 void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
   
   SetChartDataView( nullptr );
-  //StopThread();
   
   Unbind( EVENT_DRAW_CHART, &WinChartView::HandleGuiDrawChart, this );
   
   m_timerGuiRefresh.Stop();
   Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   
-  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
   Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
   
   Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );

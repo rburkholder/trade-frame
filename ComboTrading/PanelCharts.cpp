@@ -70,7 +70,7 @@ void PanelCharts::Init( void ) {
   m_sizerRight = 0;
   
   m_pTreeOps = 0;
-  m_pWinChartView = 0;
+  m_winRightDetail = 0;
   m_pWinOptionDetails = 0;
   m_pDialogPickSymbol = 0;
   m_pInstrumentActions.reset( new InstrumentActions );
@@ -207,13 +207,17 @@ void PanelCharts::CalcIV( boost::posix_time::ptime dt, ou::tf::LiborFromIQFeed l
   }
 }
 
-void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
-  if ( 0 != m_pWinChartView ) {
-    m_pWinChartView->SetChartDataView( nullptr );
-    m_sizerRight->Detach( m_pWinChartView );
+void PanelCharts::RemoveRightDetail() {
+  if ( 0 != m_winRightDetail ) {
+    //m_pWinChartView->SetChartDataView( nullptr );
+    m_sizerRight->Detach( m_winRightDetail );
     m_panelSplitterRightPanel->DestroyChildren();
-    m_pWinChartView = 0;
+    m_winRightDetail = 0;
   }
+}
+
+void PanelCharts::HandleTreeOpsChanging( wxTreeItemId item ) {
+  RemoveRightDetail();
 }
 
 PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const wxTreeItemId& item ) {
@@ -229,19 +233,21 @@ PanelCharts::pInstrumentActions_t PanelCharts::HandleGetInstrumentActions( const
   return m_pInstrumentActions;
 }
 
-// signalled in TreeItemInstrument::~TreeItemInstrument
+// signaled in TreeItemInstrument::~TreeItemInstrument
 void PanelCharts::HandleMenuItemDelete( const wxTreeItemId& item ) {
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
+    // this might be ok if deleting a group
     std::cout << "couldn't find the menuitem to delete" << std::endl;
   }
   else {
-    // shouldn't need this if HandleTreeOpsChanging comes before
-    if ( 0 != m_pWinChartView ) {
-      m_pWinChartView->SetChartDataView( nullptr );
-      m_pWinChartView->Close();
-      m_pWinChartView = 0;
-    }
+    RemoveRightDetail();
+//    if ( 0 != m_pWinChartView ) {
+//      m_pWinChartView->SetChartDataView( nullptr );
+//      m_pWinChartView->Close(); // need to remove from sizer and slider
+//      m_pWinChartView = 0;
+//    }
+    // TODO: does/is the watch info already stopped?
     m_mapWatchInfo.erase( iter );
   }
 }
@@ -258,15 +264,19 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
     m_ChartDataView.Clear();
     iter->second->ApplyDataTo( &m_ChartDataView );
 
-    assert( 0 == m_pWinChartView );
+    //assert( 0 == m_pWinChartView );
+    WinChartView* m_pWinChartView = nullptr;
     m_pWinChartView = new WinChartView( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-    ReplacePanel( m_pWinChartView );
-
     m_pWinChartView->SetChartDataView( &m_ChartDataView );
+    
+    ReplaceRightDetail( m_pWinChartView );
+
   }
 }
 
-void PanelCharts::ReplacePanel( wxWindow* pWindow ) {
+void PanelCharts::ReplaceRightDetail( wxWindow* pWindow ) {
+  RemoveRightDetail();
+  m_winRightDetail = pWindow;
   m_sizerRight->Add( pWindow, 1, wxALL|wxEXPAND, 5);
   m_sizerRight->Layout();
 }
@@ -299,7 +309,7 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
     }
   };
   
-  // maybe turn this bit of code into a lamda and pass in the function to be run on success
+  // maybe turn this bit of code into a lambda and pass in the function to be run on success
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
     std::cout << "couldn't find the menuitem for HandleOptionList" << std::endl;
@@ -312,11 +322,15 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
       case ou::tf::InstrumentType::Stock:
         sSymbol = p->GetInstrumentName( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF );
         break;
-      case ou::tf::InstrumentType::Future:
+      case ou::tf::InstrumentType::Future: {
         std::string sTemp = p->GetInstrumentName();
         size_t pos = sTemp.find( '-' );
         assert( 0 != pos );
         sSymbol = sTemp.substr( 0, pos );
+        }
+        break;
+      default:
+        assert(0);
         break;
     }
     assert( 0 != sSymbol.length() );
@@ -590,9 +604,10 @@ void PanelCharts::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a 
   
-  if ( 0 != m_pWinChartView ) {
-    m_pWinChartView->SetChartDataView( nullptr );
-  }
+  // should happen automatically when children are deleted
+  //if ( 0 != m_pWinChartView ) {
+  //  m_pWinChartView->SetChartDataView( nullptr );
+  //}
 
   event.Skip();  // auto followed by Destroy();
 }

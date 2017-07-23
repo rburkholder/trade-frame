@@ -35,7 +35,6 @@ TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResourc
   assert( 0 != m_pInstrumentActions.use_count() );
 }
   
-// TODO: This is not being called, on each instrument delete
 TreeItemInstrument::~TreeItemInstrument( void ) {
   std::cout << "TreeItemInstrument::~TreeItemInstrument" << std::endl;
 }
