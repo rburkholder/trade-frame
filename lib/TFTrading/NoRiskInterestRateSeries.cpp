@@ -79,13 +79,15 @@ void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
 }
 
 double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
-  assert( boost::posix_time::not_a_date_time != td );
   
-  assert( m_bWatching );  // before disabling this, check the IsWatching, doesnt seem to turn off when providers are off
+  assert( boost::posix_time::not_a_date_time != td );
   assert( td >= m_vInterestRate[ 0 ].td );
+  //assert( m_bWatching );  // don't worry about this as the values don't vary much anyway
+  
   structInterestRate tmp( td, "" );
   vInterestRate_citer_t iter1 = std::lower_bound( m_vInterestRate.begin(), m_vInterestRate.end(), tmp, compareInterestRate() );
   vInterestRate_citer_t iter2;
+  
   if ( m_vInterestRate.end() == iter1 ) {
     // extrapolate beyond end
     --iter1;
@@ -139,7 +141,7 @@ LiborFromIQFeed::LiborFromIQFeed( void ): NoRiskInterestRateSeries() {
   typedef NoRiskInterestRateSeries::structSymbol structSymbol;
   NoRiskInterestRateSeries::vSymbol_t vLibor;
   // http://www.global-rates.com/interest-rates/libor/american-dollar/american-dollar.aspx 
-  //   shows sum are not available
+  //   shows some are not available
   // also based upon that chart, the values here do correspond to USD libor
   vLibor += 
     structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
