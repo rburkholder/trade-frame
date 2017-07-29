@@ -29,7 +29,7 @@ namespace tf { // TradeFrame
 
 #define GRID_AccountValues_STYLE wxTAB_TRAVERSAL
 #define GRID_AccountValues_TITLE _("Grid IB Account Values")
-#define GRID_AccountValues_IDNAME ID_PANELACCOUNTVALUES
+#define GRID_AccountValues_IDNAME ID_GRID_ACCOUNTVALUES
 #define GRID_AccountValues_SIZE wxSize(400, 300)
 #define GRID_AccountValues_POSITION wxDefaultPosition
 
@@ -77,8 +77,7 @@ protected:
     void CreateControls();
 private:
   
-  enum { ID_Null=wxID_HIGHEST, ID_PANELACCOUNTVALUES, 
-    ID_GRID_ACCOUNTVALUES
+  enum { ID_Null=wxID_HIGHEST, ID_GRID_ACCOUNTVALUES
   };
   
   std::unique_ptr<GridIBAccountValues_impl> m_pimpl;

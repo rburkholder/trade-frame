@@ -13,7 +13,6 @@
  ************************************************************************/
 // Started January 3, 2016, 3:44 PM
 
-#include <wx/sizer.h>
 #include <wx/icon.h>
 //#include <wx/event.h>
 
@@ -36,7 +35,8 @@ GridIBAccountValues::GridIBAccountValues( wxWindow* parent, wxWindowID id, const
 
 GridIBAccountValues::~GridIBAccountValues( void ) {
   // this destructor is called prior to window destruction
-  m_pimpl->DestroyControls();}
+  m_pimpl->DestroyControls();
+}
 
 void GridIBAccountValues::Init() {
 }
@@ -89,6 +89,7 @@ void GridIBAccountValues::OnDestroy( wxWindowDestroyEvent& event ) {
 
   event.Skip();  // auto followed by Destroy();
 }
+
 wxBitmap GridIBAccountValues::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;

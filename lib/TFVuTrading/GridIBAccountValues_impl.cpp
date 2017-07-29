@@ -13,8 +13,6 @@
  ************************************************************************/
 // Started January 3, 2016, 3:31 PM
 
-#include <wx/sizer.h>
-
 #include "GridIBAccountValues_impl.h"
 
 namespace ou { // One Unified

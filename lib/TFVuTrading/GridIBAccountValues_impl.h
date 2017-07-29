@@ -32,15 +32,13 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/grid.h>
+#include <wx/grid.h>  // needed for the ModelCell_macros
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
 #include "GridIBAccountValues.h"
-
-// modeled after "PanelPortfolioPosition_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -99,9 +97,6 @@ struct GridIBAccountValues_impl {
     }
   };
   
-  // need to change the whole thing from panel to grid, emulate what was done with GridOptionDetails
-  //wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
-  
   GridIBAccountValues& m_pav; // passed in on construction 
   
   typedef std::map<std::string,AccountValueRow> mapAccountValueRow_t;
@@ -112,8 +107,6 @@ struct GridIBAccountValues_impl {
   void DestroyControls();
   
   void UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av );
-  
-  //void OnClose( wxCloseEvent& event );
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
