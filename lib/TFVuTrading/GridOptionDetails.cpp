@@ -73,6 +73,10 @@ void GridOptionDetails::CreateControls() {
   
 }
 
+void GridOptionDetails::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
+  m_pimpl->Add( strike, side, sSymbol );
+}
+
 void GridOptionDetails::UpdateCallGreeks( double strike, ou::tf::Greek& greek ) {
   m_pimpl->UpdateCallGreeks( strike, greek );
 }
@@ -132,6 +136,7 @@ void GridOptionDetails::OnDestroy( wxWindowDestroyEvent& event ) {
 
   event.Skip();  // auto followed by Destroy();
 }
+
 wxBitmap GridOptionDetails::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;

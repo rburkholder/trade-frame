@@ -81,9 +81,20 @@ struct GridOptionDetails_impl {
   
   class OptionValueRow {
   public:
-    OptionValueRow( wxGrid& grid, int nRow ): m_grid( grid ), m_nRow( nRow ) { Init(); }
-    OptionValueRow( wxGrid& grid ): m_grid( grid ), m_nRow {} { Init(); }
-    OptionValueRow( const OptionValueRow& rhs ): m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ) { Init(); }
+    //OptionValueRow( wxGrid& grid, int nRow ): m_grid( grid ), m_nRow( nRow ) { Init(); }
+    //OptionValueRow( wxGrid& grid ): m_grid( grid ), m_nRow {} { Init(); }
+    OptionValueRow( wxGrid& grid, double strike )
+      : m_grid( grid ), m_nRow {} 
+      { 
+	Init(); 
+        boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike);
+       }
+    OptionValueRow( const OptionValueRow& rhs )
+      : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ) 
+    { 
+      Init();
+      boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Strike>( rhs.m_vModelCells ).GetValue() );
+    }
     ~OptionValueRow( void ) {}
     
     void SetRowIndex( int nRow ) { m_nRow = nRow; }

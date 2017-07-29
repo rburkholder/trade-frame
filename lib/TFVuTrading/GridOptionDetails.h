@@ -53,6 +53,8 @@ public:
     long style = GRID_OPTIONDETAILS_STYLE,
     const wxString& = GRID_OPTIONDETAILS_TITLE );
   
+  void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
+  
   void UpdateCallGreeks( double strike, ou::tf::Greek& );
   void UpdateCallQuote( double strike, ou::tf::Quote& );
   void UpdateCallTrade( double strike, ou::tf::Trade& );  

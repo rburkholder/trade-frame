@@ -70,7 +70,7 @@ void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionS
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
     iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.begin(),
-      mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details ) ) );
+      mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details, strike ) ) );
     
     struct Reindex {
       size_t ix;

@@ -94,6 +94,7 @@ void NotebookOptionChains::Clear() {
 void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
   
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
+  
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
     std::string sDate = boost::lexical_cast<std::string>( date.year() );
     sDate += std::string( "/" ) 
@@ -124,11 +125,12 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   }
   
   mapStrike_t& mapStrike( iterExpiry->second.mapStrike ); // assumes single thread
-  
   mapStrike_t::iterator iterStrike = mapStrike.find( strike );
+  
   if ( mapStrike.end() == iterStrike ) {
     iterStrike = mapStrike.insert( mapStrike.begin(), mapStrike_t::value_type( strike, Row( mapStrike.size() ) ) );
   }
+  
   switch ( side ) {
     case ou::tf::OptionSide::Call:
       assert( "" == iterStrike->second.sCall );
@@ -139,6 +141,8 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
       iterStrike->second.sPut = sSymbol;
       break;
   }
+  
+  iterExpiry->second.pWinOptionsDetails->Add( strike, side, sSymbol );
   
   
 }
