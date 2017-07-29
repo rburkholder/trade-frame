@@ -97,12 +97,12 @@ struct PanelPortfolioPosition_impl {
 
   class structPosition {
   public:
-    structPosition( pPosition_t pPosition, wxGrid* pGrid, int row )
-      : m_pPosition( pPosition ), m_pGrid( pGrid ), m_row( row ) {
+    structPosition( pPosition_t pPosition, wxGrid& grid, int row )
+      : m_pPosition( pPosition ), m_grid( grid ), m_row( row ) {
         Init();
     }
     structPosition( const structPosition& rhs )
-      : m_pPosition( rhs.m_pPosition ), m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) {
+      : m_pPosition( rhs.m_pPosition ), m_grid( rhs.m_grid ), m_row( rhs.m_row ) {
       Init();
     }
     ~structPosition( void ) {
@@ -116,7 +116,7 @@ struct PanelPortfolioPosition_impl {
     void UpdateGui( void ) {
       //m_pGrid->BeginBatch();
       //m_pGrid->Freeze();
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_row ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_row ) );
       //m_pGrid->Thaw();
       //m_pGrid->EndBatch();
     }
@@ -126,7 +126,7 @@ struct PanelPortfolioPosition_impl {
     }
   private:
     int m_row;
-    wxGrid* m_pGrid;
+    wxGrid& m_grid;
     pPosition_t m_pPosition;
     vModelCells_t m_vModelCells;
     void Init( void ) {

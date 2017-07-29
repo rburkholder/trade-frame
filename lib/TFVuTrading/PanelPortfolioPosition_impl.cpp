@@ -340,7 +340,7 @@ void PanelPortfolioPosition_impl::AddPosition( pPosition_t pPosition ) {
 
   int row( m_vPositions.size() );
 
-  m_vPositions.push_back( structPosition( pPosition, m_gridPositions, row ) );
+  m_vPositions.push_back( structPosition( pPosition, *m_gridPositions, row ) );
 
   UpdateGui();
 }
