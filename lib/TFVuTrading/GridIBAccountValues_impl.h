@@ -45,10 +45,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct PanelIBAccountValues_impl {
+struct GridIBAccountValues_impl {
 //public:
-  PanelIBAccountValues_impl( PanelIBAccountValues& );
-  virtual ~PanelIBAccountValues_impl();
+  GridIBAccountValues_impl( GridIBAccountValues& );
+  virtual ~GridIBAccountValues_impl();
 //private:
   
 // for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
@@ -100,25 +100,27 @@ struct PanelIBAccountValues_impl {
   };
   
   // need to change the whole thing from panel to grid, emulate what was done with GridOptionDetails
-  wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
+  //wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
   
-  PanelIBAccountValues& m_pav; // passed in on construction 
+  GridIBAccountValues& m_pav; // passed in on construction 
   
   typedef std::map<std::string,AccountValueRow> mapAccountValueRow_t;
   mapAccountValueRow_t m_mapAccountValueRow;
 
   void CreateControls();
+  //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
+  void DestroyControls();
   
   void UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av );
   
-  void OnClose( wxCloseEvent& event );
+  //void OnClose( wxCloseEvent& event );
   
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    int cnt = m_pGrid->GetCols();
+    int cnt = m_pav.GetCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_pGrid->GetColumnWidth( ix );
+      ar & m_pav.GetColumnWidth( ix );
     }
   }
 
@@ -126,11 +128,11 @@ struct PanelIBAccountValues_impl {
   void load( Archive& ar, const unsigned int version ) {
     int cnt;
     ar & cnt;
-    assert( cnt == m_pGrid->GetCols() ); 
+    assert( cnt == m_pav.GetCols() ); 
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
-      m_pGrid->SetColumnWidth( ix, width );
+      m_pav.SetColumnWidth( ix, width );
     }
   }
 
@@ -138,11 +140,11 @@ struct PanelIBAccountValues_impl {
 };
 
 template<class Archive>
-void PanelIBAccountValues::serialize(Archive & ar, const unsigned int file_version){
+void GridIBAccountValues::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
 }  
 
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelIBAccountValues_impl, 1)
+BOOST_CLASS_VERSION(ou::tf::GridIBAccountValues_impl, 1)

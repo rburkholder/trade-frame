@@ -25,62 +25,86 @@ namespace tf { // TradeFrame
 
 wxDEFINE_EVENT( EVT_IBAccountValue, IBAccountValueEvent );
 
-PanelIBAccountValues::PanelIBAccountValues() {
+GridIBAccountValues::GridIBAccountValues() {
   Init();
 }
 
-PanelIBAccountValues::PanelIBAccountValues( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+GridIBAccountValues::GridIBAccountValues( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
     Init();
-    Create(parent, id, pos, size, style);
+    Create(parent, id, pos, size, style, sTitle );
 }
 
-PanelIBAccountValues::~PanelIBAccountValues( void ) {
+GridIBAccountValues::~GridIBAccountValues( void ) {
+  // this destructor is called prior to window destruction
+  m_pimpl->DestroyControls();}
+
+void GridIBAccountValues::Init() {
 }
 
-void PanelIBAccountValues::Init() {
-  Bind( EVT_IBAccountValue, &PanelIBAccountValues::HandleIBAccountValue, this );
-  m_pimpl.reset( new PanelIBAccountValues_impl( *this ) ); 
-}
-
-bool PanelIBAccountValues::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+bool GridIBAccountValues::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
   
-    wxPanel::Create( parent, id, pos, size, style );
+  wxGrid::Create(parent, id, pos, size, style, sTitle );
+  m_pimpl.reset( new GridIBAccountValues_impl( *this ) ); 
 
-    m_pimpl->CreateControls();
-    if (GetSizer())     {
-        GetSizer()->SetSizeHints(this);
-    }
-    Centre();
-    return true;
+  CreateControls();
+    
+  return true;
+}
+
+void GridIBAccountValues::CreateControls() {    
+  
+  Bind( EVT_IBAccountValue, &GridIBAccountValues::HandleIBAccountValue, this );
+  Bind( wxEVT_DESTROY, &GridIBAccountValues::OnDestroy, this );
+  
+  m_pimpl->CreateControls();
+  
 }
 
 // need to cross a thread boundary here
 // TODO: need to check that ad is valid through the event transition
-void PanelIBAccountValues::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad ) {
+void GridIBAccountValues::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad ) {
   auto p( new IBAccountValueEvent( EVT_IBAccountValue, ad ) );
   this->QueueEvent( p );
 }
 
-void PanelIBAccountValues::HandleIBAccountValue( IBAccountValueEvent& event ) {
+void GridIBAccountValues::HandleIBAccountValue( IBAccountValueEvent& event ) {
   m_pimpl->UpdateAccountValueRow( event.GetIBAccountValue() );
 }
 
-wxBitmap PanelIBAccountValues::GetBitmapResource( const wxString& name ) {
+void GridIBAccountValues::OnDestroy( wxWindowDestroyEvent& event ) {
+  
+  //m_pimpl->DestroyControls();
+  //m_timerGuiRefresh.Stop();
+  //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  Unbind( wxEVT_DESTROY, &GridIBAccountValues::OnDestroy, this );
+  
+  //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+  //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+  
+  //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+  //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+  event.Skip();  // auto followed by Destroy();
+}
+wxBitmap GridIBAccountValues::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;
 }
 
-wxIcon PanelIBAccountValues::GetIconResource( const wxString& name ) {
+wxIcon GridIBAccountValues::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
 }
 
-template void PanelIBAccountValues::serialize<boost::archive::text_iarchive>(
+template void GridIBAccountValues::serialize<boost::archive::text_iarchive>(
     boost::archive::text_iarchive & ar, 
     const unsigned int file_version
 );
 
-template void PanelIBAccountValues::serialize<boost::archive::text_oarchive>(
+template void GridIBAccountValues::serialize<boost::archive::text_oarchive>(
     boost::archive::text_oarchive & ar, 
     const unsigned int file_version
 );

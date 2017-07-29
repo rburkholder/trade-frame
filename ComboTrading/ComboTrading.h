@@ -168,7 +168,7 @@ private:
 //  CPPOE_t* m_pCPPOE;
   
     wxSplitterWindow* m_splitPanels;
-    ou::tf::PanelIBAccountValues* m_pPanelIBAccountValues;
+    ou::tf::GridIBAccountValues* m_pPanelIBAccountValues;
     ou::tf::PanelIBPositionDetails* m_pPanelIBPositionDetails;  
     
   wxBoxSizer* m_sizerPM;

@@ -20,25 +20,25 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelIBAccountValues_impl::PanelIBAccountValues_impl( PanelIBAccountValues& pav )
-: m_pav( pav ), m_pGrid( nullptr ) {
+GridIBAccountValues_impl::GridIBAccountValues_impl( GridIBAccountValues& pav )
+: m_pav( pav ) {
 }
 
-void PanelIBAccountValues_impl::CreateControls() {
-    PanelIBAccountValues* itemPanel1 = &m_pav;
+void GridIBAccountValues_impl::CreateControls() {
+    //GridIBAccountValues* itemPanel1 = &m_pav;
 
-    wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
-    itemPanel1->SetSizer(itemBoxSizer2);
+    //wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
+    //itemPanel1->SetSizer(itemBoxSizer2);
 
-    m_pGrid = new wxGrid( itemPanel1, m_pav.ID_GRID_ACCOUNTVALUES, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
-    m_pGrid->SetDefaultColSize(50);
-    m_pGrid->SetDefaultRowSize(22);
-    m_pGrid->SetColLabelSize(22);
-    m_pGrid->SetRowLabelSize(50);
+    //m_pGrid = new wxGrid( itemPanel1, m_pav.ID_GRID_ACCOUNTVALUES, wxDefaultPosition, wxSize(400, 300), wxHSCROLL|wxVSCROLL );
+    m_pav.SetDefaultColSize(50);
+    m_pav.SetDefaultRowSize(22);
+    m_pav.SetColLabelSize(22);
+    m_pav.SetRowLabelSize(50);
     //m_pGrid->CreateGrid(5, 5, wxGrid::wxGridSelectCells);
-    itemBoxSizer2->Add(m_pGrid, 1, wxGROW|wxALL, 2);
+    //itemBoxSizer2->Add(&m_pav, 1, wxGROW|wxALL, 2);
     
-  m_pGrid->CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+  m_pav.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
 
 // found in ModelCell_macros.h  
 #ifdef GRID_EMIT_SetColSettings
@@ -46,49 +46,38 @@ void PanelIBAccountValues_impl::CreateControls() {
 #endif
   
 #define GRID_EMIT_SetColSettings( z, n, VAR ) \
-  m_pGrid->SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_pGrid->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  m_pav.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
+  m_pav.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
   
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
       
-  m_pav.Bind( wxEVT_CLOSE_WINDOW, &PanelIBAccountValues_impl::OnClose, this );  // start close of windows and controls
+  //m_pav.Bind( wxEVT_CLOSE_WINDOW, &GridIBAccountValues_impl::OnClose, this );  // start close of windows and controls
 }
 
-PanelIBAccountValues_impl::~PanelIBAccountValues_impl() {
+GridIBAccountValues_impl::~GridIBAccountValues_impl() {
 }
 
-void PanelIBAccountValues_impl::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av ) {
+void GridIBAccountValues_impl::UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& av ) {
   
   mapAccountValueRow_t::iterator iter = m_mapAccountValueRow.find( av.sKey );
   if ( m_mapAccountValueRow.end() == iter ) {
     iter = m_mapAccountValueRow.insert( m_mapAccountValueRow.end(),
-      mapAccountValueRow_t::value_type( av.sKey, AccountValueRow( *m_pGrid, m_mapAccountValueRow.size() ) ) );
-    m_pGrid->AppendRows( 1 );
+      mapAccountValueRow_t::value_type( av.sKey, AccountValueRow( m_pav, m_mapAccountValueRow.size() ) ) );
+    m_pav.AppendRows( 1 );
   }
 
   iter->second.UpdateAccountValue( av );
   iter->second.UpdateGui();  // TODO:  do a timed update
 }
 
-void PanelIBAccountValues_impl::OnClose( wxCloseEvent& event ) {
-
-  // todo:  don't close if dialog is still open.
-
-//  if ( 0 != m_menuGridLabelPositionPopUp ) {
-//    delete m_menuGridLabelPositionPopUp;
-//  }
-
-//  if ( 0 != m_menuGridCellPositionPopUp ) {
-//    delete m_menuGridCellPositionPopUp;
-//  }
-
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
-  event.Skip();  // auto followed by Destroy();
-
+void GridIBAccountValues_impl::DestroyControls() { 
+  
+  //m_timerGuiRefresh.Stop();
+  //m_details.Unbind( wxEVT_TIMER, &GridOptionDetails_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
+
 } // namespace tf
 } // namespace ou

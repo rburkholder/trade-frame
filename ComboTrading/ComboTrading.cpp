@@ -249,7 +249,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
     m_splitPanels = new wxSplitterWindow( itemFrame1, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_LIVE_UPDATE );
     m_splitPanels->SetMinimumPaneSize(20);
 
-    m_pPanelIBAccountValues = new ou::tf::PanelIBAccountValues( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelIBAccountValues = new ou::tf::GridIBAccountValues( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelIBAccountValues->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 
     m_pPanelIBPositionDetails = new ou::tf::PanelIBPositionDetails( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
@@ -261,7 +261,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
   if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
     ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
     pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::PanelIBPositionDetails::UpdatePositionDetailRow );
-    pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::PanelIBAccountValues::UpdateAccountValueRow );
+    pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::GridIBAccountValues::UpdateAccountValueRow );
   }
 
   m_pFInteractiveBrokers->SetAutoLayout( true );

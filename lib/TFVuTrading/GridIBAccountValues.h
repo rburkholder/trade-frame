@@ -20,18 +20,18 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-#include <wx/panel.h>
+#include <wx/grid.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_AccountValues_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_AccountValues_TITLE _("Panel IB Account Values")
-#define SYMBOL_PANEL_AccountValues_IDNAME ID_PANELACCOUNTVALUES
-#define SYMBOL_PANEL_AccountValues_SIZE wxSize(400, 300)
-#define SYMBOL_PANEL_AccountValues_POSITION wxDefaultPosition
+#define GRID_AccountValues_STYLE wxTAB_TRAVERSAL
+#define GRID_AccountValues_TITLE _("Grid IB Account Values")
+#define GRID_AccountValues_IDNAME ID_PANELACCOUNTVALUES
+#define GRID_AccountValues_SIZE wxSize(400, 300)
+#define GRID_AccountValues_POSITION wxDefaultPosition
 
 class IBAccountValueEvent: public wxEvent {
 public:
@@ -46,40 +46,46 @@ private:
   const ou::tf::IBTWS::AccountValue m_ad;
 };
 
-class PanelIBAccountValues_impl;  // Forward declaration
+class GridIBAccountValues_impl;  // Forward declaration
 
-class PanelIBAccountValues: public wxPanel {
-    friend class PanelIBAccountValues_impl;
+class GridIBAccountValues: public wxGrid {
+    friend class GridIBAccountValues_impl;
     friend class boost::serialization::access;
 public:
-  PanelIBAccountValues(void);
-  PanelIBAccountValues( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_AccountValues_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountValues_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountValues_SIZE, 
-    long style = SYMBOL_PANEL_AccountValues_STYLE );
-  ~PanelIBAccountValues(void);
+  GridIBAccountValues(void);
+  GridIBAccountValues( 
+    wxWindow* parent, wxWindowID id = GRID_AccountValues_IDNAME, 
+    const wxPoint& pos = GRID_AccountValues_POSITION, 
+    const wxSize& size = GRID_AccountValues_SIZE, 
+    long style = GRID_AccountValues_STYLE,
+    const wxString& = GRID_AccountValues_TITLE
+    );
+  ~GridIBAccountValues(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_AccountValues_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountValues_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountValues_SIZE, 
-    long style = SYMBOL_PANEL_AccountValues_STYLE );
+    wxWindowID id = GRID_AccountValues_IDNAME, 
+    const wxPoint& pos = GRID_AccountValues_POSITION, 
+    const wxSize& size = GRID_AccountValues_SIZE, 
+    long style = GRID_AccountValues_STYLE,
+    const wxString& = GRID_AccountValues_TITLE
+  );
   
   void UpdateAccountValueRow( const ou::tf::IBTWS::AccountValue& ad );
 
 protected:
     void Init();
+    void CreateControls();
 private:
   
   enum { ID_Null=wxID_HIGHEST, ID_PANELACCOUNTVALUES, 
     ID_GRID_ACCOUNTVALUES
   };
   
-  std::unique_ptr<PanelIBAccountValues_impl> m_pimpl;
+  std::unique_ptr<GridIBAccountValues_impl> m_pimpl;
   
   void HandleIBAccountValue( IBAccountValueEvent& event );
 
+  void OnDestroy( wxWindowDestroyEvent& event );
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };

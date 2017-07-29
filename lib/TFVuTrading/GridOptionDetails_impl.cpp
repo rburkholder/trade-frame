@@ -148,10 +148,10 @@ void GridOptionDetails_impl::DestroyControls() {
   //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 
-void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
+//void GridOptionDetails_impl::OnDestroy( wxWindowDestroyEvent& event ) {
   
-  event.Skip();
-}
+//  event.Skip();
+//}
 
 } // namespace tf
 } // namespace ou
