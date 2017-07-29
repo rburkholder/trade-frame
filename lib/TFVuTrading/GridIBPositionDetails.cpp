@@ -13,7 +13,6 @@
  ************************************************************************/
 // Started December 30, 2015, 3:40 PM
 
-#include <wx/sizer.h>
 #include <wx/icon.h>
 
 #include "GridIBPositionDetails.h"
@@ -24,59 +23,86 @@ namespace tf { // TradeFrame
 
 wxDEFINE_EVENT( EVT_IBPositionDetail, IBPositionDetailEvent );
 
-PanelIBPositionDetails::PanelIBPositionDetails() {
+GridIBPositionDetails::GridIBPositionDetails() {
   Init();
 }
 
-PanelIBPositionDetails::PanelIBPositionDetails( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+GridIBPositionDetails::GridIBPositionDetails( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
     Init();
-    Create(parent, id, pos, size, style);
+    Create(parent, id, pos, size, style, sTitle);
 }
 
-PanelIBPositionDetails::~PanelIBPositionDetails( void ) {
+GridIBPositionDetails::~GridIBPositionDetails( void ) {
+  // this destructor is called prior to window destruction
+  m_pimpl->DestroyControls();
 }
 
-void PanelIBPositionDetails::Init() {
-  m_pimpl.reset( new PanelIBPositionDetails_impl( *this ) ); 
-  Bind( EVT_IBPositionDetail, &PanelIBPositionDetails::HandleIBPositionDetail, this );
+void GridIBPositionDetails::Init() {
+  m_pimpl.reset( new GridIBPositionDetails_impl( *this ) ); 
 }
 
-bool PanelIBPositionDetails::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+bool GridIBPositionDetails::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle ) {
   
-    wxPanel::Create( parent, id, pos, size, style );
+  wxGrid::Create(parent, id, pos, size, style, sTitle );
 
-    m_pimpl->CreateControls();
-    if (GetSizer())     {
-        GetSizer()->SetSizeHints(this);
-    }
-    Centre();
-    return true;
+  m_pimpl.reset( new GridIBPositionDetails_impl( *this ) ); 
+  CreateControls();
+
+  return true;
 }
 
-void PanelIBPositionDetails::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& pd ) {
+void GridIBPositionDetails::CreateControls() {    
+  
+  Bind( EVT_IBPositionDetail, &GridIBPositionDetails::HandleIBPositionDetail, this );
+  Bind( wxEVT_DESTROY, &GridIBPositionDetails::OnDestroy, this );
+  
+  m_pimpl->CreateControls();
+  
+}
+
+void GridIBPositionDetails::UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& pd ) {
   auto p( new IBPositionDetailEvent( EVT_IBPositionDetail, pd ) );
   this->QueueEvent( p );
 }
 
-void PanelIBPositionDetails::HandleIBPositionDetail( IBPositionDetailEvent& event ) {
+void GridIBPositionDetails::HandleIBPositionDetail( IBPositionDetailEvent& event ) {
   m_pimpl->UpdatePositionDetailRow( event.GetIBPositionDetail() );
 }
 
-wxBitmap PanelIBPositionDetails::GetBitmapResource( const wxString& name ) {
+wxBitmap GridIBPositionDetails::GetBitmapResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullBitmap;
 }
 
-wxIcon PanelIBPositionDetails::GetIconResource( const wxString& name ) {
+void GridIBPositionDetails::OnDestroy( wxWindowDestroyEvent& event ) {
+  
+  //m_pimpl->DestroyControls();
+  //m_timerGuiRefresh.Stop();
+  //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  
+  Unbind( wxEVT_DESTROY, &GridIBPositionDetails::OnDestroy, this );
+  
+  //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
+  //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
+  
+  //Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
+  //Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
+  //Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );  
+  //Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
+
+  event.Skip();  // auto followed by Destroy();
+}
+
+wxIcon GridIBPositionDetails::GetIconResource( const wxString& name ) {
     wxUnusedVar(name);
     return wxNullIcon;
 }
 
-template void PanelIBPositionDetails::serialize<boost::archive::text_iarchive>(
+template void GridIBPositionDetails::serialize<boost::archive::text_iarchive>(
     boost::archive::text_iarchive & ar, 
     const unsigned int file_version
 );
-template void PanelIBPositionDetails::serialize<boost::archive::text_oarchive>(
+template void GridIBPositionDetails::serialize<boost::archive::text_oarchive>(
     boost::archive::text_oarchive & ar, 
     const unsigned int file_version
 );

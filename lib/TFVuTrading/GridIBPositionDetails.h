@@ -20,18 +20,18 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-#include <wx/panel.h>
+#include <wx/grid.h>
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_PANEL_AccountDetails_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_PANEL_AccountDetails_TITLE _("Panel IB Account Details")
-#define SYMBOL_PANEL_AccountDetails_IDNAME ID_PANELACCOUNTDETAILS
-#define SYMBOL_PANEL_AccountDetails_SIZE wxSize(400, 300)
-#define SYMBOL_PANEL_AccountDetails_POSITION wxDefaultPosition
+#define GRID_PositionDetails_STYLE wxTAB_TRAVERSAL
+#define GRID_PositionDetails_TITLE _("Grid IB Position Details")
+#define GRID_PositionDetails_IDNAME ID_GRID_IB_POSITION_DETAILS
+#define GRID_PositionDetails_SIZE wxSize(400, 300)
+#define GRID_PositionDetails_POSITION wxDefaultPosition
 
 class IBPositionDetailEvent: public wxEvent {
 public:
@@ -46,40 +46,43 @@ private:
   const ou::tf::IBTWS::PositionDetail m_pd;
 };
 
-class PanelIBPositionDetails_impl;  // Forward declaration
+class GridIBPositionDetails_impl;  // Forward declaration
 
-class PanelIBPositionDetails: public wxPanel {
-    friend class PanelIBPositionDetails_impl;
+class GridIBPositionDetails: public wxGrid {
+    friend class GridIBPositionDetails_impl;
     friend class boost::serialization::access;
 public:
-  PanelIBPositionDetails(void);
-  PanelIBPositionDetails( 
-    wxWindow* parent, wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountDetails_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
-    long style = SYMBOL_PANEL_AccountDetails_STYLE );
-  ~PanelIBPositionDetails(void);
+  GridIBPositionDetails(void);
+  GridIBPositionDetails( 
+    wxWindow* parent, wxWindowID id = GRID_PositionDetails_IDNAME, 
+    const wxPoint& pos = GRID_PositionDetails_POSITION, 
+    const wxSize& size = GRID_PositionDetails_SIZE, 
+    long style = GRID_PositionDetails_STYLE,
+    const wxString& = GRID_PositionDetails_TITLE );
+  ~GridIBPositionDetails(void);
 
   bool Create( wxWindow* parent, 
-    wxWindowID id = SYMBOL_PANEL_AccountDetails_IDNAME, 
-    const wxPoint& pos = SYMBOL_PANEL_AccountDetails_POSITION, 
-    const wxSize& size = SYMBOL_PANEL_AccountDetails_SIZE, 
-    long style = SYMBOL_PANEL_AccountDetails_STYLE );
+    wxWindowID id = GRID_PositionDetails_IDNAME, 
+    const wxPoint& pos = GRID_PositionDetails_POSITION, 
+    const wxSize& size = GRID_PositionDetails_SIZE, 
+    long style = GRID_PositionDetails_STYLE,
+    const wxString& = GRID_PositionDetails_TITLE );
   
   void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
 
 protected:
     void Init();
+    void CreateControls();
 private:
   
-  enum { ID_Null=wxID_HIGHEST, ID_PANELACCOUNTDETAILS, 
-    ID_GRID_ACCOUNTDETAILS
+  enum { ID_Null=wxID_HIGHEST, ID_GRID_IB_POSITION_DETAILS
   };
   
-  std::unique_ptr<PanelIBPositionDetails_impl> m_pimpl;
+  std::unique_ptr<GridIBPositionDetails_impl> m_pimpl;
   
   void HandleIBPositionDetail( IBPositionDetailEvent& event );
 
+  void OnDestroy( wxWindowDestroyEvent& event );
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };

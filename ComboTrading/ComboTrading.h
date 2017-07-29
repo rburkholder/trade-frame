@@ -169,7 +169,7 @@ private:
   
     wxSplitterWindow* m_splitPanels;
     ou::tf::GridIBAccountValues* m_pPanelIBAccountValues;
-    ou::tf::PanelIBPositionDetails* m_pPanelIBPositionDetails;  
+    ou::tf::GridIBPositionDetails* m_pPanelIBPositionDetails;  
     
   wxBoxSizer* m_sizerPM;
   wxScrolledWindow* m_scrollPM;

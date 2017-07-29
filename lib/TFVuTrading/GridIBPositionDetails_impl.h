@@ -34,9 +34,7 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-//#include <boost/signals2.hpp>
-
-#include <wx/grid.h>
+#include <wx/grid.h>  // needed for the ModelCell_macros
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -44,15 +42,15 @@
 
 #include "GridIBPositionDetails.h"
 
-// modelled after "PanelPortfolioPosition_impl.h"
+// modelled after "PanelPortfolioPosition_impl.h", which needs to be updated for wxGrid?
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct PanelIBPositionDetails_impl {
+struct GridIBPositionDetails_impl {
 //public:
-  PanelIBPositionDetails_impl( PanelIBPositionDetails& );
-  virtual ~PanelIBPositionDetails_impl();
+  GridIBPositionDetails_impl( GridIBPositionDetails& );
+  virtual ~GridIBPositionDetails_impl();
 //private:
   
 // for columns: wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
@@ -122,14 +120,13 @@ struct PanelIBPositionDetails_impl {
     }
   };
   
-  wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
-  
-  PanelIBPositionDetails& m_pad; // passed in on construction 
+  GridIBPositionDetails& m_pad; // passed in on construction 
   
   typedef std::map<std::string,PositionDetailRow> mapPositionDetailRow_t;
   mapPositionDetailRow_t m_mapPositionDetailRow;
 
   void CreateControls();
+  void DestroyControls();
   
   void UpdatePositionDetailRow( const ou::tf::IBTWS::PositionDetail& ad );
   
@@ -138,10 +135,10 @@ struct PanelIBPositionDetails_impl {
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     //ar & boost::serialization::base_object<const TreeItemResources>(*this);
-    int cnt = m_pGrid->GetCols();
+    int cnt = m_pad.GetCols();
     ar & cnt;
     for ( int ix = 0; ix < cnt; ix++ ) {
-      ar & m_pGrid->GetColumnWidth( ix );
+      ar & m_pad.GetColumnWidth( ix );
     }
   }
 
@@ -150,11 +147,11 @@ struct PanelIBPositionDetails_impl {
     //ar & boost::serialization::base_object<TreeItemResources>(*this);
     int cnt;
     ar & cnt;
-    assert( cnt == m_pGrid->GetCols() ); 
+    assert( cnt == m_pad.GetCols() ); 
     int width;
     for ( int ix = 0; ix < cnt; ix++ ) {
       ar & width;
-      m_pGrid->SetColumnWidth( ix, width );
+      m_pad.SetColumnWidth( ix, width );
     }
   }
 
@@ -162,13 +159,13 @@ struct PanelIBPositionDetails_impl {
 };
 
 template<class Archive>
-void PanelIBPositionDetails::serialize(Archive & ar, const unsigned int file_version){
+void GridIBPositionDetails::serialize(Archive & ar, const unsigned int file_version){
     ar & *m_pimpl;
 }  
 
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelIBPositionDetails_impl, 1)
+BOOST_CLASS_VERSION(ou::tf::GridIBPositionDetails_impl, 1)
   
 

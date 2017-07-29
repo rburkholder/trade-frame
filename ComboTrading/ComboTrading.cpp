@@ -36,7 +36,6 @@
 #include <wx/window.h>
 #include <wx/timer.h>
 #include <wx/app.h>
-//#include <wx-3.0/wx/app.h>
 
 #include "ComboTrading.h"
 
@@ -252,7 +251,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
     m_pPanelIBAccountValues = new ou::tf::GridIBAccountValues( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelIBAccountValues->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 
-    m_pPanelIBPositionDetails = new ou::tf::PanelIBPositionDetails( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    m_pPanelIBPositionDetails = new ou::tf::GridIBPositionDetails( m_splitPanels, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_pPanelIBPositionDetails->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 
     m_splitPanels->SplitVertically(m_pPanelIBAccountValues, m_pPanelIBPositionDetails, 50);
@@ -260,7 +259,7 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
 
   if ( ou::tf::keytypes::EProviderIB == m_pExecutionProvider->ID() ) {
     ou::tf::IBTWS::pProvider_t pProviderIB = boost::dynamic_pointer_cast<ou::tf::IBTWS>( m_pExecutionProvider );
-    pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::PanelIBPositionDetails::UpdatePositionDetailRow );
+    pProviderIB->OnPositionDetailHandler = MakeDelegate( m_pPanelIBPositionDetails, &ou::tf::GridIBPositionDetails::UpdatePositionDetailRow );
     pProviderIB->OnAccountValueHandler = MakeDelegate( m_pPanelIBAccountValues, &ou::tf::GridIBAccountValues::UpdateAccountValueRow );
   }
 
