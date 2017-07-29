@@ -75,11 +75,11 @@ struct PanelIBAccountValues_impl {
 
   class AccountValueRow {
   public:
-    AccountValueRow( wxGrid* pGrid, int nRow ): m_pGrid( pGrid ), m_nRow( nRow ) { Init(); }
-    AccountValueRow( const AccountValueRow& rhs ): m_pGrid( rhs.m_pGrid ), m_nRow( rhs.m_nRow ) { Init(); }
+    AccountValueRow( wxGrid& grid, int nRow ): m_grid( grid ), m_nRow( nRow ) { Init(); }
+    AccountValueRow( const AccountValueRow& rhs ): m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ) { Init(); }
     ~AccountValueRow( void ) {}
     void UpdateGui( void ) {
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_nRow ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
     void UpdateAccountValue( const ou::tf::IBTWS::AccountValue& av ) {
       boost::fusion::at_c<COL_Key>( m_vModelCells ).SetValue( av.sKey );
@@ -89,7 +89,7 @@ struct PanelIBAccountValues_impl {
     }
   protected:
   private:
-    wxGrid* m_pGrid;
+    wxGrid& m_grid;
     int m_nRow;
     vModelCells_t m_vModelCells;
     
@@ -99,6 +99,7 @@ struct PanelIBAccountValues_impl {
     }
   };
   
+  // need to change the whole thing from panel to grid, emulate what was done with GridOptionDetails
   wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
   
   PanelIBAccountValues& m_pav; // passed in on construction 

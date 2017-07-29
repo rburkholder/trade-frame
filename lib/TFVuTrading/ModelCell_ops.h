@@ -21,14 +21,14 @@ namespace tf { // TradeFrame
 namespace ModelCell_ops {
 
 struct UpdateGui {
-  wxGrid* m_pGrid;
+  wxGrid& m_grid;
   int m_row;
-  UpdateGui( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) {};
+  UpdateGui( wxGrid& grid, int row ): m_grid( grid ), m_row( row ) {};
   template<typename T>
   void operator()( T& t ) const {
     // todo:  deal with flicker by double-buffering?
     if ( t.Changed() ) {
-      m_pGrid->SetCellValue( m_row, t.GetCol(), wxString( t.GetText() ) );
+      m_grid.SetCellValue( m_row, t.GetCol(), wxString( t.GetText() ) );
     }
   }
 };

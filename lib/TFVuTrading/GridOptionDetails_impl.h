@@ -81,12 +81,16 @@ struct GridOptionDetails_impl {
   
   class OptionValueRow {
   public:
-    OptionValueRow( wxGrid* pGrid, int nRow ): m_pGrid( pGrid ), m_nRow( nRow ) { Init(); }
-    OptionValueRow( const OptionValueRow& rhs ): m_pGrid( rhs.m_pGrid ), m_nRow( rhs.m_nRow ) { Init(); }
+    OptionValueRow( wxGrid& grid, int nRow ): m_grid( grid ), m_nRow( nRow ) { Init(); }
+    OptionValueRow( wxGrid& grid ): m_grid( grid ), m_nRow {} { Init(); }
+    OptionValueRow( const OptionValueRow& rhs ): m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ) { Init(); }
     ~OptionValueRow( void ) {}
     
+    void SetRowIndex( int nRow ) { m_nRow = nRow; }
+    int GetRowIndex() const { return m_nRow; }
+    
     void UpdateGui( void ) {
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_nRow ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
     void UpdateCallGreeks( ou::tf::Greek& greek ) {
       boost::fusion::at_c<COL_CallIV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
@@ -114,7 +118,7 @@ struct GridOptionDetails_impl {
     }
   protected:
   private:
-    wxGrid* m_pGrid;
+    wxGrid& m_grid;
     int m_nRow;
     vModelCells_t m_vModelCells;
     
@@ -130,7 +134,7 @@ struct GridOptionDetails_impl {
 
   mapOptionValueRow_iter FindOptionValueRow( double );
   
-  //wxGrid* m_pGrid;  // for use in macro GRID_EMIT_SetColSettings
+  void Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol );
   
   void UpdateCallGreeks( double strike, ou::tf::Greek& );
   void UpdateCallQuote( double strike, ou::tf::Quote& );

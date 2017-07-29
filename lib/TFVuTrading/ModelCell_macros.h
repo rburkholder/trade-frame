@@ -38,7 +38,7 @@
   m_gridPositions->SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
 
 #define COL_ALIGNMENT( z, n, VAR ) \
-  m_pGrid->SetCellAlignment( VAR, GRID_EXTRACT_COL_DETAILS(z, n, 0), GRID_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
+  m_grid.SetCellAlignment( VAR, GRID_EXTRACT_COL_DETAILS(z, n, 0), GRID_EXTRACT_COL_DETAILS(z, n, 2), wxALIGN_CENTRE );
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

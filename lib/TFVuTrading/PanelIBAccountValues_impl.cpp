@@ -63,7 +63,7 @@ void PanelIBAccountValues_impl::UpdateAccountValueRow( const ou::tf::IBTWS::Acco
   mapAccountValueRow_t::iterator iter = m_mapAccountValueRow.find( av.sKey );
   if ( m_mapAccountValueRow.end() == iter ) {
     iter = m_mapAccountValueRow.insert( m_mapAccountValueRow.end(),
-      mapAccountValueRow_t::value_type( av.sKey, AccountValueRow( m_pGrid, m_mapAccountValueRow.size() ) ) );
+      mapAccountValueRow_t::value_type( av.sKey, AccountValueRow( *m_pGrid, m_mapAccountValueRow.size() ) ) );
     m_pGrid->AppendRows( 1 );
   }
 

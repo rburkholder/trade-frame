@@ -287,14 +287,20 @@ void PanelCharts::HandleInstrumentLiveChart( const wxTreeItemId& item ) {
 void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
   
   struct OptionList {
+    
     typedef std::map<boost::gregorian::date,int> mapDate_t;
     
     OptionList(): cnt(0) {}
     ~OptionList() {
-      std::for_each( map.begin(), map.end(), [](const mapDate_t::value_type& a){ 
-        std::cout << a.first << "," << a.second << std::endl; 
-      });
-      std::cout << cnt << std::endl;
+      if ( 0 == map.size() ) {
+        std::cout << "Empty Option List" << std::endl;
+      }
+      else {
+        std::for_each( map.begin(), map.end(), [](const mapDate_t::value_type& a){ 
+          std::cout << a.first << "," << a.second << std::endl; 
+        });
+        std::cout << cnt << std::endl;
+      }
     }
     
     int cnt;
@@ -312,6 +318,10 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
     }
   };
   
+  RemoveRightDetail();
+  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
+  ReplaceRightDetail( pNotebookOptionChains );
+
   // maybe turn this bit of code into a lambda and pass in the function to be run on success
   mapWatchInfo_t::iterator iter = m_mapWatchInfo.find( item.GetID() );
   if ( m_mapWatchInfo.end() == iter ) {
@@ -344,11 +354,20 @@ void PanelCharts::HandleOptionList( const wxTreeItemId& item ) {
       sSymbol, 
       [&list](const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ){ list( row ); }
       );
+      
+    pNotebookOptionChains->SetName( sSymbol );
+    
+    // populate tabs of notebook
+    signalRetrieveOptionList(
+      sSymbol,
+      [pNotebookOptionChains]( const ou::tf::iqfeed::MarketSymbol::TableRowDef& row ) {
+        boost::gregorian::date date( row.nYear, row.nMonth, row.nDay );
+        pNotebookOptionChains->Add( date, row.dblStrike, row.eOptionSide, row.sSymbol );
+      }
+      );
+      
   }
   
-  RemoveRightDetail();
-  auto pNotebookOptionChains = new NotebookOptionChains( m_panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
-  ReplaceRightDetail( pNotebookOptionChains );
 }
 
 void PanelCharts::HandleEmitValues( const wxTreeItemId& item ) {

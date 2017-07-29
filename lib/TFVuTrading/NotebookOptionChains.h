@@ -104,6 +104,8 @@ private:
     GridOptionDetails* pWinOptionsDetails;
     Tab( int ix = 0, const std::string& s = "", ou::tf::GridOptionDetails* p = nullptr )
       : ixTab( ix ), sDate( s ), pWinOptionsDetails( p ) {}
+    Tab( const std::string& s = "", ou::tf::GridOptionDetails* p = nullptr )
+      : ixTab{}, sDate( s ), pWinOptionsDetails( p ) {}
   };
   
   typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;

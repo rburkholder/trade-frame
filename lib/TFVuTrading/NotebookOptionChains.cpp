@@ -18,6 +18,8 @@
  * Created on July 2, 2017, 8:16 PM
  */
 
+#include <algorithm>
+
 #include <boost/lexical_cast.hpp>
 
 #include "NotebookOptionChains.h"
@@ -76,13 +78,13 @@ void NotebookOptionChains::CreateControls() {
   //Bind( wxEVT_TIMER, &GridOptionDetails::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   //m_timerGuiRefresh.Start( 250 );
   
-  auto p = new GridOptionDetails( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
-  AddPage( p, "page 1", true );
+  //auto p = new GridOptionDetails( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, "a name" );
+  //AddPage( p, "page 1", true );
 
 }
 
 void NotebookOptionChains::SetName( const std::string& sName ) {
-  
+  wxNotebook::SetName( sName );
 }
 
 void NotebookOptionChains::Clear() {
@@ -93,15 +95,32 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
   
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
-    std::string sDate = boost::lexical_cast<std::string>( date.year() ) + "/";
-    sDate += date.month() < 10 ? "0" : "" + boost::lexical_cast<std::string>( date.month() ) + "/";
-    sDate += date.day() < 10 ? "0" : "" + boost::lexical_cast<std::string>( date.day() );
-    // may need a sizer to go along with this
+    std::string sDate = boost::lexical_cast<std::string>( date.year() );
+    sDate += std::string( "/" ) 
+      + ( date.month().as_number() < 10 ? "0" : "" ) 
+      + boost::lexical_cast<std::string>( date.month().as_number() );
+    sDate += std::string( "/" ) + ( date.day()   < 10 ? "0" : "" ) + boost::lexical_cast<std::string>( date.day() );
+    
     auto* p = new GridOptionDetails( this, -1, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
-    size_t nPage( m_mapOptionExpiry.size() );
-    InsertPage( nPage, p, sDate );
+    
     iterExpiry = m_mapOptionExpiry.insert( 
-      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( nPage, sDate, p ) ) );
+      m_mapOptionExpiry.begin(), mapOptionExpiry_t::value_type( date, Tab( sDate, p ) ) );
+    
+    struct Reindex {
+      size_t ix;
+      Reindex(): ix{} {}
+      void operator()( Tab& tab ) { tab.ixTab = ix; ix++; }
+    };
+    
+    // renumber the pages
+    Reindex reindex; 
+    std::for_each( 
+      m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), 
+        [&reindex](mapOptionExpiry_t::value_type& v){ reindex( v.second ); } );
+        
+    InsertPage( iterExpiry->second.ixTab, p, sDate );
+    
+    SetSelection( 0 );
   }
   
   mapStrike_t& mapStrike( iterExpiry->second.mapStrike ); // assumes single thread

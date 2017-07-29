@@ -66,13 +66,32 @@ void GridOptionDetails_impl::CreateControls() {
 GridOptionDetails_impl::~GridOptionDetails_impl( void ) {
 }
 
+void GridOptionDetails_impl::Add( double strike, ou::tf::OptionSide::enumOptionSide side, const std::string& sSymbol ) {
+  mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
+  if ( m_mapOptionValueRow.end() == iter ) {
+    iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.begin(),
+      mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details ) ) );
+    
+    struct Reindex {
+      size_t ix;
+      Reindex(): ix{} {}
+      void operator()( OptionValueRow& row ) { row.SetRowIndex( ix ); ix++; }
+    };
+    
+    Reindex reindex; 
+    std::for_each( 
+      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), 
+        [&reindex](mapOptionValueRow_t::value_type& v){ reindex( v.second ); } );
+        
+    assert( m_details.InsertRows( iter->second.GetRowIndex() ) );
+  }
+}
+
 GridOptionDetails_impl::mapOptionValueRow_iter
 GridOptionDetails_impl::FindOptionValueRow( double strike ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
-    iter = m_mapOptionValueRow.insert( m_mapOptionValueRow.end(),
-      mapOptionValueRow_t::value_type( strike, OptionValueRow( &m_details, m_mapOptionValueRow.size() ) ) );
-    m_details.AppendRows( 1 );
+    assert( 0 );
   }
   return iter;
 }
