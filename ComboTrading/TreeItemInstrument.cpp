@@ -30,17 +30,17 @@
 
 TreeItemInstrument::TreeItemInstrument( wxTreeItemId id, ou::tf::TreeItemResources& baseResources, Resources& resources ):
   TreeItemResources( id, baseResources, resources ), m_lockType( InstrumentActions::ENewInstrumentLock::NoLock ) {
-  std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
+  //std::cout << "TreeItemInstrument::TreeItemInstrument" << std::endl;
   m_pInstrumentActions = m_resources.signalGetInstrumentActions( m_id );
   assert( 0 != m_pInstrumentActions.use_count() );
 }
   
 TreeItemInstrument::~TreeItemInstrument( void ) {
-  std::cout << "TreeItemInstrument::~TreeItemInstrument" << std::endl;
+  //std::cout << "TreeItemInstrument::~TreeItemInstrument" << std::endl;
 }
 
 void TreeItemInstrument::HandleDelete( wxCommandEvent& event ) {
-  std::cout << "TreeItemInstrument::HandleDelete" << std::endl;
+  //std::cout << "TreeItemInstrument::HandleDelete" << std::endl;
   m_pInstrumentActions->signalDelete( m_id );
   m_baseResources.signalDelete( m_id );
 }
