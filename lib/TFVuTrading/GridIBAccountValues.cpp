@@ -17,8 +17,8 @@
 #include <wx/icon.h>
 //#include <wx/event.h>
 
-#include "PanelIBAccountValues.h"
-#include "PanelIBAccountValues_impl.h"
+#include "GridIBAccountValues.h"
+#include "GridIBAccountValues_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

@@ -13,6 +13,10 @@
       <itemPath>DialogSimpleOneLineOrder.h</itemPath>
       <itemPath>EventDrawChart.h</itemPath>
       <itemPath>FrameMain.h</itemPath>
+      <itemPath>GridIBAccountValues.h</itemPath>
+      <itemPath>GridIBAccountValues_impl.h</itemPath>
+      <itemPath>GridIBPositionDetails.h</itemPath>
+      <itemPath>GridIBPositionDetails_impl.h</itemPath>
       <itemPath>GridOptionDetails.h</itemPath>
       <itemPath>GridOptionDetails_impl.h</itemPath>
       <itemPath>ModelBase.h</itemPath>
@@ -28,10 +32,6 @@
       <itemPath>NotebookOptionChains.h</itemPath>
       <itemPath>PanelChartHdf5.h</itemPath>
       <itemPath>PanelFinancialChart.h</itemPath>
-      <itemPath>PanelIBAccountValues.h</itemPath>
-      <itemPath>PanelIBAccountValues_impl.h</itemPath>
-      <itemPath>PanelIBPositionDetails.h</itemPath>
-      <itemPath>PanelIBPositionDetails_impl.h</itemPath>
       <itemPath>PanelLogging.h</itemPath>
       <itemPath>PanelManualOrder.h</itemPath>
       <itemPath>PanelPortfolioPosition.h</itemPath>
@@ -67,6 +67,10 @@
       <itemPath>DialogSimpleOneLineOrder.cpp</itemPath>
       <itemPath>EventDrawChart.cpp</itemPath>
       <itemPath>FrameMain.cpp</itemPath>
+      <itemPath>GridIBAccountValues.cpp</itemPath>
+      <itemPath>GridIBAccountValues_impl.cpp</itemPath>
+      <itemPath>GridIBPositionDetails.cpp</itemPath>
+      <itemPath>GridIBPositionDetails_impl.cpp</itemPath>
       <itemPath>GridOptionDetails.cpp</itemPath>
       <itemPath>GridOptionDetails_impl.cpp</itemPath>
       <itemPath>ModelBase.cpp</itemPath>
@@ -80,10 +84,6 @@
       <itemPath>NotebookOptionChains.cpp</itemPath>
       <itemPath>PanelChartHdf5.cpp</itemPath>
       <itemPath>PanelFinancialChart.cpp</itemPath>
-      <itemPath>PanelIBAccountValues.cpp</itemPath>
-      <itemPath>PanelIBAccountValues_impl.cpp</itemPath>
-      <itemPath>PanelIBPositionDetails.cpp</itemPath>
-      <itemPath>PanelIBPositionDetails_impl.cpp</itemPath>
       <itemPath>PanelLogging.cpp</itemPath>
       <itemPath>PanelManualOrder.cpp</itemPath>
       <itemPath>PanelPortfolioPosition.cpp</itemPath>
@@ -177,6 +177,22 @@
       </item>
       <item path="FrameMain.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="GridIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
@@ -238,22 +254,6 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelLogging.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -403,6 +403,22 @@
       </item>
       <item path="FrameMain.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="GridIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="GridIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="GridOptionDetails.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GridOptionDetails.h" ex="false" tool="3" flavor2="0">
@@ -464,22 +480,6 @@
       <item path="PanelFinancialChart.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PanelFinancialChart.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBAccountValues_impl.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails_impl.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="PanelIBPositionDetails_impl.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PanelLogging.cpp" ex="false" tool="1" flavor2="0">
       </item>

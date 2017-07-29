@@ -43,6 +43,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/DialogSimpleOneLineOrder.o \
 	${OBJECTDIR}/EventDrawChart.o \
 	${OBJECTDIR}/FrameMain.o \
+	${OBJECTDIR}/GridIBAccountValues.o \
+	${OBJECTDIR}/GridIBAccountValues_impl.o \
+	${OBJECTDIR}/GridIBPositionDetails.o \
+	${OBJECTDIR}/GridIBPositionDetails_impl.o \
 	${OBJECTDIR}/GridOptionDetails.o \
 	${OBJECTDIR}/GridOptionDetails_impl.o \
 	${OBJECTDIR}/ModelBase.o \
@@ -56,10 +60,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/NotebookOptionChains.o \
 	${OBJECTDIR}/PanelChartHdf5.o \
 	${OBJECTDIR}/PanelFinancialChart.o \
-	${OBJECTDIR}/PanelIBAccountValues.o \
-	${OBJECTDIR}/PanelIBAccountValues_impl.o \
-	${OBJECTDIR}/PanelIBPositionDetails.o \
-	${OBJECTDIR}/PanelIBPositionDetails_impl.o \
 	${OBJECTDIR}/PanelLogging.o \
 	${OBJECTDIR}/PanelManualOrder.o \
 	${OBJECTDIR}/PanelPortfolioPosition.o \
@@ -144,6 +144,26 @@ ${OBJECTDIR}/FrameMain.o: FrameMain.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameMain.o FrameMain.cpp
 
+${OBJECTDIR}/GridIBAccountValues.o: GridIBAccountValues.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridIBAccountValues.o GridIBAccountValues.cpp
+
+${OBJECTDIR}/GridIBAccountValues_impl.o: GridIBAccountValues_impl.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridIBAccountValues_impl.o GridIBAccountValues_impl.cpp
+
+${OBJECTDIR}/GridIBPositionDetails.o: GridIBPositionDetails.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridIBPositionDetails.o GridIBPositionDetails.cpp
+
+${OBJECTDIR}/GridIBPositionDetails_impl.o: GridIBPositionDetails_impl.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GridIBPositionDetails_impl.o GridIBPositionDetails_impl.cpp
+
 ${OBJECTDIR}/GridOptionDetails.o: GridOptionDetails.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -208,26 +228,6 @@ ${OBJECTDIR}/PanelFinancialChart.o: PanelFinancialChart.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelFinancialChart.o PanelFinancialChart.cpp
-
-${OBJECTDIR}/PanelIBAccountValues.o: PanelIBAccountValues.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues.o PanelIBAccountValues.cpp
-
-${OBJECTDIR}/PanelIBAccountValues_impl.o: PanelIBAccountValues_impl.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBAccountValues_impl.o PanelIBAccountValues_impl.cpp
-
-${OBJECTDIR}/PanelIBPositionDetails.o: PanelIBPositionDetails.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails.o PanelIBPositionDetails.cpp
-
-${OBJECTDIR}/PanelIBPositionDetails_impl.o: PanelIBPositionDetails_impl.cpp
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -DwxUSE_GUI -I../ -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PanelIBPositionDetails_impl.o PanelIBPositionDetails_impl.cpp
 
 ${OBJECTDIR}/PanelLogging.o: PanelLogging.cpp
 	${MKDIR} -p ${OBJECTDIR}

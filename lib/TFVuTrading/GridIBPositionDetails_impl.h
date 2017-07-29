@@ -42,7 +42,7 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "PanelIBPositionDetails.h"
+#include "GridIBPositionDetails.h"
 
 // modelled after "PanelPortfolioPosition_impl.h"
 
@@ -87,11 +87,11 @@ struct PanelIBPositionDetails_impl {
 
   class PositionDetailRow {
   public:
-    PositionDetailRow( wxGrid* pGrid, int row ): m_pGrid( pGrid ), m_row( row ) { Init(); }
-    PositionDetailRow( const PositionDetailRow& rhs ): m_pGrid( rhs.m_pGrid ), m_row( rhs.m_row ) { Init(); }
+    PositionDetailRow( wxGrid& grid, int row ): m_grid( grid ), m_row( row ) { Init(); }
+    PositionDetailRow( const PositionDetailRow& rhs ): m_grid( rhs.m_grid ), m_row( rhs.m_row ) { Init(); }
     ~PositionDetailRow( void ) {}
     void UpdateGui( void ) {
-      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_pGrid, m_row ) );
+      boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_row ) );
     }
     void UpdatePositionDetail( const ou::tf::IBTWS::PositionDetail& pd ) {
       boost::fusion::at_c<COL_Symbol1>( m_vModelCells ).SetValue( pd.sSymbol );
@@ -111,7 +111,7 @@ struct PanelIBPositionDetails_impl {
   protected:
   private:
     long m_contract;
-    wxGrid* m_pGrid;
+    wxGrid& m_grid;
     int m_row;
     vModelCells_t m_vModelCells;
     

@@ -15,7 +15,7 @@
 
 #include <wx/sizer.h>
 
-#include "PanelIBAccountValues_impl.h"
+#include "GridIBAccountValues_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

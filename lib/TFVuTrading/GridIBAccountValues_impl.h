@@ -38,7 +38,7 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "PanelIBAccountValues.h"
+#include "GridIBAccountValues.h"
 
 // modeled after "PanelPortfolioPosition_impl.h"
 

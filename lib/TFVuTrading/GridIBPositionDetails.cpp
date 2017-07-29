@@ -16,8 +16,8 @@
 #include <wx/sizer.h>
 #include <wx/icon.h>
 
-#include "PanelIBPositionDetails.h"
-#include "PanelIBPositionDetails_impl.h"
+#include "GridIBPositionDetails.h"
+#include "GridIBPositionDetails_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

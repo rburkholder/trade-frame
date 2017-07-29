@@ -37,8 +37,8 @@
 #include <TFVuTrading/PanelLogging.h>
 //#include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
-#include <TFVuTrading/PanelIBPositionDetails.h>
-#include <TFVuTrading/PanelIBAccountValues.h>
+#include <TFVuTrading/GridIBPositionDetails.h>
+#include <TFVuTrading/GridIBAccountValues.h>
 
 #include <TFInteractiveBrokers/EventIBInstrument.h>
 

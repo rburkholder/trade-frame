@@ -15,7 +15,7 @@
 
 #include <wx/sizer.h>
 
-#include "PanelIBPositionDetails_impl.h"
+#include "GridIBPositionDetails_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -63,7 +63,7 @@ void PanelIBPositionDetails_impl::UpdatePositionDetailRow( const ou::tf::IBTWS::
   mapPositionDetailRow_t::iterator iter = m_mapPositionDetailRow.find( pd.sLocalSymbol );
   if ( m_mapPositionDetailRow.end() == iter ) {
     iter = m_mapPositionDetailRow.insert( m_mapPositionDetailRow.end(),
-      mapPositionDetailRow_t::value_type( pd.sLocalSymbol, PositionDetailRow( m_pGrid, m_mapPositionDetailRow.size() ) ) );
+      mapPositionDetailRow_t::value_type( pd.sLocalSymbol, PositionDetailRow( *m_pGrid, m_mapPositionDetailRow.size() ) ) );
     try {
       m_pGrid->AppendRows( 1 );
     }
