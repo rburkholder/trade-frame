@@ -18,6 +18,9 @@
 
 #include "DialogInstrumentSelect.h"
 
+// from https://wiki.wxwidgets.org/WxNotebook
+// wxWindow objects do not transfer the focus to their first child widget; while wxPanel pages do.
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
